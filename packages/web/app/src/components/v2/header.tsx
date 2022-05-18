@@ -23,6 +23,19 @@ import {
 
 type DropdownOrganization = OrganizationsQuery['organizations']['nodes'];
 
+const OrganizationLink = (props: {
+  children: string;
+  href: string;
+}): ReactElement => {
+  return (
+    <NextLink href={props.href} passHref>
+      <a className="inline-block grow overflow-hidden text-ellipsis whitespace-nowrap py-2.5 px-2">
+        {props.children}
+      </a>
+    </NextLink>
+  );
+};
+
 export const Header = ({ children, ...props }): ReactElement => {
   const [meQuery] = useQuery({ query: MeDocument });
   const { user } = useUser();
@@ -102,9 +115,9 @@ export const Header = ({ children, ...props }): ReactElement => {
                 </DropdownMenu.Label>
                 {personal.map((org) => (
                   <DropdownMenu.Item key={org.cleanId} className="!p-0">
-                    <NextLink href={`/${org.cleanId}`}>
-                      <a className="grow py-2.5 px-2">{org.name}</a>
-                    </NextLink>
+                    <OrganizationLink href={`/${org.cleanId}`}>
+                      {org.name}
+                    </OrganizationLink>
                   </DropdownMenu.Item>
                 ))}
                 <DropdownMenu.Label className="px-2 text-xs font-bold text-gray-500">
@@ -112,11 +125,9 @@ export const Header = ({ children, ...props }): ReactElement => {
                 </DropdownMenu.Label>
                 {organizations.map((org) => (
                   <DropdownMenu.Item key={org.cleanId} className="!p-0">
-                    <NextLink href={`/${org.cleanId}`} passHref>
-                      <a className="line-clamp-1 grow py-2.5 px-2">
-                        {org.name}
-                      </a>
-                    </NextLink>
+                    <OrganizationLink href={`/${org.cleanId}`}>
+                      {org.name}
+                    </OrganizationLink>
                   </DropdownMenu.Item>
                 ))}
                 <DropdownMenu.Separator />
