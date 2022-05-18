@@ -52,7 +52,7 @@ async function main() {
         env[key] = value;
       }
 
-      if (env[key] === '<sync>') {
+      if (env[key] === '<sync>' || env[key] === '') {
         modified = true;
         env[key] = typeof rootEnv[key] !== 'undefined' ? rootEnv[key] : null;
       }
