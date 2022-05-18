@@ -1,0 +1,6 @@
+mutation createCdnToken($selector: TargetSelectorInput!) {
+  createCdnToken(selector: $selector) {
+    url
+    token
+  }
+}

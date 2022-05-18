@@ -1,0 +1,77 @@
+name: PR Checks
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  pr-checks:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:13.1-alpine
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      HIVE_TOKEN: ${{ secrets.HIVE_TOKEN }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16
+
+      - name: Install Dependencies
+        run: yarn --frozen-lockfile
+
+      - uses: actions/cache@v3
+        name: Turbo cache
+        with:
+          path: node_modules/.cache/turbo
+          key: ${{ runner.os }}-turbo-cache-v1-${{ hashFiles('yarn.lock') }}
+
+      - name: Generate Types
+        run: yarn graphql:generate
+
+      - name: Check PR label
+        if: contains(github.event.pull_request.labels.*.name, 'non-breaking')
+        run: echo '::set-output name=SAFE_FLAG::--forceSafe'
+        id: pr-label-check
+
+      - name: Schema Check
+        run: ./packages/libraries/cli/bin/dev schema:check "packages/services/api/src/modules/*/module.graphql.ts" ${{ steps.pr-label-check.outputs.SAFE_FLAG }} --github
+
+      - name: Create Database
+        working-directory: packages/services/storage
+        run: yarn db:create
+
+      - name: Migrate Database
+        working-directory: packages/services/storage
+        run: yarn db:migrator up
+
+      - name: Generate Database Types
+        working-directory: packages/services/storage
+        run: yarn db:generate
+
+      - name: Build
+        run: yarn build
+
+      - name: Test
+        run: yarn test
+
+      - name: Type Check
+        run: yarn typecheck

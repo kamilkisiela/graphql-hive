@@ -1,0 +1,23 @@
+{
+  "name": "integration-tests",
+  "type": "module",
+  "private": true,
+  "version": "0.0.0",
+  "dependencies": {
+    "@app/gql": "link:./testkit/gql",
+    "@graphql-typed-document-node/core": "3.1.1",
+    "auth0": "2.36.2",
+    "axios": "0.27.2",
+    "dotenv": "10.0.0",
+    "date-fns": "2.25.0",
+    "dependency-graph": "0.11.0",
+    "dockest": "npm:@n1ru4l/dockest@2.1.0-rc.6",
+    "slonik": "23.9.0",
+    "tsup": "5.12.7",
+    "yaml": "2.1.0"
+  },
+  "scripts": {
+    "build-and-pack": "(cd ../ && yarn build:services && yarn build:libraries && yarn build:local-cdn) && node ./scripts/pack.mjs",
+    "dockest": "tsup-node dockest.ts --format esm --target node16 --onSuccess 'node dist/dockest.js'"
+  }
+}

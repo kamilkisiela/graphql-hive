@@ -1,0 +1,36 @@
+{
+  "name": "@hive/schema",
+  "private": true,
+  "type": "module",
+  "version": "0.2.1",
+  "license": "MIT",
+  "scripts": {
+    "dev": "tsup-node src/dev.ts --format esm --target node16 --watch --onSuccess 'node dist/dev.js' | pino-pretty --translateTime HH:MM:ss TT --ignore pid,hostname",
+    "build": "bob runify --single",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@apollo/federation": "0.36.1",
+    "zod": "3.15.1",
+    "@trpc/server": "9.23.2",
+    "@graphql-tools/stitch": "8.3.1",
+    "@graphql-tools/stitching-directives": "2.1.1",
+    "@sentry/node": "6.19.7",
+    "@sentry/tracing": "6.19.7",
+    "dotenv": "10.0.0",
+    "graphql": "16.5.0",
+    "ioredis": "4.28.3"
+  },
+  "devDependencies": {
+    "@types/ioredis": "4.28.7",
+    "pino-pretty": "6.0.0"
+  },
+  "buildOptions": {
+    "runify": true,
+    "tsup": true,
+    "tags": [
+      "backend"
+    ],
+    "banner": "../../../scripts/banner.js"
+  }
+}

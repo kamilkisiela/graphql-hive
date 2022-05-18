@@ -1,0 +1,13 @@
+query targetSettings(
+  $selector: TargetSelectorInput!
+  $targetsSelector: ProjectSelectorInput!
+) {
+  targetSettings(selector: $selector) {
+    ...TargetSettingsFields
+  }
+  targets(selector: $targetsSelector) {
+    nodes {
+      ...TargetEssentials
+    }
+  }
+}

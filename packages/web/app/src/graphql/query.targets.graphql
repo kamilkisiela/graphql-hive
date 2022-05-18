@@ -1,0 +1,8 @@
+query targets($selector: ProjectSelectorInput!) {
+  targets(selector: $selector) {
+    total
+    nodes {
+      ...TargetFields
+    }
+  }
+}

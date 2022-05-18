@@ -1,0 +1,8 @@
+query projects($selector: OrganizationSelectorInput!) {
+  projects(selector: $selector) {
+    nodes {
+      ...ProjectFields
+    }
+    total
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "@hive/cdn-script",
+  "private": true,
+  "version": "0.0.0",
+  "license": "MIT",
+  "scripts": {
+    "dev": "tsup-node src/dev.ts --watch --onSuccess \"node dist/dev.js\"",
+    "build-local": "BUILD_FOR_LOCAL=1 node build.mjs",
+    "build": "node build.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "graphql": "^16.0.0"
+  },
+  "dependencies": {
+    "graphql": "16.5.0"
+  },
+  "devDependencies": {
+    "fastify": "3.29.0",
+    "esbuild": "0.14.39",
+    "cross-undici-fetch": "0.1.27",
+    "@types/service-worker-mock": "2.0.1",
+    "@cloudflare/workers-types": "3.4.0"
+  }
+}

@@ -1,0 +1,108 @@
+{
+  "name": "graphql-hive",
+  "type": "module",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "kamilkisiela/graphql-hive"
+  },
+  "author": {
+    "email": "contact@the-guild.dev",
+    "name": "The Guild",
+    "url": "https://the-guild.dev"
+  },
+  "license": "MIT",
+  "scripts": {
+    "seed": "node scripts/seed-local-env.js",
+    "postinstall": "husky install && patch-package && node ./scripts/patch-manifests.js && node ./scripts/sync-env-files.js && node ./scripts/turborepo-cleanup.js && node ./scripts/turborepo-setup.js",
+    "pre-commit": "lint-staged",
+    "prerelease": "yarn build:libraries",
+    "release": "changeset publish",
+    "test": "jest",
+    "lint": "eslint --ignore-path .gitignore \"packages/**/*.{ts,tsx}\"",
+    "format": "prettier --write .",
+    "setup": "yarn workspace @hive/storage run setup",
+    "generate": "yarn workspace @hive/storage run db:generate && yarn graphql:generate",
+    "graphql:generate": "graphql-codegen",
+    "typecheck": "yarn turbo typecheck --color",
+    "build": "yarn graphql:generate && yarn turbo build --color",
+    "build:libraries": "yarn graphql:generate && yarn turbo build --filter=./packages/libraries/* --color",
+    "build:web": "yarn graphql:generate && yarn turbo build --filter=./packages/web/* --color",
+    "build:services": "yarn graphql:generate && yarn turbo build  --filter=./packages/services/* --color",
+    "build:local-cdn": "yarn graphql:generate && yarn turbo build-local --color",
+    "env:sync": "node ./scripts/sync-env-files.js",
+    "turbo": "env-cmd turbo run"
+  },
+  "devDependencies": {
+    "@changesets/cli": "2.17.0",
+    "@graphql-codegen/add": "3.1.1",
+    "@graphql-codegen/cli": "2.6.2",
+    "@graphql-codegen/gql-tag-operations-preset": "1.4.0",
+    "@graphql-codegen/graphql-modules-preset": "2.3.11",
+    "@graphql-codegen/typed-document-node": "2.2.11",
+    "@graphql-codegen/typescript": "2.4.11",
+    "@graphql-codegen/typescript-graphql-request": "4.4.8",
+    "@graphql-codegen/typescript-operations": "2.4.0",
+    "@graphql-codegen/typescript-resolvers": "2.6.4",
+    "@swc/core": "1.2.185",
+    "@types/jest": "27.5.1",
+    "@types/lru-cache": "7.6.1",
+    "@types/node": "16.11.22",
+    "@typescript-eslint/eslint-plugin": "5.23.0",
+    "@typescript-eslint/parser": "5.23.0",
+    "bob-the-bundler": "1.7.2",
+    "env-cmd": "10.1.0",
+    "eslint": "8.15.0",
+    "eslint-plugin-import": "2.26.0",
+    "fs-extra": "10.1.0",
+    "graphql": "16.5.0",
+    "husky": "7.0.4",
+    "jest": "28.1.0",
+    "lint-staged": "11.2.6",
+    "patch-package": "6.4.7",
+    "prettier": "2.4.1",
+    "pretty-quick": "3.1.3",
+    "rimraf": "3.0.2",
+    "ts-jest": "28.0.2",
+    "tsup": "5.12.7",
+    "turbo": "1.2.6",
+    "typescript": "4.6.4"
+  },
+  "workspaces": {
+    "packages": [
+      "packages/services/*",
+      "packages/web/*",
+      "packages/libraries/*",
+      "integration-tests/"
+    ]
+  },
+  "resolutions": {
+    "@types/react": "17.0.45",
+    "@urql/core": "2.3.6",
+    "graphql": "16.5.0",
+    "typescript": "4.6.4"
+  },
+  "prettier": {
+    "trailingComma": "es5",
+    "semi": true,
+    "singleQuote": true
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "**/*": [
+      "pretty-quick --staged"
+    ],
+    "**/*.ts": [
+      "eslint"
+    ]
+  },
+  "engines": {
+    "node": ">=16"
+  },
+  "packageManager": "yarn@1.22.18",
+  "version": "0.0.0"
+}

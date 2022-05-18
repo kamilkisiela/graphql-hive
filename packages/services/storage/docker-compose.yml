@@ -1,0 +1,124 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:13.4-alpine
+    networks:
+      - 'stack'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /var/lib/postgresql/data
+    volumes:
+      - ./volumes/postgresql/db:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+
+  redis:
+    image: docker.io/bitnami/redis:6.2
+    networks:
+      - 'stack'
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+    ports:
+      - '6379:6379'
+    volumes:
+      - './volumes/redis/db:/bitnami/redis/data'
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:22.3.5.5-alpine
+    environment:
+      CLICKHOUSE_USER: test
+      CLICKHOUSE_PASSWORD: test
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'localhost:8123/ping']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    volumes:
+      - ./volumes/clickhouse/logs:/var/log/clickhouse-server
+      - ./volumes/clickhouse/db:/var/lib/clickhouse
+      - ./configs/clickhouse:/etc/clickhouse-server/conf.d
+    ports:
+      - '8123:8123'
+    networks:
+      - 'stack'
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:6.2.2
+    hostname: zookeeper
+    networks:
+      - 'stack'
+    ports:
+      - '2181:2181'
+    environment:
+      BUMP: 1
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    healthcheck:
+      test: ['CMD', 'cub', 'zk-ready', '127.0.0.1:2181', '10']
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    volumes:
+      - ./volumes/zookeeper/db:/var/lib/zookeeper/data
+      - ./volumes/zookeeper/log:/var/lib/zookeeper/log
+
+  broker:
+    image: confluentinc/cp-kafka:6.2.2
+    hostname: borker
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    networks:
+      - 'stack'
+    ports:
+      - '29092:29092'
+      - '9092:9092'
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'cub',
+          'kafka-ready',
+          '1',
+          '5',
+          '-b',
+          '127.0.0.1:9092',
+          '-c',
+          '/etc/kafka/kafka.properties',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    ulimits:
+      nofile:
+        soft: 16384
+        hard: 16384
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+    volumes:
+      - ./volumes/broker/db:/var/lib/kafka/data
+
+networks:
+  stack: {}

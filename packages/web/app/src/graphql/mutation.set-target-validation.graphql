@@ -1,0 +1,5 @@
+mutation setTargetValidation($input: SetTargetValidationInput!) {
+  setTargetValidation(input: $input) {
+    ...TargetValidationSettingsFields
+  }
+}

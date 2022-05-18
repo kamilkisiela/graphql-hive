@@ -1,0 +1,79 @@
+import { FastifyLoggerInstance } from '@hive/service-common';
+import LRU from 'tiny-lru';
+
+import type { TokensApi } from '@hive/tokens';
+import { createTRPCClient } from '@trpc/client';
+import { fetch } from 'cross-undici-fetch';
+import { tokenCacheHits, tokenRequests } from './metrics';
+
+export enum TokenStatus {
+  NotFound,
+  NoAccess,
+}
+
+export type TokensResponse = {
+  organization: string;
+  project: string;
+  target: string;
+  scopes: readonly string[];
+};
+
+type Token = TokensResponse | TokenStatus;
+
+export function createTokens(config: {
+  endpoint: string;
+  logger: FastifyLoggerInstance;
+}) {
+  const endpoint = config.endpoint.replace(/\/$/, '');
+  const tokens = LRU<Promise<Token>>(1000, 30_000);
+  const tokensApi = createTRPCClient<TokensApi>({
+    url: `${endpoint}/trpc`,
+    fetch,
+  });
+  async function fetchFreshToken(token: string) {
+    try {
+      const info = await tokensApi.query('getToken', {
+        token,
+      });
+
+      if (info) {
+        const result = info.scopes.includes('target:registry:write')
+          ? {
+              target: info.target,
+              project: info.project,
+              organization: info.organization,
+              scopes: info.scopes,
+            }
+          : TokenStatus.NoAccess;
+        return result;
+      } else {
+        return TokenStatus.NotFound;
+      }
+    } catch (error) {
+      return TokenStatus.NotFound;
+    }
+  }
+
+  return {
+    async fetch(token: string) {
+      tokenRequests.inc();
+      const tokenInfo = await tokens.get(token);
+
+      if (!tokenInfo) {
+        const result = fetchFreshToken(token);
+        tokens.set(token, result);
+        return result;
+      }
+
+      tokenCacheHits.inc();
+
+      return tokenInfo ?? TokenStatus.NotFound;
+    },
+    isNotFound(token: Token): token is TokenStatus.NotFound {
+      return token === TokenStatus.NotFound;
+    },
+    isNoAccess(token: Token): token is TokenStatus.NoAccess {
+      return token === TokenStatus.NoAccess;
+    },
+  };
+}

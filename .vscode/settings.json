@@ -1,0 +1,24 @@
+{
+  "commands.commands": [
+    {
+      "command": "terminals.runTerminals",
+      "color": "#eab308",
+      "text": "$(rocket) Start Hive $(rocket)",
+      "tooltip": "Start dev environment"
+    }
+  ],
+  "files.associations": {
+    "*.env.template": "dotenv"
+  },
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": false
+  },
+  "files.autoSave": "onFocusChange",
+  "eslint.format.enable": true,
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "yaml.schemas": {
+    "https://json.schemastore.org/github-workflow.json": ".github/workflows/deploy.yaml"
+  },
+  "typescript.tsdk": "node_modules/typescript/lib"
+}

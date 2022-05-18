@@ -1,0 +1,5 @@
+query me {
+  me {
+    ...UserFields
+  }
+}

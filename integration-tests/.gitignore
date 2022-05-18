@@ -1,0 +1,4 @@
+docker-compose.dockest-generated.yml
+db-clickhouse
+tarballs
+volumes

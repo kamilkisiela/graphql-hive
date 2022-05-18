@@ -1,0 +1,17 @@
+query organizationMembers($selector: OrganizationSelectorInput!) {
+  organization(selector: $selector) {
+    organization {
+      ...OrganizationFields
+      inviteCode
+      owner {
+        ...MemberFields
+      }
+      members {
+        nodes {
+          ...MemberFields
+        }
+        total
+      }
+    }
+  }
+}

@@ -1,0 +1,14 @@
+query targetActivities($selector: TargetActivitiesSelector!) {
+  targetActivities(selector: $selector) {
+    nodes {
+      __typename
+      id
+      createdAt
+      ...TargetCreated
+      ...TargetDeleted
+      ...TargetNameUpdated
+      ...TargetIdUpdated
+    }
+    total
+  }
+}

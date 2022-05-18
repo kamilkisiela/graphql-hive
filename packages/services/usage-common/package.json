@@ -1,0 +1,9 @@
+{
+  "name": "@hive/usage-common",
+  "private": true,
+  "version": "0.0.1",
+  "license": "MIT",
+  "dependencies": {
+    "graphql": "16.5.0"
+  }
+}

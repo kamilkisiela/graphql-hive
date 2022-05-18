@@ -1,0 +1,440 @@
+fragment OrganizationFields on Organization {
+  id
+  cleanId
+  name
+  type
+  plan
+  rateLimit {
+    operations
+    schemaPushes
+  }
+  me {
+    ...MemberFields
+  }
+}
+
+fragment OrganizationEssentials on Organization {
+  id
+  cleanId
+  name
+  type
+}
+
+fragment ProjectFields on Project {
+  id
+  cleanId
+  name
+  type
+  gitRepository
+}
+
+fragment ProjectEssentials on Project {
+  id
+  cleanId
+  name
+}
+
+fragment TargetFields on Target {
+  id
+  cleanId
+  name
+  baseSchema
+  hasSchema
+}
+
+fragment TargetEssentials on Target {
+  id
+  cleanId
+  name
+  hasSchema
+}
+
+fragment SchemaFields on Schema {
+  id
+  author
+  source
+  service
+  url
+  commit
+}
+
+fragment MemberFields on Member {
+  id
+  user {
+    ...UserFields
+  }
+  organizationAccessScopes
+  projectAccessScopes
+  targetAccessScopes
+}
+
+fragment UserFields on User {
+  id
+  email
+  fullName
+  displayName
+  provider
+}
+
+fragment OperationStatsFields on OperationStats {
+  id
+  document
+  operationHash
+  name
+  kind
+  count
+  countOk
+  percentage
+  duration {
+    p75
+    p90
+    p95
+    p99
+  }
+}
+
+fragment SchemaVersionFields on SchemaVersion {
+  id
+  date
+  valid
+  commit {
+    id
+    author
+    service
+    commit
+  }
+  baseSchema
+}
+
+fragment SchemaChangeFields on SchemaChange {
+  path
+  message
+  criticality
+}
+
+fragment SchemaCompareResultFields on SchemaCompareResult {
+  initial
+  changes {
+    total
+    nodes {
+      ...SchemaChangeFields
+    }
+  }
+  diff {
+    before
+    after
+  }
+}
+
+fragment SchemaCompareErrorFields on SchemaCompareError {
+  message
+}
+
+fragment TokenFields on Token {
+  id
+  name
+  alias
+  date
+  lastUsedAt
+}
+
+fragment OrganizationPlanChange on OrganizationPlanChangeActivity {
+  id
+  createdAt
+  organization {
+    ...OrganizationEssentials
+  }
+  user {
+    ...UserFields
+  }
+  newPlan
+  previousPlan
+}
+
+fragment OrganizationCreated on OrganizationCreatedActivity {
+  id
+  createdAt
+  organization {
+    ...OrganizationEssentials
+  }
+  user {
+    ...UserFields
+  }
+}
+
+fragment OrganizationNameUpdated on OrganizationNameUpdatedActivity {
+  id
+  createdAt
+  value
+  organization {
+    ...OrganizationEssentials
+  }
+  user {
+    ...UserFields
+  }
+}
+
+fragment OrganizationIdUpdated on OrganizationIdUpdatedActivity {
+  id
+  createdAt
+  value
+  organization {
+    ...OrganizationEssentials
+  }
+  user {
+    ...UserFields
+  }
+}
+
+fragment MemberAdded on MemberAddedActivity {
+  id
+  createdAt
+  organization {
+    ...OrganizationEssentials
+  }
+  user {
+    ...UserFields
+  }
+}
+
+fragment MemberDeleted on MemberDeletedActivity {
+  id
+  createdAt
+  email
+  organization {
+    ...OrganizationEssentials
+  }
+  user {
+    ...UserFields
+  }
+}
+
+fragment ProjectCreated on ProjectCreatedActivity {
+  id
+  createdAt
+  organization {
+    ...OrganizationEssentials
+  }
+  project {
+    ...ProjectEssentials
+  }
+  user {
+    ...UserFields
+  }
+}
+
+fragment ProjectDeleted on ProjectDeletedActivity {
+  id
+  createdAt
+  name
+  cleanId
+  organization {
+    ...OrganizationEssentials
+  }
+  user {
+    ...UserFields
+  }
+}
+
+fragment ProjectNameUpdated on ProjectNameUpdatedActivity {
+  id
+  createdAt
+  value
+  organization {
+    ...OrganizationEssentials
+  }
+  project {
+    ...ProjectEssentials
+  }
+  user {
+    ...UserFields
+  }
+}
+
+fragment ProjectIdUpdated on ProjectIdUpdatedActivity {
+  id
+  createdAt
+  value
+  organization {
+    ...OrganizationEssentials
+  }
+  project {
+    ...ProjectEssentials
+  }
+  user {
+    ...UserFields
+  }
+}
+
+fragment TargetCreated on TargetCreatedActivity {
+  id
+  createdAt
+  organization {
+    ...OrganizationEssentials
+  }
+  project {
+    ...ProjectEssentials
+  }
+  target {
+    ...TargetEssentials
+  }
+  user {
+    ...UserFields
+  }
+}
+
+fragment TargetDeleted on TargetDeletedActivity {
+  id
+  createdAt
+  name
+  cleanId
+  organization {
+    ...OrganizationEssentials
+  }
+  project {
+    ...ProjectEssentials
+  }
+  user {
+    ...UserFields
+  }
+}
+
+fragment TargetNameUpdated on TargetNameUpdatedActivity {
+  id
+  createdAt
+  value
+  organization {
+    ...OrganizationEssentials
+  }
+  project {
+    ...ProjectEssentials
+  }
+  target {
+    ...TargetEssentials
+  }
+  user {
+    ...UserFields
+  }
+}
+
+fragment TargetIdUpdated on TargetIdUpdatedActivity {
+  id
+  createdAt
+  value
+  organization {
+    ...OrganizationEssentials
+  }
+  project {
+    ...ProjectEssentials
+  }
+  target {
+    ...TargetEssentials
+  }
+  user {
+    ...UserFields
+  }
+}
+
+fragment PersistedOperationFields on PersistedOperation {
+  id
+  operationHash
+  content
+  name
+  kind
+}
+
+fragment TargetSettingsFields on TargetSettings {
+  id
+  validation {
+    ...TargetValidationSettingsFields
+  }
+}
+
+fragment TargetValidationSettingsFields on TargetValidationSettings {
+  id
+  enabled
+  period
+  percentage
+  targets {
+    ...TargetEssentials
+  }
+}
+
+fragment AlertSlackChannelFields on AlertSlackChannel {
+  id
+  name
+  type
+  channel
+}
+
+fragment AlertWebhookChannelFields on AlertWebhookChannel {
+  id
+  name
+  type
+  endpoint
+}
+fragment AlertFields on Alert {
+  id
+  type
+  channel {
+    id
+    name
+    type
+  }
+  target {
+    id
+    cleanId
+    name
+  }
+}
+
+fragment BillingInvoiceFields on BillingInvoice {
+  id
+  amount
+  pdfLink
+  date
+  periodStart
+  periodEnd
+}
+
+fragment OrgRateLimitFields on Organization {
+  id
+  cleanId
+  name
+  rateLimit {
+    limitedForOperations
+    limitedForSchemaPushes
+    operations
+    schemaPushes
+  }
+}
+
+fragment OrgBillingInfoFields on Organization {
+  id
+  cleanId
+  plan
+  ...OrgRateLimitFields
+  billingConfiguration {
+    hasActiveSubscription
+    paymentMethod {
+      brand
+      last4
+      expMonth
+      expYear
+    }
+    billingAddress {
+      city
+      country
+      line1
+      line2
+      postalCode
+      state
+    }
+    invoices {
+      ...BillingInvoiceFields
+    }
+    upcomingInvoice {
+      ...BillingInvoiceFields
+    }
+  }
+}

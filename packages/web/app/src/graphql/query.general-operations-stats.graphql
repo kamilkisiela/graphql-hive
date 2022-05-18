@@ -1,0 +1,52 @@
+query generalOperationsStats(
+  $selector: OperationsStatsSelectorInput!
+  $resolution: Int!
+) {
+  operationsStats(selector: $selector) {
+    ... on OperationsStats {
+      totalRequests(resolution: $resolution)
+      totalFailures(resolution: $resolution)
+      totalOperations
+      duration {
+        p75
+        p90
+        p95
+        p99
+      }
+    }
+    ... on OperationsStats {
+      failuresOverTime(resolution: $resolution) {
+        date
+        value
+      }
+      requestsOverTime(resolution: $resolution) {
+        date
+        value
+      }
+      durationOverTime(resolution: $resolution) {
+        date
+        duration {
+          p75
+          p90
+          p95
+          p99
+        }
+      }
+    }
+    ... on OperationsStats {
+      clients {
+        nodes {
+          name
+          count
+          percentage
+          versions {
+            version
+            count
+            percentage
+          }
+        }
+        total
+      }
+    }
+  }
+}

@@ -1,0 +1,494 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:13.4-alpine
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_DB: registry
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready']
+      interval: 5s
+      timeout: 5s
+      retries: 6
+    networks:
+      - 'stack'
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:22.3.5.5-alpine
+    volumes:
+      - ../packages/services/storage/configs/clickhouse:/etc/clickhouse-server/conf.d
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'localhost:8123/ping']
+      interval: 5s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+    environment:
+      CLICKHOUSE_USER: test
+      CLICKHOUSE_PASSWORD: test
+      KAFKA_BROKER: broker:29092
+    ports:
+      - '8123:8123'
+    networks:
+      - 'stack'
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:6.2.2-3-ubi8
+    hostname: zookeeper
+    networks:
+      - 'stack'
+    ports:
+      - '2181:2181'
+    ulimits:
+      nofile:
+        soft: 20000
+        hard: 40000
+    healthcheck:
+      test: ['CMD', 'cub', 'zk-ready', '127.0.0.1:2181', '10']
+      interval: 5s
+      timeout: 10s
+      retries: 6
+      start_period: 15s
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  broker:
+    image: confluentinc/cp-kafka:6.2.2-3-ubi8
+    hostname: borker
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    networks:
+      - 'stack'
+    ports:
+      - '29092:29092'
+      - '9092:9092'
+    ulimits:
+      nofile:
+        soft: 20000
+        hard: 40000
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'cub',
+          'kafka-ready',
+          '1',
+          '5',
+          '-b',
+          '127.0.0.1:9092',
+          '-c',
+          '/etc/kafka/kafka.properties',
+        ]
+      interval: 15s
+      timeout: 10s
+      retries: 6
+      start_period: 15s
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+
+  redis:
+    image: bitnami/redis:6.2
+    networks:
+      - 'stack'
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 10s
+      retries: 6
+      start_period: 5s
+    ports:
+      - '6379:6379'
+    environment:
+      - REDIS_PASSWORD=test
+      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+
+  migrations:
+    image: node:16.13.2-alpine3.14
+    entrypoint:
+      - '/bin/sh'
+      - '/run-migrations.sh'
+    networks:
+      - 'stack'
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+      broker:
+        condition: service_healthy
+    environment:
+      MIGRATOR: 'up'
+      CLICKHOUSE_MIGRATOR: 'up'
+      POSTGRES_CONNECTION_STRING: 'postgresql://postgres:postgres@db:5432/registry'
+      CLICKHOUSE_PROTOCOL: 'http'
+      CLICKHOUSE_HOST: 'clickhouse'
+      CLICKHOUSE_PORT: '8123'
+      CLICKHOUSE_USERNAME: 'test'
+      CLICKHOUSE_PASSWORD: 'test'
+      KAFKA_BROKER: 'broker:29092'
+    volumes:
+      - './tarballs/storage.tgz:/storage.tgz'
+      - './run-migrations.sh:/run-migrations.sh'
+
+  server:
+    image: node:16.13.2-alpine3.14
+    entrypoint:
+      - '/bin/sh'
+      - '/run-server.sh'
+    networks:
+      - 'stack'
+    depends_on:
+      redis:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+      tokens:
+        condition: service_healthy
+      webhooks:
+        condition: service_healthy
+      schema:
+        condition: service_healthy
+      usage_estimator:
+        condition: service_healthy
+      rate_limit:
+        condition: service_healthy
+      stripe_billing:
+        condition: service_healthy
+      local_cdn:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'localhost:3001/_readiness']
+      interval: 5s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
+    ports:
+      - '3001:3001'
+    volumes:
+      - './tarballs/server.tgz:/server.tgz'
+      - './run-server.sh:/run-server.sh'
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: registry
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      CLICKHOUSE_PROTOCOL: 'http'
+      CLICKHOUSE_HOST: clickhouse
+      CLICKHOUSE_PORT: 8123
+      CLICKHOUSE_USERNAME: test
+      CLICKHOUSE_PASSWORD: test
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: test
+      TOKENS_ENDPOINT: http://tokens:3003
+      WEBHOOKS_ENDPOINT: http://webhooks:3005
+      SCHEMA_ENDPOINT: http://schema:3002
+      USAGE_ESTIMATOR_ENDPOINT: http://usage_estimator:3008
+      RATE_LIMIT_ENDPOINT: http://rate_limit:3009
+      BILLING_ENDPOINT: http://stripe_billing:3010
+      CF_BASE_PATH: http://local_cdn:3004
+      CF_ACCOUNT_ID: 103df45224310d669213971ce28b5b70
+      CF_AUTH_TOKEN: 85e20c26c03759603c0f45884824a1c3
+      CF_NAMESPACE_ID: 33b1e3bbb4a4707d05ea0307cbb55c79
+      CDN_AUTH_PRIVATE_KEY: 1e1064ef9cda8bf38936b77317e90dc3
+      CDN_BASE_URL: http://localhost:3004
+      GITHUB_APP_ID: 123123
+      GITHUB_APP_PRIVATE_KEY: 5f938d51a065476c4dc1b04aeba13afb
+      ENCRYPTION_SECRET: 8ebe95cf24c1fbe306e9fa32c8c33148
+      FEEDBACK_SLACK_TOKEN: ''
+      FEEDBACK_SLACK_CHANNEL: '#hive'
+      AUTH0_SECRET: ${AUTH0_SECRET}
+      AUTH0_DOMAIN: ${AUTH0_DOMAIN}
+      AUTH0_CLIENT_ID: ${AUTH0_CLIENT_ID}
+      AUTH0_CLIENT_SECRET: ${AUTH0_CLIENT_SECRET}
+      AUTH0_SCOPE: 'openid profile offline_access'
+      AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
+      AUTH0_CONNECTION: ${AUTH0_CONNECTION}
+      PORT: 3001
+
+  schema:
+    image: node:16.13.2-alpine3.14
+    entrypoint:
+      - '/bin/sh'
+      - '/run-schema.sh'
+    networks:
+      - 'stack'
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'localhost:3002/_readiness']
+      interval: 5s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
+    ports:
+      - '3002:3002'
+    volumes:
+      - './tarballs/schema.tgz:/schema.tgz'
+      - './run-schema.sh:/run-schema.sh'
+    environment:
+      PORT: 3002
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: test
+
+  tokens:
+    image: node:16.13.2-alpine3.14
+    entrypoint:
+      - '/bin/sh'
+      - '/run-tokens.sh'
+    networks:
+      - 'stack'
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'localhost:3003/_readiness']
+      interval: 5s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
+    ports:
+      - '3003:3003'
+    volumes:
+      - './tarballs/tokens.tgz:/tokens.tgz'
+      - './run-tokens.sh:/run-tokens.sh'
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: registry
+      PORT: 3003
+
+  local_cdn:
+    image: node:16.13.2-alpine3.14
+    entrypoint:
+      - '/bin/sh'
+      - '/run-local-cdn.sh'
+    networks:
+      - 'stack'
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'localhost:3004/_readiness']
+      interval: 5s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
+    ports:
+      - '3004:3004'
+    volumes:
+      - '../packages/services/cdn-worker/dist/dev.js:/cdn.js'
+      - './run-local-cdn.sh:/run-local-cdn.sh'
+    environment:
+      PORT: 3004
+
+  webhooks:
+    image: node:16.13.2-alpine3.14
+    entrypoint:
+      - '/bin/sh'
+      - '/run-webhooks.sh'
+    networks:
+      - 'stack'
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'localhost:3005/_readiness']
+      interval: 5s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
+    ports:
+      - '3005:3005'
+    volumes:
+      - './tarballs/webhooks.tgz:/webhooks.tgz'
+      - './run-webhooks.sh:/run-webhooks.sh'
+    environment:
+      BULLMQ_COMMANDS_FROM_ROOT: 'true'
+      PORT: 3005
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: test
+
+  usage:
+    image: node:16.13.2-alpine3.14
+    entrypoint:
+      - '/bin/sh'
+      - '/run-usage.sh'
+    networks:
+      - 'stack'
+    ports:
+      - '3006:3006'
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'localhost:3006/_readiness']
+      interval: 5s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
+    volumes:
+      - './tarballs/usage.tgz:/usage.tgz'
+      - './run-usage.sh:/run-usage.sh'
+    depends_on:
+      broker:
+        condition: service_healthy
+      rate_limit:
+        condition: service_healthy
+      tokens:
+        condition: service_healthy
+    environment:
+      TOKENS_ENDPOINT: http://tokens:3003
+      RATE_LIMIT_ENDPOINT: http://rate_limit:3009
+      KAFKA_CONNECTION_MODE: 'docker'
+      KAFKA_BROKER: broker:29092
+      KAFKA_BUFFER_SIZE: 350
+      KAFKA_BUFFER_INTERVAL: 1000
+      KAFKA_BUFFER_DYNAMIC: 'true'
+      PORT: 3006
+
+  usage_ingestor:
+    image: node:16.13.2-alpine3.14
+    entrypoint:
+      - '/bin/sh'
+      - '/run-usage-ingestor.sh'
+    networks:
+      - 'stack'
+    depends_on:
+      broker:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'localhost:3007/_readiness']
+      interval: 5s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
+    ports:
+      - '3007:3007'
+    volumes:
+      - './tarballs/usage-ingestor.tgz:/usage-ingestor.tgz'
+      - './run-usage-ingestor.sh:/run-usage-ingestor.sh'
+    environment:
+      KAFKA_CONNECTION_MODE: 'docker'
+      KAFKA_BROKER: broker:29092
+      KAFKA_CONCURRENCY: 1
+      CLICKHOUSE_PROTOCOL: 'http'
+      CLICKHOUSE_HOST: clickhouse
+      CLICKHOUSE_PORT: 8123
+      CLICKHOUSE_USERNAME: test
+      CLICKHOUSE_PASSWORD: test
+      PORT: 3007
+
+  usage_estimator:
+    image: node:16.13.2-alpine3.14
+    entrypoint:
+      - '/bin/sh'
+      - '/run-usage-estimator.sh'
+    networks:
+      - 'stack'
+    ports:
+      - '3008:3008'
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'localhost:3008/_readiness']
+      interval: 5s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
+    volumes:
+      - './tarballs/usage-estimator.tgz:/usage-estimator.tgz'
+      - './run-usage-estimator.sh:/run-usage-estimator.sh'
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+    environment:
+      POSTGRES_CONNECTION_STRING: 'postgresql://postgres:postgres@db:5432/registry'
+      CLICKHOUSE_PROTOCOL: 'http'
+      CLICKHOUSE_HOST: 'clickhouse'
+      CLICKHOUSE_PORT: '8123'
+      CLICKHOUSE_USERNAME: 'test'
+      CLICKHOUSE_PASSWORD: 'test'
+      PORT: 3008
+
+  rate_limit:
+    image: node:16.13.2-alpine3.14
+    entrypoint:
+      - '/bin/sh'
+      - '/run-rate-limit.sh'
+    networks:
+      - 'stack'
+    ports:
+      - '3009:3009'
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'localhost:3009/_readiness']
+      interval: 5s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
+    volumes:
+      - './tarballs/rate-limit.tgz:/rate-limit.tgz'
+      - './run-rate-limit.sh:/run-rate-limit.sh'
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+      usage_estimator:
+        condition: service_healthy
+    environment:
+      POSTGRES_CONNECTION_STRING: 'postgresql://postgres:postgres@db:5432/registry'
+      USAGE_ESTIMATOR_ENDPOINT: http://usage_estimator:3008
+      PORT: 3009
+
+  stripe_billing:
+    image: node:16.13.2-alpine3.14
+    entrypoint:
+      - '/bin/sh'
+      - '/run-stripe-billing.sh'
+    networks:
+      - 'stack'
+    ports:
+      - '3010:3010'
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'localhost:3010/_readiness']
+      interval: 5s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
+    volumes:
+      - './tarballs/stripe-billing.tgz:/stripe-billing.tgz'
+      - './run-stripe-billing.sh:/run-stripe-billing.sh'
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+      usage_estimator:
+        condition: service_healthy
+    environment:
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      POSTGRES_CONNECTION_STRING: 'postgresql://postgres:postgres@db:5432/registry'
+      USAGE_ESTIMATOR_ENDPOINT: http://usage_estimator:3008
+      PORT: 3010
+
+networks:
+  stack: {}

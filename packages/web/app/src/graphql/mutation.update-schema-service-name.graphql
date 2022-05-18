@@ -1,0 +1,14 @@
+mutation updateSchemaServiceName($input: UpdateSchemaServiceNameInput!) {
+  updateSchemaServiceName(input: $input) {
+    ...TargetFields
+    latestSchemaVersion {
+      id
+      valid
+      schemas {
+        nodes {
+          ...SchemaFields
+        }
+      }
+    }
+  }
+}

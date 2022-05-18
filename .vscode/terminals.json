@@ -1,0 +1,83 @@
+{
+  "autorun": false,
+  "terminals": [
+    {
+      "name": "server:dev",
+      "description": "Run server",
+      "focus": true,
+      "open": true,
+      "cwd": "packages/services/server",
+      "command": "yarn dev"
+    },
+    {
+      "name": "app:dev",
+      "description": "Run application",
+      "open": true,
+      "cwd": "packages/web/app",
+      "command": "yarn dev"
+    },
+    {
+      "name": "tokens:dev",
+      "description": "Run tokens service",
+      "open": true,
+      "cwd": "packages/services/tokens",
+      "command": "yarn dev"
+    },
+    {
+      "name": "schema:dev",
+      "description": "Run schema service",
+      "open": true,
+      "cwd": "packages/services/schema",
+      "command": "yarn dev"
+    },
+    {
+      "name": "usage-estimator:dev",
+      "description": "Run Usage Estimator Service",
+      "open": true,
+      "cwd": "packages/services/usage-estimator",
+      "command": "yarn dev"
+    },
+    {
+      "name": "rate-limit:dev",
+      "description": "Run Rate Limiter Service",
+      "open": true,
+      "cwd": "packages/services/rate-limit",
+      "command": "yarn dev"
+    },
+    {
+      "name": "workdir",
+      "description": "Run empty",
+      "open": true,
+      "cwd": "./",
+      "command": ""
+    },
+    {
+      "name": "cdn:dev",
+      "description": "Run Local CDN",
+      "open": true,
+      "cwd": "packages/services/cdn-worker",
+      "command": "yarn dev"
+    },
+    {
+      "name": "billing:dev",
+      "description": "Run Billing Service",
+      "open": true,
+      "cwd": "packages/services/stripe-billing",
+      "command": "yarn dev"
+    },
+    {
+      "name": "usage:dev",
+      "description": "Run Usage Service",
+      "open": true,
+      "cwd": "packages/services/usage",
+      "command": "yarn dev"
+    },
+    {
+      "name": "usage-ingestor:dev",
+      "description": "Run Usage Ingestor",
+      "open": true,
+      "cwd": "packages/services/usage-ingestor",
+      "command": "yarn dev"
+    }
+  ]
+}

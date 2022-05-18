@@ -1,0 +1,76 @@
+{
+  "name": "ExampleService",
+  "baseUrl": "http://ip-api.com/",
+  "operations": [
+    {
+      "type": "query",
+      "field": "geoData",
+      "path": "/json",
+      "responseSample": "./exampleResponse.json"
+    }
+  ],
+  "referencedSchema": {
+    "$ref": "#/definitions/_schema",
+    "definitions": {
+      "query_geoData_lat": { "type": "number", "title": "query_geoData_lat" },
+      "query_geoData": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string" },
+          "status": { "type": "string" },
+          "country": { "type": "string" },
+          "countryCode": { "type": "string" },
+          "region": { "type": "string" },
+          "regionName": { "type": "string" },
+          "city": { "type": "string" },
+          "zip": { "type": "string" },
+          "lat": { "$ref": "#/definitions/query_geoData_lat" },
+          "lon": { "$ref": "#/definitions/query_geoData_lat" },
+          "timezone": { "type": "string" },
+          "isp": { "type": "string" },
+          "org": { "type": "string" },
+          "as": { "type": "string" }
+        },
+        "additionalProperties": false,
+        "title": "query_geoData",
+        "examples": [
+          {
+            "query": "24.48.0.1",
+            "status": "success",
+            "country": "Canada",
+            "countryCode": "CA",
+            "region": "QC",
+            "regionName": "Quebec",
+            "city": "Montreal",
+            "zip": "H3G",
+            "lat": 45.4995,
+            "lon": -73.5848,
+            "timezone": "America/Toronto",
+            "isp": "Le Groupe Videotron Ltee",
+            "org": "Videotron Ltee",
+            "as": "AS5769 Videotron Telecom Ltee"
+          }
+        ]
+      },
+      "Query": {
+        "type": "object",
+        "title": "Query",
+        "properties": { "geoData": { "$ref": "#/definitions/query_geoData" } }
+      },
+      "QueryInput": {
+        "type": "object",
+        "title": "QueryInput",
+        "properties": {}
+      },
+      "_schema": {
+        "type": "object",
+        "title": "_schema",
+        "properties": {
+          "query": { "$ref": "#/definitions/Query" },
+          "queryInput": { "$ref": "#/definitions/QueryInput" }
+        },
+        "required": ["query"]
+      }
+    }
+  }
+}

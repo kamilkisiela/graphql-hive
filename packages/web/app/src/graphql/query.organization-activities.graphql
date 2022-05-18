@@ -1,0 +1,24 @@
+query organizationActivities($selector: OrganizationActivitiesSelector!) {
+  organizationActivities(selector: $selector) {
+    nodes {
+      __typename
+      id
+      createdAt
+      ...OrganizationPlanChange
+      ...OrganizationCreated
+      ...OrganizationNameUpdated
+      ...OrganizationIdUpdated
+      ...MemberAdded
+      ...MemberDeleted
+      ...ProjectCreated
+      ...ProjectDeleted
+      ...ProjectNameUpdated
+      ...ProjectIdUpdated
+      ...TargetCreated
+      ...TargetDeleted
+      ...TargetNameUpdated
+      ...TargetIdUpdated
+    }
+    total
+  }
+}

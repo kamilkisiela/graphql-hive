@@ -1,0 +1,9 @@
+type Query {
+  test: Post!
+}
+
+type Post @model {
+  id: ID! # id: ID! is a required attribute.
+  title: String!
+  tags: [String!]!
+}

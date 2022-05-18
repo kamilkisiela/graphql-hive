@@ -1,0 +1,60 @@
+{
+  "name": "@hive/api",
+  "type": "module",
+  "private": true,
+  "version": "0.0.2",
+  "license": "MIT",
+  "peerDependencies": {
+    "graphql": "^16.0.0",
+    "reflect-metadata": "^0.1.0"
+  },
+  "dependencies": {
+    "@graphql-yoga/common": "2.5.0",
+    "cross-undici-fetch": "0.4.3",
+    "@trpc/client": "9.23.2",
+    "@graphql-hive/core": "0.2.0",
+    "@graphql-inspector/core": "3.1.2",
+    "@graphql-tools/load-files": "6.5.0",
+    "@graphql-tools/schema": "8.2.0",
+    "@octokit/app": "12.0.5",
+    "@sentry/node": "6.19.7",
+    "@sentry/types": "6.19.7",
+    "@slack/web-api": "6.4.0",
+    "@theguild/buddy": "0.1.0",
+    "agentkeepalive": "4.2.0",
+    "abort-controller": "3.0.0",
+    "auth0": "2.37.0",
+    "dataloader": "2.0.0",
+    "date-fns": "2.25.0",
+    "emittery": "0.10.0",
+    "got": "12.0.4",
+    "graphql-modules": "2.0.0",
+    "graphql-parse-resolve-info": "4.12.0",
+    "graphql-scalars": "1.12.0",
+    "human-id": "2.0.1",
+    "ioredis": "4.28.3",
+    "jwks-rsa": "2.0.5",
+    "jsonwebtoken": "8.5.1",
+    "lodash": "4.17.21",
+    "lru-cache": "7.9.0",
+    "mixpanel": "0.14.0",
+    "ms": "2.1.3",
+    "param-case": "3.0.4",
+    "p-retry": "5.1.1",
+    "p-timeout": "5.0.2",
+    "uuid": "8.3.2"
+  },
+  "devDependencies": {
+    "@types/auth0": "2.34.2",
+    "@types/ioredis": "4.28.7",
+    "@types/lodash": "4.14.182",
+    "@types/lru-cache": "7.6.1",
+    "@types/ms": "0.7.31",
+    "@types/ioredis-mock": "5.6.0",
+    "@types/uuid": "8.3.4",
+    "ioredis-mock": "7.4.0"
+  },
+  "engines": {
+    "node": ">=12"
+  }
+}

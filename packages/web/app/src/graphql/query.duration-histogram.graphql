@@ -1,0 +1,11 @@
+query durationHistogram(
+  $selector: OperationsStatsSelectorInput!
+  $resolution: Int!
+) {
+  operationsStats(selector: $selector) {
+    durationHistogram(resolution: $resolution) {
+      duration
+      count
+    }
+  }
+}

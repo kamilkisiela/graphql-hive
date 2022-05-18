@@ -1,0 +1,15 @@
+query billingPlans {
+  billingPlans {
+    id
+    planType
+    name
+    basePrice
+    description
+    includedOperationsLimit
+    includedSchemaPushLimit
+    pricePerOperationsUnit
+    pricePerSchemaPushUnit
+    rateLimit
+    retentionInDays
+  }
+}

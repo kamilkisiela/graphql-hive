@@ -1,0 +1,16 @@
+{
+  "private": true,
+  "type": "module",
+  "name": "@hive/service-common",
+  "version": "0.1.3",
+  "license": "MIT",
+  "dependencies": {
+    "fastify": "3.29.0",
+    "fastify-cors": "6.0.2",
+    "prom-client": "14.0.1"
+  },
+  "peerDependencies": {
+    "@sentry/node": "^6.0.0",
+    "@sentry/tracing": "^6.0.0"
+  }
+}

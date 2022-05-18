@@ -1,0 +1,42 @@
+mutation schemaPublish($input: SchemaPublishInput!, $usesGitHubApp: Boolean!) {
+  schemaPublish(input: $input) {
+    __typename
+    ... on SchemaPublishSuccess @skip(if: $usesGitHubApp) {
+      initial
+      valid
+      successMessage: message
+      changes {
+        nodes {
+          message
+          criticality
+        }
+        total
+      }
+    }
+    ... on SchemaPublishError @skip(if: $usesGitHubApp) {
+      valid
+      changes {
+        nodes {
+          message
+          criticality
+        }
+        total
+      }
+      errors {
+        nodes {
+          message
+        }
+        total
+      }
+    }
+    ... on SchemaPublishMissingServiceError @skip(if: $usesGitHubApp) {
+      missingServiceError: message
+    }
+    ... on GitHubSchemaPublishSuccess @include(if: $usesGitHubApp) {
+      message
+    }
+    ... on GitHubSchemaPublishError @include(if: $usesGitHubApp) {
+      message
+    }
+  }
+}

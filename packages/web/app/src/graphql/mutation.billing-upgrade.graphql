@@ -1,0 +1,21 @@
+mutation upgradeToPro(
+  $organization: ID!
+  $paymentMethodId: String
+  $couponCode: String
+  $monthlyLimits: RateLimitInput!
+) {
+  upgradeToPro(
+    input: {
+      paymentMethodId: $paymentMethodId
+      couponCode: $couponCode
+      organization: { organization: $organization }
+      monthlyLimits: $monthlyLimits
+    }
+  ) {
+    previousPlan
+    newPlan
+    organization {
+      ...OrgBillingInfoFields
+    }
+  }
+}

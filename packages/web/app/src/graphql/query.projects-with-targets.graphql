@@ -1,0 +1,16 @@
+query projectsWithTargets($selector: OrganizationSelectorInput!) {
+  projects(selector: $selector) {
+    nodes {
+      ...ProjectFields
+      ... on Project {
+        targets {
+          nodes {
+            ...TargetFields
+          }
+          total
+        }
+      }
+    }
+    total
+  }
+}

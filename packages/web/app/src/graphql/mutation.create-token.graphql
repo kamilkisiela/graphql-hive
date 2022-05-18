@@ -1,0 +1,13 @@
+mutation createToken($input: CreateTokenInput!) {
+  createToken(input: $input) {
+    selector {
+      organization
+      project
+      target
+    }
+    createdToken {
+      ...TokenFields
+    }
+    secret
+  }
+}

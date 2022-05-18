@@ -1,0 +1,42 @@
+diff --git a/node_modules/bullmq/dist/esm/classes/redis-connection.js b/node_modules/bullmq/dist/esm/classes/redis-connection.js
+index 7843e65..3807efe 100644
+--- a/node_modules/bullmq/dist/esm/classes/redis-connection.js
++++ b/node_modules/bullmq/dist/esm/classes/redis-connection.js
+@@ -105,7 +105,7 @@ export class RedisConnection extends EventEmitter {
+     }
+     loadCommands() {
+         return (this._client['bullmq:loadingCommands'] ||
+-            (this._client['bullmq:loadingCommands'] = scriptLoader.load(this._client, path.join(__dirname, '../commands'))));
++            (this._client['bullmq:loadingCommands'] = scriptLoader.load(this._client, path.join(__dirname, process.env.BULLMQ_COMMANDS_FROM_ROOT ? './' : '../commands'))));
+     }
+     async init() {
+         if (!this._client) {
+diff --git a/node_modules/bullmq/dist/esm/commands/script-loader.js b/node_modules/bullmq/dist/esm/commands/script-loader.js
+index 3ed1c00..79e455a 100644
+--- a/node_modules/bullmq/dist/esm/commands/script-loader.js
++++ b/node_modules/bullmq/dist/esm/commands/script-loader.js
+@@ -2,6 +2,7 @@ import { createHash } from 'crypto';
+ import { glob, hasMagic } from 'glob';
+ import * as path from 'path';
+ import * as fs from 'fs';
++import { fileURLToPath } from 'url';
+ import { promisify } from 'util';
+ const readFile = promisify(fs.readFile);
+ const readdir = promisify(fs.readdir);
+@@ -343,15 +344,7 @@ async function getFilenamesByPattern(pattern) {
+ // Determine the project root
+ // https://stackoverflow.com/a/18721515
+ function getPkgJsonDir() {
+-    for (const modPath of (module.paths || [])) {
+-        try {
+-            const prospectivePkgJsonDir = path.dirname(modPath);
+-            fs.accessSync(modPath, fs.constants.F_OK);
+-            return prospectivePkgJsonDir;
+-            // eslint-disable-next-line no-empty
+-        }
+-        catch (e) { }
+-    }
++    return path.dirname(fileURLToPath(import.meta.url));
+ }
+ // https://stackoverflow.com/a/66842927
+ // some dark magic here :-)

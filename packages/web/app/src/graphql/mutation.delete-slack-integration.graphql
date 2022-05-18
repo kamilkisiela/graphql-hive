@@ -1,0 +1,3 @@
+mutation deleteSlackIntegration($input: OrganizationSelectorInput!) {
+  deleteSlackIntegration(input: $input)
+}

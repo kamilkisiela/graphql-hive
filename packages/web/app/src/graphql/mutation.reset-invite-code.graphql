@@ -1,0 +1,8 @@
+mutation resetInviteCode($selector: OrganizationSelectorInput!) {
+  resetInviteCode(selector: $selector) {
+    organization {
+      id
+      inviteCode
+    }
+  }
+}

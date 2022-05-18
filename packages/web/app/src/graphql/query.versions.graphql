@@ -1,0 +1,10 @@
+query versions($selector: SchemaVersionsInput!, $limit: Int!, $after: ID) {
+  schemaVersions(selector: $selector, after: $after, limit: $limit) {
+    nodes {
+      ...SchemaVersionFields
+    }
+    pageInfo {
+      hasMore
+    }
+  }
+}

@@ -1,0 +1,107 @@
+name: ci/cd
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  publish:
+    name: 'build'
+    runs-on: ubuntu-latest
+
+    env:
+      HIVE_TOKEN: ${{ secrets.HIVE_TOKEN }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16
+
+      - name: Install Dependencies
+        run: yarn --frozen-lockfile
+
+      - uses: actions/cache@v3
+        name: Turbo cache
+        with:
+          path: node_modules/.cache/turbo
+          key: ${{ runner.os }}-turbo-cache-v1-${{ hashFiles('yarn.lock') }}
+
+      - name: Generate GraphQL Types
+        run: yarn graphql:generate
+
+      - name: Build
+        run: yarn build:libraries
+
+      - name: Schema Publish
+        run: ./packages/libraries/cli/bin/dev schema:publish "packages/services/api/src/modules/*/module.graphql.ts" --force --github
+
+      - name: Prepare NPM Credentials
+        run: |
+          echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> $HOME/.npmrc
+          npm config set always-auth true
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create Release Pull Request or Publish packages
+        id: changesets
+        uses: changesets/action@master
+        with:
+          publish: yarn release
+          commit: 'chore(release): update monorepo packages versions'
+          title: 'Upcoming Release Changes'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract published version
+        if: steps.changesets.outputs.published && contains(steps.changesets.outputs.publishedPackages, '"@graphql-hive/cli"')
+        id: cli
+        run: |
+          echo '${{steps.changesets.outputs.publishedPackages}}' > cli-ver.json
+          VERSION=`echo $(jq -r '.[] | select(.name | contains("@graphql-hive/cli")).version' cli-ver.json)`
+          echo "::set-output name=version::$VERSION"
+          echo "::set-output name=publish::true"
+
+      - name: Pack tarballs
+        if: steps.cli.outputs.publish == 'true'
+        working-directory: packages/libraries/cli
+        run: yarn oclif pack tarballs --no-xz
+
+      - name: Upload tarballs
+        if: steps.cli.outputs.publish == 'true'
+        working-directory: packages/libraries/cli
+        run: yarn oclif upload tarballs --no-xz
+
+      - name: Promote tarballs
+        if: steps.cli.outputs.publish == 'true'
+        working-directory: packages/libraries/cli
+        env:
+          VERSION: ${{ steps.cli.outputs.version }}
+        run: yarn oclif promote --no-xz --sha ${GITHUB_SHA:0:7} --version $VERSION || yarn oclif promote --no-xz --sha ${GITHUB_SHA:0:8} --version $VERSION
+
+  deploy:
+    name: 'deploy to staging'
+    needs: publish
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Dispatch Deployment
+        run: |
+          curl --request POST \
+            --url 'https://api.github.com/repos/${{ secrets.PRIVATE_REPO_OWNER }}/${{ secrets.PRIVATE_REPO_NAME }}/dispatches' \
+            --header 'Accept: application/vnd.github.everest-preview+json' \
+            --header 'Authorization: token ${{ secrets.GH_PAT }}' \
+            --header 'Content-Type: application/json' \
+            --data '{
+            "event_type": "deploy",
+            "client_payload": {
+              "environment": "staging",
+              "ref": "${{ github.sha }}"
+            }
+          }'

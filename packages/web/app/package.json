@@ -1,0 +1,79 @@
+{
+  "name": "@hive/app",
+  "private": true,
+  "version": "0.16.2",
+  "scripts": {
+    "dev": "next dev",
+    "start": "next start",
+    "build": "bob runify --single"
+  },
+  "dependencies": {
+    "@stripe/react-stripe-js": "1.7.2",
+    "@stripe/stripe-js": "1.29.0",
+    "hyperid": "2.3.1",
+    "@auth0/nextjs-auth0": "1.6.1",
+    "@chakra-ui/react": "1.6.10",
+    "@emotion/css": "11.5.0",
+    "@emotion/react": "11.5.0",
+    "@emotion/server": "11.4.0",
+    "@emotion/styled": "11.3.0",
+    "@graphql-tools/mock": "8.4.0",
+    "@monaco-editor/react": "4.3.1",
+    "@n1ru4l/react-time-ago": "1.1.0",
+    "@sentry/nextjs": "6.19.7",
+    "@sentry/react": "6.19.7",
+    "@sentry/node": "6.19.7",
+    "@sentry/tracing": "6.19.7",
+    "@theguild/editor": "0.4.1",
+    "@urql/core": "2.3.6",
+    "@urql/devtools": "2.0.3",
+    "@urql/exchange-graphcache": "4.3.6",
+    "date-fns": "2.25.0",
+    "echarts": "5.2.2",
+    "echarts-for-react": "3.0.2",
+    "formik": "2.2.9",
+    "framer-motion": "4.1.17",
+    "graphiql": "1.4.2",
+    "graphql": "16.5.0",
+    "immer": "9.0.12",
+    "mixpanel-browser": "2.45.0",
+    "monaco-editor": "0.27.0",
+    "monaco-themes": "0.3.3",
+    "node-crisp-api": "1.12.3",
+    "next": "12.1.0",
+    "react": "17.0.2",
+    "react-date-range": "1.4.0",
+    "react-dom": "17.0.2",
+    "react-icons": "4.3.1",
+    "react-string-replace": "0.4.4",
+    "react-table": "7.7.0",
+    "react-virtualized": "9.22.3",
+    "regenerator-runtime": "0.13.9",
+    "tailwindcss": "2.2.19",
+    "tslib": "2.3.1",
+    "twin.macro": "2.8.2",
+    "urql": "2.0.5",
+    "use-debounce": "6.0.1",
+    "valtio": "1.2.5",
+    "wonka": "4.0.15",
+    "yup": "0.32.11"
+  },
+  "devDependencies": {
+    "@types/mixpanel-browser": "2.35.7",
+    "@types/react": "17.0.45",
+    "@types/react-date-range": "1.1.8",
+    "@types/react-dom": "17.0.17",
+    "@types/react-virtualized": "9.21.21"
+  },
+  "babelMacros": {
+    "twin": {
+      "preset": "emotion"
+    }
+  },
+  "buildOptions": {
+    "runify": true,
+    "tags": [
+      "frontend"
+    ]
+  }
+}

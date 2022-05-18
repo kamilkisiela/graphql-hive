@@ -1,0 +1,35 @@
+{
+  "name": "@hive/webhooks",
+  "type": "module",
+  "private": true,
+  "version": "0.1.4",
+  "license": "MIT",
+  "scripts": {
+    "dev": "tsup-node src/dev.ts --format esm --target node16 --watch --onSuccess 'node dist/dev.js' | pino-pretty --translateTime HH:MM:ss TT --ignore pid,hostname",
+    "build": "bob runify --single",
+    "postbuild": "copyfiles -f \"../../../node_modules/bullmq/dist/esm/commands/*.lua\" dist && copyfiles -f \"../../../node_modules/bullmq/dist/esm/commands/includes/*.lua\" dist/includes",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@sentry/node": "6.19.7",
+    "@sentry/tracing": "6.19.7",
+    "bullmq": "1.81.4",
+    "dotenv": "10.0.0",
+    "got": "12.0.4",
+    "ioredis": "4.28.3",
+    "p-timeout": "5.0.2"
+  },
+  "devDependencies": {
+    "ioredis": "4.28.3",
+    "copyfiles": "2.4.1",
+    "pino-pretty": "6.0.0"
+  },
+  "buildOptions": {
+    "runify": true,
+    "tsup": true,
+    "tags": [
+      "backend"
+    ],
+    "banner": "../../../scripts/banner.js"
+  }
+}

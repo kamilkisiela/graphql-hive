@@ -1,0 +1,18 @@
+query projectActivities($selector: ProjectActivitiesSelector!) {
+  projectActivities(selector: $selector) {
+    nodes {
+      __typename
+      id
+      createdAt
+      ...ProjectCreated
+      ...ProjectDeleted
+      ...ProjectNameUpdated
+      ...ProjectIdUpdated
+      ...TargetCreated
+      ...TargetDeleted
+      ...TargetNameUpdated
+      ...TargetIdUpdated
+    }
+    total
+  }
+}

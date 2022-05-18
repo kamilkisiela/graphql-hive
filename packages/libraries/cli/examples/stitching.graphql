@@ -1,0 +1,15 @@
+type Post {
+  id: ID!
+  message: String!
+  author: User
+}
+
+type User {
+  id: ID!
+  posts: [Post]
+}
+
+type Query {
+  post(id: ID!): Post
+  users(ids: [ID!]!): [User]! @merge(keyField: "id")
+}

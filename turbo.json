@@ -1,0 +1,52 @@
+{
+  "baseBranch": "origin/main",
+  "globalDependencies": [
+    "package.json",
+    "codegen.yml",
+    "yarn.lock",
+    "jest.config.js",
+    "tsconfig.json",
+    "scripts/patch-manifests.js",
+    "patches/*"
+  ],
+  "pipeline": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
+    },
+    "build-local": {
+      "outputs": ["dist/**"]
+    },
+    "@hive/app#build": {
+      "dependsOn": [
+        "^build",
+        "$NEXT_PUBLIC_DOCS_LINK",
+        "$NEXT_PUBLIC_CRISP_WEBSITE_ID",
+        "$NEXT_PUBLIC_GA_TRACKING_ID",
+        "$NEXT_PUBLIC_MIXPANEL_TOKEN",
+        "$NEXT_PUBLIC_STRIPE_PUBLIC_KEY"
+      ],
+      "outputs": ["dist/**"]
+    },
+    "@hive/docs#build": {
+      "dependsOn": [
+        "^build",
+        "$NEXT_PUBLIC_APP_LINK",
+        "$NEXT_PUBLIC_CRISP_WEBSITE_ID",
+        "$NEXT_PUBLIC_GA_TRACKING_ID"
+      ],
+      "outputs": ["dist/**"]
+    },
+    "@hive/landing-page#build": {
+      "dependsOn": [
+        "^build",
+        "$NEXT_PUBLIC_CRISP_WEBSITE_ID",
+        "$NEXT_PUBLIC_GA_TRACKING_ID"
+      ],
+      "outputs": ["dist/**"]
+    },
+    "typecheck": {
+      "outputs": []
+    }
+  }
+}

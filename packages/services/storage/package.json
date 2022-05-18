@@ -1,0 +1,52 @@
+{
+  "name": "@hive/storage",
+  "type": "module",
+  "private": true,
+  "version": "0.14.1",
+  "license": "MIT",
+  "scripts": {
+    "setup": "yarn db:start && yarn db",
+    "db": "yarn db:create && yarn migration:run",
+    "db:create": "node tools/create-db.mjs",
+    "db:migrator": "node -r ./tools/register.cjs migrations/migrate.ts",
+    "migration:create": "yarn db:migrator create",
+    "migration:run": "yarn db:migrator up",
+    "migration:rollback": "yarn db:migrator down",
+    "db:generate": "schemats generate --config schemats.cjs -o src/db/types.ts",
+    "db:start": "docker-compose up -d --remove-orphans",
+    "db:dev": "docker compose up --remove-orphans",
+    "build": "bob runify --single",
+    "postbuild": "copyfiles -f \"migrations/actions/*.sql\" dist/actions && copyfiles -f \"migrations/actions/down/*.sql\" dist/actions/down"
+  },
+  "dependencies": {
+    "@sentry/node": "6.19.7",
+    "@slonik/migrator": "0.8.5",
+    "@theguild/buddy": "0.1.0",
+    "dotenv": "10.0.0",
+    "got": "12.0.4",
+    "slonik": "24.1.2",
+    "slonik-interceptor-query-logging": "1.3.9"
+  },
+  "devDependencies": {
+    "@tgriesser/schemats": "7.0.0",
+    "@types/pg": "8.6.5",
+    "esbuild-register": "3.3.2",
+    "pg-promise": "10.11.1",
+    "ts-node": "10.7.0"
+  },
+  "engines": {
+    "node": ">=12"
+  },
+  "buildOptions": {
+    "runify": true,
+    "tsup": true,
+    "bin": "migrations/migrate.ts",
+    "external": [
+      "pg-native"
+    ],
+    "tags": [
+      "backend"
+    ],
+    "banner": "../../../scripts/banner.js"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "private": true,
+  "type": "module",
+  "name": "@hive/usage-ingestor",
+  "version": "0.0.2",
+  "license": "MIT",
+  "scripts": {
+    "dev": "tsup-node src/dev.ts --watch --format esm --target node16 --onSuccess 'node dist/dev.js' | pino-pretty --translateTime HH:MM:ss TT --ignore pid,hostname",
+    "build": "bob runify --single",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@graphql-hive/core": "0.2.0",
+    "@sentry/node": "6.19.7",
+    "@sentry/tracing": "6.19.7",
+    "agentkeepalive": "4.2.0",
+    "date-fns": "2.25.0",
+    "date-fns-tz": "1.2.2",
+    "dotenv": "10.0.0",
+    "graphql": "16.5.0",
+    "got": "12.0.4",
+    "kafkajs": "2.0.0",
+    "tiny-lru": "8.0.2"
+  },
+  "devDependencies": {
+    "pino-pretty": "6.0.0"
+  },
+  "buildOptions": {
+    "runify": true,
+    "tsup": true,
+    "tags": [
+      "backend"
+    ],
+    "banner": "../../../scripts/banner.js"
+  }
+}

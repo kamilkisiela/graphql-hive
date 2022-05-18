@@ -1,0 +1,5 @@
+mutation deleteAlertChannels($input: DeleteAlertChannelsInput!) {
+  deleteAlertChannels(input: $input) {
+    id
+  }
+}

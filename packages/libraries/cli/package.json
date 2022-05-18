@@ -1,0 +1,90 @@
+{
+  "name": "@graphql-hive/cli",
+  "description": "A CLI util to manage and control your GraphQL Hive",
+  "version": "0.14.3",
+  "author": {
+    "email": "contact@the-guild.dev",
+    "name": "The Guild",
+    "url": "https://the-guild.dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "kamilkisiela/graphql-hive",
+    "directory": "packages/libraries/cli"
+  },
+  "license": "MIT",
+  "keywords": [
+    "graphql"
+  ],
+  "bin": {
+    "hive": "./bin/run"
+  },
+  "files": [
+    "/bin",
+    "/dist",
+    "/npm-shrinkwrap.json",
+    "/oclif.manifest.json"
+  ],
+  "scripts": {
+    "start": "./bin/dev",
+    "build": "tsc",
+    "postpack": "rm -f oclif.manifest.json",
+    "prepack": "rimraf lib && tsc -b && oclif manifest && oclif readme",
+    "version": "oclif readme && git add README.md",
+    "schema:check:single": "yarn start schema:check examples/single.graphql",
+    "schema:check:stitching": "yarn start schema:check examples/stitching.graphql --service posts",
+    "schema:check:federation": "yarn start schema:check examples/federation.graphql --service reviews",
+    "schema:publish:federation": "yarn start schema:publish --service reviews examples/federation.reviews.graphql"
+  },
+  "dependencies": {
+    "@graphql-hive/core": "0.2.0",
+    "@graphql-inspector/core": "~3.1.2",
+    "@graphql-tools/code-file-loader": "~7.2.14",
+    "@graphql-tools/graphql-file-loader": "~7.3.11",
+    "@graphql-tools/json-file-loader": "~7.3.11",
+    "@graphql-tools/url-loader": "~7.9.15",
+    "@graphql-tools/load": "~7.5.10",
+    "@graphql-tools/utils": "8.2.4",
+    "@oclif/core": "^1.7.0",
+    "@oclif/plugin-help": "5.1.12",
+    "@oclif/plugin-update": "3.0.0",
+    "colors": "1.4.0",
+    "env-ci": "7.1.0",
+    "git-parse": "2.1.1",
+    "graphql-request": "4.1.0",
+    "graphql-tag": "2.12.6",
+    "log-symbols": "4.1.0",
+    "mkdirp": "1.0.4",
+    "tslib": "2.3.1",
+    "ts-node": "10.7.0"
+  },
+  "peerDependencies": {
+    "graphql": "^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0"
+  },
+  "devDependencies": {
+    "oclif": "^3.0.1",
+    "@types/env-ci": "3.1.1",
+    "@types/git-parse": "2.1.2",
+    "@types/mkdirp": "1.0.2"
+  },
+  "oclif": {
+    "commands": "./dist/commands",
+    "bin": "hive",
+    "plugins": [
+      "@oclif/plugin-help",
+      "@oclif/plugin-update"
+    ],
+    "update": {
+      "s3": {
+        "bucket": "graphql-hive-cli-test"
+      }
+    }
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

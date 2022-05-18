@@ -1,0 +1,6 @@
+query alertChannels($selector: ProjectSelectorInput!) {
+  alertChannels(selector: $selector) {
+    ...AlertSlackChannelFields
+    ...AlertWebhookChannelFields
+  }
+}

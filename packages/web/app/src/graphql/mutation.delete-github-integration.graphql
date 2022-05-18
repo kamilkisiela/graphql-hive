@@ -1,0 +1,3 @@
+mutation deleteGitHubIntegration($input: OrganizationSelectorInput!) {
+  deleteGitHubIntegration(input: $input)
+}

@@ -1,0 +1,8 @@
+query organizations {
+  organizations {
+    nodes {
+      ...OrganizationFields
+    }
+    total
+  }
+}

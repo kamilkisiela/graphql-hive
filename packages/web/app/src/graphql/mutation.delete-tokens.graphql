@@ -1,0 +1,10 @@
+mutation deleteTokens($input: DeleteTokensInput!) {
+  deleteTokens(input: $input) {
+    selector {
+      organization
+      project
+      target
+    }
+    deletedTokens
+  }
+}

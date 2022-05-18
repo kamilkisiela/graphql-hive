@@ -1,0 +1,7 @@
+mutation updateTargetValidationSettings(
+  $input: UpdateTargetValidationSettingsInput!
+) {
+  updateTargetValidationSettings(input: $input) {
+    ...TargetValidationSettingsFields
+  }
+}

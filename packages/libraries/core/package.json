@@ -1,0 +1,48 @@
+{
+  "name": "@graphql-hive/core",
+  "version": "0.2.0",
+  "author": {
+    "email": "contact@the-guild.dev",
+    "name": "The Guild",
+    "url": "https://the-guild.dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "kamilkisiela/graphql-hive",
+    "directory": "packages/libraries/core"
+  },
+  "license": "MIT",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "typings": "dist/index.d.ts",
+  "typescript": {
+    "definition": "dist/index.d.ts"
+  },
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs"
+    },
+    "./*": {
+      "require": "./dist/*.js",
+      "import": "./dist/*.mjs"
+    }
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public",
+    "directory": "dist"
+  },
+  "scripts": {
+    "build": "bob build --single"
+  },
+  "peerDependencies": {
+    "graphql": "^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0"
+  },
+  "dependencies": {
+    "lodash.sortby": "4.7.0"
+  },
+  "devDependencies": {
+    "@types/lodash.sortby": "4.7.7"
+  }
+}

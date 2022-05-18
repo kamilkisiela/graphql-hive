@@ -1,0 +1,28 @@
+{
+  "extends": ["config:base", ":preserveSemverRanges"],
+  "packageRules": [
+    {
+      "matchPackageNames": ["envelop"],
+      "matchPackagePatterns": ["^@envelop/"],
+      "groupName": "envelop monorepo"
+    },
+    {
+      "matchPackageNames": ["pulumi"],
+      "matchPackagePatterns": ["^@pulumi/"],
+      "groupName": "pulumi monorepo"
+    }
+  ],
+  "regexManagers": [
+    {
+      "fileMatch": ["^deployment/"],
+      "matchStrings": ["DEFAULT_IMAGE = '(?<currentValue>.*?)'"],
+      "depNameTemplate": "docker",
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "docker"
+    }
+  ],
+  "timezone": "Europe/Warsaw",
+  "schedule": ["after 10pm and before 6:00am"],
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 3
+}

@@ -1,0 +1,11 @@
+mutation schemaSyncCdn($input: SchemaSyncCDNInput!) {
+  schemaSyncCDN(input: $input) {
+    __typename
+    ... on SchemaSyncCDNSuccess {
+      message
+    }
+    ... on SchemaSyncCDNError {
+      message
+    }
+  }
+}

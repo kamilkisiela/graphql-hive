@@ -1,0 +1,12 @@
+mutation updateOrganizationMemberAccess(
+  $input: OrganizationMemberAccessInput!
+) {
+  updateOrganizationMemberAccess(input: $input) {
+    selector {
+      organization
+    }
+    organization {
+      ...OrganizationFields
+    }
+  }
+}

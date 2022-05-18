@@ -1,0 +1,10 @@
+query organizationInvitation($code: String!) {
+  organizationByInviteCode(code: $code) {
+    ... on OrganizationInvitationPayload {
+      name
+    }
+    ... on OrganizationInvitationError {
+      message
+    }
+  }
+}

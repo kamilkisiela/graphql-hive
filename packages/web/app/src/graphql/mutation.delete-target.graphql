@@ -1,0 +1,12 @@
+mutation deleteTarget($selector: TargetSelectorInput!) {
+  deleteTarget(selector: $selector) {
+    selector {
+      organization
+      project
+      target
+    }
+    deletedTarget {
+      id
+    }
+  }
+}

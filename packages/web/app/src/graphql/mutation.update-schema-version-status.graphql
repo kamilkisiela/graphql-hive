@@ -1,0 +1,5 @@
+mutation updateSchemaVersionStatus($input: SchemaVersionUpdateInput!) {
+  updateSchemaVersionStatus(input: $input) {
+    ...SchemaVersionFields
+  }
+}

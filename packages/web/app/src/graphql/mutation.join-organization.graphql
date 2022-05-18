@@ -1,0 +1,15 @@
+mutation joinOrganization($code: String!) {
+  joinOrganization(code: $code) {
+    ... on OrganizationPayload {
+      selector {
+        organization
+      }
+      organization {
+        ...OrganizationFields
+      }
+    }
+    ... on OrganizationInvitationError {
+      message
+    }
+  }
+}
