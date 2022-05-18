@@ -21,7 +21,9 @@ test('owner of an organization should have all scopes', async () => {
 
   expect(result.body.errors).not.toBeDefined();
 
-  const owner = result.body.data!.createOrganization.organization.owner;
+  const owner =
+    result.body.data!.createOrganization.ok.createdOrganizationPayload
+      .organization.owner;
 
   Object.values(OrganizationAccessScope).forEach((scope) => {
     expect(owner.organizationAccessScopes).toContain(scope);
@@ -47,7 +49,9 @@ test('regular member of an organization should have basic scopes', async () => {
 
   // Join
   const { access_token: member_access_token } = await authenticate('extra');
-  const code = orgResult.body.data!.createOrganization.organization.inviteCode;
+  const code =
+    orgResult.body.data!.createOrganization.ok.createdOrganizationPayload
+      .organization.inviteCode;
   const joinResult = await joinOrganization(code, member_access_token);
 
   expect(joinResult.body.errors).not.toBeDefined();
@@ -98,7 +102,9 @@ test('cannot grant an access scope to another user if user has no access to that
 
   // Join
   const { access_token: member_access_token } = await authenticate('extra');
-  const org = orgResult.body.data!.createOrganization.organization;
+  const org =
+    orgResult.body.data!.createOrganization.ok.createdOrganizationPayload
+      .organization;
   const code = org.inviteCode;
   const joinResult = await joinOrganization(code, member_access_token);
 

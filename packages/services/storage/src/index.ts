@@ -289,15 +289,14 @@ export async function createStorage(connection: string): Promise<Storage> {
 
       return null;
     },
-    async createUser({ external, email }) {
-      const name = email.split('@')[0];
+    async createUser({ external, email, fullName, displayName }) {
       return transformUser(
         await pool.one<Slonik<users>>(
           sql`
             INSERT INTO public.users
               ("email", "external_auth_user_id", "full_name", "display_name")
             VALUES
-              (${email}, ${external}, ${name}, ${name})
+              (${email}, ${external}, ${fullName}, ${displayName})
             RETURNING *
           `
         )

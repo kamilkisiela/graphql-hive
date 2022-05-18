@@ -1,11 +1,13 @@
 mutation updateProjectName($input: UpdateProjectNameInput!) {
   updateProjectName(input: $input) {
-    selector {
-      organization
-      project
-    }
-    updatedProject {
-      ...ProjectFields
+    ok {
+      selector {
+        organization
+        project
+      }
+      updatedProject {
+        ...ProjectFields
+      }
     }
   }
 }

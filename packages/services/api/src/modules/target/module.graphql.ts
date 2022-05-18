@@ -8,15 +8,53 @@ export default gql`
   }
 
   extend type Mutation {
-    createTarget(input: CreateTargetInput!): CreateTargetPayload!
-    updateTargetName(input: UpdateTargetNameInput!): UpdateTargetPayload!
+    createTarget(input: CreateTargetInput!): CreateTargetResult!
+    updateTargetName(input: UpdateTargetNameInput!): UpdateTargetNameResult!
     deleteTarget(selector: TargetSelectorInput!): DeleteTargetPayload!
     updateTargetValidationSettings(
       input: UpdateTargetValidationSettingsInput!
-    ): TargetValidationSettings!
+    ): UpdateTargetValidationSettingsResult!
     setTargetValidation(
       input: SetTargetValidationInput!
     ): TargetValidationSettings!
+  }
+
+  type UpdateTargetNameResult {
+    ok: UpdateTargetNameOk
+    error: UpdateTargetNameError
+  }
+
+  type UpdateTargetNameOk {
+    selector: TargetSelector!
+    updatedTarget: Target!
+  }
+
+  type UpdateTargetNameInputErrors {
+    name: String
+  }
+
+  type UpdateTargetNameError implements Error {
+    message: String!
+    inputErrors: UpdateTargetNameInputErrors!
+  }
+
+  type CreateTargetResult {
+    ok: CreateTargetOk
+    error: CreateTargetError
+  }
+
+  type CreateTargetInputErrors {
+    name: String
+  }
+
+  type CreateTargetError implements Error {
+    message: String!
+    inputErrors: CreateTargetInputErrors!
+  }
+
+  type CreateTargetOk {
+    selector: TargetSelector!
+    createdTarget: Target!
   }
 
   input TargetSelectorInput {
@@ -32,6 +70,25 @@ export default gql`
     period: Int!
     percentage: Float!
     targets: [ID!]!
+  }
+
+  type UpdateTargetValidationSettingsResult {
+    ok: UpdateTargetValidationSettingsOk
+    error: UpdateTargetValidationSettingsError
+  }
+
+  type UpdateTargetValidationSettingsInputErrors {
+    percentage: String
+    period: String
+  }
+
+  type UpdateTargetValidationSettingsError implements Error {
+    message: String!
+    inputErrors: UpdateTargetValidationSettingsInputErrors!
+  }
+
+  type UpdateTargetValidationSettingsOk {
+    updatedTargetValidationSettings: TargetValidationSettings!
   }
 
   input SetTargetValidationInput {
@@ -86,16 +143,6 @@ export default gql`
     project: ID!
     target: ID!
     name: String!
-  }
-
-  type CreateTargetPayload {
-    selector: TargetSelector!
-    createdTarget: Target!
-  }
-
-  type UpdateTargetPayload {
-    selector: TargetSelector!
-    updatedTarget: Target!
   }
 
   type DeleteTargetPayload {

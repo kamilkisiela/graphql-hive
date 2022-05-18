@@ -5,13 +5,42 @@ export default gql`
     me: User!
   }
 
+  interface Error {
+    message: String!
+  }
+
   extend type Mutation {
-    updateMe(input: UpdateMeInput!): User!
+    updateMe(input: UpdateMeInput!): UpdateMeResult!
   }
 
   input UpdateMeInput {
     fullName: String!
     displayName: String!
+  }
+
+  type UpdateMeOk {
+    updatedUser: User!
+  }
+
+  type UpdateMeInputErrors {
+    fullName: String
+    displayName: String
+  }
+
+  type UpdateMeError implements Error {
+    message: String!
+    """
+    The detailed validation error messages for the input fields.
+    """
+    inputErrors: UpdateMeInputErrors!
+  }
+
+  """
+  @oneOf
+  """
+  type UpdateMeResult {
+    ok: UpdateMeOk
+    error: UpdateMeError
   }
 
   type User {

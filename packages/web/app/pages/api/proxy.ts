@@ -158,3 +158,11 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
 }
 
 export default withSentry(graphql);
+
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '6mb',
+    },
+  },
+};

@@ -3,8 +3,8 @@
 ## Project Stack
 
 - General: Auth0, TypeScript, GraphQL, GraphQL-Codegen
-- Server: NodeJS, GraphQL-Modules
-- App: React, NextJS, Tailwind, Twin.Macro
+- Server: Node.js, GraphQL-Modules
+- App: React, Next.js, Tailwind CSS, Radix Primitives
 - CLI: Oclif
 - Deployment: Pulumi, K8s, Nginx Proxy, Azure Cloud, CloudFlare Workers + KV Cache
 - Monitoring: Promthues, Grafana (+LogzIo), Sentry

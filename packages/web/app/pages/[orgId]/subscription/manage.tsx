@@ -1,22 +1,5 @@
-import React, { useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import 'twin.macro';
-import {
-  OrganizationAccessScope,
-  useOrganizationAccess,
-} from '@/lib/access/organization';
-import { OrganizationView } from '@/components/organization/View';
-import {
-  BillingPlansDocument,
-  DowngradeToHobbyDocument,
-  OrganizationFieldsFragment,
-  OrgBillingInfoFieldsFragment,
-  UpdateOrgRateLimitDocument,
-  UpgradeToProDocument,
-} from '@/graphql';
-import { Card, Page, Section } from '@/components/common';
-import { useMutation, useQuery } from 'urql';
-import { DataWrapper, QueryError } from '@/components/common/DataWrapper';
-import { BillingPlanType } from '@/gql/graphql';
 import {
   Button,
   Input,
@@ -25,14 +8,34 @@ import {
   StatLabel,
   StatNumber,
 } from '@chakra-ui/react';
+import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
+import { useMutation, useQuery } from 'urql';
+
+import { Card, Section } from '@/components/common';
+import { DataWrapper, QueryError } from '@/components/common/DataWrapper';
+import { BillingPaymentMethod } from '@/components/organization/billing/BillingPaymentMethod';
 import { BillingPlanPicker } from '@/components/organization/billing/BillingPlanPicker';
 import { PlanSummary } from '@/components/organization/billing/PlanSummary';
-import { BillingPaymentMethod } from '@/components/organization/billing/BillingPaymentMethod';
-import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
+import { OrganizationView } from '@/components/organization/View';
+import { BillingPlanType } from '@/gql/graphql';
+import {
+  BillingPlansDocument,
+  DowngradeToHobbyDocument,
+  OrganizationFieldsFragment,
+  OrgBillingInfoFieldsFragment,
+  UpdateOrgRateLimitDocument,
+  UpgradeToProDocument,
+} from '@/graphql';
+import {
+  OrganizationAccessScope,
+  useOrganizationAccess,
+} from '@/lib/access/organization';
 
-const Inner: React.FC<{
+const Inner = ({
+  organization,
+}: {
   organization: OrganizationFieldsFragment & OrgBillingInfoFieldsFragment;
-}> = ({ organization }) => {
+}): ReactElement => {
   const stripe = useStripe();
   const elements = useElements();
   const canAccess = useOrganizationAccess({
@@ -52,18 +55,18 @@ const Inner: React.FC<{
   const downgradeToHobbyMutation = useMutation(DowngradeToHobbyDocument);
   const updateOrgRateLimitMutation = useMutation(UpdateOrgRateLimitDocument);
 
-  const [plan, setPlan] = React.useState<BillingPlanType>(
+  const [plan, setPlan] = useState<BillingPlanType>(
     (organization?.plan || 'HOBBY') as BillingPlanType
   );
-  const [couponCode, setCouponCode] = React.useState<string | null>(null);
-  const [operationsRateLimit, setOperationsRateLimit] = React.useState<number>(
+  const [couponCode, setCouponCode] = useState<string | null>(null);
+  const [operationsRateLimit, setOperationsRateLimit] = useState<number>(
     Math.floor(organization.rateLimit.operations / 1_000_000)
   );
-  const [schemaPushesRateLimit, setSchemaPushesLimit] = React.useState<number>(
+  const [schemaPushesRateLimit, setSchemaPushesLimit] = useState<number>(
     organization.rateLimit.schemaPushes
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (query.data?.billingPlans?.length > 0) {
       if (organization.plan !== plan) {
         const actualPlan = query.data.billingPlans.find(
@@ -134,9 +137,9 @@ const Inner: React.FC<{
   const renderPaymentDetails = () => {
     if (plan === BillingPlanType.Pro && plan !== organization.plan) {
       return (
-        <div tw="mb-4">
+        <div className="mb-4">
           <Input
-            tw="w-2/5"
+            className="w-2/5"
             value={couponCode}
             onChange={(e) => setCouponCode(e.target.value)}
             placeholder="Discount Code"
@@ -186,7 +189,8 @@ const Inner: React.FC<{
           Contact Us
         </Button>
       );
-    } else if (plan === 'PRO') {
+    }
+    if (plan === 'PRO') {
       return (
         <Button
           colorScheme="primary"
@@ -198,7 +202,8 @@ const Inner: React.FC<{
           Upgrade to Pro
         </Button>
       );
-    } else if (plan === 'HOBBY') {
+    }
+    if (plan === 'HOBBY') {
       return (
         <Button
           colorScheme="primary"
@@ -220,82 +225,78 @@ const Inner: React.FC<{
     updateOrgRateLimitMutation[0].error;
 
   return (
-    <Page title={'Manage Subscription'}>
-      <DataWrapper
-        query={query}
-        loading={
-          upgradeToProMutation[0].fetching ||
-          downgradeToHobbyMutation[0].fetching ||
-          updateOrgRateLimitMutation[0].fetching
-        }
-      >
-        {(result) => {
-          const selectedPlan = result.data.billingPlans.find(
-            (v) => v.planType === plan
-          );
+    <DataWrapper
+      query={query}
+      loading={
+        upgradeToProMutation[0].fetching ||
+        downgradeToHobbyMutation[0].fetching ||
+        updateOrgRateLimitMutation[0].fetching
+      }
+    >
+      {(result) => {
+        const selectedPlan = result.data.billingPlans.find(
+          (v) => v.planType === plan
+        );
 
-          return (
-            <div tw="w-full flex flex-row">
-              <div tw="flex-grow mr-12">
-                <div tw="flex flex-col space-y-6 pb-6">
-                  <Card.Root>
-                    <Card.Title>Choose Your Plan</Card.Title>
-                    <Card.Content>
-                      <BillingPlanPicker
-                        activePlan={organization.plan}
-                        value={plan}
-                        plans={result.data.billingPlans}
-                        onPlanChange={setPlan}
-                        operationsRateLimit={operationsRateLimit}
-                        schemaPushesRateLimit={schemaPushesRateLimit}
-                        onOperationsRateLimitChange={setOperationsRateLimit}
-                        onSchemaPushesRateLimitChange={setSchemaPushesLimit}
-                      />
-                    </Card.Content>
-                  </Card.Root>
-                </div>
-              </div>
-              <div tw="flex-grow-0 w-5/12">
+        return (
+          <div className="flex w-full flex-row">
+            <div className="mr-12 flex-grow">
+              <div className="flex flex-col space-y-6 pb-6">
                 <Card.Root>
-                  <Card.Title>Plan Summary</Card.Title>
+                  <Card.Title>Choose Your Plan</Card.Title>
                   <Card.Content>
-                    {error ? (
-                      <QueryError showError={true} error={error} />
-                    ) : null}
-                    <PlanSummary
-                      plan={selectedPlan}
+                    <BillingPlanPicker
+                      activePlan={organization.plan}
+                      value={plan}
+                      plans={result.data.billingPlans}
+                      onPlanChange={setPlan}
                       operationsRateLimit={operationsRateLimit}
                       schemaPushesRateLimit={schemaPushesRateLimit}
-                    >
-                      {selectedPlan.planType === BillingPlanType.Pro ? (
-                        <Stat tw="mb-4">
-                          <StatLabel>Free Trial</StatLabel>
-                          <StatNumber>14</StatNumber>
-                          <StatHelpText>days</StatHelpText>
-                        </Stat>
-                      ) : null}
-                    </PlanSummary>
-                    <BillingPaymentMethod
-                      plan={selectedPlan.planType}
-                      organizationBilling={organization}
-                      onValidationChange={(v) => setPaymentDetailsValid(v)}
+                      onOperationsRateLimitChange={setOperationsRateLimit}
+                      onSchemaPushesRateLimitChange={setSchemaPushesLimit}
                     />
-                    {renderPaymentDetails()}
-                    {renderActions()}
                   </Card.Content>
                 </Card.Root>
               </div>
             </div>
-          );
-        }}
-      </DataWrapper>
-    </Page>
+            <div className="w-5/12 flex-grow-0">
+              <Card.Root>
+                <Card.Title>Plan Summary</Card.Title>
+                <Card.Content>
+                  {error && <QueryError showError error={error} />}
+                  <PlanSummary
+                    plan={selectedPlan}
+                    operationsRateLimit={operationsRateLimit}
+                    schemaPushesRateLimit={schemaPushesRateLimit}
+                  >
+                    {selectedPlan.planType === BillingPlanType.Pro && (
+                      <Stat tw="mb-4">
+                        <StatLabel>Free Trial</StatLabel>
+                        <StatNumber>14</StatNumber>
+                        <StatHelpText>days</StatHelpText>
+                      </Stat>
+                    )}
+                  </PlanSummary>
+                  <BillingPaymentMethod
+                    plan={selectedPlan.planType}
+                    organizationBilling={organization}
+                    onValidationChange={(v) => setPaymentDetailsValid(v)}
+                  />
+                  {renderPaymentDetails()}
+                  {renderActions()}
+                </Card.Content>
+              </Card.Root>
+            </div>
+          </div>
+        );
+      }}
+    </DataWrapper>
   );
 };
 
-export default function ManageSubscriptionPage() {
+export default function ManageSubscriptionPage(): ReactElement {
   return (
-    <OrganizationView title="Manage Subscription" includeBilling={true}>
+    <OrganizationView title="Manage Subscription" includeBilling>
       {({ organization }) => <Inner organization={organization} />}
     </OrganizationView>
   );

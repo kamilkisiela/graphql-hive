@@ -4,6 +4,9 @@ import { OrganizationType } from '../../shared/entities';
 import { IdTranslator } from '../shared/providers/id-translator';
 import { OrganizationManager } from './providers/organization-manager';
 import { AuthManager } from '../auth/providers/auth-manager';
+import { z } from 'zod';
+
+const OrganizationNameModel = z.string().min(2).max(50);
 
 export const resolvers: OrganizationModule.Resolvers = {
   Query: {
@@ -41,6 +44,23 @@ export const resolvers: OrganizationModule.Resolvers = {
   },
   Mutation: {
     async createOrganization(_, { input }, { injector }) {
+      const CreateOrganizationModel = z.object({
+        name: OrganizationNameModel,
+      });
+
+      const result = CreateOrganizationModel.safeParse(input);
+
+      if (!result.success) {
+        return {
+          error: {
+            message: 'Please check your input.',
+            inputErrors: {
+              name: result.error.formErrors.fieldErrors.name?.[0],
+            },
+          },
+        };
+      }
+
       const user = await injector.get(AuthManager).getCurrentUser();
       const organization = await injector
         .get(OrganizationManager)
@@ -51,10 +71,14 @@ export const resolvers: OrganizationModule.Resolvers = {
         });
 
       return {
-        selector: {
-          organization: organization.cleanId,
+        ok: {
+          createdOrganizationPayload: {
+            selector: {
+              organization: organization.cleanId,
+            },
+            organization,
+          },
         },
-        organization,
       };
     },
     async deleteOrganization(_, { selector }, { injector }) {
@@ -75,6 +99,22 @@ export const resolvers: OrganizationModule.Resolvers = {
       };
     },
     async updateOrganizationName(_, { input }, { injector }) {
+      const UpdateOrganizationNameModel = z.object({
+        name: OrganizationNameModel,
+      });
+
+      const result = UpdateOrganizationNameModel.safeParse(input);
+
+      if (!result.success) {
+        return {
+          error: {
+            message:
+              result.error.formErrors.fieldErrors.name?.[0] ??
+              'Changing the organization name failed.',
+          },
+        };
+      }
+
       const organizationId = await injector
         .get(IdTranslator)
         .translateOrganizationId(input);
@@ -85,10 +125,14 @@ export const resolvers: OrganizationModule.Resolvers = {
       });
 
       return {
-        selector: {
-          organization: organization.cleanId,
+        ok: {
+          updatedOrganizationPayload: {
+            selector: {
+              organization: organization.cleanId,
+            },
+            organization,
+          },
         },
-        organization,
       };
     },
     async joinOrganization(_, { code }, { injector }) {

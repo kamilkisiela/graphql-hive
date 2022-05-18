@@ -2,6 +2,10 @@ mutation updateTargetValidationSettings(
   $input: UpdateTargetValidationSettingsInput!
 ) {
   updateTargetValidationSettings(input: $input) {
-    ...TargetValidationSettingsFields
+    ok {
+      updatedTargetValidationSettings {
+        ...TargetValidationSettingsFields
+      }
+    }
   }
 }

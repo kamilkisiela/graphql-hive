@@ -1,34 +1,35 @@
 import React from 'react';
 import 'twin.macro';
-import { useQuery } from 'urql';
-import { VscChevronDown, VscChromeClose } from 'react-icons/vsc';
-import { AutoSizer, List } from 'react-virtualized';
-import { useDebouncedCallback } from 'use-debounce';
 import {
+  Button,
   Checkbox,
   Drawer,
-  DrawerOverlay,
+  DrawerBody,
+  DrawerCloseButton,
   DrawerContent,
   DrawerHeader,
-  DrawerCloseButton,
-  DrawerBody,
-  InputGroup,
-  Input,
-  InputRightElement,
+  DrawerOverlay,
   IconButton,
-  Button,
+  Input,
+  InputGroup,
+  InputRightElement,
   useDisclosure,
 } from '@chakra-ui/react';
+import { VscChevronDown, VscChromeClose } from 'react-icons/vsc';
+import { AutoSizer, List } from 'react-virtualized';
+import { useQuery } from 'urql';
+import { useDebouncedCallback } from 'use-debounce';
+
+import { Spinner } from '@/components/common/Spinner';
 import {
-  OperationsStatsDocument,
   DateRangeInput,
+  OperationsStatsDocument,
   OperationStatsFieldsFragment,
 } from '@/graphql';
-import { Spinner } from '@/components/common/Spinner';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { useFormattedNumber } from '@/lib/hooks/use-formatted-number';
+import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
-export const OperationsFilter: React.FC<{
+const OperationsFilter: React.FC<{
   onClose(): void;
   onFilter(keys: string[]): void;
   isOpen: boolean;
@@ -75,7 +76,7 @@ export const OperationsFilter: React.FC<{
 
   const selectAll = React.useCallback(() => {
     setSelectedItems(operations.map((op) => op.operationHash));
-  }, [setSelectedItems]);
+  }, [operations]);
   const selectNone = React.useCallback(() => {
     setSelectedItems([]);
   }, [setSelectedItems]);
@@ -143,33 +144,31 @@ export const OperationsFilter: React.FC<{
             </div>
             <div tw="pl-1 flex-grow">
               <AutoSizer>
-                {({ height, width }) => {
-                  return (
-                    <List
-                      height={height}
-                      width={width}
-                      rowCount={visibleOperations.length}
-                      rowHeight={24}
-                      overscanRowCount={5}
-                      rowRenderer={({ index, style }) => {
-                        const operation = visibleOperations[index];
+                {({ height, width }) => (
+                  <List
+                    height={height}
+                    width={width}
+                    rowCount={visibleOperations.length}
+                    rowHeight={24}
+                    overscanRowCount={5}
+                    rowRenderer={({ index, style }) => {
+                      const operation = visibleOperations[index];
 
-                        return (
-                          <OperationRow
-                            style={style}
-                            key={operation.id}
-                            operation={operation}
-                            selected={selectedItems.some(
-                              (operationHash) =>
-                                operationHash === operation.operationHash
-                            )}
-                            onSelect={onSelect}
-                          />
-                        );
-                      }}
-                    />
-                  );
-                }}
+                      return (
+                        <OperationRow
+                          style={style}
+                          key={operation.id}
+                          operation={operation}
+                          selected={selectedItems.some(
+                            (operationHash) =>
+                              operationHash === operation.operationHash
+                          )}
+                          onSelect={onSelect}
+                        />
+                      );
+                    }}
+                  />
+                )}
               </AutoSizer>
             </div>
           </div>
@@ -240,18 +239,18 @@ const OperationRow: React.FC<{
     <div style={style} tw="flex flex-row space-x-4 items-center">
       <Checkbox colorScheme="primary" isChecked={selected} onChange={change} />
       <div tw="flex flex-grow flex-row items-center cursor-pointer">
-        <div
+        <button
           tw="flex-grow overflow-ellipsis overflow-hidden whitespace-nowrap"
           onClick={change}
         >
           {operation.name}
-        </div>
-        <div
+        </button>
+        <button
           tw="width[75px] flex-shrink-0 text-right text-gray-500"
           onClick={change}
         >
           {requests}
-        </div>
+        </button>
       </div>
     </div>
   );

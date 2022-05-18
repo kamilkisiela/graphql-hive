@@ -1,12 +1,14 @@
 mutation createTarget($input: CreateTargetInput!) {
   createTarget(input: $input) {
-    selector {
-      organization
-      project
-      target
-    }
-    createdTarget {
-      ...TargetFields
+    ok {
+      selector {
+        organization
+        project
+        target
+      }
+      createdTarget {
+        ...TargetFields
+      }
     }
   }
 }

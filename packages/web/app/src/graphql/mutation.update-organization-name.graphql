@@ -1,10 +1,14 @@
 mutation updateOrganizationName($input: UpdateOrganizationNameInput!) {
   updateOrganizationName(input: $input) {
-    selector {
-      organization
-    }
-    organization {
-      ...OrganizationFields
+    ok {
+      updatedOrganizationPayload {
+        selector {
+          organization
+        }
+        organization {
+          ...OrganizationFields
+        }
+      }
     }
   }
 }

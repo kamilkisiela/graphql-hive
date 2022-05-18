@@ -13,6 +13,12 @@ import { TargetManager } from '../target/providers/target-manager';
 import { AuthManager } from '../auth/providers/auth-manager';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import { RateLimitProvider } from '../rate-limit/providers/rate-limit.provider';
+import { z } from 'zod';
+
+const MaybeModel = <T extends z.ZodType>(value: T) =>
+  z.union([z.null(), z.undefined(), value]);
+const GraphQLSchemaStringModel = z.string().max(5_000_000).min(0);
+const ServiceNameModel = z.string().min(1).max(100);
 
 export const resolvers: SchemaModule.Resolvers = {
   Mutation: {
@@ -85,6 +91,22 @@ export const resolvers: SchemaModule.Resolvers = {
       });
     },
     async updateBaseSchema(_, { input }, { injector }) {
+      const UpdateBaseSchemaModel = z.object({
+        newBase: MaybeModel(GraphQLSchemaStringModel),
+      });
+
+      const result = UpdateBaseSchemaModel.safeParse(input);
+
+      if (!result.success) {
+        return {
+          error: {
+            message:
+              result.error.formErrors.fieldErrors?.newBase?.[0] ??
+              'Please check your input.',
+          },
+        };
+      }
+
       const schemaManager = injector.get(SchemaManager);
       const translator = injector.get(IdTranslator);
       const [organization, project, target] = await Promise.all([
@@ -98,13 +120,34 @@ export const resolvers: SchemaModule.Resolvers = {
         selector,
         input.newBase ? input.newBase : null
       );
-      return injector.get(TargetManager).getTarget({
-        organization,
-        target,
-        project,
-      });
+
+      return {
+        ok: {
+          updatedTarget: await injector.get(TargetManager).getTarget({
+            organization,
+            target,
+            project,
+          }),
+        },
+      };
     },
     async updateSchemaServiceName(_, { input }, { injector }) {
+      const UpdateSchemaServiceNameModel = z.object({
+        serviceName: ServiceNameModel,
+      });
+
+      const result = UpdateSchemaServiceNameModel.safeParse(input);
+
+      if (!result.success) {
+        return {
+          error: {
+            message:
+              result.error.formErrors.fieldErrors.serviceName?.[0] ??
+              'Please check your input.',
+          },
+        };
+      }
+
       const translator = injector.get(IdTranslator);
       const [organization, project, target] = await Promise.all([
         translator.translateOrganizationId(input),
@@ -129,11 +172,15 @@ export const resolvers: SchemaModule.Resolvers = {
         projectType,
       });
 
-      return injector.get(TargetManager).getTarget({
-        organization,
-        project,
-        target,
-      });
+      return {
+        ok: {
+          updatedTarget: await injector.get(TargetManager).getTarget({
+            organization,
+            project,
+            target,
+          }),
+        },
+      };
     },
     async schemaSyncCDN(_, { input }, { injector }) {
       const translator = injector.get(IdTranslator);

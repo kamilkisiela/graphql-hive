@@ -2,7 +2,7 @@ import { gql } from 'graphql-modules';
 
 export default gql`
   extend type Mutation {
-    addAlertChannel(input: AddAlertChannelInput!): AlertChannel!
+    addAlertChannel(input: AddAlertChannelInput!): AddAlertChannelResult!
     deleteAlertChannels(input: DeleteAlertChannelsInput!): [AlertChannel!]!
     addAlert(input: AddAlertInput!): Alert!
     deleteAlerts(input: DeleteAlertsInput!): [Alert!]!
@@ -20,6 +20,26 @@ export default gql`
 
   enum AlertType {
     SCHEMA_CHANGE_NOTIFICATIONS
+  }
+
+  type AddAlertChannelResult {
+    ok: AddAlertChannelOk
+    error: AddAlertChannelError
+  }
+
+  type AddAlertChannelOk {
+    addedAlertChannel: AlertChannel!
+  }
+
+  type AddAlertChannelError implements Error {
+    message: String!
+    inputErrors: AddAlertChannelInputErrors!
+  }
+
+  type AddAlertChannelInputErrors {
+    name: String
+    webhookEndpoint: String
+    slackChannel: String
   }
 
   input AddAlertChannelInput {

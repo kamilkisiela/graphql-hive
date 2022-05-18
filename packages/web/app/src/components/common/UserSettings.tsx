@@ -27,9 +27,13 @@ const UpdateMeFragment = gql(/* GraphQL */ `
 `);
 
 const UpdateMeMutation = gql(/* GraphQL */ `
-  mutation updateMe($input: UpdateMeInput!) {
+  mutation UserSettings_UpdateMeMutation($input: UpdateMeInput!) {
     updateMe(input: $input) {
-      ...UpdateMeFragment
+      ok {
+        updatedUser {
+          ...UpdateMeFragment
+        }
+      }
     }
   }
 `);
@@ -59,8 +63,8 @@ export const UserSettings: React.FC<{
         if (data.updateMe) {
           formik.resetForm({
             values: {
-              fullName: data.updateMe.fullName,
-              displayName: data.updateMe.displayName,
+              fullName: data.updateMe.ok?.updatedUser.fullName,
+              displayName: data.updateMe.ok?.updatedUser.displayName,
             },
           });
         } else {

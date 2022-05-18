@@ -1,10 +1,14 @@
 mutation createOrganization($input: CreateOrganizationInput!) {
   createOrganization(input: $input) {
-    selector {
-      organization
-    }
-    organization {
-      ...OrganizationFields
+    ok {
+      createdOrganizationPayload {
+        selector {
+          organization
+        }
+        organization {
+          ...OrganizationFields
+        }
+      }
     }
   }
 }

@@ -1,37 +1,37 @@
 import React from 'react';
 import 'twin.macro';
-import { useQuery } from 'urql';
-import { useDebouncedCallback } from 'use-debounce';
-import { useTable, useSortBy, usePagination } from 'react-table';
 import {
-  VscChevronUp,
-  VscChevronDown,
-  VscChevronLeft,
-  VscChevronRight,
-  VscWarning,
-} from 'react-icons/vsc';
-import {
-  Input,
-  InputGroup,
-  InputLeftAddon,
   Button,
-  IconButton,
   Drawer,
   DrawerBody,
   DrawerCloseButton,
   DrawerContent,
   DrawerHeader,
   DrawerOverlay,
-  Tooltip,
-  useDisclosure,
   Flex,
+  IconButton,
+  Input,
+  InputGroup,
+  InputLeftAddon,
   Table,
   Tbody,
   Td,
   Th,
   Thead,
+  Tooltip,
   Tr,
+  useDisclosure,
 } from '@chakra-ui/react';
+import {
+  VscChevronDown,
+  VscChevronLeft,
+  VscChevronRight,
+  VscChevronUp,
+  VscWarning,
+} from 'react-icons/vsc';
+import { usePagination, useSortBy, useTable } from 'react-table';
+import { useQuery } from 'urql';
+import { useDebouncedCallback } from 'use-debounce';
 
 import { Scale, Section } from '@/components/common';
 import { GraphQLHighlight } from '@/components/common/GraphQLSDLBlock';
@@ -40,10 +40,9 @@ import {
   OperationsStatsDocument,
   OperationStatsFieldsFragment,
 } from '@/graphql';
-
-import { useFormattedNumber } from '@/lib/hooks/use-formatted-number';
 import { useDecimal } from '@/lib/hooks/use-decimal';
 import { useFormattedDuration } from '@/lib/hooks/use-formatted-duration';
+import { useFormattedNumber } from '@/lib/hooks/use-formatted-number';
 
 interface Operation {
   id: string;
@@ -168,52 +167,23 @@ const OperationRow: React.FC<{
   );
 };
 
+const columns = [
+  { Header: 'Operation', accessor: 'name' },
+  { Header: 'Hash', accessor: 'hash' },
+  { Header: 'Kind', accessor: 'kind' },
+  { Header: 'p90', accessor: 'p90' },
+  { Header: 'p95', accessor: 'p95' },
+  { Header: 'p99', accessor: 'p99' },
+  { Header: 'Failure Rate', accessor: 'failureRate' },
+  { Header: 'Requests', accessor: 'requests' },
+  { Header: 'Traffic', accessor: 'percentage' },
+];
+
 const OperationsTable: React.FC<{
   operations: readonly Operation[];
   fetching?: boolean;
   className?: string;
 }> = ({ operations, fetching, className }) => {
-  const columns = React.useMemo(
-    () => [
-      {
-        Header: 'Operation',
-        accessor: 'name',
-      },
-      {
-        Header: 'Hash',
-        accessor: 'hash',
-      },
-      {
-        Header: 'Kind',
-        accessor: 'kind',
-      },
-      {
-        Header: 'p90',
-        accessor: 'p90',
-      },
-      {
-        Header: 'p95',
-        accessor: 'p95',
-      },
-      {
-        Header: 'p99',
-        accessor: 'p99',
-      },
-      {
-        Header: 'Failure Rate',
-        accessor: 'failureRate',
-      },
-      {
-        Header: 'Requests',
-        accessor: 'requests',
-      },
-      {
-        Header: 'Traffic',
-        accessor: 'percentage',
-      },
-    ],
-    []
-  );
   const {
     getTableProps,
     headerGroups,
@@ -404,7 +374,7 @@ const OperationsTable: React.FC<{
           Last
         </Button>
         <InputGroup variant="filled" tw="w-auto" size="sm">
-          <InputLeftAddon children="Go to" />
+          <InputLeftAddon>Go to</InputLeftAddon>
           <Input
             width="70px"
             type="number"

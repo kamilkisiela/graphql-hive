@@ -1,29 +1,30 @@
 import React from 'react';
-import tw from 'twin.macro';
-import { useQuery } from 'urql';
+import { Grid, GridItem, useColorModeValue } from '@chakra-ui/react';
 import ReactECharts from 'echarts-for-react';
 import { AutoSizer } from 'react-virtualized';
-import { Grid, GridItem, useColorModeValue } from '@chakra-ui/react';
+import tw from 'twin.macro';
+import { useQuery } from 'urql';
+
 import { Section } from '@/components/common';
 import {
   DateRangeInput,
-  GeneralOperationsStatsDocument,
   DurationHistogramDocument,
+  GeneralOperationsStatsDocument,
   GeneralOperationsStatsQuery,
 } from '@/graphql';
 import { theme } from '@/lib/charts';
-import {
-  useFormattedNumber,
-  formatNumber,
-} from '@/lib/hooks/use-formatted-number';
 import { toDecimal } from '@/lib/hooks/use-decimal';
 import {
-  useFormattedDuration,
   formatDuration,
+  useFormattedDuration,
 } from '@/lib/hooks/use-formatted-duration';
 import {
-  useFormattedThroughput,
+  formatNumber,
+  useFormattedNumber,
+} from '@/lib/hooks/use-formatted-number';
+import {
   formatThroughput,
+  useFormattedThroughput,
 } from '@/lib/hooks/use-formatted-throughput';
 
 function resolutionToMilliseconds(
@@ -230,14 +231,14 @@ const SuccessRateStats: React.FC<{
   totalFailures: number;
 }> = ({ requests, totalFailures }) => {
   const rate =
-    typeof requests === 'undefined'
-      ? '-'
-      : toDecimal(((requests - totalFailures) * 100) / requests);
+    requests || totalFailures
+      ? `${toDecimal(((requests - totalFailures) * 100) / requests)}%`
+      : '-';
 
   return (
     <Stats.Root>
       <Stats.Value tw="text-emerald-500 dark:text-emerald-500">
-        {rate}%
+        {rate}
       </Stats.Value>
       <Stats.Title>Success rate</Stats.Title>
     </Stats.Root>
@@ -249,13 +250,13 @@ const FailureRateStats: React.FC<{
   totalFailures: number;
 }> = ({ requests, totalFailures }) => {
   const rate =
-    typeof requests === 'undefined'
-      ? '-'
-      : toDecimal((totalFailures * 100) / requests);
+    requests || totalFailures
+      ? `${toDecimal((totalFailures * 100) / requests)}%`
+      : '-';
 
   return (
     <Stats.Root tw="pt-4">
-      <Stats.Value tw="text-red-500 dark:text-red-500">{rate}%</Stats.Value>
+      <Stats.Value tw="text-red-500 dark:text-red-500">{rate}</Stats.Value>
       <Stats.Title>Failure rate</Stats.Title>
     </Stats.Root>
   );
@@ -365,7 +366,7 @@ const OverTimeStats: React.FC<{
                   name: 'Failures',
                   showSymbol: false,
                   smooth: true,
-                  color: '#EF4444',
+                  color: '#ef4444',
                   areaStyle: {},
                   emphasis: {
                     focus: 'series',
@@ -654,10 +655,10 @@ const LatencyOverTimeStats: React.FC<{
   }
 
   const series = [
-    createSeries('p75', '#10B981', p75),
-    createSeries('p90', '#06B6D4', p90),
-    createSeries('p95', '#6366F1', p95),
-    createSeries('p99', '#EC4899', p99),
+    createSeries('p75', '#10b981', p75),
+    createSeries('p90', '#06b6d4', p90),
+    createSeries('p95', '#6366f1', p95),
+    createSeries('p99', '#ec4899', p99),
   ];
 
   const legends = series.map((s) => s.name);
@@ -728,7 +729,7 @@ const RpmOverTimeStats: React.FC<{
     }
 
     return createEmptySeries({ interval, period });
-  }, [requests, interval, period]);
+  }, [requests, interval, period, windowInM]);
 
   return (
     <>
@@ -767,9 +768,8 @@ const RpmOverTimeStats: React.FC<{
                   boundaryGap: false,
                   min: 0,
                   axisLabel: {
-                    formatter(value: number) {
-                      return formatThroughput(value * 10, interval);
-                    },
+                    formatter: (value: number) =>
+                      formatThroughput(value * 10, interval),
                   },
                 },
               ],
@@ -864,11 +864,7 @@ const LatencyHistogramStats: React.FC<{
               },
               tooltip: {
                 trigger: 'axis',
-                formatter([record]: [
-                  {
-                    data: [number, number];
-                  }
-                ]) {
+                formatter([record]: [{ data: [number, number] }]) {
                   const [duration, count] = record.data;
                   const percentage = toDecimal((count * 100) / totalRequests);
 
@@ -884,18 +880,11 @@ const LatencyHistogramStats: React.FC<{
                   min,
                   max,
                   axisLabel: {
-                    formatter(value: number) {
-                      return formatDuration(value, true);
-                    },
+                    formatter: (value: number) => formatDuration(value, true),
                   },
                 },
               ],
-              yAxis: [
-                {
-                  type: 'value',
-                  min: 0,
-                },
-              ],
+              yAxis: [{ type: 'value', min: 0 }],
               series: [
                 {
                   type: 'bar',
@@ -957,7 +946,7 @@ export const OperationsStats: React.FC<{
         templateRows="repeat(2, 1fr)"
         templateColumns="repeat(4, 1fr)"
         gap={4}
-        tw="bg-gray-50 dark:bg-gray-800 p-6 rounded border-2 border-gray-100 dark:border-gray-700"
+        tw="bg-white dark:bg-gray-800 p-6 rounded border-2 border-gray-100 dark:border-gray-700"
       >
         <GridItem>
           <RequestsStats requests={totalRequests} />

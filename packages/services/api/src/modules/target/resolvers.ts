@@ -2,6 +2,11 @@ import type { TargetModule } from './__generated__/types';
 import { createConnection } from '../../shared/schema';
 import { IdTranslator } from '../shared/providers/id-translator';
 import { TargetManager } from './providers/target-manager';
+import { z } from 'zod';
+import { OrganizationManager } from '../organization/providers/organization-manager';
+
+const TargetNameModel = z.string().min(2).max(30);
+const PercentageModel = z.number().min(0).max(100);
 
 export const resolvers: TargetModule.Resolvers = {
   Query: {
@@ -69,6 +74,22 @@ export const resolvers: TargetModule.Resolvers = {
   },
   Mutation: {
     async createTarget(_, { input }, { injector }) {
+      const CreateTargetModel = z.object({
+        name: TargetNameModel,
+      });
+
+      const result = CreateTargetModel.safeParse(input);
+      if (!result.success) {
+        return {
+          error: {
+            message: 'Check your input.',
+            inputErrors: {
+              name: result.error.formErrors.fieldErrors.name?.[0],
+            },
+          },
+        };
+      }
+
       const translator = injector.get(IdTranslator);
       const [organization, project] = await Promise.all([
         translator.translateOrganizationId({
@@ -85,15 +106,33 @@ export const resolvers: TargetModule.Resolvers = {
         name: input.name,
       });
       return {
-        selector: {
-          organization: input.organization,
-          project: input.project,
-          target: target.cleanId,
+        ok: {
+          selector: {
+            organization: input.organization,
+            project: input.project,
+            target: target.cleanId,
+          },
+          createdTarget: target,
         },
-        createdTarget: target,
       };
     },
     async updateTargetName(_, { input }, { injector }) {
+      const UpdateTargetModel = z.object({
+        name: TargetNameModel,
+      });
+
+      const result = UpdateTargetModel.safeParse(input);
+      if (!result.success) {
+        return {
+          error: {
+            message: 'Check your input.',
+            inputErrors: {
+              name: result.error.formErrors.fieldErrors.name?.[0],
+            },
+          },
+        };
+      }
+
       const translator = injector.get(IdTranslator);
       const [organizationId, projectId, targetId] = await Promise.all([
         translator.translateOrganizationId({
@@ -118,12 +157,14 @@ export const resolvers: TargetModule.Resolvers = {
       });
 
       return {
-        selector: {
-          organization: input.organization,
-          project: input.project,
-          target: input.target,
+        ok: {
+          selector: {
+            organization: input.organization,
+            project: input.project,
+            target: input.target,
+          },
+          updatedTarget: target,
         },
-        updatedTarget: target,
       };
     },
     async deleteTarget(_, { selector }, { injector }) {
@@ -194,6 +235,33 @@ export const resolvers: TargetModule.Resolvers = {
         translator.translateTargetId(input),
       ]);
 
+      const org = await injector
+        .get(OrganizationManager)
+        .getOrganization({ organization });
+
+      const UpdateTargetValidationSettingsModel = z.object({
+        percentage: PercentageModel,
+        period: z
+          .number()
+          .min(1)
+          .max(org.monthlyRateLimit.retentionInDays)
+          .int(),
+      });
+
+      const result = UpdateTargetValidationSettingsModel.safeParse(input);
+
+      if (!result.success) {
+        return {
+          error: {
+            message: 'Please check your input.',
+            inputErrors: {
+              percentage: result.error.formErrors.fieldErrors.percentage?.[0],
+              period: result.error.formErrors.fieldErrors.period?.[0],
+            },
+          },
+        };
+      }
+
       const targetManager = injector.get(TargetManager);
       const settings = await targetManager.updateTargetValidatonSettings({
         period: input.period,
@@ -205,17 +273,21 @@ export const resolvers: TargetModule.Resolvers = {
       });
 
       return {
-        id: target,
-        ...settings,
-        targets: await Promise.all(
-          settings.targets.map((tid) =>
-            targetManager.getTarget({
-              organization,
-              project,
-              target: tid,
-            })
-          )
-        ),
+        ok: {
+          updatedTargetValidationSettings: {
+            id: target,
+            ...settings,
+            targets: await Promise.all(
+              settings.targets.map((tid) =>
+                targetManager.getTarget({
+                  organization,
+                  project,
+                  target: tid,
+                })
+              )
+            ),
+          },
+        },
       };
     },
   },

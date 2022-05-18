@@ -32,6 +32,7 @@ export const resolvers: RateLimitModule.Resolvers = {
         limitedForSchemaPushes,
         operations: org.monthlyRateLimit.operations,
         schemaPushes: org.monthlyRateLimit.schemaPush,
+        retentionInDays: org.monthlyRateLimit.retentionInDays,
       };
     },
   },

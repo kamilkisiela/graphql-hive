@@ -15,7 +15,9 @@ test('can publish persisted operations only with project:operations-store:write'
     },
     owner_access_token
   );
-  const org = orgResult.body.data!.createOrganization.organization;
+  const org =
+    orgResult.body.data!.createOrganization.ok.createdOrganizationPayload
+      .organization;
 
   const projectResult = await createProject(
     {
@@ -26,8 +28,8 @@ test('can publish persisted operations only with project:operations-store:write'
     owner_access_token
   );
 
-  const project = projectResult.body.data!.createProject.createdProject;
-  const target = projectResult.body.data!.createProject.createdTarget;
+  const project = projectResult.body.data!.createProject.ok.createdProject;
+  const target = projectResult.body.data!.createProject.ok.createdTarget;
 
   // Create a token with no rights
   const noAccessTokenResult = await createToken(
@@ -129,7 +131,9 @@ test('should skip on already persisted operations', async () => {
     },
     owner_access_token
   );
-  const org = orgResult.body.data!.createOrganization.organization;
+  const org =
+    orgResult.body.data!.createOrganization.ok.createdOrganizationPayload
+      .organization;
 
   const projectResult = await createProject(
     {
@@ -140,8 +144,8 @@ test('should skip on already persisted operations', async () => {
     owner_access_token
   );
 
-  const project = projectResult.body.data!.createProject.createdProject;
-  const target = projectResult.body.data!.createProject.createdTarget;
+  const project = projectResult.body.data!.createProject.ok.createdProject;
+  const target = projectResult.body.data!.createProject.ok.createdTarget;
 
   // Create a token with write rights
   const writeTokenResult = await createToken(

@@ -1,7 +1,5 @@
 // twin.d.ts
-import 'twin.macro';
-import styledImport from '@emotion/styled';
-import { css as cssImport } from '@emotion/react';
+import { css as cssImport, styled as styledImport } from 'twin.macro';
 
 declare module 'twin.macro' {
   // The styled and css imports
