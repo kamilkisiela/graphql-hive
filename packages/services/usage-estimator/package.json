@@ -15,7 +15,6 @@
     "zod": "3.15.1",
     "@trpc/server": "9.23.2",
     "reflect-metadata": "0.1.13",
-    "@graphql-hive/core": "0.2.0",
     "@sentry/node": "6.19.7",
     "@sentry/tracing": "6.19.7",
     "dotenv": "10.0.0",

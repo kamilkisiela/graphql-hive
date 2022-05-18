@@ -10,7 +10,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@graphql-hive/core": "0.2.0",
     "@sentry/node": "6.19.7",
     "@sentry/tracing": "6.19.7",
     "agentkeepalive": "4.2.0",
