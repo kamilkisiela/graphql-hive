@@ -6,6 +6,7 @@ import * as Yup from 'yup';
 
 import {
   Button,
+  Card,
   Heading,
   Input,
   Link,
@@ -208,7 +209,7 @@ const ProjectSettingsPage = ({
   return (
     <div className="flex flex-col gap-y-10">
       <Title title="Project settings" />
-      <div>
+      <Card>
         <Heading className="mb-2">Project Name</Heading>
         <p className="mb-3 font-light text-gray-300">
           Name of your project visible within organization
@@ -246,17 +247,17 @@ const ProjectSettingsPage = ({
             {mutation.data.updateProjectName.error.message}
           </div>
         )}
-      </div>
+      </Card>
 
-      <div>
+      <Card>
         <Heading className="mb-2">Git Repository</Heading>
         <p className="mb-3 font-light text-gray-300">
           Connect the project with your Git repository
         </p>
         <GitHubIntegration gitRepository={project?.gitRepository} />
-      </div>
+      </Card>
 
-      <div>
+      <Card>
         <Heading className="mb-2">Delete Project</Heading>
         <p className="mb-3 font-light text-gray-300">
           Permanently remove your Project and all targets from the Organization
@@ -276,7 +277,7 @@ const ProjectSettingsPage = ({
             This action is not reversible!
           </Tag>
         </div>
-      </div>
+      </Card>
       <DeleteProjectModal
         isOpen={isModalOpen}
         toggleModalOpen={toggleModalOpen}

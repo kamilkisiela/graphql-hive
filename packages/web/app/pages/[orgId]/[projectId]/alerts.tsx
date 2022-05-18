@@ -1,7 +1,15 @@
 import { FC, useCallback, useState } from 'react';
 import { useMutation, useQuery } from 'urql';
 
-import { Button, Checkbox, Heading, Table, Tag, Title } from '@/components/v2';
+import {
+  Button,
+  Card,
+  Checkbox,
+  Heading,
+  Table,
+  Tag,
+  Title,
+} from '@/components/v2';
 import { CreateAlertModal, CreateChannelModal } from '@/components/v2/modals';
 import {
   AlertChannelsDocument,
@@ -47,7 +55,7 @@ const Channels: FC = () => {
   const channelAlerts = channelAlertsQuery.data?.alertChannels || [];
 
   return (
-    <div>
+    <Card>
       <Heading className="mb-2">Available Channels</Heading>
       <p className="mb-3 font-light text-gray-300">
         Channel represents a form of communication
@@ -112,7 +120,7 @@ const Channels: FC = () => {
           toggleModalOpen={toggleModalOpen}
         />
       )}
-    </div>
+    </Card>
   );
 };
 
@@ -141,7 +149,7 @@ const AlertsPage: FC = () => {
     <div className="flex flex-col gap-y-10">
       <Title title="Alerts" />
       <Channels />
-      <div>
+      <Card>
         <Heading className="mb-2">Active Alerts</Heading>
         <p className="mb-3 font-light text-gray-300">
           Alerts are sent over the Channels
@@ -195,7 +203,7 @@ const AlertsPage: FC = () => {
             </Button>
           )}
         </div>
-      </div>
+      </Card>
       {isModalOpen && (
         <CreateAlertModal
           isOpen={isModalOpen}
