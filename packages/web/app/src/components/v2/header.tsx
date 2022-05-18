@@ -1,4 +1,4 @@
-import React, { ReactElement, useCallback, useState } from 'react';
+import { ReactElement, useCallback, useState } from 'react';
 import NextLink from 'next/link';
 import { useQuery } from 'urql';
 
@@ -24,7 +24,7 @@ import {
 type DropdownOrganization = OrganizationsQuery['organizations']['nodes'];
 
 const OrganizationLink = (props: {
-  children: React.ReactChild;
+  children: string;
   href: string;
 }): ReactElement => {
   return (
