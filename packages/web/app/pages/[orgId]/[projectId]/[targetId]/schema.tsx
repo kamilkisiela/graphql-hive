@@ -6,7 +6,6 @@ import { VscBug } from 'react-icons/vsc';
 import { useQuery } from 'urql';
 
 import {
-  Avatar,
   Badge,
   Button,
   DiffEditor,
@@ -20,7 +19,12 @@ import {
 } from '@/components/v2';
 import { Link2Icon } from '@/components/v2/icon';
 import { ConnectSchemaModal } from '@/components/v2/modals';
-import { CompareDocument, SchemasDocument, VersionsDocument } from '@/graphql';
+import {
+  CompareDocument,
+  SchemasDocument,
+  SchemaVersionFieldsFragment,
+  VersionsDocument,
+} from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
 const DiffView: FC = () => {
@@ -120,7 +124,7 @@ const SchemaPage: FC = () => {
   const schemaVersions = versionsQuery.data?.schemaVersions;
   const baseUrl = `/${router.organizationId}/${router.projectId}/${router.targetId}`;
 
-  const renderVersion = (version) => (
+  const renderVersion = (version: SchemaVersionFieldsFragment) => (
     <NextLink
       key={version.id}
       href={`${baseUrl}/history/${version.id}`}
@@ -128,16 +132,16 @@ const SchemaPage: FC = () => {
     >
       <a
         className={clsx(
-          'flex flex-col rounded-[10px] p-2.5 hover:bg-gray-800/40',
-          router.versionId &&
-            router.versionId === version.id &&
-            'bg-gray-800/40'
+          'flex flex-col rounded-[10px] p-2.5 hover:bg-gray-800',
+          router.versionId && router.versionId === version.id && 'bg-gray-800'
         )}
       >
-        <h3 className="font-bold">Schema v.0.0.1</h3>
-        <span className="text-xs font-medium text-gray-500">
-          {version.commit.commit}
-        </span>
+        <h3 className="truncate font-bold">{version.commit.commit}</h3>
+        <div className="truncate text-xs font-medium text-gray-500">
+          <span className="overflow-hidden truncate">
+            {version.commit.author}
+          </span>
+        </div>
         <span
           className={clsx(
             'mt-2.5 mb-1.5 text-xs font-medium text-[#c4c4c4]',
@@ -147,22 +151,6 @@ const SchemaPage: FC = () => {
           <Badge color={version.valid ? 'green' : 'red'} /> Published{' '}
           <TimeAgo date={version.date} />
         </span>
-        <div className="flex items-center gap-x-1.5 truncate text-xs font-medium text-gray-500">
-          Local Commit
-          <span className="select-none font-medium text-gray-800">•</span>
-          Author Hive API
-          <span className="select-none font-medium text-gray-800">•</span>
-          <Avatar
-            src=""
-            size="xs"
-            shape="circle"
-            className="shrink-0"
-            fallback={version.commit.author[0]}
-          />
-          <span className="overflow-hidden text-ellipsis">
-            {version.commit.author}
-          </span>
-        </div>
       </a>
     </NextLink>
   );
@@ -176,17 +164,14 @@ const SchemaPage: FC = () => {
       <div className="w-[355px]">
         <div className="mb-4 flex items-end">
           <Heading>Versions</Heading>
-          {/*<Link href="#" className="ml-auto text-xs">*/}
-          {/*  Filters*/}
-          {/*</Link>*/}
         </div>
-        <div className="flex h-[65vh] flex-col gap-2.5 overflow-scroll rounded-[20px] border border-gray-800/50 p-2.5">
+        <div className="flex h-[65vh] flex-col gap-2.5 overflow-y-auto rounded-[20px] border border-gray-800/50 p-2.5">
           <h4 className="ml-2.5 text-xs font-bold">LAST VERSION</h4>
           {schemaVersions && renderVersion(lastVersion)}
           {versions.length > 0 && (
             <>
               <h4 className="ml-2.5 text-xs font-bold text-gray-500">
-                OLD VERSION
+                OLD VERSIONS
               </h4>
               {versions.map(renderVersion)}
             </>
