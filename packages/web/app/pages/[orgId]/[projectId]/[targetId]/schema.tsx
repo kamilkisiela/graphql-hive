@@ -169,7 +169,7 @@ const SchemaPage: FC = () => {
         </div>
         <div className="flex h-[65vh] flex-col gap-2.5 overflow-y-auto rounded-md border border-gray-800/50 p-2.5">
           {schemaVersions && renderVersion(lastVersion)}
-          {versions.length > 0 && <>{versions.map(renderVersion)}</>}
+          {versions.length > 0 && versions.map(renderVersion)}
           {hasMore && (
             <Button
               variant="link"

@@ -131,7 +131,7 @@ const TargetCard: FC<{
             >
               {lastVersion ? (
                 <>
-                  {isValid ? <Badge color="green" /> : <Badge color="red" />}
+                  <Badge color={isValid ? 'green' : 'red'} />
                   <span>{lastVersion.commit.commit.substring(0, 7)}</span>
                   <span>
                     - Published <TimeAgo date={lastVersion.date} />

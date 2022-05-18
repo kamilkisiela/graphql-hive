@@ -125,6 +125,7 @@ const ProjectCard: FC<{
         {lastActivity && (
           <div className="mt-5 text-xs font-medium text-gray-500">
             <span className="line-clamp-3">
+              {/* fixes Warning: validateDOMNesting(...): <a> cannot appear as a descendant of <a> */}
               {onlyText(getActivity(lastActivity).content)}{' '}
               <TimeAgo
                 date={lastActivity.createdAt}
