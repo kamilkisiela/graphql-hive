@@ -132,8 +132,10 @@ const SchemaPage: FC = () => {
     >
       <a
         className={clsx(
-          'flex flex-col rounded-[10px] p-2.5 hover:bg-gray-800',
-          router.versionId && router.versionId === version.id && 'bg-gray-800'
+          'flex flex-col rounded-[10px] p-2.5 hover:bg-gray-800/40',
+          router.versionId && 
+            router.versionId === version.id &&
+            'bg-gray-800/40'
         )}
       >
         <h3 className="truncate font-bold">{version.commit.commit}</h3>
