@@ -38,7 +38,7 @@ DropdownMenu.Content = ({ children, className, ...props }) => (
     flex
     flex-col
     gap-1
-    rounded-[10px]
+    rounded-md
     bg-gray-800
     p-[13px]
     text-sm
@@ -99,7 +99,7 @@ DropdownMenu.Item = ({ children, className, ...props }) => (
       cursor-pointer
       items-center
       gap-2
-      rounded-[5px]
+      rounded-md
       py-2.5
       px-2
       transition
@@ -125,7 +125,7 @@ DropdownMenu.TriggerItem = ({ children, className, ...props }) => (
       cursor-pointer
       items-center
       gap-2
-      rounded-[5px]
+      rounded-md
       py-2.5
       px-2
       transition

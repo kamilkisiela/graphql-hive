@@ -15,7 +15,7 @@ export const Card = forwardRef<
       <TagToUse
         ref={forwardedRef}
         className={clsx(
-          'rounded-[20px] border border-gray-800 p-5 transition',
+          'rounded-md p-5 ring-1 ring-gray-800 transition',
           className
         )}
         {...props}

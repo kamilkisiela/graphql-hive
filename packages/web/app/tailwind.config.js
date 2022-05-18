@@ -8,7 +8,7 @@ module.exports = {
   theme: {
     fontFamily: {
       // to use `font-sans` class
-      sans: ['Poppins', 'ui-sans-serif', 'system-ui'],
+      sans: ['Inter', 'ui-sans-serif', 'system-ui'],
     },
     container: {
       center: true,
@@ -133,6 +133,6 @@ module.exports = {
     // Utilities for visually truncating text after a fixed number of lines
     require('@tailwindcss/line-clamp'),
     // Utilities and variants for styling Radix state
-    require('tailwindcss-radix')()
+    require('tailwindcss-radix')(),
   ],
 };

@@ -186,7 +186,7 @@ const SettingsPage = ({
       {isRegularOrg && (
         <div>
           <Heading className="mb-2">Organization Name</Heading>
-          <p className="mb-3 font-light text-gray-500">
+          <p className="mb-3 font-light text-gray-300">
             Name of your organization visible within Hive
           </p>
           <form onSubmit={handleSubmit} className="flex gap-x-2">
@@ -231,7 +231,7 @@ const SettingsPage = ({
 
       <div>
         <Heading className="mb-2">Integrations</Heading>
-        <p className="mb-3 font-light text-gray-500">
+        <p className="mb-3 font-light text-gray-300">
           Connect Hive to other services
         </p>
         <div className="flex flex-col gap-y-4 text-gray-500">
@@ -242,7 +242,7 @@ const SettingsPage = ({
       {isRegularOrg && (
         <div>
           <Heading className="mb-2">Delete Organization</Heading>
-          <p className="mb-3 font-light text-gray-500">
+          <p className="mb-3 font-light text-gray-300">
             Permanently remove your Organization and all projects from the Hive
           </p>
           <div className="flex items-center gap-x-2">

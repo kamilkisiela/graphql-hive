@@ -13,7 +13,7 @@ export const Checkbox = (props: CheckboxProps): ReactElement => {
       shrink-0
       items-center
       justify-center
-      rounded-[5px]
+      rounded-sm
       border
       bg-gray-800
       focus:ring
@@ -22,7 +22,7 @@ export const Checkbox = (props: CheckboxProps): ReactElement => {
     "
       {...props}
     >
-      <Indicator className="h-3.5 w-3.5 rounded-[2px] bg-current" />
+      <Indicator className="h-3.5 w-3.5 rounded-sm bg-current" />
     </Root>
   );
 };

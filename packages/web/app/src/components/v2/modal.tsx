@@ -58,7 +58,7 @@ const Modal: FC<{
             w-[450px]
             max-w-[95%]
             overflow-auto
-            rounded-[20px]
+            rounded-md
             bg-black
             p-7`,
             className

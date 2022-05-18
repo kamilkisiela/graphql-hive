@@ -49,7 +49,7 @@ const Channels: FC = () => {
   return (
     <div>
       <Heading className="mb-2">Available Channels</Heading>
-      <p className="mb-3 font-light text-gray-500">
+      <p className="mb-3 font-light text-gray-300">
         Channel represents a form of communication
       </p>
       <Table
@@ -143,7 +143,7 @@ const AlertsPage: FC = () => {
       <Channels />
       <div>
         <Heading className="mb-2">Active Alerts</Heading>
-        <p className="mb-3 font-light text-gray-500">
+        <p className="mb-3 font-light text-gray-300">
           Alerts are sent over the Channels
         </p>
         <Table

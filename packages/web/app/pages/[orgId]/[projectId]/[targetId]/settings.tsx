@@ -84,7 +84,7 @@ const Tokens: FC<{ organization: OrganizationFieldsFragment }> = ({
   return (
     <div>
       <Heading className="mb-2">Tokens</Heading>
-      <p className="mb-3 font-light text-gray-500">
+      <p className="mb-3 font-light text-gray-300">
         Be careful! These tokens allow to read and write your target data.
       </p>
       <div className="my-3.5 flex justify-between">
@@ -178,7 +178,7 @@ const ExtendBaseSchema: FC<{ baseSchema: string }> = (props) => {
   return (
     <div>
       <Heading className="mb-2">Extend Your Schema</Heading>
-      <p className="mb-3 font-light text-gray-500">
+      <p className="mb-3 font-light text-gray-300">
         Define a piece of SDL that will be added to every published schema.
         <br />
         Useful for AWS AppSync users to not send platform-specific part of
@@ -376,7 +376,7 @@ const ConditionalBreakingChanges: FC = () => {
       <div
         className={clsx(
           'mb-3 flex flex-col items-start gap-3 font-light text-gray-500',
-          !isEnabled && 'pointer-events-none opacity-20'
+          !isEnabled && 'pointer-events-none opacity-25'
         )}
       >
         <div>
@@ -436,7 +436,7 @@ const ConditionalBreakingChanges: FC = () => {
         )}
         Check collected usage data from these targets:
         {possibleTargets?.map((pt) => (
-          <div key={pt.id} className="flex items-center gap-2">
+          <div key={pt.id} className="flex items-center gap-2 pl-5">
             <Checkbox
               checked={values.targets.includes(pt.id)}
               onCheckedChange={(isChecked) => {
@@ -455,7 +455,7 @@ const ConditionalBreakingChanges: FC = () => {
         {touched.targets && errors.targets && (
           <div className="text-red-500">{errors.targets}</div>
         )}
-        <Tag className="flex-col !items-start gap-1">
+        <Tag className="mt-5 flex-col !items-start gap-1">
           Example settings: Removal of a field is considered breaking if
           <div>
             <Tag color="yellow" className="py-0">
@@ -559,7 +559,7 @@ const SettingsPage: FC<{
       <Title title="Target settings" />
       <div>
         <Heading className="mb-2">Target Info</Heading>
-        <p className="mb-3 font-light text-gray-500">
+        <p className="mb-3 font-light text-gray-300">
           Name of your target visible within organization.
         </p>
         <form onSubmit={handleSubmit} className="flex gap-x-2">
@@ -605,7 +605,7 @@ const SettingsPage: FC<{
 
       <div>
         <Heading className="mb-2">Delete Target</Heading>
-        <p className="mb-3 font-light text-gray-500">
+        <p className="mb-3 font-light text-gray-300">
           Permanently remove your Target
         </p>
         <div className="flex items-center gap-x-2">

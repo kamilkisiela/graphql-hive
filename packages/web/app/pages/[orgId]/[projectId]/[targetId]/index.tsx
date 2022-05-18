@@ -78,7 +78,7 @@ const TargetPage: FC = () => {
             <NextLink href={`/${router.organizationId}`} passHref>
               <Link className="line-clamp-1 max-w-[250px]">{org.name}</Link>
             </NextLink>
-            <ArrowDownIcon className="h-4 w-4 -rotate-90 stroke-[3px]" />
+            <ArrowDownIcon className="mx-1 h-4 w-4 -rotate-90 stroke-[1px]" />
             <NextLink
               href={`/${router.organizationId}/${router.projectId}`}
               passHref

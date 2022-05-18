@@ -210,7 +210,7 @@ const ProjectSettingsPage = ({
       <Title title="Project settings" />
       <div>
         <Heading className="mb-2">Project Name</Heading>
-        <p className="mb-3 font-light text-gray-500">
+        <p className="mb-3 font-light text-gray-300">
           Name of your project visible within organization
         </p>
         <form onSubmit={handleSubmit} className="flex gap-x-2">
@@ -250,7 +250,7 @@ const ProjectSettingsPage = ({
 
       <div>
         <Heading className="mb-2">Git Repository</Heading>
-        <p className="mb-3 font-light text-gray-500">
+        <p className="mb-3 font-light text-gray-300">
           Connect the project with your Git repository
         </p>
         <GitHubIntegration gitRepository={project?.gitRepository} />
@@ -258,7 +258,7 @@ const ProjectSettingsPage = ({
 
       <div>
         <Heading className="mb-2">Delete Project</Heading>
-        <p className="mb-3 font-light text-gray-500">
+        <p className="mb-3 font-light text-gray-300">
           Permanently remove your Project and all targets from the Organization
         </p>
         <div className="flex items-center gap-x-2">
