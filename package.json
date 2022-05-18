@@ -31,7 +31,7 @@
     "build:services": "yarn graphql:generate && yarn turbo build  --filter=./packages/services/* --color",
     "build:local-cdn": "yarn graphql:generate && yarn turbo build-local --color",
     "env:sync": "node ./scripts/sync-env-files.js",
-    "turbo": "env-cmd turbo run"
+    "turbo": "env-cmd --silent turbo run"
   },
   "devDependencies": {
     "@changesets/cli": "2.17.0",
