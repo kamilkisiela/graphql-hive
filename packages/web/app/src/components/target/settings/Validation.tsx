@@ -41,7 +41,7 @@ const Check = {
       border-2 border-yellow-100 dark:border-white dark:border-opacity-10
     `
         : tw`
-      bg-gray-50 dark:bg-gray-800
+      bg-white dark:bg-gray-800
       text-gray-400 dark:text-gray-500
       border-2 border-gray-100 dark:border-gray-700
     `,

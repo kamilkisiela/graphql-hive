@@ -11,8 +11,10 @@ export default gql`
     """
     schemaCheck(input: SchemaCheckInput!): SchemaCheckPayload!
     updateSchemaVersionStatus(input: SchemaVersionUpdateInput!): SchemaVersion!
-    updateBaseSchema(input: UpdateBaseSchemaInput!): Target!
-    updateSchemaServiceName(input: UpdateSchemaServiceNameInput!): Target!
+    updateBaseSchema(input: UpdateBaseSchemaInput!): UpdateBaseSchemaResult!
+    updateSchemaServiceName(
+      input: UpdateSchemaServiceNameInput!
+    ): UpdateSchemaServiceNameResult!
     schemaSyncCDN(input: SchemaSyncCDNInput!): SchemaSyncCDNPayload!
   }
 
@@ -35,6 +37,32 @@ export default gql`
     Requires API Token
     """
     latestValidVersion: SchemaVersion!
+  }
+
+  type UpdateSchemaServiceNameResult {
+    ok: UpdateSchemaServiceNameOk
+    error: UpdateSchemaServiceNameError
+  }
+
+  type UpdateSchemaServiceNameOk {
+    updatedTarget: Target!
+  }
+
+  type UpdateSchemaServiceNameError implements Error {
+    message: String!
+  }
+
+  type UpdateBaseSchemaResult {
+    ok: UpdateBaseSchemaOk
+    error: UpdateBaseSchemaError
+  }
+
+  type UpdateBaseSchemaOk {
+    updatedTarget: Target!
+  }
+
+  type UpdateBaseSchemaError implements Error {
+    message: String!
   }
 
   extend type Target {

@@ -39,11 +39,14 @@ const TargetCreator: React.FC<{
             organization: router.organizationId,
           },
         }).then((result) => {
+          if (!result.data?.createTarget.ok) {
+            return;
+          }
           onClose();
           router.visitTarget({
             organizationId: router.organizationId,
             projectId: router.projectId,
-            targetId: result.data.createTarget.createdTarget.cleanId,
+            targetId: result.data.createTarget.ok.createdTarget.cleanId,
           });
         });
       }

@@ -36,9 +36,15 @@ export const OrganizationCreator: React.FC<{
             name,
           },
         }).then((result) => {
+          if (!result.data?.createOrganization.ok) {
+            return;
+          }
+
           onClose();
           router.visitOrganization({
-            organizationId: result.data.createOrganization.organization.cleanId,
+            organizationId:
+              result.data.createOrganization.ok.createdOrganizationPayload
+                .organization.cleanId,
           });
         });
       }

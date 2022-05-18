@@ -9,7 +9,7 @@ import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 const PageContainer = tw.div`flex flex-col flex-1 overflow-y-auto relative`;
 
 const Container = tw.div`flex flex-1 overflow-y-auto text-gray-700 bg-white dark:bg-gray-900`;
-const Fixed = tw.div`flex-none bg-gray-50 dark:bg-gray-800 dark:text-white border-r-2 border-gray-100 dark:border-gray-700`;
+const Fixed = tw.div`flex-none bg-white dark:bg-gray-800 dark:text-white border-r-2 border-gray-100 dark:border-gray-700`;
 const Grow = tw.div`flex-grow`;
 const Content = tw.div`flex-1 overflow-y-auto`;
 
@@ -120,12 +120,12 @@ const WithNavigation: React.FC<{}> = ({ children }) => {
           <Content>{children}</Content>
         </Container>
       ) : (
-        <>{children}</>
+        children
       )}
     </PageContainer>
   );
 };
 
-export const Page: React.FC<{}> = ({ children }) => {
+export const Page: React.FC = ({ children }) => {
   return <WithNavigation>{children}</WithNavigation>;
 };

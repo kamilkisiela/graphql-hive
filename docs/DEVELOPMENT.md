@@ -20,11 +20,11 @@
 
 We have a script to feed your local instance of Hive.
 
-1. Use `Start Hive` to run your local Hive instance.
+1. Use `Start Hive` to run your local Hive instance
 2. Make sure `usage` and `usage-ingestor` are running as well (with `yarn dev`)
-3. Open Hive app, create a project and a target, then create a token.
+3. Open Hive app, create a project and a target, then create a token
 4. Run the seed script: `TOKEN="MY_TOKEN_HERE" yarn seed`
-5. This should report a dummy schema and some dummy usage data to your local instance of Hive, allowing you to test features e2e.
+5. This should report a dummy schema and some dummy usage data to your local instance of Hive, allowing you to test features e2e
 
 > Note: You can set `STAGING=1` in order to target staging env and seed a target there.
 
@@ -47,9 +47,9 @@ We have a script to feed your local instance of Hive.
 5. Update `APP_BASE_URL` and `AUTH0_BASE_URL` in [`packages/web/app/.env`](./packages/web/app/.env)
 6. Run `packages/web/app` and open `https://hive-<your-name>.loophole.site`.
 
-> We have a special slack channel called `#hive-tests` to not spam people :)
+> We have a special Slack channel called `#hive-tests` to not spam people :)
 
 ### Setting up GitHub App for developing
 
-1. Follow the steps above for Slack App.
-2. Update `Setup URL` in [GraphQL Hive Development](https://github.com/organizations/the-guild-org/settings/apps/graphql-hive-development) app and set it to `https://hive-<your-name>.loophole.site/api/github/setup-callback`.
+1. Follow the steps above for Slack App
+2. Update `Setup URL` in [GraphQL Hive Development](https://github.com/organizations/the-guild-org/settings/apps/graphql-hive-development) app and set it to `https://hive-<your-name>.loophole.site/api/github/setup-callback`

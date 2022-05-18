@@ -17,7 +17,9 @@ test('can check a schema with target:registry:read access', async () => {
     },
     owner_access_token
   );
-  const org = orgResult.body.data!.createOrganization.organization;
+  const org =
+    orgResult.body.data!.createOrganization.ok.createdOrganizationPayload
+      .organization;
   const code = org.inviteCode;
 
   // Join
@@ -33,8 +35,8 @@ test('can check a schema with target:registry:read access', async () => {
     owner_access_token
   );
 
-  const project = projectResult.body.data!.createProject.createdProject;
-  const target = projectResult.body.data!.createProject.createdTarget;
+  const project = projectResult.body.data!.createProject.ok.createdProject;
+  const target = projectResult.body.data!.createProject.ok.createdTarget;
 
   // Create a token with write rights
   const writeTokenResult = await createToken(
@@ -135,7 +137,9 @@ test('should match indentation of previous description', async () => {
     },
     owner_access_token
   );
-  const org = orgResult.body.data!.createOrganization.organization;
+  const org =
+    orgResult.body.data!.createOrganization.ok.createdOrganizationPayload
+      .organization;
   const code = org.inviteCode;
 
   // Join
@@ -151,8 +155,8 @@ test('should match indentation of previous description', async () => {
     owner_access_token
   );
 
-  const project = projectResult.body.data!.createProject.createdProject;
-  const target = projectResult.body.data!.createProject.createdTarget;
+  const project = projectResult.body.data!.createProject.ok.createdProject;
+  const target = projectResult.body.data!.createProject.ok.createdTarget;
 
   // Create a token with write rights
   const writeTokenResult = await createToken(

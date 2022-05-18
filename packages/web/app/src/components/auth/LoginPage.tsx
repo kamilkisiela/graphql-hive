@@ -49,7 +49,7 @@ export const LoginPage = () => {
       </Head>
       <section tw="h-full text-gray-600">
         <div tw="container h-full px-5 py-24 mx-auto flex items-center justify-center">
-          <div tw="lg:w-2/6 md:w-1/2 w-full bg-gray-50 rounded-lg p-8 flex flex-col">
+          <div tw="lg:w-2/6 md:w-1/2 w-full bg-white rounded-lg p-8 flex flex-col">
             <FullLogo tw="text-yellow-500 mx-auto mb-5" />
             <Button
               as="a"

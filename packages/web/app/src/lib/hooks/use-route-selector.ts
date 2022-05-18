@@ -1,4 +1,4 @@
-import React from 'react';
+import { useCallback, useMemo } from 'react';
 import { track } from '@/lib/mixpanel';
 import { useRouter } from 'next/router';
 
@@ -7,7 +7,7 @@ export type Router = ReturnType<typeof useRouteSelector>;
 export function useRouteSelector() {
   const router = useRouter();
 
-  const push = React.useCallback(
+  const push = useCallback(
     (
       route: string,
       as: string,
@@ -15,25 +15,24 @@ export function useRouteSelector() {
         shallow?: boolean;
       }
     ) => {
-      track('PAGE_VIEW', {
-        route,
-        as,
-      });
+      track('PAGE_VIEW', { route, as });
       router.push(route, as, options);
     },
     [router]
   );
 
-  const visitHome = React.useCallback(() => {
-    push(`/`, '/');
+  const visitHome = useCallback(() => {
+    push('/', '/');
   }, [push]);
-  const visitOrganization = React.useCallback(
+
+  const visitOrganization = useCallback(
     ({ organizationId }: { organizationId: string }) => {
       push('/[orgId]', `/${organizationId}`);
     },
     [push]
   );
-  const visitProject = React.useCallback(
+
+  const visitProject = useCallback(
     ({
       organizationId,
       projectId,
@@ -45,7 +44,8 @@ export function useRouteSelector() {
     },
     [push]
   );
-  const visitTarget = React.useCallback(
+
+  const visitTarget = useCallback(
     ({
       organizationId,
       projectId,
@@ -63,7 +63,7 @@ export function useRouteSelector() {
     [push]
   );
 
-  const update = React.useCallback(
+  const update = useCallback(
     (params: Record<string, string | number>) => {
       const routeParams = router.route
         .match(/\[[a-z]+\]/gi)
@@ -96,20 +96,25 @@ export function useRouteSelector() {
     [router, push]
   );
 
-  return {
-    route: router.route,
-    asPath: router.asPath,
-    query: router.query,
-    update,
-    push,
-    visitHome,
-    organizationId: router.query.orgId as string,
-    visitOrganization,
-    projectId: router.query.projectId as string,
-    visitProject,
-    targetId: router.query.targetId as string,
-    visitTarget,
-    operationHash: router.query.hash as string,
-    versionId: router.query.versionId as string,
-  };
+  // useMemo is necessary because we return new object and on every rerender `router` object will be different
+  return useMemo(
+    () => ({
+      route: router.route,
+      asPath: router.asPath,
+      query: router.query,
+      update,
+      push,
+      replace: router.replace,
+      visitHome,
+      organizationId: router.query.orgId as string,
+      visitOrganization,
+      projectId: router.query.projectId as string,
+      visitProject,
+      targetId: router.query.targetId as string,
+      visitTarget,
+      operationHash: router.query.hash as string,
+      versionId: router.query.versionId as string,
+    }),
+    [router]
+  );
 }

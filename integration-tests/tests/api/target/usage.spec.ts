@@ -50,7 +50,9 @@ test('collect operation', async () => {
     owner_access_token
   );
 
-  const org = orgResult.body.data!.createOrganization.organization;
+  const org =
+    orgResult.body.data!.createOrganization.ok.createdOrganizationPayload
+      .organization;
 
   const projectResult = await createProject(
     {
@@ -61,8 +63,8 @@ test('collect operation', async () => {
     owner_access_token
   );
 
-  const project = projectResult.body.data!.createProject.createdProject;
-  const target = projectResult.body.data!.createProject.createdTarget;
+  const project = projectResult.body.data!.createProject.ok.createdProject;
+  const target = projectResult.body.data!.createProject.ok.createdTarget;
 
   const settingsTokenResult = await createToken(
     {
@@ -233,7 +235,9 @@ test('normalize and collect operation without breaking its syntax', async () => 
     owner_access_token
   );
 
-  const org = orgResult.body.data!.createOrganization.organization;
+  const org =
+    orgResult.body.data!.createOrganization.ok.createdOrganizationPayload
+      .organization;
 
   const projectResult = await createProject(
     {
@@ -244,8 +248,8 @@ test('normalize and collect operation without breaking its syntax', async () => 
     owner_access_token
   );
 
-  const project = projectResult.body.data!.createProject.createdProject;
-  const target = projectResult.body.data!.createProject.createdTarget;
+  const project = projectResult.body.data!.createProject.ok.createdProject;
+  const target = projectResult.body.data!.createProject.ok.createdTarget;
 
   const settingsTokenResult = await createToken(
     {
@@ -414,7 +418,9 @@ test('number of produced and collected operations should match', async () => {
     owner_access_token
   );
 
-  const org = orgResult.body.data!.createOrganization.organization;
+  const org =
+    orgResult.body.data!.createOrganization.ok.createdOrganizationPayload
+      .organization;
 
   const projectResult = await createProject(
     {
@@ -425,8 +431,8 @@ test('number of produced and collected operations should match', async () => {
     owner_access_token
   );
 
-  const project = projectResult.body.data!.createProject.createdProject;
-  const target = projectResult.body.data!.createProject.createdTarget;
+  const project = projectResult.body.data!.createProject.ok.createdProject;
+  const target = projectResult.body.data!.createProject.ok.createdTarget;
 
   const tokenResult = await createToken(
     {
@@ -516,7 +522,9 @@ test('check usage from two selected targets', async () => {
     owner_access_token
   );
 
-  const org = orgResult.body.data!.createOrganization.organization;
+  const org =
+    orgResult.body.data!.createOrganization.ok.createdOrganizationPayload
+      .organization;
 
   const projectResult = await createProject(
     {
@@ -527,8 +535,8 @@ test('check usage from two selected targets', async () => {
     owner_access_token
   );
 
-  const project = projectResult.body.data!.createProject.createdProject;
-  const staging = projectResult.body.data!.createProject.createdTarget;
+  const project = projectResult.body.data!.createProject.ok.createdProject;
+  const staging = projectResult.body.data!.createProject.ok.createdTarget;
 
   const productionTargetResult = await createTarget(
     {
@@ -540,7 +548,7 @@ test('check usage from two selected targets', async () => {
   );
 
   const production =
-    productionTargetResult.body.data!.createTarget.createdTarget;
+    productionTargetResult.body.data!.createTarget.ok.createdTarget;
 
   const stagingTokenResult = await createToken(
     {
@@ -694,13 +702,16 @@ test('check usage from two selected targets', async () => {
 
   expect(updateValidationResult.body.errors).not.toBeDefined();
   expect(
-    updateValidationResult.body.data!.updateTargetValidationSettings.percentage
+    updateValidationResult.body.data!.updateTargetValidationSettings.ok
+      .updatedTargetValidationSettings.percentage
   ).toEqual(50);
   expect(
-    updateValidationResult.body.data!.updateTargetValidationSettings.period
+    updateValidationResult.body.data!.updateTargetValidationSettings.ok
+      .updatedTargetValidationSettings.period
   ).toEqual(30);
   expect(
-    updateValidationResult.body.data!.updateTargetValidationSettings.targets
+    updateValidationResult.body.data!.updateTargetValidationSettings.ok
+      .updatedTargetValidationSettings.targets
   ).toHaveLength(2);
 
   // should be non-breaking because the field is used in production and we are checking staging and production now

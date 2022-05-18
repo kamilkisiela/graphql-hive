@@ -1,6 +1,10 @@
 mutation addAlertChannel($input: AddAlertChannelInput!) {
   addAlertChannel(input: $input) {
-    ...AlertSlackChannelFields
-    ...AlertWebhookChannelFields
+    ok {
+      addedAlertChannel {
+        ...AlertSlackChannelFields
+        ...AlertWebhookChannelFields
+      }
+    }
   }
 }

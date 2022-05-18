@@ -4,12 +4,11 @@ import { useInflightRequests } from '@/lib/urql-exchanges/state';
 
 export const LoadingAPIIndicator = memo(() => {
   const inflightRequests = useInflightRequests();
-
   const isFetching = inflightRequests > 0;
 
   return useMemo(() => {
-    if (isFetching) {
-      return (
+    return (
+      isFetching && (
         <Progress
           zIndex={10_000}
           position="fixed"
@@ -20,9 +19,7 @@ export const LoadingAPIIndicator = memo(() => {
           height="5px"
           colorScheme="yellow"
         />
-      );
-    }
-
-    return null;
+      )
+    );
   }, [isFetching]);
 });

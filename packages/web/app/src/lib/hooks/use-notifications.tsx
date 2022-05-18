@@ -1,4 +1,4 @@
-import React from 'react';
+import { useCallback } from 'react';
 import { useToast } from '@chakra-ui/react';
 
 export function useNotifications() {
@@ -8,7 +8,7 @@ export function useNotifications() {
     position: 'bottom-right',
   });
 
-  return React.useCallback(
+  return useCallback(
     (title: string, status: 'success' | 'error' | 'warning' | 'info') => {
       toast({ title, status });
     },

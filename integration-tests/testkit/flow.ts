@@ -33,16 +33,26 @@ export function createOrganization(
     document: gql(/* GraphQL */ `
       mutation createOrganization($input: CreateOrganizationInput!) {
         createOrganization(input: $input) {
-          organization {
-            id
-            name
-            cleanId
-            inviteCode
-            owner {
-              id
-              organizationAccessScopes
-              projectAccessScopes
-              targetAccessScopes
+          ok {
+            createdOrganizationPayload {
+              organization {
+                id
+                name
+                cleanId
+                inviteCode
+                owner {
+                  id
+                  organizationAccessScopes
+                  projectAccessScopes
+                  targetAccessScopes
+                }
+              }
+            }
+          }
+          error {
+            message
+            inputErrors {
+              name
             }
           }
         }
@@ -92,13 +102,15 @@ export function createProject(input: CreateProjectInput, authToken: string) {
     document: gql(/* GraphQL */ `
       mutation createProject($input: CreateProjectInput!) {
         createProject(input: $input) {
-          createdProject {
-            id
-            cleanId
-          }
-          createdTarget {
-            id
-            cleanId
+          ok {
+            createdProject {
+              id
+              cleanId
+            }
+            createdTarget {
+              id
+              cleanId
+            }
           }
         }
       }
@@ -114,9 +126,11 @@ export function createTarget(input: CreateTargetInput, authToken: string) {
     document: gql(/* GraphQL */ `
       mutation createTarget($input: CreateTargetInput!) {
         createTarget(input: $input) {
-          createdTarget {
-            id
-            cleanId
+          ok {
+            createdTarget {
+              id
+              cleanId
+            }
           }
         }
       }
@@ -307,11 +321,16 @@ export function updateTargetValidationSettings(
         $input: UpdateTargetValidationSettingsInput!
       ) {
         updateTargetValidationSettings(input: $input) {
-          enabled
-          period
-          percentage
-          targets {
-            id
+          ok {
+            updatedTargetValidationSettings {
+              id
+              enabled
+              period
+              percentage
+              targets {
+                id
+              }
+            }
           }
         }
       }

@@ -27,7 +27,9 @@ test('cannot publish a schema without target:registry:write access', async () =>
 
   // Join
   const { access_token: member_access_token } = await authenticate('extra');
-  const org = orgResult.body.data!.createOrganization.organization;
+  const org =
+    orgResult.body.data!.createOrganization.ok.createdOrganizationPayload
+      .organization;
   const code = org.inviteCode;
   await joinOrganization(code, member_access_token);
 
@@ -40,8 +42,8 @@ test('cannot publish a schema without target:registry:write access', async () =>
     owner_access_token
   );
 
-  const project = projectResult.body.data!.createProject.createdProject;
-  const target = projectResult.body.data!.createProject.createdTarget;
+  const project = projectResult.body.data!.createProject.ok.createdProject;
+  const target = projectResult.body.data!.createProject.ok.createdTarget;
 
   const tokenResult = await createToken(
     {
@@ -82,7 +84,9 @@ test('can publish a schema with target:registry:write access', async () => {
 
   // Join
   const { access_token: member_access_token } = await authenticate('extra');
-  const org = orgResult.body.data!.createOrganization.organization;
+  const org =
+    orgResult.body.data!.createOrganization.ok.createdOrganizationPayload
+      .organization;
   const code = org.inviteCode;
   await joinOrganization(code, member_access_token);
 
@@ -95,8 +99,8 @@ test('can publish a schema with target:registry:write access', async () => {
     owner_access_token
   );
 
-  const project = projectResult.body.data!.createProject.createdProject;
-  const target = projectResult.body.data!.createProject.createdTarget;
+  const project = projectResult.body.data!.createProject.ok.createdProject;
+  const target = projectResult.body.data!.createProject.ok.createdTarget;
 
   const tokenResult = await createToken(
     {
@@ -168,7 +172,9 @@ test('base schema should not affect the output schema persisted in db', async ()
     },
     owner_access_token
   );
-  const org = orgResult.body.data!.createOrganization.organization;
+  const org =
+    orgResult.body.data!.createOrganization.ok.createdOrganizationPayload
+      .organization;
 
   const projectResult = await createProject(
     {
@@ -179,8 +185,8 @@ test('base schema should not affect the output schema persisted in db', async ()
     owner_access_token
   );
 
-  const project = projectResult.body.data!.createProject.createdProject;
-  const target = projectResult.body.data!.createProject.createdTarget;
+  const project = projectResult.body.data!.createProject.ok.createdProject;
+  const target = projectResult.body.data!.createProject.ok.createdTarget;
 
   // Create a token with write rights
   const writeTokenResult = await createToken(
@@ -282,7 +288,9 @@ test('directives should not be removed (federation)', async () => {
     },
     owner_access_token
   );
-  const org = orgResult.body.data!.createOrganization.organization;
+  const org =
+    orgResult.body.data!.createOrganization.ok.createdOrganizationPayload
+      .organization;
 
   const projectResult = await createProject(
     {
@@ -293,8 +301,8 @@ test('directives should not be removed (federation)', async () => {
     owner_access_token
   );
 
-  const project = projectResult.body.data!.createProject.createdProject;
-  const target = projectResult.body.data!.createProject.createdTarget;
+  const project = projectResult.body.data!.createProject.ok.createdProject;
+  const target = projectResult.body.data!.createProject.ok.createdTarget;
 
   // Create a token with write rights
   const writeTokenResult = await createToken(
@@ -363,7 +371,9 @@ test('directives should not be removed (stitching)', async () => {
     },
     owner_access_token
   );
-  const org = orgResult.body.data!.createOrganization.organization;
+  const org =
+    orgResult.body.data!.createOrganization.ok.createdOrganizationPayload
+      .organization;
 
   const projectResult = await createProject(
     {
@@ -374,8 +384,8 @@ test('directives should not be removed (stitching)', async () => {
     owner_access_token
   );
 
-  const project = projectResult.body.data!.createProject.createdProject;
-  const target = projectResult.body.data!.createProject.createdTarget;
+  const project = projectResult.body.data!.createProject.ok.createdProject;
+  const target = projectResult.body.data!.createProject.ok.createdTarget;
 
   // Create a token with write rights
   const writeTokenResult = await createToken(
@@ -444,7 +454,9 @@ test('directives should not be removed (single)', async () => {
     },
     owner_access_token
   );
-  const org = orgResult.body.data!.createOrganization.organization;
+  const org =
+    orgResult.body.data!.createOrganization.ok.createdOrganizationPayload
+      .organization;
 
   const projectResult = await createProject(
     {
@@ -455,8 +467,8 @@ test('directives should not be removed (single)', async () => {
     owner_access_token
   );
 
-  const project = projectResult.body.data!.createProject.createdProject;
-  const target = projectResult.body.data!.createProject.createdTarget;
+  const project = projectResult.body.data!.createProject.ok.createdProject;
+  const target = projectResult.body.data!.createProject.ok.createdTarget;
 
   // Create a token with write rights
   const writeTokenResult = await createToken(
@@ -525,7 +537,9 @@ test('share publication of schema using redis', async () => {
     },
     owner_access_token
   );
-  const org = orgResult.body.data!.createOrganization.organization;
+  const org =
+    orgResult.body.data!.createOrganization.ok.createdOrganizationPayload
+      .organization;
 
   const projectResult = await createProject(
     {
@@ -536,8 +550,8 @@ test('share publication of schema using redis', async () => {
     owner_access_token
   );
 
-  const project = projectResult.body.data!.createProject.createdProject;
-  const target = projectResult.body.data!.createProject.createdTarget;
+  const project = projectResult.body.data!.createProject.ok.createdProject;
+  const target = projectResult.body.data!.createProject.ok.createdTarget;
 
   // Create a token with write rights
   const writeTokenResult = await createToken(
@@ -610,7 +624,9 @@ test("Two targets with the same commit id shouldn't return an error", async () =
     },
     owner_access_token
   );
-  const org = orgResult.body.data!.createOrganization.organization;
+  const org =
+    orgResult.body.data!.createOrganization.ok.createdOrganizationPayload
+      .organization;
   const projectResult = await createProject(
     {
       organization: org.cleanId,
@@ -619,8 +635,8 @@ test("Two targets with the same commit id shouldn't return an error", async () =
     },
     owner_access_token
   );
-  const project = projectResult.body.data!.createProject.createdProject;
-  const target = projectResult.body.data!.createProject.createdTarget;
+  const project = projectResult.body.data!.createProject.ok.createdProject;
+  const target = projectResult.body.data!.createProject.ok.createdTarget;
   const writeTokenResult = await createToken(
     {
       name: 'test',
@@ -654,7 +670,7 @@ test("Two targets with the same commit id shouldn't return an error", async () =
     },
     owner_access_token
   );
-  const target2 = createTargetResult.body!.data!.createTarget.createdTarget;
+  const target2 = createTargetResult.body!.data!.createTarget.ok.createdTarget;
   const writeTokenResult2 = await createToken(
     {
       name: 'test',
@@ -701,7 +717,9 @@ test('marking versions as valid', async () => {
 
   // Join
   const { access_token: member_access_token } = await authenticate('extra');
-  const org = orgResult.body.data!.createOrganization.organization;
+  const org =
+    orgResult.body.data!.createOrganization.ok.createdOrganizationPayload
+      .organization;
   const code = org.inviteCode;
   await joinOrganization(code, member_access_token);
 
@@ -714,8 +732,8 @@ test('marking versions as valid', async () => {
     owner_access_token
   );
 
-  const project = projectResult.body.data!.createProject.createdProject;
-  const target = projectResult.body.data!.createProject.createdTarget;
+  const project = projectResult.body.data!.createProject.ok.createdProject;
+  const target = projectResult.body.data!.createProject.ok.createdTarget;
 
   const tokenResult = await createToken(
     {
@@ -863,7 +881,9 @@ test('marking only the most recent version as valid result in an update of CDN',
 
   // Join
   const { access_token: member_access_token } = await authenticate('extra');
-  const org = orgResult.body.data!.createOrganization.organization;
+  const org =
+    orgResult.body.data!.createOrganization.ok.createdOrganizationPayload
+      .organization;
   const code = org.inviteCode;
   await joinOrganization(code, member_access_token);
 
@@ -876,8 +896,8 @@ test('marking only the most recent version as valid result in an update of CDN',
     owner_access_token
   );
 
-  const project = projectResult.body.data!.createProject.createdProject;
-  const target = projectResult.body.data!.createProject.createdTarget;
+  const project = projectResult.body.data!.createProject.ok.createdProject;
+  const target = projectResult.body.data!.createProject.ok.createdTarget;
 
   const tokenResult = await createToken(
     {

@@ -85,8 +85,12 @@ export const Mutation: MutationUpdaters<{
         query: OrganizationsDocument,
       },
       (data) => {
-        data.organizations.nodes.unshift(createOrganization.organization);
-        data.organizations.total += 1;
+        if (createOrganization.ok) {
+          data.organizations.nodes.unshift(
+            createOrganization.ok.createdOrganizationPayload.organization
+          );
+          data.organizations.total += 1;
+        }
       }
     );
   },
@@ -99,8 +103,11 @@ export const Mutation: MutationUpdaters<{
     });
   },
   createProject({ createProject }, _args, cache) {
-    const selector = createProject.selector;
-    const project = createProject.createdProject;
+    if (!createProject.ok) {
+      return;
+    }
+    const selector = createProject.ok.selector;
+    const project = createProject.ok.createdProject;
 
     updateQuery(
       cache,
@@ -127,8 +134,12 @@ export const Mutation: MutationUpdaters<{
     });
   },
   createTarget({ createTarget }, _args, cache) {
-    const target = createTarget.createdTarget;
-    const selector = createTarget.selector;
+    if (!createTarget.ok) {
+      return;
+    }
+
+    const target = createTarget.ok.createdTarget;
+    const selector = createTarget.ok.selector;
 
     updateQuery(
       cache,
@@ -200,6 +211,10 @@ export const Mutation: MutationUpdaters<{
     );
   },
   addAlertChannel({ addAlertChannel }, args, cache) {
+    if (!addAlertChannel.ok) {
+      return;
+    }
+
     updateQuery(
       cache,
       {
@@ -212,7 +227,7 @@ export const Mutation: MutationUpdaters<{
         },
       },
       (data) => {
-        data.alertChannels.unshift(addAlertChannel);
+        data.alertChannels.unshift(addAlertChannel.ok.addedAlertChannel);
       }
     );
   },

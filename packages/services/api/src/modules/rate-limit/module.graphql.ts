@@ -6,6 +6,7 @@ export default gql`
     limitedForSchemaPushes: Boolean!
     operations: SafeInt!
     schemaPushes: SafeInt!
+    retentionInDays: Int!
   }
 
   input RateLimitInput {

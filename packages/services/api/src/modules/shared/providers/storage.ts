@@ -49,7 +49,12 @@ export interface Storage {
   getUserByExternalId(_: { external: string }): Promise<User | null>;
   getUserById(_: { id: string }): Promise<User | null>;
 
-  createUser(_: { email: string; external: string }): Promise<User | never>;
+  createUser(_: {
+    email: string;
+    external: string;
+    displayName: string;
+    fullName: string;
+  }): Promise<User | never>;
   updateUser(_: {
     id: string;
     fullName: string;
