@@ -13,9 +13,9 @@
     "@pulumi/azure": "4.37.0",
     "@pulumi/azure-native": "1.56.0",
     "@pulumi/cloudflare": "4.3.0",
-    "@pulumi/kubernetes": "3.15.2",
+    "@pulumi/kubernetes": "3.19.0",
     "@pulumi/kubernetesx": "0.1.6",
-    "@pulumi/pulumi": "3.24.1",
-    "@pulumi/random": "4.3.1"
+    "@pulumi/pulumi": "3.32.1",
+    "@pulumi/random": "4.6.0"
   }
 }
