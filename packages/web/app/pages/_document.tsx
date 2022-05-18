@@ -37,14 +37,14 @@ export default class MyDocument extends Document {
           <link rel="shortcut icon" href="/just-logo.svg" />
           <script async src="https://cdn.headwayapp.co/widget.js" />
           <script
+            id="force-dark-mode"
             dangerouslySetInnerHTML={{
               __html: `
-              if (window.location.pathname.startsWith('/v2')) localStorage['chakra-ui-color-mode'] = 'dark'
-              if (localStorage['chakra-ui-color-mode'] === 'dark') {
-                document.documentElement.classList.add('dark')
-              } else {
-                document.documentElement.classList.remove('dark')
-              }`,
+              if (window.location.pathname.startsWith('/v2')) {
+                localStorage['chakra-ui-color-mode'] = 'dark';
+              }
+              document.documentElement.classList.add('dark');
+              `,
             }}
           />
         </Head>
