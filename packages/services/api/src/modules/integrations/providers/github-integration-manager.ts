@@ -22,7 +22,7 @@ export const GITHUB_APP_CONFIG = new InjectionToken<GitHubApplicationConfig>(
 })
 export class GitHubIntegrationManager {
   private logger: Logger;
-  private app: App;
+  private app?: App;
 
   constructor(
     logger: Logger,
@@ -34,11 +34,14 @@ export class GitHubIntegrationManager {
     this.logger = logger.child({
       source: 'GitHubIntegrationManager',
     });
-    this.app = new App({
-      appId: this.config.appId,
-      privateKey: this.config.privateKey,
-      log: this.logger,
-    });
+
+    if (this.config.appId && this.config.privateKey) {
+      this.app = new App({
+        appId: this.config.appId,
+        privateKey: this.config.privateKey,
+        log: this.logger,
+      });
+    }
   }
 
   async register(
@@ -118,6 +121,12 @@ export class GitHubIntegrationManager {
     this.logger.debug('Fetching repositories');
 
     if (installationId) {
+      if (!this.app) {
+        throw new Error(
+          'GitHub Integration not found. Please provide GITHUB_APP_CONFIG.'
+        );
+      }
+
       const octokit = await this.app.getInstallationOctokit(
         parseInt(installationId, 10)
       );
@@ -187,6 +196,12 @@ export class GitHubIntegrationManager {
     if (!installationId) {
       throw new Error(
         'GitHub Integration not found. Please install our GraphQL Hive GitHub Application.'
+      );
+    }
+
+    if (!this.app) {
+      throw new Error(
+        'GitHub Integration not found. Please provide GITHUB_APP_CONFIG.'
       );
     }
 
