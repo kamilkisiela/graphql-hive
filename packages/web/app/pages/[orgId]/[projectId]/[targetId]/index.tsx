@@ -119,7 +119,7 @@ const TargetPage: FC = () => {
             )}
           </div>
           <div className="mb-10 text-xs font-bold text-[#34eab9]">
-            CONNECTED
+            {project.type}
           </div>
         </div>
       </Header>
