@@ -55,6 +55,11 @@ export function deployUsage({
       exposesMetrics: true,
       packageInfo: packageHelper.npmPack('@hive/usage'),
       port: 4000,
+      autoScaling: {
+        cpuAverageUtilization: 60,
+        maxReplicas: 4,
+        minReplicas: 1,
+      },
     },
     [
       dbMigrations,
