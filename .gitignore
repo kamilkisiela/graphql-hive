@@ -109,3 +109,5 @@ integration-tests/testkit/gql
 
 # IntelliJ's project specific settings files
 .idea/
+
+*.pem
