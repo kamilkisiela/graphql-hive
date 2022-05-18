@@ -76,7 +76,7 @@
     ],
     "update": {
       "s3": {
-        "bucket": "graphql-hive-cli-test"
+        "bucket": "graphql-hive-cli"
       }
     }
   },
