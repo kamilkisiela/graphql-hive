@@ -7,6 +7,12 @@ on:
 jobs:
   integration-tests:
     runs-on: ubuntu-latest
+    
+    env:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+      TURBO_PREFLIGHT: 'true'
+      TURBO_API_URL: ${{ secrets.TURBO_API_URL }}
 
     steps:
       - name: Check out repository code
