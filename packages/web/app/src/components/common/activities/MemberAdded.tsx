@@ -14,7 +14,7 @@ export const MemberAdded: React.FC<{
       </Activity.Icon>
       <Activity.Content>
         <Activity.Text>
-          <User user={activity.user} /> join the organization
+          <User user={activity.user} /> joined the organization
         </Activity.Text>
         <Activity.Time>
           <TimeAgo date={activity.createdAt} />
