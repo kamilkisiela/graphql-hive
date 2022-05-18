@@ -50,7 +50,7 @@
     "@types/node": "16.11.22",
     "@typescript-eslint/eslint-plugin": "5.23.0",
     "@typescript-eslint/parser": "5.23.0",
-    "bob-the-bundler": "1.7.2",
+    "bob-the-bundler": "1.7.3",
     "env-cmd": "10.1.0",
     "eslint": "8.15.0",
     "eslint-plugin-import": "2.26.0",

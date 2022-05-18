@@ -8,7 +8,7 @@
     "build": "bob runify --single"
   },
   "dependencies": {
-    "next": "12.1.0",
+    "next": "12.1.6",
     "nextra": "2.0.0-beta.5",
     "nextra-theme-docs": "2.0.0-beta.5",
     "react": "17.0.2",
