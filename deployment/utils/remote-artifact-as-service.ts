@@ -27,6 +27,11 @@ export class RemoteArtifactAsServiceDeployment {
        */
       exposesMetrics?: boolean;
       replicas?: number;
+      autoScaling?: {
+        minReplicas?: number;
+        maxReplicas: number;
+        cpuAverageUtilization: number;
+      };
     },
     protected dependencies?: Array<pulumi.Resource | undefined | null>,
     protected parent?: pulumi.Resource | null
@@ -206,6 +211,45 @@ export class RemoteArtifactAsServiceDeployment {
       }
     );
     const service = deployment.createService({});
+
+    if (this.options.autoScaling) {
+      new k8s.autoscaling.v2.HorizontalPodAutoscaler(
+        `${this.name}-autoscaler`,
+        {
+          apiVersion: 'autoscaling/v2',
+          kind: 'HorizontalPodAutoscaler',
+          metadata: {},
+          spec: {
+            scaleTargetRef: {
+              name: deployment.metadata.name,
+              kind: deployment.kind,
+              apiVersion: deployment.apiVersion,
+            },
+            metrics: [
+              {
+                type: 'Resource',
+                resource: {
+                  name: 'cpu',
+                  target: {
+                    type: 'Utilization',
+                    averageUtilization:
+                      this.options.autoScaling.cpuAverageUtilization,
+                  },
+                },
+              },
+            ],
+            maxReplicas: this.options.autoScaling.maxReplicas,
+            minReplicas:
+              this.options.autoScaling.minReplicas ||
+              this.options.replicas ||
+              1,
+          },
+        },
+        {
+          dependsOn: [deployment, service],
+        }
+      );
+    }
 
     return { deployment, service };
   }
