@@ -1,10 +1,12 @@
-import { FC, useCallback, useEffect, useState } from 'react';
+import { ReactElement, useCallback, useEffect, useState } from 'react';
+import { Spinner } from '@chakra-ui/react';
 import { SchemaEditor } from '@theguild/editor';
 import clsx from 'clsx';
 import { useFormik } from 'formik';
 import { gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 
+import { TargetLayout } from '@/components/layouts';
 import {
   Button,
   Card,
@@ -24,13 +26,11 @@ import {
 } from '@/components/v2/modals';
 import {
   DeleteTokensDocument,
-  OrganizationFieldsFragment,
   SetTargetValidationDocument,
-  TargetFieldsFragment,
+  TargetDocument,
   TokensDocument,
 } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
-import { Spinner } from '@chakra-ui/react';
 
 const columns = [
   { key: 'checkbox' },
@@ -40,9 +40,7 @@ const columns = [
   { key: 'createdAt', align: 'right' },
 ] as const;
 
-const Tokens: FC<{ organization: OrganizationFieldsFragment }> = ({
-  organization,
-}) => {
+const Tokens = (): ReactElement => {
   const router = useRouteSelector();
   const [{ fetching: deleting }, mutate] = useMutation(DeleteTokensDocument);
   const [checked, setChecked] = useState<string[]>([]);
@@ -139,11 +137,10 @@ const Tokens: FC<{ organization: OrganizationFieldsFragment }> = ({
         }))}
         columns={columns}
       />
-      {organization && isModalOpen && (
+      {isModalOpen && (
         <CreateAccessTokenModal
           isOpen={isModalOpen}
           toggleModalOpen={toggleModalOpen}
-          organization={organization}
         />
       )}
     </Card>
@@ -165,7 +162,7 @@ const Settings_UpdateBaseSchemaMutation = gql(/* GraphQL */ `
   }
 `);
 
-const ExtendBaseSchema: FC<{ baseSchema: string }> = (props) => {
+const ExtendBaseSchema = (props: { baseSchema: string }): ReactElement => {
   const [mutation, mutate] = useMutation(Settings_UpdateBaseSchemaMutation);
   const router = useRouteSelector();
   const [baseSchema, setBaseSchema] = useState('');
@@ -281,7 +278,7 @@ const Settings_UpdateTargetValidationSettingsMutation = gql(/* GraphQL */ `
   }
 `);
 
-const ConditionalBreakingChanges: FC = () => {
+const ConditionalBreakingChanges = (): ReactElement => {
   const router = useRouteSelector();
   const [targetValidation, setValidation] = useMutation(
     SetTargetValidationDocument
@@ -519,15 +516,23 @@ const Settings_UpdateTargetNameMutation = gql(/* GraphQL */ `
   }
 `);
 
-const SettingsPage: FC<{
-  target: TargetFieldsFragment;
-  organization: OrganizationFieldsFragment;
-}> = ({ target, organization }) => {
+export default function SettingsPage(): ReactElement {
   const router = useRouteSelector();
   const [isModalOpen, setModalOpen] = useState(false);
   const toggleModalOpen = useCallback(() => {
     setModalOpen((prevOpen) => !prevOpen);
   }, []);
+
+  const [targetQuery] = useQuery({
+    query: TargetDocument,
+    variables: {
+      organizationId: router.organizationId,
+      targetId: router.targetId,
+      projectId: router.projectId,
+    },
+  });
+
+  const target = targetQuery.data?.target;
 
   const [mutation, mutate] = useMutation(Settings_UpdateTargetNameMutation);
   const {
@@ -558,7 +563,7 @@ const SettingsPage: FC<{
   });
 
   return (
-    <div className="flex flex-col gap-16">
+    <TargetLayout value="settings" className="flex flex-col gap-16">
       <Title title="Settings" />
       <Card>
         <Heading className="mb-2">Target Info</Heading>
@@ -600,7 +605,7 @@ const SettingsPage: FC<{
         )}
       </Card>
 
-      <Tokens organization={organization} />
+      <Tokens />
 
       <ConditionalBreakingChanges />
 
@@ -631,8 +636,6 @@ const SettingsPage: FC<{
         isOpen={isModalOpen}
         toggleModalOpen={toggleModalOpen}
       />
-    </div>
+    </TargetLayout>
   );
-};
-
-export default SettingsPage;
+}

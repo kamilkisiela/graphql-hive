@@ -1,164 +1,234 @@
-import { FC, useEffect } from 'react';
-import dynamic from 'next/dynamic';
+import { ReactElement, useCallback, useState } from 'react';
 import NextLink from 'next/link';
-import { useRouter } from 'next/router';
+import { SchemaEditor } from '@theguild/editor';
+import clsx from 'clsx';
+import { VscBug } from 'react-icons/vsc';
 import { useQuery } from 'urql';
 
+import { TargetLayout } from '@/components/layouts';
 import {
+  Badge,
   Button,
-  DropdownMenu,
-  Header,
+  DiffEditor,
   Heading,
   Link,
-  Tabs,
+  noSchema,
+  prettify,
+  Spinner,
+  TimeAgo,
+  Title,
 } from '@/components/v2';
-import { ArrowDownIcon } from '@/components/v2/icon';
-import { ProjectDocument, TargetsDocument } from '@/graphql';
+import { Link2Icon } from '@/components/v2/icon';
+import { ConnectSchemaModal } from '@/components/v2/modals';
+import {
+  CompareDocument,
+  SchemasDocument,
+  SchemaVersionFieldsFragment,
+  VersionsDocument,
+} from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
-const SchemaPage = dynamic(() => import('./schema'));
-const OperationsPage = dynamic(() => import('./operations'));
-const LaboratoryPage = dynamic(() => import('./laboratory'));
-const SettingsPage = dynamic(() => import('./settings'));
-
-enum TabValue {
-  Schema = 'schema',
-  Operations = 'operations',
-  Laboratory = 'laboratory',
-  Settings = 'settings',
-}
-
-const TargetPage: FC = () => {
+const DiffView = (): ReactElement => {
   const router = useRouteSelector();
-  const { push } = useRouter();
-
-  const [targetsQuery] = useQuery({
-    query: TargetsDocument,
+  const [compareQuery] = useQuery({
+    query: CompareDocument,
     variables: {
-      selector: {
-        organization: router.organizationId,
-        project: router.projectId,
-      },
+      organization: router.organizationId,
+      project: router.projectId,
+      target: router.targetId,
+      version: router.versionId,
     },
-    requestPolicy: 'cache-and-network',
   });
+  const comparison = compareQuery.data?.schemaCompareToPrevious;
 
-  const [projectQuery] = useQuery({
-    query: ProjectDocument,
-    variables: {
-      organizationId: router.organizationId,
-      projectId: router.projectId,
-    },
-    requestPolicy: 'cache-and-network',
-  });
+  if (!comparison) {
+    return null;
+  }
 
-  const targets = targetsQuery.data?.targets;
-  const target = targets?.nodes.find(
-    (node) => node.cleanId === router.targetId
-  );
-
-  useEffect(() => {
-    if (!targetsQuery.fetching && !target) {
-      // url with # provoke error Maximum update depth exceeded
-      router.push('/404', router.asPath.replace(/#.*/, ''));
-    }
-  }, [router, target, targetsQuery.fetching]);
-
-  if (!target) return null;
-
-  const org = projectQuery.data?.organization.organization;
-  const project = projectQuery.data?.project;
-  const hash = router.asPath.replace(/.+#/, '').replace(/\?.*/, '');
-
-  return (
-    <>
-      <Header>
-        {org && project && (
-          <div className="wrapper flex items-center text-xs font-medium text-gray-500">
-            <NextLink href={`/${router.organizationId}`} passHref>
-              <Link className="line-clamp-1 max-w-[250px]">{org.name}</Link>
-            </NextLink>
-            <ArrowDownIcon className="mx-1 h-4 w-4 -rotate-90 stroke-[1px]" />
-            <NextLink
-              href={`/${router.organizationId}/${router.projectId}`}
-              passHref
-            >
-              <Link className="line-clamp-1 max-w-[250px]">{project.name}</Link>
-            </NextLink>
-          </div>
-        )}
-        <div className="wrapper">
-          <div className="flex items-center gap-2.5">
-            <Heading size="2xl" className="line-clamp-1 max-w-2xl">
-              {target?.name}
-            </Heading>
-            {targets && targets.total > 1 && (
-              <DropdownMenu>
-                <DropdownMenu.Trigger asChild>
-                  <Button size="small" rotate={180}>
-                    <ArrowDownIcon className="h-5 w-5 text-gray-500" />
-                  </Button>
-                </DropdownMenu.Trigger>
-                <DropdownMenu.Content sideOffset={5} align="end">
-                  {targets.nodes.map(
-                    (node) =>
-                      node.cleanId !== router.targetId && (
-                        <DropdownMenu.Item key={node.cleanId}>
-                          <NextLink
-                            href={`/${router.organizationId}/${router.projectId}/${node.cleanId}`}
-                          >
-                            <a className="line-clamp-1 max-w-2xl">
-                              {node.name}
-                            </a>
-                          </NextLink>
-                        </DropdownMenu.Item>
-                      )
-                  )}
-                </DropdownMenu.Content>
-              </DropdownMenu>
-            )}
-          </div>
-          <div className="mb-10 text-xs font-bold text-[#34eab9]">
-            {project?.type}
-          </div>
+  if (comparison.__typename === 'SchemaCompareError') {
+    return (
+      <div className="m-3 grow rounded-lg bg-red-500/20 p-8">
+        <div className="mb-3 flex items-center">
+          <VscBug className="mr-3 h-8 w-8 text-red-500" />
+          <h2 className="text-lg font-medium text-white">
+            Failed to build GraphQL Schema
+          </h2>
         </div>
-      </Header>
-      <Tabs
-        className="wrapper"
-        value={
-          Object.values(TabValue).includes(hash as TabValue)
-            ? hash
-            : TabValue.Schema
-        }
-        onValueChange={(newValue) => {
-          push({
-            hash: newValue,
-            // in case tab was clicked in /history/[versionId] route
-            pathname: `/${router.organizationId}/${router.projectId}/${router.targetId}`,
-          });
-        }}
-      >
-        <Tabs.List>
-          <Tabs.Trigger value={TabValue.Schema}>Schema</Tabs.Trigger>
-          <Tabs.Trigger value={TabValue.Operations}>Operations</Tabs.Trigger>
-          <Tabs.Trigger value={TabValue.Laboratory}>Laboratory</Tabs.Trigger>
-          <Tabs.Trigger value={TabValue.Settings}>Target Settings</Tabs.Trigger>
-        </Tabs.List>
-        <Tabs.Content value={TabValue.Schema}>
-          <SchemaPage />
-        </Tabs.Content>
-        <Tabs.Content value={TabValue.Operations}>
-          <OperationsPage />
-        </Tabs.Content>
-        <Tabs.Content value={TabValue.Laboratory}>
-          <LaboratoryPage />
-        </Tabs.Content>
-        <Tabs.Content value={TabValue.Settings}>
-          <SettingsPage target={target} organization={org} />
-        </Tabs.Content>
-      </Tabs>
-    </>
-  );
+        <div className="grow">
+          <p className="text-base text-gray-500">
+            Schema is most likely incomplete and was force published
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const { before, after } = comparison.diff;
+
+  return <DiffEditor before={before} after={after} />;
 };
 
-export default TargetPage;
+export default function SchemaPage(): ReactElement {
+  const router = useRouteSelector();
+  const [after, setAfter] = useState<null | string>(null);
+  const selector = {
+    organization: router.organizationId,
+    project: router.projectId,
+    target: router.targetId,
+  };
+  const [schemasQuery] = useQuery({
+    query: SchemasDocument,
+    variables: {
+      selector,
+    },
+    requestPolicy: 'cache-and-network',
+  });
+  const [versionsQuery] = useQuery({
+    query: VersionsDocument,
+    variables: {
+      selector,
+      limit: 10,
+      after,
+    },
+    requestPolicy: 'cache-and-network',
+  });
+
+  const [isModalOpen, setModalOpen] = useState(false);
+  const toggleModalOpen = useCallback(() => {
+    setModalOpen((prevOpen) => !prevOpen);
+  }, []);
+
+  if (schemasQuery.fetching) {
+    return <Spinner className="mt-10" />;
+  }
+
+  const schema = schemasQuery.data.target.latestSchemaVersion?.schemas.nodes[0];
+
+  if (!schema) {
+    return (
+      <TargetLayout value="schema" className="flex flex-col gap-5">
+        <div>
+          <Button size="large" variant="primary" onClick={toggleModalOpen}>
+            Connect
+            <Link2Icon className="ml-8" />
+          </Button>
+        </div>
+        <ConnectSchemaModal
+          isOpen={isModalOpen}
+          toggleModalOpen={toggleModalOpen}
+        />
+        {noSchema}
+      </TargetLayout>
+    );
+  }
+
+  const schemaVersions = versionsQuery.data?.schemaVersions;
+  const baseUrl = `/${router.organizationId}/${router.projectId}/${router.targetId}`;
+
+  const renderVersion = (version: SchemaVersionFieldsFragment) => (
+    <NextLink
+      key={version.id}
+      href={`${baseUrl}/history/${version.id}`}
+      passHref
+    >
+      <a
+        className={clsx(
+          'flex flex-col rounded-md p-2.5 hover:bg-gray-800/40',
+          router.versionId &&
+            router.versionId === version.id &&
+            'bg-gray-800/40'
+        )}
+      >
+        <h3 className="truncate font-bold">{version.commit.commit}</h3>
+        <div className="truncate text-xs font-medium text-gray-500">
+          <span className="overflow-hidden truncate">
+            {version.commit.author}
+          </span>
+        </div>
+        <span
+          className={clsx(
+            'mt-2.5 mb-1.5 text-xs font-medium text-[#c4c4c4]',
+            !version.valid && 'text-red-500'
+          )}
+        >
+          <Badge color={version.valid ? 'green' : 'red'} /> Published{' '}
+          <TimeAgo date={version.date} />
+        </span>
+      </a>
+    </NextLink>
+  );
+  const hasMore = versionsQuery.data?.schemaVersions.pageInfo.hasMore;
+
+  const [lastVersion, ...versions] = schemaVersions ? schemaVersions.nodes : [];
+
+  return (
+    <TargetLayout
+      value="schema"
+      className="flex h-full items-stretch gap-x-5 pb-10"
+    >
+      <Title title="Schema" />
+      <div className="w-[355px]">
+        <div className="mb-4 flex items-end">
+          <Heading>Versions</Heading>
+        </div>
+        <div className="flex h-[65vh] flex-col gap-2.5 overflow-y-auto rounded-md border border-gray-800/50 p-2.5">
+          {schemaVersions && renderVersion(lastVersion)}
+          {versions.length > 0 && versions.map(renderVersion)}
+          {hasMore && (
+            <Button
+              variant="link"
+              onClick={() => {
+                setAfter(schemaVersions.nodes.at(-1).id);
+              }}
+            >
+              Load more
+            </Button>
+          )}
+        </div>
+      </div>
+      <div className="grow">
+        <div className="mb-4 flex items-end">
+          <Heading>Simple DirectMedia Layer</Heading>
+          <NextLink
+            href={
+              router.versionId || !schemaVersions
+                ? baseUrl
+                : `${baseUrl}/history/${schemaVersions.nodes[0].id}`
+            }
+            passHref
+          >
+            <Link
+              variant={router.versionId ? 'primary' : 'secondary'}
+              className="ml-auto mr-2.5 text-xs"
+            >
+              Diff view
+            </Link>
+          </NextLink>
+          {/*<Link href="#" className="text-xs">*/}
+          {/*  Search*/}
+          {/*</Link>*/}
+        </div>
+        <div className="flex h-[65vh] grow overflow-hidden rounded-md border border-gray-800/50">
+          {router.versionId ? (
+            <DiffView />
+          ) : (
+            <SchemaEditor
+              theme="vs-dark"
+              options={{ readOnly: true }}
+              height="100%"
+              // TODO: improve, use useMemo
+              schema={prettify(schema.source)}
+            />
+          )}
+          <style jsx global>{`
+            .monaco-editor,
+            .monaco-editor-background,
+            [role='presentation'] {
+              background: transparent !important;
+            }
+          `}</style>
+        </div>
+      </div>
+    </TargetLayout>
+  );
+}

@@ -1,15 +1,16 @@
-import { FC } from 'react';
+import { ReactElement } from 'react';
 import { createGraphiQLFetcher } from '@graphiql/toolkit'; // eslint-disable-line import/no-extraneous-dependencies
 import { GraphiQL } from 'graphiql';
 import { useQuery } from 'urql';
 
+import { TargetLayout } from '@/components/layouts';
 import { noSchema, Spinner, Title } from '@/components/v2';
 import { HiveLogo } from '@/components/v2/icon';
 import { SchemasDocument } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import 'graphiql/graphiql.css';
 
-const LaboratoryPage: FC = () => {
+export default function LaboratoryPage(): ReactElement {
   const router = useRouteSelector();
   const [schemasQuery] = useQuery({
     query: SchemasDocument,
@@ -28,7 +29,7 @@ const LaboratoryPage: FC = () => {
   const endpoint = `${window.location.origin}/api/lab/${router.organizationId}/${router.projectId}/${router.targetId}`;
 
   return (
-    <div className="h-[500px] pb-10">
+    <TargetLayout value="laboratory" className="h-[500px] pb-10">
       <Title title="Schema laboratory" />
       <p className="mb-5 font-light text-gray-500">
         Experiment, mock and create live environment for your schema, without
@@ -52,8 +53,6 @@ const LaboratoryPage: FC = () => {
       ) : (
         noSchema
       )}
-    </div>
+    </TargetLayout>
   );
-};
-
-export default LaboratoryPage;
+}

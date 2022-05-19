@@ -1,169 +1,143 @@
-import { FC, useCallback, useEffect, useState } from 'react';
-import dynamic from 'next/dynamic';
+import { ReactElement } from 'react';
 import NextLink from 'next/link';
-import { useRouter } from 'next/router';
-import 'twin.macro';
+import clsx from 'clsx';
 import { useQuery } from 'urql';
 
+import { ProjectLayout } from '@/components/layouts';
 import {
+  Activities,
+  Badge,
   Button,
+  Card,
   DropdownMenu,
-  Header,
+  EmptyList,
   Heading,
-  Link,
-  Tabs,
+  TimeAgo,
+  Title,
 } from '@/components/v2';
-import { ArrowDownIcon, TargetIcon } from '@/components/v2/icon';
-import { CreateTargetModal } from '@/components/v2/modals';
-import { ProjectDocument, ProjectsDocument } from '@/graphql';
+import { LinkIcon, MoreIcon, SettingsIcon } from '@/components/v2/icon';
+import { TargetQuery, TargetsDocument, VersionsDocument } from '@/graphql';
+import { useClipboard } from '@/lib/hooks/use-clipboard';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
-const AlertsPage = dynamic(() => import('./alerts'));
-// const OperationsStorePage = dynamic(() => import('./operations-store'));
-const ProjectSettingsPage = dynamic(() => import('./settings'));
-const TargetsPage = dynamic(() => import('./targets'));
-
-enum TabValue {
-  Targets = 'targets',
-  OperationsStore = 'operations-store',
-  Alerts = 'alerts',
-  Settings = 'settings',
-}
-
-const ProjectPage: FC = () => {
+const TargetCard = ({
+  target,
+}: {
+  target: TargetQuery['target'];
+}): ReactElement => {
   const router = useRouteSelector();
-  const { push } = useRouter();
-  const [isModalOpen, setModalOpen] = useState(false);
-  const toggleModalOpen = useCallback(() => {
-    setModalOpen((prevOpen) => !prevOpen);
-  }, []);
-
-  const [projectQuery] = useQuery({
-    query: ProjectDocument,
-    variables: {
-      organizationId: router.organizationId,
-      projectId: router.projectId,
-    },
-  });
-
-  useEffect(() => {
-    if (projectQuery.error) {
-      // url with # provoke error Maximum update depth exceeded
-      router.push('/404', router.asPath.replace(/#.*/, ''));
-    }
-  }, [projectQuery.error, router]);
-
-  const [projectsQuery] = useQuery({
-    query: ProjectsDocument,
+  const copyToClipboard = useClipboard();
+  const [versionsQuery] = useQuery({
+    query: VersionsDocument,
     variables: {
       selector: {
         organization: router.organizationId,
+        project: router.projectId,
+        target: target.cleanId,
       },
+      limit: 1,
     },
+    requestPolicy: 'cache-and-network',
   });
-
-  if (projectQuery.fetching || projectQuery.error) return null;
-
-  const project = projectQuery.data?.project;
-  const org = projectQuery.data?.organization.organization;
-  const projects = projectsQuery.data?.projects;
-  const hash = router.asPath.replace(/.+#/, '').replace(/\?.*/, '');
+  const versions = versionsQuery.data?.schemaVersions;
+  const lastVersion = versions?.nodes[0];
+  const author = lastVersion?.commit.author;
+  const isValid = lastVersion?.valid;
+  const href = `/${router.organizationId}/${router.projectId}/${target.cleanId}`;
 
   return (
-    <>
-      <Header>
-        <div className="wrapper flex items-center pb-4">
+    <NextLink passHref href={href}>
+      <Card as="a" key={target.id} className="hover:bg-gray-800/40">
+        <div className="flex items-start justify-between gap-2">
           <div>
-            {org && (
-              <NextLink href={`/${router.organizationId}`} passHref>
-                <Link className="line-clamp-1 flex max-w-[250px] items-center text-xs font-medium text-gray-500">
-                  {org.name}
-                </Link>
+            <h2 className="line-clamp-2 text-lg font-bold">{target.name}</h2>
+          </div>
+          <DropdownMenu>
+            <DropdownMenu.Trigger asChild>
+              <Button rotate={90}>
+                <MoreIcon />
+              </Button>
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Content sideOffset={5} align="start">
+              <DropdownMenu.Item
+                onClick={(e) => {
+                  e.stopPropagation();
+                  copyToClipboard(`${window.location.origin}${href}`);
+                }}
+              >
+                <LinkIcon />
+                Share Link
+              </DropdownMenu.Item>
+              <NextLink
+                href={`/${router.organizationId}/${router.projectId}/${target.cleanId}#settings`}
+              >
+                <a>
+                  <DropdownMenu.Item>
+                    <SettingsIcon />
+                    Target Settings
+                  </DropdownMenu.Item>
+                </a>
               </NextLink>
-            )}
-            <div className="flex items-center gap-2.5">
-              <Heading size="2xl" className="line-clamp-1 max-w-2xl">
-                {project?.name}
-              </Heading>
-              {projects && projects.total > 1 && (
-                <DropdownMenu>
-                  <DropdownMenu.Trigger asChild>
-                    <Button size="small" rotate={180}>
-                      <ArrowDownIcon className="h-5 w-5 text-gray-500" />
-                    </Button>
-                  </DropdownMenu.Trigger>
-                  <DropdownMenu.Content sideOffset={5} align="end">
-                    {projects.nodes.map(
-                      (node) =>
-                        node.cleanId !== router.projectId && (
-                          <DropdownMenu.Item key={node.cleanId}>
-                            <NextLink
-                              href={`/${router.organizationId}/${node.cleanId}`}
-                            >
-                              <a className="line-clamp-1 max-w-2xl">
-                                {node.name}
-                              </a>
-                            </NextLink>
-                          </DropdownMenu.Item>
-                        )
-                    )}
-                  </DropdownMenu.Content>
-                </DropdownMenu>
+            </DropdownMenu.Content>
+          </DropdownMenu>
+        </div>
+        {author && (
+          <>
+            <div
+              className={clsx(
+                'mt-2.5 mb-1.5 flex items-center gap-x-2 text-sm text-gray-500'
+              )}
+            >
+              {lastVersion ? (
+                <>
+                  <Badge color={isValid ? 'green' : 'red'} />
+                  <span>{lastVersion.commit.commit.substring(0, 7)}</span>
+                  <span>
+                    - Published <TimeAgo date={lastVersion.date} />
+                  </span>
+                </>
+              ) : (
+                <Badge color="yellow" />
               )}
             </div>
-            <span className="text-xs font-bold text-[#34eab9]">
-              {project?.type}
-            </span>
-          </div>
-          <Button
-            className="ml-auto shrink-0"
-            variant="primary"
-            size="large"
-            onClick={toggleModalOpen}
-          >
-            New Target
-            <TargetIcon className="ml-6" />
-          </Button>
-          <CreateTargetModal
-            isOpen={isModalOpen}
-            toggleModalOpen={toggleModalOpen}
-          />
-        </div>
-      </Header>
-      <Tabs
-        tw="wrapper"
-        value={
-          Object.values(TabValue).includes(hash as TabValue)
-            ? hash
-            : TabValue.Targets
-        }
-        onValueChange={(newValue) => {
-          push({ hash: newValue });
-        }}
-      >
-        <Tabs.List>
-          <Tabs.Trigger value={TabValue.Targets}>Targets</Tabs.Trigger>
-          {/*<Tabs.Trigger value={TabValue.OperationsStore}>*/}
-          {/*  Operations Store*/}
-          {/*</Tabs.Trigger>*/}
-          <Tabs.Trigger value={TabValue.Alerts}>Alerts</Tabs.Trigger>
-          <Tabs.Trigger value={TabValue.Settings}>Settings</Tabs.Trigger>
-        </Tabs.List>
-        <Tabs.Content value={TabValue.Targets}>
-          <TargetsPage />
-        </Tabs.Content>
-        {/*<Tabs.Content value={TabValue.OperationsStore}>*/}
-        {/*  <OperationsStorePage />*/}
-        {/*</Tabs.Content>*/}
-        <Tabs.Content value={TabValue.Alerts}>
-          <AlertsPage />
-        </Tabs.Content>
-        <Tabs.Content value={TabValue.Settings}>
-          <ProjectSettingsPage project={project} />
-        </Tabs.Content>
-      </Tabs>
-    </>
+          </>
+        )}
+      </Card>
+    </NextLink>
   );
 };
 
-export default ProjectPage;
+export default function ProjectsPage(): ReactElement {
+  const router = useRouteSelector();
+  const [targetsQuery] = useQuery({
+    query: TargetsDocument,
+    variables: {
+      selector: {
+        organization: router.organizationId,
+        project: router.projectId,
+      },
+    },
+  });
+  const targets = targetsQuery.data?.targets;
+
+  return (
+    <ProjectLayout value="targets" className="flex gap-x-5">
+      <Title title="Targets" />
+      <div className="flex grow flex-col gap-4">
+        <Heading>List of targets</Heading>
+        {targets && targets.total === 0 ? (
+          <EmptyList
+            title="Hive is waiting for your first target"
+            description='You can create a target by clicking the "New Target" button'
+            docsUrl={`${process.env.NEXT_PUBLIC_DOCS_LINK}/get-started/targets`}
+          />
+        ) : (
+          targets?.nodes.map((target) => (
+            <TargetCard key={target.id} target={target} />
+          ))
+        )}
+      </div>
+      <Activities />
+    </ProjectLayout>
+  );
+}

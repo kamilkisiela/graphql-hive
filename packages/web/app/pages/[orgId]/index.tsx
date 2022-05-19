@@ -6,7 +6,6 @@ import { useQuery } from 'urql';
 import { OrganizationLayout } from '@/components/layouts';
 import {
   Activities,
-  Avatar,
   Button,
   Card,
   DropdownMenu,
@@ -76,7 +75,9 @@ const ProjectCard = ({
       <Card as="a" className="self-start hover:bg-gray-800/40">
         <div className="flex items-start gap-x-2">
           <div className="grow">
-            <h3 className="text-xs font-medium text-[#34EAB9]">{project.type}</h3>
+            <h3 className="text-xs font-medium text-[#34EAB9]">
+              {project.type}
+            </h3>
             <h4 className="line-clamp-2 text-lg font-bold">{project.name}</h4>
           </div>
 
@@ -141,7 +142,7 @@ const ProjectCard = ({
   );
 };
 
-const Page = (): ReactElement => {
+export default function ProjectsPage(): ReactElement {
   const router = useRouteSelector();
 
   const [projectsWithTargetsQuery] = useQuery({
@@ -156,7 +157,7 @@ const Page = (): ReactElement => {
   const isLoading = projectsWithTargetsQuery.fetching;
 
   return (
-    <div className="flex justify-between gap-5">
+    <OrganizationLayout value="overview" className="flex justify-between gap-5">
       <Title title="Projects" />
       <div className="grow">
         <Heading className="mb-4">Active Projects</Heading>
@@ -190,14 +191,6 @@ const Page = (): ReactElement => {
       </div>
 
       <Activities />
-    </div>
-  );
-};
-
-export default function ProjectsPage(): ReactElement {
-  return (
-    <OrganizationLayout value="overview">
-      <Page />
     </OrganizationLayout>
   );
 }
