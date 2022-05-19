@@ -4,6 +4,7 @@ import { useFormik } from 'formik';
 import { gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 
+import { ProjectLayout } from '@/components/layouts';
 import {
   Button,
   Card,
@@ -17,7 +18,10 @@ import {
 } from '@/components/v2';
 import { AlertTriangleIcon } from '@/components/v2/icon';
 import { DeleteProjectModal } from '@/components/v2/modals';
-import { GetGitHubIntegrationDetailsDocument, ProjectQuery } from '@/graphql';
+import {
+  GetGitHubIntegrationDetailsDocument,
+  ProjectDocument,
+} from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
 const Settings_UpdateProjectGitRepositoryMutation = gql(/* GraphQL */ `
@@ -167,12 +171,18 @@ const Settings_UpdateProjectNameMutation = gql(/* GraphQL */ `
   }
 `);
 
-const ProjectSettingsPage = ({
-  project,
-}: {
-  project: ProjectQuery['project'];
-}): ReactElement => {
+export default function SettingsPage(): ReactElement {
   const router = useRouteSelector();
+
+  const [projectQuery] = useQuery({
+    query: ProjectDocument,
+    variables: {
+      organizationId: router.organizationId,
+      projectId: router.projectId,
+    },
+  });
+  const project = projectQuery.data?.project;
+
   const [isModalOpen, setModalOpen] = useState(false);
   const toggleModalOpen = useCallback(() => {
     setModalOpen((prevOpen) => !prevOpen);
@@ -207,7 +217,7 @@ const ProjectSettingsPage = ({
   });
 
   return (
-    <div className="flex flex-col gap-y-10">
+    <ProjectLayout value="settings" className="flex flex-col gap-y-10">
       <Title title="Project settings" />
       <Card>
         <Heading className="mb-2">Project Name</Heading>
@@ -282,8 +292,6 @@ const ProjectSettingsPage = ({
         isOpen={isModalOpen}
         toggleModalOpen={toggleModalOpen}
       />
-    </div>
+    </ProjectLayout>
   );
-};
-
-export default ProjectSettingsPage;
+}

@@ -34,7 +34,7 @@ import {
 import { useNotifications } from '@/lib/hooks/use-notifications';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
-const Page = (): ReactElement => {
+export default function MembersPage(): ReactElement {
   const [checked, setChecked] = useState<string[]>([]);
   const [selectedMemberId, setSelectedMemberId] = useState<string>('');
   const [isModalOpen, setModalOpen] = useState(false);
@@ -94,7 +94,7 @@ const Page = (): ReactElement => {
     selectedMemberId && members.find((node) => node.id === selectedMemberId);
 
   return (
-    <div className="flex w-4/5 flex-col gap-4">
+    <OrganizationLayout value="members" className="flex w-4/5 flex-col gap-4">
       <Title title="Members" />
       <p className="mb-3 font-light text-gray-300">
         Invite others to your organization and manage access
@@ -212,14 +212,6 @@ const Page = (): ReactElement => {
           </Card>
         );
       })}
-    </div>
-  );
-};
-
-export default function MembersPage(): ReactElement {
-  return (
-    <OrganizationLayout value="members">
-      <Page />
     </OrganizationLayout>
   );
 }
