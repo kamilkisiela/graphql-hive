@@ -28,7 +28,7 @@ export class Observability {
     new k8s.helm.v3.Chart('metrics', {
       chart: 'opentelemetry-collector',
       namespace: ns.metadata.name,
-      version: '0.16.1',
+      version: '0.17.0',
       fetchOpts: {
         repo: 'https://open-telemetry.github.io/opentelemetry-helm-charts',
       },

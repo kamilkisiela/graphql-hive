@@ -8,6 +8,7 @@ import { serviceLocalEndpoint } from '../utils/local-endpoint';
 import { DeploymentEnvironment } from '../types';
 import { Kafka } from './kafka';
 import { RateLimitService } from './rate-limit';
+import { isProduction } from '../utils/helpers';
 
 const commonConfig = new pulumi.Config('common');
 const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
@@ -31,11 +32,15 @@ export function deployUsage({
   dbMigrations: DbMigrations;
   rateLimit: RateLimitService;
 }) {
+  const replicas = isProduction(deploymentEnv) ? 2 : 1;
+  const cpuLimit = isProduction(deploymentEnv) ? '600m' : '300m';
+  const maxReplicas = isProduction(deploymentEnv) ? 4 : 2;
+
   return new RemoteArtifactAsServiceDeployment(
     'usage-service',
     {
       storageContainer,
-      replicas: 1,
+      replicas,
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
       env: {
@@ -55,6 +60,13 @@ export function deployUsage({
       exposesMetrics: true,
       packageInfo: packageHelper.npmPack('@hive/usage'),
       port: 4000,
+      autoScaling: {
+        cpu: {
+          cpuAverageToScale: 60,
+          limit: cpuLimit,
+        },
+        maxReplicas: maxReplicas,
+      },
     },
     [
       dbMigrations,

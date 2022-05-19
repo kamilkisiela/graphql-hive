@@ -27,6 +27,14 @@ export class RemoteArtifactAsServiceDeployment {
        */
       exposesMetrics?: boolean;
       replicas?: number;
+      autoScaling?: {
+        minReplicas?: number;
+        maxReplicas: number;
+        cpu: {
+          limit: string;
+          cpuAverageToScale: number;
+        };
+      };
     },
     protected dependencies?: Array<pulumi.Resource | undefined | null>,
     protected parent?: pulumi.Resource | null
@@ -133,6 +141,13 @@ export class RemoteArtifactAsServiceDeployment {
           image,
           workingDir: appVolume.mountPath,
           volumeMounts: [appVolume],
+          resources: this.options?.autoScaling?.cpu.limit
+            ? {
+                limits: {
+                  cpu: this.options?.autoScaling?.cpu.limit,
+                },
+              }
+            : undefined,
           command:
             this.options.packageInfo.runtime === 'node'
               ? ['yarn', this.options.bin || this.options.packageInfo.bin]
@@ -206,6 +221,45 @@ export class RemoteArtifactAsServiceDeployment {
       }
     );
     const service = deployment.createService({});
+
+    if (this.options.autoScaling) {
+      new k8s.autoscaling.v2.HorizontalPodAutoscaler(
+        `${this.name}-autoscaler`,
+        {
+          apiVersion: 'autoscaling/v2',
+          kind: 'HorizontalPodAutoscaler',
+          metadata: {},
+          spec: {
+            scaleTargetRef: {
+              name: deployment.metadata.name,
+              kind: deployment.kind,
+              apiVersion: deployment.apiVersion,
+            },
+            metrics: [
+              {
+                type: 'Resource',
+                resource: {
+                  name: 'cpu',
+                  target: {
+                    type: 'Utilization',
+                    averageUtilization:
+                      this.options.autoScaling.cpu.cpuAverageToScale,
+                  },
+                },
+              },
+            ],
+            maxReplicas: this.options.autoScaling.maxReplicas,
+            minReplicas:
+              this.options.autoScaling.minReplicas ||
+              this.options.replicas ||
+              1,
+          },
+        },
+        {
+          dependsOn: [deployment, service],
+        }
+      );
+    }
 
     return { deployment, service };
   }
