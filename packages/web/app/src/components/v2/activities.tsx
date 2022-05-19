@@ -96,7 +96,7 @@ export const getActivity = (
       };
     case 'MemberAddedActivity':
       return {
-        content: `${user.displayName} join the organization`,
+        content: `${user.displayName} joined the organization`,
         icon: <UserPlusMinusIcon isPlus className="h-5 w-5" />,
       };
     case 'MemberDeletedActivity':
@@ -214,11 +214,11 @@ export const Activities = (props): ReactElement => {
   return (
     <div className="w-[450px] shrink-0" {...props}>
       <Heading>Recent Activity</Heading>
-      {(isLoading || activities?.total !== 0) && (
+      {(!activities || activities.total !== 0) && (
         <ul className="mt-4 w-full break-all rounded-md border border-gray-800 p-5">
-          {(isLoading
-            ? Array.from({ length: 3 }, (_, id) => ({ id }))
-            : activities.nodes
+          {(activities
+            ? activities.nodes
+            : Array.from({ length: 3 }, (_, id) => ({ id }))
           ).map((activity) => {
             const { content, icon } = getActivity(activity);
 

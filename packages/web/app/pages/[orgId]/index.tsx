@@ -1,36 +1,151 @@
-import { FC, useCallback, useEffect, useState } from 'react';
-import dynamic from 'next/dynamic';
-import { useRouter } from 'next/router';
+import { ReactElement } from 'react';
+import NextLink from 'next/link';
+import { onlyText } from 'react-children-utilities';
 import { useQuery } from 'urql';
 
-import { Button, Header, Heading, Tabs } from '@/components/v2';
-import { PlusIcon } from '@/components/v2/icon';
-import { CreateProjectModal } from '@/components/v2/modals';
-import { OrganizationDocument, OrganizationType } from '@/graphql';
+import { OrganizationLayout } from '@/components/layouts';
+import {
+  Activities,
+  Avatar,
+  Button,
+  Card,
+  DropdownMenu,
+  EmptyList,
+  Heading,
+  Skeleton,
+  TimeAgo,
+  Title,
+} from '@/components/v2';
+import { getActivity } from '@/components/v2/activities';
+import { LinkIcon, MoreIcon, SettingsIcon } from '@/components/v2/icon';
+import {
+  AlertsDocument,
+  ProjectActivitiesDocument,
+  ProjectsWithTargetsDocument,
+  ProjectsWithTargetsQuery,
+} from '@/graphql';
+import { fixDuplicatedFragments } from '@/lib/graphql';
+import { useClipboard } from '@/lib/hooks/use-clipboard';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
-const MembersPage = dynamic(() => import('./members'));
-const ProjectsPage = dynamic(() => import('./projects'));
-const SettingsPage = dynamic(() => import('./settings'));
-const SubscriptionPage = dynamic(() => import('./subscription'));
+const numberFormatter = Intl.NumberFormat('en', {
+  notation: 'compact',
+  maximumFractionDigits: 2,
+});
 
-enum TabValue {
-  Overview = 'overview',
-  Members = 'members',
-  Settings = 'settings',
-  Subscription = 'subscription',
-}
+const projectActivitiesDocument = fixDuplicatedFragments(
+  ProjectActivitiesDocument
+);
 
-const OrganizationPage: FC = () => {
+const ProjectCard = ({
+  project,
+}: {
+  project: ProjectsWithTargetsQuery['projects']['nodes'][number];
+}): ReactElement => {
+  const copyToClipboard = useClipboard();
   const router = useRouteSelector();
-  const { push } = useRouter();
-  const [isModalOpen, setModalOpen] = useState(false);
-  const toggleModalOpen = useCallback(() => {
-    setModalOpen((prevOpen) => !prevOpen);
-  }, []);
+  const [projectActivitiesQuery] = useQuery({
+    query: projectActivitiesDocument,
+    variables: {
+      selector: {
+        organization: router.organizationId,
+        project: project.cleanId,
+        limit: 3,
+      },
+    },
+    requestPolicy: 'cache-and-network',
+  });
 
-  const [organizationQuery] = useQuery({
-    query: OrganizationDocument,
+  const [alertsQuery] = useQuery({
+    query: AlertsDocument,
+    variables: {
+      selector: {
+        organization: router.organizationId,
+        project: project.cleanId,
+      },
+    },
+    requestPolicy: 'cache-and-network',
+  });
+
+  const href = `/${router.organizationId}/${project.cleanId}`;
+  const lastActivity = projectActivitiesQuery.data?.projectActivities.nodes[0];
+  const alerts = alertsQuery.data?.alerts;
+
+  return (
+    <NextLink key={project.id} passHref href={href}>
+      <Card as="a" className="self-start hover:bg-gray-800/40">
+        <div className="flex items-start gap-x-2">
+          <div className="grow">
+            <h3 className="text-xs font-medium text-[#34EAB9]">{project.type}</h3>
+            <h4 className="line-clamp-2 text-lg font-bold">{project.name}</h4>
+          </div>
+
+          <DropdownMenu>
+            <DropdownMenu.Trigger asChild>
+              <Button rotate={90}>
+                <MoreIcon />
+              </Button>
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Content sideOffset={5} align="start">
+              <DropdownMenu.Item
+                onClick={(e) => {
+                  e.stopPropagation();
+                  copyToClipboard(`${window.location.origin}${href}`);
+                }}
+              >
+                <LinkIcon />
+                Share Link
+              </DropdownMenu.Item>
+              <NextLink
+                href={`/${router.organizationId}/${project.cleanId}#settings`}
+              >
+                <a>
+                  <DropdownMenu.Item>
+                    <SettingsIcon />
+                    Project Settings
+                  </DropdownMenu.Item>
+                </a>
+              </NextLink>
+            </DropdownMenu.Content>
+          </DropdownMenu>
+        </div>
+        {/*<div className="my-5 flex items-center gap-x-3">*/}
+        {/*  <span>*/}
+        {/*    <div className="mb-3 text-[1.75rem] font-light">*/}
+        {/*      {numberFormatter.format(project.targets.total)}*/}
+        {/*    </div>*/}
+        {/*    <span className="text-xs font-bold">TARGETS</span>*/}
+        {/*  </span>*/}
+        {/*  <div className="h-6 w-px bg-gray-800" />*/}
+        {/*  <span>*/}
+        {/*    <div className="mb-3 text-[1.75rem] font-light">*/}
+        {/*      {alerts && numberFormatter.format(alerts.length)}*/}
+        {/*    </div>*/}
+        {/*    <span className="text-xs font-bold">ALERTS</span>*/}
+        {/*  </span>*/}
+        {/*</div>*/}
+        {lastActivity && (
+          <div className="mt-5 text-xs font-medium text-gray-500">
+            <span className="line-clamp-3">
+              {/* fixes Warning: validateDOMNesting(...): <a> cannot appear as a descendant of <a> */}
+              {onlyText(getActivity(lastActivity).content)}{' '}
+              <TimeAgo
+                date={lastActivity.createdAt}
+                className="text-gray-300"
+              />
+            </span>
+          </div>
+        )}
+      </Card>
+    </NextLink>
+  );
+};
+
+const Page = (): ReactElement => {
+  const router = useRouteSelector();
+
+  const [projectsWithTargetsQuery] = useQuery({
+    query: ProjectsWithTargetsDocument,
     variables: {
       selector: {
         organization: router.organizationId,
@@ -38,81 +153,51 @@ const OrganizationPage: FC = () => {
     },
   });
 
-  useEffect(() => {
-    if (organizationQuery.error) {
-      // url with # provoke error Maximum update depth exceeded
-      push('/404', router.asPath.replace(/#.*/, ''));
-    }
-  }, [organizationQuery.error, router]);
-
-  if (organizationQuery.fetching || organizationQuery.error) return null;
-
-  const organization = organizationQuery.data?.organization.organization;
-  const isRegularOrg =
-    !organization || organization.type === OrganizationType.Regular;
-  const hash = router.asPath.replace(/.+#/, '');
+  const isLoading = projectsWithTargetsQuery.fetching;
 
   return (
-    <>
-      <Header>
-        <header className="wrapper flex h-[84px] items-center justify-between">
-          <div>
-            <Heading size="2xl" className="line-clamp-1">
-              {organization?.name}
-            </Heading>
-            <div className="text-xs font-medium text-gray-500">
-              Organization
-            </div>
+    <div className="flex justify-between gap-5">
+      <Title title="Projects" />
+      <div className="grow">
+        <Heading className="mb-4">Active Projects</Heading>
+        {isLoading || projectsWithTargetsQuery.data.projects.total !== 0 ? (
+          <div className="grid grid-cols-2 gap-5">
+            {isLoading
+              ? [1, 2].map((key) => (
+                  <Card key={key}>
+                    <div className="flex gap-x-2">
+                      <Skeleton visible className="h-12 w-12" />
+                      <div>
+                        <Skeleton visible className="mb-2 h-3 w-16" />
+                        <Skeleton visible className="h-3 w-8" />
+                      </div>
+                    </div>
+                    <Skeleton visible className="mt-5 mb-3 h-7 w-1/2" />
+                    <Skeleton visible className="h-7" />
+                  </Card>
+                ))
+              : projectsWithTargetsQuery.data.projects.nodes.map((project) => (
+                  <ProjectCard key={project.id} project={project} />
+                ))}
           </div>
-          <Button
-            size="large"
-            variant="primary"
-            className="shrink-0"
-            onClick={toggleModalOpen}
-          >
-            Create Project
-            <PlusIcon className="ml-2" />
-          </Button>
-          <CreateProjectModal
-            isOpen={isModalOpen}
-            toggleModalOpen={toggleModalOpen}
+        ) : (
+          <EmptyList
+            title="Hive is waiting for your first project"
+            description='You can create a project by clicking the "Create Project" button'
+            docsUrl={`${process.env.NEXT_PUBLIC_DOCS_LINK}/get-started/projects`}
           />
-        </header>
-      </Header>
-      <Tabs
-        className="wrapper"
-        value={
-          Object.values(TabValue).includes(hash as TabValue)
-            ? hash
-            : TabValue.Overview
-        }
-        onValueChange={(newValue) => {
-          push({ hash: newValue });
-        }}
-      >
-        <Tabs.List>
-          <Tabs.Trigger value={TabValue.Overview}>Overview</Tabs.Trigger>
-          {isRegularOrg && (
-            <Tabs.Trigger value={TabValue.Members}>Members</Tabs.Trigger>
-          )}
-          <Tabs.Trigger value={TabValue.Settings}>Settings</Tabs.Trigger>
-          <Tabs.Trigger value={TabValue.Subscription}>Subscription</Tabs.Trigger>
-        </Tabs.List>
-        <Tabs.Content value={TabValue.Overview}>
-          <ProjectsPage />
-        </Tabs.Content>
-        <Tabs.Content value={TabValue.Members} asChild>
-          <MembersPage className="w-4/5" />
-        </Tabs.Content>
-        <Tabs.Content value={TabValue.Settings}>
-          <SettingsPage organization={organization} />
-        </Tabs.Content>
-        <Tabs.Content value={TabValue.Subscription}>
-          <SubscriptionPage />
-        </Tabs.Content>
-      </Tabs>
-    </>
+        )}
+      </div>
+
+      <Activities />
+    </div>
   );
 };
 
-export default OrganizationPage;
+export default function ProjectsPage(): ReactElement {
+  return (
+    <OrganizationLayout value="overview">
+      <Page />
+    </OrganizationLayout>
+  );
+}
