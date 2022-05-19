@@ -18,7 +18,6 @@ import {
 import { getActivity } from '@/components/v2/activities';
 import { LinkIcon, MoreIcon, SettingsIcon } from '@/components/v2/icon';
 import {
-  AlertsDocument,
   ProjectActivitiesDocument,
   ProjectsWithTargetsDocument,
   ProjectsWithTargetsQuery,
@@ -26,11 +25,6 @@ import {
 import { fixDuplicatedFragments } from '@/lib/graphql';
 import { useClipboard } from '@/lib/hooks/use-clipboard';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
-
-const numberFormatter = Intl.NumberFormat('en', {
-  notation: 'compact',
-  maximumFractionDigits: 2,
-});
 
 const projectActivitiesDocument = fixDuplicatedFragments(
   ProjectActivitiesDocument
@@ -55,20 +49,8 @@ const ProjectCard = ({
     requestPolicy: 'cache-and-network',
   });
 
-  const [alertsQuery] = useQuery({
-    query: AlertsDocument,
-    variables: {
-      selector: {
-        organization: router.organizationId,
-        project: project.cleanId,
-      },
-    },
-    requestPolicy: 'cache-and-network',
-  });
-
   const href = `/${router.organizationId}/${project.cleanId}`;
   const lastActivity = projectActivitiesQuery.data?.projectActivities.nodes[0];
-  const alerts = alertsQuery.data?.alerts;
 
   return (
     <NextLink key={project.id} passHref href={href}>

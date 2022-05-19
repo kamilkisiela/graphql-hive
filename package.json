@@ -94,7 +94,7 @@
       "pretty-quick --staged"
     ],
     "**/*.{js,cjs,mjs,ts,tsx}": [
-      "eslint"
+      "eslint --fix"
     ]
   },
   "engines": {

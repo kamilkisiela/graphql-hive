@@ -1,10 +1,9 @@
-import { ReactElement, useCallback, useEffect, useState, useRef } from 'react';
+import { ReactElement, useCallback, useEffect, useRef, useState } from 'react';
 import 'twin.macro';
 import { Stat, StatHelpText, StatLabel, StatNumber } from '@chakra-ui/react';
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { useMutation, useQuery } from 'urql';
 
-import { Card, Heading } from '@/components/v2';
 import { Section } from '@/components/common';
 import { DataWrapper, QueryError } from '@/components/common/DataWrapper';
 import { BillingPaymentMethod } from '@/components/organization/billing/BillingPaymentMethod';
@@ -12,6 +11,7 @@ import { BillingPlanPicker } from '@/components/organization/billing/BillingPlan
 import { LimitSlider } from '@/components/organization/billing/LimitSlider';
 import { PlanSummary } from '@/components/organization/billing/PlanSummary';
 import { OrganizationView } from '@/components/organization/View';
+import { Card, Heading } from '@/components/v2';
 import { Button, Input } from '@/components/v2';
 import { BillingPlanType } from '@/gql/graphql';
 import {
@@ -95,7 +95,7 @@ const Inner = ({
         setSchemaPushesLimit(organization.rateLimit.schemaPushes);
       }
     }
-  }, [plan, query.data?.billingPlans?.length]);
+  }, [plan, query.data?.billingPlans]);
 
   if (!canAccess) {
     return null;
@@ -156,7 +156,7 @@ const Inner = ({
             <Button variant="primary" type="button" onClick={updateLimits}>
               Update Limits
             </Button>
-            <Section.Subtitle tw="mt-4">
+            <Section.Subtitle className="mt-4">
               Updating your organization limitations might take a few minutes to
               update.
             </Section.Subtitle>
@@ -242,7 +242,7 @@ const Inner = ({
                       schemaPushesRateLimit={schemaPushesRateLimit}
                     >
                       {selectedPlan.planType === BillingPlanType.Pro && (
-                        <Stat tw="mb-4">
+                        <Stat className="mb-4">
                           <StatLabel>Free Trial</StatLabel>
                           <StatNumber>14</StatNumber>
                           <StatHelpText>days</StatHelpText>
