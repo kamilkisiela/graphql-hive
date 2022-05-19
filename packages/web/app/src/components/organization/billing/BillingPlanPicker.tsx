@@ -1,13 +1,6 @@
 import React from 'react';
 import 'twin.macro';
-import {
-  Link,
-  List,
-  ListIcon,
-  ListItem,
-  Radio,
-  RadioGroup,
-} from '@chakra-ui/react';
+import { List, ListIcon, ListItem } from '@chakra-ui/react';
 import {
   VscAdd,
   VscBell,
@@ -17,13 +10,13 @@ import {
   VscPerson,
   VscTable,
 } from 'react-icons/vsc';
-import { LimitSlider } from '@/components/organization/billing/LimitSlider';
 import {
   BillingPlansQuery,
   BillingPlanType,
   UsageRateLimitType,
 } from '@/graphql';
 import { Label, Section } from '@/components/common';
+import { Link, Radio, RadioGroup } from '@/components/v2';
 import { CurrencyFormatter, NumericFormatter } from './helpers';
 import { Logo } from '@/components/common/Logo';
 
@@ -32,33 +25,11 @@ export const BillingPlanPicker: React.FC<{
   activePlan: BillingPlanType;
   plans: BillingPlansQuery['billingPlans'];
   onPlanChange: (plan: BillingPlanType) => void;
-  operationsRateLimit: number;
-  schemaPushesRateLimit: number;
-  onOperationsRateLimitChange: (v: number) => void;
-  onSchemaPushesRateLimitChange: (v: number) => void;
-}> = ({
-  value,
-  activePlan,
-  plans,
-  onPlanChange,
-  operationsRateLimit,
-  onOperationsRateLimitChange,
-  onSchemaPushesRateLimitChange,
-  schemaPushesRateLimit,
-}) => {
+}> = ({ value, activePlan, plans, onPlanChange }) => {
   return (
-    <RadioGroup
-      value={value}
-      onChange={(v) => onPlanChange(v as BillingPlanType)}
-      className="relative flex flex-col gap-8"
-    >
+    <RadioGroup value={value} onValueChange={onPlanChange}>
       {plans.map((plan) => (
-        <Radio
-          colorScheme="primary"
-          key={plan.id}
-          name={plan.name}
-          value={plan.planType}
-        >
+        <Radio key={plan.id} value={plan.planType} className="px-3 py-2">
           <Section.BigTitle className="flex items-center gap-2">
             {plan.name}
             {activePlan === plan.planType && <Label>CURRENT PLAN</Label>}
@@ -93,31 +64,29 @@ export const BillingPlanPicker: React.FC<{
                     ? ' '
                     : '+ '}
                   operations per month
-                  {plan.pricePerOperationsUnit
-                    ? ` included in base price + 
+                  {Boolean(plan.pricePerOperationsUnit) &&
+                    ` included in base price + 
                         ${CurrencyFormatter.format(
                           plan.pricePerOperationsUnit
                         )} 
-                        per 1M`
-                    : null}
+                        per 1M`}
                 </Section.Subtitle>
               </ListItem>
               <ListItem>
                 <Section.Subtitle className="flex items-center">
                   <ListIcon as={VscCheck} />
-                  {!plan.includedSchemaPushLimit
-                    ? 'Unlimited'
-                    : NumericFormatter.format(plan.includedSchemaPushLimit)}
+                  {plan.includedSchemaPushLimit
+                    ? NumericFormatter.format(plan.includedSchemaPushLimit)
+                    : 'Unlimited'}
                   {plan.rateLimit === UsageRateLimitType.MonthlyLimited
                     ? ' '
                     : '+ '}
                   schema pushes per month
-                  {plan.pricePerSchemaPushUnit
-                    ? ` included in base price + 
+                  {Boolean(plan.pricePerSchemaPushUnit) &&
+                    ` included in base price + 
                         ${CurrencyFormatter.format(
                           plan.pricePerSchemaPushUnit
-                        )} per additional schema`
-                    : null}
+                        )} per additional schema`}
                 </Section.Subtitle>
               </ListItem>
               {plan.planType === BillingPlanType.Hobby ? (
@@ -147,18 +116,13 @@ export const BillingPlanPicker: React.FC<{
                     </Section.Subtitle>
                   </ListItem>
                 </>
-              ) : plan.planType === BillingPlanType.Pro ? (
-                <ListItem>
-                  <Section.Subtitle className="flex items-center">
-                    <ListIcon as={VscAdd} />
-                    All features from Hobby, including:
-                  </Section.Subtitle>
-                </ListItem>
               ) : (
                 <ListItem>
                   <Section.Subtitle className="flex items-center">
                     <ListIcon as={VscAdd} />
-                    All features from Hobby and Pro, including:
+                    All features from Hobby
+                    {plan.planType === BillingPlanType.Enterprise && ' and Pro'}
+                    , including:
                   </Section.Subtitle>
                 </ListItem>
               )}
@@ -200,47 +164,23 @@ export const BillingPlanPicker: React.FC<{
                   <ListItem>
                     <Section.Subtitle className="flex items-center">
                       <ListIcon as={Logo} />
-                      Schema design review and GraphQL support from{' '}
-                      <Link href="https://the-guild.dev" className="ml-2">
-                        The Guild
-                      </Link>
+                      <span>
+                        Schema design review and GraphQL support from{' '}
+                        <Link
+                          variant="primary"
+                          href="https://the-guild.dev"
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          The Guild
+                        </Link>
+                      </span>
                     </Section.Subtitle>
                   </ListItem>
                 </>
               )}
             </List>
           </div>
-          {value === BillingPlanType.Pro &&
-            plan.planType === BillingPlanType.Pro && (
-              <div className="pr-5 pt-5">
-                <Section.Title>Customize your reserved volume</Section.Title>
-                <LimitSlider
-                  title="Monthly GraphQL operations limit"
-                  min={5}
-                  step={1}
-                  max={300}
-                  value={operationsRateLimit}
-                  marks={[
-                    { value: 5, label: '5M (included)' },
-                    { value: 50, label: '50M' },
-                    { value: 100, label: '100M' },
-                  ]}
-                  onChange={(v) => onOperationsRateLimitChange(v)}
-                />
-                <LimitSlider
-                  title="Monthly GraphQL schema pushes"
-                  min={500}
-                  step={10}
-                  max={1000}
-                  value={schemaPushesRateLimit}
-                  marks={[
-                    { value: 500, label: '500 (included)' },
-                    { value: 1000, label: '1000' },
-                  ]}
-                  onChange={(v) => onSchemaPushesRateLimitChange(v)}
-                />
-              </div>
-            )}
         </Radio>
       ))}
     </RadioGroup>

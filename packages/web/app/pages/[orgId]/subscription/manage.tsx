@@ -1,13 +1,6 @@
 import { ReactElement, useEffect, useState } from 'react';
 import 'twin.macro';
-import {
-  Button,
-  Input,
-  Stat,
-  StatHelpText,
-  StatLabel,
-  StatNumber,
-} from '@chakra-ui/react';
+import { Stat, StatHelpText, StatLabel, StatNumber } from '@chakra-ui/react';
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { useMutation, useQuery } from 'urql';
 
@@ -15,8 +8,10 @@ import { Card, Section } from '@/components/common';
 import { DataWrapper, QueryError } from '@/components/common/DataWrapper';
 import { BillingPaymentMethod } from '@/components/organization/billing/BillingPaymentMethod';
 import { BillingPlanPicker } from '@/components/organization/billing/BillingPlanPicker';
+import { LimitSlider } from '@/components/organization/billing/LimitSlider';
 import { PlanSummary } from '@/components/organization/billing/PlanSummary';
 import { OrganizationView } from '@/components/organization/View';
+import { Button, Input } from '@/components/v2';
 import { BillingPlanType } from '@/gql/graphql';
 import {
   BillingPlansDocument,
@@ -134,23 +129,6 @@ const Inner = ({
     });
   };
 
-  const renderPaymentDetails = () => {
-    if (plan === BillingPlanType.Pro && plan !== organization.plan) {
-      return (
-        <div className="mb-4">
-          <Input
-            className="w-2/5"
-            value={couponCode}
-            onChange={(e) => setCouponCode(e.target.value)}
-            placeholder="Discount Code"
-          />
-        </div>
-      );
-    }
-
-    return null;
-  };
-
   const renderActions = () => {
     if (plan === organization.plan) {
       if (
@@ -159,12 +137,7 @@ const Inner = ({
       ) {
         return (
           <>
-            <Button
-              colorScheme="primary"
-              type="button"
-              size="sm"
-              onClick={updateLimits}
-            >
+            <Button variant="primary" type="button" onClick={updateLimits}>
               Update Limits
             </Button>
             <Section.Subtitle tw="mt-4">
@@ -180,12 +153,7 @@ const Inner = ({
 
     if (plan === 'ENTERPRISE') {
       return (
-        <Button
-          colorScheme="primary"
-          type="button"
-          size="sm"
-          onClick={openChatSupport}
-        >
+        <Button variant="primary" type="button" onClick={openChatSupport}>
           Contact Us
         </Button>
       );
@@ -193,9 +161,8 @@ const Inner = ({
     if (plan === 'PRO') {
       return (
         <Button
-          colorScheme="primary"
+          variant="primary"
           type="button"
-          size="sm"
           onClick={upgrade}
           disabled={!paymentDetailsValid}
         >
@@ -205,12 +172,7 @@ const Inner = ({
     }
     if (plan === 'HOBBY') {
       return (
-        <Button
-          colorScheme="primary"
-          type="button"
-          size="sm"
-          onClick={downgrade}
-        >
+        <Button variant="primary" type="button" onClick={downgrade}>
           Downgrade to Hobby
         </Button>
       );
@@ -239,54 +201,90 @@ const Inner = ({
         );
 
         return (
-          <div className="flex w-full flex-row">
-            <div className="mr-12 flex-grow">
-              <div className="flex flex-col space-y-6 pb-6">
-                <Card.Root>
-                  <Card.Title>Choose Your Plan</Card.Title>
-                  <Card.Content>
-                    <BillingPlanPicker
-                      activePlan={organization.plan}
-                      value={plan}
-                      plans={result.data.billingPlans}
-                      onPlanChange={setPlan}
-                      operationsRateLimit={operationsRateLimit}
-                      schemaPushesRateLimit={schemaPushesRateLimit}
-                      onOperationsRateLimitChange={setOperationsRateLimit}
-                      onSchemaPushesRateLimitChange={setSchemaPushesLimit}
+          <div className="flex w-full flex-row gap-5">
+            <Card.Root className="w-1/2">
+              <Card.Title>Choose Your Plan</Card.Title>
+              <Card.Content>
+                <BillingPlanPicker
+                  activePlan={organization.plan}
+                  value={plan}
+                  plans={result.data.billingPlans}
+                  onPlanChange={setPlan}
+                />
+              </Card.Content>
+            </Card.Root>
+            <Card.Root className="w-1/2 self-start">
+              <Card.Title>Plan Summary</Card.Title>
+              <Card.Content>
+                {error && <QueryError showError error={error} />}
+
+                <PlanSummary
+                  plan={selectedPlan}
+                  operationsRateLimit={operationsRateLimit}
+                  schemaPushesRateLimit={schemaPushesRateLimit}
+                >
+                  {selectedPlan.planType === BillingPlanType.Pro && (
+                    <Stat tw="mb-4">
+                      <StatLabel>Free Trial</StatLabel>
+                      <StatNumber>14</StatNumber>
+                      <StatHelpText>days</StatHelpText>
+                    </Stat>
+                  )}
+                </PlanSummary>
+
+                {plan === BillingPlanType.Pro && (
+                  <div className="flex flex-col gap-7 rounded-md bg-gray-500/5 p-5 pb-10">
+                    <Section.Title>
+                      Customize your reserved volume
+                    </Section.Title>
+                    <LimitSlider
+                      title="Monthly GraphQL operations limit"
+                      min={5}
+                      max={200}
+                      step={1}
+                      marks={[
+                        { value: 5, label: '5M (included)' },
+                        { value: 50, label: '50M' },
+                        { value: 100, label: '100M' },
+                        { value: 200, label: '200M' },
+                      ]}
+                      value={operationsRateLimit}
+                      onChange={setOperationsRateLimit}
                     />
-                  </Card.Content>
-                </Card.Root>
-              </div>
-            </div>
-            <div className="w-5/12 flex-grow-0">
-              <Card.Root>
-                <Card.Title>Plan Summary</Card.Title>
-                <Card.Content>
-                  {error && <QueryError showError error={error} />}
-                  <PlanSummary
-                    plan={selectedPlan}
-                    operationsRateLimit={operationsRateLimit}
-                    schemaPushesRateLimit={schemaPushesRateLimit}
-                  >
-                    {selectedPlan.planType === BillingPlanType.Pro && (
-                      <Stat tw="mb-4">
-                        <StatLabel>Free Trial</StatLabel>
-                        <StatNumber>14</StatNumber>
-                        <StatHelpText>days</StatHelpText>
-                      </Stat>
-                    )}
-                  </PlanSummary>
-                  <BillingPaymentMethod
-                    plan={selectedPlan.planType}
-                    organizationBilling={organization}
-                    onValidationChange={(v) => setPaymentDetailsValid(v)}
+                    <LimitSlider
+                      title="Monthly GraphQL schema pushes"
+                      min={500}
+                      max={1000}
+                      step={10}
+                      marks={[
+                        { value: 500, label: '500 (included)' },
+                        { value: 1000, label: '1000' },
+                      ]}
+                      value={schemaPushesRateLimit}
+                      onChange={setSchemaPushesLimit}
+                    />
+                  </div>
+                )}
+
+                <BillingPaymentMethod
+                  plan={selectedPlan.planType}
+                  organizationBilling={organization}
+                  onValidationChange={setPaymentDetailsValid}
+                />
+
+                {plan === BillingPlanType.Pro && plan !== organization.plan && (
+                  <Input
+                    className="mb-5"
+                    size="medium"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value)}
+                    placeholder="Discount Code"
                   />
-                  {renderPaymentDetails()}
-                  {renderActions()}
-                </Card.Content>
-              </Card.Root>
-            </div>
+                )}
+
+                {renderActions()}
+              </Card.Content>
+            </Card.Root>
           </div>
         );
       }}

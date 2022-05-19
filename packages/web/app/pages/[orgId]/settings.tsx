@@ -18,10 +18,11 @@ import {
   CheckIntegrationsDocument,
   DeleteGitHubIntegrationDocument,
   DeleteSlackIntegrationDocument,
-  OrganizationQuery,
+  OrganizationDocument,
   OrganizationType,
 } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { OrganizationLayout } from '@/components/layouts';
 
 const Integrations = (): ReactElement => {
   const router = useRouteSelector();
@@ -150,11 +151,19 @@ const UpdateOrganizationNameMutation = gql(/* GraphQL */ `
   }
 `);
 
-const SettingsPage = ({
-  organization,
-}: {
-  organization: OrganizationQuery['organization']['organization'];
-}): ReactElement => {
+const Page = (): ReactElement => {
+  const router = useRouteSelector();
+  const [organizationQuery] = useQuery({
+    query: OrganizationDocument,
+    variables: {
+      selector: {
+        organization: router.organizationId,
+      },
+    },
+  });
+
+  const { organization } = organizationQuery.data.organization;
+
   const isRegularOrg = organization.type === OrganizationType.Regular;
   const [isModalOpen, setModalOpen] = useState(false);
   const toggleModalOpen = useCallback(() => {
@@ -278,4 +287,10 @@ const SettingsPage = ({
   );
 };
 
-export default SettingsPage;
+export default function SettingsPage(): ReactElement {
+  return (
+    <OrganizationLayout value="settings">
+      <Page />
+    </OrganizationLayout>
+  );
+}

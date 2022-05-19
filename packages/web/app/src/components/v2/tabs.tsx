@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, forwardRef } from 'react';
 import {
   Content,
   List,
@@ -36,25 +36,29 @@ Tabs.List = ({ children, className, ...props }) => (
   </List>
 );
 
-Tabs.Trigger = ({ children, className, hasBorder = true, ...props }) => (
-  <Trigger
-    className={clsx(
-      `
+Tabs.Trigger = forwardRef(
+  ({ children, className, hasBorder = true, ...props }, forwardedRef /* when has asChild prop */) => (
+    <Trigger
+      // @ts-ignore found way to fix Types of property 'current' are incompatible
+      ref={forwardedRef}
+      className={clsx(
+        `
   radix-state-active:text-white
   font-bold
   transition
   hover:text-white`,
-      hasBorder &&
-        `
+        hasBorder &&
+          `
   radix-state-active:border-b-orange-500
   border-b-[5px]
   border-b-transparent
   pb-3`
-    )}
-    {...props}
-  >
-    {children}
-  </Trigger>
+      )}
+      {...props}
+    >
+      {children}
+    </Trigger>
+  )
 );
 
 Tabs.Content = ({ children, className, ...props }) => (
