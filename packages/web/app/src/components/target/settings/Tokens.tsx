@@ -174,7 +174,7 @@ const TokenCreator: React.FC<{
                     border={0}
                     value={mutation?.data?.createToken?.ok?.secret}
                     placeholder={mutation?.data?.createToken?.ok?.secret}
-                  ></Input>
+                  />
                   <Button colorScheme="primary" onClick={onCopy}>
                     {hasCopied ? 'Copied' : 'Copy'}
                   </Button>
