@@ -145,15 +145,18 @@ export default function SchemaPage(): ReactElement {
             {version.commit.author}
           </span>
         </div>
-        <span
-          className={clsx(
-            'mt-2.5 mb-1.5 text-xs font-medium text-[#c4c4c4]',
-            !version.valid && 'text-red-500'
+        <div className="mt-2.5 mb-1.5 flex align-middle text-xs font-medium text-[#c4c4c4]">
+          <div className={clsx('w-1/2 ', !version.valid && 'text-red-500')}>
+            <Badge color={version.valid ? 'green' : 'red'} /> Published{' '}
+            <TimeAgo date={version.date} />
+          </div>
+
+          {version.commit.service && (
+            <div className="ml-auto mr-0 w-1/2  overflow-hidden text-ellipsis whitespace-nowrap text-right font-bold">
+              {version.commit.service}
+            </div>
           )}
-        >
-          <Badge color={version.valid ? 'green' : 'red'} /> Published{' '}
-          <TimeAgo date={version.date} />
-        </span>
+        </div>
       </a>
     </NextLink>
   );
@@ -188,7 +191,7 @@ export default function SchemaPage(): ReactElement {
       </div>
       <div className="grow">
         <div className="mb-4 flex items-end">
-          <Heading>Simple DirectMedia Layer</Heading>
+          <Heading>Schema</Heading>
           <NextLink
             href={
               router.versionId || !schemaVersions
@@ -204,9 +207,6 @@ export default function SchemaPage(): ReactElement {
               Diff view
             </Link>
           </NextLink>
-          {/*<Link href="#" className="text-xs">*/}
-          {/*  Search*/}
-          {/*</Link>*/}
         </div>
         <div className="flex h-[65vh] grow overflow-hidden rounded-md border border-gray-800/50">
           {router.versionId ? (
