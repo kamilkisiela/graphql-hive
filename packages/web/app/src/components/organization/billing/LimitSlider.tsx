@@ -18,12 +18,13 @@ export const LimitSlider = (props: {
   title: string;
   onChange: (v: number) => void;
   marks?: { value: number; label: string }[];
+  className?: string;
 }): ReactElement => {
   const [showTooltip, setShowTooltip] = useState(false);
 
   return (
-    <div>
-      <Section.Subtitle>{props.title}</Section.Subtitle>
+    <div className={props.className}>
+      <Section.Subtitle className="-ml-2.5">{props.title}</Section.Subtitle>
       <Slider
         min={props.min}
         max={props.max}
