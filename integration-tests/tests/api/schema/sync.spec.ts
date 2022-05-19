@@ -57,7 +57,7 @@ test('marking only the most recent version as valid result in an update of CDN',
 
   expect(tokenResult.body.errors).not.toBeDefined();
 
-  const token = tokenResult.body.data!.createToken.secret;
+  const token = tokenResult.body.data!.createToken.ok.secret;
 
   // Initial schema
   const publishResult = await publishSchema(

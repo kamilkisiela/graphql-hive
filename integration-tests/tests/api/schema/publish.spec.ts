@@ -59,7 +59,7 @@ test('cannot publish a schema without target:registry:write access', async () =>
   );
   expect(tokenResult.body.errors).not.toBeDefined();
 
-  const token = tokenResult.body.data!.createToken.secret;
+  const token = tokenResult.body.data!.createToken.ok.secret;
   const result = await publishSchema(
     {
       author: 'Kamil',
@@ -120,7 +120,7 @@ test('can publish a schema with target:registry:write access', async () => {
 
   expect(tokenResult.body.errors).not.toBeDefined();
 
-  const token = tokenResult.body.data!.createToken.secret;
+  const token = tokenResult.body.data!.createToken.ok.secret;
 
   let result = await publishSchema(
     {
@@ -205,7 +205,7 @@ test('base schema should not affect the output schema persisted in db', async ()
     owner_access_token
   );
   expect(writeTokenResult.body.errors).not.toBeDefined();
-  const writeToken = writeTokenResult.body.data!.createToken.secret;
+  const writeToken = writeTokenResult.body.data!.createToken.ok.secret;
 
   // Publish schema with write rights
   let publishResult = await publishSchema(
@@ -321,7 +321,7 @@ test('directives should not be removed (federation)', async () => {
     owner_access_token
   );
   expect(writeTokenResult.body.errors).not.toBeDefined();
-  const writeToken = writeTokenResult.body.data!.createToken.secret;
+  const writeToken = writeTokenResult.body.data!.createToken.ok.secret;
 
   // Publish schema with write rights
   const publishResult = await publishSchema(
@@ -404,7 +404,7 @@ test('directives should not be removed (stitching)', async () => {
     owner_access_token
   );
   expect(writeTokenResult.body.errors).not.toBeDefined();
-  const writeToken = writeTokenResult.body.data!.createToken.secret;
+  const writeToken = writeTokenResult.body.data!.createToken.ok.secret;
 
   // Publish schema with write rights
   const publishResult = await publishSchema(
@@ -487,7 +487,7 @@ test('directives should not be removed (single)', async () => {
     owner_access_token
   );
   expect(writeTokenResult.body.errors).not.toBeDefined();
-  const writeToken = writeTokenResult.body.data!.createToken.secret;
+  const writeToken = writeTokenResult.body.data!.createToken.ok.secret;
 
   // Publish schema with write rights
   const publishResult = await publishSchema(
@@ -570,7 +570,7 @@ test('share publication of schema using redis', async () => {
     owner_access_token
   );
   expect(writeTokenResult.body.errors).not.toBeDefined();
-  const writeToken = writeTokenResult.body.data!.createToken.secret;
+  const writeToken = writeTokenResult.body.data!.createToken.ok.secret;
 
   // Publish schema with write rights
   const publishResult = await publishSchema(
@@ -653,7 +653,7 @@ test("Two targets with the same commit id shouldn't return an error", async () =
     owner_access_token
   );
   expect(writeTokenResult.body.errors).not.toBeDefined();
-  const writeToken = writeTokenResult.body.data!.createToken.secret;
+  const writeToken = writeTokenResult.body.data!.createToken.ok.secret;
   const publishResult = await publishSchema(
     {
       author: 'gilad',
@@ -686,7 +686,7 @@ test("Two targets with the same commit id shouldn't return an error", async () =
     },
     owner_access_token
   );
-  const writeToken2 = writeTokenResult2.body.data!.createToken.secret;
+  const writeToken2 = writeTokenResult2.body.data!.createToken.ok.secret;
   const publishResult2 = await publishSchema(
     {
       author: 'gilad',
@@ -753,7 +753,7 @@ test('marking versions as valid', async () => {
 
   expect(tokenResult.body.errors).not.toBeDefined();
 
-  const token = tokenResult.body.data!.createToken.secret;
+  const token = tokenResult.body.data!.createToken.ok.secret;
 
   // Initial schema
   let result = await publishSchema(
@@ -917,7 +917,7 @@ test('marking only the most recent version as valid result in an update of CDN',
 
   expect(tokenResult.body.errors).not.toBeDefined();
 
-  const token = tokenResult.body.data!.createToken.secret;
+  const token = tokenResult.body.data!.createToken.ok.secret;
 
   // Initial schema
   let result = await publishSchema(

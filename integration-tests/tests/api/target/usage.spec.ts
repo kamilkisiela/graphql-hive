@@ -99,8 +99,8 @@ test('collect operation', async () => {
   expect(settingsTokenResult.body.errors).not.toBeDefined();
   expect(tokenResult.body.errors).not.toBeDefined();
 
-  const token = tokenResult.body.data!.createToken.secret;
-  const tokenForSettings = settingsTokenResult.body.data!.createToken.secret;
+  const token = tokenResult.body.data!.createToken.ok.secret;
+  const tokenForSettings = settingsTokenResult.body.data!.createToken.ok.secret;
 
   const schemaPublishResult = await publishSchema(
     {
@@ -284,7 +284,7 @@ test('normalize and collect operation without breaking its syntax', async () => 
   expect(settingsTokenResult.body.errors).not.toBeDefined();
   expect(tokenResult.body.errors).not.toBeDefined();
 
-  const token = tokenResult.body.data!.createToken.secret;
+  const token = tokenResult.body.data!.createToken.ok.secret;
 
   const raw_document = `
     query outfit {
@@ -453,7 +453,7 @@ test('number of produced and collected operations should match', async () => {
 
   expect(tokenResult.body.errors).not.toBeDefined();
 
-  const token = tokenResult.body.data!.createToken.secret;
+  const token = tokenResult.body.data!.createToken.ok.secret;
 
   const batchSize = 10;
   const totalAmount = 10_000;
@@ -587,9 +587,9 @@ test('check usage from two selected targets', async () => {
   expect(stagingTokenResult.body.errors).not.toBeDefined();
   expect(productionTokenResult.body.errors).not.toBeDefined();
 
-  const tokenForStaging = stagingTokenResult.body.data!.createToken.secret;
+  const tokenForStaging = stagingTokenResult.body.data!.createToken.ok.secret;
   const tokenForProduction =
-    productionTokenResult.body.data!.createToken.secret;
+    productionTokenResult.body.data!.createToken.ok.secret;
 
   const schemaPublishResult = await publishSchema(
     {
@@ -779,7 +779,7 @@ test('number of produced and collected operations should match', async () => {
 
   expect(tokenResult.body.errors).not.toBeDefined();
 
-  const token = tokenResult.body.data!.createToken.secret;
+  const token = tokenResult.body.data!.createToken.ok.secret;
 
   const batchSize = 10;
   const totalAmount = 10_000;
