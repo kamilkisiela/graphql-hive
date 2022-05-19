@@ -74,7 +74,7 @@ const TargetCard = ({
                 <a>
                   <DropdownMenu.Item>
                     <SettingsIcon />
-                    Target Settings
+                    Settings
                   </DropdownMenu.Item>
                 </a>
               </NextLink>

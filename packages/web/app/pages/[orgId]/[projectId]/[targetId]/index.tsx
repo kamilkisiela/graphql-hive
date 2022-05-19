@@ -1,34 +1,87 @@
 import { ReactElement, useCallback, useState } from 'react';
 import NextLink from 'next/link';
-import { SchemaEditor } from '@theguild/editor';
 import clsx from 'clsx';
-import { VscBug } from 'react-icons/vsc';
+import { VscBug, VscDiff, VscListFlat } from 'react-icons/vsc';
+import reactStringReplace from 'react-string-replace';
 import { useQuery } from 'urql';
 
+import { Label } from '@/components/common';
 import { TargetLayout } from '@/components/layouts';
 import {
   Badge,
   Button,
   DiffEditor,
   Heading,
-  Link,
   noSchema,
-  prettify,
   Spinner,
   TimeAgo,
   Title,
+  ToggleGroup,
+  ToggleGroupItem,
 } from '@/components/v2';
 import { Link2Icon } from '@/components/v2/icon';
 import { ConnectSchemaModal } from '@/components/v2/modals';
 import {
   CompareDocument,
+  CriticalityLevel,
+  SchemaChangeFieldsFragment,
   SchemasDocument,
   SchemaVersionFieldsFragment,
   VersionsDocument,
 } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
-const DiffView = (): ReactElement => {
+function labelize(message: string) {
+  const findSingleQuotes = /'([^']+)'/gim;
+
+  return reactStringReplace(message, findSingleQuotes, (match, i) => (
+    <Label key={i}>{match}</Label>
+  ));
+}
+
+const titleMap: Record<CriticalityLevel, string> = {
+  Safe: 'Safe Changes',
+  Breaking: 'Breaking Changes',
+  Dangerous: 'Dangerous Changes',
+};
+
+const ChangesBlock: React.FC<{
+  changes: SchemaChangeFieldsFragment[];
+  criticality: CriticalityLevel;
+}> = ({ changes, criticality }) => {
+  const filteredChanges = changes.filter((c) => c.criticality === criticality);
+
+  if (!filteredChanges.length) {
+    return null;
+  }
+
+  return (
+    <div>
+      <h2 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">
+        {titleMap[criticality]}
+      </h2>
+      <ul className="list-inside list-disc pl-3 text-base leading-relaxed">
+        {filteredChanges.map((change, key) => (
+          <li
+            key={key}
+            className={clsx(
+              {
+                [CriticalityLevel.Safe]: 'text-emerald-400',
+                [CriticalityLevel.Dangerous]: 'text-yellow-400',
+              }[criticality] || 'text-red-400'
+            )}
+          >
+            <span className="text-gray-600 dark:text-white">
+              {labelize(change.message)}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+const DiffView = ({ view }: { view: 'sdl' | 'list' }): ReactElement => {
   const router = useRouteSelector();
   const [compareQuery] = useQuery({
     query: CompareDocument,
@@ -65,7 +118,26 @@ const DiffView = (): ReactElement => {
 
   const { before, after } = comparison.diff;
 
-  return <DiffEditor before={before} after={after} />;
+  if (view === 'sdl') {
+    return <DiffEditor before={before} after={after} />;
+  }
+
+  return (
+    <div className="space-y-3 p-6">
+      <ChangesBlock
+        changes={comparison.changes.nodes}
+        criticality={CriticalityLevel.Breaking}
+      />
+      <ChangesBlock
+        changes={comparison.changes.nodes}
+        criticality={CriticalityLevel.Dangerous}
+      />
+      <ChangesBlock
+        changes={comparison.changes.nodes}
+        criticality={CriticalityLevel.Safe}
+      />
+    </div>
+  );
 };
 
 export default function SchemaPage(): ReactElement {
@@ -92,6 +164,14 @@ export default function SchemaPage(): ReactElement {
     },
     requestPolicy: 'cache-and-network',
   });
+
+  const [view, setView] = useState<'sdl' | 'list'>('list');
+  const onViewChange = useCallback(
+    (view: any) => {
+      setView(view);
+    },
+    [setView]
+  );
 
   const [isModalOpen, setModalOpen] = useState(false);
   const toggleModalOpen = useCallback(() => {
@@ -190,36 +270,36 @@ export default function SchemaPage(): ReactElement {
         </div>
       </div>
       <div className="grow">
-        <div className="mb-4 flex items-end">
+        <div className="mb-4 flex items-center justify-between">
           <Heading>Schema</Heading>
-          <NextLink
-            href={
-              router.versionId || !schemaVersions
-                ? baseUrl
-                : `${baseUrl}/history/${schemaVersions.nodes[0].id}`
-            }
-            passHref
+          <ToggleGroup
+            defaultValue="diff"
+            onValueChange={onViewChange}
+            type="single"
+            className="bg-gray-900/50 text-gray-500"
           >
-            <Link
-              variant={router.versionId ? 'primary' : 'secondary'}
-              className="ml-auto mr-2.5 text-xs"
+            <ToggleGroupItem
+              className={clsx(
+                'hover:text-white',
+                view === 'sdl' && 'bg-gray-800 text-white'
+              )}
+              value="sdl"
             >
-              Diff view
-            </Link>
-          </NextLink>
+              <VscDiff />
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              className={clsx(
+                'hover:text-white',
+                view === 'list' && 'bg-gray-800 text-white'
+              )}
+              value="list"
+            >
+              <VscListFlat />
+            </ToggleGroupItem>
+          </ToggleGroup>
         </div>
         <div className="flex h-[65vh] grow overflow-hidden rounded-md border border-gray-800/50">
-          {router.versionId ? (
-            <DiffView />
-          ) : (
-            <SchemaEditor
-              theme="vs-dark"
-              options={{ readOnly: true }}
-              height="100%"
-              // TODO: improve, use useMemo
-              schema={prettify(schema.source)}
-            />
-          )}
+          <DiffView view={view} />
           <style jsx global>{`
             .monaco-editor,
             .monaco-editor-background,

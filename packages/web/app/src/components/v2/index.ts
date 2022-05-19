@@ -27,3 +27,4 @@ export { Tabs } from '@/components/v2/tabs';
 export { Tag } from '@/components/v2/tag';
 export { TimeAgo } from '@/components/v2/time-ago';
 export { Title } from '@/components/v2/title';
+export { ToggleGroup, ToggleGroupItem } from '@/components/v2/toggle-group';
