@@ -24,7 +24,7 @@ export const Skeleton = ({
     <div
       className={clsx(
         'animate-pulse bg-gray-900',
-        circle ? 'rounded-full' : 'rounded-[10px]',
+        circle ? 'rounded-full' : 'rounded-md',
         className
       )}
       style={{ width }}

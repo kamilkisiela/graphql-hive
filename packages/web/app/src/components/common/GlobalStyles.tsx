@@ -6,7 +6,7 @@ const customStyles = css`
   body,
   #__next {
     ${tw`w-screen h-screen overflow-y-auto`}
-    font-family: 'Lato', sans-serif;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif;
   }
 
   #__next {

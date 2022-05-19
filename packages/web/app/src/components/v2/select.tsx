@@ -23,7 +23,7 @@ export const Select = ({
           h-[50px]
           w-full
           text-ellipsis
-          rounded-[10px]
+          rounded-sm
           border
           bg-gray-800
           pl-4

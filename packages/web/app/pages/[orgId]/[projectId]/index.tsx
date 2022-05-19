@@ -73,7 +73,6 @@ const ProjectPage: FC = () => {
     <>
       <Header>
         <div className="wrapper flex items-center pb-4">
-          {/*<Avatar src="/images/project-card/logo.svg" tw="w-20 h-20 mr-2.5" />*/}
           <div>
             {org && (
               <NextLink href={`/${router.organizationId}`} passHref>
