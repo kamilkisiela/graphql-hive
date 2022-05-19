@@ -1,8 +1,8 @@
-import { FC, useCallback, useEffect, useState } from 'react';
-import clsx from 'clsx';
+import { ReactElement, useCallback, useEffect, useState } from 'react';
 import { useMutation, useQuery } from 'urql';
 
 import { useUser } from '@/components/auth/AuthProvider';
+import { OrganizationLayout } from '@/components/layouts';
 import {
   Avatar,
   Button,
@@ -34,7 +34,7 @@ import {
 import { useNotifications } from '@/lib/hooks/use-notifications';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
-const MembersPage: FC<{ className?: string }> = ({ className }) => {
+const Page = (): ReactElement => {
   const [checked, setChecked] = useState<string[]>([]);
   const [selectedMemberId, setSelectedMemberId] = useState<string>('');
   const [isModalOpen, setModalOpen] = useState(false);
@@ -80,7 +80,7 @@ const MembersPage: FC<{ className?: string }> = ({ className }) => {
     if (isPersonal) {
       router.replace(`/${router.organizationId}`);
     } else if (members) {
-      // uncheck checkboxex when members were deleted
+      // uncheck checkboxes when members were deleted
       setChecked((prev) =>
         prev.filter((id) => members.some((node) => node.id === id))
       );
@@ -94,7 +94,7 @@ const MembersPage: FC<{ className?: string }> = ({ className }) => {
     selectedMemberId && members.find((node) => node.id === selectedMemberId);
 
   return (
-    <div className={clsx('flex flex-col gap-4', className)}>
+    <div className="flex w-4/5 flex-col gap-4">
       <Title title="Members" />
       <p className="mb-3 font-light text-gray-300">
         Invite others to your organization and manage access
@@ -216,4 +216,10 @@ const MembersPage: FC<{ className?: string }> = ({ className }) => {
   );
 };
 
-export default MembersPage;
+export default function MembersPage(): ReactElement {
+  return (
+    <OrganizationLayout value="members">
+      <Page />
+    </OrganizationLayout>
+  );
+}

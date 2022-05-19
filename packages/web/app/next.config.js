@@ -68,28 +68,8 @@ module.exports = withSentryConfig(
     //   },
     //   // Redirect v1 org routes
     //   {
-    //     source: '/:orgId/members',
-    //     destination: '/:orgId#members',
-    //     permanent: true,
-    //   },
-    //   {
-    //     source: '/:orgId/projects',
-    //     destination: '/:orgId',
-    //     permanent: true,
-    //   },
-    //   {
-    //     source: '/:orgId/settings',
-    //     destination: '/:orgId#settings',
-    //     permanent: true,
-    //   },
-    //   {
-    //     source: '/:orgId/subscription',
-    //     destination: '/:orgId#subscription',
-    //     permanent: true,
-    //   },
-    //   {
     //     source: '/:orgId/subscription/manage',
-    //     destination: '/:orgId#subscription',
+    //     destination: '/:orgId/subscription',
     //     permanent: true,
     //   },
     // ],

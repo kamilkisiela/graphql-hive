@@ -21,6 +21,7 @@ export { ShineBackground } from '@/components/v2/shine-background';
 export { Skeleton } from '@/components/v2/skeleton';
 export { Spinner } from '@/components/v2/spinner';
 export { Switch } from '@/components/v2/switch';
+export { Radio, RadioGroup } from '@/components/v2/radio-group';
 export { Table } from '@/components/v2/table';
 export { Tabs } from '@/components/v2/tabs';
 export { Tag } from '@/components/v2/tag';

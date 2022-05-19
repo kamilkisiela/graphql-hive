@@ -1,13 +1,9 @@
 import { ReactElement } from 'react';
 import NextImage, { ImageProps } from 'next/image';
-import {
-  Indicator,
-  Item,
-  RadioGroupProps,
-  Root,
-} from '@radix-ui/react-radio-group';
+import { RadioGroupProps } from '@radix-ui/react-radio-group';
 import clsx from 'clsx';
 
+import { Radio, RadioGroup } from '@/components/v2';
 import { ProjectType } from '@/graphql';
 import custom from '../../../public/images/figures/custom.svg';
 import federation from '../../../public/images/figures/federation.svg';
@@ -52,28 +48,14 @@ export const ProjectTypes = ({
   ...props
 }: RadioGroupProps): ReactElement => {
   return (
-    <Root
-      className={clsx('flex flex-col justify-items-stretch gap-4', className)}
-      {...props}
-    >
+    <RadioGroup {...props}>
       {PROJECTS.map(({ type, image, title, description }) => {
         const capitalizedType = type[0] + type.slice(1).toLowerCase();
         return (
-          <Item
+          <Radio
             key={type}
             value={type}
-            className="
-              hover:border-orange-500/50
-              relative
-              flex
-              overflow-hidden
-              rounded-sm
-              border
-              border-transparent
-              bg-gray-800
-              text-left
-              focus:ring
-            "
+            className="flex border-transparent bg-gray-800"
           >
             <NextImage
               src={image}
@@ -94,10 +76,9 @@ export const ProjectTypes = ({
                 {description}
               </span>
             </div>
-            <Indicator className="border-orange-500 absolute inset-0 rounded-md border" />
-          </Item>
+          </Radio>
         );
       })}
-    </Root>
+    </RadioGroup>
   );
 };

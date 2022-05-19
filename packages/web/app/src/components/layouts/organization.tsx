@@ -7,6 +7,7 @@ import {
 } from 'react';
 import { useRouter } from 'next/router';
 import { useQuery } from 'urql';
+import NextLink from 'next/link';
 
 import { Button, Header, Heading, Tabs } from '@/components/v2';
 import { PlusIcon } from '@/components/v2/icon';
@@ -35,11 +36,13 @@ export const OrganizationLayout = ({
     setModalOpen((prevOpen) => !prevOpen);
   }, []);
 
+  const orgId = router.organizationId;
+
   const [organizationQuery] = useQuery({
     query: OrganizationDocument,
     variables: {
       selector: {
-        organization: router.organizationId,
+        organization: orgId,
       },
     },
   });
@@ -84,26 +87,30 @@ export const OrganizationLayout = ({
           />
         </header>
       </Header>
-      <Tabs
-        className="wrapper"
-        value={value}
-        onValueChange={(newValue) => {
-          push(
-            newValue === 'overview'
-              ? `/${router.organizationId}`
-              : `/${router.organizationId}/${newValue}`
-          );
-        }}
-      >
+      <Tabs className="wrapper" value={value}>
         <Tabs.List>
-          <Tabs.Trigger value={TabValue.Overview}>Overview</Tabs.Trigger>
+          <NextLink passHref href={`/${orgId}`}>
+            <Tabs.Trigger value={TabValue.Overview} asChild>
+              <a>Overview</a>
+            </Tabs.Trigger>
+          </NextLink>
           {isRegularOrg && (
-            <Tabs.Trigger value={TabValue.Members}>Members</Tabs.Trigger>
+            <NextLink passHref href={`/${orgId}/${TabValue.Members}`}>
+              <Tabs.Trigger value={TabValue.Members} asChild>
+                <a>Members</a>
+              </Tabs.Trigger>
+            </NextLink>
           )}
-          <Tabs.Trigger value={TabValue.Settings}>Settings</Tabs.Trigger>
-          <Tabs.Trigger value={TabValue.Subscription}>
-            Subscription
-          </Tabs.Trigger>
+          <NextLink passHref href={`/${orgId}/${TabValue.Settings}`}>
+            <Tabs.Trigger value={TabValue.Settings} asChild>
+              <a>Settings</a>
+            </Tabs.Trigger>
+          </NextLink>
+          <NextLink passHref href={`/${orgId}/${TabValue.Subscription}`}>
+            <Tabs.Trigger value={TabValue.Subscription} asChild>
+              <a>Subscription</a>
+            </Tabs.Trigger>
+          </NextLink>
         </Tabs.List>
         <Tabs.Content value={value}>{children}</Tabs.Content>
       </Tabs>
