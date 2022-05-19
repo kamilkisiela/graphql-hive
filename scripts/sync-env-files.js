@@ -54,7 +54,8 @@ async function main() {
 
       if (env[key] === '<sync>' || env[key] === '') {
         modified = true;
-        env[key] = typeof rootEnv[key] !== 'undefined' ? rootEnv[key] : null;
+        env[key] =
+          typeof rootEnv[key] !== 'undefined' ? rootEnv[key] : process.env[key];
       }
     }
 
