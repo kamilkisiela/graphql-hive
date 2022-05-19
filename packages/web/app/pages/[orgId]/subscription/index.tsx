@@ -1,9 +1,9 @@
 import { ReactElement } from 'react';
 import dynamic from 'next/dynamic';
-import 'twin.macro';
 import { Stat, StatHelpText, StatLabel, StatNumber } from '@chakra-ui/react';
+import { startOfMonth, endOfMonth } from 'date-fns';
 
-import { Card } from '@/components/common';
+import { Card, Heading } from '@/components/v2';
 import { OrganizationLayout } from '@/components/layouts';
 import { BillingView } from '@/components/organization/billing/Billing';
 import { CurrencyFormatter } from '@/components/organization/billing/helpers';
@@ -21,6 +21,12 @@ import {
   OrganizationAccessScope,
   useOrganizationAccess,
 } from '@/lib/access/organization';
+
+const DateFormatter = Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+});
 
 const ManagePage = dynamic(() => import('./manage'));
 
@@ -41,6 +47,10 @@ const Page = ({
     return null;
   }
 
+  const today = new Date();
+  const start = startOfMonth(today);
+  const end = endOfMonth(today);
+
   return (
     <Tabs defaultValue="overview">
       <Tabs.List>
@@ -57,51 +67,42 @@ const Page = ({
           ingestion
         </p>
         <RateLimitWarn organization={organization} />
-        <div className="flex w-full flex-row">
-          <div className="mr-12 grow">
-            <div className="flex flex-col space-y-6 pb-6">
-              <Card.Root>
-                <Card.Title>Plan and Reserved Volume</Card.Title>
-                <Card.Content>
-                  <BillingView organization={organization}>
-                    {organization.billingConfiguration?.upcomingInvoice && (
-                      <Stat tw="mb-4">
-                        <StatLabel>Next Invoice</StatLabel>
-                        <StatNumber>
-                          {CurrencyFormatter.format(
-                            organization.billingConfiguration.upcomingInvoice
-                              .amount
-                          )}
-                        </StatNumber>
-                        <StatHelpText>
-                          {
-                            organization.billingConfiguration.upcomingInvoice
-                              .date
-                          }
-                        </StatHelpText>
-                      </Stat>
+        <Card className="mt-8">
+          <Heading className="mb-2">Plan and Reserved Volume</Heading>
+          <div>
+            <BillingView organization={organization}>
+              {organization.billingConfiguration?.upcomingInvoice && (
+                <Stat className="mb-4">
+                  <StatLabel>Next Invoice</StatLabel>
+                  <StatNumber>
+                    {CurrencyFormatter.format(
+                      organization.billingConfiguration.upcomingInvoice.amount
                     )}
-                  </BillingView>
-                </Card.Content>
-              </Card.Root>
-            </div>
+                  </StatNumber>
+                  <StatHelpText>
+                    {organization.billingConfiguration.upcomingInvoice.date}
+                  </StatHelpText>
+                </Stat>
+              )}
+            </BillingView>
           </div>
-          <div className="w-5/12 grow-0">
-            <Card.Root>
-              <Card.Title>Monthly Usage Overview</Card.Title>
-              <Card.Content>
-                <OrganizationUsageEstimationView organization={organization} />
-              </Card.Content>
-            </Card.Root>
+        </Card>
+        <Card className="mt-8">
+          <Heading>Current Usage</Heading>
+          <p className="text-sm text-gray-500">
+            {DateFormatter.format(start)} — {DateFormatter.format(end)}
+          </p>
+          <div className="mt-4">
+            <OrganizationUsageEstimationView organization={organization} />
           </div>
-        </div>
+        </Card>
         {organization.billingConfiguration?.invoices?.length > 0 && (
-          <Card.Root>
-            <Card.Title>Invoices</Card.Title>
-            <Card.Content>
+          <Card>
+            <Heading className="mb-2">Invoices</Heading>
+            <div>
               <InvoicesList organization={organization} />
-            </Card.Content>
-          </Card.Root>
+            </div>
+          </Card>
         )}
       </Tabs.Content>
       <Tabs.Content value="manage">

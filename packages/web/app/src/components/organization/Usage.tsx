@@ -19,6 +19,10 @@ import {
 } from '@chakra-ui/react';
 import { calculatePeriod } from '../common/TimeFilter';
 
+const NumericFormatter = Intl.NumberFormat('en', {
+  notation: 'standard',
+});
+
 export const OrganizationUsageEstimationView: React.FC<{
   organization: OrganizationFieldsFragment & OrgBillingInfoFieldsFragment;
 }> = ({ organization }) => {
@@ -51,9 +55,15 @@ export const OrganizationUsageEstimationView: React.FC<{
                   <Tr>
                     <Td>Operations</Td>
                     <Td isNumeric>
-                      {result.data.usageEstimation.org.operations}
+                      {NumericFormatter.format(
+                        result.data.usageEstimation.org.operations
+                      )}
                     </Td>
-                    <Td isNumeric>{organization.rateLimit.operations}</Td>
+                    <Td isNumeric>
+                      {NumericFormatter.format(
+                        organization.rateLimit.operations
+                      )}
+                    </Td>
                     <Td isNumeric>
                       <Scale
                         value={result.data.usageEstimation.org.operations}
@@ -66,9 +76,15 @@ export const OrganizationUsageEstimationView: React.FC<{
                   <Tr>
                     <Td>Schema Pushes</Td>
                     <Td isNumeric>
-                      {result.data.usageEstimation.org.schemaPushes}
+                      {NumericFormatter.format(
+                        result.data.usageEstimation.org.schemaPushes
+                      )}
                     </Td>
-                    <Td isNumeric>{organization.rateLimit.schemaPushes}</Td>
+                    <Td isNumeric>
+                      {NumericFormatter.format(
+                        organization.rateLimit.schemaPushes
+                      )}
+                    </Td>
                     <Td isNumeric>
                       <Scale
                         value={result.data.usageEstimation.org.schemaPushes}

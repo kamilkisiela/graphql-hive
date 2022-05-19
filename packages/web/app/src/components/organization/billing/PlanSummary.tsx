@@ -50,20 +50,32 @@ const PriceEstimationTable = ({
       </Thead>
       <Tbody>
         <Tr>
-          <Td>Base price (unlimited seats)</Td>
+          <Td>
+            Base price <span className="text-gray-500">(unlimited seats)</span>
+          </Td>
           <Td isNumeric />
           <Td isNumeric>{CurrencyFormatter.format(plan.basePrice)}</Td>
           <Td isNumeric>{CurrencyFormatter.format(plan.basePrice)}</Td>
         </Tr>
         <Tr>
-          <Td>Monthly Operations (included)</Td>
+          <Td>
+            Included Operations <span className="text-gray-500">(free)</span>
+          </Td>
           <Td isNumeric>{includedOperationsInMillions}M</Td>
           <Td isNumeric>{CurrencyFormatter.format(0)}</Td>
           <Td isNumeric>{CurrencyFormatter.format(0)}</Td>
         </Tr>
-        {additionalOperations > 0 && (
+        <Tr>
+          <Td>
+            Included Schema Pushes <span className="text-gray-500">(free)</span>
+          </Td>
+          <Td isNumeric>{plan.includedSchemaPushLimit}</Td>
+          <Td isNumeric>{CurrencyFormatter.format(0)}</Td>
+          <Td isNumeric>{CurrencyFormatter.format(0)}</Td>
+        </Tr>
+        {plan.planType === BillingPlanType.Pro && (
           <Tr>
-            <Td>Monthly Operations (extra)</Td>
+            <Td>Additional Operations</Td>
             <Td isNumeric>{additionalOperations}M</Td>
             <Td isNumeric>
               {CurrencyFormatter.format(plan.pricePerOperationsUnit)}
@@ -71,15 +83,9 @@ const PriceEstimationTable = ({
             <Td isNumeric>{CurrencyFormatter.format(operationsTotal)}</Td>
           </Tr>
         )}
-        <Tr>
-          <Td>Monthly Schema Pushes (included)</Td>
-          <Td isNumeric>{plan.includedSchemaPushLimit}</Td>
-          <Td isNumeric>{CurrencyFormatter.format(0)}</Td>
-          <Td isNumeric>{CurrencyFormatter.format(0)}</Td>
-        </Tr>
-        {additionalSchemaPushes > 0 && (
+        {plan.planType === BillingPlanType.Pro && (
           <Tr>
-            <Td>Monthly Schema Pushes (extra)</Td>
+            <Td>Additional Schema Pushes</Td>
             <Td isNumeric>{additionalSchemaPushes}</Td>
             <Td isNumeric>
               {CurrencyFormatter.format(plan.pricePerSchemaPushUnit)}
@@ -135,18 +141,11 @@ export const PlanSummary = ({
   return (
     <>
       <StatGroup>
-        <Stat className="mb-4">
+        <Stat className="mb-8">
           <StatLabel>Plan Type</StatLabel>
           <StatNumber>{plan.planType}</StatNumber>
         </Stat>
         {children}
-      </StatGroup>
-      <PriceEstimationTable
-        plan={plan}
-        operationsRateLimit={operationsRateLimit}
-        schemaPushesRateLimit={schemaPushesRateLimit}
-      />
-      <StatGroup className="mt-8">
         <Stat>
           <StatLabel>Operations Limit</StatLabel>
           <StatHelpText>up to</StatHelpText>
@@ -158,7 +157,7 @@ export const PlanSummary = ({
           </StatNumber>
           <StatHelpText>per month</StatHelpText>
         </Stat>
-        <Stat className="mb-4">
+        <Stat className="mb-8">
           <StatLabel>Schema Pushes Limit</StatLabel>
           <StatHelpText>up to</StatHelpText>
           <StatNumber>
@@ -168,11 +167,17 @@ export const PlanSummary = ({
           </StatNumber>
           <StatHelpText>per month</StatHelpText>
         </Stat>
-        <Stat className="mb-4">
+        <Stat className="mb-8">
           <StatLabel>Retention</StatLabel>
+          <StatHelpText>usage reports</StatHelpText>
           <StatNumber>{plan.retentionInDays} days</StatNumber>
         </Stat>
       </StatGroup>
+      <PriceEstimationTable
+        plan={plan}
+        operationsRateLimit={operationsRateLimit}
+        schemaPushesRateLimit={schemaPushesRateLimit}
+      />
     </>
   );
 };

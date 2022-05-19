@@ -1,15 +1,18 @@
+import { ReactElement } from 'react';
+import clsx from 'clsx';
 import { Section } from '@/components/common';
 import { BillingPlanType, OrgBillingInfoFieldsFragment } from '@/graphql';
-import { Link } from '@/components/v2';
+import { Link, Heading } from '@/components/v2';
 import { CardElement } from '@stripe/react-stripe-js';
-import { ReactElement } from 'react';
 
 export const BillingPaymentMethod = ({
   plan,
   organizationBilling,
   onValidationChange,
+  className,
 }: {
   plan: BillingPlanType;
+  className?: string;
   organizationBilling: OrgBillingInfoFieldsFragment;
   onValidationChange?: (isValid: boolean) => void;
 }): ReactElement => {
@@ -19,9 +22,10 @@ export const BillingPaymentMethod = ({
 
   if (!organizationBilling.billingConfiguration?.paymentMethod) {
     return (
-      <div className="my-5 flex flex-col gap-6 rounded-md bg-gray-500/5 p-5">
-        <Section.BigTitle>Payment Method</Section.BigTitle>
+      <div className={clsx('flex flex-col gap-6', className)}>
+        <Heading>Payment Method</Heading>
         <CardElement
+          className="flex-grow"
           onChange={(e) => {
             if (e.error || !e.complete) {
               onValidationChange?.(false);
