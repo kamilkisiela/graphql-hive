@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { inferProcedureInput, inferProcedureOutput } from '@trpc/server';
 import { createStorage } from '@hive/storage';
 import { Stripe } from 'stripe';
-import { addMonths, startOfMonth } from 'date-fns';
+import { addDays, startOfMonth } from 'date-fns';
 
 export type Context = {
   storage$: ReturnType<typeof createStorage>;
@@ -303,15 +303,16 @@ export const stripeBillingApiRouter = trpc
       const stripePrices = await ctx.stripeData$;
 
       const subscription = await ctx.stripe.subscriptions.create({
-        trial_period_days: 14,
         metadata: {
           hive_subscription: 'true',
         },
         coupon: input.couponCode || undefined,
         customer: customerId,
         default_payment_method: paymentMethodId,
-        billing_cycle_anchor:
-          startOfMonth(addMonths(new Date(), 1)).getTime() / 1000,
+        trial_end: Math.floor(addDays(new Date(), 14).getTime() / 1000),
+        backdate_start_date: Math.floor(
+          startOfMonth(new Date()).getTime() / 1000
+        ),
         items: [
           {
             price: stripePrices.basePrice.id,
