@@ -1,7 +1,7 @@
 import { ReactElement } from 'react';
 import { Accordion } from '@chakra-ui/react';
 import { useFormik } from 'formik';
-import { gql, useMutation } from 'urql';
+import { gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 
 import {
@@ -9,7 +9,7 @@ import {
   usePermissionsManager,
 } from '@/components/organization/Permissions';
 import { Button, CopyValue, Heading, Input, Modal, Tag } from '@/components/v2';
-import { OrganizationFieldsFragment } from '@/graphql';
+import { OrganizationDocument } from '@/graphql';
 import { scopes } from '@/lib/access/common';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
@@ -37,13 +37,21 @@ const CreateAccessToken_CreateTokenMutation = gql(/* GraphQL */ `
 export const CreateAccessTokenModal = ({
   isOpen,
   toggleModalOpen,
-  organization,
 }: {
   isOpen: boolean;
   toggleModalOpen: () => void;
-  organization: OrganizationFieldsFragment;
 }): ReactElement => {
   const router = useRouteSelector();
+  const [organizationQuery] = useQuery({
+    query: OrganizationDocument,
+    variables: {
+      selector: {
+        organization: router.organizationId,
+      },
+    },
+  });
+
+  const { organization } = organizationQuery.data.organization;
 
   const [mutation, mutate] = useMutation(CreateAccessToken_CreateTokenMutation);
 

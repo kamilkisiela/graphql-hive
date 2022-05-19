@@ -1,6 +1,7 @@
-import { FC, useCallback, useState } from 'react';
+import { ReactElement, useCallback, useState } from 'react';
 import { useMutation, useQuery } from 'urql';
 
+import { ProjectLayout } from '@/components/layouts';
 import {
   Button,
   Card,
@@ -33,7 +34,7 @@ const alertsColumns = [
   { key: 'targetName' },
 ] as const;
 
-const Channels: FC = () => {
+const Channels = (): ReactElement => {
   const router = useRouteSelector();
   const [checked, setChecked] = useState<string[]>([]);
   const [channelAlertsQuery] = useQuery({
@@ -124,7 +125,7 @@ const Channels: FC = () => {
   );
 };
 
-const AlertsPage: FC = () => {
+export default function AlertsPage(): ReactElement {
   const [checked, setChecked] = useState<string[]>([]);
   const router = useRouteSelector();
   const [isModalOpen, setModalOpen] = useState(false);
@@ -146,7 +147,7 @@ const AlertsPage: FC = () => {
   const alerts = alertsQuery.data?.alerts || [];
 
   return (
-    <div className="flex flex-col gap-y-10">
+    <ProjectLayout value="alerts" className="flex flex-col gap-y-10">
       <Title title="Alerts" />
       <Channels />
       <Card>
@@ -210,8 +211,6 @@ const AlertsPage: FC = () => {
           toggleModalOpen={toggleModalOpen}
         />
       )}
-    </div>
+    </ProjectLayout>
   );
-};
-
-export default AlertsPage;
+}

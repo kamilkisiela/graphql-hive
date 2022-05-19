@@ -1,4 +1,10 @@
-import { ComponentProps, FC, useCallback, useMemo, useState } from 'react';
+import {
+  ComponentProps,
+  ReactElement,
+  useCallback,
+  useMemo,
+  useState,
+} from 'react';
 import { useRouter } from 'next/router';
 import 'twin.macro';
 import { Select, Stack } from '@chakra-ui/react';
@@ -6,6 +12,7 @@ import { formatISO, subDays, subHours, subMinutes } from 'date-fns';
 import { VscChevronDown } from 'react-icons/vsc';
 import { useQuery } from 'urql';
 
+import { TargetLayout } from '@/components/layouts';
 import { OperationsFilterTrigger } from '@/components/target/operations/Filters';
 import { OperationsList } from '@/components/target/operations/List';
 import { OperationsStats } from '@/components/target/operations/Stats';
@@ -33,11 +40,15 @@ const DateRange = {
 
 type PeriodKey = keyof typeof DateRange;
 
-const OperationsView: FC<{
+const OperationsView = ({
+  organization,
+  project,
+  target,
+}: {
   organization: OrganizationFieldsFragment;
   project: ProjectFieldsFragment;
   target: TargetFieldsFragment;
-}> = ({ organization, project, target }) => {
+}): ReactElement => {
   const router = useRouter();
   const [href, periodParam] = router.asPath.split('?');
   const selectedPeriod: PeriodKey =
@@ -123,11 +134,15 @@ const OperationsView: FC<{
   );
 };
 
-const OperationsViewGate: FC<{
+const OperationsViewGate = ({
+  organization,
+  project,
+  target,
+}: {
   organization: OrganizationFieldsFragment;
   project: ProjectFieldsFragment;
   target: TargetFieldsFragment;
-}> = ({ organization, project, target }) => {
+}): ReactElement => {
   const [query] = useQuery({
     query: HasCollectedOperationsDocument,
     variables: {
@@ -160,22 +175,24 @@ const OperationsViewGate: FC<{
   );
 };
 
-export default function OperationsPage() {
+export default function OperationsPage(): ReactElement {
   return (
-    <TargetView title="Operations">
-      {({ organization, project, target }) => (
-        <div className="relative pt-8">
-          <p className="mb-5 font-light text-gray-500">
-            Data collected based on operation executed against your GraphQL
-            schema.
-          </p>
-          <OperationsViewGate
-            organization={organization}
-            project={project}
-            target={target}
-          />
-        </div>
-      )}
-    </TargetView>
+    <TargetLayout value="operations">
+      <TargetView title="Operations">
+        {({ organization, project, target }) => (
+          <div className="relative pt-8">
+            <p className="mb-5 font-light text-gray-500">
+              Data collected based on operation executed against your GraphQL
+              schema.
+            </p>
+            <OperationsViewGate
+              organization={organization}
+              project={project}
+              target={target}
+            />
+          </div>
+        )}
+      </TargetView>
+    </TargetLayout>
   );
 }

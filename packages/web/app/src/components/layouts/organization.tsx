@@ -25,9 +25,11 @@ enum TabValue {
 export const OrganizationLayout = ({
   children,
   value,
+  className,
 }: {
   children: ReactNode;
   value: 'overview' | 'members' | 'settings' | 'subscription';
+  className?: string;
 }): ReactElement => {
   const router = useRouteSelector();
   const { push } = useRouter();
@@ -112,7 +114,9 @@ export const OrganizationLayout = ({
             </Tabs.Trigger>
           </NextLink>
         </Tabs.List>
-        <Tabs.Content value={value}>{children}</Tabs.Content>
+        <Tabs.Content value={value} className={className}>
+          {children}
+        </Tabs.Content>
       </Tabs>
     </>
   );

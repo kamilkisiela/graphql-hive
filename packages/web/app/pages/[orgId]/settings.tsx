@@ -3,6 +3,7 @@ import { useFormik } from 'formik';
 import { gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 
+import { OrganizationLayout } from '@/components/layouts';
 import {
   Button,
   Card,
@@ -22,7 +23,6 @@ import {
   OrganizationType,
 } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
-import { OrganizationLayout } from '@/components/layouts';
 
 const Integrations = (): ReactElement => {
   const router = useRouteSelector();
@@ -151,7 +151,7 @@ const UpdateOrganizationNameMutation = gql(/* GraphQL */ `
   }
 `);
 
-const Page = (): ReactElement => {
+export default function SettingsPage(): ReactElement {
   const router = useRouteSelector();
   const [organizationQuery] = useQuery({
     query: OrganizationDocument,
@@ -198,7 +198,7 @@ const Page = (): ReactElement => {
   });
 
   return (
-    <div className="flex flex-col gap-y-10">
+    <OrganizationLayout value="settings" className="flex flex-col gap-y-10">
       <Title title="Organization settings" />
       {isRegularOrg && (
         <Card>
@@ -283,14 +283,6 @@ const Page = (): ReactElement => {
           </div>
         </Card>
       )}
-    </div>
-  );
-};
-
-export default function SettingsPage(): ReactElement {
-  return (
-    <OrganizationLayout value="settings">
-      <Page />
     </OrganizationLayout>
   );
 }
