@@ -2,8 +2,8 @@ import { ReactElement, useCallback, useState } from 'react';
 import NextLink from 'next/link';
 import clsx from 'clsx';
 import { VscBug, VscDiff, VscListFlat } from 'react-icons/vsc';
-import { useQuery } from 'urql';
 import reactStringReplace from 'react-string-replace';
+import { useQuery } from 'urql';
 
 import { Label } from '@/components/common';
 import { TargetLayout } from '@/components/layouts';
@@ -23,11 +23,11 @@ import { Link2Icon } from '@/components/v2/icon';
 import { ConnectSchemaModal } from '@/components/v2/modals';
 import {
   CompareDocument,
+  CriticalityLevel,
+  SchemaChangeFieldsFragment,
   SchemasDocument,
   SchemaVersionFieldsFragment,
-  SchemaChangeFieldsFragment,
   VersionsDocument,
-  CriticalityLevel,
 } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
@@ -39,16 +39,16 @@ function labelize(message: string) {
   ));
 }
 
+const titleMap: Record<CriticalityLevel, string> = {
+  Safe: 'Safe Changes',
+  Breaking: 'Breaking Changes',
+  Dangerous: 'Dangerous Changes',
+};
+
 const ChangesBlock: React.FC<{
   changes: SchemaChangeFieldsFragment[];
   criticality: CriticalityLevel;
 }> = ({ changes, criticality }) => {
-  const titleMap: Record<CriticalityLevel, string> = {
-    Safe: 'Safe Changes',
-    Breaking: 'Breaking Changes',
-    Dangerous: 'Dangerous Changes',
-  };
-
   const filteredChanges = changes.filter((c) => c.criticality === criticality);
 
   if (!filteredChanges.length) {
