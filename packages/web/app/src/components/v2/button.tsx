@@ -48,9 +48,9 @@ export const Button = forwardRef<any, ButtonProps>(
             block && 'w-full justify-center',
             variant !== 'link' &&
               {
-                small: 'rounded-[5px] p-1',
-                medium: 'rounded-[5px] p-2',
-                large: 'rounded-[10px] p-3',
+                small: 'rounded-sm p-1',
+                medium: 'rounded-sm p-2',
+                large: 'rounded-md p-3',
               }[size],
             danger
               ? 'bg-red-500 text-white hover:brightness-110 active:bg-red-600'

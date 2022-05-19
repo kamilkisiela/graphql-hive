@@ -132,8 +132,8 @@ const SchemaPage: FC = () => {
     >
       <a
         className={clsx(
-          'flex flex-col rounded-[10px] p-2.5 hover:bg-gray-800/40',
-          router.versionId && 
+          'flex flex-col rounded-md p-2.5 hover:bg-gray-800/40',
+          router.versionId &&
             router.versionId === version.id &&
             'bg-gray-800/40'
         )}
@@ -167,17 +167,9 @@ const SchemaPage: FC = () => {
         <div className="mb-4 flex items-end">
           <Heading>Versions</Heading>
         </div>
-        <div className="flex h-[65vh] flex-col gap-2.5 overflow-y-auto rounded-[20px] border border-gray-800/50 p-2.5">
-          <h4 className="ml-2.5 text-xs font-bold">LAST VERSION</h4>
+        <div className="flex h-[65vh] flex-col gap-2.5 overflow-y-auto rounded-md border border-gray-800/50 p-2.5">
           {schemaVersions && renderVersion(lastVersion)}
-          {versions.length > 0 && (
-            <>
-              <h4 className="ml-2.5 text-xs font-bold text-gray-500">
-                OLD VERSIONS
-              </h4>
-              {versions.map(renderVersion)}
-            </>
-          )}
+          {versions.length > 0 && versions.map(renderVersion)}
           {hasMore && (
             <Button
               variant="link"
@@ -212,7 +204,7 @@ const SchemaPage: FC = () => {
           {/*  Search*/}
           {/*</Link>*/}
         </div>
-        <div className="flex h-[65vh] grow overflow-hidden rounded-[20px] border border-gray-800/50">
+        <div className="flex h-[65vh] grow overflow-hidden rounded-md border border-gray-800/50">
           {router.versionId ? (
             <DiffView />
           ) : (

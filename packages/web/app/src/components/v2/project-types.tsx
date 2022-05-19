@@ -67,7 +67,7 @@ export const ProjectTypes = ({
               relative
               flex
               overflow-hidden
-              rounded-[10px]
+              rounded-sm
               border
               border-transparent
               bg-gray-800
@@ -78,7 +78,7 @@ export const ProjectTypes = ({
             <NextImage
               src={image}
               alt={`${capitalizedType} project illustration`}
-              className="drag-none rounded-[10px] bg-black"
+              className="drag-none rounded-sm bg-black"
             />
             <div className="grow p-2.5">
               <h4
@@ -94,7 +94,7 @@ export const ProjectTypes = ({
                 {description}
               </span>
             </div>
-            <Indicator className="border-orange-500 absolute inset-0 rounded-[10px] border" />
+            <Indicator className="border-orange-500 absolute inset-0 rounded-md border" />
           </Item>
         );
       })}

@@ -71,14 +71,11 @@ const ProjectCard: FC<{
     <NextLink key={project.id} passHref href={href}>
       <Card as="a" className="self-start hover:bg-gray-800/40">
         <div className="flex items-start gap-x-2">
-          <Avatar
-            src="/images/project-card/logo.svg"
-            size="lg"
-            className="shrink-0"
-          />
           <div className="grow">
-            <h3 className="text-xs font-bold text-[#34EAB9]">{project.type}</h3>
-            <h4 className="line-clamp-2 text-lg font-bold">{project.name}</h4>
+            <h3 className="text-xs font-medium text-[#34EAB9]">
+              {project.type}
+            </h3>
+            <h4 className="line-clamp-2 text-lg font-medium">{project.name}</h4>
           </div>
 
           <DropdownMenu>
@@ -110,7 +107,7 @@ const ProjectCard: FC<{
             </DropdownMenu.Content>
           </DropdownMenu>
         </div>
-        <div className="my-5 flex items-center gap-x-3">
+        {/* <div className="my-5 flex items-center gap-x-3">
           <span>
             <div className="mb-3 text-[1.75rem] font-light">
               {numberFormatter.format(project.targets.total)}
@@ -124,9 +121,9 @@ const ProjectCard: FC<{
             </div>
             <span className="text-xs font-bold">ALERTS</span>
           </span>
-        </div>
+        </div> */}
         {lastActivity && (
-          <span className="text-xs font-medium text-gray-500">
+          <div className="mt-5 text-xs font-medium text-gray-500">
             <span className="line-clamp-3">
               {/* fixes Warning: validateDOMNesting(...): <a> cannot appear as a descendant of <a> */}
               {onlyText(getActivity(lastActivity).content)}{' '}
@@ -135,7 +132,7 @@ const ProjectCard: FC<{
                 className="text-gray-300"
               />
             </span>
-          </span>
+          </div>
         )}
       </Card>
     </NextLink>

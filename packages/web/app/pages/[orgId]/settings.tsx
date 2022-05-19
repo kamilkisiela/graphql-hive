@@ -3,7 +3,15 @@ import { useFormik } from 'formik';
 import { gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 
-import { Button, Heading, Input, Spinner, Tag, Title } from '@/components/v2';
+import {
+  Button,
+  Card,
+  Heading,
+  Input,
+  Spinner,
+  Tag,
+  Title,
+} from '@/components/v2';
 import { AlertTriangleIcon, GitHubIcon, SlackIcon } from '@/components/v2/icon';
 import { DeleteOrganizationModal } from '@/components/v2/modals';
 import {
@@ -184,9 +192,9 @@ const SettingsPage = ({
     <div className="flex flex-col gap-y-10">
       <Title title="Organization settings" />
       {isRegularOrg && (
-        <div>
+        <Card>
           <Heading className="mb-2">Organization Name</Heading>
-          <p className="mb-3 font-light text-gray-500">
+          <p className="mb-3 font-light text-gray-300">
             Name of your organization visible within Hive
           </p>
           <form onSubmit={handleSubmit} className="flex gap-x-2">
@@ -226,23 +234,23 @@ const SettingsPage = ({
                 mutation.error.message}
             </div>
           )}
-        </div>
+        </Card>
       )}
 
-      <div>
+      <Card>
         <Heading className="mb-2">Integrations</Heading>
-        <p className="mb-3 font-light text-gray-500">
+        <p className="mb-3 font-light text-gray-300">
           Connect Hive to other services
         </p>
         <div className="flex flex-col gap-y-4 text-gray-500">
           <Integrations />
         </div>
-      </div>
+      </Card>
 
       {isRegularOrg && (
-        <div>
+        <Card>
           <Heading className="mb-2">Delete Organization</Heading>
-          <p className="mb-3 font-light text-gray-500">
+          <p className="mb-3 font-light text-gray-300">
             Permanently remove your Organization and all projects from the Hive
           </p>
           <div className="flex items-center gap-x-2">
@@ -264,7 +272,7 @@ const SettingsPage = ({
               toggleModalOpen={toggleModalOpen}
             />
           </div>
-        </div>
+        </Card>
       )}
     </div>
   );

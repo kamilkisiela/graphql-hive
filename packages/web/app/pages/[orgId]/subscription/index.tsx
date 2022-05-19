@@ -51,7 +51,7 @@ const Inner = ({
         </Tabs.Trigger>
       </Tabs.List>
       <Tabs.Content value="overview">
-        <p className="mb-3 font-light text-gray-500">
+        <p className="mb-3 font-light text-gray-300">
           Information about your Hive plan, subscription, usage and data
           ingestion
         </p>

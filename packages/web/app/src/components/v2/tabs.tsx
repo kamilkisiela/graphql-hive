@@ -43,11 +43,6 @@ Tabs.Trigger = ({ children, className, hasBorder = true, ...props }) => (
   radix-state-active:text-white
   font-bold
   transition
-  after:absolute
-  after:px-2.5
-  after:text-gray-800
-  after:content-['•']
-  last:after:hidden
   hover:text-white`,
       hasBorder &&
         `

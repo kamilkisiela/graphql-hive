@@ -96,7 +96,7 @@ const MembersPage: FC<{ className?: string }> = ({ className }) => {
   return (
     <div className={clsx('flex flex-col gap-4', className)}>
       <Title title="Members" />
-      <p className="mb-3 font-light text-gray-500">
+      <p className="mb-3 font-light text-gray-300">
         Invite others to your organization and manage access
       </p>
       {selectedMember && (
@@ -170,8 +170,12 @@ const MembersPage: FC<{ className?: string }> = ({ className }) => {
               shape="circle"
             />
             <div className="grow overflow-hidden">
-              <h3 className="font-bold line-clamp-1">{node.user.displayName}</h3>
-              <h4 className="font-light text-gray-500">{node.user.email}</h4>
+              <h3 className="line-clamp-1 font-medium">
+                {node.user.displayName}
+              </h3>
+              <h4 className="text-sm font-light text-gray-500">
+                {node.user.email}
+              </h4>
             </div>
             <div
               className="rounded-full bg-gray-800 p-2"

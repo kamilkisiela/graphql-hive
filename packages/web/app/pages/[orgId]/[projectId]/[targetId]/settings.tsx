@@ -7,6 +7,7 @@ import * as Yup from 'yup';
 
 import {
   Button,
+  Card,
   Checkbox,
   Heading,
   Input,
@@ -82,9 +83,9 @@ const Tokens: FC<{ organization: OrganizationFieldsFragment }> = ({
   ]);
 
   return (
-    <div>
+    <Card>
       <Heading className="mb-2">Tokens</Heading>
-      <p className="mb-3 font-light text-gray-500">
+      <p className="mb-3 font-light text-gray-300">
         Be careful! These tokens allow to read and write your target data.
       </p>
       <div className="my-3.5 flex justify-between">
@@ -145,7 +146,7 @@ const Tokens: FC<{ organization: OrganizationFieldsFragment }> = ({
           organization={organization}
         />
       )}
-    </div>
+    </Card>
   );
 };
 
@@ -176,9 +177,9 @@ const ExtendBaseSchema: FC<{ baseSchema: string }> = (props) => {
   const isUnsaved = baseSchema?.trim() !== props.baseSchema?.trim();
 
   return (
-    <div>
+    <Card>
       <Heading className="mb-2">Extend Your Schema</Heading>
-      <p className="mb-3 font-light text-gray-500">
+      <p className="mb-3 font-light text-gray-300">
         Define a piece of SDL that will be added to every published schema.
         <br />
         Useful for AWS AppSync users to not send platform-specific part of
@@ -230,7 +231,7 @@ const ExtendBaseSchema: FC<{ baseSchema: string }> = (props) => {
         </Button>
         {isUnsaved && <span className="text-green-500">Unsaved changes!</span>}
       </div>
-    </div>
+    </Card>
   );
 };
 
@@ -350,146 +351,148 @@ const ConditionalBreakingChanges: FC = () => {
   });
 
   return (
-    <form onSubmit={handleSubmit}>
-      <Heading className="mb-2 flex items-center gap-5">
-        Conditional Breaking Changes
-        {targetSettings.fetching ? (
-          <Spinner />
-        ) : (
-          <Switch
-            className="shrink-0"
-            checked={isEnabled}
-            onCheckedChange={(enabled) => {
-              setValidation({
-                input: {
-                  target: router.targetId,
-                  project: router.projectId,
-                  organization: router.organizationId,
-                  enabled,
-                },
-              });
-            }}
-            disabled={targetValidation.fetching}
-          />
-        )}
-      </Heading>
-      <div
-        className={clsx(
-          'mb-3 flex flex-col items-start gap-3 font-light text-gray-500',
-          !isEnabled && 'pointer-events-none opacity-20'
-        )}
-      >
-        <div>
-          A schema change is considered as breaking only if affects more than
-          <Input
-            name="percentage"
-            onChange={handleChange}
-            onBlur={handleBlur}
-            value={values.percentage}
-            isInvalid={touched.percentage && Boolean(errors.percentage)}
-            disabled={isSubmitting}
-            size="small"
-            type="number"
-            min="0"
-            max="100"
-            className="mx-2 !inline-flex !w-16"
-          />
-          % of traffic in past
-          <Input
-            name="period"
-            onChange={handleChange}
-            onBlur={handleBlur}
-            value={values.period}
-            isInvalid={touched.period && Boolean(errors.period)}
-            disabled={isSubmitting}
-            size="small"
-            type="number"
-            min="1"
-            max="30"
-            className="mx-2 !inline-flex !w-16"
-          />
-          days
-        </div>
-        {touched.percentage && errors.percentage && (
-          <div className="text-red-500">{errors.percentage}</div>
-        )}
-        {mutation.data?.updateTargetValidationSettings.error?.inputErrors
-          .percentage && (
-          <div className="text-red-500">
-            {
-              mutation.data.updateTargetValidationSettings.error.inputErrors
-                .percentage
-            }
-          </div>
-        )}
-        {touched.period && errors.period && (
-          <div className="text-red-500">{errors.period}</div>
-        )}
-        {mutation.data?.updateTargetValidationSettings.error?.inputErrors
-          .period && (
-          <div className="text-red-500">
-            {
-              mutation.data.updateTargetValidationSettings.error.inputErrors
-                .period
-            }
-          </div>
-        )}
-        Check collected usage data from these targets:
-        {possibleTargets?.map((pt) => (
-          <div key={pt.id} className="flex items-center gap-2">
-            <Checkbox
-              checked={values.targets.includes(pt.id)}
-              onCheckedChange={(isChecked) => {
-                setFieldValue(
-                  'targets',
-                  isChecked
-                    ? [...values.targets, pt.id]
-                    : values.targets.filter((value) => value !== pt.id)
-                );
+    <Card>
+      <form onSubmit={handleSubmit}>
+        <Heading className="mb-2 flex items-center gap-5">
+          Conditional Breaking Changes
+          {targetSettings.fetching ? (
+            <Spinner />
+          ) : (
+            <Switch
+              className="shrink-0"
+              checked={isEnabled}
+              onCheckedChange={(enabled) => {
+                setValidation({
+                  input: {
+                    target: router.targetId,
+                    project: router.projectId,
+                    organization: router.organizationId,
+                    enabled,
+                  },
+                });
               }}
-              onBlur={() => setFieldTouched('targets', true)}
-            />{' '}
-            {pt.name}
-          </div>
-        ))}
-        {touched.targets && errors.targets && (
-          <div className="text-red-500">{errors.targets}</div>
-        )}
-        <Tag className="flex-col !items-start gap-1">
-          Example settings: Removal of a field is considered breaking if
-          <div>
-            <Tag color="yellow" className="py-0">
-              0%
-            </Tag>{' '}
-            - the field was used at least once in past 30 days
-          </div>
-          <div>
-            <Tag color="yellow" className="py-0">
-              10%
-            </Tag>{' '}
-            - the field was requested by more than 10% of all GraphQL operations
-            in recent 30 days
-          </div>
-        </Tag>
-        <div>
-          <Button
-            type="submit"
-            className="px-5"
-            variant="primary"
-            size="large"
-            disabled={isSubmitting}
-          >
-            Save
-          </Button>
-          {mutation.error && (
-            <span className="ml-2 text-red-500">
-              {mutation.error.graphQLErrors[0]?.message ??
-                mutation.error.message}
-            </span>
+              disabled={targetValidation.fetching}
+            />
           )}
+        </Heading>
+        <div
+          className={clsx(
+            'mb-3 flex flex-col items-start gap-3 font-light text-gray-500',
+            !isEnabled && 'pointer-events-none opacity-25'
+          )}
+        >
+          <div>
+            A schema change is considered as breaking only if affects more than
+            <Input
+              name="percentage"
+              onChange={handleChange}
+              onBlur={handleBlur}
+              value={values.percentage}
+              isInvalid={touched.percentage && Boolean(errors.percentage)}
+              disabled={isSubmitting}
+              size="small"
+              type="number"
+              min="0"
+              max="100"
+              className="mx-2 !inline-flex !w-16"
+            />
+            % of traffic in past
+            <Input
+              name="period"
+              onChange={handleChange}
+              onBlur={handleBlur}
+              value={values.period}
+              isInvalid={touched.period && Boolean(errors.period)}
+              disabled={isSubmitting}
+              size="small"
+              type="number"
+              min="1"
+              max="30"
+              className="mx-2 !inline-flex !w-16"
+            />
+            days
+          </div>
+          {touched.percentage && errors.percentage && (
+            <div className="text-red-500">{errors.percentage}</div>
+          )}
+          {mutation.data?.updateTargetValidationSettings.error?.inputErrors
+            .percentage && (
+            <div className="text-red-500">
+              {
+                mutation.data.updateTargetValidationSettings.error.inputErrors
+                  .percentage
+              }
+            </div>
+          )}
+          {touched.period && errors.period && (
+            <div className="text-red-500">{errors.period}</div>
+          )}
+          {mutation.data?.updateTargetValidationSettings.error?.inputErrors
+            .period && (
+            <div className="text-red-500">
+              {
+                mutation.data.updateTargetValidationSettings.error.inputErrors
+                  .period
+              }
+            </div>
+          )}
+          Check collected usage data from these targets:
+          {possibleTargets?.map((pt) => (
+            <div key={pt.id} className="flex items-center gap-2 pl-5">
+              <Checkbox
+                checked={values.targets.includes(pt.id)}
+                onCheckedChange={(isChecked) => {
+                  setFieldValue(
+                    'targets',
+                    isChecked
+                      ? [...values.targets, pt.id]
+                      : values.targets.filter((value) => value !== pt.id)
+                  );
+                }}
+                onBlur={() => setFieldTouched('targets', true)}
+              />{' '}
+              {pt.name}
+            </div>
+          ))}
+          {touched.targets && errors.targets && (
+            <div className="text-red-500">{errors.targets}</div>
+          )}
+          <Tag className="mt-5 flex-col !items-start gap-1">
+            Example settings: Removal of a field is considered breaking if
+            <div>
+              <Tag color="yellow" className="py-0">
+                0%
+              </Tag>{' '}
+              - the field was used at least once in past 30 days
+            </div>
+            <div>
+              <Tag color="yellow" className="py-0">
+                10%
+              </Tag>{' '}
+              - the field was requested by more than 10% of all GraphQL
+              operations in recent 30 days
+            </div>
+          </Tag>
+          <div>
+            <Button
+              type="submit"
+              className="px-5"
+              variant="primary"
+              size="large"
+              disabled={isSubmitting}
+            >
+              Save
+            </Button>
+            {mutation.error && (
+              <span className="ml-2 text-red-500">
+                {mutation.error.graphQLErrors[0]?.message ??
+                  mutation.error.message}
+              </span>
+            )}
+          </div>
         </div>
-      </div>
-    </form>
+      </form>
+    </Card>
   );
 };
 
@@ -556,10 +559,10 @@ const SettingsPage: FC<{
 
   return (
     <div className="flex flex-col gap-16">
-      <Title title="Target settings" />
-      <div>
+      <Title title="Settings" />
+      <Card>
         <Heading className="mb-2">Target Info</Heading>
-        <p className="mb-3 font-light text-gray-500">
+        <p className="mb-3 font-light text-gray-300">
           Name of your target visible within organization.
         </p>
         <form onSubmit={handleSubmit} className="flex gap-x-2">
@@ -595,7 +598,7 @@ const SettingsPage: FC<{
             {mutation.data.updateTargetName.error.inputErrors.name}
           </div>
         )}
-      </div>
+      </Card>
 
       <Tokens organization={organization} />
 
@@ -603,9 +606,9 @@ const SettingsPage: FC<{
 
       {target && <ExtendBaseSchema baseSchema={target.baseSchema} />}
 
-      <div>
+      <Card>
         <Heading className="mb-2">Delete Target</Heading>
-        <p className="mb-3 font-light text-gray-500">
+        <p className="mb-3 font-light text-gray-300">
           Permanently remove your Target
         </p>
         <div className="flex items-center gap-x-2">
@@ -623,7 +626,7 @@ const SettingsPage: FC<{
             This action is not reversible!
           </Tag>
         </div>
-      </div>
+      </Card>
       <DeleteTargetModal
         isOpen={isModalOpen}
         toggleModalOpen={toggleModalOpen}

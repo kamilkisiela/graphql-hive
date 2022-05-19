@@ -6,13 +6,13 @@ import { useQuery } from 'urql';
 
 import {
   Activities,
-  Avatar,
   Badge,
   Button,
   Card,
   DropdownMenu,
   EmptyList,
   Heading,
+  TimeAgo,
   Title,
 } from '@/components/v2';
 import { LinkIcon, MoreIcon, SettingsIcon } from '@/components/v2/icon';
@@ -91,10 +91,7 @@ const TargetCard: FC<{
       <Card as="a" key={target.id} className="hover:bg-gray-800/40">
         <div className="flex items-start justify-between gap-2">
           <div>
-            <h2 className="line-clamp-1 break-all text-lg">{target.name}</h2>
-            {lastVersion && (
-              <div className="text-xs font-bold text-[#34EAB9]">CONNECTED</div>
-            )}
+            <h2 className="line-clamp-2 text-lg font-bold">{target.name}</h2>
           </div>
           <DropdownMenu>
             <DropdownMenu.Trigger asChild>
@@ -129,22 +126,20 @@ const TargetCard: FC<{
           <>
             <div
               className={clsx(
-                'mt-2.5 mb-1.5 text-sm',
-                isValid ? 'text-gray-200' : 'text-red-500'
+                'mt-2.5 mb-1.5 flex items-center gap-x-2 text-sm text-gray-500'
               )}
             >
-              {!isValid && <Badge color="red" />} Last changes at:{' '}
-              {format(new Date(lastVersion.date), 'd MMM, Y (p)')}
-            </div>
-            <div className="flex items-center gap-x-1.5 text-xs font-medium text-gray-500">
-              <span className="after:ml-1.5 after:text-gray-700 after:content-['•']">
-                Local Commit
-              </span>
-              <span className="after:ml-1.5 after:text-gray-700 after:content-['•']">
-                Author Hive API
-              </span>
-              <Avatar src="" fallback={author[0]} size="xs" shape="circle" />
-              {author}
+              {lastVersion ? (
+                <>
+                  <Badge color={isValid ? 'green' : 'red'} />
+                  <span>{lastVersion.commit.commit.substring(0, 7)}</span>
+                  <span>
+                    - Published <TimeAgo date={lastVersion.date} />
+                  </span>
+                </>
+              ) : (
+                <Badge color="yellow" />
+              )}
             </div>
           </>
         )}
@@ -170,7 +165,7 @@ const TargetsPage: FC = () => {
     <div className="flex gap-x-5">
       <Title title="Targets" />
       <div className="flex grow flex-col gap-4">
-        <Heading>Connected Targets</Heading>
+        <Heading>List of targets</Heading>
         {targets && targets.total === 0 ? (
           <EmptyList
             title="Hive is waiting for your first target"

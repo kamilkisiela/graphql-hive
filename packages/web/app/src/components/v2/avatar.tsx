@@ -29,8 +29,8 @@ export const Avatar = ({
         'flex shrink-0 items-center justify-center overflow-hidden bg-gray-800',
         shape === 'square'
           ? size === 'lg'
-            ? 'rounded-[10px]'
-            : 'rounded-[5px]'
+            ? 'rounded-md'
+            : 'rounded-sm'
           : 'rounded-full',
         {
           xs: 'h-5 w-5',

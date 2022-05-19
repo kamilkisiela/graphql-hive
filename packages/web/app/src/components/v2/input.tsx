@@ -24,14 +24,14 @@ export const Input = ({
         flex
         items-center
         gap-4
-        rounded-[10px]
-        border
-        border-transparent
+        rounded-sm
         bg-gray-800
         text-sm
         font-medium
+        ring-1
+        ring-gray-700
         focus-within:ring`,
-        isInvalid ? 'border-red-500 text-red-500 caret-white' : 'text-white',
+        isInvalid ? 'text-red-500 caret-white ring-red-500' : 'text-white',
         {
           large: 'h-[50px] py-[18px] px-4',
           medium: 'py-2.5 px-4',

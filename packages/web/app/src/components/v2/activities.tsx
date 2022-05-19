@@ -215,7 +215,7 @@ export const Activities = (props): ReactElement => {
     <div className="w-[450px] shrink-0" {...props}>
       <Heading>Recent Activity</Heading>
       {(isLoading || activities?.total !== 0) && (
-        <ul className="mt-4 w-full break-all rounded-[20px] border border-gray-800 p-5">
+        <ul className="mt-4 w-full break-all rounded-md border border-gray-800 p-5">
           {(isLoading
             ? Array.from({ length: 3 }, (_, id) => ({ id }))
             : activities.nodes
