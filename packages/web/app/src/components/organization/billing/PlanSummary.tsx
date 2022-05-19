@@ -144,22 +144,13 @@ export const PlanSummary: React.FC<{
         <Stat>
           <StatLabel>Operations Limit</StatLabel>
           <StatHelpText>up to</StatHelpText>
-          <StatNumber>
-            {plan.planType === BillingPlanType.Hobby
-              ? plan.includedOperationsLimit / 1_000_000
-              : operationsRateLimit}
-            M
-          </StatNumber>
+          <StatNumber>{operationsRateLimit}M</StatNumber>
           <StatHelpText>per month</StatHelpText>
         </Stat>
         <Stat tw="mb-4">
           <StatLabel>Schema Pushes Limit</StatLabel>
           <StatHelpText>up to</StatHelpText>
-          <StatNumber>
-            {plan.planType === BillingPlanType.Hobby
-              ? plan.includedSchemaPushLimit
-              : schemaPushesRateLimit}
-          </StatNumber>
+          <StatNumber>{schemaPushesRateLimit}</StatNumber>
           <StatHelpText>per month</StatHelpText>
         </Stat>
         <Stat tw="mb-4">

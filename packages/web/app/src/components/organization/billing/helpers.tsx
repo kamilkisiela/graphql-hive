@@ -1,6 +1,6 @@
 export const NumericFormater = Intl.NumberFormat('en', { notation: 'compact' });
 export const CurrencyFormatter = Intl.NumberFormat('en', {
-  notation: 'compact',
+  notation: 'standard',
   currency: 'USD',
   style: 'currency',
 });
