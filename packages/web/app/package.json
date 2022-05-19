@@ -26,6 +26,7 @@
     "@radix-ui/react-radio-group": "0.1.5",
     "@radix-ui/react-switch": "0.1.4",
     "@radix-ui/react-tabs": "0.1.4",
+    "@radix-ui/react-toggle-group": "0.1.5",
     "@radix-ui/react-toolbar": "0.1.4",
     "@sentry/nextjs": "6.19.7",
     "@sentry/node": "6.19.7",

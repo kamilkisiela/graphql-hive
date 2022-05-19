@@ -145,7 +145,7 @@ export const TargetLayout = ({
             href={`/${orgId}/${projectId}/${targetId}/settings`}
           >
             <Tabs.Trigger value={TabValue.Settings} asChild>
-              <a>Target Settings</a>
+              <a>Settings</a>
             </Tabs.Trigger>
           </NextLink>
         </Tabs.List>
