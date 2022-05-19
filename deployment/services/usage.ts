@@ -32,7 +32,7 @@ export function deployUsage({
   dbMigrations: DbMigrations;
   rateLimit: RateLimitService;
 }) {
-  const replicas = isProduction(deploymentEnv) ? 2 : 1;
+  const replicas = 1; /*isProduction(deploymentEnv) ? 2 : 1*/
   const cpuLimit = isProduction(deploymentEnv) ? '600m' : '300m';
   const maxReplicas = isProduction(deploymentEnv) ? 4 : 2;
 
