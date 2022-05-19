@@ -56,7 +56,7 @@ export const Header = (): ReactElement => {
   // Copied from tailwindcss website
   // https://github.com/tailwindlabs/tailwindcss.com/blob/94971856747c159b4896621c3308bcfa629bb736/src/components/Header.js#L149
   useEffect(() => {
-    const offset = 50;
+    const offset = 30;
 
     const onScroll = () => {
       if (!isOpaque && window.scrollY > offset) {
@@ -75,8 +75,8 @@ export const Header = (): ReactElement => {
   return (
     <header
       className={clsx(
-        'sticky top-0 z-40 w-full border-b border-b-transparent transition',
-        isOpaque && 'border-b-gray-900 backdrop-blur'
+        'fixed top-0 z-40 w-full border-b border-b-transparent transition',
+        isOpaque && 'border-b-gray-900 backdrop-blur bg-black/80'
       )}
     >
       <div className="wrapper flex h-[84px] items-center justify-between">

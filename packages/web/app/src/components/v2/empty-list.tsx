@@ -1,7 +1,8 @@
 import { ReactElement } from 'react';
-import NextImage from 'next/image';
+import Image from 'next/image';
 
 import { Card, Heading, Link } from '@/components/v2/index';
+import magnifier from '../../../public/images/figures/magnifier.svg';
 
 export const EmptyList = ({
   title,
@@ -14,24 +15,10 @@ export const EmptyList = ({
 }): ReactElement => {
   return (
     <Card className="flex grow flex-col items-center gap-y-2">
-      <NextImage
-        src="/images/figures/magnifier.svg"
-        alt="Magnifier illustration"
-        width="200"
-        height="200"
-        className="drag-none"
-      />
+      <Image src={magnifier} alt="Magnifier illustration" width="200" height="200" className="drag-none" />
       <Heading>{title}</Heading>
-      <span className="text-center text-sm font-medium text-gray-500">
-        {description}
-      </span>
-      <Link
-        variant="primary"
-        href={docsUrl}
-        target="_blank"
-        rel="noreferrer"
-        className="my-5"
-      >
+      <span className="text-center text-sm font-medium text-gray-500">{description}</span>
+      <Link variant="primary" href={docsUrl} target="_blank" rel="noreferrer" className="my-5">
         Read about it in the documentation
       </Link>
     </Card>
