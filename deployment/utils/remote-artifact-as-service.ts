@@ -30,7 +30,10 @@ export class RemoteArtifactAsServiceDeployment {
       autoScaling?: {
         minReplicas?: number;
         maxReplicas: number;
-        cpuAverageUtilization: number;
+        cpu: {
+          limit: string;
+          cpuAverageToScale: number;
+        };
       };
     },
     protected dependencies?: Array<pulumi.Resource | undefined | null>,
@@ -138,6 +141,13 @@ export class RemoteArtifactAsServiceDeployment {
           image,
           workingDir: appVolume.mountPath,
           volumeMounts: [appVolume],
+          resources: this.options?.autoScaling?.cpu.limit
+            ? {
+                limits: {
+                  cpu: this.options?.autoScaling?.cpu.limit,
+                },
+              }
+            : undefined,
           command:
             this.options.packageInfo.runtime === 'node'
               ? ['yarn', this.options.bin || this.options.packageInfo.bin]
@@ -233,7 +243,7 @@ export class RemoteArtifactAsServiceDeployment {
                   target: {
                     type: 'Utilization',
                     averageUtilization:
-                      this.options.autoScaling.cpuAverageUtilization,
+                      this.options.autoScaling.cpu.cpuAverageToScale,
                   },
                 },
               },

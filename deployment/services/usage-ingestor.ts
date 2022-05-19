@@ -30,6 +30,9 @@ export function deployUsageIngestor({
 }) {
   const numberOfPartitions = 4;
   const replicas = isProduction(deploymentEnv) ? 2 : 1;
+  const cpuLimit = isProduction(deploymentEnv) ? '600m' : '300m';
+  const maxReplicas = isProduction(deploymentEnv) ? 4 : 2;
+
   const partitionsConsumedConcurrently = Math.floor(
     numberOfPartitions / replicas
   );
@@ -60,8 +63,11 @@ export function deployUsageIngestor({
       packageInfo: packageHelper.npmPack('@hive/usage-ingestor'),
       port: 4000,
       autoScaling: {
-        cpuAverageUtilization: 60,
-        maxReplicas: 4,
+        cpu: {
+          cpuAverageToScale: 60,
+          limit: cpuLimit,
+        },
+        maxReplicas: maxReplicas,
       },
     },
     [clickhouse.deployment, clickhouse.service, dbMigrations]
