@@ -1,15 +1,10 @@
+const { plugins, ...prettierConfig } = require('@theguild/prettier-config');
+
 module.exports = {
-  trailingComma: 'es5',
-  semi: true,
-  singleQuote: true,
-  overrides: [
-    {
-      files: '*.{md,mdx}',
-      options: {
-        semi: false,
-        trailingComma: 'none',
-      },
-    },
+  ...prettierConfig,
+  plugins: [
+    ...plugins,
+    // For sort CSS classes
+    require('prettier-plugin-tailwindcss'),
   ],
-  plugins: [require('prettier-plugin-tailwindcss')],
 };

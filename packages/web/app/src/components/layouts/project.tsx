@@ -1,22 +1,9 @@
-import {
-  ReactElement,
-  ReactNode,
-  useCallback,
-  useEffect,
-  useState,
-} from 'react';
+import { ReactElement, ReactNode, useCallback, useEffect, useState } from 'react';
 import NextLink from 'next/link';
 import 'twin.macro';
 import { useQuery } from 'urql';
 
-import {
-  Button,
-  DropdownMenu,
-  Header,
-  Heading,
-  Link,
-  Tabs,
-} from '@/components/v2';
+import { Button, DropdownMenu, Heading, Link, Tabs, SubHeader } from '@/components/v2';
 import { ArrowDownIcon, TargetIcon } from '@/components/v2/icon';
 import { CreateTargetModal } from '@/components/v2/modals';
 import { ProjectDocument, ProjectsDocument } from '@/graphql';
@@ -40,7 +27,7 @@ export const ProjectLayout = ({
   const router = useRouteSelector();
   const [isModalOpen, setModalOpen] = useState(false);
   const toggleModalOpen = useCallback(() => {
-    setModalOpen((prevOpen) => !prevOpen);
+    setModalOpen(prevOpen => !prevOpen);
   }, []);
 
   const { organizationId: orgId, projectId } = router;
@@ -77,7 +64,7 @@ export const ProjectLayout = ({
 
   return (
     <>
-      <Header>
+      <SubHeader>
         <div className="wrapper flex items-center pb-4">
           <div>
             {org && (
@@ -100,13 +87,11 @@ export const ProjectLayout = ({
                   </DropdownMenu.Trigger>
                   <DropdownMenu.Content sideOffset={5} align="end">
                     {projects.nodes.map(
-                      (node) =>
+                      node =>
                         node.cleanId !== projectId && (
                           <DropdownMenu.Item key={node.cleanId}>
                             <NextLink href={`/${orgId}/${node.cleanId}`}>
-                              <a className="line-clamp-1 max-w-2xl">
-                                {node.name}
-                              </a>
+                              <a className="line-clamp-1 max-w-2xl">{node.name}</a>
                             </NextLink>
                           </DropdownMenu.Item>
                         )
@@ -115,25 +100,16 @@ export const ProjectLayout = ({
                 </DropdownMenu>
               )}
             </div>
-            <span className="text-xs font-bold text-[#34eab9]">
-              {project?.type}
-            </span>
+            <span className="text-xs font-bold text-[#34eab9]">{project?.type}</span>
           </div>
-          <Button
-            className="ml-auto shrink-0"
-            variant="primary"
-            size="large"
-            onClick={toggleModalOpen}
-          >
+          <Button className="ml-auto shrink-0" variant="primary" size="large" onClick={toggleModalOpen}>
             New Target
             <TargetIcon className="ml-6" />
           </Button>
-          <CreateTargetModal
-            isOpen={isModalOpen}
-            toggleModalOpen={toggleModalOpen}
-          />
+          <CreateTargetModal isOpen={isModalOpen} toggleModalOpen={toggleModalOpen} />
         </div>
-      </Header>
+      </SubHeader>
+
       <Tabs className="wrapper" value={value}>
         <Tabs.List>
           <NextLink passHref href={`/${orgId}/${projectId}`}>
