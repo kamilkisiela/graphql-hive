@@ -1,0 +1,46 @@
+{
+  "name": "@the-guild-org/hive-policy",
+  "private": true,
+  "version": "0.0.1",
+  "license": "MIT",
+  "author": {
+    "email": "contact@the-guild.dev",
+    "name": "The Guild",
+    "url": "https://the-guild.dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/the-guild-org/graphql-hive",
+    "directory": "packages/policy"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "directory": "dist"
+  },
+  "scripts": {
+    "dev": "ts-node-dev src/dev.ts | pino-pretty --translateTime HH:MM:ss TT --ignore pid,hostname",
+    "build": "bob runify --single",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "eslint": "8.12.0",
+    "@graphql-eslint/eslint-plugin": "3.10.2",
+    "@sentry/node": "6.19.2",
+    "@sentry/tracing": "6.19.2",
+    "@the-guild-org/hive-service-common": "0.1.3",
+    "dotenv": "10.0.0",
+    "graphql": "15.6.1",
+    "tsconfig-paths": "3.11.0"
+  },
+  "devDependencies": {
+    "@types/eslint": "8.4.1",
+    "pino-pretty": "6.0.0"
+  },
+  "buildOptions": {
+    "runify": true,
+    "tsup": true,
+    "tags": [
+      "backend"
+    ]
+  }
+}
