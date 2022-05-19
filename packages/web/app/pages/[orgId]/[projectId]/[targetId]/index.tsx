@@ -65,11 +65,10 @@ const ChangesBlock: React.FC<{
           <li
             key={key}
             className={clsx(
-              criticality === CriticalityLevel.Safe
-                ? 'text-emerald-400'
-                : criticality === CriticalityLevel.Dangerous
-                ? 'text-yellow-400'
-                : 'text-red-400'
+              {
+                [CriticalityLevel.Safe]: 'text-emerald-400',
+                [CriticalityLevel.Dangerous]: 'text-yellow-400',
+              }[criticality] || 'text-red-400'
             )}
           >
             <span className="text-gray-600 dark:text-white">
@@ -282,7 +281,7 @@ export default function SchemaPage(): ReactElement {
             <ToggleGroupItem
               className={clsx(
                 'hover:text-white',
-                view === 'sdl' ? 'bg-gray-800 text-white' : null
+                view === 'sdl' && 'bg-gray-800 text-white'
               )}
               value="sdl"
             >
@@ -291,7 +290,7 @@ export default function SchemaPage(): ReactElement {
             <ToggleGroupItem
               className={clsx(
                 'hover:text-white',
-                view === 'list' ? 'bg-gray-800 text-white' : null
+                view === 'list' && 'bg-gray-800 text-white'
               )}
               value="list"
             >
