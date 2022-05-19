@@ -222,7 +222,7 @@ export const BillingPlanPicker: React.FC<{
                     title="Monthly GraphQL operations limit"
                     min={5}
                     step={1}
-                    max={200}
+                    max={300}
                     value={operationsRateLimit}
                     marks={[
                       {
