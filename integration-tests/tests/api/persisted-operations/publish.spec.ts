@@ -79,9 +79,9 @@ test('can publish persisted operations only with project:operations-store:write'
   );
   expect(writeTokenResult.body.errors).not.toBeDefined();
 
-  const writeToken = writeTokenResult.body.data!.createToken.secret;
-  const readToken = readTokenResult.body.data!.createToken.secret;
-  const noAccessToken = noAccessTokenResult.body.data!.createToken.secret;
+  const writeToken = writeTokenResult.body.data!.createToken.ok.secret;
+  const readToken = readTokenResult.body.data!.createToken.ok.secret;
+  const noAccessToken = noAccessTokenResult.body.data!.createToken.ok.secret;
 
   const operations = [
     {
@@ -165,7 +165,7 @@ test('should skip on already persisted operations', async () => {
   );
   expect(writeTokenResult.body.errors).not.toBeDefined();
 
-  const writeToken = writeTokenResult.body.data!.createToken.secret;
+  const writeToken = writeTokenResult.body.data!.createToken.ok.secret;
 
   const operations = [
     {

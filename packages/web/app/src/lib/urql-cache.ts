@@ -167,7 +167,10 @@ export const Mutation: MutationUpdaters<{
     });
   },
   createToken({ createToken }, _args, cache) {
-    const selector = createToken.selector;
+    if (!createToken.ok) {
+      return;
+    }
+    const selector = createToken.ok.selector;
 
     updateQuery(
       cache,
@@ -182,7 +185,7 @@ export const Mutation: MutationUpdaters<{
         },
       },
       (data) => {
-        data.tokens.nodes.unshift(createToken.createdToken);
+        data.tokens.nodes.unshift(createToken.ok.createdToken);
         data.tokens.total += 1;
       }
     );

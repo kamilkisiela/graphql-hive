@@ -146,7 +146,9 @@ export function createToken(input: CreateTokenInput, authToken: string) {
     document: gql(/* GraphQL */ `
       mutation createToken($input: CreateTokenInput!) {
         createToken(input: $input) {
-          secret
+          ok {
+            secret
+          }
         }
       }
     `),

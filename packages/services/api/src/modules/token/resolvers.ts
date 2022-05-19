@@ -6,6 +6,9 @@ import { AuthManager } from '../auth/providers/auth-manager';
 import { OrganizationManager } from '../organization/providers/organization-manager';
 import { ProjectManager } from '../project/providers/project-manager';
 import { TargetManager } from '../target/providers/target-manager';
+import { z } from 'zod';
+
+const TokenNameModel = z.string().min(2).max(50);
 
 export const resolvers: TokenModule.Resolvers = {
   Query: {
@@ -38,6 +41,22 @@ export const resolvers: TokenModule.Resolvers = {
   },
   Mutation: {
     async createToken(_, { input }, { injector }) {
+      const CreateTokenInputModel = z.object({
+        name: TokenNameModel,
+      });
+
+      const result = CreateTokenInputModel.safeParse(input);
+
+      if (!result.success) {
+        return {
+          error: {
+            message:
+              result.error.formErrors.fieldErrors.name?.[0] ??
+              'Please check your input.',
+          },
+        };
+      }
+
       const translator = injector.get(IdTranslator);
       const [organization, project, target] = await Promise.all([
         translator.translateOrganizationId(input),
@@ -55,13 +74,15 @@ export const resolvers: TokenModule.Resolvers = {
       });
 
       return {
-        selector: {
-          organization: input.organization,
-          project: input.project,
-          target: input.target,
+        ok: {
+          selector: {
+            organization: input.organization,
+            project: input.project,
+            target: input.target,
+          },
+          createdToken: token,
+          secret: token.secret,
         },
-        createdToken: token,
-        secret: token.secret,
       };
     },
     async deleteTokens(_, { input }, { injector }) {

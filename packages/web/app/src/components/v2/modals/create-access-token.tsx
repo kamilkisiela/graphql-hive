@@ -1,7 +1,7 @@
 import { ReactElement } from 'react';
 import { Accordion } from '@chakra-ui/react';
 import { useFormik } from 'formik';
-import { useMutation } from 'urql';
+import { gql, useMutation } from 'urql';
 import * as Yup from 'yup';
 
 import {
@@ -9,9 +9,30 @@ import {
   usePermissionsManager,
 } from '@/components/organization/Permissions';
 import { Button, CopyValue, Heading, Input, Modal, Tag } from '@/components/v2';
-import { CreateTokenDocument, OrganizationFieldsFragment } from '@/graphql';
+import { OrganizationFieldsFragment } from '@/graphql';
 import { scopes } from '@/lib/access/common';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+
+const CreateAccessToken_CreateTokenMutation = gql(/* GraphQL */ `
+  mutation CreateAccessToken_CreateToken($input: CreateTokenInput!) {
+    createToken(input: $input) {
+      ok {
+        selector {
+          organization
+          project
+          target
+        }
+        createdToken {
+          ...TokenFields
+        }
+        secret
+      }
+      error {
+        message
+      }
+    }
+  }
+`);
 
 export const CreateAccessTokenModal = ({
   isOpen,
@@ -24,7 +45,7 @@ export const CreateAccessTokenModal = ({
 }): ReactElement => {
   const router = useRouteSelector();
 
-  const [mutation, mutate] = useMutation(CreateTokenDocument);
+  const [mutation, mutate] = useMutation(CreateAccessToken_CreateTokenMutation);
 
   const {
     handleSubmit,
@@ -62,10 +83,10 @@ export const CreateAccessTokenModal = ({
 
   return (
     <Modal open={isOpen} onOpenChange={toggleModalOpen} className="w-[650px]">
-      {mutation.data ? (
+      {mutation.data?.createToken.ok ? (
         <div className="flex flex-col gap-5">
           <Heading className="text-center">Token successfully created!</Heading>
-          <CopyValue value={mutation.data.createToken.secret} />
+          <CopyValue value={mutation.data.createToken.ok.secret} />
           <Tag color="green">
             This is your unique API key and it is non-recoverable. If you lose
             this key, you will need to create a new one.
@@ -100,6 +121,11 @@ export const CreateAccessTokenModal = ({
 
           {touched.name && errors.name && (
             <div className="text-sm text-red-500">{errors.name}</div>
+          )}
+          {mutation.data?.createToken.error && (
+            <div className="text-sm text-red-500">
+              {mutation.data?.createToken.error.message}
+            </div>
           )}
 
           <p className="text-sm text-gray-500">
