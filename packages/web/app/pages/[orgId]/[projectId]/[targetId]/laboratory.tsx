@@ -10,7 +10,7 @@ import { SchemasDocument } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import 'graphiql/graphiql.css';
 
-export default function LaboratoryPage(): ReactElement {
+const Page = () => {
   const router = useRouteSelector();
   const [schemasQuery] = useQuery({
     query: SchemasDocument,
@@ -24,16 +24,12 @@ export default function LaboratoryPage(): ReactElement {
     requestPolicy: 'cache-and-network',
   });
 
-  const hasSchemas =
-    schemasQuery.data?.target.latestSchemaVersion?.schemas.nodes.length > 0;
+  const hasSchemas = schemasQuery.data?.target.latestSchemaVersion?.schemas.nodes.length > 0;
   const endpoint = `${window.location.origin}/api/lab/${router.organizationId}/${router.projectId}/${router.targetId}`;
-
   return (
-    <TargetLayout value="laboratory" className="h-[500px] pb-10">
-      <Title title="Schema laboratory" />
+    <>
       <p className="mb-5 font-light text-gray-500">
-        Experiment, mock and create live environment for your schema, without
-        running any backend.
+        Experiment, mock and create live environment for your schema, without running any backend.
       </p>
       {schemasQuery.fetching ? (
         <Spinner className="mt-10" />
@@ -53,6 +49,17 @@ export default function LaboratoryPage(): ReactElement {
       ) : (
         noSchema
       )}
-    </TargetLayout>
+    </>
+  );
+};
+
+export default function LaboratoryPage(): ReactElement {
+  return (
+    <>
+      <Title title="Schema laboratory" />
+      <TargetLayout value="laboratory" className="h-[500px] pb-10">
+        {() => <Page />}
+      </TargetLayout>
+    </>
   );
 }
