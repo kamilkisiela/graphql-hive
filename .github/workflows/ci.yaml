@@ -1,0 +1,200 @@
+name: CI
+on: [pull_request]
+
+jobs:
+  integration-tests:
+    name: 'Integration Tests'
+    runs-on: ubuntu-latest
+
+    env:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+      TURBO_PREFLIGHT: 'true'
+      TURBO_API_URL: ${{ secrets.TURBO_API_URL }}
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16
+
+      - name: Install Dependencies
+        run: yarn --frozen-lockfile
+
+      - name: Generate Types
+        run: yarn graphql:generate
+
+      - name: Build
+        run: yarn workspace integration-tests run build-and-pack
+        env:
+          NEXT_PUBLIC_STRIPE_PUBLIC_KEY: ${{ secrets.TEST_STRIPE_PUBLIC_KEY }}
+
+      - name: Pull images
+        run: docker-compose -f integration-tests/docker-compose.yml pull
+
+      - name: Integration Tests
+        run: yarn workspace integration-tests run dockest
+        env:
+          AUTH0_DOMAIN: ${{ secrets.TEST_AUTH0_DOMAIN }}
+          AUTH0_CLIENT_ID: ${{ secrets.TEST_AUTH0_CLIENT_ID }}
+          AUTH0_CLIENT_SECRET: ${{ secrets.TEST_AUTH0_CLIENT_SECRET }}
+          AUTH0_USER_PASSWORD: ${{ secrets.AUTH0_TESTING_USER_PASSWORD }}
+          AUTH0_USER_MAIN_EMAIL: contact@the-guild.dev
+          AUTH0_USER_EXTRA_EMAIL: contact+extra@the-guild.dev
+          AUTH0_SECRET: ${{ secrets.TEST_AUTH0_SECRET }}
+          AUTH0_AUDIENCE: ${{ secrets.TEST_AUTH0_AUDIENCE }}
+          AUTH0_CONNECTION: Username-Password-Authentication
+          STRIPE_SECRET_KEY: ${{ secrets.TEST_STRIPE_SECRET_KEY }}
+
+      - name: Dockest logs
+        if: always()
+        run: cat integration-tests/*.log
+
+  schema-check:
+    name: 'Schema Check'
+    runs-on: ubuntu-latest
+    env:
+      HIVE_TOKEN: ${{ secrets.HIVE_TOKEN }}
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+      TURBO_PREFLIGHT: 'true'
+      TURBO_API_URL: ${{ secrets.TURBO_API_URL }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16
+
+      - name: Install Dependencies
+        run: yarn --frozen-lockfile
+
+      - name: Generate Types
+        run: yarn graphql:generate
+
+      - name: Check PR label
+        if: contains(github.event.pull_request.labels.*.name, 'non-breaking')
+        run: echo '::set-output name=SAFE_FLAG::--forceSafe'
+        id: pr-label-check
+
+      - name: Schema Check
+        run: ./packages/libraries/cli/bin/dev schema:check "packages/services/api/src/modules/*/module.graphql.ts" ${{ steps.pr-label-check.outputs.SAFE_FLAG }} --github
+
+  build-test:
+    name: 'Build and Test'
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:13.1-alpine
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      HIVE_TOKEN: ${{ secrets.HIVE_TOKEN }}
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+      TURBO_PREFLIGHT: 'true'
+      TURBO_API_URL: ${{ secrets.TURBO_API_URL }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16
+
+      - name: Install Dependencies
+        run: yarn --frozen-lockfile
+
+      - name: Generate Types
+        run: yarn graphql:generate
+
+      - name: Create Database
+        working-directory: packages/services/storage
+        run: yarn db:create
+
+      - name: Migrate Database
+        working-directory: packages/services/storage
+        run: yarn db:migrator up
+
+      - name: Generate Database Types
+        working-directory: packages/services/storage
+        run: yarn db:generate
+
+      - name: Build
+        run: yarn build
+
+      - name: Test
+        run: yarn test
+
+  type-check:
+    name: 'Check types'
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:13.1-alpine
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      HIVE_TOKEN: ${{ secrets.HIVE_TOKEN }}
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+      TURBO_PREFLIGHT: 'true'
+      TURBO_API_URL: ${{ secrets.TURBO_API_URL }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16
+
+      - name: Install Dependencies
+        run: yarn --frozen-lockfile
+
+      - name: Generate Types
+        run: yarn graphql:generate
+
+      - name: Create Database
+        working-directory: packages/services/storage
+        run: yarn db:create
+
+      - name: Migrate Database
+        working-directory: packages/services/storage
+        run: yarn db:migrator up
+
+      - name: Generate Database Types
+        working-directory: packages/services/storage
+        run: yarn db:generate
+
+      - name: Type Check
+        run: yarn typecheck
