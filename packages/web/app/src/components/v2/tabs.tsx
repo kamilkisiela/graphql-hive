@@ -37,10 +37,12 @@ Tabs.List = ({ children, className, ...props }) => (
 );
 
 Tabs.Trigger = forwardRef(
-  ({ children, className, hasBorder = true, ...props }, forwardedRef /* when has asChild prop */) => (
+  (
+    { children, className, hasBorder = true, ...props },
+    forwardedRef /* when has asChild prop */
+  ) => (
     <Trigger
-      // @ts-ignore found way to fix Types of property 'current' are incompatible
-      ref={forwardedRef}
+      ref={forwardedRef as any}
       className={clsx(
         `
   radix-state-active:text-white

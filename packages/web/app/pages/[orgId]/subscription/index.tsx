@@ -1,9 +1,8 @@
 import { ReactElement } from 'react';
 import dynamic from 'next/dynamic';
 import { Stat, StatHelpText, StatLabel, StatNumber } from '@chakra-ui/react';
-import { startOfMonth, endOfMonth } from 'date-fns';
+import { endOfMonth, startOfMonth } from 'date-fns';
 
-import { Card, Heading } from '@/components/v2';
 import { OrganizationLayout } from '@/components/layouts';
 import { BillingView } from '@/components/organization/billing/Billing';
 import { CurrencyFormatter } from '@/components/organization/billing/helpers';
@@ -11,6 +10,7 @@ import { InvoicesList } from '@/components/organization/billing/InvoicesList';
 import { RateLimitWarn } from '@/components/organization/billing/RateLimitWarn';
 import { OrganizationUsageEstimationView } from '@/components/organization/Usage';
 import { OrganizationView } from '@/components/organization/View';
+import { Card, Heading } from '@/components/v2';
 import { Tabs } from '@/components/v2';
 import {
   OrganizationFieldsFragment,
