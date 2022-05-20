@@ -69,7 +69,7 @@ const OperationsView = ({
 
   return (
     <>
-      <div className="absolute top-7 right-4">
+      <div className="absolute top-0 right-0">
         <Stack direction="row" spacing={4}>
           <div>
             <OperationsFilterTrigger period={period} selected={selectedOperations} onFilter={setSelectedOperations} />
@@ -93,7 +93,7 @@ const OperationsView = ({
           </div>
         </Stack>
       </div>
-      <div>
+      <div className="space-y-12">
         <OperationsStats
           organization={organization.cleanId}
           project={project.cleanId}

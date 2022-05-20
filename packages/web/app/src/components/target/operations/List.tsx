@@ -22,24 +22,14 @@ import {
   Tr,
   useDisclosure,
 } from '@chakra-ui/react';
-import {
-  VscChevronDown,
-  VscChevronLeft,
-  VscChevronRight,
-  VscChevronUp,
-  VscWarning,
-} from 'react-icons/vsc';
+import { VscChevronDown, VscChevronLeft, VscChevronRight, VscChevronUp, VscWarning } from 'react-icons/vsc';
 import { usePagination, useSortBy, useTable } from 'react-table';
 import { useQuery } from 'urql';
 import { useDebouncedCallback } from 'use-debounce';
 
 import { Scale, Section } from '@/components/common';
 import { GraphQLHighlight } from '@/components/common/GraphQLSDLBlock';
-import {
-  DateRangeInput,
-  OperationsStatsDocument,
-  OperationStatsFieldsFragment,
-} from '@/graphql';
+import { DateRangeInput, OperationsStatsDocument, OperationStatsFieldsFragment } from '@/graphql';
 import { useDecimal } from '@/lib/hooks/use-decimal';
 import { useFormattedDuration } from '@/lib/hooks/use-formatted-duration';
 import { useFormattedNumber } from '@/lib/hooks/use-formatted-number';
@@ -67,9 +57,7 @@ const Sortable: React.FC<{
     <Flex
       direction="row"
       align="center"
-      justify={
-        align === 'center' ? 'center' : align === 'left' ? 'start' : 'end'
-      }
+      justify={align === 'center' ? 'center' : align === 'left' ? 'start' : 'end'}
       tw="cursor-pointer"
     >
       <span>{children}</span>
@@ -102,7 +90,7 @@ const OperationRow: React.FC<{
               size="sm"
               variant="link"
               ref={linkRef}
-              onClick={(e) => {
+              onClick={e => {
                 e.preventDefault();
                 onOpen();
               }}
@@ -135,24 +123,13 @@ const OperationRow: React.FC<{
         <Td textAlign="right">
           <div tw="flex flex-row justify-end">
             <div tw="mr-3">{percentage}%</div>
-            <Scale
-              value={operation.percentage}
-              size={10}
-              max={100}
-              tw="justify-end"
-            />
+            <Scale value={operation.percentage} size={10} max={100} tw="justify-end" />
           </div>
         </Td>
       </Tr>
-      <Drawer
-        size="xl"
-        isOpen={isOpen}
-        placement="right"
-        onClose={onClose}
-        finalFocusRef={linkRef}
-      >
+      <Drawer size="xl" isOpen={isOpen} placement="right" onClose={onClose} finalFocusRef={linkRef}>
         <DrawerOverlay />
-        <DrawerContent>
+        <DrawerContent bgColor="gray.900">
           <DrawerCloseButton />
           <DrawerHeader>
             {operation.kind} {operation.name}
@@ -222,7 +199,7 @@ const OperationsTable: React.FC<{
   const headerGroup = headerGroups[0];
 
   function findColumn(key: string) {
-    return headerGroup.headers[columns.findIndex((c) => c.accessor === key)];
+    return headerGroup.headers[columns.findIndex(c => c.accessor === key)];
   }
 
   const p90Column = findColumn('p90');
@@ -235,59 +212,35 @@ const OperationsTable: React.FC<{
   return (
     <div
       className={className}
-      tw="transition-opacity ease-in-out duration-700"
+      tw="transition-opacity ease-in-out duration-700 rounded-md p-5 ring-1 ring-gray-800 bg-gray-900/50"
       style={{
         opacity: fetching ? 0.5 : 1,
       }}
     >
       <Section.Title>Operations</Section.Title>
-      <Section.Subtitle>
-        List of all operations with their statistics
-      </Section.Subtitle>
-      <Table
-        tw="mt-6"
-        variant="striped"
-        colorScheme="gray"
-        size="sm"
-        {...getTableProps()}
-      >
+      <Section.Subtitle>List of all operations with their statistics</Section.Subtitle>
+      <Table tw="mt-6" variant="striped" colorScheme="gray" size="sm" {...getTableProps()}>
         <Thead>
           <Tr {...headerGroup.getHeaderGroupProps()}>
             <Th>Operation</Th>
             <Th>Hash</Th>
             <Th textAlign="center">Kind</Th>
             <Th {...p90Column.getHeaderProps(p90Column.getSortByToggleProps())}>
-              <Sortable
-                align="center"
-                isSorted={p90Column.isSorted}
-                isSortedDesc={p90Column.isSortedDesc}
-              >
+              <Sortable align="center" isSorted={p90Column.isSorted} isSortedDesc={p90Column.isSortedDesc}>
                 p90
               </Sortable>
             </Th>
             <Th {...p95Column.getHeaderProps(p95Column.getSortByToggleProps())}>
-              <Sortable
-                align="center"
-                isSorted={p95Column.isSorted}
-                isSortedDesc={p95Column.isSortedDesc}
-              >
+              <Sortable align="center" isSorted={p95Column.isSorted} isSortedDesc={p95Column.isSortedDesc}>
                 p95
               </Sortable>
             </Th>
             <Th {...p99Column.getHeaderProps(p99Column.getSortByToggleProps())}>
-              <Sortable
-                align="center"
-                isSorted={p99Column.isSorted}
-                isSortedDesc={p99Column.isSortedDesc}
-              >
+              <Sortable align="center" isSorted={p99Column.isSorted} isSortedDesc={p99Column.isSortedDesc}>
                 p99
               </Sortable>
             </Th>
-            <Th
-              {...failureRateColumn.getHeaderProps(
-                failureRateColumn.getSortByToggleProps()
-              )}
-            >
+            <Th {...failureRateColumn.getHeaderProps(failureRateColumn.getSortByToggleProps())}>
               <Sortable
                 align="center"
                 isSorted={failureRateColumn.isSorted}
@@ -296,24 +249,12 @@ const OperationsTable: React.FC<{
                 Failure Rate
               </Sortable>
             </Th>
-            <Th
-              {...requestsColumn.getHeaderProps(
-                requestsColumn.getSortByToggleProps()
-              )}
-            >
-              <Sortable
-                align="center"
-                isSorted={requestsColumn.isSorted}
-                isSortedDesc={requestsColumn.isSortedDesc}
-              >
+            <Th {...requestsColumn.getHeaderProps(requestsColumn.getSortByToggleProps())}>
+              <Sortable align="center" isSorted={requestsColumn.isSorted} isSortedDesc={requestsColumn.isSortedDesc}>
                 Requests
               </Sortable>
             </Th>
-            <Th
-              {...percentageColumn.getHeaderProps(
-                percentageColumn.getSortByToggleProps()
-              )}
-            >
+            <Th {...percentageColumn.getHeaderProps(percentageColumn.getSortByToggleProps())}>
               <Sortable
                 align="center"
                 isSorted={percentageColumn.isSorted}
@@ -325,22 +266,14 @@ const OperationsTable: React.FC<{
           </Tr>
         </Thead>
         <Tbody>
-          {rows.map((row) => {
+          {rows.map(row => {
             prepareRow(row);
-            return (
-              <OperationRow operation={row.original} key={row.original.id} />
-            );
+            return <OperationRow operation={row.original} key={row.original.id} />;
           })}
         </Tbody>
       </Table>
       <div tw="py-3 flex flex-row items-center justify-center space-x-2">
-        <Button
-          size="sm"
-          variant="ghost"
-          colorScheme="gray"
-          onClick={firstPage}
-          disabled={!canPreviousPage}
-        >
+        <Button size="sm" variant="ghost" colorScheme="gray" onClick={firstPage} disabled={!canPreviousPage}>
           First
         </Button>
         <IconButton
@@ -364,13 +297,7 @@ const OperationsTable: React.FC<{
           disabled={!canNextPage}
           icon={<VscChevronRight />}
         />
-        <Button
-          size="sm"
-          variant="ghost"
-          colorScheme="gray"
-          onClick={lastPage}
-          disabled={!canNextPage}
-        >
+        <Button size="sm" variant="ghost" colorScheme="gray" onClick={lastPage} disabled={!canNextPage}>
           Last
         </Button>
         <InputGroup variant="filled" tw="w-auto" size="sm">
@@ -381,10 +308,8 @@ const OperationsTable: React.FC<{
             placeholder="page"
             colorScheme="gray"
             defaultValue={pageIndex + 1}
-            onChange={(e) => {
-              debouncedSetPage(
-                e.target.valueAsNumber ? e.target.valueAsNumber - 1 : 0
-              );
+            onChange={e => {
+              debouncedSetPage(e.target.valueAsNumber ? e.target.valueAsNumber - 1 : 0);
             }}
           />
         </InputGroup>
@@ -402,12 +327,8 @@ const OperationsTableContainer: React.FC<{
   const data = React.useMemo(
     () =>
       operations
-        .filter((op) =>
-          operationsFilter.length
-            ? operationsFilter.includes(op.operationHash)
-            : true
-        )
-        .map((op) => ({
+        .filter(op => (operationsFilter.length ? operationsFilter.includes(op.operationHash) : true))
+        .map(op => ({
           id: op.id,
           name: op.name,
           kind: op.kind,
@@ -423,13 +344,7 @@ const OperationsTableContainer: React.FC<{
     [operations, operationsFilter]
   );
 
-  return (
-    <OperationsTable
-      fetching={fetching}
-      operations={data}
-      className={className}
-    />
-  );
+  return <OperationsTable fetching={fetching} operations={data} className={className} />;
 };
 
 export const OperationsList: React.FC<{
@@ -439,14 +354,7 @@ export const OperationsList: React.FC<{
   target: string;
   period: DateRangeInput;
   operationsFilter: readonly string[];
-}> = ({
-  className,
-  organization,
-  project,
-  target,
-  period,
-  operationsFilter = [],
-}) => {
+}> = ({ className, organization, project, target, period, operationsFilter = [] }) => {
   const [query] = useQuery({
     query: OperationsStatsDocument,
     variables: {
