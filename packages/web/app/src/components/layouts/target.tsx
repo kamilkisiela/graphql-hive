@@ -2,10 +2,18 @@ import { ReactElement, ReactNode, useEffect } from 'react';
 import NextLink from 'next/link';
 import { useQuery } from 'urql';
 
-import { Button, DropdownMenu, Heading, Link, Tabs, SubHeader } from '@/components/v2';
+import { Button, DropdownMenu, Heading, Link, Tabs, SubHeader, Spinner } from '@/components/v2';
 import { ArrowDownIcon } from '@/components/v2/icon';
-import { ProjectDocument, TargetsDocument } from '@/graphql';
+import {
+  ProjectDocument,
+  TargetsDocument,
+  TargetFieldsFragment,
+  ProjectFieldsFragment,
+  OrganizationFieldsFragment,
+} from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useTargetAccess, canAccessTarget, TargetAccessScope } from '@/lib/access/target';
+import { QueryError } from '../common/DataWrapper';
 
 enum TabValue {
   Schema = 'schema',
@@ -19,7 +27,11 @@ export const TargetLayout = ({
   value,
   className,
 }: {
-  children: ReactNode;
+  children(props: {
+    target: TargetFieldsFragment;
+    project: ProjectFieldsFragment;
+    organization: OrganizationFieldsFragment;
+  }): ReactNode;
   value: 'schema' | 'operations' | 'laboratory' | 'settings';
   className?: string;
 }): ReactElement => {
@@ -49,6 +61,9 @@ export const TargetLayout = ({
 
   const targets = targetsQuery.data?.targets;
   const target = targets?.nodes.find(node => node.cleanId === targetId);
+  const org = projectQuery.data?.organization.organization;
+  const project = projectQuery.data?.project;
+  const me = org?.me;
 
   useEffect(() => {
     if (!targetsQuery.fetching && !target) {
@@ -57,8 +72,29 @@ export const TargetLayout = ({
     }
   }, [router, target, targetsQuery.fetching]);
 
-  const org = projectQuery.data?.organization.organization;
-  const project = projectQuery.data?.project;
+  useEffect(() => {
+    if (!projectQuery.fetching && !project) {
+      // url with # provoke error Maximum update depth exceeded
+      router.push('/404', router.asPath.replace(/#.*/, ''));
+    }
+  }, [router, project, projectQuery.fetching]);
+
+  useTargetAccess({
+    scope: TargetAccessScope.Read,
+    member: me,
+    redirect: true,
+  });
+
+  const canAccessSchema = canAccessTarget(TargetAccessScope.RegistryRead, me);
+  const canAccessSettings = canAccessTarget(TargetAccessScope.Settings, me);
+
+  if (projectQuery.fetching || targetsQuery.fetching) {
+    return <Spinner className="mt-10" />;
+  }
+
+  if (projectQuery.error || targetsQuery.error) {
+    return <QueryError error={projectQuery.error || targetsQuery.error} />;
+  }
 
   return (
     <>
@@ -107,29 +143,41 @@ export const TargetLayout = ({
 
       <Tabs className="wrapper" value={value}>
         <Tabs.List>
-          <NextLink passHref href={`/${orgId}/${projectId}/${targetId}`}>
-            <Tabs.Trigger value={TabValue.Schema} asChild>
-              <a>Schema</a>
-            </Tabs.Trigger>
-          </NextLink>
-          <NextLink passHref href={`/${orgId}/${projectId}/${targetId}/operations`}>
-            <Tabs.Trigger value={TabValue.Operations} asChild>
-              <a>Operations</a>
-            </Tabs.Trigger>
-          </NextLink>
-          <NextLink passHref href={`/${orgId}/${projectId}/${targetId}/laboratory`}>
-            <Tabs.Trigger value={TabValue.Laboratory} asChild>
-              <a>Laboratory</a>
-            </Tabs.Trigger>
-          </NextLink>
-          <NextLink passHref href={`/${orgId}/${projectId}/${targetId}/settings`}>
-            <Tabs.Trigger value={TabValue.Settings} asChild>
-              <a>Settings</a>
-            </Tabs.Trigger>
-          </NextLink>
+          {canAccessSchema && (
+            <NextLink passHref href={`/${orgId}/${projectId}/${targetId}`}>
+              <Tabs.Trigger value={TabValue.Schema} asChild>
+                <a>Schema</a>
+              </Tabs.Trigger>
+            </NextLink>
+          )}
+          {canAccessSchema && (
+            <NextLink passHref href={`/${orgId}/${projectId}/${targetId}/operations`}>
+              <Tabs.Trigger value={TabValue.Operations} asChild>
+                <a>Operations</a>
+              </Tabs.Trigger>
+            </NextLink>
+          )}
+          {canAccessSchema && (
+            <NextLink passHref href={`/${orgId}/${projectId}/${targetId}/laboratory`}>
+              <Tabs.Trigger value={TabValue.Laboratory} asChild>
+                <a>Laboratory</a>
+              </Tabs.Trigger>
+            </NextLink>
+          )}
+          {canAccessSettings && (
+            <NextLink passHref href={`/${orgId}/${projectId}/${targetId}/settings`}>
+              <Tabs.Trigger value={TabValue.Settings} asChild>
+                <a>Settings</a>
+              </Tabs.Trigger>
+            </NextLink>
+          )}
         </Tabs.List>
         <Tabs.Content value={value} className={className}>
-          {children}
+          {children({
+            target,
+            project,
+            organization: org,
+          })}
         </Tabs.Content>
       </Tabs>
     </>

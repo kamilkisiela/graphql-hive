@@ -1,10 +1,4 @@
-import {
-  ComponentProps,
-  ReactElement,
-  useCallback,
-  useMemo,
-  useState,
-} from 'react';
+import { ComponentProps, ReactElement, useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import 'twin.macro';
 import { Select, Stack } from '@chakra-ui/react';
@@ -16,8 +10,7 @@ import { TargetLayout } from '@/components/layouts';
 import { OperationsFilterTrigger } from '@/components/target/operations/Filters';
 import { OperationsList } from '@/components/target/operations/List';
 import { OperationsStats } from '@/components/target/operations/Stats';
-import { TargetView } from '@/components/target/View';
-import { DataWrapper, EmptyList } from '@/components/v2';
+import { DataWrapper, EmptyList, Title } from '@/components/v2';
 import {
   HasCollectedOperationsDocument,
   OrganizationFieldsFragment,
@@ -51,25 +44,16 @@ const OperationsView = ({
 }): ReactElement => {
   const router = useRouter();
   const [href, periodParam] = router.asPath.split('?');
-  const selectedPeriod: PeriodKey =
-    (new URLSearchParams(periodParam).get('period') as PeriodKey) ?? '1d';
+  const selectedPeriod: PeriodKey = (new URLSearchParams(periodParam).get('period') as PeriodKey) ?? '1d';
   const [selectedOperations, setSelectedOperations] = useState<string[]>([]);
 
   const period = useMemo(() => {
     const now = floorDate(new Date());
-    const sub = selectedPeriod.endsWith('h')
-      ? 'h'
-      : selectedPeriod.endsWith('m')
-      ? 'm'
-      : 'd';
+    const sub = selectedPeriod.endsWith('h') ? 'h' : selectedPeriod.endsWith('m') ? 'm' : 'd';
 
     const value = parseInt(selectedPeriod.replace(sub, ''));
     const from = formatISO(
-      sub === 'h'
-        ? subHours(now, value)
-        : sub === 'm'
-        ? subMinutes(now, value)
-        : subDays(now, value)
+      sub === 'h' ? subHours(now, value) : sub === 'm' ? subMinutes(now, value) : subDays(now, value)
     );
     const to = formatISO(now);
 
@@ -77,7 +61,7 @@ const OperationsView = ({
   }, [selectedPeriod]);
 
   const updatePeriod = useCallback<ComponentProps<'select'>['onChange']>(
-    (ev) => {
+    ev => {
       router.push(`${href}?period=${ev.target.value}`);
     },
     [href, router]
@@ -88,11 +72,7 @@ const OperationsView = ({
       <div className="absolute top-7 right-4">
         <Stack direction="row" spacing={4}>
           <div>
-            <OperationsFilterTrigger
-              period={period}
-              selected={selectedOperations}
-              onFilter={setSelectedOperations}
-            />
+            <OperationsFilterTrigger period={period} selected={selectedOperations} onFilter={setSelectedOperations} />
           </div>
           <div>
             <Select
@@ -156,13 +136,9 @@ const OperationsViewGate = ({
 
   return (
     <DataWrapper query={query}>
-      {(result) =>
+      {result =>
         result.data.hasCollectedOperations ? (
-          <OperationsView
-            organization={organization}
-            project={project}
-            target={target}
-          />
+          <OperationsView organization={organization} project={project} target={target} />
         ) : (
           <EmptyList
             title="Hive is waiting for your first collected operation"
@@ -177,22 +153,18 @@ const OperationsViewGate = ({
 
 export default function OperationsPage(): ReactElement {
   return (
-    <TargetLayout value="operations">
-      <TargetView title="Operations">
+    <>
+      <Title title="Operations" />
+      <TargetLayout value="operations">
         {({ organization, project, target }) => (
-          <div className="relative pt-8">
+          <div className="relative">
             <p className="mb-5 font-light text-gray-500">
-              Data collected based on operation executed against your GraphQL
-              schema.
+              Data collected based on operation executed against your GraphQL schema.
             </p>
-            <OperationsViewGate
-              organization={organization}
-              project={project}
-              target={target}
-            />
+            <OperationsViewGate organization={organization} project={project} target={target} />
           </div>
         )}
-      </TargetView>
-    </TargetLayout>
+      </TargetLayout>
+    </>
   );
 }

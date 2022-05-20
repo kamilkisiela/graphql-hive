@@ -3,10 +3,7 @@ import tw from 'twin.macro';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { track } from '@/lib/mixpanel';
 import { useQuery, useMutation } from 'urql';
-import {
-  OrganizationInvitationDocument,
-  JoinOrganizationDocument,
-} from '@/graphql';
+import { OrganizationInvitationDocument, JoinOrganizationDocument } from '@/graphql';
 import { Button } from '@chakra-ui/react';
 import { Title } from '@/components/common';
 import { DataWrapper } from '@/components/common/DataWrapper';
@@ -16,7 +13,7 @@ const Center = tw.div`w-full h-full flex flex-row items-center justify-center`;
 
 const Invitation = {
   Root: tw.div`flex flex-col text-center md:w-2/3 w-full`,
-  Title: tw.h1`sm:text-4xl text-3xl mb-4 font-medium text-gray-900`,
+  Title: tw.h1`sm:text-4xl text-3xl mb-4 font-medium text-white`,
   Description: tw.p`mb-8 leading-relaxed`,
   Actions: tw.div`flex flex-row gap-2 items-center justify-center`,
 };
@@ -38,11 +35,8 @@ export default function OrganizationPage() {
     });
     mutate({
       code,
-    }).then((result) => {
-      if (
-        result.data.joinOrganization.__typename ===
-        'OrganizationInvitationError'
-      ) {
+    }).then(result => {
+      if (result.data.joinOrganization.__typename === 'OrganizationInvitationError') {
         notify(result.data.joinOrganization.message, 'error');
       } else {
         const org = result.data.joinOrganization.organization;
@@ -75,9 +69,7 @@ export default function OrganizationPage() {
               <Center>
                 <Invitation.Root>
                   <Invitation.Title>Invitation Error</Invitation.Title>
-                  <Invitation.Description>
-                    {invitation.message}
-                  </Invitation.Description>
+                  <Invitation.Description>{invitation.message}</Invitation.Description>
 
                   <Invitation.Actions>
                     <Button onClick={goBack}>Back to Hive</Button>
@@ -90,20 +82,13 @@ export default function OrganizationPage() {
           return (
             <Center>
               <Invitation.Root>
-                <Invitation.Title>
-                  Join "{invitation.name}" organization?
-                </Invitation.Title>
+                <Invitation.Title>Join "{invitation.name}" organization?</Invitation.Title>
                 <Invitation.Description>
-                  You've been invited to join "{invitation.name}" organization
-                  on GraphQL Hive.
+                  You've been invited to join "{invitation.name}" organization on GraphQL Hive.
                 </Invitation.Description>
 
                 <Invitation.Actions>
-                  <Button
-                    colorScheme="primary"
-                    onClick={accept}
-                    disabled={mutation.fetching}
-                  >
+                  <Button colorScheme="primary" onClick={accept} disabled={mutation.fetching}>
                     Accept
                   </Button>
                   <Button disabled={mutation.fetching} onClick={goBack}>

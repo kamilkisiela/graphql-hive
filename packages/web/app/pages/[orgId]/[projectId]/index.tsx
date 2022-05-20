@@ -4,27 +4,13 @@ import clsx from 'clsx';
 import { useQuery } from 'urql';
 
 import { ProjectLayout } from '@/components/layouts';
-import {
-  Activities,
-  Badge,
-  Button,
-  Card,
-  DropdownMenu,
-  EmptyList,
-  Heading,
-  TimeAgo,
-  Title,
-} from '@/components/v2';
+import { Activities, Badge, Button, Card, DropdownMenu, EmptyList, Heading, TimeAgo, Title } from '@/components/v2';
 import { LinkIcon, MoreIcon, SettingsIcon } from '@/components/v2/icon';
 import { TargetQuery, TargetsDocument, VersionsDocument } from '@/graphql';
 import { useClipboard } from '@/lib/hooks/use-clipboard';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
-const TargetCard = ({
-  target,
-}: {
-  target: TargetQuery['target'];
-}): ReactElement => {
+const TargetCard = ({ target }: { target: TargetQuery['target'] }): ReactElement => {
   const router = useRouteSelector();
   const copyToClipboard = useClipboard();
   const [versionsQuery] = useQuery({
@@ -60,7 +46,7 @@ const TargetCard = ({
             </DropdownMenu.Trigger>
             <DropdownMenu.Content sideOffset={5} align="start">
               <DropdownMenu.Item
-                onClick={(e) => {
+                onClick={e => {
                   e.stopPropagation();
                   copyToClipboard(`${window.location.origin}${href}`);
                 }}
@@ -68,9 +54,7 @@ const TargetCard = ({
                 <LinkIcon />
                 Share Link
               </DropdownMenu.Item>
-              <NextLink
-                href={`/${router.organizationId}/${router.projectId}/${target.cleanId}#settings`}
-              >
+              <NextLink href={`/${router.organizationId}/${router.projectId}/${target.cleanId}#settings`}>
                 <a>
                   <DropdownMenu.Item>
                     <SettingsIcon />
@@ -83,11 +67,7 @@ const TargetCard = ({
         </div>
         {author && (
           <>
-            <div
-              className={clsx(
-                'mt-2.5 mb-1.5 flex items-center gap-x-2 text-sm text-gray-500'
-              )}
-            >
+            <div className={clsx('mt-2.5 mb-1.5 flex items-center gap-x-2 text-sm text-gray-500')}>
               {lastVersion ? (
                 <>
                   <Badge color={isValid ? 'green' : 'red'} />
@@ -107,7 +87,7 @@ const TargetCard = ({
   );
 };
 
-export default function ProjectsPage(): ReactElement {
+const Page = () => {
   const router = useRouteSelector();
   const [targetsQuery] = useQuery({
     query: TargetsDocument,
@@ -121,8 +101,7 @@ export default function ProjectsPage(): ReactElement {
   const targets = targetsQuery.data?.targets;
 
   return (
-    <ProjectLayout value="targets" className="flex gap-x-5">
-      <Title title="Targets" />
+    <>
       <div className="flex grow flex-col gap-4">
         <Heading>List of targets</Heading>
         {targets && targets.total === 0 ? (
@@ -132,12 +111,21 @@ export default function ProjectsPage(): ReactElement {
             docsUrl={`${process.env.NEXT_PUBLIC_DOCS_LINK}/get-started/targets`}
           />
         ) : (
-          targets?.nodes.map((target) => (
-            <TargetCard key={target.id} target={target} />
-          ))
+          targets?.nodes.map(target => <TargetCard key={target.id} target={target} />)
         )}
       </div>
       <Activities />
-    </ProjectLayout>
+    </>
+  );
+};
+
+export default function ProjectsPage(): ReactElement {
+  return (
+    <>
+      <Title title="Targets" />
+      <ProjectLayout value="targets" className="flex gap-x-5">
+        {() => <Page />}
+      </ProjectLayout>
+    </>
   );
 }

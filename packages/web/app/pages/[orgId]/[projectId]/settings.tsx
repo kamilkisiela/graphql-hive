@@ -5,29 +5,15 @@ import { gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 
 import { ProjectLayout } from '@/components/layouts';
-import {
-  Button,
-  Card,
-  Heading,
-  Input,
-  Link,
-  Select,
-  Spinner,
-  Tag,
-  Title,
-} from '@/components/v2';
+import { Button, Card, Heading, Input, Link, Select, Spinner, Tag, Title } from '@/components/v2';
 import { AlertTriangleIcon } from '@/components/v2/icon';
 import { DeleteProjectModal } from '@/components/v2/modals';
-import {
-  GetGitHubIntegrationDetailsDocument,
-  ProjectDocument,
-} from '@/graphql';
+import { GetGitHubIntegrationDetailsDocument, OrganizationFieldsFragment, ProjectFieldsFragment } from '@/graphql';
+import { canAccessProject, ProjectAccessScope,useProjectAccess } from '@/lib/access/project';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
 const Settings_UpdateProjectGitRepositoryMutation = gql(/* GraphQL */ `
-  mutation Settings_UpdateProjectGitRepository(
-    $input: UpdateProjectGitRepositoryInput!
-  ) {
+  mutation Settings_UpdateProjectGitRepository($input: UpdateProjectGitRepositoryInput!) {
     updateProjectGitRepository(input: $input) {
       ok {
         selector {
@@ -45,11 +31,7 @@ const Settings_UpdateProjectGitRepositoryMutation = gql(/* GraphQL */ `
   }
 `);
 
-const GitHubIntegration = ({
-  gitRepository,
-}: {
-  gitRepository: string;
-}): ReactElement => {
+const GitHubIntegration = ({ gitRepository }: { gitRepository: string }): ReactElement => {
   const router = useRouteSelector();
   const [integrationQuery] = useQuery({
     query: GetGitHubIntegrationDetailsDocument,
@@ -60,18 +42,8 @@ const GitHubIntegration = ({
     },
   });
 
-  const [mutation, mutate] = useMutation(
-    Settings_UpdateProjectGitRepositoryMutation
-  );
-  const {
-    handleSubmit,
-    values,
-    handleChange,
-    handleBlur,
-    isSubmitting,
-    errors,
-    touched,
-  } = useFormik({
+  const [mutation, mutate] = useMutation(Settings_UpdateProjectGitRepositoryMutation);
+  const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } = useFormik({
     enableReinitialize: true,
     initialValues: {
       gitRepository,
@@ -79,7 +51,7 @@ const GitHubIntegration = ({
     validationSchema: Yup.object().shape({
       gitRepository: Yup.string(),
     }),
-    onSubmit: (values) =>
+    onSubmit: values =>
       mutate({
         input: {
           organization: router.organizationId,
@@ -93,8 +65,7 @@ const GitHubIntegration = ({
     return <Spinner />;
   }
 
-  const hasGitHubIntegration =
-    integrationQuery.data?.hasGitHubIntegration === true;
+  const hasGitHubIntegration = integrationQuery.data?.hasGitHubIntegration === true;
 
   if (hasGitHubIntegration) {
     return (
@@ -104,38 +75,26 @@ const GitHubIntegration = ({
             name="gitRepository"
             placeholder="None"
             className="w-96"
-            options={integrationQuery.data.gitHubIntegration.repositories.map(
-              (repo) => ({
-                name: repo.nameWithOwner,
-                value: repo.nameWithOwner,
-              })
-            )}
+            options={integrationQuery.data.gitHubIntegration.repositories.map(repo => ({
+              name: repo.nameWithOwner,
+              value: repo.nameWithOwner,
+            }))}
             value={values.gitRepository}
             onChange={handleChange}
             onBlur={handleBlur}
             isInvalid={touched.gitRepository && Boolean(errors.gitRepository)}
           />
-          <Button
-            type="submit"
-            variant="primary"
-            size="large"
-            className="px-10"
-            disabled={isSubmitting}
-          >
+          <Button type="submit" variant="primary" size="large" className="px-10" disabled={isSubmitting}>
             Save
           </Button>
         </form>
         {touched.gitRepository && (errors.gitRepository || mutation.error) && (
           <div className="mt-2 text-red-500">
-            {errors.gitRepository ??
-              mutation.error.graphQLErrors[0]?.message ??
-              mutation.error.message}
+            {errors.gitRepository ?? mutation.error.graphQLErrors[0]?.message ?? mutation.error.message}
           </div>
         )}
         {mutation.data?.updateProjectGitRepository.error && (
-          <div className="mt-2 text-red-500">
-            {mutation.data.updateProjectGitRepository.error.message}
-          </div>
+          <div className="mt-2 text-red-500">{mutation.data.updateProjectGitRepository.error.message}</div>
         )}
       </>
     );
@@ -171,34 +130,27 @@ const Settings_UpdateProjectNameMutation = gql(/* GraphQL */ `
   }
 `);
 
-export default function SettingsPage(): ReactElement {
-  const router = useRouteSelector();
-
-  const [projectQuery] = useQuery({
-    query: ProjectDocument,
-    variables: {
-      organizationId: router.organizationId,
-      projectId: router.projectId,
-    },
+const Page = ({
+  organization,
+  project,
+}: {
+  organization: OrganizationFieldsFragment;
+  project: ProjectFieldsFragment;
+}) => {
+  useProjectAccess({
+    scope: ProjectAccessScope.Settings,
+    member: organization.me,
+    redirect: true,
   });
-  const project = projectQuery.data?.project;
-
+  const router = useRouteSelector();
   const [isModalOpen, setModalOpen] = useState(false);
   const toggleModalOpen = useCallback(() => {
-    setModalOpen((prevOpen) => !prevOpen);
+    setModalOpen(prevOpen => !prevOpen);
   }, []);
 
   const [mutation, mutate] = useMutation(Settings_UpdateProjectNameMutation);
 
-  const {
-    handleSubmit,
-    values,
-    handleChange,
-    handleBlur,
-    isSubmitting,
-    errors,
-    touched,
-  } = useFormik({
+  const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } = useFormik({
     enableReinitialize: true,
     initialValues: {
       name: project?.name,
@@ -206,7 +158,7 @@ export default function SettingsPage(): ReactElement {
     validationSchema: Yup.object().shape({
       name: Yup.string().required('Project name is required'),
     }),
-    onSubmit: (values) =>
+    onSubmit: values =>
       mutate({
         input: {
           organization: router.organizationId,
@@ -217,13 +169,10 @@ export default function SettingsPage(): ReactElement {
   });
 
   return (
-    <ProjectLayout value="settings" className="flex flex-col gap-y-10">
-      <Title title="Project settings" />
+    <>
       <Card>
         <Heading className="mb-2">Project Name</Heading>
-        <p className="mb-3 font-light text-gray-300">
-          Name of your project visible within organization
-        </p>
+        <p className="mb-3 font-light text-gray-300">Name of your project visible within organization</p>
         <form onSubmit={handleSubmit} className="flex gap-x-2">
           <Input
             placeholder="Project name"
@@ -235,63 +184,55 @@ export default function SettingsPage(): ReactElement {
             isInvalid={touched.name && Boolean(errors.name)}
             className="w-96"
           />
-          <Button
-            type="submit"
-            variant="primary"
-            size="large"
-            className="px-10"
-            disabled={isSubmitting}
-          >
+          <Button type="submit" variant="primary" size="large" className="px-10" disabled={isSubmitting}>
             Save
           </Button>
         </form>
         {touched.name && (errors.name || mutation.error) && (
           <div className="mt-2 text-red-500">
-            {errors.name ??
-              mutation.error.graphQLErrors[0]?.message ??
-              mutation.error.message}
+            {errors.name ?? mutation.error.graphQLErrors[0]?.message ?? mutation.error.message}
           </div>
         )}
         {mutation.data?.updateProjectName.error && (
-          <div className="mt-2 text-red-500">
-            {mutation.data.updateProjectName.error.message}
-          </div>
+          <div className="mt-2 text-red-500">{mutation.data.updateProjectName.error.message}</div>
         )}
       </Card>
 
       <Card>
         <Heading className="mb-2">Git Repository</Heading>
-        <p className="mb-3 font-light text-gray-300">
-          Connect the project with your Git repository
-        </p>
+        <p className="mb-3 font-light text-gray-300">Connect the project with your Git repository</p>
         <GitHubIntegration gitRepository={project?.gitRepository} />
       </Card>
 
-      <Card>
-        <Heading className="mb-2">Delete Project</Heading>
-        <p className="mb-3 font-light text-gray-300">
-          Permanently remove your Project and all targets from the Organization
-        </p>
-        <div className="flex items-center gap-x-2">
-          <Button
-            variant="primary"
-            size="large"
-            danger
-            onClick={toggleModalOpen}
-            className="px-5"
-          >
-            Delete Project
-          </Button>
-          <Tag color="yellow" className="py-2.5 px-4">
-            <AlertTriangleIcon className="h-5 w-5" />
-            This action is not reversible!
-          </Tag>
-        </div>
-      </Card>
-      <DeleteProjectModal
-        isOpen={isModalOpen}
-        toggleModalOpen={toggleModalOpen}
-      />
-    </ProjectLayout>
+      {canAccessProject(ProjectAccessScope.Delete, organization.me) && (
+        <Card>
+          <Heading className="mb-2">Delete Project</Heading>
+          <p className="mb-3 font-light text-gray-300">
+            Permanently remove your Project and all targets from the Organization
+          </p>
+          <div className="flex items-center gap-x-2">
+            <Button variant="primary" size="large" danger onClick={toggleModalOpen} className="px-5">
+              Delete Project
+            </Button>
+            <Tag color="yellow" className="py-2.5 px-4">
+              <AlertTriangleIcon className="h-5 w-5" />
+              This action is not reversible!
+            </Tag>
+          </div>
+        </Card>
+      )}
+      <DeleteProjectModal isOpen={isModalOpen} toggleModalOpen={toggleModalOpen} />
+    </>
+  );
+};
+
+export default function SettingsPage(): ReactElement {
+  return (
+    <>
+      <Title title="Project settings" />
+      <ProjectLayout value="settings" className="flex flex-col gap-y-10">
+        {props => <Page {...props} />}
+      </ProjectLayout>
+    </>
   );
 }

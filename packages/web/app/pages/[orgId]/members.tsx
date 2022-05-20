@@ -3,48 +3,38 @@ import { useMutation, useQuery } from 'urql';
 
 import { useUser } from '@/components/auth/AuthProvider';
 import { OrganizationLayout } from '@/components/layouts';
-import {
-  Avatar,
-  Button,
-  Card,
-  Checkbox,
-  CopyValue,
-  DropdownMenu,
-  Title,
-} from '@/components/v2';
-import {
-  GitHubIcon,
-  GoogleIcon,
-  KeyIcon,
-  MoreIcon,
-  SettingsIcon,
-  TrashIcon,
-} from '@/components/v2/icon';
-import {
-  ChangePermissionsModal,
-  DeleteMembersModal,
-} from '@/components/v2/modals';
+import { Avatar, Button, Card, Checkbox, CopyValue, DropdownMenu, Title } from '@/components/v2';
+import { GitHubIcon, GoogleIcon, KeyIcon, MoreIcon, SettingsIcon, TrashIcon } from '@/components/v2/icon';
+import { ChangePermissionsModal, DeleteMembersModal } from '@/components/v2/modals';
 import {
   AuthProvider,
   MeDocument,
+  OrganizationFieldsFragment,
   OrganizationMembersDocument,
   OrganizationType,
   ResetInviteCodeDocument,
 } from '@/graphql';
+import { OrganizationAccessScope,useOrganizationAccess } from '@/lib/access/organization';
 import { useNotifications } from '@/lib/hooks/use-notifications';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
-export default function MembersPage(): ReactElement {
+const Page = ({ organization }: { organization: OrganizationFieldsFragment }) => {
+  useOrganizationAccess({
+    scope: OrganizationAccessScope.Members,
+    redirect: true,
+    member: organization.me,
+  });
+
   const [checked, setChecked] = useState<string[]>([]);
   const [selectedMemberId, setSelectedMemberId] = useState<string>('');
   const [isModalOpen, setModalOpen] = useState(false);
   const toggleModalOpen = useCallback(() => {
-    setModalOpen((prevOpen) => !prevOpen);
+    setModalOpen(prevOpen => !prevOpen);
   }, []);
 
   const [isDeleteMembersModalOpen, setDeleteMembersModalOpen] = useState(false);
   const toggleDeleteMembersModalOpen = useCallback(() => {
-    setDeleteMembersModalOpen((prevOpen) => !prevOpen);
+    setDeleteMembersModalOpen(prevOpen => !prevOpen);
   }, []);
 
   const { user } = useUser();
@@ -81,24 +71,18 @@ export default function MembersPage(): ReactElement {
       router.replace(`/${router.organizationId}`);
     } else if (members) {
       // uncheck checkboxes when members were deleted
-      setChecked((prev) =>
-        prev.filter((id) => members.some((node) => node.id === id))
-      );
+      setChecked(prev => prev.filter(id => members.some(node => node.id === id)));
     }
   }, [isPersonal, router, members]);
 
   if (!org || isPersonal) return null;
 
   const me = meQuery.data?.me;
-  const selectedMember =
-    selectedMemberId && members.find((node) => node.id === selectedMemberId);
+  const selectedMember = selectedMemberId && members.find(node => node.id === selectedMemberId);
 
   return (
-    <OrganizationLayout value="members" className="flex w-4/5 flex-col gap-4">
-      <Title title="Members" />
-      <p className="mb-3 font-light text-gray-300">
-        Invite others to your organization and manage access
-      </p>
+    <>
+      <p className="mb-3 font-light text-gray-300">Invite others to your organization and manage access</p>
       {selectedMember && (
         <ChangePermissionsModal
           isOpen={isModalOpen}
@@ -113,10 +97,7 @@ export default function MembersPage(): ReactElement {
         memberIds={checked}
       />
       <div className="flex gap-4">
-        <CopyValue
-          className="grow"
-          value={`${window.location.origin}/join/${org.inviteCode}`}
-        />
+        <CopyValue className="grow" value={`${window.location.origin}/join/${org.inviteCode}`} />
         <Button
           variant="secondary"
           size="large"
@@ -137,7 +118,7 @@ export default function MembersPage(): ReactElement {
           <TrashIcon />
         </Button>
       </div>
-      {members.map((node) => {
+      {members.map(node => {
         const IconToUse =
           {
             [AuthProvider.Github]: GitHubIcon,
@@ -149,38 +130,20 @@ export default function MembersPage(): ReactElement {
         const isDisabled = isOwner || isMe;
 
         return (
-          <Card
-            key={node.id}
-            className="flex items-center gap-2.5 bg-gray-800/40"
-          >
+          <Card key={node.id} className="flex items-center gap-2.5 bg-gray-800/40">
             <Checkbox
-              onCheckedChange={(isChecked) =>
-                setChecked(
-                  isChecked
-                    ? [...checked, node.id]
-                    : checked.filter((k) => k !== node.id)
-                )
+              onCheckedChange={isChecked =>
+                setChecked(isChecked ? [...checked, node.id] : checked.filter(k => k !== node.id))
               }
               checked={checked.includes(node.id)}
               disabled={isDisabled}
             />
-            <Avatar
-              src={isMe ? user.picture : ''}
-              fallback={node.user.displayName[0]}
-              shape="circle"
-            />
+            <Avatar src={isMe ? user.picture : ''} fallback={node.user.displayName[0]} shape="circle" />
             <div className="grow overflow-hidden">
-              <h3 className="line-clamp-1 font-medium">
-                {node.user.displayName}
-              </h3>
-              <h4 className="text-sm font-light text-gray-500">
-                {node.user.email}
-              </h4>
+              <h3 className="line-clamp-1 font-medium">{node.user.displayName}</h3>
+              <h4 className="text-sm font-light text-gray-500">{node.user.email}</h4>
             </div>
-            <div
-              className="rounded-full bg-gray-800 p-2"
-              title={node.user.provider}
-            >
+            <div className="rounded-full bg-gray-800 p-2" title={node.user.provider}>
               <IconToUse className="h-5 w-5" />
             </div>
             <DropdownMenu>
@@ -212,6 +175,17 @@ export default function MembersPage(): ReactElement {
           </Card>
         );
       })}
-    </OrganizationLayout>
+    </>
+  );
+};
+
+export default function MembersPage(): ReactElement {
+  return (
+    <>
+      <Title title="Members" />
+      <OrganizationLayout value="members" className="flex w-4/5 flex-col gap-4">
+        {({ organization }) => <Page organization={organization} />}
+      </OrganizationLayout>
+    </>
   );
 }

@@ -6,12 +6,12 @@ import { useMutation, useQuery } from 'urql';
 
 import { Section } from '@/components/common';
 import { DataWrapper, QueryError } from '@/components/common/DataWrapper';
+import { OrganizationLayout } from '@/components/layouts';
 import { BillingPaymentMethod } from '@/components/organization/billing/BillingPaymentMethod';
 import { BillingPlanPicker } from '@/components/organization/billing/BillingPlanPicker';
 import { LimitSlider } from '@/components/organization/billing/LimitSlider';
 import { PlanSummary } from '@/components/organization/billing/PlanSummary';
-import { OrganizationView } from '@/components/organization/View';
-import { Card, Heading } from '@/components/v2';
+import { Card, Heading, Title } from '@/components/v2';
 import { Button, Input } from '@/components/v2';
 import { BillingPlanType } from '@/gql/graphql';
 import {
@@ -22,10 +22,7 @@ import {
   UpdateOrgRateLimitDocument,
   UpgradeToProDocument,
 } from '@/graphql';
-import {
-  OrganizationAccessScope,
-  useOrganizationAccess,
-} from '@/lib/access/organization';
+import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
 
 const Inner = ({
   organization,
@@ -44,17 +41,13 @@ const Inner = ({
     query: BillingPlansDocument,
   });
 
-  const [paymentDetailsValid, setPaymentDetailsValid] = useState(
-    !!organization.billingConfiguration?.paymentMethod
-  );
+  const [paymentDetailsValid, setPaymentDetailsValid] = useState(!!organization.billingConfiguration?.paymentMethod);
   const upgradeToProMutation = useMutation(UpgradeToProDocument);
   const downgradeToHobbyMutation = useMutation(DowngradeToHobbyDocument);
   const updateOrgRateLimitMutation = useMutation(UpdateOrgRateLimitDocument);
   const planSummaryRef = useRef<HTMLDivElement>(null);
 
-  const [plan, setPlan] = useState<BillingPlanType>(
-    (organization?.plan || 'HOBBY') as BillingPlanType
-  );
+  const [plan, setPlan] = useState<BillingPlanType>((organization?.plan || 'HOBBY') as BillingPlanType);
   const onPlan = useCallback(
     (plan: BillingPlanType) => {
       setPlan(plan);
@@ -73,25 +66,17 @@ const Inner = ({
   const [operationsRateLimit, setOperationsRateLimit] = useState<number>(
     Math.floor(organization.rateLimit.operations / 1_000_000)
   );
-  const [schemaPushesRateLimit, setSchemaPushesLimit] = useState<number>(
-    organization.rateLimit.schemaPushes
-  );
+  const [schemaPushesRateLimit, setSchemaPushesLimit] = useState<number>(organization.rateLimit.schemaPushes);
 
   useEffect(() => {
     if (query.data?.billingPlans?.length > 0) {
       if (organization.plan !== plan) {
-        const actualPlan = query.data.billingPlans.find(
-          (v) => v.planType === plan
-        );
+        const actualPlan = query.data.billingPlans.find(v => v.planType === plan);
 
-        setOperationsRateLimit(
-          Math.floor(actualPlan.includedOperationsLimit / 1_000_000)
-        );
+        setOperationsRateLimit(Math.floor(actualPlan.includedOperationsLimit / 1_000_000));
         setSchemaPushesLimit(actualPlan.includedSchemaPushLimit);
       } else {
-        setOperationsRateLimit(
-          Math.floor(organization.rateLimit.operations / 1_000_000)
-        );
+        setOperationsRateLimit(Math.floor(organization.rateLimit.operations / 1_000_000));
         setSchemaPushesLimit(organization.rateLimit.schemaPushes);
       }
     }
@@ -157,8 +142,7 @@ const Inner = ({
               Update Limits
             </Button>
             <Section.Subtitle className="mt-4">
-              Updating your organization limitations might take a few minutes to
-              update.
+              Updating your organization limitations might take a few minutes to update.
             </Section.Subtitle>
           </>
         );
@@ -176,12 +160,7 @@ const Inner = ({
     }
     if (plan === 'PRO') {
       return (
-        <Button
-          variant="primary"
-          type="button"
-          onClick={upgrade}
-          disabled={!paymentDetailsValid}
-        >
+        <Button variant="primary" type="button" onClick={upgrade} disabled={!paymentDetailsValid}>
           Upgrade to Pro
         </Button>
       );
@@ -198,9 +177,7 @@ const Inner = ({
   };
 
   const error =
-    upgradeToProMutation[0].error ||
-    downgradeToHobbyMutation[0].error ||
-    updateOrgRateLimitMutation[0].error;
+    upgradeToProMutation[0].error || downgradeToHobbyMutation[0].error || updateOrgRateLimitMutation[0].error;
 
   return (
     <DataWrapper
@@ -211,10 +188,8 @@ const Inner = ({
         updateOrgRateLimitMutation[0].fetching
       }
     >
-      {(result) => {
-        const selectedPlan = result.data.billingPlans.find(
-          (v) => v.planType === plan
-        );
+      {result => {
+        const selectedPlan = result.data.billingPlans.find(v => v.planType === plan);
 
         return (
           <div className="flex w-full flex-col gap-5">
@@ -253,9 +228,7 @@ const Inner = ({
 
                   {plan === BillingPlanType.Pro && (
                     <div className="mt-8">
-                      <Heading className="mb-4">
-                        Customize your reserved volume
-                      </Heading>
+                      <Heading className="mb-4">Customize your reserved volume</Heading>
                       <div className="flex flex-row items-start gap-2 p-5">
                         <div className="w-1/2 pr-5">
                           <LimitSlider
@@ -301,15 +274,14 @@ const Inner = ({
                       onValidationChange={setPaymentDetailsValid}
                     />
                     <div className="w-1/2">
-                      {plan === BillingPlanType.Pro &&
-                      plan !== organization.plan ? (
+                      {plan === BillingPlanType.Pro && plan !== organization.plan ? (
                         <div>
                           <Heading className="mb-3">Discount</Heading>
                           <Input
                             className="w-full"
                             size="medium"
                             value={couponCode}
-                            onChange={(e) => setCouponCode(e.target.value)}
+                            onChange={e => setCouponCode(e.target.value)}
                             placeholder="Code"
                           />
                         </div>
@@ -330,8 +302,11 @@ const Inner = ({
 
 export default function ManageSubscriptionPage(): ReactElement {
   return (
-    <OrganizationView title="Manage Subscription" includeBilling>
-      {({ organization }) => <Inner organization={organization} />}
-    </OrganizationView>
+    <>
+      <Title title="Manage Subscription" />
+      <OrganizationLayout includeBilling includeRateLimit>
+        {({ organization }) => <Inner organization={organization} />}
+      </OrganizationLayout>
+    </>
   );
 }
