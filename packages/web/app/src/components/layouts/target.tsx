@@ -2,14 +2,7 @@ import { ReactElement, ReactNode, useEffect } from 'react';
 import NextLink from 'next/link';
 import { useQuery } from 'urql';
 
-import {
-  Button,
-  DropdownMenu,
-  Header,
-  Heading,
-  Link,
-  Tabs,
-} from '@/components/v2';
+import { Button, DropdownMenu, Heading, Link, Tabs, SubHeader } from '@/components/v2';
 import { ArrowDownIcon } from '@/components/v2/icon';
 import { ProjectDocument, TargetsDocument } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
@@ -55,7 +48,7 @@ export const TargetLayout = ({
   });
 
   const targets = targetsQuery.data?.targets;
-  const target = targets?.nodes.find((node) => node.cleanId === targetId);
+  const target = targets?.nodes.find(node => node.cleanId === targetId);
 
   useEffect(() => {
     if (!targetsQuery.fetching && !target) {
@@ -69,7 +62,7 @@ export const TargetLayout = ({
 
   return (
     <>
-      <Header>
+      <SubHeader>
         {org && project && (
           <div className="wrapper flex items-center text-xs font-medium text-gray-500">
             <NextLink href={`/${orgId}`} passHref>
@@ -95,15 +88,11 @@ export const TargetLayout = ({
                 </DropdownMenu.Trigger>
                 <DropdownMenu.Content sideOffset={5} align="end">
                   {targets.nodes.map(
-                    (node) =>
+                    node =>
                       node.cleanId !== targetId && (
                         <DropdownMenu.Item key={node.cleanId}>
-                          <NextLink
-                            href={`/${orgId}/${projectId}/${node.cleanId}`}
-                          >
-                            <a className="line-clamp-1 max-w-2xl">
-                              {node.name}
-                            </a>
+                          <NextLink href={`/${orgId}/${projectId}/${node.cleanId}`}>
+                            <a className="line-clamp-1 max-w-2xl">{node.name}</a>
                           </NextLink>
                         </DropdownMenu.Item>
                       )
@@ -112,11 +101,10 @@ export const TargetLayout = ({
               </DropdownMenu>
             )}
           </div>
-          <div className="mb-10 text-xs font-bold text-[#34eab9]">
-            {project?.type}
-          </div>
+          <div className="mb-10 text-xs font-bold text-[#34eab9]">{project?.type}</div>
         </div>
-      </Header>
+      </SubHeader>
+
       <Tabs className="wrapper" value={value}>
         <Tabs.List>
           <NextLink passHref href={`/${orgId}/${projectId}/${targetId}`}>
@@ -124,26 +112,17 @@ export const TargetLayout = ({
               <a>Schema</a>
             </Tabs.Trigger>
           </NextLink>
-          <NextLink
-            passHref
-            href={`/${orgId}/${projectId}/${targetId}/operations`}
-          >
+          <NextLink passHref href={`/${orgId}/${projectId}/${targetId}/operations`}>
             <Tabs.Trigger value={TabValue.Operations} asChild>
               <a>Operations</a>
             </Tabs.Trigger>
           </NextLink>
-          <NextLink
-            passHref
-            href={`/${orgId}/${projectId}/${targetId}/laboratory`}
-          >
+          <NextLink passHref href={`/${orgId}/${projectId}/${targetId}/laboratory`}>
             <Tabs.Trigger value={TabValue.Laboratory} asChild>
               <a>Laboratory</a>
             </Tabs.Trigger>
           </NextLink>
-          <NextLink
-            passHref
-            href={`/${orgId}/${projectId}/${targetId}/settings`}
-          >
+          <NextLink passHref href={`/${orgId}/${projectId}/${targetId}/settings`}>
             <Tabs.Trigger value={TabValue.Settings} asChild>
               <a>Settings</a>
             </Tabs.Trigger>

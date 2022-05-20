@@ -12,6 +12,7 @@ import GlobalStylesComponent from '@/components/common/GlobalStyles';
 import { AuthProvider } from '@/components/auth/AuthProvider';
 import { NavigationProvider } from '@/components/common/Navigation';
 import { Page } from '@/components/common/Page';
+import { Header } from '@/components/v2';
 import * as gtag from '@/lib/gtag';
 import { colors } from '@/lib/theme';
 import { LoadingAPIIndicator } from '@/components/common/LoadingAPI';
@@ -140,6 +141,7 @@ function App({ Component, pageProps }: AppProps) {
                         }
                       `}
                     />
+                    <Header />
                     <Component {...pageProps} />
                   </>
                 )}
