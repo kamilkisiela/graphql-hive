@@ -10,7 +10,7 @@ import {
   TargetActivitiesQuery,
   TargetEssentialsFragment,
   UserFieldsFragment,
-} from '../../../graphql';
+} from '@/graphql';
 
 const Link = tw.a`text-yellow-500 dark:text-yellow-300 hover:text-yellow-600 dark:hover:text-yellow-500`;
 export const Highlight = tw.span`text-yellow-500 dark:text-yellow-300 hover:text-yellow-600 dark:hover:text-yellow-500`;

@@ -31,8 +31,9 @@ export const getActivity = (
   icon: ReactElement;
   content: ReactElement | string;
 } => {
-  // @ts-ignore
-  const { __typename: type, organization, user } = activity;
+  const { __typename: type } = activity;
+  const organization = (activity as any).organization;
+  const user = (activity as any).user;
   const projectLink = 'project' in activity && (
     <NextLink
       href={{
