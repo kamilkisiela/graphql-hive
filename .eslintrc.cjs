@@ -8,6 +8,7 @@ module.exports = {
     'public',
     'packages/web/app/src/graphql/index.ts',
     'packages/libraries/cli/src/sdk.ts',
+    'packages/services/storage/src/db/types.ts',
   ],
   parserOptions: {
     ecmaVersion: 2020,

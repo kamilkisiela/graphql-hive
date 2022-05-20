@@ -2,8 +2,8 @@ name: CI
 on: [pull_request]
 
 jobs:
-  integration-tests:
-    name: 'Integration Tests'
+  setup:
+    name: 'Setup'
     runs-on: ubuntu-latest
 
     env:
@@ -23,8 +23,45 @@ jobs:
       - name: Install Dependencies
         run: yarn --frozen-lockfile
 
-      - name: Generate Types
-        run: yarn graphql:generate
+      - name: Create Database
+        working-directory: packages/services/storage
+        run: yarn db:create
+
+      - name: Migrate Database
+        working-directory: packages/services/storage
+        run: yarn db:migrator up
+
+      - name: Generate Database Types
+        working-directory: packages/services/storage
+        run: yarn db:generate
+
+      - name: Check if DB types were modified
+        run: git diff --exit-code ./packages/services/storage/src/db/types.ts
+
+      - name: Share node_modules
+        uses: actions/cache@v2
+        with:
+          path: '**/node_modules'
+          key: ${{ github.sha }}
+
+  integration-tests:
+    name: 'Integration Tests'
+    runs-on: ubuntu-latest
+    needs: setup
+
+    env:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+      TURBO_PREFLIGHT: 'true'
+      TURBO_API_URL: ${{ secrets.TURBO_API_URL }}
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16
 
       - name: Build
         run: yarn workspace integration-tests run build-and-pack
@@ -55,6 +92,8 @@ jobs:
   schema-check:
     name: 'Schema Check'
     runs-on: ubuntu-latest
+    needs: setup
+
     env:
       HIVE_TOKEN: ${{ secrets.HIVE_TOKEN }}
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
@@ -69,9 +108,6 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: 16
-
-      - name: Install Dependencies
-        run: yarn --frozen-lockfile
 
       - name: Generate Types
         run: yarn graphql:generate
@@ -84,28 +120,12 @@ jobs:
       - name: Schema Check
         run: ./packages/libraries/cli/bin/dev schema:check "packages/services/api/src/modules/*/module.graphql.ts" ${{ steps.pr-label-check.outputs.SAFE_FLAG }} --github
 
-  build-test:
-    name: 'Build and Test'
+  test:
+    name: 'Tests'
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:13.1-alpine
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_USER: postgres
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+    needs: setup
+
     env:
-      POSTGRES_HOST: localhost
-      POSTGRES_PORT: 5432
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_USER: postgres
-      HIVE_TOKEN: ${{ secrets.HIVE_TOKEN }}
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
       TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
       TURBO_PREFLIGHT: 'true'
@@ -119,52 +139,18 @@ jobs:
         with:
           node-version: 16
 
-      - name: Install Dependencies
-        run: yarn --frozen-lockfile
-
       - name: Generate Types
         run: yarn graphql:generate
-
-      - name: Create Database
-        working-directory: packages/services/storage
-        run: yarn db:create
-
-      - name: Migrate Database
-        working-directory: packages/services/storage
-        run: yarn db:migrator up
-
-      - name: Generate Database Types
-        working-directory: packages/services/storage
-        run: yarn db:generate
-
-      - name: Build
-        run: yarn build
 
       - name: Test
         run: yarn test
 
-  type-check:
-    name: 'Check types'
+  build:
+    name: 'Build'
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:13.1-alpine
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_USER: postgres
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+    needs: setup
+
     env:
-      POSTGRES_HOST: localhost
-      POSTGRES_PORT: 5432
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_USER: postgres
-      HIVE_TOKEN: ${{ secrets.HIVE_TOKEN }}
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
       TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
       TURBO_PREFLIGHT: 'true'
@@ -178,23 +164,33 @@ jobs:
         with:
           node-version: 16
 
-      - name: Install Dependencies
-        run: yarn --frozen-lockfile
-
       - name: Generate Types
         run: yarn graphql:generate
 
-      - name: Create Database
-        working-directory: packages/services/storage
-        run: yarn db:create
+      - name: Build
+        run: yarn build
 
-      - name: Migrate Database
-        working-directory: packages/services/storage
-        run: yarn db:migrator up
+  type-check:
+    name: 'Check types'
+    runs-on: ubuntu-latest
+    needs: setup
 
-      - name: Generate Database Types
-        working-directory: packages/services/storage
-        run: yarn db:generate
+    env:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+      TURBO_PREFLIGHT: 'true'
+      TURBO_API_URL: ${{ secrets.TURBO_API_URL }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16
+
+      - name: Generate Types
+        run: yarn graphql:generate
 
       - name: Type Check
         run: yarn typecheck
