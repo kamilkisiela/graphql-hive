@@ -21,11 +21,7 @@ import { useQuery } from 'urql';
 import { useDebouncedCallback } from 'use-debounce';
 
 import { Spinner } from '@/components/common/Spinner';
-import {
-  DateRangeInput,
-  OperationsStatsDocument,
-  OperationStatsFieldsFragment,
-} from '@/graphql';
+import { DateRangeInput, OperationsStatsDocument, OperationStatsFieldsFragment } from '@/graphql';
 import { useFormattedNumber } from '@/lib/hooks/use-formatted-number';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
@@ -38,28 +34,24 @@ const OperationsFilter: React.FC<{
   selected?: string[];
 }> = ({ onClose, isOpen, onFilter, focusRef, operations, selected }) => {
   const [selectedItems, setSelectedItems] = React.useState<string[]>(
-    selected?.length > 0 ? selected : operations.map((op) => op.operationHash)
+    selected?.length > 0 ? selected : operations.map(op => op.operationHash)
   );
   const onSelect = React.useCallback(
     (operationHash: string, selected: boolean) => {
-      const itemAt = selectedItems.findIndex((hash) => hash === operationHash);
+      const itemAt = selectedItems.findIndex(hash => hash === operationHash);
       const exists = itemAt > -1;
 
       if (selected && !exists) {
         setSelectedItems([...selectedItems, operationHash]);
       } else if (!selected && exists) {
-        setSelectedItems(
-          selectedItems.filter((hash) => hash !== operationHash)
-        );
+        setSelectedItems(selectedItems.filter(hash => hash !== operationHash));
       }
     },
     [selectedItems, setSelectedItems]
   );
   const [searchTerm, setSearchTerm] = React.useState('');
   const debouncedFilter = useDebouncedCallback((value: string) => {
-    setVisibleOperations(
-      operations.filter((op) => op.name.toLocaleLowerCase().includes(value))
-    );
+    setVisibleOperations(operations.filter(op => op.name.toLocaleLowerCase().includes(value)));
   }, 500);
 
   const onChange = React.useCallback(
@@ -75,33 +67,22 @@ const OperationsFilter: React.FC<{
   const [visibleOperations, setVisibleOperations] = React.useState(operations);
 
   const selectAll = React.useCallback(() => {
-    setSelectedItems(operations.map((op) => op.operationHash));
+    setSelectedItems(operations.map(op => op.operationHash));
   }, [operations]);
   const selectNone = React.useCallback(() => {
     setSelectedItems([]);
   }, [setSelectedItems]);
 
   return (
-    <Drawer
-      onClose={onClose}
-      finalFocusRef={focusRef}
-      isOpen={isOpen}
-      placement="right"
-      size="md"
-    >
+    <Drawer onClose={onClose} finalFocusRef={focusRef} isOpen={isOpen} placement="right" size="md">
       <DrawerOverlay />
       <DrawerContent>
-        <DrawerHeader>Filter by operation</DrawerHeader>
+        <DrawerHeader bgColor="gray.900">Filter by operation</DrawerHeader>
         <DrawerCloseButton />
-        <DrawerBody>
+        <DrawerBody bgColor="gray.900">
           <div tw="flex flex-col h-full space-y-3">
             <InputGroup>
-              <Input
-                pr="3rem"
-                placeholder="Search for operation..."
-                onChange={onChange}
-                value={searchTerm}
-              />
+              <Input pr="3rem" placeholder="Search for operation..." onChange={onChange} value={searchTerm} />
               <InputRightElement width="3rem">
                 <IconButton
                   variant="ghost"
@@ -159,10 +140,7 @@ const OperationsFilter: React.FC<{
                           style={style}
                           key={operation.id}
                           operation={operation}
-                          selected={selectedItems.some(
-                            (operationHash) =>
-                              operationHash === operation.operationHash
-                          )}
+                          selected={selectedItems.some(operationHash => operationHash === operation.operationHash)}
                           onSelect={onSelect}
                         />
                       );
@@ -217,7 +195,7 @@ const OperationsFilterContainer: React.FC<{
       isOpen={isOpen}
       onClose={onClose}
       focusRef={focusRef}
-      onFilter={(hashes) => {
+      onFilter={hashes => {
         onFilter(hashes.length === allOperations.length ? [] : hashes);
       }}
     />
@@ -239,16 +217,10 @@ const OperationRow: React.FC<{
     <div style={style} tw="flex flex-row space-x-4 items-center">
       <Checkbox colorScheme="primary" isChecked={selected} onChange={change} />
       <div tw="flex flex-grow flex-row items-center cursor-pointer">
-        <button
-          tw="flex-grow overflow-ellipsis overflow-hidden whitespace-nowrap"
-          onClick={change}
-        >
+        <button tw="flex-grow overflow-ellipsis overflow-hidden whitespace-nowrap" onClick={change}>
           {operation.name}
         </button>
-        <button
-          tw="width[75px] flex-shrink-0 text-right text-gray-500"
-          onClick={change}
-        >
+        <button tw="width[75px] flex-shrink-0 text-right text-gray-500" onClick={change}>
           {requests}
         </button>
       </div>
@@ -271,10 +243,11 @@ export const OperationsFilterTrigger: React.FC<{
         rightIcon={<VscChevronDown />}
         size="sm"
         onClick={onOpen}
+        borderRadius="sm"
+        bgColor="whiteAlpha.50"
+        _hover={{ bgColor: 'whiteAlpha.100' }}
       >
-        <span tw="font-normal">
-          Operations ({selected?.length > 0 ? selected.length : 'all'})
-        </span>
+        <span tw="font-normal">Operations ({selected?.length > 0 ? selected.length : 'all'})</span>
       </Button>
       <OperationsFilterContainer
         isOpen={isOpen}
