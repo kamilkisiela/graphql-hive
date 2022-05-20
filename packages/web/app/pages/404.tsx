@@ -27,10 +27,6 @@ const NotFoundPage = () => {
         #__next {
           color: inherit;
         }
-
-        .next-error-h1 {
-          border-color: #fcfcfc !important;
-        }
       `}</style>
     </div>
   );
