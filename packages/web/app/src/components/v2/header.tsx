@@ -76,7 +76,7 @@ export const Header = (): ReactElement => {
     <header
       className={clsx(
         'fixed top-0 z-40 w-full border-b border-b-transparent transition',
-        isOpaque && 'border-b-gray-900 backdrop-blur bg-black/80'
+        isOpaque && 'border-b-gray-900 bg-black/80 backdrop-blur'
       )}
     >
       <div className="wrapper flex h-[84px] items-center justify-between">
@@ -134,11 +134,7 @@ export const Header = (): ReactElement => {
               </a>
             </NextLink>
             <DropdownMenu.Item asChild>
-              <a
-                href="https://theguildoss.notion.site/Hive-Guide-c87818e1829349a89cc9209da61c0da1"
-                target="_blank"
-                rel="noreferrer"
-              >
+              <a href={process.env.NEXT_PUBLIC_DOCS_LINK} target="_blank" rel="noreferrer">
                 <FileTextIcon />
                 Documentation
               </a>
