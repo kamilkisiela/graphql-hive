@@ -6,8 +6,9 @@ import { useQuery } from 'urql';
 import { Button, DropdownMenu, Heading, Link, Tabs, SubHeader } from '@/components/v2';
 import { ArrowDownIcon, TargetIcon } from '@/components/v2/icon';
 import { CreateTargetModal } from '@/components/v2/modals';
-import { ProjectDocument, ProjectsDocument } from '@/graphql';
+import { ProjectDocument, ProjectsDocument, ProjectFieldsFragment, OrganizationFieldsFragment } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useProjectAccess, ProjectAccessScope, canAccessProject } from '@/lib/access/project';
 
 enum TabValue {
   Targets = 'targets',
@@ -20,7 +21,7 @@ export const ProjectLayout = ({
   value,
   className,
 }: {
-  children: ReactNode;
+  children(props: { project: ProjectFieldsFragment; organization: OrganizationFieldsFragment }): ReactNode;
   value: 'targets' | 'alerts' | 'settings';
   className?: string;
 }): ReactElement => {
@@ -56,11 +57,18 @@ export const ProjectLayout = ({
     },
   });
 
+  useProjectAccess({
+    scope: ProjectAccessScope.Read,
+    member: projectQuery.data?.organization.organization.me,
+    redirect: true,
+  });
+
   if (projectQuery.fetching || projectQuery.error) return null;
 
   const project = projectQuery.data?.project;
   const org = projectQuery.data?.organization.organization;
   const projects = projectsQuery.data?.projects;
+  const me = org.me;
 
   return (
     <>
@@ -117,19 +125,23 @@ export const ProjectLayout = ({
               <a>Targets</a>
             </Tabs.Trigger>
           </NextLink>
-          <NextLink passHref href={`/${orgId}/${projectId}/alerts`}>
-            <Tabs.Trigger value={TabValue.Alerts} asChild>
-              <a>Alerts</a>
-            </Tabs.Trigger>
-          </NextLink>
-          <NextLink passHref href={`/${orgId}/${projectId}/settings`}>
-            <Tabs.Trigger value={TabValue.Settings} asChild>
-              <a>Settings</a>
-            </Tabs.Trigger>
-          </NextLink>
+          {canAccessProject(ProjectAccessScope.Alerts, me) && (
+            <NextLink passHref href={`/${orgId}/${projectId}/alerts`}>
+              <Tabs.Trigger value={TabValue.Alerts} asChild>
+                <a>Alerts</a>
+              </Tabs.Trigger>
+            </NextLink>
+          )}
+          {canAccessProject(ProjectAccessScope.Settings, me) && (
+            <NextLink passHref href={`/${orgId}/${projectId}/settings`}>
+              <Tabs.Trigger value={TabValue.Settings} asChild>
+                <a>Settings</a>
+              </Tabs.Trigger>
+            </NextLink>
+          )}
         </Tabs.List>
         <Tabs.Content value={value} className={className}>
-          {children}
+          {children({ project, organization: org })}
         </Tabs.Content>
       </Tabs>
     </>

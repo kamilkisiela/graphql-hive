@@ -18,7 +18,10 @@ import {
   AlertsDocument,
   DeleteAlertChannelsDocument,
   DeleteAlertsDocument,
+  OrganizationFieldsFragment,
+  ProjectFieldsFragment,
 } from '@/graphql';
+import { ProjectAccessScope,useProjectAccess } from '@/lib/access/project';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
 const channelAlertsColumns = [
@@ -125,7 +128,15 @@ const Channels = (): ReactElement => {
   );
 };
 
-export default function AlertsPage(): ReactElement {
+const Page = (props: {
+  organization: OrganizationFieldsFragment;
+  project: ProjectFieldsFragment
+}) => {
+  useProjectAccess({
+    scope: ProjectAccessScope.Alerts,
+    member: props.organization.me,
+    redirect: true,
+  });
   const [checked, setChecked] = useState<string[]>([]);
   const router = useRouteSelector();
   const [isModalOpen, setModalOpen] = useState(false);
@@ -137,19 +148,16 @@ export default function AlertsPage(): ReactElement {
     query: AlertsDocument,
     variables: {
       selector: {
-        organization: router.organizationId,
-        project: router.projectId,
+        organization: props.organization.cleanId,
+        project: props.project.cleanId,
       },
     },
     requestPolicy: 'cache-and-network',
   });
 
   const alerts = alertsQuery.data?.alerts || [];
-
-  return (
-    <ProjectLayout value="alerts" className="flex flex-col gap-y-10">
-      <Title title="Alerts" />
-      <Channels />
+  return <>
+  <Channels />
       <Card>
         <Heading className="mb-2">Active Alerts</Heading>
         <p className="mb-3 font-light text-gray-300">
@@ -211,6 +219,16 @@ export default function AlertsPage(): ReactElement {
           toggleModalOpen={toggleModalOpen}
         />
       )}
+  </>
+}
+
+export default function AlertsPage(): ReactElement {
+  return (
+    <>
+    <Title title="Alerts" />
+    <ProjectLayout value="alerts" className="flex flex-col gap-y-10">
+      {props => <Page organization={props.organization} project={props.project} />}
     </ProjectLayout>
+    </>
   );
 }
