@@ -17,8 +17,6 @@ const NotFoundPage = () => {
         html {
           background: url(/images/bg-top-shine.svg) no-repeat left top,
             url(/images/bg-bottom-shine.svg) no-repeat right bottom, #0b0d11;
-          display: flex;
-          align-items: center;
         }
 
         body {
