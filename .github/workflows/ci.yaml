@@ -81,6 +81,12 @@ jobs:
         with:
           node-version: 16
 
+      - name: Pull node_modules
+        uses: actions/cache@v2
+        with:
+          path: '**/node_modules'
+          key: ${{ github.sha }}
+
       - name: Build
         run: yarn workspace integration-tests run build-and-pack
         env:
@@ -127,6 +133,12 @@ jobs:
         with:
           node-version: 16
 
+      - name: Pull node_modules
+        uses: actions/cache@v2
+        with:
+          path: '**/node_modules'
+          key: ${{ github.sha }}
+
       - name: Generate Types
         run: yarn graphql:generate
 
@@ -157,6 +169,12 @@ jobs:
         with:
           node-version: 16
 
+      - name: Pull node_modules
+        uses: actions/cache@v2
+        with:
+          path: '**/node_modules'
+          key: ${{ github.sha }}
+
       - name: Generate Types
         run: yarn graphql:generate
 
@@ -182,6 +200,12 @@ jobs:
         with:
           node-version: 16
 
+      - name: Pull node_modules
+        uses: actions/cache@v2
+        with:
+          path: '**/node_modules'
+          key: ${{ github.sha }}
+
       - name: Generate Types
         run: yarn graphql:generate
 
@@ -206,6 +230,12 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: 16
+
+      - name: Pull node_modules
+        uses: actions/cache@v2
+        with:
+          path: '**/node_modules'
+          key: ${{ github.sha }}
 
       - name: Generate Types
         run: yarn graphql:generate
