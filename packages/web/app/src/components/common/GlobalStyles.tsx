@@ -1,3 +1,4 @@
+import { ReactElement } from 'react';
 import tw, { GlobalStyles } from 'twin.macro';
 import { Global, css } from '@emotion/react';
 
@@ -5,7 +6,7 @@ const customStyles = css`
   html,
   body,
   #__next {
-    ${tw`w-screen h-screen overflow-y-auto`}
+    ${tw`w-screen h-screen`}
     font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif;
   }
 
@@ -14,7 +15,7 @@ const customStyles = css`
   }
 `;
 
-export default function GlobalStylesComponent() {
+export default function GlobalStylesComponent(): ReactElement {
   return (
     <>
       <GlobalStyles />

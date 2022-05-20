@@ -162,9 +162,9 @@ export default function SettingsPage(): ReactElement {
     },
   });
 
-  const { organization } = organizationQuery.data.organization;
+  const org = organizationQuery.data?.organization.organization;
 
-  const isRegularOrg = organization.type === OrganizationType.Regular;
+  const isRegularOrg = org?.type === OrganizationType.Regular;
   const [isModalOpen, setModalOpen] = useState(false);
   const toggleModalOpen = useCallback(() => {
     setModalOpen((prevOpen) => !prevOpen);
@@ -183,7 +183,7 @@ export default function SettingsPage(): ReactElement {
   } = useFormik({
     enableReinitialize: true,
     initialValues: {
-      name: organization.name,
+      name: org?.name,
     },
     validationSchema: Yup.object().shape({
       name: Yup.string().required('Organization name is required'),
@@ -191,7 +191,7 @@ export default function SettingsPage(): ReactElement {
     onSubmit: (values) =>
       mutate({
         input: {
-          organization: organization.cleanId,
+          organization: router.organizationId,
           name: values.name,
         },
       }),

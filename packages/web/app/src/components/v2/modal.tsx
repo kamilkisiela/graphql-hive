@@ -41,7 +41,7 @@ const Modal: FC<{
     <Trigger asChild>{trigger}</Trigger>
     <Portal>
       <Overlay
-        className="fixed inset-0 bg-gray-800/80"
+        className="fixed inset-0 z-50 bg-gray-800/80"
         css={css`
           @media (prefers-reduced-motion: no-preference) {
             animation: ${overlayShow} 300ms cubic-bezier(0.16, 1, 0.3, 1);
@@ -64,8 +64,7 @@ const Modal: FC<{
             className
           )}
           css={css`
-            box-shadow: hsl(206 22% 7% / 35%) 0 10px 38px -10px,
-              hsl(206 22% 7% / 20%) 0 10px 20px -15px;
+            box-shadow: hsl(206 22% 7% / 35%) 0 10px 38px -10px, hsl(206 22% 7% / 20%) 0 10px 20px -15px;
             transform: translate(-50%, -50%);
             @media (prefers-reduced-motion: no-preference) {
               animation: ${contentShow} 300ms cubic-bezier(0.16, 1, 0.3, 1);
@@ -95,10 +94,7 @@ Modal.Title = ({ className, children, ...props }) => {
 
 Modal.Description = ({ children, className, ...props }) => {
   return (
-    <Description
-      className={clsx('text-sm font-medium text-gray-500', className)}
-      {...props}
-    >
+    <Description className={clsx('text-sm font-medium text-gray-500', className)} {...props}>
       {children}
     </Description>
   );

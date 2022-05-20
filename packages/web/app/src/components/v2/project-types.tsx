@@ -1,5 +1,5 @@
 import { ReactElement } from 'react';
-import NextImage, { ImageProps } from 'next/image';
+import Image, { ImageProps } from 'next/image';
 import { RadioGroupProps } from '@radix-ui/react-radio-group';
 import clsx from 'clsx';
 
@@ -42,39 +42,26 @@ const PROJECTS: {
   },
 ];
 
-export const ProjectTypes = ({
-  children,
-  className,
-  ...props
-}: RadioGroupProps): ReactElement => {
+export const ProjectTypes = ({ children, className, ...props }: RadioGroupProps): ReactElement => {
   return (
     <RadioGroup {...props}>
       {PROJECTS.map(({ type, image, title, description }) => {
         const capitalizedType = type[0] + type.slice(1).toLowerCase();
         return (
-          <Radio
-            key={type}
-            value={type}
-            className="flex border-transparent bg-gray-800"
-          >
-            <NextImage
+          <Radio key={type} value={type} className="flex border-transparent bg-gray-800">
+            <Image
               src={image}
               alt={`${capitalizedType} project illustration`}
               className="drag-none rounded-sm bg-black"
             />
             <div className="grow p-2.5">
               <h4
-                className={clsx(
-                  'text-xs font-medium',
-                  title === 'DISTRIBUTED' ? 'text-[#1cc8ee]' : 'text-orange-500'
-                )}
+                className={clsx('text-xs font-medium', title === 'DISTRIBUTED' ? 'text-[#1cc8ee]' : 'text-orange-500')}
               >
                 {title}
               </h4>
               <h2 className="font-bold leading-none">{capitalizedType}</h2>
-              <span className="self-end text-sm font-medium text-gray-500">
-                {description}
-              </span>
+              <span className="self-end text-sm font-medium text-gray-500">{description}</span>
             </div>
           </Radio>
         );

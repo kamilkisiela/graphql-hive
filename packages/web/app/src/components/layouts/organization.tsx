@@ -1,15 +1,9 @@
-import {
-  ReactElement,
-  ReactNode,
-  useCallback,
-  useEffect,
-  useState,
-} from 'react';
+import { ReactElement, ReactNode, useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useQuery } from 'urql';
 import NextLink from 'next/link';
 
-import { Button, Header, Heading, Tabs } from '@/components/v2';
+import { Button, Heading, Tabs, SubHeader } from '@/components/v2';
 import { PlusIcon } from '@/components/v2/icon';
 import { CreateProjectModal } from '@/components/v2/modals';
 import { OrganizationDocument, OrganizationType } from '@/graphql';
@@ -35,7 +29,7 @@ export const OrganizationLayout = ({
   const { push } = useRouter();
   const [isModalOpen, setModalOpen] = useState(false);
   const toggleModalOpen = useCallback(() => {
-    setModalOpen((prevOpen) => !prevOpen);
+    setModalOpen(prevOpen => !prevOpen);
   }, []);
 
   const orgId = router.organizationId;
@@ -59,36 +53,26 @@ export const OrganizationLayout = ({
   if (organizationQuery.fetching || organizationQuery.error) return null;
 
   const organization = organizationQuery.data?.organization.organization;
-  const isRegularOrg =
-    !organization || organization.type === OrganizationType.Regular;
+  const isRegularOrg = !organization || organization.type === OrganizationType.Regular;
 
   return (
     <>
-      <Header>
-        <header className="wrapper flex h-[84px] items-center justify-between">
+      <SubHeader>
+        <div className="wrapper flex h-[84px] items-center justify-between">
           <div>
             <Heading size="2xl" className="line-clamp-1">
               {organization?.name}
             </Heading>
-            <div className="text-xs font-medium text-gray-500">
-              Organization
-            </div>
+            <div className="text-xs font-medium text-gray-500">Organization</div>
           </div>
-          <Button
-            size="large"
-            variant="primary"
-            className="shrink-0"
-            onClick={toggleModalOpen}
-          >
+          <Button size="large" variant="primary" className="shrink-0" onClick={toggleModalOpen}>
             Create Project
             <PlusIcon className="ml-2" />
           </Button>
-          <CreateProjectModal
-            isOpen={isModalOpen}
-            toggleModalOpen={toggleModalOpen}
-          />
-        </header>
-      </Header>
+          <CreateProjectModal isOpen={isModalOpen} toggleModalOpen={toggleModalOpen} />
+        </div>
+      </SubHeader>
+
       <Tabs className="wrapper" value={value}>
         <Tabs.List>
           <NextLink passHref href={`/${orgId}`}>
