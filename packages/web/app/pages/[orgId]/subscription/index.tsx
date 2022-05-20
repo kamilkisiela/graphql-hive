@@ -9,18 +9,9 @@ import { CurrencyFormatter } from '@/components/organization/billing/helpers';
 import { InvoicesList } from '@/components/organization/billing/InvoicesList';
 import { RateLimitWarn } from '@/components/organization/billing/RateLimitWarn';
 import { OrganizationUsageEstimationView } from '@/components/organization/Usage';
-import { OrganizationView } from '@/components/organization/View';
-import { Card, Heading } from '@/components/v2';
-import { Tabs } from '@/components/v2';
-import {
-  OrganizationFieldsFragment,
-  OrgBillingInfoFieldsFragment,
-  OrgRateLimitFieldsFragment,
-} from '@/graphql';
-import {
-  OrganizationAccessScope,
-  useOrganizationAccess,
-} from '@/lib/access/organization';
+import { Card, Heading, Tabs, Title } from '@/components/v2';
+import { OrganizationFieldsFragment, OrgBillingInfoFieldsFragment, OrgRateLimitFieldsFragment } from '@/graphql';
+import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
 
 const DateFormatter = Intl.DateTimeFormat('en-US', {
   month: 'short',
@@ -33,9 +24,7 @@ const ManagePage = dynamic(() => import('./manage'));
 const Page = ({
   organization,
 }: {
-  organization: OrganizationFieldsFragment &
-    OrgBillingInfoFieldsFragment &
-    OrgRateLimitFieldsFragment;
+  organization: OrganizationFieldsFragment & OrgBillingInfoFieldsFragment & OrgRateLimitFieldsFragment;
 }): ReactElement => {
   const canAccess = useOrganizationAccess({
     scope: OrganizationAccessScope.Settings,
@@ -63,8 +52,7 @@ const Page = ({
       </Tabs.List>
       <Tabs.Content value="overview">
         <p className="mb-3 font-light text-gray-300">
-          Information about your Hive plan, subscription, usage and data
-          ingestion
+          Information about your Hive plan, subscription, usage and data ingestion
         </p>
         <RateLimitWarn organization={organization} />
         <Card className="mt-8">
@@ -75,13 +63,9 @@ const Page = ({
                 <Stat className="mb-4">
                   <StatLabel>Next Invoice</StatLabel>
                   <StatNumber>
-                    {CurrencyFormatter.format(
-                      organization.billingConfiguration.upcomingInvoice.amount
-                    )}
+                    {CurrencyFormatter.format(organization.billingConfiguration.upcomingInvoice.amount)}
                   </StatNumber>
-                  <StatHelpText>
-                    {organization.billingConfiguration.upcomingInvoice.date}
-                  </StatHelpText>
+                  <StatHelpText>{organization.billingConfiguration.upcomingInvoice.date}</StatHelpText>
                 </Stat>
               )}
             </BillingView>
@@ -114,14 +98,11 @@ const Page = ({
 
 export default function SubscriptionPage(): ReactElement {
   return (
-    <OrganizationLayout value="subscription">
-      <OrganizationView
-        title="Subscription & Usage"
-        includeBilling
-        includeRateLimit
-      >
+    <>
+      <Title title="Subscription & Usage" />
+      <OrganizationLayout value="subscription" includeBilling includeRateLimit>
         {({ organization }) => <Page organization={organization} />}
-      </OrganizationView>
-    </OrganizationLayout>
+      </OrganizationLayout>
+    </>
   );
 }

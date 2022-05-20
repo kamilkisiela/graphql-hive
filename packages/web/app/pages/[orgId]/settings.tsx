@@ -4,24 +4,17 @@ import { gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 
 import { OrganizationLayout } from '@/components/layouts';
-import {
-  Button,
-  Card,
-  Heading,
-  Input,
-  Spinner,
-  Tag,
-  Title,
-} from '@/components/v2';
+import { Button, Card, Heading, Input, Spinner, Tag, Title } from '@/components/v2';
 import { AlertTriangleIcon, GitHubIcon, SlackIcon } from '@/components/v2/icon';
 import { DeleteOrganizationModal } from '@/components/v2/modals';
 import {
   CheckIntegrationsDocument,
   DeleteGitHubIntegrationDocument,
   DeleteSlackIntegrationDocument,
-  OrganizationDocument,
+  OrganizationFieldsFragment,
   OrganizationType,
 } from '@/graphql';
+import { canAccessOrganization, OrganizationAccessScope,useOrganizationAccess } from '@/lib/access/organization';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
 const Integrations = (): ReactElement => {
@@ -37,21 +30,15 @@ const Integrations = (): ReactElement => {
     },
   });
 
-  const [deleteSlackMutation, deleteSlack] = useMutation(
-    DeleteSlackIntegrationDocument
-  );
-  const [deleteGitHubMutation, deleteGitHub] = useMutation(
-    DeleteGitHubIntegrationDocument
-  );
+  const [deleteSlackMutation, deleteSlack] = useMutation(DeleteSlackIntegrationDocument);
+  const [deleteGitHubMutation, deleteGitHub] = useMutation(DeleteGitHubIntegrationDocument);
 
   if (checkIntegrations.fetching) {
     return <Spinner />;
   }
 
-  const hasGitHubIntegration =
-    checkIntegrations.data?.hasGitHubIntegration === true;
-  const hasSlackIntegration =
-    checkIntegrations.data?.hasSlackIntegration === true;
+  const hasGitHubIntegration = checkIntegrations.data?.hasGitHubIntegration === true;
+  const hasSlackIntegration = checkIntegrations.data?.hasSlackIntegration === true;
 
   return (
     <>
@@ -73,12 +60,7 @@ const Integrations = (): ReactElement => {
             Disconnect Slack
           </Button>
         ) : (
-          <Button
-            variant="secondary"
-            size="large"
-            as="a"
-            href={`/api/slack/connect/${orgId}`}
-          >
+          <Button variant="secondary" size="large" as="a" href={`/api/slack/connect/${orgId}`}>
             <SlackIcon className="mr-2" />
             Connect Slack
           </Button>
@@ -103,22 +85,12 @@ const Integrations = (): ReactElement => {
               <GitHubIcon className="mr-2" />
               Disconnect GitHub
             </Button>
-            <Button
-              size="large"
-              variant="link"
-              as="a"
-              href={`/api/github/connect/${orgId}`}
-            >
+            <Button size="large" variant="link" as="a" href={`/api/github/connect/${orgId}`}>
               Adjust permissions
             </Button>
           </>
         ) : (
-          <Button
-            variant="secondary"
-            size="large"
-            as="a"
-            href={`/api/github/connect/${orgId}`}
-          >
+          <Button variant="secondary" size="large" as="a" href={`/api/github/connect/${orgId}`}>
             <GitHubIcon className="mr-2" />
             Connect GitHub
           </Button>
@@ -130,9 +102,7 @@ const Integrations = (): ReactElement => {
 };
 
 const UpdateOrganizationNameMutation = gql(/* GraphQL */ `
-  mutation Settings_UpdateOrganizationName(
-    $input: UpdateOrganizationNameInput!
-  ) {
+  mutation Settings_UpdateOrganizationName($input: UpdateOrganizationNameInput!) {
     updateOrganizationName(input: $input) {
       ok {
         updatedOrganizationPayload {
@@ -151,44 +121,30 @@ const UpdateOrganizationNameMutation = gql(/* GraphQL */ `
   }
 `);
 
-export default function SettingsPage(): ReactElement {
-  const router = useRouteSelector();
-  const [organizationQuery] = useQuery({
-    query: OrganizationDocument,
-    variables: {
-      selector: {
-        organization: router.organizationId,
-      },
-    },
+const Page = ({ organization }: { organization: OrganizationFieldsFragment }) => {
+  useOrganizationAccess({
+    scope: OrganizationAccessScope.Settings,
+    member: organization.me,
+    redirect: true,
   });
-
-  const org = organizationQuery.data?.organization.organization;
-
-  const isRegularOrg = org?.type === OrganizationType.Regular;
+  const router = useRouteSelector();
+  const isRegularOrg = organization?.type === OrganizationType.Regular;
   const [isModalOpen, setModalOpen] = useState(false);
   const toggleModalOpen = useCallback(() => {
-    setModalOpen((prevOpen) => !prevOpen);
+    setModalOpen(prevOpen => !prevOpen);
   }, []);
 
   const [mutation, mutate] = useMutation(UpdateOrganizationNameMutation);
 
-  const {
-    handleSubmit,
-    values,
-    handleChange,
-    handleBlur,
-    isSubmitting,
-    errors,
-    touched,
-  } = useFormik({
+  const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } = useFormik({
     enableReinitialize: true,
     initialValues: {
-      name: org?.name,
+      name: organization?.name,
     },
     validationSchema: Yup.object().shape({
       name: Yup.string().required('Organization name is required'),
     }),
-    onSubmit: (values) =>
+    onSubmit: values =>
       mutate({
         input: {
           organization: router.organizationId,
@@ -198,14 +154,11 @@ export default function SettingsPage(): ReactElement {
   });
 
   return (
-    <OrganizationLayout value="settings" className="flex flex-col gap-y-10">
-      <Title title="Organization settings" />
+    <>
       {isRegularOrg && (
         <Card>
           <Heading className="mb-2">Organization Name</Heading>
-          <p className="mb-3 font-light text-gray-300">
-            Name of your organization visible within Hive
-          </p>
+          <p className="mb-3 font-light text-gray-300">Name of your organization visible within Hive</p>
           <form onSubmit={handleSubmit} className="flex gap-x-2">
             <Input
               placeholder="Organization name"
@@ -217,72 +170,59 @@ export default function SettingsPage(): ReactElement {
               isInvalid={touched.name && Boolean(errors.name)}
               className="w-96"
             />
-            <Button
-              type="submit"
-              variant="primary"
-              size="large"
-              disabled={isSubmitting}
-              className="px-10"
-            >
+            <Button type="submit" variant="primary" size="large" disabled={isSubmitting} className="px-10">
               Save
             </Button>
           </form>
           {touched.name && (errors.name || mutation.error) && (
-            <div className="mt-2 text-red-500">
-              {errors.name || mutation.error.message}
-            </div>
+            <div className="mt-2 text-red-500">{errors.name || mutation.error.message}</div>
           )}
           {mutation.data?.updateOrganizationName?.error && (
-            <div className="mt-2 text-red-500">
-              {mutation.data?.updateOrganizationName.error.message}
-            </div>
+            <div className="mt-2 text-red-500">{mutation.data?.updateOrganizationName.error.message}</div>
           )}
-          {mutation.error && (
-            <div>
-              {mutation.error.graphQLErrors[0]?.message ??
-                mutation.error.message}
-            </div>
-          )}
+          {mutation.error && <div>{mutation.error.graphQLErrors[0]?.message ?? mutation.error.message}</div>}
         </Card>
       )}
 
-      <Card>
-        <Heading className="mb-2">Integrations</Heading>
-        <p className="mb-3 font-light text-gray-300">
-          Connect Hive to other services
-        </p>
-        <div className="flex flex-col gap-y-4 text-gray-500">
-          <Integrations />
-        </div>
-      </Card>
+      {canAccessOrganization(OrganizationAccessScope.Integrations, organization.me) && (
+        <Card>
+          <Heading className="mb-2">Integrations</Heading>
+          <p className="mb-3 font-light text-gray-300">Connect Hive to other services</p>
+          <div className="flex flex-col gap-y-4 text-gray-500">
+            <Integrations />
+          </div>
+        </Card>
+      )}
 
-      {isRegularOrg && (
+      {isRegularOrg && canAccessOrganization(OrganizationAccessScope.Delete, organization.me) && (
         <Card>
           <Heading className="mb-2">Delete Organization</Heading>
           <p className="mb-3 font-light text-gray-300">
             Permanently remove your Organization and all projects from the Hive
           </p>
           <div className="flex items-center gap-x-2">
-            <Button
-              variant="primary"
-              size="large"
-              danger
-              onClick={toggleModalOpen}
-              className="px-5"
-            >
+            <Button variant="primary" size="large" danger onClick={toggleModalOpen} className="px-5">
               Delete Organization
             </Button>
             <Tag color="yellow" className="py-2.5 px-4">
               <AlertTriangleIcon className="h-5 w-5" />
               This action is not reversible!
             </Tag>
-            <DeleteOrganizationModal
-              isOpen={isModalOpen}
-              toggleModalOpen={toggleModalOpen}
-            />
+            <DeleteOrganizationModal isOpen={isModalOpen} toggleModalOpen={toggleModalOpen} />
           </div>
         </Card>
       )}
-    </OrganizationLayout>
+    </>
+  );
+};
+
+export default function SettingsPage(): ReactElement {
+  return (
+    <>
+      <Title title="Organization settings" />
+      <OrganizationLayout value="settings" className="flex flex-col gap-y-10">
+        {props => <Page {...props} />}
+      </OrganizationLayout>
+    </>
   );
 }
