@@ -15,8 +15,7 @@ import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import { RateLimitProvider } from '../rate-limit/providers/rate-limit.provider';
 import { z } from 'zod';
 
-const MaybeModel = <T extends z.ZodType>(value: T) =>
-  z.union([z.null(), z.undefined(), value]);
+const MaybeModel = <T extends z.ZodType>(value: T) => z.union([z.null(), z.undefined(), value]);
 const GraphQLSchemaStringModel = z.string().max(5_000_000).min(0);
 const ServiceNameModel = z.string().min(1).max(100);
 
@@ -51,19 +50,14 @@ export const resolvers: SchemaModule.Resolvers = {
         token,
       });
 
-      const checksum = createHash('md5')
-        .update(JSON.stringify(input))
-        .update(token)
-        .digest('base64');
+      const checksum = createHash('md5').update(JSON.stringify(input)).update(token).digest('base64');
 
       const parsedResolveInfoFragment = parseResolveInfo(info);
 
       // We only want to resolve to SchemaPublishMissingServiceError if it is selected by the operation.
       // NOTE: This should be removed once the usage of cli versions that don't request on 'SchemaPublishMissingServiceError' is becomes pretty low.
       const isSchemaPublishMissingServiceErrorSelected =
-        !!parsedResolveInfoFragment?.fieldsByTypeName[
-          'SchemaPublishMissingServiceError'
-        ];
+        !!parsedResolveInfoFragment?.fieldsByTypeName['SchemaPublishMissingServiceError'];
 
       return injector.get(SchemaPublisher).publish({
         ...input,
@@ -100,9 +94,7 @@ export const resolvers: SchemaModule.Resolvers = {
       if (!result.success) {
         return {
           error: {
-            message:
-              result.error.formErrors.fieldErrors?.newBase?.[0] ??
-              'Please check your input.',
+            message: result.error.formErrors.fieldErrors?.newBase?.[0] ?? 'Please check your input.',
           },
         };
       }
@@ -116,10 +108,7 @@ export const resolvers: SchemaModule.Resolvers = {
       ]);
 
       const selector = { organization, project, target };
-      await schemaManager.updateBaseSchema(
-        selector,
-        input.newBase ? input.newBase : null
-      );
+      await schemaManager.updateBaseSchema(selector, input.newBase ? input.newBase : null);
 
       return {
         ok: {
@@ -133,7 +122,7 @@ export const resolvers: SchemaModule.Resolvers = {
     },
     async updateSchemaServiceName(_, { input }, { injector }) {
       const UpdateSchemaServiceNameModel = z.object({
-        serviceName: ServiceNameModel,
+        newName: ServiceNameModel,
       });
 
       const result = UpdateSchemaServiceNameModel.safeParse(input);
@@ -141,9 +130,7 @@ export const resolvers: SchemaModule.Resolvers = {
       if (!result.success) {
         return {
           error: {
-            message:
-              result.error.formErrors.fieldErrors.serviceName?.[0] ??
-              'Please check your input.',
+            message: result.error.formErrors.fieldErrors.newName?.[0] ?? 'Please check your input.',
           },
         };
       }
@@ -155,12 +142,10 @@ export const resolvers: SchemaModule.Resolvers = {
         translator.translateTargetId(input),
       ]);
 
-      const { type: projectType } = await injector
-        .get(ProjectManager)
-        .getProject({
-          organization,
-          project,
-        });
+      const { type: projectType } = await injector.get(ProjectManager).getProject({
+        organization,
+        project,
+      });
 
       await injector.get(SchemaManager).updateServiceName({
         organization,
@@ -204,8 +189,7 @@ export const resolvers: SchemaModule.Resolvers = {
       } catch (error) {
         return {
           __typename: 'SchemaSyncCDNError',
-          message:
-            error instanceof Error ? error.message : 'Failed to sync with CDN',
+          message: error instanceof Error ? error.message : 'Failed to sync with CDN',
         };
       }
     },
@@ -247,7 +231,7 @@ export const resolvers: SchemaModule.Resolvers = {
       return Promise.all([
         orchestrator.build(schemasBefore.map(createSchemaObject)),
         orchestrator.build(schemasAfter.map(createSchemaObject)),
-      ]).catch((reason) => {
+      ]).catch(reason => {
         if (reason instanceof SchemaBuildError) {
           return Promise.resolve({
             message: reason.message,
@@ -291,11 +275,9 @@ export const resolvers: SchemaModule.Resolvers = {
       ]);
 
       return Promise.all([
-        schemasBefore.length
-          ? orchestrator.build(schemasBefore.map(createSchemaObject))
-          : null,
+        schemasBefore.length ? orchestrator.build(schemasBefore.map(createSchemaObject)) : null,
         orchestrator.build(schemasAfter.map(createSchemaObject)),
-      ]).catch((reason) => {
+      ]).catch(reason => {
         if (reason instanceof SchemaBuildError) {
           return Promise.resolve({
             message: reason.message,
@@ -456,9 +438,7 @@ export const resolvers: SchemaModule.Resolvers = {
         return [];
       }
 
-      return injector
-        .get(Inspector)
-        .diff(buildSchema(before), buildSchema(after));
+      return injector.get(Inspector).diff(buildSchema(before), buildSchema(after));
     },
     diff([before, after]) {
       return {

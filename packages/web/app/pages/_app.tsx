@@ -37,7 +37,7 @@ if (process.env.NODE_ENV === 'development' && 'window' in globalThis) {
 function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
   React.useEffect(() => {
-    const handleRouteChange = (url) => {
+    const handleRouteChange = url => {
       gtag.pageview(url);
     };
     router.events.on('routeChangeComplete', handleRouteChange);
@@ -129,8 +129,7 @@ function App({ Component, pageProps }: AppProps) {
                           &:hover,
                           &:focus,
                           &:active {
-                            -webkit-transition: color 9999s ease-out,
-                              background-color 9999s ease-out;
+                            -webkit-transition: color 9999s ease-out, background-color 9999s ease-out;
                             -webkit-transition-delay: 9999s;
                           }
                         }
@@ -138,6 +137,12 @@ function App({ Component, pageProps }: AppProps) {
                         select {
                           // remove default arrow down icon in right side
                           appearance: none;
+                        }
+
+                        .monaco-editor,
+                        .monaco-editor-background,
+                        [role='presentation'] {
+                          background: transparent !important;
                         }
                       `}
                     />

@@ -17,6 +17,7 @@ import { QueryError } from '../common/DataWrapper';
 
 enum TabValue {
   Schema = 'schema',
+  History = 'history',
   Operations = 'operations',
   Laboratory = 'laboratory',
   Settings = 'settings',
@@ -32,7 +33,7 @@ export const TargetLayout = ({
     project: ProjectFieldsFragment;
     organization: OrganizationFieldsFragment;
   }): ReactNode;
-  value: 'schema' | 'operations' | 'laboratory' | 'settings';
+  value: 'schema' | 'history' | 'operations' | 'laboratory' | 'settings';
   className?: string;
 }): ReactElement => {
   const router = useRouteSelector();
@@ -147,6 +148,13 @@ export const TargetLayout = ({
             <NextLink passHref href={`/${orgId}/${projectId}/${targetId}`}>
               <Tabs.Trigger value={TabValue.Schema} asChild>
                 <a>Schema</a>
+              </Tabs.Trigger>
+            </NextLink>
+          )}
+          {canAccessSchema && (
+            <NextLink passHref href={`/${orgId}/${projectId}/${targetId}/history`}>
+              <Tabs.Trigger value={TabValue.History} asChild>
+                <a>History</a>
               </Tabs.Trigger>
             </NextLink>
           )}

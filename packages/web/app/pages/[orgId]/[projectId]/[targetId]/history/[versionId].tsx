@@ -1,3 +1,3 @@
-import TargetIndexPage from '../index'
+import HistoryPage from '../history';
 
-export default TargetIndexPage;
+export default HistoryPage;
