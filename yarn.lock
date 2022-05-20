@@ -4335,7 +4335,7 @@
   dependencies:
     graphql-language-service "3.1.4"
 
-"@theguild/prettier-config@^0.0.1":
+"@theguild/prettier-config@0.0.1":
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/@theguild/prettier-config/-/prettier-config-0.0.1.tgz#de22b4543b1f2541dd6b938717e2fb877b9915df"
   integrity sha512-h3IavJZWTjk6vbYpA11aelnHZcTWLrfMTj0fsSYyVC3v5npG4L2Q1S8az31P7/AZMuDrTjleXygAJ12np5nS/A==

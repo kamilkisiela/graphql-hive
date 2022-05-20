@@ -4,15 +4,7 @@ import { gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 
 import { useUser } from '@/components/auth/AuthProvider';
-import {
-  Avatar,
-  Button,
-  Header,
-  Heading,
-  Input,
-  Tabs,
-  Title,
-} from '@/components/v2';
+import { Avatar, Button, SubHeader, Heading, Input, Tabs, Title } from '@/components/v2';
 import { MeDocument } from '@/graphql';
 
 const UpdateMeMutation = gql(/* GraphQL */ `
@@ -41,15 +33,7 @@ const SettingsPage: FC = () => {
 
   const me = meQuery.data?.me;
 
-  const {
-    handleSubmit,
-    values,
-    handleChange,
-    handleBlur,
-    isSubmitting,
-    errors,
-    touched,
-  } = useFormik({
+  const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } = useFormik({
     enableReinitialize: true,
     initialValues: {
       fullName: me?.fullName || '',
@@ -59,13 +43,13 @@ const SettingsPage: FC = () => {
       fullName: Yup.string().required('Full name is required'),
       displayName: Yup.string().required('Display name is required'),
     }),
-    onSubmit: (values) => mutate({ input: values }),
+    onSubmit: values => mutate({ input: values }),
   });
 
   return (
     <>
       <Title title="Profile settings" />
-      <Header>
+      <SubHeader>
         <header className="wrapper flex items-center pb-5">
           <div className="mr-4 rounded-full">
             <Avatar
@@ -95,21 +79,16 @@ const SettingsPage: FC = () => {
             <Heading size="2xl" className="line-clamp-1">
               {me?.displayName}
             </Heading>
-            <span className="text-xs font-medium text-gray-500">
-              {me?.email}
-            </span>
+            <span className="text-xs font-medium text-gray-500">{me?.email}</span>
           </div>
         </header>
-      </Header>
+      </SubHeader>
       <Tabs defaultValue="personal-info" className="wrapper">
         <Tabs.List>
           <Tabs.Trigger value="personal-info">Personal Info</Tabs.Trigger>
         </Tabs.List>
         <Tabs.Content value="personal-info" asChild>
-          <form
-            onSubmit={handleSubmit}
-            className="mx-auto flex w-1/2 flex-col gap-y-5"
-          >
+          <form onSubmit={handleSubmit} className="mx-auto flex w-1/2 flex-col gap-y-5">
             <div className="flex flex-col gap-4">
               <label className="text-sm font-semibold" htmlFor="name">
                 Full name
@@ -123,13 +102,9 @@ const SettingsPage: FC = () => {
                 disabled={isSubmitting}
                 isInvalid={touched.fullName && Boolean(errors.fullName)}
               />
-              {touched.fullName && errors.fullName && (
-                <span className="text-red-500">{errors.fullName}</span>
-              )}
+              {touched.fullName && errors.fullName && <span className="text-red-500">{errors.fullName}</span>}
               {mutation.data?.updateMe.error?.inputErrors.fullName && (
-                <span className="text-red-500">
-                  {mutation.data.updateMe.error.inputErrors.fullName}
-                </span>
+                <span className="text-red-500">{mutation.data.updateMe.error.inputErrors.fullName}</span>
               )}
             </div>
 
@@ -146,32 +121,18 @@ const SettingsPage: FC = () => {
                 disabled={isSubmitting}
                 isInvalid={touched.displayName && Boolean(errors.displayName)}
               />
-              {touched.displayName && errors.displayName && (
-                <span className="text-red-500">{errors.displayName}</span>
-              )}
+              {touched.displayName && errors.displayName && <span className="text-red-500">{errors.displayName}</span>}
               {mutation.data?.updateMe.error?.inputErrors.displayName && (
-                <span className="text-red-500">
-                  {mutation.data.updateMe.error.inputErrors.displayName}
-                </span>
+                <span className="text-red-500">{mutation.data.updateMe.error.inputErrors.displayName}</span>
               )}
             </div>
 
-            {mutation.error && (
-              <span className="text-red-500">{mutation.error.message}</span>
-            )}
+            {mutation.error && <span className="text-red-500">{mutation.error.message}</span>}
             {mutation.data?.updateMe.error?.message && (
-              <span className="text-red-500">
-                {mutation.data.updateMe.error.message}
-              </span>
+              <span className="text-red-500">{mutation.data.updateMe.error.message}</span>
             )}
 
-            <Button
-              type="submit"
-              variant="primary"
-              size="large"
-              block
-              disabled={isSubmitting}
-            >
+            <Button type="submit" variant="primary" size="large" block disabled={isSubmitting}>
               Save Changes
             </Button>
           </form>
