@@ -13,3 +13,4 @@ out
 dist
 temp
 __generated__
+packages/services/storage/src/db/types.ts
