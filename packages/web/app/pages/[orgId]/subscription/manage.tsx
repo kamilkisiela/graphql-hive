@@ -235,13 +235,13 @@ const Inner = ({
                             title="Monthly operations limit"
                             className="w-full"
                             min={5}
-                            max={200}
+                            max={300}
                             step={1}
                             marks={[
                               { value: 5, label: '5M' },
-                              { value: 50, label: '50M' },
                               { value: 100, label: '100M' },
                               { value: 200, label: '200M' },
+                              { value: 300, label: '300M' },
                             ]}
                             value={operationsRateLimit}
                             onChange={setOperationsRateLimit}
@@ -256,6 +256,7 @@ const Inner = ({
                             step={10}
                             marks={[
                               { value: 500, label: '500' },
+                              { value: 750, label: '750' },
                               { value: 1000, label: '1000' },
                             ]}
                             value={schemaPushesRateLimit}
