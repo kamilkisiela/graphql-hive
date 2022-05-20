@@ -10,16 +10,17 @@ import {
   Tooltip,
 } from '@chakra-ui/react';
 import { VscClose, VscSync } from 'react-icons/vsc';
-import { gql, useMutation,useQuery } from 'urql';
+import { gql, useMutation, useQuery } from 'urql';
 import { useDebouncedCallback } from 'use-debounce';
 
 import { TargetLayout } from '@/components/layouts';
-import { Button, DataWrapper, GraphQLBlock,noSchema, Title } from '@/components/v2';
+import { MarkAsValid } from '@/components/target/history/MarkAsValid';
+import { Button, DataWrapper, GraphQLBlock, noSchema, Title } from '@/components/v2';
 import { Link2Icon } from '@/components/v2/icon';
 import { ConnectSchemaModal } from '@/components/v2/modals';
 import { SchemaFieldsFragment } from '@/gql/graphql';
 import { OrganizationFieldsFragment, ProjectFieldsFragment, ProjectType, TargetFieldsFragment } from '@/graphql';
-import { TargetAccessScope,useTargetAccess } from '@/lib/access/target';
+import { TargetAccessScope, useTargetAccess } from '@/lib/access/target';
 
 const SchemaServiceName_UpdateSchemaServiceName = gql(/* GraphQL */ `
   mutation SchemaServiceName_UpdateSchemaServiceName($input: UpdateSchemaServiceNameInput!) {
@@ -103,10 +104,6 @@ const Schemas: React.FC<{
   version: string;
   filterService?: string;
 }> = ({ organization, project, target, filterService, version, schemas = [] }) => {
-  if (!schemas.length) {
-    return <>{noSchema}</>;
-  }
-
   if (project.type === ProjectType.Single) {
     return <GraphQLBlock className="mb-6" sdl={schemas[0].source} url={schemas[0].url} />;
   }
@@ -157,40 +154,6 @@ const SchemaView_LatestSchema = gql(/* GraphQL */ `
     }
   }
 `);
-
-const SchemaView: React.FC<{
-  organization: OrganizationFieldsFragment;
-  project: ProjectFieldsFragment;
-  target: TargetFieldsFragment;
-  filterService?: string;
-}> = ({ organization, project, target, filterService }) => {
-  const [query] = useQuery({
-    query: SchemaView_LatestSchema,
-    variables: {
-      selector: {
-        organization: organization.cleanId,
-        project: project.cleanId,
-        target: target.cleanId,
-      },
-    },
-    requestPolicy: 'cache-and-network',
-  });
-
-  return (
-    <DataWrapper query={query}>
-      {() => (
-        <Schemas
-          organization={organization}
-          project={project}
-          target={query.data.target}
-          filterService={filterService}
-          version={query.data.target.latestSchemaVersion.id}
-          schemas={query.data.target.latestSchemaVersion.schemas.nodes ?? []}
-        />
-      )}
-    </DataWrapper>
-  );
-};
 
 const SchemaSyncButton_SchemaSyncCDN = gql(/* GraphQL */ `
   mutation schemaSyncCdn($input: SchemaSyncCDNInput!) {
@@ -258,7 +221,7 @@ const SyncSchemaButton: React.FC<{
   );
 };
 
-function Page({
+function SchemaView({
   organization,
   project,
   target,
@@ -291,39 +254,65 @@ function Page({
 
   const isDistributed = project.type === ProjectType.Federation || project.type === ProjectType.Stitching;
 
+  const [query] = useQuery({
+    query: SchemaView_LatestSchema,
+    variables: {
+      selector: {
+        organization: organization.cleanId,
+        project: project.cleanId,
+        target: target.cleanId,
+      },
+    },
+    requestPolicy: 'cache-and-network',
+  });
+
+  if (!query.data?.target?.latestSchemaVersion?.schemas.nodes.length) {
+    return <>{noSchema}</>;
+  }
+
   return (
-    <>
-      <div className="flex flex-row items-center justify-between">
-        <div className="font-light text-gray-500">The latest schema you published for this target.</div>
-        <div className="flex flex-row items-center gap-2">
-          <>
-            {isDistributed && (
-              <form
-                onSubmit={event => {
-                  event.preventDefault();
-                }}
-              >
-                <InputGroup size="sm" variant="filled">
-                  <Input type="text" placeholder="Find service" value={term} onChange={handleChange} />
-                  <InputRightElement>
-                    <IconButton aria-label="Reset" size="xs" variant="ghost" onClick={reset} icon={<VscClose />} />
-                  </InputRightElement>
-                </InputGroup>
-              </form>
-            )}
-            <SyncSchemaButton target={target} project={project} organization={organization} />
-          </>
-          <Button size="large" variant="primary" onClick={toggleModalOpen}>
-            Connect
-            <Link2Icon className="ml-8" />
-          </Button>
-        </div>
-      </div>
-      <div className="my-8">
-        <SchemaView organization={organization} project={project} target={target} filterService={filterService} />
-      </div>
-      <ConnectSchemaModal isOpen={isModalOpen} toggleModalOpen={toggleModalOpen} />
-    </>
+    <DataWrapper query={query}>
+      {() => (
+        <>
+          <div className="flex flex-row items-center justify-between">
+            <div className="font-light text-gray-500">The latest published schema.</div>
+            <div className="flex flex-row items-center gap-4">
+              {isDistributed && (
+                <form
+                  onSubmit={event => {
+                    event.preventDefault();
+                  }}
+                >
+                  <InputGroup size="sm" variant="filled">
+                    <Input type="text" placeholder="Find service" value={term} onChange={handleChange} />
+                    <InputRightElement>
+                      <IconButton aria-label="Reset" size="xs" variant="ghost" onClick={reset} icon={<VscClose />} />
+                    </InputRightElement>
+                  </InputGroup>
+                </form>
+              )}
+              <MarkAsValid version={query.data.target.latestSchemaVersion} />
+              <SyncSchemaButton target={target} project={project} organization={organization} />
+              <Button size="large" variant="primary" onClick={toggleModalOpen}>
+                Connect
+                <Link2Icon className="ml-8" />
+              </Button>
+            </div>
+          </div>
+          <div className="my-8">
+            <Schemas
+              organization={organization}
+              project={project}
+              target={query.data.target}
+              filterService={filterService}
+              version={query.data.target.latestSchemaVersion.id}
+              schemas={query.data.target.latestSchemaVersion.schemas.nodes ?? []}
+            />
+          </div>
+          <ConnectSchemaModal isOpen={isModalOpen} toggleModalOpen={toggleModalOpen} />
+        </>
+      )}
+    </DataWrapper>
   );
 }
 
@@ -331,7 +320,7 @@ export default function SchemaPage(): ReactElement {
   return (
     <>
       <Title title="Schema" />
-      <TargetLayout value="schema">{props => <Page {...props} />}</TargetLayout>
+      <TargetLayout value="schema">{props => <SchemaView {...props} />}</TargetLayout>
     </>
   );
 }
