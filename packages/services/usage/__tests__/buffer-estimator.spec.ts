@@ -130,9 +130,9 @@ test('reset after N milliseconds', async () => {
 
   expect(estimator.estimate(10)).toBeCloseTo(1000);
 
-  await waitFor(100);
+  await waitFor(150);
 
-  // reached 15 ms, so reset
+  // reached 100 ms, so reset
   estimator.teach({
     bytes: 500,
     operations: 10,
