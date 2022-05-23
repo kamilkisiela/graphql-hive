@@ -93,6 +93,9 @@ jobs:
           path: '**/node_modules'
           key: ${{ github.sha }}
 
+      - name: Setup Turbo
+        run: node ./scripts/turborepo-setup.js
+
       - name: Build
         run: yarn workspace integration-tests run build-and-pack
         env:
@@ -221,6 +224,9 @@ jobs:
           path: '**/node_modules'
           key: ${{ github.sha }}
 
+      - name: Setup Turbo
+        run: node ./scripts/turborepo-setup.js
+
       - name: Generate Types
         run: yarn graphql:generate
 
@@ -254,6 +260,9 @@ jobs:
         with:
           path: '**/node_modules'
           key: ${{ github.sha }}
+
+      - name: Setup Turbo
+        run: node ./scripts/turborepo-setup.js
 
       - name: Generate Types
         run: yarn graphql:generate
