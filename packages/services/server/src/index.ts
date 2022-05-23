@@ -15,7 +15,7 @@ import {
 import got from 'got';
 import { stripIgnoredCharacters } from 'graphql';
 import * as Sentry from '@sentry/node';
-import { Dedupe } from '@sentry/integrations';
+import { Dedupe, ExtraErrorData } from '@sentry/integrations';
 import { asyncStorage } from './async-storage';
 import { graphqlHandler } from './graphql-handler';
 import { clickHouseReadDuration, clickHouseElapsedDuration } from './metrics';
@@ -32,16 +32,12 @@ export async function main() {
       new Sentry.Integrations.Http({ tracing: true }),
       new Sentry.Integrations.ContextLines(),
       new Sentry.Integrations.LinkedErrors(),
-      /**
-       * Disabled due to weird issues.
-       * Might be related: https://github.com/getsentry/sentry-javascript/issues/2611 , https://github.com/getsentry/sentry-javascript/pull/4487
-       *
-       */
-      // new ExtraErrorData({
-      //   depth: 2,
-      // }),
+      new ExtraErrorData({
+        depth: 2,
+      }),
       new Dedupe(),
     ],
+    maxBreadcrumbs: 5,
     defaultIntegrations: false,
     autoSessionTracking: false,
   });
