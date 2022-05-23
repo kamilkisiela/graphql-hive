@@ -15,8 +15,9 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
       TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
-      TURBO_PREFLIGHT: 'true'
       TURBO_API_URL: ${{ secrets.TURBO_API_URL }}
+      TURBO_PREFLIGHT: 'true'
+      TURBO_REMOTE_ONLY: 'true'
 
     steps:
       - name: Checkout

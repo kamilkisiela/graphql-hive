@@ -27,8 +27,9 @@ jobs:
       POSTGRES_USER: postgres
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
       TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
-      TURBO_PREFLIGHT: 'true'
       TURBO_API_URL: ${{ secrets.TURBO_API_URL }}
+      TURBO_PREFLIGHT: 'true'
+      TURBO_REMOTE_ONLY: 'true'
 
     steps:
       - name: Check out repository code
@@ -72,8 +73,9 @@ jobs:
     env:
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
       TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
-      TURBO_PREFLIGHT: 'true'
       TURBO_API_URL: ${{ secrets.TURBO_API_URL }}
+      TURBO_PREFLIGHT: 'true'
+      TURBO_REMOTE_ONLY: 'true'
 
     steps:
       - name: Check out repository code
@@ -126,8 +128,9 @@ jobs:
       HIVE_TOKEN: ${{ secrets.HIVE_TOKEN }}
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
       TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
-      TURBO_PREFLIGHT: 'true'
       TURBO_API_URL: ${{ secrets.TURBO_API_URL }}
+      TURBO_PREFLIGHT: 'true'
+      TURBO_REMOTE_ONLY: 'true'
 
     steps:
       - name: Checkout
@@ -164,8 +167,9 @@ jobs:
     env:
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
       TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
-      TURBO_PREFLIGHT: 'true'
       TURBO_API_URL: ${{ secrets.TURBO_API_URL }}
+      TURBO_PREFLIGHT: 'true'
+      TURBO_REMOTE_ONLY: 'true'
 
     steps:
       - name: Checkout
@@ -197,8 +201,9 @@ jobs:
     env:
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
       TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
-      TURBO_PREFLIGHT: 'true'
       TURBO_API_URL: ${{ secrets.TURBO_API_URL }}
+      TURBO_PREFLIGHT: 'true'
+      TURBO_REMOTE_ONLY: 'true'
 
     steps:
       - name: Checkout
@@ -230,8 +235,9 @@ jobs:
     env:
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
       TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
-      TURBO_PREFLIGHT: 'true'
       TURBO_API_URL: ${{ secrets.TURBO_API_URL }}
+      TURBO_PREFLIGHT: 'true'
+      TURBO_REMOTE_ONLY: 'true'
 
     steps:
       - name: Checkout
