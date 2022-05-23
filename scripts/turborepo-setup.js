@@ -9,17 +9,26 @@ import { fileURLToPath } from 'url';
 
 const cwd = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
-function main() {
-  const configDir = '.turbo';
-  const configFile = path.resolve(cwd, configDir, 'config.json');
+function loadEnv() {
   const envFile = path.resolve(cwd, '.env');
 
   if (!fs.existsSync(envFile)) {
-    console.log('[turborepo-setup] No .env file found. Skipping.');
-    return;
+    return {};
   }
 
-  const env = dotenv.parse(fs.readFileSync(envFile, 'utf-8'));
+  return dotenv.parse(fs.readFileSync(envFile, 'utf-8'));
+}
+
+function main() {
+  const configDir = '.turbo';
+  const configFile = path.resolve(cwd, configDir, 'config.json');
+  const envFile = loadEnv();
+
+  const env = {
+    TURBO_API_URL: envFile.TURBO_API_URL || process.env.TURBO_API_URL,
+    TURBO_TOKEN: envFile.TURBO_TOKEN || process.env.TURBO_TOKEN,
+    TURBO_TEAM: envFile.TURBO_TEAM || process.env.TURBO_TEAM,
+  };
 
   if (!env.TURBO_API_URL || !env.TURBO_TOKEN || !env.TURBO_TEAM) {
     console.log(

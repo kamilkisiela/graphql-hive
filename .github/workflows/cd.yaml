@@ -15,8 +15,8 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
       TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
-      TURBO_PREFLIGHT: 'true'
       TURBO_API_URL: ${{ secrets.TURBO_API_URL }}
+      TURBO_REMOTE_ONLY: 'true'
 
     steps:
       - name: Checkout
@@ -30,12 +30,6 @@ jobs:
 
       - name: Install Dependencies
         run: yarn --frozen-lockfile
-
-      - uses: actions/cache@v3
-        name: Turbo cache
-        with:
-          path: node_modules/.cache/turbo
-          key: ${{ runner.os }}-turbo-cache-v1-${{ hashFiles('yarn.lock') }}
 
       - name: Generate GraphQL Types
         run: yarn graphql:generate

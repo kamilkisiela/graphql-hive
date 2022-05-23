@@ -27,12 +27,14 @@ jobs:
       POSTGRES_USER: postgres
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
       TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
-      TURBO_PREFLIGHT: 'true'
       TURBO_API_URL: ${{ secrets.TURBO_API_URL }}
+      TURBO_REMOTE_ONLY: 'true'
 
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
 
       - uses: actions/setup-node@v2
         with:
@@ -70,12 +72,14 @@ jobs:
     env:
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
       TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
-      TURBO_PREFLIGHT: 'true'
       TURBO_API_URL: ${{ secrets.TURBO_API_URL }}
+      TURBO_REMOTE_ONLY: 'true'
 
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 5
 
       - uses: actions/setup-node@v2
         with:
@@ -86,6 +90,9 @@ jobs:
         with:
           path: '**/node_modules'
           key: ${{ github.sha }}
+
+      - name: Setup Turbo
+        run: node ./scripts/turborepo-setup.js
 
       - name: Build
         run: yarn workspace integration-tests run build-and-pack
@@ -122,12 +129,14 @@ jobs:
       HIVE_TOKEN: ${{ secrets.HIVE_TOKEN }}
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
       TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
-      TURBO_PREFLIGHT: 'true'
       TURBO_API_URL: ${{ secrets.TURBO_API_URL }}
+      TURBO_REMOTE_ONLY: 'true'
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 5
 
       - uses: actions/setup-node@v2
         with:
@@ -158,12 +167,14 @@ jobs:
     env:
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
       TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
-      TURBO_PREFLIGHT: 'true'
       TURBO_API_URL: ${{ secrets.TURBO_API_URL }}
+      TURBO_REMOTE_ONLY: 'true'
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
 
       - uses: actions/setup-node@v2
         with:
@@ -189,12 +200,14 @@ jobs:
     env:
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
       TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
-      TURBO_PREFLIGHT: 'true'
       TURBO_API_URL: ${{ secrets.TURBO_API_URL }}
+      TURBO_REMOTE_ONLY: 'true'
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 5
 
       - uses: actions/setup-node@v2
         with:
@@ -205,6 +218,9 @@ jobs:
         with:
           path: '**/node_modules'
           key: ${{ github.sha }}
+
+      - name: Setup Turbo
+        run: node ./scripts/turborepo-setup.js
 
       - name: Generate Types
         run: yarn graphql:generate
@@ -220,12 +236,14 @@ jobs:
     env:
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
       TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
-      TURBO_PREFLIGHT: 'true'
       TURBO_API_URL: ${{ secrets.TURBO_API_URL }}
+      TURBO_REMOTE_ONLY: 'true'
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 5
 
       - uses: actions/setup-node@v2
         with:
@@ -236,6 +254,9 @@ jobs:
         with:
           path: '**/node_modules'
           key: ${{ github.sha }}
+
+      - name: Setup Turbo
+        run: node ./scripts/turborepo-setup.js
 
       - name: Generate Types
         run: yarn graphql:generate
