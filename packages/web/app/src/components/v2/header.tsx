@@ -80,7 +80,7 @@ export const Header = (): ReactElement => {
         isOpaque && 'border-b-gray-900 bg-black/80 backdrop-blur'
       )}
     >
-      <div className="wrapper flex h-[84px] items-center justify-between">
+      <div className="container flex h-[84px] items-center justify-between">
         <HiveLink />
         <DropdownMenu>
           <DropdownMenu.Trigger asChild>

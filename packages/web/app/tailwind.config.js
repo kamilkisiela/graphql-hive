@@ -98,14 +98,7 @@ module.exports = {
     },
   },
   plugins: [
-    plugin(({ addUtilities, addComponents }) => {
-      addComponents({
-        '.wrapper': {
-          width: 1140,
-          margin: '0 auto',
-          padding: `0 1.25rem`,
-        },
-      });
+    plugin(({ addUtilities }) => {
       addUtilities({
         '.drag-none': {
           '-webkit-user-drag': 'none',

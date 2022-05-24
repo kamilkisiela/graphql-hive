@@ -73,7 +73,7 @@ export const ProjectLayout = ({
   return (
     <>
       <SubHeader>
-        <div className="wrapper flex items-center pb-4">
+        <div className="container flex items-center pb-4">
           <div>
             {org && (
               <NextLink href={`/${orgId}`} passHref>
@@ -118,7 +118,7 @@ export const ProjectLayout = ({
         </div>
       </SubHeader>
 
-      <Tabs className="wrapper" value={value}>
+      <Tabs className="container" value={value}>
         <Tabs.List>
           <NextLink passHref href={`/${orgId}/${projectId}`}>
             <Tabs.Trigger value={TabValue.Targets} asChild>

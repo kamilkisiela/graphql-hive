@@ -101,7 +101,7 @@ export const TargetLayout = ({
     <>
       <SubHeader>
         {org && project && (
-          <div className="wrapper flex items-center text-xs font-medium text-gray-500">
+          <div className="container flex items-center text-xs font-medium text-gray-500">
             <NextLink href={`/${orgId}`} passHref>
               <Link className="line-clamp-1 max-w-[250px]">{org.name}</Link>
             </NextLink>
@@ -111,7 +111,7 @@ export const TargetLayout = ({
             </NextLink>
           </div>
         )}
-        <div className="wrapper">
+        <div className="container">
           <div className="flex items-center gap-2.5">
             <Heading size="2xl" className="line-clamp-1 max-w-2xl">
               {target?.name}
@@ -142,7 +142,7 @@ export const TargetLayout = ({
         </div>
       </SubHeader>
 
-      <Tabs className="wrapper" value={value}>
+      <Tabs className="container" value={value}>
         <Tabs.List>
           {canAccessSchema && (
             <NextLink passHref href={`/${orgId}/${projectId}/${targetId}`}>
