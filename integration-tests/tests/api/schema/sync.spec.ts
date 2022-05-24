@@ -21,7 +21,9 @@ test('marking only the most recent version as valid result in an update of CDN',
 
   // Join
   const { access_token: member_access_token } = await authenticate('extra');
-  const org = orgResult.body.data!.createOrganization.organization;
+  const org =
+    orgResult.body.data!.createOrganization.ok.createdOrganizationPayload
+      .organization;
   const code = org.inviteCode;
   await joinOrganization(code, member_access_token);
 
@@ -34,8 +36,8 @@ test('marking only the most recent version as valid result in an update of CDN',
     owner_access_token
   );
 
-  const project = projectResult.body.data!.createProject.createdProject;
-  const target = projectResult.body.data!.createProject.createdTarget;
+  const project = projectResult.body.data!.createProject.ok.createdProject;
+  const target = projectResult.body.data!.createProject.ok.createdTarget;
 
   const tokenResult = await createToken(
     {
@@ -55,7 +57,7 @@ test('marking only the most recent version as valid result in an update of CDN',
 
   expect(tokenResult.body.errors).not.toBeDefined();
 
-  const token = tokenResult.body.data!.createToken.secret;
+  const token = tokenResult.body.data!.createToken.ok.secret;
 
   // Initial schema
   const publishResult = await publishSchema(

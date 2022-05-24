@@ -2,6 +2,37 @@ import { Injectable, Scope } from 'graphql-modules';
 import { Logger } from '../../shared/providers/logger';
 import { Storage } from '../../shared/providers/storage';
 
+export const displayNameLengthBoundaries = {
+  min: 2,
+  max: 25,
+} as const;
+
+export const fullNameLengthBoundaries = {
+  min: 2,
+  max: 25,
+} as const;
+
+function buildUserCreatePayloadFromInput(input: {
+  external: string;
+  email: string;
+}) {
+  const displayName = input.email
+    .split('@')[0]
+    .slice(0, displayNameLengthBoundaries.max)
+    .padEnd(displayNameLengthBoundaries.min, '1');
+  const fullName = input.email
+    .split('@')[0]
+    .slice(0, fullNameLengthBoundaries.max)
+    .padEnd(fullNameLengthBoundaries.min, '1');
+
+  return {
+    external: input.external,
+    email: input.email,
+    displayName,
+    fullName,
+  };
+}
+
 /**
  * Responsible for auth checks.
  * Talks to Storage.
@@ -20,7 +51,9 @@ export class UserManager {
 
   async createUser(input: { external: string; email: string }) {
     this.logger.info('Creating new user (input=%o)', input);
-    const user = await this.storage.createUser(input);
+    const user = await this.storage.createUser(
+      buildUserCreatePayloadFromInput(input)
+    );
 
     return user;
   }

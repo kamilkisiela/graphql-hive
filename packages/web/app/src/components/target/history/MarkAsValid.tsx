@@ -1,14 +1,12 @@
 import * as React from 'react';
 import { useMutation } from 'urql';
-import { Button, Tooltip } from '@chakra-ui/react';
+import { Tooltip } from '@chakra-ui/react';
+import { Button } from '@/components/v2';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
-import {
-  SchemaVersionFieldsFragment,
-  UpdateSchemaVersionStatusDocument,
-} from '@/graphql';
+import { SchemaVersionFieldsFragment, UpdateSchemaVersionStatusDocument } from '@/graphql';
 
 export const MarkAsValid: React.FC<{
-  version: SchemaVersionFieldsFragment;
+  version: Pick<SchemaVersionFieldsFragment, 'id' | 'valid'>;
 }> = ({ version }) => {
   const router = useRouteSelector();
   const [mutation, mutate] = useMutation(UpdateSchemaVersionStatusDocument);
@@ -34,13 +32,7 @@ export const MarkAsValid: React.FC<{
       fontSize="xs"
       placement="bottom-start"
     >
-      <Button
-        colorScheme="teal"
-        size="sm"
-        variant="ghost"
-        disabled={mutation.fetching}
-        onClick={markAsValid}
-      >
+      <Button variant="link" disabled={mutation.fetching} onClick={markAsValid}>
         Mark as valid
       </Button>
     </Tooltip>

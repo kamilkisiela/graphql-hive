@@ -1,4 +1,4 @@
-import React from 'react';
+import { createContext, useContext, FC, useEffect } from 'react';
 import { configureScope } from '@sentry/nextjs';
 import { reset, identify } from '@/lib/mixpanel';
 import {
@@ -9,33 +9,36 @@ import {
 import { Spinner } from '@/components/common/Spinner';
 import { LoginPage } from './LoginPage';
 
-export const AuthContext = React.createContext<{
+export const AuthContext = createContext<{
   user: (UserProfile & { metadata: Metadata }) | null;
 }>({
   user: null,
 });
 
-export const useUser = () => React.useContext(AuthContext);
+export const useUser = () => useContext(AuthContext);
 
-function identifyOnCrisp(user: UserProfile) {
-  if (typeof window !== 'undefined') {
-    const crisp = (window as any).$crisp;
-
-    if (crisp) {
-      pushIfNotEmpty(crisp, 'user:email', user.email);
-      pushIfNotEmpty(crisp, 'user:nickname', user.name || user.nickname);
-      pushIfNotEmpty(crisp, 'user:avatar', user.picture);
-    }
+declare global {
+  interface Window {
+    $crisp: any;
   }
 }
 
-function pushIfNotEmpty(crisp: any, key: string, value: string) {
+function identifyOnCrisp(user: UserProfile): void {
+  const crisp = globalThis.$crisp;
+  if (crisp) {
+    pushIfNotEmpty(crisp, 'user:email', user.email);
+    pushIfNotEmpty(crisp, 'user:nickname', user.name || user.nickname);
+    pushIfNotEmpty(crisp, 'user:avatar', user.picture);
+  }
+}
+
+function pushIfNotEmpty(crisp: any, key: string, value: string): void {
   if (value) {
     crisp.push(['set', key, value]);
   }
 }
 
-function identifyOnSentry(user: UserProfile) {
+function identifyOnSentry(user: UserProfile): void {
   const sub = user.sub;
 
   if (sub) {
@@ -59,10 +62,10 @@ interface Metadata {
   admin?: boolean;
 }
 
-const AuthProviderInner: React.FC = ({ children }) => {
+const AuthProviderInner: FC = ({ children }) => {
   const { user, isLoading } = useAuth0User();
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isLoading && user) {
       identify(user);
       identifyOnCrisp(user);
@@ -93,7 +96,7 @@ const AuthProviderInner: React.FC = ({ children }) => {
   );
 };
 
-export const AuthProvider: React.FC = ({ children }) => {
+export const AuthProvider: FC = ({ children }) => {
   return (
     <UserProvider>
       <AuthProviderInner>{children}</AuthProviderInner>

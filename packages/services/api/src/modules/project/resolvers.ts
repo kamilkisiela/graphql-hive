@@ -4,6 +4,12 @@ import { createConnection } from '../../shared/schema';
 import { ProjectManager } from './providers/project-manager';
 import { IdTranslator } from '../shared/providers/id-translator';
 import { TargetManager } from '../target/providers/target-manager';
+import { z } from 'zod';
+
+const ProjectNameModel = z.string().min(2).max(40);
+const URLModel = z.string().url().max(200);
+const MaybeModel = <T extends z.ZodType>(value: T) =>
+  z.union([z.null(), z.undefined(), value]);
 
 export const resolvers: ProjectModule.Resolvers & { ProjectType: any } = {
   Query: {
@@ -27,6 +33,27 @@ export const resolvers: ProjectModule.Resolvers & { ProjectType: any } = {
   },
   Mutation: {
     async createProject(_, { input }, { injector }) {
+      const CreateProjectModel = z.object({
+        name: ProjectNameModel,
+        buildUrl: MaybeModel(URLModel),
+        validationUrl: MaybeModel(URLModel),
+      });
+      const result = CreateProjectModel.safeParse(input);
+
+      if (!result.success) {
+        return {
+          error: {
+            message: 'Please check your input.',
+            inputErrors: {
+              name: result.error.formErrors.fieldErrors.name?.[0],
+              buildUrl: result.error.formErrors.fieldErrors.buildUrl?.[0],
+              validationUrl:
+                result.error.formErrors.fieldErrors.validationUrl?.[0],
+            },
+          },
+        };
+      }
+
       const translator = injector.get(IdTranslator);
       const organization = await translator.translateOrganizationId({
         organization: input.organization,
@@ -40,13 +67,16 @@ export const resolvers: ProjectModule.Resolvers & { ProjectType: any } = {
         project: project.id,
         organization,
       });
+
       return {
-        selector: {
-          organization: input.organization,
-          project: project.cleanId,
+        ok: {
+          selector: {
+            organization: input.organization,
+            project: project.cleanId,
+          },
+          createdProject: project,
+          createdTarget: target,
         },
-        createdProject: project,
-        createdTarget: target,
       };
     },
     async deleteProject(_, { selector }, { injector }) {
@@ -73,6 +103,22 @@ export const resolvers: ProjectModule.Resolvers & { ProjectType: any } = {
       };
     },
     async updateProjectName(_, { input }, { injector }) {
+      const UpdateProjectNameModel = z.object({
+        name: ProjectNameModel,
+      });
+
+      const result = UpdateProjectNameModel.safeParse(input);
+
+      if (!result.success) {
+        return {
+          error: {
+            message:
+              result.error.formErrors.fieldErrors.name?.[0] ??
+              'Please check your input.',
+          },
+        };
+      }
+
       const translator = injector.get(IdTranslator);
       const [organizationId, projectId] = await Promise.all([
         translator.translateOrganizationId(input),
@@ -86,29 +132,51 @@ export const resolvers: ProjectModule.Resolvers & { ProjectType: any } = {
       });
 
       return {
-        selector: {
-          organization: input.organization,
-          project: input.project,
+        ok: {
+          selector: {
+            organization: input.organization,
+            project: input.project,
+          },
+          updatedProject: project,
         },
-        updatedProject: project,
       };
     },
     async updateProjectGitRepository(_, { input }, { injector }) {
+      const UpdateProjectGitRepositoryModel = z.object({
+        gitRepository: MaybeModel(URLModel),
+      });
+
+      const result = UpdateProjectGitRepositoryModel.safeParse(input);
+
+      if (!result.success) {
+        return {
+          error: {
+            message:
+              result.error.formErrors.fieldErrors.gitRepository?.[0] ??
+              'Please check your input.',
+          },
+        };
+      }
+
       const [organization, project] = await Promise.all([
         injector.get(IdTranslator).translateOrganizationId(input),
         injector.get(IdTranslator).translateProjectId(input),
       ]);
 
       return {
-        selector: {
-          organization: input.organization,
-          project: input.project,
+        ok: {
+          selector: {
+            organization: input.organization,
+            project: input.project,
+          },
+          updatedProject: await injector
+            .get(ProjectManager)
+            .updateGitRepository({
+              project,
+              organization,
+              gitRepository: input.gitRepository,
+            }),
         },
-        updatedProject: await injector.get(ProjectManager).updateGitRepository({
-          project,
-          organization,
-          gitRepository: input.gitRepository,
-        }),
       };
     },
   },

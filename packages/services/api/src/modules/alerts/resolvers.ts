@@ -2,24 +2,55 @@ import type { AlertsModule } from './__generated__/types';
 import { IdTranslator } from '../shared/providers/id-translator';
 import { AlertsManager } from './providers/alerts-manager';
 import { TargetManager } from '../target/providers/target-manager';
+import { z } from 'zod';
+
+const AlertChannelNameModel = z.string().min(1).max(100);
+const SlackChannelNameModel = z.string().min(1).max(80);
+const MaybeModel = <T extends z.ZodType>(value: T) =>
+  z.union([z.null(), z.undefined(), value]);
 
 export const resolvers: AlertsModule.Resolvers = {
   Mutation: {
     async addAlertChannel(_, { input }, { injector }) {
+      const AddAlertChannelModel = z.object({
+        slack: MaybeModel(z.object({ channel: SlackChannelNameModel })),
+        webhook: MaybeModel(z.object({ endpoint: z.string().url().max(200) })),
+        name: AlertChannelNameModel,
+      });
+
+      const result = AddAlertChannelModel.safeParse(input);
+
+      if (!result.success) {
+        return {
+          error: {
+            message: 'Please check your input.',
+            inputErrors: {
+              slackChannel: result.error.formErrors.fieldErrors.slack?.[0],
+              webhookEndpoint: result.error.formErrors.fieldErrors.webhook?.[0],
+              name: result.error.formErrors.fieldErrors.name?.[0],
+            },
+          },
+        };
+      }
+
       const translator = injector.get(IdTranslator);
       const [organization, project] = await Promise.all([
         translator.translateOrganizationId(input),
         translator.translateProjectId(input),
       ]);
 
-      return injector.get(AlertsManager).addChannel({
-        organization,
-        project,
-        name: input.name,
-        type: input.type,
-        slack: input.slack,
-        webhook: input.webhook,
-      });
+      return {
+        ok: {
+          addedAlertChannel: injector.get(AlertsManager).addChannel({
+            organization,
+            project,
+            name: input.name,
+            type: input.type,
+            slack: input.slack,
+            webhook: input.webhook,
+          }),
+        },
+      };
     },
     async deleteAlertChannels(_, { input }, { injector }) {
       const translator = injector.get(IdTranslator);

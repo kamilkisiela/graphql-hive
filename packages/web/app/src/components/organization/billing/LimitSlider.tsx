@@ -6,11 +6,11 @@ import {
   SliderTrack,
   Tooltip,
 } from '@chakra-ui/react';
-import 'twin.macro';
-import React from 'react';
+import { ReactElement, useState } from 'react';
 import { Section } from '@/components/common';
+import clsx from 'clsx';
 
-export const LimitSlider: React.FC<{
+export const LimitSlider = (props: {
   value: number;
   min: number;
   max: number;
@@ -18,29 +18,29 @@ export const LimitSlider: React.FC<{
   title: string;
   onChange: (v: number) => void;
   marks?: { value: number; label: string }[];
-}> = (props) => {
-  const [showTooltip, setShowTooltip] = React.useState(false);
+  className?: string;
+}): ReactElement => {
+  const [showTooltip, setShowTooltip] = useState(false);
 
   return (
-    <div tw="mt-4 mb-8">
-      <Section.Subtitle>{props.title}</Section.Subtitle>
+    <div className={props.className}>
+      <Section.Subtitle className="-ml-2.5">{props.title}</Section.Subtitle>
       <Slider
         min={props.min}
         max={props.max}
         step={props.step}
         value={props.value}
         colorScheme="primary"
-        onChange={(v) => props.onChange(v)}
+        onChange={props.onChange}
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
       >
-        {(props.marks || []).map((mark) => (
+        {props.marks?.map((mark, i, arr) => (
           <SliderMark
             key={mark.value}
             value={mark.value}
-            mt="1"
-            ml="-2.5"
             fontSize="sm"
+            className={clsx('mt-2', i === arr.length - 1 ? '-ml-7' : '-ml-2.5')}
           >
             {mark.label}
           </SliderMark>
@@ -50,10 +50,9 @@ export const LimitSlider: React.FC<{
         </SliderTrack>
         <Tooltip
           hasArrow
-          color="white"
           placement="top"
           isOpen={showTooltip}
-          label={`${props.value}`}
+          label={props.value}
         >
           <SliderThumb />
         </Tooltip>

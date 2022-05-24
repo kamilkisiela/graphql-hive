@@ -1,52 +1,58 @@
-import React from 'react';
-import 'twin.macro';
-import { track } from '@/lib/mixpanel';
-import { useQuery, useMutation } from 'urql';
+import { ReactElement, useCallback, useEffect, useState } from 'react';
+import { useMutation, useQuery } from 'urql';
+
+import { useUser } from '@/components/auth/AuthProvider';
+import { OrganizationLayout } from '@/components/layouts';
+import { Avatar, Button, Card, Checkbox, CopyValue, DropdownMenu, Title } from '@/components/v2';
+import { GitHubIcon, GoogleIcon, KeyIcon, MoreIcon, SettingsIcon, TrashIcon } from '@/components/v2/icon';
+import { ChangePermissionsModal, DeleteMembersModal } from '@/components/v2/modals';
 import {
-  Button,
-  Checkbox,
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  useDisclosure,
-} from '@chakra-ui/react';
-import { FaGoogle, FaGithub, FaKey } from 'react-icons/fa';
-import { Page } from '@/components/common';
-import { CopyValue } from '@/components/common/CopyValue';
-import { OrganizationView } from '@/components/organization/View';
-import { MemberPermisssonsModal } from '@/components/organization/members/PermissionsModal';
-import {
+  AuthProvider,
+  MeDocument,
   OrganizationFieldsFragment,
   OrganizationMembersDocument,
+  OrganizationType,
   ResetInviteCodeDocument,
-  OrganizationMembersQuery,
-  DeleteOrganizationMembersDocument,
-  MemberFieldsFragment,
-  AuthProvider,
 } from '@/graphql';
-import {
-  OrganizationAccessScope,
-  useOrganizationAccess,
-} from '@/lib/access/organization';
+import { OrganizationAccessScope,useOrganizationAccess } from '@/lib/access/organization';
 import { useNotifications } from '@/lib/hooks/use-notifications';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
-import { DataWrapper } from '@/components/common/DataWrapper';
 
-const Invitation: React.FC<{
-  organization: OrganizationMembersQuery['organization']['organization'];
-}> = ({ organization }) => {
-  const inviteUrl = `${window.location.origin}/join/${organization.inviteCode}`;
+const Page = ({ organization }: { organization: OrganizationFieldsFragment }) => {
+  useOrganizationAccess({
+    scope: OrganizationAccessScope.Members,
+    redirect: true,
+    member: organization.me,
+  });
+
+  const [checked, setChecked] = useState<string[]>([]);
+  const [selectedMemberId, setSelectedMemberId] = useState<string>('');
+  const [isModalOpen, setModalOpen] = useState(false);
+  const toggleModalOpen = useCallback(() => {
+    setModalOpen(prevOpen => !prevOpen);
+  }, []);
+
+  const [isDeleteMembersModalOpen, setDeleteMembersModalOpen] = useState(false);
+  const toggleDeleteMembersModalOpen = useCallback(() => {
+    setDeleteMembersModalOpen(prevOpen => !prevOpen);
+  }, []);
+
+  const { user } = useUser();
+  const [meQuery] = useQuery({ query: MeDocument });
   const router = useRouteSelector();
   const notify = useNotifications();
-  const [mutation, mutate] = useMutation(ResetInviteCodeDocument);
+  const [organizationMembersQuery] = useQuery({
+    query: OrganizationMembersDocument,
+    variables: {
+      selector: {
+        organization: router.organizationId,
+      },
+    },
+  });
 
-  const generate = React.useCallback(() => {
-    track('GENERATE_NEW_INVITATION_LINK_ATTEMPT', {
-      organization: router.organizationId,
-    });
+  const [, mutate] = useMutation(ResetInviteCodeDocument);
+
+  const handleReset = useCallback(() => {
     mutate({
       selector: {
         organization: router.organizationId,
@@ -54,182 +60,132 @@ const Invitation: React.FC<{
     }).finally(() => {
       notify('Generated new invitation link', 'info');
     });
-  }, [mutate, notify]);
+  }, [mutate, notify, router.organizationId]);
 
-  return (
-    <div tw="flex flex-row space-x-3 pb-3">
-      <CopyValue value={inviteUrl} />
-      <Button type="button" onClick={generate} disabled={mutation.fetching}>
-        Reset
-      </Button>
-    </div>
-  );
-};
+  const org = organizationMembersQuery.data?.organization.organization;
+  const isPersonal = org && org.type === OrganizationType.Personal;
+  const members = org?.members.nodes;
 
-const MemberRow: React.FC<{
-  member: MemberFieldsFragment;
-  owner: MemberFieldsFragment;
-  organization: OrganizationFieldsFragment;
-  checked: string[];
-  onCheck(id: string): void;
-}> = ({ member, owner, checked, onCheck, organization }) => {
-  const isOwner = member.id === owner.id;
-  const isMe = member.id === organization.me.id;
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  useEffect(() => {
+    if (isPersonal) {
+      router.replace(`/${router.organizationId}`);
+    } else if (members) {
+      // uncheck checkboxes when members were deleted
+      setChecked(prev => prev.filter(id => members.some(node => node.id === id)));
+    }
+  }, [isPersonal, router, members]);
 
-  const canManage = !isOwner && !isMe;
+  if (!org || isPersonal) return null;
 
-  const provider = member.user.provider;
-  const providerIcon =
-    provider === AuthProvider.Google ? (
-      <FaGoogle color="#34a853" />
-    ) : provider === AuthProvider.Github ? (
-      <FaGithub color="#333" />
-    ) : (
-      <FaKey color="#fbbc05" />
-    );
+  const me = meQuery.data?.me;
+  const selectedMember = selectedMemberId && members.find(node => node.id === selectedMemberId);
 
   return (
     <>
-      <MemberPermisssonsModal
-        isOpen={isOpen}
-        onClose={onClose}
-        member={member}
-        organization={organization}
+      <p className="mb-3 font-light text-gray-300">Invite others to your organization and manage access</p>
+      {selectedMember && (
+        <ChangePermissionsModal
+          isOpen={isModalOpen}
+          toggleModalOpen={toggleModalOpen}
+          organization={org}
+          member={selectedMember}
+        />
+      )}
+      <DeleteMembersModal
+        isOpen={isDeleteMembersModalOpen}
+        toggleModalOpen={toggleDeleteMembersModalOpen}
+        memberIds={checked}
       />
-      <Tr>
-        <Td>
-          <Checkbox
-            colorScheme="primary"
-            isDisabled={!canManage}
-            checked={checked.includes(member.id)}
-            onChange={() => onCheck(member.id)}
-          />
-        </Td>
-        <Td textAlign="center">{providerIcon}</Td>
-        <Td>{member.user.displayName}</Td>
-        <Td>{member.user.email}</Td>
-        <Td textAlign="right">
-          {canManage && (
-            <Button size="sm" variant="ghost" onClick={onOpen}>
-              Change permissions
-            </Button>
-          )}
-        </Td>
-      </Tr>
+      <div className="flex gap-4">
+        <CopyValue className="grow" value={`${window.location.origin}/join/${org.inviteCode}`} />
+        <Button
+          variant="secondary"
+          size="large"
+          className="px-5"
+          onClick={handleReset}
+          title="Generate new invitation link"
+        >
+          Reset
+        </Button>
+        <Button
+          size="large"
+          danger
+          className="min-w-[150px] justify-between"
+          onClick={toggleDeleteMembersModalOpen}
+          disabled={checked.length === 0}
+        >
+          Delete {checked.length || ''}
+          <TrashIcon />
+        </Button>
+      </div>
+      {members.map(node => {
+        const IconToUse =
+          {
+            [AuthProvider.Github]: GitHubIcon,
+            [AuthProvider.Google]: GoogleIcon,
+          }[node.user.provider] || KeyIcon;
+
+        const isOwner = node.id === org.owner.id;
+        const isMe = node.id === me.id;
+        const isDisabled = isOwner || isMe;
+
+        return (
+          <Card key={node.id} className="flex items-center gap-2.5 bg-gray-800/40">
+            <Checkbox
+              onCheckedChange={isChecked =>
+                setChecked(isChecked ? [...checked, node.id] : checked.filter(k => k !== node.id))
+              }
+              checked={checked.includes(node.id)}
+              disabled={isDisabled}
+            />
+            <Avatar src={isMe ? user.picture : ''} fallback={node.user.displayName[0]} shape="circle" />
+            <div className="grow overflow-hidden">
+              <h3 className="line-clamp-1 font-medium">{node.user.displayName}</h3>
+              <h4 className="text-sm font-light text-gray-500">{node.user.email}</h4>
+            </div>
+            <div className="rounded-full bg-gray-800 p-2" title={node.user.provider}>
+              <IconToUse className="h-5 w-5" />
+            </div>
+            <DropdownMenu>
+              <DropdownMenu.Trigger asChild>
+                <Button rotate={90} className={isDisabled ? 'invisible' : ''}>
+                  <MoreIcon />
+                </Button>
+              </DropdownMenu.Trigger>
+              <DropdownMenu.Content sideOffset={5} align="start">
+                <DropdownMenu.Item
+                  onClick={() => {
+                    setSelectedMemberId(node.id);
+                    toggleModalOpen();
+                  }}
+                >
+                  <SettingsIcon />
+                  Change permissions
+                </DropdownMenu.Item>
+                <DropdownMenu.Item
+                  onClick={() => {
+                    setChecked([node.id]);
+                    toggleDeleteMembersModalOpen();
+                  }}
+                >
+                  <TrashIcon /> Remove
+                </DropdownMenu.Item>
+              </DropdownMenu.Content>
+            </DropdownMenu>
+          </Card>
+        );
+      })}
     </>
   );
 };
 
-const MembersManager: React.FC<{
-  organization: OrganizationFieldsFragment;
-}> = ({ organization }) => {
-  const [query] = useQuery({
-    query: OrganizationMembersDocument,
-    variables: {
-      selector: {
-        organization: organization.cleanId,
-      },
-    },
-  });
-  const [checked, setChecked] = React.useState<string[]>([]);
-  const onCheck = React.useCallback(
-    (id: string) => {
-      if (checked.includes(id)) {
-        setChecked(checked.filter((i) => i !== id));
-      } else {
-        setChecked(checked.concat(id));
-      }
-    },
-    [checked, setChecked]
-  );
-  const [mutation, mutate] = useMutation(DeleteOrganizationMembersDocument);
-  const deleteMembers = React.useCallback(() => {
-    mutate({
-      selector: {
-        organization: organization.cleanId,
-        users: checked,
-      },
-    }).finally(() => {
-      setChecked([]);
-    });
-  }, [mutate, checked, setChecked]);
-
+export default function MembersPage(): ReactElement {
   return (
-    <DataWrapper query={query}>
-      {() => (
-        <div>
-          <div tw="flex flex-row justify-between pb-3">
-            <Invitation organization={query.data.organization.organization} />
-            <div>
-              <Button
-                disabled={!checked.length || mutation.fetching}
-                onClick={deleteMembers}
-                type="button"
-                colorScheme="red"
-              >
-                Delete
-              </Button>
-            </div>
-          </div>
-          <Table>
-            <Thead>
-              <Tr>
-                <Th tw="w-10"></Th>
-                <Th tw="w-10"></Th>
-                <Th>Name</Th>
-                <Th>Email</Th>
-                <Th textAlign="right">Permissions</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {query.data.organization.organization?.members.nodes.map(
-                (member) => (
-                  <MemberRow
-                    key={member.id}
-                    member={member}
-                    organization={query.data.organization.organization}
-                    owner={query.data.organization.organization.owner}
-                    checked={checked}
-                    onCheck={onCheck}
-                  />
-                )
-              )}
-            </Tbody>
-          </Table>
-        </div>
-      )}
-    </DataWrapper>
-  );
-};
-
-const Inner: React.FC<{ organization: OrganizationFieldsFragment }> = ({
-  organization,
-}) => {
-  const canAccess = useOrganizationAccess({
-    scope: OrganizationAccessScope.Members,
-    member: organization?.me,
-    redirect: true,
-  });
-
-  if (!canAccess) {
-    return null;
-  }
-
-  return (
-    <Page
-      title="Members"
-      subtitle="Invite others to your organization and manage access."
-    >
-      <MembersManager organization={organization} />
-    </Page>
-  );
-};
-
-export default function OrganizationSettingsPage() {
-  return (
-    <OrganizationView title="Members">
-      {({ organization }) => <Inner organization={organization} />}
-    </OrganizationView>
+    <>
+      <Title title="Members" />
+      <OrganizationLayout value="members" className="flex w-4/5 flex-col gap-4">
+        {({ organization }) => <Page organization={organization} />}
+      </OrganizationLayout>
+    </>
   );
 }

@@ -1,63 +1,59 @@
-import React, { useCallback } from 'react';
-import tw from 'twin.macro';
+import { ReactElement, useCallback, useState } from 'react';
 import {
-  useDisclosure,
-  Modal,
-  Button,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  Code,
-  ModalFooter,
-  ModalCloseButton,
-  Alert,
-  AlertTitle,
-  AlertDescription,
-  Spinner,
-  Link,
-  InputGroup,
-  Input,
-  InputRightElement,
-  IconButton,
-  useColorModeValue,
-  Tooltip,
   Editable,
-  EditablePreview,
   EditableInput,
+  EditablePreview,
+  IconButton,
+  Input,
+  InputGroup,
+  InputRightElement,
+  Tooltip,
 } from '@chakra-ui/react';
-import { VscPlug, VscClose, VscSync } from 'react-icons/vsc';
-import { useQuery, useMutation } from 'urql';
+import { VscClose, VscSync } from 'react-icons/vsc';
+import { gql, useMutation, useQuery } from 'urql';
 import { useDebouncedCallback } from 'use-debounce';
-import {
-  SchemasDocument,
-  SchemasQuery,
-  ProjectFieldsFragment,
-  ProjectType,
-  TargetFieldsFragment,
-  OrganizationFieldsFragment,
-  CreateCdnTokenDocument,
-  SchemaSyncCdnDocument,
-  UpdateSchemaServiceNameDocument,
-} from '@/graphql';
-import { Description, Page } from '@/components/common';
-import { DataWrapper } from '@/components/common/DataWrapper';
-import { GraphQLSDLBlock } from '@/components/common/GraphQLSDLBlock';
-import { TargetView } from '@/components/target/View';
-import { NoSchemasYet } from '@/components/target/NoSchemasYet';
-import { CopyValue } from '@/components/common/CopyValue';
-import { useTargetAccess, TargetAccessScope } from '@/lib/access/target';
 
-const Block = tw.div`mb-8`;
+import { TargetLayout } from '@/components/layouts';
+import { MarkAsValid } from '@/components/target/history/MarkAsValid';
+import { Button, DataWrapper, GraphQLBlock, noSchema, Title } from '@/components/v2';
+import { Link2Icon } from '@/components/v2/icon';
+import { ConnectSchemaModal } from '@/components/v2/modals';
+import { SchemaFieldsFragment } from '@/gql/graphql';
+import { OrganizationFieldsFragment, ProjectFieldsFragment, ProjectType, TargetFieldsFragment } from '@/graphql';
+import { TargetAccessScope, useTargetAccess } from '@/lib/access/target';
+
+const SchemaServiceName_UpdateSchemaServiceName = gql(/* GraphQL */ `
+  mutation SchemaServiceName_UpdateSchemaServiceName($input: UpdateSchemaServiceNameInput!) {
+    updateSchemaServiceName(input: $input) {
+      ok {
+        updatedTarget {
+          ...TargetFields
+          latestSchemaVersion {
+            id
+            valid
+            schemas {
+              nodes {
+                ...SchemaFields
+              }
+            }
+          }
+        }
+      }
+      error {
+        message
+      }
+    }
+  }
+`);
 
 const SchemaServiceName: React.FC<{
   version: string;
-  schema: SchemasQuery['target']['latestSchemaVersion']['schemas']['nodes'][0];
-  target: SchemasQuery['target'];
+  schema: SchemaFieldsFragment;
+  target: TargetFieldsFragment;
   project: ProjectFieldsFragment;
   organization: OrganizationFieldsFragment;
 }> = ({ target, project, organization, schema, version }) => {
-  const [mutation, mutate] = useMutation(UpdateSchemaServiceNameDocument);
+  const [mutation, mutate] = useMutation(SchemaServiceName_UpdateSchemaServiceName);
   const hasAccess = useTargetAccess({
     scope: TargetAccessScope.RegistryWrite,
     member: organization.me,
@@ -88,20 +84,12 @@ const SchemaServiceName: React.FC<{
     [mutate]
   );
 
-  if (
-    (project.type !== ProjectType.Federation &&
-      project.type !== ProjectType.Stitching) ||
-    !hasAccess
-  ) {
+  if ((project.type !== ProjectType.Federation && project.type !== ProjectType.Stitching) || !hasAccess) {
     return <>{schema.service}</>;
   }
 
   return (
-    <Editable
-      defaultValue={schema.service}
-      isDisabled={mutation.fetching}
-      onSubmit={submit}
-    >
+    <Editable defaultValue={schema.service} isDisabled={mutation.fetching} onSubmit={submit}>
       <EditablePreview />
       <EditableInput />
     </Editable>
@@ -111,275 +99,83 @@ const SchemaServiceName: React.FC<{
 const Schemas: React.FC<{
   organization: OrganizationFieldsFragment;
   project: ProjectFieldsFragment;
-  target: SchemasQuery['target'];
+  target: TargetFieldsFragment;
+  schemas: SchemaFieldsFragment[];
+  version: string;
   filterService?: string;
-}> = ({ organization, project, target, filterService }) => {
-  const schemas = target.latestSchemaVersion?.schemas.nodes ?? [];
-
-  if (!schemas.length) {
-    return <NoSchemasYet />;
-  }
-
+}> = ({ organization, project, target, filterService, version, schemas = [] }) => {
   if (project.type === ProjectType.Single) {
-    return (
-      <GraphQLSDLBlock tw="mb-6" sdl={schemas[0].source} url={schemas[0].url} />
-    );
+    return <GraphQLBlock className="mb-6" sdl={schemas[0].source} url={schemas[0].url} />;
   }
 
   return (
-    <>
+    <div className="flex flex-col gap-8">
       {schemas
-        .filter((schema) => {
+        .filter(schema => {
           if (filterService && schema.service) {
-            return schema.service
-              .toLowerCase()
-              .includes(filterService.toLowerCase());
+            return schema.service.toLowerCase().includes(filterService.toLowerCase());
           }
 
           return true;
         })
-        .map((schema) => (
-          <Block key={schema.id}>
-            <GraphQLSDLBlock
-              sdl={schema.source}
-              url={schema.url}
-              title={
-                <SchemaServiceName
-                  version={target.latestSchemaVersion?.id}
-                  schema={schema}
-                  target={target}
-                  project={project}
-                  organization={organization}
-                />
-              }
-            />
-          </Block>
-        ))}
-    </>
-  );
-};
-
-const SchemaView: React.FC<{
-  organization: OrganizationFieldsFragment;
-  project: ProjectFieldsFragment;
-  target: TargetFieldsFragment;
-  filterService?: string;
-}> = ({ organization, project, target, filterService }) => {
-  const [query] = useQuery({
-    query: SchemasDocument,
-    variables: {
-      selector: {
-        organization: organization.cleanId,
-        project: project.cleanId,
-        target: target.cleanId,
-      },
-    },
-    requestPolicy: 'cache-and-network',
-  });
-
-  return (
-    <DataWrapper query={query}>
-      {() => (
-        <Schemas
-          organization={organization}
-          project={project}
-          target={query.data.target}
-          filterService={filterService}
-        />
-      )}
-    </DataWrapper>
-  );
-};
-
-const ConnectSchemaModal: React.FC<{
-  target: TargetFieldsFragment;
-  project: ProjectFieldsFragment;
-  organization: OrganizationFieldsFragment;
-  onClose(): void;
-  onOpen(): void;
-  isOpen: boolean;
-}> = ({ target, project, organization, onClose, isOpen }) => {
-  const [generating, setGenerating] = React.useState(true);
-  const [mutation, mutate] = useMutation(CreateCdnTokenDocument);
-
-  React.useEffect(() => {
-    if (!isOpen) {
-      setGenerating(true);
-      return;
-    }
-
-    mutate({
-      selector: {
-        organization: organization.cleanId,
-        project: project.cleanId,
-        target: target.cleanId,
-      },
-    }).then(() => {
-      setTimeout(() => {
-        setGenerating(false);
-      }, 2000);
-    });
-  }, [isOpen, setGenerating, mutate]);
-
-  const description = `With high-availability and multi-zone CDN service based on
-  Cloudflare, Hive allows you to access ${
-    project.type === ProjectType.Federation
-      ? 'the supergraph'
-      : project.type === ProjectType.Stitching
-      ? 'the list of services'
-      : 'the schema'
-  } of your API,
-  through a secured external service, that's always up regardless of
-  Hive.`;
-
-  const generatingDescription = `Hive is now generating an authentication token and an URL you can use to fetch your ${
-    project.type === ProjectType.Federation
-      ? 'supergraph schema'
-      : project.type === ProjectType.Stitching
-      ? 'services'
-      : 'schema'
-  }.`;
-
-  return (
-    <Modal isOpen={isOpen} onClose={onClose} size="3xl">
-      <ModalOverlay />
-      <ModalContent>
-        <ModalHeader>Connect to Hive</ModalHeader>
-        <ModalCloseButton />
-        <ModalBody>
-          <Description>{description}</Description>
-          <div tw="pt-6">
-            {generating && (
-              <Alert
-                status="info"
-                variant="subtle"
-                flexDirection="column"
-                alignItems="center"
-                justifyContent="center"
-                textAlign="center"
-                height="200px"
-              >
-                <Spinner colorScheme="purple" />
-                <AlertTitle mt={4} mb={1} fontSize="lg">
-                  Generating access...
-                </AlertTitle>
-                <AlertDescription maxWidth="sm">
-                  {generatingDescription}
-                </AlertDescription>
-              </Alert>
-            )}
-          </div>
-          {!generating && mutation.data && (
-            <>
-              <Description tw="mb-6">
-                You can use the following endpoint:
-              </Description>
-              <CopyValue
-                value={mutation.data.createCdnToken.url}
-                width={'100%'}
+        .map(schema => (
+          <GraphQLBlock
+            key={schema.id}
+            sdl={schema.source}
+            url={schema.url}
+            title={
+              <SchemaServiceName
+                version={version}
+                schema={schema}
+                target={target}
+                project={project}
+                organization={organization}
               />
-              <Description tw="mt-6">
-                To authenticate, use the following HTTP headers:
-              </Description>
-              <Code tw="mt-6">
-                X-Hive-CDN-Key: {mutation.data.createCdnToken.token}
-              </Code>
-              {project.type === ProjectType.Federation && (
-                <Description tw="mt-6">
-                  Read the{' '}
-                  <Link
-                    color="teal.500"
-                    size="sm"
-                    target="_blank"
-                    href={`${process.env.NEXT_PUBLIC_DOCS_LINK}/features/registry-usage#apollo-federation`}
-                  >
-                    "Using the Registry with a Apollo Gateway"
-                  </Link>{' '}
-                  chapter in our documentation.
-                </Description>
-              )}
-              {project.type === ProjectType.Stitching && (
-                <Description tw="mt-6">
-                  Read the{' '}
-                  <Link
-                    color="teal.500"
-                    size="sm"
-                    target="_blank"
-                    href={`${process.env.NEXT_PUBLIC_DOCS_LINK}/features/registry-usage#schema-stitching`}
-                  >
-                    "Using the Registry when Stitching"
-                  </Link>{' '}
-                  chapter in our documentation.
-                </Description>
-              )}
-              {project.type === ProjectType.Single && (
-                <Description tw="mt-6">
-                  Read the{' '}
-                  <Link
-                    color="teal.500"
-                    size="sm"
-                    target="_blank"
-                    href={`${process.env.NEXT_PUBLIC_DOCS_LINK}/features/registry-usage#other-tools`}
-                  >
-                    "Using the Registry with any tool"
-                  </Link>{' '}
-                  chapter in our documentation.
-                </Description>
-              )}
-            </>
-          )}
-        </ModalBody>
-        <ModalFooter tw="space-x-6">
-          <Button variant="ghost" type="button" onClick={onClose}>
-            Close
-          </Button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+            }
+          />
+        ))}
+    </div>
   );
 };
 
-const ConnectSchemaButton: React.FC<{
-  target: TargetFieldsFragment;
-  project: ProjectFieldsFragment;
-  organization: OrganizationFieldsFragment;
-}> = ({ target, project, organization }) => {
-  const { onClose, onOpen, isOpen } = useDisclosure();
-  const color = useColorModeValue('#fff', '#000');
+const SchemaView_LatestSchema = gql(/* GraphQL */ `
+  query SchemaView_LatestSchema($selector: TargetSelectorInput!) {
+    target(selector: $selector) {
+      ...TargetFields
+      latestSchemaVersion {
+        id
+        valid
+        schemas {
+          nodes {
+            ...SchemaFields
+          }
+        }
+      }
+    }
+  }
+`);
 
-  return (
-    <>
-      <Button
-        colorScheme="primary"
-        type="button"
-        size="sm"
-        onClick={onOpen}
-        leftIcon={<VscPlug color={color} />}
-      >
-        Connect
-      </Button>
-      <ConnectSchemaModal
-        target={target}
-        project={project}
-        organization={organization}
-        isOpen={isOpen}
-        onClose={onClose}
-        onOpen={onOpen}
-      />
-    </>
-  );
-};
+const SchemaSyncButton_SchemaSyncCDN = gql(/* GraphQL */ `
+  mutation schemaSyncCdn($input: SchemaSyncCDNInput!) {
+    schemaSyncCDN(input: $input) {
+      __typename
+      ... on SchemaSyncCDNSuccess {
+        message
+      }
+      ... on SchemaSyncCDNError {
+        message
+      }
+    }
+  }
+`);
 
 const SyncSchemaButton: React.FC<{
   target: TargetFieldsFragment;
   project: ProjectFieldsFragment;
   organization: OrganizationFieldsFragment;
 }> = ({ target, project, organization }) => {
-  const color = useColorModeValue('#fff', '#000');
-  const [status, setStatus] = React.useState<'idle' | 'error' | 'success'>(
-    'idle'
-  );
-  const [mutation, mutate] = useMutation(SchemaSyncCdnDocument);
+  const [status, setStatus] = useState<'idle' | 'error' | 'success'>('idle');
+  const [mutation, mutate] = useMutation(SchemaSyncButton_SchemaSyncCDN);
   const hasAccess = useTargetAccess({
     scope: TargetAccessScope.RegistryWrite,
     member: organization.me,
@@ -393,15 +189,11 @@ const SyncSchemaButton: React.FC<{
         project: project.cleanId,
         target: target.cleanId,
       },
-    }).then((result) => {
+    }).then(result => {
       if (result.error) {
         setStatus('error');
       } else {
-        setStatus(
-          result.data?.schemaSyncCDN.__typename === 'SchemaSyncCDNError'
-            ? 'error'
-            : 'success'
-        );
+        setStatus(result.data?.schemaSyncCDN.__typename === 'SchemaSyncCDNError' ? 'error' : 'success');
       }
       setTimeout(() => {
         setStatus('idle');
@@ -414,34 +206,22 @@ const SyncSchemaButton: React.FC<{
   }
 
   return (
-    <Tooltip
-      label="Re-upload the latest valid version to Hive CDN"
-      fontSize="xs"
-      placement="bottom-start"
-    >
-      <Button
-        colorScheme={
-          status === 'success' ? 'teal' : status === 'error' ? 'red' : 'primary'
-        }
-        type="button"
-        size="sm"
-        onClick={sync}
-        disabled={status !== 'idle' || mutation.fetching}
-        isLoading={mutation.fetching}
-        loadingText="Syncing..."
-        leftIcon={<VscSync color={color} />}
-      >
-        {status === 'idle'
+    <Tooltip label="Re-upload the latest valid version to Hive CDN" fontSize="xs" placement="bottom-start">
+      <Button variant="primary" size="large" onClick={sync} disabled={status !== 'idle' || mutation.fetching}>
+        {mutation.fetching
+          ? 'Syncing...'
+          : status === 'idle'
           ? 'Update CDN'
           : status === 'error'
           ? 'Failed to synchronize'
           : 'CDN is up to date'}
+        <VscSync className="ml-8" />
       </Button>
     </Tooltip>
   );
 };
 
-function TargetSchemaInner({
+function SchemaView({
   organization,
   project,
   target,
@@ -450,91 +230,97 @@ function TargetSchemaInner({
   project: ProjectFieldsFragment;
   target: TargetFieldsFragment;
 }) {
-  const [filterService, setFilterService] = React.useState<string | null>(null);
-  const [term, setTerm] = React.useState<string | null>(null);
+  const [isModalOpen, setModalOpen] = useState(false);
+  const toggleModalOpen = useCallback(() => {
+    setModalOpen(prevOpen => !prevOpen);
+  }, []);
+
+  const [filterService, setFilterService] = useState<string | null>(null);
+  const [term, setTerm] = useState<string | null>(null);
   const debouncedFilter = useDebouncedCallback((value: string) => {
     setFilterService(value);
   }, 500);
-  const handleChange = React.useCallback(
-    (event) => {
+  const handleChange = useCallback(
+    event => {
       debouncedFilter(event.target.value);
       setTerm(event.target.value);
     },
     [debouncedFilter, setTerm]
   );
-  const reset = React.useCallback(() => {
+  const reset = useCallback(() => {
     setFilterService('');
     setTerm('');
   }, [setFilterService]);
 
-  const isDistributed =
-    project.type === ProjectType.Federation ||
-    project.type === ProjectType.Stitching;
+  const isDistributed = project.type === ProjectType.Federation || project.type === ProjectType.Stitching;
+
+  const [query] = useQuery({
+    query: SchemaView_LatestSchema,
+    variables: {
+      selector: {
+        organization: organization.cleanId,
+        project: project.cleanId,
+        target: target.cleanId,
+      },
+    },
+    requestPolicy: 'cache-and-network',
+  });
+
+  if (!query.data?.target?.latestSchemaVersion?.schemas.nodes.length) {
+    return <>{noSchema}</>;
+  }
 
   return (
-    <Page
-      title="Schema"
-      subtitle="The latest schema you published for this target."
-      actions={
+    <DataWrapper query={query}>
+      {() => (
         <>
-          {isDistributed && (
-            <form
-              onSubmit={(event) => {
-                event.preventDefault();
-              }}
-            >
-              <InputGroup size="sm" variant="filled">
-                <Input
-                  type="text"
-                  placeholder="Find service"
-                  value={term}
-                  onChange={handleChange}
-                />
-                <InputRightElement>
-                  <IconButton
-                    aria-label="Reset"
-                    size="xs"
-                    variant="ghost"
-                    onClick={reset}
-                    icon={<VscClose />}
-                  />
-                </InputRightElement>
-              </InputGroup>
-            </form>
-          )}
-          <SyncSchemaButton
-            target={target}
-            project={project}
-            organization={organization}
-          />
-          <ConnectSchemaButton
-            target={target}
-            project={project}
-            organization={organization}
-          />
+          <div className="flex flex-row items-center justify-between">
+            <div className="font-light text-gray-500">The latest published schema.</div>
+            <div className="flex flex-row items-center gap-4">
+              {isDistributed && (
+                <form
+                  onSubmit={event => {
+                    event.preventDefault();
+                  }}
+                >
+                  <InputGroup size="sm" variant="filled">
+                    <Input type="text" placeholder="Find service" value={term} onChange={handleChange} />
+                    <InputRightElement>
+                      <IconButton aria-label="Reset" size="xs" variant="ghost" onClick={reset} icon={<VscClose />} />
+                    </InputRightElement>
+                  </InputGroup>
+                </form>
+              )}
+              <MarkAsValid version={query.data.target.latestSchemaVersion} />
+              <SyncSchemaButton target={target} project={project} organization={organization} />
+              <Button size="large" variant="primary" onClick={toggleModalOpen}>
+                Connect
+                <Link2Icon className="ml-8" />
+              </Button>
+            </div>
+          </div>
+          <div className="my-8">
+            <Schemas
+              organization={organization}
+              project={project}
+              target={query.data.target}
+              filterService={filterService}
+              version={query.data.target.latestSchemaVersion.id}
+              schemas={query.data.target.latestSchemaVersion.schemas.nodes ?? []}
+            />
+          </div>
+          <ConnectSchemaModal isOpen={isModalOpen} toggleModalOpen={toggleModalOpen} />
         </>
-      }
-    >
-      <SchemaView
-        organization={organization}
-        project={project}
-        target={target}
-        filterService={filterService}
-      />
-    </Page>
+      )}
+    </DataWrapper>
   );
 }
 
-export default function TargetSchema() {
+export default function SchemaPage(): ReactElement {
   return (
-    <TargetView title="Overview">
-      {({ organization, project, target }) => (
-        <TargetSchemaInner
-          organization={organization}
-          project={project}
-          target={target}
-        />
-      )}
-    </TargetView>
+    <>
+      <Title title="Schema" />
+      <TargetLayout value="schema">{props => <SchemaView {...props} />}</TargetLayout>
+    </>
   );
 }

@@ -90,7 +90,7 @@ const TokenCreator: React.FC<{
 
   const [state, setState] = React.useState<'FORM' | 'SECRET'>('FORM');
   const { hasCopied, onCopy } = useClipboard(
-    mutation?.data?.createToken?.secret
+    mutation?.data?.createToken?.ok?.secret
   );
   const manager = usePermissionsManager({
     onSuccess() {},
@@ -172,9 +172,9 @@ const TokenCreator: React.FC<{
                     fontWeight={600}
                     fontSize="lg"
                     border={0}
-                    value={mutation?.data?.createToken?.secret}
-                    placeholder={mutation?.data?.createToken?.secret}
-                  ></Input>
+                    value={mutation?.data?.createToken?.ok?.secret}
+                    placeholder={mutation?.data?.createToken?.ok?.secret}
+                  />
                   <Button colorScheme="primary" onClick={onCopy}>
                     {hasCopied ? 'Copied' : 'Copy'}
                   </Button>

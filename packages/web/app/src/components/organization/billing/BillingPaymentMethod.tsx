@@ -1,52 +1,69 @@
+import { ReactElement } from 'react';
+import clsx from 'clsx';
 import { Section } from '@/components/common';
 import { BillingPlanType, OrgBillingInfoFieldsFragment } from '@/graphql';
-import { Link } from '@chakra-ui/react';
+import { Link, Heading } from '@/components/v2';
 import { CardElement } from '@stripe/react-stripe-js';
-import React from 'react';
-import 'twin.macro';
 
-export const BillingPaymentMethod: React.FC<{
+export const BillingPaymentMethod = ({
+  plan,
+  organizationBilling,
+  onValidationChange,
+  className,
+}: {
   plan: BillingPlanType;
+  className?: string;
   organizationBilling: OrgBillingInfoFieldsFragment;
   onValidationChange?: (isValid: boolean) => void;
-}> = ({ plan, organizationBilling, onValidationChange }) => {
-  if (plan === 'PRO') {
-    if (!organizationBilling.billingConfiguration?.paymentMethod) {
-      return (
-        <>
-          <Section.BigTitle>Payment Method</Section.BigTitle>
-          <div tw="mb-5">
-            <CardElement
-              tw="mt-6 mb-6 w-3/5"
-              onChange={(e) => {
-                if (e.error || !e.complete) {
-                  onValidationChange?.(false);
-                } else {
-                  onValidationChange?.(true);
-                }
-              }}
-            />
-            <Section.Subtitle>
-              All payments and subscriptions are processed securely by{' '}
-              <Link href="https://stripe.com/">Stripe</Link>
-            </Section.Subtitle>
-          </div>
-        </>
-      );
-    } else {
-      const info = organizationBilling.billingConfiguration.paymentMethod;
-
-      return (
-        <>
-          <Section.BigTitle>Payment Method</Section.BigTitle>
-          <Section.Subtitle tw="mb-6">
-            {info.brand.toUpperCase()} ending with {info.last4} (expires{' '}
-            {info.expMonth}/{info.expYear})
-          </Section.Subtitle>
-        </>
-      );
-    }
+}): ReactElement => {
+  if (plan !== 'PRO') {
+    return null;
   }
 
-  return null;
+  if (!organizationBilling.billingConfiguration?.paymentMethod) {
+    return (
+      <div className={clsx('flex flex-col gap-6', className)}>
+        <Heading>Payment Method</Heading>
+        <CardElement
+          className="flex-grow"
+          onChange={(e) => {
+            if (e.error || !e.complete) {
+              onValidationChange?.(false);
+            } else {
+              onValidationChange?.(true);
+            }
+          }}
+          options={{
+            style: {
+              base: {
+                color: '#fff',
+              },
+            },
+          }}
+        />
+        <Section.Subtitle>
+          All payments and subscriptions are processed securely by{' '}
+          <Link
+            variant="primary"
+            href="https://stripe.com"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Stripe
+          </Link>
+        </Section.Subtitle>
+      </div>
+    );
+  }
+  const info = organizationBilling.billingConfiguration.paymentMethod;
+
+  return (
+    <>
+      <Section.BigTitle>Payment Method</Section.BigTitle>
+      <Section.Subtitle className="mb-6">
+        {info.brand.toUpperCase()} ending with {info.last4} (expires{' '}
+        {info.expMonth}/{info.expYear})
+      </Section.Subtitle>
+    </>
+  );
 };

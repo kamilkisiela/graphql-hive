@@ -17,29 +17,30 @@ export default class MyDocument extends Document {
           <style
             data-emotion-css={(this.props as any).ids.join(' ')}
             dangerouslySetInnerHTML={{
-              __html:
-                (this.props as any).css +
-                `
-            *:active, *:focus {
-              outline: none !important;
-            }`,
+              __html: `
+                ${(this.props as any).css}
+                *:active, *:focus {
+                  outline: none !important;
+                }
+              `,
             }}
           />
           <link rel="preconnect" href="https://fonts.gstatic.com" />
           <link
-            href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap"
+            href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap"
             rel="stylesheet"
           />
           <link rel="shortcut icon" href="/just-logo.svg" />
-          <script async src="https://cdn.headwayapp.co/widget.js"></script>
+          <script async src="https://cdn.headwayapp.co/widget.js" />
           <script
+            id="force-dark-mode"
             dangerouslySetInnerHTML={{
               __html: `
-              if (localStorage["chakra-ui-color-mode"] === 'dark') {
-              document.documentElement.classList.add('dark')
-              } else {
-                document.documentElement.classList.remove('dark')
-              }`,
+              if (window.location.pathname.startsWith('/v2')) {
+                localStorage['chakra-ui-color-mode'] = 'dark';
+              }
+              document.documentElement.classList.add('dark');
+              `,
             }}
           />
         </Head>

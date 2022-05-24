@@ -1,34 +1,31 @@
 import React from 'react';
 import 'twin.macro';
-import { useQuery } from 'urql';
-import { VscChevronDown, VscChromeClose } from 'react-icons/vsc';
-import { AutoSizer, List } from 'react-virtualized';
-import { useDebouncedCallback } from 'use-debounce';
 import {
+  Button,
   Checkbox,
   Drawer,
-  DrawerOverlay,
+  DrawerBody,
+  DrawerCloseButton,
   DrawerContent,
   DrawerHeader,
-  DrawerCloseButton,
-  DrawerBody,
-  InputGroup,
-  Input,
-  InputRightElement,
+  DrawerOverlay,
   IconButton,
-  Button,
+  Input,
+  InputGroup,
+  InputRightElement,
   useDisclosure,
 } from '@chakra-ui/react';
-import {
-  OperationsStatsDocument,
-  DateRangeInput,
-  OperationStatsFieldsFragment,
-} from '@/graphql';
-import { Spinner } from '@/components/common/Spinner';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
-import { useFormattedNumber } from '@/lib/hooks/use-formatted-number';
+import { VscChevronDown, VscChromeClose } from 'react-icons/vsc';
+import { AutoSizer, List } from 'react-virtualized';
+import { useQuery } from 'urql';
+import { useDebouncedCallback } from 'use-debounce';
 
-export const OperationsFilter: React.FC<{
+import { Spinner } from '@/components/common/Spinner';
+import { DateRangeInput, OperationsStatsDocument, OperationStatsFieldsFragment } from '@/graphql';
+import { useFormattedNumber } from '@/lib/hooks/use-formatted-number';
+import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+
+const OperationsFilter: React.FC<{
   onClose(): void;
   onFilter(keys: string[]): void;
   isOpen: boolean;
@@ -37,28 +34,24 @@ export const OperationsFilter: React.FC<{
   selected?: string[];
 }> = ({ onClose, isOpen, onFilter, focusRef, operations, selected }) => {
   const [selectedItems, setSelectedItems] = React.useState<string[]>(
-    selected?.length > 0 ? selected : operations.map((op) => op.operationHash)
+    selected?.length > 0 ? selected : operations.map(op => op.operationHash)
   );
   const onSelect = React.useCallback(
     (operationHash: string, selected: boolean) => {
-      const itemAt = selectedItems.findIndex((hash) => hash === operationHash);
+      const itemAt = selectedItems.findIndex(hash => hash === operationHash);
       const exists = itemAt > -1;
 
       if (selected && !exists) {
         setSelectedItems([...selectedItems, operationHash]);
       } else if (!selected && exists) {
-        setSelectedItems(
-          selectedItems.filter((hash) => hash !== operationHash)
-        );
+        setSelectedItems(selectedItems.filter(hash => hash !== operationHash));
       }
     },
     [selectedItems, setSelectedItems]
   );
   const [searchTerm, setSearchTerm] = React.useState('');
   const debouncedFilter = useDebouncedCallback((value: string) => {
-    setVisibleOperations(
-      operations.filter((op) => op.name.toLocaleLowerCase().includes(value))
-    );
+    setVisibleOperations(operations.filter(op => op.name.toLocaleLowerCase().includes(value)));
   }, 500);
 
   const onChange = React.useCallback(
@@ -74,33 +67,22 @@ export const OperationsFilter: React.FC<{
   const [visibleOperations, setVisibleOperations] = React.useState(operations);
 
   const selectAll = React.useCallback(() => {
-    setSelectedItems(operations.map((op) => op.operationHash));
-  }, [setSelectedItems]);
+    setSelectedItems(operations.map(op => op.operationHash));
+  }, [operations]);
   const selectNone = React.useCallback(() => {
     setSelectedItems([]);
   }, [setSelectedItems]);
 
   return (
-    <Drawer
-      onClose={onClose}
-      finalFocusRef={focusRef}
-      isOpen={isOpen}
-      placement="right"
-      size="md"
-    >
+    <Drawer onClose={onClose} finalFocusRef={focusRef} isOpen={isOpen} placement="right" size="md">
       <DrawerOverlay />
       <DrawerContent>
-        <DrawerHeader>Filter by operation</DrawerHeader>
+        <DrawerHeader bgColor="gray.900">Filter by operation</DrawerHeader>
         <DrawerCloseButton />
-        <DrawerBody>
+        <DrawerBody bgColor="gray.900">
           <div tw="flex flex-col h-full space-y-3">
             <InputGroup>
-              <Input
-                pr="3rem"
-                placeholder="Search for operation..."
-                onChange={onChange}
-                value={searchTerm}
-              />
+              <Input pr="3rem" placeholder="Search for operation..." onChange={onChange} value={searchTerm} />
               <InputRightElement width="3rem">
                 <IconButton
                   variant="ghost"
@@ -143,33 +125,28 @@ export const OperationsFilter: React.FC<{
             </div>
             <div tw="pl-1 flex-grow">
               <AutoSizer>
-                {({ height, width }) => {
-                  return (
-                    <List
-                      height={height}
-                      width={width}
-                      rowCount={visibleOperations.length}
-                      rowHeight={24}
-                      overscanRowCount={5}
-                      rowRenderer={({ index, style }) => {
-                        const operation = visibleOperations[index];
+                {({ height, width }) => (
+                  <List
+                    height={height}
+                    width={width}
+                    rowCount={visibleOperations.length}
+                    rowHeight={24}
+                    overscanRowCount={5}
+                    rowRenderer={({ index, style }) => {
+                      const operation = visibleOperations[index];
 
-                        return (
-                          <OperationRow
-                            style={style}
-                            key={operation.id}
-                            operation={operation}
-                            selected={selectedItems.some(
-                              (operationHash) =>
-                                operationHash === operation.operationHash
-                            )}
-                            onSelect={onSelect}
-                          />
-                        );
-                      }}
-                    />
-                  );
-                }}
+                      return (
+                        <OperationRow
+                          style={style}
+                          key={operation.id}
+                          operation={operation}
+                          selected={selectedItems.some(operationHash => operationHash === operation.operationHash)}
+                          onSelect={onSelect}
+                        />
+                      );
+                    }}
+                  />
+                )}
               </AutoSizer>
             </div>
           </div>
@@ -218,7 +195,7 @@ const OperationsFilterContainer: React.FC<{
       isOpen={isOpen}
       onClose={onClose}
       focusRef={focusRef}
-      onFilter={(hashes) => {
+      onFilter={hashes => {
         onFilter(hashes.length === allOperations.length ? [] : hashes);
       }}
     />
@@ -240,18 +217,12 @@ const OperationRow: React.FC<{
     <div style={style} tw="flex flex-row space-x-4 items-center">
       <Checkbox colorScheme="primary" isChecked={selected} onChange={change} />
       <div tw="flex flex-grow flex-row items-center cursor-pointer">
-        <div
-          tw="flex-grow overflow-ellipsis overflow-hidden whitespace-nowrap"
-          onClick={change}
-        >
+        <button tw="flex-grow overflow-ellipsis overflow-hidden whitespace-nowrap" onClick={change}>
           {operation.name}
-        </div>
-        <div
-          tw="width[75px] flex-shrink-0 text-right text-gray-500"
-          onClick={change}
-        >
+        </button>
+        <button tw="width[75px] flex-shrink-0 text-right text-gray-500" onClick={change}>
           {requests}
-        </div>
+        </button>
       </div>
     </div>
   );
@@ -272,10 +243,11 @@ export const OperationsFilterTrigger: React.FC<{
         rightIcon={<VscChevronDown />}
         size="sm"
         onClick={onOpen}
+        borderRadius="sm"
+        bgColor="whiteAlpha.50"
+        _hover={{ bgColor: 'whiteAlpha.100' }}
       >
-        <span tw="font-normal">
-          Operations ({selected?.length > 0 ? selected.length : 'all'})
-        </span>
+        <span tw="font-normal">Operations ({selected?.length > 0 ? selected.length : 'all'})</span>
       </Button>
       <OperationsFilterContainer
         isOpen={isOpen}

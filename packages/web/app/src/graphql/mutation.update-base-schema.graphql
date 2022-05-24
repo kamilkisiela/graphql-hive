@@ -1,5 +1,9 @@
 mutation updateBaseSchema($input: UpdateBaseSchemaInput!) {
   updateBaseSchema(input: $input) {
-    ...TargetFields
+    ok {
+      updatedTarget {
+        ...TargetFields
+      }
+    }
   }
 }

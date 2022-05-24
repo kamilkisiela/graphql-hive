@@ -1,14 +1,16 @@
 mutation createProject($input: CreateProjectInput!) {
   createProject(input: $input) {
-    selector {
-      organization
-      project
-    }
-    createdProject {
-      ...ProjectFields
-    }
-    createdTarget {
-      ...TargetFields
+    ok {
+      selector {
+        organization
+        project
+      }
+      createdProject {
+        ...ProjectFields
+      }
+      createdTarget {
+        ...TargetFields
+      }
     }
   }
 }

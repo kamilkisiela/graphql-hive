@@ -1,84 +1,99 @@
-import React from 'react';
+import { ComponentProps, ReactElement, useCallback, useMemo, useState } from 'react';
+import { useRouter } from 'next/router';
 import 'twin.macro';
+import { Select, Stack } from '@chakra-ui/react';
+import { formatISO, subDays, subHours, subMinutes } from 'date-fns';
+import { VscChevronDown } from 'react-icons/vsc';
 import { useQuery } from 'urql';
 
-import { Select, Stack } from '@chakra-ui/react';
-import { VscChevronDown } from 'react-icons/vsc';
-import {
-  HasCollectedOperationsDocument,
-  ProjectFieldsFragment,
-  TargetFieldsFragment,
-  OrganizationFieldsFragment,
-} from '@/graphql';
-import { Page } from '@/components/common';
-import { DataWrapper } from '@/components/common/DataWrapper';
-import { TargetView } from '@/components/target/View';
+import { TargetLayout } from '@/components/layouts';
+import { OperationsFilterTrigger } from '@/components/target/operations/Filters';
 import { OperationsList } from '@/components/target/operations/List';
 import { OperationsStats } from '@/components/target/operations/Stats';
-import { EmptyList } from '@/components/common/EmptyList';
-import { OperationsFilterTrigger } from '@/components/target/operations/Filters';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { DataWrapper, EmptyList, Title } from '@/components/v2';
 import {
-  calculatePeriod,
-  DATE_RANGE_OPTIONS,
-  PeriodKey,
-} from '@/components/common/TimeFilter';
+  HasCollectedOperationsDocument,
+  OrganizationFieldsFragment,
+  ProjectFieldsFragment,
+  TargetFieldsFragment,
+} from '@/graphql';
 
-const OperationsView: React.FC<{
+function floorDate(date: Date): Date {
+  const time = 1000 * 60;
+  return new Date(Math.floor(date.getTime() / time) * time);
+}
+
+const DateRange = {
+  '30d': 'Last 30 days',
+  '14d': 'Last 14 days',
+  '7d': 'Last 7 days',
+  '1d': 'Last 24 hours',
+  '1h': 'Last hour',
+};
+
+type PeriodKey = keyof typeof DateRange;
+
+const OperationsView = ({
+  organization,
+  project,
+  target,
+}: {
   organization: OrganizationFieldsFragment;
   project: ProjectFieldsFragment;
   target: TargetFieldsFragment;
-}> = ({ organization, project, target }) => {
-  const router = useRouteSelector();
-  const selectedPeriod: PeriodKey = (router.query.period as PeriodKey) ?? '1d';
-  const [selectedOperations, setSelectedOperations] = React.useState<string[]>(
-    []
-  );
+}): ReactElement => {
+  const router = useRouter();
+  const [href, periodParam] = router.asPath.split('?');
+  const selectedPeriod: PeriodKey = (new URLSearchParams(periodParam).get('period') as PeriodKey) ?? '1d';
+  const [selectedOperations, setSelectedOperations] = useState<string[]>([]);
 
-  const period = React.useMemo(
-    () => calculatePeriod(selectedPeriod),
-    [selectedPeriod]
-  );
-  const updatePeriod = React.useCallback(
-    (ev: any) => {
-      router.update({ period: ev.target.value });
+  const period = useMemo(() => {
+    const now = floorDate(new Date());
+    const sub = selectedPeriod.endsWith('h') ? 'h' : selectedPeriod.endsWith('m') ? 'm' : 'd';
+
+    const value = parseInt(selectedPeriod.replace(sub, ''));
+    const from = formatISO(
+      sub === 'h' ? subHours(now, value) : sub === 'm' ? subMinutes(now, value) : subDays(now, value)
+    );
+    const to = formatISO(now);
+
+    return { from, to };
+  }, [selectedPeriod]);
+
+  const updatePeriod = useCallback<ComponentProps<'select'>['onChange']>(
+    ev => {
+      router.push(`${href}?period=${ev.target.value}`);
     },
-    [router.update]
+    [href, router]
   );
 
   return (
     <>
-      <div tw="absolute top-7 right-4">
+      <div className="absolute top-0 right-0">
         <Stack direction="row" spacing={4}>
           <div>
-            <OperationsFilterTrigger
-              period={period}
-              selected={selectedOperations}
-              onFilter={setSelectedOperations}
-            />
+            <OperationsFilterTrigger period={period} selected={selectedOperations} onFilter={setSelectedOperations} />
           </div>
           <div>
             <Select
               variant="filled"
-              tw="cursor-pointer rounded-md"
+              className="cursor-pointer rounded-md"
               defaultValue={selectedPeriod}
               onChange={updatePeriod}
               iconSize="16"
               icon={<VscChevronDown />}
               size="sm"
             >
-              {DATE_RANGE_OPTIONS.map((item) => {
-                return (
-                  <option key={item.key} value={item.key}>
-                    {item.label}
-                  </option>
-                );
-              })}
+              {Object.entries(DateRange).map(([key, label]) => (
+                <option key={key} value={key}>
+                  {label}
+                </option>
+              ))}
             </Select>
           </div>
         </Stack>
       </div>
-      <div>
+      <div className="space-y-12">
         <OperationsStats
           organization={organization.cleanId}
           project={project.cleanId}
@@ -87,7 +102,7 @@ const OperationsView: React.FC<{
           operationsFilter={selectedOperations}
         />
         <OperationsList
-          tw="pt-12"
+          className="pt-12"
           period={period}
           organization={organization.cleanId}
           project={project.cleanId}
@@ -99,11 +114,15 @@ const OperationsView: React.FC<{
   );
 };
 
-const OperationsViewGate: React.FC<{
+const OperationsViewGate = ({
+  organization,
+  project,
+  target,
+}: {
   organization: OrganizationFieldsFragment;
   project: ProjectFieldsFragment;
   target: TargetFieldsFragment;
-}> = ({ organization, project, target }) => {
+}): ReactElement => {
   const [query] = useQuery({
     query: HasCollectedOperationsDocument,
     variables: {
@@ -117,44 +136,35 @@ const OperationsViewGate: React.FC<{
 
   return (
     <DataWrapper query={query}>
-      {(result) => {
-        if (!result.data.hasCollectedOperations) {
-          return (
-            <EmptyList
-              title="Hive is waiting for your first collected operation"
-              description="You can collect usage of your GraphQL API with Hive Client"
-              documentationLink={`${process.env.NEXT_PUBLIC_DOCS_LINK}/features/monitoring`}
-            />
-          );
-        }
-
-        return (
-          <OperationsView
-            organization={organization}
-            project={project}
-            target={target}
+      {result =>
+        result.data.hasCollectedOperations ? (
+          <OperationsView organization={organization} project={project} target={target} />
+        ) : (
+          <EmptyList
+            title="Hive is waiting for your first collected operation"
+            description="You can collect usage of your GraphQL API with Hive Client"
+            docsUrl={`${process.env.NEXT_PUBLIC_DOCS_LINK}/features/monitoring`}
           />
-        );
-      }}
+        )
+      }
     </DataWrapper>
   );
 };
 
-export default function TargetOperations() {
+export default function OperationsPage(): ReactElement {
   return (
-    <TargetView title="Operations">
-      {({ organization, project, target }) => (
-        <Page
-          title="Operations"
-          subtitle="Data collected based on operation executed against your GraphQL schema."
-        >
-          <OperationsViewGate
-            organization={organization}
-            project={project}
-            target={target}
-          />
-        </Page>
-      )}
-    </TargetView>
+    <>
+      <Title title="Operations" />
+      <TargetLayout value="operations">
+        {({ organization, project, target }) => (
+          <div className="relative">
+            <p className="mb-5 font-light text-gray-500">
+              Data collected based on operation executed against your GraphQL schema.
+            </p>
+            <OperationsViewGate organization={organization} project={project} target={target} />
+          </div>
+        )}
+      </TargetLayout>
+    </>
   );
 }

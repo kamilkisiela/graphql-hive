@@ -7,8 +7,23 @@ export default gql`
   }
 
   extend type Mutation {
-    createToken(input: CreateTokenInput!): CreateTokenPayload!
+    createToken(input: CreateTokenInput!): CreateTokenResult!
     deleteTokens(input: DeleteTokensInput!): DeleteTokensPayload!
+  }
+
+  type CreateTokenResult {
+    ok: CreateTokenOk
+    error: CreateTokenError
+  }
+
+  type CreateTokenOk {
+    selector: TargetSelector!
+    createdToken: Token!
+    secret: String!
+  }
+
+  type CreateTokenError implements Error {
+    message: String!
   }
 
   type TokenConnection {

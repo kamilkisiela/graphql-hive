@@ -1,30 +1,22 @@
 import React from 'react';
-import tw from 'twin.macro';
-import { useQuery } from 'urql';
+import { Grid, GridItem, useColorModeValue } from '@chakra-ui/react';
 import ReactECharts from 'echarts-for-react';
 import { AutoSizer } from 'react-virtualized';
-import { Grid, GridItem, useColorModeValue } from '@chakra-ui/react';
+import tw from 'twin.macro';
+import { useQuery } from 'urql';
+
 import { Section } from '@/components/common';
 import {
   DateRangeInput,
-  GeneralOperationsStatsDocument,
   DurationHistogramDocument,
+  GeneralOperationsStatsDocument,
   GeneralOperationsStatsQuery,
 } from '@/graphql';
 import { theme } from '@/lib/charts';
-import {
-  useFormattedNumber,
-  formatNumber,
-} from '@/lib/hooks/use-formatted-number';
 import { toDecimal } from '@/lib/hooks/use-decimal';
-import {
-  useFormattedDuration,
-  formatDuration,
-} from '@/lib/hooks/use-formatted-duration';
-import {
-  useFormattedThroughput,
-  formatThroughput,
-} from '@/lib/hooks/use-formatted-throughput';
+import { formatDuration, useFormattedDuration } from '@/lib/hooks/use-formatted-duration';
+import { formatNumber, useFormattedNumber } from '@/lib/hooks/use-formatted-number';
+import { formatThroughput, useFormattedThroughput } from '@/lib/hooks/use-formatted-throughput';
 
 function resolutionToMilliseconds(
   resolution: number,
@@ -33,10 +25,7 @@ function resolutionToMilliseconds(
     to: string;
   }
 ) {
-  const distanceInMinutes =
-    (new Date(period.to).getTime() - new Date(period.from).getTime()) /
-    1000 /
-    60;
+  const distanceInMinutes = (new Date(period.to).getTime() - new Date(period.from).getTime()) / 1000 / 60;
 
   return Math.round(distanceInMinutes / resolution) * 1000 * 60;
 }
@@ -69,9 +58,7 @@ function fullSeries(
   // 1. comparing two dates (last/first sample and the expected boundary sample)
   // 2. dividing by interval
   // 3. rounding to floor int
-  const stepsToAddOnLeft = Math.floor(
-    Math.abs(firstSample - startAt) / interval
-  );
+  const stepsToAddOnLeft = Math.floor(Math.abs(firstSample - startAt) / interval);
   const stepsToAddOnRight = Math.floor(Math.abs(endAt - lastSample) / interval);
 
   // Add n steps to the left side where each sample has its date decreased by i*interval based on the first sample
@@ -102,10 +89,7 @@ function fullSeries(
       if (stepsToAdd > 0) {
         // We start with 1 because we already have one sample on the left side
         for (let j = 1; j <= stepsToAdd; j++) {
-          newData.push([
-            new Date(previousTime + j * interval).toISOString(),
-            0,
-          ]);
+          newData.push([new Date(previousTime + j * interval).toISOString(), 0]);
         }
       }
     }
@@ -179,9 +163,7 @@ const RequestsStats: React.FC<{ requests: number }> = ({ requests }) => {
   );
 };
 
-const UniqueOperationsStats: React.FC<{ operations: number }> = ({
-  operations,
-}) => {
+const UniqueOperationsStats: React.FC<{ operations: number }> = ({ operations }) => {
   const value = useFormattedNumber(operations);
 
   return (
@@ -192,10 +174,7 @@ const UniqueOperationsStats: React.FC<{ operations: number }> = ({
   );
 };
 
-const PercentileStats: React.FC<{ value: number; title: string }> = ({
-  value,
-  title,
-}) => {
+const PercentileStats: React.FC<{ value: number; title: string }> = ({ value, title }) => {
   const formatted = useFormattedDuration(value);
 
   return (
@@ -229,16 +208,11 @@ const SuccessRateStats: React.FC<{
   requests: number;
   totalFailures: number;
 }> = ({ requests, totalFailures }) => {
-  const rate =
-    typeof requests === 'undefined'
-      ? '-'
-      : toDecimal(((requests - totalFailures) * 100) / requests);
+  const rate = requests || totalFailures ? `${toDecimal(((requests - totalFailures) * 100) / requests)}%` : '-';
 
   return (
     <Stats.Root>
-      <Stats.Value tw="text-emerald-500 dark:text-emerald-500">
-        {rate}%
-      </Stats.Value>
+      <Stats.Value tw="text-emerald-500 dark:text-emerald-500">{rate}</Stats.Value>
       <Stats.Title>Success rate</Stats.Title>
     </Stats.Root>
   );
@@ -248,14 +222,11 @@ const FailureRateStats: React.FC<{
   requests: number;
   totalFailures: number;
 }> = ({ requests, totalFailures }) => {
-  const rate =
-    typeof requests === 'undefined'
-      ? '-'
-      : toDecimal((totalFailures * 100) / requests);
+  const rate = requests || totalFailures ? `${toDecimal((totalFailures * 100) / requests)}%` : '-';
 
   return (
     <Stats.Root tw="pt-4">
-      <Stats.Value tw="text-red-500 dark:text-red-500">{rate}%</Stats.Value>
+      <Stats.Value tw="text-red-500 dark:text-red-500">{rate}</Stats.Value>
       <Stats.Title>Failure rate</Stats.Title>
     </Stats.Root>
   );
@@ -272,10 +243,7 @@ const OverTimeStats: React.FC<{
   const requests = React.useMemo(() => {
     if (requestsOverTime?.length) {
       return fullSeries(
-        requestsOverTime.map<[string, number]>((node) => [
-          node.date,
-          node.value,
-        ]),
+        requestsOverTime.map<[string, number]>(node => [node.date, node.value]),
         interval,
         period
       );
@@ -287,10 +255,7 @@ const OverTimeStats: React.FC<{
   const failures = React.useMemo(() => {
     if (failuresOverTime?.length) {
       return fullSeries(
-        failuresOverTime.map<[string, number]>((node) => [
-          node.date,
-          node.value,
-        ]),
+        failuresOverTime.map<[string, number]>(node => [node.date, node.value]),
         interval,
         period
       );
@@ -300,13 +265,11 @@ const OverTimeStats: React.FC<{
   }, [failuresOverTime, interval, period]);
 
   return (
-    <>
+    <div className="rounded-md bg-gray-900/50 p-5 ring-1 ring-gray-800">
       <Section.Title>Operations over time</Section.Title>
-      <Section.Subtitle>
-        Timeline of GraphQL requests and failures
-      </Section.Subtitle>
+      <Section.Subtitle>Timeline of GraphQL requests and failures</Section.Subtitle>
       <AutoSizer disableHeight>
-        {(size) => (
+        {size => (
           <ReactECharts
             style={{ width: size.width, height: 200 }}
             theme={theme.theme}
@@ -365,7 +328,7 @@ const OverTimeStats: React.FC<{
                   name: 'Failures',
                   showSymbol: false,
                   smooth: true,
-                  color: '#EF4444',
+                  color: '#ef4444',
                   areaStyle: {},
                   emphasis: {
                     focus: 'series',
@@ -378,7 +341,7 @@ const OverTimeStats: React.FC<{
           />
         )}
       </AutoSizer>
-    </>
+    </div>
   );
 };
 
@@ -387,9 +350,7 @@ const ClientsStats: React.FC<{
 }> = ({ clients }) => {
   const styles = useChartStyles();
   const sortedClients = React.useMemo(() => {
-    return clients?.length
-      ? clients.slice().sort((a, b) => b.count - a.count)
-      : [];
+    return clients?.length ? clients.slice().sort((a, b) => b.count - a.count) : [];
   }, [clients]);
   const byClient = React.useMemo(() => {
     let values: string[] = [];
@@ -408,18 +369,14 @@ const ClientsStats: React.FC<{
         } else {
           if (!labels[4]) {
             counts.push(client.count);
-            labels.push(
-              sortedClients.length === 5
-                ? client.name
-                : `Other clients (${sortedClients.length - 4})`
-            );
+            labels.push(sortedClients.length === 5 ? client.name : `Other clients (${sortedClients.length - 4})`);
           } else {
             counts[4] += client.percentage;
           }
         }
       }
 
-      values = counts.map((value) => toDecimal((value * 100) / total));
+      values = counts.map(value => toDecimal((value * 100) / total));
     }
 
     return {
@@ -459,18 +416,14 @@ const ClientsStats: React.FC<{
         } else {
           if (!labels[4]) {
             counts.push(version.count);
-            labels.push(
-              versions.length === 5
-                ? version.name
-                : `Other versions (${versions.length - 4})`
-            );
+            labels.push(versions.length === 5 ? version.name : `Other versions (${versions.length - 4})`);
           } else {
             counts[4] += version.count;
           }
         }
       }
 
-      values = counts.map((value) => toDecimal((value * 100) / total));
+      values = counts.map(value => toDecimal((value * 100) / total));
     }
 
     return {
@@ -480,80 +433,86 @@ const ClientsStats: React.FC<{
   }, [sortedClients]);
 
   return (
-    <>
+    <div className="w-full rounded-md bg-gray-900/50 p-5 ring-1 ring-gray-800">
       <Section.Title>Clients</Section.Title>
       <Section.Subtitle>Top 5 - GraphQL API consumers</Section.Subtitle>
-      <AutoSizer disableHeight>
-        {(size) => (
-          <div tw="flex flex-row">
-            <ReactECharts
-              style={{ width: size.width / 2, height: 200 }}
-              theme={theme.theme}
-              option={{
-                ...styles,
-                grid: {
-                  left: 20,
-                  top: 20,
-                  right: 20,
-                  bottom: 20,
-                  containLabel: true,
-                },
-                tooltip: {
-                  trigger: 'item',
-                  formatter: '{b0}: {c0}%',
-                },
-                xAxis: {
-                  type: 'value',
-                },
-                yAxis: {
-                  type: 'category',
-                  data: byClient.labels,
-                },
-                series: [
-                  {
-                    type: 'bar',
-                    data: byClient.values,
-                    color: 'rgb(234, 179, 8)',
+      <AutoSizer disableHeight className="mt-5 w-full">
+        {size => {
+          if (size.width === 0) {
+            return null;
+          }
+
+          return (
+            <div className="flex w-full flex-row gap-4">
+              <ReactECharts
+                style={{ width: size.width / 2, height: 200 }}
+                theme={theme.theme}
+                option={{
+                  ...styles,
+                  grid: {
+                    left: 20,
+                    top: 20,
+                    right: 20,
+                    bottom: 20,
+                    containLabel: true,
                   },
-                ],
-              }}
-            />
-            <ReactECharts
-              style={{ width: size.width / 2, height: 200 }}
-              theme={theme.theme}
-              option={{
-                ...styles,
-                grid: {
-                  left: 20,
-                  top: 20,
-                  right: 20,
-                  bottom: 20,
-                  containLabel: true,
-                },
-                tooltip: {
-                  trigger: 'item',
-                  formatter: '{b0}: {c0}%',
-                },
-                xAxis: {
-                  type: 'value',
-                },
-                yAxis: {
-                  type: 'category',
-                  data: byVersion.labels,
-                },
-                series: [
-                  {
-                    type: 'bar',
-                    data: byVersion.values,
-                    color: 'rgb(234, 179, 8)',
+                  tooltip: {
+                    trigger: 'item',
+                    formatter: '{b0}: {c0}%',
                   },
-                ],
-              }}
-            />
-          </div>
-        )}
+                  xAxis: {
+                    type: 'value',
+                  },
+                  yAxis: {
+                    type: 'category',
+                    data: byClient.labels,
+                  },
+                  series: [
+                    {
+                      type: 'bar',
+                      data: byClient.values,
+                      color: 'rgb(234, 179, 8)',
+                    },
+                  ],
+                }}
+              />
+              <ReactECharts
+                style={{ width: size.width / 2, height: 200 }}
+                theme={theme.theme}
+                option={{
+                  ...styles,
+                  grid: {
+                    left: 20,
+                    top: 20,
+                    right: 20,
+                    bottom: 20,
+                    containLabel: true,
+                  },
+                  tooltip: {
+                    trigger: 'item',
+                    formatter: '{b0}: {c0}%',
+                  },
+                  xAxis: {
+                    type: 'value',
+                  },
+                  yAxis: {
+                    type: 'category',
+                    data: byVersion.labels,
+                  },
+                  series: [
+                    {
+                      type: 'bar',
+                      data: byVersion.values,
+                      color: 'rgb(234, 179, 8)',
+                    },
+                  ],
+                }}
+              />
+            </div>
+          );
+        }}
       </AutoSizer>
-    </>
+    </div>
   );
 };
 
@@ -570,10 +529,7 @@ const LatencyOverTimeStats: React.FC<{
   const p75 = React.useMemo(() => {
     if (duration?.length) {
       return fullSeries(
-        duration.map<[string, number]>((node) => [
-          node.date,
-          node.duration.p75,
-        ]),
+        duration.map<[string, number]>(node => [node.date, node.duration.p75]),
         interval,
         period
       );
@@ -584,10 +540,7 @@ const LatencyOverTimeStats: React.FC<{
   const p90 = React.useMemo(() => {
     if (duration?.length) {
       return fullSeries(
-        duration.map<[string, number]>((node) => [
-          node.date,
-          node.duration.p90,
-        ]),
+        duration.map<[string, number]>(node => [node.date, node.duration.p90]),
         interval,
         period
       );
@@ -598,10 +551,7 @@ const LatencyOverTimeStats: React.FC<{
   const p95 = React.useMemo(() => {
     if (duration?.length) {
       return fullSeries(
-        duration.map<[string, number]>((node) => [
-          node.date,
-          node.duration.p95,
-        ]),
+        duration.map<[string, number]>(node => [node.date, node.duration.p95]),
         interval,
         period
       );
@@ -612,10 +562,7 @@ const LatencyOverTimeStats: React.FC<{
   const p99 = React.useMemo(() => {
     if (duration?.length) {
       return fullSeries(
-        duration.map<[string, number]>((node) => [
-          node.date,
-          node.duration.p99,
-        ]),
+        duration.map<[string, number]>(node => [node.date, node.duration.p99]),
         interval,
         period
       );
@@ -654,23 +601,21 @@ const LatencyOverTimeStats: React.FC<{
   }
 
   const series = [
-    createSeries('p75', '#10B981', p75),
-    createSeries('p90', '#06B6D4', p90),
-    createSeries('p95', '#6366F1', p95),
-    createSeries('p99', '#EC4899', p99),
+    createSeries('p75', '#10b981', p75),
+    createSeries('p90', '#06b6d4', p90),
+    createSeries('p95', '#6366f1', p95),
+    createSeries('p99', '#ec4899', p99),
   ];
 
-  const legends = series.map((s) => s.name);
-  const colors = series.map((s) => s.color);
+  const legends = series.map(s => s.name);
+  const colors = series.map(s => s.color);
 
   return (
-    <>
+    <div className="rounded-md bg-gray-900/50 p-5 ring-1 ring-gray-800">
       <Section.Title>Latency over time</Section.Title>
-      <Section.Subtitle>
-        Timeline of latency of GraphQL Operations
-      </Section.Subtitle>
+      <Section.Subtitle>Timeline of latency of GraphQL Operations</Section.Subtitle>
       <AutoSizer disableHeight>
-        {(size) => (
+        {size => (
           <ReactECharts
             style={{ width: size.width, height: 200 }}
             theme={theme.theme}
@@ -698,7 +643,7 @@ const LatencyOverTimeStats: React.FC<{
           />
         )}
       </AutoSizer>
-    </>
+    </div>
   );
 };
 
@@ -718,26 +663,21 @@ const RpmOverTimeStats: React.FC<{
   const rpmOverTime = React.useMemo(() => {
     if (requests.length) {
       return fullSeries(
-        requests.map<[string, number]>((node) => [
-          node.date,
-          parseFloat((node.value / windowInM).toFixed(4)),
-        ]),
+        requests.map<[string, number]>(node => [node.date, parseFloat((node.value / windowInM).toFixed(4))]),
         interval,
         period
       );
     }
 
     return createEmptySeries({ interval, period });
-  }, [requests, interval, period]);
+  }, [requests, interval, period, windowInM]);
 
   return (
-    <>
+    <div className="rounded-md bg-gray-900/50 p-5 ring-1 ring-gray-800">
       <Section.Title>RPM over time</Section.Title>
-      <Section.Subtitle>
-        Timeline of GraphQL requests and failures
-      </Section.Subtitle>
+      <Section.Subtitle>Timeline of GraphQL requests and failures</Section.Subtitle>
       <AutoSizer disableHeight>
-        {(size) => (
+        {size => (
           <ReactECharts
             style={{ width: size.width, height: 200 }}
             theme={theme.theme}
@@ -767,9 +707,7 @@ const RpmOverTimeStats: React.FC<{
                   boundaryGap: false,
                   min: 0,
                   axisLabel: {
-                    formatter(value: number) {
-                      return formatThroughput(value * 10, interval);
-                    },
+                    formatter: (value: number) => formatThroughput(value * 10, interval),
                   },
                 },
               ],
@@ -794,7 +732,7 @@ const RpmOverTimeStats: React.FC<{
           />
         )}
       </AutoSizer>
-    </>
+    </div>
   );
 };
 
@@ -827,29 +765,22 @@ const LatencyHistogramStats: React.FC<{
 
   const durationHistogram = React.useMemo(() => {
     if (histogram.length) {
-      return histogram.map((node) => [node.duration, node.count]);
+      return histogram.map(node => [node.duration, node.count]);
     }
 
     return [];
   }, [histogram]);
 
   const min = histogram.length ? durationHistogram[0][0] : 1;
-  const max = histogram.length
-    ? durationHistogram[durationHistogram.length - 1][0]
-    : 10_000;
-  const totalRequests = durationHistogram.reduce(
-    (sum, node) => node[1] + sum,
-    0
-  );
+  const max = histogram.length ? durationHistogram[durationHistogram.length - 1][0] : 10_000;
+  const totalRequests = durationHistogram.reduce((sum, node) => node[1] + sum, 0);
 
   return (
-    <>
+    <div className="rounded-md bg-gray-900/50 p-5 ring-1 ring-gray-800">
       <Section.Title>Latency histogram</Section.Title>
-      <Section.Subtitle>
-        Distribution of duration of all GraphQL requests
-      </Section.Subtitle>
+      <Section.Subtitle>Distribution of duration of all GraphQL requests</Section.Subtitle>
       <AutoSizer disableHeight>
-        {(size) => (
+        {size => (
           <ReactECharts
             style={{ width: size.width, height: 200 }}
             theme={theme.theme}
@@ -864,17 +795,11 @@ const LatencyHistogramStats: React.FC<{
               },
               tooltip: {
                 trigger: 'axis',
-                formatter([record]: [
-                  {
-                    data: [number, number];
-                  }
-                ]) {
+                formatter([record]: [{ data: [number, number] }]) {
                   const [duration, count] = record.data;
                   const percentage = toDecimal((count * 100) / totalRequests);
 
-                  return `${formatDuration(duration, true)} - ${formatNumber(
-                    count
-                  )} requests ${percentage}%`;
+                  return `${formatDuration(duration, true)} - ${formatNumber(count)} requests ${percentage}%`;
                 },
               },
               xAxis: [
@@ -884,18 +809,11 @@ const LatencyHistogramStats: React.FC<{
                   min,
                   max,
                   axisLabel: {
-                    formatter(value: number) {
-                      return formatDuration(value, true);
-                    },
+                    formatter: (value: number) => formatDuration(value, true),
                   },
                 },
               ],
-              yAxis: [
-                {
-                  type: 'value',
-                  min: 0,
-                },
-              ],
+              yAxis: [{ type: 'value', min: 0 }],
               series: [
                 {
                   type: 'bar',
@@ -912,7 +830,7 @@ const LatencyHistogramStats: React.FC<{
           />
         )}
       </AutoSizer>
-    </>
+    </div>
   );
 };
 
@@ -957,7 +875,7 @@ export const OperationsStats: React.FC<{
         templateRows="repeat(2, 1fr)"
         templateColumns="repeat(4, 1fr)"
         gap={4}
-        tw="bg-gray-50 dark:bg-gray-800 p-6 rounded border-2 border-gray-100 dark:border-gray-700"
+        tw="rounded-md p-5 ring-1 ring-gray-800 transition bg-gray-900/50"
       >
         <GridItem>
           <RequestsStats requests={totalRequests} />
@@ -970,14 +888,8 @@ export const OperationsStats: React.FC<{
         </GridItem>
 
         <GridItem rowSpan={2}>
-          <SuccessRateStats
-            requests={totalRequests}
-            totalFailures={totalFailures}
-          />
-          <FailureRateStats
-            requests={totalRequests}
-            totalFailures={totalFailures}
-          />
+          <SuccessRateStats requests={totalRequests} totalFailures={totalFailures} />
+          <FailureRateStats requests={totalRequests} totalFailures={totalFailures} />
         </GridItem>
 
         <GridItem>
@@ -1002,18 +914,10 @@ export const OperationsStats: React.FC<{
         />
       </div>
       <div>
-        <RpmOverTimeStats
-          period={period}
-          resolution={resolution}
-          requestsOverTime={stats?.requestsOverTime}
-        />
+        <RpmOverTimeStats period={period} resolution={resolution} requestsOverTime={stats?.requestsOverTime} />
       </div>
       <div>
-        <LatencyOverTimeStats
-          period={period}
-          duration={stats?.durationOverTime}
-          resolution={resolution}
-        />
+        <LatencyOverTimeStats period={period} duration={stats?.durationOverTime} resolution={resolution} />
       </div>
       <div>
         <LatencyHistogramStats

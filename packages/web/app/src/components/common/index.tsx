@@ -13,7 +13,7 @@ export const Title: React.FC<{ title: string }> = ({ title }) => (
 
 export const Card = {
   Root: tw.div`
-    bg-white dark:bg-gray-900 
+    bg-white dark:bg-transparent
     rounded-md 
     border-2 
     border-gray-100 dark:border-gray-700
@@ -21,7 +21,8 @@ export const Card = {
   Title: tw.div`
     px-4 py-4 text-base 
     text-gray-900 dark:text-white 
-    bg-gray-50 dark:bg-gray-800 
+    bg-white dark:bg-gray-900
+    rounded-t-md
     font-normal border-b 
     border-gray-100 dark:border-gray-700
   `,
@@ -61,7 +62,7 @@ export const Page: React.FC<{
   noPadding,
 }) => {
   return (
-    <div tw="flex flex-col relative h-full dark:bg-gray-900 ">
+    <div tw="flex flex-col relative h-full dark:bg-gray-900">
       <div tw="p-4 flex-shrink-0 flex flex-row justify-between items-center">
         <div>
           <h2 tw="text-xl text-black dark:text-white font-bold">{title}</h2>
@@ -126,7 +127,7 @@ export const Description = tw.p`pr-5 text-sm leading-5 text-gray-500 dark:text-g
 
 export const HorizontalSelect = {
   List: tw.div`
-    w-full divide-y-2 divide-gray-50
+    w-full divide-y-2 divide-white
   `,
   Row: styled.div(({ selected }: { selected?: boolean }) => [
     tw`

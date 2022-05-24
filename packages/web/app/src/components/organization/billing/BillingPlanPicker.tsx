@@ -1,269 +1,170 @@
 import React from 'react';
-import 'twin.macro';
-import {
-  Link,
-  List,
-  ListIcon,
-  ListItem,
-  Radio,
-  RadioGroup,
-  Stack,
-} from '@chakra-ui/react';
-import {
-  VscAdd,
-  VscBell,
-  VscCheck,
-  VscClearAll,
-  VscKey,
-  VscPerson,
-  VscTable,
-} from 'react-icons/vsc';
-import { LimitSlider } from '@/components/organization/billing/LimitSlider';
-import {
-  BillingPlansQuery,
-  BillingPlanType,
-  UsageRateLimitType,
-} from '@/graphql';
+import { List, ListIcon, ListItem } from '@chakra-ui/react';
+import { VscCheck } from 'react-icons/vsc';
+import { BillingPlanType, BillingPlansQuery } from '@/graphql';
 import { Label, Section } from '@/components/common';
-import { CurrencyFormatter, NumericFormater } from './helpers';
-import { Logo } from '@/components/common/Logo';
+import { Link, RadioGroup, Radio } from '@/components/v2';
+
+const comingSoon = <span className="text-xs">(coming soon)</span>;
+
+const planCollection: {
+  [key in BillingPlanType]: {
+    description: string;
+    features: Array<React.ReactNode | string>;
+    footer?: React.ReactNode;
+  };
+} = {
+  [BillingPlanType.Hobby]: {
+    description: 'For personal or small projects',
+    features: [
+      'Unlimited seats',
+      '1M operations',
+      '50 schema pushes',
+      'Schema Registry',
+      'Detection of breaking changes based on usage reports',
+      'GitHub and Slack integrations',
+      '3 days of usage data retention',
+    ],
+  },
+  [BillingPlanType.Pro]: {
+    description: 'For growing teams',
+    features: [
+      'Unlimited seats',
+      '5M operations',
+      '500 schema pushes',
+      'Schema Registry',
+      'Detection of breaking changes based on usage reports',
+      'GitHub and Slack integrations',
+      '90 days of usage data retention',
+      <div>Schema Policy Checks {comingSoon}</div>,
+      <div>ESLint integration {comingSoon}</div>,
+    ],
+    footer: (
+      <>
+        <div className="mb-2 text-sm font-bold">Free 14-day trial period</div>
+        <div>$15 for additional 1M operations</div>
+        <div>$1 for additional 10 schema pushes</div>
+      </>
+    ),
+  },
+  [BillingPlanType.Enterprise]: {
+    description: 'Custom plan for large companies',
+    features: [
+      'Unlimited seats',
+      'Unlimited operations',
+      'Unlimited schema pushes',
+      'Schema Registry',
+      'Detection of breaking changes based on usage reports',
+      'GitHub and Slack integrations',
+      '360 days of usage data retention',
+      <div>Schema Policy Checks {comingSoon}</div>,
+      <div>ESLint integration {comingSoon}</div>,
+      'SAML (coming soon)',
+      <span className="flex gap-1">
+        Support from
+        <Link
+          variant="primary"
+          href="https://the-guild.dev"
+          target="_blank"
+          rel="noreferrer"
+        >
+          The Guild
+        </Link>
+      </span>,
+    ],
+    footer: <>Shape a custom plan for your business</>,
+  },
+};
+
+const Plan: React.FC<{
+  isActive: boolean;
+  name: string;
+  price: string | number;
+  description: string;
+  features: React.ReactNode[];
+  footer?: React.ReactNode;
+}> = (plan) => {
+  return (
+    <div className="flex h-full flex-col justify-between">
+      <div>
+        <Section.BigTitle className="flex items-center justify-between">
+          {plan.name}
+          {plan.isActive && <Label>CURRENT PLAN</Label>}
+        </Section.BigTitle>
+        <div className="text-3xl font-bold">
+          {typeof plan.price === 'string' ? (
+            plan.price
+          ) : (
+            <>
+              {'$'}
+              {plan.price}
+              <span className="text-sm text-gray-500">/mo</span>
+            </>
+          )}
+        </div>
+        <div className="text-sm text-gray-500">{plan.description}</div>
+        <div>
+          <List spacing={2} className="mt-6">
+            {plan.features.map((feature, i) => {
+              return (
+                <ListItem key={i}>
+                  <Section.Subtitle className="flex items-center">
+                    <ListIcon color="gray.500" as={VscCheck} />
+                    {feature}
+                  </Section.Subtitle>
+                </ListItem>
+              );
+            })}
+          </List>
+        </div>
+      </div>
+      {plan.footer && (
+        <div>
+          <div className="mx-auto my-4 w-9/12 border-b border-gray-800" />
+          <div className="text-xs text-gray-300">{plan.footer}</div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 export const BillingPlanPicker: React.FC<{
   value: BillingPlanType;
   activePlan: BillingPlanType;
   plans: BillingPlansQuery['billingPlans'];
   onPlanChange: (plan: BillingPlanType) => void;
-  operationsRateLimit: number;
-  schemaPushesRateLimit: number;
-  onOperationsRateLimitChange: (v: number) => void;
-  onSchemaPushesRateLimitChange: (v: number) => void;
-}> = ({
-  value,
-  activePlan,
-  plans,
-  onPlanChange,
-  operationsRateLimit,
-  onOperationsRateLimitChange,
-  onSchemaPushesRateLimitChange,
-  schemaPushesRateLimit,
-}) => {
+}> = ({ value, activePlan, plans, onPlanChange }) => {
   return (
     <RadioGroup
       value={value}
-      onChange={(v) => onPlanChange(v as BillingPlanType)}
-      tw="mb-8"
+      onValueChange={onPlanChange}
+      className="flex !flex-row content-start	items-stretch justify-start !justify-items-start gap-4"
     >
-      <Stack>
-        {plans.map((plan) => (
+      {plans.map((plan) => {
+        return (
           <Radio
-            colorScheme="primary"
-            key={plan.id}
-            name={plan.name}
             value={plan.planType}
+            key={plan.id}
+            className="block flex w-1/3 flex-col items-start !rounded-md border p-4"
           >
-            <div tw="border-b pb-4">
-              <Section.BigTitle>
-                {plan.name}
-                {activePlan === plan.planType ? (
-                  <Label>CURRENT PLAN</Label>
-                ) : null}
-              </Section.BigTitle>
-              <Label>
-                {plan.basePrice
-                  ? `STARTS AT ${CurrencyFormatter.format(
-                      plan.basePrice
-                    )} / MONTH + RESERVED VOLUME`
-                  : plan.planType === 'ENTERPRISE'
+            <Plan
+              key={plan.id}
+              name={plan.name}
+              price={
+                plan.planType === BillingPlanType.Hobby
+                  ? 'Free'
+                  : plan.planType === BillingPlanType.Enterprise
                   ? 'Contact Us'
-                  : 'FREE'}
-              </Label>
-              <Section.Subtitle>{plan.description}</Section.Subtitle>
-              <div>
-                <List spacing={2} tw="mt-2">
-                  {plan.planType === BillingPlanType.Pro ? (
-                    <ListItem>
-                      <Section.Subtitle>
-                        <ListIcon as={VscCheck} />
-                        14 days free trial
-                      </Section.Subtitle>
-                    </ListItem>
-                  ) : null}
-                  <ListItem>
-                    <Section.Subtitle>
-                      <ListIcon as={VscCheck} />
-                      {!plan.includedOperationsLimit
-                        ? 'Unlimited'
-                        : NumericFormater.format(plan.includedOperationsLimit)}
-                      {plan.rateLimit === UsageRateLimitType.MonthlyLimited
-                        ? ' '
-                        : '+ '}
-                      operations per month
-                      {plan.pricePerOperationsUnit
-                        ? ` included in base price + 
-                        ${CurrencyFormatter.format(
-                          plan.pricePerOperationsUnit
-                        )} 
-                        per 1M`
-                        : null}
-                    </Section.Subtitle>
-                  </ListItem>
-                  <ListItem>
-                    <Section.Subtitle>
-                      <ListIcon as={VscCheck} />
-                      {!plan.includedSchemaPushLimit
-                        ? 'Unlimited'
-                        : NumericFormater.format(plan.includedSchemaPushLimit)}
-                      {plan.rateLimit === UsageRateLimitType.MonthlyLimited
-                        ? ' '
-                        : '+ '}
-                      schema pushes per month
-                      {plan.pricePerSchemaPushUnit
-                        ? ` included in base price + 
-                        ${CurrencyFormatter.format(
-                          plan.pricePerSchemaPushUnit
-                        )} per additional schema`
-                        : null}
-                    </Section.Subtitle>
-                  </ListItem>
-                  {plan.planType === BillingPlanType.Hobby ? (
-                    <>
-                      <ListItem>
-                        <Section.Subtitle>
-                          <ListIcon as={VscCheck} />
-                          GraphQL Schema Registry
-                        </Section.Subtitle>
-                      </ListItem>
-                      <ListItem>
-                        <Section.Subtitle>
-                          <ListIcon as={VscPerson} />
-                          Unlimited seats and collaboratos
-                        </Section.Subtitle>
-                      </ListItem>
-                      <ListItem>
-                        <Section.Subtitle>
-                          <ListIcon as={VscCheck} />
-                          Breaking changes checks with usage-based monitoring
-                        </Section.Subtitle>
-                      </ListItem>
-                      <ListItem>
-                        <Section.Subtitle>
-                          <ListIcon as={VscBell} />
-                          Alerts & Slack integration
-                        </Section.Subtitle>
-                      </ListItem>
-                    </>
-                  ) : plan.planType === BillingPlanType.Pro ? (
-                    <ListItem>
-                      <Section.Subtitle>
-                        <ListIcon as={VscAdd} />
-                        All features from Hobby, including:
-                      </Section.Subtitle>
-                    </ListItem>
-                  ) : (
-                    <ListItem>
-                      <Section.Subtitle>
-                        <ListIcon as={VscAdd} />
-                        All features from Hobby and Pro, including:
-                      </Section.Subtitle>
-                    </ListItem>
-                  )}
-                  <ListItem>
-                    <Section.Subtitle>
-                      <ListIcon as={VscCheck} />
-                      {plan.retentionInDays
-                        ? `${plan.retentionInDays} days`
-                        : 'Unlimited'}{' '}
-                      retention
-                    </Section.Subtitle>
-                  </ListItem>
-                  {plan.planType === BillingPlanType.Pro ? (
-                    <>
-                      <ListItem>
-                        <Section.Subtitle>
-                          <ListIcon as={VscTable} />
-                          GraphQL Schema Policy Checks
-                          <Label>COMING SOON</Label>
-                        </Section.Subtitle>
-                      </ListItem>
-                      <ListItem>
-                        <Section.Subtitle>
-                          <ListIcon as={VscClearAll} />
-                          GraphQL-ESLint Integration
-                          <Label>COMING SOON</Label>
-                        </Section.Subtitle>
-                      </ListItem>
-                    </>
-                  ) : null}
-                  {plan.planType === BillingPlanType.Enterprise ? (
-                    <>
-                      <ListItem>
-                        <Section.Subtitle>
-                          <ListIcon as={VscKey} />
-                          SAML
-                          <Label>COMING SOON</Label>
-                        </Section.Subtitle>
-                      </ListItem>
-                      <ListItem>
-                        <Section.Subtitle>
-                          <ListIcon as={Logo} />
-                          Schema design review and GraphQL support from{' '}
-                          <Link href="https://the-guild.dev">The Guild</Link>
-                        </Section.Subtitle>
-                      </ListItem>
-                    </>
-                  ) : null}
-                </List>
-              </div>
-              {value === BillingPlanType.Pro &&
-              plan.planType === BillingPlanType.Pro ? (
-                <div tw="pl-10 mt-4 pb-4">
-                  <Section.Title>Customize your reserved volume</Section.Title>
-                  <LimitSlider
-                    title="Monthly GraphQL operations limit"
-                    min={5}
-                    step={1}
-                    max={300}
-                    value={operationsRateLimit}
-                    marks={[
-                      {
-                        value: 5,
-                        label: '5M (included)',
-                      },
-                      {
-                        value: 100,
-                        label: '100M',
-                      },
-                      {
-                        value: 50,
-                        label: '50M',
-                      },
-                    ]}
-                    onChange={(v) => onOperationsRateLimitChange(v)}
-                  />
-                  <LimitSlider
-                    title="Monthly GraphQL schema pushes"
-                    min={500}
-                    step={10}
-                    max={1000}
-                    value={schemaPushesRateLimit}
-                    marks={[
-                      {
-                        value: 500,
-                        label: '500 (included)',
-                      },
-                      {
-                        value: 1000,
-                        label: '1000',
-                      },
-                    ]}
-                    onChange={(v) => onSchemaPushesRateLimitChange(v)}
-                  />
-                </div>
-              ) : null}
-            </div>
+                  : plan.basePrice!
+              }
+              isActive={activePlan === plan.planType}
+              features={planCollection[plan.planType].features}
+              description={planCollection[plan.planType].description}
+              footer={planCollection[plan.planType].footer}
+            />
           </Radio>
-        ))}
-      </Stack>
+        );
+      })}
     </RadioGroup>
   );
 };

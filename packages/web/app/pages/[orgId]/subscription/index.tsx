@@ -1,36 +1,31 @@
-import React from 'react';
-import 'twin.macro';
-import {
-  OrganizationAccessScope,
-  useOrganizationAccess,
-} from '@/lib/access/organization';
-import { OrganizationView } from '@/components/organization/View';
-import { OrganizationUsageEstimationView } from '@/components/organization/Usage';
-import {
-  OrganizationFieldsFragment,
-  OrgBillingInfoFieldsFragment,
-  OrgRateLimitFieldsFragment,
-} from '@/graphql';
-import { Card, Page } from '@/components/common';
-import { BillingView } from '@/components/organization/billing/Billing';
-import {
-  Button,
-  Stat,
-  StatHelpText,
-  StatLabel,
-  StatNumber,
-} from '@chakra-ui/react';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
-import { InvoicesList } from '@/components/organization/billing/InvoicesList';
-import { CurrencyFormatter } from '@/components/organization/billing/helpers';
-import { RateLimitWarn } from '@/components/organization/billing/RateLimitWarn';
+import { ReactElement } from 'react';
+import dynamic from 'next/dynamic';
+import { Stat, StatHelpText, StatLabel, StatNumber } from '@chakra-ui/react';
+import { endOfMonth, startOfMonth } from 'date-fns';
 
-const Inner: React.FC<{
-  organization: OrganizationFieldsFragment &
-    OrgBillingInfoFieldsFragment &
-    OrgRateLimitFieldsFragment;
-}> = ({ organization }) => {
-  const router = useRouteSelector();
+import { OrganizationLayout } from '@/components/layouts';
+import { BillingView } from '@/components/organization/billing/Billing';
+import { CurrencyFormatter } from '@/components/organization/billing/helpers';
+import { InvoicesList } from '@/components/organization/billing/InvoicesList';
+import { RateLimitWarn } from '@/components/organization/billing/RateLimitWarn';
+import { OrganizationUsageEstimationView } from '@/components/organization/Usage';
+import { Card, Heading, Tabs, Title } from '@/components/v2';
+import { OrganizationFieldsFragment, OrgBillingInfoFieldsFragment, OrgRateLimitFieldsFragment } from '@/graphql';
+import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
+
+const DateFormatter = Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+});
+
+const ManagePage = dynamic(() => import('./manage'));
+
+const Page = ({
+  organization,
+}: {
+  organization: OrganizationFieldsFragment & OrgBillingInfoFieldsFragment & OrgRateLimitFieldsFragment;
+}): ReactElement => {
   const canAccess = useOrganizationAccess({
     scope: OrganizationAccessScope.Settings,
     member: organization?.me,
@@ -41,80 +36,73 @@ const Inner: React.FC<{
     return null;
   }
 
+  const today = new Date();
+  const start = startOfMonth(today);
+  const end = endOfMonth(today);
+
   return (
-    <Page
-      title={'Subscription'}
-      subtitle={
-        'Information about your Hive plan, subscription, usage and data ingestion.'
-      }
-      actions={
-        <Button
-          colorScheme="primary"
-          type="button"
-          size="sm"
-          as="a"
-          href={`/${router.organizationId}/subscription/manage`}
-        >
-          Manage Subscription
-        </Button>
-      }
-    >
-      <RateLimitWarn organization={organization} />
-      <div tw="w-full flex flex-row">
-        <div tw="flex-grow mr-12">
-          <div tw="flex flex-col space-y-6 pb-6">
-            <Card.Root>
-              <Card.Title>Plan and Reserved Volume</Card.Title>
-              <Card.Content>
-                <BillingView organization={organization}>
-                  {organization.billingConfiguration?.upcomingInvoice ? (
-                    <Stat tw="mb-4">
-                      <StatLabel>Next Invoice</StatLabel>
-                      <StatNumber>
-                        {CurrencyFormatter.format(
-                          organization.billingConfiguration.upcomingInvoice
-                            .amount
-                        )}
-                      </StatNumber>
-                      <StatHelpText>
-                        {organization.billingConfiguration.upcomingInvoice.date}
-                      </StatHelpText>
-                    </Stat>
-                  ) : null}
-                </BillingView>
-              </Card.Content>
-            </Card.Root>
+    <Tabs defaultValue="overview">
+      <Tabs.List>
+        <Tabs.Trigger value="overview" hasBorder={false}>
+          Monthly Usage
+        </Tabs.Trigger>
+        <Tabs.Trigger value="manage" hasBorder={false}>
+          Manage
+        </Tabs.Trigger>
+      </Tabs.List>
+      <Tabs.Content value="overview">
+        <p className="mb-3 font-light text-gray-300">
+          Information about your Hive plan, subscription, usage and data ingestion
+        </p>
+        <RateLimitWarn organization={organization} />
+        <Card className="mt-8">
+          <Heading className="mb-2">Plan and Reserved Volume</Heading>
+          <div>
+            <BillingView organization={organization}>
+              {organization.billingConfiguration?.upcomingInvoice && (
+                <Stat className="mb-4">
+                  <StatLabel>Next Invoice</StatLabel>
+                  <StatNumber>
+                    {CurrencyFormatter.format(organization.billingConfiguration.upcomingInvoice.amount)}
+                  </StatNumber>
+                  <StatHelpText>{organization.billingConfiguration.upcomingInvoice.date}</StatHelpText>
+                </Stat>
+              )}
+            </BillingView>
           </div>
-        </div>
-        <div tw="flex-grow-0 w-5/12">
-          <Card.Root>
-            <Card.Title>Monthly Usage Overview</Card.Title>
-            <Card.Content>
-              <OrganizationUsageEstimationView organization={organization} />
-            </Card.Content>
-          </Card.Root>
-        </div>
-      </div>
-      {organization.billingConfiguration?.invoices?.length > 0 ? (
-        <Card.Root>
-          <Card.Title>Invoices</Card.Title>
-          <Card.Content>
-            <InvoicesList organization={organization} />
-          </Card.Content>
-        </Card.Root>
-      ) : null}
-    </Page>
+        </Card>
+        <Card className="mt-8">
+          <Heading>Current Usage</Heading>
+          <p className="text-sm text-gray-500">
+            {DateFormatter.format(start)} — {DateFormatter.format(end)}
+          </p>
+          <div className="mt-4">
+            <OrganizationUsageEstimationView organization={organization} />
+          </div>
+        </Card>
+        {organization.billingConfiguration?.invoices?.length > 0 && (
+          <Card>
+            <Heading className="mb-2">Invoices</Heading>
+            <div>
+              <InvoicesList organization={organization} />
+            </div>
+          </Card>
+        )}
+      </Tabs.Content>
+      <Tabs.Content value="manage">
+        <ManagePage />
+      </Tabs.Content>
+    </Tabs>
   );
 };
 
-export default function SubscriptionPage() {
+export default function SubscriptionPage(): ReactElement {
   return (
-    <OrganizationView
-      title="Subscription & Usage"
-      includeBilling={true}
-      includeRateLimit={true}
-    >
-      {({ organization }) => <Inner organization={organization} />}
-    </OrganizationView>
+    <>
+      <Title title="Subscription & Usage" />
+      <OrganizationLayout value="subscription" includeBilling includeRateLimit>
+        {({ organization }) => <Page organization={organization} />}
+      </OrganizationLayout>
+    </>
   );
 }

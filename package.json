@@ -45,15 +45,17 @@
     "@graphql-codegen/typescript-operations": "2.4.0",
     "@graphql-codegen/typescript-resolvers": "2.6.4",
     "@swc/core": "1.2.185",
+    "@theguild/prettier-config": "0.0.1",
     "@types/jest": "27.5.1",
     "@types/lru-cache": "7.6.1",
     "@types/node": "16.11.22",
     "@typescript-eslint/eslint-plugin": "5.23.0",
     "@typescript-eslint/parser": "5.23.0",
-    "bob-the-bundler": "1.7.2",
+    "bob-the-bundler": "1.7.3",
     "env-cmd": "10.1.0",
     "eslint": "8.15.0",
     "eslint-plugin-import": "2.26.0",
+    "eslint-plugin-simple-import-sort": "7.0.0",
     "fs-extra": "10.1.0",
     "graphql": "16.5.0",
     "husky": "7.0.4",
@@ -61,6 +63,7 @@
     "lint-staged": "11.2.6",
     "patch-package": "6.4.7",
     "prettier": "2.4.1",
+    "prettier-plugin-tailwindcss": "0.1.10",
     "pretty-quick": "3.1.3",
     "rimraf": "3.0.2",
     "ts-jest": "28.0.2",
@@ -82,11 +85,6 @@
     "graphql": "16.5.0",
     "typescript": "4.6.4"
   },
-  "prettier": {
-    "trailingComma": "es5",
-    "semi": true,
-    "singleQuote": true
-  },
   "husky": {
     "hooks": {
       "pre-commit": "lint-staged"
@@ -96,8 +94,8 @@
     "**/*": [
       "pretty-quick --staged"
     ],
-    "**/*.ts": [
-      "eslint"
+    "**/*.{js,cjs,mjs,ts,tsx}": [
+      "eslint --fix"
     ]
   },
   "engines": {

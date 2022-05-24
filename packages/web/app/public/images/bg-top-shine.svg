@@ -1,0 +1,11 @@
+<svg width="468" height="278" viewBox="0 0 468 278" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <g filter="url(#shine-top)">
+        <circle cx="-96.5" cy="-286.5" r="360.5" fill="#FF8731"/>
+    </g>
+    <filter id="shine-top" x="-661" y="-851" width="1129" height="1129"
+            filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+        <feFlood flood-opacity="0" result="bgImg"/>
+        <feBlend in="SourceGraphic" in2="bgImg"/>
+        <feGaussianBlur stdDeviation="85"/>
+    </filter>
+</svg>

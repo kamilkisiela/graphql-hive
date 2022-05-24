@@ -36,7 +36,7 @@ const Option = {
         `
         : tw`
           hover:border-gray-400 
-          hover:bg-gray-50 
+          hover:bg-white
           dark:hover:bg-gray-600 
           border-opacity-100
         `}
@@ -105,7 +105,7 @@ export const ProjectCreator: React.FC<{
           onClose();
           router.visitProject({
             organizationId: router.organizationId,
-            projectId: result.data.createProject.createdProject.cleanId,
+            projectId: result.data.createProject.ok.createdProject.cleanId,
           });
         });
       }

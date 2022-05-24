@@ -1,23 +1,24 @@
 import React from 'react';
-import { useQuery } from 'urql';
 import {
-  VscSettings,
-  VscRadioTower,
-  VscHistory,
-  VscGitCommit,
   VscBeaker,
+  VscGitCommit,
+  VscHistory,
+  VscRadioTower,
+  VscSettings,
 } from 'react-icons/vsc';
+import { useQuery } from 'urql';
+
+import { Title } from '@/components/common';
+import { DataWrapper } from '@/components/common/DataWrapper';
+import { useNavigation } from '@/components/common/Navigation';
 import {
   OrganizationFieldsFragment,
   ProjectFieldsFragment,
   TargetDocument,
   TargetQuery,
 } from '@/graphql';
-import { useNavigation } from '@/components/common/Navigation';
 import { TargetAccessScope, useTargetAccess } from '@/lib/access/target';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
-import { DataWrapper } from '@/components/common/DataWrapper';
-import { Title } from '@/components/common';
 
 export const TargetView: React.FC<{
   title: string;
@@ -95,6 +96,10 @@ export const TargetView: React.FC<{
     targetCleanId,
     setNavigation,
     canAccessSettings,
+    canAccessSchema,
+    router.organizationId,
+    router.projectId,
+    router.targetId,
   ]);
 
   const organizationName = query.data?.organization?.organization?.name;
