@@ -41,6 +41,7 @@ Tabs.Trigger = forwardRef(
     <Trigger
       ref={forwardedRef as any}
       className={clsx(
+        '!appearance-none', // unset button styles in Safari
         `
   radix-state-active:text-white
   font-bold
