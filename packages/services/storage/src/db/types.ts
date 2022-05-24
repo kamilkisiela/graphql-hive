@@ -8,11 +8,11 @@
  *
  */
 
-export type alert_channel_type = 'SLACK' | 'WEBHOOK';
-export type alert_type = 'SCHEMA_CHANGE_NOTIFICATIONS';
-export type operation_kind = 'mutation' | 'query' | 'subscription';
-export type organization_type = 'PERSONAL' | 'REGULAR';
-export type user_role = 'ADMIN' | 'MEMBER';
+export type alert_channel_type = "SLACK" | "WEBHOOK";
+export type alert_type = "SCHEMA_CHANGE_NOTIFICATIONS";
+export type operation_kind = "mutation" | "query" | "subscription";
+export type organization_type = "PERSONAL" | "REGULAR";
+export type user_role = "ADMIN" | "MEMBER";
 
 export interface activities {
   activity_metadata: any;
