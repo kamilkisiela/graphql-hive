@@ -203,9 +203,8 @@ export const resolvers: BillingModule.Resolvers = {
           newPlan: 'HOBBY',
           organization,
         };
-      } else {
-        throw new EnvelopError(`Unable to downgrade from Pro from your current plan`);
       }
+      throw new EnvelopError(`Unable to downgrade from Pro from your current plan`);
     },
     upgradeToPro: async (root, args, { injector }) => {
       const organizationId = await injector.get(IdTranslator).translateOrganizationId({
@@ -252,9 +251,8 @@ export const resolvers: BillingModule.Resolvers = {
           newPlan: 'PRO',
           organization,
         };
-      } else {
-        throw new EnvelopError(`Unable to upgrade to Pro from your current plan`);
       }
+      throw new EnvelopError(`Unable to upgrade to Pro from your current plan`);
     },
   },
 };
