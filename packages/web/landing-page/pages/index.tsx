@@ -3,17 +3,10 @@ import { HeroGradient, HeroIllustration } from '@theguild/components';
 import Head from 'next/head';
 import { GlobalStyles } from 'twin.macro';
 import { css } from 'twin.macro';
-import {
-  Header,
-  FooterExtended,
-  GlobalStyles as TGCStyles,
-  ThemeProvider,
-} from '@theguild/components';
+import { Header, FooterExtended, GlobalStyles as TGCStyles, ThemeProvider } from '@theguild/components';
 
 const CookiesConsent: React.FC = () => {
-  const [show, setShow] = React.useState(
-    typeof window !== 'undefined' && localStorage.getItem('cookies') === null
-  );
+  const [show, setShow] = React.useState(typeof window !== 'undefined' && localStorage.getItem('cookies') === null);
 
   const accept = React.useCallback(() => {
     setShow(false);
@@ -32,20 +25,11 @@ const CookiesConsent: React.FC = () => {
   return (
     <div tw="w-full fixed bg-gray-100 px-5 py-7 bottom-0 flex gap-4 flex-wrap lg:flex-nowrap text-center lg:text-left items-center justify-center lg:justify-between">
       <div tw="w-full text-sm">
-        <p>
-          This website uses cookies to analyze site usage and improve your
-          experience.{' '}
-        </p>
-        <p>
-          If you continue to use our services, you are agreeing to the use of
-          such cookies.{' '}
-        </p>
+        <p>This website uses cookies to analyze site usage and improve your experience. </p>
+        <p>If you continue to use our services, you are agreeing to the use of such cookies. </p>
       </div>
       <div tw="flex gap-4 items-center flex-shrink-0 lg:pr-24">
-        <a
-          href="/privacy-policy.pdf"
-          tw="text-yellow-600 whitespace-nowrap hover:underline"
-        >
+        <a href="/privacy-policy.pdf" tw="text-yellow-600 whitespace-nowrap hover:underline">
           Privacy Policy
         </a>
         <button
@@ -62,25 +46,27 @@ const CookiesConsent: React.FC = () => {
 const ITEMS = [
   {
     title: 'Open Source',
-    description: 'Community-based project where everyone can shape its future.',
+    description:
+      'Community-based project where everyone can shape its future. Hive is also available as SaaS, with a free plan and transparent pricing.',
     imageSrc: '/open-source.svg',
     imageAlt: 'Open Source',
   },
   {
     title: 'Works with all GraphQL servers',
-    description: 'Aims to be compatible with any kind of GraphQL server.',
+    description:
+      'Aims to be compatible with any kind of GraphQL setup. Use the Hive agent/client in your server, or use the Hive CLI.',
     imageSrc: '/agnostic-framework.svg',
     imageAlt: 'Agnostic Framework',
   },
   {
     title: 'Works with any CI/CD',
-    description: 'Integrates with GitHub, Bitbucket and Azure seamlessly.',
+    description: 'Integrates seamlessly with GitHub, and can easily be used with any CI/CD setup.',
     imageSrc: '/any-ci-cd.svg',
     imageAlt: 'Any CI/CD',
   },
   {
     title: 'Distributed Schemas',
-    description: 'Supports Apollo Federation and Schema Stitching.',
+    description: 'Supports any GraphQL schema setup: from a simple schema to Apollo Federation and Schema Stitching.',
     imageSrc: '/distributed-schemas.svg',
     imageAlt: 'Schemas',
   },
@@ -115,9 +101,9 @@ const heroWrapper = css`
 `;
 
 export default function Index() {
-  const title = 'GraphQL Hive - Manage your GraphQL API workflow';
+  const title = 'GraphQL Hive - Manage your GraphQL API workflows';
   const description =
-    'An open-source registry of schemas with many additional features to enhance your day-to-day work with GraphQL';
+    'An open-source GraphQL schema registry with many additional features to enhance your day-to-day work with GraphQL.';
 
   return (
     <ThemeProvider>
@@ -126,16 +112,8 @@ export default function Index() {
         <title>{title}</title>
         <meta property="og:title" content={title} key="title" />
         <meta name="description" content={description} key="description" />
-        <meta
-          name="og:description"
-          content={description}
-          key="og:description"
-        />
-        <meta
-          property="og:url"
-          key="og:url"
-          content="https://graphql-hive.com"
-        />
+        <meta name="og:description" content={description} key="og:description" />
+        <meta property="og:url" key="og:url" content="https://graphql-hive.com" />
         <meta property="og:type" key="og:type" content="website" />
         <meta
           property="og:image"
@@ -144,11 +122,7 @@ export default function Index() {
         />
         <meta property="og:type" content="website" />
         <meta property="og:locale" content="en" />
-        <meta
-          name="twitter:card"
-          key="twitter:card"
-          content="summary_large_image"
-        />
+        <meta name="twitter:card" key="twitter:card" content="summary_large_image" />
         <meta name="twitter:site" key="twitter:site" content="@TheGuildDev" />
         <link rel="canonical" href="https://graphql-hive.com" />
       </Head>
@@ -176,7 +150,7 @@ export default function Index() {
         <div css={heroWrapper}>
           <HeroGradient
             title="Manage your GraphQL API workflow"
-            description="An open-source registry of schemas with many additional features to enhance your day-to-day work with GraphQL"
+            description={description}
             colors={['#FFB21D']}
             image={{
               src: '/manage.svg',
@@ -185,8 +159,8 @@ export default function Index() {
             link={[
               {
                 target: '_blank',
-                href: 'https://app.graphql-hive.com/api/login',
-                title: 'Sign Up',
+                href: 'https://app.graphql-hive.com',
+                title: 'Go to app',
                 children: 'Go to app',
               },
               {
@@ -194,6 +168,17 @@ export default function Index() {
                 href: 'https://docs.graphql-hive.com',
                 title: 'Documentation',
                 children: 'Documentation',
+                style: {
+                  color: '#fff',
+                  border: '1px solid #fff',
+                  background: 'transparent',
+                },
+              },
+              {
+                target: '_blank',
+                href: 'https://github.com/kamilkisiela/graphql-hive',
+                title: 'GitHub',
+                children: 'GitHub',
                 style: {
                   color: '#fff',
                   border: '1px solid #fff',
