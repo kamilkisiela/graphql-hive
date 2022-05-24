@@ -73,7 +73,7 @@ const ChangesBlock: React.FC<{
   );
 };
 
-const DiffView = ({ view }: { view: 'sdl' | 'list' }): ReactElement => {
+const DiffView = ({ view, version }: { view: 'sdl' | 'list'; version: string }): ReactElement => {
   const router = useRouteSelector();
   const [compareQuery] = useQuery({
     query: CompareDocument,
@@ -81,7 +81,7 @@ const DiffView = ({ view }: { view: 'sdl' | 'list' }): ReactElement => {
       organization: router.organizationId,
       project: router.projectId,
       target: router.targetId,
-      version: router.versionId,
+      version,
     },
   });
   const comparison = compareQuery.data?.schemaCompareToPrevious;
@@ -147,12 +147,14 @@ const Page = ({ data, setAfter }: { data: VersionsQuery; setAfter(after: string)
 
   const baseUrl = `/${router.organizationId}/${router.projectId}/${router.targetId}`;
 
+  const currentVersion = router.versionId ?? schemas[0].id;
+
   const renderVersion = (version: SchemaVersionFieldsFragment) => (
     <NextLink key={version.id} href={`${baseUrl}/history/${version.id}`} passHref>
       <a
         className={clsx(
           'flex flex-col rounded-md p-2.5 hover:bg-gray-800/40',
-          router.versionId && router.versionId === version.id && 'bg-gray-800/40'
+          currentVersion === version.id && 'bg-gray-800/40'
         )}
       >
         <h3 className="truncate font-bold">{version.commit.commit}</h3>
@@ -224,7 +226,7 @@ const Page = ({ data, setAfter }: { data: VersionsQuery; setAfter(after: string)
               </ToggleGroup>
             </div>
             <div className="flex h-[65vh] grow overflow-hidden rounded-md border border-gray-800/50">
-              <DiffView view={view} />
+              <DiffView version={currentVersion} view={view} />
             </div>
           </div>
         </>
