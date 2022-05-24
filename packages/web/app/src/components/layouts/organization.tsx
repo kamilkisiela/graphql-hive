@@ -114,7 +114,7 @@ export function OrganizationLayout({
   return (
     <>
       <SubHeader>
-        <div className="wrapper flex h-[84px] items-center justify-between">
+        <div className="container flex h-[84px] items-center justify-between">
           <div>
             <Heading size="2xl" className="line-clamp-1">
               {organization?.name}
@@ -129,7 +129,7 @@ export function OrganizationLayout({
         </div>
       </SubHeader>
 
-      <Tabs className="wrapper" value={value}>
+      <Tabs className="container" value={value}>
         <Tabs.List>
           <NextLink passHref href={`/${orgId}`}>
             <Tabs.Trigger value={TabValue.Overview} asChild>

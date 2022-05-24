@@ -50,7 +50,7 @@ const SettingsPage: FC = () => {
     <>
       <Title title="Profile settings" />
       <SubHeader>
-        <header className="wrapper flex items-center pb-5">
+        <header className="container flex items-center pb-5">
           <div className="mr-4 rounded-full">
             <Avatar
               src={user.picture}
@@ -83,7 +83,7 @@ const SettingsPage: FC = () => {
           </div>
         </header>
       </SubHeader>
-      <Tabs defaultValue="personal-info" className="wrapper">
+      <Tabs defaultValue="personal-info" className="container">
         <Tabs.List>
           <Tabs.Trigger value="personal-info">Personal Info</Tabs.Trigger>
         </Tabs.List>

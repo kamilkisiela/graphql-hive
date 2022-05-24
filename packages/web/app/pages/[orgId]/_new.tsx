@@ -128,7 +128,7 @@ const NewPage: FC = () => {
   return (
     <>
       <ShineBackground />
-      <div className="wrapper relative flex h-full flex-col pt-5 pb-[155px]" ref={wrapperRef}>
+      <div className="container relative flex h-full flex-col pt-5 pb-[155px]" ref={wrapperRef}>
         {[3, 4, 5].includes(page) && (
           <div className="absolute top-0 right-1/2 translate-x-1/2 rounded-b-[10px] border border-t-0 border-gray-800 px-2.5 py-7">
             <h1 className="text-center text-xs font-bold text-[#34eab9]">THE GUILD</h1>
