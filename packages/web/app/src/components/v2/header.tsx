@@ -168,14 +168,12 @@ export const Header = (): ReactElement => {
                 </a>
               </NextLink>
             ) : null}
-            <NextLink href="/api/logout" passHref>
-              <a>
-                <DropdownMenu.Item>
-                  <LogOutIcon />
-                  Log out
-                </DropdownMenu.Item>
+            <DropdownMenu.Item asChild>
+              <a href="/api/logout">
+                <LogOutIcon />
+                Log out
               </a>
-            </NextLink>
+            </DropdownMenu.Item>
           </DropdownMenu.Content>
         </DropdownMenu>
       </div>
