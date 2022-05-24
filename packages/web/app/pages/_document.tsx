@@ -36,9 +36,7 @@ export default class MyDocument extends Document {
             id="force-dark-mode"
             dangerouslySetInnerHTML={{
               __html: `
-              if (window.location.pathname.startsWith('/v2')) {
-                localStorage['chakra-ui-color-mode'] = 'dark';
-              }
+              localStorage['chakra-ui-color-mode'] = 'dark';
               document.documentElement.classList.add('dark');
               `,
             }}
