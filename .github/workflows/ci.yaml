@@ -3,7 +3,7 @@ on: [pull_request]
 
 jobs:
   setup:
-    name: 'Setup'
+    name: Setup
     runs-on: ubuntu-latest
 
     services:
@@ -65,7 +65,7 @@ jobs:
           key: ${{ github.sha }}
 
   integration-tests:
-    name: 'Integration Tests'
+    name: Integration Tests
     runs-on: ubuntu-latest
     needs: setup
 
@@ -121,7 +121,7 @@ jobs:
         run: cat integration-tests/*.log
 
   schema-check:
-    name: 'Schema Check'
+    name: Schema Check
     runs-on: ubuntu-latest
     needs: setup
 
@@ -160,7 +160,7 @@ jobs:
         run: ./packages/libraries/cli/bin/dev schema:check "packages/services/api/src/modules/*/module.graphql.ts" ${{ steps.pr-label-check.outputs.SAFE_FLAG }} --github
 
   test:
-    name: 'Tests'
+    name: Tests
     runs-on: ubuntu-latest
     needs: setup
 
@@ -193,7 +193,7 @@ jobs:
         run: yarn test
 
   build:
-    name: 'Build'
+    name: Build
     runs-on: ubuntu-latest
     needs: setup
 
@@ -229,7 +229,7 @@ jobs:
         run: yarn build
 
   type-check:
-    name: 'Check types'
+    name: Check types
     runs-on: ubuntu-latest
     needs: setup
 
@@ -263,3 +263,39 @@ jobs:
 
       - name: Type Check
         run: yarn typecheck
+
+  prettier-check:
+    name: Prettier Check
+    runs-on: ubuntu-latest
+    needs: setup
+
+    env:
+      TURBO_TOKEN: ${{secrets.TURBO_TOKEN}}
+      TURBO_TEAM: ${{secrets.TURBO_TEAM}}
+      TURBO_API_URL: ${{secrets.TURBO_API_URL}}
+      TURBO_REMOTE_ONLY: 'true'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 5
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16
+
+      - name: Pull node_modules
+        uses: actions/cache@v2
+        with:
+          path: '**/node_modules'
+          key: ${{github.sha}}
+
+      - name: Setup Turbo
+        run: node ./scripts/turborepo-setup.js
+
+      - name: Generate Types
+        run: yarn graphql:generate
+
+      - name: Prettier Check
+        run: 'yarn prettier:check'
