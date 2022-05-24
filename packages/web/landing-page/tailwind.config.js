@@ -4,7 +4,7 @@ const colors = require('tailwindcss/colors');
 module.exports = {
   theme: {
     fontFamily: {
-      title: ['Poppins', 'ui-sans-serif', 'system-ui'],
+      title: ['Inter', 'ui-sans-serif', 'system-ui'],
     },
     colors: {
       transparent: 'transparent',
@@ -15,6 +15,7 @@ module.exports = {
       red: colors.red,
       yellow: colors.yellow,
       emerald: colors.emerald,
+      orange: colors.orange,
     },
   },
 };

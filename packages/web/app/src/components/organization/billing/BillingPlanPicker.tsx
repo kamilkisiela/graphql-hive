@@ -35,7 +35,7 @@ const planCollection: {
       'Schema Registry',
       'Detection of breaking changes based on usage reports',
       'GitHub and Slack integrations',
-      '90 days of usage data retention',
+      '180 days of usage data retention',
       <div>Schema Policy Checks {comingSoon}</div>,
       <div>ESLint integration {comingSoon}</div>,
     ],
