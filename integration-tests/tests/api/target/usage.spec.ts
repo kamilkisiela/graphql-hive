@@ -636,7 +636,7 @@ test('check usage from two selected targets', async () => {
   );
 
   expect(updateValidationResult.body.errors).not.toBeDefined();
-  expect(updateValidationResult.body.data!.updateTargetValidationSettings.error).not.toBeDefined();
+  expect(updateValidationResult.body.data!.updateTargetValidationSettings.error).toBeNull();
   expect(
     updateValidationResult.body.data!.updateTargetValidationSettings.ok!.updatedTargetValidationSettings.percentage
   ).toEqual(50);
