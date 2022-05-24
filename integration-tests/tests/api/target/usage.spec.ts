@@ -642,7 +642,7 @@ test('check usage from two selected targets', async () => {
   ).toEqual(50);
   expect(
     updateValidationResult.body.data!.updateTargetValidationSettings.ok!.updatedTargetValidationSettings.period
-  ).toEqual(30);
+  ).toEqual(2);
   expect(
     updateValidationResult.body.data!.updateTargetValidationSettings.ok!.updatedTargetValidationSettings.targets
   ).toHaveLength(2);
