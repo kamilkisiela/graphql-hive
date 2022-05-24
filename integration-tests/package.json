@@ -18,6 +18,6 @@
   },
   "scripts": {
     "build-and-pack": "(cd ../ && yarn build:services && yarn build:libraries && yarn build:local-cdn) && node ./scripts/pack.mjs",
-    "dockest": "tsup-node dockest.ts --format esm --target node16 --onSuccess 'node dist/dockest.js'"
+    "dockest": "tsup-node dockest.ts --format esm --target node16 && node dist/dockest.js"
   }
 }
