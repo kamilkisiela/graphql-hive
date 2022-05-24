@@ -13,7 +13,7 @@ export function ensureEnv(key: string, valueType?: ValueType) {
     value = undefined;
   }
 
-  invariant(typeof value === 'string', `Missing "${key}" environment varariable`);
+  invariant(typeof value === 'string', `Missing "${key}" environment variable`);
 
   switch (valueType) {
     case 'number':
