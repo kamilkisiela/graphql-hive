@@ -38,7 +38,6 @@ interface Operation {
   id: string;
   name: string;
   kind: string;
-  hash: string;
   p90: number;
   p95: number;
   p99: number;
@@ -77,12 +76,11 @@ const OperationRow: React.FC<{
   const p90 = useFormattedDuration(operation.p90);
   const p95 = useFormattedDuration(operation.p95);
   const p99 = useFormattedDuration(operation.p99);
-  const operationHash = operation.hash;
 
   return (
     <>
       <Tr>
-        <Td tw="font-medium">
+        <Td tw="font-medium truncate">
           <div tw="flex flex-row">
             <Button
               as="a"
@@ -108,9 +106,6 @@ const OperationRow: React.FC<{
               </Tooltip>
             )}
           </div>
-        </Td>
-        <Td>
-          <span tw="text-xs text-gray-500">{operationHash}</span>
         </Td>
         <Td textAlign="center">
           <span tw="text-xs">{operation.kind}</span>
@@ -146,7 +141,6 @@ const OperationRow: React.FC<{
 
 const columns = [
   { Header: 'Operation', accessor: 'name' },
-  { Header: 'Hash', accessor: 'hash' },
   { Header: 'Kind', accessor: 'kind' },
   { Header: 'p90', accessor: 'p90' },
   { Header: 'p95', accessor: 'p95' },
@@ -222,8 +216,7 @@ const OperationsTable: React.FC<{
       <Table tw="mt-6" variant="striped" colorScheme="gray" size="sm" {...getTableProps()}>
         <Thead>
           <Tr {...headerGroup.getHeaderGroupProps()}>
-            <Th>Operation</Th>
-            <Th>Hash</Th>
+            <Th tw="truncate">Operation</Th>
             <Th textAlign="center">Kind</Th>
             <Th {...p90Column.getHeaderProps(p90Column.getSortByToggleProps())}>
               <Sortable align="center" isSorted={p90Column.isSorted} isSortedDesc={p90Column.isSortedDesc}>
@@ -332,7 +325,6 @@ const OperationsTableContainer: React.FC<{
           id: op.id,
           name: op.name,
           kind: op.kind,
-          hash: op.operationHash,
           p90: op.duration.p90,
           p95: op.duration.p95,
           p99: op.duration.p99,
