@@ -1,17 +1,9 @@
 #!/usr/bin/env node
 
 import 'reflect-metadata';
-import {
-  createServer,
-  startMetrics,
-  ensureEnv,
-  registerShutdown,
-} from '@hive/service-common';
+import { createServer, startMetrics, ensureEnv, registerShutdown } from '@hive/service-common';
 import { createRegistry, LogFn, Logger } from '@hive/api';
-import {
-  createStorage as createPostgreSQLStorage,
-  createConnectionString,
-} from '@hive/storage';
+import { createStorage as createPostgreSQLStorage, createConnectionString } from '@hive/storage';
 import got from 'got';
 import { stripIgnoredCharacters } from 'graphql';
 import * as Sentry from '@sentry/node';
@@ -26,7 +18,10 @@ export async function main() {
     enabled: process.env.ENVIRONMENT === 'prod',
     environment: process.env.ENVIRONMENT,
     dsn: process.env.SENTRY_DSN,
-    tracesSampleRate: 1.0,
+    tracesSampleRate: 1,
+    tracesSampler() {
+      return 1;
+    },
     release: process.env.RELEASE || 'local',
     integrations: [
       new Sentry.Integrations.Http({ tracing: true }),
@@ -58,12 +53,7 @@ export async function main() {
     return (error: any, errorLike?: any, ...args: any[]) => {
       server.log.error(error, errorLike, ...args);
 
-      const errorObj =
-        error instanceof Error
-          ? error
-          : errorLike instanceof Error
-          ? errorLike
-          : null;
+      const errorObj = error instanceof Error ? error : errorLike instanceof Error ? errorLike : null;
 
       if (errorObj instanceof Error) {
         console.log('createErrorHandler', errorObj);
@@ -127,9 +117,7 @@ export async function main() {
         endpoint: ensureEnv('TOKENS_ENDPOINT'),
       },
       billing: {
-        endpoint: process.env.BILLING_ENDPOINT
-          ? ensureEnv('BILLING_ENDPOINT').replace(/\/$/g, '')
-          : null,
+        endpoint: process.env.BILLING_ENDPOINT ? ensureEnv('BILLING_ENDPOINT').replace(/\/$/g, '') : null,
       },
       webhooks: {
         endpoint: ensureEnv('WEBHOOKS_ENDPOINT').replace(/\/$/g, ''),
@@ -143,14 +131,10 @@ export async function main() {
           : null,
       },
       rateLimitService: {
-        endpoint: process.env.RATE_LIMIT_ENDPOINT
-          ? ensureEnv('RATE_LIMIT_ENDPOINT').replace(/\/$/g, '')
-          : null,
+        endpoint: process.env.RATE_LIMIT_ENDPOINT ? ensureEnv('RATE_LIMIT_ENDPOINT').replace(/\/$/g, '') : null,
       },
       logger: graphqlLogger,
-      storage: await createPostgreSQLStorage(
-        createConnectionString(process.env as any)
-      ),
+      storage: await createPostgreSQLStorage(createConnectionString(process.env as any)),
       redis: {
         host: ensureEnv('REDIS_HOST'),
         port: ensureEnv('REDIS_PORT', 'number'),
@@ -167,12 +151,8 @@ export async function main() {
         username: ensureEnv('CLICKHOUSE_USERNAME'),
         password: ensureEnv('CLICKHOUSE_PASSWORD'),
         onReadEnd(query, timings) {
-          clickHouseReadDuration
-            .labels({ query })
-            .observe(timings.totalSeconds);
-          clickHouseElapsedDuration
-            .labels({ query })
-            .observe(timings.elapsedSeconds);
+          clickHouseReadDuration.labels({ query }).observe(timings.totalSeconds);
+          clickHouseElapsedDuration.labels({ query }).observe(timings.elapsedSeconds);
         },
       },
       cdn: {
@@ -254,18 +234,15 @@ export async function main() {
       url: '/_readiness',
       async handler(req, res) {
         try {
-          const response = await got.post(
-            `http://0.0.0.0:${port}${graphqlPath}`,
-            {
-              method: 'POST',
-              body: introspection,
-              headers: {
-                'Content-Type': 'application/json',
-                Accept: 'application/json',
-                'x-signature': signature,
-              },
-            }
-          );
+          const response = await got.post(`http://0.0.0.0:${port}${graphqlPath}`, {
+            method: 'POST',
+            body: introspection,
+            headers: {
+              'Content-Type': 'application/json',
+              Accept: 'application/json',
+              'x-signature': signature,
+            },
+          });
 
           if (response.statusCode >= 200 && response.statusCode < 300) {
             if (response.body.includes('"__schema"')) {
@@ -296,7 +273,7 @@ export async function main() {
   }
 }
 
-main().catch((err) => {
+main().catch(err => {
   console.error(err);
   process.exit(1);
 });

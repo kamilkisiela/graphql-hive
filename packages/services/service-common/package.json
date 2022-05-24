@@ -7,10 +7,12 @@
   "dependencies": {
     "fastify": "3.29.0",
     "fastify-cors": "6.0.2",
+    "fastify-plugin": "3.0.1",
     "prom-client": "14.0.1"
   },
   "peerDependencies": {
     "@sentry/node": "^6.0.0",
-    "@sentry/tracing": "^6.0.0"
+    "@sentry/tracing": "^6.0.0",
+    "@sentry/utils": "^6.0.0"
   }
 }
