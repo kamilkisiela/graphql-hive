@@ -16,6 +16,7 @@ import {
 } from '@/components/v2/icon';
 import { CreateOrganizationModal } from '@/components/v2/modals';
 import { MeDocument, OrganizationsDocument, OrganizationsQuery, OrganizationType } from '@/graphql';
+import { ManagerRoleGuard } from '../auth/ManagerRoleGuard';
 
 type DropdownOrganization = OrganizationsQuery['organizations']['nodes'];
 
@@ -125,6 +126,7 @@ export const Header = (): ReactElement => {
                 Schedule a meeting
               </a>
             </DropdownMenu.Item>
+
             <NextLink href="/settings">
               <a>
                 <DropdownMenu.Item>
@@ -144,6 +146,28 @@ export const Header = (): ReactElement => {
             {/*  <SunIcon />*/}
             {/*  Switch Light Theme*/}
             {/*</DropdownMenu.Item>*/}
+            {user?.metadata?.admin ? (
+              <ManagerRoleGuard>
+                <NextLink href="/manage">
+                  <a>
+                    <DropdownMenu.Item>
+                      <SettingsIcon />
+                      Manage Instance
+                    </DropdownMenu.Item>
+                  </a>
+                </NextLink>
+              </ManagerRoleGuard>
+            ) : null}
+            {process.env.NODE_ENV === 'development' ? (
+              <NextLink href="/dev">
+                <a>
+                  <DropdownMenu.Item>
+                    <SettingsIcon />
+                    Dev GraphiQL
+                  </DropdownMenu.Item>
+                </a>
+              </NextLink>
+            ) : null}
             <NextLink href="/api/logout" passHref>
               <a>
                 <DropdownMenu.Item>

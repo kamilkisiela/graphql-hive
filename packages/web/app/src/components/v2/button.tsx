@@ -55,23 +55,19 @@ export const Button = forwardRef<any, ButtonProps>(
             danger
               ? 'bg-red-500 text-white hover:brightness-110 active:bg-red-600'
               : {
-                  primary:
-                    'bg-orange-500 active:bg-orange-600 text-white hover:brightness-110',
-                  secondary:
-                    'hover:text-orange-500 bg-gray-800 text-gray-500 hover:brightness-110 active:bg-gray-900',
-                  default:
-                    'hover:text-orange-500 bg-transparent text-gray-500 hover:border-gray-800',
-                  link: 'text-orange-500 hover:underline',
+                  primary: 'bg-orange-600 active:bg-orange-700 text-white hover:brightness-110',
+                  secondary: 'hover:text-orange-600 bg-gray-800 text-gray-500 hover:brightness-110 active:bg-gray-900',
+                  default: 'hover:text-orange-600 bg-transparent text-gray-500 hover:border-gray-800',
+                  link: 'text-orange-600 hover:underline',
                 }[variant],
-            variant !== 'link' &&
-              'inline-flex items-center border border-transparent text-sm font-bold',
+            variant !== 'link' && 'inline-flex items-center border border-transparent text-sm font-bold',
             className
           )}
           css={
             rotate > 0 &&
             css`
               &[data-state='open'] {
-                ${tw`border-gray-800 text-orange-500`}
+                ${tw`border-gray-800 text-orange-600`}
                 svg {
                   transform: rotate(${rotate}deg);
                   ${tw`will-change-transform transition-transform`}
