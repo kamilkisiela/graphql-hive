@@ -147,7 +147,7 @@ const Page = ({ data, setAfter }: { data: VersionsQuery; setAfter(after: string)
 
   const baseUrl = `/${router.organizationId}/${router.projectId}/${router.targetId}`;
 
-  const currentVersion = router.versionId ?? versions.nodes[0].id;
+  const currentVersion = router.versionId ?? schemas[0].id;
 
   const renderVersion = (version: SchemaVersionFieldsFragment) => (
     <NextLink key={version.id} href={`${baseUrl}/history/${version.id}`} passHref>
