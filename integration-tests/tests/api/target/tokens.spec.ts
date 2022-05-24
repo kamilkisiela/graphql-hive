@@ -19,7 +19,7 @@ test('cannot set a scope on a token if user has no access to that scope', async 
 
   // Join
   const { access_token: member_access_token } = await authenticate('extra');
-  const org = orgResult.body.data!.createOrganization.ok.createdOrganizationPayload.organization;
+  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
   const code = org.inviteCode;
   const joinResult = await joinOrganization(code, member_access_token);
 
@@ -37,8 +37,8 @@ test('cannot set a scope on a token if user has no access to that scope', async 
   }
 
   const member = joinResult.body.data!.joinOrganization.organization.me;
-  const project = projectResult.body.data!.createProject.ok.createdProject;
-  const target = projectResult.body.data!.createProject.ok.createdTarget;
+  const project = projectResult.body.data!.createProject.ok!.createdProject;
+  const target = projectResult.body.data!.createProject.ok!.createdTarget;
 
   // Give access to tokens
   await updateMemberAccess(

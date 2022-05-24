@@ -41,7 +41,7 @@ test('collect operation', async () => {
     owner_access_token
   );
 
-  const org = orgResult.body.data!.createOrganization.ok.createdOrganizationPayload.organization;
+  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
 
   const projectResult = await createProject(
     {
@@ -52,8 +52,8 @@ test('collect operation', async () => {
     owner_access_token
   );
 
-  const project = projectResult.body.data!.createProject.ok.createdProject;
-  const target = projectResult.body.data!.createProject.ok.createdTarget;
+  const project = projectResult.body.data!.createProject.ok!.createdProject;
+  const target = projectResult.body.data!.createProject.ok!.createdTarget;
 
   const settingsTokenResult = await createToken(
     {
@@ -84,8 +84,8 @@ test('collect operation', async () => {
   expect(settingsTokenResult.body.errors).not.toBeDefined();
   expect(tokenResult.body.errors).not.toBeDefined();
 
-  const token = tokenResult.body.data!.createToken.ok.secret;
-  const tokenForSettings = settingsTokenResult.body.data!.createToken.ok.secret;
+  const token = tokenResult.body.data!.createToken.ok!.secret;
+  const tokenForSettings = settingsTokenResult.body.data!.createToken.ok!.secret;
 
   const schemaPublishResult = await publishSchema(
     {
@@ -204,7 +204,7 @@ test('normalize and collect operation without breaking its syntax', async () => 
     owner_access_token
   );
 
-  const org = orgResult.body.data!.createOrganization.ok.createdOrganizationPayload.organization;
+  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
 
   const projectResult = await createProject(
     {
@@ -215,8 +215,8 @@ test('normalize and collect operation without breaking its syntax', async () => 
     owner_access_token
   );
 
-  const project = projectResult.body.data!.createProject.ok.createdProject;
-  const target = projectResult.body.data!.createProject.ok.createdTarget;
+  const project = projectResult.body.data!.createProject.ok!.createdProject;
+  const target = projectResult.body.data!.createProject.ok!.createdTarget;
 
   const settingsTokenResult = await createToken(
     {
@@ -247,7 +247,7 @@ test('normalize and collect operation without breaking its syntax', async () => 
   expect(settingsTokenResult.body.errors).not.toBeDefined();
   expect(tokenResult.body.errors).not.toBeDefined();
 
-  const token = tokenResult.body.data!.createToken.ok.secret;
+  const token = tokenResult.body.data!.createToken.ok!.secret;
 
   const raw_document = `
     query outfit {
@@ -381,7 +381,7 @@ test('number of produced and collected operations should match', async () => {
     owner_access_token
   );
 
-  const org = orgResult.body.data!.createOrganization.ok.createdOrganizationPayload.organization;
+  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
 
   const projectResult = await createProject(
     {
@@ -392,8 +392,8 @@ test('number of produced and collected operations should match', async () => {
     owner_access_token
   );
 
-  const project = projectResult.body.data!.createProject.ok.createdProject;
-  const target = projectResult.body.data!.createProject.ok.createdTarget;
+  const project = projectResult.body.data!.createProject.ok!.createdProject;
+  const target = projectResult.body.data!.createProject.ok!.createdTarget;
 
   const tokenResult = await createToken(
     {
@@ -410,7 +410,7 @@ test('number of produced and collected operations should match', async () => {
 
   expect(tokenResult.body.errors).not.toBeDefined();
 
-  const token = tokenResult.body.data!.createToken.ok.secret;
+  const token = tokenResult.body.data!.createToken.ok!.secret;
 
   const batchSize = 10;
   const totalAmount = 10_000;
@@ -479,7 +479,7 @@ test('check usage from two selected targets', async () => {
     owner_access_token
   );
 
-  const org = orgResult.body.data!.createOrganization.ok.createdOrganizationPayload.organization;
+  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
 
   const projectResult = await createProject(
     {
@@ -490,8 +490,8 @@ test('check usage from two selected targets', async () => {
     owner_access_token
   );
 
-  const project = projectResult.body.data!.createProject.ok.createdProject;
-  const staging = projectResult.body.data!.createProject.ok.createdTarget;
+  const project = projectResult.body.data!.createProject.ok!.createdProject;
+  const staging = projectResult.body.data!.createProject.ok!.createdTarget;
 
   const productionTargetResult = await createTarget(
     {
@@ -502,7 +502,7 @@ test('check usage from two selected targets', async () => {
     owner_access_token
   );
 
-  const production = productionTargetResult.body.data!.createTarget.ok.createdTarget;
+  const production = productionTargetResult.body.data!.createTarget.ok!.createdTarget;
 
   const stagingTokenResult = await createToken(
     {
@@ -533,8 +533,8 @@ test('check usage from two selected targets', async () => {
   expect(stagingTokenResult.body.errors).not.toBeDefined();
   expect(productionTokenResult.body.errors).not.toBeDefined();
 
-  const tokenForStaging = stagingTokenResult.body.data!.createToken.ok.secret;
-  const tokenForProduction = productionTokenResult.body.data!.createToken.ok.secret;
+  const tokenForStaging = stagingTokenResult.body.data!.createToken.ok!.secret;
+  const tokenForProduction = productionTokenResult.body.data!.createToken.ok!.secret;
 
   const schemaPublishResult = await publishSchema(
     {
@@ -637,13 +637,13 @@ test('check usage from two selected targets', async () => {
 
   expect(updateValidationResult.body.errors).not.toBeDefined();
   expect(
-    updateValidationResult.body.data!.updateTargetValidationSettings.ok.updatedTargetValidationSettings.percentage
+    updateValidationResult.body.data!.updateTargetValidationSettings.ok!.updatedTargetValidationSettings.percentage
   ).toEqual(50);
   expect(
-    updateValidationResult.body.data!.updateTargetValidationSettings.ok.updatedTargetValidationSettings.period
+    updateValidationResult.body.data!.updateTargetValidationSettings.ok!.updatedTargetValidationSettings.period
   ).toEqual(30);
   expect(
-    updateValidationResult.body.data!.updateTargetValidationSettings.ok.updatedTargetValidationSettings.targets
+    updateValidationResult.body.data!.updateTargetValidationSettings.ok!.updatedTargetValidationSettings.targets
   ).toHaveLength(2);
 
   // should be non-breaking because the field is used in production and we are checking staging and production now
@@ -672,7 +672,7 @@ test('number of produced and collected operations should match', async () => {
     owner_access_token
   );
 
-  const org = orgResult.body.data!.createOrganization.ok.createdOrganizationPayload.organization;
+  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
 
   const projectResult = await createProject(
     {
@@ -683,8 +683,8 @@ test('number of produced and collected operations should match', async () => {
     owner_access_token
   );
 
-  const project = projectResult.body.data!.createProject.ok.createdProject;
-  const target = projectResult.body.data!.createProject.ok.createdTarget;
+  const project = projectResult.body.data!.createProject.ok!.createdProject;
+  const target = projectResult.body.data!.createProject.ok!.createdTarget;
 
   const tokenResult = await createToken(
     {
@@ -701,7 +701,7 @@ test('number of produced and collected operations should match', async () => {
 
   expect(tokenResult.body.errors).not.toBeDefined();
 
-  const token = tokenResult.body.data!.createToken.ok.secret;
+  const token = tokenResult.body.data!.createToken.ok!.secret;
 
   const batchSize = 10;
   const totalAmount = 10_000;
