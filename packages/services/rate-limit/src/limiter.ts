@@ -7,10 +7,7 @@ import * as Sentry from '@sentry/node';
 import { createTRPCClient } from '@trpc/client';
 import type { UsageEstimatorApi } from '@hive/usage-estimator';
 import type { RateLimitInput } from './api';
-import {
-  rateLimitOperationsEventOrg,
-  rateLimitSchemaEventOrg,
-} from './metrics';
+import { rateLimitOperationsEventOrg, rateLimitSchemaEventOrg } from './metrics';
 
 export type RateLimitCheckResponse = {
   limited: boolean;
@@ -56,9 +53,7 @@ export function createRateLimiter(config: {
       startTime: startOfMonth(now).toUTCString(),
       endTime: endOfMonth(now).toUTCString(),
     };
-    config.logger.info(
-      `Calculating rate-limit information based on window: ${window.startTime} -> ${window.endTime}`
-    );
+    config.logger.info(`Calculating rate-limit information based on window: ${window.startTime} -> ${window.endTime}`);
     const storage = await postgres$;
     const newMap: typeof targetIdToRateLimitStatus = {
       orgToTargetIdMap: new Map<string, string>(),
@@ -73,27 +68,15 @@ export function createRateLimiter(config: {
       rateEstimator.query('estiamteSchemaPushesForAllTargets', window),
     ]);
 
-    logger.debug(
-      `Fetched total of ${Object.keys(records).length} targets from the DB`
-    );
-    logger.debug(
-      `Fetched total of ${
-        Object.keys(operations).length
-      } targets with usage information`
-    );
-    logger.debug(
-      `Fetched total of ${
-        Object.keys(pushes).length
-      } targets with schema push information`
-    );
+    logger.debug(`Fetched total of ${Object.keys(records).length} targets from the DB`);
+    logger.debug(`Fetched total of ${Object.keys(operations).length} targets with usage information`);
+    logger.debug(`Fetched total of ${Object.keys(pushes).length} targets with schema push information`);
 
     for (const record of records) {
       newMap.orgToTargetIdMap.set(record.organization, record.target);
       const currentOperations = operations[record.target] || 0;
       const operationsLimited =
-        record.limit_operations_monthly === 0
-          ? false
-          : record.limit_operations_monthly < currentOperations;
+        record.limit_operations_monthly === 0 ? false : record.limit_operations_monthly < currentOperations;
 
       newMap.retention.set(record.target, record.limit_retention_days);
 
@@ -105,9 +88,7 @@ export function createRateLimiter(config: {
 
       const currentPushes = pushes[record.target] || 0;
       const pushLimited =
-        record.limit_schema_push_monthly === 0
-          ? false
-          : record.limit_schema_push_monthly < currentPushes;
+        record.limit_schema_push_monthly === 0 ? false : record.limit_schema_push_monthly < currentPushes;
       newMap.schemaPushes.set(record.target, {
         current: currentPushes,
         quota: record.limit_schema_push_monthly,
@@ -155,15 +136,15 @@ export function createRateLimiter(config: {
       }
     },
     checkLimit(input: RateLimitInput): RateLimitCheckResponse {
+      logger.info(`Rate-limit check triggered, input is: ${input}`);
+
       const map =
         input.type === 'operations-reporting'
           ? targetIdToRateLimitStatus.operationsReporting
           : targetIdToRateLimitStatus.schemaPushes;
 
       const entityId =
-        input.entityType === 'target'
-          ? input.id
-          : targetIdToRateLimitStatus.orgToTargetIdMap.get(input.id);
+        input.entityType === 'target' ? input.id : targetIdToRateLimitStatus.orgToTargetIdMap.get(input.id);
 
       if (!entityId) {
         logger.warn(
@@ -188,12 +169,13 @@ export function createRateLimiter(config: {
       logger.info(
         `Rate Limiter starting, will update rate-limit information every ${config.rateLimitConfig.interval}ms`
       );
-      await fetchAndCalculateUsageInformation();
+      await fetchAndCalculateUsageInformation().catch(e => {
+        logger.error(e, `Failed to fetch rate-limit info from usage-estimator, error: `);
+      });
+
       initialized = true;
       intervalHandle = setInterval(async () => {
-        logger.info(
-          `Interval triggered, updating internval rate-limit cache...`
-        );
+        logger.info(`Interval triggered, updating internval rate-limit cache...`);
 
         try {
           await fetchAndCalculateUsageInformation();

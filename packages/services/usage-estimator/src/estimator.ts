@@ -27,11 +27,7 @@ export function createEstimator(config: {
   const { logger } = config;
   const postgres$ = createPostgreSQLStorage(config.storage.connectionString);
   const httpClient = new HttpClient();
-  const clickhouse = new ClickHouse(
-    config.clickhouse,
-    httpClient,
-    config.logger
-  );
+  const clickhouse = new ClickHouse(config.clickhouse, httpClient, config.logger);
   const operationsReader = new OperationsReader(clickhouse);
 
   return {
@@ -39,10 +35,10 @@ export function createEstimator(config: {
       return true;
     },
     async start() {
-      logger.info('Usage Estimator starting');
+      logger.info('Usage Estimator started');
     },
     async stop() {
-      logger.info('Usage Reported stopped');
+      logger.info('Usage Estimator stopped');
     },
     async estimateSchemaPushesForTargets(input: {
       targets: string[];
@@ -60,10 +56,7 @@ export function createEstimator(config: {
         count: response,
       };
     },
-    async estimateSchemaPushesForAllTargets(input: {
-      startTime: Date;
-      endTime: Date;
-    }) {
+    async estimateSchemaPushesForAllTargets(input: { startTime: Date; endTime: Date }) {
       const storage = await postgres$;
       const response = await storage.getAllSchemaPushesGrouped({
         startTime: input.startTime,
@@ -72,10 +65,7 @@ export function createEstimator(config: {
 
       return response;
     },
-    async estimateOperationsForAllTargets(input: {
-      startTime: Date;
-      endTime: Date;
-    }) {
+    async estimateOperationsForAllTargets(input: { startTime: Date; endTime: Date }) {
       const filter = operationsReader.createFilter({
         period: {
           from: input.startTime,
@@ -99,11 +89,7 @@ export function createEstimator(config: {
         timeout: 60_000,
       });
     },
-    async estimateCollectedOperationsForTargets(input: {
-      targets: string[];
-      startTime: Date;
-      endTime: Date;
-    }) {
+    async estimateCollectedOperationsForTargets(input: { targets: string[]; startTime: Date; endTime: Date }) {
       const filter = operationsReader.createFilter({
         target: input.targets,
         period: {

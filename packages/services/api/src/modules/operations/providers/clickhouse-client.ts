@@ -100,8 +100,12 @@ export class ClickHouse {
               }
 
               const delayBy = info.attemptCount * 250;
-
-              this.logger.error(`Failed to run ClickHouse query, error is: `, info.error);
+              this.logger.error(
+                `Failed to run ClickHouse query, code: %s , error name: %s, message: %s`,
+                info.error.code,
+                info.error.name,
+                info.error.message
+              );
 
               this.logger.debug(
                 `Retry (delay=%s, attempt=%s, reason=%s, queryId=%s)`,
@@ -120,6 +124,7 @@ export class ClickHouse {
             https: httpsAgent,
           },
         },
+
         span
       )
       .finally(() => {
