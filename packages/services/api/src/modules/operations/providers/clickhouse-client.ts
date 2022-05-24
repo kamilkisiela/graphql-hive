@@ -15,11 +15,7 @@ export interface QueryResponse<T> {
   };
 }
 
-export type RowOf<T extends QueryResponse<any>> = T extends QueryResponse<
-  infer R
->
-  ? R
-  : never;
+export type RowOf<T extends QueryResponse<any>> = T extends QueryResponse<infer R> ? R : never;
 
 const agentConfig: Agent.HttpOptions = {
   // Keep sockets around in a pool to be used by other requests in the future
@@ -68,11 +64,9 @@ export class ClickHouse {
       op: queryId,
     });
     const startedAt = Date.now();
-    const endpoint = `${this.config.protocol ?? 'https'}://${
-      this.config.host
-    }:${this.config.port}`;
+    const endpoint = `${this.config.protocol ?? 'https'}://${this.config.host}:${this.config.port}`;
 
-    this.logger.debug(`Execution ClickHouse Query: %s`, query);
+    this.logger.debug(`Executing ClickHouse Query: %s`, query);
 
     const response = await this.httpClient
       .post<QueryResponse<T>>(
@@ -99,13 +93,15 @@ export class ClickHouse {
             request: timeout,
           },
           retry: {
-            calculateDelay: (info) => {
+            calculateDelay: info => {
               if (info.attemptCount >= 6) {
                 // After 5 retries, stop.
                 return 0;
               }
 
               const delayBy = info.attemptCount * 250;
+
+              this.logger.error(`Failed to run ClickHouse query, error is: `, info.error);
 
               this.logger.debug(
                 `Retry (delay=%s, attempt=%s, reason=%s, queryId=%s)`,
@@ -139,13 +135,7 @@ export class ClickHouse {
     return response;
   }
 
-  translateWindow({
-    value,
-    unit,
-  }: {
-    value: number;
-    unit: 'd' | 'h' | 'm';
-  }): string {
+  translateWindow({ value, unit }: { value: number; unit: 'd' | 'h' | 'm' }): string {
     const unitMap = {
       d: 'DAY',
       h: 'HOUR',
