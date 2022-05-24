@@ -4,6 +4,7 @@ dist/
 .next/
 __generated__/
 
+/.husky/_/
 /.turbo/
 /integration-tests/testkit/gql/
 /packages/services/storage/src/db/types.ts
