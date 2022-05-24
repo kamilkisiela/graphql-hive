@@ -1,155 +1,12 @@
 import React from 'react';
+import { HeroGradient, HeroIllustration } from '@theguild/components';
 import Head from 'next/head';
 import { GlobalStyles } from 'twin.macro';
-import { Logo } from '../components/logo';
-import { VersionControl } from '../components/illustrations/version-control';
-import { OpenSource } from '../components/illustrations/open-source';
-import { World } from '../components/illustrations/world';
-import { Universal } from '../components/illustrations/universal';
-import { Honeycomb } from '../components/honeycomb';
-import {
-  Header,
-  FooterExtended,
-  GlobalStyles as TGCStyles,
-} from '@theguild/components';
-
-function TopBar() {
-  return (
-    <div tw="py-6 relative flex-shrink-0">
-      <Logo tw="mx-auto" />
-    </div>
-  );
-}
-
-function Hero() {
-  return (
-    <main tw="w-4/5 lg:w-3/5 mx-auto pt-16 text-center">
-      <h1 tw="font-title text-3xl font-extrabold">
-        Manage your GraphQL API workflow
-      </h1>
-      <h2 tw="text-base pt-3 text-gray-500">
-        An open-source registry of schemas with many additional features to
-        enhance your day-to-day work with GraphQL
-      </h2>
-    </main>
-  );
-}
-
-function EarlyAccess() {
-  const [email, setEmail] = React.useState('');
-  const [disabled, setDisabled] = React.useState(false);
-  const [status, setStatus] = React.useState<'success' | 'failure' | null>(
-    null
-  );
-  const onChange = React.useCallback(
-    (ev) => {
-      setEmail(ev.target.value);
-    },
-    [setEmail]
-  );
-  const onSubmit = React.useCallback(
-    (ev) => {
-      ev.preventDefault();
-      setDisabled(true);
-      fetch('https://app.graphql-hive.com/api/join-waiting-list', {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-        }),
-      })
-        .then((response) => response.json())
-        .then(
-          (result) => {
-            if (result.ok) {
-              setStatus('success');
-              setDisabled(false);
-            } else {
-              setStatus('failure');
-              setDisabled(false);
-            }
-          },
-          (error) => {
-            console.error(error);
-            setStatus('failure');
-            setDisabled(false);
-          }
-        );
-    },
-    [email, setDisabled, setStatus]
-  );
-
-  return (
-    <div tw="w-4/5 lg:w-3/5 pt-12 mx-auto">
-      <form tw="w-full flex flex-row" onSubmit={onSubmit}>
-        <input
-          type="email"
-          name="email"
-          value={email}
-          onChange={onChange}
-          disabled={disabled}
-          placeholder="Your Email"
-          tw="
-            w-full p-3
-            bg-gray-100
-            text-black
-            border-2 border-transparent
-            rounded-bl-md rounded-tl-md
-            focus:outline-none
-            hover:border-yellow-500
-            focus:border-yellow-500
-            disabled:cursor-not-allowed
-          "
-        />
-        <input
-          type="submit"
-          value="Request Early Access"
-          disabled={disabled}
-          tw="
-            p-3
-            rounded-br-md rounded-tr-md
-            bg-yellow-500 hover:bg-yellow-600
-            text-white
-            cursor-pointer
-            disabled:cursor-not-allowed
-          "
-        />
-      </form>
-      {status === 'failure' && (
-        <div tw="pt-3 text-center text-red-500">
-          Failed to join the waiting list. Try again or{' '}
-          <a target="_blank" href="mailto:contact@the-guild.dev">
-            contact@the-guild.dev
-          </a>
-        </div>
-      )}
-      {status === 'success' && (
-        <div tw="pt-3 text-center text-yellow-500">
-          Request successful. We'll get back to you soon!
-        </div>
-      )}
-    </div>
-  );
-}
-
-function Highlight({ title, description, image }) {
-  return (
-    <div tw="flex flex-col lg:flex-row p-6 w-full bg-white rounded-md items-center shadow">
-      <div>
-        <h3 tw="font-title font-medium">{title}</h3>
-        <p tw="mt-3 text-sm text-gray-500">{description || title}</p>
-      </div>
-      <div tw="flex-grow lg:ml-6 width[120px] my-6 lg:my-0">{image}</div>
-    </div>
-  );
-}
+import { css } from 'twin.macro';
+import { Header, FooterExtended, GlobalStyles as TGCStyles, ThemeProvider } from '@theguild/components';
 
 const CookiesConsent: React.FC = () => {
-  const [show, setShow] = React.useState(
-    typeof window !== 'undefined' && localStorage.getItem('cookies') === null
-  );
+  const [show, setShow] = React.useState(typeof window !== 'undefined' && localStorage.getItem('cookies') === null);
 
   const accept = React.useCallback(() => {
     setShow(false);
@@ -168,24 +25,15 @@ const CookiesConsent: React.FC = () => {
   return (
     <div tw="w-full fixed bg-gray-100 px-5 py-7 bottom-0 flex gap-4 flex-wrap lg:flex-nowrap text-center lg:text-left items-center justify-center lg:justify-between">
       <div tw="w-full text-sm">
-        <p>
-          This website uses cookies to analyze site usage and improve your
-          experience.{' '}
-        </p>
-        <p>
-          If you continue to use our services, you are agreeing to the use of
-          such cookies.{' '}
-        </p>
+        <p>This website uses cookies to analyze site usage and improve your experience. </p>
+        <p>If you continue to use our services, you are agreeing to the use of such cookies. </p>
       </div>
       <div tw="flex gap-4 items-center flex-shrink-0 lg:pr-24">
-        <a
-          href="/privacy-policy.pdf"
-          tw="text-emerald-600 whitespace-nowrap hover:underline"
-        >
+        <a href="/privacy-policy.pdf" tw="text-yellow-600 whitespace-nowrap hover:underline">
           Privacy Policy
         </a>
         <button
-          tw="bg-emerald-500 px-5 py-2 text-white rounded-md hover:bg-emerald-700 focus:outline-none"
+          tw="bg-yellow-500 px-5 py-2 text-white rounded-md hover:bg-yellow-700 focus:outline-none"
           onClick={accept}
         >
           Allow Cookies
@@ -195,57 +43,77 @@ const CookiesConsent: React.FC = () => {
   );
 };
 
-function Highlights() {
-  return (
-    <div tw="flex-grow py-12 bg-gradient-to-b from-yellow-500 via-yellow-600 to-yellow-600">
-      <div tw="grid grid-cols-1 md:grid-cols-2 gap-12 w-4/5 lg:width[990px] mx-auto">
-        <Highlight
-          title="Open-Source"
-          description="Community-based project where everyone can shape its future."
-          image={<OpenSource />}
-        />
-        <Highlight
-          title="Framework agnostic"
-          description="Aims to be compatible with any kind of GraphQL server."
-          image={<Universal />}
-        />
-        <Highlight
-          title="Works with any CI/CD"
-          description="Integrates with GitHub, Bitbucket and Azure seamlessly."
-          image={<VersionControl />}
-        />
-        <Highlight
-          title="Distributed Schemas"
-          description="Supports Apollo Federation and Schema Stitching"
-          image={<World />}
-        />
-      </div>
-    </div>
-  );
-}
+const ITEMS = [
+  {
+    title: 'Open Source',
+    description:
+      'Community-based project where everyone can shape its future. Hive is also available as SaaS, with a free plan and transparent pricing.',
+    imageSrc: '/open-source.svg',
+    imageAlt: 'Open Source',
+  },
+  {
+    title: 'Works with all GraphQL servers',
+    description:
+      'Aims to be compatible with any kind of GraphQL setup. Use the Hive agent/client in your server, or use the Hive CLI.',
+    imageSrc: '/agnostic-framework.svg',
+    imageAlt: 'Agnostic Framework',
+  },
+  {
+    title: 'Works with any CI/CD',
+    description: 'Integrates seamlessly with GitHub, and can easily be used with any CI/CD setup.',
+    imageSrc: '/any-ci-cd.svg',
+    imageAlt: 'Any CI/CD',
+  },
+  {
+    title: 'Distributed Schemas',
+    description: 'Supports any GraphQL schema setup: from a simple schema to Apollo Federation and Schema Stitching.',
+    imageSrc: '/distributed-schemas.svg',
+    imageAlt: 'Schemas',
+  },
+];
+
+const heroWrapper = css`
+  @media only screen and (min-width: 500px) {
+    & img {
+      margin-top: 4%;
+      margin-right: 7%;
+    }
+  }
+  @media only screen and (max-width: 768px) {
+    & img {
+      margin-right 25%;
+    }
+  }
+  @media only screen and (max-width: 500px) {
+    & img {
+      display: none !important;
+    }
+    & div:nth-child(2) {
+      justify-content: center;
+    }
+    & h1 {
+      margin-top: 2.5rem !important;
+    }
+    & div {
+      padding-bottom: 0.1rem;
+    }
+  }
+`;
 
 export default function Index() {
-  const title = 'GraphQL Hive - Manage your GraphQL API workflow';
+  const title = 'GraphQL Hive - Manage your GraphQL API workflows';
   const description =
-    'An open-source registry of schemas with many additional features to enhance your day-to-day work with GraphQL';
+    'An open-source GraphQL schema registry with many additional features to enhance your day-to-day work with GraphQL.';
 
   return (
-    <>
+    <ThemeProvider>
       <Head>
         <meta charSet="utf-8" />
         <title>{title}</title>
         <meta property="og:title" content={title} key="title" />
         <meta name="description" content={description} key="description" />
-        <meta
-          name="og:description"
-          content={description}
-          key="og:description"
-        />
-        <meta
-          property="og:url"
-          key="og:url"
-          content="https://graphql-hive.com"
-        />
+        <meta name="og:description" content={description} key="og:description" />
+        <meta property="og:url" key="og:url" content="https://graphql-hive.com" />
         <meta property="og:type" key="og:type" content="website" />
         <meta
           property="og:image"
@@ -254,43 +122,86 @@ export default function Index() {
         />
         <meta property="og:type" content="website" />
         <meta property="og:locale" content="en" />
-        <meta
-          name="twitter:card"
-          key="twitter:card"
-          content="summary_large_image"
-        />
+        <meta name="twitter:card" key="twitter:card" content="summary_large_image" />
         <meta name="twitter:site" key="twitter:site" content="@TheGuildDev" />
         <link rel="canonical" href="https://graphql-hive.com" />
       </Head>
 
       <div tw="flex flex-col h-full">
         <style global jsx>{`
+          * {
+            font-family: Poppins;
+          }
+          .dark {
+            background-color: #0b0d11;
+          }
           html,
           body,
           #__next {
             height: 100vh;
           }
-
           body {
             margin: 0;
           }
         `}</style>
         <GlobalStyles />
-        <TGCStyles includeFonts />
-        <Header activeLink="/open-source" accentColor="#D49605" />
-        <TopBar />
-        <div tw="flex-shrink-0 relative">
-          <div tw="absolute left-0 top-0 right-0 bottom-0 opacity-5">
-            <Honeycomb />
-          </div>
-          <div tw="relative pb-24">
-            <div tw="w-full lg:width[990px] mx-auto">
-              <Hero />
-              <EarlyAccess />
-            </div>
-          </div>
+        <TGCStyles includeFonts={false} />
+        <Header accentColor="#D49605" activeLink="" disableSearch />
+        <div css={heroWrapper}>
+          <HeroGradient
+            title="Manage your GraphQL API workflow"
+            description={description}
+            colors={['#FFB21D']}
+            image={{
+              src: '/manage.svg',
+              alt: 'Manage workflows',
+            }}
+            link={[
+              {
+                target: '_blank',
+                href: 'https://app.graphql-hive.com',
+                title: 'Go to app',
+                children: 'Go to app',
+              },
+              {
+                target: '_blank',
+                href: 'https://docs.graphql-hive.com',
+                title: 'Documentation',
+                children: 'Documentation',
+                style: {
+                  color: '#fff',
+                  border: '1px solid #fff',
+                  background: 'transparent',
+                },
+              },
+              {
+                target: '_blank',
+                href: 'https://github.com/kamilkisiela/graphql-hive',
+                title: 'GitHub',
+                children: 'GitHub',
+                style: {
+                  color: '#fff',
+                  border: '1px solid #fff',
+                  background: 'transparent',
+                },
+              },
+            ]}
+          />
         </div>
-        <Highlights />
+        {ITEMS.map((option, i) => {
+          return (
+            <HeroIllustration
+              key={option.title}
+              title={option.title}
+              description={option.description}
+              image={{
+                src: option.imageSrc,
+                alt: option.imageAlt,
+              }}
+              flipped={i % 2 !== 0}
+            />
+          );
+        })}
         <FooterExtended
           resources={[
             {
@@ -307,6 +218,6 @@ export default function Index() {
         />
       </div>
       <CookiesConsent />
-    </>
+    </ThemeProvider>
   );
 }
