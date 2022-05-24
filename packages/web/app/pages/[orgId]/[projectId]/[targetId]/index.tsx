@@ -19,7 +19,13 @@ import { Button, DataWrapper, GraphQLBlock, noSchema, Title } from '@/components
 import { Link2Icon } from '@/components/v2/icon';
 import { ConnectSchemaModal } from '@/components/v2/modals';
 import { SchemaFieldsFragment } from '@/gql/graphql';
-import { OrganizationFieldsFragment, ProjectFieldsFragment, ProjectType, TargetFieldsFragment } from '@/graphql';
+import {
+  LatestSchemaDocument,
+  OrganizationFieldsFragment,
+  ProjectFieldsFragment,
+  ProjectType,
+  TargetFieldsFragment,
+} from '@/graphql';
 import { TargetAccessScope, useTargetAccess } from '@/lib/access/target';
 
 const SchemaServiceName_UpdateSchemaServiceName = gql(/* GraphQL */ `
@@ -46,13 +52,19 @@ const SchemaServiceName_UpdateSchemaServiceName = gql(/* GraphQL */ `
   }
 `);
 
-const SchemaServiceName: React.FC<{
+const SchemaServiceName = ({
+  target,
+  project,
+  organization,
+  schema,
+  version,
+}: {
   version: string;
   schema: SchemaFieldsFragment;
   target: TargetFieldsFragment;
   project: ProjectFieldsFragment;
   organization: OrganizationFieldsFragment;
-}> = ({ target, project, organization, schema, version }) => {
+}): ReactElement => {
   const [mutation, mutate] = useMutation(SchemaServiceName_UpdateSchemaServiceName);
   const hasAccess = useTargetAccess({
     scope: TargetAccessScope.RegistryWrite,
@@ -96,14 +108,21 @@ const SchemaServiceName: React.FC<{
   );
 };
 
-const Schemas: React.FC<{
+const Schemas = ({
+  organization,
+  project,
+  target,
+  filterService,
+  version,
+  schemas = [],
+}: {
   organization: OrganizationFieldsFragment;
   project: ProjectFieldsFragment;
   target: TargetFieldsFragment;
   schemas: SchemaFieldsFragment[];
   version: string;
   filterService?: string;
-}> = ({ organization, project, target, filterService, version, schemas = [] }) => {
+}): ReactElement => {
   if (project.type === ProjectType.Single) {
     return <GraphQLBlock className="mb-6" sdl={schemas[0].source} url={schemas[0].url} />;
   }
@@ -138,23 +157,6 @@ const Schemas: React.FC<{
   );
 };
 
-const SchemaView_LatestSchema = gql(/* GraphQL */ `
-  query SchemaView_LatestSchema($selector: TargetSelectorInput!) {
-    target(selector: $selector) {
-      ...TargetFields
-      latestSchemaVersion {
-        id
-        valid
-        schemas {
-          nodes {
-            ...SchemaFields
-          }
-        }
-      }
-    }
-  }
-`);
-
 const SchemaSyncButton_SchemaSyncCDN = gql(/* GraphQL */ `
   mutation schemaSyncCdn($input: SchemaSyncCDNInput!) {
     schemaSyncCDN(input: $input) {
@@ -169,11 +171,15 @@ const SchemaSyncButton_SchemaSyncCDN = gql(/* GraphQL */ `
   }
 `);
 
-const SyncSchemaButton: React.FC<{
+const SyncSchemaButton = ({
+  target,
+  project,
+  organization,
+}: {
   target: TargetFieldsFragment;
   project: ProjectFieldsFragment;
   organization: OrganizationFieldsFragment;
-}> = ({ target, project, organization }) => {
+}): ReactElement => {
   const [status, setStatus] = useState<'idle' | 'error' | 'success'>('idle');
   const [mutation, mutate] = useMutation(SchemaSyncButton_SchemaSyncCDN);
   const hasAccess = useTargetAccess({
@@ -229,7 +235,7 @@ function SchemaView({
   organization: OrganizationFieldsFragment;
   project: ProjectFieldsFragment;
   target: TargetFieldsFragment;
-}) {
+}): ReactElement {
   const [isModalOpen, setModalOpen] = useState(false);
   const toggleModalOpen = useCallback(() => {
     setModalOpen(prevOpen => !prevOpen);
@@ -255,7 +261,7 @@ function SchemaView({
   const isDistributed = project.type === ProjectType.Federation || project.type === ProjectType.Stitching;
 
   const [query] = useQuery({
-    query: SchemaView_LatestSchema,
+    query: LatestSchemaDocument,
     variables: {
       selector: {
         organization: organization.cleanId,
@@ -267,7 +273,7 @@ function SchemaView({
   });
 
   if (!query.data?.target?.latestSchemaVersion?.schemas.nodes.length) {
-    return <>{noSchema}</>;
+    return noSchema;
   }
 
   return (

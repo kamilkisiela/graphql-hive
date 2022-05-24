@@ -13,7 +13,6 @@ import {
   DiffEditor,
   Heading,
   noSchema,
-  Spinner,
   TimeAgo,
   Title,
   ToggleGroup,
@@ -22,10 +21,9 @@ import {
 import {
   CompareDocument,
   CriticalityLevel,
+  LatestSchemaDocument,
   SchemaChangeFieldsFragment,
-  SchemaVersionFieldsFragment,
   VersionsDocument,
-  VersionsQuery,
 } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
@@ -41,10 +39,13 @@ const titleMap: Record<CriticalityLevel, string> = {
   Dangerous: 'Dangerous Changes',
 };
 
-const ChangesBlock: React.FC<{
+const ChangesBlock = ({
+  changes,
+  criticality,
+}: {
   changes: SchemaChangeFieldsFragment[];
   criticality: CriticalityLevel;
-}> = ({ changes, criticality }) => {
+}): ReactElement => {
   const filteredChanges = changes.filter(c => c.criticality === criticality);
 
   if (!filteredChanges.length) {
@@ -73,7 +74,7 @@ const ChangesBlock: React.FC<{
   );
 };
 
-const DiffView = ({ view, version }: { view: 'sdl' | 'list'; version: string }): ReactElement => {
+const DiffView = ({ view, versionId }: { view: 'sdl' | 'list'; versionId: string }): ReactElement => {
   const router = useRouteSelector();
   const [compareQuery] = useQuery({
     query: CompareDocument,
@@ -81,7 +82,7 @@ const DiffView = ({ view, version }: { view: 'sdl' | 'list'; version: string }):
       organization: router.organizationId,
       project: router.projectId,
       target: router.targetId,
-      version,
+      version: versionId,
     },
   });
   const comparison = compareQuery.data?.schemaCompareToPrevious;
@@ -119,148 +120,165 @@ const DiffView = ({ view, version }: { view: 'sdl' | 'list'; version: string }):
   );
 };
 
-const NoSchemaPage = () => {
+// URQL's Infinite scrolling pattern
+// https://formidable.com/open-source/urql/docs/basics/ui-patterns/#infinite-scrolling
+const ListPage = ({
+  variables,
+  isLastPage,
+  onLoadMore,
+  versionId,
+}: {
+  variables: { after: string; limit: number };
+  isLastPage: boolean;
+  onLoadMore: (after: string) => void;
+  versionId: string;
+}): ReactElement => {
+  const router = useRouteSelector();
+
+  const [versionsQuery] = useQuery({
+    query: VersionsDocument,
+    variables: {
+      selector: {
+        organization: router.organizationId,
+        project: router.projectId,
+        target: router.targetId,
+      },
+      ...variables,
+    },
+    requestPolicy: 'cache-and-network',
+  });
+
+  const versions = versionsQuery.data?.schemaVersions;
+  const hasMore = versions?.pageInfo.hasMore;
+
   return (
-    <TargetLayout value="history" className="flex flex-col gap-5">
-      {() => <>{noSchema}</>}
-    </TargetLayout>
+    <>
+      {versions?.nodes.map(version => (
+        <NextLink
+          key={version.id}
+          href={`/${router.organizationId}/${router.projectId}/${router.targetId}/history/${version.id}`}
+          passHref
+          scroll={false} // disable the scroll to top on page
+        >
+          <a
+            className={clsx(
+              'flex flex-col rounded-md p-2.5 hover:bg-gray-800/40',
+              versionId === version.id && 'bg-gray-800/40'
+            )}
+          >
+            <h3 className="truncate font-bold">{version.commit.commit}</h3>
+            <div className="truncate text-xs font-medium text-gray-500">
+              <span className="overflow-hidden truncate">{version.commit.author}</span>
+            </div>
+            <div className="mt-2.5 mb-1.5 flex align-middle text-xs font-medium text-[#c4c4c4]">
+              <div className={clsx('w-1/2 ', !version.valid && 'text-red-500')}>
+                <Badge color={version.valid ? 'green' : 'red'} /> Published <TimeAgo date={version.date} />
+              </div>
+
+              {version.commit.service && (
+                <div className="ml-auto mr-0 w-1/2 overflow-hidden text-ellipsis whitespace-nowrap text-right font-bold">
+                  {version.commit.service}
+                </div>
+              )}
+            </div>
+          </a>
+        </NextLink>
+      ))}
+      {isLastPage && hasMore && (
+        <Button
+          variant="link"
+          onClick={() => {
+            onLoadMore(versions.nodes.at(-1).id);
+          }}
+        >
+          Load more
+        </Button>
+      )}
+    </>
   );
 };
 
-const Page = ({ data, setAfter }: { data: VersionsQuery; setAfter(after: string): void }) => {
-  const router = useRouteSelector();
+type View = 'sdl' | 'list';
 
-  const [view, setView] = useState<'sdl' | 'list'>('list');
-  const onViewChange = useCallback(
-    (view: any) => {
-      setView(view);
-    },
-    [setView]
-  );
+const Page = ({ versionId }: { versionId: string }) => {
+  const [pageVariables, setPageVariables] = useState([{ limit: 10, after: '' }]);
 
-  const versions = data?.schemaVersions;
-  const schemas = data?.schemaVersions.nodes;
-
-  if (!schemas || !schemas.length) {
-    return <NoSchemaPage />;
-  }
-
-  const baseUrl = `/${router.organizationId}/${router.projectId}/${router.targetId}`;
-
-  const currentVersion = router.versionId ?? schemas[0].id;
-
-  const renderVersion = (version: SchemaVersionFieldsFragment) => (
-    <NextLink key={version.id} href={`${baseUrl}/history/${version.id}`} passHref>
-      <a
-        className={clsx(
-          'flex flex-col rounded-md p-2.5 hover:bg-gray-800/40',
-          currentVersion === version.id && 'bg-gray-800/40'
-        )}
-      >
-        <h3 className="truncate font-bold">{version.commit.commit}</h3>
-        <div className="truncate text-xs font-medium text-gray-500">
-          <span className="overflow-hidden truncate">{version.commit.author}</span>
-        </div>
-        <div className="mt-2.5 mb-1.5 flex align-middle text-xs font-medium text-[#c4c4c4]">
-          <div className={clsx('w-1/2 ', !version.valid && 'text-red-500')}>
-            <Badge color={version.valid ? 'green' : 'red'} /> Published <TimeAgo date={version.date} />
-          </div>
-
-          {version.commit.service && (
-            <div className="ml-auto mr-0 w-1/2  overflow-hidden text-ellipsis whitespace-nowrap text-right font-bold">
-              {version.commit.service}
-            </div>
-          )}
-        </div>
-      </a>
-    </NextLink>
-  );
-  const hasMore = versions?.pageInfo.hasMore;
-
-  const [lastVersion, ...otherVersions] = versions ? versions.nodes : [];
+  const [view, setView] = useState<View>('list');
+  const onViewChange = useCallback((view: View) => {
+    setView(view);
+  }, []);
 
   return (
-    <TargetLayout value="history" className="flex h-full items-stretch gap-x-5 pb-10">
-      {() => (
-        <>
-          <div className="w-[355px]">
-            <div className="mb-4 flex items-end">
-              <Heading>Versions</Heading>
-            </div>
-            <div className="flex h-[65vh] flex-col gap-2.5 overflow-y-auto rounded-md border border-gray-800/50 p-2.5">
-              {versions && renderVersion(lastVersion)}
-              {otherVersions.length > 0 && otherVersions.map(renderVersion)}
-              {hasMore && (
-                <Button
-                  variant="link"
-                  onClick={() => {
-                    setAfter(versions.nodes.at(-1).id);
-                  }}
-                >
-                  Load more
-                </Button>
-              )}
-            </div>
-          </div>
-          <div className="grow">
-            <div className="mb-4 flex items-center justify-between">
-              <Heading>Schema</Heading>
-              <ToggleGroup
-                defaultValue="diff"
-                onValueChange={onViewChange}
-                type="single"
-                className="bg-gray-900/50 text-gray-500"
-              >
-                <ToggleGroupItem
-                  className={clsx('hover:text-white', view === 'sdl' && 'bg-gray-800 text-white')}
-                  value="sdl"
-                >
-                  <VscDiff />
-                </ToggleGroupItem>
-                <ToggleGroupItem
-                  className={clsx('hover:text-white', view === 'list' && 'bg-gray-800 text-white')}
-                  value="list"
-                >
-                  <VscListFlat />
-                </ToggleGroupItem>
-              </ToggleGroup>
-            </div>
-            <div className="flex h-[65vh] grow overflow-hidden rounded-md border border-gray-800/50">
-              <DiffView version={currentVersion} view={view} />
-            </div>
-          </div>
-        </>
-      )}
-    </TargetLayout>
+    <>
+      <div className="w-[355px]">
+        <Heading className="mb-5">Versions</Heading>
+        <div className="flex h-[65vh] flex-col gap-2.5 overflow-y-auto rounded-md border border-gray-800/50 p-2.5">
+          {pageVariables.map((variables, i) => (
+            <ListPage
+              key={variables.after}
+              variables={variables}
+              isLastPage={i === pageVariables.length - 1}
+              onLoadMore={after => {
+                setPageVariables([...pageVariables, { after, limit: 10 }]);
+              }}
+              versionId={versionId}
+            />
+          ))}
+        </div>
+      </div>
+      <div className="grow">
+        <div className="mb-4 flex items-center justify-between">
+          <Heading>Schema</Heading>
+          <ToggleGroup
+            defaultValue="diff"
+            onValueChange={onViewChange}
+            type="single"
+            className="bg-gray-900/50 text-gray-500"
+          >
+            <ToggleGroupItem
+              className={clsx('hover:text-white', view === 'sdl' && 'bg-gray-800 text-white')}
+              value="sdl"
+            >
+              <VscDiff />
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              className={clsx('hover:text-white', view === 'list' && 'bg-gray-800 text-white')}
+              value="list"
+            >
+              <VscListFlat />
+            </ToggleGroupItem>
+          </ToggleGroup>
+        </div>
+        <div className="flex h-[65vh] grow overflow-hidden rounded-md border border-gray-800/50">
+          <DiffView versionId={versionId} view={view} />
+        </div>
+      </div>
+    </>
   );
 };
 
 export default function HistoryPage(): ReactElement {
   const router = useRouteSelector();
-  const [after, setAfter] = useState<null | string>(null);
-  const selector = {
-    organization: router.organizationId,
-    project: router.projectId,
-    target: router.targetId,
-  };
-  const [versionsQuery] = useQuery({
-    query: VersionsDocument,
+  const [latestSchemaQuery] = useQuery({
+    query: LatestSchemaDocument,
     variables: {
-      selector,
-      limit: 10,
-      after,
+      selector: {
+        organization: router.organizationId,
+        project: router.projectId,
+        target: router.targetId,
+      },
     },
     requestPolicy: 'cache-and-network',
   });
-
-  if (versionsQuery.fetching) {
-    return <Spinner className="mt-10" />;
-  }
+  const latestVersionId = latestSchemaQuery.data?.target.latestSchemaVersion?.id;
+  const versionId = router.versionId || latestVersionId;
 
   return (
     <>
       <Title title="History" />
-      <Page data={versionsQuery.data} setAfter={setAfter} />
+      <TargetLayout value="history" className="flex h-full items-stretch gap-x-5">
+        {() => (latestVersionId ? <Page versionId={versionId} /> : noSchema)}
+      </TargetLayout>
     </>
   );
 }
