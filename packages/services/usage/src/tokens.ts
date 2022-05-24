@@ -43,9 +43,8 @@ export function createTokens(config: { endpoint: string; logger: FastifyLoggerIn
             }
           : TokenStatus.NoAccess;
         return result;
-      } else {
-        return TokenStatus.NotFound;
       }
+      return TokenStatus.NotFound;
     } catch (error) {
       return TokenStatus.NotFound;
     }
