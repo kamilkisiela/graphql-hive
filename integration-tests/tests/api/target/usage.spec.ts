@@ -627,7 +627,7 @@ test('check usage from two selected targets', async () => {
       project: project.cleanId,
       target: staging.cleanId,
       percentage: 50, // Out of 3 requests, 1 is for Query.me, 2 are done for Query.me so it's 1/3 = 33.3%
-      period: 30,
+      period: 2,
       targets: [production.id, staging.id],
     },
     {
