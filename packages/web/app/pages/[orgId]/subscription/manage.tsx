@@ -195,14 +195,12 @@ const Inner = ({
           <div className="flex w-full flex-col gap-5">
             <Card className="w-full">
               <Heading className="mb-4">Choose Your Plan</Heading>
-              <div>
-                <BillingPlanPicker
-                  activePlan={organization.plan}
-                  value={plan}
-                  plans={result.data.billingPlans}
-                  onPlanChange={onPlan}
-                />
-              </div>
+              <BillingPlanPicker
+                activePlan={organization.plan}
+                value={plan}
+                plans={result.data.billingPlans}
+                onPlanChange={onPlan}
+              />
             </Card>
             <Card className="w-full self-start" ref={planSummaryRef}>
               <Heading className="mb-2">Plan Summary</Heading>
