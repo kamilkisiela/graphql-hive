@@ -101,7 +101,7 @@ export class ClickHouse {
 
               const delayBy = info.attemptCount * 250;
 
-              this.logger.error(`Failed to run ClickHouse query, error is: `, info.error);
+              this.logger.error(`Failed to run ClickHouse query, error is: ${JSON.stringify(info.error, null, 2)}`);
 
               this.logger.debug(
                 `Retry (delay=%s, attempt=%s, reason=%s, queryId=%s)`,

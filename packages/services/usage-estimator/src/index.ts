@@ -1,12 +1,7 @@
 #!/usr/bin/env node
 import 'reflect-metadata';
 import * as Sentry from '@sentry/node';
-import {
-  createServer,
-  startMetrics,
-  ensureEnv,
-  registerShutdown,
-} from '@hive/service-common';
+import { createServer, startMetrics, ensureEnv, registerShutdown } from '@hive/service-common';
 import { createEstimator } from './estimator';
 import { createConnectionString } from '@hive/storage';
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify/dist/trpc-server-adapters-fastify.cjs.js';
@@ -15,7 +10,7 @@ import { clickHouseElapsedDuration, clickHouseReadDuration } from './metrics';
 
 async function main() {
   Sentry.init({
-    serverName: 'usage-reporter',
+    serverName: 'usage-estimator',
     enabled: process.env.ENVIRONMENT === 'prod',
     environment: process.env.ENVIRONMENT,
     dsn: process.env.SENTRY_DSN,
@@ -37,12 +32,8 @@ async function main() {
         username: ensureEnv('CLICKHOUSE_USERNAME'),
         password: ensureEnv('CLICKHOUSE_PASSWORD'),
         onReadEnd(query, timings) {
-          clickHouseReadDuration
-            .labels({ query })
-            .observe(timings.totalSeconds);
-          clickHouseElapsedDuration
-            .labels({ query })
-            .observe(timings.elapsedSeconds);
+          clickHouseReadDuration.labels({ query }).observe(timings.totalSeconds);
+          clickHouseElapsedDuration.labels({ query }).observe(timings.elapsedSeconds);
         },
       },
       storage: {
@@ -96,7 +87,7 @@ async function main() {
   }
 }
 
-main().catch((err) => {
+main().catch(err => {
   Sentry.captureException(err, {
     level: Sentry.Severity.Fatal,
   });

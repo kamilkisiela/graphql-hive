@@ -12,12 +12,12 @@ export class Clickhouse {
   ) {}
 
   deploy() {
-    const image = 'clickhouse/clickhouse-server:22.3.3.44-alpine';
+    const image = 'clickhouse/clickhouse-server:22.3.5.5-alpine';
     const port = 8123;
 
     const env: any[] = Array.isArray(this.options.env)
       ? this.options.env
-      : Object.keys(this.options.env as kx.types.EnvMap).map((name) => ({
+      : Object.keys(this.options.env as kx.types.EnvMap).map(name => ({
           name,
           value: (this.options.env as kx.types.EnvMap)[name],
         }));
