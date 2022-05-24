@@ -1,8 +1,5 @@
 import { Injectable, Inject } from 'graphql-modules';
-import type {
-  CommunicationAdapter,
-  SchemaChangeNotificationInput,
-} from './common';
+import type { CommunicationAdapter, SchemaChangeNotificationInput } from './common';
 import { Logger } from '../../../shared/providers/logger';
 import { HttpClient } from '../../../shared/providers/http-client';
 import { WEBHOOKS_CONFIG } from '../tokens';
@@ -12,11 +9,7 @@ import type { WebhooksConfig } from '../tokens';
 export class WebhookCommunicationAdapter implements CommunicationAdapter {
   private logger: Logger;
 
-  constructor(
-    logger: Logger,
-    private http: HttpClient,
-    @Inject(WEBHOOKS_CONFIG) private config: WebhooksConfig
-  ) {
+  constructor(logger: Logger, private http: HttpClient, @Inject(WEBHOOKS_CONFIG) private config: WebhooksConfig) {
     this.logger = logger.child({ service: 'WebhookCommunicationAdapter' });
   }
 

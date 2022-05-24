@@ -14,8 +14,7 @@ export const ProjectDeleted: React.FC<{
       </Activity.Icon>
       <Activity.Content>
         <Activity.Text>
-          <User user={activity.user} /> removed project{' '}
-          <Highlight>{activity.name}</Highlight>
+          <User user={activity.user} /> removed project <Highlight>{activity.name}</Highlight>
         </Activity.Text>
         <Activity.Time>
           <TimeAgo date={activity.createdAt} />

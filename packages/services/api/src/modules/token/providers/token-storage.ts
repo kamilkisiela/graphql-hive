@@ -3,11 +3,7 @@ import { atomic } from '../../../shared/helpers';
 import { HiveError } from '../../../shared/errors';
 import type { Token } from '../../../shared/entities';
 import { Logger } from '../../shared/providers/logger';
-import {
-  TargetSelector,
-  ProjectSelector,
-  OrganizationSelector,
-} from '../../shared/providers/storage';
+import { TargetSelector, ProjectSelector, OrganizationSelector } from '../../shared/providers/storage';
 import type { TargetAccessScope } from '../../auth/providers/target-access';
 import type { ProjectAccessScope } from '../../auth/providers/project-access';
 import type { OrganizationAccessScope } from '../../auth/providers/organization-access';
@@ -18,11 +14,7 @@ import { createTRPCClient } from '@trpc/client';
 import { fetch } from 'cross-undici-fetch';
 
 function maskToken(token: string) {
-  return (
-    token.substring(0, 3) +
-    '*'.repeat(token.length - 6) +
-    token.substring(token.length - 3)
-  );
+  return token.substring(0, 3) + '*'.repeat(token.length - 6) + token.substring(token.length - 3);
 }
 
 export interface TokenSelector {
@@ -31,9 +23,7 @@ export interface TokenSelector {
 
 interface CreateTokenInput extends TargetSelector {
   name: string;
-  scopes: Array<
-    OrganizationAccessScope | ProjectAccessScope | TargetAccessScope
-  >;
+  scopes: Array<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
 }
 
 export interface CreateTokenResult extends Token {
@@ -48,10 +38,7 @@ export class TokenStorage {
   private logger: Logger;
   private tokensService;
 
-  constructor(
-    logger: Logger,
-    @Inject(TOKENS_CONFIG) tokensConfig: TokensConfig
-  ) {
+  constructor(logger: Logger, @Inject(TOKENS_CONFIG) tokensConfig: TokensConfig) {
     this.logger = logger.child({ source: 'TokenStorage' });
     this.tokensService = createTRPCClient<TokensApi>({
       url: `${tokensConfig.endpoint}/trpc`,
@@ -80,11 +67,7 @@ export class TokenStorage {
   ): Promise<readonly string[]> {
     this.logger.debug('Deleting tokens (input=%o)', input);
 
-    await Promise.all(
-      input.tokens.map((token) =>
-        this.tokensService.mutation('deleteToken', { token })
-      )
-    );
+    await Promise.all(input.tokens.map(token => this.tokensService.mutation('deleteToken', { token })));
 
     return input.tokens;
   }
@@ -96,7 +79,7 @@ export class TokenStorage {
       .mutation('invalidateTokenByTarget', {
         targetId: input.target,
       })
-      .catch((error) => {
+      .catch(error => {
         this.logger.error(error);
       });
   }
@@ -108,7 +91,7 @@ export class TokenStorage {
       .mutation('invalidateTokenByProject', {
         projectId: input.project,
       })
-      .catch((error) => {
+      .catch(error => {
         this.logger.error(error);
       });
   }
@@ -120,7 +103,7 @@ export class TokenStorage {
       .mutation('invalidateTokenByOrganization', {
         organizationId: input.organization,
       })
-      .catch((error) => {
+      .catch(error => {
         this.logger.error(error);
       });
   }

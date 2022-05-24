@@ -14,8 +14,7 @@ export const MemberDeleted: React.FC<{
       </Activity.Icon>
       <Activity.Content>
         <Activity.Text>
-          <User user={activity.email} /> from the organization by{' '}
-          <User user={activity.user} />
+          <User user={activity.email} /> from the organization by <User user={activity.user} />
         </Activity.Text>
         <Activity.Time>
           <TimeAgo date={activity.createdAt} />

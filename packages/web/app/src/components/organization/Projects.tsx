@@ -1,10 +1,7 @@
 import * as React from 'react';
 import 'twin.macro';
 import { useQuery } from 'urql';
-import {
-  OrganizationFieldsFragment,
-  ProjectsWithTargetsDocument,
-} from '@/graphql';
+import { OrganizationFieldsFragment, ProjectsWithTargetsDocument } from '@/graphql';
 import { EmptyList } from '@/components/common/EmptyList';
 import { DataWrapper } from '@/components/common/DataWrapper';
 import { Section } from '@/components/common';
@@ -39,13 +36,8 @@ export const OrganizationProjects: React.FC<{
           <>
             <Section.Title>Projects</Section.Title>
             <div tw="pt-6 flex flex-col space-y-6">
-              {query.data.projects.nodes.map((project) => (
-                <ProjectCard
-                  key={project.id}
-                  org={org}
-                  project={project}
-                  targets={project.targets.nodes}
-                />
+              {query.data.projects.nodes.map(project => (
+                <ProjectCard key={project.id} org={org} project={project} targets={project.targets.nodes} />
               ))}
             </div>
           </>

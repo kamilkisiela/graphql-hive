@@ -4,6 +4,4 @@ export type BillingConfig = {
   endpoint: string | null;
 };
 
-export const BILLING_CONFIG = new InjectionToken<BillingConfig>(
-  'billing-config'
-);
+export const BILLING_CONFIG = new InjectionToken<BillingConfig>('billing-config');

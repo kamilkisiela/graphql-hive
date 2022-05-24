@@ -85,22 +85,16 @@ test('GraphQL Yoga - should not interrupt the process', async () => {
         }
       `,
     })
-    .catch(async (error) => {
+    .catch(async error => {
       await stop();
       return Promise.reject(error);
     });
 
   await waitFor(5_000);
   await stop();
-  expect(logger.error).toHaveBeenCalledWith(
-    expect.stringContaining('[hive][info]')
-  );
-  expect(logger.error).toHaveBeenCalledWith(
-    expect.stringContaining('[hive][usage]')
-  );
-  expect(logger.error).toHaveBeenCalledWith(
-    expect.stringContaining('[hive][reporting]')
-  );
+  expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('[hive][info]'));
+  expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('[hive][usage]'));
+  expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('[hive][reporting]'));
   clean();
 }, 10_000);
 
@@ -147,13 +141,7 @@ test('Apollo Server - should not interrupt the process', async () => {
   await waitFor(5_000);
   await apollo.stop();
   clean();
-  expect(logger.error).toHaveBeenCalledWith(
-    expect.stringContaining('[hive][info]')
-  );
-  expect(logger.error).toHaveBeenCalledWith(
-    expect.stringContaining('[hive][usage]')
-  );
-  expect(logger.error).toHaveBeenCalledWith(
-    expect.stringContaining('[hive][reporting]')
-  );
+  expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('[hive][info]'));
+  expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('[hive][usage]'));
+  expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('[hive][reporting]'));
 }, 10_000);

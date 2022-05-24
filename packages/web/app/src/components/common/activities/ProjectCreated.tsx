@@ -15,10 +15,7 @@ export const ProjectCreated: React.FC<{
       <Activity.Content>
         <Activity.Text>
           <User user={activity.user} /> created{' '}
-          <Project
-            project={activity.project}
-            organization={activity.organization}
-          />
+          <Project project={activity.project} organization={activity.organization} />
         </Activity.Text>
         <Activity.Time>
           <TimeAgo date={activity.createdAt} />

@@ -5,15 +5,11 @@ export default gql`
     """
     Requires API Token
     """
-    publishPersistedOperations(
-      input: [PublishPersistedOperationInput!]!
-    ): PublishPersistedOperationPayload!
+    publishPersistedOperations(input: [PublishPersistedOperationInput!]!): PublishPersistedOperationPayload!
     """
     Requires API Token
     """
-    deletePersistedOperation(
-      selector: PersistedOperationSelectorInput!
-    ): DeletePersistedOperationPayload!
+    deletePersistedOperation(selector: PersistedOperationSelectorInput!): DeletePersistedOperationPayload!
   }
 
   extend type Query {
@@ -25,12 +21,8 @@ export default gql`
     Requires API Token
     """
     comparePersistedOperations(hashes: [String!]!): [String!]!
-    persistedOperation(
-      selector: PersistedOperationSelectorInput!
-    ): PersistedOperation
-    persistedOperations(
-      selector: ProjectSelectorInput!
-    ): PersistedOperationConnection!
+    persistedOperation(selector: PersistedOperationSelectorInput!): PersistedOperation
+    persistedOperations(selector: ProjectSelectorInput!): PersistedOperationConnection!
   }
 
   input PersistedOperationSelectorInput {

@@ -33,9 +33,7 @@ export function deployUsageIngestor({
   const cpuLimit = isProduction(deploymentEnv) ? '600m' : '300m';
   const maxReplicas = isProduction(deploymentEnv) ? 4 : 2;
 
-  const partitionsConsumedConcurrently = Math.floor(
-    numberOfPartitions / replicas
-  );
+  const partitionsConsumedConcurrently = Math.floor(numberOfPartitions / replicas);
 
   return new RemoteArtifactAsServiceDeployment(
     'usage-ingestor-service',

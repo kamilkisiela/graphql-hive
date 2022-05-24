@@ -1,7 +1,7 @@
 import { createKVBuffer, calculateChunkSize } from '../src/buffer';
 
 function waitFor(time: number) {
-  return new Promise((resolve) => setTimeout(resolve, time));
+  return new Promise(resolve => setTimeout(resolve, time));
 }
 
 const eventHubLimitInBytes = 900_000;
@@ -51,11 +51,8 @@ test('increase the defaultBytesPerOperation estimation by 5% when over 100 calls
       return reports;
     },
     async sender(reports, _bytes, _batchId, validateSize) {
-      const receivedSize = reports.reduce(
-        (sum, report) => report.size + sum,
-        0
-      );
-      flush(reports.map((r) => r.id).join(','));
+      const receivedSize = reports.reduce((sum, report) => report.size + sum, 0);
+      flush(reports.map(r => r.id).join(','));
       if (receivedSize === size.error) {
         validateSize(size.error * bytesPerUnit);
         throw new Error('Over the size limit!');
@@ -78,9 +75,7 @@ test('increase the defaultBytesPerOperation estimation by 5% when over 100 calls
   // Interval passes
   await waitFor(interval + 50);
 
-  expect(logger.info).not.toHaveBeenCalledWith(
-    expect.stringContaining('Increasing default bytes per unit')
-  );
+  expect(logger.info).not.toHaveBeenCalledWith(expect.stringContaining('Increasing default bytes per unit'));
 
   expect(flush).toBeCalledTimes(100);
 
@@ -97,9 +92,7 @@ test('increase the defaultBytesPerOperation estimation by 5% when over 100 calls
 
   expect(flush).toBeCalledTimes(112);
 
-  expect(logger.info).not.toHaveBeenCalledWith(
-    expect.stringContaining('Increasing default bytes per unit')
-  );
+  expect(logger.info).not.toHaveBeenCalledWith(expect.stringContaining('Increasing default bytes per unit'));
 
   await waitFor(1000);
 
@@ -114,9 +107,7 @@ test('increase the defaultBytesPerOperation estimation by 5% when over 100 calls
 
   const newDefault = bytesPerUnit * 1.05;
   expect(logger.info).toHaveBeenCalledWith(
-    expect.stringContaining(
-      'Increasing default bytes per unit (ratio=%s, new=%s)'
-    ),
+    expect.stringContaining('Increasing default bytes per unit (ratio=%s, new=%s)'),
     0.05,
     newDefault
   );
@@ -183,11 +174,8 @@ test('buffer should split the report into multiple reports when the estimated si
       return reports;
     },
     async sender(reports, _bytes, _batchId, validateSize) {
-      const receivedSize = reports.reduce(
-        (sum, report) => report.size + sum,
-        0
-      );
-      flush(reports.map((r) => r.id).join(','), receivedSize);
+      const receivedSize = reports.reduce((sum, report) => report.size + sum, 0);
+      flush(reports.map(r => r.id).join(','), receivedSize);
       validateSize(receivedSize * defaultBytesPerUnit);
     },
   });
@@ -276,12 +264,9 @@ test('buffer create two chunks out of one buffer when actual buffer size is too 
     onRetry,
     split,
     async sender(reports, _bytes, batchId, validateSize) {
-      const receivedSize = reports.reduce(
-        (sum, report) => report.size + sum,
-        0
-      );
+      const receivedSize = reports.reduce((sum, report) => report.size + sum, 0);
       validateSize(receivedSize * 2 * defaultBytesPerUnit);
-      flush(reports.map((r) => r.id).join(','), receivedSize, batchId);
+      flush(reports.map(r => r.id).join(','), receivedSize, batchId);
     },
   });
 
@@ -303,18 +288,8 @@ test('buffer create two chunks out of one buffer when actual buffer size is too 
   // Flush should be retried because the buffer size was too big (twice as big)
   expect(onRetry).toBeCalledTimes(1);
   // Buffer should flush two reports, the big report splitted in half
-  expect(flush).toHaveBeenNthCalledWith(
-    1,
-    'big-0',
-    bufferSize / 2,
-    expect.stringContaining('--retry-chunk-0')
-  );
-  expect(flush).toHaveBeenNthCalledWith(
-    2,
-    'big-1',
-    bufferSize / 2,
-    expect.stringContaining('--retry-chunk-1')
-  );
+  expect(flush).toHaveBeenNthCalledWith(1, 'big-0', bufferSize / 2, expect.stringContaining('--retry-chunk-0'));
+  expect(flush).toHaveBeenNthCalledWith(2, 'big-1', bufferSize / 2, expect.stringContaining('--retry-chunk-1'));
 
   await buffer.stop();
 });

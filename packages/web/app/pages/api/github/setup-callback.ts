@@ -2,10 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { graphql } from '@/lib/api/utils';
 import { ensureGithubIntegration } from './callback';
 
-export default async function githubSetupCallback(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default async function githubSetupCallback(req: NextApiRequest, res: NextApiResponse) {
   console.log('GitHub Integration Setup Callback');
   const installationId = req.query.installation_id as string;
   let orgId = req.query.state as string | undefined;

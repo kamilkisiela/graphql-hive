@@ -8,23 +8,13 @@ export default gql`
   }
 
   extend type Mutation {
-    createOrganization(
-      input: CreateOrganizationInput!
-    ): CreateOrganizationResult!
-    deleteOrganization(
-      selector: OrganizationSelectorInput!
-    ): OrganizationPayload!
-    deleteOrganizationMembers(
-      selector: OrganizationMembersSelectorInput!
-    ): OrganizationPayload!
+    createOrganization(input: CreateOrganizationInput!): CreateOrganizationResult!
+    deleteOrganization(selector: OrganizationSelectorInput!): OrganizationPayload!
+    deleteOrganizationMembers(selector: OrganizationMembersSelectorInput!): OrganizationPayload!
     joinOrganization(code: String!): JoinOrganizationPayload!
     resetInviteCode(selector: OrganizationSelectorInput!): OrganizationPayload!
-    updateOrganizationName(
-      input: UpdateOrganizationNameInput!
-    ): UpdateOrganizationNameResult!
-    updateOrganizationMemberAccess(
-      input: OrganizationMemberAccessInput!
-    ): OrganizationPayload!
+    updateOrganizationName(input: UpdateOrganizationNameInput!): UpdateOrganizationNameResult!
+    updateOrganizationMemberAccess(input: OrganizationMemberAccessInput!): OrganizationPayload!
   }
 
   type UpdateOrganizationNameResult {
@@ -116,13 +106,9 @@ export default gql`
     name: String!
   }
 
-  union JoinOrganizationPayload =
-      OrganizationInvitationError
-    | OrganizationPayload
+  union JoinOrganizationPayload = OrganizationInvitationError | OrganizationPayload
 
-  union OrganizationByInviteCodePayload =
-      OrganizationInvitationError
-    | OrganizationInvitationPayload
+  union OrganizationByInviteCodePayload = OrganizationInvitationError | OrganizationInvitationPayload
 
   type OrganizationPayload {
     selector: OrganizationSelector!

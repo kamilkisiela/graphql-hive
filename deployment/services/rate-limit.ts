@@ -37,13 +37,10 @@ export function deployRateLimit({
       env: {
         ...deploymentEnv,
         ...commonEnv,
-        LIMIT_CACHE_UPDATE_INTERVAL_MS:
-          rateLimitConfig.require('updateIntervalMs'),
+        LIMIT_CACHE_UPDATE_INTERVAL_MS: rateLimitConfig.require('updateIntervalMs'),
         RELEASE: packageHelper.currentReleaseId(),
         USAGE_ESTIMATOR_ENDPOINT: serviceLocalEndpoint(usageEstimator.service),
-        POSTGRES_CONNECTION_STRING: apiConfig.requireSecret(
-          'postgresConnectionString'
-        ),
+        POSTGRES_CONNECTION_STRING: apiConfig.requireSecret('postgresConnectionString'),
       },
       exposesMetrics: true,
       packageInfo: packageHelper.npmPack('@hive/rate-limit'),

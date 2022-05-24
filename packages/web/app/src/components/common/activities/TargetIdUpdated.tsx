@@ -15,17 +15,9 @@ export const TargetIdUpdated: React.FC<{
       <Activity.Content>
         <Activity.Text>
           <User user={activity.user} /> changed{' '}
-          <Target
-            target={activity.target}
-            project={activity.project}
-            organization={activity.organization}
-          />{' '}
-          target id to <Highlight>{activity.value}</Highlight> in{' '}
-          <Project
-            project={activity.project}
-            organization={activity.organization}
-          />{' '}
-          project
+          <Target target={activity.target} project={activity.project} organization={activity.organization} /> target id
+          to <Highlight>{activity.value}</Highlight> in{' '}
+          <Project project={activity.project} organization={activity.organization} /> project
         </Activity.Text>
         <Activity.Time>
           <TimeAgo date={activity.createdAt} />

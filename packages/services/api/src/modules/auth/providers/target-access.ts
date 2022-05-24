@@ -69,29 +69,21 @@ export class TargetAccess {
   private logger: Logger;
   private userAccess: Dataloader<TargetUserAccessSelector, boolean, string>;
   private tokenAccess: Dataloader<TargetTokenAccessSelector, boolean, string>;
-  private scopes: Dataloader<
-    TargetUserScopesSelector,
-    readonly TargetAccessScope[],
-    string
-  >;
+  private scopes: Dataloader<TargetUserScopesSelector, readonly TargetAccessScope[], string>;
 
   constructor(logger: Logger, private organizationAccess: OrganizationAccess) {
     this.logger = logger.child({
       source: 'TargetAccess',
     });
     this.userAccess = new Dataloader(
-      async (selectors) => {
+      async selectors => {
         const scopes = await this.scopes.loadMany(selectors);
 
         return selectors.map((selector, i) => {
           const scopesForSelector = scopes[i];
 
           if (scopesForSelector instanceof Error) {
-            this.logger.warn(
-              `TargetAccess:user (error=%s, selector=%o)`,
-              scopesForSelector.message,
-              selector
-            );
+            this.logger.warn(`TargetAccess:user (error=%s, selector=%o)`, scopesForSelector.message, selector);
             return false;
           }
 
@@ -112,12 +104,10 @@ export class TargetAccess {
       }
     );
     this.tokenAccess = new Dataloader(
-      (selectors) =>
+      selectors =>
         Promise.all(
-          selectors.map(async (selector) => {
-            const tokenInfo = await this.organizationAccess.tokenInfo.load(
-              selector
-            );
+          selectors.map(async selector => {
+            const tokenInfo = await this.organizationAccess.tokenInfo.load(selector);
 
             if (
               tokenInfo?.organization === selector.organization &&
@@ -145,20 +135,14 @@ export class TargetAccess {
     );
 
     this.scopes = new Dataloader(
-      async (selectors) => {
-        const scopesPerSelector = await this.organizationAccess.getAllScopes(
-          selectors
-        );
+      async selectors => {
+        const scopesPerSelector = await this.organizationAccess.getAllScopes(selectors);
 
         return selectors.map((selector, i) => {
           const scopes = scopesPerSelector[i];
 
           if (scopes instanceof Error) {
-            this.logger.warn(
-              `TargetAccess:scopes (error=%s, selector=%o)`,
-              scopes.message,
-              selector
-            );
+            this.logger.warn(`TargetAccess:scopes (error=%s, selector=%o)`, scopes.message, selector);
             return [];
           }
 
@@ -177,9 +161,7 @@ export class TargetAccess {
     );
   }
 
-  async ensureAccessForToken(
-    selector: TargetTokenAccessSelector
-  ): Promise<void | never> {
+  async ensureAccessForToken(selector: TargetTokenAccessSelector): Promise<void | never> {
     const canAccess = await this.tokenAccess.load(selector);
 
     if (!canAccess) {
@@ -187,9 +169,7 @@ export class TargetAccess {
     }
   }
 
-  async ensureAccessForUser(
-    selector: TargetUserAccessSelector
-  ): Promise<void | never> {
+  async ensureAccessForUser(selector: TargetUserAccessSelector): Promise<void | never> {
     const canAccess = await this.userAccess.load(selector);
 
     if (!canAccess) {

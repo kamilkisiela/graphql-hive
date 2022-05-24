@@ -20,13 +20,11 @@ const artifactTypesHandlers = {
   /**
    * Returns SchemaArtifact or SchemaArtifact[], same way as it's stored in the storage
    */
-  schema: (targetId: string, artifactType: string, rawValue: string) =>
-    new Response(rawValue, { status: 200 }),
+  schema: (targetId: string, artifactType: string, rawValue: string) => new Response(rawValue, { status: 200 }),
   /**
    * Returns Federation Supergraph, we store it as-is.
    */
-  supergraph: (targetId: string, artifactType: string, rawValue: string) =>
-    new Response(rawValue, { status: 200 }),
+  supergraph: (targetId: string, artifactType: string, rawValue: string) => new Response(rawValue, { status: 200 }),
   sdl: (targetId: string, artifactType: string, rawValue: string) => {
     if (rawValue.startsWith('[')) {
       return new InvalidArtifactMatch(artifactType, targetId);
@@ -78,10 +76,7 @@ function parseIncomingRequest(
       artifactType: keyof typeof artifactTypesHandlers;
       storageKeyType: string;
     } {
-  const params = new URL(request.url).pathname
-    .replace(/^\/+/, '/')
-    .split('/')
-    .filter(Boolean);
+  const params = new URL(request.url).pathname.replace(/^\/+/, '/').split('/').filter(Boolean);
   const targetId = params[0];
 
   if (!targetId) {
@@ -90,8 +85,7 @@ function parseIncomingRequest(
     };
   }
 
-  const artifactType = (params[1] ||
-    'schema') as keyof typeof artifactTypesHandlers;
+  const artifactType = (params[1] || 'schema') as keyof typeof artifactTypesHandlers;
 
   if (!VALID_ARTIFACT_TYPES.includes(artifactType)) {
     return { error: new InvalidArtifactTypeResponse(artifactType) };
@@ -113,18 +107,11 @@ function parseIncomingRequest(
     targetId,
     artifactType,
     storageKeyType:
-      artifactType === 'sdl' ||
-      artifactType === 'introspection' ||
-      artifactType === 'schema'
-        ? 'schema'
-        : artifactType,
+      artifactType === 'sdl' || artifactType === 'introspection' || artifactType === 'schema' ? 'schema' : artifactType,
   };
 }
 
-export async function handleRequest(
-  request: Request,
-  keyValidator: typeof isKeyValid
-) {
+export async function handleRequest(request: Request, keyValidator: typeof isKeyValid) {
   const parsedRequest = parseIncomingRequest(request, keyValidator);
 
   if ('error' in parsedRequest) {
@@ -141,19 +128,11 @@ export async function handleRequest(
       case 'schema':
         return artifactTypesHandlers.schema(targetId, artifactType, rawValue);
       case 'supergraph':
-        return artifactTypesHandlers.supergraph(
-          targetId,
-          artifactType,
-          rawValue
-        );
+        return artifactTypesHandlers.supergraph(targetId, artifactType, rawValue);
       case 'sdl':
         return artifactTypesHandlers.sdl(targetId, artifactType, rawValue);
       case 'introspection':
-        return artifactTypesHandlers.introspection(
-          targetId,
-          artifactType,
-          rawValue
-        );
+        return artifactTypesHandlers.introspection(targetId, artifactType, rawValue);
       case 'metadata':
         return artifactTypesHandlers.metadata(targetId, artifactType, rawValue);
       default:

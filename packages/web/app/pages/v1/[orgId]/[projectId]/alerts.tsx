@@ -31,9 +31,5 @@ const Gate: React.FC<{
 };
 
 export default function ProjectSettingsPage() {
-  return (
-    <ProjectView title="Alerts">
-      {({ organization }) => <Gate organization={organization} />}
-    </ProjectView>
-  );
+  return <ProjectView title="Alerts">{({ organization }) => <Gate organization={organization} />}</ProjectView>;
 }

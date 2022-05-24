@@ -17,9 +17,7 @@ test('can check a schema with target:registry:read access', async () => {
     },
     owner_access_token
   );
-  const org =
-    orgResult.body.data!.createOrganization.ok.createdOrganizationPayload
-      .organization;
+  const org = orgResult.body.data!.createOrganization.ok.createdOrganizationPayload.organization;
   const code = org.inviteCode;
 
   // Join
@@ -47,10 +45,7 @@ test('can check a schema with target:registry:read access', async () => {
       target: target.cleanId,
       organizationScopes: [],
       projectScopes: [],
-      targetScopes: [
-        TargetAccessScope.RegistryRead,
-        TargetAccessScope.RegistryWrite,
-      ],
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
     },
     owner_access_token
   );
@@ -69,9 +64,7 @@ test('can check a schema with target:registry:read access', async () => {
 
   // Schema publish should be successful
   expect(publishResult.body.errors).not.toBeDefined();
-  expect(publishResult.body.data!.schemaPublish.__typename).toBe(
-    'SchemaPublishSuccess'
-  );
+  expect(publishResult.body.data!.schemaPublish.__typename).toBe('SchemaPublishSuccess');
 
   // Create a token with no rights
   const noAccessTokenResult = await createToken(
@@ -124,9 +117,7 @@ test('can check a schema with target:registry:read access', async () => {
     readToken
   );
   expect(checkResult.body.errors).not.toBeDefined();
-  expect(checkResult.body.data!.schemaCheck.__typename).toBe(
-    'SchemaCheckSuccess'
-  );
+  expect(checkResult.body.data!.schemaCheck.__typename).toBe('SchemaCheckSuccess');
 });
 
 test('should match indentation of previous description', async () => {
@@ -137,9 +128,7 @@ test('should match indentation of previous description', async () => {
     },
     owner_access_token
   );
-  const org =
-    orgResult.body.data!.createOrganization.ok.createdOrganizationPayload
-      .organization;
+  const org = orgResult.body.data!.createOrganization.ok.createdOrganizationPayload.organization;
   const code = org.inviteCode;
 
   // Join
@@ -167,10 +156,7 @@ test('should match indentation of previous description', async () => {
       target: target.cleanId,
       organizationScopes: [],
       projectScopes: [],
-      targetScopes: [
-        TargetAccessScope.RegistryRead,
-        TargetAccessScope.RegistryWrite,
-      ],
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
     },
     owner_access_token
   );
@@ -196,9 +182,7 @@ test('should match indentation of previous description', async () => {
 
   // Schema publish should be successful
   expect(publishResult.body.errors).not.toBeDefined();
-  expect(publishResult.body.data!.schemaPublish.__typename).toBe(
-    'SchemaPublishSuccess'
-  );
+  expect(publishResult.body.data!.schemaPublish.__typename).toBe('SchemaPublishSuccess');
 
   // Create a token with read rights
   const readTokenResult = await createToken(

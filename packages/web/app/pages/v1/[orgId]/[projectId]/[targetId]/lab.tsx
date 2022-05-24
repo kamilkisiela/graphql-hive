@@ -20,21 +20,13 @@ const GraphiQL: typeof GraphiQLType = process.browser
     require('graphiql').default
   : null;
 
-export const ConnectLabTrigger: React.FC<{ endpoint: string }> = ({
-  endpoint,
-}) => {
+export const ConnectLabTrigger: React.FC<{ endpoint: string }> = ({ endpoint }) => {
   const { isOpen, onClose, onOpen: open } = useDisclosure();
   const color = useColorModeValue('#fff', '#000');
 
   return (
     <>
-      <Button
-        colorScheme="primary"
-        type="button"
-        size="sm"
-        onClick={open}
-        leftIcon={<VscPlug color={color} />}
-      >
+      <Button colorScheme="primary" type="button" size="sm" onClick={open} leftIcon={<VscPlug color={color} />}>
         Connect
       </Button>
       <ConnectLabModal isOpen={isOpen} onClose={onClose} endpoint={endpoint} />
@@ -48,12 +40,7 @@ export const CustomizeLabTrigger = () => {
 
   return (
     <>
-      <Button
-        colorScheme="primary"
-        type="button"
-        onClick={open}
-        leftIcon={<VscSettings color={'#ffffff'} />}
-      >
+      <Button colorScheme="primary" type="button" onClick={open} leftIcon={<VscSettings color={'#ffffff'} />}>
         Customize
       </Button>
       <CustomizeLabModal isOpen={isOpen} onClose={onClose} />
@@ -84,27 +71,16 @@ export default function SchemaLabPage() {
     <TargetView title="Schema Laboratory">
       {({ organization, project, target }) => {
         const endpoint = `${window.location.origin}/api/lab/${organization.cleanId}/${project.cleanId}/${target.cleanId}`;
-        const noSchemas =
-          target.latestSchemaVersion?.schemas.nodes?.length === 0;
+        const noSchemas = target.latestSchemaVersion?.schemas.nodes?.length === 0;
 
         return (
           <Page
             noPadding={true}
             title="Schema Laboratory"
             subtitle="Experiment, mock and create live environment for your schema, without running any backend."
-            actions={
-              GraphiQL && !noSchemas ? (
-                <ConnectLabTrigger endpoint={endpoint} />
-              ) : null
-            }
+            actions={GraphiQL && !noSchemas ? <ConnectLabTrigger endpoint={endpoint} /> : null}
           >
-            {GraphiQL ? (
-              noSchemas ? (
-                <NoSchemasYet />
-              ) : (
-                <SchemaLabContent endpoint={endpoint} />
-              )
-            ) : null}
+            {GraphiQL ? noSchemas ? <NoSchemasYet /> : <SchemaLabContent endpoint={endpoint} /> : null}
           </Page>
         );
       }}

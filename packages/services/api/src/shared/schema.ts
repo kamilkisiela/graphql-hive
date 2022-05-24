@@ -1,9 +1,5 @@
 import { createHash } from 'crypto';
-import {
-  buildASTSchema,
-  GraphQLSchema,
-  lexicographicSortSchema,
-} from 'graphql';
+import { buildASTSchema, GraphQLSchema, lexicographicSortSchema } from 'graphql';
 import { Schema, SchemaObject, emptySource } from './entities';
 
 export function hashSchema(schema: Schema): string {
@@ -22,11 +18,8 @@ export function buildSchema(schema: SchemaObject): GraphQLSchema {
   );
 }
 
-export function findSchema(
-  schemas: readonly Schema[],
-  expected: Schema
-): Schema | undefined {
-  return schemas.find((schema) => schema.service === expected.service);
+export function findSchema(schemas: readonly Schema[], expected: Schema): Schema | undefined {
+  return schemas.find(schema => schema.service === expected.service);
 }
 
 export function updateSchemas(
@@ -37,9 +30,8 @@ export function updateSchemas(
   swappedSchema: Schema | null;
 } {
   let swappedSchema: Schema | null = null;
-  const newSchemas = schemas.map((schema) => {
-    const matching =
-      (schema.service ?? emptySource) === (incoming.service ?? emptySource);
+  const newSchemas = schemas.map(schema => {
+    const matching = (schema.service ?? emptySource) === (incoming.service ?? emptySource);
 
     if (matching) {
       swappedSchema = schema;

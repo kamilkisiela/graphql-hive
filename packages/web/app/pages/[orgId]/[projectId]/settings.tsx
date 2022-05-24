@@ -9,7 +9,7 @@ import { Button, Card, Heading, Input, Link, Select, Spinner, Tag, Title } from 
 import { AlertTriangleIcon } from '@/components/v2/icon';
 import { DeleteProjectModal } from '@/components/v2/modals';
 import { GetGitHubIntegrationDetailsDocument, OrganizationFieldsFragment, ProjectFieldsFragment } from '@/graphql';
-import { canAccessProject, ProjectAccessScope,useProjectAccess } from '@/lib/access/project';
+import { canAccessProject, ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
 const Settings_UpdateProjectGitRepositoryMutation = gql(/* GraphQL */ `

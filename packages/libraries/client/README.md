@@ -22,8 +22,8 @@ If you're not familiar with Envelop - in "short" it's a lightweight JavaScript l
 Here's [more](https://github.com/dotansimha/envelop#envelop) on that topic.
 
 ```ts
-import { envelop } from '@envelop/core';
-import { useHive } from '@graphql-hive/client';
+import { envelop } from '@envelop/core'
+import { useHive } from '@graphql-hive/client'
 
 const envelopProxy = envelop({
   plugins: [
@@ -35,12 +35,12 @@ const envelopProxy = envelop({
       reporting: {
         // feel free to set dummy values here
         author: 'Author of the schema version',
-        commit: 'git sha or any identifier',
+        commit: 'git sha or any identifier'
       },
-      usage: true, // Collects schema usage based on operations
-    }),
-  ],
-});
+      usage: true // Collects schema usage based on operations
+    })
+  ]
+})
 ```
 
 #### With Apollo Server
@@ -48,8 +48,8 @@ const envelopProxy = envelop({
 Thanks to the plugin system it's a matter of adding hiveApollo plugin to ApolloServer instance:
 
 ```ts
-import { ApolloServer } from 'apollo-server';
-import { hiveApollo } from '@graphql-hive/client';
+import { ApolloServer } from 'apollo-server'
+import { hiveApollo } from '@graphql-hive/client'
 
 const server = new ApolloServer({
   typeDefs,
@@ -62,12 +62,12 @@ const server = new ApolloServer({
       reporting: {
         // feel free to set dummy values here
         author: 'Author of the latest change',
-        commit: 'git sha or any identifier',
+        commit: 'git sha or any identifier'
       },
-      usage: true, // Collects schema usage based on operations
-    }),
-  ],
-});
+      usage: true // Collects schema usage based on operations
+    })
+  ]
+})
 ```
 
 #### With Other Servers
@@ -125,29 +125,29 @@ Prerequisites:
 The `createServicesFetcher` factory function returns another function that is responsible for fetching a list of services from Hive's high-availability endpoint.
 
 ```ts
-import { createServicesFetcher } from '@graphql-hive/client';
+import { createServicesFetcher } from '@graphql-hive/client'
 
 const fetchServices = createServicesFetcher({
   endpoint: process.env.HIVE_CDN_ENDPOINT,
-  key: process.env.HIVE_CDN_KEY,
-});
+  key: process.env.HIVE_CDN_KEY
+})
 
 // This is your GraphQL gateway with built-in polling mechanism, in which the `stitchServices` method is called every 10 seconds.
 startMyGraphQLGateway({
   // a function that resolves a list of services to stitch them together
   async stitchServices() {
-    const services = await fetchServices();
+    const services = await fetchServices()
 
-    return services.map((service) => {
+    return services.map(service => {
       return {
         sdl: service.sdl,
         url: service.url,
-        checksum: service.id, // to check if service's schema was modified
-      };
-    });
+        checksum: service.id // to check if service's schema was modified
+      }
+    })
   },
-  pollingInSec: 10, // every 10s
-});
+  pollingInSec: 10 // every 10s
+})
 ```
 
 #### Using the registry with Apollo Gateway
@@ -160,23 +160,23 @@ The `experimental_pollInterval` value is up to you. Apollo Gateway uses 10s (10_
 - `HIVE_CDN_KEY` - the access
 
 ```ts
-import { createSupergraphSDLFetcher } from '@graphql-hive/client';
-import { ApolloGateway } from '@apollo/gateway';
-import { ApolloServer } from 'apollo-server';
+import { createSupergraphSDLFetcher } from '@graphql-hive/client'
+import { ApolloGateway } from '@apollo/gateway'
+import { ApolloServer } from 'apollo-server'
 
 const gateway = new ApolloGateway({
   experimental_pollInterval: 10_000, // define the poll interval (in ms)
   experimental_updateSupergraphSdl: createSupergraphFetcher({
     endpoint: HIVE_CDN_ENDPOINT,
-    key: HIVE_CDN_KEY,
-  }),
-});
+    key: HIVE_CDN_KEY
+  })
+})
 
 const server = new ApolloServer({
-  gateway,
-});
+  gateway
+})
 
 server.listen().then(({ url }) => {
-  console.log(`🚀 Server ready at ${url}`);
-});
+  console.log(`🚀 Server ready at ${url}`)
+})
 ```

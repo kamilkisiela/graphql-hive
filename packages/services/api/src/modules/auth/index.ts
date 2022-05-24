@@ -13,12 +13,5 @@ export const authModule = createModule({
   dirname: __dirname,
   typeDefs,
   resolvers,
-  providers: [
-    AuthManager,
-    UserManager,
-    ApiTokenProvider,
-    OrganizationAccess,
-    ProjectAccess,
-    TargetAccess,
-  ],
+  providers: [AuthManager, UserManager, ApiTokenProvider, OrganizationAccess, ProjectAccess, TargetAccess],
 });

@@ -13,9 +13,7 @@ export interface HiveClient {
 
 export type AsyncIterableIteratorOrValue<T> = AsyncIterableIterator<T> | T;
 
-export type CollectUsageCallback = (
-  result: AsyncIterableIteratorOrValue<GraphQLErrorsResult>
-) => void;
+export type CollectUsageCallback = (result: AsyncIterableIteratorOrValue<GraphQLErrorsResult>) => void;
 export interface ClientInfo {
   name: string;
   version: string;

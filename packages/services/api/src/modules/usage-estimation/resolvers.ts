@@ -33,11 +33,9 @@ export const resolvers: UsageEstimationModule.Resolvers = {
       };
     },
     async org(range, args, { injector }) {
-      const organizationId = await injector
-        .get(IdTranslator)
-        .translateOrganizationId({
-          organization: args.selector.organization,
-        });
+      const organizationId = await injector.get(IdTranslator).translateOrganizationId({
+        organization: args.selector.organization,
+      });
       await injector.get(AuthManager).ensureOrganizationAccess({
         organization: organizationId,
         scope: OrganizationAccessScope.SETTINGS,
@@ -49,7 +47,7 @@ export const resolvers: UsageEstimationModule.Resolvers = {
 
       const targets = (
         await Promise.all(
-          projects.map((project) => {
+          projects.map(project => {
             return injector.get(TargetManager).getTargets({
               organization: organizationId,
               project: project.id,
@@ -60,41 +58,33 @@ export const resolvers: UsageEstimationModule.Resolvers = {
 
       return {
         ...range,
-        targets: targets.map((t) => t.id),
+        targets: targets.map(t => t.id),
       };
     },
   },
   UsageEstimation: {
     operations: async (params, args, { injector }) => {
-      const result = await injector
-        .get(UsageEstimationProvider)
-        .estimateOperations({
-          targetIds: params.targets,
-          endTime: params.endTime.toString(),
-          startTime: params.startTime.toString(),
-        });
+      const result = await injector.get(UsageEstimationProvider).estimateOperations({
+        targetIds: params.targets,
+        endTime: params.endTime.toString(),
+        startTime: params.startTime.toString(),
+      });
 
       if (!result && result !== 0) {
-        throw new EnvelopError(
-          `Failed to estimate usage, please try again later.`
-        );
+        throw new EnvelopError(`Failed to estimate usage, please try again later.`);
       }
 
       return result;
     },
     schemaPushes: async (params, args, { injector }) => {
-      const result = await injector
-        .get(UsageEstimationProvider)
-        .estimateSchemaPushes({
-          targetIds: params.targets,
-          endTime: params.endTime.toString(),
-          startTime: params.startTime.toString(),
-        });
+      const result = await injector.get(UsageEstimationProvider).estimateSchemaPushes({
+        targetIds: params.targets,
+        endTime: params.endTime.toString(),
+        startTime: params.startTime.toString(),
+      });
 
       if (!result && result !== 0) {
-        throw new EnvelopError(
-          `Failed to estimate usage, please try again later.`
-        );
+        throw new EnvelopError(`Failed to estimate usage, please try again later.`);
       }
 
       return result;

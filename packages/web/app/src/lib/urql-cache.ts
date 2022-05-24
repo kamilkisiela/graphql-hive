@@ -1,10 +1,5 @@
 import { getOperationName, TypedDocumentNode } from 'urql';
-import {
-  Cache,
-  ResolveInfo,
-  UpdateResolver,
-  QueryInput,
-} from '@urql/exchange-graphcache';
+import { Cache, ResolveInfo, UpdateResolver, QueryInput } from '@urql/exchange-graphcache';
 import produce from 'immer';
 import {
   TokensDocument,
@@ -31,11 +26,7 @@ import {
   DeleteGitHubIntegrationDocument,
 } from '../graphql';
 
-function updateQuery<T, V>(
-  cache: Cache,
-  input: QueryInput<T, V>,
-  recipe: (obj: T) => void
-) {
+function updateQuery<T, V>(cache: Cache, input: QueryInput<T, V>, recipe: (obj: T) => void) {
   return cache.updateQuery(input, (data: T) => {
     if (!data) {
       console.error('Query Cache Updater: Empty data', {
@@ -56,10 +47,9 @@ type MutationUpdaters<
   [K in keyof T]: Updater<T[K]>;
 };
 
-type Updater<TDocument extends TypedDocumentNode> =
-  TDocument extends TypedDocumentNode<infer R, infer V>
-    ? (result: R, args: V, cache: Cache, info: ResolveInfo) => void
-    : UpdateResolver;
+type Updater<TDocument extends TypedDocumentNode> = TDocument extends TypedDocumentNode<infer R, infer V>
+  ? (result: R, args: V, cache: Cache, info: ResolveInfo) => void
+  : UpdateResolver;
 
 export const Mutation: MutationUpdaters<{
   createOrganization: typeof CreateOrganizationDocument;
@@ -84,11 +74,9 @@ export const Mutation: MutationUpdaters<{
       {
         query: OrganizationsDocument,
       },
-      (data) => {
+      data => {
         if (createOrganization.ok) {
-          data.organizations.nodes.unshift(
-            createOrganization.ok.createdOrganizationPayload.organization
-          );
+          data.organizations.nodes.unshift(createOrganization.ok.createdOrganizationPayload.organization);
           data.organizations.total += 1;
         }
       }
@@ -119,7 +107,7 @@ export const Mutation: MutationUpdaters<{
           },
         },
       },
-      (data) => {
+      data => {
         data.projects.nodes.unshift(project);
         data.projects.total += 1;
       }
@@ -152,7 +140,7 @@ export const Mutation: MutationUpdaters<{
           },
         },
       },
-      (data) => {
+      data => {
         data.targets.nodes.unshift(target);
         data.targets.total += 1;
       }
@@ -184,7 +172,7 @@ export const Mutation: MutationUpdaters<{
           },
         },
       },
-      (data) => {
+      data => {
         data.tokens.nodes.unshift(createToken.ok.createdToken);
         data.tokens.total += 1;
       }
@@ -205,10 +193,8 @@ export const Mutation: MutationUpdaters<{
           },
         },
       },
-      (data) => {
-        data.tokens.nodes = data.tokens.nodes.filter(
-          (node) => !deleteTokens.deletedTokens.includes(node.id)
-        );
+      data => {
+        data.tokens.nodes = data.tokens.nodes.filter(node => !deleteTokens.deletedTokens.includes(node.id));
         data.tokens.total = data.tokens.nodes.length;
       }
     );
@@ -229,13 +215,13 @@ export const Mutation: MutationUpdaters<{
           },
         },
       },
-      (data) => {
+      data => {
         data.alertChannels.unshift(addAlertChannel.ok.addedAlertChannel);
       }
     );
   },
   deleteAlertChannels({ deleteAlertChannels }, _args, cache) {
-    deleteAlertChannels.forEach((channel) => {
+    deleteAlertChannels.forEach(channel => {
       cache.invalidate({
         __typename: channel.__typename,
         id: channel.id,
@@ -254,13 +240,13 @@ export const Mutation: MutationUpdaters<{
           },
         },
       },
-      (data) => {
+      data => {
         data.alerts.unshift(addAlert);
       }
     );
   },
   deleteAlerts({ deleteAlerts }, _args, cache) {
-    deleteAlerts.forEach((alert) => {
+    deleteAlerts.forEach(alert => {
       cache.invalidate({
         __typename: alert.__typename,
         id: alert.id,
@@ -285,7 +271,7 @@ export const Mutation: MutationUpdaters<{
           },
         },
       },
-      (data) => ({
+      data => ({
         ...data,
         hasSlackIntegration: false,
       })
@@ -301,7 +287,7 @@ export const Mutation: MutationUpdaters<{
           },
         },
       },
-      (data) => ({
+      data => ({
         ...data,
         hasGitHubIntegration: false,
       })

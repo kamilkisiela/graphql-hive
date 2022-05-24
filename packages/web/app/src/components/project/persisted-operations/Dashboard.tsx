@@ -4,11 +4,7 @@ import { useQuery } from 'urql';
 import { DataWrapper } from '@/components/common/DataWrapper';
 import { PersistedOperations } from '@/components/project/persisted-operations/Operations';
 import { Viewer } from '@/components/project/persisted-operations/Viewer';
-import {
-  OrganizationFieldsFragment,
-  PersistedOperationsDocument,
-  ProjectFieldsFragment,
-} from '@/graphql';
+import { OrganizationFieldsFragment, PersistedOperationsDocument, ProjectFieldsFragment } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { NoPersistedOperationsYet } from './NoPersistedOperationsYet';
 
@@ -39,10 +35,7 @@ export const Dashboard: React.FC<{
     }
   }, [router.query.operation, setSelectedOperation]);
 
-  const selectOperation = React.useCallback(
-    (operation) => router.update({ operation }),
-    [router]
-  );
+  const selectOperation = React.useCallback(operation => router.update({ operation }), [router]);
 
   return (
     <DataWrapper query={query}>
@@ -64,11 +57,7 @@ export const Dashboard: React.FC<{
             </div>
             <div tw="w-9/12 overflow-y-auto">
               {selectedOperation && (
-                <Viewer
-                  project={project}
-                  organization={organization}
-                  operation={selectedOperation}
-                />
+                <Viewer project={project} organization={organization} operation={selectedOperation} />
               )}
             </div>
           </div>

@@ -25,8 +25,6 @@ test('should not leak the exception', async () => {
     .then(() => 'OK')
     .catch(() => 'ERROR');
 
-  expect(logger.error).toHaveBeenCalledWith(
-    expect.stringContaining(`[hive][info] Error`)
-  );
+  expect(logger.error).toHaveBeenCalledWith(expect.stringContaining(`[hive][info] Error`));
   expect(result).toBe('OK');
 });

@@ -146,9 +146,7 @@ test('should send data to Hive', async () => {
   http.done();
 
   expect(logger.error).not.toHaveBeenCalled();
-  expect(logger.info).toHaveBeenCalledWith(
-    `[hive][usage] Sending (queue 1) (attempt 1)`
-  );
+  expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sending (queue 1) (attempt 1)`);
   expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sent!`);
 
   // Map
@@ -221,19 +219,11 @@ test('should not leak the exception', async () => {
   await waitFor(1000);
   await hive.dispose();
 
-  expect(logger.info).toHaveBeenCalledWith(
-    `[hive][usage] Sending (queue 1) (attempt 1)`
-  );
-  expect(logger.info).toHaveBeenCalledWith(
-    expect.stringContaining(`[hive][usage] Attempt 1 failed:`)
-  );
-  expect(logger.info).toHaveBeenCalledWith(
-    `[hive][usage] Sending (queue 1) (attempt 2)`
-  );
+  expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sending (queue 1) (attempt 1)`);
+  expect(logger.info).toHaveBeenCalledWith(expect.stringContaining(`[hive][usage] Attempt 1 failed:`));
+  expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sending (queue 1) (attempt 2)`);
   expect(logger.error).toHaveBeenCalledTimes(1);
-  expect(logger.error).toHaveBeenCalledWith(
-    expect.stringContaining(`[hive][usage] Failed to send data`)
-  );
+  expect(logger.error).toHaveBeenCalledWith(expect.stringContaining(`[hive][usage] Failed to send data`));
 });
 
 test('sendImmediately should not stop the schedule', async () => {
@@ -284,13 +274,9 @@ test('sendImmediately should not stop the schedule', async () => {
   // Because maxSize is 2 and sendInterval is 100ms
   // the scheduled send task should be done by now
   expect(logger.error).not.toHaveBeenCalled();
-  expect(logger.info).toHaveBeenCalledWith(
-    `[hive][usage] Sending (queue 1) (attempt 1)`
-  );
+  expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sending (queue 1) (attempt 1)`);
   expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sent!`);
-  expect(logger.info).not.toHaveBeenCalledWith(
-    `[hive][usage] Sending immediately`
-  );
+  expect(logger.info).not.toHaveBeenCalledWith(`[hive][usage] Sending immediately`);
   expect(logger.info).toHaveBeenCalledTimes(2);
 
   // Now we will check the maxSize
@@ -298,9 +284,7 @@ test('sendImmediately should not stop the schedule', async () => {
   collect({});
   collect({});
   expect(logger.error).not.toHaveBeenCalled();
-  expect(logger.info).toHaveBeenCalledWith(
-    `[hive][usage] Sending (queue 1) (attempt 1)`
-  );
+  expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sending (queue 1) (attempt 1)`);
   expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sending immediately`);
   await waitFor(1); // we run setImmediate under the hood
   // It should be sent already
@@ -314,9 +298,7 @@ test('sendImmediately should not stop the schedule', async () => {
   collect({});
   await waitFor(200);
   expect(logger.error).not.toHaveBeenCalled();
-  expect(logger.info).toHaveBeenCalledWith(
-    `[hive][usage] Sending (queue 1) (attempt 1)`
-  );
+  expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sending (queue 1) (attempt 1)`);
   expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sent!`);
   expect(logger.info).toHaveBeenCalledTimes(7);
 

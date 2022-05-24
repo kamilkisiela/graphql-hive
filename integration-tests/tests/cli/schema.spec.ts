@@ -1,12 +1,7 @@
 import { TargetAccessScope, ProjectType } from '@app/gql/graphql';
 import { schemaPublish, schemaCheck } from '../../testkit/cli';
 import { authenticate } from '../../testkit/auth';
-import {
-  createOrganization,
-  joinOrganization,
-  createProject,
-  createToken,
-} from '../../testkit/flow';
+import { createOrganization, joinOrganization, createProject, createToken } from '../../testkit/flow';
 
 test('can publish and check a schema with target:registry:read access', async () => {
   const { access_token: owner_access_token } = await authenticate('main');
@@ -16,9 +11,7 @@ test('can publish and check a schema with target:registry:read access', async ()
     },
     owner_access_token
   );
-  const org =
-    orgResult.body.data!.createOrganization.ok.createdOrganizationPayload
-      .organization;
+  const org = orgResult.body.data!.createOrganization.ok.createdOrganizationPayload.organization;
   const code = org.inviteCode;
 
   // Join
@@ -46,10 +39,7 @@ test('can publish and check a schema with target:registry:read access', async ()
       target: target.cleanId,
       organizationScopes: [],
       projectScopes: [],
-      targetScopes: [
-        TargetAccessScope.RegistryRead,
-        TargetAccessScope.RegistryWrite,
-      ],
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
     },
     owner_access_token
   );
@@ -66,13 +56,9 @@ test('can publish and check a schema with target:registry:read access', async ()
     'fixtures/init-schema.graphql',
   ]);
 
-  await schemaCheck([
-    '--token',
-    writeToken,
-    'fixtures/nonbreaking-schema.graphql',
-  ]);
+  await schemaCheck(['--token', writeToken, 'fixtures/nonbreaking-schema.graphql']);
 
-  await expect(
-    schemaCheck(['--token', writeToken, 'fixtures/breaking-schema.graphql'])
-  ).rejects.toThrowError('EXIT: 1');
+  await expect(schemaCheck(['--token', writeToken, 'fixtures/breaking-schema.graphql'])).rejects.toThrowError(
+    'EXIT: 1'
+  );
 });

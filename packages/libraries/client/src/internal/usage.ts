@@ -27,19 +27,8 @@ import { normalizeOperation } from '@graphql-hive/core';
 import { createAgent } from './agent';
 import { randomSampling } from './sampling';
 import { version } from '../version';
-import {
-  cache,
-  cacheDocumentKey,
-  measureDuration,
-  memo,
-  isAsyncIterableIterator,
-} from './utils';
-import type {
-  HivePluginOptions,
-  HiveUsagePluginOptions,
-  CollectUsageCallback,
-  ClientInfo,
-} from './types';
+import { cache, cacheDocumentKey, measureDuration, memo, isAsyncIterableIterator } from './utils';
+import type { HivePluginOptions, HiveUsagePluginOptions, CollectUsageCallback, ClientInfo } from './types';
 
 interface UsageCollector {
   collect(args: ExecutionArgs): CollectUsageCallback;
@@ -61,12 +50,9 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
     map: {},
     operations: [],
   };
-  const options =
-    typeof pluginOptions.usage === 'boolean'
-      ? ({} as HiveUsagePluginOptions)
-      : pluginOptions.usage;
+  const options = typeof pluginOptions.usage === 'boolean' ? ({} as HiveUsagePluginOptions) : pluginOptions.usage;
   const logger = pluginOptions.agent?.logger ?? console;
-  const collector = memo(createCollector, (arg) => arg.schema);
+  const collector = memo(createCollector, arg => arg.schema);
   const excludeSet = new Set(options.exclude ?? []);
   const agent = createAgent<CollectedOperation>(
     {
@@ -147,16 +133,15 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
           }
 
           const rootOperation = args.document.definitions.find(
-            (o) => o.kind === Kind.OPERATION_DEFINITION
+            o => o.kind === Kind.OPERATION_DEFINITION
           ) as OperationDefinitionNode;
           const document = args.document;
-          const operationName =
-            args.operationName || rootOperation.name?.value || 'anonymous';
+          const operationName = args.operationName || rootOperation.name?.value || 'anonymous';
           const duration = finish();
 
           if (!excludeSet.has(operationName) && shouldInclude()) {
             const errors =
-              result.errors?.map((error) => ({
+              result.errors?.map(error => ({
                 message: error.message,
                 path: error.path?.join('.'),
               })) ?? [];
@@ -181,8 +166,7 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
               },
               // TODO: operationHash is ready to accept hashes of persisted operations
               client:
-                typeof args.contextValue !== 'undefined' &&
-                typeof options.clientInfo !== 'undefined'
+                typeof args.contextValue !== 'undefined' && typeof options.clientInfo !== 'undefined'
                   ? options.clientInfo(args.contextValue)
                   : null,
             });
@@ -200,15 +184,7 @@ interface CacheResult {
   fields: string[];
 }
 
-export function createCollector({
-  schema,
-  max,
-  ttl,
-}: {
-  schema: GraphQLSchema;
-  max?: number;
-  ttl?: number;
-}) {
+export function createCollector({ schema, max, ttl }: { schema: GraphQLSchema; max?: number; ttl?: number }) {
   const typeInfo = new TypeInfo(schema);
 
   function collect(doc: DocumentNode): CacheResult {
@@ -254,10 +230,7 @@ export function createCollector({
       if (node.value.kind === Kind.ENUM) {
         // Collect only a specific enum value
         collectInputType(inputTypeName, node.value.value);
-      } else if (
-        node.value.kind !== Kind.OBJECT &&
-        node.value.kind !== Kind.LIST
-      ) {
+      } else if (node.value.kind !== Kind.OBJECT && node.value.kind !== Kind.LIST) {
         collectInputType(inputTypeName);
       }
     }
@@ -271,7 +244,7 @@ export function createCollector({
       }
 
       if (isEnumType(namedType)) {
-        namedType.getValues().forEach((value) => {
+        namedType.getValues().forEach(value => {
           markAsUsed(makeId(namedType.name, value.name));
         });
         return;
@@ -312,7 +285,7 @@ export function createCollector({
           const inputType = typeInfo.getInputType()!;
           const inputTypeName = resolveTypeName(inputType);
 
-          node.values.forEach((value) => {
+          node.values.forEach(value => {
             if (value.kind !== Kind.OBJECT) {
               // if a value is not an object we need to collect all fields
               collectInputType(inputTypeName);
@@ -335,7 +308,7 @@ export function createCollector({
       if (all) {
         markEntireTypeAsUsed(schema.getType(inputTypeName) as any);
       } else {
-        fields.forEach((field) => {
+        fields.forEach(field => {
           markAsUsed(makeId(inputTypeName, field));
         });
       }
@@ -369,10 +342,7 @@ function unwrapType(type: GraphQLType): GraphQLNamedType {
   return type;
 }
 
-type GraphQLNamedInputType = Exclude<
-  GraphQLNamedType,
-  GraphQLObjectType | GraphQLInterfaceType | GraphQLUnionType
->;
+type GraphQLNamedInputType = Exclude<GraphQLNamedType, GraphQLObjectType | GraphQLInterfaceType | GraphQLUnionType>;
 type GraphQLNamedOutputType = Exclude<GraphQLNamedType, GraphQLInputObjectType>;
 
 export interface Report {

@@ -18,8 +18,6 @@ export default class SetConfig extends Command {
   async run() {
     const { args } = await this.parse(SetConfig);
     this._userConfig.set(args.key, args.value);
-    this.success(
-      this.bolderize(`Config flag "${args.key}" was set to "${args.value}"!`)
-    );
+    this.success(this.bolderize(`Config flag "${args.key}" was set to "${args.value}"!`));
   }
 }

@@ -26,15 +26,9 @@ const PriceEstimationTable = ({
   schemaPushesRateLimit: number;
 }): ReactElement => {
   const includedOperationsInMillions = plan.includedOperationsLimit / 1_000_000;
-  const additionalOperations = Math.max(
-    0,
-    operationsRateLimit - includedOperationsInMillions
-  );
+  const additionalOperations = Math.max(0, operationsRateLimit - includedOperationsInMillions);
   const operationsTotal = plan.pricePerOperationsUnit * additionalOperations;
-  const additionalSchemaPushes = Math.max(
-    0,
-    schemaPushesRateLimit - plan.includedSchemaPushLimit
-  );
+  const additionalSchemaPushes = Math.max(0, schemaPushesRateLimit - plan.includedSchemaPushLimit);
   const schemaTotal = plan.pricePerSchemaPushUnit * additionalSchemaPushes;
   const total = plan.basePrice + operationsTotal + schemaTotal;
 
@@ -77,9 +71,7 @@ const PriceEstimationTable = ({
           <Tr>
             <Td>Additional Operations</Td>
             <Td isNumeric>{additionalOperations}M</Td>
-            <Td isNumeric>
-              {CurrencyFormatter.format(plan.pricePerOperationsUnit)}
-            </Td>
+            <Td isNumeric>{CurrencyFormatter.format(plan.pricePerOperationsUnit)}</Td>
             <Td isNumeric>{CurrencyFormatter.format(operationsTotal)}</Td>
           </Tr>
         )}
@@ -87,9 +79,7 @@ const PriceEstimationTable = ({
           <Tr>
             <Td>Additional Schema Pushes</Td>
             <Td isNumeric>{additionalSchemaPushes}</Td>
-            <Td isNumeric>
-              {CurrencyFormatter.format(plan.pricePerSchemaPushUnit)}
-            </Td>
+            <Td isNumeric>{CurrencyFormatter.format(plan.pricePerSchemaPushUnit)}</Td>
             <Td isNumeric>{CurrencyFormatter.format(schemaTotal)}</Td>
           </Tr>
         )}
@@ -99,9 +89,7 @@ const PriceEstimationTable = ({
           <Th>TOTAL MONTHLY (AFTER TRIAL ENDS)</Th>
           <Th />
           <Th />
-          <Th isNumeric>
-            {total === 0 ? 'FREE' : CurrencyFormatter.format(total)}
-          </Th>
+          <Th isNumeric>{total === 0 ? 'FREE' : CurrencyFormatter.format(total)}</Th>
         </Tr>
       </Tfoot>
     </Table>
@@ -127,12 +115,10 @@ export const PlanSummary = ({
           <StatNumber>{plan.planType}</StatNumber>
         </Stat>
         <div className="mb-6">
-          Enterprise plan is for organizations that needs to ship and ingest
-          large amount of data.
+          Enterprise plan is for organizations that needs to ship and ingest large amount of data.
           <br />
-          If you wish to upgrade to Enterprise, or you can't find the plan for
-          you, please contact us and we'll find the right plan for your
-          organization.
+          If you wish to upgrade to Enterprise, or you can't find the plan for you, please contact us and we'll find the
+          right plan for your organization.
         </div>
       </>
     );

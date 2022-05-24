@@ -5,9 +5,7 @@ import { isHiveClient } from './internal/utils';
 
 export function useHive(clientOrOptions: HiveClient): Plugin;
 export function useHive(clientOrOptions: HivePluginOptions): Plugin;
-export function useHive(
-  clientOrOptions: HiveClient | HivePluginOptions
-): Plugin {
+export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin {
   const hive = isHiveClient(clientOrOptions)
     ? clientOrOptions
     : createHive({

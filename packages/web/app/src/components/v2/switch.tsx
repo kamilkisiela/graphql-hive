@@ -3,11 +3,7 @@ import * as SwitchPrimitive from '@radix-ui/react-switch';
 import { SwitchProps } from '@radix-ui/react-switch';
 import clsx from 'clsx';
 
-export const Switch = ({
-  className,
-  disabled,
-  ...props
-}: SwitchProps): ReactElement => {
+export const Switch = ({ className, disabled, ...props }: SwitchProps): ReactElement => {
   return (
     <SwitchPrimitive.Root
       className={clsx(

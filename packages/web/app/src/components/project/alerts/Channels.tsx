@@ -13,13 +13,11 @@ import {
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { ChannelCreatorTrigger } from './ChannelCreator';
 
-export const ChannelLabel = styled(Label)(
-  ({ channel }: { channel: AlertChannelType }) => [
-    channel === 'SLACK' && tw` background-color[#EBFAF3] color[#2EB67D] `,
-    // channel === 'DISCORD' && tw` background-color[#E7E9FD] color[#5865F2] `,
-    tw`lowercase`,
-  ]
-);
+export const ChannelLabel = styled(Label)(({ channel }: { channel: AlertChannelType }) => [
+  channel === 'SLACK' && tw` background-color[#EBFAF3] color[#2EB67D] `,
+  // channel === 'DISCORD' && tw` background-color[#E7E9FD] color[#5865F2] `,
+  tw`lowercase`,
+]);
 
 const ChannelRow: React.FC<{
   channel: AlertSlackChannelFieldsFragment | AlertWebhookChannelFieldsFragment;
@@ -50,7 +48,7 @@ export const Channels: React.FC = () => {
   const onCheck = React.useCallback(
     (id: string) => {
       if (checked.includes(id)) {
-        setChecked(checked.filter((i) => i !== id));
+        setChecked(checked.filter(i => i !== id));
       } else {
         setChecked(checked.concat(id));
       }
@@ -75,9 +73,7 @@ export const Channels: React.FC = () => {
       <div tw="flex flex-row justify-between items-center">
         <div>
           <Section.Title>Available Channels</Section.Title>
-          <Section.Subtitle>
-            Channel represents a form of communication
-          </Section.Subtitle>
+          <Section.Subtitle>Channel represents a form of communication</Section.Subtitle>
         </div>
         <div>
           <Button
@@ -102,15 +98,8 @@ export const Channels: React.FC = () => {
       <div tw="pt-3">
         <Table size="sm">
           <Tbody>
-            {query.data?.alertChannels.map((channel) => {
-              return (
-                <ChannelRow
-                  key={channel.id}
-                  onCheck={onCheck}
-                  checked={checked}
-                  channel={channel}
-                />
-              );
+            {query.data?.alertChannels.map(channel => {
+              return <ChannelRow key={channel.id} onCheck={onCheck} checked={checked} channel={channel} />;
             })}
           </Tbody>
         </Table>

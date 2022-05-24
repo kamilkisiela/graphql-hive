@@ -1,9 +1,4 @@
-import {
-  InjectionToken,
-  FactoryProvider,
-  Scope,
-  CONTEXT,
-} from 'graphql-modules';
+import { InjectionToken, FactoryProvider, Scope, CONTEXT } from 'graphql-modules';
 
 export const ApiToken = new InjectionToken<string>('x-api-token');
 export const ApiTokenProvider: FactoryProvider<string | undefined> = {

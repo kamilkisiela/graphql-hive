@@ -25,30 +25,21 @@ async function main() {
   fsExtra.mkdirSync(tarballDir, { recursive: true });
 
   function isBackendPackage(manifestPath) {
-    return JSON.parse(
-      fs.readFileSync(manifestPath, 'utf-8')
-    ).buildOptions?.tags.includes('backend');
+    return JSON.parse(fs.readFileSync(manifestPath, 'utf-8')).buildOptions?.tags.includes('backend');
   }
 
   function listBackendPackages() {
-    const manifestPathCollection = glob.sync(
-      'packages/services/*/package.json',
-      {
-        cwd,
-        absolute: true,
-        ignore: ['**/node_modules/**', '**/dist/**'],
-      }
-    );
+    const manifestPathCollection = glob.sync('packages/services/*/package.json', {
+      cwd,
+      absolute: true,
+      ignore: ['**/node_modules/**', '**/dist/**'],
+    });
 
-    return manifestPathCollection
-      .filter(isBackendPackage)
-      .map((filepath) => path.relative(cwd, path.dirname(filepath)));
+    return manifestPathCollection.filter(isBackendPackage).map(filepath => path.relative(cwd, path.dirname(filepath)));
   }
 
   async function pack(location) {
-    const { version, name } = JSON.parse(
-      await fsExtra.readFile(path.join(cwd, location, 'package.json'), 'utf-8')
-    );
+    const { version, name } = JSON.parse(await fsExtra.readFile(path.join(cwd, location, 'package.json'), 'utf-8'));
     const stdout = await new Promise((resolve, reject) => {
       exec(
         `npm pack ${path.join(cwd, location, 'dist')}`,
@@ -69,10 +60,7 @@ async function main() {
 
     const lines = stdout.split('\n');
     const org_filename = path.resolve(cwd, lines[lines.length - 2]);
-    let filename = org_filename
-      .replace(cwd, tarballDir)
-      .replace('hive-', '')
-      .replace(`-${version}`, '');
+    let filename = org_filename.replace(cwd, tarballDir).replace('hive-', '').replace(`-${version}`, '');
 
     if (/-\d+\.\d+\.\d+\.tgz$/.test(filename)) {
       throw new Error(`Build ${name} package first!`);
@@ -86,7 +74,7 @@ async function main() {
   const locations = listBackendPackages();
 
   await Promise.all(
-    locations.map(async (loc) => {
+    locations.map(async loc => {
       try {
         const filename = await pack(loc);
 

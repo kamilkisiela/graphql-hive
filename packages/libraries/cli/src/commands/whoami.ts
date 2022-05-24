@@ -33,9 +33,7 @@ export default class WhoAmI extends Command {
       .catch((error: Error & { response?: any }) => {
         if ('response' in error) {
           this.error(error.response.errors[0].message, {
-            ref: this.cleanRequestId(
-              error.response?.headers?.get('x-request-id')
-            ),
+            ref: this.cleanRequestId(error.response?.headers?.get('x-request-id')),
           });
         } else {
           this.error(error);
@@ -58,43 +56,30 @@ export default class WhoAmI extends Command {
       const print = createPrinter({
         'Token name:': [colors.bold(tokenInfo.token.name)],
         ' ': [''],
-        'Organization:': [
-          colors.bold(organization.name),
-          colors.dim(organizationUrl),
-        ],
+        'Organization:': [colors.bold(organization.name), colors.dim(organizationUrl)],
         'Project:': [colors.bold(project.name), colors.dim(projectUrl)],
         'Target:': [colors.bold(target.name), colors.dim(targetUrl)],
         '  ': [''],
-        'Access to schema:publish': [
-          tokenInfo.canPublishSchema ? access.yes : access.not,
-        ],
-        'Access to schema:check': [
-          tokenInfo.canCheckSchema ? access.yes : access.not,
-        ],
-        'Access to operation:publish': [
-          tokenInfo.canPublishOperations ? access.yes : access.not,
-        ],
+        'Access to schema:publish': [tokenInfo.canPublishSchema ? access.yes : access.not],
+        'Access to schema:check': [tokenInfo.canCheckSchema ? access.yes : access.not],
+        'Access to operation:publish': [tokenInfo.canPublishOperations ? access.yes : access.not],
       });
 
       this.log(print());
     } else if (result.tokenInfo.__typename === 'TokenNotFoundError') {
       this.error(`Token not found. Reason: ${result.tokenInfo.message}`, {
         exit: 0,
-        suggestions: [
-          `How to create a token? https://docs.graphql-hive.com/features/tokens`,
-        ],
+        suggestions: [`How to create a token? https://docs.graphql-hive.com/features/tokens`],
       });
     }
   }
 }
 
-function createPrinter(records: {
-  [label: string]: [value: string, extra?: string];
-}) {
+function createPrinter(records: { [label: string]: [value: string, extra?: string] }) {
   const labels = Object.keys(records);
-  const values = Object.values(records).map((v) => v[0]);
-  const maxLabelsLen = Math.max(...labels.map((v) => v.length)) + 4;
-  const maxValuesLen = Math.max(...values.map((v) => v.length)) + 4;
+  const values = Object.values(records).map(v => v[0]);
+  const maxLabelsLen = Math.max(...labels.map(v => v.length)) + 4;
+  const maxValuesLen = Math.max(...values.map(v => v.length)) + 4;
 
   return () => {
     const lines: string[] = [];
@@ -102,11 +87,7 @@ function createPrinter(records: {
     for (const label in records) {
       const [value, extra] = records[label];
 
-      lines.push(
-        label.padEnd(maxLabelsLen, ' ') +
-          value.padEnd(maxValuesLen, ' ') +
-          (extra || '')
-      );
+      lines.push(label.padEnd(maxLabelsLen, ' ') + value.padEnd(maxValuesLen, ' ') + (extra || ''));
     }
 
     return lines.join('\n');

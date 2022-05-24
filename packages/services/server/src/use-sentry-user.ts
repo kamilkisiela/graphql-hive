@@ -9,9 +9,7 @@ export function extractUserId(context?: { user?: { sub: string } }) {
     const maxLen = 10;
 
     // Why? Sentry hides a user id when it looks similar to an api key (long hash)
-    return `${provider}|${
-      id.length > maxLen ? id.substr(0, maxLen) + '...' : id
-    }`;
+    return `${provider}|${id.length > maxLen ? id.substr(0, maxLen) + '...' : id}`;
   }
 
   return null;
@@ -25,7 +23,7 @@ export const useSentryUser = (): Plugin<{
       const id = extractUserId(args.contextValue);
 
       if (id) {
-        Sentry.configureScope((scope) => {
+        Sentry.configureScope(scope => {
           scope.setUser({
             id,
           });

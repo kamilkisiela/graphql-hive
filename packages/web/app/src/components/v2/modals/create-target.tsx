@@ -41,15 +41,7 @@ export const CreateTargetModal = ({
   const { push } = useRouter();
   const router = useRouteSelector();
 
-  const {
-    handleSubmit,
-    values,
-    handleChange,
-    handleBlur,
-    isSubmitting,
-    errors,
-    touched,
-  } = useFormik({
+  const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } = useFormik({
     initialValues: { name: '' },
     validationSchema: Yup.object().shape({
       name: Yup.string().required('Target name is required'),
@@ -76,8 +68,7 @@ export const CreateTargetModal = ({
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
         <Heading className="text-center">Create an organization</Heading>
         <p className="text-sm text-gray-500">
-          A project is build on top of <b>Targets</b>, which are just your
-          environments.
+          A project is build on top of <b>Targets</b>, which are just your environments.
         </p>
         <Input
           placeholder="Target name"
@@ -90,26 +81,16 @@ export const CreateTargetModal = ({
           className="grow"
         />
         {touched.name && (errors.name || mutation.error) && (
-          <div className="-mt-2 text-sm text-red-500">
-            {errors.name || mutation.error.message}
-          </div>
+          <div className="-mt-2 text-sm text-red-500">{errors.name || mutation.error.message}</div>
         )}
         {mutation.data?.createTarget.error?.inputErrors.name && (
-          <div className="-mt-2 text-sm text-red-500">
-            {mutation.data.createTarget.error.inputErrors.name}
-          </div>
+          <div className="-mt-2 text-sm text-red-500">{mutation.data.createTarget.error.inputErrors.name}</div>
         )}
         <div className="flex gap-2">
           <Button type="button" size="large" block onClick={toggleModalOpen}>
             Cancel
           </Button>
-          <Button
-            type="submit"
-            size="large"
-            block
-            variant="primary"
-            disabled={isSubmitting}
-          >
+          <Button type="submit" size="large" block variant="primary" disabled={isSubmitting}>
             Create Target
           </Button>
         </div>

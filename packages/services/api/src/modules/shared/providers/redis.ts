@@ -7,14 +7,10 @@ import { Logger } from './logger';
 
 export type { RedisInstance as Redis };
 
-export type RedisConfig = Required<
-  Pick<RedisOptions, 'host' | 'port' | 'password'>
->;
+export type RedisConfig = Required<Pick<RedisOptions, 'host' | 'port' | 'password'>>;
 
 export const REDIS_CONFIG = new InjectionToken<RedisConfig>('REDIS_CONFIG');
-export const REDIS_INSTANCE = new InjectionToken<RedisInstance>(
-  'REDIS_INSTANCE'
-);
+export const REDIS_INSTANCE = new InjectionToken<RedisInstance>('REDIS_INSTANCE');
 
 export const RedisProvider: FactoryProvider<RedisInstance> = {
   provide: REDIS_INSTANCE,
@@ -38,7 +34,7 @@ export const RedisProvider: FactoryProvider<RedisInstance> = {
       enableReadyCheck: false,
     });
 
-    redis.on('error', (err) => {
+    redis.on('error', err => {
       logger.error(err);
     });
 
@@ -54,7 +50,7 @@ export const RedisProvider: FactoryProvider<RedisInstance> = {
       logger.info('Redis connection closed');
     });
 
-    redis.on('reconnecting', (timeToReconnect) => {
+    redis.on('reconnecting', timeToReconnect => {
       logger.info('Redis reconnecting in %s', timeToReconnect);
     });
 

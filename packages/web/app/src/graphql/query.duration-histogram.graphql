@@ -1,7 +1,4 @@
-query durationHistogram(
-  $selector: OperationsStatsSelectorInput!
-  $resolution: Int!
-) {
+query durationHistogram($selector: OperationsStatsSelectorInput!, $resolution: Int!) {
   operationsStats(selector: $selector) {
     durationHistogram(resolution: $resolution) {
       duration

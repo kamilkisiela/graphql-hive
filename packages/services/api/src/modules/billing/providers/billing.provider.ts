@@ -2,11 +2,7 @@ import { Inject, Injectable, Scope } from 'graphql-modules';
 import { Logger } from '../../shared/providers/logger';
 import { BILLING_CONFIG } from './tokens';
 import type { BillingConfig } from './tokens';
-import type {
-  StripeBillingApi,
-  StripeBillingMutationInput,
-  StripeBillingQueryInput,
-} from '@hive/stripe-billing';
+import type { StripeBillingApi, StripeBillingMutationInput, StripeBillingQueryInput } from '@hive/stripe-billing';
 import { createTRPCClient } from '@trpc/client';
 import { fetch } from 'cross-undici-fetch';
 import { OrganizationSelector } from '../../../__generated__/types';
@@ -23,11 +19,7 @@ export class BillingProvider {
 
   enabled = false;
 
-  constructor(
-    logger: Logger,
-    private storage: Storage,
-    @Inject(BILLING_CONFIG) billingConfig: BillingConfig
-  ) {
+  constructor(logger: Logger, private storage: Storage, @Inject(BILLING_CONFIG) billingConfig: BillingConfig) {
     this.logger = logger.child({ source: 'BillingProvider' });
     this.billingService = billingConfig.endpoint
       ? createTRPCClient<StripeBillingApi>({
@@ -41,22 +33,15 @@ export class BillingProvider {
     }
   }
 
-  upgradeToPro(
-    input: StripeBillingMutationInput<'createSubscriptionForOrganization'>
-  ) {
+  upgradeToPro(input: StripeBillingMutationInput<'createSubscriptionForOrganization'>) {
     if (!this.billingService) {
       throw new Error(`Billing service is not configured!`);
     }
 
-    return this.billingService.mutation(
-      'createSubscriptionForOrganization',
-      input
-    );
+    return this.billingService.mutation('createSubscriptionForOrganization', input);
   }
 
-  syncOrganization(
-    input: StripeBillingMutationInput<'syncOrganizationToStripe'>
-  ) {
+  syncOrganization(input: StripeBillingMutationInput<'syncOrganizationToStripe'>) {
     if (!this.billingService) {
       throw new Error(`Billing service is not configured!`);
     }
@@ -72,9 +57,7 @@ export class BillingProvider {
     return await this.billingService.query('availablePrices');
   }
 
-  async getOrganizationBillingParticipant(
-    selector: OrganizationSelector
-  ): Promise<OrganizationBilling | null> {
+  async getOrganizationBillingParticipant(selector: OrganizationSelector): Promise<OrganizationBilling | null> {
     this.logger.debug('Fetching organization billing (selector=%o)', selector);
 
     return this.storage.getOrganizationBilling({
@@ -106,16 +89,11 @@ export class BillingProvider {
     return this.billingService.query('upcomingInvoice', input);
   }
 
-  async downgradeToHobby(
-    input: StripeBillingMutationInput<'cancelSubscriptionForOrganization'>
-  ) {
+  async downgradeToHobby(input: StripeBillingMutationInput<'cancelSubscriptionForOrganization'>) {
     if (!this.billingService) {
       throw new Error(`Billing service is not configured!`);
     }
 
-    return await this.billingService.mutation(
-      'cancelSubscriptionForOrganization',
-      input
-    );
+    return await this.billingService.mutation('cancelSubscriptionForOrganization', input);
   }
 }

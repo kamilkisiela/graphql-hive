@@ -36,10 +36,7 @@ export class AdminManager {
   }
 
   async getOperationsOverTime({ daysLimit }: { daysLimit: number }) {
-    this.logger.debug(
-      'Fetching collected operations over time (admin, daysLimit=%s)',
-      daysLimit
-    );
+    this.logger.debug('Fetching collected operations over time (admin, daysLimit=%s)', daysLimit);
     const user = await this.authManager.getCurrentUser();
 
     if (!user.isAdmin) {
@@ -50,7 +47,7 @@ export class AdminManager {
       daysLimit,
     });
 
-    return points.map((point) => ({
+    return points.map(point => ({
       date: point.date,
       count: point.total,
     }));
@@ -58,23 +55,17 @@ export class AdminManager {
 
   @atomic((arg: { daysLimit: number }) => arg.daysLimit + '')
   async countOperationsPerOrganization({ daysLimit }: { daysLimit: number }) {
-    this.logger.info(
-      'Counting collected operations per organization (admin, daysLimit=%s)',
-      daysLimit
-    );
+    this.logger.info('Counting collected operations per organization (admin, daysLimit=%s)', daysLimit);
     const user = await this.authManager.getCurrentUser();
 
     if (user.isAdmin) {
       const pairs = await this.storage.adminGetOrganizationsTargetPairs();
-      const operations =
-        await this.operationsReader.adminCountOperationsPerTarget({
-          daysLimit,
-        });
+      const operations = await this.operationsReader.adminCountOperationsPerTarget({
+        daysLimit,
+      });
 
       const organizationCountMap = new Map<string, number>();
-      const targetOrganizationMap = new Map<string, string>(
-        pairs.map((p) => [p.target, p.organization])
-      );
+      const targetOrganizationMap = new Map<string, string>(pairs.map(p => [p.target, p.organization]));
 
       for (const op of operations) {
         const organizationId = targetOrganizationMap.get(op.target);
@@ -85,7 +76,7 @@ export class AdminManager {
         }
       }
 
-      return Array.from(organizationCountMap.entries()).map((entry) => ({
+      return Array.from(organizationCountMap.entries()).map(entry => ({
         organization: entry[0],
         total: entry[1],
       }));

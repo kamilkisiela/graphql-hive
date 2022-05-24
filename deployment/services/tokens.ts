@@ -29,9 +29,7 @@ export function deployTokens({
       env: {
         ...deploymentEnv,
         ...commonEnv,
-        POSTGRES_CONNECTION_STRING: apiConfig.requireSecret(
-          'postgresConnectionString'
-        ),
+        POSTGRES_CONNECTION_STRING: apiConfig.requireSecret('postgresConnectionString'),
         RELEASE: packageHelper.currentReleaseId(),
       },
       readinessProbe: '/_readiness',

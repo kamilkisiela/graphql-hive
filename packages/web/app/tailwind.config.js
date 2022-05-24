@@ -91,7 +91,7 @@ module.exports = {
       zIndex: {
         '-1': -1,
       },
-      ringColor: (theme) => ({
+      ringColor: theme => ({
         DEFAULT: theme('colors.orange.500'),
         ...theme('colors'),
       }),

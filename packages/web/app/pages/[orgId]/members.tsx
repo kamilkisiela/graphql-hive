@@ -14,7 +14,7 @@ import {
   OrganizationType,
   ResetInviteCodeDocument,
 } from '@/graphql';
-import { OrganizationAccessScope,useOrganizationAccess } from '@/lib/access/organization';
+import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
 import { useNotifications } from '@/lib/hooks/use-notifications';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 

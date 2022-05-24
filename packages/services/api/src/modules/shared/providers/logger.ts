@@ -16,6 +16,5 @@ export class Logger {
   fatal: LogFn = notImplemented('fatal');
   trace: LogFn = notImplemented('trace');
   debug: LogFn = notImplemented('debug');
-  child: (bindings: Record<string, unknown>) => Logger =
-    notImplemented('child');
+  child: (bindings: Record<string, unknown>) => Logger = notImplemented('child');
 }

@@ -57,14 +57,7 @@ export class BotKube {
                 restrictAccess: 'true',
                 enabled: String(config.enableKubectl),
                 commands: {
-                  verbs: [
-                    'cluster-info',
-                    'describe',
-                    'get',
-                    'logs',
-                    'top',
-                    'restart',
-                  ],
+                  verbs: ['cluster-info', 'describe', 'get', 'logs', 'top', 'restart'],
                   resources: [
                     'deployments',
                     'pods',

@@ -1,34 +1,19 @@
 import React from 'react';
 import 'twin.macro';
-import {
-  OrganizationAccessScope,
-  useOrganizationAccess,
-} from '@/lib/access/organization';
+import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
 import { OrganizationView } from '@/components/organization/View';
 import { OrganizationUsageEstimationView } from '@/components/organization/Usage';
-import {
-  OrganizationFieldsFragment,
-  OrgBillingInfoFieldsFragment,
-  OrgRateLimitFieldsFragment,
-} from '@/graphql';
+import { OrganizationFieldsFragment, OrgBillingInfoFieldsFragment, OrgRateLimitFieldsFragment } from '@/graphql';
 import { Card, Page } from '@/components/common';
 import { BillingView } from '@/components/organization/billing/Billing';
-import {
-  Button,
-  Stat,
-  StatHelpText,
-  StatLabel,
-  StatNumber,
-} from '@chakra-ui/react';
+import { Button, Stat, StatHelpText, StatLabel, StatNumber } from '@chakra-ui/react';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { InvoicesList } from '@/components/organization/billing/InvoicesList';
 import { CurrencyFormatter } from '@/components/organization/billing/helpers';
 import { RateLimitWarn } from '@/components/organization/billing/RateLimitWarn';
 
 const Inner: React.FC<{
-  organization: OrganizationFieldsFragment &
-    OrgBillingInfoFieldsFragment &
-    OrgRateLimitFieldsFragment;
+  organization: OrganizationFieldsFragment & OrgBillingInfoFieldsFragment & OrgRateLimitFieldsFragment;
 }> = ({ organization }) => {
   const router = useRouteSelector();
   const canAccess = useOrganizationAccess({
@@ -44,9 +29,7 @@ const Inner: React.FC<{
   return (
     <Page
       title={'Subscription'}
-      subtitle={
-        'Information about your Hive plan, subscription, usage and data ingestion.'
-      }
+      subtitle={'Information about your Hive plan, subscription, usage and data ingestion.'}
       actions={
         <Button
           colorScheme="primary"
@@ -71,14 +54,9 @@ const Inner: React.FC<{
                     <Stat tw="mb-4">
                       <StatLabel>Next Invoice</StatLabel>
                       <StatNumber>
-                        {CurrencyFormatter.format(
-                          organization.billingConfiguration.upcomingInvoice
-                            .amount
-                        )}
+                        {CurrencyFormatter.format(organization.billingConfiguration.upcomingInvoice.amount)}
                       </StatNumber>
-                      <StatHelpText>
-                        {organization.billingConfiguration.upcomingInvoice.date}
-                      </StatHelpText>
+                      <StatHelpText>{organization.billingConfiguration.upcomingInvoice.date}</StatHelpText>
                     </Stat>
                   ) : null}
                 </BillingView>
@@ -109,11 +87,7 @@ const Inner: React.FC<{
 
 export default function SubscriptionPage() {
   return (
-    <OrganizationView
-      title="Subscription & Usage"
-      includeBilling={true}
-      includeRateLimit={true}
-    >
+    <OrganizationView title="Subscription & Usage" includeBilling={true} includeRateLimit={true}>
       {({ organization }) => <Inner organization={organization} />}
     </OrganizationView>
   );

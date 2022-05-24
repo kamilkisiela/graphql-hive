@@ -20,20 +20,13 @@ export const DeleteMembersModal = ({
   const isSingle = memberIds.length === 1;
 
   return (
-    <Modal
-      open={isOpen}
-      onOpenChange={toggleModalOpen}
-      className="flex flex-col items-center gap-5"
-    >
+    <Modal open={isOpen} onOpenChange={toggleModalOpen} className="flex flex-col items-center gap-5">
       <TrashIcon className="h-24 w-24 text-red-500 opacity-70" />
       <Heading>Delete member{isSingle ? '' : 's'}</Heading>
       <p className="text-sm text-gray-500">
-        Are you sure you wish to delete{' '}
-        {isSingle ? 'this user' : `${memberIds.length} users`}?
+        Are you sure you wish to delete {isSingle ? 'this user' : `${memberIds.length} users`}?
       </p>
-      {mutation.error && (
-        <div className="text-sm text-red-500">{mutation.error.message}</div>
-      )}
+      {mutation.error && <div className="text-sm text-red-500">{mutation.error.message}</div>}
       <div className="flex w-full gap-2">
         <Button type="button" size="large" block onClick={toggleModalOpen}>
           Cancel

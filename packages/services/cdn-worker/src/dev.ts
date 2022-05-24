@@ -32,23 +32,14 @@ export function sendNodeResponse(
   if (body == null) {
     serverResponse.end();
   } else {
-    const nodeStream = (
-      isReadable(body) ? body : Readable.from(body)
-    ) as Readable;
+    const nodeStream = (isReadable(body) ? body : Readable.from(body)) as Readable;
     nodeStream.pipe(serverResponse);
   }
 }
 
-function getRequestAddressInfo(
-  nodeRequest: FastifyRequest,
-  defaultAddressInfo: AddressInfo
-): AddressInfo {
-  const hostnameWithPort =
-    nodeRequest.hostname ??
-    nodeRequest.headers.host ??
-    defaultAddressInfo.hostname;
-  const [hostname = nodeRequest.hostname, port = defaultAddressInfo.port] =
-    hostnameWithPort.split(':');
+function getRequestAddressInfo(nodeRequest: FastifyRequest, defaultAddressInfo: AddressInfo): AddressInfo {
+  const hostnameWithPort = nodeRequest.hostname ?? nodeRequest.headers.host ?? defaultAddressInfo.hostname;
+  const [hostname = nodeRequest.hostname, port = defaultAddressInfo.port] = hostnameWithPort.split(':');
   return {
     protocol: nodeRequest.protocol ?? defaultAddressInfo.protocol,
     hostname,
@@ -61,10 +52,7 @@ function buildFullUrl(addressInfo: AddressInfo) {
   return `${addressInfo.protocol}://${addressInfo.hostname}:${addressInfo.port}${addressInfo.endpoint}`;
 }
 
-export async function getNodeRequest(
-  nodeRequest: FastifyRequest,
-  defaultAddressInfo: AddressInfo
-): Promise<Request> {
+export async function getNodeRequest(nodeRequest: FastifyRequest, defaultAddressInfo: AddressInfo): Promise<Request> {
   const addressInfo = getRequestAddressInfo(nodeRequest, defaultAddressInfo);
   const fullUrl = buildFullUrl(addressInfo);
   const baseRequestInit: RequestInit = {
@@ -80,10 +68,7 @@ export async function getNodeRequest(
   if (maybeParsedBody) {
     return new Request(fullUrl, {
       ...baseRequestInit,
-      body:
-        typeof maybeParsedBody === 'string'
-          ? maybeParsedBody
-          : JSON.stringify(maybeParsedBody),
+      body: typeof maybeParsedBody === 'string' ? maybeParsedBody : JSON.stringify(maybeParsedBody),
     });
   }
 
@@ -110,7 +95,7 @@ async function main() {
   }>({
     url: '/:accountId/storage/kv/namespaces/:namespaceId/values/:key',
     method: 'PUT',
-    handler: async (request) => {
+    handler: async request => {
       if (!request.params.key) {
         throw new Error(`Missing key`);
       }
@@ -119,9 +104,7 @@ async function main() {
         throw new Error(`Missing body value`);
       }
 
-      console.log(
-        `Writing to ephermal storage: ${request.params.key}, value: ${request.body}`
-      );
+      console.log(`Writing to ephermal storage: ${request.params.key}, value: ${request.body}`);
 
       devStorage.set(request.params.key, request.body as string);
 
@@ -168,4 +151,4 @@ async function main() {
   await server.listen(PORT, '0.0.0.0');
 }
 
-main().catch((e) => console.error(e));
+main().catch(e => console.error(e));

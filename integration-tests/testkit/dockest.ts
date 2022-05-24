@@ -1,8 +1,5 @@
 import { DockestService, execa } from 'dockest';
-import {
-  containerIsHealthyReadinessCheck,
-  zeroExitCodeReadinessCheck,
-} from 'dockest/dist/readiness-check/index.js';
+import { containerIsHealthyReadinessCheck, zeroExitCodeReadinessCheck } from 'dockest/dist/readiness-check/index.js';
 import { DepGraph } from 'dependency-graph';
 import { readFileSync } from 'fs';
 import { join } from 'path';
@@ -28,9 +25,7 @@ export function createServices() {
     graph.addNode(serviceName, {
       serviceName,
       dependsOn: [],
-      readinessCheck: service.healthcheck
-        ? containerIsHealthyReadinessCheck
-        : zeroExitCodeReadinessCheck,
+      readinessCheck: service.healthcheck ? containerIsHealthyReadinessCheck : zeroExitCodeReadinessCheck,
     });
   }
 
@@ -58,20 +53,16 @@ export function createServices() {
 
     registry[serviceName] = {
       ...service,
-      dependsOn: graph
-        .directDependenciesOf(serviceName)
-        .map((dep) => graph.getNodeData(dep)),
+      dependsOn: graph.directDependenciesOf(serviceName).map(dep => graph.getNodeData(dep)),
     };
   }
 
   // And return a list of services
-  return allServices.map((serviceName) => graph.getNodeData(serviceName));
+  return allServices.map(serviceName => graph.getNodeData(serviceName));
 }
 
 export function cleanDockerContainers() {
-  const output = execa(
-    `docker ps --all --filter "name=integration-tests" --format={{.ID}}:{{.Status}}`
-  );
+  const output = execa(`docker ps --all --filter "name=integration-tests" --format={{.ID}}:{{.Status}}`);
 
   if (output.stdout.length) {
     const runningContainers = output.stdout.split('\n');

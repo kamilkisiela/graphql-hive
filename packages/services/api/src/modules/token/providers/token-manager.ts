@@ -50,11 +50,7 @@ export class TokenManager {
       scope: TargetAccessScope.TOKENS_WRITE,
     });
 
-    const scopes = [
-      ...input.organizationScopes,
-      ...input.projectScopes,
-      ...input.targetScopes,
-    ];
+    const scopes = [...input.organizationScopes, ...input.projectScopes, ...input.targetScopes];
 
     const currentUser = await this.authManager.getCurrentUser();
     const currentMember = await this.storage.getOrganizationMember({
@@ -62,25 +58,17 @@ export class TokenManager {
       user: currentUser.id,
     });
 
-    const newScopes = [
-      ...input.organizationScopes,
-      ...input.projectScopes,
-      ...input.targetScopes,
-    ];
+    const newScopes = [...input.organizationScopes, ...input.projectScopes, ...input.targetScopes];
 
     // See what scopes were removed or added
     const modifiedScopes = diffArrays(currentMember.scopes, newScopes);
 
     // Check if the current user has rights to set these scopes.
-    const currentUserMissingScopes = modifiedScopes.filter(
-      (scope) => !currentMember.scopes.includes(scope)
-    );
+    const currentUserMissingScopes = modifiedScopes.filter(scope => !currentMember.scopes.includes(scope));
 
     if (currentUserMissingScopes.length > 0) {
       this.logger.debug(`Logged user scopes: %o`, currentMember.scopes);
-      throw new HiveError(
-        `No access to the scopes: ${currentUserMissingScopes.join(', ')}`
-      );
+      throw new HiveError(`No access to the scopes: ${currentUserMissingScopes.join(', ')}`);
     }
 
     pushIfMissing(scopes, TargetAccessScope.READ);

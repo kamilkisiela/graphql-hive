@@ -13,21 +13,9 @@ import {
   EnsurePersonalOrganizationEventPayload,
 } from '../../organization/providers/events';
 import { ApiToken } from './tokens';
-import {
-  OrganizationAccess,
-  OrganizationAccessScope,
-  OrganizationUserScopesSelector,
-} from './organization-access';
-import {
-  ProjectAccess,
-  ProjectAccessScope,
-  ProjectUserScopesSelector,
-} from './project-access';
-import {
-  TargetAccess,
-  TargetAccessScope,
-  TargetUserScopesSelector,
-} from './target-access';
+import { OrganizationAccess, OrganizationAccessScope, OrganizationUserScopesSelector } from './organization-access';
+import { ProjectAccess, ProjectAccessScope, ProjectUserScopesSelector } from './project-access';
+import { TargetAccess, TargetAccessScope, TargetUserScopesSelector } from './target-access';
 import { UserManager } from './user-manager';
 
 export interface OrganizationAccessSelector {
@@ -74,13 +62,11 @@ export class AuthManager {
     this.user = context.user;
   }
 
-  async ensureTargetAccess(
-    selector: Listify<TargetAccessSelector, 'target'>
-  ): Promise<void | never> {
+  async ensureTargetAccess(selector: Listify<TargetAccessSelector, 'target'>): Promise<void | never> {
     if (this.apiToken) {
       if (hasManyTargets(selector)) {
         await Promise.all(
-          selector.target.map((target) =>
+          selector.target.map(target =>
             this.ensureTargetAccess({
               ...selector,
               target,
@@ -96,7 +82,7 @@ export class AuthManager {
     } else {
       if (hasManyTargets(selector)) {
         await Promise.all(
-          selector.target.map((target) =>
+          selector.target.map(target =>
             this.ensureTargetAccess({
               ...selector,
               target,
@@ -113,9 +99,7 @@ export class AuthManager {
     }
   }
 
-  async ensureProjectAccess(
-    selector: ProjectAccessSelector
-  ): Promise<void | never> {
+  async ensureProjectAccess(selector: ProjectAccessSelector): Promise<void | never> {
     if (this.apiToken) {
       await this.projectAccess.ensureAccessForToken({
         ...selector,
@@ -130,9 +114,7 @@ export class AuthManager {
     }
   }
 
-  async ensureOrganizationAccess(
-    selector: OrganizationAccessSelector
-  ): Promise<void | never> {
+  async ensureOrganizationAccess(selector: OrganizationAccessSelector): Promise<void | never> {
     if (this.apiToken) {
       await this.organizationAccess.ensureAccessForToken({
         ...selector,
@@ -153,13 +135,9 @@ export class AuthManager {
     }
   }
 
-  async checkOrganizationAccess(
-    selector: OrganizationAccessSelector
-  ): Promise<boolean> {
+  async checkOrganizationAccess(selector: OrganizationAccessSelector): Promise<boolean> {
     if (this.apiToken) {
-      throw new Error(
-        'checkOrganizationAccess for token is not implemented yet'
-      );
+      throw new Error('checkOrganizationAccess for token is not implemented yet');
     }
 
     const user = await this.getCurrentUser();
@@ -179,9 +157,7 @@ export class AuthManager {
   }
 
   getUserIdForTracking: () => Promise<string | never> = share(async () => {
-    const user = await (this.apiToken
-      ? this.getOrganizationOwnerByToken()
-      : this.getCurrentUser());
+    const user = await (this.apiToken ? this.getOrganizationOwnerByToken() : this.getCurrentUser());
 
     createOrUpdateUser({
       id: user.externalAuthUserId,
@@ -207,33 +183,31 @@ export class AuthManager {
     return member.user;
   });
 
-  getCurrentUser: () => Promise<(User & { isAdmin: boolean }) | never> = share(
-    async () => {
-      if (!this.user) {
-        throw new AccessError('Authorization token is missing');
-      }
-
-      const info = (this.user as any)['https://graphql-hive.com/userinfo'];
-      const metadata = (this.user as any)['https://graphql-hive.com/metadata'];
-
-      let internalUser = await this.storage.getUserByExternalId({
-        external: info.user_id,
-      });
-
-      if (!internalUser) {
-        internalUser = await this.idempotentRunner.run({
-          identifier: `user:create:${info.user_id}`,
-          executor: () => this.ensureInternalUser(info),
-          ttl: 60,
-        });
-      }
-
-      return {
-        ...internalUser,
-        isAdmin: metadata?.admin === true,
-      };
+  getCurrentUser: () => Promise<(User & { isAdmin: boolean }) | never> = share(async () => {
+    if (!this.user) {
+      throw new AccessError('Authorization token is missing');
     }
-  );
+
+    const info = (this.user as any)['https://graphql-hive.com/userinfo'];
+    const metadata = (this.user as any)['https://graphql-hive.com/metadata'];
+
+    let internalUser = await this.storage.getUserByExternalId({
+      external: info.user_id,
+    });
+
+    if (!internalUser) {
+      internalUser = await this.idempotentRunner.run({
+        identifier: `user:create:${info.user_id}`,
+        executor: () => this.ensureInternalUser(info),
+        ttl: 60,
+      });
+    }
+
+    return {
+      ...internalUser,
+      isAdmin: metadata?.admin === true,
+    };
+  });
 
   private async ensureInternalUser(input: { user_id: string; email: string }) {
     let internalUser = await this.storage.getUserByExternalId({
@@ -247,24 +221,18 @@ export class AuthManager {
       });
     }
 
-    await this.messageBus.emit<EnsurePersonalOrganizationEventPayload>(
-      ENSURE_PERSONAL_ORGANIZATION_EVENT,
-      {
-        name: internalUser.displayName,
-        user: {
-          id: internalUser.id,
-          externalAuthUserId: internalUser.externalAuthUserId,
-        },
-      }
-    );
+    await this.messageBus.emit<EnsurePersonalOrganizationEventPayload>(ENSURE_PERSONAL_ORGANIZATION_EVENT, {
+      name: internalUser.displayName,
+      user: {
+        id: internalUser.id,
+        externalAuthUserId: internalUser.externalAuthUserId,
+      },
+    });
 
     return internalUser;
   }
 
-  async updateCurrentUser(input: {
-    displayName: string;
-    fullName: string;
-  }): Promise<User> {
+  async updateCurrentUser(input: { displayName: string; fullName: string }): Promise<User> {
     const user = await this.getCurrentUser();
     return this.userManager.updateUser({
       id: user.id,

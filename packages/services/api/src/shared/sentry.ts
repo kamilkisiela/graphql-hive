@@ -5,10 +5,7 @@ export type SentryContext = Parameters<Span['startChild']>[0] & {
   captureException?: boolean;
 };
 
-export function sentry(
-  name: string,
-  addToContext?: (...args: any[]) => SentryContext
-): MethodDecorator {
+export function sentry(name: string, addToContext?: (...args: any[]) => SentryContext): MethodDecorator {
   return function sentryDecorator(_target, _prop, descriptor) {
     const originalMethod = descriptor.value;
 
@@ -17,10 +14,8 @@ export function sentry(
         op: name,
       };
 
-      const lastArgument =
-        args.length > 0 ? (args[args.length - 1] as Span) : null;
-      const passedSpan =
-        lastArgument && 'spanId' in lastArgument ? lastArgument : null;
+      const lastArgument = args.length > 0 ? (args[args.length - 1] as Span) : null;
+      const passedSpan = lastArgument && 'spanId' in lastArgument ? lastArgument : null;
 
       if (addToContext) {
         context = {
@@ -29,8 +24,7 @@ export function sentry(
         };
       }
 
-      const parentSpan =
-        passedSpan ?? Sentry.getCurrentHub().getScope()?.getSpan();
+      const parentSpan = passedSpan ?? Sentry.getCurrentHub().getScope()?.getSpan();
       const span = parentSpan?.startChild(
         typeof context === 'string'
           ? {
@@ -43,21 +37,14 @@ export function sentry(
         return (originalMethod as any).apply(this, args);
       }
 
-      const argsWithoutSpan = passedSpan
-        ? args.slice(0, args.length - 1)
-        : args;
+      const argsWithoutSpan = passedSpan ? args.slice(0, args.length - 1) : args;
 
-      return (
-        (originalMethod as any).apply(
-          this,
-          argsWithoutSpan.concat(span)
-        ) as Promise<any>
-      ).then(
-        (result) => {
+      return ((originalMethod as any).apply(this, argsWithoutSpan.concat(span)) as Promise<any>).then(
+        result => {
           span.finish();
           return Promise.resolve(result);
         },
-        (error) => {
+        error => {
           console.log('sentry decorator error', error);
           Sentry.captureException(error);
           span.setStatus('internal_error');

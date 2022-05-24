@@ -63,29 +63,21 @@ export class ProjectAccess {
   private logger: Logger;
   private userAccess: Dataloader<ProjectUserAccessSelector, boolean, string>;
   private tokenAccess: Dataloader<ProjectTokenAccessSelector, boolean, string>;
-  private scopes: Dataloader<
-    ProjectUserScopesSelector,
-    readonly ProjectAccessScope[],
-    string
-  >;
+  private scopes: Dataloader<ProjectUserScopesSelector, readonly ProjectAccessScope[], string>;
 
   constructor(logger: Logger, private organizationAccess: OrganizationAccess) {
     this.logger = logger.child({
       source: 'ProjectAccess',
     });
     this.userAccess = new Dataloader(
-      async (selectors) => {
+      async selectors => {
         const scopes = await this.scopes.loadMany(selectors);
 
         return selectors.map((selector, i) => {
           const scopesForSelector = scopes[i];
 
           if (scopesForSelector instanceof Error) {
-            this.logger.warn(
-              `ProjectAccess:user (error=%s, selector=%o)`,
-              scopesForSelector.message,
-              selector
-            );
+            this.logger.warn(`ProjectAccess:user (error=%s, selector=%o)`, scopesForSelector.message, selector);
             return false;
           }
 
@@ -105,17 +97,12 @@ export class ProjectAccess {
       }
     );
     this.tokenAccess = new Dataloader(
-      (selectors) =>
+      selectors =>
         Promise.all(
-          selectors.map(async (selector) => {
-            const tokenInfo = await this.organizationAccess.tokenInfo.load(
-              selector
-            );
+          selectors.map(async selector => {
+            const tokenInfo = await this.organizationAccess.tokenInfo.load(selector);
 
-            if (
-              tokenInfo?.organization === selector.organization &&
-              tokenInfo?.project === selector.project
-            ) {
+            if (tokenInfo?.organization === selector.organization && tokenInfo?.project === selector.project) {
               return tokenInfo.scopes.includes(selector.scope);
             }
 
@@ -135,20 +122,14 @@ export class ProjectAccess {
       }
     );
     this.scopes = new Dataloader(
-      async (selectors) => {
-        const scopesPerSelector = await this.organizationAccess.getAllScopes(
-          selectors
-        );
+      async selectors => {
+        const scopesPerSelector = await this.organizationAccess.getAllScopes(selectors);
 
         return selectors.map((selector, i) => {
           const scopes = scopesPerSelector[i];
 
           if (scopes instanceof Error) {
-            this.logger.debug(
-              `ProjectAccess:scopes (error=%s, selector=%o)`,
-              scopes.message,
-              selector
-            );
+            this.logger.debug(`ProjectAccess:scopes (error=%s, selector=%o)`, scopes.message, selector);
             return [];
           }
 
@@ -167,9 +148,7 @@ export class ProjectAccess {
     );
   }
 
-  async ensureAccessForToken(
-    selector: ProjectTokenAccessSelector
-  ): Promise<void | never> {
+  async ensureAccessForToken(selector: ProjectTokenAccessSelector): Promise<void | never> {
     const canAccess = await this.tokenAccess.load(selector);
 
     if (!canAccess) {
@@ -177,9 +156,7 @@ export class ProjectAccess {
     }
   }
 
-  async ensureAccessForUser(
-    selector: ProjectUserAccessSelector
-  ): Promise<void | never> {
+  async ensureAccessForUser(selector: ProjectUserAccessSelector): Promise<void | never> {
     const canAccess = await this.userAccess.load(selector);
 
     if (!canAccess) {

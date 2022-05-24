@@ -39,13 +39,9 @@ export const NameSettings: React.FC<{
             placeholder="Name your target"
             disabled={disabled}
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={e => setName(e.target.value)}
           />
-          <Button
-            colorScheme="primary"
-            disabled={disabled || name.length === 0}
-            onClick={submit}
-          >
+          <Button colorScheme="primary" disabled={disabled || name.length === 0} onClick={submit}>
             Save
           </Button>
         </form>

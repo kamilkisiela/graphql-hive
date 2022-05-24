@@ -6,13 +6,7 @@ import { AuthManager } from '../../auth/providers/auth-manager';
 import { Logger } from '../../shared/providers/logger';
 import { Storage } from '../../shared/providers/storage';
 import type { OrganizationSelector } from '../../shared/providers/storage';
-import {
-  share,
-  cache,
-  uuid,
-  diffArrays,
-  pushIfMissing,
-} from '../../../shared/helpers';
+import { share, cache, uuid, diffArrays, pushIfMissing } from '../../../shared/helpers';
 import { MessageBus } from '../../shared/providers/message-bus';
 import { ActivityManager } from '../../activity/providers/activity-manager';
 import { BillingProvider } from '../../billing/providers/billing.provider';
@@ -21,10 +15,7 @@ import { Tracking } from '../../shared/providers/tracking';
 import { OrganizationAccessScope } from '../../auth/providers/organization-access';
 import { ProjectAccessScope } from '../../auth/providers/project-access';
 import { TargetAccessScope } from '../../auth/providers/target-access';
-import {
-  EnsurePersonalOrganizationEventPayload,
-  ENSURE_PERSONAL_ORGANIZATION_EVENT,
-} from './events';
+import { EnsurePersonalOrganizationEventPayload, ENSURE_PERSONAL_ORGANIZATION_EVENT } from './events';
 
 const reservedNames = [
   'registry',
@@ -82,27 +73,24 @@ export class OrganizationManager {
     private billingProvider: BillingProvider
   ) {
     this.logger = logger.child({ source: 'OrganizationManager' });
-    this.messageBus.on<EnsurePersonalOrganizationEventPayload>(
-      ENSURE_PERSONAL_ORGANIZATION_EVENT,
-      (data) => this.ensurePersonalOrganization(data)
+    this.messageBus.on<EnsurePersonalOrganizationEventPayload>(ENSURE_PERSONAL_ORGANIZATION_EVENT, data =>
+      this.ensurePersonalOrganization(data)
     );
   }
 
-  getOrganizationFromToken: () => Promise<Organization | never> = share(
-    async () => {
-      const token = this.authManager.ensureApiToken();
-      const result = await this.tokenStorage.getToken({ token });
+  getOrganizationFromToken: () => Promise<Organization | never> = share(async () => {
+    const token = this.authManager.ensureApiToken();
+    const result = await this.tokenStorage.getToken({ token });
 
-      await this.authManager.ensureOrganizationAccess({
-        organization: result.organization,
-        scope: OrganizationAccessScope.READ,
-      });
+    await this.authManager.ensureOrganizationAccess({
+      organization: result.organization,
+      scope: OrganizationAccessScope.READ,
+    });
 
-      return this.storage.getOrganization({
-        organization: result.organization,
-      });
-    }
-  );
+    return this.storage.getOrganization({
+      organization: result.organization,
+    });
+  });
 
   getOrganizationIdByToken: () => Promise<string | never> = share(async () => {
     const token = this.authManager.ensureApiToken();
@@ -128,11 +116,7 @@ export class OrganizationManager {
     return this.storage.getOrganizations({ user: user.id });
   }
 
-  async getOrganizationByInviteCode({
-    code,
-  }: {
-    code: string;
-  }): Promise<Organization | { message: string } | never> {
+  async getOrganizationByInviteCode({ code }: { code: string }): Promise<Organization | { message: string } | never> {
     this.logger.debug('Fetching organization (inviteCode=%s)', code);
     const organization = await this.storage.getOrganizationByInviteCode({
       inviteCode: code,
@@ -163,9 +147,7 @@ export class OrganizationManager {
     return this.storage.getOrganizationMembers(selector);
   }
 
-  async getOrganizationMember(
-    selector: OrganizationSelector & { user: string }
-  ) {
+  async getOrganizationMember(selector: OrganizationSelector & { user: string }) {
     return this.storage.getOrganizationMember(selector);
   }
 
@@ -185,10 +167,7 @@ export class OrganizationManager {
     this.logger.info('Creating an organization (input=%o)', input);
     let cleanId = paramCase(name);
 
-    if (
-      reservedNames.includes(cleanId) ||
-      (await this.storage.getOrganizationByCleanId({ cleanId }))
-    ) {
+    if (reservedNames.includes(cleanId) || (await this.storage.getOrganizationByCleanId({ cleanId }))) {
       cleanId = paramCase(`${name}-${uuid(4)}`);
     }
 
@@ -215,13 +194,8 @@ export class OrganizationManager {
     return organization;
   }
 
-  async deleteOrganization(
-    selector: OrganizationSelector
-  ): Promise<Organization> {
-    this.logger.info(
-      'Deleting an organization (organization=%s)',
-      selector.organization
-    );
+  async deleteOrganization(selector: OrganizationSelector): Promise<Organization> {
+    this.logger.info('Deleting an organization (organization=%s)', selector.organization);
     await this.authManager.ensureOrganizationAccess({
       organization: selector.organization,
       scope: OrganizationAccessScope.DELETE,
@@ -292,9 +266,7 @@ export class OrganizationManager {
     return result;
   }
 
-  async updateRateLimits(
-    input: Pick<Organization, 'monthlyRateLimit'> & OrganizationSelector
-  ): Promise<Organization> {
+  async updateRateLimits(input: Pick<Organization, 'monthlyRateLimit'> & OrganizationSelector): Promise<Organization> {
     const { monthlyRateLimit } = input;
     this.logger.info('Updating an organization plan (input=%o)', input);
     await this.authManager.ensureOrganizationAccess({
@@ -364,11 +336,7 @@ export class OrganizationManager {
     return result;
   }
 
-  async joinOrganization({
-    code,
-  }: {
-    code: string;
-  }): Promise<Organization | { message: string }> {
+  async joinOrganization({ code }: { code: string }): Promise<Organization | { message: string }> {
     this.logger.info('Joining an organization (code=%s)', code);
     const organization = await this.getOrganizationByInviteCode({
       code,
@@ -417,10 +385,7 @@ export class OrganizationManager {
       users: readonly string[];
     } & OrganizationSelector
   ): Promise<Organization> {
-    this.logger.info(
-      'Deleting a member from an organization (selector=%o)',
-      selector
-    );
+    this.logger.info('Deleting a member from an organization (selector=%o)', selector);
     await this.authManager.ensureOrganizationAccess({
       ...selector,
       scope: OrganizationAccessScope.MEMBERS,
@@ -428,7 +393,7 @@ export class OrganizationManager {
     const owner = await this.getOrganizationOwner(selector);
     const { users, organization } = selector;
 
-    if (users.some((user) => user === owner.id)) {
+    if (users.some(user => user === owner.id)) {
       throw new HiveError(`Cannot remove the owner from the organization`);
     }
 
@@ -442,8 +407,8 @@ export class OrganizationManager {
     });
 
     await Promise.all(
-      users.map((user) => {
-        const member = members.find((m) => m.id === user);
+      users.map(user => {
+        const member = members.find(m => m.id === user);
 
         if (member) {
           return this.activityManager.create({
@@ -475,10 +440,7 @@ export class OrganizationManager {
       targetScopes: readonly TargetAccessScope[];
     } & OrganizationSelector
   ) {
-    this.logger.info(
-      'Updating a member access in an organization (input=%o)',
-      input
-    );
+    this.logger.info('Updating a member access in an organization (input=%o)', input);
     await this.authManager.ensureOrganizationAccess({
       ...input,
       scope: OrganizationAccessScope.MEMBERS,
@@ -497,26 +459,18 @@ export class OrganizationManager {
       }),
     ]);
 
-    const newScopes = [
-      ...input.organizationScopes,
-      ...input.projectScopes,
-      ...input.targetScopes,
-    ];
+    const newScopes = [...input.organizationScopes, ...input.projectScopes, ...input.targetScopes];
 
     // See what scopes were removed or added
     const modifiedScopes = diffArrays(member.scopes, newScopes);
 
     // Check if the current user has rights to update these member scopes
     // User can't manage other user's scope if he's missing the scope as well
-    const currentUserMissingScopes = modifiedScopes.filter(
-      (scope) => !currentMember.scopes.includes(scope)
-    );
+    const currentUserMissingScopes = modifiedScopes.filter(scope => !currentMember.scopes.includes(scope));
 
     if (currentUserMissingScopes.length > 0) {
       this.logger.debug(`Logged user scopes: %o`, currentMember.scopes);
-      throw new HiveError(
-        `No access to modify the scopes: ${currentUserMissingScopes.join(', ')}`
-      );
+      throw new HiveError(`No access to modify the scopes: ${currentUserMissingScopes.join(', ')}`);
     }
 
     // Ensure user still has read-only access
@@ -540,10 +494,7 @@ export class OrganizationManager {
   }
 
   async resetInviteCode(selector: OrganizationSelector) {
-    this.logger.info(
-      'Resetting an organization invite code (selector=%o)',
-      selector
-    );
+    this.logger.info('Resetting an organization invite code (selector=%o)', selector);
     await this.authManager.ensureOrganizationAccess({
       ...selector,
       scope: OrganizationAccessScope.MEMBERS,
@@ -554,18 +505,13 @@ export class OrganizationManager {
     });
   }
 
-  async ensurePersonalOrganization(
-    payload: EnsurePersonalOrganizationEventPayload
-  ) {
+  async ensurePersonalOrganization(payload: EnsurePersonalOrganizationEventPayload) {
     const myOrg = await this.storage.getMyOrganization({
       user: payload.user.id,
     });
 
     if (!myOrg) {
-      this.logger.info(
-        'Detected missing personal organization (user=%s)',
-        payload.user.id
-      );
+      this.logger.info('Detected missing personal organization (user=%s)', payload.user.id);
       await this.createOrganization({
         name: payload.name,
         user: payload.user,

@@ -62,12 +62,7 @@ const planCollection: {
       'SAML (coming soon)',
       <span className="flex gap-1">
         Support from
-        <Link
-          variant="primary"
-          href="https://the-guild.dev"
-          target="_blank"
-          rel="noreferrer"
-        >
+        <Link variant="primary" href="https://the-guild.dev" target="_blank" rel="noreferrer">
           The Guild
         </Link>
       </span>,
@@ -83,7 +78,7 @@ const Plan: React.FC<{
   description: string;
   features: React.ReactNode[];
   footer?: React.ReactNode;
-}> = (plan) => {
+}> = plan => {
   return (
     <div className="flex h-full flex-col justify-between">
       <div>
@@ -140,7 +135,7 @@ export const BillingPlanPicker: React.FC<{
       onValueChange={onPlanChange}
       className="flex !flex-row content-start	items-stretch justify-start !justify-items-start gap-4"
     >
-      {plans.map((plan) => {
+      {plans.map(plan => {
         return (
           <Radio
             value={plan.planType}

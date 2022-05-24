@@ -1,11 +1,7 @@
 import { createContext, useContext, FC, useEffect } from 'react';
 import { configureScope } from '@sentry/nextjs';
 import { reset, identify } from '@/lib/mixpanel';
-import {
-  UserProvider,
-  useUser as useAuth0User,
-  UserProfile,
-} from '@auth0/nextjs-auth0';
+import { UserProvider, useUser as useAuth0User, UserProfile } from '@auth0/nextjs-auth0';
 import { Spinner } from '@/components/common/Spinner';
 import { LoginPage } from './LoginPage';
 
@@ -46,11 +42,9 @@ function identifyOnSentry(user: UserProfile): void {
     const maxLen = 10;
 
     // Why? Sentry hides a user id when it looks similar to an api key (long hash)
-    const userId = `${provider}|${
-      id.length > maxLen ? id.substr(0, maxLen) + '...' : id
-    }`;
+    const userId = `${provider}|${id.length > maxLen ? id.substr(0, maxLen) + '...' : id}`;
 
-    configureScope((scope) => {
+    configureScope(scope => {
       scope.setUser({
         id: userId,
       });

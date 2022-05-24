@@ -14,11 +14,7 @@ import {
   bufferFlushes,
   estimationError,
 } from './metrics';
-import {
-  createKVBuffer,
-  calculateChunkSize,
-  isBufferTooBigError,
-} from './buffer';
+import { createKVBuffer, calculateChunkSize, isBufferTooBigError } from './buffer';
 import { validateOperation, validateOperationMapRecord } from './validation';
 import type { FastifyLoggerInstance } from '@hive/service-common';
 import type { RawReport, RawOperationMap } from '@hive/usage-common';
@@ -51,11 +47,7 @@ export function splitReport(report: RawReport, numOfChunks: number) {
   const operationMapEntries = Object.entries(report.map);
   let endedAt = 0;
   for (let chunkIndex = 0; chunkIndex < numOfChunks; chunkIndex++) {
-    const chunkSize = calculateChunkSize(
-      operationMapLength,
-      numOfChunks,
-      chunkIndex
-    );
+    const chunkSize = calculateChunkSize(operationMapLength, numOfChunks, chunkIndex);
     const start = endedAt;
     const end = start + chunkSize;
     endedAt = end;
@@ -135,7 +127,7 @@ export function createUsage(config: {
         }),
     logLevel: logLevel.INFO,
     logCreator() {
-      return (entry) => {
+      return entry => {
         logger[levelMap[entry.level]]({
           ...entry.log,
           message: undefined,
@@ -169,17 +161,11 @@ export function createUsage(config: {
     },
     onRetry(reports) {
       // Because we do a retry, we need to decrease the number of failures
-      const numOfOperations = reports.reduce(
-        (sum, report) => report.size + sum,
-        0
-      );
+      const numOfOperations = reports.reduce((sum, report) => report.size + sum, 0);
       rawOperationFailures.dec(numOfOperations);
     },
     async sender(reports, estimatedSizeInBytes, batchId, validateSize) {
-      const numOfOperations = reports.reduce(
-        (sum, report) => report.size + sum,
-        0
-      );
+      const numOfOperations = reports.reduce((sum, report) => report.size + sum, 0);
       try {
         const compressLatencyStop = compressLatency.startTimer();
         const value = await compress(JSON.stringify(reports)).finally(() => {
@@ -187,9 +173,7 @@ export function createUsage(config: {
         });
         const stopTimer = kafkaLatency.startTimer();
 
-        estimationError.observe(
-          Math.abs(estimatedSizeInBytes - value.byteLength) / value.byteLength
-        );
+        estimationError.observe(Math.abs(estimatedSizeInBytes - value.byteLength) / value.byteLength);
 
         validateSize(value.byteLength);
         bufferFlushes.inc();
@@ -208,34 +192,18 @@ export function createUsage(config: {
           });
         if (meta[0].errorCode) {
           rawOperationFailures.inc(numOfOperations);
-          logger.error(
-            `Failed to flush (id=%s, errorCode=%s)`,
-            batchId,
-            meta[0].errorCode
-          );
+          logger.error(`Failed to flush (id=%s, errorCode=%s)`, batchId, meta[0].errorCode);
         } else {
           rawOperationWrites.inc(numOfOperations);
-          logger.info(
-            `Flushed (id=%s, operations=%s)`,
-            batchId,
-            numOfOperations
-          );
+          logger.info(`Flushed (id=%s, operations=%s)`, batchId, numOfOperations);
         }
       } catch (error: any) {
         rawOperationFailures.inc(numOfOperations);
 
         if (isBufferTooBigError(error)) {
-          logger.debug(
-            'Buffer too big, retrying (id=%s, error=%s)',
-            batchId,
-            error.message
-          );
+          logger.debug('Buffer too big, retrying (id=%s, error=%s)', batchId, error.message);
         } else {
-          logger.error(
-            `Failed to flush (id=%s, error=%s)`,
-            batchId,
-            error.message
-          );
+          logger.error(`Failed to flush (id=%s, error=%s)`, batchId, error.message);
         }
 
         throw error;
@@ -300,9 +268,7 @@ export function createUsage(config: {
           outgoing.operations.push({
             operationMapKey: operation.operationMapKey,
             timestamp: ts,
-            expiresAt: targetRetentionInDays
-              ? ts + targetRetentionInDays * DAY_IN_MS
-              : undefined,
+            expiresAt: targetRetentionInDays ? ts + targetRetentionInDays * DAY_IN_MS : undefined,
             execution: {
               ok: operation.execution.ok,
               duration: operation.execution.duration,
@@ -316,10 +282,7 @@ export function createUsage(config: {
             },
           });
         } else {
-          logger.warn(
-            `Detected invalid operation: %o`,
-            validationResult.errors
-          );
+          logger.warn(`Detected invalid operation: %o`, validationResult.errors);
           invalidOperationSize += 1;
         }
       }
@@ -351,15 +314,11 @@ export function createUsage(config: {
   };
 }
 
-function isLegacyReport(
-  report: IncomingReport | IncomingLegacyReport
-): report is IncomingLegacyReport {
+function isLegacyReport(report: IncomingReport | IncomingLegacyReport): report is IncomingLegacyReport {
   return Array.isArray(report);
 }
 
-function ensureReportFormat(
-  report: IncomingLegacyReport | IncomingReport
-): IncomingReport {
+function ensureReportFormat(report: IncomingLegacyReport | IncomingReport): IncomingReport {
   if (isLegacyReport(report)) {
     totalLegacyReports.inc();
     return convertLegacyReport(report);
@@ -379,10 +338,7 @@ function convertLegacyReport(legacy: IncomingLegacyReport): IncomingReport {
     let operationMapKey = hashMap.get(op.operation);
 
     if (!operationMapKey) {
-      operationMapKey = createHash('sha256')
-        .update(op.operation)
-        .update(JSON.stringify(op.fields))
-        .digest('hex');
+      operationMapKey = createHash('sha256').update(op.operation).update(JSON.stringify(op.fields)).digest('hex');
       report.map[operationMapKey] = {
         operation: op.operation,
         operationName: op.operationName,

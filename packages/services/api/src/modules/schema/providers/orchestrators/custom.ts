@@ -3,12 +3,7 @@ import { parse } from 'graphql';
 import { Logger } from '../../../shared/providers/logger';
 import { HiveError } from '../../../../shared/errors';
 import { HttpClient } from '../../../shared/providers/http-client';
-import {
-  Orchestrator,
-  ProjectType,
-  emptySource,
-  SchemaObject,
-} from '../../../../shared/entities';
+import { Orchestrator, ProjectType, emptySource, SchemaObject } from '../../../../shared/entities';
 import type { SchemaError } from '../../../../__generated__/types';
 import { SchemaBuildError } from './errors';
 import { sentry } from '../../../../shared/sentry';
@@ -52,10 +47,7 @@ export class CustomOrchestrator implements Orchestrator {
   }
 
   @sentry('CustomOrchestrator.validate')
-  async validate(
-    schemas: SchemaObject[],
-    config: CustomOrchestratorConfig
-  ): Promise<SchemaError[]> {
+  async validate(schemas: SchemaObject[], config: CustomOrchestratorConfig): Promise<SchemaError[]> {
     this.logger.debug('Validating Custom Schemas');
     return this.http.post(config.validationUrl, {
       responseType: 'json',
@@ -65,16 +57,13 @@ export class CustomOrchestrator implements Orchestrator {
         'Content-Type': 'application/json',
       },
       json: {
-        schemas: schemas.map((s) => s.raw),
+        schemas: schemas.map(s => s.raw),
       },
     });
   }
 
   @sentry('CustomOrchestrator.build')
-  async build(
-    schemas: SchemaObject[],
-    config: CustomOrchestratorConfig
-  ): Promise<SchemaObject> {
+  async build(schemas: SchemaObject[], config: CustomOrchestratorConfig): Promise<SchemaObject> {
     this.logger.debug('Building Custom Schema');
     try {
       const response = await this.http.post<BuildResponse>(config.buildUrl, {
@@ -85,16 +74,13 @@ export class CustomOrchestrator implements Orchestrator {
           'Content-Type': 'application/json',
         },
         json: {
-          schemas: schemas.map((s) => s.raw),
+          schemas: schemas.map(s => s.raw),
         },
       });
 
       if (hasErrors(response)) {
         throw new HiveError(
-          [
-            `Schema couldn't be build:`,
-            response.errors.map((error) => `\t - ${error.message}`),
-          ].join('\n')
+          [`Schema couldn't be build:`, response.errors.map(error => `\t - ${error.message}`)].join('\n')
         );
       }
 

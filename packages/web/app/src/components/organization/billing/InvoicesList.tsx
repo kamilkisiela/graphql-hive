@@ -1,17 +1,5 @@
-import {
-  OrganizationFieldsFragment,
-  OrgBillingInfoFieldsFragment,
-} from '@/graphql';
-import {
-  Table,
-  TableContainer,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
-  Link,
-} from '@chakra-ui/react';
+import { OrganizationFieldsFragment, OrgBillingInfoFieldsFragment } from '@/graphql';
+import { Table, TableContainer, Tbody, Td, Th, Thead, Tr, Link } from '@chakra-ui/react';
 import React from 'react';
 import { VscCloudDownload } from 'react-icons/vsc';
 import { CurrencyFormatter } from './helpers';
@@ -36,7 +24,7 @@ export const InvoicesList: React.FC<{
           </Tr>
         </Thead>
         <Tbody>
-          {organization.billingConfiguration.invoices.map((invoice) => (
+          {organization.billingConfiguration.invoices.map(invoice => (
             <Tr>
               <Td>{invoice.date}</Td>
               <Td>{CurrencyFormatter.format(invoice.amount)}</Td>

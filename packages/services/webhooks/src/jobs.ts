@@ -12,9 +12,7 @@ export async function scheduleWebhook({
   config: Config;
   queue: Queue;
 }) {
-  const checksum = createHash('sha256')
-    .update(JSON.stringify(webhook))
-    .digest('hex');
+  const checksum = createHash('sha256').update(JSON.stringify(webhook)).digest('hex');
   const jobName = `${webhook.event.target.id}-${checksum}`;
   config.logger.debug(`Schedule ${jobName}`);
 
@@ -23,7 +21,7 @@ export async function scheduleWebhook({
       attempts: config.maxAttempts,
       backoff: { type: 'exponential', delay: config.backoffDelay },
     })
-    .then((result) => {
+    .then(result => {
       config.logger.debug(`Scheduled ${jobName}`);
       return Promise.resolve(result);
     });

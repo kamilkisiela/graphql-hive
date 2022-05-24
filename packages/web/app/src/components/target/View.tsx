@@ -1,22 +1,11 @@
 import React from 'react';
-import {
-  VscBeaker,
-  VscGitCommit,
-  VscHistory,
-  VscRadioTower,
-  VscSettings,
-} from 'react-icons/vsc';
+import { VscBeaker, VscGitCommit, VscHistory, VscRadioTower, VscSettings } from 'react-icons/vsc';
 import { useQuery } from 'urql';
 
 import { Title } from '@/components/common';
 import { DataWrapper } from '@/components/common/DataWrapper';
 import { useNavigation } from '@/components/common/Navigation';
-import {
-  OrganizationFieldsFragment,
-  ProjectFieldsFragment,
-  TargetDocument,
-  TargetQuery,
-} from '@/graphql';
+import { OrganizationFieldsFragment, ProjectFieldsFragment, TargetDocument, TargetQuery } from '@/graphql';
 import { TargetAccessScope, useTargetAccess } from '@/lib/access/target';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 

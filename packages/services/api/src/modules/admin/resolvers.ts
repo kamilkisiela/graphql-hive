@@ -32,17 +32,12 @@ export const resolvers: AdminModule.Resolvers = {
   },
   AdminOrganizationStats: {
     async operations(stats, _, { injector }) {
-      const results = await injector
-        .get(AdminManager)
-        .countOperationsPerOrganization({
-          // Max days limit is 30 (that's the default TTL in ClickHouse table)
-          daysLimit: stats.daysLimit ?? 30,
-        });
+      const results = await injector.get(AdminManager).countOperationsPerOrganization({
+        // Max days limit is 30 (that's the default TTL in ClickHouse table)
+        daysLimit: stats.daysLimit ?? 30,
+      });
 
-      return (
-        results.find((r) => r.organization === stats.organization.id)?.total ??
-        0
-      );
+      return results.find(r => r.organization === stats.organization.id)?.total ?? 0;
     },
   },
 };

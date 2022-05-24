@@ -2,7 +2,7 @@ import type { NextWebVitalsMetric } from 'next/app';
 
 export const GA_TRACKING_ID = process.env.NEXT_PUBLIC_GA_TRACKING_ID;
 
-export const pageview = (url) => {
+export const pageview = url => {
   if (!GA_TRACKING_ID) {
     return;
   }
@@ -23,18 +23,12 @@ export const event = ({ action, category, label, value }) => {
   });
 };
 
-export function reportWebVitals({
-  id,
-  name,
-  label,
-  value,
-}: NextWebVitalsMetric) {
+export function reportWebVitals({ id, name, label, value }: NextWebVitalsMetric) {
   if (!GA_TRACKING_ID) {
     return;
   }
   (window as any).gtag('event', name, {
-    event_category:
-      label === 'web-vital' ? 'Web Vitals' : 'Next.js custom metric',
+    event_category: label === 'web-vital' ? 'Web Vitals' : 'Next.js custom metric',
     value: Math.round(name === 'CLS' ? value * 1000 : value),
     event_label: id,
     non_interaction: true,

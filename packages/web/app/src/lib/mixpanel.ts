@@ -6,10 +6,7 @@ import type { UserProfile } from '@auth0/nextjs-auth0';
 
 const MIXPANEL_TOKEN = process.env.NEXT_PUBLIC_MIXPANEL_TOKEN;
 
-const enabled =
-  typeof window !== 'undefined' &&
-  window.location.host === 'app.graphql-hive.com' &&
-  !!MIXPANEL_TOKEN;
+const enabled = typeof window !== 'undefined' && window.location.host === 'app.graphql-hive.com' && !!MIXPANEL_TOKEN;
 
 export function initMixpanel() {
   if (enabled) {

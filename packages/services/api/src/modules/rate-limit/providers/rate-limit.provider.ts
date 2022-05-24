@@ -42,19 +42,14 @@ export class RateLimitProvider {
   @sentry('RateLimitProvider.checkRateLimit')
   async checkRateLimit(input: RateLimitQueryInput<'checkRateLimit'>) {
     if (this.rateLimit === null) {
-      this.logger.warn(
-        `Unable to check rate-limit for input: %o , service information is not available`,
-        input
-      );
+      this.logger.warn(`Unable to check rate-limit for input: %o , service information is not available`, input);
 
       return {
         limited: false,
       };
     }
 
-    this.logger.debug(
-      `Checking rate limit for target id="${input.id}", type=${input.type}`
-    );
+    this.logger.debug(`Checking rate limit for target id="${input.id}", type=${input.type}`);
 
     return await this.rateLimit.query('checkRateLimit', input);
   }

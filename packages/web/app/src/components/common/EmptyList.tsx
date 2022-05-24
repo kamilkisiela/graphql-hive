@@ -24,12 +24,7 @@ export const EmptyList: React.FC<{
         <h2 tw="text-gray-900 text-lg font-medium">{title}</h2>
         <p tw="leading-relaxed text-sm dark:text-gray-600">{description}</p>
         <div tw="pt-3">
-          <Button
-            as="a"
-            size="sm"
-            href={documentationLink}
-            colorScheme="primary"
-          >
+          <Button as="a" size="sm" href={documentationLink} colorScheme="primary">
             Read about it in the documentation
           </Button>
         </div>

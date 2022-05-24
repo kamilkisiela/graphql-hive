@@ -13,8 +13,6 @@ export default class DeleteConfig extends Command {
   async run() {
     const { args } = await this.parse(DeleteConfig);
     this._userConfig.set(args.key, args.value);
-    this.success(
-      this.bolderize(`Config flag "${args.key}" was set to "${args.value}"!`)
-    );
+    this.success(this.bolderize(`Config flag "${args.key}" was set to "${args.value}"!`));
   }
 }

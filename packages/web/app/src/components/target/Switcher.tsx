@@ -27,7 +27,7 @@ export const TargetSwitcher: React.FC<{
       return [];
     }
 
-    return data.targets.nodes.map((node) => ({
+    return data.targets.nodes.map(node => ({
       key: node.cleanId,
       label: node.name,
     }));
@@ -40,23 +40,15 @@ export const TargetSwitcher: React.FC<{
     return null;
   }
 
-  const currentTarget = data.targets.nodes.find(
-    (node) => node.cleanId === targetId
-  );
+  const currentTarget = data.targets.nodes.find(node => node.cleanId === targetId);
 
   return (
     <Menu autoSelect={false}>
-      <MenuButton
-        size="sm"
-        as={Button}
-        rightIcon={<VscChevronDown />}
-        variant="ghost"
-        tw="font-normal"
-      >
+      <MenuButton size="sm" as={Button} rightIcon={<VscChevronDown />} variant="ghost" tw="font-normal">
         {currentTarget.name}
       </MenuButton>
       <MenuList bg={dropdownBgColor} color={dropdownTextColor}>
-        {items.map((item) => {
+        {items.map(item => {
           return (
             <MenuItem
               onClick={() => {

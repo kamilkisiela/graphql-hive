@@ -33,63 +33,39 @@ export function useRouteSelector() {
   );
 
   const visitProject = useCallback(
-    ({
-      organizationId,
-      projectId,
-    }: {
-      organizationId: string;
-      projectId: string;
-    }) => {
+    ({ organizationId, projectId }: { organizationId: string; projectId: string }) => {
       push('/[orgId]/[projectId]', `/${organizationId}/${projectId}`);
     },
     [push]
   );
 
   const visitTarget = useCallback(
-    ({
-      organizationId,
-      projectId,
-      targetId,
-    }: {
-      organizationId: string;
-      projectId: string;
-      targetId: string;
-    }) => {
-      push(
-        '/[orgId]/[projectId]/[targetId]',
-        `/${organizationId}/${projectId}/${targetId}`
-      );
+    ({ organizationId, projectId, targetId }: { organizationId: string; projectId: string; targetId: string }) => {
+      push('/[orgId]/[projectId]/[targetId]', `/${organizationId}/${projectId}/${targetId}`);
     },
     [push]
   );
 
   const update = useCallback(
     (params: Record<string, string | number>) => {
-      const routeParams = router.route
-        .match(/\[[a-z]+\]/gi)
-        .map((p) => p.replace('[', '').replace(']', ''));
+      const routeParams = router.route.match(/\[[a-z]+\]/gi).map(p => p.replace('[', '').replace(']', ''));
       const query = {
         ...router.query,
         ...params,
       };
 
-      const attributes = Object.keys(query).filter(
-        (attr) => !routeParams.includes(attr)
-      );
+      const attributes = Object.keys(query).filter(attr => !routeParams.includes(attr));
 
       const attributesPath = attributes.length
         ? '?' +
           attributes
-            .map((attr) => (query[attr] ? `${attr}=${query[attr]}` : null))
+            .map(attr => (query[attr] ? `${attr}=${query[attr]}` : null))
             .filter(Boolean)
             .join('&')
         : '';
 
       const route =
-        router.route.replace(
-          /\[([a-z]+)\]/gi,
-          (_, param) => router.query[param] as string
-        ) + attributesPath;
+        router.route.replace(/\[([a-z]+)\]/gi, (_, param) => router.query[param] as string) + attributesPath;
 
       push(router.route + attributesPath, route, { shallow: true });
     },

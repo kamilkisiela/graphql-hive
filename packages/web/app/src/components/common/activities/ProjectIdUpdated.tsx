@@ -15,11 +15,7 @@ export const ProjectIdUpdated: React.FC<{
       <Activity.Content>
         <Activity.Text>
           <User user={activity.user} /> changed{' '}
-          <Project
-            project={activity.project}
-            organization={activity.organization}
-          />{' '}
-          id
+          <Project project={activity.project} organization={activity.organization} /> id
         </Activity.Text>
         <Activity.Time>
           <TimeAgo date={activity.createdAt} />

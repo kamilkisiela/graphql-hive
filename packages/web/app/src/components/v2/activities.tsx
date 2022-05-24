@@ -70,9 +70,7 @@ export const getActivity = (
         content: (
           <>
             {user.displayName} changed organization name to{' '}
-            <b className="text-gray-300">
-              {(activity as OrganizationNameUpdatedActivity).value}
-            </b>
+            <b className="text-gray-300">{(activity as OrganizationNameUpdatedActivity).value}</b>
           </>
         ),
         icon: <EditIcon className="h-3.5 w-3.5" />,
@@ -106,11 +104,8 @@ export const getActivity = (
       return {
         content: (
           <>
-            {user.displayName} removed{' '}
-            <b className="text-gray-300">
-              {(activity as MemberDeletedActivity).email}
-            </b>{' '}
-            from organization
+            {user.displayName} removed <b className="text-gray-300">{(activity as MemberDeletedActivity).email}</b> from
+            organization
           </>
         ),
         icon: <UserPlusMinusIcon isPlus={false} className="h-5 w-5" />,
@@ -129,10 +124,7 @@ export const getActivity = (
       return {
         content: (
           <>
-            {user.displayName} removed{' '}
-            <b className="text-gray-300">
-              {(activity as ProjectDeletedActivity).name}
-            </b>{' '}
+            {user.displayName} removed <b className="text-gray-300">{(activity as ProjectDeletedActivity).name}</b>{' '}
             project
           </>
         ),
@@ -162,8 +154,7 @@ export const getActivity = (
       return {
         content: (
           <>
-            {user.displayName} created {targetLink} target in {projectLink}{' '}
-            project
+            {user.displayName} created {targetLink} target in {projectLink} project
           </>
         ),
         icon: <PlusIcon className="h-4 w-4" />,
@@ -172,9 +163,8 @@ export const getActivity = (
       return {
         content: (
           <>
-            {user.displayName} removed{' '}
-            <b className="text-gray-300">{activity.name}</b> target from{' '}
-            {projectLink} project
+            {user.displayName} removed <b className="text-gray-300">{activity.name}</b> target from {projectLink}{' '}
+            project
           </>
         ),
         icon: <TrashIcon className="h-5 w-5" />,

@@ -1,28 +1,17 @@
 import { ReactElement } from 'react';
 import clsx from 'clsx';
 
-export const Spinner = ({
-  className,
-}: {
-  className?: string;
-}): ReactElement => {
+export const Spinner = ({ className }: { className?: string }): ReactElement => {
   return (
     <svg
       viewBox="0 0 24 24"
       height="32"
       width="32"
-      className={clsx('text-orange-500 animate-spin w-full', className)}
+      className={clsx('text-orange-500 w-full animate-spin', className)}
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
     >
-      <circle
-        className="opacity-25"
-        cx="12"
-        cy="12"
-        r="10"
-        stroke="currentColor"
-        strokeWidth="4"
-      />
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
       <path
         className="opacity-75"
         fill="currentColor"

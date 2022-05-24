@@ -47,7 +47,7 @@ export const OrganizationSwitcher: React.FC<{
       organizations: [],
     };
 
-    data.organizations.nodes.forEach((node) => {
+    data.organizations.nodes.forEach(node => {
       if (node.type === OrganizationType.Personal) {
         return menu.personal.push({
           key: node.cleanId,
@@ -71,28 +71,20 @@ export const OrganizationSwitcher: React.FC<{
     return null;
   }
 
-  const currentOrganization = data.organizations.nodes.find(
-    (node) => node.cleanId === organizationId
-  );
+  const currentOrganization = data.organizations.nodes.find(node => node.cleanId === organizationId);
 
   return (
     <>
       <OrganizationCreator isOpen={isOpen} onClose={onClose} />
       <Menu autoSelect={false}>
-        <MenuButton
-          size="sm"
-          as={Button}
-          rightIcon={<VscChevronDown />}
-          variant="ghost"
-          tw="font-normal"
-        >
+        <MenuButton size="sm" as={Button} rightIcon={<VscChevronDown />} variant="ghost" tw="font-normal">
           {currentOrganization.name}
         </MenuButton>
         <MenuList bg={dropdownBgColor} color={dropdownTextColor}>
           {menu.personal.length && (
             <>
               <MenuGroup title="Personal">
-                {menu.personal.map((item) => {
+                {menu.personal.map(item => {
                   return (
                     <MenuItem
                       key={item.key}
@@ -113,7 +105,7 @@ export const OrganizationSwitcher: React.FC<{
           {menu.organizations.length ? (
             <>
               <MenuGroup title="Organizations">
-                {menu.organizations.map((item) => {
+                {menu.organizations.map(item => {
                   return (
                     <MenuItem
                       key={item.key}

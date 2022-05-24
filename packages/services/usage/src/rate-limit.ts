@@ -1,28 +1,17 @@
 import { FastifyLoggerInstance } from '@hive/service-common';
 import LRU from 'tiny-lru';
-import type {
-  RateLimitApi,
-  RateLimitQueryInput,
-  RateLimitQueryOutput,
-} from '@hive/rate-limit';
+import type { RateLimitApi, RateLimitQueryInput, RateLimitQueryOutput } from '@hive/rate-limit';
 import { createTRPCClient } from '@trpc/client';
 import { fetch } from 'cross-undici-fetch';
 
-export function createUsageRateLimit(config: {
-  endpoint: string | null;
-  logger: FastifyLoggerInstance;
-}) {
+export function createUsageRateLimit(config: { endpoint: string | null; logger: FastifyLoggerInstance }) {
   const logger = config.logger;
 
   if (!config.endpoint) {
-    logger.warn(
-      `Usage service is not configured to use rate-limit (missing config)`
-    );
+    logger.warn(`Usage service is not configured to use rate-limit (missing config)`);
 
     return {
-      async isRateLimited(
-        _input: RateLimitQueryInput<'checkRateLimit'>
-      ): Promise<boolean> {
+      async isRateLimited(_input: RateLimitQueryInput<'checkRateLimit'>): Promise<boolean> {
         return false;
       },
     };
@@ -32,13 +21,8 @@ export function createUsageRateLimit(config: {
     url: `${endpoint}/trpc`,
     fetch,
   });
-  const cache = LRU<Promise<RateLimitQueryOutput<'checkRateLimit'> | null>>(
-    1000,
-    30_000
-  );
-  const retentionCache = LRU<
-    Promise<RateLimitQueryOutput<'getRetention'> | null>
-  >(1000, 30_000);
+  const cache = LRU<Promise<RateLimitQueryOutput<'checkRateLimit'> | null>>(1000, 30_000);
+  const retentionCache = LRU<Promise<RateLimitQueryOutput<'getRetention'> | null>>(1000, 30_000);
 
   async function fetchFreshRetentionInfo(
     input: RateLimitQueryInput<'getRetention'>
@@ -70,9 +54,7 @@ export function createUsageRateLimit(config: {
 
       return retentionResponse;
     },
-    async isRateLimited(
-      input: RateLimitQueryInput<'checkRateLimit'>
-    ): Promise<boolean> {
+    async isRateLimited(input: RateLimitQueryInput<'checkRateLimit'>): Promise<boolean> {
       const limitInfo = await cache.get(input.id);
 
       if (!limitInfo) {
@@ -81,7 +63,7 @@ export function createUsageRateLimit(config: {
         if (result) {
           cache.set(input.id, result);
 
-          return result.then((r) => r !== null && r.limited);
+          return result.then(r => r !== null && r.limited);
         }
 
         return false;

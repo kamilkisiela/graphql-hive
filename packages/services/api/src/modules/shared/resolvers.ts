@@ -1,8 +1,4 @@
-import {
-  DateTimeResolver,
-  JSONResolver,
-  SafeIntResolver,
-} from 'graphql-scalars';
+import { DateTimeResolver, JSONResolver, SafeIntResolver } from 'graphql-scalars';
 import type { SharedModule } from './__generated__/types';
 
 // Remove descriptions from resolvers

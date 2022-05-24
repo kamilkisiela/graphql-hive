@@ -16,10 +16,7 @@ import type {
   OrganizationBilling,
 } from '../../../shared/entities';
 import type { CustomOrchestratorConfig } from '../../schema/providers/orchestrators/custom';
-import type {
-  AddAlertChannelInput,
-  AddAlertInput,
-} from '../../../__generated__/types';
+import type { AddAlertChannelInput, AddAlertInput } from '../../../__generated__/types';
 import type { OrganizationAccessScope } from '../../auth/providers/organization-access';
 import type { ProjectAccessScope } from '../../auth/providers/project-access';
 import type { TargetAccessScope } from '../../auth/providers/target-access';
@@ -49,48 +46,27 @@ export interface Storage {
   getUserByExternalId(_: { external: string }): Promise<User | null>;
   getUserById(_: { id: string }): Promise<User | null>;
 
-  createUser(_: {
-    email: string;
-    external: string;
-    displayName: string;
-    fullName: string;
-  }): Promise<User | never>;
-  updateUser(_: {
-    id: string;
-    fullName: string;
-    displayName: string;
-  }): Promise<User | never>;
+  createUser(_: { email: string; external: string; displayName: string; fullName: string }): Promise<User | never>;
+  updateUser(_: { id: string; fullName: string; displayName: string }): Promise<User | never>;
 
   getOrganizationId(_: OrganizationSelector): Promise<string | never>;
-  getOrganizationByInviteCode(_: {
-    inviteCode: string;
-  }): Promise<Organization | null>;
-  getOrganizationByCleanId(_: {
-    cleanId: string;
-  }): Promise<Organization | null>;
-  getOrganizationByGitHubInstallationId(_: {
-    installationId: string;
-  }): Promise<Organization | null>;
+  getOrganizationByInviteCode(_: { inviteCode: string }): Promise<Organization | null>;
+  getOrganizationByCleanId(_: { cleanId: string }): Promise<Organization | null>;
+  getOrganizationByGitHubInstallationId(_: { installationId: string }): Promise<Organization | null>;
   getOrganization(_: OrganizationSelector): Promise<Organization | never>;
   getMyOrganization(_: { user: string }): Promise<Organization | null>;
-  getOrganizations(_: {
-    user: string;
-  }): Promise<readonly Organization[] | never>;
+  getOrganizations(_: { user: string }): Promise<readonly Organization[] | never>;
   createOrganization(
     _: Pick<Organization, 'cleanId' | 'name' | 'type'> & {
       user: string;
-      scopes: ReadonlyArray<
-        OrganizationAccessScope | ProjectAccessScope | TargetAccessScope
-      >;
+      scopes: ReadonlyArray<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
     }
   ): Promise<Organization | never>;
   deleteOrganization(_: OrganizationSelector): Promise<Organization | never>;
   updateOrganizationName(
     _: OrganizationSelector & Pick<Organization, 'name'> & { user: string }
   ): Promise<Organization | never>;
-  updateOrganizationPlan(
-    _: OrganizationSelector & Pick<Organization, 'billingPlan'>
-  ): Promise<Organization | never>;
+  updateOrganizationPlan(_: OrganizationSelector & Pick<Organization, 'billingPlan'>): Promise<Organization | never>;
   updateOrganizationRateLimits(
     _: OrganizationSelector & Pick<Organization, 'monthlyRateLimit'>
   ): Promise<Organization | never>;
@@ -98,93 +74,55 @@ export interface Storage {
   updateOrganizationInviteCode(
     _: OrganizationSelector & Pick<Organization, 'inviteCode'>
   ): Promise<Organization | never>;
-  getOrganizationMembers(
-    _: OrganizationSelector
-  ): Promise<readonly Member[] | never>;
+  getOrganizationMembers(_: OrganizationSelector): Promise<readonly Member[] | never>;
   getOrganizationOwner(_: OrganizationSelector): Promise<Member | never>;
   getOrganizationOwner(_: OrganizationSelector): Promise<Member | never>;
-  getOrganizationMember(
-    _: OrganizationSelector & { user: string }
-  ): Promise<Member | never>;
+  getOrganizationMember(_: OrganizationSelector & { user: string }): Promise<Member | never>;
   getOrganizationMemberAccessPairs(
     _: readonly (OrganizationSelector & { user: string })[]
-  ): Promise<
-    ReadonlyArray<
-      ReadonlyArray<
-        OrganizationAccessScope | ProjectAccessScope | TargetAccessScope
-      >
-    >
-  >;
-  hasOrganizationMemberPairs(
-    _: readonly (OrganizationSelector & { user: string })[]
-  ): Promise<readonly boolean[]>;
-  hasOrganizationProjectMemberPairs(
-    _: readonly (ProjectSelector & { user: string })[]
-  ): Promise<readonly boolean[]>;
+  ): Promise<ReadonlyArray<ReadonlyArray<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>>>;
+  hasOrganizationMemberPairs(_: readonly (OrganizationSelector & { user: string })[]): Promise<readonly boolean[]>;
+  hasOrganizationProjectMemberPairs(_: readonly (ProjectSelector & { user: string })[]): Promise<readonly boolean[]>;
   addOrganizationMember(
     _: OrganizationSelector & {
       user: string;
-      scopes: ReadonlyArray<
-        OrganizationAccessScope | ProjectAccessScope | TargetAccessScope
-      >;
+      scopes: ReadonlyArray<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
     }
   ): Promise<void>;
-  deleteOrganizationMembers(
-    _: OrganizationSelector & { users: readonly string[] }
-  ): Promise<void>;
+  deleteOrganizationMembers(_: OrganizationSelector & { users: readonly string[] }): Promise<void>;
   updateOrganizationMemberAccess(
     _: OrganizationSelector & {
       user: string;
-      scopes: ReadonlyArray<
-        OrganizationAccessScope | ProjectAccessScope | TargetAccessScope
-      >;
+      scopes: ReadonlyArray<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
     }
   ): Promise<void>;
 
-  getPersistedOperationId(
-    _: PersistedOperationSelector
-  ): Promise<string | never>;
+  getPersistedOperationId(_: PersistedOperationSelector): Promise<string | never>;
 
   getProject(_: ProjectSelector): Promise<Project | never>;
   getProjectId(_: ProjectSelector): Promise<string | never>;
-  getProjectByCleanId(
-    _: { cleanId: string } & OrganizationSelector
-  ): Promise<Project | null>;
+  getProjectByCleanId(_: { cleanId: string } & OrganizationSelector): Promise<Project | null>;
   getProjects(_: OrganizationSelector): Promise<Project[] | never>;
   createProject(
-    _: Pick<Project, 'name' | 'cleanId' | 'type'> &
-      NullableAndPartial<CustomOrchestratorConfig> &
-      OrganizationSelector
+    _: Pick<Project, 'name' | 'cleanId' | 'type'> & NullableAndPartial<CustomOrchestratorConfig> & OrganizationSelector
   ): Promise<Project | never>;
   deleteProject(_: ProjectSelector): Promise<Project | never>;
-  updateProjectName(
-    _: ProjectSelector & Pick<Project, 'name'> & { user: string }
-  ): Promise<Project | never>;
-  updateProjectGitRepository(
-    _: ProjectSelector & Pick<Project, 'gitRepository'>
-  ): Promise<Project | never>;
+  updateProjectName(_: ProjectSelector & Pick<Project, 'name'> & { user: string }): Promise<Project | never>;
+  updateProjectGitRepository(_: ProjectSelector & Pick<Project, 'gitRepository'>): Promise<Project | never>;
 
-  getTargetId(
-    _: TargetSelector & { useIds?: boolean }
-  ): Promise<string | never>;
+  getTargetId(_: TargetSelector & { useIds?: boolean }): Promise<string | never>;
   getTargetByCleanId(
     _: {
       cleanId: string;
     } & ProjectSelector
   ): Promise<Target | null>;
-  createTarget(
-    _: Pick<Target, 'cleanId' | 'name'> & ProjectSelector
-  ): Promise<Target | never>;
-  updateTargetName(
-    _: TargetSelector & Pick<Project, 'name'> & { user: string }
-  ): Promise<Target | never>;
+  createTarget(_: Pick<Target, 'cleanId' | 'name'> & ProjectSelector): Promise<Target | never>;
+  updateTargetName(_: TargetSelector & Pick<Project, 'name'> & { user: string }): Promise<Target | never>;
   deleteTarget(_: TargetSelector): Promise<Target | never>;
   getTarget(_: TargetSelector): Promise<Target | never>;
   getTargets(_: ProjectSelector): Promise<readonly Target[]>;
   getTargetSettings(_: TargetSelector): Promise<TargetSettings | never>;
-  setTargetValidation(
-    _: TargetSelector & { enabled: boolean }
-  ): Promise<TargetSettings['validation'] | never>;
+  setTargetValidation(_: TargetSelector & { enabled: boolean }): Promise<TargetSettings['validation'] | never>;
   updateTargetValidationSettings(
     _: TargetSelector & Omit<TargetSettings['validation'], 'enabled'>
   ): Promise<TargetSettings['validation'] | never>;
@@ -202,9 +140,7 @@ export interface Storage {
     | never
   >;
   getLatestValidVersion(_: TargetSelector): Promise<SchemaVersion | never>;
-  getMaybeLatestValidVersion(
-    _: TargetSelector
-  ): Promise<SchemaVersion | null | never>;
+  getMaybeLatestValidVersion(_: TargetSelector): Promise<SchemaVersion | null | never>;
   getLatestVersion(_: TargetSelector): Promise<SchemaVersion | never>;
   getMaybeLatestVersion(_: TargetSelector): Promise<SchemaVersion | null>;
 
@@ -226,16 +162,10 @@ export interface Storage {
       }
     | never
   >;
-  getVersion(
-    _: TargetSelector & { version: string }
-  ): Promise<SchemaVersion | never>;
+  getVersion(_: TargetSelector & { version: string }): Promise<SchemaVersion | never>;
 
-  updateSchemaUrlOfVersion(
-    _: TargetSelector & { version: string; url?: string | null; commit: string }
-  ): Promise<void>;
-  updateServiceName(
-    _: TargetSelector & { commit: string; name: string }
-  ): Promise<void>;
+  updateSchemaUrlOfVersion(_: TargetSelector & { version: string; url?: string | null; commit: string }): Promise<void>;
+  updateServiceName(_: TargetSelector & { commit: string; name: string }): Promise<void>;
 
   insertSchema(
     _: {
@@ -267,11 +197,7 @@ export interface Storage {
 
   getSchema(_: { commit: string; target: string }): Promise<Schema | never>;
 
-  getSchemaPushCount(_: {
-    targetIds: string[];
-    startTime: Date;
-    endTime: Date;
-  }): Promise<number>;
+  getSchemaPushCount(_: { targetIds: string[]; startTime: Date; endTime: Date }): Promise<number>;
 
   getAllSchemaPushesGrouped(_: { startTime: Date; endTime: Date }): Promise<
     {
@@ -302,9 +228,7 @@ export interface Storage {
     }
   ): Promise<readonly ActivityObject[]>;
 
-  getPersistedOperations(
-    _: ProjectSelector
-  ): Promise<readonly PersistedOperation[]>;
+  getPersistedOperations(_: ProjectSelector): Promise<readonly PersistedOperation[]>;
 
   getSelectedPersistedOperations(
     _: ProjectSelector & { hashes: readonly string[] }
@@ -316,9 +240,7 @@ export interface Storage {
     }
   ): Promise<readonly string[]>;
 
-  getPersistedOperation(
-    _: PersistedOperationSelector
-  ): Promise<PersistedOperation | never>;
+  getPersistedOperation(_: PersistedOperationSelector): Promise<PersistedOperation | never>;
 
   insertPersistedOperation(
     _: {
@@ -329,25 +251,15 @@ export interface Storage {
     } & ProjectSelector
   ): Promise<PersistedOperation | never>;
 
-  deletePersistedOperation(
-    _: PersistedOperationSelector
-  ): Promise<PersistedOperation | never>;
+  deletePersistedOperation(_: PersistedOperationSelector): Promise<PersistedOperation | never>;
 
-  addSlackIntegration(
-    _: OrganizationSelector & { token: string }
-  ): Promise<void>;
+  addSlackIntegration(_: OrganizationSelector & { token: string }): Promise<void>;
   deleteSlackIntegration(_: OrganizationSelector): Promise<void>;
-  getSlackIntegrationToken(
-    _: OrganizationSelector
-  ): Promise<string | null | undefined>;
+  getSlackIntegrationToken(_: OrganizationSelector): Promise<string | null | undefined>;
 
-  addGitHubIntegration(
-    _: OrganizationSelector & { installationId: string }
-  ): Promise<void>;
+  addGitHubIntegration(_: OrganizationSelector & { installationId: string }): Promise<void>;
   deleteGitHubIntegration(_: OrganizationSelector): Promise<void>;
-  getGitHubIntegrationInstallationId(
-    _: OrganizationSelector
-  ): Promise<string | null | undefined>;
+  getGitHubIntegrationInstallationId(_: OrganizationSelector): Promise<string | null | undefined>;
 
   addAlertChannel(_: AddAlertChannelInput): Promise<AlertChannel>;
   deleteAlertChannels(
@@ -395,14 +307,10 @@ export interface Storage {
   >;
 
   getBillingParticipants(): Promise<ReadonlyArray<OrganizationBilling>>;
-  getOrganizationBilling(
-    _: OrganizationSelector
-  ): Promise<OrganizationBilling | null>;
+  getOrganizationBilling(_: OrganizationSelector): Promise<OrganizationBilling | null>;
   deleteOrganizationBilling(_: OrganizationSelector): Promise<void>;
 
-  createOrganizationBilling(
-    _: OrganizationBilling
-  ): Promise<OrganizationBilling>;
+  createOrganizationBilling(_: OrganizationBilling): Promise<OrganizationBilling>;
 
   getBaseSchema(_: TargetSelector): Promise<string | null>;
   updateBaseSchema(_: TargetSelector, base: string | null): Promise<void>;

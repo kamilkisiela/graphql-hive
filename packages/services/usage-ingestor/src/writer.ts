@@ -2,11 +2,7 @@ import * as Sentry from '@sentry/node';
 import { got } from 'got';
 import Agent from 'agentkeepalive';
 import { compress } from '@hive/usage-common';
-import {
-  operationsOrder,
-  registryOrder,
-  joinIntoSingleMessage,
-} from './serializer';
+import { operationsOrder, registryOrder, joinIntoSingleMessage } from './serializer';
 
 export interface ClickHouseConfig {
   protocol: string;
@@ -108,7 +104,7 @@ async function writeCsv(
         https: agents.https,
       },
     })
-    .catch((error) => {
+    .catch(error => {
       Sentry.captureException(error, {
         level: Sentry.Severity.Critical,
         extra: {

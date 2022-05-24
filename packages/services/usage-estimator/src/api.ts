@@ -41,9 +41,7 @@ export const usageEstimatorApiRouter = trpc
         endTime: new Date(input.endTime),
       });
 
-      return Object.fromEntries(
-        estimationResponse.map((item) => [item.target, item.total])
-      );
+      return Object.fromEntries(estimationResponse.map(item => [item.target, item.total]));
     },
   })
   .query('estimateOperationsForTarget', {
@@ -54,12 +52,11 @@ export const usageEstimatorApiRouter = trpc
       })
       .required(),
     async resolve({ ctx, input }) {
-      const estimationResponse =
-        await ctx.estimateCollectedOperationsForTargets({
-          targets: input.targetIds,
-          startTime: new Date(input.startTime),
-          endTime: new Date(input.endTime),
-        });
+      const estimationResponse = await ctx.estimateCollectedOperationsForTargets({
+        targets: input.targetIds,
+        startTime: new Date(input.startTime),
+        endTime: new Date(input.endTime),
+      });
 
       return {
         totalOperations: parseInt(estimationResponse.data[0].total),
@@ -74,19 +71,15 @@ export const usageEstimatorApiRouter = trpc
         endTime: new Date(input.endTime),
       });
 
-      return Object.fromEntries(
-        estimationResponse.data.map((item) => [
-          item.target,
-          parseInt(item.total),
-        ])
-      );
+      return Object.fromEntries(estimationResponse.data.map(item => [item.target, parseInt(item.total)]));
     },
   });
 
 export type UsageEstimatorApi = typeof usageEstimatorApiRouter;
 export type UsageEstimatorApiQuery = keyof UsageEstimatorApi['_def']['queries'];
-export type UsageEstimatorQueryOutput<
-  TRouteKey extends UsageEstimatorApiQuery
-> = inferProcedureOutput<UsageEstimatorApi['_def']['queries'][TRouteKey]>;
-export type UsageEstimatorQueryInput<TRouteKey extends UsageEstimatorApiQuery> =
-  inferProcedureInput<UsageEstimatorApi['_def']['queries'][TRouteKey]>;
+export type UsageEstimatorQueryOutput<TRouteKey extends UsageEstimatorApiQuery> = inferProcedureOutput<
+  UsageEstimatorApi['_def']['queries'][TRouteKey]
+>;
+export type UsageEstimatorQueryInput<TRouteKey extends UsageEstimatorApiQuery> = inferProcedureInput<
+  UsageEstimatorApi['_def']['queries'][TRouteKey]
+>;

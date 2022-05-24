@@ -1,4 +1,4 @@
-import Callout from 'nextra-theme-docs/callout';
+import Callout from 'nextra-theme-docs/callout'
 
 # Monitoring Operations
 
@@ -26,8 +26,8 @@ Full configuration is available under `HiveUsagePluginOptions` interface. You ca
 Thanks to the plugin system it's a matter of adding `hiveApollo` plugin to `ApolloServer` instance:
 
 ```typescript
-import { ApolloServer } from 'apollo-server';
-import { hiveApollo } from '@graphql-hive/client';
+import { ApolloServer } from 'apollo-server'
+import { hiveApollo } from '@graphql-hive/client'
 
 const server = new ApolloServer({
   typeDefs,
@@ -37,10 +37,10 @@ const server = new ApolloServer({
       enabled: true,
       debug: true, // or false
       token: 'YOUR-TOKEN',
-      usage: true, // or { ... usage options }
-    }),
-  ],
-});
+      usage: true // or { ... usage options }
+    })
+  ]
+})
 ```
 
 ### Envelop
@@ -50,8 +50,8 @@ If you're not familiar with Envelop - in "short" it's a lightweight JavaScript l
 Here's [more](https://github.com/dotansimha/envelop#envelop) on that topic.
 
 ```typescript
-import { envelop } from '@envelop/core';
-import { useHive } from '@graphql-hive/client';
+import { envelop } from '@envelop/core'
+import { useHive } from '@graphql-hive/client'
 
 const envelopProxy = envelop({
   plugins: [
@@ -59,10 +59,10 @@ const envelopProxy = envelop({
       enabled: true,
       debug: true, // or false
       token: 'YOUR-TOKEN',
-      usage: true, // or { ... usage options }
-    }),
-  ],
-});
+      usage: true // or { ... usage options }
+    })
+  ]
+})
 ```
 
 ### Other servers
@@ -75,37 +75,36 @@ The `collectUsage` method accepts the same arguments as `execute` function of gr
 - `finish(result)` (function returned by `collectUsage(args)`) - has to be invoked right after execution finishes.
 
 ```typescript
-import express from 'express';
-import { execute } from 'graphql';
-import { graphqlHTTP } from 'express-graphql';
-import { createHive } from '@graphql-hive/client';
+import express from 'express'
+import { execute } from 'graphql'
+import { graphqlHTTP } from 'express-graphql'
+import { createHive } from '@graphql-hive/client'
 
-const app = express();
+const app = express()
 const hive = createHive({
   enabled: true,
   debug: true, // or false
   token: 'YOUR-TOKEN',
-  usage: true, // or { ... usage options }
-});
+  usage: true // or { ... usage options }
+})
 
 app.post(
   '/graphql',
   graphqlHTTP({
     schema: yourSchema,
     async customExecuteFn(args) {
-      const finish = hive.collectUsage(args);
-      const result = await execute(args);
-      finish(result);
-      return result;
-    },
+      const finish = hive.collectUsage(args)
+      const result = await execute(args)
+      finish(result)
+      return result
+    }
   })
-);
+)
 ```
 
 <Callout>
-  We wrapped `execute` function with Hive and used it as a custom execute
-  function in `express-graphql`. This is the easiest and closest way to control
-  GraphQL execution.
+  We wrapped `execute` function with Hive and used it as a custom execute function in `express-graphql`. This is the
+  easiest and closest way to control GraphQL execution.
 </Callout>
 
 ## Client info
@@ -113,8 +112,8 @@ app.post(
 Hive enables you to assign collected operation to an actual GraphQL client (consumer).
 
 ```typescript
-import { ApolloServer } from 'apollo-server';
-import { hiveApollo } from '@graphql-hive/client';
+import { ApolloServer } from 'apollo-server'
+import { hiveApollo } from '@graphql-hive/client'
 
 const server = new ApolloServer({
   typeDefs,
@@ -126,30 +125,29 @@ const server = new ApolloServer({
       token: 'YOUR-TOKEN',
       usage: {
         clientInfo(context) {
-          const name = context.headers['x-graphql-client-name'];
-          const version = context.headers['x-graphql-client-version'];
+          const name = context.headers['x-graphql-client-name']
+          const version = context.headers['x-graphql-client-version']
 
           if (name && version) {
-            return { name, version };
+            return { name, version }
           }
 
-          return null;
-        },
-      },
-    }),
+          return null
+        }
+      }
+    })
   ],
   context({ req }) {
     return {
-      headers: req.headers,
-    };
-  },
-});
+      headers: req.headers
+    }
+  }
+})
 ```
 
 <Callout>
-  The `clientInfo` method receives a context object as the first and only
-  argument and expects to get either `null`, `undefined` or `{(name, version)}`
-  object.
+  The `clientInfo` method receives a context object as the first and only argument and expects to get either `null`,
+  `undefined` or `{(name, version)}` object.
 </Callout>
 
 ## Excluding operations
@@ -157,8 +155,8 @@ const server = new ApolloServer({
 In case you want to skip some operations, here's how to do it:
 
 ```typescript
-import { ApolloServer } from 'apollo-server';
-import { hiveApollo } from '@graphql-hive/client';
+import { ApolloServer } from 'apollo-server'
+import { hiveApollo } from '@graphql-hive/client'
 
 const server = new ApolloServer({
   typeDefs,
@@ -169,11 +167,11 @@ const server = new ApolloServer({
       debug: true, // or false
       token: 'YOUR-TOKEN',
       usage: {
-        exclude: ['unwantedOperationName', 'anotherOperationName'],
-      },
-    }),
-  ],
-});
+        exclude: ['unwantedOperationName', 'anotherOperationName']
+      }
+    })
+  ]
+})
 ```
 
 ## Using Dashboard

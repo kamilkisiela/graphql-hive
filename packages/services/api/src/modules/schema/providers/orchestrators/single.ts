@@ -2,11 +2,7 @@ import { Injectable, Inject } from 'graphql-modules';
 import { parse } from 'graphql';
 import { Logger } from '../../../shared/providers/logger';
 import { HiveError } from '../../../../shared/errors';
-import {
-  Orchestrator,
-  ProjectType,
-  SchemaObject,
-} from '../../../../shared/entities';
+import { Orchestrator, ProjectType, SchemaObject } from '../../../../shared/entities';
 import { SchemaBuildError } from './errors';
 import { SCHEMA_SERVICE_CONFIG } from './tokens';
 import type { SchemaServiceConfig } from './tokens';
@@ -21,10 +17,7 @@ export class SingleOrchestrator implements Orchestrator {
   private logger: Logger;
   private schemaService;
 
-  constructor(
-    logger: Logger,
-    @Inject(SCHEMA_SERVICE_CONFIG) serviceConfig: SchemaServiceConfig
-  ) {
+  constructor(logger: Logger, @Inject(SCHEMA_SERVICE_CONFIG) serviceConfig: SchemaServiceConfig) {
     this.logger = logger.child({ service: 'SingleOrchestrator' });
     this.schemaService = createTRPCClient<SchemaBuilderApi>({
       url: `${serviceConfig.endpoint}/trpc`,
@@ -39,14 +32,14 @@ export class SingleOrchestrator implements Orchestrator {
     this.logger.debug('Validating Single Schema');
     if (schemas.length > 1) {
       this.logger.debug('More than one schema (sources=%o)', {
-        sources: schemas.map((s) => s.source),
+        sources: schemas.map(s => s.source),
       });
       throw new HiveError('too many schemas');
     }
 
     const result = await this.schemaService.mutation('validate', {
       type: 'single',
-      schemas: schemas.map((s) => ({
+      schemas: schemas.map(s => ({
         raw: s.raw,
         source: s.source,
       })),
@@ -60,14 +53,14 @@ export class SingleOrchestrator implements Orchestrator {
     try {
       if (schemas.length > 1) {
         this.logger.error('More than one schema (sources=%o)', {
-          sources: schemas.map((s) => s.source),
+          sources: schemas.map(s => s.source),
         });
         throw new HiveError('too many schemas');
       }
 
       const result = await this.schemaService.mutation('build', {
         type: 'single',
-        schemas: schemas.map((s) => ({
+        schemas: schemas.map(s => ({
           raw: s.raw,
           source: s.source,
         })),

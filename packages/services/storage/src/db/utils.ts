@@ -32,12 +32,12 @@ export function objectToParams<T extends Record<string, any>>(
   transformArray?: <K extends keyof T>(key: K, value: T[K]) => any
 ) {
   const identifiers = sql.join(
-    Object.keys(obj).map((k) => sql.identifier([k])),
+    Object.keys(obj).map(k => sql.identifier([k])),
     sql`, `
   );
 
   const values = sql.join(
-    Object.keys(obj).map((key) => {
+    Object.keys(obj).map(key => {
       if (obj[key] === undefined || obj[key] === null) {
         return null;
       } else if (Array.isArray(obj[key])) {
@@ -56,7 +56,7 @@ export function objectToParams<T extends Record<string, any>>(
 
 export function objectToUpdateParams(obj: Record<string, any>) {
   return sql.join(
-    Object.keys(obj).map((key) => sql`${sql.identifier([key])} = ${obj[key]}`),
+    Object.keys(obj).map(key => sql`${sql.identifier([key])} = ${obj[key]}`),
     sql`, `
   );
 }

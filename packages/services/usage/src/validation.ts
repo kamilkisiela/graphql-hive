@@ -1,8 +1,4 @@
-import type {
-  IncomingOperation,
-  OperationMap,
-  OperationMapRecord,
-} from './types';
+import type { IncomingOperation, OperationMap, OperationMapRecord } from './types';
 import Ajv from 'ajv';
 import type { JSONSchemaType } from 'ajv';
 
@@ -67,10 +63,7 @@ export function validateOperationMapRecord(record: OperationMapRecord) {
   }
 }
 
-export function validateOperation(
-  operation: IncomingOperation,
-  operationMap: OperationMap
-) {
+export function validateOperation(operation: IncomingOperation, operationMap: OperationMap) {
   const validate = ajv.compile(operationSchema);
 
   if (!operationMap[operation.operationMapKey]) {

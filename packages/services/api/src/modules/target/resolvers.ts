@@ -60,7 +60,7 @@ export const resolvers: TargetModule.Resolvers = {
           id,
           ...settings.validation,
           targets: await Promise.all(
-            settings.validation.targets.map((tid) =>
+            settings.validation.targets.map(tid =>
               targetManager.getTarget({
                 organization,
                 project,
@@ -217,7 +217,7 @@ export const resolvers: TargetModule.Resolvers = {
         id: target,
         ...settings,
         targets: await Promise.all(
-          settings.targets.map((tid) =>
+          settings.targets.map(tid =>
             targetManager.getTarget({
               organization,
               project,
@@ -235,17 +235,11 @@ export const resolvers: TargetModule.Resolvers = {
         translator.translateTargetId(input),
       ]);
 
-      const org = await injector
-        .get(OrganizationManager)
-        .getOrganization({ organization });
+      const org = await injector.get(OrganizationManager).getOrganization({ organization });
 
       const UpdateTargetValidationSettingsModel = z.object({
         percentage: PercentageModel,
-        period: z
-          .number()
-          .min(1)
-          .max(org.monthlyRateLimit.retentionInDays)
-          .int(),
+        period: z.number().min(1).max(org.monthlyRateLimit.retentionInDays).int(),
       });
 
       const result = UpdateTargetValidationSettingsModel.safeParse(input);
@@ -278,7 +272,7 @@ export const resolvers: TargetModule.Resolvers = {
             id: target,
             ...settings,
             targets: await Promise.all(
-              settings.targets.map((tid) =>
+              settings.targets.map(tid =>
                 targetManager.getTarget({
                   organization,
                   project,

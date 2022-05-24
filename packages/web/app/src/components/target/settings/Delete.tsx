@@ -47,17 +47,10 @@ export const DeleteSettings: React.FC = () => {
         <Card.Content>
           <p>Permanently remove your Target.</p>
           <div tw="mt-3 flex flex-row items-center">
-            <Button
-              colorScheme="red"
-              disabled={result.fetching}
-              onClick={deleteTarget}
-              size="sm"
-            >
+            <Button colorScheme="red" disabled={result.fetching} onClick={deleteTarget} size="sm">
               Delete Target
             </Button>
-            <span tw="pl-2 font-bold text-sm">
-              This action is not reversible
-            </span>
+            <span tw="pl-2 font-bold text-sm">This action is not reversible</span>
           </div>
         </Card.Content>
       </Card.Root>

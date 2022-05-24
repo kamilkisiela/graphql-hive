@@ -1,7 +1,4 @@
-import {
-  validateOperation,
-  validateOperationMapRecord,
-} from '../src/validation';
+import { validateOperation, validateOperationMapRecord } from '../src/validation';
 
 test('correct operation should be valid', () => {
   expect(
@@ -398,7 +395,7 @@ test('operation with empty in fields should NOT be valid', () => {
 });
 
 test('operation with empty fields should NOT be valid', () => {
-  expect(
-    validateOperationMapRecord({ operation: 'query foo { foo }', fields: [] })
-  ).toEqual(expect.objectContaining({ valid: false }));
+  expect(validateOperationMapRecord({ operation: 'query foo { foo }', fields: [] })).toEqual(
+    expect.objectContaining({ valid: false })
+  );
 });

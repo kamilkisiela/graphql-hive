@@ -32,10 +32,10 @@ function getUniqueKey(op: Operation) {
 }
 
 export const networkStatusExchange: Exchange = ({ forward }) => {
-  return (operations$) => {
+  return operations$ => {
     const forward$ = pipe(
       operations$,
-      map((op) => {
+      map(op => {
         if (op.kind === 'teardown') {
           end(getUniqueKey(op));
         } else {
@@ -48,7 +48,7 @@ export const networkStatusExchange: Exchange = ({ forward }) => {
 
     return pipe(
       forward(forward$),
-      tap((result) => {
+      tap(result => {
         setTimeout(() => {
           end(getUniqueKey(result.operation));
         }, 100);

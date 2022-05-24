@@ -31,9 +31,7 @@ function main() {
   };
 
   if (!env.TURBO_API_URL || !env.TURBO_TOKEN || !env.TURBO_TEAM) {
-    console.log(
-      '[turborepo-setup] No TURBO_API_URL, TURBO_TOKEN or TURBO_TEAM found. Skipping.'
-    );
+    console.log('[turborepo-setup] No TURBO_API_URL, TURBO_TOKEN or TURBO_TEAM found. Skipping.');
     return;
   }
 

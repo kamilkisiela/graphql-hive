@@ -1,11 +1,7 @@
 import { Injectable, Inject } from 'graphql-modules';
 import { parse } from 'graphql';
 import { Logger } from '../../../shared/providers/logger';
-import {
-  Orchestrator,
-  ProjectType,
-  SchemaObject,
-} from '../../../../shared/entities';
+import { Orchestrator, ProjectType, SchemaObject } from '../../../../shared/entities';
 import { SchemaBuildError } from './errors';
 import { SCHEMA_SERVICE_CONFIG } from './tokens';
 import type { SchemaServiceConfig } from './tokens';
@@ -20,10 +16,7 @@ export class StitchingOrchestrator implements Orchestrator {
   private logger: Logger;
   private schemaService;
 
-  constructor(
-    logger: Logger,
-    @Inject(SCHEMA_SERVICE_CONFIG) private serviceConfig: SchemaServiceConfig
-  ) {
+  constructor(logger: Logger, @Inject(SCHEMA_SERVICE_CONFIG) private serviceConfig: SchemaServiceConfig) {
     this.logger = logger.child({ service: 'StitchingOrchestrator' });
     this.schemaService = createTRPCClient<SchemaBuilderApi>({
       url: `${serviceConfig.endpoint}/trpc`,
@@ -39,7 +32,7 @@ export class StitchingOrchestrator implements Orchestrator {
 
     const result = await this.schemaService.mutation('validate', {
       type: 'stitching',
-      schemas: schemas.map((s) => ({
+      schemas: schemas.map(s => ({
         raw: s.raw,
         source: s.source,
       })),
@@ -54,7 +47,7 @@ export class StitchingOrchestrator implements Orchestrator {
     try {
       const result = await this.schemaService.mutation('build', {
         type: 'stitching',
-        schemas: schemas.map((s) => ({
+        schemas: schemas.map(s => ({
           raw: s.raw,
           source: s.source,
         })),

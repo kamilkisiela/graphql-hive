@@ -14,7 +14,7 @@ import {
   OrganizationFieldsFragment,
   OrganizationType,
 } from '@/graphql';
-import { canAccessOrganization, OrganizationAccessScope,useOrganizationAccess } from '@/lib/access/organization';
+import { canAccessOrganization, OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
 const Integrations = (): ReactElement => {

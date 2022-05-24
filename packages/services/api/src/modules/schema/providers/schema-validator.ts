@@ -1,10 +1,5 @@
 import { Injectable, Scope } from 'graphql-modules';
-import {
-  createSchemaObject,
-  Orchestrator,
-  Schema,
-  SchemaObject,
-} from '../../../shared/entities';
+import { createSchemaObject, Orchestrator, Schema, SchemaObject } from '../../../shared/entities';
 import { buildSchema, findSchema, hashSchema } from '../../../shared/schema';
 import * as Types from '../../../__generated__/types';
 import { Logger } from '../../shared/providers/logger';
@@ -57,14 +52,12 @@ export class SchemaValidator {
         target: schema.target,
       };
     });
-    const afterSchemasWithBase: SchemaObject[] =
-      afterWithBase.map(createSchemaObject);
+    const afterSchemasWithBase: SchemaObject[] = afterWithBase.map(createSchemaObject);
     const afterSchemas: SchemaObject[] = after.map(createSchemaObject);
     const beforeSchemas: SchemaObject[] = before.map(createSchemaObject);
 
     const isInitialSchema = beforeSchemas.length === 0;
-    const isIdentical =
-      existing && hashSchema(existing) === hashSchema(incoming);
+    const isIdentical = existing && hashSchema(existing) === hashSchema(incoming);
 
     if (isIdentical) {
       return {
@@ -98,13 +91,9 @@ export class SchemaValidator {
         orchestrator.build(afterSchemas),
       ]);
       if (existingSchema) {
-        changes = await this.inspector.diff(
-          buildSchema(existingSchema),
-          buildSchema(incomingSchema),
-          selector
-        );
+        changes = await this.inspector.diff(buildSchema(existingSchema), buildSchema(incomingSchema), selector);
 
-        changes.forEach((change) => {
+        changes.forEach(change => {
           if (change.criticality === 'Breaking') {
             errors.push({
               message: `Breaking Change: ${change.message}`,
@@ -120,9 +109,7 @@ export class SchemaValidator {
     }
 
     const hasErrors = errors.length > 0;
-    const hasBreakingChanges = changes.some(
-      (change) => change.criticality === 'Breaking'
-    );
+    const hasBreakingChanges = changes.some(change => change.criticality === 'Breaking');
     const valid = !hasErrors && !hasBreakingChanges;
 
     return {

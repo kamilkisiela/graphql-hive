@@ -21,12 +21,7 @@ export const TargetNameUpdated: React.FC<{
             project={activity.project}
             organization={activity.organization}
           />{' '}
-          target name in{' '}
-          <Project
-            project={activity.project}
-            organization={activity.organization}
-          />{' '}
-          project
+          target name in <Project project={activity.project} organization={activity.organization} /> project
         </Activity.Text>
         <Activity.Time>
           <TimeAgo date={activity.createdAt} />

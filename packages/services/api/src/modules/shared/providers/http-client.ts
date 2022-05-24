@@ -11,10 +11,7 @@ interface HttpClientOptions extends OptionsOfJSONResponseBody {
   };
 }
 
-type HttpOptions = Omit<
-  HttpClientOptions,
-  'method' | 'throwHttpErrors' | 'resolveBodyOnly'
->;
+type HttpOptions = Omit<HttpClientOptions, 'method' | 'throwHttpErrors' | 'resolveBodyOnly'>;
 
 @Injectable()
 export class HttpClient {
@@ -31,13 +28,8 @@ export class HttpClient {
     return this.request<T>(url, { ...opts, method: 'DELETE' }, span);
   }
 
-  private request<T>(
-    url: string,
-    opts: HttpClientOptions,
-    upstreamSpan?: Span
-  ) {
-    const parentSpan =
-      upstreamSpan ?? Sentry.getCurrentHub().getScope()?.getSpan();
+  private request<T>(url: string, opts: HttpClientOptions, upstreamSpan?: Span) {
+    const parentSpan = upstreamSpan ?? Sentry.getCurrentHub().getScope()?.getSpan();
     const span = parentSpan?.startChild({
       op: 'HttpClient',
       description: opts?.context?.description ?? `${opts.method} ${url}`,
@@ -49,11 +41,11 @@ export class HttpClient {
     });
 
     if (!span) {
-      return request.then((response) => response.body);
+      return request.then(response => response.body);
     }
 
     return request.then(
-      (response) => {
+      response => {
         span.setHttpStatus(response.statusCode);
 
         if (typeof response.headers['x-cache'] !== 'undefined') {
@@ -63,7 +55,7 @@ export class HttpClient {
         span.finish();
         return Promise.resolve(response.body);
       },
-      (error) => {
+      error => {
         console.log('HttpClient.request error', error);
         console.error(error);
         Sentry.captureException(error);
@@ -72,9 +64,7 @@ export class HttpClient {
           span.setHttpStatus(error.response.statusCode);
         }
 
-        span.setStatus(
-          error instanceof TimeoutError ? 'deadline_exceeded' : 'internal_error'
-        );
+        span.setStatus(error instanceof TimeoutError ? 'deadline_exceeded' : 'internal_error');
         span.finish();
         return Promise.reject(error);
       }

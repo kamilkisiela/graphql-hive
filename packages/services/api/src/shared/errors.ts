@@ -6,7 +6,7 @@ export function toSchemaError(error: unknown): SchemaError {
   if (isGraphQLError(error)) {
     return {
       message: error.message,
-      path: error.path?.map((i) => (typeof i === 'number' ? i + '' : i)),
+      path: error.path?.map(i => (typeof i === 'number' ? i + '' : i)),
     };
   }
 

@@ -3,10 +3,7 @@ import 'twin.macro';
 import { useMutation } from 'urql';
 import { Input, Button } from '@chakra-ui/react';
 import { Card } from '@/components/common';
-import {
-  OrganizationFieldsFragment,
-  UpdateOrganizationNameDocument,
-} from '@/graphql';
+import { OrganizationFieldsFragment, UpdateOrganizationNameDocument } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
 export const NameSettings: React.FC<{
@@ -40,14 +37,9 @@ export const NameSettings: React.FC<{
             placeholder="Name your organization"
             disabled={disabled}
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={e => setName(e.target.value)}
           />
-          <Button
-            colorScheme="primary"
-            type="button"
-            disabled={disabled || name.length === 0}
-            onClick={submit}
-          >
+          <Button colorScheme="primary" type="button" disabled={disabled || name.length === 0} onClick={submit}>
             Save
           </Button>
         </form>

@@ -38,7 +38,9 @@ export const rateLimitApiRouter = trpc
 
 export type RateLimitApi = typeof rateLimitApiRouter;
 export type RateLimitApiQuery = keyof RateLimitApi['_def']['queries'];
-export type RateLimitQueryOutput<TRouteKey extends RateLimitApiQuery> =
-  inferProcedureOutput<RateLimitApi['_def']['queries'][TRouteKey]>;
-export type RateLimitQueryInput<TRouteKey extends RateLimitApiQuery> =
-  inferProcedureInput<RateLimitApi['_def']['queries'][TRouteKey]>;
+export type RateLimitQueryOutput<TRouteKey extends RateLimitApiQuery> = inferProcedureOutput<
+  RateLimitApi['_def']['queries'][TRouteKey]
+>;
+export type RateLimitQueryInput<TRouteKey extends RateLimitApiQuery> = inferProcedureInput<
+  RateLimitApi['_def']['queries'][TRouteKey]
+>;

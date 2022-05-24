@@ -1,12 +1,5 @@
 import type * as Types from '../../../../__generated__/types';
-import {
-  Alert,
-  AlertChannel,
-  Organization,
-  Project,
-  Target,
-  SchemaVersion,
-} from '../../../../shared/entities';
+import { Alert, AlertChannel, Organization, Project, Target, SchemaVersion } from '../../../../shared/entities';
 
 export interface SchemaChangeNotificationInput {
   event: {
@@ -42,9 +35,7 @@ export interface ChannelConfirmationInput {
 }
 
 export interface CommunicationAdapter {
-  sendSchemaChangeNotification(
-    input: SchemaChangeNotificationInput
-  ): Promise<void>;
+  sendSchemaChangeNotification(input: SchemaChangeNotificationInput): Promise<void>;
   sendChannelConfirmation(input: ChannelConfirmationInput): Promise<void>;
 }
 
@@ -60,9 +51,7 @@ export function quotesTransformer(msg: string, symbols = '**') {
     return `${symbols}${value}${symbols}`;
   }
 
-  return msg
-    .replace(findSingleQuotes, transformm)
-    .replace(findDoubleQuotes, transformm);
+  return msg.replace(findSingleQuotes, transformm).replace(findDoubleQuotes, transformm);
 }
 
 export function filterChangesByLevel(level: Types.CriticalityLevel) {

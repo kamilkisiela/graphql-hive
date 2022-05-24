@@ -4,11 +4,7 @@ import type { Target, TargetSettings } from '../../../shared/entities';
 import { HiveError } from './../../../shared/errors';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { Logger } from '../../shared/providers/logger';
-import {
-  Storage,
-  ProjectSelector,
-  TargetSelector,
-} from '../../shared/providers/storage';
+import { Storage, ProjectSelector, TargetSelector } from '../../shared/providers/storage';
 import { share, uuid } from '../../../shared/helpers';
 import { ActivityManager } from '../../activity/providers/activity-manager';
 import { TokenStorage } from '../../token/providers/token-storage';
@@ -45,12 +41,7 @@ export class TargetManager {
   }: {
     name: string;
   } & ProjectSelector): Promise<Target> {
-    this.logger.info(
-      'Creating a target (name=%s, project=%s, organization=%s)',
-      name,
-      project,
-      organization
-    );
+    this.logger.info('Creating a target (name=%s, project=%s, organization=%s)', name, project, organization);
     await this.authManager.ensureProjectAccess({
       project,
       organization,
@@ -59,9 +50,7 @@ export class TargetManager {
 
     let cleanId = paramCase(name);
 
-    if (
-      await this.storage.getTargetByCleanId({ cleanId, project, organization })
-    ) {
+    if (await this.storage.getTargetByCleanId({ cleanId, project, organization })) {
       cleanId = paramCase(`${name}-${uuid(4)}`);
     }
 
@@ -85,17 +74,8 @@ export class TargetManager {
     return target;
   }
 
-  async deleteTarget({
-    organization,
-    project,
-    target,
-  }: TargetSelector): Promise<Target> {
-    this.logger.info(
-      'Deleting a target (target=%s, project=%s, organization=%s)',
-      target,
-      project,
-      organization
-    );
+  async deleteTarget({ organization, project, target }: TargetSelector): Promise<Target> {
+    this.logger.info('Deleting a target (target=%s, project=%s, organization=%s)', target, project, organization);
     await this.authManager.ensureTargetAccess({
       project,
       organization,
@@ -199,9 +179,7 @@ export class TargetManager {
     });
 
     await this.tracking.track({
-      event: input.enabled
-        ? 'TARGET_VALIDATION_ENABLED'
-        : 'TARGET_VALIDATION_DISABLED',
+      event: input.enabled ? 'TARGET_VALIDATION_ENABLED' : 'TARGET_VALIDATION_DISABLED',
       data: {
         ...input,
       },

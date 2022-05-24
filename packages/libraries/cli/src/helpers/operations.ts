@@ -58,7 +58,7 @@ export async function loadOperations(
     loaders: [new CodeFileLoader(), new GraphQLFileLoader()],
   });
 
-  return sources.map((source) => ({
+  return sources.map(source => ({
     content: normalizeOperation({
       document: source.document!,
       hideLiterals: false,

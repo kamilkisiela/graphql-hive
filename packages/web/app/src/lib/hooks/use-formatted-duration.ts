@@ -14,8 +14,5 @@ export function formatDuration(duration: number, showZero = false) {
 }
 
 export function useFormattedDuration(duration?: number): string {
-  return useMemo(
-    () => (typeof duration === 'undefined' ? '-' : formatDuration(duration)),
-    [duration]
-  );
+  return useMemo(() => (typeof duration === 'undefined' ? '-' : formatDuration(duration)), [duration]);
 }

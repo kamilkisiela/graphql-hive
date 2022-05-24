@@ -78,9 +78,7 @@ export function deployGraphQL({
         REDIS_PORT: String(redis.config.port),
         REDIS_PASSWORD: redis.config.password,
         RELEASE: packageHelper.currentReleaseId(),
-        POSTGRES_CONNECTION_STRING: apiConfig.requireSecret(
-          'postgresConnectionString'
-        ),
+        POSTGRES_CONNECTION_STRING: apiConfig.requireSecret('postgresConnectionString'),
         AUTH0_DOMAIN: commonConfig.require('auth0Domain'),
         AUTH0_CLIENT_ID: commonConfig.require('auth0ClientId'),
         AUTH0_CLIENT_SECRET: commonConfig.requireSecret('auth0ClientSecret'),

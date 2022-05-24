@@ -48,11 +48,7 @@ export class IdempotentRunner {
     span?: Span;
   }): Promise<T> {
     const traceId = uuid();
-    this.logger.debug(
-      'Running idempotent job (id=%s, traceId=%s)',
-      identifier,
-      traceId
-    );
+    this.logger.debug('Running idempotent job (id=%s, traceId=%s)', identifier, traceId);
     return this.start({
       identifier,
       traceId,
@@ -65,21 +61,9 @@ export class IdempotentRunner {
     });
   }
 
-  private async set(
-    identifier: string,
-    job: JobPending,
-    ttl: number
-  ): Promise<boolean>;
-  private async set<T>(
-    identifier: string,
-    job: JobCompleted<T>,
-    ttl: number
-  ): Promise<boolean>;
-  private async set<T>(
-    identifier: string,
-    job: JobPending | JobCompleted<T>,
-    ttl: number
-  ): Promise<boolean> {
+  private async set(identifier: string, job: JobPending, ttl: number): Promise<boolean>;
+  private async set<T>(identifier: string, job: JobCompleted<T>, ttl: number): Promise<boolean>;
+  private async set<T>(identifier: string, job: JobPending | JobCompleted<T>, ttl: number): Promise<boolean> {
     if (job.status === JobStatus.PENDING) {
       // SET if Not eXists
       const inserted = await this.redis.setnx(identifier, JSON.stringify(job));
@@ -100,9 +84,7 @@ export class IdempotentRunner {
   private async get(identifier: string): Promise<null>;
   private async get(identifier: string): Promise<JobPending>;
   private async get<T>(identifier: string): Promise<JobCompleted<T>>;
-  private async get<T>(
-    identifier: string
-  ): Promise<null | JobPending | JobCompleted<T>> {
+  private async get<T>(identifier: string): Promise<null | JobPending | JobCompleted<T>> {
     const cached = await this.redis.get(identifier);
 
     if (cached) {
@@ -133,12 +115,7 @@ export class IdempotentRunner {
     ttl: number;
     context: JobExecutorContext;
   }): Promise<T> {
-    this.logger.debug(
-      'Starting new job (id=%s, traceId=%s, attempt=%s)',
-      identifier,
-      traceId,
-      context.attempt
-    );
+    this.logger.debug('Starting new job (id=%s, traceId=%s, attempt=%s)', identifier, traceId, context.attempt);
     if (context.attempt > 3) {
       this.logger.error(
         'Job failed after 3 attempts (id=%s, traceId=%s, attempt=%s)',
@@ -161,11 +138,7 @@ export class IdempotentRunner {
       );
 
       if (!created) {
-        this.logger.debug(
-          'Job is pending (id=%s, traceId=%s)',
-          identifier,
-          traceId
-        );
+        this.logger.debug('Job is pending (id=%s, traceId=%s)', identifier, traceId);
         context.attempt++;
         return this.start({
           identifier,
@@ -181,19 +154,9 @@ export class IdempotentRunner {
         });
       }
 
-      this.logger.debug(
-        'Executing job (id=%s, traceId=%s, attempt=%s)',
-        identifier,
-        traceId,
-        context.attempt
-      );
-      const payload = await executor(context).catch(async (error) => {
-        this.logger.debug(
-          'Job execution failed (id=%s, traceId=%s, error=%s)',
-          identifier,
-          traceId,
-          error.message
-        );
+      this.logger.debug('Executing job (id=%s, traceId=%s, attempt=%s)', identifier, traceId, context.attempt);
+      const payload = await executor(context).catch(async error => {
+        this.logger.debug('Job execution failed (id=%s, traceId=%s, error=%s)', identifier, traceId, error.message);
         console.error(error);
         await this.del(identifier);
         return await Promise.reject(error);
@@ -206,24 +169,15 @@ export class IdempotentRunner {
         },
         ttl
       );
-      this.logger.debug(
-        'Job completed (id=%s, traceId=%s)',
-        identifier,
-        traceId
-      );
+      this.logger.debug('Job completed (id=%s, traceId=%s)', identifier, traceId);
 
       return payload;
     }
 
     const startedAt = Date.now();
     while (job && job.status !== JobStatus.COMPLETED) {
-      this.logger.debug(
-        'Awaiting job (id=%s, traceId=%s, time=%s)',
-        identifier,
-        traceId,
-        Date.now() - startedAt
-      );
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      this.logger.debug('Awaiting job (id=%s, traceId=%s, time=%s)', identifier, traceId, Date.now() - startedAt);
+      await new Promise(resolve => setTimeout(resolve, 500));
       job = await this.get<T>(identifier);
     }
 

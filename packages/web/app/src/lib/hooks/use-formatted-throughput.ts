@@ -21,18 +21,9 @@ export function formatThroughput(requests: number, window: number) {
   return toDecimal(rpm, 4);
 }
 
-export function useFormattedThroughput({
-  requests,
-  window,
-}: {
-  requests?: number;
-  window: number;
-}) {
+export function useFormattedThroughput({ requests, window }: { requests?: number; window: number }) {
   return React.useMemo(
-    () =>
-      typeof requests === 'undefined'
-        ? '-'
-        : formatThroughput(requests, window),
+    () => (typeof requests === 'undefined' ? '-' : formatThroughput(requests, window)),
     [requests, window]
   );
 }

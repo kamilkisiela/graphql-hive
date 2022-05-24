@@ -2,13 +2,7 @@ import { normalizeOperation as coreNormalizeOperation } from '@graphql-hive/core
 import { Kind, parse } from 'graphql';
 import LRU from 'tiny-lru';
 import { cache } from './helpers';
-import {
-  reportSize,
-  totalOperations,
-  reportMessageSize,
-  normalizeCacheMisses,
-  schemaCoordinatesSize,
-} from './metrics';
+import { reportSize, totalOperations, reportMessageSize, normalizeCacheMisses, schemaCoordinatesSize } from './metrics';
 import { stringifyOperation, stringifyRegistryRecord } from './serializer';
 
 import type { FastifyLoggerInstance } from '@hive/service-common';
@@ -19,12 +13,7 @@ import type {
   RawOperationMapRecord,
   ProcessedOperation,
 } from '@hive/usage-common';
-import type {
-  DefinitionNode,
-  DocumentNode,
-  OperationDefinitionNode,
-  OperationTypeNode,
-} from 'graphql';
+import type { DefinitionNode, DocumentNode, OperationDefinitionNode, OperationTypeNode } from 'graphql';
 
 type NormalizeFunction = (arg: RawOperationMapRecord) => {
   key: string;
@@ -54,11 +43,7 @@ export function createProcessor(config: { logger: FastifyLoggerInstance }) {
       reportMessageSize.observe(sizeOfAllReports);
       totalOperations.inc(sizeOfAllReports);
 
-      logger.info(
-        `Processing (reports=%s, operations=%s)`,
-        rawReports.length,
-        sizeOfAllReports
-      );
+      logger.info(`Processing (reports=%s, operations=%s)`, rawReports.length, sizeOfAllReports);
 
       // We do it to collect unique operations for the registry table
       const processedRegistryKeys = new Set<string>();
@@ -70,12 +55,7 @@ export function createProcessor(config: { logger: FastifyLoggerInstance }) {
         reportSize.observe(rawReport.size);
 
         for (const rawOperation of rawReport.operations) {
-          const processedOperation = processSingleOperation(
-            rawOperation,
-            rawReport.map,
-            rawReport.target,
-            normalize
-          );
+          const processedOperation = processSingleOperation(rawOperation, rawReport.map, rawReport.target, normalize);
 
           serializedOperations.push(stringifyOperation(processedOperation));
 
@@ -131,10 +111,7 @@ function processSingleOperation(
 
   schemaCoordinatesSize.observe(unique_fields.size);
 
-  const timestamp =
-    typeof operation.timestamp === 'string'
-      ? parseInt(operation.timestamp, 10)
-      : operation.timestamp;
+  const timestamp = typeof operation.timestamp === 'string' ? parseInt(operation.timestamp, 10) : operation.timestamp;
 
   return {
     document: normalized.result,

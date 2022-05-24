@@ -37,9 +37,7 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
   const url = process.env.GRAPHQL_ENDPOINT;
 
   const requestIdHeader = req.headers['x-request-id'];
-  const requestId = Array.isArray(requestIdHeader)
-    ? requestIdHeader[0]
-    : requestIdHeader ?? reqIdGenerate();
+  const requestId = Array.isArray(requestIdHeader) ? requestIdHeader[0] : requestIdHeader ?? reqIdGenerate();
 
   if (req.method === 'GET') {
     const response = await fetch(url, {
@@ -107,8 +105,7 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
       body: JSON.stringify(req.body || {}),
     } as any);
 
-    const contentType =
-      (response.headers && response.headers.get('Content-Type')) || '';
+    const contentType = (response.headers && response.headers.get('Content-Type')) || '';
     const isStream = /multipart\/mixed/i.test(contentType);
 
     if (isStream) {

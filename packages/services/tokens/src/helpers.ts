@@ -2,9 +2,7 @@ import pTimeout from 'p-timeout';
 
 const requestsInFlight = new Map<string, Promise<any>>();
 
-export function atomic<A extends string, R>(
-  fn: (arg: A) => Promise<R>
-): (arg: A) => Promise<R> {
+export function atomic<A extends string, R>(fn: (arg: A) => Promise<R>): (arg: A) => Promise<R> {
   return function atomicWrapper(arg) {
     if (requestsInFlight.has(arg)) {
       return requestsInFlight.get(arg)!;
@@ -45,7 +43,7 @@ export function useActionTracker() {
 
 export function until(fn: () => boolean, timeout: number): Promise<void> {
   return pTimeout(
-    new Promise((resolve) => {
+    new Promise(resolve => {
       const interval = setInterval(() => {
         if (fn()) {
           clearInterval(interval);

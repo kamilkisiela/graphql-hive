@@ -1,7 +1,3 @@
 {
-  "recommendations": [
-    "fabiospampinato.vscode-terminals",
-    "fabiospampinato.vscode-commands",
-    "esbenp.prettier-vscode"
-  ]
+  "recommendations": ["fabiospampinato.vscode-terminals", "fabiospampinato.vscode-commands", "esbenp.prettier-vscode"]
 }

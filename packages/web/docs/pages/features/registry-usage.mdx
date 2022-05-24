@@ -24,25 +24,25 @@ You're a programmer (or if you prefer a Software Engineer) so no need to explain
 The `experimental_pollInterval` value is up to you. Apollo Gateway uses 10s (10.000 ms) by default but we think it's better to fetch a supergraph more often.
 
 ```typescript
-import { createSupergraphSDLFetcher } from '@graphql-hive/client';
-import { ApolloGateway } from '@apollo/gateway';
-import { ApolloServer } from 'apollo-server';
+import { createSupergraphSDLFetcher } from '@graphql-hive/client'
+import { ApolloGateway } from '@apollo/gateway'
+import { ApolloServer } from 'apollo-server'
 
 const gateway = new ApolloGateway({
   experimental_pollInterval: 10_000, // define the poll interval (in ms)
   experimental_updateSupergraphSdl: createSupergraphFetcher({
     endpoint: HIVE_CDN_ENDPOINT,
-    key: HIVE_CDN_KEY,
-  }),
-});
+    key: HIVE_CDN_KEY
+  })
+})
 
 const server = new ApolloServer({
-  gateway,
-});
+  gateway
+})
 
 server.listen().then(({ url }) => {
-  console.log(`🚀 Server ready at ${url}`);
-});
+  console.log(`🚀 Server ready at ${url}`)
+})
 ```
 
 ## Schema Stitching
@@ -52,28 +52,28 @@ Stitching could be done in many ways, that's why `@graphql-hive/client` provides
 Here's an example of how it could work
 
 ```typescript
-import { createServicesFetcher } from '@graphql-hive/client';
+import { createServicesFetcher } from '@graphql-hive/client'
 
 const fetchServices = createServicesFetcher({
   endpoint: process.env.HIVE_CDN_ENDPOINT,
-  key: process.env.HIVE_CDN_KEY,
-});
+  key: process.env.HIVE_CDN_KEY
+})
 
 startMyGraphQLGateway({
   // a function that resolves a list of services to stitch them together
   async stitchServices() {
-    const services = await fetchServices();
+    const services = await fetchServices()
 
-    return services.map((service) => {
+    return services.map(service => {
       return {
         sdl: service.sdl,
         url: service.url,
-        checksum: service.id, // to check if service's schema was modified
-      };
-    });
+        checksum: service.id // to check if service's schema was modified
+      }
+    })
   },
-  pollingInSec: 10, // every 10s
-});
+  pollingInSec: 10 // every 10s
+})
 ```
 
 - `HIVE_CDN_ENDPOINT` - the endpoint Hive generated for you in the previous step
@@ -105,8 +105,7 @@ Here's a list of available endpoints:
   ```bash
   curl --request GET \
     --url https://cdn.graphql-hive.com/asce7c12-753d-hive-bee-d7f2c803e232/schema \
-    --header 'X-Hive-CDN-Key: aabTxbEyC78NvSPQNO+qLrrRnBvODJJ8k4sL/2EtIwc='
-  \
+    --header 'X-Hive-CDN-Key: aabTxbEyC78NvSPQNO+qLrrRnBvODJJ8k4sL/2EtIwc=' \
     --header 'Accept: application/json'
   ```
 
@@ -134,8 +133,8 @@ Here's a list of available endpoints:
 
   ```bash
   curl --request GET \
-  --url https://cdn.graphql-hive.com/asce7c12-753d-hive-bee-d7f2c803e232/metadata \
-  --header 'X-Hive-CDN-Key: YOUR_KEY_HERE'
+    --url https://cdn.graphql-hive.com/asce7c12-753d-hive-bee-d7f2c803e232/metadata \
+    --header 'X-Hive-CDN-Key: YOUR_KEY_HERE'
   ```
 
   The value returned is the value you stored, as JSON, with `Content-Type: application/json` header.

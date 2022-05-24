@@ -7,9 +7,7 @@ import { createConnection } from '../../shared/schema';
 export const resolvers: ActivityModule.Resolvers = {
   Query: {
     async organizationActivities(_, { selector }, { injector }) {
-      const organization = await injector
-        .get(IdTranslator)
-        .translateOrganizationId(selector);
+      const organization = await injector.get(IdTranslator).translateOrganizationId(selector);
 
       return injector.get(ActivityManager).getByOrganization({
         organization,

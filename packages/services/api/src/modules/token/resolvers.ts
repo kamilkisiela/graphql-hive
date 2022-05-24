@@ -50,9 +50,7 @@ export const resolvers: TokenModule.Resolvers = {
       if (!result.success) {
         return {
           error: {
-            message:
-              result.error.formErrors.fieldErrors.name?.[0] ??
-              'Please check your input.',
+            message: result.error.formErrors.fieldErrors.name?.[0] ?? 'Please check your input.',
           },
         };
       }

@@ -17,13 +17,7 @@ export class HivePolice {
     });
 
     const script = new cf.WorkerScript('hive-police-worker', {
-      content: readFileSync(
-        resolve(
-          __dirname,
-          '../../packages/services/police-worker/dist/worker.js'
-        ),
-        'utf-8'
-      ),
+      content: readFileSync(resolve(__dirname, '../../packages/services/police-worker/dist/worker.js'), 'utf-8'),
       name: `hive-police-${this.envName}`,
       kvNamespaceBindings: [
         {

@@ -89,9 +89,7 @@ export class SlackCommunicationAdapter implements CommunicationAdapter {
     }
 
     const actionMessage =
-      input.event.kind === 'created'
-        ? `I will send here notifications`
-        : `I will no longer send here notifications`;
+      input.event.kind === 'created' ? `I will send here notifications` : `I will no longer send here notifications`;
 
     try {
       const projectLink = this.createLink({
@@ -102,10 +100,9 @@ export class SlackCommunicationAdapter implements CommunicationAdapter {
       const client = new WebClient(token);
       await client.chat.postMessage({
         channel: input.channel.slackChannel!,
-        text: [
-          `:wave: Hi! I'm the notification :bee:.`,
-          `${actionMessage} about your ${projectLink} project.`,
-        ].join('\n'),
+        text: [`:wave: Hi! I'm the notification :bee:.`, `${actionMessage} about your ${projectLink} project.`].join(
+          '\n'
+        ),
       });
     } catch (error) {
       this.logger.error(`Failed to send Slack notification`, error);
@@ -166,9 +163,7 @@ function renderAttachments({
   title: string;
   changes: readonly Types.SchemaChange[];
 }): MessageAttachment {
-  const text = changes
-    .map((change) => slackCoderize(change.message))
-    .join('\n');
+  const text = changes.map(change => slackCoderize(change.message)).join('\n');
 
   return {
     mrkdwn_in: ['text'],

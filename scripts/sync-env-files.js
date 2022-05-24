@@ -18,20 +18,14 @@ const cwd = process.cwd();
 async function main() {
   console.log('[sync-env-files] Syncing');
 
-  const [localFiles, rootEnv] = await Promise.all([
-    findLocalEnvFiles(),
-    loadRootEnv(),
-  ]);
+  const [localFiles, rootEnv] = await Promise.all([findLocalEnvFiles(), loadRootEnv()]);
 
   async function syncEnvFile(envLocalFile) {
     const dir = dirname(envLocalFile);
     const envFile = join(dir, '.env');
 
     if (!(await exists(envFile))) {
-      console.log(
-        '[sync-env-files] Write .env file in',
-        relative(process.cwd(), dir)
-      );
+      console.log('[sync-env-files] Write .env file in', relative(process.cwd(), dir));
       await writeFile(envFile, await readFile(envLocalFile));
     }
 
@@ -54,8 +48,7 @@ async function main() {
 
       if (env[key] === '<sync>' || env[key] === '') {
         modified = true;
-        env[key] =
-          typeof rootEnv[key] !== 'undefined' ? rootEnv[key] : process.env[key];
+        env[key] = typeof rootEnv[key] !== 'undefined' ? rootEnv[key] : process.env[key];
       }
     }
 
@@ -70,7 +63,7 @@ async function main() {
   console.log('[sync-env-files] Synced');
 }
 
-main().catch((error) => {
+main().catch(error => {
   console.error(error);
   process.exit(1);
 });
@@ -108,9 +101,7 @@ function findLocalEnvFiles() {
 
 async function loadRootEnv() {
   const rootEnvFile = join(cwd, '.env');
-  return (await exists(rootEnvFile))
-    ? parse(await readFile(rootEnvFile, 'utf8'))
-    : {};
+  return (await exists(rootEnvFile)) ? parse(await readFile(rootEnvFile, 'utf8')) : {};
 }
 
 function stringifyDotEnv(obj) {
@@ -121,7 +112,7 @@ function stringifyDotEnv(obj) {
   }
 
   return Object.keys(obj)
-    .map((key) => {
+    .map(key => {
       const val = obj[key];
 
       let str = '';

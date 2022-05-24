@@ -116,9 +116,9 @@ export class RemoteArtifactAsServiceDeployment {
           volumeMounts,
           command:
             this.options.packageInfo.runtime === 'node'
-              ? ['/bin/sh', '-c', artifactUrl.apply((v) => `yarn add ${v}`)]
+              ? ['/bin/sh', '-c', artifactUrl.apply(v => `yarn add ${v}`)]
               : this.options.packageInfo.runtime === 'rust'
-              ? ['/bin/sh', '-c', artifactUrl.apply((v) => `wget ${v}`)]
+              ? ['/bin/sh', '-c', artifactUrl.apply(v => `wget ${v}`)]
               : ['echo missing script!'],
         },
       ],
@@ -242,17 +242,13 @@ export class RemoteArtifactAsServiceDeployment {
                   name: 'cpu',
                   target: {
                     type: 'Utilization',
-                    averageUtilization:
-                      this.options.autoScaling.cpu.cpuAverageToScale,
+                    averageUtilization: this.options.autoScaling.cpu.cpuAverageToScale,
                   },
                 },
               },
             ],
             maxReplicas: this.options.autoScaling.maxReplicas,
-            minReplicas:
-              this.options.autoScaling.minReplicas ||
-              this.options.replicas ||
-              1,
+            minReplicas: this.options.autoScaling.minReplicas || this.options.replicas || 1,
           },
         },
         {

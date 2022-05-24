@@ -16,9 +16,7 @@ export const GitRepositorySettings: React.FC<{
   project: ProjectFieldsFragment;
 }> = ({ project }) => {
   const router = useRouteSelector();
-  const [selectedRepository, setSelectedRepository] = React.useState<string>(
-    project.gitRepository
-  );
+  const [selectedRepository, setSelectedRepository] = React.useState<string>(project.gitRepository);
   const [disabled, setDisabled] = React.useState(false);
   const [, mutate] = useMutation(UpdateProjectGitRepositoryDocument);
 
@@ -44,8 +42,7 @@ export const GitRepositorySettings: React.FC<{
     },
   });
 
-  const hasGitHubIntegration =
-    integrationQuery.data?.hasGitHubIntegration === true;
+  const hasGitHubIntegration = integrationQuery.data?.hasGitHubIntegration === true;
 
   return (
     <Card.Root>
@@ -60,23 +57,15 @@ export const GitRepositorySettings: React.FC<{
               placeholder="None"
               disabled={disabled}
               value={selectedRepository ?? undefined}
-              onChange={(e) => setSelectedRepository(e.target.value)}
+              onChange={e => setSelectedRepository(e.target.value)}
             >
-              {integrationQuery.data?.gitHubIntegration.repositories.map(
-                (repo) => (
-                  <option key={repo.nameWithOwner} value={repo.nameWithOwner}>
-                    {repo.nameWithOwner}
-                  </option>
-                )
-              )}
+              {integrationQuery.data?.gitHubIntegration.repositories.map(repo => (
+                <option key={repo.nameWithOwner} value={repo.nameWithOwner}>
+                  {repo.nameWithOwner}
+                </option>
+              ))}
             </Select>
-            <Button
-              colorScheme="primary"
-              type="button"
-              disabled={disabled}
-              isLoading={disabled}
-              onClick={submit}
-            >
+            <Button colorScheme="primary" type="button" disabled={disabled} isLoading={disabled} onClick={submit}>
               Save
             </Button>
           </form>

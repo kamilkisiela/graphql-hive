@@ -37,29 +37,13 @@ const ActivityRow: React.FC<ActivityProps> = ({ activity }) => {
   switch (activity.__typename) {
     /* Organization */
     case 'OrganizationCreatedActivity':
-      return (
-        <OrganizationCreated
-          activity={activity as OrganizationCreatedActivity}
-        />
-      );
+      return <OrganizationCreated activity={activity as OrganizationCreatedActivity} />;
     case 'OrganizationPlanChangeActivity':
-      return (
-        <OrganizationPlanChange
-          activity={activity as OrganizationPlanChangeActivity}
-        />
-      );
+      return <OrganizationPlanChange activity={activity as OrganizationPlanChangeActivity} />;
     case 'OrganizationNameUpdatedActivity':
-      return (
-        <OrganizationNameUpdated
-          activity={activity as OrganizationNameUpdatedActivity}
-        />
-      );
+      return <OrganizationNameUpdated activity={activity as OrganizationNameUpdatedActivity} />;
     case 'OrganizationIdUpdatedActivity':
-      return (
-        <OrganizationIdUpdated
-          activity={activity as OrganizationIdUpdatedActivity}
-        />
-      );
+      return <OrganizationIdUpdated activity={activity as OrganizationIdUpdatedActivity} />;
     case 'MemberAddedActivity':
       return <MemberAdded activity={activity as MemberAddedActivity} />;
     case 'MemberDeletedActivity':
@@ -70,22 +54,16 @@ const ActivityRow: React.FC<ActivityProps> = ({ activity }) => {
     case 'ProjectDeletedActivity':
       return <ProjectDeleted activity={activity as ProjectDeletedActivity} />;
     case 'ProjectNameUpdatedActivity':
-      return (
-        <ProjectNameUpdated activity={activity as ProjectNameUpdatedActivity} />
-      );
+      return <ProjectNameUpdated activity={activity as ProjectNameUpdatedActivity} />;
     case 'ProjectIdUpdatedActivity':
-      return (
-        <ProjectIdUpdated activity={activity as ProjectIdUpdatedActivity} />
-      );
+      return <ProjectIdUpdated activity={activity as ProjectIdUpdatedActivity} />;
     /* Target */
     case 'TargetCreatedActivity':
       return <TargetCreated activity={activity as TargetCreatedActivity} />;
     case 'TargetDeletedActivity':
       return <TargetDeleted activity={activity as TargetDeletedActivity} />;
     case 'TargetNameUpdatedActivity':
-      return (
-        <TargetNameUpdated activity={activity as TargetNameUpdatedActivity} />
-      );
+      return <TargetNameUpdated activity={activity as TargetNameUpdatedActivity} />;
     case 'TargetIdUpdatedActivity':
       return <TargetIdUpdated activity={activity as TargetIdUpdatedActivity} />;
     default:
@@ -105,29 +83,17 @@ export const Activities: React.FC<{
       {fetching ? (
         <>
           <div tw="py-3">
-            <Skeleton
-              startColor={startColor}
-              endColor={endColor}
-              height="36px"
-            />
+            <Skeleton startColor={startColor} endColor={endColor} height="36px" />
           </div>
           <div tw="py-3">
-            <Skeleton
-              startColor={startColor}
-              endColor={endColor}
-              height="36px"
-            />
+            <Skeleton startColor={startColor} endColor={endColor} height="36px" />
           </div>
           <div tw="py-3">
-            <Skeleton
-              startColor={startColor}
-              endColor={endColor}
-              height="36px"
-            />
+            <Skeleton startColor={startColor} endColor={endColor} height="36px" />
           </div>
         </>
       ) : (
-        activities.map((node) => <ActivityRow key={node.id} activity={node} />)
+        activities.map(node => <ActivityRow key={node.id} activity={node} />)
       )}
     </div>
   );

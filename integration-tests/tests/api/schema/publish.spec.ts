@@ -27,9 +27,7 @@ test('cannot publish a schema without target:registry:write access', async () =>
 
   // Join
   const { access_token: member_access_token } = await authenticate('extra');
-  const org =
-    orgResult.body.data!.createOrganization.ok.createdOrganizationPayload
-      .organization;
+  const org = orgResult.body.data!.createOrganization.ok.createdOrganizationPayload.organization;
   const code = org.inviteCode;
   await joinOrganization(code, member_access_token);
 
@@ -84,9 +82,7 @@ test('can publish a schema with target:registry:write access', async () => {
 
   // Join
   const { access_token: member_access_token } = await authenticate('extra');
-  const org =
-    orgResult.body.data!.createOrganization.ok.createdOrganizationPayload
-      .organization;
+  const org = orgResult.body.data!.createOrganization.ok.createdOrganizationPayload.organization;
   const code = org.inviteCode;
   await joinOrganization(code, member_access_token);
 
@@ -110,10 +106,7 @@ test('can publish a schema with target:registry:write access', async () => {
       target: target.cleanId,
       organizationScopes: [],
       projectScopes: [],
-      targetScopes: [
-        TargetAccessScope.RegistryRead,
-        TargetAccessScope.RegistryWrite,
-      ],
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
     },
     owner_access_token
   );
@@ -132,9 +125,7 @@ test('can publish a schema with target:registry:write access', async () => {
   );
 
   expect(result.body.errors).not.toBeDefined();
-  expect(result.body.data!.schemaPublish.__typename).toBe(
-    'SchemaPublishSuccess'
-  );
+  expect(result.body.data!.schemaPublish.__typename).toBe('SchemaPublishSuccess');
 
   result = await publishSchema(
     {
@@ -146,9 +137,7 @@ test('can publish a schema with target:registry:write access', async () => {
   );
 
   expect(result.body.errors).not.toBeDefined();
-  expect(result.body.data!.schemaPublish.__typename).toBe(
-    'SchemaPublishSuccess'
-  );
+  expect(result.body.data!.schemaPublish.__typename).toBe('SchemaPublishSuccess');
 
   const versionsResult = await fetchVersions(
     {
@@ -172,9 +161,7 @@ test('base schema should not affect the output schema persisted in db', async ()
     },
     owner_access_token
   );
-  const org =
-    orgResult.body.data!.createOrganization.ok.createdOrganizationPayload
-      .organization;
+  const org = orgResult.body.data!.createOrganization.ok.createdOrganizationPayload.organization;
 
   const projectResult = await createProject(
     {
@@ -197,10 +184,7 @@ test('base schema should not affect the output schema persisted in db', async ()
       target: target.cleanId,
       organizationScopes: [],
       projectScopes: [],
-      targetScopes: [
-        TargetAccessScope.RegistryRead,
-        TargetAccessScope.RegistryWrite,
-      ],
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
     },
     owner_access_token
   );
@@ -219,9 +203,7 @@ test('base schema should not affect the output schema persisted in db', async ()
 
   // Schema publish should be successful
   expect(publishResult.body.errors).not.toBeDefined();
-  expect(publishResult.body.data!.schemaPublish.__typename).toBe(
-    'SchemaPublishSuccess'
-  );
+  expect(publishResult.body.data!.schemaPublish.__typename).toBe('SchemaPublishSuccess');
 
   const updateBaseResult = await updateBaseSchema(
     {
@@ -246,9 +228,7 @@ test('base schema should not affect the output schema persisted in db', async ()
     writeToken
   );
   expect(publishResult.body.errors).not.toBeDefined();
-  expect(publishResult.body.data!.schemaPublish.__typename).toBe(
-    'SchemaPublishSuccess'
-  );
+  expect(publishResult.body.data!.schemaPublish.__typename).toBe('SchemaPublishSuccess');
 
   const versionsResult = await fetchVersions(
     {
@@ -266,18 +246,12 @@ test('base schema should not affect the output schema persisted in db', async ()
   const latestResult = await fetchLatestSchema(writeToken);
   expect(latestResult.body.errors).not.toBeDefined();
   expect(latestResult.body.data!.latestVersion.schemas.total).toBe(1);
-  expect(latestResult.body.data!.latestVersion.schemas.nodes[0].commit).toBe(
-    'abc234'
-  );
+  expect(latestResult.body.data!.latestVersion.schemas.nodes[0].commit).toBe('abc234');
   expect(latestResult.body.data!.latestVersion.schemas.nodes[0].source).toMatch(
     'type Query { ping: String @auth pong: String }'
   );
-  expect(
-    latestResult.body.data!.latestVersion.schemas.nodes[0].source
-  ).not.toMatch('directive');
-  expect(latestResult.body.data!.latestVersion.baseSchema).toMatch(
-    'directive @auth on OBJECT | FIELD_DEFINITION'
-  );
+  expect(latestResult.body.data!.latestVersion.schemas.nodes[0].source).not.toMatch('directive');
+  expect(latestResult.body.data!.latestVersion.baseSchema).toMatch('directive @auth on OBJECT | FIELD_DEFINITION');
 });
 
 test('directives should not be removed (federation)', async () => {
@@ -288,9 +262,7 @@ test('directives should not be removed (federation)', async () => {
     },
     owner_access_token
   );
-  const org =
-    orgResult.body.data!.createOrganization.ok.createdOrganizationPayload
-      .organization;
+  const org = orgResult.body.data!.createOrganization.ok.createdOrganizationPayload.organization;
 
   const projectResult = await createProject(
     {
@@ -313,10 +285,7 @@ test('directives should not be removed (federation)', async () => {
       target: target.cleanId,
       organizationScopes: [],
       projectScopes: [],
-      targetScopes: [
-        TargetAccessScope.RegistryRead,
-        TargetAccessScope.RegistryWrite,
-      ],
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
     },
     owner_access_token
   );
@@ -335,9 +304,7 @@ test('directives should not be removed (federation)', async () => {
 
   // Schema publish should be successful
   expect(publishResult.body.errors).not.toBeDefined();
-  expect(publishResult.body.data!.schemaPublish.__typename).toBe(
-    'SchemaPublishSuccess'
-  );
+  expect(publishResult.body.data!.schemaPublish.__typename).toBe('SchemaPublishSuccess');
 
   const versionsResult = await fetchVersions(
     {
@@ -355,9 +322,7 @@ test('directives should not be removed (federation)', async () => {
   const latestResult = await fetchLatestSchema(writeToken);
   expect(latestResult.body.errors).not.toBeDefined();
   expect(latestResult.body.data!.latestVersion.schemas.total).toBe(1);
-  expect(latestResult.body.data!.latestVersion.schemas.nodes[0].commit).toBe(
-    'abc123'
-  );
+  expect(latestResult.body.data!.latestVersion.schemas.nodes[0].commit).toBe('abc123');
   expect(latestResult.body.data!.latestVersion.schemas.nodes[0].source).toMatch(
     `type Query { me: User } type User @key(fields: "id") { id: ID! name: String }`
   );
@@ -371,9 +336,7 @@ test('directives should not be removed (stitching)', async () => {
     },
     owner_access_token
   );
-  const org =
-    orgResult.body.data!.createOrganization.ok.createdOrganizationPayload
-      .organization;
+  const org = orgResult.body.data!.createOrganization.ok.createdOrganizationPayload.organization;
 
   const projectResult = await createProject(
     {
@@ -396,10 +359,7 @@ test('directives should not be removed (stitching)', async () => {
       target: target.cleanId,
       organizationScopes: [],
       projectScopes: [],
-      targetScopes: [
-        TargetAccessScope.RegistryRead,
-        TargetAccessScope.RegistryWrite,
-      ],
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
     },
     owner_access_token
   );
@@ -418,9 +378,7 @@ test('directives should not be removed (stitching)', async () => {
 
   // Schema publish should be successful
   expect(publishResult.body.errors).not.toBeDefined();
-  expect(publishResult.body.data!.schemaPublish.__typename).toBe(
-    'SchemaPublishSuccess'
-  );
+  expect(publishResult.body.data!.schemaPublish.__typename).toBe('SchemaPublishSuccess');
 
   const versionsResult = await fetchVersions(
     {
@@ -438,9 +396,7 @@ test('directives should not be removed (stitching)', async () => {
   const latestResult = await fetchLatestSchema(writeToken);
   expect(latestResult.body.errors).not.toBeDefined();
   expect(latestResult.body.data!.latestVersion.schemas.total).toBe(1);
-  expect(latestResult.body.data!.latestVersion.schemas.nodes[0].commit).toBe(
-    'abc123'
-  );
+  expect(latestResult.body.data!.latestVersion.schemas.nodes[0].commit).toBe('abc123');
   expect(latestResult.body.data!.latestVersion.schemas.nodes[0].source).toMatch(
     `type Query { me: User } type User @key(selectionSet: "{ id }") { id: ID! name: String }`
   );
@@ -454,9 +410,7 @@ test('directives should not be removed (single)', async () => {
     },
     owner_access_token
   );
-  const org =
-    orgResult.body.data!.createOrganization.ok.createdOrganizationPayload
-      .organization;
+  const org = orgResult.body.data!.createOrganization.ok.createdOrganizationPayload.organization;
 
   const projectResult = await createProject(
     {
@@ -479,10 +433,7 @@ test('directives should not be removed (single)', async () => {
       target: target.cleanId,
       organizationScopes: [],
       projectScopes: [],
-      targetScopes: [
-        TargetAccessScope.RegistryRead,
-        TargetAccessScope.RegistryWrite,
-      ],
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
     },
     owner_access_token
   );
@@ -501,9 +452,7 @@ test('directives should not be removed (single)', async () => {
 
   // Schema publish should be successful
   expect(publishResult.body.errors).not.toBeDefined();
-  expect(publishResult.body.data!.schemaPublish.__typename).toBe(
-    'SchemaPublishSuccess'
-  );
+  expect(publishResult.body.data!.schemaPublish.__typename).toBe('SchemaPublishSuccess');
 
   const versionsResult = await fetchVersions(
     {
@@ -521,9 +470,7 @@ test('directives should not be removed (single)', async () => {
   const latestResult = await fetchLatestSchema(writeToken);
   expect(latestResult.body.errors).not.toBeDefined();
   expect(latestResult.body.data!.latestVersion.schemas.total).toBe(1);
-  expect(latestResult.body.data!.latestVersion.schemas.nodes[0].commit).toBe(
-    'abc123'
-  );
+  expect(latestResult.body.data!.latestVersion.schemas.nodes[0].commit).toBe('abc123');
   expect(latestResult.body.data!.latestVersion.schemas.nodes[0].source).toMatch(
     `directive @auth on FIELD_DEFINITION type Query { me: User @auth } type User { id: ID! name: String }`
   );
@@ -537,9 +484,7 @@ test('share publication of schema using redis', async () => {
     },
     owner_access_token
   );
-  const org =
-    orgResult.body.data!.createOrganization.ok.createdOrganizationPayload
-      .organization;
+  const org = orgResult.body.data!.createOrganization.ok.createdOrganizationPayload.organization;
 
   const projectResult = await createProject(
     {
@@ -562,10 +507,7 @@ test('share publication of schema using redis', async () => {
       target: target.cleanId,
       organizationScopes: [],
       projectScopes: [],
-      targetScopes: [
-        TargetAccessScope.RegistryRead,
-        TargetAccessScope.RegistryWrite,
-      ],
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
     },
     owner_access_token
   );
@@ -584,9 +526,7 @@ test('share publication of schema using redis', async () => {
 
   // Schema publish should be successful
   expect(publishResult.body.errors).not.toBeDefined();
-  expect(publishResult.body.data!.schemaPublish.__typename).toBe(
-    'SchemaPublishSuccess'
-  );
+  expect(publishResult.body.data!.schemaPublish.__typename).toBe('SchemaPublishSuccess');
 
   const [publishResult1, publishResult2] = await Promise.all([
     publishSchema(
@@ -608,12 +548,8 @@ test('share publication of schema using redis', async () => {
   ]);
   expect(publishResult1.body.errors).not.toBeDefined();
   expect(publishResult2.body.errors).not.toBeDefined();
-  expect(publishResult1.body.data!.schemaPublish.__typename).toBe(
-    'SchemaPublishSuccess'
-  );
-  expect(publishResult2.body.data!.schemaPublish.__typename).toBe(
-    'SchemaPublishSuccess'
-  );
+  expect(publishResult1.body.data!.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+  expect(publishResult2.body.data!.schemaPublish.__typename).toBe('SchemaPublishSuccess');
 });
 
 test("Two targets with the same commit id shouldn't return an error", async () => {
@@ -624,9 +560,7 @@ test("Two targets with the same commit id shouldn't return an error", async () =
     },
     owner_access_token
   );
-  const org =
-    orgResult.body.data!.createOrganization.ok.createdOrganizationPayload
-      .organization;
+  const org = orgResult.body.data!.createOrganization.ok.createdOrganizationPayload.organization;
   const projectResult = await createProject(
     {
       organization: org.cleanId,
@@ -645,10 +579,7 @@ test("Two targets with the same commit id shouldn't return an error", async () =
       target: target.cleanId,
       organizationScopes: [],
       projectScopes: [],
-      targetScopes: [
-        TargetAccessScope.RegistryRead,
-        TargetAccessScope.RegistryWrite,
-      ],
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
     },
     owner_access_token
   );
@@ -679,10 +610,7 @@ test("Two targets with the same commit id shouldn't return an error", async () =
       target: target2.cleanId,
       organizationScopes: [],
       projectScopes: [],
-      targetScopes: [
-        TargetAccessScope.RegistryRead,
-        TargetAccessScope.RegistryWrite,
-      ],
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
     },
     owner_access_token
   );
@@ -697,13 +625,9 @@ test("Two targets with the same commit id shouldn't return an error", async () =
   );
   // Schema publish should be successful
   expect(publishResult.body.errors).not.toBeDefined();
-  expect(publishResult.body.data!.schemaPublish.__typename).toBe(
-    'SchemaPublishSuccess'
-  );
+  expect(publishResult.body.data!.schemaPublish.__typename).toBe('SchemaPublishSuccess');
   expect(publishResult2.body.errors).not.toBeDefined();
-  expect(publishResult2.body.data!.schemaPublish.__typename).toBe(
-    'SchemaPublishSuccess'
-  );
+  expect(publishResult2.body.data!.schemaPublish.__typename).toBe('SchemaPublishSuccess');
 });
 
 test('marking versions as valid', async () => {
@@ -717,9 +641,7 @@ test('marking versions as valid', async () => {
 
   // Join
   const { access_token: member_access_token } = await authenticate('extra');
-  const org =
-    orgResult.body.data!.createOrganization.ok.createdOrganizationPayload
-      .organization;
+  const org = orgResult.body.data!.createOrganization.ok.createdOrganizationPayload.organization;
   const code = org.inviteCode;
   await joinOrganization(code, member_access_token);
 
@@ -743,10 +665,7 @@ test('marking versions as valid', async () => {
       target: target.cleanId,
       organizationScopes: [],
       projectScopes: [],
-      targetScopes: [
-        TargetAccessScope.RegistryRead,
-        TargetAccessScope.RegistryWrite,
-      ],
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
     },
     owner_access_token
   );
@@ -766,9 +685,7 @@ test('marking versions as valid', async () => {
   );
 
   expect(result.body.errors).not.toBeDefined();
-  expect(result.body.data!.schemaPublish.__typename).toBe(
-    'SchemaPublishSuccess'
-  );
+  expect(result.body.data!.schemaPublish.__typename).toBe('SchemaPublishSuccess');
 
   // Second version with a forced breaking change
   result = await publishSchema(
@@ -814,18 +731,11 @@ test('marking versions as valid', async () => {
   // the initial version should be the latest valid version
   let latestValidSchemaResult = await fetchLatestValidSchema(token);
   expect(latestValidSchemaResult.body.errors).not.toBeDefined();
-  expect(
-    latestValidSchemaResult.body.data!.latestValidVersion.schemas.total
-  ).toEqual(1);
-  expect(
-    latestValidSchemaResult.body.data!.latestValidVersion.schemas.nodes[0]
-      .commit
-  ).toEqual('c0');
+  expect(latestValidSchemaResult.body.data!.latestValidVersion.schemas.total).toEqual(1);
+  expect(latestValidSchemaResult.body.data!.latestValidVersion.schemas.nodes[0].commit).toEqual('c0');
 
   const versionId = (commit: string) =>
-    versionsResult.body.data!.schemaVersions.nodes.find(
-      (node) => node.commit.commit === commit
-    )!.id;
+    versionsResult.body.data!.schemaVersions.nodes.find(node => node.commit.commit === commit)!.id;
 
   // marking the third version as valid should promote it to be the latest valid version
   let versionStatusUpdateResult = await updateSchemaVersionStatus(
@@ -840,15 +750,11 @@ test('marking versions as valid', async () => {
   );
 
   expect(versionStatusUpdateResult.body.errors).not.toBeDefined();
-  expect(
-    versionStatusUpdateResult.body.data!.updateSchemaVersionStatus.id
-  ).toEqual(versionId('c2'));
+  expect(versionStatusUpdateResult.body.data!.updateSchemaVersionStatus.id).toEqual(versionId('c2'));
 
   latestValidSchemaResult = await fetchLatestValidSchema(token);
   expect(latestValidSchemaResult.body.errors).not.toBeDefined();
-  expect(latestValidSchemaResult.body.data!.latestValidVersion.id).toEqual(
-    versionId('c2')
-  );
+  expect(latestValidSchemaResult.body.data!.latestValidVersion.id).toEqual(versionId('c2'));
 
   // marking the second (not the most recent) version as valid should NOT promote it to be the latest valid version
   versionStatusUpdateResult = await updateSchemaVersionStatus(
@@ -865,9 +771,7 @@ test('marking versions as valid', async () => {
 
   latestValidSchemaResult = await fetchLatestValidSchema(token);
   expect(latestValidSchemaResult.body.errors).not.toBeDefined();
-  expect(latestValidSchemaResult.body.data!.latestValidVersion.id).toEqual(
-    versionId('c2')
-  );
+  expect(latestValidSchemaResult.body.data!.latestValidVersion.id).toEqual(versionId('c2'));
 });
 
 test('marking only the most recent version as valid result in an update of CDN', async () => {
@@ -881,9 +785,7 @@ test('marking only the most recent version as valid result in an update of CDN',
 
   // Join
   const { access_token: member_access_token } = await authenticate('extra');
-  const org =
-    orgResult.body.data!.createOrganization.ok.createdOrganizationPayload
-      .organization;
+  const org = orgResult.body.data!.createOrganization.ok.createdOrganizationPayload.organization;
   const code = org.inviteCode;
   await joinOrganization(code, member_access_token);
 
@@ -907,10 +809,7 @@ test('marking only the most recent version as valid result in an update of CDN',
       target: target.cleanId,
       organizationScopes: [],
       projectScopes: [],
-      targetScopes: [
-        TargetAccessScope.RegistryRead,
-        TargetAccessScope.RegistryWrite,
-      ],
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
     },
     owner_access_token
   );
@@ -931,9 +830,7 @@ test('marking only the most recent version as valid result in an update of CDN',
   );
 
   expect(result.body.errors).not.toBeDefined();
-  expect(result.body.data!.schemaPublish.__typename).toBe(
-    'SchemaPublishSuccess'
-  );
+  expect(result.body.data!.schemaPublish.__typename).toBe('SchemaPublishSuccess');
 
   // Second version with a forced breaking change
   result = await publishSchema(
@@ -980,9 +877,7 @@ test('marking only the most recent version as valid result in an update of CDN',
   const versionsResult = await fetchVersions(targetSelector, 3, token);
 
   const versionId = (commit: string) =>
-    versionsResult.body.data!.schemaVersions.nodes.find(
-      (node) => node.commit.commit === commit
-    )!.id;
+    versionsResult.body.data!.schemaVersions.nodes.find(node => node.commit.commit === commit)!.id;
 
   // marking the third version as valid should promote it to be the latest valid version and publish it to CDN
   await updateSchemaVersionStatus(

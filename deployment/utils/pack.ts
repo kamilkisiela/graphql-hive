@@ -12,7 +12,7 @@ export function createPackageHelper(dir = resolve(process.cwd(), '../')) {
   return {
     currentReleaseId: () => revision,
     npmPack(name: string): PackageInfo {
-      const dir = packages.find((p) => p.packageJson.name === name)?.dir;
+      const dir = packages.find(p => p.packageJson.name === name)?.dir;
 
       if (!dir) {
         throw new Error(`Failed to find package "${name}" in workspace!`);

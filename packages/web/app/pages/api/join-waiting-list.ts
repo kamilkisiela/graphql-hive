@@ -20,12 +20,9 @@ async function joinWaitingList(req: NextApiRequest, res: NextApiResponse) {
     console.log('Joining the waiting list (input=%o)', req.body);
 
     if (req.body.email) {
-      await fetch(
-        `https://guild-ms-slack-bot.vercel.app/api/hive?email=${req.body.email}`,
-        {
-          method: 'GET',
-        }
-      );
+      await fetch(`https://guild-ms-slack-bot.vercel.app/api/hive?email=${req.body.email}`, {
+        method: 'GET',
+      });
     } else {
       return failure('Missing email');
     }

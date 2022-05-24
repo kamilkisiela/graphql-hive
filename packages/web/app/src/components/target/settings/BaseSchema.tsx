@@ -72,36 +72,18 @@ export const BaseSchemaSettings: React.FC<{
       <Card.Root>
         <Card.Title>Extend Your Schema</Card.Title>
         <Card.Content>
-          <p>
-            Define a piece of SDL that will be added to every published schema.
-          </p>
+          <p>Define a piece of SDL that will be added to every published schema.</p>
           <Description tw="mt-3">
-            Useful for AWS AppSync users to not send platform-specific part of
-            schema to Hive.
+            Useful for AWS AppSync users to not send platform-specific part of schema to Hive.
           </Description>
           <div tw="py-3">
-            <SchemaEditor
-              value={baseSchema}
-              onChange={setBaseSchema}
-              readOnly={disabled}
-            />
+            <SchemaEditor value={baseSchema} onChange={setBaseSchema} readOnly={disabled} />
           </div>
           <div tw="flex flex-row items-center space-x-3">
-            <Button
-              colorScheme="primary"
-              size="sm"
-              disabled={disabled}
-              isLoading={loading}
-              onClick={submit}
-            >
+            <Button colorScheme="primary" size="sm" disabled={disabled} isLoading={loading} onClick={submit}>
               Save
             </Button>
-            <Button
-              colorScheme="gray"
-              size="sm"
-              disabled={disabled}
-              onClick={reset}
-            >
+            <Button colorScheme="gray" size="sm" disabled={disabled} onClick={reset}>
               Reset
             </Button>
             {isUnsaved && (

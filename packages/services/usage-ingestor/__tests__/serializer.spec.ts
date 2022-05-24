@@ -1,8 +1,4 @@
-import {
-  stringifyOperation,
-  stringifyRegistryRecord,
-  joinIntoSingleMessage,
-} from '../src/serializer';
+import { stringifyOperation, stringifyRegistryRecord, joinIntoSingleMessage } from '../src/serializer';
 
 const timestamp = {
   asNumber: 1643892203027,

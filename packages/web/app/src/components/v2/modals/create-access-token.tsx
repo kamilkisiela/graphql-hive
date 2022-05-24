@@ -4,10 +4,7 @@ import { useFormik } from 'formik';
 import { gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 
-import {
-  PermissionsSpace,
-  usePermissionsManager,
-} from '@/components/organization/Permissions';
+import { PermissionsSpace, usePermissionsManager } from '@/components/organization/Permissions';
 import { Button, CopyValue, Heading, Input, Modal, Tag } from '@/components/v2';
 import { OrganizationDocument } from '@/graphql';
 import { scopes } from '@/lib/access/common';
@@ -55,15 +52,7 @@ export const CreateAccessTokenModal = ({
 
   const [mutation, mutate] = useMutation(CreateAccessToken_CreateTokenMutation);
 
-  const {
-    handleSubmit,
-    values,
-    handleChange,
-    handleBlur,
-    isSubmitting,
-    errors,
-    touched,
-  } = useFormik({
+  const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } = useFormik({
     initialValues: { name: '' },
     validationSchema: Yup.object().shape({
       name: Yup.string().required('Must enter name'),
@@ -96,15 +85,10 @@ export const CreateAccessTokenModal = ({
           <Heading className="text-center">Token successfully created!</Heading>
           <CopyValue value={mutation.data.createToken.ok.secret} />
           <Tag color="green">
-            This is your unique API key and it is non-recoverable. If you lose
-            this key, you will need to create a new one.
+            This is your unique API key and it is non-recoverable. If you lose this key, you will need to create a new
+            one.
           </Tag>
-          <Button
-            variant="primary"
-            size="large"
-            className="ml-auto"
-            onClick={toggleModalOpen}
-          >
+          <Button variant="primary" size="large" className="ml-auto" onClick={toggleModalOpen}>
             Ok, got it!
           </Button>
         </div>
@@ -112,8 +96,7 @@ export const CreateAccessTokenModal = ({
         <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
           <Heading className="text-center">Create an access token</Heading>
           <p className="text-sm text-gray-500">
-            To access GraphQL Hive, your application or tool needs an active API
-            key.
+            To access GraphQL Hive, your application or tool needs an active API key.
           </p>
 
           <Input
@@ -127,18 +110,13 @@ export const CreateAccessTokenModal = ({
             className="w-full"
           />
 
-          {touched.name && errors.name && (
-            <div className="text-sm text-red-500">{errors.name}</div>
-          )}
+          {touched.name && errors.name && <div className="text-sm text-red-500">{errors.name}</div>}
           {mutation.data?.createToken.error && (
-            <div className="text-sm text-red-500">
-              {mutation.data?.createToken.error.message}
-            </div>
+            <div className="text-sm text-red-500">{mutation.data?.createToken.error.message}</div>
           )}
 
           <p className="text-sm text-gray-500">
-            This will be displayed on the tokens list, we recommend to make it
-            self-explanatory.
+            This will be displayed on the tokens list, we recommend to make it self-explanatory.
           </p>
 
           <Heading>Permissions</Heading>
@@ -167,21 +145,13 @@ export const CreateAccessTokenModal = ({
             />
           </Accordion>
 
-          {mutation.error && (
-            <div className="text-sm text-red-500">{mutation.error.message}</div>
-          )}
+          {mutation.error && <div className="text-sm text-red-500">{mutation.error.message}</div>}
 
           <div className="flex w-full gap-2">
             <Button type="button" size="large" block onClick={toggleModalOpen}>
               Cancel
             </Button>
-            <Button
-              type="submit"
-              size="large"
-              block
-              variant="primary"
-              disabled={isSubmitting}
-            >
+            <Button type="submit" size="large" block variant="primary" disabled={isSubmitting}>
               Generate Token
             </Button>
           </div>

@@ -1,11 +1,7 @@
 import React from 'react';
 import { useQuery } from 'urql';
 import { VscBell, VscSettings, VscBook, VscProject } from 'react-icons/vsc';
-import {
-  ProjectFieldsFragment,
-  ProjectDocument,
-  OrganizationFieldsFragment,
-} from '@/graphql';
+import { ProjectFieldsFragment, ProjectDocument, OrganizationFieldsFragment } from '@/graphql';
 import { useNavigation } from '@/components/common/Navigation';
 import { ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
@@ -77,10 +73,7 @@ export const ProjectView: React.FC<{
 
   const projectName = query.data?.project?.name;
   const organizationName = query.data?.organization?.organization?.name;
-  const pageTitle =
-    projectName && organizationName
-      ? `${title} - ${projectName} / ${organizationName}`
-      : title;
+  const pageTitle = projectName && organizationName ? `${title} - ${projectName} / ${organizationName}` : title;
 
   return (
     <>

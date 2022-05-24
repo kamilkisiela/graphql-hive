@@ -100,9 +100,7 @@ export function createAgent<T>(
 
   function debugLog(msg: string) {
     if (options.debug) {
-      options.logger.info(
-        `[hive][${prefix}]${enabled ? '' : '[DISABLED]'} ${msg}`
-      );
+      options.logger.info(`[hive][${prefix}]${enabled ? '' : '[DISABLED]'} ${msg}`);
     }
   }
 
@@ -155,7 +153,7 @@ export function createAgent<T>(
             responseType: 'json',
             timeout: options.timeout,
           })
-          .catch((error) => {
+          .catch(error => {
             debugLog(`Attempt ${attempt} failed: ${error.message}`);
             return Promise.reject(error);
           });
@@ -175,16 +173,12 @@ export function createAgent<T>(
       });
 
       if (response.statusCode < 200 || response.statusCode >= 300) {
-        throw new Error(
-          `[hive][${prefix}] Failed to send data (HTTP status ${response.status}): ${response.data}`
-        );
+        throw new Error(`[hive][${prefix}] Failed to send data (HTTP status ${response.status}): ${response.data}`);
       }
 
       debugLog(`Sent!`);
     } catch (error: any) {
-      options.logger.error(
-        `[hive][${prefix}] Failed to send data: ${error.message}`
-      );
+      options.logger.error(`[hive][${prefix}] Failed to send data: ${error.message}`);
     }
 
     if (!runOnce) {

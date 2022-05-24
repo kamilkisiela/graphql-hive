@@ -41,9 +41,7 @@ export function deployUsageEstimation({
         CLICKHOUSE_USERNAME: clickhouse.config.username,
         CLICKHOUSE_PASSWORD: clickhouse.config.password,
         RELEASE: packageHelper.currentReleaseId(),
-        POSTGRES_CONNECTION_STRING: apiConfig.requireSecret(
-          'postgresConnectionString'
-        ),
+        POSTGRES_CONNECTION_STRING: apiConfig.requireSecret('postgresConnectionString'),
       },
       exposesMetrics: true,
       packageInfo: packageHelper.npmPack('@hive/usage-estimator'),

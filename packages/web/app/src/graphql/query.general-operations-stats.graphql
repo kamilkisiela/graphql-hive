@@ -1,7 +1,4 @@
-query generalOperationsStats(
-  $selector: OperationsStatsSelectorInput!
-  $resolution: Int!
-) {
+query generalOperationsStats($selector: OperationsStatsSelectorInput!, $resolution: Int!) {
   operationsStats(selector: $selector) {
     ... on OperationsStats {
       totalRequests(resolution: $resolution)

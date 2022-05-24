@@ -21,8 +21,8 @@ export function registerShutdown(config: {
     await config.onShutdown();
   }
 
-  errorTypes.map((type) => {
-    process.on(type, async (e) => {
+  errorTypes.map(type => {
+    process.on(type, async e => {
       try {
         config.logger.info(`process.on ${type}`);
         config.logger.error(e);
@@ -38,7 +38,7 @@ export function registerShutdown(config: {
     });
   });
 
-  signalTraps.map((type) => {
+  signalTraps.map(type => {
     process.once(type, async () => {
       try {
         await shutdown();

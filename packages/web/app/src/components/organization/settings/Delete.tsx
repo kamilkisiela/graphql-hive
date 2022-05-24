@@ -12,10 +12,7 @@ export const DeleteSettings: React.FC = () => {
   const [result, mutate] = useMutation(DeleteOrganizationDocument);
   const [isOpen, setIsOpen] = React.useState(false);
 
-  const deleteOrganization = React.useCallback(
-    () => setIsOpen(true),
-    [setIsOpen]
-  );
+  const deleteOrganization = React.useCallback(() => setIsOpen(true), [setIsOpen]);
   const onCancel = React.useCallback(() => {
     setIsOpen(false);
   }, [setIsOpen]);
@@ -43,9 +40,7 @@ export const DeleteSettings: React.FC = () => {
       <Card.Root>
         <Card.Title>Delete Organization</Card.Title>
         <Card.Content>
-          <p>
-            Permanently remove your Organization and all projects from the Hive.
-          </p>
+          <p>Permanently remove your Organization and all projects from the Hive.</p>
           <div tw="mt-3 flex flex-row items-center">
             <Button
               colorScheme="red"
@@ -57,9 +52,7 @@ export const DeleteSettings: React.FC = () => {
             >
               Delete Organization
             </Button>
-            <span tw="pl-2 font-bold text-sm">
-              This action is not reversible
-            </span>
+            <span tw="pl-2 font-bold text-sm">This action is not reversible</span>
           </div>
         </Card.Content>
       </Card.Root>

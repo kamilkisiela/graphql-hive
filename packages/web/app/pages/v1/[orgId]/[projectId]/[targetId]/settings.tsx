@@ -56,9 +56,7 @@ const Inner: React.FC<{
       {() => (
         <Settings title="Settings" subtitle="Tokens and stuff">
           <NameSettings target={target} />
-          {canAccessTokens && (
-            <TokensSettings target={target} organization={organization} />
-          )}
+          {canAccessTokens && <TokensSettings target={target} organization={organization} />}
           <ValidationSettings
             target={target}
             possibleTargets={settings.data.targets.nodes}
@@ -75,9 +73,7 @@ const Inner: React.FC<{
 export default function TargetSettingsPage() {
   return (
     <TargetView title="Settings">
-      {({ target, project, organization }) => (
-        <Inner target={target} project={project} organization={organization} />
-      )}
+      {({ target, project, organization }) => <Inner target={target} project={project} organization={organization} />}
     </TargetView>
   );
 }

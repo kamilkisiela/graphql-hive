@@ -39,15 +39,7 @@ export const CreateOrganizationModal = ({
   const [mutation, mutate] = useMutation(CreateOrganizationMutation);
   const { push } = useRouter();
 
-  const {
-    handleSubmit,
-    values,
-    handleChange,
-    handleBlur,
-    isSubmitting,
-    errors,
-    touched,
-  } = useFormik({
+  const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } = useFormik({
     initialValues: { name: '' },
     validationSchema: Yup.object().shape({
       name: Yup.string().required('Organization name is required'),
@@ -61,9 +53,7 @@ export const CreateOrganizationModal = ({
 
       if (mutation.data?.createOrganization.ok) {
         toggleModalOpen();
-        push(
-          `/${mutation.data.createOrganization.ok.createdOrganizationPayload.organization.cleanId}`
-        );
+        push(`/${mutation.data.createOrganization.ok.createdOrganizationPayload.organization.cleanId}`);
       }
     },
   });
@@ -73,8 +63,8 @@ export const CreateOrganizationModal = ({
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
         <Heading className="text-center">Create an organization</Heading>
         <p className="text-sm text-gray-500">
-          An organization is built on top of <b>Projects</b>. You will become an{' '}
-          <b>admin</b> and don't worry, you can add members later.
+          An organization is built on top of <b>Projects</b>. You will become an <b>admin</b> and don't worry, you can
+          add members later.
         </p>
         <Input
           placeholder="Organization name"
@@ -87,26 +77,16 @@ export const CreateOrganizationModal = ({
           className="grow"
         />
         {touched.name && (errors.name || mutation.error) && (
-          <div className="-mt-2 text-sm text-red-500">
-            {errors.name || mutation.error.message}
-          </div>
+          <div className="-mt-2 text-sm text-red-500">{errors.name || mutation.error.message}</div>
         )}
         {mutation.data?.createOrganization.error?.inputErrors.name && (
-          <div className="-mt-2 text-sm text-red-500">
-            {mutation.data.createOrganization.error.inputErrors.name}
-          </div>
+          <div className="-mt-2 text-sm text-red-500">{mutation.data.createOrganization.error.inputErrors.name}</div>
         )}
         <div className="flex gap-2">
           <Button type="button" size="large" block onClick={toggleModalOpen}>
             Cancel
           </Button>
-          <Button
-            type="submit"
-            size="large"
-            block
-            variant="primary"
-            disabled={isSubmitting}
-          >
+          <Button type="submit" size="large" block variant="primary" disabled={isSubmitting}>
             Create Organization
           </Button>
         </div>

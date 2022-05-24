@@ -10,13 +10,7 @@ import type {
 } from '../__generated__/types';
 import { DateRange } from './entities';
 
-export {
-  msToNs,
-  nsToMs,
-  atomicPromise as atomic,
-  sharePromise as share,
-  cacheResult as cache,
-} from '@theguild/buddy';
+export { msToNs, nsToMs, atomicPromise as atomic, sharePromise as share, cacheResult as cache } from '@theguild/buddy';
 
 export type NullableAndPartial<T> = {
   [P in keyof T]?: T[P] | undefined | null;
@@ -35,26 +29,14 @@ export function uuid(len = 13) {
   return Math.random().toString(16).substr(2, len);
 }
 
-export function filterSelector(
-  kind: 'organization',
-  selector: OrganizationSelector
-): OrganizationSelector;
-export function filterSelector(
-  kind: 'project',
-  selector: ProjectSelector
-): ProjectSelector;
-export function filterSelector(
-  kind: 'target',
-  selector: TargetSelector
-): TargetSelector;
+export function filterSelector(kind: 'organization', selector: OrganizationSelector): OrganizationSelector;
+export function filterSelector(kind: 'project', selector: ProjectSelector): ProjectSelector;
+export function filterSelector(kind: 'target', selector: TargetSelector): TargetSelector;
 export function filterSelector(
   kind: 'persistedOperation',
   selector: PersistedOperationSelector
 ): PersistedOperationSelector;
-export function filterSelector(
-  kind: 'organization' | 'project' | 'target' | 'persistedOperation',
-  selector: any
-): any {
+export function filterSelector(kind: 'organization' | 'project' | 'target' | 'persistedOperation', selector: any): any {
   switch (kind) {
     case 'organization':
       return {
@@ -88,15 +70,12 @@ export function stringifySelector<
   return JSON.stringify(
     Object.keys(obj)
       .sort()
-      .map((key) => [key, obj[key]])
+      .map(key => [key, obj[key]])
   );
 }
 
 function validateDateTime(dateTimeString?: string) {
-  dateTimeString =
-    dateTimeString === null || dateTimeString === void 0
-      ? void 0
-      : dateTimeString.toUpperCase();
+  dateTimeString = dateTimeString === null || dateTimeString === void 0 ? void 0 : dateTimeString.toUpperCase();
 
   if (!dateTimeString) {
     return false;
@@ -176,25 +155,19 @@ export function parseDateTime(value: number | string | Date): Date {
     if (validateDateTime(value)) {
       return new Date(value);
     }
-    throw new TypeError(
-      `DateTime cannot represent an invalid date-time-string ${value}.`
-    );
+    throw new TypeError(`DateTime cannot represent an invalid date-time-string ${value}.`);
   }
 
   if (typeof value === 'number') {
     try {
       return new Date(value);
     } catch (e) {
-      throw new TypeError(
-        'DateTime cannot represent an invalid Unix timestamp ' + value
-      );
+      throw new TypeError('DateTime cannot represent an invalid Unix timestamp ' + value);
     }
   }
 
   throw new TypeError(
-    'DateTime cannot be serialized from a non string, ' +
-      'non numeric or non Date type ' +
-      JSON.stringify(value)
+    'DateTime cannot be serialized from a non string, ' + 'non numeric or non Date type ' + JSON.stringify(value)
   );
 }
 
@@ -217,8 +190,7 @@ export function createPeriod(period: string): DateRange {
 
 export type TypeOfToken<T> = T extends InjectionToken<infer R> ? R : unknown;
 
-export type Optional<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>> &
-  Partial<Pick<T, K>>;
+export type Optional<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>> & Partial<Pick<T, K>>;
 
 export function hash(key: string): string {
   return createHash('md5').update(key).digest('hex');
@@ -227,13 +199,8 @@ export function hash(key: string): string {
 /**
  * A function that accepts two arrays and returns a difference
  */
-export function diffArrays<T>(
-  left: readonly T[],
-  right: readonly T[]
-): readonly T[] {
-  return left
-    .filter((val) => !right.includes(val))
-    .concat(right.filter((val) => !left.includes(val)));
+export function diffArrays<T>(left: readonly T[], right: readonly T[]): readonly T[] {
+  return left.filter(val => !right.includes(val)).concat(right.filter(val => !left.includes(val)));
 }
 
 export function pushIfMissing<T>(list: T[], item: T): void {

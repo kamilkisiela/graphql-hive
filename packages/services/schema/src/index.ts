@@ -1,11 +1,5 @@
 #!/usr/bin/env node
-import {
-  createServer,
-  createErrorHandler,
-  ensureEnv,
-  startMetrics,
-  registerShutdown,
-} from '@hive/service-common';
+import { createServer, createErrorHandler, ensureEnv, startMetrics, registerShutdown } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
 import Redis from 'ioredis';
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify/dist/trpc-server-adapters-fastify.cjs.js';
@@ -51,7 +45,7 @@ async function main() {
   });
 
   try {
-    redis.on('error', (err) => {
+    redis.on('error', err => {
       errorHandler('Redis error', err);
     });
 
@@ -67,7 +61,7 @@ async function main() {
       server.log.info('Redis connection closed');
     });
 
-    redis.on('reconnecting', (timeToReconnect) => {
+    redis.on('reconnecting', timeToReconnect => {
       server.log.info('Redis reconnecting in %s', timeToReconnect);
     });
 
@@ -112,7 +106,7 @@ async function main() {
   }
 }
 
-main().catch((err) => {
+main().catch(err => {
   Sentry.captureException(err, {
     level: Sentry.Severity.Fatal,
   });

@@ -1,10 +1,5 @@
 import { Flags, Errors } from '@oclif/core';
-import {
-  loadSchema,
-  renderChanges,
-  renderErrors,
-  minifySchema,
-} from '../../helpers/schema';
+import { loadSchema, renderChanges, renderErrors, minifySchema } from '../../helpers/schema';
 import { invariant } from '../../helpers/validation';
 import { gitInfo } from '../../helpers/git';
 import Command from '../../base-command';
@@ -29,8 +24,7 @@ export default class SchemaCheck extends Command {
       default: false,
     }),
     require: Flags.string({
-      description:
-        'Loads specific require.extensions before running the codegen and reading the configuration',
+      description: 'Loads specific require.extensions before running the codegen and reading the configuration',
       default: [],
       multiple: true,
     }),
@@ -72,16 +66,10 @@ export default class SchemaCheck extends Command {
       });
       const commit = git.commit;
 
-      invariant(
-        typeof sdl === 'string' && sdl.length > 0,
-        'Schema seems empty'
-      );
+      invariant(typeof sdl === 'string' && sdl.length > 0, 'Schema seems empty');
 
       if (usesGitHubApp) {
-        invariant(
-          typeof commit === 'string',
-          `Couldn't resolve commit sha required for GitHub Application`
-        );
+        invariant(typeof commit === 'string', `Couldn't resolve commit sha required for GitHub Application`);
       }
 
       const result = await this.registryApi(registry, token).schemaCheck({
@@ -130,15 +118,12 @@ export default class SchemaCheck extends Command {
       if (error instanceof Errors.ExitError) {
         throw error;
       } else {
-        const parsedError: Error & { response?: any } =
-          error instanceof Error ? error : new Error(error as string);
+        const parsedError: Error & { response?: any } = error instanceof Error ? error : new Error(error as string);
 
         this.fail('Failed to check schema');
         if ('response' in parsedError) {
           this.error(parsedError.response.errors[0].message, {
-            ref: this.cleanRequestId(
-              parsedError.response?.headers?.get('x-request-id')
-            ),
+            ref: this.cleanRequestId(parsedError.response?.headers?.get('x-request-id')),
           });
         } else {
           this.error(parsedError);

@@ -70,11 +70,11 @@ typings/
 .cache
 
 # Next.js build output
-.next
+.next/
 
 # Nuxt.js build / generate output
 .nuxt
-dist
+dist/
 
 # Gatsby files
 .cache/
@@ -101,13 +101,14 @@ temp
 
 .DS_STORE
 
-__generated__
+__generated__/
 
-integration-tests/testkit/gql
-.turbo
-.turbo/config.json
+integration-tests/testkit/gql/
+.turbo/
 
 # IntelliJ's project specific settings files
 .idea/
 
 *.pem
+
+/.husky/_/

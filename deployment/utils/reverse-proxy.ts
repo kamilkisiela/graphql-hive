@@ -4,10 +4,7 @@ import { Output } from '@pulumi/pulumi';
 export class Proxy {
   private lbService: Output<k8s.core.v1.Service> | null = null;
 
-  constructor(
-    private tlsSecretName: string,
-    private staticIp?: { address?: string }
-  ) {}
+  constructor(private tlsSecretName: string, private staticIp?: { address?: string }) {}
 
   registerService(
     dns: { record: string; apex?: boolean },
@@ -56,16 +53,13 @@ export class Proxy {
               secretName: dns.record,
             },
             corsPolicy: {
-              allowOrigin: [
-                'https://app.graphql-hive.com',
-                'https://graphql-hive.com',
-              ],
+              allowOrigin: ['https://app.graphql-hive.com', 'https://graphql-hive.com'],
               allowMethods: ['GET', 'POST', 'OPTIONS'],
               allowHeaders: ['*'],
               exposeHeaders: ['*'],
             },
           },
-          routes: routes.map((route) => ({
+          routes: routes.map(route => ({
             conditions: [
               {
                 prefix: route.path,
@@ -176,10 +170,7 @@ export class Proxy {
       },
     });
 
-    this.lbService = proxyController.getResource(
-      'v1/Service',
-      'contour/contour-proxy-envoy'
-    );
+    this.lbService = proxyController.getResource('v1/Service', 'contour/contour-proxy-envoy');
 
     new k8s.apiextensions.CustomResource(
       'secret-delegation',

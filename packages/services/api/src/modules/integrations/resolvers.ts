@@ -23,15 +23,10 @@ export const resolvers: IntegrationsModule.Resolvers = {
       const result = AddSlackTokenIntegrationModel.safeParse(input);
 
       if (!result.success) {
-        throw new HiveError(
-          result.error.formErrors.fieldErrors.token?.[0] ??
-            'Please check your input.'
-        );
+        throw new HiveError(result.error.formErrors.fieldErrors.token?.[0] ?? 'Please check your input.');
       }
 
-      const organization = await injector
-        .get(IdTranslator)
-        .translateOrganizationId(input);
+      const organization = await injector.get(IdTranslator).translateOrganizationId(input);
 
       await injector.get(SlackIntegrationManager).register({
         organization,
@@ -41,9 +36,7 @@ export const resolvers: IntegrationsModule.Resolvers = {
       return true;
     },
     async deleteSlackIntegration(_, { input }, { injector }) {
-      const organization = await injector
-        .get(IdTranslator)
-        .translateOrganizationId(input);
+      const organization = await injector.get(IdTranslator).translateOrganizationId(input);
 
       await injector.get(SlackIntegrationManager).unregister({
         organization,
@@ -52,9 +45,7 @@ export const resolvers: IntegrationsModule.Resolvers = {
       return true;
     },
     async addGitHubIntegration(_, { input }, { injector }) {
-      const organization = await injector
-        .get(IdTranslator)
-        .translateOrganizationId(input);
+      const organization = await injector.get(IdTranslator).translateOrganizationId(input);
 
       await injector.get(GitHubIntegrationManager).register({
         organization,
@@ -64,9 +55,7 @@ export const resolvers: IntegrationsModule.Resolvers = {
       return true;
     },
     async deleteGitHubIntegration(_, { input }, { injector }) {
-      const organization = await injector
-        .get(IdTranslator)
-        .translateOrganizationId(input);
+      const organization = await injector.get(IdTranslator).translateOrganizationId(input);
 
       await injector.get(GitHubIntegrationManager).unregister({
         organization,
@@ -77,34 +66,26 @@ export const resolvers: IntegrationsModule.Resolvers = {
   },
   Query: {
     async hasSlackIntegration(_, { selector }, { injector }) {
-      const organization = await injector
-        .get(IdTranslator)
-        .translateOrganizationId(selector);
+      const organization = await injector.get(IdTranslator).translateOrganizationId(selector);
 
       return injector.get(SlackIntegrationManager).isAvailable({
         organization,
       });
     },
     async hasGitHubIntegration(_, { selector }, { injector }) {
-      const organization = await injector
-        .get(IdTranslator)
-        .translateOrganizationId(selector);
+      const organization = await injector.get(IdTranslator).translateOrganizationId(selector);
 
       return injector.get(GitHubIntegrationManager).isAvailable({
         organization,
       });
     },
     async gitHubIntegration(_, { selector }, { injector }) {
-      const organization = await injector
-        .get(IdTranslator)
-        .translateOrganizationId(selector);
+      const organization = await injector.get(IdTranslator).translateOrganizationId(selector);
 
       return {
-        repositories: await injector
-          .get(GitHubIntegrationManager)
-          .getRepositories({
-            organization,
-          }),
+        repositories: await injector.get(GitHubIntegrationManager).getRepositories({
+          organization,
+        }),
       };
     },
     organizationByGitHubInstallationId(_, { installation }, { injector }) {

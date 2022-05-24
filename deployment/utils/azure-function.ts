@@ -3,13 +3,7 @@ import * as resources from '@pulumi/azure-native/resources';
 import * as storage from '@pulumi/azure-native/storage';
 import * as web from '@pulumi/azure-native/web';
 import { tmpdir } from 'os';
-import {
-  mkdtempSync,
-  copyFileSync,
-  writeFileSync,
-  mkdirSync,
-  readFileSync,
-} from 'fs';
+import { mkdtempSync, copyFileSync, writeFileSync, mkdirSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { createHash } from 'crypto';
 
@@ -22,9 +16,7 @@ function createFunctionFolder({
   functionDefinition: Record<string, any>;
   functionFile: string;
 }) {
-  const hostDir = mkdtempSync(
-    join(tmpdir(), Math.random().toString(16).slice(2))
-  );
+  const hostDir = mkdtempSync(join(tmpdir(), Math.random().toString(16).slice(2)));
   const fnDir = join(hostDir, name);
   mkdirSync(fnDir);
 
@@ -40,10 +32,7 @@ function createFunctionFolder({
   );
 
   copyFileSync(functionFile, join(fnDir, 'index.js'));
-  writeFileSync(
-    join(fnDir, 'function.json'),
-    JSON.stringify(functionDefinition, null, 2)
-  );
+  writeFileSync(join(fnDir, 'function.json'), JSON.stringify(functionDefinition, null, 2));
 
   return {
     checksum: createHash('sha256')
@@ -66,19 +55,14 @@ export class AzureFunction {
   ) {}
 
   deployAsJob() {
-    const resourceGroup = new resources.ResourceGroup(
-      `hive-${this.config.envName}-fn-rg`
-    );
-    const storageAccount = new storage.StorageAccount(
-      `hive${this.config.envName}fn`,
-      {
-        resourceGroupName: resourceGroup.name,
-        sku: {
-          name: storage.SkuName.Standard_LRS,
-        },
-        kind: storage.Kind.StorageV2,
-      }
-    );
+    const resourceGroup = new resources.ResourceGroup(`hive-${this.config.envName}-fn-rg`);
+    const storageAccount = new storage.StorageAccount(`hive${this.config.envName}fn`, {
+      resourceGroupName: resourceGroup.name,
+      sku: {
+        name: storage.SkuName.Standard_LRS,
+      },
+      kind: storage.Kind.StorageV2,
+    });
 
     const codeContainer = new storage.BlobContainer('functions', {
       resourceGroupName: resourceGroup.name,
@@ -106,16 +90,8 @@ export class AzureFunction {
       },
     });
 
-    const storageConnectionString = getConnectionString(
-      resourceGroup.name,
-      storageAccount.name
-    );
-    const codeBlobUrl = signedBlobReadUrl(
-      codeBlob,
-      codeContainer,
-      storageAccount,
-      resourceGroup
-    );
+    const storageConnectionString = getConnectionString(resourceGroup.name, storageAccount.name);
+    const codeBlobUrl = signedBlobReadUrl(codeBlob, codeContainer, storageAccount, resourceGroup);
 
     const app = new web.WebApp(
       `${this.config.name}-${this.config.envName}-fn`,

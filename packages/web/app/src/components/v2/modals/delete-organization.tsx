@@ -4,11 +4,7 @@ import { useMutation, useQuery } from 'urql';
 
 import { Button, Heading, Modal } from '@/components/v2';
 import { TrashIcon } from '@/components/v2/icon';
-import {
-  DeleteOrganizationDocument,
-  OrganizationsDocument,
-  OrganizationType,
-} from '@/graphql';
+import { DeleteOrganizationDocument, OrganizationsDocument, OrganizationType } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
 export const DeleteOrganizationModal = ({
@@ -22,22 +18,16 @@ export const DeleteOrganizationModal = ({
   const router = useRouteSelector();
   const { replace } = useRouter();
   const [organizationsQuery] = useQuery({ query: OrganizationsDocument });
-  const personalOrganization =
-    organizationsQuery.data?.organizations.nodes.find(
-      (node) => node.type === OrganizationType.Personal
-    );
+  const personalOrganization = organizationsQuery.data?.organizations.nodes.find(
+    node => node.type === OrganizationType.Personal
+  );
 
   return (
-    <Modal
-      open={isOpen}
-      onOpenChange={toggleModalOpen}
-      className="flex flex-col items-center gap-5"
-    >
+    <Modal open={isOpen} onOpenChange={toggleModalOpen} className="flex flex-col items-center gap-5">
       <TrashIcon className="h-24 w-24 text-red-500 opacity-70" />
       <Heading>Delete organization</Heading>
       <p className="text-sm text-gray-500">
-        Are you sure you wish to delete this organization? This action is
-        irreversible!
+        Are you sure you wish to delete this organization? This action is irreversible!
       </p>
 
       <div className="flex w-full gap-2">

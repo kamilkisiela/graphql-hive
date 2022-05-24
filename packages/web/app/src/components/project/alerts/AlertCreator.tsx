@@ -19,12 +19,7 @@ import {
   ModalCloseButton,
   useDisclosure,
 } from '@chakra-ui/react';
-import {
-  AddAlertDocument,
-  AlertChannelsDocument,
-  AlertType,
-  TargetsDocument,
-} from '@/graphql';
+import { AddAlertDocument, AlertChannelsDocument, AlertType, TargetsDocument } from '@/graphql';
 import { useTracker } from '@/lib/hooks/use-tracker';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
@@ -54,10 +49,8 @@ const AlertCreator: React.FC<{
   });
   const [mutation, mutate] = useMutation(AddAlertDocument);
 
-  const channels =
-    channelsQuery.data?.alertChannels?.map((channel) => channel.id) || [];
-  const targets =
-    targetsQuery.data?.targets.nodes?.map((target) => target.cleanId) || [];
+  const channels = channelsQuery.data?.alertChannels?.map(channel => channel.id) || [];
+  const targets = targetsQuery.data?.targets.nodes?.map(target => target.cleanId) || [];
 
   const formik = useFormik({
     initialValues: {
@@ -66,15 +59,9 @@ const AlertCreator: React.FC<{
       target: '',
     },
     validationSchema: Yup.object().shape({
-      type: Yup.string()
-        .equals([AlertType.SchemaChangeNotifications])
-        .required('Must select type'),
-      channel: Yup.lazy(() =>
-        Yup.string().min(1).equals(channels).required('Must select channel')
-      ),
-      target: Yup.lazy(() =>
-        Yup.string().min(1).equals(targets).required('Must select target')
-      ),
+      type: Yup.string().equals([AlertType.SchemaChangeNotifications]).required('Must select type'),
+      channel: Yup.lazy(() => Yup.string().min(1).equals(channels).required('Must select channel')),
+      target: Yup.lazy(() => Yup.string().min(1).equals(targets).required('Must select target')),
     }),
     async onSubmit(values) {
       if (formik.isValid && !mutation.fetching) {
@@ -118,16 +105,11 @@ const AlertCreator: React.FC<{
                 onBlur={formik.handleBlur}
                 placeholder="Select alert type..."
               >
-                <option value={AlertType.SchemaChangeNotifications}>
-                  Schema Change Notifications
-                </option>
+                <option value={AlertType.SchemaChangeNotifications}>Schema Change Notifications</option>
               </Select>
               <FormErrorMessage>{formik.errors.type}</FormErrorMessage>
             </FormControl>
-            <FormControl
-              isInvalid={isValid('channel')}
-              isDisabled={channelsQuery.fetching || !!channelsQuery.error}
-            >
+            <FormControl isInvalid={isValid('channel')} isDisabled={channelsQuery.fetching || !!channelsQuery.error}>
               <FormLabel>Channel</FormLabel>
               <Select
                 name="channel"
@@ -136,7 +118,7 @@ const AlertCreator: React.FC<{
                 onBlur={formik.handleBlur}
                 placeholder="Pick channel..."
               >
-                {channelsQuery.data?.alertChannels?.map((channel) => {
+                {channelsQuery.data?.alertChannels?.map(channel => {
                   return (
                     <option key={channel.id} value={channel.id}>
                       {channel.name}
@@ -146,10 +128,7 @@ const AlertCreator: React.FC<{
               </Select>
               <FormErrorMessage>{formik.errors.channel}</FormErrorMessage>
             </FormControl>
-            <FormControl
-              isInvalid={isValid('target')}
-              isDisabled={targetsQuery.fetching || !!targetsQuery.error}
-            >
+            <FormControl isInvalid={isValid('target')} isDisabled={targetsQuery.fetching || !!targetsQuery.error}>
               <FormLabel>Target</FormLabel>
               <Select
                 name="target"
@@ -158,7 +137,7 @@ const AlertCreator: React.FC<{
                 onBlur={formik.handleBlur}
                 placeholder="Select target..."
               >
-                {targetsQuery.data?.targets?.nodes.map((target) => {
+                {targetsQuery.data?.targets?.nodes.map(target => {
                   return (
                     <option key={target.cleanId} value={target.cleanId}>
                       {target.name}
@@ -171,20 +150,10 @@ const AlertCreator: React.FC<{
           </div>
         </ModalBody>
         <ModalFooter tw="space-x-6">
-          <Button
-            variant="ghost"
-            type="button"
-            onClick={onClose}
-            disabled={mutation.fetching}
-          >
+          <Button variant="ghost" type="button" onClick={onClose} disabled={mutation.fetching}>
             Cancel
           </Button>
-          <Button
-            colorScheme="primary"
-            type="submit"
-            disabled={!formik.isValid}
-            isLoading={mutation.fetching}
-          >
+          <Button colorScheme="primary" type="submit" disabled={!formik.isValid} isLoading={mutation.fetching}>
             Create Alert
           </Button>
         </ModalFooter>
@@ -198,13 +167,7 @@ export const AlertCreatorTrigger: React.FC = () => {
 
   return (
     <>
-      <Button
-        leftIcon={<VscBell />}
-        colorScheme="teal"
-        variant="ghost"
-        size="sm"
-        onClick={open}
-      >
+      <Button leftIcon={<VscBell />} colorScheme="teal" variant="ghost" size="sm" onClick={open}>
         Create alert
       </Button>
       <AlertCreator isOpen={isOpen} onClose={onClose} />

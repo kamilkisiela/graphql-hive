@@ -42,9 +42,7 @@ const ChannelCreator: React.FC<{
     },
     validationSchema: Yup.object().shape({
       name: Yup.string().min(0).required('Must enter name'),
-      type: Yup.string()
-        .equals([AlertChannelType.Slack, AlertChannelType.Webhook])
-        .required('Must select type'),
+      type: Yup.string().equals([AlertChannelType.Slack, AlertChannelType.Webhook]).required('Must select type'),
       slackChannel: Yup.string()
         .matches(/^[@#]{1}/)
         .min(0)
@@ -114,8 +112,7 @@ const ChannelCreator: React.FC<{
                 type="text"
               />
               <FormHelperText>
-                This will be displayed on channels list, we recommend to make it
-                self-explanatory.
+                This will be displayed on channels list, we recommend to make it self-explanatory.
               </FormHelperText>
               <FormErrorMessage>{formik.errors.name}</FormErrorMessage>
             </FormControl>
@@ -144,9 +141,7 @@ const ChannelCreator: React.FC<{
                   placeholder="Your endpoint"
                   type="text"
                 />
-                <FormHelperText>
-                  Hive will send alerts to your endpoint.
-                </FormHelperText>
+                <FormHelperText>Hive will send alerts to your endpoint.</FormHelperText>
                 <FormErrorMessage>{formik.errors.endpoint}</FormErrorMessage>
               </FormControl>
             )}
@@ -164,28 +159,16 @@ const ChannelCreator: React.FC<{
                 <FormHelperText>
                   Use <Code>#channel</Code> or <Code>@username</Code> form.
                 </FormHelperText>
-                <FormErrorMessage>
-                  {formik.errors.slackChannel}
-                </FormErrorMessage>
+                <FormErrorMessage>{formik.errors.slackChannel}</FormErrorMessage>
               </FormControl>
             )}
           </div>
         </ModalBody>
         <ModalFooter tw="space-x-6">
-          <Button
-            variant="ghost"
-            type="button"
-            onClick={onClose}
-            disabled={mutation.fetching}
-          >
+          <Button variant="ghost" type="button" onClick={onClose} disabled={mutation.fetching}>
             Cancel
           </Button>
-          <Button
-            colorScheme="primary"
-            type="submit"
-            isLoading={mutation.fetching}
-            disabled={!formik.isValid}
-          >
+          <Button colorScheme="primary" type="submit" isLoading={mutation.fetching} disabled={!formik.isValid}>
             Create Channel
           </Button>
         </ModalFooter>
@@ -199,13 +182,7 @@ export const ChannelCreatorTrigger: React.FC = () => {
 
   return (
     <>
-      <Button
-        leftIcon={<VscRadioTower />}
-        colorScheme="teal"
-        variant="ghost"
-        size="sm"
-        onClick={open}
-      >
+      <Button leftIcon={<VscRadioTower />} colorScheme="teal" variant="ghost" size="sm" onClick={open}>
         Add channel
       </Button>
       <ChannelCreator isOpen={isOpen} onClose={onClose} />

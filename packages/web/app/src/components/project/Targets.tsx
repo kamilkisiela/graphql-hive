@@ -2,12 +2,7 @@ import * as React from 'react';
 import 'twin.macro';
 import Link from 'next/link';
 import { useQuery } from 'urql';
-import {
-  CriticalityLevel,
-  TargetsDocument,
-  ProjectFieldsFragment,
-  OrganizationFieldsFragment,
-} from '@/graphql';
+import { CriticalityLevel, TargetsDocument, ProjectFieldsFragment, OrganizationFieldsFragment } from '@/graphql';
 import { Card, Circle, Section } from '@/components/common';
 import { DataWrapper } from '@/components/common/DataWrapper';
 import { EmptyList } from '@/components/common/EmptyList';
@@ -42,11 +37,9 @@ export const ProjectTargets: React.FC<{
           <>
             <Section.Title>Targets</Section.Title>
             <div tw="pt-6 flex flex-col space-y-6">
-              {query.data.targets.nodes.map((target) => (
+              {query.data.targets.nodes.map(target => (
                 <Card.Root key={target.id}>
-                  <Link
-                    href={`/${organization.cleanId}/${project.cleanId}/${target.cleanId}`}
-                  >
+                  <Link href={`/${organization.cleanId}/${project.cleanId}/${target.cleanId}`}>
                     <Card.Title tw="flex items-center justify-between bg-white cursor-pointer">
                       {target.name}
                       <Circle criticality={CriticalityLevel.Safe} tw="mr-2" />

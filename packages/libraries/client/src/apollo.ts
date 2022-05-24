@@ -1,19 +1,12 @@
 import type { ApolloServerPlugin } from 'apollo-server-plugin-base';
 import type { DocumentNode } from 'graphql';
-import type {
-  HiveClient,
-  HivePluginOptions,
-  SupergraphSDLFetcherOptions,
-} from './internal/types';
+import type { HiveClient, HivePluginOptions, SupergraphSDLFetcherOptions } from './internal/types';
 import { createHash } from 'crypto';
 import axios from 'axios';
 import { createHive } from './client';
 import { isHiveClient } from './internal/utils';
 
-export function createSupergraphSDLFetcher({
-  endpoint,
-  key,
-}: SupergraphSDLFetcherOptions) {
+export function createSupergraphSDLFetcher({ endpoint, key }: SupergraphSDLFetcherOptions) {
   return function supergraphSDLFetcher() {
     return axios
       .get(endpoint + '/supergraph', {
@@ -21,25 +14,21 @@ export function createSupergraphSDLFetcher({
           'X-Hive-CDN-Key': key,
         },
       })
-      .then((response) => {
+      .then(response => {
         if (response.status >= 200 && response.status < 300) {
           return response.data;
         }
 
-        return Promise.reject(
-          new Error(`Failed to fetch supergraph [${response.status}]`)
-        );
+        return Promise.reject(new Error(`Failed to fetch supergraph [${response.status}]`));
       })
-      .then((supergraphSdl) => ({
+      .then(supergraphSdl => ({
         id: createHash('sha256').update(supergraphSdl).digest('base64'),
         supergraphSdl,
       }));
   };
 }
 
-export function hiveApollo(
-  clientOrOptions: HiveClient | HivePluginOptions
-): ApolloServerPlugin {
+export function hiveApollo(clientOrOptions: HiveClient | HivePluginOptions): ApolloServerPlugin {
   const hive = isHiveClient(clientOrOptions)
     ? clientOrOptions
     : createHive({

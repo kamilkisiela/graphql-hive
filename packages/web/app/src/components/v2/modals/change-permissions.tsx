@@ -1,10 +1,7 @@
 import { ReactElement } from 'react';
 import { Accordion } from '@chakra-ui/react';
 
-import {
-  PermissionsSpace,
-  usePermissionsManager,
-} from '@/components/organization/Permissions';
+import { PermissionsSpace, usePermissionsManager } from '@/components/organization/Permissions';
 import { Button, Heading, Modal } from '@/components/v2';
 import { MemberFieldsFragment, OrganizationFieldsFragment } from '@/graphql';
 import { scopes } from '@/lib/access/common';
@@ -28,10 +25,7 @@ export const ChangePermissionsModal = ({
 
   return (
     <Modal open={isOpen} onOpenChange={toggleModalOpen} className="w-[600px]">
-      <form
-        className="flex flex-col items-center gap-5"
-        onSubmit={manager.submit}
-      >
+      <form className="flex flex-col items-center gap-5" onSubmit={manager.submit}>
         <Heading>Permissions</Heading>
         <Accordion defaultIndex={0}>
           <PermissionsSpace

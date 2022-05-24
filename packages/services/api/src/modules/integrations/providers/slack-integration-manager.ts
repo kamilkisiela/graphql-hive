@@ -5,12 +5,7 @@ import { ProjectAccessScope } from '../../auth/providers/project-access';
 import { TargetAccessScope } from '../../auth/providers/target-access';
 import { Logger } from '../../shared/providers/logger';
 import { CryptoProvider } from '../../shared/providers/crypto';
-import {
-  Storage,
-  OrganizationSelector,
-  ProjectSelector,
-  TargetSelector,
-} from '../../shared/providers/storage';
+import { Storage, OrganizationSelector, ProjectSelector, TargetSelector } from '../../shared/providers/storage';
 import { Tracking } from '../../shared/providers/tracking';
 import { AccessError } from '../../../shared/errors';
 import { IntegrationsAccessContext } from './integrations-access-context';
@@ -39,10 +34,7 @@ export class SlackIntegrationManager {
       token: string;
     }
   ): Promise<void> {
-    this.logger.debug(
-      'Registering Slack integration (organization=%s)',
-      input.organization
-    );
+    this.logger.debug('Registering Slack integration (organization=%s)', input.organization);
     await this.authManager.ensureOrganizationAccess({
       ...input,
       scope: OrganizationAccessScope.INTEGRATIONS,
@@ -60,10 +52,7 @@ export class SlackIntegrationManager {
   }
 
   async unregister(input: OrganizationSelector): Promise<void> {
-    this.logger.debug(
-      'Removing Slack integration (organization=%s)',
-      input.organization
-    );
+    this.logger.debug('Removing Slack integration (organization=%s)', input.organization);
     await this.authManager.ensureOrganizationAccess({
       ...input,
       scope: OrganizationAccessScope.INTEGRATIONS,
@@ -80,10 +69,7 @@ export class SlackIntegrationManager {
   }
 
   async isAvailable(selector: OrganizationSelector): Promise<boolean> {
-    this.logger.debug(
-      'Checking Slack integration (organization=%s)',
-      selector.organization
-    );
+    this.logger.debug('Checking Slack integration (organization=%s)', selector.organization);
     const token = await this.getToken({
       organization: selector.organization,
       context: IntegrationsAccessContext.Integrations,

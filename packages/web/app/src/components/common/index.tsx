@@ -53,30 +53,17 @@ export const Page: React.FC<{
   actions?: React.ReactElement;
   scrollable?: boolean;
   noPadding?: boolean;
-}> = ({
-  title,
-  subtitle = '',
-  scrollable = false,
-  actions,
-  children,
-  noPadding,
-}) => {
+}> = ({ title, subtitle = '', scrollable = false, actions, children, noPadding }) => {
   return (
     <div tw="flex flex-col relative h-full dark:bg-gray-900">
       <div tw="p-4 flex-shrink-0 flex flex-row justify-between items-center">
         <div>
           <h2 tw="text-xl text-black dark:text-white font-bold">{title}</h2>
-          <span tw="text-sm text-gray-600 dark:text-gray-300 mt-2">
-            {subtitle}
-          </span>
+          <span tw="text-sm text-gray-600 dark:text-gray-300 mt-2">{subtitle}</span>
         </div>
         <div tw="flex flex-row items-center space-x-2">{actions}</div>
       </div>
-      {noPadding ? (
-        children
-      ) : (
-        <PageContent scrollable={scrollable}>{children}</PageContent>
-      )}
+      {noPadding ? children : <PageContent scrollable={scrollable}>{children}</PageContent>}
     </div>
   );
 };
@@ -87,16 +74,10 @@ export const Section = {
   Subtitle: tw.div`text-sm text-gray-600 dark:text-gray-300`,
 };
 
-export const Circle = styled.span(
-  ({ criticality }: { criticality: CriticalityLevel }) => [
-    tw`inline-block w-2 h-2 rounded-full`,
-    criticality === 'Safe'
-      ? tw`bg-emerald-500`
-      : criticality === 'Breaking'
-      ? tw`bg-red-500`
-      : tw`bg-yellow-400`,
-  ]
-);
+export const Circle = styled.span(({ criticality }: { criticality: CriticalityLevel }) => [
+  tw`inline-block w-2 h-2 rounded-full`,
+  criticality === 'Safe' ? tw`bg-emerald-500` : criticality === 'Breaking' ? tw`bg-red-500` : tw`bg-yellow-400`,
+]);
 
 export const TimeAgo: React.FC<{ date: string }> = ({ date }) => {
   const dateObject = React.useMemo(() => new Date(date), [date]);

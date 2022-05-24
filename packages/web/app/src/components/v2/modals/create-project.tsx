@@ -46,16 +46,7 @@ export const CreateProjectModal = ({
   const { push } = useRouter();
   const router = useRouteSelector();
 
-  const {
-    handleSubmit,
-    values,
-    handleChange,
-    handleBlur,
-    isSubmitting,
-    errors,
-    setFieldValue,
-    touched,
-  } = useFormik({
+  const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, setFieldValue, touched } = useFormik({
     initialValues: {
       name: '',
       type: '' as ProjectType,
@@ -64,9 +55,7 @@ export const CreateProjectModal = ({
     },
     validationSchema: Yup.object().shape({
       name: Yup.string().required('Project name is required'),
-      type: Yup.mixed()
-        .oneOf(Object.values(ProjectType))
-        .required('Project type is required'),
+      type: Yup.mixed().oneOf(Object.values(ProjectType)).required('Project type is required'),
       validationUrl: Yup.string()
         .url()
         .when('type', {
@@ -95,9 +84,7 @@ export const CreateProjectModal = ({
       });
       if (data.createProject.ok) {
         toggleModalOpen();
-        push(
-          `/${router.organizationId}/${data.createProject.ok.createdProject.cleanId}`
-        );
+        push(`/${router.organizationId}/${data.createProject.ok.createdProject.cleanId}`);
       }
     },
   });
@@ -107,9 +94,8 @@ export const CreateProjectModal = ({
       <form onSubmit={handleSubmit} className="flex flex-col gap-8">
         <Heading className="text-center">Create a project</Heading>
         <p className="text-sm text-gray-500">
-          A project is built on top of <b>Targets</b>, which are just your
-          environments. We will also create a default stack named{' '}
-          <b>experiment</b> for you (don't worry, you can change it later).
+          A project is built on top of <b>Targets</b>, which are just your environments. We will also create a default
+          stack named <b>experiment</b> for you (don't worry, you can change it later).
         </p>
 
         <div className="flex flex-col gap-4">
@@ -126,13 +112,9 @@ export const CreateProjectModal = ({
             isInvalid={touched.name && Boolean(errors.name)}
             className="grow"
           />
-          {touched.name && errors.name && (
-            <div className="text-sm text-red-500">{errors.name}</div>
-          )}
+          {touched.name && errors.name && <div className="text-sm text-red-500">{errors.name}</div>}
           {mutation.data?.createProject.error?.inputErrors.name && (
-            <div className="text-sm text-red-500">
-              {mutation.data?.createProject.error.inputErrors.name}
-            </div>
+            <div className="text-sm text-red-500">{mutation.data?.createProject.error.inputErrors.name}</div>
           )}
         </div>
 
@@ -140,13 +122,8 @@ export const CreateProjectModal = ({
           <label className="text-sm font-semibold" htmlFor="type">
             Choose project type
           </label>
-          <ProjectTypes
-            value={values.type}
-            onValueChange={(type) => setFieldValue('type', type)}
-          />
-          {touched.type && errors.type && (
-            <div className="text-sm text-red-500">{errors.type}</div>
-          )}
+          <ProjectTypes value={values.type} onValueChange={type => setFieldValue('type', type)} />
+          {touched.type && errors.type && <div className="text-sm text-red-500">{errors.type}</div>}
         </div>
 
         {values.type === ProjectType.Custom && (
@@ -162,26 +139,20 @@ export const CreateProjectModal = ({
                 onChange={handleChange}
                 onBlur={handleBlur}
                 disabled={isSubmitting}
-                isInvalid={
-                  touched.validationUrl && Boolean(errors.validationUrl)
-                }
+                isInvalid={touched.validationUrl && Boolean(errors.validationUrl)}
                 className="grow"
               />
               {touched.validationUrl && errors.validationUrl && (
-                <div className="text-sm text-red-500">
-                  {errors.validationUrl}
-                </div>
+                <div className="text-sm text-red-500">{errors.validationUrl}</div>
               )}
-              {mutation.data?.createProject.error?.inputErrors
-                .validationUrl && (
+              {mutation.data?.createProject.error?.inputErrors.validationUrl && (
                 <div className="text-sm text-red-500">
                   {mutation.data?.createProject.error.inputErrors.validationUrl}
                 </div>
               )}
               <p className="text-sm text-gray-500">
                 In Custom mode, Hive will ask you to validate GraphQL Schemas.
-                <br />A POST request containing schemas will be made to the
-                endpoint above.
+                <br />A POST request containing schemas will be made to the endpoint above.
               </p>
             </div>
             <div className="flex flex-col gap-4">
@@ -198,43 +169,28 @@ export const CreateProjectModal = ({
                 isInvalid={touched.buildUrl && Boolean(errors.buildUrl)}
                 className="grow"
               />
-              {touched.buildUrl && errors.buildUrl && (
-                <div className="text-sm text-red-500">{errors.buildUrl}</div>
-              )}
+              {touched.buildUrl && errors.buildUrl && <div className="text-sm text-red-500">{errors.buildUrl}</div>}
               {mutation.data?.createProject.error?.inputErrors.buildUrl && (
-                <div className="text-sm text-red-500">
-                  {mutation.data?.createProject.error.inputErrors.buildUrl}
-                </div>
+                <div className="text-sm text-red-500">{mutation.data?.createProject.error.inputErrors.buildUrl}</div>
               )}
               <p className="text-sm text-gray-500">
                 In Custom mode, Hive will ask you to validate GraphQL Schemas.
-                <br />A POST request containing schemas will be made to the
-                endpoint above.
+                <br />A POST request containing schemas will be made to the endpoint above.
               </p>
             </div>
           </>
         )}
 
-        {mutation.error && (
-          <div className="text-sm text-red-500">{mutation.error.message}</div>
-        )}
+        {mutation.error && <div className="text-sm text-red-500">{mutation.error.message}</div>}
         {mutation.data?.createProject.error && (
-          <div className="text-sm text-red-500">
-            {mutation.data.createProject.error.message}
-          </div>
+          <div className="text-sm text-red-500">{mutation.data.createProject.error.message}</div>
         )}
 
         <div className="flex gap-2">
           <Button type="button" size="large" block onClick={toggleModalOpen}>
             Cancel
           </Button>
-          <Button
-            type="submit"
-            size="large"
-            block
-            variant="primary"
-            disabled={isSubmitting}
-          >
+          <Button type="submit" size="large" block variant="primary" disabled={isSubmitting}>
             Create Project
           </Button>
         </div>

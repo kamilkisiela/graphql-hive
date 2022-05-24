@@ -45,10 +45,7 @@ export const Target: React.FC<{
   organization: OrganizationEssentialsFragment;
 }> = ({ name, target, project, organization }) => {
   return (
-    <NextLink
-      passHref
-      href={`/${organization.cleanId}/${project.cleanId}/${target.cleanId}`}
-    >
+    <NextLink passHref href={`/${organization.cleanId}/${project.cleanId}/${target.cleanId}`}>
       <Link>{name ?? target.name}</Link>
     </NextLink>
   );

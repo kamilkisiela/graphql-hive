@@ -7,10 +7,7 @@ import type { DateRange } from '../../../shared/entities';
 import { sentry } from '../../../shared/sentry';
 
 function formatDate(date: Date): string {
-  return format(
-    addMinutes(date, date.getTimezoneOffset()),
-    'yyyy-MM-dd HH:mm:ss'
-  );
+  return format(addMinutes(date, date.getTimezoneOffset()), 'yyyy-MM-dd HH:mm:ss');
 }
 
 export interface Percentiles {
@@ -74,11 +71,7 @@ function canUseHourlyAggTable({
   return true;
 }
 
-const schemaCoordinatesDailyStartedAt = parse(
-  '2022-01-25 00:00:00',
-  'yyyy-MM-dd HH:mm:ss',
-  new Date()
-);
+const schemaCoordinatesDailyStartedAt = parse('2022-01-25 00:00:00', 'yyyy-MM-dd HH:mm:ss', new Date());
 
 function canUseSchemaCoordinatesDailyTable(period?: DateRange): boolean {
   if (period) {
@@ -112,7 +105,7 @@ export class OperationsReader {
       target,
       period,
       fields: [{ type, field, argument }],
-    }).then((r) => r[this.makeId({ type, field, argument })]);
+    }).then(r => r[this.makeId({ type, field, argument })]);
   }
 
   @sentry('OperationsReader.countFields')
@@ -136,7 +129,7 @@ export class OperationsReader {
   ): Promise<Record<string, number>> {
     // Once we collect data from more than 30 days, we can leave on this part of code
     if (canUseSchemaCoordinatesDailyTable(period)) {
-      const coordinates = fields.map((selector) => this.makeId(selector));
+      const coordinates = fields.map(selector => this.makeId(selector));
 
       const res = await this.clickHouse.query<{
         total: string;
@@ -180,14 +173,8 @@ export class OperationsReader {
 
     const sep = `_${Math.random().toString(36).substr(2, 5)}_`;
 
-    function createAlias(selector: {
-      type: string;
-      field?: string | null;
-      argument?: string | null;
-    }) {
-      return [selector.type, selector.field, selector.argument]
-        .filter(Boolean)
-        .join(sep);
+    function createAlias(selector: { type: string; field?: string | null; argument?: string | null }) {
+      return [selector.type, selector.field, selector.argument].filter(Boolean).join(sep);
     }
 
     function extractSelector(alias: string): {
@@ -237,7 +224,7 @@ export class OperationsReader {
     const row = res.data[0];
     const stats: Record<string, number> = {};
 
-    Object.keys(row).forEach((alias) => {
+    Object.keys(row).forEach(alias => {
       const selector = extractSelector(alias);
       const total = ensureNumber(row[alias]);
 
@@ -330,9 +317,7 @@ export class OperationsReader {
     period: DateRange;
     operations?: readonly string[];
   }): Promise<number> {
-    return this.countOperations({ target, period, operations }).then(
-      (r) => r.notOk
-    );
+    return this.countOperations({ target, period, operations }).then(r => r.notOk);
   }
 
   @sentry('OperationsReader.countUniqueDocuments')
@@ -401,10 +386,7 @@ export class OperationsReader {
             span,
           }
     );
-    const total = result.data.reduce(
-      (sum, row) => sum + parseInt(row.total, 10),
-      0
-    );
+    const total = result.data.reduce((sum, row) => sum + parseInt(row.total, 10), 0);
 
     const registryResult = await this.clickHouse.query<{
       name?: string;
@@ -434,7 +416,7 @@ export class OperationsReader {
       operationsMap.set(row.hash, row);
     }
 
-    return result.data.map((row) => {
+    return result.data.map(row => {
       const rowTotal = parseInt(row.total, 10);
       const rowTotalOk = parseInt(row.totalOk, 10);
       const op = operationsMap.get(row.hash);
@@ -503,10 +485,7 @@ export class OperationsReader {
       span,
     });
 
-    const total = result.data.reduce(
-      (sum, row) => sum + parseInt(row.total, 10),
-      0
-    );
+    const total = result.data.reduce((sum, row) => sum + parseInt(row.total, 10), 0);
 
     const clientMap = new Map<
       string,
@@ -522,9 +501,7 @@ export class OperationsReader {
 
     for (const row of result.data) {
       const client_name = !row.client_name ? 'unknown' : row.client_name;
-      const client_version = !row.client_version
-        ? 'unknown'
-        : row.client_version;
+      const client_version = !row.client_version ? 'unknown' : row.client_version;
 
       if (!clientMap.has(client_name)) {
         clientMap.set(client_name, {
@@ -543,10 +520,10 @@ export class OperationsReader {
       });
     }
 
-    return Array.from(clientMap.values()).map((client) => {
+    return Array.from(clientMap.values()).map(client => {
       return {
         name: client.name,
-        versions: client.versions.map((version) => ({
+        versions: client.versions.map(version => ({
           version: version.version,
           count: version.total,
           percentage: (version.total / client.total) * 100,
@@ -576,7 +553,7 @@ export class OperationsReader {
       operations,
     });
 
-    return results.map((row) => ({
+    return results.map(row => ({
       date: row.date,
       value: row.total,
     }));
@@ -601,7 +578,7 @@ export class OperationsReader {
       operations,
     });
 
-    return result.map((row) => ({
+    return result.map(row => ({
       date: row.date,
       value: row.total - row.totalOk,
     }));
@@ -672,7 +649,7 @@ export class OperationsReader {
       span,
     });
 
-    return result.data.map((row) => {
+    return result.data.map(row => {
       return {
         duration: Math.round(Math.pow(10, row.latency)),
         count: Math.round(row.total),
@@ -772,7 +749,7 @@ export class OperationsReader {
 
     const collection = new Map<string, ESPercentiles>();
 
-    result.data.forEach((row) => {
+    result.data.forEach(row => {
       collection.set(row.hash, toESPercentiles(row.percentiles));
     });
 
@@ -848,7 +825,7 @@ export class OperationsReader {
           }
     );
 
-    return result.data.map((row) => {
+    return result.data.map(row => {
       return {
         date: ensureNumber(row.date) as any,
         total: ensureNumber(row.total),
@@ -868,7 +845,7 @@ export class OperationsReader {
       timeout: 15_000,
     });
 
-    return result.data.map((row) => ({
+    return result.data.map(row => ({
       total: ensureNumber(row.total),
       target: row.target,
     }));
@@ -904,7 +881,7 @@ export class OperationsReader {
       timeout: 15_000,
     });
 
-    return result.data.map((row) => ({
+    return result.data.map(row => ({
       date: ensureNumber(row.date) as any,
       total: ensureNumber(row.total),
     }));
@@ -925,21 +902,19 @@ export class OperationsReader {
 
     if (target) {
       if (Array.isArray(target)) {
-        where.push(`target IN (${target.map((t) => `'${t}'`).join(', ')})`);
+        where.push(`target IN (${target.map(t => `'${t}'`).join(', ')})`);
       } else {
         where.push(`target = '${target}'`);
       }
     }
 
     if (period) {
-      where.push(
-        `timestamp >= toDateTime('${formatDate(period.from)}', 'UTC')`
-      );
+      where.push(`timestamp >= toDateTime('${formatDate(period.from)}', 'UTC')`);
       where.push(`timestamp <= toDateTime('${formatDate(period.to)}', 'UTC')`);
     }
 
     if (operations?.length) {
-      where.push(`(hash) IN (${operations.map((op) => `'${op}'`).join(',')})`);
+      where.push(`(hash) IN (${operations.map(op => `'${op}'`).join(',')})`);
     }
 
     if (extra.length) {
@@ -951,15 +926,7 @@ export class OperationsReader {
     return statement;
   }
 
-  private makeId({
-    type,
-    field,
-    argument,
-  }: {
-    type: string;
-    field?: string | null;
-    argument?: string | null;
-  }): string {
+  private makeId({ type, field, argument }: { type: string; field?: string | null; argument?: string | null }): string {
     return [type, field, argument].filter(Boolean).join('.');
   }
 }

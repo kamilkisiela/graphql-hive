@@ -23,10 +23,7 @@ const Inner: React.FC<{
   }
 
   return (
-    <Settings
-      title="Settings"
-      subtitle="Applies to all targets within the project"
-    >
+    <Settings title="Settings" subtitle="Applies to all targets within the project">
       <NameSettings project={project} />
       <GitRepositorySettings project={project} />
       <DeleteSettings />
@@ -37,9 +34,7 @@ const Inner: React.FC<{
 export default function ProjectSettingsPage() {
   return (
     <ProjectView title="Settings">
-      {({ project, organization }) => (
-        <Inner project={project} organization={organization} />
-      )}
+      {({ project, organization }) => <Inner project={project} organization={organization} />}
     </ProjectView>
   );
 }

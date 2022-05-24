@@ -7,13 +7,7 @@ query target($organizationId: ID!, $targetId: ID!, $projectId: ID!) {
   project(selector: { organization: $organizationId, project: $projectId }) {
     ...ProjectFields
   }
-  target(
-    selector: {
-      organization: $organizationId
-      project: $projectId
-      target: $targetId
-    }
-  ) {
+  target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
     ...TargetFields
     latestSchemaVersion {
       id
