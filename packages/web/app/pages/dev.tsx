@@ -1,3 +1,5 @@
+import React from 'react';
+import 'twin.macro';
 /* eslint-disable import/no-extraneous-dependencies */
 import dynamic from 'next/dynamic';
 import 'graphiql/graphiql.css';
@@ -14,5 +16,14 @@ const fetcher = process.browser
   : null;
 
 export default function Dev() {
-  return <GraphiQL fetcher={fetcher} headerEditorEnabled={true} />;
+  return (
+    <div tw="mt-20 h-full w-full">
+      <GraphiQL fetcher={fetcher} headerEditorEnabled={true} />
+      <style jsx global>{`
+        .graphiql-container {
+          filter: invert(1);
+        }
+      `}</style>
+    </div>
+  );
 }

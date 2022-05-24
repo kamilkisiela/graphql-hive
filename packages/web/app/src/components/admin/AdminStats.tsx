@@ -1,17 +1,5 @@
 import 'twin.macro';
-import {
-  Table,
-  Thead,
-  Tbody,
-  Th,
-  Tr,
-  Td,
-  Flex,
-  StatGroup,
-  Stat,
-  StatLabel,
-  StatNumber,
-} from '@chakra-ui/react';
+import { Table, Thead, Tbody, Th, Tr, Td, Flex, StatGroup, Stat, StatLabel, StatNumber } from '@chakra-ui/react';
 import ReactECharts from 'echarts-for-react';
 import { AutoSizer } from 'react-virtualized';
 import { useTable, useSortBy } from 'react-table';
@@ -52,9 +40,7 @@ const CollectedOperationsOverTime_OperationFragment = gql(/* GraphQL */ `
 
 const CollectedOperationsOverTime: React.FC<{
   last: number;
-  operations: Array<
-    DocumentType<typeof CollectedOperationsOverTime_OperationFragment>
-  >;
+  operations: Array<DocumentType<typeof CollectedOperationsOverTime_OperationFragment>>;
 }> = ({ last, operations }) => {
   const period = {
     from: new Date(Date.now() - (last === 0 ? 30 : last) * 24 * 60 * 60 * 1000),
@@ -62,12 +48,12 @@ const CollectedOperationsOverTime: React.FC<{
   };
 
   const data = React.useMemo(() => {
-    return operations.map<[string, number]>((node) => [node.date, node.count]);
+    return operations.map<[string, number]>(node => [node.date, node.count]);
   }, []);
 
   return (
     <AutoSizer disableHeight>
-      {(size) => (
+      {size => (
         <ReactECharts
           style={{ width: size.width, height: 200 }}
           theme={theme.theme}
@@ -139,13 +125,7 @@ const Sortable: React.FC<{
     <Flex
       direction="row"
       align="center"
-      justifyContent={
-        align === 'center'
-          ? 'center'
-          : align === 'left'
-          ? 'flex-start'
-          : 'flex-end'
-      }
+      justifyContent={align === 'center' ? 'center' : align === 'left' ? 'flex-start' : 'flex-end'}
       tw="cursor-pointer"
     >
       <span>{children}</span>
@@ -169,6 +149,14 @@ const AdminStatsQuery = gql(/* GraphQL */ `
                 email
               }
             }
+            members {
+              nodes {
+                user {
+                  id
+                  email
+                }
+              }
+            }
           }
           versions
           users
@@ -188,9 +176,7 @@ const AdminStatsQuery = gql(/* GraphQL */ `
 `);
 
 function filterStats(
-  row: DocumentType<
-    typeof AdminStatsQuery
-  >['admin']['stats']['organizations'][0],
+  row: DocumentType<typeof AdminStatsQuery>['admin']['stats']['organizations'][0],
   filters: Filters
 ) {
   if (filters['only-regular'] && row.organization.type !== 'REGULAR') {
@@ -248,6 +234,10 @@ export const AdminStats: React.FC<{
         align: 'right',
       },
       {
+        Header: 'Users',
+        accessor: 'members',
+      },
+      {
         Header: 'Projects',
         accessor: 'projects',
         isNumeric: true,
@@ -283,9 +273,10 @@ export const AdminStats: React.FC<{
 
   const data = React.useMemo(() => {
     return (query.data?.admin?.stats.organizations ?? [])
-      .filter((node) => filterStats(node, filters))
-      .map((node) => ({
+      .filter(node => filterStats(node, filters))
+      .map(node => ({
         name: `${node.organization.name} (id: ${node.organization.cleanId}, owner: ${node.organization.owner.user.email})`,
+        members: (node.organization.members.nodes || []).map(v => v.user.email).join(', '),
         type: node.organization.type,
         users: node.users,
         projects: node.projects,
@@ -296,21 +287,17 @@ export const AdminStats: React.FC<{
       }));
   }, [query.data, filters]);
 
-  const { getTableProps, getTableBodyProps, headerGroups, prepareRow, rows } =
-    useTable(
-      {
-        columns,
-        data,
-      },
-      useSortBy
-    );
+  const { getTableProps, getTableBodyProps, headerGroups, prepareRow, rows } = useTable(
+    {
+      columns,
+      data,
+    },
+    useSortBy
+  );
 
   const overall = React.useMemo(() => {
     return {
-      users: data.reduce(
-        (total, node) => (node.type === 'PERSONAL' ? total + 1 : total),
-        0
-      ),
+      users: data.reduce((total, node) => (node.type === 'PERSONAL' ? total + 1 : total), 0),
       organizations: data.length,
       projects: sumByKey(data, 'projects'),
       targets: sumByKey(data, 'targets'),
@@ -332,30 +319,17 @@ export const AdminStats: React.FC<{
             <OverallStat label="Projects" value={overall.projects} />
             <OverallStat label="Targets" value={overall.targets} />
             <OverallStat label="Schema Pushes" value={overall.versions} />
-            <OverallStat
-              label="Peristed Ops"
-              value={overall.persistedOperations}
-            />
+            <OverallStat label="Peristed Ops" value={overall.persistedOperations} />
             <OverallStat label="Collected Ops" value={overall.operations} />
           </StatGroup>
-          <CollectedOperationsOverTime
-            last={last}
-            operations={query.data?.admin.stats.general.operationsOverTime}
-          />
-          <Table variant="striped" size="sm" {...getTableProps()}>
+          <CollectedOperationsOverTime last={last} operations={query.data?.admin.stats.general.operationsOverTime} />
+          <Table size="sm" {...getTableProps()}>
             <Thead>
               <Tr {...headerGroup.getHeaderGroupProps()}>
-                {headerGroup.headers.map((column) => {
+                {headerGroup.headers.map(column => {
                   return (
-                    <Th
-                      {...column.getHeaderProps(column.getSortByToggleProps())}
-                      align={column.align}
-                    >
-                      <Sortable
-                        align={column.align}
-                        isSorted={column.isSorted}
-                        isSortedDesc={column.isSortedDesc}
-                      >
+                    <Th {...column.getHeaderProps(column.getSortByToggleProps())} align={column.align}>
+                      <Sortable align={column.align} isSorted={column.isSorted} isSortedDesc={column.isSortedDesc}>
                         {column.render('Header')}
                       </Sortable>
                     </Th>
@@ -364,20 +338,14 @@ export const AdminStats: React.FC<{
               </Tr>
             </Thead>
             <Tbody {...getTableBodyProps()}>
-              {rows.map((row) => {
+              {rows.map(row => {
                 prepareRow(row);
                 return (
                   <Tr {...row.getRowProps()}>
-                    {row.cells.map((cell) => {
+                    {row.cells.map(cell => {
                       return (
-                        <Td
-                          {...cell.getCellProps()}
-                          isNumeric={cell.column.isNumeric}
-                          align={cell.column.align}
-                        >
-                          {cell.column.isNumeric
-                            ? formatNumber(cell.value)
-                            : cell.render('Cell')}
+                        <Td {...cell.getCellProps()} isNumeric={cell.column.isNumeric} align={cell.column.align}>
+                          {cell.column.isNumeric ? formatNumber(cell.value) : cell.render('Cell')}
                         </Td>
                       );
                     })}
