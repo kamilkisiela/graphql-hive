@@ -4,6 +4,7 @@ import Head from 'next/head';
 import { GlobalStyles } from 'twin.macro';
 import { css } from 'twin.macro';
 import { Header, FooterExtended, GlobalStyles as TGCStyles, ThemeProvider } from '@theguild/components';
+import { Pricing } from '../components/pricing';
 
 const CookiesConsent: React.FC = () => {
   const [show, setShow] = React.useState(typeof window !== 'undefined' && localStorage.getItem('cookies') === null);
@@ -11,11 +12,6 @@ const CookiesConsent: React.FC = () => {
   const accept = React.useCallback(() => {
     setShow(false);
     localStorage.setItem('cookies', 'true');
-  }, [setShow]);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const close = React.useCallback(() => {
-    setShow(false);
-    localStorage.setItem('cookies', 'false');
   }, [setShow]);
 
   if (!show) {
@@ -130,7 +126,7 @@ export default function Index() {
       <div tw="flex flex-col h-full">
         <style global jsx>{`
           * {
-            font-family: Poppins;
+            font-family: Inter;
           }
           .dark {
             background-color: #0b0d11;
@@ -202,6 +198,7 @@ export default function Index() {
             />
           );
         })}
+        <Pricing />
         <FooterExtended
           resources={[
             {
