@@ -9,10 +9,7 @@ const HistoryView: React.FC = () => {
   const router = useRouteSelector();
 
   return (
-    <Page
-      title="Schema History"
-      subtitle="A list of published changes for your GraphQL schema."
-    >
+    <Page title="Schema History" subtitle="A list of published changes for your GraphQL schema.">
       <div tw="flex flex-row h-full">
         <div tw="flex-grow overflow-x-auto divide-y divide-gray-200">
           <Versions

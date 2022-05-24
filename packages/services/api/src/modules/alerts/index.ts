@@ -10,9 +10,5 @@ export const alertsModule = createModule({
   dirname: __dirname,
   typeDefs,
   resolvers,
-  providers: [
-    AlertsManager,
-    SlackCommunicationAdapter,
-    WebhookCommunicationAdapter,
-  ],
+  providers: [AlertsManager, SlackCommunicationAdapter, WebhookCommunicationAdapter],
 });

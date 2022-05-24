@@ -27,11 +27,7 @@ export const Avatar = ({
       className={clsx(
         // By default Root has `span` element with `display: inline` property
         'flex shrink-0 items-center justify-center overflow-hidden bg-gray-800',
-        shape === 'square'
-          ? size === 'lg'
-            ? 'rounded-md'
-            : 'rounded-sm'
-          : 'rounded-full',
+        shape === 'square' ? (size === 'lg' ? 'rounded-md' : 'rounded-sm') : 'rounded-full',
         {
           xs: 'h-5 w-5',
           sm: 'h-9 w-9',
@@ -42,11 +38,7 @@ export const Avatar = ({
       )}
       {...props}
     >
-      <Image
-        src={src}
-        alt={alt}
-        className="drag-none h-full w-full object-cover"
-      />
+      <Image src={src} alt={alt} className="drag-none h-full w-full object-cover" />
       {fallback && <Fallback delayMs={500}>{fallback}</Fallback>}
     </Root>
   );

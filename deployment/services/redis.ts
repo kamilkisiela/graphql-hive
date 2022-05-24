@@ -8,11 +8,7 @@ const redisConfig = new pulumi.Config('redis');
 
 export type Redis = ReturnType<typeof deployRedis>;
 
-export function deployRedis({
-  deploymentEnv,
-}: {
-  deploymentEnv: DeploymentEnvironment;
-}) {
+export function deployRedis({ deploymentEnv }: { deploymentEnv: DeploymentEnvironment }) {
   const redisPassword = redisConfig.require('password');
   const redisApi = new RedisStore({
     password: redisPassword,

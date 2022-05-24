@@ -1,19 +1,13 @@
 #!/usr/bin/env node
 import 'reflect-metadata';
 import * as Sentry from '@sentry/node';
-import {
-  createServer,
-  startMetrics,
-  ensureEnv,
-  registerShutdown,
-} from '@hive/service-common';
+import { createServer, startMetrics, ensureEnv, registerShutdown } from '@hive/service-common';
 import { createRateLimiter } from './limiter';
 import { createConnectionString } from '@hive/storage';
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify/dist/trpc-server-adapters-fastify.cjs.js';
 import { rateLimitApiRouter } from './api';
 
-const LIMIT_CACHE_UPDATE_INTERVAL_MS = process.env
-  .LIMIT_CACHE_UPDATE_INTERVAL_MS
+const LIMIT_CACHE_UPDATE_INTERVAL_MS = process.env.LIMIT_CACHE_UPDATE_INTERVAL_MS
   ? parseInt(process.env.LIMIT_CACHE_UPDATE_INTERVAL_MS as string)
   : 1 * 60_000; // default is every 1m
 
@@ -91,7 +85,7 @@ async function main() {
   }
 }
 
-main().catch((err) => {
+main().catch(err => {
   Sentry.captureException(err, {
     level: Sentry.Severity.Fatal,
   });

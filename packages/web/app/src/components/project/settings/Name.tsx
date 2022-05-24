@@ -38,7 +38,7 @@ export const NameSettings: React.FC<{
             placeholder="Name your project"
             disabled={disabled}
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={e => setName(e.target.value)}
           />
           <Button
             colorScheme="primary"

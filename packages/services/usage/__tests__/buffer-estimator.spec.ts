@@ -5,7 +5,7 @@ const bufferSize = 1200;
 const defaultBytesPerUnit = eventHubLimitInBytes / bufferSize;
 
 function waitFor(time: number) {
-  return new Promise((resolve) => setTimeout(resolve, time));
+  return new Promise(resolve => setTimeout(resolve, time));
 }
 
 test('default estimation should be a ratio of max size and the limit in bytes', () => {
@@ -55,9 +55,7 @@ test('increasing the defaultBytesPerUnit', () => {
 
   estimator.overflowed('test');
 
-  expect(estimator.estimate(bufferSize)).toBeCloseTo(
-    1.25 * eventHubLimitInBytes
-  );
+  expect(estimator.estimate(bufferSize)).toBeCloseTo(1.25 * eventHubLimitInBytes);
 });
 
 test('increasing the defaultBytesPerUnit should not go over 50% of original estimation', () => {
@@ -76,9 +74,7 @@ test('increasing the defaultBytesPerUnit should not go over 50% of original esti
 
   estimator.overflowed('test');
 
-  expect(estimator.estimate(bufferSize)).toBeCloseTo(
-    1.5 * eventHubLimitInBytes
-  );
+  expect(estimator.estimate(bufferSize)).toBeCloseTo(1.5 * eventHubLimitInBytes);
 });
 
 test('teach estimator multiple times', () => {

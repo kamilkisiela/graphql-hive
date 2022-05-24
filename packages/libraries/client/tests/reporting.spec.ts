@@ -50,19 +50,11 @@ test('should not leak the exception', async () => {
   await waitFor(2000);
   await hive.dispose();
 
-  expect(logger.info).toHaveBeenCalledWith(
-    '[hive][reporting] Sending (queue 1) (attempt 1)'
-  );
-  expect(logger.info).toHaveBeenCalledWith(
-    expect.stringContaining('[hive][reporting] Attempt 1 failed:')
-  );
-  expect(logger.info).toHaveBeenCalledWith(
-    '[hive][reporting] Sending (queue 1) (attempt 2)'
-  );
+  expect(logger.info).toHaveBeenCalledWith('[hive][reporting] Sending (queue 1) (attempt 1)');
+  expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('[hive][reporting] Attempt 1 failed:'));
+  expect(logger.info).toHaveBeenCalledWith('[hive][reporting] Sending (queue 1) (attempt 2)');
   expect(logger.error).toHaveBeenCalledTimes(1);
-  expect(logger.error).toHaveBeenCalledWith(
-    expect.stringContaining(`[hive][reporting] Failed to send data`)
-  );
+  expect(logger.error).toHaveBeenCalledWith(expect.stringContaining(`[hive][reporting] Failed to send data`));
 });
 
 test('should send data to Hive', async () => {
@@ -121,9 +113,7 @@ test('should send data to Hive', async () => {
   http.done();
 
   expect(logger.error).not.toHaveBeenCalled();
-  expect(logger.info).toHaveBeenCalledWith(
-    '[hive][reporting] Sending (queue 1) (attempt 1)'
-  );
+  expect(logger.info).toHaveBeenCalledWith('[hive][reporting] Sending (queue 1) (attempt 1)');
   expect(logger.info).toHaveBeenCalledWith(`[hive][reporting] Sent!`);
 
   expect(body.variables.input.sdl).toBe(`type Query{foo:String}`);
@@ -187,14 +177,10 @@ test.only('should send data to Hive immediately', async () => {
   });
 
   expect(logger.error).not.toHaveBeenCalled();
-  expect(logger.info).toHaveBeenCalledWith(
-    '[hive][reporting] Sending immediately'
-  );
+  expect(logger.info).toHaveBeenCalledWith('[hive][reporting] Sending immediately');
   expect(logger.info).toHaveBeenCalledTimes(1);
   await waitFor(50);
-  expect(logger.info).toHaveBeenCalledWith(
-    '[hive][reporting] Sending (queue 1) (attempt 1)'
-  );
+  expect(logger.info).toHaveBeenCalledWith('[hive][reporting] Sending (queue 1) (attempt 1)');
   expect(logger.error).not.toHaveBeenCalled();
   expect(logger.info).toHaveBeenCalledWith(`[hive][reporting] Sent!`);
   expect(logger.info).toHaveBeenCalledTimes(3);

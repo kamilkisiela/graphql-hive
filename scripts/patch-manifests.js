@@ -13,10 +13,7 @@ function patchPackage(name, patchFn) {
   const indexFile = require.resolve(name);
   const nameParts = name.split('/');
 
-  const packagePath = findPackageJson(
-    path.dirname(indexFile),
-    nameParts[nameParts.length - 1]
-  );
+  const packagePath = findPackageJson(path.dirname(indexFile), nameParts[nameParts.length - 1]);
 
   const pkg = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
 
@@ -46,7 +43,7 @@ function findPackageJson(dirname, until) {
 
   That's why we patch package.json of @octokit/webhooks-methods and replace the value of `main` with the value from `source`.
 */
-patchPackage('@octokit/webhooks-methods', (pkg) => {
+patchPackage('@octokit/webhooks-methods', pkg => {
   delete pkg.module;
 });
 
@@ -55,7 +52,7 @@ patchPackage('@octokit/webhooks-methods', (pkg) => {
 
   That's why we patch package.json of universal-github-app-jwt and replace the value of `main` with the value from `source`.
 */
-patchPackage('universal-github-app-jwt', (pkg) => {
+patchPackage('universal-github-app-jwt', pkg => {
   delete pkg.module;
 });
 
@@ -65,7 +62,7 @@ patchPackage('universal-github-app-jwt', (pkg) => {
 
   The very quick fix means we need to patch the graphql module to be CJS-only.
 */
-patchPackage('graphql', (pkg) => {
+patchPackage('graphql', pkg => {
   pkg.main = 'index.js';
   delete pkg.module;
 });

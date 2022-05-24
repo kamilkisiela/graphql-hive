@@ -29,7 +29,7 @@ const TargetCreator: React.FC<{
   const [name, setName] = React.useState('');
   const [{ fetching }, mutate] = useMutation(CreateTargetDocument);
   const submit = React.useCallback(
-    (evt) => {
+    evt => {
       evt.preventDefault();
       if (name) {
         mutate({
@@ -38,7 +38,7 @@ const TargetCreator: React.FC<{
             project: router.projectId,
             organization: router.organizationId,
           },
-        }).then((result) => {
+        }).then(result => {
           if (!result.data?.createTarget.ok) {
             return;
           }
@@ -55,7 +55,7 @@ const TargetCreator: React.FC<{
   );
 
   const onNameChange = React.useCallback(
-    (evt) => {
+    evt => {
       setName(evt.target.value);
     },
     [setName]
@@ -69,8 +69,7 @@ const TargetCreator: React.FC<{
         <ModalCloseButton />
         <ModalBody>
           <Description>
-            A project is build on top of <Label>Targets</Label>, which are just
-            your environments.
+            A project is build on top of <Label>Targets</Label>, which are just your environments.
           </Description>
           <div tw="pt-6 space-y-6">
             <FormControl>
@@ -87,12 +86,7 @@ const TargetCreator: React.FC<{
           </div>
         </ModalBody>
         <ModalFooter tw="space-x-6">
-          <Button
-            variant="ghost"
-            type="button"
-            disabled={fetching}
-            onClick={onClose}
-          >
+          <Button variant="ghost" type="button" disabled={fetching} onClick={onClose}>
             Cancel
           </Button>
           <Button colorScheme="primary" type="submit" disabled={fetching}>

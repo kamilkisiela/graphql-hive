@@ -1,9 +1,5 @@
 import React from 'react';
-import {
-  BillingPlansDocument,
-  OrganizationFieldsFragment,
-  OrgBillingInfoFieldsFragment,
-} from '@/graphql';
+import { BillingPlansDocument, OrganizationFieldsFragment, OrgBillingInfoFieldsFragment } from '@/graphql';
 import 'twin.macro';
 import { PlanSummary } from './PlanSummary';
 import { useQuery } from 'urql';
@@ -18,16 +14,12 @@ export const BillingView: React.FC<{
 
   return (
     <DataWrapper query={query}>
-      {(result) => {
-        const plan = result.data.billingPlans.find(
-          (v) => v.planType === organization.plan
-        );
+      {result => {
+        const plan = result.data.billingPlans.find(v => v.planType === organization.plan);
 
         return (
           <PlanSummary
-            operationsRateLimit={Math.floor(
-              organization.rateLimit.operations / 1_000_000
-            )}
+            operationsRateLimit={Math.floor(organization.rateLimit.operations / 1_000_000)}
             schemaPushesRateLimit={organization.rateLimit.schemaPushes}
             plan={plan}
           >

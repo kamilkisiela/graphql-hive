@@ -1,10 +1,6 @@
 import React from 'react';
 import { Router, useRouteSelector } from '@/lib/hooks/use-route-selector';
-import {
-  OrganizationAccessScope,
-  ProjectAccessScope,
-  TargetAccessScope,
-} from '../../graphql';
+import { OrganizationAccessScope, ProjectAccessScope, TargetAccessScope } from '../../graphql';
 
 export interface Scope<T> {
   name: string;
@@ -93,8 +89,7 @@ export const scopes: {
     },
     {
       name: 'Registry',
-      description:
-        'Manage schema registry (publish new schemas, run schema checks, report usage, etc.)',
+      description: 'Manage schema registry (publish new schemas, run schema checks, report usage, etc.)',
       mapping: {
         'read-only': TargetAccessScope.RegistryRead,
         'read-write': TargetAccessScope.RegistryWrite,

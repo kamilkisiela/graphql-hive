@@ -136,40 +136,24 @@ export function Navigation() {
             </Link>
             <div tw="hidden sm:block sm:ml-6">
               <div tw="flex space-x-4 items-center ">
-                {organization && (
-                  <OrganizationSwitcher organizationId={organization} />
-                )}
+                {organization && <OrganizationSwitcher organizationId={organization} />}
                 {project && (
                   <>
-                    <div tw="text-xl text-gray-200 font-normal select-none">
-                      /
-                    </div>
-                    <ProjectSwitcher
-                      organizationId={organization}
-                      projectId={project}
-                    />
+                    <div tw="text-xl text-gray-200 font-normal select-none">/</div>
+                    <ProjectSwitcher organizationId={organization} projectId={project} />
                   </>
                 )}
                 {project && target && (
                   <>
-                    <div tw="text-xl text-gray-200 font-normal select-none">
-                      /
-                    </div>
-                    <TargetSwitcher
-                      organizationId={organization}
-                      projectId={project}
-                      targetId={target}
-                    />
+                    <div tw="text-xl text-gray-200 font-normal select-none">/</div>
+                    <TargetSwitcher organizationId={organization} projectId={project} targetId={target} />
                   </>
                 )}
               </div>
             </div>
           </div>
           <div tw="flex flex-row items-center space-x-4">
-            <ChakraLink
-              tw="text-sm dark:text-gray-200"
-              href={process.env.NEXT_PUBLIC_DOCS_LINK}
-            >
+            <ChakraLink tw="text-sm dark:text-gray-200" href={process.env.NEXT_PUBLIC_DOCS_LINK}>
               Documentation
             </ChakraLink>
           </div>
@@ -182,13 +166,7 @@ export function Navigation() {
                   as={Button}
                   tw="font-normal"
                   variant="ghost"
-                  rightIcon={
-                    <img
-                      tw="h-6 w-6 rounded-full"
-                      src={user.picture}
-                      alt={user.name}
-                    />
-                  }
+                  rightIcon={<img tw="h-6 w-6 rounded-full" src={user.picture} alt={user.name} />}
                 >
                   {me?.displayName ?? user.nickname}
                 </MenuButton>
@@ -196,30 +174,17 @@ export function Navigation() {
                   {me && (
                     <>
                       <MenuItem onClick={settings.onOpen}>Settings</MenuItem>
-                      <UserSettings
-                        me={meQuery.data?.me}
-                        isOpen={settings.isOpen}
-                        onClose={settings.onClose}
-                      />
+                      <UserSettings me={meQuery.data?.me} isOpen={settings.isOpen} onClose={settings.onClose} />
                     </>
                   )}
-                  <MenuItem
-                    as="a"
-                    href="https://calendly.com/d/zjjt-g8zd/hive-feedback"
-                  >
+                  <MenuItem as="a" href="https://calendly.com/d/zjjt-g8zd/hive-feedback">
                     Schedule a meeting
                   </MenuItem>
                   <MenuItem onClick={feedback.onOpen}>Give feedback</MenuItem>
-                  <Feedback
-                    isOpen={feedback.isOpen}
-                    onClose={feedback.onClose}
-                  />
+                  <Feedback isOpen={feedback.isOpen} onClose={feedback.onClose} />
                   <MenuItem
                     onClick={() => {
-                      if (
-                        typeof window !== 'undefined' &&
-                        (window as any).$crisp
-                      ) {
+                      if (typeof window !== 'undefined' && (window as any).$crisp) {
                         (window as any).$crisp.push(['do', 'chat:open']);
                       }
                     }}

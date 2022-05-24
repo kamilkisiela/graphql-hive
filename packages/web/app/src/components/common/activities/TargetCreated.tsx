@@ -15,17 +15,8 @@ export const TargetCreated: React.FC<{
       <Activity.Content>
         <Activity.Text>
           <User user={activity.user} /> created{' '}
-          <Target
-            target={activity.target}
-            project={activity.project}
-            organization={activity.organization}
-          />{' '}
-          target in{' '}
-          <Project
-            project={activity.project}
-            organization={activity.organization}
-          />{' '}
-          project
+          <Target target={activity.target} project={activity.project} organization={activity.organization} /> target in{' '}
+          <Project project={activity.project} organization={activity.organization} /> project
         </Activity.Text>
         <Activity.Time>
           <TimeAgo date={activity.createdAt} />

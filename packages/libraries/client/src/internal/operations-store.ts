@@ -10,9 +10,7 @@ export interface OperationsStore {
   reload(): Promise<void>;
 }
 
-export function createOperationsStore(
-  pluginOptions: HivePluginOptions
-): OperationsStore {
+export function createOperationsStore(pluginOptions: HivePluginOptions): OperationsStore {
   const operationsStoreOptions = pluginOptions.operationsStore;
   const token = pluginOptions.token;
 
@@ -31,18 +29,17 @@ export function createOperationsStore(
 
   const store = new Map<string, DocumentNode>();
 
-  const canHandle: OperationsStore['canHandle'] = (key) => {
+  const canHandle: OperationsStore['canHandle'] = key => {
     return typeof key === 'string' && !key.includes('{');
   };
 
-  const get: OperationsStore['get'] = (key) => {
+  const get: OperationsStore['get'] = key => {
     return store.get(key)!;
   };
 
   const load: OperationsStore['load'] = async () => {
     const response = await axios.post(
-      operationsStoreOptions.endpoint ??
-        'https://app.graphql-hive.com/registry',
+      operationsStoreOptions.endpoint ?? 'https://app.graphql-hive.com/registry',
       {
         query,
         operationName: 'loadStoredOperations',

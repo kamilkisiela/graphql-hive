@@ -68,12 +68,6 @@ export function deployUsage({
         maxReplicas: maxReplicas,
       },
     },
-    [
-      dbMigrations,
-      tokens.deployment,
-      tokens.service,
-      rateLimit.deployment,
-      rateLimit.service,
-    ]
+    [dbMigrations, tokens.deployment, tokens.service, rateLimit.deployment, rateLimit.service]
   ).deploy();
 }

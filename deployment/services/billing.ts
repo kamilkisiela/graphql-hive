@@ -40,9 +40,7 @@ export function deployStripeBilling({
         RELEASE: packageHelper.currentReleaseId(),
         USAGE_ESTIMATOR_ENDPOINT: serviceLocalEndpoint(usageEstimator.service),
         STRIPE_SECRET_KEY: billingConfig.requireSecret('stripePrivateKey'),
-        POSTGRES_CONNECTION_STRING: apiConfig.requireSecret(
-          'postgresConnectionString'
-        ),
+        POSTGRES_CONNECTION_STRING: apiConfig.requireSecret('postgresConnectionString'),
       },
       exposesMetrics: true,
       packageInfo: packageHelper.npmPack('@hive/stripe-billing'),

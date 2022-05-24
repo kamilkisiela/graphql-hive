@@ -82,13 +82,7 @@ export const UserSettings: React.FC<{
   );
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      size="xl"
-      closeOnEsc={false}
-      closeOnOverlayClick={false}
-    >
+    <Modal isOpen={isOpen} onClose={onClose} size="xl" closeOnEsc={false} closeOnOverlayClick={false}>
       <ModalOverlay />
       <ModalContent as="form" onSubmit={formik.handleSubmit}>
         <ModalHeader>User Settings</ModalHeader>
@@ -119,12 +113,7 @@ export const UserSettings: React.FC<{
           </div>
         </ModalBody>
         <ModalFooter tw="space-x-6">
-          <Button
-            variant="ghost"
-            type="button"
-            disabled={formik.isSubmitting}
-            onClick={onClose}
-          >
+          <Button variant="ghost" type="button" disabled={formik.isSubmitting} onClick={onClose}>
             Cancel
           </Button>
           <Button

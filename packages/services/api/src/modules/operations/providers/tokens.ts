@@ -15,6 +15,4 @@ export interface ClickHouseConfig {
   ) => void;
 }
 
-export const CLICKHOUSE_CONFIG = new InjectionToken<ClickHouseConfig>(
-  'clickhouse-config'
-);
+export const CLICKHOUSE_CONFIG = new InjectionToken<ClickHouseConfig>('clickhouse-config');

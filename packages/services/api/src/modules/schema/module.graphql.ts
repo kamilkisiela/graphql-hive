@@ -12,22 +12,14 @@ export default gql`
     schemaCheck(input: SchemaCheckInput!): SchemaCheckPayload!
     updateSchemaVersionStatus(input: SchemaVersionUpdateInput!): SchemaVersion!
     updateBaseSchema(input: UpdateBaseSchemaInput!): UpdateBaseSchemaResult!
-    updateSchemaServiceName(
-      input: UpdateSchemaServiceNameInput!
-    ): UpdateSchemaServiceNameResult!
+    updateSchemaServiceName(input: UpdateSchemaServiceNameInput!): UpdateSchemaServiceNameResult!
     schemaSyncCDN(input: SchemaSyncCDNInput!): SchemaSyncCDNPayload!
   }
 
   extend type Query {
     schemaCompare(selector: SchemaCompareInput!): SchemaComparePayload!
-    schemaCompareToPrevious(
-      selector: SchemaCompareToPreviousInput!
-    ): SchemaComparePayload!
-    schemaVersions(
-      selector: SchemaVersionsInput!
-      after: ID
-      limit: Int!
-    ): SchemaVersionConnection!
+    schemaCompareToPrevious(selector: SchemaCompareToPreviousInput!): SchemaComparePayload!
+    schemaVersions(selector: SchemaVersionsInput!, after: ID, limit: Int!): SchemaVersionConnection!
     schemaVersion(selector: SchemaVersionInput!): SchemaVersion!
     """
     Requires API Token
@@ -108,11 +100,7 @@ export default gql`
     github: Boolean
   }
 
-  union SchemaCheckPayload =
-      SchemaCheckSuccess
-    | SchemaCheckError
-    | GitHubSchemaCheckSuccess
-    | GitHubSchemaCheckError
+  union SchemaCheckPayload = SchemaCheckSuccess | SchemaCheckError | GitHubSchemaCheckSuccess | GitHubSchemaCheckError
 
   enum CriticalityLevel {
     Breaking

@@ -37,15 +37,7 @@ export const CreateChannelModal = ({
 }): ReactElement => {
   const router = useRouteSelector();
   const [mutation, mutate] = useMutation(CreateChannel_AddAlertChannelMutation);
-  const {
-    errors,
-    values,
-    touched,
-    handleChange,
-    handleBlur,
-    handleSubmit,
-    isSubmitting,
-  } = useFormik({
+  const { errors, values, touched, handleChange, handleBlur, handleSubmit, isSubmitting } = useFormik({
     initialValues: {
       name: '',
       type: '' as AlertChannelType,
@@ -54,9 +46,7 @@ export const CreateChannelModal = ({
     },
     validationSchema: Yup.object().shape({
       name: Yup.string().required('Must enter name'),
-      type: Yup.mixed()
-        .oneOf(Object.values(AlertChannelType))
-        .required('Must select type'),
+      type: Yup.mixed().oneOf(Object.values(AlertChannelType)).required('Must select type'),
       slackChannel: Yup.string()
         .matches(/^[@#]{1}/, 'Must start with a @ or # character')
         .when('type', {
@@ -77,14 +67,8 @@ export const CreateChannelModal = ({
           project: router.projectId,
           name: values.name,
           type: values.type,
-          slack:
-            values.type === AlertChannelType.Slack
-              ? { channel: values.slackChannel }
-              : null,
-          webhook:
-            values.type === AlertChannelType.Webhook
-              ? { endpoint: values.endpoint }
-              : null,
+          slack: values.type === AlertChannelType.Slack ? { channel: values.slackChannel } : null,
+          webhook: values.type === AlertChannelType.Webhook ? { endpoint: values.endpoint } : null,
         },
       });
       if (data?.addAlertChannel.ok) {
@@ -111,17 +95,12 @@ export const CreateChannelModal = ({
             isInvalid={touched.name && Boolean(errors.name)}
             className="grow"
           />
-          {touched.name && errors.name && (
-            <div className="text-sm text-red-500">{errors.name}</div>
-          )}
+          {touched.name && errors.name && <div className="text-sm text-red-500">{errors.name}</div>}
           {mutation.data?.addAlertChannel.error?.inputErrors.name && (
-            <div className="text-sm text-red-500">
-              {mutation.data.addAlertChannel.error.inputErrors.name}
-            </div>
+            <div className="text-sm text-red-500">{mutation.data.addAlertChannel.error.inputErrors.name}</div>
           )}
           <p className="text-sm text-gray-500">
-            This will be displayed on channels list, we recommend to make it
-            self-explanatory.
+            This will be displayed on channels list, we recommend to make it self-explanatory.
           </p>
         </div>
 
@@ -141,9 +120,7 @@ export const CreateChannelModal = ({
               { value: AlertChannelType.Webhook, name: 'Webhook' },
             ]}
           />
-          {touched.type && errors.type && (
-            <div className="text-sm text-red-500">{errors.type}</div>
-          )}
+          {touched.type && errors.type && <div className="text-sm text-red-500">{errors.type}</div>}
         </div>
 
         {values.type === AlertChannelType.Webhook && (
@@ -161,21 +138,13 @@ export const CreateChannelModal = ({
               isInvalid={touched.endpoint && Boolean(errors.endpoint)}
               className="grow"
             />
-            {touched.endpoint && errors.endpoint && (
-              <div className="text-sm text-red-500">{errors.endpoint}</div>
-            )}
-            {mutation.data?.addAlertChannel.error?.inputErrors
-              .webhookEndpoint && (
+            {touched.endpoint && errors.endpoint && <div className="text-sm text-red-500">{errors.endpoint}</div>}
+            {mutation.data?.addAlertChannel.error?.inputErrors.webhookEndpoint && (
               <div className="text-sm text-red-500">
-                {
-                  mutation.data.addAlertChannel.error.inputErrors
-                    .webhookEndpoint
-                }
+                {mutation.data.addAlertChannel.error.inputErrors.webhookEndpoint}
               </div>
             )}
-            <p className="text-sm text-gray-500">
-              Hive will send alerts to your endpoint.
-            </p>
+            <p className="text-sm text-gray-500">Hive will send alerts to your endpoint.</p>
           </div>
         )}
 
@@ -198,9 +167,7 @@ export const CreateChannelModal = ({
               <div className="text-sm text-red-500">{errors.slackChannel}</div>
             )}
             {mutation.data?.addAlertChannel.error?.inputErrors.slackChannel && (
-              <div className="text-sm text-red-500">
-                {mutation.data.addAlertChannel.error.inputErrors.slackChannel}
-              </div>
+              <div className="text-sm text-red-500">{mutation.data.addAlertChannel.error.inputErrors.slackChannel}</div>
             )}
             <p className="text-sm text-gray-500">
               Use <Tag>#channel</Tag> or <Tag>@username</Tag> form.
@@ -212,13 +179,7 @@ export const CreateChannelModal = ({
           <Button type="button" size="large" block onClick={toggleModalOpen}>
             Cancel
           </Button>
-          <Button
-            type="submit"
-            size="large"
-            block
-            variant="primary"
-            disabled={isSubmitting}
-          >
+          <Button type="submit" size="large" block variant="primary" disabled={isSubmitting}>
             Create Channel
           </Button>
         </div>

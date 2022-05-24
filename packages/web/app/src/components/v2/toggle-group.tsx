@@ -9,10 +9,7 @@ type ItemProps = PropsOf<typeof Item>;
 
 export const ToggleGroup = (props: RootProps) => {
   return (
-    <Root
-      {...props}
-      className={clsx('inline-flex rounded-md shadow-sm', props.className)}
-    >
+    <Root {...props} className={clsx('inline-flex rounded-md shadow-sm', props.className)}>
       {props.children}
     </Root>
   );

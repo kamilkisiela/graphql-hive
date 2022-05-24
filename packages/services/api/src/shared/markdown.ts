@@ -10,7 +10,5 @@ export function quotesTransformer(msg: string, symbols = '**') {
     return `${symbols}${value}${symbols}`;
   }
 
-  return msg
-    .replace(findSingleQuotes, transformm)
-    .replace(findDoubleQuotes, transformm);
+  return msg.replace(findSingleQuotes, transformm).replace(findDoubleQuotes, transformm);
 }

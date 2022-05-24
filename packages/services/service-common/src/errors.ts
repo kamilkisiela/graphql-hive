@@ -2,11 +2,7 @@ import type { FastifyInstance, FastifyLoggerInstance } from 'fastify';
 import * as Sentry from '@sentry/node';
 
 export function createErrorHandler(server: FastifyInstance) {
-  return function errorHandler(
-    message: string,
-    error: Error,
-    logger?: FastifyLoggerInstance
-  ) {
+  return function errorHandler(message: string, error: Error, logger?: FastifyLoggerInstance) {
     console.log('createErrorHandler', message, error);
     Sentry.captureException(error);
     if (logger) {

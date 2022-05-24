@@ -48,10 +48,7 @@ export class SchemaManager {
   }
 
   async hasSchema(selector: TargetSelector) {
-    this.logger.debug(
-      'Checking if schema is available (selector=%o)',
-      selector
-    );
+    this.logger.debug('Checking if schema is available (selector=%o)', selector);
     await this.authManager.ensureTargetAccess({
       ...selector,
       scope: TargetAccessScope.REGISTRY_READ,
@@ -78,10 +75,7 @@ export class SchemaManager {
       version: string;
     } & TargetSelector
   ) {
-    this.logger.debug(
-      'Fetching schemas from the previous version (selector=%o)',
-      selector
-    );
+    this.logger.debug('Fetching schemas from the previous version (selector=%o)', selector);
     await this.authManager.ensureTargetAccess({
       ...selector,
       scope: TargetAccessScope.REGISTRY_READ,
@@ -193,7 +187,7 @@ export class SchemaManager {
     const result = await this.storage.getVersions(selector);
 
     return {
-      nodes: result.versions.map((r) => ({
+      nodes: result.versions.map(r => ({
         ...r,
         project: selector.project,
         target: selector.target,
@@ -203,9 +197,7 @@ export class SchemaManager {
     };
   }
 
-  async updateSchemaVersionStatus(
-    input: TargetSelector & { version: string; valid: boolean }
-  ): Promise<SchemaVersion> {
+  async updateSchemaVersionStatus(input: TargetSelector & { version: string; valid: boolean }): Promise<SchemaVersion> {
     this.logger.debug('Updating schema version status (input=%o)', input);
     await this.authManager.ensureTargetAccess({
       ...input,
@@ -279,22 +271,8 @@ export class SchemaManager {
       metadata: string | null;
     } & TargetSelector
   ) {
-    this.logger.info(
-      'Creating a new version (input=%o)',
-      lodash.omit(input, ['schema'])
-    );
-    const {
-      valid,
-      project,
-      organization,
-      target,
-      commit,
-      schema,
-      author,
-      commits,
-      url,
-      metadata,
-    } = input;
+    this.logger.info('Creating a new version (input=%o)', lodash.omit(input, ['schema']));
+    const { valid, project, organization, target, commit, schema, author, commits, url, metadata } = input;
     let service = input.service;
 
     await this.authManager.ensureTargetAccess({
@@ -319,9 +297,7 @@ export class SchemaManager {
 
     if (existingSchema) {
       if (service) {
-        throw new HiveError(
-          `Only one service schema per commit per target is allowed`
-        );
+        throw new HiveError(`Only one service schema per commit per target is allowed`);
       }
 
       throw new HiveError(`Only one schema per commit per target is allowed`);
@@ -368,9 +344,7 @@ export class SchemaManager {
         return this.customOrchestrator;
       }
       default: {
-        throw new HiveError(
-          `Couldn't find an orchestrator for project type "${projectType}"`
-        );
+        throw new HiveError(`Couldn't find an orchestrator for project type "${projectType}"`);
       }
     }
   }
@@ -385,10 +359,7 @@ export class SchemaManager {
       metadata: string | null;
     } & TargetSelector
   ) {
-    this.logger.info(
-      'Inserting schema (input=%o)',
-      lodash.omit(input, ['schema'])
-    );
+    this.logger.info('Inserting schema (input=%o)', lodash.omit(input, ['schema']));
     await this.authManager.ensureTargetAccess({
       ...input,
       scope: TargetAccessScope.REGISTRY_WRITE,
@@ -404,10 +375,7 @@ export class SchemaManager {
     });
     return await this.storage.getBaseSchema(selector);
   }
-  async updateBaseSchema(
-    selector: TargetSelector,
-    newBaseSchema: string | null
-  ) {
+  async updateBaseSchema(selector: TargetSelector, newBaseSchema: string | null) {
     this.logger.debug('Updating base schema (selector=%o)', selector);
     await this.authManager.ensureTargetAccess({
       ...selector,
@@ -430,13 +398,8 @@ export class SchemaManager {
       scope: TargetAccessScope.REGISTRY_WRITE,
     });
 
-    if (
-      input.projectType !== ProjectType.FEDERATION &&
-      input.projectType !== ProjectType.STITCHING
-    ) {
-      throw new HiveError(
-        `Project type "${input.projectType}" doesn't support service name updates`
-      );
+    if (input.projectType !== ProjectType.FEDERATION && input.projectType !== ProjectType.STITCHING) {
+      throw new HiveError(`Project type "${input.projectType}" doesn't support service name updates`);
     }
 
     const schemas = await this.storage.getSchemasOfVersion({
@@ -446,7 +409,7 @@ export class SchemaManager {
       organization: input.organization,
     });
 
-    const schema = schemas.find((s) => s.service === input.name);
+    const schema = schemas.find(s => s.service === input.name);
 
     if (!schema) {
       throw new HiveError(`Couldn't find service "${input.name}"`);
@@ -456,7 +419,7 @@ export class SchemaManager {
       throw new HiveError(`Service name can't be empty`);
     }
 
-    const duplicatedSchema = schemas.find((s) => s.service === input.newName);
+    const duplicatedSchema = schemas.find(s => s.service === input.newName);
 
     if (duplicatedSchema) {
       throw new HiveError(`Service "${input.newName}" already exists`);

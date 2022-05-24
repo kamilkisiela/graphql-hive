@@ -3,12 +3,7 @@ import tw, { styled } from 'twin.macro';
 import NextLink from 'next/link';
 import { useQuery } from 'urql';
 import { Button, Table, Tr, Td, Th } from '@chakra-ui/react';
-import {
-  VersionsDocument,
-  VersionsQueryVariables,
-  SchemaVersionsInput,
-  SchemaVersionFieldsFragment,
-} from '@/graphql';
+import { VersionsDocument, VersionsQueryVariables, SchemaVersionsInput, SchemaVersionFieldsFragment } from '@/graphql';
 import { TimeAgo } from '@/components/common';
 import { NoSchemasYet } from '@/components/target/NoSchemasYet';
 import { Spinner } from '@/components/common/Spinner';
@@ -30,10 +25,7 @@ const Version: React.FC<{
 }> = ({ version, organization, project, target }) => {
   return (
     <Tr>
-      <Td
-        tw="whitespace-nowrap px-4"
-        title={version.valid ? 'Valid' : 'Invalid'}
-      >
+      <Td tw="whitespace-nowrap px-4" title={version.valid ? 'Valid' : 'Invalid'}>
         <Status valid={version.valid} />
       </Td>
       <Td tw="whitespace-nowrap">
@@ -44,9 +36,7 @@ const Version: React.FC<{
       </Td>
       <Td tw="w-full">
         <div tw="flex-grow overflow-x-hidden">
-          <Value tw="overflow-ellipsis overflow-hidden">
-            {version.commit.commit}
-          </Value>
+          <Value tw="overflow-ellipsis overflow-hidden">{version.commit.commit}</Value>
           <ValueLabel>Commit</ValueLabel>
         </div>
       </Td>
@@ -64,10 +54,7 @@ const Version: React.FC<{
       </Td>
       <Td tw="whitespace-nowrap">
         <div tw="flex flex-row items-center space-x-2 justify-end">
-          <NextLink
-            href={`/${organization}/${project}/${target}/history/${version.id}`}
-            passHref
-          >
+          <NextLink href={`/${organization}/${project}/${target}/history/${version.id}`} passHref>
             <Button as="a" size="sm" colorScheme="primary">
               View changes
             </Button>
@@ -88,15 +75,7 @@ const VersionsPage: React.FC<{
   organization: string;
   project: string;
   target: string;
-}> = ({
-  variables,
-  isFirstPage,
-  isLastPage,
-  onLoadMore,
-  organization,
-  project,
-  target,
-}) => {
+}> = ({ variables, isFirstPage, isLastPage, onLoadMore, organization, project, target }) => {
   const [query] = useQuery({
     query: VersionsDocument,
     variables,
@@ -122,15 +101,9 @@ const VersionsPage: React.FC<{
 
   return (
     <>
-      {versions.map((version) => {
+      {versions.map(version => {
         return (
-          <Version
-            key={version.id}
-            version={version}
-            organization={organization}
-            project={project}
-            target={target}
-          />
+          <Version key={version.id} version={version} organization={organization} project={project} target={target} />
         );
       })}
       {isLastPage && hasMore && (

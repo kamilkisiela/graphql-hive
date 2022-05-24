@@ -5,11 +5,7 @@ import { PersistedOperationsModule } from '../__generated__/types';
 import type { PersistedOperation } from '../../../shared/entities';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { Logger } from '../../shared/providers/logger';
-import {
-  PersistedOperationSelector,
-  ProjectSelector,
-  Storage,
-} from '../../shared/providers/storage';
+import { PersistedOperationSelector, ProjectSelector, Storage } from '../../shared/providers/storage';
 import { Tracking } from '../../shared/providers/tracking';
 import { ProjectAccessScope } from '../../auth/providers/project-access';
 
@@ -23,12 +19,7 @@ import { ProjectAccessScope } from '../../auth/providers/project-access';
 export class PersistedOperationManager {
   private logger: Logger;
 
-  constructor(
-    logger: Logger,
-    private storage: Storage,
-    private authManager: AuthManager,
-    private tracking: Tracking
-  ) {
+  constructor(logger: Logger, private storage: Storage, private authManager: AuthManager, private tracking: Tracking) {
     this.logger = logger.child({ source: 'PersistedOperationManager' });
   }
 
@@ -58,15 +49,14 @@ export class PersistedOperationManager {
       },
     });
 
-    const operations = operationList.map((operation) => {
+    const operations = operationList.map(operation => {
       const document = parse(operation.content);
       const normalizedDocument = normalizeOperation({
         document,
         hideLiterals: true,
         removeAliases: true,
       });
-      const operationHash =
-        operation.operationHash || hashOperation(normalizedDocument);
+      const operationHash = operation.operationHash || hashOperation(normalizedDocument);
       const op = document.definitions.find(isOperation)!;
 
       return {
@@ -82,20 +72,18 @@ export class PersistedOperationManager {
     const hashesToPublish = await this.comparePersistedOperations({
       organization,
       project,
-      hashes: operations.map((op) => op.operationHash),
+      hashes: operations.map(op => op.operationHash),
     });
 
     const publishedOperations = await Promise.all(
       operations
-        .filter((op) => hashesToPublish.includes(op.operationHash))
-        .map((operation) => this.storage.insertPersistedOperation(operation))
+        .filter(op => hashesToPublish.includes(op.operationHash))
+        .map(operation => this.storage.insertPersistedOperation(operation))
     );
 
     const unchangedOperations = await this.getSelectedPersistedOperations(
       { organization, project },
-      operations
-        .filter((op) => !hashesToPublish.includes(op.operationHash))
-        .map((op) => op.operationHash)
+      operations.filter(op => !hashesToPublish.includes(op.operationHash)).map(op => op.operationHash)
     );
     const total = operations.length;
     const unchanged = total - hashesToPublish.length;
@@ -156,9 +144,7 @@ export class PersistedOperationManager {
     return this.storage.comparePersistedOperations(selector);
   }
 
-  async getPersistedOperations(
-    selector: ProjectSelector
-  ): Promise<readonly PersistedOperation[]> {
+  async getPersistedOperations(selector: ProjectSelector): Promise<readonly PersistedOperation[]> {
     this.logger.debug('Fetching persisted operations (selector=%o)', selector);
     await this.authManager.ensureProjectAccess({
       ...selector,
@@ -167,9 +153,7 @@ export class PersistedOperationManager {
     return this.storage.getPersistedOperations(selector);
   }
 
-  async getPersistedOperation(
-    selector: PersistedOperationSelector
-  ): Promise<PersistedOperation> {
+  async getPersistedOperation(selector: PersistedOperationSelector): Promise<PersistedOperation> {
     this.logger.debug('Fetching target (selector=%o)', selector);
     await this.authManager.ensureProjectAccess({
       ...selector,
@@ -182,11 +166,7 @@ export class PersistedOperationManager {
     selector: ProjectSelector,
     hashes: readonly string[]
   ): Promise<readonly PersistedOperation[]> {
-    this.logger.debug(
-      'Fetching selected persisted operations (selector=%o, size=%s)',
-      selector,
-      hashes.length
-    );
+    this.logger.debug('Fetching selected persisted operations (selector=%o, size=%s)', selector, hashes.length);
     await this.authManager.ensureProjectAccess({
       ...selector,
       scope: ProjectAccessScope.OPERATIONS_STORE_READ,

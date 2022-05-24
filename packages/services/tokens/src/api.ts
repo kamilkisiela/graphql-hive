@@ -33,11 +33,7 @@ function hashToken(token: string) {
 }
 
 function maskToken(token: string) {
-  return (
-    token.substring(0, 3) +
-    '•'.repeat(token.length - 6) +
-    token.substring(token.length - 3)
-  );
+  return token.substring(0, 3) + '•'.repeat(token.length - 6) + token.substring(token.length - 3);
 }
 
 function generateToken() {
@@ -92,10 +88,7 @@ export const tokensApiRouter = trpc
 
         return true;
       } catch (error) {
-        ctx.errorHandler(
-          'Failed to invalidate tokens of a target',
-          error as Error
-        );
+        ctx.errorHandler('Failed to invalidate tokens of a target', error as Error);
 
         throw error;
       }
@@ -110,10 +103,7 @@ export const tokensApiRouter = trpc
 
         return true;
       } catch (error) {
-        ctx.errorHandler(
-          'Failed to invalidate tokens of a project',
-          error as Error
-        );
+        ctx.errorHandler('Failed to invalidate tokens of a project', error as Error);
 
         throw error;
       }
@@ -128,10 +118,7 @@ export const tokensApiRouter = trpc
 
         return true;
       } catch (error) {
-        ctx.errorHandler(
-          'Failed to invalidate tokens of a org',
-          error as Error
-        );
+        ctx.errorHandler('Failed to invalidate tokens of a org', error as Error);
 
         throw error;
       }
@@ -215,11 +202,7 @@ export const tokensApiRouter = trpc
 
         return result;
       } catch (error) {
-        ctx.errorHandler(
-          `Failed to get a token "${alias}"`,
-          error as Error,
-          ctx.logger
-        );
+        ctx.errorHandler(`Failed to get a token "${alias}"`, error as Error, ctx.logger);
 
         // set token read as failure
         ctx.tokenReadFailuresCache.set(hash, {
@@ -236,11 +219,14 @@ export type TokensApi = typeof tokensApiRouter;
 export type TokensApiMutate = keyof TokensApi['_def']['mutations'];
 export type TokensApiQuery = keyof TokensApi['_def']['queries'];
 
-export type TokensMutationInput<TRouteKey extends TokensApiMutate> =
-  inferProcedureInput<TokensApi['_def']['mutations'][TRouteKey]>;
+export type TokensMutationInput<TRouteKey extends TokensApiMutate> = inferProcedureInput<
+  TokensApi['_def']['mutations'][TRouteKey]
+>;
 
-export type TokensQueryInput<TRouteKey extends TokensApiQuery> =
-  inferProcedureInput<TokensApi['_def']['queries'][TRouteKey]>;
+export type TokensQueryInput<TRouteKey extends TokensApiQuery> = inferProcedureInput<
+  TokensApi['_def']['queries'][TRouteKey]
+>;
 
-export type TokensQueryOutput<TRouteKey extends TokensApiQuery> =
-  inferProcedureOutput<TokensApi['_def']['queries'][TRouteKey]>;
+export type TokensQueryOutput<TRouteKey extends TokensApiQuery> = inferProcedureOutput<
+  TokensApi['_def']['queries'][TRouteKey]
+>;

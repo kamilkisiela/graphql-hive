@@ -18,11 +18,7 @@ import { OperationsStats } from '@/components/target/operations/Stats';
 import { EmptyList } from '@/components/common/EmptyList';
 import { OperationsFilterTrigger } from '@/components/target/operations/Filters';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
-import {
-  calculatePeriod,
-  DATE_RANGE_OPTIONS,
-  PeriodKey,
-} from '@/components/common/TimeFilter';
+import { calculatePeriod, DATE_RANGE_OPTIONS, PeriodKey } from '@/components/common/TimeFilter';
 
 const OperationsView: React.FC<{
   organization: OrganizationFieldsFragment;
@@ -31,14 +27,9 @@ const OperationsView: React.FC<{
 }> = ({ organization, project, target }) => {
   const router = useRouteSelector();
   const selectedPeriod: PeriodKey = (router.query.period as PeriodKey) ?? '1d';
-  const [selectedOperations, setSelectedOperations] = React.useState<string[]>(
-    []
-  );
+  const [selectedOperations, setSelectedOperations] = React.useState<string[]>([]);
 
-  const period = React.useMemo(
-    () => calculatePeriod(selectedPeriod),
-    [selectedPeriod]
-  );
+  const period = React.useMemo(() => calculatePeriod(selectedPeriod), [selectedPeriod]);
   const updatePeriod = React.useCallback(
     (ev: any) => {
       router.update({ period: ev.target.value });
@@ -51,11 +42,7 @@ const OperationsView: React.FC<{
       <div tw="absolute top-7 right-4">
         <Stack direction="row" spacing={4}>
           <div>
-            <OperationsFilterTrigger
-              period={period}
-              selected={selectedOperations}
-              onFilter={setSelectedOperations}
-            />
+            <OperationsFilterTrigger period={period} selected={selectedOperations} onFilter={setSelectedOperations} />
           </div>
           <div>
             <Select
@@ -67,7 +54,7 @@ const OperationsView: React.FC<{
               icon={<VscChevronDown />}
               size="sm"
             >
-              {DATE_RANGE_OPTIONS.map((item) => {
+              {DATE_RANGE_OPTIONS.map(item => {
                 return (
                   <option key={item.key} value={item.key}>
                     {item.label}
@@ -117,7 +104,7 @@ const OperationsViewGate: React.FC<{
 
   return (
     <DataWrapper query={query}>
-      {(result) => {
+      {result => {
         if (!result.data.hasCollectedOperations) {
           return (
             <EmptyList
@@ -128,13 +115,7 @@ const OperationsViewGate: React.FC<{
           );
         }
 
-        return (
-          <OperationsView
-            organization={organization}
-            project={project}
-            target={target}
-          />
-        );
+        return <OperationsView organization={organization} project={project} target={target} />;
       }}
     </DataWrapper>
   );
@@ -144,15 +125,8 @@ export default function TargetOperations() {
   return (
     <TargetView title="Operations">
       {({ organization, project, target }) => (
-        <Page
-          title="Operations"
-          subtitle="Data collected based on operation executed against your GraphQL schema."
-        >
-          <OperationsViewGate
-            organization={organization}
-            project={project}
-            target={target}
-          />
+        <Page title="Operations" subtitle="Data collected based on operation executed against your GraphQL schema.">
+          <OperationsViewGate organization={organization} project={project} target={target} />
         </Page>
       )}
     </TargetView>

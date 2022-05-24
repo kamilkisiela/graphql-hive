@@ -26,7 +26,7 @@ export const BillingPaymentMethod = ({
         <Heading>Payment Method</Heading>
         <CardElement
           className="flex-grow"
-          onChange={(e) => {
+          onChange={e => {
             if (e.error || !e.complete) {
               onValidationChange?.(false);
             } else {
@@ -43,12 +43,7 @@ export const BillingPaymentMethod = ({
         />
         <Section.Subtitle>
           All payments and subscriptions are processed securely by{' '}
-          <Link
-            variant="primary"
-            href="https://stripe.com"
-            target="_blank"
-            rel="noreferrer"
-          >
+          <Link variant="primary" href="https://stripe.com" target="_blank" rel="noreferrer">
             Stripe
           </Link>
         </Section.Subtitle>
@@ -61,8 +56,7 @@ export const BillingPaymentMethod = ({
     <>
       <Section.BigTitle>Payment Method</Section.BigTitle>
       <Section.Subtitle className="mb-6">
-        {info.brand.toUpperCase()} ending with {info.last4} (expires{' '}
-        {info.expMonth}/{info.expYear})
+        {info.brand.toUpperCase()} ending with {info.last4} (expires {info.expMonth}/{info.expYear})
       </Section.Subtitle>
     </>
   );

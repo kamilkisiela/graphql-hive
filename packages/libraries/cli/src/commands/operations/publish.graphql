@@ -1,6 +1,4 @@
-mutation publishPersistedOperations(
-  $input: [PublishPersistedOperationInput!]!
-) {
+mutation publishPersistedOperations($input: [PublishPersistedOperationInput!]!) {
   publishPersistedOperations(input: $input) {
     summary {
       total

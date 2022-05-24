@@ -48,8 +48,7 @@ DropdownMenu.Content = ({ children, className, ...props }) => (
       className
     )}
     css={css`
-      box-shadow: 0 10px 38px -10px rgba(22, 23, 24, 0.35),
-        0 10px 20px -15px rgba(22, 23, 24, 0.2);
+      box-shadow: 0 10px 38px -10px rgba(22, 23, 24, 0.35), 0 10px 20px -15px rgba(22, 23, 24, 0.2);
       @media (prefers-reduced-motion: no-preference) {
         animation-duration: 400ms;
         animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
@@ -142,10 +141,7 @@ DropdownMenu.TriggerItem = ({ children, className, ...props }) => (
 );
 
 DropdownMenu.Separator = ({ className, asChild }) => (
-  <Separator
-    className={clsx('h-px bg-gray-700/50', className)}
-    asChild={asChild}
-  />
+  <Separator className={clsx('h-px bg-gray-700/50', className)} asChild={asChild} />
 );
 
 export { DropdownMenu };

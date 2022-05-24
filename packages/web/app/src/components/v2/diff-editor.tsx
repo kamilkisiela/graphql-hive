@@ -16,13 +16,7 @@ export const prettify = (sdl: string): string => {
   }
 };
 
-export const DiffEditor = ({
-  before,
-  after,
-}: {
-  before: string;
-  after: string;
-}): ReactElement => {
+export const DiffEditor = ({ before, after }: { before: string; after: string }): ReactElement => {
   const sdlBefore = useMemo(() => prettify(before), [before]);
   const sdlAfter = useMemo(() => prettify(after), [after]);
 

@@ -1,6 +1,4 @@
-mutation deleteOrganizationMembers(
-  $selector: OrganizationMembersSelectorInput!
-) {
+mutation deleteOrganizationMembers($selector: OrganizationMembersSelectorInput!) {
   deleteOrganizationMembers(selector: $selector) {
     selector {
       organization

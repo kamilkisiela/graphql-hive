@@ -59,10 +59,7 @@ export async function createTokenStorage(connection: string) {
           INSERT INTO public.tokens
             (name, token, token_alias, target_id, project_id, organization_id, scopes)
           VALUES
-            (${name}, ${token}, ${tokenAlias}, ${target}, ${project}, ${organization}, ${sql.array(
-          scopes,
-          'text'
-        )})
+            (${name}, ${token}, ${tokenAlias}, ${target}, ${project}, ${organization}, ${sql.array(scopes, 'text')})
           RETURNING *
         `
       );
@@ -74,18 +71,14 @@ export async function createTokenStorage(connection: string) {
         `
       );
     },
-    async touchTokens({
-      tokens,
-    }: {
-      tokens: Array<{ token: string; date: Date }>;
-    }) {
+    async touchTokens({ tokens }: { tokens: Array<{ token: string; date: Date }> }) {
       await pool.query(sql`
         UPDATE public.tokens as t
         SET last_used_at = c.last_used_at
         FROM (
             VALUES
               (${sql.join(
-                tokens.map((t) => sql`${t.token}, ${toDate(t.date)}`),
+                tokens.map(t => sql`${t.token}, ${toDate(t.date)}`),
                 sql`), (`
               )})
         ) as c(token, last_used_at) 

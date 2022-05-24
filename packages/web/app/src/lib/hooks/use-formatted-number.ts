@@ -23,8 +23,5 @@ export function formatNumber(value: number) {
 }
 
 export function useFormattedNumber(value?: number) {
-  return useMemo(
-    () => (typeof value === 'undefined' ? '-' : formatNumber(value)),
-    [value]
-  );
+  return useMemo(() => (typeof value === 'undefined' ? '-' : formatNumber(value)), [value]);
 }

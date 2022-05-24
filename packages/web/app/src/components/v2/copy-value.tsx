@@ -4,13 +4,7 @@ import { Button, Input } from '@/components/v2';
 import { CheckIcon, CopyIcon } from '@/components/v2/icon';
 import { useClipboard } from '@/lib/hooks/use-clipboard';
 
-export const CopyValue = ({
-  value,
-  className,
-}: {
-  value: string;
-  className?: string;
-}): ReactElement => {
+export const CopyValue = ({ value, className }: { value: string; className?: string }): ReactElement => {
   const [isCopied, setCopied] = useState(false);
   const copyToClipboard = useClipboard();
 

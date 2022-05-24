@@ -1,20 +1,11 @@
 import { createHash } from 'crypto';
-import type {
-  HiveClient,
-  HivePluginOptions,
-  AsyncIterableIteratorOrValue,
-} from './types';
+import type { HiveClient, HivePluginOptions, AsyncIterableIteratorOrValue } from './types';
 
-export function isAsyncIterableIterator<T>(
-  value: AsyncIterableIteratorOrValue<T>
-): value is AsyncIterableIterator<T> {
+export function isAsyncIterableIterator<T>(value: AsyncIterableIteratorOrValue<T>): value is AsyncIterableIterator<T> {
   return typeof (value as any)?.[Symbol.asyncIterator] === 'function';
 }
 
-export function memo<R, A, K>(
-  fn: (arg: A) => R,
-  cacheKeyFn: (arg: A) => K
-): (arg: A) => R {
+export function memo<R, A, K>(fn: (arg: A) => R, cacheKeyFn: (arg: A) => K): (arg: A) => R {
   let memoizedResult: R | null = null;
   let memoizedKey: K | null = null;
 
@@ -88,11 +79,7 @@ export function measureDuration() {
   };
 }
 
-export function addProperty<T, K extends string>(
-  key: K,
-  value: undefined | null,
-  obj: T
-): T;
+export function addProperty<T, K extends string>(key: K, value: undefined | null, obj: T): T;
 export function addProperty<T, K extends string, V>(
   key: K,
   value: V,
@@ -100,11 +87,7 @@ export function addProperty<T, K extends string, V>(
 ): T & {
   [k in K]: V;
 };
-export function addProperty<T, K extends string, V>(
-  key: K,
-  value: V | undefined | null,
-  obj: T
-): any {
+export function addProperty<T, K extends string, V>(key: K, value: V | undefined | null, obj: T): any {
   if (value === null || typeof value === 'undefined') {
     return obj;
   }
@@ -115,8 +98,6 @@ export function addProperty<T, K extends string, V>(
   };
 }
 
-export function isHiveClient(
-  clientOrOptions: HiveClient | HivePluginOptions
-): clientOrOptions is HiveClient {
+export function isHiveClient(clientOrOptions: HiveClient | HivePluginOptions): clientOrOptions is HiveClient {
   return 'operationsStore' in clientOrOptions;
 }

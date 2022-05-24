@@ -14,8 +14,7 @@ export const OrganizationIdUpdated: React.FC<{
       </Activity.Icon>
       <Activity.Content>
         <Activity.Text>
-          <User user={activity.user} /> changed organization id to{' '}
-          <Highlight>{activity.value}</Highlight>
+          <User user={activity.user} /> changed organization id to <Highlight>{activity.value}</Highlight>
         </Activity.Text>
         <Activity.Time>
           <TimeAgo date={activity.createdAt} />

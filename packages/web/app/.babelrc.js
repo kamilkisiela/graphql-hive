@@ -12,9 +12,5 @@ module.exports = {
       },
     ],
   ],
-  plugins: [
-    '@emotion/babel-plugin',
-    'babel-plugin-macros',
-    [babelPlugin, { artifactDirectory: './src/gql' }],
-  ],
+  plugins: ['@emotion/babel-plugin', 'babel-plugin-macros', [babelPlugin, { artifactDirectory: './src/gql' }]],
 };

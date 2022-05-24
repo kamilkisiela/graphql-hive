@@ -1,11 +1,6 @@
 import React from 'react';
 import { useQuery } from 'urql';
-import {
-  VscProject,
-  VscPerson,
-  VscSettings,
-  VscDatabase,
-} from 'react-icons/vsc';
+import { VscProject, VscPerson, VscSettings, VscDatabase } from 'react-icons/vsc';
 import {
   OrganizationDocument,
   OrganizationFieldsFragment,
@@ -13,19 +8,13 @@ import {
   OrgBillingInfoFieldsFragment,
   OrgRateLimitFieldsFragment,
 } from '@/graphql';
-import {
-  OrganizationAccessScope,
-  useOrganizationAccess,
-} from '@/lib/access/organization';
+import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
 import { useNavigation } from '@/components/common/Navigation';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { DataWrapper } from '@/components/common/DataWrapper';
 import { Title } from '@/components/common';
 
-type Props<
-  IncludingBilling extends boolean,
-  IncludingRateLimit extends boolean
-> = React.PropsWithChildren<{
+type Props<IncludingBilling extends boolean, IncludingRateLimit extends boolean> = React.PropsWithChildren<{
   title: string;
   children: React.FC<{
     organization: OrganizationFieldsFragment &
@@ -36,10 +25,7 @@ type Props<
   includeBilling?: IncludingBilling;
 }>;
 
-export function OrganizationView<
-  IncludingBilling extends boolean,
-  IncludingRateLimit extends boolean
->({
+export function OrganizationView<IncludingBilling extends boolean, IncludingRateLimit extends boolean>({
   title,
   children,
   includeBilling,
@@ -69,8 +55,7 @@ export function OrganizationView<
     scope: OrganizationAccessScope.Settings,
     member: data?.organization.organization?.me,
   });
-  const isRegular =
-    data?.organization.organization.type === OrganizationType.Regular;
+  const isRegular = data?.organization.organization.type === OrganizationType.Regular;
 
   React.useEffect(() => {
     if (organizationCleanId) {

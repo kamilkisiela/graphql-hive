@@ -19,9 +19,7 @@ test('cannot set a scope on a token if user has no access to that scope', async 
 
   // Join
   const { access_token: member_access_token } = await authenticate('extra');
-  const org =
-    orgResult.body.data!.createOrganization.ok.createdOrganizationPayload
-      .organization;
+  const org = orgResult.body.data!.createOrganization.ok.createdOrganizationPayload.organization;
   const code = org.inviteCode;
   const joinResult = await joinOrganization(code, member_access_token);
 
@@ -34,12 +32,8 @@ test('cannot set a scope on a token if user has no access to that scope', async 
     owner_access_token
   );
 
-  if (
-    joinResult.body.data!.joinOrganization.__typename !== 'OrganizationPayload'
-  ) {
-    throw new Error(
-      `Join failed: ${joinResult.body.data!.joinOrganization.message}`
-    );
+  if (joinResult.body.data!.joinOrganization.__typename !== 'OrganizationPayload') {
+    throw new Error(`Join failed: ${joinResult.body.data!.joinOrganization.message}`);
   }
 
   const member = joinResult.body.data!.joinOrganization.organization.me;

@@ -1,14 +1,7 @@
 import { Injectable, Scope } from 'graphql-modules';
 import lodash from 'lodash';
 import type { Span } from '@sentry/types';
-import {
-  Schema,
-  Target,
-  Project,
-  ProjectType,
-  createSchemaObject,
-  Orchestrator,
-} from '../../../shared/entities';
+import { Schema, Target, Project, ProjectType, createSchemaObject, Orchestrator } from '../../../shared/entities';
 import * as Types from '../../../__generated__/types';
 import { ProjectManager } from '../../project/providers/project-manager';
 import { Logger } from '../../shared/providers/logger';
@@ -28,11 +21,7 @@ import { AuthManager } from '../../auth/providers/auth-manager';
 import { TargetAccessScope } from '../../auth/providers/target-access';
 import { GitHubIntegrationManager } from '../../integrations/providers/github-integration-manager';
 
-type CheckInput = Omit<
-  Types.SchemaCheckInput,
-  'project' | 'organization' | 'target'
-> &
-  TargetSelector;
+type CheckInput = Omit<Types.SchemaCheckInput, 'project' | 'organization' | 'target'> & TargetSelector;
 
 type PublishInput = Types.SchemaPublishInput &
   TargetSelector & {
@@ -42,9 +31,7 @@ type PublishInput = Types.SchemaPublishInput &
 
 type BreakPromise<T> = T extends Promise<infer U> ? U : never;
 
-type PublishResult = BreakPromise<
-  ReturnType<SchemaPublisher['internalPublish']>
->;
+type PublishResult = BreakPromise<ReturnType<SchemaPublisher['internalPublish']>>;
 
 @Injectable({
   scope: Scope.Operation,
@@ -153,8 +140,7 @@ export class SchemaPublisher {
           message: 'Git repository is not configured for this project',
         };
       }
-      const [repositoryOwner, repositoryName] =
-        project.gitRepository.split('/');
+      const [repositoryOwner, repositoryName] = project.gitRepository.split('/');
 
       try {
         let title: string;
@@ -169,16 +155,10 @@ export class SchemaPublisher {
             summary = this.changesToMarkdown(validationResult.changes);
           }
         } else {
-          title = `Detected ${validationResult.errors.length} error${
-            validationResult.errors.length === 1 ? '' : 's'
-          }`;
+          title = `Detected ${validationResult.errors.length} error${validationResult.errors.length === 1 ? '' : 's'}`;
           summary = [
-            validationResult.errors
-              ? this.errorsToMarkdown(validationResult.errors)
-              : null,
-            validationResult.changes
-              ? this.changesToMarkdown(validationResult.changes)
-              : null,
+            validationResult.errors ? this.errorsToMarkdown(validationResult.errors) : null,
+            validationResult.changes ? this.changesToMarkdown(validationResult.changes) : null,
           ]
             .filter(Boolean)
             .join('\n\n');
@@ -253,19 +233,14 @@ export class SchemaPublisher {
         includeMetadata: true,
       });
 
-      this.logger.info(
-        'Deploying version to CDN (version=%s)',
-        latestVersion.id
-      );
+      this.logger.info('Deploying version to CDN (version=%s)', latestVersion.id);
       await this.updateCDN(
         {
           target,
           project,
           supergraph:
             project.type === ProjectType.FEDERATION
-              ? await this.schemaManager
-                  .matchOrchestrator(project.type)
-                  .supergraph(schemas.map(createSchemaObject))
+              ? await this.schemaManager.matchOrchestrator(project.type).supergraph(schemas.map(createSchemaObject))
               : null,
           schemas,
         },
@@ -277,12 +252,8 @@ export class SchemaPublisher {
     }
   }
 
-  public async updateVersionStatus(
-    input: TargetSelector & { version: string; valid: boolean }
-  ) {
-    const updateResult = await this.schemaManager.updateSchemaVersionStatus(
-      input
-    );
+  public async updateVersionStatus(input: TargetSelector & { version: string; valid: boolean }) {
+    const updateResult = await this.schemaManager.updateSchemaVersionStatus(input);
 
     if (updateResult.valid === true) {
       // Now, when fetching the latest valid version, we should be able to detect
@@ -290,16 +261,11 @@ export class SchemaPublisher {
       // Why?
       // Because we change its status to valid
       // and `getLatestValidVersion` calls for fresh data from DB
-      const latestVersion = await this.schemaManager.getLatestValidVersion(
-        input
-      );
+      const latestVersion = await this.schemaManager.getLatestValidVersion(input);
 
       // if it is the latest version, we should update the CDN
       if (latestVersion.id === updateResult.id) {
-        this.logger.info(
-          'Version is now promoted to latest valid (version=%s)',
-          latestVersion.id
-        );
+        this.logger.info('Version is now promoted to latest valid (version=%s)', latestVersion.id);
         const [project, target, schemas] = await Promise.all([
           this.projectManager.getProject({
             organization: input.organization,
@@ -319,18 +285,13 @@ export class SchemaPublisher {
           }),
         ]);
 
-        this.logger.info(
-          'Deploying version to CDN (version=%s)',
-          latestVersion.id
-        );
+        this.logger.info('Deploying version to CDN (version=%s)', latestVersion.id);
         await this.updateCDN({
           target,
           project,
           supergraph:
             project.type === ProjectType.FEDERATION
-              ? await this.schemaManager
-                  .matchOrchestrator(project.type)
-                  .supergraph(schemas.map(createSchemaObject))
+              ? await this.schemaManager.matchOrchestrator(project.type).supergraph(schemas.map(createSchemaObject))
               : null,
           schemas,
         });
@@ -340,18 +301,12 @@ export class SchemaPublisher {
     return updateResult;
   }
 
-  private validateMetadata(
-    metadataRaw: string | null | undefined
-  ): Record<string, any> | null {
+  private validateMetadata(metadataRaw: string | null | undefined): Record<string, any> | null {
     if (metadataRaw) {
       try {
         return JSON.parse(metadataRaw);
       } catch (e) {
-        throw new Error(
-          `Failed to parse schema metadata JSON: ${
-            e instanceof Error ? e.message : e
-          }`
-        );
+        throw new Error(`Failed to parse schema metadata JSON: ${e instanceof Error ? e.message : e}`);
       }
     }
 
@@ -359,19 +314,9 @@ export class SchemaPublisher {
   }
 
   private async internalPublish(input: PublishInput) {
-    const [organizationId, projectId, targetId] = [
-      input.organization,
-      input.project,
-      input.target,
-    ];
+    const [organizationId, projectId, targetId] = [input.organization, input.project, input.target];
     this.logger.info('Publishing schema (input=%o)', {
-      ...lodash.omit(input, [
-        'sdl',
-        'organization',
-        'project',
-        'target',
-        'metadata',
-      ]),
+      ...lodash.omit(input, ['sdl', 'organization', 'project', 'target', 'metadata']),
       organization: organizationId,
       project: projectId,
       target: targetId,
@@ -426,8 +371,7 @@ export class SchemaPublisher {
 
     if (
       input.isSchemaPublishMissingServiceErrorSelected &&
-      (project.type === ProjectType.STITCHING ||
-        project.type === ProjectType.FEDERATION) &&
+      (project.type === ProjectType.STITCHING || project.type === ProjectType.FEDERATION) &&
       input.service == null
     ) {
       const missingServiceNameMessage = `Can not publish schema for a '${project.type.toLowerCase()}' project without a service name.`;
@@ -467,8 +411,7 @@ export class SchemaPublisher {
       metadata: this.validateMetadata(input.metadata),
     };
 
-    const { schemas: newSchemas, swappedSchema: previousSchema } =
-      updateSchemas(schemas, incomingSchema);
+    const { schemas: newSchemas, swappedSchema: previousSchema } = updateSchemas(schemas, incomingSchema);
 
     this.logger.debug(`Produced ${newSchemas.length} new schemas`);
 
@@ -488,21 +431,11 @@ export class SchemaPublisher {
     if (errors.length === 0 && changes.length === 0 && schemas.length !== 0) {
       const updated: string[] = [];
 
-      if (
-        latest.version &&
-        previousSchema &&
-        (previousSchema.url ?? null) !== (incomingSchema.url ?? null)
-      ) {
-        this.logger.debug(
-          'New url detected: %s (previously: %s)',
-          incomingSchema.url,
-          previousSchema.url
-        );
+      if (latest.version && previousSchema && (previousSchema.url ?? null) !== (incomingSchema.url ?? null)) {
+        this.logger.debug('New url detected: %s (previously: %s)', incomingSchema.url, previousSchema.url);
 
         updated.push(
-          `New service url: ${incomingSchema.url ?? 'empty'} (previously: ${
-            previousSchema.url ?? 'empty'
-          })`
+          `New service url: ${incomingSchema.url ?? 'empty'} (previously: ${previousSchema.url ?? 'empty'})`
         );
 
         await this.schemaManager.updateSchemaUrl({
@@ -549,9 +482,7 @@ export class SchemaPublisher {
       }
 
       return {
-        __typename: valid
-          ? ('SchemaPublishSuccess' as const)
-          : ('SchemaPublishError' as const),
+        __typename: valid ? ('SchemaPublishSuccess' as const) : ('SchemaPublishError' as const),
         initial: isInitialSchema,
         valid,
         errors,
@@ -596,9 +527,7 @@ export class SchemaPublisher {
     }
 
     return {
-      __typename: valid
-        ? ('SchemaPublishSuccess' as const)
-        : ('SchemaPublishError' as const),
+      __typename: valid ? ('SchemaPublishSuccess' as const) : ('SchemaPublishError' as const),
       initial: isInitialSchema,
       valid,
       errors,
@@ -630,8 +559,8 @@ export class SchemaPublisher {
     initial: boolean;
   }) {
     const commits = schemas
-      .filter((s) => s.id !== newSchema.id) // do not include the incoming schema
-      .map((s) => s.id);
+      .filter(s => s.id !== newSchema.id) // do not include the incoming schema
+      .map(s => s.id);
 
     this.logger.debug(`Assigning ${commits.length} schemas to new version`);
     const baseSchema = await this.schemaManager.getBaseSchema({
@@ -669,7 +598,7 @@ export class SchemaPublisher {
         errors,
         initial,
       })
-      .catch((err) => {
+      .catch(err => {
         this.logger.error('Failed to trigger schema change notifications', err);
       });
   }
@@ -732,9 +661,7 @@ export class SchemaPublisher {
           {
             targetId: target.id,
             resourceType: 'metadata',
-            value: JSON.stringify(
-              metadata.length === 1 ? metadata[0] : metadata
-            ),
+            value: JSON.stringify(metadata.length === 1 ? metadata[0] : metadata),
           },
           span
         );
@@ -748,7 +675,7 @@ export class SchemaPublisher {
           resourceType: 'schema',
           value: JSON.stringify(
             schemas.length > 1
-              ? schemas.map((s) => ({
+              ? schemas.map(s => ({
                   sdl: s.source,
                   url: s.url,
                   name: s.service,
@@ -831,19 +758,14 @@ export class SchemaPublisher {
           summary = this.changesToMarkdown(changes);
         }
       } else {
-        title = `Detected ${errors.length} error${
-          errors.length === 1 ? '' : 's'
-        }`;
-        summary = [
-          errors ? this.errorsToMarkdown(errors) : null,
-          changes ? this.changesToMarkdown(changes) : null,
-        ]
+        title = `Detected ${errors.length} error${errors.length === 1 ? '' : 's'}`;
+        summary = [errors ? this.errorsToMarkdown(errors) : null, changes ? this.changesToMarkdown(changes) : null]
           .filter(Boolean)
           .join('\n\n');
       }
 
       if (updates?.length) {
-        summary += `\n\n${updates.map((val) => `- ${val}`).join('\n')}`;
+        summary += `\n\n${updates.map(val => `- ${val}`).join('\n')}`;
       }
 
       if (valid === false && force === true) {
@@ -875,9 +797,7 @@ export class SchemaPublisher {
   }
 
   private errorsToMarkdown(errors: readonly Types.SchemaError[]): string {
-    return ['', ...errors.map((error) => `- ${bolderize(error.message)}`)].join(
-      '\n'
-    );
+    return ['', ...errors.map(error => `- ${bolderize(error.message)}`)].join('\n');
   }
 
   private changesToMarkdown(changes: readonly Types.SchemaChange[]): string {
@@ -885,10 +805,7 @@ export class SchemaPublisher {
     const dangerousChanges = changes.filter(filterChangesByLevel('Dangerous'));
     const safeChanges = changes.filter(filterChangesByLevel('Safe'));
 
-    const lines: string[] = [
-      `## Found ${changes.length} change${changes.length > 1 ? 's' : ''}`,
-      '',
-    ];
+    const lines: string[] = [`## Found ${changes.length} change${changes.length > 1 ? 's' : ''}`, ''];
 
     if (breakingChanges.length) {
       lines.push(`Breaking: ${breakingChanges.length}`);
@@ -922,14 +839,6 @@ function filterChangesByLevel(level: Types.CriticalityLevel) {
   return (change: Types.SchemaChange) => change.criticality === level;
 }
 
-function writeChanges(
-  type: string,
-  changes: readonly Types.SchemaChange[],
-  lines: string[]
-): void {
-  lines.push(
-    ...['', `### ${type} changes`].concat(
-      changes.map((change) => ` - ${bolderize(change.message)}`)
-    )
-  );
+function writeChanges(type: string, changes: readonly Types.SchemaChange[], lines: string[]): void {
+  lines.push(...['', `### ${type} changes`].concat(changes.map(change => ` - ${bolderize(change.message)}`)));
 }

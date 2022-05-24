@@ -34,9 +34,7 @@ const Inner: React.FC<{
 export default function PersistedOperationsPage() {
   return (
     <ProjectView title="Persisted Operations">
-      {({ project, organization }) => (
-        <Inner project={project} organization={organization} />
-      )}
+      {({ project, organization }) => <Inner project={project} organization={organization} />}
     </ProjectView>
   );
 }

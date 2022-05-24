@@ -21,9 +21,7 @@ test('marking only the most recent version as valid result in an update of CDN',
 
   // Join
   const { access_token: member_access_token } = await authenticate('extra');
-  const org =
-    orgResult.body.data!.createOrganization.ok.createdOrganizationPayload
-      .organization;
+  const org = orgResult.body.data!.createOrganization.ok.createdOrganizationPayload.organization;
   const code = org.inviteCode;
   await joinOrganization(code, member_access_token);
 
@@ -47,10 +45,7 @@ test('marking only the most recent version as valid result in an update of CDN',
       target: target.cleanId,
       organizationScopes: [],
       projectScopes: [],
-      targetScopes: [
-        TargetAccessScope.RegistryRead,
-        TargetAccessScope.RegistryWrite,
-      ],
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
     },
     owner_access_token
   );
@@ -70,9 +65,7 @@ test('marking only the most recent version as valid result in an update of CDN',
   );
 
   expect(publishResult.body.errors).not.toBeDefined();
-  expect(publishResult.body.data!.schemaPublish.__typename).toBe(
-    'SchemaPublishSuccess'
-  );
+  expect(publishResult.body.data!.schemaPublish.__typename).toBe('SchemaPublishSuccess');
 
   const targetSelector = {
     organization: org.cleanId,
@@ -95,9 +88,7 @@ test('marking only the most recent version as valid result in an update of CDN',
   );
 
   expect(syncResult.body.errors).not.toBeDefined();
-  expect(syncResult.body.data!.schemaSyncCDN.__typename).toBe(
-    'SchemaSyncCDNSuccess'
-  );
+  expect(syncResult.body.data!.schemaSyncCDN.__typename).toBe('SchemaSyncCDNSuccess');
 
   // the initial version should available on CDN
   cdnResult = await fetchSchemaFromCDN(targetSelector, token);

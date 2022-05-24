@@ -1,12 +1,7 @@
 import React from 'react';
 import 'twin.macro';
 import { useMutation } from 'urql';
-import {
-  Select,
-  AccordionItem,
-  AccordionButton,
-  AccordionPanel,
-} from '@chakra-ui/react';
+import { Select, AccordionItem, AccordionButton, AccordionPanel } from '@chakra-ui/react';
 import {
   MemberFieldsFragment,
   OrganizationFieldsFragment,
@@ -29,16 +24,11 @@ interface Props<T> {
   checkAccess: (scope: T) => boolean;
 }
 
-function matchScope<T>(
-  list: readonly T[],
-  defaultValue: string,
-  lowerPriority?: T,
-  higherPriority?: T
-) {
+function matchScope<T>(list: readonly T[], defaultValue: string, lowerPriority?: T, higherPriority?: T) {
   let hasHigher = false;
   let hasLower = false;
 
-  list.forEach((item) => {
+  list.forEach(item => {
     if (item === higherPriority) {
       hasHigher = true;
     } else if (item === lowerPriority) {
@@ -57,18 +47,12 @@ function matchScope<T>(
   return defaultValue;
 }
 
-function PermissionsSpaceInner(
-  props: Props<OrganizationAccessScope>
-): React.ReactElement<any, any>;
-function PermissionsSpaceInner(
-  props: Props<ProjectAccessScope>
-): React.ReactElement<any, any>;
-function PermissionsSpaceInner(
-  props: Props<TargetAccessScope>
-): React.ReactElement<any, any>;
-function PermissionsSpaceInner<
-  T extends OrganizationAccessScope | ProjectAccessScope | TargetAccessScope
->(props: Props<T>) {
+function PermissionsSpaceInner(props: Props<OrganizationAccessScope>): React.ReactElement<any, any>;
+function PermissionsSpaceInner(props: Props<ProjectAccessScope>): React.ReactElement<any, any>;
+function PermissionsSpaceInner(props: Props<TargetAccessScope>): React.ReactElement<any, any>;
+function PermissionsSpaceInner<T extends OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>(
+  props: Props<T>
+) {
   const { title, scopes, initialScopes, onChange, checkAccess } = props;
 
   return (
@@ -76,11 +60,8 @@ function PermissionsSpaceInner<
       <AccordionButton tw="font-bold">{title}</AccordionButton>
       <AccordionPanel pb={4}>
         <div tw="divide-y-2 divide-gray-100">
-          {scopes.map((scope) => {
-            const possibleScope = [
-              scope.mapping['read-only'],
-              scope.mapping['read-write'],
-            ].filter(Boolean);
+          {scopes.map(scope => {
+            const possibleScope = [scope.mapping['read-only'], scope.mapping['read-write']].filter(Boolean);
             const canManageScope = possibleScope.some(checkAccess);
 
             if (!canManageScope) {
@@ -96,10 +77,7 @@ function PermissionsSpaceInner<
             );
 
             return (
-              <div
-                tw="py-2 flex flex-row justify-between items-center"
-                key={scope.name}
-              >
+              <div tw="py-2 flex flex-row justify-between items-center" key={scope.name}>
                 <div>
                   <div tw="font-semibold text-gray-600">{scope.name}</div>
                   <div tw="text-xs text-gray-600">{scope.description}</div>
@@ -108,24 +86,17 @@ function PermissionsSpaceInner<
                   <Select
                     size="sm"
                     value={selectedScope}
-                    onChange={(event) => {
+                    onChange={event => {
                       const value = event.target.value as T | string;
 
                       if (value === NoAccess) {
                         // Remove all posible scopes
-                        onChange(
-                          initialScopes.filter(
-                            (scope) => !possibleScope.includes(scope)
-                          )
-                        );
+                        onChange(initialScopes.filter(scope => !possibleScope.includes(scope)));
                       } else {
-                        const isReadWrite =
-                          value === scope.mapping['read-write'];
+                        const isReadWrite = value === scope.mapping['read-write'];
 
                         // Remove possible scopes
-                        const newScopes = initialScopes.filter(
-                          (scope) => !possibleScope.includes(scope)
-                        );
+                        const newScopes = initialScopes.filter(scope => !possibleScope.includes(scope));
 
                         if (isReadWrite) {
                           newScopes.push(scope.mapping['read-write']);
@@ -144,18 +115,12 @@ function PermissionsSpaceInner<
                     }}
                   >
                     <option value={NoAccess}>No access</option>
-                    {scope.mapping['read-only'] &&
-                      checkAccess(scope.mapping['read-only']) && (
-                        <option value={scope.mapping['read-only']}>
-                          Read-only
-                        </option>
-                      )}
-                    {scope.mapping['read-write'] &&
-                      checkAccess(scope.mapping['read-write']) && (
-                        <option value={scope.mapping['read-write']}>
-                          Read &amp; write
-                        </option>
-                      )}
+                    {scope.mapping['read-only'] && checkAccess(scope.mapping['read-only']) && (
+                      <option value={scope.mapping['read-only']}>Read-only</option>
+                    )}
+                    {scope.mapping['read-write'] && checkAccess(scope.mapping['read-write']) && (
+                      <option value={scope.mapping['read-write']}>Read &amp; write</option>
+                    )}
                   </Select>
                 </div>
               </div>
@@ -167,9 +132,7 @@ function PermissionsSpaceInner<
   );
 }
 
-export const PermissionsSpace = React.memo(
-  PermissionsSpaceInner
-) as unknown as typeof PermissionsSpaceInner;
+export const PermissionsSpace = React.memo(PermissionsSpaceInner) as unknown as typeof PermissionsSpaceInner;
 
 export function usePermissionsManager({
   organization,
@@ -184,20 +147,14 @@ export function usePermissionsManager({
   const notify = useNotifications();
   const [, mutate] = useMutation(UpdateOrganizationMemberAccessDocument);
 
-  const [targetScopes, setTargetScopes] = React.useState(
-    member.targetAccessScopes
-  );
+  const [targetScopes, setTargetScopes] = React.useState(member.targetAccessScopes);
 
-  const [projectScopes, setProjectScopes] = React.useState(
-    member.projectAccessScopes
-  );
+  const [projectScopes, setProjectScopes] = React.useState(member.projectAccessScopes);
 
-  const [organizationScopes, setOrganizationScopes] = React.useState(
-    member.organizationAccessScopes
-  );
+  const [organizationScopes, setOrganizationScopes] = React.useState(member.organizationAccessScopes);
 
   const submit = React.useCallback(
-    (evt) => {
+    evt => {
       evt.preventDefault();
       setState('LOADING');
       mutate({
@@ -208,30 +165,17 @@ export function usePermissionsManager({
           projectScopes,
           organizationScopes,
         },
-      }).then((result) => {
+      }).then(result => {
         setState('IDLE');
         if (result.error) {
-          notify(
-            `Failed to change access (reason: ${result.error.message}`,
-            'error'
-          );
+          notify(`Failed to change access (reason: ${result.error.message}`, 'error');
         } else {
           onSuccess();
           notify('Member access saved', 'success');
         }
       });
     },
-    [
-      mutate,
-      notify,
-      setState,
-      targetScopes,
-      projectScopes,
-      organizationScopes,
-      organization,
-      member,
-      onSuccess,
-    ]
+    [mutate, notify, setState, targetScopes, projectScopes, organizationScopes, organization, member, onSuccess]
   );
 
   return {
@@ -247,8 +191,7 @@ export function usePermissionsManager({
     state,
     // Methods
     canAccessOrganization: React.useCallback(
-      (scope: OrganizationAccessScope) =>
-        canAccessOrganization(scope, organization.me),
+      (scope: OrganizationAccessScope) => canAccessOrganization(scope, organization.me),
       [organization]
     ),
     canAccessProject: React.useCallback(

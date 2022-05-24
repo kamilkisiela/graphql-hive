@@ -27,7 +27,7 @@ const Option = {
       border-2 border-opacity-0 border-transparent 
       dark:border-gray-600
     `}
-    ${(props) =>
+    ${props =>
       props.selected
         ? tw`
           border-yellow-400 dark:border-yellow-400
@@ -43,16 +43,15 @@ const Option = {
   `,
   Title: styled.h3<{ selected?: boolean }>`
     ${tw`uppercase text-xs text-gray-400 font-semibold tracking-wide`}
-    ${(props) =>
-      props.selected ? tw`text-yellow-400 dark:text-yellow-700` : tw``}
+    ${props => (props.selected ? tw`text-yellow-400 dark:text-yellow-700` : tw``)}
   `,
   Content: styled.h3<{ selected?: boolean }>`
     ${tw`text-xl text-gray-700 dark:text-white font-semibold tracking-wide`}
-    ${(props) => (props.selected ? tw`dark:text-black` : tw``)}
+    ${props => (props.selected ? tw`dark:text-black` : tw``)}
   `,
   Description: styled.h3<{ selected?: boolean }>`
     ${tw`text-xs text-gray-500 dark:text-gray-300 tracking-wide`}
-    ${(props) => (props.selected ? tw`dark:text-gray-700` : tw``)}
+    ${props => (props.selected ? tw`dark:text-gray-700` : tw``)}
   `,
 };
 
@@ -67,11 +66,7 @@ const ProjectTypeOption: React.FC<{
     <Option.Root onClick={onClick} selected={selected}>
       <Option.Title selected={selected}>{type}</Option.Title>
       <Option.Content selected={selected}>{label}</Option.Content>
-      {description && (
-        <Option.Description selected={selected}>
-          {description}
-        </Option.Description>
-      )}
+      {description && <Option.Description selected={selected}>{description}</Option.Description>}
     </Option.Root>
   );
 };
@@ -86,11 +81,9 @@ export const ProjectCreator: React.FC<{
   const [name, setName] = React.useState('');
   const [validationUrl, setValidationUrl] = React.useState('');
   const [buildUrl, setBuildUrl] = React.useState('');
-  const [projectType, setProjectType] = React.useState<ProjectType>(
-    ProjectType.Single
-  );
+  const [projectType, setProjectType] = React.useState<ProjectType>(ProjectType.Single);
   const submit = React.useCallback(
-    (evt) => {
+    evt => {
       evt.preventDefault();
       if (name && projectType) {
         mutate({
@@ -101,7 +94,7 @@ export const ProjectCreator: React.FC<{
             validationUrl,
             buildUrl,
           },
-        }).then((result) => {
+        }).then(result => {
           onClose();
           router.visitProject({
             organizationId: router.organizationId,
@@ -114,19 +107,19 @@ export const ProjectCreator: React.FC<{
   );
 
   const onNameChange = React.useCallback(
-    (evt) => {
+    evt => {
       setName(evt.target.value);
     },
     [setName]
   );
   const onValidationUrlChange = React.useCallback(
-    (evt) => {
+    evt => {
       setValidationUrl(evt.target.value);
     },
     [setValidationUrl]
   );
   const onBuildUrlChange = React.useCallback(
-    (evt) => {
+    evt => {
       setBuildUrl(evt.target.value);
     },
     [setBuildUrl]
@@ -142,12 +135,11 @@ export const ProjectCreator: React.FC<{
         <ModalCloseButton />
         <ModalBody>
           <Description>
-            A project is built on top of <Label>Targets</Label>, which are just
-            your environments.
+            A project is built on top of <Label>Targets</Label>, which are just your environments.
           </Description>
           <Description>
-            We will also create a default stack named <Label>experiment</Label>{' '}
-            for you (don't worry, you can change it later).
+            We will also create a default stack named <Label>experiment</Label> for you (don't worry, you can change it
+            later).
           </Description>
           <div tw="pt-6 space-y-6">
             <div tw="relative flex-grow w-full flex-col">
@@ -209,12 +201,10 @@ export const ProjectCreator: React.FC<{
                     placeholder="Where validation should happen"
                   />
                   <Description tw="pt-2 px-2 text-xs">
-                    In Custom mode, Hive will ask you to validate GraphQL
-                    Schemas.
+                    In Custom mode, Hive will ask you to validate GraphQL Schemas.
                   </Description>
                   <Description tw="px-2 text-xs">
-                    A POST request containing schemas will be made to the
-                    endpoint above.
+                    A POST request containing schemas will be made to the endpoint above.
                   </Description>
                 </FormControl>
                 <FormControl>
@@ -228,12 +218,10 @@ export const ProjectCreator: React.FC<{
                     placeholder="Where building should happen"
                   />
                   <Description tw="pt-2 px-2 text-xs">
-                    In Custom mode, Hive will ask you to validate GraphQL
-                    Schemas.
+                    In Custom mode, Hive will ask you to validate GraphQL Schemas.
                   </Description>
                   <Description tw="px-2 text-xs">
-                    A POST request containing schemas will be made to the
-                    endpoint above.
+                    A POST request containing schemas will be made to the endpoint above.
                   </Description>
                 </FormControl>
               </>
@@ -241,12 +229,7 @@ export const ProjectCreator: React.FC<{
           </div>
         </ModalBody>
         <ModalFooter tw="space-x-6">
-          <Button
-            variant="ghost"
-            type="button"
-            disabled={fetching}
-            onClick={onClose}
-          >
+          <Button variant="ghost" type="button" disabled={fetching} onClick={onClose}>
             Cancel
           </Button>
           <Button colorScheme="primary" type="submit" disabled={fetching}>

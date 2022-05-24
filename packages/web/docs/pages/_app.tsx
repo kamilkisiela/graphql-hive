@@ -10,7 +10,7 @@ const CRISP_WEBSITE_ID = process.env.NEXT_PUBLIC_CRISP_WEBSITE_ID;
 export default function Nextra({ Component, pageProps }: AppProps) {
   const router = useRouter();
   React.useEffect(() => {
-    const handleRouteChange = (url) => {
+    const handleRouteChange = url => {
       gtag.pageview(url);
     };
     router.events.on('routeChangeComplete', handleRouteChange);

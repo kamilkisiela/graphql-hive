@@ -6,8 +6,7 @@ import { z } from 'zod';
 
 const AlertChannelNameModel = z.string().min(1).max(100);
 const SlackChannelNameModel = z.string().min(1).max(80);
-const MaybeModel = <T extends z.ZodType>(value: T) =>
-  z.union([z.null(), z.undefined(), value]);
+const MaybeModel = <T extends z.ZodType>(value: T) => z.union([z.null(), z.undefined(), value]);
 
 export const resolvers: AlertsModule.Resolvers = {
   Mutation: {
@@ -128,7 +127,7 @@ export const resolvers: AlertsModule.Resolvers = {
         project: alert.projectId,
       });
 
-      return channels.find((c) => c.id === alert.channelId)!;
+      return channels.find(c => c.id === alert.channelId)!;
     },
     target(alert, _, { injector }) {
       return injector.get(TargetManager).getTarget({

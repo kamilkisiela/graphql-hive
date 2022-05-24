@@ -3,10 +3,7 @@ import { activityModule } from './modules/activity';
 import { authModule } from './modules/auth';
 import { labModule } from './modules/lab';
 import { operationsModule } from './modules/operations';
-import {
-  ClickHouseConfig,
-  CLICKHOUSE_CONFIG,
-} from './modules/operations/providers/tokens';
+import { ClickHouseConfig, CLICKHOUSE_CONFIG } from './modules/operations/providers/tokens';
 import { organizationModule } from './modules/organization';
 import { persistedOperationModule } from './modules/persisted-operations';
 import { projectModule } from './modules/project';
@@ -17,15 +14,8 @@ import { IdTranslator } from './modules/shared/providers/id-translator';
 import { IdempotentRunner } from './modules/shared/providers/idempotent-runner';
 import { Logger } from './modules/shared/providers/logger';
 import { MessageBus } from './modules/shared/providers/message-bus';
-import {
-  CryptoProvider,
-  encryptionSecretProvider,
-} from './modules/shared/providers/crypto';
-import {
-  RedisConfig,
-  REDIS_CONFIG,
-  RedisProvider,
-} from './modules/shared/providers/redis';
+import { CryptoProvider, encryptionSecretProvider } from './modules/shared/providers/crypto';
+import { RedisConfig, REDIS_CONFIG, RedisProvider } from './modules/shared/providers/redis';
 import { Storage } from './modules/shared/providers/storage';
 import { Tracking } from './modules/shared/providers/tracking';
 import { targetModule } from './modules/target';
@@ -38,35 +28,20 @@ import { alertsModule } from './modules/alerts';
 import { tokenModule } from './modules/token';
 import { feedbackModule } from './modules/feedback';
 import { TokensConfig, TOKENS_CONFIG } from './modules/token/providers/tokens';
-import {
-  WebhooksConfig,
-  WEBHOOKS_CONFIG,
-} from './modules/alerts/providers/tokens';
-import {
-  SchemaServiceConfig,
-  SCHEMA_SERVICE_CONFIG,
-} from './modules/schema/providers/orchestrators/tokens';
+import { WebhooksConfig, WEBHOOKS_CONFIG } from './modules/alerts/providers/tokens';
+import { SchemaServiceConfig, SCHEMA_SERVICE_CONFIG } from './modules/schema/providers/orchestrators/tokens';
 import { CDN_CONFIG, CDNConfig } from './modules/cdn/providers/tokens';
 import { cdnModule } from './modules/cdn';
 import { adminModule } from './modules/admin';
-import {
-  FEEDBACK_SLACK_CHANNEL,
-  FEEDBACK_SLACK_TOKEN,
-} from './modules/feedback/providers/tokens';
+import { FEEDBACK_SLACK_CHANNEL, FEEDBACK_SLACK_TOKEN } from './modules/feedback/providers/tokens';
 import { usageEstimationModule } from './modules/usage-estimation';
 import {
   UsageEstimationServiceConfig,
   USAGE_ESTIMATION_SERVICE_CONFIG,
 } from './modules/usage-estimation/providers/tokens';
 import { rateLimitModule } from './modules/rate-limit';
-import {
-  RateLimitServiceConfig,
-  RATE_LIMIT_SERVICE_CONFIG,
-} from './modules/rate-limit/providers/tokens';
-import {
-  BillingConfig,
-  BILLING_CONFIG,
-} from './modules/billing/providers/tokens';
+import { RateLimitServiceConfig, RATE_LIMIT_SERVICE_CONFIG } from './modules/rate-limit/providers/tokens';
+import { BillingConfig, BILLING_CONFIG } from './modules/billing/providers/tokens';
 import { billingModule } from './modules/billing';
 
 const modules = [

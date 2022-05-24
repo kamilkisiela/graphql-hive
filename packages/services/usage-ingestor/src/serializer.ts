@@ -1,20 +1,13 @@
 import * as dateFnsTz from 'date-fns-tz';
 import LRU from 'tiny-lru';
 import { cache } from './helpers';
-import type {
-  ProcessedRegistryRecord,
-  ProcessedOperation,
-} from '@hive/usage-common';
+import type { ProcessedRegistryRecord, ProcessedOperation } from '@hive/usage-common';
 
 const delimiter = '\n';
 const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 function formatDate(date: number): string {
-  return dateFnsTz.formatInTimeZone(
-    dateFnsTz.zonedTimeToUtc(date, timezone),
-    'UTC',
-    'yyyy-MM-dd HH:mm:ss'
-  );
+  return dateFnsTz.formatInTimeZone(dateFnsTz.zonedTimeToUtc(date, timezone), 'UTC', 'yyyy-MM-dd HH:mm:ss');
 }
 
 function dateCacheKey(date: number): string {
@@ -36,22 +29,13 @@ export const operationsOrder = [
   'client_version',
 ] as const;
 
-export const registryOrder = [
-  'target',
-  'hash',
-  'name',
-  'body',
-  'operation',
-  'inserted_at',
-] as const;
+export const registryOrder = ['target', 'hash', 'name', 'body', 'operation', 'inserted_at'] as const;
 
 export function joinIntoSingleMessage(items: string[]): string {
   return items.join(delimiter);
 }
 
-type KeysOfArray<T extends readonly any[]> = T extends readonly (infer U)[]
-  ? U
-  : never;
+type KeysOfArray<T extends readonly any[]> = T extends readonly (infer U)[] ? U : never;
 
 // Important, it has to be in the same order as columns in the table
 export function stringifyOperation(operation: ProcessedOperation): string {
@@ -70,9 +54,7 @@ export function stringifyOperation(operation: ProcessedOperation): string {
   return Object.values(mapper).join(',');
 }
 
-export function stringifyRegistryRecord(
-  record: ProcessedRegistryRecord
-): string {
+export function stringifyRegistryRecord(record: ProcessedRegistryRecord): string {
   const mapper: Record<KeysOfArray<typeof registryOrder>, any> = {
     target: castValue(record.target),
     hash: castValue(record.hash),
@@ -113,7 +95,7 @@ function castValue(value?: any) {
   }
 
   if (Array.isArray(value)) {
-    return `"[${value.map((val) => `'${val}'`).join(',')}]"`;
+    return `"[${value.map(val => `'${val}'`).join(',')}]"`;
   }
 
   return '\\N'; // NULL is \N

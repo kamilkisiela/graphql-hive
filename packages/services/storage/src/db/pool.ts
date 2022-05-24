@@ -8,10 +8,7 @@ import {
 import { createQueryLoggingInterceptor } from 'slonik-interceptor-query-logging';
 import { createSentryInterceptor } from './sentry';
 
-const dbInterceptors = [
-  createQueryLoggingInterceptor(),
-  createSentryInterceptor(),
-];
+const dbInterceptors = [createQueryLoggingInterceptor(), createSentryInterceptor()];
 
 export function getPool(connection: string) {
   const pool = createPool(connection, {
@@ -19,9 +16,7 @@ export function getPool(connection: string) {
     captureStackTrace: false,
   });
 
-  function interceptError<K extends keyof CommonQueryMethodsType>(
-    methodName: K
-  ) {
+  function interceptError<K extends keyof CommonQueryMethodsType>(methodName: K) {
     const original: CommonQueryMethodsType[K] = pool[methodName];
 
     function interceptor<T>(

@@ -32,9 +32,7 @@ async function lab(req: NextApiRequest, res: NextApiResponse) {
     } catch (error) {
       console.warn('Lab auth failed:', error);
       res.status(200).send({
-        errors: [
-          new GraphQLError('Invalid or missing X-Hive-Key authentication'),
-        ],
+        errors: [new GraphQLError('Invalid or missing X-Hive-Key authentication')],
       });
       return;
     }

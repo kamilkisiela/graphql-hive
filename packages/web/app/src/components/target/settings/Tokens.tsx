@@ -40,10 +40,7 @@ import { Card, TimeAgo } from '@/components/common';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { scopes } from '@/lib/access/common';
 import { TargetAccessScope, useTargetAccess } from '@/lib/access/target';
-import {
-  usePermissionsManager,
-  PermissionsSpace,
-} from '@/components/organization/Permissions';
+import { usePermissionsManager, PermissionsSpace } from '@/components/organization/Permissions';
 
 const TokenRow: React.FC<{
   token: TokenFieldsFragment;
@@ -89,9 +86,7 @@ const TokenCreator: React.FC<{
   const [mutation, mutate] = useMutation(CreateTokenDocument);
 
   const [state, setState] = React.useState<'FORM' | 'SECRET'>('FORM');
-  const { hasCopied, onCopy } = useClipboard(
-    mutation?.data?.createToken?.ok?.secret
-  );
+  const { hasCopied, onCopy } = useClipboard(mutation?.data?.createToken?.ok?.secret);
   const manager = usePermissionsManager({
     onSuccess() {},
     organization,
@@ -133,20 +128,10 @@ const TokenCreator: React.FC<{
   );
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      size="3xl"
-      closeOnEsc={false}
-      closeOnOverlayClick={false}
-    >
+    <Modal isOpen={isOpen} onClose={onClose} size="3xl" closeOnEsc={false} closeOnOverlayClick={false}>
       <ModalOverlay />
       <ModalContent as="form" onSubmit={formik.handleSubmit}>
-        <ModalHeader>
-          {state === 'SECRET'
-            ? 'Token successfully created!'
-            : 'Create an access token'}
-        </ModalHeader>
+        <ModalHeader>{state === 'SECRET' ? 'Token successfully created!' : 'Create an access token'}</ModalHeader>
         <ModalBody>
           {state === 'SECRET' && (
             <>
@@ -160,13 +145,7 @@ const TokenCreator: React.FC<{
                 height="200px"
               >
                 <AlertIcon boxSize="40px" mr={0} />
-                <Box
-                  mt={4}
-                  mb={1}
-                  display="flex"
-                  alignItems="center"
-                  width={'65%'}
-                >
+                <Box mt={4} mb={1} display="flex" alignItems="center" width={'65%'}>
                   <Input
                     isReadOnly
                     fontWeight={600}
@@ -180,18 +159,15 @@ const TokenCreator: React.FC<{
                   </Button>
                 </Box>
                 <AlertDescription maxWidth="sm">
-                  This is your unique API key and it is non-recoverable. If you
-                  lose this key, you will need to create a new one.
+                  This is your unique API key and it is non-recoverable. If you lose this key, you will need to create a
+                  new one.
                 </AlertDescription>
               </Alert>
             </>
           )}
           {state === 'FORM' && (
             <>
-              <div tw="pb-6">
-                To access GraphQL Hive, your application or tool needs an active
-                API key.
-              </div>
+              <div tw="pb-6">To access GraphQL Hive, your application or tool needs an active API key.</div>
               <FormControl isInvalid={isValid('name')}>
                 <FormLabel>Name</FormLabel>
                 <Input
@@ -203,8 +179,7 @@ const TokenCreator: React.FC<{
                   type="text"
                 />
                 <FormHelperText>
-                  This will be displayed on the tokens list, we recommend to
-                  make it self-explanatory.
+                  This will be displayed on the tokens list, we recommend to make it self-explanatory.
                 </FormHelperText>
               </FormControl>
               <FormLabel tw="pt-6">Permissions</FormLabel>
@@ -249,20 +224,10 @@ const TokenCreator: React.FC<{
           )}
           {state === 'FORM' && (
             <>
-              <Button
-                variant="ghost"
-                type="button"
-                onClick={onClose}
-                disabled={mutation.fetching}
-              >
+              <Button variant="ghost" type="button" onClick={onClose} disabled={mutation.fetching}>
                 Cancel
               </Button>
-              <Button
-                colorScheme="primary"
-                type="submit"
-                isLoading={mutation.fetching}
-                disabled={!formik.isValid}
-              >
+              <Button colorScheme="primary" type="submit" isLoading={mutation.fetching} disabled={!formik.isValid}>
                 Generate token
               </Button>
             </>
@@ -281,21 +246,10 @@ const TokenCreatorTrigger: React.FC<{
 
   return (
     <>
-      <Button
-        leftIcon={<VscKey />}
-        colorScheme="teal"
-        variant="ghost"
-        size="sm"
-        onClick={open}
-      >
+      <Button leftIcon={<VscKey />} colorScheme="teal" variant="ghost" size="sm" onClick={open}>
         Generate new token
       </Button>
-      <TokenCreator
-        organization={organization}
-        target={target}
-        isOpen={isOpen}
-        onClose={onClose}
-      />
+      <TokenCreator organization={organization} target={target} isOpen={isOpen} onClose={onClose} />
     </>
   );
 };
@@ -325,7 +279,7 @@ export const TokensSettings: React.FC<{
   const onCheck = React.useCallback(
     (id: string) => {
       if (checked.includes(id)) {
-        setChecked(checked.filter((i) => i !== id));
+        setChecked(checked.filter(i => i !== id));
       } else {
         setChecked(checked.concat(id));
       }
@@ -350,9 +304,7 @@ export const TokensSettings: React.FC<{
   return (
     <Card.Root>
       <Card.Title>Tokens</Card.Title>
-      <Card.Description>
-        Be careful! These tokens allow to read and write your target data.
-      </Card.Description>
+      <Card.Description>Be careful! These tokens allow to read and write your target data.</Card.Description>
       <Card.Content>
         {canManageTokens && (
           <div tw="flex flex-row justify-between">
@@ -372,7 +324,7 @@ export const TokensSettings: React.FC<{
         {data?.tokens.total ? (
           <Table striped tw="mt-3" size="sm">
             {data?.tokens &&
-              data.tokens.nodes.map((token) => (
+              data.tokens.nodes.map(token => (
                 <TokenRow
                   key={token.id}
                   token={token}

@@ -2,12 +2,7 @@ import React from 'react';
 import 'twin.macro';
 import { Table, Tbody, Tr, Td, Checkbox, Button } from '@chakra-ui/react';
 import { useQuery, useMutation } from 'urql';
-import {
-  AlertFieldsFragment,
-  AlertsDocument,
-  DeleteAlertsDocument,
-  AlertType,
-} from '@/graphql';
+import { AlertFieldsFragment, AlertsDocument, DeleteAlertsDocument, AlertType } from '@/graphql';
 import { Section } from '@/components/common';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { AlertCreatorTrigger } from './AlertCreator';
@@ -54,7 +49,7 @@ export const Alerts: React.FC = () => {
   const onCheck = React.useCallback(
     (id: string) => {
       if (checked.includes(id)) {
-        setChecked(checked.filter((i) => i !== id));
+        setChecked(checked.filter(i => i !== id));
       } else {
         setChecked(checked.concat(id));
       }
@@ -104,15 +99,8 @@ export const Alerts: React.FC = () => {
       <div tw="pt-3">
         <Table size="sm">
           <Tbody>
-            {query.data?.alerts?.map((alert) => {
-              return (
-                <AlertRow
-                  key={alert.id}
-                  onCheck={onCheck}
-                  checked={checked}
-                  alert={alert}
-                />
-              );
+            {query.data?.alerts?.map(alert => {
+              return <AlertRow key={alert.id} onCheck={onCheck} checked={checked} alert={alert} />;
             })}
           </Tbody>
         </Table>

@@ -1,11 +1,6 @@
 #!/usr/bin/env node
 import * as Sentry from '@sentry/node';
-import {
-  createServer,
-  startMetrics,
-  ensureEnv,
-  registerShutdown,
-} from '@hive/service-common';
+import { createServer, startMetrics, ensureEnv, registerShutdown } from '@hive/service-common';
 import { createTokens } from './tokens';
 import { createUsage } from './usage';
 import {
@@ -123,9 +118,7 @@ async function main() {
           return;
         }
 
-        const retentionInfo =
-          (await rateLimit?.getRetentionForTargetId?.(tokenInfo.target)) ||
-          null;
+        const retentionInfo = (await rateLimit?.getRetentionForTargetId?.(tokenInfo.target)) || null;
 
         const stopTimer = collectLatency.startTimer();
         try {
@@ -172,7 +165,7 @@ async function main() {
   }
 }
 
-main().catch((err) => {
+main().catch(err => {
   Sentry.captureException(err, {
     level: Sentry.Severity.Fatal,
   });

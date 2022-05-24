@@ -139,9 +139,7 @@ export interface Member {
   id: string;
   user: User;
   organization: string;
-  scopes: Array<
-    OrganizationAccessScope | ProjectAccessScope | TargetAccessScope
-  >;
+  scopes: Array<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
 }
 
 export interface TargetSettings {

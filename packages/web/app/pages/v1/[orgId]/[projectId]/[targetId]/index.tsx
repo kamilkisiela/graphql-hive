@@ -88,20 +88,12 @@ const SchemaServiceName: React.FC<{
     [mutate]
   );
 
-  if (
-    (project.type !== ProjectType.Federation &&
-      project.type !== ProjectType.Stitching) ||
-    !hasAccess
-  ) {
+  if ((project.type !== ProjectType.Federation && project.type !== ProjectType.Stitching) || !hasAccess) {
     return <>{schema.service}</>;
   }
 
   return (
-    <Editable
-      defaultValue={schema.service}
-      isDisabled={mutation.fetching}
-      onSubmit={submit}
-    >
+    <Editable defaultValue={schema.service} isDisabled={mutation.fetching} onSubmit={submit}>
       <EditablePreview />
       <EditableInput />
     </Editable>
@@ -121,24 +113,20 @@ const Schemas: React.FC<{
   }
 
   if (project.type === ProjectType.Single) {
-    return (
-      <GraphQLSDLBlock tw="mb-6" sdl={schemas[0].source} url={schemas[0].url} />
-    );
+    return <GraphQLSDLBlock tw="mb-6" sdl={schemas[0].source} url={schemas[0].url} />;
   }
 
   return (
     <>
       {schemas
-        .filter((schema) => {
+        .filter(schema => {
           if (filterService && schema.service) {
-            return schema.service
-              .toLowerCase()
-              .includes(filterService.toLowerCase());
+            return schema.service.toLowerCase().includes(filterService.toLowerCase());
           }
 
           return true;
         })
-        .map((schema) => (
+        .map(schema => (
           <Block key={schema.id}>
             <GraphQLSDLBlock
               sdl={schema.source}
@@ -263,27 +251,16 @@ const ConnectSchemaModal: React.FC<{
                 <AlertTitle mt={4} mb={1} fontSize="lg">
                   Generating access...
                 </AlertTitle>
-                <AlertDescription maxWidth="sm">
-                  {generatingDescription}
-                </AlertDescription>
+                <AlertDescription maxWidth="sm">{generatingDescription}</AlertDescription>
               </Alert>
             )}
           </div>
           {!generating && mutation.data && (
             <>
-              <Description tw="mb-6">
-                You can use the following endpoint:
-              </Description>
-              <CopyValue
-                value={mutation.data.createCdnToken.url}
-                width={'100%'}
-              />
-              <Description tw="mt-6">
-                To authenticate, use the following HTTP headers:
-              </Description>
-              <Code tw="mt-6">
-                X-Hive-CDN-Key: {mutation.data.createCdnToken.token}
-              </Code>
+              <Description tw="mb-6">You can use the following endpoint:</Description>
+              <CopyValue value={mutation.data.createCdnToken.url} width={'100%'} />
+              <Description tw="mt-6">To authenticate, use the following HTTP headers:</Description>
+              <Code tw="mt-6">X-Hive-CDN-Key: {mutation.data.createCdnToken.token}</Code>
               {project.type === ProjectType.Federation && (
                 <Description tw="mt-6">
                   Read the{' '}
@@ -349,13 +326,7 @@ const ConnectSchemaButton: React.FC<{
 
   return (
     <>
-      <Button
-        colorScheme="primary"
-        type="button"
-        size="sm"
-        onClick={onOpen}
-        leftIcon={<VscPlug color={color} />}
-      >
+      <Button colorScheme="primary" type="button" size="sm" onClick={onOpen} leftIcon={<VscPlug color={color} />}>
         Connect
       </Button>
       <ConnectSchemaModal
@@ -376,9 +347,7 @@ const SyncSchemaButton: React.FC<{
   organization: OrganizationFieldsFragment;
 }> = ({ target, project, organization }) => {
   const color = useColorModeValue('#fff', '#000');
-  const [status, setStatus] = React.useState<'idle' | 'error' | 'success'>(
-    'idle'
-  );
+  const [status, setStatus] = React.useState<'idle' | 'error' | 'success'>('idle');
   const [mutation, mutate] = useMutation(SchemaSyncCdnDocument);
   const hasAccess = useTargetAccess({
     scope: TargetAccessScope.RegistryWrite,
@@ -393,15 +362,11 @@ const SyncSchemaButton: React.FC<{
         project: project.cleanId,
         target: target.cleanId,
       },
-    }).then((result) => {
+    }).then(result => {
       if (result.error) {
         setStatus('error');
       } else {
-        setStatus(
-          result.data?.schemaSyncCDN.__typename === 'SchemaSyncCDNError'
-            ? 'error'
-            : 'success'
-        );
+        setStatus(result.data?.schemaSyncCDN.__typename === 'SchemaSyncCDNError' ? 'error' : 'success');
       }
       setTimeout(() => {
         setStatus('idle');
@@ -414,15 +379,9 @@ const SyncSchemaButton: React.FC<{
   }
 
   return (
-    <Tooltip
-      label="Re-upload the latest valid version to Hive CDN"
-      fontSize="xs"
-      placement="bottom-start"
-    >
+    <Tooltip label="Re-upload the latest valid version to Hive CDN" fontSize="xs" placement="bottom-start">
       <Button
-        colorScheme={
-          status === 'success' ? 'teal' : status === 'error' ? 'red' : 'primary'
-        }
+        colorScheme={status === 'success' ? 'teal' : status === 'error' ? 'red' : 'primary'}
         type="button"
         size="sm"
         onClick={sync}
@@ -431,11 +390,7 @@ const SyncSchemaButton: React.FC<{
         loadingText="Syncing..."
         leftIcon={<VscSync color={color} />}
       >
-        {status === 'idle'
-          ? 'Update CDN'
-          : status === 'error'
-          ? 'Failed to synchronize'
-          : 'CDN is up to date'}
+        {status === 'idle' ? 'Update CDN' : status === 'error' ? 'Failed to synchronize' : 'CDN is up to date'}
       </Button>
     </Tooltip>
   );
@@ -456,7 +411,7 @@ function TargetSchemaInner({
     setFilterService(value);
   }, 500);
   const handleChange = React.useCallback(
-    (event) => {
+    event => {
       debouncedFilter(event.target.value);
       setTerm(event.target.value);
     },
@@ -467,9 +422,7 @@ function TargetSchemaInner({
     setTerm('');
   }, [setFilterService]);
 
-  const isDistributed =
-    project.type === ProjectType.Federation ||
-    project.type === ProjectType.Stitching;
+  const isDistributed = project.type === ProjectType.Federation || project.type === ProjectType.Stitching;
 
   return (
     <Page
@@ -479,48 +432,24 @@ function TargetSchemaInner({
         <>
           {isDistributed && (
             <form
-              onSubmit={(event) => {
+              onSubmit={event => {
                 event.preventDefault();
               }}
             >
               <InputGroup size="sm" variant="filled">
-                <Input
-                  type="text"
-                  placeholder="Find service"
-                  value={term}
-                  onChange={handleChange}
-                />
+                <Input type="text" placeholder="Find service" value={term} onChange={handleChange} />
                 <InputRightElement>
-                  <IconButton
-                    aria-label="Reset"
-                    size="xs"
-                    variant="ghost"
-                    onClick={reset}
-                    icon={<VscClose />}
-                  />
+                  <IconButton aria-label="Reset" size="xs" variant="ghost" onClick={reset} icon={<VscClose />} />
                 </InputRightElement>
               </InputGroup>
             </form>
           )}
-          <SyncSchemaButton
-            target={target}
-            project={project}
-            organization={organization}
-          />
-          <ConnectSchemaButton
-            target={target}
-            project={project}
-            organization={organization}
-          />
+          <SyncSchemaButton target={target} project={project} organization={organization} />
+          <ConnectSchemaButton target={target} project={project} organization={organization} />
         </>
       }
     >
-      <SchemaView
-        organization={organization}
-        project={project}
-        target={target}
-        filterService={filterService}
-      />
+      <SchemaView organization={organization} project={project} target={target} filterService={filterService} />
     </Page>
   );
 }
@@ -529,11 +458,7 @@ export default function TargetSchema() {
   return (
     <TargetView title="Overview">
       {({ organization, project, target }) => (
-        <TargetSchemaInner
-          organization={organization}
-          project={project}
-          target={target}
-        />
+        <TargetSchemaInner organization={organization} project={project} target={target} />
       )}
     </TargetView>
   );

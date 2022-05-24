@@ -30,10 +30,7 @@ export async function ensureGithubIntegration(
   });
 }
 
-export default async function githubCallback(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default async function githubCallback(req: NextApiRequest, res: NextApiResponse) {
   console.log('GitHub Integration Callback');
   const installationId = req.query.installation_id as string;
   const orgId = req.query.state as string;

@@ -1,9 +1,4 @@
-import {
-  createClient,
-  dedupExchange,
-  errorExchange,
-  fetchExchange,
-} from 'urql';
+import { createClient, dedupExchange, errorExchange, fetchExchange } from 'urql';
 import { cacheExchange } from '@urql/exchange-graphcache';
 import { captureException } from '@sentry/nextjs';
 

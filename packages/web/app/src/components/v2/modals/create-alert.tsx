@@ -4,12 +4,7 @@ import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 
 import { Button, Heading, Modal, Select } from '@/components/v2';
-import {
-  AddAlertDocument,
-  AlertChannelsDocument,
-  AlertType,
-  TargetsDocument,
-} from '@/graphql';
+import { AddAlertDocument, AlertChannelsDocument, AlertType, TargetsDocument } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
 export const CreateAlertModal = ({
@@ -45,45 +40,42 @@ export const CreateAlertModal = ({
   const channels = channelsQuery.data?.alertChannels || [];
   const targets = targetsQuery.data?.targets.nodes || [];
 
-  const { handleSubmit, values, handleChange, errors, touched, isSubmitting } =
-    useFormik({
-      initialValues: {
-        type: AlertType.SchemaChangeNotifications,
-        channel: '',
-        target: '',
-      },
-      validationSchema: Yup.object().shape({
-        type: Yup.string()
-          .equals([AlertType.SchemaChangeNotifications])
-          .required('Must select type'),
-        channel: Yup.lazy(() =>
-          Yup.string()
-            .min(1)
-            .equals(channels.map((channel) => channel.id))
-            .required('Must select channel')
-        ),
-        target: Yup.lazy(() =>
-          Yup.string()
-            .min(1)
-            .equals(targets.map((target) => target.cleanId))
-            .required('Must select target')
-        ),
-      }),
-      async onSubmit(values) {
-        const { error } = await mutate({
-          input: {
-            organization: router.organizationId,
-            project: router.projectId,
-            target: values.target,
-            channel: values.channel,
-            type: values.type,
-          },
-        });
-        if (!error) {
-          toggleModalOpen();
-        }
-      },
-    });
+  const { handleSubmit, values, handleChange, errors, touched, isSubmitting } = useFormik({
+    initialValues: {
+      type: AlertType.SchemaChangeNotifications,
+      channel: '',
+      target: '',
+    },
+    validationSchema: Yup.object().shape({
+      type: Yup.string().equals([AlertType.SchemaChangeNotifications]).required('Must select type'),
+      channel: Yup.lazy(() =>
+        Yup.string()
+          .min(1)
+          .equals(channels.map(channel => channel.id))
+          .required('Must select channel')
+      ),
+      target: Yup.lazy(() =>
+        Yup.string()
+          .min(1)
+          .equals(targets.map(target => target.cleanId))
+          .required('Must select target')
+      ),
+    }),
+    async onSubmit(values) {
+      const { error } = await mutate({
+        input: {
+          organization: router.organizationId,
+          project: router.projectId,
+          target: values.target,
+          channel: values.channel,
+          type: values.type,
+        },
+      });
+      if (!error) {
+        toggleModalOpen();
+      }
+    },
+  });
 
   return (
     <Modal open={isOpen} onOpenChange={toggleModalOpen}>
@@ -107,9 +99,7 @@ export const CreateAlertModal = ({
             onChange={handleChange}
             isInvalid={touched.type && Boolean(errors.type)}
           />
-          {touched.type && errors.type && (
-            <div className="text-sm text-red-500">{errors.type}</div>
-          )}
+          {touched.type && errors.type && <div className="text-sm text-red-500">{errors.type}</div>}
         </div>
 
         <div className="flex flex-col gap-4">
@@ -119,7 +109,7 @@ export const CreateAlertModal = ({
           <Select
             name="channel"
             placeholder="Select channel"
-            options={channels.map((channel) => ({
+            options={channels.map(channel => ({
               value: channel.id,
               name: channel.name,
             }))}
@@ -127,9 +117,7 @@ export const CreateAlertModal = ({
             onChange={handleChange}
             isInvalid={touched.channel && Boolean(errors.channel)}
           />
-          {touched.channel && errors.channel && (
-            <div className="text-sm text-red-500">{errors.channel}</div>
-          )}
+          {touched.channel && errors.channel && <div className="text-sm text-red-500">{errors.channel}</div>}
         </div>
 
         <div className="flex flex-col gap-4">
@@ -139,7 +127,7 @@ export const CreateAlertModal = ({
           <Select
             name="target"
             placeholder="Select target"
-            options={targets.map((target) => ({
+            options={targets.map(target => ({
               value: target.cleanId,
               name: target.name,
             }))}
@@ -147,26 +135,16 @@ export const CreateAlertModal = ({
             onChange={handleChange}
             isInvalid={touched.target && Boolean(errors.target)}
           />
-          {touched.target && errors.target && (
-            <div className="text-sm text-red-500">{errors.target}</div>
-          )}
+          {touched.target && errors.target && <div className="text-sm text-red-500">{errors.target}</div>}
         </div>
 
-        {mutation.error && (
-          <div className="text-sm text-red-500">{mutation.error.message}</div>
-        )}
+        {mutation.error && <div className="text-sm text-red-500">{mutation.error.message}</div>}
 
         <div className="flex w-full gap-2">
           <Button type="button" size="large" block onClick={toggleModalOpen}>
             Cancel
           </Button>
-          <Button
-            type="submit"
-            size="large"
-            block
-            variant="primary"
-            disabled={isSubmitting}
-          >
+          <Button type="submit" size="large" block variant="primary" disabled={isSubmitting}>
             Create Alert
           </Button>
         </div>

@@ -23,12 +23,8 @@ export const IntegrationsSettings: React.FC<{
     },
   });
 
-  const [deleteSlackMutation, deleteSlack] = useMutation(
-    DeleteSlackIntegrationDocument
-  );
-  const [deleteGitHubMutation, deleteGitHub] = useMutation(
-    DeleteGitHubIntegrationDocument
-  );
+  const [deleteSlackMutation, deleteSlack] = useMutation(DeleteSlackIntegrationDocument);
+  const [deleteGitHubMutation, deleteGitHub] = useMutation(DeleteGitHubIntegrationDocument);
 
   const hasGitHubIntegration = query.data?.hasGitHubIntegration === true;
   const hasSlackIntegration = query.data?.hasSlackIntegration === true;

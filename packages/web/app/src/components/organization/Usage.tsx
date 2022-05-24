@@ -1,22 +1,10 @@
 import React from 'react';
-import {
-  OrganizationFieldsFragment,
-  OrgBillingInfoFieldsFragment,
-  UsageEstimationDocument,
-} from '@/graphql';
+import { OrganizationFieldsFragment, OrgBillingInfoFieldsFragment, UsageEstimationDocument } from '@/graphql';
 import { useQuery } from 'urql';
 import { Scale } from '../common';
 import { DataWrapper } from '../common/DataWrapper';
 import 'twin.macro';
-import {
-  Table,
-  TableContainer,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
-} from '@chakra-ui/react';
+import { Table, TableContainer, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
 import { calculatePeriod } from '../common/TimeFilter';
 
 const NumericFormatter = Intl.NumberFormat('en', {
@@ -40,7 +28,7 @@ export const OrganizationUsageEstimationView: React.FC<{
     <>
       <div tw="top-7 right-4">
         <DataWrapper query={query}>
-          {(result) => (
+          {result => (
             <TableContainer>
               <Table size="sm">
                 <Thead>
@@ -54,16 +42,8 @@ export const OrganizationUsageEstimationView: React.FC<{
                 <Tbody>
                   <Tr>
                     <Td>Operations</Td>
-                    <Td isNumeric>
-                      {NumericFormatter.format(
-                        result.data.usageEstimation.org.operations
-                      )}
-                    </Td>
-                    <Td isNumeric>
-                      {NumericFormatter.format(
-                        organization.rateLimit.operations
-                      )}
-                    </Td>
+                    <Td isNumeric>{NumericFormatter.format(result.data.usageEstimation.org.operations)}</Td>
+                    <Td isNumeric>{NumericFormatter.format(organization.rateLimit.operations)}</Td>
                     <Td isNumeric>
                       <Scale
                         value={result.data.usageEstimation.org.operations}
@@ -75,16 +55,8 @@ export const OrganizationUsageEstimationView: React.FC<{
                   </Tr>
                   <Tr>
                     <Td>Schema Pushes</Td>
-                    <Td isNumeric>
-                      {NumericFormatter.format(
-                        result.data.usageEstimation.org.schemaPushes
-                      )}
-                    </Td>
-                    <Td isNumeric>
-                      {NumericFormatter.format(
-                        organization.rateLimit.schemaPushes
-                      )}
-                    </Td>
+                    <Td isNumeric>{NumericFormatter.format(result.data.usageEstimation.org.schemaPushes)}</Td>
+                    <Td isNumeric>{NumericFormatter.format(organization.rateLimit.schemaPushes)}</Td>
                     <Td isNumeric>
                       <Scale
                         value={result.data.usageEstimation.org.schemaPushes}

@@ -22,13 +22,10 @@ import type {
 import { execute } from './graphql';
 
 export function waitFor(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-export function createOrganization(
-  input: CreateOrganizationInput,
-  authToken: string
-) {
+export function createOrganization(input: CreateOrganizationInput, authToken: string) {
   return execute({
     document: gql(/* GraphQL */ `
       mutation createOrganization($input: CreateOrganizationInput!) {
@@ -159,15 +156,10 @@ export function createToken(input: CreateTokenInput, authToken: string) {
   });
 }
 
-export function updateMemberAccess(
-  input: OrganizationMemberAccessInput,
-  authToken: string
-) {
+export function updateMemberAccess(input: OrganizationMemberAccessInput, authToken: string) {
   return execute({
     document: gql(/* GraphQL */ `
-      mutation updateOrganizationMemberAccess(
-        $input: OrganizationMemberAccessInput!
-      ) {
+      mutation updateOrganizationMemberAccess($input: OrganizationMemberAccessInput!) {
         updateOrganizationMemberAccess(input: $input) {
           organization {
             cleanId
@@ -319,9 +311,7 @@ export function updateTargetValidationSettings(
 ) {
   return execute({
     document: gql(/* GraphQL */ `
-      mutation updateTargetValidationSettings(
-        $input: UpdateTargetValidationSettingsInput!
-      ) {
+      mutation updateTargetValidationSettings($input: UpdateTargetValidationSettingsInput!) {
         updateTargetValidationSettings(input: $input) {
           ok {
             updatedTargetValidationSettings {
@@ -360,10 +350,7 @@ export function updateBaseSchema(input: UpdateBaseSchemaInput, token: string) {
   });
 }
 
-export function readOperationsStats(
-  input: OperationsStatsSelectorInput,
-  token: string
-) {
+export function readOperationsStats(input: OperationsStatsSelectorInput, token: string) {
   return execute({
     document: gql(/* GraphQL */ `
       query readOperationsStats($input: OperationsStatsSelectorInput!) {
@@ -437,11 +424,7 @@ export function fetchLatestValidSchema(token: string) {
   });
 }
 
-export function fetchVersions(
-  selector: SchemaVersionsInput,
-  limit: number,
-  token: string
-) {
+export function fetchVersions(selector: SchemaVersionsInput, limit: number, token: string) {
   return execute({
     document: gql(/* GraphQL */ `
       query schemaVersions($limit: Int!, $selector: SchemaVersionsInput!) {
@@ -473,15 +456,10 @@ export function fetchVersions(
   });
 }
 
-export function publishPersistedOperations(
-  input: PublishPersistedOperationInput[],
-  token: string
-) {
+export function publishPersistedOperations(input: PublishPersistedOperationInput[], token: string) {
   return execute({
     document: gql(/* GraphQL */ `
-      mutation publishPersistedOperations(
-        $input: [PublishPersistedOperationInput!]!
-      ) {
+      mutation publishPersistedOperations($input: [PublishPersistedOperationInput!]!) {
         publishPersistedOperations(input: $input) {
           summary {
             total
@@ -504,10 +482,7 @@ export function publishPersistedOperations(
   });
 }
 
-export function updateSchemaVersionStatus(
-  input: SchemaVersionUpdateInput,
-  token: string
-) {
+export function updateSchemaVersionStatus(input: SchemaVersionUpdateInput, token: string) {
   return execute({
     document: gql(/* GraphQL */ `
       mutation updateSchemaVersionStatus($input: SchemaVersionUpdateInput!) {
@@ -568,10 +543,7 @@ export function createCdnAccess(selector: TargetSelectorInput, token: string) {
   });
 }
 
-export async function fetchSchemaFromCDN(
-  selector: TargetSelectorInput,
-  token: string
-) {
+export async function fetchSchemaFromCDN(selector: TargetSelectorInput, token: string) {
   const cdnAccessResult = await createCdnAccess(selector, token);
 
   if (cdnAccessResult.body.errors) {
@@ -594,10 +566,7 @@ export async function fetchSchemaFromCDN(
   };
 }
 
-export async function fetchMetadataFromCDN(
-  selector: TargetSelectorInput,
-  token: string
-) {
+export async function fetchMetadataFromCDN(selector: TargetSelectorInput, token: string) {
   const cdnAccessResult = await createCdnAccess(selector, token);
 
   if (cdnAccessResult.body.errors) {

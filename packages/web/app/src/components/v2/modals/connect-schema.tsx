@@ -3,11 +3,7 @@ import { Spinner } from '@chakra-ui/react';
 import { useMutation, useQuery } from 'urql';
 
 import { Button, CopyValue, Heading, Link, Modal, Tag } from '@/components/v2';
-import {
-  CreateCdnTokenDocument,
-  ProjectDocument,
-  ProjectType,
-} from '@/graphql';
+import { CreateCdnTokenDocument, ProjectDocument, ProjectType } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
 export const ConnectSchemaModal = ({
@@ -46,22 +42,12 @@ export const ConnectSchemaModal = ({
         setGenerating(false);
       }, 2000);
     });
-  }, [
-    isOpen,
-    mutate,
-    router.organizationId,
-    router.projectId,
-    router.targetId,
-  ]);
+  }, [isOpen, mutate, router.organizationId, router.projectId, router.targetId]);
 
   const project = projectQuery.data?.project;
 
   return (
-    <Modal
-      open={isOpen}
-      onOpenChange={toggleModalOpen}
-      className="flex w-[650px] flex-col gap-5"
-    >
+    <Modal open={isOpen} onOpenChange={toggleModalOpen} className="flex w-[650px] flex-col gap-5">
       <Heading className="text-center">Connect to Hive</Heading>
 
       {project && generating && (
@@ -69,8 +55,7 @@ export const ConnectSchemaModal = ({
           <Spinner />
           <Heading>Generating access...</Heading>
           <p className="text-center">
-            Hive is now generating an authentication token and an URL you can
-            use to fetch your{' '}
+            Hive is now generating an authentication token and an URL you can use to fetch your{' '}
             {{
               [ProjectType.Federation]: 'supergraph schema',
               [ProjectType.Stitching]: 'services',
@@ -83,22 +68,16 @@ export const ConnectSchemaModal = ({
       {project && !generating && mutation.data && (
         <>
           <p className="text-sm text-gray-500">
-            With high-availability and multi-zone CDN service based on
-            Cloudflare, Hive allows you to access the
+            With high-availability and multi-zone CDN service based on Cloudflare, Hive allows you to access the
             {{
               [ProjectType.Federation]: 'supergraph',
               [ProjectType.Stitching]: 'list of services',
             }[project.type] || 'schema'}{' '}
-            of your API, through a secured external service, that's always up
-            regardless of Hive.
+            of your API, through a secured external service, that's always up regardless of Hive.
           </p>
-          <span className="text-sm text-gray-500">
-            You can use the following endpoint:
-          </span>
+          <span className="text-sm text-gray-500">You can use the following endpoint:</span>
           <CopyValue value={mutation.data.createCdnToken.url} />
-          <span className="text-sm text-gray-500">
-            To authenticate, use the following HTTP headers:
-          </span>
+          <span className="text-sm text-gray-500">To authenticate, use the following HTTP headers:</span>
           <Tag>X-Hive-CDN-Key: {mutation.data.createCdnToken.token}</Tag>
           <p className="text-sm text-gray-500">
             Read the{' '}
@@ -114,13 +93,7 @@ export const ConnectSchemaModal = ({
           </p>
         </>
       )}
-      <Button
-        type="button"
-        variant="secondary"
-        size="large"
-        onClick={toggleModalOpen}
-        className="self-end"
-      >
+      <Button type="button" variant="secondary" size="large" onClick={toggleModalOpen} className="self-end">
         Close
       </Button>
     </Modal>

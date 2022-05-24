@@ -2,17 +2,13 @@ import * as React from 'react';
 import { GetServerSideProps } from 'next';
 import { useQuery } from 'urql';
 import { print, stripIgnoredCharacters, ExecutionResult } from 'graphql';
-import {
-  OrganizationsDocument,
-  OrganizationsQuery,
-  OrganizationType,
-} from '@/graphql';
+import { OrganizationsDocument, OrganizationsQuery, OrganizationType } from '@/graphql';
 import { Title } from '@/components/common';
 import { useNavigation } from '@/components/common/Navigation';
 import { DataWrapper } from '@/components/common/DataWrapper';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
+export const getServerSideProps: GetServerSideProps = async ctx => {
   try {
     const host = ctx.req.headers.host;
     const protocol = host.startsWith('localhost') ? 'http' : 'https';
@@ -34,9 +30,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     });
 
     const result: ExecutionResult<OrganizationsQuery> = await response.json();
-    const org = result.data?.organizations?.nodes?.find(
-      (node) => node.type === OrganizationType.Personal
-    );
+    const org = result.data?.organizations?.nodes?.find(node => node.type === OrganizationType.Personal);
 
     if (org) {
       return {
@@ -69,9 +63,7 @@ export default function Home() {
   React.useEffect(() => {
     // Just in case server-side redirect wasn't working
     if (query.data) {
-      const org = query.data.organizations.nodes.find(
-        (node) => node.type === OrganizationType.Personal
-      );
+      const org = query.data.organizations.nodes.find(node => node.type === OrganizationType.Personal);
 
       router.visitOrganization({ organizationId: org.cleanId });
     }

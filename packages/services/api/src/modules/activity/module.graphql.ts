@@ -8,9 +8,7 @@ export default gql`
   }
 
   extend type Query {
-    organizationActivities(
-      selector: OrganizationActivitiesSelector!
-    ): ActivityConnection!
+    organizationActivities(selector: OrganizationActivitiesSelector!): ActivityConnection!
     projectActivities(selector: ProjectActivitiesSelector!): ActivityConnection!
     targetActivities(selector: TargetActivitiesSelector!): ActivityConnection!
   }

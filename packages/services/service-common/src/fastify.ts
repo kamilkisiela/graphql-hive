@@ -27,7 +27,7 @@ export function createServer(options: { tracing: boolean; name: string }) {
       Sentry.captureException(reason);
       server.log.error(reason as any, 'Unhandled Rejection at Promise', p);
     })
-    .on('uncaughtException', (err) => {
+    .on('uncaughtException', err => {
       console.log('uncaughtException', err);
       Sentry.captureException(err);
       server.log.error(err as any, 'Uncaught Exception thrown');

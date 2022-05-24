@@ -5,10 +5,7 @@ import { Storage } from '../../shared/providers/storage';
 import { Token } from '../../../shared/entities';
 import { AccessError } from '../../../shared/errors';
 import DataLoader from 'dataloader';
-import {
-  TokenStorage,
-  TokenSelector,
-} from '../../token/providers/token-storage';
+import { TokenStorage, TokenSelector } from '../../token/providers/token-storage';
 import type { ProjectAccessScope } from './project-access';
 import type { TargetAccessScope } from './target-access';
 
@@ -63,28 +60,14 @@ function isOrganizationScope(scope: any): scope is OrganizationAccessScope {
 })
 export class OrganizationAccess {
   private logger: Logger;
-  private userAccess: Dataloader<
-    OrganizationUserAccessSelector,
-    boolean,
-    string
-  >;
-  private tokenAccess: Dataloader<
-    OrganizationTokenAccessSelector,
-    boolean,
-    string
-  >;
+  private userAccess: Dataloader<OrganizationUserAccessSelector, boolean, string>;
+  private tokenAccess: Dataloader<OrganizationTokenAccessSelector, boolean, string>;
   private allScopes: DataLoader<
     OrganizationUserScopesSelector,
-    ReadonlyArray<
-      OrganizationAccessScope | ProjectAccessScope | TargetAccessScope
-    >,
+    ReadonlyArray<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>,
     string
   >;
-  private scopes: DataLoader<
-    OrganizationUserScopesSelector,
-    readonly OrganizationAccessScope[],
-    string
-  >;
+  private scopes: DataLoader<OrganizationUserScopesSelector, readonly OrganizationAccessScope[], string>;
   tokenInfo: DataLoader<TokenSelector, Token | null, string>;
 
   constructor(
@@ -96,18 +79,14 @@ export class OrganizationAccess {
       source: 'OrganizationAccess',
     });
     this.userAccess = new Dataloader(
-      async (selectors) => {
+      async selectors => {
         const scopes = await this.scopes.loadMany(selectors);
 
         return selectors.map((selector, i) => {
           const scopesForSelector = scopes[i];
 
           if (scopesForSelector instanceof Error) {
-            this.logger.warn(
-              `OrganizationAccess:user (error=%s, selector=%o)`,
-              scopesForSelector.message,
-              selector
-            );
+            this.logger.warn(`OrganizationAccess:user (error=%s, selector=%o)`, scopesForSelector.message, selector);
             return false;
           }
 
@@ -126,9 +105,9 @@ export class OrganizationAccess {
       }
     );
     this.tokenAccess = new Dataloader(
-      (selectors) =>
+      selectors =>
         Promise.all(
-          selectors.map(async (selector) => {
+          selectors.map(async selector => {
             const tokenInfo = await this.tokenInfo.load(selector);
 
             if (tokenInfo?.organization === selector.organization) {
@@ -150,9 +129,8 @@ export class OrganizationAccess {
       }
     );
     this.allScopes = new Dataloader(
-      async (selectors) => {
-        const scopesPerSelector =
-          await this.storage.getOrganizationMemberAccessPairs(selectors);
+      async selectors => {
+        const scopesPerSelector = await this.storage.getOrganizationMemberAccessPairs(selectors);
 
         return selectors.map((_, i) => scopesPerSelector[i]);
       },
@@ -167,18 +145,14 @@ export class OrganizationAccess {
       }
     );
     this.scopes = new Dataloader(
-      async (selectors) => {
+      async selectors => {
         const scopesPerSelector = await this.allScopes.loadMany(selectors);
 
         return selectors.map((selector, i) => {
           const scopes = scopesPerSelector[i];
 
           if (scopes instanceof Error) {
-            this.logger.warn(
-              `OrganizationAccess:scopes (error=%s, selector=%o)`,
-              scopes.message,
-              selector
-            );
+            this.logger.warn(`OrganizationAccess:scopes (error=%s, selector=%o)`, scopes.message, selector);
             return [];
           }
 
@@ -196,10 +170,7 @@ export class OrganizationAccess {
       }
     );
     this.tokenInfo = new Dataloader(
-      (selectors) =>
-        Promise.all(
-          selectors.map((selector) => this.tokenStorage.getToken(selector))
-        ),
+      selectors => Promise.all(selectors.map(selector => this.tokenStorage.getToken(selector))),
       {
         cacheKeyFn(selector) {
           return selector.token;
@@ -208,9 +179,7 @@ export class OrganizationAccess {
     );
   }
 
-  async ensureAccessForToken(
-    selector: OrganizationTokenAccessSelector
-  ): Promise<void | never> {
+  async ensureAccessForToken(selector: OrganizationTokenAccessSelector): Promise<void | never> {
     const canAccess = await this.tokenAccess.load(selector);
 
     if (!canAccess) {
@@ -218,9 +187,7 @@ export class OrganizationAccess {
     }
   }
 
-  async ensureAccessForUser(
-    selector: OrganizationUserAccessSelector
-  ): Promise<void | never> {
+  async ensureAccessForUser(selector: OrganizationUserAccessSelector): Promise<void | never> {
     const canAccess = await this.userAccess.load(selector);
 
     if (!canAccess) {
@@ -228,9 +195,7 @@ export class OrganizationAccess {
     }
   }
 
-  async checkAccessForUser(
-    selector: OrganizationUserAccessSelector
-  ): Promise<boolean> {
+  async checkAccessForUser(selector: OrganizationUserAccessSelector): Promise<boolean> {
     return this.userAccess.load(selector);
   }
 

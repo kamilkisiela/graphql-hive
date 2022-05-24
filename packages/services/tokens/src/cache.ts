@@ -68,7 +68,7 @@ export function useCache(
         const items = cache.get(target);
 
         if (items) {
-          const item = items.find((p) => p.token === token);
+          const item = items.find(p => p.token === token);
 
           if (item) {
             item.lastUsedAt = date.getTime() as any;
@@ -125,14 +125,10 @@ export function useCache(
         invalidate(target);
       },
       invalidateProject(project) {
-        relations
-          .getTargetsOfProject(project)
-          .forEach((target) => cachedStorage.invalidateTarget(target));
+        relations.getTargetsOfProject(project).forEach(target => cachedStorage.invalidateTarget(target));
       },
       invalidateOrganization(organization) {
-        relations
-          .getTargetsOfOrganization(organization)
-          .forEach((target) => cachedStorage.invalidateTarget(target));
+        relations.getTargetsOfOrganization(organization).forEach(target => cachedStorage.invalidateTarget(target));
       },
       async readToken(hashed_token, res) {
         const targetIds = cache.keys();
@@ -141,7 +137,7 @@ export function useCache(
           const items = cache.get(target);
 
           if (items) {
-            const item = items.find((p) => p.token === hashed_token);
+            const item = items.find(p => p.token === hashed_token);
 
             if (item) {
               cacheHits.inc(1);
@@ -161,14 +157,14 @@ export function useCache(
 
         return item;
       },
-      writeToken: tracker.wrap(async (item) => {
+      writeToken: tracker.wrap(async item => {
         logger.debug('Writing token (target=%s)', item.target);
         const result = await storage.writeToken(item);
         invalidate(item.target);
 
         return result;
       }),
-      deleteToken: tracker.wrap(async (hashed_token) => {
+      deleteToken: tracker.wrap(async hashed_token => {
         const item = await cachedStorage.readToken(hashed_token);
         invalidate(item.target);
 
@@ -189,7 +185,7 @@ export function useCache(
     logger.info('Started Tokens shutdown...');
     started = false;
 
-    await until(tracker.idle, 10_000).catch((error) => {
+    await until(tracker.idle, 10_000).catch(error => {
       logger.error('Failed to wait for tokens being idle', error);
     });
 
@@ -223,8 +219,8 @@ function useRelations() {
   function getTargetsOfOrganization(organization: string): Set<string> {
     const targets = new Set<string>();
 
-    getProjectsOfOrganization(organization).forEach((project) => {
-      getTargetsOfProject(project).forEach((target) => {
+    getProjectsOfOrganization(organization).forEach(project => {
+      getTargetsOfProject(project).forEach(target => {
         targets.add(target);
       });
     });
@@ -232,11 +228,7 @@ function useRelations() {
     return targets;
   }
 
-  function ensureRelation(
-    from: string,
-    to: string,
-    mapSet: Map<string, Set<string>>
-  ) {
+  function ensureRelation(from: string, to: string, mapSet: Map<string, Set<string>>) {
     if (!mapSet.has(from)) {
       mapSet.set(from, new Set());
     }
@@ -282,17 +274,15 @@ function useTokenTouchScheduler(
       return;
     }
 
-    const tokens = Array.from(scheduledTokens.entries()).map(
-      ([token, date]) => ({
-        token,
-        date,
-      })
-    );
+    const tokens = Array.from(scheduledTokens.entries()).map(([token, date]) => ({
+      token,
+      date,
+    }));
     scheduledTokens.clear();
 
     logger.debug(`Touch ${tokens.length} tokens`);
     tokens.forEach(({ token, date }) => onTouch(token, date));
-    storage.touchTokens(tokens).catch((error) => {
+    storage.touchTokens(tokens).catch(error => {
       logger.error(error);
     });
   }, ms('10m'));

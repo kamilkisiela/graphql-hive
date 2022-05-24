@@ -8,11 +8,7 @@ export function deployBotKube({ envName }: { envName: string }) {
     return;
   }
 
-  if (
-    botkubeConfig &&
-    botkubeConfig.get('slackChannel') &&
-    botkubeConfig.getSecret('slackToken')
-  ) {
+  if (botkubeConfig && botkubeConfig.get('slackChannel') && botkubeConfig.getSecret('slackToken')) {
     new BotKube().deploy({
       clusterName: envName,
       enableKubectl: true,

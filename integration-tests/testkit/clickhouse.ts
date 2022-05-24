@@ -11,7 +11,7 @@ export async function resetClickHouse() {
     `operations_new`,
     `schema_coordinates_daily`,
     `client_names_daily`,
-  ].map((table) => `TRUNCATE TABLE default.${table}`);
+  ].map(table => `TRUNCATE TABLE default.${table}`);
 
   for await (const query of queries) {
     await axios.post(endpoint, query, {

@@ -7,11 +7,7 @@ if (enabled) {
   mixpanel = Mixpanel.init(process.env.MIXPANEL_TOKEN ?? '');
 }
 
-export function track(event: {
-  event: string;
-  distinct_id: string;
-  data?: Record<string, any>;
-}) {
+export function track(event: { event: string; distinct_id: string; data?: Record<string, any> }) {
   if (enabled) {
     mixpanel.track(event.event, {
       distinct_id: event.distinct_id,
@@ -20,11 +16,7 @@ export function track(event: {
   }
 }
 
-export function createOrUpdateUser(user: {
-  id: string;
-  email: string;
-  name?: string;
-}) {
+export function createOrUpdateUser(user: { id: string; email: string; name?: string }) {
   if (enabled) {
     mixpanel.people.set(user.id, {
       ...('name' in user

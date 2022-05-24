@@ -11,10 +11,7 @@ import {
   ModalCloseButton,
   Accordion,
 } from '@chakra-ui/react';
-import {
-  usePermissionsManager,
-  PermissionsSpace,
-} from '@/components/organization/Permissions';
+import { usePermissionsManager, PermissionsSpace } from '@/components/organization/Permissions';
 import { MemberFieldsFragment, OrganizationFieldsFragment } from '@/graphql';
 import { scopes } from '@/lib/access/common';
 import { useTracker } from '@/lib/hooks/use-tracker';
@@ -64,12 +61,7 @@ export const MemberPermisssonsModal: React.FC<{
           </Accordion>
         </ModalBody>
         <ModalFooter tw="space-x-6">
-          <Button
-            variant="ghost"
-            type="button"
-            disabled={manager.state !== 'IDLE'}
-            onClick={onClose}
-          >
+          <Button variant="ghost" type="button" disabled={manager.state !== 'IDLE'} onClick={onClose}>
             Cancel
           </Button>
           <Button

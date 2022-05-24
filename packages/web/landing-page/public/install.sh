@@ -1,7 +1,7 @@
 #!/bin/bash
 {
-    set -e
-    bash <<SCRIPT
+  set -e
+  bash << SCRIPT
   set -e
 
   echoerr() { echo "\$@" 1>&2; }

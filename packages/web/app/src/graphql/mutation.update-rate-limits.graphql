@@ -1,11 +1,5 @@
-mutation updateOrgRateLimit(
-  $organization: ID!
-  $monthlyLimits: RateLimitInput!
-) {
-  updateOrgRateLimit(
-    monthlyLimits: $monthlyLimits
-    selector: { organization: $organization }
-  ) {
+mutation updateOrgRateLimit($organization: ID!, $monthlyLimits: RateLimitInput!) {
+  updateOrgRateLimit(monthlyLimits: $monthlyLimits, selector: { organization: $organization }) {
     ...OrgBillingInfoFields
   }
 }

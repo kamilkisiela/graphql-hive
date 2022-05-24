@@ -1,12 +1,7 @@
 import * as React from 'react';
 import 'twin.macro';
 import Link from 'next/link';
-import {
-  CriticalityLevel,
-  OrganizationFieldsFragment,
-  ProjectFieldsFragment,
-  TargetFieldsFragment,
-} from '@/graphql';
+import { CriticalityLevel, OrganizationFieldsFragment, ProjectFieldsFragment, TargetFieldsFragment } from '@/graphql';
 import { Card, Circle, Label } from '@/components/common';
 
 export const ProjectCard: React.FC<{
@@ -22,15 +17,11 @@ export const ProjectCard: React.FC<{
         </Card.Title>
       </Link>
       <Card.Content>
-        {targets.map((target) => (
+        {targets.map(target => (
           <Card.List key={target.id}>
             <div tw="flex items-center">
               <Circle criticality={CriticalityLevel.Safe} tw="mr-2" />
-              <Link
-                href={`/${org.cleanId}/${project.cleanId}/${target.cleanId}`}
-              >
-                {target.name}
-              </Link>
+              <Link href={`/${org.cleanId}/${project.cleanId}/${target.cleanId}`}>{target.name}</Link>
             </div>
           </Card.List>
         ))}

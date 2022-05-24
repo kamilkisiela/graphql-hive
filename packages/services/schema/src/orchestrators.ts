@@ -84,17 +84,11 @@ interface CompositionFailure {
   };
 }
 
-const createFederation: (
-  redis: RedisInstance,
-  logger: FastifyLoggerInstance
-) => Orchestrator = (redis, logger) => {
-  const compose = reuse<
-    ValidationInput,
-    CompositionSuccess | CompositionFailure
-  >(
-    async (schemas) => {
+const createFederation: (redis: RedisInstance, logger: FastifyLoggerInstance) => Orchestrator = (redis, logger) => {
+  const compose = reuse<ValidationInput, CompositionSuccess | CompositionFailure>(
+    async schemas => {
       const result = composeAndValidate(
-        schemas.map((schema) => {
+        schemas.map(schema => {
           return {
             typeDefs: trimDescriptions(parse(schema.raw)),
             name: schema.source,
@@ -143,10 +137,7 @@ const createFederation: (
 
       if (result.type === 'failure') {
         throw new Error(
-          [
-            `Schemas couldn't be merged:`,
-            result.result.errors.map((error) => `\t - ${error.message}`),
-          ].join('\n')
+          [`Schemas couldn't be merged:`, result.result.errors.map(error => `\t - ${error.message}`)].join('\n')
         );
       }
 
@@ -159,8 +150,7 @@ const createFederation: (
       const result = await compose(schemas);
 
       return {
-        supergraph:
-          'supergraphSdl' in result.result ? result.result.supergraphSdl : null,
+        supergraph: 'supergraphSdl' in result.result ? result.result.supergraphSdl : null,
       };
     },
   };
@@ -188,17 +178,12 @@ const single: Orchestrator = {
   },
 };
 
-const createStitching: (
-  redis: RedisInstance,
-  logger: FastifyLoggerInstance
-) => Orchestrator = (redis, logger) => {
+const createStitching: (redis: RedisInstance, logger: FastifyLoggerInstance) => Orchestrator = (redis, logger) => {
   const stitchAndPrint = reuse(
     async (schemas: ValidationInput) => {
       return printSchema(
         stitchSchemas({
-          typeDefs: schemas.map((schema) =>
-            trimDescriptions(parse(schema.raw))
-          ),
+          typeDefs: schemas.map(schema => trimDescriptions(parse(schema.raw))),
         })
       );
     },
@@ -209,11 +194,9 @@ const createStitching: (
 
   return {
     async validate(schemas) {
-      const parsed = schemas.map((s) => parse(s.raw));
+      const parsed = schemas.map(s => parse(s.raw));
 
-      const errors = parsed
-        .map((schema) => validateStitchedSchema(schema))
-        .flat();
+      const errors = parsed.map(schema => validateStitchedSchema(schema)).flat();
 
       try {
         await stitchAndPrint(schemas);
@@ -234,9 +217,7 @@ const createStitching: (
       };
     },
     async supergraph() {
-      throw new Error(
-        'Stitching schema orchestrator does not support supergraph'
-      );
+      throw new Error('Stitching schema orchestrator does not support supergraph');
     },
   };
 };
@@ -244,16 +225,10 @@ const createStitching: (
 function validateStitchedSchema(doc: DocumentNode) {
   const { allStitchingDirectivesTypeDefs } = stitchingDirectives();
 
-  return validateSDL(
-    concatAST([parse(allStitchingDirectivesTypeDefs), doc])
-  ).map(toValidationError);
+  return validateSDL(concatAST([parse(allStitchingDirectivesTypeDefs), doc])).map(toValidationError);
 }
 
-export function pickOrchestrator(
-  type: SchemaType,
-  redis: RedisInstance,
-  logger: FastifyLoggerInstance
-) {
+export function pickOrchestrator(type: SchemaType, redis: RedisInstance, logger: FastifyLoggerInstance) {
   switch (type) {
     case 'federation':
       logger.debug('Using federation orchestrator');
@@ -279,10 +254,7 @@ interface ActionCompleted<T> {
 }
 
 function createChecksum<TInput>(input: TInput, uniqueKey: string): string {
-  return createHash('sha256')
-    .update(JSON.stringify(input))
-    .update(`key:${uniqueKey}`)
-    .digest('hex');
+  return createHash('sha256').update(JSON.stringify(input)).update(`key:${uniqueKey}`).digest('hex');
 }
 
 async function readAction<O>(
@@ -298,18 +270,11 @@ async function readAction<O>(
   return null;
 }
 
-async function startAction(
-  checksum: string,
-  redis: RedisInstance,
-  logger: FastifyLoggerInstance
-): Promise<boolean> {
+async function startAction(checksum: string, redis: RedisInstance, logger: FastifyLoggerInstance): Promise<boolean> {
   const key = `schema-service:${checksum}`;
   logger.debug('Starting action (checksum=%s)', checksum);
   // Set and lock + expire
-  const inserted = await redis.setnx(
-    key,
-    JSON.stringify({ status: 'started' })
-  );
+  const inserted = await redis.setnx(key, JSON.stringify({ status: 'started' }));
 
   if (inserted) {
     logger.debug('Started action (checksum=%s)', checksum);
@@ -340,11 +305,7 @@ async function completeAction<O>(
   );
 }
 
-async function removeAction(
-  checksum: string,
-  redis: RedisInstance,
-  logger: FastifyLoggerInstance
-): Promise<void> {
+async function removeAction(checksum: string, redis: RedisInstance, logger: FastifyLoggerInstance): Promise<void> {
   logger.debug('Removing action (checksum=%s)', checksum);
   const key = `schema-service:${checksum}`;
   await redis.del(key);
@@ -373,7 +334,7 @@ function reuse<I, O>(
         return reuseFactory(input, attempt + 1);
       }
 
-      const result = await factory(input).catch(async (error) => {
+      const result = await factory(input).catch(async error => {
         await removeAction(checksum, redis, logger);
         return Promise.reject(error);
       });
@@ -384,12 +345,8 @@ function reuse<I, O>(
 
     const startedAt = Date.now();
     while (cached && cached.status !== 'completed') {
-      logger.debug(
-        'Waiting action to complete (checksum=%s, time=%s)',
-        checksum,
-        Date.now() - startedAt
-      );
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      logger.debug('Waiting action to complete (checksum=%s, time=%s)', checksum, Date.now() - startedAt);
+      await new Promise(resolve => setTimeout(resolve, 500));
       cached = await readAction<O>(checksum, redis);
 
       if (Date.now() - startedAt > 30_000) {

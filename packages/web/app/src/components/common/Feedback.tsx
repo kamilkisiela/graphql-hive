@@ -35,11 +35,7 @@ export const Feedback: React.FC<{
       feedback: '',
     },
     validationSchema: Yup.object().shape({
-      feedback: Yup.string()
-        .min(1)
-        .required(
-          `Hey hey hey, you opened the feedback modal and won't even say Hi?`
-        ),
+      feedback: Yup.string().min(1).required(`Hey hey hey, you opened the feedback modal and won't even say Hi?`),
     }),
     async onSubmit(values) {
       if (formik.isValid && !mutation.fetching) {
@@ -62,18 +58,10 @@ export const Feedback: React.FC<{
   const sending = mutation.fetching;
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      size="xl"
-      closeOnEsc={false}
-      closeOnOverlayClick={false}
-    >
+    <Modal isOpen={isOpen} onClose={onClose} size="xl" closeOnEsc={false} closeOnOverlayClick={false}>
       <ModalOverlay />
       <ModalContent as="form" onSubmit={formik.handleSubmit}>
-        <ModalHeader>
-          {state === 'FORM' ? 'Send feedback' : 'We got your feedback'}
-        </ModalHeader>
+        <ModalHeader>{state === 'FORM' ? 'Send feedback' : 'We got your feedback'}</ModalHeader>
         <ModalBody>
           {state === 'FORM' ? (
             <div tw="space-y-6">
@@ -104,8 +92,7 @@ export const Feedback: React.FC<{
                 Thank you!
               </AlertTitle>
               <AlertDescription maxWidth="sm">
-                We sincerely appreciate your comment because it helps us improve
-                GraphQL Hive.
+                We sincerely appreciate your comment because it helps us improve GraphQL Hive.
               </AlertDescription>
             </Alert>
           )}
@@ -116,12 +103,7 @@ export const Feedback: React.FC<{
               <Button variant="ghost" type="button" onClick={onClose}>
                 Cancel
               </Button>
-              <Button
-                colorScheme="primary"
-                type="submit"
-                isLoading={sending}
-                disabled={sending || !formik.isValid}
-              >
+              <Button colorScheme="primary" type="submit" isLoading={sending} disabled={sending || !formik.isValid}>
                 Send feedback
               </Button>
             </>

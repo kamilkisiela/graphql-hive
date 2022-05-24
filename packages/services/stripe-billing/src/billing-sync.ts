@@ -39,50 +39,34 @@ export function createStripeBilling(config: {
         active: true,
         type: 'service',
       })
-      .then((r) => r.data.filter((v) => v.metadata?.hive_plan));
+      .then(r => r.data.filter(v => v.metadata?.hive_plan));
 
     if (relevantProducts.length !== 1) {
-      throw new Error(
-        `Invalid count of Hive products configured in Stripe: ${relevantProducts.length}`
-      );
+      throw new Error(`Invalid count of Hive products configured in Stripe: ${relevantProducts.length}`);
     }
 
     const prices = (await stripeApi.prices.list({
       product: relevantProducts[0].id,
       active: true,
       expand: ['data.tiers'],
-    })) as Stripe.Response<
-      Stripe.ApiList<Stripe.Price & { tiers: Stripe.Price.Tier[] }>
-    >;
+    })) as Stripe.Response<Stripe.ApiList<Stripe.Price & { tiers: Stripe.Price.Tier[] }>>;
 
-    const schemaPushesPrice = prices.data.find(
-      (v) => v.metadata?.hive_usage === 'schema_pushes'
-    );
+    const schemaPushesPrice = prices.data.find(v => v.metadata?.hive_usage === 'schema_pushes');
 
     if (!schemaPushesPrice) {
-      throw new Error(
-        `Failed to find Stripe price ID with Hive metadata for schema-pushses`
-      );
+      throw new Error(`Failed to find Stripe price ID with Hive metadata for schema-pushses`);
     }
 
-    const operationsPrice = prices.data.find(
-      (v) => v.metadata?.hive_usage === 'operations'
-    );
+    const operationsPrice = prices.data.find(v => v.metadata?.hive_usage === 'operations');
 
     if (!operationsPrice) {
-      throw new Error(
-        `Failed to find Stripe price ID with Hive metadata for operations`
-      );
+      throw new Error(`Failed to find Stripe price ID with Hive metadata for operations`);
     }
 
-    const basePrice = prices.data.find(
-      (v) => v.metadata?.hive_usage === 'base'
-    );
+    const basePrice = prices.data.find(v => v.metadata?.hive_usage === 'base');
 
     if (!basePrice) {
-      throw new Error(
-        `Failed to find Stripe price ID with Hive metadata for base price`
-      );
+      throw new Error(`Failed to find Stripe price ID with Hive metadata for base price`);
     }
 
     return {
@@ -193,15 +177,10 @@ export function createStripeBilling(config: {
       return true;
     },
     async start() {
-      logger.info(
-        `Stripe Billing Sync starting, will sync Stripe every ${config.stripe.syncIntervalMs}ms...`
-      );
+      logger.info(`Stripe Billing Sync starting, will sync Stripe every ${config.stripe.syncIntervalMs}ms...`);
 
       const stripeData = await loadStripeData$;
-      logger.info(
-        `Stripe is configured correctly, prices info: %o`,
-        stripeData
-      );
+      logger.info(`Stripe is configured correctly, prices info: %o`, stripeData);
 
       // feat(metered-usage)
       // await estimateAndReport().catch((e) => {

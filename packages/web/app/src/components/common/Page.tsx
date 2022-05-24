@@ -44,28 +44,20 @@ const Menu = {
       <li tw="px-3 pb-2">
         <div tw="flex flex-row items-center h-8">
           <span tw="inline-flex justify-center items-center">{icon}</span>
-          <div tw="ml-4 text-sm font-semibold text-gray-500 dark:text-gray-300 tracking-wide">
-            {children}
-          </div>
+          <div tw="ml-4 text-sm font-semibold text-gray-500 dark:text-gray-300 tracking-wide">{children}</div>
         </div>
       </li>
     );
   },
   Item: (item: NavigationItem & { path: string }) => {
-    const active = item.exact
-      ? item.path === item.link
-      : item.path.startsWith(item.link);
+    const active = item.exact ? item.path === item.link : item.path.startsWith(item.link);
 
     return (
       <li>
         <Link href={item.link}>
           <MenuLink href="#" active={active}>
-            <span tw="inline-flex justify-center items-center">
-              {item.icon}
-            </span>
-            <span tw="ml-4 text-sm tracking-wide truncate font-normal">
-              {item.label}
-            </span>
+            <span tw="inline-flex justify-center items-center">{item.icon}</span>
+            <span tw="ml-4 text-sm tracking-wide truncate font-normal">{item.label}</span>
           </MenuLink>
         </Link>
       </li>
@@ -81,19 +73,9 @@ const WithNavigation: React.FC<{}> = ({ children }) => {
     return <>{children}</>;
   }
 
-  const menuTitle = router.targetId
-    ? `Target`
-    : router.projectId
-    ? `Project`
-    : 'Organization';
+  const menuTitle = router.targetId ? `Target` : router.projectId ? `Project` : 'Organization';
 
-  const menuIcon = router.targetId ? (
-    <FiTarget />
-  ) : router.projectId ? (
-    <VscFolder />
-  ) : (
-    <VscOrganization />
-  );
+  const menuIcon = router.targetId ? <FiTarget /> : router.projectId ? <VscFolder /> : <VscOrganization />;
 
   return (
     <PageContainer>

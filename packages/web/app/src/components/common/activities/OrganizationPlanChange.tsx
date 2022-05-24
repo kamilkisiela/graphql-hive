@@ -14,8 +14,7 @@ export const OrganizationPlanChange: React.FC<{
       </Activity.Icon>
       <Activity.Content>
         <Activity.Text>
-          <User user={activity.user} /> changed organization plan to{' '}
-          <Highlight>{activity.newPlan}</Highlight>
+          <User user={activity.user} /> changed organization plan to <Highlight>{activity.newPlan}</Highlight>
         </Activity.Text>
         <Activity.Time>
           <TimeAgo date={activity.createdAt} />

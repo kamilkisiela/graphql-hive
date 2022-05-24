@@ -1,9 +1,6 @@
 import React from 'react';
 
-export function useEventListener<T extends Function>(
-  eventName: string,
-  handler: T
-) {
+export function useEventListener<T extends Function>(eventName: string, handler: T) {
   const savedHandler = React.useRef<T>();
 
   React.useEffect(() => {
@@ -11,7 +8,7 @@ export function useEventListener<T extends Function>(
   }, [handler]);
 
   React.useEffect(() => {
-    const eventListener = (event) => savedHandler.current(event);
+    const eventListener = event => savedHandler.current(event);
 
     window.addEventListener(eventName, eventListener);
 

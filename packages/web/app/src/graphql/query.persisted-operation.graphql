@@ -1,8 +1,4 @@
-query persistedOperation(
-  $organizationId: ID!
-  $projectId: ID!
-  $operationId: ID!
-) {
+query persistedOperation($organizationId: ID!, $projectId: ID!, $operationId: ID!) {
   organization(selector: { organization: $organizationId }) {
     organization {
       ...OrganizationFields
@@ -11,13 +7,7 @@ query persistedOperation(
   project(selector: { organization: $organizationId, project: $projectId }) {
     ...ProjectFields
   }
-  persistedOperation(
-    selector: {
-      organization: $organizationId
-      project: $projectId
-      operation: $operationId
-    }
-  ) {
+  persistedOperation(selector: { organization: $organizationId, project: $projectId, operation: $operationId }) {
     ...PersistedOperationFields
   }
 }

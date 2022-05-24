@@ -20,10 +20,7 @@ export type TokensResponse = {
 
 type Token = TokensResponse | TokenStatus;
 
-export function createTokens(config: {
-  endpoint: string;
-  logger: FastifyLoggerInstance;
-}) {
+export function createTokens(config: { endpoint: string; logger: FastifyLoggerInstance }) {
   const endpoint = config.endpoint.replace(/\/$/, '');
   const tokens = LRU<Promise<Token>>(1000, 30_000);
   const tokensApi = createTRPCClient<TokensApi>({

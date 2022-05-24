@@ -17,10 +17,7 @@ export class CloudflareCDN {
     });
 
     const script = new cf.WorkerScript('hive-ha-worker', {
-      content: readFileSync(
-        resolve(__dirname, '../../packages/services/cdn-worker/dist/worker.js'),
-        'utf-8'
-      ),
+      content: readFileSync(resolve(__dirname, '../../packages/services/cdn-worker/dist/worker.js'), 'utf-8'),
       name: `hive-storage-cdn-${this.envName}`,
       kvNamespaceBindings: [
         {

@@ -52,9 +52,7 @@ MyError.getInitialProps = async (props: NextPageContext) => {
   // If this point is reached, getInitialProps was called without any
   // information about what the error might be. This is unexpected and may
   // indicate a bug introduced in Next.js, so record it in Sentry
-  Sentry.captureException(
-    new Error(`_error.tsx getInitialProps missing data at path: ${asPath}`)
-  );
+  Sentry.captureException(new Error(`_error.tsx getInitialProps missing data at path: ${asPath}`));
   await Sentry.flush(2000);
 
   return errorInitialProps;

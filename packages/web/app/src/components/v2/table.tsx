@@ -13,12 +13,9 @@ export const Table = ({
   return (
     <table className="w-full">
       <tbody>
-        {dataSource?.map((row) => (
-          <tr
-            key={row.id}
-            className="border border-gray-600/10 text-xs odd:bg-gray-600/10"
-          >
-            {columns.map((column) => (
+        {dataSource?.map(row => (
+          <tr key={row.id} className="border border-gray-600/10 text-xs odd:bg-gray-600/10">
+            {columns.map(column => (
               <td
                 key={column.key}
                 className={clsx(

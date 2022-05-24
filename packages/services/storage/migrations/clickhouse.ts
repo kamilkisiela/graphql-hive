@@ -170,7 +170,7 @@ export async function migrateClickHouse() {
         username: config.clickhouse.username,
         password: config.clickhouse.password,
       })
-      .catch((error) => {
+      .catch(error => {
         const body = error?.response?.body;
         if (body) {
           console.error(body);

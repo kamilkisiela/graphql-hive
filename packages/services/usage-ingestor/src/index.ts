@@ -1,11 +1,6 @@
 #!/usr/bin/env node
 import * as Sentry from '@sentry/node';
-import {
-  createServer,
-  startMetrics,
-  ensureEnv,
-  registerShutdown,
-} from '@hive/service-common';
+import { createServer, startMetrics, ensureEnv, registerShutdown } from '@hive/service-common';
 import { createIngestor } from './ingestor';
 
 async function main() {
@@ -88,7 +83,7 @@ async function main() {
   }
 }
 
-main().catch((err) => {
+main().catch(err => {
   Sentry.captureException(err, {
     level: Sentry.Severity.Fatal,
   });

@@ -9,9 +9,7 @@ export interface SchemaReporter {
   dispose(): Promise<void>;
 }
 
-export function createReporting(
-  pluginOptions: HivePluginOptions
-): SchemaReporter {
+export function createReporting(pluginOptions: HivePluginOptions): SchemaReporter {
   if (!pluginOptions.reporting) {
     return {
       report() {},
@@ -28,8 +26,7 @@ export function createReporting(
     {
       logger,
       ...(pluginOptions.agent ?? {}),
-      endpoint:
-        reportingOptions.endpoint ?? 'https://app.graphql-hive.com/registry',
+      endpoint: reportingOptions.endpoint ?? 'https://app.graphql-hive.com/registry',
       token: token,
       enabled: pluginOptions.enabled,
       debug: pluginOptions.debug,
@@ -117,14 +114,10 @@ function isFederatedSchema(schema: GraphQLSchema): boolean {
  * Extracts the SDL of a federated service from a GraphQLSchema object
  * We do it to not send federated schema to the registry but only the original schema provided by user
  */
-async function extractFederationServiceSDL(
-  schema: GraphQLSchema
-): Promise<string> {
+async function extractFederationServiceSDL(schema: GraphQLSchema): Promise<string> {
   const queryType = schema.getQueryType()!;
   const serviceField = queryType.getFields()._service;
-  const resolved = await (
-    serviceField.resolve as () => Promise<{ sdl: string }>
-  )();
+  const resolved = await (serviceField.resolve as () => Promise<{ sdl: string }>)();
   return resolved.sdl;
 }
 
@@ -155,9 +148,7 @@ function printSchemaWithDirectives(schema: GraphQLSchema) {
     // We do it to avoid sending schema definition to the registry, which may be unwanted by federated services or something
     return print({
       kind: Kind.DOCUMENT,
-      definitions: doc.definitions.filter(
-        (def) => def.kind !== Kind.SCHEMA_DEFINITION
-      ),
+      definitions: doc.definitions.filter(def => def.kind !== Kind.SCHEMA_DEFINITION),
     });
   }
 
@@ -166,8 +157,6 @@ function printSchemaWithDirectives(schema: GraphQLSchema) {
 
 async function printToSDL(schema: GraphQLSchema) {
   return stripIgnoredCharacters(
-    isFederatedSchema(schema)
-      ? await extractFederationServiceSDL(schema)
-      : printSchemaWithDirectives(schema)
+    isFederatedSchema(schema) ? await extractFederationServiceSDL(schema) : printSchemaWithDirectives(schema)
   );
 }

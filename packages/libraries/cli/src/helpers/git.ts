@@ -40,8 +40,7 @@ function useGitHubAction(): CIRunner {
     },
     env() {
       const isPr =
-        process.env.GITHUB_EVENT_NAME === 'pull_request' ||
-        process.env.GITHUB_EVENT_NAME === 'pull_request_target';
+        process.env.GITHUB_EVENT_NAME === 'pull_request' || process.env.GITHUB_EVENT_NAME === 'pull_request_target';
 
       if (isPr) {
         try {
@@ -82,10 +81,7 @@ export async function gitInfo(noGit: () => void) {
 
   if (!commit || !author) {
     const rootFromEnv = 'root' in env ? env.root : null;
-    const git =
-      rootFromEnv ??
-      findParentDir(__dirname, '.git') ??
-      findParentDir(process.cwd(), '.git');
+    const git = rootFromEnv ?? findParentDir(__dirname, '.git') ?? findParentDir(process.cwd(), '.git');
 
     if (git) {
       const commits = await gitToJs(git);

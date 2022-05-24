@@ -9,15 +9,13 @@ export const resetDb = async (conn: DatabasePoolConnectionType) => {
     WHERE "schemaname" = 'public';
   `);
 
-  const tablenames = result
-    .map(({ tablename }) => tablename)
-    .filter((tablename) => !migrationTables.includes(tablename));
+  const tablenames = result.map(({ tablename }) => tablename).filter(tablename => !migrationTables.includes(tablename));
 
   if (tablenames.length) {
     await conn.query(sql`
       TRUNCATE TABLE 
         ${sql.join(
-          tablenames.map((name) => sql.identifier([name])),
+          tablenames.map(name => sql.identifier([name])),
           sql`,`
         )}
         RESTART IDENTITY

@@ -2,17 +2,7 @@ import React from 'react';
 import 'twin.macro';
 import { track } from '@/lib/mixpanel';
 import { useQuery, useMutation } from 'urql';
-import {
-  Button,
-  Checkbox,
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  useDisclosure,
-} from '@chakra-ui/react';
+import { Button, Checkbox, Table, Thead, Tbody, Tr, Th, Td, useDisclosure } from '@chakra-ui/react';
 import { FaGoogle, FaGithub, FaKey } from 'react-icons/fa';
 import { Page } from '@/components/common';
 import { CopyValue } from '@/components/common/CopyValue';
@@ -27,10 +17,7 @@ import {
   MemberFieldsFragment,
   AuthProvider,
 } from '@/graphql';
-import {
-  OrganizationAccessScope,
-  useOrganizationAccess,
-} from '@/lib/access/organization';
+import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
 import { useNotifications } from '@/lib/hooks/use-notifications';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { DataWrapper } from '@/components/common/DataWrapper';
@@ -91,12 +78,7 @@ const MemberRow: React.FC<{
 
   return (
     <>
-      <MemberPermisssonsModal
-        isOpen={isOpen}
-        onClose={onClose}
-        member={member}
-        organization={organization}
-      />
+      <MemberPermisssonsModal isOpen={isOpen} onClose={onClose} member={member} organization={organization} />
       <Tr>
         <Td>
           <Checkbox
@@ -136,7 +118,7 @@ const MembersManager: React.FC<{
   const onCheck = React.useCallback(
     (id: string) => {
       if (checked.includes(id)) {
-        setChecked(checked.filter((i) => i !== id));
+        setChecked(checked.filter(i => i !== id));
       } else {
         setChecked(checked.concat(id));
       }
@@ -183,18 +165,16 @@ const MembersManager: React.FC<{
               </Tr>
             </Thead>
             <Tbody>
-              {query.data.organization.organization?.members.nodes.map(
-                (member) => (
-                  <MemberRow
-                    key={member.id}
-                    member={member}
-                    organization={query.data.organization.organization}
-                    owner={query.data.organization.organization.owner}
-                    checked={checked}
-                    onCheck={onCheck}
-                  />
-                )
-              )}
+              {query.data.organization.organization?.members.nodes.map(member => (
+                <MemberRow
+                  key={member.id}
+                  member={member}
+                  organization={query.data.organization.organization}
+                  owner={query.data.organization.organization.owner}
+                  checked={checked}
+                  onCheck={onCheck}
+                />
+              ))}
             </Tbody>
           </Table>
         </div>
@@ -203,9 +183,7 @@ const MembersManager: React.FC<{
   );
 };
 
-const Inner: React.FC<{ organization: OrganizationFieldsFragment }> = ({
-  organization,
-}) => {
+const Inner: React.FC<{ organization: OrganizationFieldsFragment }> = ({ organization }) => {
   const canAccess = useOrganizationAccess({
     scope: OrganizationAccessScope.Members,
     member: organization?.me,
@@ -217,10 +195,7 @@ const Inner: React.FC<{ organization: OrganizationFieldsFragment }> = ({
   }
 
   return (
-    <Page
-      title="Members"
-      subtitle="Invite others to your organization and manage access."
-    >
+    <Page title="Members" subtitle="Invite others to your organization and manage access.">
       <MembersManager organization={organization} />
     </Page>
   );
@@ -228,8 +203,6 @@ const Inner: React.FC<{ organization: OrganizationFieldsFragment }> = ({
 
 export default function OrganizationSettingsPage() {
   return (
-    <OrganizationView title="Members">
-      {({ organization }) => <Inner organization={organization} />}
-    </OrganizationView>
+    <OrganizationView title="Members">{({ organization }) => <Inner organization={organization} />}</OrganizationView>
   );
 }

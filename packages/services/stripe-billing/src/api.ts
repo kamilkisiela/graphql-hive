@@ -84,9 +84,7 @@ export const stripeBillingApiRouter = trpc
         throw new Error(`Organization does not have a subscription record!`);
       }
 
-      const customer = await ctx.stripe.customers.retrieve(
-        organizationBillingRecord.externalBillingReference
-      );
+      const customer = await ctx.stripe.customers.retrieve(organizationBillingRecord.externalBillingReference);
 
       if (customer.deleted === true) {
         await storage.deleteOrganizationBilling({
@@ -100,7 +98,7 @@ export const stripeBillingApiRouter = trpc
         .list({
           customer: organizationBillingRecord.externalBillingReference,
         })
-        .then((v) => v.data.filter((r) => r.metadata?.hive_subscription));
+        .then(v => v.data.filter(r => r.metadata?.hive_subscription));
 
       const actualSubscription = subscriptions[0] || null;
 
@@ -128,25 +126,22 @@ export const stripeBillingApiRouter = trpc
     }),
     async resolve({ ctx, input }) {
       const storage = await ctx.storage$;
-      const [organizationBillingRecord, organization, stripePrices] =
-        await Promise.all([
-          storage.getOrganizationBilling({
-            organization: input.organizationId,
-          }),
-          storage.getOrganization({
-            organization: input.organizationId,
-          }),
-          ctx.stripeData$,
-        ]);
+      const [organizationBillingRecord, organization, stripePrices] = await Promise.all([
+        storage.getOrganizationBilling({
+          organization: input.organizationId,
+        }),
+        storage.getOrganization({
+          organization: input.organizationId,
+        }),
+        ctx.stripeData$,
+      ]);
 
       if (organizationBillingRecord && organization) {
         const allSubscriptions = await ctx.stripe.subscriptions.list({
           customer: organizationBillingRecord.externalBillingReference,
         });
 
-        const actualSubscription = allSubscriptions.data.find(
-          (r) => r.metadata?.hive_subscription
-        );
+        const actualSubscription = allSubscriptions.data.find(r => r.metadata?.hive_subscription);
 
         if (actualSubscription) {
           for (const item of actualSubscription.items.data) {
@@ -170,15 +165,10 @@ export const stripeBillingApiRouter = trpc
         }
 
         if (Object.keys(updateParams).length > 0) {
-          await ctx.stripe.customers.update(
-            organizationBillingRecord.externalBillingReference,
-            updateParams
-          );
+          await ctx.stripe.customers.update(organizationBillingRecord.externalBillingReference, updateParams);
         }
       } else {
-        throw new Error(
-          `Failed to sync subscription for organization: failed to find find active record`
-        );
+        throw new Error(`Failed to sync subscription for organization: failed to find find active record`);
       }
     },
   })
@@ -193,30 +183,23 @@ export const stripeBillingApiRouter = trpc
       });
 
       if (organizationBillingRecord === null) {
-        throw new Error(
-          `Failed to cancel subscription for organization: no existing participant record`
-        );
+        throw new Error(`Failed to cancel subscription for organization: no existing participant record`);
       }
 
       const subscriptions = await ctx.stripe.subscriptions
         .list({
           customer: organizationBillingRecord.externalBillingReference,
         })
-        .then((v) => v.data.filter((r) => r.metadata?.hive_subscription));
+        .then(v => v.data.filter(r => r.metadata?.hive_subscription));
 
       if (subscriptions.length === 0) {
-        throw new Error(
-          `Failed to cancel subscription for organization: failed to find linked Stripe subscriptions`
-        );
+        throw new Error(`Failed to cancel subscription for organization: failed to find linked Stripe subscriptions`);
       }
 
       const actualSubscription = subscriptions[0];
-      const response = await ctx.stripe.subscriptions.del(
-        actualSubscription.id,
-        {
-          prorate: true,
-        }
-      );
+      const response = await ctx.stripe.subscriptions.del(actualSubscription.id, {
+        prorate: true,
+      });
 
       return response;
     },
@@ -257,7 +240,7 @@ export const stripeBillingApiRouter = trpc
               email: orgOwner.user.email,
               name: organization.name,
             })
-            .then((r) => r.id);
+            .then(r => r.id);
 
       if (!organizationBillingRecord) {
         organizationBillingRecord = await storage.createOrganizationBilling({
@@ -277,9 +260,7 @@ export const stripeBillingApiRouter = trpc
       let paymentMethodId: string | null = null;
 
       if (input.paymentMethodId) {
-        const paymentMethodConfiguredAlready = existingPaymentMethods.find(
-          (v) => v.id === input.paymentMethodId
-        );
+        const paymentMethodConfiguredAlready = existingPaymentMethods.find(v => v.id === input.paymentMethodId);
 
         if (paymentMethodConfiguredAlready) {
           paymentMethodId = paymentMethodConfiguredAlready.id;
@@ -295,9 +276,7 @@ export const stripeBillingApiRouter = trpc
       }
 
       if (!paymentMethodId) {
-        throw new Error(
-          `Payment method is not specified, and customer does not have it configured.`
-        );
+        throw new Error(`Payment method is not specified, and customer does not have it configured.`);
       }
 
       const stripePrices = await ctx.stripeData$;
@@ -310,9 +289,7 @@ export const stripeBillingApiRouter = trpc
         customer: customerId,
         default_payment_method: paymentMethodId,
         trial_end: Math.floor(addDays(new Date(), 14).getTime() / 1000),
-        backdate_start_date: Math.floor(
-          startOfMonth(new Date()).getTime() / 1000
-        ),
+        backdate_start_date: Math.floor(startOfMonth(new Date()).getTime() / 1000),
         items: [
           {
             price: stripePrices.basePrice.id,
@@ -340,16 +317,17 @@ export const stripeBillingApiRouter = trpc
 export type StripeBillingApi = typeof stripeBillingApiRouter;
 
 export type StripeBillingApiQuery = keyof StripeBillingApi['_def']['queries'];
-export type StripeBillingQueryOutput<TRouteKey extends StripeBillingApiQuery> =
-  inferProcedureOutput<StripeBillingApi['_def']['queries'][TRouteKey]>;
-export type StripeBillingQueryInput<TRouteKey extends StripeBillingApiQuery> =
-  inferProcedureInput<StripeBillingApi['_def']['queries'][TRouteKey]>;
+export type StripeBillingQueryOutput<TRouteKey extends StripeBillingApiQuery> = inferProcedureOutput<
+  StripeBillingApi['_def']['queries'][TRouteKey]
+>;
+export type StripeBillingQueryInput<TRouteKey extends StripeBillingApiQuery> = inferProcedureInput<
+  StripeBillingApi['_def']['queries'][TRouteKey]
+>;
 
-export type StripeBillingApiMutation =
-  keyof StripeBillingApi['_def']['mutations'];
-export type StripeBillingMutationOutput<
-  TRouteKey extends StripeBillingApiMutation
-> = inferProcedureOutput<StripeBillingApi['_def']['mutations'][TRouteKey]>;
-export type StripeBillingMutationInput<
-  TRouteKey extends StripeBillingApiMutation
-> = inferProcedureInput<StripeBillingApi['_def']['mutations'][TRouteKey]>;
+export type StripeBillingApiMutation = keyof StripeBillingApi['_def']['mutations'];
+export type StripeBillingMutationOutput<TRouteKey extends StripeBillingApiMutation> = inferProcedureOutput<
+  StripeBillingApi['_def']['mutations'][TRouteKey]
+>;
+export type StripeBillingMutationInput<TRouteKey extends StripeBillingApiMutation> = inferProcedureInput<
+  StripeBillingApi['_def']['mutations'][TRouteKey]
+>;

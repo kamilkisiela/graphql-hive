@@ -35,14 +35,11 @@ if (process.env.MIGRATOR === 'up' && !isCreateCommand && !isDownCommand) {
     .then(() => {
       process.exit(0);
     })
-    .catch((error) => {
+    .catch(error => {
       console.error(error);
       process.exit(1);
     });
-} else if (
-  import.meta.url === url.pathToFileURL(process.argv[1]).href ||
-  require.main === module
-) {
+} else if (import.meta.url === url.pathToFileURL(process.argv[1]).href || require.main === module) {
   console.log('Running as a CLI');
   migrator.runAsCLI();
 }

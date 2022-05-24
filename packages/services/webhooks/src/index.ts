@@ -1,11 +1,5 @@
 #!/usr/bin/env node
-import {
-  createServer,
-  createErrorHandler,
-  ensureEnv,
-  startMetrics,
-  registerShutdown,
-} from '@hive/service-common';
+import { createServer, createErrorHandler, ensureEnv, startMetrics, registerShutdown } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
 import type { WebhookInput } from './types';
 import { createScheduler } from './scheduler';
@@ -98,7 +92,7 @@ async function main() {
   }
 }
 
-main().catch((err) => {
+main().catch(err => {
   Sentry.captureException(err, {
     level: Sentry.Severity.Fatal,
   });

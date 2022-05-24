@@ -28,23 +28,21 @@ export const OrganizationCreator: React.FC<{
   const [{ fetching }, mutate] = useMutation(CreateOrganizationDocument);
   const [name, setName] = React.useState('');
   const submit = React.useCallback(
-    (evt) => {
+    evt => {
       evt.preventDefault();
       if (name) {
         mutate({
           input: {
             name,
           },
-        }).then((result) => {
+        }).then(result => {
           if (!result.data?.createOrganization.ok) {
             return;
           }
 
           onClose();
           router.visitOrganization({
-            organizationId:
-              result.data.createOrganization.ok.createdOrganizationPayload
-                .organization.cleanId,
+            organizationId: result.data.createOrganization.ok.createdOrganizationPayload.organization.cleanId,
           });
         });
       }
@@ -53,7 +51,7 @@ export const OrganizationCreator: React.FC<{
   );
 
   const onNameChange = React.useCallback(
-    (evt) => {
+    evt => {
       setName(evt.target.value);
     },
     [setName]
@@ -70,8 +68,7 @@ export const OrganizationCreator: React.FC<{
             An organization is built on top of <Label>Projects</Label>.
           </Description>
           <Description>
-            You will become an <Label>admin</Label> and don't worry, you can add
-            members later.
+            You will become an <Label>admin</Label> and don't worry, you can add members later.
           </Description>
           <div tw="pt-6 space-y-6">
             <FormControl>
@@ -88,12 +85,7 @@ export const OrganizationCreator: React.FC<{
           </div>
         </ModalBody>
         <ModalFooter tw="space-x-6">
-          <Button
-            variant="ghost"
-            type="button"
-            disabled={fetching}
-            onClick={onClose}
-          >
+          <Button variant="ghost" type="button" disabled={fetching} onClick={onClose}>
             Cancel
           </Button>
           <Button colorScheme="primary" type="submit" disabled={fetching}>

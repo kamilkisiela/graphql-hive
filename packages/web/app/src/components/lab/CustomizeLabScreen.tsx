@@ -1,12 +1,5 @@
 import { useTracker } from '@/lib/hooks/use-tracker';
-import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalCloseButton,
-} from '@chakra-ui/react';
+import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton } from '@chakra-ui/react';
 import { Description } from '@/components/common';
 
 export const CustomizeLabModal: React.FC<{

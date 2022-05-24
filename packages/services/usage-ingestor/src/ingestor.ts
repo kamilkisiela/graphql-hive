@@ -73,7 +73,7 @@ export function createIngestor(config: {
         }),
     logLevel: logLevel.INFO,
     logCreator() {
-      return (entry) => {
+      return entry => {
         logger[levelMap[entry.level]]({
           ...entry.log,
           message: undefined,
@@ -137,7 +137,7 @@ export function createIngestor(config: {
           processor,
           writer,
         })
-          .catch((error) => {
+          .catch(error => {
             errors.inc();
             return Promise.reject(error);
           })
@@ -179,34 +179,30 @@ async function processMessage({
 }) {
   reportMessageBytes.observe(message.value!.byteLength);
   // Decompress and parse the message to get a list of reports
-  const rawReports: RawReport[] = JSON.parse(
-    (await decompress(message.value!)).toString()
-  );
+  const rawReports: RawReport[] = JSON.parse((await decompress(message.value!)).toString());
 
-  const { operations, registryRecords } = await processor.processReports(
-    rawReports
-  );
+  const { operations, registryRecords } = await processor.processReports(rawReports);
 
   try {
     // .then and .catch looks weird but async/await with try/catch and Promise.all is even weirder
     await Promise.all([
       writer
         .writeRegistry(registryRecords)
-        .then((value) => {
+        .then(value => {
           ingestedOperationRegistryWrites.inc(registryRecords.length);
           return Promise.resolve(value);
         })
-        .catch((error) => {
+        .catch(error => {
           ingestedOperationRegistryFailures.inc(registryRecords.length);
           return Promise.reject(error);
         }),
       writer
         .writeOperations(operations)
-        .then((value) => {
+        .then(value => {
           ingestedOperationsWrites.inc(operations.length);
           return Promise.resolve(value);
         })
-        .catch((error) => {
+        .catch(error => {
           ingestedOperationsFailures.inc(operations.length);
           // We want to retry the kafka message only if the write to operations_new table fails.
           // Why? Because if we retry the message for operation_registry, we will have duplicate.

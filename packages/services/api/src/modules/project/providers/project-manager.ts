@@ -3,11 +3,7 @@ import { paramCase } from 'param-case';
 import type { Project, ProjectType } from '../../../shared/entities';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { Logger } from '../../shared/providers/logger';
-import {
-  Storage,
-  OrganizationSelector,
-  ProjectSelector,
-} from '../../shared/providers/storage';
+import { Storage, OrganizationSelector, ProjectSelector } from '../../shared/providers/storage';
 import { NullableAndPartial, share, uuid } from '../../../shared/helpers';
 import { SchemaManager } from '../../schema/providers/schema-manager';
 import type { CustomOrchestratorConfig } from '../../schema/providers/orchestrators/custom';
@@ -81,15 +77,8 @@ export class ProjectManager {
     return project;
   }
 
-  async deleteProject({
-    organization,
-    project,
-  }: ProjectSelector): Promise<Project> {
-    this.logger.info(
-      'Deleting a project (project=%s, organization=%s)',
-      project,
-      organization
-    );
+  async deleteProject({ organization, project }: ProjectSelector): Promise<Project> {
+    this.logger.info('Deleting a project (project=%s, organization=%s)', project, organization);
     await this.authManager.ensureProjectAccess({
       project,
       organization,

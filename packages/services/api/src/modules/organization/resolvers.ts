@@ -11,9 +11,7 @@ const OrganizationNameModel = z.string().min(2).max(50);
 export const resolvers: OrganizationModule.Resolvers = {
   Query: {
     async organization(_, { selector }, { injector }) {
-      const organization = await injector
-        .get(IdTranslator)
-        .translateOrganizationId(selector);
+      const organization = await injector.get(IdTranslator).translateOrganizationId(selector);
 
       return {
         selector,
@@ -26,11 +24,9 @@ export const resolvers: OrganizationModule.Resolvers = {
       return injector.get(OrganizationManager).getOrganizations();
     },
     async organizationByInviteCode(_, { code }, { injector }) {
-      const organization = await injector
-        .get(OrganizationManager)
-        .getOrganizationByInviteCode({
-          code,
-        });
+      const organization = await injector.get(OrganizationManager).getOrganizationByInviteCode({
+        code,
+      });
 
       if ('message' in organization) {
         return organization;
@@ -62,13 +58,11 @@ export const resolvers: OrganizationModule.Resolvers = {
       }
 
       const user = await injector.get(AuthManager).getCurrentUser();
-      const organization = await injector
-        .get(OrganizationManager)
-        .createOrganization({
-          name: input.name,
-          type: OrganizationType.REGULAR,
-          user,
-        });
+      const organization = await injector.get(OrganizationManager).createOrganization({
+        name: input.name,
+        type: OrganizationType.REGULAR,
+        user,
+      });
 
       return {
         ok: {
@@ -86,11 +80,9 @@ export const resolvers: OrganizationModule.Resolvers = {
       const organizationId = await translator.translateOrganizationId({
         organization: selector.organization,
       });
-      const organization = await injector
-        .get(OrganizationManager)
-        .deleteOrganization({
-          organization: organizationId,
-        });
+      const organization = await injector.get(OrganizationManager).deleteOrganization({
+        organization: organizationId,
+      });
       return {
         selector: {
           organization: organizationId,
@@ -108,16 +100,12 @@ export const resolvers: OrganizationModule.Resolvers = {
       if (!result.success) {
         return {
           error: {
-            message:
-              result.error.formErrors.fieldErrors.name?.[0] ??
-              'Changing the organization name failed.',
+            message: result.error.formErrors.fieldErrors.name?.[0] ?? 'Changing the organization name failed.',
           },
         };
       }
 
-      const organizationId = await injector
-        .get(IdTranslator)
-        .translateOrganizationId(input);
+      const organizationId = await injector.get(IdTranslator).translateOrganizationId(input);
 
       const organization = await injector.get(OrganizationManager).updateName({
         name: input.name,
@@ -136,9 +124,7 @@ export const resolvers: OrganizationModule.Resolvers = {
       };
     },
     async joinOrganization(_, { code }, { injector }) {
-      const organization = await injector
-        .get(OrganizationManager)
-        .joinOrganization({ code });
+      const organization = await injector.get(OrganizationManager).joinOrganization({ code });
 
       if ('message' in organization) {
         return organization;
@@ -153,9 +139,7 @@ export const resolvers: OrganizationModule.Resolvers = {
       };
     },
     async resetInviteCode(_, { selector }, { injector }) {
-      const organizationId = await injector
-        .get(IdTranslator)
-        .translateOrganizationId(selector);
+      const organizationId = await injector.get(IdTranslator).translateOrganizationId(selector);
       const organizationManager = injector.get(OrganizationManager);
       const organization = organizationManager.resetInviteCode({
         organization: organizationId,
@@ -167,9 +151,7 @@ export const resolvers: OrganizationModule.Resolvers = {
       };
     },
     async deleteOrganizationMembers(_, { selector }, { injector }) {
-      const organizationId = await injector
-        .get(IdTranslator)
-        .translateOrganizationId(selector);
+      const organizationId = await injector.get(IdTranslator).translateOrganizationId(selector);
       const organization = await injector
         .get(OrganizationManager)
         .deleteMembers({ organization: organizationId, users: selector.users });
@@ -180,23 +162,19 @@ export const resolvers: OrganizationModule.Resolvers = {
       };
     },
     async updateOrganizationMemberAccess(_, { input }, { injector }) {
-      const organization = await injector
-        .get(IdTranslator)
-        .translateOrganizationId(input);
+      const organization = await injector.get(IdTranslator).translateOrganizationId(input);
 
       return {
         selector: {
           organization: input.organization,
         },
-        organization: await injector
-          .get(OrganizationManager)
-          .updateMemberAccess({
-            organization,
-            user: input.user,
-            organizationScopes: input.organizationScopes,
-            projectScopes: input.projectScopes,
-            targetScopes: input.targetScopes,
-          }),
+        organization: await injector.get(OrganizationManager).updateMemberAccess({
+          organization,
+          user: input.user,
+          organizationScopes: input.organizationScopes,
+          projectScopes: input.projectScopes,
+          targetScopes: input.targetScopes,
+        }),
       };
     },
   },
@@ -205,22 +183,16 @@ export const resolvers: OrganizationModule.Resolvers = {
       return !!organization.id;
     },
     owner(organization, _, { injector }) {
-      return injector
-        .get(OrganizationManager)
-        .getOrganizationOwner({ organization: organization.id });
+      return injector.get(OrganizationManager).getOrganizationOwner({ organization: organization.id });
     },
     async me(organization, _, { injector }) {
       const me = await injector.get(AuthManager).getCurrentUser();
-      const members = await injector
-        .get(OrganizationManager)
-        .getOrganizationMembers({ organization: organization.id });
+      const members = await injector.get(OrganizationManager).getOrganizationMembers({ organization: organization.id });
 
-      return members.find((m) => m.id === me.id)!;
+      return members.find(m => m.id === me.id)!;
     },
     members(organization, _, { injector }) {
-      return injector
-        .get(OrganizationManager)
-        .getOrganizationMembers({ organization: organization.id });
+      return injector.get(OrganizationManager).getOrganizationMembers({ organization: organization.id });
     },
   },
   OrganizationInvitationError: {

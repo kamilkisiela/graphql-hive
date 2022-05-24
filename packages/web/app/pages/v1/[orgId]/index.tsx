@@ -6,25 +6,16 @@ import { OrganizationView } from '@/components/organization/View';
 import { OrganizationProjects } from '@/components/organization/Projects';
 import { OrganizationActivities } from '@/components/organization/Activities';
 import { ProjectCreatorTrigger } from '@/components/project/Creator';
-import {
-  OrganizationAccessScope,
-  useOrganizationAccess,
-} from '@/lib/access/organization';
+import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
 
-const Inner: React.FC<{ organization: OrganizationFieldsFragment }> = ({
-  organization,
-}) => {
+const Inner: React.FC<{ organization: OrganizationFieldsFragment }> = ({ organization }) => {
   const canCreate = useOrganizationAccess({
     scope: OrganizationAccessScope.Read,
     member: organization?.me,
   });
 
   return (
-    <Page
-      title={organization.name}
-      subtitle="An overview"
-      actions={canCreate && <ProjectCreatorTrigger />}
-    >
+    <Page title={organization.name} subtitle="An overview" actions={canCreate && <ProjectCreatorTrigger />}>
       <div tw="w-full flex flex-row">
         <div tw="flex-grow mr-12">
           <OrganizationProjects org={organization} />
@@ -39,8 +30,6 @@ const Inner: React.FC<{ organization: OrganizationFieldsFragment }> = ({
 
 export default function OrganizationPage() {
   return (
-    <OrganizationView title="Overview">
-      {({ organization }) => <Inner organization={organization} />}
-    </OrganizationView>
+    <OrganizationView title="Overview">{({ organization }) => <Inner organization={organization} />}</OrganizationView>
   );
 }

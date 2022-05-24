@@ -21,10 +21,7 @@ export interface CollectedOperation {
   };
 }
 
-export async function collect(params: {
-  operations: CollectedOperation[];
-  token: string;
-}) {
+export async function collect(params: { operations: CollectedOperation[]; token: string }) {
   const res = await axios.post(`http://${usageAddress}`, params.operations, {
     headers: {
       'Content-Type': 'application/json',

@@ -12,10 +12,7 @@ export const fullNameLengthBoundaries = {
   max: 25,
 } as const;
 
-function buildUserCreatePayloadFromInput(input: {
-  external: string;
-  email: string;
-}) {
+function buildUserCreatePayloadFromInput(input: { external: string; email: string }) {
   const displayName = input.email
     .split('@')[0]
     .slice(0, displayNameLengthBoundaries.max)
@@ -51,9 +48,7 @@ export class UserManager {
 
   async createUser(input: { external: string; email: string }) {
     this.logger.info('Creating new user (input=%o)', input);
-    const user = await this.storage.createUser(
-      buildUserCreatePayloadFromInput(input)
-    );
+    const user = await this.storage.createUser(buildUserCreatePayloadFromInput(input));
 
     return user;
   }

@@ -26,8 +26,7 @@ export class CryptoProvider {
     const secretBuffer = Buffer.from(this.encryptionSecret, 'latin1');
     const iv = crypto.randomBytes(IV);
     const cipher = crypto.createCipheriv(ALG, secretBuffer, iv);
-    const ciphered =
-      cipher.update(text, IN_ENC, OUT_ENC) + cipher.final(OUT_ENC);
+    const ciphered = cipher.update(text, IN_ENC, OUT_ENC) + cipher.final(OUT_ENC);
     return iv.toString(OUT_ENC) + ':' + ciphered;
   }
 
@@ -48,9 +47,6 @@ export class CryptoProvider {
     const iv = Buffer.from(components.shift() || '', OUT_ENC);
     const decipher = crypto.createDecipheriv(ALG, secretBuffer, iv);
 
-    return (
-      decipher.update(components.join(':'), OUT_ENC, IN_ENC) +
-      decipher.final(IN_ENC)
-    );
+    return decipher.update(components.join(':'), OUT_ENC, IN_ENC) + decipher.final(IN_ENC);
   }
 }

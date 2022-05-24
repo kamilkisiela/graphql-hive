@@ -4,6 +4,4 @@ export interface WebhooksConfig {
   endpoint: string;
 }
 
-export const WEBHOOKS_CONFIG = new InjectionToken<WebhooksConfig>(
-  'webhooks-endpoint'
-);
+export const WEBHOOKS_CONFIG = new InjectionToken<WebhooksConfig>('webhooks-endpoint');

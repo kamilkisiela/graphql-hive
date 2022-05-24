@@ -1,11 +1,6 @@
 import { Injectable, Scope } from 'graphql-modules';
 import type { GraphQLSchema } from 'graphql';
-import {
-  diff,
-  Change,
-  CriticalityLevel,
-  DiffRule,
-} from '@graphql-inspector/core';
+import { diff, Change, CriticalityLevel, DiffRule } from '@graphql-inspector/core';
 import type * as Types from '../../../__generated__/types';
 import type { TargetSettings } from '../../../shared/entities';
 import { Logger } from '../../shared/providers/logger';
@@ -26,11 +21,7 @@ const criticalityMap: Record<CriticalityLevel, Types.CriticalityLevel> = {
 export class Inspector {
   private logger: Logger;
 
-  constructor(
-    logger: Logger,
-    private operationsManager: OperationsManager,
-    private targetManager: TargetManager
-  ) {
+  constructor(logger: Logger, private operationsManager: OperationsManager, private targetManager: TargetManager) {
     this.logger = logger.child({ service: 'Inspector' });
   }
 
@@ -43,7 +34,7 @@ export class Inspector {
     this.logger.debug('Comparing Schemas');
 
     const changes = await diff(existing, incoming, [DiffRule.considerUsage], {
-      checkUsage: async (fields) => {
+      checkUsage: async fields => {
         this.logger.debug('Checking usage (fields=%s)', fields.length);
         const BREAKING = false;
         const NOT_BREAKING = true;
@@ -74,26 +65,14 @@ export class Inspector {
 
         this.logger.debug('Got the stats');
 
-        function useStats({
-          type,
-          field,
-          argument,
-        }: {
-          type: string;
-          field?: string;
-          argument?: string;
-        }) {
-          const stats = statsList!.find(
-            (s) =>
-              s.field === field && s.type === type && s.argument === argument
-          );
+        function useStats({ type, field, argument }: { type: string; field?: string; argument?: string }) {
+          const stats = statsList!.find(s => s.field === field && s.type === type && s.argument === argument);
 
           if (!stats) {
             return NOT_BREAKING;
           }
 
-          const aboveThreshold =
-            stats.percentage > settings!.validation.percentage;
+          const aboveThreshold = stats.percentage > settings!.validation.percentage;
           return aboveThreshold ? BREAKING : NOT_BREAKING;
         }
 
@@ -102,7 +81,7 @@ export class Inspector {
     });
 
     return changes
-      .map((change) => this.translateChange(change))
+      .map(change => this.translateChange(change))
       .sort((a, b) => a.criticality.localeCompare(b.criticality));
   }
 
@@ -124,13 +103,8 @@ export class Inspector {
         return null;
       }
 
-      if (
-        settings.validation.enabled &&
-        settings.validation.targets.length === 0
-      ) {
-        this.logger.debug(
-          'Usage validation enabled but no targets to check against'
-        );
+      if (settings.validation.enabled && settings.validation.targets.length === 0) {
+        this.logger.debug('Usage validation enabled but no targets to check against');
         this.logger.debug('Mark all as used');
         return null;
       }

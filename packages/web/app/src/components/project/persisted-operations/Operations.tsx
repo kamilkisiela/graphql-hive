@@ -10,7 +10,7 @@ export const PersistedOperations: React.FC<{
 }> = ({ persistedOperations, onSelect, selected }) => {
   return (
     <HorizontalSelect.List>
-      {persistedOperations.map((operation) => {
+      {persistedOperations.map(operation => {
         return (
           <HorizontalSelect.Row
             key={operation.id}

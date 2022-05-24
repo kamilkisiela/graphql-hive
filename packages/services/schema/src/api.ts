@@ -41,19 +41,11 @@ export const schemaBuilderApiRouter = trpc
         })
         .inc();
       try {
-        const orchestrator = pickOrchestrator(
-          input.type,
-          ctx.redis,
-          ctx.logger
-        );
+        const orchestrator = pickOrchestrator(input.type, ctx.redis, ctx.logger);
 
         return await orchestrator.supergraph(input.schemas);
       } catch (error) {
-        ctx.errorHandler(
-          'Failed to build a supergraph',
-          error as Error,
-          ctx.logger
-        );
+        ctx.errorHandler('Failed to build a supergraph', error as Error, ctx.logger);
 
         throw error;
       }
@@ -73,18 +65,10 @@ export const schemaBuilderApiRouter = trpc
         })
         .inc();
       try {
-        const orchestrator = pickOrchestrator(
-          input.type,
-          ctx.redis,
-          ctx.logger
-        );
+        const orchestrator = pickOrchestrator(input.type, ctx.redis, ctx.logger);
         return await orchestrator.validate(input.schemas);
       } catch (error) {
-        ctx.errorHandler(
-          'Failed to validate a schema',
-          error as Error,
-          ctx.logger
-        );
+        ctx.errorHandler('Failed to validate a schema', error as Error, ctx.logger);
 
         throw error;
       }
@@ -104,19 +88,11 @@ export const schemaBuilderApiRouter = trpc
         })
         .inc();
       try {
-        const orchestrator = pickOrchestrator(
-          input.type,
-          ctx.redis,
-          ctx.logger
-        );
+        const orchestrator = pickOrchestrator(input.type, ctx.redis, ctx.logger);
 
         return await orchestrator.build(input.schemas);
       } catch (error) {
-        ctx.errorHandler(
-          'Failed to build a schema',
-          error as Error,
-          ctx.logger
-        );
+        ctx.errorHandler('Failed to build a schema', error as Error, ctx.logger);
 
         throw error;
       }
@@ -124,9 +100,8 @@ export const schemaBuilderApiRouter = trpc
   });
 
 export type SchemaBuilderApi = typeof schemaBuilderApiRouter;
-export type SchemaBuilderApiMutate =
-  keyof SchemaBuilderApi['_def']['mutations'];
+export type SchemaBuilderApiMutate = keyof SchemaBuilderApi['_def']['mutations'];
 
-export type SchemaBuilderMutationInput<
-  TRouteKey extends SchemaBuilderApiMutate
-> = inferProcedureInput<SchemaBuilderApi['_def']['mutations'][TRouteKey]>;
+export type SchemaBuilderMutationInput<TRouteKey extends SchemaBuilderApiMutate> = inferProcedureInput<
+  SchemaBuilderApi['_def']['mutations'][TRouteKey]
+>;

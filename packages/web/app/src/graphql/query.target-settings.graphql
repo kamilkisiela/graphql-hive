@@ -1,7 +1,4 @@
-query targetSettings(
-  $selector: TargetSelectorInput!
-  $targetsSelector: ProjectSelectorInput!
-) {
+query targetSettings($selector: TargetSelectorInput!, $targetsSelector: ProjectSelectorInput!) {
   targetSettings(selector: $selector) {
     ...TargetSettingsFields
   }

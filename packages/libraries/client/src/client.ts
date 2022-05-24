@@ -96,20 +96,8 @@ export function createHive(options: HivePluginOptions): HiveClient {
         if (result.data?.tokenInfo.__typename === 'TokenInfo') {
           const { tokenInfo } = result.data;
 
-          const {
-            organization,
-            project,
-            target,
-            canReportSchema,
-            canCollectUsage,
-            canReadOperations,
-          } = tokenInfo;
-          const print = createPrinter([
-            tokenInfo.token.name,
-            organization.name,
-            project.name,
-            target.name,
-          ]);
+          const { organization, project, target, canReportSchema, canCollectUsage, canReadOperations } = tokenInfo;
+          const print = createPrinter([tokenInfo.token.name, organization.name, project.name, target.name]);
 
           const organizationUrl = `https://app.graphql-hive.com/${organization.cleanId}`;
           const projectUrl = `${organizationUrl}/${project.cleanId}`;
@@ -120,38 +108,25 @@ export function createHive(options: HivePluginOptions): HiveClient {
               '[hive][info] Token details',
               '',
               `Token name:            ${print(tokenInfo.token.name)}`,
-              `Organization:          ${print(
-                organization.name,
-                organizationUrl
-              )}`,
+              `Organization:          ${print(organization.name, organizationUrl)}`,
               `Project:               ${print(project.name, projectUrl)}`,
               `Target:                ${print(target.name, targetUrl)}`,
               '',
               `Can report schema?     ${print(canReportSchema ? 'Yes' : 'No')}`,
               `Can collect usage?     ${print(canCollectUsage ? 'Yes' : 'No')}`,
-              `Can read operations?   ${print(
-                canReadOperations ? 'Yes' : 'No'
-              )}`,
+              `Can read operations?   ${print(canReadOperations ? 'Yes' : 'No')}`,
               '',
             ].join('\n')
           );
         } else if (result.data?.tokenInfo.message) {
-          logger.error(
-            `[hive][info] Token not found. Reason: ${result.data?.tokenInfo.message}`
-          );
-          logger.info(
-            `[hive][info] How to create a token? https://docs.graphql-hive.com/features/tokens`
-          );
+          logger.error(`[hive][info] Token not found. Reason: ${result.data?.tokenInfo.message}`);
+          logger.info(`[hive][info] How to create a token? https://docs.graphql-hive.com/features/tokens`);
         } else {
           logger.error(`[hive][info] ${result.errors![0].message}`);
-          logger.info(
-            `[hive][info] How to create a token? https://docs.graphql-hive.com/features/tokens`
-          );
+          logger.info(`[hive][info] How to create a token? https://docs.graphql-hive.com/features/tokens`);
         }
       } else {
-        logger.error(
-          `[hive][info] Error ${response.status}: ${response.statusText}`
-        );
+        logger.error(`[hive][info] Error ${response.status}: ${response.statusText}`);
       }
     } catch (error: any) {
       logger.error(`[hive][info] Error ${error.message}`);
@@ -168,7 +143,7 @@ export function createHive(options: HivePluginOptions): HiveClient {
 }
 
 function createPrinter(values: string[]) {
-  const maxLen = Math.max(...values.map((v) => v.length)) + 4;
+  const maxLen = Math.max(...values.map(v => v.length)) + 4;
 
   return (base: string, extra?: string) => {
     return base.padEnd(maxLen, ' ') + (extra || '');

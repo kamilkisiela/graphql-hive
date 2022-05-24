@@ -6,9 +6,7 @@ import { Activities } from '@/components/common/activities';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { Section } from '../common';
 
-const targetActivitiesDocument = fixDuplicatedFragments(
-  TargetActivitiesDocument
-);
+const targetActivitiesDocument = fixDuplicatedFragments(TargetActivitiesDocument);
 
 export const TargetActivities: React.FC = () => {
   const router = useRouteSelector();
@@ -28,10 +26,7 @@ export const TargetActivities: React.FC = () => {
   return (
     <div>
       <Section.Title>Recent Activity</Section.Title>
-      <Activities
-        fetching={query.fetching}
-        activities={query.data?.targetActivities.nodes}
-      />
+      <Activities fetching={query.fetching} activities={query.data?.targetActivities.nodes} />
     </div>
   );
 };

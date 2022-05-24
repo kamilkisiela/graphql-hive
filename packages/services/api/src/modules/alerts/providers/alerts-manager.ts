@@ -40,9 +40,7 @@ export class AlertsManager {
     });
   }
 
-  async addChannel(
-    input: AlertsModule.AddAlertChannelInput
-  ): Promise<AlertChannel> {
+  async addChannel(input: AlertsModule.AddAlertChannelInput): Promise<AlertChannel> {
     this.logger.debug(
       'Adding Alert Channel (organization=%s, project=%s, type=%s)',
       input.organization,
@@ -100,7 +98,7 @@ export class AlertsManager {
     const channels = await this.storage.deleteAlertChannels(input);
 
     await Promise.all(
-      channels.map((channel) =>
+      channels.map(channel =>
         this.triggerChannelConfirmation({
           kind: 'deleted',
           channel,
@@ -113,17 +111,9 @@ export class AlertsManager {
     return channels;
   }
 
-  @cache<ProjectSelector>(
-    (selector) => selector.project + selector.organization
-  )
-  async getChannels(
-    selector: ProjectSelector
-  ): Promise<readonly AlertChannel[]> {
-    this.logger.debug(
-      'Fetching Alert Channels (organization=%s, project=%s)',
-      selector.organization,
-      selector.project
-    );
+  @cache<ProjectSelector>(selector => selector.project + selector.organization)
+  async getChannels(selector: ProjectSelector): Promise<readonly AlertChannel[]> {
+    this.logger.debug('Fetching Alert Channels (organization=%s, project=%s)', selector.organization, selector.project);
     await this.authManager.ensureProjectAccess({
       ...selector,
       scope: ProjectAccessScope.READ,
@@ -181,11 +171,7 @@ export class AlertsManager {
   }
 
   async getAlerts(selector: ProjectSelector): Promise<readonly Alert[]> {
-    this.logger.debug(
-      'Fetching Alerts (organization=%s, project=%s)',
-      selector.organization,
-      selector.project
-    );
+    this.logger.debug('Fetching Alerts (organization=%s, project=%s)', selector.organization, selector.project);
     await this.authManager.ensureProjectAccess({
       ...selector,
       scope: ProjectAccessScope.READ,
@@ -193,9 +179,7 @@ export class AlertsManager {
     return this.storage.getAlerts(selector);
   }
 
-  async triggerSchemaChangeNotifications(
-    event: SchemaChangeNotificationInput['event']
-  ) {
+  async triggerSchemaChangeNotifications(event: SchemaChangeNotificationInput['event']) {
     const organization = event.organization.id;
     const project = event.project.id;
     const target = event.target.id;
@@ -226,14 +210,12 @@ export class AlertsManager {
     ]);
 
     const matchingAlerts = alerts.filter(
-      (alert) =>
-        alert.type === 'SCHEMA_CHANGE_NOTIFICATIONS' &&
-        alert.targetId === target
+      alert => alert.type === 'SCHEMA_CHANGE_NOTIFICATIONS' && alert.targetId === target
     );
-    const pairs = matchingAlerts.map((alert) => {
+    const pairs = matchingAlerts.map(alert => {
       return {
         alert,
-        channel: channels.find((channel) => channel.id === alert.channelId)!,
+        channel: channels.find(channel => channel.id === alert.channelId)!,
       };
     });
 

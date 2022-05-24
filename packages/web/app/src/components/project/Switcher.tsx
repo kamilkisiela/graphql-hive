@@ -25,7 +25,7 @@ export const ProjectSwitcher: React.FC<{
       return [];
     }
 
-    return data.projects.nodes.map((node) => ({
+    return data.projects.nodes.map(node => ({
       key: node.cleanId,
       label: node.name,
     }));
@@ -38,23 +38,15 @@ export const ProjectSwitcher: React.FC<{
     return null;
   }
 
-  const currentProject = data.projects.nodes.find(
-    (node) => node.cleanId === projectId
-  );
+  const currentProject = data.projects.nodes.find(node => node.cleanId === projectId);
 
   return (
     <Menu autoSelect={false}>
-      <MenuButton
-        size="sm"
-        as={Button}
-        rightIcon={<VscChevronDown />}
-        variant="ghost"
-        tw="font-normal"
-      >
+      <MenuButton size="sm" as={Button} rightIcon={<VscChevronDown />} variant="ghost" tw="font-normal">
         {currentProject.name}
       </MenuButton>
       <MenuList bg={dropdownBgColor} color={dropdownTextColor}>
-        {items.map((item) => {
+        {items.map(item => {
           return (
             <MenuItem
               onClick={() => {

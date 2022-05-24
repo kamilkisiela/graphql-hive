@@ -13,11 +13,7 @@ export class Redis {
     }
   ) {}
 
-  deploy({
-    limits,
-  }: {
-    limits: k8s.types.input.core.v1.ResourceRequirements['limits'];
-  }) {
+  deploy({ limits }: { limits: k8s.types.input.core.v1.ResourceRequirements['limits'] }) {
     const name = 'redis-store';
     const image = DEFAULT_IMAGE;
 

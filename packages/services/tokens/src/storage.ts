@@ -1,8 +1,4 @@
-import {
-  createTokenStorage,
-  createConnectionString,
-  tokens,
-} from '@hive/storage';
+import { createTokenStorage, createConnectionString, tokens } from '@hive/storage';
 import type { FastifyReply } from 'fastify';
 
 export interface StorageItem {
@@ -20,9 +16,7 @@ export interface StorageItem {
 export interface Storage {
   readTarget(targetId: string, res?: FastifyReply): Promise<StorageItem[]>;
   readToken(token: string, res?: FastifyReply): Promise<StorageItem>;
-  writeToken(
-    item: Omit<StorageItem, 'date' | 'lastUsedAt'>
-  ): Promise<StorageItem>;
+  writeToken(item: Omit<StorageItem, 'date' | 'lastUsedAt'>): Promise<StorageItem>;
   deleteToken(token: string): Promise<void>;
   touchTokens(tokens: Array<{ token: string; date: Date }>): Promise<void>;
 }

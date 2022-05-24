@@ -52,22 +52,15 @@ export function createScheduler(config: Config) {
     });
 
     // Wait for Queues and Scheduler to be ready
-    await Promise.all([
-      webhookQueueScheduler.waitUntilReady(),
-      webhookQueue.waitUntilReady(),
-    ]);
+    await Promise.all([webhookQueueScheduler.waitUntilReady(), webhookQueue.waitUntilReady()]);
 
     const webhookJob = createWebhookJob({ config });
 
-    const webhookWorker = new Worker<WebhookInput>(
-      config.webhookQueueName,
-      webhookJob,
-      {
-        prefix,
-        connection: redisConnection,
-        sharedConnection: true,
-      }
-    );
+    const webhookWorker = new Worker<WebhookInput>(config.webhookQueueName, webhookJob, {
+      prefix,
+      connection: redisConnection,
+      sharedConnection: true,
+    });
 
     webhookWorker.on('error', onError('webhookWorker'));
     webhookWorker.on('failed', onFailed);
@@ -93,7 +86,7 @@ export function createScheduler(config: Config) {
       enableReadyCheck: false,
     });
 
-    redisConnection.on('error', (err) => {
+    redisConnection.on('error', err => {
       onError('redis:error')(err);
     });
 
@@ -110,7 +103,7 @@ export function createScheduler(config: Config) {
       logger.info('Redis connection closed');
     });
 
-    redisConnection.on('reconnecting', (timeToReconnect) => {
+    redisConnection.on('reconnecting', timeToReconnect => {
       logger.info('Redis reconnecting in %s', timeToReconnect);
     });
 
@@ -134,12 +127,7 @@ export function createScheduler(config: Config) {
   }
 
   function onFailed(job: Job, error: Error) {
-    logger.debug(
-      `Job %s failed after %s attempts, reason: %s`,
-      job.name,
-      job.attemptsMade,
-      job.failedReason
-    );
+    logger.debug(`Job %s failed after %s attempts, reason: %s`, job.name, job.attemptsMade, job.failedReason);
     logger.error(error);
   }
 
@@ -181,11 +169,7 @@ export function createScheduler(config: Config) {
         return false;
       }
 
-      return (
-        webhookQueue !== null &&
-        redisConnection !== null &&
-        redisConnection?.status === 'ready'
-      );
+      return webhookQueue !== null && redisConnection !== null && redisConnection?.status === 'ready';
     },
   };
 }

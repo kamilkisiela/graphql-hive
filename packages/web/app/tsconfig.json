@@ -20,13 +20,6 @@
     },
     "incremental": true
   },
-  "include": [
-    "next-env.d.ts",
-    "twin.d.ts",
-    "modules.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    "pages/stack/[stackId]/2"
-  ],
+  "include": ["next-env.d.ts", "twin.d.ts", "modules.d.ts", "**/*.ts", "**/*.tsx", "pages/stack/[stackId]/2"],
   "exclude": ["node_modules"]
 }

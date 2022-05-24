@@ -40,12 +40,8 @@ export default abstract class extends Command {
     const findDoubleQuotes = /"([^"]+)"/gim;
 
     return msg
-      .replace(findSingleQuotes, (_: string, value: string) =>
-        colors.bold(value)
-      )
-      .replace(findDoubleQuotes, (_: string, value: string) =>
-        colors.bold(value)
-      );
+      .replace(findSingleQuotes, (_: string, value: string) => colors.bold(value))
+      .replace(findDoubleQuotes, (_: string, value: string) => colors.bold(value));
   }
 
   /**
@@ -144,11 +140,7 @@ export default abstract class extends Command {
     }
   >(flags: TFlags) {
     if (flags.require && flags.require.length > 0) {
-      await Promise.all(
-        flags.require.map(
-          (mod) => import(require.resolve(mod, { paths: [process.cwd()] }))
-        )
-      );
+      await Promise.all(flags.require.map(mod => import(require.resolve(mod, { paths: [process.cwd()] }))));
     }
   }
 }

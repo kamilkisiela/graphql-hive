@@ -18,11 +18,7 @@ const Inner: React.FC<{
   });
 
   return (
-    <Page
-      title={project.name}
-      subtitle="An overview"
-      actions={canCreate && <TargetCreatorTrigger />}
-    >
+    <Page title={project.name} subtitle="An overview" actions={canCreate && <TargetCreatorTrigger />}>
       <div tw="w-full flex flex-row">
         <div tw="flex-grow mr-12">
           <ProjectTargets project={project} organization={organization} />
@@ -38,9 +34,7 @@ const Inner: React.FC<{
 export default function ProjectPage() {
   return (
     <ProjectView title="Overview">
-      {({ project, organization }) => (
-        <Inner project={project} organization={organization} />
-      )}
+      {({ project, organization }) => <Inner project={project} organization={organization} />}
     </ProjectView>
   );
 }

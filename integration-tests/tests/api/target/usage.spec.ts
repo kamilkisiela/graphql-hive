@@ -1,9 +1,4 @@
-import {
-  TargetAccessScope,
-  ProjectType,
-  ProjectAccessScope,
-  OrganizationAccessScope,
-} from '@app/gql/graphql';
+import { TargetAccessScope, ProjectType, ProjectAccessScope, OrganizationAccessScope } from '@app/gql/graphql';
 import formatISO from 'date-fns/formatISO';
 import subHours from 'date-fns/subHours';
 import {
@@ -26,11 +21,7 @@ import { normalizeOperation } from '@graphql-hive/core';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { parse, print } from 'graphql';
 
-function sendBatch(
-  amount: number,
-  operation: CollectedOperation,
-  token: string
-) {
+function sendBatch(amount: number, operation: CollectedOperation, token: string) {
   return Promise.all(
     new Array(amount).fill(null).map(() =>
       collect({
@@ -50,9 +41,7 @@ test('collect operation', async () => {
     owner_access_token
   );
 
-  const org =
-    orgResult.body.data!.createOrganization.ok.createdOrganizationPayload
-      .organization;
+  const org = orgResult.body.data!.createOrganization.ok.createdOrganizationPayload.organization;
 
   const projectResult = await createProject(
     {
@@ -87,11 +76,7 @@ test('collect operation', async () => {
       target: target.cleanId,
       organizationScopes: [OrganizationAccessScope.Read],
       projectScopes: [ProjectAccessScope.Read],
-      targetScopes: [
-        TargetAccessScope.Read,
-        TargetAccessScope.RegistryRead,
-        TargetAccessScope.RegistryWrite,
-      ],
+      targetScopes: [TargetAccessScope.Read, TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
     },
     owner_access_token
   );
@@ -112,9 +97,7 @@ test('collect operation', async () => {
   );
 
   expect(schemaPublishResult.body.errors).not.toBeDefined();
-  expect((schemaPublishResult.body.data!.schemaPublish as any).valid).toEqual(
-    true
-  );
+  expect((schemaPublishResult.body.data!.schemaPublish as any).valid).toEqual(true);
 
   const targetValidationResult = await setTargetValidation(
     {
@@ -129,15 +112,9 @@ test('collect operation', async () => {
   );
 
   expect(targetValidationResult.body.errors).not.toBeDefined();
-  expect(targetValidationResult.body.data!.setTargetValidation.enabled).toEqual(
-    true
-  );
-  expect(
-    targetValidationResult.body.data!.setTargetValidation.percentage
-  ).toEqual(0);
-  expect(targetValidationResult.body.data!.setTargetValidation.period).toEqual(
-    30
-  );
+  expect(targetValidationResult.body.data!.setTargetValidation.enabled).toEqual(true);
+  expect(targetValidationResult.body.data!.setTargetValidation.percentage).toEqual(0);
+  expect(targetValidationResult.body.data!.setTargetValidation.period).toEqual(30);
 
   // should not be breaking because the field is unused
   const unusedCheckResult = await checkSchema(
@@ -147,9 +124,7 @@ test('collect operation', async () => {
     token
   );
   expect(unusedCheckResult.body.errors).not.toBeDefined();
-  expect(unusedCheckResult.body.data!.schemaCheck.__typename).toEqual(
-    'SchemaCheckSuccess'
-  );
+  expect(unusedCheckResult.body.data!.schemaCheck.__typename).toEqual('SchemaCheckSuccess');
 
   const collectResult = await collect({
     operations: [
@@ -179,14 +154,8 @@ test('collect operation', async () => {
     token
   );
 
-  if (
-    usedCheckResult.body.data!.schemaCheck.__typename !== 'SchemaCheckError'
-  ) {
-    throw new Error(
-      `Expected SchemaCheckError, got ${
-        usedCheckResult.body.data!.schemaCheck.__typename
-      }`
-    );
+  if (usedCheckResult.body.data!.schemaCheck.__typename !== 'SchemaCheckError') {
+    throw new Error(`Expected SchemaCheckError, got ${usedCheckResult.body.data!.schemaCheck.__typename}`);
   }
 
   expect(usedCheckResult.body.data!.schemaCheck.valid).toEqual(false);
@@ -235,9 +204,7 @@ test('normalize and collect operation without breaking its syntax', async () => 
     owner_access_token
   );
 
-  const org =
-    orgResult.body.data!.createOrganization.ok.createdOrganizationPayload
-      .organization;
+  const org = orgResult.body.data!.createOrganization.ok.createdOrganizationPayload.organization;
 
   const projectResult = await createProject(
     {
@@ -272,11 +239,7 @@ test('normalize and collect operation without breaking its syntax', async () => 
       target: target.cleanId,
       organizationScopes: [OrganizationAccessScope.Read],
       projectScopes: [ProjectAccessScope.Read],
-      targetScopes: [
-        TargetAccessScope.Read,
-        TargetAccessScope.RegistryRead,
-        TargetAccessScope.RegistryWrite,
-      ],
+      targetScopes: [TargetAccessScope.Read, TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
     },
     owner_access_token
   );
@@ -418,9 +381,7 @@ test('number of produced and collected operations should match', async () => {
     owner_access_token
   );
 
-  const org =
-    orgResult.body.data!.createOrganization.ok.createdOrganizationPayload
-      .organization;
+  const org = orgResult.body.data!.createOrganization.ok.createdOrganizationPayload.organization;
 
   const projectResult = await createProject(
     {
@@ -442,11 +403,7 @@ test('number of produced and collected operations should match', async () => {
       target: target.cleanId,
       organizationScopes: [OrganizationAccessScope.Read],
       projectScopes: [ProjectAccessScope.Read],
-      targetScopes: [
-        TargetAccessScope.Read,
-        TargetAccessScope.RegistryRead,
-        TargetAccessScope.RegistryWrite,
-      ],
+      targetScopes: [TargetAccessScope.Read, TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
     },
     owner_access_token
   );
@@ -522,9 +479,7 @@ test('check usage from two selected targets', async () => {
     owner_access_token
   );
 
-  const org =
-    orgResult.body.data!.createOrganization.ok.createdOrganizationPayload
-      .organization;
+  const org = orgResult.body.data!.createOrganization.ok.createdOrganizationPayload.organization;
 
   const projectResult = await createProject(
     {
@@ -547,8 +502,7 @@ test('check usage from two selected targets', async () => {
     owner_access_token
   );
 
-  const production =
-    productionTargetResult.body.data!.createTarget.ok.createdTarget;
+  const production = productionTargetResult.body.data!.createTarget.ok.createdTarget;
 
   const stagingTokenResult = await createToken(
     {
@@ -558,11 +512,7 @@ test('check usage from two selected targets', async () => {
       target: staging.cleanId,
       organizationScopes: [OrganizationAccessScope.Read],
       projectScopes: [ProjectAccessScope.Read],
-      targetScopes: [
-        TargetAccessScope.Read,
-        TargetAccessScope.RegistryRead,
-        TargetAccessScope.RegistryWrite,
-      ],
+      targetScopes: [TargetAccessScope.Read, TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
     },
     owner_access_token
   );
@@ -575,11 +525,7 @@ test('check usage from two selected targets', async () => {
       target: production.cleanId,
       organizationScopes: [OrganizationAccessScope.Read],
       projectScopes: [ProjectAccessScope.Read],
-      targetScopes: [
-        TargetAccessScope.Read,
-        TargetAccessScope.RegistryRead,
-        TargetAccessScope.RegistryWrite,
-      ],
+      targetScopes: [TargetAccessScope.Read, TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
     },
     owner_access_token
   );
@@ -588,8 +534,7 @@ test('check usage from two selected targets', async () => {
   expect(productionTokenResult.body.errors).not.toBeDefined();
 
   const tokenForStaging = stagingTokenResult.body.data!.createToken.ok.secret;
-  const tokenForProduction =
-    productionTokenResult.body.data!.createToken.ok.secret;
+  const tokenForProduction = productionTokenResult.body.data!.createToken.ok.secret;
 
   const schemaPublishResult = await publishSchema(
     {
@@ -601,9 +546,7 @@ test('check usage from two selected targets', async () => {
   );
 
   expect(schemaPublishResult.body.errors).not.toBeDefined();
-  expect((schemaPublishResult.body.data!.schemaPublish as any).valid).toEqual(
-    true
-  );
+  expect((schemaPublishResult.body.data!.schemaPublish as any).valid).toEqual(true);
 
   const targetValidationResult = await setTargetValidation(
     {
@@ -618,15 +561,9 @@ test('check usage from two selected targets', async () => {
   );
 
   expect(targetValidationResult.body.errors).not.toBeDefined();
-  expect(targetValidationResult.body.data!.setTargetValidation.enabled).toEqual(
-    true
-  );
-  expect(
-    targetValidationResult.body.data!.setTargetValidation.percentage
-  ).toEqual(0);
-  expect(targetValidationResult.body.data!.setTargetValidation.period).toEqual(
-    30
-  );
+  expect(targetValidationResult.body.data!.setTargetValidation.enabled).toEqual(true);
+  expect(targetValidationResult.body.data!.setTargetValidation.percentage).toEqual(0);
+  expect(targetValidationResult.body.data!.setTargetValidation.period).toEqual(30);
 
   const collectResult = await collect({
     operations: [
@@ -680,9 +617,7 @@ test('check usage from two selected targets', async () => {
     tokenForStaging
   );
   expect(unusedCheckResult.body.errors).not.toBeDefined();
-  expect(unusedCheckResult.body.data!.schemaCheck.__typename).toEqual(
-    'SchemaCheckSuccess'
-  );
+  expect(unusedCheckResult.body.data!.schemaCheck.__typename).toEqual('SchemaCheckSuccess');
 
   // Now switch to using checking both staging and production
 
@@ -702,16 +637,13 @@ test('check usage from two selected targets', async () => {
 
   expect(updateValidationResult.body.errors).not.toBeDefined();
   expect(
-    updateValidationResult.body.data!.updateTargetValidationSettings.ok
-      .updatedTargetValidationSettings.percentage
+    updateValidationResult.body.data!.updateTargetValidationSettings.ok.updatedTargetValidationSettings.percentage
   ).toEqual(50);
   expect(
-    updateValidationResult.body.data!.updateTargetValidationSettings.ok
-      .updatedTargetValidationSettings.period
+    updateValidationResult.body.data!.updateTargetValidationSettings.ok.updatedTargetValidationSettings.period
   ).toEqual(30);
   expect(
-    updateValidationResult.body.data!.updateTargetValidationSettings.ok
-      .updatedTargetValidationSettings.targets
+    updateValidationResult.body.data!.updateTargetValidationSettings.ok.updatedTargetValidationSettings.targets
   ).toHaveLength(2);
 
   // should be non-breaking because the field is used in production and we are checking staging and production now
@@ -723,14 +655,8 @@ test('check usage from two selected targets', async () => {
     tokenForStaging
   );
 
-  if (
-    usedCheckResult.body.data!.schemaCheck.__typename !== 'SchemaCheckSuccess'
-  ) {
-    throw new Error(
-      `Expected SchemaCheckSuccess, got ${
-        usedCheckResult.body.data!.schemaCheck.__typename
-      }`
-    );
+  if (usedCheckResult.body.data!.schemaCheck.__typename !== 'SchemaCheckSuccess') {
+    throw new Error(`Expected SchemaCheckSuccess, got ${usedCheckResult.body.data!.schemaCheck.__typename}`);
   }
 
   expect(usedCheckResult.body.data!.schemaCheck.valid).toEqual(true);
@@ -746,9 +672,7 @@ test('number of produced and collected operations should match', async () => {
     owner_access_token
   );
 
-  const org =
-    orgResult.body.data!.createOrganization.ok.createdOrganizationPayload
-      .organization;
+  const org = orgResult.body.data!.createOrganization.ok.createdOrganizationPayload.organization;
 
   const projectResult = await createProject(
     {
@@ -770,11 +694,7 @@ test('number of produced and collected operations should match', async () => {
       target: target.cleanId,
       organizationScopes: [OrganizationAccessScope.Read],
       projectScopes: [ProjectAccessScope.Read],
-      targetScopes: [
-        TargetAccessScope.Read,
-        TargetAccessScope.RegistryRead,
-        TargetAccessScope.RegistryWrite,
-      ],
+      targetScopes: [TargetAccessScope.Read, TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
     },
     owner_access_token
   );
@@ -785,9 +705,7 @@ test('number of produced and collected operations should match', async () => {
 
   const batchSize = 10;
   const totalAmount = 10_000;
-  for await (const i of new Array(totalAmount / batchSize)
-    .fill(null)
-    .map((_, i) => i)) {
+  for await (const i of new Array(totalAmount / batchSize).fill(null).map((_, i) => i)) {
     await sendBatch(
       batchSize,
       i % 2 === 0

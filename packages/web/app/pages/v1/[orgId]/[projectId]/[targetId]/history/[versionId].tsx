@@ -70,9 +70,7 @@ const VersionView: React.FC<{
           <div tw="h-full flex flex-col">
             <div tw="mb-6 p-3 flex flex-row items-center space-x-12 bg-gray-100 dark:bg-gray-900 rounded-sm">
               <div>
-                <Value title={version.date}>
-                  {formatDate(new Date(version.date), 'yyyy-MM-dd HH:mm')}
-                </Value>
+                <Value title={version.date}>{formatDate(new Date(version.date), 'yyyy-MM-dd HH:mm')}</Value>
                 <ValueLabel>Published</ValueLabel>
               </div>
 
@@ -86,11 +84,7 @@ const VersionView: React.FC<{
                   <ValueLabel>Commit</ValueLabel>
                 </div>
               </Tooltip>
-              <Tooltip
-                label="Author of the schema push action"
-                fontSize="xs"
-                placement="bottom-start"
-              >
+              <Tooltip label="Author of the schema push action" fontSize="xs" placement="bottom-start">
                 <div>
                   <Value>{version.commit.author}</Value>
                   <ValueLabel>Author</ValueLabel>
@@ -98,11 +92,7 @@ const VersionView: React.FC<{
               </Tooltip>
 
               {version.commit.service && (
-                <Tooltip
-                  label="Source of schema change"
-                  fontSize="xs"
-                  placement="bottom-start"
-                >
+                <Tooltip label="Source of schema change" fontSize="xs" placement="bottom-start">
                   <div>
                     <Value>{version.commit.service}</Value>
                     <ValueLabel>Service</ValueLabel>
@@ -111,11 +101,7 @@ const VersionView: React.FC<{
               )}
               {version.valid && (
                 <Tooltip
-                  label={
-                    version.valid
-                      ? 'Composed successfully'
-                      : 'Failed to compose'
-                  }
+                  label={version.valid ? 'Composed successfully' : 'Failed to compose'}
                   fontSize="xs"
                   placement="bottom-start"
                 >
@@ -129,10 +115,7 @@ const VersionView: React.FC<{
               )}
             </div>
             <div tw="flex-grow">
-              <Compare
-                view={view}
-                comparison={query.data.schemaCompareToPrevious}
-              />
+              <Compare view={view} comparison={query.data.schemaCompareToPrevious} />
             </div>
           </div>
         </Page>
@@ -142,9 +125,5 @@ const VersionView: React.FC<{
 };
 
 export default function TargetHistory() {
-  return (
-    <TargetView title="History">
-      {({ organization }) => <VersionView organization={organization} />}
-    </TargetView>
-  );
+  return <TargetView title="History">{({ organization }) => <VersionView organization={organization} />}</TargetView>;
 }

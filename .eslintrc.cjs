@@ -19,10 +19,7 @@ module.exports = {
   plugins: ['@typescript-eslint', 'import'],
   extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended'],
   rules: {
-    '@typescript-eslint/no-unused-vars': [
-      'error',
-      { argsIgnorePattern: '^_', ignoreRestSiblings: true },
-    ],
+    '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', ignoreRestSiblings: true }],
     'no-empty': ['error', { allowEmptyCatch: true }],
 
     'import/no-absolute-path': 'error',
@@ -48,7 +45,7 @@ module.exports = {
   overrides: [
     {
       // TODO: replace with packages/web/**
-      files: ['packages/web/app/src/components/v2/**','packages/web/app/pages/\\[orgId\\]/**'],
+      files: ['packages/web/app/src/components/v2/**', 'packages/web/app/pages/\\[orgId\\]/**'],
       extends: [
         'plugin:react/recommended',
         'plugin:react-hooks/recommended',
@@ -88,18 +85,9 @@ module.exports = {
         'react/prop-types': 'off',
         'react/no-unescaped-entities': 'off',
         'react/jsx-curly-brace-presence': 'error',
-        'jsx-a11y/anchor-is-valid': [
-          'off',
-          { components: ['Link', 'NextLink'] },
-        ],
-        'jsx-a11y/alt-text': [
-          'warn',
-          { elements: ['img'], img: ['Image', 'NextImage'] },
-        ],
-        '@typescript-eslint/consistent-type-imports': [
-          'error',
-          { prefer: 'no-type-imports' },
-        ],
+        'jsx-a11y/anchor-is-valid': ['off', { components: ['Link', 'NextLink'] }],
+        'jsx-a11y/alt-text': ['warn', { elements: ['img'], img: ['Image', 'NextImage'] }],
+        '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'no-type-imports' }],
         'simple-import-sort/exports': 'error',
         'simple-import-sort/imports': [
           'error',
@@ -108,7 +96,7 @@ module.exports = {
               [
                 // Node.js builtins
                 `^(node:)?(${builtinModules
-                  .filter((mod) => !mod.startsWith('_') && !mod.includes('/'))
+                  .filter(mod => !mod.startsWith('_') && !mod.includes('/'))
                   .join('|')})(/.*|$)`,
                 '^react(-dom)?$',
                 '^next(/.*|$)',

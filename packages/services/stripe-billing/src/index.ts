@@ -1,12 +1,7 @@
 #!/usr/bin/env node
 import 'reflect-metadata';
 import * as Sentry from '@sentry/node';
-import {
-  createServer,
-  startMetrics,
-  ensureEnv,
-  registerShutdown,
-} from '@hive/service-common';
+import { createServer, startMetrics, ensureEnv, registerShutdown } from '@hive/service-common';
 import { createConnectionString } from '@hive/storage';
 import { createStripeBilling } from './billing-sync';
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify/dist/trpc-server-adapters-fastify.cjs.js';
@@ -31,20 +26,19 @@ async function main() {
   });
 
   try {
-    const { readiness, start, stop, stripeApi, postgres$, loadStripeData$ } =
-      createStripeBilling({
-        logger: server.log,
-        stripe: {
-          token: ensureEnv('STRIPE_SECRET_KEY', 'string'),
-          syncIntervalMs: STRIPE_SYNC_INTERVAL_MS,
-        },
-        rateEstimator: {
-          endpoint: ensureEnv('USAGE_ESTIMATOR_ENDPOINT', 'string'),
-        },
-        storage: {
-          connectionString: createConnectionString(process.env as any),
-        },
-      });
+    const { readiness, start, stop, stripeApi, postgres$, loadStripeData$ } = createStripeBilling({
+      logger: server.log,
+      stripe: {
+        token: ensureEnv('STRIPE_SECRET_KEY', 'string'),
+        syncIntervalMs: STRIPE_SYNC_INTERVAL_MS,
+      },
+      rateEstimator: {
+        endpoint: ensureEnv('USAGE_ESTIMATOR_ENDPOINT', 'string'),
+      },
+      storage: {
+        connectionString: createConnectionString(process.env as any),
+      },
+    });
 
     registerShutdown({
       logger: server.log,
@@ -98,7 +92,7 @@ async function main() {
   }
 }
 
-main().catch((err) => {
+main().catch(err => {
   Sentry.captureException(err, {
     level: Sentry.Severity.Fatal,
   });

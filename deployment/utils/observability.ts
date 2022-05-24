@@ -71,12 +71,7 @@ export class Observability {
             },
             {
               apiGroups: ['apps'],
-              resources: [
-                'daemonsets',
-                'deployments',
-                'replicasets',
-                'statefulsets',
-              ],
+              resources: ['daemonsets', 'deployments', 'replicasets', 'statefulsets'],
               verbs: ['get', 'list', 'watch'],
             },
             {
@@ -193,40 +188,29 @@ export class Observability {
                     metrics_path: '/metrics',
                     relabel_configs: [
                       {
-                        source_labels: [
-                          '__meta_kubernetes_pod_container_port_name',
-                        ],
+                        source_labels: ['__meta_kubernetes_pod_container_port_name'],
                         action: 'keep',
                         regex: 'metrics',
                       },
                       {
-                        source_labels: [
-                          '__meta_kubernetes_pod_annotation_prometheus_io_scrape',
-                        ],
+                        source_labels: ['__meta_kubernetes_pod_annotation_prometheus_io_scrape'],
                         action: 'keep',
                         regex: true,
                       },
                       {
-                        source_labels: [
-                          '__meta_kubernetes_pod_annotation_prometheus_io_scheme',
-                        ],
+                        source_labels: ['__meta_kubernetes_pod_annotation_prometheus_io_scheme'],
                         action: 'replace',
                         target_label: '__scheme__',
                         regex: '(https?)',
                       },
                       {
-                        source_labels: [
-                          '__meta_kubernetes_pod_annotation_prometheus_io_path',
-                        ],
+                        source_labels: ['__meta_kubernetes_pod_annotation_prometheus_io_path'],
                         action: 'replace',
                         target_label: '__metrics_path__',
                         regex: '(.+)',
                       },
                       {
-                        source_labels: [
-                          '__address__',
-                          '__meta_kubernetes_pod_annotation_prometheus_io_port',
-                        ],
+                        source_labels: ['__address__', '__meta_kubernetes_pod_annotation_prometheus_io_port'],
                         action: 'replace',
                         regex: '([^:]+)(?::d+)?;(d+)',
                         replacement: '$1:$2',

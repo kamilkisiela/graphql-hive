@@ -4,12 +4,7 @@ import { print } from 'graphql';
 import Command from '../../base-command';
 import { gitInfo } from '../../helpers/git';
 import { invariant } from '../../helpers/validation';
-import {
-  loadSchema,
-  minifySchema,
-  renderChanges,
-  renderErrors,
-} from '../../helpers/schema';
+import { loadSchema, minifySchema, renderChanges, renderErrors } from '../../helpers/schema';
 import { existsSync, readFileSync } from 'fs';
 
 export default class SchemaPublish extends Command {
@@ -46,8 +41,7 @@ export default class SchemaPublish extends Command {
       default: false,
     }),
     require: Flags.string({
-      description:
-        'Loads specific require.extensions before running the codegen and reading the configuration',
+      description: 'Loads specific require.extensions before running the codegen and reading the configuration',
       default: [],
       multiple: true,
     }),
@@ -124,9 +118,7 @@ export default class SchemaPublish extends Command {
 
       if (!commit || !author) {
         const git = await gitInfo(() => {
-          this.warn(
-            `No git information found. Couldn't resolve author and commit.`
-          );
+          this.warn(`No git information found. Couldn't resolve author and commit.`);
         });
 
         if (!commit) {
@@ -148,10 +140,7 @@ export default class SchemaPublish extends Command {
 
       const sdl = await loadSchema(file);
 
-      invariant(
-        typeof sdl === 'string' && sdl.length > 0,
-        'Schema seems empty'
-      );
+      invariant(typeof sdl === 'string' && sdl.length > 0, 'Schema seems empty');
 
       const transformedSDL = print(transformCommentsToDescriptions(sdl));
       const minifiedSDL = minifySchema(transformedSDL);
@@ -183,12 +172,8 @@ export default class SchemaPublish extends Command {
           renderChanges.call(this, changes);
           this.success('Schema published');
         }
-      } else if (
-        result.schemaPublish.__typename === 'SchemaPublishMissingServiceError'
-      ) {
-        this.fail(
-          `${result.schemaPublish.missingServiceError} Please use the '--service <name>' parameter.`
-        );
+      } else if (result.schemaPublish.__typename === 'SchemaPublishMissingServiceError') {
+        this.fail(`${result.schemaPublish.missingServiceError} Please use the '--service <name>' parameter.`);
         this.exit(1);
       } else if (result.schemaPublish.__typename === 'SchemaPublishError') {
         const changes = result.schemaPublish.changes;
@@ -207,9 +192,7 @@ export default class SchemaPublish extends Command {
         } else {
           this.success('Schema published (forced)');
         }
-      } else if (
-        result.schemaPublish.__typename === 'GitHubSchemaPublishSuccess'
-      ) {
+      } else if (result.schemaPublish.__typename === 'GitHubSchemaPublishSuccess') {
         this.success(result.schemaPublish.message);
       } else {
         this.error(result.schemaPublish.message);
@@ -218,15 +201,12 @@ export default class SchemaPublish extends Command {
       if (error instanceof Errors.ExitError) {
         throw error;
       } else {
-        const parsedError: Error & { response?: any } =
-          error instanceof Error ? error : new Error(error as string);
+        const parsedError: Error & { response?: any } = error instanceof Error ? error : new Error(error as string);
 
         this.fail('Failed to publish schema');
         if ('response' in parsedError) {
           this.error(parsedError.response.errors[0].message, {
-            ref: this.cleanRequestId(
-              parsedError.response?.headers?.get('x-request-id')
-            ),
+            ref: this.cleanRequestId(parsedError.response?.headers?.get('x-request-id')),
           });
         } else {
           this.error(parsedError);

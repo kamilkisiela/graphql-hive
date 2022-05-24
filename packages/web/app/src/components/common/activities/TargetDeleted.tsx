@@ -2,13 +2,7 @@ import React from 'react';
 import { VscTrash } from 'react-icons/vsc';
 import { TargetDeletedActivity } from '../../../graphql';
 import { TimeAgo } from '../index';
-import {
-  Activity,
-  Highlight,
-  Project,
-  User,
-  useRemoveIconColor,
-} from './common';
+import { Activity, Highlight, Project, User, useRemoveIconColor } from './common';
 
 export const TargetDeleted: React.FC<{
   activity: TargetDeletedActivity;
@@ -20,13 +14,8 @@ export const TargetDeleted: React.FC<{
       </Activity.Icon>
       <Activity.Content>
         <Activity.Text>
-          <User user={activity.user} /> removed target{' '}
-          <Highlight>{activity.name}</Highlight> from{' '}
-          <Project
-            project={activity.project}
-            organization={activity.organization}
-          />{' '}
-          project
+          <User user={activity.user} /> removed target <Highlight>{activity.name}</Highlight> from{' '}
+          <Project project={activity.project} organization={activity.organization} /> project
         </Activity.Text>
         <Activity.Time>
           <TimeAgo date={activity.createdAt} />

@@ -4,14 +4,7 @@ import { SchemaEditor } from '@theguild/editor';
 import clsx from 'clsx';
 import { useQuery } from 'urql';
 
-import {
-  EmptyList,
-  Heading,
-  prettify,
-  Spinner,
-  TimeAgo,
-  Title,
-} from '@/components/v2';
+import { EmptyList, Heading, prettify, Spinner, TimeAgo, Title } from '@/components/v2';
 import { PersistedOperationsDocument } from '@/graphql';
 
 const OperationsStorePage: FC = () => {
@@ -35,9 +28,7 @@ const OperationsStorePage: FC = () => {
 
   const [href, operation] = router.asPath.split('?');
   const operationId = new URLSearchParams(operation).get('operation');
-  const selectedOperation = persistedOperations.nodes.find(
-    (node) => node.id === operationId
-  );
+  const selectedOperation = persistedOperations.nodes.find(node => node.id === operationId);
 
   return (
     <div className="flex h-full items-stretch gap-x-5 pb-10">
@@ -55,14 +46,12 @@ const OperationsStorePage: FC = () => {
               <Heading>Persisted operations</Heading>
             </div>
             <div className="flex h-[65vh] flex-col gap-2.5 overflow-scroll rounded-[20px] border border-gray-800/50 p-2.5">
-              {persistedOperations.nodes.map((node) => (
+              {persistedOperations.nodes.map(node => (
                 <button
                   key={node.id}
                   className={clsx(
                     'flex items-center gap-x-1.5 truncate rounded-[5px] p-3 text-left text-xs font-medium text-gray-500 hover:bg-gray-800/40',
-                    selectedOperation &&
-                      selectedOperation.id === node.id &&
-                      'bg-gray-800/40'
+                    selectedOperation && selectedOperation.id === node.id && 'bg-gray-800/40'
                   )}
                   onClick={() => {
                     router.push(`${href}?operation=${node.id}`);
@@ -72,9 +61,7 @@ const OperationsStorePage: FC = () => {
                     {node.operationHash.slice(0, 7)}_{node.name}
                   </span>
                   {node.kind}
-                  <span className="select-none font-medium text-gray-800">
-                    •
-                  </span>
+                  <span className="select-none font-medium text-gray-800">•</span>
                   <TimeAgo date={new Date().toISOString()} />
                 </button>
               ))}

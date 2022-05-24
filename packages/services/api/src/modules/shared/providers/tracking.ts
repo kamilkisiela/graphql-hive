@@ -20,9 +20,7 @@ export class Tracking {
     try {
       track({
         event: event.event,
-        distinct_id:
-          event.user?.externalAuthUserId ??
-          (await this.authManager.getUserIdForTracking()),
+        distinct_id: event.user?.externalAuthUserId ?? (await this.authManager.getUserIdForTracking()),
         data: event.data,
       });
     } catch (error) {

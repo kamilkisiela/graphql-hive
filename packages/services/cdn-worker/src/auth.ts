@@ -11,25 +11,13 @@ export function byteStringToUint8Array(byteString: string) {
   return ui;
 }
 
-export async function isKeyValid(
-  targetId: string,
-  headerKey: string
-): Promise<boolean> {
+export async function isKeyValid(targetId: string, headerKey: string): Promise<boolean> {
   const headerData = byteStringToUint8Array(atob(headerKey));
-  const secretKey = await crypto.subtle.importKey(
-    'raw',
-    SECRET_KEY_DATA,
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['verify']
-  );
+  const secretKey = await crypto.subtle.importKey('raw', SECRET_KEY_DATA, { name: 'HMAC', hash: 'SHA-256' }, false, [
+    'verify',
+  ]);
 
-  const verified = await crypto.subtle.verify(
-    'HMAC',
-    secretKey,
-    headerData,
-    encoder.encode(targetId)
-  );
+  const verified = await crypto.subtle.verify('HMAC', secretKey, headerData, encoder.encode(targetId));
 
   return verified;
 }

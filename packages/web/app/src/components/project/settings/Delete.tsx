@@ -43,10 +43,7 @@ export const DeleteSettings: React.FC = () => {
       <Card.Root>
         <Card.Title>Delete Project</Card.Title>
         <Card.Content>
-          <p>
-            Permanently remove your Project and all targets from the
-            Organization.
-          </p>
+          <p>Permanently remove your Project and all targets from the Organization.</p>
           <div tw="mt-3 flex flex-row items-center">
             <Button
               colorScheme="red"
@@ -58,9 +55,7 @@ export const DeleteSettings: React.FC = () => {
             >
               Delete Project
             </Button>
-            <span tw="pl-2 font-bold text-sm">
-              This action is not reversible
-            </span>
+            <span tw="pl-2 font-bold text-sm">This action is not reversible</span>
           </div>
         </Card.Content>
       </Card.Root>

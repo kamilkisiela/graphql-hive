@@ -2,15 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { stringify } from 'querystring';
 import { graphql } from '@/lib/api/utils';
 
-async function fetchData({
-  url,
-  headers,
-  body,
-}: {
-  url: string;
-  headers: Record<string, any>;
-  body: string;
-}) {
+async function fetchData({ url, headers, body }: { url: string; headers: Record<string, any>; body: string }) {
   const response = await fetch(url, {
     headers,
     method: 'POST',
@@ -20,10 +12,7 @@ async function fetchData({
   return response.json();
 }
 
-export default async function slackCallback(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default async function slackCallback(req: NextApiRequest, res: NextApiResponse) {
   console.log('Slack Integration Callback');
   const code = req.query.code;
   const orgId = req.query.state;

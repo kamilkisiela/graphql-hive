@@ -26,9 +26,7 @@ export function deployDbMigrations({
     'db-migrations',
     {
       env: {
-        POSTGRES_CONNECTION_STRING: apiConfig.requireSecret(
-          'postgresConnectionString'
-        ),
+        POSTGRES_CONNECTION_STRING: apiConfig.requireSecret('postgresConnectionString'),
         MIGRATOR: 'up',
         CLICKHOUSE_MIGRATOR: 'up',
         CLICKHOUSE_HOST: clickhouse.config.host,

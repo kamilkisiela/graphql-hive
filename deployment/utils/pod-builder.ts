@@ -5,7 +5,7 @@ import * as pulumi from '@pulumi/pulumi';
 export function normalizeEnv(env: kx.types.Container['env']): any[] {
   return Array.isArray(env)
     ? env
-    : Object.keys(env as kx.types.EnvMap).map((name) => ({
+    : Object.keys(env as kx.types.EnvMap).map(name => ({
         name,
         value: (env as kx.types.EnvMap)[name],
       }));

@@ -6,13 +6,7 @@ const cfConfig = new pulumi.Config('cloudflareCustom');
 
 export type Cloudflare = ReturnType<typeof deployCloudflare>;
 
-export function deployCloudflare({
-  rootDns,
-  envName,
-}: {
-  rootDns: string;
-  envName: string;
-}) {
+export function deployCloudflare({ rootDns, envName }: { rootDns: string; envName: string }) {
   const cdnAuthPrivateKey = commonConfig.requireSecret('cdnAuthPrivateKey');
   const cdn = new CloudflareCDN(
     envName,

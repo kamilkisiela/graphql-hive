@@ -5,10 +5,7 @@ import { OrganizationAccessScope } from './providers/organization-access';
 import { ProjectAccessScope } from './providers/project-access';
 import { TargetAccessScope } from './providers/target-access';
 import { z } from 'zod';
-import {
-  displayNameLengthBoundaries,
-  fullNameLengthBoundaries,
-} from './providers/user-manager';
+import { displayNameLengthBoundaries, fullNameLengthBoundaries } from './providers/user-manager';
 
 export const resolvers: AuthModule.Resolvers & {
   OrganizationAccessScope: {
@@ -27,14 +24,8 @@ export const resolvers: AuthModule.Resolvers & {
   Mutation: {
     async updateMe(_, { input }, { injector }) {
       const InputModel = z.object({
-        displayName: z
-          .string()
-          .min(displayNameLengthBoundaries.min)
-          .max(displayNameLengthBoundaries.max),
-        fullName: z
-          .string()
-          .min(fullNameLengthBoundaries.min)
-          .max(fullNameLengthBoundaries.max),
+        displayName: z.string().min(displayNameLengthBoundaries.min).max(displayNameLengthBoundaries.max),
+        fullName: z.string().min(fullNameLengthBoundaries.min).max(fullNameLengthBoundaries.max),
       });
       const result = InputModel.safeParse(input);
 
@@ -50,9 +41,7 @@ export const resolvers: AuthModule.Resolvers & {
         };
       }
 
-      const updatedUser = await injector
-        .get(AuthManager)
-        .updateCurrentUser(input);
+      const updatedUser = await injector.get(AuthManager).updateCurrentUser(input);
 
       return {
         ok: {

@@ -4,6 +4,4 @@ export interface TokensConfig {
   endpoint: string;
 }
 
-export const TOKENS_CONFIG = new InjectionToken<TokensConfig>(
-  'tokens-endpoint'
-);
+export const TOKENS_CONFIG = new InjectionToken<TokensConfig>('tokens-endpoint');

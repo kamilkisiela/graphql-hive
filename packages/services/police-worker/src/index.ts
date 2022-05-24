@@ -1,13 +1,10 @@
 const CF_BASE_URL = 'https://api.cloudflare.com/client/v4';
 
-addEventListener('scheduled', (event) => {
+addEventListener('scheduled', event => {
   event.waitUntil(handleSchedule());
 });
 
-async function execute(
-  url: string,
-  options: Request | RequestInit = {}
-): Promise<any> {
+async function execute(url: string, options: Request | RequestInit = {}): Promise<any> {
   const config = {
     headers: {
       Authorization: `Bearer ${CF_BEARER_TOKEN}`,
@@ -18,15 +15,12 @@ async function execute(
     ...options,
   };
 
-  return await fetch(
-    `${CF_BASE_URL}/zones/${ZONE_IDENTIFIER}${url}`,
-    config
-  ).then((r) => r.json());
+  return await fetch(`${CF_BASE_URL}/zones/${ZONE_IDENTIFIER}${url}`, config).then(r => r.json());
 }
 
 async function handleSchedule() {
   const data = await HIVE_POLICE.list();
-  const rulesArr = data.keys.map((key) => {
+  const rulesArr = data.keys.map(key => {
     const [type, value, ...rest] = key.name.split(':');
 
     switch (type) {
@@ -70,11 +64,11 @@ async function handleSchedule() {
 
   let rulesExpression = rulesArr
     .filter(Boolean)
-    .map((v) => `(${v})`)
+    .map(v => `(${v})`)
     .join(' or ');
 
   rulesExpression = `http.host in { ${HOSTNAMES.split(',')
-    .map((v) => `"${v}"`)
+    .map(v => `"${v}"`)
     .join(' ')} } and ${rulesExpression}`;
 
   console.log(`Calculated WAF Expression:`, rulesExpression);

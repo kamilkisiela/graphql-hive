@@ -1,11 +1,6 @@
 #!/usr/bin/env node
 import 'reflect-metadata';
-import {
-  createServer,
-  createErrorHandler,
-  startMetrics,
-  registerShutdown,
-} from '@hive/service-common';
+import { createServer, createErrorHandler, startMetrics, registerShutdown } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
 import LRU from 'tiny-lru';
 import ms from 'ms';
@@ -31,10 +26,7 @@ export async function main() {
   const errorHandler = createErrorHandler(server);
 
   try {
-    const { start, stop, readiness, getStorage } = useCache(
-      createStorage(),
-      server.log
-    );
+    const { start, stop, readiness, getStorage } = useCache(createStorage(), server.log);
     const tokenReadFailuresCache = LRU<{
       error: string;
       checkAt: number;
@@ -97,7 +89,7 @@ export async function main() {
   }
 }
 
-main().catch((err) => {
+main().catch(err => {
   Sentry.captureException(err, {
     level: Sentry.Severity.Fatal,
   });

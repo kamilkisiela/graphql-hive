@@ -14,8 +14,7 @@ export default class OperationsCheck extends Command {
       description: 'api token',
     }),
     require: Flags.string({
-      description:
-        'Loads specific require.extensions before running the command',
+      description: 'Loads specific require.extensions before running the command',
       default: [],
       multiple: true,
     }),
@@ -59,10 +58,7 @@ export default class OperationsCheck extends Command {
         return;
       }
 
-      const result = await this.registryApi(
-        registry,
-        token
-      ).fetchLatestVersion();
+      const result = await this.registryApi(registry, token).fetchLatestVersion();
 
       const sdl = result.latestVersion.sdl;
 
@@ -77,7 +73,7 @@ export default class OperationsCheck extends Command {
 
       const invalidOperations = validate(
         schema,
-        operations.map((s) => new Source(s.content, s.location))
+        operations.map(s => new Source(s.content, s.location))
       );
 
       if (invalidOperations.length === 0) {
@@ -88,29 +84,19 @@ export default class OperationsCheck extends Command {
 
       this.fail('Some operations are invalid');
 
-      this.log(
-        [
-          '',
-          `Total: ${operations.length}`,
-          `Invalid: ${invalidOperations.length}`,
-          '',
-        ].join('\n')
-      );
+      this.log(['', `Total: ${operations.length}`, `Invalid: ${invalidOperations.length}`, ''].join('\n'));
 
       this.printInvalidDocuments(invalidOperations, 'errors');
     } catch (error) {
       if (error instanceof Errors.ExitError) {
         throw error;
       } else {
-        const parsedError: Error & { response?: any } =
-          error instanceof Error ? error : new Error(error as string);
+        const parsedError: Error & { response?: any } = error instanceof Error ? error : new Error(error as string);
         this.fail('Failed to validate operations');
 
         if ('response' in parsedError) {
           this.error(parsedError.response.errors[0].message, {
-            ref: this.cleanRequestId(
-              parsedError.response?.headers?.get('x-request-id')
-            ),
+            ref: this.cleanRequestId(parsedError.response?.headers?.get('x-request-id')),
           });
         } else {
           this.error(parsedError);
@@ -119,13 +105,10 @@ export default class OperationsCheck extends Command {
     }
   }
 
-  private printInvalidDocuments(
-    invalidDocuments: InvalidDocument[],
-    listKey: 'errors' | 'deprecated'
-  ): void {
-    invalidDocuments.forEach((doc) => {
+  private printInvalidDocuments(invalidDocuments: InvalidDocument[], listKey: 'errors' | 'deprecated'): void {
+    invalidDocuments.forEach(doc => {
       if (doc.errors.length) {
-        this.renderErrors(doc.source.name, doc[listKey]).forEach((line) => {
+        this.renderErrors(doc.source.name, doc[listKey]).forEach(line => {
           this.log(line);
         });
       }
@@ -133,9 +116,7 @@ export default class OperationsCheck extends Command {
   }
 
   private renderErrors(sourceName: string, errors: GraphQLError[]): string[] {
-    const errorsAsString = errors
-      .map((e) => ` - ${this.bolderize(e.message)}`)
-      .join('\n');
+    const errorsAsString = errors.map(e => ` - ${this.bolderize(e.message)}`).join('\n');
 
     return [`ERROR in ${sourceName}:\n`, errorsAsString, '\n\n'];
   }
