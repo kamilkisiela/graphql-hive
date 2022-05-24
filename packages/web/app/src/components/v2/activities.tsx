@@ -4,26 +4,20 @@ import { useQuery } from 'urql';
 
 import { ActivityNode } from '@/components/common/activities/common';
 import { Heading, Link, Skeleton, TimeAgo } from '@/components/v2';
-import {
-  ArrowDownIcon,
-  EditIcon,
-  PlusIcon,
-  TrashIcon,
-  UserPlusMinusIcon,
-} from '@/components/v2/icon';
+import { ArrowDownIcon, EditIcon, PlusIcon, TrashIcon, UserPlusMinusIcon } from '@/components/v2/icon';
 import {
   MemberDeletedActivity,
   OrganizationActivitiesDocument,
   OrganizationIdUpdatedActivity,
   OrganizationNameUpdatedActivity,
+  OrganizationPlanChangeActivity,
   ProjectDeletedActivity,
+  ProjectIdUpdatedActivity,
 } from '@/graphql';
 import { fixDuplicatedFragments } from '@/lib/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
-const organizationActivitiesDocument = fixDuplicatedFragments(
-  OrganizationActivitiesDocument
-);
+const organizationActivitiesDocument = fixDuplicatedFragments(OrganizationActivitiesDocument);
 
 export const getActivity = (
   activity: ActivityNode
@@ -88,9 +82,17 @@ export const getActivity = (
         content: (
           <>
             {user.displayName} changed organization id to{' '}
-            <b className="text-gray-300">
-              {(activity as OrganizationIdUpdatedActivity).value}
-            </b>
+            <b className="text-gray-300">{(activity as OrganizationIdUpdatedActivity).value}</b>
+          </>
+        ),
+        icon: <EditIcon className="h-3.5 w-3.5" />,
+      };
+    case 'OrganizationPlanChangeActivity':
+      return {
+        content: (
+          <>
+            {user.displayName} changed organization plan to{' '}
+            <b className="text-gray-300">{(activity as OrganizationPlanChangeActivity).newPlan}</b>
           </>
         ),
         icon: <EditIcon className="h-3.5 w-3.5" />,
@@ -147,7 +149,12 @@ export const getActivity = (
       };
     case 'ProjectIdUpdatedActivity':
       return {
-        content: '',
+        content: (
+          <>
+            {user.displayName} changed project id to{' '}
+            <b className="text-gray-300">{(activity as ProjectIdUpdatedActivity).value}</b>
+          </>
+        ),
         icon: <EditIcon className="h-3.5 w-3.5" />,
       };
     /* Target */
@@ -187,7 +194,11 @@ export const getActivity = (
       };
     case 'TargetIdUpdatedActivity':
       return {
-        content: '',
+        content: (
+          <>
+            {user.displayName} changed target id to <b className="text-gray-300">{activity.value}</b>
+          </>
+        ),
         icon: <EditIcon className="h-3.5 w-3.5" />,
       };
     default:
@@ -217,10 +228,7 @@ export const Activities = (props): ReactElement => {
       <Heading>Recent Activity</Heading>
       {(!activities || activities.total !== 0) && (
         <ul className="mt-4 w-full break-all rounded-md border border-gray-800 p-5">
-          {(activities
-            ? activities.nodes
-            : Array.from({ length: 3 }, (_, id) => ({ id }))
-          ).map((activity) => {
+          {(activities ? activities.nodes : Array.from({ length: 3 }, (_, id) => ({ id }))).map(activity => {
             const { content, icon } = getActivity(activity);
 
             return (
@@ -255,28 +263,19 @@ export const Activities = (props): ReactElement => {
                     <div className="grow">
                       {'project' in activity && (
                         <h3 className="mb-1 flex items-center font-medium">
-                          <span className="line-clamp-1">
-                            {activity.project.name}
-                          </span>
+                          <span className="line-clamp-1">{activity.project.name}</span>
                           {'target' in activity && (
                             <>
                               <ArrowDownIcon className="h-4 w-4 shrink-0 -rotate-90 select-none" />
-                              <span className="line-clamp-1">
-                                {activity.target.name}
-                              </span>
+                              <span className="line-clamp-1">{activity.target.name}</span>
                             </>
                           )}
                         </h3>
                       )}
                       <div>
-                        <span className="text-sm text-[#c4c4c4]">
-                          {content}
-                        </span>
+                        <span className="text-sm text-[#c4c4c4]">{content}</span>
                         &nbsp;
-                        <TimeAgo
-                          date={activity.createdAt}
-                          className="float-right text-xs"
-                        />
+                        <TimeAgo date={activity.createdAt} className="float-right text-xs" />
                       </div>
                     </div>
                   </>
