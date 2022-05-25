@@ -1,4 +1,5 @@
 /* eslint-env node */
+/* eslint-disable-next-line @typescript-eslint/no-var-requires */
 const { builtinModules } = require('module');
 
 module.exports = {
@@ -24,6 +25,14 @@ module.exports = {
 
     'import/no-absolute-path': 'error',
     'import/no-self-import': 'error',
+    'import/no-unused-modules': [
+      'error',
+      {
+        unusedExports: true,
+        missingExports: true,
+        ignoreExports: ['.eslintrc.cjs', 'packages/web/app/pages/**/*.tsx'],
+      },
+    ],
     'import/no-extraneous-dependencies': [
       'error',
       {
