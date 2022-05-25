@@ -6,7 +6,7 @@
     "dev": "next dev",
     "start": "next start",
     "build": "bob runify --single",
-    "check:ts": "tsc"
+    "typecheck": "tsc"
   },
   "dependencies": {
     "@stripe/react-stripe-js": "1.7.2",
