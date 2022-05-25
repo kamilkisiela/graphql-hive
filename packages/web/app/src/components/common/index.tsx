@@ -1,7 +1,6 @@
 import React from 'react';
 import tw, { styled } from 'twin.macro';
 import Head from 'next/head';
-import { TimeAgo as ReactTimeAgo } from '@n1ru4l/react-time-ago';
 
 export const Title: React.FC<{ title: string }> = ({ title }) => (
   <Head>
@@ -48,11 +47,6 @@ export const Section = {
   Title: tw.h3`text-base text-black dark:text-white font-bold`,
   BigTitle: tw.h2`text-base text-black dark:text-white font-bold`,
   Subtitle: tw.div`text-sm text-gray-600 dark:text-gray-300`,
-};
-
-export const TimeAgo: React.FC<{ date: string }> = ({ date }) => {
-  const dateObject = React.useMemo(() => new Date(date), [date]);
-  return <ReactTimeAgo date={dateObject}>{({ value }) => value}</ReactTimeAgo>;
 };
 
 const ScalePiece = styled.div(({ filled }: { filled: boolean }) => [
