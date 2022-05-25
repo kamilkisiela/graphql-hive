@@ -12,6 +12,7 @@
     "url": "kamilkisiela/graphql-hive",
     "directory": "packages/libraries/cli"
   },
+  "homepage": "https://graphql-hive.com",
   "license": "MIT",
   "keywords": [
     "graphql"

@@ -12,6 +12,7 @@
     "url": "kamilkisiela/graphql-hive",
     "directory": "packages/libraries/client"
   },
+  "homepage": "https://graphql-hive.com",
   "license": "MIT",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
