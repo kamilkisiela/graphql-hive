@@ -5,7 +5,7 @@ import { UserProvider, useUser as useAuth0User, UserProfile } from '@auth0/nextj
 import { Spinner } from '@/components/common/Spinner';
 import { LoginPage } from './LoginPage';
 
-export const AuthContext = createContext<{
+const AuthContext = createContext<{
   user: (UserProfile & { metadata: Metadata }) | null;
 }>({
   user: null,

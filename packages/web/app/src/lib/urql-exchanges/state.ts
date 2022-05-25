@@ -4,7 +4,7 @@ import { proxy, useSnapshot } from 'valtio';
 
 const inflightRequests = new Set<number>();
 
-export const NetworkState = proxy({
+const NetworkState = proxy({
   inflightRequests: 0,
 });
 

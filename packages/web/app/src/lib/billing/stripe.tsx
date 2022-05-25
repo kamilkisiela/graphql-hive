@@ -4,7 +4,7 @@ import React from 'react';
 
 const STRIPE_PUBLIC_KEY = process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY || null;
 
-export const stripePromise$ = !STRIPE_PUBLIC_KEY ? null : loadStripe(STRIPE_PUBLIC_KEY);
+const stripePromise$ = !STRIPE_PUBLIC_KEY ? null : loadStripe(STRIPE_PUBLIC_KEY);
 
 export const HiveStripeWrapper: React.FC<{}> = ({ children }) => {
   if (STRIPE_PUBLIC_KEY === null || stripePromise$ === null) {

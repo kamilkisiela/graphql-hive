@@ -149,21 +149,6 @@ export const ArrowDownIcon: FC<IconProps> = ({ className }) => (
   </svg>
 );
 
-export const MailIcon: FC<IconProps> = ({ className, ...props }) => (
-  <svg
-    viewBox="0 0 24 24"
-    xmlns="http://www.w3.org/2000/svg"
-    className={clsx('fill-none h-6 w-6 stroke-current', className)}
-    {...props}
-  >
-    <path
-      d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z"
-      {...DEFAULT_PATH_PROPS}
-    />
-    <path d="M22 6L12 13L2 6" {...DEFAULT_PATH_PROPS} />
-  </svg>
-);
-
 export const CheckIcon: FC<IconProps> = ({ className }) => (
   <svg
     viewBox="0 0 24 24"
@@ -199,16 +184,6 @@ export const TargetIcon: FC<IconProps> = ({ className }) => (
       d="M12 14C13.1046 14 14 13.1046 14 12C14 10.8954 13.1046 10 12 10C10.8954 10 10 10.8954 10 12C10 13.1046 10.8954 14 12 14Z"
       {...DEFAULT_PATH_PROPS}
     />
-  </svg>
-);
-
-export const SearchIcon: FC<IconProps> = props => (
-  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" tw="w-6 h-6 stroke-current fill-none" {...props}>
-    <path
-      d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z"
-      {...DEFAULT_PATH_PROPS}
-    />
-    <path d="M20.9999 20.9999L16.6499 16.6499" {...DEFAULT_PATH_PROPS} />
   </svg>
 );
 
@@ -263,23 +238,6 @@ export const FileTextIcon: FC<IconProps> = ({ className }) => (
   </svg>
 );
 
-export const SunIcon: FC<IconProps> = props => (
-  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" tw="w-6 h-6 stroke-current fill-none" {...props}>
-    <path
-      d="M12 17C14.7614 17 17 14.7614 17 12C17 9.23858 14.7614 7 12 7C9.23858 7 7 9.23858 7 12C7 14.7614 9.23858 17 12 17Z"
-      {...DEFAULT_PATH_PROPS}
-    />
-    <path d="M12 1V3" {...DEFAULT_PATH_PROPS} />
-    <path d="M12 21V23" {...DEFAULT_PATH_PROPS} />
-    <path d="M4.22021 4.21997L5.64021 5.63997" {...DEFAULT_PATH_PROPS} />
-    <path d="M18.3599 18.3601L19.7799 19.7801" {...DEFAULT_PATH_PROPS} />
-    <path d="M1 12H3" {...DEFAULT_PATH_PROPS} />
-    <path d="M21 12H23" {...DEFAULT_PATH_PROPS} />
-    <path d="M4.22021 19.7801L5.64021 18.3601" {...DEFAULT_PATH_PROPS} />
-    <path d="M18.3599 5.63997L19.7799 4.21997" {...DEFAULT_PATH_PROPS} />
-  </svg>
-);
-
 export const LogOutIcon: FC<IconProps> = props => (
   <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" tw="w-6 h-6 stroke-current fill-none" {...props}>
     <path d="M9 21H5C3.89543 21 3 20.1046 3 19V5C3 3.89543 3.89543 3 5 3H9" {...DEFAULT_PATH_PROPS} />
@@ -301,24 +259,6 @@ export const LinkIcon: FC<IconProps> = props => (
   </svg>
 );
 
-export const DownloadIcon: FC<IconProps> = props => (
-  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" tw="w-6 h-6 stroke-current fill-none" {...props}>
-    <path d="M21 15V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V15" {...DEFAULT_PATH_PROPS} />
-    <path d="M7 10L12 15L17 10" {...DEFAULT_PATH_PROPS} />
-    <path d="M12 15V3" {...DEFAULT_PATH_PROPS} />
-  </svg>
-);
-
-export const EyeIcon: FC<IconProps> = props => (
-  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" tw="w-6 h-6 stroke-current fill-none" {...props}>
-    <path d="M1 12C1 12 5 4 12 4C19 4 23 12 23 12C23 12 19 20 12 20C5 20 1 12 1 12Z" {...DEFAULT_PATH_PROPS} />
-    <path
-      d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z"
-      {...DEFAULT_PATH_PROPS}
-    />
-  </svg>
-);
-
 export const KeyIcon: FC<IconProps> = ({ className }) => (
   <svg
     viewBox="0 0 24 24"
@@ -329,19 +269,6 @@ export const KeyIcon: FC<IconProps> = ({ className }) => (
     className={className}
   >
     <path d="M21.7069 2.70711C22.0974 2.31658 22.0974 1.68342 21.7069 1.29289C21.3164 0.902369 20.6832 0.902369 20.2927 1.29289L21.7069 2.70711ZM18.2927 3.29289C17.9022 3.68342 17.9022 4.31658 18.2927 4.70711C18.6832 5.09763 19.3164 5.09763 19.7069 4.70711L18.2927 3.29289ZM11.3898 11.61L12.0921 10.8982C11.7009 10.5122 11.0716 10.5142 10.6828 10.9027L11.3898 11.61ZM3.61179 19.388L2.89246 20.0828L2.89996 20.0904L3.61179 19.388ZM11.3888 11.611L10.6941 12.3303C11.0864 12.7092 11.71 12.7039 12.0957 12.3183L11.3888 11.611ZM10.6827 10.9029C10.2922 11.2934 10.2922 11.9266 10.6827 12.3171C11.0732 12.7076 11.7064 12.7076 12.0969 12.3171L10.6827 10.9029ZM16.2069 8.20711C16.5974 7.81658 16.5974 7.18342 16.2069 6.79289C15.8164 6.40237 15.1832 6.40237 14.7927 6.79289L16.2069 8.20711ZM16.2069 6.79289C15.8164 6.40237 15.1832 6.40237 14.7927 6.79289C14.4022 7.18342 14.4022 7.81658 14.7927 8.20711L16.2069 6.79289ZM18.4998 10.5L17.7927 11.2071C18.1832 11.5976 18.8164 11.5976 19.2069 11.2071L18.4998 10.5ZM21.9998 7L22.7069 7.70711C23.0974 7.31658 23.0974 6.68342 22.7069 6.29289L21.9998 7ZM19.7069 3.29289C19.3164 2.90237 18.6832 2.90237 18.2927 3.29289C17.9022 3.68342 17.9022 4.31658 18.2927 4.70711L19.7069 3.29289ZM14.7927 6.79289C14.4022 7.18342 14.4022 7.81658 14.7927 8.20711C15.1832 8.59763 15.8164 8.59763 16.2069 8.20711L14.7927 6.79289ZM19.7069 4.70711C20.0974 4.31658 20.0974 3.68342 19.7069 3.29289C19.3164 2.90237 18.6832 2.90237 18.2927 3.29289L19.7069 4.70711ZM20.2927 1.29289L18.2927 3.29289L19.7069 4.70711L21.7069 2.70711L20.2927 1.29289ZM10.6874 12.3218C11.837 13.456 12.2906 15.1193 11.8761 16.68L13.8091 17.1934C14.4078 14.9389 13.7526 12.5365 12.0921 10.8982L10.6874 12.3218ZM11.8761 16.68C11.4616 18.2408 10.2426 19.4598 8.68182 19.8743L9.19514 21.8073C11.4496 21.2086 13.2104 19.4478 13.8091 17.1934L11.8761 16.68ZM8.68182 19.8743C7.12104 20.2888 5.45783 19.8352 4.32362 18.6856L2.89996 20.0904C4.53827 21.7508 6.94068 22.406 9.19514 21.8073L8.68182 19.8743ZM4.33108 18.6933C2.6257 16.9276 2.65009 14.1209 4.38589 12.3851L2.97168 10.9709C0.464409 13.4782 0.42918 17.5322 2.8925 20.0827L4.33108 18.6933ZM4.38589 12.3851C6.12169 10.6493 8.92837 10.6249 10.6941 12.3303L12.0835 10.8917C9.53304 8.42839 5.47895 8.46362 2.97168 10.9709L4.38589 12.3851ZM12.0957 12.3183L12.0967 12.3173L10.6828 10.9027L10.6818 10.9037L12.0957 12.3183ZM12.0969 12.3171L16.2069 8.20711L14.7927 6.79289L10.6827 10.9029L12.0969 12.3171ZM14.7927 8.20711L17.7927 11.2071L19.2069 9.79289L16.2069 6.79289L14.7927 8.20711ZM19.2069 11.2071L22.7069 7.70711L21.2927 6.29289L17.7927 9.79289L19.2069 11.2071ZM22.7069 6.29289L19.7069 3.29289L18.2927 4.70711L21.2927 7.70711L22.7069 6.29289ZM16.2069 8.20711L19.7069 4.70711L18.2927 3.29289L14.7927 6.79289L16.2069 8.20711Z" />
-  </svg>
-);
-
-export const CameraIcon: FC<IconProps> = props => (
-  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" tw="w-6 h-6 stroke-current fill-none" {...props}>
-    <path
-      d="M23 19C23 20.1046 22.1046 21 21 21H3C1.89543 21 1 20.1046 1 19V8C1 6.89543 1.89543 6 3 6H7L9 3H15L17 6H21C22.1046 6 23 6.89543 23 8V19Z"
-      {...DEFAULT_PATH_PROPS}
-    />
-    <path
-      d="M12 17C14.2091 17 16 15.2091 16 13C16 10.7909 14.2091 9 12 9C9.79086 9 8 10.7909 8 13C8 15.2091 9.79086 17 12 17Z"
-      {...DEFAULT_PATH_PROPS}
-    />
   </svg>
 );
 
@@ -412,31 +339,6 @@ export const SlackIcon: FC<IconProps> = ({ className }) => (
     <path d="M15.5 19H14V20.5C14 21.33 14.67 22 15.5 22C16.33 22 17 21.33 17 20.5C17 19.67 16.33 19 15.5 19Z" />
     <path d="M10 9.5C10 8.67 9.33 8 8.5 8H3.5C2.67 8 2 8.67 2 9.5C2 10.33 2.67 11 3.5 11H8.5C9.33 11 10 10.33 10 9.5Z" />
     <path d="M8.5 5H10V3.5C10 2.67 9.33 2 8.5 2C7.67 2 7 2.67 7 3.5C7 4.33 7.67 5 8.5 5Z" />
-  </svg>
-);
-
-export const CheckSquareIcon: FC<IconProps> = ({ className }) => (
-  <svg
-    viewBox="0 0 24 24"
-    width="24"
-    height="24"
-    stroke="currentColor"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-  >
-    <path d="M9 11L12 14L22 4" {...DEFAULT_PATH_PROPS} />
-    <path
-      d="M21 12V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V5C3 3.89543 3.89543 3 5 3H16"
-      {...DEFAULT_PATH_PROPS}
-    />
-  </svg>
-);
-
-export const PaperPlaneIcon: FC<IconProps> = props => (
-  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" tw="w-6 h-6 stroke-current fill-none" {...props}>
-    <path d="M22 2L11 13" {...DEFAULT_PATH_PROPS} />
-    <path d="M22 2L15 22L11 13L2 9L22 2V2Z" {...DEFAULT_PATH_PROPS} />
   </svg>
 );
 
