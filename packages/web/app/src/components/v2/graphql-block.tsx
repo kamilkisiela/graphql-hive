@@ -14,7 +14,7 @@ function prettify(sdl: string) {
   }
 }
 
-export const GraphQLHighlight: React.FC<
+const GraphQLHighlight: React.FC<
   Omit<SchemaEditorProps, 'schema'> & {
     code: string;
     light?: boolean;
