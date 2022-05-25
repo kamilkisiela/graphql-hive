@@ -2,7 +2,6 @@ import React from 'react';
 import tw, { styled } from 'twin.macro';
 import Head from 'next/head';
 import { TimeAgo as ReactTimeAgo } from '@n1ru4l/react-time-ago';
-import { CriticalityLevel } from '../../graphql';
 
 export const Title: React.FC<{ title: string }> = ({ title }) => (
   <Head>
@@ -11,29 +10,6 @@ export const Title: React.FC<{ title: string }> = ({ title }) => (
   </Head>
 );
 
-export const Card = {
-  Root: tw.div`
-    bg-white dark:bg-transparent
-    rounded-md 
-    border-2 
-    border-gray-100 dark:border-gray-700
-  `,
-  Title: tw.div`
-    px-4 py-4 text-base 
-    text-gray-900 dark:text-white 
-    bg-white dark:bg-gray-900
-    rounded-t-md
-    font-normal border-b 
-    border-gray-100 dark:border-gray-700
-  `,
-  Content: tw.div`px-4 pt-3 pb-4`,
-  Description: tw.div`
-    px-4 pt-3 pb-4 
-    text-gray-600 dark:text-white 
-    tracking-wide
-  `,
-  List: tw.div`flex pt-2 gap-2 flex-col`,
-};
 export const Label = tw.span`
   inline-block
   py-1 px-2
@@ -74,11 +50,6 @@ export const Section = {
   Subtitle: tw.div`text-sm text-gray-600 dark:text-gray-300`,
 };
 
-export const Circle = styled.span(({ criticality }: { criticality: CriticalityLevel }) => [
-  tw`inline-block w-2 h-2 rounded-full`,
-  criticality === 'Safe' ? tw`bg-emerald-500` : criticality === 'Breaking' ? tw`bg-red-500` : tw`bg-yellow-400`,
-]);
-
 export const TimeAgo: React.FC<{ date: string }> = ({ date }) => {
   const dateObject = React.useMemo(() => new Date(date), [date]);
   return <ReactTimeAgo date={dateObject}>{({ value }) => value}</ReactTimeAgo>;
@@ -105,19 +76,3 @@ export const Scale: React.FC<{
 };
 
 export const Description = tw.p`pr-5 text-sm leading-5 text-gray-500 dark:text-gray-300`;
-
-export const HorizontalSelect = {
-  List: tw.div`
-    w-full divide-y-2 divide-white
-  `,
-  Row: styled.div(({ selected }: { selected?: boolean }) => [
-    tw`
-      flex flex-row items-center
-      cursor-pointer rounded-md
-      hover:bg-gray-100 focus:outline-none
-    `,
-    selected ? tw`bg-gray-100` : tw``,
-  ]),
-  Item: tw.div`p-2 whitespace-nowrap`,
-  Date: tw.div`px-4 whitespace-nowrap flex-shrink-0 text-right text-xs text-gray-500`,
-};

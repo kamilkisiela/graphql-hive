@@ -15,10 +15,6 @@ import {
 const Link = tw.a`text-yellow-500 dark:text-yellow-300 hover:text-yellow-600 dark:hover:text-yellow-500`;
 export const Highlight = tw.span`text-yellow-500 dark:text-yellow-300 hover:text-yellow-600 dark:hover:text-yellow-500`;
 
-export interface ActivityProps {
-  activity: ActivityNode;
-}
-
 export type ActivityNode =
   | OrganizationActivitiesQuery['organizationActivities']['nodes'][0]
   | ProjectActivitiesQuery['projectActivities']['nodes'][0]
