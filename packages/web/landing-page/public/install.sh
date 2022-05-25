@@ -36,7 +36,7 @@
   rm -rf ~/.local/share/hive
 
 
-  URL=https://graphql-hive-cli-test.s3.us-east-2.amazonaws.com/channels/stable/hive-\$OS-\$ARCH.tar.gz
+  URL=https://graphql-hive-cli.s3.us-east-2.amazonaws.com/channels/stable/hive-\$OS-\$ARCH.tar.gz
   TAR_ARGS="xz"
   echo "Installing CLI from \$URL"
 

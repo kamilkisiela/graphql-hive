@@ -1,6 +1,6 @@
 # GraphQL Hive Client
 
-GraphQL Hive is a GraphQL schemas registry where you can host, manage and collaborate on all your GraphQL schemas and operations, compatible with all architecture: schema stitching, federation, or just a good old monolith.
+[GraphQL Hive](https://graphql-hive.com) is a GraphQL schemas registry where you can host, manage and collaborate on all your GraphQL schemas and operations, compatible with all architecture: schema stitching, federation, or just a good old monolith.
 
 GraphQL Hive is currently available as a hosted service to be used by all.
 We take care of the heavy lifting behind the scenes be managing the registry, scaling it for your needs, to free your time to focus on the most important things at hand.
