@@ -11,6 +11,7 @@
     "noImplicitThis": true,
     "strictBindCallApply": true,
     "alwaysStrict": true,
+    "noImplicitAny": true,
 
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,

@@ -40,7 +40,7 @@ function fullSeries(
     from: string;
     to: string;
   }
-) {
+): Array<[string, number]> {
   if (!data.length) {
     return createEmptySeries({ interval, period });
   }
@@ -72,7 +72,7 @@ function fullSeries(
   }
 
   // Instead of creating a new array, we could move things around but this is easier
-  const newData = [];
+  const newData: Array<[string, number]> = [];
 
   for (let i = 0; i < data.length; i++) {
     const current = data[i];
@@ -100,6 +100,14 @@ function fullSeries(
   return newData;
 }
 
+function times<T>(amount: number, f: (index: number) => T) {
+  const items: Array<T> = [];
+  for (const i = 0; i < amount; amount++) {
+    items[i] = f(i);
+  }
+  return items;
+}
+
 function createEmptySeries({
   interval,
   period,
@@ -114,9 +122,7 @@ function createEmptySeries({
   const endAt = new Date(period.to).getTime();
 
   const steps = Math.floor((endAt - startAt) / interval);
-  return Array(steps)
-    .fill(0)
-    .map((_, i) => [new Date(startAt + i * interval).toISOString(), 0]);
+  return times(steps, i => [new Date(startAt + i * interval).toISOString(), 0]);
 }
 
 function useChartStyles() {

@@ -63,7 +63,7 @@ const NavigationContext = React.createContext<{
 
 export const useNavigation = () => React.useContext(NavigationContext);
 
-export const NavigationProvider = ({ children }) => {
+export const NavigationProvider = ({ children }: { children: React.ReactNode }) => {
   const [state, setState] = React.useState<State>({});
   const [visible, setVisible] = React.useState<boolean>(true);
   const show = React.useCallback(() => setVisible(true), [setVisible]);

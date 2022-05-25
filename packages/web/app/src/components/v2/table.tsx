@@ -1,15 +1,15 @@
 import { ReactElement } from 'react';
 import clsx from 'clsx';
 
-type Column = { key: string; align?: 'right'; width?: 'auto' };
+type Column<TKey extends string> = { key: TKey; align?: 'right'; width?: 'auto' };
 
-export const Table = ({
+export function Table<TColumns extends string>({
   dataSource,
   columns,
 }: {
-  dataSource?: { id: string }[];
-  columns: Column[] | ReadonlyArray<Column>;
-}): ReactElement => {
+  dataSource?: Array<{ id: string } & Record<TColumns, ReactElement | string>>;
+  columns: Array<Column<TColumns>> | ReadonlyArray<Column<TColumns>>;
+}): ReactElement {
   return (
     <table className="w-full">
       <tbody>
@@ -32,4 +32,4 @@ export const Table = ({
       </tbody>
     </table>
   );
-};
+}

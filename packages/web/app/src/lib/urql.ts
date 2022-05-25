@@ -5,7 +5,7 @@ import { captureException } from '@sentry/nextjs';
 import { Mutation } from './urql-cache';
 import { networkStatusExchange } from './urql-exchanges/state';
 
-const noKey = () => null;
+const noKey = (): null => null;
 
 const SERVER_BASE_PATH = '/api/proxy';
 

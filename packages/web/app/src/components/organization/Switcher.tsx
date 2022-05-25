@@ -42,7 +42,10 @@ export const OrganizationSwitcher: React.FC<{
       };
     }
 
-    const menu = {
+    const menu: {
+      personal: Array<{ key: string; label: string }>;
+      organizations: Array<{ key: string; label: string }>;
+    } = {
       personal: [],
       organizations: [],
     };

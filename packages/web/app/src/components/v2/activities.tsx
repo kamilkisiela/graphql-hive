@@ -1,4 +1,4 @@
-import { ReactElement } from 'react';
+import React, { ReactElement } from 'react';
 import NextLink from 'next/link';
 import { useQuery } from 'urql';
 
@@ -197,7 +197,7 @@ export const getActivity = (
   }
 };
 
-export const Activities = (props): ReactElement => {
+export const Activities = (props: React.ComponentProps<'div'>): ReactElement => {
   const router = useRouteSelector();
   const [organizationActivitiesQuery] = useQuery({
     query: organizationActivitiesDocument,

@@ -39,6 +39,11 @@ const titleMap: Record<CriticalityLevel, string> = {
   Dangerous: 'Dangerous Changes',
 };
 
+const criticalityLevelMapping = {
+  [CriticalityLevel.Safe]: 'text-emerald-400',
+  [CriticalityLevel.Dangerous]: 'text-yellow-400',
+} as Record<CriticalityLevel, string | undefined>;
+
 const ChangesBlock = ({
   changes,
   criticality,
@@ -57,15 +62,7 @@ const ChangesBlock = ({
       <h2 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">{titleMap[criticality]}</h2>
       <ul className="list-inside list-disc pl-3 text-base leading-relaxed">
         {filteredChanges.map((change, key) => (
-          <li
-            key={key}
-            className={clsx(
-              {
-                [CriticalityLevel.Safe]: 'text-emerald-400',
-                [CriticalityLevel.Dangerous]: 'text-yellow-400',
-              }[criticality] || 'text-red-400'
-            )}
-          >
+          <li key={key} className={clsx(criticalityLevelMapping[criticality] ?? 'text-red-400')}>
             <span className="text-gray-600 dark:text-white">{labelize(change.message)}</span>
           </li>
         ))}

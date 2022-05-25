@@ -1,4 +1,5 @@
 import { ReactElement, useCallback, useEffect, useState } from 'react';
+import { IconProps } from '@chakra-ui/react';
 import { useMutation, useQuery } from 'urql';
 
 import { useUser } from '@/components/auth/AuthProvider';
@@ -17,6 +18,11 @@ import {
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
 import { useNotifications } from '@/lib/hooks/use-notifications';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+
+const authProviderIcons = {
+  [AuthProvider.Github]: GitHubIcon,
+  [AuthProvider.Google]: GoogleIcon,
+} as Record<AuthProvider, React.FC<IconProps> | undefined>;
 
 const Page = ({ organization }: { organization: OrganizationFieldsFragment }) => {
   useOrganizationAccess({
@@ -119,11 +125,7 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
         </Button>
       </div>
       {members.map(node => {
-        const IconToUse =
-          {
-            [AuthProvider.Github]: GitHubIcon,
-            [AuthProvider.Google]: GoogleIcon,
-          }[node.user.provider] || KeyIcon;
+        const IconToUse = authProviderIcons[node.user.provider] ?? KeyIcon;
 
         const isOwner = node.id === org.owner.id;
         const isMe = node.id === me.id;
