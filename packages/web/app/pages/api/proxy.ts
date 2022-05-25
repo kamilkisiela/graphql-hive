@@ -4,6 +4,7 @@ import type { Transaction } from '@sentry/types';
 import { Readable } from 'stream';
 import { auth0 } from '../../src/lib/auth0';
 import hyperid from 'hyperid';
+import { AccessTokenError } from '@auth0/nextjs-auth0';
 
 const reqIdGenerate = hyperid({ fixedLength: true });
 
@@ -68,7 +69,7 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
     const result = await auth0.getAccessToken(req, res);
     accessToken = result.accessToken;
   } catch (error) {
-    if (error?.code !== 'invalid_session') {
+    if (error instanceof AccessTokenError && error.code !== 'invalid_session') {
       captureException(error);
     }
   }
@@ -147,9 +148,14 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
     graphqlSpan.finish();
     finishTransaction();
 
-    res.status(error.status || 500).json({
-      code: error.code,
-      error: error.message,
+    // TODO: better type narrowing of the error
+    const status = (error as Record<string, number | undefined>)?.['status'] ?? 500;
+    const code = (error as Record<string, unknown | undefined>)?.['code'] ?? '';
+    const message = (error as Record<string, unknown | undefined>)?.['message'] ?? '';
+
+    res.status(status).json({
+      code: code,
+      error: message,
     });
   }
 }
