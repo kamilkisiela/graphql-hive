@@ -7,6 +7,7 @@ GraphQL Hive provides all the tools the get visibility of your GraphQL architect
 - [Read the docs](https://docs.graphql-hive.com)
 
 ## Built for the community, for all GraphQL APIs
+
 GraphQL Hive has been built with 3 main objectives in mind:
 
 - **Help GraphQL developers to get to know their GraphQL APIs** a little more with our Schema Registry, Performance Monitoring, Alerts, and Integrations.
