@@ -1,5 +1,11 @@
 # @graphql-hive/core
 
+## 0.2.2
+
+### Patch Changes
+
+- ad66973: Bump
+
 ## 0.2.1
 
 ### Patch Changes
