@@ -1,5 +1,11 @@
 # @graphql-hive/cli
 
+## 0.14.6
+
+### Patch Changes
+
+- ce343ac: Bump
+
 ## 0.14.5
 
 ### Patch Changes
