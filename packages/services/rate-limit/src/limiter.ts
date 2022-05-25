@@ -135,8 +135,6 @@ export function createRateLimiter(config: {
       return DEFAULT_RETENTION;
     },
     checkLimit(input: RateLimitInput): RateLimitCheckResponse {
-      logger.info(`Rate-limit check triggered, input is: ${input}`);
-
       const map =
         input.type === 'operations-reporting'
           ? targetIdToRateLimitStatus.operationsReporting
