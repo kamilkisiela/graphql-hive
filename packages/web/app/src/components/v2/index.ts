@@ -6,7 +6,7 @@ export { Card } from '@/components/v2/card';
 export { Checkbox } from '@/components/v2/checkbox';
 export { CopyValue } from '@/components/v2/copy-value';
 export { DataWrapper } from '@/components/v2/data-wrapper';
-export { DiffEditor, prettify } from '@/components/v2/diff-editor';
+export { DiffEditor } from '@/components/v2/diff-editor';
 export { DropdownMenu } from '@/components/v2/dropdown';
 export { EmptyList, noSchema } from '@/components/v2/empty-list';
 export { GraphQLBlock } from '@/components/v2/graphql-block';

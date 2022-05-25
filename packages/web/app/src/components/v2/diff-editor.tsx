@@ -4,7 +4,7 @@ import { DiffEditor as MonacoDiffEditor } from '@monaco-editor/react';
 
 import { Spinner } from '@/components/common/Spinner';
 
-export const prettify = (sdl: string): string => {
+const prettify = (sdl: string): string => {
   if (!sdl) {
     return '';
   }
