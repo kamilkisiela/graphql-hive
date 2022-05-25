@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "start": "next start",
-    "build": "bob runify --single"
+    "build": "bob runify --single",
+    "typecheck": "tsc"
   },
   "dependencies": {
     "@stripe/react-stripe-js": "1.7.2",
