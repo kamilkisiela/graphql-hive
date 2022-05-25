@@ -66,7 +66,7 @@ export const CreateTargetModal = ({
   return (
     <Modal open={isOpen} onOpenChange={toggleModalOpen}>
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-        <Heading className="text-center">Create an organization</Heading>
+        <Heading className="text-center">Create a new target</Heading>
         <p className="text-sm text-gray-500">
           A project is build on top of <b>Targets</b>, which are just your environments.
         </p>
