@@ -8,6 +8,9 @@
 
     "strict": false,
     "useUnknownInCatchVariables": true,
+    "noImplicitThis": true,
+    "strictBindCallApply": true,
+    "alwaysStrict": true,
 
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
