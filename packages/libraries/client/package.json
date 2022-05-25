@@ -1,7 +1,7 @@
 {
   "name": "@graphql-hive/client",
   "description": "A NodeJS client for GraphQL Hive",
-  "version": "0.15.3",
+  "version": "0.15.4",
   "author": {
     "email": "contact@the-guild.dev",
     "name": "The Guild",
@@ -37,7 +37,7 @@
     "graphql": "^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0"
   },
   "dependencies": {
-    "@graphql-hive/core": "^0.2.1",
+    "@graphql-hive/core": "^0.2.2",
     "@graphql-tools/utils": "^8.0.0",
     "async-retry": "1.3.3",
     "axios": "^0.27.0",
