@@ -144,8 +144,6 @@ const AdminStatsQuery = gql(/* GraphQL */ `
             cleanId
             name
             type
-            ...OrgRateLimitFields
-            plan
             owner {
               user {
                 email
@@ -236,14 +234,6 @@ export const AdminStats: React.FC<{
         align: 'right',
       },
       {
-        Header: 'Org Plan',
-        accessor: 'plan',
-      },
-      {
-        Header: 'Rate Limit',
-        accessor: 'rateLimit',
-      },
-      {
         Header: 'Users',
         accessor: 'members',
       },
@@ -287,16 +277,6 @@ export const AdminStats: React.FC<{
       .map(node => ({
         name: `${node.organization.name} (id: ${node.organization.cleanId}, owner: ${node.organization.owner.user.email})`,
         members: (node.organization.members.nodes || []).map(v => v.user.email).join(', '),
-        plan: node.organization.plan,
-        rateLimit: [
-          node.organization.rateLimit.limitedForOperations ? `Limited for operations` : null,
-          node.organization.rateLimit.limitedForSchemaPushes ? `Limited schema pushes` : null,
-          `${node.organization.rateLimit.retentionInDays}d retention`,
-          `${node.organization.rateLimit.operations} operations/m`,
-          `${node.organization.rateLimit.schemaPushes} schemas/m`,
-        ]
-          .filter(Boolean)
-          .join(' - '),
         type: node.organization.type,
         users: node.users,
         projects: node.projects,
