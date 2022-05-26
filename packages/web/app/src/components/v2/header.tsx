@@ -13,7 +13,7 @@ import {
   LogOutIcon,
   PlusIcon,
   SettingsIcon,
-  AlertTriangleIcon
+  AlertTriangleIcon,
 } from '@/components/v2/icon';
 import { CreateOrganizationModal } from '@/components/v2/modals';
 import { MeDocument, OrganizationsDocument, OrganizationsQuery, OrganizationType } from '@/graphql';
