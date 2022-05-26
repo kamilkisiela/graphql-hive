@@ -4,6 +4,15 @@ import promClient from 'prom-client';
 
 export { promClient as metrics };
 
+export const readiness = new promClient.Gauge({
+  name: 'service_readiness',
+  help: "Shows if the service is ready to serve requests (1 is ready, 0 is not ready)",
+});
+
+export function reportReadiness(isReady: boolean) {
+  readiness.set(isReady ? 1 : 0);
+}
+
 export function startMetrics() {
   promClient.collectDefaultMetrics({
     labels: { instance: process.env.POD_NAME },

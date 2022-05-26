@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { createServer, createErrorHandler, ensureEnv, startMetrics, registerShutdown } from '@hive/service-common';
+import { createServer, createErrorHandler, ensureEnv, startMetrics, registerShutdown, reportReadiness } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
 import type { WebhookInput } from './types';
 import { createScheduler } from './scheduler';
@@ -72,7 +72,9 @@ async function main() {
       method: ['GET', 'HEAD'],
       url: '/_readiness',
       handler(_, res) {
-        res.status(readiness() ? 200 : 400).send();
+        const isReady = readiness();
+        reportReadiness(isReady);
+        res.status(isReady ? 200 : 400).send();
       },
     });
 

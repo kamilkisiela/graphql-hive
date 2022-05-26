@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import * as Sentry from '@sentry/node';
-import { createServer, startMetrics, ensureEnv, registerShutdown } from '@hive/service-common';
+import { createServer, startMetrics, ensureEnv, registerShutdown, reportReadiness } from '@hive/service-common';
 import { createTokens } from './tokens';
 import { createUsage } from './usage';
 import {
@@ -148,7 +148,9 @@ async function main() {
       method: ['GET', 'HEAD'],
       url: '/_readiness',
       handler(_, res) {
-        res.status(readiness() ? 200 : 400).send();
+        const isReady = readiness();
+        reportReadiness(isReady);
+        res.status(isReady ? 200 : 400).send();
       },
     });
 

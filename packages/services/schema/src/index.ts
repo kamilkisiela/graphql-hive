@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { createServer, createErrorHandler, ensureEnv, startMetrics, registerShutdown } from '@hive/service-common';
+import { createServer, createErrorHandler, ensureEnv, startMetrics, registerShutdown, reportReadiness } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
 import Redis from 'ioredis';
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify/dist/trpc-server-adapters-fastify.cjs.js';
@@ -92,6 +92,7 @@ async function main() {
       method: ['GET', 'HEAD'],
       url: '/_readiness',
       handler(_, res) {
+        reportReadiness(true);
         res.status(200).send();
       },
     });
