@@ -182,11 +182,6 @@ const SyncSchemaButton = ({
 }): ReactElement => {
   const [status, setStatus] = useState<'idle' | 'error' | 'success'>('idle');
   const [mutation, mutate] = useMutation(SchemaSyncButton_SchemaSyncCDN);
-  const hasAccess = useTargetAccess({
-    scope: TargetAccessScope.RegistryWrite,
-    member: organization.me,
-    redirect: false,
-  });
 
   const sync = useCallback(() => {
     mutate({
@@ -207,7 +202,7 @@ const SyncSchemaButton = ({
     });
   }, [mutate, setStatus]);
 
-  if (!hasAccess || !target.hasSchema) {
+  if (!target.hasSchema) {
     return null;
   }
 
@@ -272,6 +267,12 @@ function SchemaView({
     requestPolicy: 'cache-and-network',
   });
 
+  const canManage = useTargetAccess({
+    scope: TargetAccessScope.RegistryWrite,
+    member: organization.me,
+    redirect: false,
+  });
+
   if (!query.data?.target?.latestSchemaVersion?.schemas.nodes.length) {
     return noSchema;
   }
@@ -297,8 +298,8 @@ function SchemaView({
                   </InputGroup>
                 </form>
               )}
-              <MarkAsValid version={query.data.target.latestSchemaVersion} />
-              <SyncSchemaButton target={target} project={project} organization={organization} />
+              {canManage && <MarkAsValid version={query.data.target.latestSchemaVersion} />}
+              {canManage && <SyncSchemaButton target={target} project={project} organization={organization} />}
               <Button size="large" variant="primary" onClick={toggleModalOpen}>
                 Connect
                 <Link2Icon className="ml-8" />
