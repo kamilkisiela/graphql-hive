@@ -7,6 +7,7 @@ fragment OrganizationFields on Organization {
   rateLimit {
     operations
     schemaPushes
+    retentionInDays
   }
   me {
     ...MemberFields
@@ -406,6 +407,7 @@ fragment OrgRateLimitFields on Organization {
     limitedForSchemaPushes
     operations
     schemaPushes
+    retentionInDays
   }
 }
 

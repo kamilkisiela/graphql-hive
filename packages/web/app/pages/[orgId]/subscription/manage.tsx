@@ -211,6 +211,7 @@ const Inner = ({
                   <div>
                     <PlanSummary
                       plan={selectedPlan}
+                      retentionInDays={selectedPlan.retentionInDays}
                       operationsRateLimit={operationsRateLimit}
                       schemaPushesRateLimit={schemaPushesRateLimit}
                     >
