@@ -3,15 +3,43 @@ import tw, { GlobalStyles } from 'twin.macro';
 import { Global, css } from '@emotion/react';
 
 const customStyles = css`
+  *:active,
+  *:focus {
+    outline: none !important;
+  }
+
   html,
   body,
   #__next {
     ${tw`w-screen h-screen`}
-    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif;
   }
 
   #__next {
+    font-family: inherit !important;
+    color: inherit !important;
     ${tw`flex flex-col h-full text-sm antialiased text-gray-700 lg:text-base`}
+  }
+
+  // Remove autocomplete color in Chrome
+  input:-webkit-autofill {
+    &,
+    &:hover,
+    &:focus,
+    &:active {
+      -webkit-transition: color 9999s ease-out, background-color 9999s ease-out;
+      -webkit-transition-delay: 9999s;
+    }
+  }
+
+  select {
+    // remove default arrow down icon in right side
+    appearance: none;
+  }
+
+  .monaco-editor,
+  .monaco-editor-background,
+  [role='presentation'] {
+    background: transparent !important;
   }
 `;
 
