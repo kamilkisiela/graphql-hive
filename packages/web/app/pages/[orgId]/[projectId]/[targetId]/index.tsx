@@ -9,15 +9,14 @@ import {
   InputRightElement,
   Tooltip,
 } from '@chakra-ui/react';
-import { VscClose, VscSync } from 'react-icons/vsc';
+import { VscClose } from 'react-icons/vsc';
 import { gql, useMutation, useQuery } from 'urql';
 import { useDebouncedCallback } from 'use-debounce';
 
 import { TargetLayout } from '@/components/layouts';
 import { MarkAsValid } from '@/components/target/history/MarkAsValid';
 import { Button, DataWrapper, GraphQLBlock, noSchema, Title } from '@/components/v2';
-import { Link2Icon } from '@/components/v2/icon';
-import { ConnectSchemaModal } from '@/components/v2/modals';
+import { RefreshIcon } from '@/components/v2/icon';
 import { SchemaFieldsFragment } from '@/gql/graphql';
 import {
   LatestSchemaDocument,
@@ -210,13 +209,12 @@ const SyncSchemaButton = ({
     <Tooltip label="Re-upload the latest valid version to Hive CDN" fontSize="xs" placement="bottom-start">
       <Button variant="primary" size="large" onClick={sync} disabled={status !== 'idle' || mutation.fetching}>
         {mutation.fetching
-          ? 'Syncing...'
-          : status === 'idle'
-          ? 'Update CDN'
-          : status === 'error'
-          ? 'Failed to synchronize'
-          : 'CDN is up to date'}
-        <VscSync className="ml-8" />
+          ? 'Syncing…'
+          : {
+              idle: 'Update CDN',
+              error: 'Failed to synchronize',
+            }[status] || 'CDN is up to date'}
+        <RefreshIcon className="ml-8 h-4 w-4" />
       </Button>
     </Tooltip>
   );
@@ -231,11 +229,6 @@ function SchemaView({
   project: ProjectFieldsFragment;
   target: TargetFieldsFragment;
 }): ReactElement {
-  const [isModalOpen, setModalOpen] = useState(false);
-  const toggleModalOpen = useCallback(() => {
-    setModalOpen(prevOpen => !prevOpen);
-  }, []);
-
   const [filterService, setFilterService] = useState<string | null>(null);
   const [term, setTerm] = useState<string | null>(null);
   const debouncedFilter = useDebouncedCallback((value: string) => {
@@ -281,7 +274,7 @@ function SchemaView({
     <DataWrapper query={query}>
       {() => (
         <>
-          <div className="flex flex-row items-center justify-between">
+          <div className="mb-5 flex flex-row items-center justify-between">
             <div className="font-light text-gray-500">The latest published schema.</div>
             <div className="flex flex-row items-center gap-4">
               {isDistributed && (
@@ -300,23 +293,16 @@ function SchemaView({
               )}
               {canManage && <MarkAsValid version={query.data.target.latestSchemaVersion} />}
               {canManage && <SyncSchemaButton target={target} project={project} organization={organization} />}
-              <Button size="large" variant="primary" onClick={toggleModalOpen}>
-                Connect
-                <Link2Icon className="ml-8" />
-              </Button>
             </div>
           </div>
-          <div className="my-8">
-            <Schemas
-              organization={organization}
-              project={project}
-              target={query.data.target}
-              filterService={filterService}
-              version={query.data.target.latestSchemaVersion.id}
-              schemas={query.data.target.latestSchemaVersion.schemas.nodes ?? []}
-            />
-          </div>
-          <ConnectSchemaModal isOpen={isModalOpen} toggleModalOpen={toggleModalOpen} />
+          <Schemas
+            organization={organization}
+            project={project}
+            target={query.data.target}
+            filterService={filterService}
+            version={query.data.target.latestSchemaVersion.id}
+            schemas={query.data.target.latestSchemaVersion.schemas.nodes ?? []}
+          />
         </>
       )}
     </DataWrapper>
