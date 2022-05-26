@@ -100,11 +100,13 @@ export const PlanSummary = ({
   plan,
   operationsRateLimit,
   schemaPushesRateLimit,
+  retentionInDays,
   children,
 }: {
   plan: BillingPlansQuery['billingPlans'][number];
   operationsRateLimit: number;
   schemaPushesRateLimit: number;
+  retentionInDays: number;
   children: ReactNode;
 }): ReactElement => {
   if (plan.planType === BillingPlanType.Enterprise) {
@@ -147,7 +149,7 @@ export const PlanSummary = ({
         <Stat className="mb-8">
           <StatLabel>Retention</StatLabel>
           <StatHelpText>usage reports</StatHelpText>
-          <StatNumber>{plan.retentionInDays} days</StatNumber>
+          <StatNumber>{retentionInDays} days</StatNumber>
         </Stat>
       </StatGroup>
       <PriceEstimationTable
