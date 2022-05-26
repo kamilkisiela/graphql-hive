@@ -11,6 +11,7 @@ export default {
   prevLinks: true,
   search: true,
   unstable_flexsearch: true,
+  floatTOC: true,
   customSearch: null,
   darkMode: true,
   footer: false,

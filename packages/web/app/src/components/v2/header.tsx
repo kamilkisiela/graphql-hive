@@ -13,6 +13,7 @@ import {
   LogOutIcon,
   PlusIcon,
   SettingsIcon,
+  AlertTriangleIcon,
 } from '@/components/v2/icon';
 import { CreateOrganizationModal } from '@/components/v2/modals';
 import { MeDocument, OrganizationsDocument, OrganizationsQuery, OrganizationType } from '@/graphql';
@@ -139,6 +140,12 @@ export const Header = (): ReactElement => {
               <a href={process.env.NEXT_PUBLIC_DOCS_LINK} target="_blank" rel="noreferrer">
                 <FileTextIcon />
                 Documentation
+              </a>
+            </DropdownMenu.Item>
+            <DropdownMenu.Item asChild>
+              <a href="https://status.graphql-hive.com" target="_blank" rel="noreferrer">
+                <AlertTriangleIcon />
+                Status page
               </a>
             </DropdownMenu.Item>
             {/* TODO: Light mode will be available after releasing */}
