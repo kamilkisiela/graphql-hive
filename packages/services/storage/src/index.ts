@@ -364,16 +364,25 @@ export async function createStorage(connection: string): Promise<Storage> {
         return Promise.reject(new Error(`Owner not found (organization=${organization})`));
       });
     }),
-    async getOrganizationMembers({ organization }) {
-      const results = await pool.many<Slonik<users & Pick<organization_member, 'scopes' | 'organization_id'>>>(
+    getOrganizationMembers: batch(async selectors => {
+      const organizations = selectors.map(s => s.organization);
+      const allMembers = await pool.query<Slonik<users & Pick<organization_member, 'scopes' | 'organization_id'>>>(
         sql`
-          SELECT u.*, om.scopes, om.organization_id FROM public.organization_member as om
-          LEFT JOIN public.users as u ON (u.id = om.user_id)
-          WHERE om.organization_id = ${organization} ORDER BY u.created_at DESC`
+        SELECT u.*, om.scopes, om.organization_id FROM public.organization_member as om
+        LEFT JOIN public.users as u ON (u.id = om.user_id)
+        WHERE om.organization_id IN (${sql.join(organizations, sql`, `)}) ORDER BY u.created_at DESC`
       );
 
-      return results.map(transformMember);
-    },
+      return organizations.map(organization => {
+        const members = allMembers.rows.filter(row => row.organization_id === organization);
+
+        if (members) {
+          return Promise.resolve(members.map(transformMember));
+        }
+
+        return Promise.reject(new Error(`Members not found (organization=${organization})`));
+      });
+    }),
     async getOrganizationMember({ organization, user }) {
       const member = await pool.one<Slonik<users & Pick<organization_member, 'organization_id' | 'scopes'>>>(
         sql`
