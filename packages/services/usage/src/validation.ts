@@ -55,12 +55,11 @@ export function validateOperationMapRecord(record: OperationMapRecord) {
     return {
       valid: true,
     };
-  } else {
-    return {
-      valid: false,
-      errors: validate.errors,
-    };
   }
+  return {
+    valid: false,
+    errors: validate.errors,
+  };
 }
 
 export function validateOperation(operation: IncomingOperation, operationMap: OperationMap) {
@@ -81,10 +80,9 @@ export function validateOperation(operation: IncomingOperation, operationMap: Op
     return {
       valid: true,
     };
-  } else {
-    return {
-      valid: false,
-      errors: validate.errors,
-    };
   }
+  return {
+    valid: false,
+    errors: validate.errors,
+  };
 }

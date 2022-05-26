@@ -27,7 +27,7 @@ async function main() {
   return dockest.run(createServices());
 }
 
-await main().catch(err => {
+main().catch(err => {
   console.error(err);
   process.exit(1);
 });

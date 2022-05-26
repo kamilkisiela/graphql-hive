@@ -49,7 +49,7 @@ jobs:
 
       - name: Create Release Pull Request or Publish packages
         id: changesets
-        uses: changesets/action@master
+        uses: changesets/action@v1.3.0
         with:
           publish: yarn release
           commit: 'chore(release): update monorepo packages versions'
@@ -62,7 +62,7 @@ jobs:
         id: cli
         run: |
           echo '${{steps.changesets.outputs.publishedPackages}}' > cli-ver.json
-          VERSION=`echo $(jq -r '.[] | select(.name | contains("@graphql-hive/cli")).version' cli-ver.json)`
+          VERSION=`echo $(jq -r '.[] | select(.name | endswith("@graphql-hive/cli")).version' cli-ver.json)`
           echo "::set-output name=version::$VERSION"
           echo "::set-output name=publish::true"
 

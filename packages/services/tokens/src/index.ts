@@ -1,6 +1,12 @@
 #!/usr/bin/env node
 import 'reflect-metadata';
-import { createServer, createErrorHandler, startMetrics, registerShutdown } from '@hive/service-common';
+import {
+  createServer,
+  createErrorHandler,
+  startMetrics,
+  registerShutdown,
+  reportReadiness,
+} from '@hive/service-common';
 import * as Sentry from '@sentry/node';
 import LRU from 'tiny-lru';
 import ms from 'ms';
@@ -71,7 +77,9 @@ export async function main() {
       method: ['GET', 'HEAD'],
       url: '/_readiness',
       handler(_, res) {
-        res.status(readiness() ? 200 : 400).send();
+        const isReady = readiness();
+        reportReadiness(isReady);
+        res.status(isReady ? 200 : 400).send();
       },
     });
 

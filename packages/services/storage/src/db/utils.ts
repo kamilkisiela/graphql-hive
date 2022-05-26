@@ -40,13 +40,14 @@ export function objectToParams<T extends Record<string, any>>(
     Object.keys(obj).map(key => {
       if (obj[key] === undefined || obj[key] === null) {
         return null;
-      } else if (Array.isArray(obj[key])) {
-        return transformArray!(key, obj[key]);
-      } else if (typeof obj[key] === 'object') {
-        return sql.json(obj[key]);
-      } else {
-        return obj[key];
       }
+      if (Array.isArray(obj[key])) {
+        return transformArray!(key, obj[key]);
+      }
+      if (typeof obj[key] === 'object') {
+        return sql.json(obj[key]);
+      }
+      return obj[key];
     }),
     sql`, `
   );

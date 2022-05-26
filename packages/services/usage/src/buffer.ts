@@ -28,9 +28,8 @@ export function calculateChunkSize(totalLength: number, numOfChunks: number, chu
 
   if (chunkIndex >= zp) {
     return pp + 1;
-  } else {
-    return pp;
   }
+  return pp;
 }
 
 export function createEstimator(config: {

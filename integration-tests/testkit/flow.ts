@@ -324,6 +324,13 @@ export function updateTargetValidationSettings(
               }
             }
           }
+          error {
+            message
+            inputErrors {
+              percentage
+              period
+            }
+          }
         }
       }
     `),

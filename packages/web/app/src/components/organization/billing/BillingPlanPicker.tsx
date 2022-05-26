@@ -1,4 +1,4 @@
-import React from 'react';
+import { ReactNode, ReactElement } from 'react';
 import { List, ListIcon, ListItem } from '@chakra-ui/react';
 import { VscCheck } from 'react-icons/vsc';
 import { BillingPlanType, BillingPlansQuery } from '@/graphql';
@@ -10,8 +10,8 @@ const comingSoon = <span className="text-xs">(coming soon)</span>;
 const planCollection: {
   [key in BillingPlanType]: {
     description: string;
-    features: Array<React.ReactNode | string>;
-    footer?: React.ReactNode;
+    features: Array<ReactNode | string>;
+    footer?: ReactNode;
   };
 } = {
   [BillingPlanType.Hobby]: {
@@ -59,7 +59,7 @@ const planCollection: {
       '360 days of usage data retention',
       <div>Schema Policy Checks {comingSoon}</div>,
       <div>ESLint integration {comingSoon}</div>,
-      'SAML (coming soon)',
+      <div>SAML {comingSoon}</div>,
       <span className="flex gap-1">
         Support from
         <Link variant="primary" href="https://the-guild.dev" target="_blank" rel="noreferrer">
@@ -67,18 +67,18 @@ const planCollection: {
         </Link>
       </span>,
     ],
-    footer: <>Shape a custom plan for your business</>,
+    footer: 'Shape a custom plan for your business',
   },
 };
 
-const Plan: React.FC<{
+const Plan = (plan: {
   isActive: boolean;
   name: string;
   price: string | number;
   description: string;
-  features: React.ReactNode[];
-  footer?: React.ReactNode;
-}> = plan => {
+  features: ReactNode[];
+  footer?: ReactNode;
+}): ReactElement => {
   return (
     <div className="flex h-full flex-col justify-between">
       <div>
@@ -100,16 +100,14 @@ const Plan: React.FC<{
         <div className="text-sm text-gray-500">{plan.description}</div>
         <div>
           <List spacing={2} className="mt-6">
-            {plan.features.map((feature, i) => {
-              return (
-                <ListItem key={i}>
-                  <Section.Subtitle className="flex items-center">
-                    <ListIcon color="gray.500" as={VscCheck} />
-                    {feature}
-                  </Section.Subtitle>
-                </ListItem>
-              );
-            })}
+            {plan.features.map((feature, i) => (
+              <ListItem key={i}>
+                <Section.Subtitle className="flex items-center">
+                  <ListIcon color="gray.500" as={VscCheck} />
+                  {feature}
+                </Section.Subtitle>
+              </ListItem>
+            ))}
           </List>
         </div>
       </div>
@@ -123,43 +121,37 @@ const Plan: React.FC<{
   );
 };
 
-export const BillingPlanPicker: React.FC<{
+export const BillingPlanPicker = ({
+  value,
+  activePlan,
+  plans,
+  onPlanChange,
+}: {
   value: BillingPlanType;
   activePlan: BillingPlanType;
   plans: BillingPlansQuery['billingPlans'];
   onPlanChange: (plan: BillingPlanType) => void;
-}> = ({ value, activePlan, plans, onPlanChange }) => {
+}): ReactElement => {
   return (
-    <RadioGroup
-      value={value}
-      onValueChange={onPlanChange}
-      className="flex !flex-row content-start	items-stretch justify-start !justify-items-start gap-4"
-    >
-      {plans.map(plan => {
-        return (
-          <Radio
-            value={plan.planType}
+    <RadioGroup value={value} onValueChange={onPlanChange} className="flex gap-4 md:!flex-row">
+      {plans.map(plan => (
+        <Radio value={plan.planType} key={plan.id} className="!rounded-md border p-4 md:w-1/3">
+          <Plan
             key={plan.id}
-            className="block flex w-1/3 flex-col items-start !rounded-md border p-4"
-          >
-            <Plan
-              key={plan.id}
-              name={plan.name}
-              price={
-                plan.planType === BillingPlanType.Hobby
-                  ? 'Free'
-                  : plan.planType === BillingPlanType.Enterprise
-                  ? 'Contact Us'
-                  : plan.basePrice!
-              }
-              isActive={activePlan === plan.planType}
-              features={planCollection[plan.planType].features}
-              description={planCollection[plan.planType].description}
-              footer={planCollection[plan.planType].footer}
-            />
-          </Radio>
-        );
-      })}
+            name={plan.name}
+            price={
+              {
+                [BillingPlanType.Hobby]: 'Free',
+                [BillingPlanType.Enterprise]: 'Contact Us',
+              }[plan.planType] || plan.basePrice
+            }
+            isActive={activePlan === plan.planType}
+            features={planCollection[plan.planType].features}
+            description={planCollection[plan.planType].description}
+            footer={planCollection[plan.planType].footer}
+          />
+        </Radio>
+      ))}
     </RadioGroup>
   );
 };

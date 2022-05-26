@@ -126,7 +126,8 @@ function validateDate(datestring: string) {
     case 2: // February
       if (leapYear(year) && day > 29) {
         return false;
-      } else if (!leapYear(year) && day > 28) {
+      }
+      if (!leapYear(year) && day > 28) {
         return false;
       }
       return true;

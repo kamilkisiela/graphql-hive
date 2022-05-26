@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import 'reflect-metadata';
-import { createServer, startMetrics, ensureEnv, registerShutdown } from '@hive/service-common';
+import { createServer, startMetrics, ensureEnv, registerShutdown, reportReadiness } from '@hive/service-common';
 import { createRegistry, LogFn, Logger } from '@hive/api';
 import { createStorage as createPostgreSQLStorage, createConnectionString } from '@hive/storage';
 import got from 'got';
@@ -246,6 +246,7 @@ export async function main() {
 
           if (response.statusCode >= 200 && response.statusCode < 300) {
             if (response.body.includes('"__schema"')) {
+              reportReadiness(true);
               res.status(200).send();
               return;
             }
@@ -255,6 +256,7 @@ export async function main() {
           console.error(error);
         }
 
+        reportReadiness(false);
         res.status(500).send();
       },
     });

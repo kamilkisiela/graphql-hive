@@ -1,6 +1,6 @@
 {
   "name": "@graphql-hive/core",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "author": {
     "email": "contact@the-guild.dev",
     "name": "The Guild",
@@ -11,6 +11,7 @@
     "url": "kamilkisiela/graphql-hive",
     "directory": "packages/libraries/core"
   },
+  "homepage": "https://graphql-hive.com",
   "license": "MIT",
   "main": "dist/index.js",
   "module": "dist/index.mjs",

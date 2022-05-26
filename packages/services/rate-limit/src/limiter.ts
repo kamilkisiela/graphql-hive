@@ -130,14 +130,11 @@ export function createRateLimiter(config: {
 
       if (map.has(targetId)) {
         return map.get(targetId)!;
-      } else {
-        // In case we don't have any knowledge on that target id, to use the default.
-        return DEFAULT_RETENTION;
       }
+      // In case we don't have any knowledge on that target id, to use the default.
+      return DEFAULT_RETENTION;
     },
     checkLimit(input: RateLimitInput): RateLimitCheckResponse {
-      logger.info(`Rate-limit check triggered, input is: ${input}`);
-
       const map =
         input.type === 'operations-reporting'
           ? targetIdToRateLimitStatus.operationsReporting
@@ -158,12 +155,11 @@ export function createRateLimiter(config: {
 
       if (map.has(entityId)) {
         return map.get(entityId)!;
-      } else {
-        // In case we don't have any knowledge on that target id, we allow it to run
-        return {
-          limited: false,
-        };
       }
+      // In case we don't have any knowledge on that target id, we allow it to run
+      return {
+        limited: false,
+      };
     },
     async start() {
       logger.info(

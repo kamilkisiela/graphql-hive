@@ -1,5 +1,27 @@
 # @graphql-hive/cli
 
+## 0.14.6
+
+### Patch Changes
+
+- ce343ac: Bump
+
+## 0.14.5
+
+### Patch Changes
+
+- ad66973: Bump
+- Updated dependencies [ad66973]
+  - @graphql-hive/core@0.2.2
+
+## 0.14.4
+
+### Patch Changes
+
+- 0a5dbeb: Point to graphql-hive.com
+- Updated dependencies [0a5dbeb]
+  - @graphql-hive/core@0.2.1
+
 ## 0.14.3
 
 ### Patch Changes

@@ -7,7 +7,7 @@ import { networkStatusExchange } from './urql-exchanges/state';
 
 const noKey = () => null;
 
-export const SERVER_BASE_PATH = '/api/proxy';
+const SERVER_BASE_PATH = '/api/proxy';
 
 export const urqlClient = createClient({
   url: SERVER_BASE_PATH,

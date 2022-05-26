@@ -9,10 +9,10 @@ function Plan(plan: {
   footer?: React.ReactNode;
 }) {
   return (
-    <div tw="flex w-1/3 flex-col items-start rounded-md border border-gray-700 p-4 hover:border-gray-600">
+    <div tw="flex w-full md:w-1/3 flex-col items-start rounded-md border border-gray-700 p-4 hover:border-gray-600">
       <div tw="flex h-full flex-col justify-between">
         <div>
-          <h2 tw="text-base text-black dark:text-white font-bold flex items-center justify-between">{plan.name}</h2>
+          <h2 tw="text-base text-white font-bold flex items-center justify-between">{plan.name}</h2>
           <div tw="text-3xl font-bold text-white">
             {typeof plan.price === 'string' ? (
               plan.price
@@ -30,7 +30,7 @@ function Plan(plan: {
               {plan.features.map((feature, i) => {
                 return (
                   <li key={i} tw="box-border mb-2">
-                    <div tw="text-sm text-gray-600 dark:text-gray-300 flex items-center">{feature}</div>
+                    <div tw="text-sm text-gray-300 flex items-center">{feature}</div>
                   </li>
                 );
               })}
@@ -54,7 +54,7 @@ export function Pricing() {
       <div tw="max-width[1024px] w-full px-6 box-border mx-auto my-12">
         <h2 tw="md:text-3xl text-2xl text-white font-bold">Pricing</h2>
         <p tw="text-gray-400">Available in the application</p>
-        <div tw="flex flex-row content-start	items-stretch justify-start justify-items-start gap-4 mt-6">
+        <div tw="flex flex-col md:flex-row content-start items-stretch justify-start justify-items-start gap-4 mt-6">
           <Plan
             name="Hobby"
             description="For personal or small projects"

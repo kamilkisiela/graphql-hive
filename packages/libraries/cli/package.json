@@ -1,7 +1,7 @@
 {
   "name": "@graphql-hive/cli",
   "description": "A CLI util to manage and control your GraphQL Hive",
-  "version": "0.14.3",
+  "version": "0.14.6",
   "author": {
     "email": "contact@the-guild.dev",
     "name": "The Guild",
@@ -12,6 +12,7 @@
     "url": "kamilkisiela/graphql-hive",
     "directory": "packages/libraries/cli"
   },
+  "homepage": "https://graphql-hive.com",
   "license": "MIT",
   "keywords": [
     "graphql"
@@ -37,7 +38,7 @@
     "schema:publish:federation": "yarn start schema:publish --service reviews examples/federation.reviews.graphql"
   },
   "dependencies": {
-    "@graphql-hive/core": "0.2.0",
+    "@graphql-hive/core": "0.2.2",
     "@graphql-inspector/core": "~3.1.2",
     "@graphql-tools/code-file-loader": "~7.2.14",
     "@graphql-tools/graphql-file-loader": "~7.3.11",
