@@ -3,10 +3,20 @@ import NextLink from 'next/link';
 import clsx from 'clsx';
 
 import { HiveLogo } from '@/components/v2/icon';
+import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
 export const HiveLink = ({ className }: { className?: string }): ReactElement => {
+  const router = useRouteSelector();
+  const orgId = router.organizationId;
+
   return (
-    <NextLink href="/" passHref>
+    <NextLink
+      href={
+        // orgId can be undefined on /404 route
+        orgId ? `/${orgId}` : '/'
+      }
+      passHref
+    >
       <a className={clsx('inline-flex items-center focus:ring', className)}>
         <HiveLogo />
         <div className="ml-2.5">
