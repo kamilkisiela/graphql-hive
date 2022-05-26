@@ -26,7 +26,7 @@ module.exports = {
     'import/no-absolute-path': 'error',
     'import/no-self-import': 'error',
     'import/no-unused-modules': [
-      'error',
+      process.env.CI === 'true' ? 'error' : 'off',
       {
         unusedExports: true,
         missingExports: true,
