@@ -1,6 +1,12 @@
 #!/usr/bin/env node
 import 'reflect-metadata';
-import { createServer, createErrorHandler, startMetrics, registerShutdown, reportReadiness } from '@hive/service-common';
+import {
+  createServer,
+  createErrorHandler,
+  startMetrics,
+  registerShutdown,
+  reportReadiness,
+} from '@hive/service-common';
 import * as Sentry from '@sentry/node';
 import LRU from 'tiny-lru';
 import ms from 'ms';

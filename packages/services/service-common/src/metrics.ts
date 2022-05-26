@@ -6,7 +6,7 @@ export { promClient as metrics };
 
 export const readiness = new promClient.Gauge({
   name: 'service_readiness',
-  help: "Shows if the service is ready to serve requests (1 is ready, 0 is not ready)",
+  help: 'Shows if the service is ready to serve requests (1 is ready, 0 is not ready)',
 });
 
 export function reportReadiness(isReady: boolean) {

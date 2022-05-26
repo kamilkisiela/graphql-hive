@@ -1,5 +1,12 @@
 #!/usr/bin/env node
-import { createServer, createErrorHandler, ensureEnv, startMetrics, registerShutdown, reportReadiness } from '@hive/service-common';
+import {
+  createServer,
+  createErrorHandler,
+  ensureEnv,
+  startMetrics,
+  registerShutdown,
+  reportReadiness,
+} from '@hive/service-common';
 import * as Sentry from '@sentry/node';
 import type { WebhookInput } from './types';
 import { createScheduler } from './scheduler';
