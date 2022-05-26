@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import 'reflect-metadata';
 import * as Sentry from '@sentry/node';
-import { createServer, startMetrics, ensureEnv, registerShutdown } from '@hive/service-common';
+import { createServer, startMetrics, ensureEnv, registerShutdown, reportReadiness } from '@hive/service-common';
 import { createEstimator } from './estimator';
 import { createConnectionString } from '@hive/storage';
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify/dist/trpc-server-adapters-fastify.cjs.js';
@@ -70,7 +70,9 @@ async function main() {
       method: ['GET', 'HEAD'],
       url: '/_readiness',
       handler(_, res) {
-        res.status(context.readiness() ? 200 : 400).send();
+        const isReady = context.readiness();
+        reportReadiness(isReady);
+        res.status(isReady ? 200 : 400).send();
       },
     });
 
