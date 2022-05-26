@@ -2,7 +2,7 @@
 
 GraphQL Hive provides all the tools the get visibility of your GraphQL architecture at all stages, from standalone APIs to composed schemas (Federation, Stitching).
 
-- Visit [graphql-hive.com](https://graphql-hive.com)
+- Visit [graphql-hive.com](https://graphql-hive.com) ([status page](https://status.graphql-hive.com/)) 
 - [Read the announcement blog post](https://www.the-guild.dev/blog/announcing-graphql-hive-public)
 - [Read the docs](https://docs.graphql-hive.com)
 
