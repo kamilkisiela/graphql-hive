@@ -46,6 +46,17 @@ export const ConnectSchemaModal = ({
 
   const project = projectQuery.data?.project;
 
+  let cdnTokenUrl: string;
+
+  if (mutation.data) {
+    let url: string | URL = mutation.data.createCdnToken.url;
+    if (location.pathname.endsWith('/laboratory')) {
+      url = new URL(url);
+      url.pathname = '/sdl';
+    }
+    cdnTokenUrl = url.toString();
+  }
+
   return (
     <Modal open={isOpen} onOpenChange={toggleModalOpen} className="flex w-[650px] flex-col gap-5">
       <Heading className="text-center">Connect to Hive</Heading>
@@ -76,7 +87,7 @@ export const ConnectSchemaModal = ({
             of your API, through a secured external service, that's always up regardless of Hive.
           </p>
           <span className="text-sm text-gray-500">You can use the following endpoint:</span>
-          <CopyValue value={mutation.data.createCdnToken.url} />
+          <CopyValue value={cdnTokenUrl} />
           <span className="text-sm text-gray-500">To authenticate, use the following HTTP headers:</span>
           <Tag>X-Hive-CDN-Key: {mutation.data.createCdnToken.token}</Tag>
           <p className="text-sm text-gray-500">
