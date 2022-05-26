@@ -97,7 +97,7 @@ DropdownMenu.Item = ({ children, className, ...props }) => (
       flex
       cursor-pointer
       items-center
-      gap-2
+      gap-4
       rounded-md
       py-2.5
       px-2
@@ -123,7 +123,7 @@ DropdownMenu.TriggerItem = ({ children, className, ...props }) => (
       flex
       cursor-pointer
       items-center
-      gap-2
+      gap-4
       rounded-md
       py-2.5
       px-2

@@ -9,10 +9,12 @@ import {
   ArrowDownIcon,
   CalendarIcon,
   FileTextIcon,
+  GraphQLIcon,
   GridIcon,
   LogOutIcon,
   PlusIcon,
   SettingsIcon,
+  TrendingUpIcon,
   AlertTriangleIcon,
 } from '@/components/v2/icon';
 import { CreateOrganizationModal } from '@/components/v2/modals';
@@ -95,7 +97,7 @@ export const Header = (): ReactElement => {
             <DropdownMenu.Label className="line-clamp-1 mb-2 max-w-[250px] px-2">{me?.displayName}</DropdownMenu.Label>
             <DropdownMenu>
               <DropdownMenu.TriggerItem>
-                <GridIcon />
+                <GridIcon className="h-5 w-5" />
                 Switch organization
                 <ArrowDownIcon className="ml-10 -rotate-90 text-white" />
               </DropdownMenu.TriggerItem>
@@ -123,7 +125,7 @@ export const Header = (): ReactElement => {
             </DropdownMenu>
             <DropdownMenu.Item asChild>
               <a href={process.env.NEXT_PUBLIC_DOCS_LINK} target="_blank" rel="noreferrer">
-                <CalendarIcon />
+                <CalendarIcon className="h-5 w-5" />
                 Schedule a meeting
               </a>
             </DropdownMenu.Item>
@@ -131,20 +133,20 @@ export const Header = (): ReactElement => {
             <NextLink href="/settings">
               <a>
                 <DropdownMenu.Item>
-                  <SettingsIcon />
+                  <SettingsIcon className="h-5 w-5" />
                   Profile settings
                 </DropdownMenu.Item>
               </a>
             </NextLink>
             <DropdownMenu.Item asChild>
               <a href={process.env.NEXT_PUBLIC_DOCS_LINK} target="_blank" rel="noreferrer">
-                <FileTextIcon />
+                <FileTextIcon className="h-5 w-5" />
                 Documentation
               </a>
             </DropdownMenu.Item>
             <DropdownMenu.Item asChild>
               <a href="https://status.graphql-hive.com" target="_blank" rel="noreferrer">
-                <AlertTriangleIcon />
+                <AlertTriangleIcon className="h-5 w-5" />
                 Status page
               </a>
             </DropdownMenu.Item>
@@ -153,31 +155,31 @@ export const Header = (): ReactElement => {
             {/*  <SunIcon />*/}
             {/*  Switch Light Theme*/}
             {/*</DropdownMenu.Item>*/}
-            {user?.metadata?.admin ? (
+            {user?.metadata?.admin && (
               <ManagerRoleGuard>
                 <NextLink href="/manage">
                   <a>
                     <DropdownMenu.Item>
-                      <SettingsIcon />
+                      <TrendingUpIcon className="h-5 w-5" />
                       Manage Instance
                     </DropdownMenu.Item>
                   </a>
                 </NextLink>
               </ManagerRoleGuard>
-            ) : null}
-            {process.env.NODE_ENV === 'development' ? (
+            )}
+            {process.env.NODE_ENV === 'development' && (
               <NextLink href="/dev">
                 <a>
                   <DropdownMenu.Item>
-                    <SettingsIcon />
+                    <GraphQLIcon className="h-5 w-5" />
                     Dev GraphiQL
                   </DropdownMenu.Item>
                 </a>
               </NextLink>
-            ) : null}
+            )}
             <DropdownMenu.Item asChild>
               <a href="/api/logout">
-                <LogOutIcon />
+                <LogOutIcon className="h-5 w-5" />
                 Log out
               </a>
             </DropdownMenu.Item>

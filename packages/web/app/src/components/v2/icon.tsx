@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, ReactElement } from 'react';
 import 'twin.macro';
 import clsx from 'clsx';
 
@@ -9,6 +9,60 @@ const DEFAULT_PATH_PROPS = {
 } as const;
 
 type IconProps = { className?: string };
+
+export const RefreshIcon = ({ className }: IconProps): ReactElement => (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+  >
+    <path d="M23 4V10H17" {...DEFAULT_PATH_PROPS} />
+    <path d="M1 20V14H7" {...DEFAULT_PATH_PROPS} />
+    <path
+      d="M2.56728 8.66641C2.38304 9.18705 2.65576 9.75848 3.1764 9.94272C3.69705 10.127 4.26848 9.85425 4.45272 9.3336L2.56728 8.66641ZM18.36 5.64L17.6527 6.34693C17.6601 6.35432 17.6676 6.3616 17.6752 6.36875L18.36 5.64ZM22.3152 10.7288C22.7177 11.1069 23.3506 11.0873 23.7288 10.6848C24.1069 10.2823 24.0873 9.64944 23.6848 9.27125L22.3152 10.7288ZM1.68478 13.2712C1.2823 12.8931 0.649439 12.9127 0.271247 13.3152C-0.106945 13.7177 -0.0872558 14.3506 0.315223 14.7288L1.68478 13.2712ZM5.64 18.36L6.34728 17.6531C6.3399 17.6457 6.33239 17.6384 6.32478 17.6312L5.64 18.36ZM21.4327 15.3336C21.617 14.813 21.3442 14.2415 20.8236 14.0573C20.3029 13.873 19.7315 14.1458 19.5473 14.6664L21.4327 15.3336ZM4.45272 9.3336C5.36906 6.7441 7.54984 4.80579 10.229 4.19961L9.7876 2.24891C6.43869 3.00665 3.71271 5.42953 2.56728 8.66641L4.45272 9.3336ZM10.229 4.19961C12.9081 3.59342 15.7109 4.40413 17.6527 6.34693L19.0673 4.93307C16.64 2.50457 13.1365 1.49118 9.7876 2.24891L10.229 4.19961ZM17.6752 6.36875L22.3152 10.7288L23.6848 9.27125L19.0448 4.91125L17.6752 6.36875ZM0.315223 14.7288L4.95522 19.0888L6.32478 17.6312L1.68478 13.2712L0.315223 14.7288ZM4.93272 19.0669C7.36 21.4954 10.8635 22.5088 14.2124 21.7511L13.771 19.8004C11.0919 20.4066 8.28911 19.5959 6.34728 17.6531L4.93272 19.0669ZM14.2124 21.7511C17.5613 20.9934 20.2873 18.5705 21.4327 15.3336L19.5473 14.6664C18.6309 17.2559 16.4502 19.1942 13.771 19.8004L14.2124 21.7511Z"
+      fill="currentColor"
+      stroke="none"
+    />
+  </svg>
+);
+
+export const GraphQLIcon = ({ className }: IconProps): ReactElement => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    height="24"
+    width="24"
+    viewBox="0 0 29.999 30"
+    fill="currentColor"
+    className={className}
+  >
+    <path d="M4.08 22.864l-1.1-.636L15.248.98l1.1.636z" />
+    <path d="M2.727 20.53h24.538v1.272H2.727z" />
+    <path d="M15.486 28.332L3.213 21.246l.636-1.1 12.273 7.086zm10.662-18.47L13.874 2.777l.636-1.1 12.273 7.086z" />
+    <path d="M3.852 9.858l-.636-1.1L15.5 1.67l.636 1.1z" />
+    <path d="M25.922 22.864l-12.27-21.25 1.1-.636 12.27 21.25zM3.7 7.914h1.272v14.172H3.7zm21.328 0H26.3v14.172h-1.272z" />
+    <path d="M15.27 27.793l-.555-.962 10.675-6.163.555.962z" />
+    <path d="M27.985 22.5a2.68 2.68 0 0 1-3.654.981 2.68 2.68 0 0 1-.981-3.654 2.68 2.68 0 0 1 3.654-.981c1.287.743 1.724 2.375.98 3.654M6.642 10.174a2.68 2.68 0 0 1-3.654.981A2.68 2.68 0 0 1 2.007 7.5a2.68 2.68 0 0 1 3.654-.981 2.68 2.68 0 0 1 .981 3.654M2.015 22.5a2.68 2.68 0 0 1 .981-3.654 2.68 2.68 0 0 1 3.654.981 2.68 2.68 0 0 1-.981 3.654c-1.287.735-2.92.3-3.654-.98m21.343-12.326a2.68 2.68 0 0 1 .981-3.654 2.68 2.68 0 0 1 3.654.981 2.68 2.68 0 0 1-.981 3.654 2.68 2.68 0 0 1-3.654-.981M15 30a2.674 2.674 0 1 1 2.674-2.673A2.68 2.68 0 0 1 15 30m0-24.652a2.67 2.67 0 0 1-2.674-2.674 2.67 2.67 0 1 1 5.347 0A2.67 2.67 0 0 1 15 5.347" />
+  </svg>
+);
+
+export const TrendingUpIcon = ({ className }: IconProps): ReactElement => (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+  >
+    <path d="M23 6L13.5 15.5L8.5 10.5L1 18" {...DEFAULT_PATH_PROPS} />
+    <path d="M17 6H23V12" {...DEFAULT_PATH_PROPS} />
+  </svg>
+);
 
 export const PlusIcon: FC<IconProps> = ({ className }) => (
   <svg
@@ -24,7 +78,7 @@ export const PlusIcon: FC<IconProps> = ({ className }) => (
   </svg>
 );
 
-export const CalendarIcon: FC<IconProps> = ({ className }) => (
+export const CalendarIcon = ({ className }: IconProps): ReactElement => (
   <svg
     width="24"
     height="24"
@@ -187,7 +241,7 @@ export const TargetIcon: FC<IconProps> = ({ className }) => (
   </svg>
 );
 
-export const GridIcon: FC<IconProps> = ({ className }) => (
+export const GridIcon = ({ className }: IconProps): ReactElement => (
   <svg
     viewBox="0 0 24 24"
     width="24"
@@ -204,8 +258,16 @@ export const GridIcon: FC<IconProps> = ({ className }) => (
   </svg>
 );
 
-export const SettingsIcon: FC<IconProps> = props => (
-  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" tw="w-6 h-6 stroke-current fill-none" {...props}>
+export const SettingsIcon = ({ className }: IconProps): ReactElement => (
+  <svg
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    stroke="currentColor"
+    fill="none"
+    className={className}
+  >
     <path
       d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z"
       {...DEFAULT_PATH_PROPS}
@@ -217,7 +279,7 @@ export const SettingsIcon: FC<IconProps> = props => (
   </svg>
 );
 
-export const FileTextIcon: FC<IconProps> = ({ className }) => (
+export const FileTextIcon = ({ className }: IconProps): ReactElement => (
   <svg
     viewBox="0 0 24 24"
     width="24"
@@ -238,8 +300,16 @@ export const FileTextIcon: FC<IconProps> = ({ className }) => (
   </svg>
 );
 
-export const LogOutIcon: FC<IconProps> = props => (
-  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" tw="w-6 h-6 stroke-current fill-none" {...props}>
+export const LogOutIcon = ({ className }: IconProps): ReactElement => (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    stroke="currentColor"
+    className={className}
+  >
     <path d="M9 21H5C3.89543 21 3 20.1046 3 19V5C3 3.89543 3.89543 3 5 3H9" {...DEFAULT_PATH_PROPS} />
     <path d="M16 17L21 12L16 7" {...DEFAULT_PATH_PROPS} />
     <path d="M21 12H9" {...DEFAULT_PATH_PROPS} />
@@ -353,10 +423,10 @@ export const Link2Icon: FC<IconProps> = ({ className }) => (
   </svg>
 );
 
-export const HiveLogo: FC<IconProps> = ({ className }) => (
+export const HiveLogo = ({ className }: IconProps): ReactElement => (
   <svg
-    width={42}
-    height={44}
+    width="42"
+    height="44"
     viewBox="0 0 42 44"
     xmlns="http://www.w3.org/2000/svg"
     className={clsx('fill-none inline', className)}
