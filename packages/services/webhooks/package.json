@@ -2,7 +2,7 @@
   "name": "@hive/webhooks",
   "type": "module",
   "private": true,
-  "version": "0.1.4",
+  "version": "0.0.0",
   "license": "MIT",
   "scripts": {
     "dev": "tsup-node src/dev.ts --format esm --target node16 --watch --onSuccess 'node dist/dev.js' | pino-pretty --translateTime HH:MM:ss TT --ignore pid,hostname",
@@ -20,6 +20,7 @@
     "p-timeout": "5.0.2"
   },
   "devDependencies": {
+    "@hive/service-common": "0.0.0",
     "ioredis": "4.28.3",
     "copyfiles": "2.4.1",
     "pino-pretty": "6.0.0"

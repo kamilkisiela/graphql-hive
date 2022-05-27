@@ -2,7 +2,7 @@
   "name": "@hive/usage",
   "type": "module",
   "private": true,
-  "version": "0.18.0",
+  "version": "0.0.0",
   "license": "MIT",
   "scripts": {
     "dev": "tsup-node src/dev.ts --format esm --target node16 --watch --onSuccess 'node dist/dev.js' | pino-pretty --translateTime HH:MM:ss TT --ignore pid,hostname",
@@ -21,6 +21,9 @@
     "tiny-lru": "8.0.2"
   },
   "devDependencies": {
+    "@hive/usage-common": "0.0.0",
+    "@hive/service-common": "0.0.0",
+    "@hive/tokens": "0.0.0",
     "pino-pretty": "6.0.0"
   },
   "buildOptions": {

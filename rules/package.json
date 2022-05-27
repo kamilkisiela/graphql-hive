@@ -1,0 +1,7 @@
+{
+  "private": true,
+  "name": "eslint-plugin-hive",
+  "main": "index.cjs",
+  "type": "commonjs",
+  "version": "0.0.0"
+}

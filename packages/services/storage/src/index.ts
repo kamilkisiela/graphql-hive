@@ -13,8 +13,10 @@ import type {
   Alert,
   AuthProvider,
   OrganizationBilling,
+  Storage,
+  ProjectType,
+  OrganizationType,
 } from '@hive/api';
-import { Storage, ProjectType, OrganizationType } from '@hive/api';
 import { sql, TaggedTemplateLiteralInvocationType } from 'slonik';
 import {
   commits,
@@ -97,7 +99,7 @@ export async function createStorage(connection: string): Promise<Storage> {
         schemaPush: parseInt(organization.limit_schema_push_monthly),
       },
       billingPlan: organization.plan_name,
-      type: organization.type === 'PERSONAL' ? OrganizationType.PERSONAL : OrganizationType.REGULAR,
+      type: (organization.type === 'PERSONAL' ? 'PERSONAL' : 'REGULAR') as OrganizationType,
     };
   }
 
@@ -570,7 +572,7 @@ export async function createStorage(connection: string): Promise<Storage> {
     },
     async getMyOrganization({ user }) {
       const org = await pool.maybeOne<Slonik<organizations>>(
-        sql`SELECT * FROM public.organizations WHERE user_id = ${user} AND type = ${OrganizationType.PERSONAL} LIMIT 1`
+        sql`SELECT * FROM public.organizations WHERE user_id = ${user} AND type = ${'PERSONAL'} LIMIT 1`
       );
 
       return org ? transformOrganization(org) : null;

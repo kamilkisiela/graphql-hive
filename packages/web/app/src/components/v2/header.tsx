@@ -6,6 +6,7 @@ import { useQuery } from 'urql';
 import { useUser } from '@/components/auth/AuthProvider';
 import { Avatar, Button, DropdownMenu, HiveLink } from '@/components/v2';
 import {
+  AlertTriangleIcon,
   ArrowDownIcon,
   CalendarIcon,
   FileTextIcon,
@@ -15,7 +16,6 @@ import {
   PlusIcon,
   SettingsIcon,
   TrendingUpIcon,
-  AlertTriangleIcon,
 } from '@/components/v2/icon';
 import { CreateOrganizationModal } from '@/components/v2/modals';
 import { MeDocument, OrganizationsDocument, OrganizationsQuery, OrganizationType } from '@/graphql';

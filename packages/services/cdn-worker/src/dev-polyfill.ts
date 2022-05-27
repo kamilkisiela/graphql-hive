@@ -1,4 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
 import { Response, Request, Headers, ReadableStream } from 'cross-undici-fetch';
 
 globalThis.Response = Response;

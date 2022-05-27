@@ -2,7 +2,7 @@
   "name": "@hive/storage",
   "type": "module",
   "private": true,
-  "version": "0.14.1",
+  "version": "0.0.0",
   "license": "MIT",
   "scripts": {
     "setup": "yarn db:start && yarn db",
