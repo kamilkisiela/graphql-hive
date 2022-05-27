@@ -37,9 +37,9 @@ import {
 import { batch } from '@theguild/buddy';
 import type { Slonik } from './shared';
 
+export type { tokens } from './db/types';
 export { createConnectionString } from './db/utils';
 export { createTokenStorage } from './tokens';
-export type { tokens } from './db/types';
 
 export type WithUrl<T> = T & Pick<version_commit, 'url'>;
 export type WithMaybeMetadata<T> = T & {

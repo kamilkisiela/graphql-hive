@@ -10,7 +10,7 @@ import type {
 } from '../__generated__/types';
 import { DateRange } from './entities';
 
-export { msToNs, nsToMs, atomicPromise as atomic, sharePromise as share, cacheResult as cache } from '@theguild/buddy';
+export { atomicPromise as atomic, cacheResult as cache, msToNs, nsToMs, sharePromise as share } from '@theguild/buddy';
 
 export type NullableAndPartial<T> = {
   [P in keyof T]?: T[P] | undefined | null;
