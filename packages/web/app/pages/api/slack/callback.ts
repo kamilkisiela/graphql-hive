@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { stringify } from 'querystring';
+import { stringify } from 'node:querystring';
 import { graphql } from '@/lib/api/utils';
 
 async function fetchData({ url, headers, body }: { url: string; headers: Record<string, any>; body: string }) {

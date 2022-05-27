@@ -1,6 +1,6 @@
 import { normalizeOperation } from '@graphql-hive/core';
-import { promises as fs } from 'fs';
-import { relative } from 'path';
+import { promises as fs } from 'node:fs';
+import { relative } from 'node:path';
 import { parse } from 'graphql';
 import { loadDocuments } from '@graphql-tools/load';
 import { CodeFileLoader } from '@graphql-tools/code-file-loader';

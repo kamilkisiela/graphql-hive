@@ -1,5 +1,5 @@
 import { Kafka, CompressionTypes, logLevel, Partitioners } from 'kafkajs';
-import { createHash, randomUUID } from 'crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { compress } from '@hive/usage-common';
 import {
   rawOperationWrites,

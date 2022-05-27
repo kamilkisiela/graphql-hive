@@ -4,7 +4,7 @@ import { inferProcedureInput, inferProcedureOutput } from '@trpc/server';
 import type { FastifyLoggerInstance } from 'fastify';
 import { z } from 'zod';
 import { useCache } from './cache';
-import { createHash } from 'crypto';
+import { createHash } from 'node:crypto';
 import { Lru as LruType } from 'tiny-lru';
 
 const TARGET_VALIDATION = z

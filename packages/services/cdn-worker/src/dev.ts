@@ -2,8 +2,8 @@ import './dev-polyfill';
 import type { FastifyRequest } from 'fastify';
 import { createServer } from '@hive/service-common';
 import { handleRequest } from './handler';
-import type { ServerResponse } from 'http';
-import { Readable } from 'stream';
+import type { ServerResponse } from 'node:http';
+import { Readable } from 'node:stream';
 import { devStorage } from './dev-polyfill';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4010;

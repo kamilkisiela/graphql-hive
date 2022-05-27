@@ -5,7 +5,7 @@ import Command from '../../base-command';
 import { gitInfo } from '../../helpers/git';
 import { invariant } from '../../helpers/validation';
 import { loadSchema, minifySchema, renderChanges, renderErrors } from '../../helpers/schema';
-import { existsSync, readFileSync } from 'fs';
+import { existsSync, readFileSync } from 'node:fs';
 
 export default class SchemaPublish extends Command {
   static description = 'publishes schema';

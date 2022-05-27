@@ -1,7 +1,7 @@
 import type { ApolloServerPlugin } from 'apollo-server-plugin-base';
 import type { DocumentNode } from 'graphql';
 import type { HiveClient, HivePluginOptions, SupergraphSDLFetcherOptions } from './internal/types';
-import { createHash } from 'crypto';
+import { createHash } from 'node:crypto';
 import axios from 'axios';
 import { createHive } from './client';
 import { isHiveClient } from './internal/utils';

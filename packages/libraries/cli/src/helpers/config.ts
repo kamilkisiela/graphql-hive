@@ -1,6 +1,6 @@
-import fs from 'fs';
+import fs from 'node:fs';
 import mkdirp from 'mkdirp';
-import path from 'path';
+import path from 'node:path';
 
 export class Config<TValue = any> {
   private cache?: Record<string, TValue>;
