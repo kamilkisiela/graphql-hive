@@ -1,10 +1,10 @@
 import { config as dotenv } from 'dotenv';
 
+import cn from '../tools/db-connection-string.mjs';
+
 dotenv({
   debug: true,
 });
-
-import cn from '../tools/db-connection-string.mjs';
 
 function ensureVarIf(key: string, condition: boolean) {
   if (condition) {
