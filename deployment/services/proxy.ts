@@ -76,6 +76,12 @@ export function deployProxy({
         service: graphql.service,
       },
       {
+        name: 'graphql-api',
+        path: '/graphql',
+        customRewrite: '/graphql',
+        service: graphql.service,
+      },
+      {
         name: 'usage',
         path: '/usage',
         service: usage.service,

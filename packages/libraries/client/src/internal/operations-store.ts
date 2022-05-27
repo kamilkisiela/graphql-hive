@@ -39,7 +39,7 @@ export function createOperationsStore(pluginOptions: HivePluginOptions): Operati
 
   const load: OperationsStore['load'] = async () => {
     const response = await axios.post(
-      operationsStoreOptions.endpoint ?? 'https://app.graphql-hive.com/registry',
+      operationsStoreOptions.endpoint ?? 'https://app.graphql-hive.com/graphql',
       {
         query,
         operationName: 'loadStoredOperations',
@@ -48,7 +48,7 @@ export function createOperationsStore(pluginOptions: HivePluginOptions): Operati
         responseType: 'json',
         headers: {
           'content-type': 'application/json',
-          'x-api-token': token,
+          Authorization: `Bearer ${token}`,
         },
       }
     );

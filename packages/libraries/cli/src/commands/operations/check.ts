@@ -3,6 +3,7 @@ import { buildSchema, Source, GraphQLError } from 'graphql';
 import { validate, InvalidDocument } from '@graphql-inspector/core';
 import Command from '../../base-command';
 import { loadOperations } from '../../helpers/operations';
+import { graphqlEndpoint } from '../../helpers/config';
 
 export default class OperationsCheck extends Command {
   static description = 'checks operations against a published schema';
@@ -38,7 +39,7 @@ export default class OperationsCheck extends Command {
       const registry = this.ensure({
         key: 'registry',
         args: flags,
-        defaultValue: 'https://app.graphql-hive.com/registry',
+        defaultValue: graphqlEndpoint,
         env: 'HIVE_REGISTRY',
       });
       const file: string = args.file;

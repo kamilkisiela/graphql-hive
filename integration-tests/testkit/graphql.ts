@@ -2,6 +2,7 @@ import * as utils from 'dockest/test-helper';
 import axios from 'axios';
 import type { ExecutionResult } from 'graphql';
 import { TypedDocumentNode } from '@graphql-typed-document-node/core';
+import { isLegacyAuthorizationMode } from './auth';
 
 const registryAddress = utils.getServiceAddress('server', 3001);
 
@@ -28,9 +29,13 @@ export async function execute<R, V>(params: {
             }
           : {}),
         ...(params.token
-          ? {
-              'X-API-Token': params.token,
-            }
+          ? isLegacyAuthorizationMode()
+            ? {
+                'X-API-Token': params.token,
+              }
+            : {
+                Authorization: `Bearer ${params.token}`,
+              }
           : {}),
       },
       responseType: 'json',

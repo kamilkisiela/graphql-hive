@@ -81,7 +81,19 @@ async function main() {
       url: '/',
       async handler(req, res) {
         httpRequests.inc();
-        const token = req.headers['x-api-token'] as string;
+        let token: string | undefined;
+        const legacyToken = req.headers['x-api-token'] as string;
+
+        if (legacyToken) {
+          // TODO: add metrics to track legacy x-api-token header
+          token = legacyToken;
+        } else {
+          const authValue = req.headers.authorization;
+
+          if (authValue) {
+            token = authValue.replace(/^Bearer\s+/, '');
+          }
+        }
 
         if (!token) {
           res.status(400).send('Missing token'); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void

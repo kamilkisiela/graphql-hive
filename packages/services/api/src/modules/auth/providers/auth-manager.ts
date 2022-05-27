@@ -153,7 +153,7 @@ export class AuthManager {
       return this.apiToken;
     }
 
-    throw new AccessError('X-API-Token is missing');
+    throw new AccessError('Authorization header is missing');
   }
 
   getUserIdForTracking: () => Promise<string | never> = share(async () => {

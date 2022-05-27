@@ -125,7 +125,7 @@ export default abstract class extends Command {
       new GraphQLClient(registry, {
         headers: {
           'User-Agent': `HiveCLI@${this.config.version}`,
-          'X-API-Token': token,
+          Authorization: `Bearer ${token}`,
           'graphql-client-name': 'Hive CLI',
           'graphql-client-version': this.config.version,
         },

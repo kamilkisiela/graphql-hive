@@ -14,6 +14,17 @@ export const ApiTokenProvider: FactoryProvider<string | undefined> = {
         if (singleValue && singleValue !== '') {
           token = singleValue;
         }
+      } else if (headerName.toLowerCase() === 'authorization') {
+        const values = context.headers[headerName];
+        const singleValue = Array.isArray(values) ? values[0] : values;
+
+        if (singleValue && singleValue !== '') {
+          const bearer = singleValue.replace(/^Bearer\s+/, '');
+
+          if (bearer.length === 32) {
+            token = bearer;
+          }
+        }
       }
     }
 

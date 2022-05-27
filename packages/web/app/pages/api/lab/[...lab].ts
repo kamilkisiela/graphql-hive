@@ -19,6 +19,7 @@ async function lab(req: NextApiRequest, res: NextApiResponse) {
   const headers: Record<string, string> = {};
 
   if (req.headers['x-hive-key']) {
+    // TODO: change that to Authorization: Bearer
     headers['X-API-Token'] = req.headers['x-hive-key'] as string;
   } else {
     try {

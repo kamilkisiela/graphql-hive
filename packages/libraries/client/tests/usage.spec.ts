@@ -109,7 +109,7 @@ test('should send data to Hive', async () => {
   };
   const http = nock('http://localhost')
     .post('/200')
-    .matchHeader('x-api-token', token)
+    .matchHeader('Authorization', `Bearer ${token}`)
     .matchHeader('Content-Type', headers['Content-Type'])
     .matchHeader('graphql-client-name', headers['graphql-client-name'])
     .matchHeader('graphql-client-version', headers['graphql-client-version'])

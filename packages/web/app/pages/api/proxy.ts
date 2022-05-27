@@ -1,7 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { withSentry, captureException, startTransaction } from '@sentry/nextjs';
 import type { Transaction } from '@sentry/types';
-import { Readable } from 'stream';
 import { auth0 } from '../../src/lib/auth0';
 import hyperid from 'hyperid';
 import { AccessTokenError } from '@auth0/nextjs-auth0';
@@ -47,6 +46,8 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
         accept: req.headers['accept'],
         'accept-encoding': req.headers['accept-encoding'],
         'x-request-id': requestId,
+        authorization: req.headers.authorization,
+        // We need that to be backwards compatible with the new Authorization header format
         'X-API-Token': req.headers['x-api-token'] ?? '',
         'graphql-client-name': 'Hive App',
         'x-use-proxy': '/api/proxy',
@@ -106,40 +107,17 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
       body: JSON.stringify(req.body || {}),
     } as any);
 
-    const contentType = (response.headers && response.headers.get('Content-Type')) || '';
-    const isStream = /multipart\/mixed/i.test(contentType);
-
-    if (isStream) {
-      graphqlSpan.setHttpStatus(response.status);
-      const headers: Record<string, string> = {};
-
-      response.headers.forEach((value, key) => {
-        headers[key] = value;
-      });
-      res.writeHead(response.status, headers);
-
-      const body = response.body as unknown as Readable;
-      body.on('data', (chunk: Buffer) => {
-        res.write(chunk.toString('utf8'));
-      });
-      body.on('end', () => {
-        graphqlSpan.finish();
-        finishTransaction();
-        res.end();
-      });
-    } else {
-      const xRequestId = response.headers.get('x-request-id');
-      if (xRequestId) {
-        res.setHeader('x-request-id', xRequestId);
-      }
-      const parsedData = await response.json();
-
-      graphqlSpan.setHttpStatus(200);
-      graphqlSpan.finish();
-      finishTransaction();
-
-      res.status(200).json(parsedData);
+    const xRequestId = response.headers.get('x-request-id');
+    if (xRequestId) {
+      res.setHeader('x-request-id', xRequestId);
     }
+    const parsedData = await response.json();
+
+    graphqlSpan.setHttpStatus(200);
+    graphqlSpan.finish();
+    finishTransaction();
+
+    res.status(200).json(parsedData);
   } catch (error) {
     console.error(error);
     captureException(error);

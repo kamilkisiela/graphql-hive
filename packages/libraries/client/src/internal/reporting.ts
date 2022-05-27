@@ -39,7 +39,7 @@ export function createReporting(pluginOptions: HivePluginOptions): SchemaReporte
     {
       logger,
       ...(pluginOptions.agent ?? {}),
-      endpoint: reportingOptions.endpoint ?? 'https://app.graphql-hive.com/registry',
+      endpoint: reportingOptions.endpoint ?? 'https://app.graphql-hive.com/graphql',
       token: token,
       enabled: pluginOptions.enabled,
       debug: pluginOptions.debug,

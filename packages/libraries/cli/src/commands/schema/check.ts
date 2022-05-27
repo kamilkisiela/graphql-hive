@@ -2,6 +2,7 @@ import { Flags, Errors } from '@oclif/core';
 import { loadSchema, renderChanges, renderErrors, minifySchema } from '../../helpers/schema';
 import { invariant } from '../../helpers/validation';
 import { gitInfo } from '../../helpers/git';
+import { graphqlEndpoint } from '../../helpers/config';
 import Command from '../../base-command';
 
 export default class SchemaCheck extends Command {
@@ -51,7 +52,7 @@ export default class SchemaCheck extends Command {
       const registry = this.ensure({
         key: 'registry',
         args: flags,
-        defaultValue: 'https://app.graphql-hive.com/registry',
+        defaultValue: graphqlEndpoint,
         env: 'HIVE_REGISTRY',
       });
       const file = args.file;

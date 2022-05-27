@@ -2,6 +2,7 @@ import { transformCommentsToDescriptions } from '@graphql-tools/utils';
 import { Flags, Errors } from '@oclif/core';
 import { GraphQLError, print } from 'graphql';
 import Command from '../../base-command';
+import { graphqlEndpoint } from '../../helpers/config';
 import { gitInfo } from '../../helpers/git';
 import { invariant } from '../../helpers/validation';
 import { loadSchema, minifySchema, renderChanges, renderErrors } from '../../helpers/schema';
@@ -98,7 +99,7 @@ export default class SchemaPublish extends Command {
       const registry = this.ensure({
         key: 'registry',
         args: flags,
-        defaultValue: 'https://app.graphql-hive.com/registry',
+        defaultValue: graphqlEndpoint,
         env: 'HIVE_REGISTRY',
       });
       const service = this.maybe('service', flags);

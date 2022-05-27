@@ -33,3 +33,7 @@ export function authenticate(userId: UserID) {
 
   return tokenResponsePromise[userId]!;
 }
+
+export function isLegacyAuthorizationMode() {
+  return ensureEnv('AUTH_MODE') === 'legacy';
+}

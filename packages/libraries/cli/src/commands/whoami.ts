@@ -1,6 +1,7 @@
 import { Flags } from '@oclif/core';
 import colors from 'colors';
 import Command from '../base-command';
+import { graphqlEndpoint } from '../helpers/config';
 
 export default class WhoAmI extends Command {
   static description = 'checks schema';
@@ -19,7 +20,7 @@ export default class WhoAmI extends Command {
     const registry = this.ensure({
       key: 'registry',
       args: flags,
-      defaultValue: 'https://app.graphql-hive.com/registry',
+      defaultValue: graphqlEndpoint,
       env: 'HIVE_REGISTRY',
     });
     const token = this.ensure({

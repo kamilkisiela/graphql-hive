@@ -1,6 +1,7 @@
 import { Flags, Errors } from '@oclif/core';
 import Command from '../../base-command';
 import { loadOperations } from '../../helpers/operations';
+import { graphqlEndpoint } from '../../helpers/config';
 
 export default class OperationsPublish extends Command {
   static description = 'saves operations to the store';
@@ -36,7 +37,7 @@ export default class OperationsPublish extends Command {
       const registry = this.ensure({
         key: 'registry',
         args: flags,
-        defaultValue: 'https://app.graphql-hive.com/registry',
+        defaultValue: graphqlEndpoint,
         env: 'HIVE_REGISTRY',
       });
       const file: string = args.file;
