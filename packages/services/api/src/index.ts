@@ -1,12 +1,20 @@
 import './context';
-export type { Application as Registry } from 'graphql-modules';
+export type { AuthProvider } from './__generated__/types';
+export { OrganizationType, ProjectType } from './__generated__/types';
 export { createRegistry } from './create';
+export { ClickHouse } from './modules/operations/providers/clickhouse-client';
+export { OperationsManager } from './modules/operations/providers/operations-manager';
+export { OperationsReader } from './modules/operations/providers/operations-reader';
+export { HttpClient } from './modules/shared/providers/http-client';
 export type { LogFn, Logger } from './modules/shared/providers/logger';
 export type { Storage } from './modules/shared/providers/storage';
 export type {
   ActivityObject,
+  Alert,
+  AlertChannel,
   Member,
   Organization,
+  OrganizationBilling,
   PersistedOperation,
   Project,
   Schema,
@@ -16,15 +24,7 @@ export type {
   TargetSettings,
   Token,
   User,
-  AlertChannel,
-  Alert,
-  OrganizationBilling,
 } from './shared/entities';
-export { minifySchema } from './shared/schema';
 export { HiveError } from './shared/errors';
-export { OrganizationType, ProjectType } from './__generated__/types';
-export type { AuthProvider } from './__generated__/types';
-export { HttpClient } from './modules/shared/providers/http-client';
-export { OperationsManager } from './modules/operations/providers/operations-manager';
-export { OperationsReader } from './modules/operations/providers/operations-reader';
-export { ClickHouse } from './modules/operations/providers/clickhouse-client';
+export { minifySchema } from './shared/schema';
+export type { Application as Registry } from 'graphql-modules';

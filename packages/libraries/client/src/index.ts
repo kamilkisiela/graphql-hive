@@ -1,5 +1,5 @@
-export type { HivePluginOptions, HiveClient } from './internal/types';
-export { useHive } from './envelop';
-export { hiveApollo, createSupergraphSDLFetcher } from './apollo';
-export { createSchemaFetcher, createServicesFetcher } from './gateways';
+export { createSupergraphSDLFetcher, hiveApollo } from './apollo';
 export { createHive } from './client';
+export { useHive } from './envelop';
+export { createSchemaFetcher, createServicesFetcher } from './gateways';
+export type { HiveClient, HivePluginOptions } from './internal/types';
