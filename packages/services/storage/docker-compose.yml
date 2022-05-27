@@ -56,28 +56,31 @@ services:
       - 'stack'
 
   zookeeper:
-    image: confluentinc/cp-zookeeper:6.2.2
+    image: confluentinc/cp-zookeeper:6.2.2-3-ubi8
     hostname: zookeeper
     networks:
       - 'stack'
     ports:
       - '2181:2181'
-    environment:
-      BUMP: 1
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
+    ulimits:
+      nofile:
+        soft: 20000
+        hard: 40000
     healthcheck:
       test: ['CMD', 'cub', 'zk-ready', '127.0.0.1:2181', '10']
-      interval: 30s
+      interval: 5s
       timeout: 10s
-      retries: 10
-      start_period: 30s
+      retries: 6
+      start_period: 15s
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
     volumes:
       - ./volumes/zookeeper/db:/var/lib/zookeeper/data
       - ./volumes/zookeeper/log:/var/lib/zookeeper/log
 
   broker:
-    image: confluentinc/cp-kafka:6.2.2
+    image: confluentinc/cp-kafka:6.2.2-3-ubi8
     hostname: borker
     depends_on:
       zookeeper:
@@ -87,19 +90,20 @@ services:
     ports:
       - '29092:29092'
       - '9092:9092'
-    healthcheck:
-      test: ['CMD', 'cub', 'kafka-ready', '1', '5', '-b', '127.0.0.1:9092', '-c', '/etc/kafka/kafka.properties']
-      interval: 30s
-      timeout: 10s
-      retries: 10
-      start_period: 30s
     ulimits:
       nofile:
-        soft: 16384
-        hard: 16384
+        soft: 20000
+        hard: 40000
+    healthcheck:
+      test: ['CMD', 'cub', 'kafka-ready', '1', '5', '-b', '127.0.0.1:9092', '-c', '/etc/kafka/kafka.properties']
+      interval: 15s
+      timeout: 10s
+      retries: 6
+      start_period: 15s
     environment:
       KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1

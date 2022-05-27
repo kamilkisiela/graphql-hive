@@ -1,5 +1,5 @@
 import { ForwardRefExoticComponent } from 'react';
-import { Root, Item } from '@radix-ui/react-toggle-group';
+import { Item, Root } from '@radix-ui/react-toggle-group';
 import clsx from 'clsx';
 
 type PropsOf<T> = T extends ForwardRefExoticComponent<infer P> ? P : unknown;

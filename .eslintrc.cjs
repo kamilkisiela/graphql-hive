@@ -6,6 +6,7 @@ module.exports = {
   reportUnusedDisableDirectives: true,
   ignorePatterns: [
     'scripts',
+    'rules',
     'out',
     'public',
     'packages/web/app/src/graphql/index.ts',
@@ -17,7 +18,7 @@ module.exports = {
     sourceType: 'module',
   },
   parser: '@typescript-eslint/parser',
-  plugins: ['@typescript-eslint', 'import'],
+  plugins: ['@typescript-eslint', 'import', 'hive'],
   extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended'],
   rules: {
     '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', ignoreRestSiblings: true }],
@@ -36,11 +37,17 @@ module.exports = {
     'import/no-extraneous-dependencies': [
       'error',
       {
-        devDependencies: ['packages/services/storage/tools/*.js'],
+        devDependencies: ['packages/services/storage/tools/*.js', 'packages/services/**'],
         optionalDependencies: false,
       },
     ],
-    'no-restricted-imports': ['error', { patterns: ['packages/*'] }],
+    'hive/enforce-deps-in-dev': [
+      'error',
+      {
+        scopes: ['@hive', '@graphql-hive'],
+        ignored: ['packages/libraries/**', 'packages/web/**'],
+      },
+    ],
 
     // 🚨 The following rules needs to be fixed and was temporarily disabled to avoid printing warning
     '@typescript-eslint/no-explicit-any': 'off',

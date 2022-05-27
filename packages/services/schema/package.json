@@ -2,7 +2,7 @@
   "name": "@hive/schema",
   "private": true,
   "type": "module",
-  "version": "0.2.1",
+  "version": "0.0.0",
   "license": "MIT",
   "scripts": {
     "dev": "tsup-node src/dev.ts --format esm --target node16 --watch --onSuccess 'node dist/dev.js' | pino-pretty --translateTime HH:MM:ss TT --ignore pid,hostname",
@@ -22,6 +22,7 @@
     "ioredis": "4.28.3"
   },
   "devDependencies": {
+    "@hive/service-common": "0.0.0",
     "@types/ioredis": "4.28.7",
     "pino-pretty": "6.0.0"
   },

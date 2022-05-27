@@ -2,7 +2,7 @@
   "name": "@hive/api",
   "type": "module",
   "private": true,
-  "version": "0.0.2",
+  "version": "0.0.0",
   "license": "MIT",
   "peerDependencies": {
     "graphql": "^16.0.0",
@@ -45,6 +45,9 @@
     "zod": "3.15.1"
   },
   "devDependencies": {
+    "@hive/schema": "0.0.0",
+    "@hive/tokens": "0.0.0",
+    "@graphql-hive/core": "0.2.2",
     "@types/auth0": "2.34.2",
     "@types/ioredis": "4.28.7",
     "@types/lodash": "4.14.182",

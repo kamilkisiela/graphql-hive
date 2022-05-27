@@ -16,6 +16,7 @@
     "graphql": "16.5.0"
   },
   "devDependencies": {
+    "@hive/service-common": "0.0.0",
     "fastify": "3.29.0",
     "esbuild": "0.14.39",
     "cross-undici-fetch": "0.1.27",
