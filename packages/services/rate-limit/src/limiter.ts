@@ -11,13 +11,29 @@ import { rateLimitOperationsEventOrg, rateLimitSchemaEventOrg } from './metrics'
 
 export type RateLimitCheckResponse = {
   limited: boolean;
-  quota?: number;
-  current?: number;
+  quota: number;
+  current: number;
+};
+
+const UNKNOWN_RATE_LIMIT_OBJ: RateLimitCheckResponse = {
+  current: -1,
+  quota: -1,
+  limited: false,
+};
+
+export type CachedRateLimitInfo = {
+  orgName: string;
+  schemaPushes: RateLimitCheckResponse;
+  operations: RateLimitCheckResponse;
+  retentionInDays: number;
 };
 
 const DEFAULT_RETENTION = 30; // days
 
 export type Limiter = ReturnType<typeof createRateLimiter>;
+
+type OrganizationId = string;
+type TargetId = string;
 
 export function createRateLimiter(config: {
   logger: FastifyLoggerInstance;
@@ -40,12 +56,9 @@ export function createRateLimiter(config: {
   const postgres$ = createPostgreSQLStorage(config.storage.connectionString);
   let initialized = false;
   let intervalHandle: ReturnType<typeof setInterval> | null = null;
-  let targetIdToRateLimitStatus = {
-    orgToTargetIdMap: new Map<string, string>(),
-    retention: new Map<string, number>(),
-    operationsReporting: new Map<string, RateLimitCheckResponse>(),
-    schemaPushes: new Map<string, RateLimitCheckResponse>(),
-  };
+
+  let targetIdToOrgLookup = new Map<TargetId, OrganizationId>();
+  let cachedResult = new Map<OrganizationId, CachedRateLimitInfo>();
 
   async function fetchAndCalculateUsageInformation() {
     const now = new Date();
@@ -55,12 +68,6 @@ export function createRateLimiter(config: {
     };
     config.logger.info(`Calculating rate-limit information based on window: ${window.startTime} -> ${window.endTime}`);
     const storage = await postgres$;
-    const newMap: typeof targetIdToRateLimitStatus = {
-      orgToTargetIdMap: new Map<string, string>(),
-      retention: new Map<string, number>(),
-      operationsReporting: new Map<string, RateLimitCheckResponse>(),
-      schemaPushes: new Map<string, RateLimitCheckResponse>(),
-    };
 
     const [records, operations, pushes] = await Promise.all([
       storage.getGetOrganizationsAndTargetPairsWithLimitInfo(),
@@ -72,53 +79,59 @@ export function createRateLimiter(config: {
     logger.debug(`Fetched total of ${Object.keys(operations).length} targets with usage information`);
     logger.debug(`Fetched total of ${Object.keys(pushes).length} targets with schema push information`);
 
-    for (const record of records) {
-      newMap.orgToTargetIdMap.set(record.organization, record.target);
-      const currentOperations = operations[record.target] || 0;
-      const operationsLimited =
-        record.limit_operations_monthly === 0 ? false : record.limit_operations_monthly < currentOperations;
+    const newTargetIdToOrgLookup = new Map<TargetId, OrganizationId>();
+    const newCachedResult = new Map<OrganizationId, CachedRateLimitInfo>();
 
-      newMap.retention.set(record.target, record.limit_retention_days);
+    for (const pairRecord of records) {
+      newTargetIdToOrgLookup.set(pairRecord.target, pairRecord.organization);
 
-      newMap.operationsReporting.set(record.target, {
-        current: currentOperations,
-        quota: record.limit_operations_monthly,
-        limited: operationsLimited,
-      });
-
-      const currentPushes = pushes[record.target] || 0;
-      const pushLimited =
-        record.limit_schema_push_monthly === 0 ? false : record.limit_schema_push_monthly < currentPushes;
-      newMap.schemaPushes.set(record.target, {
-        current: currentPushes,
-        quota: record.limit_schema_push_monthly,
-        limited: pushLimited,
-      });
-
-      if (operationsLimited) {
-        rateLimitOperationsEventOrg
-          .labels({
-            orgId: record.organization,
-          })
-          .inc();
-        logger.info(
-          `Target="${record.target}" (org="${record.organization}") is now being rate-limited for operations (${currentOperations}/${record.limit_operations_monthly})`
-        );
+      if (!newCachedResult.has(pairRecord.organization)) {
+        newCachedResult.set(pairRecord.organization, {
+          orgName: pairRecord.org_name,
+          operations: {
+            current: 0,
+            quota: pairRecord.limit_operations_monthly,
+            limited: false,
+          },
+          schemaPushes: {
+            current: 0,
+            quota: pairRecord.limit_schema_push_monthly,
+            limited: false,
+          },
+          retentionInDays: pairRecord.limit_retention_days,
+        });
       }
 
-      if (pushLimited) {
-        rateLimitSchemaEventOrg
-          .labels({
-            orgId: record.organization,
-          })
-          .inc();
-        logger.info(
-          `Target="${record.target}" (org="${record.organization}") is now being rate-limited for schema pushes (${currentPushes}/${record.limit_schema_push_monthly})`
-        );
-      }
+      const orgRecord = newCachedResult.get(pairRecord.organization)!;
+      orgRecord.operations.current = (orgRecord.operations.current || 0) + (operations[pairRecord.target] || 0);
+      orgRecord.schemaPushes.current = (orgRecord.schemaPushes.current || 0) + (pushes[pairRecord.target] || 0);
     }
 
-    targetIdToRateLimitStatus = newMap;
+    newCachedResult.forEach((orgRecord, orgId) => {
+      const orgName = orgRecord.orgName;
+      orgRecord.operations.limited =
+        orgRecord.operations.quota === 0 ? false : orgRecord.operations.current > orgRecord.operations.quota;
+      orgRecord.schemaPushes.limited =
+        orgRecord.schemaPushes.quota === 0 ? false : orgRecord.schemaPushes.current > orgRecord.schemaPushes.quota;
+
+      if (orgRecord.operations.limited) {
+        rateLimitOperationsEventOrg.labels({ orgId, orgName }).inc();
+        logger.info(
+          `Organization "${orgName}"/"${orgId}" is now being rate-limited for operations (${orgRecord.operations.current}/${orgRecord.operations.quota})`
+        );
+      }
+
+      if (orgRecord.schemaPushes.limited) {
+        rateLimitSchemaEventOrg.labels({ orgId, orgName }).inc();
+        logger.info(
+          `Organization "${orgName}"/"${orgId}" is now being rate-limited for schema pushes (${orgRecord.schemaPushes.current}/${orgRecord.schemaPushes.quota})`
+        );
+      }
+    });
+
+    cachedResult = newCachedResult;
+    targetIdToOrgLookup = newTargetIdToOrgLookup;
+    logger.info(`Built a new rate-limit map: %s`, JSON.stringify(Array.from(newCachedResult.entries())));
   }
 
   return {
@@ -127,40 +140,44 @@ export function createRateLimiter(config: {
       return initialized;
     },
     getRetention(targetId: string) {
-      const map = targetIdToRateLimitStatus.retention;
+      const orgId = targetIdToOrgLookup.get(targetId);
 
-      if (map.has(targetId)) {
-        return map.get(targetId)!;
+      if (!orgId) {
+        return DEFAULT_RETENTION;
       }
-      // In case we don't have any knowledge on that target id, to use the default.
-      return DEFAULT_RETENTION;
+
+      const orgData = cachedResult.get(orgId);
+
+      if (!orgData) {
+        return DEFAULT_RETENTION;
+      }
+
+      return orgData.retentionInDays;
     },
     checkLimit(input: RateLimitInput): RateLimitCheckResponse {
-      const map =
-        input.type === 'operations-reporting'
-          ? targetIdToRateLimitStatus.operationsReporting
-          : targetIdToRateLimitStatus.schemaPushes;
+      const orgId = input.entityType === 'organization' ? input.id : targetIdToOrgLookup.get(input.id);
 
-      const entityId =
-        input.entityType === 'target' ? input.id : targetIdToRateLimitStatus.orgToTargetIdMap.get(input.id);
-
-      if (!entityId) {
+      if (!orgId) {
         logger.warn(
-          `Failed to resolve/find rate limit information for entityId=${entityId} (type=${input.entityType})`
+          `Failed to resolve/find rate limit information for entityId=${input.id} (type=${input.entityType})`
         );
 
-        return {
-          limited: false,
-        };
+        return UNKNOWN_RATE_LIMIT_OBJ;
       }
 
-      if (map.has(entityId)) {
-        return map.get(entityId)!;
+      const orgData = cachedResult.get(orgId);
+
+      if (!orgData) {
+        return UNKNOWN_RATE_LIMIT_OBJ;
       }
-      // In case we don't have any knowledge on that target id, we allow it to run
-      return {
-        limited: false,
-      };
+
+      if (input.type === 'operations-reporting') {
+        return orgData.operations;
+      } else if (input.type === 'schema-push') {
+        return orgData.schemaPushes;
+      } else {
+        return UNKNOWN_RATE_LIMIT_OBJ;
+      }
     },
     async start() {
       logger.info(
