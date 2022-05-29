@@ -299,6 +299,7 @@ export interface Storage {
   getGetOrganizationsAndTargetPairsWithLimitInfo(): Promise<
     ReadonlyArray<{
       organization: string;
+      org_name: string;
       target: string;
       limit_operations_monthly: number;
       limit_schema_push_monthly: number;

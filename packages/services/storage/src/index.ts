@@ -1590,6 +1590,7 @@ export async function createStorage(connection: string): Promise<Storage> {
       const results = await pool.query<
         Slonik<{
           organization: string;
+          org_name: string;
           target: string;
           limit_operations_monthly: number;
           limit_schema_push_monthly: number;
@@ -1599,6 +1600,7 @@ export async function createStorage(connection: string): Promise<Storage> {
         sql`
           SELECT 
             o.id as organization,
+            o.name as org_name,
             o.limit_operations_monthly,
             o.limit_schema_push_monthly,
             o.limit_retention_days,

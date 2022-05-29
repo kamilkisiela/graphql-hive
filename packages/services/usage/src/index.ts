@@ -9,6 +9,7 @@ import {
   httpRequestsWithNonExistingToken,
   httpRequestsWithNoAccess,
   collectLatency,
+  droppedReports,
 } from './metrics';
 import type { IncomingLegacyReport, IncomingReport } from './types';
 import { createUsageRateLimit } from './rate-limit';
@@ -112,7 +113,7 @@ async function main() {
             entityType: 'target',
           })
         ) {
-          // TODO: We should trigger a call to update the KV in the WAF in case we want to make sure token is being blocked?
+          droppedReports.labels({ targetId: tokenInfo.target }).inc();
           res.status(429).send();
 
           return;

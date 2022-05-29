@@ -4,11 +4,6 @@ fragment OrganizationFields on Organization {
   name
   type
   plan
-  rateLimit {
-    operations
-    schemaPushes
-    retentionInDays
-  }
   me {
     ...MemberFields
   }
