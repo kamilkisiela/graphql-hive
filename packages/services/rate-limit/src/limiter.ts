@@ -122,6 +122,7 @@ export function createRateLimiter(config: {
   }
 
   return {
+    logger,
     readiness() {
       return initialized;
     },
