@@ -8,7 +8,7 @@ export const resolvers: RateLimitModule.Resolvers = {
       let limitedForSchemaPushes = false;
 
       try {
-        const [organizationRateLimit, schemaPushLimit] = await Promise.all([
+        const [operationsRateLimit, schemaPushLimit] = await Promise.all([
           injector.get(RateLimitProvider).checkRateLimit({
             entityType: 'organization',
             id: org.id,
@@ -21,10 +21,11 @@ export const resolvers: RateLimitModule.Resolvers = {
           }),
         ]);
 
-        limitedForOperations = organizationRateLimit.limited;
+        console.info('Fetched rate-limit info:', { orgId: org.id, operationsRateLimit, schemaPushLimit });
+        limitedForOperations = operationsRateLimit.limited;
         limitedForSchemaPushes = schemaPushLimit.limited;
       } catch (e) {
-        // nothing to do here
+        console.warn('Failed to fetch rate-limit info:', org.id, e);
       }
 
       return {

@@ -32,7 +32,11 @@ export const rateLimitApiRouter = trpc
   .query('checkRateLimit', {
     input: VALIDATION,
     async resolve({ ctx, input }) {
-      return ctx.checkLimit(input);
+      ctx.logger.info(`checkRateLimit called, input is: %o`, input);
+      const result = await ctx.checkLimit(input);
+      ctx.logger.info(`checkRateLimit done, result is: %o`, input);
+
+      return result;
     },
   });
 
