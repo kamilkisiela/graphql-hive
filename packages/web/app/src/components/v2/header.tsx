@@ -124,7 +124,7 @@ export const Header = (): ReactElement => {
               </DropdownMenu.Content>
             </DropdownMenu>
             <DropdownMenu.Item asChild>
-              <a href={process.env.NEXT_PUBLIC_DOCS_LINK} target="_blank" rel="noreferrer">
+              <a href="https://calendly.com/d/zjjt-g8zd/hive-feedback" target="_blank" rel="noreferrer">
                 <CalendarIcon className="h-5 w-5" />
                 Schedule a meeting
               </a>
