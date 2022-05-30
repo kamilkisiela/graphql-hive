@@ -1,8 +1,8 @@
-import { createContext, useContext, FC, useEffect } from 'react';
+import { createContext, useContext, useEffect, ReactElement, ReactNode } from 'react';
 import { configureScope } from '@sentry/nextjs';
 import { reset, identify } from '@/lib/mixpanel';
 import { UserProvider, useUser as useAuth0User, UserProfile } from '@auth0/nextjs-auth0';
-import { Spinner } from '@/components/common/Spinner';
+import { Spinner } from '@/components/v2';
 import { LoginPage } from './LoginPage';
 
 const AuthContext = createContext<{
@@ -45,9 +45,7 @@ function identifyOnSentry(user: UserProfile): void {
     const userId = `${provider}|${id.length > maxLen ? id.substr(0, maxLen) + '...' : id}`;
 
     configureScope(scope => {
-      scope.setUser({
-        id: userId,
-      });
+      scope.setUser({ id: userId });
     });
   }
 }
@@ -56,7 +54,7 @@ interface Metadata {
   admin?: boolean;
 }
 
-const AuthProviderInner: FC = ({ children }) => {
+const AuthProviderInner = ({ children }: { children: ReactNode }): ReactElement => {
   const { user, isLoading } = useAuth0User();
 
   useEffect(() => {
@@ -68,7 +66,7 @@ const AuthProviderInner: FC = ({ children }) => {
   }, [isLoading, user]);
 
   if (isLoading) {
-    return <Spinner />;
+    return <Spinner className="my-auto" />;
   }
 
   if (!user) {
@@ -90,7 +88,7 @@ const AuthProviderInner: FC = ({ children }) => {
   );
 };
 
-export const AuthProvider: FC = ({ children }) => {
+export const AuthProvider = ({ children }: { children: ReactNode }): ReactElement => {
   return (
     <UserProvider>
       <AuthProviderInner>{children}</AuthProviderInner>

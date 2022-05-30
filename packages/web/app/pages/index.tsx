@@ -1,41 +1,48 @@
-import * as React from 'react';
+import { useEffect, ReactElement } from 'react';
 import { GetServerSideProps } from 'next';
 import { useQuery } from 'urql';
 import { print, stripIgnoredCharacters, ExecutionResult } from 'graphql';
 import { OrganizationsDocument, OrganizationsQuery, OrganizationType } from '@/graphql';
 import { Title } from '@/components/common';
-import { useNavigation } from '@/components/common/Navigation';
 import { DataWrapper } from '@/components/common/DataWrapper';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import Cookies from 'cookies';
+import { LAST_VISITED_ORG_KEY } from '@/constants';
 
-export const getServerSideProps: GetServerSideProps = async ctx => {
+export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   try {
-    const host = ctx.req.headers.host;
-    const protocol = host.startsWith('localhost') ? 'http' : 'https';
-    const url = `${protocol}://${host}`;
-    const query = stripIgnoredCharacters(print(OrganizationsDocument));
+    let orgId: string;
+    const cookies = new Cookies(req, res);
+    const lastOrgIdInCookies = cookies.get(LAST_VISITED_ORG_KEY);
 
-    const response = await fetch(url + '/api/proxy', {
-      method: 'POST',
-      body: JSON.stringify({
-        query,
-        operationName: 'organizations',
-        variables: {},
-      }),
-      headers: {
-        cookie: ctx.req.headers.cookie,
-        'content-type': 'application/json',
-        Accept: 'application/json',
-      },
-    });
+    if (lastOrgIdInCookies) {
+      orgId = lastOrgIdInCookies;
+    } else {
+      const { host, cookie } = req.headers;
+      const protocol = host.startsWith('localhost') ? 'http' : 'https';
+      const query = stripIgnoredCharacters(print(OrganizationsDocument));
 
-    const result: ExecutionResult<OrganizationsQuery> = await response.json();
-    const org = result.data?.organizations?.nodes?.find(node => node.type === OrganizationType.Personal);
+      const response = await fetch(`${protocol}://${host}/api/proxy`, {
+        method: 'POST',
+        body: JSON.stringify({ query, operationName: 'organizations' }),
+        headers: {
+          cookie,
+          'content-type': 'application/json',
+          Accept: 'application/json',
+        },
+      });
 
-    if (org) {
+      const result: ExecutionResult<OrganizationsQuery> = await response.json();
+      const org = result.data?.organizations?.nodes?.find(node => node.type === OrganizationType.Personal);
+      if (org) {
+        orgId = org.cleanId;
+      }
+    }
+
+    if (orgId) {
       return {
         redirect: {
-          destination: `/${org.cleanId}`,
+          destination: `/${orgId}`,
           permanent: false,
         },
       };
@@ -49,18 +56,11 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
   };
 };
 
-export default function Home() {
-  const { setNavigation } = useNavigation();
-  const [query] = useQuery({
-    query: OrganizationsDocument,
-  });
+export default function Home(): ReactElement {
+  const [query] = useQuery({ query: OrganizationsDocument });
   const router = useRouteSelector();
 
-  React.useEffect(() => {
-    setNavigation({});
-  }, []);
-
-  React.useEffect(() => {
+  useEffect(() => {
     // Just in case server-side redirect wasn't working
     if (query.data) {
       const org = query.data.organizations.nodes.find(node => node.type === OrganizationType.Personal);

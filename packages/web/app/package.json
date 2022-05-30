@@ -39,6 +39,7 @@
     "@urql/devtools": "2.0.3",
     "@urql/exchange-graphcache": "4.3.6",
     "clsx": "1.1.1",
+    "cookies": "0.8.0",
     "date-fns": "2.25.0",
     "echarts": "5.3.2",
     "echarts-for-react": "3.0.2",
@@ -48,6 +49,7 @@
     "graphql": "16.5.0",
     "hyperid": "2.3.1",
     "immer": "9.0.12",
+    "js-cookie": "3.0.1",
     "mixpanel-browser": "2.45.0",
     "monaco-editor": "0.27.0",
     "monaco-themes": "0.3.3",
@@ -74,6 +76,7 @@
   "devDependencies": {
     "@next/eslint-plugin-next": "12.1.6",
     "@tailwindcss/line-clamp": "0.3.1",
+    "@types/cookies": "0.7.7",
     "@types/mixpanel-browser": "2.35.7",
     "@types/react": "17.0.45",
     "@types/react-date-range": "1.1.8",
