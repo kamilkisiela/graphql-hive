@@ -1,4 +1,4 @@
-import { createHash } from 'crypto';
+import { createHash } from 'node:crypto';
 import { got } from 'got';
 import type { Queue, Job } from 'bullmq';
 import type { Config, WebhookInput } from './types';

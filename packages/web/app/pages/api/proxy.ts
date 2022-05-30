@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { withSentry, captureException, startTransaction } from '@sentry/nextjs';
 import type { Transaction } from '@sentry/types';
-import { Readable } from 'stream';
+import { Readable } from 'node:stream';
 import { auth0 } from '../../src/lib/auth0';
 import hyperid from 'hyperid';
 import { AccessTokenError } from '@auth0/nextjs-auth0';

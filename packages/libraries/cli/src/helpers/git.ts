@@ -1,7 +1,7 @@
 import { gitToJs } from 'git-parse';
 import ci from 'env-ci';
-import { readFileSync, existsSync } from 'fs';
-import { join } from 'path';
+import { readFileSync, existsSync } from 'node:fs';
+import { join } from 'node:path';
 
 function splitPath(path: string) {
   const parts = path.split(/(\/|\\)/);

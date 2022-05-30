@@ -1,6 +1,6 @@
 import type { Redis as RedisInstance } from 'ioredis';
 import type { FastifyLoggerInstance } from '@hive/service-common';
-import { createHash } from 'crypto';
+import { createHash } from 'node:crypto';
 import { printSchema, parse, concatAST, visit, print, ASTNode } from 'graphql';
 import type { DocumentNode } from 'graphql';
 import { validateSDL } from 'graphql/validation/validate.js';

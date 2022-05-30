@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import url from 'url';
-import { sep } from 'path';
+import url from 'node:url';
+import { sep } from 'node:path';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { SlonikMigrator } from '@slonik/migrator';
 // eslint-disable-next-line import/no-extraneous-dependencies

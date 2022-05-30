@@ -1,5 +1,5 @@
 import { Injectable, Inject, Scope } from 'graphql-modules';
-import { createHmac } from 'crypto';
+import { createHmac } from 'node:crypto';
 import type { Span } from '@sentry/types';
 import { HiveError } from '../../../shared/errors';
 import { HttpClient } from '../../shared/providers/http-client';
