@@ -12,6 +12,7 @@ import { OrganizationUsageEstimationView } from '@/components/organization/Usage
 import { Card, Heading, Tabs, Title } from '@/components/v2';
 import { OrganizationFieldsFragment, OrgBillingInfoFieldsFragment, OrgRateLimitFieldsFragment } from '@/graphql';
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
+import { useTracker } from '@/lib/hooks/use-tracker';
 
 const DateFormatter = Intl.DateTimeFormat('en-US', {
   month: 'short',
@@ -97,6 +98,8 @@ const Page = ({
 };
 
 export default function SubscriptionPage(): ReactElement {
+  useTracker('SUBSCRIPTION_PAGE_VISIT');
+
   return (
     <>
       <Title title="Subscription & Usage" />
