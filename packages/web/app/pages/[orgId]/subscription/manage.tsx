@@ -23,6 +23,8 @@ import {
   UpgradeToProDocument,
 } from '@/graphql';
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
+import { useTracker } from '@/lib/hooks/use-tracker';
+import { track } from '@/lib/mixpanel';
 
 const Inner = ({
   organization,
@@ -68,6 +70,25 @@ const Inner = ({
   );
   const [schemaPushesRateLimit, setSchemaPushesLimit] = useState<number>(organization.rateLimit.schemaPushes);
 
+  const onOperationsRateLimitChange = useCallback(
+    (limit: number) => {
+      track('SUBSCRIPTION_OPERATIONS_RATE_LIMIT_FORM_INPUT_CHANGE', {
+        limit,
+      });
+      setOperationsRateLimit(limit);
+    },
+    [setOperationsRateLimit]
+  );
+  const onSchemaPushesLimitChange = useCallback(
+    (limit: number) => {
+      track('SUBSCRIPTION_SCHEMA_PUSHES_LIMIT_FORM_INPUT_CHANGE', {
+        limit,
+      });
+      setSchemaPushesLimit(limit);
+    },
+    [setSchemaPushesLimit]
+  );
+
   useEffect(() => {
     if (query.data?.billingPlans?.length > 0) {
       if (organization.plan !== plan) {
@@ -87,12 +108,17 @@ const Inner = ({
   }
 
   const openChatSupport = () => {
+    track('SUBSCRIPTION_ENTERPRISE_PLAN_CHAT_SUPPORT_CLICK');
     if (typeof window !== 'undefined' && (window as any).$crisp) {
       (window as any).$crisp.push(['do', 'chat:open']);
     }
   };
 
   const upgrade = async () => {
+    track('SUBSCRIPTION_UPGRADE_TO_PRO', {
+      operations: operationsRateLimit * 1_000_000,
+      schemaPushes: schemaPushesRateLimit,
+    });
     let paymentMethodId: string | null = null;
 
     if (organization.billingConfiguration.paymentMethod === null) {
@@ -115,12 +141,17 @@ const Inner = ({
   };
 
   const downgrade = () => {
+    track('SUBSCRIPTION_DOWNGRADE_TO_HOBBY');
     downgradeToHobbyMutation[1]({
       organization: organization.cleanId,
     });
   };
 
   const updateLimits = () => {
+    track('SUBSCRIPTION_LIMITS_UPDATE', {
+      operations: operationsRateLimit * 1_000_000,
+      schemaPushes: schemaPushesRateLimit,
+    });
     updateOrgRateLimitMutation[1]({
       organization: organization.cleanId,
       monthlyLimits: {
@@ -243,7 +274,7 @@ const Inner = ({
                               { value: 300, label: '300M' },
                             ]}
                             value={operationsRateLimit}
-                            onChange={setOperationsRateLimit}
+                            onChange={onOperationsRateLimitChange}
                           />
                         </div>
                         <div className="w-1/2 pl-5">
@@ -259,7 +290,7 @@ const Inner = ({
                               { value: 1000, label: '1000' },
                             ]}
                             value={schemaPushesRateLimit}
-                            onChange={setSchemaPushesLimit}
+                            onChange={onSchemaPushesLimitChange}
                           />
                         </div>
                       </div>
@@ -301,6 +332,7 @@ const Inner = ({
 };
 
 export default function ManageSubscriptionPage(): ReactElement {
+  useTracker('SUBSCRIPTION_MANAGE_PAGE_VISIT');
   return (
     <>
       <Title title="Manage Subscription" />
