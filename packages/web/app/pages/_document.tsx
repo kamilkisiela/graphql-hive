@@ -11,18 +11,18 @@ export default class MyDocument extends Document {
   }
 
   render() {
+    const { ids, css } = this.props as any;
+
     return (
-      <Html>
+      <Html className="dark">
         <Head>
           <style
-            data-emotion-css={(this.props as any).ids.join(' ')}
+            data-emotion-css={ids.join(' ')}
             dangerouslySetInnerHTML={{
-              __html: `
-                ${(this.props as any).css}
-                *:active, *:focus {
-                  outline: none !important;
-                }
-              `,
+              __html:
+                css +
+                // we setup background via style tag to prevent white flash on initial page loading
+                `html {background: #0b0d11}`,
             }}
           />
           <link rel="preconnect" href="https://fonts.gstatic.com" />
@@ -34,15 +34,10 @@ export default class MyDocument extends Document {
           <script async src="https://cdn.headwayapp.co/widget.js" />
           <script
             id="force-dark-mode"
-            dangerouslySetInnerHTML={{
-              __html: `
-                localStorage['chakra-ui-color-mode'] = 'dark';
-                document.documentElement.classList.add('dark');
-              `,
-            }}
+            dangerouslySetInnerHTML={{ __html: "localStorage['chakra-ui-color-mode'] = 'dark';" }}
           />
         </Head>
-        <body>
+        <body className="bg-transparent font-sans text-white">
           <Main />
           <NextScript />
         </body>

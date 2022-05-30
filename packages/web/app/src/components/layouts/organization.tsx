@@ -15,6 +15,8 @@ import {
 } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { canAccessOrganization, OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
+import cookies from 'js-cookie';
+import { LAST_VISITED_ORG_KEY } from '@/constants';
 
 enum TabValue {
   Overview = 'overview',
@@ -30,28 +32,15 @@ type OrganizationLayout<T, P> = {
 } & P;
 
 export function OrganizationLayout(
-  props: OrganizationLayout<
-    OrgBillingInfoFieldsFragment,
-    {
-      includeBilling: true;
-    }
-  >
+  props: OrganizationLayout<OrgBillingInfoFieldsFragment, { includeBilling: true }>
 ): ReactElement;
 export function OrganizationLayout(
-  props: OrganizationLayout<
-    OrgRateLimitFieldsFragment,
-    {
-      includeRateLimit: true;
-    }
-  >
+  props: OrganizationLayout<OrgRateLimitFieldsFragment, { includeRateLimit: true }>
 ): ReactElement;
 export function OrganizationLayout(
   props: OrganizationLayout<
     OrgBillingInfoFieldsFragment & OrgRateLimitFieldsFragment,
-    {
-      includeBilling: true;
-      includeRateLimit: true;
-    }
+    { includeBilling: true; includeRateLimit: true }
   >
 ): ReactElement;
 export function OrganizationLayout(props: OrganizationLayout<{}, {}>): ReactElement;
@@ -90,6 +79,7 @@ export function OrganizationLayout({
 
   useEffect(() => {
     if (organizationQuery.error) {
+      cookies.remove(LAST_VISITED_ORG_KEY);
       // url with # provoke error Maximum update depth exceeded
       push('/404', router.asPath.replace(/#.*/, ''));
     }

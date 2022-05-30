@@ -1,8 +1,7 @@
 import type { NextWebVitalsMetric } from 'next/app';
+import { GA_TRACKING_ID } from '@/constants';
 
-export const GA_TRACKING_ID = process.env.NEXT_PUBLIC_GA_TRACKING_ID;
-
-export const pageview = url => {
+export const pageview = (url): void => {
   if (!GA_TRACKING_ID) {
     return;
   }
@@ -12,7 +11,7 @@ export const pageview = url => {
 };
 
 // https://developers.google.com/analytics/devguides/collection/gtagjs/events
-export const event = ({ action, category, label, value }) => {
+export const event = ({ action, category, label, value }): void => {
   if (!GA_TRACKING_ID) {
     return;
   }
@@ -23,7 +22,7 @@ export const event = ({ action, category, label, value }) => {
   });
 };
 
-export function reportWebVitals({ id, name, label, value }: NextWebVitalsMetric) {
+export function reportWebVitals({ id, name, label, value }: NextWebVitalsMetric): void {
   if (!GA_TRACKING_ID) {
     return;
   }
