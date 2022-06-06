@@ -1,4 +1,8 @@
 version: '3.8'
+
+volumes:
+  pgdata:
+    external: true
 services:
   db:
     image: postgres:13.4-alpine
@@ -14,10 +18,9 @@ services:
       POSTGRES_PASSWORD: postgres
       PGDATA: /var/lib/postgresql/data
     volumes:
-      - ./volumes/postgresql/db:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
     ports:
       - '5432:5432'
-
   redis:
     image: docker.io/bitnami/redis:6.2
     networks:
