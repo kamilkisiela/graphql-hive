@@ -141,6 +141,9 @@ export async function handleRequest(request: Request, keyValidator: typeof isKey
         });
     }
   } else {
+    console.log(
+      `CDN Artifact not found for targetId=${targetId}, artifactType=${artifactType}, storageKeyType=${storageKeyType}`
+    );
     return new CDNArtifactNotFound(artifactType, targetId);
   }
 }
