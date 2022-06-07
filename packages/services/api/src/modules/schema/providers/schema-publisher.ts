@@ -447,7 +447,7 @@ export class SchemaPublisher {
           url: incomingSchema.url ?? null,
         });
 
-        this.publishToCDN({
+        await this.publishToCDN({
           valid,
           target,
           project,
@@ -457,7 +457,7 @@ export class SchemaPublisher {
       }
 
       if (incomingSchema.metadata && latest.version && previousSchema) {
-        this.publishToCDN({
+        await this.publishToCDN({
           valid,
           target,
           project,
@@ -505,7 +505,7 @@ export class SchemaPublisher {
         errors,
         initial: isInitialSchema,
       });
-      this.publishToCDN({
+      await this.publishToCDN({
         valid,
         target,
         project,
@@ -619,7 +619,7 @@ export class SchemaPublisher {
   }) {
     try {
       if (valid) {
-        this.updateCDN({
+        await this.updateCDN({
           target,
           project,
           schemas,

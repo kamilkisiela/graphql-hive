@@ -85,13 +85,14 @@ interface CompositionFailure {
 }
 
 const createFederation: (redis: RedisInstance, logger: FastifyLoggerInstance) => Orchestrator = (redis, logger) => {
-  const compose = reuse<ValidationInput, CompositionSuccess | CompositionFailure>(
+  const compose = reuse<ValidationInput | SupergraphInput, CompositionSuccess | CompositionFailure>(
     async schemas => {
       const result = composeAndValidate(
         schemas.map(schema => {
           return {
             typeDefs: trimDescriptions(parse(schema.raw)),
             name: schema.source,
+            url: 'url' in schema && typeof schema.url === 'string' ? schema.url : undefined,
           };
         })
       );

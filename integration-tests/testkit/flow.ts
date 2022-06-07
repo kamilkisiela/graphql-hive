@@ -573,6 +573,28 @@ export async function fetchSchemaFromCDN(selector: TargetSelectorInput, token: s
   };
 }
 
+export async function fetchSupergraphFromCDN(selector: TargetSelectorInput, token: string) {
+  const cdnAccessResult = await createCdnAccess(selector, token);
+
+  if (cdnAccessResult.body.errors) {
+    throw new Error(cdnAccessResult.body.errors[0].message);
+  }
+
+  const cdn = cdnAccessResult.body.data!.createCdnToken;
+
+  const res = await axios.get<string>(`${cdn.url}/supergraph`, {
+    headers: {
+      'X-Hive-CDN-Key': cdn.token,
+    },
+    responseType: 'text',
+  });
+
+  return {
+    body: res.data,
+    status: res.status,
+  };
+}
+
 export async function fetchMetadataFromCDN(selector: TargetSelectorInput, token: string) {
   const cdnAccessResult = await createCdnAccess(selector, token);
 
