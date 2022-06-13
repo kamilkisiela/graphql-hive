@@ -93,14 +93,12 @@ const DiffView = ({ view, versionId }: { view: 'sdl' | 'list'; versionId: string
 
   if (comparison.__typename === 'SchemaCompareError') {
     return (
-      <div className="m-3 grow rounded-lg bg-red-500/20 p-8">
-        <div className="mb-3 flex items-center">
-          <VscBug className="mr-3 h-8 w-8 text-red-500" />
+      <div className="m-3 rounded-lg bg-red-500/20 p-8">
+        <div className="mb-3 flex items-center gap-3">
+          <VscBug className="h-8 w-8 text-red-500" />
           <h2 className="text-lg font-medium text-white">Failed to build GraphQL Schema</h2>
         </div>
-        <div className="grow">
-          <p className="text-base text-gray-500">Schema is most likely incomplete and was force published</p>
-        </div>
+        <p className="text-base text-gray-500">Schema is most likely incomplete and was force published</p>
       </div>
     );
   }
@@ -210,9 +208,9 @@ const Page = ({ versionId }: { versionId: string }) => {
 
   return (
     <>
-      <div className="w-[355px]">
-        <Heading className="mb-5">Versions</Heading>
-        <div className="flex h-[65vh] flex-col gap-2.5 overflow-y-auto rounded-md border border-gray-800/50 p-2.5">
+      <div className="flex flex-col gap-5">
+        <Heading>Versions</Heading>
+        <div className="flex h-0 min-w-[420px] grow flex-col gap-2.5 overflow-y-auto rounded-md border border-gray-800/50 p-2.5">
           {pageVariables.map((variables, i) => (
             <ListPage
               key={variables.after}
@@ -226,30 +224,30 @@ const Page = ({ versionId }: { versionId: string }) => {
           ))}
         </div>
       </div>
-      <div className="grow">
-        <div className="mb-4 flex items-center justify-between">
+      <div className="flex grow flex-col gap-4">
+        <div className="flex items-center justify-between">
           <Heading>Schema</Heading>
           <ToggleGroup
-            defaultValue="diff"
+            defaultValue="list"
             onValueChange={onViewChange}
             type="single"
             className="bg-gray-900/50 text-gray-500"
           >
-            <ToggleGroupItem
-              className={clsx('hover:text-white', view === 'sdl' && 'bg-gray-800 text-white')}
-              value="sdl"
-            >
-              <VscDiff />
-            </ToggleGroupItem>
-            <ToggleGroupItem
-              className={clsx('hover:text-white', view === 'list' && 'bg-gray-800 text-white')}
-              value="list"
-            >
-              <VscListFlat />
-            </ToggleGroupItem>
+            {[
+              { value: 'sdl', icon: <VscDiff /> },
+              { value: 'list', icon: <VscListFlat /> },
+            ].map(({ value, icon }) => (
+              <ToggleGroupItem
+                key={value}
+                value={value}
+                className={clsx('hover:text-white', view === value && 'bg-gray-800 text-white')}
+              >
+                {icon}
+              </ToggleGroupItem>
+            ))}
           </ToggleGroup>
         </div>
-        <div className="flex h-[65vh] grow overflow-hidden rounded-md border border-gray-800/50">
+        <div className="grow rounded-md border border-gray-800/50">
           <DiffView versionId={versionId} view={view} />
         </div>
       </div>
@@ -276,7 +274,7 @@ export default function HistoryPage(): ReactElement {
   return (
     <>
       <Title title="History" />
-      <TargetLayout value="history" className="flex h-full items-stretch gap-x-5">
+      <TargetLayout value="history" className={latestVersionId ? 'flex h-full items-stretch gap-x-5' : ''}>
         {() => (latestVersionId ? <Page versionId={versionId} /> : noSchema)}
       </TargetLayout>
     </>
