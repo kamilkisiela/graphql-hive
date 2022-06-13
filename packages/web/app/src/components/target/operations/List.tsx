@@ -23,7 +23,16 @@ import {
   useDisclosure,
 } from '@chakra-ui/react';
 import { VscChevronDown, VscChevronLeft, VscChevronRight, VscChevronUp, VscWarning } from 'react-icons/vsc';
-import { usePagination, useSortBy, useTable } from 'react-table';
+import {
+  createTable,
+  useTableInstance,
+  getCoreRowModel,
+  getSortedRowModel,
+  getPaginationRowModel,
+  SortingState,
+  PaginationState,
+  OnChangeFn,
+} from '@tanstack/react-table';
 import { useQuery } from 'urql';
 import { useDebouncedCallback } from 'use-debounce';
 
@@ -139,61 +148,80 @@ const OperationRow: React.FC<{
   );
 };
 
+const table = createTable().setRowType<Operation>();
+
 const columns = [
-  { Header: 'Operation', accessor: 'name' },
-  { Header: 'Kind', accessor: 'kind' },
-  { Header: 'p90', accessor: 'p90' },
-  { Header: 'p95', accessor: 'p95' },
-  { Header: 'p99', accessor: 'p99' },
-  { Header: 'Failure Rate', accessor: 'failureRate' },
-  { Header: 'Requests', accessor: 'requests' },
-  { Header: 'Traffic', accessor: 'percentage' },
+  table.createDataColumn('name', {
+    header: 'Operations',
+  }),
+  table.createDataColumn('kind', {
+    header: 'Kind',
+  }),
+  table.createDataColumn('p90', {
+    header: 'p90',
+    footer: props => props.column.id,
+  }),
+  table.createDataColumn('p95', {
+    header: 'p95',
+    footer: props => props.column.id,
+  }),
+  table.createDataColumn('p99', {
+    header: 'p99',
+    footer: props => props.column.id,
+  }),
+  table.createDataColumn('failureRate', {
+    header: 'Failure Rate',
+    footer: props => props.column.id,
+  }),
+  table.createDataColumn('requests', {
+    header: 'Requests',
+    footer: props => props.column.id,
+  }),
+  table.createDataColumn('percentage', {
+    header: 'Traffic',
+    footer: props => props.column.id,
+  }),
 ];
 
 const OperationsTable: React.FC<{
-  operations: readonly Operation[];
+  operations: Operation[];
+  pagination: PaginationState;
+  setPagination: (state: PaginationState) => void;
+  sorting: SortingState;
+  setSorting: OnChangeFn<SortingState>;
   fetching?: boolean;
   className?: string;
-}> = ({ operations, fetching, className }) => {
-  const {
-    getTableProps,
-    headerGroups,
-    prepareRow,
-    page: rows,
-    previousPage,
-    gotoPage,
-    nextPage,
-    canPreviousPage,
-    canNextPage,
-    pageCount,
-    pageOptions,
-    state: { pageIndex },
-  } = useTable(
-    {
-      columns,
-      data: operations,
-      pageCount: Math.ceil(operations.length / 20),
-      initialState: {
-        pageSize: 20,
-      },
+}> = ({ operations, sorting, setSorting, pagination, setPagination, fetching, className }) => {
+  const tableInstance = useTableInstance(table, {
+    columns,
+    data: operations,
+    state: {
+      sorting,
+      pagination,
     },
-    useSortBy,
-    usePagination
-  );
+    onSortingChange: setSorting,
+    onPaginationChange: setPagination,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    debugTable: true,
+  });
 
   const firstPage = React.useCallback(() => {
-    gotoPage(0);
-  }, [gotoPage]);
+    tableInstance.setPageIndex(0);
+  }, [tableInstance]);
   const lastPage = React.useCallback(() => {
-    gotoPage(pageCount - 1);
-  }, [gotoPage, pageCount]);
+    tableInstance.setPageIndex(tableInstance.getPageCount() - 1);
+  }, [tableInstance]);
 
-  const debouncedSetPage = useDebouncedCallback(gotoPage, 500);
+  const debouncedSetPage = useDebouncedCallback((pageIndex: number) => {
+    setPagination({ pageSize: tableInstance.getState().pagination.pageSize, pageIndex });
+  }, 500);
 
-  const headerGroup = headerGroups[0];
+  const headerGroup = tableInstance.getHeaderGroups()[0];
 
   function findColumn(key: string) {
-    return headerGroup.headers[columns.findIndex(c => c.accessor === key)];
+    return headerGroup.headers[columns.findIndex(c => c.accessorKey === key)];
   }
 
   const p90Column = findColumn('p90');
@@ -213,45 +241,61 @@ const OperationsTable: React.FC<{
     >
       <Section.Title>Operations</Section.Title>
       <Section.Subtitle>List of all operations with their statistics</Section.Subtitle>
-      <Table tw="mt-6" variant="striped" colorScheme="gray" size="sm" {...getTableProps()}>
+      <Table tw="mt-6" variant="striped" colorScheme="gray" size="sm">
         <Thead>
-          <Tr {...headerGroup.getHeaderGroupProps()}>
+          <Tr>
             <Th tw="truncate">Operation</Th>
             <Th textAlign="center">Kind</Th>
-            <Th {...p90Column.getHeaderProps(p90Column.getSortByToggleProps())}>
-              <Sortable align="center" isSorted={p90Column.isSorted} isSortedDesc={p90Column.isSortedDesc}>
+            <Th onClick={p90Column.column.getToggleSortingHandler()}>
+              <Sortable
+                align="center"
+                isSorted={p90Column.column.getIsSorted() !== false}
+                isSortedDesc={p90Column.column.getIsSorted() === 'desc'}
+              >
                 p90
               </Sortable>
             </Th>
-            <Th {...p95Column.getHeaderProps(p95Column.getSortByToggleProps())}>
-              <Sortable align="center" isSorted={p95Column.isSorted} isSortedDesc={p95Column.isSortedDesc}>
+            <Th onClick={p95Column.column.getToggleSortingHandler()}>
+              <Sortable
+                align="center"
+                isSorted={p95Column.column.getIsSorted() !== false}
+                isSortedDesc={p95Column.column.getIsSorted() === 'desc'}
+              >
                 p95
               </Sortable>
             </Th>
-            <Th {...p99Column.getHeaderProps(p99Column.getSortByToggleProps())}>
-              <Sortable align="center" isSorted={p99Column.isSorted} isSortedDesc={p99Column.isSortedDesc}>
+            <Th onClick={p99Column.column.getToggleSortingHandler()}>
+              <Sortable
+                align="center"
+                isSorted={p99Column.column.getIsSorted() !== false}
+                isSortedDesc={p99Column.column.getIsSorted() === 'desc'}
+              >
                 p99
               </Sortable>
             </Th>
-            <Th {...failureRateColumn.getHeaderProps(failureRateColumn.getSortByToggleProps())}>
+            <Th onClick={failureRateColumn.column.getToggleSortingHandler()}>
               <Sortable
                 align="center"
-                isSorted={failureRateColumn.isSorted}
-                isSortedDesc={failureRateColumn.isSortedDesc}
+                isSorted={failureRateColumn.column.getIsSorted() !== false}
+                isSortedDesc={failureRateColumn.column.getIsSorted() === 'desc'}
               >
                 Failure Rate
               </Sortable>
             </Th>
-            <Th {...requestsColumn.getHeaderProps(requestsColumn.getSortByToggleProps())}>
-              <Sortable align="center" isSorted={requestsColumn.isSorted} isSortedDesc={requestsColumn.isSortedDesc}>
+            <Th onClick={requestsColumn.column.getToggleSortingHandler()}>
+              <Sortable
+                align="center"
+                isSorted={requestsColumn.column.getIsSorted() !== false}
+                isSortedDesc={requestsColumn.column.getIsSorted() === 'desc'}
+              >
                 Requests
               </Sortable>
             </Th>
-            <Th {...percentageColumn.getHeaderProps(percentageColumn.getSortByToggleProps())}>
+            <Th onClick={percentageColumn.column.getToggleSortingHandler()}>
               <Sortable
                 align="center"
-                isSorted={percentageColumn.isSorted}
-                isSortedDesc={percentageColumn.isSortedDesc}
+                isSorted={percentageColumn.column.getIsSorted() !== false}
+                isSortedDesc={percentageColumn.column.getIsSorted() === 'desc'}
               >
                 Traffic
               </Sortable>
@@ -259,14 +303,19 @@ const OperationsTable: React.FC<{
           </Tr>
         </Thead>
         <Tbody>
-          {rows.map(row => {
-            prepareRow(row);
+          {tableInstance.getRowModel().rows.map(row => {
             return <OperationRow operation={row.original} key={row.original.id} />;
           })}
         </Tbody>
       </Table>
       <div tw="py-3 flex flex-row items-center justify-center space-x-2">
-        <Button size="sm" variant="ghost" colorScheme="gray" onClick={firstPage} disabled={!canPreviousPage}>
+        <Button
+          size="sm"
+          variant="ghost"
+          colorScheme="gray"
+          onClick={firstPage}
+          disabled={!tableInstance.getCanPreviousPage()}
+        >
           First
         </Button>
         <IconButton
@@ -274,23 +323,29 @@ const OperationsTable: React.FC<{
           variant="ghost"
           colorScheme="gray"
           aria-label="Go to previous page"
-          onClick={previousPage}
-          disabled={!canPreviousPage}
+          onClick={tableInstance.previousPage}
+          disabled={!tableInstance.getCanPreviousPage()}
           icon={<VscChevronLeft />}
         />
         <span tw="font-bold whitespace-nowrap text-sm">
-          {pageIndex + 1} / {pageOptions.length}
+          {tableInstance.getState().pagination.pageIndex + 1} / {tableInstance.getPageCount()}
         </span>
         <IconButton
           size="sm"
           variant="ghost"
           colorScheme="gray"
           aria-label="Go to next page"
-          onClick={nextPage}
-          disabled={!canNextPage}
+          onClick={tableInstance.nextPage}
+          disabled={!tableInstance.getCanNextPage()}
           icon={<VscChevronRight />}
         />
-        <Button size="sm" variant="ghost" colorScheme="gray" onClick={lastPage} disabled={!canNextPage}>
+        <Button
+          size="sm"
+          variant="ghost"
+          colorScheme="gray"
+          onClick={lastPage}
+          disabled={!tableInstance.getCanNextPage()}
+        >
           Last
         </Button>
         <InputGroup variant="filled" tw="w-auto" size="sm">
@@ -300,7 +355,7 @@ const OperationsTable: React.FC<{
             type="number"
             placeholder="page"
             colorScheme="gray"
-            defaultValue={pageIndex + 1}
+            defaultValue={tableInstance.getState().pagination.pageIndex + 1}
             onChange={e => {
               debouncedSetPage(e.target.valueAsNumber ? e.target.valueAsNumber - 1 : 0);
             }}
@@ -336,7 +391,39 @@ const OperationsTableContainer: React.FC<{
     [operations, operationsFilter]
   );
 
-  return <OperationsTable fetching={fetching} operations={data} className={className} />;
+  const [pagination, setPagination] = React.useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 20,
+  });
+
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+
+  const safeSetPagination = React.useCallback(
+    (state: PaginationState) => {
+      const maxPageIndex = Math.ceil(data.length / state.pageSize) - 1;
+
+      if (state.pageIndex < 0) {
+        setPagination({ ...state, pageIndex: 0 });
+      } else if (state.pageIndex > maxPageIndex) {
+        setPagination({ ...state, pageIndex: maxPageIndex });
+      } else {
+        setPagination(state);
+      }
+    },
+    [pagination, setPagination, data]
+  );
+
+  return (
+    <OperationsTable
+      fetching={fetching}
+      operations={data}
+      className={className}
+      pagination={pagination}
+      setPagination={safeSetPagination}
+      sorting={sorting}
+      setSorting={setSorting}
+    />
+  );
 };
 
 export const OperationsList: React.FC<{

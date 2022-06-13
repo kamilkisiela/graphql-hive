@@ -16,7 +16,8 @@ import {
   useDisclosure,
 } from '@chakra-ui/react';
 import { VscChevronDown, VscChromeClose } from 'react-icons/vsc';
-import { AutoSizer, List } from 'react-virtualized';
+import AutoSizer from 'react-virtualized-auto-sizer';
+import { FixedSizeList } from 'react-window';
 import { useQuery } from 'urql';
 import { useDebouncedCallback } from 'use-debounce';
 
@@ -73,6 +74,23 @@ const OperationsFilter: React.FC<{
     setSelectedItems([]);
   }, [setSelectedItems]);
 
+  const renderRow = React.useCallback(
+    ({ index, style }) => {
+      const operation = visibleOperations[index];
+
+      return (
+        <OperationRow
+          style={style}
+          key={operation.id}
+          operation={operation}
+          selected={selectedItems.some(operationHash => operationHash === operation.operationHash)}
+          onSelect={onSelect}
+        />
+      );
+    },
+    [visibleOperations, selectedItems, onSelect]
+  );
+
   return (
     <Drawer onClose={onClose} finalFocusRef={focusRef} isOpen={isOpen} placement="right" size="md">
       <DrawerOverlay />
@@ -126,26 +144,15 @@ const OperationsFilter: React.FC<{
             <div tw="pl-1 flex-grow">
               <AutoSizer>
                 {({ height, width }) => (
-                  <List
+                  <FixedSizeList
                     height={height}
                     width={width}
-                    rowCount={visibleOperations.length}
-                    rowHeight={24}
-                    overscanRowCount={5}
-                    rowRenderer={({ index, style }) => {
-                      const operation = visibleOperations[index];
-
-                      return (
-                        <OperationRow
-                          style={style}
-                          key={operation.id}
-                          operation={operation}
-                          selected={selectedItems.some(operationHash => operationHash === operation.operationHash)}
-                          onSelect={onSelect}
-                        />
-                      );
-                    }}
-                  />
+                    itemCount={visibleOperations.length}
+                    itemSize={24}
+                    overscanCount={5}
+                  >
+                    {renderRow}
+                  </FixedSizeList>
                 )}
               </AutoSizer>
             </div>

@@ -1,13 +1,39 @@
 import 'twin.macro';
 import { Table, Thead, Tbody, Th, Tr, Td, Flex, StatGroup, Stat, StatLabel, StatNumber } from '@chakra-ui/react';
 import ReactECharts from 'echarts-for-react';
-import { AutoSizer } from 'react-virtualized';
-import { useTable, useSortBy } from 'react-table';
+import AutoSizer from 'react-virtualized-auto-sizer';
+import { FixedSizeList } from 'react-window';
+import {
+  createTable,
+  useTableInstance,
+  getCoreRowModel,
+  getSortedRowModel,
+  SortingState,
+  TableInstance as OriginalTableInstance,
+  Table as OriginalTable,
+} from '@tanstack/react-table';
 import React from 'react';
 import { DocumentType, gql, useQuery } from 'urql';
 import { VscChevronUp, VscChevronDown } from 'react-icons/vsc';
 import { DataWrapper } from '@/components/common/DataWrapper';
 import { theme } from '@/lib/charts';
+import { OrganizationType } from '@/graphql';
+
+interface Organization {
+  name: string;
+  members: string;
+  type: OrganizationType;
+  users: number;
+  projects: number;
+  targets: number;
+  versions: number;
+  persistedOperations: number;
+  operations: any;
+}
+
+const table = createTable().setRowType<Organization>();
+
+type TableInstance = typeof table extends OriginalTable<infer T> ? OriginalTableInstance<T> : never;
 
 function formatNumber(value: number) {
   return Intl.NumberFormat().format(value);
@@ -206,6 +232,88 @@ function filterStats(
   return true;
 }
 
+function Row({ tableInstance, index }: { tableInstance: TableInstance; index: string }) {
+  const row = tableInstance.getRowModel().rows[index];
+  return (
+    <Tr key={row.id}>
+      {row.getVisibleCells().map(cell => {
+        const isNumeric = typeof cell.getValue() === 'number';
+        return (
+          <Td
+            key={cell.id}
+            isNumeric={isNumeric}
+            align={(cell.column.columnDef.meta as { align: 'right' } | undefined)?.align ?? 'left'}
+          >
+            {isNumeric ? formatNumber(cell.getValue() as number) : cell.renderCell()}
+          </Td>
+        );
+      })}
+    </Tr>
+  );
+}
+
+function AdminTable({
+  rowCount,
+  tableInstance,
+}: {
+  tableInstance: TableInstance;
+  rowCount: number;
+  sorting: SortingState;
+}) {
+  const Inner = React.useCallback(({ children }) => {
+    const headerGroup = tableInstance.getHeaderGroups()[0];
+
+    return (
+      <Table size="sm">
+        <Thead>
+          <Tr>
+            {headerGroup.headers.map(header => {
+              const align =
+                (
+                  header.column.columnDef.meta as
+                    | {
+                        align: 'right';
+                      }
+                    | undefined
+                )?.align ?? 'left';
+
+              return (
+                <Th key={header.id} align={align} onClick={header.column.getToggleSortingHandler()}>
+                  <Sortable
+                    align={align}
+                    isSorted={header.column.getIsSorted() !== false}
+                    isSortedDesc={header.column.getIsSorted() === 'desc'}
+                  >
+                    {header.renderHeader()}
+                  </Sortable>
+                </Th>
+              );
+            })}
+          </Tr>
+        </Thead>
+        <Tbody>{children}</Tbody>
+      </Table>
+    );
+  }, []);
+
+  return (
+    <AutoSizer>
+      {({ height, width }) => (
+        <FixedSizeList
+          innerElementType={Inner}
+          height={height}
+          width={width}
+          itemCount={rowCount}
+          itemSize={24}
+          overscanCount={10}
+        >
+          {({ index }) => <Row tableInstance={tableInstance} index={index as any} />}
+        </FixedSizeList>
+      )}
+    </AutoSizer>
+  );
+}
+
 export const AdminStats: React.FC<{
   last: number;
   filters: Filters;
@@ -219,54 +327,60 @@ export const AdminStats: React.FC<{
 
   const columns = React.useMemo(
     () => [
-      {
-        Header: 'Organization',
-        accessor: 'name',
-      },
-      {
-        Header: 'Type',
-        accessor: 'type',
-      },
-      {
-        Header: 'Members',
-        accessor: 'users',
-        isNumeric: true,
-        align: 'right',
-      },
-      {
-        Header: 'Users',
-        accessor: 'members',
-      },
-      {
-        Header: 'Projects',
-        accessor: 'projects',
-        isNumeric: true,
-        align: 'right',
-      },
-      {
-        Header: 'Targets',
-        accessor: 'targets',
-        isNumeric: true,
-        align: 'right',
-      },
-      {
-        Header: 'Schema pushes',
-        accessor: 'versions',
-        isNumeric: true,
-        align: 'right',
-      },
-      {
-        Header: 'Persisted Ops',
-        accessor: 'persistedOperations',
-        isNumeric: true,
-        align: 'right',
-      },
-      {
-        Header: 'Collected Ops',
-        accessor: 'operations',
-        isNumeric: true,
-        align: 'right',
-      },
+      table.createDataColumn('name', {
+        header: 'Organization',
+        footer: props => props.column.id,
+      }),
+      table.createDataColumn('type', {
+        header: 'Type',
+        footer: props => props.column.id,
+      }),
+      table.createDataColumn('members', {
+        header: 'Members',
+        footer: props => props.column.id,
+        meta: {
+          align: 'right',
+        },
+      }),
+      table.createDataColumn('users', {
+        header: 'Users',
+        footer: props => props.column.id,
+      }),
+      table.createDataColumn('projects', {
+        header: 'Projects',
+        footer: props => props.column.id,
+        meta: {
+          align: 'right',
+        },
+      }),
+      table.createDataColumn('targets', {
+        header: 'Targets',
+        footer: props => props.column.id,
+        meta: {
+          align: 'right',
+        },
+      }),
+      table.createDataColumn('versions', {
+        header: 'Schema pushes',
+        footer: props => props.column.id,
+        meta: {
+          align: 'right',
+        },
+      }),
+      table.createDataColumn('persistedOperations', {
+        header: 'Persisted Ops',
+        footer: props => props.column.id,
+        meta: {
+          align: 'right',
+        },
+      }),
+      table.createDataColumn('operations', {
+        header: 'Collected Ops',
+        footer: props => props.column.id,
+        meta: {
+          align: 'right',
+        },
+      }),
     ],
     []
   );
@@ -287,13 +401,20 @@ export const AdminStats: React.FC<{
       }));
   }, [query.data, filters]);
 
-  const { getTableProps, getTableBodyProps, headerGroups, prepareRow, rows } = useTable(
-    {
-      columns,
-      data,
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+
+  const tableInstance = useTableInstance(table, {
+    data,
+    columns,
+    state: {
+      sorting,
     },
-    useSortBy
-  );
+    onSortingChange: setSorting,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    debugTable: true,
+    debugAll: true,
+  });
 
   const overall = React.useMemo(() => {
     return {
@@ -307,8 +428,6 @@ export const AdminStats: React.FC<{
     };
   }, [data]);
 
-  const headerGroup = headerGroups[0];
-
   return (
     <DataWrapper query={query}>
       {() => (
@@ -319,41 +438,11 @@ export const AdminStats: React.FC<{
             <OverallStat label="Projects" value={overall.projects} />
             <OverallStat label="Targets" value={overall.targets} />
             <OverallStat label="Schema Pushes" value={overall.versions} />
-            <OverallStat label="Peristed Ops" value={overall.persistedOperations} />
+            <OverallStat label="Persisted Ops" value={overall.persistedOperations} />
             <OverallStat label="Collected Ops" value={overall.operations} />
           </StatGroup>
           <CollectedOperationsOverTime last={last} operations={query.data?.admin.stats.general.operationsOverTime} />
-          <Table size="sm" {...getTableProps()}>
-            <Thead>
-              <Tr {...headerGroup.getHeaderGroupProps()}>
-                {headerGroup.headers.map(column => {
-                  return (
-                    <Th {...column.getHeaderProps(column.getSortByToggleProps())} align={column.align}>
-                      <Sortable align={column.align} isSorted={column.isSorted} isSortedDesc={column.isSortedDesc}>
-                        {column.render('Header')}
-                      </Sortable>
-                    </Th>
-                  );
-                })}
-              </Tr>
-            </Thead>
-            <Tbody {...getTableBodyProps()}>
-              {rows.map(row => {
-                prepareRow(row);
-                return (
-                  <Tr {...row.getRowProps()}>
-                    {row.cells.map(cell => {
-                      return (
-                        <Td {...cell.getCellProps()} isNumeric={cell.column.isNumeric} align={cell.column.align}>
-                          {cell.column.isNumeric ? formatNumber(cell.value) : cell.render('Cell')}
-                        </Td>
-                      );
-                    })}
-                  </Tr>
-                );
-              })}
-            </Tbody>
-          </Table>
+          <AdminTable tableInstance={tableInstance} rowCount={data.length} sorting={sorting} />
         </div>
       )}
     </DataWrapper>
