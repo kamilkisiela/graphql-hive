@@ -1,7 +1,7 @@
 import React from 'react';
 import { Grid, GridItem, useColorModeValue } from '@chakra-ui/react';
 import ReactECharts from 'echarts-for-react';
-import { AutoSizer } from 'react-virtualized';
+import AutoSizer from 'react-virtualized-auto-sizer';
 import tw from 'twin.macro';
 import { useQuery } from 'urql';
 
