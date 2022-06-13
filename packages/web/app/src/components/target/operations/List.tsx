@@ -192,7 +192,6 @@ const OperationsTable: React.FC<{
   fetching?: boolean;
   className?: string;
 }> = ({ operations, sorting, setSorting, pagination, setPagination, fetching, className }) => {
-  console.log(pagination.pageIndex);
   const tableInstance = useTableInstance(table, {
     columns,
     data: operations,
