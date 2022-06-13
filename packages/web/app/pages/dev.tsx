@@ -1,6 +1,6 @@
 import React from 'react';
 import 'twin.macro';
-/* eslint-disable import/no-extraneous-dependencies */
+
 import dynamic from 'next/dynamic';
 import 'graphiql/graphiql.css';
 

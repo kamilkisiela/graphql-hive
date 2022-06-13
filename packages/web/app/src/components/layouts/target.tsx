@@ -26,6 +26,7 @@ enum TabValue {
 
 export const TargetLayout = ({
   children,
+  connect,
   value,
   className,
 }: {
@@ -36,6 +37,7 @@ export const TargetLayout = ({
   }): ReactNode;
   value: 'schema' | 'history' | 'operations' | 'laboratory' | 'settings';
   className?: string;
+  connect?: ReactNode;
 }): ReactElement => {
   const [isModalOpen, setModalOpen] = useState(false);
   const toggleModalOpen = useCallback(() => {
@@ -145,11 +147,15 @@ export const TargetLayout = ({
             </div>
             <div className="mb-10 text-xs font-bold text-[#34eab9]">{project?.type}</div>
           </div>
-          <Button size="large" variant="primary" onClick={toggleModalOpen} className="ml-auto">
-            Connect
-            <Link2Icon className="ml-8 h-4 w-4" />
-          </Button>
-          <ConnectSchemaModal isOpen={isModalOpen} toggleModalOpen={toggleModalOpen} />
+          {connect ?? (
+            <>
+              <Button size="large" variant="primary" onClick={toggleModalOpen} className="ml-auto">
+                Connect
+                <Link2Icon className="ml-8 h-4 w-4" />
+              </Button>
+              <ConnectSchemaModal isOpen={isModalOpen} toggleModalOpen={toggleModalOpen} />
+            </>
+          )}
         </div>
       </SubHeader>
 
