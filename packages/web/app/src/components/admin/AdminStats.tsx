@@ -1,20 +1,35 @@
 import 'twin.macro';
-import { Table, Thead, Tbody, Th, Tr, Td, Flex, StatGroup, Stat, StatLabel, StatNumber } from '@chakra-ui/react';
+import React from 'react';
+import {
+  Table,
+  Thead,
+  Tbody,
+  Th,
+  Tr,
+  Td,
+  Flex,
+  StatGroup,
+  Stat,
+  StatLabel,
+  StatNumber,
+  Button,
+  IconButton,
+} from '@chakra-ui/react';
 import ReactECharts from 'echarts-for-react';
 import AutoSizer from 'react-virtualized-auto-sizer';
-import { FixedSizeList } from 'react-window';
 import {
   createTable,
   useTableInstance,
   getCoreRowModel,
   getSortedRowModel,
+  getPaginationRowModel,
   SortingState,
+  PaginationState,
   TableInstance as OriginalTableInstance,
   Table as OriginalTable,
 } from '@tanstack/react-table';
-import React from 'react';
 import { DocumentType, gql, useQuery } from 'urql';
-import { VscChevronUp, VscChevronDown } from 'react-icons/vsc';
+import { VscChevronUp, VscChevronDown, VscChevronLeft, VscChevronRight } from 'react-icons/vsc';
 import { DataWrapper } from '@/components/common/DataWrapper';
 import { theme } from '@/lib/charts';
 import { OrganizationType } from '@/graphql';
@@ -232,8 +247,7 @@ function filterStats(
   return true;
 }
 
-function Row({ tableInstance, index }: { tableInstance: TableInstance; index: string }) {
-  const row = tableInstance.getRowModel().rows[index];
+function OrganizationTableRow({ row }: { row: ReturnType<TableInstance['getRow']> }) {
   return (
     <Tr key={row.id}>
       {row.getVisibleCells().map(cell => {
@@ -252,79 +266,7 @@ function Row({ tableInstance, index }: { tableInstance: TableInstance; index: st
   );
 }
 
-function AdminTable({
-  rowCount,
-  tableInstance,
-}: {
-  tableInstance: TableInstance;
-  rowCount: number;
-  sorting: SortingState;
-}) {
-  const Inner = React.useCallback(({ children }) => {
-    const headerGroup = tableInstance.getHeaderGroups()[0];
-
-    return (
-      <Table size="sm">
-        <Thead>
-          <Tr>
-            {headerGroup.headers.map(header => {
-              const align =
-                (
-                  header.column.columnDef.meta as
-                    | {
-                        align: 'right';
-                      }
-                    | undefined
-                )?.align ?? 'left';
-
-              return (
-                <Th key={header.id} align={align} onClick={header.column.getToggleSortingHandler()}>
-                  <Sortable
-                    align={align}
-                    isSorted={header.column.getIsSorted() !== false}
-                    isSortedDesc={header.column.getIsSorted() === 'desc'}
-                  >
-                    {header.renderHeader()}
-                  </Sortable>
-                </Th>
-              );
-            })}
-          </Tr>
-        </Thead>
-        <Tbody>{children}</Tbody>
-      </Table>
-    );
-  }, []);
-
-  return (
-    <AutoSizer>
-      {({ height, width }) => (
-        <FixedSizeList
-          innerElementType={Inner}
-          height={height}
-          width={width}
-          itemCount={rowCount}
-          itemSize={24}
-          overscanCount={10}
-        >
-          {({ index }) => <Row tableInstance={tableInstance} index={index as any} />}
-        </FixedSizeList>
-      )}
-    </AutoSizer>
-  );
-}
-
-export const AdminStats: React.FC<{
-  last: number;
-  filters: Filters;
-}> = ({ last, filters }) => {
-  const [query] = useQuery({
-    query: AdminStatsQuery,
-    variables: {
-      last: last === 0 ? null : last,
-    },
-  });
-
+function OrganizationTable({ data }: { data: Organization[] }) {
   const columns = React.useMemo(
     () => [
       table.createDataColumn('name', {
@@ -385,6 +327,124 @@ export const AdminStats: React.FC<{
     []
   );
 
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [pagination, setPagination] = React.useState<PaginationState>({ pageIndex: 0, pageSize: 20 });
+
+  const tableInstance = useTableInstance(table, {
+    data,
+    columns,
+    state: {
+      sorting,
+      pagination,
+    },
+    onSortingChange: setSorting,
+    onPaginationChange: setPagination,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    debugTable: process.env.NODE_ENV !== 'production',
+  });
+
+  const firstPage = React.useCallback(() => {
+    tableInstance.setPageIndex(0);
+  }, [tableInstance]);
+  const lastPage = React.useCallback(() => {
+    tableInstance.setPageIndex(tableInstance.getPageCount() - 1);
+  }, [tableInstance]);
+
+  const headerGroup = tableInstance.getHeaderGroups()[0];
+
+  return (
+    <div>
+      <Table size="sm">
+        <Thead>
+          <Tr>
+            {headerGroup.headers.map(header => {
+              const align =
+                (
+                  header.column.columnDef.meta as
+                    | {
+                        align: 'right';
+                      }
+                    | undefined
+                )?.align ?? 'left';
+
+              return (
+                <Th key={header.id} align={align} onClick={header.column.getToggleSortingHandler()}>
+                  <Sortable
+                    align={align}
+                    isSorted={header.column.getIsSorted() !== false}
+                    isSortedDesc={header.column.getIsSorted() === 'desc'}
+                  >
+                    {header.renderHeader()}
+                  </Sortable>
+                </Th>
+              );
+            })}
+          </Tr>
+        </Thead>
+        <Tbody>
+          {tableInstance.getRowModel().rows.map(row => (
+            <OrganizationTableRow row={row} key={row.id} />
+          ))}
+        </Tbody>
+      </Table>
+      <div tw="py-3 flex flex-row items-center justify-center space-x-2">
+        <Button
+          size="sm"
+          variant="ghost"
+          colorScheme="gray"
+          onClick={firstPage}
+          disabled={!tableInstance.getCanPreviousPage()}
+        >
+          First
+        </Button>
+        <IconButton
+          size="sm"
+          variant="ghost"
+          colorScheme="gray"
+          aria-label="Go to previous page"
+          onClick={tableInstance.previousPage}
+          disabled={!tableInstance.getCanPreviousPage()}
+          icon={<VscChevronLeft />}
+        />
+        <span tw="font-bold whitespace-nowrap text-sm">
+          {tableInstance.getState().pagination.pageIndex + 1} / {tableInstance.getPageCount()}
+        </span>
+        <IconButton
+          size="sm"
+          variant="ghost"
+          colorScheme="gray"
+          aria-label="Go to next page"
+          onClick={tableInstance.nextPage}
+          disabled={!tableInstance.getCanNextPage()}
+          icon={<VscChevronRight />}
+        />
+        <Button
+          size="sm"
+          variant="ghost"
+          colorScheme="gray"
+          onClick={lastPage}
+          disabled={!tableInstance.getCanNextPage()}
+        >
+          Last
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+export const AdminStats: React.FC<{
+  last: number;
+  filters: Filters;
+}> = ({ last, filters }) => {
+  const [query] = useQuery({
+    query: AdminStatsQuery,
+    variables: {
+      last: last === 0 ? null : last,
+    },
+  });
+
   const data = React.useMemo(() => {
     return (query.data?.admin?.stats.organizations ?? [])
       .filter(node => filterStats(node, filters))
@@ -400,21 +460,6 @@ export const AdminStats: React.FC<{
         operations: node.operations,
       }));
   }, [query.data, filters]);
-
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-
-  const tableInstance = useTableInstance(table, {
-    data,
-    columns,
-    state: {
-      sorting,
-    },
-    onSortingChange: setSorting,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    debugTable: true,
-    debugAll: true,
-  });
 
   const overall = React.useMemo(() => {
     return {
@@ -442,7 +487,7 @@ export const AdminStats: React.FC<{
             <OverallStat label="Collected Ops" value={overall.operations} />
           </StatGroup>
           <CollectedOperationsOverTime last={last} operations={query.data?.admin.stats.general.operationsOverTime} />
-          <AdminTable tableInstance={tableInstance} rowCount={data.length} sorting={sorting} />
+          <OrganizationTable data={data} />
         </div>
       )}
     </DataWrapper>
