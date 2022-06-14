@@ -14,7 +14,7 @@
     "migration:rollback": "yarn db:migrator down",
     "db:generate": "schemats generate --config schemats.cjs -o src/db/types.ts",
     "db:start": "docker-compose up -d --remove-orphans",
-    "db:dev": "docker compose up --remove-orphans",
+    "db:dev": "docker compose up --remove-orphans --abort-on-container-exit",
     "build": "bob runify --single",
     "postbuild": "copyfiles -f \"migrations/actions/*.sql\" dist/actions && copyfiles -f \"migrations/actions/down/*.sql\" dist/actions/down"
   },

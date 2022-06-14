@@ -204,7 +204,7 @@ const OperationsTable: React.FC<{
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    debugTable: true,
+    debugTable: process.env.NODE_ENV !== 'production',
   });
 
   const firstPage = React.useCallback(() => {
