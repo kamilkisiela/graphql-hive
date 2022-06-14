@@ -1,6 +1,6 @@
 import React from 'react';
 import 'twin.macro';
-import { Select, HStack, CheckboxGroup, Checkbox, Tooltip } from '@chakra-ui/react';
+import { Select, CheckboxGroup, Checkbox, Tooltip } from '@chakra-ui/react';
 import { VscChevronDown } from 'react-icons/vsc';
 import { AdminStats, Filters } from '@/components/admin/AdminStats';
 import { Page } from '@/components/common';
@@ -36,31 +36,31 @@ export default function Manage() {
       <div tw="flex flex-row h-full">
         <div tw="flex-grow overflow-x-auto divide-y divide-gray-200">
           <div tw="w-6/12 mt-10 mb-6">
-            <HStack spacing="6">
+            <div tw="inline-block">
               <CheckboxGroup
                 colorScheme="teal"
                 size="sm"
                 defaultValue={Object.keys(filters).filter(key => !!filters[key])}
                 onChange={onFiltersChange}
               >
-                <Checkbox tw="whitespace-nowrap" value="only-regular">
+                <Checkbox tw="whitespace-nowrap align-middle" value="only-regular">
                   <Tooltip label="Do not count personal organizations, created automatically for every user">
                     Only Regular
                   </Tooltip>
                 </Checkbox>
-                <Checkbox tw="whitespace-nowrap" value="with-projects">
+                <Checkbox tw="whitespace-nowrap align-middle" value="with-projects">
                   With Projects
                 </Checkbox>
-                <Checkbox tw="whitespace-nowrap" value="with-targets">
+                <Checkbox tw="whitespace-nowrap align-middle" value="with-targets">
                   With Targets
                 </Checkbox>
-                <Checkbox tw="whitespace-nowrap" value="with-schema-pushes">
+                <Checkbox tw="whitespace-nowrap align-middle" value="with-schema-pushes">
                   With Schema Pushes
                 </Checkbox>
-                <Checkbox tw="whitespace-nowrap" value="with-persisted">
+                <Checkbox tw="whitespace-nowrap align-middle" value="with-persisted">
                   With Persisted
                 </Checkbox>
-                <Checkbox tw="whitespace-nowrap" value="with-collected">
+                <Checkbox tw="whitespace-nowrap align-middle" value="with-collected">
                   With Collected
                 </Checkbox>
               </CheckboxGroup>
@@ -71,6 +71,7 @@ export default function Manage() {
                   iconSize="16"
                   icon={<VscChevronDown />}
                   size="sm"
+                  tw="inline-block align-middle"
                 >
                   {DATE_RANGE_OPTIONS.filter(v => v.asDays).map(item => {
                     return (
@@ -81,7 +82,7 @@ export default function Manage() {
                   })}
                 </Select>
               </Tooltip>
-            </HStack>
+            </div>
           </div>
           <AdminStats last={last} filters={filters} />
         </div>
