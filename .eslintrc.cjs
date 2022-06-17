@@ -45,7 +45,7 @@ module.exports = {
       'error',
       {
         scopes: ['@hive', '@graphql-hive'],
-        ignored: ['packages/libraries/**', 'packages/web/**'],
+        ignored: ['packages/libraries/**', 'packages/web/**', 'integration-tests'],
       },
     ],
 

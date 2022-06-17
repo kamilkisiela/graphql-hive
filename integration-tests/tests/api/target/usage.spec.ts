@@ -14,9 +14,9 @@ import {
   waitFor,
 } from '../../../testkit/flow';
 import { authenticate } from '../../../testkit/auth';
-import { collect, CollectedOperation } from '../../../testkit/usage';
+import { collect, collectReport, CollectedOperation } from '../../../testkit/usage';
 import { clickHouseQuery } from '../../../testkit/clickhouse';
-// eslint-disable-next-line import/no-extraneous-dependencies
+// eslint-disable-next-line import/no-extraneous-dependencies, hive/enforce-deps-in-dev
 import { normalizeOperation } from '@graphql-hive/core';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { parse, print } from 'graphql';
@@ -193,6 +193,117 @@ test('collect operation', async () => {
   expect(op.kind).toEqual('query');
   expect(op.name).toMatch('ping');
   expect(op.percentage).toBeGreaterThan(99);
+});
+
+test('Charly bit my finger! ORIGINAL', async () => {
+  const { access_token: owner_access_token } = await authenticate('main');
+  const orgResult = await createOrganization(
+    {
+      name: 'foo',
+    },
+    owner_access_token
+  );
+
+  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+
+  const projectResult = await createProject(
+    {
+      organization: org.cleanId,
+      type: ProjectType.Single,
+      name: 'foo',
+    },
+    owner_access_token
+  );
+
+  const project = projectResult.body.data!.createProject.ok!.createdProject;
+  const target = projectResult.body.data!.createProject.ok!.createdTarget;
+
+  const tokenResult = await createToken(
+    {
+      name: 'test',
+      organization: org.cleanId,
+      project: project.cleanId,
+      target: target.cleanId,
+      organizationScopes: [OrganizationAccessScope.Read],
+      projectScopes: [ProjectAccessScope.Read],
+      targetScopes: [TargetAccessScope.Read, TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+    },
+    owner_access_token
+  );
+  expect(tokenResult.body.errors).not.toBeDefined();
+
+  const token = tokenResult.body.data!.createToken.ok!.secret;
+
+  const collectResult = await collectReport({
+    report: {
+      size: 2,
+      map: {
+        op1: {
+          fields: ['Query', 'Query.ping'],
+          operation: 'query ping { ping }',
+          operationName: 'ping',
+        },
+      },
+      operations: [
+        {
+          timestamp: Date.now(),
+          operationMapKey: 'op1',
+          execution: {
+            ok: true,
+            duration: 200000000,
+            errorsTotal: 0,
+          },
+        },
+        {
+          timestamp: Date.now(),
+          operationMapKey: 'op1',
+          execution: {
+            ok: true,
+            duration: 300000000,
+            errorsTotal: 0,
+          },
+        },
+      ],
+    },
+    token,
+  });
+
+  expect(collectResult.status).toEqual(200);
+
+  await waitFor(5_000);
+
+  const from = formatISO(subHours(Date.now(), 6));
+  const to = formatISO(Date.now());
+  const operationStatsResult = await readOperationsStats(
+    {
+      organization: org.cleanId,
+      project: project.cleanId,
+      target: target.cleanId,
+      period: {
+        from,
+        to,
+      },
+    },
+    token
+  );
+
+  expect(operationStatsResult.body.errors).not.toBeDefined();
+
+  const operationsStats = operationStatsResult.body.data!.operationsStats;
+
+  expect(operationsStats.operations.nodes).toHaveLength(1);
+
+  const op = operationsStats.operations.nodes[0];
+
+  expect(op.count).toEqual(2);
+  expect(op.document).toMatch('ping');
+  expect(op.operationHash).toBeDefined();
+  expect(op.duration.p75).toEqual(150);
+  expect(op.duration.p90).toEqual(150);
+  expect(op.duration.p95).toEqual(150);
+  expect(op.duration.p99).toEqual(150);
+  expect(op.kind).toEqual('query');
+  expect(op.name).toMatch('ping');
 });
 
 test('normalize and collect operation without breaking its syntax', async () => {
