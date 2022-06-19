@@ -17,7 +17,5 @@ export async function isKeyValid(targetId: string, headerKey: string): Promise<b
     'verify',
   ]);
 
-  const verified = await crypto.subtle.verify('HMAC', secretKey, headerData, encoder.encode(targetId));
-
-  return verified;
+  return await crypto.subtle.verify('HMAC', secretKey, headerData, encoder.encode(targetId));
 }

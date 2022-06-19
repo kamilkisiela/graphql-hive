@@ -98,20 +98,28 @@ async function parseIncomingRequest(
     return { error: new MissingAuthKey() };
   }
 
-  const isKeyValid = await keyValidator(targetId, headerKey);
+  try {
+    const keyValid = await keyValidator(targetId, headerKey);
 
-  if (!isKeyValid) {
+    if (!keyValid) {
+      return {
+        error: new InvalidAuthKey(),
+      };
+    }
+
+    return {
+      targetId,
+      artifactType,
+      storageKeyType:
+        artifactType === 'sdl' || artifactType === 'introspection' || artifactType === 'schema'
+          ? 'schema'
+          : artifactType,
+    };
+  } catch (e) {
     return {
       error: new InvalidAuthKey(),
     };
   }
-
-  return {
-    targetId,
-    artifactType,
-    storageKeyType:
-      artifactType === 'sdl' || artifactType === 'introspection' || artifactType === 'schema' ? 'schema' : artifactType,
-  };
 }
 
 export async function handleRequest(request: Request, keyValidator: typeof isKeyValid) {

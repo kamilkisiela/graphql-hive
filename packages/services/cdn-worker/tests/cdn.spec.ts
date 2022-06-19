@@ -146,7 +146,7 @@ describe('CDN Worker', () => {
 
       const request = new Request(`https://fake-worker.com/some-target/sdl`, {
         headers: {
-          'x-hive-cdn-key': '124',
+          'x-hive-cdn-key': 'i-like-turtles',
         },
       });
 
