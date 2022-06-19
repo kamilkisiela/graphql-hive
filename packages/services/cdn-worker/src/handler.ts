@@ -98,7 +98,9 @@ async function parseIncomingRequest(
     return { error: new MissingAuthKey() };
   }
 
-  if (!(await keyValidator(targetId, headerKey))) {
+  const isKeyValid = await keyValidator(targetId, headerKey);
+
+  if (!isKeyValid) {
     return {
       error: new InvalidAuthKey(),
     };
