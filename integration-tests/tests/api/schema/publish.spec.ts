@@ -13,8 +13,10 @@ import {
   fetchSchemaFromCDN,
   createTarget,
   fetchMetadataFromCDN,
+  createCdnAccess,
 } from '../../../testkit/flow';
 import { authenticate } from '../../../testkit/auth';
+import axios from 'axios';
 
 test('cannot publish a schema without target:registry:write access', async () => {
   const { access_token: owner_access_token } = await authenticate('main');
@@ -918,4 +920,168 @@ test('marking only the most recent version as valid result in an update of CDN',
   cdnMetadataResult = await fetchMetadataFromCDN(targetSelector, token);
   expect(cdnMetadataResult.status).toEqual(200);
   expect(cdnMetadataResult.body).toEqual({ c2: 1 });
+});
+
+test('CDN data can not be fetched with an invalid access token', async () => {
+  const { access_token: owner_access_token } = await authenticate('main');
+  const orgResult = await createOrganization(
+    {
+      name: 'foo',
+    },
+    owner_access_token
+  );
+
+  // Join
+  const { access_token: member_access_token } = await authenticate('extra');
+  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+  const code = org.inviteCode;
+  await joinOrganization(code, member_access_token);
+
+  const projectResult = await createProject(
+    {
+      organization: org.cleanId,
+      type: ProjectType.Single,
+      name: 'foo',
+    },
+    owner_access_token
+  );
+
+  const project = projectResult.body.data!.createProject.ok!.createdProject;
+  const target = projectResult.body.data!.createProject.ok!.createdTarget;
+
+  const tokenResult = await createToken(
+    {
+      name: 'test',
+      organization: org.cleanId,
+      project: project.cleanId,
+      target: target.cleanId,
+      organizationScopes: [],
+      projectScopes: [],
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+    },
+    owner_access_token
+  );
+
+  expect(tokenResult.body.errors).not.toBeDefined();
+
+  const token = tokenResult.body.data!.createToken.ok!.secret;
+
+  // Initial schema
+  const result = await publishSchema(
+    {
+      author: 'Kamil',
+      commit: 'c0',
+      sdl: `type Query { ping: String }`,
+      metadata: JSON.stringify({ c0: 1 }),
+    },
+    token
+  );
+
+  expect(result.body.errors).not.toBeDefined();
+  expect(result.body.data!.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+  const targetSelector = {
+    organization: org.cleanId,
+    project: project.cleanId,
+    target: target.cleanId,
+  };
+
+  const cdnAccessResult = await createCdnAccess(targetSelector, token);
+
+  if (cdnAccessResult.body.errors) {
+    throw new Error(cdnAccessResult.body.errors[0].message);
+  }
+
+  const cdn = cdnAccessResult.body.data!.createCdnToken;
+
+  await expect(() =>
+    axios.get<{ sdl: string }>(`${cdn.url}/schema`, {
+      headers: {
+        'X-Hive-CDN-Key': 'i-like-turtles',
+      },
+      responseType: 'json',
+    })
+  ).rejects.toThrow(/403/);
+});
+
+test('CDN data can be fetched with an valid access token', async () => {
+  const { access_token: owner_access_token } = await authenticate('main');
+  const orgResult = await createOrganization(
+    {
+      name: 'foo',
+    },
+    owner_access_token
+  );
+
+  // Join
+  const { access_token: member_access_token } = await authenticate('extra');
+  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+  const code = org.inviteCode;
+  await joinOrganization(code, member_access_token);
+
+  const projectResult = await createProject(
+    {
+      organization: org.cleanId,
+      type: ProjectType.Single,
+      name: 'foo',
+    },
+    owner_access_token
+  );
+
+  const project = projectResult.body.data!.createProject.ok!.createdProject;
+  const target = projectResult.body.data!.createProject.ok!.createdTarget;
+
+  const tokenResult = await createToken(
+    {
+      name: 'test',
+      organization: org.cleanId,
+      project: project.cleanId,
+      target: target.cleanId,
+      organizationScopes: [],
+      projectScopes: [],
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+    },
+    owner_access_token
+  );
+
+  expect(tokenResult.body.errors).not.toBeDefined();
+
+  const token = tokenResult.body.data!.createToken.ok!.secret;
+
+  // Initial schema
+  const result = await publishSchema(
+    {
+      author: 'Kamil',
+      commit: 'c0',
+      sdl: `type Query { ping: String }`,
+      metadata: JSON.stringify({ c0: 1 }),
+    },
+    token
+  );
+
+  expect(result.body.errors).not.toBeDefined();
+  expect(result.body.data!.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+  const targetSelector = {
+    organization: org.cleanId,
+    project: project.cleanId,
+    target: target.cleanId,
+  };
+
+  const cdnAccessResult = await createCdnAccess(targetSelector, token);
+
+  if (cdnAccessResult.body.errors) {
+    throw new Error(cdnAccessResult.body.errors[0].message);
+  }
+
+  const cdn = cdnAccessResult.body.data!.createCdnToken;
+
+  const cdnResult = await axios.get<{ sdl: string }>(`${cdn.url}/schema`, {
+    headers: {
+      'X-Hive-CDN-Key': cdn.token,
+    },
+    responseType: 'json',
+  });
+
+  expect(cdnResult.status).toEqual(200);
 });
