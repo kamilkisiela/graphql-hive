@@ -13,8 +13,10 @@ import {
   fetchSchemaFromCDN,
   createTarget,
   fetchMetadataFromCDN,
+  createCdnAccess,
 } from '../../../testkit/flow';
 import { authenticate } from '../../../testkit/auth';
+import axios from 'axios';
 
 test('cannot publish a schema without target:registry:write access', async () => {
   const { access_token: owner_access_token } = await authenticate('main');
@@ -984,6 +986,21 @@ test('CDN data can not be fetched with an invalid access token', async () => {
     target: target.cleanId,
   };
 
-  const cdnResult = await fetchSchemaFromCDN(targetSelector, 'i-like-turtles');
+  const cdnAccessResult = await createCdnAccess(targetSelector, token);
+
+  if (cdnAccessResult.body.errors) {
+    throw new Error(cdnAccessResult.body.errors[0].message);
+  }
+
+  const cdn = cdnAccessResult.body.data!.createCdnToken;
+
+  const cdnResult = await axios.get<{ sdl: string }>(`${cdn.url}/schema`, {
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Hive-CDN-Key': 'i-like-turtles',
+    },
+    responseType: 'json',
+  });
+
   expect(cdnResult.status).toEqual(403);
 });
