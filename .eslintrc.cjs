@@ -41,6 +41,7 @@ module.exports = {
         optionalDependencies: false,
       },
     ],
+    'import/first': 'error',
     'hive/enforce-deps-in-dev': [
       'error',
       {
