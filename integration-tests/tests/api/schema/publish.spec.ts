@@ -1001,6 +1001,6 @@ test('CDN data can not be fetched with an invalid access token', async () => {
     },
     responseType: 'json',
   });
-
+  console.log(cdnResult);
   expect(cdnResult.status).toEqual(403);
 });
