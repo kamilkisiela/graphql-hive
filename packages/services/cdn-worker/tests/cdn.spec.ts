@@ -1,4 +1,4 @@
-import './polyfill';
+import '../src/dev-polyfill';
 import { handleRequest } from '../src/handler';
 import {
   InvalidArtifactTypeResponse,

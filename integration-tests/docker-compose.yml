@@ -288,6 +288,7 @@ services:
       - './run-local-cdn.sh:/run-local-cdn.sh'
     environment:
       PORT: 3004
+      CDN_AUTH_PRIVATE_KEY: 1e1064ef9cda8bf38936b77317e90dc3
 
   webhooks:
     image: node:16.13.2-alpine3.14

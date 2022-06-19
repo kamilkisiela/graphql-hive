@@ -5,6 +5,7 @@ import { handleRequest } from './handler';
 import type { ServerResponse } from 'http';
 import { Readable } from 'stream';
 import { devStorage } from './dev-polyfill';
+import { isKeyValid } from './auth';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4010;
 
@@ -141,7 +142,7 @@ async function main() {
           protocol: 'http',
           endpoint: '/',
         }),
-        async () => true
+        isKeyValid
       );
 
       sendNodeResponse(response, reply.raw);
