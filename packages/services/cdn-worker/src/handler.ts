@@ -116,6 +116,7 @@ async function parseIncomingRequest(
           : artifactType,
     };
   } catch (e) {
+    console.warn(`Failed to validate key for ${targetId}, error:`, e);
     return {
       error: new InvalidAuthKey(),
     };
