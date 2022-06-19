@@ -66,16 +66,17 @@ const artifactTypesHandlers = {
 const VALID_ARTIFACT_TYPES = Object.keys(artifactTypesHandlers);
 const AUTH_HEADER_NAME = 'x-hive-cdn-key';
 
-function parseIncomingRequest(
+async function parseIncomingRequest(
   request: Request,
   keyValidator: typeof isKeyValid
-):
+): Promise<
   | { error: Response }
   | {
       targetId: string;
       artifactType: keyof typeof artifactTypesHandlers;
       storageKeyType: string;
-    } {
+    }
+> {
   const params = new URL(request.url).pathname.replace(/^\/+/, '/').split('/').filter(Boolean);
   const targetId = params[0];
 
@@ -97,7 +98,7 @@ function parseIncomingRequest(
     return { error: new MissingAuthKey() };
   }
 
-  if (!keyValidator(targetId, headerKey)) {
+  if (!(await keyValidator(targetId, headerKey))) {
     return {
       error: new InvalidAuthKey(),
     };
@@ -112,7 +113,7 @@ function parseIncomingRequest(
 }
 
 export async function handleRequest(request: Request, keyValidator: typeof isKeyValid) {
-  const parsedRequest = parseIncomingRequest(request, keyValidator);
+  const parsedRequest = await parseIncomingRequest(request, keyValidator);
 
   if ('error' in parsedRequest) {
     return parsedRequest.error;
