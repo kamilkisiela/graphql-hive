@@ -50,7 +50,7 @@ async function main() {
     registerShutdown({
       logger: server.log,
       async onShutdown() {
-        await Promise.all([stop(), server.close()]);
+        await Promise.all([ctx.stop(), server.close()]);
       },
     });
 
