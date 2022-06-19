@@ -994,13 +994,14 @@ test('CDN data can not be fetched with an invalid access token', async () => {
 
   const cdn = cdnAccessResult.body.data!.createCdnToken;
 
-  const cdnResult = await axios.get<{ sdl: string }>(`${cdn.url}/schema`, {
-    headers: {
-      'X-Hive-CDN-Key': 'i-like-turtles',
-    },
-    responseType: 'json',
-  });
-  expect(cdnResult.status).toEqual(403);
+  await expect(() =>
+    axios.get<{ sdl: string }>(`${cdn.url}/schema`, {
+      headers: {
+        'X-Hive-CDN-Key': 'i-like-turtles',
+      },
+      responseType: 'json',
+    })
+  ).rejects.toThrow(/403/);
 });
 
 test('CDN data can be fetched with an valid access token', async () => {
