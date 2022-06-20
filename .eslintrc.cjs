@@ -21,6 +21,7 @@ module.exports = {
   plugins: ['@typescript-eslint', 'import', 'hive'],
   extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended'],
   rules: {
+    'no-restricted-globals': ['error', 'stop'],
     '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', ignoreRestSiblings: true }],
     'no-empty': ['error', { allowEmptyCatch: true }],
 
