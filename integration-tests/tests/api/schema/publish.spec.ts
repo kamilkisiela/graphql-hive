@@ -412,6 +412,8 @@ test('should allow to update the URL of a Federated service without changing the
     writeToken
   );
 
+  console.log(updateResult.body);
+
   expect(updateResult.body.errors).not.toBeDefined();
 });
 
