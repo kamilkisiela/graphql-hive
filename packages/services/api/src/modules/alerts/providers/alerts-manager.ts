@@ -285,7 +285,7 @@ export class AlertsManager {
     channel: AlertChannel;
     organization: string;
     project: string;
-  }) {
+  }): Promise<void> {
     const channel = input.channel;
     const [organization, project] = await Promise.all([
       this.organizationManager.getOrganization({

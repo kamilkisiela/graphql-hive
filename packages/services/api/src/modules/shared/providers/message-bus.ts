@@ -7,7 +7,7 @@ import Emittery from 'emittery';
 export class MessageBus {
   private emitter = new Emittery();
 
-  async on<TPayload>(event: string, listener: (payload: TPayload) => Promise<void>) {
+  on<TPayload>(event: string, listener: (payload: TPayload) => Promise<void>): void {
     this.emitter.on(event, listener);
   }
 

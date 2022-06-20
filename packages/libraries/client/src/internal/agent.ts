@@ -110,14 +110,12 @@ export function createAgent<T>(
     if (options.sendImmediately || data.size() >= options.maxSize) {
       debugLog('Sending immediately');
       setImmediate(() => {
-        send({
-          runOnce: true,
-        });
+        send({ runOnce: true });
       });
     }
   }
 
-  async function send(sendOptions?: { runOnce?: boolean }) {
+  async function send(sendOptions?: { runOnce?: boolean }): Promise<void> {
     const runOnce = sendOptions?.runOnce ?? false;
 
     if (!data.size()) {

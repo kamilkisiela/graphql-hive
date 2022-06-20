@@ -44,9 +44,7 @@ async function main() {
 
     registerShutdown({
       logger: server.log,
-      async onShutdown() {
-        await stop();
-      },
+      onShutdown: stop,
     });
 
     server.route<{
