@@ -330,6 +330,91 @@ test('directives should not be removed (federation)', async () => {
   );
 });
 
+test('should allow to update the URL of a Federated service without changing the schema', async () => {
+  const { access_token: owner_access_token } = await authenticate('main');
+  const orgResult = await createOrganization(
+    {
+      name: 'foo',
+    },
+    owner_access_token
+  );
+  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+
+  const projectResult = await createProject(
+    {
+      organization: org.cleanId,
+      type: ProjectType.Federation,
+      name: 'foo',
+    },
+    owner_access_token
+  );
+
+  const project = projectResult.body.data!.createProject.ok!.createdProject;
+  const target = projectResult.body.data!.createProject.ok!.createdTarget;
+
+  // Create a token with write rights
+  const writeTokenResult = await createToken(
+    {
+      name: 'test',
+      organization: org.cleanId,
+      project: project.cleanId,
+      target: target.cleanId,
+      organizationScopes: [],
+      projectScopes: [],
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+    },
+    owner_access_token
+  );
+  expect(writeTokenResult.body.errors).not.toBeDefined();
+  const writeToken = writeTokenResult.body.data!.createToken.ok!.secret;
+
+  const basePublishParams = {
+    service: 'test',
+    author: 'Kamil',
+    commit: 'abc123',
+    sdl: `type Query { me: User } type User @key(fields: "id") { id: ID! name: String }`,
+  };
+
+  const publishResult = await publishSchema(basePublishParams, writeToken);
+
+  // Schema publish should be successful
+  expect(publishResult.body.errors).not.toBeDefined();
+  expect(publishResult.body.data!.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+  const versionsResult = await fetchVersions(
+    {
+      organization: org.cleanId,
+      project: project.cleanId,
+      target: target.cleanId,
+    },
+    5,
+    writeToken
+  );
+
+  expect(versionsResult.body.errors).not.toBeDefined();
+  expect(versionsResult.body.data!.schemaVersions.nodes).toHaveLength(1);
+
+  const latestResult = await fetchLatestSchema(writeToken);
+  expect(latestResult.body.errors).not.toBeDefined();
+  expect(latestResult.body.data!.latestVersion.schemas.total).toBe(1);
+  expect(latestResult.body.data!.latestVersion.schemas.nodes[0].commit).toBe('abc123');
+  expect(latestResult.body.data!.latestVersion.schemas.nodes[0].source).toMatch(
+    `type Query { me: User } type User @key(fields: "id") { id: ID! name: String }`
+  );
+
+  // try to update the schema again, with force and url set
+  const updateResult = await publishSchema(
+    {
+      ...basePublishParams,
+      force: true,
+      url: `http://localhost:3000/test/graphql`,
+    },
+    writeToken
+  );
+
+  expect(updateResult.body.errors).not.toBeDefined();
+});
+
 test('directives should not be removed (stitching)', async () => {
   const { access_token: owner_access_token } = await authenticate('main');
   const orgResult = await createOrganization(
