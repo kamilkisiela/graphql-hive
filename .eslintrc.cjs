@@ -16,6 +16,7 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 2020,
     sourceType: 'module',
+    project: './tsconfig.json'
   },
   parser: '@typescript-eslint/parser',
   plugins: ['@typescript-eslint', 'import', 'hive'],
@@ -49,6 +50,7 @@ module.exports = {
         ignored: ['packages/libraries/**', 'packages/web/**'],
       },
     ],
+    '@typescript-eslint/no-floating-promises': 'error',
 
     // 🚨 The following rules needs to be fixed and was temporarily disabled to avoid printing warning
     '@typescript-eslint/no-explicit-any': 'off',
@@ -60,6 +62,17 @@ module.exports = {
     '@typescript-eslint/triple-slash-reference': 'off',
   },
   overrides: [
+    {
+      files: 'packages/web/**',
+      rules: {
+        // because this folder is excluded in tsconfig.json
+        '@typescript-eslint/no-floating-promises': 'off',
+      },
+      parserOptions: {
+        // Fixes Parsing error: "parserOptions.project" has been set for @typescript-eslint/parser
+        createDefaultProgram: true,
+      }
+    },
     {
       files: ['twin.d.ts', 'next-env.d.ts', '*.spec.ts'],
       rules: {
