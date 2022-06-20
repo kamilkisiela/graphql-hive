@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import url from 'node:url';
 import path from 'node:path';
-import { SlonikMigrator } from '@slonik/migrator'; // eslint-disable-line import/no-extraneous-dependencies
-import { createPool } from 'slonik'; // eslint-disable-line import/no-extraneous-dependencies
+import { SlonikMigrator } from '@slonik/migrator';
+import { createPool } from 'slonik';
 import { config } from '../src/env';
 import { migrateClickHouse } from './clickhouse';
 
