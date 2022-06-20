@@ -21,7 +21,7 @@ async function main() {
     release: process.env.RELEASE || 'local',
   });
 
-  const server = createServer({
+  const server = await createServer({
     name: 'schema',
     tracing: false,
   });
@@ -29,7 +29,8 @@ async function main() {
   registerShutdown({
     logger: server.log,
     async onShutdown() {
-      await Promise.all([server.close(), redis.disconnect(false)]);
+      await server.close();
+      redis.disconnect(false);
     },
   });
 

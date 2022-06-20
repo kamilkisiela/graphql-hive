@@ -20,7 +20,7 @@ async function main() {
     release: process.env.RELEASE || 'local',
   });
 
-  const server = createServer({
+  const server = await createServer({
     name: 'rate-limit',
     tracing: false,
   });
@@ -39,7 +39,7 @@ async function main() {
       },
     });
 
-    server.register(fastifyTRPCPlugin, {
+    await server.register(fastifyTRPCPlugin, {
       prefix: '/trpc',
       trpcOptions: {
         router: rateLimitApiRouter,

@@ -37,7 +37,7 @@ export async function main() {
     autoSessionTracking: false,
   });
 
-  const server = createServer({
+  const server = await createServer({
     name: 'graphql-api',
     tracing: true,
   });
@@ -199,7 +199,7 @@ export async function main() {
     });
 
     const introspection = JSON.stringify({
-      query: stripIgnoredCharacters(`
+      query: stripIgnoredCharacters(/* GraphQL */ `
         query readiness {
           __schema {
             queryType {
@@ -215,7 +215,7 @@ export async function main() {
       method: ['GET', 'HEAD'],
       url: '/_health',
       async handler(req, res) {
-        res.status(200).send();
+        res.status(200).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
       },
     });
 
@@ -223,9 +223,7 @@ export async function main() {
       method: 'GET',
       url: '/lab/:org/:project/:target',
       async handler(req, res) {
-        res.status(200).send({
-          ok: true,
-        });
+        res.status(200).send({ ok: true }); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
       },
     });
 
@@ -247,7 +245,7 @@ export async function main() {
           if (response.statusCode >= 200 && response.statusCode < 300) {
             if (response.body.includes('"__schema"')) {
               reportReadiness(true);
-              res.status(200).send();
+              res.status(200).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
               return;
             }
           }
@@ -257,7 +255,7 @@ export async function main() {
         }
 
         reportReadiness(false);
-        res.status(500).send();
+        res.status(500).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
       },
     });
 
