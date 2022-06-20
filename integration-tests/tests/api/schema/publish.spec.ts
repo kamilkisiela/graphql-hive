@@ -414,7 +414,7 @@ test('should allow to update the URL of a Federated service without changing the
 
   expect(updateResult.body.errors).not.toBeDefined();
   expect(updateResult.body.data!.schemaPublish.__typename).toBe('SchemaPublishSuccess');
-  expect(updateResult.body.data!.schemaPublish['message']).toBe(
+  expect((updateResult.body.data!.schemaPublish as any).message).toBe(
     'Updated: New service url: http://localhost:3000/test/graphql (previously: empty)'
   );
 });
