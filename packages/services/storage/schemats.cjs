@@ -1,10 +1,4 @@
-const { register } = require('esbuild-register/dist/node');
-
-register({
-  format: 'cjs',
-});
-
-const cn = require('./tools/db-connection-string.mjs').default;
+const cn = require('./tools/db-connection-string.cjs');
 
 module.exports = {
   conn: cn('registry'),

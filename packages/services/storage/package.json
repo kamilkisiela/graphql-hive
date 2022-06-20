@@ -8,7 +8,7 @@
     "setup": "yarn db:start && yarn db",
     "db": "yarn db:create && yarn migration:run",
     "db:create": "node tools/create-db.mjs",
-    "db:migrator": "node -r ./tools/register.cjs migrations/migrate.ts",
+    "db:migrator": "node --experimental-specifier-resolution=node --loader ts-node/esm migrations/migrate.ts",
     "migration:create": "yarn db:migrator create",
     "migration:run": "yarn db:migrator up",
     "migration:rollback": "yarn db:migrator down",
@@ -30,7 +30,6 @@
   "devDependencies": {
     "@tgriesser/schemats": "7.0.0",
     "@types/pg": "8.6.5",
-    "esbuild-register": "3.3.2",
     "pg-promise": "10.11.1",
     "ts-node": "10.7.0"
   },

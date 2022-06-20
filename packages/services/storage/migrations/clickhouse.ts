@@ -73,7 +73,7 @@ const create_operations_registry_query = /* SQL */ `
   SETTINGS index_granularity = 8192
 `;
 
-const create_schema_coordinates_daily_query = `
+const create_schema_coordinates_daily_query = /* SQL */ `
   CREATE MATERIALIZED VIEW IF NOT EXISTS default.schema_coordinates_daily
   (
     target LowCardinality(String) CODEC(ZSTD(1)),
@@ -103,7 +103,7 @@ const create_schema_coordinates_daily_query = `
     timestamp
 `;
 
-const create_client_names_daily_query = `
+const create_client_names_daily_query = /* SQL */ `
   CREATE MATERIALIZED VIEW IF NOT EXISTS default.client_names_daily
   (
     target LowCardinality(String) CODEC(ZSTD(1)),

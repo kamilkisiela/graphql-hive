@@ -1,5 +1,5 @@
 import { config as dotenv } from 'dotenv';
-import cn from '../tools/db-connection-string.mjs';
+import cn from '../tools/db-connection-string.cjs';
 
 dotenv({
   debug: true,
