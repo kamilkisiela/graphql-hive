@@ -141,7 +141,7 @@ const envelopProxy = envelop({
 })
 ```
 
-# Other servers
+### Other Node.js servers
 
 First, `createHive` to instantiate the Hive Client.
 
@@ -168,6 +168,33 @@ hive.reportSchema({ schema: yourSchema })
 
 app.post('/graphql', graphqlHTTP({ schema: yourSchema }))
 ```
+
+
+### GraphQL Ruby
+
+Add `GraphQL::Hive` **at the end** of your schema definition:
+
+```ruby
+class Schema < GraphQL::Schema
+  query QueryType
+
+  use(
+      GraphQL::Hive,
+      {
+        token: '<YOUR_TOKEN>',
+        reporting: {
+          # feel free to set dummy values here
+          author: 'Author of the schema version',
+          commit: 'git sha or any identifier'
+        },
+      }
+  )
+end
+
+```
+
+More information is available on the `graphql-hive` repository: https://github.com/charlypoly/graphql-ruby-hive
+
 
 ## GitHub Integration
 
