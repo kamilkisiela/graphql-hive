@@ -10,19 +10,19 @@ To run Hive CDN locally, you can use the following command: `yarn dev`.
 
 To publish manually a schema, for target id `1`:
 
-```
+```sh
 curl -X PUT http://localhost:4010/1/storage/kv/namespaces/2/values/target:1:schema --data-raw '{"sdl": "type Query { foo: String }" }' -H 'content-type: text/plain'
 ```
 
 You can also use the following to dump everything stored in the mocked KV:
 
-```
+```sh
 curl http://localhost:4010/dump
 ```
 
 To fetch a specific resource, for target id `1`, run one of the following:
 
-```
+```sh
 curl http://localhost:4010/1/schema -H "x-hive-cdn-key: fake"
 curl http://localhost:4010/1/sdl -H "x-hive-cdn-key: fake"
 curl http://localhost:4010/1/introspection -H "x-hive-cdn-key: fake"
@@ -36,7 +36,7 @@ Hive server has `CF_BASE_PATH` env var that tells is where to send the published
 
 To connect your server to the local, mocked CDN, make sure you have the following in `packages/server/.env`:
 
-```
+```dotenv
 CF_BASE_PATH=http://localhost:4010
 ```
 

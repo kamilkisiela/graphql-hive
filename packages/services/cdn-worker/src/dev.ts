@@ -82,7 +82,7 @@ export async function getNodeRequest(nodeRequest: FastifyRequest, defaultAddress
 }
 
 async function main() {
-  const server = createServer({
+  const server = await createServer({
     tracing: false,
     name: 'local_cdn',
   });
