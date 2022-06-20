@@ -13,7 +13,7 @@ export function reportReadiness(isReady: boolean) {
   readiness.set(isReady ? 1 : 0);
 }
 
-export function startMetrics() {
+export async function startMetrics() {
   promClient.collectDefaultMetrics({
     labels: { instance: process.env.POD_NAME },
   });
@@ -28,18 +28,18 @@ export function startMetrics() {
     url: '/metrics',
     async handler(req, res) {
       try {
-        res.header('Content-Type', promClient.register.contentType);
+        res.header('Content-Type', promClient.register.contentType); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
         const result = await promClient.register.metrics();
 
-        res.send(result);
+        res.send(result); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
       } catch (error) {
         console.log('metrics error', error);
-        res.status(500).send(error);
+        res.status(500).send(error); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
       }
     },
   });
 
-  server.register(cors);
+  await server.register(cors);
 
   return server.listen(10254, '0.0.0.0');
 }

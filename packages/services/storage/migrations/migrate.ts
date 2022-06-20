@@ -29,17 +29,15 @@ const isDownCommand = cmd === 'down';
 // We are building a "cli" out of the package, so we need a workaround to pass the command to run.
 if (process.env.MIGRATOR === 'up' && !isCreateCommand && !isDownCommand) {
   console.log('Running the UP migrations');
-  migrator
-    .up()
-    .then(() => migrateClickHouse())
-    .then(() => {
-      process.exit(0);
-    })
-    .catch(error => {
-      console.error(error);
-      process.exit(1);
-    });
+
+  try {
+    await migrator.up();
+    await migrateClickHouse();
+  } catch (error) {
+    console.error(error);
+    process.exit(1);
+  }
 } else if (import.meta.url === url.pathToFileURL(process.argv[1]).href || require.main === module) {
   console.log('Running as a CLI');
-  migrator.runAsCLI();
+  await migrator.runAsCLI();
 }

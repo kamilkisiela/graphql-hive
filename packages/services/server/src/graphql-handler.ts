@@ -163,15 +163,14 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
         });
 
         response.headers.forEach((value, key) => {
-          reply.header(key, value);
+          reply.header(key, value); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
         });
 
         if (!reply.hasHeader('x-request-id')) {
-          reply.header('x-request-id', requestId || '');
+          reply.header('x-request-id', requestId || ''); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
         }
 
-        reply.status(response.status);
-        reply.send(response.body);
+        reply.status(response.status).send(response.body); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
       }
     );
   };

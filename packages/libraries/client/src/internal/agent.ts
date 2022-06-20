@@ -89,9 +89,7 @@ export function createAgent<T>(
       clearTimeout(timeoutID);
     }
 
-    timeoutID = setTimeout(() => {
-      send();
-    }, options.sendInterval);
+    timeoutID = setTimeout(send, options.sendInterval);
   }
 
   if (!options.sendImmediately) {
@@ -109,9 +107,7 @@ export function createAgent<T>(
 
     if (options.sendImmediately || data.size() >= options.maxSize) {
       debugLog('Sending immediately');
-      setImmediate(() => {
-        send({ runOnce: true });
-      });
+      setImmediate(() => send({ runOnce: true }));
     }
   }
 

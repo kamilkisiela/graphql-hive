@@ -29,7 +29,7 @@ export function createHive(options: HivePluginOptions): HiveClient {
     await Promise.all([schemaReporter.dispose(), usage.dispose()]);
   }
 
-  async function info() {
+  async function info(): Promise<void> {
     if (options.enabled !== true) {
       return;
     }
@@ -128,8 +128,8 @@ export function createHive(options: HivePluginOptions): HiveClient {
       } else {
         logger.error(`[hive][info] Error ${response.status}: ${response.statusText}`);
       }
-    } catch (error: any) {
-      logger.error(`[hive][info] Error ${error.message}`);
+    } catch (error) {
+      logger.error(`[hive][info] Error ${(error as Error).message}`);
     }
   }
 

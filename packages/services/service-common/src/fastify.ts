@@ -5,7 +5,7 @@ import { useSentryTracing } from './sentry';
 
 export type { FastifyLoggerInstance } from 'fastify';
 
-export function createServer(options: { tracing: boolean; name: string }) {
+export async function createServer(options: { tracing: boolean; name: string }) {
   const server = fastify({
     disableRequestLogging: true,
     bodyLimit: 11e6, // 11 mb
@@ -34,10 +34,10 @@ export function createServer(options: { tracing: boolean; name: string }) {
     });
 
   if (options.tracing) {
-    useSentryTracing(server);
+    await useSentryTracing(server);
   }
 
-  server.register(cors);
+  await server.register(cors);
 
   return server;
 }
