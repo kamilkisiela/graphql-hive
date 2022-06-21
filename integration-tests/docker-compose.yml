@@ -11,9 +11,9 @@ services:
       PGDATA: /var/lib/postgresql/data
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready']
-      interval: 5s
-      timeout: 5s
-      retries: 6
+      interval: 2s
+      timeout: 2s
+      retries: 10
     networks:
       - 'stack'
 
@@ -23,10 +23,9 @@ services:
       - ../packages/services/storage/configs/clickhouse:/etc/clickhouse-server/conf.d
     healthcheck:
       test: ['CMD', 'wget', '--spider', '-q', 'localhost:8123/ping']
-      interval: 5s
-      timeout: 5s
-      retries: 6
-      start_period: 10s
+      interval: 2s
+      timeout: 2s
+      retries: 10
     environment:
       CLICKHOUSE_USER: test
       CLICKHOUSE_PASSWORD: test
@@ -48,11 +47,11 @@ services:
         soft: 20000
         hard: 40000
     healthcheck:
-      test: ['CMD', 'cub', 'zk-ready', '127.0.0.1:2181', '10']
-      interval: 5s
-      timeout: 10s
-      retries: 6
-      start_period: 15s
+      test: ['CMD', 'cub', 'zk-ready', '127.0.0.1:2181', '2']
+      interval: 3s
+      timeout: 2s
+      retries: 10
+      start_period: 5s
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
@@ -74,10 +73,10 @@ services:
         hard: 40000
     healthcheck:
       test: ['CMD', 'cub', 'kafka-ready', '1', '5', '-b', '127.0.0.1:9092', '-c', '/etc/kafka/kafka.properties']
-      interval: 15s
-      timeout: 10s
-      retries: 6
-      start_period: 15s
+      interval: 3s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -95,10 +94,9 @@ services:
       - 'stack'
     healthcheck:
       test: ['CMD', 'redis-cli', 'ping']
-      interval: 5s
-      timeout: 10s
-      retries: 6
-      start_period: 5s
+      interval: 1s
+      timeout: 1s
+      retries: 10
     ports:
       - '6379:6379'
     environment:
@@ -163,10 +161,9 @@ services:
         condition: service_healthy
     healthcheck:
       test: ['CMD', 'wget', '--spider', '-q', 'localhost:3001/_readiness']
-      interval: 5s
-      timeout: 5s
-      retries: 6
-      start_period: 5s
+      interval: 1s
+      timeout: 1s
+      retries: 10
     ports:
       - '3001:3001'
     volumes:
@@ -224,10 +221,9 @@ services:
         condition: service_healthy
     healthcheck:
       test: ['CMD', 'wget', '--spider', '-q', 'localhost:3002/_readiness']
-      interval: 5s
-      timeout: 5s
-      retries: 6
-      start_period: 5s
+      interval: 1s
+      timeout: 1s
+      retries: 10
     ports:
       - '3002:3002'
     volumes:
@@ -251,10 +247,9 @@ services:
         condition: service_completed_successfully
     healthcheck:
       test: ['CMD', 'wget', '--spider', '-q', 'localhost:3003/_readiness']
-      interval: 5s
-      timeout: 5s
-      retries: 6
-      start_period: 5s
+      interval: 1s
+      timeout: 1s
+      retries: 10
     ports:
       - '3003:3003'
     volumes:
@@ -277,10 +272,9 @@ services:
       - 'stack'
     healthcheck:
       test: ['CMD', 'wget', '--spider', '-q', 'localhost:3004/_readiness']
-      interval: 5s
-      timeout: 5s
-      retries: 6
-      start_period: 5s
+      interval: 1s
+      timeout: 1s
+      retries: 10
     ports:
       - '3004:3004'
     volumes:
@@ -302,10 +296,9 @@ services:
         condition: service_healthy
     healthcheck:
       test: ['CMD', 'wget', '--spider', '-q', 'localhost:3005/_readiness']
-      interval: 5s
-      timeout: 5s
-      retries: 6
-      start_period: 5s
+      interval: 1s
+      timeout: 1s
+      retries: 10
     ports:
       - '3005:3005'
     volumes:
@@ -329,9 +322,9 @@ services:
       - '3006:3006'
     healthcheck:
       test: ['CMD', 'wget', '--spider', '-q', 'localhost:3006/_readiness']
-      interval: 5s
-      timeout: 5s
-      retries: 6
+      interval: 1s
+      timeout: 1s
+      retries: 10
       start_period: 5s
     volumes:
       - './tarballs/usage.tgz:/usage.tgz'
@@ -367,9 +360,9 @@ services:
         condition: service_healthy
     healthcheck:
       test: ['CMD', 'wget', '--spider', '-q', 'localhost:3007/_readiness']
-      interval: 5s
-      timeout: 5s
-      retries: 6
+      interval: 1s
+      timeout: 1s
+      retries: 10
       start_period: 5s
     ports:
       - '3007:3007'
@@ -398,10 +391,9 @@ services:
       - '3008:3008'
     healthcheck:
       test: ['CMD', 'wget', '--spider', '-q', 'localhost:3008/_readiness']
-      interval: 5s
-      timeout: 5s
-      retries: 6
-      start_period: 5s
+      interval: 1s
+      timeout: 1s
+      retries: 10
     volumes:
       - './tarballs/usage-estimator.tgz:/usage-estimator.tgz'
       - './run-usage-estimator.sh:/run-usage-estimator.sh'
@@ -430,10 +422,9 @@ services:
       - '3009:3009'
     healthcheck:
       test: ['CMD', 'wget', '--spider', '-q', 'localhost:3009/_readiness']
-      interval: 5s
-      timeout: 5s
-      retries: 6
-      start_period: 5s
+      interval: 1s
+      timeout: 1s
+      retries: 10
     volumes:
       - './tarballs/rate-limit.tgz:/rate-limit.tgz'
       - './run-rate-limit.sh:/run-rate-limit.sh'
@@ -460,10 +451,9 @@ services:
       - '3010:3010'
     healthcheck:
       test: ['CMD', 'wget', '--spider', '-q', 'localhost:3010/_readiness']
-      interval: 5s
-      timeout: 5s
-      retries: 6
-      start_period: 5s
+      interval: 1s
+      timeout: 1s
+      retries: 10
     volumes:
       - './tarballs/stripe-billing.tgz:/stripe-billing.tgz'
       - './run-stripe-billing.sh:/run-stripe-billing.sh'
