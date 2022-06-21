@@ -180,8 +180,50 @@ Once this is done, and you start collecting the analytics as relevant you will b
 
 ![Monitoring view](../../public/monitoring-view.png)
 
-## 3rd-party integrations
+## Other languages
 
-Here's a list of community-supported integrations:
+### GraphQL Ruby
 
-- [(php) Lighthouse GraphQL Hive](https://github.com/stayallive/lighthouse-graphql-hive)
+Our [`graphql-hive` gem](https://github.com/charlypoly/graphql-ruby-hive) allows GraphQL Ruby users to use Hive to both monitor operations and publish schemas.
+
+**1. Install the `graphql-hive` gem**
+
+```
+gem install graphql-hive
+```
+
+<br />
+
+**2. Configure `GraphQL::Hive` in your Schema**
+
+Add `GraphQL::Hive` **at the end** of your schema definition:
+
+```ruby
+class Schema < GraphQL::Schema
+  query QueryType
+
+  use(
+      GraphQL::Hive,
+      {
+        token: '<YOUR_TOKEN>',
+        reporting: {
+          author: ENV['GITHUB_USER'],
+          commit: ENV['GITHUB_COMMIT']
+        },
+      }
+  )
+end
+```
+
+The `reporting` configuration is required to push your GraphQL Schema to the Hive registry.
+Doing so will help better detect breaking changes and more upcoming features.
+If you only want to use the operations monitoring, replace the `reporting` option with the following `report_schema: false`.
+
+More information is available on the `graphql-hive` repository: https://github.com/charlypoly/graphql-ruby-hive
+
+### Laravel Lighthouse (PHP)
+
+The [Lighthouse GraphQL Hive](https://github.com/stayallive/lighthouse-graphql-hive) 3rd party integration can be used to measure and collect data against all your GraphQL operations.
+At the moment, **it does not support Schema publishing**.
+
+Get started [on their repository](https://github.com/stayallive/lighthouse-graphql-hive).
