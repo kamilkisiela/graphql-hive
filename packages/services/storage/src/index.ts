@@ -1267,25 +1267,6 @@ export async function createStorage(connection: string): Promise<Storage> {
         return Promise.reject(new Error(`Schema not found (commit=${selector.commit}, target=${selector.target})`));
       });
     }),
-
-    async getMaybeSchema({ commit, service, project, target }) {
-      const result = await pool.maybeOne<Slonik<WithUrl<commits>>>(
-        sql`
-          SELECT c.* FROM public.commits as c
-          LEFT JOIN public.projects as p ON (p.id = c.project_id)
-          WHERE 
-            c.commit = ${commit}
-            AND c.project_id = ${project}
-            AND c.target_id = ${target}
-            AND c.service = ${service ?? null}`
-      );
-
-      if (!result) {
-        return null;
-      }
-
-      return transformSchema(result);
-    },
     async createActivity({ organization, project, target, user, type, meta }) {
       const { identifiers, values } = objectToParams<Omit<activities, 'id' | 'created_at'>>({
         activity_metadata: meta,
