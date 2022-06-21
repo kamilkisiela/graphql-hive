@@ -21,7 +21,7 @@
     "test": "jest",
     "lint": "eslint --ignore-path .gitignore \"packages/**/*.{ts,tsx}\"",
     "prettier": "prettier --write --list-different .",
-    "prettier:check": "prettier --check .",
+    "lint:prettier": "prettier --check .",
     "setup": "yarn workspace @hive/storage run setup",
     "generate": "yarn workspace @hive/storage run db:generate && yarn graphql:generate",
     "graphql:generate": "graphql-codegen",

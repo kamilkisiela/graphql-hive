@@ -28,11 +28,10 @@ module.exports = {
     'import/no-absolute-path': 'error',
     'import/no-self-import': 'error',
     'import/no-unused-modules': [
-      process.env.CI === 'true' ? 'error' : 'off',
+      process.env.CI === 'true' ? 'warn' : 'off',
       {
         unusedExports: true,
         missingExports: true,
-        ignoreExports: ['.eslintrc.cjs', 'packages/web/app/pages/**/*.tsx'],
       },
     ],
     'import/no-extraneous-dependencies': [
@@ -61,6 +60,12 @@ module.exports = {
     '@typescript-eslint/triple-slash-reference': 'off',
   },
   overrides: [
+    {
+      files: ['twin.d.ts', 'next-env.d.ts', '*.spec.ts'],
+      rules: {
+        'import/no-unused-modules': 'off',
+      },
+    },
     {
       // TODO: replace with packages/web/**
       files: ['packages/web/app/src/components/v2/**', 'packages/web/app/pages/\\[orgId\\]/**'],
