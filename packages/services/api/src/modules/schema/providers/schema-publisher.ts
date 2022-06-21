@@ -371,11 +371,11 @@ export class SchemaPublisher {
     this.logger.debug(`Found ${schemas.length} most recent schemas`);
 
     if (
-      (input.isSchemaPublishMissingServiceErrorSelected &&
-        (project.type === ProjectType.STITCHING || project.type === ProjectType.FEDERATION) &&
-        lodash.isNil(input.service)) ||
-      input.service?.trim() === ''
+      input.isSchemaPublishMissingServiceErrorSelected &&
+      (project.type === ProjectType.STITCHING || project.type === ProjectType.FEDERATION) &&
+      (lodash.isNil(input.service) || input.service?.trim() === '')
     ) {
+      this.logger.debug('Detected missing service name');
       const missingServiceNameMessage = `Can not publish schema for a '${project.type.toLowerCase()}' project without a service name.`;
 
       if (input.github) {
@@ -399,7 +399,8 @@ export class SchemaPublisher {
       };
     }
 
-    if ((project.type === ProjectType.FEDERATION && lodash.isNil(input.url)) || input.url?.trim() === '') {
+    if (project.type === ProjectType.FEDERATION && (lodash.isNil(input.url) || input.url?.trim() === '')) {
+      this.logger.debug('Detected missing service url');
       const missingServiceUrlMessage = `Can not publish schema for a '${project.type.toLowerCase()}' project without a service url.`;
 
       if (input.github) {
@@ -462,8 +463,14 @@ export class SchemaPublisher {
     const isForced = input.force === true;
     const isModified = hasNewUrl || hasSchemaChanges || hasErrors;
 
+    this.logger.debug('Is initial: %s', isInitialSchema ? 'yes' : 'false');
+    this.logger.debug('Errors: %s', errors.length);
+    this.logger.debug('Changes: %s', changes.length);
+    this.logger.debug('Forced: %s', isForced ? 'yes' : 'false');
+    this.logger.debug('New url: %s', hasNewUrl ? 'yes' : 'false');
+
     // if the schema is not modified, we don't need to do anything, just return the success
-    if (!isModified) {
+    if (!isModified && !isInitialSchema) {
       this.logger.debug('Schema is not modified');
 
       if (input.github === true) {
@@ -489,6 +496,7 @@ export class SchemaPublisher {
 
     // if the schema is valid or the user is forcing the publish, we can go ahead and publish
     if (!hasErrors || isForced) {
+      this.logger.debug('Publishing new version');
       await this.publishNewVersion({
         input,
         valid,
@@ -510,6 +518,14 @@ export class SchemaPublisher {
       });
     }
 
+    const updates: string[] = [];
+
+    if (valid && hasNewUrl) {
+      updates.push(
+        `Updated: New service url: ${incomingSchema.url ?? 'empty'} (previously: ${previousSchema!.url ?? 'empty'})`
+      );
+    }
+
     if (input.github) {
       return this.createPublishCheckRun({
         force: input.force,
@@ -519,6 +535,7 @@ export class SchemaPublisher {
         valid,
         changes,
         errors,
+        updates,
       });
     }
 
@@ -528,6 +545,7 @@ export class SchemaPublisher {
       valid,
       errors,
       changes,
+      message: updates.length ? updates.join('\n') : null,
     };
   }
 

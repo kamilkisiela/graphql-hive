@@ -400,6 +400,7 @@ export function fetchLatestSchema(token: string) {
             nodes {
               source
               commit
+              url
             }
             total
           }

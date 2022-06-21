@@ -299,6 +299,8 @@ test('directives should not be removed (federation)', async () => {
     {
       author: 'Kamil',
       commit: 'abc123',
+      url: 'https://api.com/users',
+      service: 'users',
       sdl: `type Query { me: User } type User @key(fields: "id") { id: ID! name: String }`,
     },
     writeToken
@@ -372,6 +374,7 @@ test('should allow to update the URL of a Federated service without changing the
     service: 'test',
     author: 'Kamil',
     commit: 'abc123',
+    url: 'https://api.com/users',
     sdl: `type Query { me: User } type User @key(fields: "id") { id: ID! name: String }`,
   };
 
@@ -394,20 +397,12 @@ test('should allow to update the URL of a Federated service without changing the
   expect(versionsResult.body.errors).not.toBeDefined();
   expect(versionsResult.body.data!.schemaVersions.nodes).toHaveLength(1);
 
-  const latestResult = await fetchLatestSchema(writeToken);
-  expect(latestResult.body.errors).not.toBeDefined();
-  expect(latestResult.body.data!.latestVersion.schemas.total).toBe(1);
-  expect(latestResult.body.data!.latestVersion.schemas.nodes[0].commit).toBe('abc123');
-  expect(latestResult.body.data!.latestVersion.schemas.nodes[0].source).toMatch(
-    `type Query { me: User } type User @key(fields: "id") { id: ID! name: String }`
-  );
-
   // try to update the schema again, with force and url set
   const updateResult = await publishSchema(
     {
       ...basePublishParams,
-      force: true,
       url: `http://localhost:3000/test/graphql`,
+      commit: 'abc1234',
     },
     writeToken
   );
@@ -415,7 +410,16 @@ test('should allow to update the URL of a Federated service without changing the
   expect(updateResult.body.errors).not.toBeDefined();
   expect(updateResult.body.data!.schemaPublish.__typename).toBe('SchemaPublishSuccess');
   expect((updateResult.body.data!.schemaPublish as any).message).toBe(
-    'Updated: New service url: http://localhost:3000/test/graphql (previously: empty)'
+    'Updated: New service url: http://localhost:3000/test/graphql (previously: https://api.com/users)'
+  );
+
+  const latestResult = await fetchLatestSchema(writeToken);
+  expect(latestResult.body.errors).not.toBeDefined();
+  expect(latestResult.body.data!.latestVersion.schemas.total).toBe(1);
+  expect(latestResult.body.data!.latestVersion.schemas.nodes[0].commit).toBe('abc1234');
+  expect(latestResult.body.data!.latestVersion.schemas.nodes[0].url).toBe('http://localhost:3000/test/graphql');
+  expect(latestResult.body.data!.latestVersion.schemas.nodes[0].source).toMatch(
+    `type Query { me: User } type User @key(fields: "id") { id: ID! name: String }`
   );
 });
 
@@ -461,6 +465,7 @@ test('should allow to update the URL of a Federated service while also changing 
     service: 'test',
     author: 'Kamil',
     commit: 'abc123',
+    url: 'https://api.com/users',
     sdl: `type Query { me: User } type User @key(fields: "id") { id: ID! name: String }`,
   };
 
@@ -502,8 +507,6 @@ test('should allow to update the URL of a Federated service while also changing 
     },
     writeToken
   );
-
-  console.log(updateResult.body);
 
   expect(updateResult.body.errors).not.toBeDefined();
   expect(updateResult.body.data!.schemaPublish.__typename).toBe('SchemaPublishSuccess');
@@ -553,6 +556,8 @@ test('directives should not be removed (stitching)', async () => {
       author: 'Kamil',
       commit: 'abc123',
       sdl: `type Query { me: User } type User @key(selectionSet: "{ id }") { id: ID! name: String }`,
+      service: 'test',
+      url: 'https://api.com/users',
     },
     writeToken
   );
@@ -627,6 +632,8 @@ test('directives should not be removed (single)', async () => {
       author: 'Kamil',
       commit: 'abc123',
       sdl: `directive @auth on FIELD_DEFINITION type Query { me: User @auth } type User { id: ID! name: String }`,
+      service: 'test',
+      url: 'https://api.com/users',
     },
     writeToken
   );
