@@ -175,9 +175,6 @@ export default class SchemaPublish extends Command {
       } else if (result.schemaPublish.__typename === 'SchemaPublishMissingServiceError') {
         this.fail(`${result.schemaPublish.missingServiceError} Please use the '--service <name>' parameter.`);
         this.exit(1);
-      } else if (result.schemaPublish.__typename === 'SchemaPublishMissingUrlError') {
-        this.fail(`${result.schemaPublish.missingUrlError} Please use the '--url <url>' parameter.`);
-        this.exit(1);
       } else if (result.schemaPublish.__typename === 'SchemaPublishError') {
         const changes = result.schemaPublish.changes;
         const errors = result.schemaPublish.errors;

@@ -286,6 +286,23 @@ export class SchemaManager {
       service = service.toLowerCase();
     }
 
+    // if schema exists
+    const existingSchema = await this.storage.getMaybeSchema({
+      commit,
+      service,
+      organization,
+      project,
+      target,
+    });
+
+    if (existingSchema) {
+      if (service) {
+        throw new HiveError(`Only one service schema per commit per target is allowed`);
+      }
+
+      throw new HiveError(`Only one schema per commit per target is allowed`);
+    }
+
     // insert new schema
     const insertedSchema = await this.insertSchema({
       organization,
