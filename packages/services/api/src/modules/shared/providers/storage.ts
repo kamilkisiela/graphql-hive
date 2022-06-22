@@ -206,13 +206,6 @@ export interface Storage {
     }[]
   >;
 
-  getMaybeSchema(
-    _: {
-      commit: string;
-      service?: string | null;
-    } & TargetSelector
-  ): Promise<Schema | null>;
-
   createActivity(
     _: {
       user: string;

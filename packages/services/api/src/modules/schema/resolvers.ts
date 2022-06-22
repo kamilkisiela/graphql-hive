@@ -59,6 +59,11 @@ export const resolvers: SchemaModule.Resolvers = {
       const isSchemaPublishMissingServiceErrorSelected =
         !!parsedResolveInfoFragment?.fieldsByTypeName['SchemaPublishMissingServiceError'];
 
+      // We only want to resolve to SchemaPublishMissingUrlError if it is selected by the operation.
+      // NOTE: This should be removed once the usage of cli versions that don't request on 'SchemaPublishMissingUrlError' is becomes pretty low.
+      const isSchemaPublishMissingUrlErrorSelected =
+        !!parsedResolveInfoFragment?.fieldsByTypeName['SchemaPublishMissingUrlError'];
+
       return injector.get(SchemaPublisher).publish({
         ...input,
         checksum,
@@ -66,6 +71,7 @@ export const resolvers: SchemaModule.Resolvers = {
         project,
         target,
         isSchemaPublishMissingServiceErrorSelected,
+        isSchemaPublishMissingUrlErrorSelected,
       });
     },
     async updateSchemaVersionStatus(_, { input }, { injector }) {
