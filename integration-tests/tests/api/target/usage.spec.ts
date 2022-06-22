@@ -16,7 +16,7 @@ import {
 import { authenticate } from '../../../testkit/auth';
 import { collect, CollectedOperation } from '../../../testkit/usage';
 import { clickHouseQuery } from '../../../testkit/clickhouse';
-// eslint-disable-next-line import/no-extraneous-dependencies, hive/enforce-deps-in-dev
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { normalizeOperation } from '@graphql-hive/core';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { parse, print } from 'graphql';
@@ -372,7 +372,7 @@ test('normalize and collect operation without breaking its syntax', async () => 
   expect(op.percentage).toBeGreaterThan(99);
 });
 
-test('number of produced and collected operations should match (no errors)', async () => {
+test('number of produced and collected operations should match', async () => {
   const { access_token: owner_access_token } = await authenticate('main');
   const orgResult = await createOrganization(
     {

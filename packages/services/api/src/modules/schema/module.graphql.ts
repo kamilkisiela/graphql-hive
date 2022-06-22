@@ -83,7 +83,6 @@ export default gql`
       SchemaPublishSuccess
     | SchemaPublishError
     | SchemaPublishMissingServiceError
-    | SchemaPublishMissingUrlError
     | GitHubSchemaPublishSuccess
     | GitHubSchemaPublishError
 
@@ -171,10 +170,6 @@ export default gql`
   }
 
   type SchemaPublishMissingServiceError {
-    message: String!
-  }
-
-  type SchemaPublishMissingUrlError {
     message: String!
   }
 
