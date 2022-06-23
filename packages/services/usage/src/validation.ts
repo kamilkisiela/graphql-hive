@@ -2,7 +2,20 @@ import type { IncomingOperation, OperationMap, OperationMapRecord } from './type
 import Ajv from 'ajv';
 import type { JSONSchemaType } from 'ajv';
 
-const ajv = new Ajv();
+const unixTimestampRegex = /^\d{13,}$/;
+
+function isUnixTimestamp(x: number) {
+  return unixTimestampRegex.test(String(x));
+}
+
+const ajv = new Ajv({
+  formats: {
+    unix_timestamp_in_ms: {
+      type: 'number',
+      validate: isUnixTimestamp,
+    },
+  },
+});
 
 const operationMapRecordSchema: JSONSchemaType<OperationMapRecord> = {
   type: 'object',
@@ -18,7 +31,7 @@ const operationSchema: JSONSchemaType<IncomingOperation> = {
   type: 'object',
   required: ['operationMapKey', 'execution'],
   properties: {
-    timestamp: { type: 'number', nullable: true },
+    timestamp: { type: 'number', format: 'unix_timestamp_in_ms', nullable: true },
     operationMapKey: { type: 'string' },
     execution: {
       type: 'object',
