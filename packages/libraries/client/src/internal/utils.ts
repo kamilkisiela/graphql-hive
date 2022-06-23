@@ -102,14 +102,12 @@ export function isHiveClient(clientOrOptions: HiveClient | HivePluginOptions): c
   return 'operationsStore' in clientOrOptions;
 }
 
-export function warnIf(
+export function logIf(
   condition: boolean,
   message: string,
-  logger: {
-    warn(message: string): void;
-  } = console
+  logFn: (message: string): void
 ) {
   if (condition) {
-    logger.warn(message);
+    logFn(message);
   }
 }
