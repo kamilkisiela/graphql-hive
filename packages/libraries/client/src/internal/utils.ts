@@ -105,7 +105,7 @@ export function isHiveClient(clientOrOptions: HiveClient | HivePluginOptions): c
 export function logIf(
   condition: boolean,
   message: string,
-  logFn: (message: string): void
+  logFn: (message: string) => void
 ) {
   if (condition) {
     logFn(message);
