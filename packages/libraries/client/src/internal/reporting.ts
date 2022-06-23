@@ -3,6 +3,7 @@ import { getDocumentNodeFromSchema } from '@graphql-tools/utils';
 import { createAgent } from './agent';
 import { version } from '../version';
 import type { HivePluginOptions } from './types';
+import { warnIf } from './utils';
 
 export interface SchemaReporter {
   report(args: { schema: GraphQLSchema }): void;
@@ -19,8 +20,20 @@ export function createReporting(pluginOptions: HivePluginOptions): SchemaReporte
 
   const token = pluginOptions.token;
   const reportingOptions = pluginOptions.reporting;
-
   const logger = pluginOptions.agent?.logger ?? console;
+
+  warnIf(
+    typeof reportingOptions.author !== 'string' || reportingOptions.author.length === 0,
+    '[hive][reporting] author is missing',
+    logger
+  );
+  warnIf(
+    typeof reportingOptions.commit !== 'string' || reportingOptions.commit.length === 0,
+    '[hive][reporting] commit is missing',
+    logger
+  );
+  warnIf(typeof token !== 'string' || token.length === 0, '[hive][reporting] token is missing', logger);
+
   let currentSchema: GraphQLSchema | null = null;
   const agent = createAgent<GraphQLSchema>(
     {

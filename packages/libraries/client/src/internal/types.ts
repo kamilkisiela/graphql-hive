@@ -22,6 +22,7 @@ export interface ClientInfo {
 export interface Logger {
   info(msg: string): void;
   error(error: any, ...data: any[]): void;
+  warn(msg: string): void;
 }
 
 export interface HiveUsagePluginOptions {
