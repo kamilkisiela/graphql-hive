@@ -101,3 +101,9 @@ export function addProperty<T, K extends string, V>(key: K, value: V | undefined
 export function isHiveClient(clientOrOptions: HiveClient | HivePluginOptions): clientOrOptions is HiveClient {
   return 'operationsStore' in clientOrOptions;
 }
+
+export function logIf(condition: boolean, message: string, logFn: (message: string) => void) {
+  if (condition) {
+    logFn(message);
+  }
+}

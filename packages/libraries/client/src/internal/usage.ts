@@ -27,7 +27,7 @@ import { normalizeOperation } from '@graphql-hive/core';
 import { createAgent } from './agent';
 import { randomSampling } from './sampling';
 import { version } from '../version';
-import { cache, cacheDocumentKey, measureDuration, memo, isAsyncIterableIterator } from './utils';
+import { cache, cacheDocumentKey, measureDuration, memo, isAsyncIterableIterator, logIf } from './utils';
 import type { HivePluginOptions, HiveUsagePluginOptions, CollectUsageCallback, ClientInfo } from './types';
 
 interface UsageCollector {
@@ -115,6 +115,12 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
         return JSON.stringify(report);
       },
     }
+  );
+
+  logIf(
+    typeof pluginOptions.token !== 'string' || pluginOptions.token.length === 0,
+    '[hive][usage] token is missing',
+    logger.error
   );
 
   const shouldInclude = randomSampling(options.sampleRate ?? 1.0);
