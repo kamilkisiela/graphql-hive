@@ -1,9 +1,19 @@
 import { DockestService, execa } from 'dockest';
 import { containerIsHealthyReadinessCheck, zeroExitCodeReadinessCheck } from 'dockest/dist/readiness-check/index.js';
+import { ReadinessCheck } from 'dockest/dist/@types.js';
+import { mapTo, take, filter } from 'rxjs/operators/index.js';
 import { DepGraph } from 'dependency-graph';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { parse } from 'yaml';
+
+export const startReadinessCheck: ReadinessCheck = ({ runner }) => {
+  return runner.dockerEventStream$.pipe(
+    filter(ev => ev.action === 'start'),
+    mapTo(undefined),
+    take(1)
+  );
+};
 
 export function createServices() {
   const dockerComposeFile: {
@@ -11,6 +21,9 @@ export function createServices() {
       [key: string]: {
         depends_on?: { [key: string]: unknown };
         healthcheck?: any;
+        labels?: {
+          'dockest.readiness'?: 'exit_code';
+        };
       };
     };
   } = parse(readFileSync(join(process.cwd(), 'docker-compose.yml'), 'utf8'));
@@ -25,7 +38,11 @@ export function createServices() {
     graph.addNode(serviceName, {
       serviceName,
       dependsOn: [],
-      readinessCheck: service.healthcheck ? containerIsHealthyReadinessCheck : zeroExitCodeReadinessCheck,
+      readinessCheck: service.healthcheck
+        ? containerIsHealthyReadinessCheck
+        : service?.labels?.['dockest.readiness'] === 'exit_code'
+        ? zeroExitCodeReadinessCheck
+        : startReadinessCheck,
     });
   }
 
