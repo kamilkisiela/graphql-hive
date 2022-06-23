@@ -10,7 +10,7 @@ services:
       POSTGRES_PASSWORD: postgres
       PGDATA: /var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready']
+      test: ['CMD-SHELL', 'pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}']
       interval: 5s
       timeout: 5s
       retries: 6
@@ -18,7 +18,7 @@ services:
       - 'stack'
 
   clickhouse:
-    image: clickhouse/clickhouse-server:22.3.5.5-alpine
+    image: clickhouse/clickhouse-server:22.6.1-alpine
     volumes:
       - ../packages/services/storage/configs/clickhouse:/etc/clickhouse-server/conf.d
     healthcheck:
@@ -30,7 +30,6 @@ services:
     environment:
       CLICKHOUSE_USER: test
       CLICKHOUSE_PASSWORD: test
-      KAFKA_BROKER: broker:29092
     ports:
       - '8123:8123'
     networks:
@@ -47,12 +46,6 @@ services:
       nofile:
         soft: 20000
         hard: 40000
-    healthcheck:
-      test: ['CMD', 'cub', 'zk-ready', '127.0.0.1:2181', '1']
-      interval: 2s
-      timeout: 1s
-      retries: 20
-      start_period: 10s
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
@@ -62,7 +55,7 @@ services:
     hostname: borker
     depends_on:
       zookeeper:
-        condition: service_healthy
+        condition: service_started
     networks:
       - 'stack'
     ports:
@@ -117,8 +110,6 @@ services:
         condition: service_healthy
       db:
         condition: service_healthy
-      broker:
-        condition: service_healthy
     environment:
       MIGRATOR: 'up'
       CLICKHOUSE_MIGRATOR: 'up'
@@ -128,7 +119,9 @@ services:
       CLICKHOUSE_PORT: '8123'
       CLICKHOUSE_USERNAME: 'test'
       CLICKHOUSE_PASSWORD: 'test'
-      KAFKA_BROKER: 'broker:29092'
+    # Tell dockest, we want to wait for the exit code of the migrator to be 0
+    labels:
+      dockest.readiness: 'exit_code'
     volumes:
       - './tarballs/storage.tgz:/storage.tgz'
       - './run-migrations.sh:/run-migrations.sh'
