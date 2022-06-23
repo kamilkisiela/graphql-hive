@@ -27,6 +27,7 @@ type PublishInput = Types.SchemaPublishInput &
   TargetSelector & {
     checksum: string;
     isSchemaPublishMissingServiceErrorSelected: boolean;
+    isSchemaPublishMissingUrlErrorSelected: boolean;
   };
 
 type BreakPromise<T> = T extends Promise<infer U> ? U : never;
@@ -372,8 +373,9 @@ export class SchemaPublisher {
     if (
       input.isSchemaPublishMissingServiceErrorSelected &&
       (project.type === ProjectType.STITCHING || project.type === ProjectType.FEDERATION) &&
-      input.service == null
+      (lodash.isNil(input.service) || input.service?.trim() === '')
     ) {
+      this.logger.debug('Detected missing service name');
       const missingServiceNameMessage = `Can not publish schema for a '${project.type.toLowerCase()}' project without a service name.`;
 
       if (input.github) {
@@ -397,7 +399,31 @@ export class SchemaPublisher {
       };
     }
 
-    const isInitialSchema = schemas.length === 0;
+    if (project.type === ProjectType.FEDERATION && (lodash.isNil(input.url) || input.url?.trim() === '')) {
+      this.logger.debug('Detected missing service url');
+      const missingServiceUrlMessage = `Can not publish schema for a '${project.type.toLowerCase()}' project without a service url.`;
+
+      if (input.github) {
+        return this.createPublishCheckRun({
+          force: false,
+          initial: false,
+          input,
+          project,
+          valid: false,
+          changes: [],
+          errors: [
+            {
+              message: missingServiceUrlMessage,
+            },
+          ],
+        });
+      }
+      return {
+        __typename: 'SchemaPublishMissingUrlError' as const,
+        message: missingServiceUrlMessage,
+      };
+    }
+
     const orchestrator = this.schemaManager.matchOrchestrator(project.type);
     const incomingSchema: Schema = {
       id: 'new-schema',
@@ -415,6 +441,8 @@ export class SchemaPublisher {
 
     this.logger.debug(`Produced ${newSchemas.length} new schemas`);
 
+    const isInitialSchema = schemas.length === 0;
+
     const { errors, changes, valid } = await this.schemaValidator.validate({
       orchestrator,
       incoming: incomingSchema,
@@ -428,71 +456,47 @@ export class SchemaPublisher {
       baseSchema: baseSchema,
     });
 
-    if (errors.length === 0 && changes.length === 0 && schemas.length !== 0) {
-      const updated: string[] = [];
+    const hasNewUrl =
+      !!latest.version && !!previousSchema && (previousSchema.url ?? null) !== (incomingSchema.url ?? null);
+    const hasSchemaChanges = changes.length > 0;
+    const hasErrors = errors.length > 0;
+    const isForced = input.force === true;
+    const isModified = hasNewUrl || hasSchemaChanges || hasErrors;
 
-      if (latest.version && previousSchema && (previousSchema.url ?? null) !== (incomingSchema.url ?? null)) {
-        this.logger.debug('New url detected: %s (previously: %s)', incomingSchema.url, previousSchema.url);
+    this.logger.debug('Is initial: %s', isInitialSchema ? 'yes' : 'false');
+    this.logger.debug('Errors: %s', errors.length);
+    this.logger.debug('Changes: %s', changes.length);
+    this.logger.debug('Forced: %s', isForced ? 'yes' : 'false');
+    this.logger.debug('New url: %s', hasNewUrl ? 'yes' : 'false');
 
-        updated.push(
-          `New service url: ${incomingSchema.url ?? 'empty'} (previously: ${previousSchema.url ?? 'empty'})`
-        );
+    // if the schema is not modified, we don't need to do anything, just return the success
+    if (!isModified && !isInitialSchema) {
+      this.logger.debug('Schema is not modified');
 
-        await this.schemaManager.updateSchemaUrl({
-          organization: organizationId,
-          project: projectId,
-          target: targetId,
-          version: latest.version,
-          commit: previousSchema.id,
-          url: incomingSchema.url ?? null,
-        });
-
-        await this.publishToCDN({
-          valid,
-          target,
-          project,
-          orchestrator,
-          schemas: newSchemas,
-        });
-      }
-
-      if (incomingSchema.metadata && latest.version && previousSchema) {
-        await this.publishToCDN({
-          valid,
-          target,
-          project,
-          orchestrator,
-          schemas: newSchemas,
-        });
-
-        updated.push('Schema metadata');
-      }
-
-      if (input.github) {
+      if (input.github === true) {
         return this.createPublishCheckRun({
           force: input.force,
           initial: isInitialSchema,
           input,
           project,
-          valid,
-          changes,
-          errors,
-          updates: updated,
+          valid: true,
+          changes: [],
+          errors: [],
         });
       }
 
       return {
-        __typename: valid ? ('SchemaPublishSuccess' as const) : ('SchemaPublishError' as const),
+        __typename: 'SchemaPublishSuccess' as const,
         initial: isInitialSchema,
-        valid,
-        errors,
-        changes,
-        message: updated.length === 0 ? null : `Updated: ${updated.join('\n')}`,
+        valid: true,
+        errors: [],
+        changes: [],
       };
     }
 
-    // if we detect any changes
-    if (errors.length === 0 || input.force) {
+    // if the schema is valid or the user is forcing the publish, we can go ahead and publish
+    if (!hasErrors || isForced) {
+      this.logger.debug('Publishing new version');
       await this.publishNewVersion({
         input,
         valid,
@@ -514,6 +518,14 @@ export class SchemaPublisher {
       });
     }
 
+    const updates: string[] = [];
+
+    if (valid && hasNewUrl) {
+      updates.push(
+        `Updated: New service url: ${incomingSchema.url ?? 'empty'} (previously: ${previousSchema!.url ?? 'empty'})`
+      );
+    }
+
     if (input.github) {
       return this.createPublishCheckRun({
         force: input.force,
@@ -523,6 +535,7 @@ export class SchemaPublisher {
         valid,
         changes,
         errors,
+        updates,
       });
     }
 
@@ -532,8 +545,10 @@ export class SchemaPublisher {
       valid,
       errors,
       changes,
+      message: updates.length ? updates.join('\n') : null,
     };
   }
+
   @sentry('SchemaPublisher.publishNewVersion')
   private async publishNewVersion({
     valid,
@@ -564,9 +579,9 @@ export class SchemaPublisher {
 
     this.logger.debug(`Assigning ${commits.length} schemas to new version`);
     const baseSchema = await this.schemaManager.getBaseSchema({
-      organization: await input.organization,
-      project: await input.project,
-      target: await input.target,
+      organization: input.organization,
+      project: input.project,
+      target: input.target,
     });
     const [schemaVersion, organization] = await Promise.all([
       this.schemaManager.createVersion({

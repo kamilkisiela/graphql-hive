@@ -195,7 +195,7 @@ export default class SchemaPublish extends Command {
       } else if (result.schemaPublish.__typename === 'GitHubSchemaPublishSuccess') {
         this.success(result.schemaPublish.message);
       } else {
-        this.error(result.schemaPublish.message);
+        this.error('message' in result.schemaPublish ? result.schemaPublish.message : 'Unknown error');
       }
     } catch (error) {
       if (error instanceof Errors.ExitError) {
