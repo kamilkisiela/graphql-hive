@@ -1,5 +1,11 @@
 # @graphql-hive/cli
 
+## 0.15.0
+
+### Minor Changes
+
+- 5de7e38: Support SchemaPublishMissingUrlError type
+
 ## 0.14.6
 
 ### Patch Changes
