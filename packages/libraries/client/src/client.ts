@@ -129,7 +129,7 @@ export function createHive(options: HivePluginOptions): HiveClient {
         logger.error(`[hive][info] Error ${response.status}: ${response.statusText}`);
       }
     } catch (error) {
-      logger.error(`[hive][info] Error ${(error as Error).message}`);
+      logger.error(`[hive][info] Error ${(error as Error)?.message ?? error}`);
     }
   }
 
