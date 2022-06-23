@@ -89,9 +89,7 @@ export function createAgent<T>(
       clearTimeout(timeoutID);
     }
 
-    timeoutID = setTimeout(() => {
-      send();
-    }, options.sendInterval);
+    timeoutID = setTimeout(send, options.sendInterval);
   }
 
   if (!options.sendImmediately) {
@@ -109,15 +107,11 @@ export function createAgent<T>(
 
     if (options.sendImmediately || data.size() >= options.maxSize) {
       debugLog('Sending immediately');
-      setImmediate(() => {
-        send({
-          runOnce: true,
-        });
-      });
+      setImmediate(() => send({ runOnce: true }));
     }
   }
 
-  async function send(sendOptions?: { runOnce?: boolean }) {
+  async function send(sendOptions?: { runOnce?: boolean }): Promise<void> {
     const runOnce = sendOptions?.runOnce ?? false;
 
     if (!data.size()) {

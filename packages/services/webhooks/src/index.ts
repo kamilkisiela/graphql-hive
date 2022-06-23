@@ -20,7 +20,7 @@ async function main() {
     release: process.env.RELEASE || 'local',
   });
 
-  const server = createServer({
+  const server = await createServer({
     name: 'webhooks',
     tracing: false,
   });
@@ -44,9 +44,7 @@ async function main() {
 
     registerShutdown({
       logger: server.log,
-      async onShutdown() {
-        await stop();
-      },
+      onShutdown: stop,
     });
 
     server.route<{
@@ -57,12 +55,10 @@ async function main() {
       async handler(req, res) {
         try {
           const job = await schedule(req.body);
-          res.status(200).send({
-            job: job.id ?? 'unknown',
-          });
+          res.status(200).send({ job: job.id ?? 'unknown' }); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
         } catch (error) {
           errorHandler('Failed to schedule a webhook', error as Error, req.log);
-          res.status(500).send(error);
+          res.status(500).send(error); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
         }
       },
     });
@@ -71,7 +67,7 @@ async function main() {
       method: ['GET', 'HEAD'],
       url: '/_health',
       handler(req, res) {
-        res.status(200).send();
+        res.status(200).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
       },
     });
 
@@ -81,7 +77,7 @@ async function main() {
       handler(_, res) {
         const isReady = readiness();
         reportReadiness(isReady);
-        res.status(isReady ? 200 : 400).send();
+        res.status(isReady ? 200 : 400).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
       },
     });
 

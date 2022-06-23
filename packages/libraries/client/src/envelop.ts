@@ -16,7 +16,7 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
         },
       });
 
-  hive.info();
+  void hive.info();
 
   return {
     onSchemaChange({ schema }) {

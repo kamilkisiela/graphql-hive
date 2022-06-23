@@ -1,6 +1,6 @@
 // @ts-check
-import cn from './db-connection-string.mjs';
 import pgpFactory from 'pg-promise';
+import cn from './db-connection-string.cjs';
 
 const pgp = pgpFactory();
 const db = pgp(cn('postgres'));

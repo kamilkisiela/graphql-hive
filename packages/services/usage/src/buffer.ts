@@ -254,7 +254,7 @@ export function createKVBuffer<T>(config: {
       const estimatedBufferSize = currentBufferSize + estimatedReportSize;
 
       if (currentBufferSize >= config.limitInBytes || estimatedBufferSize >= config.limitInBytes) {
-        send(true);
+        void send(true);
       }
 
       if (estimatedReportSize > config.limitInBytes) {
@@ -269,7 +269,7 @@ export function createKVBuffer<T>(config: {
     } else {
       buffer.push(report);
       if (sumOfOperationsSizeInBuffer() >= config.size) {
-        send(true);
+        void send(true);
       }
     }
   }

@@ -21,7 +21,7 @@ async function main() {
     release: process.env.RELEASE || 'local',
   });
 
-  const server = createServer({
+  const server = await createServer({
     name: 'schema',
     tracing: false,
   });
@@ -29,7 +29,8 @@ async function main() {
   registerShutdown({
     logger: server.log,
     async onShutdown() {
-      await Promise.all([server.close(), redis.disconnect(false)]);
+      await server.close();
+      redis.disconnect(false);
     },
   });
 
@@ -79,7 +80,7 @@ async function main() {
       errorHandler,
     };
 
-    server.register(fastifyTRPCPlugin, {
+    await server.register(fastifyTRPCPlugin, {
       prefix: '/trpc',
       trpcOptions: {
         router: schemaBuilderApiRouter,
@@ -91,7 +92,7 @@ async function main() {
       method: ['GET', 'HEAD'],
       url: '/_health',
       handler(_, res) {
-        res.status(200).send();
+        res.status(200).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
       },
     });
 
@@ -100,7 +101,7 @@ async function main() {
       url: '/_readiness',
       handler(_, res) {
         reportReadiness(true);
-        res.status(200).send();
+        res.status(200).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
       },
     });
 

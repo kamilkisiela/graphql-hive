@@ -39,7 +39,7 @@ export function hiveApollo(clientOrOptions: HiveClient | HivePluginOptions): Apo
         },
       });
 
-  hive.info();
+  void hive.info();
 
   return {
     requestDidStart(context) {

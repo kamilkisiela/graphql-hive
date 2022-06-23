@@ -17,7 +17,7 @@ async function main() {
     release: process.env.RELEASE || 'local',
   });
 
-  const server = createServer({
+  const server = await createServer({
     name: 'usage-estimator',
     tracing: false,
   });
@@ -48,7 +48,7 @@ async function main() {
       },
     });
 
-    server.register(fastifyTRPCPlugin, {
+    await server.register(fastifyTRPCPlugin, {
       prefix: '/trpc',
       trpcOptions: {
         router: usageEstimatorApiRouter,
@@ -62,7 +62,7 @@ async function main() {
       method: ['GET', 'HEAD'],
       url: '/_health',
       handler(_, res) {
-        res.status(200).send();
+        res.status(200).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
       },
     });
 
@@ -72,7 +72,7 @@ async function main() {
       handler(_, res) {
         const isReady = context.readiness();
         reportReadiness(isReady);
-        res.status(isReady ? 200 : 400).send();
+        res.status(isReady ? 200 : 400).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
       },
     });
 

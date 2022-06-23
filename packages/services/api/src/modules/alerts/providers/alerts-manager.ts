@@ -285,8 +285,8 @@ export class AlertsManager {
     channel: AlertChannel;
     organization: string;
     project: string;
-  }) {
-    const channel = input.channel;
+  }): Promise<void> {
+    const { channel } = input;
     const [organization, project] = await Promise.all([
       this.organizationManager.getOrganization({
         organization: input.organization,
@@ -304,7 +304,7 @@ export class AlertsManager {
         context: IntegrationsAccessContext.ChannelConfirmation,
       });
 
-      this.slack.sendChannelConfirmation({
+      await this.slack.sendChannelConfirmation({
         event: {
           kind: 'created',
           organization: {
@@ -326,7 +326,7 @@ export class AlertsManager {
         },
       });
     } else {
-      this.webhook.sendChannelConfirmation();
+      await this.webhook.sendChannelConfirmation();
     }
   }
 }

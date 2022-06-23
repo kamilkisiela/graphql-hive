@@ -90,10 +90,10 @@ const plugin: FastifyPluginAsync = async server => {
       const requestId = cleanRequestId(req.headers['x-request-id']);
 
       if (requestId) {
-        scope.setTag('request_id', requestId as string);
+        scope.setTag('request_id', requestId);
       }
 
-      const referer = req.headers.referer;
+      const { referer } = req.headers;
 
       if (referer) {
         scope.setTag('referer', referer);
@@ -104,6 +104,7 @@ const plugin: FastifyPluginAsync = async server => {
       console.log('fastify.setErrorHandler error', err);
       Sentry.captureException(err);
 
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
       reply.send({
         error: 500,
         message: 'Internal Server Error',
@@ -161,8 +162,8 @@ function extractRequestData(req: FastifyRequest, keys: string[] = DEFAULT_REQUES
   return requestData;
 }
 
-export function useSentryTracing(server: FastifyInstance) {
-  server.register(sentryPlugin);
+export async function useSentryTracing(server: FastifyInstance) {
+  await server.register(sentryPlugin);
 }
 
 function replaceString(value: string) {

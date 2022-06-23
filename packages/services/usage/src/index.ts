@@ -23,7 +23,7 @@ async function main() {
     release: process.env.RELEASE || 'local',
   });
 
-  const server = createServer({
+  const server = await createServer({
     name: 'usage',
     tracing: false,
   });
@@ -84,7 +84,7 @@ async function main() {
         const token = req.headers['x-api-token'] as string;
 
         if (!token) {
-          res.status(400).send('Missing token');
+          res.status(400).send('Missing token'); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
           httpRequestsWithoutToken.inc();
           return;
         }
@@ -93,15 +93,15 @@ async function main() {
 
         if (tokens.isNotFound(tokenInfo)) {
           httpRequestsWithNonExistingToken.inc();
-          res.status(400).send('Missing token');
+          res.status(400).send('Missing token'); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
           return;
         }
 
         // We treat collected operations as part of registry
         if (tokens.isNoAccess(tokenInfo)) {
           httpRequestsWithNoAccess.inc();
-          server.log.info(`No access`);
-          res.status(403).send('No access');
+          server.log.info('No access');
+          res.status(403).send('No access'); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
           return;
         }
 
@@ -114,7 +114,7 @@ async function main() {
           })
         ) {
           droppedReports.labels({ targetId: tokenInfo.target }).inc();
-          res.status(429).send();
+          res.status(429).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
 
           return;
         }
@@ -125,14 +125,14 @@ async function main() {
         try {
           await collect(req.body, tokenInfo, retentionInfo);
           stopTimer();
-          res.status(200).send();
+          res.status(200).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
         } catch (error) {
           stopTimer();
           req.log.error(error, 'Failed to collect');
           Sentry.captureException(error, {
             level: Sentry.Severity.Error,
           });
-          res.status(500).send();
+          res.status(500).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
         }
       },
     });
@@ -141,7 +141,7 @@ async function main() {
       method: ['GET', 'HEAD'],
       url: '/_health',
       handler(_, res) {
-        res.status(200).send();
+        res.status(200).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
       },
     });
 
@@ -151,7 +151,7 @@ async function main() {
       handler(_, res) {
         const isReady = readiness();
         reportReadiness(isReady);
-        res.status(isReady ? 200 : 400).send();
+        res.status(isReady ? 200 : 400).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
       },
     });
 
