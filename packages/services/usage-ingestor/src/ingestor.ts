@@ -107,15 +107,13 @@ export function createIngestor(config: {
 
   consumer.on('consumer.stop', async () => {
     logger.info('Consumer stopped');
-    if (status === Status.Stopped) {
-      return;
-    }
-
     await stop();
     await start();
   });
 
   async function start() {
+    logger.info('Starting Usage Ingestor...');
+
     logger.info('Connecting Kafka Consumer');
     await consumer.connect();
 
