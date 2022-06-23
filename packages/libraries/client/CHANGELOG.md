@@ -1,5 +1,11 @@
 # @graphql-hive/client
 
+## 0.16.0
+
+### Minor Changes
+
+- 52bebed: Raise an error on missing commit, author or token options.
+
 ## 0.15.4
 
 ### Patch Changes
