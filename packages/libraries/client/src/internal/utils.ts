@@ -102,11 +102,7 @@ export function isHiveClient(clientOrOptions: HiveClient | HivePluginOptions): c
   return 'operationsStore' in clientOrOptions;
 }
 
-export function logIf(
-  condition: boolean,
-  message: string,
-  logFn: (message: string) => void
-) {
+export function logIf(condition: boolean, message: string, logFn: (message: string) => void) {
   if (condition) {
     logFn(message);
   }
