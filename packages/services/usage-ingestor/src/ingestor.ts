@@ -17,6 +17,7 @@ import type { RawReport } from '@hive/usage-common';
 
 enum Status {
   Waiting,
+  Connected,
   Ready,
   Stopped,
 }
@@ -107,17 +108,26 @@ export function createIngestor(config: {
 
   consumer.on('consumer.stop', async () => {
     logger.info('Consumer stopped');
+
     if (status === Status.Stopped) {
       return;
     }
 
-    await stop();
+    status = Status.Stopped;
+    logger.info('Disconnecting consumer...');
+    await consumer.disconnect();
     await start();
   });
 
   async function start() {
+    logger.info('Starting Usage Ingestor...');
+
+    status = Status.Waiting;
+
     logger.info('Connecting Kafka Consumer');
     await consumer.connect();
+
+    status = Status.Connected;
 
     logger.info('Subscribing to Kafka topic: %s', config.kafka.topic);
     await consumer.subscribe({
