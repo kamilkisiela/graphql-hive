@@ -3,6 +3,7 @@ mutation schemaCheck($input: SchemaCheckInput!, $usesGitHubApp: Boolean!) {
     __typename
     ... on SchemaCheckSuccess @skip(if: $usesGitHubApp) {
       valid
+      initial
       changes {
         nodes {
           message
