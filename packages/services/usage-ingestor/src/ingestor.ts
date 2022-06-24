@@ -107,21 +107,22 @@ export function createIngestor(config: {
   }
 
   consumer.on('consumer.stop', async () => {
-    logger.info('Consumer stopped');
+    logger.warn('Consumer stopped');
   });
 
   consumer.on('consumer.crash', async ev => {
-    logger.info('Consumer crashed (restart=%s, error=%s)', ev.payload.restart, ev.payload.error);
+    logger.error('Consumer crashed (restart=%s, error=%s)', ev.payload.restart, ev.payload.error);
 
     if (ev.payload.restart) {
       return;
     }
 
+    logger.info('Restarting consumer...');
     await start();
   });
 
   consumer.on('consumer.disconnect', async () => {
-    logger.info('Consumer disconnected');
+    logger.warn('Consumer disconnected');
   });
 
   async function start() {
