@@ -132,6 +132,7 @@ export default gql`
 
   type SchemaCheckSuccess {
     valid: Boolean!
+    initial: Boolean!
     changes: SchemaChangeConnection
   }
 

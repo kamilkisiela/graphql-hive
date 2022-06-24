@@ -81,6 +81,7 @@ export class SchemaPublisher {
     ]);
 
     const schemas = latest.schemas;
+    const isInitialSchema = schemas.length === 0;
 
     await this.tracking.track({
       event: 'SCHEMA_CHECK',
@@ -189,7 +190,10 @@ export class SchemaPublisher {
       }
     }
 
-    return validationResult;
+    return {
+      ...validationResult,
+      initial: isInitialSchema,
+    };
   }
 
   @sentry('SchemaPublisher.publish')
