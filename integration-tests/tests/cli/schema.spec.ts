@@ -65,7 +65,7 @@ test('can publish and check a schema with target:registry:read access', async ()
   await schemaCheck(['--token', writeToken, 'fixtures/nonbreaking-schema.graphql']);
 
   await expect(schemaCheck(['--token', writeToken, 'fixtures/breaking-schema.graphql'])).rejects.toThrowError(
-    'EXIT: 1'
+    /breaking/
   );
 });
 
@@ -193,5 +193,5 @@ test('service url should be required in Federation', async () => {
       'users',
       'fixtures/federation-init.graphql',
     ])
-  ).rejects.toThrowError('EXIT: 1');
+  ).rejects.toThrowError(/url/);
 });
