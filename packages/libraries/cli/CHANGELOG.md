@@ -1,5 +1,11 @@
 # @graphql-hive/cli
 
+## 0.16.0
+
+### Minor Changes
+
+- 23eb4cc: Add message about empty schema registry in schema:check
+
 ## 0.15.0
 
 ### Minor Changes
