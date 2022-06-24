@@ -70,12 +70,6 @@ export class SchemaValidator {
     const errors = await orchestrator.validate(afterSchemasWithBase);
 
     if (isInitialSchema) {
-      if (errors.length > 0) {
-        errors.push({
-          message: `Note: If this is your first schema publish, please make sure it's fully valid and standalone.`,
-        });
-      }
-
       return {
         valid: errors.length === 0,
         errors: errors,
