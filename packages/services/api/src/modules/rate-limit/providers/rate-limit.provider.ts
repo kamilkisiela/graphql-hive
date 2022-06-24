@@ -6,6 +6,7 @@ import type { RateLimitServiceConfig } from './tokens';
 import type { RateLimitApi, RateLimitQueryInput } from '@hive/rate-limit';
 import { createTRPCClient } from '@trpc/client';
 import { fetch } from 'cross-undici-fetch';
+import { HiveError } from '../../../shared/errors';
 
 @Injectable({
   global: true,
@@ -33,7 +34,7 @@ export class RateLimitProvider {
     const limit = await this.checkRateLimit(input);
 
     if (limit.limited) {
-      throw new Error(`Monthly limit for ${input.type} has reached!`);
+      throw new HiveError(`Monthly limit for ${input.type} has reached!`);
     }
 
     return limit;
