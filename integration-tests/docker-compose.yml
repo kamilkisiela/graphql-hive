@@ -3,7 +3,7 @@ services:
   db:
     image: postgres:13.4-alpine
     ports:
-      - '5432:5432'
+      - 5432:5432
     environment:
       POSTGRES_DB: registry
       POSTGRES_USER: postgres
@@ -31,7 +31,7 @@ services:
       CLICKHOUSE_USER: test
       CLICKHOUSE_PASSWORD: test
     ports:
-      - '8123:8123'
+      - 8123:8123
     networks:
       - 'stack'
 
@@ -41,7 +41,7 @@ services:
     networks:
       - 'stack'
     ports:
-      - '2181:2181'
+      - 2181:2181
     ulimits:
       nofile:
         soft: 20000
@@ -59,8 +59,8 @@ services:
     networks:
       - 'stack'
     ports:
-      - '29092:29092'
-      - '9092:9092'
+      - 29092:29092
+      - 9092:9092
     ulimits:
       nofile:
         soft: 20000
@@ -93,7 +93,7 @@ services:
       retries: 6
       start_period: 5s
     ports:
-      - '6379:6379'
+      - 6379:6379
     environment:
       - REDIS_PASSWORD=test
       - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
@@ -161,7 +161,7 @@ services:
       retries: 6
       start_period: 5s
     ports:
-      - '3001:3001'
+      - 3001:3001
     volumes:
       - './tarballs/server.tgz:/server.tgz'
       - './run-server.sh:/run-server.sh'
@@ -222,7 +222,7 @@ services:
       retries: 6
       start_period: 5s
     ports:
-      - '3002:3002'
+      - 3002:3002
     volumes:
       - './tarballs/schema.tgz:/schema.tgz'
       - './run-schema.sh:/run-schema.sh'
@@ -249,7 +249,7 @@ services:
       retries: 6
       start_period: 5s
     ports:
-      - '3003:3003'
+      - 3003:3003
     volumes:
       - './tarballs/tokens.tgz:/tokens.tgz'
       - './run-tokens.sh:/run-tokens.sh'
@@ -275,7 +275,7 @@ services:
       retries: 6
       start_period: 5s
     ports:
-      - '3004:3004'
+      - 3004:3004
     volumes:
       - '../packages/services/cdn-worker/dist/dev.js:/cdn.js'
       - './run-local-cdn.sh:/run-local-cdn.sh'
@@ -300,7 +300,7 @@ services:
       retries: 6
       start_period: 5s
     ports:
-      - '3005:3005'
+      - 3005:3005
     volumes:
       - './tarballs/webhooks.tgz:/webhooks.tgz'
       - './run-webhooks.sh:/run-webhooks.sh'
@@ -365,7 +365,7 @@ services:
       retries: 6
       start_period: 5s
     ports:
-      - '3007:3007'
+      - 3007:3007
     volumes:
       - './tarballs/usage-ingestor.tgz:/usage-ingestor.tgz'
       - './run-usage-ingestor.sh:/run-usage-ingestor.sh'
@@ -388,7 +388,7 @@ services:
     networks:
       - 'stack'
     ports:
-      - '3008:3008'
+      - 3008:3008
     healthcheck:
       test: ['CMD', 'wget', '--spider', '-q', 'localhost:3008/_readiness']
       interval: 5s
@@ -420,7 +420,7 @@ services:
     networks:
       - 'stack'
     ports:
-      - '3009:3009'
+      - 3009:3009
     healthcheck:
       test: ['CMD', 'wget', '--spider', '-q', 'localhost:3009/_readiness']
       interval: 5s
@@ -450,7 +450,7 @@ services:
     networks:
       - 'stack'
     ports:
-      - '3010:3010'
+      - 3010:3010
     healthcheck:
       test: ['CMD', 'wget', '--spider', '-q', 'localhost:3010/_readiness']
       interval: 5s
