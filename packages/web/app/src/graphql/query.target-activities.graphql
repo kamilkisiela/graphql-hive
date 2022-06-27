@@ -4,7 +4,10 @@ query targetActivities($selector: TargetActivitiesSelector!) {
       __typename
       id
       createdAt
-      ...ActivityNode
+      ...TargetCreated
+      ...TargetDeleted
+      ...TargetNameUpdated
+      ...TargetIdUpdated
     }
     total
   }

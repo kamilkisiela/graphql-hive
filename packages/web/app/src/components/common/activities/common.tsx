@@ -1,23 +1,6 @@
-import { gql } from 'urql';
+import type { OrganizationActivitiesQuery, ProjectActivitiesQuery, TargetActivitiesQuery } from '@/graphql';
 
-export const ActivityNode = gql(/* GraphQL */ `
-  fragment ActivityNode on Activity {
-    id
-    type
-    createdAt
-    ...OrganizationPlanChange
-    ...OrganizationCreated
-    ...OrganizationNameUpdated
-    ...OrganizationIdUpdated
-    ...MemberAdded
-    ...MemberDeleted
-    ...ProjectCreated
-    ...ProjectDeleted
-    ...ProjectNameUpdated
-    ...ProjectIdUpdated
-    ...TargetCreated
-    ...TargetDeleted
-    ...TargetNameUpdated
-    ...TargetIdUpdated
-  }
-`);
+export type ActivityNode =
+  | OrganizationActivitiesQuery['organizationActivities']['nodes'][0]
+  | ProjectActivitiesQuery['projectActivities']['nodes'][0]
+  | TargetActivitiesQuery['targetActivities']['nodes'][0];

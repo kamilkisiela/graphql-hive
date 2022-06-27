@@ -4,7 +4,20 @@ query organizationActivities($selector: OrganizationActivitiesSelector!) {
       __typename
       id
       createdAt
-      ...ActivityNode
+      ...OrganizationPlanChange
+      ...OrganizationCreated
+      ...OrganizationNameUpdated
+      ...OrganizationIdUpdated
+      ...MemberAdded
+      ...MemberDeleted
+      ...ProjectCreated
+      ...ProjectDeleted
+      ...ProjectNameUpdated
+      ...ProjectIdUpdated
+      ...TargetCreated
+      ...TargetDeleted
+      ...TargetNameUpdated
+      ...TargetIdUpdated
     }
     total
   }
