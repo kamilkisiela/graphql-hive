@@ -15,7 +15,7 @@ export const urqlClient = createClient({
     dedupExchange,
     cacheExchange({
       updates: {
-        Mutation: Mutation as any,
+        Mutation,
       },
       keys: {
         RequestsOverTime: noKey,

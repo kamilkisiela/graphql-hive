@@ -12,6 +12,7 @@
     "strictBindCallApply": true,
     "alwaysStrict": true,
     "noImplicitAny": true,
+    "strictFunctionTypes": true,
 
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
