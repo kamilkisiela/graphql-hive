@@ -4,14 +4,7 @@ query projectActivities($selector: ProjectActivitiesSelector!) {
       __typename
       id
       createdAt
-      ...ProjectCreated
-      ...ProjectDeleted
-      ...ProjectNameUpdated
-      ...ProjectIdUpdated
-      ...TargetCreated
-      ...TargetDeleted
-      ...TargetNameUpdated
-      ...TargetIdUpdated
+      ...ActivityNode
     }
     total
   }

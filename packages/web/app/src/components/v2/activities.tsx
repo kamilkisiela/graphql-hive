@@ -1,6 +1,6 @@
-import React, { ReactElement } from 'react';
+import React, { ReactElement, ReactNode } from 'react';
 import NextLink from 'next/link';
-import { useQuery } from 'urql';
+import { DocumentType, useQuery } from 'urql';
 
 import { ActivityNode } from '@/components/common/activities/common';
 import { Heading, Link, Skeleton, TimeAgo } from '@/components/v2';
@@ -20,7 +20,7 @@ import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 const organizationActivitiesDocument = fixDuplicatedFragments(OrganizationActivitiesDocument);
 
 export const getActivity = (
-  activity: ActivityNode
+  activity: DocumentType<typeof ActivityNode>
 ): {
   icon: ReactElement;
   content: ReactElement | string;
@@ -216,38 +216,22 @@ export const Activities = (props: React.ComponentProps<'div'>): ReactElement => 
   return (
     <div className="w-[450px] shrink-0" {...props}>
       <Heading>Recent Activity</Heading>
-      {(!activities || activities.total !== 0) && (
-        <ul className="mt-4 w-full break-all rounded-md border border-gray-800 p-5">
-          {(activities ? activities.nodes : Array.from({ length: 3 }, (_, id) => ({ id }))).map(activity => {
-            const { content, icon } = getActivity(activity);
+      <ul className="mt-4 w-full break-all rounded-md border border-gray-800 p-5">
+        {isLoading || !activities?.nodes
+          ? new Array(3).fill(null).map((_, index) => {
+              <ActivityContainer key={index}>
+                <Skeleton circle visible className="h-7 w-7 shrink-0" />
+                <div className="grow">
+                  <Skeleton visible className="mb-2 h-3 w-2/5" />
+                  <Skeleton visible className="h-3 w-full" />
+                </div>
+              </ActivityContainer>;
+            })
+          : activities.nodes.map(activity => {
+              const { content, icon } = getActivity(activity);
 
-            return (
-              <li
-                key={activity.id}
-                className="
-                  flex
-                  items-center
-                  gap-2.5
-                  border-b
-                  border-gray-800
-                  py-5
-                  text-xs
-                  text-gray-500
-                  first:pt-0
-                  last:border-b-0
-                  last:pb-0
-                  first-of-type:mt-0
-                "
-              >
-                {isLoading ? (
-                  <>
-                    <Skeleton circle visible className="h-7 w-7 shrink-0" />
-                    <div className="grow">
-                      <Skeleton visible className="mb-2 h-3 w-2/5" />
-                      <Skeleton visible className="h-3 w-full" />
-                    </div>
-                  </>
-                ) : (
+              return (
+                <ActivityContainer key={activity.id}>
                   <>
                     <div className="self-center p-1">{icon}</div>
                     <div className="grow">
@@ -269,12 +253,31 @@ export const Activities = (props: React.ComponentProps<'div'>): ReactElement => 
                       </div>
                     </div>
                   </>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      )}
+                </ActivityContainer>
+              );
+            })}
+      </ul>
     </div>
   );
 };
+
+const ActivityContainer = (props: { children: ReactNode }) => (
+  <li
+    className="
+    flex
+    items-center
+    gap-2.5
+    border-b
+    border-gray-800
+    py-5
+    text-xs
+    text-gray-500
+    first:pt-0
+    last:border-b-0
+    last:pb-0
+    first-of-type:mt-0
+  "
+  >
+    {props.children}
+  </li>
+);
