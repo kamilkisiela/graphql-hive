@@ -16,11 +16,13 @@ export function deployTokens({
   dbMigrations,
   storageContainer,
   packageHelper,
+  heartbeat,
 }: {
   storageContainer: azure.storage.Container;
   packageHelper: PackageHelper;
   deploymentEnv: DeploymentEnvironment;
   dbMigrations: DbMigrations;
+  heartbeat?: string;
 }) {
   return new RemoteArtifactAsServiceDeployment(
     'tokens-service',
@@ -29,6 +31,7 @@ export function deployTokens({
       env: {
         ...deploymentEnv,
         ...commonEnv,
+        HEARTBEAT_ENDPOINT: heartbeat ?? '',
         POSTGRES_CONNECTION_STRING: apiConfig.requireSecret('postgresConnectionString'),
         RELEASE: packageHelper.currentReleaseId(),
       },

@@ -37,6 +37,8 @@ const rootDns = commonConfig.require('dnsZone');
 const appHostname = `${appDns}.${rootDns}`;
 const docsHostname = `${docsDns}.${rootDns}`;
 
+const heartbeatsConfig = new pulumi.Config('heartbeats');
+
 const resourceGroup = new azure.core.ResourceGroup(`hive-${envName}-rg`, {
   location: azure.Locations.EastUS,
 });
@@ -89,6 +91,7 @@ const tokensApi = deployTokens({
   storageContainer,
   deploymentEnv,
   dbMigrations,
+  heartbeat: heartbeatsConfig.get('tokens'),
 });
 
 const webhooksApi = deployWebhooks({
@@ -96,6 +99,7 @@ const webhooksApi = deployWebhooks({
   storageContainer,
   deploymentEnv,
   redis: redisApi,
+  heartbeat: heartbeatsConfig.get('webhooks'),
 });
 
 const usageEstimationApi = deployUsageEstimation({
@@ -139,6 +143,7 @@ const usageIngestorApi = deployUsageIngestor({
   storageContainer,
   deploymentEnv,
   dbMigrations,
+  heartbeat: heartbeatsConfig.get('usageIngestor'),
 });
 
 const schemaApi = deploySchema({

@@ -15,11 +15,13 @@ export function deployWebhooks({
   packageHelper,
   deploymentEnv,
   redis,
+  heartbeat,
 }: {
   storageContainer: azure.storage.Container;
   packageHelper: PackageHelper;
   deploymentEnv: DeploymentEnvironment;
   redis: Redis;
+  heartbeat?: string;
 }) {
   return new RemoteArtifactAsServiceDeployment(
     'webhooks-service',
@@ -28,6 +30,7 @@ export function deployWebhooks({
       env: {
         ...deploymentEnv,
         ...commonEnv,
+        HEARTBEAT_ENDPOINT: heartbeat ?? '',
         RELEASE: packageHelper.currentReleaseId(),
         REDIS_HOST: redis.config.host,
         REDIS_PORT: String(redis.config.port),

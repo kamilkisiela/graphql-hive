@@ -20,6 +20,7 @@ export function deployUsageIngestor({
   clickhouse,
   kafka,
   dbMigrations,
+  heartbeat,
 }: {
   storageContainer: azure.storage.Container;
   packageHelper: PackageHelper;
@@ -27,6 +28,7 @@ export function deployUsageIngestor({
   clickhouse: Clickhouse;
   kafka: Kafka;
   dbMigrations: DbMigrations;
+  heartbeat?: string;
 }) {
   const numberOfPartitions = 4;
   const replicas = isProduction(deploymentEnv) ? 2 : 1;
@@ -45,6 +47,7 @@ export function deployUsageIngestor({
       env: {
         ...deploymentEnv,
         ...commonEnv,
+        HEARTBEAT_ENDPOINT: heartbeat ?? '',
         KAFKA_CONNECTION_MODE: 'hosted',
         KAFKA_KEY: kafka.config.key,
         KAFKA_USER: kafka.config.user,

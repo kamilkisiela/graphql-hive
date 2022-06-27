@@ -6,6 +6,7 @@ import {
   startMetrics,
   registerShutdown,
   reportReadiness,
+  startHeartbeats,
 } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
 import LRU from 'tiny-lru';
@@ -39,9 +40,21 @@ export async function main() {
     }>(50);
     const errorCachingInterval = ms('10m');
 
+    const stopHeartbeats =
+      typeof process.env.HEARTBEATS_ENDPOINT === 'string' && process.env.HEARTBEATS_ENDPOINT.length > 0
+        ? startHeartbeats({
+            enabled: true,
+            endpoint: process.env.HEARTBEATS_ENDPOINT,
+            intervalInMS: 20_000,
+            onError: server.log.error,
+            isReady: readiness,
+          })
+        : startHeartbeats({ enabled: false });
+
     registerShutdown({
       logger: server.log,
       async onShutdown() {
+        stopHeartbeats();
         await server.close();
         await stop();
       },
