@@ -44,10 +44,10 @@ async function main() {
     });
 
     const stopHeartbeats =
-      typeof process.env.HEARTBEATS_ENDPOINT === 'string' && process.env.HEARTBEATS_ENDPOINT.length > 0
+      typeof process.env.HEARTBEAT_ENDPOINT === 'string' && process.env.HEARTBEAT_ENDPOINT.length > 0
         ? startHeartbeats({
             enabled: true,
-            endpoint: process.env.HEARTBEATS_ENDPOINT,
+            endpoint: process.env.HEARTBEAT_ENDPOINT,
             intervalInMS: 20_000,
             onError: server.log.error,
             isReady: readiness,
