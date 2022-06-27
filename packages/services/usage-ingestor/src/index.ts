@@ -1,6 +1,13 @@
 #!/usr/bin/env node
 import * as Sentry from '@sentry/node';
-import { createServer, startMetrics, ensureEnv, registerShutdown, reportReadiness } from '@hive/service-common';
+import {
+  createServer,
+  startMetrics,
+  ensureEnv,
+  registerShutdown,
+  reportReadiness,
+  startHeartbeats,
+} from '@hive/service-common';
 import { createIngestor } from './ingestor';
 
 async function main() {
@@ -45,9 +52,21 @@ async function main() {
       },
     });
 
+    const stopHeartbeats =
+      typeof process.env.HEARTBEATS_ENDPOINT === 'string' && process.env.HEARTBEATS_ENDPOINT.length > 0
+        ? startHeartbeats({
+            enabled: true,
+            endpoint: process.env.HEARTBEATS_ENDPOINT,
+            intervalInMS: 20_000,
+            onError: server.log.error,
+            isReady: readiness,
+          })
+        : startHeartbeats({ enabled: false });
+
     registerShutdown({
       logger: server.log,
       async onShutdown() {
+        stopHeartbeats();
         await Promise.all([stop(), server.close()]);
       },
     });

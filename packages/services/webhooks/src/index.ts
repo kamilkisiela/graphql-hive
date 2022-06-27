@@ -6,6 +6,7 @@ import {
   startMetrics,
   registerShutdown,
   reportReadiness,
+  startHeartbeats,
 } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
 import type { WebhookInput } from './types';
@@ -42,9 +43,23 @@ async function main() {
       backoffDelay: 2000,
     });
 
+    const stopHeartbeats =
+      typeof process.env.HEARTBEATS_ENDPOINT === 'string' && process.env.HEARTBEATS_ENDPOINT.length > 0
+        ? startHeartbeats({
+            enabled: true,
+            endpoint: process.env.HEARTBEATS_ENDPOINT,
+            intervalInMS: 20_000,
+            onError: server.log.error,
+            isReady: readiness,
+          })
+        : startHeartbeats({ enabled: false });
+
     registerShutdown({
       logger: server.log,
-      onShutdown: stop,
+      async onShutdown() {
+        stopHeartbeats();
+        await stop();
+      },
     });
 
     server.route<{
