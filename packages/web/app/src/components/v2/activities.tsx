@@ -1,6 +1,6 @@
 import React, { ReactElement, ReactNode } from 'react';
 import NextLink from 'next/link';
-import { DocumentType, useQuery } from 'urql';
+import { useQuery } from 'urql';
 
 import { ActivityNode } from '@/components/common/activities/common';
 import { Heading, Link, Skeleton, TimeAgo } from '@/components/v2';
@@ -20,7 +20,7 @@ import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 const organizationActivitiesDocument = fixDuplicatedFragments(OrganizationActivitiesDocument);
 
 export const getActivity = (
-  activity: DocumentType<typeof ActivityNode>
+  activity: ActivityNode
 ): {
   icon: ReactElement;
   content: ReactElement | string;
