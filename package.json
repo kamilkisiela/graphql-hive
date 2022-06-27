@@ -45,7 +45,6 @@
     "@graphql-codegen/typescript-graphql-request": "4.4.10",
     "@graphql-codegen/typescript-operations": "2.4.2",
     "@graphql-codegen/typescript-resolvers": "2.6.6",
-    "@n1ru4l/graphql-codegen-relay-optimizer-plugin": "5.0.0",
     "@swc/core": "1.2.185",
     "@theguild/prettier-config": "0.0.1",
     "@types/jest": "27.5.1",
