@@ -91,7 +91,7 @@ export default abstract class extends Command {
       throw new Errors.CLIError(message);
     }
 
-    throw new Errors.CLIError(`Missing "${key}"`);
+    throw new Errors.CLIError(`Missing "${String(key)}"`);
   }
 
   /**
