@@ -40,7 +40,7 @@ export default function Manage() {
               <CheckboxGroup
                 colorScheme="teal"
                 size="sm"
-                defaultValue={Object.keys(filters).filter(key => !!filters[key])}
+                defaultValue={Object.keys(filters).filter((key: keyof typeof filters) => !!filters[key])}
                 onChange={onFiltersChange}
               >
                 <Checkbox tw="whitespace-nowrap align-middle" value="only-regular">
