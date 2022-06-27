@@ -20,7 +20,7 @@ declare global {
 }
 
 function identifyOnCrisp(user: UserProfile): void {
-  const crisp = globalThis.$crisp;
+  const crisp = globalThis.window.$crisp;
   if (crisp) {
     pushIfNotEmpty(crisp, 'user:email', user.email);
     pushIfNotEmpty(crisp, 'user:nickname', user.name || user.nickname);

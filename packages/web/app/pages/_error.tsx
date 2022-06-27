@@ -3,7 +3,15 @@ import type { NextPageContext } from 'next';
 
 import * as Sentry from '@sentry/nextjs';
 
-const MyError = ({ statusCode, hasGetInitialPropsRun, err }) => {
+const MyError = ({
+  statusCode,
+  hasGetInitialPropsRun,
+  err,
+}: {
+  statusCode: number;
+  hasGetInitialPropsRun: boolean;
+  err: Error;
+}) => {
   if (!hasGetInitialPropsRun && err) {
     // getInitialProps is not called in case of
     // https://github.com/vercel/next.js/issues/8592. As a workaround, we pass

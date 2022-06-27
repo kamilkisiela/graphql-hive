@@ -92,7 +92,7 @@ const SchemaServiceName = ({
         },
       });
     },
-    [mutate]
+    [mutate, organization.cleanId, project.cleanId, schema.service, target.cleanId, version]
   );
 
   if ((project.type !== ProjectType.Federation && project.type !== ProjectType.Stitching) || !hasAccess) {
@@ -199,7 +199,7 @@ const SyncSchemaButton = ({
         setStatus('idle');
       }, 5000);
     });
-  }, [mutate, setStatus]);
+  }, [mutate, organization.cleanId, project.cleanId, target.cleanId]);
 
   if (!target.hasSchema) {
     return null;
@@ -210,15 +210,17 @@ const SyncSchemaButton = ({
       <Button variant="primary" size="large" onClick={sync} disabled={status !== 'idle' || mutation.fetching}>
         {mutation.fetching
           ? 'Syncing…'
-          : {
-              idle: 'Update CDN',
-              error: 'Failed to synchronize',
-            }[status] || 'CDN is up to date'}
+          : FetchingMessages[status as keyof typeof FetchingMessages] ?? 'CDN is up to date'}
         <RefreshIcon className="ml-8 h-4 w-4" />
       </Button>
     </Tooltip>
   );
 };
+
+const FetchingMessages = {
+  idle: 'Update CDN',
+  error: 'Failed to synchronize',
+} as const;
 
 function SchemaView({
   organization,

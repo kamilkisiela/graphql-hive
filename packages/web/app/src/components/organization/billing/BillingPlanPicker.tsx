@@ -121,6 +121,11 @@ const Plan = (plan: {
   );
 };
 
+const billingPlanLookUpMap = {
+  [BillingPlanType.Hobby]: 'Free',
+  [BillingPlanType.Enterprise]: 'Contact Us',
+} as Record<BillingPlanType, string | undefined>;
+
 export const BillingPlanPicker = ({
   value,
   activePlan,
@@ -139,12 +144,7 @@ export const BillingPlanPicker = ({
           <Plan
             key={plan.id}
             name={plan.name}
-            price={
-              {
-                [BillingPlanType.Hobby]: 'Free',
-                [BillingPlanType.Enterprise]: 'Contact Us',
-              }[plan.planType] || plan.basePrice
-            }
+            price={billingPlanLookUpMap[plan.planType] ?? plan.basePrice}
             isActive={activePlan === plan.planType}
             features={planCollection[plan.planType].features}
             description={planCollection[plan.planType].description}

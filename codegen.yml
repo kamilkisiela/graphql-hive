@@ -68,7 +68,9 @@ generates:
 
   # App
   ./packages/web/app/src/graphql/index.ts:
-    documents: ./packages/web/app/src/graphql/*.graphql
+    documents:
+      - ./packages/web/app/src/graphql/*.graphql
+      - './packages/web/app/src/(components|lib)/**/*.ts(x)?'
     config:
       dedupeFragments: true
       scalars:

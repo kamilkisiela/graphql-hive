@@ -32,7 +32,7 @@ if (process.env.NODE_ENV === 'development' && 'window' in globalThis) {
 
 function App({ Component, pageProps }: AppProps): ReactElement {
   useEffect(() => {
-    const handleRouteChange = url => {
+    const handleRouteChange = (url: string) => {
       gtag.pageview(url);
 
       const orgId = Router.query.orgId as string;

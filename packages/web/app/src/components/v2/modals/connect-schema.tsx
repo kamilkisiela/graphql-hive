@@ -6,6 +6,11 @@ import { Button, CopyValue, Heading, Link, Modal, Tag } from '@/components/v2';
 import { CreateCdnTokenDocument, ProjectDocument, ProjectType } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
+const taxonomy = {
+  [ProjectType.Federation]: 'supergraph schema',
+  [ProjectType.Stitching]: 'services',
+} as Record<ProjectType, string | undefined>;
+
 export const ConnectSchemaModal = ({
   isOpen,
   toggleModalOpen,
@@ -56,11 +61,7 @@ export const ConnectSchemaModal = ({
           <Heading>Generating access...</Heading>
           <p className="text-center">
             Hive is now generating an authentication token and an URL you can use to fetch your{' '}
-            {{
-              [ProjectType.Federation]: 'supergraph schema',
-              [ProjectType.Stitching]: 'services',
-            }[project.type] || 'schema'}
-            .
+            {taxonomy[project.type] ?? 'schema'}.
           </p>
         </div>
       )}
@@ -69,11 +70,8 @@ export const ConnectSchemaModal = ({
         <>
           <p className="text-sm text-gray-500">
             With high-availability and multi-zone CDN service based on Cloudflare, Hive allows you to access the
-            {{
-              [ProjectType.Federation]: 'supergraph',
-              [ProjectType.Stitching]: 'list of services',
-            }[project.type] || 'schema'}{' '}
-            of your API, through a secured external service, that's always up regardless of Hive.
+            {taxonomy[project.type] ?? 'schema'} of your API, through a secured external service, that's always up
+            regardless of Hive.
           </p>
           <span className="text-sm text-gray-500">You can use the following endpoint:</span>
           <CopyValue value={mutation.data.createCdnToken.url} />

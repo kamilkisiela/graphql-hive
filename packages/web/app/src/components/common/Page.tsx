@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactElement } from 'react';
 import tw, { styled } from 'twin.macro';
 import Link from 'next/link';
 import { FiTarget } from 'react-icons/fi';
@@ -39,7 +39,7 @@ const MenuLink = styled.a(({ active }: { active?: boolean }) => [
 
 const Menu = {
   Root: tw.ul`flex flex-col px-2 py-4`,
-  Title: ({ children, icon }) => {
+  Title: ({ children, icon }: { children: string; icon: ReactElement }) => {
     return (
       <li tw="px-3 pb-2">
         <div tw="flex flex-row items-center h-8">
