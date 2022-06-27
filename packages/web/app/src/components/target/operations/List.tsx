@@ -183,10 +183,12 @@ const columns = [
   }),
 ];
 
+type SetPaginationFn = (updater: React.SetStateAction<PaginationState>) => void;
+
 const OperationsTable: React.FC<{
   operations: Operation[];
   pagination: PaginationState;
-  setPagination: (state: PaginationState) => void;
+  setPagination: SetPaginationFn;
   sorting: SortingState;
   setSorting: OnChangeFn<SortingState>;
   fetching?: boolean;
@@ -398,17 +400,18 @@ const OperationsTableContainer: React.FC<{
 
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
-  const safeSetPagination = React.useCallback(
-    (state: PaginationState) => {
-      const maxPageIndex = Math.ceil(data.length / state.pageSize) - 1;
-
-      if (state.pageIndex < 0) {
-        setPagination({ ...state, pageIndex: 0 });
-      } else if (state.pageIndex > maxPageIndex) {
-        setPagination({ ...state, pageIndex: maxPageIndex });
-      } else {
-        setPagination(state);
-      }
+  const safeSetPagination = React.useCallback<SetPaginationFn>(
+    state => {
+      const handleValue = (state: PaginationState) => {
+        const maxPageIndex = Math.ceil(data.length / state.pageSize) - 1;
+        if (state.pageIndex < 0) {
+          return { ...state, pageIndex: 0 };
+        } else if (state.pageIndex > maxPageIndex) {
+          return { ...state, pageIndex: maxPageIndex };
+        }
+        return state;
+      };
+      setPagination(typeof state === 'function' ? value => handleValue(state(value)) : handleValue(state));
     },
     [pagination, setPagination, data]
   );

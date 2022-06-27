@@ -1,6 +1,6 @@
-import { FC, ReactElement, ReactNode } from 'react';
+import { ReactElement, ReactNode } from 'react';
 
-export const SubHeader: FC = ({ children }: { children: ReactNode }): ReactElement => {
+export const SubHeader = ({ children }: { children: ReactNode }): ReactElement => {
   return (
     <header
       className={`
