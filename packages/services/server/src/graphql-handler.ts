@@ -10,6 +10,9 @@ import { asyncStorage } from './async-storage';
 import { useSentryUser, extractUserId } from './use-sentry-user';
 import { useHive } from '@graphql-hive/client';
 import { useErrorHandler, Plugin } from '@graphql-yoga/node';
+import hyperid from 'hyperid';
+
+const reqIdGenerate = hyperid({ fixedLength: true });
 
 export interface GraphQLHandlerOptions {
   graphiqlEndpoint: string;
@@ -144,7 +147,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
   });
 
   return async (req, reply) => {
-    const requestIdHeader = req.headers['x-request-id'];
+    const requestIdHeader = req.headers['x-request-id'] ?? reqIdGenerate();
     const requestId = cleanRequestId(requestIdHeader);
 
     await asyncStorage.run(
