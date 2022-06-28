@@ -172,6 +172,10 @@ export default class SchemaPublish extends Command {
           renderChanges.call(this, changes);
           this.success('Schema published');
         }
+
+        if (result.schemaPublish.linkToWebsite) {
+          this.info(`Available at ${result.schemaPublish.linkToWebsite}`);
+        }
       } else if (result.schemaPublish.__typename === 'SchemaPublishMissingServiceError') {
         this.fail(`${result.schemaPublish.missingServiceError} Please use the '--service <name>' parameter.`);
         this.exit(1);
@@ -194,6 +198,10 @@ export default class SchemaPublish extends Command {
           this.exit(1);
         } else {
           this.success('Schema published (forced)');
+        }
+
+        if (result.schemaPublish.linkToWebsite) {
+          this.info(`Available at ${result.schemaPublish.linkToWebsite}`);
         }
       } else if (result.schemaPublish.__typename === 'GitHubSchemaPublishSuccess') {
         this.success(result.schemaPublish.message);
