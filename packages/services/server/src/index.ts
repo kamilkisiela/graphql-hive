@@ -176,7 +176,7 @@ export async function main() {
                 let url = `${process.env.WEB_APP_URL}/${input.organization.cleanId}/${input.project.cleanId}/${input.target.cleanId}`;
 
                 if (input.version) {
-                  url += `/history/${input.version}`;
+                  url += `/history/${input.version.id}`;
                 }
 
                 return url;
