@@ -48,7 +48,7 @@ export default gql`
   type CreateProjectOk {
     selector: ProjectSelector!
     createdProject: Project!
-    createdTarget: Target!
+    createdTargets: [Target!]!
   }
 
   type CreateProjectInputErrors {

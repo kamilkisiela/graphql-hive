@@ -8,7 +8,7 @@ mutation createProject($input: CreateProjectInput!) {
       createdProject {
         ...ProjectFields
       }
-      createdTarget {
+      createdTargets {
         ...TargetFields
       }
     }

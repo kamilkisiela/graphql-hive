@@ -43,7 +43,7 @@ test('cannot publish a schema without target:registry:write access', async () =>
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTarget;
+  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
 
   const tokenResult = await createToken(
     {
@@ -98,7 +98,7 @@ test('can publish a schema with target:registry:write access', async () => {
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTarget;
+  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
 
   const tokenResult = await createToken(
     {
@@ -175,7 +175,7 @@ test('base schema should not affect the output schema persisted in db', async ()
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTarget;
+  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
 
   // Create a token with write rights
   const writeTokenResult = await createToken(
@@ -276,7 +276,7 @@ test('directives should not be removed (federation)', async () => {
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTarget;
+  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
 
   // Create a token with write rights
   const writeTokenResult = await createToken(
@@ -352,7 +352,7 @@ test('should allow to update the URL of a Federated service without changing the
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTarget;
+  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
 
   // Create a token with write rights
   const writeTokenResult = await createToken(
@@ -443,7 +443,7 @@ test('should allow to update the URL of a Federated service while also changing 
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTarget;
+  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
 
   // Create a token with write rights
   const writeTokenResult = await createToken(
@@ -532,7 +532,7 @@ test('directives should not be removed (stitching)', async () => {
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTarget;
+  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
 
   // Create a token with write rights
   const writeTokenResult = await createToken(
@@ -608,7 +608,7 @@ test('directives should not be removed (single)', async () => {
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTarget;
+  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
 
   // Create a token with write rights
   const writeTokenResult = await createToken(
@@ -684,7 +684,7 @@ test('share publication of schema using redis', async () => {
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTarget;
+  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
 
   // Create a token with write rights
   const writeTokenResult = await createToken(
@@ -758,7 +758,7 @@ test("Two targets with the same commit id shouldn't return an error", async () =
     owner_access_token
   );
   const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTarget;
+  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
   const writeTokenResult = await createToken(
     {
       name: 'test',
@@ -843,7 +843,7 @@ test('marking versions as valid', async () => {
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTarget;
+  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
 
   const tokenResult = await createToken(
     {
@@ -987,7 +987,7 @@ test('marking only the most recent version as valid result in an update of CDN',
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTarget;
+  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
 
   const tokenResult = await createToken(
     {
@@ -1133,7 +1133,7 @@ test('CDN data can not be fetched with an invalid access token', async () => {
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTarget;
+  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
 
   const tokenResult = await createToken(
     {
@@ -1215,7 +1215,7 @@ test('CDN data can be fetched with an valid access token', async () => {
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTarget;
+  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
 
   const tokenResult = await createToken(
     {

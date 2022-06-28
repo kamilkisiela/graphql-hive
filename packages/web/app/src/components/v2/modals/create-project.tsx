@@ -19,7 +19,7 @@ const CreateProjectMutation = gql(/* GraphQL */ `
         createdProject {
           ...ProjectFields
         }
-        createdTarget {
+        createdTargets {
           ...TargetFields
         }
       }
@@ -95,7 +95,8 @@ export const CreateProjectModal = ({
         <Heading className="text-center">Create a project</Heading>
         <p className="text-sm text-gray-500">
           A project is built on top of <b>Targets</b>, which are just your environments. We will also create a default
-          stack named <b>experiment</b> for you (don't worry, you can change it later).
+          stacks named <b>production</b>, <b>staging</b> and <b>development</b> for you (don't worry, you can change it
+          later).
         </p>
 
         <div className="flex flex-col gap-4">

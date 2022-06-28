@@ -34,7 +34,7 @@ test('can check a schema with target:registry:read access', async () => {
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTarget;
+  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
 
   // Create a token with write rights
   const writeTokenResult = await createToken(
@@ -145,7 +145,7 @@ test('should match indentation of previous description', async () => {
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTarget;
+  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
 
   // Create a token with write rights
   const writeTokenResult = await createToken(

@@ -53,7 +53,7 @@ test('collect operation', async () => {
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTarget;
+  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
 
   const settingsTokenResult = await createToken(
     {
@@ -216,7 +216,7 @@ test('normalize and collect operation without breaking its syntax', async () => 
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTarget;
+  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
 
   const settingsTokenResult = await createToken(
     {
@@ -393,7 +393,7 @@ test('number of produced and collected operations should match (no errors)', asy
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTarget;
+  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
 
   const tokenResult = await createToken(
     {
@@ -491,7 +491,7 @@ test('check usage from two selected targets', async () => {
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const staging = projectResult.body.data!.createProject.ok!.createdTarget;
+  const staging = projectResult.body.data!.createProject.ok!.createdTargets[0];
 
   const productionTargetResult = await createTarget(
     {
@@ -685,7 +685,7 @@ test('number of produced and collected operations should match', async () => {
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTarget;
+  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
 
   const tokenResult = await createToken(
     {
