@@ -9,7 +9,7 @@ import {
 } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
 import Redis from 'ioredis';
-import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
+import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify/dist/trpc-server-adapters-fastify.cjs.js';
 import type { CreateFastifyContextOptions } from '@trpc/server/adapters/fastify';
 import { schemaBuilderApiRouter } from './api';
 
