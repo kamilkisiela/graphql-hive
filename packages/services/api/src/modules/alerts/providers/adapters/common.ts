@@ -7,8 +7,8 @@ export interface SchemaChangeNotificationInput {
     project: Pick<Project, 'id' | 'cleanId' | 'name'>;
     target: Pick<Target, 'id' | 'cleanId' | 'name'>;
     schema: Pick<SchemaVersion, 'id' | 'commit' | 'valid'>;
-    changes: readonly Types.SchemaChange[];
-    errors: readonly Types.SchemaError[];
+    changes: Types.SchemaChange[];
+    errors: Types.SchemaError[];
     initial: boolean;
   };
   alert: Alert;

@@ -9,8 +9,11 @@ import {
   startHeartbeats,
 } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
-import type { WebhookInput } from './types';
+import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
+import type { CreateFastifyContextOptions } from '@trpc/server/adapters/fastify';
 import { createScheduler } from './scheduler';
+import { webhooksApiRouter } from './api';
+import type { Context } from './types';
 
 async function main() {
   Sentry.init({
@@ -62,19 +65,13 @@ async function main() {
       },
     });
 
-    server.route<{
-      Body: WebhookInput;
-    }>({
-      method: 'POST',
-      url: '/schedule',
-      async handler(req, res) {
-        try {
-          const job = await schedule(req.body);
-          res.status(200).send({ job: job.id ?? 'unknown' }); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
-        } catch (error) {
-          errorHandler('Failed to schedule a webhook', error as Error, req.log);
-          res.status(500).send(error); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
-        }
+    await server.register(fastifyTRPCPlugin, {
+      prefix: '/trpc',
+      trpcOptions: {
+        router: webhooksApiRouter,
+        createContext({ req }: CreateFastifyContextOptions): Context {
+          return { logger: req.log, errorHandler, schedule };
+        },
       },
     });
 

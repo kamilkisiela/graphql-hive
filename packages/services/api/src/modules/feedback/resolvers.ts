@@ -26,7 +26,6 @@ export const resolvers: FeedbackModule.Resolvers = {
           text: [`Got a feedback from \`${user.email}\``, `> ${feedback}`].join('\n'),
         }),
       ]).catch(error => {
-        console.log('Feedback.sendFeedback error', error);
         Sentry.captureException(error, {
           extra: {
             feedback,

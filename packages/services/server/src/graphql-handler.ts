@@ -10,11 +10,13 @@ import { asyncStorage } from './async-storage';
 import { useSentryUser, extractUserId } from './use-sentry-user';
 import { useHive } from '@graphql-hive/client';
 import { useErrorHandler, Plugin } from '@graphql-yoga/node';
+import hyperid from 'hyperid';
+
+const reqIdGenerate = hyperid({ fixedLength: true });
 
 export interface GraphQLHandlerOptions {
   graphiqlEndpoint: string;
   registry: Registry;
-  onError: (e: Error) => void;
   signature: string;
 }
 
@@ -84,10 +86,6 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
       useSentryUser(),
       useErrorHandler(errors => {
         errors?.map(e => server.logger.error(e));
-
-        for (const error of errors) {
-          options.onError(error);
-        }
       })
     );
   }
@@ -96,6 +94,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
     req: FastifyRequest;
     reply: FastifyReply;
     headers: Record<string, string | string[] | undefined>;
+    requestId?: string | null;
   }>({
     maskedErrors: process.env.ENVIRONMENT === 'prod' || process.env.ENVIRONMENT === 'staging',
     plugins: [
@@ -148,7 +147,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
   });
 
   return async (req, reply) => {
-    const requestIdHeader = req.headers['x-request-id'];
+    const requestIdHeader = req.headers['x-request-id'] ?? reqIdGenerate();
     const requestId = cleanRequestId(requestIdHeader);
 
     await asyncStorage.run(
@@ -160,6 +159,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
           req,
           reply,
           headers: req.headers,
+          requestId,
         });
 
         response.headers.forEach((value, key) => {

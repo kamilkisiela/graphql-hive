@@ -1,4 +1,4 @@
-import { Inject, Injectable, Scope } from 'graphql-modules';
+import { Inject, Injectable, Scope, CONTEXT } from 'graphql-modules';
 import { atomic } from '../../../shared/helpers';
 import { HiveError } from '../../../shared/errors';
 import type { Token } from '../../../shared/entities';
@@ -38,11 +38,18 @@ export class TokenStorage {
   private logger: Logger;
   private tokensService;
 
-  constructor(logger: Logger, @Inject(TOKENS_CONFIG) tokensConfig: TokensConfig) {
+  constructor(
+    logger: Logger,
+    @Inject(TOKENS_CONFIG) tokensConfig: TokensConfig,
+    @Inject(CONTEXT) context: GraphQLModules.ModuleContext
+  ) {
     this.logger = logger.child({ source: 'TokenStorage' });
     this.tokensService = createTRPCClient<TokensApi>({
       url: `${tokensConfig.endpoint}/trpc`,
       fetch,
+      headers: {
+        'x-request-id': context.requestId,
+      },
     });
   }
 

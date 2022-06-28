@@ -56,7 +56,6 @@ export class HttpClient {
         return Promise.resolve(response.body);
       },
       error => {
-        console.log('HttpClient.request error', error);
         console.error(error);
         Sentry.captureException(error);
 

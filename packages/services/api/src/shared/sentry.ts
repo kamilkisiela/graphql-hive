@@ -45,7 +45,6 @@ export function sentry(name: string, addToContext?: (...args: any[]) => SentryCo
           return Promise.resolve(result);
         },
         error => {
-          console.log('sentry decorator error', error);
           Sentry.captureException(error);
           span.setStatus('internal_error');
           span.finish();

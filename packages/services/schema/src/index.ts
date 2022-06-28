@@ -9,7 +9,8 @@ import {
 } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
 import Redis from 'ioredis';
-import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify/dist/trpc-server-adapters-fastify.cjs.js';
+import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
+import type { CreateFastifyContextOptions } from '@trpc/server/adapters/fastify';
 import { schemaBuilderApiRouter } from './api';
 
 async function main() {
@@ -74,17 +75,14 @@ async function main() {
     });
 
     const port = process.env.PORT || 6500;
-    const context = {
-      redis,
-      logger: server.log,
-      errorHandler,
-    };
 
     await server.register(fastifyTRPCPlugin, {
       prefix: '/trpc',
       trpcOptions: {
         router: schemaBuilderApiRouter,
-        createContext: () => context,
+        createContext({ req }: CreateFastifyContextOptions) {
+          return { redis, logger: req.log, errorHandler };
+        },
       },
     });
 

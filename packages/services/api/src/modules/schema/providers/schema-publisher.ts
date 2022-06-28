@@ -573,8 +573,8 @@ export class SchemaPublisher {
     organizationId: string;
     newSchema: Schema;
     schemas: readonly Schema[];
-    changes: readonly Types.SchemaChange[];
-    errors: readonly Types.SchemaError[];
+    changes: Types.SchemaChange[];
+    errors: Types.SchemaError[];
     initial: boolean;
   }) {
     const commits = schemas

@@ -1,4 +1,4 @@
-import { Injectable, Inject } from 'graphql-modules';
+import { Injectable, Inject, Scope, CONTEXT } from 'graphql-modules';
 import { parse } from 'graphql';
 import { Logger } from '../../../shared/providers/logger';
 import { HiveError } from '../../../../shared/errors';
@@ -11,17 +11,26 @@ import { createTRPCClient } from '@trpc/client';
 import { fetch } from 'cross-undici-fetch';
 import type { SchemaBuilderApi } from '@hive/schema';
 
-@Injectable()
+@Injectable({
+  scope: Scope.Operation,
+})
 export class SingleOrchestrator implements Orchestrator {
   type = ProjectType.SINGLE;
   private logger: Logger;
   private schemaService;
 
-  constructor(logger: Logger, @Inject(SCHEMA_SERVICE_CONFIG) serviceConfig: SchemaServiceConfig) {
+  constructor(
+    logger: Logger,
+    @Inject(SCHEMA_SERVICE_CONFIG) serviceConfig: SchemaServiceConfig,
+    @Inject(CONTEXT) context: GraphQLModules.ModuleContext
+  ) {
     this.logger = logger.child({ service: 'SingleOrchestrator' });
     this.schemaService = createTRPCClient<SchemaBuilderApi>({
       url: `${serviceConfig.endpoint}/trpc`,
       fetch,
+      headers: {
+        'x-request-id': context.requestId,
+      },
     });
   }
 

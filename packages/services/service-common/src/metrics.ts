@@ -33,7 +33,6 @@ export async function startMetrics() {
 
         res.send(result); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
       } catch (error) {
-        console.log('metrics error', error);
         res.status(500).send(error); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
       }
     },

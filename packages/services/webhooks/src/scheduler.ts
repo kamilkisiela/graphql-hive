@@ -2,8 +2,36 @@ import * as Sentry from '@sentry/node';
 import { Queue, QueueScheduler, Worker, Job } from 'bullmq';
 import Redis, { Redis as RedisInstance } from 'ioredis';
 import pTimeout from 'p-timeout';
-import type { WebhookInput, Config } from './types';
+import type { Config } from './types';
 import { scheduleWebhook, createWebhookJob } from './jobs';
+
+export interface WebhookInput {
+  endpoint: string;
+  event: {
+    organization: {
+      id: string;
+      cleanId: string;
+      name: string;
+    };
+    project: {
+      id: string;
+      cleanId: string;
+      name: string;
+    };
+    target: {
+      id: string;
+      cleanId: string;
+      name: string;
+    };
+    schema: {
+      id: string;
+      valid: boolean;
+      commit: string;
+    };
+    changes: any[];
+    errors: any[];
+  };
+}
 
 export function createScheduler(config: Config) {
   let redisConnection: RedisInstance | null;

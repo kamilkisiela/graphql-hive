@@ -56,7 +56,6 @@ export const createSentryInterceptor = (): InterceptorType => {
         return null;
       }
 
-      console.log('Sentry interceptor error', error);
       captureException(error, {
         extra: {
           query: context.originalQuery.sql,
