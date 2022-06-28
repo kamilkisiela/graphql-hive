@@ -232,13 +232,10 @@ function validateStitchedSchema(doc: DocumentNode) {
 export function pickOrchestrator(type: SchemaType, redis: RedisInstance, logger: FastifyLoggerInstance) {
   switch (type) {
     case 'federation':
-      logger.debug('Using federation orchestrator');
       return createFederation(redis, logger);
     case 'single':
-      logger.debug('Using single orchestrator');
       return single;
     case 'stitching':
-      logger.debug('Using stitching orchestrator');
       return createStitching(redis, logger);
     default:
       throw new Error(`Unknown schema type: ${type}`);

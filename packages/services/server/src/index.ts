@@ -56,7 +56,6 @@ export async function main() {
       const errorObj = error instanceof Error ? error : errorLike instanceof Error ? errorLike : null;
 
       if (errorObj instanceof Error) {
-        console.log('createErrorHandler', errorObj);
         Sentry.captureException(errorObj, {
           level,
           extra: {
@@ -178,18 +177,6 @@ export async function main() {
       graphiqlEndpoint: graphqlPath,
       registry,
       signature,
-      onError(error) {
-        console.log('graphqlHandler.onError', error);
-        Sentry.captureException(error, {
-          extra: {
-            error,
-            originalError: (error as any).originalError,
-          },
-          level: Sentry.Severity.Error,
-        });
-        graphqlLogger.error(error.message);
-        return graphqlLogger.error(`GraphQL execution failed`, error);
-      },
     });
 
     server.route({

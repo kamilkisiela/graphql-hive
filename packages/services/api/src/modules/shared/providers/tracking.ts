@@ -24,7 +24,6 @@ export class Tracking {
         data: event.data,
       });
     } catch (error) {
-      console.log('Tracking.track error', error);
       Sentry.captureException(error);
     }
   }
