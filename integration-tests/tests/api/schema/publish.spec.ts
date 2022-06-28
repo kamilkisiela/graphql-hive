@@ -1335,7 +1335,6 @@ test('linkToWebsite should be available when publishing initial schema', async (
       : null;
 
   expect(linkToWebsite).toEqual('https://app.graphql-hive.com/foo/foo/development');
-  expect(linkToWebsite).toMatch(/history\/[a-z0-9-]+$/);
 });
 
 test('linkToWebsite should be available when publishing non-initial schema', async () => {

@@ -572,11 +572,11 @@ export class SchemaPublisher {
                 cleanId: target.cleanId,
               },
               version:
-                !isInitialSchema && !!newVersionId
-                  ? {
+                isInitialSchema || !newVersionId
+                  ? undefined
+                  : {
                       id: newVersionId,
-                    }
-                  : undefined,
+                    },
             })
           : null,
     };
