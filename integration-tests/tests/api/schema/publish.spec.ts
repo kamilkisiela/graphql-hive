@@ -1335,5 +1335,5 @@ test('linkToWebsite should be available', async () => {
       : null;
 
   expect(linkToWebsite).toMatch('https://app.graphql-hive.com/foo/foo/experiment/history/');
-  expect(linkToWebsite).toMatch(/history\/[a-z0-9-]+/$);
+  expect(linkToWebsite).toMatch(/history\/[a-z0-9-]+$/);
 });
