@@ -1,4 +1,6 @@
 import type { FastifyLoggerInstance } from '@hive/service-common';
+import type { Job } from 'bullmq';
+import type { WebhookInput } from './scheduler';
 
 export interface Config {
   logger: FastifyLoggerInstance;
@@ -12,30 +14,8 @@ export interface Config {
   backoffDelay: number;
 }
 
-export interface WebhookInput {
-  endpoint: string;
-  event: {
-    organization: {
-      id: string;
-      cleanId: string;
-      name: string;
-    };
-    project: {
-      id: string;
-      cleanId: string;
-      name: string;
-    };
-    target: {
-      id: string;
-      cleanId: string;
-      name: string;
-    };
-    schema: {
-      id: string;
-      valid: boolean;
-      commit: string;
-    };
-    changes: any[];
-    errors: any[];
-  };
+export interface Context {
+  logger: FastifyLoggerInstance;
+  errorHandler(message: string, error: Error, logger?: FastifyLoggerInstance | undefined): void;
+  schedule(webhook: WebhookInput): Promise<Job<any, any, string>>;
 }
