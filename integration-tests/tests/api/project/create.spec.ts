@@ -26,16 +26,19 @@ test('creating a project should result in creating the development, staging and 
   expect(targets).toHaveLength(3);
   expect(targets).toContainEqual(
     expect.objectContaining({
+      cleanId: 'development',
       name: 'development',
     })
   );
   expect(targets).toContainEqual(
     expect.objectContaining({
+      cleanId: 'staging',
       name: 'staging',
     })
   );
   expect(targets).toContainEqual(
     expect.objectContaining({
+      cleanId: 'production',
       name: 'production',
     })
   );

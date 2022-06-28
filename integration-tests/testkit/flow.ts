@@ -107,6 +107,7 @@ export function createProject(input: CreateProjectInput, authToken: string) {
             createdTargets {
               id
               cleanId
+              name
             }
           }
         }
