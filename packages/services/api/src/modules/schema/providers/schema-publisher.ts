@@ -20,7 +20,8 @@ import { OrganizationManager } from '../../organization/providers/organization-m
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { TargetAccessScope } from '../../auth/providers/target-access';
 import { GitHubIntegrationManager } from '../../integrations/providers/github-integration-manager';
-import { SchemaModuleConfig, SCHEMA_MODULE_CONFIG } from './config';
+import type { SchemaModuleConfig } from './config';
+import { SCHEMA_MODULE_CONFIG } from './config';
 
 type CheckInput = Omit<Types.SchemaCheckInput, 'project' | 'organization' | 'target'> & TargetSelector;
 
