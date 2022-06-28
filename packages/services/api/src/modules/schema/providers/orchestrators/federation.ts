@@ -1,4 +1,4 @@
-import { Injectable, Inject } from 'graphql-modules';
+import { Injectable, Inject, Scope, CONTEXT } from 'graphql-modules';
 import { parse } from 'graphql';
 import { Logger } from '../../../shared/providers/logger';
 import { sentry } from '../../../../shared/sentry';
@@ -10,17 +10,26 @@ import { createTRPCClient } from '@trpc/client';
 import { fetch } from 'cross-undici-fetch';
 import type { SchemaBuilderApi } from '@hive/schema';
 
-@Injectable()
+@Injectable({
+  scope: Scope.Operation,
+})
 export class FederationOrchestrator implements Orchestrator {
   type = ProjectType.FEDERATION;
   private logger: Logger;
   private schemaService;
 
-  constructor(logger: Logger, @Inject(SCHEMA_SERVICE_CONFIG) private serviceConfig: SchemaServiceConfig) {
+  constructor(
+    logger: Logger,
+    @Inject(SCHEMA_SERVICE_CONFIG) serviceConfig: SchemaServiceConfig,
+    @Inject(CONTEXT) context: GraphQLModules.ModuleContext
+  ) {
     this.logger = logger.child({ service: 'FederationOrchestrator' });
     this.schemaService = createTRPCClient<SchemaBuilderApi>({
       url: `${serviceConfig.endpoint}/trpc`,
       fetch,
+      headers: {
+        'x-request-id': context.requestId,
+      },
     });
   }
 

@@ -14,7 +14,6 @@ import { useErrorHandler, Plugin } from '@graphql-yoga/node';
 export interface GraphQLHandlerOptions {
   graphiqlEndpoint: string;
   registry: Registry;
-  onError: (e: Error) => void;
   signature: string;
 }
 
@@ -84,10 +83,6 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
       useSentryUser(),
       useErrorHandler(errors => {
         errors?.map(e => server.logger.error(e));
-
-        for (const error of errors) {
-          options.onError(error);
-        }
       })
     );
   }
@@ -96,6 +91,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
     req: FastifyRequest;
     reply: FastifyReply;
     headers: Record<string, string | string[] | undefined>;
+    requestId?: string | null;
   }>({
     maskedErrors: process.env.ENVIRONMENT === 'prod' || process.env.ENVIRONMENT === 'staging',
     plugins: [
@@ -160,6 +156,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
           req,
           reply,
           headers: req.headers,
+          requestId,
         });
 
         response.headers.forEach((value, key) => {
