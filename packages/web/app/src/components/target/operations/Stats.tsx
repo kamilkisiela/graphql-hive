@@ -102,8 +102,8 @@ function fullSeries(
 
 function times<T>(amount: number, f: (index: number) => T) {
   const items: Array<T> = [];
-  for (const i = 0; i < amount; amount++) {
-    items[i] = f(i);
+  for (let i = 0; i < amount; i++) {
+    items.push(f(i));
   }
   return items;
 }
