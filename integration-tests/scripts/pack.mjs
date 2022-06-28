@@ -59,16 +59,18 @@ async function main() {
     });
 
     const lines = stdout.split('\n');
-    const org_filename = path.resolve(cwd, lines[lines.length - 2]);
-    let filename = org_filename.replace(cwd, tarballDir).replace('hive-', '').replace(`-${version}`, '');
+    const sourceFilename = lines[lines.length - 2];
+    const sourceFilePath = path.resolve(cwd, sourceFilename);
+    const targetFilename = sourceFilename.replace('hive-', '').replace(`-${version}`, '');
+    const targetFilePath = path.join(tarballDir, targetFilename);
 
-    if (/-\d+\.\d+\.\d+\.tgz$/.test(filename)) {
+    if (/-\d+\.\d+\.\d+\.tgz$/.test(targetFilePath)) {
       throw new Error(`Build ${name} package first!`);
     }
 
-    await fsExtra.rename(org_filename, filename);
+    await fsExtra.rename(sourceFilePath, targetFilePath);
 
-    return filename;
+    return targetFilePath;
   }
 
   const locations = listBackendPackages();
