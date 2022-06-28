@@ -104,7 +104,7 @@ export function createProject(input: CreateProjectInput, authToken: string) {
               id
               cleanId
             }
-            createdTarget {
+            createdTargets {
               id
               cleanId
             }

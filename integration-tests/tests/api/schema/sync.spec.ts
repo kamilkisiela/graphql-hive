@@ -35,7 +35,7 @@ test('marking only the most recent version as valid result in an update of CDN',
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTarget;
+  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
 
   const tokenResult = await createToken(
     {

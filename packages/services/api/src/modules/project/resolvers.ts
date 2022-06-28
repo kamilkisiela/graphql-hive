@@ -62,11 +62,26 @@ export const resolvers: ProjectModule.Resolvers & { ProjectType: any } = {
         ...input,
         organization,
       });
-      const target = await injector.get(TargetManager).createTarget({
-        name: 'experiment',
-        project: project.id,
-        organization,
-      });
+
+      const targetManager = injector.get(TargetManager);
+
+      const targets = await Promise.all([
+        targetManager.createTarget({
+          name: 'production',
+          project: project.id,
+          organization,
+        }),
+        targetManager.createTarget({
+          name: 'staging',
+          project: project.id,
+          organization,
+        }),
+        targetManager.createTarget({
+          name: 'development',
+          project: project.id,
+          organization,
+        }),
+      ]);
 
       return {
         ok: {
@@ -75,7 +90,7 @@ export const resolvers: ProjectModule.Resolvers & { ProjectType: any } = {
             project: project.cleanId,
           },
           createdProject: project,
-          createdTarget: target,
+          createdTargets: targets,
         },
       };
     },

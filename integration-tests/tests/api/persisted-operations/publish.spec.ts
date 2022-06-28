@@ -22,7 +22,7 @@ test('can publish persisted operations only with project:operations-store:write'
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTarget;
+  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
 
   // Create a token with no rights
   const noAccessTokenResult = await createToken(
@@ -127,7 +127,7 @@ test('should skip on already persisted operations', async () => {
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTarget;
+  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
 
   // Create a token with write rights
   const writeTokenResult = await createToken(

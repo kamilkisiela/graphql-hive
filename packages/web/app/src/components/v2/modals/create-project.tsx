@@ -19,7 +19,7 @@ const CreateProjectMutation = gql(/* GraphQL */ `
         createdProject {
           ...ProjectFields
         }
-        createdTarget {
+        createdTargets {
           ...TargetFields
         }
       }

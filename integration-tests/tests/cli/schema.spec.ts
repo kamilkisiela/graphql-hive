@@ -34,7 +34,7 @@ test('can publish and check a schema with target:registry:read access', async ()
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTarget;
+  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
 
   // Create a token with write rights
   const writeTokenResult = await createToken(
@@ -94,7 +94,7 @@ test('service url should be available in supergraph', async () => {
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTarget;
+  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
 
   // Create a token with write rights
   const writeTokenResult = await createToken(
@@ -163,7 +163,7 @@ test('service url should be required in Federation', async () => {
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTarget;
+  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
 
   // Create a token with write rights
   const writeTokenResult = await createToken(
@@ -221,7 +221,7 @@ test('schema:check should notify user when registry is empty', async () => {
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTarget;
+  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
 
   // Create a token with write rights
   const writeTokenResult = await createToken(
@@ -267,7 +267,7 @@ test('schema:check should throw on corrupted schema', async () => {
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTarget;
+  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
 
   // Create a token with write rights
   const writeTokenResult = await createToken(

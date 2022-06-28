@@ -38,7 +38,7 @@ test('cannot set a scope on a token if user has no access to that scope', async 
 
   const member = joinResult.body.data!.joinOrganization.organization.me;
   const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTarget;
+  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
 
   // Give access to tokens
   await updateMemberAccess(
