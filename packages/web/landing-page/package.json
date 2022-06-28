@@ -7,7 +7,7 @@
     "build": "bob runify --single"
   },
   "dependencies": {
-    "next": "12.1.6",
+    "next": "12.2.0",
     "@theguild/components": "1.12.0-alpha-f2032ea.0",
     "framer-motion": "^6.3.3",
     "react": "17.0.2",

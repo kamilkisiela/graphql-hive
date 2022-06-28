@@ -1,0 +1,44 @@
+diff --git a/node_modules/bob-the-bundler/dist/commands/runify.js b/node_modules/bob-the-bundler/dist/commands/runify.js
+index a44025b..e1deb51 100644
+--- a/node_modules/bob-the-bundler/dist/commands/runify.js
++++ b/node_modules/bob-the-bundler/dist/commands/runify.js
+@@ -148,33 +148,14 @@ async function buildNext(cwd) {
+     });
+     await fs_extra_1.default.mkdirp(path_1.join(cwd, "dist"));
+     await Promise.all([
+-        fs_extra_1.default.copy(path_1.join(cwd, ".next"), path_1.join(cwd, "dist/.next"), {
+-            filter(src) {
+-                // copy without webpack cache (it's 900mb...)
+-                return src.includes("cache/webpack") === false;
+-            },
+-        }),
++        fs_extra_1.default.copy(path_1.join(cwd, ".next/standalone"), path_1.join(cwd, "dist")),
++        fs_extra_1.default.copy(path_1.join(cwd, ".next/static"), path_1.join(cwd, "dist/.next/static")),
+         fs_extra_1.default.copy(path_1.join(cwd, "public"), path_1.join(cwd, "dist/public")),
+-        fs_extra_1.default.writeFile(path_1.join(cwd, "dist/index.js"), [
+-            `#!/usr/bin/env node`,
+-            `process.on('SIGTERM', () => process.exit(0))`,
+-            `process.on('SIGINT', () => process.exit(0))`,
+-            `
+-          require('next/dist/server/lib/start-server').startServer({
+-            dir: __dirname,
+-            hostname: '0.0.0.0',
+-            port: parseInt(process.env.PORT)
+-          }).then(async (app)=>{
+-            const appUrl = 'http://' + app.hostname + ':' + app.port;
+-            console.log('started server on '+ app.hostname + ':' + app.port + ', url: ' + appUrl);
+-            await app.prepare();
+-          }).catch((err)=>{
+-            console.error(err);
+-            process.exit(1);
+-          })
+-        `,
+-        ].join("\n")),
+     ]);
++    await fs_extra_1.default.writeFile(path_1.join(cwd, "dist/index.js"), [
++        `#!/usr/bin/env node`,
++        `require("./server.js")`,
++    ].join("\n"))
+ }
+ async function compile(cwd, entryPoint, buildOptions, dependencies, useEsm = false) {
+     if (buildOptions.tsup) {
