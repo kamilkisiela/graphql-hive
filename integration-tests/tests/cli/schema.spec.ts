@@ -240,7 +240,11 @@ test('schema:publish should print a link to the website', async () => {
   expect(writeTokenResult.body.errors).not.toBeDefined();
   const writeToken = writeTokenResult.body.data!.createToken.ok!.secret;
 
-  await expect(schemaCheck(['--token', writeToken, 'fixtures/init-schema.graphql'])).resolves.toMatch(
+  await expect(schemaPublish(['--token', writeToken, 'fixtures/init-schema.graphql'])).resolves.toMatch(
+    'Available at https://app.graphql-hive.com/foo/foo/development'
+  );
+
+  await expect(schemaPublish(['--token', writeToken, 'fixtures/nonbreaking-schema.graphql'])).resolves.toMatch(
     'Available at https://app.graphql-hive.com/foo/foo/development/history/'
   );
 });

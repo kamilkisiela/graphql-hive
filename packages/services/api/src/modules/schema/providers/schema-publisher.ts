@@ -559,7 +559,8 @@ export class SchemaPublisher {
       changes,
       message: updates.length ? updates.join('\n') : null,
       linkToWebsite:
-        typeof this.schemaModuleConfig.schemaPublishLink === 'function' && typeof newVersionId === 'string'
+        typeof this.schemaModuleConfig.schemaPublishLink === 'function' &&
+        (typeof newVersionId === 'string' || isInitialSchema)
           ? this.schemaModuleConfig.schemaPublishLink({
               organization: {
                 cleanId: project.cleanId,
@@ -570,9 +571,11 @@ export class SchemaPublisher {
               target: {
                 cleanId: target.cleanId,
               },
-              version: {
-                id: newVersionId,
-              },
+              version: newVersionId
+                ? {
+                    id: newVersionId,
+                  }
+                : undefined,
             })
           : null,
     };

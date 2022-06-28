@@ -173,14 +173,13 @@ export async function main() {
         typeof process.env.WEB_APP_URL === 'string'
           ? {
               schemaPublishLink(input) {
-                return [
-                  process.env.WEB_APP_URL,
-                  input.organization.cleanId,
-                  input.project.cleanId,
-                  input.target.cleanId,
-                  'history',
-                  input.version.id,
-                ].join('/');
+                let url = `${process.env.WEB_APP_URL}/${input.organization.cleanId}/${input.project.cleanId}/${input.target.cleanId}`;
+
+                if (input.version) {
+                  url += `/history/${input.version}`;
+                }
+
+                return url;
               },
             }
           : {},

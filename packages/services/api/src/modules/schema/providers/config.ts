@@ -11,7 +11,7 @@ export interface SchemaModuleConfig {
     target: {
       cleanId: string;
     };
-    version: {
+    version?: {
       id: string;
     };
   }): string;
