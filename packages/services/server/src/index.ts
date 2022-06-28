@@ -169,6 +169,21 @@ export async function main() {
         token: ensureEnv('FEEDBACK_SLACK_TOKEN'),
         channel: ensureEnv('FEEDBACK_SLACK_CHANNEL'),
       },
+      schemaConfig:
+        typeof process.env.WEB_APP_URL === 'string'
+          ? {
+              schemaPublishLink(input) {
+                return [
+                  process.env.WEB_APP_URL,
+                  input.organization.cleanId,
+                  input.project.cleanId,
+                  input.target.cleanId,
+                  'history',
+                  input.version.id,
+                ].join('/');
+              },
+            }
+          : {},
     });
     const graphqlPath = '/graphql';
     const port = process.env.PORT || 4000;

@@ -202,7 +202,8 @@ services:
       AUTH0_CLIENT_SECRET: ${AUTH0_CLIENT_SECRET}
       AUTH0_SCOPE: 'openid profile offline_access'
       AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
-      AUTH0_CONNECTION: ${AUTH0_CONNECTION}
+      AUTH0_CONNECTION: ${AUTH0_CONNECTION}\
+      WEB_APP_URL: https://app.graphql-hive.com
       PORT: 3001
 
   schema:

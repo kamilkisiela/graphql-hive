@@ -1271,3 +1271,69 @@ test('CDN data can be fetched with an valid access token', async () => {
 
   expect(cdnResult.status).toEqual(200);
 });
+
+test('linkToWebsite should be available', async () => {
+  const { access_token: owner_access_token } = await authenticate('main');
+  const orgResult = await createOrganization(
+    {
+      name: 'foo',
+    },
+    owner_access_token
+  );
+
+  // Join
+  const { access_token: member_access_token } = await authenticate('extra');
+  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+  const code = org.inviteCode;
+  await joinOrganization(code, member_access_token);
+
+  const projectResult = await createProject(
+    {
+      organization: org.cleanId,
+      type: ProjectType.Single,
+      name: 'foo',
+    },
+    owner_access_token
+  );
+
+  const project = projectResult.body.data!.createProject.ok!.createdProject;
+  const targets = projectResult.body.data!.createProject.ok!.createdTargets;
+  const target = targets.find(t => t.name === 'development')!;
+
+  const tokenResult = await createToken(
+    {
+      name: 'test',
+      organization: org.cleanId,
+      project: project.cleanId,
+      target: target.cleanId,
+      organizationScopes: [],
+      projectScopes: [],
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+    },
+    owner_access_token
+  );
+
+  expect(tokenResult.body.errors).not.toBeDefined();
+
+  const token = tokenResult.body.data!.createToken.ok!.secret;
+
+  const result = await publishSchema(
+    {
+      author: 'Kamil',
+      commit: 'abc123',
+      sdl: `type Query { ping: String }`,
+    },
+    token
+  );
+
+  expect(result.body.errors).not.toBeDefined();
+  expect(result.body.data!.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+  const linkToWebsite =
+    result.body.data!.schemaPublish.__typename === 'SchemaPublishSuccess'
+      ? result.body.data!.schemaPublish.linkToWebsite
+      : null;
+
+  expect(linkToWebsite).toMatch('https://app.graphql-hive.com/foo/foo/experiment/history/');
+  expect(linkToWebsite).toMatch(/history\/[a-z0-9-]+/$);
+});
