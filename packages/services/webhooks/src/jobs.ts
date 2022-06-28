@@ -1,7 +1,8 @@
 import { createHash } from 'crypto';
 import { got } from 'got';
 import type { Queue, Job } from 'bullmq';
-import type { Config, WebhookInput } from './types';
+import type { Config } from './types';
+import type { WebhookInput } from './scheduler';
 
 export async function scheduleWebhook({
   queue,
