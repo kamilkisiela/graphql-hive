@@ -1414,3 +1414,26 @@ test('linkToWebsite should be available when publishing non-initial schema', asy
   expect(linkToWebsite).toMatch('https://app.graphql-hive.com/foo/foo/development/history/');
   expect(linkToWebsite).toMatch(/history\/[a-z0-9-]+$/);
 });
+
+test('cannot do API request with invalid access token', async () => {
+  const orgResult = await publishSchema(
+    {
+      commit: '1',
+      sdl: 'type Query { smokeBangBang: String }',
+      author: 'Kamil',
+    },
+    'foobars'
+  );
+  expect(orgResult).toEqual({
+    body: {
+      data: null,
+      errors: [
+        {
+          message: 'Invalid token provided!',
+          path: ['schemaPublish'],
+        },
+      ],
+    },
+    status: 200,
+  });
+});
