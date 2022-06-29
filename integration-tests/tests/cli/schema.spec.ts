@@ -1,4 +1,5 @@
 import { TargetAccessScope, ProjectType } from '@app/gql/graphql';
+import { createHash } from 'node:crypto';
 import { schemaPublish, schemaCheck } from '../../testkit/cli';
 import { authenticate } from '../../testkit/auth';
 import {
@@ -341,4 +342,35 @@ test('schema:check should throw on corrupted schema', async () => {
   const output = schemaCheck(['--token', writeToken, 'fixtures/missing-type.graphql']);
 
   await expect(output).rejects.toThrowError('Unknown type');
+});
+
+test('schema:publish should see Invalid Token error when token is invalid', async () => {
+  const { access_token: owner_access_token } = await authenticate('main');
+  const orgResult = await createOrganization(
+    {
+      name: 'foo',
+    },
+    owner_access_token
+  );
+  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+  const code = org.inviteCode;
+
+  // Join
+  const { access_token: member_access_token } = await authenticate('extra');
+  await joinOrganization(code, member_access_token);
+
+  await createProject(
+    {
+      organization: org.cleanId,
+      type: ProjectType.Single,
+      name: 'foo',
+    },
+    owner_access_token
+  );
+
+  const token = createHash('md5').update('nope').digest('hex').substring(0, 31);
+
+  const output = schemaPublish(['--token', token, 'fixtures/init-schema.graphql']);
+
+  await expect(output).rejects.toThrowError('Invalid token provided');
 });
