@@ -24,7 +24,7 @@ export const Badge = ({
           yellow: 'border-yellow-900 bg-yellow-500',
           green: 'border-green-900 bg-green-500',
           gray: 'border-gray-900 bg-gray-500',
-          orange: 'bg-orange-500 border-orange-900',
+          orange: 'border-orange-900 bg-orange-500',
           // TODO: add variants and uncomment https://javisperez.github.io/tailwindcolorshades/?jumbo=7f818c&alizarin-crimson=ed2e39
           // cyan: 'bg-cyan-500 border-cyan-900',
           // purple: 'border-purple-900 bg-purple-500',

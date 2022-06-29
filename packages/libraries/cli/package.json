@@ -52,15 +52,13 @@
     "colors": "1.4.0",
     "env-ci": "7.1.0",
     "git-parse": "2.1.1",
+    "graphql": "^16.0.0",
     "graphql-request": "4.1.0",
     "graphql-tag": "2.12.6",
     "log-symbols": "4.1.0",
     "mkdirp": "1.0.4",
     "tslib": "2.3.1",
     "ts-node": "10.7.0"
-  },
-  "peerDependencies": {
-    "graphql": "^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0"
   },
   "devDependencies": {
     "oclif": "^3.0.1",

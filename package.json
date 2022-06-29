@@ -19,7 +19,7 @@
     "prerelease": "yarn build:libraries",
     "release": "changeset publish",
     "test": "jest",
-    "lint": "eslint --ignore-path .gitignore \"packages/**/*.{ts,tsx}\"",
+    "lint": "eslint --cache --ignore-path .gitignore \"packages/**/*.{ts,tsx}\"",
     "prettier": "prettier --cache --write --list-different .",
     "lint:prettier": "prettier --cache --check .",
     "setup": "yarn workspace @hive/storage run setup",
