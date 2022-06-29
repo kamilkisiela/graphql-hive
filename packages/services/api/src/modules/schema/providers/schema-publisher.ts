@@ -551,6 +551,26 @@ export class SchemaPublisher {
       });
     }
 
+    const linkToWebsite =
+      typeof this.schemaModuleConfig.schemaPublishLink === 'function' && typeof newVersionId === 'string'
+        ? this.schemaModuleConfig.schemaPublishLink({
+            organization: {
+              cleanId: project.cleanId,
+            },
+            project: {
+              cleanId: project.cleanId,
+            },
+            target: {
+              cleanId: target.cleanId,
+            },
+            version: isInitialSchema
+              ? undefined
+              : {
+                  id: newVersionId,
+                },
+          })
+        : null;
+
     return {
       __typename: valid ? ('SchemaPublishSuccess' as const) : ('SchemaPublishError' as const),
       initial: isInitialSchema,
@@ -558,27 +578,7 @@ export class SchemaPublisher {
       errors,
       changes,
       message: updates.length ? updates.join('\n') : null,
-      linkToWebsite:
-        typeof this.schemaModuleConfig.schemaPublishLink === 'function' &&
-        (typeof newVersionId === 'string' || isInitialSchema)
-          ? this.schemaModuleConfig.schemaPublishLink({
-              organization: {
-                cleanId: project.cleanId,
-              },
-              project: {
-                cleanId: project.cleanId,
-              },
-              target: {
-                cleanId: target.cleanId,
-              },
-              version:
-                isInitialSchema || !newVersionId
-                  ? undefined
-                  : {
-                      id: newVersionId,
-                    },
-            })
-          : null,
+      linkToWebsite,
     };
   }
 

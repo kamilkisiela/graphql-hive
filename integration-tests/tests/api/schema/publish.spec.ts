@@ -1382,11 +1382,23 @@ test('linkToWebsite should be available when publishing non-initial schema', asy
 
   const token = tokenResult.body.data!.createToken.ok!.secret;
 
-  const result = await publishSchema(
+  let result = await publishSchema(
     {
       author: 'Kamil',
       commit: 'abc123',
       sdl: `type Query { ping: String }`,
+    },
+    token
+  );
+
+  expect(result.body.errors).not.toBeDefined();
+  expect(result.body.data!.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+  result = await publishSchema(
+    {
+      author: 'Kamil',
+      commit: 'abc123',
+      sdl: `type Query { ping: String pong: String }`,
     },
     token
   );
