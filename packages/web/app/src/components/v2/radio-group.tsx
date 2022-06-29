@@ -15,13 +15,13 @@ export const Radio = ({ children, className, ...props }: RadioGroupItemProps): R
     <Item
       className={clsx(
         `
-        hover:border-orange-500/50
         radix-state-checked:border-orange-500
         relative
         overflow-hidden
         rounded-sm
         border
         text-left
+        hover:border-orange-500/50
         focus:ring
         `,
         className

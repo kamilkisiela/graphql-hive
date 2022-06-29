@@ -74,7 +74,7 @@ const Modal: FC<{
           {children}
 
           <Close asChild>
-            <Button className="hover:text-orange-500 absolute top-5 right-5 text-gray-500 hover:border-gray-500">
+            <Button className="absolute top-5 right-5 text-gray-500 hover:border-gray-500 hover:text-orange-500">
               <XIcon />
             </Button>
           </Close>
