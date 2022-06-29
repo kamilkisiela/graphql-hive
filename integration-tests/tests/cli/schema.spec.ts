@@ -353,11 +353,6 @@ test('schema:publish should see Invalid Token error when token is invalid', asyn
     owner_access_token
   );
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
-  const code = org.inviteCode;
-
-  // Join
-  const { access_token: member_access_token } = await authenticate('extra');
-  await joinOrganization(code, member_access_token);
 
   await createProject(
     {
