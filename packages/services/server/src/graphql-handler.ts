@@ -96,7 +96,6 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
     headers: Record<string, string | string[] | undefined>;
     requestId?: string | null;
   }>({
-    maskedErrors: process.env.ENVIRONMENT === 'prod' || process.env.ENVIRONMENT === 'staging',
     plugins: [
       ...additionalPlugins,
       useAuth0({
