@@ -197,7 +197,7 @@ test('service url should be required in Federation', async () => {
   ).rejects.toThrowError(/url/);
 });
 
-test('schema:publish should print a link to the website', async () => {
+test.skip('schema:publish should print a link to the website', async () => {
   const { access_token: owner_access_token } = await authenticate('main');
   const orgResult = await createOrganization(
     {
