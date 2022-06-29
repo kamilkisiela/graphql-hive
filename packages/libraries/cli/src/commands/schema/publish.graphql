@@ -5,6 +5,7 @@ mutation schemaPublish($input: SchemaPublishInput!, $usesGitHubApp: Boolean!) {
       initial
       valid
       successMessage: message
+      linkToWebsite
       changes {
         nodes {
           message
@@ -15,6 +16,7 @@ mutation schemaPublish($input: SchemaPublishInput!, $usesGitHubApp: Boolean!) {
     }
     ... on SchemaPublishError @skip(if: $usesGitHubApp) {
       valid
+      linkToWebsite
       changes {
         nodes {
           message

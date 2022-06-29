@@ -196,6 +196,59 @@ test('service url should be required in Federation', async () => {
   ).rejects.toThrowError(/url/);
 });
 
+test('schema:publish should print a link to the website', async () => {
+  const { access_token: owner_access_token } = await authenticate('main');
+  const orgResult = await createOrganization(
+    {
+      name: 'foo',
+    },
+    owner_access_token
+  );
+  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+  const code = org.inviteCode;
+
+  // Join
+  const { access_token: member_access_token } = await authenticate('extra');
+  await joinOrganization(code, member_access_token);
+
+  const projectResult = await createProject(
+    {
+      organization: org.cleanId,
+      type: ProjectType.Single,
+      name: 'foo',
+    },
+    owner_access_token
+  );
+
+  const project = projectResult.body.data!.createProject.ok!.createdProject;
+  const targets = projectResult.body.data!.createProject.ok!.createdTargets;
+  const target = targets.find(t => t.name === 'development')!;
+
+  // Create a token with write rights
+  const writeTokenResult = await createToken(
+    {
+      name: 'test',
+      organization: org.cleanId,
+      project: project.cleanId,
+      target: target.cleanId,
+      organizationScopes: [],
+      projectScopes: [],
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+    },
+    owner_access_token
+  );
+  expect(writeTokenResult.body.errors).not.toBeDefined();
+  const writeToken = writeTokenResult.body.data!.createToken.ok!.secret;
+
+  await expect(schemaPublish(['--token', writeToken, 'fixtures/init-schema.graphql'])).resolves.toMatch(
+    'Available at https://app.graphql-hive.com/foo/foo/development'
+  );
+
+  await expect(schemaPublish(['--token', writeToken, 'fixtures/nonbreaking-schema.graphql'])).resolves.toMatch(
+    'Available at https://app.graphql-hive.com/foo/foo/development/history/'
+  );
+});
+
 test('schema:check should notify user when registry is empty', async () => {
   const { access_token: owner_access_token } = await authenticate('main');
   const orgResult = await createOrganization(

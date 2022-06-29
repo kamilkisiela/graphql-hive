@@ -1,4 +1,4 @@
-import { Injectable, Scope } from 'graphql-modules';
+import { Injectable, Inject, Scope } from 'graphql-modules';
 import lodash from 'lodash';
 import type { Span } from '@sentry/types';
 import { Schema, Target, Project, ProjectType, createSchemaObject, Orchestrator } from '../../../shared/entities';
@@ -20,6 +20,8 @@ import { OrganizationManager } from '../../organization/providers/organization-m
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { TargetAccessScope } from '../../auth/providers/target-access';
 import { GitHubIntegrationManager } from '../../integrations/providers/github-integration-manager';
+import type { SchemaModuleConfig } from './config';
+import { SCHEMA_MODULE_CONFIG } from './config';
 
 type CheckInput = Omit<Types.SchemaCheckInput, 'project' | 'organization' | 'target'> & TargetSelector;
 
@@ -52,7 +54,8 @@ export class SchemaPublisher {
     private cdn: CdnProvider,
     private tracking: Tracking,
     private gitHubIntegrationManager: GitHubIntegrationManager,
-    private idempotentRunner: IdempotentRunner
+    private idempotentRunner: IdempotentRunner,
+    @Inject(SCHEMA_MODULE_CONFIG) private schemaModuleConfig: SchemaModuleConfig
   ) {
     this.logger = logger.child({ service: 'SchemaPublisher' });
   }
@@ -498,10 +501,12 @@ export class SchemaPublisher {
       };
     }
 
+    let newVersionId: string | null = null;
+
     // if the schema is valid or the user is forcing the publish, we can go ahead and publish
     if (!hasErrors || isForced) {
       this.logger.debug('Publishing new version');
-      await this.publishNewVersion({
+      const newVersion = await this.publishNewVersion({
         input,
         valid,
         schemas: newSchemas,
@@ -513,6 +518,9 @@ export class SchemaPublisher {
         errors,
         initial: isInitialSchema,
       });
+
+      newVersionId = newVersion.id;
+
       await this.publishToCDN({
         valid,
         target,
@@ -543,6 +551,26 @@ export class SchemaPublisher {
       });
     }
 
+    const linkToWebsite =
+      typeof this.schemaModuleConfig.schemaPublishLink === 'function' && typeof newVersionId === 'string'
+        ? this.schemaModuleConfig.schemaPublishLink({
+            organization: {
+              cleanId: project.cleanId,
+            },
+            project: {
+              cleanId: project.cleanId,
+            },
+            target: {
+              cleanId: target.cleanId,
+            },
+            version: isInitialSchema
+              ? undefined
+              : {
+                  id: newVersionId,
+                },
+          })
+        : null;
+
     return {
       __typename: valid ? ('SchemaPublishSuccess' as const) : ('SchemaPublishError' as const),
       initial: isInitialSchema,
@@ -550,6 +578,7 @@ export class SchemaPublisher {
       errors,
       changes,
       message: updates.length ? updates.join('\n') : null,
+      linkToWebsite,
     };
   }
 
@@ -607,7 +636,7 @@ export class SchemaPublisher {
       }),
     ]);
 
-    this.alertsManager
+    void this.alertsManager
       .triggerSchemaChangeNotifications({
         organization,
         project,
@@ -620,6 +649,8 @@ export class SchemaPublisher {
       .catch(err => {
         this.logger.error('Failed to trigger schema change notifications', err);
       });
+
+    return schemaVersion;
   }
 
   @sentry('SchemaPublisher.publishToCDN')

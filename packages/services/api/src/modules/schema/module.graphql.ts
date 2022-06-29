@@ -161,12 +161,14 @@ export default gql`
   type SchemaPublishSuccess {
     initial: Boolean!
     valid: Boolean!
+    linkToWebsite: String
     message: String
     changes: SchemaChangeConnection
   }
 
   type SchemaPublishError {
     valid: Boolean!
+    linkToWebsite: String
     changes: SchemaChangeConnection
     errors: SchemaErrorConnection!
   }

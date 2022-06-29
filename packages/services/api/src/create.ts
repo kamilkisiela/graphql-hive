@@ -30,6 +30,7 @@ import { feedbackModule } from './modules/feedback';
 import { TokensConfig, TOKENS_CONFIG } from './modules/token/providers/tokens';
 import { WebhooksConfig, WEBHOOKS_CONFIG } from './modules/alerts/providers/tokens';
 import { SchemaServiceConfig, SCHEMA_SERVICE_CONFIG } from './modules/schema/providers/orchestrators/tokens';
+import { provideSchemaModuleConfig, SchemaModuleConfig } from './modules/schema/providers/config';
 import { CDN_CONFIG, CDNConfig } from './modules/cdn/providers/tokens';
 import { cdnModule } from './modules/cdn';
 import { adminModule } from './modules/admin';
@@ -91,6 +92,7 @@ export function createRegistry({
   encryptionSecret,
   feedback,
   billing,
+  schemaConfig,
 }: {
   logger: Logger;
   storage: Storage;
@@ -109,6 +111,7 @@ export function createRegistry({
     channel: string;
   };
   billing: BillingConfig;
+  schemaConfig: SchemaModuleConfig;
 }) {
   return createApplication({
     modules,
@@ -184,6 +187,7 @@ export function createRegistry({
         scope: Scope.Singleton,
       },
       encryptionSecretProvider(encryptionSecret),
+      provideSchemaModuleConfig(schemaConfig),
     ]),
   });
 }

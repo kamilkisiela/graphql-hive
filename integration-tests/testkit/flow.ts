@@ -196,6 +196,7 @@ export function publishSchema(input: SchemaPublishInput, token: string) {
             initial
             valid
             message
+            linkToWebsite
             changes {
               nodes {
                 message
@@ -206,6 +207,7 @@ export function publishSchema(input: SchemaPublishInput, token: string) {
           }
           ... on SchemaPublishError {
             valid
+            linkToWebsite
             changes {
               nodes {
                 message

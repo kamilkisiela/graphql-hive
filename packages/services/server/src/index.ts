@@ -169,6 +169,20 @@ export async function main() {
         token: ensureEnv('FEEDBACK_SLACK_TOKEN'),
         channel: ensureEnv('FEEDBACK_SLACK_CHANNEL'),
       },
+      schemaConfig:
+        typeof process.env.WEB_APP_URL === 'string'
+          ? {
+              schemaPublishLink(input) {
+                let url = `${process.env.WEB_APP_URL}/${input.organization.cleanId}/${input.project.cleanId}/${input.target.cleanId}`;
+
+                if (input.version) {
+                  url += `/history/${input.version.id}`;
+                }
+
+                return url;
+              },
+            }
+          : {},
     });
     const graphqlPath = '/graphql';
     const port = process.env.PORT || 4000;
