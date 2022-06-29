@@ -1,5 +1,12 @@
 # @graphql-hive/cli
 
+## 0.17.0
+
+### Minor Changes
+
+- ae6ae2f: Print link to the website when publishing new schema
+- fa5045f: Use graphql@^16.0.0 as direct dependency
+
 ## 0.16.0
 
 ### Minor Changes
