@@ -1,6 +1,5 @@
 import * as utils from 'dockest/test-helper';
 import axios from 'axios';
-import { isLegacyAuthorizationMode } from './auth';
 
 const usageAddress = utils.getServiceAddress('usage', 3006);
 
@@ -22,11 +21,15 @@ export interface CollectedOperation {
   };
 }
 
-export async function collect(params: { operations: CollectedOperation[]; token: string }) {
+export async function collect(params: {
+  operations: CollectedOperation[];
+  token: string;
+  authorizationHeader?: 'x-api-token' | 'authorization';
+}) {
   const res = await axios.post(`http://${usageAddress}`, params.operations, {
     headers: {
       'Content-Type': 'application/json',
-      ...(isLegacyAuthorizationMode()
+      ...(params.authorizationHeader === 'x-api-token'
         ? {
             'X-API-Token': params.token,
           }

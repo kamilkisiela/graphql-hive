@@ -2,7 +2,6 @@ import * as utils from 'dockest/test-helper';
 import axios from 'axios';
 import type { ExecutionResult } from 'graphql';
 import { TypedDocumentNode } from '@graphql-typed-document-node/core';
-import { isLegacyAuthorizationMode } from './auth';
 
 const registryAddress = utils.getServiceAddress('server', 3001);
 
@@ -12,6 +11,7 @@ export async function execute<R, V>(params: {
   variables?: V;
   authToken?: string;
   token?: string;
+  legacyAuthorizationMode?: boolean;
 }) {
   const res = await axios.post<ExecutionResult<R>>(
     `http://${registryAddress}/graphql`,
@@ -29,7 +29,7 @@ export async function execute<R, V>(params: {
             }
           : {}),
         ...(params.token
-          ? isLegacyAuthorizationMode()
+          ? params.legacyAuthorizationMode
             ? {
                 'X-API-Token': params.token,
               }
