@@ -31,14 +31,8 @@ export default class WhoAmI extends Command {
 
     const result = await this.registryApi(registry, token)
       .myTokenInfo()
-      .catch((error: Error & { response?: any }) => {
-        if ('response' in error) {
-          this.error(error.response.errors[0].message, {
-            ref: this.cleanRequestId(error.response?.headers?.get('x-request-id')),
-          });
-        } else {
-          this.error(error);
-        }
+      .catch(error => {
+        this.handleFetchError(error);
       });
 
     if (result.tokenInfo.__typename === 'TokenInfo') {

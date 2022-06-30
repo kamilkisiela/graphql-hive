@@ -2,7 +2,8 @@ import fs from 'fs';
 import mkdirp from 'mkdirp';
 import path from 'path';
 
-export const graphqlEndpoint = 'https://app.graphql-hive.com/graphql';
+// export const graphqlEndpoint = 'https://app.graphql-hive.com/graphql';
+export const graphqlEndpoint = 'https://app.graphql-hive.com/registry';
 
 export class Config<TValue = any> {
   private cache?: Record<string, TValue>;
