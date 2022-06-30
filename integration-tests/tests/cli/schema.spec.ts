@@ -129,7 +129,8 @@ test('publishing invalid schema SDL provides meaningful feedback for the user.',
     if (err === allocatedError) {
       throw err;
     }
-    expect(String(err)).toContain(`The SDL is not valid at line 1, column 1:\nSyntax Error: Unexpected Name "iliketurtles"`);
+    expect(String(err)).toMatch(`The SDL is not valid at line 1, column 1:`);
+    expect(String(err)).toMatch(`Syntax Error: Unexpected Name "iliketurtles"`);
   }
 });
 
