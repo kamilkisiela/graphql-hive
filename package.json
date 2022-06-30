@@ -18,7 +18,7 @@
     "pre-commit": "lint-staged",
     "prerelease": "yarn build:libraries",
     "release": "changeset publish",
-    "upload-sourcemaps": "find packages/*/*/dist -type d -maxdepth 0 -exec yarn sentry-cli releases files $SENTRY_RELEASE upload-sourcemaps {} --no-rewrite --no-sourcemap-reference --url-prefix {} \\;",
+    "upload-sourcemaps": "./scripts/upload-sourcmaps.sh",
     "test": "jest",
     "lint": "eslint --cache --ignore-path .gitignore \"packages/**/*.{ts,tsx}\"",
     "prettier": "prettier --cache --write --list-different .",
