@@ -1,13 +1,13 @@
 import { Injectable, Inject, Scope } from 'graphql-modules';
 import lodash from 'lodash';
 import type { Span } from '@sentry/types';
-import { Schema, Target, Project, ProjectType, createSchemaObject, Orchestrator } from '../../../shared/entities';
+import { Schema, Target, Project, ProjectType, createSchemaObject, Orchestrator, GraphQLDocumentStringInvalidError } from '../../../shared/entities';
 import * as Types from '../../../__generated__/types';
 import { ProjectManager } from '../../project/providers/project-manager';
 import { Logger } from '../../shared/providers/logger';
 import { updateSchemas } from '../../../shared/schema';
 import { SchemaManager } from './schema-manager';
-import { SchemaValidator } from './schema-validator';
+import { SchemaValidator, ValidationResult } from './schema-validator';
 import { sentry } from '../../../shared/sentry';
 import type { TargetSelector } from '../../shared/providers/storage';
 import { IdempotentRunner } from '../../shared/providers/idempotent-runner';
@@ -22,6 +22,7 @@ import { TargetAccessScope } from '../../auth/providers/target-access';
 import { GitHubIntegrationManager } from '../../integrations/providers/github-integration-manager';
 import type { SchemaModuleConfig } from './config';
 import { SCHEMA_MODULE_CONFIG } from './config';
+import { HiveError } from '../../../shared/errors';
 
 type CheckInput = Omit<Types.SchemaCheckInput, 'project' | 'organization' | 'target'> & TargetSelector;
 
@@ -450,18 +451,29 @@ export class SchemaPublisher {
 
     const isInitialSchema = schemas.length === 0;
 
-    const { errors, changes, valid } = await this.schemaValidator.validate({
-      orchestrator,
-      incoming: incomingSchema,
-      before: schemas,
-      after: newSchemas,
-      selector: {
-        organization: organizationId,
-        project: projectId,
-        target: targetId,
-      },
-      baseSchema: baseSchema,
-    });
+    let result: ValidationResult 
+    
+    try {
+      result = await this.schemaValidator.validate({
+        orchestrator,
+        incoming: incomingSchema,
+        before: schemas,
+        after: newSchemas,
+        selector: {
+          organization: organizationId,
+          project: projectId,
+          target: targetId,
+        },
+        baseSchema: baseSchema,
+      });
+    } catch (err) {
+      if (err instanceof GraphQLDocumentStringInvalidError) {
+        throw new HiveError(err.message);
+      }
+      throw err
+    }
+
+    const { changes, errors, valid } = result;
 
     const hasNewUrl =
       !!latest.version && !!previousSchema && (previousSchema.url ?? null) !== (incomingSchema.url ?? null);

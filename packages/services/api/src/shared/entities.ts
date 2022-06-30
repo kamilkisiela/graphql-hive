@@ -1,4 +1,4 @@
-import type { DocumentNode } from 'graphql';
+import { DocumentNode, GraphQLError, SourceLocation } from 'graphql';
 import type {
   SchemaError,
   AlertChannelType,
@@ -54,9 +54,27 @@ export interface PersistedOperation {
 
 export const emptySource = '*';
 
+export class GraphQLDocumentStringInvalidError extends Error {
+  constructor(message: string, location?: SourceLocation) {
+    const locationString = location ? ` at line ${location.line}, column ${location.column}` : ''
+    super(`The provided SDL is not valid${locationString}\n: ${message}`);
+  }
+}
+
 export function createSchemaObject(schema: Schema): SchemaObject {
+  let document: DocumentNode;
+  
+  try {
+    document = parse(schema.source)
+  }  catch (err) {
+    if (err instanceof GraphQLError) {
+      throw new GraphQLDocumentStringInvalidError(err.message,  err.locations?.[0])
+    }
+    throw err
+  }
+
   return {
-    document: parse(schema.source),
+    document,
     raw: schema.source,
     source: schema.service ?? emptySource,
     url: schema.url ?? null,
