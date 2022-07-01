@@ -137,7 +137,9 @@ export function useRedirect({
     if (!canAccess && entity && !redirectRef.current) {
       redirectRef.current = true;
       const route = redirectTo(router);
-      router.push(route.route, route.as);
+      if (route) {
+        router.push(route.route, route.as);
+      }
     }
   }, [router, canAccess, redirectRef, redirectTo]);
 }
