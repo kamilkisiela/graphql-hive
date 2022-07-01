@@ -9,7 +9,7 @@ type Props = {
   width?: CSSProperties['width'];
 };
 
-export const Skeleton = ({ className, visible, circle, width, ...props }: Props): ReactElement => {
+export const Skeleton = ({ className, visible, circle, width, ...props }: Props): ReactElement | null => {
   if (!visible) {
     return null;
   }
