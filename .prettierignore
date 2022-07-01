@@ -12,3 +12,6 @@ __generated__/
 /packages/web/app/src/gql/gql.d.ts
 /packages/web/app/src/gql/graphql.ts
 /packages/web/app/src/graphql/index.ts
+
+# test fixtures
+integration-tests/fixtures/init-invalid-schema.graphql
