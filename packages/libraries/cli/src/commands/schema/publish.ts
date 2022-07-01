@@ -1,6 +1,6 @@
 import { transformCommentsToDescriptions } from '@graphql-tools/utils';
 import { Flags, Errors } from '@oclif/core';
-import { print } from 'graphql';
+import { GraphQLError, print } from 'graphql';
 import Command from '../../base-command';
 import { gitInfo } from '../../helpers/git';
 import { invariant } from '../../helpers/validation';
@@ -138,12 +138,20 @@ export default class SchemaPublish extends Command {
         throw new Errors.CLIError(`Missing "commit"`);
       }
 
-      const sdl = await loadSchema(file);
-
-      invariant(typeof sdl === 'string' && sdl.length > 0, 'Schema seems empty');
-
-      const transformedSDL = print(transformCommentsToDescriptions(sdl));
-      const minifiedSDL = minifySchema(transformedSDL);
+      let sdl: string;
+      try {
+        const rawSdl = await loadSchema(file);
+        invariant(typeof rawSdl === 'string' && rawSdl.length > 0, 'Schema seems empty');
+        const transformedSDL = print(transformCommentsToDescriptions(rawSdl));
+        sdl = minifySchema(transformedSDL);
+      } catch (err) {
+        if (err instanceof GraphQLError) {
+          const location = err.locations?.[0];
+          const locationString = location ? ` at line ${location.line}, column ${location.column}` : '';
+          throw new Error(`The SDL is not valid${locationString}:\n ${err.message}`);
+        }
+        throw err;
+      }
 
       const result = await this.registryApi(registry, token).schemaPublish({
         input: {
@@ -151,7 +159,7 @@ export default class SchemaPublish extends Command {
           url,
           author,
           commit,
-          sdl: minifiedSDL,
+          sdl,
           force,
           metadata,
           github: usesGitHubApp,

@@ -1,7 +1,7 @@
 import type { RouteHandlerMethod, FastifyRequest, FastifyReply } from 'fastify';
 import { Registry } from '@hive/api';
 import { cleanRequestId } from '@hive/service-common';
-import { createServer } from '@graphql-yoga/node';
+import { createServer, GraphQLYogaError } from '@graphql-yoga/node';
 import { GraphQLError, ValidationContext, ValidationRule, Kind, OperationDefinitionNode, print } from 'graphql';
 import { useGraphQLModules } from '@envelop/graphql-modules';
 import { useAuth0 } from '@envelop/auth0';
@@ -83,10 +83,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
           return args.operationName === 'readiness';
         },
       }),
-      useSentryUser(),
-      useErrorHandler(errors => {
-        errors?.map(e => server.logger.error(e));
-      })
+      useSentryUser()
     );
   }
 
@@ -98,6 +95,15 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
   }>({
     plugins: [
       ...additionalPlugins,
+      useErrorHandler(errors => {
+        for (const error of errors) {
+          // Only log unexpected errors.
+          if (error.originalError instanceof GraphQLYogaError) {
+            continue;
+          }
+          server.logger.error(error);
+        }
+      }),
       useAuth0({
         onError() {},
         domain: process.env.AUTH0_DOMAIN!,

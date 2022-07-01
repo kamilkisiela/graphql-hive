@@ -9,6 +9,7 @@ async function main() {
     logLevel: logLevel.DEBUG,
     jestOpts: {
       runInBand: true,
+      testMatch: process.env.TEST_FILTER ? [`**/${process.env.TEST_FILTER}?(*.)+(spec|test).[jt]s?(x)`] : undefined,
       config: JSON.stringify({
         roots: ['<rootDir>/tests'],
         transform: {

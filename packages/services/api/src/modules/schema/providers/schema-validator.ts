@@ -6,6 +6,11 @@ import { Logger } from '../../shared/providers/logger';
 import { sentry } from '../../../shared/sentry';
 import { Inspector } from './inspector';
 
+export type ValidationResult = {
+  valid: boolean;
+  errors: Array<Types.SchemaError>;
+  changes: Array<Types.SchemaChange>;
+};
 @Injectable({
   scope: Scope.Operation,
 })
@@ -31,7 +36,7 @@ export class SchemaValidator {
     after: readonly Schema[];
     selector: Types.TargetSelector;
     baseSchema: string | null;
-  }) {
+  }): Promise<ValidationResult> {
     this.logger.debug('Validating Schema');
     const existing = findSchema(before, incoming);
     const afterWithBase = after.map((schema, index) => {
