@@ -48,7 +48,7 @@ export function useRouteSelector() {
 
   const update = useCallback(
     (params: Record<string, string | number>) => {
-      const routeParams = router.route.match(/\[[a-z]+\]/gi).map(p => p.replace('[', '').replace(']', ''));
+      const routeParams = router.route.match(/\[[a-z]+\]/gi)?.map(p => p.replace('[', '').replace(']', '')) ?? [];
       const query = {
         ...router.query,
         ...params,
