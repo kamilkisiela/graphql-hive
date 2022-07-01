@@ -22,7 +22,7 @@ export function track(eventName: string, data?: Record<string, any>) {
 
 export function identify(user: UserProfile) {
   if (enabled) {
-    mixpanel.identify(user.sub);
+    mixpanel.identify(user.sub ?? undefined);
     mixpanel.people.set({
       ...('name' in user
         ? {
