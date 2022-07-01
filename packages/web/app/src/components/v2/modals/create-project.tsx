@@ -82,7 +82,7 @@ export const CreateProjectModal = ({
               }),
         },
       });
-      if (data.createProject.ok) {
+      if (data?.createProject.ok) {
         toggleModalOpen();
         push(`/${router.organizationId}/${data.createProject.ok.createdProject.cleanId}`);
       }
