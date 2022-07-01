@@ -29,15 +29,15 @@ import {
 } from '../graphql';
 
 function updateQuery<T, V>(cache: Cache, input: QueryInput<T, V>, recipe: (obj: T) => void) {
-  return cache.updateQuery(input, (data: T) => {
+  return cache.updateQuery(input, (data: T | null) => {
     if (!data) {
       console.error('Query Cache Updater: Empty data', {
         operationName: getOperationName(input.query as TypedDocumentNode),
         variables: input.variables,
       });
-    } else {
-      return produce(data, recipe);
+      return null;
     }
+    return produce(data, recipe);
   });
 }
 
@@ -167,7 +167,7 @@ const createToken: TypedDocumentNodeUpdateResolver<typeof CreateTokenDocument> =
   if (!createToken.ok) {
     return;
   }
-  const selector = createToken.ok.selector;
+  const { selector, createdToken } = createToken.ok;
 
   updateQuery(
     cache,
@@ -182,7 +182,7 @@ const createToken: TypedDocumentNodeUpdateResolver<typeof CreateTokenDocument> =
       },
     },
     data => {
-      data.tokens.nodes.unshift(createToken.ok.createdToken);
+      data.tokens.nodes.unshift(createdToken);
       data.tokens.total += 1;
     }
   );
@@ -219,6 +219,8 @@ const addAlertChannel: TypedDocumentNodeUpdateResolver<typeof AddAlertChannelDoc
     return;
   }
 
+  const { addedAlertChannel } = addAlertChannel.ok;
+
   updateQuery(
     cache,
     {
@@ -231,7 +233,7 @@ const addAlertChannel: TypedDocumentNodeUpdateResolver<typeof AddAlertChannelDoc
       },
     },
     data => {
-      data.alertChannels.unshift(addAlertChannel.ok.addedAlertChannel);
+      data.alertChannels.unshift(addedAlertChannel);
     }
   );
 };
@@ -290,10 +292,15 @@ const deleteSlackIntegration: TypedDocumentNodeUpdateResolver<typeof DeleteSlack
         },
       },
     },
-    data => ({
-      ...data,
-      hasSlackIntegration: false,
-    })
+    data => {
+      if (data === null) {
+        return null;
+      }
+      return {
+        ...data,
+        hasSlackIntegration: false,
+      };
+    }
   );
 };
 const deleteGitHubIntegration: TypedDocumentNodeUpdateResolver<typeof DeleteGitHubIntegrationDocument> = (
@@ -310,10 +317,15 @@ const deleteGitHubIntegration: TypedDocumentNodeUpdateResolver<typeof DeleteGitH
         },
       },
     },
-    data => ({
-      ...data,
-      hasGitHubIntegration: false,
-    })
+    data => {
+      if (data === null) {
+        return null;
+      }
+      return {
+        ...data,
+        hasGitHubIntegration: false,
+      };
+    }
   );
 };
 

@@ -5,6 +5,7 @@ mutation deleteProject($selector: ProjectSelectorInput!) {
       project
     }
     deletedProject {
+      __typename
       id
     }
   }
