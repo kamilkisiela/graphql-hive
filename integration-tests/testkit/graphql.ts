@@ -11,6 +11,7 @@ export async function execute<R, V>(params: {
   variables?: V;
   authToken?: string;
   token?: string;
+  legacyAuthorizationMode?: boolean;
 }) {
   const res = await axios.post<ExecutionResult<R>>(
     `http://${registryAddress}/graphql`,
@@ -28,9 +29,13 @@ export async function execute<R, V>(params: {
             }
           : {}),
         ...(params.token
-          ? {
-              'X-API-Token': params.token,
-            }
+          ? params.legacyAuthorizationMode
+            ? {
+                'X-API-Token': params.token,
+              }
+            : {
+                Authorization: `Bearer ${params.token}`,
+              }
           : {}),
       },
       responseType: 'json',

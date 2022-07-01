@@ -186,7 +186,7 @@ export function updateMemberAccess(input: OrganizationMemberAccessInput, authTok
   });
 }
 
-export function publishSchema(input: SchemaPublishInput, token: string) {
+export function publishSchema(input: SchemaPublishInput, token: string, authHeader?: 'x-api-token' | 'authorization') {
   return execute({
     document: gql(/* GraphQL */ `
       mutation schemaPublish($input: SchemaPublishInput!) {
@@ -229,6 +229,7 @@ export function publishSchema(input: SchemaPublishInput, token: string) {
     variables: {
       input,
     },
+    legacyAuthorizationMode: authHeader === 'x-api-token',
   });
 }
 

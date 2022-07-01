@@ -1,6 +1,7 @@
 import { Flags } from '@oclif/core';
 import colors from 'colors';
 import Command from '../base-command';
+import { graphqlEndpoint } from '../helpers/config';
 
 export default class WhoAmI extends Command {
   static description = 'checks schema';
@@ -19,7 +20,7 @@ export default class WhoAmI extends Command {
     const registry = this.ensure({
       key: 'registry',
       args: flags,
-      defaultValue: 'https://app.graphql-hive.com/registry',
+      defaultValue: graphqlEndpoint,
       env: 'HIVE_REGISTRY',
     });
     const token = this.ensure({
@@ -30,14 +31,8 @@ export default class WhoAmI extends Command {
 
     const result = await this.registryApi(registry, token)
       .myTokenInfo()
-      .catch((error: Error & { response?: any }) => {
-        if ('response' in error) {
-          this.error(error.response.errors[0].message, {
-            ref: this.cleanRequestId(error.response?.headers?.get('x-request-id')),
-          });
-        } else {
-          this.error(error);
-        }
+      .catch(error => {
+        this.handleFetchError(error);
       });
 
     if (result.tokenInfo.__typename === 'TokenInfo') {

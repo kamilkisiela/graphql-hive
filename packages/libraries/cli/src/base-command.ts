@@ -1,7 +1,7 @@
 import { Command, Config as OclifConfig, Errors } from '@oclif/core';
 import colors from 'colors';
 import symbols from 'log-symbols';
-import { GraphQLClient } from 'graphql-request';
+import { GraphQLClient, ClientError } from 'graphql-request';
 import { Config } from './helpers/config';
 import { getSdk } from './sdk';
 
@@ -125,12 +125,39 @@ export default abstract class extends Command {
       new GraphQLClient(registry, {
         headers: {
           'User-Agent': `HiveCLI@${this.config.version}`,
+          // Authorization: `Bearer ${token}`,
           'X-API-Token': token,
           'graphql-client-name': 'Hive CLI',
           'graphql-client-version': this.config.version,
         },
       })
     );
+  }
+
+  handleFetchError(error: unknown): never {
+    if (typeof error === 'string') {
+      return this.error(error);
+    }
+
+    if (error instanceof Error) {
+      if (isClientError(error)) {
+        const errors = error.response?.errors;
+
+        if (Array.isArray(errors) && errors.length > 0) {
+          return this.error(errors[0].message, {
+            ref: this.cleanRequestId(error.response?.headers?.get('x-request-id')),
+          });
+        }
+
+        return this.error(error.message, {
+          ref: this.cleanRequestId(error.response?.headers?.get('x-request-id')),
+        });
+      }
+
+      return this.error(error);
+    }
+
+    return this.error(JSON.stringify(error));
   }
 
   async require<
@@ -143,4 +170,8 @@ export default abstract class extends Command {
       await Promise.all(flags.require.map(mod => import(require.resolve(mod, { paths: [process.cwd()] }))));
     }
   }
+}
+
+function isClientError(error: Error): error is ClientError {
+  return 'response' in error;
 }

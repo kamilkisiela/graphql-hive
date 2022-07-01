@@ -35,7 +35,7 @@ export function createHive(options: HivePluginOptions): HiveClient {
     }
 
     try {
-      let endpoint = 'https://app.graphql-hive.com/registry';
+      let endpoint = 'https://app.graphql-hive.com/graphql';
 
       if (options.reporting && options.reporting.endpoint) {
         endpoint = options.reporting.endpoint;
@@ -82,7 +82,7 @@ export function createHive(options: HivePluginOptions): HiveClient {
         {
           headers: {
             'content-type': 'application/json',
-            'x-api-token': options.token,
+            Authorization: `Bearer ${options.token}`,
           },
           timeout: 30_000,
           decompress: true,

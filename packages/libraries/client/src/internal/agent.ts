@@ -140,7 +140,7 @@ export function createAgent<T>(
           .post(options.endpoint, buffer, {
             headers: {
               'content-type': 'application/json',
-              'x-api-token': options.token,
+              Authorization: `Bearer ${options.token}`,
               'User-Agent': `${options.name}@${version}`,
               ...headers(),
             },

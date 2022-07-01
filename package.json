@@ -18,7 +18,7 @@
     "pre-commit": "lint-staged",
     "prerelease": "yarn build:libraries",
     "release": "changeset publish",
-    "upload-sourcemaps": "./scripts/upload-sourcmaps.sh",
+    "upload-sourcemaps": "./scripts/upload-sourcemaps.sh",
     "test": "jest",
     "lint": "eslint --cache --ignore-path .gitignore \"packages/**/*.{ts,tsx}\"",
     "prettier": "prettier --cache --write --list-different .",

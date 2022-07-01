@@ -21,11 +21,21 @@ export interface CollectedOperation {
   };
 }
 
-export async function collect(params: { operations: CollectedOperation[]; token: string }) {
+export async function collect(params: {
+  operations: CollectedOperation[];
+  token: string;
+  authorizationHeader?: 'x-api-token' | 'authorization';
+}) {
   const res = await axios.post(`http://${usageAddress}`, params.operations, {
     headers: {
       'Content-Type': 'application/json',
-      'X-API-Token': params.token,
+      ...(params.authorizationHeader === 'x-api-token'
+        ? {
+            'X-API-Token': params.token,
+          }
+        : {
+            Authorization: `Bearer ${params.token}`,
+          }),
     },
   });
 
