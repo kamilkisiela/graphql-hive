@@ -1,5 +1,15 @@
 # @graphql-hive/cli
 
+## 0.18.0
+
+### Minor Changes
+
+- 25d6b01: Migrate to Authorization header (previously X-API-Token)
+
+### Patch Changes
+
+- 8035861: Better error messages for SDL syntax errors.
+
 ## 0.17.0
 
 ### Minor Changes

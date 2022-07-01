@@ -2,7 +2,7 @@
   "name": "@hive/api",
   "type": "module",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "license": "MIT",
   "peerDependencies": {
     "graphql": "^16.0.0",

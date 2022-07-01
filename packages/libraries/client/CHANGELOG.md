@@ -1,5 +1,11 @@
 # @graphql-hive/client
 
+## 0.17.0
+
+### Minor Changes
+
+- 25d6b01: Migrate to Authorization header (previously X-API-Token)
+
 ## 0.16.0
 
 ### Minor Changes
