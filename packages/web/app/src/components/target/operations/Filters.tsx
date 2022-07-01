@@ -34,9 +34,22 @@ const OperationsFilter: React.FC<{
   operations: readonly OperationStatsFieldsFragment[];
   selected?: string[];
 }> = ({ onClose, isOpen, onFilter, focusRef, operations, selected }) => {
-  const [selectedItems, setSelectedItems] = React.useState<string[]>(
-    selected?.length > 0 ? selected : operations.map(op => op.operationHash)
-  );
+  function getOperationHashes() {
+    const items: Array<string> = [];
+    for (const op of operations) {
+      if (op.operationHash) {
+        items.push(op.operationHash);
+      }
+    }
+    return items;
+  }
+  const [selectedItems, setSelectedItems] = React.useState<string[]>(() => {
+    if (selected?.length) {
+      return selected;
+    }
+    return getOperationHashes();
+  });
+
   const onSelect = React.useCallback(
     (operationHash: string, selected: boolean) => {
       const itemAt = selectedItems.findIndex(hash => hash === operationHash);
@@ -68,7 +81,7 @@ const OperationsFilter: React.FC<{
   const [visibleOperations, setVisibleOperations] = React.useState(operations);
 
   const selectAll = React.useCallback(() => {
-    setSelectedItems(operations.map(op => op.operationHash));
+    setSelectedItems(getOperationHashes());
   }, [operations]);
   const selectNone = React.useCallback(() => {
     setSelectedItems([]);
@@ -189,7 +202,7 @@ const OperationsFilterContainer: React.FC<{
     return null;
   }
 
-  if (query.fetching || query.error) {
+  if (query.fetching || query.error || !query.data) {
     return <Spinner />;
   }
 
@@ -217,7 +230,9 @@ const OperationRow: React.FC<{
 }> = ({ operation, selected, onSelect, style }) => {
   const requests = useFormattedNumber(operation.count);
   const change = React.useCallback(() => {
-    onSelect(operation.operationHash, !selected);
+    if (operation.operationHash) {
+      onSelect(operation.operationHash, !selected);
+    }
   }, [onSelect, operation.operationHash, selected]);
 
   return (
@@ -241,7 +256,7 @@ export const OperationsFilterTrigger: React.FC<{
   selected?: string[];
 }> = ({ period, onFilter, selected }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const ref = React.useRef();
+  const ref = React.useRef<HTMLButtonElement | null>(null);
 
   return (
     <>
@@ -254,7 +269,7 @@ export const OperationsFilterTrigger: React.FC<{
         bgColor="whiteAlpha.50"
         _hover={{ bgColor: 'whiteAlpha.100' }}
       >
-        <span tw="font-normal">Operations ({selected?.length > 0 ? selected.length : 'all'})</span>
+        <span tw="font-normal">Operations ({selected?.length ? selected.length : 'all'})</span>
       </Button>
       <OperationsFilterContainer
         isOpen={isOpen}
