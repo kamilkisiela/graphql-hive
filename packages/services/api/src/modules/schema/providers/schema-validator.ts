@@ -10,7 +10,7 @@ export type ValidationResult = {
   valid: boolean;
   errors: Array<Types.SchemaError>;
   changes: Array<Types.SchemaChange>;
-}
+};
 @Injectable({
   scope: Scope.Operation,
 })

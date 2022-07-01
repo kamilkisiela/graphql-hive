@@ -1,7 +1,15 @@
 import { Injectable, Inject, Scope } from 'graphql-modules';
 import lodash from 'lodash';
 import type { Span } from '@sentry/types';
-import { Schema, Target, Project, ProjectType, createSchemaObject, Orchestrator, GraphQLDocumentStringInvalidError } from '../../../shared/entities';
+import {
+  Schema,
+  Target,
+  Project,
+  ProjectType,
+  createSchemaObject,
+  Orchestrator,
+  GraphQLDocumentStringInvalidError,
+} from '../../../shared/entities';
 import * as Types from '../../../__generated__/types';
 import { ProjectManager } from '../../project/providers/project-manager';
 import { Logger } from '../../shared/providers/logger';
@@ -451,8 +459,8 @@ export class SchemaPublisher {
 
     const isInitialSchema = schemas.length === 0;
 
-    let result: ValidationResult 
-    
+    let result: ValidationResult;
+
     try {
       result = await this.schemaValidator.validate({
         orchestrator,
@@ -470,7 +478,7 @@ export class SchemaPublisher {
       if (err instanceof GraphQLDocumentStringInvalidError) {
         throw new HiveError(err.message);
       }
-      throw err
+      throw err;
     }
 
     const { changes, errors, valid } = result;

@@ -137,8 +137,8 @@ export default class SchemaPublish extends Command {
       if (!commit) {
         throw new Errors.CLIError(`Missing "commit"`);
       }
-      
-      let sdl: string
+
+      let sdl: string;
       try {
         const rawSdl = await loadSchema(file);
         invariant(typeof rawSdl === 'string' && rawSdl.length > 0, 'Schema seems empty');
@@ -147,10 +147,10 @@ export default class SchemaPublish extends Command {
       } catch (err) {
         if (err instanceof GraphQLError) {
           const location = err.locations?.[0];
-          const locationString = location ? ` at line ${location.line}, column ${location.column}` : ''
-          throw new Error(`The SDL is not valid${locationString}:\n ${err.message}`)
+          const locationString = location ? ` at line ${location.line}, column ${location.column}` : '';
+          throw new Error(`The SDL is not valid${locationString}:\n ${err.message}`);
         }
-        throw err
+        throw err;
       }
 
       const result = await this.registryApi(registry, token).schemaPublish({
