@@ -1,26 +1,24 @@
 import { ReactElement } from 'react';
 import { useRouter } from 'next/router';
-import { useMutation, useQuery } from 'urql';
+import { useMutation } from 'urql';
 
 import { Button, Heading, Modal } from '@/components/v2';
 import { TrashIcon } from '@/components/v2/icon';
-import { DeleteOrganizationDocument, OrganizationsDocument, OrganizationType } from '@/graphql';
+import { DeleteOrganizationDocument, OrganizationFieldsFragment } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
 export const DeleteOrganizationModal = ({
   isOpen,
   toggleModalOpen,
+  organization,
 }: {
   isOpen: boolean;
   toggleModalOpen: () => void;
+  organization: OrganizationFieldsFragment;
 }): ReactElement => {
   const [, mutate] = useMutation(DeleteOrganizationDocument);
   const router = useRouteSelector();
   const { replace } = useRouter();
-  const [organizationsQuery] = useQuery({ query: OrganizationsDocument });
-  const personalOrganization = organizationsQuery.data?.organizations.nodes.find(
-    node => node.type === OrganizationType.Personal
-  );
 
   return (
     <Modal open={isOpen} onOpenChange={toggleModalOpen} className="flex flex-col items-center gap-5">
@@ -45,7 +43,7 @@ export const DeleteOrganizationModal = ({
               },
             });
             toggleModalOpen();
-            replace(`/${personalOrganization.cleanId}`);
+            replace(`/${organization.cleanId}`);
           }}
         >
           Delete
