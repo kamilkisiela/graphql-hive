@@ -53,27 +53,12 @@ const SettingsPage: FC = () => {
         <header className="container flex items-center pb-5">
           <div className="mr-4 rounded-full">
             <Avatar
-              src={user.picture}
+              src={user?.picture ?? null}
               alt="Your profile photo"
               shape="circle"
-              fallback={me?.displayName[0]}
+              fallback={me?.displayName[0] ?? '?'}
               className="!h-[94px] !w-[94px] text-4xl"
             />
-            {/* TODO: changing profile photo currently unavailable */}
-            {/*<div*/}
-            {/*  tw="*/}
-            {/*  opacity-0*/}
-            {/*  absolute inset-0*/}
-            {/*  w-full h-full*/}
-            {/*  flex items-center justify-center*/}
-            {/*  rounded-full*/}
-            {/*  bg-[#0B0D1199]*/}
-            {/*  hover:opacity-100*/}
-            {/*  transition-opacity duration-200*/}
-            {/*"*/}
-            {/*>*/}
-            {/*  <CameraIcon />*/}
-            {/*</div>*/}
           </div>
           <div className="overflow-hidden">
             <Heading size="2xl" className="line-clamp-1">
