@@ -56,7 +56,7 @@ export function OrganizationLayout({
     includeBilling?: boolean;
     includeRateLimit?: boolean;
   }
->): ReactElement {
+>): ReactElement | null {
   const router = useRouteSelector();
   const { push } = useRouter();
   const [isModalOpen, setModalOpen] = useState(false);
@@ -86,16 +86,22 @@ export function OrganizationLayout({
   }, [organizationQuery.error, router]);
 
   useOrganizationAccess({
-    member: organizationQuery.data?.organization.organization?.me,
+    member: organizationQuery.data?.organization?.organization?.me,
     scope: OrganizationAccessScope.Read,
     redirect: true,
   });
 
-  if (organizationQuery.fetching || organizationQuery.error) return null;
+  if (organizationQuery.fetching || organizationQuery.error) {
+    return null;
+  }
 
-  const organization = organizationQuery.data?.organization.organization;
-  const me = organization.me;
+  const organization = organizationQuery.data?.organization?.organization;
+  const me = organization?.me;
   const isRegularOrg = !organization || organization.type === OrganizationType.Regular;
+
+  if (!organization || !me) {
+    return null;
+  }
 
   if (!value) {
     return <>{children({ organization })}</>;
