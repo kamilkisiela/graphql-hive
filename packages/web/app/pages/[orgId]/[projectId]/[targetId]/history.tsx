@@ -50,7 +50,7 @@ const ChangesBlock = ({
 }: {
   changes: SchemaChangeFieldsFragment[];
   criticality: CriticalityLevel;
-}): ReactElement => {
+}): ReactElement | null => {
   const filteredChanges = changes.filter(c => c.criticality === criticality);
 
   if (!filteredChanges.length) {
@@ -71,7 +71,7 @@ const ChangesBlock = ({
   );
 };
 
-const DiffView = ({ view, versionId }: { view: 'sdl' | 'list'; versionId: string }): ReactElement => {
+const DiffView = ({ view, versionId }: { view: 'sdl' | 'list'; versionId: string }): ReactElement | null => {
   const router = useRouteSelector();
   const [compareQuery] = useQuery({
     query: CompareDocument,
@@ -183,7 +183,10 @@ const ListPage = ({
         <Button
           variant="link"
           onClick={() => {
-            onLoadMore(versions.nodes.at(-1).id);
+            const id = versions.nodes.at(-1)?.id;
+            if (typeof id == 'string') {
+              onLoadMore(id);
+            }
           }}
         >
           Load more
@@ -265,14 +268,13 @@ export default function HistoryPage(): ReactElement {
     },
     requestPolicy: 'cache-and-network',
   });
-  const latestVersionId = latestSchemaQuery.data?.target.latestSchemaVersion?.id;
-  const versionId = router.versionId || latestVersionId;
+  const versionId = router.versionId ?? latestSchemaQuery.data?.target?.latestSchemaVersion?.id;
 
   return (
     <>
       <Title title="History" />
-      <TargetLayout value="history" className={latestVersionId ? 'flex h-full items-stretch gap-x-5' : ''}>
-        {() => (latestVersionId ? <Page versionId={versionId} /> : noSchema)}
+      <TargetLayout value="history" className={versionId ? 'flex h-full items-stretch gap-x-5' : ''}>
+        {() => (versionId ? <Page versionId={versionId} /> : noSchema)}
       </TargetLayout>
     </>
   );
