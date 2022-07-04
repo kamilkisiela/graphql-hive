@@ -38,7 +38,7 @@ export const TargetLayout = ({
   value: 'schema' | 'history' | 'operations' | 'laboratory' | 'settings';
   className?: string;
   connect?: ReactNode;
-}): ReactElement => {
+}): ReactElement | null => {
   const [isModalOpen, setModalOpen] = useState(false);
   const toggleModalOpen = useCallback(() => {
     setModalOpen(prevOpen => !prevOpen);
@@ -70,7 +70,7 @@ export const TargetLayout = ({
 
   const targets = targetsQuery.data?.targets;
   const target = targets?.nodes.find(node => node.cleanId === targetId);
-  const org = projectQuery.data?.organization.organization;
+  const org = projectQuery.data?.organization?.organization;
   const project = projectQuery.data?.project;
   const me = org?.me;
 
@@ -103,6 +103,10 @@ export const TargetLayout = ({
 
   if (projectQuery.error || targetsQuery.error) {
     return <QueryError error={projectQuery.error || targetsQuery.error} />;
+  }
+
+  if (!org || !project || !target) {
+    return null;
   }
 
   return (
