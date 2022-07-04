@@ -15,7 +15,7 @@ export const BillingPaymentMethod = ({
   className?: string;
   organizationBilling: OrgBillingInfoFieldsFragment;
   onValidationChange?: (isValid: boolean) => void;
-}): ReactElement => {
+}): ReactElement | null => {
   if (plan !== 'PRO') {
     return null;
   }
