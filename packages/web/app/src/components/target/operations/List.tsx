@@ -78,7 +78,7 @@ const OperationRow: React.FC<{
   operation: Operation;
 }> = ({ operation }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const linkRef = React.useRef();
+  const linkRef = React.useRef<HTMLButtonElement | null>(null);
   const count = useFormattedNumber(operation.requests);
   const percentage = useDecimal(operation.percentage);
   const failureRate = useDecimal(operation.failureRate);
@@ -96,6 +96,9 @@ const OperationRow: React.FC<{
               href="#"
               size="sm"
               variant="link"
+              // TODO: If you have an idea how to solve this TS issue, send a PR :)
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
               ref={linkRef}
               onClick={e => {
                 e.preventDefault();
@@ -306,6 +309,9 @@ const OperationsTable: React.FC<{
         </Thead>
         <Tbody>
           {tableInstance.getRowModel().rows.map(row => {
+            if (!row.original) {
+              return null;
+            }
             return <OperationRow operation={row.original} key={row.original.id} />;
           })}
         </Tbody>
@@ -374,24 +380,30 @@ const OperationsTableContainer: React.FC<{
   fetching?: boolean;
   className?: string;
 }> = ({ operations, operationsFilter, className, fetching }) => {
-  const data = React.useMemo(
-    () =>
-      operations
-        .filter(op => (operationsFilter.length ? operationsFilter.includes(op.operationHash) : true))
-        .map(op => ({
-          id: op.id,
-          name: op.name,
-          kind: op.kind,
-          p90: op.duration.p90,
-          p95: op.duration.p95,
-          p99: op.duration.p99,
-          failureRate: 1 - op.countOk / op.count,
-          requests: op.count,
-          percentage: op.percentage,
-          document: op.document,
-        })),
-    [operations, operationsFilter]
-  );
+  const data = React.useMemo(() => {
+    const records: Array<Operation> = [];
+    for (const op of operations) {
+      if (operationsFilter.length > 0 && op.operationHash) {
+        if (operationsFilter.includes(op.operationHash) === false) {
+          continue;
+        }
+      }
+      records.push({
+        id: op.id,
+        name: op.name,
+        kind: op.kind,
+        p90: op.duration.p90,
+        p95: op.duration.p95,
+        p99: op.duration.p99,
+        failureRate: 1 - op.countOk / op.count,
+        requests: op.count,
+        percentage: op.percentage,
+        document: op.document,
+      });
+    }
+
+    return records;
+  }, [operations, operationsFilter]);
 
   const [pagination, setPagination] = React.useState<PaginationState>({
     pageIndex: 0,
