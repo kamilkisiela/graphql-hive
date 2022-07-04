@@ -24,7 +24,7 @@ export const ProjectLayout = ({
   children(props: { project: ProjectFieldsFragment; organization: OrganizationFieldsFragment }): ReactNode;
   value: 'targets' | 'alerts' | 'settings';
   className?: string;
-}): ReactElement => {
+}): ReactElement | null => {
   const router = useRouteSelector();
   const [isModalOpen, setModalOpen] = useState(false);
   const toggleModalOpen = useCallback(() => {
@@ -59,16 +59,21 @@ export const ProjectLayout = ({
 
   useProjectAccess({
     scope: ProjectAccessScope.Read,
-    member: projectQuery.data?.organization.organization.me,
+    member: projectQuery.data?.organization?.organization.me,
     redirect: true,
   });
 
-  if (projectQuery.fetching || projectQuery.error) return null;
+  if (projectQuery.fetching || projectQuery.error) {
+    return null;
+  }
 
   const project = projectQuery.data?.project;
-  const org = projectQuery.data?.organization.organization;
+  const org = projectQuery.data?.organization?.organization;
   const projects = projectsQuery.data?.projects;
-  const me = org.me;
+
+  if (!org || !project) {
+    return null;
+  }
 
   return (
     <>
@@ -125,14 +130,14 @@ export const ProjectLayout = ({
               <a>Targets</a>
             </Tabs.Trigger>
           </NextLink>
-          {canAccessProject(ProjectAccessScope.Alerts, me) && (
+          {canAccessProject(ProjectAccessScope.Alerts, org.me) && (
             <NextLink passHref href={`/${orgId}/${projectId}/alerts`}>
               <Tabs.Trigger value={TabValue.Alerts} asChild>
                 <a>Alerts</a>
               </Tabs.Trigger>
             </NextLink>
           )}
-          {canAccessProject(ProjectAccessScope.Settings, me) && (
+          {canAccessProject(ProjectAccessScope.Settings, org.me) && (
             <NextLink passHref href={`/${orgId}/${projectId}/settings`}>
               <Tabs.Trigger value={TabValue.Settings} asChild>
                 <a>Settings</a>

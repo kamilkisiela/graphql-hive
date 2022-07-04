@@ -3,7 +3,10 @@ import { useRedirect } from './common';
 
 export { ProjectAccessScope } from '../../graphql';
 
-export function canAccessProject(scope: ProjectAccessScope, member: Pick<MemberFieldsFragment, 'projectAccessScopes'>) {
+export function canAccessProject(
+  scope: ProjectAccessScope,
+  member: Pick<MemberFieldsFragment, 'projectAccessScopes'> | null | undefined
+) {
   if (!member) {
     return false;
   }
@@ -17,7 +20,7 @@ export function useProjectAccess({
   redirect = false,
 }: {
   scope: ProjectAccessScope;
-  member: Pick<MemberFieldsFragment, 'projectAccessScopes'>;
+  member: Pick<MemberFieldsFragment, 'projectAccessScopes'> | null | undefined;
   redirect?: boolean;
 }) {
   const canAccess = canAccessProject(scope, member);

@@ -125,7 +125,7 @@ export function useRedirect({
         as: string;
       }
     | undefined;
-  entity: any;
+  entity?: any;
 }) {
   const router = useRouteSelector();
   const redirectRef = React.useRef(false);
