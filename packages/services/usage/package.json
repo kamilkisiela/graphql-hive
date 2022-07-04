@@ -12,8 +12,8 @@
   "dependencies": {
     "cross-undici-fetch": "0.4.3",
     "@trpc/client": "9.23.2",
-    "@sentry/node": "6.19.7",
-    "@sentry/tracing": "6.19.7",
+    "@sentry/node": "7.5.0",
+    "@sentry/tracing": "7.5.0",
     "ajv": "8.11.0",
     "dotenv": "10.0.0",
     "got": "12.0.4",

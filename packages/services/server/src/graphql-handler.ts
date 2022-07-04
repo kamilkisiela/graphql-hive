@@ -42,11 +42,21 @@ function useNoIntrospection(params: { signature: string }): Plugin<{ req: Fastif
   };
 }
 
-export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMethod => {
-  const additionalPlugins: Plugin<any>[] = [];
+const sampleRatePerOperationName: {
+  [key: string]: number;
+} = {
+  myTokenInfo: 0.1, // collect ~10% of requests
+  schemaPublish: 0.1,
+};
 
-  if (process.env.ENVIRONMENT === 'prod') {
-    additionalPlugins.push(
+export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMethod => {
+  const server = createServer<{
+    req: FastifyRequest;
+    reply: FastifyReply;
+    headers: Record<string, string | string[] | undefined>;
+    requestId?: string | null;
+  }>({
+    plugins: [
       useSentry({
         startTransaction: false,
         renameTransaction: true,
@@ -64,6 +74,17 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
         includeResolverArgs: false,
         includeExecuteVariables: true,
         configureScope(args, scope) {
+          const transaction = scope.getTransaction();
+
+          // Reduce the number of transactions to avoid overloading the Sentry
+          if (transaction && args.operationName && sampleRatePerOperationName[args.operationName]) {
+            const shouldBeDropped = Math.random() > sampleRatePerOperationName[args.operationName];
+
+            if (shouldBeDropped) {
+              transaction.sampled = false;
+            }
+          }
+
           scope.setContext('Extra Info', {
             variables: JSON.stringify(args.variableValues),
             operationName: args.operationName,
@@ -83,18 +104,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
           return args.operationName === 'readiness';
         },
       }),
-      useSentryUser()
-    );
-  }
-
-  const server = createServer<{
-    req: FastifyRequest;
-    reply: FastifyReply;
-    headers: Record<string, string | string[] | undefined>;
-    requestId?: string | null;
-  }>({
-    plugins: [
-      ...additionalPlugins,
+      useSentryUser(),
       useErrorHandler(errors => {
         for (const error of errors) {
           // Only log unexpected errors.

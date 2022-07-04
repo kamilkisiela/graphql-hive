@@ -49,7 +49,7 @@ export async function main() {
     },
   });
 
-  function createErrorHandler(level: Sentry.Severity): LogFn {
+  function createErrorHandler(level: Sentry.SeverityLevel): LogFn {
     return (error: any, errorLike?: any, ...args: any[]) => {
       server.log.error(error, errorLike, ...args);
 
@@ -87,8 +87,8 @@ export async function main() {
   }
 
   try {
-    const errorHandler = createErrorHandler(Sentry.Severity.Error);
-    const fatalHandler = createErrorHandler(Sentry.Severity.Fatal);
+    const errorHandler = createErrorHandler('error');
+    const fatalHandler = createErrorHandler('fatal');
 
     // eslint-disable-next-line no-inner-declarations
     function createGraphQLLogger(binds: Record<string, any> = {}): Logger {
@@ -268,7 +268,7 @@ export async function main() {
   } catch (error) {
     server.log.fatal(error);
     Sentry.captureException(error, {
-      level: Sentry.Severity.Fatal,
+      level: 'fatal',
     });
     process.exit(1);
   }
