@@ -1,24 +1,17 @@
 import { FC, forwardRef } from 'react';
 import {
-  Content,
-  List,
+  Content as TabsContent,
+  List as TabsList,
   Root,
   TabsContentProps,
   TabsListProps,
-  TabsProps,
   TabsTriggerProps,
-  Trigger,
+  Trigger as TabsTrigger,
 } from '@radix-ui/react-tabs';
 import clsx from 'clsx';
 
-const Tabs: FC<TabsProps> & {
-  List?: FC<TabsListProps>;
-  Trigger?: FC<TabsTriggerProps & { hasBorder?: boolean }>;
-  Content?: FC<TabsContentProps>;
-} = Root;
-
-Tabs.List = ({ children, className, ...props }) => (
-  <List
+const List: FC<TabsListProps> = ({ children, className, ...props }) => (
+  <TabsList
     className={clsx(
       `
       relative
@@ -33,12 +26,12 @@ Tabs.List = ({ children, className, ...props }) => (
     {...props}
   >
     {children}
-  </List>
+  </TabsList>
 );
 
-Tabs.Trigger = forwardRef(
+const Trigger: FC<TabsTriggerProps & { hasBorder?: boolean }> = forwardRef(
   ({ children, className, hasBorder = true, ...props }, forwardedRef /* when has asChild prop */) => (
-    <Trigger
+    <TabsTrigger
       ref={forwardedRef as any}
       className={clsx(
         '!appearance-none', // unset button styles in Safari
@@ -57,14 +50,18 @@ Tabs.Trigger = forwardRef(
       {...props}
     >
       {children}
-    </Trigger>
+    </TabsTrigger>
   )
 );
 
-Tabs.Content = ({ children, className, ...props }) => (
-  <Content className={clsx('py-7', className)} {...props}>
+const Content: FC<TabsContentProps> = ({ children, className, ...props }) => (
+  <TabsContent className={clsx('py-7', className)} {...props}>
     {children}
-  </Content>
+  </TabsContent>
 );
 
-export { Tabs };
+export const Tabs = Object.assign(Root, {
+  Content,
+  Trigger,
+  List,
+});
