@@ -26,7 +26,7 @@ const Page = ({
   organization,
 }: {
   organization: OrganizationFieldsFragment & OrgBillingInfoFieldsFragment & OrgRateLimitFieldsFragment;
-}): ReactElement => {
+}): ReactElement | null => {
   const canAccess = useOrganizationAccess({
     scope: OrganizationAccessScope.Settings,
     member: organization?.me,
@@ -81,7 +81,7 @@ const Page = ({
             <OrganizationUsageEstimationView organization={organization} />
           </div>
         </Card>
-        {organization.billingConfiguration?.invoices?.length > 0 && (
+        {organization.billingConfiguration?.invoices?.length && (
           <Card>
             <Heading className="mb-2">Invoices</Heading>
             <div>
