@@ -94,8 +94,6 @@ export default function ProjectsPage(): ReactElement {
     },
   });
 
-  const isLoading = projectsWithTargetsQuery.fetching;
-
   return (
     <>
       <Title title="Projects" />
@@ -104,9 +102,15 @@ export default function ProjectsPage(): ReactElement {
           <>
             <div className="grow">
               <Heading className="mb-4">Active Projects</Heading>
-              {isLoading || projectsWithTargetsQuery.data.projects.total !== 0 ? (
+              {projectsWithTargetsQuery.data?.projects.total === 0 ? (
+                <EmptyList
+                  title="Hive is waiting for your first project"
+                  description='You can create a project by clicking the "Create Project" button'
+                  docsUrl={`${process.env.NEXT_PUBLIC_DOCS_LINK}/get-started/projects`}
+                />
+              ) : (
                 <div className="grid grid-cols-2 gap-5">
-                  {isLoading
+                  {projectsWithTargetsQuery.fetching
                     ? [1, 2].map(key => (
                         <Card key={key}>
                           <div className="flex gap-x-2">
@@ -120,16 +124,10 @@ export default function ProjectsPage(): ReactElement {
                           <Skeleton visible className="h-7" />
                         </Card>
                       ))
-                    : projectsWithTargetsQuery.data.projects.nodes.map(project => (
+                    : projectsWithTargetsQuery.data?.projects.nodes.map(project => (
                         <ProjectCard key={project.id} project={project} />
                       ))}
                 </div>
-              ) : (
-                <EmptyList
-                  title="Hive is waiting for your first project"
-                  description='You can create a project by clicking the "Create Project" button'
-                  docsUrl={`${process.env.NEXT_PUBLIC_DOCS_LINK}/get-started/projects`}
-                />
               )}
             </div>
 
