@@ -17,6 +17,10 @@ export const BillingView: React.FC<{
       {result => {
         const plan = result.data.billingPlans.find(v => v.planType === organization.plan);
 
+        if (plan == null) {
+          return null;
+        }
+
         return (
           <PlanSummary
             retentionInDays={organization.rateLimit.retentionInDays}
