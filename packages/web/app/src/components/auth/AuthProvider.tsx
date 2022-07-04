@@ -22,13 +22,13 @@ declare global {
 function identifyOnCrisp(user: UserProfile): void {
   const crisp = globalThis.window.$crisp;
   if (crisp) {
-    pushIfNotEmpty(crisp, 'user:email', user.email);
-    pushIfNotEmpty(crisp, 'user:nickname', user.name || user.nickname);
-    pushIfNotEmpty(crisp, 'user:avatar', user.picture);
+    pushIfNotEmpty(crisp, 'user:email', user?.email);
+    pushIfNotEmpty(crisp, 'user:nickname', user?.name ?? user?.nickname);
+    pushIfNotEmpty(crisp, 'user:avatar', user?.picture);
   }
 }
 
-function pushIfNotEmpty(crisp: any, key: string, value: string): void {
+function pushIfNotEmpty(crisp: any, key: string, value: string | undefined | null): void {
   if (value) {
     crisp.push(['set', key, value]);
   }
