@@ -30,7 +30,7 @@ const Inner = ({
   organization,
 }: {
   organization: OrganizationFieldsFragment & OrgBillingInfoFieldsFragment;
-}): ReactElement => {
+}): ReactElement | null => {
   const stripe = useStripe();
   const elements = useElements();
   const canAccess = useOrganizationAccess({
@@ -54,8 +54,9 @@ const Inner = ({
     (plan: BillingPlanType) => {
       setPlan(plan);
       if (planSummaryRef.current) {
+        const planSummaryElement = planSummaryRef.current;
         setTimeout(() => {
-          planSummaryRef.current.scrollIntoView({
+          planSummaryElement.scrollIntoView({
             block: 'start',
             behavior: 'smooth',
           });
@@ -64,7 +65,7 @@ const Inner = ({
     },
     [setPlan, planSummaryRef]
   );
-  const [couponCode, setCouponCode] = useState<string | null>(null);
+  const [couponCode, setCouponCode] = useState<string>('');
   const [operationsRateLimit, setOperationsRateLimit] = useState<number>(
     Math.floor(organization.rateLimit.operations / 1_000_000)
   );
@@ -90,18 +91,24 @@ const Inner = ({
   );
 
   useEffect(() => {
-    if (query.data?.billingPlans?.length > 0) {
+    if (query.data?.billingPlans?.length) {
       if (organization.plan !== plan) {
         const actualPlan = query.data.billingPlans.find(v => v.planType === plan);
 
-        setOperationsRateLimit(Math.floor(actualPlan.includedOperationsLimit / 1_000_000));
-        setSchemaPushesLimit(actualPlan.includedSchemaPushLimit);
+        setOperationsRateLimit(Math.floor((actualPlan?.includedOperationsLimit ?? 0) / 1_000_000));
+        setSchemaPushesLimit(actualPlan?.includedSchemaPushLimit ?? 0);
       } else {
-        setOperationsRateLimit(Math.floor(organization.rateLimit.operations / 1_000_000));
+        setOperationsRateLimit(Math.floor((organization.rateLimit.operations ?? 0) / 1_000_000));
         setSchemaPushesLimit(organization.rateLimit.schemaPushes);
       }
     }
-  }, [plan, query.data?.billingPlans]);
+  }, [
+    organization.plan,
+    organization.rateLimit.operations,
+    organization.rateLimit.schemaPushes,
+    plan,
+    query.data?.billingPlans,
+  ]);
 
   if (!canAccess) {
     return null;
@@ -122,10 +129,25 @@ const Inner = ({
     let paymentMethodId: string | null = null;
 
     if (organization.billingConfiguration.paymentMethod === null) {
+      if (stripe === null || elements === null) {
+        // TODO: what to do here?
+        return;
+      }
+      const card = elements.getElement(CardElement);
+
+      if (card === null) {
+        // TODO: what to do here?
+        return;
+      }
       const { paymentMethod } = await stripe.createPaymentMethod({
         type: 'card',
-        card: elements.getElement(CardElement),
+        card,
       });
+
+      if (paymentMethod === undefined) {
+        // TODO: what to do here?
+        return;
+      }
       paymentMethodId = paymentMethod.id;
     }
 
@@ -136,7 +158,7 @@ const Inner = ({
         schemaPushes: schemaPushesRateLimit,
       },
       paymentMethodId: paymentMethodId,
-      couponCode,
+      couponCode: couponCode.trim() === '' ? null : couponCode.trim(),
     });
   };
 
@@ -220,7 +242,8 @@ const Inner = ({
       }
     >
       {result => {
-        const selectedPlan = result.data.billingPlans.find(v => v.planType === plan);
+        // TODO: this is also not safe as billingPlans might be an empty list.
+        const selectedPlan = result.data.billingPlans.find(v => v.planType === plan) ?? result.data.billingPlans[0];
 
         return (
           <div className="flex w-full flex-col gap-5">
@@ -311,7 +334,7 @@ const Inner = ({
                           <Input
                             className="w-full"
                             size="medium"
-                            value={couponCode}
+                            value={couponCode ?? ''}
                             onChange={e => setCouponCode(e.target.value)}
                             placeholder="Code"
                           />
