@@ -47,6 +47,10 @@ function matchScope<T>(list: readonly T[], defaultValue: string, lowerPriority?:
   return defaultValue;
 }
 
+function isBoolean(value: unknown): value is boolean {
+  return typeof value === 'boolean';
+}
+
 function PermissionsSpaceInner(props: Props<OrganizationAccessScope>): React.ReactElement<any, any>;
 function PermissionsSpaceInner(props: Props<ProjectAccessScope>): React.ReactElement<any, any>;
 function PermissionsSpaceInner(props: Props<TargetAccessScope>): React.ReactElement<any, any>;
@@ -62,13 +66,15 @@ function PermissionsSpaceInner<T extends OrganizationAccessScope | ProjectAccess
         <div tw="divide-y-2 divide-gray-100">
           {scopes.map(scope => {
             const possibleScope = [scope.mapping['read-only'], scope.mapping['read-write']].filter(Boolean);
-            const canManageScope = possibleScope.some(checkAccess);
+            const canManageScope = possibleScope.some(isBoolean);
 
             if (!canManageScope) {
               return null;
             }
 
-            const hasReadOnly = !!scope.mapping['read-only'];
+            const readOnlyScope = scope.mapping['read-only'];
+            const hasReadOnly = typeof readOnlyScope !== 'undefined';
+
             const selectedScope = matchScope(
               initialScopes,
               NoAccess,
@@ -103,11 +109,11 @@ function PermissionsSpaceInner<T extends OrganizationAccessScope | ProjectAccess
 
                           if (hasReadOnly) {
                             // Include read-only as well
-                            newScopes.push(scope.mapping['read-only']);
+                            newScopes.push(readOnlyScope);
                           }
-                        } else {
+                        } else if (readOnlyScope) {
                           // just read-only
-                          newScopes.push(scope.mapping['read-only']);
+                          newScopes.push(readOnlyScope);
                         }
 
                         onChange(newScopes);
