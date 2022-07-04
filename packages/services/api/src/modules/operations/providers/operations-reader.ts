@@ -835,6 +835,21 @@ export class OperationsReader {
     });
   }
 
+  async getCoordinatesPerTarget({ target, daysLimit }: { target: string; daysLimit: number }): Promise<string[]> {
+    const result = await this.clickHouse.query<{
+      coordinate: string;
+    }>({
+      query: `
+        SELECT coordinate FROM schema_coordinates_daily
+        ${this.createFilter({ target, extra: [`timestamp >= subtractDays(NOW(), ${daysLimit})`] })}
+        GROUP BY coordinate`,
+      queryId: 'coordinates_per_target',
+      timeout: 15_000,
+    });
+
+    return result.data.map(row => row.coordinate);
+  }
+
   async adminCountOperationsPerTarget({ daysLimit }: { daysLimit: number }) {
     const result = await this.clickHouse.query<{
       total: string;
