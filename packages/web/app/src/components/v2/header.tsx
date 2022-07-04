@@ -89,7 +89,7 @@ export const Header = (): ReactElement => {
           <DropdownMenu.Trigger asChild>
             <Button>
               <ArrowDownIcon className="h-5 w-5 text-gray-500" />
-              <Avatar src={user.picture} shape="circle" className="ml-2.5 border-2 border-gray-900" />
+              <Avatar src={user?.picture} shape="circle" className="ml-2.5 border-2 border-gray-900" />
             </Button>
           </DropdownMenu.Trigger>
 
