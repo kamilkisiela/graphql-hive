@@ -68,8 +68,8 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
     });
   }, [mutate, notify, router.organizationId]);
 
-  const org = organizationMembersQuery.data?.organization.organization;
-  const isPersonal = org && org.type === OrganizationType.Personal;
+  const org = organizationMembersQuery.data?.organization?.organization;
+  const isPersonal = org?.type === OrganizationType.Personal;
   const members = org?.members.nodes;
 
   useEffect(() => {
@@ -84,7 +84,7 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
   if (!org || isPersonal) return null;
 
   const me = meQuery.data?.me;
-  const selectedMember = selectedMemberId && members.find(node => node.id === selectedMemberId);
+  const selectedMember = selectedMemberId ? members?.find(node => node.id === selectedMemberId) : null;
 
   return (
     <>
@@ -124,11 +124,11 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
           <TrashIcon />
         </Button>
       </div>
-      {members.map(node => {
+      {members?.map(node => {
         const IconToUse = authProviderIcons[node.user.provider] ?? KeyIcon;
 
         const isOwner = node.id === org.owner.id;
-        const isMe = node.id === me.id;
+        const isMe = node.id === me?.id;
         const isDisabled = isOwner || isMe;
 
         return (
@@ -140,7 +140,7 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
               checked={checked.includes(node.id)}
               disabled={isDisabled}
             />
-            <Avatar src={isMe ? user.picture : ''} fallback={node.user.displayName[0]} shape="circle" />
+            <Avatar src={isMe ? user?.picture : ''} fallback={node.user.displayName[0]} shape="circle" />
             <div className="grow overflow-hidden">
               <h3 className="line-clamp-1 font-medium">{node.user.displayName}</h3>
               <h4 className="text-sm font-light text-gray-500">{node.user.email}</h4>
