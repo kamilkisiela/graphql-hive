@@ -60,11 +60,11 @@ export const UserSettings: React.FC<{
           input: values,
         });
 
-        if (data.updateMe) {
+        if (data?.updateMe?.ok) {
           formik.resetForm({
             values: {
-              fullName: data.updateMe.ok?.updatedUser.fullName,
-              displayName: data.updateMe.ok?.updatedUser.displayName,
+              fullName: data.updateMe.ok.updatedUser.fullName,
+              displayName: data.updateMe.ok.updatedUser.displayName,
             },
           });
         } else {
@@ -84,7 +84,13 @@ export const UserSettings: React.FC<{
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="xl" closeOnEsc={false} closeOnOverlayClick={false}>
       <ModalOverlay />
-      <ModalContent as="form" onSubmit={formik.handleSubmit}>
+      <ModalContent
+        as="form"
+        // Chakra does not let us use the correct type signature/formik is to strict in it's types.
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        onSubmit={formik.handleSubmit}
+      >
         <ModalHeader>User Settings</ModalHeader>
         <ModalBody>
           <div tw="space-y-6">
