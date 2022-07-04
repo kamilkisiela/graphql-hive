@@ -8,5 +8,6 @@ declare namespace NodeJS {
   export interface ProcessEnv {
     APP_BASE_URL: string;
     GITHUB_APP_NAME: string;
+    GRAPHQL_ENDPOINT: string;
   }
 }

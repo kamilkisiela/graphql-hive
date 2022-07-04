@@ -64,7 +64,7 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
     op: 'app.accessToken',
   });
 
-  let accessToken: string;
+  let accessToken: string | undefined;
 
   try {
     const result = await auth0.getAccessToken(req, res);
