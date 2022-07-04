@@ -53,7 +53,8 @@ export const getActivity = (
   };
 
   const targetLink = 'target' in activity && (
-    <NextLink href={targetHref} passHref>
+    /* TODO: figure out what is going on with targetHref... */
+    <NextLink href={targetHref as any} passHref>
       <Link variant="primary">{activity.target.name}</Link>
     </NextLink>
   );
@@ -173,8 +174,8 @@ export const getActivity = (
       return {
         content: (
           <>
-            {user.displayName} changed{' '}
-            <NextLink href={targetHref} passHref>
+            {user.displayName} changed {/* TODO: figure out what is going on with targetHref... */}
+            <NextLink href={targetHref as any} passHref>
               <Link variant="primary">{activity.value}</Link>
             </NextLink>{' '}
             target name in {projectLink} project
