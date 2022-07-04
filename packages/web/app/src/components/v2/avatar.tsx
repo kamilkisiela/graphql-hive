@@ -1,4 +1,4 @@
-import { ReactElement } from 'react';
+import { ReactElement, ReactNode } from 'react';
 import { Fallback, Image, Root } from '@radix-ui/react-avatar';
 import clsx from 'clsx';
 
@@ -6,11 +6,11 @@ type Size = 'lg' | 'md' | 'sm' | 'xs';
 //           50     40     34     20
 
 type AvatarProps = {
-  src: string;
+  src?: string | null;
   alt?: string;
   shape?: 'circle' | 'square';
   size?: Size;
-  fallback?: any;
+  fallback?: ReactNode;
 };
 
 export const Avatar = ({
@@ -38,7 +38,7 @@ export const Avatar = ({
       )}
       {...props}
     >
-      <Image src={src} alt={alt} className="drag-none h-full w-full object-cover" />
+      <Image src={src ?? undefined} alt={alt} className="drag-none h-full w-full object-cover" />
       {fallback && <Fallback delayMs={500}>{fallback}</Fallback>}
     </Root>
   );
