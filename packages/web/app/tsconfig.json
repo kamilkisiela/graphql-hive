@@ -13,6 +13,7 @@
     "alwaysStrict": true,
     "noImplicitAny": true,
     "strictFunctionTypes": true,
+    "strictNullChecks": true,
 
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
