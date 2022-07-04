@@ -435,4 +435,27 @@ export class OperationsManager {
       operations,
     });
   }
+
+  async readCoordinatesPerTarget({
+    daysLimit,
+    target,
+    project,
+    organization,
+  }: {
+    daysLimit: number;
+  } & TargetSelector): Promise<string[]> {
+    this.logger.info('Reading coordinates per target (target=%s)', target);
+
+    await this.authManager.ensureTargetAccess({
+      organization,
+      project,
+      target,
+      scope: TargetAccessScope.REGISTRY_READ,
+    });
+
+    return this.reader.getCoordinatesPerTarget({
+      target,
+      daysLimit,
+    });
+  }
 }
