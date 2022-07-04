@@ -22,25 +22,17 @@ export const TargetSwitcher: React.FC<{
       },
     },
   });
-  const items = React.useMemo(() => {
-    if (!data?.targets?.nodes) {
-      return [];
-    }
 
-    return data.targets.nodes.map(node => ({
-      key: node.cleanId,
-      label: node.name,
-    }));
+  const currentTarget = React.useMemo(() => {
+    return data?.targets.nodes.find(node => node.cleanId === targetId);
   }, [data]);
 
   const dropdownBgColor = useColorModeValue('white', 'gray.900');
   const dropdownTextColor = useColorModeValue('gray.700', 'gray.300');
 
-  if (!items.length) {
+  if (!currentTarget || !data?.targets.nodes.length) {
     return null;
   }
-
-  const currentTarget = data.targets.nodes.find(node => node.cleanId === targetId);
 
   return (
     <Menu autoSelect={false}>
@@ -48,19 +40,19 @@ export const TargetSwitcher: React.FC<{
         {currentTarget.name}
       </MenuButton>
       <MenuList bg={dropdownBgColor} color={dropdownTextColor}>
-        {items.map(item => {
+        {data.targets.nodes.map(item => {
           return (
             <MenuItem
               onClick={() => {
                 router.visitTarget({
                   organizationId,
                   projectId,
-                  targetId: item.key,
+                  targetId: item.cleanId,
                 });
               }}
-              key={item.key}
+              key={item.cleanId}
             >
-              {item.label}
+              {item.name}
             </MenuItem>
           );
         })}
