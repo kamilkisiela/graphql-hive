@@ -65,9 +65,7 @@ const GitHubIntegration = ({ gitRepository }: { gitRepository: string }): ReactE
     return <Spinner />;
   }
 
-  const hasGitHubIntegration = integrationQuery.data?.hasGitHubIntegration === true;
-
-  if (hasGitHubIntegration) {
+  if (integrationQuery.data?.gitHubIntegration) {
     return (
       <>
         <form className="flex gap-x-2" onSubmit={handleSubmit}>
@@ -82,7 +80,7 @@ const GitHubIntegration = ({ gitRepository }: { gitRepository: string }): ReactE
             value={values.gitRepository}
             onChange={handleChange}
             onBlur={handleBlur}
-            isInvalid={touched.gitRepository && Boolean(errors.gitRepository)}
+            isInvalid={!!touched.gitRepository && Boolean(errors.gitRepository)}
           />
           <Button type="submit" variant="primary" size="large" className="px-10" disabled={isSubmitting}>
             Save
@@ -90,7 +88,7 @@ const GitHubIntegration = ({ gitRepository }: { gitRepository: string }): ReactE
         </form>
         {touched.gitRepository && (errors.gitRepository || mutation.error) && (
           <div className="mt-2 text-red-500">
-            {errors.gitRepository ?? mutation.error.graphQLErrors[0]?.message ?? mutation.error.message}
+            {errors.gitRepository ?? mutation.error?.graphQLErrors[0]?.message ?? mutation.error?.message}
           </div>
         )}
         {mutation.data?.updateProjectGitRepository.error && (
@@ -190,7 +188,7 @@ const Page = ({
         </form>
         {touched.name && (errors.name || mutation.error) && (
           <div className="mt-2 text-red-500">
-            {errors.name ?? mutation.error.graphQLErrors[0]?.message ?? mutation.error.message}
+            {errors.name ?? mutation.error?.graphQLErrors[0]?.message ?? mutation.error?.message}
           </div>
         )}
         {mutation.data?.updateProjectName.error && (
@@ -201,7 +199,7 @@ const Page = ({
       <Card>
         <Heading className="mb-2">Git Repository</Heading>
         <p className="mb-3 font-light text-gray-300">Connect the project with your Git repository</p>
-        <GitHubIntegration gitRepository={project?.gitRepository} />
+        {project?.gitRepository ? <GitHubIntegration gitRepository={project.gitRepository} /> : null}
       </Card>
 
       {canAccessProject(ProjectAccessScope.Delete, organization.me) && (
