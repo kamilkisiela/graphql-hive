@@ -865,10 +865,11 @@ export const OperationsStats: React.FC<{
     },
   });
 
-  const stats = query.data?.operationsStats;
+  if (!query.data) {
+    return null;
+  }
 
-  const totalRequests = stats?.totalRequests;
-  const totalFailures = stats?.totalFailures;
+  const { operationsStats } = query.data;
 
   return (
     <section
@@ -884,46 +885,50 @@ export const OperationsStats: React.FC<{
         tw="rounded-md p-5 ring-1 ring-gray-800 transition bg-gray-900/50"
       >
         <GridItem>
-          <RequestsStats requests={totalRequests} />
+          <RequestsStats requests={operationsStats.totalRequests} />
         </GridItem>
         <GridItem>
-          <RPM requests={totalRequests} period={period} />
+          <RPM requests={operationsStats.totalRequests} period={period} />
         </GridItem>
         <GridItem>
-          <UniqueOperationsStats operations={stats?.totalOperations} />
+          <UniqueOperationsStats operations={operationsStats.totalOperations} />
         </GridItem>
 
         <GridItem rowSpan={2}>
-          <SuccessRateStats requests={totalRequests} totalFailures={totalFailures} />
-          <FailureRateStats requests={totalRequests} totalFailures={totalFailures} />
+          <SuccessRateStats requests={operationsStats.totalRequests} totalFailures={operationsStats.totalFailures} />
+          <FailureRateStats requests={operationsStats.totalRequests} totalFailures={operationsStats.totalFailures} />
         </GridItem>
 
         <GridItem>
-          <PercentileStats value={stats?.duration?.p90} title="Latency p90" />
+          <PercentileStats value={operationsStats?.duration?.p90} title="Latency p90" />
         </GridItem>
         <GridItem>
-          <PercentileStats value={stats?.duration?.p95} title="Latency p95" />
+          <PercentileStats value={operationsStats?.duration?.p95} title="Latency p95" />
         </GridItem>
         <GridItem>
-          <PercentileStats value={stats?.duration?.p99} title="Latency p99" />
+          <PercentileStats value={operationsStats?.duration?.p99} title="Latency p99" />
         </GridItem>
       </Grid>
       <div>
-        <ClientsStats clients={stats?.clients?.nodes} />
+        <ClientsStats clients={operationsStats?.clients?.nodes} />
       </div>
       <div>
         <OverTimeStats
           period={period}
           resolution={resolution}
-          requestsOverTime={stats?.requestsOverTime}
-          failuresOverTime={stats?.failuresOverTime}
+          requestsOverTime={operationsStats?.requestsOverTime}
+          failuresOverTime={operationsStats?.failuresOverTime}
         />
       </div>
       <div>
-        <RpmOverTimeStats period={period} resolution={resolution} requestsOverTime={stats?.requestsOverTime} />
+        <RpmOverTimeStats
+          period={period}
+          resolution={resolution}
+          requestsOverTime={operationsStats?.requestsOverTime}
+        />
       </div>
       <div>
-        <LatencyOverTimeStats period={period} duration={stats?.durationOverTime} resolution={resolution} />
+        <LatencyOverTimeStats period={period} duration={operationsStats?.durationOverTime} resolution={resolution} />
       </div>
       <div>
         <LatencyHistogramStats
