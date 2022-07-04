@@ -137,13 +137,13 @@ export function Navigation() {
             <div tw="hidden sm:block sm:ml-6">
               <div tw="flex space-x-4 items-center ">
                 {organization && <OrganizationSwitcher organizationId={organization} />}
-                {project && (
+                {project && organization && (
                   <>
                     <div tw="text-xl text-gray-200 font-normal select-none">/</div>
                     <ProjectSwitcher organizationId={organization} projectId={project} />
                   </>
                 )}
-                {project && target && (
+                {project && target && organization && (
                   <>
                     <div tw="text-xl text-gray-200 font-normal select-none">/</div>
                     <TargetSwitcher organizationId={organization} projectId={project} targetId={target} />
@@ -166,15 +166,17 @@ export function Navigation() {
                   as={Button}
                   tw="font-normal"
                   variant="ghost"
-                  rightIcon={<img tw="h-6 w-6 rounded-full" src={user.picture} alt={user.name} />}
+                  rightIcon={
+                    <img tw="h-6 w-6 rounded-full" src={user?.picture ?? undefined} alt={user?.name ?? undefined} />
+                  }
                 >
-                  {me?.displayName ?? user.nickname}
+                  {me?.displayName ?? user?.nickname}
                 </MenuButton>
                 <MenuList bg={dropdownBgColor} color={dropdownTextColor}>
                   {me && (
                     <>
                       <MenuItem onClick={settings.onOpen}>Settings</MenuItem>
-                      <UserSettings me={meQuery.data?.me} isOpen={settings.isOpen} onClose={settings.onClose} />
+                      <UserSettings me={me} isOpen={settings.isOpen} onClose={settings.onClose} />
                     </>
                   )}
                   <MenuItem as="a" href="https://calendly.com/d/zjjt-g8zd/hive-feedback">
