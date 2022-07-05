@@ -1437,3 +1437,115 @@ test('cannot do API request with invalid access token', async () => {
     status: 200,
   });
 });
+
+test('publish new schema when a field is moved from one service to another (stitching)', async () => {
+  const { access_token } = await authenticate('main');
+  const orgResult = await createOrganization(
+    {
+      name: 'foo',
+    },
+    access_token
+  );
+
+  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+
+  const projectResult = await createProject(
+    {
+      organization: org.cleanId,
+      type: ProjectType.Stitching,
+      name: 'foo',
+    },
+    access_token
+  );
+
+  const project = projectResult.body.data!.createProject.ok!.createdProject;
+  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
+
+  const tokenResult = await createToken(
+    {
+      name: 'test',
+      organization: org.cleanId,
+      project: project.cleanId,
+      target: target.cleanId,
+      organizationScopes: [],
+      projectScopes: [],
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+    },
+    access_token
+  );
+
+  expect(tokenResult.body.errors).not.toBeDefined();
+
+  const token = tokenResult.body.data!.createToken.ok!.secret;
+
+  // cats service has only one field
+  let result = await publishSchema(
+    {
+      author: 'Kamil',
+      commit: 'cats',
+      sdl: /* GraphQL */ `
+        type Query {
+          randomCat: String
+        }
+      `,
+      service: 'cats',
+    },
+    token
+  );
+
+  expect(result.body.errors).not.toBeDefined();
+  expect(result.body.data!.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+  // dogs service has two fields
+  result = await publishSchema(
+    {
+      author: 'Kamil',
+      commit: 'dogs',
+      sdl: /* GraphQL */ `
+        type Query {
+          randomDog: String
+          randomAnimal: String
+        }
+      `,
+      service: 'dogs',
+    },
+    token
+  );
+
+  expect(result.body.errors).not.toBeDefined();
+  expect(result.body.data!.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+  // cats service has now two fields, randomAnimal is borrowed from dogs service
+  result = await publishSchema(
+    {
+      author: 'Kamil',
+      commit: 'animals',
+      sdl: /* GraphQL */ `
+        type Query {
+          randomCat: String
+          randomAnimal: String
+        }
+      `,
+      service: 'cats',
+    },
+    token
+  );
+
+  // We expect to have a new version, even tough the schema (merged) is the same
+
+  expect(result.body.errors).not.toBeDefined();
+  expect(result.body.data!.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+  const versionsResult = await fetchVersions(
+    {
+      organization: org.cleanId,
+      project: project.cleanId,
+      target: target.cleanId,
+    },
+    3,
+    token
+  );
+
+  expect(versionsResult.body.errors).not.toBeDefined();
+  expect(versionsResult.body.data!.schemaVersions.nodes).toHaveLength(3);
+});
