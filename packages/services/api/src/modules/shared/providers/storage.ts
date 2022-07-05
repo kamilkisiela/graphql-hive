@@ -149,7 +149,7 @@ export interface Storage {
       version: string;
       includeMetadata?: boolean;
     } & TargetSelector
-  ): Promise<readonly Schema[] | never>;
+  ): Promise<Schema[] | never>;
   getSchemasOfPreviousVersion(
     _: {
       version: string;
