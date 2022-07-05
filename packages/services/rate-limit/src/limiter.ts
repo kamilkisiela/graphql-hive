@@ -196,7 +196,7 @@ export function createRateLimiter(config: {
         } catch (error) {
           logger.error(error, `Failed to update rate-limit cache`);
           Sentry.captureException(error, {
-            level: Sentry.Severity.Error,
+            level: 'error',
           });
         }
       }, config.rateLimitConfig.interval);

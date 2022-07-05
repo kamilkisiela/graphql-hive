@@ -115,7 +115,7 @@ async function main() {
 
 main().catch(err => {
   Sentry.captureException(err, {
-    level: Sentry.Severity.Fatal,
+    level: 'fatal',
   });
   console.error(err);
   process.exit(1);

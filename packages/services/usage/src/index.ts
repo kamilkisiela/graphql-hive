@@ -142,7 +142,7 @@ async function main() {
           stopTimer();
           req.log.error(error, 'Failed to collect');
           Sentry.captureException(error, {
-            level: Sentry.Severity.Error,
+            level: 'error',
           });
           res.status(500).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
         }
@@ -175,14 +175,14 @@ async function main() {
   } catch (error) {
     server.log.fatal(error);
     Sentry.captureException(error, {
-      level: Sentry.Severity.Fatal,
+      level: 'fatal',
     });
   }
 }
 
 main().catch(err => {
   Sentry.captureException(err, {
-    level: Sentry.Severity.Fatal,
+    level: 'fatal',
   });
   console.error(err);
   process.exit(1);

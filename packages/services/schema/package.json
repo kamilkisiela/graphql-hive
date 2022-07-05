@@ -15,8 +15,8 @@
     "@trpc/server": "9.23.2",
     "@graphql-tools/stitch": "8.3.1",
     "@graphql-tools/stitching-directives": "2.1.1",
-    "@sentry/node": "6.19.7",
-    "@sentry/tracing": "6.19.7",
+    "@sentry/node": "7.5.0",
+    "@sentry/tracing": "7.5.0",
     "dotenv": "10.0.0",
     "graphql": "16.5.0",
     "ioredis": "4.28.3"

@@ -69,6 +69,7 @@ const plugin: FastifyPluginAsync = async server => {
 
     setImmediate(() => {
       const transaction: Transaction = (request as any).sentryTransaction;
+
       transaction.setData('url', request.url);
       transaction.setData('query', request.query);
 

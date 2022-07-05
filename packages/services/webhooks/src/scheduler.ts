@@ -149,7 +149,7 @@ export function createScheduler(config: Config) {
           error,
           source,
         },
-        level: Sentry.Severity.Critical,
+        level: 'error',
       });
     };
   }

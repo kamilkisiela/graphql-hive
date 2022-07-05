@@ -166,6 +166,7 @@ services:
       - './tarballs/server.tgz:/server.tgz'
       - './run-server.sh:/run-server.sh'
     environment:
+      NODE_ENV: production
       POSTGRES_HOST: db
       POSTGRES_PORT: 5432
       POSTGRES_DB: registry
@@ -228,6 +229,7 @@ services:
       - './tarballs/schema.tgz:/schema.tgz'
       - './run-schema.sh:/run-schema.sh'
     environment:
+      NODE_ENV: production
       PORT: 3002
       REDIS_HOST: redis
       REDIS_PORT: 6379
@@ -255,6 +257,7 @@ services:
       - './tarballs/tokens.tgz:/tokens.tgz'
       - './run-tokens.sh:/run-tokens.sh'
     environment:
+      NODE_ENV: production
       POSTGRES_HOST: db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -281,6 +284,7 @@ services:
       - '../packages/services/cdn-worker/dist/dev.js:/cdn.js'
       - './run-local-cdn.sh:/run-local-cdn.sh'
     environment:
+      NODE_ENV: production
       PORT: 3004
       CDN_AUTH_PRIVATE_KEY: 1e1064ef9cda8bf38936b77317e90dc3
 
@@ -306,6 +310,7 @@ services:
       - './tarballs/webhooks.tgz:/webhooks.tgz'
       - './run-webhooks.sh:/run-webhooks.sh'
     environment:
+      NODE_ENV: production
       BULLMQ_COMMANDS_FROM_ROOT: 'true'
       PORT: 3005
       REDIS_HOST: redis
@@ -338,6 +343,7 @@ services:
       tokens:
         condition: service_healthy
     environment:
+      NODE_ENV: production
       TOKENS_ENDPOINT: http://tokens:3003
       RATE_LIMIT_ENDPOINT: http://rate_limit:3009
       KAFKA_CONNECTION_MODE: 'docker'
@@ -371,6 +377,7 @@ services:
       - './tarballs/usage-ingestor.tgz:/usage-ingestor.tgz'
       - './run-usage-ingestor.sh:/run-usage-ingestor.sh'
     environment:
+      NODE_ENV: production
       KAFKA_CONNECTION_MODE: 'docker'
       KAFKA_BROKER: broker:29092
       KAFKA_CONCURRENCY: 1
@@ -405,6 +412,7 @@ services:
       migrations:
         condition: service_completed_successfully
     environment:
+      NODE_ENV: production
       POSTGRES_CONNECTION_STRING: 'postgresql://postgres:postgres@db:5432/registry'
       CLICKHOUSE_PROTOCOL: 'http'
       CLICKHOUSE_HOST: 'clickhouse'
@@ -439,6 +447,7 @@ services:
       usage_estimator:
         condition: service_healthy
     environment:
+      NODE_ENV: production
       POSTGRES_CONNECTION_STRING: 'postgresql://postgres:postgres@db:5432/registry'
       USAGE_ESTIMATOR_ENDPOINT: http://usage_estimator:3008
       PORT: 3009
@@ -469,6 +478,7 @@ services:
       usage_estimator:
         condition: service_healthy
     environment:
+      NODE_ENV: production
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
       POSTGRES_CONNECTION_STRING: 'postgresql://postgres:postgres@db:5432/registry'
       USAGE_ESTIMATOR_ENDPOINT: http://usage_estimator:3008
