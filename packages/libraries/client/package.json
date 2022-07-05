@@ -45,7 +45,7 @@
   },
   "devDependencies": {
     "@apollo/federation": "0.36.1",
-    "@envelop/types": "2.2.0",
+    "@envelop/types": "2.3.0",
     "@graphql-yoga/node": "2.5.0",
     "@types/async-retry": "1.4.3",
     "apollo-server-core": "3.7.0",

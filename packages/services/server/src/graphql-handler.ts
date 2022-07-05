@@ -20,6 +20,13 @@ export interface GraphQLHandlerOptions {
   signature: string;
 }
 
+interface Context {
+  req: FastifyRequest;
+  reply: FastifyReply;
+  headers: Record<string, string | string[] | undefined>;
+  requestId?: string | null;
+}
+
 const NoIntrospection: ValidationRule = (context: ValidationContext) => ({
   Field(node) {
     if (node.name.value === '__schema' || node.name.value === '__type') {
@@ -29,6 +36,12 @@ const NoIntrospection: ValidationRule = (context: ValidationContext) => ({
 });
 
 const isNonProductionEnvironment = process.env.ENVIRONMENT !== 'prod';
+
+function hasFastifyRequest(ctx: unknown): ctx is {
+  req: FastifyRequest;
+} {
+  return !!ctx && typeof ctx === 'object' && 'req' in ctx;
+}
 
 function useNoIntrospection(params: { signature: string }): Plugin<{ req: FastifyRequest }> {
   return {
@@ -50,10 +63,8 @@ const sampleRatePerOperationName: {
 };
 
 export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMethod => {
-  const additionalPlugins: Plugin<any>[] = [];
-
-  if (process.env.ENVIRONMENT === 'prod') {
-    additionalPlugins.push(
+  const server = createServer<Context>({
+    plugins: [
       useSentry({
         startTransaction: false,
         renameTransaction: true,
@@ -101,25 +112,19 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
           return args.operationName === 'readiness';
         },
       }),
-      useSentryUser()
-    );
-  }
-
-  const server = createServer<{
-    req: FastifyRequest;
-    reply: FastifyReply;
-    headers: Record<string, string | string[] | undefined>;
-    requestId?: string | null;
-  }>({
-    plugins: [
-      ...additionalPlugins,
-      useErrorHandler(errors => {
+      useSentryUser(),
+      useErrorHandler((errors, ctx) => {
         for (const error of errors) {
           // Only log unexpected errors.
           if (error.originalError instanceof GraphQLYogaError) {
             continue;
           }
-          server.logger.error(error);
+
+          if (hasFastifyRequest(ctx)) {
+            ctx.req.log.error(error);
+          } else {
+            server.logger.error(error);
+          }
         }
       }),
       useAuth0({
