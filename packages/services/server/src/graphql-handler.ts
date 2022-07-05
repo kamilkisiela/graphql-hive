@@ -1,4 +1,4 @@
-import type { RouteHandlerMethod, FastifyRequest, FastifyReply, FastifyLoggerInstance } from 'fastify';
+import type { RouteHandlerMethod, FastifyRequest, FastifyReply } from 'fastify';
 import { Registry } from '@hive/api';
 import { cleanRequestId } from '@hive/service-common';
 import { createServer, GraphQLYogaError } from '@graphql-yoga/node';
@@ -18,7 +18,6 @@ export interface GraphQLHandlerOptions {
   graphiqlEndpoint: string;
   registry: Registry;
   signature: string;
-  logger: FastifyLoggerInstance;
 }
 
 const NoIntrospection: ValidationRule = (context: ValidationContext) => ({
@@ -51,13 +50,10 @@ const sampleRatePerOperationName: {
 };
 
 export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMethod => {
-  const server = createServer<{
-    req: FastifyRequest;
-    reply: FastifyReply;
-    headers: Record<string, string | string[] | undefined>;
-    requestId?: string | null;
-  }>({
-    plugins: [
+  const additionalPlugins: Plugin<any>[] = [];
+
+  if (process.env.ENVIRONMENT === 'prod') {
+    additionalPlugins.push(
       useSentry({
         startTransaction: false,
         renameTransaction: true,
@@ -105,7 +101,18 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
           return args.operationName === 'readiness';
         },
       }),
-      useSentryUser(),
+      useSentryUser()
+    );
+  }
+
+  const server = createServer<{
+    req: FastifyRequest;
+    reply: FastifyReply;
+    headers: Record<string, string | string[] | undefined>;
+    requestId?: string | null;
+  }>({
+    plugins: [
+      ...additionalPlugins,
       useErrorHandler(errors => {
         for (const error of errors) {
           // Only log unexpected errors.
