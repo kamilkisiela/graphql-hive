@@ -68,6 +68,11 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
       useSentry({
         startTransaction: false,
         renameTransaction: true,
+        /**
+         * When it's not `null`, the plugin modifies the error object.
+         * We end up with an unintended error masking, because the GraphQLYogaError is replaced with GraphQLError (without error.originalError).
+         */
+        eventIdKey: null,
         operationName: () => 'graphql',
         transactionName(args) {
           const rootOperation = args.document.definitions.find(
