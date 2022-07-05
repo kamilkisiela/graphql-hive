@@ -106,7 +106,7 @@ async function writeCsv(
     })
     .catch(error => {
       Sentry.captureException(error, {
-        level: Sentry.Severity.Critical,
+        level: 'error',
         extra: {
           query,
         },

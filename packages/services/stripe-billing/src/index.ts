@@ -89,14 +89,14 @@ async function main() {
   } catch (error) {
     server.log.fatal(error);
     Sentry.captureException(error, {
-      level: Sentry.Severity.Fatal,
+      level: 'fatal',
     });
   }
 }
 
 main().catch(err => {
   Sentry.captureException(err, {
-    level: Sentry.Severity.Fatal,
+    level: 'fatal',
   });
   console.error(err);
   process.exit(1);
