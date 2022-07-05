@@ -6,7 +6,6 @@ import {
   Target,
   Project,
   ProjectType,
-  createSchemaObject,
   Orchestrator,
   GraphQLDocumentStringInvalidError,
 } from '../../../shared/entities';
@@ -30,6 +29,7 @@ import { TargetAccessScope } from '../../auth/providers/target-access';
 import { GitHubIntegrationManager } from '../../integrations/providers/github-integration-manager';
 import type { SchemaModuleConfig } from './config';
 import { SCHEMA_MODULE_CONFIG } from './config';
+import { SchemaHelper } from './schema-helper';
 import { HiveError } from '../../../shared/errors';
 
 type CheckInput = Omit<Types.SchemaCheckInput, 'project' | 'organization' | 'target'> & TargetSelector;
@@ -64,6 +64,7 @@ export class SchemaPublisher {
     private tracking: Tracking,
     private gitHubIntegrationManager: GitHubIntegrationManager,
     private idempotentRunner: IdempotentRunner,
+    private helper: SchemaHelper,
     @Inject(SCHEMA_MODULE_CONFIG) private schemaModuleConfig: SchemaModuleConfig
   ) {
     this.logger = logger.child({ service: 'SchemaPublisher' });
@@ -257,7 +258,9 @@ export class SchemaPublisher {
           project,
           supergraph:
             project.type === ProjectType.FEDERATION
-              ? await this.schemaManager.matchOrchestrator(project.type).supergraph(schemas.map(createSchemaObject))
+              ? await this.schemaManager
+                  .matchOrchestrator(project.type)
+                  .supergraph(schemas.map(s => this.helper.createSchemaObject(s)))
               : null,
           schemas,
         },
@@ -308,7 +311,9 @@ export class SchemaPublisher {
           project,
           supergraph:
             project.type === ProjectType.FEDERATION
-              ? await this.schemaManager.matchOrchestrator(project.type).supergraph(schemas.map(createSchemaObject))
+              ? await this.schemaManager
+                  .matchOrchestrator(project.type)
+                  .supergraph(schemas.map(s => this.helper.createSchemaObject(s)))
               : null,
           schemas,
         });
@@ -488,13 +493,29 @@ export class SchemaPublisher {
     const hasSchemaChanges = changes.length > 0;
     const hasErrors = errors.length > 0;
     const isForced = input.force === true;
-    const isModified = hasNewUrl || hasSchemaChanges || hasErrors;
+    let hasDifferentChecksum = false;
+
+    if (!!latest.version && !!previousSchema) {
+      const before = this.helper
+        .sortSchemas(schemas)
+        .map(s => this.helper.createChecksum(this.helper.createSchemaObject(s)))
+        .join(',');
+      const after = this.helper
+        .sortSchemas(newSchemas)
+        .map(s => this.helper.createChecksum(this.helper.createSchemaObject(s)))
+        .join(',');
+
+      hasDifferentChecksum = before !== after;
+    }
+
+    const isModified = hasNewUrl || hasSchemaChanges || hasErrors || hasDifferentChecksum;
 
     this.logger.debug('Is initial: %s', isInitialSchema ? 'yes' : 'false');
     this.logger.debug('Errors: %s', errors.length);
     this.logger.debug('Changes: %s', changes.length);
     this.logger.debug('Forced: %s', isForced ? 'yes' : 'false');
     this.logger.debug('New url: %s', hasNewUrl ? 'yes' : 'false');
+    this.logger.debug('Checksums comparison:', hasDifferentChecksum ? 'different' : 'same');
 
     // if the schema is not modified, we don't need to do anything, just return the success
     if (!isModified && !isInitialSchema) {
@@ -695,7 +716,7 @@ export class SchemaPublisher {
           schemas,
           supergraph:
             project.type === ProjectType.FEDERATION
-              ? await orchestrator.supergraph(schemas.map(createSchemaObject))
+              ? await orchestrator.supergraph(schemas.map(s => this.helper.createSchemaObject(s)))
               : null,
         });
       }
