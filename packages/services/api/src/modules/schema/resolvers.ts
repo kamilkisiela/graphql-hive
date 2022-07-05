@@ -4,7 +4,7 @@ import { SchemaManager } from './providers/schema-manager';
 import { SchemaPublisher } from './providers/schema-publisher';
 import { Inspector } from './providers/inspector';
 import { buildSchema, createConnection } from '../../shared/schema';
-import { createSchemaObject, ProjectType } from '../../shared/entities';
+import { ProjectType } from '../../shared/entities';
 import { ProjectManager } from '../project/providers/project-manager';
 import { IdTranslator } from '../shared/providers/id-translator';
 import { OrganizationManager } from '../organization/providers/organization-manager';
@@ -14,6 +14,7 @@ import { AuthManager } from '../auth/providers/auth-manager';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import { RateLimitProvider } from '../rate-limit/providers/rate-limit.provider';
 import { z } from 'zod';
+import { SchemaHelper } from './providers/schema-helper';
 
 const MaybeModel = <T extends z.ZodType>(value: T) => z.union([z.null(), z.undefined(), value]);
 const GraphQLSchemaStringModel = z.string().max(5_000_000).min(0);
@@ -205,6 +206,7 @@ export const resolvers: SchemaModule.Resolvers = {
       const translator = injector.get(IdTranslator);
       const schemaManager = injector.get(SchemaManager);
       const projectManager = injector.get(ProjectManager);
+      const helper = injector.get(SchemaHelper);
 
       const [organizationId, projectId, targetId] = await Promise.all([
         translator.translateOrganizationId(selector),
@@ -235,8 +237,8 @@ export const resolvers: SchemaModule.Resolvers = {
       ]);
 
       return Promise.all([
-        orchestrator.build(schemasBefore.map(createSchemaObject)),
-        orchestrator.build(schemasAfter.map(createSchemaObject)),
+        orchestrator.build(schemasBefore.map(s => helper.createSchemaObject(s))),
+        orchestrator.build(schemasAfter.map(s => helper.createSchemaObject(s))),
       ]).catch(reason => {
         if (reason instanceof SchemaBuildError) {
           return Promise.resolve({
@@ -251,6 +253,7 @@ export const resolvers: SchemaModule.Resolvers = {
       const translator = injector.get(IdTranslator);
       const schemaManager = injector.get(SchemaManager);
       const projectManager = injector.get(ProjectManager);
+      const helper = injector.get(SchemaHelper);
 
       const [organizationId, projectId, targetId] = await Promise.all([
         translator.translateOrganizationId(selector),
@@ -281,8 +284,8 @@ export const resolvers: SchemaModule.Resolvers = {
       ]);
 
       return Promise.all([
-        schemasBefore.length ? orchestrator.build(schemasBefore.map(createSchemaObject)) : null,
-        orchestrator.build(schemasAfter.map(createSchemaObject)),
+        schemasBefore.length ? orchestrator.build(schemasBefore.map(s => helper.createSchemaObject(s))) : null,
+        orchestrator.build(schemasAfter.map(s => helper.createSchemaObject(s))),
       ]).catch(reason => {
         if (reason instanceof SchemaBuildError) {
           return Promise.resolve({
@@ -395,6 +398,7 @@ export const resolvers: SchemaModule.Resolvers = {
 
       const schemaManager = injector.get(SchemaManager);
       const orchestrator = schemaManager.matchOrchestrator(project.type);
+      const helper = injector.get(SchemaHelper);
 
       const schemas = await schemaManager.getCommits({
         version: version.id,
@@ -403,7 +407,7 @@ export const resolvers: SchemaModule.Resolvers = {
         target: version.target,
       });
 
-      return orchestrator.supergraph(schemas.map(createSchemaObject));
+      return orchestrator.supergraph(schemas.map(s => helper.createSchemaObject(s)));
     },
     async sdl(version, _, { injector }) {
       const project = await injector.get(ProjectManager).getProject({
@@ -413,6 +417,7 @@ export const resolvers: SchemaModule.Resolvers = {
 
       const schemaManager = injector.get(SchemaManager);
       const orchestrator = schemaManager.matchOrchestrator(project.type);
+      const helper = injector.get(SchemaHelper);
 
       const schemas = await schemaManager.getCommits({
         version: version.id,
@@ -421,7 +426,7 @@ export const resolvers: SchemaModule.Resolvers = {
         target: version.target,
       });
 
-      return (await orchestrator.build(schemas.map(createSchemaObject))).raw;
+      return (await orchestrator.build(schemas.map(s => helper.createSchemaObject(s)))).raw;
     },
     async baseSchema(version) {
       return version.base_schema || null;

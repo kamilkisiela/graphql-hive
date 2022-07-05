@@ -134,7 +134,7 @@ export interface Storage {
     } & TargetSelector
   ): Promise<
     | {
-        schemas: readonly Schema[];
+        schemas: Schema[];
         version?: string;
       }
     | never

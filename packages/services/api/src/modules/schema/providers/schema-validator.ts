@@ -1,9 +1,10 @@
 import { Injectable, Scope } from 'graphql-modules';
-import { createSchemaObject, Orchestrator, Schema, SchemaObject } from '../../../shared/entities';
+import { Orchestrator, Schema, SchemaObject } from '../../../shared/entities';
 import { buildSchema, findSchema, hashSchema } from '../../../shared/schema';
 import * as Types from '../../../__generated__/types';
 import { Logger } from '../../shared/providers/logger';
 import { sentry } from '../../../shared/sentry';
+import { SchemaHelper } from './schema-helper';
 import { Inspector } from './inspector';
 
 export type ValidationResult = {
@@ -11,13 +12,14 @@ export type ValidationResult = {
   errors: Array<Types.SchemaError>;
   changes: Array<Types.SchemaChange>;
 };
+
 @Injectable({
   scope: Scope.Operation,
 })
 export class SchemaValidator {
   private logger: Logger;
 
-  constructor(logger: Logger, private inspector: Inspector) {
+  constructor(logger: Logger, private inspector: Inspector, private helper: SchemaHelper) {
     this.logger = logger.child({ service: 'SchemaValidator' });
   }
 
@@ -57,14 +59,14 @@ export class SchemaValidator {
         target: schema.target,
       };
     });
-    const afterSchemasWithBase: SchemaObject[] = afterWithBase.map(createSchemaObject);
-    const afterSchemas: SchemaObject[] = after.map(createSchemaObject);
-    const beforeSchemas: SchemaObject[] = before.map(createSchemaObject);
+    const afterSchemasWithBase: SchemaObject[] = afterWithBase.map(s => this.helper.createSchemaObject(s));
+    const afterSchemas: SchemaObject[] = after.map(s => this.helper.createSchemaObject(s));
+    const beforeSchemas: SchemaObject[] = before.map(s => this.helper.createSchemaObject(s));
 
     const isInitialSchema = beforeSchemas.length === 0;
-    const isIdentical = existing && hashSchema(existing) === hashSchema(incoming);
+    const areIdentical = existing && hashSchema(existing) === hashSchema(incoming);
 
-    if (isIdentical) {
+    if (areIdentical) {
       return {
         valid: true,
         errors: [],

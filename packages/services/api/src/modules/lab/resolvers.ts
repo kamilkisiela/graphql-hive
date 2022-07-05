@@ -3,8 +3,8 @@ import { IdTranslator } from '../shared/providers/id-translator';
 import { SchemaManager } from '../schema/providers/schema-manager';
 import { ProjectManager } from '../project/providers/project-manager';
 import { AuthManager } from '../auth/providers/auth-manager';
-import { createSchemaObject } from '../../shared/entities';
 import { TargetAccessScope } from '../auth/providers/target-access';
+import { SchemaHelper } from '../schema/providers/schema-helper';
 
 export const resolvers: LabModule.Resolvers = {
   Query: {
@@ -49,8 +49,9 @@ export const resolvers: LabModule.Resolvers = {
       ]);
 
       const orchestrator = schemaManager.matchOrchestrator(type);
+      const helper = injector.get(SchemaHelper);
 
-      const schema = await orchestrator.build(schemas.map(createSchemaObject));
+      const schema = await orchestrator.build(schemas.map(s => helper.createSchemaObject(s)));
 
       return {
         schema: schema.raw,
