@@ -2,6 +2,15 @@ import { Dockest, logLevel } from 'dockest';
 import { cleanDockerContainers, createServices } from './testkit/dockest';
 import dotenv from 'dotenv';
 
+/**
+ * Run only the tests that were specified with a pattern or filename:
+ *  $ yarn dockest filenameOrPattern
+ *
+ * Run all tests:
+ *  $ yarn dockest
+ */
+const [, , testFile] = process.argv;
+
 async function main() {
   dotenv.config();
 
@@ -9,7 +18,7 @@ async function main() {
     logLevel: logLevel.DEBUG,
     jestOpts: {
       runInBand: true,
-      testMatch: process.env.TEST_FILTER ? [`**/${process.env.TEST_FILTER}?(*.)+(spec|test).[jt]s?(x)`] : undefined,
+      testRegex: testFile ?? undefined,
       config: JSON.stringify({
         roots: ['<rootDir>/tests'],
         transform: {

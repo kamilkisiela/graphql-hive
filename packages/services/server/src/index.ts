@@ -191,6 +191,7 @@ export async function main() {
       graphiqlEndpoint: graphqlPath,
       registry,
       signature,
+      logger: server.log,
     });
 
     server.route({

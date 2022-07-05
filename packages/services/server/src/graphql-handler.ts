@@ -1,4 +1,4 @@
-import type { RouteHandlerMethod, FastifyRequest, FastifyReply } from 'fastify';
+import type { RouteHandlerMethod, FastifyRequest, FastifyReply, FastifyLoggerInstance } from 'fastify';
 import { Registry } from '@hive/api';
 import { cleanRequestId } from '@hive/service-common';
 import { createServer, GraphQLYogaError } from '@graphql-yoga/node';
@@ -18,6 +18,7 @@ export interface GraphQLHandlerOptions {
   graphiqlEndpoint: string;
   registry: Registry;
   signature: string;
+  logger: FastifyLoggerInstance;
 }
 
 const NoIntrospection: ValidationRule = (context: ValidationContext) => ({
