@@ -1,4 +1,4 @@
-import { sortBy } from 'lodash';
+import lodash from 'lodash';
 import { createHash } from 'crypto';
 import {
   buildASTSchema,
@@ -237,10 +237,10 @@ function sortNodes(nodes: readonly any[] | undefined): readonly any[] | undefine
     }
 
     if (isOfKindList<OperationTypeDefinitionNode>(nodes, Kind.OPERATION_TYPE_DEFINITION)) {
-      return sortBy(nodes, 'operation');
+      return lodash.sortBy(nodes, 'operation');
     }
 
-    return sortBy(nodes, 'kind', 'name.value');
+    return lodash.sortBy(nodes, 'kind', 'name.value');
   }
 
   return;

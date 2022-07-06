@@ -148,7 +148,7 @@ export const resolvers: ProjectModule.Resolvers & { ProjectType: any } = {
         ok: {
           selector: {
             organization: input.organization,
-            project: input.project,
+            project: project.cleanId,
           },
           updatedProject: project,
         },

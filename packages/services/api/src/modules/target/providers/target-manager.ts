@@ -225,8 +225,15 @@ export class TargetManager {
     });
     const user = await this.authManager.getCurrentUser();
 
+    let cleanId = paramCase(name);
+
+    if (await this.storage.getTargetByCleanId({ cleanId, organization, project })) {
+      cleanId = paramCase(`${name}-${uuid(4)}`);
+    }
+
     const result = await this.storage.updateTargetName({
       name,
+      cleanId,
       organization,
       project,
       target,

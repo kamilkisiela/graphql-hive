@@ -161,7 +161,7 @@ export const resolvers: TargetModule.Resolvers = {
           selector: {
             organization: input.organization,
             project: input.project,
-            target: input.target,
+            target: target.cleanId,
           },
           updatedTarget: target,
         },

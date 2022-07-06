@@ -3,8 +3,10 @@ import axios from 'axios';
 
 import type {
   CreateOrganizationInput,
+  UpdateOrganizationNameInput,
   SchemaPublishInput,
   CreateProjectInput,
+  UpdateProjectNameInput,
   CreateTokenInput,
   OrganizationMemberAccessInput,
   SchemaCheckInput,
@@ -15,6 +17,7 @@ import type {
   UpdateBaseSchemaInput,
   SchemaVersionsInput,
   CreateTargetInput,
+  UpdateTargetNameInput,
   SchemaVersionUpdateInput,
   TargetSelectorInput,
   SchemaSyncCdnInput,
@@ -59,6 +62,36 @@ export function createOrganization(input: CreateOrganizationInput, authToken: st
     variables: {
       input,
     },
+  });
+}
+
+export function renameOrganization(input: UpdateOrganizationNameInput, authToken: string) {
+  return execute({
+    document: gql(/* GraphQL */ `
+      mutation updateOrganizationName($input: UpdateOrganizationNameInput!) {
+        updateOrganizationName(input: $input) {
+          ok {
+            updatedOrganizationPayload {
+              selector {
+                organization
+              }
+              organization {
+                id
+                name
+                cleanId
+              }
+            }
+          }
+          error {
+            message
+          }
+        }
+      }
+    `),
+    variables: {
+      input,
+    },
+    authToken,
   });
 }
 
@@ -119,6 +152,36 @@ export function createProject(input: CreateProjectInput, authToken: string) {
     },
   });
 }
+
+export function renameProject(input: UpdateProjectNameInput, authToken: string) {
+  return execute({
+    document: gql(/* GraphQL */ `
+      mutation updateProjectName($input: UpdateProjectNameInput!) {
+        updateProjectName(input: $input) {
+          ok {
+            selector {
+              organization
+              project
+            }
+            updatedProject {
+              id
+              cleanId
+              name
+            }
+          }
+          error {
+            message
+          }
+        }
+      }
+    `),
+    authToken,
+    variables: {
+      input,
+    },
+  });
+}
+
 export function createTarget(input: CreateTargetInput, authToken: string) {
   return execute({
     document: gql(/* GraphQL */ `
@@ -139,6 +202,37 @@ export function createTarget(input: CreateTargetInput, authToken: string) {
     },
   });
 }
+
+export function renameTarget(input: UpdateTargetNameInput, authToken: string) {
+  return execute({
+    document: gql(/* GraphQL */ `
+      mutation updateTargetName($input: UpdateTargetNameInput!) {
+        updateTargetName(input: $input) {
+          ok {
+            selector {
+              organization
+              project
+              target
+            }
+            updatedTarget {
+              id
+              cleanId
+              name
+            }
+          }
+          error {
+            message
+          }
+        }
+      }
+    `),
+    authToken,
+    variables: {
+      input,
+    },
+  });
+}
+
 export function createToken(input: CreateTokenInput, authToken: string) {
   return execute({
     document: gql(/* GraphQL */ `

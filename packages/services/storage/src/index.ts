@@ -447,11 +447,11 @@ export async function createStorage(connection: string): Promise<Storage> {
         )
       );
     },
-    async updateOrganizationName({ name, organization }) {
+    async updateOrganizationName({ name, cleanId, organization }) {
       return transformOrganization(
         await pool.one<Slonik<organizations>>(sql`
           UPDATE public.organizations
-          SET name = ${name}
+          SET name = ${name}, clean_id = ${cleanId}
           WHERE id = ${organization}
           RETURNING *
         `)
@@ -653,11 +653,11 @@ export async function createStorage(connection: string): Promise<Storage> {
 
       return result.rows.map(transformProject);
     },
-    async updateProjectName({ name, organization, project }) {
+    async updateProjectName({ name, cleanId, organization, project }) {
       return transformProject(
         await pool.one<Slonik<projects>>(sql`
           UPDATE public.projects
-          SET name = ${name}
+          SET name = ${name}, clean_id = ${cleanId}
           WHERE id = ${project} AND org_id = ${organization}
           RETURNING *
         `)
@@ -700,11 +700,11 @@ export async function createStorage(connection: string): Promise<Storage> {
         organization
       );
     },
-    async updateTargetName({ organization, project, target, name }) {
+    async updateTargetName({ organization, project, target, name, cleanId }) {
       return transformTarget(
         await pool.one<Slonik<targets>>(sql`
           UPDATE public.targets
-          SET name = ${name}
+          SET name = ${name}, clean_id = ${cleanId}
           WHERE id = ${target} AND project_id = ${project}
           RETURNING *
         `),

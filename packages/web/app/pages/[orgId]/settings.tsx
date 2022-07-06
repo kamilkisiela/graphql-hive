@@ -150,6 +150,11 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
           organization: router.organizationId,
           name: values.name,
         },
+      }).then(result => {
+        if (result.data?.updateOrganizationName?.ok) {
+          const newOrgId = result.data?.updateOrganizationName?.ok.updatedOrganizationPayload.selector.organization;
+          router.replace(`/${newOrgId}/settings`);
+        }
       }),
   });
 

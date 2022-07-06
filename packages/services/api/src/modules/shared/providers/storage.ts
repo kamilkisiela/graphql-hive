@@ -64,7 +64,7 @@ export interface Storage {
   ): Promise<Organization | never>;
   deleteOrganization(_: OrganizationSelector): Promise<Organization | never>;
   updateOrganizationName(
-    _: OrganizationSelector & Pick<Organization, 'name'> & { user: string }
+    _: OrganizationSelector & Pick<Organization, 'name' | 'cleanId'> & { user: string }
   ): Promise<Organization | never>;
   updateOrganizationPlan(_: OrganizationSelector & Pick<Organization, 'billingPlan'>): Promise<Organization | never>;
   updateOrganizationRateLimits(
@@ -107,7 +107,9 @@ export interface Storage {
     _: Pick<Project, 'name' | 'cleanId' | 'type'> & NullableAndPartial<CustomOrchestratorConfig> & OrganizationSelector
   ): Promise<Project | never>;
   deleteProject(_: ProjectSelector): Promise<Project | never>;
-  updateProjectName(_: ProjectSelector & Pick<Project, 'name'> & { user: string }): Promise<Project | never>;
+  updateProjectName(
+    _: ProjectSelector & Pick<Project, 'name' | 'cleanId'> & { user: string }
+  ): Promise<Project | never>;
   updateProjectGitRepository(_: ProjectSelector & Pick<Project, 'gitRepository'>): Promise<Project | never>;
 
   getTargetId(_: TargetSelector & { useIds?: boolean }): Promise<string | never>;
@@ -117,7 +119,7 @@ export interface Storage {
     } & ProjectSelector
   ): Promise<Target | null>;
   createTarget(_: Pick<Target, 'cleanId' | 'name'> & ProjectSelector): Promise<Target | never>;
-  updateTargetName(_: TargetSelector & Pick<Project, 'name'> & { user: string }): Promise<Target | never>;
+  updateTargetName(_: TargetSelector & Pick<Project, 'name' | 'cleanId'> & { user: string }): Promise<Target | never>;
   deleteTarget(_: TargetSelector): Promise<Target | never>;
   getTarget(_: TargetSelector): Promise<Target | never>;
   getTargets(_: ProjectSelector): Promise<readonly Target[]>;
