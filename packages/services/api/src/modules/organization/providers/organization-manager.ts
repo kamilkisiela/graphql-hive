@@ -317,8 +317,15 @@ export class OrganizationManager {
       throw new HiveError(`Cannot rename a personal organization`);
     }
 
+    let cleanId = paramCase(name);
+
+    if (await this.storage.getOrganizationByCleanId({ cleanId })) {
+      cleanId = paramCase(`${name}-${uuid(4)}`);
+    }
+
     const result = await this.storage.updateOrganizationName({
       name,
+      cleanId,
       organization: organization.id,
       user: user.id,
     });

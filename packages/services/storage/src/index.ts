@@ -447,11 +447,11 @@ export async function createStorage(connection: string): Promise<Storage> {
         )
       );
     },
-    async updateOrganizationName({ name, organization }) {
+    async updateOrganizationName({ name, cleanId, organization }) {
       return transformOrganization(
         await pool.one<Slonik<organizations>>(sql`
           UPDATE public.organizations
-          SET name = ${name}
+          SET name = ${name}, clean_id = ${cleanId}
           WHERE id = ${organization}
           RETURNING *
         `)

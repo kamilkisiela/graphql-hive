@@ -64,7 +64,7 @@ export interface Storage {
   ): Promise<Organization | never>;
   deleteOrganization(_: OrganizationSelector): Promise<Organization | never>;
   updateOrganizationName(
-    _: OrganizationSelector & Pick<Organization, 'name'> & { user: string }
+    _: OrganizationSelector & Pick<Organization, 'name' | 'cleanId'> & { user: string }
   ): Promise<Organization | never>;
   updateOrganizationPlan(_: OrganizationSelector & Pick<Organization, 'billingPlan'>): Promise<Organization | never>;
   updateOrganizationRateLimits(

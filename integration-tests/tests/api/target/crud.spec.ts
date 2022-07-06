@@ -2,7 +2,7 @@ import { ProjectType } from '@app/gql/graphql';
 import { createOrganization, createProject, renameTarget } from '../../../testkit/flow';
 import { authenticate } from '../../../testkit/auth';
 
-test('renaming a project should result changing its cleanId', async () => {
+test('renaming a target should result changing its cleanId', async () => {
   const { access_token } = await authenticate('main');
   const orgResult = await createOrganization(
     {

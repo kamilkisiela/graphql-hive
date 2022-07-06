@@ -3,6 +3,7 @@ import axios from 'axios';
 
 import type {
   CreateOrganizationInput,
+  UpdateOrganizationNameInput,
   SchemaPublishInput,
   CreateProjectInput,
   UpdateProjectNameInput,
@@ -61,6 +62,36 @@ export function createOrganization(input: CreateOrganizationInput, authToken: st
     variables: {
       input,
     },
+  });
+}
+
+export function renameOrganization(input: UpdateOrganizationNameInput, authToken: string) {
+  return execute({
+    document: gql(/* GraphQL */ `
+      mutation updateOrganizationName($input: UpdateOrganizationNameInput!) {
+        updateOrganizationName(input: $input) {
+          ok {
+            updatedOrganizationPayload {
+              selector {
+                organization
+              }
+              organization {
+                id
+                name
+                cleanId
+              }
+            }
+          }
+          error {
+            message
+          }
+        }
+      }
+    `),
+    variables: {
+      input,
+    },
+    authToken,
   });
 }
 
