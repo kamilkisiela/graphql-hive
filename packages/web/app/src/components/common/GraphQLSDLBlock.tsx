@@ -28,7 +28,7 @@ export const GraphQLHighlight: React.FC<
       options={{
         readOnly: true,
       }}
-      height={'60vh'}
+      height="100vh"
       {...props}
       schema={pretty}
     />
