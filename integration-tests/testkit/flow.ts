@@ -5,6 +5,7 @@ import type {
   CreateOrganizationInput,
   SchemaPublishInput,
   CreateProjectInput,
+  UpdateProjectNameInput,
   CreateTokenInput,
   OrganizationMemberAccessInput,
   SchemaCheckInput,
@@ -15,6 +16,7 @@ import type {
   UpdateBaseSchemaInput,
   SchemaVersionsInput,
   CreateTargetInput,
+  UpdateTargetNameInput,
   SchemaVersionUpdateInput,
   TargetSelectorInput,
   SchemaSyncCdnInput,
@@ -119,6 +121,36 @@ export function createProject(input: CreateProjectInput, authToken: string) {
     },
   });
 }
+
+export function renameProject(input: UpdateProjectNameInput, authToken: string) {
+  return execute({
+    document: gql(/* GraphQL */ `
+      mutation updateProjectName($input: UpdateProjectNameInput!) {
+        updateProjectName(input: $input) {
+          ok {
+            selector {
+              organization
+              project
+            }
+            updatedProject {
+              id
+              cleanId
+              name
+            }
+          }
+          error {
+            message
+          }
+        }
+      }
+    `),
+    authToken,
+    variables: {
+      input,
+    },
+  });
+}
+
 export function createTarget(input: CreateTargetInput, authToken: string) {
   return execute({
     document: gql(/* GraphQL */ `
@@ -139,6 +171,37 @@ export function createTarget(input: CreateTargetInput, authToken: string) {
     },
   });
 }
+
+export function renameTarget(input: UpdateTargetNameInput, authToken: string) {
+  return execute({
+    document: gql(/* GraphQL */ `
+      mutation updateTargetName($input: UpdateTargetNameInput!) {
+        updateTargetName(input: $input) {
+          ok {
+            selector {
+              organization
+              project
+              target
+            }
+            updatedTarget {
+              id
+              cleanId
+              name
+            }
+          }
+          error {
+            message
+          }
+        }
+      }
+    `),
+    authToken,
+    variables: {
+      input,
+    },
+  });
+}
+
 export function createToken(input: CreateTokenInput, authToken: string) {
   return execute({
     document: gql(/* GraphQL */ `

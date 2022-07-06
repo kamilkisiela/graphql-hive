@@ -165,6 +165,11 @@ const Page = ({
           project: router.projectId,
           name: values.name,
         },
+      }).then(result => {
+        if (result?.data?.updateProjectName?.ok) {
+          const newProjectId = result.data.updateProjectName.ok.updatedProject.cleanId;
+          router.replace(`/${router.organizationId}/${newProjectId}/settings`);
+        }
       }),
   });
 

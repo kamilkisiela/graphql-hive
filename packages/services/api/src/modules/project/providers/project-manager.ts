@@ -148,11 +148,18 @@ export class ProjectManager {
     });
     const user = await this.authManager.getCurrentUser();
 
+    let cleanId = paramCase(name);
+
+    if (await this.storage.getProjectByCleanId({ cleanId, organization })) {
+      cleanId = paramCase(`${name}-${uuid(4)}`);
+    }
+
     const result = await this.storage.updateProjectName({
       name,
       organization,
       project,
       user: user.id,
+      cleanId,
     });
 
     await this.activityManager.create({

@@ -469,6 +469,11 @@ const Page = ({ target, organization }: { target: TargetFieldsFragment; organiza
           target: router.targetId,
           name: values.name,
         },
+      }).then(result => {
+        if (result?.data?.updateTargetName?.ok) {
+          const newTargetId = result.data.updateTargetName.ok.updatedTarget.cleanId;
+          router.replace(`/${router.organizationId}/${router.projectId}/${newTargetId}/settings`);
+        }
       }),
   });
 
