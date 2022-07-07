@@ -3,7 +3,6 @@ import 'reflect-metadata';
 import * as Sentry from '@sentry/node';
 import { createServer, startMetrics, ensureEnv, registerShutdown, reportReadiness } from '@hive/service-common';
 import { createEstimator } from './estimator';
-import { createConnectionString } from '@hive/storage';
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify/dist/trpc-server-adapters-fastify.cjs.js';
 import { usageEstimatorApiRouter } from './api';
 import { clickHouseElapsedDuration, clickHouseReadDuration } from './metrics';
@@ -35,9 +34,6 @@ async function main() {
           clickHouseReadDuration.labels({ query }).observe(timings.totalSeconds);
           clickHouseElapsedDuration.labels({ query }).observe(timings.elapsedSeconds);
         },
-      },
-      storage: {
-        connectionString: createConnectionString(process.env as any),
       },
     });
 

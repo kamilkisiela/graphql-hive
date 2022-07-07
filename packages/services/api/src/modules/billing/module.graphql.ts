@@ -50,9 +50,7 @@ export default gql`
     description: String
     basePrice: Float
     includedOperationsLimit: SafeInt
-    includedSchemaPushLimit: SafeInt
     pricePerOperationsUnit: Float
-    pricePerSchemaPushUnit: Float
     rateLimit: UsageRateLimitType!
     retentionInDays: Int!
   }

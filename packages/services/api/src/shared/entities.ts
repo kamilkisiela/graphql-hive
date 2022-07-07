@@ -113,7 +113,6 @@ export interface Organization {
   monthlyRateLimit: {
     retentionInDays: number;
     operations: number;
-    schemaPush: number;
   };
   getStarted: OrganizationGetStarted;
 }

@@ -9,7 +9,7 @@ const VALIDATION = z
   .object({
     id: z.string().nonempty(),
     entityType: z.enum(['organization', 'target']),
-    type: z.enum(['schema-push', 'operations-reporting']),
+    type: z.enum(['operations-reporting']),
     /**
      * Token is optional, and used only when an additional blocking (WAF) process is needed.
      */

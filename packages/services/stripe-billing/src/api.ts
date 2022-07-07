@@ -9,7 +9,6 @@ export type Context = {
   storage$: ReturnType<typeof createStorage>;
   stripe: Stripe;
   stripeData$: Promise<{
-    schemaPushesPrice: Stripe.Price;
     operationsPrice: Stripe.Price;
     basePrice: Stripe.Price;
   }>;
@@ -120,7 +119,6 @@ export const stripeBillingApiRouter = trpc
         .object({
           /** in millions, value 1 is actually 1_000_000 */
           operations: z.number().nonnegative(),
-          schemaPushes: z.number().nonnegative(),
         })
         .required(),
     }),
@@ -148,11 +146,6 @@ export const stripeBillingApiRouter = trpc
             if (item.plan.id === stripePrices.operationsPrice.id) {
               await ctx.stripe.subscriptionItems.update(item.id, {
                 quantity: input.reserved.operations,
-              });
-            }
-            if (item.plan.id === stripePrices.schemaPushesPrice.id) {
-              await ctx.stripe.subscriptionItems.update(item.id, {
-                quantity: input.reserved.schemaPushes,
               });
             }
           }
@@ -213,7 +206,6 @@ export const stripeBillingApiRouter = trpc
         .object({
           /** in millions, value 1 is actually 1_000_000 */
           operations: z.number().nonnegative(),
-          schemaPushes: z.number().nonnegative(),
         })
         .required(),
     }),
@@ -298,10 +290,6 @@ export const stripeBillingApiRouter = trpc
           {
             price: stripePrices.operationsPrice.id,
             quantity: input.reserved.operations,
-          },
-          {
-            price: stripePrices.schemaPushesPrice.id,
-            quantity: input.reserved.schemaPushes,
           },
         ],
       });

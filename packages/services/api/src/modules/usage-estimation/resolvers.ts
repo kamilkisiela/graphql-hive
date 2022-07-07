@@ -76,18 +76,5 @@ export const resolvers: UsageEstimationModule.Resolvers = {
 
       return result;
     },
-    schemaPushes: async (params, args, { injector }) => {
-      const result = await injector.get(UsageEstimationProvider).estimateSchemaPushes({
-        targetIds: params.targets,
-        endTime: params.endTime.toString(),
-        startTime: params.startTime.toString(),
-      });
-
-      if (!result && result !== 0) {
-        throw new EnvelopError(`Failed to estimate usage, please try again later.`);
-      }
-
-      return result;
-    },
   },
 };

@@ -1,5 +1,4 @@
 import type { FastifyLoggerInstance } from '@hive/service-common';
-import { createStorage as createPostgreSQLStorage } from '@hive/storage';
 import { HttpClient, ClickHouse, OperationsReader } from '@hive/api';
 
 export type Estimator = ReturnType<typeof createEstimator>;
@@ -20,12 +19,8 @@ export function createEstimator(config: {
       }
     ) => void;
   };
-  storage: {
-    connectionString: string;
-  };
 }) {
   const { logger } = config;
-  const postgres$ = createPostgreSQLStorage(config.storage.connectionString);
   const httpClient = new HttpClient();
   const clickhouse = new ClickHouse(config.clickhouse, httpClient, config.logger);
   const operationsReader = new OperationsReader(clickhouse);
@@ -39,31 +34,6 @@ export function createEstimator(config: {
     },
     async stop() {
       logger.info('Usage Estimator stopped');
-    },
-    async estimateSchemaPushesForTargets(input: {
-      targets: string[];
-      startTime: Date;
-      endTime: Date;
-    }): Promise<{ count: number }> {
-      const storage = await postgres$;
-      const response = await storage.getSchemaPushCount({
-        targetIds: input.targets,
-        startTime: input.startTime,
-        endTime: input.endTime,
-      });
-
-      return {
-        count: response,
-      };
-    },
-    async estimateSchemaPushesForAllTargets(input: { startTime: Date; endTime: Date }) {
-      const storage = await postgres$;
-      const response = await storage.getAllSchemaPushesGrouped({
-        startTime: input.startTime,
-        endTime: input.endTime,
-      });
-
-      return response;
     },
     async estimateOperationsForAllTargets(input: { startTime: Date; endTime: Date }) {
       const filter = operationsReader.createFilter({

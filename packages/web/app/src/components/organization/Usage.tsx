@@ -53,19 +53,6 @@ export const OrganizationUsageEstimationView: React.FC<{
                       />
                     </Td>
                   </Tr>
-                  <Tr>
-                    <Td>Schema Pushes</Td>
-                    <Td isNumeric>{NumericFormatter.format(result.data.usageEstimation.org.schemaPushes)}</Td>
-                    <Td isNumeric>{NumericFormatter.format(organization.rateLimit.schemaPushes)}</Td>
-                    <Td isNumeric>
-                      <Scale
-                        value={result.data.usageEstimation.org.schemaPushes}
-                        size={10}
-                        max={organization.rateLimit.schemaPushes}
-                        tw="justify-end"
-                      />
-                    </Td>
-                  </Tr>
                 </Tbody>
               </Table>
             </TableContainer>

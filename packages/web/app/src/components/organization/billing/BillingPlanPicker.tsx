@@ -5,8 +5,6 @@ import { BillingPlanType, BillingPlansQuery } from '@/graphql';
 import { Label, Section } from '@/components/common';
 import { Link, RadioGroup, Radio } from '@/components/v2';
 
-const comingSoon = <span className="text-xs">(coming soon)</span>;
-
 const planCollection: {
   [key in BillingPlanType]: {
     description: string;
@@ -18,32 +16,22 @@ const planCollection: {
     description: 'For personal or small projects',
     features: [
       'Unlimited seats',
-      '1M operations',
-      '50 schema pushes',
-      'Schema Registry',
-      'Detection of breaking changes based on usage reports',
-      'GitHub and Slack integrations',
-      '3 days of usage data retention',
+      'Unlimited schema pushes',
+      'Limit of 1M operations',
+      '7 days of usage data retention',
     ],
   },
   [BillingPlanType.Pro]: {
-    description: 'For growing teams',
+    description: 'For scaling API',
     features: [
       'Unlimited seats',
-      '5M operations',
-      '500 schema pushes',
-      'Schema Registry',
-      'Detection of breaking changes based on usage reports',
-      'GitHub and Slack integrations',
-      '180 days of usage data retention',
-      <div>Schema Policy Checks {comingSoon}</div>,
-      <div>ESLint integration {comingSoon}</div>,
+      'Unlimited schema pushes',
+      '$10 per 1M operations',
+      '90 days of usage data retention',
     ],
     footer: (
       <>
-        <div className="mb-2 text-sm font-bold">Free 14-day trial period</div>
-        <div>$15 for additional 1M operations</div>
-        <div>$1 for additional 10 schema pushes</div>
+        <div className="mb-2 text-sm font-bold">Free 30 days trial period</div>
       </>
     ),
   },
@@ -53,13 +41,7 @@ const planCollection: {
       'Unlimited seats',
       'Unlimited operations',
       'Unlimited schema pushes',
-      'Schema Registry',
-      'Detection of breaking changes based on usage reports',
-      'GitHub and Slack integrations',
-      '360 days of usage data retention',
-      <div>Schema Policy Checks {comingSoon}</div>,
-      <div>ESLint integration {comingSoon}</div>,
-      <div>SAML {comingSoon}</div>,
+      '12 months of usage data retention',
       <span className="flex gap-1">
         Support from
         <Link variant="primary" href="https://the-guild.dev" target="_blank" rel="noreferrer">

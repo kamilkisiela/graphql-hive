@@ -46,23 +46,4 @@ export class UsageEstimationProvider {
 
     return result.totalOperations;
   }
-
-  @sentry('UsageEstimation.estimateSchemaPushes')
-  async estimateSchemaPushes(input: UsageEstimatorQueryInput<'estimateSchemaPushesForTarget'>): Promise<null | number> {
-    this.logger.debug('Estimation schema pushes, input: %o', input);
-
-    if (input.targetIds.length === 0) {
-      return 0;
-    }
-
-    if (!this.usageEstimator) {
-      this.logger.warn('Usage estimator is not available due to missing configuration');
-
-      return null;
-    }
-
-    const result = await this.usageEstimator.query('estimateSchemaPushesForTarget', input);
-
-    return result.totalSchemaPushes;
-  }
 }

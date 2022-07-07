@@ -70,10 +70,6 @@ function getProviderBasedOnExternalId(externalId: string): AuthProvider {
   return 'AUTH0';
 }
 
-function dateToSqlTimestamp(input: Date) {
-  return sql`TO_TIMESTAMP(${input.getTime()} / 1000.0)`;
-}
-
 export async function createStorage(connection: string): Promise<Storage> {
   const pool = getPool(connection);
 
@@ -106,7 +102,6 @@ export async function createStorage(connection: string): Promise<Storage> {
       monthlyRateLimit: {
         retentionInDays: parseInt(organization.limit_retention_days),
         operations: parseInt(organization.limit_operations_monthly),
-        schemaPush: parseInt(organization.limit_schema_push_monthly),
       },
       billingPlan: organization.plan_name,
       type: (organization.type === 'PERSONAL' ? 'PERSONAL' : 'REGULAR') as OrganizationType,
@@ -490,7 +485,7 @@ export async function createStorage(connection: string): Promise<Storage> {
       return transformOrganization(
         await pool.one<Slonik<organizations>>(sql`
           UPDATE public.organizations
-          SET limit_operations_monthly = ${monthlyRateLimit.operations}, limit_schema_push_monthly = ${monthlyRateLimit.schemaPush}, limit_retention_days = ${monthlyRateLimit.retentionInDays}
+          SET limit_operations_monthly = ${monthlyRateLimit.operations}, limit_retention_days = ${monthlyRateLimit.retentionInDays}
           WHERE id = ${organization}
           RETURNING *
         `)
@@ -1239,42 +1234,6 @@ export async function createStorage(connection: string): Promise<Storage> {
       );
     },
 
-    getSchemaPushCount: async selector => {
-      if (selector.targetIds.length === 0) {
-        return 0;
-      }
-
-      const result = await pool.query<
-        Slonik<{
-          total: number;
-        }>
-      >(sql`
-        SELECT count(*) as total FROM public.versions WHERE target_id IN (${sql.join(
-          selector.targetIds,
-          sql`, `
-        )}) AND created_at BETWEEN ${dateToSqlTimestamp(selector.startTime)} AND ${dateToSqlTimestamp(
-        selector.endTime
-      )};
-      `);
-
-      return result.rows[0].total;
-    },
-
-    getAllSchemaPushesGrouped: async selector => {
-      const result = await pool.query<
-        Slonik<{
-          total: number;
-          target: string;
-        }>
-      >(sql`
-        SELECT target_id as target, count(*) as total FROM public.versions WHERE created_at BETWEEN ${dateToSqlTimestamp(
-          selector.startTime
-        )} AND ${dateToSqlTimestamp(selector.endTime)} GROUP BY target_id;
-      `);
-
-      return [...result.rows];
-    },
-
     getSchema: batch(async selectors => {
       const rows = await pool.many<Slonik<WithUrl<commits>>>(
         sql`
@@ -1605,7 +1564,6 @@ export async function createStorage(connection: string): Promise<Storage> {
           org_name: string;
           target: string;
           limit_operations_monthly: number;
-          limit_schema_push_monthly: number;
           limit_retention_days: number;
         }>
       >(
@@ -1614,7 +1572,6 @@ export async function createStorage(connection: string): Promise<Storage> {
             o.id as organization,
             o.name as org_name,
             o.limit_operations_monthly,
-            o.limit_schema_push_monthly,
             o.limit_retention_days,
             t.id as target
           FROM public.targets AS t

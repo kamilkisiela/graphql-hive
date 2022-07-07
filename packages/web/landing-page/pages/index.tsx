@@ -4,6 +4,7 @@ import Head from 'next/head';
 import { GlobalStyles } from 'twin.macro';
 import { css } from 'twin.macro';
 import { Header, FooterExtended, GlobalStyles as TGCStyles, ThemeProvider } from '@theguild/components';
+import * as Tooltip from '@radix-ui/react-tooltip';
 import { Pricing } from '../components/pricing';
 
 const CookiesConsent: React.FC = () => {
@@ -123,98 +124,100 @@ export default function Index() {
         <link rel="canonical" href="https://graphql-hive.com" />
       </Head>
 
-      <div tw="flex flex-col h-full">
-        <style global jsx>{`
-          * {
-            font-family: Inter;
-          }
-          .dark {
-            background-color: #0b0d11;
-          }
-          html,
-          body,
-          #__next {
-            height: 100vh;
-          }
-          body {
-            margin: 0;
-          }
-        `}</style>
-        <GlobalStyles />
-        <TGCStyles includeFonts={false} />
-        <Header accentColor="#D49605" activeLink="" disableSearch />
-        <div css={heroWrapper}>
-          <HeroGradient
-            title="Manage your GraphQL API workflow"
-            description={description}
-            colors={['#FFB21D']}
-            image={{
-              src: '/manage.svg',
-              alt: 'Manage workflows',
-            }}
-            link={[
+      <Tooltip.Provider>
+        <div tw="flex flex-col h-full">
+          <style global jsx>{`
+            * {
+              font-family: Inter;
+            }
+            .dark {
+              background-color: #0b0d11;
+            }
+            html,
+            body,
+            #__next {
+              height: 100vh;
+            }
+            body {
+              margin: 0;
+            }
+          `}</style>
+          <GlobalStyles />
+          <TGCStyles includeFonts={false} />
+          <Header accentColor="#D49605" activeLink="" disableSearch />
+          <div css={heroWrapper}>
+            <HeroGradient
+              title="Manage your GraphQL API workflow"
+              description={description}
+              colors={['#FFB21D']}
+              image={{
+                src: '/manage.svg',
+                alt: 'Manage workflows',
+              }}
+              link={[
+                {
+                  target: '_blank',
+                  href: 'https://app.graphql-hive.com',
+                  title: 'Go to app',
+                  children: 'Go to app',
+                },
+                {
+                  target: '_blank',
+                  href: 'https://docs.graphql-hive.com',
+                  title: 'Documentation',
+                  children: 'Documentation',
+                  style: {
+                    color: '#fff',
+                    border: '1px solid #fff',
+                    background: 'transparent',
+                  },
+                },
+                {
+                  target: '_blank',
+                  href: 'https://github.com/kamilkisiela/graphql-hive',
+                  title: 'GitHub',
+                  children: 'GitHub',
+                  style: {
+                    color: '#fff',
+                    border: '1px solid #fff',
+                    background: 'transparent',
+                  },
+                },
+              ]}
+            />
+          </div>
+          {ITEMS.map((option, i) => {
+            return (
+              <HeroIllustration
+                key={option.title}
+                title={option.title}
+                description={option.description}
+                image={{
+                  src: option.imageSrc,
+                  alt: option.imageAlt,
+                }}
+                flipped={i % 2 !== 0}
+              />
+            );
+          })}
+          <Pricing />
+          <FooterExtended
+            resources={[
               {
-                target: '_blank',
-                href: 'https://app.graphql-hive.com',
-                title: 'Go to app',
-                children: 'Go to app',
+                title: 'Privacy Policy',
+                href: '/privacy-policy.pdf',
+                children: 'Privacy Policy',
               },
               {
-                target: '_blank',
-                href: 'https://docs.graphql-hive.com',
-                title: 'Documentation',
-                children: 'Documentation',
-                style: {
-                  color: '#fff',
-                  border: '1px solid #fff',
-                  background: 'transparent',
-                },
-              },
-              {
-                target: '_blank',
-                href: 'https://github.com/kamilkisiela/graphql-hive',
-                title: 'GitHub',
-                children: 'GitHub',
-                style: {
-                  color: '#fff',
-                  border: '1px solid #fff',
-                  background: 'transparent',
-                },
+                title: 'Terms of Use',
+                href: '/terms-of-use.pdf',
+                children: 'Terms of Use',
               },
             ]}
           />
         </div>
-        {ITEMS.map((option, i) => {
-          return (
-            <HeroIllustration
-              key={option.title}
-              title={option.title}
-              description={option.description}
-              image={{
-                src: option.imageSrc,
-                alt: option.imageAlt,
-              }}
-              flipped={i % 2 !== 0}
-            />
-          );
-        })}
-        <Pricing />
-        <FooterExtended
-          resources={[
-            {
-              title: 'Privacy Policy',
-              href: '/privacy-policy.pdf',
-              children: 'Privacy Policy',
-            },
-            {
-              title: 'Terms of Use',
-              href: '/terms-of-use.pdf',
-              children: 'Terms of Use',
-            },
-          ]}
-        />
-      </div>
-      <CookiesConsent />
+        <CookiesConsent />
+      </Tooltip.Provider>
     </ThemeProvider>
   );
 }

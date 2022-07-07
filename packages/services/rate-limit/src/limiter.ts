@@ -7,7 +7,7 @@ import * as Sentry from '@sentry/node';
 import { createTRPCClient } from '@trpc/client';
 import type { UsageEstimatorApi } from '@hive/usage-estimator';
 import type { RateLimitInput } from './api';
-import { rateLimitOperationsEventOrg, rateLimitSchemaEventOrg } from './metrics';
+import { rateLimitOperationsEventOrg } from './metrics';
 
 export type RateLimitCheckResponse = {
   limited: boolean;
@@ -23,7 +23,6 @@ const UNKNOWN_RATE_LIMIT_OBJ: RateLimitCheckResponse = {
 
 export type CachedRateLimitInfo = {
   orgName: string;
-  schemaPushes: RateLimitCheckResponse;
   operations: RateLimitCheckResponse;
   retentionInDays: number;
 };
@@ -69,15 +68,13 @@ export function createRateLimiter(config: {
     config.logger.info(`Calculating rate-limit information based on window: ${window.startTime} -> ${window.endTime}`);
     const storage = await postgres$;
 
-    const [records, operations, pushes] = await Promise.all([
+    const [records, operations] = await Promise.all([
       storage.getGetOrganizationsAndTargetPairsWithLimitInfo(),
       rateEstimator.query('estimateOperationsForAllTargets', window),
-      rateEstimator.query('estiamteSchemaPushesForAllTargets', window),
     ]);
 
     logger.debug(`Fetched total of ${Object.keys(records).length} targets from the DB`);
     logger.debug(`Fetched total of ${Object.keys(operations).length} targets with usage information`);
-    logger.debug(`Fetched total of ${Object.keys(pushes).length} targets with schema push information`);
 
     const newTargetIdToOrgLookup = new Map<TargetId, OrganizationId>();
     const newCachedResult = new Map<OrganizationId, CachedRateLimitInfo>();
@@ -93,38 +90,23 @@ export function createRateLimiter(config: {
             quota: pairRecord.limit_operations_monthly,
             limited: false,
           },
-          schemaPushes: {
-            current: 0,
-            quota: pairRecord.limit_schema_push_monthly,
-            limited: false,
-          },
           retentionInDays: pairRecord.limit_retention_days,
         });
       }
 
       const orgRecord = newCachedResult.get(pairRecord.organization)!;
       orgRecord.operations.current = (orgRecord.operations.current || 0) + (operations[pairRecord.target] || 0);
-      orgRecord.schemaPushes.current = (orgRecord.schemaPushes.current || 0) + (pushes[pairRecord.target] || 0);
     }
 
     newCachedResult.forEach((orgRecord, orgId) => {
       const orgName = orgRecord.orgName;
       orgRecord.operations.limited =
         orgRecord.operations.quota === 0 ? false : orgRecord.operations.current > orgRecord.operations.quota;
-      orgRecord.schemaPushes.limited =
-        orgRecord.schemaPushes.quota === 0 ? false : orgRecord.schemaPushes.current > orgRecord.schemaPushes.quota;
 
       if (orgRecord.operations.limited) {
         rateLimitOperationsEventOrg.labels({ orgId, orgName }).inc();
         logger.info(
           `Organization "${orgName}"/"${orgId}" is now being rate-limited for operations (${orgRecord.operations.current}/${orgRecord.operations.quota})`
-        );
-      }
-
-      if (orgRecord.schemaPushes.limited) {
-        rateLimitSchemaEventOrg.labels({ orgId, orgName }).inc();
-        logger.info(
-          `Organization "${orgName}"/"${orgId}" is now being rate-limited for schema pushes (${orgRecord.schemaPushes.current}/${orgRecord.schemaPushes.quota})`
         );
       }
     });
@@ -173,8 +155,6 @@ export function createRateLimiter(config: {
 
       if (input.type === 'operations-reporting') {
         return orgData.operations;
-      } else if (input.type === 'schema-push') {
-        return orgData.schemaPushes;
       } else {
         return UNKNOWN_RATE_LIMIT_OBJ;
       }
@@ -189,7 +169,7 @@ export function createRateLimiter(config: {
 
       initialized = true;
       intervalHandle = setInterval(async () => {
-        logger.info(`Interval triggered, updating internval rate-limit cache...`);
+        logger.info(`Interval triggered, updating interval rate-limit cache...`);
 
         try {
           await fetchAndCalculateUsageInformation();
