@@ -14,11 +14,15 @@ export class DataWrapper<TData, TVariables> extends Component<{
     const { query, children, spinnerComponent } = this.props;
 
     if (query.fetching) {
-      return spinnerComponent || <Spinner />;
+      return spinnerComponent ?? <Spinner />;
     }
 
     if (query.error) {
       return <QueryError error={query.error} />;
+    }
+
+    if (!query.data) {
+      return spinnerComponent ?? <Spinner />;
     }
 
     return children({ data: query.data });

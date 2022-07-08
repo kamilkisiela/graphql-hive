@@ -28,7 +28,7 @@ const NewPage: FC = () => {
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    wrapperRef.current.scrollIntoView({
+    wrapperRef.current?.scrollIntoView({
       behavior: 'smooth',
     });
   }, [page]);

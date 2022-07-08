@@ -160,7 +160,7 @@ const ExtendBaseSchema = (props: { baseSchema: string }): ReactElement => {
         options={{ readOnly: mutation.fetching }}
         value={baseSchema}
         height={300}
-        onChange={setBaseSchema}
+        onChange={value => setBaseSchema(value ?? '')}
       />
       {mutation.data?.updateBaseSchema.error && (
         <div className="text-red-500">{mutation.data.updateBaseSchema.error.message}</div>
@@ -504,7 +504,7 @@ const Page = ({ target, organization }: { target: TargetFieldsFragment; organiza
         </form>
         {touched.name && (errors.name || mutation.error) && (
           <div className="mt-2 text-red-500">
-            {errors.name ?? mutation.error.graphQLErrors[0]?.message ?? mutation.error.message}
+            {errors.name ?? mutation.error?.graphQLErrors[0]?.message ?? mutation.error?.message}
           </div>
         )}
         {mutation.data?.updateTargetName.error?.inputErrors?.name && (
@@ -516,7 +516,7 @@ const Page = ({ target, organization }: { target: TargetFieldsFragment; organiza
 
       <ConditionalBreakingChanges />
 
-      {target && <ExtendBaseSchema baseSchema={target.baseSchema} />}
+      {target?.baseSchema?.length ? <ExtendBaseSchema baseSchema={target.baseSchema} /> : null}
 
       {canDelete && (
         <Card>

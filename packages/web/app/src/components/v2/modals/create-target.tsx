@@ -81,7 +81,7 @@ export const CreateTargetModal = ({
           className="grow"
         />
         {touched.name && (errors.name || mutation.error) && (
-          <div className="-mt-2 text-sm text-red-500">{errors.name || mutation.error.message}</div>
+          <div className="-mt-2 text-sm text-red-500">{errors.name || mutation.error?.message}</div>
         )}
         {mutation.data?.createTarget.error?.inputErrors.name && (
           <div className="-mt-2 text-sm text-red-500">{mutation.data.createTarget.error.inputErrors.name}</div>

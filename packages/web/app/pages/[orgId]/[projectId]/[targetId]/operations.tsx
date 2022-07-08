@@ -60,7 +60,7 @@ const OperationsView = ({
     return { from, to };
   }, [selectedPeriod]);
 
-  const updatePeriod = useCallback<ComponentProps<'select'>['onChange']>(
+  const updatePeriod = useCallback<Exclude<ComponentProps<'select'>['onChange'], undefined | null>>(
     ev => {
       router.push(`${href}?period=${ev.target.value}`);
     },

@@ -25,12 +25,12 @@ const PriceEstimationTable = ({
   operationsRateLimit: number;
   schemaPushesRateLimit: number;
 }): ReactElement => {
-  const includedOperationsInMillions = plan.includedOperationsLimit / 1_000_000;
+  const includedOperationsInMillions = (plan.includedOperationsLimit ?? 0) / 1_000_000;
   const additionalOperations = Math.max(0, operationsRateLimit - includedOperationsInMillions);
-  const operationsTotal = plan.pricePerOperationsUnit * additionalOperations;
-  const additionalSchemaPushes = Math.max(0, schemaPushesRateLimit - plan.includedSchemaPushLimit);
-  const schemaTotal = plan.pricePerSchemaPushUnit * additionalSchemaPushes;
-  const total = plan.basePrice + operationsTotal + schemaTotal;
+  const operationsTotal = (plan.pricePerOperationsUnit ?? 0) * additionalOperations;
+  const additionalSchemaPushes = Math.max(0, schemaPushesRateLimit - (plan.includedSchemaPushLimit ?? 0));
+  const schemaTotal = (plan.pricePerSchemaPushUnit ?? 0) * additionalSchemaPushes;
+  const total = (plan.basePrice ?? 0) + operationsTotal + schemaTotal;
 
   return (
     <Table size="sm">
@@ -48,8 +48,8 @@ const PriceEstimationTable = ({
             Base price <span className="text-gray-500">(unlimited seats)</span>
           </Td>
           <Td isNumeric />
-          <Td isNumeric>{CurrencyFormatter.format(plan.basePrice)}</Td>
-          <Td isNumeric>{CurrencyFormatter.format(plan.basePrice)}</Td>
+          <Td isNumeric>{CurrencyFormatter.format(plan.basePrice ?? 0)}</Td>
+          <Td isNumeric>{CurrencyFormatter.format(plan.basePrice ?? 0)}</Td>
         </Tr>
         <Tr>
           <Td>
@@ -71,7 +71,7 @@ const PriceEstimationTable = ({
           <Tr>
             <Td>Additional Operations</Td>
             <Td isNumeric>{additionalOperations}M</Td>
-            <Td isNumeric>{CurrencyFormatter.format(plan.pricePerOperationsUnit)}</Td>
+            <Td isNumeric>{CurrencyFormatter.format(plan.pricePerOperationsUnit ?? 0)}</Td>
             <Td isNumeric>{CurrencyFormatter.format(operationsTotal)}</Td>
           </Tr>
         )}
@@ -79,7 +79,7 @@ const PriceEstimationTable = ({
           <Tr>
             <Td>Additional Schema Pushes</Td>
             <Td isNumeric>{additionalSchemaPushes}</Td>
-            <Td isNumeric>{CurrencyFormatter.format(plan.pricePerSchemaPushUnit)}</Td>
+            <Td isNumeric>{CurrencyFormatter.format(plan.pricePerSchemaPushUnit ?? 0)}</Td>
             <Td isNumeric>{CurrencyFormatter.format(schemaTotal)}</Td>
           </Tr>
         )}

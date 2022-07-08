@@ -4,6 +4,7 @@ mutation deleteOrganization($selector: OrganizationSelectorInput!) {
       organization
     }
     organization {
+      __typename
       id
     }
   }

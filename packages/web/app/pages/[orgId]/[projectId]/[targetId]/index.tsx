@@ -100,7 +100,7 @@ const SchemaServiceName = ({
   }
 
   return (
-    <Editable defaultValue={schema.service} isDisabled={mutation.fetching} onSubmit={submit}>
+    <Editable defaultValue={schema.service ?? ''} isDisabled={mutation.fetching} onSubmit={submit}>
       <EditablePreview />
       <EditableInput />
     </Editable>
@@ -123,7 +123,7 @@ const Schemas = ({
   filterService?: string;
 }): ReactElement => {
   if (project.type === ProjectType.Single) {
-    return <GraphQLBlock className="mb-6" sdl={schemas[0].source} url={schemas[0].url} />;
+    return <GraphQLBlock className="mb-6" sdl={schemas[0].source} url={schemas[0]?.url ?? ''} />;
   }
 
   return (
@@ -140,7 +140,7 @@ const Schemas = ({
           <GraphQLBlock
             key={schema.id}
             sdl={schema.source}
-            url={schema.url}
+            url={schema.url ?? ''}
             title={
               <SchemaServiceName
                 version={version}
@@ -178,7 +178,7 @@ const SyncSchemaButton = ({
   target: TargetFieldsFragment;
   project: ProjectFieldsFragment;
   organization: OrganizationFieldsFragment;
-}): ReactElement => {
+}): ReactElement | null => {
   const [status, setStatus] = useState<'idle' | 'error' | 'success'>('idle');
   const [mutation, mutate] = useMutation(SchemaSyncButton_SchemaSyncCDN);
 
@@ -230,9 +230,9 @@ function SchemaView({
   organization: OrganizationFieldsFragment;
   project: ProjectFieldsFragment;
   target: TargetFieldsFragment;
-}): ReactElement {
-  const [filterService, setFilterService] = useState<string | null>(null);
-  const [term, setTerm] = useState<string | null>(null);
+}): ReactElement | null {
+  const [filterService, setFilterService] = useState<string>('');
+  const [term, setTerm] = useState<string>('');
   const debouncedFilter = useDebouncedCallback((value: string) => {
     setFilterService(value);
   }, 500);
@@ -268,45 +268,51 @@ function SchemaView({
     redirect: false,
   });
 
-  if (!query.data?.target?.latestSchemaVersion?.schemas.nodes.length) {
-    return noSchema;
-  }
-
   return (
     <DataWrapper query={query}>
-      {() => (
-        <>
-          <div className="mb-5 flex flex-row items-center justify-between">
-            <div className="font-light text-gray-500">The latest published schema.</div>
-            <div className="flex flex-row items-center gap-4">
-              {isDistributed && (
-                <form
-                  onSubmit={event => {
-                    event.preventDefault();
-                  }}
-                >
-                  <InputGroup size="sm" variant="filled">
-                    <Input type="text" placeholder="Find service" value={term} onChange={handleChange} />
-                    <InputRightElement>
-                      <IconButton aria-label="Reset" size="xs" variant="ghost" onClick={reset} icon={<VscClose />} />
-                    </InputRightElement>
-                  </InputGroup>
-                </form>
-              )}
-              {canManage && <MarkAsValid version={query.data.target.latestSchemaVersion} />}
-              {canManage && <SyncSchemaButton target={target} project={project} organization={organization} />}
+      {query => {
+        if (!query.data?.target?.latestSchemaVersion?.schemas.nodes.length) {
+          return noSchema;
+        }
+
+        return (
+          <>
+            <div className="mb-5 flex flex-row items-center justify-between">
+              <div className="font-light text-gray-500">The latest published schema.</div>
+              <div className="flex flex-row items-center gap-4">
+                {isDistributed && (
+                  <form
+                    onSubmit={event => {
+                      event.preventDefault();
+                    }}
+                  >
+                    <InputGroup size="sm" variant="filled">
+                      <Input type="text" placeholder="Find service" value={term} onChange={handleChange} />
+                      <InputRightElement>
+                        <IconButton aria-label="Reset" size="xs" variant="ghost" onClick={reset} icon={<VscClose />} />
+                      </InputRightElement>
+                    </InputGroup>
+                  </form>
+                )}
+                {canManage ? (
+                  <>
+                    <MarkAsValid version={query.data.target.latestSchemaVersion} />{' '}
+                    <SyncSchemaButton target={target} project={project} organization={organization} />
+                  </>
+                ) : null}
+              </div>
             </div>
-          </div>
-          <Schemas
-            organization={organization}
-            project={project}
-            target={query.data.target}
-            filterService={filterService}
-            version={query.data.target.latestSchemaVersion.id}
-            schemas={query.data.target.latestSchemaVersion.schemas.nodes ?? []}
-          />
-        </>
-      )}
+            <Schemas
+              organization={organization}
+              project={project}
+              target={query.data.target}
+              filterService={filterService}
+              version={query.data.target.latestSchemaVersion.id}
+              schemas={query.data.target.latestSchemaVersion.schemas.nodes ?? []}
+            />
+          </>
+        );
+      }}
     </DataWrapper>
   );
 }

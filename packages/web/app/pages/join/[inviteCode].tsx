@@ -36,17 +36,19 @@ export default function OrganizationPage() {
     mutate({
       code,
     }).then(result => {
-      if (result.data.joinOrganization.__typename === 'OrganizationInvitationError') {
-        notify(result.data.joinOrganization.message, 'error');
-      } else {
-        const org = result.data.joinOrganization.organization;
-        notify(`You joined "${org.name}" organization`, 'success');
-        track('JOIN_ORGANIZATION_ATTEMPT_SUCCESS', {
-          code,
-        });
-        router.visitOrganization({
-          organizationId: org.cleanId,
-        });
+      if (result.data) {
+        if (result.data.joinOrganization.__typename === 'OrganizationInvitationError') {
+          notify(result.data.joinOrganization.message, 'error');
+        } else {
+          const org = result.data.joinOrganization.organization;
+          notify(`You joined "${org.name}" organization`, 'success');
+          track('JOIN_ORGANIZATION_ATTEMPT_SUCCESS', {
+            code,
+          });
+          router.visitOrganization({
+            organizationId: org.cleanId,
+          });
+        }
       }
     });
   }, [mutate, code, router, notify]);
@@ -62,8 +64,12 @@ export default function OrganizationPage() {
     <>
       <Title title="Invitation" />
       <DataWrapper query={query}>
-        {() => {
-          const invitation = query.data.organizationByInviteCode;
+        {({ data }) => {
+          if (data.organizationByInviteCode == null) {
+            return null;
+          }
+          const invitation = data.organizationByInviteCode;
+
           if (invitation.__typename === 'OrganizationInvitationError') {
             return (
               <Center>

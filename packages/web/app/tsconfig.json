@@ -6,13 +6,7 @@
     "allowJs": true,
     "skipLibCheck": true,
 
-    "strict": false,
-    "useUnknownInCatchVariables": true,
-    "noImplicitThis": true,
-    "strictBindCallApply": true,
-    "alwaysStrict": true,
-    "noImplicitAny": true,
-    "strictFunctionTypes": true,
+    "strict": true,
 
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,

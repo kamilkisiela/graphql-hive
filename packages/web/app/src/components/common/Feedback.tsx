@@ -60,7 +60,13 @@ export const Feedback: React.FC<{
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="xl" closeOnEsc={false} closeOnOverlayClick={false}>
       <ModalOverlay />
-      <ModalContent as="form" onSubmit={formik.handleSubmit}>
+      <ModalContent
+        as="form"
+        // Chakra does not let us use the correct type signature/formik is to strict in it's types.
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        onSubmit={formik.handleSubmit}
+      >
         <ModalHeader>{state === 'FORM' ? 'Send feedback' : 'We got your feedback'}</ModalHeader>
         <ModalBody>
           {state === 'FORM' ? (

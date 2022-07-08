@@ -3,7 +3,10 @@ import { MemberFieldsFragment, TargetAccessScope } from '../../graphql';
 
 export { TargetAccessScope } from '../../graphql';
 
-export function canAccessTarget(scope: TargetAccessScope, member: Pick<MemberFieldsFragment, 'targetAccessScopes'>) {
+export function canAccessTarget(
+  scope: TargetAccessScope,
+  member: Pick<MemberFieldsFragment, 'targetAccessScopes'> | null | undefined
+) {
   if (!member) {
     return false;
   }
@@ -17,7 +20,7 @@ export function useTargetAccess({
   redirect = false,
 }: {
   scope: TargetAccessScope;
-  member: Pick<MemberFieldsFragment, 'targetAccessScopes'>;
+  member: Pick<MemberFieldsFragment, 'targetAccessScopes'> | null | undefined;
   redirect?: boolean;
 }) {
   const canAccess = canAccessTarget(scope, member);

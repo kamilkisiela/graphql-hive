@@ -180,7 +180,7 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
             </Button>
           </form>
           {touched.name && (errors.name || mutation.error) && (
-            <div className="mt-2 text-red-500">{errors.name || mutation.error.message}</div>
+            <div className="mt-2 text-red-500">{errors.name || mutation.error?.message}</div>
           )}
           {mutation.data?.updateOrganizationName?.error && (
             <div className="mt-2 text-red-500">{mutation.data?.updateOrganizationName.error.message}</div>
@@ -213,7 +213,11 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
               <AlertTriangleIcon className="h-5 w-5" />
               This action is not reversible!
             </Tag>
-            <DeleteOrganizationModal isOpen={isModalOpen} toggleModalOpen={toggleModalOpen} />
+            <DeleteOrganizationModal
+              isOpen={isModalOpen}
+              toggleModalOpen={toggleModalOpen}
+              organization={organization}
+            />
           </div>
         </Card>
       )}

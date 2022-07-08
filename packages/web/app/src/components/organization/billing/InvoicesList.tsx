@@ -7,7 +7,7 @@ import { CurrencyFormatter } from './helpers';
 export const InvoicesList: React.FC<{
   organization: OrganizationFieldsFragment & OrgBillingInfoFieldsFragment;
 }> = ({ organization }) => {
-  if (organization.billingConfiguration?.invoices?.length === 0) {
+  if (null == organization.billingConfiguration?.invoices?.length) {
     return null;
   }
 

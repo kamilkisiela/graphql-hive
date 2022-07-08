@@ -10,7 +10,7 @@ import { TargetQuery, TargetsDocument, VersionsDocument } from '@/graphql';
 import { useClipboard } from '@/lib/hooks/use-clipboard';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
-const TargetCard = ({ target }: { target: TargetQuery['target'] }): ReactElement => {
+const TargetCard = ({ target }: { target: Exclude<TargetQuery['target'], null | undefined> }): ReactElement => {
   const router = useRouteSelector();
   const copyToClipboard = useClipboard();
   const [versionsQuery] = useQuery({

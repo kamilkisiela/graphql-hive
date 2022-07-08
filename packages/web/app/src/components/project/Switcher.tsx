@@ -20,44 +20,45 @@ export const ProjectSwitcher: React.FC<{
       },
     },
   });
-  const items = React.useMemo(() => {
+  const refinedData = React.useMemo(() => {
     if (!data?.projects?.nodes) {
-      return [];
+      return null;
     }
 
-    return data.projects.nodes.map(node => ({
-      key: node.cleanId,
-      label: node.name,
-    }));
+    const currentProject = data?.projects?.nodes.find(node => node.cleanId === projectId);
+
+    if (!currentProject) {
+      return null;
+    }
+
+    return { items: data.projects.nodes, currentProject };
   }, [data]);
 
   const dropdownBgColor = useColorModeValue('white', 'gray.900');
   const dropdownTextColor = useColorModeValue('gray.700', 'gray.300');
 
-  if (!items.length) {
+  if (refinedData === null) {
     return null;
   }
-
-  const currentProject = data.projects.nodes.find(node => node.cleanId === projectId);
 
   return (
     <Menu autoSelect={false}>
       <MenuButton size="sm" as={Button} rightIcon={<VscChevronDown />} variant="ghost" tw="font-normal">
-        {currentProject.name}
+        {refinedData.currentProject.name}
       </MenuButton>
       <MenuList bg={dropdownBgColor} color={dropdownTextColor}>
-        {items.map(item => {
+        {refinedData.items.map(item => {
           return (
             <MenuItem
               onClick={() => {
                 router.visitProject({
                   organizationId: organizationId,
-                  projectId: item.key,
+                  projectId: item.cleanId,
                 });
               }}
-              key={item.key}
+              key={item.cleanId}
             >
-              {item.label}
+              {item.name}
             </MenuItem>
           );
         })}

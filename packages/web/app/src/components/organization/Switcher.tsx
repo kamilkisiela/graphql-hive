@@ -13,7 +13,7 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react';
 import 'twin.macro';
-import { OrganizationsDocument, OrganizationType } from '@/graphql';
+import { OrganizationsDocument, OrganizationsQuery, OrganizationType } from '@/graphql';
 import { OrganizationCreator } from './Creator';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
@@ -25,63 +25,57 @@ export const OrganizationSwitcher: React.FC<{
     query: OrganizationsDocument,
   });
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const menu = React.useMemo<{
-    personal: Array<{
-      key: string;
-      label: string;
-    }>;
-    organizations: Array<{
-      key: string;
-      label: string;
-    }>;
-  }>(() => {
+  const menu = React.useMemo(() => {
     if (!data?.organizations?.nodes) {
-      return {
-        personal: [],
-        organizations: [],
-      };
+      return null;
     }
 
-    const menu: {
-      personal: Array<{ key: string; label: string }>;
-      organizations: Array<{ key: string; label: string }>;
-    } = {
-      personal: [],
-      organizations: [],
-    };
+    const personal: Array<{ key: string; label: string }> = [];
+    const organizations: Array<{ key: string; label: string }> = [];
+    let currentOrganization: null | OrganizationsQuery['organizations']['nodes'][number] = null;
 
-    data.organizations.nodes.forEach(node => {
+    for (const node of data.organizations.nodes) {
+      if (node.cleanId === organizationId) {
+        currentOrganization = node;
+      }
       if (node.type === OrganizationType.Personal) {
-        return menu.personal.push({
+        personal.push({
           key: node.cleanId,
           label: node.name,
         });
+        continue;
       }
 
-      menu.organizations.push({
+      organizations.push({
         key: node.cleanId,
         label: node.name,
       });
-    });
+    }
 
-    return menu;
+    if (currentOrganization === null) {
+      return null;
+    }
+
+    return {
+      personal,
+      organizations,
+      currentOrganization,
+    };
   }, [data]);
 
   const dropdownBgColor = useColorModeValue('white', 'gray.900');
   const dropdownTextColor = useColorModeValue('gray.700', 'gray.300');
 
-  if (!menu.personal.length) {
+  if (!menu) {
     return null;
   }
-
-  const currentOrganization = data.organizations.nodes.find(node => node.cleanId === organizationId);
 
   return (
     <>
       <OrganizationCreator isOpen={isOpen} onClose={onClose} />
       <Menu autoSelect={false}>
         <MenuButton size="sm" as={Button} rightIcon={<VscChevronDown />} variant="ghost" tw="font-normal">
-          {currentOrganization.name}
+          {menu.currentOrganization.name}
         </MenuButton>
         <MenuList bg={dropdownBgColor} color={dropdownTextColor}>
           {menu.personal.length && (

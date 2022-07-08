@@ -1,38 +1,23 @@
 import { FC } from 'react';
 import { keyframes } from '@emotion/react';
 import {
-  Content,
+  Content as DropDownMenuContent,
   DropdownMenuContentProps,
   DropdownMenuItemProps,
-  DropdownMenuLabelProps,
-  DropdownMenuProps,
   DropdownMenuSeparatorProps,
   DropdownMenuTriggerItemProps,
-  DropdownMenuTriggerProps,
-  Item,
+  Item as DropDownMenuItem,
   Label,
   Root,
-  Separator,
+  Separator as DropDownMenuSeparator,
   Trigger,
-  TriggerItem,
+  TriggerItem as DropDownMenuTriggerItem,
 } from '@radix-ui/react-dropdown-menu';
 import clsx from 'clsx';
 import { css } from 'twin.macro';
 
-const DropdownMenu: FC<DropdownMenuProps> & {
-  Trigger?: FC<DropdownMenuTriggerProps>;
-  Label?: FC<DropdownMenuLabelProps>;
-  Content?: FC<DropdownMenuContentProps>;
-  Item?: FC<DropdownMenuItemProps>;
-  TriggerItem?: FC<DropdownMenuTriggerItemProps>;
-  Separator?: FC<DropdownMenuSeparatorProps>;
-} = Root;
-
-DropdownMenu.Trigger = Trigger;
-DropdownMenu.Label = Label;
-
-DropdownMenu.Content = ({ children, className, ...props }) => (
-  <Content
+const Content: FC<DropdownMenuContentProps> = ({ children, className, ...props }) => (
+  <DropDownMenuContent
     className={clsx(
       `
     flex
@@ -87,11 +72,11 @@ DropdownMenu.Content = ({ children, className, ...props }) => (
     {...props}
   >
     {children}
-  </Content>
+  </DropDownMenuContent>
 );
 
-DropdownMenu.Item = ({ children, className, ...props }) => (
-  <Item
+const Item: FC<DropdownMenuItemProps> = ({ children, className, ...props }) => (
+  <DropDownMenuItem
     className={clsx(
       `
       flex
@@ -111,11 +96,11 @@ DropdownMenu.Item = ({ children, className, ...props }) => (
     {...props}
   >
     {children}
-  </Item>
+  </DropDownMenuItem>
 );
 
-DropdownMenu.TriggerItem = ({ children, className, ...props }) => (
-  <TriggerItem
+const TriggerItem: FC<DropdownMenuTriggerItemProps> = ({ children, className, ...props }) => (
+  <DropDownMenuTriggerItem
     className={clsx(
       `
       radix-state-open:sepia
@@ -137,11 +122,18 @@ DropdownMenu.TriggerItem = ({ children, className, ...props }) => (
     {...props}
   >
     {children}
-  </TriggerItem>
+  </DropDownMenuTriggerItem>
 );
 
-DropdownMenu.Separator = ({ className, asChild }) => (
-  <Separator className={clsx('h-px bg-gray-700/50', className)} asChild={asChild} />
+const Separator: FC<DropdownMenuSeparatorProps> = ({ className, asChild }) => (
+  <DropDownMenuSeparator className={clsx('h-px bg-gray-700/50', className)} asChild={asChild} />
 );
 
-export { DropdownMenu };
+export const DropdownMenu = Object.assign(Root, {
+  Separator,
+  Trigger,
+  Label,
+  Content,
+  TriggerItem,
+  Item,
+});

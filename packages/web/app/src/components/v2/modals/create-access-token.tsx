@@ -6,7 +6,7 @@ import * as Yup from 'yup';
 
 import { PermissionsSpace, usePermissionsManager } from '@/components/organization/Permissions';
 import { Button, CopyValue, Heading, Input, Modal, Tag } from '@/components/v2';
-import { OrganizationDocument } from '@/graphql';
+import { OrganizationDocument, OrganizationQuery } from '@/graphql';
 import { scopes } from '@/lib/access/common';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
@@ -48,8 +48,30 @@ export const CreateAccessTokenModal = ({
     },
   });
 
-  const { organization } = organizationQuery.data.organization;
+  const organization = organizationQuery.data?.organization?.organization;
 
+  return (
+    <Modal open={isOpen} onOpenChange={toggleModalOpen} className="w-[650px]">
+      {organization ? (
+        <ModalContent
+          organization={organization}
+          organizationId={router.organizationId}
+          projectId={router.projectId}
+          targetId={router.targetId}
+          toggleModalOpen={toggleModalOpen}
+        />
+      ) : null}
+    </Modal>
+  );
+};
+
+const ModalContent = (props: {
+  organization: Exclude<OrganizationQuery['organization'], null | undefined>['organization'];
+  organizationId: string;
+  projectId: string;
+  targetId: string;
+  toggleModalOpen: () => void;
+}) => {
   const [mutation, mutate] = useMutation(CreateAccessToken_CreateTokenMutation);
 
   const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } = useFormik({
@@ -60,9 +82,9 @@ export const CreateAccessTokenModal = ({
     async onSubmit(values) {
       await mutate({
         input: {
-          organization: router.organizationId,
-          project: router.projectId,
-          target: router.targetId,
+          organization: props.organizationId,
+          project: props.projectId,
+          target: props.targetId,
           name: values.name,
           organizationScopes: manager.organizationScopes,
           projectScopes: manager.projectScopes,
@@ -74,12 +96,12 @@ export const CreateAccessTokenModal = ({
 
   const manager = usePermissionsManager({
     onSuccess() {},
-    organization,
-    member: organization.me,
+    organization: props.organization,
+    member: props.organization.me,
   });
 
   return (
-    <Modal open={isOpen} onOpenChange={toggleModalOpen} className="w-[650px]">
+    <>
       {mutation.data?.createToken.ok ? (
         <div className="flex flex-col gap-5">
           <Heading className="text-center">Token successfully created!</Heading>
@@ -88,7 +110,7 @@ export const CreateAccessTokenModal = ({
             This is your unique API key and it is non-recoverable. If you lose this key, you will need to create a new
             one.
           </Tag>
-          <Button variant="primary" size="large" className="ml-auto" onClick={toggleModalOpen}>
+          <Button variant="primary" size="large" className="ml-auto" onClick={props.toggleModalOpen}>
             Ok, got it!
           </Button>
         </div>
@@ -148,7 +170,7 @@ export const CreateAccessTokenModal = ({
           {mutation.error && <div className="text-sm text-red-500">{mutation.error.message}</div>}
 
           <div className="flex w-full gap-2">
-            <Button type="button" size="large" block onClick={toggleModalOpen}>
+            <Button type="button" size="large" block onClick={props.toggleModalOpen}>
               Cancel
             </Button>
             <Button type="submit" size="large" block variant="primary" disabled={isSubmitting}>
@@ -157,6 +179,6 @@ export const CreateAccessTokenModal = ({
           </div>
         </form>
       )}
-    </Modal>
+    </>
   );
 };

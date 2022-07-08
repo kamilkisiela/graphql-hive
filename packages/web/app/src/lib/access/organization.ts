@@ -5,7 +5,7 @@ export { OrganizationAccessScope } from '../../graphql';
 
 export function canAccessOrganization(
   scope: OrganizationAccessScope,
-  member: Pick<MemberFieldsFragment, 'organizationAccessScopes'>
+  member: Pick<MemberFieldsFragment, 'organizationAccessScopes'> | null | undefined
 ) {
   if (!member) {
     return false;
@@ -20,7 +20,7 @@ export function useOrganizationAccess({
   redirect = false,
 }: {
   scope: OrganizationAccessScope;
-  member: Pick<MemberFieldsFragment, 'organizationAccessScopes'>;
+  member: Pick<MemberFieldsFragment, 'organizationAccessScopes'> | null | undefined;
   redirect?: boolean;
 }) {
   const canAccess = canAccessOrganization(scope, member);

@@ -11,7 +11,7 @@ import { LAST_VISITED_ORG_KEY } from '@/constants';
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   try {
-    let orgId: string;
+    let orgId: string | null = null;
     const cookies = new Cookies(req, res);
     const lastOrgIdInCookies = cookies.get(LAST_VISITED_ORG_KEY);
 
@@ -19,17 +19,22 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
       orgId = lastOrgIdInCookies;
     } else {
       const { host, cookie } = req.headers;
-      const protocol = host.startsWith('localhost') ? 'http' : 'https';
+      const protocol = host?.startsWith('localhost') ? 'http' : 'https';
       const query = stripIgnoredCharacters(print(OrganizationsDocument));
+
+      const headers: Record<string, string> = {
+        'content-type': 'application/json',
+        Accept: 'application/json',
+      };
+
+      if (cookie != null) {
+        headers['cookie'] = cookie;
+      }
 
       const response = await fetch(`${protocol}://${host}/api/proxy`, {
         method: 'POST',
         body: JSON.stringify({ query, operationName: 'organizations' }),
-        headers: {
-          cookie,
-          'content-type': 'application/json',
-          Accept: 'application/json',
-        },
+        headers,
       });
 
       const result: ExecutionResult<OrganizationsQuery> = await response.json();
@@ -64,8 +69,9 @@ export default function Home(): ReactElement {
     // Just in case server-side redirect wasn't working
     if (query.data) {
       const org = query.data.organizations.nodes.find(node => node.type === OrganizationType.Personal);
-
-      router.visitOrganization({ organizationId: org.cleanId });
+      if (org) {
+        router.visitOrganization({ organizationId: org.cleanId });
+      }
     }
   }, [router, query.data]);
 

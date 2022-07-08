@@ -67,6 +67,10 @@ export class DataWrapper<TData, TVariables> extends React.Component<{
       return <QueryError error={query.error} />;
     }
 
+    if (query.data == null) {
+      return this.props.spinnerComponent || <Spinner />;
+    }
+
     return <>{children({ data: query.data })}</>;
   }
 }

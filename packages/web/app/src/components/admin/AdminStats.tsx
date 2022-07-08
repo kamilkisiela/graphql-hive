@@ -445,7 +445,7 @@ export const AdminStats: React.FC<{
     },
   });
 
-  const data = React.useMemo(() => {
+  const tableData = React.useMemo(() => {
     return (query.data?.admin?.stats.organizations ?? [])
       .filter(node => filterStats(node, filters))
       .map(node => ({
@@ -463,19 +463,19 @@ export const AdminStats: React.FC<{
 
   const overall = React.useMemo(() => {
     return {
-      users: data.reduce((total, node) => (node.type === 'PERSONAL' ? total + 1 : total), 0),
-      organizations: data.length,
-      projects: sumByKey(data, 'projects'),
-      targets: sumByKey(data, 'targets'),
-      versions: sumByKey(data, 'versions'),
-      persistedOperations: sumByKey(data, 'persistedOperations'),
-      operations: sumByKey(data, 'operations'),
+      users: tableData.reduce((total, node) => (node.type === 'PERSONAL' ? total + 1 : total), 0),
+      organizations: tableData.length,
+      projects: sumByKey(tableData, 'projects'),
+      targets: sumByKey(tableData, 'targets'),
+      versions: sumByKey(tableData, 'versions'),
+      persistedOperations: sumByKey(tableData, 'persistedOperations'),
+      operations: sumByKey(tableData, 'operations'),
     };
-  }, [data]);
+  }, [tableData]);
 
   return (
     <DataWrapper query={query}>
-      {() => (
+      {({ data }) => (
         <div tw="flex flex-col space-y-6">
           <StatGroup tw="bg-gray-100 dark:bg-gray-800 px-3 py-2">
             <OverallStat label="Users" value={overall.users} />
@@ -486,8 +486,8 @@ export const AdminStats: React.FC<{
             <OverallStat label="Persisted Ops" value={overall.persistedOperations} />
             <OverallStat label="Collected Ops" value={overall.operations} />
           </StatGroup>
-          <CollectedOperationsOverTime last={last} operations={query.data?.admin.stats.general.operationsOverTime} />
-          <OrganizationTable data={data} />
+          <CollectedOperationsOverTime last={last} operations={data.admin.stats.general.operationsOverTime} />
+          <OrganizationTable data={tableData} />
         </div>
       )}
     </DataWrapper>
