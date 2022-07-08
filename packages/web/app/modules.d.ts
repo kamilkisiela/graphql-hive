@@ -1,4 +1,3 @@
- 
 declare module 'node-crisp-api';
 declare module 'tailwindcss/colors';
 
