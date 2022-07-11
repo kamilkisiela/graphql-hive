@@ -45,7 +45,7 @@ export function GetStartedProgress({
           invitingMembers: undefined,
         }
       : tasks;
-  const values = Object.values(processedTasks);
+  const values = Object.values(processedTasks).filter(v => typeof v === 'boolean');
   const total = values.length;
   const completed = values.filter(t => t === true).length;
   const remaining = total - completed;

@@ -45,7 +45,8 @@ export const Header = (): ReactElement => {
   }, []);
 
   const me = meQuery.data?.me;
-  const { personal, organizations } = (organizationsQuery.data?.organizations.nodes || []).reduce<{
+  const allOrgs = organizationsQuery.data?.organizations.nodes || [];
+  const { personal, organizations } = allOrgs.reduce<{
     personal: DropdownOrganization;
     organizations: DropdownOrganization;
   }>(
@@ -61,7 +62,7 @@ export const Header = (): ReactElement => {
   );
 
   const currentOrg =
-    typeof router.organizationId === 'string' ? organizations.find(org => org.cleanId === router.organizationId) : null;
+    typeof router.organizationId === 'string' ? allOrgs.find(org => org.cleanId === router.organizationId) : null;
 
   // Copied from tailwindcss website
   // https://github.com/tailwindlabs/tailwindcss.com/blob/94971856747c159b4896621c3308bcfa629bb736/src/components/Header.js#L149
