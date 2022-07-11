@@ -158,6 +158,7 @@ function Task({
     <a
       href={link}
       target="_blank"
+      rel="noreferrer"
       className={clsx('flex flex-row items-center gap-4 p-3 text-left', completed ? 'opacity-50' : 'hover:opacity-80')}
     >
       {completed ? (
