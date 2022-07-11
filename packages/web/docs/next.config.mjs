@@ -11,4 +11,5 @@ export default withNextra({
   compiler: {
     styledComponents: true,
   },
+  output: 'standalone',
 });

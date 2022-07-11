@@ -13,6 +13,7 @@ const SentryWebpackPluginOptions = {
 
 export default withSentryConfig(
   {
+    output: 'standalone',
     eslint: {
       ignoreDuringBuilds: true,
     },
