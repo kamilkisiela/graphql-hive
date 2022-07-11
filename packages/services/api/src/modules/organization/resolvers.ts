@@ -194,6 +194,9 @@ export const resolvers: OrganizationModule.Resolvers = {
     members(organization, _, { injector }) {
       return injector.get(OrganizationManager).getOrganizationMembers({ organization: organization.id });
     },
+    getStarted(organization) {
+      return organization.getStarted;
+    },
   },
   OrganizationInvitationError: {
     __isTypeOf(obj) {

@@ -72,6 +72,12 @@ export interface organization_member {
 export interface organizations {
   clean_id: string;
   created_at: Date;
+  get_started_checking_schema: boolean;
+  get_started_creating_project: boolean;
+  get_started_inviting_members: boolean;
+  get_started_publishing_schema: boolean;
+  get_started_reporting_operations: boolean;
+  get_started_usage_breaking: boolean;
   github_app_installation_id: string | null;
   id: string;
   invite_code: string;

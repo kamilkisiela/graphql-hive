@@ -100,6 +100,14 @@ export async function createStorage(connection: string): Promise<Storage> {
       },
       billingPlan: organization.plan_name,
       type: (organization.type === 'PERSONAL' ? 'PERSONAL' : 'REGULAR') as OrganizationType,
+      getStarted: {
+        creatingProject: organization.get_started_creating_project,
+        publishingSchema: organization.get_started_publishing_schema,
+        checkingSchema: organization.get_started_checking_schema,
+        invitingMembers: organization.get_started_inviting_members,
+        reportingOperations: organization.get_started_reporting_operations,
+        enablingUsageBasedBreakingChanges: organization.get_started_usage_breaking,
+      },
     };
   }
 

@@ -105,6 +105,14 @@ export interface Organization {
     operations: number;
     schemaPush: number;
   };
+  getStarted: {
+    creatingProject: boolean;
+    publishingSchema: boolean;
+    checkingSchema: boolean;
+    invitingMembers: boolean;
+    reportingOperations: boolean;
+    enablingUsageBasedBreakingChanges: boolean;
+  };
 }
 
 export interface OrganizationBilling {

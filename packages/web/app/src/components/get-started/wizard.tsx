@@ -1,6 +1,5 @@
 import React from 'react';
 import { VscIssues, VscError } from 'react-icons/vsc';
-import clsx from 'clsx';
 import {
   useDisclosure,
   Drawer,
@@ -10,28 +9,27 @@ import {
   DrawerContent,
   DrawerCloseButton,
 } from '@chakra-ui/react';
+import clsx from 'clsx';
+import { gql, DocumentType } from 'urql';
 
-interface OnboardingTasks {
-  creatingProject: boolean;
-  publishingSchema: boolean;
-  checkingSchema: boolean;
-  invitingMembers: boolean;
-  reportingOperations: boolean;
-  enablingUsageBasedBreakingChanges: boolean;
-}
+const GetStartedWizard_GetStartedProgress = gql(/* GraphQL */ `
+  fragment GetStartedWizard_GetStartedProgress on OrganizationGetStarted {
+    creatingProject
+    publishingSchema
+    checkingSchema
+    invitingMembers
+    reportingOperations
+    enablingUsageBasedBreakingChanges
+  }
+`);
 
-export function OnboardingProgress() {
-  const tasks: OnboardingTasks = {
-    creatingProject: true,
-    publishingSchema: false,
-    checkingSchema: false,
-    invitingMembers: false,
-    reportingOperations: false,
-    enablingUsageBasedBreakingChanges: true,
-  };
-
+export function GetStartedProgress({ tasks }: { tasks: DocumentType<typeof GetStartedWizard_GetStartedProgress> }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const triggerRef = React.useRef<HTMLButtonElement>(null);
+
+  if (!tasks) {
+    return null;
+  }
 
   const values = Object.values(tasks);
   const total = values.length;
@@ -65,12 +63,12 @@ export function OnboardingProgress() {
           </div>
         </div>
       </button>
-      <OnboardingWizard isOpen={isOpen} onClose={onClose} triggerRef={triggerRef} tasks={tasks} />
+      <GetStartedWizard isOpen={isOpen} onClose={onClose} triggerRef={triggerRef} tasks={tasks} />
     </>
   );
 }
 
-function OnboardingWizard({
+function GetStartedWizard({
   isOpen,
   onClose,
   triggerRef,
@@ -79,7 +77,7 @@ function OnboardingWizard({
   isOpen: boolean;
   onClose(): void;
   triggerRef: React.RefObject<HTMLButtonElement>;
-  tasks: OnboardingTasks;
+  tasks: DocumentType<typeof GetStartedWizard_GetStartedProgress>;
 }) {
   return (
     <Drawer isOpen={isOpen} placement="right" onClose={onClose} finalFocusRef={triggerRef} size="md">

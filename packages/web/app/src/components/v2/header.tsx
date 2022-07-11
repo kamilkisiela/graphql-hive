@@ -4,7 +4,7 @@ import clsx from 'clsx';
 import { useQuery } from 'urql';
 
 import { useUser } from '@/components/auth/AuthProvider';
-import { OnboardingProgress } from '@/components/onboarding/wizard';
+import { GetStartedProgress } from '@/components/get-started/wizard';
 import { Avatar, Button, DropdownMenu, HiveLink } from '@/components/v2';
 import {
   AlertTriangleIcon,
@@ -20,6 +20,7 @@ import {
 } from '@/components/v2/icon';
 import { CreateOrganizationModal } from '@/components/v2/modals';
 import { MeDocument, OrganizationsDocument, OrganizationsQuery, OrganizationType } from '@/graphql';
+import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { ManagerRoleGuard } from '../auth/ManagerRoleGuard';
 
 type DropdownOrganization = OrganizationsQuery['organizations']['nodes'];
@@ -33,6 +34,7 @@ const OrganizationLink = (props: { children: string; href: string }): ReactEleme
 };
 
 export const Header = (): ReactElement => {
+  const router = useRouteSelector();
   const [meQuery] = useQuery({ query: MeDocument });
   const { user } = useUser();
   const [organizationsQuery] = useQuery({ query: OrganizationsDocument });
@@ -57,6 +59,9 @@ export const Header = (): ReactElement => {
     },
     { personal: [], organizations: [] }
   );
+
+  const currentOrg =
+    typeof router.organizationId === 'string' ? organizations.find(org => org.cleanId === router.organizationId) : null;
 
   // Copied from tailwindcss website
   // https://github.com/tailwindlabs/tailwindcss.com/blob/94971856747c159b4896621c3308bcfa629bb736/src/components/Header.js#L149
@@ -87,7 +92,7 @@ export const Header = (): ReactElement => {
       <div className="container flex h-[84px] items-center justify-between">
         <HiveLink />
         <div className="flex flex-row gap-8">
-          <OnboardingProgress />
+          {currentOrg ? <GetStartedProgress tasks={currentOrg.getStarted} /> : null}
           <DropdownMenu>
             <DropdownMenu.Trigger asChild>
               <Button>
