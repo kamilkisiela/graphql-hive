@@ -22,6 +22,6 @@
     },
     "incremental": true
   },
-  "include": ["next-env.d.ts", "twin.d.ts", "modules.d.ts", "**/*.ts", "**/*.tsx", "pages/stack/[stackId]/2"],
+  "include": ["next-env.d.ts", "modules.d.ts", "twin.d.ts", "src", "pages"],
   "exclude": ["node_modules"]
 }

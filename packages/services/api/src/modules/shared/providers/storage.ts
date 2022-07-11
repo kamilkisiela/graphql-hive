@@ -289,7 +289,6 @@ export interface Storage {
       org_name: string;
       target: string;
       limit_operations_monthly: number;
-      limit_schema_push_monthly: number;
       limit_retention_days: number;
     }>
   >;
