@@ -287,7 +287,6 @@ export class OrganizationManager {
         organizationId: organization.id,
         reserved: {
           operations: Math.floor(input.monthlyRateLimit.operations / 1_000_000),
-          schemaPushes: input.monthlyRateLimit.schemaPush,
         },
       });
     }
