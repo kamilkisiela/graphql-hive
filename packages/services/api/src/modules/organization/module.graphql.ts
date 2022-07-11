@@ -91,6 +91,7 @@ export default gql`
     me: Member!
     members: MemberConnection!
     inviteCode: String!
+    getStarted: OrganizationGetStarted!
   }
 
   type OrganizationConnection {
@@ -113,5 +114,13 @@ export default gql`
   type OrganizationPayload {
     selector: OrganizationSelector!
     organization: Organization!
+  }
+
+  type OrganizationGetStarted {
+    creatingProject: Boolean!
+    publishingSchema: Boolean!
+    checkingSchema: Boolean!
+    invitingMembers: Boolean!
+    enablingUsageBasedBreakingChanges: Boolean!
   }
 `;

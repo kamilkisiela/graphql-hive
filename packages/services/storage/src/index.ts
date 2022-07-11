@@ -18,6 +18,7 @@ import type {
   OrganizationType,
 } from '@hive/api';
 import { sql, TaggedTemplateLiteralInvocationType } from 'slonik';
+import { update } from 'slonik-utilities';
 import {
   commits,
   getPool,
@@ -46,6 +47,15 @@ export type { tokens } from './db/types';
 export type WithUrl<T> = T & Pick<version_commit, 'url'>;
 export type WithMaybeMetadata<T> = T & {
   metadata?: string | null;
+};
+
+const organizationGetStartedMapping: Record<Exclude<keyof Organization['getStarted'], 'id'>, keyof organizations> = {
+  creatingProject: 'get_started_creating_project',
+  publishingSchema: 'get_started_publishing_schema',
+  checkingSchema: 'get_started_checking_schema',
+  invitingMembers: 'get_started_inviting_members',
+  reportingOperations: 'get_started_reporting_operations',
+  enablingUsageBasedBreakingChanges: 'get_started_usage_breaking',
 };
 
 function getProviderBasedOnExternalId(externalId: string): AuthProvider {
@@ -100,6 +110,15 @@ export async function createStorage(connection: string): Promise<Storage> {
       },
       billingPlan: organization.plan_name,
       type: (organization.type === 'PERSONAL' ? 'PERSONAL' : 'REGULAR') as OrganizationType,
+      getStarted: {
+        id: organization.id,
+        creatingProject: organization.get_started_creating_project,
+        publishingSchema: organization.get_started_publishing_schema,
+        checkingSchema: organization.get_started_checking_schema,
+        invitingMembers: organization.get_started_inviting_members,
+        reportingOperations: organization.get_started_reporting_operations,
+        enablingUsageBasedBreakingChanges: organization.get_started_usage_breaking,
+      },
     };
   }
 
@@ -752,6 +771,18 @@ export async function createStorage(connection: string): Promise<Storage> {
       );
 
       return results.rows.map(r => transformTarget(r, organization));
+    },
+    async getTargetIdsOfOrganization({ organization }) {
+      const results = await pool.query<Slonik<Pick<targets, 'id'>>>(
+        sql`
+          SELECT t.id as id FROM public.targets as t 
+          LEFT JOIN public.projects as p ON (p.id = t.project_id)
+          WHERE p.org_id = ${organization}
+          GROUP BY t.id
+        `
+      );
+
+      return results.rows.map(r => r.id);
     },
     async getTargetSettings({ target, project }) {
       const row = await pool.one<
@@ -1775,6 +1806,18 @@ export async function createStorage(connection: string): Promise<Storage> {
             RETURNING *
           `
         )
+      );
+    },
+    async completeGetStartedStep({ organization, step }) {
+      await update(
+        pool,
+        'organizations',
+        {
+          [organizationGetStartedMapping[step]]: true,
+        },
+        {
+          id: organization,
+        }
       );
     },
   };

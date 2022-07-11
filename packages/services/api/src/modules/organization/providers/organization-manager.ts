@@ -374,13 +374,19 @@ export class OrganizationManager {
     // Because we checked the access before, it's stale by now
     this.authManager.resetAccessCache();
 
-    await this.activityManager.create({
-      type: 'MEMBER_ADDED',
-      selector: {
+    await Promise.all([
+      this.storage.completeGetStartedStep({
         organization: organization.id,
-        user: user.id,
-      },
-    });
+        step: 'invitingMembers',
+      }),
+      this.activityManager.create({
+        type: 'MEMBER_ADDED',
+        selector: {
+          organization: organization.id,
+          user: user.id,
+        },
+      }),
+    ]);
 
     return this.storage.getOrganization({
       organization: organization.id,

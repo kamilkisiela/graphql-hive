@@ -7,6 +7,9 @@ fragment OrganizationFields on Organization {
   me {
     ...MemberFields
   }
+  getStarted {
+    ...GetStartedWizard_GetStartedProgress
+  }
 }
 
 fragment OrganizationEssentials on Organization {

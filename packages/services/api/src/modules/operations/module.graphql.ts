@@ -140,4 +140,8 @@ export default gql`
     duration: Int!
     count: SafeInt!
   }
+
+  extend type OrganizationGetStarted {
+    reportingOperations: Boolean!
+  }
 `;

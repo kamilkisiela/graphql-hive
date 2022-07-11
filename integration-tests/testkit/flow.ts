@@ -65,6 +65,31 @@ export function createOrganization(input: CreateOrganizationInput, authToken: st
   });
 }
 
+export function getOrganizationGetStartedProgress(organizationId: string, authToken: string) {
+  return execute({
+    document: gql(/* GraphQL */ `
+      query getOrganizationGetStartedProgress($organizationId: ID!) {
+        organization(selector: { organization: $organizationId }) {
+          organization {
+            getStarted {
+              creatingProject
+              publishingSchema
+              checkingSchema
+              invitingMembers
+              reportingOperations
+              enablingUsageBasedBreakingChanges
+            }
+          }
+        }
+      }
+    `),
+    authToken,
+    variables: {
+      organizationId,
+    },
+  });
+}
+
 export function renameOrganization(input: UpdateOrganizationNameInput, authToken: string) {
   return execute({
     document: gql(/* GraphQL */ `

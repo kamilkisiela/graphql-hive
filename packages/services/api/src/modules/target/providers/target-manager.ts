@@ -167,7 +167,7 @@ export class TargetManager {
     return this.storage.getTargetSettings(selector);
   }
 
-  async setTargetValidaton(
+  async setTargetValidation(
     input: {
       enabled: boolean;
     } & TargetSelector
@@ -178,17 +178,23 @@ export class TargetManager {
       scope: TargetAccessScope.SETTINGS,
     });
 
-    await this.tracking.track({
-      event: input.enabled ? 'TARGET_VALIDATION_ENABLED' : 'TARGET_VALIDATION_DISABLED',
-      data: {
-        ...input,
-      },
-    });
+    await Promise.all([
+      this.storage.completeGetStartedStep({
+        organization: input.organization,
+        step: 'enablingUsageBasedBreakingChanges',
+      }),
+      this.tracking.track({
+        event: input.enabled ? 'TARGET_VALIDATION_ENABLED' : 'TARGET_VALIDATION_DISABLED',
+        data: {
+          ...input,
+        },
+      }),
+    ]);
 
     return this.storage.setTargetValidation(input);
   }
 
-  async updateTargetValidatonSettings(
+  async updateTargetValidationSettings(
     input: Omit<TargetSettings['validation'], 'enabled'> & TargetSelector
   ): Promise<TargetSettings['validation']> {
     this.logger.debug('Updating target validation settings (input=%o)', input);

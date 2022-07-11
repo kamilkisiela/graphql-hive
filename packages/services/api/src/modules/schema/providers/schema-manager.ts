@@ -6,7 +6,7 @@ import { atomic, stringifySelector } from '../../../shared/helpers';
 import { HiveError } from '../../../shared/errors';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { Logger } from '../../shared/providers/logger';
-import { Storage, TargetSelector } from '../../shared/providers/storage';
+import { Storage, TargetSelector, OrganizationSelector } from '../../shared/providers/storage';
 import { CustomOrchestrator } from './orchestrators/custom';
 import { FederationOrchestrator } from './orchestrators/federation';
 import { SingleOrchestrator } from './orchestrators/single';
@@ -415,5 +415,13 @@ export class SchemaManager {
       commit: schema.id,
       name: input.newName,
     });
+  }
+
+  completeGetStartedCheck(
+    selector: OrganizationSelector & {
+      step: 'publishingSchema' | 'checkingSchema';
+    }
+  ): Promise<void> {
+    return this.storage.completeGetStartedStep(selector);
   }
 }

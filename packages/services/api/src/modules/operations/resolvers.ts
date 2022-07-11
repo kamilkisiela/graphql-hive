@@ -246,6 +246,17 @@ export const resolvers: OperationsModule.Resolvers = {
   },
   OperationStatsConnection: createConnection(),
   ClientStatsConnection: createConnection(),
+  OrganizationGetStarted: {
+    reportingOperations(organization, _, { injector }) {
+      if (organization.reportingOperations === true) {
+        return organization.reportingOperations;
+      }
+
+      return injector.get(OperationsManager).hasOperationsForOrganization({
+        organization: organization.id,
+      });
+    },
+  },
 };
 
 function transformPercentile(value: number | null): number {
