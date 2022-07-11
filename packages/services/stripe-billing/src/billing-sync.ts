@@ -38,7 +38,7 @@ export function createStripeBilling(config: {
         active: true,
         type: 'service',
       })
-      .then(r => r.data.filter(v => v.metadata?.hive_plan));
+      .then(r => r.data.filter(v => v.metadata?.hive_plan && v.active === true));
 
     if (relevantProducts.length !== 1) {
       throw new Error(`Invalid count of Hive products configured in Stripe: ${relevantProducts.length}`);
