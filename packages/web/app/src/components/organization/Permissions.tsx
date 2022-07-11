@@ -47,8 +47,8 @@ function matchScope<T>(list: readonly T[], defaultValue: string, lowerPriority?:
   return defaultValue;
 }
 
-function isBoolean(value: unknown): value is boolean {
-  return typeof value === 'boolean';
+function isDefined<T>(value: T | null | undefined): value is T {
+  return typeof value !== 'undefined' && value !== null;
 }
 
 function PermissionsSpaceInner(props: Props<OrganizationAccessScope>): React.ReactElement<any, any>;
@@ -65,8 +65,8 @@ function PermissionsSpaceInner<T extends OrganizationAccessScope | ProjectAccess
       <AccordionPanel pb={4}>
         <div tw="divide-y-2 divide-gray-100">
           {scopes.map(scope => {
-            const possibleScope = [scope.mapping['read-only'], scope.mapping['read-write']].filter(Boolean);
-            const canManageScope = possibleScope.some(isBoolean);
+            const possibleScope = [scope.mapping['read-only'], scope.mapping['read-write']].filter(isDefined);
+            const canManageScope = possibleScope.some(checkAccess);
 
             if (!canManageScope) {
               return null;
@@ -96,7 +96,7 @@ function PermissionsSpaceInner<T extends OrganizationAccessScope | ProjectAccess
                       const value = event.target.value as T | string;
 
                       if (value === NoAccess) {
-                        // Remove all posible scopes
+                        // Remove all possible scopes
                         onChange(initialScopes.filter(scope => !possibleScope.includes(scope)));
                       } else {
                         const isReadWrite = value === scope.mapping['read-write'];
