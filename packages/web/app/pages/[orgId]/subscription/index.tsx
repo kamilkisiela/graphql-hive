@@ -66,7 +66,9 @@ const Page = ({
                   <StatNumber>
                     {CurrencyFormatter.format(organization.billingConfiguration.upcomingInvoice.amount)}
                   </StatNumber>
-                  <StatHelpText>{organization.billingConfiguration.upcomingInvoice.date}</StatHelpText>
+                  <StatHelpText>
+                    {DateFormatter.format(new Date(organization.billingConfiguration.upcomingInvoice.date))}
+                  </StatHelpText>
                 </Stat>
               )}
             </BillingView>
