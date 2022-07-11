@@ -206,7 +206,7 @@ export const resolvers: TargetModule.Resolvers = {
       ]);
 
       const targetManager = injector.get(TargetManager);
-      const settings = await targetManager.setTargetValidaton({
+      const settings = await targetManager.setTargetValidation({
         organization,
         project,
         target,
@@ -257,7 +257,7 @@ export const resolvers: TargetModule.Resolvers = {
       }
 
       const targetManager = injector.get(TargetManager);
-      const settings = await targetManager.updateTargetValidatonSettings({
+      const settings = await targetManager.updateTargetValidationSettings({
         period: input.period,
         percentage: input.percentage,
         target,

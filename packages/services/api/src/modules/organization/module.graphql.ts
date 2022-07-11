@@ -121,7 +121,6 @@ export default gql`
     publishingSchema: Boolean!
     checkingSchema: Boolean!
     invitingMembers: Boolean!
-    reportingOperations: Boolean!
     enablingUsageBasedBreakingChanges: Boolean!
   }
 `;

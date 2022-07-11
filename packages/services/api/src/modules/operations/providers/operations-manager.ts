@@ -6,7 +6,8 @@ import { cache } from '../../../shared/helpers';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { TargetAccessScope } from '../../auth/providers/target-access';
 import { Logger } from '../../shared/providers/logger';
-import type { TargetSelector } from '../../shared/providers/storage';
+import type { TargetSelector, OrganizationSelector } from '../../shared/providers/storage';
+import { Storage } from '../../shared/providers/storage';
 import { OperationsReader } from './operations-reader';
 
 const DAY_IN_MS = 86_400_000;
@@ -57,7 +58,12 @@ interface ReadFieldStatsOutput {
 export class OperationsManager {
   private logger: Logger;
 
-  constructor(logger: Logger, private authManager: AuthManager, private reader: OperationsReader) {
+  constructor(
+    logger: Logger,
+    private authManager: AuthManager,
+    private reader: OperationsReader,
+    private storage: Storage
+  ) {
     this.logger = logger.child({ source: 'OperationsManager' });
   }
 
@@ -434,5 +440,27 @@ export class OperationsManager {
       period,
       operations,
     });
+  }
+
+  async hasOperationsForOrganization(selector: OrganizationSelector): Promise<boolean> {
+    const targets = await this.storage.getTargetIdsOfOrganization(selector);
+
+    if (targets.length === 0) {
+      return false;
+    }
+
+    const total = await this.reader.countOperationsForTargets({
+      targets,
+    });
+
+    if (total > 0) {
+      await this.storage.completeGetStartedStep({
+        organization: selector.organization,
+        step: 'reportingOperations',
+      });
+      return true;
+    }
+
+    return false;
   }
 }

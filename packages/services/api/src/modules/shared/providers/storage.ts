@@ -123,6 +123,7 @@ export interface Storage {
   deleteTarget(_: TargetSelector): Promise<Target | never>;
   getTarget(_: TargetSelector): Promise<Target | never>;
   getTargets(_: ProjectSelector): Promise<readonly Target[]>;
+  getTargetIdsOfOrganization(_: OrganizationSelector): Promise<readonly string[]>;
   getTargetSettings(_: TargetSelector): Promise<TargetSettings | never>;
   setTargetValidation(_: TargetSelector & { enabled: boolean }): Promise<TargetSettings['validation'] | never>;
   updateTargetValidationSettings(
@@ -310,6 +311,12 @@ export interface Storage {
 
   getBaseSchema(_: TargetSelector): Promise<string | null>;
   updateBaseSchema(_: TargetSelector, base: string | null): Promise<void>;
+
+  completeGetStartedStep(
+    _: OrganizationSelector & {
+      step: Exclude<keyof Organization['getStarted'], 'id'>;
+    }
+  ): Promise<void>;
 }
 
 @Injectable()

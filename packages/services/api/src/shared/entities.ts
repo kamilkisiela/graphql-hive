@@ -93,6 +93,16 @@ export enum OrganizationType {
   REGULAR = 'REGULAR',
 }
 
+export interface OrganizationGetStarted {
+  id: string;
+  creatingProject: boolean;
+  publishingSchema: boolean;
+  checkingSchema: boolean;
+  invitingMembers: boolean;
+  reportingOperations: boolean;
+  enablingUsageBasedBreakingChanges: boolean;
+}
+
 export interface Organization {
   id: string;
   cleanId: string;
@@ -105,14 +115,7 @@ export interface Organization {
     operations: number;
     schemaPush: number;
   };
-  getStarted: {
-    creatingProject: boolean;
-    publishingSchema: boolean;
-    checkingSchema: boolean;
-    invitingMembers: boolean;
-    reportingOperations: boolean;
-    enablingUsageBasedBreakingChanges: boolean;
-  };
+  getStarted: OrganizationGetStarted;
 }
 
 export interface OrganizationBilling {

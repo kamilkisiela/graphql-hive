@@ -92,7 +92,7 @@ export const Header = (): ReactElement => {
       <div className="container flex h-[84px] items-center justify-between">
         <HiveLink />
         <div className="flex flex-row gap-8">
-          {currentOrg ? <GetStartedProgress tasks={currentOrg.getStarted} /> : null}
+          {currentOrg ? <GetStartedProgress organizationType={currentOrg.type} tasks={currentOrg.getStarted} /> : null}
           <DropdownMenu>
             <DropdownMenu.Trigger asChild>
               <Button>

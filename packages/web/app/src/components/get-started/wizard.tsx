@@ -10,6 +10,7 @@ import {
   DrawerCloseButton,
 } from '@chakra-ui/react';
 import clsx from 'clsx';
+import { OrganizationType } from '@/graphql';
 import { gql, DocumentType } from 'urql';
 
 const GetStartedWizard_GetStartedProgress = gql(/* GraphQL */ `
@@ -23,7 +24,13 @@ const GetStartedWizard_GetStartedProgress = gql(/* GraphQL */ `
   }
 `);
 
-export function GetStartedProgress({ tasks }: { tasks: DocumentType<typeof GetStartedWizard_GetStartedProgress> }) {
+export function GetStartedProgress({
+  tasks,
+  organizationType,
+}: {
+  tasks: DocumentType<typeof GetStartedWizard_GetStartedProgress>;
+  organizationType: OrganizationType;
+}) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const triggerRef = React.useRef<HTMLButtonElement>(null);
 
@@ -31,7 +38,14 @@ export function GetStartedProgress({ tasks }: { tasks: DocumentType<typeof GetSt
     return null;
   }
 
-  const values = Object.values(tasks);
+  const processedTasks =
+    organizationType === OrganizationType.Personal
+      ? {
+          ...tasks,
+          invitingMembers: undefined,
+        }
+      : tasks;
+  const values = Object.values(processedTasks);
   const total = values.length;
   const completed = values.filter(t => t === true).length;
   const remaining = total - completed;
@@ -63,7 +77,7 @@ export function GetStartedProgress({ tasks }: { tasks: DocumentType<typeof GetSt
           </div>
         </div>
       </button>
-      <GetStartedWizard isOpen={isOpen} onClose={onClose} triggerRef={triggerRef} tasks={tasks} />
+      <GetStartedWizard isOpen={isOpen} onClose={onClose} triggerRef={triggerRef} tasks={processedTasks} />
     </>
   );
 }
@@ -77,7 +91,9 @@ function GetStartedWizard({
   isOpen: boolean;
   onClose(): void;
   triggerRef: React.RefObject<HTMLButtonElement>;
-  tasks: DocumentType<typeof GetStartedWizard_GetStartedProgress>;
+  tasks:
+    | DocumentType<typeof GetStartedWizard_GetStartedProgress>
+    | Omit<DocumentType<typeof GetStartedWizard_GetStartedProgress>, 'invitingMembers'>;
 }) {
   return (
     <Drawer isOpen={isOpen} placement="right" onClose={onClose} finalFocusRef={triggerRef} size="md">
@@ -103,12 +119,14 @@ function GetStartedWizard({
             >
               Check a schema
             </Task>
-            <Task
-              link={`${process.env.NEXT_PUBLIC_DOCS_LINK}/get-started/organizations#members`}
-              completed={tasks.invitingMembers}
-            >
-              Invite members
-            </Task>
+            {'invitingMembers' in tasks && typeof tasks.invitingMembers === 'boolean' ? (
+              <Task
+                link={`${process.env.NEXT_PUBLIC_DOCS_LINK}/get-started/organizations#members`}
+                completed={tasks.invitingMembers}
+              >
+                Invite members
+              </Task>
+            ) : null}
             <Task
               link={`${process.env.NEXT_PUBLIC_DOCS_LINK}/features/monitoring`}
               completed={tasks.reportingOperations}

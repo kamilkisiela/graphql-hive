@@ -835,6 +835,26 @@ export class OperationsReader {
     });
   }
 
+  async countOperationsForTargets({ targets }: { targets: readonly string[] }): Promise<number> {
+    const result = await this.clickHouse.query<{
+      total: string;
+    }>({
+      query: `SELECT sum(total) as total from operations_new_hourly_mv WHERE target IN ('${targets.join(`', '`)}')`,
+      queryId: 'count_operations_for_targets',
+      timeout: 15_000,
+    });
+
+    if (result.data.length === 0) {
+      return 0;
+    }
+
+    if (result.data.length > 1) {
+      throw new Error('Too many rows returned, expected 1');
+    }
+
+    return ensureNumber(result.data[0].total);
+  }
+
   async adminCountOperationsPerTarget({ daysLimit }: { daysLimit: number }) {
     const result = await this.clickHouse.query<{
       total: string;

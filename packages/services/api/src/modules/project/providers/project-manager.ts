@@ -63,16 +63,22 @@ export class ProjectManager {
       validationUrl,
     });
 
-    await this.activityManager.create({
-      type: 'PROJECT_CREATED',
-      selector: {
+    await Promise.all([
+      this.storage.completeGetStartedStep({
         organization,
-        project: project.id,
-      },
-      meta: {
-        projectType: type,
-      },
-    });
+        step: 'creatingProject',
+      }),
+      this.activityManager.create({
+        type: 'PROJECT_CREATED',
+        selector: {
+          organization,
+          project: project.id,
+        },
+        meta: {
+          projectType: type,
+        },
+      }),
+    ]);
 
     return project;
   }

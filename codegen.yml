@@ -60,6 +60,7 @@ generates:
         BillingPaymentMethod: 'StripeTypes.PaymentMethod.Card'
         BillingDetails: 'StripeTypes.PaymentMethod.BillingDetails'
         BillingInvoice: 'StripeTypes.Invoice'
+        OrganizationGetStarted: ../shared/entities#OrganizationGetStarted as OrganizationGetStartedMapper
     plugins:
       - add:
           content: "import { StripeTypes } from '@hive/stripe-billing';"

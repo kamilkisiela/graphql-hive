@@ -96,15 +96,21 @@ export class SchemaPublisher {
     const schemas = latest.schemas;
     const isInitialSchema = schemas.length === 0;
 
-    await this.tracking.track({
-      event: 'SCHEMA_CHECK',
-      data: {
-        organization: input.organization,
-        project: input.project,
-        target: input.target,
-        projectType: project.type,
-      },
-    });
+    await Promise.all([
+      this.schemaManager.completeGetStartedCheck({
+        organization: project.orgId,
+        step: 'checkingSchema',
+      }),
+      this.tracking.track({
+        event: 'SCHEMA_CHECK',
+        data: {
+          organization: input.organization,
+          project: input.project,
+          target: input.target,
+          projectType: project.type,
+        },
+      }),
+    ]);
 
     if (input.github) {
       await this.tracking.track({
@@ -379,15 +385,21 @@ export class SchemaPublisher {
 
     const schemas = latest.schemas;
 
-    await this.tracking.track({
-      event: 'SCHEMA_PUBLISH',
-      data: {
-        organization: organizationId,
-        project: projectId,
-        target: targetId,
-        projectType: project.type,
-      },
-    });
+    await Promise.all([
+      this.schemaManager.completeGetStartedCheck({
+        organization: project.orgId,
+        step: 'publishingSchema',
+      }),
+      this.tracking.track({
+        event: 'SCHEMA_PUBLISH',
+        data: {
+          organization: organizationId,
+          project: projectId,
+          target: targetId,
+          projectType: project.type,
+        },
+      }),
+    ]);
 
     this.logger.debug(`Found ${schemas.length} most recent schemas`);
 
