@@ -83,14 +83,14 @@ const Page = ({
             <OrganizationUsageEstimationView organization={organization} />
           </div>
         </Card>
-        {organization.billingConfiguration?.invoices?.length && (
+        {organization.billingConfiguration?.invoices?.length ? (
           <Card className="mt-8">
             <Heading>Invoices</Heading>
             <div className="mt-4">
               <InvoicesList organization={organization} />
             </div>
           </Card>
-        )}
+        ) : null}
       </Tabs.Content>
       <Tabs.Content value="manage">
         <ManagePage />
