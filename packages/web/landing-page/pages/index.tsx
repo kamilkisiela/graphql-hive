@@ -98,9 +98,9 @@ const heroWrapper = css`
 `;
 
 export default function Index() {
-  const title = 'GraphQL Hive - Manage your GraphQL API workflows';
+  const title = 'GraphQL Hive - Schema Registry and Monitoring';
   const description =
-    'An open-source GraphQL schema registry with many additional features to enhance your day-to-day work with GraphQL.';
+    'An open-source GraphQL schema registry and performance monitoring tool with many additional features to enhance your day-to-day work with GraphQL.';
 
   return (
     <ThemeProvider>
@@ -115,7 +115,7 @@ export default function Index() {
         <meta
           property="og:image"
           key="og:image"
-          content="https://the-guild-og-image.vercel.app/**Manage%20your%20GraphQL%20APIs**.png?theme=light&md=1&fontSize=100px&images=https://graphql-hive.com/logo.svg&widths=800&heights=400"
+          content="https://og-image-guild.vercel.app/**Manage%20your%20GraphQL%20APIs**.png?theme=light&md=1&fontSize=100px&images=https://graphql-hive.com/logo.svg&widths=800&heights=400"
         />
         <meta property="og:type" content="website" />
         <meta property="og:locale" content="en" />
@@ -158,8 +158,8 @@ export default function Index() {
                 {
                   target: '_blank',
                   href: 'https://app.graphql-hive.com',
-                  title: 'Go to app',
-                  children: 'Go to app',
+                  title: 'Go to dashboard',
+                  children: 'Dashboard',
                 },
                 {
                   target: '_blank',
