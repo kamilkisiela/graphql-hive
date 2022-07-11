@@ -83,7 +83,6 @@ export interface organizations {
   invite_code: string;
   limit_operations_monthly: string;
   limit_retention_days: string;
-  limit_schema_push_monthly: string;
   name: string;
   plan_name: string;
   slack_token: string | null;

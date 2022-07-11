@@ -67,9 +67,8 @@ const Inner = ({
   );
   const [couponCode, setCouponCode] = useState<string>('');
   const [operationsRateLimit, setOperationsRateLimit] = useState<number>(
-    Math.floor(organization.rateLimit.operations / 1_000_000)
+    Math.floor((organization.rateLimit.operations || 1_000_000) / 1_000_000)
   );
-  const [schemaPushesRateLimit, setSchemaPushesLimit] = useState<number>(organization.rateLimit.schemaPushes);
 
   const onOperationsRateLimitChange = useCallback(
     (limit: number) => {
@@ -80,35 +79,18 @@ const Inner = ({
     },
     [setOperationsRateLimit]
   );
-  const onSchemaPushesLimitChange = useCallback(
-    (limit: number) => {
-      track('SUBSCRIPTION_SCHEMA_PUSHES_LIMIT_FORM_INPUT_CHANGE', {
-        limit,
-      });
-      setSchemaPushesLimit(limit);
-    },
-    [setSchemaPushesLimit]
-  );
 
   useEffect(() => {
     if (query.data?.billingPlans?.length) {
       if (organization.plan !== plan) {
         const actualPlan = query.data.billingPlans.find(v => v.planType === plan);
 
-        setOperationsRateLimit(Math.floor((actualPlan?.includedOperationsLimit ?? 0) / 1_000_000));
-        setSchemaPushesLimit(actualPlan?.includedSchemaPushLimit ?? 0);
+        setOperationsRateLimit(Math.floor((actualPlan?.includedOperationsLimit || 1_000_000) / 1_000_000));
       } else {
-        setOperationsRateLimit(Math.floor((organization.rateLimit.operations ?? 0) / 1_000_000));
-        setSchemaPushesLimit(organization.rateLimit.schemaPushes);
+        setOperationsRateLimit(Math.floor((organization.rateLimit.operations || 0) / 1_000_000));
       }
     }
-  }, [
-    organization.plan,
-    organization.rateLimit.operations,
-    organization.rateLimit.schemaPushes,
-    plan,
-    query.data?.billingPlans,
-  ]);
+  }, [organization.plan, organization.rateLimit.operations, plan, query.data?.billingPlans]);
 
   if (!canAccess) {
     return null;
@@ -124,7 +106,6 @@ const Inner = ({
   const upgrade = async () => {
     track('SUBSCRIPTION_UPGRADE_TO_PRO', {
       operations: operationsRateLimit * 1_000_000,
-      schemaPushes: schemaPushesRateLimit,
     });
     let paymentMethodId: string | null = null;
 
@@ -155,7 +136,6 @@ const Inner = ({
       organization: organization.cleanId,
       monthlyLimits: {
         operations: operationsRateLimit * 1_000_000,
-        schemaPushes: schemaPushesRateLimit,
       },
       paymentMethodId: paymentMethodId,
       couponCode: couponCode.trim() === '' ? null : couponCode.trim(),
@@ -172,23 +152,18 @@ const Inner = ({
   const updateLimits = () => {
     track('SUBSCRIPTION_LIMITS_UPDATE', {
       operations: operationsRateLimit * 1_000_000,
-      schemaPushes: schemaPushesRateLimit,
     });
     updateOrgRateLimitMutation[1]({
       organization: organization.cleanId,
       monthlyLimits: {
         operations: operationsRateLimit * 1_000_000,
-        schemaPushes: schemaPushesRateLimit,
       },
     });
   };
 
   const renderActions = () => {
     if (plan === organization.plan) {
-      if (
-        organization.rateLimit.operations !== operationsRateLimit * 1_000_000 ||
-        organization.rateLimit.schemaPushes !== schemaPushesRateLimit
-      ) {
+      if (organization.rateLimit.operations !== operationsRateLimit * 1_000_000) {
         return (
           <>
             <Button variant="primary" type="button" onClick={updateLimits}>
@@ -267,12 +242,11 @@ const Inner = ({
                       plan={selectedPlan}
                       retentionInDays={selectedPlan.retentionInDays}
                       operationsRateLimit={operationsRateLimit}
-                      schemaPushesRateLimit={schemaPushesRateLimit}
                     >
                       {selectedPlan.planType === BillingPlanType.Pro && (
                         <Stat className="mb-4">
                           <StatLabel>Free Trial</StatLabel>
-                          <StatNumber>14</StatNumber>
+                          <StatNumber>30</StatNumber>
                           <StatHelpText>days</StatHelpText>
                         </Stat>
                       )}
@@ -280,42 +254,30 @@ const Inner = ({
                   </div>
 
                   {plan === BillingPlanType.Pro && (
-                    <div className="mt-8">
-                      <Heading className="mb-4">Customize your reserved volume</Heading>
-                      <div className="flex flex-row items-start gap-2 p-5">
-                        <div className="w-1/2 pr-5">
-                          <LimitSlider
-                            title="Monthly operations limit"
-                            className="w-full"
-                            min={5}
-                            max={300}
-                            step={1}
-                            marks={[
-                              { value: 5, label: '5M' },
-                              { value: 100, label: '100M' },
-                              { value: 200, label: '200M' },
-                              { value: 300, label: '300M' },
-                            ]}
-                            value={operationsRateLimit}
-                            onChange={onOperationsRateLimitChange}
-                          />
-                        </div>
-                        <div className="w-1/2 pl-5">
-                          <LimitSlider
-                            title="Monthly schema pushes limit"
-                            className="w-full"
-                            min={500}
-                            max={1000}
-                            step={10}
-                            marks={[
-                              { value: 500, label: '500' },
-                              { value: 750, label: '750' },
-                              { value: 1000, label: '1000' },
-                            ]}
-                            value={schemaPushesRateLimit}
-                            onChange={onSchemaPushesLimitChange}
-                          />
-                        </div>
+                    <div className="my-8 w-1/2">
+                      <Heading>Define your reserved volume</Heading>
+                      <p className="text-sm text-gray-500">
+                        Pro plan requires to defined quota of reported operations.
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        Pick a volume a little higher than you think you'll need to avoid being rate limited.
+                      </p>
+                      <p className="text-sm text-gray-500">Don't worry, you can always adjust it later.</p>
+                      <div className="mt-5 pl-2.5">
+                        <LimitSlider
+                          title="Monthly operations limit"
+                          min={1}
+                          max={300}
+                          step={1}
+                          marks={[
+                            { value: 1, label: '1M' },
+                            { value: 100, label: '100M' },
+                            { value: 200, label: '200M' },
+                            { value: 300, label: '300M' },
+                          ]}
+                          value={operationsRateLimit}
+                          onChange={onOperationsRateLimitChange}
+                        />
                       </div>
                     </div>
                   )}

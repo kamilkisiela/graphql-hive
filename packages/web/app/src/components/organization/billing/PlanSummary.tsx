@@ -19,18 +19,14 @@ import { CurrencyFormatter } from './helpers';
 const PriceEstimationTable = ({
   plan,
   operationsRateLimit,
-  schemaPushesRateLimit,
 }: {
   plan: BillingPlansQuery['billingPlans'][number];
   operationsRateLimit: number;
-  schemaPushesRateLimit: number;
 }): ReactElement => {
   const includedOperationsInMillions = (plan.includedOperationsLimit ?? 0) / 1_000_000;
   const additionalOperations = Math.max(0, operationsRateLimit - includedOperationsInMillions);
   const operationsTotal = (plan.pricePerOperationsUnit ?? 0) * additionalOperations;
-  const additionalSchemaPushes = Math.max(0, schemaPushesRateLimit - (plan.includedSchemaPushLimit ?? 0));
-  const schemaTotal = (plan.pricePerSchemaPushUnit ?? 0) * additionalSchemaPushes;
-  const total = (plan.basePrice ?? 0) + operationsTotal + schemaTotal;
+  const total = (plan.basePrice ?? 0) + operationsTotal;
 
   return (
     <Table size="sm">
@@ -51,36 +47,22 @@ const PriceEstimationTable = ({
           <Td isNumeric>{CurrencyFormatter.format(plan.basePrice ?? 0)}</Td>
           <Td isNumeric>{CurrencyFormatter.format(plan.basePrice ?? 0)}</Td>
         </Tr>
-        <Tr>
-          <Td>
-            Included Operations <span className="text-gray-500">(free)</span>
-          </Td>
-          <Td isNumeric>{includedOperationsInMillions}M</Td>
-          <Td isNumeric>{CurrencyFormatter.format(0)}</Td>
-          <Td isNumeric>{CurrencyFormatter.format(0)}</Td>
-        </Tr>
-        <Tr>
-          <Td>
-            Included Schema Pushes <span className="text-gray-500">(free)</span>
-          </Td>
-          <Td isNumeric>{plan.includedSchemaPushLimit}</Td>
-          <Td isNumeric>{CurrencyFormatter.format(0)}</Td>
-          <Td isNumeric>{CurrencyFormatter.format(0)}</Td>
-        </Tr>
+        {includedOperationsInMillions > 0 ? (
+          <Tr>
+            <Td>
+              Included Operations <span className="text-gray-500">(free)</span>
+            </Td>
+            <Td isNumeric>{includedOperationsInMillions}M</Td>
+            <Td isNumeric>{CurrencyFormatter.format(0)}</Td>
+            <Td isNumeric>{CurrencyFormatter.format(0)}</Td>
+          </Tr>
+        ) : null}
         {plan.planType === BillingPlanType.Pro && (
           <Tr>
-            <Td>Additional Operations</Td>
+            <Td>Operations</Td>
             <Td isNumeric>{additionalOperations}M</Td>
             <Td isNumeric>{CurrencyFormatter.format(plan.pricePerOperationsUnit ?? 0)}</Td>
             <Td isNumeric>{CurrencyFormatter.format(operationsTotal)}</Td>
-          </Tr>
-        )}
-        {plan.planType === BillingPlanType.Pro && (
-          <Tr>
-            <Td>Additional Schema Pushes</Td>
-            <Td isNumeric>{additionalSchemaPushes}</Td>
-            <Td isNumeric>{CurrencyFormatter.format(plan.pricePerSchemaPushUnit ?? 0)}</Td>
-            <Td isNumeric>{CurrencyFormatter.format(schemaTotal)}</Td>
           </Tr>
         )}
       </Tbody>
@@ -99,13 +81,11 @@ const PriceEstimationTable = ({
 export const PlanSummary = ({
   plan,
   operationsRateLimit,
-  schemaPushesRateLimit,
   retentionInDays,
   children,
 }: {
   plan: BillingPlansQuery['billingPlans'][number];
   operationsRateLimit: number;
-  schemaPushesRateLimit: number;
   retentionInDays: number;
   children: ReactNode;
 }): ReactElement => {
@@ -141,22 +121,12 @@ export const PlanSummary = ({
           <StatHelpText>per month</StatHelpText>
         </Stat>
         <Stat className="mb-8">
-          <StatLabel>Schema Pushes Limit</StatLabel>
-          <StatHelpText>up to</StatHelpText>
-          <StatNumber>{schemaPushesRateLimit}</StatNumber>
-          <StatHelpText>per month</StatHelpText>
-        </Stat>
-        <Stat className="mb-8">
           <StatLabel>Retention</StatLabel>
           <StatHelpText>usage reports</StatHelpText>
           <StatNumber>{retentionInDays} days</StatNumber>
         </Stat>
       </StatGroup>
-      <PriceEstimationTable
-        plan={plan}
-        operationsRateLimit={operationsRateLimit}
-        schemaPushesRateLimit={schemaPushesRateLimit}
-      />
+      <PriceEstimationTable plan={plan} operationsRateLimit={operationsRateLimit} />
     </>
   );
 };

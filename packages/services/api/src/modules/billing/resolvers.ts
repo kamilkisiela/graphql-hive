@@ -7,24 +7,18 @@ import { IdTranslator } from '../shared/providers/id-translator';
 import { BillingProvider } from './providers/billing.provider';
 import { BillingModule } from './__generated__/types';
 
-const USAGE_DEFAULT_LIMITATIONS: Record<
-  'HOBBY' | 'PRO' | 'ENTERPRISE',
-  { operations: number; schemaPushes: number; retention: number }
-> = {
+const USAGE_DEFAULT_LIMITATIONS: Record<'HOBBY' | 'PRO' | 'ENTERPRISE', { operations: number; retention: number }> = {
   HOBBY: {
     operations: 1_000_000,
-    schemaPushes: 50,
-    retention: 3,
+    retention: 7,
   },
   PRO: {
-    operations: 5_000_000,
-    schemaPushes: 500,
-    retention: 180,
+    operations: 0,
+    retention: 90,
   },
   ENTERPRISE: {
     operations: 0, // unlimited
-    schemaPushes: 0, // unlimited
-    retention: 360,
+    retention: 365,
   },
 };
 
@@ -116,10 +110,8 @@ export const resolvers: BillingModule.Resolvers = {
           name: 'Hobby',
           description: 'Free for non-commercial use, startups, side-projects and just experiments.',
           includedOperationsLimit: USAGE_DEFAULT_LIMITATIONS.HOBBY.operations,
-          includedSchemaPushLimit: USAGE_DEFAULT_LIMITATIONS.HOBBY.schemaPushes,
           rateLimit: 'MONTHLY_LIMITED',
           pricePerOperationsUnit: 0,
-          pricePerSchemaPushUnit: 0,
           retentionInDays: USAGE_DEFAULT_LIMITATIONS.HOBBY.retention,
         },
         {
@@ -127,12 +119,9 @@ export const resolvers: BillingModule.Resolvers = {
           planType: 'PRO',
           basePrice: availablePrices.basePrice.unit_amount! / 100,
           name: 'Pro',
-          description:
-            'For production-ready applications that requires long retention, high ingestion capacity and unlimited access to all Hive features.',
+          description: 'For production-ready applications that requires long retention, high ingestion capacity.',
           includedOperationsLimit: USAGE_DEFAULT_LIMITATIONS.PRO.operations,
-          includedSchemaPushLimit: USAGE_DEFAULT_LIMITATIONS.PRO.schemaPushes,
           pricePerOperationsUnit: availablePrices.operationsPrice.tiers![1].unit_amount! / 100,
-          pricePerSchemaPushUnit: availablePrices.schemaPushesPrice.tiers![1].unit_amount! / 100,
           retentionInDays: USAGE_DEFAULT_LIMITATIONS.PRO.retention,
           rateLimit: 'MONTHLY_QUOTA',
         },
@@ -140,9 +129,8 @@ export const resolvers: BillingModule.Resolvers = {
           id: 'ENTERPRISE',
           planType: 'ENTERPRISE',
           name: 'Enterprise',
-          description: 'For enterprise and organization that requires custom setup and custn data ingestion rates.',
+          description: 'For enterprise and organization that requires custom setup and custom data ingestion rates.',
           includedOperationsLimit: USAGE_DEFAULT_LIMITATIONS.ENTERPRISE.operations,
-          includedSchemaPushLimit: USAGE_DEFAULT_LIMITATIONS.ENTERPRISE.schemaPushes,
           retentionInDays: USAGE_DEFAULT_LIMITATIONS.ENTERPRISE.retention,
           rateLimit: 'UNLIMITED',
         },
@@ -160,7 +148,6 @@ export const resolvers: BillingModule.Resolvers = {
         monthlyRateLimit: {
           retentionInDays: USAGE_DEFAULT_LIMITATIONS.PRO.retention,
           operations: args.monthlyLimits.operations,
-          schemaPush: args.monthlyLimits.schemaPushes,
         },
       });
     },
@@ -194,7 +181,6 @@ export const resolvers: BillingModule.Resolvers = {
           monthlyRateLimit: {
             retentionInDays: USAGE_DEFAULT_LIMITATIONS.HOBBY.retention,
             operations: USAGE_DEFAULT_LIMITATIONS.HOBBY.operations,
-            schemaPush: USAGE_DEFAULT_LIMITATIONS.HOBBY.schemaPushes,
           },
         });
 
@@ -227,7 +213,6 @@ export const resolvers: BillingModule.Resolvers = {
           paymentMethodId: args.input.paymentMethodId,
           reserved: {
             operations: Math.floor(args.input.monthlyLimits.operations / 1_000_000),
-            schemaPushes: args.input.monthlyLimits.schemaPushes,
           },
         });
 
@@ -242,7 +227,6 @@ export const resolvers: BillingModule.Resolvers = {
           monthlyRateLimit: {
             retentionInDays: USAGE_DEFAULT_LIMITATIONS.PRO.retention,
             operations: args.input.monthlyLimits.operations || USAGE_DEFAULT_LIMITATIONS.PRO.operations,
-            schemaPush: args.input.monthlyLimits.schemaPushes || USAGE_DEFAULT_LIMITATIONS.PRO.schemaPushes,
           },
         });
 

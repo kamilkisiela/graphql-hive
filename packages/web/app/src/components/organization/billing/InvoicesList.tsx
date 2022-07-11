@@ -2,7 +2,7 @@ import { OrganizationFieldsFragment, OrgBillingInfoFieldsFragment } from '@/grap
 import { Table, TableContainer, Tbody, Td, Th, Thead, Tr, Link } from '@chakra-ui/react';
 import React from 'react';
 import { VscCloudDownload } from 'react-icons/vsc';
-import { CurrencyFormatter } from './helpers';
+import { CurrencyFormatter, DateFormatter } from './helpers';
 
 export const InvoicesList: React.FC<{
   organization: OrganizationFieldsFragment & OrgBillingInfoFieldsFragment;
@@ -26,10 +26,10 @@ export const InvoicesList: React.FC<{
         <Tbody>
           {organization.billingConfiguration.invoices.map(invoice => (
             <Tr>
-              <Td>{invoice.date}</Td>
+              <Td>{DateFormatter.format(new Date(invoice.date))}</Td>
               <Td>{CurrencyFormatter.format(invoice.amount)}</Td>
-              <Td>{invoice.periodStart}</Td>
-              <Td>{invoice.periodEnd}</Td>
+              <Td>{DateFormatter.format(new Date(invoice.periodStart))}</Td>
+              <Td>{DateFormatter.format(new Date(invoice.periodEnd))}</Td>
               <Td>
                 {invoice.pdfLink ? (
                   <Link href={invoice.pdfLink}>

@@ -11,7 +11,6 @@ export default gql`
   }
 
   type UsageEstimation {
-    schemaPushes: SafeInt!
     operations: SafeInt!
   }
 `;

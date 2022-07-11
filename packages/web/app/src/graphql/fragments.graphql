@@ -402,9 +402,7 @@ fragment OrgRateLimitFields on Organization {
   name
   rateLimit {
     limitedForOperations
-    limitedForSchemaPushes
     operations
-    schemaPushes
     retentionInDays
   }
 }

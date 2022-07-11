@@ -66,7 +66,9 @@ const Page = ({
                   <StatNumber>
                     {CurrencyFormatter.format(organization.billingConfiguration.upcomingInvoice.amount)}
                   </StatNumber>
-                  <StatHelpText>{organization.billingConfiguration.upcomingInvoice.date}</StatHelpText>
+                  <StatHelpText>
+                    {DateFormatter.format(new Date(organization.billingConfiguration.upcomingInvoice.date))}
+                  </StatHelpText>
                 </Stat>
               )}
             </BillingView>
@@ -82,9 +84,9 @@ const Page = ({
           </div>
         </Card>
         {organization.billingConfiguration?.invoices?.length && (
-          <Card>
-            <Heading className="mb-2">Invoices</Heading>
-            <div>
+          <Card className="mt-8">
+            <Heading>Invoices</Heading>
+            <div className="mt-4">
               <InvoicesList organization={organization} />
             </div>
           </Card>

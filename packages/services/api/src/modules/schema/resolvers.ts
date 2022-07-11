@@ -12,7 +12,6 @@ import { SchemaBuildError } from './providers/orchestrators/errors';
 import { TargetManager } from '../target/providers/target-manager';
 import { AuthManager } from '../auth/providers/auth-manager';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
-import { RateLimitProvider } from '../rate-limit/providers/rate-limit.provider';
 import { z } from 'zod';
 import { SchemaHelper } from './providers/schema-helper';
 
@@ -43,13 +42,6 @@ export const resolvers: SchemaModule.Resolvers = {
         injector.get(TargetManager).getTargetIdByToken(),
       ]);
       const token = injector.get(AuthManager).ensureApiToken();
-
-      await injector.get(RateLimitProvider).assertRateLimit({
-        entityType: 'target',
-        id: target,
-        type: 'schema-push',
-        token,
-      });
 
       const checksum = createHash('md5').update(JSON.stringify(input)).update(token).digest('base64');
 

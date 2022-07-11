@@ -23,7 +23,6 @@
   "devDependencies": {
     "@hive/api": "0.0.1",
     "@hive/service-common": "0.0.0",
-    "@hive/storage": "0.0.0",
     "pino-pretty": "6.0.0"
   },
   "buildOptions": {

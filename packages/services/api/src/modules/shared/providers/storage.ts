@@ -200,15 +200,6 @@ export interface Storage {
 
   getSchema(_: { commit: string; target: string }): Promise<Schema | never>;
 
-  getSchemaPushCount(_: { targetIds: string[]; startTime: Date; endTime: Date }): Promise<number>;
-
-  getAllSchemaPushesGrouped(_: { startTime: Date; endTime: Date }): Promise<
-    {
-      total: number;
-      target: string;
-    }[]
-  >;
-
   createActivity(
     _: {
       user: string;
@@ -298,7 +289,6 @@ export interface Storage {
       org_name: string;
       target: string;
       limit_operations_monthly: number;
-      limit_schema_push_monthly: number;
       limit_retention_days: number;
     }>
   >;

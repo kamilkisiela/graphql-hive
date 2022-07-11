@@ -14,36 +14,6 @@ const TARGET_BASED_FILTER = {
 
 export const usageEstimatorApiRouter = trpc
   .router<Estimator>()
-  .query('estimateSchemaPushesForTarget', {
-    input: z
-      .object({
-        ...DATE_RANGE_VALIDATION,
-        ...TARGET_BASED_FILTER,
-      })
-      .required(),
-    async resolve({ ctx, input }) {
-      const estimationResponse = await ctx.estimateSchemaPushesForTargets({
-        targets: input.targetIds,
-        startTime: new Date(input.startTime),
-        endTime: new Date(input.endTime),
-      });
-
-      return {
-        totalSchemaPushes: estimationResponse.count,
-      };
-    },
-  })
-  .query('estiamteSchemaPushesForAllTargets', {
-    input: z.object(DATE_RANGE_VALIDATION).required(),
-    async resolve({ ctx, input }) {
-      const estimationResponse = await ctx.estimateSchemaPushesForAllTargets({
-        startTime: new Date(input.startTime),
-        endTime: new Date(input.endTime),
-      });
-
-      return Object.fromEntries(estimationResponse.map(item => [item.target, item.total]));
-    },
-  })
   .query('estimateOperationsForTarget', {
     input: z
       .object({

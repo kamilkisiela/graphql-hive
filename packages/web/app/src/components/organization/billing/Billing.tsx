@@ -25,7 +25,6 @@ export const BillingView: React.FC<{
           <PlanSummary
             retentionInDays={organization.rateLimit.retentionInDays}
             operationsRateLimit={Math.floor(organization.rateLimit.operations / 1_000_000)}
-            schemaPushesRateLimit={organization.rateLimit.schemaPushes}
             plan={plan}
           >
             {children}

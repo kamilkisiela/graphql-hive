@@ -30,7 +30,6 @@ export function createStripeBilling(config: {
   const loadStripeData$ = ensureStripeProducts();
 
   async function ensureStripeProducts(): Promise<{
-    schemaPushesPrice: Stripe.Price;
     operationsPrice: Stripe.Price;
     basePrice: Stripe.Price;
   }> {
@@ -39,7 +38,7 @@ export function createStripeBilling(config: {
         active: true,
         type: 'service',
       })
-      .then(r => r.data.filter(v => v.metadata?.hive_plan));
+      .then(r => r.data.filter(v => v.metadata?.hive_plan && v.active === true));
 
     if (relevantProducts.length !== 1) {
       throw new Error(`Invalid count of Hive products configured in Stripe: ${relevantProducts.length}`);
@@ -50,12 +49,6 @@ export function createStripeBilling(config: {
       active: true,
       expand: ['data.tiers'],
     })) as Stripe.Response<Stripe.ApiList<Stripe.Price & { tiers: Stripe.Price.Tier[] }>>;
-
-    const schemaPushesPrice = prices.data.find(v => v.metadata?.hive_usage === 'schema_pushes');
-
-    if (!schemaPushesPrice) {
-      throw new Error(`Failed to find Stripe price ID with Hive metadata for schema-pushses`);
-    }
 
     const operationsPrice = prices.data.find(v => v.metadata?.hive_usage === 'operations');
 
@@ -71,7 +64,6 @@ export function createStripeBilling(config: {
 
     return {
       operationsPrice,
-      schemaPushesPrice,
       basePrice,
     };
   }
