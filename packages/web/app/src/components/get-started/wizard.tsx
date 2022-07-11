@@ -57,7 +57,7 @@ export function GetStartedProgress({
   return (
     <>
       <button onClick={onOpen} className="cursor-pointer rounded px-4 py-2 text-left hover:opacity-80" ref={triggerRef}>
-        <div className="font-medium">Get Started</div>
+        <div className="text-sm font-medium">Get Started</div>
         <div className="text-xs text-gray-500">
           {remaining} remaining task{remaining > 1 ? 's' : ''}
         </div>
