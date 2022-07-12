@@ -269,6 +269,7 @@ export default gql`
     schemas: SchemaConnection!
     supergraph: String
     sdl: String
+    explorer(usage: SchemaExplorerUsageInput): SchemaExplorer!
   }
 
   type SchemaVersionConnection {
@@ -291,4 +292,122 @@ export default gql`
   }
 
   union SchemaSyncCDNPayload = SchemaSyncCDNSuccess | SchemaSyncCDNError
+
+  input SchemaExplorerUsageInput {
+    daysLimit: Int!
+  }
+
+  type SchemaExplorer {
+    types: [GraphQLNamedType!]!
+  }
+
+  type SchemaCoordinateUsage {
+    total: Int!
+    isUsed: Boolean!
+  }
+
+  union GraphQLNamedType =
+      GraphQLObjectType
+    | GraphQLInterfaceType
+    | GraphQLUnionType
+    | GraphQLEnumType
+    | GraphQLInputObjectType
+    | GraphQLScalarType
+
+  type GraphQLObjectType {
+    name: String!
+    description: String
+    fields: [GraphQLField!]!
+    interfaces: [String!]!
+    usage: SchemaCoordinateUsage!
+  }
+
+  type GraphQLInterfaceType {
+    name: String!
+    description: String
+    fields: [GraphQLField!]!
+    interfaces: [String!]!
+    usage: SchemaCoordinateUsage!
+  }
+
+  type GraphQLUnionType {
+    name: String!
+    description: String
+    members: [GraphQLUnionTypeMember!]!
+    usage: SchemaCoordinateUsage!
+  }
+
+  type GraphQLUnionTypeMember {
+    name: String!
+    usage: SchemaCoordinateUsage!
+  }
+
+  type GraphQLEnumType {
+    name: String!
+    description: String
+    values: [GraphQLEnumValue!]!
+    usage: SchemaCoordinateUsage!
+  }
+
+  type GraphQLInputObjectType {
+    name: String!
+    description: String
+    fields: [GraphQLInputField!]!
+    usage: SchemaCoordinateUsage!
+  }
+
+  type GraphQLScalarType {
+    name: String!
+    description: String
+    usage: SchemaCoordinateUsage!
+  }
+
+  type GraphQLField {
+    name: String!
+    description: String
+    type: String!
+    args: [GraphQLArgument!]!
+    isDeprecated: Boolean!
+    deprecationReason: String
+    usage: SchemaCoordinateUsage!
+  }
+
+  type GraphQLInputField {
+    name: String!
+    description: String
+    type: String!
+    defaultValue: String
+    isDeprecated: Boolean!
+    deprecationReason: String
+    usage: SchemaCoordinateUsage!
+  }
+
+  type GraphQLArgument {
+    name: String!
+    description: String
+    type: String!
+    defaultValue: String
+    isDeprecated: Boolean!
+    deprecationReason: String
+    usage: SchemaCoordinateUsage!
+  }
+
+  type GraphQLEnumValue {
+    name: String!
+    description: String
+    isDeprecated: Boolean!
+    deprecationReason: String
+    usage: SchemaCoordinateUsage!
+  }
 `;
+
+/**
+ * What do we want to get from API
+ *  - list of types
+ *  - list of fields per type
+ *  - list of members per union
+ *  - list of values per enum
+ *  - list of arguments per field
+ *  - return type for each field, argument
+ *  - ownership of each type, field, argument (service name)
+ */

@@ -1,3 +1,16 @@
+import type {
+  GraphQLField,
+  GraphQLInputField,
+  GraphQLObjectType,
+  GraphQLInterfaceType,
+  GraphQLUnionType,
+  GraphQLEnumType,
+  GraphQLInputObjectType,
+  GraphQLScalarType,
+  GraphQLEnumValue,
+  GraphQLSchema,
+  GraphQLArgument,
+} from 'graphql';
 import type { SchemaChange, SchemaError, OperationStats, ClientStats } from '../__generated__/types';
 import type {
   Member,
@@ -18,6 +31,42 @@ export interface SchemaVersion extends SchemaVersionEntity {
   target: string;
   organization: string;
 }
+
+export type WithParent<T> = T & {
+  parent: {
+    coordinate: string;
+  };
+};
+
+export type WithUsage<T> = T & {
+  usage: {
+    daysLimit: number;
+    organization: string;
+    project: string;
+    target: string;
+  };
+};
+
+export type SchemaExplorerMapper = WithUsage<{
+  schema: GraphQLSchema;
+}>;
+
+export type GraphQLFieldMapper = WithUsage<WithParent<GraphQLField<any, any, any>>>;
+export type GraphQLInputFieldMapper = WithUsage<WithParent<GraphQLInputField>>;
+export type GraphQLEnumValueMapper = WithUsage<WithParent<GraphQLEnumValue>>;
+export type GraphQLArgumentMapper = WithUsage<WithParent<GraphQLArgument>>;
+export type GraphQLUnionTypeMemberMapper = WithUsage<
+  WithParent<{
+    name: string;
+  }>
+>;
+
+export type GraphQLObjectTypeMapper = WithUsage<{ type: GraphQLObjectType }>;
+export type GraphQLInterfaceTypeMapper = WithUsage<{ type: GraphQLInterfaceType }>;
+export type GraphQLUnionTypeMapper = WithUsage<{ type: GraphQLUnionType }>;
+export type GraphQLEnumTypeMapper = WithUsage<{ type: GraphQLEnumType }>;
+export type GraphQLInputObjectTypeMapper = WithUsage<{ type: GraphQLInputObjectType }>;
+export type GraphQLScalarTypeMapper = WithUsage<{ type: GraphQLScalarType }>;
 
 export type SchemaChangeConnection = readonly SchemaChange[];
 export type SchemaErrorConnection = readonly SchemaError[];

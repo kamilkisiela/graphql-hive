@@ -1,4 +1,14 @@
 import { createHash } from 'crypto';
+import {
+  buildASTSchema,
+  isObjectType,
+  isInterfaceType,
+  isUnionType,
+  isEnumType,
+  isInputObjectType,
+  isScalarType,
+  GraphQLNamedType,
+} from 'graphql';
 import type { SchemaModule } from './__generated__/types';
 import { SchemaManager } from './providers/schema-manager';
 import { SchemaPublisher } from './providers/schema-publisher';
@@ -14,10 +24,49 @@ import { AuthManager } from '../auth/providers/auth-manager';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import { z } from 'zod';
 import { SchemaHelper } from './providers/schema-helper';
+import { WithUsage, WithParent } from '../../shared/mappers';
+import { OperationsManager } from '../operations/providers/operations-manager';
 
 const MaybeModel = <T extends z.ZodType>(value: T) => z.union([z.null(), z.undefined(), value]);
 const GraphQLSchemaStringModel = z.string().max(5_000_000).min(0);
 const ServiceNameModel = z.string().min(1).max(100);
+
+async function usage(
+  source:
+    | WithUsage<{
+        type: {
+          name: string;
+        };
+      }>
+    | WithParent<
+        WithUsage<{
+          name: string;
+        }>
+      >,
+  _: unknown,
+  { injector }: GraphQLModules.ModuleContext
+) {
+  const result = await injector.get(OperationsManager).countCoordinatePerTarget({
+    coordinate: 'parent' in source ? `${source.parent.coordinate}.${source.name}` : source.type.name,
+    daysLimit: source.usage.daysLimit,
+    organization: source.usage.organization,
+    project: source.usage.project,
+    target: source.usage.target,
+  });
+  return result
+    ? {
+        total: result.total,
+        isUsed: result.total > 0,
+      }
+    : {
+        total: 0,
+        isUsed: false,
+      };
+}
+
+function __isTypeOf<T extends GraphQLNamedType>(isFn: (type: GraphQLNamedType) => type is T) {
+  return ({ type }: { type: GraphQLNamedType }) => isFn(type);
+}
 
 export const resolvers: SchemaModule.Resolvers = {
   Mutation: {
@@ -423,6 +472,37 @@ export const resolvers: SchemaModule.Resolvers = {
     async baseSchema(version) {
       return version.base_schema || null;
     },
+    async explorer(version, { usage }, { injector }) {
+      const project = await injector.get(ProjectManager).getProject({
+        organization: version.organization,
+        project: version.project,
+      });
+
+      const schemaManager = injector.get(SchemaManager);
+      const orchestrator = schemaManager.matchOrchestrator(project.type);
+      const helper = injector.get(SchemaHelper);
+
+      const schemas = await schemaManager.getCommits({
+        version: version.id,
+        organization: version.organization,
+        project: version.project,
+        target: version.target,
+      });
+
+      const schema = await orchestrator.build(schemas.map(s => helper.createSchemaObject(s)));
+
+      return {
+        schema: buildASTSchema(schema.document, {
+          assumeValidSDL: true,
+        }),
+        usage: {
+          daysLimit: usage?.daysLimit ?? 30,
+          organization: version.organization,
+          project: version.project,
+          target: version.target,
+        },
+      };
+    },
   },
   SchemaCompareError: {
     __isTypeOf(error) {
@@ -470,4 +550,159 @@ export const resolvers: SchemaModule.Resolvers = {
       return !obj.valid;
     },
   },
+  SchemaExplorer: {
+    types({ schema, usage }) {
+      // TODO: use a proper type here
+      const types: Array<{
+        type: any;
+        usage: typeof usage;
+      }> = [];
+      const typeMap = schema.getTypeMap();
+
+      for (const typename in typeMap) {
+        if (typename.startsWith('__')) {
+          continue;
+        }
+
+        types.push({
+          type: typeMap[typename],
+          usage,
+        });
+      }
+
+      return types;
+    },
+  },
+  GraphQLObjectType: {
+    __isTypeOf: __isTypeOf(isObjectType),
+    name: t => t.type.name,
+    description: t => t.type.description ?? null,
+    fields: t =>
+      Object.values(t.type.getFields()).map(f => ({
+        ...f,
+        parent: {
+          coordinate: t.type.name,
+        },
+        usage: t.usage,
+      })),
+    interfaces: t => t.type.getInterfaces().map(i => i.name),
+    usage,
+  },
+  GraphQLInterfaceType: {
+    __isTypeOf: __isTypeOf(isInterfaceType),
+    name: t => t.type.name,
+    description: t => t.type.description ?? null,
+    fields: t =>
+      Object.values(t.type.getFields()).map(f => ({
+        ...f,
+        parent: {
+          coordinate: t.type.name,
+        },
+        usage: t.usage,
+      })),
+    interfaces: t => t.type.getInterfaces().map(i => i.name),
+    usage,
+  },
+  GraphQLUnionType: {
+    __isTypeOf: __isTypeOf(isUnionType),
+    name: t => t.type.name,
+    description: t => t.type.description ?? null,
+    members: t =>
+      t.type.getTypes().map(i => {
+        return {
+          name: i.name,
+          usage: t.usage,
+          parent: {
+            coordinate: t.type.name,
+          },
+        };
+      }),
+    usage,
+  },
+  GraphQLEnumType: {
+    __isTypeOf: __isTypeOf(isEnumType),
+    name: t => t.type.name,
+    description: t => t.type.description ?? null,
+    values: t =>
+      t.type.getValues().map(v => ({
+        ...v,
+        parent: {
+          coordinate: t.type.name,
+        },
+        usage: t.usage,
+      })),
+    usage,
+  },
+  GraphQLInputObjectType: {
+    __isTypeOf: __isTypeOf(isInputObjectType),
+    name: t => t.type.name,
+    description: t => t.type.description ?? null,
+    fields: t =>
+      Object.values(t.type.getFields()).map(f => ({
+        ...f,
+        parent: {
+          coordinate: t.type.name,
+        },
+        usage: t.usage,
+      })),
+    usage,
+  },
+  GraphQLScalarType: {
+    __isTypeOf: __isTypeOf(isScalarType),
+    name: t => t.type.name,
+    description: t => t.type.description ?? null,
+    usage,
+  },
+  GraphQLEnumValue: {
+    name: v => v.name,
+    description: v => v.description ?? null,
+    isDeprecated: v => typeof v.deprecationReason === 'string',
+    deprecationReason: v => v.deprecationReason ?? null,
+    usage,
+  },
+  GraphQLUnionTypeMember: {
+    name: m => m.name,
+    usage,
+  },
+  GraphQLField: {
+    name: f => f.name,
+    description: f => f.description ?? null,
+    isDeprecated: f => typeof f.deprecationReason === 'string',
+    deprecationReason: f => f.deprecationReason ?? null,
+    type: f => f.type.toString(),
+    args: f =>
+      f.args.map(a => ({
+        ...a,
+        parent: {
+          coordinate: `${f.parent.coordinate}.${f.name}`,
+        },
+        usage: f.usage,
+      })),
+    usage,
+  },
+  GraphQLInputField: {
+    name: f => f.name,
+    description: f => f.description ?? null,
+    type: f => f.type.toString(),
+    defaultValue: f => stringifyDefaultValue(f.defaultValue),
+    isDeprecated: f => typeof f.deprecationReason === 'string',
+    deprecationReason: f => f.deprecationReason ?? null,
+    usage,
+  },
+  GraphQLArgument: {
+    name: a => a.name,
+    description: a => a.description ?? null,
+    type: a => a.type.toString(),
+    defaultValue: a => stringifyDefaultValue(a.defaultValue),
+    deprecationReason: a => a.deprecationReason ?? null,
+    isDeprecated: a => typeof a.deprecationReason === 'string',
+    usage,
+  },
 };
+
+function stringifyDefaultValue(value: unknown): string | null {
+  if (typeof value !== 'undefined') {
+    return JSON.stringify(value);
+  }
+  return null;
+}

@@ -493,4 +493,66 @@ export class OperationsManager {
 
     return false;
   }
+
+  @cache<
+    {
+      daysLimit: number;
+    } & TargetSelector
+  >(selector =>
+    JSON.stringify({
+      daysLimit: selector.daysLimit,
+      target: selector.target,
+      project: selector.project,
+      organization: selector.organization,
+    })
+  )
+  async countCoordinatesPerTarget({
+    daysLimit,
+    target,
+    project,
+    organization,
+  }: {
+    daysLimit: number;
+  } & TargetSelector) {
+    this.logger.info('Reading coordinates per target (target=%s)', target);
+
+    await this.authManager.ensureTargetAccess({
+      organization,
+      project,
+      target,
+      scope: TargetAccessScope.REGISTRY_READ,
+    });
+
+    return this.reader.countCoordinatesPerTarget({
+      target,
+      daysLimit,
+    });
+  }
+
+  async countCoordinatePerTarget({
+    daysLimit,
+    target,
+    project,
+    organization,
+    coordinate,
+  }: {
+    daysLimit: number;
+    coordinate: string;
+  } & TargetSelector) {
+    await this.authManager.ensureTargetAccess({
+      organization,
+      project,
+      target,
+      scope: TargetAccessScope.REGISTRY_READ,
+    });
+
+    const all = await this.countCoordinatesPerTarget({
+      target,
+      project,
+      organization,
+      daysLimit,
+    });
+
+    return all.find(row => row.coordinate === coordinate);
+  }
 }

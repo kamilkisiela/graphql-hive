@@ -848,6 +848,25 @@ export class OperationsReader {
     return ensureNumber(result.data[0].total);
   }
 
+  async countCoordinatesPerTarget({ target, daysLimit }: { target: string; daysLimit: number }) {
+    const result = await this.clickHouse.query<{
+      coordinate: string;
+      total: number;
+    }>({
+      query: `
+        SELECT coordinate, sum(total) as total FROM schema_coordinates_daily
+        ${this.createFilter({ target, extra: [`timestamp >= subtractDays(NOW(), ${daysLimit})`] })}
+        GROUP BY coordinate`,
+      queryId: 'coordinates_per_target',
+      timeout: 15_000,
+    });
+
+    return result.data.map(row => ({
+      coordinate: row.coordinate,
+      total: ensureNumber(row.total),
+    }));
+  }
+
   async adminCountOperationsPerTarget({ daysLimit }: { daysLimit: number }) {
     const result = await this.clickHouse.query<{
       total: string;
