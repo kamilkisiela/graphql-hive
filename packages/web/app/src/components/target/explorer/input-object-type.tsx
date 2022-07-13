@@ -17,10 +17,11 @@ const GraphQLInputObjectTypeComponent_TypeFragment = gql(/* GraphQL */ `
 
 export function GraphQLInputObjectTypeComponent(props: {
   type: DocumentType<typeof GraphQLInputObjectTypeComponent_TypeFragment>;
+  totalRequests: number;
 }) {
   return (
     <GraphQLTypeCard kind="input" name={props.type.name} description={props.type.description}>
-      <GraphQLInputFields fields={props.type.fields} />
+      <GraphQLInputFields fields={props.type.fields} totalRequests={props.totalRequests} />
     </GraphQLTypeCard>
   );
 }

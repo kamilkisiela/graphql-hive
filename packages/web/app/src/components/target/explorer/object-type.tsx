@@ -18,6 +18,7 @@ const GraphQLObjectTypeComponent_TypeFragment = gql(/* GraphQL */ `
 
 export function GraphQLObjectTypeComponent(props: {
   type: DocumentType<typeof GraphQLObjectTypeComponent_TypeFragment>;
+  totalRequests: number;
 }) {
   return (
     <GraphQLTypeCard
@@ -26,7 +27,7 @@ export function GraphQLObjectTypeComponent(props: {
       description={props.type.description}
       implements={props.type.interfaces}
     >
-      <GraphQLFields fields={props.type.fields} />
+      <GraphQLFields fields={props.type.fields} totalRequests={props.totalRequests} />
     </GraphQLTypeCard>
   );
 }

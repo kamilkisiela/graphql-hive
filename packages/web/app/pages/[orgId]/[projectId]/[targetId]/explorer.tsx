@@ -13,15 +13,15 @@ function floorDate(date: Date): Date {
 }
 
 const SchemaView_SchemaExplorer = gql(/* GraphQL */ `
-  query SchemaView_SchemaExplorer($selector: TargetSelectorInput!, $usage: SchemaExplorerUsageInput!) {
-    target(selector: $selector) {
+  query SchemaView_SchemaExplorer($organization: ID!, $project: ID!, $target: ID!, $period: DateRangeInput!) {
+    target(selector: { organization: $organization, project: $project, target: $target }) {
       __typename
       id
       latestSchemaVersion {
         __typename
         id
         valid
-        explorer(usage: $usage) {
+        explorer(usage: { period: $period }) {
           query {
             ...GraphQLObjectTypeComponent_TypeFragment
           }
@@ -31,17 +31,11 @@ const SchemaView_SchemaExplorer = gql(/* GraphQL */ `
           subscription {
             ...GraphQLObjectTypeComponent_TypeFragment
           }
-          # types {
-          #   __typename
-          #   ...GraphQLObjectTypeComponent_TypeFragment
-          #   ...GraphQLInterfaceTypeComponent_TypeFragment
-          #   ...GraphQLUnionTypeComponent_TypeFragment
-          #   ...GraphQLEnumTypeComponent_TypeFragment
-          #   ...GraphQLInputObjectTypeComponent_TypeFragment
-          #   ...GraphQLScalarTypeComponent_TypeFragment
-          # }
         }
       }
+    }
+    operationsStats(selector: { organization: $organization, project: $project, target: $target, period: $period }) {
+      totalRequests
     }
   }
 `);
@@ -59,16 +53,12 @@ function SchemaView({
   const [query] = useQuery({
     query: SchemaView_SchemaExplorer,
     variables: {
-      selector: {
-        organization: organization.cleanId,
-        project: project.cleanId,
-        target: target.cleanId,
-      },
-      usage: {
-        period: {
-          to: floorDate(now),
-          from: formatISO(subDays(now, 60)),
-        },
+      organization: organization.cleanId,
+      project: project.cleanId,
+      target: target.cleanId,
+      period: {
+        to: floorDate(now),
+        from: formatISO(subDays(now, 60)),
       },
     },
     requestPolicy: 'cache-first',
@@ -82,6 +72,9 @@ function SchemaView({
         }
 
         const { query, mutation, subscription } = data.target.latestSchemaVersion.explorer;
+        const { totalRequests } = data.operationsStats;
+
+        console.log(typeof totalRequests);
 
         return (
           <>
@@ -89,9 +82,9 @@ function SchemaView({
               <div className="font-light text-gray-500">The latest published schema.</div>
             </div>
             <div className="flex flex-col gap-4">
-              {query ? <GraphQLObjectTypeComponent type={query} /> : null}
-              {mutation ? <GraphQLObjectTypeComponent type={mutation} /> : null}
-              {subscription ? <GraphQLObjectTypeComponent type={subscription} /> : null}
+              {query ? <GraphQLObjectTypeComponent type={query} totalRequests={totalRequests} /> : null}
+              {mutation ? <GraphQLObjectTypeComponent type={mutation} totalRequests={totalRequests} /> : null}
+              {subscription ? <GraphQLObjectTypeComponent type={subscription} totalRequests={totalRequests} /> : null}
             </div>
           </>
         );

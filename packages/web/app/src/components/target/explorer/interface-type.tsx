@@ -18,6 +18,7 @@ const GraphQLInterfaceTypeComponent_TypeFragment = gql(/* GraphQL */ `
 
 export function GraphQLInterfaceTypeComponent(props: {
   type: DocumentType<typeof GraphQLInterfaceTypeComponent_TypeFragment>;
+  totalRequests: number;
 }) {
   return (
     <GraphQLTypeCard
@@ -26,7 +27,7 @@ export function GraphQLInterfaceTypeComponent(props: {
       description={props.type.description}
       implements={props.type.interfaces}
     >
-      <GraphQLFields fields={props.type.fields} />
+      <GraphQLFields fields={props.type.fields} totalRequests={props.totalRequests} />
     </GraphQLTypeCard>
   );
 }

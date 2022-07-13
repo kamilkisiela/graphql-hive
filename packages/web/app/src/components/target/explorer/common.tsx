@@ -150,7 +150,13 @@ export function GraphQLArguments(props: { args: DocumentType<typeof GraphQLArgum
   );
 }
 
-export function GraphQLFields({ fields }: { fields: DocumentType<typeof GraphQLFields_FieldFragment>[] }) {
+export function GraphQLFields({
+  fields,
+  totalRequests,
+}: {
+  fields: DocumentType<typeof GraphQLFields_FieldFragment>[];
+  totalRequests: number;
+}) {
   return (
     <div className="flex flex-col">
       {fields.map((field, i) => {
@@ -180,7 +186,7 @@ export function GraphQLFields({ fields }: { fields: DocumentType<typeof GraphQLF
                 <div
                   className="bg-orange-500 h-full"
                   style={{
-                    width: `${(field.usage.total / 1000) * 100}%`,
+                    width: `${totalRequests ? (field.usage.total / totalRequests) * 100 : 0}%`,
                   }}
                 />
               </div>
@@ -194,8 +200,10 @@ export function GraphQLFields({ fields }: { fields: DocumentType<typeof GraphQLF
 
 export function GraphQLInputFields({
   fields,
+  totalRequests,
 }: {
   fields: DocumentType<typeof GraphQLInputFields_InputFieldFragment>[];
+  totalRequests: number;
 }) {
   return (
     <div className="flex flex-col">
@@ -225,7 +233,7 @@ export function GraphQLInputFields({
                 <div
                   className="bg-orange-500 h-full"
                   style={{
-                    width: `${(field.usage.total / 1000) * 100}%`,
+                    width: `${totalRequests ? (field.usage.total / totalRequests) * 100 : 0}%`,
                   }}
                 />
               </div>
