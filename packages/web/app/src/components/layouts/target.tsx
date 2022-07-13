@@ -18,6 +18,7 @@ import { ConnectSchemaModal } from '@/components/v2/modals';
 
 enum TabValue {
   Schema = 'schema',
+  Explorer = 'explorer',
   History = 'history',
   Operations = 'operations',
   Laboratory = 'laboratory',
@@ -35,7 +36,7 @@ export const TargetLayout = ({
     project: ProjectFieldsFragment;
     organization: OrganizationFieldsFragment;
   }): ReactNode;
-  value: 'schema' | 'history' | 'operations' | 'laboratory' | 'settings';
+  value: 'schema' | 'explorer' | 'history' | 'operations' | 'laboratory' | 'settings';
   className?: string;
   connect?: ReactNode;
 }): ReactElement | null => {
@@ -170,6 +171,11 @@ export const TargetLayout = ({
               <NextLink passHref href={`/${orgId}/${projectId}/${targetId}`}>
                 <Tabs.Trigger value={TabValue.Schema} asChild>
                   <a>Schema</a>
+                </Tabs.Trigger>
+              </NextLink>
+              <NextLink passHref href={`/${orgId}/${projectId}/${targetId}/explorer`}>
+                <Tabs.Trigger value={TabValue.Explorer} asChild>
+                  <a>Explorer</a>
                 </Tabs.Trigger>
               </NextLink>
               <NextLink passHref href={`/${orgId}/${projectId}/${targetId}/history`}>
