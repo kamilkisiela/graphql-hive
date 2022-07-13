@@ -496,23 +496,23 @@ export class OperationsManager {
 
   @cache<
     {
-      daysLimit: number;
+      period: DateRange;
     } & TargetSelector
   >(selector =>
     JSON.stringify({
-      daysLimit: selector.daysLimit,
+      period: selector.period,
       target: selector.target,
       project: selector.project,
       organization: selector.organization,
     })
   )
   async countCoordinatesPerTarget({
-    daysLimit,
+    period,
     target,
     project,
     organization,
   }: {
-    daysLimit: number;
+    period: DateRange;
   } & TargetSelector) {
     this.logger.info('Reading coordinates per target (target=%s)', target);
 
@@ -525,18 +525,18 @@ export class OperationsManager {
 
     return this.reader.countCoordinatesPerTarget({
       target,
-      daysLimit,
+      period,
     });
   }
 
   async countCoordinatePerTarget({
-    daysLimit,
+    period,
     target,
     project,
     organization,
     coordinate,
   }: {
-    daysLimit: number;
+    period: DateRange;
     coordinate: string;
   } & TargetSelector) {
     await this.authManager.ensureTargetAccess({
@@ -550,7 +550,7 @@ export class OperationsManager {
       target,
       project,
       organization,
-      daysLimit,
+      period,
     });
 
     return all.find(row => row.coordinate === coordinate);

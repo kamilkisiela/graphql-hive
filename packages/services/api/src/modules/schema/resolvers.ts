@@ -24,7 +24,8 @@ import { AuthManager } from '../auth/providers/auth-manager';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import { z } from 'zod';
 import { SchemaHelper } from './providers/schema-helper';
-import { WithUsage, WithParent } from '../../shared/mappers';
+import type { WithUsage, WithParent } from '../../shared/mappers';
+import { createPeriod, parseDateRangeInput } from '../../shared/helpers';
 import { OperationsManager } from '../operations/providers/operations-manager';
 
 const MaybeModel = <T extends z.ZodType>(value: T) => z.union([z.null(), z.undefined(), value]);
@@ -48,11 +49,12 @@ async function usage(
 ) {
   const result = await injector.get(OperationsManager).countCoordinatePerTarget({
     coordinate: 'parent' in source ? `${source.parent.coordinate}.${source.name}` : source.type.name,
-    daysLimit: source.usage.daysLimit,
+    period: source.usage.period,
     organization: source.usage.organization,
     project: source.usage.project,
     target: source.usage.target,
   });
+
   return result
     ? {
         total: result.total,
@@ -496,7 +498,7 @@ export const resolvers: SchemaModule.Resolvers = {
           assumeValidSDL: true,
         }),
         usage: {
-          daysLimit: usage?.daysLimit ?? 30,
+          period: usage?.period ? parseDateRangeInput(usage.period) : createPeriod('30d'),
           organization: version.organization,
           project: version.project,
           target: version.target,
@@ -551,8 +553,19 @@ export const resolvers: SchemaModule.Resolvers = {
     },
   },
   SchemaExplorer: {
+    type({ schema, usage }, { name }) {
+      const namedType = schema.getType(name);
+
+      return namedType
+        ? {
+            // TODO: fix any
+            type: namedType as any,
+            usage,
+          }
+        : null;
+    },
     types({ schema, usage }) {
-      // TODO: use a proper type here
+      // TODO: fix any
       const types: Array<{
         type: any;
         usage: typeof usage;
@@ -571,6 +584,36 @@ export const resolvers: SchemaModule.Resolvers = {
       }
 
       return types;
+    },
+    query({ schema, usage }) {
+      const queryType = schema.getQueryType();
+
+      return queryType
+        ? {
+            type: queryType,
+            usage,
+          }
+        : null;
+    },
+    mutation({ schema, usage }) {
+      const mutationType = schema.getMutationType();
+
+      return mutationType
+        ? {
+            type: mutationType,
+            usage,
+          }
+        : null;
+    },
+    subscription({ schema, usage }) {
+      const subscriptionType = schema.getSubscriptionType();
+
+      return subscriptionType
+        ? {
+            type: subscriptionType,
+            usage,
+          }
+        : null;
     },
   },
   GraphQLObjectType: {

@@ -848,14 +848,14 @@ export class OperationsReader {
     return ensureNumber(result.data[0].total);
   }
 
-  async countCoordinatesPerTarget({ target, daysLimit }: { target: string; daysLimit: number }) {
+  async countCoordinatesPerTarget({ target, period }: { target: string; period: DateRange }) {
     const result = await this.clickHouse.query<{
       coordinate: string;
       total: number;
     }>({
       query: `
         SELECT coordinate, sum(total) as total FROM schema_coordinates_daily
-        ${this.createFilter({ target, extra: [`timestamp >= subtractDays(NOW(), ${daysLimit})`] })}
+        ${this.createFilter({ target, period })}
         GROUP BY coordinate`,
       queryId: 'coordinates_per_target',
       timeout: 15_000,

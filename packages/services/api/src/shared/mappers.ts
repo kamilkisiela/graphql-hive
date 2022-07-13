@@ -40,7 +40,7 @@ export type WithParent<T> = T & {
 
 export type WithUsage<T> = T & {
   usage: {
-    daysLimit: number;
+    period: DateRange;
     organization: string;
     project: string;
     target: string;

@@ -294,11 +294,15 @@ export default gql`
   union SchemaSyncCDNPayload = SchemaSyncCDNSuccess | SchemaSyncCDNError
 
   input SchemaExplorerUsageInput {
-    daysLimit: Int!
+    period: DateRangeInput!
   }
 
   type SchemaExplorer {
     types: [GraphQLNamedType!]!
+    type(name: String!): GraphQLNamedType
+    query: GraphQLObjectType
+    mutation: GraphQLObjectType
+    subscription: GraphQLObjectType
   }
 
   type SchemaCoordinateUsage {
@@ -400,14 +404,3 @@ export default gql`
     usage: SchemaCoordinateUsage!
   }
 `;
-
-/**
- * What do we want to get from API
- *  - list of types
- *  - list of fields per type
- *  - list of members per union
- *  - list of values per enum
- *  - list of arguments per field
- *  - return type for each field, argument
- *  - ownership of each type, field, argument (service name)
- */
