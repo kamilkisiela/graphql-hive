@@ -4640,10 +4640,10 @@
   dependencies:
     graphql-language-service "3.1.4"
 
-"@theguild/prettier-config@0.0.1":
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/@theguild/prettier-config/-/prettier-config-0.0.1.tgz#de22b4543b1f2541dd6b938717e2fb877b9915df"
-  integrity sha512-h3IavJZWTjk6vbYpA11aelnHZcTWLrfMTj0fsSYyVC3v5npG4L2Q1S8az31P7/AZMuDrTjleXygAJ12np5nS/A==
+"@theguild/prettier-config@0.0.2":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@theguild/prettier-config/-/prettier-config-0.0.2.tgz#1b40cf900f20a9a49b73d65c69643278f275a220"
+  integrity sha512-iawNy3+9GtmIPZqgnXqDgwqlhFYYlfEYS2zqIWwdqTA96D69QtcxURhC04pz2cy823VFLGHfP9/JOvjWZVeQhg==
   dependencies:
     prettier-plugin-sh "^0.11.0"
 
