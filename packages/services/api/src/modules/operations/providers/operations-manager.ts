@@ -494,28 +494,16 @@ export class OperationsManager {
     return false;
   }
 
-  @cache<
-    {
-      period: DateRange;
-    } & TargetSelector
-  >(selector =>
-    JSON.stringify({
-      period: selector.period,
-      target: selector.target,
-      project: selector.project,
-      organization: selector.organization,
-    })
-  )
-  async countCoordinatesPerTarget({
+  async countCoordinatesForType({
     period,
     target,
     project,
     organization,
+    typename,
   }: {
     period: DateRange;
+    typename: string;
   } & TargetSelector) {
-    this.logger.info('Reading coordinates per target (target=%s)', target);
-
     await this.authManager.ensureTargetAccess({
       organization,
       project,
@@ -523,21 +511,36 @@ export class OperationsManager {
       scope: TargetAccessScope.REGISTRY_READ,
     });
 
-    return this.reader.countCoordinatesPerTarget({
+    const rows = await this.reader.countCoordinatesForType({
       target,
       period,
+      typename,
     });
+
+    const records: {
+      [coordinate: string]: {
+        total: number;
+        isUsed: boolean;
+      };
+    } = {};
+
+    for (const row of rows) {
+      records[row.coordinate] = {
+        total: row.total,
+        isUsed: row.total > 0,
+      };
+    }
+
+    return records;
   }
 
-  async countCoordinatePerTarget({
+  async countCoordinatesForTarget({
     period,
     target,
     project,
     organization,
-    coordinate,
   }: {
     period: DateRange;
-    coordinate: string;
   } & TargetSelector) {
     await this.authManager.ensureTargetAccess({
       organization,
@@ -546,13 +549,25 @@ export class OperationsManager {
       scope: TargetAccessScope.REGISTRY_READ,
     });
 
-    const all = await this.countCoordinatesPerTarget({
+    const rows = await this.reader.countCoordinatesForTarget({
       target,
-      project,
-      organization,
       period,
     });
 
-    return all.find(row => row.coordinate === coordinate);
+    const records: {
+      [coordinate: string]: {
+        total: number;
+        isUsed: boolean;
+      };
+    } = {};
+
+    for (const row of rows) {
+      records[row.coordinate] = {
+        total: row.total,
+        isUsed: row.total > 0,
+      };
+    }
+
+    return records;
   }
 }

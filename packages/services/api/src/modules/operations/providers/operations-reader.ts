@@ -1,6 +1,7 @@
 import { Injectable } from 'graphql-modules';
 import { format, addMinutes, subDays } from 'date-fns';
 import type { Span } from '@sentry/types';
+import { batch } from '@theguild/buddy';
 import { ClickHouse, RowOf } from './clickhouse-client';
 import { calculateTimeWindow, maxResolution } from './helpers';
 import type { DateRange } from '../../../shared/entities';
@@ -848,14 +849,120 @@ export class OperationsReader {
     return ensureNumber(result.data[0].total);
   }
 
-  async countCoordinatesPerTarget({ target, period }: { target: string; period: DateRange }) {
+  countCoordinatesForType = batch(
+    async (
+      selectors: Array<{
+        target: string;
+        period: DateRange;
+        typename: string;
+      }>
+    ) => {
+      const groupedByTargetAndPeriod = new Map<
+        string,
+        {
+          target: string;
+          period: DateRange;
+          typenames: string[];
+        }
+      >();
+
+      console.log('batched call for', selectors.length, 'selectors');
+
+      for (const selector of selectors) {
+        const key = `${selector.target}-${selector.period.from}-${selector.period.to}`;
+        const value = groupedByTargetAndPeriod.get(key);
+
+        if (!value) {
+          groupedByTargetAndPeriod.set(key, {
+            target: selector.target,
+            period: selector.period,
+            typenames: [selector.typename],
+          });
+        } else {
+          value.typenames.push(selector.typename);
+        }
+      }
+
+      const grouped = new Map<
+        string,
+        Promise<
+          {
+            coordinate: string;
+            total: number;
+          }[]
+        >
+      >();
+
+      for (const selector of groupedByTargetAndPeriod.values()) {
+        const key = `${selector.target}-${selector.period.from}-${selector.period.to}`;
+        console.log('grouped call for', selector.typenames);
+
+        grouped.set(
+          key,
+          this.countCoordinates({
+            target: selector.target,
+            period: selector.period,
+            typenames: selector.typenames,
+          })
+        );
+      }
+
+      return selectors.map(selector => {
+        const key = `${selector.target}-${selector.period.from}-${selector.period.to}`;
+        const value = grouped.get(key);
+
+        if (!value) {
+          throw new Error('OMG');
+        }
+
+        return value;
+      });
+    }
+  );
+
+  private async countCoordinates({
+    target,
+    period,
+    typenames,
+  }: {
+    target: string;
+    period: DateRange;
+    typenames: string[];
+  }) {
+    const typesFilter = typenames.map(t => `coordinate = '${t}' OR coordinate LIKE '${t}.%'`).join(' OR ');
     const result = await this.clickHouse.query<{
       coordinate: string;
       total: number;
     }>({
       query: `
         SELECT coordinate, sum(total) as total FROM schema_coordinates_daily
-        ${this.createFilter({ target, period })}
+        ${this.createFilter({
+          target,
+          period,
+          extra: [`(${typesFilter})`],
+        })}
+        GROUP BY coordinate`,
+      queryId: 'coordinates_per_target',
+      timeout: 15_000,
+    });
+
+    return result.data.map(row => ({
+      coordinate: row.coordinate,
+      total: ensureNumber(row.total),
+    }));
+  }
+
+  async countCoordinatesForTarget({ target, period }: { target: string; period: DateRange }) {
+    const result = await this.clickHouse.query<{
+      coordinate: string;
+      total: number;
+    }>({
+      query: `
+        SELECT coordinate, sum(total) as total FROM schema_coordinates_daily
+        ${this.createFilter({
+          target,
+          period,
+        })}
         GROUP BY coordinate`,
       queryId: 'coordinates_per_target',
       timeout: 15_000,

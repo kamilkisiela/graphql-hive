@@ -40,16 +40,25 @@ export type WithParent<T> = T & {
 
 export type WithUsage<T> = T & {
   usage: {
+    [coordinate: string]: {
+      total: number;
+    };
+  };
+};
+
+type TypeWithUsageSelector<T> = WithUsage<{
+  type: T;
+}>;
+
+export type SchemaExplorerMapper = {
+  schema: GraphQLSchema;
+  usage: {
     period: DateRange;
     organization: string;
     project: string;
     target: string;
   };
 };
-
-export type SchemaExplorerMapper = WithUsage<{
-  schema: GraphQLSchema;
-}>;
 
 export type GraphQLFieldMapper = WithUsage<WithParent<GraphQLField<any, any, any>>>;
 export type GraphQLInputFieldMapper = WithUsage<WithParent<GraphQLInputField>>;
@@ -61,12 +70,12 @@ export type GraphQLUnionTypeMemberMapper = WithUsage<
   }>
 >;
 
-export type GraphQLObjectTypeMapper = WithUsage<{ type: GraphQLObjectType }>;
-export type GraphQLInterfaceTypeMapper = WithUsage<{ type: GraphQLInterfaceType }>;
-export type GraphQLUnionTypeMapper = WithUsage<{ type: GraphQLUnionType }>;
-export type GraphQLEnumTypeMapper = WithUsage<{ type: GraphQLEnumType }>;
-export type GraphQLInputObjectTypeMapper = WithUsage<{ type: GraphQLInputObjectType }>;
-export type GraphQLScalarTypeMapper = WithUsage<{ type: GraphQLScalarType }>;
+export type GraphQLObjectTypeMapper = TypeWithUsageSelector<GraphQLObjectType>;
+export type GraphQLInterfaceTypeMapper = TypeWithUsageSelector<GraphQLInterfaceType>;
+export type GraphQLUnionTypeMapper = TypeWithUsageSelector<GraphQLUnionType>;
+export type GraphQLEnumTypeMapper = TypeWithUsageSelector<GraphQLEnumType>;
+export type GraphQLInputObjectTypeMapper = TypeWithUsageSelector<GraphQLInputObjectType>;
+export type GraphQLScalarTypeMapper = TypeWithUsageSelector<GraphQLScalarType>;
 
 export type SchemaChangeConnection = readonly SchemaChange[];
 export type SchemaErrorConnection = readonly SchemaError[];

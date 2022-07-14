@@ -43,22 +43,15 @@ async function usage(
         WithUsage<{
           name: string;
         }>
-      >,
-  _: unknown,
-  { injector }: GraphQLModules.ModuleContext
+      >
 ) {
-  const result = await injector.get(OperationsManager).countCoordinatePerTarget({
-    coordinate: 'parent' in source ? `${source.parent.coordinate}.${source.name}` : source.type.name,
-    period: source.usage.period,
-    organization: source.usage.organization,
-    project: source.usage.project,
-    target: source.usage.target,
-  });
+  const coordinate = 'parent' in source ? `${source.parent.coordinate}.${source.name}` : source.type.name;
+  const usage = source.usage[coordinate];
 
-  return result
+  return usage
     ? {
-        total: result.total,
-        isUsed: result.total > 0,
+        total: usage.total,
+        isUsed: usage.total > 0,
       }
     : {
         total: 0,
@@ -553,67 +546,109 @@ export const resolvers: SchemaModule.Resolvers = {
     },
   },
   SchemaExplorer: {
-    type({ schema, usage }, { name }) {
+    async type({ schema, usage }, { name }, { injector }) {
       const namedType = schema.getType(name);
 
-      return namedType
-        ? {
-            // TODO: fix any
-            type: namedType as any,
-            usage,
-          }
-        : null;
+      if (!namedType) {
+        return null;
+      }
+
+      const stats = await injector.get(OperationsManager).countCoordinatesForType({
+        typename: namedType.name,
+        organization: usage.organization,
+        project: usage.project,
+        target: usage.target,
+        period: usage.period,
+      });
+
+      return {
+        // TODO: fix any
+        type: namedType as any,
+        usage: stats,
+      };
     },
-    types({ schema, usage }) {
+    async types({ schema, usage }, _, { injector }) {
       // TODO: fix any
       const types: Array<{
         type: any;
-        usage: typeof usage;
+        usage: {
+          [coordinate: string]: {
+            total: number;
+          };
+        };
       }> = [];
       const typeMap = schema.getTypeMap();
+
+      const stats = await injector.get(OperationsManager).countCoordinatesForTarget({
+        target: usage.target,
+        organization: usage.organization,
+        project: usage.project,
+        period: usage.period,
+      });
 
       for (const typename in typeMap) {
         if (typename.startsWith('__')) {
           continue;
         }
 
-        types.push({
-          type: typeMap[typename],
-          usage,
-        });
+        types.push({ type: typeMap[typename], usage: stats });
       }
 
       return types;
     },
-    query({ schema, usage }) {
+    async query({ schema, usage }, _, { injector }) {
       const queryType = schema.getQueryType();
 
-      return queryType
-        ? {
-            type: queryType,
-            usage,
-          }
-        : null;
+      if (!queryType) {
+        return null;
+      }
+
+      return {
+        type: queryType,
+        usage: await injector.get(OperationsManager).countCoordinatesForType({
+          typename: queryType.name,
+          organization: usage.organization,
+          project: usage.project,
+          target: usage.target,
+          period: usage.period,
+        }),
+      };
     },
-    mutation({ schema, usage }) {
+    async mutation({ schema, usage }, _, { injector }) {
       const mutationType = schema.getMutationType();
 
-      return mutationType
-        ? {
-            type: mutationType,
-            usage,
-          }
-        : null;
+      if (!mutationType) {
+        return null;
+      }
+
+      return {
+        type: mutationType,
+        usage: await injector.get(OperationsManager).countCoordinatesForType({
+          typename: mutationType.name,
+          organization: usage.organization,
+          project: usage.project,
+          target: usage.target,
+          period: usage.period,
+        }),
+      };
     },
-    subscription({ schema, usage }) {
+    async subscription({ schema, usage }, _, { injector }) {
       const subscriptionType = schema.getSubscriptionType();
 
-      return subscriptionType
-        ? {
-            type: subscriptionType,
-            usage,
-          }
-        : null;
+      if (!subscriptionType) {
+        return null;
+      }
+
+      return {
+        type: subscriptionType,
+        usage: await injector.get(OperationsManager).countCoordinatesForType({
+          typename: subscriptionType.name,
+          organization: usage.organization,
+          project: usage.project,
+          target: usage.target,
+          period: usage.period,
+        }),
+      };
     },
   },
   GraphQLObjectType: {
