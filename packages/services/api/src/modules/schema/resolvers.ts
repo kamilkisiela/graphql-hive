@@ -24,7 +24,7 @@ import { AuthManager } from '../auth/providers/auth-manager';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import { z } from 'zod';
 import { SchemaHelper } from './providers/schema-helper';
-import type { WithUsage, WithParent } from '../../shared/mappers';
+import type { WithSchemaCoordinatesUsage, WithGraphQLParentInfo } from '../../shared/mappers';
 import { createPeriod, parseDateRangeInput } from '../../shared/helpers';
 import { OperationsManager } from '../operations/providers/operations-manager';
 
@@ -34,18 +34,20 @@ const ServiceNameModel = z.string().min(1).max(100);
 
 async function usage(
   source:
-    | WithUsage<{
-        type: {
+    | WithSchemaCoordinatesUsage<{
+        entity: {
           name: string;
         };
       }>
-    | WithParent<
-        WithUsage<{
-          name: string;
+    | WithGraphQLParentInfo<
+        WithSchemaCoordinatesUsage<{
+          entity: {
+            name: string;
+          };
         }>
       >
 ) {
-  const coordinate = 'parent' in source ? `${source.parent.coordinate}.${source.name}` : source.type.name;
+  const coordinate = 'parent' in source ? `${source.parent.coordinate}.${source.entity.name}` : source.entity.name;
   const usage = source.usage[coordinate];
 
   return usage
@@ -59,8 +61,8 @@ async function usage(
       };
 }
 
-function __isTypeOf<T extends GraphQLNamedType>(isFn: (type: GraphQLNamedType) => type is T) {
-  return ({ type }: { type: GraphQLNamedType }) => isFn(type);
+function __isTypeOf<T extends GraphQLNamedType>(isFn: (entity: GraphQLNamedType) => entity is T) {
+  return ({ entity }: { entity: GraphQLNamedType }) => isFn(entity);
 }
 
 export const resolvers: SchemaModule.Resolvers = {
@@ -553,7 +555,7 @@ export const resolvers: SchemaModule.Resolvers = {
         return null;
       }
 
-      const stats = await injector.get(OperationsManager).countCoordinatesForType({
+      const stats = await injector.get(OperationsManager).countCoordinatesOfType({
         typename: namedType.name,
         organization: usage.organization,
         project: usage.project,
@@ -563,23 +565,20 @@ export const resolvers: SchemaModule.Resolvers = {
 
       return {
         // TODO: fix any
-        type: namedType as any,
+        entity: namedType as any,
         usage: stats,
       };
     },
     async types({ schema, usage }, _, { injector }) {
       // TODO: fix any
-      const types: Array<{
-        type: any;
-        usage: {
-          [coordinate: string]: {
-            total: number;
-          };
-        };
-      }> = [];
+      const types: Array<
+        WithSchemaCoordinatesUsage<{
+          entity: any;
+        }>
+      > = [];
       const typeMap = schema.getTypeMap();
 
-      const stats = await injector.get(OperationsManager).countCoordinatesForTarget({
+      const stats = await injector.get(OperationsManager).countCoordinatesOfTarget({
         target: usage.target,
         organization: usage.organization,
         project: usage.project,
@@ -591,7 +590,7 @@ export const resolvers: SchemaModule.Resolvers = {
           continue;
         }
 
-        types.push({ type: typeMap[typename], usage: stats });
+        types.push({ entity: typeMap[typename], usage: stats });
       }
 
       return types;
@@ -604,8 +603,8 @@ export const resolvers: SchemaModule.Resolvers = {
       }
 
       return {
-        type: queryType,
-        usage: await injector.get(OperationsManager).countCoordinatesForType({
+        entity: queryType,
+        usage: await injector.get(OperationsManager).countCoordinatesOfType({
           typename: queryType.name,
           organization: usage.organization,
           project: usage.project,
@@ -622,8 +621,8 @@ export const resolvers: SchemaModule.Resolvers = {
       }
 
       return {
-        type: mutationType,
-        usage: await injector.get(OperationsManager).countCoordinatesForType({
+        entity: mutationType,
+        usage: await injector.get(OperationsManager).countCoordinatesOfType({
           typename: mutationType.name,
           organization: usage.organization,
           project: usage.project,
@@ -640,8 +639,8 @@ export const resolvers: SchemaModule.Resolvers = {
       }
 
       return {
-        type: subscriptionType,
-        usage: await injector.get(OperationsManager).countCoordinatesForType({
+        entity: subscriptionType,
+        usage: await injector.get(OperationsManager).countCoordinatesOfType({
           typename: subscriptionType.name,
           organization: usage.organization,
           project: usage.project,
@@ -653,45 +652,45 @@ export const resolvers: SchemaModule.Resolvers = {
   },
   GraphQLObjectType: {
     __isTypeOf: __isTypeOf(isObjectType),
-    name: t => t.type.name,
-    description: t => t.type.description ?? null,
+    name: t => t.entity.name,
+    description: t => t.entity.description ?? null,
     fields: t =>
-      Object.values(t.type.getFields()).map(f => ({
-        ...f,
+      Object.values(t.entity.getFields()).map(f => ({
+        entity: f,
         parent: {
-          coordinate: t.type.name,
+          coordinate: t.entity.name,
         },
         usage: t.usage,
       })),
-    interfaces: t => t.type.getInterfaces().map(i => i.name),
+    interfaces: t => t.entity.getInterfaces().map(i => i.name),
     usage,
   },
   GraphQLInterfaceType: {
     __isTypeOf: __isTypeOf(isInterfaceType),
-    name: t => t.type.name,
-    description: t => t.type.description ?? null,
+    name: t => t.entity.name,
+    description: t => t.entity.description ?? null,
     fields: t =>
-      Object.values(t.type.getFields()).map(f => ({
-        ...f,
+      Object.values(t.entity.getFields()).map(f => ({
+        entity: f,
         parent: {
-          coordinate: t.type.name,
+          coordinate: t.entity.name,
         },
         usage: t.usage,
       })),
-    interfaces: t => t.type.getInterfaces().map(i => i.name),
+    interfaces: t => t.entity.getInterfaces().map(i => i.name),
     usage,
   },
   GraphQLUnionType: {
     __isTypeOf: __isTypeOf(isUnionType),
-    name: t => t.type.name,
-    description: t => t.type.description ?? null,
+    name: t => t.entity.name,
+    description: t => t.entity.description ?? null,
     members: t =>
-      t.type.getTypes().map(i => {
+      t.entity.getTypes().map(i => {
         return {
-          name: i.name,
+          entity: i,
           usage: t.usage,
           parent: {
-            coordinate: t.type.name,
+            coordinate: t.entity.name,
           },
         };
       }),
@@ -699,13 +698,13 @@ export const resolvers: SchemaModule.Resolvers = {
   },
   GraphQLEnumType: {
     __isTypeOf: __isTypeOf(isEnumType),
-    name: t => t.type.name,
-    description: t => t.type.description ?? null,
+    name: t => t.entity.name,
+    description: t => t.entity.description ?? null,
     values: t =>
-      t.type.getValues().map(v => ({
-        ...v,
+      t.entity.getValues().map(v => ({
+        entity: v,
         parent: {
-          coordinate: t.type.name,
+          coordinate: t.entity.name,
         },
         usage: t.usage,
       })),
@@ -713,13 +712,13 @@ export const resolvers: SchemaModule.Resolvers = {
   },
   GraphQLInputObjectType: {
     __isTypeOf: __isTypeOf(isInputObjectType),
-    name: t => t.type.name,
-    description: t => t.type.description ?? null,
+    name: t => t.entity.name,
+    description: t => t.entity.description ?? null,
     fields: t =>
-      Object.values(t.type.getFields()).map(f => ({
-        ...f,
+      Object.values(t.entity.getFields()).map(f => ({
+        entity: f,
         parent: {
-          coordinate: t.type.name,
+          coordinate: t.entity.name,
         },
         usage: t.usage,
       })),
@@ -727,53 +726,53 @@ export const resolvers: SchemaModule.Resolvers = {
   },
   GraphQLScalarType: {
     __isTypeOf: __isTypeOf(isScalarType),
-    name: t => t.type.name,
-    description: t => t.type.description ?? null,
+    name: t => t.entity.name,
+    description: t => t.entity.description ?? null,
     usage,
   },
   GraphQLEnumValue: {
-    name: v => v.name,
-    description: v => v.description ?? null,
-    isDeprecated: v => typeof v.deprecationReason === 'string',
-    deprecationReason: v => v.deprecationReason ?? null,
+    name: v => v.entity.name,
+    description: v => v.entity.description ?? null,
+    isDeprecated: v => typeof v.entity.deprecationReason === 'string',
+    deprecationReason: v => v.entity.deprecationReason ?? null,
     usage,
   },
   GraphQLUnionTypeMember: {
-    name: m => m.name,
+    name: m => m.entity.name,
     usage,
   },
   GraphQLField: {
-    name: f => f.name,
-    description: f => f.description ?? null,
-    isDeprecated: f => typeof f.deprecationReason === 'string',
-    deprecationReason: f => f.deprecationReason ?? null,
-    type: f => f.type.toString(),
+    name: f => f.entity.name,
+    description: f => f.entity.description ?? null,
+    isDeprecated: f => typeof f.entity.deprecationReason === 'string',
+    deprecationReason: f => f.entity.deprecationReason ?? null,
+    type: f => f.entity.toString(),
     args: f =>
-      f.args.map(a => ({
-        ...a,
+      f.entity.args.map(a => ({
+        entity: a,
         parent: {
-          coordinate: `${f.parent.coordinate}.${f.name}`,
+          coordinate: `${f.parent.coordinate}.${f.entity.name}`,
         },
         usage: f.usage,
       })),
     usage,
   },
   GraphQLInputField: {
-    name: f => f.name,
-    description: f => f.description ?? null,
-    type: f => f.type.toString(),
-    defaultValue: f => stringifyDefaultValue(f.defaultValue),
-    isDeprecated: f => typeof f.deprecationReason === 'string',
-    deprecationReason: f => f.deprecationReason ?? null,
+    name: f => f.entity.name,
+    description: f => f.entity.description ?? null,
+    type: f => f.entity.type.toString(),
+    defaultValue: f => stringifyDefaultValue(f.entity.defaultValue),
+    isDeprecated: f => typeof f.entity.deprecationReason === 'string',
+    deprecationReason: f => f.entity.deprecationReason ?? null,
     usage,
   },
   GraphQLArgument: {
-    name: a => a.name,
-    description: a => a.description ?? null,
-    type: a => a.type.toString(),
-    defaultValue: a => stringifyDefaultValue(a.defaultValue),
-    deprecationReason: a => a.deprecationReason ?? null,
-    isDeprecated: a => typeof a.deprecationReason === 'string',
+    name: a => a.entity.name,
+    description: a => a.entity.description ?? null,
+    type: a => a.entity.type.toString(),
+    defaultValue: a => stringifyDefaultValue(a.entity.defaultValue),
+    deprecationReason: a => a.entity.deprecationReason ?? null,
+    isDeprecated: a => typeof a.entity.deprecationReason === 'string',
     usage,
   },
 };

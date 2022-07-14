@@ -849,7 +849,11 @@ export class OperationsReader {
     return ensureNumber(result.data[0].total);
   }
 
-  countCoordinatesForType = batch(
+  // Every call to this method is part of the batching logic.
+  // The `batch` function works similar to the DataLoader concept.
+  // It gathers all function calls within the same event loop,
+  // and calls the inner function in the next cycle.
+  countCoordinatesOfType = batch(
     async (
       selectors: Array<{
         target: string;
@@ -857,7 +861,7 @@ export class OperationsReader {
         typename: string;
       }>
     ) => {
-      const groupedByTargetAndPeriod = new Map<
+      const aggregationMap = new Map<
         string,
         {
           target: string;
@@ -866,14 +870,18 @@ export class OperationsReader {
         }
       >();
 
-      console.log('batched call for', selectors.length, 'selectors');
+      const makeKey = (selector: { target: string; period: DateRange }) =>
+        `${selector.target}-${selector.period.from}-${selector.period.to}`;
 
+      // Groups the type names by their target and period
+      // The idea here is to make the least possible number of queries to ClickHouse
+      // by fetching all selected type names of the same target and period.
       for (const selector of selectors) {
-        const key = `${selector.target}-${selector.period.from}-${selector.period.to}`;
-        const value = groupedByTargetAndPeriod.get(key);
+        const key = makeKey(selector);
+        const value = aggregationMap.get(key);
 
         if (!value) {
-          groupedByTargetAndPeriod.set(key, {
+          aggregationMap.set(key, {
             target: selector.target,
             period: selector.period,
             typenames: [selector.typename],
@@ -883,7 +891,7 @@ export class OperationsReader {
         }
       }
 
-      const grouped = new Map<
+      const resultMap = new Map<
         string,
         Promise<
           {
@@ -893,13 +901,13 @@ export class OperationsReader {
         >
       >();
 
-      for (const selector of groupedByTargetAndPeriod.values()) {
-        const key = `${selector.target}-${selector.period.from}-${selector.period.to}`;
-        console.log('grouped call for', selector.typenames);
+      // Do the actual call to ClickHouse to get the coordinates and counts of selected type names.
+      for (const selector of aggregationMap.values()) {
+        const key = makeKey(selector);
 
-        grouped.set(
+        resultMap.set(
           key,
-          this.countCoordinates({
+          this.countCoordinatesOfTypes({
             target: selector.target,
             period: selector.period,
             typenames: selector.typenames,
@@ -907,12 +915,14 @@ export class OperationsReader {
         );
       }
 
+      // Because the `batch` function is used (it's a similar concept to DataLoader),
+      // it has tu return a map of promises matching provided selectors in exact same order.
       return selectors.map(selector => {
-        const key = `${selector.target}-${selector.period.from}-${selector.period.to}`;
-        const value = grouped.get(key);
+        const key = makeKey(selector);
+        const value = resultMap.get(key);
 
         if (!value) {
-          throw new Error('OMG');
+          throw new Error(`Could not find data for ${key} selector`);
         }
 
         return value;
@@ -920,7 +930,7 @@ export class OperationsReader {
     }
   );
 
-  private async countCoordinates({
+  private async countCoordinatesOfTypes({
     target,
     period,
     typenames,
@@ -942,7 +952,7 @@ export class OperationsReader {
           extra: [`(${typesFilter})`],
         })}
         GROUP BY coordinate`,
-      queryId: 'coordinates_per_target',
+      queryId: 'coordinates_per_types',
       timeout: 15_000,
     });
 
@@ -952,7 +962,7 @@ export class OperationsReader {
     }));
   }
 
-  async countCoordinatesForTarget({ target, period }: { target: string; period: DateRange }) {
+  async countCoordinatesOfTarget({ target, period }: { target: string; period: DateRange }) {
     const result = await this.clickHouse.query<{
       coordinate: string;
       total: number;

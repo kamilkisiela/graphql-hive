@@ -494,7 +494,10 @@ export class OperationsManager {
     return false;
   }
 
-  async countCoordinatesForType({
+  /**
+   * Returns a collection of all schema coordinates for a given target AND type, with the number of calls to each coordinate.
+   */
+  async countCoordinatesOfType({
     period,
     target,
     project,
@@ -511,7 +514,7 @@ export class OperationsManager {
       scope: TargetAccessScope.REGISTRY_READ,
     });
 
-    const rows = await this.reader.countCoordinatesForType({
+    const rows = await this.reader.countCoordinatesOfType({
       target,
       period,
       typename,
@@ -534,7 +537,10 @@ export class OperationsManager {
     return records;
   }
 
-  async countCoordinatesForTarget({
+  /**
+   * Returns a collection of all schema coordinates for a given target, with the number of calls to each coordinate.
+   */
+  async countCoordinatesOfTarget({
     period,
     target,
     project,
@@ -549,7 +555,7 @@ export class OperationsManager {
       scope: TargetAccessScope.REGISTRY_READ,
     });
 
-    const rows = await this.reader.countCoordinatesForTarget({
+    const rows = await this.reader.countCoordinatesOfTarget({
       target,
       period,
     });
