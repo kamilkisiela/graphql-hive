@@ -2,6 +2,7 @@ import { ReactElement, useCallback, useEffect, useState } from 'react';
 import { Spinner } from '@chakra-ui/react';
 import { SchemaEditor } from '@theguild/editor';
 import clsx from 'clsx';
+import { formatISO, subDays } from 'date-fns';
 import { useFormik } from 'formik';
 import { gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
@@ -201,6 +202,7 @@ const Settings_TargetSettingsQuery = gql(/* GraphQL */ `
     $selector: TargetSelectorInput!
     $targetsSelector: ProjectSelectorInput!
     $organizationSelector: OrganizationSelectorInput!
+    $operationsStatsSelector: OperationsStatsSelectorInput!
   ) {
     targetSettings(selector: $selector) {
       ...TargetSettingsFields
@@ -216,6 +218,12 @@ const Settings_TargetSettingsQuery = gql(/* GraphQL */ `
         rateLimit {
           retentionInDays
         }
+      }
+    }
+    operationsStats(selector: $operationsStatsSelector) {
+      clientNames {
+        name
+        count
       }
     }
   }
@@ -240,7 +248,13 @@ const Settings_UpdateTargetValidationSettingsMutation = gql(/* GraphQL */ `
   }
 `);
 
+function floorDate(date: Date): Date {
+  const time = 1000 * 60;
+  return new Date(Math.floor(date.getTime() / time) * time);
+}
+
 const ConditionalBreakingChanges = (): ReactElement => {
+  const now = floorDate(new Date());
   const router = useRouteSelector();
   const [targetValidation, setValidation] = useMutation(SetTargetValidationDocument);
   const [mutation, updateValidation] = useMutation(Settings_UpdateTargetValidationSettingsMutation);
@@ -258,6 +272,15 @@ const ConditionalBreakingChanges = (): ReactElement => {
       },
       organizationSelector: {
         organization: router.organizationId,
+      },
+      operationsStatsSelector: {
+        organization: router.organizationId,
+        project: router.projectId,
+        target: router.targetId,
+        period: {
+          from: formatISO(subDays(now, 90)),
+          to: formatISO(now),
+        },
       },
     },
   });
@@ -282,6 +305,7 @@ const ConditionalBreakingChanges = (): ReactElement => {
       percentage: settings?.percentage || 0,
       period: settings?.period || 0,
       targets: settings?.targets.map(t => t.id) || [],
+      excludedClients: settings?.excludedClients || [],
     },
     validationSchema: Yup.object().shape({
       percentage: Yup.number().min(0).max(100).required(),
@@ -290,6 +314,7 @@ const ConditionalBreakingChanges = (): ReactElement => {
         .max(targetSettings.data?.organization?.organization?.rateLimit.retentionInDays ?? 30)
         .required(),
       targets: Yup.array().of(Yup.string()).min(1),
+      excludedClients: Yup.array().of(Yup.string()),
     }),
     onSubmit: values =>
       updateValidation({

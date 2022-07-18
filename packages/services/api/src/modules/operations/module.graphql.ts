@@ -71,6 +71,7 @@ export default gql`
     duration: DurationStats!
     operations: OperationStatsConnection!
     clients: ClientStatsConnection!
+    clientNames: [ClientNameStats!]
   }
 
   type OperationStatsConnection {
@@ -119,6 +120,11 @@ export default gql`
     version: String!
     count: Int!
     percentage: Float!
+  }
+
+  type ClientNameStats {
+    name: String!
+    count: Int!
   }
 
   type RequestsOverTime {

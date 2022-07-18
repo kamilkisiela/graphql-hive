@@ -187,6 +187,15 @@ export const resolvers: OperationsModule.Resolvers = {
         operations: operationsFilter,
       });
     },
+    clientNames({ organization, project, target, period, operations: operationsFilter }, _, { injector }) {
+      return injector.get(OperationsManager).readUniqueClientNames({
+        target,
+        project,
+        organization,
+        period,
+        operations: operationsFilter,
+      });
+    },
     duration({ organization, project, target, period, operations: operationsFilter }, _, { injector }) {
       return injector.get(OperationsManager).readGeneralDurationPercentiles({
         organization,

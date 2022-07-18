@@ -66,6 +66,7 @@ export default gql`
     period: Int!
     percentage: Float!
     targets: [ID!]!
+    excludedClients: [String!]
   }
 
   type UpdateTargetValidationSettingsResult {
@@ -126,6 +127,7 @@ export default gql`
     period: Int!
     percentage: Float!
     targets: [Target!]!
+    excludedClients: [String!]!
   }
 
   input CreateTargetInput {

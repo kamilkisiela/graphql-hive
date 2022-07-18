@@ -442,6 +442,28 @@ export class OperationsManager {
     });
   }
 
+  async readUniqueClientNames({
+    period,
+    organization,
+    project,
+    target,
+    operations,
+  }: { period: DateRange; operations?: readonly string[] } & TargetSelector) {
+    this.logger.info('Read unique client names (period=%o, target=%s)', period, target);
+    await this.authManager.ensureTargetAccess({
+      organization,
+      project,
+      target,
+      scope: TargetAccessScope.REGISTRY_READ,
+    });
+
+    return this.reader.readUniqueClientNames({
+      target,
+      period,
+      operations,
+    });
+  }
+
   async hasOperationsForOrganization(selector: OrganizationSelector): Promise<boolean> {
     const targets = await this.storage.getTargetIdsOfOrganization(selector);
 

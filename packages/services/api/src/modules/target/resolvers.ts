@@ -264,6 +264,7 @@ export const resolvers: TargetModule.Resolvers = {
         project,
         organization,
         targets: input.targets,
+        excludedClients: [], // TODO
       });
 
       return {

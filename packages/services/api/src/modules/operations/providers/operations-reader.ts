@@ -467,6 +467,54 @@ export class OperationsReader {
     });
   }
 
+  @sentry('OperationsReader.readUniqueClientNames')
+  async readUniqueClientNames(
+    {
+      target,
+      period,
+      operations,
+    }: {
+      target: string;
+      period: DateRange;
+      operations?: readonly string[];
+    },
+    span?: Span
+  ): Promise<
+    Array<{
+      name: string;
+      count: number;
+    }>
+  > {
+    const result = await this.clickHouse.query<{
+      count: string;
+      client_name: string;
+    }>({
+      query: `
+      SELECT 
+        sum(total) as count,
+        client_name
+      FROM client_names_daily
+      ${this.createFilter({
+        target,
+        period,
+        operations,
+        extra: ['notEmpty(client_name)'],
+      })}
+      GROUP BY client_name
+    `,
+      queryId: 'count_unique_client_names',
+      timeout: 15_000,
+      span,
+    });
+
+    return result.data.map(row => {
+      return {
+        name: row.client_name,
+        count: ensureNumber(row.count),
+      };
+    });
+  }
+
   @sentry('OperationsReader.requestsOverTime')
   async requestsOverTime({
     target,
