@@ -156,7 +156,6 @@ export function createUsage(config: {
       return Object.keys(report.map).length;
     },
     split(report, numOfChunks) {
-      logger.info('Split report (chunks=%s)', numOfChunks);
       return splitReport(report, numOfChunks);
     },
     onRetry(reports) {
@@ -282,13 +281,18 @@ export function createUsage(config: {
             },
           });
         } else {
-          logger.warn(`Detected invalid operation: %o`, validationResult.errors);
+          logger.warn(`Detected invalid operation (target=%s): %o`, token.target, validationResult.errors);
           invalidOperationSize += 1;
         }
       }
 
       invalidRawOperations.inc(invalidOperationSize);
+
       buffer.add(outgoing);
+      return {
+        size: outgoing.size,
+        id: outgoing.id,
+      };
     },
     readiness() {
       return status === Status.Ready;
