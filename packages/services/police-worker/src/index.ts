@@ -34,11 +34,18 @@ async function handleSchedule() {
         const path = rest[2];
         let rule: string | null = null;
 
-        if (headerValue === 'empty' || headerValue === 'undefined') {
-          rule = `not any(lower(http.request.headers.names[*])[*] contains "${value}")`;
-        } else {
-          rule = `any(http.request.headers["${value}"][*] contains "${headerValue}")`;
+        const headerNames = value.includes('|') ? value.split('|') : [value];
+
+        const headerRules: string[] = [];
+        for (const headerName of headerNames) {
+          if (headerValue === 'empty' || headerValue === 'undefined') {
+            headerRules.push(`not any(lower(http.request.headers.names[*])[*] contains "${headerName}")`);
+          } else {
+            headerRules.push(`any(http.request.headers["${headerName}"][*] contains "${headerValue}")`);
+          }
         }
+
+        rule = `(${headerRules.join(' or ')})`;
 
         if (method) {
           rule = `${rule} and http.request.method == "${method}"`;
