@@ -45,7 +45,7 @@ async function handleSchedule() {
           }
         }
 
-        rule = `(${headerRules.join(' or ')})`;
+        rule = `(${headerRules.join(' and ')})`;
 
         if (method) {
           rule = `${rule} and http.request.method == "${method}"`;
