@@ -13,6 +13,7 @@ import {
 } from './metrics';
 import type { IncomingLegacyReport, IncomingReport } from './types';
 import { createUsageRateLimit } from './rate-limit';
+import { maskToken } from './helpers';
 
 async function main() {
   Sentry.init({
@@ -103,8 +104,11 @@ async function main() {
 
         const tokenInfo = await tokens.fetch(token);
 
+        const maskedToken = maskToken(token);
+
         if (tokens.isNotFound(tokenInfo)) {
           httpRequestsWithNonExistingToken.inc();
+          req.log.info('Token not found (token=%s)', maskedToken);
           res.status(400).send('Missing token'); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
           return;
         }
@@ -112,7 +116,7 @@ async function main() {
         // We treat collected operations as part of registry
         if (tokens.isNoAccess(tokenInfo)) {
           httpRequestsWithNoAccess.inc();
-          server.log.info('No access');
+          req.log.info('No access (token=%s)', maskedToken);
           res.status(403).send('No access'); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
           return;
         }
@@ -126,6 +130,7 @@ async function main() {
           })
         ) {
           droppedReports.labels({ targetId: tokenInfo.target }).inc();
+          req.log.info('Rate limited (token=%s)', maskedToken);
           res.status(429).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
 
           return;
@@ -135,11 +140,21 @@ async function main() {
 
         const stopTimer = collectLatency.startTimer();
         try {
-          await collect(req.body, tokenInfo, retentionInfo);
+          const reportDetails = await collect(req.body, tokenInfo, retentionInfo);
+          req.log.info(
+            'Collected report (token=%s, operations=%s, id=%s, target=%s, org=%s, retention=%s)',
+            maskedToken,
+            reportDetails.size,
+            reportDetails.id,
+            tokenInfo.target,
+            tokenInfo.organization,
+            retentionInfo
+          );
           stopTimer();
           res.status(200).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
         } catch (error) {
           stopTimer();
+          req.log.error('Failed to collect report (token=%s)', maskedToken);
           req.log.error(error, 'Failed to collect');
           Sentry.captureException(error, {
             level: 'error',
