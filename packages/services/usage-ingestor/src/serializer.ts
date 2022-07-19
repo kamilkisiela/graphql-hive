@@ -1,13 +1,24 @@
-import * as dateFnsTz from 'date-fns-tz';
 import LRU from 'tiny-lru';
 import { cache } from './helpers';
 import type { ProcessedRegistryRecord, ProcessedOperation } from '@hive/usage-common';
 
 const delimiter = '\n';
-const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+const formatter = Intl.DateTimeFormat('en-GB', {
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+  hour12: false,
+  timeZone: 'UTC',
+});
 
-function formatDate(date: number): string {
-  return dateFnsTz.formatInTimeZone(dateFnsTz.zonedTimeToUtc(date, timezone), 'UTC', 'yyyy-MM-dd HH:mm:ss');
+export function formatDate(date: number): string {
+  return formatter
+    .format(date)
+    .replace(',', '')
+    .replace(/(\d+)\/(\d+)\/(\d+)/, (_, d, m, y) => `${y}-${m}-${d}`);
 }
 
 function dateCacheKey(date: number): string {

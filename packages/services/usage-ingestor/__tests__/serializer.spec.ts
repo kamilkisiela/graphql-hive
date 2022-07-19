@@ -1,8 +1,8 @@
-import { stringifyOperation, stringifyRegistryRecord, joinIntoSingleMessage } from '../src/serializer';
+import { stringifyOperation, stringifyRegistryRecord, joinIntoSingleMessage, formatDate } from '../src/serializer';
 
 const timestamp = {
   asNumber: 1643892203027,
-  asString: '2022-02-03 12:43:23',
+  asString: '2022-02-03 12:43:23', // date as string in UTC timezone
 };
 
 test('stringify operation in correct format and order', () => {
@@ -116,4 +116,8 @@ test('stringify registry records in correct format and order', () => {
       ].join(','),
     ].join('\n')
   );
+});
+
+test('formatDate should return formatted date in UTC timezone', () => {
+  expect(formatDate(timestamp.asNumber)).toEqual(timestamp.asString);
 });
