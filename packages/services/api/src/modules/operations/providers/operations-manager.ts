@@ -211,7 +211,12 @@ export class OperationsManager {
     unsafe__itIsMeInspector?: boolean;
     excludedClients?: readonly string[];
   } & Listify<TargetSelector, 'target'>) {
-    this.logger.info('Counting fields (period=%o, target=%s)', period, target);
+    this.logger.info(
+      'Counting fields (period=%o, target=%s, excludedClients=%s)',
+      period,
+      target,
+      excludedClients?.join(', ') ?? 'none'
+    );
 
     if (!unsafe__itIsMeInspector) {
       await this.authManager.ensureTargetAccess({

@@ -926,7 +926,7 @@ export async function createStorage(connection: string): Promise<Storage> {
               LIMIT 1
             ) ret
             WHERE t.id = ret.id
-            RETURNING t.id, t.validation_enabled, t.validation_percentage, t.validation_period, ret.targets;
+            RETURNING t.id, t.validation_enabled, t.validation_percentage, t.validation_period, t.validation_excluded_clients, ret.targets;
           `);
         })
       ).validation;

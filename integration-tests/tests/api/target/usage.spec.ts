@@ -685,18 +685,11 @@ test('check usage not from excluded client names', async () => {
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const staging = projectResult.body.data!.createProject.ok!.createdTargets[0];
+  const production = projectResult.body.data!.createProject.ok!.createdTargets.find(t => t.name === 'production');
 
-  const productionTargetResult = await createTarget(
-    {
-      name: 'production',
-      organization: org.cleanId,
-      project: project.cleanId,
-    },
-    owner_access_token
-  );
-
-  const production = productionTargetResult.body.data!.createTarget.ok!.createdTarget;
+  if (!production) {
+    throw new Error('No production target');
+  }
 
   const productionTokenResult = await createToken(
     {
@@ -732,7 +725,7 @@ test('check usage not from excluded client names', async () => {
       enabled: true,
       organization: org.cleanId,
       project: project.cleanId,
-      target: staging.cleanId,
+      target: production.cleanId,
     },
     {
       authToken: owner_access_token,
@@ -803,25 +796,24 @@ test('check usage not from excluded client names', async () => {
 
   expect(collectResult.status).toEqual(200);
 
-  await waitFor(22_000);
+  await waitFor(5_000);
 
   // should be breaking because the field is used
   const unusedCheckResult = await checkSchema(
     {
-      sdl: `type Query { me: String }`, // ping is used
+      sdl: `type Query { ping: String }`, // Query.me is used
     },
     tokenForProduction
   );
   expect(unusedCheckResult.body.errors).not.toBeDefined();
-  expect(unusedCheckResult.body.data!.schemaCheck.__typename).toEqual('SchemaCheckSuccess');
+  expect(unusedCheckResult.body.data!.schemaCheck.__typename).toEqual('SchemaCheckError');
 
   // Exclude app from the check
-
   const updateValidationResult = await updateTargetValidationSettings(
     {
       organization: org.cleanId,
       project: project.cleanId,
-      target: staging.cleanId,
+      target: production.cleanId,
       percentage: 0,
       period: 2,
       targets: [production.id],
@@ -835,6 +827,9 @@ test('check usage not from excluded client names', async () => {
   expect(updateValidationResult.body.errors).not.toBeDefined();
   expect(updateValidationResult.body.data!.updateTargetValidationSettings.error).toBeNull();
   expect(
+    updateValidationResult.body.data!.updateTargetValidationSettings.ok!.updatedTargetValidationSettings.enabled
+  ).toBe(true);
+  expect(
     updateValidationResult.body.data!.updateTargetValidationSettings.ok!.updatedTargetValidationSettings.excludedClients
   ).toHaveLength(1);
   expect(
@@ -844,7 +839,7 @@ test('check usage not from excluded client names', async () => {
   // should be safe because the field was not used by the non-excluded clients (cli never requested `Query.me`, but app did)
   const usedCheckResult = await checkSchema(
     {
-      sdl: `type Query { me: String }`,
+      sdl: `type Query { ping: String }`,
     },
     tokenForProduction
   );
