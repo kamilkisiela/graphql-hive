@@ -289,7 +289,15 @@ const ConditionalBreakingChanges = (): ReactElement => {
   const settings = targetSettings.data?.targetSettings.validation;
   const isEnabled = settings?.enabled || false;
   const possibleTargets = targetSettings.data?.targets.nodes;
-  const allClientNames = targetSettings.data?.operationsStats.clientNames ?? [];
+  const clientNamesFromStats = targetSettings.data?.operationsStats.clientNames?.map(c => c.name);
+  const allClientNames =
+    clientNamesFromStats && settings
+      ? clientNamesFromStats.concat(
+          // In case of clients from validation settings being no longer available in usage stats,
+          // add them to the list of options
+          settings.excludedClients.filter(clientName => !clientNamesFromStats.includes(clientName))
+        )
+      : settings?.excludedClients ?? [];
 
   const {
     handleSubmit,
@@ -413,9 +421,9 @@ const ConditionalBreakingChanges = (): ReactElement => {
                   value,
                   label: value,
                 }))}
-                options={allClientNames.map(c => ({
-                  value: c.name,
-                  label: c.name,
+                options={allClientNames.map(name => ({
+                  value: name,
+                  label: name,
                 }))}
                 onBlur={() => setFieldTouched('excludedClients')}
                 onChange={options => {
