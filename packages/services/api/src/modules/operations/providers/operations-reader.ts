@@ -105,7 +105,7 @@ export class OperationsReader {
       target,
       period,
       operations,
-      excludeClientNames,
+      excludedClients,
     }: {
       fields: ReadonlyArray<{
         type: string;
@@ -115,14 +115,14 @@ export class OperationsReader {
       target: string | readonly string[];
       period: DateRange;
       operations?: readonly string[];
-      excludeClientNames?: readonly string[];
+      excludedClients?: readonly string[];
     },
     span?: Span
   ): Promise<Record<string, number>> {
     const coordinates = fields.map(selector => this.makeId(selector));
     const conditions = [`( coordinate IN ('${coordinates.join(`', '`)}') )`];
 
-    if (Array.isArray(excludeClientNames)) {
+    if (Array.isArray(excludedClients) && excludedClients.length > 0) {
       // Eliminate coordinates fetched by excluded clients.
       // We can connect a coordinate to a client by using the hash column.
       // The hash column is basically a unique identifier of a GraphQL operation.
@@ -131,7 +131,7 @@ export class OperationsReader {
           SELECT hash FROM client_names_daily ${this.createFilter({
             target,
             period,
-            extra: [`client_name IN ('${excludeClientNames.join(`', '`)}')`],
+            extra: [`client_name IN ('${excludedClients.join(`', '`)}')`],
           })} GROUP BY hash
         )
       `);

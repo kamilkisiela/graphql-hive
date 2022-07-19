@@ -194,6 +194,7 @@ export class OperationsManager {
     project,
     target,
     unsafe__itIsMeInspector,
+    excludedClients,
   }: {
     fields: ReadonlyArray<{
       type: string;
@@ -208,6 +209,7 @@ export class OperationsManager {
      * TODO: let's think how to solve it well, soon.
      */
     unsafe__itIsMeInspector?: boolean;
+    excludedClients?: readonly string[];
   } & Listify<TargetSelector, 'target'>) {
     this.logger.info('Counting fields (period=%o, target=%s)', period, target);
 
@@ -225,6 +227,7 @@ export class OperationsManager {
         fields,
         target,
         period,
+        excludedClients,
       }),
       this.reader.countOperations({ target, period }).then(r => r.total),
     ]);
