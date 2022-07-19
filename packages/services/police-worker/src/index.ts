@@ -18,6 +18,26 @@ async function execute(url: string, options: Request | RequestInit = {}): Promis
   return await fetch(`${CF_BASE_URL}/zones/${ZONE_IDENTIFIER}${url}`, config).then(r => r.json());
 }
 
+/**
+ * Requirements:
+ *  - HIVE_POLICE KV store has to be available.
+ *  - WAF_RULE_NAME has to be available
+ *
+ * Police Worker can block http requests based on:
+ *  - IP
+    - missing headers
+ *  - headers with specific values
+ *
+ * @example:
+ *  - header:x-api-token|authorization:empty:POST:/usage
+ *    Blocks all POST requests to /usage without x-api-token and authorization headers.
+ * 
+ *  - header:content-type:empty:POST:/usage
+ *    Block all POST requests to /usage without content-type header.
+ *
+ *  - ip:1.1.1.1
+ *    Block all requests from 1.1.1.1 IP
+ */
 async function handleSchedule() {
   const data = await HIVE_POLICE.list();
   const rulesArr = data.keys.map(key => {
@@ -34,13 +54,16 @@ async function handleSchedule() {
         const path = rest[2];
         let rule: string | null = null;
 
+        // allows for multiple headers to be specified
         const headerNames = value.includes('|') ? value.split('|') : [value];
 
         const headerRules: string[] = [];
         for (const headerName of headerNames) {
+          // if header value is 'empty', block all requests without the header
           if (headerValue === 'empty' || headerValue === 'undefined') {
             headerRules.push(`not any(lower(http.request.headers.names[*])[*] contains "${headerName}")`);
           } else {
+            // if header value not 'empty', block all requests with the header of the given value
             headerRules.push(`any(http.request.headers["${headerName}"][*] contains "${headerValue}")`);
           }
         }
@@ -48,10 +71,12 @@ async function handleSchedule() {
         rule = headerRules.join(' and ');
 
         if (method) {
+          // if method is specified, block all requests with the given method
           rule = `${rule} and http.request.method == "${method}"`;
         }
 
         if (path) {
+          // if path is specified, block all requests with the given path
           rule = `${rule} and http.request.uri.path == "${path}"`;
         }
 
