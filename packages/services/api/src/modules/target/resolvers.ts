@@ -240,6 +240,8 @@ export const resolvers: TargetModule.Resolvers = {
       const UpdateTargetValidationSettingsModel = z.object({
         percentage: PercentageModel,
         period: z.number().min(1).max(org.monthlyRateLimit.retentionInDays).int(),
+        targets: z.array(z.string()).min(1),
+        excludedClients: z.optional(z.array(z.string())),
       });
 
       const result = UpdateTargetValidationSettingsModel.safeParse(input);
@@ -264,7 +266,7 @@ export const resolvers: TargetModule.Resolvers = {
         project,
         organization,
         targets: input.targets,
-        excludedClients: [], // TODO
+        excludedClients: input.excludedClients ?? [],
       });
 
       return {

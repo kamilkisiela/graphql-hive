@@ -886,7 +886,7 @@ export async function createStorage(connection: string): Promise<Storage> {
         })
       ).validation;
     },
-    async updateTargetValidationSettings({ target, project, percentage, period, targets }) {
+    async updateTargetValidationSettings({ target, project, percentage, period, targets, excludedClients }) {
       return transformTargetSettings(
         await pool.transaction(async trx => {
           await trx.query(sql`
@@ -911,7 +911,10 @@ export async function createStorage(connection: string): Promise<Storage> {
 
           return trx.one(sql`
             UPDATE public.targets as t
-            SET validation_percentage = ${percentage}, validation_period = ${period}
+            SET validation_percentage = ${percentage}, validation_period = ${period}, validation_excluded_clients = ${sql.array(
+            excludedClients,
+            'text'
+          )}
             FROM (
               SELECT
                 it.id,

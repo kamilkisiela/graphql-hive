@@ -9,6 +9,7 @@ import * as Yup from 'yup';
 
 import { TargetLayout } from '@/components/layouts';
 import { Button, Card, Checkbox, Heading, Input, Switch, Table, Tag, TimeAgo, Title } from '@/components/v2';
+import { Combobox } from '@/components/v2/combobox';
 import { AlertTriangleIcon } from '@/components/v2/icon';
 import { CreateAccessTokenModal, DeleteTargetModal } from '@/components/v2/modals';
 import {
@@ -288,6 +289,7 @@ const ConditionalBreakingChanges = (): ReactElement => {
   const settings = targetSettings.data?.targetSettings.validation;
   const isEnabled = settings?.enabled || false;
   const possibleTargets = targetSettings.data?.targets.nodes;
+  const allClientNames = targetSettings.data?.operationsStats.clientNames ?? [];
 
   const {
     handleSubmit,
@@ -354,7 +356,7 @@ const ConditionalBreakingChanges = (): ReactElement => {
         </Heading>
         <div
           className={clsx(
-            'mb-3 flex flex-col items-start gap-3 font-light text-gray-500',
+            'mb-3 flex flex-col items-start gap-3 font-light text-gray-300',
             !isEnabled && 'pointer-events-none opacity-25'
           )}
         >
@@ -399,6 +401,36 @@ const ConditionalBreakingChanges = (): ReactElement => {
           {mutation.data?.updateTargetValidationSettings.error?.inputErrors.period && (
             <div className="text-red-500">{mutation.data.updateTargetValidationSettings.error.inputErrors.period}</div>
           )}
+          <div className="my-4 flex flex-col gap-2">
+            <div>
+              <div>Exclude these clients:</div>
+              <div className="text-xs">Marks a breaking change as safe when it only affects the following clients.</div>
+            </div>
+            <div>
+              <Combobox
+                name="excludedClients"
+                value={values.excludedClients.map(value => ({
+                  value,
+                  label: value,
+                }))}
+                options={allClientNames.map(c => ({
+                  value: c.name,
+                  label: c.name,
+                }))}
+                onBlur={() => setFieldTouched('excludedClients')}
+                onChange={options => {
+                  setFieldValue(
+                    'excludedClients',
+                    options.map(o => o.value)
+                  );
+                }}
+                disabled={isSubmitting}
+              />
+            </div>
+            {touched.excludedClients && errors.excludedClients && (
+              <div className="text-red-500">{errors.excludedClients}</div>
+            )}
+          </div>
           Check collected usage data from these targets:
           {possibleTargets?.map(pt => (
             <div key={pt.id} className="flex items-center gap-2 pl-5">
