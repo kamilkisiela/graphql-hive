@@ -200,7 +200,10 @@ export async function createStorage(connection: string): Promise<Storage> {
   }
 
   function transformTargetSettings(
-    row: Pick<targets, 'validation_enabled' | 'validation_percentage' | 'validation_period'> & {
+    row: Pick<
+      targets,
+      'validation_enabled' | 'validation_percentage' | 'validation_period' | 'validation_excluded_clients'
+    > & {
       targets: target_validation['destination_target_id'][] | null;
     }
   ): TargetSettings {
@@ -210,6 +213,9 @@ export async function createStorage(connection: string): Promise<Storage> {
         percentage: row.validation_percentage,
         period: row.validation_period,
         targets: Array.isArray(row.targets) ? row.targets.filter(isDefined) : [],
+        excludedClients: Array.isArray(row.validation_excluded_clients)
+          ? row.validation_excluded_clients.filter(isDefined)
+          : [],
       },
     };
   }
@@ -741,14 +747,51 @@ export async function createStorage(connection: string): Promise<Storage> {
 
       return result;
     },
-    async getTarget({ organization, project, target }) {
-      return transformTarget(
-        await pool.one<Slonik<targets>>(
-          sql`SELECT * FROM public.targets WHERE id = ${target} AND project_id = ${project} LIMIT 1`
-        ),
-        organization
-      );
-    },
+    getTarget: batch(
+      async (
+        selectors: Array<{
+          organization: string;
+          project: string;
+          target: string;
+        }>
+      ) => {
+        const uniqueSelectorsMap = new Map<string, typeof selectors[0]>();
+
+        for (const selector of selectors) {
+          const key = JSON.stringify({
+            organization: selector.organization,
+            project: selector.project,
+            target: selector.target,
+          });
+
+          uniqueSelectorsMap.set(key, selector);
+        }
+
+        const uniqueSelectors = Array.from(uniqueSelectorsMap.values());
+
+        const rows = await pool.many<Slonik<targets>>(
+          sql`
+            SELECT * FROM public.targets
+            WHERE (id, project_id) IN ((${sql.join(
+              uniqueSelectors.map(s => sql`${s.target}, ${s.project}`),
+              sql`), (`
+            )}))
+          `
+        );
+
+        return selectors.map(selector => {
+          const row = rows.find(row => row.id === selector.target && row.project_id === selector.project);
+
+          if (!row) {
+            return Promise.reject(
+              new Error(`Target not found (target=${selector.target}, project=${selector.project})`)
+            );
+          }
+
+          return Promise.resolve(transformTarget(row, selector.organization));
+        });
+      }
+    ),
     async getTargetByCleanId({ organization, project, cleanId }) {
       const result = await pool.maybeOne<Slonik<targets>>(
         sql`SELECT * FROM public.targets WHERE clean_id = ${cleanId} AND project_id = ${project} LIMIT 1`
@@ -781,7 +824,10 @@ export async function createStorage(connection: string): Promise<Storage> {
     },
     async getTargetSettings({ target, project }) {
       const row = await pool.one<
-        Pick<targets, 'validation_enabled' | 'validation_percentage' | 'validation_period'> & {
+        Pick<
+          targets,
+          'validation_enabled' | 'validation_percentage' | 'validation_period' | 'validation_excluded_clients'
+        > & {
           targets: target_validation['destination_target_id'][];
         }
       >(sql`
@@ -789,6 +835,7 @@ export async function createStorage(connection: string): Promise<Storage> {
           t.validation_enabled,
           t.validation_percentage,
           t.validation_period,
+          t.validation_excluded_clients,
           array_agg(tv.destination_target_id) as targets
         FROM public.targets AS t
         LEFT JOIN public.target_validation AS tv ON (tv.target_id = t.id)
@@ -813,7 +860,10 @@ export async function createStorage(connection: string): Promise<Storage> {
           }
 
           return trx.one<
-            Pick<targets, 'validation_enabled' | 'validation_percentage' | 'validation_period'> & {
+            Pick<
+              targets,
+              'validation_enabled' | 'validation_percentage' | 'validation_period' | 'validation_excluded_clients'
+            > & {
               targets: target_validation['destination_target_id'][];
             }
           >(sql`
@@ -831,12 +881,12 @@ export async function createStorage(connection: string): Promise<Storage> {
               LIMIT 1
             ) ret
           WHERE t.id = ret.id
-          RETURNING ret.id, t.validation_enabled, t.validation_percentage, t.validation_period, ret.targets
+          RETURNING ret.id, t.validation_enabled, t.validation_percentage, t.validation_period, t.validation_excluded_clients, ret.targets
         `);
         })
       ).validation;
     },
-    async updateTargetValidationSettings({ target, project, percentage, period, targets }) {
+    async updateTargetValidationSettings({ target, project, percentage, period, targets, excludedClients }) {
       return transformTargetSettings(
         await pool.transaction(async trx => {
           await trx.query(sql`
@@ -861,7 +911,10 @@ export async function createStorage(connection: string): Promise<Storage> {
 
           return trx.one(sql`
             UPDATE public.targets as t
-            SET validation_percentage = ${percentage}, validation_period = ${period}
+            SET validation_percentage = ${percentage}, validation_period = ${period}, validation_excluded_clients = ${sql.array(
+            excludedClients,
+            'text'
+          )}
             FROM (
               SELECT
                 it.id,
@@ -873,7 +926,7 @@ export async function createStorage(connection: string): Promise<Storage> {
               LIMIT 1
             ) ret
             WHERE t.id = ret.id
-            RETURNING t.id, t.validation_enabled, t.validation_percentage, t.validation_period, ret.targets;
+            RETURNING t.id, t.validation_enabled, t.validation_percentage, t.validation_period, t.validation_excluded_clients, ret.targets;
           `);
         })
       ).validation;

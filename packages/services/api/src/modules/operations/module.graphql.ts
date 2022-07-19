@@ -6,6 +6,7 @@ export default gql`
     fieldListStats(selector: FieldListStatsInput!): [FieldStats!]!
     operationsStats(selector: OperationsStatsSelectorInput!): OperationsStats!
     hasCollectedOperations(selector: TargetSelectorInput!): Boolean!
+    clientStatsByTargets(selector: ClientStatsByTargetsInput!): ClientStatsConnection!
   }
 
   input OperationsStatsSelectorInput {
@@ -14,6 +15,13 @@ export default gql`
     target: ID!
     period: DateRangeInput!
     operations: [ID!]
+  }
+
+  input ClientStatsByTargetsInput {
+    organization: ID!
+    project: ID!
+    targetIds: [ID!]!
+    period: DateRangeInput!
   }
 
   input DateRangeInput {
@@ -119,6 +127,11 @@ export default gql`
     version: String!
     count: Int!
     percentage: Float!
+  }
+
+  type ClientNameStats {
+    name: String!
+    count: Int!
   }
 
   type RequestsOverTime {

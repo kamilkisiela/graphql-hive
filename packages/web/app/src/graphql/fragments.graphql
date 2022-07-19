@@ -357,6 +357,7 @@ fragment TargetValidationSettingsFields on TargetValidationSettings {
   targets {
     ...TargetEssentials
   }
+  excludedClients
 }
 
 fragment AlertSlackChannelFields on AlertSlackChannel {

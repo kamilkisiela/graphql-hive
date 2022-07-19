@@ -412,6 +412,7 @@ export function setTargetValidation(
           enabled
           period
           percentage
+          excludedClients
         }
       }
     `),
@@ -445,6 +446,7 @@ export function updateTargetValidationSettings(
               targets {
                 id
               }
+              excludedClients
             }
           }
           error {

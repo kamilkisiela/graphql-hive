@@ -214,7 +214,6 @@ export class TargetManager {
       throw new HiveError(`No targets specified. Required at least one target`);
     }
 
-    // TODO: validation of percentage (0 - 100) and period (1 - 30)
     return this.storage.updateTargetValidationSettings(input);
   }
 

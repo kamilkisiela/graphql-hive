@@ -134,6 +134,7 @@ export class Inspector {
         fields,
         period: createPeriod(`${settings.validation.period}d`),
         target: settings.validation.targets,
+        excludedClients: settings.validation.excludedClients,
         project: selector.project,
         organization: selector.organization,
         unsafe__itIsMeInspector: true,

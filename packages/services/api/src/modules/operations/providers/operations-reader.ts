@@ -1,5 +1,5 @@
 import { Injectable } from 'graphql-modules';
-import { format, addMinutes, subDays, parse, isAfter } from 'date-fns';
+import { format, addMinutes, subDays } from 'date-fns';
 import type { Span } from '@sentry/types';
 import { ClickHouse, RowOf } from './clickhouse-client';
 import { calculateTimeWindow, maxResolution } from './helpers';
@@ -71,16 +71,6 @@ function canUseHourlyAggTable({
   return true;
 }
 
-const schemaCoordinatesDailyStartedAt = parse('2022-01-25 00:00:00', 'yyyy-MM-dd HH:mm:ss', new Date());
-
-function canUseSchemaCoordinatesDailyTable(period?: DateRange): boolean {
-  if (period) {
-    return isAfter(period.from, schemaCoordinatesDailyStartedAt);
-  }
-
-  return false;
-}
-
 @Injectable({
   global: true,
 })
@@ -115,6 +105,7 @@ export class OperationsReader {
       target,
       period,
       operations,
+      excludedClients,
     }: {
       fields: ReadonlyArray<{
         type: string;
@@ -124,18 +115,33 @@ export class OperationsReader {
       target: string | readonly string[];
       period: DateRange;
       operations?: readonly string[];
+      excludedClients?: readonly string[];
     },
     span?: Span
   ): Promise<Record<string, number>> {
-    // Once we collect data from more than 30 days, we can leave on this part of code
-    if (canUseSchemaCoordinatesDailyTable(period)) {
-      const coordinates = fields.map(selector => this.makeId(selector));
+    const coordinates = fields.map(selector => this.makeId(selector));
+    const conditions = [`( coordinate IN ('${coordinates.join(`', '`)}') )`];
 
-      const res = await this.clickHouse.query<{
-        total: string;
-        coordinate: string;
-      }>({
-        query: `
+    if (Array.isArray(excludedClients) && excludedClients.length > 0) {
+      // Eliminate coordinates fetched by excluded clients.
+      // We can connect a coordinate to a client by using the hash column.
+      // The hash column is basically a unique identifier of a GraphQL operation.
+      conditions.push(`
+        hash NOT IN (
+          SELECT hash FROM client_names_daily ${this.createFilter({
+            target,
+            period,
+            extra: [`client_name IN ('${excludedClients.join(`', '`)}')`],
+          })} GROUP BY hash
+        )
+      `);
+    }
+
+    const res = await this.clickHouse.query<{
+      total: string;
+      coordinate: string;
+    }>({
+      query: `
           SELECT
             coordinate,
             sum(total) as total
@@ -144,92 +150,19 @@ export class OperationsReader {
             target,
             period,
             operations,
-            extra: [`( coordinate IN ('${coordinates.join(`', '`)}') )`],
+            extra: conditions,
           })}
           GROUP BY coordinate
         `,
-        queryId: 'count_fields_v2',
-        timeout: 30_000,
-        span,
-      });
-
-      const stats: Record<string, number> = {};
-      for (const row of res.data) {
-        stats[row.coordinate] = ensureNumber(row.total);
-      }
-
-      for (const selector of fields) {
-        const key = this.makeId(selector);
-
-        if (typeof stats[key] !== 'number') {
-          stats[key] = 0;
-        }
-      }
-
-      return stats;
-    }
-
-    // TODO: Remove after 2022-02-25
-
-    const sep = `_${Math.random().toString(36).substr(2, 5)}_`;
-
-    function createAlias(selector: { type: string; field?: string | null; argument?: string | null }) {
-      return [selector.type, selector.field, selector.argument].filter(Boolean).join(sep);
-    }
-
-    function extractSelector(alias: string): {
-      type: string;
-      field?: string | null;
-      argument?: string | null;
-    } {
-      const [type, field, argument] = alias.split(sep);
-
-      return {
-        type,
-        field,
-        argument,
-      };
-    }
-
-    const counters: string[] = [];
-    const conditions: string[] = [];
-
-    for (const selector of fields) {
-      const alias = createAlias(selector);
-      const id = this.makeId(selector);
-
-      counters.push(`sum(has(schema, '${id}')) as ${alias}`);
-      conditions.push(`has(schema, '${id}')`);
-    }
-
-    const res = await this.clickHouse.query<{
-      [key: string]: string;
-    }>({
-      query: `
-        SELECT
-          ${counters.join(', ')}
-        FROM operations_new
-        ${this.createFilter({
-          target,
-          period,
-          operations,
-          extra: [`( ${conditions.join(' OR ')} )`],
-        })}
-      `,
-      queryId: 'count_fields',
-      timeout: 60_000,
+      queryId: 'count_fields_v2',
+      timeout: 30_000,
       span,
     });
 
-    const row = res.data[0];
     const stats: Record<string, number> = {};
-
-    Object.keys(row).forEach(alias => {
-      const selector = extractSelector(alias);
-      const total = ensureNumber(row[alias]);
-
-      stats[this.makeId(selector)] = total;
-    });
+    for (const row of res.data) {
+      stats[row.coordinate] = ensureNumber(row.total);
+    }
 
     for (const selector of fields) {
       const key = this.makeId(selector);
@@ -534,6 +467,54 @@ export class OperationsReader {
     });
   }
 
+  @sentry('OperationsReader.readUniqueClientNames')
+  async readUniqueClientNames(
+    {
+      target,
+      period,
+      operations,
+    }: {
+      target: string | readonly string[];
+      period: DateRange;
+      operations?: readonly string[];
+    },
+    span?: Span
+  ): Promise<
+    Array<{
+      name: string;
+      count: number;
+    }>
+  > {
+    const result = await this.clickHouse.query<{
+      count: string;
+      client_name: string;
+    }>({
+      query: `
+      SELECT 
+        sum(total) as count,
+        client_name
+      FROM client_names_daily
+      ${this.createFilter({
+        target,
+        period,
+        operations,
+        extra: ['notEmpty(client_name)'],
+      })}
+      GROUP BY client_name
+    `,
+      queryId: 'count_unique_client_names',
+      timeout: 15_000,
+      span,
+    });
+
+    return result.data.map(row => {
+      return {
+        name: row.client_name,
+        count: ensureNumber(row.count),
+      };
+    });
+  }
+
   @sentry('OperationsReader.requestsOverTime')
   async requestsOverTime({
     target,
@@ -754,6 +735,18 @@ export class OperationsReader {
     });
 
     return collection;
+  }
+
+  async getClientNames({ target, period }: { target: string; period: DateRange }): Promise<string[]> {
+    const result = await this.clickHouse.query<{
+      client_name: string;
+    }>({
+      queryId: 'client_names_per_target',
+      query: `SELECT client_name FROM client_names_daily ${this.createFilter({ target, period })} GROUP BY client_name`,
+      timeout: 10_000,
+    });
+
+    return result.data.map(row => row.client_name);
   }
 
   @sentry('OperationsReader.getDurationAndCountOverTime')

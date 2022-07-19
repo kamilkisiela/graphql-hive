@@ -131,6 +131,7 @@ export interface targets {
   name: string;
   project_id: string;
   validation_enabled: boolean;
+  validation_excluded_clients: Array<string> | null;
   validation_percentage: number;
   validation_period: number;
 }

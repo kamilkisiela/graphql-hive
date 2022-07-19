@@ -115,7 +115,7 @@ export class OperationsManager {
     target,
     period,
     operations,
-  }: { period: DateRange; operations?: readonly string[] } & TargetSelector) {
+  }: { period: DateRange; operations?: readonly string[] } & Listify<TargetSelector, 'target'>) {
     this.logger.info('Counting requests (period=%s, target=%s)', period, target);
     await this.authManager.ensureTargetAccess({
       organization,
@@ -194,6 +194,7 @@ export class OperationsManager {
     project,
     target,
     unsafe__itIsMeInspector,
+    excludedClients,
   }: {
     fields: ReadonlyArray<{
       type: string;
@@ -208,8 +209,14 @@ export class OperationsManager {
      * TODO: let's think how to solve it well, soon.
      */
     unsafe__itIsMeInspector?: boolean;
+    excludedClients?: readonly string[];
   } & Listify<TargetSelector, 'target'>) {
-    this.logger.info('Counting fields (period=%o, target=%s)', period, target);
+    this.logger.info(
+      'Counting fields (period=%o, target=%s, excludedClients=%s)',
+      period,
+      target,
+      excludedClients?.join(', ') ?? 'none'
+    );
 
     if (!unsafe__itIsMeInspector) {
       await this.authManager.ensureTargetAccess({
@@ -225,6 +232,7 @@ export class OperationsManager {
         fields,
         target,
         period,
+        excludedClients,
       }),
       this.reader.countOperations({ target, period }).then(r => r.total),
     ]);
@@ -436,6 +444,28 @@ export class OperationsManager {
     });
 
     return this.reader.countUniqueClients({
+      target,
+      period,
+      operations,
+    });
+  }
+
+  async readUniqueClientNames({
+    period,
+    organization,
+    project,
+    target,
+    operations,
+  }: { period: DateRange; operations?: readonly string[] } & Listify<TargetSelector, 'target'>) {
+    this.logger.info('Read unique client names (period=%o, target=%s)', period, target);
+    await this.authManager.ensureTargetAccess({
+      organization,
+      project,
+      target,
+      scope: TargetAccessScope.REGISTRY_READ,
+    });
+
+    return this.reader.readUniqueClientNames({
       target,
       period,
       operations,

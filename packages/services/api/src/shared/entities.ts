@@ -176,6 +176,7 @@ export interface TargetSettings {
     period: number;
     percentage: number;
     targets: readonly string[];
+    excludedClients: readonly string[];
   };
 }
 

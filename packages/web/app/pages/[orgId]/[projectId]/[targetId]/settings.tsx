@@ -1,13 +1,15 @@
-import { ReactElement, useCallback, useEffect, useState } from 'react';
+import React, { ReactElement, useCallback, useEffect, useState } from 'react';
 import { Spinner } from '@chakra-ui/react';
 import { SchemaEditor } from '@theguild/editor';
 import clsx from 'clsx';
+import { formatISO, subDays } from 'date-fns';
 import { useFormik } from 'formik';
 import { gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 
 import { TargetLayout } from '@/components/layouts';
 import { Button, Card, Checkbox, Heading, Input, Switch, Table, Tag, TimeAgo, Title } from '@/components/v2';
+import { Combobox } from '@/components/v2/combobox';
 import { AlertTriangleIcon } from '@/components/v2/icon';
 import { CreateAccessTokenModal, DeleteTargetModal } from '@/components/v2/modals';
 import {
@@ -196,6 +198,67 @@ const ExtendBaseSchema = (props: { baseSchema: string }): ReactElement => {
   );
 };
 
+const ClientExclusion_AvailableClientNamesQuery = gql(/* GraphQL */ `
+  query ClientExclusion_AvailableClientNamesQuery($selector: ClientStatsByTargetsInput!) {
+    clientStatsByTargets(selector: $selector) {
+      nodes {
+        name
+      }
+      total
+    }
+  }
+`);
+
+function ClientExclusion(
+  props: React.PropsWithoutRef<
+    {
+      organizationId: string;
+      projectId: string;
+      selectedTargets: string[];
+      clientsFromSettings: string[];
+      value: string[];
+    } & Pick<React.ComponentProps<typeof Combobox>, 'name' | 'disabled' | 'onBlur' | 'onChange'>
+  >
+) {
+  const now = floorDate(new Date());
+  const [availableClientNamesQuery] = useQuery({
+    query: ClientExclusion_AvailableClientNamesQuery,
+    variables: {
+      selector: {
+        organization: props.organizationId,
+        project: props.projectId,
+        targetIds: props.selectedTargets,
+        period: {
+          from: formatISO(subDays(now, 90)),
+          to: formatISO(now),
+        },
+      },
+    },
+  });
+
+  const clientNamesFromStats = availableClientNamesQuery.data?.clientStatsByTargets.nodes.map(n => n.name) ?? [];
+  const allClientNames = clientNamesFromStats.concat(
+    props.clientsFromSettings.filter(clientName => !clientNamesFromStats.includes(clientName))
+  );
+
+  return (
+    <Combobox
+      name={props.name}
+      value={props.value.map(name => ({ label: name, value: name }))}
+      options={
+        allClientNames.map(name => ({
+          value: name,
+          label: name,
+        })) ?? []
+      }
+      onBlur={props.onBlur}
+      onChange={props.onChange}
+      disabled={props.disabled}
+      loading={availableClientNamesQuery.fetching}
+    />
+  );
+}
+
 const Settings_TargetSettingsQuery = gql(/* GraphQL */ `
   query Settings_TargetSettingsQuery(
     $selector: TargetSelectorInput!
@@ -240,6 +303,11 @@ const Settings_UpdateTargetValidationSettingsMutation = gql(/* GraphQL */ `
   }
 `);
 
+function floorDate(date: Date): Date {
+  const time = 1000 * 60;
+  return new Date(Math.floor(date.getTime() / time) * time);
+}
+
 const ConditionalBreakingChanges = (): ReactElement => {
   const router = useRouteSelector();
   const [targetValidation, setValidation] = useMutation(SetTargetValidationDocument);
@@ -282,6 +350,7 @@ const ConditionalBreakingChanges = (): ReactElement => {
       percentage: settings?.percentage || 0,
       period: settings?.period || 0,
       targets: settings?.targets.map(t => t.id) || [],
+      excludedClients: settings?.excludedClients ?? [],
     },
     validationSchema: Yup.object().shape({
       percentage: Yup.number().min(0).max(100).required(),
@@ -290,6 +359,7 @@ const ConditionalBreakingChanges = (): ReactElement => {
         .max(targetSettings.data?.organization?.organization?.rateLimit.retentionInDays ?? 30)
         .required(),
       targets: Yup.array().of(Yup.string()).min(1),
+      excludedClients: Yup.array().of(Yup.string()),
     }),
     onSubmit: values =>
       updateValidation({
@@ -329,7 +399,7 @@ const ConditionalBreakingChanges = (): ReactElement => {
         </Heading>
         <div
           className={clsx(
-            'mb-3 flex flex-col items-start gap-3 font-light text-gray-500',
+            'mb-3 flex flex-col items-start gap-3 font-light text-gray-300',
             !isEnabled && 'pointer-events-none opacity-25'
           )}
         >
@@ -374,6 +444,37 @@ const ConditionalBreakingChanges = (): ReactElement => {
           {mutation.data?.updateTargetValidationSettings.error?.inputErrors.period && (
             <div className="text-red-500">{mutation.data.updateTargetValidationSettings.error.inputErrors.period}</div>
           )}
+          <div className="my-4 flex flex-col gap-2">
+            <div>
+              <div>Exclude these clients:</div>
+              <div className="text-xs">Marks a breaking change as safe when it only affects the following clients.</div>
+            </div>
+            <div>
+              {values.targets.length > 0 ? (
+                <ClientExclusion
+                  organizationId={router.organizationId}
+                  projectId={router.projectId}
+                  selectedTargets={values.targets}
+                  clientsFromSettings={settings?.excludedClients ?? []}
+                  name="excludedClients"
+                  value={values.excludedClients}
+                  onBlur={() => setFieldTouched('excludedClients')}
+                  onChange={options => {
+                    setFieldValue(
+                      'excludedClients',
+                      options.map(o => o.value)
+                    );
+                  }}
+                  disabled={isSubmitting}
+                />
+              ) : (
+                <div className="text-gray-500">Select targets first</div>
+              )}
+            </div>
+            {touched.excludedClients && errors.excludedClients && (
+              <div className="text-red-500">{errors.excludedClients}</div>
+            )}
+          </div>
           Check collected usage data from these targets:
           {possibleTargets?.map(pt => (
             <div key={pt.id} className="flex items-center gap-2 pl-5">
