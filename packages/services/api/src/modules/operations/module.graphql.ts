@@ -6,6 +6,7 @@ export default gql`
     fieldListStats(selector: FieldListStatsInput!): [FieldStats!]!
     operationsStats(selector: OperationsStatsSelectorInput!): OperationsStats!
     hasCollectedOperations(selector: TargetSelectorInput!): Boolean!
+    clientStatsByTargets(selector: ClientStatsByTargetsInput!): ClientStatsConnection!
   }
 
   input OperationsStatsSelectorInput {
@@ -14,6 +15,13 @@ export default gql`
     target: ID!
     period: DateRangeInput!
     operations: [ID!]
+  }
+
+  input ClientStatsByTargetsInput {
+    organization: ID!
+    project: ID!
+    targetIds: [ID!]!
+    period: DateRangeInput!
   }
 
   input DateRangeInput {
@@ -71,7 +79,6 @@ export default gql`
     duration: DurationStats!
     operations: OperationStatsConnection!
     clients: ClientStatsConnection!
-    clientNames: [ClientNameStats!]
   }
 
   type OperationStatsConnection {

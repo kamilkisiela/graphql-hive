@@ -1,4 +1,4 @@
-import { ReactElement, useCallback, useEffect, useState } from 'react';
+import React, { ReactElement, useCallback, useEffect, useState } from 'react';
 import { Spinner } from '@chakra-ui/react';
 import { SchemaEditor } from '@theguild/editor';
 import clsx from 'clsx';
@@ -198,12 +198,72 @@ const ExtendBaseSchema = (props: { baseSchema: string }): ReactElement => {
   );
 };
 
+const ClientExclusion_AvailableClientNamesQuery = gql(/* GraphQL */ `
+  query ClientExclusion_AvailableClientNamesQuery($selector: ClientStatsByTargetsInput!) {
+    clientStatsByTargets(selector: $selector) {
+      nodes {
+        name
+      }
+      total
+    }
+  }
+`);
+
+function ClientExclusion(
+  props: React.PropsWithoutRef<
+    {
+      organizationId: string;
+      projectId: string;
+      selectedTargets: string[];
+      clientsFromSettings: string[];
+      value: string[];
+    } & Pick<React.ComponentProps<typeof Combobox>, 'name' | 'disabled' | 'onBlur' | 'onChange'>
+  >
+) {
+  const now = floorDate(new Date());
+  const [availableClientNamesQuery] = useQuery({
+    query: ClientExclusion_AvailableClientNamesQuery,
+    variables: {
+      selector: {
+        organization: props.organizationId,
+        project: props.projectId,
+        targetIds: props.selectedTargets,
+        period: {
+          from: formatISO(subDays(now, 90)),
+          to: formatISO(now),
+        },
+      },
+    },
+  });
+
+  const clientNamesFromStats = availableClientNamesQuery.data?.clientStatsByTargets.nodes.map(n => n.name) ?? [];
+  const allClientNames = clientNamesFromStats.concat(
+    props.clientsFromSettings.filter(clientName => !clientNamesFromStats.includes(clientName))
+  );
+
+  return (
+    <Combobox
+      name={props.name}
+      value={props.value.map(name => ({ label: name, value: name }))}
+      options={
+        allClientNames.map(name => ({
+          value: name,
+          label: name,
+        })) ?? []
+      }
+      onBlur={props.onBlur}
+      onChange={props.onChange}
+      disabled={props.disabled}
+      loading={availableClientNamesQuery.fetching}
+    />
+  );
+}
+
 const Settings_TargetSettingsQuery = gql(/* GraphQL */ `
   query Settings_TargetSettingsQuery(
     $selector: TargetSelectorInput!
     $targetsSelector: ProjectSelectorInput!
     $organizationSelector: OrganizationSelectorInput!
-    $operationsStatsSelector: OperationsStatsSelectorInput!
   ) {
     targetSettings(selector: $selector) {
       ...TargetSettingsFields
@@ -219,12 +279,6 @@ const Settings_TargetSettingsQuery = gql(/* GraphQL */ `
         rateLimit {
           retentionInDays
         }
-      }
-    }
-    operationsStats(selector: $operationsStatsSelector) {
-      clientNames {
-        name
-        count
       }
     }
   }
@@ -255,7 +309,6 @@ function floorDate(date: Date): Date {
 }
 
 const ConditionalBreakingChanges = (): ReactElement => {
-  const now = floorDate(new Date());
   const router = useRouteSelector();
   const [targetValidation, setValidation] = useMutation(SetTargetValidationDocument);
   const [mutation, updateValidation] = useMutation(Settings_UpdateTargetValidationSettingsMutation);
@@ -274,30 +327,12 @@ const ConditionalBreakingChanges = (): ReactElement => {
       organizationSelector: {
         organization: router.organizationId,
       },
-      operationsStatsSelector: {
-        organization: router.organizationId,
-        project: router.projectId,
-        target: router.targetId,
-        period: {
-          from: formatISO(subDays(now, 90)),
-          to: formatISO(now),
-        },
-      },
     },
   });
 
   const settings = targetSettings.data?.targetSettings.validation;
   const isEnabled = settings?.enabled || false;
   const possibleTargets = targetSettings.data?.targets.nodes;
-  const clientNamesFromStats = targetSettings.data?.operationsStats.clientNames?.map(c => c.name);
-  const allClientNames =
-    clientNamesFromStats && settings
-      ? clientNamesFromStats.concat(
-          // In case of clients from validation settings being no longer available in usage stats,
-          // add them to the list of options
-          settings.excludedClients.filter(clientName => !clientNamesFromStats.includes(clientName))
-        )
-      : settings?.excludedClients ?? [];
 
   const {
     handleSubmit,
@@ -315,7 +350,7 @@ const ConditionalBreakingChanges = (): ReactElement => {
       percentage: settings?.percentage || 0,
       period: settings?.period || 0,
       targets: settings?.targets.map(t => t.id) || [],
-      excludedClients: settings?.excludedClients || [],
+      excludedClients: settings?.excludedClients ?? [],
     },
     validationSchema: Yup.object().shape({
       percentage: Yup.number().min(0).max(100).required(),
@@ -415,25 +450,26 @@ const ConditionalBreakingChanges = (): ReactElement => {
               <div className="text-xs">Marks a breaking change as safe when it only affects the following clients.</div>
             </div>
             <div>
-              <Combobox
-                name="excludedClients"
-                value={values.excludedClients.map(value => ({
-                  value,
-                  label: value,
-                }))}
-                options={allClientNames.map(name => ({
-                  value: name,
-                  label: name,
-                }))}
-                onBlur={() => setFieldTouched('excludedClients')}
-                onChange={options => {
-                  setFieldValue(
-                    'excludedClients',
-                    options.map(o => o.value)
-                  );
-                }}
-                disabled={isSubmitting}
-              />
+              {values.targets.length > 0 ? (
+                <ClientExclusion
+                  organizationId={router.organizationId}
+                  projectId={router.projectId}
+                  selectedTargets={values.targets}
+                  clientsFromSettings={settings?.excludedClients ?? []}
+                  name="excludedClients"
+                  value={values.excludedClients}
+                  onBlur={() => setFieldTouched('excludedClients')}
+                  onChange={options => {
+                    setFieldValue(
+                      'excludedClients',
+                      options.map(o => o.value)
+                    );
+                  }}
+                  disabled={isSubmitting}
+                />
+              ) : (
+                <div className="text-gray-500">Select targets first</div>
+              )}
             </div>
             {touched.excludedClients && errors.excludedClients && (
               <div className="text-red-500">{errors.excludedClients}</div>

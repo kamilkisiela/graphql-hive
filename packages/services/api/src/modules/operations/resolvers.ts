@@ -72,6 +72,40 @@ export const resolvers: OperationsModule.Resolvers = {
         operations,
       };
     },
+    async clientStatsByTargets(_, { selector }, { injector }) {
+      const translator = injector.get(IdTranslator);
+      const [organization, project] = await Promise.all([
+        translator.translateOrganizationId(selector),
+        translator.translateProjectId(selector),
+      ]);
+
+      const targets = selector.targetIds;
+      const period = parseDateRangeInput(selector.period);
+
+      const [rows, total] = await Promise.all([
+        injector.get(OperationsManager).readUniqueClientNames({
+          target: targets,
+          project,
+          organization,
+          period,
+        }),
+        injector.get(OperationsManager).countRequests({
+          organization,
+          project,
+          target: targets,
+          period,
+        }),
+      ]);
+
+      return rows.map(row => {
+        return {
+          name: row.name,
+          count: row.count,
+          percentage: total === 0 ? 0 : (row.count / total) * 100,
+          versions: [], // TODO: include versions at some point
+        };
+      });
+    },
   },
   OperationsStats: {
     async operations({ organization, project, target, period, operations: operationsFilter }, _, { injector }) {
@@ -180,15 +214,6 @@ export const resolvers: OperationsModule.Resolvers = {
     },
     clients({ organization, project, target, period, operations: operationsFilter }, _, { injector }) {
       return injector.get(OperationsManager).readUniqueClients({
-        target,
-        project,
-        organization,
-        period,
-        operations: operationsFilter,
-      });
-    },
-    clientNames({ organization, project, target, period, operations: operationsFilter }, _, { injector }) {
-      return injector.get(OperationsManager).readUniqueClientNames({
         target,
         project,
         organization,

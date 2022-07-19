@@ -474,7 +474,7 @@ export class OperationsReader {
       period,
       operations,
     }: {
-      target: string;
+      target: string | readonly string[];
       period: DateRange;
       operations?: readonly string[];
     },

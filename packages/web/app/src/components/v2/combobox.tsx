@@ -54,6 +54,7 @@ export function Combobox(
     onChange: (value: readonly Option[]) => void;
     onBlur: (el: unknown) => void;
     disabled?: boolean;
+    loading?: boolean;
   }>
 ) {
   return (
@@ -67,6 +68,7 @@ export function Combobox(
       onChange={props.onChange as any}
       isDisabled={props.disabled}
       onBlur={props.onBlur}
+      isLoading={props.loading}
     />
   );
 }

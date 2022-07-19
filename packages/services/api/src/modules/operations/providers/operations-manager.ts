@@ -115,7 +115,7 @@ export class OperationsManager {
     target,
     period,
     operations,
-  }: { period: DateRange; operations?: readonly string[] } & TargetSelector) {
+  }: { period: DateRange; operations?: readonly string[] } & Listify<TargetSelector, 'target'>) {
     this.logger.info('Counting requests (period=%s, target=%s)', period, target);
     await this.authManager.ensureTargetAccess({
       organization,
@@ -456,7 +456,7 @@ export class OperationsManager {
     project,
     target,
     operations,
-  }: { period: DateRange; operations?: readonly string[] } & TargetSelector) {
+  }: { period: DateRange; operations?: readonly string[] } & Listify<TargetSelector, 'target'>) {
     this.logger.info('Read unique client names (period=%o, target=%s)', period, target);
     await this.authManager.ensureTargetAccess({
       organization,
