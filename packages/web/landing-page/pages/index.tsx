@@ -1,5 +1,5 @@
 import React from 'react';
-import tw from 'twin.macro';
+import tw, { styled } from 'twin.macro';
 import Head from 'next/head';
 import { GlobalStyles } from 'twin.macro';
 import {
@@ -10,6 +10,7 @@ import {
   useThemeContext,
 } from '@theguild/components';
 import * as Tooltip from '@radix-ui/react-tooltip';
+import { FiServer, FiGlobe, FiRadio } from 'react-icons/fi';
 import { Pricing } from '../components/pricing';
 
 const PrimaryLink = tw.a`
@@ -21,8 +22,8 @@ const PrimaryLink = tw.a`
 `;
 
 const SecondaryLink = tw.a`
-inline-block
-  bg-gray-50 hover:bg-gray-100 
+  inline-block
+  bg-gray-100 hover:bg-gray-200
   dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700
   text-gray-600 px-6 py-3 rounded-lg font-medium
   shadow-sm
@@ -152,45 +153,75 @@ function Hero() {
   );
 }
 
+const FeatureWrapper = styled.div((props: { flipped?: boolean }) => [
+  tw`w-full py-24`,
+  props.flipped ? tw`bg-gray-50 dark:bg-gray-900` : tw`bg-white dark:bg-black`,
+]);
+
+const Highlight = {
+  Root: tw.div`flex flex-row flex-1 gap-x-6`,
+  Icon: tw.div`w-16 h-16 text-yellow-500 flex-shrink-0`,
+  Content: tw.div`flex flex-col text-black dark:text-white`,
+  Title: tw.h3`text-xl font-semibold`,
+  Description: tw.p`text-gray-600 dark:text-gray-400`,
+};
+
 function Feature(props: {
   title: string;
   description: React.ReactNode;
+  highlights?: Array<{
+    title: string;
+    description: React.ReactNode;
+    icon?: React.ReactNode;
+  }>;
   image: string | string[];
-  href: string;
   gradient: number;
   flipped?: boolean;
 }) {
-  const [start, end] = pickGradient(props.gradient);
+  const { title, description, highlights, image, gradient, flipped } = props;
+  const [start, end] = pickGradient(gradient);
 
   return (
-    <div tw="w-full">
-      <div
-        tw="container box-border px-6 mx-auto flex flex-row gap-x-24 items-center"
-        style={{
-          flexDirection: props.flipped ? 'row-reverse' : 'row',
-        }}
-      >
-        <div tw="flex flex-col gap-4 w-1/3 flex-shrink-0">
-          <h2 tw="font-semibold text-3xl text-black dark:text-white">{props.title}</h2>
-          <div tw="text-gray-600 dark:text-gray-400 leading-7">{props.description}</div>
-          <div>
-            <SecondaryLink href={props.href}>Read more</SecondaryLink>
-          </div>
-        </div>
-        {/* shadow-md border-2 */}
+    <FeatureWrapper flipped={flipped}>
+      <div tw="container box-border px-6 mx-auto flex flex-col gap-y-24">
         <div
-          tw="rounded-3xl overflow-hidden p-8 flex-grow flex flex-col justify-center items-center relative"
+          tw="flex flex-row gap-x-24 items-start"
           style={{
-            backgroundImage: `linear-gradient(to right, ${start}, ${end})`,
-            // borderColor: props.flipped ? start : end,
+            flexDirection: flipped ? 'row-reverse' : 'row',
           }}
         >
-          {
-            typeof props.image === 'string' ? <img src={props.image} tw="rounded-2xl" /> : null // implement slider
-          }
+          <div tw="flex flex-col gap-4 w-1/3 flex-shrink-0">
+            <h2 tw="font-semibold text-5xl text-black dark:text-white">{title}</h2>
+            <div tw="text-lg text-gray-600 dark:text-gray-400 leading-7">{description}</div>
+          </div>
+          {/* shadow-md border-2 */}
+          <div
+            tw="rounded-3xl overflow-hidden p-8 flex-grow flex flex-col justify-center items-center relative"
+            style={{
+              backgroundImage: `linear-gradient(to right, ${start}, ${end})`,
+              // borderColor: props.flipped ? start : end,
+            }}
+          >
+            {
+              typeof image === 'string' ? <img src={image} tw="rounded-2xl" /> : null // implement slider
+            }
+          </div>
         </div>
+        {Array.isArray(highlights) && highlights.length > 0 ? (
+          <div tw="flex flex-row gap-x-12 justify-between">
+            {highlights.map(({ title, description, icon }, i) => (
+              <Highlight.Root key={i}>
+                <Highlight.Icon>{icon}</Highlight.Icon>
+                <Highlight.Content>
+                  <Highlight.Title>{title}</Highlight.Title>
+                  <Highlight.Description>{description}</Highlight.Description>
+                </Highlight.Content>
+              </Highlight.Root>
+            ))}
+          </div>
+        ) : null}
       </div>
-    </div>
+    </FeatureWrapper>
   );
 }
 
@@ -243,37 +274,146 @@ export default function Index() {
           <TGCStyles includeFonts={false} />
           <GuildHeader />
           <Hero />
-          <div tw="flex flex-col gap-24 my-24">
+          <div tw="flex flex-col my-24">
             <Feature
               title="Schema Registry"
               description={
                 <div tw="space-y-2">
                   <p>Push GraphQL schema to the registry and track the history of changes.</p>
-                  <p>Get an overview of all GraphQL services in one place.</p>
-                  <ul tw="ml-2 list-disc list-inside">
-                    <li>Use with Apollo Federation</li>
-                    <li>GraphQL Mesh, Stitching and more</li>
-                    <li>Available in Global Edge Network</li>
-                  </ul>
+                  <p>All your GraphQL services in one place.</p>
                 </div>
               }
+              highlights={[
+                {
+                  title: 'Manage your Gateway',
+                  description: 'Connect to Apollo Federation, GraphQL Mesh, Stitching and more.',
+                  icon: <FiServer tw="w-full h-full" />,
+                },
+                {
+                  title: 'Global Edge Network',
+                  description: 'Access the registry from any place on earth within milliseconds.',
+                  icon: <FiGlobe tw="w-full h-full" />,
+                },
+                {
+                  title: 'Make it smarter',
+                  description: 'Detect unused parts of Schema thanks to GraphQL analytics.',
+                  icon: <FiRadio tw="w-full h-full" />,
+                },
+              ]}
               image="/features/schema-history.png"
-              href="https://docs.graphql-hive.com/features/publish-schema"
               gradient={0}
             />
             <Feature
-              title="Prevent Breaking Changes"
+              title="Monitoring"
               description={
-                <div>
-                  <p>Push GraphQL schema to the registry and track the history of changes.</p>
-                  <p>Get an overview of all GraphQL services in one place.</p>
+                <div tw="flex flex-col gap-y-24">
+                  <div>
+                    <p>Be aware of how your GraphQL API is used and what is the experience of its final users.</p>
+                  </div>
+                  <div tw="flex flex-col gap-y-12">
+                    <Highlight.Root>
+                      <Highlight.Content>
+                        <Highlight.Title tw="text-lg">GraphQL Consumers</Highlight.Title>
+                        <Highlight.Description tw="text-sm">
+                          Track every source of GraphQL requests and see how the API is consumed.
+                        </Highlight.Description>
+                      </Highlight.Content>
+                    </Highlight.Root>
+                    <Highlight.Root>
+                      <Highlight.Content>
+                        <Highlight.Title tw="text-lg">Overall performance</Highlight.Title>
+                        <Highlight.Description tw="text-sm">
+                          Get a global overview of the usage of your GraphQL API.
+                        </Highlight.Description>
+                      </Highlight.Content>
+                    </Highlight.Root>
+                    <Highlight.Root>
+                      <Highlight.Content>
+                        <Highlight.Title tw="text-lg">Query performance</Highlight.Title>
+                        <Highlight.Description tw="text-sm">
+                          Detect slow GraphQL Operations and identify the culprits.
+                        </Highlight.Description>
+                      </Highlight.Content>
+                    </Highlight.Root>
+                  </div>
+                </div>
+              }
+              image="/features/monitoring-preview.png"
+              gradient={1}
+              flipped
+            />
+            <Feature
+              title="Analytics"
+              description={
+                <div tw="flex flex-col gap-y-12">
+                  <div>
+                    <p>Maintain your GraphQL API across many teams without concerns.</p>
+                  </div>
+                  <div tw="flex flex-col gap-y-12">
+                    <Highlight.Root>
+                      <Highlight.Content>
+                        <Highlight.Title tw="text-lg">Prevent Breaking Changes</Highlight.Title>
+                        <Highlight.Description tw="text-sm">
+                          Combination of Schema Registry and GraphQL Monitoring helps you evolve your GraphQL API.
+                        </Highlight.Description>
+                      </Highlight.Content>
+                    </Highlight.Root>
+                    <Highlight.Root>
+                      <Highlight.Content>
+                        <Highlight.Title tw="text-lg">Detect unused fields</Highlight.Title>
+                        <Highlight.Description tw="text-sm">
+                          Helps you understand the coverage of GraphQL schema and safely remove the unused part.
+                        </Highlight.Description>
+                      </Highlight.Content>
+                    </Highlight.Root>
+                    <Highlight.Root>
+                      <Highlight.Content>
+                        <Highlight.Title tw="text-lg">Alerts and notifications</Highlight.Title>
+                        <Highlight.Description tw="text-sm">
+                          Stay on top of everything with Slack notifications.
+                        </Highlight.Description>
+                      </Highlight.Content>
+                    </Highlight.Root>
+                  </div>
                 </div>
               }
               image={ITEMS[1].imageSrc}
-              gradient={1}
-              href=""
-              flipped
+              gradient={2}
             />
+            <FeatureWrapper flipped>
+              <div tw="container box-border px-6 mx-auto flex flex-col gap-y-24">
+                <div tw="text-center">
+                  <h2 tw="font-semibold text-5xl text-black dark:text-white mb-6">Open-Source</h2>
+                  <p tw="text-lg text-gray-600 dark:text-gray-400 leading-7">
+                    Built entirely in public and open to any contribution.
+                  </p>
+                </div>
+                <div tw="flex flex-row gap-x-12 justify-between">
+                  <Highlight.Root>
+                    <Highlight.Content>
+                      <Highlight.Title tw="text-lg">Public Roadmap</Highlight.Title>
+                      <Highlight.Description tw="text-sm">Influence the future of GraphQL Hive.</Highlight.Description>
+                    </Highlight.Content>
+                  </Highlight.Root>
+                  <Highlight.Root>
+                    <Highlight.Content>
+                      <Highlight.Title tw="text-lg">Available for free</Highlight.Title>
+                      <Highlight.Description tw="text-sm">
+                        Free Hobby plan that fits perfectly for most side projects.
+                      </Highlight.Description>
+                    </Highlight.Content>
+                  </Highlight.Root>
+                  <Highlight.Root>
+                    <Highlight.Content>
+                      <Highlight.Title tw="text-lg">Self-Hosted</Highlight.Title>
+                      <Highlight.Description tw="text-sm">
+                        MIT licensed, host it on your own infrastructure.
+                      </Highlight.Description>
+                    </Highlight.Content>
+                  </Highlight.Root>
+                </div>
+              </div>
+            </FeatureWrapper>
           </div>
           <Pricing />
           <FooterExtended
