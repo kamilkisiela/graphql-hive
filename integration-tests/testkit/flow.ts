@@ -65,12 +65,17 @@ export function createOrganization(input: CreateOrganizationInput, authToken: st
   });
 }
 
-export function getOrganizationGetStartedProgress(organizationId: string, authToken: string) {
+export function getOrganization(organizationId: string, authToken: string) {
   return execute({
     document: gql(/* GraphQL */ `
-      query getOrganizationGetStartedProgress($organizationId: ID!) {
+      query getOrganization($organizationId: ID!) {
         organization(selector: { organization: $organizationId }) {
           organization {
+            id
+            cleanId
+            name
+            type
+            inviteCode
             getStarted {
               creatingProject
               publishingSchema

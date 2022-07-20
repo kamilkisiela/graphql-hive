@@ -1,6 +1,6 @@
 import {
   createOrganization,
-  getOrganizationGetStartedProgress,
+  getOrganization,
   createProject,
   createToken,
   publishSchema,
@@ -14,7 +14,7 @@ import { collect } from '../../../testkit/usage';
 import { TargetAccessScope, ProjectType, ProjectAccessScope, OrganizationAccessScope } from '@app/gql/graphql';
 
 async function getSteps({ organization, token }: { organization: string; token: string }) {
-  const result = await getOrganizationGetStartedProgress(organization, token);
+  const result = await getOrganization(organization, token);
 
   expect(result.body.errors).not.toBeDefined();
 
