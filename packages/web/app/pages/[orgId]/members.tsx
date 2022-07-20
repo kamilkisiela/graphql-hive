@@ -1,5 +1,6 @@
 import { ReactElement, useCallback, useEffect, useState } from 'react';
 import { IconProps } from '@chakra-ui/react';
+import { Tooltip } from '@chakra-ui/react';
 import { useMutation, useQuery } from 'urql';
 
 import { useUser } from '@/components/auth/AuthProvider';
@@ -103,7 +104,11 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
         memberIds={checked}
       />
       <div className="flex gap-4">
-        <CopyValue className="grow" value={`${window.location.origin}/join/${org.inviteCode}`} />
+        <Tooltip placement="right" label="A one-time invitation link">
+          <div className="grow">
+            <CopyValue value={`${window.location.origin}/join/${org.inviteCode}`} />
+          </div>
+        </Tooltip>
         <Button
           variant="secondary"
           size="large"

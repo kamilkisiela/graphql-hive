@@ -387,8 +387,9 @@ export class OrganizationManager {
       }),
     ]);
 
-    return this.storage.getOrganization({
+    return this.storage.updateOrganizationInviteCode({
       organization: organization.id,
+      inviteCode: this.generateRandomCode(),
     });
   }
 
@@ -513,7 +514,7 @@ export class OrganizationManager {
     });
     return this.storage.updateOrganizationInviteCode({
       organization: selector.organization,
-      inviteCode: Math.random().toString(16).substr(2, 10),
+      inviteCode: this.generateRandomCode(),
     });
   }
 
@@ -530,5 +531,9 @@ export class OrganizationManager {
         type: OrganizationType.PERSONAL,
       });
     }
+  }
+
+  private generateRandomCode() {
+    return Math.random().toString(16).substring(2, 10);
   }
 }
