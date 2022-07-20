@@ -4,9 +4,39 @@ import type { HivePluginOptions, HiveClient } from './internal/types';
 import { createUsage } from './internal/usage';
 import { createReporting } from './internal/reporting';
 import { createOperationsStore } from './internal/operations-store';
+import { logIf } from './internal/utils';
 
 export function createHive(options: HivePluginOptions): HiveClient {
   const logger = options?.agent?.logger ?? console;
+
+  if (!options.enabled) {
+    logIf(options.debug === true, '[hive] is not enabled.', logger.info);
+
+    // return a full empty HiveClient
+    return {
+      async info() {},
+      reportSchema: () => {
+        return {
+          report() {},
+          async dispose() {},
+        };
+      },
+      collectUsage: () => {
+        return () => {};
+      },
+      operationsStore: {
+        canHandle() {
+          return false;
+        },
+        get() {
+          return null;
+        },
+        async load() {},
+        async reload() {},
+      },
+      async dispose() {},
+    };
+  }
 
   if (!options.token && options.enabled) {
     options.enabled = false;
