@@ -1,11 +1,32 @@
 import React from 'react';
-import { HeroGradient, HeroIllustration } from '@theguild/components';
+import tw from 'twin.macro';
 import Head from 'next/head';
 import { GlobalStyles } from 'twin.macro';
-import { css } from 'twin.macro';
-import { Header, FooterExtended, GlobalStyles as TGCStyles, ThemeProvider } from '@theguild/components';
+import {
+  Header,
+  FooterExtended,
+  ThemeProvider,
+  GlobalStyles as TGCStyles,
+  useThemeContext,
+} from '@theguild/components';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { Pricing } from '../components/pricing';
+
+const PrimaryLink = tw.a`
+  inline-block
+  bg-yellow-500 hover:bg-opacity-75
+  dark:bg-yellow-600 dark:hover:bg-opacity-100 dark:hover:bg-yellow-500
+  text-white px-6 py-3 rounded-lg font-medium
+  shadow-sm
+`;
+
+const SecondaryLink = tw.a`
+inline-block
+  bg-gray-50 hover:bg-gray-100 
+  dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700
+  text-gray-600 px-6 py-3 rounded-lg font-medium
+  shadow-sm
+`;
 
 const CookiesConsent: React.FC = () => {
   const [show, setShow] = React.useState(typeof window !== 'undefined' && localStorage.getItem('cookies') === null);
@@ -69,38 +90,114 @@ const ITEMS = [
   },
 ];
 
-const heroWrapper = css`
-  @media only screen and (min-width: 500px) {
-    & img {
-      margin-top: 4%;
-      margin-right: 7%;
-    }
+const gradients: [string, string][] = [
+  ['#ff9472', '#f2709c'],
+  ['#4776e6', '#8e54e9'],
+  ['#f857a6', '#ff5858'],
+  ['#ee9ca7', '#ffdde1'],
+  ['#de6262', '#ffb88c'],
+];
+
+function pickGradient(i: number) {
+  const gradient = gradients[i % gradients.length];
+
+  if (!gradient) {
+    throw new Error('No gradient found');
   }
-  @media only screen and (max-width: 768px) {
-    & img {
-      margin-right 25%;
-    }
-  }
-  @media only screen and (max-width: 500px) {
-    & img {
-      display: none !important;
-    }
-    & div:nth-child(2) {
-      justify-content: center;
-    }
-    & h1 {
-      margin-top: 2.5rem !important;
-    }
-    & div {
-      padding-bottom: 0.1rem;
-    }
-  }
-`;
+
+  return gradient;
+}
+
+function GuildHeader() {
+  const { isDarkTheme } = useThemeContext();
+  const color = isDarkTheme ? '#000' : '#f9fafb';
+
+  return (
+    <Header
+      wrapperProps={{
+        style: {
+          backgroundColor: color,
+        },
+      }}
+      navigationProps={{
+        style: {
+          backgroundColor: color,
+        },
+      }}
+      accentColor="#D49605"
+      activeLink=""
+      themeSwitch
+      disableSearch
+    />
+  );
+}
+
+function Hero() {
+  return (
+    <div tw="w-full">
+      <div tw="py-20 sm:py-24 lg:py-32 my-6">
+        <h1 tw="max-w-screen-md mx-auto font-extrabold text-5xl sm:text-5xl lg:text-6xl text-center bg-gradient-to-r from-yellow-500 to-orange-600 dark:from-yellow-400 dark:to-orange-500 bg-clip-text text-transparent">
+          Take full control of GraphQL API
+        </h1>
+        <p tw="max-w-screen-sm mx-auto mt-6 text-2xl text-gray-600 text-center dark:text-gray-400">
+          Prevent breaking changes, monitor performance of your GraphQL API, and manage your API gateway
+        </p>
+        <div tw="mt-10 flex flex-row items-center justify-center gap-4">
+          <PrimaryLink href="https://app.graphql-hive.com">Sign up for free</PrimaryLink>
+          <SecondaryLink href="https://docs.graphql-hive.com">Documentation</SecondaryLink>
+          <SecondaryLink href="https://github.com/kamilkisiela/graphql-hive">GitHub</SecondaryLink>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Feature(props: {
+  title: string;
+  description: React.ReactNode;
+  image: string | string[];
+  href: string;
+  gradient: number;
+  flipped?: boolean;
+}) {
+  const [start, end] = pickGradient(props.gradient);
+
+  return (
+    <div tw="w-full">
+      <div
+        tw="container box-border px-6 mx-auto flex flex-row gap-x-24 items-center"
+        style={{
+          flexDirection: props.flipped ? 'row-reverse' : 'row',
+        }}
+      >
+        <div tw="flex flex-col gap-4 w-1/3 flex-shrink-0">
+          <h2 tw="font-semibold text-3xl text-black dark:text-white">{props.title}</h2>
+          <div tw="text-gray-600 dark:text-gray-400 leading-7">{props.description}</div>
+          <div>
+            <SecondaryLink href={props.href}>Read more</SecondaryLink>
+          </div>
+        </div>
+        {/* shadow-md border-2 */}
+        <div
+          tw="rounded-3xl overflow-hidden p-8 flex-grow flex flex-col justify-center items-center relative"
+          style={{
+            backgroundImage: `linear-gradient(to right, ${start}, ${end})`,
+            // borderColor: props.flipped ? start : end,
+          }}
+        >
+          {
+            typeof props.image === 'string' ? <img src={props.image} tw="rounded-2xl" /> : null // implement slider
+          }
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function Index() {
   const title = 'GraphQL Hive - Schema Registry and Monitoring';
-  const description =
-    'An open-source GraphQL schema registry and performance monitoring tool with many additional features to enhance your day-to-day work with GraphQL.';
+  const fullDescription =
+    'Prevent breaking changes, monitor performance of your GraphQL API, and manage your API gateway (Federation, Stitching) with the Schema Registry. GraphQL Hive is a SAAS solution that is also 100% open source and can be self-hosted.';
 
   return (
     <ThemeProvider>
@@ -108,8 +205,8 @@ export default function Index() {
         <meta charSet="utf-8" />
         <title>{title}</title>
         <meta property="og:title" content={title} key="title" />
-        <meta name="description" content={description} key="description" />
-        <meta name="og:description" content={description} key="og:description" />
+        <meta name="description" content={fullDescription} key="description" />
+        <meta name="og:description" content={fullDescription} key="og:description" />
         <meta property="og:url" key="og:url" content="https://graphql-hive.com" />
         <meta property="og:type" key="og:type" content="website" />
         <meta
@@ -144,62 +241,40 @@ export default function Index() {
           `}</style>
           <GlobalStyles />
           <TGCStyles includeFonts={false} />
-          <Header accentColor="#D49605" activeLink="" disableSearch />
-          <div css={heroWrapper}>
-            <HeroGradient
-              title="Manage your GraphQL API workflow"
-              description={description}
-              colors={['#FFB21D']}
-              image={{
-                src: '/manage.svg',
-                alt: 'Manage workflows',
-              }}
-              link={[
-                {
-                  target: '_blank',
-                  href: 'https://app.graphql-hive.com',
-                  title: 'Go to dashboard',
-                  children: 'Dashboard',
-                },
-                {
-                  target: '_blank',
-                  href: 'https://docs.graphql-hive.com',
-                  title: 'Documentation',
-                  children: 'Documentation',
-                  style: {
-                    color: '#fff',
-                    border: '1px solid #fff',
-                    background: 'transparent',
-                  },
-                },
-                {
-                  target: '_blank',
-                  href: 'https://github.com/kamilkisiela/graphql-hive',
-                  title: 'GitHub',
-                  children: 'GitHub',
-                  style: {
-                    color: '#fff',
-                    border: '1px solid #fff',
-                    background: 'transparent',
-                  },
-                },
-              ]}
+          <GuildHeader />
+          <Hero />
+          <div tw="flex flex-col gap-24 my-24">
+            <Feature
+              title="Schema Registry"
+              description={
+                <div tw="space-y-2">
+                  <p>Push GraphQL schema to the registry and track the history of changes.</p>
+                  <p>Get an overview of all GraphQL services in one place.</p>
+                  <ul tw="ml-2 list-disc list-inside">
+                    <li>Use with Apollo Federation</li>
+                    <li>GraphQL Mesh, Stitching and more</li>
+                    <li>Available in Global Edge Network</li>
+                  </ul>
+                </div>
+              }
+              image="/features/schema-history.png"
+              href="https://docs.graphql-hive.com/features/publish-schema"
+              gradient={0}
+            />
+            <Feature
+              title="Prevent Breaking Changes"
+              description={
+                <div>
+                  <p>Push GraphQL schema to the registry and track the history of changes.</p>
+                  <p>Get an overview of all GraphQL services in one place.</p>
+                </div>
+              }
+              image={ITEMS[1].imageSrc}
+              gradient={1}
+              href=""
+              flipped
             />
           </div>
-          {ITEMS.map((option, i) => {
-            return (
-              <HeroIllustration
-                key={option.title}
-                title={option.title}
-                description={option.description}
-                image={{
-                  src: option.imageSrc,
-                  alt: option.imageAlt,
-                }}
-                flipped={i % 2 !== 0}
-              />
-            );
-          })}
           <Pricing />
           <FooterExtended
             resources={[

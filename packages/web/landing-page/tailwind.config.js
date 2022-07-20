@@ -2,6 +2,7 @@
 const colors = require('tailwindcss/colors');
 
 module.exports = {
+  darkMode: 'class',
   theme: {
     fontFamily: {
       title: ['Inter', 'ui-sans-serif', 'system-ui'],
