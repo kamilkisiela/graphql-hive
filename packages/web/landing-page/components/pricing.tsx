@@ -58,12 +58,19 @@ function Plan(plan: {
 const usageDataRetentionExplainer = 'How long to store GraphQL requests reported to GraphQL Hive';
 const operationsExplainer = 'GraphQL requests reported to GraphQL Hive';
 
-export function Pricing() {
+export function Pricing({ gradient }: { gradient: [string, string] }) {
   return (
     <div style={{ backgroundColor: 'rgb(23, 23, 23)' }} tw="w-full">
       <div tw="max-width[1024px] w-full px-6 box-border mx-auto my-12">
-        <h2 tw="md:text-3xl text-2xl text-white font-bold">Pricing</h2>
-        <p tw="text-gray-400">All features for every plan</p>
+        <h2
+          tw="md:text-3xl text-2xl text-white font-bold bg-clip-text text-transparent dark:text-transparent leading-normal"
+          style={{
+            backgroundImage: `linear-gradient(-70deg, ${gradient[1]}, ${gradient[0]})`,
+          }}
+        >
+          Pricing
+        </h2>
+        <p tw="text-gray-400">All features are available in every plan</p>
         <div tw="flex flex-col md:flex-row content-start items-stretch justify-start justify-items-start gap-4 mt-6">
           <Plan
             name="Hobby"

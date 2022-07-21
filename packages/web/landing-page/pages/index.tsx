@@ -1,11 +1,41 @@
 import React from 'react';
-import { HeroGradient, HeroIllustration } from '@theguild/components';
+import tw from 'twin.macro';
 import Head from 'next/head';
 import { GlobalStyles } from 'twin.macro';
-import { css } from 'twin.macro';
-import { Header, FooterExtended, GlobalStyles as TGCStyles, ThemeProvider } from '@theguild/components';
+import {
+  Header,
+  FooterExtended,
+  ThemeProvider,
+  GlobalStyles as TGCStyles,
+  useThemeContext,
+} from '@theguild/components';
 import * as Tooltip from '@radix-ui/react-tooltip';
+import { FiServer, FiGlobe, FiRadio, FiGithub } from 'react-icons/fi';
 import { Pricing } from '../components/pricing';
+
+const PrimaryLink = tw.a`
+  inline-block
+  bg-yellow-500 hover:bg-opacity-75
+  dark:bg-yellow-600 dark:hover:bg-opacity-100 dark:hover:bg-yellow-500
+  text-white px-6 py-3 rounded-lg font-medium
+  shadow-sm
+`;
+
+const SecondaryLink = tw.a`
+  inline-block
+  bg-gray-100 hover:bg-gray-200
+  dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700
+  text-gray-600 px-6 py-3 rounded-lg font-medium
+  shadow-sm
+`;
+
+const FeatureWrapper = tw.div`
+  w-full py-24 
+  odd:bg-gray-50
+  odd:dark:bg-gray-900
+  even:bg-white
+  even:dark:bg-black
+`;
 
 const CookiesConsent: React.FC = () => {
   const [show, setShow] = React.useState(typeof window !== 'undefined' && localStorage.getItem('cookies') === null);
@@ -40,67 +70,142 @@ const CookiesConsent: React.FC = () => {
   );
 };
 
-const ITEMS = [
-  {
-    title: 'Open Source',
-    description:
-      'Community-based project where everyone can shape its future. Hive is also available as SaaS, with a free plan and transparent pricing.',
-    imageSrc: '/open-source.svg',
-    imageAlt: 'Open Source',
-  },
-  {
-    title: 'Works with all GraphQL servers',
-    description:
-      'Aims to be compatible with any kind of GraphQL setup. Use the Hive agent/client in your server, or use the Hive CLI.',
-    imageSrc: '/agnostic-framework.svg',
-    imageAlt: 'Agnostic Framework',
-  },
-  {
-    title: 'Works with any CI/CD',
-    description: 'Integrates seamlessly with GitHub, and can easily be used with any CI/CD setup.',
-    imageSrc: '/any-ci-cd.svg',
-    imageAlt: 'Any CI/CD',
-  },
-  {
-    title: 'Distributed Schemas',
-    description: 'Supports any GraphQL schema setup: from a simple schema to Apollo Federation and Schema Stitching.',
-    imageSrc: '/distributed-schemas.svg',
-    imageAlt: 'Schemas',
-  },
+const gradients: [string, string][] = [
+  ['#ff9472', '#f2709c'],
+  ['#4776e6', '#8e54e9'],
+  ['#f857a6', '#ff5858'],
+  ['#4AC29A', '#BDFFF3'],
+  ['#00c6ff', '#0072ff'],
 ];
 
-const heroWrapper = css`
-  @media only screen and (min-width: 500px) {
-    & img {
-      margin-top: 4%;
-      margin-right: 7%;
-    }
+function pickGradient(i: number) {
+  const gradient = gradients[i % gradients.length];
+
+  if (!gradient) {
+    throw new Error('No gradient found');
   }
-  @media only screen and (max-width: 768px) {
-    & img {
-      margin-right 25%;
-    }
-  }
-  @media only screen and (max-width: 500px) {
-    & img {
-      display: none !important;
-    }
-    & div:nth-child(2) {
-      justify-content: center;
-    }
-    & h1 {
-      margin-top: 2.5rem !important;
-    }
-    & div {
-      padding-bottom: 0.1rem;
-    }
-  }
-`;
+
+  return gradient;
+}
+
+function GuildHeader() {
+  const { isDarkTheme } = useThemeContext();
+  const color = isDarkTheme ? '#000' : '#f9fafb';
+
+  return (
+    <Header
+      wrapperProps={{
+        style: {
+          backgroundColor: color,
+        },
+      }}
+      navigationProps={{
+        style: {
+          backgroundColor: color,
+        },
+      }}
+      accentColor="#D49605"
+      activeLink=""
+      themeSwitch
+      disableSearch
+    />
+  );
+}
+
+function Hero() {
+  return (
+    <div tw="w-full">
+      <div tw="py-20 sm:py-24 lg:py-32 my-6">
+        <h1 tw="max-w-screen-md mx-auto font-extrabold text-5xl sm:text-5xl lg:text-6xl text-center bg-gradient-to-r from-yellow-500 to-orange-600 dark:from-yellow-400 dark:to-orange-500 bg-clip-text text-transparent">
+          Take full control of GraphQL API
+        </h1>
+        <p tw="max-w-screen-sm mx-auto mt-6 text-2xl text-gray-600 text-center dark:text-gray-400">
+          Prevent breaking changes, monitor performance of your GraphQL API, and manage your API gateway
+        </p>
+        <div tw="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+          <PrimaryLink href="https://app.graphql-hive.com">Sign up for free</PrimaryLink>
+          <SecondaryLink href="https://docs.graphql-hive.com">Documentation</SecondaryLink>
+          <SecondaryLink tw="flex flex-row gap-2 items-center" href="https://github.com/kamilkisiela/graphql-hive">
+            <FiGithub /> GitHub
+          </SecondaryLink>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const Highlight = {
+  Root: tw.div`flex flex-row md:flex-col lg:flex-row flex-1 gap-6`,
+  Icon: tw.div`w-16 h-16 text-yellow-500 flex-shrink-0`,
+  Content: tw.div`flex flex-col text-black dark:text-white`,
+  Title: tw.h3`text-xl font-semibold`,
+  Description: tw.p`text-gray-600 dark:text-gray-400`,
+};
+
+function Feature(props: {
+  title: string;
+  description: React.ReactNode;
+  highlights?: Array<{
+    title: string;
+    description: React.ReactNode;
+    icon?: React.ReactNode;
+  }>;
+  image: string;
+  gradient: number;
+  flipped?: boolean;
+}) {
+  const { title, description, highlights, image, gradient, flipped } = props;
+  const [start, end] = pickGradient(gradient);
+
+  return (
+    <FeatureWrapper>
+      <div tw="container box-border px-6 mx-auto flex flex-col gap-y-24">
+        <div
+          tw="flex flex-col gap-24 md:gap-12 lg:gap-24 items-start"
+          css={[flipped ? tw`md:flex-row-reverse` : tw`md:flex-row`]}
+        >
+          <div tw="flex flex-col gap-4 w-full md:w-2/5 lg:w-1/3 flex-shrink-0">
+            <h2
+              tw="font-semibold text-5xl bg-clip-text text-transparent dark:text-transparent leading-normal"
+              style={{
+                backgroundImage: `linear-gradient(-70deg, ${end}, ${start})`,
+              }}
+            >
+              {title}
+            </h2>
+            <div tw="text-lg text-gray-600 dark:text-gray-400 leading-7">{description}</div>
+          </div>
+          <div
+            tw="rounded-3xl overflow-hidden p-8 flex-grow flex flex-col justify-center items-center relative"
+            style={{
+              backgroundImage: `linear-gradient(70deg, ${start}, ${end})`,
+            }}
+          >
+            <img src={image} tw="rounded-2xl" alt={title} />
+          </div>
+        </div>
+        {Array.isArray(highlights) && highlights.length > 0 ? (
+          <div tw="flex flex-col md:flex-row gap-12 justify-between">
+            {highlights.map(({ title, description, icon }, i) => (
+              <Highlight.Root key={i}>
+                <Highlight.Icon>{icon}</Highlight.Icon>
+                <Highlight.Content>
+                  <Highlight.Title>{title}</Highlight.Title>
+                  <Highlight.Description>{description}</Highlight.Description>
+                </Highlight.Content>
+              </Highlight.Root>
+            ))}
+          </div>
+        ) : null}
+      </div>
+    </FeatureWrapper>
+  );
+}
 
 export default function Index() {
   const title = 'GraphQL Hive - Schema Registry and Monitoring';
-  const description =
-    'An open-source GraphQL schema registry and performance monitoring tool with many additional features to enhance your day-to-day work with GraphQL.';
+  const fullDescription =
+    'Prevent breaking changes, monitor performance of your GraphQL API, and manage your API gateway (Federation, Stitching) with the Schema Registry. GraphQL Hive is a SAAS solution that is also 100% open source and can be self-hosted.';
 
   return (
     <ThemeProvider>
@@ -108,8 +213,8 @@ export default function Index() {
         <meta charSet="utf-8" />
         <title>{title}</title>
         <meta property="og:title" content={title} key="title" />
-        <meta name="description" content={description} key="description" />
-        <meta name="og:description" content={description} key="og:description" />
+        <meta name="description" content={fullDescription} key="description" />
+        <meta name="og:description" content={fullDescription} key="og:description" />
         <meta property="og:url" key="og:url" content="https://graphql-hive.com" />
         <meta property="og:type" key="og:type" content="website" />
         <meta
@@ -144,63 +249,163 @@ export default function Index() {
           `}</style>
           <GlobalStyles />
           <TGCStyles includeFonts={false} />
-          <Header accentColor="#D49605" activeLink="" disableSearch />
-          <div css={heroWrapper}>
-            <HeroGradient
-              title="Manage your GraphQL API workflow"
-              description={description}
-              colors={['#FFB21D']}
-              image={{
-                src: '/manage.svg',
-                alt: 'Manage workflows',
-              }}
-              link={[
+          <GuildHeader />
+          <Hero />
+          <div tw="flex flex-col">
+            <Feature
+              title="Schema Registry"
+              description={
+                <div tw="space-y-2">
+                  <p>Push GraphQL schema to the registry and track the history of changes.</p>
+                  <p>All your GraphQL services in one place.</p>
+                </div>
+              }
+              highlights={[
                 {
-                  target: '_blank',
-                  href: 'https://app.graphql-hive.com',
-                  title: 'Go to dashboard',
-                  children: 'Dashboard',
+                  title: 'Manage your Gateway',
+                  description: 'Connect to Apollo Federation, GraphQL Mesh, Stitching and more.',
+                  icon: <FiServer tw="w-full h-full" />,
                 },
                 {
-                  target: '_blank',
-                  href: 'https://docs.graphql-hive.com',
-                  title: 'Documentation',
-                  children: 'Documentation',
-                  style: {
-                    color: '#fff',
-                    border: '1px solid #fff',
-                    background: 'transparent',
-                  },
+                  title: 'Global Edge Network',
+                  description: 'Access the registry from any place on earth within milliseconds.',
+                  icon: <FiGlobe tw="w-full h-full" />,
                 },
                 {
-                  target: '_blank',
-                  href: 'https://github.com/kamilkisiela/graphql-hive',
-                  title: 'GitHub',
-                  children: 'GitHub',
-                  style: {
-                    color: '#fff',
-                    border: '1px solid #fff',
-                    background: 'transparent',
-                  },
+                  title: 'Make it smarter',
+                  description: 'Detect unused parts of Schema thanks to GraphQL analytics.',
+                  icon: <FiRadio tw="w-full h-full" />,
                 },
               ]}
+              image="/features/schema-history.png"
+              gradient={0}
             />
+            <Feature
+              title="Monitoring"
+              description={
+                <div tw="flex flex-col gap-y-24">
+                  <div>
+                    <p>Be aware of how your GraphQL API is used and what is the experience of its final users.</p>
+                  </div>
+                  <div tw="flex flex-col gap-y-12">
+                    <Highlight.Root>
+                      <Highlight.Content>
+                        <Highlight.Title tw="text-lg">GraphQL Consumers</Highlight.Title>
+                        <Highlight.Description tw="text-sm">
+                          Track every source of GraphQL requests and see how the API is consumed.
+                        </Highlight.Description>
+                      </Highlight.Content>
+                    </Highlight.Root>
+                    <Highlight.Root>
+                      <Highlight.Content>
+                        <Highlight.Title tw="text-lg">Overall performance</Highlight.Title>
+                        <Highlight.Description tw="text-sm">
+                          Get a global overview of the usage of your GraphQL API.
+                        </Highlight.Description>
+                      </Highlight.Content>
+                    </Highlight.Root>
+                    <Highlight.Root>
+                      <Highlight.Content>
+                        <Highlight.Title tw="text-lg">Query performance</Highlight.Title>
+                        <Highlight.Description tw="text-sm">
+                          Detect slow GraphQL Operations and identify the culprits.
+                        </Highlight.Description>
+                      </Highlight.Content>
+                    </Highlight.Root>
+                  </div>
+                </div>
+              }
+              image="/features/monitoring-preview.png"
+              gradient={1}
+              flipped
+            />
+            <Feature
+              title="Analytics"
+              description={
+                <div tw="flex flex-col gap-y-12">
+                  <div>
+                    <p>Maintain your GraphQL API across many teams without concerns.</p>
+                  </div>
+                  <div tw="flex flex-col gap-y-12">
+                    <Highlight.Root>
+                      <Highlight.Content>
+                        <Highlight.Title tw="text-lg">Prevent Breaking Changes</Highlight.Title>
+                        <Highlight.Description tw="text-sm">
+                          Combination of Schema Registry and GraphQL Monitoring helps you evolve your GraphQL API.
+                        </Highlight.Description>
+                      </Highlight.Content>
+                    </Highlight.Root>
+                    <Highlight.Root>
+                      <Highlight.Content>
+                        <Highlight.Title tw="text-lg">Detect unused fields</Highlight.Title>
+                        <Highlight.Description tw="text-sm">
+                          Helps you understand the coverage of GraphQL schema and safely remove the unused part.
+                        </Highlight.Description>
+                      </Highlight.Content>
+                    </Highlight.Root>
+                    <Highlight.Root>
+                      <Highlight.Content>
+                        <Highlight.Title tw="text-lg">Alerts and notifications</Highlight.Title>
+                        <Highlight.Description tw="text-sm">
+                          Stay on top of everything with Slack notifications.
+                        </Highlight.Description>
+                      </Highlight.Content>
+                    </Highlight.Root>
+                  </div>
+                </div>
+              }
+              image="/any-ci-cd.svg"
+              gradient={2}
+            />
+            <FeatureWrapper>
+              <div tw="container box-border px-6 mx-auto flex flex-col gap-y-24">
+                <div tw="text-center">
+                  <h2
+                    tw="font-semibold text-5xl mb-6 bg-clip-text text-transparent dark:text-transparent leading-normal"
+                    style={{
+                      backgroundImage: `linear-gradient(-70deg, ${gradients[3][1]}, ${gradients[3][0]})`,
+                    }}
+                  >
+                    Open-Source
+                  </h2>
+                  <p tw="text-lg text-gray-600 dark:text-gray-400 leading-7">Built entirely in public.</p>
+                </div>
+                <div tw="max-w-screen-lg px-6 box-border mx-auto grid grid-cols-2 gap-12">
+                  <Highlight.Root>
+                    <Highlight.Content>
+                      <Highlight.Title tw="text-lg">Public roadmap</Highlight.Title>
+                      <Highlight.Description tw="text-sm">Influence the future of GraphQL Hive.</Highlight.Description>
+                    </Highlight.Content>
+                  </Highlight.Root>
+                  <Highlight.Root>
+                    <Highlight.Content>
+                      <Highlight.Title tw="text-lg">Cloud and Self-Hosted</Highlight.Title>
+                      <Highlight.Description tw="text-sm">
+                        MIT licensed, host it on your own infrastructure.
+                      </Highlight.Description>
+                    </Highlight.Content>
+                  </Highlight.Root>
+                  <Highlight.Root>
+                    <Highlight.Content>
+                      <Highlight.Title tw="text-lg">Available for free</Highlight.Title>
+                      <Highlight.Description tw="text-sm">
+                        Free Hobby plan that fits perfectly for most side projects.
+                      </Highlight.Description>
+                    </Highlight.Content>
+                  </Highlight.Root>
+                  <Highlight.Root>
+                    <Highlight.Content>
+                      <Highlight.Title tw="text-lg">Community</Highlight.Title>
+                      <Highlight.Description tw="text-sm">
+                        Implement your own features with our help.
+                      </Highlight.Description>
+                    </Highlight.Content>
+                  </Highlight.Root>
+                </div>
+              </div>
+            </FeatureWrapper>
           </div>
-          {ITEMS.map((option, i) => {
-            return (
-              <HeroIllustration
-                key={option.title}
-                title={option.title}
-                description={option.description}
-                image={{
-                  src: option.imageSrc,
-                  alt: option.imageAlt,
-                }}
-                flipped={i % 2 !== 0}
-              />
-            );
-          })}
-          <Pricing />
+          <Pricing gradient={gradients[4]} />
           <FooterExtended
             resources={[
               {
