@@ -117,7 +117,7 @@ function Hero() {
     <div tw="w-full">
       <div tw="py-20 sm:py-24 lg:py-32 my-6">
         <h1 tw="max-w-screen-md mx-auto font-extrabold text-5xl sm:text-5xl lg:text-6xl text-center bg-gradient-to-r from-yellow-500 to-orange-600 dark:from-yellow-400 dark:to-orange-500 bg-clip-text text-transparent">
-          Take full control of GraphQL API
+          Take full control of your GraphQL API
         </h1>
         <p tw="max-w-screen-sm mx-auto mt-6 text-2xl text-gray-600 text-center dark:text-gray-400">
           Prevent breaking changes, monitor performance of your GraphQL API, and manage your API gateway
