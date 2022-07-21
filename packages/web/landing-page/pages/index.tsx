@@ -10,7 +10,7 @@ import {
   useThemeContext,
 } from '@theguild/components';
 import * as Tooltip from '@radix-ui/react-tooltip';
-import { FiServer, FiGlobe, FiRadio } from 'react-icons/fi';
+import { FiServer, FiGlobe, FiRadio, FiGithub } from 'react-icons/fi';
 import { Pricing } from '../components/pricing';
 
 const PrimaryLink = tw.a`
@@ -125,7 +125,9 @@ function Hero() {
         <div tw="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
           <PrimaryLink href="https://app.graphql-hive.com">Sign up for free</PrimaryLink>
           <SecondaryLink href="https://docs.graphql-hive.com">Documentation</SecondaryLink>
-          <SecondaryLink href="https://github.com/kamilkisiela/graphql-hive">GitHub</SecondaryLink>
+          <SecondaryLink tw="flex flex-row gap-2 items-center" href="https://github.com/kamilkisiela/graphql-hive">
+            <FiGithub /> GitHub
+          </SecondaryLink>
         </div>
       </div>
     </div>
