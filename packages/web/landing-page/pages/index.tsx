@@ -122,7 +122,7 @@ function Hero() {
         <p tw="max-w-screen-sm mx-auto mt-6 text-2xl text-gray-600 text-center dark:text-gray-400">
           Prevent breaking changes, monitor performance of your GraphQL API, and manage your API gateway
         </p>
-        <div tw="mt-10 flex flex-row items-center justify-center gap-4">
+        <div tw="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
           <PrimaryLink href="https://app.graphql-hive.com">Sign up for free</PrimaryLink>
           <SecondaryLink href="https://docs.graphql-hive.com">Documentation</SecondaryLink>
           <SecondaryLink href="https://github.com/kamilkisiela/graphql-hive">GitHub</SecondaryLink>
@@ -133,7 +133,7 @@ function Hero() {
 }
 
 const Highlight = {
-  Root: tw.div`flex flex-row flex-1 gap-x-6`,
+  Root: tw.div`flex flex-row md:flex-col lg:flex-row flex-1 gap-6`,
   Icon: tw.div`w-16 h-16 text-yellow-500 flex-shrink-0`,
   Content: tw.div`flex flex-col text-black dark:text-white`,
   Title: tw.h3`text-xl font-semibold`,
@@ -148,7 +148,7 @@ function Feature(props: {
     description: React.ReactNode;
     icon?: React.ReactNode;
   }>;
-  image: string | string[];
+  image: string;
   gradient: number;
   flipped?: boolean;
 }) {
@@ -159,12 +159,10 @@ function Feature(props: {
     <FeatureWrapper>
       <div tw="container box-border px-6 mx-auto flex flex-col gap-y-24">
         <div
-          tw="flex flex-row gap-x-24 items-start"
-          style={{
-            flexDirection: flipped ? 'row-reverse' : 'row',
-          }}
+          tw="flex flex-col gap-24 md:gap-12 lg:gap-24 items-start"
+          css={[flipped ? tw`md:flex-row-reverse` : tw`md:flex-row`]}
         >
-          <div tw="flex flex-col gap-4 w-1/3 flex-shrink-0">
+          <div tw="flex flex-col gap-4 w-full md:w-2/5 lg:w-1/3 flex-shrink-0">
             <h2
               tw="font-semibold text-5xl bg-clip-text text-transparent dark:text-transparent leading-normal"
               style={{
@@ -175,21 +173,17 @@ function Feature(props: {
             </h2>
             <div tw="text-lg text-gray-600 dark:text-gray-400 leading-7">{description}</div>
           </div>
-          {/* shadow-md border-2 */}
           <div
             tw="rounded-3xl overflow-hidden p-8 flex-grow flex flex-col justify-center items-center relative"
             style={{
               backgroundImage: `linear-gradient(70deg, ${start}, ${end})`,
-              // borderColor: props.flipped ? start : end,
             }}
           >
-            {
-              typeof image === 'string' ? <img src={image} tw="rounded-2xl" /> : null // implement slider
-            }
+            <img src={image} tw="rounded-2xl" />
           </div>
         </div>
         {Array.isArray(highlights) && highlights.length > 0 ? (
-          <div tw="flex flex-row gap-x-12 justify-between">
+          <div tw="flex flex-col md:flex-row gap-12 justify-between">
             {highlights.map(({ title, description, icon }, i) => (
               <Highlight.Root key={i}>
                 <Highlight.Icon>{icon}</Highlight.Icon>
