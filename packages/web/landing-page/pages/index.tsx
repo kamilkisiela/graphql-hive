@@ -1,5 +1,5 @@
 import React from 'react';
-import tw, { styled } from 'twin.macro';
+import tw from 'twin.macro';
 import Head from 'next/head';
 import { GlobalStyles } from 'twin.macro';
 import {
@@ -27,6 +27,14 @@ const SecondaryLink = tw.a`
   dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700
   text-gray-600 px-6 py-3 rounded-lg font-medium
   shadow-sm
+`;
+
+const FeatureWrapper = tw.div`
+  w-full py-24 
+  odd:bg-gray-50
+  odd:dark:bg-gray-900
+  even:bg-white
+  even:dark:bg-black
 `;
 
 const CookiesConsent: React.FC = () => {
@@ -62,41 +70,12 @@ const CookiesConsent: React.FC = () => {
   );
 };
 
-const ITEMS = [
-  {
-    title: 'Open Source',
-    description:
-      'Community-based project where everyone can shape its future. Hive is also available as SaaS, with a free plan and transparent pricing.',
-    imageSrc: '/open-source.svg',
-    imageAlt: 'Open Source',
-  },
-  {
-    title: 'Works with all GraphQL servers',
-    description:
-      'Aims to be compatible with any kind of GraphQL setup. Use the Hive agent/client in your server, or use the Hive CLI.',
-    imageSrc: '/agnostic-framework.svg',
-    imageAlt: 'Agnostic Framework',
-  },
-  {
-    title: 'Works with any CI/CD',
-    description: 'Integrates seamlessly with GitHub, and can easily be used with any CI/CD setup.',
-    imageSrc: '/any-ci-cd.svg',
-    imageAlt: 'Any CI/CD',
-  },
-  {
-    title: 'Distributed Schemas',
-    description: 'Supports any GraphQL schema setup: from a simple schema to Apollo Federation and Schema Stitching.',
-    imageSrc: '/distributed-schemas.svg',
-    imageAlt: 'Schemas',
-  },
-];
-
 const gradients: [string, string][] = [
   ['#ff9472', '#f2709c'],
   ['#4776e6', '#8e54e9'],
   ['#f857a6', '#ff5858'],
-  ['#ee9ca7', '#ffdde1'],
-  ['#de6262', '#ffb88c'],
+  ['#4AC29A', '#BDFFF3'],
+  ['#00c6ff', '#0072ff'],
 ];
 
 function pickGradient(i: number) {
@@ -153,11 +132,6 @@ function Hero() {
   );
 }
 
-const FeatureWrapper = styled.div((props: { flipped?: boolean }) => [
-  tw`w-full py-24`,
-  props.flipped ? tw`bg-gray-50 dark:bg-gray-900` : tw`bg-white dark:bg-black`,
-]);
-
 const Highlight = {
   Root: tw.div`flex flex-row flex-1 gap-x-6`,
   Icon: tw.div`w-16 h-16 text-yellow-500 flex-shrink-0`,
@@ -182,7 +156,7 @@ function Feature(props: {
   const [start, end] = pickGradient(gradient);
 
   return (
-    <FeatureWrapper flipped={flipped}>
+    <FeatureWrapper>
       <div tw="container box-border px-6 mx-auto flex flex-col gap-y-24">
         <div
           tw="flex flex-row gap-x-24 items-start"
@@ -191,14 +165,21 @@ function Feature(props: {
           }}
         >
           <div tw="flex flex-col gap-4 w-1/3 flex-shrink-0">
-            <h2 tw="font-semibold text-5xl text-black dark:text-white">{title}</h2>
+            <h2
+              tw="font-semibold text-5xl bg-clip-text text-transparent dark:text-transparent leading-normal"
+              style={{
+                backgroundImage: `linear-gradient(-70deg, ${end}, ${start})`,
+              }}
+            >
+              {title}
+            </h2>
             <div tw="text-lg text-gray-600 dark:text-gray-400 leading-7">{description}</div>
           </div>
           {/* shadow-md border-2 */}
           <div
             tw="rounded-3xl overflow-hidden p-8 flex-grow flex flex-col justify-center items-center relative"
             style={{
-              backgroundImage: `linear-gradient(to right, ${start}, ${end})`,
+              backgroundImage: `linear-gradient(70deg, ${start}, ${end})`,
               // borderColor: props.flipped ? start : end,
             }}
           >
@@ -274,7 +255,7 @@ export default function Index() {
           <TGCStyles includeFonts={false} />
           <GuildHeader />
           <Hero />
-          <div tw="flex flex-col my-24">
+          <div tw="flex flex-col">
             <Feature
               title="Schema Registry"
               description={
@@ -377,22 +358,35 @@ export default function Index() {
                   </div>
                 </div>
               }
-              image={ITEMS[1].imageSrc}
+              image="/any-ci-cd.svg"
               gradient={2}
             />
-            <FeatureWrapper flipped>
+            <FeatureWrapper>
               <div tw="container box-border px-6 mx-auto flex flex-col gap-y-24">
                 <div tw="text-center">
-                  <h2 tw="font-semibold text-5xl text-black dark:text-white mb-6">Open-Source</h2>
-                  <p tw="text-lg text-gray-600 dark:text-gray-400 leading-7">
-                    Built entirely in public and open to any contribution.
-                  </p>
+                  <h2
+                    tw="font-semibold text-5xl mb-6 bg-clip-text text-transparent dark:text-transparent leading-normal"
+                    style={{
+                      backgroundImage: `linear-gradient(-70deg, ${gradients[3][1]}, ${gradients[3][0]})`,
+                    }}
+                  >
+                    Open-Source
+                  </h2>
+                  <p tw="text-lg text-gray-600 dark:text-gray-400 leading-7">Built entirely in public.</p>
                 </div>
-                <div tw="flex flex-row gap-x-12 justify-between">
+                <div tw="max-w-screen-lg px-6 box-border mx-auto grid grid-cols-2 gap-12">
                   <Highlight.Root>
                     <Highlight.Content>
-                      <Highlight.Title tw="text-lg">Public Roadmap</Highlight.Title>
+                      <Highlight.Title tw="text-lg">Public roadmap</Highlight.Title>
                       <Highlight.Description tw="text-sm">Influence the future of GraphQL Hive.</Highlight.Description>
+                    </Highlight.Content>
+                  </Highlight.Root>
+                  <Highlight.Root>
+                    <Highlight.Content>
+                      <Highlight.Title tw="text-lg">Cloud and Self-Hosted</Highlight.Title>
+                      <Highlight.Description tw="text-sm">
+                        MIT licensed, host it on your own infrastructure.
+                      </Highlight.Description>
                     </Highlight.Content>
                   </Highlight.Root>
                   <Highlight.Root>
@@ -405,9 +399,9 @@ export default function Index() {
                   </Highlight.Root>
                   <Highlight.Root>
                     <Highlight.Content>
-                      <Highlight.Title tw="text-lg">Self-Hosted</Highlight.Title>
+                      <Highlight.Title tw="text-lg">Community</Highlight.Title>
                       <Highlight.Description tw="text-sm">
-                        MIT licensed, host it on your own infrastructure.
+                        Implement your own features with our help.
                       </Highlight.Description>
                     </Highlight.Content>
                   </Highlight.Root>
@@ -415,7 +409,7 @@ export default function Index() {
               </div>
             </FeatureWrapper>
           </div>
-          <Pricing />
+          <Pricing gradient={gradients[4]} />
           <FooterExtended
             resources={[
               {
