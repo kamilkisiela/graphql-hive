@@ -181,7 +181,7 @@ function Feature(props: {
               backgroundImage: `linear-gradient(70deg, ${start}, ${end})`,
             }}
           >
-            <img src={image} tw="rounded-2xl" />
+            <img src={image} tw="rounded-2xl" alt={title} />
           </div>
         </div>
         {Array.isArray(highlights) && highlights.length > 0 ? (
