@@ -19,6 +19,7 @@ export async function scheduleWebhook({
 
   return queue
     .add(jobName, webhook, {
+      jobId: jobName,
       attempts: config.maxAttempts,
       backoff: { type: 'exponential', delay: config.backoffDelay },
     })

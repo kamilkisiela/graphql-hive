@@ -11,13 +11,14 @@ import {
 import * as Sentry from '@sentry/node';
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify/dist/trpc-server-adapters-fastify.cjs.js';
 import type { CreateFastifyContextOptions } from '@trpc/server/adapters/fastify';
+import { emailsApiRouter } from './api';
 import { createScheduler } from './scheduler';
-import { webhooksApiRouter } from './api';
-import type { Context } from './types';
+import { createEmailProvider } from './providers';
+import type { Context } from './context';
 
 async function main() {
   Sentry.init({
-    serverName: 'webhooks',
+    serverName: 'emails',
     enabled: process.env.ENVIRONMENT === 'prod',
     environment: process.env.ENVIRONMENT,
     dsn: process.env.SENTRY_DSN,
@@ -25,15 +26,16 @@ async function main() {
   });
 
   const server = await createServer({
-    name: 'webhooks',
+    name: 'emails',
     tracing: false,
   });
 
   const errorHandler = createErrorHandler(server);
 
   try {
-    const port = process.env.PORT || 6250;
+    const port = process.env.PORT || 6260;
 
+    const emailProvider = createEmailProvider();
     const { schedule, readiness, start, stop } = createScheduler({
       logger: server.log,
       redis: {
@@ -41,9 +43,8 @@ async function main() {
         port: ensureEnv('REDIS_PORT', 'number'),
         password: ensureEnv('REDIS_PASSWORD'),
       },
-      webhookQueueName: 'webhook',
-      maxAttempts: 10,
-      backoffDelay: 2000,
+      queueName: 'emails',
+      emailProvider,
     });
 
     const stopHeartbeats =
@@ -68,7 +69,7 @@ async function main() {
     await server.register(fastifyTRPCPlugin, {
       prefix: '/trpc',
       trpcOptions: {
-        router: webhooksApiRouter,
+        router: emailsApiRouter,
         createContext({ req }: CreateFastifyContextOptions): Context {
           return { logger: req.log, errorHandler, schedule };
         },
@@ -92,6 +93,16 @@ async function main() {
         res.status(isReady ? 200 : 400).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
       },
     });
+
+    if (emailProvider.id === 'mock') {
+      server.route({
+        method: ['GET'],
+        url: '/_history',
+        handler(_, res) {
+          res.status(200).send(emailProvider.history); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+        },
+      });
+    }
 
     await server.listen(port, '0.0.0.0');
 

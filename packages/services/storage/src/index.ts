@@ -1619,6 +1619,8 @@ export async function createStorage(connection: string): Promise<Storage> {
         Slonik<{
           organization: string;
           org_name: string;
+          org_clean_id: string;
+          owner_email: string;
           target: string;
           limit_operations_monthly: number;
           limit_retention_days: number;
@@ -1627,13 +1629,16 @@ export async function createStorage(connection: string): Promise<Storage> {
         sql`
           SELECT 
             o.id as organization,
+            o.clean_id as org_clean_id,
             o.name as org_name,
             o.limit_operations_monthly,
             o.limit_retention_days,
-            t.id as target
+            t.id as target,
+            u.email as owner_email
           FROM public.targets AS t
           LEFT JOIN public.projects AS p ON (p.id = t.project_id)
           LEFT JOIN public.organizations AS o ON (o.id = p.org_id)
+          LEFT JOIN public.users AS u ON (u.id = o.user_id)
         `
       );
       return results.rows;

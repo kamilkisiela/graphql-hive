@@ -20,7 +20,9 @@ import type {
   UpdateTargetNameInput,
   SchemaVersionUpdateInput,
   TargetSelectorInput,
+  OrganizationSelectorInput,
   SchemaSyncCdnInput,
+  RateLimitInput,
 } from './gql/graphql';
 import { execute } from './graphql';
 
@@ -747,4 +749,25 @@ export async function fetchMetadataFromCDN(selector: TargetSelectorInput, token:
     body: res.data,
     status: res.status,
   };
+}
+
+export async function updateOrgRateLimit(
+  selector: OrganizationSelectorInput,
+  monthlyLimits: RateLimitInput,
+  authToken: string
+) {
+  return execute({
+    document: gql(/* GraphQL */ `
+      mutation updateOrgRateLimit($selector: OrganizationSelectorInput!, $monthlyLimits: RateLimitInput!) {
+        updateOrgRateLimit(selector: $selector, monthlyLimits: $monthlyLimits) {
+          id
+        }
+      }
+    `),
+    variables: {
+      selector,
+      monthlyLimits,
+    },
+    authToken,
+  });
 }

@@ -287,6 +287,8 @@ export interface Storage {
     ReadonlyArray<{
       organization: string;
       org_name: string;
+      org_clean_id: string;
+      owner_email: string;
       target: string;
       limit_operations_monthly: number;
       limit_retention_days: number;

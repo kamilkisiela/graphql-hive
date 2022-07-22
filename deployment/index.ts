@@ -3,6 +3,7 @@ import { DeploymentEnvironment } from './types';
 import { deployDbMigrations } from './services/db-migrations';
 import { deployTokens } from './services/tokens';
 import { deployWebhooks } from './services/webhooks';
+import { deployEmails } from './services/emails';
 import { deploySchema } from './services/schema';
 import { deployUsage } from './services/usage';
 import { deployUsageIngestor } from './services/usage-ingestor';
@@ -38,6 +39,7 @@ const appHostname = `${appDns}.${rootDns}`;
 const docsHostname = `${docsDns}.${rootDns}`;
 
 const heartbeatsConfig = new pulumi.Config('heartbeats');
+const emailConfig = new pulumi.Config('email');
 
 const resourceGroup = new azure.core.ResourceGroup(`hive-${envName}-rg`, {
   location: azure.Locations.EastUS,
@@ -102,6 +104,19 @@ const webhooksApi = deployWebhooks({
   heartbeat: heartbeatsConfig.get('webhooks'),
 });
 
+const emailsApi = deployEmails({
+  packageHelper,
+  storageContainer,
+  deploymentEnv,
+  redis: redisApi,
+  email: {
+    token: emailConfig.requireSecret('token'),
+    from: emailConfig.require('from'),
+    messageStream: emailConfig.require('messageStream'),
+  },
+  // heartbeat: heartbeatsConfig.get('emails'),
+});
+
 const usageEstimationApi = deployUsageEstimation({
   packageHelper,
   storageContainer,
@@ -124,6 +139,7 @@ const rateLimitApi = deployRateLimit({
   deploymentEnv,
   dbMigrations,
   usageEstimator: usageEstimationApi,
+  emails: emailsApi,
 });
 
 const usageApi = deployUsage({

@@ -24,7 +24,7 @@ async function main() {
         transform: {
           '^.+\\.ts$': 'ts-jest',
         },
-        testTimeout: 60_000,
+        testTimeout: 30_000,
         maxConcurrency: 1,
         setupFiles: ['dotenv/config'],
         setupFilesAfterEnv: ['./jest-setup.ts'],

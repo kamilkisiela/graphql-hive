@@ -114,6 +114,7 @@ jobs:
           AUTH0_CLIENT_ID: ${{ secrets.TEST_AUTH0_CLIENT_ID }}
           AUTH0_CLIENT_SECRET: ${{ secrets.TEST_AUTH0_CLIENT_SECRET }}
           AUTH0_USER_PASSWORD: ${{ secrets.AUTH0_TESTING_USER_PASSWORD }}
+          AUTH0_USER_ADMIN_EMAIL: kamil@graphql-hive.com
           AUTH0_USER_MAIN_EMAIL: contact@the-guild.dev
           AUTH0_USER_EXTRA_EMAIL: contact+extra@the-guild.dev
           AUTH0_SECRET: ${{ secrets.TEST_AUTH0_SECRET }}

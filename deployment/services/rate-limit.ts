@@ -5,6 +5,7 @@ import { PackageHelper } from '../utils/pack';
 import { DeploymentEnvironment } from '../types';
 import { DbMigrations } from './db-migrations';
 import { UsageEstimator } from './usage-estimation';
+import { Emails } from './emails';
 import { serviceLocalEndpoint } from '../utils/local-endpoint';
 
 const rateLimitConfig = new pulumi.Config('rateLimit');
@@ -20,12 +21,14 @@ export function deployRateLimit({
   deploymentEnv,
   dbMigrations,
   usageEstimator,
+  emails,
 }: {
   usageEstimator: UsageEstimator;
   storageContainer: azure.storage.Container;
   packageHelper: PackageHelper;
   deploymentEnv: DeploymentEnvironment;
   dbMigrations: DbMigrations;
+  emails: Emails;
 }) {
   return new RemoteArtifactAsServiceDeployment(
     'rate-limiter',
@@ -40,6 +43,7 @@ export function deployRateLimit({
         LIMIT_CACHE_UPDATE_INTERVAL_MS: rateLimitConfig.require('updateIntervalMs'),
         RELEASE: packageHelper.currentReleaseId(),
         USAGE_ESTIMATOR_ENDPOINT: serviceLocalEndpoint(usageEstimator.service),
+        EMAILS_ENDPOINT: serviceLocalEndpoint(emails.service),
         POSTGRES_CONNECTION_STRING: apiConfig.requireSecret('postgresConnectionString'),
       },
       exposesMetrics: true,
