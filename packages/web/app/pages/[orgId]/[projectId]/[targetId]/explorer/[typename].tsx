@@ -1,6 +1,6 @@
 import { ReactElement } from 'react';
 import { formatISO, subDays } from 'date-fns';
-import { DocumentType,gql, useQuery } from 'urql';
+import { DocumentType, gql, useQuery } from 'urql';
 
 import { TargetLayout } from '@/components/layouts';
 import {
