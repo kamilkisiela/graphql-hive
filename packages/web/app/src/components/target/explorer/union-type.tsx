@@ -1,6 +1,6 @@
 import { gql, DocumentType } from 'urql';
 
-const GraphQLUnionTypeComponent_TypeFragment = gql(/* GraphQL */ `
+export const GraphQLUnionTypeComponent_TypeFragment = gql(/* GraphQL */ `
   fragment GraphQLUnionTypeComponent_TypeFragment on GraphQLUnionType {
     name
     description

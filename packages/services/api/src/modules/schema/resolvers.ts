@@ -48,7 +48,7 @@ async function usage(
       >
 ) {
   const coordinate = 'parent' in source ? `${source.parent.coordinate}.${source.entity.name}` : source.entity.name;
-  const usage = source.usage[coordinate];
+  const usage = (await source.usage)[coordinate];
 
   return usage
     ? {
@@ -555,18 +555,16 @@ export const resolvers: SchemaModule.Resolvers = {
         return null;
       }
 
-      const stats = await injector.get(OperationsManager).countCoordinatesOfType({
-        typename: namedType.name,
-        organization: usage.organization,
-        project: usage.project,
-        target: usage.target,
-        period: usage.period,
-      });
-
       return {
         // TODO: fix any
         entity: namedType as any,
-        usage: stats,
+        usage: injector.get(OperationsManager).countCoordinatesOfType({
+          typename: namedType.name,
+          organization: usage.organization,
+          project: usage.project,
+          target: usage.target,
+          period: usage.period,
+        }),
       };
     },
     async types({ schema, usage }, _, { injector }) {
@@ -577,20 +575,29 @@ export const resolvers: SchemaModule.Resolvers = {
         }>
       > = [];
       const typeMap = schema.getTypeMap();
+      const operationsManager = injector.get(OperationsManager);
 
-      const stats = await injector.get(OperationsManager).countCoordinatesOfTarget({
-        target: usage.target,
-        organization: usage.organization,
-        project: usage.project,
-        period: usage.period,
-      });
+      function getStats() {
+        return operationsManager.countCoordinatesOfTarget({
+          target: usage.target,
+          organization: usage.organization,
+          project: usage.project,
+          period: usage.period,
+        });
+      }
 
       for (const typename in typeMap) {
         if (typename.startsWith('__')) {
           continue;
         }
 
-        types.push({ entity: typeMap[typename], usage: stats });
+        types.push({
+          entity: typeMap[typename],
+          get usage() {
+            console.log('Usage getter called!');
+            return getStats();
+          },
+        });
       }
 
       return types;
@@ -604,13 +611,15 @@ export const resolvers: SchemaModule.Resolvers = {
 
       return {
         entity: queryType,
-        usage: await injector.get(OperationsManager).countCoordinatesOfType({
-          typename: queryType.name,
-          organization: usage.organization,
-          project: usage.project,
-          target: usage.target,
-          period: usage.period,
-        }),
+        get usage() {
+          return injector.get(OperationsManager).countCoordinatesOfType({
+            typename: queryType.name,
+            organization: usage.organization,
+            project: usage.project,
+            target: usage.target,
+            period: usage.period,
+          });
+        },
       };
     },
     async mutation({ schema, usage }, _, { injector }) {
@@ -622,13 +631,15 @@ export const resolvers: SchemaModule.Resolvers = {
 
       return {
         entity: mutationType,
-        usage: await injector.get(OperationsManager).countCoordinatesOfType({
-          typename: mutationType.name,
-          organization: usage.organization,
-          project: usage.project,
-          target: usage.target,
-          period: usage.period,
-        }),
+        get usage() {
+          return injector.get(OperationsManager).countCoordinatesOfType({
+            typename: mutationType.name,
+            organization: usage.organization,
+            project: usage.project,
+            target: usage.target,
+            period: usage.period,
+          });
+        },
       };
     },
     async subscription({ schema, usage }, _, { injector }) {
@@ -640,13 +651,15 @@ export const resolvers: SchemaModule.Resolvers = {
 
       return {
         entity: subscriptionType,
-        usage: await injector.get(OperationsManager).countCoordinatesOfType({
-          typename: subscriptionType.name,
-          organization: usage.organization,
-          project: usage.project,
-          target: usage.target,
-          period: usage.period,
-        }),
+        get usage() {
+          return injector.get(OperationsManager).countCoordinatesOfType({
+            typename: subscriptionType.name,
+            organization: usage.organization,
+            project: usage.project,
+            target: usage.target,
+            period: usage.period,
+          });
+        },
       };
     },
   },
@@ -746,7 +759,7 @@ export const resolvers: SchemaModule.Resolvers = {
     description: f => f.entity.description ?? null,
     isDeprecated: f => typeof f.entity.deprecationReason === 'string',
     deprecationReason: f => f.entity.deprecationReason ?? null,
-    type: f => f.entity.toString(),
+    type: f => f.entity.type.toString(),
     args: f =>
       f.entity.args.map(a => ({
         entity: a,

@@ -4,6 +4,7 @@ import { gql, useQuery } from 'urql';
 
 import { TargetLayout } from '@/components/layouts';
 import { GraphQLObjectTypeComponent } from '@/components/target/explorer/object-type';
+import { ExplorerSearch } from '@/components/target/explorer/search';
 import { DataWrapper, noSchema, Title } from '@/components/v2';
 import { OrganizationFieldsFragment, ProjectFieldsFragment, TargetFieldsFragment } from '@/graphql';
 
@@ -49,17 +50,18 @@ function SchemaView({
   project: ProjectFieldsFragment;
   target: TargetFieldsFragment;
 }): ReactElement | null {
-  const now = new Date();
+  const now = floorDate(new Date());
+  const period = {
+    to: formatISO(now),
+    from: formatISO(subDays(now, 60)),
+  };
   const [query] = useQuery({
     query: SchemaView_SchemaExplorer,
     variables: {
       organization: organization.cleanId,
       project: project.cleanId,
       target: target.cleanId,
-      period: {
-        to: floorDate(now),
-        from: formatISO(subDays(now, 60)),
-      },
+      period,
     },
     requestPolicy: 'cache-first',
   });
@@ -74,14 +76,13 @@ function SchemaView({
         const { query, mutation, subscription } = data.target.latestSchemaVersion.explorer;
         const { totalRequests } = data.operationsStats;
 
-        console.log(typeof totalRequests);
-
         return (
           <>
             <div className="mb-5 flex flex-row items-center justify-between">
               <div className="font-light text-gray-500">The latest published schema.</div>
             </div>
             <div className="flex flex-col gap-4">
+              <ExplorerSearch organization={organization} project={project} target={target} period={period} />
               {query ? <GraphQLObjectTypeComponent type={query} totalRequests={totalRequests} /> : null}
               {mutation ? <GraphQLObjectTypeComponent type={mutation} totalRequests={totalRequests} /> : null}
               {subscription ? <GraphQLObjectTypeComponent type={subscription} totalRequests={totalRequests} /> : null}

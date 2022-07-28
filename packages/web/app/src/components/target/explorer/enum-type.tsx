@@ -1,6 +1,6 @@
 import { gql, DocumentType } from 'urql';
 
-const GraphQLEnumTypeComponent_TypeFragment = gql(/* GraphQL */ `
+export const GraphQLEnumTypeComponent_TypeFragment = gql(/* GraphQL */ `
   fragment GraphQLEnumTypeComponent_TypeFragment on GraphQLEnumType {
     name
     description

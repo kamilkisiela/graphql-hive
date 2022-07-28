@@ -1,14 +1,33 @@
 import { ReactElement } from 'react';
 import { formatISO, subDays } from 'date-fns';
-import { gql, useQuery } from 'urql';
+import { DocumentType,gql, useQuery } from 'urql';
 
 import { TargetLayout } from '@/components/layouts';
-import { GraphQLEnumTypeComponent } from '@/components/target/explorer/enum-type';
-import { GraphQLInputObjectTypeComponent } from '@/components/target/explorer/input-object-type';
-import { GraphQLInterfaceTypeComponent } from '@/components/target/explorer/interface-type';
-import { GraphQLObjectTypeComponent } from '@/components/target/explorer/object-type';
-import { GraphQLScalarTypeComponent } from '@/components/target/explorer/scalar-type';
-import { GraphQLUnionTypeComponent } from '@/components/target/explorer/union-type';
+import {
+  GraphQLEnumTypeComponent,
+  GraphQLEnumTypeComponent_TypeFragment,
+} from '@/components/target/explorer/enum-type';
+import {
+  GraphQLInputObjectTypeComponent,
+  GraphQLInputObjectTypeComponent_TypeFragment,
+} from '@/components/target/explorer/input-object-type';
+import {
+  GraphQLInterfaceTypeComponent,
+  GraphQLInterfaceTypeComponent_TypeFragment,
+} from '@/components/target/explorer/interface-type';
+import {
+  GraphQLObjectTypeComponent,
+  GraphQLObjectTypeComponent_TypeFragment,
+} from '@/components/target/explorer/object-type';
+import {
+  GraphQLScalarTypeComponent,
+  GraphQLScalarTypeComponent_TypeFragment,
+} from '@/components/target/explorer/scalar-type';
+import { ExplorerSearch } from '@/components/target/explorer/search';
+import {
+  GraphQLUnionTypeComponent,
+  GraphQLUnionTypeComponent_TypeFragment,
+} from '@/components/target/explorer/union-type';
 import { DataWrapper, noSchema, Title } from '@/components/v2';
 import { OrganizationFieldsFragment, ProjectFieldsFragment, TargetFieldsFragment } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
@@ -52,6 +71,33 @@ const SchemaTypeExplorer_Type = gql(/* GraphQL */ `
   }
 `);
 
+type GraphQLNamedType =
+  | DocumentType<typeof GraphQLEnumTypeComponent_TypeFragment>
+  | DocumentType<typeof GraphQLInputObjectTypeComponent_TypeFragment>
+  | DocumentType<typeof GraphQLInterfaceTypeComponent_TypeFragment>
+  | DocumentType<typeof GraphQLObjectTypeComponent_TypeFragment>
+  | DocumentType<typeof GraphQLScalarTypeComponent_TypeFragment>
+  | DocumentType<typeof GraphQLUnionTypeComponent_TypeFragment>;
+
+function TypeRenderer({ type, totalRequests }: { type: GraphQLNamedType; totalRequests: number }) {
+  switch (type.__typename) {
+    case 'GraphQLObjectType':
+      return <GraphQLObjectTypeComponent type={type} totalRequests={totalRequests} />;
+    case 'GraphQLInterfaceType':
+      return <GraphQLInterfaceTypeComponent type={type} totalRequests={totalRequests} />;
+    case 'GraphQLUnionType':
+      return <GraphQLUnionTypeComponent type={type} />;
+    case 'GraphQLEnumType':
+      return <GraphQLEnumTypeComponent type={type} />;
+    case 'GraphQLInputObjectType':
+      return <GraphQLInputObjectTypeComponent type={type} totalRequests={totalRequests} />;
+    case 'GraphQLScalarType':
+      return <GraphQLScalarTypeComponent type={type} />;
+    default:
+      return null;
+  }
+}
+
 function SchemaTypeExplorer({
   organization,
   project,
@@ -63,17 +109,18 @@ function SchemaTypeExplorer({
   target: TargetFieldsFragment;
   typename: string;
 }): ReactElement | null {
-  const now = new Date();
+  const now = floorDate(new Date());
+  const period = {
+    to: formatISO(now),
+    from: formatISO(subDays(now, 60)),
+  };
   const [query] = useQuery({
     query: SchemaTypeExplorer_Type,
     variables: {
       organization: organization.cleanId,
       project: project.cleanId,
       target: target.cleanId,
-      period: {
-        to: floorDate(now),
-        from: formatISO(subDays(now, 60)),
-      },
+      period,
       typename,
     },
     requestPolicy: 'cache-first',
@@ -93,20 +140,18 @@ function SchemaTypeExplorer({
           return <div>No type found</div>;
         }
 
-        switch (type.__typename) {
-          case 'GraphQLObjectType':
-            return <GraphQLObjectTypeComponent type={type} totalRequests={totalRequests} />;
-          case 'GraphQLInterfaceType':
-            return <GraphQLInterfaceTypeComponent type={type} totalRequests={totalRequests} />;
-          case 'GraphQLUnionType':
-            return <GraphQLUnionTypeComponent type={type} />;
-          case 'GraphQLEnumType':
-            return <GraphQLEnumTypeComponent type={type} />;
-          case 'GraphQLInputObjectType':
-            return <GraphQLInputObjectTypeComponent type={type} totalRequests={totalRequests} />;
-          case 'GraphQLScalarType':
-            return <GraphQLScalarTypeComponent type={type} />;
-        }
+        return (
+          <div className="space-y-4">
+            <ExplorerSearch
+              organization={organization}
+              project={project}
+              target={target}
+              period={period}
+              typename={typename}
+            />
+            <TypeRenderer totalRequests={totalRequests} type={type} />
+          </div>
+        );
       }}
     </DataWrapper>
   );
@@ -114,7 +159,7 @@ function SchemaTypeExplorer({
 
 export default function ExplorerPage(): ReactElement | null {
   const router = useRouteSelector();
-  const typename = router.query.name;
+  const { typename } = router.query;
 
   if (typeof typename !== 'string') {
     return null;

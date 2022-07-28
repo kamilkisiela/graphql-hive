@@ -39,11 +39,11 @@ export type WithGraphQLParentInfo<T> = T & {
 };
 
 export type WithSchemaCoordinatesUsage<T> = T & {
-  usage: {
+  usage: Promise<{
     [coordinate: string]: {
       total: number;
     };
-  };
+  }>;
 };
 
 export type SchemaExplorerMapper = {

@@ -250,7 +250,7 @@ export function GraphQLTypeAsLink(props: { type: string }) {
   const typename = props.type.replace(/[[\]!]+/g, '');
 
   return (
-    <NextLink href={`/${router.organizationId}/${router.projectId}/${router.targetId}/type/${typename}`} passHref>
+    <NextLink href={`/${router.organizationId}/${router.projectId}/${router.targetId}/explorer/${typename}`} passHref>
       <Link className="text-orange-500">{props.type}</Link>
     </NextLink>
   );

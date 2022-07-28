@@ -497,6 +497,12 @@ export class OperationsManager {
   /**
    * Returns a collection of all schema coordinates for a given target AND type, with the number of calls to each coordinate.
    */
+  @cache<
+    {
+      period: DateRange;
+      typename: string;
+    } & TargetSelector
+  >(selector => JSON.stringify(selector))
   async countCoordinatesOfType({
     period,
     target,
@@ -540,6 +546,11 @@ export class OperationsManager {
   /**
    * Returns a collection of all schema coordinates for a given target, with the number of calls to each coordinate.
    */
+  @cache<
+    {
+      period: DateRange;
+    } & TargetSelector
+  >(selector => JSON.stringify(selector))
   async countCoordinatesOfTarget({
     period,
     target,

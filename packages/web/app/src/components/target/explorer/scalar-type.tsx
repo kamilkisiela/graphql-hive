@@ -1,6 +1,6 @@
 import { gql, DocumentType } from 'urql';
 
-const GraphQLScalarTypeComponent_TypeFragment = gql(/* GraphQL */ `
+export const GraphQLScalarTypeComponent_TypeFragment = gql(/* GraphQL */ `
   fragment GraphQLScalarTypeComponent_TypeFragment on GraphQLScalarType {
     name
     description

@@ -1,7 +1,7 @@
 import { gql, DocumentType } from 'urql';
 import { GraphQLTypeCard, GraphQLFields } from './common';
 
-const GraphQLInterfaceTypeComponent_TypeFragment = gql(/* GraphQL */ `
+export const GraphQLInterfaceTypeComponent_TypeFragment = gql(/* GraphQL */ `
   fragment GraphQLInterfaceTypeComponent_TypeFragment on GraphQLInterfaceType {
     name
     description
