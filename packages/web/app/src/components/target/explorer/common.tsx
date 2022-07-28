@@ -7,6 +7,7 @@ import { VscCommentDiscussion } from 'react-icons/vsc';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { Link } from '@/components/v2/link';
 import { formatNumber } from '@/lib/hooks/use-formatted-number';
+import { useArgumentListToggle } from './provider';
 
 function Description(props: { description: string }) {
   return (
@@ -109,8 +110,16 @@ export function GraphQLTypeCard(
 
 export function GraphQLArguments(props: { args: DocumentType<typeof GraphQLArguments_ArgumentFragment>[] }) {
   const { args } = props;
+  const [isCollapsedGlobally] = useArgumentListToggle();
+  const [collapsed, setCollapsed] = React.useState(isCollapsedGlobally);
+  const hasMoreThanTwo = args.length > 2;
+  const showAll = hasMoreThanTwo && !collapsed;
 
-  if (args.length > 2) {
+  React.useEffect(() => {
+    setCollapsed(isCollapsedGlobally);
+  }, [isCollapsedGlobally, setCollapsed]);
+
+  if (showAll) {
     return (
       <span className="ml-1">
         <span className="text-gray-400">{'('}</span>
@@ -135,7 +144,7 @@ export function GraphQLArguments(props: { args: DocumentType<typeof GraphQLArgum
     <span className="ml-1">
       <span className="text-gray-400">{'('}</span>
       <span className="space-x-2">
-        {props.args.map(arg => {
+        {props.args.slice(0, 2).map(arg => {
           return (
             <span key={arg.name}>
               {arg.name}
@@ -144,19 +153,42 @@ export function GraphQLArguments(props: { args: DocumentType<typeof GraphQLArgum
             </span>
           );
         })}
+        {hasMoreThanTwo ? (
+          <span
+            className="cursor-pointer rounded bg-gray-900 p-1 text-xs text-gray-300 hover:bg-gray-700 hover:text-white"
+            onClick={() => setCollapsed(prev => !prev)}
+          >
+            {props.args.length - 2} hidden
+          </span>
+        ) : null}
       </span>
       <span className="text-gray-400">{')'}</span>
     </span>
   );
 }
 
-export function GraphQLFields({
-  fields,
-  totalRequests,
-}: {
+function useCollapsibleList<T>(list: T[], max: number, defaultValue: boolean) {
+  const [collapsed, setCollapsed] = React.useState(defaultValue === true && list.length > max ? true : false);
+  const expand = React.useCallback(() => {
+    setCollapsed(false);
+  }, [setCollapsed]);
+  const noop = React.useCallback(() => {}, []);
+
+  if (collapsed) {
+    return [list.slice(0, max), collapsed, expand] as const;
+  }
+
+  return [list, collapsed, noop] as const;
+}
+
+export function GraphQLFields(props: {
   fields: DocumentType<typeof GraphQLFields_FieldFragment>[];
   totalRequests: number;
+  collapsed?: boolean;
 }) {
+  const { totalRequests } = props;
+  const [fields, collapsed, expand] = useCollapsibleList(props.fields, 5, props.collapsed ?? false);
+
   return (
     <div className="flex flex-col">
       {fields.map((field, i) => {
@@ -194,6 +226,17 @@ export function GraphQLFields({
           </div>
         );
       })}
+      {collapsed ? (
+        <div
+          className={clsx(
+            'flex cursor-pointer flex-row items-center justify-between p-4 text-sm font-semibold hover:bg-gray-800',
+            fields.length % 2 ? '' : 'bg-gray-900 bg-opacity-50'
+          )}
+          onClick={expand}
+        >
+          Show {props.fields.length - fields.length} more fields
+        </div>
+      ) : null}
     </div>
   );
 }

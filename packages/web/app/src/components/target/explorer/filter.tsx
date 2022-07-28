@@ -2,9 +2,11 @@ import { useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import { gql, useQuery } from 'urql';
 import { Autocomplete } from '@/components/v2/autocomplete';
+import { Switch } from '@/components/v2/switch';
+import { useArgumentListToggle } from './provider';
 
-const ExplorerSearch_AllTypes = gql(/* GraphQL */ `
-  query ExplorerSearch_AllTypes($organization: ID!, $project: ID!, $target: ID!, $period: DateRangeInput!) {
+const SchemaExplorerFilter_AllTypes = gql(/* GraphQL */ `
+  query SchemaExplorerFilter_AllTypes($organization: ID!, $project: ID!, $target: ID!, $period: DateRangeInput!) {
     target(selector: { organization: $organization, project: $project, target: $target }) {
       __typename
       id
@@ -40,7 +42,7 @@ const ExplorerSearch_AllTypes = gql(/* GraphQL */ `
   }
 `);
 
-export function ExplorerSearch({
+export function SchemaExplorerFilter({
   organization,
   project,
   target,
@@ -62,10 +64,11 @@ export function ExplorerSearch({
     from: string;
   };
 }) {
+  const [collapsed, toggleCollapsed] = useArgumentListToggle();
   const [disabled, setDisabled] = useState(false);
   const router = useRouter();
   const [query] = useQuery({
-    query: ExplorerSearch_AllTypes,
+    query: SchemaExplorerFilter_AllTypes,
     variables: {
       organization: organization.cleanId,
       project: project.cleanId,
@@ -88,23 +91,33 @@ export function ExplorerSearch({
   }, [allNamedTypes]);
 
   return (
-    <Autocomplete
-      placeholder="Search for a type"
-      defaultValue={
-        typename
-          ? {
-              value: typename,
-              label: typename,
-            }
-          : null
-      }
-      options={types}
-      onChange={option => {
-        setDisabled(true);
-        router.push(`/${organization.cleanId}/${project.cleanId}/${target.cleanId}/explorer/${option.value}`);
-      }}
-      loading={query.fetching}
-      disabled={disabled}
-    />
+    <div className="flex flex-row items-center gap-12">
+      <div className="flex-grow">
+        <Autocomplete
+          placeholder="Search for a type"
+          defaultValue={
+            typename
+              ? {
+                  value: typename,
+                  label: typename,
+                }
+              : null
+          }
+          options={types}
+          onChange={option => {
+            setDisabled(true);
+            router.push(`/${organization.cleanId}/${project.cleanId}/${target.cleanId}/explorer/${option.value}`);
+          }}
+          loading={query.fetching}
+          disabled={disabled}
+        />
+      </div>
+      <div className="flex-shrink-0">
+        <div className="flex flex-row items-center gap-4">
+          <div>Show all arguments</div>
+          <Switch checked={!collapsed} onCheckedChange={toggleCollapsed} />
+        </div>
+      </div>
+    </div>
   );
 }

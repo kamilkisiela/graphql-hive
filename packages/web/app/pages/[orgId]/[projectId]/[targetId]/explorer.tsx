@@ -3,8 +3,9 @@ import { formatISO, subDays } from 'date-fns';
 import { gql, useQuery } from 'urql';
 
 import { TargetLayout } from '@/components/layouts';
+import { SchemaExplorerFilter } from '@/components/target/explorer/filter';
 import { GraphQLObjectTypeComponent } from '@/components/target/explorer/object-type';
-import { ExplorerSearch } from '@/components/target/explorer/search';
+import { SchemaExplorerProvider } from '@/components/target/explorer/provider';
 import { DataWrapper, noSchema, Title } from '@/components/v2';
 import { OrganizationFieldsFragment, ProjectFieldsFragment, TargetFieldsFragment } from '@/graphql';
 
@@ -77,17 +78,19 @@ function SchemaView({
         const { totalRequests } = data.operationsStats;
 
         return (
-          <>
+          <SchemaExplorerProvider>
             <div className="mb-5 flex flex-row items-center justify-between">
               <div className="font-light text-gray-500">The latest published schema.</div>
             </div>
             <div className="flex flex-col gap-4">
-              <ExplorerSearch organization={organization} project={project} target={target} period={period} />
-              {query ? <GraphQLObjectTypeComponent type={query} totalRequests={totalRequests} /> : null}
-              {mutation ? <GraphQLObjectTypeComponent type={mutation} totalRequests={totalRequests} /> : null}
-              {subscription ? <GraphQLObjectTypeComponent type={subscription} totalRequests={totalRequests} /> : null}
+              <SchemaExplorerFilter organization={organization} project={project} target={target} period={period} />
+              {query ? <GraphQLObjectTypeComponent type={query} totalRequests={totalRequests} collapsed /> : null}
+              {mutation ? <GraphQLObjectTypeComponent type={mutation} totalRequests={totalRequests} collapsed /> : null}
+              {subscription ? (
+                <GraphQLObjectTypeComponent type={subscription} totalRequests={totalRequests} collapsed />
+              ) : null}
             </div>
-          </>
+          </SchemaExplorerProvider>
         );
       }}
     </DataWrapper>

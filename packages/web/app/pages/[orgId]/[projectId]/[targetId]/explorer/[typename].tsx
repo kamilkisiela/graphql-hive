@@ -7,6 +7,7 @@ import {
   GraphQLEnumTypeComponent,
   GraphQLEnumTypeComponent_TypeFragment,
 } from '@/components/target/explorer/enum-type';
+import { SchemaExplorerFilter } from '@/components/target/explorer/filter';
 import {
   GraphQLInputObjectTypeComponent,
   GraphQLInputObjectTypeComponent_TypeFragment,
@@ -19,11 +20,11 @@ import {
   GraphQLObjectTypeComponent,
   GraphQLObjectTypeComponent_TypeFragment,
 } from '@/components/target/explorer/object-type';
+import { SchemaExplorerProvider } from '@/components/target/explorer/provider';
 import {
   GraphQLScalarTypeComponent,
   GraphQLScalarTypeComponent_TypeFragment,
 } from '@/components/target/explorer/scalar-type';
-import { ExplorerSearch } from '@/components/target/explorer/search';
 import {
   GraphQLUnionTypeComponent,
   GraphQLUnionTypeComponent_TypeFragment,
@@ -141,16 +142,18 @@ function SchemaTypeExplorer({
         }
 
         return (
-          <div className="space-y-4">
-            <ExplorerSearch
-              organization={organization}
-              project={project}
-              target={target}
-              period={period}
-              typename={typename}
-            />
-            <TypeRenderer totalRequests={totalRequests} type={type} />
-          </div>
+          <SchemaExplorerProvider>
+            <div className="space-y-4">
+              <SchemaExplorerFilter
+                organization={organization}
+                project={project}
+                target={target}
+                period={period}
+                typename={typename}
+              />
+              <TypeRenderer totalRequests={totalRequests} type={type} />
+            </div>
+          </SchemaExplorerProvider>
         );
       }}
     </DataWrapper>

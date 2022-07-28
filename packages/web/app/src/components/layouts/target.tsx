@@ -203,6 +203,7 @@ export const TargetLayout = ({
             </NextLink>
           )}
         </Tabs.List>
+
         <Tabs.Content value={value} className={className}>
           {children({
             target,
