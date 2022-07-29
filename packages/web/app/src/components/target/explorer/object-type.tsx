@@ -7,8 +7,7 @@ export const GraphQLObjectTypeComponent_TypeFragment = gql(/* GraphQL */ `
     description
     interfaces
     usage {
-      total
-      isUsed
+      ...SchemaExplorerUsageStats_UsageFragment
     }
     fields {
       ...GraphQLFields_FieldFragment

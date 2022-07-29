@@ -100,7 +100,7 @@ function SchemaView({
 export default function ExplorerPage(): ReactElement {
   return (
     <>
-      <Title title="Explorer" />
+      <Title title="Schema Explorer" />
       <TargetLayout value="explorer">{props => <SchemaView {...props} />}</TargetLayout>
     </>
   );

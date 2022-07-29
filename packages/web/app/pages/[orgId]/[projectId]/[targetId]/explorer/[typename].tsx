@@ -87,15 +87,15 @@ function TypeRenderer({ type, totalRequests }: { type: GraphQLNamedType; totalRe
     case 'GraphQLInterfaceType':
       return <GraphQLInterfaceTypeComponent type={type} totalRequests={totalRequests} />;
     case 'GraphQLUnionType':
-      return <GraphQLUnionTypeComponent type={type} />;
+      return <GraphQLUnionTypeComponent type={type} totalRequests={totalRequests} />;
     case 'GraphQLEnumType':
-      return <GraphQLEnumTypeComponent type={type} />;
+      return <GraphQLEnumTypeComponent type={type} totalRequests={totalRequests} />;
     case 'GraphQLInputObjectType':
       return <GraphQLInputObjectTypeComponent type={type} totalRequests={totalRequests} />;
     case 'GraphQLScalarType':
-      return <GraphQLScalarTypeComponent type={type} />;
+      return <GraphQLScalarTypeComponent type={type} totalRequests={totalRequests} />;
     default:
-      return null;
+      return <div>Unknown type: {type.__typename}</div>;
   }
 }
 

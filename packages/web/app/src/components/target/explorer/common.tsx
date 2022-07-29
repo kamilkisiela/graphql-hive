@@ -6,8 +6,23 @@ import * as Popover from '@radix-ui/react-popover';
 import { VscCommentDiscussion } from 'react-icons/vsc';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { Link } from '@/components/v2/link';
+import { Markdown } from '@/components/v2/markdown';
 import { formatNumber } from '@/lib/hooks/use-formatted-number';
 import { useArgumentListToggle } from './provider';
+
+function useCollapsibleList<T>(list: T[], max: number, defaultValue: boolean) {
+  const [collapsed, setCollapsed] = React.useState(defaultValue === true && list.length > max ? true : false);
+  const expand = React.useCallback(() => {
+    setCollapsed(false);
+  }, [setCollapsed]);
+  const noop = React.useCallback(() => {}, []);
+
+  if (collapsed) {
+    return [list.slice(0, max), collapsed, expand] as const;
+  }
+
+  return [list, collapsed, noop] as const;
+}
 
 function Description(props: { description: string }) {
   return (
@@ -23,9 +38,41 @@ function Description(props: { description: string }) {
         sideOffset={5}
       >
         <Popover.Arrow className="fill-current text-gray-800" />
-        {props.description}
+        <Markdown content={props.description} />
       </Popover.Content>
     </Popover.Root>
+  );
+}
+
+const SchemaExplorerUsageStats_UsageFragment = gql(/* GraphQL */ `
+  fragment SchemaExplorerUsageStats_UsageFragment on SchemaCoordinateUsage {
+    total
+    isUsed
+  }
+`);
+
+export function SchemaExplorerUsageStats(props: {
+  usage: DocumentType<typeof SchemaExplorerUsageStats_UsageFragment>;
+  totalRequests: number;
+}) {
+  return (
+    <div className="text-xs">
+      <div className="font-semibold">Requested</div>
+      <div>{formatNumber(props.usage.total)} times</div>
+      <div
+        className="relative mt-1 w-full overflow-hidden rounded bg-gray-800"
+        style={{
+          height: 5,
+        }}
+      >
+        <div
+          className="bg-orange-500 h-full"
+          style={{
+            width: `${props.totalRequests ? (props.usage.total / props.totalRequests) * 100 : 0}%`,
+          }}
+        />
+      </div>
+    </div>
   );
 }
 
@@ -37,8 +84,7 @@ const GraphQLFields_FieldFragment = gql(/* GraphQL */ `
     isDeprecated
     deprecationReason
     usage {
-      total
-      isUsed
+      ...SchemaExplorerUsageStats_UsageFragment
     }
     args {
       ...GraphQLArguments_ArgumentFragment
@@ -54,8 +100,7 @@ const GraphQLArguments_ArgumentFragment = gql(/* GraphQL */ `
     isDeprecated
     deprecationReason
     usage {
-      total
-      isUsed
+      ...SchemaExplorerUsageStats_UsageFragment
     }
   }
 `);
@@ -68,8 +113,7 @@ const GraphQLInputFields_InputFieldFragment = gql(/* GraphQL */ `
     isDeprecated
     deprecationReason
     usage {
-      total
-      isUsed
+      ...SchemaExplorerUsageStats_UsageFragment
     }
   }
 `);
@@ -167,18 +211,25 @@ export function GraphQLArguments(props: { args: DocumentType<typeof GraphQLArgum
   );
 }
 
-function useCollapsibleList<T>(list: T[], max: number, defaultValue: boolean) {
-  const [collapsed, setCollapsed] = React.useState(defaultValue === true && list.length > max ? true : false);
-  const expand = React.useCallback(() => {
-    setCollapsed(false);
-  }, [setCollapsed]);
-  const noop = React.useCallback(() => {}, []);
-
-  if (collapsed) {
-    return [list.slice(0, max), collapsed, expand] as const;
-  }
-
-  return [list, collapsed, noop] as const;
+export function GraphQLTypeCardListItem(
+  props: React.PropsWithChildren<{
+    index: number;
+    className?: string;
+    onClick?: () => void;
+  }>
+) {
+  return (
+    <div
+      onClick={props.onClick}
+      className={clsx(
+        'flex flex-row items-center justify-between p-4 text-sm',
+        props.index % 2 ? '' : 'bg-gray-900 bg-opacity-50',
+        props.className
+      )}
+    >
+      {props.children}
+    </div>
+  );
 }
 
 export function GraphQLFields(props: {
@@ -193,49 +244,25 @@ export function GraphQLFields(props: {
     <div className="flex flex-col">
       {fields.map((field, i) => {
         return (
-          <div
-            key={field.name}
-            className={clsx(
-              'flex flex-row items-center justify-between p-4 text-sm',
-              i % 2 ? '' : 'bg-gray-900 bg-opacity-50'
-            )}
-          >
+          <GraphQLTypeCardListItem key={field.name} index={i}>
             <div>
               {field.name}
               {field.args.length > 0 ? <GraphQLArguments args={field.args} /> : null}
               <span className="mr-1">{':'}</span>
               <GraphQLTypeAsLink type={field.type} />
             </div>
-            <div className="text-xs">
-              <div className="font-semibold">Requested</div>
-              <div>{formatNumber(field.usage.total)} times</div>
-              <div
-                className="relative mt-1 w-full overflow-hidden rounded bg-gray-800"
-                style={{
-                  height: 5,
-                }}
-              >
-                <div
-                  className="bg-orange-500 h-full"
-                  style={{
-                    width: `${totalRequests ? (field.usage.total / totalRequests) * 100 : 0}%`,
-                  }}
-                />
-              </div>
-            </div>
-          </div>
+            <SchemaExplorerUsageStats totalRequests={totalRequests} usage={field.usage} />
+          </GraphQLTypeCardListItem>
         );
       })}
       {collapsed ? (
-        <div
-          className={clsx(
-            'flex cursor-pointer flex-row items-center justify-between p-4 text-sm font-semibold hover:bg-gray-800',
-            fields.length % 2 ? '' : 'bg-gray-900 bg-opacity-50'
-          )}
+        <GraphQLTypeCardListItem
+          index={fields.length}
+          className="cursor-pointer font-semibold hover:bg-gray-800"
           onClick={expand}
         >
           Show {props.fields.length - fields.length} more fields
-        </div>
+        </GraphQLTypeCardListItem>
       ) : null}
     </div>
   );
@@ -252,36 +279,14 @@ export function GraphQLInputFields({
     <div className="flex flex-col">
       {fields.map((field, i) => {
         return (
-          <div
-            key={field.name}
-            className={clsx(
-              'flex flex-row items-center justify-between p-4 text-sm',
-              i % 2 ? '' : 'bg-gray-900 bg-opacity-50'
-            )}
-          >
+          <GraphQLTypeCardListItem key={field.name} index={i}>
             <div>
               {field.name}
               <span className="mr-1">{':'}</span>
               <GraphQLTypeAsLink type={field.type} />
             </div>
-            <div className="text-xs">
-              <div className="font-semibold">Requested</div>
-              <div>{formatNumber(field.usage.total)} times</div>
-              <div
-                className="relative mt-1 w-full overflow-hidden rounded bg-gray-800"
-                style={{
-                  height: 5,
-                }}
-              >
-                <div
-                  className="bg-orange-500 h-full"
-                  style={{
-                    width: `${totalRequests ? (field.usage.total / totalRequests) * 100 : 0}%`,
-                  }}
-                />
-              </div>
-            </div>
-          </div>
+            <SchemaExplorerUsageStats totalRequests={totalRequests} usage={field.usage} />
+          </GraphQLTypeCardListItem>
         );
       })}
     </div>

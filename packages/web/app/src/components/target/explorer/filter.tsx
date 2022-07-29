@@ -95,14 +95,7 @@ export function SchemaExplorerFilter({
       <div className="flex-grow">
         <Autocomplete
           placeholder="Search for a type"
-          defaultValue={
-            typename
-              ? {
-                  value: typename,
-                  label: typename,
-                }
-              : null
-          }
+          defaultValue={typename ? { value: typename, label: typename } : null}
           options={types}
           onChange={option => {
             setDisabled(true);
