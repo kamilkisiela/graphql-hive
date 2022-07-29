@@ -107,8 +107,11 @@ export function SchemaExplorerFilter({
       </div>
       <div className="flex-shrink-0">
         <div className="flex flex-row items-center gap-4">
-          <div>Show all arguments</div>
           <Switch checked={!collapsed} onCheckedChange={toggleCollapsed} />
+          <div>
+            <div>Show all arguments</div>
+            <p className="text-xs text-gray-500">List of arguments is collapsed by default</p>
+          </div>
         </div>
       </div>
     </div>
