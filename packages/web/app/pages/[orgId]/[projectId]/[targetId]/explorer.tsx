@@ -1,18 +1,12 @@
 import { ReactElement } from 'react';
-import { formatISO, subDays } from 'date-fns';
 import { gql, useQuery } from 'urql';
 
 import { TargetLayout } from '@/components/layouts';
 import { SchemaExplorerFilter } from '@/components/target/explorer/filter';
 import { GraphQLObjectTypeComponent } from '@/components/target/explorer/object-type';
-import { SchemaExplorerProvider } from '@/components/target/explorer/provider';
+import { SchemaExplorerProvider, useSchemaExplorerContext } from '@/components/target/explorer/provider';
 import { DataWrapper, noSchema, Title } from '@/components/v2';
 import { OrganizationFieldsFragment, ProjectFieldsFragment, TargetFieldsFragment } from '@/graphql';
-
-function floorDate(date: Date): Date {
-  const time = 1000 * 60;
-  return new Date(Math.floor(date.getTime() / time) * time);
-}
 
 const SchemaView_SchemaExplorer = gql(/* GraphQL */ `
   query SchemaView_SchemaExplorer($organization: ID!, $project: ID!, $target: ID!, $period: DateRangeInput!) {
@@ -51,11 +45,7 @@ function SchemaView({
   project: ProjectFieldsFragment;
   target: TargetFieldsFragment;
 }): ReactElement | null {
-  const now = floorDate(new Date());
-  const period = {
-    to: formatISO(now),
-    from: formatISO(subDays(now, 60)),
-  };
+  const { period } = useSchemaExplorerContext();
   const [query] = useQuery({
     query: SchemaView_SchemaExplorer,
     variables: {
@@ -78,7 +68,7 @@ function SchemaView({
         const { totalRequests } = data.operationsStats;
 
         return (
-          <SchemaExplorerProvider>
+          <>
             <div className="mb-5 flex flex-row items-center justify-between">
               <div className="font-light text-gray-500">The latest published schema.</div>
             </div>
@@ -90,7 +80,7 @@ function SchemaView({
                 <GraphQLObjectTypeComponent type={subscription} totalRequests={totalRequests} collapsed />
               ) : null}
             </div>
-          </SchemaExplorerProvider>
+          </>
         );
       }}
     </DataWrapper>
@@ -101,7 +91,13 @@ export default function ExplorerPage(): ReactElement {
   return (
     <>
       <Title title="Schema Explorer" />
-      <TargetLayout value="explorer">{props => <SchemaView {...props} />}</TargetLayout>
+      <TargetLayout value="explorer">
+        {props => (
+          <SchemaExplorerProvider dataRetentionInDays={props.organization.rateLimit.retentionInDays}>
+            <SchemaView {...props} />
+          </SchemaExplorerProvider>
+        )}
+      </TargetLayout>
     </>
   );
 }

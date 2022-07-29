@@ -3,7 +3,7 @@ import NextLink from 'next/link';
 import clsx from 'clsx';
 import { gql, DocumentType } from 'urql';
 import * as Popover from '@radix-ui/react-popover';
-import { VscCommentDiscussion } from 'react-icons/vsc';
+import { VscCommentDiscussion, VscPulse } from 'react-icons/vsc';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { Link } from '@/components/v2/link';
 import { Markdown } from '@/components/v2/markdown';
@@ -55,22 +55,32 @@ export function SchemaExplorerUsageStats(props: {
   usage: DocumentType<typeof SchemaExplorerUsageStats_UsageFragment>;
   totalRequests: number;
 }) {
+  const percentage = props.totalRequests ? (props.usage.total / props.totalRequests) * 100 : 0;
+
   return (
-    <div className="text-xs">
-      <div className="font-semibold">Requested</div>
-      <div>{formatNumber(props.usage.total)} times</div>
-      <div
-        className="relative mt-1 w-full overflow-hidden rounded bg-gray-800"
-        style={{
-          height: 5,
-        }}
-      >
+    <div className="flex flex-row items-center gap-2 text-xs">
+      <div className="text-xl">
+        <VscPulse />
+      </div>
+      <div className="flex-grow">
+        <div className="text-center" title={`${props.usage.total} requests`}>
+          {formatNumber(props.usage.total)}
+        </div>
         <div
-          className="bg-orange-500 h-full"
+          title={`${percentage.toFixed(2)}% of all requests`}
+          className="bg-orange-500 relative mt-1 w-full overflow-hidden rounded bg-opacity-20"
           style={{
-            width: `${props.totalRequests ? (props.usage.total / props.totalRequests) * 100 : 0}%`,
+            width: 50,
+            height: 5,
           }}
-        />
+        >
+          <div
+            className="bg-orange-500 h-full"
+            style={{
+              width: `${percentage}%`,
+            }}
+          />
+        </div>
       </div>
     </div>
   );

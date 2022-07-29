@@ -2,8 +2,9 @@ import { useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import { gql, useQuery } from 'urql';
 import { Autocomplete } from '@/components/v2/autocomplete';
+import { RadixSelect } from '@/components/v2/select';
 import { Switch } from '@/components/v2/switch';
-import { useArgumentListToggle } from './provider';
+import { useArgumentListToggle, usePeriodSelector } from './provider';
 
 const SchemaExplorerFilter_AllTypes = gql(/* GraphQL */ `
   query SchemaExplorerFilter_AllTypes($organization: ID!, $project: ID!, $target: ID!, $period: DateRangeInput!) {
@@ -77,6 +78,7 @@ export function SchemaExplorerFilter({
     },
     requestPolicy: 'cache-first',
   });
+  const periodSelector = usePeriodSelector();
 
   const allNamedTypes = query.data?.target?.latestSchemaVersion?.explorer.types ?? [];
   const types = useMemo(() => {
@@ -103,6 +105,15 @@ export function SchemaExplorerFilter({
           }}
           loading={query.fetching}
           disabled={disabled}
+        />
+      </div>
+      <div className="flex-shrink-0">
+        <RadixSelect
+          className="cursor-pointer rounded-md"
+          value={periodSelector.value}
+          onChange={periodSelector.onChange}
+          placeholder="Select a date range"
+          options={periodSelector.options}
         />
       </div>
       <div className="flex-shrink-0">

@@ -1,5 +1,4 @@
 import { ReactElement } from 'react';
-import { formatISO, subDays } from 'date-fns';
 import { DocumentType, gql, useQuery } from 'urql';
 
 import { TargetLayout } from '@/components/layouts';
@@ -20,7 +19,7 @@ import {
   GraphQLObjectTypeComponent,
   GraphQLObjectTypeComponent_TypeFragment,
 } from '@/components/target/explorer/object-type';
-import { SchemaExplorerProvider } from '@/components/target/explorer/provider';
+import { SchemaExplorerProvider, useSchemaExplorerContext } from '@/components/target/explorer/provider';
 import {
   GraphQLScalarTypeComponent,
   GraphQLScalarTypeComponent_TypeFragment,
@@ -32,11 +31,6 @@ import {
 import { DataWrapper, noSchema, Title } from '@/components/v2';
 import { OrganizationFieldsFragment, ProjectFieldsFragment, TargetFieldsFragment } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
-
-function floorDate(date: Date): Date {
-  const time = 1000 * 60;
-  return new Date(Math.floor(date.getTime() / time) * time);
-}
 
 const SchemaTypeExplorer_Type = gql(/* GraphQL */ `
   query SchemaTypeExplorer_Type(
@@ -110,11 +104,7 @@ function SchemaTypeExplorer({
   target: TargetFieldsFragment;
   typename: string;
 }): ReactElement | null {
-  const now = floorDate(new Date());
-  const period = {
-    to: formatISO(now),
-    from: formatISO(subDays(now, 60)),
-  };
+  const { period } = useSchemaExplorerContext();
   const [query] = useQuery({
     query: SchemaTypeExplorer_Type,
     variables: {
@@ -142,18 +132,16 @@ function SchemaTypeExplorer({
         }
 
         return (
-          <SchemaExplorerProvider>
-            <div className="space-y-4">
-              <SchemaExplorerFilter
-                organization={organization}
-                project={project}
-                target={target}
-                period={period}
-                typename={typename}
-              />
-              <TypeRenderer totalRequests={totalRequests} type={type} />
-            </div>
-          </SchemaExplorerProvider>
+          <div className="space-y-4">
+            <SchemaExplorerFilter
+              organization={organization}
+              project={project}
+              target={target}
+              period={period}
+              typename={typename}
+            />
+            <TypeRenderer totalRequests={totalRequests} type={type} />
+          </div>
         );
       }}
     </DataWrapper>
@@ -171,7 +159,13 @@ export default function ExplorerPage(): ReactElement | null {
   return (
     <>
       <Title title={`Type ${typename}`} />
-      <TargetLayout value="explorer">{props => <SchemaTypeExplorer {...props} typename={typename} />}</TargetLayout>
+      <TargetLayout value="explorer">
+        {props => (
+          <SchemaExplorerProvider dataRetentionInDays={props.organization.rateLimit.retentionInDays}>
+            <SchemaTypeExplorer {...props} typename={typename} />
+          </SchemaExplorerProvider>
+        )}
+      </TargetLayout>
     </>
   );
 }
