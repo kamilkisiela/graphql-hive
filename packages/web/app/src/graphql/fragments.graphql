@@ -7,6 +7,9 @@ fragment OrganizationFields on Organization {
   me {
     ...MemberFields
   }
+  rateLimit {
+    retentionInDays
+  }
   getStarted {
     ...GetStartedWizard_GetStartedProgress
   }

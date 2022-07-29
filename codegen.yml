@@ -61,6 +61,18 @@ generates:
         BillingDetails: 'StripeTypes.PaymentMethod.BillingDetails'
         BillingInvoice: 'StripeTypes.Invoice'
         OrganizationGetStarted: ../shared/entities#OrganizationGetStarted as OrganizationGetStartedMapper
+        SchemaExplorer: ../shared/mappers#SchemaExplorerMapper
+        GraphQLObjectType: ../shared/mappers#GraphQLObjectTypeMapper
+        GraphQLInterfaceType: ../shared/mappers#GraphQLInterfaceTypeMapper
+        GraphQLUnionType: ../shared/mappers#GraphQLUnionTypeMapper
+        GraphQLEnumType: ../shared/mappers#GraphQLEnumTypeMapper
+        GraphQLInputObjectType: ../shared/mappers#GraphQLInputObjectTypeMapper
+        GraphQLScalarType: ../shared/mappers#GraphQLScalarTypeMapper
+        GraphQLUnionTypeMember: ../shared/mappers#GraphQLUnionTypeMemberMapper
+        GraphQLEnumValue: ../shared/mappers#GraphQLEnumValueMapper
+        GraphQLField: ../shared/mappers#GraphQLFieldMapper
+        GraphQLInputField: ../shared/mappers#GraphQLInputFieldMapper
+        GraphQLArgument: ../shared/mappers#GraphQLArgumentMapper
     plugins:
       - add:
           content: "import { StripeTypes } from '@hive/stripe-billing';"

@@ -259,7 +259,7 @@ function SchemaView({
         target: target.cleanId,
       },
     },
-    requestPolicy: 'cache-and-network',
+    requestPolicy: 'cache-first',
   });
 
   const canManage = useTargetAccess({

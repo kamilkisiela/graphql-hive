@@ -1,8 +1,8 @@
 query generalOperationsStats($selector: OperationsStatsSelectorInput!, $resolution: Int!) {
   operationsStats(selector: $selector) {
     ... on OperationsStats {
-      totalRequests(resolution: $resolution)
-      totalFailures(resolution: $resolution)
+      totalRequests
+      totalFailures
       totalOperations
       duration {
         p75

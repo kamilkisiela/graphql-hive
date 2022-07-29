@@ -493,4 +493,98 @@ export class OperationsManager {
 
     return false;
   }
+
+  /**
+   * Returns a collection of all schema coordinates for a given target AND type, with the number of calls to each coordinate.
+   */
+  @cache<
+    {
+      period: DateRange;
+      typename: string;
+    } & TargetSelector
+  >(selector => JSON.stringify(selector))
+  async countCoordinatesOfType({
+    period,
+    target,
+    project,
+    organization,
+    typename,
+  }: {
+    period: DateRange;
+    typename: string;
+  } & TargetSelector) {
+    await this.authManager.ensureTargetAccess({
+      organization,
+      project,
+      target,
+      scope: TargetAccessScope.REGISTRY_READ,
+    });
+
+    const rows = await this.reader.countCoordinatesOfType({
+      target,
+      period,
+      typename,
+    });
+
+    const records: {
+      [coordinate: string]: {
+        total: number;
+        isUsed: boolean;
+      };
+    } = {};
+
+    for (const row of rows) {
+      records[row.coordinate] = {
+        total: row.total,
+        isUsed: row.total > 0,
+      };
+    }
+
+    return records;
+  }
+
+  /**
+   * Returns a collection of all schema coordinates for a given target, with the number of calls to each coordinate.
+   */
+  @cache<
+    {
+      period: DateRange;
+    } & TargetSelector
+  >(selector => JSON.stringify(selector))
+  async countCoordinatesOfTarget({
+    period,
+    target,
+    project,
+    organization,
+  }: {
+    period: DateRange;
+  } & TargetSelector) {
+    await this.authManager.ensureTargetAccess({
+      organization,
+      project,
+      target,
+      scope: TargetAccessScope.REGISTRY_READ,
+    });
+
+    const rows = await this.reader.countCoordinatesOfTarget({
+      target,
+      period,
+    });
+
+    const records: {
+      [coordinate: string]: {
+        total: number;
+        isUsed: boolean;
+      };
+    } = {};
+
+    for (const row of rows) {
+      records[row.coordinate] = {
+        total: row.total,
+        isUsed: row.total > 0,
+      };
+    }
+
+    return records;
+  }
 }

@@ -1,10 +1,28 @@
 import { createHash } from 'crypto';
+import {
+  buildASTSchema,
+  isObjectType,
+  isInterfaceType,
+  isUnionType,
+  isEnumType,
+  isInputObjectType,
+  isScalarType,
+  GraphQLNamedType,
+} from 'graphql';
 import type { SchemaModule } from './__generated__/types';
 import { SchemaManager } from './providers/schema-manager';
 import { SchemaPublisher } from './providers/schema-publisher';
 import { Inspector } from './providers/inspector';
 import { buildSchema, createConnection } from '../../shared/schema';
 import { ProjectType } from '../../shared/entities';
+import type {
+  GraphQLObjectTypeMapper,
+  GraphQLInterfaceTypeMapper,
+  GraphQLUnionTypeMapper,
+  GraphQLEnumTypeMapper,
+  GraphQLInputObjectTypeMapper,
+  GraphQLScalarTypeMapper,
+} from '../../shared/mappers';
 import { ProjectManager } from '../project/providers/project-manager';
 import { IdTranslator } from '../shared/providers/id-translator';
 import { OrganizationManager } from '../organization/providers/organization-manager';
@@ -14,10 +32,46 @@ import { AuthManager } from '../auth/providers/auth-manager';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import { z } from 'zod';
 import { SchemaHelper } from './providers/schema-helper';
+import type { WithSchemaCoordinatesUsage, WithGraphQLParentInfo } from '../../shared/mappers';
+import { createPeriod, parseDateRangeInput } from '../../shared/helpers';
+import { OperationsManager } from '../operations/providers/operations-manager';
 
 const MaybeModel = <T extends z.ZodType>(value: T) => z.union([z.null(), z.undefined(), value]);
 const GraphQLSchemaStringModel = z.string().max(5_000_000).min(0);
 const ServiceNameModel = z.string().min(1).max(100);
+
+async function usage(
+  source:
+    | WithSchemaCoordinatesUsage<{
+        entity: {
+          name: string;
+        };
+      }>
+    | WithGraphQLParentInfo<
+        WithSchemaCoordinatesUsage<{
+          entity: {
+            name: string;
+          };
+        }>
+      >
+) {
+  const coordinate = 'parent' in source ? `${source.parent.coordinate}.${source.entity.name}` : source.entity.name;
+  const usage = (await source.usage)[coordinate];
+
+  return usage
+    ? {
+        total: usage.total,
+        isUsed: usage.total > 0,
+      }
+    : {
+        total: 0,
+        isUsed: false,
+      };
+}
+
+function __isTypeOf<T extends GraphQLNamedType>(isFn: (entity: GraphQLNamedType) => entity is T) {
+  return ({ entity }: { entity: GraphQLNamedType }) => isFn(entity);
+}
 
 export const resolvers: SchemaModule.Resolvers = {
   Mutation: {
@@ -423,6 +477,37 @@ export const resolvers: SchemaModule.Resolvers = {
     async baseSchema(version) {
       return version.base_schema || null;
     },
+    async explorer(version, { usage }, { injector }) {
+      const project = await injector.get(ProjectManager).getProject({
+        organization: version.organization,
+        project: version.project,
+      });
+
+      const schemaManager = injector.get(SchemaManager);
+      const orchestrator = schemaManager.matchOrchestrator(project.type);
+      const helper = injector.get(SchemaHelper);
+
+      const schemas = await schemaManager.getCommits({
+        version: version.id,
+        organization: version.organization,
+        project: version.project,
+        target: version.target,
+      });
+
+      const schema = await orchestrator.build(schemas.map(s => helper.createSchemaObject(s)));
+
+      return {
+        schema: buildASTSchema(schema.document, {
+          assumeValidSDL: true,
+        }),
+        usage: {
+          period: usage?.period ? parseDateRangeInput(usage.period) : createPeriod('30d'),
+          organization: version.organization,
+          project: version.project,
+          target: version.target,
+        },
+      };
+    },
   },
   SchemaCompareError: {
     __isTypeOf(error) {
@@ -470,4 +555,255 @@ export const resolvers: SchemaModule.Resolvers = {
       return !obj.valid;
     },
   },
+  SchemaExplorer: {
+    async type({ schema, usage }, { name }, { injector }) {
+      const namedType = schema.getType(name);
+
+      if (!namedType) {
+        return null;
+      }
+
+      return {
+        // TODO: fix any
+        entity: namedType as any,
+        usage: injector.get(OperationsManager).countCoordinatesOfType({
+          typename: namedType.name,
+          organization: usage.organization,
+          project: usage.project,
+          target: usage.target,
+          period: usage.period,
+        }),
+      };
+    },
+    async types({ schema, usage }, _, { injector }) {
+      const types: Array<
+        | GraphQLObjectTypeMapper
+        | GraphQLInterfaceTypeMapper
+        | GraphQLUnionTypeMapper
+        | GraphQLEnumTypeMapper
+        | GraphQLInputObjectTypeMapper
+        | GraphQLScalarTypeMapper
+      > = [];
+      const typeMap = schema.getTypeMap();
+      const operationsManager = injector.get(OperationsManager);
+
+      function getStats() {
+        return operationsManager.countCoordinatesOfTarget({
+          target: usage.target,
+          organization: usage.organization,
+          project: usage.project,
+          period: usage.period,
+        });
+      }
+
+      for (const typename in typeMap) {
+        if (typename.startsWith('__')) {
+          continue;
+        }
+
+        types.push({
+          entity: typeMap[typename] as any,
+          get usage() {
+            return getStats();
+          },
+        });
+      }
+
+      types.sort((a, b) => a.entity.name.localeCompare(b.entity.name));
+
+      return types;
+    },
+    async query({ schema, usage }, _, { injector }) {
+      const queryType = schema.getQueryType();
+
+      if (!queryType) {
+        return null;
+      }
+
+      return {
+        entity: queryType,
+        get usage() {
+          return injector.get(OperationsManager).countCoordinatesOfType({
+            typename: queryType.name,
+            organization: usage.organization,
+            project: usage.project,
+            target: usage.target,
+            period: usage.period,
+          });
+        },
+      };
+    },
+    async mutation({ schema, usage }, _, { injector }) {
+      const mutationType = schema.getMutationType();
+
+      if (!mutationType) {
+        return null;
+      }
+
+      return {
+        entity: mutationType,
+        get usage() {
+          return injector.get(OperationsManager).countCoordinatesOfType({
+            typename: mutationType.name,
+            organization: usage.organization,
+            project: usage.project,
+            target: usage.target,
+            period: usage.period,
+          });
+        },
+      };
+    },
+    async subscription({ schema, usage }, _, { injector }) {
+      const subscriptionType = schema.getSubscriptionType();
+
+      if (!subscriptionType) {
+        return null;
+      }
+
+      return {
+        entity: subscriptionType,
+        get usage() {
+          return injector.get(OperationsManager).countCoordinatesOfType({
+            typename: subscriptionType.name,
+            organization: usage.organization,
+            project: usage.project,
+            target: usage.target,
+            period: usage.period,
+          });
+        },
+      };
+    },
+  },
+  GraphQLObjectType: {
+    __isTypeOf: __isTypeOf(isObjectType),
+    name: t => t.entity.name,
+    description: t => t.entity.description ?? null,
+    fields: t =>
+      Object.values(t.entity.getFields()).map(f => ({
+        entity: f,
+        parent: {
+          coordinate: t.entity.name,
+        },
+        usage: t.usage,
+      })),
+    interfaces: t => t.entity.getInterfaces().map(i => i.name),
+    usage,
+  },
+  GraphQLInterfaceType: {
+    __isTypeOf: __isTypeOf(isInterfaceType),
+    name: t => t.entity.name,
+    description: t => t.entity.description ?? null,
+    fields: t =>
+      Object.values(t.entity.getFields()).map(f => ({
+        entity: f,
+        parent: {
+          coordinate: t.entity.name,
+        },
+        usage: t.usage,
+      })),
+    interfaces: t => t.entity.getInterfaces().map(i => i.name),
+    usage,
+  },
+  GraphQLUnionType: {
+    __isTypeOf: __isTypeOf(isUnionType),
+    name: t => t.entity.name,
+    description: t => t.entity.description ?? null,
+    members: t =>
+      t.entity.getTypes().map(i => {
+        return {
+          entity: i,
+          usage: t.usage,
+          parent: {
+            coordinate: t.entity.name,
+          },
+        };
+      }),
+    usage,
+  },
+  GraphQLEnumType: {
+    __isTypeOf: __isTypeOf(isEnumType),
+    name: t => t.entity.name,
+    description: t => t.entity.description ?? null,
+    values: t =>
+      t.entity.getValues().map(v => ({
+        entity: v,
+        parent: {
+          coordinate: t.entity.name,
+        },
+        usage: t.usage,
+      })),
+    usage,
+  },
+  GraphQLInputObjectType: {
+    __isTypeOf: __isTypeOf(isInputObjectType),
+    name: t => t.entity.name,
+    description: t => t.entity.description ?? null,
+    fields: t =>
+      Object.values(t.entity.getFields()).map(f => ({
+        entity: f,
+        parent: {
+          coordinate: t.entity.name,
+        },
+        usage: t.usage,
+      })),
+    usage,
+  },
+  GraphQLScalarType: {
+    __isTypeOf: __isTypeOf(isScalarType),
+    name: t => t.entity.name,
+    description: t => t.entity.description ?? null,
+    usage,
+  },
+  GraphQLEnumValue: {
+    name: v => v.entity.name,
+    description: v => v.entity.description ?? null,
+    isDeprecated: v => typeof v.entity.deprecationReason === 'string',
+    deprecationReason: v => v.entity.deprecationReason ?? null,
+    usage,
+  },
+  GraphQLUnionTypeMember: {
+    name: m => m.entity.name,
+    usage,
+  },
+  GraphQLField: {
+    name: f => f.entity.name,
+    description: f => f.entity.description ?? null,
+    isDeprecated: f => typeof f.entity.deprecationReason === 'string',
+    deprecationReason: f => f.entity.deprecationReason ?? null,
+    type: f => f.entity.type.toString(),
+    args: f =>
+      f.entity.args.map(a => ({
+        entity: a,
+        parent: {
+          coordinate: `${f.parent.coordinate}.${f.entity.name}`,
+        },
+        usage: f.usage,
+      })),
+    usage,
+  },
+  GraphQLInputField: {
+    name: f => f.entity.name,
+    description: f => f.entity.description ?? null,
+    type: f => f.entity.type.toString(),
+    defaultValue: f => stringifyDefaultValue(f.entity.defaultValue),
+    isDeprecated: f => typeof f.entity.deprecationReason === 'string',
+    deprecationReason: f => f.entity.deprecationReason ?? null,
+    usage,
+  },
+  GraphQLArgument: {
+    name: a => a.entity.name,
+    description: a => a.entity.description ?? null,
+    type: a => a.entity.type.toString(),
+    defaultValue: a => stringifyDefaultValue(a.entity.defaultValue),
+    deprecationReason: a => a.entity.deprecationReason ?? null,
+    isDeprecated: a => typeof a.entity.deprecationReason === 'string',
+    usage,
+  },
 };
+
+function stringifyDefaultValue(value: unknown): string | null {
+  if (typeof value !== 'undefined') {
+    return JSON.stringify(value);
+  }
+  return null;
+}

@@ -72,8 +72,8 @@ export default gql`
     requestsOverTime(resolution: Int!): [RequestsOverTime!]!
     failuresOverTime(resolution: Int!): [FailuresOverTime!]!
     durationOverTime(resolution: Int!): [DurationOverTime!]!
-    totalRequests(resolution: Int!): SafeInt!
-    totalFailures(resolution: Int!): SafeInt!
+    totalRequests: SafeInt!
+    totalFailures: SafeInt!
     totalOperations: Int!
     durationHistogram(resolution: Int!): [DurationHistogram!]!
     duration: DurationStats!
