@@ -15,6 +15,14 @@ import { SchemaPublisher } from './providers/schema-publisher';
 import { Inspector } from './providers/inspector';
 import { buildSchema, createConnection } from '../../shared/schema';
 import { ProjectType } from '../../shared/entities';
+import type {
+  GraphQLObjectTypeMapper,
+  GraphQLInterfaceTypeMapper,
+  GraphQLUnionTypeMapper,
+  GraphQLEnumTypeMapper,
+  GraphQLInputObjectTypeMapper,
+  GraphQLScalarTypeMapper,
+} from '../../shared/mappers';
 import { ProjectManager } from '../project/providers/project-manager';
 import { IdTranslator } from '../shared/providers/id-translator';
 import { OrganizationManager } from '../organization/providers/organization-manager';
@@ -568,11 +576,13 @@ export const resolvers: SchemaModule.Resolvers = {
       };
     },
     async types({ schema, usage }, _, { injector }) {
-      // TODO: fix any
       const types: Array<
-        WithSchemaCoordinatesUsage<{
-          entity: any;
-        }>
+        | GraphQLObjectTypeMapper
+        | GraphQLInterfaceTypeMapper
+        | GraphQLUnionTypeMapper
+        | GraphQLEnumTypeMapper
+        | GraphQLInputObjectTypeMapper
+        | GraphQLScalarTypeMapper
       > = [];
       const typeMap = schema.getTypeMap();
       const operationsManager = injector.get(OperationsManager);
@@ -592,13 +602,14 @@ export const resolvers: SchemaModule.Resolvers = {
         }
 
         types.push({
-          entity: typeMap[typename],
+          entity: typeMap[typename] as any,
           get usage() {
-            console.log('Usage getter called!');
             return getStats();
           },
         });
       }
+
+      types.sort((a, b) => a.entity.name.localeCompare(b.entity.name));
 
       return types;
     },
