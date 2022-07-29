@@ -269,6 +269,9 @@ export default gql`
     schemas: SchemaConnection!
     supergraph: String
     sdl: String
+    """
+    Experimental: This field is not stable and may change in the future.
+    """
     explorer(usage: SchemaExplorerUsageInput): SchemaExplorer!
   }
 
