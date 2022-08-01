@@ -112,3 +112,6 @@ integration-tests/testkit/gql/
 *.pem
 
 /.husky/_/
+
+# Rust
+/target

@@ -1,0 +1,31 @@
+[package]
+name = "graphql-hive-router"
+version = "0.0.1"
+authors = ["Kamil Kisiela <kamil.kisiela@gmail.com>"]
+edition = "2021"
+license = "MIT"
+publish = false
+
+[[bin]]
+name = "router"
+path = "src/main.rs"
+
+[dependencies]
+apollo-router = { git = "https://github.com/apollographql/router.git", branch = "main" }
+reqwest = { version = "0.11.11", features = ["blocking"] }
+sha2 = { version = "0.10.2", features = ["std"] }
+anyhow = "1"
+tracing = "0.1"
+async-trait = "0.1"
+futures = "0.3"
+schemars = { version = "0.8", features = ["url"] }
+serde = "1"
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+tower = { version = "0.4", features = ["full"] }
+http = "0.2"
+graphql-parser = { git = "https://github.com/kamilkisiela/graphql-parser.git", branch = "kamil-minifier" }
+graphql-tools = { git = "https://github.com/dotansimha/graphql-tools-rs.git", branch = "kamil-transformer" }
+lru = "0.7.8"
+md5 = "0.7.0"
+rand = "0.8.5"

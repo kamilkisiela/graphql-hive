@@ -234,6 +234,12 @@ jobs:
       - name: Build
         run: yarn build
 
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v1
+
+      - name: Cargo Build
+        run: cargo build --release
+
   lint:
     name: Lint
     runs-on: ubuntu-latest
