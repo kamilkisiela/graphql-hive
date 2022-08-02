@@ -36,7 +36,7 @@ interface UsageCollector {
 }
 
 export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
-  if (!pluginOptions.usage) {
+  if (!pluginOptions.usage || pluginOptions.enabled === false) {
     return {
       collect() {
         return () => {};

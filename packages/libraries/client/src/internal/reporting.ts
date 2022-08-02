@@ -11,7 +11,7 @@ export interface SchemaReporter {
 }
 
 export function createReporting(pluginOptions: HivePluginOptions): SchemaReporter {
-  if (!pluginOptions.reporting) {
+  if (!pluginOptions.reporting || pluginOptions.enabled === false) {
     return {
       report() {},
       async dispose() {},
