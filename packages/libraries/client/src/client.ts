@@ -11,31 +11,6 @@ export function createHive(options: HivePluginOptions): HiveClient {
 
   if (!options.enabled) {
     logIf(options.debug === true, '[hive] is not enabled.', logger.info);
-
-    // return a full empty HiveClient
-    return {
-      async info() {},
-      reportSchema: () => {
-        return {
-          report() {},
-          async dispose() {},
-        };
-      },
-      collectUsage: () => {
-        return () => {};
-      },
-      operationsStore: {
-        canHandle() {
-          return false;
-        },
-        get() {
-          return null;
-        },
-        async load() {},
-        async reload() {},
-      },
-      async dispose() {},
-    };
   }
 
   if (!options.token && options.enabled) {

@@ -12,7 +12,7 @@ test("should log that it's not enabled", async () => {
     agent: {
       logger,
     },
-    token: 'Token',
+    token: '',
   });
 
   const result = await hive
@@ -36,7 +36,7 @@ test("should not log that it's not enabled", async () => {
     agent: {
       logger,
     },
-    token: 'Token',
+    token: '',
   });
 
   const result = await hive
