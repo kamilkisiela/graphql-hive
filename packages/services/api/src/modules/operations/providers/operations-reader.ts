@@ -1,6 +1,7 @@
 import { Injectable } from 'graphql-modules';
 import { format, addMinutes, subDays } from 'date-fns';
 import type { Span } from '@sentry/types';
+import { batch } from '@theguild/buddy';
 import { ClickHouse, RowOf } from './clickhouse-client';
 import { calculateTimeWindow, maxResolution } from './helpers';
 import type { DateRange } from '../../../shared/entities';
@@ -846,6 +847,141 @@ export class OperationsReader {
     }
 
     return ensureNumber(result.data[0].total);
+  }
+
+  // Every call to this method is part of the batching logic.
+  // The `batch` function works similar to the DataLoader concept.
+  // It gathers all function calls within the same event loop,
+  // and calls the inner function in the next cycle.
+  countCoordinatesOfType = batch(
+    async (
+      selectors: Array<{
+        target: string;
+        period: DateRange;
+        typename: string;
+      }>
+    ) => {
+      const aggregationMap = new Map<
+        string,
+        {
+          target: string;
+          period: DateRange;
+          typenames: string[];
+        }
+      >();
+
+      const makeKey = (selector: { target: string; period: DateRange }) =>
+        `${selector.target}-${selector.period.from}-${selector.period.to}`;
+
+      // Groups the type names by their target and period
+      // The idea here is to make the least possible number of queries to ClickHouse
+      // by fetching all selected type names of the same target and period.
+      for (const selector of selectors) {
+        const key = makeKey(selector);
+        const value = aggregationMap.get(key);
+
+        if (!value) {
+          aggregationMap.set(key, {
+            target: selector.target,
+            period: selector.period,
+            typenames: [selector.typename],
+          });
+        } else {
+          value.typenames.push(selector.typename);
+        }
+      }
+
+      const resultMap = new Map<
+        string,
+        Promise<
+          {
+            coordinate: string;
+            total: number;
+          }[]
+        >
+      >();
+
+      // Do the actual call to ClickHouse to get the coordinates and counts of selected type names.
+      for (const selector of aggregationMap.values()) {
+        const key = makeKey(selector);
+
+        resultMap.set(
+          key,
+          this.countCoordinatesOfTypes({
+            target: selector.target,
+            period: selector.period,
+            typenames: selector.typenames,
+          })
+        );
+      }
+
+      // Because the `batch` function is used (it's a similar concept to DataLoader),
+      // it has tu return a map of promises matching provided selectors in exact same order.
+      return selectors.map(selector => {
+        const key = makeKey(selector);
+        const value = resultMap.get(key);
+
+        if (!value) {
+          throw new Error(`Could not find data for ${key} selector`);
+        }
+
+        return value;
+      });
+    }
+  );
+
+  private async countCoordinatesOfTypes({
+    target,
+    period,
+    typenames,
+  }: {
+    target: string;
+    period: DateRange;
+    typenames: string[];
+  }) {
+    const typesFilter = typenames.map(t => `coordinate = '${t}' OR coordinate LIKE '${t}.%'`).join(' OR ');
+    const result = await this.clickHouse.query<{
+      coordinate: string;
+      total: number;
+    }>({
+      query: `
+        SELECT coordinate, sum(total) as total FROM schema_coordinates_daily
+        ${this.createFilter({
+          target,
+          period,
+          extra: [`(${typesFilter})`],
+        })}
+        GROUP BY coordinate`,
+      queryId: 'coordinates_per_types',
+      timeout: 15_000,
+    });
+
+    return result.data.map(row => ({
+      coordinate: row.coordinate,
+      total: ensureNumber(row.total),
+    }));
+  }
+
+  async countCoordinatesOfTarget({ target, period }: { target: string; period: DateRange }) {
+    const result = await this.clickHouse.query<{
+      coordinate: string;
+      total: number;
+    }>({
+      query: `
+        SELECT coordinate, sum(total) as total FROM schema_coordinates_daily
+        ${this.createFilter({
+          target,
+          period,
+        })}
+        GROUP BY coordinate`,
+      queryId: 'coordinates_per_target',
+      timeout: 15_000,
+    });
+
+    return result.data.map(row => ({
+      coordinate: row.coordinate,
+      total: ensureNumber(row.total),
+    }));
   }
 
   async adminCountOperationsPerTarget({ daysLimit }: { daysLimit: number }) {

@@ -1,5 +1,11 @@
 # @graphql-hive/client
 
+## 0.18.0
+
+### Minor Changes
+
+- a94fd68: Introduce createSupergraphManager for @apollo/gateway v2
+
 ## 0.17.0
 
 ### Minor Changes

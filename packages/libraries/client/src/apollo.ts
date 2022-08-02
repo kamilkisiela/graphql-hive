@@ -28,6 +28,46 @@ export function createSupergraphSDLFetcher({ endpoint, key }: SupergraphSDLFetch
   };
 }
 
+export function createSupergraphManager(options: { pollIntervalInMs?: number } & SupergraphSDLFetcherOptions) {
+  const pollIntervalInMs = options.pollIntervalInMs ?? 30_000;
+  const fetchSupergraph = createSupergraphSDLFetcher({ endpoint: options.endpoint, key: options.key });
+  let timer: ReturnType<typeof setTimeout> | null = null;
+
+  return {
+    async initialize(hooks: { update(supergraphSdl: string): void }): Promise<{
+      supergraphSdl: string;
+      cleanup?: () => Promise<void>;
+    }> {
+      const initialResult = await fetchSupergraph();
+
+      function poll() {
+        timer = setTimeout(async () => {
+          try {
+            const result = await fetchSupergraph();
+            if (result.supergraphSdl) {
+              hooks.update?.(result.supergraphSdl);
+            }
+          } catch (error) {
+            console.error(`Failed to update supergraph: ${error instanceof Error ? error.message : error}`);
+          }
+          poll();
+        }, pollIntervalInMs);
+      }
+
+      poll();
+
+      return {
+        supergraphSdl: initialResult.supergraphSdl,
+        cleanup: async () => {
+          if (timer) {
+            clearTimeout(timer);
+          }
+        },
+      };
+    },
+  };
+}
+
 export function hiveApollo(clientOrOptions: HiveClient | HivePluginOptions): ApolloServerPlugin {
   const hive = isHiveClient(clientOrOptions)
     ? clientOrOptions

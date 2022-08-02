@@ -1,3 +1,16 @@
+import type {
+  GraphQLField,
+  GraphQLInputField,
+  GraphQLObjectType,
+  GraphQLInterfaceType,
+  GraphQLUnionType,
+  GraphQLEnumType,
+  GraphQLInputObjectType,
+  GraphQLScalarType,
+  GraphQLEnumValue,
+  GraphQLSchema,
+  GraphQLArgument,
+} from 'graphql';
 import type { SchemaChange, SchemaError, OperationStats, ClientStats } from '../__generated__/types';
 import type {
   Member,
@@ -18,6 +31,55 @@ export interface SchemaVersion extends SchemaVersionEntity {
   target: string;
   organization: string;
 }
+
+export type WithGraphQLParentInfo<T> = T & {
+  parent: {
+    coordinate: string;
+  };
+};
+
+export type WithSchemaCoordinatesUsage<T> = T & {
+  usage: Promise<{
+    [coordinate: string]: {
+      total: number;
+    };
+  }>;
+};
+
+export type SchemaExplorerMapper = {
+  schema: GraphQLSchema;
+  usage: {
+    period: DateRange;
+    organization: string;
+    project: string;
+    target: string;
+  };
+};
+
+export type GraphQLFieldMapper = WithSchemaCoordinatesUsage<
+  WithGraphQLParentInfo<{
+    entity: GraphQLField<any, any, any>;
+  }>
+>;
+export type GraphQLInputFieldMapper = WithSchemaCoordinatesUsage<
+  WithGraphQLParentInfo<{
+    entity: GraphQLInputField;
+  }>
+>;
+export type GraphQLEnumValueMapper = WithSchemaCoordinatesUsage<WithGraphQLParentInfo<{ entity: GraphQLEnumValue }>>;
+export type GraphQLArgumentMapper = WithSchemaCoordinatesUsage<WithGraphQLParentInfo<{ entity: GraphQLArgument }>>;
+export type GraphQLUnionTypeMemberMapper = WithSchemaCoordinatesUsage<
+  WithGraphQLParentInfo<{
+    entity: GraphQLObjectType;
+  }>
+>;
+
+export type GraphQLObjectTypeMapper = WithSchemaCoordinatesUsage<{ entity: GraphQLObjectType }>;
+export type GraphQLInterfaceTypeMapper = WithSchemaCoordinatesUsage<{ entity: GraphQLInterfaceType }>;
+export type GraphQLUnionTypeMapper = WithSchemaCoordinatesUsage<{ entity: GraphQLUnionType }>;
+export type GraphQLEnumTypeMapper = WithSchemaCoordinatesUsage<{ entity: GraphQLEnumType }>;
+export type GraphQLInputObjectTypeMapper = WithSchemaCoordinatesUsage<{ entity: GraphQLInputObjectType }>;
+export type GraphQLScalarTypeMapper = WithSchemaCoordinatesUsage<{ entity: GraphQLScalarType }>;
 
 export type SchemaChangeConnection = readonly SchemaChange[];
 export type SchemaErrorConnection = readonly SchemaError[];

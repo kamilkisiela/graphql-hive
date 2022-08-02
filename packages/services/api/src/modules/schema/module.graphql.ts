@@ -269,6 +269,10 @@ export default gql`
     schemas: SchemaConnection!
     supergraph: String
     sdl: String
+    """
+    Experimental: This field is not stable and may change in the future.
+    """
+    explorer(usage: SchemaExplorerUsageInput): SchemaExplorer!
   }
 
   type SchemaVersionConnection {
@@ -291,4 +295,115 @@ export default gql`
   }
 
   union SchemaSyncCDNPayload = SchemaSyncCDNSuccess | SchemaSyncCDNError
+
+  input SchemaExplorerUsageInput {
+    period: DateRangeInput!
+  }
+
+  type SchemaExplorer {
+    types: [GraphQLNamedType!]!
+    type(name: String!): GraphQLNamedType
+    query: GraphQLObjectType
+    mutation: GraphQLObjectType
+    subscription: GraphQLObjectType
+  }
+
+  type SchemaCoordinateUsage {
+    total: Int!
+    isUsed: Boolean!
+  }
+
+  union GraphQLNamedType =
+      GraphQLObjectType
+    | GraphQLInterfaceType
+    | GraphQLUnionType
+    | GraphQLEnumType
+    | GraphQLInputObjectType
+    | GraphQLScalarType
+
+  type GraphQLObjectType {
+    name: String!
+    description: String
+    fields: [GraphQLField!]!
+    interfaces: [String!]!
+    usage: SchemaCoordinateUsage!
+  }
+
+  type GraphQLInterfaceType {
+    name: String!
+    description: String
+    fields: [GraphQLField!]!
+    interfaces: [String!]!
+    usage: SchemaCoordinateUsage!
+  }
+
+  type GraphQLUnionType {
+    name: String!
+    description: String
+    members: [GraphQLUnionTypeMember!]!
+    usage: SchemaCoordinateUsage!
+  }
+
+  type GraphQLUnionTypeMember {
+    name: String!
+    usage: SchemaCoordinateUsage!
+  }
+
+  type GraphQLEnumType {
+    name: String!
+    description: String
+    values: [GraphQLEnumValue!]!
+    usage: SchemaCoordinateUsage!
+  }
+
+  type GraphQLInputObjectType {
+    name: String!
+    description: String
+    fields: [GraphQLInputField!]!
+    usage: SchemaCoordinateUsage!
+  }
+
+  type GraphQLScalarType {
+    name: String!
+    description: String
+    usage: SchemaCoordinateUsage!
+  }
+
+  type GraphQLField {
+    name: String!
+    description: String
+    type: String!
+    args: [GraphQLArgument!]!
+    isDeprecated: Boolean!
+    deprecationReason: String
+    usage: SchemaCoordinateUsage!
+  }
+
+  type GraphQLInputField {
+    name: String!
+    description: String
+    type: String!
+    defaultValue: String
+    isDeprecated: Boolean!
+    deprecationReason: String
+    usage: SchemaCoordinateUsage!
+  }
+
+  type GraphQLArgument {
+    name: String!
+    description: String
+    type: String!
+    defaultValue: String
+    isDeprecated: Boolean!
+    deprecationReason: String
+    usage: SchemaCoordinateUsage!
+  }
+
+  type GraphQLEnumValue {
+    name: String!
+    description: String
+    isDeprecated: Boolean!
+    deprecationReason: String
+    usage: SchemaCoordinateUsage!
+  }
 `;

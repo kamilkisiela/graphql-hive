@@ -1,5 +1,11 @@
 # @graphql-hive/cli
 
+## 0.18.1
+
+### Patch Changes
+
+- 41ec31b: Update GraphQL Inspector range to ~3.2.0
+
 ## 0.18.0
 
 ### Minor Changes
