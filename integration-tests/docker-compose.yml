@@ -144,6 +144,8 @@ services:
         condition: service_healthy
       webhooks:
         condition: service_healthy
+      emails:
+        condition: service_healthy
       schema:
         condition: service_healthy
       usage_estimator:
@@ -317,6 +319,35 @@ services:
       REDIS_PORT: 6379
       REDIS_PASSWORD: test
 
+  emails:
+    image: node:16.13.2-alpine3.14
+    entrypoint:
+      - '/bin/sh'
+      - '/run-emails.sh'
+    networks:
+      - 'stack'
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'localhost:3011/_readiness']
+      interval: 5s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
+    ports:
+      - 3011:3011
+    volumes:
+      - './tarballs/emails.tgz:/emails.tgz'
+      - './run-emails.sh:/run-emails.sh'
+    environment:
+      NODE_ENV: production
+      BULLMQ_COMMANDS_FROM_ROOT: 'true'
+      PORT: 3011
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: test
+
   usage:
     image: node:16.13.2-alpine3.14
     entrypoint:
@@ -446,10 +477,13 @@ services:
         condition: service_completed_successfully
       usage_estimator:
         condition: service_healthy
+      emails:
+        condition: service_healthy
     environment:
       NODE_ENV: production
       POSTGRES_CONNECTION_STRING: 'postgresql://postgres:postgres@db:5432/registry'
       USAGE_ESTIMATOR_ENDPOINT: http://usage_estimator:3008
+      EMAILS_ENDPOINT: http://emails:3011
       PORT: 3009
 
   stripe_billing:

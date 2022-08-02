@@ -1,0 +1,10 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "esnext",
+    "skipLibCheck": true,
+    "rootDir": "../.."
+  },
+  "files": ["src/index.ts"]
+}

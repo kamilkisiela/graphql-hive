@@ -34,6 +34,9 @@ async function main() {
       rateEstimator: {
         endpoint: ensureEnv('USAGE_ESTIMATOR_ENDPOINT', 'string'),
       },
+      emails: {
+        endpoint: ensureEnv('EMAILS_ENDPOINT', 'string'),
+      },
       storage: {
         connectionString: createConnectionString(process.env as any),
       },

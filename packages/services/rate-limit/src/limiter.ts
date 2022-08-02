@@ -1,6 +1,7 @@
 import { fetch } from 'cross-undici-fetch';
 import type { FastifyLoggerInstance } from '@hive/service-common';
 import { createStorage as createPostgreSQLStorage } from '@hive/storage';
+import type { EmailsApi } from '@hive/emails';
 
 import { startOfMonth, endOfMonth } from 'date-fns';
 import * as Sentry from '@sentry/node';
@@ -23,6 +24,7 @@ const UNKNOWN_RATE_LIMIT_OBJ: RateLimitCheckResponse = {
 
 export type CachedRateLimitInfo = {
   orgName: string;
+  orgEmail: string;
   operations: RateLimitCheckResponse;
   retentionInDays: number;
 };
@@ -42,12 +44,19 @@ export function createRateLimiter(config: {
   rateEstimator: {
     endpoint: string;
   };
+  emails: {
+    endpoint: string;
+  };
   storage: {
     connectionString: string;
   };
 }) {
   const rateEstimator = createTRPCClient<UsageEstimatorApi>({
     url: `${config.rateEstimator.endpoint}/trpc`,
+    fetch,
+  });
+  const emails = createTRPCClient<EmailsApi>({
+    url: `${config.emails.endpoint}/trpc`,
     fetch,
   });
 
@@ -62,15 +71,21 @@ export function createRateLimiter(config: {
   async function fetchAndCalculateUsageInformation() {
     const now = new Date();
     const window = {
+      startTime: startOfMonth(now),
+      endTime: endOfMonth(now),
+    };
+    const windowAsString = {
       startTime: startOfMonth(now).toUTCString(),
       endTime: endOfMonth(now).toUTCString(),
     };
-    config.logger.info(`Calculating rate-limit information based on window: ${window.startTime} -> ${window.endTime}`);
+    config.logger.info(
+      `Calculating rate-limit information based on window: ${windowAsString.startTime} -> ${windowAsString.endTime}`
+    );
     const storage = await postgres$;
 
     const [records, operations] = await Promise.all([
       storage.getGetOrganizationsAndTargetPairsWithLimitInfo(),
-      rateEstimator.query('estimateOperationsForAllTargets', window),
+      rateEstimator.query('estimateOperationsForAllTargets', windowAsString),
     ]);
 
     logger.debug(`Fetched total of ${Object.keys(records).length} targets from the DB`);
@@ -85,6 +100,7 @@ export function createRateLimiter(config: {
       if (!newCachedResult.has(pairRecord.organization)) {
         newCachedResult.set(pairRecord.organization, {
           orgName: pairRecord.org_name,
+          orgEmail: pairRecord.owner_email,
           operations: {
             current: 0,
             quota: pairRecord.limit_operations_monthly,
@@ -98,6 +114,8 @@ export function createRateLimiter(config: {
       orgRecord.operations.current = (orgRecord.operations.current || 0) + (operations[pairRecord.target] || 0);
     }
 
+    const scheduledEmails: Promise<unknown>[] = [];
+
     newCachedResult.forEach((orgRecord, orgId) => {
       const orgName = orgRecord.orgName;
       orgRecord.operations.limited =
@@ -108,12 +126,36 @@ export function createRateLimiter(config: {
         logger.info(
           `Organization "${orgName}"/"${orgId}" is now being rate-limited for operations (${orgRecord.operations.current}/${orgRecord.operations.quota})`
         );
+
+        scheduledEmails.push(
+          emails.mutation('schedule', {
+            email: orgRecord.orgEmail,
+            template: {
+              id: 'rate-limit-exceeded',
+              organization: {
+                id: orgId,
+                name: orgName,
+                limit: orgRecord.operations.quota,
+                usage: orgRecord.operations.current,
+                period: {
+                  start: window.startTime.getTime(),
+                  end: window.endTime.getTime(),
+                },
+              },
+            },
+          })
+        );
       }
     });
 
     cachedResult = newCachedResult;
     targetIdToOrgLookup = newTargetIdToOrgLookup;
     logger.info(`Built a new rate-limit map: %s`, JSON.stringify(Array.from(newCachedResult.entries())));
+
+    if (scheduledEmails.length > 0) {
+      await Promise.all(scheduledEmails);
+      logger.info(`Scheduled ${scheduledEmails.length} emails`);
+    }
   }
 
   return {

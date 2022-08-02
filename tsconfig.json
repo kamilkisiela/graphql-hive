@@ -35,6 +35,7 @@
       "@hive/rate-limit": ["./packages/services/rate-limit/src/api.ts"],
       "@hive/tokens": ["./packages/services/tokens/src/api.ts"],
       "@hive/webhooks": ["./packages/services/webhooks/src/api.ts"],
+      "@hive/emails": ["./packages/services/emails/src/api.ts"],
       "@graphql-hive/client": ["./packages/libraries/client/src/index.ts"],
       "@graphql-hive/core": ["./packages/libraries/core/src/index.ts"],
       "@hive/storage": ["./packages/services/storage/src/index.ts"]
