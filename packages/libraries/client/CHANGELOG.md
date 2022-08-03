@@ -1,5 +1,11 @@
 # @graphql-hive/client
 
+## 0.18.1
+
+### Patch Changes
+
+- c0e0821: fix: enabled false will log in debug that hive is disabled
+
 ## 0.18.0
 
 ### Minor Changes
