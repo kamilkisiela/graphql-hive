@@ -315,7 +315,7 @@ jobs:
       - name: Cache Rust
         uses: Swatinem/rust-cache@v1
         with:
-          key: rust_linux
+          key: rust_linux_cross
 
       - uses: actions-rs/cargo@v1
         with:
@@ -331,66 +331,66 @@ jobs:
           name: router-linux
           path: target/x86_64-unknown-linux-musl/release/router
 
-  rust_arm_binary:
-    name: 'Build Rust ARM binary ${{ matrix.arch }}'
-    strategy:
-      matrix:
-        include:
-          - arch: arm64
-            rust_target: aarch64-unknown-linux-musl
-            docker_image: arm64v8/ubuntu
-            docker_platform: aarch64
-          - arch: arm32
-            rust_target: armv7-unknown-linux-gnueabihf
-            docker_image: arm32v7/ubuntu
-            docker_platform: armv7
+  # rust_arm_binary:
+  #   name: 'Build Rust ARM binary ${{ matrix.arch }}'
+  #   strategy:
+  #     matrix:
+  #       include:
+  #         - arch: arm64
+  #           rust_target: aarch64-unknown-linux-musl
+  #           docker_image: arm64v8/ubuntu
+  #           docker_platform: aarch64
+  #         # - arch: arm32
+  #         #   rust_target: armv7-unknown-linux-gnueabihf
+  #         #   docker_image: arm32v7/ubuntu
+  #         #   docker_platform: armv7
 
-    runs-on: ubuntu-latest
+  #   runs-on: ubuntu-latest
 
-    env:
-      RUST_TARGET: ${{ matrix.rust_target }}
+  #   env:
+  #     RUST_TARGET: ${{ matrix.rust_target }}
 
-    steps:
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+  #   steps:
+  #     - name: Set up QEMU
+  #       uses: docker/setup-qemu-action@v2
 
-      - name: Install Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
+  #     - name: Install Rust
+  #       uses: actions-rs/toolchain@v1
+  #       with:
+  #         toolchain: stable
+  #         override: true
 
-      - uses: Swatinem/rust-cache@v1
-        with:
-          key: rust_arm_${{ matrix.arch }}
+  #     - uses: Swatinem/rust-cache@v1
+  #       with:
+  #         key: rust_arm_${{ matrix.arch }}
 
-      - name: 'Download `cross` crate'
-        run: cargo install cross
+  #     - name: 'Download `cross` crate'
+  #       run: cargo install cross
 
-      - name: 'Checkout'
-        uses: actions/checkout@v3
+  #     - name: 'Checkout'
+  #       uses: actions/checkout@v3
 
-      - name: 'Build release'
-        run: cross build --target $RUST_TARGET --release
+  #     - name: 'Build release'
+  #       run: cross build --target $RUST_TARGET --release
 
-      - name: Compress binary using UPX
-        run: |
-          sudo apt-get install -y upx
-          upx target/$RUST_TARGET/release/router
+  #     - name: Compress binary using UPX
+  #       run: |
+  #         sudo apt-get install -y upx
+  #         upx target/$RUST_TARGET/release/router
 
-      - uses: uraimo/run-on-arch-action@v2
-        name: Sanity test
-        with:
-          arch: ${{matrix.docker_platform}}
-          distro: ubuntu18.04
-          dockerRunArgs: |
-            --volume "${PWD}/target/${{matrix.rust_target}}/release:/artifacts"
-          run: /artifacts/router --version
+  #     - uses: uraimo/run-on-arch-action@v2
+  #       name: Sanity test
+  #       with:
+  #         arch: ${{matrix.docker_platform}}
+  #         distro: ubuntu18.04
+  #         dockerRunArgs: |
+  #           --volume "${PWD}/target/${{matrix.rust_target}}/release:/artifacts"
+  #         run: /artifacts/router --version
 
-      - uses: actions/upload-artifact@v3
-        with:
-          name: router-${{ matrix.arch }}
-          path: target/${{ env.RUST_TARGET }}/release/router
+  #     - uses: actions/upload-artifact@v3
+  #       with:
+  #         name: router-${{ matrix.arch }}
+  #         path: target/${{ env.RUST_TARGET }}/release/router
 
   lint:
     name: Lint
