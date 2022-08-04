@@ -8,6 +8,8 @@ use tokio::sync::mpsc;
 use tokio::sync::oneshot;
 use tokio::time::sleep;
 
+static COMMIT: Option<&'static str> = option_env!("GITHUB_SHA");
+
 #[derive(Serialize, Debug)]
 struct Report {
     size: usize,
@@ -225,8 +227,14 @@ impl UsageAgent {
         for _ in 0..3 {
             let resp = client
                 .post(self.endpoint.clone())
-                .header("Authorization", format!("Bearer {}", self.token.clone()))
-                .header("User-Agent", format!("graphql-hive-router@0.0.1"))
+                .header(
+                    reqwest::header::AUTHORIZATION,
+                    format!("Bearer {}", self.token.clone()),
+                )
+                .header(
+                    reqwest::header::USER_AGENT,
+                    format!("graphql-hive-router@{}", COMMIT.unwrap_or_else(|| "local")),
+                )
                 .json(&report)
                 .send()
                 .await
