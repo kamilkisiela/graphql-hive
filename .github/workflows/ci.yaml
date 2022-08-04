@@ -237,7 +237,7 @@ jobs:
   rust_windows:
     name: Build Rust for Windows
     runs-on: windows-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
@@ -264,7 +264,7 @@ jobs:
   rust_linux:
     name: Build Rust for Linux
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
@@ -286,6 +286,33 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: router-linux
+          path: target/release/router
+
+  rust_macos:
+    name: Build Rust for MacOS
+    runs-on: macos-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v1
+
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: router-macos
           path: target/release/router
 
   lint:
