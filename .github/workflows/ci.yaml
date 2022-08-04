@@ -237,7 +237,7 @@ jobs:
   rust_windows:
     name: Build Rust for Windows
     runs-on: windows-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
 
     steps:
       - name: Checkout
@@ -255,6 +255,9 @@ jobs:
         with:
           command: build
           args: --release
+
+      - name: Strip binary from debug symbols
+        run: strip target/release/router
 
       - uses: actions/upload-artifact@v3
         with:
@@ -264,7 +267,7 @@ jobs:
   rust_linux:
     name: Build Rust for Linux
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
 
     steps:
       - name: Checkout
@@ -282,6 +285,9 @@ jobs:
         with:
           command: build
           args: --release
+
+      - name: Strip binary from debug symbols
+        run: strip target/release/router
 
       - uses: actions/upload-artifact@v3
         with:
@@ -291,7 +297,7 @@ jobs:
   rust_macos:
     name: Build Rust for MacOS
     runs-on: macos-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
 
     steps:
       - name: Checkout
@@ -309,6 +315,9 @@ jobs:
         with:
           command: build
           args: --release
+
+      - name: Strip binary from debug symbols
+        run: strip target/release/router
 
       - uses: actions/upload-artifact@v3
         with:
