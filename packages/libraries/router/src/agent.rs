@@ -254,7 +254,7 @@ impl UsageAgent {
                     error_message = format!(
                         "Could not send usage report: ({}) {}",
                         resp.status().as_str(),
-                        resp.text().await.unwrap()
+                        resp.text().await.unwrap_or_default()
                     );
                 }
             }

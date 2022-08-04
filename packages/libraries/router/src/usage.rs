@@ -96,7 +96,12 @@ impl UsagePlugin {
             .map(|v| v.to_string());
 
         let operation_name = req.originating_request.body().operation_name.clone();
-        let operation_body = req.originating_request.body().query.clone().unwrap();
+        let operation_body = req
+            .originating_request
+            .body()
+            .query
+            .clone()
+            .expect("operation body");
 
         let sample_rate = config.sample_rate.clone();
         let excluded_operation_names: HashSet<String> = config
