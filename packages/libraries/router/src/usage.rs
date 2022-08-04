@@ -24,12 +24,16 @@ use tower::ServiceExt;
 
 use crate::agent::{ExecutionReport, UsageAgent};
 
-pub(crate) static CLIENT_NAME: &str = "hive::client_name";
-pub(crate) static CLIENT_VERSION: &str = "hive::client_version";
-pub(crate) static TIMESTAMP: &str = "hive::timestamp";
-pub(crate) static OPERATION_BODY: &str = "hive::operation_body";
-pub(crate) static OPERATION_NAME: &str = "hive::operation_name";
-pub(crate) static DROPPED: &str = "hive::dropped";
+pub(crate) static OPERATION_CONTEXT: &str = "hive::operation_context";
+
+struct OperationContext {
+    pub(crate) client_name: String,
+    pub(crate) client_version: String,
+    pub(crate) timestamp: u64,
+    pub(crate) operation_body: String,
+    pub(crate) operation_name: String,
+    pub(crate) dropped: bool,
+}
 
 struct UsagePlugin {
     #[allow(dead_code)]
@@ -125,18 +129,20 @@ impl UsagePlugin {
             tracing::debug!("Dropped the operation");
         }
 
-        let _ = context.insert(DROPPED, dropped);
-        let _ = context.insert(OPERATION_NAME, operation_name);
-        let _ = context.insert(OPERATION_BODY, operation_body);
-        let _ = context.insert(CLIENT_NAME, client_version);
-        let _ = context.insert(CLIENT_VERSION, client_name);
         let _ = context.insert(
-            TIMESTAMP,
-            SystemTime::now()
-                .duration_since(UNIX_EPOCH)
-                .unwrap()
-                .as_secs()
-                * 1000,
+            OPERATION_CONTEXT,
+            OperationContext {
+                dropped,
+                client_name,
+                client_version,
+                operation_name,
+                operation_body,
+                timestamp: SystemTime::now()
+                    .duration_since(UNIX_EPOCH)
+                    .unwrap()
+                    .as_secs()
+                    * 1000,
+            },
         );
     }
 
@@ -187,37 +193,22 @@ impl Plugin for UsagePlugin {
                     let sender = report_sender.clone();
 
                     async move {
-                        let dropped = ctx
-                            .get::<_, bool>(DROPPED)
+                        let operation_context = ctx
+                            .get::<_, OperationContext>(OPERATION_CONTEXT)
                             .unwrap_or_default()
                             .unwrap_or_default();
-                        if dropped {
+
+                        if operation_context.dropped {
                             let result: Result<RouterResponse, BoxError> = fut.await;
                             return result;
                         }
 
                         let result: Result<RouterResponse, BoxError> = fut.await;
-                        let client_name = ctx
-                            .get::<_, String>(CLIENT_NAME)
-                            .unwrap_or_default()
-                            .unwrap_or_default();
-                        let client_version = ctx
-                            .get::<_, String>(CLIENT_VERSION)
-                            .unwrap_or_default()
-                            .unwrap_or_default();
-                        let operation_name = ctx
-                            .get::<_, String>(OPERATION_NAME)
-                            .unwrap_or_default()
-                            .unwrap_or_default();
-
-                        let operation_body = ctx
-                            .get::<_, String>(OPERATION_BODY)
-                            .unwrap_or_default()
-                            .unwrap_or_default();
-                        let timestamp = ctx
-                            .get::<_, u64>(TIMESTAMP)
-                            .unwrap_or_default()
-                            .unwrap_or_default();
+                        let client_name = operation_context.client_name;
+                        let client_version = operation_context.client_version;
+                        let operation_name = operation_context.operation_name;
+                        let operation_body = operation_context.operation_body;
+                        let timestamp = operation_context.timestamp;
                         let duration = start.elapsed();
 
                         match result {
