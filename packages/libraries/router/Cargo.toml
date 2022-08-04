@@ -12,7 +12,7 @@ path = "src/main.rs"
 
 [dependencies]
 apollo-router = { git = "https://github.com/apollographql/router.git", branch = "main" }
-reqwest = { version = "0.11.11", features = ["blocking"] }
+reqwest = { version = "0.11.11", default-features = false, features = ["rustls-tls", "blocking", "json"] }
 sha2 = { version = "0.10.2", features = ["std"] }
 anyhow = "1"
 tracing = "0.1"
