@@ -254,6 +254,7 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           target: ${{ matrix.target }}
+          toolchain: stable
 
       - name: Cache Rust
         uses: Swatinem/rust-cache@v1
