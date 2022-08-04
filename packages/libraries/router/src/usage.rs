@@ -10,7 +10,7 @@ use futures::StreamExt;
 use http::HeaderValue;
 use rand::Rng;
 use schemars::JsonSchema;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::env;
 use std::time::Instant;
@@ -26,12 +26,13 @@ use crate::agent::{ExecutionReport, UsageAgent};
 
 pub(crate) static OPERATION_CONTEXT: &str = "hive::operation_context";
 
+#[derive(Serialize, Deserialize)]
 struct OperationContext {
-    pub(crate) client_name: String,
-    pub(crate) client_version: String,
+    pub(crate) client_name: Option<String>,
+    pub(crate) client_version: Option<String>,
     pub(crate) timestamp: u64,
     pub(crate) operation_body: String,
-    pub(crate) operation_name: String,
+    pub(crate) operation_name: Option<String>,
     pub(crate) dropped: bool,
 }
 
@@ -83,19 +84,19 @@ impl UsagePlugin {
             .cloned()
             .unwrap_or_else(|| HeaderValue::from_static(""))
             .to_str()
-            .unwrap_or_default()
-            .to_string();
+            .ok()
+            .map(|v| v.to_string());
 
         let client_version = headers
             .get(client_version_header)
             .cloned()
             .unwrap_or_else(|| HeaderValue::from_static(""))
             .to_str()
-            .unwrap_or_default()
-            .to_string();
+            .ok()
+            .map(|v| v.to_string());
 
         let operation_name = req.originating_request.body().operation_name.clone();
-        let operation_body = req.originating_request.body().query.clone();
+        let operation_body = req.originating_request.body().query.clone().unwrap();
 
         let sample_rate = config.sample_rate.clone();
         let excluded_operation_names: HashSet<String> = config
@@ -196,7 +197,7 @@ impl Plugin for UsagePlugin {
                         let operation_context = ctx
                             .get::<_, OperationContext>(OPERATION_CONTEXT)
                             .unwrap_or_default()
-                            .unwrap_or_default();
+                            .unwrap();
 
                         if operation_context.dropped {
                             let result: Result<RouterResponse, BoxError> = fut.await;

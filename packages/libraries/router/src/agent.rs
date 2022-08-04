@@ -53,14 +53,14 @@ struct ClientInfo {
 
 #[derive(Debug, Clone)]
 pub struct ExecutionReport {
-    pub client_name: String,
-    pub client_version: String,
+    pub client_name: Option<String>,
+    pub client_version: Option<String>,
     pub timestamp: u64,
     pub duration: Duration,
     pub ok: bool,
     pub errors: usize,
     pub operation_body: String,
-    pub operation_name: String,
+    pub operation_name: Option<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -96,7 +96,15 @@ pub struct UsageAgent {
     processor: Arc<Mutex<OperationProcessor>>,
 }
 
-// asd
+fn non_empty_string(value: Option<String>) -> Option<String> {
+    match value {
+        Some(value) => match value.is_empty() {
+            true => None,
+            false => Some(value),
+        },
+        None => None,
+    }
+}
 
 impl UsageAgent {
     pub fn new(
@@ -186,14 +194,8 @@ impl UsageAgent {
                         },
                         metadata: Some(Metadata {
                             client: Some(ClientInfo {
-                                name: match op.client_name.is_empty() {
-                                    true => None,
-                                    false => Some(op.client_name),
-                                },
-                                version: match op.client_version.is_empty() {
-                                    true => None,
-                                    false => Some(op.client_version),
-                                },
+                                name: non_empty_string(op.client_name),
+                                version: non_empty_string(op.client_version),
                             }),
                         }),
                     });
@@ -202,10 +204,7 @@ impl UsageAgent {
                             hash,
                             OperationMapRecord {
                                 operation: operation.operation,
-                                operationName: match op.operation_name.is_empty() {
-                                    true => None,
-                                    false => Some(op.operation_name),
-                                },
+                                operationName: non_empty_string(op.operation_name),
                                 fields: operation.coordinates,
                             },
                         );
