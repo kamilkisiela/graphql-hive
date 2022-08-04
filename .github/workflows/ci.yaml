@@ -234,17 +234,10 @@ jobs:
       - name: Build
         run: yarn build
 
-  rust:
-    name: Build Rust for ${{ matrix.target }}
-    runs-on: ubuntu-latest
+  rust_windows:
+    name: Build Rust for Windows
+    runs-on: windows-latest
     timeout-minutes: 25
-
-    strategy:
-      matrix:
-        target:
-          - x86_64-unknown-linux-gnu
-          - x86_64-apple-darwin
-          - x86_64-pc-windows-gnu
 
     steps:
       - name: Checkout
@@ -253,7 +246,6 @@ jobs:
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
-          target: ${{ matrix.target }}
           toolchain: stable
 
       - name: Cache Rust
@@ -262,7 +254,39 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --release --target ${{ matrix.target }}
+          args: --release
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: router-win
+          path: target/release/router.exe
+
+  rust_linux:
+    name: Build Rust for Linux
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v1
+
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: router-linux
+          path: target/release/router
 
   lint:
     name: Lint
