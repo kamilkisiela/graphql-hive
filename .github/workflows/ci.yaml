@@ -239,34 +239,54 @@ jobs:
       - name: Build
         run: yarn build
 
-  # rust_windows:
-  #   name: Build Rust for Windows
-  #   runs-on: windows-latest
-  #   timeout-minutes: 40
+  rust_windows:
+    name: Build Rust for Windows
+    runs-on: windows-latest
+    timeout-minutes: 40
 
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v3
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
 
-  #     - name: Install Rust
-  #       uses: actions-rs/toolchain@v1
-  #       with:
-  #         toolchain: stable
-  #         override: true
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
 
-  #     - name: Cache Rust
-  #       uses: Swatinem/rust-cache@v1
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v1
 
-  #     - uses: actions-rs/cargo@v1
-  #       with:
-  #         command: build
-  #         args: --release
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release
 
-  #     - name: Upload artifacts
-  #       uses: actions/upload-artifact@v3
-  #       with:
-  #         name: router-win
-  #         path: target/release/router.exe
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: router-win
+          path: target/release/router.exe
+
+      - name: Upload to R2
+        uses: randomairborne/r2-release@v1.0.2
+        with:
+          endpoint: https://6d5bc18cd8d13babe7ed321adba3d8ae.r2.cloudflarestorage.com
+          accesskeyid: ${{ secrets.R2_ACCESS_KEY_ID }}
+          secretaccesskey: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          bucket: apollo-router
+          file: target/release/router
+          destination: ${{ github.sha }}/win/router.exe
+
+      - name: Upload to R2
+        uses: randomairborne/r2-release@v1.0.2
+        with:
+          endpoint: https://6d5bc18cd8d13babe7ed321adba3d8ae.r2.cloudflarestorage.com
+          accesskeyid: ${{ secrets.R2_ACCESS_KEY_ID }}
+          secretaccesskey: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          bucket: apollo-router
+          file: target/release/router
+          destination: latest/win/router.exe
 
   rust_macos:
     name: Build Rust for MacOS
