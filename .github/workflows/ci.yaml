@@ -265,13 +265,6 @@ jobs:
         with:
           key: rust_linux_cross
 
-      - name: Look for changes
-        run: |
-          lines=$( git diff HEAD~ HEAD --name-only -- 'packages/libraries/router' | wc -l )
-          if [ $lines -gt 0 ]; then
-              echo "changes!"
-          fi
-
       - name: Build
         run: cargo build --target x86_64-unknown-linux-gnu --release
 
