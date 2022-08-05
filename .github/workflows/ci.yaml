@@ -350,7 +350,7 @@ jobs:
       #     args: --release --target x86_64-unknown-linux-gnu
 
       - name: Strip binary from debug symbols
-        run: strip target/x86_64-unknown-linux-gnu/router
+        run: strip target/x86_64-unknown-linux-musl/release/router
 
       - uses: actions/upload-artifact@v3
         with:
