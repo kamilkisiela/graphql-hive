@@ -323,7 +323,7 @@ jobs:
           node-version: 16
 
       - name: Install Rust
-        run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -- -y
+        run: curl https://sh.rustup.rs -sSf | sh -s -- -y
 
       - name: Install cross-target
         run: rustup target add x86_64-unknown-linux-gnu
