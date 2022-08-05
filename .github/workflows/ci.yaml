@@ -37,7 +37,8 @@ jobs:
         with:
           fetch-depth: 1
 
-      - uses: actions/setup-node@v2
+      - name: Install Node
+        uses: actions/setup-node@v2
         with:
           node-version: 16
 
@@ -83,7 +84,8 @@ jobs:
         with:
           fetch-depth: 5
 
-      - uses: actions/setup-node@v2
+      - name: Install Node
+        uses: actions/setup-node@v2
         with:
           node-version: 16
 
@@ -142,7 +144,8 @@ jobs:
         with:
           fetch-depth: 5
 
-      - uses: actions/setup-node@v2
+      - name: Install Node
+        uses: actions/setup-node@v2
         with:
           node-version: 16
 
@@ -181,7 +184,8 @@ jobs:
         with:
           fetch-depth: 1
 
-      - uses: actions/setup-node@v2
+      - name: Install Node
+        uses: actions/setup-node@v2
         with:
           node-version: 16
 
@@ -215,7 +219,8 @@ jobs:
         with:
           fetch-depth: 5
 
-      - uses: actions/setup-node@v2
+      - name: Install Node
+        uses: actions/setup-node@v2
         with:
           node-version: 16
 
@@ -242,6 +247,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
+      - name: Install Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
 
       - name: Install Rust
         uses: actions-rs/toolchain@v1
@@ -270,6 +280,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
+      - name: Install Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
 
       - name: Install Rust
         uses: actions-rs/toolchain@v1
@@ -301,6 +316,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
+      - name: Install Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
 
       - name: Install Rust
         uses: actions-rs/toolchain@v1
@@ -350,6 +370,11 @@ jobs:
     steps:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
+
+      - name: Install Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
 
       - name: Install Rust
         uses: actions-rs/toolchain@v1
