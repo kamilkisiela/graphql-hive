@@ -239,121 +239,8 @@ jobs:
       - name: Build
         run: yarn build
 
-  rust_windows:
-    name: Build Rust for Windows
-    runs-on: windows-latest
-    timeout-minutes: 40
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Install Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-
-      - name: Cache Rust
-        uses: Swatinem/rust-cache@v1
-
-      - uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release
-
-      - name: Compress
-        run: ./target/release/compress ./target/release/router.exe ./router.tar.gz
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: router-win
-          path: router.tar.gz
-
-      - name: Upload to R2
-        uses: randomairborne/r2-release@v1.0.2
-        with:
-          endpoint: https://6d5bc18cd8d13babe7ed321adba3d8ae.r2.cloudflarestorage.com
-          accesskeyid: ${{ secrets.R2_ACCESS_KEY_ID }}
-          secretaccesskey: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          bucket: apollo-router
-          file: router.tar.gz
-          destination: ${{ github.sha }}/win/router.tar.gz
-
-      - name: Upload to R2 as latest
-        uses: randomairborne/r2-release@v1.0.2
-        with:
-          endpoint: https://6d5bc18cd8d13babe7ed321adba3d8ae.r2.cloudflarestorage.com
-          accesskeyid: ${{ secrets.R2_ACCESS_KEY_ID }}
-          secretaccesskey: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          bucket: apollo-router
-          file: router.tar.gz
-          destination: latest/win/router.tar.gz
-
-  rust_macos:
-    name: Build Rust for MacOS
-    runs-on: macos-latest
-    timeout-minutes: 40
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Install Node
-        uses: actions/setup-node@v2
-        with:
-          node-version: 16
-
-      - name: Install Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-
-      - name: Cache Rust
-        uses: Swatinem/rust-cache@v1
-
-      - name: Build
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release
-
-      - name: Strip binary from debug symbols
-        run: strip target/release/router
-
-      - name: Compress
-        run: ./target/release/compress ./target/release/router ./router.tar.gz
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: router-macos
-          path: router.tar.gz
-
-      - name: Upload to R2
-        uses: randomairborne/r2-release@v1.0.2
-        with:
-          endpoint: https://6d5bc18cd8d13babe7ed321adba3d8ae.r2.cloudflarestorage.com
-          accesskeyid: ${{ secrets.R2_ACCESS_KEY_ID }}
-          secretaccesskey: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          bucket: apollo-router
-          file: router.tar.gz
-          destination: ${{ github.sha }}/macos/router.tar.gz
-
-      - name: Upload to R2 as latest
-        uses: randomairborne/r2-release@v1.0.2
-        with:
-          endpoint: https://6d5bc18cd8d13babe7ed321adba3d8ae.r2.cloudflarestorage.com
-          accesskeyid: ${{ secrets.R2_ACCESS_KEY_ID }}
-          secretaccesskey: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          bucket: apollo-router
-          file: router.tar.gz
-          destination: latest/macos/router.tar.gz
-
-  rust_linux:
-    name: Build Rust for Linux
+  rust:
+    name: Build Rust
     runs-on: ubuntu-latest
     timeout-minutes: 40
 
@@ -376,112 +263,30 @@ jobs:
         with:
           key: rust_linux_cross
 
+      - name: Look for changes
+        run: |
+          lines=$( git diff HEAD~ HEAD --name-only -- 'packages/libraries/asd' | wc -l )
+          if [ $lines -gt 0 ]; then
+              echo "changes!"
+          fi
+
       - name: Build
         run: cargo build --target x86_64-unknown-linux-gnu --release
 
       - name: Strip binary from debug symbols
         run: strip target/x86_64-unknown-linux-gnu/release/router
 
-      - name: Compress
-        run: ./target/x86_64-unknown-linux-gnu/release/compress ./target/x86_64-unknown-linux-gnu/release/router ./router.tar.gz
-
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
           name: router-linux
-          path: router.tar.gz
-
-      - name: Upload to R2
-        uses: randomairborne/r2-release@v1.0.2
-        with:
-          endpoint: https://6d5bc18cd8d13babe7ed321adba3d8ae.r2.cloudflarestorage.com
-          accesskeyid: ${{ secrets.R2_ACCESS_KEY_ID }}
-          secretaccesskey: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          bucket: apollo-router
-          file: router.tar.gz
-          destination: ${{ github.sha }}/linux/router.tar.gz
-
-      - name: Upload to R2 as latest
-        uses: randomairborne/r2-release@v1.0.2
-        with:
-          endpoint: https://6d5bc18cd8d13babe7ed321adba3d8ae.r2.cloudflarestorage.com
-          accesskeyid: ${{ secrets.R2_ACCESS_KEY_ID }}
-          secretaccesskey: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          bucket: apollo-router
-          file: router.tar.gz
-          destination: latest/linux/router.tar.gz
-
-  # rust_arm_binary:
-  #   name: 'Build Rust ARM binary ${{ matrix.arch }}'
-  #   strategy:
-  #     matrix:
-  #       include:
-  #         - arch: arm64
-  #           rust_target: aarch64-unknown-linux-musl
-  #           docker_image: arm64v8/ubuntu
-  #           docker_platform: aarch64
-  #         - arch: arm32
-  #           rust_target: armv7-unknown-linux-gnueabihf
-  #           docker_image: arm32v7/ubuntu
-  #           docker_platform: armv7
-
-  #   runs-on: ubuntu-latest
-
-  #   env:
-  #     RUST_TARGET: ${{ matrix.rust_target }}
-
-  #   steps:
-  #     - name: Set up QEMU
-  #       uses: docker/setup-qemu-action@v2
-
-  #     - name: Install Node
-  #       uses: actions/setup-node@v2
-  #       with:
-  #         node-version: 16
-
-  #     - name: Install Rust
-  #       uses: actions-rs/toolchain@v1
-  #       with:
-  #         toolchain: stable
-  #         override: true
-
-  #     - uses: Swatinem/rust-cache@v1
-  #       with:
-  #         key: rust_arm_${{ matrix.arch }}
-
-  #     - name: 'Download `cross` crate'
-  #       run: cargo install cross
-
-  #     - name: 'Checkout'
-  #       uses: actions/checkout@v3
-
-  #     - name: 'Build release'
-  #       run: cross build --target $RUST_TARGET --release
-
-  #     - name: Compress binary using UPX
-  #       run: |
-  #         sudo apt-get install -y upx
-  #         upx target/$RUST_TARGET/release/router
-
-  #     - uses: uraimo/run-on-arch-action@v2
-  #       name: Sanity test
-  #       with:
-  #         arch: ${{matrix.docker_platform}}
-  #         distro: ubuntu18.04
-  #         dockerRunArgs: |
-  #           --volume "${PWD}/target/${{matrix.rust_target}}/release:/artifacts"
-  #         run: /artifacts/router --version
-
-  #     - uses: actions/upload-artifact@v3
-  #       with:
-  #         name: router-${{ matrix.arch }}
-  #         path: target/${{ env.RUST_TARGET }}/release/router
+          path: target/x86_64-unknown-linux-gnu/release/router
 
   lint:
     name: Lint
     runs-on: ubuntu-latest
     needs: setup
-    timeout-minutes: 15
+    timeout-minutes: 25
 
     env:
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
