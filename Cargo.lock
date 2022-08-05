@@ -98,7 +98,7 @@ dependencies = [
 [[package]]
 name = "apollo-router"
 version = "0.14.0"
-source = "git+https://github.com/apollographql/router.git?branch=main#e21e1569836495b56a9cec37694ce757d8eae121"
+source = "git+https://github.com/kamilkisiela/router.git?branch=kamil-fix-stream#e85d6ea58bf035820ea0a0feefc769ec42cc40f5"
 dependencies = [
  "access-json",
  "anyhow",
@@ -189,7 +189,7 @@ dependencies = [
 [[package]]
 name = "apollo-spaceport"
 version = "0.14.0"
-source = "git+https://github.com/apollographql/router.git?branch=main#e21e1569836495b56a9cec37694ce757d8eae121"
+source = "git+https://github.com/kamilkisiela/router.git?branch=kamil-fix-stream#e85d6ea58bf035820ea0a0feefc769ec42cc40f5"
 dependencies = [
  "bytes",
  "clap",
@@ -211,7 +211,7 @@ dependencies = [
 [[package]]
 name = "apollo-uplink"
 version = "0.14.0"
-source = "git+https://github.com/apollographql/router.git?branch=main#e21e1569836495b56a9cec37694ce757d8eae121"
+source = "git+https://github.com/kamilkisiela/router.git?branch=kamil-fix-stream#e85d6ea58bf035820ea0a0feefc769ec42cc40f5"
 dependencies = [
  "futures",
  "graphql_client",
@@ -2801,7 +2801,7 @@ dependencies = [
 [[package]]
 name = "router-bridge"
 version = "0.1.0"
-source = "git+https://github.com/apollographql/federation-rs.git?branch=geal/defer#4cdcd574a967fc0fe61e0f6d6db92035ed395f0a"
+source = "git+https://github.com/apollographql/federation-rs.git?branch=abernix/geals-defer#281aae2a1abc642266e3316b2514c5e9a3e74026"
 dependencies = [
  "anyhow",
  "async-channel",
