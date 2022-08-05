@@ -314,7 +314,7 @@ jobs:
           secretaccesskey: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           bucket: apollo-router
           file: target/release/router
-          destination: /${{ github.sha }}/macos/router
+          destination: /router-macos-${{ github.sha }}
 
   # rust_linux:
   #   name: Build Rust for Linux
