@@ -271,6 +271,9 @@ jobs:
       - name: Strip binary from debug symbols
         run: strip target/x86_64-unknown-linux-gnu/release/router
 
+      - name: Compress
+        run: ./target/x86_64-unknown-linux-gnu/release/compress ./target/x86_64-unknown-linux-gnu/release/router ./router.tar.gz
+
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
