@@ -277,6 +277,16 @@ jobs:
           name: router-linux
           path: target/x86_64-unknown-linux-gnu/release/router
 
+      - name: Upload to R2 as latest
+        uses: randomairborne/r2-release@v1.0.2
+        with:
+          endpoint: https://6d5bc18cd8d13babe7ed321adba3d8ae.r2.cloudflarestorage.com
+          accesskeyid: ${{ secrets.R2_ACCESS_KEY_ID }}
+          secretaccesskey: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          bucket: apollo-router
+          file: router.tar.gz
+          destination: latest/linux/router.tar.gz
+
   lint:
     name: Lint
     runs-on: ubuntu-latest
