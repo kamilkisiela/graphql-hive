@@ -267,7 +267,7 @@ jobs:
 
       - name: Look for changes
         run: |
-          lines=$( git diff HEAD~ HEAD --name-only -- 'packages/libraries/asd' | wc -l )
+          lines=$( git diff HEAD~ HEAD --name-only -- 'packages/libraries/router' | wc -l )
           if [ $lines -gt 0 ]; then
               echo "changes!"
           fi
