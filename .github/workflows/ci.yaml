@@ -239,38 +239,34 @@ jobs:
       - name: Build
         run: yarn build
 
-  # rust_windows:
-  #   name: Build Rust for Windows
-  #   runs-on: windows-latest
-  #   timeout-minutes: 40
+  rust_windows:
+    name: Build Rust for Windows
+    runs-on: windows-latest
+    timeout-minutes: 40
 
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v3
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
 
-  #     - name: Install Node
-  #       uses: actions/setup-node@v2
-  #       with:
-  #         node-version: 16
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
 
-  #     - name: Install Rust
-  #       uses: actions-rs/toolchain@v1
-  #       with:
-  #         toolchain: stable
-  #         override: true
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v1
 
-  #     - name: Cache Rust
-  #       uses: Swatinem/rust-cache@v1
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release
 
-  #     - uses: actions-rs/cargo@v1
-  #       with:
-  #         command: build
-  #         args: --release
-
-  #     - uses: actions/upload-artifact@v3
-  #       with:
-  #         name: router-win
-  #         path: target/release/router.exe
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: router-win
+          path: target/release/router.exe
 
   rust_macos:
     name: Build Rust for MacOS
@@ -295,7 +291,8 @@ jobs:
       - name: Cache Rust
         uses: Swatinem/rust-cache@v1
 
-      - uses: actions-rs/cargo@v1
+      - name: Build
+        uses: actions-rs/cargo@v1
         with:
           command: build
           args: --release
@@ -303,7 +300,8 @@ jobs:
       - name: Strip binary from debug symbols
         run: strip target/release/router
 
-      - uses: actions/upload-artifact@v3
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
         with:
           name: router-macos
           path: target/release/router
@@ -328,13 +326,6 @@ jobs:
       - name: Install cross-target
         run: rustup target add x86_64-unknown-linux-gnu
 
-      # - name: Install Rust
-      #   uses: actions-rs/toolchain@v1
-      #   with:
-      #     toolchain: stable
-      #     target: x86_64-unknown-linux-gnu
-      #     override: true
-
       - name: Cache Rust
         uses: Swatinem/rust-cache@v1
         with:
@@ -343,16 +334,11 @@ jobs:
       - name: Build
         run: cargo build --release --target x86_64-unknown-linux-gnu
 
-      # - uses: actions-rs/cargo@v1
-      #   with:
-      #     use-cross: true
-      #     command: build
-      #     args: --release --target x86_64-unknown-linux-gnu
-
       - name: Strip binary from debug symbols
         run: strip target/x86_64-unknown-linux-musl/release/router
 
-      - uses: actions/upload-artifact@v3
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
         with:
           name: router-linux
           path: target/x86_64-unknown-linux-musl/release/router
