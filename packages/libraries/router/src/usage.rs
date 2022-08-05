@@ -176,7 +176,12 @@ impl Plugin for UsagePlugin {
 
         Ok(UsagePlugin {
             config: init.config,
-            agent: UsageAgent::new(init.supergraph_sdl, token, endpoint, Some(shutdown_rx)),
+            agent: UsageAgent::new(
+                init.supergraph_sdl.to_string(),
+                token,
+                endpoint,
+                Some(shutdown_rx),
+            ),
             shutdown_signal: Some(shutdown_tx),
         })
     }
