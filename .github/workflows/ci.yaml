@@ -239,34 +239,34 @@ jobs:
       - name: Build
         run: yarn build
 
-  rust_windows:
-    name: Build Rust for Windows
-    runs-on: windows-latest
-    timeout-minutes: 40
+  # rust_windows:
+  #   name: Build Rust for Windows
+  #   runs-on: windows-latest
+  #   timeout-minutes: 40
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
 
-      - name: Install Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
+  #     - name: Install Rust
+  #       uses: actions-rs/toolchain@v1
+  #       with:
+  #         toolchain: stable
+  #         override: true
 
-      - name: Cache Rust
-        uses: Swatinem/rust-cache@v1
+  #     - name: Cache Rust
+  #       uses: Swatinem/rust-cache@v1
 
-      - uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release
+  #     - uses: actions-rs/cargo@v1
+  #       with:
+  #         command: build
+  #         args: --release
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: router-win
-          path: target/release/router.exe
+  #     - name: Upload artifacts
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: router-win
+  #         path: target/release/router.exe
 
   rust_macos:
     name: Build Rust for MacOS
@@ -306,42 +306,52 @@ jobs:
           name: router-macos
           path: target/release/router
 
-  rust_linux:
-    name: Build Rust for Linux
-    runs-on: ubuntu-latest
-    timeout-minutes: 40
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Install Node
-        uses: actions/setup-node@v2
+      - name: Upload to R2
+        uses: randomairborne/r2-release@v1.0.2
         with:
-          node-version: 16
+          endpoint: https://6d5bc18cd8d13babe7ed321adba3d8ae.r2.cloudflarestorage.com
+          accesskeyid: ${{ secrets.R2_ACCESS_KEY_ID }}
+          secretaccesskey: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          bucket: apollo-router
+          file: target/release/router
+          destination: /${{ github.sha }}/macos/router
 
-      - name: Install Rust
-        run: curl https://sh.rustup.rs -sSf | sh -s -- -y
+  # rust_linux:
+  #   name: Build Rust for Linux
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 40
 
-      - name: Install cross-target
-        run: rustup target add x86_64-unknown-linux-gnu
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
 
-      - name: Cache Rust
-        uses: Swatinem/rust-cache@v1
-        with:
-          key: rust_linux_cross
+  #     - name: Install Node
+  #       uses: actions/setup-node@v2
+  #       with:
+  #         node-version: 16
 
-      - name: Build
-        run: cargo build --release --target x86_64-unknown-linux-gnu
+  #     - name: Install Rust
+  #       run: curl https://sh.rustup.rs -sSf | sh -s -- -y
 
-      - name: Strip binary from debug symbols
-        run: strip target/x86_64-unknown-linux-musl/release/router
+  #     - name: Install cross-target
+  #       run: rustup target add x86_64-unknown-linux-gnu
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: router-linux
-          path: target/x86_64-unknown-linux-musl/release/router
+  #     - name: Cache Rust
+  #       uses: Swatinem/rust-cache@v1
+  #       with:
+  #         key: rust_linux_cross
+
+  #     - name: Build
+  #       run: cargo build --release --target x86_64-unknown-linux-gnu
+
+  #     - name: Strip binary from debug symbols
+  #       run: strip target/release/router
+
+  #     - name: Upload artifact
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: router-linux
+  #         path: target/release/router
 
   # rust_arm_binary:
   #   name: 'Build Rust ARM binary ${{ matrix.arch }}'
