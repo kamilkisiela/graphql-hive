@@ -1,4 +1,5 @@
 [workspace]
 members = [
-  "packages/libraries/router"
+  "packages/libraries/router",
+  "scripts/compress"
 ]

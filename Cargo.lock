@@ -621,6 +621,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "compress"
+version = "0.0.1"
+dependencies = [
+ "flate2",
+]
+
+[[package]]
 name = "concurrent-queue"
 version = "1.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"

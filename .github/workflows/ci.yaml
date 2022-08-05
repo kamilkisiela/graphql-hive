@@ -262,11 +262,14 @@ jobs:
           command: build
           args: --release
 
+      - name: Compress
+        run: ./target/release/compress ./target/release/router.exe ./router.tar.gz
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
           name: router-win
-          path: target/release/router.exe
+          path: router.tar.gz
 
       - name: Upload to R2
         uses: randomairborne/r2-release@v1.0.2
@@ -275,18 +278,18 @@ jobs:
           accesskeyid: ${{ secrets.R2_ACCESS_KEY_ID }}
           secretaccesskey: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           bucket: apollo-router
-          file: target/release/router
-          destination: ${{ github.sha }}/win/router.exe
+          file: router.tar.gz
+          destination: ${{ github.sha }}/win/router.tar.gz
 
-      - name: Upload to R2
+      - name: Upload to R2 as latest
         uses: randomairborne/r2-release@v1.0.2
         with:
           endpoint: https://6d5bc18cd8d13babe7ed321adba3d8ae.r2.cloudflarestorage.com
           accesskeyid: ${{ secrets.R2_ACCESS_KEY_ID }}
           secretaccesskey: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           bucket: apollo-router
-          file: target/release/router
-          destination: latest/win/router.exe
+          file: router.tar.gz
+          destination: latest/win/router.tar.gz
 
   rust_macos:
     name: Build Rust for MacOS
@@ -320,11 +323,14 @@ jobs:
       - name: Strip binary from debug symbols
         run: strip target/release/router
 
+      - name: Compress
+        run: ./target/release/compress ./target/release/router ./router.tar.gz
+
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
           name: router-macos
-          path: target/release/router
+          path: router.tar.gz
 
       - name: Upload to R2
         uses: randomairborne/r2-release@v1.0.2
@@ -333,18 +339,18 @@ jobs:
           accesskeyid: ${{ secrets.R2_ACCESS_KEY_ID }}
           secretaccesskey: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           bucket: apollo-router
-          file: target/release/router
-          destination: ${{ github.sha }}/macos/router
+          file: router.tar.gz
+          destination: ${{ github.sha }}/macos/router.tar.gz
 
-      - name: Upload to R2
+      - name: Upload to R2 as latest
         uses: randomairborne/r2-release@v1.0.2
         with:
           endpoint: https://6d5bc18cd8d13babe7ed321adba3d8ae.r2.cloudflarestorage.com
           accesskeyid: ${{ secrets.R2_ACCESS_KEY_ID }}
           secretaccesskey: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           bucket: apollo-router
-          file: target/release/router
-          destination: latest/macos/router
+          file: router.tar.gz
+          destination: latest/macos/router.tar.gz
 
   # rust_linux:
   #   name: Build Rust for Linux
