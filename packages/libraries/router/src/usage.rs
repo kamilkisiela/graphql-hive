@@ -165,7 +165,8 @@ impl Plugin for UsagePlugin {
 
     async fn new(init: PluginInit<Self::Config>) -> Result<Self, BoxError> {
         tracing::debug!("Starting GraphQL Hive Usage plugin");
-        let token = env::var("HIVE_TOKEN").map_err(|e| e.to_string())?;
+        let token =
+            env::var("HIVE_TOKEN").map_err(|_| "environment variable HIVE_TOKEN not found")?;
         let endpoint = env::var("HIVE_ENDPOINT");
         let endpoint = match endpoint {
             Ok(endpoint) => endpoint,

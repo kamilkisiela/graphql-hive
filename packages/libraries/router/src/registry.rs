@@ -14,8 +14,10 @@ pub struct HiveRegistry {
 
 impl HiveRegistry {
     pub fn new() -> Result<(), String> {
-        let endpoint = env::var("HIVE_CDN_ENDPOINT").map_err(|e| e.to_string())?;
-        let key = env::var("HIVE_CDN_KEY").map_err(|e| e.to_string())?;
+        let endpoint = env::var("HIVE_CDN_ENDPOINT")
+            .map_err(|_| "environment variable HIVE_CDN_ENDPOINT not found")?;
+        let key =
+            env::var("HIVE_CDN_KEY").map_err(|_| "environment variable HIVE_CDN_KEY not found")?;
         let file_name = "supergraph-schema.graphql".to_string();
 
         env::set_var("APOLLO_ROUTER_SUPERGRAPH_PATH", file_name.clone());
