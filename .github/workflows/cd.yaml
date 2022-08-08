@@ -87,6 +87,9 @@ jobs:
     name: Publish Rust
     runs-on: ubuntu-latest
 
+    outputs:
+      rust_changed: ${{ steps.rust_changed.outputs.rust_changed }}
+
     steps:
       - uses: actions/checkout@v3
         with:
