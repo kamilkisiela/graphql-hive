@@ -14,11 +14,32 @@ pub struct HiveRegistry {
 
 impl HiveRegistry {
     pub fn new() -> Result<(), String> {
-        let endpoint = env::var("HIVE_CDN_ENDPOINT")
-            .map_err(|_| "environment variable HIVE_CDN_ENDPOINT not found")?;
-        let key =
-            env::var("HIVE_CDN_KEY").map_err(|_| "environment variable HIVE_CDN_KEY not found")?;
+        let endpoint = env::var("HIVE_CDN_ENDPOINT").unwrap_or_default();
+        let key = env::var("HIVE_CDN_KEY").unwrap_or_default();
+
+        //.map_err(|_| "environment variable HIVE_CDN_KEY not found")?;
+        // .map_err(|_| "environment variable HIVE_CDN_ENDPOINT not found")?;
+        if endpoint.is_empty() && key.is_empty() {
+            tracing::info!("You're not using GraphQL Hive as the source of schema.");
+            tracing::info!(
+                "Reason: could not find HIVE_CDN_KEY and HIVE_CDN_ENDPOINT environment variables."
+            );
+            return Ok(());
+        }
+
+        if endpoint.is_empty() {
+            return Err("environment variable HIVE_CDN_ENDPOINT not found".to_string());
+        }
+
+        if key.is_empty() {
+            return Err("environment variable HIVE_CDN_KEY not found".to_string());
+        }
+
         let file_name = "supergraph-schema.graphql".to_string();
+        let poll_interval: u32 = env::var("HIVE_CDN_POLL_INTERVAL")
+            .or_else("10")?
+            .parse()
+            .expect("failed to parse HIVE_CDN_POLL_INTERVAL");
 
         env::set_var("APOLLO_ROUTER_SUPERGRAPH_PATH", file_name.clone());
         env::set_var("APOLLO_ROUTER_HOT_RELOAD", "true");
@@ -40,7 +61,7 @@ impl HiveRegistry {
         }
 
         thread::spawn(move || loop {
-            thread::sleep(std::time::Duration::from_secs(10));
+            thread::sleep(std::time::Duration::from_secs(poll_interval));
             registry.poll()
         });
 

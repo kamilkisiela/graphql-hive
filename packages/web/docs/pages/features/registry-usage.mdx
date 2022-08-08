@@ -65,6 +65,8 @@ HIVE_CDN_ENDPOINT="..." HIVE_CDN_KEY="..." ./router
 - `HIVE_CDN_ENDPOINT` - the endpoint Hive generated for you in the previous step
 - `HIVE_CDN_KEY` - the access key
 
+> Apollo Router polls schema from the registry every 10 seconds. In order to change it to 15 seconds pass: `HIVE_CDN_POLL_INTERVAL=15`.
+
 ## Schema Stitching
 
 Stitching could be done in many ways, that's why `@graphql-hive/client` provides generic functions, not something dedicated for stitching. Unfortunately the implementation of gateway + polling is up to you.
