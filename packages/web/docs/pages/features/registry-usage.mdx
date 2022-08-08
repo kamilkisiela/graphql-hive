@@ -16,23 +16,24 @@ GraphQL Hive will now generate a unique key:
 
 ## Apollo Federation
 
-You're a programmer (or if you prefer a Software Engineer) so no need to explain the code snippet below. Just two things:
+There are gateways maintained by Apollo team, [Apollo Gateway](#apollo-gateway) and [Apollo Router](#apollo-router). GraphQL Hive supports both!
+
+### Apollo Gateway
 
 - `HIVE_CDN_ENDPOINT` - the endpoint Hive generated for you in the previous step
 - `HIVE_CDN_KEY` - the access key
 
-The `experimental_pollInterval` value is up to you. Apollo Gateway uses 10s (10.000 ms) by default but we think it's better to fetch a supergraph more often.
-
 ```typescript
-import { createSupergraphSDLFetcher } from '@graphql-hive/client'
+import { createSupergraphManager } from '@graphql-hive/client'
 import { ApolloGateway } from '@apollo/gateway'
 import { ApolloServer } from 'apollo-server'
 
 const gateway = new ApolloGateway({
-  experimental_pollInterval: 10_000, // define the poll interval (in ms)
-  experimental_updateSupergraphSdl: createSupergraphFetcher({
-    endpoint: HIVE_CDN_ENDPOINT,
-    key: HIVE_CDN_KEY
+  // Apollo Gateway will fetch Supergraph from GraphQL Hive CDN
+  supergraphSdl: createSupergraphManager({
+    endpoint: process.env.HIVE_CDN_ENDPOINT,
+    key: process.env.HIVE_CDN_KEY,
+    pollIntervalInMs: 15_000
   })
 })
 
@@ -44,6 +45,27 @@ server.listen().then(({ url }) => {
   console.log(`🚀 Server ready at ${url}`)
 })
 ```
+
+### Apollo Router
+
+GraphQL Hive ships a custom version of [Apollo Router](https://www.apollographql.com/docs/router/). The reason is that in order to extend Apollo Router, we need to write [a native Rust plugin](https://www.apollographql.com/docs/router/customizations/native).
+
+Download Apollo Router for Linux (x86_64), MacOS (x86_64) or Windows (x86_64):
+
+```bash
+curl -fsSL https://graphql-hive.com/apollo-router-download.sh | bash
+```
+
+Start the router:
+
+```bash
+HIVE_CDN_ENDPOINT="..." HIVE_CDN_KEY="..." ./router
+```
+
+- `HIVE_CDN_ENDPOINT` - the endpoint Hive generated for you in the previous step
+- `HIVE_CDN_KEY` - the access key
+
+> Apollo Router polls schema from the registry every 10 seconds. In order to change it to 15 seconds pass: `HIVE_CDN_POLL_INTERVAL=15`.
 
 ## Schema Stitching
 

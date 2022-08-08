@@ -1,0 +1,15 @@
+[package]
+name = "compress"
+version = "0.0.1"
+authors = ["Kamil Kisiela <kamil.kisiela@gmail.com>"]
+edition = "2021"
+license = "MIT"
+publish = false
+
+[[bin]]
+name = "compress"
+path = "src/main.rs"
+
+[dependencies]
+flate2 = "1.0.24"
+tar = "0.4"

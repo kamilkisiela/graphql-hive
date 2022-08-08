@@ -1,0 +1,5 @@
+[workspace]
+members = [
+  "packages/libraries/router",
+  "scripts/compress"
+]
