@@ -65,6 +65,49 @@ const envelopProxy = envelop({
 })
 ```
 
+### Apollo Router
+
+GraphQL Hive ships a custom version of [Apollo Router](https://www.apollographql.com/docs/router/). The reason is that in order to extend Apollo Router, we need to write [a native Rust plugin](https://www.apollographql.com/docs/router/customizations/native).
+
+Download Apollo Router for Linux (x86_64), MacOS (x86_64) or Windows (x86_64):
+
+```bash
+curl -fsSL https://graphql-hive.com/apollo-router-download.sh | bash
+```
+
+Write `router.yaml` file and enable `hive.usage` plugin:
+
+```yaml
+plugins:
+  hive.usage:
+    {}
+    #  Sample rate to determine sampling.
+    #  0.0 = 0% chance of being sent
+    #  1.0 = 100% chance of being sent.
+    #  Default: 1.0
+    # sample_rate: "0.5",
+    #
+    #  A list of operations (by name) to be ignored by Hive.
+    # exclude: ["IntrospectionQuery", "MeQuery"],
+    #
+    #  Uses graphql-client-name by default
+    # client_name_header: "x-client-name",
+    #  Uses graphql-client-version by default
+    # client_version_header: "x-client-version",
+```
+
+You can also enable other feautes like sampling.
+
+Now, start the router:
+
+```bash
+HIVE_TOKEN="your-token" HIVE_CDN_ENDPOINT="..." HIVE_CDN_KEY="..." ./router
+```
+
+> The `HIVE_CDN_*` environment variables are required to connect the router to the Schema Registry (Hive CDN).
+
+If everything worked correctly, you should see the first operations in GraphQL Hive in 1-2 minutes.
+
 ### Other servers
 
 The `createHive` function creates a generic Hive Client to be used with any GraphQL flow.

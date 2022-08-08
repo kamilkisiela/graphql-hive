@@ -60,7 +60,7 @@ download() {
     exit 1
   fi
 
-  tar xzf "/Users/kamilkisiela/Work/guild/graphql-hive/router.tar.gz"
+  tar xzf "$DOWNLOAD_DIR/router.tar.gz"
 }
 
 parse_args "$@"

@@ -80,37 +80,39 @@ The `collectUsage` method accepts the same arguments as execute function of grap
 - `finish(result)` (function returned by `collectUsage(args)`) - has to be invoked right after execution finishes.
 
 ```ts
-import express from 'express';
-import { graphqlHTTP } from 'express-graphql';
-import { createHive } from '@graphql-hive/client';
+import express from 'express'
+import { graphqlHTTP } from 'express-graphql'
+import { createHive } from '@graphql-hive/client'
 
-const app = express();
+const app = express()
 const hive = createHive({
   enabled: true, // Enable/Disable Hive Client
   debug: true, // Debugging mode
   token: 'YOUR-TOKEN',
   reporting: {
-  // feel free to set dummy values here
+    // feel free to set dummy values here
     author: 'Author of the latest change',
-    commit: 'git sha or any identifier',
+    commit: 'git sha or any identifier'
   },
-  usage: true, // Collects schema usage based operations
-  },
-});
+  usage: true // Collects schema usage based operations
+})
 
 // Report Schema
-hive.reportSchema({ schema: yourSchema });
+hive.reportSchema({ schema: yourSchema })
 
-app.post("/graphql", graphqlHTTP({
-  schema: yourSchema,
-  async customExecuteFn(args) {
-    // Collecting usage
-    const finish = hive.collectUsage(args);
-    const result = await execute(args);
-    finish(result);
-    return result;
-  }
-}));
+app.post(
+  '/graphql',
+  graphqlHTTP({
+    schema: yourSchema,
+    async customExecuteFn(args) {
+      // Collecting usage
+      const finish = hive.collectUsage(args)
+      const result = await execute(args)
+      finish(result)
+      return result
+    }
+  })
+)
 ```
 
 #### Using the registry when Stitching
@@ -154,21 +156,20 @@ startMyGraphQLGateway({
 
 You can connect your Apollo Gateway with Hive client.
 
-The `experimental_pollInterval` value is up to you. Apollo Gateway uses 10s (10_000 ms) by default but we think it's better to fetch a supergraph more often.
-
 - `HIVE_CDN_ENDPOINT` - the endpoint Hive generated for you in the previous step
 - `HIVE_CDN_KEY` - the access
 
 ```ts
-import { createSupergraphSDLFetcher } from '@graphql-hive/client'
+import { createSupergraphManager } from '@graphql-hive/client'
 import { ApolloGateway } from '@apollo/gateway'
 import { ApolloServer } from 'apollo-server'
 
 const gateway = new ApolloGateway({
-  experimental_pollInterval: 10_000, // define the poll interval (in ms)
-  experimental_updateSupergraphSdl: createSupergraphFetcher({
+  // Apollo Gateway will fetch Supergraph from GraphQL Hive CDN
+  supergraphSdl: createSupergraphManager({
     endpoint: HIVE_CDN_ENDPOINT,
-    key: HIVE_CDN_KEY
+    key: HIVE_CDN_KEY,
+    pollIntervalInMs: 15_000
   })
 })
 
