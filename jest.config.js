@@ -21,7 +21,7 @@ export default {
   },
   restoreMocks: true,
   reporters: ['default'],
-  modulePathIgnorePatterns: ['dist', 'integration-tests', 'tmp'],
+  modulePathIgnorePatterns: ['dist', 'integration-tests', 'tmp', 'target'],
   moduleNameMapper: {
     ...pathsToModuleNameMapper(tsconfig.compilerOptions.paths, {
       prefix: `${ROOT_DIR}/`,

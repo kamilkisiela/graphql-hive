@@ -54,7 +54,9 @@ test('should not leak the exception', async () => {
   expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('[hive][reporting] Attempt 1 failed:'));
   expect(logger.info).toHaveBeenCalledWith('[hive][reporting] Sending (queue 1) (attempt 2)');
   expect(logger.error).toHaveBeenCalledTimes(1);
-  expect(logger.error).toHaveBeenCalledWith(expect.stringContaining(`[hive][reporting] Failed to send data`));
+  expect(logger.error).toHaveBeenCalledWith(
+    expect.stringContaining(`[hive][reporting] Failed to report schema: connect ECONNREFUSED`)
+  );
 });
 
 test('should send data to Hive', async () => {
@@ -79,7 +81,18 @@ test('should send data to Hive', async () => {
     .once()
     .reply((_, _body) => {
       body = _body;
-      return [200];
+      return [
+        200,
+        {
+          data: {
+            schemaPublish: {
+              __typename: 'SchemaPublishSuccess',
+              initial: false,
+              valid: true,
+            },
+          },
+        },
+      ];
     });
 
   const hive = createHive({
@@ -124,7 +137,7 @@ test('should send data to Hive', async () => {
   expect(body.variables.input.force).toBe(true);
 });
 
-test.only('should send data to Hive immediately', async () => {
+test('should send data to Hive immediately', async () => {
   const logger = {
     error: jest.fn(),
     info: jest.fn(),
@@ -146,7 +159,19 @@ test.only('should send data to Hive immediately', async () => {
     .once()
     .reply((_, _body) => {
       body = _body;
-      return [200];
+      return [
+        200,
+        {
+          data: {
+            schemaPublish: {
+              __typename: 'SchemaPublishSuccess',
+              initial: false,
+              valid: true,
+              successMessage: 'Successfully published schema',
+            },
+          },
+        },
+      ];
     });
 
   const hive = createHive({
@@ -183,7 +208,8 @@ test.only('should send data to Hive immediately', async () => {
   expect(logger.info).toHaveBeenCalledWith('[hive][reporting] Sending (queue 1) (attempt 1)');
   expect(logger.error).not.toHaveBeenCalled();
   expect(logger.info).toHaveBeenCalledWith(`[hive][reporting] Sent!`);
-  expect(logger.info).toHaveBeenCalledTimes(3);
+  expect(logger.info).toHaveBeenCalledWith(`[hive][reporting] Successfully published schema`);
+  expect(logger.info).toHaveBeenCalledTimes(4);
 
   expect(body.variables.input.sdl).toBe(`type Query{foo:String}`);
   expect(body.variables.input.author).toBe(author);
@@ -193,7 +219,7 @@ test.only('should send data to Hive immediately', async () => {
   expect(body.variables.input.force).toBe(true);
 
   await waitFor(400);
-  expect(logger.info).toHaveBeenCalledTimes(3);
+  expect(logger.info).toHaveBeenCalledTimes(4);
 
   await hive.dispose();
   http.done();
@@ -261,4 +287,124 @@ test('should send original schema of a federated service', async () => {
   expect(body.variables.input.service).toBe(serviceName);
   expect(body.variables.input.url).toBe(serviceUrl);
   expect(body.variables.input.force).toBe(true);
+});
+
+test('should display SchemaPublishMissingServiceError', async () => {
+  const logger = {
+    error: jest.fn(),
+    info: jest.fn(),
+  };
+
+  const token = 'Token';
+  const http = nock('http://localhost')
+    .post('/200')
+    .matchHeader('Authorization', `Bearer ${token}`)
+    .matchHeader('Content-Type', headers['Content-Type'])
+    .matchHeader('graphql-client-name', headers['graphql-client-name'])
+    .matchHeader('graphql-client-version', headers['graphql-client-version'])
+    .once()
+    .reply((_, _body) => {
+      return [
+        200,
+        {
+          data: {
+            schemaPublish: {
+              __typename: 'SchemaPublishMissingServiceError',
+              missingServiceError: 'Service name is required',
+            },
+          },
+        },
+      ];
+    });
+
+  const hive = createHive({
+    enabled: true,
+    debug: true,
+    agent: {
+      timeout: 500,
+      maxRetries: 1,
+      logger,
+    },
+    token: token,
+    reporting: {
+      author: 'Test',
+      commit: 'Commit',
+      endpoint: 'http://localhost/200',
+    },
+  });
+
+  hive.reportSchema({
+    schema: buildSchema(/* GraphQL */ `
+      type Query {
+        foo: String
+      }
+    `),
+  });
+
+  await waitFor(50);
+  await hive.dispose();
+  http.done();
+
+  expect(logger.info).toHaveBeenCalledWith('[hive][reporting] Sending (queue 1) (attempt 1)');
+  expect(logger.error).toHaveBeenCalledWith(`[hive][reporting] Failed to report schema: Service name is not defined`);
+});
+
+test('should display SchemaPublishMissingUrlError', async () => {
+  const logger = {
+    error: jest.fn(),
+    info: jest.fn(),
+  };
+
+  const token = 'Token';
+  const http = nock('http://localhost')
+    .post('/200')
+    .matchHeader('Authorization', `Bearer ${token}`)
+    .matchHeader('Content-Type', headers['Content-Type'])
+    .matchHeader('graphql-client-name', headers['graphql-client-name'])
+    .matchHeader('graphql-client-version', headers['graphql-client-version'])
+    .once()
+    .reply((_, _body) => {
+      return [
+        200,
+        {
+          data: {
+            schemaPublish: {
+              __typename: 'SchemaPublishMissingUrlError',
+              missingUrlError: 'Service url is required',
+            },
+          },
+        },
+      ];
+    });
+
+  const hive = createHive({
+    enabled: true,
+    debug: true,
+    agent: {
+      timeout: 500,
+      maxRetries: 1,
+      logger,
+    },
+    token: token,
+    reporting: {
+      author: 'Test',
+      commit: 'Commit',
+      endpoint: 'http://localhost/200',
+    },
+  });
+
+  hive.reportSchema({
+    schema: buildSchema(/* GraphQL */ `
+      type Query {
+        foo: String
+      }
+    `),
+  });
+
+  await waitFor(50);
+  await hive.dispose();
+  http.done();
+
+  expect(logger.info).toHaveBeenCalledWith('[hive][reporting] Sending (queue 1) (attempt 1)');
+  expect(logger.error).toHaveBeenCalledWith(`[hive][reporting] Failed to report schema: Service url is not defined`);
 });
