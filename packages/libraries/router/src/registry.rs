@@ -36,7 +36,7 @@ impl HiveRegistry {
         }
 
         let file_name = "supergraph-schema.graphql".to_string();
-        let poll_interval: u32 = env::var("HIVE_CDN_POLL_INTERVAL")
+        let poll_interval: u64 = env::var("HIVE_CDN_POLL_INTERVAL")
             .or_else("10")?
             .parse()
             .expect("failed to parse HIVE_CDN_POLL_INTERVAL");
