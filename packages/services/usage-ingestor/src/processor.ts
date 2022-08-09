@@ -51,7 +51,6 @@ export function createProcessor(config: { logger: FastifyLoggerInstance }) {
       const serializedRegistryRecords: string[] = [];
 
       for (const rawReport of rawReports) {
-        logger.info(`Processing report (id=%s)`, rawReport.id ?? 'missing');
         reportSize.observe(rawReport.size);
 
         for (const rawOperation of rawReport.operations) {
