@@ -1208,63 +1208,67 @@ export async function createStorage(connection: string): Promise<Storage> {
       return transformSchema({ ...result, url });
     },
     async createVersion(input) {
-      // look for latest version in order to fetch urls of commits associated with that version
-      const previousVersion = await pool.maybeOne<Slonik<versions>>(sql`
-        SELECT v.id FROM public.versions as v
-        LEFT JOIN public.targets as t ON (t.id = v.target_id)
-        WHERE t.id = ${input.target} AND t.project_id = ${input.project}
-        ORDER BY v.created_at DESC
-        LIMIT 1
-      `);
-      // creates a new version
-      const newVersion = await pool.one<Slonik<Pick<versions, 'id' | 'created_at'>>>(sql`
-        INSERT INTO public.versions
-          (
-            valid,
-            target_id,
-            commit_id,
-            base_schema
-          )
-        VALUES
-          (
-            ${input.valid},
-            ${input.target},
-            ${input.commit},
-            ${input.base_schema}
-          )
-        RETURNING
-          id,
-          created_at
-      `);
+      const newVersion = await pool.transaction(async trx => {
+        // look for latest version in order to fetch urls of commits associated with that version
+        const previousVersion = await trx.maybeOne<Slonik<versions>>(sql`
+          SELECT v.id FROM public.versions as v
+          LEFT JOIN public.targets as t ON (t.id = v.target_id)
+          WHERE t.id = ${input.target} AND t.project_id = ${input.project}
+          ORDER BY v.created_at DESC
+          LIMIT 1
+        `);
+        // creates a new version
+        const newVersion = await trx.one<Slonik<Pick<versions, 'id' | 'created_at'>>>(sql`
+          INSERT INTO public.versions
+            (
+              valid,
+              target_id,
+              commit_id,
+              base_schema
+            )
+          VALUES
+            (
+              ${input.valid},
+              ${input.target},
+              ${input.commit},
+              ${input.base_schema}
+            )
+          RETURNING
+            id,
+            created_at
+        `);
 
-      // we want to write new url, so fill up the array with provided data
-      let commits: Array<{ commit_id: string; url?: string | null }> = [
-        {
-          commit_id: input.commit,
-          url: input.url,
-        },
-      ];
+        // we want to write new url, so fill up the array with provided data
+        let commits: Array<{ commit_id: string; url?: string | null }> = [
+          {
+            commit_id: input.commit,
+            url: input.url,
+          },
+        ];
 
-      if (previousVersion?.id) {
-        const vid = previousVersion.id;
-        // fetch the rest of commits
-        const otherCommits = await pool.many<Pick<version_commit, 'commit_id' | 'url'>>(
-          sql`SELECT commit_id, url FROM public.version_commit WHERE version_id = ${vid} AND commit_id != ${input.commit}`
+        if (previousVersion?.id) {
+          const vid = previousVersion.id;
+          // fetch the rest of commits
+          const otherCommits = await trx.many<Pick<version_commit, 'commit_id' | 'url'>>(
+            sql`SELECT commit_id, url FROM public.version_commit WHERE version_id = ${vid} AND commit_id != ${input.commit}`
+          );
+
+          commits = commits.concat(otherCommits);
+        }
+
+        await Promise.all(
+          input.commits.map(async cid => {
+            await trx.query(sql`
+              INSERT INTO public.version_commit
+                (version_id, commit_id, url)
+              VALUES
+              (${newVersion.id}, ${cid}, ${commits.find(c => c.commit_id === cid)?.url || null})
+            `);
+          })
         );
 
-        commits = commits.concat(otherCommits);
-      }
-
-      await Promise.all(
-        input.commits.map(async cid => {
-          await pool.query(sql`
-            INSERT INTO public.version_commit
-              (version_id, commit_id, url)
-            VALUES
-            (${newVersion.id}, ${cid}, ${commits.find(c => c.commit_id === cid)?.url || null})
-          `);
-        })
-      );
+        return newVersion;
+      });
 
       return {
         id: newVersion.id,
