@@ -36,7 +36,8 @@
     "turbo": "env-cmd --silent turbo run"
   },
   "devDependencies": {
-    "@changesets/cli": "2.22.0",
+    "@changesets/cli": "2.24.2",
+    "@changesets/changelog-github": "0.4.6",
     "@graphql-codegen/add": "3.2.0",
     "@graphql-codegen/cli": "2.8.0",
     "@graphql-codegen/gql-tag-operations-preset": "1.5.2-alpha-8565e86c3.0",

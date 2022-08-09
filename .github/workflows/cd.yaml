@@ -40,22 +40,25 @@ jobs:
       - name: Schema Publish
         run: ./packages/libraries/cli/bin/dev schema:publish "packages/services/api/src/modules/*/module.graphql.ts" --force --github
 
-      - name: Prepare NPM Credentials
+      - name: Set version variables
+        id: vars
+        shell: bash
         run: |
-          echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> $HOME/.npmrc
-          npm config set always-auth true
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+          echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
 
-      - name: Create Release Pull Request or Publish packages
+      - name: Create Release Pull Request or Publish to npm
         id: changesets
-        uses: changesets/action@v1.3.0
+        uses: dotansimha/changesets-action@1bd10e16a393db098c8f537c719621962c0d5571
         with:
           publish: yarn release
           commit: 'chore(release): update monorepo packages versions'
           title: 'Upcoming Release Changes'
+          createGithubReleases: aggregate
+          githubReleaseName: 'Release ${{ steps.vars.outputs.sha_short }} (from ${{ steps.vars.outputs.branch }})'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Extract published version
         if: steps.changesets.outputs.published && contains(steps.changesets.outputs.publishedPackages, '"@graphql-hive/cli"')
