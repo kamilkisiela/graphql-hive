@@ -140,16 +140,7 @@ async function main() {
 
         const stopTimer = collectLatency.startTimer();
         try {
-          const reportDetails = await collect(req.body, tokenInfo, retentionInfo);
-          req.log.info(
-            'Collected report (token=%s, operations=%s, id=%s, target=%s, org=%s, retention=%s)',
-            maskedToken,
-            reportDetails.size,
-            reportDetails.id,
-            tokenInfo.target,
-            tokenInfo.organization,
-            retentionInfo
-          );
+          await collect(req.body, tokenInfo, retentionInfo);
           stopTimer();
           res.status(200).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
         } catch (error) {
