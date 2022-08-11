@@ -4,34 +4,14 @@ on:
   pull_request:
     branches:
       - main
-    paths:
-      - '.changeset/**/*.md'
 
 jobs:
-  canary:
-    runs-on: ubuntu-latest
-    if: github.event.pull_request.head.repo.full_name == github.repository || github.event.inputs.onDemand == 'yes'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Use Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16
-          cache: 'yarn'
-
-      - name: Install Dependencies
-        run: yarn --frozen-lockfile
-
-      - name: Release Canary
-        id: canary
-        uses: 'the-guild-org/changesets-snapshot-action@main'
-        with:
-          tag: alpha
-          prepareScript: 'yarn build:libraries'
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN  }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  release:
+    uses: the-guild-org/shared-config/.github/workflows/release-snapshot.yml@main
+    with:
+      npmTag: alpha
+      buildScript: 'yarn build:libraries'
+      nodeVersion: 16
+    secrets:
+      githubToken: ${{ secrets.GITHUB_TOKEN }}
+      npmToken: ${{ secrets.NPM_TOKEN }}
