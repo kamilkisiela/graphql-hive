@@ -13,7 +13,7 @@
     "dependency-graph": "0.11.0",
     "dockest": "npm:@n1ru4l/dockest@2.1.0-rc.6",
     "rxjs": "^6.5.4",
-    "slonik": "23.9.0",
+    "slonik": "30.1.2",
     "tsup": "5.12.7",
     "yaml": "2.1.0"
   },

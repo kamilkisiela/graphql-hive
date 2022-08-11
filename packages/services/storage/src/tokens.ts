@@ -4,7 +4,7 @@ import { getPool, tokens, toDate } from './db';
 import type { Slonik } from './shared';
 
 export async function createTokenStorage(connection: string) {
-  const pool = getPool(connection);
+  const pool = await getPool(connection);
 
   return {
     async getTokens({ target }: { target: string }) {

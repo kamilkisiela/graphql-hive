@@ -9,7 +9,7 @@ const redisAddress = utils.getServiceAddress('redis', 6379);
 
 const pool = createPool(`postgresql://postgres:postgres@${dbAddress}/registry`);
 
-beforeEach(() => resetDb(pool));
+beforeEach(async () => resetDb(await pool));
 beforeEach(() => resetClickHouse());
 beforeEach(() =>
   resetRedis({

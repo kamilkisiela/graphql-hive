@@ -1,8 +1,8 @@
-import { InterceptorType } from 'slonik';
+import { Interceptor } from 'slonik';
 import { getCurrentHub, captureException } from '@sentry/node';
 import type { Span } from '@sentry/types';
 
-export const createSentryInterceptor = (): InterceptorType => {
+export const createSentryInterceptor = (): Interceptor => {
   const connections: Record<string, Record<string, Span>> = {};
 
   return {

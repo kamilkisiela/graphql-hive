@@ -1,30 +1,30 @@
 diff --git a/node_modules/slonik/dist/src/routines/executeQuery.js b/node_modules/slonik/dist/src/routines/executeQuery.js
-index bc40363..8c5e437 100644
+index 007d169..61441f8 100644
 --- a/node_modules/slonik/dist/src/routines/executeQuery.js
 +++ b/node_modules/slonik/dist/src/routines/executeQuery.js
-@@ -4,8 +4,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
+@@ -4,7 +4,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
  };
  Object.defineProperty(exports, "__esModule", { value: true });
  exports.executeQuery = void 0;
--// eslint-disable-next-line import/order
 -const get_stack_trace_1 = require("get-stack-trace");
- // @ts-expect-error
- const promise_deferred_1 = __importDefault(require("promise-deferred"));
+ const p_defer_1 = __importDefault(require("p-defer"));
  const serialize_error_1 = require("serialize-error");
-@@ -64,16 +62,6 @@ const executeQuery = async (connectionLogger, connection, clientConfiguration, r
+ const constants_1 = require("../constants");
+@@ -80,17 +79,6 @@ const executeQuery = async (connectionLogger, connection, clientConfiguration, s
      }
      const queryInputTime = process.hrtime.bigint();
      let stackTrace = null;
 -    if (clientConfiguration.captureStackTrace) {
--        const callSites = await get_stack_trace_1.getStackTrace();
+-        const callSites = await (0, get_stack_trace_1.getStackTrace)();
 -        stackTrace = callSites.map((callSite) => {
 -            return {
 -                columnNumber: callSite.columnNumber,
 -                fileName: callSite.fileName,
+-                functionName: callSite.functionName,
 -                lineNumber: callSite.lineNumber,
 -            };
 -        });
 -    }
-     const queryId = inheritedQueryId !== null && inheritedQueryId !== void 0 ? inheritedQueryId : utilities_1.createQueryId();
+     const queryId = inheritedQueryId !== null && inheritedQueryId !== void 0 ? inheritedQueryId : (0, utilities_1.createQueryId)();
      const log = connectionLogger.child({
          queryId,

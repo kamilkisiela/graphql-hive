@@ -1,6 +1,6 @@
-import { sql, DatabasePoolConnectionType } from 'slonik';
+import { sql, DatabasePoolConnection } from 'slonik';
 
-export const resetDb = async (conn: DatabasePoolConnectionType) => {
+export const resetDb = async (conn: DatabasePoolConnection) => {
   const migrationTables = ['migrations'];
 
   const result = await conn.many<{ tablename: string }>(sql`
