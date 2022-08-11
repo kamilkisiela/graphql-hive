@@ -17,7 +17,7 @@ import type {
   ProjectType,
   OrganizationType,
 } from '@hive/api';
-import { sql, TaggedTemplateLiteralInvocationType } from 'slonik';
+import { sql, TaggedTemplateLiteralInvocation } from 'slonik';
 import { update } from 'slonik-utilities';
 import {
   commits,
@@ -71,7 +71,7 @@ function getProviderBasedOnExternalId(externalId: string): AuthProvider {
 }
 
 export async function createStorage(connection: string): Promise<Storage> {
-  const pool = getPool(connection);
+  const pool = await getPool(connection);
 
   function transformUser(user: users): User {
     return {
@@ -1329,7 +1329,7 @@ export async function createStorage(connection: string): Promise<Storage> {
       );
     },
     async getActivities(selector) {
-      let query: TaggedTemplateLiteralInvocationType;
+      let query: TaggedTemplateLiteralInvocation;
       if ('target' in selector) {
         query = sql`
           SELECT

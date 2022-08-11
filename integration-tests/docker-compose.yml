@@ -172,6 +172,7 @@ services:
       POSTGRES_DB: registry
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+      ROARR_LOG: 'true'
       CLICKHOUSE_PROTOCOL: 'http'
       CLICKHOUSE_HOST: clickhouse
       CLICKHOUSE_PORT: 8123
@@ -263,6 +264,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_PORT: 5432
       POSTGRES_DB: registry
+      ROARR_LOG: 'true'
       PORT: 3003
 
   local_cdn:
@@ -414,6 +416,7 @@ services:
     environment:
       NODE_ENV: production
       POSTGRES_CONNECTION_STRING: 'postgresql://postgres:postgres@db:5432/registry'
+      ROARR_LOG: 'true'
       CLICKHOUSE_PROTOCOL: 'http'
       CLICKHOUSE_HOST: 'clickhouse'
       CLICKHOUSE_PORT: '8123'
@@ -450,6 +453,7 @@ services:
       NODE_ENV: production
       POSTGRES_CONNECTION_STRING: 'postgresql://postgres:postgres@db:5432/registry'
       USAGE_ESTIMATOR_ENDPOINT: http://usage_estimator:3008
+      ROARR_LOG: 'true'
       PORT: 3009
 
   stripe_billing:
@@ -481,6 +485,7 @@ services:
       NODE_ENV: production
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
       POSTGRES_CONNECTION_STRING: 'postgresql://postgres:postgres@db:5432/registry'
+      ROARR_LOG: 'true'
       USAGE_ESTIMATOR_ENDPOINT: http://usage_estimator:3008
       PORT: 3010
 

@@ -7,7 +7,7 @@ import { config } from '../src/env';
 import { migrateClickHouse } from './clickhouse';
 
 const [, , cmd] = process.argv;
-const slonik = createPool(config.postgresConnectionString);
+const slonik = await createPool(config.postgresConnectionString);
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const actionsDirectory = __dirname + path.sep + 'actions';

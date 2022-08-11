@@ -24,9 +24,9 @@
     "@theguild/buddy": "0.1.0",
     "dotenv": "10.0.0",
     "got": "12.0.4",
-    "slonik": "24.1.2",
-    "slonik-interceptor-query-logging": "1.3.9",
-    "slonik-utilities": "1.9.2"
+    "slonik": "30.1.2",
+    "slonik-interceptor-query-logging": "1.4.7",
+    "slonik-utilities": "1.9.4"
   },
   "devDependencies": {
     "@tgriesser/schemats": "7.0.0",
