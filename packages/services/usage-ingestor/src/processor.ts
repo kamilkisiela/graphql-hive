@@ -34,7 +34,6 @@ export function createProcessor(config: { logger: FastifyLoggerInstance }) {
       return createHash('md5')
         .update(op.operation)
         .update(op.operationName ?? '')
-        .update(op.fields.sort((a, b) => a.localeCompare(b)).join(';'))
         .digest('hex');
     },
     LRU<{
@@ -101,8 +100,14 @@ function processSingleOperation(
   const { operationName, fields } = operationMapRecord;
   const { execution, metadata } = operation;
 
-  const { key: hash, value: normalized } = normalize(operationMapRecord)!;
-  const operationHash = normalized.result ? hash : 'unknown';
+  const { value: normalized } = normalize(operationMapRecord)!;
+  const operationHash = normalized.result
+    ? createHash('md5')
+        .update(normalized.result)
+        .update(operationName ?? '')
+        .update(fields.sort().join(';')) // we do not need to sort from A to Z, default lexicographic sorting is enough
+        .digest('hex')
+    : 'unknown';
 
   const unique_fields = new Set<string>();
 

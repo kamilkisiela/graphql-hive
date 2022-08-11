@@ -22,14 +22,10 @@ import { normalizeOperation } from '@graphql-hive/core';
 import { parse, print } from 'graphql';
 
 function sendBatch(amount: number, operation: CollectedOperation, token: string) {
-  return Promise.all(
-    new Array(amount).fill(null).map(() =>
-      collect({
-        operations: [operation],
-        token,
-      })
-    )
-  );
+  return collect({
+    operations: new Array(amount).fill(operation),
+    token,
+  });
 }
 
 test('collect operation', async () => {
@@ -412,7 +408,7 @@ test('number of produced and collected operations should match (no errors)', asy
 
   const token = tokenResult.body.data!.createToken.ok!.secret;
 
-  const batchSize = 10;
+  const batchSize = 1000;
   const totalAmount = 10_000;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   for await (const _ of new Array(totalAmount / batchSize)) {
@@ -892,7 +888,7 @@ test('number of produced and collected operations should match', async () => {
 
   const token = tokenResult.body.data!.createToken.ok!.secret;
 
-  const batchSize = 10;
+  const batchSize = 1000;
   const totalAmount = 10_000;
   for await (const i of new Array(totalAmount / batchSize).fill(null).map((_, i) => i)) {
     await sendBatch(
@@ -1038,7 +1034,7 @@ test('different order of schema coordinates should not result in different hash'
     hash: string;
     total: number;
   }>(`
-    SELECT coordinate FROM schema_coordinates_daily
+    SELECT coordinate, hash FROM schema_coordinates_daily GROUP BY coordinate, hash
   `);
 
   expect(coordinatesResult.rows).toEqual(2);
@@ -1129,7 +1125,7 @@ test('same operation but with different schema coordinates should result in diff
     hash: string;
     total: number;
   }>(`
-    SELECT coordinate FROM schema_coordinates_daily
+    SELECT coordinate, hash FROM schema_coordinates_daily GROUP BY coordinate, hash
   `);
 
   expect(coordinatesResult.rows).toEqual(4);
