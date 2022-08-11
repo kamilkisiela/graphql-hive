@@ -6,13 +6,13 @@
 - Make sure to install the recommended VSCode extensions (defined in `.vscode/extensions.json`)
 - In the root of the repo, run `nvm use` to use the same version of node as mentioned
 - Run `yarn` at the root to install all the dependencies and run the hooks
-
 - Run `yarn setup` to create and apply migrations on the PostgreSQL database
 - Run `yarn generate` to generate the typings from the graphql files (use `yarn graphql:generate` if you only need to run GraphQL Codegen)
 - Run `yarn build` to build all services
 - Click on `Start Hive` in the bottom bar of VSCode
-- Open the UI (`http://localhost:3000` by default) and Sign in with any of the identity provider
 - If you are not added to the list of guest users, request access from The Guild maintainers
+  - Alternatively, [configure hive to use your own Auth0 Application](#setting-up-auth0-app-for-developing)
+- Open the UI (`http://localhost:3000` by default) and Sign in with any of the identity provider
 - Once this is done, you should be able to login and use the project
 - Once you generate the token against your organization/personal account in hive, the same can be added locally to `hive.json` within `packages/libraries/cli` which can be used to interact via the hive cli with the registry
 
@@ -33,10 +33,10 @@ We have a script to feed your local instance of Hive.
 ## Publish your first schema (manually)
 
 1. Start Hive locally
-1. Create a project and a target
-1. Create a token from that target
-1. Go to `packages/libraries/cli` and run `yarn build`
-1. Inside `packages/libraries/cli`, run: `yarn start schema:publish --token "YOUR_TOKEN_HERE" --registry "http://localhost:4000/graphql" examples/single.graphql`
+2. Create a project and a target
+3. Create a token from that target
+4. Go to `packages/libraries/cli` and run `yarn build`
+5. Inside `packages/libraries/cli`, run: `yarn start schema:publish --token "YOUR_TOKEN_HERE" --registry "http://localhost:4000/graphql" examples/single.graphql`
 
 ### Setting up Slack App for developing
 
@@ -53,3 +53,74 @@ We have a script to feed your local instance of Hive.
 
 1. Follow the steps above for Slack App
 2. Update `Setup URL` in [GraphQL Hive Development](https://github.com/organizations/the-guild-org/settings/apps/graphql-hive-development) app and set it to `https://hive-<your-name>.loophole.site/api/github/setup-callback`
+
+### Setting up Auth0 App for developing
+
+> **Note**: GraphQL Hive will soon be migrating its User Auth management to
+> [Super Tokens](https://supertokens.com/), which should also significantly
+> simplify the local development experience.
+
+You may want to use your own Auth0 app when running hive locally.
+
+1. Create your own Auth0 application
+   1. If you haven't already, create an account on [manage.auth0.com](https://manage.auth0.com)
+   2. Create a new application with the following settings:
+      1. Type: `Regular Web Application`
+      2. Allowed Callback URLs: `http://localhost:3000/api/callback`
+      3. Allowed Logout URLs: `http://localhost:3000/`
+   3. Create two Auth0 users
+      1. This can be done from the "User Management" page
+         - [`https://manage.auth0.com/dashboard/<REGION>/<DOMAIN>/users`](https://manage.auth0.com/dashboard/us/dev-azj17nyp/users)
+   4. Create a new "Rule" in your Auth0 Account
+      1. This can be done from the "Auth Pipeline -> Rules" section on the left navigation bar.
+         - [`https://manage.auth0.com/dashboard/<REGION>/<DOMAIN>/rules`](https://manage.auth0.com/dashboard/us/dev-azj17nyp/rules)
+      2. Enter the following code:
+         ```javascript
+         function (user, context, callback) {
+           var namespace = 'https://graphql-hive.com';
+           context.accessToken[namespace + '/metadata'] = user.user_metadata;
+           context.idToken[namespace + '/metadata'] = user.user_metadata;
+           context.accessToken[namespace + '/userinfo'] = {
+             user_id: user.user_id,
+             email: user.email,
+             username: user.username,
+             nickname: user.nickname
+           };
+           return callback(null, user, context);
+         }
+         ```
+2. Update the `.env` secrets used by your local hive instance:
+   - The `AUTH0_DOMAIN`, `AUTH0_CLIENT_ID`, and `AUTH0_CLIENT_SECRET` values
+     are found when viewing your new application on Auth0.
+
+```bash
+# packages/services/server/.env
+
+# Can be any value
+AUTH0_SECRET=super-secret-value
+
+AUTH0_DOMAIN=
+AUTH0_CLIENT_ID=
+AUTH0_CLIENT_SECRET=
+AUTH0_SCOPE="openid profile offline_access"
+AUTH0_AUDIENCE=https://${AUTH0_DOMAIN}/api/v2/
+AUTH0_CONNECTION=Username-Password-Authentication
+```
+
+```bash
+# packages/web/app/.env
+
+# Must be the same value as in 'packages/services/server/.env'
+AUTH0_SECRET=super-secret-value
+
+AUTH0_DOMAIN=
+AUTH0_CLIENT_ID=
+AUTH0_CLIENT_SECRET=
+AUTH0_SCOPE="openid profile offline_access"
+AUTH0_AUDIENCE=https://${AUTH0_DOMAIN}/api/v2/
+AUTH0_BASE_URL=http://localhost:3000
+AUTH0_ISSUER_BASE_URL=https://${AUTH0_DOMAIN}
+```
+
+3. Click on Start Hive in the bottom bar of VSCode
+4. Open the UI (`http://localhost:3000` by default) and Sign in with one of the users you created on the Auth0 management console
