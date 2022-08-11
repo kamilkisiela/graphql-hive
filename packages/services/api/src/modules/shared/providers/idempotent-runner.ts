@@ -5,6 +5,18 @@ import type { Redis } from '../../shared/providers/redis';
 import { Logger } from '../../shared/providers/logger';
 import { uuid } from '../../../shared/helpers';
 
+/**
+ *
+ * Deduplicates exact same jobs.
+ *
+ * https://excalidraw.com/#json=Rcg7Z1f0UZM91kElUrGE3,WhZJ6hQqafV0fY-XdjbHUw
+ *
+ * Stores the state of the job in Redis with a TTL.
+ * When running a job, it asks Redis if the job is already running.
+ * If the job is already pending, it will wait for it to finish and return the data (stored on Redis).
+ * If the job is not pending, it will run the job, set the state to pending, finish the job, update the state and return the data.
+ */
+
 export enum JobStatus {
   PENDING = 'PENDING',
   COMPLETED = 'COMPLETED',
@@ -61,29 +73,26 @@ export class IdempotentRunner {
     });
   }
 
-  private async set(identifier: string, job: JobPending, ttl: number): Promise<boolean>;
-  private async set<T>(identifier: string, job: JobCompleted<T>, ttl: number): Promise<boolean>;
   private async set<T>(identifier: string, job: JobPending | JobCompleted<T>, ttl: number): Promise<boolean> {
+    // Set the job as pending
     if (job.status === JobStatus.PENDING) {
       // SET if Not eXists
       const inserted = await this.redis.setnx(identifier, JSON.stringify(job));
 
       if (inserted) {
-        // expire if inserted
+        // set TTL if inserted
         await this.redis.expire(identifier, ttl);
+        return true;
       }
 
-      return inserted === 1;
+      return false;
     }
 
-    // remove the key and set + expire
+    // set as completed but timeout after N seconds
     await this.redis.setex(identifier, ttl, JSON.stringify(job));
     return true;
   }
 
-  private async get(identifier: string): Promise<null>;
-  private async get(identifier: string): Promise<JobPending>;
-  private async get<T>(identifier: string): Promise<JobCompleted<T>>;
   private async get<T>(identifier: string): Promise<null | JobPending | JobCompleted<T>> {
     const cached = await this.redis.get(identifier);
 
@@ -129,6 +138,8 @@ export class IdempotentRunner {
     let job = await this.get<T>(identifier);
 
     if (!job) {
+      this.logger.debug('Job not found (id=%s, traceId=%s, attempt=%s)', identifier, traceId, context.attempt);
+      this.logger.debug('Trying to create a job (id=%s, traceId=%s, attempt=%s)', identifier, traceId, context.attempt);
       const created = await this.set(
         identifier,
         {
@@ -152,15 +163,24 @@ export class IdempotentRunner {
           },
           ttl,
         });
+      } else {
+        this.logger.debug('Job created (id=%s, traceId=%s, attempt=%s)', identifier, traceId, context.attempt);
       }
 
       this.logger.debug('Executing job (id=%s, traceId=%s, attempt=%s)', identifier, traceId, context.attempt);
       const payload = await executor(context).catch(async error => {
         this.logger.debug('Job execution failed (id=%s, traceId=%s, error=%s)', identifier, traceId, error.message);
-        console.error(error);
+        this.logger.debug('Deleting the job (id=%s, traceId=%s, attempt=%s)', identifier, traceId, context.attempt);
         await this.del(identifier);
         return await Promise.reject(error);
       });
+
+      this.logger.debug(
+        'Marking job as completed (id=%s, traceId=%s, attempt=%s)',
+        identifier,
+        traceId,
+        context.attempt
+      );
       await this.set<T>(
         identifier,
         {
@@ -176,7 +196,12 @@ export class IdempotentRunner {
 
     const startedAt = Date.now();
     while (job && job.status !== JobStatus.COMPLETED) {
-      this.logger.debug('Awaiting job (id=%s, traceId=%s, time=%s)', identifier, traceId, Date.now() - startedAt);
+      const elapsed = Date.now() - startedAt;
+      if (elapsed > ttl * 1000) {
+        job = null;
+        break;
+      }
+      this.logger.debug('Awaiting job (id=%s, traceId=%s, time=%s)', identifier, traceId, elapsed);
       await new Promise(resolve => setTimeout(resolve, 500));
       job = await this.get<T>(identifier);
     }
@@ -205,7 +230,7 @@ export class IdempotentRunner {
     }
 
     this.logger.debug(
-      'Resolving the runner (id=%s, traceId=%s, attempt=%s, status=%s)',
+      'Resolving the job (id=%s, traceId=%s, attempt=%s, status=%s)',
       identifier,
       traceId,
       context.attempt,
