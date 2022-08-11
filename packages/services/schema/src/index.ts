@@ -81,7 +81,7 @@ async function main() {
       trpcOptions: {
         router: schemaBuilderApiRouter,
         createContext({ req }: CreateFastifyContextOptions) {
-          return { redis, logger: req.log, errorHandler };
+          return { redis, logger: req.log };
         },
       },
     });

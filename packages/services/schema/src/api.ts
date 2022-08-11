@@ -5,7 +5,6 @@ import { z } from 'zod';
 import { buildCounter, supergraphCounter, validateCounter } from './metrics';
 import { pickOrchestrator } from './orchestrators';
 import { Redis } from 'ioredis';
-import { createErrorHandler } from '@hive/service-common';
 
 const TYPE_VALIDATION = z.enum(['single', 'federation', 'stitching']);
 const SCHEMA_OBJECT_VALIDATION = {
@@ -18,7 +17,6 @@ export const schemaBuilderApiRouter = trpc
   .router<{
     logger: FastifyLoggerInstance;
     redis: Redis;
-    errorHandler: ReturnType<typeof createErrorHandler>;
   }>()
   .mutation('supergraph', {
     input: z
@@ -40,15 +38,7 @@ export const schemaBuilderApiRouter = trpc
           type: input.type,
         })
         .inc();
-      try {
-        const orchestrator = pickOrchestrator(input.type, ctx.redis, ctx.logger);
-
-        return await orchestrator.supergraph(input.schemas);
-      } catch (error) {
-        ctx.errorHandler('Failed to build a supergraph', error as Error, ctx.logger);
-
-        throw error;
-      }
+      return await pickOrchestrator(input.type, ctx.redis, ctx.logger).supergraph(input.schemas);
     },
   })
   .mutation('validate', {
@@ -64,14 +54,7 @@ export const schemaBuilderApiRouter = trpc
           type: input.type,
         })
         .inc();
-      try {
-        const orchestrator = pickOrchestrator(input.type, ctx.redis, ctx.logger);
-        return await orchestrator.validate(input.schemas);
-      } catch (error) {
-        ctx.errorHandler('Failed to validate a schema', error as Error, ctx.logger);
-
-        throw error;
-      }
+      return await pickOrchestrator(input.type, ctx.redis, ctx.logger).validate(input.schemas);
     },
   })
   .mutation('build', {
@@ -87,15 +70,7 @@ export const schemaBuilderApiRouter = trpc
           type: input.type,
         })
         .inc();
-      try {
-        const orchestrator = pickOrchestrator(input.type, ctx.redis, ctx.logger);
-
-        return await orchestrator.build(input.schemas);
-      } catch (error) {
-        ctx.errorHandler('Failed to build a schema', error as Error, ctx.logger);
-
-        throw error;
-      }
+      return await pickOrchestrator(input.type, ctx.redis, ctx.logger).build(input.schemas);
     },
   });
 
