@@ -1,6 +1,7 @@
 import { normalizeOperation as coreNormalizeOperation } from '@graphql-hive/core';
 import { Kind, parse } from 'graphql';
 import LRU from 'tiny-lru';
+import { createHash } from 'crypto';
 import { cache } from './helpers';
 import { reportSize, totalOperations, reportMessageSize, normalizeCacheMisses, schemaCoordinatesSize } from './metrics';
 import { stringifyOperation, stringifyRegistryRecord } from './serializer';
@@ -29,7 +30,13 @@ export function createProcessor(config: { logger: FastifyLoggerInstance }) {
   const { logger } = config;
   const normalize = cache(
     normalizeOperation,
-    cacheOperationKey,
+    op => {
+      return createHash('md5')
+        .update(op.operation)
+        .update(op.operationName ?? '')
+        .update(op.fields.sort((a, b) => a.localeCompare(b)).join(';'))
+        .digest('hex');
+    },
     LRU<{
       type: OperationTypeNode;
       result: string;
@@ -146,8 +153,4 @@ function normalizeOperation(operation: RawOperationMapRecord) {
       removeAliases: true,
     }),
   };
-}
-
-function cacheOperationKey(operation: RawOperationMapRecord) {
-  return operation.key;
 }
