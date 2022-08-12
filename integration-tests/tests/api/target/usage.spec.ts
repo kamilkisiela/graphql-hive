@@ -1003,7 +1003,7 @@ test('different order of schema coordinates should not result in different hash'
   await collect({
     operations: [
       {
-        operation: 'query ping {        ping      }',
+        operation: 'query ping {        ping      }', // those spaces are expected and important to ensure normalization is in place
         operationName: 'ping',
         fields: ['Query', 'Query.ping'],
         execution: {
@@ -1094,7 +1094,7 @@ test('same operation but with different schema coordinates should result in diff
   await collect({
     operations: [
       {
-        operation: 'query ping {        ping      }',
+        operation: 'query ping {        ping      }', // those spaces are expected and important to ensure normalization is in place
         operationName: 'ping',
         fields: ['Query', 'Query.ping'],
         execution: {
