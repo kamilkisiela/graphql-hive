@@ -20,7 +20,8 @@ type NormalizeFunction = (arg: RawOperationMapRecord) => {
   key: string;
   value: {
     type: OperationTypeNode;
-    result: string;
+    body: string;
+    hash: string;
   };
 };
 
@@ -30,15 +31,11 @@ export function createProcessor(config: { logger: FastifyLoggerInstance }) {
   const { logger } = config;
   const normalize = cache(
     normalizeOperation,
-    op => {
-      return createHash('md5')
-        .update(op.operation)
-        .update(op.operationName ?? '')
-        .digest('hex');
-    },
+    op => op.key,
     LRU<{
       type: OperationTypeNode;
-      result: string;
+      body: string;
+      hash: string;
     }>(10_000, 1_800_000 /* 30 minutes */)
   );
 
@@ -101,13 +98,7 @@ function processSingleOperation(
   const { execution, metadata } = operation;
 
   const { value: normalized } = normalize(operationMapRecord)!;
-  const operationHash = normalized.result
-    ? createHash('md5')
-        .update(normalized.result)
-        .update(operationName ?? '')
-        .update(fields.sort().join(';')) // we do not need to sort from A to Z, default lexicographic sorting is enough
-        .digest('hex')
-    : 'unknown';
+  const operationHash = normalized.hash ?? 'unknown';
 
   const unique_fields = new Set<string>();
 
@@ -125,7 +116,7 @@ function processSingleOperation(
   const timestamp = typeof operation.timestamp === 'string' ? parseInt(operation.timestamp, 10) : operation.timestamp;
 
   return {
-    document: normalized.result,
+    document: normalized.body,
     timestamp: timestamp,
     expiresAt: operation.expiresAt || timestamp + 30 * DAY_IN_MS,
     operationType: normalized.type,
@@ -149,13 +140,21 @@ function getOperationType(operation: DocumentNode): OperationTypeNode {
 function normalizeOperation(operation: RawOperationMapRecord) {
   normalizeCacheMisses.inc();
   const parsed = parse(operation.operation);
+  const body = coreNormalizeOperation({
+    document: parsed,
+    hideLiterals: true,
+    removeAliases: true,
+  });
+
+  const hash = createHash('md5')
+    .update(body)
+    .update(operation.operationName ?? '')
+    .update(operation.fields.sort().join(';')) // we do not need to sort from A to Z, default lexicographic sorting is enough
+    .digest('hex');
 
   return {
     type: getOperationType(parsed),
-    result: coreNormalizeOperation({
-      document: parsed,
-      hideLiterals: true,
-      removeAliases: true,
-    }),
+    hash,
+    body,
   };
 }
