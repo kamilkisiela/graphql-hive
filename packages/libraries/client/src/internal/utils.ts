@@ -52,7 +52,7 @@ export function cache<R, A, K>(
   };
 }
 
-export function cacheDocumentKey(doc: object) {
+export function cacheDocumentKey<T>(doc: T) {
   return createHash('md5').update(JSON.stringify(doc)).digest('hex');
 }
 

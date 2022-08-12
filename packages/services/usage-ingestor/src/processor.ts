@@ -1,6 +1,7 @@
 import { normalizeOperation as coreNormalizeOperation } from '@graphql-hive/core';
 import { Kind, parse } from 'graphql';
 import LRU from 'tiny-lru';
+import { createHash } from 'crypto';
 import { cache } from './helpers';
 import { reportSize, totalOperations, reportMessageSize, normalizeCacheMisses, schemaCoordinatesSize } from './metrics';
 import { stringifyOperation, stringifyRegistryRecord } from './serializer';
@@ -15,12 +16,15 @@ import type {
 } from '@hive/usage-common';
 import type { DefinitionNode, DocumentNode, OperationDefinitionNode, OperationTypeNode } from 'graphql';
 
+interface NormalizationResult {
+  type: OperationTypeNode;
+  body: string;
+  hash: string;
+  coordinates: string[];
+}
 type NormalizeFunction = (arg: RawOperationMapRecord) => {
   key: string;
-  value: {
-    type: OperationTypeNode;
-    result: string;
-  };
+  value: NormalizationResult;
 };
 
 const DAY_IN_MS = 86_400_000;
@@ -29,11 +33,8 @@ export function createProcessor(config: { logger: FastifyLoggerInstance }) {
   const { logger } = config;
   const normalize = cache(
     normalizeOperation,
-    cacheOperationKey,
-    LRU<{
-      type: OperationTypeNode;
-      result: string;
-    }>(10_000, 1_800_000 /* 30 minutes */)
+    op => op.key,
+    LRU<NormalizationResult>(10_000, 1_800_000 /* 30 minutes */)
   );
 
   return {
@@ -91,33 +92,22 @@ function processSingleOperation(
   normalize: NormalizeFunction
 ): ProcessedOperation {
   const operationMapRecord = operationMap[operation.operationMapKey];
-  const { operationName, fields } = operationMapRecord;
+  const { operationName } = operationMapRecord;
   const { execution, metadata } = operation;
 
-  const { key: hash, value: normalized } = normalize(operationMapRecord)!;
-  const operationHash = normalized.result ? hash : 'unknown';
+  const { value: normalized } = normalize(operationMapRecord)!;
+  const operationHash = normalized.hash ?? 'unknown';
 
-  const unique_fields = new Set<string>();
-
-  for (const field of fields) {
-    unique_fields.add(field);
-    // `Query.foo` -> `Query`
-    const at = field.indexOf('.');
-    if (at > -1) {
-      unique_fields.add(field.substring(0, at));
-    }
-  }
-
-  schemaCoordinatesSize.observe(unique_fields.size);
+  schemaCoordinatesSize.observe(normalized.coordinates.length);
 
   const timestamp = typeof operation.timestamp === 'string' ? parseInt(operation.timestamp, 10) : operation.timestamp;
 
   return {
-    document: normalized.result,
+    document: normalized.body,
     timestamp: timestamp,
     expiresAt: operation.expiresAt || timestamp + 30 * DAY_IN_MS,
     operationType: normalized.type,
-    fields: Array.from(unique_fields.keys()),
+    fields: normalized.coordinates,
     target,
     execution,
     metadata,
@@ -137,17 +127,40 @@ function getOperationType(operation: DocumentNode): OperationTypeNode {
 function normalizeOperation(operation: RawOperationMapRecord) {
   normalizeCacheMisses.inc();
   const parsed = parse(operation.operation);
+  const body = coreNormalizeOperation({
+    document: parsed,
+    hideLiterals: true,
+    removeAliases: true,
+  });
+
+  // Two operations with the same hash has to be equal:
+  // 1. body is the same
+  // 2. name is the same
+  // 3. used schema coordinates are equal - this is important to assign schema coordinate to an operation
+
+  const uniqueCoordinatesSet = new Set<string>();
+  for (const field of operation.fields) {
+    uniqueCoordinatesSet.add(field);
+    // Add types as well:
+    // `Query.foo` -> `Query`
+    const at = field.indexOf('.');
+    if (at > -1) {
+      uniqueCoordinatesSet.add(field.substring(0, at));
+    }
+  }
+
+  const sortedCoordinates = Array.from(uniqueCoordinatesSet).sort();
+
+  const hash = createHash('md5')
+    .update(body)
+    .update(operation.operationName ?? '')
+    .update(sortedCoordinates.join(';')) // we do not need to sort from A to Z, default lexicographic sorting is enough
+    .digest('hex');
 
   return {
     type: getOperationType(parsed),
-    result: coreNormalizeOperation({
-      document: parsed,
-      hideLiterals: true,
-      removeAliases: true,
-    }),
+    hash,
+    body,
+    coordinates: sortedCoordinates,
   };
-}
-
-function cacheOperationKey(operation: RawOperationMapRecord) {
-  return operation.key;
 }

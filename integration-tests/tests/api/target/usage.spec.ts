@@ -22,14 +22,10 @@ import { normalizeOperation } from '@graphql-hive/core';
 import { parse, print } from 'graphql';
 
 function sendBatch(amount: number, operation: CollectedOperation, token: string) {
-  return Promise.all(
-    new Array(amount).fill(null).map(() =>
-      collect({
-        operations: [operation],
-        token,
-      })
-    )
-  );
+  return collect({
+    operations: new Array(amount).fill(operation),
+    token,
+  });
 }
 
 test('collect operation', async () => {
@@ -412,7 +408,7 @@ test('number of produced and collected operations should match (no errors)', asy
 
   const token = tokenResult.body.data!.createToken.ok!.secret;
 
-  const batchSize = 10;
+  const batchSize = 1000;
   const totalAmount = 10_000;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   for await (const _ of new Array(totalAmount / batchSize)) {
@@ -892,7 +888,7 @@ test('number of produced and collected operations should match', async () => {
 
   const token = tokenResult.body.data!.createToken.ok!.secret;
 
-  const batchSize = 10;
+  const batchSize = 1000;
   const totalAmount = 10_000;
   for await (const i of new Array(totalAmount / batchSize).fill(null).map((_, i) => i)) {
     await sendBatch(
@@ -962,4 +958,277 @@ test('number of produced and collected operations should match', async () => {
       total: expect.stringMatching('5000'),
     })
   );
+});
+
+test('different order of schema coordinates should not result in different hash', async () => {
+  const { access_token: owner_access_token } = await authenticate('main');
+  const orgResult = await createOrganization(
+    {
+      name: 'foo',
+    },
+    owner_access_token
+  );
+
+  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+
+  const projectResult = await createProject(
+    {
+      organization: org.cleanId,
+      type: ProjectType.Single,
+      name: 'foo',
+    },
+    owner_access_token
+  );
+
+  const project = projectResult.body.data!.createProject.ok!.createdProject;
+  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
+
+  const tokenResult = await createToken(
+    {
+      name: 'test',
+      organization: org.cleanId,
+      project: project.cleanId,
+      target: target.cleanId,
+      organizationScopes: [OrganizationAccessScope.Read],
+      projectScopes: [ProjectAccessScope.Read],
+      targetScopes: [TargetAccessScope.Read, TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+    },
+    owner_access_token
+  );
+
+  expect(tokenResult.body.errors).not.toBeDefined();
+
+  const token = tokenResult.body.data!.createToken.ok!.secret;
+
+  await collect({
+    operations: [
+      {
+        operation: 'query ping {        ping      }', // those spaces are expected and important to ensure normalization is in place
+        operationName: 'ping',
+        fields: ['Query', 'Query.ping'],
+        execution: {
+          ok: true,
+          duration: 200000000,
+          errorsTotal: 0,
+        },
+      },
+      {
+        operation: 'query ping { ping }',
+        operationName: 'ping',
+        fields: ['Query.ping', 'Query'],
+        execution: {
+          ok: true,
+          duration: 200000000,
+          errorsTotal: 0,
+        },
+      },
+    ],
+    token,
+  });
+
+  await waitFor(5_000);
+
+  const coordinatesResult = await clickHouseQuery<{
+    target: string;
+    client_name: string | null;
+    hash: string;
+    total: number;
+  }>(`
+    SELECT coordinate, hash FROM schema_coordinates_daily GROUP BY coordinate, hash
+  `);
+
+  expect(coordinatesResult.rows).toEqual(2);
+
+  const operationsResult = await clickHouseQuery<{
+    target: string;
+    client_name: string | null;
+    hash: string;
+    total: number;
+  }>(`
+    SELECT hash FROM operations_registry FINAL GROUP BY hash
+  `);
+
+  expect(operationsResult.rows).toEqual(1);
+});
+
+test('same operation but with different schema coordinates should result in different hash', async () => {
+  const { access_token: owner_access_token } = await authenticate('main');
+  const orgResult = await createOrganization(
+    {
+      name: 'foo',
+    },
+    owner_access_token
+  );
+
+  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+
+  const projectResult = await createProject(
+    {
+      organization: org.cleanId,
+      type: ProjectType.Single,
+      name: 'foo',
+    },
+    owner_access_token
+  );
+
+  const project = projectResult.body.data!.createProject.ok!.createdProject;
+  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
+
+  const tokenResult = await createToken(
+    {
+      name: 'test',
+      organization: org.cleanId,
+      project: project.cleanId,
+      target: target.cleanId,
+      organizationScopes: [OrganizationAccessScope.Read],
+      projectScopes: [ProjectAccessScope.Read],
+      targetScopes: [TargetAccessScope.Read, TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+    },
+    owner_access_token
+  );
+
+  expect(tokenResult.body.errors).not.toBeDefined();
+
+  const token = tokenResult.body.data!.createToken.ok!.secret;
+
+  await collect({
+    operations: [
+      {
+        operation: 'query ping {        ping      }', // those spaces are expected and important to ensure normalization is in place
+        operationName: 'ping',
+        fields: ['Query', 'Query.ping'],
+        execution: {
+          ok: true,
+          duration: 200000000,
+          errorsTotal: 0,
+        },
+      },
+      {
+        operation: 'query ping { ping }',
+        operationName: 'ping',
+        fields: ['RootQuery', 'RootQuery.ping'],
+        execution: {
+          ok: true,
+          duration: 200000000,
+          errorsTotal: 0,
+        },
+      },
+    ],
+    token,
+  });
+
+  await waitFor(5_000);
+
+  const coordinatesResult = await clickHouseQuery<{
+    target: string;
+    client_name: string | null;
+    hash: string;
+    total: number;
+  }>(`
+    SELECT coordinate, hash FROM schema_coordinates_daily GROUP BY coordinate, hash
+  `);
+
+  expect(coordinatesResult.rows).toEqual(4);
+
+  const operationsResult = await clickHouseQuery<{
+    target: string;
+    client_name: string | null;
+    hash: string;
+    total: number;
+  }>(`
+    SELECT hash FROM operations_registry FINAL GROUP BY hash
+  `);
+
+  expect(operationsResult.rows).toEqual(2);
+});
+
+test('operations with the same schema coordinates and body but with different name should result in different hashes', async () => {
+  const { access_token: owner_access_token } = await authenticate('main');
+  const orgResult = await createOrganization(
+    {
+      name: 'foo',
+    },
+    owner_access_token
+  );
+
+  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+
+  const projectResult = await createProject(
+    {
+      organization: org.cleanId,
+      type: ProjectType.Single,
+      name: 'foo',
+    },
+    owner_access_token
+  );
+
+  const project = projectResult.body.data!.createProject.ok!.createdProject;
+  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
+
+  const tokenResult = await createToken(
+    {
+      name: 'test',
+      organization: org.cleanId,
+      project: project.cleanId,
+      target: target.cleanId,
+      organizationScopes: [OrganizationAccessScope.Read],
+      projectScopes: [ProjectAccessScope.Read],
+      targetScopes: [TargetAccessScope.Read, TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+    },
+    owner_access_token
+  );
+
+  expect(tokenResult.body.errors).not.toBeDefined();
+
+  const token = tokenResult.body.data!.createToken.ok!.secret;
+
+  await collect({
+    operations: [
+      {
+        operation: 'query pingv2 { ping }',
+        operationName: 'pingv2',
+        fields: ['Query', 'Query.ping'],
+        execution: {
+          ok: true,
+          duration: 200000000,
+          errorsTotal: 0,
+        },
+      },
+      {
+        operation: 'query ping { ping }',
+        operationName: 'ping',
+        fields: ['Query', 'Query.ping'],
+        execution: {
+          ok: true,
+          duration: 200000000,
+          errorsTotal: 0,
+        },
+      },
+    ],
+    token,
+  });
+
+  await waitFor(5_000);
+
+  const coordinatesResult = await clickHouseQuery<{
+    target: string;
+    client_name: string | null;
+    hash: string;
+    total: number;
+  }>(`
+    SELECT coordinate, hash FROM schema_coordinates_daily GROUP BY coordinate, hash
+  `);
+
+  expect(coordinatesResult.rows).toEqual(4);
+
+  const operationsResult = await clickHouseQuery<{
+    target: string;
+    client_name: string | null;
+    hash: string;
+    total: number;
+  }>(`
+    SELECT hash FROM operations_registry FINAL GROUP BY hash
+  `);
+
+  expect(operationsResult.rows).toEqual(2);
 });
