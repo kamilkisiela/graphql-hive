@@ -133,7 +133,9 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
         }
       }),
       useAuth0({
-        onError() {},
+        onError(error) {
+          server.logger.error(error);
+        },
         domain: process.env.AUTH0_DOMAIN!,
         audience: process.env.AUTH0_AUDIENCE!,
         extendContextField: 'user',
