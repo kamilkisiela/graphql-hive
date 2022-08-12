@@ -87,7 +87,7 @@ export function createScheduler(config: {
         });
 
         logger.info('Email sent');
-        emailsTotal.inc({ organization: job.data.email });
+        emailsTotal.inc();
       },
       {
         prefix,

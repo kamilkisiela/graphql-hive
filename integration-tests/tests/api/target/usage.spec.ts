@@ -603,7 +603,7 @@ test('check usage from two selected targets', async () => {
 
   expect(collectResult.status).toEqual(200);
 
-  await waitFor(22_000);
+  await waitFor(5_000);
 
   // should not be breaking because the field is unused on staging
   const unusedCheckResult = await checkSchema(

@@ -4,21 +4,25 @@ import * as emails from '../../../testkit/emails';
 import { authenticate } from '../../../testkit/auth';
 import { collect } from '../../../testkit/usage';
 
+function generateUnique() {
+  return Math.random().toString(36).substring(7);
+}
+
+function filterEmailsByOrg(orgName: string, emails: emails.Email[]) {
+  return emails.filter(email => email.subject.startsWith(orgName));
+}
+
 test('rate limit approaching and reached for organization', async () => {
   const adminEmail = process.env.AUTH0_USER_ADMIN_EMAIL!;
-  console.log('Authenticate admin');
   const { access_token } = await authenticate('admin');
-
-  console.log('Create organization');
   const orgResult = await createOrganization(
     {
-      name: 'foo',
+      name: generateUnique(),
     },
     access_token
   );
 
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
-  console.log('Create project');
   const projectResult = await createProject(
     {
       organization: org.cleanId,
@@ -31,7 +35,6 @@ test('rate limit approaching and reached for organization', async () => {
   const project = projectResult.body.data!.createProject.ok!.createdProject;
   const target = projectResult.body.data!.createProject.ok!.createdTargets.find(t => t.name === 'production')!;
 
-  console.log('Update org rate limit');
   await updateOrgRateLimit(
     {
       organization: org.cleanId,
@@ -42,7 +45,6 @@ test('rate limit approaching and reached for organization', async () => {
     access_token
   );
 
-  console.log('Create token');
   const tokenResult = await createToken(
     {
       name: 'test',
@@ -71,7 +73,6 @@ test('rate limit approaching and reached for organization', async () => {
     },
   };
 
-  console.log('Collect 10 operations');
   const collectResult = await collect({
     operations: new Array(10).fill(op),
     token,
@@ -79,50 +80,41 @@ test('rate limit approaching and reached for organization', async () => {
 
   expect(collectResult.status).toEqual(200);
 
-  console.log('Wait for 5s');
   await waitFor(5_000);
 
-  console.log('Fetch history of emails');
   let sent = await emails.history();
-  expect(sent.length).toEqual(1);
-
   expect(sent).toContainEqual({
     to: adminEmail,
     subject: `${org.name} is approaching its rate limit`,
     body: expect.any(String),
   });
+  expect(filterEmailsByOrg(org.name, sent)).toHaveLength(1);
 
-  console.log('Collect 2 operations');
   await collect({
     operations: [op, op],
     token,
   });
 
-  console.log('Wait for 5s');
   await waitFor(5_000);
 
-  console.log('Fetch history of emails');
   sent = await emails.history();
-  expect(sent.length).toEqual(2);
 
   expect(sent).toContainEqual({
     to: adminEmail,
     subject: `${org.name} has exceeded its rate limit`,
     body: expect.any(String),
   });
+  expect(filterEmailsByOrg(org.name, sent)).toHaveLength(2);
 
-  console.log('Collect 1 operation');
   // Make sure we don't send the same email again
   await collect({
     operations: [op, op],
     token,
   });
 
-  console.log('Wait for 5s');
   await waitFor(5_000);
 
-  console.log('Fetch history of emails');
+  // Nothing new
   sent = await emails.history();
-  expect(sent.length).toEqual(2);
-  console.log('done');
+  expect(filterEmailsByOrg(org.name, sent)).toHaveLength(2);
 });
