@@ -118,6 +118,16 @@ generates:
       - typescript-operations
       - typescript-graphql-request
 
+  # Client
+  packages/libraries/client/src/__generated__/types.ts:
+    documents: ./packages/libraries/client/src/**/*.ts
+    config:
+      flattenGeneratedTypes: true
+      onlyOperationTypes: true
+    plugins:
+      - typescript
+      - typescript-operations
+
   # Integration tests
   ./integration-tests/testkit/gql:
     documents: ./integration-tests/**/*.ts

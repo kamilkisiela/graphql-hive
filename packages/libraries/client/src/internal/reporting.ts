@@ -1,8 +1,9 @@
-import { GraphQLSchema, stripIgnoredCharacters, print, Kind } from 'graphql';
+import { GraphQLSchema, stripIgnoredCharacters, print, Kind, ExecutionResult } from 'graphql';
 import { getDocumentNodeFromSchema } from '@graphql-tools/utils';
 import { createAgent } from './agent';
 import { version } from '../version';
 import type { HivePluginOptions } from './types';
+import type { SchemaPublishMutation } from '../__generated__/types';
 import { logIf } from './utils';
 
 export interface SchemaReporter {
@@ -13,7 +14,7 @@ export interface SchemaReporter {
 export function createReporting(pluginOptions: HivePluginOptions): SchemaReporter {
   if (!pluginOptions.reporting || pluginOptions.enabled === false) {
     return {
-      report() {},
+      async report() {},
       async dispose() {},
     };
   }
@@ -35,7 +36,7 @@ export function createReporting(pluginOptions: HivePluginOptions): SchemaReporte
   logIf(typeof token !== 'string' || token.length === 0, '[hive][reporting] token is missing', logger.error);
 
   let currentSchema: GraphQLSchema | null = null;
-  const agent = createAgent<GraphQLSchema>(
+  const agent = createAgent<GraphQLSchema, ExecutionResult<SchemaPublishMutation>>(
     {
       logger,
       ...(pluginOptions.agent ?? {}),
@@ -43,7 +44,6 @@ export function createReporting(pluginOptions: HivePluginOptions): SchemaReporte
       token: token,
       enabled: pluginOptions.enabled,
       debug: pluginOptions.debug,
-      sendImmediately: true,
     },
     {
       prefix: 'reporting',
@@ -85,11 +85,45 @@ export function createReporting(pluginOptions: HivePluginOptions): SchemaReporte
   );
 
   return {
-    report({ schema }) {
+    async report({ schema }) {
       try {
-        agent.capture(schema);
+        const result = await agent.sendImmediately(schema);
+
+        if (result === null) {
+          throw new Error('Empty response');
+        }
+
+        if (Array.isArray(result.errors)) {
+          throw new Error(result.errors.map(error => error.message).join('\n'));
+        }
+
+        const data = result.data!.schemaPublish;
+
+        switch (data.__typename) {
+          case 'SchemaPublishSuccess': {
+            logger.info(`[hive][reporting] ${data.successMessage ?? 'Published schema'}`);
+            return;
+          }
+          case 'SchemaPublishMissingServiceError': {
+            throw new Error('Service name is not defined');
+          }
+          case 'SchemaPublishMissingUrlError': {
+            throw new Error('Service url is not defined');
+          }
+          case 'SchemaPublishError': {
+            logger.info(`[hive][reporting] Published schema (forced with ${data.errors.total} errors)`);
+            data.errors.nodes.slice(0, 5).forEach(error => {
+              logger.info(` - ${error.message}`);
+            });
+            return;
+          }
+        }
       } catch (error) {
-        logger.error(`Failed to report schema`, error);
+        logger.error(
+          `[hive][reporting] Failed to report schema: ${
+            error instanceof Error && 'message' in error ? error.message : error
+          }`
+        );
       }
     },
     dispose: agent.dispose,
@@ -100,6 +134,26 @@ const query = stripIgnoredCharacters(/* GraphQL */ `
   mutation schemaPublish($input: SchemaPublishInput!) {
     schemaPublish(input: $input) {
       __typename
+      ... on SchemaPublishSuccess {
+        initial
+        valid
+        successMessage: message
+      }
+      ... on SchemaPublishError {
+        valid
+        errors {
+          nodes {
+            message
+          }
+          total
+        }
+      }
+      ... on SchemaPublishMissingServiceError {
+        missingServiceError: message
+      }
+      ... on SchemaPublishMissingUrlError {
+        missingUrlError: message
+      }
     }
   }
 `);

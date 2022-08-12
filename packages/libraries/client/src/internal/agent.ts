@@ -31,10 +31,6 @@ export interface AgentOptions {
    */
   minTimeout?: number;
   /**
-   * Send report after each GraphQL operation
-   */
-  sendImmediately?: boolean;
-  /**
    * Send reports in interval (defaults to 10_000ms)
    */
   sendInterval?: number;
@@ -48,7 +44,7 @@ export interface AgentOptions {
   logger?: Logger;
 }
 
-export function createAgent<T>(
+export function createAgent<TEvent, TResult = void>(
   pluginOptions: AgentOptions,
   {
     prefix,
@@ -59,7 +55,7 @@ export function createAgent<T>(
     prefix: string;
     data: {
       clear(): void;
-      set(data: T): void;
+      set(data: TEvent): void;
       size(): number;
     };
     body(): Buffer | string | Promise<string | Buffer>;
@@ -72,7 +68,6 @@ export function createAgent<T>(
     enabled: true,
     minTimeout: 200,
     maxRetries: 3,
-    sendImmediately: false,
     sendInterval: 10_000,
     maxSize: 25,
     logger: console,
@@ -92,33 +87,46 @@ export function createAgent<T>(
     timeoutID = setTimeout(send, options.sendInterval);
   }
 
-  if (!options.sendImmediately) {
-    schedule();
-  }
-
   function debugLog(msg: string) {
     if (options.debug) {
       options.logger.info(`[hive][${prefix}]${enabled ? '' : '[DISABLED]'} ${msg}`);
     }
   }
 
-  function capture(event: T) {
+  let scheduled = false;
+
+  function capture(event: TEvent) {
+    // Calling capture starts the schedule
+    if (!scheduled) {
+      scheduled = true;
+      schedule();
+    }
+
     data.set(event);
 
-    if (options.sendImmediately || data.size() >= options.maxSize) {
+    if (data.size() >= options.maxSize) {
       debugLog('Sending immediately');
-      setImmediate(() => send({ runOnce: true }));
+      setImmediate(() => send({ runOnce: true, throwOnError: false }));
     }
   }
 
-  async function send(sendOptions?: { runOnce?: boolean }): Promise<void> {
+  function sendImmediately(event: TEvent): Promise<TResult | null> {
+    data.set(event);
+
+    debugLog('Sending immediately');
+    return send({ runOnce: true, throwOnError: true });
+  }
+
+  async function send<T>(sendOptions: { runOnce?: boolean; throwOnError: true }): Promise<T | null | never>;
+  async function send<T>(sendOptions: { runOnce?: boolean; throwOnError: false }): Promise<T | null>;
+  async function send<T>(sendOptions?: { runOnce?: boolean; throwOnError: boolean }): Promise<T | null | never> {
     const runOnce = sendOptions?.runOnce ?? false;
 
     if (!data.size()) {
       if (!runOnce) {
         schedule();
       }
-      return;
+      return null;
     }
 
     try {
@@ -127,18 +135,23 @@ export function createAgent<T>(
 
       data.clear();
 
-      const sendReport: retry.RetryFunction<any> = async (_bail, attempt) => {
+      const sendReport: retry.RetryFunction<{
+        status: number;
+        data: T | null;
+      }> = async (_bail, attempt) => {
         debugLog(`Sending (queue ${dataToSend}) (attempt ${attempt})`);
 
         if (!enabled) {
           return {
-            statusCode: 200,
+            status: 200,
+            data: null,
           };
         }
 
         const response = await axios
           .post(options.endpoint, buffer, {
             headers: {
+              accept: 'application/json',
               'content-type': 'application/json',
               Authorization: `Bearer ${options.token}`,
               'User-Agent': `${options.name}@${version}`,
@@ -166,17 +179,29 @@ export function createAgent<T>(
         factor: 2,
       });
 
-      if (response.statusCode < 200 || response.statusCode >= 300) {
+      if (response.status < 200 || response.status >= 300) {
         throw new Error(`[hive][${prefix}] Failed to send data (HTTP status ${response.status}): ${response.data}`);
       }
 
       debugLog(`Sent!`);
-    } catch (error: any) {
-      options.logger.error(`[hive][${prefix}] Failed to send data: ${error.message}`);
-    }
 
-    if (!runOnce) {
-      schedule();
+      if (!runOnce) {
+        schedule();
+      }
+
+      return response.data;
+    } catch (error: any) {
+      if (!runOnce) {
+        schedule();
+      }
+
+      if (sendOptions?.throwOnError) {
+        throw error;
+      }
+
+      options.logger.error(`[hive][${prefix}] Failed to send data: ${error.message}`);
+
+      return null;
     }
   }
 
@@ -188,11 +213,13 @@ export function createAgent<T>(
 
     await send({
       runOnce: true,
+      throwOnError: false,
     });
   }
 
   return {
     capture,
+    sendImmediately,
     dispose,
   };
 }

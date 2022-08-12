@@ -23,7 +23,7 @@ export function createHive(options: HivePluginOptions): HiveClient {
   const operationsStore = createOperationsStore(options);
 
   function reportSchema({ schema }: { schema: GraphQLSchema }) {
-    schemaReporter.report({ schema });
+    void schemaReporter.report({ schema });
   }
 
   function collectUsage(args: ExecutionArgs) {
