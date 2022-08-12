@@ -37,6 +37,7 @@ export function deployEmails({
         ...deploymentEnv,
         ...commonEnv,
         HEARTBEAT_ENDPOINT: heartbeat ?? '',
+        METRICS_ENABLED: 'true',
         RELEASE: packageHelper.currentReleaseId(),
         REDIS_HOST: redis.config.host,
         REDIS_PORT: String(redis.config.port),

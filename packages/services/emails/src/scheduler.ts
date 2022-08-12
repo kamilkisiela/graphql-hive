@@ -4,6 +4,7 @@ import { Queue, QueueScheduler, Worker, Job } from 'bullmq';
 import Redis, { Redis as RedisInstance } from 'ioredis';
 import pTimeout from 'p-timeout';
 import mjml2html from 'mjml';
+import { emailsTotal, emailsFailuresTotal } from './metrics';
 import type { EmailInput } from './shapes';
 import type { EmailProvider } from './providers';
 
@@ -41,6 +42,7 @@ export function createScheduler(config: {
   function onFailed(job: Job, error: Error) {
     logger.debug(`Job %s failed after %s attempts, reason: %s`, job.name, job.attemptsMade, job.failedReason);
     logger.error(error);
+    emailsFailuresTotal.inc();
   }
 
   async function initQueueAndWorkers() {
@@ -85,6 +87,7 @@ export function createScheduler(config: {
         });
 
         logger.info('Email sent');
+        emailsTotal.inc({ organization: job.data.email });
       },
       {
         prefix,
