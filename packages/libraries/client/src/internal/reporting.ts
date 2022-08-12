@@ -93,10 +93,6 @@ export function createReporting(pluginOptions: HivePluginOptions): SchemaReporte
           throw new Error('Empty response');
         }
 
-        if (result instanceof Error) {
-          throw result;
-        }
-
         if (Array.isArray(result.errors)) {
           throw new Error(result.errors.map(error => error.message).join('\n'));
         }

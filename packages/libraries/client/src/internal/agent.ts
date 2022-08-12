@@ -110,7 +110,7 @@ export function createAgent<TEvent, TResult = void>(
     }
   }
 
-  function sendImmediately(event: TEvent): Promise<TResult | Error | null> {
+  function sendImmediately(event: TEvent): Promise<TResult | null> {
     data.set(event);
 
     debugLog('Sending immediately');
