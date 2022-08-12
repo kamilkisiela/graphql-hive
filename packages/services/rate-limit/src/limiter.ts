@@ -8,6 +8,7 @@ import { createTRPCClient } from '@trpc/client';
 import type { UsageEstimatorApi } from '@hive/usage-estimator';
 import type { RateLimitInput } from './api';
 import { rateLimitOperationsEventOrg } from './metrics';
+import { createEmailScheduler } from './emails';
 
 export type RateLimitCheckResponse = {
   limited: boolean;
@@ -23,6 +24,8 @@ const UNKNOWN_RATE_LIMIT_OBJ: RateLimitCheckResponse = {
 
 export type CachedRateLimitInfo = {
   orgName: string;
+  orgEmail: string;
+  orgCleanId: string;
   operations: RateLimitCheckResponse;
   retentionInDays: number;
 };
@@ -42,6 +45,9 @@ export function createRateLimiter(config: {
   rateEstimator: {
     endpoint: string;
   };
+  emails?: {
+    endpoint: string;
+  };
   storage: {
     connectionString: string;
   };
@@ -50,6 +56,7 @@ export function createRateLimiter(config: {
     url: `${config.rateEstimator.endpoint}/trpc`,
     fetch,
   });
+  const emails = createEmailScheduler(config.emails);
 
   const { logger } = config;
   const postgres$ = createPostgreSQLStorage(config.storage.connectionString);
@@ -62,15 +69,21 @@ export function createRateLimiter(config: {
   async function fetchAndCalculateUsageInformation() {
     const now = new Date();
     const window = {
+      startTime: startOfMonth(now),
+      endTime: endOfMonth(now),
+    };
+    const windowAsString = {
       startTime: startOfMonth(now).toUTCString(),
       endTime: endOfMonth(now).toUTCString(),
     };
-    config.logger.info(`Calculating rate-limit information based on window: ${window.startTime} -> ${window.endTime}`);
+    config.logger.info(
+      `Calculating rate-limit information based on window: ${windowAsString.startTime} -> ${windowAsString.endTime}`
+    );
     const storage = await postgres$;
 
     const [records, operations] = await Promise.all([
       storage.getGetOrganizationsAndTargetPairsWithLimitInfo(),
-      rateEstimator.query('estimateOperationsForAllTargets', window),
+      rateEstimator.query('estimateOperationsForAllTargets', windowAsString),
     ]);
 
     logger.debug(`Fetched total of ${Object.keys(records).length} targets from the DB`);
@@ -85,6 +98,8 @@ export function createRateLimiter(config: {
       if (!newCachedResult.has(pairRecord.organization)) {
         newCachedResult.set(pairRecord.organization, {
           orgName: pairRecord.org_name,
+          orgEmail: pairRecord.owner_email,
+          orgCleanId: pairRecord.org_clean_id,
           operations: {
             current: 0,
             quota: pairRecord.limit_operations_monthly,
@@ -100,20 +115,60 @@ export function createRateLimiter(config: {
 
     newCachedResult.forEach((orgRecord, orgId) => {
       const orgName = orgRecord.orgName;
-      orgRecord.operations.limited =
-        orgRecord.operations.quota === 0 ? false : orgRecord.operations.current > orgRecord.operations.quota;
+      const noLimits = orgRecord.operations.quota === 0;
+      orgRecord.operations.limited = noLimits ? false : orgRecord.operations.current > orgRecord.operations.quota;
 
       if (orgRecord.operations.limited) {
         rateLimitOperationsEventOrg.labels({ orgId, orgName }).inc();
         logger.info(
           `Organization "${orgName}"/"${orgId}" is now being rate-limited for operations (${orgRecord.operations.current}/${orgRecord.operations.quota})`
         );
+
+        emails.limitExceeded({
+          organization: {
+            id: orgId,
+            cleanId: orgRecord.orgCleanId,
+            name: orgName,
+            email: orgRecord.orgEmail,
+          },
+          period: {
+            start: window.startTime.getTime(),
+            end: window.endTime.getTime(),
+          },
+          usage: {
+            quota: orgRecord.operations.quota,
+            current: orgRecord.operations.current,
+          },
+        });
+      } else if (orgRecord.operations.current / orgRecord.operations.quota >= 0.9) {
+        emails.limitWarning({
+          organization: {
+            id: orgId,
+            cleanId: orgRecord.orgCleanId,
+            name: orgName,
+            email: orgRecord.orgEmail,
+          },
+          period: {
+            start: window.startTime.getTime(),
+            end: window.endTime.getTime(),
+          },
+          usage: {
+            quota: orgRecord.operations.quota,
+            current: orgRecord.operations.current,
+          },
+        });
       }
     });
 
     cachedResult = newCachedResult;
     targetIdToOrgLookup = newTargetIdToOrgLookup;
     logger.info(`Built a new rate-limit map: %s`, JSON.stringify(Array.from(newCachedResult.entries())));
+
+    const scheduledEmails = emails.drain();
+    if (scheduledEmails.length > 0) {
+      await Promise.all(scheduledEmails);
+      logger.info(`Scheduled ${scheduledEmails.length} emails`);
+    }
   }
 
   return {

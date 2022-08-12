@@ -59,13 +59,6 @@
       "command": "yarn dev"
     },
     {
-      "name": "billing:dev",
-      "description": "Run Billing Service",
-      "open": true,
-      "cwd": "packages/services/stripe-billing",
-      "command": "yarn dev"
-    },
-    {
       "name": "usage:dev",
       "description": "Run Usage Service",
       "open": true,

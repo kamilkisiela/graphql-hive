@@ -1,0 +1,29 @@
+diff --git a/node_modules/mjml-core/lib/index.js b/node_modules/mjml-core/lib/index.js
+index 597502e..0c686f3 100644
+--- a/node_modules/mjml-core/lib/index.js
++++ b/node_modules/mjml-core/lib/index.js
+@@ -97,8 +97,6 @@ var _juice = _interopRequireDefault(require("juice"));
+ 
+ var _jsBeautify = require("js-beautify");
+ 
+-var _htmlMinifier = require("html-minifier");
+-
+ var _cheerio = _interopRequireDefault(require("cheerio"));
+ 
+ var _mjmlParserXml = _interopRequireDefault(require("mjml-parser-xml"));
+@@ -477,14 +475,7 @@ function mjml2html(mjml, options = {}) {
+ 
+   if (minify) {
+     // eslint-disable-next-line no-console
+-    console.warn('"minify" option is deprecated in mjml-core and only available in mjml cli.');
+-    content = (0, _htmlMinifier.minify)(content, {
+-      collapseWhitespace: true,
+-      minifyCSS: false,
+-      caseSensitive: true,
+-      removeEmptyAttributes: true,
+-      ...minifyOptions
+-    });
++    console.warn('"minify" option is not available');
+   }
+ 
+   return {

@@ -187,7 +187,7 @@ test('completing each step should result in updated Get Started progress', async
     token,
     authorizationHeader: 'authorization',
   });
-  await waitFor(10_000);
+  await waitFor(5_000);
 
   steps = await getSteps({
     organization: org.cleanId,
