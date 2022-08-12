@@ -1,5 +1,11 @@
 # @graphql-hive/client
 
+## 0.18.2
+
+### Patch Changes
+
+- ef18a38: Show error messages when publishing the schema
+
 ## 0.18.1
 
 ### Patch Changes
