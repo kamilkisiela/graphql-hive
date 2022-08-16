@@ -1,5 +1,11 @@
 # @graphql-hive/cli
 
+## 0.18.2
+
+### Patch Changes
+
+- [#292](https://github.com/kamilkisiela/graphql-hive/pull/292) [`efb03e1`](https://github.com/kamilkisiela/graphql-hive/commit/efb03e184d5a878dbcca83295b2d1d53b3c9f8e3) Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Bump @oclif/core dependency range to ^1.13.10
+
 ## 0.18.1
 
 ### Patch Changes
