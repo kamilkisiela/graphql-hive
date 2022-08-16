@@ -25,14 +25,6 @@ import { ManagerRoleGuard } from '../auth/ManagerRoleGuard';
 
 type DropdownOrganization = OrganizationsQuery['organizations']['nodes'];
 
-const OrganizationLink = (props: { children: string; href: string }): ReactElement => {
-  return (
-    <NextLink href={props.href} passHref>
-      <a className="inline-block grow overflow-hidden text-ellipsis whitespace-nowrap py-2.5 px-2">{props.children}</a>
-    </NextLink>
-  );
-};
-
 export const Header = (): ReactElement => {
   const router = useRouteSelector();
   const [meQuery] = useQuery({ query: MeDocument });
@@ -115,17 +107,21 @@ export const Header = (): ReactElement => {
                 <DropdownMenu.Content sideOffset={25} className="max-w-[300px]">
                   <DropdownMenu.Label className="px-2 text-xs font-bold text-gray-500">PERSONAL</DropdownMenu.Label>
                   {personal.map(org => (
-                    <DropdownMenu.Item key={org.cleanId} className="!p-0">
-                      <OrganizationLink href={`/${org.cleanId}`}>{org.name}</OrganizationLink>
-                    </DropdownMenu.Item>
+                    <NextLink href={`/${org.cleanId}`} key={org.cleanId}>
+                      <a>
+                        <DropdownMenu.Item>{org.name}</DropdownMenu.Item>
+                      </a>
+                    </NextLink>
                   ))}
                   <DropdownMenu.Label className="px-2 text-xs font-bold text-gray-500">
                     OUTERS ORGANIZATIONS
                   </DropdownMenu.Label>
                   {organizations.map(org => (
-                    <DropdownMenu.Item key={org.cleanId} className="!p-0">
-                      <OrganizationLink href={`/${org.cleanId}`}>{org.name}</OrganizationLink>
-                    </DropdownMenu.Item>
+                    <NextLink href={`/${org.cleanId}`} key={org.cleanId}>
+                      <a>
+                        <DropdownMenu.Item>{org.name}</DropdownMenu.Item>
+                      </a>
+                    </NextLink>
                   ))}
                   <DropdownMenu.Separator />
                   <DropdownMenu.Item onSelect={toggleModalOpen}>
