@@ -102,11 +102,11 @@ export const ProjectLayout = ({
                     {projects.nodes.map(
                       node =>
                         node.cleanId !== projectId && (
-                          <DropdownMenu.Item key={node.cleanId}>
-                            <NextLink href={`/${orgId}/${node.cleanId}`}>
-                              <a className="line-clamp-1 max-w-2xl">{node.name}</a>
-                            </NextLink>
-                          </DropdownMenu.Item>
+                          <NextLink href={`/${orgId}/${node.cleanId}`} key={node.cleanId}>
+                            <a className="line-clamp-1 max-w-2xl">
+                              <DropdownMenu.Item>{node.name}</DropdownMenu.Item>
+                            </a>
+                          </NextLink>
                         )
                     )}
                   </DropdownMenu.Content>

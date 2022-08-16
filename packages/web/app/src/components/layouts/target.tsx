@@ -139,11 +139,11 @@ export const TargetLayout = ({
                     {targets.nodes.map(
                       node =>
                         node.cleanId !== targetId && (
-                          <DropdownMenu.Item key={node.cleanId}>
-                            <NextLink href={`/${orgId}/${projectId}/${node.cleanId}`}>
-                              <a className="line-clamp-1 max-w-2xl">{node.name}</a>
-                            </NextLink>
-                          </DropdownMenu.Item>
+                          <NextLink href={`/${orgId}/${projectId}/${node.cleanId}`} key={node.cleanId}>
+                            <a className="line-clamp-1 max-w-2xl">
+                              <DropdownMenu.Item>{node.name}</DropdownMenu.Item>
+                            </a>
+                          </NextLink>
                         )
                     )}
                   </DropdownMenu.Content>
