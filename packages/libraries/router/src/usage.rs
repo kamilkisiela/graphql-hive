@@ -116,7 +116,7 @@ impl UsagePlugin {
         let mut dropped = match sample_rate {
             Some(rate) => {
                 let num: f64 = rng.gen();
-                num <= rate
+                num > rate
             }
             None => false,
         };
