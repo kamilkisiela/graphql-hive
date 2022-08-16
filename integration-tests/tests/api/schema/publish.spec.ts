@@ -1549,3 +1549,109 @@ test('publish new schema when a field is moved from one service to another (stit
   expect(versionsResult.body.errors).not.toBeDefined();
   expect(versionsResult.body.data!.schemaVersions.nodes).toHaveLength(3);
 });
+
+test('publishing safe changes to an already invalid state results in invalid state', async () => {
+  const { access_token } = await authenticate('main');
+  const orgResult = await createOrganization(
+    {
+      name: 'foo',
+    },
+    access_token
+  );
+
+  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+
+  const projectResult = await createProject(
+    {
+      organization: org.cleanId,
+      type: ProjectType.Single,
+      name: 'foo',
+    },
+    access_token
+  );
+
+  const project = projectResult.body.data!.createProject.ok!.createdProject;
+  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
+
+  const tokenResult = await createToken(
+    {
+      name: 'test',
+      organization: org.cleanId,
+      project: project.cleanId,
+      target: target.cleanId,
+      organizationScopes: [],
+      projectScopes: [],
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+    },
+    access_token
+  );
+
+  expect(tokenResult.body.errors).not.toBeDefined();
+
+  const token = tokenResult.body.data!.createToken.ok!.secret;
+
+  // Publish initial schema
+  let result = await publishSchema(
+    {
+      author: 'Kamil',
+      commit: 'initial',
+      sdl: /* GraphQL */ `
+        type Query {
+          randomDog: String
+          randomAnimal: String
+        }
+      `,
+    },
+    token
+  );
+
+  expect(result.body.errors).not.toBeDefined();
+  expect(result.body.data!.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+  // publish unsafe schema
+  result = await publishSchema(
+    {
+      author: 'Kamil',
+      commit: 'dogs',
+      sdl: /* GraphQL */ `
+        type Query {
+          randomAnimal: String
+        }
+      `,
+      force: true,
+    },
+    token
+  );
+
+  expect(result.body.errors).not.toBeDefined();
+  expect(result.body.data!.schemaPublish.__typename).toBe('SchemaPublishError');
+
+  // We expect the latest valid version to be the initial one
+  let latestValidResult = await fetchLatestValidSchema(token);
+  expect(latestValidResult.body.errors).not.toBeDefined();
+  expect(latestValidResult.body.data!.latestValidVersion.schemas.nodes[0].commit).toBe('initial');
+
+  // publish safe schema to registry with an invalid state
+  result = await publishSchema(
+    {
+      author: 'Kamil',
+      commit: 'dogs',
+      sdl: /* GraphQL */ `
+        type Query {
+          randomCat: String
+          randomAnimal: String
+        }
+      `,
+      force: true,
+    },
+    token
+  );
+
+  expect(result.body.errors).not.toBeDefined();
+  expect(result.body.data!.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+  // We expect the latest valid version to be the initial one, still
+  latestValidResult = await fetchLatestValidSchema(token);
+  expect(latestValidResult.body.errors).not.toBeDefined();
+  expect(latestValidResult.body.data!.latestValidVersion.schemas.nodes[0].commit).toBe('initial');
+});
