@@ -16,3 +16,4 @@ __generated__/
 # test fixtures
 integration-tests/fixtures/init-invalid-schema.graphql
 /target
+tmp
