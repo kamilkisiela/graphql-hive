@@ -12,59 +12,81 @@
 
   # run inside sudo
   $SUDO bash << SCRIPT
-  set -e
+      set -e
+      
+      OS=""
+      ARCH=""
+      OS_ARCH=""
 
-  echoerr() { echo "\$@" 1>&2; }
+      echoerr() { echo "\$@" 1>&2; }
 
-  if [[ ! ":\$PATH:" == *":/usr/local/bin:"* ]]; then
-    echoerr "Your path is missing /usr/local/bin, you need to add this to use this installer."
-    exit 1
-  fi
+      unsupported_arch() {
+        local os=$1
+        local arch=$2
+        echoerr "GraphQL Hive CLI does not support $os / $arch at this time."
+        echo "If you think that's a bug - please file an issue to https://github.com/kamilkisiela/graphql-hive/issues"
+        exit 1
+      }
 
-  if [ "\$(uname)" == "Darwin" ]; then
-    OS=darwin
-  elif [ "\$(expr substr \$(uname -s) 1 5)" == "Linux" ]; then
-    OS=linux
-  else
-    echoerr "This installer is only supported on Linux and MacOS"
-    exit 1
-  fi
+      unsupported_win() {
+        echoerr "This installation script does not support Windows."
+        echo "Go to https://docs.graphql-hive.com and look for Windows installer."
+        exit 1
+      }
 
-  ARCH="\$(uname -m)"
-  if [ "\$ARCH" == "x86_64" ]; then
-    ARCH=x64
-  elif [[ "\$ARCH" == aarch* ]]; then
-    ARCH=arm
-  else
-    echoerr "unsupported arch: \$ARCH"
-    exit 1
-  fi
+      set_os_arch() {
+        if [ "\$(uname)" == "Darwin" ]; then
+          OS=darwin
+        elif [ "\$(expr substr \$(uname -s) 1 5)" == "Linux" ]; then
+          OS=linux
+        else
+          unsupported_win
+        fi
 
-  mkdir -p /usr/local/lib
-  cd /usr/local/lib
-  rm -rf hive
-  rm -rf ~/.local/share/hive/client
-  if [ \$(command -v xz) ]; then
-    URL=https://graphql-hive-cli.s3.us-east-2.amazonaws.com/channels/stable/hive-\$OS-\$ARCH.tar.gz
-    TAR_ARGS="xJ"
-  else
-    URL=https://graphql-hive-cli.s3.us-east-2.amazonaws.com/channels/stable/hive-\$OS-\$ARCH.tar.gz
-    TAR_ARGS="xz"
-  fi
-  echo "Installing CLI from \$URL"
-  if [ \$(command -v curl) ]; then
-    curl "\$URL" | tar "\$TAR_ARGS"
-  else
-    wget -O- "\$URL" | tar "\$TAR_ARGS"
-  fi
-  # delete old hive bin if exists
-  rm -f \$(command -v hive) || true
-  rm -f /usr/local/bin/hive
-  ln -s /usr/local/lib/hive/bin/hive /usr/local/bin/hive
+        ARCH="\$(uname -m)"
+        if [ "\$ARCH" == "x86_64" ]; then
+          ARCH=x64
+        elif [ "\$ARCH" == "amd64" ]; then
+          ARCH=x64
+        elif [ "\$ARCH" == "arm64" ]; then
+          if [ "\$OS" == "darwin" ]; then
+            ARCH=arm64
+          else
+            ARCH=arm
+          fi
+        elif [[ "\$ARCH" == aarch* ]]; then
+          ARCH=arm
+        else
+          unsupported_arch $OS $ARCH
+        fi
+      }
 
-  # on alpine (and maybe others) the basic node binary does not work
-  # remove our node binary and fall back to whatever node is on the PATH
-  /usr/local/lib/hive/bin/node -v || rm /usr/local/lib/hive/bin/node
+      download() {
+        DOWNLOAD_DIR=$(mktemp -d)
+
+        TARGET="\$OS-\$ARCH"
+        URL="https://graphql-hive-cli.s3.us-east-2.amazonaws.com/channels/stable/hive-\$TARGET.tar.gz"
+        echo "Downloading \$URL"
+
+        if ! curl --progress-bar --fail -L "\$URL" -o "\$DOWNLOAD_DIR/hive.tar.gz"; then
+          echo "Download failed."
+          exit 1
+        fi
+
+        echo "Downloaded to \$DOWNLOAD_DIR"
+
+        rm -rf "/usr/local/lib/hive"
+        tar xzf "\$DOWNLOAD_DIR/hive.tar.gz" -C /usr/local/lib
+        rm -rf "\$DOWNLOAD_DIR"
+        echo "Unpacked to /usr/local/lib/hive"
+
+        echo "Installing to /usr/local/bin/hive"
+        rm -f /usr/local/bin/hive
+        ln -s /usr/local/lib/hive/bin/hive /usr/local/bin/hive
+      }
+
+      set_os_arch
+      download
 
 SCRIPT
   LOCATION=$(command -v hive)
