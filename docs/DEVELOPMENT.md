@@ -1,5 +1,14 @@
 # Development
 
+## Prerequisites
+
+Developing Hive locally requires you to have the following software installed locally:
+
+- Node.js 16 LTS (or `nvm` or `fnm`)
+- yarn v1
+- docker
+- docker-compose
+
 ## Setup Instructions
 
 - Clone the repository locally
