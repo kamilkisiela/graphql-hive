@@ -12,7 +12,7 @@ import '@/lib/graphiql.css';
 import '../public/styles.css';
 import cookies from 'js-cookie';
 import Session from 'supertokens-auth-react/recipe/session';
-import SuperTokens from 'supertokens-auth-react';
+import SuperTokens, { SuperTokensWrapper } from 'supertokens-auth-react';
 import { frontendConfig } from '@/config/frontend-config';
 import { configureScope } from '@sentry/nextjs';
 import { identify } from '@/lib/mixpanel';
@@ -130,12 +130,14 @@ function App({ Component, pageProps }: AppProps): ReactElement {
         />
       )}
 
-      <UrqlProvider value={urqlClient}>
-        <ChakraProvider theme={theme}>
-          <LoadingAPIIndicator />
-          <Component {...pageProps} />
-        </ChakraProvider>
-      </UrqlProvider>
+      <SuperTokensWrapper>
+        <UrqlProvider value={urqlClient}>
+          <ChakraProvider theme={theme}>
+            <LoadingAPIIndicator />
+            <Component {...pageProps} />
+          </ChakraProvider>
+        </UrqlProvider>
+      </SuperTokensWrapper>
     </>
   );
 }
