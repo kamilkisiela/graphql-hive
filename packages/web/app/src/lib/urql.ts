@@ -1,10 +1,10 @@
 import { createClient, dedupExchange, errorExchange, fetchExchange } from 'urql';
 import { cacheExchange } from '@urql/exchange-graphcache';
 import { captureException } from '@sentry/nextjs';
-import { signOut } from 'supertokens-auth-react/recipe/thirdpartyemailpassword';
 
 import { Mutation } from './urql-cache';
 import { networkStatusExchange } from './urql-exchanges/state';
+import { logOut } from './client/logout';
 
 const noKey = (): null => null;
 
@@ -49,9 +49,7 @@ export const urqlClient = createClient({
     errorExchange({
       onError(error) {
         if (error.response?.status === 401) {
-          signOut().then(() => {
-            window.location.href = '/auth';
-          });
+          logOut();
         } else {
           captureException(error);
         }
