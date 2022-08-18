@@ -13,12 +13,13 @@
   "editor.codeActionsOnSave": {
     "source.organizeImports": false
   },
-  "files.autoSave": "onFocusChange",
+  "files.autoSave": "off",
   "eslint.format.enable": true,
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "yaml.schemas": {
     "https://json.schemastore.org/github-workflow.json": ".github/workflows/deploy.yaml"
   },
-  "typescript.tsdk": "node_modules/typescript/lib"
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "git.mergeEditor": false
 }

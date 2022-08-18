@@ -1,6 +1,6 @@
 interface User {
   id: string;
-  externalAuthUserId: string;
+  superTokensUserId: string | null;
 }
 
 interface BaseActivity {

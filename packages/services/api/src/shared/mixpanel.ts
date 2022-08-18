@@ -7,7 +7,7 @@ if (enabled) {
   mixpanel = Mixpanel.init(process.env.MIXPANEL_TOKEN ?? '');
 }
 
-export function track(event: { event: string; distinct_id: string; data?: Record<string, any> }) {
+export function track(event: { event: string; distinct_id: string | null; data?: Record<string, any> }) {
   if (enabled) {
     mixpanel.track(event.event, {
       distinct_id: event.distinct_id,

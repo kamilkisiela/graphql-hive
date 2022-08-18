@@ -4,15 +4,25 @@ import { cleanRequestId } from '@hive/service-common';
 import { createServer, GraphQLYogaError } from '@graphql-yoga/node';
 import { GraphQLError, ValidationContext, ValidationRule, Kind, OperationDefinitionNode, print } from 'graphql';
 import { useGraphQLModules } from '@envelop/graphql-modules';
-import { useAuth0 } from '@envelop/auth0';
+import { useGenericAuth } from '@envelop/generic-auth';
+import SuperTokens from 'supertokens-node';
+import Session from 'supertokens-node/recipe/session/index.js';
+import ThirdPartyEmailPasswordNode from 'supertokens-node/recipe/thirdpartyemailpassword/index.js';
 import { useSentry } from '@envelop/sentry';
 import { asyncStorage } from './async-storage';
 import { useSentryUser, extractUserId } from './use-sentry-user';
 import { useHive } from '@graphql-hive/client';
 import { useErrorHandler, Plugin } from '@graphql-yoga/node';
 import hyperid from 'hyperid';
+import zod from 'zod';
 
 const reqIdGenerate = hyperid({ fixedLength: true });
+
+const AccessTokenModel = zod.object({
+  version: zod.literal('1'),
+  superTokensUserId: zod.string(),
+  email: zod.string(),
+});
 
 export interface GraphQLHandlerOptions {
   graphiqlEndpoint: string;
@@ -20,11 +30,15 @@ export interface GraphQLHandlerOptions {
   signature: string;
 }
 
+export type SuperTokenSession = zod.ZodType<typeof AccessTokenModel>;
+
 interface Context {
   req: FastifyRequest;
   reply: FastifyReply;
+  session: Session.SessionContainer | undefined;
   headers: Record<string, string | string[] | undefined>;
   requestId?: string | null;
+  superTokenSession: SuperTokenSession | null;
 }
 
 const NoIntrospection: ValidationRule = (context: ValidationContext) => ({
@@ -132,16 +146,24 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
           }
         }
       }),
-      useAuth0({
-        onError(error) {
-          server.logger.error(error);
+      useGenericAuth({
+        mode: 'protect-all',
+        contextFieldName: 'superTokenSession',
+        resolveUserFn: async (ctx: Context) => {
+          const data: unknown = await ctx.session?.getAccessTokenPayload();
+
+          if (!data) {
+            return null;
+          }
+
+          const result = AccessTokenModel.safeParse(data);
+
+          if (result.success === false) {
+            return null;
+          }
+
+          return result.data;
         },
-        domain: process.env.AUTH0_DOMAIN!,
-        audience: process.env.AUTH0_AUDIENCE!,
-        extendContextField: 'user',
-        headerName: 'authorization',
-        preventUnauthenticatedAccess: true,
-        tokenType: 'Bearer',
       }),
       useHive({
         debug: true,
@@ -183,11 +205,17 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
         requestId,
       },
       async () => {
+        const session = await Session.getSession(req, reply, {
+          sessionRequired: false,
+        });
+
         const response = await server.handleIncomingMessage(req, {
           req,
           reply,
           headers: req.headers,
           requestId,
+          session,
+          superTokenSession: null,
         });
 
         response.headers.forEach((value, key) => {
@@ -203,3 +231,20 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
     );
   };
 };
+
+SuperTokens.init({
+  framework: 'fastify',
+  supertokens: {
+    connectionURI: 'http://localhost:3567',
+    apiKey: process.env['SUPERTOKENS_API_KEY'],
+  },
+  appInfo: {
+    // learn more about this on https://supertokens.com/docs/thirdpartyemailpassword/appinfo
+    appName: 'GraphQL Hive',
+    apiBasePath: '/api/auth',
+    websiteBasePath: '/auth',
+    apiDomain: 'http://localhost:3000',
+    websiteDomain: 'http://localhost:3000',
+  },
+  recipeList: [ThirdPartyEmailPasswordNode.init({}), Session.init({})],
+});

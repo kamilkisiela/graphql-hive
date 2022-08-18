@@ -44,10 +44,16 @@ export interface PersistedOperationSelector extends ProjectSelector {
 }
 
 export interface Storage {
-  getUserByExternalId(_: { external: string }): Promise<User | null>;
+  getUserBySuperTokenId(_: { superTokensUserId: string }): Promise<User | null>;
+  setsuperTokensUserId(_: { auth0UserId: string; superTokensUserId: string }): Promise<void>;
   getUserById(_: { id: string }): Promise<User | null>;
 
-  createUser(_: { email: string; external: string; displayName: string; fullName: string }): Promise<User | never>;
+  createUser(_: {
+    email: string;
+    superTokensUserId: string;
+    displayName: string;
+    fullName: string;
+  }): Promise<User | never>;
   updateUser(_: { id: string; fullName: string; displayName: string }): Promise<User | never>;
 
   getOrganizationId(_: OrganizationSelector): Promise<string | never>;

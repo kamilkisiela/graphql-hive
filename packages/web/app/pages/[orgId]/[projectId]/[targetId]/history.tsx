@@ -5,6 +5,7 @@ import { VscBug, VscDiff, VscListFlat } from 'react-icons/vsc';
 import reactStringReplace from 'react-string-replace';
 import { useQuery } from 'urql';
 
+import { authenticated } from '@/components/authenticated-container';
 import { Label } from '@/components/common';
 import { TargetLayout } from '@/components/layouts';
 import {
@@ -255,7 +256,7 @@ const Page = ({ versionId }: { versionId: string }) => {
   );
 };
 
-export default function HistoryPage(): ReactElement {
+function HistoryPage(): ReactElement {
   const router = useRouteSelector();
   const [latestSchemaQuery] = useQuery({
     query: LatestSchemaDocument,
@@ -279,3 +280,5 @@ export default function HistoryPage(): ReactElement {
     </>
   );
 }
+
+export default authenticated(HistoryPage);

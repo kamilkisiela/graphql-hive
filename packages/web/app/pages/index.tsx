@@ -8,6 +8,7 @@ import { DataWrapper } from '@/components/common/DataWrapper';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import Cookies from 'cookies';
 import { LAST_VISITED_ORG_KEY } from '@/constants';
+import { authenticated } from '@/components/authenticated-container';
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   try {
@@ -61,7 +62,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   };
 };
 
-export default function Home(): ReactElement {
+function Home(): ReactElement {
   const [query] = useQuery({ query: OrganizationsDocument });
   const router = useRouteSelector();
 
@@ -82,3 +83,5 @@ export default function Home(): ReactElement {
     </>
   );
 }
+
+export default authenticated(Home);

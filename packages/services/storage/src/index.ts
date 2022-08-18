@@ -79,8 +79,9 @@ export async function createStorage(connection: string): Promise<Storage> {
     return {
       id: user.id,
       email: user.email,
-      externalAuthUserId: user.external_auth_user_id,
-      provider: getProviderBasedOnExternalId(user.external_auth_user_id),
+      superTokensUserId: user.supertoken_user_id,
+      // TODO: figure out what to do here.
+      provider: getProviderBasedOnExternalId(user.external_auth_user_id ?? ''),
       fullName: user.full_name,
       displayName: user.display_name,
     };
@@ -276,16 +277,32 @@ export async function createStorage(connection: string): Promise<Storage> {
   }
 
   const storage: Storage = {
-    async getUserByExternalId({ external }) {
-      const user = await pool.maybeOne<Slonik<users>>(
-        sql`SELECT * FROM public.users WHERE external_auth_user_id = ${external} LIMIT 1`
-      );
+    async getUserBySuperTokenId({ superTokensUserId }) {
+      const user = await pool.maybeOne<Slonik<users>>(sql`
+        SELECT
+          *
+        FROM
+          public."users"
+        WHERE
+          "supertoken_user_id" = ${superTokensUserId}
+        LIMIT 1
+      `);
 
       if (user) {
         return transformUser(user);
       }
 
       return null;
+    },
+    async setsuperTokensUserId({ auth0UserId, superTokensUserId }) {
+      await pool.query(sql`
+        UPDATE
+          public."users"
+        SET
+          "supertoken_user_id" = ${superTokensUserId}
+        WHERE
+          "external_auth_user_id" = ${auth0UserId}
+      `);
     },
     async getUserById({ id }) {
       const user = await pool.maybeOne<Slonik<users>>(sql`SELECT * FROM public.users WHERE id = ${id} LIMIT 1`);
@@ -296,14 +313,15 @@ export async function createStorage(connection: string): Promise<Storage> {
 
       return null;
     },
-    async createUser({ external, email, fullName, displayName }) {
+    async createUser({ superTokensUserId, email, fullName, displayName }) {
+      console.log({ superTokensUserId });
       return transformUser(
         await pool.one<Slonik<users>>(
           sql`
             INSERT INTO public.users
-              ("email", "external_auth_user_id", "full_name", "display_name")
+              ("email", "supertoken_user_id", "full_name", "display_name")
             VALUES
-              (${email}, ${external}, ${fullName}, ${displayName})
+              (${email}, ${superTokensUserId}, ${fullName}, ${displayName})
             RETURNING *
           `
         )

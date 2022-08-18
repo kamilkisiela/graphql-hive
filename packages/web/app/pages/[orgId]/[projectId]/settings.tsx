@@ -4,6 +4,7 @@ import { useFormik } from 'formik';
 import { gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 
+import { authenticated } from '@/components/authenticated-container';
 import { ProjectLayout } from '@/components/layouts';
 import { Button, Card, Heading, Input, Link, Select, Spinner, Tag, Title } from '@/components/v2';
 import { AlertTriangleIcon } from '@/components/v2/icon';
@@ -229,7 +230,7 @@ const Page = ({
   );
 };
 
-export default function SettingsPage(): ReactElement {
+function SettingsPage(): ReactElement {
   return (
     <>
       <Title title="Project settings" />
@@ -239,3 +240,5 @@ export default function SettingsPage(): ReactElement {
     </>
   );
 }
+
+export default authenticated(SettingsPage);

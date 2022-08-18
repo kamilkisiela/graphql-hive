@@ -7,7 +7,7 @@ export default async function githubConnectOrg(req: NextApiRequest, res: NextApi
 
   const url = `https://github.com/apps/${process.env.GITHUB_APP_NAME}/installations/new`;
 
-  const redirectUrl = `${process.env.APP_BASE_URL.replace(/\/$/, '')}/api/github/callback`;
+  const redirectUrl = `${process.env['NEXT_PUBLIC_APP_BASE_URL'].replace(/\/$/, '')}/api/github/callback`;
 
   res.redirect(`${url}?state=${orgId}&redirect_url=${redirectUrl}`);
 }

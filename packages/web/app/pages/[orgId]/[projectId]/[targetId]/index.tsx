@@ -13,6 +13,7 @@ import { VscClose } from 'react-icons/vsc';
 import { gql, useMutation, useQuery } from 'urql';
 import { useDebouncedCallback } from 'use-debounce';
 
+import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
 import { MarkAsValid } from '@/components/target/history/MarkAsValid';
 import { Button, DataWrapper, GraphQLBlock, noSchema, Title } from '@/components/v2';
@@ -317,7 +318,7 @@ function SchemaView({
   );
 }
 
-export default function SchemaPage(): ReactElement {
+function SchemaPage(): ReactElement {
   return (
     <>
       <Title title="Schema" />
@@ -325,3 +326,5 @@ export default function SchemaPage(): ReactElement {
     </>
   );
 }
+
+export default authenticated(SchemaPage);

@@ -6,6 +6,7 @@ import { formatISO, subDays, subHours, subMinutes } from 'date-fns';
 import { VscChevronDown } from 'react-icons/vsc';
 import { useQuery } from 'urql';
 
+import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
 import { OperationsFilterTrigger } from '@/components/target/operations/Filters';
 import { OperationsList } from '@/components/target/operations/List';
@@ -151,7 +152,7 @@ const OperationsViewGate = ({
   );
 };
 
-export default function OperationsPage(): ReactElement {
+function OperationsPage(): ReactElement {
   return (
     <>
       <Title title="Operations" />
@@ -168,3 +169,5 @@ export default function OperationsPage(): ReactElement {
     </>
   );
 }
+
+export default authenticated(OperationsPage);

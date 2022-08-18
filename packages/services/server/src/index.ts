@@ -11,6 +11,12 @@ import { Dedupe, ExtraErrorData } from '@sentry/integrations';
 import { asyncStorage } from './async-storage';
 import { graphqlHandler } from './graphql-handler';
 import { clickHouseReadDuration, clickHouseElapsedDuration } from './metrics';
+import zod from 'zod';
+
+const LegacyPayloadModel = zod.object({
+  auth0UserId: zod.string(),
+  superTokensUserId: zod.string(),
+});
 
 export async function main() {
   Sentry.init({
@@ -109,8 +115,9 @@ export async function main() {
       };
     }
 
-    const graphqlLogger = createGraphQLLogger();
+    const storage = await createPostgreSQLStorage(createConnectionString(process.env as any));
 
+    const graphqlLogger = createGraphQLLogger();
     const registry = createRegistry({
       tokens: {
         endpoint: ensureEnv('TOKENS_ENDPOINT'),
@@ -134,7 +141,7 @@ export async function main() {
         endpoint: process.env.RATE_LIMIT_ENDPOINT ? ensureEnv('RATE_LIMIT_ENDPOINT').replace(/\/$/g, '') : null,
       },
       logger: graphqlLogger,
-      storage: await createPostgreSQLStorage(createConnectionString(process.env as any)),
+      storage,
       redis: {
         host: ensureEnv('REDIS_HOST'),
         port: ensureEnv('REDIS_PORT', 'number'),
@@ -258,6 +265,18 @@ export async function main() {
 
         reportReadiness(false);
         res.status(500).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+      },
+    });
+
+    server.route({
+      method: 'POST',
+      url: '/__legacy/update_user_id_mapping',
+      async handler(req, reply) {
+        // TODO: this should require some authentication
+
+        const { auth0UserId, superTokensUserId } = LegacyPayloadModel.parse(req.body);
+        await storage.setsuperTokensUserId({ auth0UserId, superTokensUserId });
+        reply.status(200).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
       },
     });
 

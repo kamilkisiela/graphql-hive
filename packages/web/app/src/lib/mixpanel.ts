@@ -1,5 +1,4 @@
 import mixpanel from 'mixpanel-browser';
-import type { UserProfile } from '@auth0/nextjs-auth0';
 
 // The reason why we wrap mixpanel with custom functions is that
 // mixpanel sends some events even though `mixpanel.disable()` was called
@@ -20,16 +19,11 @@ export function track(eventName: string, data?: Record<string, any>) {
   }
 }
 
-export function identify(user: UserProfile) {
+export function identify(id: string, email: string) {
   if (enabled) {
-    mixpanel.identify(user.sub ?? undefined);
+    mixpanel.identify(id);
     mixpanel.people.set({
-      ...('name' in user
-        ? {
-            $name: user.name,
-          }
-        : {}),
-      $email: user.email,
+      email,
     });
   }
 }

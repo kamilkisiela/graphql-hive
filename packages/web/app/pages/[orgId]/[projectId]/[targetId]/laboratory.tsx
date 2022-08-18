@@ -2,6 +2,7 @@ import { ReactElement, useCallback, useState } from 'react';
 import { createGraphiQLFetcher } from '@graphiql/toolkit';
 import { GraphiQL } from 'graphiql';
 
+import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
 import { Button, Title } from '@/components/v2';
 import { HiveLogo, Link2Icon } from '@/components/v2/icon';
@@ -29,7 +30,7 @@ const Page = ({ endpoint }: { endpoint: string }): ReactElement => {
   );
 };
 
-export default function LaboratoryPage(): ReactElement {
+function LaboratoryPage(): ReactElement {
   const [isModalOpen, setModalOpen] = useState(false);
   const toggleModalOpen = useCallback(() => {
     setModalOpen(prevOpen => !prevOpen);
@@ -58,3 +59,5 @@ export default function LaboratoryPage(): ReactElement {
     </>
   );
 }
+
+export default authenticated(LaboratoryPage);

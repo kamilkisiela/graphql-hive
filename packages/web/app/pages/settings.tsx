@@ -1,11 +1,10 @@
-import { FC } from 'react';
 import { useFormik } from 'formik';
 import { gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 
-import { useUser } from '@/components/auth/AuthProvider';
 import { Avatar, Button, SubHeader, Heading, Input, Tabs, Title } from '@/components/v2';
 import { MeDocument } from '@/graphql';
+import { authenticated } from '@/components/authenticated-container';
 
 const UpdateMeMutation = gql(/* GraphQL */ `
   mutation updateMe($input: UpdateMeInput!) {
@@ -26,8 +25,7 @@ const UpdateMeMutation = gql(/* GraphQL */ `
   }
 `);
 
-const SettingsPage: FC = () => {
-  const { user } = useUser();
+const SettingsPage = (): React.ReactElement => {
   const [meQuery] = useQuery({ query: MeDocument });
   const [mutation, mutate] = useMutation(UpdateMeMutation);
 
@@ -53,7 +51,7 @@ const SettingsPage: FC = () => {
         <header className="container flex items-center pb-5">
           <div className="mr-4 rounded-full">
             <Avatar
-              src={user?.picture ?? null}
+              src={null}
               alt="Your profile photo"
               shape="circle"
               fallback={me?.displayName[0] ?? '?'}
@@ -127,4 +125,4 @@ const SettingsPage: FC = () => {
   );
 };
 
-export default SettingsPage;
+export default authenticated(SettingsPage);

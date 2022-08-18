@@ -4,6 +4,7 @@ import { Stat, StatHelpText, StatLabel, StatNumber } from '@chakra-ui/react';
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { useMutation, useQuery } from 'urql';
 
+import { authenticated } from '@/components/authenticated-container';
 import { Section } from '@/components/common';
 import { DataWrapper, QueryError } from '@/components/common/DataWrapper';
 import { OrganizationLayout } from '@/components/layouts';
@@ -316,7 +317,7 @@ const Inner = ({
   );
 };
 
-export default function ManageSubscriptionPage(): ReactElement {
+function ManageSubscriptionPage(): ReactElement {
   useTracker('SUBSCRIPTION_MANAGE_PAGE_VISIT');
   return (
     <>
@@ -327,3 +328,5 @@ export default function ManageSubscriptionPage(): ReactElement {
     </>
   );
 }
+
+export default authenticated(ManageSubscriptionPage);

@@ -5,8 +5,9 @@ import { VscChevronDown } from 'react-icons/vsc';
 import { AdminStats, Filters } from '@/components/admin/AdminStats';
 import { Page } from '@/components/common';
 import { DATE_RANGE_OPTIONS } from '@/components/common/TimeFilter';
+import { authenticated } from '@/components/authenticated-container';
 
-export default function Manage() {
+function Manage() {
   const [last, setLast] = React.useState(30);
   const [filters, setFilters] = React.useState<Filters>({});
   const onFiltersChange = React.useCallback(
@@ -90,3 +91,5 @@ export default function Manage() {
     </Page>
   );
 }
+
+export default authenticated(Manage);

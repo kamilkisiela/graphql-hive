@@ -7,6 +7,7 @@ import { useFormik } from 'formik';
 import { gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 
+import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
 import { Button, Card, Checkbox, Heading, Input, Switch, Table, Tag, TimeAgo, Title } from '@/components/v2';
 import { Combobox } from '@/components/v2/combobox';
@@ -639,7 +640,7 @@ const Page = ({ target, organization }: { target: TargetFieldsFragment; organiza
   );
 };
 
-export default function SettingsPage(): ReactElement {
+function SettingsPage(): ReactElement {
   return (
     <>
       <Title title="Settings" />
@@ -649,3 +650,5 @@ export default function SettingsPage(): ReactElement {
     </>
   );
 }
+
+export default authenticated(SettingsPage);

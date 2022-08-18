@@ -1,6 +1,7 @@
 import { ReactElement } from 'react';
 import { DocumentType, gql, useQuery } from 'urql';
 
+import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
 import {
   GraphQLEnumTypeComponent,
@@ -148,7 +149,7 @@ function SchemaTypeExplorer({
   );
 }
 
-export default function ExplorerPage(): ReactElement | null {
+function ExplorerPage(): ReactElement | null {
   const router = useRouteSelector();
   const { typename } = router.query;
 
@@ -169,3 +170,5 @@ export default function ExplorerPage(): ReactElement | null {
     </>
   );
 }
+
+export default authenticated(ExplorerPage);

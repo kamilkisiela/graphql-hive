@@ -3,7 +3,7 @@ import NextLink from 'next/link';
 import clsx from 'clsx';
 import { useQuery } from 'urql';
 
-import { useUser } from '@/components/auth/AuthProvider';
+// import { useUser } from '@/components/auth/AuthProvider';
 import { GetStartedProgress } from '@/components/get-started/wizard';
 import { Avatar, Button, DropdownMenu, HiveLink } from '@/components/v2';
 import {
@@ -16,19 +16,18 @@ import {
   LogOutIcon,
   PlusIcon,
   SettingsIcon,
-  TrendingUpIcon,
 } from '@/components/v2/icon';
 import { CreateOrganizationModal } from '@/components/v2/modals';
 import { MeDocument, OrganizationsDocument, OrganizationsQuery, OrganizationType } from '@/graphql';
+import { logOut } from '@/lib/client/logout';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
-import { ManagerRoleGuard } from '../auth/ManagerRoleGuard';
+// import { ManagerRoleGuard } from '../auth/ManagerRoleGuard';
 
 type DropdownOrganization = OrganizationsQuery['organizations']['nodes'];
 
 export const Header = (): ReactElement => {
   const router = useRouteSelector();
   const [meQuery] = useQuery({ query: MeDocument });
-  const { user } = useUser();
   const [organizationsQuery] = useQuery({ query: OrganizationsDocument });
   const [isModalOpen, setModalOpen] = useState(false);
   const [isOpaque, setIsOpaque] = useState(false);
@@ -90,7 +89,7 @@ export const Header = (): ReactElement => {
             <DropdownMenu.Trigger asChild>
               <Button>
                 <ArrowDownIcon className="h-5 w-5 text-gray-500" />
-                <Avatar src={user?.picture} shape="circle" className="ml-2.5 border-2 border-gray-900" />
+                <Avatar shape="circle" className="ml-2.5 border-2 border-gray-900" />
               </Button>
             </DropdownMenu.Trigger>
 
@@ -162,7 +161,7 @@ export const Header = (): ReactElement => {
               {/*  <SunIcon />*/}
               {/*  Switch Light Theme*/}
               {/*</DropdownMenu.Item>*/}
-              {user?.metadata?.admin && (
+              {/* {user?.metadata?.admin && (
                 <ManagerRoleGuard>
                   <NextLink href="/manage">
                     <a>
@@ -173,7 +172,7 @@ export const Header = (): ReactElement => {
                     </a>
                   </NextLink>
                 </ManagerRoleGuard>
-              )}
+              )} */}
               {process.env.NODE_ENV === 'development' && (
                 <NextLink href="/dev">
                   <a>
@@ -185,10 +184,10 @@ export const Header = (): ReactElement => {
                 </NextLink>
               )}
               <DropdownMenu.Item asChild>
-                <a href="/api/logout">
+                <button onClick={() => logOut()}>
                   <LogOutIcon className="h-5 w-5" />
                   Log out
-                </a>
+                </button>
               </DropdownMenu.Item>
             </DropdownMenu.Content>
           </DropdownMenu>
