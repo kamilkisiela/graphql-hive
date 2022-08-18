@@ -19,7 +19,6 @@ import {
 } from '@/components/v2/icon';
 import { CreateOrganizationModal } from '@/components/v2/modals';
 import { MeDocument, OrganizationsDocument, OrganizationsQuery, OrganizationType } from '@/graphql';
-import { logOut } from '@/lib/client/logout';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 // import { ManagerRoleGuard } from '../auth/ManagerRoleGuard';
 
@@ -184,10 +183,10 @@ export const Header = (): ReactElement => {
                 </NextLink>
               )}
               <DropdownMenu.Item asChild>
-                <button onClick={() => logOut()}>
+                <a href="/logout">
                   <LogOutIcon className="h-5 w-5" />
                   Log out
-                </button>
+                </a>
               </DropdownMenu.Item>
             </DropdownMenu.Content>
           </DropdownMenu>

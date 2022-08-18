@@ -45,7 +45,12 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
       }
     }
 
-    if (orgId) {
+    /**
+     * Check whether user is authenticated.
+     */
+    const isAuthenticated = !!cookies.get('sAccessToken');
+
+    if (isAuthenticated && orgId) {
       return {
         redirect: {
           destination: `/${orgId}`,

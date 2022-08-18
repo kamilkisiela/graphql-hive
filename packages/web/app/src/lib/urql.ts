@@ -4,7 +4,6 @@ import { captureException } from '@sentry/nextjs';
 
 import { Mutation } from './urql-cache';
 import { networkStatusExchange } from './urql-exchanges/state';
-import { logOut } from './client/logout';
 
 const noKey = (): null => null;
 
@@ -49,7 +48,7 @@ export const urqlClient = createClient({
     errorExchange({
       onError(error) {
         if (error.response?.status === 401) {
-          logOut();
+          window.location.href = '/logout';
         } else {
           captureException(error);
         }
