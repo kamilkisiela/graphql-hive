@@ -2,8 +2,6 @@ import type { ReactNode } from 'react';
 import ThirdPartyEmailPassword from 'supertokens-auth-react/recipe/thirdpartyemailpassword';
 import { Header } from './v2';
 import { HiveStripeWrapper } from '@/lib/billing/stripe';
-import { Provider as UrqlProvider } from 'urql';
-import { urqlClient } from '@/lib/urql';
 
 /**
  * Wrapper component for a authenticated route.
@@ -12,12 +10,10 @@ export const AuthenticatedContainer = (props: { children: ReactNode }): React.Re
   return (
     <>
       <ThirdPartyEmailPassword.ThirdPartyEmailPasswordAuth>
-        <UrqlProvider value={urqlClient}>
-          <HiveStripeWrapper>
-            <Header />
-            {props.children}
-          </HiveStripeWrapper>
-        </UrqlProvider>
+        <HiveStripeWrapper>
+          <Header />
+          {props.children}
+        </HiveStripeWrapper>
       </ThirdPartyEmailPassword.ThirdPartyEmailPasswordAuth>
     </>
   );

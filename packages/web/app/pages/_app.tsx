@@ -17,6 +17,8 @@ import { frontendConfig } from '@/config/frontend-config';
 import { configureScope } from '@sentry/nextjs';
 import { identify } from '@/lib/mixpanel';
 import { LAST_VISITED_ORG_KEY, GA_TRACKING_ID, CRISP_WEBSITE_ID } from '@/constants';
+import { Provider as UrqlProvider } from 'urql';
+import { urqlClient } from '@/lib/urql';
 
 const theme = extendTheme({ colors });
 
@@ -127,10 +129,13 @@ function App({ Component, pageProps }: AppProps): ReactElement {
           }}
         />
       )}
-      <ChakraProvider theme={theme}>
-        <LoadingAPIIndicator />
-        <Component {...pageProps} />
-      </ChakraProvider>
+
+      <UrqlProvider value={urqlClient}>
+        <ChakraProvider theme={theme}>
+          <LoadingAPIIndicator />
+          <Component {...pageProps} />
+        </ChakraProvider>
+      </UrqlProvider>
     </>
   );
 }
