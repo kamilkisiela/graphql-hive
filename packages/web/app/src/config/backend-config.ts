@@ -2,6 +2,7 @@ import ThirdPartyEmailPasswordNode from 'supertokens-node/recipe/thirdpartyemail
 import SessionNode from 'supertokens-node/recipe/session';
 import type { TypeInput } from 'supertokens-node/types';
 import type { TypeProvider } from 'supertokens-node/recipe/thirdparty/types';
+import type { TypeInput as ThirdPartEmailPasswordTypeInput } from 'supertokens-node/recipe/thirdpartyemailpassword/types';
 import { fetch } from 'cross-undici-fetch';
 import { appInfo } from './app-info';
 
@@ -32,7 +33,6 @@ export const backendConfig = (): TypeInput => {
   }
 
   return {
-    framework: 'express',
     supertokens: {
       connectionURI: process.env['SUPERTOKENS_CONNECTION_URI'],
       apiKey: process.env['SUPERTOKENS_API_KEY'],
@@ -40,96 +40,12 @@ export const backendConfig = (): TypeInput => {
     appInfo,
     recipeList: [
       ThirdPartyEmailPasswordNode.init({
-        override:
-          process.env['NEXT_PUBLIC_APP_BASE_URL_AUTH_LEGACY_AUTH0'] === '1'
-            ? {
-                functions(originalImplementation) {
-                  return {
-                    ...originalImplementation,
-                    async emailPasswordSignIn(input) {
-                      // does user exist in auth0?
-                      if (await doesUserExistInAuth0(input.email)) {
-                        // check if user exists in SuperTokens
-                        const superTokensUsers = await this.getUsersByEmail({
-                          email: input.email,
-                          userContext: input.userContext,
-                        });
-                        let emailPasswordUser = undefined;
-
-                        for (let i = 0; i < superTokensUsers.length; i++) {
-                          // if the thirdParty field in the user object is undefined, then the user is an EmailPassword account.
-                          if (superTokensUsers[i].thirdParty === undefined) {
-                            emailPasswordUser = superTokensUsers[i];
-                            break;
-                          }
-                        }
-
-                        if (emailPasswordUser === undefined) {
-                          // EmailPassword user does not exist in SuperTokens
-
-                          // Box 6: validate users credentials in Auth0
-                          const auth0UserData = await validateAndGetUserInfoFromAuth0(input.email, input.password);
-
-                          if (auth0UserData === null) {
-                            // Box 9: credentials are incorrect
-                            return {
-                              status: 'WRONG_CREDENTIALS_ERROR',
-                            };
-                          }
-
-                          // Box 7: call the signup function to create a new SuperTokens user.
-                          const response = await this.emailPasswordSignUp(input);
-
-                          if (response.status !== 'OK') {
-                            return {
-                              status: 'WRONG_CREDENTIALS_ERROR',
-                            };
-                          }
-
-                          // Box 8: map the Auth0 userId to the SuperTokens userId, to learn more about user mapping please check the User Id  Mapping section.
-                          // If you have not stored the users Auth0 userId in your tables, you can ignore this step
-                          await setUserIdMapping({
-                            auth0UserId: auth0UserData.sub,
-                            supertokensUserId: response.user.id,
-                          });
-
-                          return response;
-                        }
-                      }
-                      return originalImplementation.emailPasswordSignIn(input);
-                    },
-                    async thirdPartySignInUp(input) {
-                      // Box 2: Get userInfo from Auth0 with Social Provider id.
-                      const auth0UserInfo = await getThirdPartyUserFromAuth0(input.thirdPartyUserId);
-                      // Box 3: check if userInfo exists
-                      if (auth0UserInfo !== undefined) {
-                        // Box 4: call the Supertokens signInUp implementation
-                        const response = await originalImplementation.thirdPartySignInUp(input);
-                        if (response.status !== 'OK') {
-                          return response;
-                        }
-
-                        // Box 5: check if a new SuperTokens user is created
-                        if (response.createdNewUser) {
-                          await setUserIdMapping({
-                            auth0UserId: auth0UserInfo.user_id,
-                            supertokensUserId: response.user.id,
-                          });
-
-                          // Box 7: Set the newly created flag value to false in the response
-                          response.createdNewUser = false;
-                        }
-
-                        return response;
-                      }
-                      // Box 9: Auth0 user does not exist
-                      return await originalImplementation.thirdPartySignInUp(input);
-                    },
-                  };
-                },
-              }
-            : undefined,
         providers,
+        override:
+          /**
+           * These overrides are only relevant for the legacy Auth0 -> SuperTokens migration (period).
+           */
+          process.env['NEXT_PUBLIC_APP_BASE_URL_AUTH_LEGACY_AUTH0'] === '1' ? getAuth0Overrides() : undefined,
       }),
       SessionNode.init({
         override: {
@@ -140,8 +56,10 @@ export const backendConfig = (): TypeInput => {
                 const user = await ThirdPartyEmailPasswordNode.getUserById(input.userId);
 
                 if (!user) {
+                  // TODO: better error handling
                   throw new Error('Could not find user??');
                 }
+
                 // This is stored in the db against the sessionHandle for this session
                 input.accessTokenPayload = {
                   version: '1',
@@ -166,9 +84,103 @@ export const backendConfig = (): TypeInput => {
   };
 };
 
+//
+// LEGACY Auth0 Utilities
+// These are only required for the Auth0 -> SuperTokens migrations and can be removed once the migration (period) is complete.
+//
+
+const getAuth0Overrides = () => {
+  const override: ThirdPartEmailPasswordTypeInput['override'] = {
+    functions(originalImplementation) {
+      return {
+        ...originalImplementation,
+        async emailPasswordSignIn(input) {
+          if (await doesUserExistInAuth0(input.email)) {
+            // check if user exists in SuperTokens
+            const superTokensUsers = await this.getUsersByEmail({
+              email: input.email,
+              userContext: input.userContext,
+            });
+
+            let emailPasswordUser = undefined;
+
+            for (const superTokensUser of superTokensUsers) {
+              // if the thirdParty field in the user object is undefined, then the user is an EmailPassword account.
+              if (superTokensUser.thirdParty === undefined) {
+                emailPasswordUser = superTokensUser;
+                break;
+              }
+            }
+
+            // EmailPassword user does not exist in SuperTokens
+            // We first need to verify whether the password is legit,then if so, create a new user in SuperTokens with the same password.
+            if (emailPasswordUser === undefined) {
+              const auth0UserData = await trySignIntoAuth0WithUserCredentialsAndRetrieveUserInfo(
+                input.email,
+                input.password
+              );
+
+              if (auth0UserData === null) {
+                // Invalid credentials -> Sent this to the client.
+                return {
+                  status: 'WRONG_CREDENTIALS_ERROR',
+                };
+              }
+
+              // If the Auth0 credentials are correct we can successfully create the user in supertokens.
+              const response = await this.emailPasswordSignUp(input);
+
+              if (response.status !== 'OK') {
+                return {
+                  status: 'WRONG_CREDENTIALS_ERROR',
+                };
+              }
+
+              // We also set the 'supertokensUserId' on the users table within our database.
+              await setUserIdMapping({
+                auth0UserId: auth0UserData.sub,
+                supertokensUserId: response.user.id,
+              });
+
+              return response;
+            }
+          }
+
+          return originalImplementation.emailPasswordSignIn(input);
+        },
+        async thirdPartySignInUp(input) {
+          // Check whether third party user exists on Auth0
+          const auth0UserInfo = await getThirdPartyUserFromAuth0(input.thirdPartyUserId);
+          // Sign up the user with SuperTokens.
+          const response = await originalImplementation.thirdPartySignInUp(input);
+
+          // Auth0 user exists
+          if (auth0UserInfo && response.status === 'OK') {
+            // We always make sure that we set the user mapping between Auth0 and SuperTokens.
+            await setUserIdMapping({
+              auth0UserId: auth0UserInfo.user_id,
+              supertokensUserId: response.user.id,
+            });
+            response.createdNewUser = false;
+
+            return response;
+          }
+
+          // Auth0 user does not exist
+          return await originalImplementation.thirdPartySignInUp(input);
+        },
+      };
+    },
+  };
+
+  return override;
+};
+
+/**
+ * Check whether a specific user that SIGNED UP VIA EMAIL and password exists in Auth0.
+ */
 async function doesUserExistInAuth0(email: string): Promise<boolean> {
-  // generate an access token to use the Auth0's Management API.
-  const access_token = await generateAccessToken();
+  const access_token = await generateAuth0AccessToken();
 
   // check if a user exists with the input email and is not a Social Account
   const response = await fetch(
@@ -179,44 +191,65 @@ async function doesUserExistInAuth0(email: string): Promise<boolean> {
       method: 'GET',
       headers: { authorization: `Bearer ${access_token}` },
     }
-  ).then(res => res.json());
+  );
 
-  if (response[0] !== undefined) {
+  // TODO: status code and error handling
+
+  const body = await response.json();
+
+  if (body[0] !== undefined) {
     return true;
   }
   return false;
 }
 
-async function validateAndGetUserInfoFromAuth0(email: string, password: string): Promise<{ sub: string } | null> {
-  let accessToken: string;
+/**
+ * try to authenticate a user with Auth0 and if successful return the user info.
+ */
+async function trySignIntoAuth0WithUserCredentialsAndRetrieveUserInfo(
+  email: string,
+  password: string
+): Promise<{ sub: string } | null> {
   try {
     // generate an user access token using the input credentials
-    accessToken = (
-      await fetch(`${process.env['AUTH_LEGACY_AUTH0_ISSUER_BASE_URL']}/oauth/token`, {
-        method: 'POST',
-        headers: {
-          accept: 'application/json',
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify({
-          client_id: process.env['AUTH_LEGACY_AUTH0_CLIENT_ID'],
-          grant_type: 'password',
-          username: email,
-          password: password,
-        }),
-      }).then(res => res.json())
-    ).data.access_token;
+    const response = await fetch(`${process.env['AUTH_LEGACY_AUTH0_ISSUER_BASE_URL']}/oauth/token`, {
+      method: 'POST',
+      headers: {
+        accept: 'application/json',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        client_id: process.env['AUTH_LEGACY_AUTH0_CLIENT_ID'],
+        grant_type: 'password',
+        username: email,
+        password: password,
+      }),
+    });
+
+    // TODO: verify status code and error handling
+
+    const body = await response.json();
+    const { access_token: accessToken } = body;
+
+    const userResponse = await fetch(`${process.env['AUTH_LEGACY_AUTH0_ISSUER_BASE_URL']}/userInfo`, {
+      method: 'GET',
+      headers: { authorization: `Bearer ${accessToken}` },
+    });
+
+    // TODO: verify status code and error handling
+
+    const userBody = await userResponse.json();
+    return userBody;
   } catch (error) {
     // input credentials are invalid
     return null;
   }
-  const userResponse = await fetch(`${process.env['AUTH_LEGACY_AUTH0_ISSUER_BASE_URL']}/userInfo`, {
-    method: 'GET',
-    headers: { authorization: `Bearer ${accessToken}` },
-  }).then(res => res.json());
-  return userResponse.data;
 }
 
+/**
+ * Handler for updating the auth0UserId to superTokensUserId mapping within the users table of the Postgres database.
+ * We do this via an HTTP call to our API service instead of directly connecting to the database here (in a serverless context).
+ */
 async function setUserIdMapping(params: { auth0UserId: string; supertokensUserId: string }): Promise<void> {
   const response = await fetch(`http://localhost:4000/__legacy/update_user_id_mapping`, {
     method: 'POST',
@@ -226,33 +259,43 @@ async function setUserIdMapping(params: { auth0UserId: string; supertokensUserId
       superTokensUserId: params.supertokensUserId,
     }),
   });
-
-  console.log(response.status, await response.text());
+  if (response.status !== 200) {
+    // TODO: error handling
+  }
 }
 
-// Get the social account user info from Auth0 with the input thirdPartyId.
-const getThirdPartyUserFromAuth0 = async (thirdPartyId: string) => {
-  const access_token = await generateAccessToken();
+/**
+ * Get the social account user info from Auth0 via the third party user id.
+ * The third party user id is unique per GitHub or Google user and is the same whether you are signed up on Auth0 or SuperTokens.
+ */
+const getThirdPartyUserFromAuth0 = async (thirdPartyId: string): Promise<null | { user_id: string }> => {
+  const access_token = await generateAuth0AccessToken();
 
-  // send a request to Auth0's get user API with the input thirdPartyId as the search criteria.
   const response = await fetch(
     `${process.env['AUTH_LEGACY_AUTH0_AUDIENCE']}users?q=${encodeURIComponent(`identities.user_id:"${thirdPartyId}"`)}`,
     {
       method: 'GET',
       headers: { authorization: `Bearer ${access_token}` },
     }
-  ).then(res => res.json());
+  );
+
+  // TODO: verify status code and error handling
+
+  const body = await response.json();
 
   // check if user information exists in response.
-  if (response[0] !== undefined) {
+  if (body[0]) {
     // return the user's Auth0 userId
-    return response[0];
+    return body[0];
   }
 
-  return undefined;
+  return null;
 };
 
-const generateAccessToken = async (): Promise<string> => {
+/**
+ * Generate a Auth0 access token that is required for making API calls to Auth0.
+ */
+const generateAuth0AccessToken = async (): Promise<string> => {
   const response = await fetch(`${process.env['AUTH_LEGACY_AUTH0_ISSUER_BASE_URL']}/oauth/token`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
