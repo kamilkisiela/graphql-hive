@@ -164,6 +164,7 @@ export interface users {
   external_auth_user_id: string | null;
   full_name: string;
   id: string;
+  is_admin: boolean | null;
   supertoken_user_id: string | null;
 }
 
