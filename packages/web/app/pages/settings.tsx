@@ -4,7 +4,7 @@ import * as Yup from 'yup';
 
 import { Avatar, Button, SubHeader, Heading, Input, Tabs, Title } from '@/components/v2';
 import { MeDocument } from '@/graphql';
-import { authenticated } from '@/components/authenticated-container';
+import { authenticated, withSessionProtection } from '@/components/authenticated-container';
 
 const UpdateMeMutation = gql(/* GraphQL */ `
   mutation updateMe($input: UpdateMeInput!) {
@@ -124,5 +124,7 @@ const SettingsPage = (): React.ReactElement => {
     </>
   );
 };
+
+export const getServerSideProps = withSessionProtection();
 
 export default authenticated(SettingsPage);

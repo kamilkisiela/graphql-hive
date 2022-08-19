@@ -1,7 +1,7 @@
 import { ReactElement } from 'react';
 import { DocumentType, gql, useQuery } from 'urql';
 
-import { authenticated } from '@/components/authenticated-container';
+import { authenticated, withSessionProtection } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
 import {
   GraphQLEnumTypeComponent,
@@ -170,5 +170,7 @@ function ExplorerPage(): ReactElement | null {
     </>
   );
 }
+
+export const getServerSideProps = withSessionProtection();
 
 export default authenticated(ExplorerPage);

@@ -2,7 +2,7 @@ import { ReactElement, useCallback, useState } from 'react';
 import { createGraphiQLFetcher } from '@graphiql/toolkit';
 import { GraphiQL } from 'graphiql';
 
-import { authenticated } from '@/components/authenticated-container';
+import { authenticated, withSessionProtection } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
 import { Button, Title } from '@/components/v2';
 import { HiveLogo, Link2Icon } from '@/components/v2/icon';
@@ -59,5 +59,7 @@ function LaboratoryPage(): ReactElement {
     </>
   );
 }
+
+export const getServerSideProps = withSessionProtection();
 
 export default authenticated(LaboratoryPage);

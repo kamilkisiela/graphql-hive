@@ -1,7 +1,7 @@
 import { ReactElement } from 'react';
 import { gql, useQuery } from 'urql';
 
-import { authenticated } from '@/components/authenticated-container';
+import { authenticated, withSessionProtection } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
 import { SchemaExplorerFilter } from '@/components/target/explorer/filter';
 import { GraphQLObjectTypeComponent } from '@/components/target/explorer/object-type';
@@ -102,5 +102,7 @@ function ExplorerPage(): ReactElement {
     </>
   );
 }
+
+export const getServerSideProps = withSessionProtection();
 
 export default authenticated(ExplorerPage);

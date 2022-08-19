@@ -4,7 +4,7 @@ import { Stat, StatHelpText, StatLabel, StatNumber } from '@chakra-ui/react';
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { useMutation, useQuery } from 'urql';
 
-import { authenticated } from '@/components/authenticated-container';
+import { authenticated, withSessionProtection } from '@/components/authenticated-container';
 import { Section } from '@/components/common';
 import { DataWrapper, QueryError } from '@/components/common/DataWrapper';
 import { OrganizationLayout } from '@/components/layouts';
@@ -328,5 +328,7 @@ function ManageSubscriptionPage(): ReactElement {
     </>
   );
 }
+
+export const getServerSideProps = withSessionProtection();
 
 export default authenticated(ManageSubscriptionPage);

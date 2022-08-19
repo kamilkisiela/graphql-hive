@@ -6,7 +6,7 @@ import { formatISO, subDays, subHours, subMinutes } from 'date-fns';
 import { VscChevronDown } from 'react-icons/vsc';
 import { useQuery } from 'urql';
 
-import { authenticated } from '@/components/authenticated-container';
+import { authenticated, withSessionProtection } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
 import { OperationsFilterTrigger } from '@/components/target/operations/Filters';
 import { OperationsList } from '@/components/target/operations/List';
@@ -169,5 +169,7 @@ function OperationsPage(): ReactElement {
     </>
   );
 }
+
+export const getServerSideProps = withSessionProtection();
 
 export default authenticated(OperationsPage);

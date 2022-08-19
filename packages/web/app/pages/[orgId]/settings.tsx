@@ -3,7 +3,7 @@ import { useFormik } from 'formik';
 import { gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 
-import { authenticated } from '@/components/authenticated-container';
+import { authenticated, withSessionProtection } from '@/components/authenticated-container';
 import { OrganizationLayout } from '@/components/layouts';
 import { Button, Card, Heading, Input, Spinner, Tag, Title } from '@/components/v2';
 import { AlertTriangleIcon, GitHubIcon, SlackIcon } from '@/components/v2/icon';
@@ -236,5 +236,7 @@ function SettingsPage(): ReactElement {
     </>
   );
 }
+
+export const getServerSideProps = withSessionProtection();
 
 export default authenticated(SettingsPage);

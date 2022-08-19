@@ -3,7 +3,7 @@ import dynamic from 'next/dynamic';
 import { Stat, StatHelpText, StatLabel, StatNumber } from '@chakra-ui/react';
 import { endOfMonth, startOfMonth } from 'date-fns';
 
-import { authenticated } from '@/components/authenticated-container';
+import { authenticated, withSessionProtection } from '@/components/authenticated-container';
 import { OrganizationLayout } from '@/components/layouts';
 import { BillingView } from '@/components/organization/billing/Billing';
 import { CurrencyFormatter } from '@/components/organization/billing/helpers';
@@ -112,5 +112,7 @@ function SubscriptionPage(): ReactElement {
     </>
   );
 }
+
+export const getServerSideProps = withSessionProtection();
 
 export default authenticated(SubscriptionPage);

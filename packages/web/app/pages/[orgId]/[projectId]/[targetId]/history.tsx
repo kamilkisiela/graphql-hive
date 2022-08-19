@@ -5,7 +5,7 @@ import { VscBug, VscDiff, VscListFlat } from 'react-icons/vsc';
 import reactStringReplace from 'react-string-replace';
 import { useQuery } from 'urql';
 
-import { authenticated } from '@/components/authenticated-container';
+import { authenticated, withSessionProtection } from '@/components/authenticated-container';
 import { Label } from '@/components/common';
 import { TargetLayout } from '@/components/layouts';
 import {
@@ -280,5 +280,7 @@ function HistoryPage(): ReactElement {
     </>
   );
 }
+
+export const getServerSideProps = withSessionProtection();
 
 export default authenticated(HistoryPage);

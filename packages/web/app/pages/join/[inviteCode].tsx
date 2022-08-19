@@ -8,7 +8,7 @@ import { Button } from '@chakra-ui/react';
 import { Title } from '@/components/common';
 import { DataWrapper } from '@/components/common/DataWrapper';
 import { useNotifications } from '@/lib/hooks/use-notifications';
-import { authenticated } from '@/components/authenticated-container';
+import { authenticated, withSessionProtection } from '@/components/authenticated-container';
 
 const Center = tw.div`w-full h-full flex flex-row items-center justify-center`;
 
@@ -110,5 +110,7 @@ function OrganizationPage() {
     </>
   );
 }
+
+export const getServerSideProps = withSessionProtection();
 
 export default authenticated(OrganizationPage);
