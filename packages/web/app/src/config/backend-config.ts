@@ -248,7 +248,7 @@ async function trySignIntoAuth0WithUserCredentialsAndRetrieveUserInfo(
  * We do this via an HTTP call to our API service instead of directly connecting to the database here (in a serverless context).
  */
 async function setUserIdMapping(params: { auth0UserId: string; supertokensUserId: string }): Promise<void> {
-  const response = await fetch(`http://localhost:4000/__legacy/update_user_id_mapping`, {
+  const response = await fetch(`${process.env.API_ENDPOINT}/__legacy/update_user_id_mapping`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({
