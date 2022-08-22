@@ -268,18 +268,24 @@ export async function main() {
       },
     });
 
-    server.route({
-      method: 'POST',
-      url: '/__legacy/update_user_id_mapping',
-      async handler(req, reply) {
-        // TODO: this should require some authentication
+    // TODO: env variables should probably be parsed...
+    if (process.env['AUTH_LEGACY_AUTH0'] === '1') {
+      const requiredMappingKey = process.env['AUTH_LEGACY_AUTH0_UPDATE_USER_ID_MAPPING_KEY'];
+      server.route({
+        method: 'POST',
+        url: '/__legacy/update_user_id_mapping',
+        async handler(req, reply) {
+          if (req.headers['x-authorization'] !== requiredMappingKey) {
+            reply.status(401).send({ error: 'Invalid update user id mapping key.', code: 'ERR_INVALID_KEY' }); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+            return;
+          }
 
-        const { auth0UserId, superTokensUserId } = LegacyPayloadModel.parse(req.body);
-        await storage.setsuperTokensUserId({ auth0UserId, superTokensUserId });
-        reply.status(200).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
-      },
-    });
-
+          const { auth0UserId, superTokensUserId } = LegacyPayloadModel.parse(req.body);
+          await storage.setsuperTokensUserId({ auth0UserId, superTokensUserId });
+          reply.status(200).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+        },
+      });
+    }
     if (process.env.METRICS_ENABLED === 'true') {
       await startMetrics();
     }

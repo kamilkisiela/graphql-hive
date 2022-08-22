@@ -13,6 +13,8 @@ const LegacyAuth0ConfigEnabledModel = zod.object({
   AUTH_LEGACY_AUTH0_ISSUER_BASE_URL: zod.string(),
   AUTH_LEGACY_AUTH0_CLIENT_ID: zod.string(),
   AUTH_LEGACY_AUTH0_CLIENT_SECRET: zod.string(),
+  AUTH_LEGACY_AUTH0_UPDATE_USER_ID_MAPPING_ENDPOINT: zod.string(),
+  AUTH_LEGACY_AUTH0_UPDATE_USER_ID_MAPPING_KEY: zod.string(),
 });
 
 const LegacyAuth0Config = zod.union([
@@ -177,8 +179,11 @@ const getAuth0Overrides = (config: LegacyAuth0ConfigEnabled) => {
                 };
               }
 
-              // We also set the 'supertokensUserId' on the users table within our database.
-              await setUserIdMapping({
+              //
+              // NOTE: if this call fails for some reason (db unavailable, HTTP API unreachable) then once the user actually makes a request via the GraphQL API
+              // a NEW USER will be created. Ideally the emailPasswordSignUp and setUserIdMapping call should happen within a transaction.
+              //
+              await setUserIdMapping(config, {
                 auth0UserId: auth0UserData.sub,
                 supertokensUserId: response.user.id,
               });
@@ -198,7 +203,11 @@ const getAuth0Overrides = (config: LegacyAuth0ConfigEnabled) => {
           // Auth0 user exists
           if (auth0UserInfo && response.status === 'OK') {
             // We always make sure that we set the user mapping between Auth0 and SuperTokens.
-            await setUserIdMapping({
+            //
+            // NOTE: if this call fails for some reason (db unavailable, HTTP API unreachable) then once the user actually makes a request via the GraphQL API
+            // a NEW USER will be created. Ideally the thirdPartySignInUp and setUserIdMapping call should happen within a transaction.
+            //
+            await setUserIdMapping(config, {
               auth0UserId: auth0UserInfo.user_id,
               supertokensUserId: response.user.id,
             });
@@ -295,10 +304,16 @@ async function trySignIntoAuth0WithUserCredentialsAndRetrieveUserInfo(
  * Handler for updating the auth0UserId to superTokensUserId mapping within the users table of the Postgres database.
  * We do this via an HTTP call to our API service instead of directly connecting to the database here (in a serverless context).
  */
-async function setUserIdMapping(params: { auth0UserId: string; supertokensUserId: string }): Promise<void> {
-  const response = await fetch(`${process.env.API_ENDPOINT}/__legacy/update_user_id_mapping`, {
+async function setUserIdMapping(
+  config: LegacyAuth0ConfigEnabled,
+  params: { auth0UserId: string; supertokensUserId: string }
+): Promise<void> {
+  const response = await fetch(config['AUTH_LEGACY_AUTH0_UPDATE_USER_ID_MAPPING_ENDPOINT'], {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    headers: {
+      'content-type': 'application/json',
+      'x-authorization': config['AUTH_LEGACY_AUTH0_UPDATE_USER_ID_MAPPING_KEY'],
+    },
     body: JSON.stringify({
       auth0UserId: params.auth0UserId,
       superTokensUserId: params.supertokensUserId,
