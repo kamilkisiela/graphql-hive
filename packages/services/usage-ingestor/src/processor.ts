@@ -95,7 +95,7 @@ export function createProcessor(config: { logger: FastifyLoggerInstance }) {
                 name: processedOperation.legacy.name,
                 body: processedOperation.legacy.body,
                 operation_kind: processedOperation.legacy.kind,
-                inserted_at: processedOperation.timestamp,
+                timestamp: processedOperation.timestamp,
               })
             );
           } else {
@@ -123,12 +123,12 @@ export function createProcessor(config: { logger: FastifyLoggerInstance }) {
               size: group.size,
               target: rawReport.target,
               hash: operationHash,
-              name: normalized.type,
+              name: operationMapRecord.operationName,
               body: normalized.body,
               operation_kind: normalized.type,
               coordinates: normalized.coordinates,
               expires_at: group.operation.expiresAt || timestamp + 30 * DAY_IN_MS,
-              inserted_at: timestamp,
+              timestamp: timestamp,
             })
           );
         }

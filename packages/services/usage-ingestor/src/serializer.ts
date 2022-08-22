@@ -60,7 +60,7 @@ export const registryOrder = [
   'body',
   'operation_kind',
   'coordinates',
-  'inserted_at',
+  'timestamp',
   'expires_at',
 ] as const;
 
@@ -113,7 +113,7 @@ export function stringifyRegistryRecord(record: ProcessedRegistryRecord): string
     body: castValue(record.body),
     operation_kind: castValue(record.operation_kind),
     coordinates: castValue(record.coordinates),
-    inserted_at: castDate(record.inserted_at),
+    timestamp: castDate(record.timestamp),
     expires_at: castDate(record.expires_at),
   };
 
@@ -121,7 +121,7 @@ export function stringifyRegistryRecord(record: ProcessedRegistryRecord): string
 }
 
 export function stringifyLegacyRegistryRecord(
-  record: Pick<ProcessedRegistryRecord, 'body' | 'hash' | 'inserted_at' | 'name' | 'operation_kind' | 'target'>
+  record: Pick<ProcessedRegistryRecord, 'body' | 'hash' | 'timestamp' | 'name' | 'operation_kind' | 'target'>
 ): string {
   const mapper: Record<KeysOfArray<typeof legacyRegistryOrder>, any> = {
     target: castValue(record.target),
@@ -129,7 +129,7 @@ export function stringifyLegacyRegistryRecord(
     name: castValue(record.name),
     body: castValue(record.body),
     operation: castValue(record.operation_kind),
-    inserted_at: castDate(record.inserted_at),
+    inserted_at: castDate(record.timestamp),
   };
 
   return Object.values(mapper).join(',');

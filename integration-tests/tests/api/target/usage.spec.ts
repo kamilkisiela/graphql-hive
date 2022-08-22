@@ -21,6 +21,14 @@ import { normalizeOperation } from '@graphql-hive/core';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { parse, print } from 'graphql';
 
+function ensureNumber(value: number | string): number {
+  if (typeof value === 'number') {
+    return value;
+  }
+
+  return parseFloat(value);
+}
+
 const CLICKHOUSE_USE_V2_TABLES = process.env.CLICKHOUSE_USE_V2_TABLES === '1';
 
 function sendBatch(amount: number, operation: CollectedOperation, token: string) {
@@ -1043,7 +1051,7 @@ test('different order of schema coordinates should not result in different hash'
 
   expect(coordinatesResult.rows).toEqual(2);
 
-  const operationsResult = await clickHouseQuery<{
+  const operationCollectionResult = await clickHouseQuery<{
     target: string;
     client_name: string | null;
     hash: string;
@@ -1054,7 +1062,7 @@ test('different order of schema coordinates should not result in different hash'
       : `SELECT hash FROM operations_registry FINAL GROUP BY hash`
   );
 
-  expect(operationsResult.rows).toEqual(1);
+  expect(operationCollectionResult.rows).toEqual(1);
 });
 
 test('same operation but with different schema coordinates should result in different hash', async () => {
@@ -1126,10 +1134,8 @@ test('same operation but with different schema coordinates should result in diff
   await waitFor(5_000);
 
   const coordinatesResult = await clickHouseQuery<{
-    target: string;
-    client_name: string | null;
+    coordinate: string;
     hash: string;
-    total: number;
   }>(`
     SELECT coordinate, hash FROM ${
       CLICKHOUSE_USE_V2_TABLES ? 'coordinates_daily' : 'schema_coordinates_daily'
@@ -1137,6 +1143,16 @@ test('same operation but with different schema coordinates should result in diff
   `);
 
   expect(coordinatesResult.rows).toEqual(4);
+
+  const operationCollectionResult = await clickHouseQuery<{
+    hash: string;
+  }>(
+    CLICKHOUSE_USE_V2_TABLES
+      ? `SELECT hash FROM operation_collection GROUP BY hash`
+      : `SELECT hash FROM operations_registry FINAL GROUP BY hash`
+  );
+
+  expect(operationCollectionResult.rows).toEqual(2);
 
   const operationsResult = await clickHouseQuery<{
     target: string;
@@ -1245,4 +1261,440 @@ test('operations with the same schema coordinates and body but with different na
   );
 
   expect(operationsResult.rows).toEqual(2);
+});
+
+test('ensure correct data', async () => {
+  const { access_token: owner_access_token } = await authenticate('main');
+  const orgResult = await createOrganization(
+    {
+      name: 'foo',
+    },
+    owner_access_token
+  );
+
+  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+
+  const projectResult = await createProject(
+    {
+      organization: org.cleanId,
+      type: ProjectType.Single,
+      name: 'foo',
+    },
+    owner_access_token
+  );
+
+  const project = projectResult.body.data!.createProject.ok!.createdProject;
+  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
+
+  const tokenResult = await createToken(
+    {
+      name: 'test',
+      organization: org.cleanId,
+      project: project.cleanId,
+      target: target.cleanId,
+      organizationScopes: [OrganizationAccessScope.Read],
+      projectScopes: [ProjectAccessScope.Read],
+      targetScopes: [TargetAccessScope.Read, TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+    },
+    owner_access_token
+  );
+
+  expect(tokenResult.body.errors).not.toBeDefined();
+
+  const token = tokenResult.body.data!.createToken.ok!.secret;
+
+  await collect({
+    operations: [
+      {
+        operation: 'query ping {        ping      }', // those spaces are expected and important to ensure normalization is in place
+        operationName: 'ping',
+        fields: ['Query', 'Query.ping'],
+        execution: {
+          ok: true,
+          duration: 200000000,
+          errorsTotal: 0,
+        },
+      },
+      {
+        operation: 'query ping { ping }',
+        operationName: 'ping',
+        fields: ['Query', 'Query.ping'],
+        execution: {
+          ok: true,
+          duration: 200000000,
+          errorsTotal: 0,
+        },
+        metadata: {
+          client: {
+            name: 'test-name',
+            version: 'test-version',
+          },
+        },
+      },
+    ],
+    token,
+  });
+
+  await waitFor(5_000);
+
+  if (CLICKHOUSE_USE_V2_TABLES) {
+    // operation_collection
+    const operationCollectionResult = await clickHouseQuery<{
+      target: string;
+      hash: string;
+      name: string;
+      body: string;
+      operation_kind: string;
+      coordinates: string[];
+      total: string;
+      timestamp: string;
+      expires_at: string;
+    }>(`
+      SELECT
+        target,
+        hash,
+        name,
+        body,
+        operation_kind,
+        sum(total) as total,
+        coordinates
+      FROM operation_collection
+      GROUP BY target, hash, coordinates, name, body, operation_kind
+    `);
+
+    expect(operationCollectionResult.data).toHaveLength(1);
+
+    const operationCollectionRow = operationCollectionResult.data[0];
+    expect(operationCollectionRow.body).toEqual('query ping{ping}');
+    expect(operationCollectionRow.coordinates).toHaveLength(2);
+    expect(operationCollectionRow.coordinates).toContainEqual('Query.ping');
+    expect(operationCollectionRow.coordinates).toContainEqual('Query');
+    expect(operationCollectionRow.hash).toHaveLength(32);
+    expect(operationCollectionRow.name).toBe('ping');
+    expect(operationCollectionRow.target).toBe(target.id);
+    expect(ensureNumber(operationCollectionRow.total)).toEqual(2);
+
+    // operations
+    const operationsResult = await clickHouseQuery<{
+      target: string;
+      timestamp: string;
+      expires_at: string;
+      hash: string;
+      ok: boolean;
+      errors: number;
+      duration: number;
+      client_name: string;
+      client_version: string;
+    }>(`
+      SELECT
+        target,
+        timestamp,
+        expires_at,
+        hash,
+        ok,
+        errors,
+        duration,
+        client_name,
+        client_version
+      FROM operations
+    `);
+
+    expect(operationsResult.data).toHaveLength(2);
+
+    const operationWithClient = operationsResult.data.find(o => o.client_name.length > 0)!;
+    expect(operationWithClient).toBeDefined();
+    expect(operationWithClient.client_name).toEqual('test-name');
+    expect(operationWithClient.client_version).toEqual('test-version');
+    expect(ensureNumber(operationWithClient.duration)).toEqual(200_000_000);
+    expect(ensureNumber(operationWithClient.errors)).toEqual(0);
+    expect(operationWithClient.hash).toHaveLength(32);
+    expect(operationWithClient.target).toEqual(target.id);
+
+    const operationWithoutClient = operationsResult.data.find(o => o.client_name.length === 0)!;
+    expect(operationWithoutClient).toBeDefined();
+    expect(operationWithoutClient.client_name).toHaveLength(0);
+    expect(operationWithoutClient.client_version).toHaveLength(0);
+    expect(ensureNumber(operationWithoutClient.duration)).toEqual(200_000_000);
+    expect(ensureNumber(operationWithoutClient.errors)).toEqual(0);
+    expect(operationWithoutClient.hash).toHaveLength(32);
+    expect(operationWithoutClient.target).toEqual(target.id);
+
+    // operations_hourly
+    const operationsHourlyResult = await clickHouseQuery<{
+      target: string;
+      hash: string;
+      total_ok: string;
+      total: string;
+      quantiles: [number];
+    }>(`
+      SELECT
+        target,
+        sum(total) as total,
+        sum(total_ok) as total_ok,
+        hash,
+        quantilesMerge(0.99)(duration_quantiles) as quantiles
+      FROM operations_hourly GROUP BY target, hash
+    `);
+
+    expect(operationsHourlyResult.data).toHaveLength(1);
+
+    const hourlyAgg = operationsHourlyResult.data[0];
+    expect(hourlyAgg).toBeDefined();
+    expect(ensureNumber(hourlyAgg.quantiles[0])).toEqual(200_000_000);
+    expect(ensureNumber(hourlyAgg.total)).toEqual(2);
+    expect(ensureNumber(hourlyAgg.total_ok)).toEqual(2);
+    expect(hourlyAgg.hash).toHaveLength(32);
+    expect(hourlyAgg.target).toEqual(target.id);
+
+    // operations_daily
+    const operationsDailyResult = await clickHouseQuery<{
+      target: string;
+      hash: string;
+      total_ok: string;
+      total: string;
+      quantiles: [number];
+    }>(`
+      SELECT
+        target,
+        sum(total) as total,
+        sum(total_ok) as total_ok,
+        hash,
+        quantilesMerge(0.99)(duration_quantiles) as quantiles
+      FROM operations_daily GROUP BY target, hash
+    `);
+
+    expect(operationsDailyResult.data).toHaveLength(1);
+
+    const dailyAgg = operationsDailyResult.data[0];
+    expect(dailyAgg).toBeDefined();
+    expect(ensureNumber(dailyAgg.quantiles[0])).toEqual(200_000_000);
+    expect(ensureNumber(dailyAgg.total)).toEqual(2);
+    expect(ensureNumber(dailyAgg.total_ok)).toEqual(2);
+    expect(dailyAgg.hash).toHaveLength(32);
+    expect(dailyAgg.target).toEqual(target.id);
+
+    // coordinates_daily
+    const coordinatesDailyResult = await clickHouseQuery<{
+      target: string;
+      hash: string;
+      total: string;
+      coordinate: string;
+    }>(`
+      SELECT
+        target,
+        sum(total) as total,
+        hash,
+        coordinate
+      FROM coordinates_daily GROUP BY target, hash, coordinate
+    `);
+
+    expect(coordinatesDailyResult.data).toHaveLength(2);
+
+    const rootCoordinate = coordinatesDailyResult.data.find(c => c.coordinate === 'Query')!;
+    expect(rootCoordinate).toBeDefined();
+    expect(ensureNumber(rootCoordinate.total)).toEqual(2);
+    expect(rootCoordinate.hash).toHaveLength(32);
+    expect(rootCoordinate.target).toEqual(target.id);
+
+    const fieldCoordinate = coordinatesDailyResult.data.find(c => c.coordinate === 'Query.ping')!;
+    expect(fieldCoordinate).toBeDefined();
+    expect(ensureNumber(fieldCoordinate.total)).toEqual(2);
+    expect(fieldCoordinate.hash).toHaveLength(32);
+    expect(fieldCoordinate.target).toEqual(target.id);
+
+    // clients_daily
+    const clientsDailyResult = await clickHouseQuery<{
+      target: string;
+      hash: string;
+      client_name: string;
+      client_version: string;
+      total: string;
+    }>(`
+      SELECT
+        target,
+        sum(total) as total,
+        hash,
+        client_name,
+        client_version
+      FROM clients_daily
+      GROUP BY target, hash, client_name, client_version
+    `);
+
+    expect(clientsDailyResult.data).toHaveLength(2);
+
+    const dailyAggOfKnownClient = clientsDailyResult.data.find(c => c.client_name === 'test-name')!;
+    expect(dailyAggOfKnownClient).toBeDefined();
+    expect(ensureNumber(dailyAggOfKnownClient.total)).toEqual(1);
+    expect(dailyAggOfKnownClient.client_version).toBe('test-version');
+    expect(dailyAggOfKnownClient.hash).toHaveLength(32);
+    expect(dailyAggOfKnownClient.target).toEqual(target.id);
+
+    const dailyAggOfUnknownClient = clientsDailyResult.data.find(c => c.client_name !== 'test-name')!;
+    expect(dailyAggOfUnknownClient).toBeDefined();
+    expect(ensureNumber(dailyAggOfUnknownClient.total)).toEqual(1);
+    expect(dailyAggOfUnknownClient.client_version).toHaveLength(0);
+    expect(dailyAggOfUnknownClient.hash).toHaveLength(32);
+    expect(dailyAggOfUnknownClient.target).toEqual(target.id);
+  } else {
+    // operations_registry
+    const operationsRegistryResult = await clickHouseQuery<{
+      target: string;
+      hash: string;
+      name: string;
+      body: string;
+      operation: string;
+    }>(`
+          SELECT
+            target,
+            hash,
+            name,
+            body,
+            operation
+          FROM operations_registry FINAL
+          GROUP BY target, hash, name, body, operation
+        `);
+
+    expect(operationsRegistryResult.data).toHaveLength(1);
+
+    const operationCollectionRow = operationsRegistryResult.data[0];
+    expect(operationCollectionRow.body).toEqual('query ping{ping}');
+    expect(operationCollectionRow.hash).toHaveLength(32);
+    expect(operationCollectionRow.name).toBe('ping');
+    expect(operationCollectionRow.target).toBe(target.id);
+
+    // operations_new
+    const operationsResult = await clickHouseQuery<{
+      target: string;
+      hash: string;
+      ok: boolean;
+      errors: number;
+      duration: number;
+      schema: string[];
+      client_name: string;
+      client_version: string;
+    }>(`
+          SELECT
+            target,
+            hash,
+            ok,
+            errors,
+            duration,
+            schema,
+            client_name,
+            client_version
+          FROM operations_new
+        `);
+
+    expect(operationsResult.data).toHaveLength(2);
+
+    const operationWithClient = operationsResult.data.find(o => o.client_name.length > 0)!;
+    expect(operationWithClient).toBeDefined();
+    expect(operationWithClient.client_name).toEqual('test-name');
+    expect(operationWithClient.client_version).toEqual('test-version');
+    expect(operationWithClient.schema).toHaveLength(2);
+    expect(operationWithClient.schema).toContainEqual('Query.ping');
+    expect(operationWithClient.schema).toContainEqual('Query');
+    expect(ensureNumber(operationWithClient.duration)).toEqual(200_000_000);
+    expect(ensureNumber(operationWithClient.errors)).toEqual(0);
+    expect(operationWithClient.hash).toHaveLength(32);
+    expect(operationWithClient.target).toEqual(target.id);
+
+    const operationWithoutClient = operationsResult.data.find(o => o.client_name.length === 0)!;
+    expect(operationWithoutClient).toBeDefined();
+    expect(operationWithoutClient.client_name).toHaveLength(0);
+    expect(operationWithoutClient.client_version).toHaveLength(0);
+    expect(operationWithClient.schema).toHaveLength(2);
+    expect(operationWithClient.schema).toContainEqual('Query.ping');
+    expect(operationWithClient.schema).toContainEqual('Query');
+    expect(ensureNumber(operationWithoutClient.duration)).toEqual(200_000_000);
+    expect(ensureNumber(operationWithoutClient.errors)).toEqual(0);
+    expect(operationWithoutClient.hash).toHaveLength(32);
+    expect(operationWithoutClient.target).toEqual(target.id);
+
+    // operations_new_hourly_mv
+    const operationsHourlyResult = await clickHouseQuery<{
+      target: string;
+      hash: string;
+      total_ok: string;
+      total: string;
+      quantiles: [number];
+    }>(`
+          SELECT
+            target,
+            hash,
+            sum(total) as total,
+            sum(total_ok) as total_ok,
+            quantilesMerge(0.99)(duration_quantiles) as quantiles
+          FROM operations_new_hourly_mv GROUP BY target, hash
+        `);
+
+    expect(operationsHourlyResult.data).toHaveLength(1);
+
+    const hourlyAgg = operationsHourlyResult.data[0];
+    expect(hourlyAgg).toBeDefined();
+    expect(ensureNumber(hourlyAgg.quantiles[0])).toEqual(200_000_000);
+    expect(ensureNumber(hourlyAgg.total)).toEqual(2);
+    expect(ensureNumber(hourlyAgg.total_ok)).toEqual(2);
+    expect(hourlyAgg.hash).toHaveLength(32);
+    expect(hourlyAgg.target).toEqual(target.id);
+
+    // schema_coordinates_daily
+    const coordinatesDailyResult = await clickHouseQuery<{
+      target: string;
+      hash: string;
+      total: string;
+      coordinate: string;
+    }>(`
+          SELECT
+            target,
+            sum(total) as total,
+            hash,
+            coordinate
+          FROM schema_coordinates_daily GROUP BY target, hash, coordinate
+        `);
+
+    expect(coordinatesDailyResult.data).toHaveLength(2);
+
+    const rootCoordinate = coordinatesDailyResult.data.find(c => c.coordinate === 'Query')!;
+    expect(rootCoordinate).toBeDefined();
+    expect(ensureNumber(rootCoordinate.total)).toEqual(2);
+    expect(rootCoordinate.hash).toHaveLength(32);
+    expect(rootCoordinate.target).toEqual(target.id);
+
+    const fieldCoordinate = coordinatesDailyResult.data.find(c => c.coordinate === 'Query.ping')!;
+    expect(fieldCoordinate).toBeDefined();
+    expect(ensureNumber(fieldCoordinate.total)).toEqual(2);
+    expect(fieldCoordinate.hash).toHaveLength(32);
+    expect(fieldCoordinate.target).toEqual(target.id);
+
+    // clients_daily
+    const clientsDailyResult = await clickHouseQuery<{
+      target: string;
+      hash: string;
+      client_name: string;
+      total: string;
+    }>(`
+          SELECT
+            target,
+            sum(total) as total,
+            hash,
+            client_name
+          FROM client_names_daily
+          GROUP BY target, hash, client_name
+        `);
+
+    expect(clientsDailyResult.data).toHaveLength(2);
+
+    const dailyAggOfKnownClient = clientsDailyResult.data.find(c => c.client_name === 'test-name')!;
+    expect(dailyAggOfKnownClient).toBeDefined();
+    expect(ensureNumber(dailyAggOfKnownClient.total)).toEqual(1);
+    expect(dailyAggOfKnownClient.hash).toHaveLength(32);
+    expect(dailyAggOfKnownClient.target).toEqual(target.id);
+
+    const dailyAggOfUnknownClient = clientsDailyResult.data.find(c => c.client_name !== 'test-name')!;
+    expect(dailyAggOfUnknownClient).toBeDefined();
+    expect(ensureNumber(dailyAggOfUnknownClient.total)).toEqual(1);
+    expect(dailyAggOfUnknownClient.hash).toHaveLength(32);
+    expect(dailyAggOfUnknownClient.target).toEqual(target.id);
+  }
 });

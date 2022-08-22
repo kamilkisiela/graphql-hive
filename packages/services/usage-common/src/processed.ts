@@ -18,7 +18,7 @@ export interface ProcessedRegistryRecord {
   name?: string | null;
   body: string;
   operation_kind: string;
-  inserted_at: number;
+  timestamp: number;
   expires_at: number;
   coordinates: string[];
 }

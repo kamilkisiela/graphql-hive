@@ -197,7 +197,7 @@ async function processMessage({
   // Decompress and parse the message to get a list of reports
   const rawReports: RawReport[] = JSON.parse((await decompress(message.value!)).toString());
 
-  const { operations, registryRecords } = await processor.processReports(rawReports);
+  const { operations, registryRecords, legacy } = await processor.processReports(rawReports);
 
   try {
     // .then and .catch looks weird but async/await with try/catch and Promise.all is even weirder
@@ -228,8 +228,8 @@ async function processMessage({
           return Promise.reject(error);
         }),
       // legacy
-      writer.legacy.writeRegistry(registryRecords),
-      writer.legacy.writeOperations(operations),
+      writer.legacy.writeRegistry(legacy.registryRecords),
+      writer.legacy.writeOperations(legacy.operations),
     ]);
   } catch (error) {
     logger.error(error);
