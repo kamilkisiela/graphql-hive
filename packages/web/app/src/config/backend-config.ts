@@ -102,19 +102,13 @@ const getAuth0Overrides = () => {
               userContext: input.userContext,
             });
 
-            let emailPasswordUser = undefined;
-
-            for (const superTokensUser of superTokensUsers) {
+            const emailPasswordUser =
               // if the thirdParty field in the user object is undefined, then the user is an EmailPassword account.
-              if (superTokensUser.thirdParty === undefined) {
-                emailPasswordUser = superTokensUser;
-                break;
-              }
-            }
+              superTokensUsers.find(superTokensUser => superTokensUser.thirdParty === undefined) ?? null;
 
             // EmailPassword user does not exist in SuperTokens
             // We first need to verify whether the password is legit,then if so, create a new user in SuperTokens with the same password.
-            if (emailPasswordUser === undefined) {
+            if (emailPasswordUser === null) {
               const auth0UserData = await trySignIntoAuth0WithUserCredentialsAndRetrieveUserInfo(
                 input.email,
                 input.password
@@ -193,7 +187,9 @@ async function doesUserExistInAuth0(email: string): Promise<boolean> {
     }
   );
 
-  // TODO: status code and error handling
+  if (response.status !== 200) {
+    throw new Error('Could not check whether user exists in Auth0.');
+  }
 
   const body = await response.json();
 
@@ -210,40 +206,41 @@ async function trySignIntoAuth0WithUserCredentialsAndRetrieveUserInfo(
   email: string,
   password: string
 ): Promise<{ sub: string } | null> {
-  try {
-    // generate an user access token using the input credentials
-    const response = await fetch(`${process.env['AUTH_LEGACY_AUTH0_ISSUER_BASE_URL']}/oauth/token`, {
-      method: 'POST',
-      headers: {
-        accept: 'application/json',
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({
-        client_id: process.env['AUTH_LEGACY_AUTH0_CLIENT_ID'],
-        grant_type: 'password',
-        username: email,
-        password: password,
-      }),
-    });
+  // generate an user access token using the input credentials
+  const response = await fetch(`${process.env['AUTH_LEGACY_AUTH0_ISSUER_BASE_URL']}/oauth/token`, {
+    method: 'POST',
+    headers: {
+      accept: 'application/json',
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      client_id: process.env['AUTH_LEGACY_AUTH0_CLIENT_ID'],
+      client_secret: process.env['AUTH_LEGACY_AUTH0_CLIENT_SECRET'],
+      grant_type: 'password',
+      username: email,
+      password: password,
+    }),
+  });
 
-    // TODO: verify status code and error handling
+  const body = await response.text();
 
-    const body = await response.json();
-    const { access_token: accessToken } = body;
+  if (response.status !== 200) {
+    throw new Error("Couldn't authenticate user with Auth0.");
+  }
 
-    const userResponse = await fetch(`${process.env['AUTH_LEGACY_AUTH0_ISSUER_BASE_URL']}/userInfo`, {
-      method: 'GET',
-      headers: { authorization: `Bearer ${accessToken}` },
-    });
+  const { access_token: accessToken } = JSON.parse(body);
 
-    // TODO: verify status code and error handling
+  const userResponse = await fetch(`${process.env['AUTH_LEGACY_AUTH0_ISSUER_BASE_URL']}/userInfo`, {
+    method: 'GET',
+    headers: { authorization: `Bearer ${accessToken}` },
+  });
 
-    const userBody = await userResponse.json();
-    return userBody;
-  } catch (error) {
-    // input credentials are invalid
+  if (userResponse.status !== 200) {
     return null;
   }
+
+  const userBody = await userResponse.text();
+  return JSON.parse(userBody);
 }
 
 /**
@@ -259,8 +256,9 @@ async function setUserIdMapping(params: { auth0UserId: string; supertokensUserId
       superTokensUserId: params.supertokensUserId,
     }),
   });
+
   if (response.status !== 200) {
-    // TODO: error handling
+    throw new Error('Failed to set user id mapping code.');
   }
 }
 
@@ -279,9 +277,12 @@ const getThirdPartyUserFromAuth0 = async (thirdPartyId: string): Promise<null | 
     }
   );
 
-  // TODO: verify status code and error handling
+  const rawBody = await response.text();
+  if (response.status !== 200) {
+    throw new Error('Failed to retreive the third party user info from Auth0.\n' + rawBody);
+  }
 
-  const body = await response.json();
+  const body = JSON.parse(rawBody);
 
   // check if user information exists in response.
   if (body[0]) {
