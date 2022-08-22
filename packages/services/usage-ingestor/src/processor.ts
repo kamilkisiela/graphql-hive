@@ -4,7 +4,12 @@ import LRU from 'tiny-lru';
 import { createHash } from 'crypto';
 import { cache } from './helpers';
 import { reportSize, totalOperations, reportMessageSize, normalizeCacheMisses, schemaCoordinatesSize } from './metrics';
-import { stringifyOperation, stringifyRegistryRecord } from './serializer';
+import {
+  stringifyOperation,
+  stringifyRegistryRecord,
+  stringifyLegacyOperation,
+  stringifyLegacyRegistryRecord,
+} from './serializer';
 
 import type { FastifyLoggerInstance } from '@hive/service-common';
 import type {
@@ -46,40 +51,96 @@ export function createProcessor(config: { logger: FastifyLoggerInstance }) {
 
       logger.info(`Processing (reports=%s, operations=%s)`, rawReports.length, sizeOfAllReports);
 
-      // We do it to collect unique operations for the registry table
-      const processedRegistryKeys = new Set<string>();
       const serializedOperations: string[] = [];
       const serializedRegistryRecords: string[] = [];
 
+      // legacy
+      const serializedLegacyOperations: string[] = [];
+      const serializedLegacyRegistryRecords: string[] = [];
+
       for (const rawReport of rawReports) {
         reportSize.observe(rawReport.size);
+
+        const operationSample = new Map<
+          string,
+          {
+            operation: RawOperation;
+            size: number;
+          }
+        >();
 
         for (const rawOperation of rawReport.operations) {
           const processedOperation = processSingleOperation(rawOperation, rawReport.map, rawReport.target, normalize);
 
           serializedOperations.push(stringifyOperation(processedOperation));
 
-          const operationKey = `${processedOperation.operationHash}-${processedOperation.target}`;
+          // legacy
+          serializedLegacyOperations.push(
+            stringifyLegacyOperation(processedOperation, processedOperation.legacy.coordinates)
+          );
 
-          if (!processedRegistryKeys.has(operationKey)) {
-            processedRegistryKeys.add(operationKey);
-            serializedRegistryRecords.push(
-              stringifyRegistryRecord({
+          const sample = operationSample.get(rawOperation.operationMapKey);
+
+          // count operations per operationMapKey
+          if (!sample) {
+            operationSample.set(rawOperation.operationMapKey, {
+              operation: rawOperation,
+              size: 1,
+            });
+            // legacy
+            serializedLegacyRegistryRecords.push(
+              stringifyLegacyRegistryRecord({
                 target: processedOperation.target,
                 hash: processedOperation.operationHash,
-                name: processedOperation.operationName,
-                body: processedOperation.document,
-                operation: processedOperation.operationType,
+                name: processedOperation.legacy.name,
+                body: processedOperation.legacy.body,
+                operation_kind: processedOperation.legacy.kind,
                 inserted_at: processedOperation.timestamp,
               })
             );
+          } else {
+            sample.size += 1;
           }
+        }
+
+        for (const group of operationSample.values()) {
+          const operationMapRecord = rawReport.map[group.operation.operationMapKey];
+
+          if (!operationMapRecord) {
+            logger.warn(`Operation map record not found key=%s`, group.operation.operationMapKey);
+            continue;
+          }
+
+          const { value: normalized } = normalize(operationMapRecord)!;
+          const operationHash = normalized.hash ?? 'unknown';
+          const timestamp =
+            typeof group.operation.timestamp === 'string'
+              ? parseInt(group.operation.timestamp, 10)
+              : group.operation.timestamp;
+
+          serializedRegistryRecords.push(
+            stringifyRegistryRecord({
+              size: group.size,
+              target: rawReport.target,
+              hash: operationHash,
+              name: normalized.type,
+              body: normalized.body,
+              operation_kind: normalized.type,
+              coordinates: normalized.coordinates,
+              expires_at: group.operation.expiresAt || timestamp + 30 * DAY_IN_MS,
+              inserted_at: timestamp,
+            })
+          );
         }
       }
 
       return {
         operations: serializedOperations,
         registryRecords: serializedRegistryRecords,
+        legacy: {
+          operations: serializedLegacyOperations,
+          registryRecords: serializedLegacyRegistryRecords,
+        },
       };
     },
   };
@@ -90,9 +151,15 @@ function processSingleOperation(
   operationMap: RawOperationMap,
   target: string,
   normalize: NormalizeFunction
-): ProcessedOperation {
+): ProcessedOperation & {
+  legacy: {
+    coordinates: string[];
+    name?: string | null;
+    body: string;
+    kind: string;
+  };
+} {
   const operationMapRecord = operationMap[operation.operationMapKey];
-  const { operationName } = operationMapRecord;
   const { execution, metadata } = operation;
 
   const { value: normalized } = normalize(operationMapRecord)!;
@@ -103,16 +170,18 @@ function processSingleOperation(
   const timestamp = typeof operation.timestamp === 'string' ? parseInt(operation.timestamp, 10) : operation.timestamp;
 
   return {
-    document: normalized.body,
     timestamp: timestamp,
     expiresAt: operation.expiresAt || timestamp + 30 * DAY_IN_MS,
-    operationType: normalized.type,
-    fields: normalized.coordinates,
     target,
     execution,
     metadata,
     operationHash,
-    operationName,
+    legacy: {
+      coordinates: normalized.coordinates,
+      name: operationMapRecord.operationName,
+      body: normalized.body,
+      kind: normalized.type,
+    },
   };
 }
 

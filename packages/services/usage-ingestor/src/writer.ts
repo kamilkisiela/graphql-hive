@@ -45,7 +45,7 @@ export function createWriter({ clickhouse }: { clickhouse: ClickHouseConfig }) {
       await writeCsv(
         clickhouse,
         agents,
-        `INSERT INTO operations_new (${operationsFields}) FORMAT CSV`,
+        `INSERT INTO operations (${operationsFields}) FORMAT CSV`,
         await compress(csv)
       );
     },
@@ -54,9 +54,30 @@ export function createWriter({ clickhouse }: { clickhouse: ClickHouseConfig }) {
       await writeCsv(
         clickhouse,
         agents,
-        `INSERT INTO operations_registry (${registryFields}) FORMAT CSV`,
+        `INSERT INTO operations_registry_v2 (${registryFields}) FORMAT CSV`,
         await compress(csv)
       );
+    },
+    legacy: {
+      async writeOperations(operations: string[]) {
+        const csv = joinIntoSingleMessage(operations);
+
+        await writeCsv(
+          clickhouse,
+          agents,
+          `INSERT INTO operations_new (${operationsFields}) FORMAT CSV`,
+          await compress(csv)
+        );
+      },
+      async writeRegistry(records: string[]) {
+        const csv = joinIntoSingleMessage(records);
+        await writeCsv(
+          clickhouse,
+          agents,
+          `INSERT INTO operations_registry (${registryFields}) FORMAT CSV`,
+          await compress(csv)
+        );
+      },
     },
   };
 }

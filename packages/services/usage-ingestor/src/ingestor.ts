@@ -227,6 +227,9 @@ async function processMessage({
           error[retryOnFailureSymbol] = true;
           return Promise.reject(error);
         }),
+      // legacy
+      writer.legacy.writeRegistry(registryRecords),
+      writer.legacy.writeOperations(operations),
     ]);
   } catch (error) {
     logger.error(error);

@@ -21,6 +21,8 @@ import { normalizeOperation } from '@graphql-hive/core';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { parse, print } from 'graphql';
 
+const CLICKHOUSE_USE_V2_TABLES = process.env.CLICKHOUSE_USE_V2_TABLES === '1';
+
 function sendBatch(amount: number, operation: CollectedOperation, token: string) {
   return collect({
     operations: new Array(amount).fill(operation),
@@ -934,7 +936,7 @@ test('number of produced and collected operations should match', async () => {
   }>(`
     SELECT
       target, client_name, hash, sum(total) as total
-    FROM client_names_daily
+    FROM ${CLICKHOUSE_USE_V2_TABLES ? 'clients_daily' : 'client_names_daily'}
     WHERE 
       timestamp >= subtractDays(now(), 30)
       AND timestamp <= now()
@@ -1034,7 +1036,9 @@ test('different order of schema coordinates should not result in different hash'
     hash: string;
     total: number;
   }>(`
-    SELECT coordinate, hash FROM schema_coordinates_daily GROUP BY coordinate, hash
+    SELECT coordinate, hash FROM ${
+      CLICKHOUSE_USE_V2_TABLES ? 'coordinates_daily' : 'schema_coordinates_daily'
+    } GROUP BY coordinate, hash
   `);
 
   expect(coordinatesResult.rows).toEqual(2);
@@ -1044,9 +1048,11 @@ test('different order of schema coordinates should not result in different hash'
     client_name: string | null;
     hash: string;
     total: number;
-  }>(`
-    SELECT hash FROM operations_registry FINAL GROUP BY hash
-  `);
+  }>(
+    CLICKHOUSE_USE_V2_TABLES
+      ? `SELECT hash FROM operation_collection GROUP BY hash`
+      : `SELECT hash FROM operations_registry FINAL GROUP BY hash`
+  );
 
   expect(operationsResult.rows).toEqual(1);
 });
@@ -1125,7 +1131,9 @@ test('same operation but with different schema coordinates should result in diff
     hash: string;
     total: number;
   }>(`
-    SELECT coordinate, hash FROM schema_coordinates_daily GROUP BY coordinate, hash
+    SELECT coordinate, hash FROM ${
+      CLICKHOUSE_USE_V2_TABLES ? 'coordinates_daily' : 'schema_coordinates_daily'
+    } GROUP BY coordinate, hash
   `);
 
   expect(coordinatesResult.rows).toEqual(4);
@@ -1135,9 +1143,11 @@ test('same operation but with different schema coordinates should result in diff
     client_name: string | null;
     hash: string;
     total: number;
-  }>(`
-    SELECT hash FROM operations_registry FINAL GROUP BY hash
-  `);
+  }>(
+    CLICKHOUSE_USE_V2_TABLES
+      ? `SELECT hash FROM operation_collection GROUP BY hash`
+      : `SELECT hash FROM operations_registry FINAL GROUP BY hash`
+  );
 
   expect(operationsResult.rows).toEqual(2);
 });
@@ -1216,7 +1226,9 @@ test('operations with the same schema coordinates and body but with different na
     hash: string;
     total: number;
   }>(`
-    SELECT coordinate, hash FROM schema_coordinates_daily GROUP BY coordinate, hash
+    SELECT coordinate, hash FROM ${
+      CLICKHOUSE_USE_V2_TABLES ? 'coordinates_daily' : 'schema_coordinates_daily'
+    } GROUP BY coordinate, hash
   `);
 
   expect(coordinatesResult.rows).toEqual(4);
@@ -1226,9 +1238,11 @@ test('operations with the same schema coordinates and body but with different na
     client_name: string | null;
     hash: string;
     total: number;
-  }>(`
-    SELECT hash FROM operations_registry FINAL GROUP BY hash
-  `);
+  }>(
+    CLICKHOUSE_USE_V2_TABLES
+      ? `SELECT hash FROM operation_collection GROUP BY hash`
+      : `SELECT hash FROM operations_registry FINAL GROUP BY hash`
+  );
 
   expect(operationsResult.rows).toEqual(2);
 });
