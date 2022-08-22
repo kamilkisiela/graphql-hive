@@ -4,17 +4,14 @@ import 'twin.macro';
 import { FullLogo } from '@/components/common/Logo';
 import dynamic from 'next/dynamic';
 import SuperTokensReact from 'supertokens-auth-react';
-import { frontendConfig } from '@/config/frontend-config';
 
 const SuperTokensComponentNoSSR = dynamic(new Promise(res => res(SuperTokensReact.getRoutingComponent)) as any, {
   ssr: false,
 });
 
-if (globalThis.window) {
-  // we only want to call this init function on the frontend, so we check typeof window !== 'undefined'
-  SuperTokensReact.init(frontendConfig());
-}
-
+/**
+ * Route for showing the SuperTokens login page.
+ */
 export default function Auth(): React.ReactElement {
   return (
     <>
@@ -37,8 +34,8 @@ export default function Auth(): React.ReactElement {
         </Head>
         <section tw="h-full text-gray-600">
           <div tw="container h-full px-5 py-24 mx-auto flex items-center justify-center">
-            <div tw="lg:w-2/6 md:w-1/2 w-full bg-white rounded-lg p-8 flex flex-col">
-              <FullLogo tw="text-yellow-500 mx-auto mb-5" />
+            <div tw="lg:w-2/6 md:w-1/2 w-full rounded-lg p-8 flex flex-col">
+              <FullLogo tw="text-yellow-500 mx-auto mb-5" width={250} color={{ main: '#fff', sub: '#fff' }} />
               <SuperTokensComponentNoSSR />
             </div>
           </div>

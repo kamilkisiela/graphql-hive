@@ -8,6 +8,9 @@ import NextCors from 'nextjs-cors';
 
 supertokens.init(backendConfig());
 
+/**
+ * Route for proxying to the underlying SuperTokens backend.
+ */
 export default async function superTokens(req: NextApiRequest & Request, res: NextApiResponse & Response) {
   // NOTE: We need CORS only if we are querying the APIs from a different origin
   await NextCors(req, res, {
@@ -24,6 +27,7 @@ export default async function superTokens(req: NextApiRequest & Request, res: Ne
     req,
     res
   );
+
   if (!res.writableEnded) {
     res.status(404).send('Not found');
   }

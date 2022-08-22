@@ -3,7 +3,7 @@ import NextLink from 'next/link';
 import { onlyText } from 'react-children-utilities';
 import { useQuery } from 'urql';
 
-import { authenticated, serverSidePropsSessionHandling } from '@/components/authenticated-container';
+import { authenticated, withSessionProtection } from '@/components/authenticated-container';
 import { OrganizationLayout } from '@/components/layouts';
 import { Activities, Button, Card, DropdownMenu, EmptyList, Heading, Skeleton, TimeAgo, Title } from '@/components/v2';
 import { getActivity } from '@/components/v2/activities';
@@ -139,14 +139,5 @@ function ProjectsPage(): ReactElement {
   );
 }
 
-export async function getServerSideProps(context: any) {
-  const result = await serverSidePropsSessionHandling(context);
-  console.log(result);
-  if (result) {
-    return result;
-  }
-
-  return { props: {} };
-}
-
+export const getServerSideProps = withSessionProtection();
 export default authenticated(ProjectsPage);

@@ -232,10 +232,14 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
   };
 };
 
+if (!process.env['SUPERTOKENS_CONNECTION_URI']) {
+  throw new Error('Missing SUPERTOKENS_CONNECTION_URI env variable.');
+}
+
 SuperTokens.init({
   framework: 'fastify',
   supertokens: {
-    connectionURI: 'http://localhost:3567',
+    connectionURI: process.env['SUPERTOKENS_CONNECTION_URI'],
     apiKey: process.env['SUPERTOKENS_API_KEY'],
   },
   appInfo: {
