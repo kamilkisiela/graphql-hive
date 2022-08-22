@@ -5,37 +5,81 @@ import type { TypeProvider } from 'supertokens-node/recipe/thirdparty/types';
 import type { TypeInput as ThirdPartEmailPasswordTypeInput } from 'supertokens-node/recipe/thirdpartyemailpassword/types';
 import { fetch } from 'cross-undici-fetch';
 import { appInfo } from './app-info';
+import zod from 'zod';
+
+const LegacyAuth0ConfigEnabledModel = zod.object({
+  NEXT_PUBLIC_APP_BASE_URL_AUTH_LEGACY_AUTH0: zod.literal('1'),
+  AUTH_LEGACY_AUTH0_AUDIENCE: zod.string(),
+  AUTH_LEGACY_AUTH0_ISSUER_BASE_URL: zod.string(),
+  AUTH_LEGACY_AUTH0_CLIENT_ID: zod.string(),
+  AUTH_LEGACY_AUTH0_CLIENT_SECRET: zod.string(),
+});
+
+const LegacyAuth0Config = zod.union([
+  zod.object({
+    NEXT_PUBLIC_APP_BASE_URL_AUTH_LEGACY_AUTH0: zod.union([zod.void(), zod.literal('0')]),
+  }),
+  LegacyAuth0ConfigEnabledModel,
+]);
+
+type LegacyAuth0ConfigEnabled = zod.TypeOf<typeof LegacyAuth0ConfigEnabledModel>;
+
+const GitHubConfigModel = zod.union([
+  zod.object({
+    NEXT_PUBLIC_APP_BASE_URL_AUTH_GITHUB: zod.union([zod.void(), zod.literal('0')]),
+  }),
+  zod.object({
+    NEXT_PUBLIC_APP_BASE_URL_AUTH_GITHUB: zod.literal('1'),
+    AUTH_GITHUB_CLIENT_ID: zod.string(),
+    AUTH_GITHUB_CLIENT_SECRET: zod.string(),
+  }),
+]);
+
+const GoogleConfigModel = zod.union([
+  zod.object({
+    NEXT_PUBLIC_APP_BASE_URL_AUTH_GOOGLE: zod.union([zod.void(), zod.literal('0')]),
+  }),
+  zod.object({
+    NEXT_PUBLIC_APP_BASE_URL_AUTH_GOOGLE: zod.literal('1'),
+    AUTH_GOOGLE_CLIENT_ID: zod.string(),
+    AUTH_GOOGLE_CLIENT_SECRET: zod.string(),
+  }),
+]);
+
+const SuperTokensConfigModel = zod.object({
+  SUPERTOKENS_CONNECTION_URI: zod.string(),
+  SUPERTOKENS_API_KEY: zod.string(),
+});
 
 export const backendConfig = (): TypeInput => {
+  const githubConfig = GitHubConfigModel.parse(process.env);
+  const googleConfig = GoogleConfigModel.parse(process.env);
+  const auth0Config = LegacyAuth0Config.parse(process.env);
+  const superTokensConfig = SuperTokensConfigModel.parse(process.env);
+
   const providers: Array<TypeProvider> = [];
 
-  if (process.env['NEXT_PUBLIC_APP_BASE_URL_AUTH_GITHUB'] === '1') {
-    if (!process.env['AUTH_GITHUB_CLIENT_ID'] || !process.env['AUTH_GITHUB_CLIENT_SECRET']) {
-      throw new Error('Insufficient GitHub configuration.');
-    }
+  if (githubConfig['NEXT_PUBLIC_APP_BASE_URL_AUTH_GITHUB'] === '1') {
     providers.push(
       ThirdPartyEmailPasswordNode.Github({
-        clientId: process.env['AUTH_GITHUB_CLIENT_ID'],
-        clientSecret: process.env['AUTH_GITHUB_CLIENT_SECRET'],
+        clientId: githubConfig['AUTH_GITHUB_CLIENT_ID'],
+        clientSecret: githubConfig['AUTH_GITHUB_CLIENT_SECRET'],
       })
     );
   }
-  if (process.env['NEXT_PUBLIC_APP_BASE_URL_AUTH_GOOGLE'] === '1') {
-    if (!process.env['AUTH_GOOGLE_CLIENT_ID'] || !process.env['AUTH_GOOGLE_CLIENT_SECRET']) {
-      throw new Error('Insufficient GitHub configuration.');
-    }
+  if (googleConfig['NEXT_PUBLIC_APP_BASE_URL_AUTH_GOOGLE'] === '1') {
     providers.push(
       ThirdPartyEmailPasswordNode.Google({
-        clientId: process.env['AUTH_GOOGLE_CLIENT_ID'],
-        clientSecret: process.env['AUTH_GOOGLE_CLIENT_SECRET'],
+        clientId: googleConfig['AUTH_GOOGLE_CLIENT_ID'],
+        clientSecret: googleConfig['AUTH_GOOGLE_CLIENT_SECRET'],
       })
     );
   }
 
   return {
     supertokens: {
-      connectionURI: process.env['SUPERTOKENS_CONNECTION_URI'],
-      apiKey: process.env['SUPERTOKENS_API_KEY'],
+      connectionURI: superTokensConfig['SUPERTOKENS_CONNECTION_URI'],
+      apiKey: superTokensConfig['SUPERTOKENS_API_KEY'],
     },
     appInfo,
     recipeList: [
@@ -45,7 +89,9 @@ export const backendConfig = (): TypeInput => {
           /**
            * These overrides are only relevant for the legacy Auth0 -> SuperTokens migration (period).
            */
-          process.env['NEXT_PUBLIC_APP_BASE_URL_AUTH_LEGACY_AUTH0'] === '1' ? getAuth0Overrides() : undefined,
+          auth0Config['NEXT_PUBLIC_APP_BASE_URL_AUTH_LEGACY_AUTH0'] === '1'
+            ? getAuth0Overrides(auth0Config)
+            : undefined,
       }),
       SessionNode.init({
         override: {
@@ -56,11 +102,11 @@ export const backendConfig = (): TypeInput => {
                 const user = await ThirdPartyEmailPasswordNode.getUserById(input.userId);
 
                 if (!user) {
-                  // TODO: better error handling
-                  throw new Error('Could not find user??');
+                  throw new Error(
+                    `SuperTokens: Creating a new session failed. Could not find user with id ${input.userId}.`
+                  );
                 }
 
-                // This is stored in the db against the sessionHandle for this session
                 input.accessTokenPayload = {
                   version: '1',
                   superTokensUserId: input.userId,
@@ -89,13 +135,13 @@ export const backendConfig = (): TypeInput => {
 // These are only required for the Auth0 -> SuperTokens migrations and can be removed once the migration (period) is complete.
 //
 
-const getAuth0Overrides = () => {
+const getAuth0Overrides = (config: LegacyAuth0ConfigEnabled) => {
   const override: ThirdPartEmailPasswordTypeInput['override'] = {
     functions(originalImplementation) {
       return {
         ...originalImplementation,
         async emailPasswordSignIn(input) {
-          if (await doesUserExistInAuth0(input.email)) {
+          if (await doesUserExistInAuth0(config, input.email)) {
             // check if user exists in SuperTokens
             const superTokensUsers = await this.getUsersByEmail({
               email: input.email,
@@ -110,6 +156,7 @@ const getAuth0Overrides = () => {
             // We first need to verify whether the password is legit,then if so, create a new user in SuperTokens with the same password.
             if (emailPasswordUser === null) {
               const auth0UserData = await trySignIntoAuth0WithUserCredentialsAndRetrieveUserInfo(
+                config,
                 input.email,
                 input.password
               );
@@ -144,7 +191,7 @@ const getAuth0Overrides = () => {
         },
         async thirdPartySignInUp(input) {
           // Check whether third party user exists on Auth0
-          const auth0UserInfo = await getThirdPartyUserFromAuth0(input.thirdPartyUserId);
+          const auth0UserInfo = await getThirdPartyUserFromAuth0(config, input.thirdPartyUserId);
           // Sign up the user with SuperTokens.
           const response = await originalImplementation.thirdPartySignInUp(input);
 
@@ -173,8 +220,8 @@ const getAuth0Overrides = () => {
 /**
  * Check whether a specific user that SIGNED UP VIA EMAIL and password exists in Auth0.
  */
-async function doesUserExistInAuth0(email: string): Promise<boolean> {
-  const access_token = await generateAuth0AccessToken();
+async function doesUserExistInAuth0(config: LegacyAuth0ConfigEnabled, email: string): Promise<boolean> {
+  const access_token = await generateAuth0AccessToken(config);
 
   // check if a user exists with the input email and is not a Social Account
   const response = await fetch(
@@ -203,19 +250,20 @@ async function doesUserExistInAuth0(email: string): Promise<boolean> {
  * try to authenticate a user with Auth0 and if successful return the user info.
  */
 async function trySignIntoAuth0WithUserCredentialsAndRetrieveUserInfo(
+  config: LegacyAuth0ConfigEnabled,
   email: string,
   password: string
 ): Promise<{ sub: string } | null> {
   // generate an user access token using the input credentials
-  const response = await fetch(`${process.env['AUTH_LEGACY_AUTH0_ISSUER_BASE_URL']}/oauth/token`, {
+  const response = await fetch(`${config['AUTH_LEGACY_AUTH0_ISSUER_BASE_URL']}/oauth/token`, {
     method: 'POST',
     headers: {
       accept: 'application/json',
       'content-type': 'application/json',
     },
     body: JSON.stringify({
-      client_id: process.env['AUTH_LEGACY_AUTH0_CLIENT_ID'],
-      client_secret: process.env['AUTH_LEGACY_AUTH0_CLIENT_SECRET'],
+      client_id: config['AUTH_LEGACY_AUTH0_CLIENT_ID'],
+      client_secret: config['AUTH_LEGACY_AUTH0_CLIENT_SECRET'],
       grant_type: 'password',
       username: email,
       password: password,
@@ -266,11 +314,14 @@ async function setUserIdMapping(params: { auth0UserId: string; supertokensUserId
  * Get the social account user info from Auth0 via the third party user id.
  * The third party user id is unique per GitHub or Google user and is the same whether you are signed up on Auth0 or SuperTokens.
  */
-const getThirdPartyUserFromAuth0 = async (thirdPartyId: string): Promise<null | { user_id: string }> => {
-  const access_token = await generateAuth0AccessToken();
+const getThirdPartyUserFromAuth0 = async (
+  config: LegacyAuth0ConfigEnabled,
+  thirdPartyId: string
+): Promise<null | { user_id: string }> => {
+  const access_token = await generateAuth0AccessToken(config);
 
   const response = await fetch(
-    `${process.env['AUTH_LEGACY_AUTH0_AUDIENCE']}users?q=${encodeURIComponent(`identities.user_id:"${thirdPartyId}"`)}`,
+    `${config['AUTH_LEGACY_AUTH0_AUDIENCE']}users?q=${encodeURIComponent(`identities.user_id:"${thirdPartyId}"`)}`,
     {
       method: 'GET',
       headers: { authorization: `Bearer ${access_token}` },
@@ -296,14 +347,14 @@ const getThirdPartyUserFromAuth0 = async (thirdPartyId: string): Promise<null | 
 /**
  * Generate a Auth0 access token that is required for making API calls to Auth0.
  */
-const generateAuth0AccessToken = async (): Promise<string> => {
-  const response = await fetch(`${process.env['AUTH_LEGACY_AUTH0_ISSUER_BASE_URL']}/oauth/token`, {
+const generateAuth0AccessToken = async (config: LegacyAuth0ConfigEnabled): Promise<string> => {
+  const response = await fetch(`${config['AUTH_LEGACY_AUTH0_ISSUER_BASE_URL']}/oauth/token`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({
-      client_id: process.env['AUTH_LEGACY_AUTH0_CLIENT_ID'],
-      client_secret: process.env['AUTH_LEGACY_AUTH0_CLIENT_SECRET'],
-      audience: process.env['AUTH_LEGACY_AUTH0_AUDIENCE'],
+      client_id: config['AUTH_LEGACY_AUTH0_CLIENT_ID'],
+      client_secret: config['AUTH_LEGACY_AUTH0_CLIENT_SECRET'],
+      audience: config['AUTH_LEGACY_AUTH0_AUDIENCE'],
       grant_type: 'client_credentials',
     }),
   }).then(res => res.json());

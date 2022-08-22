@@ -80,7 +80,8 @@
     "supertokens-auth-react": "0.24.6",
     "supertokens-node": "11.1.0",
     "nextjs-cors": "2.1.1",
-    "cross-undici-fetch": "0.4.3"
+    "cross-undici-fetch": "0.4.3",
+    "zod": "3.15.1"
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "12.1.6",
