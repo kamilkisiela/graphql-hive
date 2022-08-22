@@ -45,7 +45,7 @@ export interface PersistedOperationSelector extends ProjectSelector {
 
 export interface Storage {
   getUserBySuperTokenId(_: { superTokensUserId: string }): Promise<User | null>;
-  setsuperTokensUserId(_: { auth0UserId: string; superTokensUserId: string }): Promise<void>;
+  setSuperTokensUserId(_: { auth0UserId: string; superTokensUserId: string }): Promise<void>;
   getUserById(_: { id: string }): Promise<User | null>;
 
   createUser(_: {

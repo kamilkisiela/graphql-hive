@@ -13,8 +13,8 @@ const LegacyAuth0ConfigEnabledModel = zod.object({
   AUTH_LEGACY_AUTH0_ISSUER_BASE_URL: zod.string(),
   AUTH_LEGACY_AUTH0_CLIENT_ID: zod.string(),
   AUTH_LEGACY_AUTH0_CLIENT_SECRET: zod.string(),
-  AUTH_LEGACY_AUTH0_UPDATE_USER_ID_MAPPING_ENDPOINT: zod.string(),
-  AUTH_LEGACY_AUTH0_UPDATE_USER_ID_MAPPING_KEY: zod.string(),
+  AUTH_LEGACY_AUTH0_INTERNAL_API_ENDPOINT: zod.string(),
+  AUTH_LEGACY_AUTH0_INTERNAL_API_KEY: zod.string(),
 });
 
 const LegacyAuth0Config = zod.union([
@@ -178,11 +178,6 @@ const getAuth0Overrides = (config: LegacyAuth0ConfigEnabled) => {
                   status: 'WRONG_CREDENTIALS_ERROR',
                 };
               }
-
-              //
-              // NOTE: if this call fails for some reason (db unavailable, HTTP API unreachable) then once the user actually makes a request via the GraphQL API
-              // a NEW USER will be created. Ideally the emailPasswordSignUp and setUserIdMapping call should happen within a transaction.
-              //
               await setUserIdMapping(config, {
                 auth0UserId: auth0UserData.sub,
                 supertokensUserId: response.user.id,
@@ -195,20 +190,15 @@ const getAuth0Overrides = (config: LegacyAuth0ConfigEnabled) => {
           return originalImplementation.emailPasswordSignIn(input);
         },
         async thirdPartySignInUp(input) {
-          // Check whether third party user exists on Auth0
-          const auth0UserInfo = await getThirdPartyUserFromAuth0(config, input.thirdPartyUserId);
+          const externalUserId = `${input.thirdPartyId}|${input.thirdPartyUserId}`;
           // Sign up the user with SuperTokens.
           const response = await originalImplementation.thirdPartySignInUp(input);
 
           // Auth0 user exists
-          if (auth0UserInfo && response.status === 'OK') {
+          if (response.status === 'OK') {
             // We always make sure that we set the user mapping between Auth0 and SuperTokens.
-            //
-            // NOTE: if this call fails for some reason (db unavailable, HTTP API unreachable) then once the user actually makes a request via the GraphQL API
-            // a NEW USER will be created. Ideally the thirdPartySignInUp and setUserIdMapping call should happen within a transaction.
-            //
             await setUserIdMapping(config, {
-              auth0UserId: auth0UserInfo.user_id,
+              auth0UserId: externalUserId,
               supertokensUserId: response.user.id,
             });
             response.createdNewUser = false;
@@ -308,11 +298,11 @@ async function setUserIdMapping(
   config: LegacyAuth0ConfigEnabled,
   params: { auth0UserId: string; supertokensUserId: string }
 ): Promise<void> {
-  const response = await fetch(config['AUTH_LEGACY_AUTH0_UPDATE_USER_ID_MAPPING_ENDPOINT'], {
+  const response = await fetch(config['AUTH_LEGACY_AUTH0_INTERNAL_API_ENDPOINT'] + '/update_user_id_mapping', {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
-      'x-authorization': config['AUTH_LEGACY_AUTH0_UPDATE_USER_ID_MAPPING_KEY'],
+      'x-authorization': config['AUTH_LEGACY_AUTH0_INTERNAL_API_KEY'],
     },
     body: JSON.stringify({
       auth0UserId: params.auth0UserId,
@@ -324,40 +314,6 @@ async function setUserIdMapping(
     throw new Error('Failed to set user id mapping code.');
   }
 }
-
-/**
- * Get the social account user info from Auth0 via the third party user id.
- * The third party user id is unique per GitHub or Google user and is the same whether you are signed up on Auth0 or SuperTokens.
- */
-const getThirdPartyUserFromAuth0 = async (
-  config: LegacyAuth0ConfigEnabled,
-  thirdPartyId: string
-): Promise<null | { user_id: string }> => {
-  const access_token = await generateAuth0AccessToken(config);
-
-  const response = await fetch(
-    `${config['AUTH_LEGACY_AUTH0_AUDIENCE']}users?q=${encodeURIComponent(`identities.user_id:"${thirdPartyId}"`)}`,
-    {
-      method: 'GET',
-      headers: { authorization: `Bearer ${access_token}` },
-    }
-  );
-
-  const rawBody = await response.text();
-  if (response.status !== 200) {
-    throw new Error('Failed to retreive the third party user info from Auth0.\n' + rawBody);
-  }
-
-  const body = JSON.parse(rawBody);
-
-  // check if user information exists in response.
-  if (body[0]) {
-    // return the user's Auth0 userId
-    return body[0];
-  }
-
-  return null;
-};
 
 /**
  * Generate a Auth0 access token that is required for making API calls to Auth0.

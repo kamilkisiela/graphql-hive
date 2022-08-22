@@ -294,7 +294,7 @@ export async function createStorage(connection: string): Promise<Storage> {
 
       return null;
     },
-    async setsuperTokensUserId({ auth0UserId, superTokensUserId }) {
+    async setSuperTokensUserId({ auth0UserId, superTokensUserId }) {
       await pool.query(sql`
         UPDATE
           public."users"
