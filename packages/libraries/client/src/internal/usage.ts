@@ -195,6 +195,7 @@ export function createCollector({ schema, max, ttl }: { schema: GraphQLSchema; m
 
   function collect(doc: DocumentNode): CacheResult {
     const entries = new Set<string>();
+    const collected_entire_named_types = new Set<string>();
 
     function markAsUsed(id: string) {
       if (!entries.has(id)) {
@@ -243,6 +244,15 @@ export function createCollector({ schema, max, ttl }: { schema: GraphQLSchema; m
 
     function markEntireTypeAsUsed(type: GraphQLInputType): void {
       const namedType = unwrapType(type);
+
+      if (collected_entire_named_types.has(namedType.name)) {
+        // No need to mark this type as used again
+        return;
+      } else {
+        // Add this type to the set of types that have been marked as used
+        // to avoid infinite loops
+        collected_entire_named_types.add(namedType.name);
+      }
 
       if (isScalarType(namedType)) {
         markAsUsed(makeId(namedType.name));
