@@ -6,6 +6,13 @@ const endpoint = `http://${clickhouseAddress}/?default_format=JSON`;
 
 export async function resetClickHouse() {
   const queries = [
+    'operation_collection',
+    'operations',
+    'operations_hourly',
+    'operations_daily',
+    'coordinates_daily',
+    'clients_daily',
+    // legacy
     `operations_registry`,
     `operations_new_hourly_mv`,
     `operations_new`,

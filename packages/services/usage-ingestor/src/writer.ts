@@ -2,7 +2,13 @@ import * as Sentry from '@sentry/node';
 import { got } from 'got';
 import Agent from 'agentkeepalive';
 import { compress } from '@hive/usage-common';
-import { operationsOrder, registryOrder, joinIntoSingleMessage } from './serializer';
+import {
+  operationsOrder,
+  registryOrder,
+  legacyOperationsOrder,
+  legacyRegistryOrder,
+  joinIntoSingleMessage,
+} from './serializer';
 
 export interface ClickHouseConfig {
   protocol: string;
@@ -14,6 +20,8 @@ export interface ClickHouseConfig {
 
 const operationsFields = operationsOrder.join(', ');
 const registryFields = registryOrder.join(', ');
+const legacyOperationsFields = legacyOperationsOrder.join(', ');
+const legacyRegistryFields = legacyRegistryOrder.join(', ');
 
 const agentConfig: Agent.HttpOptions = {
   // Keep sockets around in a pool to be used by other requests in the future
@@ -45,7 +53,7 @@ export function createWriter({ clickhouse }: { clickhouse: ClickHouseConfig }) {
       await writeCsv(
         clickhouse,
         agents,
-        `INSERT INTO operations_new (${operationsFields}) FORMAT CSV`,
+        `INSERT INTO operations (${operationsFields}) FORMAT CSV`,
         await compress(csv)
       );
     },
@@ -54,9 +62,30 @@ export function createWriter({ clickhouse }: { clickhouse: ClickHouseConfig }) {
       await writeCsv(
         clickhouse,
         agents,
-        `INSERT INTO operations_registry (${registryFields}) FORMAT CSV`,
+        `INSERT INTO operation_collection (${registryFields}) FORMAT CSV`,
         await compress(csv)
       );
+    },
+    legacy: {
+      async writeOperations(operations: string[]) {
+        const csv = joinIntoSingleMessage(operations);
+
+        await writeCsv(
+          clickhouse,
+          agents,
+          `INSERT INTO operations_new (${legacyOperationsFields}) FORMAT CSV`,
+          await compress(csv)
+        );
+      },
+      async writeRegistry(records: string[]) {
+        const csv = joinIntoSingleMessage(records);
+        await writeCsv(
+          clickhouse,
+          agents,
+          `INSERT INTO operations_registry (${legacyRegistryFields}) FORMAT CSV`,
+          await compress(csv)
+        );
+      },
     },
   };
 }

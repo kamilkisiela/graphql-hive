@@ -209,6 +209,7 @@ services:
       AUTH0_CONNECTION: ${AUTH0_CONNECTION}\
       WEB_APP_URL: https://app.graphql-hive.com
       PORT: 3001
+      FF_CLICKHOUSE_V2_TABLES: ${FF_CLICKHOUSE_V2_TABLES}
 
   schema:
     image: node:16.13.2-alpine3.14
@@ -456,6 +457,7 @@ services:
       CLICKHOUSE_USERNAME: 'test'
       CLICKHOUSE_PASSWORD: 'test'
       PORT: 3008
+      FF_CLICKHOUSE_V2_TABLES: ${FF_CLICKHOUSE_V2_TABLES}
 
   rate_limit:
     image: node:16.13.2-alpine3.14
