@@ -270,6 +270,19 @@ impl<'s, T: Text<'s> + Clone> SortSelectionsTransform<'s, T> {
 }
 
 impl<'s, T: Text<'s> + Clone> OperationTransformer<'s, T> for SortSelectionsTransform<'s, T> {
+    fn transform_document(
+        &mut self,
+        document: &Document<'s, T>,
+    ) -> TransformedValue<Document<'s, T>> {
+        let mut next_definitions = self
+            .transform_list(&document.definitions, Self::transform_definition)
+            .replace_or_else(|| document.definitions.to_vec());
+        next_definitions.sort_unstable_by(|a, b| self.compare_definitions(a, b));
+        TransformedValue::Replace(Document {
+            definitions: next_definitions,
+        })
+    }
+
     fn transform_selection_set(
         &mut self,
         selections: &SelectionSet<'s, T>,
@@ -364,6 +377,17 @@ impl<'s, T: Text<'s> + Clone> OperationTransformer<'s, T> for SortSelectionsTran
 }
 
 impl<'s, T: Text<'s> + Clone> SortSelectionsTransform<'s, T> {
+    fn compare_definitions(&self, a: &Definition<'s, T>, b: &Definition<'s, T>) -> Ordering {
+        match (a, b) {
+            // Keep operations as they are
+            (Definition::Operation(_), Definition::Operation(_)) => Ordering::Equal,
+            // Sort fragments by name
+            (Definition::Fragment(a), Definition::Fragment(b)) => a.name.cmp(&b.name),
+            // Operation -> Fragment
+            _ => definition_kind_ordering(a).cmp(&definition_kind_ordering(b)),
+        }
+    }
+
     fn compare_selections(&self, a: &Selection<'s, T>, b: &Selection<'s, T>) -> Ordering {
         match (a, b) {
             (Selection::Field(a), Selection::Field(b)) => a.name.cmp(&b.name),
@@ -373,12 +397,6 @@ impl<'s, T: Text<'s> + Clone> SortSelectionsTransform<'s, T> {
             _ => {
                 let a_ordering = selection_kind_ordering(a);
                 let b_ordering = selection_kind_ordering(b);
-                assert!(
-                    a_ordering != b_ordering,
-                    "expected different ordering, got {} == {}",
-                    a_ordering,
-                    b_ordering
-                );
                 a_ordering.cmp(&b_ordering)
             }
         }
@@ -408,6 +426,14 @@ fn selection_kind_ordering<'s, T: Text<'s>>(selection: &Selection<'s, T>) -> u8 
         Selection::FragmentSpread(_) => 1,
         Selection::InlineFragment(_) => 2,
         Selection::Field(_) => 3,
+    }
+}
+
+/// Assigns an order to different variants of Definition
+fn definition_kind_ordering<'a, T: Text<'a>>(definition: &Definition<'a, T>) -> u8 {
+    match definition {
+        Definition::Operation(_) => 1,
+        Definition::Fragment(_) => 2,
     }
 }
 
