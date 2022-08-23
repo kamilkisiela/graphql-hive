@@ -1,5 +1,11 @@
 # @graphql-hive/client
 
+## 0.18.3
+
+### Patch Changes
+
+- [#308](https://github.com/kamilkisiela/graphql-hive/pull/308) [`5a212f6`](https://github.com/kamilkisiela/graphql-hive/commit/5a212f61f206d7b73f8abf04667480851aa6066e) Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Avoid marking the same type as used twice
+
 ## 0.18.2
 
 ### Patch Changes
