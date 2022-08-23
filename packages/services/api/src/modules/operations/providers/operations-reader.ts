@@ -68,7 +68,9 @@ function canUseV2(period?: DateRange): boolean {
     return false;
   }
 
-  return isAfter(period.from, new Date(2022, 8, 1));
+  // 25.08.2022 - data starts to flow into the new tables
+  // We can gradually switch to the new tables
+  return isAfter(period.from, new Date(2022, 7, 25));
 }
 
 function pickQueryByPeriod(
@@ -183,8 +185,8 @@ export class OperationsReader {
   ): Promise<Record<string, number>> {
     const { clientTableName, coordinatesTableName, queryId } = canUseV2(period)
       ? {
-          clientTableName: 'clients_daily', // TODO: use this name
-          coordinatesTableName: 'coordinates_daily', // TODO: use this name
+          clientTableName: 'clients_daily',
+          coordinatesTableName: 'coordinates_daily',
           queryId: 'count_fields_v2',
         }
       : {
@@ -505,7 +507,6 @@ export class OperationsReader {
     }>(
       canUseV2(period)
         ? {
-            // TODO: pick a name for the table
             query: `
             SELECT 
               name,
@@ -1242,7 +1243,7 @@ export class OperationsReader {
     const result = await this.clickHouse.query<{
       total: string;
     }>({
-      // TODO: use v2 once it's available
+      // TODO: use the operations_daily table once the FF_CLICKHOUSE_V2_TABLES is available for everyone
       query: `SELECT sum(total) as total from operations_hourly WHERE target IN ('${targets.join(`', '`)}')`,
       queryId: 'count_operations_for_targets',
       timeout: 15_000,
