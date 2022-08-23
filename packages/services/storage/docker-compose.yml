@@ -12,11 +12,12 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: registry
       PGDATA: /var/lib/postgresql/data
     volumes:
       - ./volumes/postgresql/db:/var/lib/postgresql/data
     ports:
-      - '5432:5432'
+      - '${DOCKER_HOST_PORT_POSTGRES:-5432}:5432'
 
   redis:
     image: docker.io/bitnami/redis:6.2
@@ -32,7 +33,7 @@ services:
       - ALLOW_EMPTY_PASSWORD=yes
       - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
     ports:
-      - '6379:6379'
+      - '${DOCKER_HOST_PORT_REDIS:-6379}:6379'
     volumes:
       - './volumes/redis/db:/bitnami/redis/data'
 
@@ -51,7 +52,7 @@ services:
       - ./volumes/clickhouse/db:/var/lib/clickhouse
       - ./configs/clickhouse:/etc/clickhouse-server/conf.d
     ports:
-      - '8123:8123'
+      - '${DOCKER_HOST_PORT_CLICKHOUSE:-8123}:8123'
     networks:
       - 'stack'
 

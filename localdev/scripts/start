@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+set -e -o pipefail
+
+CUR_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" > /dev/null 2>&1 && pwd)"
+PROJECT_ROOT="${CUR_DIR}/../.."
+
+start_storage_containers() {
+  pushd "${PROJECT_ROOT}/services/storage"
+  yarn run db:start
+  popd
+}
+
+# To run a (potentially failed, intermediate) container/layer interactively:
+# docker run --rm -it <container/layer_id> bash
+build_base_docker_image() {
+  pushd "${PROJECT_ROOT}"
+
+  # Build docker image
+  # Set storage hosts to their docker network hostname to run migrations
+  export DOCKER_BUILDKIT=${DOCKER_BUILDKIT:-0}
+  docker build \
+    --build-arg POSTGRES_HOST="db" \
+    --build-arg CLICKHOUSE_HOST="clickhouse" \
+    --build-arg REDIS_HOST="redis" \
+    --network='storage_stack' \
+    -t 'hive-baseimage:dev' \
+    .
+
+  popd
+}
+
+start_localdev_containers() {
+  pushd "${PROJECT_ROOT}/localdev"
+  docker compose --project-name 'hive-local' \
+    up \
+    --detach \
+    --remove-orphans
+  popd
+}
+
+main() {
+  start_storage_containers
+  build_base_docker_image
+  start_localdev_containers
+}
+
+main

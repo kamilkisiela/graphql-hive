@@ -2,14 +2,14 @@
  * The goal here is to sync the .env file with the .env.template file, in every package.
  * <sync> is a special value that will be replaced with the value from the root .env file.
  */
-import { constants } from 'fs';
+import { constants, existsSync } from 'fs';
 import { readFile, writeFile, access } from 'fs/promises';
 import { join, dirname, relative } from 'path';
 import { parse } from 'dotenv';
 import glob from 'glob';
 
-if (!!process.env.CI) {
-  console.log('[sync-env-files] CI Detected, skipping');
+if (!!process.env.CI || existsSync('/.dockerenv')) {
+  console.log('[sync-env-files] CI/Docker Environment Detected, skipping');
   process.exit(0);
 }
 

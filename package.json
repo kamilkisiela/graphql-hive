@@ -13,6 +13,7 @@
   },
   "license": "MIT",
   "scripts": {
+    "dev": "./localdev/scripts/start",
     "seed": "node scripts/seed-local-env.js",
     "postinstall": "husky install && patch-package && node ./scripts/patch-manifests.js && node ./scripts/sync-env-files.js && node ./scripts/turborepo-cleanup.js && node ./scripts/turborepo-setup.js",
     "pre-commit": "lint-staged",

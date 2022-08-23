@@ -1,0 +1,136 @@
+version: '3.8'
+services:
+  server:
+    image: 'hive-baseimage:dev'
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'localhost:4000/_readiness']
+      interval: 5s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
+    env_file: ../packages/services/server/.env
+    working_dir: /usr/src/app/packages/services/server
+    command: 'yarn dev'
+    environment:
+      POSTGRES_HOST: db
+      CLICKHOUSE_HOST: clickhouse
+      REDIS_HOST: redis
+      TOKENS_ENDPOINT: http://tokens:6001
+      SCHEMA_ENDPOINT: http://schema:6500
+      USAGE_ESTIMATOR_ENDPOINT: http://usage_estimator:4011
+      RATE_LIMIT_ENDPOINT: http://rate_limit:4012
+      CDN_BASE_URL: http://local_cdn:4010
+
+      # ???
+      WEBHOOKS_ENDPOINT: http://webhooks:6250
+
+  tokens:
+    command: 'yarn dev'
+    env_file: ../packages/services/tokens/.env
+    environment:
+      POSTGRES_HOST: db
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'localhost:6001/_readiness']
+      interval: 5s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
+    image: 'hive-baseimage:dev'
+    working_dir: /usr/src/app/packages/services/tokens
+
+  schema:
+    command: 'yarn dev'
+    env_file: ./../packages/services/schema/.env
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'localhost:6500/_readiness']
+      interval: 5s
+      timeout: 5s
+      retries: 6
+    environment:
+      REDIS_HOST: redis
+    image: 'hive-baseimage:dev'
+    working_dir: /usr/src/app/packages/services/schema
+
+  usage_estimator:
+    command: 'yarn dev'
+    env_file: ../packages/services/usage-estimator/.env
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'localhost:4011/_readiness']
+      interval: 5s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
+    environment:
+      POSTGRES_CONNECTION_STRING: 'postgresql://postgres:postgres@db:5432/registry'
+      CLICKHOUSE_HOST: 'clickhouse'
+    image: 'hive-baseimage:dev'
+    working_dir: /usr/src/app/packages/services/usage-estimator
+
+  rate_limit:
+    image: 'hive-baseimage:dev'
+    env_file: ../packages/services/rate-limit/.env
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'localhost:4012/_readiness']
+      interval: 5s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
+    working_dir: /usr/src/app/packages/services/rate-limit
+    command: 'yarn dev'
+    environment:
+      POSTGRES_CONNECTION_STRING: 'postgresql://postgres:postgres@db:5432/registry'
+      USAGE_ESTIMATOR_ENDPOINT: http://usage_estimator:4011
+      EMAILS_ENDPOINT: http://emails:3011
+
+  # Needed?
+  local_cdn:
+    image: 'hive-baseimage:dev'
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'localhost:4010/_readiness']
+      interval: 5s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
+    working_dir: /usr/src/app/packages/services/cdn-worker
+    command: 'yarn dev'
+
+  usage:
+    image: 'hive-baseimage:dev'
+    env_file: ../packages/services/usage/.env
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'localhost:4001/_readiness']
+      interval: 5s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
+    working_dir: /usr/src/app/packages/services/usage
+    command: 'yarn dev'
+    environment:
+      TOKENS_ENDPOINT: http://tokens:6001
+      RATE_LIMIT_ENDPOINT: http://rate_limit:4012
+      KAFKA_BROKER: broker:29092
+
+  app:
+    image: 'hive-baseimage:dev'
+    env_file: ../packages/web/app/.env
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'localhost:9000/_readiness']
+      interval: 5s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
+    ports:
+      - '9000:9000'
+    working_dir: /usr/src/app/packages/web/app
+    command: 'yarn dev'
+    environment:
+      GRAPHQL_ENDPOINT: http://server:4000/graphql
+      APP_BASE_URL: http://localhost:9000
+      AUTH0_BASE_URL: http://localhost:9000
+      PORT: 9000
+
+# Connect to the network created by the `@hive/storage` docker compose config
+networks:
+  default:
+    external: true
+    name: storage_stack
