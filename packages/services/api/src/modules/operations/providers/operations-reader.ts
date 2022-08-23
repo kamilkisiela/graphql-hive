@@ -52,9 +52,15 @@ function ensureNumber(value: number | string): number {
   return parseFloat(value);
 }
 
+const FF_CLICKHOUSE_V2_TABLES = process.env.FF_CLICKHOUSE_V2_TABLES === '1';
+
+if (FF_CLICKHOUSE_V2_TABLES) {
+  console.log('Using FF_CLICKHOUSE_V2_TABLES');
+}
+
 // Remove after legacy tables are no longer used
 function canUseV2(period?: DateRange): boolean {
-  if (process.env.CLICKHOUSE_USE_V2_TABLES === '1') {
+  if (FF_CLICKHOUSE_V2_TABLES) {
     return true;
   }
 

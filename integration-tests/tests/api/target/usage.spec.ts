@@ -29,7 +29,11 @@ function ensureNumber(value: number | string): number {
   return parseFloat(value);
 }
 
-const CLICKHOUSE_USE_V2_TABLES = process.env.CLICKHOUSE_USE_V2_TABLES === '1';
+const FF_CLICKHOUSE_V2_TABLES = process.env.FF_CLICKHOUSE_V2_TABLES === '1';
+
+if (FF_CLICKHOUSE_V2_TABLES) {
+  console.log('Using FF_CLICKHOUSE_V2_TABLES');
+}
 
 function sendBatch(amount: number, operation: CollectedOperation, token: string) {
   return collect({
@@ -944,7 +948,7 @@ test('number of produced and collected operations should match', async () => {
   }>(`
     SELECT
       target, client_name, hash, sum(total) as total
-    FROM ${CLICKHOUSE_USE_V2_TABLES ? 'clients_daily' : 'client_names_daily'}
+    FROM ${FF_CLICKHOUSE_V2_TABLES ? 'clients_daily' : 'client_names_daily'}
     WHERE 
       timestamp >= subtractDays(now(), 30)
       AND timestamp <= now()
@@ -1045,7 +1049,7 @@ test('different order of schema coordinates should not result in different hash'
     total: number;
   }>(`
     SELECT coordinate, hash FROM ${
-      CLICKHOUSE_USE_V2_TABLES ? 'coordinates_daily' : 'schema_coordinates_daily'
+      FF_CLICKHOUSE_V2_TABLES ? 'coordinates_daily' : 'schema_coordinates_daily'
     } GROUP BY coordinate, hash
   `);
 
@@ -1057,7 +1061,7 @@ test('different order of schema coordinates should not result in different hash'
     hash: string;
     total: number;
   }>(
-    CLICKHOUSE_USE_V2_TABLES
+    FF_CLICKHOUSE_V2_TABLES
       ? `SELECT hash FROM operation_collection GROUP BY hash`
       : `SELECT hash FROM operations_registry FINAL GROUP BY hash`
   );
@@ -1138,7 +1142,7 @@ test('same operation but with different schema coordinates should result in diff
     hash: string;
   }>(`
     SELECT coordinate, hash FROM ${
-      CLICKHOUSE_USE_V2_TABLES ? 'coordinates_daily' : 'schema_coordinates_daily'
+      FF_CLICKHOUSE_V2_TABLES ? 'coordinates_daily' : 'schema_coordinates_daily'
     } GROUP BY coordinate, hash
   `);
 
@@ -1147,7 +1151,7 @@ test('same operation but with different schema coordinates should result in diff
   const operationCollectionResult = await clickHouseQuery<{
     hash: string;
   }>(
-    CLICKHOUSE_USE_V2_TABLES
+    FF_CLICKHOUSE_V2_TABLES
       ? `SELECT hash FROM operation_collection GROUP BY hash`
       : `SELECT hash FROM operations_registry FINAL GROUP BY hash`
   );
@@ -1160,7 +1164,7 @@ test('same operation but with different schema coordinates should result in diff
     hash: string;
     total: number;
   }>(
-    CLICKHOUSE_USE_V2_TABLES
+    FF_CLICKHOUSE_V2_TABLES
       ? `SELECT hash FROM operation_collection GROUP BY hash`
       : `SELECT hash FROM operations_registry FINAL GROUP BY hash`
   );
@@ -1243,7 +1247,7 @@ test('operations with the same schema coordinates and body but with different na
     total: number;
   }>(`
     SELECT coordinate, hash FROM ${
-      CLICKHOUSE_USE_V2_TABLES ? 'coordinates_daily' : 'schema_coordinates_daily'
+      FF_CLICKHOUSE_V2_TABLES ? 'coordinates_daily' : 'schema_coordinates_daily'
     } GROUP BY coordinate, hash
   `);
 
@@ -1255,7 +1259,7 @@ test('operations with the same schema coordinates and body but with different na
     hash: string;
     total: number;
   }>(
-    CLICKHOUSE_USE_V2_TABLES
+    FF_CLICKHOUSE_V2_TABLES
       ? `SELECT hash FROM operation_collection GROUP BY hash`
       : `SELECT hash FROM operations_registry FINAL GROUP BY hash`
   );
@@ -1337,7 +1341,7 @@ test('ensure correct data', async () => {
 
   await waitFor(5_000);
 
-  if (CLICKHOUSE_USE_V2_TABLES) {
+  if (FF_CLICKHOUSE_V2_TABLES) {
     // operation_collection
     const operationCollectionResult = await clickHouseQuery<{
       target: string;

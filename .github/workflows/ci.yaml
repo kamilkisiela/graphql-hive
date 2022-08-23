@@ -126,6 +126,83 @@ jobs:
         if: always()
         run: cat integration-tests/*.log
 
+  integration-tests-ff:
+    name: Integration Tests (with Feature Flags enabled)
+    runs-on: ubuntu-latest
+    needs: setup
+    timeout-minutes: 15
+
+    env:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+      TURBO_API_URL: ${{ secrets.TURBO_API_URL }}
+      TURBO_REMOTE_ONLY: 'true'
+      # Feature Flags
+      FF_CLICKHOUSE_V2_TABLES: '1'
+
+    steps:
+      - name: Detect feature flags
+        id: feature_flags
+        run: |
+          total=$(env | grep "FF_.*" -c)
+          if [ $total -gt 0 ]; then
+              echo '::set-output name=detected::true'
+          fi
+
+      - name: Check out repository code
+        if: steps.feature_flags.outputs.detected == 'true'
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 5
+
+      - name: Install Node
+        if: steps.feature_flags.outputs.detected == 'true'
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+
+      - name: Pull node_modules
+        if: steps.feature_flags.outputs.detected == 'true'
+        uses: actions/cache@v2
+        with:
+          path: '**/node_modules'
+          key: ${{ github.sha }}
+
+      - name: Setup Turbo
+        if: steps.feature_flags.outputs.detected == 'true'
+        run: node ./scripts/turborepo-setup.js
+
+      - name: Build
+        if: steps.feature_flags.outputs.detected == 'true'
+        run: yarn workspace integration-tests run build-and-pack
+        env:
+          NEXT_PUBLIC_STRIPE_PUBLIC_KEY: ${{ secrets.TEST_STRIPE_PUBLIC_KEY }}
+
+      - name: Pull images
+        if: steps.feature_flags.outputs.detected == 'true'
+        run: docker-compose -f integration-tests/docker-compose.yml pull
+
+      - name: Integration Tests
+        if: steps.feature_flags.outputs.detected == 'true'
+        run: yarn workspace integration-tests run dockest
+        timeout-minutes: 15
+        env:
+          AUTH0_DOMAIN: ${{ secrets.TEST_AUTH0_DOMAIN }}
+          AUTH0_CLIENT_ID: ${{ secrets.TEST_AUTH0_CLIENT_ID }}
+          AUTH0_CLIENT_SECRET: ${{ secrets.TEST_AUTH0_CLIENT_SECRET }}
+          AUTH0_USER_PASSWORD: ${{ secrets.AUTH0_TESTING_USER_PASSWORD }}
+          AUTH0_USER_ADMIN_EMAIL: kamil@graphql-hive.com
+          AUTH0_USER_MAIN_EMAIL: contact@the-guild.dev
+          AUTH0_USER_EXTRA_EMAIL: contact+extra@the-guild.dev
+          AUTH0_SECRET: ${{ secrets.TEST_AUTH0_SECRET }}
+          AUTH0_AUDIENCE: ${{ secrets.TEST_AUTH0_AUDIENCE }}
+          AUTH0_CONNECTION: Username-Password-Authentication
+          STRIPE_SECRET_KEY: ${{ secrets.TEST_STRIPE_SECRET_KEY }}
+
+      - name: Dockest logs
+        if: steps.feature_flags.outputs.detected == 'true' && always()
+        run: cat integration-tests/*.log
+
   schema-check:
     name: Schema Check
     runs-on: ubuntu-latest
