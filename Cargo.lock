@@ -611,16 +611,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "combine"
-version = "4.6.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2a604e93b79d1808327a6fca85a6f2d69de66461e7620f5a4cbf5fb4d1d7c948"
-dependencies = [
- "bytes",
- "memchr",
-]
-
-[[package]]
 name = "compress"
 version = "0.0.1"
 dependencies = [
@@ -1266,29 +1256,27 @@ version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d2ebc8013b4426d5b81a4364c419a95ed0b404af2b82e2457de52d9348f0e474"
 dependencies = [
- "combine 3.8.1",
+ "combine",
  "thiserror",
 ]
 
 [[package]]
 name = "graphql-parser"
 version = "0.4.0"
-source = "git+https://github.com/kamilkisiela/graphql-parser.git?branch=kamil-minifier#98b7d89dba38850fffa0c7f652dc2f7db79e7017"
+source = "git+https://github.com/kamilkisiela/graphql-parser.git?branch=kamil-minifier#3773ba8e1b471531823be0b90d7ffd5ca4752c20"
 dependencies = [
- "combine 3.8.1",
+ "combine",
  "thiserror",
 ]
 
 [[package]]
 name = "graphql-tools"
-version = "0.0.20"
-source = "git+https://github.com/dotansimha/graphql-tools-rs.git?branch=kamil-transformer#e8abb1440e4a50d187c2fc4e02587b3ac12b10ee"
+version = "0.1.0"
+source = "git+https://github.com/dotansimha/graphql-tools-rs.git?branch=kamil-minifier#e1ab0436aef74aa2b53f1dfdbd2471b72ea6898a"
 dependencies = [
- "combine 4.6.4",
  "graphql-parser 0.4.0 (git+https://github.com/kamilkisiela/graphql-parser.git?branch=kamil-minifier)",
  "serde",
  "serde_json",
- "thiserror",
 ]
 
 [[package]]
