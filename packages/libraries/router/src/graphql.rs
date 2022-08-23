@@ -10,8 +10,8 @@ use std::collections::HashSet;
 use graphql_parser::minify_query;
 use graphql_parser::parse_query;
 use graphql_parser::query::{
-    Directive, Document, Field, FragmentDefinition, Number, Selection, SelectionSet, Text, Type,
-    Value, VariableDefinition,
+    Definition, Directive, Document, Field, FragmentDefinition, Number, OperationDefinition,
+    Selection, SelectionSet, Text, Type, Value, VariableDefinition,
 };
 use graphql_parser::schema::{Document as SchemaDocument, TypeDefinition};
 use graphql_tools::ast::{
@@ -72,8 +72,8 @@ impl<'a> OperationVisitor<'a, SchemaCoordinatesContext> for SchemaCoordinatesVis
         ctx: &mut SchemaCoordinatesContext,
         field: &Field<'static, String>,
     ) {
-        let parent_name = info.current_parent_type().unwrap().name();
         let field_name = field.name.to_string();
+        let parent_name = info.current_parent_type().unwrap().name();
 
         ctx.schema_coordinates
             .insert(format!("{}.{}", parent_name, field_name));
@@ -419,7 +419,7 @@ pub struct ProcessedOperation {
 }
 
 pub struct OperationProcessor {
-    cache: LruCache<String, ProcessedOperation>,
+    cache: LruCache<String, Option<ProcessedOperation>>,
 }
 
 impl OperationProcessor {
@@ -433,7 +433,7 @@ impl OperationProcessor {
         &mut self,
         query: &str,
         schema: &SchemaDocument<'static, String>,
-    ) -> Result<ProcessedOperation, String> {
+    ) -> Result<Option<ProcessedOperation>, String> {
         let key = query.to_string();
         if self.cache.contains(&key) {
             Ok(self.cache.get(&key).expect("lock cache").clone())
@@ -448,11 +448,33 @@ impl OperationProcessor {
         &self,
         operation: &str,
         schema: &SchemaDocument<'static, String>,
-    ) -> Result<ProcessedOperation, String> {
+    ) -> Result<Option<ProcessedOperation>, String> {
         let mut strip_literals_transformer = StripLiteralsTransformer {};
         let parsed = parse_query(operation)
             .map_err(|e| e.to_string())?
             .into_static();
+
+        let is_introspection = parsed.definitions.iter().find(|def| match def {
+            Definition::Operation(op) => match op {
+                OperationDefinition::Query(query) => query
+                    .selection_set
+                    .items
+                    .iter()
+                    .find(|selection| match selection {
+                        Selection::Field(field) => {
+                            field.name == "__schema" || field.name == "__type"
+                        }
+                        _ => false,
+                    })
+                    .is_some(),
+                _ => false,
+            },
+            _ => false,
+        });
+
+        if is_introspection.is_some() {
+            return Ok(None);
+        }
 
         let schema_coordinates: Vec<String> =
             Vec::from_iter(collect_schema_coordinates(&parsed, schema));
@@ -468,10 +490,10 @@ impl OperationProcessor {
         let printed = minify_query(format!("{}", normalized.clone())).map_err(|e| e.to_string())?;
         let hash = format!("{:x}", md5::compute(printed.clone()));
 
-        Ok(ProcessedOperation {
+        Ok(Some(ProcessedOperation {
             operation: printed,
             hash,
             coordinates: schema_coordinates,
-        })
+        }))
     }
 }

@@ -1,9 +1,8 @@
-use apollo_router::layers::ServiceBuilderExt;
+use apollo_router::layers::ServiceExt;
 use apollo_router::plugin::Plugin;
 use apollo_router::plugin::PluginInit;
 use apollo_router::register_plugin;
-use apollo_router::services::RouterRequest;
-use apollo_router::services::RouterResponse;
+use apollo_router::services::supergraph;
 use apollo_router::Context;
 use core::ops::Drop;
 use futures::StreamExt;
@@ -17,10 +16,8 @@ use std::time::Instant;
 use std::time::{SystemTime, UNIX_EPOCH};
 use tokio::sync::mpsc;
 use tokio::sync::oneshot;
-use tower::util::BoxService;
 use tower::BoxError;
-use tower::ServiceBuilder;
-use tower::ServiceExt;
+use tower::ServiceExt as TowerServiceExt;
 
 use crate::agent::{ExecutionReport, UsageAgent};
 
@@ -50,10 +47,13 @@ struct Config {
     /// 1.0 = 100% chance of being sent.
     /// Default: 1.0
     sample_rate: Option<f64>,
-    /// A list of operations (by name) to be ignored by Hive.
+    /// A list of operations (by name) to be ignored by GraphQL Hive.
     exclude: Option<Vec<String>>,
     client_name_header: Option<String>,
     client_version_header: Option<String>,
+    /// A maximum number of operations to hold in a buffer before sending to GraphQL Hive
+    /// Default: 1000
+    buffer_size: Option<usize>,
 }
 
 impl Default for Config {
@@ -63,12 +63,13 @@ impl Default for Config {
             exclude: None,
             client_name_header: None,
             client_version_header: None,
+            buffer_size: Some(1000),
         }
     }
 }
 
 impl UsagePlugin {
-    fn populate_context(config: Config, req: &RouterRequest) {
+    fn populate_context(config: Config, req: &supergraph::Request) {
         let context = &req.context;
         let http_request = &req.originating_request;
         let headers = http_request.headers();
@@ -173,6 +174,8 @@ impl Plugin for UsagePlugin {
             Err(_) => "https://app.graphql-hive.com/usage".to_string(),
         };
 
+        let buffer_size = init.config.buffer_size.unwrap_or(1000);
+
         let (shutdown_tx, shutdown_rx) = oneshot::channel::<()>();
 
         Ok(UsagePlugin {
@@ -181,48 +184,43 @@ impl Plugin for UsagePlugin {
                 init.supergraph_sdl.to_string(),
                 token,
                 endpoint,
+                buffer_size,
                 Some(shutdown_rx),
             ),
             shutdown_signal: Some(shutdown_tx),
         })
     }
 
-    fn router_service(
-        &self,
-        service: BoxService<RouterRequest, RouterResponse, BoxError>,
-    ) -> BoxService<RouterRequest, RouterResponse, BoxError> {
+    fn supergraph_service(&self, service: supergraph::BoxService) -> supergraph::BoxService {
         let config = self.config.clone();
         let report_sender = self.agent.sender.clone();
 
-        ServiceBuilder::new()
-            .map_future_with_context(
-                move |req: &RouterRequest| {
+        service
+            .map_future_with_request_data(
+                move |req: &supergraph::Request| {
                     Self::populate_context(config.clone(), req);
                     req.context.clone()
                 },
                 move |ctx: Context, fut| {
                     let start = Instant::now();
                     let sender = report_sender.clone();
-
                     async move {
                         let operation_context = ctx
                             .get::<_, OperationContext>(OPERATION_CONTEXT)
                             .unwrap_or_default()
                             .unwrap();
-
                         if operation_context.dropped {
-                            let result: Result<RouterResponse, BoxError> = fut.await;
+                            let result: supergraph::ServiceResult = fut.await;
                             return result;
                         }
 
-                        let result: Result<RouterResponse, BoxError> = fut.await;
+                        let result: supergraph::ServiceResult = fut.await;
                         let client_name = operation_context.client_name;
                         let client_version = operation_context.client_version;
                         let operation_name = operation_context.operation_name;
                         let operation_body = operation_context.operation_body;
                         let timestamp = operation_context.timestamp;
                         let duration = start.elapsed();
-
                         match result {
                             Err(e) => {
                                 Self::add_report(
@@ -241,6 +239,7 @@ impl Plugin for UsagePlugin {
                                 Err(e)
                             }
                             Ok(router_response) => {
+                                // router_response.
                                 let is_failure = !router_response.response.status().is_success();
                                 Ok(router_response.map(move |response_stream| {
                                     let sender = sender.clone();
@@ -248,12 +247,10 @@ impl Plugin for UsagePlugin {
                                     let client_version = client_version.clone();
                                     let operation_body = operation_body.clone();
                                     let operation_name = operation_name.clone();
-
                                     response_stream
                                         .map(move |response| {
                                             // make sure we send a single report, not for each chunk
                                             let response_has_errors = !response.errors.is_empty();
-
                                             Self::add_report(
                                                 sender.clone(),
                                                 ExecutionReport {
@@ -267,7 +264,6 @@ impl Plugin for UsagePlugin {
                                                     operation_name: operation_name.clone(),
                                                 },
                                             );
-
                                             response
                                         })
                                         .boxed()
@@ -277,7 +273,6 @@ impl Plugin for UsagePlugin {
                     }
                 },
             )
-            .service(service)
             .boxed()
     }
 }

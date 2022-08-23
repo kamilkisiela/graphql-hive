@@ -94,6 +94,7 @@ pub struct UsageAgent {
     pub sender: mpsc::Sender<ExecutionReport>,
     token: String,
     endpoint: String,
+    buffer_size: usize,
     state: Arc<Mutex<State>>,
     processor: Arc<Mutex<OperationProcessor>>,
 }
@@ -113,6 +114,7 @@ impl UsageAgent {
         schema: String,
         token: String,
         endpoint: String,
+        buffer_size: usize,
         _shutdown_signal: Option<oneshot::Receiver<()>>,
     ) -> Self {
         let (tx, mut rx) = mpsc::channel::<ExecutionReport>(1024);
@@ -128,6 +130,7 @@ impl UsageAgent {
             processor,
             endpoint,
             token,
+            buffer_size,
         };
 
         let agent_for_report_receiver = agent.clone();
@@ -184,35 +187,38 @@ impl UsageAgent {
                     tracing::warn!("Dropping operation: {}", e);
                     continue;
                 }
-                Ok(operation) => {
-                    let hash = operation.hash;
-                    report.operations.push(Operation {
-                        operationMapKey: hash.clone(),
-                        timestamp: op.timestamp,
-                        execution: Execution {
-                            ok: op.ok,
-                            duration: op.duration.as_nanos(),
-                            errorsTotal: op.errors,
-                        },
-                        metadata: Some(Metadata {
-                            client: Some(ClientInfo {
-                                name: non_empty_string(op.client_name),
-                                version: non_empty_string(op.client_version),
-                            }),
-                        }),
-                    });
-                    if !report.map.contains_key(&hash) {
-                        report.map.insert(
-                            hash,
-                            OperationMapRecord {
-                                operation: operation.operation,
-                                operationName: non_empty_string(op.operation_name),
-                                fields: operation.coordinates,
+                Ok(operation) => match operation {
+                    Some(operation) => {
+                        let hash = operation.hash;
+                        report.operations.push(Operation {
+                            operationMapKey: hash.clone(),
+                            timestamp: op.timestamp,
+                            execution: Execution {
+                                ok: op.ok,
+                                duration: op.duration.as_nanos(),
+                                errorsTotal: op.errors,
                             },
-                        );
+                            metadata: Some(Metadata {
+                                client: Some(ClientInfo {
+                                    name: non_empty_string(op.client_name),
+                                    version: non_empty_string(op.client_version),
+                                }),
+                            }),
+                        });
+                        if !report.map.contains_key(&hash) {
+                            report.map.insert(
+                                hash,
+                                OperationMapRecord {
+                                    operation: operation.operation,
+                                    operationName: non_empty_string(op.operation_name),
+                                    fields: operation.coordinates,
+                                },
+                            );
+                        }
+                        report.size += 1;
                     }
-                    report.size += 1;
-                }
+                    None => {}
+                },
             }
         }
 
@@ -275,7 +281,7 @@ impl UsageAgent {
     }
 
     async fn flush_if_full(&mut self, size: usize) {
-        if size >= 5 {
+        if size >= self.buffer_size {
             self.flush().await;
         }
     }
