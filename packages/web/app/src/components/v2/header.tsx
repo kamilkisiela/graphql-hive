@@ -3,7 +3,6 @@ import NextLink from 'next/link';
 import clsx from 'clsx';
 import { useQuery } from 'urql';
 
-// import { useUser } from '@/components/auth/AuthProvider';
 import { GetStartedProgress } from '@/components/get-started/wizard';
 import { Avatar, Button, DropdownMenu, HiveLink } from '@/components/v2';
 import {
@@ -16,11 +15,11 @@ import {
   LogOutIcon,
   PlusIcon,
   SettingsIcon,
+  TrendingUpIcon,
 } from '@/components/v2/icon';
 import { CreateOrganizationModal } from '@/components/v2/modals';
 import { MeDocument, OrganizationsDocument, OrganizationsQuery, OrganizationType } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
-// import { ManagerRoleGuard } from '../auth/ManagerRoleGuard';
 
 type DropdownOrganization = OrganizationsQuery['organizations']['nodes'];
 
@@ -155,23 +154,16 @@ export const Header = (): ReactElement => {
                   Status page
                 </a>
               </DropdownMenu.Item>
-              {/* TODO: Light mode will be available after releasing */}
-              {/*<DropdownMenu.Item>*/}
-              {/*  <SunIcon />*/}
-              {/*  Switch Light Theme*/}
-              {/*</DropdownMenu.Item>*/}
-              {/* {user?.metadata?.admin && (
-                <ManagerRoleGuard>
-                  <NextLink href="/manage">
-                    <a>
-                      <DropdownMenu.Item>
-                        <TrendingUpIcon className="h-5 w-5" />
-                        Manage Instance
-                      </DropdownMenu.Item>
-                    </a>
-                  </NextLink>
-                </ManagerRoleGuard>
-              )} */}
+              {meQuery.data?.me?.isAdmin && (
+                <NextLink href="/manage">
+                  <a>
+                    <DropdownMenu.Item>
+                      <TrendingUpIcon className="h-5 w-5" />
+                      Manage Instance
+                    </DropdownMenu.Item>
+                  </a>
+                </NextLink>
+              )}
               {process.env.NODE_ENV === 'development' && (
                 <NextLink href="/dev">
                   <a>

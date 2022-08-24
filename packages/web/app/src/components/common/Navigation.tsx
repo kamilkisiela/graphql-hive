@@ -20,7 +20,6 @@ import { TargetSwitcher } from '../target/Switcher';
 import { Logo } from './Logo';
 import { Feedback } from './Feedback';
 import { UserSettings } from './UserSettings';
-// import { ManagerRoleGuard } from '../auth/ManagerRoleGuard';
 import ThemeButton from './ThemeButton';
 
 export interface NavigationItem {
@@ -198,17 +197,6 @@ export function Navigation() {
                       GraphiQL
                     </MenuItem>
                   ) : null}
-                  {/* {user?.metadata?.admin ? (
-                    <ManagerRoleGuard>
-                      <MenuItem
-                        onClick={() => {
-                          window.location.href = '/manage';
-                        }}
-                      >
-                        Manage Instance
-                      </MenuItem>
-                    </ManagerRoleGuard>
-                  ) : null} */}
                   <MenuItem
                     onClick={() => {
                       window.location.href = '/api/logout';

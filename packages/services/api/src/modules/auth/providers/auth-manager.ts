@@ -198,7 +198,7 @@ export class AuthManager {
 
     const { session } = this;
 
-    const internalUser = await this.idempotentRunner.run({
+    return await this.idempotentRunner.run({
       identifier: `user:create:${session.superTokensUserId}`,
       executor: () =>
         this.ensureInternalUser({
@@ -207,11 +207,6 @@ export class AuthManager {
         }),
       ttl: 60,
     });
-
-    return {
-      ...internalUser,
-      isAdmin: false,
-    };
   });
 
   private async ensureInternalUser(input: { superTokensUserId: string; email: string }) {

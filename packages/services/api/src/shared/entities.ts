@@ -168,6 +168,7 @@ export interface User {
   displayName: string;
   provider: AuthProvider;
   superTokensUserId: string | null;
+  isAdmin: boolean;
 }
 
 export interface Member {

@@ -76,6 +76,7 @@ fragment UserFields on User {
   fullName
   displayName
   provider
+  isAdmin
 }
 
 fragment OperationStatsFields on OperationStats {

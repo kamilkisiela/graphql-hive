@@ -84,6 +84,7 @@ export async function createStorage(connection: string): Promise<Storage> {
       provider: getProviderBasedOnExternalId(user.external_auth_user_id ?? ''),
       fullName: user.full_name,
       displayName: user.display_name,
+      isAdmin: user.is_admin ?? false,
     };
   }
 
