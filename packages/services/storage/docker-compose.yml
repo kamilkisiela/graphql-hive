@@ -109,7 +109,7 @@ services:
       - ./volumes/broker/db:/var/lib/kafka/data
 
   supertokens:
-    image: registry.supertokens.io/supertokens/supertokens-postgresql # TODO: this should be pinned :)
+    image: registry.supertokens.io/supertokens/supertokens-postgresql:3.9
     networks:
       - 'stack'
     ports:

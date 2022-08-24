@@ -5,9 +5,7 @@ import { createServer, GraphQLYogaError } from '@graphql-yoga/node';
 import { GraphQLError, ValidationContext, ValidationRule, Kind, OperationDefinitionNode, print } from 'graphql';
 import { useGraphQLModules } from '@envelop/graphql-modules';
 import { useGenericAuth } from '@envelop/generic-auth';
-import SuperTokens from 'supertokens-node';
-import Session from 'supertokens-node/recipe/session/index.js';
-import ThirdPartyEmailPasswordNode from 'supertokens-node/recipe/thirdpartyemailpassword/index.js';
+import { fetch } from 'cross-undici-fetch';
 import { useSentry } from '@envelop/sentry';
 import { asyncStorage } from './async-storage';
 import { useSentryUser, extractUserId } from './use-sentry-user';
@@ -15,10 +13,11 @@ import { useHive } from '@graphql-hive/client';
 import { useErrorHandler, Plugin } from '@graphql-yoga/node';
 import hyperid from 'hyperid';
 import zod from 'zod';
+import { HiveError } from '@hive/api';
 
 const reqIdGenerate = hyperid({ fixedLength: true });
 
-const AccessTokenModel = zod.object({
+const SuperTokenAccessTokenModel = zod.object({
   version: zod.literal('1'),
   superTokensUserId: zod.string(),
   email: zod.string(),
@@ -30,15 +29,14 @@ export interface GraphQLHandlerOptions {
   signature: string;
 }
 
-export type SuperTokenSession = zod.ZodType<typeof AccessTokenModel>;
+export type SuperTokenSession = zod.TypeOf<typeof SuperTokenAccessTokenModel>;
 
 interface Context {
   req: FastifyRequest;
   reply: FastifyReply;
-  session: Session.SessionContainer | undefined;
   headers: Record<string, string | string[] | undefined>;
   requestId?: string | null;
-  superTokenSession: SuperTokenSession | null;
+  session: SuperTokenSession | null;
 }
 
 const NoIntrospection: ValidationRule = (context: ValidationContext) => ({
@@ -121,10 +119,10 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
         },
         trackResolvers: false,
         appendTags: ({ contextValue }) => {
-          const auth0_user_id = extractUserId(contextValue as any);
+          const supertokens_user_id = extractUserId(contextValue as any);
           const request_id = cleanRequestId((contextValue as any).req.headers['x-request-id']);
 
-          return { auth0_user_id, request_id };
+          return { supertokens_user_id, request_id };
         },
         skip(args) {
           // It's the readiness check
@@ -147,22 +145,23 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
         }
       }),
       useGenericAuth({
-        mode: 'protect-all',
-        contextFieldName: 'superTokenSession',
+        mode: 'resolve-only',
+        contextFieldName: 'session',
         resolveUserFn: async (ctx: Context) => {
-          const data: unknown = await ctx.session?.getAccessTokenPayload();
+          if (ctx.headers['authorization']) {
+            let authHeader = ctx.headers['authorization'];
+            authHeader = Array.isArray(authHeader) ? authHeader[0] : authHeader;
 
-          if (!data) {
-            return null;
+            const authHeaderParts = authHeader.split(' ');
+            if (authHeaderParts.length === 2 && authHeaderParts[0] === 'Bearer') {
+              const token = authHeaderParts[1];
+              if (token.length > 32) {
+                return await verifySuperTokensSession(token);
+              }
+            }
           }
 
-          const result = AccessTokenModel.safeParse(data);
-
-          if (result.success === false) {
-            return null;
-          }
-
-          return result.data;
+          return null;
         },
       }),
       useHive({
@@ -205,17 +204,12 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
         requestId,
       },
       async () => {
-        const session = await Session.getSession(req, reply, {
-          sessionRequired: false,
-        });
-
         const response = await server.handleIncomingMessage(req, {
           req,
           reply,
           headers: req.headers,
           requestId,
-          session,
-          superTokenSession: null,
+          session: null,
         });
 
         response.headers.forEach((value, key) => {
@@ -236,19 +230,37 @@ if (!process.env['SUPERTOKENS_CONNECTION_URI']) {
   throw new Error('Missing SUPERTOKENS_CONNECTION_URI env variable.');
 }
 
-SuperTokens.init({
-  framework: 'fastify',
-  supertokens: {
-    connectionURI: process.env['SUPERTOKENS_CONNECTION_URI'],
-    apiKey: process.env['SUPERTOKENS_API_KEY'],
-  },
-  appInfo: {
-    // learn more about this on https://supertokens.com/docs/thirdpartyemailpassword/appinfo
-    appName: 'GraphQL Hive',
-    apiBasePath: '/api/auth',
-    websiteBasePath: '/auth',
-    apiDomain: 'http://localhost:3000',
-    websiteDomain: 'http://localhost:3000',
-  },
-  recipeList: [ThirdPartyEmailPasswordNode.init({}), Session.init({})],
-});
+if (!process.env['SUPERTOKENS_API_KEY']) {
+  throw new Error('Missing SUPERTOKENS_API_KEY env variable.');
+}
+
+const connectionUri = process.env['SUPERTOKENS_CONNECTION_URI'];
+const apiKey = process.env['SUPERTOKENS_API_KEY'];
+
+/**
+ * Verify whether a SuperTokens access token session is valid.
+ * https://app.swaggerhub.com/apis/supertokens/CDI/2.15.1#/Session%20Recipe/verifySession
+ */
+async function verifySuperTokensSession(accessToken: string): Promise<SuperTokenSession> {
+  const response = await fetch(connectionUri + '/recipe/session/verify', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'api-key': apiKey,
+      rid: 'session',
+    },
+    body: JSON.stringify({
+      accessToken,
+      enableAntiCsrf: false,
+      doAntiCsrfCheck: false,
+    }),
+  });
+  const body = await response.text();
+  if (response.status !== 200) {
+    console.error(`SuperTokens session verification failed with status ${response.status}.\n` + body);
+    throw new HiveError(`Invalid token.`);
+  }
+
+  const result = JSON.parse(body);
+  return SuperTokenAccessTokenModel.parse(result.session.userDataInJWT);
+}

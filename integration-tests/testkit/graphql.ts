@@ -5,15 +5,16 @@ import { TypedDocumentNode } from '@graphql-typed-document-node/core';
 
 const registryAddress = utils.getServiceAddress('server', 3001);
 
-export async function execute<R, V>(params: {
-  document: TypedDocumentNode<R, V>;
-  operationName?: string;
-  variables?: V;
-  authToken?: string;
-  token?: string;
-  legacyAuthorizationMode?: boolean;
-}) {
-  const res = await axios.post<ExecutionResult<R>>(
+export async function execute<TResult, TVariables>(
+  params: {
+    document: TypedDocumentNode<TResult, TVariables>;
+    operationName?: string;
+    authToken?: string;
+    token?: string;
+    legacyAuthorizationMode?: boolean;
+  } & (TVariables extends Record<string, never> ? { variables?: never } : { variables: TVariables })
+) {
+  const res = await axios.post<ExecutionResult<TResult>>(
     `http://${registryAddress}/graphql`,
     {
       query: params.document,
@@ -22,19 +23,19 @@ export async function execute<R, V>(params: {
     },
     {
       headers: {
-        'Content-Type': 'application/json',
+        'content-type': 'application/json',
         ...(params.authToken
           ? {
-              Authorization: `Bearer ${params.authToken}`,
+              authorization: `Bearer ${params.authToken}`,
             }
           : {}),
         ...(params.token
           ? params.legacyAuthorizationMode
             ? {
-                'X-API-Token': params.token,
+                'x-api-token': params.token,
               }
             : {
-                Authorization: `Bearer ${params.token}`,
+                authorization: `Bearer ${params.token}`,
               }
           : {}),
       },

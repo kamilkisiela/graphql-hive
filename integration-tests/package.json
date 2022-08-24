@@ -15,7 +15,9 @@
     "rxjs": "^6.5.4",
     "slonik": "30.1.2",
     "tsup": "5.12.7",
-    "yaml": "2.1.0"
+    "yaml": "2.1.0",
+    "cross-undici-fetch": "0.4.3",
+    "zod": "3.15.1"
   },
   "scripts": {
     "build-and-pack": "(cd ../ && yarn build:services && yarn build:libraries && yarn build:local-cdn) && node ./scripts/pack.mjs",

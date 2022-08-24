@@ -314,7 +314,6 @@ export async function createStorage(connection: string): Promise<Storage> {
       return null;
     },
     async createUser({ superTokensUserId, email, fullName, displayName }) {
-      console.log({ superTokensUserId });
       return transformUser(
         await pool.one<Slonik<users>>(
           sql`

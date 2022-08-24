@@ -36,6 +36,12 @@ export interface TargetAccessSelector {
   scope: TargetAccessScope;
 }
 
+export type SuperTokensSession = {
+  version: '1';
+  superTokensUserId: string;
+  email: string;
+};
+
 /**
  * Responsible for auth checks.
  * Talks to Storage.
@@ -45,12 +51,7 @@ export interface TargetAccessSelector {
   global: true,
 })
 export class AuthManager {
-  // TODO: re-use this type
-  private session: {
-    version: '1';
-    superTokensUserId: string;
-    email: string;
-  } | null;
+  private session: SuperTokensSession | null;
 
   constructor(
     @Inject(ApiToken) private apiToken: string,
@@ -64,7 +65,7 @@ export class AuthManager {
     private storage: Storage,
     private idempotentRunner: IdempotentRunner
   ) {
-    this.session = context.superTokenSession;
+    this.session = context.session;
   }
 
   async ensureTargetAccess(selector: Listify<TargetAccessSelector, 'target'>): Promise<void | never> {
@@ -217,7 +218,6 @@ export class AuthManager {
     let internalUser = await this.storage.getUserBySuperTokenId({
       superTokensUserId: input.superTokensUserId,
     });
-    console.log('wtf');
 
     if (!internalUser) {
       internalUser = await this.userManager.createUser({

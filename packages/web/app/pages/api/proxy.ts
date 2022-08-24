@@ -51,8 +51,6 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
         'graphql-client-name': 'Hive App',
         'x-use-proxy': '/api/proxy',
         'graphql-client-version': process.env.RELEASE ?? 'local',
-        // this actually includes the session cookie...
-        cookie: req.headers.cookie,
       },
       method: 'GET',
     } as any);
@@ -100,8 +98,6 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
         'sentry-trace': transaction.toTraceparent(),
         'graphql-client-name': 'Hive App',
         'graphql-client-version': process.env.RELEASE ?? 'local',
-        // this actually includes the session cookie...
-        cookie: req.headers.cookie,
       },
       method: 'POST',
       body: JSON.stringify(req.body || {}),
