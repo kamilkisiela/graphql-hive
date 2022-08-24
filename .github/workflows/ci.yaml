@@ -121,6 +121,8 @@ jobs:
           AUTH0_AUDIENCE: ${{ secrets.TEST_AUTH0_AUDIENCE }}
           AUTH0_CONNECTION: Username-Password-Authentication
           STRIPE_SECRET_KEY: ${{ secrets.TEST_STRIPE_SECRET_KEY }}
+          SUPERTOKENS_CONNECTION_URI: http://supertokens:3567
+          SUPERTOKENS_API_KEY: bubatzbieber6942096420
 
       - name: Dockest logs
         if: always()
