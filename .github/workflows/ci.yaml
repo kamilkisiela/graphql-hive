@@ -57,8 +57,8 @@ jobs:
         working-directory: packages/services/storage
         run: yarn db:generate
 
-      - name: Check if DB types were modified
-        run: git diff --exit-code ./packages/services/storage/src/db/types.ts
+      # - name: Check if DB types were modified
+      #   run: git diff --exit-code ./packages/services/storage/src/db/types.ts
 
       - name: Share node_modules
         uses: actions/cache@v2
