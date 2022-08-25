@@ -14,6 +14,7 @@ import { Usage } from './usage';
 import { PackageHelper } from '../utils/pack';
 import { UsageEstimator } from './usage-estimation';
 import { RateLimitService } from './rate-limit';
+import { Emails } from './emails';
 import { StripeBillingService } from './billing';
 
 const commonConfig = new pulumi.Config('common');
@@ -41,6 +42,7 @@ export function deployGraphQL({
   dbMigrations,
   rateLimit,
   billing,
+  emails,
 }: {
   storageContainer: azure.storage.Container;
   packageHelper: PackageHelper;
@@ -56,6 +58,7 @@ export function deployGraphQL({
   dbMigrations: DbMigrations;
   rateLimit: RateLimitService;
   billing: StripeBillingService;
+  emails: Emails;
 }) {
   return new RemoteArtifactAsServiceDeployment(
     'graphql-api',
@@ -97,6 +100,7 @@ export function deployGraphQL({
         HIVE_REPORTING_ENDPOINT: 'http://0.0.0.0:4000/graphql',
         GITHUB_APP_PRIVATE_KEY: githubAppConfig.requireSecret('key'),
         RATE_LIMIT_ENDPOINT: serviceLocalEndpoint(rateLimit.service),
+        EMAILS_ENDPOINT: serviceLocalEndpoint(emails.service),
         GITHUB_APP_ID: githubAppConfig.require('id'),
         ENCRYPTION_SECRET: commonConfig.requireSecret('encryptionSecret'),
       },
