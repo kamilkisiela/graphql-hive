@@ -20,7 +20,10 @@ const reqIdGenerate = hyperid({ fixedLength: true });
 const SuperTokenAccessTokenModel = zod.object({
   version: zod.literal('1'),
   superTokensUserId: zod.string(),
-  externalUserId: zod.union([zod.string(), zod.null()]),
+  /**
+   * Supertokens for some reason omits externalUserId from the access token payload if it is null.
+   */
+  externalUserId: zod.optional(zod.union([zod.string(), zod.null()])),
   email: zod.string(),
 });
 
@@ -266,5 +269,10 @@ async function verifySuperTokensSession(
   }
 
   const result = JSON.parse(body);
-  return SuperTokenAccessTokenModel.parse(result.session.userDataInJWT);
+  const sessionInfo = SuperTokenAccessTokenModel.parse(result.session.userDataInJWT);
+  // ensure externalUserId is a string or null
+  return {
+    ...sessionInfo,
+    externalUserId: sessionInfo.externalUserId ?? null,
+  };
 }

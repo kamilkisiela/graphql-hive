@@ -1,4 +1,3 @@
-// import { AuthenticationClient, TokenResponse } from 'auth0';
 import { fetch } from 'cross-undici-fetch';
 import zod from 'zod';
 import { ensureEnv } from './env';
