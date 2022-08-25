@@ -138,18 +138,6 @@ export const resolvers: OrganizationModule.Resolvers = {
         organization,
       };
     },
-    async resetInviteCode(_, { selector }, { injector }) {
-      const organizationId = await injector.get(IdTranslator).translateOrganizationId(selector);
-      const organizationManager = injector.get(OrganizationManager);
-      const organization = organizationManager.resetInviteCode({
-        organization: organizationId,
-      });
-
-      return {
-        selector,
-        organization,
-      };
-    },
     async deleteOrganizationMembers(_, { selector }, { injector }) {
       const organizationId = await injector.get(IdTranslator).translateOrganizationId(selector);
       const organization = await injector
@@ -159,6 +147,24 @@ export const resolvers: OrganizationModule.Resolvers = {
       return {
         selector,
         organization,
+      };
+    },
+    async deleteOrganizationInvitation(_, { input }, { injector }) {
+      const organizationId = await injector.get(IdTranslator).translateOrganizationId(input);
+      const invitation = await injector
+        .get(OrganizationManager)
+        .deleteInvitation({ organization: organizationId, email: input.email });
+
+      if (invitation) {
+        return {
+          ok: invitation,
+        };
+      }
+
+      return {
+        error: {
+          message: 'Invitation not found',
+        },
       };
     },
     async updateOrganizationMemberAccess(_, { input }, { injector }) {
@@ -177,6 +183,32 @@ export const resolvers: OrganizationModule.Resolvers = {
         }),
       };
     },
+    async inviteToOrganizationByEmail(_, { input }, { injector }) {
+      const InputModel = z.object({
+        email: z.string().email(),
+      });
+      const result = InputModel.safeParse(input);
+
+      if (!result.success) {
+        return {
+          error: {
+            message: 'Please check your input.',
+            inputErrors: {
+              email: result.error.formErrors.fieldErrors.email?.[0],
+            },
+          },
+        };
+      }
+      const organization = await injector.get(IdTranslator).translateOrganizationId(input);
+      const invitation = await injector.get(OrganizationManager).inviteByEmail({
+        organization,
+        email: input.email,
+      });
+
+      return {
+        ok: invitation,
+      };
+    },
   },
   Organization: {
     __isTypeOf(organization) {
@@ -193,6 +225,27 @@ export const resolvers: OrganizationModule.Resolvers = {
     },
     members(organization, _, { injector }) {
       return injector.get(OrganizationManager).getOrganizationMembers({ organization: organization.id });
+    },
+    async invitations(organization, _, { injector }) {
+      const invitations = await injector.get(OrganizationManager).getInvitations({
+        organization: organization.id,
+      });
+
+      return {
+        total: invitations.length,
+        nodes: invitations,
+      };
+    },
+  },
+  OrganizationInvitation: {
+    id(invitation) {
+      return Buffer.from([invitation.organization_id, invitation.email, invitation.code].join(':')).toString('hex');
+    },
+    createdAt(invitation) {
+      return invitation.created_at;
+    },
+    expiresAt(invitation) {
+      return invitation.expires_at;
     },
   },
   OrganizationInvitationError: {

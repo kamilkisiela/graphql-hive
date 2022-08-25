@@ -108,13 +108,20 @@ export interface Organization {
   cleanId: string;
   name: string;
   type: OrganizationType;
-  inviteCode: string;
   billingPlan: string;
   monthlyRateLimit: {
     retentionInDays: number;
     operations: number;
   };
   getStarted: OrganizationGetStarted;
+}
+
+export interface OrganizationInvitation {
+  organization_id: string;
+  code: string;
+  email: string;
+  created_at: string;
+  expires_at: string;
 }
 
 export interface OrganizationBilling {

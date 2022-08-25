@@ -73,6 +73,7 @@ generates:
         GraphQLField: ../shared/mappers#GraphQLFieldMapper
         GraphQLInputField: ../shared/mappers#GraphQLInputFieldMapper
         GraphQLArgument: ../shared/mappers#GraphQLArgumentMapper
+        OrganizationInvitation: ../shared/entities#OrganizationInvitation as OrganizationInvitationMapper
     plugins:
       - add:
           content: "import { StripeTypes } from '@hive/stripe-billing';"

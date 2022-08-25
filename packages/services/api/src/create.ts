@@ -1,4 +1,4 @@
-import { createApplication, Provider, Scope } from 'graphql-modules';
+import { createApplication, Scope } from 'graphql-modules';
 import { activityModule } from './modules/activity';
 import { authModule } from './modules/auth';
 import { labModule } from './modules/lab';
@@ -17,6 +17,7 @@ import { MessageBus } from './modules/shared/providers/message-bus';
 import { CryptoProvider, encryptionSecretProvider } from './modules/shared/providers/crypto';
 import { RedisConfig, REDIS_CONFIG, RedisProvider } from './modules/shared/providers/redis';
 import { Storage } from './modules/shared/providers/storage';
+import { EMAILS_ENDPOINT, Emails } from './modules/shared/providers/emails';
 import { Tracking } from './modules/shared/providers/tracking';
 import { targetModule } from './modules/target';
 import { integrationsModule } from './modules/integrations';
@@ -67,16 +68,6 @@ const modules = [
   billingModule,
 ];
 
-const providers: Provider[] = [
-  HttpClient,
-  IdTranslator,
-  MessageBus,
-  Tracking,
-  RedisProvider,
-  IdempotentRunner,
-  CryptoProvider,
-];
-
 export function createRegistry({
   tokens,
   webhooks,
@@ -93,6 +84,7 @@ export function createRegistry({
   feedback,
   billing,
   schemaConfig,
+  emailsEndpoint,
 }: {
   logger: Logger;
   storage: Storage;
@@ -112,82 +104,101 @@ export function createRegistry({
   };
   billing: BillingConfig;
   schemaConfig: SchemaModuleConfig;
+  emailsEndpoint?: string;
 }) {
+  const providers = [
+    HttpClient,
+    IdTranslator,
+    MessageBus,
+    Tracking,
+    RedisProvider,
+    IdempotentRunner,
+    CryptoProvider,
+    Emails,
+    {
+      provide: Logger,
+      useValue: logger,
+      scope: Scope.Singleton,
+    },
+    {
+      provide: Storage,
+      useValue: storage,
+      scope: Scope.Singleton,
+    },
+    {
+      provide: CLICKHOUSE_CONFIG,
+      useValue: clickHouse,
+      scope: Scope.Singleton,
+    },
+    {
+      provide: TOKENS_CONFIG,
+      useValue: tokens,
+      scope: Scope.Singleton,
+    },
+    {
+      provide: BILLING_CONFIG,
+      useValue: billing,
+      scope: Scope.Singleton,
+    },
+    {
+      provide: WEBHOOKS_CONFIG,
+      useValue: webhooks,
+      scope: Scope.Singleton,
+    },
+    {
+      provide: SCHEMA_SERVICE_CONFIG,
+      useValue: schemaService,
+      scope: Scope.Singleton,
+    },
+    {
+      provide: USAGE_ESTIMATION_SERVICE_CONFIG,
+      useValue: usageEstimationService,
+      scope: Scope.Singleton,
+    },
+    {
+      provide: RATE_LIMIT_SERVICE_CONFIG,
+      useValue: rateLimitService,
+      scope: Scope.Singleton,
+    },
+    {
+      provide: REDIS_CONFIG,
+      useValue: redis,
+      scope: Scope.Singleton,
+    },
+    {
+      provide: GITHUB_APP_CONFIG,
+      useValue: githubApp,
+      scope: Scope.Singleton,
+    },
+    {
+      provide: CDN_CONFIG,
+      useValue: cdn,
+      scope: Scope.Singleton,
+    },
+    {
+      provide: FEEDBACK_SLACK_CHANNEL,
+      useValue: feedback.channel,
+      scope: Scope.Singleton,
+    },
+    {
+      provide: FEEDBACK_SLACK_TOKEN,
+      useValue: feedback.token,
+      scope: Scope.Singleton,
+    },
+    encryptionSecretProvider(encryptionSecret),
+    provideSchemaModuleConfig(schemaConfig),
+  ];
+
+  if (emailsEndpoint) {
+    providers.push({
+      provide: EMAILS_ENDPOINT,
+      useValue: emailsEndpoint,
+      scope: Scope.Singleton,
+    });
+  }
+
   return createApplication({
     modules,
-    providers: providers.concat([
-      {
-        provide: Logger,
-        useValue: logger,
-        scope: Scope.Singleton,
-      },
-      {
-        provide: Storage,
-        useValue: storage,
-        scope: Scope.Singleton,
-      },
-      {
-        provide: CLICKHOUSE_CONFIG,
-        useValue: clickHouse,
-        scope: Scope.Singleton,
-      },
-      {
-        provide: TOKENS_CONFIG,
-        useValue: tokens,
-        scope: Scope.Singleton,
-      },
-      {
-        provide: BILLING_CONFIG,
-        useValue: billing,
-        scope: Scope.Singleton,
-      },
-      {
-        provide: WEBHOOKS_CONFIG,
-        useValue: webhooks,
-        scope: Scope.Singleton,
-      },
-      {
-        provide: SCHEMA_SERVICE_CONFIG,
-        useValue: schemaService,
-        scope: Scope.Singleton,
-      },
-      {
-        provide: USAGE_ESTIMATION_SERVICE_CONFIG,
-        useValue: usageEstimationService,
-        scope: Scope.Singleton,
-      },
-      {
-        provide: RATE_LIMIT_SERVICE_CONFIG,
-        useValue: rateLimitService,
-        scope: Scope.Singleton,
-      },
-      {
-        provide: REDIS_CONFIG,
-        useValue: redis,
-        scope: Scope.Singleton,
-      },
-      {
-        provide: GITHUB_APP_CONFIG,
-        useValue: githubApp,
-        scope: Scope.Singleton,
-      },
-      {
-        provide: CDN_CONFIG,
-        useValue: cdn,
-        scope: Scope.Singleton,
-      },
-      {
-        provide: FEEDBACK_SLACK_CHANNEL,
-        useValue: feedback.channel,
-        scope: Scope.Singleton,
-      },
-      {
-        provide: FEEDBACK_SLACK_TOKEN,
-        useValue: feedback.token,
-        scope: Scope.Singleton,
-      },
-      encryptionSecretProvider(encryptionSecret),
-      provideSchemaModuleConfig(schemaConfig),
-    ]),
+    providers,
   });
 }

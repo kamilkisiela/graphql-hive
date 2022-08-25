@@ -1,6 +1,7 @@
 import { Injectable, Scope } from 'graphql-modules';
 import { paramCase } from 'param-case';
-import { Organization, OrganizationType } from '../../../shared/entities';
+import { createHash } from 'crypto';
+import { Organization, OrganizationType, OrganizationInvitation } from '../../../shared/entities';
 import { HiveError } from '../../../shared/errors';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { Logger } from '../../shared/providers/logger';
@@ -12,6 +13,7 @@ import { ActivityManager } from '../../activity/providers/activity-manager';
 import { BillingProvider } from '../../billing/providers/billing.provider';
 import { TokenStorage } from '../../token/providers/token-storage';
 import { Tracking } from '../../shared/providers/tracking';
+import { Emails } from '../../shared/providers/emails';
 import { OrganizationAccessScope } from '../../auth/providers/organization-access';
 import { ProjectAccessScope } from '../../auth/providers/project-access';
 import { TargetAccessScope } from '../../auth/providers/target-access';
@@ -70,7 +72,8 @@ export class OrganizationManager {
     private messageBus: MessageBus,
     private activityManager: ActivityManager,
     private tracking: Tracking,
-    private billingProvider: BillingProvider
+    private billingProvider: BillingProvider,
+    private emails: Emails
   ) {
     this.logger = logger.child({ source: 'OrganizationManager' });
     this.messageBus.on<EnsurePersonalOrganizationEventPayload>(ENSURE_PERSONAL_ORGANIZATION_EVENT, data =>
@@ -149,6 +152,15 @@ export class OrganizationManager {
 
   async getOrganizationMember(selector: OrganizationSelector & { user: string }) {
     return this.storage.getOrganizationMember(selector);
+  }
+
+  @cache((selector: OrganizationSelector) => selector.organization)
+  async getInvitations(selector: OrganizationSelector) {
+    await this.authManager.ensureOrganizationAccess({
+      organization: selector.organization,
+      scope: OrganizationAccessScope.MEMBERS,
+    });
+    return this.storage.getOrganizationInvitations(selector);
   }
 
   async getOrganizationOwner(selector: OrganizationSelector) {
@@ -342,6 +354,79 @@ export class OrganizationManager {
     return result;
   }
 
+  async deleteInvitation(input: { email: string; organization: string }) {
+    return this.storage.deleteOrganizationInvitationByEmail(input);
+  }
+
+  async inviteByEmail(input: { email: string; organization: string }): Promise<OrganizationInvitation> {
+    const { email } = input;
+    this.logger.info('Inviting to the organization (email=%s, organization=%s)', email, input.organization);
+    const organization = await this.getOrganization({
+      organization: input.organization,
+    });
+
+    if (organization.type === OrganizationType.PERSONAL) {
+      throw new HiveError(`Cannot invite to a personal organization`);
+    }
+
+    const members = await this.getOrganizationMembers({ organization: input.organization });
+    const existingMember = members.find(member => member.user.email === email);
+
+    if (existingMember) {
+      throw new HiveError(`User ${email} is already a member of the organization`);
+    }
+
+    // Delete existing invitation
+    await this.storage.deleteOrganizationInvitationByEmail({
+      organization: organization.id,
+      email,
+    });
+
+    // create an invitation code (with 7d TTL)
+    const invitation = await this.storage.createOrganizationInvitation({
+      organization: organization.id,
+      email,
+    });
+
+    await Promise.all([
+      this.storage.completeGetStartedStep({
+        organization: organization.id,
+        step: 'invitingMembers',
+      }),
+      // schedule an email
+      this.emails.schedule({
+        id: JSON.stringify({
+          id: 'org-invitation',
+          organization: invitation.organization_id,
+          code: createHash('sha256').update(invitation.code).digest('hex'),
+          email: createHash('sha256').update(invitation.email).digest('hex'),
+        }),
+        email,
+        body: `
+          <mjml>
+            <mj-body>
+              <mj-section>
+                <mj-column>
+                  <mj-image width="150px" src="https://graphql-hive.com/logo.png"></mj-image>
+                  <mj-divider border-color="#ca8a04"></mj-divider>
+                  <mj-text>
+                    Someone from <strong>${organization.name}</strong> invited you to join GraphQL Hive.
+                  </mj-text>.
+                  <mj-button href="https://app.graphql-hive.com/join/${invitation.code}">
+                    Accept the invitation
+                  </mj-button>
+                </mj-column>
+              </mj-section>
+            </mj-body>
+          </mjml>
+        `,
+        subject: `You have been invited to join ${organization.name}`,
+      }),
+    ]);
+
+    return invitation;
+  }
+
   async joinOrganization({ code }: { code: string }): Promise<Organization | { message: string }> {
     this.logger.info('Joining an organization (code=%s)', code);
     const organization = await this.getOrganizationByInviteCode({
@@ -359,6 +444,7 @@ export class OrganizationManager {
     const user = await this.authManager.getCurrentUser();
 
     await this.storage.addOrganizationMember({
+      code,
       user: user.id,
       organization: organization.id,
       scopes: [
@@ -387,10 +473,7 @@ export class OrganizationManager {
       }),
     ]);
 
-    return this.storage.updateOrganizationInviteCode({
-      organization: organization.id,
-      inviteCode: this.generateRandomCode(),
-    });
+    return organization;
   }
 
   async deleteMembers(
@@ -506,18 +589,6 @@ export class OrganizationManager {
     });
   }
 
-  async resetInviteCode(selector: OrganizationSelector) {
-    this.logger.info('Resetting an organization invite code (selector=%o)', selector);
-    await this.authManager.ensureOrganizationAccess({
-      ...selector,
-      scope: OrganizationAccessScope.MEMBERS,
-    });
-    return this.storage.updateOrganizationInviteCode({
-      organization: selector.organization,
-      inviteCode: this.generateRandomCode(),
-    });
-  }
-
   async ensurePersonalOrganization(payload: EnsurePersonalOrganizationEventPayload) {
     const myOrg = await this.storage.getMyOrganization({
       user: payload.user.id,
@@ -531,9 +602,5 @@ export class OrganizationManager {
         type: OrganizationType.PERSONAL,
       });
     }
-  }
-
-  private generateRandomCode() {
-    return Math.random().toString(16).substring(2, 10);
   }
 }

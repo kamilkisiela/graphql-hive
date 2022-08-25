@@ -1,24 +1,19 @@
-import { ComponentProps, ReactElement } from 'react';
+import { ComponentProps, forwardRef,ReactElement } from 'react';
 import clsx from 'clsx';
 
-export const Input = ({
-  prefix,
-  suffix,
-  placeholder,
-  type,
-  className,
-  size = 'large',
-  isInvalid,
-  ...props
-}: {
-  placeholder?: string;
-  prefix?: ReactElement;
-  suffix?: ReactElement;
-  size?: 'large' | 'medium' | 'small';
-  isInvalid?: boolean;
-} & Omit<ComponentProps<'input'>, 'prefix' | 'size'>): ReactElement => {
+export const Input = forwardRef<
+  any,
+  {
+    placeholder?: string;
+    prefix?: ReactElement;
+    suffix?: ReactElement;
+    size?: 'large' | 'medium' | 'small';
+    isInvalid?: boolean;
+  } & Omit<ComponentProps<'input'>, 'prefix' | 'size'>
+>(({ prefix, suffix, placeholder, type, className, size = 'large', isInvalid, ...props }, forwardedRef) => {
   return (
     <div
+      ref={forwardedRef}
       className={clsx(
         `
         flex
@@ -54,4 +49,23 @@ export const Input = ({
       {suffix}
     </div>
   );
-};
+});
+
+// ({
+//   prefix,
+//   suffix,
+//   placeholder,
+//   type,
+//   className,
+//   size = 'large',
+//   isInvalid,
+//   ...props
+// }: {
+//   placeholder?: string;
+//   prefix?: ReactElement;
+//   suffix?: ReactElement;
+//   size?: 'large' | 'medium' | 'small';
+//   isInvalid?: boolean;
+// } & Omit<ComponentProps<'input'>, 'prefix' | 'size'>): ReactElement => {
+
+// };

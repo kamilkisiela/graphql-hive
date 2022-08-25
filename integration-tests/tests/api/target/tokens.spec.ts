@@ -5,6 +5,7 @@ import {
   createProject,
   createToken,
   updateMemberAccess,
+  inviteToOrganization,
 } from '../../../testkit/flow';
 import { authenticate } from '../../../testkit/auth';
 
@@ -20,8 +21,19 @@ test('cannot set a scope on a token if user has no access to that scope', async 
   // Join
   const { access_token: member_access_token } = await authenticate('extra');
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
-  const code = org.inviteCode;
-  const joinResult = await joinOrganization(code, member_access_token);
+
+  const invitationResult = await inviteToOrganization(
+    {
+      email: 'some@email.com',
+      organization: org.cleanId,
+    },
+    owner_access_token
+  );
+
+  const inviteCode = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
+  expect(inviteCode).toBeDefined();
+
+  const joinResult = await joinOrganization(inviteCode!, member_access_token);
 
   const projectResult = await createProject(
     {

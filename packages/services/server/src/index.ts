@@ -118,6 +118,7 @@ export async function main() {
       billing: {
         endpoint: process.env.BILLING_ENDPOINT ? ensureEnv('BILLING_ENDPOINT').replace(/\/$/g, '') : null,
       },
+      emailsEndpoint: process.env.EMAILS_ENDPOINT ? ensureEnv('EMAILS_ENDPOINT').replace(/\/$/g, '') : undefined,
       webhooks: {
         endpoint: ensureEnv('WEBHOOKS_ENDPOINT').replace(/\/$/g, ''),
       },

@@ -23,6 +23,7 @@ import type {
   OrganizationSelectorInput,
   SchemaSyncCdnInput,
   RateLimitInput,
+  InviteToOrganizationByEmailInput,
 } from './gql/graphql';
 import { execute } from './graphql';
 
@@ -41,7 +42,6 @@ export function createOrganization(input: CreateOrganizationInput, authToken: st
                 id
                 name
                 cleanId
-                inviteCode
                 owner {
                   id
                   organizationAccessScopes
@@ -77,7 +77,6 @@ export function getOrganization(organizationId: string, authToken: string) {
             cleanId
             name
             type
-            inviteCode
             getStarted {
               creatingProject
               publishingSchema
@@ -94,6 +93,31 @@ export function getOrganization(organizationId: string, authToken: string) {
     variables: {
       organizationId,
     },
+  });
+}
+
+export function inviteToOrganization(input: InviteToOrganizationByEmailInput, authToken: string) {
+  return execute({
+    document: gql(/* GraphQL */ `
+      mutation inviteToOrganization($input: InviteToOrganizationByEmailInput!) {
+        inviteToOrganizationByEmail(input: $input) {
+          ok {
+            id
+            createdAt
+            expiresAt
+            email
+            code
+          }
+          error {
+            message
+          }
+        }
+      }
+    `),
+    variables: {
+      input,
+    },
+    authToken,
   });
 }
 

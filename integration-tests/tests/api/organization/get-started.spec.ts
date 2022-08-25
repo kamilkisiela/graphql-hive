@@ -6,6 +6,7 @@ import {
   publishSchema,
   checkSchema,
   joinOrganization,
+  inviteToOrganization,
   waitFor,
   setTargetValidation,
 } from '../../../testkit/flow';
@@ -154,8 +155,19 @@ test('completing each step should result in updated Get Started progress', async
 
   // Step: inviting members
 
+  const invitationResult = await inviteToOrganization(
+    {
+      email: 'some@email.com',
+      organization: org.cleanId,
+    },
+    access_token
+  );
+
+  const inviteCode = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
+  expect(inviteCode).toBeDefined();
+
   const { access_token: member_access_token } = await authenticate('extra');
-  await joinOrganization(org.inviteCode, member_access_token);
+  await joinOrganization(inviteCode!, member_access_token);
 
   steps = await getSteps({
     organization: org.cleanId,

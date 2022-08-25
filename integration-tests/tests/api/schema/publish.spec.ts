@@ -14,6 +14,7 @@ import {
   createTarget,
   fetchMetadataFromCDN,
   createCdnAccess,
+  inviteToOrganization,
 } from '../../../testkit/flow';
 import { authenticate } from '../../../testkit/auth';
 import axios from 'axios';
@@ -30,8 +31,19 @@ test('cannot publish a schema without target:registry:write access', async () =>
   // Join
   const { access_token: member_access_token } = await authenticate('extra');
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
-  const code = org.inviteCode;
-  await joinOrganization(code, member_access_token);
+
+  const invitationResult = await inviteToOrganization(
+    {
+      email: 'some@email.com',
+      organization: org.cleanId,
+    },
+    owner_access_token
+  );
+
+  const inviteCode = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
+  expect(inviteCode).toBeDefined();
+
+  await joinOrganization(inviteCode!, member_access_token);
 
   const projectResult = await createProject(
     {
@@ -85,8 +97,19 @@ test('can publish a schema with target:registry:write access', async () => {
   // Join
   const { access_token: member_access_token } = await authenticate('extra');
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
-  const code = org.inviteCode;
-  await joinOrganization(code, member_access_token);
+
+  const invitationResult = await inviteToOrganization(
+    {
+      email: 'some@email.com',
+      organization: org.cleanId,
+    },
+    owner_access_token
+  );
+
+  const inviteCode = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
+  expect(inviteCode).toBeDefined();
+
+  await joinOrganization(inviteCode!, member_access_token);
 
   const projectResult = await createProject(
     {
@@ -830,8 +853,19 @@ test('marking versions as valid', async () => {
   // Join
   const { access_token: member_access_token } = await authenticate('extra');
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
-  const code = org.inviteCode;
-  await joinOrganization(code, member_access_token);
+
+  const invitationResult = await inviteToOrganization(
+    {
+      email: 'some@email.com',
+      organization: org.cleanId,
+    },
+    owner_access_token
+  );
+
+  const inviteCode = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
+  expect(inviteCode).toBeDefined();
+
+  await joinOrganization(inviteCode!, member_access_token);
 
   const projectResult = await createProject(
     {
@@ -974,8 +1008,19 @@ test('marking only the most recent version as valid result in an update of CDN',
   // Join
   const { access_token: member_access_token } = await authenticate('extra');
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
-  const code = org.inviteCode;
-  await joinOrganization(code, member_access_token);
+
+  const invitationResult = await inviteToOrganization(
+    {
+      email: 'some@email.com',
+      organization: org.cleanId,
+    },
+    owner_access_token
+  );
+
+  const inviteCode = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
+  expect(inviteCode).toBeDefined();
+
+  await joinOrganization(inviteCode!, member_access_token);
 
   const projectResult = await createProject(
     {
@@ -1120,8 +1165,19 @@ test('CDN data can not be fetched with an invalid access token', async () => {
   // Join
   const { access_token: member_access_token } = await authenticate('extra');
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
-  const code = org.inviteCode;
-  await joinOrganization(code, member_access_token);
+
+  const invitationResult = await inviteToOrganization(
+    {
+      email: 'some@email.com',
+      organization: org.cleanId,
+    },
+    owner_access_token
+  );
+
+  const inviteCode = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
+  expect(inviteCode).toBeDefined();
+
+  await joinOrganization(inviteCode!, member_access_token);
 
   const projectResult = await createProject(
     {
@@ -1202,8 +1258,19 @@ test('CDN data can be fetched with an valid access token', async () => {
   // Join
   const { access_token: member_access_token } = await authenticate('extra');
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
-  const code = org.inviteCode;
-  await joinOrganization(code, member_access_token);
+
+  const invitationResult = await inviteToOrganization(
+    {
+      email: 'some@email.com',
+      organization: org.cleanId,
+    },
+    owner_access_token
+  );
+
+  const inviteCode = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
+  expect(inviteCode).toBeDefined();
+
+  await joinOrganization(inviteCode!, member_access_token);
 
   const projectResult = await createProject(
     {
@@ -1284,8 +1351,19 @@ test('linkToWebsite should be available when publishing initial schema', async (
   // Join
   const { access_token: member_access_token } = await authenticate('extra');
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
-  const code = org.inviteCode;
-  await joinOrganization(code, member_access_token);
+
+  const invitationResult = await inviteToOrganization(
+    {
+      email: 'some@email.com',
+      organization: org.cleanId,
+    },
+    owner_access_token
+  );
+
+  const inviteCode = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
+  expect(inviteCode).toBeDefined();
+
+  await joinOrganization(inviteCode!, member_access_token);
 
   const projectResult = await createProject(
     {
@@ -1349,8 +1427,19 @@ test('linkToWebsite should be available when publishing non-initial schema', asy
   // Join
   const { access_token: member_access_token } = await authenticate('extra');
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
-  const code = org.inviteCode;
-  await joinOrganization(code, member_access_token);
+
+  const invitationResult = await inviteToOrganization(
+    {
+      email: 'some@email.com',
+      organization: org.cleanId,
+    },
+    owner_access_token
+  );
+
+  const inviteCode = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
+  expect(inviteCode).toBeDefined();
+
+  await joinOrganization(inviteCode!, member_access_token);
 
   const projectResult = await createProject(
     {

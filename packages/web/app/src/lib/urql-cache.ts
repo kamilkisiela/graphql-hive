@@ -28,6 +28,12 @@ import {
   DeleteGitHubIntegrationDocument,
 } from '../graphql';
 
+import {
+  MemberInvitationForm_InviteByEmail,
+  InvitationDeleteButton_DeleteInvitation,
+  Members_OrganizationMembers,
+} from '../../pages/[orgId]/members';
+
 function updateQuery<T, V>(cache: Cache, input: QueryInput<T, V>, recipe: (obj: T) => void) {
   return cache.updateQuery(input, (data: T | null) => {
     if (!data) {
@@ -329,6 +335,77 @@ const deleteGitHubIntegration: TypedDocumentNodeUpdateResolver<typeof DeleteGitH
   );
 };
 
+const inviteToOrganizationByEmail: TypedDocumentNodeUpdateResolver<typeof MemberInvitationForm_InviteByEmail> = (
+  { inviteToOrganizationByEmail },
+  args,
+  cache
+) => {
+  if (inviteToOrganizationByEmail.ok) {
+    cache.updateQuery(
+      {
+        query: Members_OrganizationMembers,
+        variables: {
+          selector: {
+            organization: args.input.organization,
+          },
+        },
+      },
+      data => {
+        if (data === null) {
+          return null;
+        }
+
+        const invitation = inviteToOrganizationByEmail.ok;
+
+        if (invitation) {
+          data.organization?.organization?.invitations.nodes.push({
+            ...invitation,
+            __typename: 'OrganizationInvitation',
+          });
+        }
+
+        return data;
+      }
+    );
+  }
+};
+
+const deleteOrganizationInvitation: TypedDocumentNodeUpdateResolver<typeof InvitationDeleteButton_DeleteInvitation> = (
+  { deleteOrganizationInvitation },
+  args,
+  cache
+) => {
+  if (deleteOrganizationInvitation.ok) {
+    cache.updateQuery(
+      {
+        query: Members_OrganizationMembers,
+        variables: {
+          selector: {
+            organization: args.input.organization,
+          },
+        },
+      },
+      data => {
+        if (data === null) {
+          return null;
+        }
+
+        const invitation = deleteOrganizationInvitation.ok;
+
+        if (invitation) {
+          if (data.organization?.organization?.invitations.nodes) {
+            data.organization.organization.invitations.nodes = data.organization.organization.invitations.nodes.filter(
+              node => node.id !== invitation.id
+            );
+          }
+        }
+
+        return data;
+      }
+    );
+  }
+};
+
 // UpdateResolver
 export const Mutation = {
   createOrganization,
@@ -346,4 +423,6 @@ export const Mutation = {
   deleteAlertChannels,
   addAlert,
   deletePersistedOperation,
+  inviteToOrganizationByEmail,
+  deleteOrganizationInvitation,
 };
