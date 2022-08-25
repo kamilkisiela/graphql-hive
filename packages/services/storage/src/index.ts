@@ -80,7 +80,6 @@ export async function createStorage(connection: string): Promise<Storage> {
       id: user.id,
       email: user.email,
       superTokensUserId: user.supertoken_user_id,
-      // TODO: figure out what to do here.
       provider: getProviderBasedOnExternalId(user.external_auth_user_id ?? ''),
       fullName: user.full_name,
       displayName: user.display_name,
@@ -314,14 +313,14 @@ export async function createStorage(connection: string): Promise<Storage> {
 
       return null;
     },
-    async createUser({ superTokensUserId, email, fullName, displayName }) {
+    async createUser({ superTokensUserId, email, fullName, displayName, externalAuthUserId }) {
       return transformUser(
         await pool.one<Slonik<users>>(
           sql`
             INSERT INTO public.users
-              ("email", "supertoken_user_id", "full_name", "display_name")
+              ("email", "supertoken_user_id", "full_name", "display_name", "external_auth_user_id")
             VALUES
-              (${email}, ${superTokensUserId}, ${fullName}, ${displayName})
+              (${email}, ${superTokensUserId}, ${fullName}, ${displayName}, ${externalAuthUserId})
             RETURNING *
           `
         )

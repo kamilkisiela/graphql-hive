@@ -36,10 +36,11 @@ export interface TargetAccessSelector {
   scope: TargetAccessScope;
 }
 
-export type SuperTokensSession = {
+type SuperTokenSessionPayload = {
   version: '1';
   superTokensUserId: string;
   email: string;
+  externalUserId: string | null;
 };
 
 /**
@@ -51,7 +52,7 @@ export type SuperTokensSession = {
   global: true,
 })
 export class AuthManager {
-  private session: SuperTokensSession | null;
+  private session: SuperTokenSessionPayload | null;
 
   constructor(
     @Inject(ApiToken) private apiToken: string,
@@ -204,12 +205,17 @@ export class AuthManager {
         this.ensureInternalUser({
           superTokensUserId: session.superTokensUserId,
           email: session.email,
+          externalAuthUserId: session.externalUserId,
         }),
       ttl: 60,
     });
   });
 
-  private async ensureInternalUser(input: { superTokensUserId: string; email: string }) {
+  private async ensureInternalUser(input: {
+    superTokensUserId: string;
+    email: string;
+    externalAuthUserId: string | null;
+  }): Promise<User> {
     let internalUser = await this.storage.getUserBySuperTokenId({
       superTokensUserId: input.superTokensUserId,
     });
@@ -217,6 +223,7 @@ export class AuthManager {
     if (!internalUser) {
       internalUser = await this.userManager.createUser({
         superTokensUserId: input.superTokensUserId,
+        externalAuthUserId: input.externalAuthUserId,
         email: input.email,
       });
     }

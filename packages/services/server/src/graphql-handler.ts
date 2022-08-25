@@ -20,6 +20,7 @@ const reqIdGenerate = hyperid({ fixedLength: true });
 const SuperTokenAccessTokenModel = zod.object({
   version: zod.literal('1'),
   superTokensUserId: zod.string(),
+  externalUserId: zod.union([zod.string(), zod.null()]),
   email: zod.string(),
 });
 
@@ -33,14 +34,14 @@ export interface GraphQLHandlerOptions {
   };
 }
 
-export type SuperTokenSession = zod.TypeOf<typeof SuperTokenAccessTokenModel>;
+export type SuperTokenSessionPayload = zod.TypeOf<typeof SuperTokenAccessTokenModel>;
 
 interface Context {
   req: FastifyRequest;
   reply: FastifyReply;
   headers: Record<string, string | string[] | undefined>;
   requestId?: string | null;
-  session: SuperTokenSession | null;
+  session: SuperTokenSessionPayload | null;
 }
 
 const NoIntrospection: ValidationRule = (context: ValidationContext) => ({
@@ -244,7 +245,7 @@ async function verifySuperTokensSession(
   connectionUri: string,
   apiKey: string,
   accessToken: string
-): Promise<SuperTokenSession> {
+): Promise<SuperTokenSessionPayload> {
   const response = await fetch(connectionUri + '/recipe/session/verify', {
     method: 'POST',
     headers: {

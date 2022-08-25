@@ -12,7 +12,11 @@ export const fullNameLengthBoundaries = {
   max: 25,
 } as const;
 
-function buildUserCreatePayloadFromInput(input: { superTokensUserId: string; email: string }) {
+function buildUserCreatePayloadFromInput(input: {
+  superTokensUserId: string;
+  email: string;
+  externalAuthUserId: string | null;
+}) {
   const displayName = input.email
     .split('@')[0]
     .slice(0, displayNameLengthBoundaries.max)
@@ -27,6 +31,7 @@ function buildUserCreatePayloadFromInput(input: { superTokensUserId: string; ema
     email: input.email,
     displayName,
     fullName,
+    externalAuthUserId: input.externalAuthUserId,
   };
 }
 
@@ -46,7 +51,7 @@ export class UserManager {
     });
   }
 
-  async createUser(input: { superTokensUserId: string; email: string }) {
+  async createUser(input: { superTokensUserId: string; email: string; externalAuthUserId: string | null }) {
     this.logger.info('Creating new user (input=%o)', input);
     const user = await this.storage.createUser(buildUserCreatePayloadFromInput(input));
 

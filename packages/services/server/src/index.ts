@@ -280,7 +280,7 @@ export async function main() {
     });
 
     const authLegacyAuth0 = optionalEnv('AUTH_LEGACY_AUTH0', '0');
-    const authLegacyAPIKey = optionalEnv('AUTH_LEGACY_API_KEY', '');
+    const authLegacyAPIKey = optionalEnv('AUTH_LEGACY_AUTH0_INTERNAL_API_KEY', '');
 
     if (authLegacyAuth0 === '1') {
       server.route({

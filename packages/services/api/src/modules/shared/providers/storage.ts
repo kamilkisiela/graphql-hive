@@ -51,6 +51,7 @@ export interface Storage {
   createUser(_: {
     email: string;
     superTokensUserId: string;
+    externalAuthUserId: string | null;
     displayName: string;
     fullName: string;
   }): Promise<User | never>;

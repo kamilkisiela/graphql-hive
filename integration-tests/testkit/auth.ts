@@ -34,6 +34,7 @@ const signUpUserViaEmail = async (
 const createSessionPayload = (superTokensUserId: string, email: string) => ({
   version: '1',
   superTokensUserId,
+  externalUserId: null,
   email,
 });
 

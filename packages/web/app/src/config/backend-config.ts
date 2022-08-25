@@ -109,15 +109,19 @@ export const backendConfig = (): TypeInput => {
                   );
                 }
 
+                const externalUserId = user.thirdParty ? `${user.thirdParty.id}|${user.thirdParty.userId}` : null;
+
                 input.accessTokenPayload = {
                   version: '1',
                   superTokensUserId: input.userId,
+                  externalUserId,
                   email: user.email,
                 };
 
                 input.sessionData = {
                   version: '1',
                   superTokensUserId: input.userId,
+                  externalUserId,
                   email: user.email,
                 };
 
