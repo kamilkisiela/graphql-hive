@@ -24,3 +24,11 @@ export function ensureEnv(key: string, valueType?: ValueType) {
       return value;
   }
 }
+
+export function optionalEnv(key: string, fallbackValue: string) {
+  let value = process.env[key];
+  if (value === '<sync>') {
+    value = undefined;
+  }
+  return value ?? fallbackValue;
+}

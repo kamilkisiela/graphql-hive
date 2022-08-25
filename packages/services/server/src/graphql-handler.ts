@@ -27,6 +27,10 @@ export interface GraphQLHandlerOptions {
   graphiqlEndpoint: string;
   registry: Registry;
   signature: string;
+  supertokens: {
+    connectionUri: string;
+    apiKey: string;
+  };
 }
 
 export type SuperTokenSession = zod.TypeOf<typeof SuperTokenAccessTokenModel>;
@@ -154,11 +158,15 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
 
             const authHeaderParts = authHeader.split(' ');
             if (authHeaderParts.length === 2 && authHeaderParts[0] === 'Bearer') {
-              const token = authHeaderParts[1];
+              const accessToken = authHeaderParts[1];
               // The token issued by Hive is always 32 characters long.
               // Everything longer should be treated as an supertokens token (JWT).
-              if (token.length > 32) {
-                return await verifySuperTokensSession(token);
+              if (accessToken.length > 32) {
+                return await verifySuperTokensSession(
+                  options.supertokens.connectionUri,
+                  options.supertokens.apiKey,
+                  accessToken
+                );
               }
             }
           }
@@ -228,22 +236,15 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
   };
 };
 
-if (!process.env['SUPERTOKENS_CONNECTION_URI']) {
-  throw new Error('Missing SUPERTOKENS_CONNECTION_URI env variable.');
-}
-
-if (!process.env['SUPERTOKENS_API_KEY']) {
-  throw new Error('Missing SUPERTOKENS_API_KEY env variable.');
-}
-
-const connectionUri = process.env['SUPERTOKENS_CONNECTION_URI'];
-const apiKey = process.env['SUPERTOKENS_API_KEY'];
-
 /**
  * Verify whether a SuperTokens access token session is valid.
  * https://app.swaggerhub.com/apis/supertokens/CDI/2.15.1#/Session%20Recipe/verifySession
  */
-async function verifySuperTokensSession(accessToken: string): Promise<SuperTokenSession> {
+async function verifySuperTokensSession(
+  connectionUri: string,
+  apiKey: string,
+  accessToken: string
+): Promise<SuperTokenSession> {
   const response = await fetch(connectionUri + '/recipe/session/verify', {
     method: 'POST',
     headers: {

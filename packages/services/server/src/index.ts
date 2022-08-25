@@ -1,7 +1,14 @@
 #!/usr/bin/env node
 
 import 'reflect-metadata';
-import { createServer, startMetrics, ensureEnv, registerShutdown, reportReadiness } from '@hive/service-common';
+import {
+  createServer,
+  startMetrics,
+  ensureEnv,
+  registerShutdown,
+  reportReadiness,
+  optionalEnv,
+} from '@hive/service-common';
 import { createRegistry, LogFn, Logger } from '@hive/api';
 import { createStorage as createPostgreSQLStorage, createConnectionString } from '@hive/storage';
 import got from 'got';
@@ -199,6 +206,10 @@ export async function main() {
       graphiqlEndpoint: graphqlPath,
       registry,
       signature,
+      supertokens: {
+        connectionUri: ensureEnv('SUPERTOKENS_CONNECTION_URI'),
+        apiKey: ensureEnv('SUPERTOKENS_API_KEY'),
+      },
     });
 
     server.route({
@@ -268,14 +279,15 @@ export async function main() {
       },
     });
 
-    // TODO: env variables should probably be parsed...
-    if (process.env['AUTH_LEGACY_AUTH0'] === '1') {
-      const internalAPIKey = process.env['AUTH_LEGACY_AUTH0_INTERNAL_API_KEY'];
+    const authLegacyAuth0 = optionalEnv('AUTH_LEGACY_AUTH0', '0');
+    const authLegacyAPIKey = optionalEnv('AUTH_LEGACY_API_KEY', '');
+
+    if (authLegacyAuth0 === '1') {
       server.route({
         method: 'POST',
         url: '/__legacy/update_user_id_mapping',
         async handler(req, reply) {
-          if (req.headers['x-authorization'] !== internalAPIKey) {
+          if (req.headers['x-authorization'] !== authLegacyAPIKey) {
             reply.status(401).send({ error: 'Invalid update user id mapping key.', code: 'ERR_INVALID_KEY' }); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
             return;
           }
