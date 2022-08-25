@@ -2,7 +2,7 @@ import { ReactElement, useEffect, useState } from 'react';
 import { IconProps } from '@chakra-ui/react';
 import { Tooltip } from '@chakra-ui/react';
 import { useFormik } from 'formik';
-import { gql,useMutation, useQuery } from 'urql';
+import { gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 
 import { useUser } from '@/components/auth/AuthProvider';

@@ -1,4 +1,4 @@
-import { ComponentProps, forwardRef,ReactElement } from 'react';
+import { ComponentProps, forwardRef, ReactElement } from 'react';
 import clsx from 'clsx';
 
 export const Input = forwardRef<
