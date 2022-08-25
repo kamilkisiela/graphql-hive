@@ -14,6 +14,7 @@ import type {
   AlertChannel,
   Alert,
   OrganizationBilling,
+  OrganizationInvitation,
 } from '../../../shared/entities';
 import type { CustomOrchestratorConfig } from '../../schema/providers/orchestrators/custom';
 import type { AddAlertChannelInput, AddAlertInput } from '../../../__generated__/types';
@@ -70,11 +71,13 @@ export interface Storage {
   updateOrganizationRateLimits(
     _: OrganizationSelector & Pick<Organization, 'monthlyRateLimit'>
   ): Promise<Organization | never>;
+  createOrganizationInvitation(_: OrganizationSelector & { email: string }): Promise<OrganizationInvitation | never>;
+  deleteOrganizationInvitationByEmail(
+    _: OrganizationSelector & { email: string }
+  ): Promise<OrganizationInvitation | null>;
 
-  updateOrganizationInviteCode(
-    _: OrganizationSelector & Pick<Organization, 'inviteCode'>
-  ): Promise<Organization | never>;
   getOrganizationMembers(_: OrganizationSelector): Promise<readonly Member[] | never>;
+  getOrganizationInvitations(_: OrganizationSelector): Promise<readonly OrganizationInvitation[]>;
   getOrganizationOwner(_: OrganizationSelector): Promise<Member | never>;
   getOrganizationOwner(_: OrganizationSelector): Promise<Member | never>;
   getOrganizationMember(_: OrganizationSelector & { user: string }): Promise<Member | never>;
@@ -85,6 +88,7 @@ export interface Storage {
   hasOrganizationProjectMemberPairs(_: readonly (ProjectSelector & { user: string })[]): Promise<readonly boolean[]>;
   addOrganizationMember(
     _: OrganizationSelector & {
+      code: string;
       user: string;
       scopes: ReadonlyArray<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
     }

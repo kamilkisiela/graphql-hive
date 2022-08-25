@@ -6,6 +6,7 @@ import {
   checkSchema,
   createProject,
   createToken,
+  inviteToOrganization,
 } from '../../../testkit/flow';
 import { authenticate } from '../../../testkit/auth';
 
@@ -18,11 +19,21 @@ test('can check a schema with target:registry:read access', async () => {
     owner_access_token
   );
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
-  const code = org.inviteCode;
+
+  const invitationResult = await inviteToOrganization(
+    {
+      email: 'some@email.com',
+      organization: org.cleanId,
+    },
+    owner_access_token
+  );
+
+  const inviteCode = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
+  expect(inviteCode).toBeDefined();
 
   // Join
   const { access_token: member_access_token } = await authenticate('extra');
-  await joinOrganization(code, member_access_token);
+  await joinOrganization(inviteCode!, member_access_token);
 
   const projectResult = await createProject(
     {
@@ -129,11 +140,21 @@ test('should match indentation of previous description', async () => {
     owner_access_token
   );
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
-  const code = org.inviteCode;
+
+  const invitationResult = await inviteToOrganization(
+    {
+      email: 'some@email.com',
+      organization: org.cleanId,
+    },
+    owner_access_token
+  );
+
+  const inviteCode = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
+  expect(inviteCode).toBeDefined();
 
   // Join
   const { access_token: member_access_token } = await authenticate('extra');
-  await joinOrganization(code, member_access_token);
+  await joinOrganization(inviteCode!, member_access_token);
 
   const projectResult = await createProject(
     {

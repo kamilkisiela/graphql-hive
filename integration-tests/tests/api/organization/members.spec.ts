@@ -1,6 +1,7 @@
 import { OrganizationAccessScope, ProjectAccessScope, TargetAccessScope } from '@app/gql/graphql';
-import { createOrganization, getOrganization, joinOrganization, updateMemberAccess } from '../../../testkit/flow';
+import { createOrganization, inviteToOrganization, joinOrganization, updateMemberAccess } from '../../../testkit/flow';
 import { authenticate } from '../../../testkit/auth';
+import { history } from '../../../testkit/emails';
 
 test('owner of an organization should have all scopes', async () => {
   const { access_token } = await authenticate('main');
@@ -37,10 +38,23 @@ test('regular member of an organization should have basic scopes', async () => {
     owner_access_token
   );
 
+  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+
+  // Invite
+  const invitationResult = await inviteToOrganization(
+    {
+      email: 'some@email.com',
+      organization: org.cleanId,
+    },
+    owner_access_token
+  );
+
+  const inviteCode = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
+  expect(inviteCode).toBeDefined();
+
   // Join
   const { access_token: member_access_token } = await authenticate('extra');
-  const code = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization.inviteCode;
-  const joinResult = await joinOrganization(code, member_access_token);
+  const joinResult = await joinOrganization(inviteCode!, member_access_token);
 
   expect(joinResult.body.errors).not.toBeDefined();
   expect(joinResult.body.data?.joinOrganization.__typename).toBe('OrganizationPayload');
@@ -78,11 +92,23 @@ test('cannot grant an access scope to another user if user has no access to that
     owner_access_token
   );
 
-  // Join
-  const { access_token: member_access_token } = await authenticate('extra');
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
-  const code = org.inviteCode;
-  const joinResult = await joinOrganization(code, member_access_token);
+
+  // Join
+  const invitationResult = await inviteToOrganization(
+    {
+      email: 'some@email.com',
+      organization: org.cleanId,
+    },
+    owner_access_token
+  );
+
+  const inviteCode = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
+  expect(inviteCode).toBeDefined();
+
+  const { access_token: member_access_token } = await authenticate('extra');
+
+  const joinResult = await joinOrganization(inviteCode!, member_access_token);
 
   if (joinResult.body.data!.joinOrganization.__typename !== 'OrganizationPayload') {
     throw new Error(`Join failed: ${joinResult.body.data!.joinOrganization.message}`);
@@ -118,7 +144,7 @@ test('cannot grant an access scope to another user if user has no access to that
   expect(accessResult.body.errors![0].message).toMatch('target:tokens:write');
 });
 
-test('reset invite code after joining', async () => {
+test('email invitation', async () => {
   const { access_token: owner_access_token } = await authenticate('main');
   const createOrgResult = await createOrganization(
     {
@@ -126,12 +152,50 @@ test('reset invite code after joining', async () => {
     },
     owner_access_token
   );
+  const org = createOrgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+
+  // Invite
+  const email = 'invited@invited.com';
+  const invitationResult = await inviteToOrganization(
+    {
+      email,
+      organization: org.cleanId,
+    },
+    owner_access_token
+  );
+
+  const inviteCode = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
+  expect(inviteCode).toBeDefined();
+
+  const sentEmails = await history();
+  expect(sentEmails).toContainEqual(expect.objectContaining({ to: email }));
+});
+
+test('cannot join organization twice using the same invitation code', async () => {
+  const { access_token: owner_access_token } = await authenticate('main');
+  const createOrgResult = await createOrganization(
+    {
+      name: 'foo',
+    },
+    owner_access_token
+  );
+  const org = createOrgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+
+  // Invite
+  const invitationResult = await inviteToOrganization(
+    {
+      email: 'some@email.com',
+      organization: org.cleanId,
+    },
+    owner_access_token
+  );
+
+  const inviteCode = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
+  expect(inviteCode).toBeDefined();
 
   // Join
   const { access_token: member_access_token } = await authenticate('extra');
-  const code = createOrgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization.inviteCode;
-  const cleanId = createOrgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization.cleanId;
-  const joinResult = await joinOrganization(code, member_access_token);
+  const joinResult = await joinOrganization(inviteCode!, member_access_token);
 
   expect(joinResult.body.errors).not.toBeDefined();
   expect(joinResult.body.data?.joinOrganization.__typename).toBe('OrganizationPayload');
@@ -140,8 +204,7 @@ test('reset invite code after joining', async () => {
     throw new Error('Join failed');
   }
 
-  const orgResult = await getOrganization(cleanId, owner_access_token);
-  const newCode = orgResult.body.data!.organization!.organization.inviteCode;
-
-  expect(newCode).not.toEqual(code);
+  const { access_token: another_access_token } = await authenticate('admin');
+  const secondJoinResult = await joinOrganization(inviteCode!, another_access_token);
+  expect(secondJoinResult.body.data?.joinOrganization.__typename).toBe('OrganizationInvitationError');
 });

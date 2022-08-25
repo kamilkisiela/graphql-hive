@@ -1,29 +1,173 @@
-import { ReactElement, useCallback, useEffect, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import { IconProps } from '@chakra-ui/react';
 import { Tooltip } from '@chakra-ui/react';
-import { useMutation, useQuery } from 'urql';
+import { useFormik } from 'formik';
+import { gql, useMutation, useQuery } from 'urql';
+import * as Yup from 'yup';
 
 import { useUser } from '@/components/auth/AuthProvider';
 import { OrganizationLayout } from '@/components/layouts';
-import { Avatar, Button, Card, Checkbox, CopyValue, DropdownMenu, Title } from '@/components/v2';
+import { Avatar, Button, Card, Checkbox, DropdownMenu, Input, Title } from '@/components/v2';
 import { GitHubIcon, GoogleIcon, KeyIcon, MoreIcon, SettingsIcon, TrashIcon } from '@/components/v2/icon';
 import { ChangePermissionsModal, DeleteMembersModal } from '@/components/v2/modals';
-import {
-  AuthProvider,
-  MeDocument,
-  OrganizationFieldsFragment,
-  OrganizationMembersDocument,
-  OrganizationType,
-  ResetInviteCodeDocument,
-} from '@/graphql';
+import { AuthProvider, MeDocument, OrganizationFieldsFragment, OrganizationType } from '@/graphql';
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
 import { useNotifications } from '@/lib/hooks/use-notifications';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useToggle } from '@/lib/hooks/use-toggle';
+
+export const DateFormatter = Intl.DateTimeFormat('en', {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+});
 
 const authProviderIcons = {
   [AuthProvider.Github]: GitHubIcon,
   [AuthProvider.Google]: GoogleIcon,
 } as Record<AuthProvider, React.FC<IconProps> | undefined>;
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const Members_Invitation = gql(/* GraphQL */ `
+  fragment Members_Invitation on OrganizationInvitation {
+    id
+    createdAt
+    expiresAt
+    email
+  }
+`);
+
+export const MemberInvitationForm_InviteByEmail = gql(/* GraphQL */ `
+  mutation MemberInvitationForm_InviteByEmail($input: InviteToOrganizationByEmailInput!) {
+    inviteToOrganizationByEmail(input: $input) {
+      ok {
+        ...Members_Invitation
+      }
+      error {
+        message
+        inputErrors {
+          email
+        }
+      }
+    }
+  }
+`);
+
+export const InvitationDeleteButton_DeleteInvitation = gql(/* GraphQL */ `
+  mutation InvitationDeleteButton_DeleteInvitation($input: DeleteOrganizationInvitationInput!) {
+    deleteOrganizationInvitation(input: $input) {
+      ok {
+        ...Members_Invitation
+      }
+      error {
+        message
+      }
+    }
+  }
+`);
+
+const MemberInvitationForm = ({
+  organizationCleanId,
+}: {
+  organizationCleanId: OrganizationFieldsFragment['cleanId'];
+}) => {
+  const notify = useNotifications();
+  const [invitation, invite] = useMutation(MemberInvitationForm_InviteByEmail);
+  const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched, isValid, dirty, resetForm } =
+    useFormik({
+      initialValues: { email: '' },
+      validationSchema: Yup.object().shape({
+        email: Yup.string().email().required('Email is required'),
+      }),
+      async onSubmit(values) {
+        const result = await invite({
+          input: {
+            organization: organizationCleanId,
+            email: values.email,
+          },
+        });
+
+        if (result.data?.inviteToOrganizationByEmail?.ok?.email) {
+          notify(`Invited ${result.data.inviteToOrganizationByEmail.ok.email}`, 'success');
+          resetForm();
+        }
+      },
+    });
+
+  const errorMessage =
+    touched.email && (errors.email || invitation.error)
+      ? errors.email || invitation.error?.message
+      : invitation.data?.inviteToOrganizationByEmail.error?.inputErrors.email
+      ? invitation.data.inviteToOrganizationByEmail.error.inputErrors.email
+      : null;
+
+  return (
+    <form onSubmit={handleSubmit} className="flex flex-row gap-2">
+      <Tooltip hasArrow placement="top" label={errorMessage} isOpen={typeof errorMessage === 'string'} bg="red.600">
+        <Input
+          style={{
+            minWidth: '200px',
+          }}
+          placeholder="Email"
+          name="email"
+          type="email"
+          value={values.email}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          disabled={isSubmitting}
+          isInvalid={touched.email && Boolean(errors.email)}
+        />
+      </Tooltip>
+      <Button type="submit" size="large" block variant="primary" disabled={isSubmitting || !isValid || !dirty}>
+        Send an invite
+      </Button>
+    </form>
+  );
+};
+
+const InvitationDeleteButton = ({ email, organizationCleanId }: { email: string; organizationCleanId: string }) => {
+  const [mutation, mutate] = useMutation(InvitationDeleteButton_DeleteInvitation);
+
+  return (
+    <Button
+      disabled={mutation.fetching}
+      onClick={() => {
+        mutate({
+          input: {
+            organization: organizationCleanId,
+            email,
+          },
+        });
+      }}
+    >
+      <TrashIcon />
+    </Button>
+  );
+};
+
+export const Members_OrganizationMembers = gql(/* GraphQL */ `
+  query Members_OrganizationMembers($selector: OrganizationSelectorInput!) {
+    organization(selector: $selector) {
+      organization {
+        ...OrganizationFields
+        owner {
+          ...MemberFields
+        }
+        members {
+          nodes {
+            ...MemberFields
+          }
+          total
+        }
+        invitations {
+          nodes {
+            ...Members_Invitation
+          }
+        }
+      }
+    }
+  }
+`);
 
 const Page = ({ organization }: { organization: OrganizationFieldsFragment }) => {
   useOrganizationAccess({
@@ -34,22 +178,14 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
 
   const [checked, setChecked] = useState<string[]>([]);
   const [selectedMemberId, setSelectedMemberId] = useState<string>('');
-  const [isModalOpen, setModalOpen] = useState(false);
-  const toggleModalOpen = useCallback(() => {
-    setModalOpen(prevOpen => !prevOpen);
-  }, []);
-
-  const [isDeleteMembersModalOpen, setDeleteMembersModalOpen] = useState(false);
-  const toggleDeleteMembersModalOpen = useCallback(() => {
-    setDeleteMembersModalOpen(prevOpen => !prevOpen);
-  }, []);
+  const [isPermissionsModalOpen, togglePermissionsModalOpen] = useToggle(false);
+  const [isDeleteMembersModalOpen, toggleDeleteMembersModalOpen] = useToggle(false);
 
   const { user } = useUser();
   const [meQuery] = useQuery({ query: MeDocument });
   const router = useRouteSelector();
-  const notify = useNotifications();
   const [organizationMembersQuery] = useQuery({
-    query: OrganizationMembersDocument,
+    query: Members_OrganizationMembers,
     variables: {
       selector: {
         organization: router.organizationId,
@@ -57,21 +193,10 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
     },
   });
 
-  const [, mutate] = useMutation(ResetInviteCodeDocument);
-
-  const handleReset = useCallback(() => {
-    mutate({
-      selector: {
-        organization: router.organizationId,
-      },
-    }).finally(() => {
-      notify('Generated new invitation link', 'info');
-    });
-  }, [mutate, notify, router.organizationId]);
-
   const org = organizationMembersQuery.data?.organization?.organization;
   const isPersonal = org?.type === OrganizationType.Personal;
   const members = org?.members.nodes;
+  const invitations = org?.invitations.nodes;
 
   useEffect(() => {
     if (isPersonal) {
@@ -92,8 +217,8 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
       <p className="mb-3 font-light text-gray-300">Invite others to your organization and manage access</p>
       {selectedMember && (
         <ChangePermissionsModal
-          isOpen={isModalOpen}
-          toggleModalOpen={toggleModalOpen}
+          isOpen={isPermissionsModalOpen}
+          toggleModalOpen={togglePermissionsModalOpen}
           organization={org}
           member={selectedMember}
         />
@@ -103,21 +228,8 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
         toggleModalOpen={toggleDeleteMembersModalOpen}
         memberIds={checked}
       />
-      <div className="flex gap-4">
-        <Tooltip placement="right" label="A one-time invitation link">
-          <div className="grow">
-            <CopyValue value={`${window.location.origin}/join/${org.inviteCode}`} />
-          </div>
-        </Tooltip>
-        <Button
-          variant="secondary"
-          size="large"
-          className="px-5"
-          onClick={handleReset}
-          title="Generate new invitation link"
-        >
-          Reset
-        </Button>
+      <div className="flex items-center justify-between">
+        <MemberInvitationForm organizationCleanId={org.cleanId} />
         <Button
           size="large"
           danger
@@ -163,7 +275,7 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
                 <DropdownMenu.Item
                   onClick={() => {
                     setSelectedMemberId(node.id);
-                    toggleModalOpen();
+                    togglePermissionsModalOpen();
                   }}
                 >
                   <SettingsIcon />
@@ -182,6 +294,24 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
           </Card>
         );
       })}
+      {invitations?.length ? (
+        <div className="pt-3">
+          <div className="border-t-4 border-solid pb-6"></div>
+          {invitations?.map(node => {
+            return (
+              <Card key={node.id} className="flex items-center gap-2.5 bg-gray-800/40">
+                <div className="grow overflow-hidden">
+                  <h3 className="line-clamp-1 font-medium">{node.email}</h3>
+                  <h4 className="text-sm font-light text-gray-500">
+                    Invitation expires on {DateFormatter.format(new Date(node.expiresAt))}
+                  </h4>
+                </div>
+                <InvitationDeleteButton organizationCleanId={org.cleanId} email={node.email} />
+              </Card>
+            );
+          })}
+        </div>
+      ) : null}
     </>
   );
 };

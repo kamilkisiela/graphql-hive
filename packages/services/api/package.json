@@ -45,6 +45,7 @@
     "zod": "3.15.1"
   },
   "devDependencies": {
+    "@hive/emails": "0.0.0",
     "@hive/schema": "0.0.0",
     "@hive/tokens": "0.0.0",
     "@hive/webhooks": "0.0.0",

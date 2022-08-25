@@ -8,6 +8,7 @@ import {
   createProject,
   createToken,
   fetchSupergraphFromCDN,
+  inviteToOrganization,
 } from '../../testkit/flow';
 
 test('can publish and check a schema with target:registry:read access', async () => {
@@ -19,11 +20,21 @@ test('can publish and check a schema with target:registry:read access', async ()
     owner_access_token
   );
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
-  const code = org.inviteCode;
+
+  const invitationResult = await inviteToOrganization(
+    {
+      email: 'some@email.com',
+      organization: org.cleanId,
+    },
+    owner_access_token
+  );
+
+  const inviteCode = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
+  expect(inviteCode).toBeDefined();
 
   // Join
   const { access_token: member_access_token } = await authenticate('extra');
-  await joinOrganization(code, member_access_token);
+  await joinOrganization(inviteCode!, member_access_token);
 
   const projectResult = await createProject(
     {
@@ -79,11 +90,21 @@ test('publishing invalid schema SDL provides meaningful feedback for the user.',
     owner_access_token
   );
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
-  const code = org.inviteCode;
+
+  const invitationResult = await inviteToOrganization(
+    {
+      email: 'some@email.com',
+      organization: org.cleanId,
+    },
+    owner_access_token
+  );
+
+  const code = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
+  expect(code).toBeDefined();
 
   // Join
   const { access_token: member_access_token } = await authenticate('extra');
-  await joinOrganization(code, member_access_token);
+  await joinOrganization(code!, member_access_token);
 
   const projectResult = await createProject(
     {
@@ -143,11 +164,21 @@ test('service url should be available in supergraph', async () => {
     owner_access_token
   );
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
-  const code = org.inviteCode;
+
+  const invitationResult = await inviteToOrganization(
+    {
+      email: 'some@email.com',
+      organization: org.cleanId,
+    },
+    owner_access_token
+  );
+
+  const code = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
+  expect(code).toBeDefined();
 
   // Join
   const { access_token: member_access_token } = await authenticate('extra');
-  await joinOrganization(code, member_access_token);
+  await joinOrganization(code!, member_access_token);
 
   const projectResult = await createProject(
     {
@@ -212,11 +243,21 @@ test('service url should be required in Federation', async () => {
     owner_access_token
   );
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
-  const code = org.inviteCode;
+
+  const invitationResult = await inviteToOrganization(
+    {
+      email: 'some@email.com',
+      organization: org.cleanId,
+    },
+    owner_access_token
+  );
+
+  const code = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
+  expect(code).toBeDefined();
 
   // Join
   const { access_token: member_access_token } = await authenticate('extra');
-  await joinOrganization(code, member_access_token);
+  await joinOrganization(code!, member_access_token);
 
   const projectResult = await createProject(
     {
@@ -270,11 +311,21 @@ test('schema:publish should print a link to the website', async () => {
     owner_access_token
   );
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
-  const code = org.inviteCode;
+
+  const invitationResult = await inviteToOrganization(
+    {
+      email: 'some@email.com',
+      organization: org.cleanId,
+    },
+    owner_access_token
+  );
+
+  const code = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
+  expect(code).toBeDefined();
 
   // Join
   const { access_token: member_access_token } = await authenticate('extra');
-  await joinOrganization(code, member_access_token);
+  await joinOrganization(code!, member_access_token);
 
   const projectResult = await createProject(
     {
@@ -323,11 +374,21 @@ test('schema:check should notify user when registry is empty', async () => {
     owner_access_token
   );
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
-  const code = org.inviteCode;
+
+  const invitationResult = await inviteToOrganization(
+    {
+      email: 'some@email.com',
+      organization: org.cleanId,
+    },
+    owner_access_token
+  );
+
+  const code = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
+  expect(code).toBeDefined();
 
   // Join
   const { access_token: member_access_token } = await authenticate('extra');
-  await joinOrganization(code, member_access_token);
+  await joinOrganization(code!, member_access_token);
 
   const projectResult = await createProject(
     {
@@ -369,11 +430,21 @@ test('schema:check should throw on corrupted schema', async () => {
     owner_access_token
   );
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
-  const code = org.inviteCode;
+
+  const invitationResult = await inviteToOrganization(
+    {
+      email: 'some@email.com',
+      organization: org.cleanId,
+    },
+    owner_access_token
+  );
+
+  const code = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
+  expect(code).toBeDefined();
 
   // Join
   const { access_token: member_access_token } = await authenticate('extra');
-  await joinOrganization(code, member_access_token);
+  await joinOrganization(code!, member_access_token);
 
   const projectResult = await createProject(
     {

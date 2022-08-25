@@ -1,7 +1,6 @@
 import { TargetAccessScope, ProjectType } from '@app/gql/graphql';
 import {
   createOrganization,
-  joinOrganization,
   publishSchema,
   createProject,
   createToken,
@@ -19,11 +18,7 @@ test('marking only the most recent version as valid result in an update of CDN',
     owner_access_token
   );
 
-  // Join
-  const { access_token: member_access_token } = await authenticate('extra');
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
-  const code = org.inviteCode;
-  await joinOrganization(code, member_access_token);
 
   const projectResult = await createProject(
     {

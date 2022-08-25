@@ -19,6 +19,7 @@ export type {
   AlertChannel,
   Alert,
   OrganizationBilling,
+  OrganizationInvitation,
 } from './shared/entities';
 export { minifySchema } from './shared/schema';
 export { HiveError } from './shared/errors';

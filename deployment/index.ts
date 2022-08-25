@@ -184,6 +184,7 @@ const graphqlApi = deployGraphQL({
   usageEstimator: usageEstimationApi,
   rateLimit: rateLimitApi,
   billing: billingApi,
+  emails: emailsApi,
 });
 
 const app = deployApp({

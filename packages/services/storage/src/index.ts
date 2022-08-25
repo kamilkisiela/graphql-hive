@@ -16,6 +16,7 @@ import type {
   Storage,
   ProjectType,
   OrganizationType,
+  OrganizationInvitation,
 } from '@hive/api';
 import { sql, TaggedTemplateLiteralInvocation } from 'slonik';
 import { update } from 'slonik-utilities';
@@ -36,6 +37,7 @@ import {
   alert_channels,
   alerts,
   organizations_billing,
+  organization_invitations,
 } from './db';
 import { batch } from '@theguild/buddy';
 import type { Slonik } from './shared';
@@ -98,7 +100,6 @@ export async function createStorage(connection: string): Promise<Storage> {
       id: organization.id,
       cleanId: organization.clean_id,
       name: organization.name,
-      inviteCode: organization.invite_code,
       monthlyRateLimit: {
         retentionInDays: parseInt(organization.limit_retention_days),
         operations: parseInt(organization.limit_operations_monthly),
@@ -114,6 +115,16 @@ export async function createStorage(connection: string): Promise<Storage> {
         reportingOperations: organization.get_started_reporting_operations,
         enablingUsageBasedBreakingChanges: organization.get_started_usage_breaking,
       },
+    };
+  }
+
+  function transformOrganizationInvitation(invitation: organization_invitations): OrganizationInvitation {
+    return {
+      email: invitation.email,
+      organization_id: invitation.organization_id,
+      code: invitation.code,
+      created_at: invitation.created_at as any,
+      expires_at: invitation.expires_at as any,
     };
   }
 
@@ -415,6 +426,23 @@ export async function createStorage(connection: string): Promise<Storage> {
 
       return transformMember(member);
     },
+    getOrganizationInvitations: batch(async selectors => {
+      const organizations = selectors.map(s => s.organization);
+      const allInvitations = await pool.query<Slonik<organization_invitations>>(
+        sql`
+          SELECT * FROM public.organization_invitations
+          WHERE organization_id IN (${sql.join(organizations, sql`, `)}) AND expires_at > NOW() ORDER BY created_at DESC
+        `
+      );
+
+      return organizations.map(organization => {
+        return Promise.resolve(
+          allInvitations.rows
+            .filter(row => row.organization_id === organization)
+            .map(transformOrganizationInvitation) ?? []
+        );
+      });
+    }),
     async getOrganizationMemberAccessPairs(pairs) {
       const results = await pool.query<Slonik<Pick<organization_member, 'organization_id' | 'user_id' | 'scopes'>>>(
         sql`
@@ -497,26 +525,40 @@ export async function createStorage(connection: string): Promise<Storage> {
         `)
       );
     },
-    async updateOrganizationInviteCode({ organization, inviteCode }) {
-      return transformOrganization(
-        await pool.one<Slonik<organizations>>(sql`
-          UPDATE public.organizations
-          SET invite_code = ${inviteCode}
-          WHERE id = ${organization}
+    async createOrganizationInvitation({ organization, email }) {
+      return transformOrganizationInvitation(
+        await pool.one<Slonik<organization_invitations>>(sql`
+          INSERT INTO public.organization_invitations (organization_id, email)
+          VALUES (${organization}, ${email})
           RETURNING *
         `)
       );
     },
-    async addOrganizationMember({ user, organization, scopes }) {
-      await pool.one<Slonik<organization_member>>(
-        sql`
-          INSERT INTO public.organization_member
-            (organization_id, user_id, scopes)
-          VALUES
-            (${organization}, ${user}, ${sql.array(scopes, 'text')})
-          RETURNING *
-        `
-      );
+    async deleteOrganizationInvitationByEmail({ organization, email }) {
+      const deleted = await pool.maybeOne<Slonik<organization_invitations>>(sql`
+        DELETE FROM public.organization_invitations
+        WHERE organization_id = ${organization} AND email = ${email}
+        RETURNING *
+      `);
+      return deleted ? transformOrganizationInvitation(deleted) : null;
+    },
+    async addOrganizationMember({ code, user, organization, scopes }) {
+      await pool.transaction(async trx => {
+        await trx.query(sql`
+          DELETE FROM public.organization_invitations
+          WHERE organization_id = ${organization} AND code = ${code}
+        `);
+
+        await pool.one<Slonik<organization_member>>(
+          sql`
+            INSERT INTO public.organization_member
+              (organization_id, user_id, scopes)
+            VALUES
+              (${organization}, ${user}, ${sql.array(scopes, 'text')})
+            RETURNING *
+          `
+        );
+      });
     },
     async deleteOrganizationMembers({ users, organization }) {
       await pool.query<Slonik<organization_member>>(
@@ -612,8 +654,10 @@ export async function createStorage(connection: string): Promise<Storage> {
     async getOrganizationByInviteCode({ inviteCode }) {
       const result = await pool.maybeOne<Slonik<organizations>>(
         sql`
-          SELECT * FROM public.organizations
-          WHERE invite_code = ${inviteCode}
+          SELECT o.* FROM public.organizations as o
+          LEFT JOIN public.organization_invitations as i ON (i.organization_id = o.id)
+          WHERE i.code = ${inviteCode} AND i.expires_at > NOW()
+          GROUP BY o.id
           LIMIT 1
         `
       );

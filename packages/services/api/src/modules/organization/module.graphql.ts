@@ -12,7 +12,8 @@ export default gql`
     deleteOrganization(selector: OrganizationSelectorInput!): OrganizationPayload!
     deleteOrganizationMembers(selector: OrganizationMembersSelectorInput!): OrganizationPayload!
     joinOrganization(code: String!): JoinOrganizationPayload!
-    resetInviteCode(selector: OrganizationSelectorInput!): OrganizationPayload!
+    inviteToOrganizationByEmail(input: InviteToOrganizationByEmailInput!): InviteToOrganizationByEmailResult!
+    deleteOrganizationInvitation(input: DeleteOrganizationInvitationInput!): DeleteOrganizationInvitationResult!
     updateOrganizationName(input: UpdateOrganizationNameInput!): UpdateOrganizationNameResult!
     updateOrganizationMemberAccess(input: OrganizationMemberAccessInput!): OrganizationPayload!
   }
@@ -25,6 +26,7 @@ export default gql`
   type UpdateOrganizationNameOk {
     updatedOrganizationPayload: OrganizationPayload!
   }
+
   type UpdateOrganizationNameError implements Error {
     message: String!
   }
@@ -77,6 +79,36 @@ export default gql`
     name: String!
   }
 
+  input InviteToOrganizationByEmailInput {
+    organization: ID!
+    email: String!
+  }
+
+  input DeleteOrganizationInvitationInput {
+    organization: ID!
+    email: String!
+  }
+
+  type InviteToOrganizationByEmailError implements Error {
+    message: String!
+    """
+    The detailed validation error messages for the input fields.
+    """
+    inputErrors: InviteToOrganizationByEmailInputErrors!
+  }
+
+  type InviteToOrganizationByEmailInputErrors {
+    email: String
+  }
+
+  """
+  @oneOf
+  """
+  type InviteToOrganizationByEmailResult {
+    ok: OrganizationInvitation
+    error: InviteToOrganizationByEmailError
+  }
+
   enum OrganizationType {
     PERSONAL
     REGULAR
@@ -90,13 +122,26 @@ export default gql`
     owner: Member!
     me: Member!
     members: MemberConnection!
-    inviteCode: String!
+    invitations: OrganizationInvitationConnection!
     getStarted: OrganizationGetStarted!
   }
 
   type OrganizationConnection {
     nodes: [Organization!]!
     total: Int!
+  }
+
+  type OrganizationInvitationConnection {
+    nodes: [OrganizationInvitation!]!
+    total: Int!
+  }
+
+  type OrganizationInvitation {
+    id: ID!
+    createdAt: DateTime!
+    expiresAt: DateTime!
+    email: String!
+    code: String!
   }
 
   type OrganizationInvitationError {
@@ -122,5 +167,14 @@ export default gql`
     checkingSchema: Boolean!
     invitingMembers: Boolean!
     enablingUsageBasedBreakingChanges: Boolean!
+  }
+
+  type DeleteOrganizationInvitationResult {
+    ok: OrganizationInvitation
+    error: DeleteOrganizationInvitationError
+  }
+
+  type DeleteOrganizationInvitationError implements Error {
+    message: String!
   }
 `;
