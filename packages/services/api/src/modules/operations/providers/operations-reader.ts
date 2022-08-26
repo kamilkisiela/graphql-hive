@@ -613,24 +613,65 @@ export class OperationsReader {
       client_version: string;
     }>(
       canUseV2(period)
-        ? {
-            query: `
-              SELECT 
-                sum(total) as total,
-                client_name,
-                client_version
-              FROM clients_daily
-              ${this.createFilter({
-                target,
-                period,
-                operations,
-              })}
-              GROUP BY client_name, client_version
-            `,
-            queryId: 'count_clients',
-            timeout: 10_000,
-            span,
-          }
+        ? pickQueryByPeriod(
+            {
+              daily: {
+                query: `
+                  SELECT 
+                    sum(total) as total,
+                    client_name,
+                    client_version
+                  FROM clients_daily
+                  ${this.createFilter({
+                    target,
+                    period,
+                    operations,
+                  })}
+                  GROUP BY client_name, client_version
+                `,
+                queryId: 'count_clients',
+                timeout: 10_000,
+                span,
+              },
+              hourly: {
+                query: `
+                  SELECT 
+                    count(*) as total,
+                    client_name,
+                    client_version
+                  FROM operations
+                  ${this.createFilter({
+                    target,
+                    period,
+                    operations,
+                  })}
+                  GROUP BY client_name, client_version
+                `,
+                queryId: 'count_clients',
+                timeout: 10_000,
+                span,
+              },
+              regular: {
+                query: `
+                  SELECT 
+                    count(*) as total,
+                    client_name,
+                    client_version
+                  FROM operations
+                  ${this.createFilter({
+                    target,
+                    period,
+                    operations,
+                  })}
+                  GROUP BY client_name, client_version
+                `,
+                queryId: 'count_clients',
+                timeout: 10_000,
+                span,
+              },
+            },
+            period
+          )
         : {
             query: `
               SELECT 
