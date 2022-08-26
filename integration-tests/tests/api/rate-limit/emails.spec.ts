@@ -1,7 +1,7 @@
 import { TargetAccessScope, ProjectType, ProjectAccessScope, OrganizationAccessScope } from '@app/gql/graphql';
 import { createOrganization, createProject, createToken, updateOrgRateLimit, waitFor } from '../../../testkit/flow';
 import * as emails from '../../../testkit/emails';
-import { authenticate } from '../../../testkit/auth';
+import { authenticate, userEmails } from '../../../testkit/auth';
 import { collect } from '../../../testkit/usage';
 
 function generateUnique() {
@@ -13,7 +13,7 @@ function filterEmailsByOrg(orgName: string, emails: emails.Email[]) {
 }
 
 test('rate limit approaching and reached for organization', async () => {
-  const adminEmail = process.env.AUTH0_USER_ADMIN_EMAIL!;
+  const adminEmail = userEmails.admin;
   const { access_token } = await authenticate('admin');
   const orgResult = await createOrganization(
     {

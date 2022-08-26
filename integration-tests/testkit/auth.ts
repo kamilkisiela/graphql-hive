@@ -85,10 +85,10 @@ const createSession = async (superTokensUserId: string, email: string) => {
 type UserID = 'main' | 'extra' | 'admin';
 const password = 'ilikebigturtlesandicannotlie47';
 
-const userEmails: Record<UserID, string> = {
-  main: 'main@localhost',
-  extra: 'extra@localhost',
-  admin: 'admin@localhost',
+export const userEmails: Record<UserID, string> = {
+  main: 'main@localhost.localhost',
+  extra: 'extra@localhost.localhost',
+  admin: 'admin@localhost.localhost',
 };
 
 const tokenResponsePromise: Record<UserID, Promise<{ access_token: string }> | null> = {
