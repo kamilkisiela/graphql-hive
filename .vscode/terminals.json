@@ -59,6 +59,13 @@
       "command": "yarn dev"
     },
     {
+      "name": "emails:dev",
+      "description": "Run Emails serivce",
+      "open": true,
+      "cwd": "packages/services/emails",
+      "command": "yarn dev"
+    },
+    {
       "name": "usage:dev",
       "description": "Run Usage Service",
       "open": true,
