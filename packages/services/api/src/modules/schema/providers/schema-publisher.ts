@@ -37,7 +37,6 @@ type CheckInput = Omit<Types.SchemaCheckInput, 'project' | 'organization' | 'tar
 type PublishInput = Types.SchemaPublishInput &
   TargetSelector & {
     checksum: string;
-    isSchemaPublishMissingServiceErrorSelected: boolean;
     isSchemaPublishMissingUrlErrorSelected: boolean;
   };
 
@@ -404,7 +403,6 @@ export class SchemaPublisher {
     this.logger.debug(`Found ${schemas.length} most recent schemas`);
 
     if (
-      input.isSchemaPublishMissingServiceErrorSelected &&
       (project.type === ProjectType.STITCHING || project.type === ProjectType.FEDERATION) &&
       (lodash.isNil(input.service) || input.service?.trim() === '')
     ) {
