@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Grid, GridItem, useColorModeValue } from '@chakra-ui/react';
 import ReactECharts from 'echarts-for-react';
 import AutoSizer from 'react-virtualized-auto-sizer';
@@ -17,6 +17,7 @@ import { toDecimal } from '@/lib/hooks/use-decimal';
 import { formatDuration, useFormattedDuration } from '@/lib/hooks/use-formatted-duration';
 import { formatNumber, useFormattedNumber } from '@/lib/hooks/use-formatted-number';
 import { formatThroughput, useFormattedThroughput } from '@/lib/hooks/use-formatted-throughput';
+import { OperationsFallback } from './Fallback';
 
 function resolutionToMilliseconds(
   resolution: number,
@@ -158,7 +159,7 @@ const Stats = {
   Title: tw.p`text-sm leading-relaxed`,
 };
 
-const RequestsStats: React.FC<{ requests: number }> = ({ requests }) => {
+const RequestsStats: React.FC<{ requests?: number }> = ({ requests = 0 }) => {
   const value = useFormattedNumber(requests);
 
   return (
@@ -169,7 +170,7 @@ const RequestsStats: React.FC<{ requests: number }> = ({ requests }) => {
   );
 };
 
-const UniqueOperationsStats: React.FC<{ operations: number }> = ({ operations }) => {
+const UniqueOperationsStats: React.FC<{ operations?: number }> = ({ operations = 0 }) => {
   const value = useFormattedNumber(operations);
 
   return (
@@ -180,7 +181,7 @@ const UniqueOperationsStats: React.FC<{ operations: number }> = ({ operations })
   );
 };
 
-const PercentileStats: React.FC<{ value: number; title: string }> = ({ value, title }) => {
+const PercentileStats: React.FC<{ value?: number; title: string }> = ({ value, title }) => {
   const formatted = useFormattedDuration(value);
 
   return (
@@ -192,12 +193,12 @@ const PercentileStats: React.FC<{ value: number; title: string }> = ({ value, ti
 };
 
 const RPM: React.FC<{
-  requests: number;
+  requests?: number;
   period: {
     from: string;
     to: string;
   };
-}> = ({ period, requests }) => {
+}> = ({ period, requests = 0 }) => {
   const throughput = useFormattedThroughput({
     requests,
     window: new Date(period.to).getTime() - new Date(period.from).getTime(),
@@ -211,9 +212,9 @@ const RPM: React.FC<{
 };
 
 const SuccessRateStats: React.FC<{
-  requests: number;
-  totalFailures: number;
-}> = ({ requests, totalFailures }) => {
+  requests?: number;
+  totalFailures?: number;
+}> = ({ requests = 0, totalFailures = 0 }) => {
   const rate = requests || totalFailures ? `${toDecimal(((requests - totalFailures) * 100) / requests)}%` : '-';
 
   return (
@@ -225,9 +226,9 @@ const SuccessRateStats: React.FC<{
 };
 
 const FailureRateStats: React.FC<{
-  requests: number;
-  totalFailures: number;
-}> = ({ requests, totalFailures }) => {
+  requests?: number;
+  totalFailures?: number;
+}> = ({ requests = 0, totalFailures = 0 }) => {
   const rate = requests || totalFailures ? `${toDecimal((totalFailures * 100) / requests)}%` : '-';
 
   return (
@@ -241,9 +242,9 @@ const FailureRateStats: React.FC<{
 const OverTimeStats: React.FC<{
   period: DateRangeInput;
   resolution: number;
-  requestsOverTime: GeneralOperationsStatsQuery['operationsStats']['requestsOverTime'];
-  failuresOverTime: GeneralOperationsStatsQuery['operationsStats']['failuresOverTime'];
-}> = ({ period, resolution, requestsOverTime, failuresOverTime }) => {
+  requestsOverTime?: GeneralOperationsStatsQuery['operationsStats']['requestsOverTime'];
+  failuresOverTime?: GeneralOperationsStatsQuery['operationsStats']['failuresOverTime'];
+}> = ({ period, resolution, requestsOverTime = [], failuresOverTime = [] }) => {
   const styles = useChartStyles();
   const interval = resolutionToMilliseconds(resolution, period);
   const requests = React.useMemo(() => {
@@ -352,8 +353,8 @@ const OverTimeStats: React.FC<{
 };
 
 const ClientsStats: React.FC<{
-  clients: GeneralOperationsStatsQuery['operationsStats']['clients']['nodes'];
-}> = ({ clients }) => {
+  clients?: GeneralOperationsStatsQuery['operationsStats']['clients']['nodes'];
+}> = ({ clients = [] }) => {
   const styles = useChartStyles();
   const sortedClients = React.useMemo(() => {
     return clients?.length ? clients.slice().sort((a, b) => b.count - a.count) : [];
@@ -528,8 +529,8 @@ const LatencyOverTimeStats: React.FC<{
     to: string;
   };
   resolution: number;
-  duration: GeneralOperationsStatsQuery['operationsStats']['durationOverTime'];
-}> = ({ period, resolution, duration }) => {
+  duration?: GeneralOperationsStatsQuery['operationsStats']['durationOverTime'];
+}> = ({ period, resolution, duration = [] }) => {
   const styles = useChartStyles();
   const interval = resolutionToMilliseconds(resolution, period);
   const p75 = React.useMemo(() => {
@@ -659,8 +660,8 @@ const RpmOverTimeStats: React.FC<{
     to: string;
   };
   resolution: number;
-  requestsOverTime: GeneralOperationsStatsQuery['operationsStats']['requestsOverTime'];
-}> = ({ period, resolution, requestsOverTime }) => {
+  requestsOverTime?: GeneralOperationsStatsQuery['operationsStats']['requestsOverTime'];
+}> = ({ period, resolution, requestsOverTime = [] }) => {
   const styles = useChartStyles();
   const requests = requestsOverTime ?? [];
 
@@ -753,7 +754,7 @@ const LatencyHistogramStats: React.FC<{
   operationsFilter: string[];
 }> = ({ organization, project, target, period, operationsFilter }) => {
   const styles = useChartStyles();
-  const [query] = useQuery({
+  const [query, refetch] = useQuery({
     query: DurationHistogramDocument,
     variables: {
       selector: {
@@ -782,61 +783,70 @@ const LatencyHistogramStats: React.FC<{
   const totalRequests = durationHistogram.reduce((sum, node) => node[1] + sum, 0);
 
   return (
-    <div className="rounded-md bg-gray-900/50 p-5 ring-1 ring-gray-800">
-      <Section.Title>Latency histogram</Section.Title>
-      <Section.Subtitle>Distribution of duration of all GraphQL requests</Section.Subtitle>
-      <AutoSizer disableHeight>
-        {size => (
-          <ReactECharts
-            style={{ width: size.width, height: 200 }}
-            theme={theme.theme}
-            option={{
-              ...styles,
-              grid: {
-                left: 20,
-                top: 20,
-                right: 20,
-                bottom: 20,
-                containLabel: true,
-              },
-              tooltip: {
-                trigger: 'axis',
-                formatter([record]: [{ data: [number, number] }]) {
-                  const [duration, count] = record.data;
-                  const percentage = toDecimal((count * 100) / totalRequests);
-
-                  return `${formatDuration(duration, true)} - ${formatNumber(count)} requests ${percentage}%`;
+    <OperationsFallback
+      isError={!!query.error}
+      refetch={() => {
+        refetch({
+          requestPolicy: 'cache-and-network',
+        });
+      }}
+    >
+      <div className="rounded-md bg-gray-900/50 p-5 ring-1 ring-gray-800">
+        <Section.Title>Latency histogram</Section.Title>
+        <Section.Subtitle>Distribution of duration of all GraphQL requests</Section.Subtitle>
+        <AutoSizer disableHeight>
+          {size => (
+            <ReactECharts
+              style={{ width: size.width, height: 200 }}
+              theme={theme.theme}
+              option={{
+                ...styles,
+                grid: {
+                  left: 20,
+                  top: 20,
+                  right: 20,
+                  bottom: 20,
+                  containLabel: true,
                 },
-              },
-              xAxis: [
-                {
-                  type: 'log',
-                  scale: true,
-                  min,
-                  max,
-                  axisLabel: {
-                    formatter: (value: number) => formatDuration(value, true),
+                tooltip: {
+                  trigger: 'axis',
+                  formatter([record]: [{ data: [number, number] }]) {
+                    const [duration, count] = record.data;
+                    const percentage = toDecimal((count * 100) / totalRequests);
+
+                    return `${formatDuration(duration, true)} - ${formatNumber(count)} requests ${percentage}%`;
                   },
                 },
-              ],
-              yAxis: [{ type: 'value', min: 0 }],
-              series: [
-                {
-                  type: 'bar',
-                  name: 'Request Duration',
-                  symbol: 'none',
-                  color: 'rgb(234, 179, 8)',
-                  areaStyle: {},
-                  barMaxWidth: 5,
-                  large: true,
-                  data: durationHistogram,
-                },
-              ],
-            }}
-          />
-        )}
-      </AutoSizer>
-    </div>
+                xAxis: [
+                  {
+                    type: 'log',
+                    scale: true,
+                    min,
+                    max,
+                    axisLabel: {
+                      formatter: (value: number) => formatDuration(value, true),
+                    },
+                  },
+                ],
+                yAxis: [{ type: 'value', min: 0 }],
+                series: [
+                  {
+                    type: 'bar',
+                    name: 'Request Duration',
+                    symbol: 'none',
+                    color: 'rgb(234, 179, 8)',
+                    areaStyle: {},
+                    barMaxWidth: 5,
+                    large: true,
+                    data: durationHistogram,
+                  },
+                ],
+              }}
+            />
+          )}
+        </AutoSizer>
+      </div>
+    </OperationsFallback>
   );
 };
 
@@ -851,7 +861,7 @@ export const OperationsStats: React.FC<{
   operationsFilter: string[];
 }> = ({ organization, project, target, period, operationsFilter }) => {
   const resolution = 90;
-  const [query] = useQuery({
+  const [query, refetchQuery] = useQuery({
     query: GeneralOperationsStatsDocument,
     variables: {
       selector: {
@@ -865,70 +875,84 @@ export const OperationsStats: React.FC<{
     },
   });
 
-  if (!query.data) {
-    return null;
-  }
+  const refetch = useCallback(() => {
+    refetchQuery({
+      requestPolicy: 'cache-and-network',
+    });
+  }, [refetchQuery]);
 
-  const { operationsStats } = query.data;
+  const isFetching = query.fetching;
+  const isError = !!query.error;
+
+  const operationsStats = query.data?.operationsStats;
 
   return (
-    <section
-      tw="text-gray-600 dark:text-gray-400 space-y-12 transition-opacity ease-in-out duration-700"
-      style={{
-        opacity: query.fetching ? 0.5 : 1,
-      }}
-    >
-      <Grid
-        templateRows="repeat(2, 1fr)"
-        templateColumns="repeat(4, 1fr)"
-        gap={4}
-        tw="rounded-md p-5 ring-1 ring-gray-800 transition bg-gray-900/50"
-      >
-        <GridItem>
-          <RequestsStats requests={operationsStats.totalRequests} />
-        </GridItem>
-        <GridItem>
-          <RPM requests={operationsStats.totalRequests} period={period} />
-        </GridItem>
-        <GridItem>
-          <UniqueOperationsStats operations={operationsStats.totalOperations} />
-        </GridItem>
+    <section tw="text-gray-600 dark:text-gray-400 space-y-12 transition-opacity ease-in-out duration-700">
+      <OperationsFallback isError={isError} refetch={refetch} isFetching={isFetching}>
+        <Grid
+          templateRows="repeat(2, 1fr)"
+          templateColumns="repeat(4, 1fr)"
+          gap={4}
+          tw="rounded-md p-5 ring-1 ring-gray-800 transition bg-gray-900/50"
+        >
+          <GridItem>
+            <RequestsStats requests={operationsStats?.totalRequests} />
+          </GridItem>
+          <GridItem>
+            <RPM requests={operationsStats?.totalRequests} period={period} />
+          </GridItem>
+          <GridItem>
+            <UniqueOperationsStats operations={operationsStats?.totalOperations} />
+          </GridItem>
 
-        <GridItem rowSpan={2}>
-          <SuccessRateStats requests={operationsStats.totalRequests} totalFailures={operationsStats.totalFailures} />
-          <FailureRateStats requests={operationsStats.totalRequests} totalFailures={operationsStats.totalFailures} />
-        </GridItem>
+          <GridItem rowSpan={2}>
+            <SuccessRateStats
+              requests={operationsStats?.totalRequests}
+              totalFailures={operationsStats?.totalFailures}
+            />
+            <FailureRateStats
+              requests={operationsStats?.totalRequests}
+              totalFailures={operationsStats?.totalFailures}
+            />
+          </GridItem>
 
-        <GridItem>
-          <PercentileStats value={operationsStats?.duration?.p90} title="Latency p90" />
-        </GridItem>
-        <GridItem>
-          <PercentileStats value={operationsStats?.duration?.p95} title="Latency p95" />
-        </GridItem>
-        <GridItem>
-          <PercentileStats value={operationsStats?.duration?.p99} title="Latency p99" />
-        </GridItem>
-      </Grid>
+          <GridItem>
+            <PercentileStats value={operationsStats?.duration?.p90} title="Latency p90" />
+          </GridItem>
+          <GridItem>
+            <PercentileStats value={operationsStats?.duration?.p95} title="Latency p95" />
+          </GridItem>
+          <GridItem>
+            <PercentileStats value={operationsStats?.duration?.p99} title="Latency p99" />
+          </GridItem>
+        </Grid>
+      </OperationsFallback>
       <div>
         <ClientsStats clients={operationsStats?.clients?.nodes} />
       </div>
       <div>
-        <OverTimeStats
-          period={period}
-          resolution={resolution}
-          requestsOverTime={operationsStats?.requestsOverTime}
-          failuresOverTime={operationsStats?.failuresOverTime}
-        />
+        <OperationsFallback isError={isError} refetch={refetch} isFetching={isFetching}>
+          <OverTimeStats
+            period={period}
+            resolution={resolution}
+            requestsOverTime={operationsStats?.requestsOverTime}
+            failuresOverTime={operationsStats?.failuresOverTime}
+          />
+        </OperationsFallback>
       </div>
       <div>
-        <RpmOverTimeStats
-          period={period}
-          resolution={resolution}
-          requestsOverTime={operationsStats?.requestsOverTime}
-        />
+        <OperationsFallback isError={isError} refetch={refetch} isFetching={isFetching}>
+          <RpmOverTimeStats
+            period={period}
+            resolution={resolution}
+            requestsOverTime={operationsStats?.requestsOverTime}
+          />
+        </OperationsFallback>
       </div>
       <div>
-        <LatencyOverTimeStats period={period} duration={operationsStats?.durationOverTime} resolution={resolution} />
+        <OperationsFallback isError={isError} refetch={refetch}>
+          <LatencyOverTimeStats period={period} duration={operationsStats?.durationOverTime} resolution={resolution} />
+        </OperationsFallback>
       </div>
       <div>
         <LatencyHistogramStats
