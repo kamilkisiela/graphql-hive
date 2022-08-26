@@ -59,6 +59,7 @@ jobs:
 
       - name: Check if DB types were modified
         run: git diff --exit-code ./packages/services/storage/src/db/types.ts
+        continue-on-error: true
 
       - name: Share node_modules
         uses: actions/cache@v2
