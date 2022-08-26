@@ -42,6 +42,7 @@ import { DateRangeInput, OperationsStatsDocument, OperationStatsFieldsFragment }
 import { useDecimal } from '@/lib/hooks/use-decimal';
 import { useFormattedDuration } from '@/lib/hooks/use-formatted-duration';
 import { useFormattedNumber } from '@/lib/hooks/use-formatted-number';
+import { OperationsFallback } from './Fallback';
 
 interface Operation {
   id: string;
@@ -194,9 +195,8 @@ const OperationsTable: React.FC<{
   setPagination: SetPaginationFn;
   sorting: SortingState;
   setSorting: OnChangeFn<SortingState>;
-  fetching?: boolean;
   className?: string;
-}> = ({ operations, sorting, setSorting, pagination, setPagination, fetching, className }) => {
+}> = ({ operations, sorting, setSorting, pagination, setPagination, className }) => {
   const tableInstance = useTableInstance(table, {
     columns,
     data: operations,
@@ -240,9 +240,6 @@ const OperationsTable: React.FC<{
     <div
       className={className}
       tw="transition-opacity ease-in-out duration-700 rounded-md p-5 ring-1 ring-gray-800 bg-gray-900/50"
-      style={{
-        opacity: fetching ? 0.5 : 1,
-      }}
     >
       <Section.Title>Operations</Section.Title>
       <Section.Subtitle>List of all operations with their statistics</Section.Subtitle>
@@ -377,9 +374,8 @@ const OperationsTable: React.FC<{
 const OperationsTableContainer: React.FC<{
   operations: readonly OperationStatsFieldsFragment[];
   operationsFilter: readonly string[];
-  fetching?: boolean;
   className?: string;
-}> = ({ operations, operationsFilter, className, fetching }) => {
+}> = ({ operations, operationsFilter, className }) => {
   const data = React.useMemo(() => {
     const records: Array<Operation> = [];
     for (const op of operations) {
@@ -430,7 +426,6 @@ const OperationsTableContainer: React.FC<{
 
   return (
     <OperationsTable
-      fetching={fetching}
       operations={data}
       className={className}
       pagination={pagination}
@@ -449,7 +444,7 @@ export const OperationsList: React.FC<{
   period: DateRangeInput;
   operationsFilter: readonly string[];
 }> = ({ className, organization, project, target, period, operationsFilter = [] }) => {
-  const [query] = useQuery({
+  const [query, refetch] = useQuery({
     query: OperationsStatsDocument,
     variables: {
       selector: {
@@ -464,11 +459,16 @@ export const OperationsList: React.FC<{
   const operations = query.data?.operationsStats?.operations?.nodes ?? [];
 
   return (
-    <OperationsTableContainer
-      fetching={query.fetching}
-      operations={operations}
-      operationsFilter={operationsFilter}
-      className={className}
-    />
+    <OperationsFallback
+      isError={!!query.error}
+      isFetching={query.fetching}
+      refetch={() =>
+        refetch({
+          requestPolicy: 'cache-and-network',
+        })
+      }
+    >
+      <OperationsTableContainer operations={operations} operationsFilter={operationsFilter} className={className} />
+    </OperationsFallback>
   );
 };
