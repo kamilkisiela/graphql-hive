@@ -1,14 +1,14 @@
-import { ReactElement, useCallback,useEffect, useState } from 'react';
+import { ReactElement, useCallback, useEffect, useState } from 'react';
 import { IconProps } from '@chakra-ui/react';
 import { Tooltip } from '@chakra-ui/react';
 import { useFormik } from 'formik';
-import { DocumentType,gql, useMutation, useQuery } from 'urql';
+import { DocumentType, gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 
 import { useUser } from '@/components/auth/AuthProvider';
 import { OrganizationLayout } from '@/components/layouts';
 import { Avatar, Button, Card, Checkbox, DropdownMenu, Input, Title } from '@/components/v2';
-import { CopyIcon,GitHubIcon, GoogleIcon, KeyIcon, MoreIcon, SettingsIcon, TrashIcon } from '@/components/v2/icon';
+import { CopyIcon, GitHubIcon, GoogleIcon, KeyIcon, MoreIcon, SettingsIcon, TrashIcon } from '@/components/v2/icon';
 import { ChangePermissionsModal, DeleteMembersModal } from '@/components/v2/modals';
 import { AuthProvider, MeDocument, OrganizationFieldsFragment, OrganizationType } from '@/graphql';
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
