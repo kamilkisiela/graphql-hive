@@ -1,17 +1,18 @@
-import { ReactElement, useEffect, useState } from 'react';
+import { ReactElement, useCallback, useEffect, useState } from 'react';
 import { IconProps } from '@chakra-ui/react';
 import { Tooltip } from '@chakra-ui/react';
 import { useFormik } from 'formik';
-import { gql, useMutation, useQuery } from 'urql';
+import { DocumentType, gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 
 import { useUser } from '@/components/auth/AuthProvider';
 import { OrganizationLayout } from '@/components/layouts';
 import { Avatar, Button, Card, Checkbox, DropdownMenu, Input, Title } from '@/components/v2';
-import { GitHubIcon, GoogleIcon, KeyIcon, MoreIcon, SettingsIcon, TrashIcon } from '@/components/v2/icon';
+import { CopyIcon, GitHubIcon, GoogleIcon, KeyIcon, MoreIcon, SettingsIcon, TrashIcon } from '@/components/v2/icon';
 import { ChangePermissionsModal, DeleteMembersModal } from '@/components/v2/modals';
 import { AuthProvider, MeDocument, OrganizationFieldsFragment, OrganizationType } from '@/graphql';
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
+import { useClipboard } from '@/lib/hooks/use-clipboard';
 import { useNotifications } from '@/lib/hooks/use-notifications';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { useToggle } from '@/lib/hooks/use-toggle';
@@ -27,13 +28,13 @@ const authProviderIcons = {
   [AuthProvider.Google]: GoogleIcon,
 } as Record<AuthProvider, React.FC<IconProps> | undefined>;
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const Members_Invitation = gql(/* GraphQL */ `
   fragment Members_Invitation on OrganizationInvitation {
     id
     createdAt
     expiresAt
     email
+    code
   }
 `);
 
@@ -129,7 +130,7 @@ const InvitationDeleteButton = ({ email, organizationCleanId }: { email: string;
   const [mutation, mutate] = useMutation(InvitationDeleteButton_DeleteInvitation);
 
   return (
-    <Button
+    <DropdownMenu.Item
       disabled={mutation.fetching}
       onClick={() => {
         mutate({
@@ -140,8 +141,8 @@ const InvitationDeleteButton = ({ email, organizationCleanId }: { email: string;
         });
       }}
     >
-      <TrashIcon />
-    </Button>
+      <TrashIcon /> Remove
+    </DropdownMenu.Item>
   );
 };
 
@@ -168,6 +169,44 @@ export const Members_OrganizationMembers = gql(/* GraphQL */ `
     }
   }
 `);
+
+const Invitation = ({
+  invitation,
+  organizationCleanId,
+}: {
+  invitation: DocumentType<typeof Members_Invitation>;
+  organizationCleanId: string;
+}) => {
+  const copyToClipboard = useClipboard();
+  const copyLink = useCallback(async () => {
+    await copyToClipboard(`${window.location.origin}/join/${invitation.code}`);
+  }, [invitation.code, copyToClipboard]);
+
+  return (
+    <Card className="flex items-center gap-2.5 bg-gray-800/40">
+      <div className="grow overflow-hidden">
+        <h3 className="line-clamp-1 font-medium">{invitation.email}</h3>
+        <h4 className="text-sm font-light text-gray-500">
+          Invitation expires on {DateFormatter.format(new Date(invitation.expiresAt))}
+        </h4>
+      </div>
+      <DropdownMenu>
+        <DropdownMenu.Trigger asChild>
+          <Button rotate={90}>
+            <MoreIcon />
+          </Button>
+        </DropdownMenu.Trigger>
+        <DropdownMenu.Content sideOffset={5} align="start">
+          <DropdownMenu.Item onClick={copyLink}>
+            <CopyIcon />
+            Copy invite link
+          </DropdownMenu.Item>
+          <InvitationDeleteButton organizationCleanId={organizationCleanId} email={invitation.email} />
+        </DropdownMenu.Content>
+      </DropdownMenu>
+    </Card>
+  );
+};
 
 const Page = ({ organization }: { organization: OrganizationFieldsFragment }) => {
   useOrganizationAccess({
@@ -297,19 +336,9 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
       {invitations?.length ? (
         <div className="pt-3">
           <div className="border-t-4 border-solid pb-6"></div>
-          {invitations?.map(node => {
-            return (
-              <Card key={node.id} className="flex items-center gap-2.5 bg-gray-800/40">
-                <div className="grow overflow-hidden">
-                  <h3 className="line-clamp-1 font-medium">{node.email}</h3>
-                  <h4 className="text-sm font-light text-gray-500">
-                    Invitation expires on {DateFormatter.format(new Date(node.expiresAt))}
-                  </h4>
-                </div>
-                <InvitationDeleteButton organizationCleanId={org.cleanId} email={node.email} />
-              </Card>
-            );
-          })}
+          {invitations.map(node => (
+            <Invitation key={node.id} invitation={node} organizationCleanId={org.cleanId} />
+          ))}
         </div>
       ) : null}
     </>

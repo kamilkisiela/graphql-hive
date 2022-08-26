@@ -3,7 +3,7 @@ import { format, addMinutes, subDays, isAfter } from 'date-fns';
 import type { Span } from '@sentry/types';
 import { batch } from '@theguild/buddy';
 import { ClickHouse, RowOf } from './clickhouse-client';
-import { calculateTimeWindow, maxResolution } from './helpers';
+import { calculateTimeWindow } from './helpers';
 import type { DateRange } from '../../../shared/entities';
 import { sentry } from '../../../shared/sentry';
 
@@ -94,7 +94,8 @@ function pickQueryByPeriod(
       span?: Span | undefined;
     };
   },
-  period: DateRange | null
+  period: DateRange | null,
+  resolution?: number
 ) {
   if (!period) {
     return queryMap.daily;
@@ -102,12 +103,25 @@ function pickQueryByPeriod(
 
   const distance = period.to.getTime() - period.from.getTime();
   const distanceInHours = distance / 1000 / 60 / 60;
+  const distanceInDays = distance / 1000 / 60 / 60 / 24;
 
-  if (distanceInHours >= 24) {
+  if (resolution) {
+    if (distanceInDays >= resolution) {
+      return queryMap.daily;
+    }
+
+    if (distanceInHours >= resolution) {
+      return queryMap.hourly;
+    }
+
+    return queryMap.regular;
+  }
+
+  if (distanceInHours > 24) {
     return queryMap.daily;
   }
 
-  if (distanceInHours >= 1) {
+  if (distanceInHours > 1) {
     return queryMap.hourly;
   }
 
@@ -115,19 +129,18 @@ function pickQueryByPeriod(
 }
 
 // Remove after legacy tables are no longer used
-function canUseHourlyAggTable({
-  period,
-  resolution = maxResolution,
-}: {
-  period?: DateRange;
-  resolution?: number;
-}): boolean {
+function canUseHourlyAggTable({ period, resolution }: { period?: DateRange; resolution?: number }): boolean {
   if (period) {
     const distance = period.to.getTime() - period.from.getTime();
     const distanceInHours = distance / 1000 / 60 / 60;
 
     // We can't show data in 90 time-windows from past 24 hours (based on hourly table)
-    if (distanceInHours < resolution) {
+    if (resolution && distanceInHours < resolution) {
+      return false;
+    }
+
+    // We can't show data from less past n minutes based on hourly table if the range is less than 1 hours
+    if (distanceInHours < 1) {
       return false;
     }
   }
@@ -1180,9 +1193,10 @@ export class OperationsReader {
                 span,
               },
             },
-            period
+            period,
+            resolution
           )
-        : canUseHourlyAggTable({ period })
+        : canUseHourlyAggTable({ period, resolution })
         ? {
             query: `
           SELECT 
@@ -1458,6 +1472,7 @@ export class OperationsReader {
       from: subDays(new Date(), daysLimit),
       to: new Date(),
     };
+    const resolution = 90;
     const result = await this.clickHouse.query<{
       date: number;
       total: string;
@@ -1471,13 +1486,13 @@ export class OperationsReader {
                     toStartOfInterval(timestamp, INTERVAL ${this.clickHouse.translateWindow(
                       calculateTimeWindow({
                         period,
-                        resolution: 90,
+                        resolution,
                       })
                     )}, 'UTC'),
                   'UTC'),
                 1000) as date,
                 sum(total) as total
-              FROM ${daysLimit > 1 ? 'operations_daily' : 'operations_hourly'}
+              FROM ${daysLimit > 1 && daysLimit >= resolution ? 'operations_daily' : 'operations_hourly'}
               WHERE timestamp >= subtractDays(NOW(), ${daysLimit})
               GROUP BY date
               ORDER BY date
@@ -1496,7 +1511,7 @@ export class OperationsReader {
                           from: subDays(new Date(), daysLimit),
                           to: new Date(),
                         },
-                        resolution: 90,
+                        resolution,
                       })
                     )}, 'UTC'),
                   'UTC'),
