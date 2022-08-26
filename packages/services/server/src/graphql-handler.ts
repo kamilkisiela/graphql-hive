@@ -151,14 +151,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
           endpoint: process.env.HIVE_USAGE_ENDPOINT,
           clientInfo(ctx: { req: FastifyRequest; reply: FastifyReply }) {
             const name = ctx.req.headers['graphql-client-name'] as string;
-            const version =
-              ((ctx.req.headers['graphql-client-version'] as string) ||
-                // Our CLI sent a header with a typo.
-                // We'll support both for next 30 days or more to collect correct versions.
-                // After that, we will drop the header
-                // and use SchemaPublishMissingServiceError in schemaPublish mutation by default.
-                (ctx.req.headers['graphql-client-vesion'] as string)) ??
-              'missing';
+            const version = (ctx.req.headers['graphql-client-version'] as string) ?? 'missing';
 
             if (name) {
               return { name, version };
