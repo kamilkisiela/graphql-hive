@@ -8,7 +8,7 @@ import { appInfo } from './app-info';
 import zod from 'zod';
 
 const LegacyAuth0ConfigEnabledModel = zod.object({
-  NEXT_PUBLIC_APP_BASE_URL_AUTH_LEGACY_AUTH0: zod.literal('1'),
+  NEXT_PUBLIC_AUTH_LEGACY_AUTH0: zod.literal('1'),
   AUTH_LEGACY_AUTH0_AUDIENCE: zod.string(),
   AUTH_LEGACY_AUTH0_ISSUER_BASE_URL: zod.string(),
   AUTH_LEGACY_AUTH0_CLIENT_ID: zod.string(),
@@ -19,7 +19,7 @@ const LegacyAuth0ConfigEnabledModel = zod.object({
 
 const LegacyAuth0Config = zod.union([
   zod.object({
-    NEXT_PUBLIC_APP_BASE_URL_AUTH_LEGACY_AUTH0: zod.union([zod.void(), zod.literal('0')]),
+    NEXT_PUBLIC_AUTH_LEGACY_AUTH0: zod.union([zod.void(), zod.literal('0')]),
   }),
   LegacyAuth0ConfigEnabledModel,
 ]);
@@ -28,10 +28,10 @@ type LegacyAuth0ConfigEnabled = zod.TypeOf<typeof LegacyAuth0ConfigEnabledModel>
 
 const GitHubConfigModel = zod.union([
   zod.object({
-    NEXT_PUBLIC_APP_BASE_URL_AUTH_GITHUB: zod.union([zod.void(), zod.literal('0')]),
+    NEXT_PUBLIC_AUTH_GITHUB: zod.union([zod.void(), zod.literal('0')]),
   }),
   zod.object({
-    NEXT_PUBLIC_APP_BASE_URL_AUTH_GITHUB: zod.literal('1'),
+    NEXT_PUBLIC_AUTH_GITHUB: zod.literal('1'),
     AUTH_GITHUB_CLIENT_ID: zod.string(),
     AUTH_GITHUB_CLIENT_SECRET: zod.string(),
   }),
@@ -39,10 +39,10 @@ const GitHubConfigModel = zod.union([
 
 const GoogleConfigModel = zod.union([
   zod.object({
-    NEXT_PUBLIC_APP_BASE_URL_AUTH_GOOGLE: zod.union([zod.void(), zod.literal('0')]),
+    NEXT_PUBLIC_AUTH_GOOGLE: zod.union([zod.void(), zod.literal('0')]),
   }),
   zod.object({
-    NEXT_PUBLIC_APP_BASE_URL_AUTH_GOOGLE: zod.literal('1'),
+    NEXT_PUBLIC_AUTH_GOOGLE: zod.literal('1'),
     AUTH_GOOGLE_CLIENT_ID: zod.string(),
     AUTH_GOOGLE_CLIENT_SECRET: zod.string(),
   }),
@@ -61,7 +61,7 @@ export const backendConfig = (): TypeInput => {
 
   const providers: Array<TypeProvider> = [];
 
-  if (githubConfig['NEXT_PUBLIC_APP_BASE_URL_AUTH_GITHUB'] === '1') {
+  if (githubConfig['NEXT_PUBLIC_AUTH_GITHUB'] === '1') {
     providers.push(
       ThirdPartyEmailPasswordNode.Github({
         clientId: githubConfig['AUTH_GITHUB_CLIENT_ID'],
@@ -69,7 +69,7 @@ export const backendConfig = (): TypeInput => {
       })
     );
   }
-  if (googleConfig['NEXT_PUBLIC_APP_BASE_URL_AUTH_GOOGLE'] === '1') {
+  if (googleConfig['NEXT_PUBLIC_AUTH_GOOGLE'] === '1') {
     providers.push(
       ThirdPartyEmailPasswordNode.Google({
         clientId: googleConfig['AUTH_GOOGLE_CLIENT_ID'],
@@ -91,9 +91,7 @@ export const backendConfig = (): TypeInput => {
           /**
            * These overrides are only relevant for the legacy Auth0 -> SuperTokens migration (period).
            */
-          auth0Config['NEXT_PUBLIC_APP_BASE_URL_AUTH_LEGACY_AUTH0'] === '1'
-            ? getAuth0Overrides(auth0Config)
-            : undefined,
+          auth0Config['NEXT_PUBLIC_AUTH_LEGACY_AUTH0'] === '1' ? getAuth0Overrides(auth0Config) : undefined,
       }),
       SessionNode.init({
         override: {

@@ -110,7 +110,7 @@ export function deployApp({
 
         // Auth0 Legacy
         {
-          name: 'NEXT_PUBLIC_APP_BASE_URL_AUTH_LEGACY_AUTH0',
+          name: 'NEXT_PUBLIC_AUTH_LEGACY_AUTH0',
           value: '1',
         },
         {
@@ -139,7 +139,7 @@ export function deployApp({
         },
         // GitHub
         {
-          name: 'NEXT_PUBLIC_APP_BASE_URL_AUTH_GITHUB',
+          name: 'NEXT_PUBLIC_AUTH_GITHUB',
           value: '1',
         },
         {
@@ -152,7 +152,7 @@ export function deployApp({
         },
         // Google
         {
-          name: 'NEXT_PUBLIC_APP_BASE_URL_AUTH_GOOGLE',
+          name: 'NEXT_PUBLIC_AUTH_GOOGLE',
           value: '1',
         },
         {
