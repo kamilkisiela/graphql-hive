@@ -176,17 +176,16 @@ const schemaApi = deploySchema({
 const supertokensApiKey = new random.RandomPassword('supertokens-api-key', { length: 31 });
 const auth0LegacyMigrationKey = new random.RandomPassword('auth0-legacy-migration-key', { length: 69 });
 
-const pulumiGithubConfig = new pulumi.Config('github');
-const pulumiGoogleConfig = new pulumi.Config('google');
+const oauthConfig = new pulumi.Config('oauth');
 
 const githubConfig = {
-  clientId: pulumiGithubConfig.requireSecret('clientId'),
-  clientSecret: pulumiGithubConfig.requireSecret('clientSecret'),
+  clientId: oauthConfig.requireSecret('githubClient'),
+  clientSecret: oauthConfig.requireSecret('githubSecret'),
 };
 
 const googleConfig = {
-  clientId: pulumiGoogleConfig.requireSecret('clientId'),
-  clientSecret: pulumiGoogleConfig.requireSecret('clientSecret'),
+  clientId: oauthConfig.requireSecret('googleClient'),
+  clientSecret: oauthConfig.requireSecret('googleSecret'),
 };
 
 const supertokens = deploySuperTokens({ apiKey: supertokensApiKey.result });
