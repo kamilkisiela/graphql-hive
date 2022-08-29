@@ -38,7 +38,9 @@ export function deploySuperTokens({ apiKey }: { apiKey: Output<string> }) {
         },
         env: {
           POSTGRESQL_TABLE_NAMES_PREFIX: 'supertokens',
-          POSTGRESQL_CONNECTION_URI: apiConfig.requireSecret('postgresConnectionString'),
+          POSTGRESQL_CONNECTION_URI: apiConfig
+            .requireSecret('postgresConnectionString')
+            .apply(str => str.replace('postgres://', 'postgresql://')),
           API_KEYS: apiKey,
         },
       },
