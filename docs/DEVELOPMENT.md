@@ -111,9 +111,6 @@ AUTH0_SECRET=super-secret-value
 AUTH0_DOMAIN=
 AUTH0_CLIENT_ID=
 AUTH0_CLIENT_SECRET=
-AUTH0_SCOPE="openid profile offline_access"
-AUTH0_AUDIENCE=https://${AUTH0_DOMAIN}/api/v2/
-AUTH0_CONNECTION=Username-Password-Authentication
 ```
 
 ```bash

@@ -22,12 +22,31 @@ export function deployApp({
   dbMigrations,
   storageContainer,
   packageHelper,
+  supertokensConfig,
+  auth0Config,
+  googleConfig,
+  githubConfig,
 }: {
   storageContainer: azure.storage.Container;
   packageHelper: PackageHelper;
   deploymentEnv: DeploymentEnvironment;
   graphql: GraphQL;
   dbMigrations: DbMigrations;
+  supertokensConfig: {
+    endpoint: pulumi.Output<string>;
+    apiKey: pulumi.Output<string>;
+  };
+  auth0Config: {
+    internalApiKey: pulumi.Output<string>;
+  };
+  googleConfig: {
+    clientId: pulumi.Output<string>;
+    clientSecret: pulumi.Output<string>;
+  };
+  githubConfig: {
+    clientId: pulumi.Output<string>;
+    clientSecret: pulumi.Output<string>;
+  };
 }) {
   const appRelease = packageHelper.currentReleaseId();
 
@@ -54,37 +73,6 @@ export function deployApp({
           name: 'NEXT_PUBLIC_RELEASE',
           value: appRelease,
         },
-        { name: 'AUTH0_DOMAIN', value: commonConfig.require('auth0Domain') },
-        {
-          name: 'AUTH0_CLIENT_ID',
-          value: commonConfig.require('auth0ClientId'),
-        },
-        {
-          name: 'AUTH0_CLIENT_SECRET',
-          value: commonConfig.requireSecret('auth0ClientSecret'),
-        },
-        {
-          name: 'AUTH0_BASE_URL',
-          value: `https://${deploymentEnv.DEPLOYED_DNS}/`,
-        },
-        {
-          name: 'AUTH0_AUDIENCE',
-          value: `https://${commonConfig.require('auth0Domain')}/api/v2/`,
-        },
-        {
-          name: 'AUTH0_ISSUER_BASE_URL',
-          value: `https://${commonConfig.require('auth0Domain')}`,
-        },
-        { name: 'AUTH0_CALLBACK', value: `/api/callback` },
-        {
-          name: 'POST_LOGOUT_REDIRECT_URI',
-          value: `https://${deploymentEnv.DEPLOYED_DNS}/`,
-        },
-        {
-          name: 'AUTH0_SECRET',
-          value: commonConfig.requireSecret('cookieSecret'),
-        },
-        { name: 'AUTH0_SCOPE', value: 'openid profile offline_access' },
         { name: 'SENTRY_DSN', value: commonEnv.SENTRY_DSN },
         { name: 'NEXT_PUBLIC_SENTRY_DSN', value: commonEnv.SENTRY_DSN },
         {
@@ -92,7 +80,7 @@ export function deployApp({
           value: serviceLocalEndpoint(graphql.service).apply(s => `${s}/graphql`),
         },
         {
-          name: 'APP_BASE_URL',
+          name: 'NEXT_PUBLIC_APP_BASE_URL',
           value: `https://${deploymentEnv.DEPLOYED_DNS}/`,
         },
         {
@@ -106,6 +94,74 @@ export function deployApp({
         {
           name: 'GITHUB_APP_NAME',
           value: githubAppConfig.require('name'),
+        },
+
+        //
+        // AUTH
+        //
+        {
+          name: 'SUPERTOKENS_CONNECTION_URI',
+          value: supertokensConfig.endpoint,
+        },
+        {
+          name: 'SUPERTOKENS_API_KEY',
+          value: supertokensConfig.apiKey,
+        },
+
+        // Auth0 Legacy
+        {
+          name: 'NEXT_PUBLIC_APP_BASE_URL_AUTH_LEGACY_AUTH0',
+          value: '1',
+        },
+        {
+          name: 'AUTH_LEGACY_AUTH0_CLIENT_ID',
+          value: commonConfig.require('auth0ClientId'),
+        },
+        {
+          name: 'AUTH_LEGACY_AUTH0_CLIENT_SECRET',
+          value: commonConfig.requireSecret('auth0ClientSecret'),
+        },
+        {
+          name: 'AUTH_LEGACY_AUTH0_AUDIENCE',
+          value: `https://${commonConfig.require('auth0Domain')}/api/v2/`,
+        },
+        {
+          name: 'AUTH_LEGACY_AUTH0_ISSUER_BASE_URL',
+          value: `https://${commonConfig.require('auth0Domain')}`,
+        },
+        {
+          name: 'AUTH_LEGACY_AUTH0_INTERNAL_API_ENDPOINT',
+          value: serviceLocalEndpoint(graphql.service).apply(s => `${s}/__legacy`),
+        },
+        {
+          name: 'AUTH_LEGACY_AUTH0_INTERNAL_API_KEY',
+          value: auth0Config.internalApiKey,
+        },
+        // GitHub
+        {
+          name: 'NEXT_PUBLIC_APP_BASE_URL_AUTH_GITHUB',
+          value: '1',
+        },
+        {
+          name: 'AUTH_GITHUB_CLIENT_ID',
+          value: githubConfig.clientId,
+        },
+        {
+          name: 'AUTH_GITHUB_CLIENT_SECRET',
+          value: githubConfig.clientSecret,
+        },
+        // Google
+        {
+          name: 'NEXT_PUBLIC_APP_BASE_URL_AUTH_GOOGLE',
+          value: '1',
+        },
+        {
+          name: 'AUTH_GOOGLE_CLIENT_ID',
+          value: googleConfig.clientId,
+        },
+        {
+          name: 'AUTH_GOOGLE_CLIENT_SECRET',
+          value: googleConfig.clientSecret,
         },
       ],
       port: 3000,

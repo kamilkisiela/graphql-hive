@@ -115,8 +115,6 @@ jobs:
           AUTH0_CLIENT_ID: ${{ secrets.TEST_AUTH0_CLIENT_ID }}
           AUTH0_CLIENT_SECRET: ${{ secrets.TEST_AUTH0_CLIENT_SECRET }}
           AUTH0_SECRET: ${{ secrets.TEST_AUTH0_SECRET }}
-          AUTH0_AUDIENCE: ${{ secrets.TEST_AUTH0_AUDIENCE }}
-          AUTH0_CONNECTION: Username-Password-Authentication
           STRIPE_SECRET_KEY: ${{ secrets.TEST_STRIPE_SECRET_KEY }}
           SUPERTOKENS_CONNECTION_URI: http://127.0.0.1:3567
           SUPERTOKENS_API_KEY: bubatzbieber6942096420
@@ -189,10 +187,7 @@ jobs:
           AUTH0_DOMAIN: ${{ secrets.TEST_AUTH0_DOMAIN }}
           AUTH0_CLIENT_ID: ${{ secrets.TEST_AUTH0_CLIENT_ID }}
           AUTH0_CLIENT_SECRET: ${{ secrets.TEST_AUTH0_CLIENT_SECRET }}
-          AUTH0_USER_PASSWORD: ${{ secrets.AUTH0_TESTING_USER_PASSWORD }}
           AUTH0_SECRET: ${{ secrets.TEST_AUTH0_SECRET }}
-          AUTH0_AUDIENCE: ${{ secrets.TEST_AUTH0_AUDIENCE }}
-          AUTH0_CONNECTION: Username-Password-Authentication
           STRIPE_SECRET_KEY: ${{ secrets.TEST_STRIPE_SECRET_KEY }}
           SUPERTOKENS_CONNECTION_URI: http://127.0.0.1:3567
           SUPERTOKENS_API_KEY: bubatzbieber6942096420

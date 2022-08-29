@@ -20,11 +20,13 @@ import { deployBotKube } from './services/bot-kube';
 import { deployProxy } from './services/proxy';
 import { deployClickhouse } from './services/clickhouse';
 import { deployUsageEstimation } from './services/usage-estimation';
+import { deploySuperTokens } from './services/supertokens';
 import { createPackageHelper } from './utils/pack';
 import * as azure from '@pulumi/azure';
 import { optimizeAzureCluster } from './utils/azure-helpers';
 import { deployRateLimit } from './services/rate-limit';
 import { deployStripeBilling } from './services/billing';
+import * as random from '@pulumi/random';
 
 const packageHelper = createPackageHelper();
 
@@ -169,6 +171,26 @@ const schemaApi = deploySchema({
   redis: redisApi,
 });
 
+// https://github.com/the-guild-org/graphql-hive-deployment/pull/1306
+
+const supertokensApiKey = new random.RandomPassword('supertokens-api-key', { length: 31 });
+const auth0LegacyMigrationKey = new random.RandomPassword('auth0-legacy-migration-key', { length: 69 });
+
+const pulumiGithubConfig = new pulumi.Config('github');
+const pulumiGoogleConfig = new pulumi.Config('google');
+
+const githubConfig = {
+  clientId: pulumiGithubConfig.requireSecret('clientId'),
+  clientSecret: pulumiGithubConfig.requireSecret('clientSecret'),
+};
+
+const googleConfig = {
+  clientId: pulumiGoogleConfig.requireSecret('clientId'),
+  clientSecret: pulumiGoogleConfig.requireSecret('clientSecret'),
+};
+
+const supertokens = deploySuperTokens({ apiKey: supertokensApiKey.result });
+
 const graphqlApi = deployGraphQL({
   clickhouse: clickhouseApi,
   packageHelper,
@@ -185,6 +207,13 @@ const graphqlApi = deployGraphQL({
   rateLimit: rateLimitApi,
   billing: billingApi,
   emails: emailsApi,
+  supertokensConfig: {
+    apiKey: supertokensApiKey.result,
+    endpoint: supertokens.localEndpoint,
+  },
+  auth0Config: {
+    internalApiKey: auth0LegacyMigrationKey.result,
+  },
 });
 
 const app = deployApp({
@@ -193,6 +222,15 @@ const app = deployApp({
   dbMigrations,
   packageHelper,
   storageContainer,
+  supertokensConfig: {
+    apiKey: supertokensApiKey.result,
+    endpoint: supertokens.localEndpoint,
+  },
+  auth0Config: {
+    internalApiKey: auth0LegacyMigrationKey.result,
+  },
+  githubConfig,
+  googleConfig,
 });
 
 const landingPage = deployLandingPage({
