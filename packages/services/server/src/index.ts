@@ -293,7 +293,12 @@ export async function main() {
           }
 
           const { auth0UserId, superTokensUserId } = LegacySetUserIdMappingPayloadModel.parse(req.body);
-          await storage.setSuperTokensUserId({ auth0UserId, superTokensUserId });
+
+          await storage.setSuperTokensUserId({
+            auth0UserId: auth0UserId.replace('google|', 'google-oauth2|'),
+            superTokensUserId,
+            externalUserId: auth0UserId,
+          });
           reply.status(200).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
         },
       });

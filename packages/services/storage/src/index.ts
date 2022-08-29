@@ -294,12 +294,13 @@ export async function createStorage(connection: string): Promise<Storage> {
 
       return null;
     },
-    async setSuperTokensUserId({ auth0UserId, superTokensUserId }) {
+    async setSuperTokensUserId({ auth0UserId, superTokensUserId, externalUserId }) {
       await pool.query(sql`
         UPDATE
           public."users"
         SET
-          "supertoken_user_id" = ${superTokensUserId}
+          "supertoken_user_id" = ${superTokensUserId},
+          "external_auth_user_id" = ${externalUserId}
         WHERE
           "external_auth_user_id" = ${auth0UserId}
       `);
