@@ -1,7 +1,7 @@
 import { Injectable, InjectionToken, Inject, Optional } from 'graphql-modules';
 import { fetch } from 'cross-undici-fetch';
 import { createTRPCClient, TRPCClient } from '@trpc/client';
-import type { EmailsApi } from '@hive/emails';
+import type { EmailsApi, EmailScheduleInput } from '@hive/emails';
 
 export const EMAILS_ENDPOINT = new InjectionToken<string>('EMAILS_ENDPOINT');
 
@@ -18,7 +18,7 @@ export class Emails {
       : null;
   }
 
-  schedule(input: Parameters<TRPCClient<EmailsApi>['mutation']>[1]) {
+  schedule(input: EmailScheduleInput) {
     if (!this.api) {
       return Promise.resolve();
     }
