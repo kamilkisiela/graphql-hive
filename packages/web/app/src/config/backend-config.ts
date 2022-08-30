@@ -7,7 +7,7 @@ import { fetch } from 'cross-undici-fetch';
 import { appInfo } from './app-info';
 import zod from 'zod';
 import { createTRPCClient } from '@trpc/client';
-import { EmailsApi } from '@hive/emails';
+import type { EmailsApi } from '@hive/emails';
 
 const LegacyAuth0ConfigEnabledModel = zod.object({
   NEXT_PUBLIC_AUTH_LEGACY_AUTH0: zod.literal('1'),
