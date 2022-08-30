@@ -58,7 +58,7 @@
     "log-symbols": "4.1.0",
     "mkdirp": "1.0.4",
     "tslib": "2.3.1",
-    "ts-node": "10.7.0"
+    "ts-node": "10.9.1"
   },
   "devDependencies": {
     "oclif": "^3.1.2",
