@@ -21,6 +21,9 @@ export const frontendConfig = () => {
         signInAndUpFeature: {
           providers,
         },
+        emailVerificationFeature: {
+          mode: 'REQUIRED',
+        },
       }),
       SessionReact.init(),
     ],

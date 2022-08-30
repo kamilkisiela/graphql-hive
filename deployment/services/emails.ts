@@ -4,6 +4,7 @@ import { RemoteArtifactAsServiceDeployment } from '../utils/remote-artifact-as-s
 import { DeploymentEnvironment } from '../types';
 import { Redis } from './redis';
 import { PackageHelper } from '../utils/pack';
+import { serviceLocalEndpoint } from '../utils/local-endpoint';
 
 const commonConfig = new pulumi.Config('common');
 const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
@@ -29,7 +30,7 @@ export function deployEmails({
     messageStream: string;
   };
 }) {
-  return new RemoteArtifactAsServiceDeployment(
+  const { deployment, service } = new RemoteArtifactAsServiceDeployment(
     'emails-service',
     {
       storageContainer,
@@ -56,4 +57,6 @@ export function deployEmails({
     },
     [redis.deployment, redis.service]
   ).deploy();
+
+  return { deployment, service, localEndpoint: serviceLocalEndpoint(service) };
 }

@@ -71,19 +71,24 @@ export function createScheduler(config: {
       config.queueName,
       async job => {
         logger.info('Sending email to %s', job.data.email);
-        const rendered = mjml2html(job.data.body, {
-          minify: false,
-          minifyOptions: undefined,
-        });
+        let body = job.data.body;
+        // Poor mans MJML check :)
+        if (job.data.body.includes('<mjml>')) {
+          const rendered = mjml2html(body, {
+            minify: false,
+            minifyOptions: undefined,
+          });
 
-        if (rendered.errors.length > 0) {
-          throw new Error(rendered.errors.map(e => e.formattedMessage).join('\n'));
+          if (rendered.errors.length > 0) {
+            throw new Error(rendered.errors.map(e => e.formattedMessage).join('\n'));
+          }
+          body = rendered.html;
         }
 
         await config.emailProvider.send({
           to: job.data.email,
           subject: job.data.subject,
-          body: rendered.html,
+          body,
         });
 
         logger.info('Email sent');

@@ -26,6 +26,7 @@ export function deployApp({
   auth0Config,
   googleConfig,
   githubConfig,
+  emailsEndpoint,
 }: {
   storageContainer: azure.storage.Container;
   packageHelper: PackageHelper;
@@ -47,6 +48,7 @@ export function deployApp({
     clientId: pulumi.Output<string>;
     clientSecret: pulumi.Output<string>;
   };
+  emailsEndpoint: pulumi.Output<string>;
 }) {
   const appRelease = packageHelper.currentReleaseId();
 
@@ -106,6 +108,10 @@ export function deployApp({
         {
           name: 'SUPERTOKENS_API_KEY',
           value: supertokensConfig.apiKey,
+        },
+        {
+          name: 'EMAILS_ENDPOINT',
+          value: emailsEndpoint,
         },
 
         // Auth0 Legacy

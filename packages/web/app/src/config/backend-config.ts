@@ -6,6 +6,8 @@ import type { TypeInput as ThirdPartEmailPasswordTypeInput } from 'supertokens-n
 import { fetch } from 'cross-undici-fetch';
 import { appInfo } from './app-info';
 import zod from 'zod';
+import { createTRPCClient } from '@trpc/client';
+import { EmailsApi } from '@hive/emails';
 
 const LegacyAuth0ConfigEnabledModel = zod.object({
   NEXT_PUBLIC_AUTH_LEGACY_AUTH0: zod.literal('1'),
@@ -23,6 +25,10 @@ const LegacyAuth0Config = zod.union([
   }),
   LegacyAuth0ConfigEnabledModel,
 ]);
+
+const EmailTRPCConfig = zod.object({
+  EMAILS_ENDPOINT: zod.string(),
+});
 
 type LegacyAuth0ConfigEnabled = zod.TypeOf<typeof LegacyAuth0ConfigEnabledModel>;
 
@@ -58,7 +64,11 @@ export const backendConfig = (): TypeInput => {
   const googleConfig = GoogleConfigModel.parse(process.env);
   const auth0Config = LegacyAuth0Config.parse(process.env);
   const superTokensConfig = SuperTokensConfigModel.parse(process.env);
+  const emailConfig = EmailTRPCConfig.parse(process.env);
 
+  const trpcService = createTRPCClient<EmailsApi>({
+    url: `${emailConfig['EMAILS_ENDPOINT']}/trpc`,
+  });
   const providers: Array<TypeProvider> = [];
 
   if (githubConfig['NEXT_PUBLIC_AUTH_GITHUB'] === '1') {
@@ -87,6 +97,35 @@ export const backendConfig = (): TypeInput => {
     recipeList: [
       ThirdPartyEmailPasswordNode.init({
         providers,
+        emailDelivery: {
+          override: originalImplementation => ({
+            ...originalImplementation,
+            async sendEmail(input) {
+              if (input.type === 'EMAIL_VERIFICATION') {
+                await trpcService.mutation('sendEmailVerificationEmail', {
+                  user: {
+                    id: input.user.id,
+                    email: input.user.email,
+                  },
+                  emailVerifyLink: input.emailVerifyLink,
+                });
+
+                return Promise.resolve();
+              } else if (input.type === 'PASSWORD_RESET') {
+                await trpcService.mutation('sendPasswordResetEmail', {
+                  user: {
+                    id: input.user.id,
+                    email: input.user.email,
+                  },
+                  passwordResetLink: input.passwordResetLink,
+                });
+                return Promise.resolve();
+              }
+
+              return Promise.reject(new Error('Unsupported email type.'));
+            },
+          }),
+        },
         override:
           /**
            * These overrides are only relevant for the legacy Auth0 -> SuperTokens migration (period).

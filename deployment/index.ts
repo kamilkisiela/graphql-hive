@@ -230,6 +230,7 @@ const app = deployApp({
   },
   githubConfig,
   googleConfig,
+  emailsEndpoint: emailsApi.localEndpoint,
 });
 
 const landingPage = deployLandingPage({
