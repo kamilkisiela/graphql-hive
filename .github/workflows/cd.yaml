@@ -109,6 +109,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 40
 
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAME: ${{ github.repository }}
+
+    permissions:
+      contents: read
+      packages: write
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -119,14 +127,15 @@ jobs:
       - name: Login to registry
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKER_ID }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract metadata (tags, labels)
         id: router-extract
         uses: docker/metadata-action@v4
         with:
-          images: kamilkisiela/graphql-hive
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=ref,event=branch
             type=sha,prefix=,format=long
