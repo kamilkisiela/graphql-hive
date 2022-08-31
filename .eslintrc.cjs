@@ -16,7 +16,7 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 2020,
     sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.eslint.json'],
+    project: ['./tsconfig.json', './tsconfig.eslint.json', './deployment/tsconfig.json'],
   },
   parser: '@typescript-eslint/parser',
   plugins: ['@typescript-eslint', 'import', 'hive'],

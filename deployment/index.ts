@@ -171,8 +171,6 @@ const schemaApi = deploySchema({
   redis: redisApi,
 });
 
-// https://github.com/the-guild-org/graphql-hive-deployment/pull/1306
-
 const supertokensApiKey = new random.RandomPassword('supertokens-api-key', { length: 31, special: false });
 const auth0LegacyMigrationKey = new random.RandomPassword('auth0-legacy-migration-key', { length: 69, special: false });
 
