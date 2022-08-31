@@ -51,16 +51,8 @@ export function deploySuperTokens({ apiKey }: { apiKey: Output<string> }) {
     spec: pb.asDeploymentSpec({ replicas: 1 }), // <-- here,
   });
 
-  // Pod -> group of containers ("internal network", main container + sidecars)
-  // Deployment -> definition of Pods
-  // Service -> Exposing some Pods to other pods, like "internal load balancer"
-
-  // SuperTokens: 1 Deployment that creates 1 Pod (with the SuePerToken image)
-  //            + 1 Service that to make it available
-
   const service = deployment.createService({});
 
-  // serviceLocalEndpoint
   return {
     deployment,
     service,
