@@ -101,8 +101,6 @@ jobs:
 
       - name: Build
         run: yarn workspace integration-tests run build-and-pack
-        env:
-          NEXT_PUBLIC_STRIPE_PUBLIC_KEY: ${{ secrets.TEST_STRIPE_PUBLIC_KEY }}
 
       - name: Pull images
         run: docker-compose -f integration-tests/docker-compose.yml pull
@@ -111,6 +109,7 @@ jobs:
         run: yarn workspace integration-tests run dockest
         timeout-minutes: 15
         env:
+          STRIPE_PUBLIC_KEY: ${{ secrets.TEST_STRIPE_PUBLIC_KEY }}
           STRIPE_SECRET_KEY: ${{ secrets.TEST_STRIPE_SECRET_KEY }}
           SUPERTOKENS_CONNECTION_URI: http://127.0.0.1:3567
           SUPERTOKENS_API_KEY: bubatzbieber6942096420
@@ -168,8 +167,6 @@ jobs:
       - name: Build
         if: steps.feature_flags.outputs.detected == 'true'
         run: yarn workspace integration-tests run build-and-pack
-        env:
-          NEXT_PUBLIC_STRIPE_PUBLIC_KEY: ${{ secrets.TEST_STRIPE_PUBLIC_KEY }}
 
       - name: Pull images
         if: steps.feature_flags.outputs.detected == 'true'
@@ -181,6 +178,7 @@ jobs:
         timeout-minutes: 15
         env:
           STRIPE_SECRET_KEY: ${{ secrets.TEST_STRIPE_SECRET_KEY }}
+          STRIPE_PUBLIC_KEY: ${{ secrets.TEST_STRIPE_PUBLIC_KEY }}
           SUPERTOKENS_CONNECTION_URI: http://127.0.0.1:3567
           SUPERTOKENS_API_KEY: bubatzbieber6942096420
 

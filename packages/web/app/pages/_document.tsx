@@ -7,7 +7,19 @@ export default class MyDocument extends Document {
     const initialProps = await Document.getInitialProps(ctx);
     const page = await ctx.renderPage();
     const styles = extractCritical(page.html);
-    return { ...initialProps, ...page, ...styles };
+    return {
+      ...initialProps,
+      ...page,
+      ...styles,
+      __ENV__: {
+        APP_BASE_URL: process.env['APP_BASE_URL'],
+        AUTH_GOOGLE: process.env['AUTH_GOOGLE'],
+        AUTH_GITHUB: process.env['AUTH_GITHUB'],
+        STRIPE_PUBLIC_KEY: process.env['STRIPE_PUBLIC_KEY'],
+        SENTRY_DSN: process.env['SENTRY_DSN'],
+        ENVIRONMENT: process.env['ENVIRONMENT'],
+      },
+    };
   }
 
   render() {
@@ -35,6 +47,12 @@ export default class MyDocument extends Document {
           <script
             id="force-dark-mode"
             dangerouslySetInnerHTML={{ __html: "localStorage['chakra-ui-color-mode'] = 'dark';" }}
+          />
+          <script
+            type="module"
+            dangerouslySetInnerHTML={{
+              __html: `globalThis["__ENV__"] = ${JSON.stringify((this.props as any).__ENV__)}`,
+            }}
           />
         </Head>
         <body className="bg-transparent font-sans text-white">

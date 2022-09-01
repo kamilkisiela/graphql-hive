@@ -15,7 +15,7 @@ export default async function superTokens(req: NextApiRequest & Request, res: Ne
   // NOTE: We need CORS only if we are querying the APIs from a different origin
   await NextCors(req, res, {
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
-    origin: process.env['NEXT_PUBLIC_APP_BASE_URL'],
+    origin: process.env['APP_BASE_URL'],
     credentials: true,
     allowedHeaders: ['content-type', ...supertokens.getAllCORSHeaders()],
   });

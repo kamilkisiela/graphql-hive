@@ -64,10 +64,6 @@ export function deployApp({
         { name: 'NODE_ENV', value: 'production' },
         { name: 'ENVIRONMENT', value: deploymentEnv.ENVIRONMENT },
         {
-          name: 'NEXT_PUBLIC_ENVIRONMENT',
-          value: deploymentEnv.ENVIRONMENT,
-        },
-        {
           name: 'RELEASE',
           value: appRelease,
         },
@@ -76,13 +72,12 @@ export function deployApp({
           value: appRelease,
         },
         { name: 'SENTRY_DSN', value: commonEnv.SENTRY_DSN },
-        { name: 'NEXT_PUBLIC_SENTRY_DSN', value: commonEnv.SENTRY_DSN },
         {
           name: 'GRAPHQL_ENDPOINT',
           value: serviceLocalEndpoint(graphql.service).apply(s => `${s}/graphql`),
         },
         {
-          name: 'NEXT_PUBLIC_APP_BASE_URL',
+          name: 'APP_BASE_URL',
           value: `https://${deploymentEnv.DEPLOYED_DNS}/`,
         },
         {
@@ -145,7 +140,7 @@ export function deployApp({
         },
         // GitHub
         {
-          name: 'NEXT_PUBLIC_AUTH_GITHUB',
+          name: 'AUTH_GITHUB',
           value: '1',
         },
         {
@@ -158,7 +153,7 @@ export function deployApp({
         },
         // Google
         {
-          name: 'NEXT_PUBLIC_AUTH_GOOGLE',
+          name: 'AUTH_GOOGLE',
           value: '1',
         },
         {
