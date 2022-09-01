@@ -10,7 +10,7 @@ import { createTRPCClient } from '@trpc/client';
 import type { EmailsApi } from '@hive/emails';
 
 const LegacyAuth0ConfigEnabledModel = zod.object({
-  NEXT_PUBLIC_AUTH_LEGACY_AUTH0: zod.literal('1'),
+  AUTH_LEGACY_AUTH0: zod.literal('1'),
   AUTH_LEGACY_AUTH0_AUDIENCE: zod.string(),
   AUTH_LEGACY_AUTH0_ISSUER_BASE_URL: zod.string(),
   AUTH_LEGACY_AUTH0_CLIENT_ID: zod.string(),
@@ -21,7 +21,7 @@ const LegacyAuth0ConfigEnabledModel = zod.object({
 
 const LegacyAuth0Config = zod.union([
   zod.object({
-    NEXT_PUBLIC_AUTH_LEGACY_AUTH0: zod.union([zod.void(), zod.literal('0')]),
+    AUTH_LEGACY_AUTH0: zod.union([zod.void(), zod.literal('0')]),
   }),
   LegacyAuth0ConfigEnabledModel,
 ]);
@@ -130,7 +130,7 @@ export const backendConfig = (): TypeInput => {
           /**
            * These overrides are only relevant for the legacy Auth0 -> SuperTokens migration (period).
            */
-          auth0Config['NEXT_PUBLIC_AUTH_LEGACY_AUTH0'] === '1' ? getAuth0Overrides(auth0Config) : undefined,
+          auth0Config['AUTH_LEGACY_AUTH0'] === '1' ? getAuth0Overrides(auth0Config) : undefined,
       }),
       SessionNode.init({
         override: {

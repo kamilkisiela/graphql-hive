@@ -111,10 +111,6 @@ jobs:
         run: yarn workspace integration-tests run dockest
         timeout-minutes: 15
         env:
-          AUTH0_DOMAIN: ${{ secrets.TEST_AUTH0_DOMAIN }}
-          AUTH0_CLIENT_ID: ${{ secrets.TEST_AUTH0_CLIENT_ID }}
-          AUTH0_CLIENT_SECRET: ${{ secrets.TEST_AUTH0_CLIENT_SECRET }}
-          AUTH0_SECRET: ${{ secrets.TEST_AUTH0_SECRET }}
           STRIPE_SECRET_KEY: ${{ secrets.TEST_STRIPE_SECRET_KEY }}
           SUPERTOKENS_CONNECTION_URI: http://127.0.0.1:3567
           SUPERTOKENS_API_KEY: bubatzbieber6942096420
@@ -184,10 +180,6 @@ jobs:
         run: yarn workspace integration-tests run dockest
         timeout-minutes: 15
         env:
-          AUTH0_DOMAIN: ${{ secrets.TEST_AUTH0_DOMAIN }}
-          AUTH0_CLIENT_ID: ${{ secrets.TEST_AUTH0_CLIENT_ID }}
-          AUTH0_CLIENT_SECRET: ${{ secrets.TEST_AUTH0_CLIENT_SECRET }}
-          AUTH0_SECRET: ${{ secrets.TEST_AUTH0_SECRET }}
           STRIPE_SECRET_KEY: ${{ secrets.TEST_STRIPE_SECRET_KEY }}
           SUPERTOKENS_CONNECTION_URI: http://127.0.0.1:3567
           SUPERTOKENS_API_KEY: bubatzbieber6942096420

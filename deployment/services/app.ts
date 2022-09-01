@@ -116,7 +116,7 @@ export function deployApp({
 
         // Auth0 Legacy
         {
-          name: 'NEXT_PUBLIC_AUTH_LEGACY_AUTH0',
+          name: 'AUTH_LEGACY_AUTH0',
           value: '1',
         },
         {
