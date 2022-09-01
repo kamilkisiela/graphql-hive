@@ -53,7 +53,7 @@ const createSession = async (superTokensUserId: string, email: string) => {
   const sessionData = createSessionPayload(superTokensUserId, email);
   const payload = {
     enableAntiCsrf: false,
-    userId: 'cdb5c5ff-605f-4c11-baf8-147a839ce953',
+    userId: superTokensUserId,
     userDataInDatabase: sessionData,
     userDataInJWT: sessionData,
   };
