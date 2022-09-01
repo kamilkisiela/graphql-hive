@@ -20,5 +20,4 @@ RUN apt update && apt install -y ca-certificates \
 
 COPY --from=build /usr/src/router/target/release/router .
 
-ENV RUST_BACKTRACE=full
 ENTRYPOINT ["./router"]
