@@ -17,4 +17,4 @@ RUN mkdir /app
 COPY --from=build /usr/src/router/target/release/router /app
 
 ENV RUST_BACKTRACE=full
-ENTRYPOINT /app/router
+ENTRYPOINT ["/app/router"]
