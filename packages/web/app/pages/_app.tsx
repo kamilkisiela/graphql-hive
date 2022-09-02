@@ -19,6 +19,8 @@ import { identify } from '@/lib/mixpanel';
 import { LAST_VISITED_ORG_KEY, GA_TRACKING_ID, CRISP_WEBSITE_ID } from '@/constants';
 import { Provider as UrqlProvider } from 'urql';
 import { urqlClient } from '@/lib/urql';
+import 'react-notifications-component/dist/theme.css';
+import { ReactNotifications } from 'react-notifications-component';
 
 const theme = extendTheme({ colors });
 
@@ -146,6 +148,7 @@ function App({ Component, pageProps }: AppProps): ReactElement {
           </ChakraProvider>
         </UrqlProvider>
       </SuperTokensWrapper>
+      {globalThis.window ? <ReactNotifications /> : null}
     </>
   );
 }

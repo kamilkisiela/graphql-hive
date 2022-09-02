@@ -1,9 +1,9 @@
 import { createClient, dedupExchange, errorExchange, fetchExchange } from 'urql';
 import { cacheExchange } from '@urql/exchange-graphcache';
 import { captureException } from '@sentry/nextjs';
-
 import { Mutation } from './urql-cache';
 import { networkStatusExchange } from './urql-exchanges/state';
+import { DefinitionNode, Kind, OperationDefinitionNode } from 'graphql';
 
 const noKey = (): null => null;
 
@@ -46,11 +46,24 @@ export const urqlClient = createClient({
       },
     }),
     errorExchange({
-      onError(error) {
+      onError(error, op) {
         if (error.response?.status === 401) {
           window.location.href = '/logout';
         } else {
           captureException(error);
+        }
+        if (globalThis.window && process.env['NEXT_PUBLIC_ENVIRONMENT'] === 'development') {
+          import('react-notifications-component').then(({ Store }) => {
+            const operationName = op.query.definitions.find(isOperationDefinition)?.name?.value ?? '<anonymous>';
+            Store.addNotification({
+              type: 'danger',
+              insert: 'top',
+              title: 'GraphQL Error',
+              message: `Operation ${operationName} raised error ${error.message}`,
+              container: 'bottom-right',
+            });
+          });
+          console.error(error);
         }
       },
     }),
@@ -58,3 +71,6 @@ export const urqlClient = createClient({
     fetchExchange,
   ].filter(Boolean),
 });
+
+const isOperationDefinition = (op: DefinitionNode): op is OperationDefinitionNode =>
+  op.kind === Kind.OPERATION_DEFINITION;

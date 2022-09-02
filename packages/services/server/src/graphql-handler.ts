@@ -14,6 +14,9 @@ import { useErrorHandler, Plugin } from '@graphql-yoga/node';
 import hyperid from 'hyperid';
 import zod from 'zod';
 import { HiveError } from '@hive/api';
+import { maxAliasesPlugin } from '@escape.tech/graphql-armor-max-aliases';
+import { maxDepthPlugin } from '@escape.tech/graphql-armor-max-depth';
+import { maxDirectivesPlugin } from '@escape.tech/graphql-armor-max-directives';
 
 const reqIdGenerate = hyperid({ fixedLength: true });
 
@@ -75,6 +78,18 @@ function useNoIntrospection(params: { signature: string }): Plugin<{ req: Fastif
   };
 }
 
+const graphqlArmorPlugins = [
+  maxAliasesPlugin({
+    n: 20,
+  }),
+  maxDepthPlugin({
+    n: 20,
+  }),
+  maxDirectivesPlugin({
+    n: 20,
+  }),
+];
+
 const sampleRatePerOperationName: {
   [key: string]: number;
 } = {
@@ -85,6 +100,7 @@ const sampleRatePerOperationName: {
 export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMethod => {
   const server = createServer<Context>({
     plugins: [
+      ...graphqlArmorPlugins,
       useSentry({
         startTransaction: false,
         renameTransaction: true,
