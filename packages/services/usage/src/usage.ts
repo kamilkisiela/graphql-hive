@@ -139,6 +139,8 @@ export function createUsage(config: {
     },
     // settings recommended by Azure EventHub https://docs.microsoft.com/en-us/azure/event-hubs/apache-kafka-configurations
     requestTimeout: 60_000, //
+    connectionTimeout: 5000,
+    authenticationTimeout: 5000,
   });
   const producer = kafka.producer({
     idempotent: true,
