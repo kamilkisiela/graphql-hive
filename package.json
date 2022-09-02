@@ -47,7 +47,7 @@
     "@graphql-codegen/typescript-graphql-request": "4.5.1",
     "@graphql-codegen/typescript-operations": "2.5.1",
     "@graphql-codegen/typescript-resolvers": "2.7.1",
-    "@graphql-inspector/cli": "0.0.0-canary.c5a95ca",
+    "@graphql-inspector/cli": "0.0.0-canary.7db8980",
     "@sentry/cli": "2.2.0",
     "@swc/core": "1.2.185",
     "@theguild/prettier-config": "0.0.2",

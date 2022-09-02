@@ -17,6 +17,7 @@ import { HiveError } from '@hive/api';
 import { maxAliasesPlugin } from '@escape.tech/graphql-armor-max-aliases';
 import { maxDepthPlugin } from '@escape.tech/graphql-armor-max-depth';
 import { maxDirectivesPlugin } from '@escape.tech/graphql-armor-max-directives';
+import { useTokenLimit } from './use-token-limit';
 
 const reqIdGenerate = hyperid({ fixedLength: true });
 
@@ -78,16 +79,17 @@ function useNoIntrospection(params: { signature: string }): Plugin<{ req: Fastif
   };
 }
 
-const graphqlArmorPlugins = [
+const graphqlArmorPlugins: Array<Plugin> = [
   maxAliasesPlugin({
-    n: 20,
+    n: 100,
+  }),
+  maxDirectivesPlugin({
+    n: 100,
   }),
   maxDepthPlugin({
     n: 20,
   }),
-  maxDirectivesPlugin({
-    n: 20,
-  }),
+  useTokenLimit({ tokenLimit: 800 }),
 ];
 
 const sampleRatePerOperationName: {

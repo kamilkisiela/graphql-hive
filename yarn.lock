@@ -2098,60 +2098,60 @@
     parse-filepath "^1.0.2"
     tslib "~2.4.0"
 
-"@graphql-inspector/audit-command@0.0.0-canary.c5a95ca":
-  version "0.0.0-canary.c5a95ca"
-  resolved "https://registry.yarnpkg.com/@graphql-inspector/audit-command/-/audit-command-0.0.0-canary.c5a95ca.tgz#e36b42de477d766615007641449eb9aa0a6af388"
-  integrity sha512-9c6JKzZTrkbcWT+ZmCP/jOeirnStztVo4iKfK5j/wDc9dQF6kO3OPukhzI9P+GuSE4CIev3B5pzziebmYNRB9Q==
+"@graphql-inspector/audit-command@0.0.0-canary.7db8980":
+  version "0.0.0-canary.7db8980"
+  resolved "https://registry.yarnpkg.com/@graphql-inspector/audit-command/-/audit-command-0.0.0-canary.7db8980.tgz#6f3537cbd1ee66924eb3669483823135907f6dd9"
+  integrity sha512-hbi7ChFQzUVVqrx1SZCSv9juRfT3wWjq1FcIzsHW/6F9El5d4g7SLbVNMxaQ6jAvvrsD8YPYktrOZR9A3XeqVw==
   dependencies:
-    "@graphql-inspector/commands" "0.0.0-canary.c5a95ca"
-    "@graphql-inspector/core" "0.0.0-canary.c5a95ca"
-    "@graphql-inspector/logger" "0.0.0-canary.c5a95ca"
+    "@graphql-inspector/commands" "0.0.0-canary.7db8980"
+    "@graphql-inspector/core" "0.0.0-canary.7db8980"
+    "@graphql-inspector/logger" "0.0.0-canary.7db8980"
     cli-table3 "0.6.2"
     tslib "^2.0.0"
 
-"@graphql-inspector/cli@0.0.0-canary.c5a95ca":
-  version "0.0.0-canary.c5a95ca"
-  resolved "https://registry.yarnpkg.com/@graphql-inspector/cli/-/cli-0.0.0-canary.c5a95ca.tgz#10cbafd127d876c3e1266dd8ea148fc80feea7f3"
-  integrity sha512-w95C3MCn7e2CFZ0zmR62AI3Z92IiHFBfb9NJiwYf1sfoHbo5MNko2MtV8S1J1ZP217iHQJMDyKE95dPVSCSYgQ==
+"@graphql-inspector/cli@0.0.0-canary.7db8980":
+  version "0.0.0-canary.7db8980"
+  resolved "https://registry.yarnpkg.com/@graphql-inspector/cli/-/cli-0.0.0-canary.7db8980.tgz#d773b046ee9608499dbd67c9d26bf1099cefd775"
+  integrity sha512-8nmmji2lpuTpVoLqpnT1IA/xnLGb0WeLtwSg9inLNwaVzoRrhfv/Y60CXpeiVkwwDwn2b3VnD14lTgt6BcB/2w==
   dependencies:
-    "@graphql-inspector/audit-command" "0.0.0-canary.c5a95ca"
-    "@graphql-inspector/code-loader" "0.0.0-canary.c5a95ca"
-    "@graphql-inspector/commands" "0.0.0-canary.c5a95ca"
-    "@graphql-inspector/coverage-command" "0.0.0-canary.c5a95ca"
-    "@graphql-inspector/diff-command" "0.0.0-canary.c5a95ca"
-    "@graphql-inspector/docs-command" "0.0.0-canary.c5a95ca"
-    "@graphql-inspector/git-loader" "0.0.0-canary.c5a95ca"
-    "@graphql-inspector/github-loader" "0.0.0-canary.c5a95ca"
-    "@graphql-inspector/graphql-loader" "0.0.0-canary.c5a95ca"
-    "@graphql-inspector/introspect-command" "0.0.0-canary.c5a95ca"
-    "@graphql-inspector/json-loader" "0.0.0-canary.c5a95ca"
-    "@graphql-inspector/loaders" "0.0.0-canary.c5a95ca"
-    "@graphql-inspector/serve-command" "0.0.0-canary.c5a95ca"
-    "@graphql-inspector/similar-command" "0.0.0-canary.c5a95ca"
-    "@graphql-inspector/url-loader" "0.0.0-canary.c5a95ca"
-    "@graphql-inspector/validate-command" "0.0.0-canary.c5a95ca"
+    "@graphql-inspector/audit-command" "0.0.0-canary.7db8980"
+    "@graphql-inspector/code-loader" "0.0.0-canary.7db8980"
+    "@graphql-inspector/commands" "0.0.0-canary.7db8980"
+    "@graphql-inspector/coverage-command" "0.0.0-canary.7db8980"
+    "@graphql-inspector/diff-command" "0.0.0-canary.7db8980"
+    "@graphql-inspector/docs-command" "0.0.0-canary.7db8980"
+    "@graphql-inspector/git-loader" "0.0.0-canary.7db8980"
+    "@graphql-inspector/github-loader" "0.0.0-canary.7db8980"
+    "@graphql-inspector/graphql-loader" "0.0.0-canary.7db8980"
+    "@graphql-inspector/introspect-command" "0.0.0-canary.7db8980"
+    "@graphql-inspector/json-loader" "0.0.0-canary.7db8980"
+    "@graphql-inspector/loaders" "0.0.0-canary.7db8980"
+    "@graphql-inspector/serve-command" "0.0.0-canary.7db8980"
+    "@graphql-inspector/similar-command" "0.0.0-canary.7db8980"
+    "@graphql-inspector/url-loader" "0.0.0-canary.7db8980"
+    "@graphql-inspector/validate-command" "0.0.0-canary.7db8980"
     tslib "^2.0.0"
     yargs "17.2.1"
 
-"@graphql-inspector/code-loader@0.0.0-canary.c5a95ca":
-  version "0.0.0-canary.c5a95ca"
-  resolved "https://registry.yarnpkg.com/@graphql-inspector/code-loader/-/code-loader-0.0.0-canary.c5a95ca.tgz#b5d537cd9b4b3ee567127edd75847ff255fbf870"
-  integrity sha512-7ZXEVo8utGeKQmpaaV015A+AchD3sFyaKawyC4KpYlP1sh1TFKdu9Av9btFPRdvIuJ4035KpJ96OLmEZU/GZFQ==
+"@graphql-inspector/code-loader@0.0.0-canary.7db8980":
+  version "0.0.0-canary.7db8980"
+  resolved "https://registry.yarnpkg.com/@graphql-inspector/code-loader/-/code-loader-0.0.0-canary.7db8980.tgz#e6e4e82278ce006a694cbde3ec75d35075fdbd30"
+  integrity sha512-KIbHFz9EZkIvmp8ub46f6xnr2V8ySzD7JR/UiP922pzOR0hauyZKaCXTkvLiXWIzJCgVYv2HLB0o1sCXYZ9+nw==
   dependencies:
     "@graphql-tools/code-file-loader" "^7.2.2"
     tslib "^2.0.0"
 
-"@graphql-inspector/commands@0.0.0-canary.c5a95ca":
-  version "0.0.0-canary.c5a95ca"
-  resolved "https://registry.yarnpkg.com/@graphql-inspector/commands/-/commands-0.0.0-canary.c5a95ca.tgz#65a1b9a43c14b64439c1646b873baa34648e9ecc"
-  integrity sha512-2XKTxprrDA9smbhAEFxzN7c9q6YPVRXrPj3plBdAF19p/4Mc4jLbj+NB/I5VsHwEK1EChaJBgfQXgq9p2C7PZQ==
+"@graphql-inspector/commands@0.0.0-canary.7db8980":
+  version "0.0.0-canary.7db8980"
+  resolved "https://registry.yarnpkg.com/@graphql-inspector/commands/-/commands-0.0.0-canary.7db8980.tgz#48621ab279c07ee556308e82ec44bd4173546cfc"
+  integrity sha512-yV9jaaKgqo+sjvb61pFcvSMmY0cxPAHeu45e+T9LKxw+a9dYREkERtoyYgCdS0volTonx9pxnVqCzLw9dMJwJQ==
   dependencies:
     tslib "^2.0.0"
 
-"@graphql-inspector/core@0.0.0-canary.c5a95ca":
-  version "0.0.0-canary.c5a95ca"
-  resolved "https://registry.yarnpkg.com/@graphql-inspector/core/-/core-0.0.0-canary.c5a95ca.tgz#f985a106ab44b2c79ef60c8c766ae34a7908063c"
-  integrity sha512-JgiF1bYVXr/KjZ1zQxEwZct7hqNwEmqyWo6fSrG0ZM8miHo0Nkm9VsVz4PO3OfaaKutGvMcsYo+6WhRInaRgSA==
+"@graphql-inspector/core@0.0.0-canary.7db8980":
+  version "0.0.0-canary.7db8980"
+  resolved "https://registry.yarnpkg.com/@graphql-inspector/core/-/core-0.0.0-canary.7db8980.tgz#7ad363bf3404f001c13bb2fefc0a15a596f905c1"
+  integrity sha512-PDCEVUruULBTfFGfqNT18q8mijyT1WNb8VOdeRWoMDltmfB0Qoza4WVv9iRvSGbvtooW6oVB88b4ZAdZqP2NhA==
   dependencies:
     dependency-graph "0.11.0"
     object-inspect "1.10.3"
@@ -2166,89 +2166,89 @@
     object-inspect "1.10.3"
     tslib "^2.0.0"
 
-"@graphql-inspector/coverage-command@0.0.0-canary.c5a95ca":
-  version "0.0.0-canary.c5a95ca"
-  resolved "https://registry.yarnpkg.com/@graphql-inspector/coverage-command/-/coverage-command-0.0.0-canary.c5a95ca.tgz#b3197be8891cb952ca2675f9cffca2ae27ac7bba"
-  integrity sha512-5Whsfj+t0Et4JXu22vikNs8OM6GzfBOhK1G8Y4oboeUoH992/I5cKA7SjuZymOgl4M+PouTlbF4yIpPjMElWHg==
+"@graphql-inspector/coverage-command@0.0.0-canary.7db8980":
+  version "0.0.0-canary.7db8980"
+  resolved "https://registry.yarnpkg.com/@graphql-inspector/coverage-command/-/coverage-command-0.0.0-canary.7db8980.tgz#d951622ee63c3cd18c9140a1fcc83dbeceacc1e3"
+  integrity sha512-dXmDZ0QZS5bsEPzOg26vBSPpWX1+3m0AG03dppDiOS36diafmxX5KfTE+UxpsYFsYrrE3ey3o/n9lFR7+C0+Xg==
   dependencies:
-    "@graphql-inspector/commands" "0.0.0-canary.c5a95ca"
-    "@graphql-inspector/core" "0.0.0-canary.c5a95ca"
-    "@graphql-inspector/logger" "0.0.0-canary.c5a95ca"
+    "@graphql-inspector/commands" "0.0.0-canary.7db8980"
+    "@graphql-inspector/core" "0.0.0-canary.7db8980"
+    "@graphql-inspector/logger" "0.0.0-canary.7db8980"
     tslib "^2.0.0"
 
-"@graphql-inspector/diff-command@0.0.0-canary.c5a95ca":
-  version "0.0.0-canary.c5a95ca"
-  resolved "https://registry.yarnpkg.com/@graphql-inspector/diff-command/-/diff-command-0.0.0-canary.c5a95ca.tgz#024ea892866b8d98f1ade69e582a9da387a0d7c6"
-  integrity sha512-kaZkwh6LCxLHmzkZazCXgsSENi/mb/7j1Pl0S2DDE7cNUjSUAIty16bL0hiZKRBJSpBuyf/iIxW+VhHJMezsDw==
+"@graphql-inspector/diff-command@0.0.0-canary.7db8980":
+  version "0.0.0-canary.7db8980"
+  resolved "https://registry.yarnpkg.com/@graphql-inspector/diff-command/-/diff-command-0.0.0-canary.7db8980.tgz#9d4764cf40b7589e9e19375df743fddc43becf83"
+  integrity sha512-M3ws+5C1tjRSqyQ2OXXzTfl16mWeJWxxsObRw/Zk3gPpgV8FnIHw/JA2VUqS3UgUx1fGTZT1vv7WRHb9zMPOvw==
   dependencies:
-    "@graphql-inspector/commands" "0.0.0-canary.c5a95ca"
-    "@graphql-inspector/core" "0.0.0-canary.c5a95ca"
-    "@graphql-inspector/logger" "0.0.0-canary.c5a95ca"
+    "@graphql-inspector/commands" "0.0.0-canary.7db8980"
+    "@graphql-inspector/core" "0.0.0-canary.7db8980"
+    "@graphql-inspector/logger" "0.0.0-canary.7db8980"
     tslib "^2.0.0"
 
-"@graphql-inspector/docs-command@0.0.0-canary.c5a95ca":
-  version "0.0.0-canary.c5a95ca"
-  resolved "https://registry.yarnpkg.com/@graphql-inspector/docs-command/-/docs-command-0.0.0-canary.c5a95ca.tgz#c9a2d6fc4bfdc9bde7e6e8e6a4e0f731699f242f"
-  integrity sha512-lCEkqU39TAcJSqGEWM8HFouA3Zem10a24uv0Zd8Bavnc6hMgqHagZrF4q8xIy/dr7OfeZ6rjS1BV9bkYtexLgA==
+"@graphql-inspector/docs-command@0.0.0-canary.7db8980":
+  version "0.0.0-canary.7db8980"
+  resolved "https://registry.yarnpkg.com/@graphql-inspector/docs-command/-/docs-command-0.0.0-canary.7db8980.tgz#024496736e57d0a8dc0a0be3a2947b3e27c47661"
+  integrity sha512-dz/ZwLiuoHnZpDfiEqSTVdW7Y2g9kiVUPVLTuGkBndr/HsyVkjSl2vxr9VYU3k/Zt3D0XSxrUjcXkffgGBicsQ==
   dependencies:
-    "@graphql-inspector/commands" "0.0.0-canary.c5a95ca"
+    "@graphql-inspector/commands" "0.0.0-canary.7db8980"
     open "8.2.1"
     tslib "^2.0.0"
 
-"@graphql-inspector/git-loader@0.0.0-canary.c5a95ca":
-  version "0.0.0-canary.c5a95ca"
-  resolved "https://registry.yarnpkg.com/@graphql-inspector/git-loader/-/git-loader-0.0.0-canary.c5a95ca.tgz#b35104efb82d3b7368725c0aac478c887d107cb3"
-  integrity sha512-lTxCTunJ9SMP1tRsFsIK5JdUSK+ADLwVxlwHGojdfsbzpKB6AaI2OBFQowE/RWqfH1WSrsmn9vWd+1Pb2FdFGQ==
+"@graphql-inspector/git-loader@0.0.0-canary.7db8980":
+  version "0.0.0-canary.7db8980"
+  resolved "https://registry.yarnpkg.com/@graphql-inspector/git-loader/-/git-loader-0.0.0-canary.7db8980.tgz#e3345e13ad8a0a677f0820b2e94014619cfd6d61"
+  integrity sha512-WJcNth83AfS5XRNKt5wwfslSQBS/p//f85EoVPJcUmyw3BZtl32jFi/a9pqa4+FSHyOjGa3tI2xSdIbM7sQTSA==
   dependencies:
     "@graphql-tools/git-loader" "^7.1.2"
     tslib "^2.0.0"
 
-"@graphql-inspector/github-loader@0.0.0-canary.c5a95ca":
-  version "0.0.0-canary.c5a95ca"
-  resolved "https://registry.yarnpkg.com/@graphql-inspector/github-loader/-/github-loader-0.0.0-canary.c5a95ca.tgz#a339bc09e2a0c46e4aa92a68f7a2bbe7056e26e7"
-  integrity sha512-n5pw1BquNXZIPVKEsxJYlg2aFZVi/DaYKL0qvW2fLQgqdUFF6FUA+48sK94b6aRY44mC4x1CUOeD5WwRyI0IOQ==
+"@graphql-inspector/github-loader@0.0.0-canary.7db8980":
+  version "0.0.0-canary.7db8980"
+  resolved "https://registry.yarnpkg.com/@graphql-inspector/github-loader/-/github-loader-0.0.0-canary.7db8980.tgz#34499053b705da2892d0c17be34d8aa0f51a4c9e"
+  integrity sha512-tcJ6cwbUnsVLq2zTjf9KR12IwttCnXQ/AM4IN5OakaOWLoyHTcWMXXMYo1hERKQyvIoTAtU6o7pqhdMxioiRuA==
   dependencies:
     "@graphql-tools/github-loader" "^7.1.1"
     tslib "^2.0.0"
 
-"@graphql-inspector/graphql-loader@0.0.0-canary.c5a95ca":
-  version "0.0.0-canary.c5a95ca"
-  resolved "https://registry.yarnpkg.com/@graphql-inspector/graphql-loader/-/graphql-loader-0.0.0-canary.c5a95ca.tgz#83473dd38646b5658ff8723abe49708aa489561a"
-  integrity sha512-YtUU2D7DHPKocQHN799qPwI1BHLoV9YxHMnY9ZxloQ4OCOJwEO2JhNPJsESRFblvsJ5bjGFlvQEY4AmFkGIYAw==
+"@graphql-inspector/graphql-loader@0.0.0-canary.7db8980":
+  version "0.0.0-canary.7db8980"
+  resolved "https://registry.yarnpkg.com/@graphql-inspector/graphql-loader/-/graphql-loader-0.0.0-canary.7db8980.tgz#44981a3209dd2ea305d4122b21261ef0bc52bb02"
+  integrity sha512-gwq89OZLU0O35BRMQHcB/bAZCn8udwtEj9ttR9FKD1jEfevNpsyXuhhW72k615VgNzn/nNzQ1E1uiVRcBtInpA==
   dependencies:
     "@graphql-tools/graphql-file-loader" "^7.3.2"
     tslib "^2.0.0"
 
-"@graphql-inspector/introspect-command@0.0.0-canary.c5a95ca":
-  version "0.0.0-canary.c5a95ca"
-  resolved "https://registry.yarnpkg.com/@graphql-inspector/introspect-command/-/introspect-command-0.0.0-canary.c5a95ca.tgz#2a70da396f1811ebb1db41a8857a1c35c2527541"
-  integrity sha512-4nH1kk2tzIfFuqi6gOVQZR5Rvn72/WzFJ5JDA1wkjB7+zm39baT6oAESUc0K7TfTiHgULjereD9X/rhrU0vJ1A==
+"@graphql-inspector/introspect-command@0.0.0-canary.7db8980":
+  version "0.0.0-canary.7db8980"
+  resolved "https://registry.yarnpkg.com/@graphql-inspector/introspect-command/-/introspect-command-0.0.0-canary.7db8980.tgz#9e06a9ec898fcf813af344dd394999349873e393"
+  integrity sha512-KO018U+uWTDPx3tBbWNVBH+JhWuFwRumvGfMD5olvrraybmfo81n1lhEyej5LfIJpSbWpoPyiP3so7uuvbbpOA==
   dependencies:
-    "@graphql-inspector/commands" "0.0.0-canary.c5a95ca"
-    "@graphql-inspector/core" "0.0.0-canary.c5a95ca"
-    "@graphql-inspector/logger" "0.0.0-canary.c5a95ca"
+    "@graphql-inspector/commands" "0.0.0-canary.7db8980"
+    "@graphql-inspector/core" "0.0.0-canary.7db8980"
+    "@graphql-inspector/logger" "0.0.0-canary.7db8980"
     tslib "^2.0.0"
 
-"@graphql-inspector/json-loader@0.0.0-canary.c5a95ca":
-  version "0.0.0-canary.c5a95ca"
-  resolved "https://registry.yarnpkg.com/@graphql-inspector/json-loader/-/json-loader-0.0.0-canary.c5a95ca.tgz#ad64a05d412294f04561c033ccebe3dfedbb8cf6"
-  integrity sha512-U9KtYn4KoKzKbB2Bqr6hpeQ0RoeXl49oqobSACTTTbfwmmz1UjBIYobUQDGK+bTzs5Sp2V4hoYy6i4tVC1vjKw==
+"@graphql-inspector/json-loader@0.0.0-canary.7db8980":
+  version "0.0.0-canary.7db8980"
+  resolved "https://registry.yarnpkg.com/@graphql-inspector/json-loader/-/json-loader-0.0.0-canary.7db8980.tgz#58cb1586a4c184b9338a803f65a7ab3a2124f6b3"
+  integrity sha512-dpr/Qt5Br7mqaqI2gEsK1e7gDqELl7zITVMSppHjQFwTlapSIxd8ayFD0Us9pvTz0PtfSkC9y4uwR9QVCKTw2A==
   dependencies:
     "@graphql-tools/json-file-loader" "^7.3.2"
     tslib "^2.0.0"
 
-"@graphql-inspector/loaders@0.0.0-canary.c5a95ca":
-  version "0.0.0-canary.c5a95ca"
-  resolved "https://registry.yarnpkg.com/@graphql-inspector/loaders/-/loaders-0.0.0-canary.c5a95ca.tgz#447e44d9eceef2d7919c6a11884a15abfcbb624d"
-  integrity sha512-xFZOv/llW2TyM9LzzLuSIBgeLlsKy2/gdzRUiYLPpjuHHFon8QE7lFkfq2ygE3rQY5mkqjAWhclh9uNPgcVNrA==
+"@graphql-inspector/loaders@0.0.0-canary.7db8980":
+  version "0.0.0-canary.7db8980"
+  resolved "https://registry.yarnpkg.com/@graphql-inspector/loaders/-/loaders-0.0.0-canary.7db8980.tgz#1783ae13b9baf50820107512dc86890f6638485d"
+  integrity sha512-+1N+57pxXhjqyi965Tux/4ULpXbwNdtNG/cY+ULqi3M+PLbIZnL/lQW2cfItz0FKBemkIHjUyThoTRuGXmz9Vw==
   dependencies:
     "@graphql-tools/load" "^7.4.1"
     tslib "^2.0.0"
 
-"@graphql-inspector/logger@0.0.0-canary.c5a95ca":
-  version "0.0.0-canary.c5a95ca"
-  resolved "https://registry.yarnpkg.com/@graphql-inspector/logger/-/logger-0.0.0-canary.c5a95ca.tgz#131958a31507f515316b85f9c86427f79d3bb3d1"
-  integrity sha512-2n9KTPvMSidg/6CPujyOEMvUZMbbvGZYAAXQWoMA/iUArfSOjXsjUc7JZSHcMX17tSqZq9Rgbeoti8Qhn1iX8Q==
+"@graphql-inspector/logger@0.0.0-canary.7db8980":
+  version "0.0.0-canary.7db8980"
+  resolved "https://registry.yarnpkg.com/@graphql-inspector/logger/-/logger-0.0.0-canary.7db8980.tgz#02eeca5fe3915309acddf1d8e774a3c66d04dcec"
+  integrity sha512-YaH4Ti9LnmACuR0v8zz+DFLH2UCtoGXXdDnl/qxsjbrrRZO25+B0v+nVDmjRn/0Z9J4h1loXu1efUOBy1Oupjg==
   dependencies:
     chalk "4.1.2"
     figures "3.2.0"
@@ -2256,43 +2256,43 @@
     std-env "2.3.0"
     tslib "^2.0.0"
 
-"@graphql-inspector/serve-command@0.0.0-canary.c5a95ca":
-  version "0.0.0-canary.c5a95ca"
-  resolved "https://registry.yarnpkg.com/@graphql-inspector/serve-command/-/serve-command-0.0.0-canary.c5a95ca.tgz#0bfc464f8a8b39a3761a1d42490a3a162c14d5d2"
-  integrity sha512-dlDJMYRHcf6QmG+BbR8MgHvxfU2O2ICY1gisNsYhPQ43uuqNDKhLdevpZdRMvvZXAC2KBGVjf1fkvK7ai39XJA==
+"@graphql-inspector/serve-command@0.0.0-canary.7db8980":
+  version "0.0.0-canary.7db8980"
+  resolved "https://registry.yarnpkg.com/@graphql-inspector/serve-command/-/serve-command-0.0.0-canary.7db8980.tgz#da70ee5f76a919bd84e92c9ceca5c9ac6e9f0899"
+  integrity sha512-phdvZ+XXVKYdIdWt4nndjOlsWVx1BJkVpSc8sf1zdTe49DOEsKzptSYls3DxE5e5vjGGrkMVJTbQ3eA9GObxdw==
   dependencies:
-    "@graphql-inspector/commands" "0.0.0-canary.c5a95ca"
-    "@graphql-inspector/logger" "0.0.0-canary.c5a95ca"
+    "@graphql-inspector/commands" "0.0.0-canary.7db8980"
+    "@graphql-inspector/logger" "0.0.0-canary.7db8980"
     "@graphql-yoga/node" "2.0.0"
     open "8.2.1"
     tslib "^2.0.0"
 
-"@graphql-inspector/similar-command@0.0.0-canary.c5a95ca":
-  version "0.0.0-canary.c5a95ca"
-  resolved "https://registry.yarnpkg.com/@graphql-inspector/similar-command/-/similar-command-0.0.0-canary.c5a95ca.tgz#22ad6f78ea3b1cc2eaf8bc6b7501386853b6cc85"
-  integrity sha512-BLhdElvuKxBJzEKXZ7CYx9lnjerxzJ+Va9DucOc8R/f4yBEyFsJvykNRPjdzVUCUAwfOiE7OQxYniFDRI2pWAA==
+"@graphql-inspector/similar-command@0.0.0-canary.7db8980":
+  version "0.0.0-canary.7db8980"
+  resolved "https://registry.yarnpkg.com/@graphql-inspector/similar-command/-/similar-command-0.0.0-canary.7db8980.tgz#f54a63728f2358a958005f1842db20bab981964f"
+  integrity sha512-5LZqPFSNbc6Rp6HWAlieg1WDD2WlOOTH8iIHnLVQrEkOAkOrOjCmPlUCkiNq84qRp0bavsUNIWujAdrPxTn9GA==
   dependencies:
-    "@graphql-inspector/commands" "0.0.0-canary.c5a95ca"
-    "@graphql-inspector/core" "0.0.0-canary.c5a95ca"
-    "@graphql-inspector/logger" "0.0.0-canary.c5a95ca"
+    "@graphql-inspector/commands" "0.0.0-canary.7db8980"
+    "@graphql-inspector/core" "0.0.0-canary.7db8980"
+    "@graphql-inspector/logger" "0.0.0-canary.7db8980"
     tslib "^2.0.0"
 
-"@graphql-inspector/url-loader@0.0.0-canary.c5a95ca":
-  version "0.0.0-canary.c5a95ca"
-  resolved "https://registry.yarnpkg.com/@graphql-inspector/url-loader/-/url-loader-0.0.0-canary.c5a95ca.tgz#bd5460fbd1a0824a6c03e371e7e84565cef6b137"
-  integrity sha512-JWfBJNx9yCJrJXTbG4QeC0UIvpMoYT+vXnWV3kwyN+qw0JOQM+MpMmPebEcoeENSzbBRm22igYe8ji5EHep5lQ==
+"@graphql-inspector/url-loader@0.0.0-canary.7db8980":
+  version "0.0.0-canary.7db8980"
+  resolved "https://registry.yarnpkg.com/@graphql-inspector/url-loader/-/url-loader-0.0.0-canary.7db8980.tgz#b30ca960ff683884a9556ac10463fc3fd709e5cf"
+  integrity sha512-2yBxy+t5eShAz8pY+Qi0YrpMfoD3l1eKFIdu7Nm3wOane1qnX6iTRaopspXnEG3H6ED1qL79eOVAIPD71+L1gw==
   dependencies:
     "@graphql-tools/url-loader" "^7.4.2"
     tslib "^2.0.0"
 
-"@graphql-inspector/validate-command@0.0.0-canary.c5a95ca":
-  version "0.0.0-canary.c5a95ca"
-  resolved "https://registry.yarnpkg.com/@graphql-inspector/validate-command/-/validate-command-0.0.0-canary.c5a95ca.tgz#4e1b055e88138dfe1926ae8132ad5ec1eb1ef495"
-  integrity sha512-V/+LDuZ1HOaWaWLTcVYp/gIdbQpNh5cYjAcs2BcgmeaQAxTPd8LlqkYtnXmb5EWkFtpybQt7fGq9IUs9UdyWtw==
+"@graphql-inspector/validate-command@0.0.0-canary.7db8980":
+  version "0.0.0-canary.7db8980"
+  resolved "https://registry.yarnpkg.com/@graphql-inspector/validate-command/-/validate-command-0.0.0-canary.7db8980.tgz#56373010ece9fc8cf4a3590553830ba30a6c1537"
+  integrity sha512-D1029q1RSpfQCpn+sFI2ohlcKDnPWmuVrVxTCZxhHCHBA49bbXOfhtCY9TlCNQ/Pk8Q5s6q1tDRuYPKSKvkwyg==
   dependencies:
-    "@graphql-inspector/commands" "0.0.0-canary.c5a95ca"
-    "@graphql-inspector/core" "0.0.0-canary.c5a95ca"
-    "@graphql-inspector/logger" "0.0.0-canary.c5a95ca"
+    "@graphql-inspector/commands" "0.0.0-canary.7db8980"
+    "@graphql-inspector/core" "0.0.0-canary.7db8980"
+    "@graphql-inspector/logger" "0.0.0-canary.7db8980"
     tslib "^2.0.0"
 
 "@graphql-tools/apollo-engine-loader@^7.3.1":

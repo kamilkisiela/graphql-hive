@@ -266,8 +266,9 @@ jobs:
             "packages/web/app/**/*.graphql|packages/libraries/cli/**/*.graphql|packages/web/app/**/*.ts(x)" \
             "packages/**/module.graphql.ts" \
             --maxDepth=20 \
-            --maxAliasCount=20 \
-            --maxDirectiveCount=20
+            --maxAliasCount=100 \
+            --maxDirectiveCount=20 \
+            --maxTokenCount=800
 
   test:
     name: Tests
