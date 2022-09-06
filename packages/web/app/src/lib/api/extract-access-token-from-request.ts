@@ -16,7 +16,7 @@ export async function extractAccessTokenFromRequest(req: NextApiRequest, res: Ne
     req,
     res
   );
-  // Session can be undefined in case access token was sent.
+  // Session can be undefined in case no access token was sent.
   const accessToken = (req as any).session?.getAccessToken() || null;
   return accessToken;
 }
