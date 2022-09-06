@@ -14,14 +14,12 @@ import {
 } from '@chakra-ui/react';
 import { useQuery } from 'urql';
 import { MeDocument } from '@/graphql';
-import { useUser } from '../auth/AuthProvider';
 import { OrganizationSwitcher } from '../organization/Switcher';
 import { ProjectSwitcher } from '../project/Switcher';
 import { TargetSwitcher } from '../target/Switcher';
 import { Logo } from './Logo';
 import { Feedback } from './Feedback';
 import { UserSettings } from './UserSettings';
-import { ManagerRoleGuard } from '../auth/ManagerRoleGuard';
 import ThemeButton from './ThemeButton';
 
 export interface NavigationItem {
@@ -99,7 +97,6 @@ export function Navigation() {
   const { organization, project, target, visible } = useNavigation();
   const feedback = useDisclosure();
   const settings = useDisclosure();
-  const { user } = useUser();
   const [meQuery] = useQuery({
     query: MeDocument,
   });
@@ -166,11 +163,9 @@ export function Navigation() {
                   as={Button}
                   tw="font-normal"
                   variant="ghost"
-                  rightIcon={
-                    <img tw="h-6 w-6 rounded-full" src={user?.picture ?? undefined} alt={user?.name ?? undefined} />
-                  }
+                  rightIcon={<img tw="h-6 w-6 rounded-full" src={undefined} alt={me?.displayName ?? undefined} />}
                 >
-                  {me?.displayName ?? user?.nickname}
+                  {me?.displayName}
                 </MenuButton>
                 <MenuList bg={dropdownBgColor} color={dropdownTextColor}>
                   {me && (
@@ -201,17 +196,6 @@ export function Navigation() {
                     >
                       GraphiQL
                     </MenuItem>
-                  ) : null}
-                  {user?.metadata?.admin ? (
-                    <ManagerRoleGuard>
-                      <MenuItem
-                        onClick={() => {
-                          window.location.href = '/manage';
-                        }}
-                      >
-                        Manage Instance
-                      </MenuItem>
-                    </ManagerRoleGuard>
                   ) : null}
                   <MenuItem
                     onClick={() => {

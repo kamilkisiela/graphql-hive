@@ -1,6 +1,7 @@
 import { ReactElement, useCallback, useState } from 'react';
 import { useMutation, useQuery } from 'urql';
 
+import { authenticated, withSessionProtection } from '@/components/authenticated-container';
 import { ProjectLayout } from '@/components/layouts';
 import { Button, Card, Checkbox, Heading, Table, Tag, Title } from '@/components/v2';
 import { CreateAlertModal, CreateChannelModal } from '@/components/v2/modals';
@@ -175,7 +176,7 @@ const Page = (props: { organization: OrganizationFieldsFragment; project: Projec
   );
 };
 
-export default function AlertsPage(): ReactElement {
+function AlertsPage(): ReactElement {
   return (
     <>
       <Title title="Alerts" />
@@ -185,3 +186,7 @@ export default function AlertsPage(): ReactElement {
     </>
   );
 }
+
+export const getServerSideProps = withSessionProtection();
+
+export default authenticated(AlertsPage);

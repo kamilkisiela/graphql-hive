@@ -48,7 +48,7 @@ export const urqlClient = createClient({
     errorExchange({
       onError(error) {
         if (error.response?.status === 401) {
-          window.location.href = '/api/auth/logout';
+          window.location.href = '/logout';
         } else {
           captureException(error);
         }

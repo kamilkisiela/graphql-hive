@@ -20,11 +20,13 @@ import { deployBotKube } from './services/bot-kube';
 import { deployProxy } from './services/proxy';
 import { deployClickhouse } from './services/clickhouse';
 import { deployUsageEstimation } from './services/usage-estimation';
+import { deploySuperTokens } from './services/supertokens';
 import { createPackageHelper } from './utils/pack';
 import * as azure from '@pulumi/azure';
 import { optimizeAzureCluster } from './utils/azure-helpers';
 import { deployRateLimit } from './services/rate-limit';
 import { deployStripeBilling } from './services/billing';
+import * as random from '@pulumi/random';
 
 const packageHelper = createPackageHelper();
 
@@ -169,6 +171,23 @@ const schemaApi = deploySchema({
   redis: redisApi,
 });
 
+const supertokensApiKey = new random.RandomPassword('supertokens-api-key', { length: 31, special: false });
+const auth0LegacyMigrationKey = new random.RandomPassword('auth0-legacy-migration-key', { length: 69, special: false });
+
+const oauthConfig = new pulumi.Config('oauth');
+
+const githubConfig = {
+  clientId: oauthConfig.requireSecret('githubClient'),
+  clientSecret: oauthConfig.requireSecret('githubSecret'),
+};
+
+const googleConfig = {
+  clientId: oauthConfig.requireSecret('googleClient'),
+  clientSecret: oauthConfig.requireSecret('googleSecret'),
+};
+
+const supertokens = deploySuperTokens({ apiKey: supertokensApiKey.result });
+
 const graphqlApi = deployGraphQL({
   clickhouse: clickhouseApi,
   packageHelper,
@@ -185,6 +204,13 @@ const graphqlApi = deployGraphQL({
   rateLimit: rateLimitApi,
   billing: billingApi,
   emails: emailsApi,
+  supertokensConfig: {
+    apiKey: supertokensApiKey.result,
+    endpoint: supertokens.localEndpoint,
+  },
+  auth0Config: {
+    internalApiKey: auth0LegacyMigrationKey.result,
+  },
 });
 
 const app = deployApp({
@@ -193,6 +219,16 @@ const app = deployApp({
   dbMigrations,
   packageHelper,
   storageContainer,
+  supertokensConfig: {
+    apiKey: supertokensApiKey.result,
+    endpoint: supertokens.localEndpoint,
+  },
+  auth0Config: {
+    internalApiKey: auth0LegacyMigrationKey.result,
+  },
+  githubConfig,
+  googleConfig,
+  emailsEndpoint: emailsApi.localEndpoint,
 });
 
 const landingPage = deployLandingPage({

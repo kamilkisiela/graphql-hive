@@ -1,7 +1,14 @@
 #!/usr/bin/env node
 
 import 'reflect-metadata';
-import { createServer, startMetrics, ensureEnv, registerShutdown, reportReadiness } from '@hive/service-common';
+import {
+  createServer,
+  startMetrics,
+  ensureEnv,
+  registerShutdown,
+  reportReadiness,
+  optionalEnv,
+} from '@hive/service-common';
 import { createRegistry, LogFn, Logger } from '@hive/api';
 import { createStorage as createPostgreSQLStorage, createConnectionString } from '@hive/storage';
 import got from 'got';
@@ -11,6 +18,12 @@ import { Dedupe, ExtraErrorData } from '@sentry/integrations';
 import { asyncStorage } from './async-storage';
 import { graphqlHandler } from './graphql-handler';
 import { clickHouseReadDuration, clickHouseElapsedDuration } from './metrics';
+import zod from 'zod';
+
+const LegacySetUserIdMappingPayloadModel = zod.object({
+  auth0UserId: zod.string(),
+  superTokensUserId: zod.string(),
+});
 
 export async function main() {
   Sentry.init({
@@ -109,8 +122,9 @@ export async function main() {
       };
     }
 
-    const graphqlLogger = createGraphQLLogger();
+    const storage = await createPostgreSQLStorage(createConnectionString(process.env as any));
 
+    const graphqlLogger = createGraphQLLogger();
     const registry = createRegistry({
       tokens: {
         endpoint: ensureEnv('TOKENS_ENDPOINT'),
@@ -134,7 +148,7 @@ export async function main() {
         endpoint: process.env.RATE_LIMIT_ENDPOINT ? ensureEnv('RATE_LIMIT_ENDPOINT').replace(/\/$/g, '') : null,
       },
       logger: graphqlLogger,
-      storage: await createPostgreSQLStorage(createConnectionString(process.env as any)),
+      storage,
       redis: {
         host: ensureEnv('REDIS_HOST'),
         port: ensureEnv('REDIS_PORT', 'number'),
@@ -192,6 +206,10 @@ export async function main() {
       graphiqlEndpoint: graphqlPath,
       registry,
       signature,
+      supertokens: {
+        connectionUri: ensureEnv('SUPERTOKENS_CONNECTION_URI'),
+        apiKey: ensureEnv('SUPERTOKENS_API_KEY'),
+      },
     });
 
     server.route({
@@ -260,6 +278,31 @@ export async function main() {
         res.status(500).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
       },
     });
+
+    const authLegacyAuth0 = optionalEnv('AUTH_LEGACY_AUTH0', '0');
+    const authLegacyAPIKey = optionalEnv('AUTH_LEGACY_AUTH0_INTERNAL_API_KEY', '');
+
+    if (authLegacyAuth0 === '1') {
+      server.route({
+        method: 'POST',
+        url: '/__legacy/update_user_id_mapping',
+        async handler(req, reply) {
+          if (req.headers['x-authorization'] !== authLegacyAPIKey) {
+            reply.status(401).send({ error: 'Invalid update user id mapping key.', code: 'ERR_INVALID_KEY' }); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+            return;
+          }
+
+          const { auth0UserId, superTokensUserId } = LegacySetUserIdMappingPayloadModel.parse(req.body);
+
+          await storage.setSuperTokensUserId({
+            auth0UserId: auth0UserId.replace('google|', 'google-oauth2|'),
+            superTokensUserId,
+            externalUserId: auth0UserId,
+          });
+          reply.status(200).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+        },
+      });
+    }
 
     if (process.env.METRICS_ENABLED === 'true') {
       await startMetrics();

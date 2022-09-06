@@ -18,6 +18,8 @@
     "jsx": "preserve",
     "jsxImportSource": "@emotion/react",
     "paths": {
+      "@hive/emails": ["../../services/emails/src/api.ts"],
+      "@hive/service-common": ["../../services/service-common/src/index.ts"],
       "@/*": ["src/*"]
     },
     "incremental": true

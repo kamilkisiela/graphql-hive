@@ -10,8 +10,9 @@ declare module '@n1ru4l/react-time-ago' {
 
 declare namespace NodeJS {
   export interface ProcessEnv {
-    APP_BASE_URL: string;
+    NEXT_PUBLIC_APP_BASE_URL: string;
     GITHUB_APP_NAME: string;
     GRAPHQL_ENDPOINT: string;
+    SUPERTOKENS_CONNECTION_URI: string;
   }
 }

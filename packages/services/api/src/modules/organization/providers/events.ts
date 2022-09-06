@@ -3,6 +3,6 @@ export interface EnsurePersonalOrganizationEventPayload {
   name: string;
   user: {
     id: string;
-    externalAuthUserId: string;
+    superTokensUserId: string;
   };
 }

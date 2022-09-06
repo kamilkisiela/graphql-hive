@@ -201,16 +201,11 @@ services:
       ENCRYPTION_SECRET: 8ebe95cf24c1fbe306e9fa32c8c33148
       FEEDBACK_SLACK_TOKEN: ''
       FEEDBACK_SLACK_CHANNEL: '#hive'
-      AUTH0_SECRET: ${AUTH0_SECRET}
-      AUTH0_DOMAIN: ${AUTH0_DOMAIN}
-      AUTH0_CLIENT_ID: ${AUTH0_CLIENT_ID}
-      AUTH0_CLIENT_SECRET: ${AUTH0_CLIENT_SECRET}
-      AUTH0_SCOPE: 'openid profile offline_access'
-      AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
-      AUTH0_CONNECTION: ${AUTH0_CONNECTION}\
       WEB_APP_URL: https://app.graphql-hive.com
       PORT: 3001
       FF_CLICKHOUSE_V2_TABLES: ${FF_CLICKHOUSE_V2_TABLES}
+      SUPERTOKENS_CONNECTION_URI: http://supertokens:3567
+      SUPERTOKENS_API_KEY: bubatzbieber6942096420
 
   schema:
     image: node:16.13.2-alpine3.14
@@ -528,6 +523,21 @@ services:
       ROARR_LOG: 'true'
       USAGE_ESTIMATOR_ENDPOINT: http://usage_estimator:3008
       PORT: 3010
+
+  supertokens:
+    image: registry.supertokens.io/supertokens/supertokens-postgresql:3.9
+    networks:
+      - 'stack'
+    ports:
+      - '3567:3567'
+    environment:
+      POSTGRESQL_USER: postgres
+      POSTGRESQL_PASSWORD: postgres
+      POSTGRESQL_DATABASE_NAME: registry
+      POSTGRESQL_TABLE_NAMES_PREFIX: 'supertokens'
+      POSTGRESQL_HOST: db
+      POSTGRESQL_PORT: 5432
+      API_KEYS: bubatzbieber6942096420
 
 networks:
   stack: {}

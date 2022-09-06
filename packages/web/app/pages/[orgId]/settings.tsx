@@ -3,6 +3,7 @@ import { useFormik } from 'formik';
 import { gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 
+import { authenticated, withSessionProtection } from '@/components/authenticated-container';
 import { OrganizationLayout } from '@/components/layouts';
 import { Button, Card, Heading, Input, Spinner, Tag, Title } from '@/components/v2';
 import { AlertTriangleIcon, GitHubIcon, SlackIcon } from '@/components/v2/icon';
@@ -225,7 +226,7 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
   );
 };
 
-export default function SettingsPage(): ReactElement {
+function SettingsPage(): ReactElement {
   return (
     <>
       <Title title="Organization settings" />
@@ -235,3 +236,7 @@ export default function SettingsPage(): ReactElement {
     </>
   );
 }
+
+export const getServerSideProps = withSessionProtection();
+
+export default authenticated(SettingsPage);

@@ -36,6 +36,13 @@ export interface TargetAccessSelector {
   scope: TargetAccessScope;
 }
 
+type SuperTokenSessionPayload = {
+  version: '1';
+  superTokensUserId: string;
+  email: string;
+  externalUserId: string | null;
+};
+
 /**
  * Responsible for auth checks.
  * Talks to Storage.
@@ -45,7 +52,7 @@ export interface TargetAccessSelector {
   global: true,
 })
 export class AuthManager {
-  private user: any;
+  private session: SuperTokenSessionPayload | null;
 
   constructor(
     @Inject(ApiToken) private apiToken: string,
@@ -59,7 +66,7 @@ export class AuthManager {
     private storage: Storage,
     private idempotentRunner: IdempotentRunner
   ) {
-    this.user = context.user;
+    this.session = context.session;
   }
 
   async ensureTargetAccess(selector: Listify<TargetAccessSelector, 'target'>): Promise<void | never> {
@@ -156,15 +163,17 @@ export class AuthManager {
     throw new AccessError('Authorization header is missing');
   }
 
-  getUserIdForTracking: () => Promise<string | never> = share(async () => {
+  getUserIdForTracking: () => Promise<string | null> = share(async () => {
     const user = await (this.apiToken ? this.getOrganizationOwnerByToken() : this.getCurrentUser());
 
-    createOrUpdateUser({
-      id: user.externalAuthUserId,
-      email: user.email,
-    });
+    if (user.superTokensUserId) {
+      createOrUpdateUser({
+        id: user.superTokensUserId,
+        email: user.email,
+      });
+    }
 
-    return user.externalAuthUserId;
+    return user.superTokensUserId;
   });
 
   getOrganizationOwnerByToken: () => Promise<User | never> = share(async () => {
@@ -184,39 +193,37 @@ export class AuthManager {
   });
 
   getCurrentUser: () => Promise<(User & { isAdmin: boolean }) | never> = share(async () => {
-    if (!this.user) {
+    if (!this.session) {
       throw new AccessError('Authorization token is missing');
     }
 
-    const info = (this.user as any)['https://graphql-hive.com/userinfo'];
-    const metadata = (this.user as any)['https://graphql-hive.com/metadata'];
+    const { session } = this;
 
-    let internalUser = await this.storage.getUserByExternalId({
-      external: info.user_id,
+    return await this.idempotentRunner.run({
+      identifier: `user:create:${session.superTokensUserId}`,
+      executor: () =>
+        this.ensureInternalUser({
+          superTokensUserId: session.superTokensUserId,
+          email: session.email,
+          externalAuthUserId: session.externalUserId,
+        }),
+      ttl: 60,
     });
-
-    if (!internalUser) {
-      internalUser = await this.idempotentRunner.run({
-        identifier: `user:create:${info.user_id}`,
-        executor: () => this.ensureInternalUser(info),
-        ttl: 60,
-      });
-    }
-
-    return {
-      ...internalUser,
-      isAdmin: metadata?.admin === true,
-    };
   });
 
-  private async ensureInternalUser(input: { user_id: string; email: string }) {
-    let internalUser = await this.storage.getUserByExternalId({
-      external: input.user_id,
+  private async ensureInternalUser(input: {
+    superTokensUserId: string;
+    email: string;
+    externalAuthUserId: string | null;
+  }): Promise<User> {
+    let internalUser = await this.storage.getUserBySuperTokenId({
+      superTokensUserId: input.superTokensUserId,
     });
 
     if (!internalUser) {
       internalUser = await this.userManager.createUser({
-        external: input.user_id,
+        superTokensUserId: input.superTokensUserId,
+        externalAuthUserId: input.externalAuthUserId,
         email: input.email,
       });
     }
@@ -225,7 +232,7 @@ export class AuthManager {
       name: internalUser.displayName,
       user: {
         id: internalUser.id,
-        externalAuthUserId: internalUser.externalAuthUserId,
+        superTokensUserId: input.superTokensUserId,
       },
     });
 
@@ -241,7 +248,7 @@ export class AuthManager {
   }
 
   isUser() {
-    return !!this.user;
+    return !!this.session;
   }
 
   getMemberOrganizationScopes(selector: OrganizationUserScopesSelector) {

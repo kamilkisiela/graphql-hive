@@ -1,6 +1,7 @@
 import { ReactElement } from 'react';
 import { gql, useQuery } from 'urql';
 
+import { authenticated, withSessionProtection } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
 import { SchemaExplorerFilter } from '@/components/target/explorer/filter';
 import { GraphQLObjectTypeComponent } from '@/components/target/explorer/object-type';
@@ -87,7 +88,7 @@ function SchemaView({
   );
 }
 
-export default function ExplorerPage(): ReactElement {
+function ExplorerPage(): ReactElement {
   return (
     <>
       <Title title="Schema Explorer" />
@@ -101,3 +102,7 @@ export default function ExplorerPage(): ReactElement {
     </>
   );
 }
+
+export const getServerSideProps = withSessionProtection();
+
+export default authenticated(ExplorerPage);

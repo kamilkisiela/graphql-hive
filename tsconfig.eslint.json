@@ -4,5 +4,5 @@
     // "noEmit": true,
     // "allowJs": true
   },
-  "include": ["integration-tests"]
+  "include": ["integration-tests", ".eslintrc.cjs"]
 }

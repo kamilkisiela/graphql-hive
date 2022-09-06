@@ -3,6 +3,7 @@ import NextLink from 'next/link';
 import { onlyText } from 'react-children-utilities';
 import { useQuery } from 'urql';
 
+import { authenticated, withSessionProtection } from '@/components/authenticated-container';
 import { OrganizationLayout } from '@/components/layouts';
 import { Activities, Button, Card, DropdownMenu, EmptyList, Heading, Skeleton, TimeAgo, Title } from '@/components/v2';
 import { getActivity } from '@/components/v2/activities';
@@ -82,7 +83,7 @@ const ProjectCard = ({ project }: { project: ProjectsWithTargetsQuery['projects'
   );
 };
 
-export default function ProjectsPage(): ReactElement {
+function ProjectsPage(): ReactElement {
   const router = useRouteSelector();
 
   const [projectsWithTargetsQuery] = useQuery({
@@ -93,7 +94,6 @@ export default function ProjectsPage(): ReactElement {
       },
     },
   });
-
   return (
     <>
       <Title title="Projects" />
@@ -138,3 +138,6 @@ export default function ProjectsPage(): ReactElement {
     </>
   );
 }
+
+export const getServerSideProps = withSessionProtection();
+export default authenticated(ProjectsPage);

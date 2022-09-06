@@ -49,6 +49,7 @@ export default gql`
     fullName: String!
     displayName: String!
     provider: AuthProvider!
+    isAdmin: Boolean!
   }
 
   type UserConnection {

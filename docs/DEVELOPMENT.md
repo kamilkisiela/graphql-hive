@@ -63,13 +63,18 @@ We have a script to feed your local instance of Hive.
 1. Follow the steps above for Slack App
 2. Update `Setup URL` in [GraphQL Hive Development](https://github.com/organizations/the-guild-org/settings/apps/graphql-hive-development) app and set it to `https://hive-<your-name>.loophole.site/api/github/setup-callback`
 
-### Setting up Auth0 App for developing
+### Run Hive
 
-> **Note**: GraphQL Hive will soon be migrating its User Auth management to
-> [Super Tokens](https://supertokens.com/), which should also significantly
-> simplify the local development experience.
+1. Click on Start Hive in the bottom bar of VSCode
+2. Open the UI (`http://localhost:3000` by default) and Sign in with one of the users you created on the Auth0 management console
 
-You may want to use your own Auth0 app when running hive locally.
+### Legacy Auth0 Integration
+
+**Note:** If you are not working at The Guild, you can safely ignore this section.
+
+Since we migrated from Auth0 to SuperTokens there is a compatibility layer for importing/migrating accounts from Auth0 to SuperTokens.
+
+By default you don't need to set this up and can just use SuperTokens locally. However, if you need to test some stuff or fix the Auth0 -> SuperTokens migration flow you have to set up some stuff.
 
 1. Create your own Auth0 application
    1. If you haven't already, create an account on [manage.auth0.com](https://manage.auth0.com)
@@ -98,38 +103,9 @@ You may want to use your own Auth0 app when running hive locally.
            return callback(null, user, context);
          }
          ```
-2. Update the `.env` secrets used by your local hive instance:
-   - The `AUTH0_DOMAIN`, `AUTH0_CLIENT_ID`, and `AUTH0_CLIENT_SECRET` values
-     are found when viewing your new application on Auth0.
-
-```bash
-# packages/services/server/.env
-
-# Can be any value
-AUTH0_SECRET=super-secret-value
-
-AUTH0_DOMAIN=
-AUTH0_CLIENT_ID=
-AUTH0_CLIENT_SECRET=
-AUTH0_SCOPE="openid profile offline_access"
-AUTH0_AUDIENCE=https://${AUTH0_DOMAIN}/api/v2/
-AUTH0_CONNECTION=Username-Password-Authentication
-```
-
-```bash
-# packages/web/app/.env
-
-# Must be the same value as in 'packages/services/server/.env'
-AUTH0_SECRET=super-secret-value
-
-AUTH0_DOMAIN=
-AUTH0_CLIENT_ID=
-AUTH0_CLIENT_SECRET=
-AUTH0_SCOPE="openid profile offline_access"
-AUTH0_AUDIENCE=https://${AUTH0_DOMAIN}/api/v2/
-AUTH0_BASE_URL=http://localhost:3000
-AUTH0_ISSUER_BASE_URL=https://${AUTH0_DOMAIN}
-```
-
-3. Click on Start Hive in the bottom bar of VSCode
-4. Open the UI (`http://localhost:3000` by default) and Sign in with one of the users you created on the Auth0 management console
+2. Update the `.env` secrets used by your local hive instance that are found when viewing your new application on Auth0:
+   - `AUTH_LEGACY_AUTH0` (set this to `1` for enabling the migration.)
+   - `AUTH_LEGACY_AUTH0_CLIENT_ID` (e.g. `rGSrExtM9sfilpF8kbMULkMNYI2SgXro`)
+   - `AUTH_LEGACY_AUTH0_CLIENT_SECRET` (e.g. `gJjNQJsCaOC0nCKTgqWv2wvrh1XXXb-iqzVdn8pi2nSPq2TxxxJ9FIUYbNjheXxx`)
+   - `AUTH_LEGACY_AUTH0_ISSUER_BASE_URL`(e.g. `https://foo-bars.us.auth0.com`)
+   - `AUTH_LEGACY_AUTH0_AUDIENCE` (e.g. `https://foo-bars.us.auth0.com/api/v2/`)

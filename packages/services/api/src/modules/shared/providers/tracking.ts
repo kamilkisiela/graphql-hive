@@ -14,13 +14,13 @@ export class Tracking {
     data?: Record<string, any>;
     user?: {
       id: string;
-      externalAuthUserId: string;
+      superTokensUserId: string | null;
     };
   }) {
     try {
       track({
         event: event.event,
-        distinct_id: event.user?.externalAuthUserId ?? (await this.authManager.getUserIdForTracking()),
+        distinct_id: event.user?.superTokensUserId ?? (await this.authManager.getUserIdForTracking()),
         data: event.data,
       });
     } catch (error) {

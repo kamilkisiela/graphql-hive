@@ -18,7 +18,7 @@ export default async function githubSetupCallback(req: NextApiRequest, res: Next
         cleanId: string;
       };
     }>({
-      url: `${process.env.APP_BASE_URL.replace(/\/$/, '')}/api/proxy`,
+      url: `${process.env['NEXT_PUBLIC_APP_BASE_URL'].replace(/\/$/, '')}/api/proxy`,
       headers: {
         ...req.headers,
         'content-type': 'application/json',

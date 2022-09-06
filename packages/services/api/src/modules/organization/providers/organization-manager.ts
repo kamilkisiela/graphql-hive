@@ -172,7 +172,7 @@ export class OrganizationManager {
     type: OrganizationType;
     user: {
       id: string;
-      externalAuthUserId: string;
+      superTokensUserId: string | null;
     };
   }): Promise<Organization> {
     const { name, type, user } = input;

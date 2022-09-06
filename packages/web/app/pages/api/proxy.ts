@@ -1,9 +1,8 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { withSentry, captureException, startTransaction } from '@sentry/nextjs';
 import type { Transaction } from '@sentry/types';
-import { auth0 } from '../../src/lib/auth0';
 import hyperid from 'hyperid';
-import { AccessTokenError } from '@auth0/nextjs-auth0';
+import { extractAccessTokenFromRequest } from '@/lib/api/extract-access-token-from-request';
 
 const reqIdGenerate = hyperid({ fixedLength: true });
 
@@ -67,12 +66,9 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
   let accessToken: string | undefined;
 
   try {
-    const result = await auth0.getAccessToken(req, res);
-    accessToken = result.accessToken;
+    accessToken = await extractAccessTokenFromRequest(req, res);
   } catch (error) {
-    if (error instanceof AccessTokenError && error.code !== 'invalid_session') {
-      captureException(error);
-    }
+    captureException(error);
   }
 
   if (!accessToken) {

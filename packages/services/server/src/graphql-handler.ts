@@ -4,27 +4,47 @@ import { cleanRequestId } from '@hive/service-common';
 import { createServer, GraphQLYogaError } from '@graphql-yoga/node';
 import { GraphQLError, ValidationContext, ValidationRule, Kind, OperationDefinitionNode, print } from 'graphql';
 import { useGraphQLModules } from '@envelop/graphql-modules';
-import { useAuth0 } from '@envelop/auth0';
+import { useGenericAuth } from '@envelop/generic-auth';
+import { fetch } from 'cross-undici-fetch';
 import { useSentry } from '@envelop/sentry';
 import { asyncStorage } from './async-storage';
 import { useSentryUser, extractUserId } from './use-sentry-user';
 import { useHive } from '@graphql-hive/client';
 import { useErrorHandler, Plugin } from '@graphql-yoga/node';
 import hyperid from 'hyperid';
+import zod from 'zod';
+import { HiveError } from '@hive/api';
 
 const reqIdGenerate = hyperid({ fixedLength: true });
+
+const SuperTokenAccessTokenModel = zod.object({
+  version: zod.literal('1'),
+  superTokensUserId: zod.string(),
+  /**
+   * Supertokens for some reason omits externalUserId from the access token payload if it is null.
+   */
+  externalUserId: zod.optional(zod.union([zod.string(), zod.null()])),
+  email: zod.string(),
+});
 
 export interface GraphQLHandlerOptions {
   graphiqlEndpoint: string;
   registry: Registry;
   signature: string;
+  supertokens: {
+    connectionUri: string;
+    apiKey: string;
+  };
 }
+
+export type SuperTokenSessionPayload = zod.TypeOf<typeof SuperTokenAccessTokenModel>;
 
 interface Context {
   req: FastifyRequest;
   reply: FastifyReply;
   headers: Record<string, string | string[] | undefined>;
   requestId?: string | null;
+  session: SuperTokenSessionPayload | null;
 }
 
 const NoIntrospection: ValidationRule = (context: ValidationContext) => ({
@@ -107,10 +127,10 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
         },
         trackResolvers: false,
         appendTags: ({ contextValue }) => {
-          const auth0_user_id = extractUserId(contextValue as any);
+          const supertokens_user_id = extractUserId(contextValue as any);
           const request_id = cleanRequestId((contextValue as any).req.headers['x-request-id']);
 
-          return { auth0_user_id, request_id };
+          return { supertokens_user_id, request_id };
         },
         skip(args) {
           // It's the readiness check
@@ -132,16 +152,31 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
           }
         }
       }),
-      useAuth0({
-        onError(error) {
-          server.logger.error(error);
+      useGenericAuth({
+        mode: 'resolve-only',
+        contextFieldName: 'session',
+        resolveUserFn: async (ctx: Context) => {
+          if (ctx.headers['authorization']) {
+            let authHeader = ctx.headers['authorization'];
+            authHeader = Array.isArray(authHeader) ? authHeader[0] : authHeader;
+
+            const authHeaderParts = authHeader.split(' ');
+            if (authHeaderParts.length === 2 && authHeaderParts[0] === 'Bearer') {
+              const accessToken = authHeaderParts[1];
+              // The token issued by Hive is always 32 characters long.
+              // Everything longer should be treated as an supertokens token (JWT).
+              if (accessToken.length > 32) {
+                return await verifySuperTokensSession(
+                  options.supertokens.connectionUri,
+                  options.supertokens.apiKey,
+                  accessToken
+                );
+              }
+            }
+          }
+
+          return null;
         },
-        domain: process.env.AUTH0_DOMAIN!,
-        audience: process.env.AUTH0_AUDIENCE!,
-        extendContextField: 'user',
-        headerName: 'authorization',
-        preventUnauthenticatedAccess: true,
-        tokenType: 'Bearer',
       }),
       useHive({
         debug: true,
@@ -188,6 +223,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
           reply,
           headers: req.headers,
           requestId,
+          session: null,
         });
 
         response.headers.forEach((value, key) => {
@@ -203,3 +239,40 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
     );
   };
 };
+
+/**
+ * Verify whether a SuperTokens access token session is valid.
+ * https://app.swaggerhub.com/apis/supertokens/CDI/2.15.1#/Session%20Recipe/verifySession
+ */
+async function verifySuperTokensSession(
+  connectionUri: string,
+  apiKey: string,
+  accessToken: string
+): Promise<SuperTokenSessionPayload> {
+  const response = await fetch(connectionUri + '/recipe/session/verify', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'api-key': apiKey,
+      rid: 'session',
+    },
+    body: JSON.stringify({
+      accessToken,
+      enableAntiCsrf: false,
+      doAntiCsrfCheck: false,
+    }),
+  });
+  const body = await response.text();
+  if (response.status !== 200) {
+    console.error(`SuperTokens session verification failed with status ${response.status}.\n` + body);
+    throw new HiveError(`Invalid token.`);
+  }
+
+  const result = JSON.parse(body);
+  const sessionInfo = SuperTokenAccessTokenModel.parse(result.session.userDataInJWT);
+  // ensure externalUserId is a string or null
+  return {
+    ...sessionInfo,
+    externalUserId: sessionInfo.externalUserId ?? null,
+  };
+}

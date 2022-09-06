@@ -16,6 +16,7 @@ import { UsageEstimator } from './usage-estimation';
 import { RateLimitService } from './rate-limit';
 import { Emails } from './emails';
 import { StripeBillingService } from './billing';
+import { Output } from '@pulumi/pulumi';
 
 const commonConfig = new pulumi.Config('common');
 const cloudflareConfig = new pulumi.Config('cloudflare');
@@ -43,6 +44,8 @@ export function deployGraphQL({
   rateLimit,
   billing,
   emails,
+  supertokensConfig,
+  auth0Config,
 }: {
   storageContainer: azure.storage.Container;
   packageHelper: PackageHelper;
@@ -59,6 +62,13 @@ export function deployGraphQL({
   rateLimit: RateLimitService;
   billing: StripeBillingService;
   emails: Emails;
+  supertokensConfig: {
+    endpoint: Output<string>;
+    apiKey: Output<string>;
+  };
+  auth0Config: {
+    internalApiKey: Output<string>;
+  };
 }) {
   return new RemoteArtifactAsServiceDeployment(
     'graphql-api',
@@ -82,9 +92,6 @@ export function deployGraphQL({
         REDIS_PASSWORD: redis.config.password,
         RELEASE: packageHelper.currentReleaseId(),
         POSTGRES_CONNECTION_STRING: apiConfig.requireSecret('postgresConnectionString'),
-        AUTH0_DOMAIN: commonConfig.require('auth0Domain'),
-        AUTH0_CLIENT_ID: commonConfig.require('auth0ClientId'),
-        AUTH0_CLIENT_SECRET: commonConfig.requireSecret('auth0ClientSecret'),
         BILLING_ENDPOINT: serviceLocalEndpoint(billing.service),
         TOKENS_ENDPOINT: serviceLocalEndpoint(tokens.service),
         WEBHOOKS_ENDPOINT: serviceLocalEndpoint(webhooks.service),
@@ -103,6 +110,11 @@ export function deployGraphQL({
         EMAILS_ENDPOINT: serviceLocalEndpoint(emails.service),
         GITHUB_APP_ID: githubAppConfig.require('id'),
         ENCRYPTION_SECRET: commonConfig.requireSecret('encryptionSecret'),
+        // Auth
+        SUPERTOKENS_CONNECTION_URI: supertokensConfig.endpoint,
+        SUPERTOKENS_API_KEY: supertokensConfig.apiKey,
+        AUTH_LEGACY_AUTH0: '1',
+        AUTH_LEGACY_AUTH0_INTERNAL_API_KEY: auth0Config.internalApiKey,
       },
       packageInfo: packageHelper.npmPack('@hive/server'),
       exposesMetrics: true,

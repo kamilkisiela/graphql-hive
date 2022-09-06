@@ -1,16 +1,15 @@
 import { ReactElement, useCallback, useEffect, useState } from 'react';
-import { IconProps } from '@chakra-ui/react';
 import { Tooltip } from '@chakra-ui/react';
 import { useFormik } from 'formik';
 import { DocumentType, gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 
-import { useUser } from '@/components/auth/AuthProvider';
+import { authenticated, withSessionProtection } from '@/components/authenticated-container';
 import { OrganizationLayout } from '@/components/layouts';
 import { Avatar, Button, Card, Checkbox, DropdownMenu, Input, Title } from '@/components/v2';
-import { CopyIcon, GitHubIcon, GoogleIcon, KeyIcon, MoreIcon, SettingsIcon, TrashIcon } from '@/components/v2/icon';
+import { CopyIcon, KeyIcon, MoreIcon, SettingsIcon, TrashIcon } from '@/components/v2/icon';
 import { ChangePermissionsModal, DeleteMembersModal } from '@/components/v2/modals';
-import { AuthProvider, MeDocument, OrganizationFieldsFragment, OrganizationType } from '@/graphql';
+import { MeDocument, OrganizationFieldsFragment, OrganizationType } from '@/graphql';
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
 import { useClipboard } from '@/lib/hooks/use-clipboard';
 import { useNotifications } from '@/lib/hooks/use-notifications';
@@ -22,11 +21,6 @@ export const DateFormatter = Intl.DateTimeFormat('en', {
   month: 'short',
   day: 'numeric',
 });
-
-const authProviderIcons = {
-  [AuthProvider.Github]: GitHubIcon,
-  [AuthProvider.Google]: GoogleIcon,
-} as Record<AuthProvider, React.FC<IconProps> | undefined>;
 
 const Members_Invitation = gql(/* GraphQL */ `
   fragment Members_Invitation on OrganizationInvitation {
@@ -220,7 +214,6 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
   const [isPermissionsModalOpen, togglePermissionsModalOpen] = useToggle(false);
   const [isDeleteMembersModalOpen, toggleDeleteMembersModalOpen] = useToggle(false);
 
-  const { user } = useUser();
   const [meQuery] = useQuery({ query: MeDocument });
   const router = useRouteSelector();
   const [organizationMembersQuery] = useQuery({
@@ -281,7 +274,7 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
         </Button>
       </div>
       {members?.map(node => {
-        const IconToUse = authProviderIcons[node.user.provider] ?? KeyIcon;
+        const IconToUse = KeyIcon;
 
         const isOwner = node.id === org.owner.id;
         const isMe = node.id === me?.id;
@@ -296,7 +289,7 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
               checked={checked.includes(node.id)}
               disabled={isDisabled}
             />
-            <Avatar src={isMe ? user?.picture : ''} fallback={node.user.displayName[0]} shape="circle" />
+            <Avatar fallback="P" shape="circle" />
             <div className="grow overflow-hidden">
               <h3 className="line-clamp-1 font-medium">{node.user.displayName}</h3>
               <h4 className="text-sm font-light text-gray-500">{node.user.email}</h4>
@@ -345,7 +338,7 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
   );
 };
 
-export default function MembersPage(): ReactElement {
+function MembersPage(): ReactElement {
   return (
     <>
       <Title title="Members" />
@@ -355,3 +348,7 @@ export default function MembersPage(): ReactElement {
     </>
   );
 }
+
+export const getServerSideProps = withSessionProtection();
+
+export default authenticated(MembersPage);

@@ -1,7 +1,7 @@
-import { auth0 } from '../../../src/lib/auth0';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { buildSchema, execute, GraphQLError, parse } from 'graphql';
 import { addMocksToSchema } from '@graphql-tools/mock';
+import { extractAccessTokenFromRequest } from '@/lib/api/extract-access-token-from-request';
 
 async function lab(req: NextApiRequest, res: NextApiResponse) {
   const url = process.env.GRAPHQL_ENDPOINT;
@@ -23,7 +23,7 @@ async function lab(req: NextApiRequest, res: NextApiResponse) {
     headers['X-API-Token'] = req.headers['x-hive-key'] as string;
   } else {
     try {
-      const { accessToken } = await auth0.getAccessToken(req, res);
+      const accessToken = await extractAccessTokenFromRequest(req, res);
 
       if (!accessToken) {
         throw 'Invalid Token!';
