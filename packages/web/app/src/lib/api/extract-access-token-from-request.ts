@@ -8,8 +8,15 @@ import { backendConfig } from '@/config/backend-config';
 supertokens.init(backendConfig());
 
 export async function extractAccessTokenFromRequest(req: NextApiRequest, res: NextApiResponse): Promise<string> {
-  await superTokensNextWrapper(async next => await verifySession()(req as any, res as any, next), req, res);
-  // TODO: figure out what kind of error this can raise :)
-  const accessToken = (req as any).session.getAccessToken();
+  await superTokensNextWrapper(
+    async next =>
+      await verifySession({
+        sessionRequired: false,
+      })(req as any, res as any, next),
+    req,
+    res
+  );
+  // Session can be undefined in case no access token was sent.
+  const accessToken = (req as any).session?.getAccessToken() || null;
   return accessToken;
 }
