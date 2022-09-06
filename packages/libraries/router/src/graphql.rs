@@ -51,8 +51,7 @@ pub fn collect_schema_coordinates(
                 _ => {}
             },
             None => {
-                ctx.schema_coordinates
-                    .insert(format!("{}", input_type_name));
+                ctx.schema_coordinates.insert(input_type_name);
             }
         }
     }
