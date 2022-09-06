@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useRouter } from 'next/router';
 import { gql, useQuery } from 'urql';
 import { Autocomplete } from '@/components/v2/autocomplete';
@@ -66,7 +66,6 @@ export function SchemaExplorerFilter({
   };
 }) {
   const [collapsed, toggleCollapsed] = useArgumentListToggle();
-  const [disabled, setDisabled] = useState(false);
   const router = useRouter();
   const [query] = useQuery({
     query: SchemaExplorerFilter_AllTypes,
@@ -100,11 +99,9 @@ export function SchemaExplorerFilter({
           defaultValue={typename ? { value: typename, label: typename } : null}
           options={types}
           onChange={option => {
-            setDisabled(true);
             router.push(`/${organization.cleanId}/${project.cleanId}/${target.cleanId}/explorer/${option.value}`);
           }}
           loading={query.fetching}
-          disabled={disabled}
         />
       </div>
       <div className="flex-shrink-0">
