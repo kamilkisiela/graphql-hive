@@ -37,3 +37,9 @@ async function joinWaitingList(req: NextApiRequest, res: NextApiResponse) {
 }
 
 export default withSentry(joinWaitingList);
+
+export const config = {
+  api: {
+    externalResolver: true,
+  },
+};

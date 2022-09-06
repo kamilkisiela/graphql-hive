@@ -75,8 +75,7 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
     accessSpan.setHttpStatus(401);
     accessSpan.finish();
     finishTransaction();
-
-    res.status(401).send({});
+    res.status(401).json({});
     return;
   }
 
@@ -141,5 +140,6 @@ export const config = {
     bodyParser: {
       sizeLimit: '6mb',
     },
+    externalResolver: true,
   },
 };
