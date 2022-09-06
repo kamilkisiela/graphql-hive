@@ -10,7 +10,7 @@ import { clickHouseElapsedDuration, clickHouseReadDuration } from './metrics';
 async function main() {
   Sentry.init({
     serverName: 'usage-estimator',
-    enabled: process.env.ENVIRONMENT === 'prod',
+    enabled: String(process.env.SENTRY_ENABLED) === '1',
     environment: process.env.ENVIRONMENT,
     dsn: process.env.SENTRY_DSN,
     release: process.env.RELEASE || 'local',

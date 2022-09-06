@@ -180,7 +180,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
       }),
       useHive({
         debug: true,
-        enabled: process.env.ENVIRONMENT === 'prod' || process.env.ENVIRONMENT === 'staging',
+        enabled: String(process.env.SENTRY_ENABLED) === '1',
         token: process.env.HIVE_API_TOKEN!,
         usage: {
           endpoint: process.env.HIVE_USAGE_ENDPOINT,

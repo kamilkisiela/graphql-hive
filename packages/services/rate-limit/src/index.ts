@@ -14,7 +14,7 @@ const LIMIT_CACHE_UPDATE_INTERVAL_MS = process.env.LIMIT_CACHE_UPDATE_INTERVAL_M
 async function main() {
   Sentry.init({
     serverName: 'rate-limit',
-    enabled: process.env.ENVIRONMENT === 'prod',
+    enabled: String(process.env.SENTRY_ENABLED) === '1',
     environment: process.env.ENVIRONMENT,
     dsn: process.env.SENTRY_DSN,
     release: process.env.RELEASE || 'local',
