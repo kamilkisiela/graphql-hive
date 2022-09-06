@@ -11,7 +11,7 @@ The official JavaScript Hive Client (`@graphql-hive/client`) collects executed o
 | Header   | `X-API-Token: token-here`            |
 | Method   | `POST`                               |
 
-**Data structure**
+## Data structure
 
 <details>
   <summary>TypeScript schema</summary>
@@ -210,7 +210,7 @@ export interface Client {
 
 </details>
 
-**Example**
+## Raw JSON Example Payload
 
 ```json
 {
@@ -235,6 +235,12 @@ export interface Client {
         "ok": true,
         "duration": 150000000, // 150ms in nanoseconds
         "errorsTotal": 0
+      },
+      "metadata": {
+        "client": {
+          "name": "demo",
+          "version": "0.0.1"
+        }
       }
     },
     {
@@ -244,6 +250,12 @@ export interface Client {
         "ok": false, // failed operation
         "duration": 150000000, // 150ms in nanoseconds
         "errorsTotal": 1 // 1 GraphQL error
+      },
+      "metadata": {
+        "client": {
+          "name": "demo",
+          "version": "0.0.1"
+        }
       }
     },
     {
@@ -253,8 +265,24 @@ export interface Client {
         "ok": true,
         "duration": 150000000, // 150ms in nanoseconds
         "errorsTotal": 0
+      },
+      "metadata": {
+        "client": {
+          "name": "demo",
+          "version": "0.0.1"
+        }
       }
     }
   ]
 }
+```
+
+## Curl example request
+
+```bash
+curl -X POST \
+  https://app.graphql-hive.com/usage \
+  -H 'x-api-token: token-here' \
+  -H 'content-type: application/json' \
+  -d '{ "size": 1, "map": { "aaa": { "operationName": "me", "operation": "query me { me { id } }", "fields": ["Query", "Query.me", "User", "User.id"] } }, "operations": [{ "operationMapKey" : "c3b6d9b0", "timestamp" : 1655112281535, "execution" : { "ok" : true, "duration" : 150000000, "errorsTotal" : 0 }, "metadata" : { "client" : { "name" : "demo" , "version" : "0.0.1" } } } ] }'
 ```
