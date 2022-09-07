@@ -38,15 +38,21 @@ pub fn collect_schema_coordinates(
     visit_document(&mut visitor, &document, &mut visit_context, &mut ctx);
 
     for input_type_name in ctx.input_types_to_collect {
-        let named_type = schema.type_by_name(&input_type_name).unwrap();
+        let named_type = schema.type_by_name(&input_type_name);
+
         match named_type {
-            TypeDefinition::InputObject(input_type) => {
-                for field in input_type.fields {
-                    ctx.schema_coordinates
-                        .insert(format!("{}.{}", input_type_name, field.name));
+            Some(named_type) => match named_type {
+                TypeDefinition::InputObject(input_type) => {
+                    for field in input_type.fields {
+                        ctx.schema_coordinates
+                            .insert(format!("{}.{}", input_type_name, field.name));
+                    }
                 }
+                _ => {}
+            },
+            None => {
+                ctx.schema_coordinates.insert(input_type_name);
             }
-            _ => {}
         }
     }
 
