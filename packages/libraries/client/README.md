@@ -5,17 +5,45 @@
 GraphQL Hive is currently available as a hosted service to be used by all.
 We take care of the heavy lifting behind the scenes be managing the registry, scaling it for your needs, to free your time to focus on the most important things at hand.
 
-### Installation
+## Installation
 
 ```
 npm install @graphql-hive/client
 ```
 
-### Usage
+## Basic Usage
 
 Hive Client comes with generic client and plugins for [Envelop](https://envelop.dev) and [Apollo Server](https://github.com/apollographql/apollo-server)
 
-#### With Envelop
+### With GraphQL Yoga
+
+[GraphQL Yoga](https://www.the-guild.dev/graphql/yoga-server) is a cross-platform GraphQL sever built on top of the envelop engine.
+
+```ts
+import { createYoga } from '@graphql-yoga/node'
+import { useHive } from '@graphql-hive/client'
+
+const server = createYoga({
+  plugins: [
+    useHive({
+      enabled: true, // Enable/Disable Hive Client
+      debug: true, // Debugging mode
+      token: 'YOUR-TOKEN',
+      // Schema reporting
+      reporting: {
+        // feel free to set dummy values here
+        author: 'Author of the schema version',
+        commit: 'git sha or any identifier'
+      },
+      usage: true // Collects schema usage based on operations
+    })
+  ]
+})
+
+server.start()
+```
+
+### With Envelop
 
 If you're not familiar with Envelop - in "short" it's a lightweight JavaScript library for wrapping GraphQL execution layer and flow, allowing developers to develop, share and collaborate on GraphQL-related plugins, while filling the missing pieces in GraphQL implementations.
 
@@ -43,7 +71,7 @@ const envelopProxy = envelop({
 })
 ```
 
-#### With Apollo Server
+### With Apollo Server
 
 Thanks to the plugin system it's a matter of adding hiveApollo plugin to ApolloServer instance:
 
@@ -70,7 +98,7 @@ const server = new ApolloServer({
 })
 ```
 
-#### With Other Servers
+### With Other Servers
 
 First you need to instantiate the Hive Client.
 
@@ -115,7 +143,7 @@ app.post(
 )
 ```
 
-#### Using the registry when Stitching
+### Using the registry when Stitching
 
 Stitching could be done in many ways, that's why `@graphql-hive/client` provide generic functions, not something dedicated for stitching. Unfortunately the implementation of gateway + polling is up to you.
 
@@ -152,7 +180,7 @@ startMyGraphQLGateway({
 })
 ```
 
-#### Using the registry with Apollo Gateway
+### Using the registry with Apollo Gateway
 
 You can connect your Apollo Gateway with Hive client.
 
@@ -179,5 +207,100 @@ const server = new ApolloServer({
 
 server.listen().then(({ url }) => {
   console.log(`🚀 Server ready at ${url}`)
+})
+```
+
+## Usage Reporting configuration
+
+### Client Info
+
+The schema usage operation information can be enriched with meta information that will be displayed on the Hive dashboard in order to get a better understanding of the origin of an executed GraphQL operation.
+
+### GraphQL Yoga Example
+
+```ts
+import { createYoga } from '@graphql-yoga/node'
+import { useHive } from '@graphql-hive/client'
+
+const server = createYoga({
+  plugins: [
+    useHive({
+      enabled: true, // Enable/Disable Hive Client
+      token: 'YOUR-TOKEN',
+      usage: {
+        clientInfo(ctx: { req: Request }) {
+          const name = ctx.req.headers.get('x-graphql-client-name')
+          const version = ctx.req.headers.get('x-graphql-client-version') ?? 'missing'
+
+          if (name) {
+            return { name, version }
+          }
+
+          return null
+        }
+      }
+    })
+  ]
+})
+
+server.start()
+```
+
+#### Envelop Example
+
+```ts
+import { envelop } from '@envelop/core'
+import { useHive } from '@graphql-hive/client'
+
+const envelopProxy = envelop({
+  plugins: [
+    useHive({
+      enabled: true, // Enable/Disable Hive Client
+      token: 'YOUR-TOKEN',
+      usage: {
+        clientInfo(ctx: { req: Request }) {
+          const name = ctx.req.headers.get('x-graphql-client-name')
+          const version = ctx.req.headers.get('x-graphql-client-version') ?? 'missing'
+
+          if (name) {
+            return { name, version }
+          }
+
+          return null
+        }
+      }
+    })
+  ]
+})
+```
+
+#### Apollo Server Example
+
+```ts
+import { ApolloServer } from 'apollo-server'
+import { hiveApollo } from '@graphql-hive/client'
+import type { IncomingMessage } from 'http'
+
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  plugins: [
+    hiveApollo({
+      enabled: true, // Enable/Disable Hive Client
+      token: 'YOUR-TOKEN',
+      usage: {
+        clientInfo(ctx: { req: IncomingMessage }) {
+          const name = ctx.req.headers['x-graphql-client-name']
+          const version = ctx.req.headers['x-graphql-client-version'] ?? 'missing'
+
+          if (name) {
+            return { name, version }
+          }
+
+          return null
+        }
+      }
+    })
+  ]
 })
 ```
