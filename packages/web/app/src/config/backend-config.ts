@@ -369,7 +369,13 @@ const generateAuth0AccessToken = async (config: LegacyAuth0ConfigEnabled): Promi
       audience: config['AUTH_LEGACY_AUTH0_AUDIENCE'],
       grant_type: 'client_credentials',
     }),
-  }).then(res => res.json());
+  });
 
-  return response.access_token;
+  const body = await response.text();
+
+  if (response.status !== 200) {
+    throw new Error(`Couldn't generate access token for Auth0. Status: ${response.status} Body:${body}`);
+  }
+
+  return JSON.parse(body).access_token;
 };
