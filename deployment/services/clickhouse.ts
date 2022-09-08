@@ -14,6 +14,7 @@ type ClickhouseConfig = {
   port: pulumi.Output<string> | string;
   username: pulumi.Output<string> | string;
   password: pulumi.Output<string>;
+  cloud: Omit<ClickhouseConfig, 'cloud'> | null;
 };
 
 function getRemoteClickhouseConfig(): ClickhouseConfig {
@@ -22,7 +23,14 @@ function getRemoteClickhouseConfig(): ClickhouseConfig {
     port: clickhouseConfig.require('port'),
     username: clickhouseConfig.require('username'),
     password: clickhouseConfig.requireSecret('password'),
-    protocol: clickhouseConfig.requireSecret('protocol'),
+    protocol: clickhouseConfig.require('protocol'),
+    cloud: {
+      host: clickhouseConfig.require('cloudHost'),
+      port: clickhouseConfig.require('cloudPort'),
+      username: clickhouseConfig.require('cloudUsername'),
+      password: clickhouseConfig.requireSecret('cloudPassword'),
+      protocol: clickhouseConfig.require('cloudProtocol'),
+    },
   };
 }
 
@@ -51,6 +59,7 @@ export function deployClickhouse() {
     port: String(chApi.port),
     password: password,
     username,
+    cloud: null,
   };
 
   return {
