@@ -20,7 +20,7 @@
     "postbuild": "copyfiles -f \"migrations/actions/*.sql\" dist/actions && copyfiles -f \"migrations/actions/down/*.sql\" dist/actions/down"
   },
   "dependencies": {
-    "@sentry/node": "7.12.0",
+    "@sentry/node": "7.12.1",
     "@slonik/migrator": "0.8.5",
     "@theguild/buddy": "0.1.0",
     "dotenv": "10.0.0",
