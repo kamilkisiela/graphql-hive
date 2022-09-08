@@ -24,6 +24,7 @@ const MyError = ({
 };
 
 MyError.getInitialProps = async (props: NextPageContext) => {
+  console.log(props);
   const errorInitialProps = await NextErrorComponent.getInitialProps({
     res: props.res,
     err: props.err,
