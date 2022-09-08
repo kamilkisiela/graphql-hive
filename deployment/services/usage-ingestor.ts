@@ -37,6 +37,23 @@ export function deployUsageIngestor({
 
   const partitionsConsumedConcurrently = Math.floor(numberOfPartitions / replicas);
 
+  const clickhouseEnv = {
+    CLICKHOUSE_PROTOCOL: clickhouse.config.protocol,
+    CLICKHOUSE_HOST: clickhouse.config.host,
+    CLICKHOUSE_PORT: clickhouse.config.port,
+    CLICKHOUSE_USERNAME: clickhouse.config.username,
+    CLICKHOUSE_PASSWORD: clickhouse.config.password,
+    ...(clickhouse.config.cloud
+      ? {
+          CLICKHOUSE_CLOUD_PROTOCOL: clickhouse.config.cloud.protocol,
+          CLICKHOUSE_CLOUD_HOST: clickhouse.config.cloud.host,
+          CLICKHOUSE_CLOUD_PORT: clickhouse.config.cloud.port,
+          CLICKHOUSE_CLOUD_USERNAME: clickhouse.config.cloud.username,
+          CLICKHOUSE_CLOUD_PASSWORD: clickhouse.config.cloud.password,
+        }
+      : {}),
+  };
+
   return new RemoteArtifactAsServiceDeployment(
     'usage-ingestor-service',
     {
@@ -47,17 +64,13 @@ export function deployUsageIngestor({
       env: {
         ...deploymentEnv,
         ...commonEnv,
+        ...clickhouseEnv,
         HEARTBEAT_ENDPOINT: heartbeat ?? '',
         KAFKA_CONNECTION_MODE: 'hosted',
         KAFKA_KEY: kafka.config.key,
         KAFKA_USER: kafka.config.user,
         KAFKA_BROKER: kafka.config.endpoint,
         KAFKA_CONCURRENCY: `${partitionsConsumedConcurrently}`,
-        CLICKHOUSE_PROTOCOL: clickhouse.config.protocol,
-        CLICKHOUSE_HOST: clickhouse.config.host,
-        CLICKHOUSE_PORT: clickhouse.config.port,
-        CLICKHOUSE_USERNAME: clickhouse.config.username,
-        CLICKHOUSE_PASSWORD: clickhouse.config.password,
         RELEASE: packageHelper.currentReleaseId(),
       },
       exposesMetrics: true,

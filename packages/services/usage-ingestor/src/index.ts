@@ -34,6 +34,15 @@ async function main() {
         username: ensureEnv('CLICKHOUSE_USERNAME'),
         password: ensureEnv('CLICKHOUSE_PASSWORD'),
       },
+      clickhouseCloud: process.env.CLICKHOUSE_CLOUD_HOST
+        ? {
+            protocol: ensureEnv('CLICKHOUSE_CLOUD_PROTOCOL'),
+            host: ensureEnv('CLICKHOUSE_CLOUD_HOST'),
+            port: ensureEnv('CLICKHOUSE_CLOUD_PORT', 'number'),
+            username: ensureEnv('CLICKHOUSE_CLOUD_USERNAME'),
+            password: ensureEnv('CLICKHOUSE_CLOUD_PASSWORD'),
+          }
+        : null,
       kafka: {
         topic: 'usage_reports_v2',
         concurrency: ensureEnv('KAFKA_CONCURRENCY', 'number'),

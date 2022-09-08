@@ -1,6 +1,7 @@
 import * as Sentry from '@sentry/node';
 import { got } from 'got';
 import Agent from 'agentkeepalive';
+import type { FastifyLoggerInstance } from '@hive/service-common';
 import { compress } from '@hive/usage-common';
 import {
   operationsOrder,
@@ -37,7 +38,15 @@ const agentConfig: Agent.HttpOptions = {
   scheduling: 'lifo',
 };
 
-export function createWriter({ clickhouse }: { clickhouse: ClickHouseConfig }) {
+export function createWriter({
+  clickhouse,
+  clickhouseCloud,
+  logger,
+}: {
+  clickhouse: ClickHouseConfig;
+  clickhouseCloud: ClickHouseConfig | null;
+  logger: FastifyLoggerInstance;
+}) {
   const httpAgent = new Agent(agentConfig);
   const httpsAgent = new Agent.HttpsAgent(agentConfig);
 
@@ -49,22 +58,42 @@ export function createWriter({ clickhouse }: { clickhouse: ClickHouseConfig }) {
   return {
     async writeOperations(operations: string[]) {
       const csv = joinIntoSingleMessage(operations);
+      const compressed = await compress(csv);
 
-      await writeCsv(
-        clickhouse,
-        agents,
-        `INSERT INTO operations (${operationsFields}) FORMAT CSV`,
-        await compress(csv)
-      );
+      await Promise.all([
+        writeCsv(clickhouse, agents, `INSERT INTO operations (${operationsFields}) FORMAT CSV`, compressed),
+        clickhouseCloud
+          ? writeCsv(
+              clickhouseCloud,
+              agents,
+              `INSERT INTO operations (${operationsFields}) FORMAT CSV`,
+              compressed
+            ).catch(error => {
+              logger.error('Failed to write operations to ClickHouse Cloud %s', error);
+              // Ignore errors from clickhouse cloud
+              return Promise.resolve();
+            })
+          : Promise.resolve(),
+      ]);
     },
     async writeRegistry(records: string[]) {
       const csv = joinIntoSingleMessage(records);
-      await writeCsv(
-        clickhouse,
-        agents,
-        `INSERT INTO operation_collection (${registryFields}) FORMAT CSV`,
-        await compress(csv)
-      );
+      const compressed = await compress(csv);
+      await Promise.all([
+        writeCsv(clickhouse, agents, `INSERT INTO operation_collection (${registryFields}) FORMAT CSV`, compressed),
+        clickhouseCloud
+          ? writeCsv(
+              clickhouse,
+              agents,
+              `INSERT INTO operation_collection (${registryFields}) FORMAT CSV`,
+              compressed
+            ).catch(error => {
+              logger.error('Failed to write operation_collection to ClickHouse Cloud %s', error);
+              // Ignore errors from clickhouse cloud
+              return Promise.resolve();
+            })
+          : Promise.resolve(),
+      ]);
     },
     legacy: {
       async writeOperations(operations: string[]) {

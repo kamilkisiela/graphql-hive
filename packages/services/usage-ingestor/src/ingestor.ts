@@ -39,6 +39,7 @@ function shouldRetryOnFailure(error: any) {
 export function createIngestor(config: {
   logger: FastifyLoggerInstance;
   clickhouse: ClickHouseConfig;
+  clickhouseCloud: ClickHouseConfig | null;
   kafka: {
     topic: string;
     concurrency: number;
@@ -169,6 +170,8 @@ export function createIngestor(config: {
   const processor = createProcessor({ logger });
   const writer = createWriter({
     clickhouse: config.clickhouse,
+    clickhouseCloud: config.clickhouseCloud,
+    logger,
   });
 
   let status: Status = Status.Waiting;
