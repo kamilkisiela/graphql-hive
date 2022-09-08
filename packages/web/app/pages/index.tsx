@@ -9,14 +9,44 @@ import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import Cookies from 'cookies';
 import { LAST_VISITED_ORG_KEY } from '@/constants';
 import { authenticated } from '@/components/authenticated-container';
+import { createHash } from 'node:crypto';
+
+function hash(data: string): string {
+  return createHash('sha256').update(data).digest('hex');
+}
+
+function readLastVisitedOrganization(cookies: Cookies, token: string | undefined): string | undefined {
+  const data = cookies.get(LAST_VISITED_ORG_KEY);
+
+  // Seems like the cookie is not set or it's in the legacy format (before we started hashing the access token)
+  if (data?.includes(':') && token) {
+    const [orgId, checksum] = data.split(':');
+
+    if (checksum === hash(token)) {
+      return orgId;
+    }
+  }
+}
+
+function writeLastVisitedOrganization(cookies: Cookies, token: string, orgId: string): void {
+  cookies.set(LAST_VISITED_ORG_KEY, `${orgId}:${hash(token)}`, {
+    httpOnly: false,
+  });
+}
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   try {
     let orgId: string | null = null;
     const cookies = new Cookies(req, res);
-    const lastOrgIdInCookies = cookies.get(LAST_VISITED_ORG_KEY);
+
+    // Check whether user is authenticated.
+    const sAccessToken = cookies.get('sAccessToken');
+    const isAuthenticated = !!sAccessToken;
+
+    const lastOrgIdInCookies = readLastVisitedOrganization(cookies, sAccessToken);
 
     if (lastOrgIdInCookies) {
+      console.log('Use last visited org', lastOrgIdInCookies);
       orgId = lastOrgIdInCookies;
     } else {
       const { host, cookie } = req.headers;
@@ -40,15 +70,15 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
 
       const result: ExecutionResult<OrganizationsQuery> = await response.json();
       const org = result.data?.organizations?.nodes?.find(node => node.type === OrganizationType.Personal);
+
       if (org) {
         orgId = org.cleanId;
+
+        if (sAccessToken) {
+          writeLastVisitedOrganization(cookies, sAccessToken, orgId);
+        }
       }
     }
-
-    /**
-     * Check whether user is authenticated.
-     */
-    const isAuthenticated = !!cookies.get('sAccessToken');
 
     if (isAuthenticated && orgId) {
       return {

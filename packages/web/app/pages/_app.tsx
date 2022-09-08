@@ -61,8 +61,16 @@ function App({ Component, pageProps }: AppProps): ReactElement {
       gtag.pageview(url);
 
       const orgId = Router.query.orgId as string;
-      if (orgId && orgId !== cookies.get(LAST_VISITED_ORG_KEY)) {
-        cookies.set(LAST_VISITED_ORG_KEY, orgId);
+      const lastVisitedOrgCookieValue = cookies.get(LAST_VISITED_ORG_KEY);
+
+      // Make sure we do have orgId and the cookie is not in the legacy format
+      if (lastVisitedOrgCookieValue?.includes(':') && orgId) {
+        const [lastVisitedOrgId, checksum] = lastVisitedOrgCookieValue.split(':');
+
+        if (orgId !== lastVisitedOrgId) {
+          // Update the cookie with the new orgId
+          cookies.set(LAST_VISITED_ORG_KEY, `${orgId}:${checksum}`);
+        }
       }
     };
 
