@@ -275,7 +275,9 @@ async function doesUserExistInAuth0(config: LegacyAuth0ConfigEnabled, email: str
   );
 
   if (response.status !== 200) {
-    throw new Error('Could not check whether user exists in Auth0.');
+    throw new Error(
+      `Could not check whether user exists in Auth0. Status: ${response.status} Body: ${await response.text()}`
+    );
   }
 
   const body = await response.json();
@@ -313,7 +315,7 @@ async function trySignIntoAuth0WithUserCredentialsAndRetrieveUserInfo(
   const body = await response.text();
 
   if (response.status !== 200) {
-    throw new Error("Couldn't authenticate user with Auth0.");
+    throw new Error(`Couldn't authenticate user with Auth0. Status: ${response.status} Body: ${await response.text()}`);
   }
 
   const { access_token: accessToken } = JSON.parse(body);
@@ -369,7 +371,13 @@ const generateAuth0AccessToken = async (config: LegacyAuth0ConfigEnabled): Promi
       audience: config['AUTH_LEGACY_AUTH0_AUDIENCE'],
       grant_type: 'client_credentials',
     }),
-  }).then(res => res.json());
+  });
 
-  return response.access_token;
+  const body = await response.text();
+
+  if (response.status !== 200) {
+    throw new Error(`Couldn't generate access token for Auth0. Status: ${response.status} Body: ${body}`);
+  }
+
+  return JSON.parse(body).access_token;
 };
