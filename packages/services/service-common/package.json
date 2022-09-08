@@ -12,8 +12,8 @@
     "prom-client": "14.0.1"
   },
   "peerDependencies": {
-    "@sentry/node": "^6.0.0",
-    "@sentry/tracing": "^6.0.0",
-    "@sentry/utils": "^6.0.0"
+    "@sentry/node": "^7.0.0",
+    "@sentry/tracing": "^7.0.0",
+    "@sentry/utils": "^7.0.0"
   }
 }
