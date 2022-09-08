@@ -59,16 +59,12 @@ export function createWriter({
     async writeOperations(operations: string[]) {
       const csv = joinIntoSingleMessage(operations);
       const compressed = await compress(csv);
+      const sql = `INSERT INTO operations (${operationsFields}) FORMAT CSV`;
 
       await Promise.all([
-        writeCsv(clickhouse, agents, `INSERT INTO operations (${operationsFields}) FORMAT CSV`, compressed),
+        writeCsv(clickhouse, agents, sql, compressed),
         clickhouseCloud
-          ? writeCsv(
-              clickhouseCloud,
-              agents,
-              `INSERT INTO operations (${operationsFields}) FORMAT CSV`,
-              compressed
-            ).catch(error => {
+          ? writeCsv(clickhouseCloud, agents, sql, compressed).catch(error => {
               logger.error('Failed to write operations to ClickHouse Cloud %s', error);
               // Ignore errors from clickhouse cloud
               return Promise.resolve();
@@ -79,15 +75,12 @@ export function createWriter({
     async writeRegistry(records: string[]) {
       const csv = joinIntoSingleMessage(records);
       const compressed = await compress(csv);
+      const sql = `INSERT INTO operation_collection (${registryFields}) FORMAT CSV`;
+
       await Promise.all([
-        writeCsv(clickhouse, agents, `INSERT INTO operation_collection (${registryFields}) FORMAT CSV`, compressed),
+        writeCsv(clickhouse, agents, sql, compressed),
         clickhouseCloud
-          ? writeCsv(
-              clickhouse,
-              agents,
-              `INSERT INTO operation_collection (${registryFields}) FORMAT CSV`,
-              compressed
-            ).catch(error => {
+          ? writeCsv(clickhouseCloud, agents, sql, compressed).catch(error => {
               logger.error('Failed to write operation_collection to ClickHouse Cloud %s', error);
               // Ignore errors from clickhouse cloud
               return Promise.resolve();
