@@ -6,6 +6,7 @@ import type { TypeInput as ThirdPartEmailPasswordTypeInput } from 'supertokens-n
 import { fetch } from 'cross-undici-fetch';
 import { appInfo } from './app-info';
 import zod from 'zod';
+import * as crypto from 'crypto';
 import { createTRPCClient } from '@trpc/client';
 import type { EmailsApi } from '@hive/emails';
 
@@ -180,6 +181,43 @@ export const backendConfig = (): TypeInput => {
 
 const getAuth0Overrides = (config: LegacyAuth0ConfigEnabled) => {
   const override: ThirdPartEmailPasswordTypeInput['override'] = {
+    apis(originalImplementation) {
+      return {
+        ...originalImplementation,
+        async generatePasswordResetTokenPOST(input) {
+          const email = input.formFields.find(formField => formField.id === 'email')?.value;
+
+          if (email) {
+            // We first use the existing implementation for looking for users within supertokens.
+            const users = await ThirdPartyEmailPasswordNode.getUsersByEmail(email);
+
+            // If there is no email/password SuperTokens user yet, we need to check if there is an Auth0 user for this email.
+            if (users.some(user => user.thirdParty == null) === false) {
+              // RPC call to check if email/password user exists in Auth0
+              const dbUser = await checkWhetherAuth0EmailUserWithoutAssociatedSuperTokensIdExists(config, { email });
+
+              if (dbUser) {
+                // If we have this user within our database we create our new supertokens user
+                const newUserResult = await ThirdPartyEmailPasswordNode.emailPasswordSignUp(
+                  dbUser.email,
+                  await generateRandomPassword()
+                );
+
+                if (newUserResult.status === 'OK') {
+                  // link the db record to the new supertokens user
+                  await setUserIdMapping(config, {
+                    auth0UserId: dbUser.auth0UserId,
+                    supertokensUserId: newUserResult.user.id,
+                  });
+                }
+              }
+            }
+          }
+
+          return await originalImplementation.generatePasswordResetTokenPOST!(input);
+        },
+      };
+    },
     functions(originalImplementation) {
       return {
         ...originalImplementation,
@@ -358,6 +396,43 @@ async function setUserIdMapping(
   }
 }
 
+const CheckAuth0EmailUserExistsResponseModel = zod.object({
+  user: zod.nullable(zod.object({ id: zod.string(), email: zod.string(), auth0UserId: zod.string() })),
+});
+
+/**
+ * Check whether a specific user that SIGNED UP VIA EMAIL and password THAT DOES NOT YET EXIST IN SUPER TOKENS exists in the database as an Auth0 user.
+ */
+async function checkWhetherAuth0EmailUserWithoutAssociatedSuperTokensIdExists(
+  config: LegacyAuth0ConfigEnabled,
+  params: { email: string }
+): Promise<zod.TypeOf<typeof CheckAuth0EmailUserExistsResponseModel>['user']> {
+  const response = await fetch(
+    config['AUTH_LEGACY_AUTH0_INTERNAL_API_ENDPOINT'] +
+      '/check_auth0_email_user_without_associated_supertoken_id_exists',
+    {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-authorization': config['AUTH_LEGACY_AUTH0_INTERNAL_API_KEY'],
+      },
+      body: JSON.stringify({
+        email: params.email,
+      }),
+    }
+  );
+
+  if (response.status !== 200) {
+    throw new Error('Failed to check whether user exists in Auth0.');
+  }
+
+  const body = await response.json();
+
+  const { user } = CheckAuth0EmailUserExistsResponseModel.parse(body);
+
+  return user;
+}
+
 /**
  * Generate a Auth0 access token that is required for making API calls to Auth0.
  */
@@ -381,3 +456,15 @@ const generateAuth0AccessToken = async (config: LegacyAuth0ConfigEnabled): Promi
 
   return JSON.parse(body).access_token;
 };
+
+async function generateRandomPassword(): Promise<string> {
+  return await new Promise<string>((resolve, reject) =>
+    crypto.randomBytes(20, (err, buf) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(buf.toString('hex'));
+    })
+  );
+}

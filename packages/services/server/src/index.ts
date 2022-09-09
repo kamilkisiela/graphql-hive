@@ -25,6 +25,10 @@ const LegacySetUserIdMappingPayloadModel = zod.object({
   superTokensUserId: zod.string(),
 });
 
+const LegacyCheckAuth0EmailUserExistsPayloadModel = zod.object({
+  email: zod.string(),
+});
+
 export async function main() {
   Sentry.init({
     serverName: 'api',
@@ -300,6 +304,32 @@ export async function main() {
             externalUserId: auth0UserId,
           });
           reply.status(200).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+        },
+      });
+      server.route({
+        method: 'POST',
+        url: '/__legacy/check_auth0_email_user_without_associated_supertoken_id_exists',
+        async handler(req, reply) {
+          if (req.headers['x-authorization'] !== authLegacyAPIKey) {
+            reply.status(401).send({ error: 'Invalid update user id mapping key.', code: 'ERR_INVALID_KEY' }); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+            return;
+          }
+
+          const { email } = LegacyCheckAuth0EmailUserExistsPayloadModel.parse(req.body);
+
+          const user = await storage.getUserWithoutAssociatedSuperTokenIdByAuth0Email({
+            email,
+          });
+
+          await reply.status(200).send({
+            user: user
+              ? {
+                  id: user.id,
+                  email: user?.email,
+                  auth0UserId: user.externalAuthUserId,
+                }
+              : null,
+          });
         },
       });
     }
