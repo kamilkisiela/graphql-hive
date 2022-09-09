@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react';
 import ThirdPartyEmailPassword from 'supertokens-auth-react/recipe/thirdpartyemailpassword';
-import { captureException } from '@sentry/nextjs';
 import { Header } from './v2';
 import { HiveStripeWrapper } from '@/lib/billing/stripe';
 import type { GetServerSideProps } from 'next';
+import { SessionContainerInterface } from 'supertokens-node/lib/build/recipe/session/types';
 
 /**
  * Wrapper component for a authenticated route.
@@ -38,10 +38,16 @@ export const serverSidePropsSessionHandling = async (context: Parameters<GetServ
   const SupertokensNode = await import('supertokens-node');
   const Session = await import('supertokens-node/recipe/session');
   SupertokensNode.init(backendConfig());
-  const session = await Session.getSession(context.req, context.res, { sessionRequired: false }).catch(err => {
-    captureException(err);
-    return Promise.reject(err);
-  });
+  let session: SessionContainerInterface | undefined;
+
+  try {
+    session = await Session.getSession(context.req, context.res, { sessionRequired: false });
+  } catch (err: any) {
+    if (err.type === Session.Error.TRY_REFRESH_TOKEN) {
+      return { props: { fromSupertokens: 'needs-refresh' } };
+    }
+    throw err;
+  }
 
   if (session === undefined) {
     return {

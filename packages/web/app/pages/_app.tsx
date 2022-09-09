@@ -1,7 +1,7 @@
 import { ReactElement, useEffect } from 'react';
 import { AppProps } from 'next/app';
 import Script from 'next/script';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import { initMixpanel } from '@/lib/mixpanel';
 import { ChakraProvider, extendTheme } from '@chakra-ui/react';
 import GlobalStylesComponent from '@/components/common/GlobalStyles';
@@ -55,7 +55,8 @@ function identifyOnSentry(userId: string, email: string): void {
   });
 }
 
-function App({ Component, pageProps }: AppProps): ReactElement {
+function App({ Component, pageProps }: AppProps<{ fromSupertokens?: 'needs-refresh' }>): ReactElement {
+  const router = useRouter();
   useEffect(() => {
     const handleRouteChange = (url: string) => {
       gtag.pageview(url);
@@ -93,6 +94,19 @@ function App({ Component, pageProps }: AppProps): ReactElement {
       identify(payload.superTokensId, payload.email);
     });
   }, []);
+
+  useEffect(() => {
+    async function doRefresh() {
+      if (pageProps.fromSupertokens === 'needs-refresh') {
+        if (await Session.attemptRefreshingSession()) {
+          location.reload();
+        } else {
+          router.replace(`/auth?redirectToPath=${router.asPath}`);
+        }
+      }
+    }
+    doRefresh();
+  }, [pageProps.fromSupertokens]);
 
   return (
     <>
@@ -138,14 +152,16 @@ function App({ Component, pageProps }: AppProps): ReactElement {
         />
       )}
 
-      <SuperTokensWrapper>
-        <UrqlProvider value={urqlClient}>
-          <ChakraProvider theme={theme}>
-            <LoadingAPIIndicator />
-            <Component {...pageProps} />
-          </ChakraProvider>
-        </UrqlProvider>
-      </SuperTokensWrapper>
+      {pageProps.fromSupertokens === 'needs-refresh' ? null : (
+        <SuperTokensWrapper>
+          <UrqlProvider value={urqlClient}>
+            <ChakraProvider theme={theme}>
+              <LoadingAPIIndicator />
+              <Component {...pageProps} />
+            </ChakraProvider>
+          </UrqlProvider>
+        </SuperTokensWrapper>
+      )}
     </>
   );
 }
