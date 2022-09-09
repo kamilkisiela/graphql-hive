@@ -422,13 +422,15 @@ async function checkWhetherAuth0EmailUserWithoutAssociatedSuperTokensIdExists(
     }
   );
 
+  const body = await response.text();
+
   if (response.status !== 200) {
-    throw new Error('Failed to check whether user exists in Auth0.');
+    throw new Error(
+      `Failed to check whether the Auth0 email user without an associated supertokenId exists. Status: ${response.status}. Body: ${body}`
+    );
   }
 
-  const body = await response.json();
-
-  const { user } = CheckAuth0EmailUserExistsResponseModel.parse(body);
+  const { user } = CheckAuth0EmailUserExistsResponseModel.parse(JSON.parse(body));
 
   return user;
 }
