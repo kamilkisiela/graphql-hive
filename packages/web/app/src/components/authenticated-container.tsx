@@ -29,7 +29,9 @@ export const AuthenticatedContainer = (props: { children: ReactNode }): React.Re
  * Utility for wrapping a component with an authenticated container that has the default application layout.
  */
 export const authenticated =
-  <TProps extends { fromSupertokens?: 'needs-refresh' }>(Component: (props: TProps) => React.ReactElement | null) =>
+  <TProps extends { fromSupertokens?: 'needs-refresh' }>(
+    Component: (props: Omit<TProps, 'fromSupertokens'>) => React.ReactElement | null
+  ) =>
   (props: TProps) => {
     const router = useRouter();
 
@@ -44,7 +46,7 @@ export const authenticated =
         }
       }
       doRefresh();
-    }, [props.fromSupertokens]);
+    }, []);
 
     if (props.fromSupertokens) {
       return null;
@@ -52,7 +54,7 @@ export const authenticated =
 
     return (
       <AuthenticatedContainer>
-        <Component {...props} />
+        <Component {...(props as any)} />
       </AuthenticatedContainer>
     );
   };
