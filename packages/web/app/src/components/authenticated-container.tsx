@@ -1,9 +1,12 @@
+import React from 'react';
 import type { ReactNode } from 'react';
 import ThirdPartyEmailPassword from 'supertokens-auth-react/recipe/thirdpartyemailpassword';
 import { Header } from './v2';
 import { HiveStripeWrapper } from '@/lib/billing/stripe';
 import type { GetServerSideProps } from 'next';
 import { SessionContainerInterface } from 'supertokens-node/lib/build/recipe/session/types';
+import Session from 'supertokens-auth-react/recipe/session';
+import { useRouter } from 'next/router';
 
 /**
  * Wrapper component for a authenticated route.
@@ -25,13 +28,33 @@ export const AuthenticatedContainer = (props: { children: ReactNode }): React.Re
  * Utility for wrapping a component with an authenticated container that has the default application layout.
  */
 export const authenticated =
-  <TProps,>(Component: (props: TProps) => React.ReactElement | null) =>
-  (props: TProps) =>
-    (
+  <TProps extends { fromSupertokens?: 'needs-refresh' }>(Component: (props: TProps) => React.ReactElement | null) =>
+  (props: TProps) => {
+    const router = useRouter();
+
+    React.useEffect(() => {
+      async function doRefresh() {
+        if (props.fromSupertokens === 'needs-refresh') {
+          if (await Session.attemptRefreshingSession()) {
+            location.reload();
+          } else {
+            router.replace(`/auth?redirectToPath=${router.asPath}`);
+          }
+        }
+      }
+      doRefresh();
+    }, [props.fromSupertokens]);
+
+    if (props.fromSupertokens) {
+      return null;
+    }
+
+    return (
       <AuthenticatedContainer>
         <Component {...props} />
       </AuthenticatedContainer>
     );
+  };
 
 export const serverSidePropsSessionHandling = async (context: Parameters<GetServerSideProps>[0]) => {
   const { backendConfig } = await import('@/config/backend-config');
