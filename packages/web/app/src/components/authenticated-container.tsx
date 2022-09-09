@@ -1,6 +1,7 @@
 import React from 'react';
 import type { ReactNode } from 'react';
 import ThirdPartyEmailPassword from 'supertokens-auth-react/recipe/thirdpartyemailpassword';
+import { captureException } from '@sentry/nextjs';
 import { Header } from './v2';
 import { HiveStripeWrapper } from '@/lib/billing/stripe';
 import type { GetServerSideProps } from 'next';
@@ -69,6 +70,7 @@ export const serverSidePropsSessionHandling = async (context: Parameters<GetServ
     if (err.type === Session.Error.TRY_REFRESH_TOKEN) {
       return { props: { fromSupertokens: 'needs-refresh' } };
     }
+    captureException(err);
     throw err;
   }
 
