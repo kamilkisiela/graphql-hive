@@ -84,6 +84,7 @@ export async function createStorage(connection: string): Promise<Storage> {
       fullName: user.full_name,
       displayName: user.display_name,
       isAdmin: user.is_admin ?? false,
+      externalAuthUserId: user.external_auth_user_id ?? null,
     };
   }
 
@@ -285,6 +286,25 @@ export async function createStorage(connection: string): Promise<Storage> {
           public."users"
         WHERE
           "supertoken_user_id" = ${superTokensUserId}
+        LIMIT 1
+      `);
+
+      if (user) {
+        return transformUser(user);
+      }
+
+      return null;
+    },
+    async getUserWithoutAssociatedSuperTokenIdByAuth0Email({ email }) {
+      const user = await pool.maybeOne<Slonik<users>>(sql`
+        SELECT
+          *
+        FROM
+          public."users"
+        WHERE
+          "email" = ${email}
+          AND "supertoken_user_id" IS NULL
+          AND "external_auth_user_id" LIKE 'auth0|%'
         LIMIT 1
       `);
 
