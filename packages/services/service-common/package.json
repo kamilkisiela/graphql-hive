@@ -5,9 +5,9 @@
   "version": "0.0.0",
   "license": "MIT",
   "dependencies": {
+    "@fastify/cors": "8.1.0",
     "cross-undici-fetch": "0.4.3",
     "fastify": "4.5.3",
-    "fastify-cors": "6.1.0",
     "fastify-plugin": "4.2.1",
     "prom-client": "14.0.1"
   },

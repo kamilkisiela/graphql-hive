@@ -1,5 +1,5 @@
 import { fastify } from 'fastify';
-import cors from 'fastify-cors';
+import cors from '@fastify/cors';
 import promClient from 'prom-client';
 
 export { promClient as metrics };
