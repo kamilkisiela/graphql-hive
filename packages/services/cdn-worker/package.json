@@ -17,7 +17,7 @@
   },
   "devDependencies": {
     "@hive/service-common": "0.0.0",
-    "fastify": "3.29.0",
+    "fastify": "4.5.3",
     "esbuild": "0.14.39",
     "cross-undici-fetch": "0.1.27",
     "@types/service-worker-mock": "2.0.1",

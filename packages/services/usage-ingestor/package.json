@@ -24,7 +24,7 @@
     "@graphql-hive/core": "0.2.2",
     "@hive/service-common": "0.0.0",
     "@hive/usage-common": "0.0.0",
-    "pino-pretty": "6.0.0"
+    "pino-pretty": "9.1.0"
   },
   "buildOptions": {
     "runify": true,
