@@ -1864,6 +1864,13 @@
   dependencies:
     graphql "^16.5.0"
 
+"@escape.tech/graphql-armor-max-tokens@1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@escape.tech/graphql-armor-max-tokens/-/graphql-armor-max-tokens-1.0.1.tgz#7a5cf8b911a9b59c1af4550ccb67a3acf4e272f9"
+  integrity sha512-gkaCO7uh8Qv7IVlVGaCOERFAbhinBwdKP1X7lFU9gihZDyBIkXLVjNBKfpLPk2k5aeH+x6ZPiA4+oghCokoZtQ==
+  dependencies:
+    graphql "^16.5.0"
+
 "@eslint/eslintrc@^1.3.0":
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/@eslint/eslintrc/-/eslintrc-1.3.0.tgz#29f92c30bb3e771e4a2048c95fa6855392dfac4f"

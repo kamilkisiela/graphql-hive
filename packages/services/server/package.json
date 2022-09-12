@@ -19,6 +19,7 @@
     "@escape.tech/graphql-armor-max-aliases": "1.2.2",
     "@escape.tech/graphql-armor-max-depth": "1.4.3",
     "@escape.tech/graphql-armor-max-directives": "1.2.2",
+    "@escape.tech/graphql-armor-max-tokens": "1.0.1",
     "@sentry/node": "7.12.1",
     "@sentry/integrations": "7.12.1",
     "@sentry/tracing": "7.12.1",

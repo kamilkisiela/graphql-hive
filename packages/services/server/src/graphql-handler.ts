@@ -17,7 +17,7 @@ import { HiveError } from '@hive/api';
 import { maxAliasesPlugin } from '@escape.tech/graphql-armor-max-aliases';
 import { maxDepthPlugin } from '@escape.tech/graphql-armor-max-depth';
 import { maxDirectivesPlugin } from '@escape.tech/graphql-armor-max-directives';
-import { useTokenLimit } from './use-token-limit';
+import { maxTokensPlugin } from '@escape.tech/graphql-armor-max-tokens';
 
 const reqIdGenerate = hyperid({ fixedLength: true });
 
@@ -89,7 +89,7 @@ const graphqlArmorPlugins: Array<Plugin> = [
   maxDepthPlugin({
     n: 20,
   }),
-  useTokenLimit({ tokenLimit: 800 }),
+  maxTokensPlugin({ n: 800 }),
 ];
 
 const sampleRatePerOperationName: {
