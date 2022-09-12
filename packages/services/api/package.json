@@ -12,7 +12,7 @@
     "@graphql-yoga/common": "2.5.0",
     "cross-undici-fetch": "0.4.3",
     "@trpc/client": "9.23.2",
-    "@graphql-inspector/core": "3.2.0",
+    "@graphql-inspector/core": "3.4.0",
     "@graphql-tools/load-files": "6.5.0",
     "@graphql-tools/schema": "8.2.0",
     "@octokit/app": "12.0.5",
