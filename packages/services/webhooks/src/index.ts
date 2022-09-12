@@ -32,7 +32,7 @@ async function main() {
   const errorHandler = createErrorHandler(server);
 
   try {
-    const port = process.env.PORT || 6250;
+    const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 6250;
 
     const { schedule, readiness, start, stop } = createScheduler({
       logger: server.log,
@@ -93,7 +93,10 @@ async function main() {
       },
     });
 
-    await server.listen(port, '0.0.0.0');
+    await server.listen({
+      port,
+      host: '0.0.0.0',
+    });
 
     if (process.env.METRICS_ENABLED === 'true') {
       await startMetrics();

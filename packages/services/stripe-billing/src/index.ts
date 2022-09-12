@@ -47,7 +47,7 @@ async function main() {
       },
     });
 
-    const port = process.env.PORT || 4013;
+    const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 4013;
 
     const context: Context = {
       storage$: postgres$,
@@ -84,7 +84,10 @@ async function main() {
     if (process.env.METRICS_ENABLED === 'true') {
       await startMetrics();
     }
-    await server.listen(port, '0.0.0.0');
+    await server.listen({
+      port,
+      host: '0.0.0.0',
+    });
     await start();
   } catch (error) {
     server.log.fatal(error);

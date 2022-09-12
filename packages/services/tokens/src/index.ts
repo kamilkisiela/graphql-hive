@@ -61,7 +61,7 @@ export async function main() {
       },
     });
 
-    const port = process.env.PORT || 6001;
+    const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 6001;
 
     await server.register(fastifyTRPCPlugin, {
       prefix: '/trpc',
@@ -100,7 +100,10 @@ export async function main() {
     if (process.env.METRICS_ENABLED === 'true') {
       await startMetrics();
     }
-    await server.listen(port, '0.0.0.0');
+    await server.listen({
+      port,
+      host: '0.0.0.0',
+    });
     await start();
   } catch (error) {
     server.log.fatal(error);

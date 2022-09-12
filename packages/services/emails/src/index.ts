@@ -33,7 +33,7 @@ async function main() {
   const errorHandler = createErrorHandler(server);
 
   try {
-    const port = process.env.PORT || 6260;
+    const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 6260;
 
     const emailProvider = createEmailProvider();
     const { schedule, readiness, start, stop } = createScheduler({
@@ -104,7 +104,10 @@ async function main() {
       });
     }
 
-    await server.listen(port, '0.0.0.0');
+    await server.listen({
+      port,
+      host: '0.0.0.0',
+    });
 
     if (process.env.METRICS_ENABLED === 'true') {
       await startMetrics();

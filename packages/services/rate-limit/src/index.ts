@@ -59,7 +59,7 @@ async function main() {
       },
     });
 
-    const port = process.env.PORT || 5000;
+    const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 5000;
 
     server.route({
       method: ['GET', 'HEAD'],
@@ -82,7 +82,10 @@ async function main() {
     if (process.env.METRICS_ENABLED === 'true') {
       await startMetrics();
     }
-    await server.listen(port, '0.0.0.0');
+    await server.listen({
+      port,
+      host: '0.0.0.0',
+    });
     await ctx.start();
   } catch (error) {
     server.log.fatal(error);

@@ -149,7 +149,10 @@ async function main() {
     },
   });
 
-  await server.listen(PORT, '0.0.0.0');
+  await server.listen({
+    port: PORT,
+    host: '0.0.0.0',
+  });
 }
 
 main().catch(e => console.error(e));

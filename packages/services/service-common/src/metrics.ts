@@ -40,5 +40,8 @@ export async function startMetrics() {
 
   await server.register(cors);
 
-  return server.listen(10254, '0.0.0.0');
+  return server.listen({
+    port: 10254,
+    host: '0.0.0.0',
+  });
 }

@@ -74,7 +74,7 @@ async function main() {
       server.log.info('Redis reconnecting in %s', timeToReconnect);
     });
 
-    const port = process.env.PORT || 6500;
+    const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 6500;
 
     await server.register(fastifyTRPCPlugin, {
       prefix: '/trpc',
@@ -103,7 +103,10 @@ async function main() {
       },
     });
 
-    await server.listen(port, '0.0.0.0');
+    await server.listen({
+      port,
+      host: '0.0.0.0',
+    });
     if (process.env.METRICS_ENABLED === 'true') {
       await startMetrics();
     }

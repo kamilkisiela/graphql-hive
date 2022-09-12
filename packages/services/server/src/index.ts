@@ -204,7 +204,7 @@ export async function main() {
           : {},
     });
     const graphqlPath = '/graphql';
-    const port = process.env.PORT || 4000;
+    const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 4000;
     const signature = Math.random().toString(16).substr(2);
     const graphql = graphqlHandler({
       graphiqlEndpoint: graphqlPath,
@@ -338,7 +338,10 @@ export async function main() {
       await startMetrics();
     }
 
-    await server.listen(port, '0.0.0.0');
+    await server.listen({
+      port,
+      host: '0.0.0.0',
+    });
   } catch (error) {
     server.log.fatal(error);
     Sentry.captureException(error, {
