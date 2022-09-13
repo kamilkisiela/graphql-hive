@@ -151,6 +151,7 @@ export class SchemaPublisher {
         target: input.target,
       },
       baseSchema: baseSchema,
+      experimental_acceptBreakingChanges: false,
     });
 
     if (input.github) {
@@ -349,6 +350,7 @@ export class SchemaPublisher {
       target: targetId,
       sdl: input.sdl.length,
       checksum: input.checksum,
+      experimental_accept_breaking_changes: input.experimental_acceptBreakingChanges === true,
       metadata: !!input.metadata,
     });
 
@@ -488,6 +490,7 @@ export class SchemaPublisher {
           target: targetId,
         },
         baseSchema: baseSchema,
+        experimental_acceptBreakingChanges: input.experimental_acceptBreakingChanges === true,
       });
     } catch (err) {
       if (err instanceof GraphQLDocumentStringInvalidError) {

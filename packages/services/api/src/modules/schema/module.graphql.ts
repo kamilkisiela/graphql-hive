@@ -94,6 +94,10 @@ export default gql`
     author: String!
     commit: String!
     force: Boolean
+    """
+    Accept breaking changes and mark schema as valid (if composable)
+    """
+    experimental_acceptBreakingChanges: Boolean
     metadata: String
     """
     Talk to GitHub Application and create a check-run

@@ -31,6 +31,7 @@ export class SchemaValidator {
     before,
     after,
     baseSchema,
+    experimental_acceptBreakingChanges,
   }: {
     orchestrator: Orchestrator;
     incoming: Schema;
@@ -38,6 +39,7 @@ export class SchemaValidator {
     after: readonly Schema[];
     selector: Types.TargetSelector;
     baseSchema: string | null;
+    experimental_acceptBreakingChanges: boolean;
   }): Promise<ValidationResult> {
     this.logger.debug('Validating Schema');
     const existing = findSchema(before, incoming);
@@ -94,14 +96,22 @@ export class SchemaValidator {
       if (existingSchema) {
         changes = await this.inspector.diff(buildSchema(existingSchema), buildSchema(incomingSchema), selector);
 
-        changes.forEach(change => {
-          if (change.criticality === 'Breaking') {
-            errors.push({
-              message: `Breaking Change: ${change.message}`,
-              path: change.path,
+        const hasBreakingChanges = changes.some(change => change.criticality === 'Breaking');
+
+        if (hasBreakingChanges) {
+          if (experimental_acceptBreakingChanges) {
+            this.logger.debug('Schema contains breaking changes, but the experimental safe mode is enabled');
+          } else {
+            changes.forEach(change => {
+              if (change.criticality === 'Breaking') {
+                errors.push({
+                  message: `Breaking Change: ${change.message}`,
+                  path: change.path,
+                });
+              }
             });
           }
-        });
+        }
       }
     } catch (error) {
       errors.push({
@@ -109,9 +119,8 @@ export class SchemaValidator {
       });
     }
 
-    const hasErrors = errors.length > 0;
-    const hasBreakingChanges = changes.some(change => change.criticality === 'Breaking');
-    const valid = !hasErrors && !hasBreakingChanges;
+    const hasErrors = errors.length > 0; // no errors means no breaking changes
+    const valid = !hasErrors;
 
     return {
       valid,
