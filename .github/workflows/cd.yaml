@@ -38,7 +38,7 @@ jobs:
         run: yarn build:libraries
 
       - name: Schema Publish
-        run: ./packages/libraries/cli/bin/dev schema:publish "packages/services/api/src/modules/*/module.graphql.ts" --force --github || echo 'migration'
+        run: ./packages/libraries/cli/bin/dev schema:publish "packages/services/api/src/modules/*/module.graphql.ts" --force --github
 
       - name: Prepare NPM Credentials
         run: |
