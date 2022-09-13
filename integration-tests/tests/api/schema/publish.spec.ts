@@ -1638,3 +1638,75 @@ test('publish new schema when a field is moved from one service to another (stit
   expect(versionsResult.body.errors).not.toBeDefined();
   expect(versionsResult.body.data!.schemaVersions.nodes).toHaveLength(3);
 });
+
+test('(experimental_acceptBreakingChanges) accept breaking changes if schema is composable', async () => {
+  const { access_token: owner_access_token } = await authenticate('main');
+  const orgResult = await createOrganization(
+    {
+      name: 'foo',
+    },
+    owner_access_token
+  );
+  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+
+  const projectResult = await createProject(
+    {
+      organization: org.cleanId,
+      type: ProjectType.Federation,
+      name: 'foo',
+    },
+    owner_access_token
+  );
+
+  const project = projectResult.body.data!.createProject.ok!.createdProject;
+  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
+
+  // Create a token with write rights
+  const writeTokenResult = await createToken(
+    {
+      name: 'test',
+      organization: org.cleanId,
+      project: project.cleanId,
+      target: target.cleanId,
+      organizationScopes: [],
+      projectScopes: [],
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+    },
+    owner_access_token
+  );
+  expect(writeTokenResult.body.errors).not.toBeDefined();
+  const writeToken = writeTokenResult.body.data!.createToken.ok!.secret;
+
+  const basePublishParams = {
+    service: 'test',
+    author: 'Kamil',
+    commit: 'init',
+    url: 'https://api.com/users',
+    sdl: `type Query { me: User } type User @key(fields: "id") { id: ID! name: String }`,
+  };
+
+  const publishResult = await publishSchema(basePublishParams, writeToken);
+
+  // Schema publish should be successful
+  expect(publishResult.body.errors).not.toBeDefined();
+  expect(publishResult.body.data!.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+  // Publish a new version that makes the schema composable but includes a breaking change
+  const composableButBreakingResult = await publishSchema(
+    {
+      ...basePublishParams,
+      commit: 'composable-but-breaking',
+      force: true,
+      experimental_acceptBreakingChanges: true,
+      // We changed the `@key(fields: "age")` to `@key(fields: "id")`
+      // We also removed the `name` field (breaking)
+      sdl: `type Query { me: User } type User @key(fields: "id") { id: ID! }`,
+    },
+    writeToken
+  );
+
+  const latestValid = await fetchLatestValidSchema(writeToken);
+
+  expect(composableButBreakingResult.body.data!.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+  expect(latestValid.body.data?.latestValidVersion.schemas.nodes[0].commit).toBe('composable-but-breaking');
+});
