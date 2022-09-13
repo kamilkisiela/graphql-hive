@@ -1,5 +1,11 @@
 # @graphql-hive/cli
 
+## 0.19.0
+
+### Minor Changes
+
+- [#357](https://github.com/kamilkisiela/graphql-hive/pull/357) [`30f11c4`](https://github.com/kamilkisiela/graphql-hive/commit/30f11c40054debfcbd8b6090316d129eb7851046) Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Adds experimental_acceptBreakingChanges
+
 ## 0.18.2
 
 ### Patch Changes
