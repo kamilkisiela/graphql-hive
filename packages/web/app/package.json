@@ -37,15 +37,18 @@
     "@stripe/stripe-js": "1.29.0",
     "@tanstack/react-table": "8.0.0-beta.8",
     "@theguild/editor": "0.4.1",
+    "@trpc/client": "9.23.2",
     "@urql/core": "2.3.6",
     "@urql/devtools": "2.0.3",
     "@urql/exchange-graphcache": "4.3.6",
     "clsx": "1.1.1",
     "cookies": "0.8.0",
+    "cross-undici-fetch": "0.4.3",
     "date-fns": "2.25.0",
     "dompurify": "2.3.10",
     "echarts": "5.3.2",
     "echarts-for-react": "3.0.2",
+    "express": "^4.18.1",
     "formik": "2.2.9",
     "framer-motion": "4.1.17",
     "graphiql": "1.7.2",
@@ -57,6 +60,7 @@
     "monaco-editor": "0.27.0",
     "monaco-themes": "0.3.3",
     "next": "12.3.0",
+    "nextjs-cors": "2.1.1",
     "node-crisp-api": "1.12.3",
     "react": "17.0.2",
     "react-children-utilities": "2.7.1",
@@ -69,6 +73,8 @@
     "react-window": "1.8.7",
     "regenerator-runtime": "0.13.9",
     "snarkdown": "2.0.0",
+    "supertokens-auth-react": "0.24.6",
+    "supertokens-node": "11.1.0",
     "tailwindcss": "2.2.19",
     "tslib": "2.3.1",
     "twin.macro": "2.8.2",
@@ -77,14 +83,10 @@
     "valtio": "1.2.5",
     "wonka": "4.0.15",
     "yup": "0.32.11",
-    "supertokens-auth-react": "0.24.6",
-    "supertokens-node": "11.1.0",
-    "nextjs-cors": "2.1.1",
-    "cross-undici-fetch": "0.4.3",
-    "zod": "3.15.1",
-    "@trpc/client": "9.23.2"
+    "zod": "3.15.1"
   },
   "devDependencies": {
+    "@hive/emails": "*",
     "@next/eslint-plugin-next": "12.1.6",
     "@tailwindcss/line-clamp": "0.3.1",
     "@types/cookies": "0.7.7",
@@ -103,8 +105,7 @@
     "eslint-plugin-tailwindcss": "3.5.2",
     "postcss": "8.4.13",
     "tailwindcss": "2.2.19",
-    "tailwindcss-radix": "2.2.0",
-    "@hive/emails": "*"
+    "tailwindcss-radix": "2.2.0"
   },
   "babelMacros": {
     "twin": {
