@@ -41,6 +41,9 @@ export default class SchemaPublish extends Command {
       description: 'force publish even on breaking changes',
       default: false,
     }),
+    experimental_acceptBreakingChanges: Flags.boolean({
+      description: '(experimental) accept breaking changes and mark schema as valid (only if composable)',
+    }),
     require: Flags.string({
       description: 'Loads specific require.extensions before running the codegen and reading the configuration',
       default: [],
@@ -111,6 +114,7 @@ export default class SchemaPublish extends Command {
         env: 'HIVE_TOKEN',
       });
       const force = this.maybe('force', flags);
+      const experimental_acceptBreakingChanges = this.maybe('experimental_acceptBreakingChanges', flags);
       const metadata = this.resolveMetadata(this.maybe('metadata', flags));
       const usesGitHubApp = this.maybe('github', flags) === true;
 
@@ -162,6 +166,7 @@ export default class SchemaPublish extends Command {
           commit,
           sdl,
           force,
+          experimental_acceptBreakingChanges: experimental_acceptBreakingChanges === true,
           metadata,
           github: usesGitHubApp,
         },
