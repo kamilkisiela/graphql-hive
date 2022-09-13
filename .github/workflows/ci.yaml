@@ -40,7 +40,7 @@ jobs:
       - name: Install Node
         uses: actions/setup-node@v2
         with:
-          node-version: 16
+          node-version-file: .node-version
 
       - name: Install Dependencies
         run: yarn --frozen-lockfile
@@ -88,7 +88,7 @@ jobs:
       - name: Install Node
         uses: actions/setup-node@v2
         with:
-          node-version: 16
+          node-version-file: .node-version
 
       - name: Pull node_modules
         uses: actions/cache@v2
@@ -152,7 +152,7 @@ jobs:
         if: steps.feature_flags.outputs.detected == 'true'
         uses: actions/setup-node@v2
         with:
-          node-version: 16
+          node-version-file: .node-version
 
       - name: Pull node_modules
         if: steps.feature_flags.outputs.detected == 'true'
@@ -210,7 +210,7 @@ jobs:
       - name: Install Node
         uses: actions/setup-node@v2
         with:
-          node-version: 16
+          node-version-file: .node-version
 
       - name: Pull node_modules
         uses: actions/cache@v2
@@ -250,7 +250,7 @@ jobs:
       - name: Install Node
         uses: actions/setup-node@v2
         with:
-          node-version: 16
+          node-version-file: .node-version
 
       - name: Pull node_modules
         uses: actions/cache@v2
@@ -285,7 +285,7 @@ jobs:
       - name: Install Node
         uses: actions/setup-node@v2
         with:
-          node-version: 16
+          node-version-file: .node-version
 
       - name: Pull node_modules
         uses: actions/cache@v2
@@ -316,7 +316,7 @@ jobs:
       - name: Install Node
         uses: actions/setup-node@v2
         with:
-          node-version: 16
+          node-version-file: .node-version
 
       - name: Install Rust
         run: |
@@ -363,7 +363,7 @@ jobs:
 
       - uses: actions/setup-node@v2
         with:
-          node-version: 16
+          node-version-file: .node-version
 
       - name: Pull node_modules
         uses: actions/cache@v2
