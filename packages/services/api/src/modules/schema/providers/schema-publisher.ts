@@ -361,7 +361,10 @@ export class SchemaPublisher {
       scope: TargetAccessScope.REGISTRY_WRITE,
     });
 
-    const [project, target, latest, baseSchema] = await Promise.all([
+    const [organization, project, target, latest, baseSchema] = await Promise.all([
+      this.organizationManager.getOrganization({
+        organization: organizationId,
+      }),
       this.projectManager.getProject({
         organization: organizationId,
         project: projectId,
@@ -609,7 +612,7 @@ export class SchemaPublisher {
       typeof this.schemaModuleConfig.schemaPublishLink === 'function' && typeof newVersionId === 'string'
         ? this.schemaModuleConfig.schemaPublishLink({
             organization: {
-              cleanId: organizationId,
+              cleanId: organization.cleanId,
             },
             project: {
               cleanId: project.cleanId,
