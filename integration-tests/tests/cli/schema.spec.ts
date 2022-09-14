@@ -374,7 +374,7 @@ test('schema:publish should print a link to the website', async () => {
   const { access_token: owner_access_token } = await authenticate('main');
   const orgResult = await createOrganization(
     {
-      name: 'foo',
+      name: 'bar',
     },
     owner_access_token
   );
@@ -425,11 +425,11 @@ test('schema:publish should print a link to the website', async () => {
   const writeToken = writeTokenResult.body.data!.createToken.ok!.secret;
 
   await expect(schemaPublish(['--token', writeToken, 'fixtures/init-schema.graphql'])).resolves.toMatch(
-    'Available at https://app.graphql-hive.com/foo/foo/development'
+    'Available at https://app.graphql-hive.com/bar/foo/development'
   );
 
   await expect(schemaPublish(['--token', writeToken, 'fixtures/nonbreaking-schema.graphql'])).resolves.toMatch(
-    'Available at https://app.graphql-hive.com/foo/foo/development/history/'
+    'Available at https://app.graphql-hive.com/bar/foo/development/history/'
   );
 });
 
@@ -577,7 +577,7 @@ test('schema:publish should support experimental_acceptBreakingChanges flag', as
   const { access_token: owner_access_token } = await authenticate('main');
   const orgResult = await createOrganization(
     {
-      name: 'foo',
+      name: 'bar',
     },
     owner_access_token
   );
@@ -612,10 +612,10 @@ test('schema:publish should support experimental_acceptBreakingChanges flag', as
   const writeToken = writeTokenResult.body.data!.createToken.ok!.secret;
 
   await expect(schemaPublish(['--token', writeToken, 'fixtures/init-schema.graphql'])).resolves.toMatch(
-    'Available at https://app.graphql-hive.com/foo/foo/development'
+    'Available at https://app.graphql-hive.com/bar/foo/development'
   );
 
   await expect(
     schemaPublish(['--token', writeToken, '--experimental_acceptBreakingChanges', 'fixtures/breaking-schema.graphql'])
-  ).resolves.toMatch('Available at https://app.graphql-hive.com/foo/foo/development/history/');
+  ).resolves.toMatch('Available at https://app.graphql-hive.com/bar/foo/development/history/');
 });

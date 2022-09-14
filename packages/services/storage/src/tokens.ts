@@ -1,4 +1,3 @@
-/// <reference path="./module.d.ts" />
 import { sql } from 'slonik';
 import { getPool, tokens, toDate } from './db';
 import type { Slonik } from './shared';
