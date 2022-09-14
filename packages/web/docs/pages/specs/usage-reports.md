@@ -230,7 +230,7 @@ export interface Client {
   "operations": [
     {
       "operationMapKey": "c3b6d9b0", // points to the 'me' query
-      "timestamp": 1655112281535,
+      "timestamp": 1663158676535, // must be within retention period of use plan (free/Pro/enterprise)
       "execution": {
         "ok": true,
         "duration": 150000000, // 150ms in nanoseconds
@@ -245,7 +245,7 @@ export interface Client {
     },
     {
       "operationMapKey": "c3b6d9b0", // points to the 'me' query
-      "timestamp": 1655112327589,
+      "timestamp": 1663158676589,
       "execution": {
         "ok": false, // failed operation
         "duration": 150000000, // 150ms in nanoseconds
@@ -260,7 +260,7 @@ export interface Client {
     },
     {
       "operationMapKey": "762a45e3", // points to the 'users' query
-      "timestamp": 1655112327589,
+      "timestamp": 1663158676589,
       "execution": {
         "ok": true,
         "duration": 150000000, // 150ms in nanoseconds
@@ -284,5 +284,5 @@ curl -X POST \
   https://app.graphql-hive.com/usage \
   -H 'x-api-token: token-here' \
   -H 'content-type: application/json' \
-  -d '{ "size": 1, "map": { "aaa": { "operationName": "me", "operation": "query me { me { id } }", "fields": ["Query", "Query.me", "User", "User.id"] } }, "operations": [{ "operationMapKey" : "c3b6d9b0", "timestamp" : 1655112281535, "execution" : { "ok" : true, "duration" : 150000000, "errorsTotal" : 0 }, "metadata" : { "client" : { "name" : "demo" , "version" : "0.0.1" } } } ] }'
+  -d '{ "size": 1, "map": { "aaa": { "operationName": "me", "operation": "query me { me { id } }", "fields": ["Query", "Query.me", "User", "User.id"] } }, "operations": [{ "operationMapKey" : "c3b6d9b0", "timestamp" : 1663158676535, "execution" : { "ok" : true, "duration" : 150000000, "errorsTotal" : 0 }, "metadata" : { "client" : { "name" : "demo" , "version" : "0.0.1" } } } ] }'
 ```
