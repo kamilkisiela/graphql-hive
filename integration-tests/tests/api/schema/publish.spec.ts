@@ -1343,7 +1343,7 @@ test('linkToWebsite should be available when publishing initial schema', async (
   const { access_token: owner_access_token } = await authenticate('main');
   const orgResult = await createOrganization(
     {
-      name: 'foo',
+      name: 'bar',
     },
     owner_access_token
   );
@@ -1412,14 +1412,14 @@ test('linkToWebsite should be available when publishing initial schema', async (
       ? result.body.data!.schemaPublish.linkToWebsite
       : null;
 
-  expect(linkToWebsite).toEqual('https://app.graphql-hive.com/foo/foo/development');
+  expect(linkToWebsite).toEqual('https://app.graphql-hive.com/bar/foo/development');
 });
 
 test('linkToWebsite should be available when publishing non-initial schema', async () => {
   const { access_token: owner_access_token } = await authenticate('main');
   const orgResult = await createOrganization(
     {
-      name: 'foo',
+      name: 'bar',
     },
     owner_access_token
   );
@@ -1500,7 +1500,7 @@ test('linkToWebsite should be available when publishing non-initial schema', asy
       ? result.body.data!.schemaPublish.linkToWebsite
       : null;
 
-  expect(linkToWebsite).toMatch('https://app.graphql-hive.com/foo/foo/development/history/');
+  expect(linkToWebsite).toMatch('https://app.graphql-hive.com/bar/foo/development/history/');
   expect(linkToWebsite).toMatch(/history\/[a-z0-9-]+$/);
 });
 
