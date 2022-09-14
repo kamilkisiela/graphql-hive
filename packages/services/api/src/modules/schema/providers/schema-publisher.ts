@@ -609,7 +609,7 @@ export class SchemaPublisher {
       typeof this.schemaModuleConfig.schemaPublishLink === 'function' && typeof newVersionId === 'string'
         ? this.schemaModuleConfig.schemaPublishLink({
             organization: {
-              cleanId: project.cleanId,
+              cleanId: organizationId,
             },
             project: {
               cleanId: project.cleanId,
