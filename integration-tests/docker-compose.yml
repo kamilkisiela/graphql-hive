@@ -525,7 +525,10 @@ services:
       PORT: 3010
 
   supertokens:
-    image: registry.supertokens.io/supertokens/supertokens-postgresql:3.9
+    image: registry.supertokens.io/supertokens/supertokens-postgresql:3.16
+    depends_on:
+      db:
+        condition: service_healthy
     networks:
       - 'stack'
     ports:
