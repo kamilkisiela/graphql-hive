@@ -74,7 +74,7 @@ export function deployGraphQL({
     'graphql-api',
     {
       storageContainer,
-      replicas: 1,
+      replicas: 2,
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
       env: {
