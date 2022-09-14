@@ -11,7 +11,7 @@ export function deploySuperTokens({ apiKey }: { apiKey: Output<string> }) {
     restartPolicy: 'Always',
     containers: [
       {
-        image: 'registry.supertokens.io/supertokens/supertokens-postgresql:3.9',
+        image: 'registry.supertokens.io/supertokens/supertokens-postgresql:3.16',
         name: 'supertokens',
         ports: {
           http: port,
