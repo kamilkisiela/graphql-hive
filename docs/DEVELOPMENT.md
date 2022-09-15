@@ -66,7 +66,12 @@ We have a script to feed your local instance of Hive.
 ### Run Hive
 
 1. Click on Start Hive in the bottom bar of VSCode
-2. Open the UI (`http://localhost:3000` by default) and Sign in with one of the users you created on the Auth0 management console
+2. Open the UI (`http://localhost:3000` by default) and register any email and
+   password
+3. Sending e-mails is mocked out during local development, so in order to
+   verify the account find the verification link by visiting the email server's
+   `/_history` endpoint - `http://localhost:6260/_history` by default.
+   - Searching for `token` should help you find the link.
 
 ### Legacy Auth0 Integration
 
