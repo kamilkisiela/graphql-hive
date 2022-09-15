@@ -18,6 +18,9 @@ if (typeof process.env.SECRET === 'undefined') {
 const SECRET = process.env.SECRET;
 const PORT = process.env.PORT;
 
+/**
+ * @type string[]
+ */
 const history = [];
 
 const composeFederation = compose(services => {
@@ -75,9 +78,13 @@ async function main() {
     method: ['POST'],
     url: '/compose',
     handler(req, res) {
+      /**
+       * @type any
+       */
+      const signature = req.headers[signatureHeaderName];
       const error = verifyRequest({
         body: JSON.stringify(req.body),
-        signature: req.headers[signatureHeaderName],
+        signature: signature,
         secret: SECRET,
       });
 
@@ -85,7 +92,11 @@ async function main() {
         // Failed to verify the request
         res.status(500).send(error);
       } else {
-        const result = composeFederation(req.body);
+        /**
+         * @type any
+         */
+        const input = req.body;
+        const result = composeFederation(input);
         res.send(JSON.stringify(result));
       }
     },
