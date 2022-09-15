@@ -1,5 +1,5 @@
 name: CI
-on: [pull_request_target]
+on: [pull_request]
 
 jobs:
   setup:
@@ -21,11 +21,15 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
+    outputs:
+      hive_token_present: ${{ steps.secrets_present.outputs.hive_token }}
+
     env:
       POSTGRES_HOST: localhost
       POSTGRES_PORT: 5432
       POSTGRES_PASSWORD: postgres
       POSTGRES_USER: postgres
+      HIVE_TOKEN: ${{ secrets.HIVE_TOKEN }}
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
       TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
       TURBO_API_URL: ${{ secrets.TURBO_API_URL }}
@@ -66,6 +70,10 @@ jobs:
         with:
           path: '**/node_modules'
           key: ${{ github.sha }}
+
+      - name: Check for Presence of Repository Secrets
+        id: secrets_present
+        run: echo "::set-output name=hive_token::${{ env.HIVE_TOKEN != '' }}"
 
   integration-tests:
     name: Integration Tests
@@ -192,6 +200,7 @@ jobs:
     name: Schema Check
     runs-on: ubuntu-latest
     needs: setup
+    if: needs.setup.outputs.hive_token_present == 'true'
     timeout-minutes: 5
 
     env:
