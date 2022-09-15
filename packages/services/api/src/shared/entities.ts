@@ -139,6 +139,11 @@ export interface Project {
   buildUrl?: string | null;
   validationUrl?: string | null;
   gitRepository?: string | null;
+  externalComposition: {
+    enabled: boolean;
+    endpoint?: string | null;
+    encryptedSecret?: string | null;
+  };
 }
 
 export interface Target {
@@ -191,9 +196,9 @@ export interface TargetSettings {
 
 export interface Orchestrator {
   ensureConfig(config: any): void | never;
-  validate(schemas: SchemaObject[], config?: any): Promise<SchemaError[]>;
-  build(schemas: SchemaObject[], config?: any): Promise<SchemaObject>;
-  supergraph(schemas: SchemaObject[], config?: any): Promise<string | null>;
+  validate(schemas: SchemaObject[], config: any): Promise<SchemaError[]>;
+  build(schemas: SchemaObject[], config: any): Promise<SchemaObject>;
+  supergraph(schemas: SchemaObject[], config: any): Promise<string | null>;
 }
 
 export interface ActivityObject {

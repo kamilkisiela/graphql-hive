@@ -45,6 +45,7 @@ export class StitchingOrchestrator implements Orchestrator {
         raw: s.raw,
         source: s.source,
       })),
+      external: null,
     });
 
     return result.errors;
@@ -60,6 +61,7 @@ export class StitchingOrchestrator implements Orchestrator {
           raw: s.raw,
           source: s.source,
         })),
+        external: null,
       });
 
       return {

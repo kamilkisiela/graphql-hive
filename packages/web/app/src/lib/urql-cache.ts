@@ -34,6 +34,12 @@ import {
   Members_OrganizationMembers,
 } from '../../pages/[orgId]/members';
 
+import {
+  ExternalCompositionForm_EnableMutation,
+  ExternalComposition_DisableMutation,
+  ExternalComposition_ProjectConfigurationQuery,
+} from '@/components/project/settings/external-composition';
+
 function updateQuery<T, V>(cache: Cache, input: QueryInput<T, V>, recipe: (obj: T) => void) {
   return cache.updateQuery(input, (data: T | null) => {
     if (!data) {
@@ -406,6 +412,73 @@ const deleteOrganizationInvitation: TypedDocumentNodeUpdateResolver<typeof Invit
   }
 };
 
+const enableExternalSchemaComposition: TypedDocumentNodeUpdateResolver<
+  typeof ExternalCompositionForm_EnableMutation
+> = ({ enableExternalSchemaComposition }, args, cache) => {
+  if (enableExternalSchemaComposition.ok) {
+    cache.updateQuery(
+      {
+        query: ExternalComposition_ProjectConfigurationQuery,
+        variables: {
+          selector: {
+            organization: args.input.organization,
+            project: args.input.project,
+          },
+        },
+      },
+      data => {
+        if (data === null) {
+          return null;
+        }
+
+        const ok = enableExternalSchemaComposition.ok;
+
+        if (ok && data.project?.externalSchemaComposition) {
+          data.project.externalSchemaComposition = {
+            __typename: 'ExternalSchemaComposition',
+            endpoint: ok.endpoint,
+          };
+        }
+
+        return data;
+      }
+    );
+  }
+};
+
+const disableExternalSchemaComposition: TypedDocumentNodeUpdateResolver<typeof ExternalComposition_DisableMutation> = (
+  { disableExternalSchemaComposition },
+  args,
+  cache
+) => {
+  if (disableExternalSchemaComposition.ok) {
+    cache.updateQuery(
+      {
+        query: ExternalComposition_ProjectConfigurationQuery,
+        variables: {
+          selector: {
+            organization: args.input.organization,
+            project: args.input.project,
+          },
+        },
+      },
+      data => {
+        if (data === null) {
+          return null;
+        }
+
+        const ok = disableExternalSchemaComposition.ok;
+
+        if (ok && data.project?.externalSchemaComposition) {
+          data.project.externalSchemaComposition = null;
+        }
+
+        return data;
+      }
+    );
+  }
+};
+
 // UpdateResolver
 export const Mutation = {
   createOrganization,
@@ -425,4 +498,6 @@ export const Mutation = {
   deletePersistedOperation,
   inviteToOrganizationByEmail,
   deleteOrganizationInvitation,
+  enableExternalSchemaComposition,
+  disableExternalSchemaComposition,
 };

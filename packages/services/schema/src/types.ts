@@ -30,3 +30,8 @@ export type SupergraphInput = Array<{
 export type SupergraphOutput = {
   supergraph: string | null;
 };
+
+export type ExternalComposition = {
+  endpoint: string;
+  encryptedSecret: string;
+} | null;

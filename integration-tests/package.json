@@ -20,7 +20,7 @@
     "zod": "3.15.1"
   },
   "scripts": {
-    "build-and-pack": "(cd ../ && yarn build:services && yarn build:libraries && yarn build:local-cdn) && node ./scripts/pack.mjs",
+    "build-and-pack": "(cd ../ && yarn build:services && yarn build:libraries && yarn build:local) && node ./scripts/pack.mjs",
     "dockest": "tsup-node dockest.ts --format esm --target node16 && node dist/dockest.js"
   }
 }

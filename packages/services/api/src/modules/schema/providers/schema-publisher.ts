@@ -152,6 +152,7 @@ export class SchemaPublisher {
       },
       baseSchema: baseSchema,
       experimental_acceptBreakingChanges: false,
+      project,
     });
 
     if (input.github) {
@@ -264,9 +265,10 @@ export class SchemaPublisher {
           project,
           supergraph:
             project.type === ProjectType.FEDERATION
-              ? await this.schemaManager
-                  .matchOrchestrator(project.type)
-                  .supergraph(schemas.map(s => this.helper.createSchemaObject(s)))
+              ? await this.schemaManager.matchOrchestrator(project.type).supergraph(
+                  schemas.map(s => this.helper.createSchemaObject(s)),
+                  project.externalComposition
+                )
               : null,
           schemas,
         },
@@ -317,9 +319,10 @@ export class SchemaPublisher {
           project,
           supergraph:
             project.type === ProjectType.FEDERATION
-              ? await this.schemaManager
-                  .matchOrchestrator(project.type)
-                  .supergraph(schemas.map(s => this.helper.createSchemaObject(s)))
+              ? await this.schemaManager.matchOrchestrator(project.type).supergraph(
+                  schemas.map(s => this.helper.createSchemaObject(s)),
+                  project.externalComposition
+                )
               : null,
           schemas,
         });
@@ -494,6 +497,7 @@ export class SchemaPublisher {
         },
         baseSchema: baseSchema,
         experimental_acceptBreakingChanges: input.experimental_acceptBreakingChanges === true,
+        project,
       });
     } catch (err) {
       if (err instanceof GraphQLDocumentStringInvalidError) {
@@ -732,7 +736,10 @@ export class SchemaPublisher {
           schemas,
           supergraph:
             project.type === ProjectType.FEDERATION
-              ? await orchestrator.supergraph(schemas.map(s => this.helper.createSchemaObject(s)))
+              ? await orchestrator.supergraph(
+                  schemas.map(s => this.helper.createSchemaObject(s)),
+                  project.externalComposition
+                )
               : null,
         });
       }

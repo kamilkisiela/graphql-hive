@@ -14,6 +14,12 @@ export default gql`
     updateBaseSchema(input: UpdateBaseSchemaInput!): UpdateBaseSchemaResult!
     updateSchemaServiceName(input: UpdateSchemaServiceNameInput!): UpdateSchemaServiceNameResult!
     schemaSyncCDN(input: SchemaSyncCDNInput!): SchemaSyncCDNPayload!
+    enableExternalSchemaComposition(
+      input: EnableExternalSchemaCompositionInput!
+    ): EnableExternalSchemaCompositionResult!
+    disableExternalSchemaComposition(
+      input: DisableExternalSchemaCompositionInput!
+    ): DisableExternalSchemaCompositionResult!
   }
 
   extend type Query {
@@ -29,6 +35,55 @@ export default gql`
     Requires API Token
     """
     latestValidVersion: SchemaVersion!
+  }
+
+  input DisableExternalSchemaCompositionInput {
+    organization: ID!
+    project: ID!
+  }
+
+  """
+  @oneOf
+  """
+  type DisableExternalSchemaCompositionResult {
+    ok: Boolean
+    error: String
+  }
+
+  input EnableExternalSchemaCompositionInput {
+    organization: ID!
+    project: ID!
+    endpoint: String!
+    secret: String!
+  }
+
+  """
+  @oneOf
+  """
+  type EnableExternalSchemaCompositionResult {
+    ok: ExternalSchemaComposition
+    error: EnableExternalSchemaCompositionError
+  }
+
+  type ExternalSchemaComposition {
+    endpoint: String!
+  }
+
+  extend type Project {
+    externalSchemaComposition: ExternalSchemaComposition
+  }
+
+  type EnableExternalSchemaCompositionError implements Error {
+    message: String!
+    """
+    The detailed validation error messages for the input fields.
+    """
+    inputErrors: EnableExternalSchemaCompositionInputErrors!
+  }
+
+  type EnableExternalSchemaCompositionInputErrors {
+    endpoint: String
+    secret: String
   }
 
   type UpdateSchemaServiceNameResult {

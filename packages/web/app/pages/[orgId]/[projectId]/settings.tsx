@@ -6,10 +6,16 @@ import * as Yup from 'yup';
 
 import { authenticated, withSessionProtection } from '@/components/authenticated-container';
 import { ProjectLayout } from '@/components/layouts';
+import { ExternalCompositionSettings } from '@/components/project/settings/external-composition';
 import { Button, Card, Heading, Input, Link, Select, Spinner, Tag, Title } from '@/components/v2';
 import { AlertTriangleIcon } from '@/components/v2/icon';
 import { DeleteProjectModal } from '@/components/v2/modals';
-import { GetGitHubIntegrationDetailsDocument, OrganizationFieldsFragment, ProjectFieldsFragment } from '@/graphql';
+import {
+  GetGitHubIntegrationDetailsDocument,
+  OrganizationFieldsFragment,
+  ProjectFieldsFragment,
+  ProjectType,
+} from '@/graphql';
 import { canAccessProject, ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
@@ -207,6 +213,10 @@ const Page = ({
         <p className="mb-3 font-light text-gray-300">Connect the project with your Git repository</p>
         {project?.gitRepository ? <GitHubIntegration gitRepository={project.gitRepository} /> : null}
       </Card>
+
+      {project.type === ProjectType.Federation ? (
+        <ExternalCompositionSettings project={project} organization={organization} />
+      ) : null}
 
       {canAccessProject(ProjectAccessScope.Delete, organization.me) && (
         <Card>

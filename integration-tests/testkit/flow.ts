@@ -24,6 +24,7 @@ import type {
   SchemaSyncCdnInput,
   RateLimitInput,
   InviteToOrganizationByEmailInput,
+  EnableExternalSchemaCompositionInput,
 } from './gql/graphql';
 import { execute } from './graphql';
 
@@ -793,5 +794,30 @@ export async function updateOrgRateLimit(
       monthlyLimits,
     },
     authToken,
+  });
+}
+
+export async function enableExternalSchemaComposition(input: EnableExternalSchemaCompositionInput, token: string) {
+  return execute({
+    document: gql(/* GraphQL */ `
+      mutation enableExternalSchemaComposition($input: EnableExternalSchemaCompositionInput!) {
+        enableExternalSchemaComposition(input: $input) {
+          ok {
+            endpoint
+          }
+          error {
+            message
+            inputErrors {
+              endpoint
+              secret
+            }
+          }
+        }
+      }
+    `),
+    variables: {
+      input,
+    },
+    token,
   });
 }

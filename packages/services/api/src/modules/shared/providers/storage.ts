@@ -123,6 +123,13 @@ export interface Storage {
     _: ProjectSelector & Pick<Project, 'name' | 'cleanId'> & { user: string }
   ): Promise<Project | never>;
   updateProjectGitRepository(_: ProjectSelector & Pick<Project, 'gitRepository'>): Promise<Project | never>;
+  enableExternalSchemaComposition(
+    _: ProjectSelector & {
+      endpoint: string;
+      encryptedSecret: string;
+    }
+  ): Promise<Project>;
+  disableExternalSchemaComposition(_: ProjectSelector): Promise<Project>;
 
   getTargetId(_: TargetSelector & { useIds?: boolean }): Promise<string | never>;
   getTargetByCleanId(

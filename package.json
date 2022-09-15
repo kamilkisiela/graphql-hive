@@ -31,7 +31,7 @@
     "build:libraries": "yarn graphql:generate && yarn turbo build --filter=./packages/libraries/* --color",
     "build:web": "yarn graphql:generate && yarn turbo build --filter=./packages/web/* --color",
     "build:services": "yarn graphql:generate && yarn turbo build  --filter=./packages/services/* --color",
-    "build:local-cdn": "yarn graphql:generate && yarn turbo build-local --color",
+    "build:local": "yarn graphql:generate && yarn turbo build-local --color",
     "env:sync": "node ./scripts/sync-env-files.js",
     "turbo": "env-cmd --silent turbo run"
   },
