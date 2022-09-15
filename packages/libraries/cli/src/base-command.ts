@@ -47,7 +47,7 @@ export default abstract class extends Command {
    * @param args all arguments or flags
    * @param defaultValue default value
    * @param message custom error message in case of no value
-   * @param env
+   * @param env an env var name
    */
   ensure<
     TArgs extends {
