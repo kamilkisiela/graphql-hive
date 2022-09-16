@@ -75,13 +75,6 @@ function useNoIntrospection(params: { signature: string }): Plugin<{ req: Fastif
   };
 }
 
-const sampleRatePerOperationName: {
-  [key: string]: number;
-} = {
-  myTokenInfo: 0.1, // collect ~10% of requests
-  schemaPublish: 0.1,
-};
-
 export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMethod => {
   const server = createServer<Context>({
     plugins: [
@@ -109,13 +102,12 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
         configureScope(args, scope) {
           const transaction = scope.getTransaction();
 
-          // Reduce the number of transactions to avoid overloading the Sentry
-          if (transaction && args.operationName && sampleRatePerOperationName[args.operationName]) {
-            const shouldBeDropped = Math.random() > sampleRatePerOperationName[args.operationName];
+          // Reduce the number of transactions to avoid overloading Sentry
+          const ctx = args.contextValue as Context;
+          const graphqlClientName = ctx.headers['graphql-client-name'];
 
-            if (shouldBeDropped) {
-              transaction.sampled = false;
-            }
+          if (transaction && graphqlClientName !== 'Hive CLI' && graphqlClientName !== 'Hive App') {
+            transaction.sampled = false;
           }
 
           scope.setContext('Extra Info', {
