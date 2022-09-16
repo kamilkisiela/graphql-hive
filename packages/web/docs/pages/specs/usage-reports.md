@@ -9,7 +9,11 @@ The official JavaScript Hive Client (`@graphql-hive/client`) collects executed o
 | -------- | ------------------------------------ |
 | Endpoint | `https://app.graphql-hive.com/usage` |
 | Header   | `X-API-Token: token-here`            |
+| Header   | `Authorization: Bearer token-here`   |
 | Method   | `POST`                               |
+
+> The same token can be used in either `Authorization` or `x-api-token`
+> but use only once authentication header.
 
 ## Data structure
 
@@ -286,3 +290,6 @@ curl -X POST \
   -H 'content-type: application/json' \
   -d '{ "size": 1, "map": { "aaa": { "operationName": "me", "operation": "query me { me { id } }", "fields": ["Query", "Query.me", "User", "User.id"] } }, "operations": [{ "operationMapKey" : "c3b6d9b0", "timestamp" : 1663158676535, "execution" : { "ok" : true, "duration" : 150000000, "errorsTotal" : 0 }, "metadata" : { "client" : { "name" : "demo" , "version" : "0.0.1" } } } ] }'
 ```
+
+`x-api-token` header can be replaced with `Authorization` and bearer token
+(the same token as used with `x-api-token`).
