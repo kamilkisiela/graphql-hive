@@ -11,7 +11,7 @@ export interface AgentOptions {
    */
   endpoint: string;
   /**
-   * API Token
+   * API Token generated in Settings section in a target.
    */
   token: string;
   /**
@@ -75,7 +75,7 @@ export function createAgent<TEvent, TResult = void>(
     ...pluginOptions,
   };
 
-  const enabled = options.enabled !== false;
+  const enabled = options.enabled;
 
   let timeoutID: any = null;
 
@@ -153,7 +153,7 @@ export function createAgent<TEvent, TResult = void>(
             headers: {
               accept: 'application/json',
               'content-type': 'application/json',
-              Authorization: `Bearer ${options.token}`,
+              'X-API-Token': options.token,
               'User-Agent': `${options.name}@${version}`,
               ...headers(),
             },

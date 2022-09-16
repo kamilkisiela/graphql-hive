@@ -74,7 +74,7 @@ test('should send data to Hive', async () => {
   let body: any = {};
   const http = nock('http://localhost')
     .post('/200')
-    .matchHeader('Authorization', `Bearer ${token}`)
+    .matchHeader('X-API-Token', token)
     .matchHeader('Content-Type', headers['Content-Type'])
     .matchHeader('graphql-client-name', headers['graphql-client-name'])
     .matchHeader('graphql-client-version', headers['graphql-client-version'])
@@ -152,7 +152,7 @@ test('should send data to Hive immediately', async () => {
   let body: any = {};
   const http = nock('http://localhost')
     .post('/200')
-    .matchHeader('Authorization', `Bearer ${token}`)
+    .matchHeader('X-API-Token', token)
     .matchHeader('Content-Type', headers['Content-Type'])
     .matchHeader('graphql-client-name', headers['graphql-client-name'])
     .matchHeader('graphql-client-version', headers['graphql-client-version'])
@@ -258,7 +258,7 @@ test('should send original schema of a federated service', async () => {
   let body: any = {};
   const http = nock('http://localhost')
     .post('/200')
-    .matchHeader('Authorization', `Bearer ${token}`)
+    .matchHeader('X-API-Token', token)
     .matchHeader('Content-Type', headers['Content-Type'])
     .matchHeader('graphql-client-name', headers['graphql-client-name'])
     .matchHeader('graphql-client-version', headers['graphql-client-version'])
@@ -298,7 +298,7 @@ test('should display SchemaPublishMissingServiceError', async () => {
   const token = 'Token';
   const http = nock('http://localhost')
     .post('/200')
-    .matchHeader('Authorization', `Bearer ${token}`)
+    .matchHeader('X-API-Token', token)
     .matchHeader('Content-Type', headers['Content-Type'])
     .matchHeader('graphql-client-name', headers['graphql-client-name'])
     .matchHeader('graphql-client-version', headers['graphql-client-version'])
@@ -358,7 +358,7 @@ test('should display SchemaPublishMissingUrlError', async () => {
   const token = 'Token';
   const http = nock('http://localhost')
     .post('/200')
-    .matchHeader('Authorization', `Bearer ${token}`)
+    .matchHeader('X-API-Token', token)
     .matchHeader('Content-Type', headers['Content-Type'])
     .matchHeader('graphql-client-name', headers['graphql-client-name'])
     .matchHeader('graphql-client-version', headers['graphql-client-version'])
