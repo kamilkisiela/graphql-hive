@@ -8,7 +8,7 @@ The official JavaScript Hive Client (`@graphql-hive/client`) collects executed o
 | Name     | Value                                |
 | -------- | ------------------------------------ |
 | Endpoint | `https://app.graphql-hive.com/usage` |
-| Header   | `X-API-Token: token-here`            |
+| Header   | `Authorization: Bearer token-here`   |
 | Method   | `POST`                               |
 
 ## Data structure
@@ -282,7 +282,7 @@ export interface Client {
 ```bash
 curl -X POST \
   https://app.graphql-hive.com/usage \
-  -H 'x-api-token: token-here' \
+  -H 'Authorization: Bearer token-here' \
   -H 'content-type: application/json' \
   -d '{ "size": 1, "map": { "aaa": { "operationName": "me", "operation": "query me { me { id } }", "fields": ["Query", "Query.me", "User", "User.id"] } }, "operations": [{ "operationMapKey" : "c3b6d9b0", "timestamp" : 1663158676535, "execution" : { "ok" : true, "duration" : 150000000, "errorsTotal" : 0 }, "metadata" : { "client" : { "name" : "demo" , "version" : "0.0.1" } } } ] }'
 ```
