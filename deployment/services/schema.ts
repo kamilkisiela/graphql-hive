@@ -33,6 +33,7 @@ export function deploySchema({
         REDIS_HOST: redis.config.host,
         REDIS_PORT: String(redis.config.port),
         REDIS_PASSWORD: redis.config.password,
+        ENCRYPTION_SECRET: commonConfig.requireSecret('encryptionSecret'),
       },
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
