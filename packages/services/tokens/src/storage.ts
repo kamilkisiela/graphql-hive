@@ -23,7 +23,7 @@ export interface Storage {
 
 export async function createStorage(): Promise<Storage> {
   const connectionString = createConnectionString(process.env as any);
-  const db = await createTokenStorage(connectionString);
+  const db = await createTokenStorage(connectionString, 5);
 
   function transformToken(item: tokens): StorageItem {
     return {

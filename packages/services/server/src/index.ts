@@ -126,7 +126,7 @@ export async function main() {
       };
     }
 
-    const storage = await createPostgreSQLStorage(createConnectionString(process.env as any));
+    const storage = await createPostgreSQLStorage(createConnectionString(process.env as any), 10);
 
     const graphqlLogger = createGraphQLLogger();
     const registry = createRegistry({

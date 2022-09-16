@@ -59,7 +59,7 @@ export function createRateLimiter(config: {
   const emails = createEmailScheduler(config.emails);
 
   const { logger } = config;
-  const postgres$ = createPostgreSQLStorage(config.storage.connectionString);
+  const postgres$ = createPostgreSQLStorage(config.storage.connectionString, 1);
   let initialized = false;
   let intervalHandle: ReturnType<typeof setInterval> | null = null;
 
