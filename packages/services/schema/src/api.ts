@@ -12,11 +12,18 @@ const SCHEMA_OBJECT_VALIDATION = {
   source: z.string().nonempty(),
 };
 const SCHEMAS_VALIDATION = z.array(z.object(SCHEMA_OBJECT_VALIDATION));
+const EXTERNAL_VALIDATION = z
+  .object({
+    endpoint: z.string().url().nonempty(),
+    encryptedSecret: z.string().nonempty(),
+  })
+  .nullable();
 
 export const schemaBuilderApiRouter = trpc
   .router<{
     logger: FastifyLoggerInstance;
     redis: Redis;
+    decrypt(value: string): string;
   }>()
   .mutation('supergraph', {
     input: z
@@ -30,6 +37,7 @@ export const schemaBuilderApiRouter = trpc
             })
             .required()
         ),
+        external: EXTERNAL_VALIDATION.optional(),
       })
       .required(),
     async resolve({ ctx, input }) {
@@ -38,7 +46,10 @@ export const schemaBuilderApiRouter = trpc
           type: input.type,
         })
         .inc();
-      return await pickOrchestrator(input.type, ctx.redis, ctx.logger).supergraph(input.schemas);
+      return await pickOrchestrator(input.type, ctx.redis, ctx.logger, ctx.decrypt).supergraph(
+        input.schemas,
+        input.external
+      );
     },
   })
   .mutation('validate', {
@@ -46,6 +57,7 @@ export const schemaBuilderApiRouter = trpc
       .object({
         type: TYPE_VALIDATION,
         schemas: SCHEMAS_VALIDATION,
+        external: EXTERNAL_VALIDATION,
       })
       .required(),
     async resolve({ ctx, input }) {
@@ -54,7 +66,10 @@ export const schemaBuilderApiRouter = trpc
           type: input.type,
         })
         .inc();
-      return await pickOrchestrator(input.type, ctx.redis, ctx.logger).validate(input.schemas);
+      return await pickOrchestrator(input.type, ctx.redis, ctx.logger, ctx.decrypt).validate(
+        input.schemas,
+        input.external
+      );
     },
   })
   .mutation('build', {
@@ -62,6 +77,7 @@ export const schemaBuilderApiRouter = trpc
       .object({
         type: TYPE_VALIDATION,
         schemas: SCHEMAS_VALIDATION,
+        external: EXTERNAL_VALIDATION,
       })
       .required(),
     async resolve({ ctx, input }) {
@@ -70,7 +86,10 @@ export const schemaBuilderApiRouter = trpc
           type: input.type,
         })
         .inc();
-      return await pickOrchestrator(input.type, ctx.redis, ctx.logger).build(input.schemas);
+      return await pickOrchestrator(input.type, ctx.redis, ctx.logger, ctx.decrypt).build(
+        input.schemas,
+        input.external
+      );
     },
   });
 

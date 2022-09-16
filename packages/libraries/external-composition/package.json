@@ -1,0 +1,50 @@
+{
+  "name": "@graphql-hive/external-composition",
+  "description": "Compose schemas outside GraphQL Hive",
+  "version": "0.0.1",
+  "author": {
+    "email": "contact@the-guild.dev",
+    "name": "The Guild",
+    "url": "https://the-guild.dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "kamilkisiela/graphql-hive",
+    "directory": "packages/libraries/external-composition"
+  },
+  "homepage": "https://graphql-hive.com",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "typings": "dist/index.d.ts",
+  "typescript": {
+    "definition": "dist/index.d.ts"
+  },
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs"
+    },
+    "./*": {
+      "require": "./dist/*.js",
+      "import": "./dist/*.mjs"
+    }
+  },
+  "scripts": {
+    "build": "bob build --single",
+    "build-local": "yarn build && node build-example.mjs"
+  },
+  "peerDependencies": {
+    "graphql": "^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0"
+  },
+  "devDependencies": {
+    "@apollo/federation": "0.36.1",
+    "graphql": "16.5.0",
+    "esbuild": "0.14.39"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public",
+    "directory": "dist"
+  }
+}

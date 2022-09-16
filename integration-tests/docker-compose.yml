@@ -234,6 +234,7 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: test
+      ENCRYPTION_SECRET: 8ebe95cf24c1fbe306e9fa32c8c33148
 
   tokens:
     image: node:16.13.2-alpine3.14
@@ -288,6 +289,29 @@ services:
       NODE_ENV: production
       PORT: 3004
       CDN_AUTH_PRIVATE_KEY: 1e1064ef9cda8bf38936b77317e90dc3
+
+  external_composition:
+    image: node:16.13.2-alpine3.14
+    entrypoint:
+      - '/bin/sh'
+      - '/run-external-composition.sh'
+    networks:
+      - 'stack'
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'localhost:3012/_readiness']
+      interval: 5s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
+    ports:
+      - 3012:3012
+    volumes:
+      - '../packages/libraries/external-composition/dist/example.mjs:/example.mjs'
+      - './run-external-composition.sh:/run-external-composition.sh'
+    environment:
+      NODE_ENV: production
+      PORT: 3012
+      SECRET: secretsecret
 
   webhooks:
     image: node:16.13.2-alpine3.14

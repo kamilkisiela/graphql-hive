@@ -9,9 +9,28 @@ import {
 } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
 import Redis from 'ioredis';
+import crypto from 'crypto';
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify/dist/trpc-server-adapters-fastify.cjs.js';
 import type { CreateFastifyContextOptions } from '@trpc/server/adapters/fastify';
 import { schemaBuilderApiRouter } from './api';
+
+const ENCRYPTION_SECRET = crypto.createHash('md5').update(ensureEnv('ENCRYPTION_SECRET')).digest('hex');
+
+function decryptFactory() {
+  const ALG = 'aes256';
+  const IN_ENC = 'utf8';
+  const OUT_ENC = 'hex';
+
+  const secretBuffer = Buffer.from(ENCRYPTION_SECRET, 'latin1');
+
+  return function decrypt(text: string) {
+    const components = text.split(':');
+    const iv = Buffer.from(components.shift() || '', OUT_ENC);
+    const decipher = crypto.createDecipheriv(ALG, secretBuffer, iv);
+
+    return decipher.update(components.join(':'), OUT_ENC, IN_ENC) + decipher.final(IN_ENC);
+  };
+}
 
 async function main() {
   Sentry.init({
@@ -76,12 +95,14 @@ async function main() {
 
     const port = process.env.PORT || 6500;
 
+    const decrypt = decryptFactory();
+
     await server.register(fastifyTRPCPlugin, {
       prefix: '/trpc',
       trpcOptions: {
         router: schemaBuilderApiRouter,
         createContext({ req }: CreateFastifyContextOptions) {
-          return { redis, logger: req.log };
+          return { redis, logger: req.log, decrypt };
         },
       },
     });
