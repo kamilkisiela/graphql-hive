@@ -2082,10 +2082,12 @@
   dependencies:
     tiny-lru "7.0.6"
 
-"@envelop/sentry@3.5.0":
-  version "3.5.0"
-  resolved "https://registry.yarnpkg.com/@envelop/sentry/-/sentry-3.5.0.tgz#2d5cee3822d4a1c6d995baa8ca5a1ac8ba8e4db5"
-  integrity sha512-MdNguYxSbcb3gKJCdDqnQDZsVTJLaXCRaPIzbVuUHfuj+/bxgAUY0R1Yb7SkUs53rSuB4ckYpDnaFdGFROtuHA==
+"@envelop/sentry@3.8.0":
+  version "3.8.0"
+  resolved "https://registry.yarnpkg.com/@envelop/sentry/-/sentry-3.8.0.tgz#599a774073b59ed3a1b02dbec3d6de1666f42b75"
+  integrity sha512-UPzECtZ5x/rv+RH8RlgwKL+UAzecJrUS7wegfxH4VaHP9Fp1ShBAaBd9d+L2NpCHpalmO45iEMEBCFGdS+QTUg==
+  dependencies:
+    tslib "^2.4.0"
 
 "@envelop/types@2.2.0":
   version "2.2.0"
