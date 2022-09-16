@@ -11,10 +11,11 @@ import { createSentryInterceptor } from './sentry';
 
 const dbInterceptors: Interceptor[] = [createQueryLoggingInterceptor(), createSentryInterceptor()];
 
-export async function getPool(connection: string) {
+export async function getPool(connection: string, maximumPoolSize: number) {
   const pool = await createPool(connection, {
     interceptors: dbInterceptors,
     captureStackTrace: false,
+    maximumPoolSize,
   });
 
   function interceptError<K extends Exclude<keyof CommonQueryMethods, 'transaction'>>(methodName: K) {

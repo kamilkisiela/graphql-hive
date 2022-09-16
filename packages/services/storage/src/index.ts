@@ -72,8 +72,8 @@ function getProviderBasedOnExternalId(externalId: string): AuthProvider {
   return 'AUTH0';
 }
 
-export async function createStorage(connection: string): Promise<Storage> {
-  const pool = await getPool(connection);
+export async function createStorage(connection: string, maximumPoolSize: number): Promise<Storage> {
+  const pool = await getPool(connection, maximumPoolSize);
 
   function transformUser(user: users): User {
     return {

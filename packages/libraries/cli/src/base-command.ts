@@ -5,16 +5,10 @@ import { GraphQLClient, ClientError } from 'graphql-request';
 import { Config } from './helpers/config';
 import { getSdk } from './sdk';
 
-export interface UserConfig {
-  [key: string]: any;
-  endpoint: string | null;
-  project: string | null;
-}
-
 export default abstract class extends Command {
   protected _userConfig: Config;
 
-  constructor(argv: string[], config: OclifConfig) {
+  protected constructor(argv: string[], config: OclifConfig) {
     super(argv, config);
 
     this._userConfig = new Config({
@@ -45,13 +39,15 @@ export default abstract class extends Command {
   }
 
   /**
-   * Get a value from arguments or flags first, then fallback to config.
-   * Throw when no there's no value.
+   * Get a value from arguments or flags first, then from env variables,
+   * then fallback to config.
+   * Throw when there's no value.
    *
    * @param key
    * @param args all arguments or flags
    * @param defaultValue default value
    * @param message custom error message in case of no value
+   * @param env an env var name
    */
   ensure<
     TArgs extends {
