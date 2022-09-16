@@ -1,5 +1,5 @@
 import { Injectable, Scope } from 'graphql-modules';
-import { Orchestrator, Schema, SchemaObject } from '../../../shared/entities';
+import { Orchestrator, Schema, SchemaObject, Project } from '../../../shared/entities';
 import { buildSchema, findSchema, hashSchema } from '../../../shared/schema';
 import * as Types from '../../../__generated__/types';
 import { Logger } from '../../shared/providers/logger';
@@ -32,6 +32,7 @@ export class SchemaValidator {
     after,
     baseSchema,
     experimental_acceptBreakingChanges,
+    project,
   }: {
     orchestrator: Orchestrator;
     incoming: Schema;
@@ -40,6 +41,7 @@ export class SchemaValidator {
     selector: Types.TargetSelector;
     baseSchema: string | null;
     experimental_acceptBreakingChanges: boolean;
+    project: Project;
   }): Promise<ValidationResult> {
     this.logger.debug('Validating Schema');
     const existing = findSchema(before, incoming);
@@ -76,7 +78,10 @@ export class SchemaValidator {
       };
     }
 
-    const errors = await orchestrator.validate(afterSchemasWithBase);
+    const errors = await orchestrator.validate(
+      afterSchemasWithBase,
+      project.externalComposition.enabled ? project.externalComposition : null
+    );
 
     if (isInitialSchema) {
       return {
@@ -90,8 +95,8 @@ export class SchemaValidator {
 
     try {
       const [existingSchema, incomingSchema] = await Promise.all([
-        orchestrator.build(beforeSchemas),
-        orchestrator.build(afterSchemas),
+        orchestrator.build(beforeSchemas, project.externalComposition),
+        orchestrator.build(afterSchemas, project.externalComposition),
       ]);
       if (existingSchema) {
         changes = await this.inspector.diff(buildSchema(existingSchema), buildSchema(incomingSchema), selector);

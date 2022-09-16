@@ -6,13 +6,21 @@ import { atomic, stringifySelector } from '../../../shared/helpers';
 import { HiveError } from '../../../shared/errors';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { Logger } from '../../shared/providers/logger';
-import { Storage, TargetSelector, OrganizationSelector } from '../../shared/providers/storage';
+import { Storage, TargetSelector, ProjectSelector, OrganizationSelector } from '../../shared/providers/storage';
 import { CustomOrchestrator } from './orchestrators/custom';
 import { FederationOrchestrator } from './orchestrators/federation';
 import { SingleOrchestrator } from './orchestrators/single';
 import { StitchingOrchestrator } from './orchestrators/stitching';
 import { Tracking } from '../../shared/providers/tracking';
 import { TargetAccessScope } from '../../auth/providers/target-access';
+import { ProjectAccessScope } from '../../auth/providers/project-access';
+import { CryptoProvider } from '../../shared/providers/crypto';
+import { z } from 'zod';
+
+const ENABLE_EXTERNAL_COMPOSITION_SCHEMA = z.object({
+  endpoint: z.string().url().nonempty(),
+  secret: z.string().nonempty(),
+});
 
 interface VersionSelector extends TargetSelector {
   version: string;
@@ -42,6 +50,7 @@ export class SchemaManager {
     private stitchingOrchestrator: StitchingOrchestrator,
     private federationOrchestrator: FederationOrchestrator,
     private customOrchestrator: CustomOrchestrator,
+    private crypto: CryptoProvider,
     private tracking: Tracking
   ) {
     this.logger = logger.child({ source: 'SchemaManager' });
@@ -423,5 +432,64 @@ export class SchemaManager {
     }
   ): Promise<void> {
     return this.storage.completeGetStartedStep(selector);
+  }
+
+  async disableExternalSchemaComposition(input: ProjectSelector) {
+    this.logger.debug('Disabling external composition (input=%o)', input);
+    await this.authManager.ensureProjectAccess({
+      ...input,
+      scope: ProjectAccessScope.SETTINGS,
+    });
+
+    await this.storage.disableExternalSchemaComposition(input);
+
+    return {
+      ok: true,
+    };
+  }
+
+  async enableExternalSchemaComposition(
+    input: ProjectSelector & {
+      endpoint: string;
+      secret: string;
+    }
+  ) {
+    this.logger.debug('Enabling external composition (input=%o)', lodash.omit(input, ['secret']));
+    await this.authManager.ensureProjectAccess({
+      ...input,
+      scope: ProjectAccessScope.SETTINGS,
+    });
+
+    const parseResult = ENABLE_EXTERNAL_COMPOSITION_SCHEMA.safeParse({
+      endpoint: input.endpoint,
+      secret: input.secret,
+    });
+
+    if (!parseResult.success) {
+      return {
+        error: {
+          message: parseResult.error.message,
+          inputErrors: {
+            endpoint: parseResult.error.formErrors.fieldErrors.endpoint?.[0],
+            secret: parseResult.error.formErrors.fieldErrors.secret?.[0],
+          },
+        },
+      };
+    }
+
+    const encryptedSecret = this.crypto.encrypt(input.secret);
+
+    await this.storage.enableExternalSchemaComposition({
+      project: input.project,
+      organization: input.organization,
+      endpoint: input.endpoint.trim(),
+      encryptedSecret,
+    });
+
+    return {
+      ok: {
+        endpoint: input.endpoint,
+      },
+    };
   }
 }

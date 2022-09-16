@@ -35,7 +35,7 @@ export const resolvers: LabModule.Resolvers = {
         return null;
       }
 
-      const [schemas, { type }] = await Promise.all([
+      const [schemas, { type, externalComposition }] = await Promise.all([
         schemaManager.getSchemasOfVersion({
           organization,
           project,
@@ -51,7 +51,10 @@ export const resolvers: LabModule.Resolvers = {
       const orchestrator = schemaManager.matchOrchestrator(type);
       const helper = injector.get(SchemaHelper);
 
-      const schema = await orchestrator.build(schemas.map(s => helper.createSchemaObject(s)));
+      const schema = await orchestrator.build(
+        schemas.map(s => helper.createSchemaObject(s)),
+        externalComposition
+      );
 
       return {
         schema: schema.raw,

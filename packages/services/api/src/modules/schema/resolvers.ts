@@ -239,6 +239,32 @@ export const resolvers: SchemaModule.Resolvers = {
         };
       }
     },
+    async disableExternalSchemaComposition(_, { input }, { injector }) {
+      const translator = injector.get(IdTranslator);
+      const [organization, project] = await Promise.all([
+        translator.translateOrganizationId(input),
+        translator.translateProjectId(input),
+      ]);
+
+      return injector.get(SchemaManager).disableExternalSchemaComposition({
+        project,
+        organization,
+      });
+    },
+    async enableExternalSchemaComposition(_, { input }, { injector }) {
+      const translator = injector.get(IdTranslator);
+      const [organization, project] = await Promise.all([
+        translator.translateOrganizationId(input),
+        translator.translateProjectId(input),
+      ]);
+
+      return injector.get(SchemaManager).enableExternalSchemaComposition({
+        project,
+        organization,
+        endpoint: input.endpoint,
+        secret: input.secret,
+      });
+    },
   },
   Query: {
     async schemaCompare(_, { selector }, { injector }) {
@@ -276,8 +302,14 @@ export const resolvers: SchemaModule.Resolvers = {
       ]);
 
       return Promise.all([
-        orchestrator.build(schemasBefore.map(s => helper.createSchemaObject(s))),
-        orchestrator.build(schemasAfter.map(s => helper.createSchemaObject(s))),
+        orchestrator.build(
+          schemasBefore.map(s => helper.createSchemaObject(s)),
+          project.externalComposition
+        ),
+        orchestrator.build(
+          schemasAfter.map(s => helper.createSchemaObject(s)),
+          project.externalComposition
+        ),
       ]).catch(reason => {
         if (reason instanceof SchemaBuildError) {
           return Promise.resolve({
@@ -323,8 +355,16 @@ export const resolvers: SchemaModule.Resolvers = {
       ]);
 
       return Promise.all([
-        schemasBefore.length ? orchestrator.build(schemasBefore.map(s => helper.createSchemaObject(s))) : null,
-        orchestrator.build(schemasAfter.map(s => helper.createSchemaObject(s))),
+        schemasBefore.length
+          ? orchestrator.build(
+              schemasBefore.map(s => helper.createSchemaObject(s)),
+              project.externalComposition
+            )
+          : null,
+        orchestrator.build(
+          schemasAfter.map(s => helper.createSchemaObject(s)),
+          project.externalComposition
+        ),
       ]).catch(reason => {
         if (reason instanceof SchemaBuildError) {
           return Promise.resolve({
@@ -446,7 +486,10 @@ export const resolvers: SchemaModule.Resolvers = {
         target: version.target,
       });
 
-      return orchestrator.supergraph(schemas.map(s => helper.createSchemaObject(s)));
+      return orchestrator.supergraph(
+        schemas.map(s => helper.createSchemaObject(s)),
+        project.externalComposition
+      );
     },
     async sdl(version, _, { injector }) {
       const project = await injector.get(ProjectManager).getProject({
@@ -465,7 +508,12 @@ export const resolvers: SchemaModule.Resolvers = {
         target: version.target,
       });
 
-      return (await orchestrator.build(schemas.map(s => helper.createSchemaObject(s)))).raw;
+      return (
+        await orchestrator.build(
+          schemas.map(s => helper.createSchemaObject(s)),
+          project.externalComposition
+        )
+      ).raw;
     },
     async baseSchema(version) {
       return version.base_schema || null;
@@ -487,7 +535,10 @@ export const resolvers: SchemaModule.Resolvers = {
         target: version.target,
       });
 
-      const schema = await orchestrator.build(schemas.map(s => helper.createSchemaObject(s)));
+      const schema = await orchestrator.build(
+        schemas.map(s => helper.createSchemaObject(s)),
+        project.externalComposition
+      );
 
       return {
         schema: buildASTSchema(schema.document, {
@@ -546,6 +597,17 @@ export const resolvers: SchemaModule.Resolvers = {
   SchemaCheckError: {
     __isTypeOf(obj) {
       return !obj.valid;
+    },
+  },
+  Project: {
+    externalSchemaComposition(project) {
+      if (project.externalComposition.enabled && project.externalComposition.endpoint) {
+        return {
+          endpoint: project.externalComposition.endpoint,
+        };
+      }
+
+      return null;
     },
   },
   SchemaExplorer: {

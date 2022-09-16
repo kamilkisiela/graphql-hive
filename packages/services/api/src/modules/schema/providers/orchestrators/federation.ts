@@ -10,6 +10,12 @@ import { createTRPCClient } from '@trpc/client';
 import { fetch } from 'cross-undici-fetch';
 import type { SchemaBuilderApi } from '@hive/schema';
 
+type ExternalComposition = {
+  enabled: boolean;
+  endpoint: string;
+  encryptedSecret: string;
+} | null;
+
 @Injectable({
   scope: Scope.Operation,
 })
@@ -33,10 +39,20 @@ export class FederationOrchestrator implements Orchestrator {
     });
   }
 
-  ensureConfig() {}
+  ensureConfig(config?: ExternalComposition) {
+    if (config && config.enabled) {
+      if (!config.endpoint) {
+        throw new Error('External composition error: endpoint is missing');
+      }
+
+      if (!config.encryptedSecret) {
+        throw new Error('External composition error: encryptedSecret is missing');
+      }
+    }
+  }
 
   @sentry('FederationOrchestrator.validate')
-  async validate(schemas: SchemaObject[]) {
+  async validate(schemas: SchemaObject[], external: ExternalComposition) {
     this.logger.debug('Validating Federated Schemas');
 
     const result = await this.schemaService.mutation('validate', {
@@ -45,13 +61,14 @@ export class FederationOrchestrator implements Orchestrator {
         raw: s.raw,
         source: s.source,
       })),
+      external: external?.enabled ? external : null,
     });
 
     return result.errors;
   }
 
   @sentry('FederationOrchestrator.build')
-  async build(schemas: SchemaObject[]): Promise<SchemaObject> {
+  async build(schemas: SchemaObject[], external: ExternalComposition): Promise<SchemaObject> {
     this.logger.debug('Building Federated Schemas');
 
     try {
@@ -61,6 +78,7 @@ export class FederationOrchestrator implements Orchestrator {
           raw: s.raw,
           source: s.source,
         })),
+        external: external?.enabled ? external : null,
       });
 
       return {
@@ -74,7 +92,7 @@ export class FederationOrchestrator implements Orchestrator {
   }
 
   @sentry('FederationOrchestrator.supergraph')
-  async supergraph(schemas: SchemaObject[]): Promise<string | null> {
+  async supergraph(schemas: SchemaObject[], external: ExternalComposition): Promise<string | null> {
     this.logger.debug('Generating Federated Supergraph');
 
     const result = await this.schemaService.mutation('supergraph', {
@@ -84,6 +102,7 @@ export class FederationOrchestrator implements Orchestrator {
         source: s.source,
         url: s.url,
       })),
+      external: external?.enabled ? external : null,
     });
 
     return result.supergraph;

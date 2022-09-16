@@ -122,6 +122,7 @@ jobs:
           STRIPE_SECRET_KEY: ${{ secrets.TEST_STRIPE_SECRET_KEY }}
           SUPERTOKENS_CONNECTION_URI: http://127.0.0.1:3567
           SUPERTOKENS_API_KEY: bubatzbieber6942096420
+          EXTERNAL_COMPOSITION_SECRET: secretsecret
 
       - name: Dockest logs
         if: always()
@@ -191,6 +192,7 @@ jobs:
           STRIPE_SECRET_KEY: ${{ secrets.TEST_STRIPE_SECRET_KEY }}
           SUPERTOKENS_CONNECTION_URI: http://127.0.0.1:3567
           SUPERTOKENS_API_KEY: bubatzbieber6942096420
+          EXTERNAL_COMPOSITION_SECRET: secretsecret
 
       - name: Dockest logs
         if: steps.feature_flags.outputs.detected == 'true' && always()

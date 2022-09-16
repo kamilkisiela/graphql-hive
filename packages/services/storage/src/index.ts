@@ -140,6 +140,11 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       buildUrl: project.build_url,
       validationUrl: project.validation_url,
       gitRepository: project.git_repository,
+      externalComposition: {
+        enabled: project.external_composition_enabled,
+        endpoint: project.external_composition_endpoint,
+        encryptedSecret: project.external_composition_secret,
+      },
     };
   }
 
@@ -775,6 +780,33 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         `)
       );
     },
+    async enableExternalSchemaComposition({ project, endpoint, encryptedSecret }) {
+      return transformProject(
+        await pool.one<Slonik<projects>>(sql`
+          UPDATE public.projects
+          SET
+            external_composition_enabled = TRUE,
+            external_composition_endpoint = ${endpoint},
+            external_composition_secret = ${encryptedSecret}
+          WHERE id = ${project}
+          RETURNING *
+        `)
+      );
+    },
+    async disableExternalSchemaComposition({ project }) {
+      return transformProject(
+        await pool.one<Slonik<projects>>(sql`
+          UPDATE public.projects
+          SET
+            external_composition_enabled = FALSE,
+            external_composition_endpoint = NULL,
+            external_composition_secret = NULL
+          WHERE id = ${project}
+          RETURNING *
+        `)
+      );
+    },
+
     async deleteProject({ organization, project }) {
       const result = transformProject(
         await pool.one<Slonik<projects>>(

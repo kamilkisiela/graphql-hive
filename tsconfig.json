@@ -36,9 +36,10 @@
       "@hive/tokens": ["./packages/services/tokens/src/api.ts"],
       "@hive/webhooks": ["./packages/services/webhooks/src/api.ts"],
       "@hive/emails": ["./packages/services/emails/src/api.ts"],
+      "@hive/storage": ["./packages/services/storage/src/index.ts"],
       "@graphql-hive/client": ["./packages/libraries/client/src/index.ts"],
-      "@graphql-hive/core": ["./packages/libraries/core/src/index.ts"],
-      "@hive/storage": ["./packages/services/storage/src/index.ts"]
+      "@graphql-hive/external-composition": ["./packages/libraries/external-composition/src/index.ts"],
+      "@graphql-hive/core": ["./packages/libraries/core/src/index.ts"]
     }
   },
   "include": ["packages"],

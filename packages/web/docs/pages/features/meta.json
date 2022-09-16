@@ -6,5 +6,6 @@
   "monitoring": "Monitoring",
   "schema-history": "Schema and History",
   "integrations": "Integrations",
-  "alerts-notifications": "Alerts and Notifications"
+  "alerts-notifications": "Alerts and Notifications",
+  "external-schema-composition": "External Schema Composition"
 }

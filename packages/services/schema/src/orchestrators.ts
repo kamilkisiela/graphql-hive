@@ -1,12 +1,15 @@
 import type { Redis as RedisInstance } from 'ioredis';
 import type { FastifyLoggerInstance } from '@hive/service-common';
-import { createHash } from 'crypto';
+import { createHash, createHmac } from 'crypto';
 import { printSchema, parse, concatAST, visit, print, ASTNode } from 'graphql';
 import type { DocumentNode } from 'graphql';
 import { validateSDL } from 'graphql/validation/validate.js';
 import { composeAndValidate, compositionHasErrors } from '@apollo/federation';
 import { stitchSchemas } from '@graphql-tools/stitch';
 import { stitchingDirectives } from '@graphql-tools/stitching-directives';
+import { fetch } from 'cross-undici-fetch';
+import retry from 'async-retry';
+import { z } from 'zod';
 import type {
   SchemaType,
   BuildInput,
@@ -15,7 +18,49 @@ import type {
   ValidationOutput,
   SupergraphInput,
   SupergraphOutput,
+  ExternalComposition,
 } from './types';
+
+interface CompositionSuccess {
+  type: 'success';
+  result: {
+    supergraphSdl: string;
+    raw: string;
+  };
+}
+
+interface CompositionFailure {
+  type: 'failure';
+  result: {
+    errors: Array<{
+      message: string;
+    }>;
+  };
+}
+
+const EXTERNAL_COMPOSITION_RESULT = z.union([
+  z
+    .object({
+      type: z.literal('success'),
+      result: z
+        .object({
+          supergraph: z.string(),
+          sdl: z.string(),
+        })
+        .required(),
+    })
+    .required(),
+  z
+    .object({
+      type: z.literal('failure'),
+      result: z
+        .object({
+          errors: z.array(z.object({ message: z.string() }).required()),
+        })
+        .required(),
+    })
+    .required(),
+]);
 
 function trimDescriptions(doc: DocumentNode): DocumentNode {
   function trim<T extends ASTNode>(node: T): T {
@@ -62,31 +107,88 @@ function toValidationError(error: any) {
 }
 
 interface Orchestrator {
-  validate(schemas: ValidationInput): Promise<ValidationOutput>;
-  build(schemas: BuildInput): Promise<BuildOutput>;
-  supergraph(schemas: SupergraphInput): Promise<SupergraphOutput>;
+  validate(schemas: ValidationInput, external: ExternalComposition): Promise<ValidationOutput>;
+  build(schemas: BuildInput, external: ExternalComposition): Promise<BuildOutput>;
+  supergraph(schemas: SupergraphInput, external: ExternalComposition): Promise<SupergraphOutput>;
 }
 
-interface CompositionSuccess {
-  type: 'success';
-  result: {
-    supergraphSdl: string;
-    raw: string;
-  };
+function hash(secret: string, alg: string, value: string) {
+  return createHmac(alg, secret).update(value, 'utf-8').digest('hex');
 }
 
-interface CompositionFailure {
-  type: 'failure';
-  result: {
-    errors: Array<{
-      message: string;
-    }>;
-  };
-}
+const createFederation: (
+  redis: RedisInstance,
+  logger: FastifyLoggerInstance,
+  decrypt: (value: string) => string
+) => Orchestrator = (redis, logger, decrypt) => {
+  const compose = reuse<
+    {
+      schemas: ValidationInput | SupergraphInput;
+      external: ExternalComposition;
+    },
+    CompositionSuccess | CompositionFailure
+  >(
+    async ({ schemas, external }) => {
+      if (external) {
+        const body = JSON.stringify(
+          schemas.map(schema => {
+            return {
+              sdl: print(trimDescriptions(parse(schema.raw))),
+              name: schema.source,
+              url: 'url' in schema && typeof schema.url === 'string' ? schema.url : undefined,
+            };
+          })
+        );
+        const signature = hash(decrypt(external.encryptedSecret), 'sha256', body);
+        logger.debug('Calling external composition service (url=%s)', external.endpoint);
+        const response = await retry(
+          async () => {
+            const response = await fetch(external.endpoint, {
+              body,
+              method: 'POST',
+              headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'x-hive-signature-256': signature,
+              },
+            }).catch(error => {
+              logger.error(error);
 
-const createFederation: (redis: RedisInstance, logger: FastifyLoggerInstance) => Orchestrator = (redis, logger) => {
-  const compose = reuse<ValidationInput | SupergraphInput, CompositionSuccess | CompositionFailure>(
-    async schemas => {
+              return Promise.reject(error);
+            });
+
+            if (!response.ok) {
+              const message = await response.text().catch(_ => Promise.resolve(response.statusText));
+              throw new Error(`External composition failure: ${response.status} ${message}`);
+            }
+
+            return response;
+          },
+          {
+            retries: 3,
+          }
+        );
+
+        const result = await response.json();
+        const parseResult = EXTERNAL_COMPOSITION_RESULT.safeParse(result);
+
+        if (!parseResult.success) {
+          throw new Error(`External composition failure: invalid shape of data`);
+        }
+
+        if (parseResult.data.type === 'success') {
+          return {
+            type: 'success',
+            result: {
+              supergraphSdl: parseResult.data.result.supergraph,
+              raw: parseResult.data.result.sdl,
+            },
+          };
+        }
+
+        return parseResult.data;
+      }
+
       const result = composeAndValidate(
         schemas.map(schema => {
           return {
@@ -120,8 +222,8 @@ const createFederation: (redis: RedisInstance, logger: FastifyLoggerInstance) =>
   );
 
   return {
-    async validate(schemas) {
-      const result = await compose(schemas);
+    async validate(schemas, external) {
+      const result = await compose({ schemas, external });
 
       if (result.type === 'failure') {
         return {
@@ -133,8 +235,8 @@ const createFederation: (redis: RedisInstance, logger: FastifyLoggerInstance) =>
         errors: [],
       };
     },
-    async build(schemas) {
-      const result = await compose(schemas);
+    async build(schemas, external) {
+      const result = await compose({ schemas, external });
 
       if (result.type === 'failure') {
         throw new Error(
@@ -147,8 +249,8 @@ const createFederation: (redis: RedisInstance, logger: FastifyLoggerInstance) =>
         source: emptySource,
       };
     },
-    async supergraph(schemas) {
-      const result = await compose(schemas);
+    async supergraph(schemas, external) {
+      const result = await compose({ schemas, external });
 
       return {
         supergraph: 'supergraphSdl' in result.result ? result.result.supergraphSdl : null,
@@ -196,7 +298,6 @@ const createStitching: (redis: RedisInstance, logger: FastifyLoggerInstance) => 
   return {
     async validate(schemas) {
       const parsed = schemas.map(s => parse(s.raw));
-
       const errors = parsed.map(schema => validateStitchedSchema(schema)).flat();
 
       try {
@@ -229,10 +330,15 @@ function validateStitchedSchema(doc: DocumentNode) {
   return validateSDL(concatAST([parse(allStitchingDirectivesTypeDefs), doc])).map(toValidationError);
 }
 
-export function pickOrchestrator(type: SchemaType, redis: RedisInstance, logger: FastifyLoggerInstance) {
+export function pickOrchestrator(
+  type: SchemaType,
+  redis: RedisInstance,
+  logger: FastifyLoggerInstance,
+  decrypt: (value: string) => string
+) {
   switch (type) {
     case 'federation':
-      return createFederation(redis, logger);
+      return createFederation(redis, logger, decrypt);
     case 'single':
       return single;
     case 'stitching':
