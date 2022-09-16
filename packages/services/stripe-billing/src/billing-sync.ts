@@ -16,7 +16,7 @@ export function createStripeBilling(config: {
   };
 }) {
   const logger = config.logger;
-  const postgres$ = createPostgreSQLStorage(config.storage.connectionString);
+  const postgres$ = createPostgreSQLStorage(config.storage.connectionString, 10);
   let intervalHandle: null | ReturnType<typeof setInterval> = null;
   // feat(metered-usage)
   // const estimationApi = createTRPCClient<UsageEstimatorApi>({

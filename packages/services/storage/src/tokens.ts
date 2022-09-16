@@ -2,8 +2,8 @@ import { sql } from 'slonik';
 import { getPool, tokens, toDate } from './db';
 import type { Slonik } from './shared';
 
-export async function createTokenStorage(connection: string) {
-  const pool = await getPool(connection);
+export async function createTokenStorage(connection: string, maximumPoolSize: number) {
+  const pool = await getPool(connection, maximumPoolSize);
 
   return {
     async getTokens({ target }: { target: string }) {
