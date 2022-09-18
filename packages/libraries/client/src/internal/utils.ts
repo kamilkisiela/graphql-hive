@@ -22,17 +22,17 @@ export function memo<R, A, K>(fn: (arg: A) => R, cacheKeyFn: (arg: A) => K): (ar
   };
 }
 
-export function cache<R, A, K>(
-  fn: (arg: A) => R,
-  cacheKeyFn: (arg: A) => K,
+export function cache<R, A, K, V>(
+  fn: (arg: A, arg2: V) => R,
+  cacheKeyFn: (arg: A, arg2: V) => K,
   cacheMap: {
     has(key: K): boolean;
     set(key: K, value: R): void;
     get(key: K): R | undefined;
   }
 ) {
-  return (arg: A) => {
-    const key = cacheKeyFn(arg);
+  return (arg: A, arg2: V) => {
+    const key = cacheKeyFn(arg, arg2);
     const cachedValue = cacheMap.get(key);
 
     if (cachedValue !== null && typeof cachedValue !== 'undefined') {
@@ -42,7 +42,7 @@ export function cache<R, A, K>(
       };
     }
 
-    const value = fn(arg);
+    const value = fn(arg, arg2);
     cacheMap.set(key, value);
 
     return {
@@ -52,8 +52,25 @@ export function cache<R, A, K>(
   };
 }
 
-export function cacheDocumentKey<T>(doc: T) {
-  return createHash('md5').update(JSON.stringify(doc)).digest('hex');
+export function cacheDocumentKey<T, V>(doc: T, variables: V) {
+  return createHash('md5')
+    .update(
+      JSON.stringify({
+        doc,
+        // creating cache key from variables keys and nested keys
+        vars: JSON.stringify(variables, (key, value) => {
+          if (
+            (value && typeof value === 'object' && Object.keys(value).length) ||
+            (Array.isArray(value) && value.length)
+          ) {
+            return value;
+          }
+
+          return '';
+        }),
+      })
+    )
+    .digest('hex');
 }
 
 const HR_TO_NS = 1e9;

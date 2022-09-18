@@ -20,11 +20,22 @@ const schema = buildSchema(/* GraphQL */ `
   input FilterInput {
     type: ProjectType
     pagination: PaginationInput
+    order: [ProjectOrderByInput!]
   }
 
   input PaginationInput {
     limit: Int
     offset: Int
+  }
+
+  input ProjectOrderByInput {
+    field: String!
+    direction: OrderDirection
+  }
+
+  enum OrderDirection {
+    ASC
+    DESC
   }
 
   type ProjectSelector {
@@ -80,7 +91,7 @@ test('collect fields', async () => {
     schema,
     max: 1,
   });
-  const info = collect(op).value;
+  const info = collect(op, {}).value;
 
   expect(info.fields).toContain(`Mutation.deleteProject`);
   expect(info.fields).toContain(`Project.id`);
@@ -91,7 +102,7 @@ test('collect input object types', async () => {
     schema,
     max: 1,
   });
-  const info = collect(op).value;
+  const info = collect(op, {}).value;
 
   expect(info.fields).toContain(`ProjectSelectorInput.organization`);
   expect(info.fields).toContain(`ProjectSelectorInput.project`);
@@ -109,7 +120,8 @@ test('collect enums and scalars as inputs', async () => {
           id
         }
       }
-    `)
+    `),
+    {}
   ).value;
 
   expect(info.fields).toContain(`Int`);
@@ -131,7 +143,8 @@ test('collect enum values from object fields', async () => {
           id
         }
       }
-    `)
+    `),
+    {}
   ).value;
 
   expect(info.fields).toContain(`Int`);
@@ -153,7 +166,8 @@ test('collect enum values from arguments', async () => {
           id
         }
       }
-    `)
+    `),
+    {}
   ).value;
 
   expect(info.fields).toContain(`ProjectType.FEDERATION`);
@@ -174,7 +188,8 @@ test('collect arguments', async () => {
           id
         }
       }
-    `)
+    `),
+    {}
   ).value;
 
   expect(info.fields).toContain(`Query.projects.filter`);
@@ -192,7 +207,8 @@ test('collect used-only input fields', async () => {
           id
         }
       }
-    `)
+    `),
+    {}
   ).value;
 
   expect(info.fields).toContain(`FilterInput.pagination`);
@@ -201,7 +217,7 @@ test('collect used-only input fields', async () => {
   expect(info.fields).not.toContain(`PaginationInput.offset`);
 });
 
-test('collect all input fields when it is impossible to pick only those used', async () => {
+test('collect used-only input fields if input is passed as a variable', async () => {
   const collect = createCollector({
     schema,
     max: 1,
@@ -213,11 +229,59 @@ test('collect all input fields when it is impossible to pick only those used', a
           id
         }
       }
-    `)
+    `),
+    {
+      pagination: {
+        limit: 1,
+      },
+      type: 'STITCHING',
+    }
   ).value;
 
   expect(info.fields).toContain(`FilterInput.pagination`);
   expect(info.fields).toContain(`FilterInput.type`);
   expect(info.fields).toContain(`PaginationInput.limit`);
-  expect(info.fields).toContain(`PaginationInput.offset`);
+  expect(info.fields).not.toContain(`PaginationInput.offset`);
+});
+
+test('collect used-only input fields if input array is passed as a variable', async () => {
+  const collect = createCollector({
+    schema,
+    max: 1,
+  });
+  const info = collect(
+    parse(/* GraphQL */ `
+      query getProjects($filter: FilterInput) {
+        projects(filter: $filter) {
+          id
+        }
+      }
+    `),
+    {
+      filter: {
+        order: [
+          {
+            field: 'name',
+          },
+          {
+            field: 'buildUrl',
+            direction: 'DESC',
+          },
+        ],
+        pagination: {
+          limit: 10,
+        },
+      },
+    }
+  ).value;
+
+  console.log('info.fields', info.fields);
+
+  expect(info.fields).toContain(`FilterInput.pagination`);
+  expect(info.fields).toContain(`PaginationInput.limit`);
+  expect(info.fields).toContain(`FilterInput.order`);
+  expect(info.fields).toContain(`ProjectOrderByInput.field`);
+  expect(info.fields).toContain(`ProjectOrderByInput.direction`);
+  expect(info.fields).not.toContain(`FilterInput.type`);
+  expect(info.fields).not.toContain(`PaginationInput.offset`);
 });

@@ -94,6 +94,7 @@ export function hiveApollo(clientOrOptions: HiveClient | HivePluginOptions): Apo
         },
         operationName: context.operationName,
         contextValue: context.context,
+        variableValues: context.request.variables,
       });
 
       if (isLegacyV0) {
