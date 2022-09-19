@@ -319,6 +319,7 @@ const Inner = ({
 
 function ManageSubscriptionPage(): ReactElement {
   useTracker('SUBSCRIPTION_MANAGE_PAGE_VISIT');
+
   return (
     <>
       <Title title="Manage Subscription" />

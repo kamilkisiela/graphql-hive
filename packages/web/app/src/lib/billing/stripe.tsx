@@ -1,16 +1,16 @@
 import { Elements as ElementsProvider } from '@stripe/react-stripe-js';
-import { loadStripe } from '@stripe/stripe-js';
 import React from 'react';
-
-// TODO: maybe we should instead read the env from a context provider... but this is fine for now.
-const STRIPE_PUBLIC_KEY = globalThis['__ENV__']?.['STRIPE_PUBLIC_KEY'] ?? (process.env.STRIPE_PUBLIC_KEY || null);
-
-const stripePromise$ = !STRIPE_PUBLIC_KEY ? null : loadStripe(STRIPE_PUBLIC_KEY);
+import { getStripePublicKey } from './stripe-public-key';
+import { loadStripe } from '@stripe/stripe-js';
 
 export const HiveStripeWrapper: React.FC<{}> = ({ children }) => {
-  if (STRIPE_PUBLIC_KEY === null || stripePromise$ === null) {
+  const [stripe] = React.useState(() => {
+    const stripePublicKey = getStripePublicKey();
+    return stripePublicKey ? loadStripe(stripePublicKey) : null;
+  });
+
+  if (stripe === null) {
     return children as any;
   }
-
-  return <ElementsProvider stripe={stripePromise$}>{children}</ElementsProvider>;
+  return <ElementsProvider stripe={stripe}>{children}</ElementsProvider>;
 };

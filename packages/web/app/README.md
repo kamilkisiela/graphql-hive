@@ -16,7 +16,6 @@ The following environment variables configure the application.
 | `SLACK_CLIENT_ID`            | **Yes**                              | The Slack client ID.                                                                  | `g6aff8102efda5e1d12e`                               |
 | `SLACK_CLIENT_SECRET`        | **Yes**                              | The Slack client secret.                                                              | `g12e552xx54xx2b127821dc4abc4491dxxxa6b187`          |
 | `GITHUB_APP_NAME`            | **Yes**                              | The GitHub App name.                                                                  | `graphql-hive-self-hosted`                           |
-| `STRIPE_PUBLIC_KEY`          | **Yes**                              | The Stripe Public Key.                                                                | `g6aff8102efda5e1d12e`                               |
 | `AUTH_GITHUB`                | No                                   | Whether login via GitHub should be allowed                                            | `1` (enabled) or `0` (disabled)                      |
 | `AUTH_GITHUB_CLIENT_ID`      | No (**Yes** if `AUTH_GITHUB` is set) | The GitHub client ID.                                                                 | `g6aff8102efda5e1d12e`                               |
 | `AUTH_GITHUB_CLIENT_SECRET`  | No (**Yes** if `AUTH_GITHUB` is set) | The GitHub client secret.                                                             | `g12e552xx54xx2b127821dc4abc4491dxxxa6b187`          |
@@ -31,6 +30,16 @@ The following environment variables configure the application.
 | `MIXPANEL_TOKEN`             | No                                   | The token for Mixpanel in order to track user actions.                                | `g6aff8102efda5e1d12e`                               |
 | `GA_TRACKING_ID`             | No                                   | The token for Google Analytics in order to track user actions.                        | `g6aff8102efda5e1d12e`                               |
 | `CRISP_WEBSITE_ID`           | No                                   | The Crisp Website ID                                                                  | `g6aff8102efda5e1d12e`                               |
+
+## Hive Hosted Configuration
+
+This is only important if you are hosting Hive for getting 💰.
+
+### Payments
+
+| Name                | Required | Description            | Example Value          |
+| ------------------- | -------- | ---------------------- | ---------------------- |
+| `STRIPE_PUBLIC_KEY` | No       | The Stripe Public Key. | `g6aff8102efda5e1d12e` |
 
 ### Legacy Auth0 Configuration
 
