@@ -15,7 +15,7 @@ export const frontendConfig = () => {
   }
 
   return {
-    appInfo,
+    appInfo: appInfo(),
     recipeList: [
       ThirdPartyEmailPasswordReact.init({
         signInAndUpFeature: {

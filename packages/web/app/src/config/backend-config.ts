@@ -94,7 +94,7 @@ export const backendConfig = (): TypeInput => {
       connectionURI: superTokensConfig['SUPERTOKENS_CONNECTION_URI'],
       apiKey: superTokensConfig['SUPERTOKENS_API_KEY'],
     },
-    appInfo,
+    appInfo: appInfo(),
     recipeList: [
       ThirdPartyEmailPasswordNode.init({
         providers,
