@@ -404,7 +404,7 @@ jobs:
         run: yarn lint:prettier
 
   publish_app:
-    needs: build
+    needs: setup
     name: Publish for Docker
     runs-on: ubuntu-latest
     timeout-minutes: 40
@@ -420,6 +420,26 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
+      - name: Install Node
+        uses: actions/setup-node@v2
+        with:
+          node-version-file: .node-version
+
+      - name: Pull node_modules
+        uses: actions/cache@v2
+        with:
+          path: '**/node_modules'
+          key: ${{ github.sha }}
+
+      - name: Setup Turbo
+        run: node ./scripts/turborepo-setup.js
+
+      - name: Generate Types
+        run: yarn graphql:generate
+
+      - name: Build
+        run: yarn build
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
