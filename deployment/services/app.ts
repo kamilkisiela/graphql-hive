@@ -99,6 +99,11 @@ export function deployApp({
           value: githubAppConfig.require('name'),
         },
 
+        {
+          name: 'STRIPE_PUBLIC_KEY',
+          value: appEnv.STRIPE_PUBLIC_KEY,
+        },
+
         //
         // AUTH
         //

@@ -16,3 +16,10 @@ declare namespace NodeJS {
     SUPERTOKENS_CONNECTION_URI: string;
   }
 }
+
+// eslint-disable-next-line no-var
+declare var __ENV__:
+  | undefined
+  | {
+      STRIPE_PUBLIC_KEY: string;
+    };
