@@ -1,0 +1,47 @@
+# `@hive/app`
+
+The Hive application as seen on https://app.graphql-hive.com/.
+
+## Configuration
+
+The following environment variables configure the application.
+
+| Name                         | Required                             | Description                                                                           | Example Value                                        |
+| ---------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| `APP_BASE_URL`               | **Yes**                              | The base url of the app,                                                              | `https://app.graphql-hive.com`                       |
+| `GRAPHQL_ENDPOINT`           | **Yes**                              | The endpoint of the Hive GraphQL API.                                                 | `http://127.0.0.1:4000/graphql`                      |
+| `EMAILS_ENDPOINT`            | **Yes**                              | The endpoint of the GraphQL Hive Email service.                                       | `http://127.0.0.1:6260`                              |
+| `SUPERTOKENS_CONNECTION_URI` | **Yes**                              | The URI of the SuperTokens instance.                                                  | `http://127.0.0.1:3567`                              |
+| `SUPERTOKENS_API_KEY`        | **Yes**                              | The API KEY of the SuperTokens instance.                                              | `iliketurtlesandicannotlie`                          |
+| `SLACK_CLIENT_ID`            | **Yes**                              | The Slack client ID.                                                                  | `g6aff8102efda5e1d12e`                               |
+| `SLACK_CLIENT_SECRET`        | **Yes**                              | The Slack client secret.                                                              | `g12e552xx54xx2b127821dc4abc4491dxxxa6b187`          |
+| `GITHUB_APP_NAME`            | **Yes**                              | The GitHub App name.                                                                  | `graphql-hive-self-hosted`                           |
+| `STRIPE_PUBLIC_KEY`          | **Yes**                              | The Stripe Public Key.                                                                | `g6aff8102efda5e1d12e`                               |
+| `AUTH_GITHUB`                | No                                   | Whether login via GitHub should be allowed                                            | `1` (enabled) or `0` (disabled)                      |
+| `AUTH_GITHUB_CLIENT_ID`      | No (**Yes** if `AUTH_GITHUB` is set) | The GitHub client ID.                                                                 | `g6aff8102efda5e1d12e`                               |
+| `AUTH_GITHUB_CLIENT_SECRET`  | No (**Yes** if `AUTH_GITHUB` is set) | The GitHub client secret.                                                             | `g12e552xx54xx2b127821dc4abc4491dxxxa6b187`          |
+| `AUTH_GOOGLE`                | No                                   | Whether login via GitHub should be allowed                                            | `1` (enabled) or `0` (disabled)                      |
+| `AUTH_GOOGLE_CLIENT_ID`      | No (**Yes** if `AUTH_GOOGLE` is set) | The Google client ID.                                                                 | `g6aff8102efda5e1d12e`                               |
+| `AUTH_GOOGLE_CLIENT_SECRET`  | No (**Yes** if `AUTH_GOOGLE` is set) | The Google client secret.                                                             | `g12e552xx54xx2b127821dc4abc4491dxxxa6b187`          |
+| `ENVIRONMENT`                | No                                   | The environment of your Hive app. (**Note:** This will be used for Sentry reporting.) | `staging`                                            |
+| `SENTRY_DSN`                 | No                                   | The DSN for reporting errors to Sentry.                                               | `https://dooobars@o557896.ingest.sentry.io/12121212` |
+| `SENTRY_ENABLED`             | No                                   | Whether Sentry error reporting should be enabled.                                     | `1` (enabled) or `0` (disabled)                      |
+| `DOCS_URL`                   | No                                   | The URL of the Hive Docs                                                              | `https://docs.graphql-hive.com`                      |
+| `NODE_ENV`                   | No                                   | The `NODE_ENV` value.                                                                 | `production`                                         |
+| `MIXPANEL_TOKEN`             | No                                   | The token for Mixpanel in order to track user actions.                                | `g6aff8102efda5e1d12e`                               |
+| `GA_TRACKING_ID`             | No                                   | The token for Google Analytics in order to track user actions.                        | `g6aff8102efda5e1d12e`                               |
+| `CRISP_WEBSITE_ID`           | No                                   | The Crisp Website ID                                                                  | `g6aff8102efda5e1d12e`                               |
+
+### Legacy Auth0 Configuration
+
+If you are not self-hosting GraphQL Hive, you can ignore this section. It is only required for the legacy Auth0 compatibility layer.
+
+| Name                                      | Required                                   | Description                                                                                               | Example Value                               |
+| ----------------------------------------- | ------------------------------------------ | --------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| `AUTH_LEGACY_AUTH0`                       | No                                         | Whether the legacy Auth0 import is enabled.                                                               | `1` (enabled) or `0` (disabled)             |
+| `AUTH_LEGACY_AUTH0_CLIENT_ID`             | No (**Yes** if `AUTH_LEGACY_AUTH0` is set) | The Auth0 client ID.                                                                                      | `rDSpExxD8sfqlpF1kbxxLkMNYI2Sxxx`           |
+| `AUTH_LEGACY_AUTH0_CLIENT_SECRET`         | No (**Yes** if `AUTH_LEGACY_AUTH0` is set) | The Auth0 client secret.                                                                                  | `e43f156xx54en2b56117dc4abc4491dxxbb6b187`  |
+| `AUTH_LEGACY_AUTH0_ISSUER_BASE_URL`       | No (**Yes** if `AUTH_LEGACY_AUTH0` is set) | The Auth0 issuer base url.                                                                                | `https://your-project.us.auth0.com`         |
+| `AUTH_LEGACY_AUTH0_AUDIENCE`              | No (**Yes** if `AUTH_LEGACY_AUTH0` is set) | The Auth0 audience                                                                                        | `https://your-project.us.auth0.com/api/v2/` |
+| `AUTH_LEGACY_AUTH0_INTERNAL_API_ENDPOINT` | No (**Yes** if `AUTH_LEGACY_AUTH0` is set) | The internal endpoint for importing Auth0 accounts. (**Note:** This route is within the GraphQL service.) | `http://127.0.0.1:4000/__legacy`            |
+| `AUTH_LEGACY_AUTH0_INTERNAL_API_KEY`      | No (**Yes** if `AUTH_LEGACY_AUTH0` is set) | The internal endpoint key.                                                                                | `iliketurtles`                              |
