@@ -19,6 +19,7 @@ import {
 } from '@/components/v2/icon';
 import { CreateOrganizationModal } from '@/components/v2/modals';
 import { MeDocument, OrganizationsDocument, OrganizationsQuery, OrganizationType } from '@/graphql';
+import { getDocsUrl } from '@/lib/docs-url';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
 type DropdownOrganization = OrganizationsQuery['organizations']['nodes'];
@@ -72,6 +73,7 @@ export const Header = (): ReactElement => {
     };
   }, [isOpaque]);
 
+  const docsUrl = getDocsUrl();
   return (
     <header
       className={clsx(
@@ -142,12 +144,14 @@ export const Header = (): ReactElement => {
                   </DropdownMenu.Item>
                 </a>
               </NextLink>
-              <DropdownMenu.Item asChild>
-                <a href={process.env.NEXT_PUBLIC_DOCS_LINK} target="_blank" rel="noreferrer">
-                  <FileTextIcon className="h-5 w-5" />
-                  Documentation
-                </a>
-              </DropdownMenu.Item>
+              {docsUrl ? (
+                <DropdownMenu.Item asChild>
+                  <a href={docsUrl} target="_blank" rel="noreferrer">
+                    <FileTextIcon className="h-5 w-5" />
+                    Documentation
+                  </a>
+                </DropdownMenu.Item>
+              ) : null}
               <DropdownMenu.Item asChild>
                 <a href="https://status.graphql-hive.com" target="_blank" rel="noreferrer">
                   <AlertTriangleIcon className="h-5 w-5" />

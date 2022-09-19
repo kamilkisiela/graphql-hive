@@ -18,7 +18,7 @@
       "outputs": ["dist/**"]
     },
     "@hive/app#build": {
-      "dependsOn": ["^build", "$NEXT_PUBLIC_DOCS_LINK"],
+      "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
     "@hive/docs#build": {

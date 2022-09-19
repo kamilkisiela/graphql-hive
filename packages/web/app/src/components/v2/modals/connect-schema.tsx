@@ -4,6 +4,7 @@ import { useMutation, useQuery } from 'urql';
 
 import { Button, CopyValue, Heading, Link, Modal, Tag } from '@/components/v2';
 import { CreateCdnTokenDocument, ProjectDocument, ProjectType } from '@/graphql';
+import { getDocsUrl } from '@/lib/docs-url';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
 const taxonomy = {
@@ -83,7 +84,7 @@ export const ConnectSchemaModal = ({
               variant="primary"
               target="_blank"
               rel="noreferrer"
-              href={`${process.env.NEXT_PUBLIC_DOCS_LINK}/features/registry-usage#apollo-federation`}
+              href={getDocsUrl(`/features/registry-usage#apollo-federation`) ?? undefined}
             >
               Using the Registry with a Apollo Gateway
             </Link>{' '}

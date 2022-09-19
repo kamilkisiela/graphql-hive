@@ -2,29 +2,44 @@ import 'regenerator-runtime/runtime';
 import Document, { Html, Head, Main, NextScript, DocumentContext } from 'next/document';
 import { extractCritical } from '@emotion/server';
 
-export default class MyDocument extends Document {
+type FrontendEnvironment = {
+  APP_BASE_URL: string | undefined;
+  DOCS_URL: string | undefined;
+  STRIPE_PUBLIC_KEY: string | undefined;
+  AUTH_GITHUB: string | undefined;
+  AUTH_GOOGLE: string | undefined;
+  MIXPANEL_TOKEN: string | undefined;
+  GA_TRACKING_ID: string | undefined;
+  CRISP_WEBSITE_ID: string | undefined;
+};
+
+export default class MyDocument extends Document<{ ids: Array<string>; css: string; __ENV__: FrontendEnvironment }> {
   static async getInitialProps(ctx: DocumentContext) {
     const initialProps = await Document.getInitialProps(ctx);
     const page = await ctx.renderPage();
     const styles = extractCritical(page.html);
+
+    const __ENV__: FrontendEnvironment = {
+      APP_BASE_URL: process.env['APP_BASE_URL'],
+      DOCS_URL: process.env['DOCS_URL'],
+      STRIPE_PUBLIC_KEY: process.env['STRIPE_PUBLIC_KEY'],
+      AUTH_GITHUB: process.env['AUTH_GITHUB'],
+      AUTH_GOOGLE: process.env['AUTH_GOOGLE'],
+      MIXPANEL_TOKEN: process.env['MIXPANEL_TOKEN'],
+      GA_TRACKING_ID: process.env['GA_TRACKING_ID'],
+      CRISP_WEBSITE_ID: process.env['CRISP_WEBSITE_ID'],
+    };
+
     return {
       ...initialProps,
       ...page,
       ...styles,
-      __ENV__: {
-        APP_BASE_URL: process.env['APP_BASE_URL'],
-        STRIPE_PUBLIC_KEY: process.env['STRIPE_PUBLIC_KEY'],
-        AUTH_GITHUB: process.env['AUTH_GITHUB'],
-        AUTH_GOOGLE: process.env['AUTH_GOOGLE'],
-        MIXPANEL_TOKEN: process.env['MIXPANEL_TOKEN'],
-        GA_TRACKING_ID: process.env['GA_TRACKING_ID'],
-        CRISP_WEBSITE_ID: process.env['CRISP_WEBSITE_ID'],
-      },
+      __ENV__,
     };
   }
 
   render() {
-    const { ids, css } = this.props as any;
+    const { ids, css } = this.props;
 
     return (
       <Html className="dark">

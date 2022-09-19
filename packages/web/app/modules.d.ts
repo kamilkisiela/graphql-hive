@@ -22,6 +22,7 @@ declare var __ENV__:
   | undefined
   | {
       APP_BASE_URL: string;
+      DOCS_URL: string | undefined;
       STRIPE_PUBLIC_KEY: string | undefined;
       AUTH_GITHUB: string | undefined;
       AUTH_GOOGLE: string | undefined;

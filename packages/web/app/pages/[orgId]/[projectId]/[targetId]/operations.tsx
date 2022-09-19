@@ -18,6 +18,7 @@ import {
   ProjectFieldsFragment,
   TargetFieldsFragment,
 } from '@/graphql';
+import { getDocsUrl } from '@/lib/docs-url';
 
 function floorDate(date: Date): Date {
   const time = 1000 * 60;
@@ -144,7 +145,7 @@ const OperationsViewGate = ({
           <EmptyList
             title="Hive is waiting for your first collected operation"
             description="You can collect usage of your GraphQL API with Hive Client"
-            docsUrl={`${process.env.NEXT_PUBLIC_DOCS_LINK}/features/monitoring`}
+            docsUrl={getDocsUrl(`/features/monitoring`)}
           />
         )
       }

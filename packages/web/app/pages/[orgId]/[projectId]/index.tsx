@@ -8,6 +8,7 @@ import { ProjectLayout } from '@/components/layouts';
 import { Activities, Badge, Button, Card, DropdownMenu, EmptyList, Heading, TimeAgo, Title } from '@/components/v2';
 import { LinkIcon, MoreIcon, SettingsIcon } from '@/components/v2/icon';
 import { TargetQuery, TargetsDocument, VersionsDocument } from '@/graphql';
+import { getDocsUrl } from '@/lib/docs-url';
 import { useClipboard } from '@/lib/hooks/use-clipboard';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
@@ -109,7 +110,7 @@ const Page = () => {
           <EmptyList
             title="Hive is waiting for your first target"
             description='You can create a target by clicking the "New Target" button'
-            docsUrl={`${process.env.NEXT_PUBLIC_DOCS_LINK}/get-started/targets`}
+            docsUrl={getDocsUrl(`/get-started/targets`)}
           />
         ) : (
           targets?.nodes.map(target => <TargetCard key={target.id} target={target} />)

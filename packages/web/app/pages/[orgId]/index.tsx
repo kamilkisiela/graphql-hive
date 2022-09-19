@@ -1,4 +1,4 @@
-import { ReactElement } from 'react';
+import React, { ReactElement } from 'react';
 import NextLink from 'next/link';
 import { onlyText } from 'react-children-utilities';
 import { useQuery } from 'urql';
@@ -9,6 +9,7 @@ import { Activities, Button, Card, DropdownMenu, EmptyList, Heading, Skeleton, T
 import { getActivity } from '@/components/v2/activities';
 import { LinkIcon, MoreIcon, SettingsIcon } from '@/components/v2/icon';
 import { ProjectActivitiesDocument, ProjectsWithTargetsDocument, ProjectsWithTargetsQuery } from '@/graphql';
+import { getDocsUrl } from '@/lib/docs-url';
 import { fixDuplicatedFragments } from '@/lib/graphql';
 import { useClipboard } from '@/lib/hooks/use-clipboard';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
@@ -94,6 +95,7 @@ function ProjectsPage(): ReactElement {
       },
     },
   });
+
   return (
     <>
       <Title title="Projects" />
@@ -106,7 +108,7 @@ function ProjectsPage(): ReactElement {
                 <EmptyList
                   title="Hive is waiting for your first project"
                   description='You can create a project by clicking the "Create Project" button'
-                  docsUrl={`${process.env.NEXT_PUBLIC_DOCS_LINK}/get-started/projects`}
+                  docsUrl={getDocsUrl(`/get-started/projects`)}
                 />
               ) : (
                 <div className="grid grid-cols-2 gap-5">

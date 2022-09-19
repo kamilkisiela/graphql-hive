@@ -12,6 +12,7 @@ import {
 import clsx from 'clsx';
 import { OrganizationType } from '@/graphql';
 import { gql, DocumentType } from 'urql';
+import { getDocsUrl } from '@/lib/docs-url';
 
 const GetStartedWizard_GetStartedProgress = gql(/* GraphQL */ `
   fragment GetStartedWizard_GetStartedProgress on OrganizationGetStarted {
@@ -104,37 +105,25 @@ function GetStartedWizard({
         <DrawerBody>
           <p>Complete these steps to experience the full power of GraphQL Hive</p>
           <div className="mt-4 flex flex-col divide-y-2 divide-gray-900">
-            <Task link={`${process.env.NEXT_PUBLIC_DOCS_LINK}/get-started/projects`} completed={tasks.creatingProject}>
+            <Task link={getDocsUrl(`/get-started/projects`)} completed={tasks.creatingProject}>
               Create a project
             </Task>
-            <Task
-              link={`${process.env.NEXT_PUBLIC_DOCS_LINK}/features/publish-schema`}
-              completed={tasks.publishingSchema}
-            >
+            <Task link={getDocsUrl(`/features/publish-schema`)} completed={tasks.publishingSchema}>
               Publish a schema
             </Task>
-            <Task
-              link={`${process.env.NEXT_PUBLIC_DOCS_LINK}/features/checking-schema`}
-              completed={tasks.checkingSchema}
-            >
+            <Task link={getDocsUrl(`/features/checking-schema`)} completed={tasks.checkingSchema}>
               Check a schema
             </Task>
             {'invitingMembers' in tasks && typeof tasks.invitingMembers === 'boolean' ? (
-              <Task
-                link={`${process.env.NEXT_PUBLIC_DOCS_LINK}/get-started/organizations#members`}
-                completed={tasks.invitingMembers}
-              >
+              <Task link={getDocsUrl(`/get-started/organizations#members`)} completed={tasks.invitingMembers}>
                 Invite members
               </Task>
             ) : null}
-            <Task
-              link={`${process.env.NEXT_PUBLIC_DOCS_LINK}/features/monitoring`}
-              completed={tasks.reportingOperations}
-            >
+            <Task link={getDocsUrl(`/features/monitoring`)} completed={tasks.reportingOperations}>
               Report operations
             </Task>
             <Task
-              link={`${process.env.NEXT_PUBLIC_DOCS_LINK}/features/checking-schema#with-usage-enabled`}
+              link={getDocsUrl(`/features/checking-schema#with-usage-enabled`)}
               completed={tasks.enablingUsageBasedBreakingChanges}
             >
               Enable usage-based breaking changes
@@ -152,11 +141,11 @@ function Task({
   link,
 }: React.PropsWithChildren<{
   completed: boolean;
-  link: string;
+  link: string | null;
 }>) {
   return (
     <a
-      href={link}
+      href={link ?? undefined}
       target="_blank"
       rel="noreferrer"
       className={clsx('flex flex-row items-center gap-4 p-3 text-left', completed ? 'opacity-50' : 'hover:opacity-80')}

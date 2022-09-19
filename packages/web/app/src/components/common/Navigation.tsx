@@ -21,6 +21,7 @@ import { Logo } from './Logo';
 import { Feedback } from './Feedback';
 import { UserSettings } from './UserSettings';
 import ThemeButton from './ThemeButton';
+import { getDocsUrl } from '@/lib/docs-url';
 
 export interface NavigationItem {
   label: string;
@@ -121,6 +122,8 @@ export function Navigation() {
 
   const me = meQuery.data?.me;
 
+  const docsUrl = getDocsUrl();
+
   return (
     <nav tw="bg-white shadow-md dark:bg-gray-900 z-10">
       <div tw="mx-auto px-2 sm:px-6 lg:px-8">
@@ -149,11 +152,13 @@ export function Navigation() {
               </div>
             </div>
           </div>
-          <div tw="flex flex-row items-center space-x-4">
-            <ChakraLink tw="text-sm dark:text-gray-200" href={process.env.NEXT_PUBLIC_DOCS_LINK}>
-              Documentation
-            </ChakraLink>
-          </div>
+          {docsUrl ? (
+            <div tw="flex flex-row items-center space-x-4">
+              <ChakraLink tw="text-sm dark:text-gray-200" href={docsUrl}>
+                Documentation
+              </ChakraLink>
+            </div>
+          ) : null}
           <Divider orientation="vertical" tw="height[20px] ml-8 mr-3" />
           <div tw="inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:pr-0">
             <div tw="ml-3 relative">

@@ -119,6 +119,11 @@ export function deployApp({
           value: appEnv.CRISP_WEBSITE_ID,
         },
 
+        {
+          name: 'DOCS_URL',
+          value: appEnv.DOCS_URL,
+        },
+
         //
         // AUTH
         //
