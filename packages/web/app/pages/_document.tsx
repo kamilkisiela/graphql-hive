@@ -16,6 +16,7 @@ export default class MyDocument extends Document {
         STRIPE_PUBLIC_KEY: process.env['STRIPE_PUBLIC_KEY'],
         AUTH_GITHUB: process.env['AUTH_GITHUB'],
         AUTH_GOOGLE: process.env['AUTH_GOOGLE'],
+        MIXPANEL_TOKEN: process.env['MIXPANEL_TOKEN'],
       },
     };
   }

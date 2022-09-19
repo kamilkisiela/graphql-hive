@@ -3,13 +3,13 @@ import mixpanel from 'mixpanel-browser';
 // The reason why we wrap mixpanel with custom functions is that
 // mixpanel sends some events even though `mixpanel.disable()` was called
 
-const MIXPANEL_TOKEN = process.env.NEXT_PUBLIC_MIXPANEL_TOKEN;
+const mixpanelToken = globalThis.process?.env['MIXPANEL_TOKEN'] ?? globalThis['__ENV__']?.['MIXPANEL_TOKEN'];
 
-const enabled = typeof window !== 'undefined' && window.location.host === 'app.graphql-hive.com' && !!MIXPANEL_TOKEN;
+const enabled = !!mixpanelToken;
 
 export function initMixpanel() {
   if (enabled) {
-    mixpanel.init(MIXPANEL_TOKEN);
+    mixpanel.init(mixpanelToken);
   }
 }
 

@@ -25,4 +25,5 @@ declare var __ENV__:
       STRIPE_PUBLIC_KEY: string;
       AUTH_GITHUB: string;
       AUTH_GOOGLE: string;
+      MIXPANEL_TOKEN: string;
     };

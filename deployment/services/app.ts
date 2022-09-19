@@ -104,6 +104,11 @@ export function deployApp({
           value: appEnv.STRIPE_PUBLIC_KEY,
         },
 
+        {
+          name: 'MIXPANEL_TOKEN',
+          value: appEnv.MIXPANEL_TOKEN,
+        },
+
         //
         // AUTH
         //
