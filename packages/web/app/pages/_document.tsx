@@ -13,6 +13,8 @@ export default class MyDocument extends Document {
       ...styles,
       __ENV__: {
         STRIPE_PUBLIC_KEY: process.env['STRIPE_PUBLIC_KEY'],
+        AUTH_GITHUB: process.env['AUTH_GITHUB'],
+        AUTH_GOOGLE: process.env['AUTH_GOOGLE'],
       },
     };
   }

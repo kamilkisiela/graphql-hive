@@ -35,10 +35,10 @@ type LegacyAuth0ConfigEnabled = zod.TypeOf<typeof LegacyAuth0ConfigEnabledModel>
 
 const GitHubConfigModel = zod.union([
   zod.object({
-    NEXT_PUBLIC_AUTH_GITHUB: zod.union([zod.void(), zod.literal('0')]),
+    AUTH_GITHUB: zod.union([zod.void(), zod.literal('0')]),
   }),
   zod.object({
-    NEXT_PUBLIC_AUTH_GITHUB: zod.literal('1'),
+    AUTH_GITHUB: zod.literal('1'),
     AUTH_GITHUB_CLIENT_ID: zod.string(),
     AUTH_GITHUB_CLIENT_SECRET: zod.string(),
   }),
@@ -46,10 +46,10 @@ const GitHubConfigModel = zod.union([
 
 const GoogleConfigModel = zod.union([
   zod.object({
-    NEXT_PUBLIC_AUTH_GOOGLE: zod.union([zod.void(), zod.literal('0')]),
+    AUTH_GOOGLE: zod.union([zod.void(), zod.literal('0')]),
   }),
   zod.object({
-    NEXT_PUBLIC_AUTH_GOOGLE: zod.literal('1'),
+    AUTH_GOOGLE: zod.literal('1'),
     AUTH_GOOGLE_CLIENT_ID: zod.string(),
     AUTH_GOOGLE_CLIENT_SECRET: zod.string(),
   }),
@@ -72,7 +72,7 @@ export const backendConfig = (): TypeInput => {
   });
   const providers: Array<TypeProvider> = [];
 
-  if (githubConfig['NEXT_PUBLIC_AUTH_GITHUB'] === '1') {
+  if (githubConfig['AUTH_GITHUB'] === '1') {
     providers.push(
       ThirdPartyEmailPasswordNode.Github({
         clientId: githubConfig['AUTH_GITHUB_CLIENT_ID'],
@@ -80,7 +80,7 @@ export const backendConfig = (): TypeInput => {
       })
     );
   }
-  if (googleConfig['NEXT_PUBLIC_AUTH_GOOGLE'] === '1') {
+  if (googleConfig['AUTH_GOOGLE'] === '1') {
     providers.push(
       ThirdPartyEmailPasswordNode.Google({
         clientId: googleConfig['AUTH_GOOGLE_CLIENT_ID'],

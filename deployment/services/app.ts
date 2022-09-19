@@ -151,7 +151,7 @@ export function deployApp({
         },
         // GitHub
         {
-          name: 'NEXT_PUBLIC_AUTH_GITHUB',
+          name: 'AUTH_GITHUB',
           value: '1',
         },
         {
@@ -164,7 +164,7 @@ export function deployApp({
         },
         // Google
         {
-          name: 'NEXT_PUBLIC_AUTH_GOOGLE',
+          name: 'AUTH_GOOGLE',
           value: '1',
         },
         {

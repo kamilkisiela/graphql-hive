@@ -7,10 +7,10 @@ import { appInfo } from './app-info';
 export const frontendConfig = () => {
   const providers: Array<Provider> = [];
 
-  if (process.env['NEXT_PUBLIC_AUTH_GITHUB'] === '1') {
+  if (globalThis['__ENV__']?.['AUTH_GITHUB'] === '1') {
     providers.push(ThirdPartyEmailPasswordReact.Github.init());
   }
-  if (process.env['NEXT_PUBLIC_AUTH_GOOGLE'] === '1') {
+  if (globalThis['__ENV__']?.['AUTH_GOOGLE'] === '1') {
     providers.push(ThirdPartyEmailPasswordReact.Google.init());
   }
 

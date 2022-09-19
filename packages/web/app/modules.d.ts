@@ -22,4 +22,6 @@ declare var __ENV__:
   | undefined
   | {
       STRIPE_PUBLIC_KEY: string;
+      AUTH_GITHUB: string;
+      AUTH_GOOGLE: string;
     };
