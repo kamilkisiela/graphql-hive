@@ -457,4 +457,4 @@ jobs:
           file: packages/web/app/Dockerfile
           context: ./packages/web/app
           push: true
-          tags: hive/app:laurin-test
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}/app:${{ github.sha }}
