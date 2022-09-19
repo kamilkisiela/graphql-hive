@@ -62,21 +62,15 @@ export function deployApp({
       env: [
         { name: 'DEPLOYED_DNS', value: deploymentEnv.DEPLOYED_DNS },
         { name: 'NODE_ENV', value: 'production' },
-        { name: 'ENVIRONMENT', value: deploymentEnv.ENVIRONMENT },
         {
-          name: 'NEXT_PUBLIC_ENVIRONMENT',
+          name: 'ENVIRONMENT',
           value: deploymentEnv.ENVIRONMENT,
         },
         {
           name: 'RELEASE',
           value: appRelease,
         },
-        {
-          name: 'NEXT_PUBLIC_RELEASE',
-          value: appRelease,
-        },
         { name: 'SENTRY_DSN', value: commonEnv.SENTRY_DSN },
-        { name: 'NEXT_PUBLIC_SENTRY_DSN', value: commonEnv.SENTRY_DSN },
         { name: 'SENTRY_ENABLED', value: commonEnv.SENTRY_ENABLED },
         {
           name: 'GRAPHQL_ENDPOINT',

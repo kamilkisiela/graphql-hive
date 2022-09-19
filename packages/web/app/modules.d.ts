@@ -29,4 +29,8 @@ declare var __ENV__:
       MIXPANEL_TOKEN: string | undefined;
       GA_TRACKING_ID: string | undefined;
       CRISP_WEBSITE_ID: string | undefined;
+      SENTRY_DSN: string | undefined;
+      RELEASE: string | undefined;
+      ENVIRONMENT: string | undefined;
+      SENTRY_ENABLED: string | undefined;
     };

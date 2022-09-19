@@ -11,6 +11,10 @@ type FrontendEnvironment = {
   MIXPANEL_TOKEN: string | undefined;
   GA_TRACKING_ID: string | undefined;
   CRISP_WEBSITE_ID: string | undefined;
+  SENTRY_DSN: string | undefined;
+  RELEASE: string | undefined;
+  ENVIRONMENT: string | undefined;
+  SENTRY_ENABLED: string | undefined;
 };
 
 export default class MyDocument extends Document<{ ids: Array<string>; css: string; __ENV__: FrontendEnvironment }> {
@@ -28,6 +32,10 @@ export default class MyDocument extends Document<{ ids: Array<string>; css: stri
       MIXPANEL_TOKEN: process.env['MIXPANEL_TOKEN'],
       GA_TRACKING_ID: process.env['GA_TRACKING_ID'],
       CRISP_WEBSITE_ID: process.env['CRISP_WEBSITE_ID'],
+      SENTRY_DSN: process.env['SENTRY_DSN'],
+      RELEASE: process.env['RELEASE'],
+      ENVIRONMENT: process.env['ENVIRONMENT'],
+      SENTRY_ENABLED: process.env['SENTRY_ENABLED'],
     };
 
     return {
