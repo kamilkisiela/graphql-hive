@@ -17,6 +17,8 @@ export default class MyDocument extends Document {
         AUTH_GITHUB: process.env['AUTH_GITHUB'],
         AUTH_GOOGLE: process.env['AUTH_GOOGLE'],
         MIXPANEL_TOKEN: process.env['MIXPANEL_TOKEN'],
+        GA_TRACKING_ID: process.env['GA_TRACKING_ID'],
+        CRISP_WEBSITE_ID: process.env['CRISP_WEBSITE_ID'],
       },
     };
   }

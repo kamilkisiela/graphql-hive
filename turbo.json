@@ -18,7 +18,7 @@
       "outputs": ["dist/**"]
     },
     "@hive/app#build": {
-      "dependsOn": ["^build", "$NEXT_PUBLIC_DOCS_LINK", "$NEXT_PUBLIC_CRISP_WEBSITE_ID", "$NEXT_PUBLIC_GA_TRACKING_ID"],
+      "dependsOn": ["^build", "$NEXT_PUBLIC_DOCS_LINK"],
       "outputs": ["dist/**"]
     },
     "@hive/docs#build": {

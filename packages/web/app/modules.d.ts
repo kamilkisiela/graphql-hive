@@ -22,8 +22,10 @@ declare var __ENV__:
   | undefined
   | {
       APP_BASE_URL: string;
-      STRIPE_PUBLIC_KEY: string;
-      AUTH_GITHUB: string;
-      AUTH_GOOGLE: string;
-      MIXPANEL_TOKEN: string;
+      STRIPE_PUBLIC_KEY: string | undefined;
+      AUTH_GITHUB: string | undefined;
+      AUTH_GOOGLE: string | undefined;
+      MIXPANEL_TOKEN: string | undefined;
+      GA_TRACKING_ID: string | undefined;
+      CRISP_WEBSITE_ID: string | undefined;
     };

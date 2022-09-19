@@ -109,6 +109,16 @@ export function deployApp({
           value: appEnv.MIXPANEL_TOKEN,
         },
 
+        {
+          name: 'GA_TRACKING_ID',
+          value: appEnv.GA_TRACKING_ID,
+        },
+
+        {
+          name: 'CRISP_WEBSITE_ID',
+          value: appEnv.CRISP_WEBSITE_ID,
+        },
+
         //
         // AUTH
         //
