@@ -11,10 +11,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@envelop/graphql-modules": "3.3.1",
-    "@envelop/generic-auth": "4.4.0",
-    "@envelop/sentry": "3.8.0",
-    "@envelop/types": "2.2.0",
+    "@envelop/core": "3.0.0-alpha-20220916183245-c7c892d8",
+    "@envelop/graphql-modules": "4.0.0-alpha-20220916183245-c7c892d8",
+    "@envelop/generic-auth": "5.0.0-alpha-20220916183245-c7c892d8",
+    "@envelop/sentry": "4.0.0-alpha-20220916183245-c7c892d8",
+    "@envelop/types": "2.4.1-alpha-20220916183245-c7c892d8",
     "@graphql-yoga/node": "2.5.0",
     "@sentry/node": "7.12.1",
     "@sentry/integrations": "7.12.1",

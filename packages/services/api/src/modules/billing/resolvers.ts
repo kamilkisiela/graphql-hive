@@ -1,4 +1,4 @@
-import { EnvelopError } from '@graphql-yoga/common';
+import { GraphQLError } from 'graphql';
 import { BillingPlanType } from '../../__generated__/types';
 import { AuthManager } from '../auth/providers/auth-manager';
 import { OrganizationAccessScope } from '../auth/providers/organization-access';
@@ -190,7 +190,7 @@ export const resolvers: BillingModule.Resolvers = {
           organization,
         };
       }
-      throw new EnvelopError(`Unable to downgrade from Pro from your current plan`);
+      throw new GraphQLError(`Unable to downgrade from Pro from your current plan`);
     },
     upgradeToPro: async (root, args, { injector }) => {
       const organizationId = await injector.get(IdTranslator).translateOrganizationId({
@@ -236,7 +236,7 @@ export const resolvers: BillingModule.Resolvers = {
           organization,
         };
       }
-      throw new EnvelopError(`Unable to upgrade to Pro from your current plan`);
+      throw new GraphQLError(`Unable to upgrade to Pro from your current plan`);
     },
   },
 };
