@@ -1,8 +1,8 @@
 import React from 'react';
 import { parse, print } from 'graphql';
-import { SchemaEditor, SchemaEditorProps } from '@theguild/editor';
 import clsx from 'clsx';
 
+import { SchemaEditor, SchemaEditorProps } from '@/components/schema-editor';
 import { Card } from '@/components/v2/card';
 import { Heading } from '@/components/v2/heading';
 

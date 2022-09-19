@@ -1,6 +1,5 @@
 import React, { ReactElement, useCallback, useEffect, useState } from 'react';
 import { Spinner } from '@chakra-ui/react';
-import { SchemaEditor } from '@theguild/editor';
 import clsx from 'clsx';
 import { formatISO, subDays } from 'date-fns';
 import { useFormik } from 'formik';
@@ -9,6 +8,7 @@ import * as Yup from 'yup';
 
 import { authenticated, withSessionProtection } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
+import { SchemaEditor } from '@/components/schema-editor';
 import { Button, Card, Checkbox, Heading, Input, Switch, Table, Tag, TimeAgo, Title } from '@/components/v2';
 import { Combobox } from '@/components/v2/combobox';
 import { AlertTriangleIcon } from '@/components/v2/icon';
