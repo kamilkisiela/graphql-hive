@@ -45,3 +45,11 @@ If you are not self-hosting GraphQL Hive, you can ignore this section. It is onl
 | `AUTH_LEGACY_AUTH0_AUDIENCE`              | No (**Yes** if `AUTH_LEGACY_AUTH0` is set) | The Auth0 audience                                                                                        | `https://your-project.us.auth0.com/api/v2/` |
 | `AUTH_LEGACY_AUTH0_INTERNAL_API_ENDPOINT` | No (**Yes** if `AUTH_LEGACY_AUTH0` is set) | The internal endpoint for importing Auth0 accounts. (**Note:** This route is within the GraphQL service.) | `http://127.0.0.1:4000/__legacy`            |
 | `AUTH_LEGACY_AUTH0_INTERNAL_API_KEY`      | No (**Yes** if `AUTH_LEGACY_AUTH0` is set) | The internal endpoint key.                                                                                | `iliketurtles`                              |
+
+### Building the Docker Image
+
+**Prerequisites:** Make sure you built the mono-repository using `yarn build`.
+
+```bash
+docker build . --build-arg RELEASE=stable-main -t graphql-hive/app
+```
