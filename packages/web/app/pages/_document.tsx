@@ -12,6 +12,7 @@ export default class MyDocument extends Document {
       ...page,
       ...styles,
       __ENV__: {
+        APP_BASE_URL: process.env['APP_BASE_URL'],
         STRIPE_PUBLIC_KEY: process.env['STRIPE_PUBLIC_KEY'],
         AUTH_GITHUB: process.env['AUTH_GITHUB'],
         AUTH_GOOGLE: process.env['AUTH_GOOGLE'],
