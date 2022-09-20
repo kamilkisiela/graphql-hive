@@ -16,7 +16,7 @@
     "@envelop/generic-auth": "5.0.0-alpha-20220916183245-c7c892d8",
     "@envelop/sentry": "4.0.0-alpha-20220916183245-c7c892d8",
     "@envelop/types": "2.4.1-alpha-20220916183245-c7c892d8",
-    "@graphql-yoga/node": "2.5.0",
+    "@graphql-yoga/node": "3.0.0-alpha-20220920170847-cf0b166a",
     "@sentry/node": "7.12.1",
     "@sentry/integrations": "7.12.1",
     "@sentry/tracing": "7.12.1",

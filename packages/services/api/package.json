@@ -9,7 +9,7 @@
     "reflect-metadata": "^0.1.0"
   },
   "dependencies": {
-    "@graphql-yoga/common": "2.5.0",
+    "@graphql-yoga/common": "3.0.0-alpha-20220920170847-cf0b166a",
     "cross-undici-fetch": "0.4.3",
     "@trpc/client": "9.23.2",
     "@graphql-inspector/core": "3.2.0",
