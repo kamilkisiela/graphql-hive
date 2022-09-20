@@ -24,8 +24,6 @@ import {
   UpgradeToProDocument,
 } from '@/graphql';
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
-import { useTracker } from '@/lib/hooks/use-tracker';
-import { track } from '@/lib/mixpanel';
 
 const Inner = ({
   organization,
@@ -73,9 +71,6 @@ const Inner = ({
 
   const onOperationsRateLimitChange = useCallback(
     (limit: number) => {
-      track('SUBSCRIPTION_OPERATIONS_RATE_LIMIT_FORM_INPUT_CHANGE', {
-        limit,
-      });
       setOperationsRateLimit(limit);
     },
     [setOperationsRateLimit]
@@ -98,16 +93,12 @@ const Inner = ({
   }
 
   const openChatSupport = () => {
-    track('SUBSCRIPTION_ENTERPRISE_PLAN_CHAT_SUPPORT_CLICK');
     if (typeof window !== 'undefined' && (window as any).$crisp) {
       (window as any).$crisp.push(['do', 'chat:open']);
     }
   };
 
   const upgrade = async () => {
-    track('SUBSCRIPTION_UPGRADE_TO_PRO', {
-      operations: operationsRateLimit * 1_000_000,
-    });
     let paymentMethodId: string | null = null;
 
     if (organization.billingConfiguration.paymentMethod === null) {
@@ -144,16 +135,12 @@ const Inner = ({
   };
 
   const downgrade = () => {
-    track('SUBSCRIPTION_DOWNGRADE_TO_HOBBY');
     downgradeToHobbyMutation[1]({
       organization: organization.cleanId,
     });
   };
 
   const updateLimits = () => {
-    track('SUBSCRIPTION_LIMITS_UPDATE', {
-      operations: operationsRateLimit * 1_000_000,
-    });
     updateOrgRateLimitMutation[1]({
       organization: organization.cleanId,
       monthlyLimits: {
@@ -318,7 +305,6 @@ const Inner = ({
 };
 
 function ManageSubscriptionPage(): ReactElement {
-  useTracker('SUBSCRIPTION_MANAGE_PAGE_VISIT');
   return (
     <>
       <Title title="Manage Subscription" />

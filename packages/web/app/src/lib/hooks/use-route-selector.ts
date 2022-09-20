@@ -1,5 +1,4 @@
 import { useCallback, useMemo } from 'react';
-import { track } from '@/lib/mixpanel';
 import { useRouter } from 'next/router';
 
 export type Router = ReturnType<typeof useRouteSelector>;
@@ -15,7 +14,6 @@ export function useRouteSelector() {
         shallow?: boolean;
       }
     ) => {
-      track('PAGE_VIEW', { route, as });
       router.push(route, as, options);
     },
     [router]

@@ -8,7 +8,6 @@ import { Storage, ProjectSelector, TargetSelector } from '../../shared/providers
 import { share, uuid } from '../../../shared/helpers';
 import { ActivityManager } from '../../activity/providers/activity-manager';
 import { TokenStorage } from '../../token/providers/token-storage';
-import { Tracking } from '../../shared/providers/tracking';
 import { ProjectAccessScope } from '../../auth/providers/project-access';
 import { TargetAccessScope } from '../../auth/providers/target-access';
 
@@ -28,8 +27,7 @@ export class TargetManager {
     private storage: Storage,
     private tokenStorage: TokenStorage,
     private authManager: AuthManager,
-    private activityManager: ActivityManager,
-    private tracking: Tracking
+    private activityManager: ActivityManager
   ) {
     this.logger = logger.child({ source: 'TargetManager' });
   }
@@ -178,18 +176,10 @@ export class TargetManager {
       scope: TargetAccessScope.SETTINGS,
     });
 
-    await Promise.all([
-      this.storage.completeGetStartedStep({
-        organization: input.organization,
-        step: 'enablingUsageBasedBreakingChanges',
-      }),
-      this.tracking.track({
-        event: input.enabled ? 'TARGET_VALIDATION_ENABLED' : 'TARGET_VALIDATION_DISABLED',
-        data: {
-          ...input,
-        },
-      }),
-    ]);
+    await this.storage.completeGetStartedStep({
+      organization: input.organization,
+      step: 'enablingUsageBasedBreakingChanges',
+    });
 
     return this.storage.setTargetValidation(input);
   }
@@ -201,13 +191,6 @@ export class TargetManager {
     await this.authManager.ensureTargetAccess({
       ...input,
       scope: TargetAccessScope.SETTINGS,
-    });
-
-    await this.tracking.track({
-      event: 'TARGET_VALIDATION_UPDATED',
-      data: {
-        ...input,
-      },
     });
 
     if (input.targets.length === 0) {

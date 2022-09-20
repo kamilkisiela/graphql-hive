@@ -5,7 +5,6 @@ import { AuthManager } from '../../auth/providers/auth-manager';
 import { OrganizationAccessScope } from '../../auth/providers/organization-access';
 import { Logger } from '../../shared/providers/logger';
 import { Storage, OrganizationSelector } from '../../shared/providers/storage';
-import { Tracking } from '../../shared/providers/tracking';
 
 export interface GitHubApplicationConfig {
   appId: number;
@@ -26,7 +25,6 @@ export class GitHubIntegrationManager {
     logger: Logger,
     private authManager: AuthManager,
     private storage: Storage,
-    private tracking: Tracking,
     @Inject(GITHUB_APP_CONFIG) private config: GitHubApplicationConfig
   ) {
     this.logger = logger.child({
@@ -52,12 +50,6 @@ export class GitHubIntegrationManager {
       ...input,
       scope: OrganizationAccessScope.INTEGRATIONS,
     });
-    await this.tracking.track({
-      event: 'ADDED_GITHUB_INTEGRATION',
-      data: {
-        organization: input.organization,
-      },
-    });
     await this.storage.addGitHubIntegration({
       organization: input.organization,
       installationId: input.installationId,
@@ -69,12 +61,6 @@ export class GitHubIntegrationManager {
     await this.authManager.ensureOrganizationAccess({
       ...input,
       scope: OrganizationAccessScope.INTEGRATIONS,
-    });
-    await this.tracking.track({
-      event: 'DELETED_GITHUB_INTEGRATION',
-      data: {
-        organization: input.organization,
-      },
     });
     await this.storage.deleteGitHubIntegration({
       organization: input.organization,

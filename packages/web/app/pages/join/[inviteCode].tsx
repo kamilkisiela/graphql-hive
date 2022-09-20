@@ -1,7 +1,6 @@
 import * as React from 'react';
 import tw from 'twin.macro';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
-import { track } from '@/lib/mixpanel';
 import { useQuery, useMutation } from 'urql';
 import { OrganizationInvitationDocument, JoinOrganizationDocument } from '@/graphql';
 import { Button } from '@chakra-ui/react';
@@ -31,9 +30,6 @@ function OrganizationPage() {
   });
   const [mutation, mutate] = useMutation(JoinOrganizationDocument);
   const accept = React.useCallback(() => {
-    track('JOIN_ORGANIZATION_ATTEMPT', {
-      code,
-    });
     mutate({
       code,
     }).then(result => {
@@ -43,9 +39,6 @@ function OrganizationPage() {
         } else {
           const org = result.data.joinOrganization.organization;
           notify(`You joined "${org.name}" organization`, 'success');
-          track('JOIN_ORGANIZATION_ATTEMPT_SUCCESS', {
-            code,
-          });
           router.visitOrganization({
             organizationId: org.cleanId,
           });
@@ -55,9 +48,6 @@ function OrganizationPage() {
   }, [mutate, code, router, notify]);
 
   const goBack = React.useCallback(() => {
-    track('JOIN_ORGANIZATION_ATTEMPT_FAILURE', {
-      code,
-    });
     router.visitHome();
   }, [router]);
 

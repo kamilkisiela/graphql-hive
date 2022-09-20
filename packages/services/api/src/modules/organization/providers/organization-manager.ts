@@ -12,7 +12,6 @@ import { MessageBus } from '../../shared/providers/message-bus';
 import { ActivityManager } from '../../activity/providers/activity-manager';
 import { BillingProvider } from '../../billing/providers/billing.provider';
 import { TokenStorage } from '../../token/providers/token-storage';
-import { Tracking } from '../../shared/providers/tracking';
 import { Emails } from '../../shared/providers/emails';
 import { OrganizationAccessScope } from '../../auth/providers/organization-access';
 import { ProjectAccessScope } from '../../auth/providers/project-access';
@@ -71,7 +70,6 @@ export class OrganizationManager {
     private tokenStorage: TokenStorage,
     private messageBus: MessageBus,
     private activityManager: ActivityManager,
-    private tracking: Tracking,
     private billingProvider: BillingProvider,
     private emails: Emails
   ) {
@@ -220,14 +218,6 @@ export class OrganizationManager {
     if (organization.type === OrganizationType.PERSONAL) {
       throw new HiveError(`Cannot remove a personal organization`);
     }
-
-    await this.tracking.track({
-      event: 'ORGANIZATION_DELETED',
-      data: {
-        ...selector,
-        name: organization.name,
-      },
-    });
 
     const [deletedOrganization] = await Promise.all([
       this.storage.deleteOrganization({

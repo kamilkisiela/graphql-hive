@@ -6,7 +6,6 @@ import type { PersistedOperation } from '../../../shared/entities';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { Logger } from '../../shared/providers/logger';
 import { PersistedOperationSelector, ProjectSelector, Storage } from '../../shared/providers/storage';
-import { Tracking } from '../../shared/providers/tracking';
 import { ProjectAccessScope } from '../../auth/providers/project-access';
 
 /**
@@ -19,7 +18,7 @@ import { ProjectAccessScope } from '../../auth/providers/project-access';
 export class PersistedOperationManager {
   private logger: Logger;
 
-  constructor(logger: Logger, private storage: Storage, private authManager: AuthManager, private tracking: Tracking) {
+  constructor(logger: Logger, private storage: Storage, private authManager: AuthManager) {
     this.logger = logger.child({ source: 'PersistedOperationManager' });
   }
 
@@ -38,15 +37,6 @@ export class PersistedOperationManager {
       project,
       organization,
       scope: ProjectAccessScope.OPERATIONS_STORE_WRITE,
-    });
-
-    await this.tracking.track({
-      event: 'PERSISTED_OPERATIONS_CREATED',
-      data: {
-        size: operationList.length,
-        project,
-        organization,
-      },
     });
 
     const operations = operationList.map(operation => {
@@ -112,14 +102,6 @@ export class PersistedOperationManager {
       project,
       organization,
       scope: ProjectAccessScope.OPERATIONS_STORE_WRITE,
-    });
-
-    await this.tracking.track({
-      event: 'PERSISTED_OPERATIONS_DELETED',
-      data: {
-        project,
-        organization,
-      },
     });
 
     const result = await this.storage.deletePersistedOperation({

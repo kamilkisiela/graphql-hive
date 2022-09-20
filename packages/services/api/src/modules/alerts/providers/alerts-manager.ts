@@ -8,7 +8,6 @@ import { ProjectManager } from '../../project/providers/project-manager';
 import { Logger } from '../../shared/providers/logger';
 import { Storage } from '../../shared/providers/storage';
 import type { ProjectSelector } from '../../shared/providers/storage';
-import { Tracking } from '../../shared/providers/tracking';
 import { SlackIntegrationManager } from '../../integrations/providers/slack-integration-manager';
 import { IntegrationsAccessContext } from '../../integrations/providers/integrations-access-context';
 import { SchemaChangeNotificationInput } from './adapters/common';
@@ -32,8 +31,7 @@ export class AlertsManager {
     private webhook: WebhookCommunicationAdapter,
     private organizationManager: OrganizationManager,
     private projectManager: ProjectManager,
-    private storage: Storage,
-    private tracking: Tracking
+    private storage: Storage
   ) {
     this.logger = logger.child({
       source: 'AlertsManager',
@@ -50,14 +48,6 @@ export class AlertsManager {
     await this.authManager.ensureProjectAccess({
       ...input,
       scope: ProjectAccessScope.ALERTS,
-    });
-    await this.tracking.track({
-      event: 'ADDED_ALERT_CHANNEL',
-      data: {
-        organization: input.organization,
-        project: input.project,
-        type: input.type,
-      },
     });
 
     const channel = await this.storage.addAlertChannel(input);
@@ -83,14 +73,6 @@ export class AlertsManager {
       input.project,
       input.channels.length
     );
-    await this.tracking.track({
-      event: 'DELETED_ALERT_CHANNELS',
-      data: {
-        organization: input.organization,
-        project: input.project,
-        size: input.channels.length,
-      },
-    });
     await this.authManager.ensureProjectAccess({
       ...input,
       scope: ProjectAccessScope.ALERTS,
@@ -132,14 +114,6 @@ export class AlertsManager {
       ...input,
       scope: ProjectAccessScope.ALERTS,
     });
-    await this.tracking.track({
-      event: 'ADDED_ALERT',
-      data: {
-        organization: input.organization,
-        project: input.project,
-        type: input.type,
-      },
-    });
 
     return this.storage.addAlert(input);
   }
@@ -155,14 +129,6 @@ export class AlertsManager {
       input.project,
       input.alerts.length
     );
-    await this.tracking.track({
-      event: 'DELETED_ALERTS',
-      data: {
-        organization: input.organization,
-        project: input.project,
-        size: input.alerts.length,
-      },
-    });
     await this.authManager.ensureProjectAccess({
       ...input,
       scope: ProjectAccessScope.ALERTS,

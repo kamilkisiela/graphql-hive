@@ -19,7 +19,6 @@ import { sentry } from '../../../shared/sentry';
 import type { TargetSelector } from '../../shared/providers/storage';
 import { IdempotentRunner } from '../../shared/providers/idempotent-runner';
 import { bolderize } from '../../../shared/markdown';
-import { Tracking } from '../../shared/providers/tracking';
 import { AlertsManager } from '../../alerts/providers/alerts-manager';
 import { TargetManager } from '../../target/providers/target-manager';
 import { CdnProvider } from '../../cdn/providers/cdn.provider';
@@ -60,7 +59,6 @@ export class SchemaPublisher {
     private schemaValidator: SchemaValidator,
     private alertsManager: AlertsManager,
     private cdn: CdnProvider,
-    private tracking: Tracking,
     private gitHubIntegrationManager: GitHubIntegrationManager,
     private idempotentRunner: IdempotentRunner,
     private helper: SchemaHelper,
@@ -95,33 +93,10 @@ export class SchemaPublisher {
     const schemas = latest.schemas;
     const isInitialSchema = schemas.length === 0;
 
-    await Promise.all([
-      this.schemaManager.completeGetStartedCheck({
-        organization: project.orgId,
-        step: 'checkingSchema',
-      }),
-      this.tracking.track({
-        event: 'SCHEMA_CHECK',
-        data: {
-          organization: input.organization,
-          project: input.project,
-          target: input.target,
-          projectType: project.type,
-        },
-      }),
-    ]);
-
-    if (input.github) {
-      await this.tracking.track({
-        event: 'SCHEMA_CHECK_GITHUB',
-        data: {
-          organization: input.organization,
-          project: input.project,
-          target: input.target,
-          projectType: project.type,
-        },
-      });
-    }
+    await this.schemaManager.completeGetStartedCheck({
+      organization: project.orgId,
+      step: 'checkingSchema',
+    });
 
     const baseSchema = await this.schemaManager.getBaseSchema({
       organization: input.organization,
@@ -392,21 +367,10 @@ export class SchemaPublisher {
 
     const schemas = latest.schemas;
 
-    await Promise.all([
-      this.schemaManager.completeGetStartedCheck({
-        organization: project.orgId,
-        step: 'publishingSchema',
-      }),
-      this.tracking.track({
-        event: 'SCHEMA_PUBLISH',
-        data: {
-          organization: organizationId,
-          project: projectId,
-          target: targetId,
-          projectType: project.type,
-        },
-      }),
-    ]);
+    await this.schemaManager.completeGetStartedCheck({
+      organization: project.orgId,
+      step: 'publishingSchema',
+    });
 
     this.logger.debug(`Found ${schemas.length} most recent schemas`);
 

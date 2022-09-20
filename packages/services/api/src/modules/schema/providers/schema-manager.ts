@@ -11,7 +11,6 @@ import { CustomOrchestrator } from './orchestrators/custom';
 import { FederationOrchestrator } from './orchestrators/federation';
 import { SingleOrchestrator } from './orchestrators/single';
 import { StitchingOrchestrator } from './orchestrators/stitching';
-import { Tracking } from '../../shared/providers/tracking';
 import { TargetAccessScope } from '../../auth/providers/target-access';
 import { ProjectAccessScope } from '../../auth/providers/project-access';
 import { CryptoProvider } from '../../shared/providers/crypto';
@@ -50,8 +49,7 @@ export class SchemaManager {
     private stitchingOrchestrator: StitchingOrchestrator,
     private federationOrchestrator: FederationOrchestrator,
     private customOrchestrator: CustomOrchestrator,
-    private crypto: CryptoProvider,
-    private tracking: Tracking
+    private crypto: CryptoProvider
   ) {
     this.logger = logger.child({ source: 'SchemaManager' });
   }
@@ -213,11 +211,6 @@ export class SchemaManager {
       scope: TargetAccessScope.REGISTRY_WRITE,
     });
 
-    await this.tracking.track({
-      event: 'SCHEMA_VERSION_STATUS_UPDATED',
-      ...input,
-    });
-
     return {
       ...(await this.storage.updateVersionStatus(input)),
       organization: input.organization,
@@ -237,10 +230,6 @@ export class SchemaManager {
     await this.authManager.ensureTargetAccess({
       ...input,
       scope: TargetAccessScope.REGISTRY_WRITE,
-    });
-    await this.tracking.track({
-      event: 'SCHEMA_URL_UPDATED',
-      ...input,
     });
     await this.storage.updateSchemaUrlOfVersion(input);
   }
