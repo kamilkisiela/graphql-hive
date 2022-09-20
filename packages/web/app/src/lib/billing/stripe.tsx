@@ -12,5 +12,9 @@ export const HiveStripeWrapper: React.FC<{}> = ({ children }) => {
   if (stripe === null) {
     return children as any;
   }
-  return <ElementsProvider stripe={stripe}>{children}</ElementsProvider>;
+  return (
+    <React.Suspense fallback={() => <>{children}</>}>
+      <ElementsProvider stripe={stripe}>{children}</ElementsProvider>
+    </React.Suspense>
+  );
 };
