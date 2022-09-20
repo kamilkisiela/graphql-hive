@@ -3,79 +3,121 @@ version: '3.8'
 services:
   emails:
     build:
-      dockerfile: '${PWD:-.}/services.dockerfile'
-      context: './packages/services/emails/dist'
       x-bake:
         platforms:
           - linux/amd64
           - linux/arm64
         cache-from:
-          - type=registry,ref=${DOCKER_REGISTRY}emails:build-cache
+          - type=gha
         cache-to:
-          - type=registry,ref=${DOCKER_REGISTRY}emails:build-cache,mode=max
+          - type=gha,mode=max
   rate-limit:
     build:
       x-bake:
         platforms:
           - linux/amd64
           - linux/arm64
+        cache-from:
+          - type=gha
+        cache-to:
+          - type=gha,mode=max
   schema:
     build:
       x-bake:
         platforms:
           - linux/amd64
           - linux/arm64
+        cache-from:
+          - type=gha
+        cache-to:
+          - type=gha,mode=max
   server:
     build:
       x-bake:
         platforms:
           - linux/amd64
           - linux/arm64
+        cache-from:
+          - type=gha
+        cache-to:
+          - type=gha,mode=max
   storage:
     build:
       x-bake:
         platforms:
           - linux/amd64
           - linux/arm64
+        cache-from:
+          - type=gha
+        cache-to:
+          - type=gha,mode=max
   stripe-billing:
     build:
       x-bake:
         platforms:
           - linux/amd64
           - linux/arm64
+        cache-from:
+          - type=gha
+        cache-to:
+          - type=gha,mode=max
   tokens:
     build:
       x-bake:
         platforms:
           - linux/amd64
           - linux/arm64
+        cache-from:
+          - type=gha
+        cache-to:
+          - type=gha,mode=max
   usage-estimator:
     build:
       x-bake:
         platforms:
           - linux/amd64
           - linux/arm64
+        cache-from:
+          - type=gha
+        cache-to:
+          - type=gha,mode=max
   usage-ingestor:
     build:
       x-bake:
         platforms:
           - linux/amd64
           - linux/arm64
+        cache-from:
+          - type=gha
+        cache-to:
+          - type=gha,mode=max
   usage:
     build:
       x-bake:
         platforms:
           - linux/amd64
           - linux/arm64
+        cache-from:
+          - type=gha
+        cache-to:
+          - type=gha,mode=max
   webhooks:
     build:
       x-bake:
         platforms:
           - linux/amd64
           - linux/arm64
+        cache-from:
+          - type=gha
+        cache-to:
+          - type=gha,mode=max
   app:
     build:
       x-bake:
         platforms:
           - linux/amd64
           - linux/arm64
+        cache-from:
+          - type=gha
+        cache-to:
+          - type=gha,mode=max
