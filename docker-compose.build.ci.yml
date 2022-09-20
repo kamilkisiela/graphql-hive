@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  emails:
+    build:
+      dockerfile: '${PWD:-.}/services.dockerfile'
+      context: './packages/services/emails/dist'
+      x-bake:
+        platforms:
+          - linux/amd64
+          - linux/arm64
+        cache-from:
+          - user/app:cache
+          - type=registry,ref=${DOCKER_REGISTRY}emails:build-cache
+        cache-to:
+          - type=registry,ref=${DOCKER_REGISTRY}emails:build-cache,mode=max
+  rate-limit:
+    build:
+      x-bake:
+        platforms:
+          - linux/amd64
+          - linux/arm64
+  schema:
+    build:
+      x-bake:
+        platforms:
+          - linux/amd64
+          - linux/arm64
+  server:
+    build:
+      x-bake:
+        platforms:
+          - linux/amd64
+          - linux/arm64
+  storage:
+    build:
+      x-bake:
+        platforms:
+          - linux/amd64
+          - linux/arm64
+  stripe-billing:
+    build:
+      x-bake:
+        platforms:
+          - linux/amd64
+          - linux/arm64
+  tokens:
+    build:
+      x-bake:
+        platforms:
+          - linux/amd64
+          - linux/arm64
+  usage-estimator:
+    build:
+      x-bake:
+        platforms:
+          - linux/amd64
+          - linux/arm64
+  usage-ingestor:
+    build:
+      x-bake:
+        platforms:
+          - linux/amd64
+          - linux/arm64
+  usage:
+    build:
+      x-bake:
+        platforms:
+          - linux/amd64
+          - linux/arm64
+  webhooks:
+    build:
+      x-bake:
+        platforms:
+          - linux/amd64
+          - linux/arm64
+  app:
+    build:
+      x-bake:
+        platforms:
+          - linux/amd64
+          - linux/arm64

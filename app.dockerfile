@@ -2,7 +2,7 @@ FROM node:16-slim as install
 
 WORKDIR /usr/src/app
 
-COPY dist/ /usr/src/app/
+COPY . /usr/src/app/
 
 ENV NODE_ENV production
 
