@@ -197,8 +197,9 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
       useGraphQLModules(options.registry),
       useNoIntrospection({ signature: options.signature }),
     ],
-    graphiql: request =>
-      isNonProductionEnvironment ? { endpoint: request.headers.get('x-use-proxy') ?? request.url } : false,
+    // TODO - Bring this back
+    // graphiql: request =>
+    // isNonProductionEnvironment ? { endpoint: request.headers.get('x-use-proxy') ?? request.url } : false,
   });
 
   return async (req, reply) => {
