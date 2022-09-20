@@ -38,7 +38,7 @@ const Settings_UpdateProjectGitRepositoryMutation = gql(/* GraphQL */ `
   }
 `);
 
-const GitHubIntegration = ({ gitRepository }: { gitRepository: string }): ReactElement => {
+const GitHubIntegration = ({ gitRepository }: { gitRepository: string | null }): ReactElement => {
   const router = useRouteSelector();
   const [integrationQuery] = useQuery({
     query: GetGitHubIntegrationDetailsDocument,
@@ -84,7 +84,7 @@ const GitHubIntegration = ({ gitRepository }: { gitRepository: string }): ReactE
               name: repo.nameWithOwner,
               value: repo.nameWithOwner,
             }))}
-            value={values.gitRepository}
+            value={values.gitRepository ?? undefined}
             onChange={handleChange}
             onBlur={handleBlur}
             isInvalid={!!touched.gitRepository && Boolean(errors.gitRepository)}
@@ -211,7 +211,7 @@ const Page = ({
       <Card>
         <Heading className="mb-2">Git Repository</Heading>
         <p className="mb-3 font-light text-gray-300">Connect the project with your Git repository</p>
-        {project?.gitRepository ? <GitHubIntegration gitRepository={project.gitRepository} /> : null}
+        <GitHubIntegration gitRepository={project.gitRepository ?? null} />
       </Card>
 
       {project.type === ProjectType.Federation ? (
