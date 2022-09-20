@@ -1,7 +1,6 @@
 import { ReactElement } from 'react';
 
 import { Button, CopyValue, Heading, Link, Modal, Tag } from '@/components/v2';
-import { useTracker } from '@/lib/hooks/use-tracker';
 
 export const ConnectLabModal = ({
   isOpen,
@@ -12,8 +11,6 @@ export const ConnectLabModal = ({
   toggleModalOpen: () => void;
   endpoint: string;
 }): ReactElement => {
-  useTracker('CONNECT_LAB', isOpen);
-
   return (
     <Modal open={isOpen} onOpenChange={toggleModalOpen} className="flex w-[650px] flex-col gap-5">
       <Heading className="text-center">Connect to Lab</Heading>

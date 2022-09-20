@@ -6,7 +6,6 @@ import { TargetAccessScope } from '../../auth/providers/target-access';
 import { Logger } from '../../shared/providers/logger';
 import { CryptoProvider } from '../../shared/providers/crypto';
 import { Storage, OrganizationSelector, ProjectSelector, TargetSelector } from '../../shared/providers/storage';
-import { Tracking } from '../../shared/providers/tracking';
 import { AccessError } from '../../../shared/errors';
 import { IntegrationsAccessContext } from './integrations-access-context';
 
@@ -21,7 +20,6 @@ export class SlackIntegrationManager {
     logger: Logger,
     private authManager: AuthManager,
     private storage: Storage,
-    private tracking: Tracking,
     private crypto: CryptoProvider
   ) {
     this.logger = logger.child({
@@ -39,12 +37,6 @@ export class SlackIntegrationManager {
       ...input,
       scope: OrganizationAccessScope.INTEGRATIONS,
     });
-    await this.tracking.track({
-      event: 'ADDED_SLACK_INTEGRATION',
-      data: {
-        organization: input.organization,
-      },
-    });
     await this.storage.addSlackIntegration({
       organization: input.organization,
       token: this.crypto.encrypt(input.token),
@@ -56,12 +48,6 @@ export class SlackIntegrationManager {
     await this.authManager.ensureOrganizationAccess({
       ...input,
       scope: OrganizationAccessScope.INTEGRATIONS,
-    });
-    await this.tracking.track({
-      event: 'DELETED_SLACK_INTEGRATION',
-      data: {
-        organization: input.organization,
-      },
     });
     await this.storage.deleteSlackIntegration({
       organization: input.organization,

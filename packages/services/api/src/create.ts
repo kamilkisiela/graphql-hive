@@ -18,7 +18,6 @@ import { CryptoProvider, encryptionSecretProvider } from './modules/shared/provi
 import { RedisConfig, REDIS_CONFIG, RedisProvider } from './modules/shared/providers/redis';
 import { Storage } from './modules/shared/providers/storage';
 import { EMAILS_ENDPOINT, Emails } from './modules/shared/providers/emails';
-import { Tracking } from './modules/shared/providers/tracking';
 import { targetModule } from './modules/target';
 import { integrationsModule } from './modules/integrations';
 import {
@@ -110,7 +109,6 @@ export function createRegistry({
     HttpClient,
     IdTranslator,
     MessageBus,
-    Tracking,
     RedisProvider,
     IdempotentRunner,
     CryptoProvider,
