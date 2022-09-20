@@ -330,7 +330,7 @@ jobs:
             packages/services/usage-ingestor/dist
             packages/services/usage/dist
             packages/services/webhooks/dist
-            packages/services/app/dist
+            packages/web/app/dist
 
   rust:
     name: Build Rust
