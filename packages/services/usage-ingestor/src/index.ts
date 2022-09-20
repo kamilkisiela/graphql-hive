@@ -44,7 +44,8 @@ async function main() {
           }
         : null,
       kafka: {
-        topic: 'usage_reports_v2',
+        topic: ensureEnv('KAFKA_TOPIC'),
+        consumerGroup: ensureEnv('KAFKA_CONSUMER_GROUP'),
         concurrency: ensureEnv('KAFKA_CONCURRENCY', 'number'),
         connection:
           ensureEnv('KAFKA_CONNECTION_MODE') == 'hosted'

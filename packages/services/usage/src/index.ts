@@ -33,7 +33,7 @@ async function main() {
     const { collect, readiness, start, stop } = createUsage({
       logger: server.log,
       kafka: {
-        topic: 'usage_reports_v2',
+        topic: ensureEnv('KAFKA_TOPIC'),
         buffer: {
           size: ensureEnv('KAFKA_BUFFER_SIZE', 'number'),
           interval: ensureEnv('KAFKA_BUFFER_INTERVAL', 'number'),
