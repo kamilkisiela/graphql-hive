@@ -425,11 +425,10 @@ jobs:
       - name: Lint Prettier
         run: yarn lint:prettier
 
-  docker_build_images:
+  docker-build-push:
     needs: build
-    name: Publish for Docker
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 20
 
     env:
       REGISTRY: ghcr.io
