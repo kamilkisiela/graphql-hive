@@ -463,6 +463,7 @@ jobs:
         env:
           DOCKER_REGISTRY: ${{ env.REGISTRY }}/${{ github.repository }}/
           DOCKER_TAG: :${{ github.sha }}
+          RELEASE: ${{ github.sha }}
         run: |
           docker buildx bake \
             -f docker-compose.build.yml \
