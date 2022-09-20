@@ -1,7 +1,7 @@
 import type { RouteHandlerMethod, FastifyRequest, FastifyReply } from 'fastify';
 import { Registry } from '@hive/api';
 import { cleanRequestId } from '@hive/service-common';
-import { createServer, GraphQLYogaError } from '@graphql-yoga/node';
+import { createYoga, isGraphQLError } from '@graphql-yoga/node';
 import { GraphQLError, ValidationContext, ValidationRule, Kind, OperationDefinitionNode, print } from 'graphql';
 import { useGraphQLModules } from '@envelop/graphql-modules';
 import { useGenericAuth } from '@envelop/generic-auth';
@@ -76,14 +76,14 @@ function useNoIntrospection(params: { signature: string }): Plugin<{ req: Fastif
 }
 
 export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMethod => {
-  const server = createServer<Context>({
+  const server = createYoga<Context>({
     plugins: [
       useSentry({
         startTransaction: false,
         renameTransaction: true,
         /**
          * When it's not `null`, the plugin modifies the error object.
-         * We end up with an unintended error masking, because the GraphQLYogaError is replaced with GraphQLError (without error.originalError).
+         * We end up with an unintended error masking, because the GraphQLError is replaced with GraphQLError (without error.originalError).
          */
         eventIdKey: null,
         operationName: () => 'graphql',
@@ -130,15 +130,15 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
         },
       }),
       useSentryUser(),
-      useErrorHandler((errors, ctx) => {
+      useErrorHandler(({ errors, context }) => {
         for (const error of errors) {
           // Only log unexpected errors.
-          if (error.originalError instanceof GraphQLYogaError) {
+          if (isGraphQLError(error) && error.originalError instanceof GraphQLError) {
             continue;
           }
 
-          if (hasFastifyRequest(ctx)) {
-            ctx.req.log.error(error);
+          if (hasFastifyRequest(context)) {
+            context.req.log.error(error);
           } else {
             server.logger.error(error);
           }
@@ -210,7 +210,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
         requestId,
       },
       async () => {
-        const response = await server.handleIncomingMessage(req, {
+        const response = await server.handleNodeRequest(req, {
           req,
           reply,
           headers: req.headers,
