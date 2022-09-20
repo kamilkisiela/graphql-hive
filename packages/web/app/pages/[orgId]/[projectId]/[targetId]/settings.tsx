@@ -1,4 +1,4 @@
-import React, { ReactElement, useCallback, useEffect, useState } from 'react';
+import React, { ReactElement, useCallback, useState } from 'react';
 import { Spinner } from '@chakra-ui/react';
 import clsx from 'clsx';
 import { formatISO, subDays } from 'date-fns';
@@ -142,11 +142,7 @@ const Settings_UpdateBaseSchemaMutation = gql(/* GraphQL */ `
 const ExtendBaseSchema = (props: { baseSchema: string }): ReactElement => {
   const [mutation, mutate] = useMutation(Settings_UpdateBaseSchemaMutation);
   const router = useRouteSelector();
-  const [baseSchema, setBaseSchema] = useState('');
-
-  useEffect(() => {
-    setBaseSchema(props.baseSchema);
-  }, [props.baseSchema]);
+  const [baseSchema, setBaseSchema] = useState(props.baseSchema);
 
   const isUnsaved = baseSchema?.trim() !== props.baseSchema?.trim();
 
@@ -376,7 +372,7 @@ const ConditionalBreakingChanges = (): ReactElement => {
   return (
     <Card>
       <form onSubmit={handleSubmit}>
-        <Heading className="mb-2 flex items-center gap-5">
+        <Heading className="mb-2 flex items-center justify-between gap-5">
           Conditional Breaking Changes
           {targetSettings.fetching ? (
             <Spinner />
@@ -618,7 +614,7 @@ const Page = ({ target, organization }: { target: TargetFieldsFragment; organiza
 
       <ConditionalBreakingChanges />
 
-      {target?.baseSchema?.length ? <ExtendBaseSchema baseSchema={target.baseSchema} /> : null}
+      <ExtendBaseSchema baseSchema={target?.baseSchema ?? ''} />
 
       {canDelete && (
         <Card>
