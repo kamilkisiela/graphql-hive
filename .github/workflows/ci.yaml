@@ -317,6 +317,7 @@ jobs:
           name: docker-build-sources
           path: |
             docker-compose.build.yml
+            docker-compose.build.ci.yml
             services.dockerfile
             app.dockerfile
             packages/services/emails/dist
@@ -444,7 +445,10 @@ jobs:
           name: docker-build-sources
           path: ./
 
-      - run: ls -R
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+        with:
+          platforms: 'linux/arm64,linux/amd64'
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -463,4 +467,5 @@ jobs:
         run: |
           docker buildx bake \
             -f docker-compose.build.yml \
+            -f docker-compose.build.ci.yml \
             --push
