@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  emails:
+    build:
+      dockerfile: '${PWD:-.}/services.dockerfile'
+      context: './packages/services/emails/dist'
+    image: '${DOCKER_REGISTRY}emails${DOCKER_TAG}'
+  rate-limit:
+    build:
+      dockerfile: '${PWD:-.}/services.dockerfile'
+      context: './packages/services/rate-limit/dist'
+    image: '${DOCKER_REGISTRY}rate-limit${DOCKER_TAG}'
+  schema:
+    build:
+      dockerfile: '${PWD:-.}/services.dockerfile'
+      context: './packages/services/schema/dist'
+    image: '${DOCKER_REGISTRY}schema${DOCKER_TAG}'
+  server:
+    build:
+      dockerfile: '${PWD:-.}/services.dockerfile'
+      context: './packages/services/server/dist'
+    image: '${DOCKER_REGISTRY}server${DOCKER_TAG}'
+  storage:
+    build:
+      dockerfile: '${PWD:-.}/services.dockerfile'
+      context: './packages/services/storage/dist'
+    image: '${DOCKER_REGISTRY}storage${DOCKER_TAG}'
+  stripe-billing:
+    build:
+      dockerfile: '${PWD:-.}/services.dockerfile'
+      context: './packages/services/stripe-billing/dist'
+    image: '${DOCKER_REGISTRY}stripe-billing${DOCKER_TAG}'
+  tokens:
+    build:
+      dockerfile: '${PWD:-.}/services.dockerfile'
+      context: './packages/services/tokens/dist'
+    image: '${DOCKER_REGISTRY}tokens${DOCKER_TAG}'
+  usage-estimator:
+    build:
+      dockerfile: '${PWD:-.}/services.dockerfile'
+      context: './packages/services/usage-estimator/dist'
+    image: '${DOCKER_REGISTRY}usage-estimator${DOCKER_TAG}'
+  usage-ingestor:
+    build:
+      dockerfile: '${PWD:-.}/services.dockerfile'
+      context: './packages/services/usage-ingestor/dist'
+    image: '${DOCKER_REGISTRY}usage-ingestor${DOCKER_TAG}'
+  usage:
+    build:
+      dockerfile: '${PWD:-.}/services.dockerfile'
+      context: './packages/services/usage/dist'
+    image: '${DOCKER_REGISTRY}usage${DOCKER_TAG}'
+  webhooks:
+    build:
+      dockerfile: '${PWD:-.}/services.dockerfile'
+      context: './packages/services/webhooks/dist'
+    image: '${DOCKER_REGISTRY}webhooks${DOCKER_TAG}'
+  app:
+    build:
+      dockerfile: '${PWD:-.}/app.dockerfile'
+      context: './packages/web/app/dist'
+    image: '${DOCKER_REGISTRY}app${DOCKER_TAG}'
