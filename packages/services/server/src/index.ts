@@ -59,10 +59,13 @@ export async function main() {
     tracing: true,
   });
 
+  const storage = await createPostgreSQLStorage(createConnectionString(process.env as any), 10);
+
   registerShutdown({
     logger: server.log,
     async onShutdown() {
       await server.close();
+      await storage.destroy();
     },
   });
 
@@ -125,8 +128,6 @@ export async function main() {
         },
       };
     }
-
-    const storage = await createPostgreSQLStorage(createConnectionString(process.env as any), 10);
 
     const graphqlLogger = createGraphQLLogger();
     const registry = createRegistry({

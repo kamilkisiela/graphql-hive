@@ -14,6 +14,7 @@ export interface StorageItem {
 }
 
 export interface Storage {
+  destroy(): Promise<void>;
   readTarget(targetId: string, res?: FastifyReply): Promise<StorageItem[]>;
   readToken(token: string, res?: FastifyReply): Promise<StorageItem>;
   writeToken(item: Omit<StorageItem, 'date' | 'lastUsedAt'>): Promise<StorageItem>;
@@ -40,6 +41,9 @@ export async function createStorage(): Promise<Storage> {
   }
 
   return {
+    destroy() {
+      return db.destroy();
+    },
     async readTarget(target) {
       const tokens = await db.getTokens({ target });
 

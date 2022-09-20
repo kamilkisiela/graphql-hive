@@ -26,7 +26,7 @@ const agentConfig: Agent.HttpOptions = {
   freeSocketTimeout: 30_000,
   // Sets the socket active time to live
   socketActiveTTL: 60_000,
-  maxSockets: 35,
+  maxSockets: 32,
   maxFreeSockets: 10,
   scheduling: 'lifo',
 };

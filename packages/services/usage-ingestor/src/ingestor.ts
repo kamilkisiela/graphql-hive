@@ -102,6 +102,7 @@ export function createIngestor(config: {
 
     status = Status.Stopped;
     await consumer.disconnect();
+    writer.destroy();
     logger.info(`Consumer disconnected`);
 
     logger.info('Usage Ingestor stopped');

@@ -242,6 +242,7 @@ export function createRateLimiter(config: {
         clearInterval(intervalHandle);
         intervalHandle = null;
       }
+      await (await postgres$).destroy();
       logger.info('Rate Limiter stopped');
     },
   };
