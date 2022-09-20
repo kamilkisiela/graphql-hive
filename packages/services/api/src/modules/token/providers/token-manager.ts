@@ -5,7 +5,6 @@ import { diffArrays, pushIfMissing } from '../../../shared/helpers';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { Storage, TargetSelector } from '../../shared/providers/storage';
 import { Logger } from '../../shared/providers/logger';
-import { Tracking } from '../../shared/providers/tracking';
 import { TokenStorage } from './token-storage';
 import type { CreateTokenResult } from './token-storage';
 import { TargetAccessScope } from '../../auth/providers/target-access';
@@ -34,7 +33,6 @@ export class TokenManager {
     private authManager: AuthManager,
     private tokenStorage: TokenStorage,
     private storage: Storage,
-    private tracking: Tracking,
     logger: Logger
   ) {
     this.logger = logger.child({
@@ -75,13 +73,6 @@ export class TokenManager {
     pushIfMissing(scopes, ProjectAccessScope.READ);
     pushIfMissing(scopes, OrganizationAccessScope.READ);
 
-    await this.tracking.track({
-      event: 'TOKEN_CREATED',
-      data: {
-        ...input,
-      },
-    });
-
     return this.tokenStorage.createToken({
       organization: input.organization,
       project: input.project,
@@ -101,16 +92,6 @@ export class TokenManager {
       organization: input.organization,
       target: input.target,
       scope: TargetAccessScope.TOKENS_WRITE,
-    });
-
-    await this.tracking.track({
-      event: 'TOKEN_DELETED',
-      data: {
-        organization: input.organization,
-        project: input.project,
-        target: input.target,
-        size: input.tokens.length,
-      },
     });
 
     return this.tokenStorage.deleteTokens(input);

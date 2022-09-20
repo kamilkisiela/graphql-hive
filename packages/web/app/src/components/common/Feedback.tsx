@@ -21,13 +21,11 @@ import {
   AlertDescription,
 } from '@chakra-ui/react';
 import { SendFeedbackDocument } from '@/graphql';
-import { useTracker } from '@/lib/hooks/use-tracker';
 
 export const Feedback: React.FC<{
   isOpen: boolean;
   onClose(): void;
 }> = ({ isOpen, onClose }) => {
-  useTracker('FEEDBACK_MODAL', isOpen);
   const [mutation, mutate] = useMutation(SendFeedbackDocument);
   const [state, setState] = React.useState<'FORM' | 'THANK_YOU'>('FORM');
   const formik = useFormik({

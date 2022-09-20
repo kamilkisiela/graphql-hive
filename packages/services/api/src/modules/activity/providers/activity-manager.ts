@@ -5,7 +5,6 @@ import { OrganizationAccessScope } from '../../auth/providers/organization-acces
 import { ProjectAccessScope } from '../../auth/providers/project-access';
 import { Logger } from '../../shared/providers/logger';
 import { Storage, OrganizationSelector, ProjectSelector, TargetSelector } from '../../shared/providers/storage';
-import { Tracking } from '../../shared/providers/tracking';
 import { Activity } from './activities';
 
 interface PaginationSelector {
@@ -19,7 +18,7 @@ interface PaginationSelector {
 export class ActivityManager {
   private logger: Logger;
 
-  constructor(logger: Logger, private authManager: AuthManager, private storage: Storage, private tracking: Tracking) {
+  constructor(logger: Logger, private authManager: AuthManager, private storage: Storage) {
     this.logger = logger.child({
       source: 'ActivityManager',
     });
@@ -41,15 +40,6 @@ export class ActivityManager {
       });
 
       this.logger.debug(`Created activity ${activity.type}`);
-
-      await this.tracking.track({
-        event: activity.type,
-        data: {
-          ...activity.selector,
-          ...('meta' in activity ? activity.meta : {}),
-        },
-        user: activity.user,
-      });
     } catch (error) {
       this.logger.error(`Failed to create an activity: ${error}`, error);
     }

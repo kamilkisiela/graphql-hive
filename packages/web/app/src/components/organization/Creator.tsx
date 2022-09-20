@@ -17,13 +17,11 @@ import {
 import { CreateOrganizationDocument } from '@/graphql';
 import { Label, Description } from '@/components/common';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
-import { useTracker } from '@/lib/hooks/use-tracker';
 
 export const OrganizationCreator: React.FC<{
   isOpen: boolean;
   onClose(): void;
 }> = ({ isOpen, onClose }) => {
-  useTracker('ORGANIZATION_CREATOR', isOpen);
   const router = useRouteSelector();
   const [{ fetching }, mutate] = useMutation(CreateOrganizationDocument);
   const [name, setName] = React.useState('');

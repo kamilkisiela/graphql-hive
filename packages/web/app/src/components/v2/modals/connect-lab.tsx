@@ -2,7 +2,6 @@ import { ReactElement } from 'react';
 
 import { Button, CopyValue, Heading, Link, Modal, Tag } from '@/components/v2';
 import { getDocsUrl } from '@/lib/docs-url';
-import { useTracker } from '@/lib/hooks/use-tracker';
 
 export const ConnectLabModal = ({
   isOpen,
@@ -13,8 +12,6 @@ export const ConnectLabModal = ({
   toggleModalOpen: () => void;
   endpoint: string;
 }): ReactElement => {
-  useTracker('CONNECT_LAB', isOpen);
-
   const docsUrl = getDocsUrl('/features/tokens');
 
   return (

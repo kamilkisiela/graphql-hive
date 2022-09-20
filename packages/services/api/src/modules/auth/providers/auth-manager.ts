@@ -3,7 +3,6 @@ import type { User } from '../../../shared/entities';
 import type { Listify, MapToArray } from '../../../shared/helpers';
 import { AccessError } from '../../../shared/errors';
 import { share } from '../../../shared/helpers';
-import { createOrUpdateUser } from '../../../shared/mixpanel';
 import { Storage } from '../../shared/providers/storage';
 import { MessageBus } from '../../shared/providers/message-bus';
 import { IdempotentRunner } from '../../shared/providers/idempotent-runner';
@@ -162,19 +161,6 @@ export class AuthManager {
 
     throw new AccessError('Authorization header is missing');
   }
-
-  getUserIdForTracking: () => Promise<string | null> = share(async () => {
-    const user = await (this.apiToken ? this.getOrganizationOwnerByToken() : this.getCurrentUser());
-
-    if (user.superTokensUserId) {
-      createOrUpdateUser({
-        id: user.superTokensUserId,
-        email: user.email,
-      });
-    }
-
-    return user.superTokensUserId;
-  });
 
   getOrganizationOwnerByToken: () => Promise<User | never> = share(async () => {
     const token = this.ensureApiToken();

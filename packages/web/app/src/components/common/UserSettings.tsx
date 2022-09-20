@@ -16,7 +16,6 @@ import {
   ModalBody,
   FormLabel,
 } from '@chakra-ui/react';
-import { useTracker } from '@/lib/hooks/use-tracker';
 
 const UpdateMeFragment = gql(/* GraphQL */ `
   fragment UpdateMeFragment on User {
@@ -43,7 +42,6 @@ export const UserSettings: React.FC<{
   isOpen: boolean;
   onClose(): void;
 }> = ({ me, isOpen, onClose }) => {
-  useTracker('USER_SETTINGS', isOpen);
   const [mutation, mutate] = useMutation(UpdateMeMutation);
   const formik = useFormik({
     initialValues: {

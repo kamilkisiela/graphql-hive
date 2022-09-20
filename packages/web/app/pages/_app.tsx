@@ -2,7 +2,6 @@ import { ReactElement, useEffect } from 'react';
 import { AppProps } from 'next/app';
 import Script from 'next/script';
 import Router from 'next/router';
-import { initMixpanel } from '@/lib/mixpanel';
 import { ChakraProvider, extendTheme } from '@chakra-ui/react';
 import GlobalStylesComponent from '@/components/common/GlobalStyles';
 import * as gtag from '@/lib/gtag';
@@ -15,7 +14,6 @@ import Session from 'supertokens-auth-react/recipe/session';
 import SuperTokens, { SuperTokensWrapper } from 'supertokens-auth-react';
 import { frontendConfig } from '@/config/frontend-config';
 import { configureScope } from '@sentry/nextjs';
-import { identify } from '@/lib/mixpanel';
 import { LAST_VISITED_ORG_KEY, GA_TRACKING_ID, CRISP_WEBSITE_ID } from '@/constants';
 import { Provider as UrqlProvider } from 'urql';
 import { urqlClient } from '@/lib/urql';
@@ -90,7 +88,6 @@ function App({ Component, pageProps }: AppProps): ReactElement {
       const payload = await Session.getAccessTokenPayloadSecurely();
       identifyOnCrisp(payload.email);
       identifyOnSentry(payload.superTokensUserId, payload.email);
-      identify(payload.superTokensId, payload.email);
     });
   }, []);
 
@@ -150,7 +147,6 @@ function App({ Component, pageProps }: AppProps): ReactElement {
   );
 }
 if (globalThis.window) {
-  initMixpanel();
   SuperTokens.init(frontendConfig());
 }
 
