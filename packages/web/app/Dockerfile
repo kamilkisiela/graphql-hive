@@ -1,4 +1,4 @@
-FROM node:18-slim as install
+FROM node:16-slim as install
 
 WORKDIR /usr/src/app
 
@@ -11,7 +11,7 @@ ENV NODE_ENV production
 
 RUN npm install --legacy-peer-deps
 
-FROM node:18-slim as app
+FROM node:16-slim as app
 
 WORKDIR /usr/src/app
 
