@@ -8,7 +8,6 @@ type FrontendEnvironment = {
   STRIPE_PUBLIC_KEY: string | undefined;
   AUTH_GITHUB: string | undefined;
   AUTH_GOOGLE: string | undefined;
-  MIXPANEL_TOKEN: string | undefined;
   GA_TRACKING_ID: string | undefined;
   CRISP_WEBSITE_ID: string | undefined;
   SENTRY_DSN: string | undefined;
@@ -29,7 +28,6 @@ export default class MyDocument extends Document<{ ids: Array<string>; css: stri
       STRIPE_PUBLIC_KEY: process.env['STRIPE_PUBLIC_KEY'],
       AUTH_GITHUB: process.env['AUTH_GITHUB'],
       AUTH_GOOGLE: process.env['AUTH_GOOGLE'],
-      MIXPANEL_TOKEN: process.env['MIXPANEL_TOKEN'],
       GA_TRACKING_ID: process.env['GA_TRACKING_ID'],
       CRISP_WEBSITE_ID: process.env['CRISP_WEBSITE_ID'],
       SENTRY_DSN: process.env['SENTRY_DSN'],

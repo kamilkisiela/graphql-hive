@@ -26,7 +26,6 @@ declare var __ENV__:
       STRIPE_PUBLIC_KEY: string | undefined;
       AUTH_GITHUB: string | undefined;
       AUTH_GOOGLE: string | undefined;
-      MIXPANEL_TOKEN: string | undefined;
       GA_TRACKING_ID: string | undefined;
       CRISP_WEBSITE_ID: string | undefined;
       SENTRY_DSN: string | undefined;

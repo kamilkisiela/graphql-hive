@@ -99,11 +99,6 @@ export function deployApp({
         },
 
         {
-          name: 'MIXPANEL_TOKEN',
-          value: appEnv.MIXPANEL_TOKEN,
-        },
-
-        {
           name: 'GA_TRACKING_ID',
           value: appEnv.GA_TRACKING_ID,
         },

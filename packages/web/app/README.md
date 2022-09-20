@@ -27,7 +27,6 @@ The following environment variables configure the application.
 | `SENTRY_ENABLED`             | No                                   | Whether Sentry error reporting should be enabled.                                     | `1` (enabled) or `0` (disabled)                      |
 | `DOCS_URL`                   | No                                   | The URL of the Hive Docs                                                              | `https://docs.graphql-hive.com`                      |
 | `NODE_ENV`                   | No                                   | The `NODE_ENV` value.                                                                 | `production`                                         |
-| `MIXPANEL_TOKEN`             | No                                   | The token for Mixpanel in order to track user actions.                                | `g6aff8102efda5e1d12e`                               |
 | `GA_TRACKING_ID`             | No                                   | The token for Google Analytics in order to track user actions.                        | `g6aff8102efda5e1d12e`                               |
 | `CRISP_WEBSITE_ID`           | No                                   | The Crisp Website ID                                                                  | `g6aff8102efda5e1d12e`                               |
 
