@@ -442,6 +442,9 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: docker-build-sources
+          path: ./
+
+      - run: ls -R
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
