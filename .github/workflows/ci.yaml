@@ -109,8 +109,6 @@ jobs:
 
       - name: Build
         run: yarn workspace integration-tests run build-and-pack
-        env:
-          NEXT_PUBLIC_STRIPE_PUBLIC_KEY: ${{ secrets.TEST_STRIPE_PUBLIC_KEY }}
 
       - name: Pull images
         run: docker-compose -f integration-tests/docker-compose.yml pull
@@ -119,6 +117,7 @@ jobs:
         run: yarn workspace integration-tests run dockest
         timeout-minutes: 15
         env:
+          STRIPE_PUBLIC_KEY: ${{ secrets.TEST_STRIPE_PUBLIC_KEY }}
           STRIPE_SECRET_KEY: ${{ secrets.TEST_STRIPE_SECRET_KEY }}
           SUPERTOKENS_CONNECTION_URI: http://127.0.0.1:3567
           SUPERTOKENS_API_KEY: bubatzbieber6942096420
@@ -177,8 +176,6 @@ jobs:
       - name: Build
         if: steps.feature_flags.outputs.detected == 'true'
         run: yarn workspace integration-tests run build-and-pack
-        env:
-          NEXT_PUBLIC_STRIPE_PUBLIC_KEY: ${{ secrets.TEST_STRIPE_PUBLIC_KEY }}
 
       - name: Pull images
         if: steps.feature_flags.outputs.detected == 'true'
@@ -189,6 +186,7 @@ jobs:
         run: yarn workspace integration-tests run dockest
         timeout-minutes: 15
         env:
+          STRIPE_PUBLIC_KEY: ${{ secrets.TEST_STRIPE_PUBLIC_KEY }}
           STRIPE_SECRET_KEY: ${{ secrets.TEST_STRIPE_SECRET_KEY }}
           SUPERTOKENS_CONNECTION_URI: http://127.0.0.1:3567
           SUPERTOKENS_API_KEY: bubatzbieber6942096420
@@ -404,3 +402,59 @@ jobs:
 
       - name: Lint Prettier
         run: yarn lint:prettier
+
+  publish_app:
+    needs: setup
+    name: Publish for Docker
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAME: ${{ github.repository }}
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Node
+        uses: actions/setup-node@v2
+        with:
+          node-version-file: .node-version
+
+      - name: Pull node_modules
+        uses: actions/cache@v2
+        with:
+          path: '**/node_modules'
+          key: ${{ github.sha }}
+
+      - name: Setup Turbo
+        run: node ./scripts/turborepo-setup.js
+
+      - name: Generate Types
+        run: yarn graphql:generate
+
+      - name: Build
+        run: yarn build
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3
+        with:
+          file: packages/web/app/Dockerfile
+          context: ./packages/web/app
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}/app:${{ github.sha }}

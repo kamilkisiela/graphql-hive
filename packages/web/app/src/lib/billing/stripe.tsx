@@ -1,15 +1,20 @@
 import { Elements as ElementsProvider } from '@stripe/react-stripe-js';
-import { loadStripe } from '@stripe/stripe-js';
 import React from 'react';
-
-const STRIPE_PUBLIC_KEY = process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY || null;
-
-const stripePromise$ = !STRIPE_PUBLIC_KEY ? null : loadStripe(STRIPE_PUBLIC_KEY);
+import { getStripePublicKey } from './stripe-public-key';
+import { loadStripe } from '@stripe/stripe-js';
 
 export const HiveStripeWrapper: React.FC<{}> = ({ children }) => {
-  if (STRIPE_PUBLIC_KEY === null || stripePromise$ === null) {
+  const [stripe] = React.useState(() => {
+    const stripePublicKey = getStripePublicKey();
+    return stripePublicKey ? loadStripe(stripePublicKey) : null;
+  });
+
+  if (stripe === null) {
     return children as any;
   }
-
-  return <ElementsProvider stripe={stripePromise$}>{children}</ElementsProvider>;
+  return (
+    <React.Suspense fallback={() => <>{children}</>}>
+      <ElementsProvider stripe={stripe}>{children}</ElementsProvider>
+    </React.Suspense>
+  );
 };

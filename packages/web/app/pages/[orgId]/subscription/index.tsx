@@ -13,6 +13,7 @@ import { OrganizationUsageEstimationView } from '@/components/organization/Usage
 import { Card, Heading, Tabs, Title } from '@/components/v2';
 import { OrganizationFieldsFragment, OrgBillingInfoFieldsFragment, OrgRateLimitFieldsFragment } from '@/graphql';
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
+import { getIsStripeEnabled } from '@/lib/billing/stripe-public-key';
 
 const DateFormatter = Intl.DateTimeFormat('en-US', {
   month: 'short',
@@ -110,6 +111,22 @@ function SubscriptionPage(): ReactElement {
   );
 }
 
-export const getServerSideProps = withSessionProtection();
+export const getServerSideProps = withSessionProtection(async context => {
+  /**
+   * If Strive is not enabled we redirect the user to the organization.
+   */
+  const isStripeEnabled = getIsStripeEnabled();
+  if (isStripeEnabled === false) {
+    const parts = `${context.resolvedUrl}`.split('/');
+    parts.pop();
+    return {
+      redirect: {
+        destination: `${parts.join('/')}`,
+        permanent: false,
+      },
+    };
+  }
+  return { props: {} };
+});
 
 export default authenticated(SubscriptionPage);

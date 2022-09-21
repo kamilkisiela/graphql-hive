@@ -62,28 +62,22 @@ export function deployApp({
       env: [
         { name: 'DEPLOYED_DNS', value: deploymentEnv.DEPLOYED_DNS },
         { name: 'NODE_ENV', value: 'production' },
-        { name: 'ENVIRONMENT', value: deploymentEnv.ENVIRONMENT },
         {
-          name: 'NEXT_PUBLIC_ENVIRONMENT',
+          name: 'ENVIRONMENT',
           value: deploymentEnv.ENVIRONMENT,
         },
         {
           name: 'RELEASE',
           value: appRelease,
         },
-        {
-          name: 'NEXT_PUBLIC_RELEASE',
-          value: appRelease,
-        },
         { name: 'SENTRY_DSN', value: commonEnv.SENTRY_DSN },
-        { name: 'NEXT_PUBLIC_SENTRY_DSN', value: commonEnv.SENTRY_DSN },
         { name: 'SENTRY_ENABLED', value: commonEnv.SENTRY_ENABLED },
         {
           name: 'GRAPHQL_ENDPOINT',
           value: serviceLocalEndpoint(graphql.service).apply(s => `${s}/graphql`),
         },
         {
-          name: 'NEXT_PUBLIC_APP_BASE_URL',
+          name: 'APP_BASE_URL',
           value: `https://${deploymentEnv.DEPLOYED_DNS}/`,
         },
         {
@@ -97,6 +91,26 @@ export function deployApp({
         {
           name: 'GITHUB_APP_NAME',
           value: githubAppConfig.require('name'),
+        },
+
+        {
+          name: 'STRIPE_PUBLIC_KEY',
+          value: appEnv.STRIPE_PUBLIC_KEY,
+        },
+
+        {
+          name: 'GA_TRACKING_ID',
+          value: appEnv.GA_TRACKING_ID,
+        },
+
+        {
+          name: 'CRISP_WEBSITE_ID',
+          value: appEnv.CRISP_WEBSITE_ID,
+        },
+
+        {
+          name: 'DOCS_URL',
+          value: appEnv.DOCS_URL,
         },
 
         //
@@ -146,7 +160,7 @@ export function deployApp({
         },
         // GitHub
         {
-          name: 'NEXT_PUBLIC_AUTH_GITHUB',
+          name: 'AUTH_GITHUB',
           value: '1',
         },
         {
@@ -159,7 +173,7 @@ export function deployApp({
         },
         // Google
         {
-          name: 'NEXT_PUBLIC_AUTH_GOOGLE',
+          name: 'AUTH_GOOGLE',
           value: '1',
         },
         {

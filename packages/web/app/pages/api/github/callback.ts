@@ -10,7 +10,7 @@ export async function ensureGithubIntegration(
 ) {
   const { orgId, installationId } = input;
   await graphql({
-    url: `${process.env['NEXT_PUBLIC_APP_BASE_URL'].replace(/\/$/, '')}/api/proxy`,
+    url: `${process.env['APP_BASE_URL'].replace(/\/$/, '')}/api/proxy`,
     headers: {
       ...req.headers,
       'content-type': 'application/json',

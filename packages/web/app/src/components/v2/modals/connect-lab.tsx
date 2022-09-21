@@ -1,6 +1,7 @@
 import { ReactElement } from 'react';
 
 import { Button, CopyValue, Heading, Link, Modal, Tag } from '@/components/v2';
+import { getDocsUrl } from '@/lib/docs-url';
 
 export const ConnectLabModal = ({
   isOpen,
@@ -11,6 +12,8 @@ export const ConnectLabModal = ({
   toggleModalOpen: () => void;
   endpoint: string;
 }): ReactElement => {
+  const docsUrl = getDocsUrl('/features/tokens');
+
   return (
     <Modal open={isOpen} onOpenChange={toggleModalOpen} className="flex w-[650px] flex-col gap-5">
       <Heading className="text-center">Connect to Lab</Heading>
@@ -22,23 +25,13 @@ export const ConnectLabModal = ({
       <span className="text-sm text-gray-500">To authenticate, use the following HTTP headers:</span>
       <Tag>
         X-Hive-Key:{' '}
-        <Link
-          variant="secondary"
-          target="_blank"
-          rel="noreferrer"
-          href={`${process.env.NEXT_PUBLIC_DOCS_LINK}/features/tokens`}
-        >
+        <Link variant="secondary" target="_blank" rel="noreferrer" href={docsUrl ?? undefined}>
           YOUR_TOKEN_HERE
         </Link>
       </Tag>
       <p className="text-sm text-gray-500">
         Read the{' '}
-        <Link
-          variant="primary"
-          target="_blank"
-          rel="noreferrer"
-          href={`${process.env.NEXT_PUBLIC_DOCS_LINK}/features/tokens`}
-        >
+        <Link variant="primary" target="_blank" rel="noreferrer" href={docsUrl ?? undefined}>
           Managing Tokens
         </Link>{' '}
         chapter in our documentation.

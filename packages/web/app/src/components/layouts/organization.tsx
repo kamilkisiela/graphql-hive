@@ -17,6 +17,7 @@ import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { canAccessOrganization, OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
 import cookies from 'js-cookie';
 import { LAST_VISITED_ORG_KEY } from '@/constants';
+import { getIsStripeEnabled } from '@/lib/billing/stripe-public-key';
 
 enum TabValue {
   Overview = 'overview',
@@ -146,7 +147,7 @@ export function OrganizationLayout({
               </Tabs.Trigger>
             </NextLink>
           )}
-          {canAccessOrganization(OrganizationAccessScope.Settings, me) && (
+          {getIsStripeEnabled() && canAccessOrganization(OrganizationAccessScope.Settings, me) && (
             <NextLink passHref href={`/${orgId}/${TabValue.Subscription}`}>
               <Tabs.Trigger value={TabValue.Subscription} asChild>
                 <a>Subscription</a>
