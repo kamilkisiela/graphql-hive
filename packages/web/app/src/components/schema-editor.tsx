@@ -1,11 +1,14 @@
-import React from 'react';
+import dynamic from 'next/dynamic';
 
-export const SchemaEditor = React.lazy(() =>
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  import('regenerator-runtime/runtime')
-    .then(() => import('@theguild/editor'))
-    .then(({ SchemaEditor }) => ({ default: SchemaEditor }))
-);
+export const SchemaEditor = dynamic({
+  async loader() {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    await import('regenerator-runtime/runtime');
+    const { SchemaEditor } = await import('@theguild/editor');
+    return SchemaEditor;
+  },
+  ssr: false,
+});
 
 export type { SchemaEditorProps } from '@theguild/editor';
