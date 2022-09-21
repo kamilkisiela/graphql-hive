@@ -233,6 +233,8 @@ group "build" {
     "usage-ingestor",
     "usage",
     "webhooks",
+    "server",
+    "stripe-billing",
     "app"
   ]
 }
