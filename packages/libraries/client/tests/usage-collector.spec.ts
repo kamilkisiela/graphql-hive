@@ -217,10 +217,33 @@ test('collect used-only input fields', async () => {
   expect(info.fields).not.toContain(`PaginationInput.offset`);
 });
 
+test('collect all input fields when `processVariables` has not been passed and input is passed as a variable', async () => {
+  const collect = createCollector({
+    schema,
+    max: 1,
+  });
+  const info = collect(
+    parse(/* GraphQL */ `
+      query getProjects($pagination: PaginationInput!, $type: ProjectType!) {
+        projects(filter: { pagination: $pagination, type: $type }) {
+          id
+        }
+      }
+    `),
+    {}
+  ).value;
+
+  expect(info.fields).toContain(`FilterInput.pagination`);
+  expect(info.fields).toContain(`FilterInput.type`);
+  expect(info.fields).toContain(`PaginationInput.limit`);
+  expect(info.fields).toContain(`PaginationInput.offset`);
+});
+
 test('collect used-only input fields if input is passed as a variable', async () => {
   const collect = createCollector({
     schema,
     max: 1,
+    processVariables: true,
   });
   const info = collect(
     parse(/* GraphQL */ `
@@ -248,6 +271,7 @@ test('collect used-only input fields if input array is passed as a variable', as
   const collect = createCollector({
     schema,
     max: 1,
+    processVariables: true,
   });
   const info = collect(
     parse(/* GraphQL */ `
@@ -274,8 +298,6 @@ test('collect used-only input fields if input array is passed as a variable', as
       },
     }
   ).value;
-
-  console.log('info.fields', info.fields);
 
   expect(info.fields).toContain(`FilterInput.pagination`);
   expect(info.fields).toContain(`PaginationInput.limit`);

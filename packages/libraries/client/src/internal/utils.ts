@@ -52,25 +52,18 @@ export function cache<R, A, K, V>(
   };
 }
 
-export function cacheDocumentKey<T, V>(doc: T, variables: V) {
-  return createHash('md5')
-    .update(
-      JSON.stringify({
-        doc,
-        // creating cache key from variables keys and nested keys
-        vars: JSON.stringify(variables, (key, value) => {
-          if (
-            (value && typeof value === 'object' && Object.keys(value).length) ||
-            (Array.isArray(value) && value.length)
-          ) {
-            return value;
-          }
+export function cacheDocumentKey<T, V>(doc: T, variables?: V) {
+  const cacheKeySource: { doc: T; variables?: string } = { doc };
+  if (variables) {
+    cacheKeySource['variables'] = JSON.stringify(variables, (key, value) => {
+      if ((value && typeof value === 'object' && Object.keys(value).length) || (Array.isArray(value) && value.length)) {
+        return value;
+      }
 
-          return '';
-        }),
-      })
-    )
-    .digest('hex');
+      return '';
+    });
+  }
+  return createHash('md5').update(JSON.stringify(cacheKeySource)).digest('hex');
 }
 
 const HR_TO_NS = 1e9;

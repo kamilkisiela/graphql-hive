@@ -156,6 +156,7 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
               schema: args.schema,
               max: options.max ?? 1000,
               ttl: options.ttl,
+              processVariables: options.processVariables ?? false,
             });
             const { key, value: info } = collect(document, args.variableValues);
 
@@ -191,7 +192,17 @@ interface CacheResult {
   fields: string[];
 }
 
-export function createCollector({ schema, max, ttl }: { schema: GraphQLSchema; max?: number; ttl?: number }) {
+export function createCollector({
+  schema,
+  max,
+  ttl,
+  processVariables,
+}: {
+  schema: GraphQLSchema;
+  max?: number;
+  ttl?: number;
+  processVariables?: boolean;
+}) {
   const typeInfo = new TypeInfo(schema);
 
   function collect(doc: DocumentNode, variables: ExecutionArgs['variableValues']): CacheResult {
@@ -375,7 +386,12 @@ export function createCollector({ schema, max, ttl }: { schema: GraphQLSchema; m
     };
   }
 
-  return cache(collect, cacheDocumentKey, LRU<CacheResult>(max, ttl));
+  return cache(
+    (doc: DocumentNode, variables: ExecutionArgs['variableValues']) =>
+      collect(doc, processVariables ? variables : undefined),
+    cacheDocumentKey,
+    LRU<CacheResult>(max, ttl)
+  );
 }
 
 function resolveTypeName(inputType: GraphQLType): string {

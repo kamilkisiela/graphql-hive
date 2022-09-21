@@ -65,6 +65,12 @@ export interface HiveUsagePluginOptions {
    * Default: 1.0
    */
   sampleRate?: number;
+  /**
+   * Enables collecting Input fields usage based on the variables passed to the operation.
+   *
+   * Default: false
+   */
+  processVariables?: boolean;
 }
 
 export interface HiveReportingPluginOptions {
