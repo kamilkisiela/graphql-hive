@@ -6,6 +6,9 @@ export async function createTokenStorage(connection: string, maximumPoolSize: nu
   const pool = await getPool(connection, maximumPoolSize);
 
   return {
+    destroy() {
+      return pool.end();
+    },
     async getTokens({ target }: { target: string }) {
       const result = await pool.query<
         Slonik<

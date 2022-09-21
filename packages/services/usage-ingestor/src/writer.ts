@@ -33,7 +33,7 @@ const agentConfig: Agent.HttpOptions = {
   freeSocketTimeout: 30_000,
   // Sets the socket active time to live
   socketActiveTTL: 60_000,
-  maxSockets: 35,
+  maxSockets: 10,
   maxFreeSockets: 10,
   scheduling: 'lifo',
 };
@@ -108,6 +108,10 @@ export function createWriter({
           await compress(csv)
         );
       },
+    },
+    destroy() {
+      httpAgent.destroy();
+      httpsAgent.destroy();
     },
   };
 }

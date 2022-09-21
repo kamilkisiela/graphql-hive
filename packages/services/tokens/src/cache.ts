@@ -108,6 +108,9 @@ export function useCache(
     });
 
     const cachedStorage: CacheStorage = {
+      destroy() {
+        return storage.destroy();
+      },
       async readTarget(target, res) {
         const cachedValue = cache.get(target);
         if (cachedValue) {
@@ -188,6 +191,10 @@ export function useCache(
     await until(tracker.idle, 10_000).catch(error => {
       logger.error('Failed to wait for tokens being idle', error);
     });
+
+    if (cachedStoragePromise) {
+      await (await cachedStoragePromise).destroy();
+    }
 
     process.exit(0);
   }

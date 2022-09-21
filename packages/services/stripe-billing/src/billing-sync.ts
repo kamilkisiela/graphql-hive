@@ -193,6 +193,8 @@ export function createStripeBilling(config: {
         intervalHandle = null;
       }
 
+      await (await postgres$).destroy();
+
       logger.info(`Stripe Billing Sync stopped...`);
     },
   };

@@ -283,6 +283,9 @@ export async function createStorage(connection: string, maximumPoolSize: number)
   }
 
   const storage: Storage = {
+    destroy() {
+      return pool.end();
+    },
     async getUserBySuperTokenId({ superTokensUserId }) {
       const user = await pool.maybeOne<Slonik<users>>(sql`
         SELECT
