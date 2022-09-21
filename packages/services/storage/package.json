@@ -8,7 +8,7 @@
     "setup": "yarn db:start && yarn db",
     "db": "yarn db:create && yarn migration:run",
     "db:create": "node tools/create-db.mjs",
-    "db:migrator": "node --experimental-specifier-resolution=node --loader ts-node/esm migrations/migrate.ts",
+    "db:migrator": "node --experimental-specifier-resolution=node --loader ts-node/esm migrations/index.ts",
     "migration:create": "yarn db:migrator create",
     "migration:run": "yarn db:migrator up",
     "migration:rollback": "yarn db:migrator down",
@@ -41,7 +41,7 @@
   "buildOptions": {
     "runify": true,
     "tsup": true,
-    "bin": "migrations/migrate.ts",
+    "bin": "migrations/index.ts",
     "external": [
       "pg-native"
     ],

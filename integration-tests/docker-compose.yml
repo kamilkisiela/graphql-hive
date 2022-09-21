@@ -98,11 +98,26 @@ services:
       - REDIS_PASSWORD=test
       - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
 
-  migrations:
-    image: node:16.13.2-alpine3.14
-    entrypoint:
-      - '/bin/sh'
-      - '/run-migrations.sh'
+  supertokens:
+    image: registry.supertokens.io/supertokens/supertokens-postgresql:3.16
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - 'stack'
+    ports:
+      - '3567:3567'
+    environment:
+      POSTGRESQL_USER: postgres
+      POSTGRESQL_PASSWORD: postgres
+      POSTGRESQL_DATABASE_NAME: registry
+      POSTGRESQL_TABLE_NAMES_PREFIX: 'supertokens'
+      POSTGRESQL_HOST: db
+      POSTGRESQL_PORT: 5432
+      API_KEYS: bubatzbieber6942096420
+
+  storage:
+    image: '${DOCKER_REGISTRY}storage${DOCKER_TAG}'
     networks:
       - 'stack'
     depends_on:
@@ -122,15 +137,9 @@ services:
     # Tell dockest, we want to wait for the exit code of the migrator to be 0
     labels:
       dockest.readiness: 'exit_code'
-    volumes:
-      - './tarballs/storage.tgz:/storage.tgz'
-      - './run-migrations.sh:/run-migrations.sh'
 
   server:
-    image: node:16.13.2-alpine3.14
-    entrypoint:
-      - '/bin/sh'
-      - '/run-server.sh'
+    image: '${DOCKER_REGISTRY}server${DOCKER_TAG}'
     networks:
       - 'stack'
     depends_on:
@@ -138,7 +147,7 @@ services:
         condition: service_healthy
       clickhouse:
         condition: service_healthy
-      migrations:
+      storage:
         condition: service_completed_successfully
       tokens:
         condition: service_healthy
@@ -148,25 +157,16 @@ services:
         condition: service_healthy
       schema:
         condition: service_healthy
-      usage_estimator:
+      usage-estimator:
         condition: service_healthy
-      rate_limit:
+      rate-limit:
         condition: service_healthy
-      stripe_billing:
+      stripe-billing:
         condition: service_healthy
       local_cdn:
         condition: service_healthy
-    healthcheck:
-      test: ['CMD', 'wget', '--spider', '-q', 'localhost:3001/_readiness']
-      interval: 5s
-      timeout: 5s
-      retries: 6
-      start_period: 5s
     ports:
       - 3001:3001
-    volumes:
-      - './tarballs/server.tgz:/server.tgz'
-      - './run-server.sh:/run-server.sh'
     environment:
       NODE_ENV: production
       POSTGRES_HOST: db
@@ -186,9 +186,9 @@ services:
       TOKENS_ENDPOINT: http://tokens:3003
       WEBHOOKS_ENDPOINT: http://webhooks:3005
       SCHEMA_ENDPOINT: http://schema:3002
-      USAGE_ESTIMATOR_ENDPOINT: http://usage_estimator:3008
-      RATE_LIMIT_ENDPOINT: http://rate_limit:3009
-      BILLING_ENDPOINT: http://stripe_billing:3010
+      USAGE_ESTIMATOR_ENDPOINT: http://usage-estimator:3008
+      RATE_LIMIT_ENDPOINT: http://rate-limit:3009
+      BILLING_ENDPOINT: http://stripe-billing:3010
       EMAILS_ENDPOINT: http://emails:3011
       CF_BASE_PATH: http://local_cdn:3004
       CF_ACCOUNT_ID: 103df45224310d669213971ce28b5b70
@@ -208,26 +208,14 @@ services:
       SUPERTOKENS_API_KEY: bubatzbieber6942096420
 
   schema:
-    image: node:16.13.2-alpine3.14
-    entrypoint:
-      - '/bin/sh'
-      - '/run-schema.sh'
+    image: '${DOCKER_REGISTRY}schema${DOCKER_TAG}'
     networks:
       - 'stack'
     depends_on:
       redis:
         condition: service_healthy
-    healthcheck:
-      test: ['CMD', 'wget', '--spider', '-q', 'localhost:3002/_readiness']
-      interval: 5s
-      timeout: 5s
-      retries: 6
-      start_period: 5s
     ports:
       - 3002:3002
-    volumes:
-      - './tarballs/schema.tgz:/schema.tgz'
-      - './run-schema.sh:/run-schema.sh'
     environment:
       NODE_ENV: production
       PORT: 3002
@@ -237,26 +225,14 @@ services:
       ENCRYPTION_SECRET: 8ebe95cf24c1fbe306e9fa32c8c33148
 
   tokens:
-    image: node:16.13.2-alpine3.14
-    entrypoint:
-      - '/bin/sh'
-      - '/run-tokens.sh'
+    image: '${DOCKER_REGISTRY}tokens${DOCKER_TAG}'
     networks:
       - 'stack'
     depends_on:
-      migrations:
+      storage:
         condition: service_completed_successfully
-    healthcheck:
-      test: ['CMD', 'wget', '--spider', '-q', 'localhost:3003/_readiness']
-      interval: 5s
-      timeout: 5s
-      retries: 6
-      start_period: 5s
     ports:
       - 3003:3003
-    volumes:
-      - './tarballs/tokens.tgz:/tokens.tgz'
-      - './run-tokens.sh:/run-tokens.sh'
     environment:
       NODE_ENV: production
       POSTGRES_HOST: db
@@ -314,26 +290,14 @@ services:
       SECRET: secretsecret
 
   webhooks:
-    image: node:16.13.2-alpine3.14
-    entrypoint:
-      - '/bin/sh'
-      - '/run-webhooks.sh'
+    image: '${DOCKER_REGISTRY}webhooks${DOCKER_TAG}'
     networks:
       - 'stack'
     depends_on:
       redis:
         condition: service_healthy
-    healthcheck:
-      test: ['CMD', 'wget', '--spider', '-q', 'localhost:3005/_readiness']
-      interval: 5s
-      timeout: 5s
-      retries: 6
-      start_period: 5s
     ports:
       - 3005:3005
-    volumes:
-      - './tarballs/webhooks.tgz:/webhooks.tgz'
-      - './run-webhooks.sh:/run-webhooks.sh'
     environment:
       NODE_ENV: production
       BULLMQ_COMMANDS_FROM_ROOT: 'true'
@@ -343,26 +307,14 @@ services:
       REDIS_PASSWORD: test
 
   emails:
-    image: node:16.13.2-alpine3.14
-    entrypoint:
-      - '/bin/sh'
-      - '/run-emails.sh'
+    image: '${DOCKER_REGISTRY}emails${DOCKER_TAG}'
     networks:
       - 'stack'
     depends_on:
       redis:
         condition: service_healthy
-    healthcheck:
-      test: ['CMD', 'wget', '--spider', '-q', 'localhost:3011/_readiness']
-      interval: 5s
-      timeout: 5s
-      retries: 6
-      start_period: 5s
     ports:
       - 3011:3011
-    volumes:
-      - './tarballs/emails.tgz:/emails.tgz'
-      - './run-emails.sh:/run-emails.sh'
     environment:
       NODE_ENV: production
       BULLMQ_COMMANDS_FROM_ROOT: 'true'
@@ -374,34 +326,22 @@ services:
       EMAIL_FROM: mock@graphql-hive.com
 
   usage:
-    image: node:16.13.2-alpine3.14
-    entrypoint:
-      - '/bin/sh'
-      - '/run-usage.sh'
+    image: '${DOCKER_REGISTRY}usage${DOCKER_TAG}'
     networks:
       - 'stack'
     ports:
       - '3006:3006'
-    healthcheck:
-      test: ['CMD', 'wget', '--spider', '-q', 'localhost:3006/_readiness']
-      interval: 5s
-      timeout: 5s
-      retries: 6
-      start_period: 5s
-    volumes:
-      - './tarballs/usage.tgz:/usage.tgz'
-      - './run-usage.sh:/run-usage.sh'
     depends_on:
       broker:
         condition: service_healthy
-      rate_limit:
+      rate-limit:
         condition: service_healthy
       tokens:
         condition: service_healthy
     environment:
       NODE_ENV: production
       TOKENS_ENDPOINT: http://tokens:3003
-      RATE_LIMIT_ENDPOINT: http://rate_limit:3009
+      RATE_LIMIT_ENDPOINT: http://rate-limit:3009
       KAFKA_CONNECTION_MODE: 'docker'
       KAFKA_BROKER: broker:29092
       KAFKA_BUFFER_SIZE: 350
@@ -409,11 +349,8 @@ services:
       KAFKA_BUFFER_DYNAMIC: 'true'
       PORT: 3006
 
-  usage_ingestor:
-    image: node:16.13.2-alpine3.14
-    entrypoint:
-      - '/bin/sh'
-      - '/run-usage-ingestor.sh'
+  usage-ingestor:
+    image: '${DOCKER_REGISTRY}usage-ingestor${DOCKER_TAG}'
     networks:
       - 'stack'
     depends_on:
@@ -421,17 +358,8 @@ services:
         condition: service_healthy
       clickhouse:
         condition: service_healthy
-    healthcheck:
-      test: ['CMD', 'wget', '--spider', '-q', 'localhost:3007/_readiness']
-      interval: 5s
-      timeout: 5s
-      retries: 6
-      start_period: 5s
     ports:
       - 3007:3007
-    volumes:
-      - './tarballs/usage-ingestor.tgz:/usage-ingestor.tgz'
-      - './run-usage-ingestor.sh:/run-usage-ingestor.sh'
     environment:
       NODE_ENV: production
       KAFKA_CONNECTION_MODE: 'docker'
@@ -444,28 +372,16 @@ services:
       CLICKHOUSE_PASSWORD: test
       PORT: 3007
 
-  usage_estimator:
-    image: node:16.13.2-alpine3.14
-    entrypoint:
-      - '/bin/sh'
-      - '/run-usage-estimator.sh'
+  usage-estimator:
+    image: '${DOCKER_REGISTRY}usage-estimator${DOCKER_TAG}'
     networks:
       - 'stack'
     ports:
       - 3008:3008
-    healthcheck:
-      test: ['CMD', 'wget', '--spider', '-q', 'localhost:3008/_readiness']
-      interval: 5s
-      timeout: 5s
-      retries: 6
-      start_period: 5s
-    volumes:
-      - './tarballs/usage-estimator.tgz:/usage-estimator.tgz'
-      - './run-usage-estimator.sh:/run-usage-estimator.sh'
     depends_on:
       clickhouse:
         condition: service_healthy
-      migrations:
+      storage:
         condition: service_completed_successfully
     environment:
       NODE_ENV: production
@@ -479,30 +395,18 @@ services:
       PORT: 3008
       FF_CLICKHOUSE_V2_TABLES: ${FF_CLICKHOUSE_V2_TABLES}
 
-  rate_limit:
-    image: node:16.13.2-alpine3.14
-    entrypoint:
-      - '/bin/sh'
-      - '/run-rate-limit.sh'
+  rate-limit:
+    image: '${DOCKER_REGISTRY}rate-limit${DOCKER_TAG}'
     networks:
       - 'stack'
     ports:
       - 3009:3009
-    healthcheck:
-      test: ['CMD', 'wget', '--spider', '-q', 'localhost:3009/_readiness']
-      interval: 5s
-      timeout: 5s
-      retries: 6
-      start_period: 5s
-    volumes:
-      - './tarballs/rate-limit.tgz:/rate-limit.tgz'
-      - './run-rate-limit.sh:/run-rate-limit.sh'
     depends_on:
       clickhouse:
         condition: service_healthy
-      migrations:
+      storage:
         condition: service_completed_successfully
-      usage_estimator:
+      usage-estimator:
         condition: service_healthy
       emails:
         condition: service_healthy
@@ -510,61 +414,31 @@ services:
       NODE_ENV: production
       LIMIT_CACHE_UPDATE_INTERVAL_MS: 2000
       POSTGRES_CONNECTION_STRING: 'postgresql://postgres:postgres@db:5432/registry'
-      USAGE_ESTIMATOR_ENDPOINT: http://usage_estimator:3008
+      USAGE_ESTIMATOR_ENDPOINT: http://usage-estimator:3008
       EMAILS_ENDPOINT: http://emails:3011
       ROARR_LOG: 'true'
       PORT: 3009
 
-  stripe_billing:
-    image: node:16.13.2-alpine3.14
-    entrypoint:
-      - '/bin/sh'
-      - '/run-stripe-billing.sh'
+  stripe-billing:
+    image: '${DOCKER_REGISTRY}stripe-billing${DOCKER_TAG}'
     networks:
       - 'stack'
     ports:
       - 3010:3010
-    healthcheck:
-      test: ['CMD', 'wget', '--spider', '-q', 'localhost:3010/_readiness']
-      interval: 5s
-      timeout: 5s
-      retries: 6
-      start_period: 5s
-    volumes:
-      - './tarballs/stripe-billing.tgz:/stripe-billing.tgz'
-      - './run-stripe-billing.sh:/run-stripe-billing.sh'
     depends_on:
       clickhouse:
         condition: service_healthy
-      migrations:
+      storage:
         condition: service_completed_successfully
-      usage_estimator:
+      usage-estimator:
         condition: service_healthy
     environment:
       NODE_ENV: production
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
       POSTGRES_CONNECTION_STRING: 'postgresql://postgres:postgres@db:5432/registry'
       ROARR_LOG: 'true'
-      USAGE_ESTIMATOR_ENDPOINT: http://usage_estimator:3008
+      USAGE_ESTIMATOR_ENDPOINT: http://usage-estimator:3008
       PORT: 3010
-
-  supertokens:
-    image: registry.supertokens.io/supertokens/supertokens-postgresql:3.16
-    depends_on:
-      db:
-        condition: service_healthy
-    networks:
-      - 'stack'
-    ports:
-      - '3567:3567'
-    environment:
-      POSTGRESQL_USER: postgres
-      POSTGRESQL_PASSWORD: postgres
-      POSTGRESQL_DATABASE_NAME: registry
-      POSTGRESQL_TABLE_NAMES_PREFIX: 'supertokens'
-      POSTGRESQL_HOST: db
-      POSTGRESQL_PORT: 5432
-      API_KEYS: bubatzbieber6942096420
 
 networks:
   stack: {}
