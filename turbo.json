@@ -17,6 +17,14 @@
     "build-local": {
       "outputs": ["dist/**"]
     },
+    "@hive/cdn-script#build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/index.js"]
+    },
+    "@hive/cdn-script#build-local": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/dev.js"]
+    },
     "@hive/app#build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]

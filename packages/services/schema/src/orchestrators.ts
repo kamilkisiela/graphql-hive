@@ -7,7 +7,7 @@ import { validateSDL } from 'graphql/validation/validate.js';
 import { composeAndValidate, compositionHasErrors } from '@apollo/federation';
 import { stitchSchemas } from '@graphql-tools/stitch';
 import { stitchingDirectives } from '@graphql-tools/stitching-directives';
-import { fetch } from 'cross-undici-fetch';
+import { fetch } from '@whatwg-node/fetch';
 import retry from 'async-retry';
 import { z } from 'zod';
 import type {

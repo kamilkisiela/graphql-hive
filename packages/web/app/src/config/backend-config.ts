@@ -3,7 +3,7 @@ import SessionNode from 'supertokens-node/recipe/session';
 import type { TypeInput } from 'supertokens-node/types';
 import type { TypeProvider } from 'supertokens-node/recipe/thirdparty/types';
 import type { TypeInput as ThirdPartEmailPasswordTypeInput } from 'supertokens-node/recipe/thirdpartyemailpassword/types';
-import { fetch } from 'cross-undici-fetch';
+import { fetch } from '@whatwg-node/fetch';
 import { appInfo } from './app-info';
 import zod from 'zod';
 import * as crypto from 'crypto';

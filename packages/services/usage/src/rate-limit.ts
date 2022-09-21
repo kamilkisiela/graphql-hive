@@ -2,7 +2,7 @@ import { FastifyLoggerInstance } from '@hive/service-common';
 import LRU from 'tiny-lru';
 import type { RateLimitApi, RateLimitQueryInput, RateLimitQueryOutput } from '@hive/rate-limit';
 import { createTRPCClient } from '@trpc/client';
-import { fetch } from 'cross-undici-fetch';
+import { fetch } from '@whatwg-node/fetch';
 
 export function createUsageRateLimit(config: { endpoint: string | null; logger: FastifyLoggerInstance }) {
   const logger = config.logger;

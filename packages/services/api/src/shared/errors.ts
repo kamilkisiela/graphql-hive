@@ -1,5 +1,4 @@
 import { GraphQLError } from 'graphql';
-import { GraphQLYogaError } from '@graphql-yoga/common';
 import type { SchemaError } from '../__generated__/types';
 
 export function toSchemaError(error: unknown): SchemaError {
@@ -25,7 +24,7 @@ export function isGraphQLError(error: unknown): error is GraphQLError {
   return error instanceof GraphQLError;
 }
 
-export const HiveError = GraphQLYogaError;
+export const HiveError = GraphQLError;
 
 export class AccessError extends HiveError {
   constructor(reason: string) {

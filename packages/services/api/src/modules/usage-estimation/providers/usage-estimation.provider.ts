@@ -5,7 +5,7 @@ import { sentry } from '../../../shared/sentry';
 import { Logger } from '../../shared/providers/logger';
 import type { UsageEstimationServiceConfig } from './tokens';
 import { USAGE_ESTIMATION_SERVICE_CONFIG } from './tokens';
-import { fetch } from 'cross-undici-fetch';
+import { fetch } from '@whatwg-node/fetch';
 
 @Injectable({
   scope: Scope.Singleton,

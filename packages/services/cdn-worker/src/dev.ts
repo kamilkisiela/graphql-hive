@@ -1,85 +1,13 @@
 import './dev-polyfill';
-import type { FastifyRequest } from 'fastify';
 import { createServer } from '@hive/service-common';
 import { handleRequest } from './handler';
-import type { ServerResponse } from 'http';
-import { Readable } from 'stream';
 import { devStorage } from './dev-polyfill';
 import { isKeyValid } from './auth';
+import { createServerAdapter } from '@whatwg-node/server';
+import { FastifyRequest, FastifyReply } from 'fastify';
+import { Readable } from 'stream';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4010;
-
-function isReadable(responseBody: any): responseBody is Readable {
-  return !!responseBody.pipe;
-}
-
-export interface AddressInfo {
-  protocol: 'http' | 'https';
-  hostname: string;
-  endpoint: string;
-  port: number;
-}
-
-export function sendNodeResponse(
-  { headers, status, statusText, body }: Response,
-  serverResponse: ServerResponse
-): void {
-  headers.forEach((value, name) => {
-    serverResponse.setHeader(name, value);
-  });
-  serverResponse.statusCode = status;
-  serverResponse.statusMessage = statusText;
-  // Some fetch implementations like `node-fetch`, return `Response.body` as Promise
-  if (body == null) {
-    serverResponse.end();
-  } else {
-    const nodeStream = (isReadable(body) ? body : Readable.from(body)) as Readable;
-    nodeStream.pipe(serverResponse);
-  }
-}
-
-function getRequestAddressInfo(nodeRequest: FastifyRequest, defaultAddressInfo: AddressInfo): AddressInfo {
-  const hostnameWithPort = nodeRequest.hostname ?? nodeRequest.headers.host ?? defaultAddressInfo.hostname;
-  const [hostname = nodeRequest.hostname, port = defaultAddressInfo.port] = hostnameWithPort.split(':');
-  return {
-    protocol: nodeRequest.protocol ?? defaultAddressInfo.protocol,
-    hostname,
-    endpoint: nodeRequest.url ?? defaultAddressInfo.endpoint,
-    port,
-  } as AddressInfo;
-}
-
-function buildFullUrl(addressInfo: AddressInfo) {
-  return `${addressInfo.protocol}://${addressInfo.hostname}:${addressInfo.port}${addressInfo.endpoint}`;
-}
-
-export async function getNodeRequest(nodeRequest: FastifyRequest, defaultAddressInfo: AddressInfo): Promise<Request> {
-  const addressInfo = getRequestAddressInfo(nodeRequest, defaultAddressInfo);
-  const fullUrl = buildFullUrl(addressInfo);
-  const baseRequestInit: RequestInit = {
-    method: nodeRequest.method,
-    headers: nodeRequest.headers,
-  };
-
-  if (nodeRequest.method !== 'POST') {
-    return new Request(fullUrl, baseRequestInit);
-  }
-
-  const maybeParsedBody = nodeRequest.body;
-  if (maybeParsedBody) {
-    return new Request(fullUrl, {
-      ...baseRequestInit,
-      body: typeof maybeParsedBody === 'string' ? maybeParsedBody : JSON.stringify(maybeParsedBody),
-    });
-  }
-
-  const rawRequest = nodeRequest.raw || nodeRequest.req || nodeRequest;
-  return new Request(fullUrl, {
-    headers: nodeRequest.headers,
-    method: nodeRequest.method,
-    body: rawRequest as any,
-  });
-}
 
 async function main() {
   const server = await createServer({
@@ -131,21 +59,29 @@ async function main() {
     },
   });
 
+  const serverAdapter = createServerAdapter<{
+    req: FastifyRequest;
+    reply: FastifyReply;
+  }>(req => handleRequest(req, isKeyValid));
+
   server.route({
     url: '*',
     method: ['GET'],
     handler: async (req, reply) => {
-      const response = await handleRequest(
-        await getNodeRequest(req, {
-          hostname: 'localhost',
-          port: PORT,
-          protocol: 'http',
-          endpoint: '/',
-        }),
-        isKeyValid
-      );
+      const response = await serverAdapter.handleNodeRequest(req, {
+        req,
+        reply,
+      });
+      response.headers.forEach((value, key) => {
+        reply.header(key, value);
+      });
 
-      sendNodeResponse(response, reply.raw);
+      reply.status(response.status);
+
+      // @ts-expect-error because @ardatan told me it's fine
+      reply.send(Readable.from(response.body!));
+
+      return reply;
     },
   });
 

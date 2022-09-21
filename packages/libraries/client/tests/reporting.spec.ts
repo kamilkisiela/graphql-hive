@@ -35,7 +35,7 @@ test('should not leak the exception', async () => {
     reporting: {
       author: 'Test',
       commit: 'Commit',
-      endpoint: 'http://404.localhost',
+      endpoint: 'http://127.0.0.1:55404',
     },
   });
 
@@ -55,7 +55,7 @@ test('should not leak the exception', async () => {
   expect(logger.info).toHaveBeenCalledWith('[hive][reporting] Sending (queue 1) (attempt 2)');
   expect(logger.error).toHaveBeenCalledTimes(1);
   expect(logger.error).toHaveBeenCalledWith(
-    expect.stringContaining(`[hive][reporting] Failed to report schema: connect ECONNREFUSED`)
+    expect.stringContaining(`[hive][reporting] Failed to report schema: connect ECONNREFUSED 127.0.0.1:55404`)
   );
 });
 
