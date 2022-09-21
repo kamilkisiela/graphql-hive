@@ -195,8 +195,7 @@ jobs:
         with:
           name: docker-build-sources
           path: |
-            docker-compose.build.yml
-            docker-compose.build.ci.yml
+            docker.hcl
             services.dockerfile
             app.dockerfile
             packages/services/emails/dist
@@ -338,16 +337,22 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Get branch name
+        id: branch-name
+        uses: tj-actions/branch-names@v6
+
       - name: Build Docker Images
         env:
           DOCKER_REGISTRY: ${{ env.REGISTRY }}/${{ github.repository }}/
-          DOCKER_TAG: :${{ github.sha }}
+          COMMIT_SHA: :${{ github.sha }}
           RELEASE: ${{ github.sha }}
+          BRANCH_NAME: ${{ steps.branch-name.outputs.current_branch }}
+          CI: '1'
         run: |
           docker buildx bake \
-            -f docker-compose.build.yml \
-            -f docker-compose.build.ci.yml \
-            --push
+            -f docker.hcl \
+            --push \
+            build
 
   integration-tests:
     name: Integration Tests
