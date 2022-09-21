@@ -344,7 +344,7 @@ jobs:
       - name: Build Docker Images
         env:
           DOCKER_REGISTRY: ${{ env.REGISTRY }}/${{ github.repository }}/
-          COMMIT_SHA: :${{ github.sha }}
+          COMMIT_SHA: ${{ github.sha }}
           RELEASE: ${{ github.sha }}
           BRANCH_NAME: ${{ steps.branch-name.outputs.current_branch }}
           CI: '1'
