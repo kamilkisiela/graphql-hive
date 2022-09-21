@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "cross-undici-fetch": "0.4.3",
+    "@whatwg-node/fetch": "0.4.6",
     "@trpc/client": "9.23.2",
     "@sentry/node": "7.12.1",
     "@sentry/tracing": "7.12.1",

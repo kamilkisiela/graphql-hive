@@ -1,14 +1,23 @@
-import { Response, Request, Headers, ReadableStream } from 'cross-undici-fetch';
-import { webcrypto } from 'crypto';
+import { Response, Request, Headers, ReadableStream, crypto } from '@whatwg-node/fetch';
 
-globalThis.Response = Response;
-globalThis.Request = Request;
-globalThis.Headers = Headers;
-globalThis.ReadableStream = ReadableStream;
+if (!globalThis.Response) {
+  globalThis.Response = Response;
+}
+if (!globalThis.Request) {
+  globalThis.Request = Request;
+}
+if (!globalThis.Headers) {
+  globalThis.Headers = Headers;
+}
+if (!globalThis.ReadableStream) {
+  globalThis.ReadableStream = ReadableStream;
+}
+if (!globalThis.crypto) {
+  globalThis.crypto = crypto;
+}
 
 export const devStorage = new Map<string, string>();
 
 // eslint-disable-next-line no-process-env
 (globalThis as any).KEY_DATA = process.env.CDN_AUTH_PRIVATE_KEY || '';
 (globalThis as any).HIVE_DATA = devStorage;
-(globalThis as any).crypto = webcrypto as any;

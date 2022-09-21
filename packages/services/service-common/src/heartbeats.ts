@@ -1,4 +1,4 @@
-import { fetch } from 'cross-undici-fetch';
+import { fetch } from '@whatwg-node/fetch';
 import { invariant } from './helpers';
 
 type Heartbeats = () => void;

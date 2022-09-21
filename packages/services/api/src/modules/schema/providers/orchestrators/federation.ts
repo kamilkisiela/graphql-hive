@@ -7,7 +7,7 @@ import { SchemaBuildError } from './errors';
 import { SCHEMA_SERVICE_CONFIG } from './tokens';
 import type { SchemaServiceConfig } from './tokens';
 import { createTRPCClient } from '@trpc/client';
-import { fetch } from 'cross-undici-fetch';
+import { fetch } from '@whatwg-node/fetch';
 import type { SchemaBuilderApi } from '@hive/schema';
 
 type ExternalComposition = {

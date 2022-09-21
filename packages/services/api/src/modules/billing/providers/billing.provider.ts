@@ -4,7 +4,7 @@ import { BILLING_CONFIG } from './tokens';
 import type { BillingConfig } from './tokens';
 import type { StripeBillingApi, StripeBillingMutationInput, StripeBillingQueryInput } from '@hive/stripe-billing';
 import { createTRPCClient } from '@trpc/client';
-import { fetch } from 'cross-undici-fetch';
+import { fetch } from '@whatwg-node/fetch';
 import { OrganizationSelector } from '../../../__generated__/types';
 import { OrganizationBilling } from '../../../shared/entities';
 import { Storage } from '../../shared/providers/storage';

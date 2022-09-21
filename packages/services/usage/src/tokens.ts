@@ -3,7 +3,7 @@ import LRU from 'tiny-lru';
 
 import type { TokensApi } from '@hive/tokens';
 import { createTRPCClient } from '@trpc/client';
-import { fetch } from 'cross-undici-fetch';
+import { fetch } from '@whatwg-node/fetch';
 import { tokenCacheHits, tokenRequests } from './metrics';
 
 export enum TokenStatus {

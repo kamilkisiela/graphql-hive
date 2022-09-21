@@ -20,10 +20,10 @@ Hive Client comes with generic client and plugins for [Envelop](https://envelop.
 [GraphQL Yoga](https://www.the-guild.dev/graphql/yoga-server) is a cross-platform GraphQL sever built on top of the envelop engine.
 
 ```ts
-import { createYoga } from '@graphql-yoga/node'
+import { createServer } from '@graphql-yoga/node'
 import { useHive } from '@graphql-hive/client'
 
-const server = createYoga({
+const server = createServer({
   plugins: [
     useHive({
       enabled: true, // Enable/Disable Hive Client
@@ -219,10 +219,10 @@ The schema usage operation information can be enriched with meta information tha
 ### GraphQL Yoga Example
 
 ```ts
-import { createYoga } from '@graphql-yoga/node'
+import { createServer } from '@graphql-yoga/node'
 import { useHive } from '@graphql-hive/client'
 
-const server = createYoga({
+const server = createServer({
   plugins: [
     useHive({
       enabled: true, // Enable/Disable Hive Client

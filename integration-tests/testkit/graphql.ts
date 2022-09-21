@@ -1,6 +1,6 @@
 import * as utils from 'dockest/test-helper';
 import axios from 'axios';
-import type { ExecutionResult } from 'graphql';
+import { ExecutionResult, print } from 'graphql';
 import { TypedDocumentNode } from '@graphql-typed-document-node/core';
 
 const registryAddress = utils.getServiceAddress('server', 3001);
@@ -17,7 +17,7 @@ export async function execute<TResult, TVariables>(
   const res = await axios.post<ExecutionResult<TResult>>(
     `http://${registryAddress}/graphql`,
     {
-      query: params.document,
+      query: print(params.document),
       operationName: params.operationName,
       variables: params.variables,
     },

@@ -8,17 +8,9 @@ const TSCONFIG = resolve(ROOT_DIR, 'tsconfig.json');
 const tsconfig = JSON.parse(readFileSync(TSCONFIG, 'utf-8'));
 
 export default {
-  transform: { '^.+\\.tsx?$': 'ts-jest' },
   extensionsToTreatAsEsm: ['.ts', '.tsx'],
   testEnvironment: 'node',
   rootDir: ROOT_DIR,
-  globals: {
-    'ts-jest': {
-      diagnostics: false,
-      tsconfig: TSCONFIG,
-      useESM: true,
-    },
-  },
   restoreMocks: true,
   reporters: ['default'],
   modulePathIgnorePatterns: ['dist', 'integration-tests', 'tmp', 'target'],

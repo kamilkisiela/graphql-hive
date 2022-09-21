@@ -1,4 +1,4 @@
-import { fetch } from 'cross-undici-fetch';
+import { fetch } from '@whatwg-node/fetch';
 import type { FastifyLoggerInstance } from '@hive/service-common';
 import { createStorage as createPostgreSQLStorage } from '@hive/storage';
 
