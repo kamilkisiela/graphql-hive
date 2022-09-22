@@ -39,6 +39,7 @@ export function cache<R, A, K, V>(
       return {
         key,
         value: cachedValue,
+        cacheHit: true,
       };
     }
 
@@ -48,6 +49,7 @@ export function cache<R, A, K, V>(
     return {
       key,
       value,
+      cacheHit: false,
     };
   };
 }
