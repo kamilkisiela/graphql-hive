@@ -1,16 +1,16 @@
 import ThirdPartyEmailPasswordReact from 'supertokens-auth-react/recipe/thirdpartyemailpassword';
 import SessionReact from 'supertokens-auth-react/recipe/session';
 import Provider from 'supertokens-auth-react/lib/build/recipe/thirdparty/providers';
-
+import { env } from '@/env/frontend';
 import { appInfo } from './app-info';
 
 export const frontendConfig = () => {
   const providers: Array<Provider> = [];
 
-  if (globalThis['__ENV__']?.['AUTH_GITHUB'] === '1') {
+  if (env.auth.github === true) {
     providers.push(ThirdPartyEmailPasswordReact.Github.init());
   }
-  if (globalThis['__ENV__']?.['AUTH_GOOGLE'] === '1') {
+  if (env.auth.google === true) {
     providers.push(ThirdPartyEmailPasswordReact.Google.init());
   }
 

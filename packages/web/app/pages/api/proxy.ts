@@ -3,6 +3,7 @@ import { withSentry, captureException, startTransaction } from '@sentry/nextjs';
 import type { Transaction } from '@sentry/types';
 import hyperid from 'hyperid';
 import { extractAccessTokenFromRequest } from '@/lib/api/extract-access-token-from-request';
+import { env } from '@/env/backend';
 
 const reqIdGenerate = hyperid({ fixedLength: true });
 
@@ -33,7 +34,7 @@ function useTransaction(res: any) {
 }
 
 async function graphql(req: NextApiRequest, res: NextApiResponse) {
-  const url = process.env.GRAPHQL_ENDPOINT;
+  const url = env.graphqlEndpoint;
 
   const requestIdHeader = req.headers['x-request-id'];
   const requestId = Array.isArray(requestIdHeader) ? requestIdHeader[0] : requestIdHeader ?? reqIdGenerate();
@@ -50,7 +51,7 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
         'X-API-Token': req.headers['x-api-token'] ?? '',
         'graphql-client-name': 'Hive App',
         'x-use-proxy': '/api/proxy',
-        'graphql-client-version': process.env.RELEASE ?? 'local',
+        'graphql-client-version': env.release,
       },
       method: 'GET',
     } as any);
@@ -96,7 +97,7 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
         'X-API-Token': req.headers['x-api-token'] ?? '',
         'sentry-trace': transaction.toTraceparent(),
         'graphql-client-name': 'Hive App',
-        'graphql-client-version': process.env.RELEASE ?? 'local',
+        'graphql-client-version': env.release,
       },
       method: 'POST',
       body: JSON.stringify(req.body || {}),

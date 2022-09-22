@@ -14,9 +14,10 @@ import Session from 'supertokens-auth-react/recipe/session';
 import SuperTokens, { SuperTokensWrapper } from 'supertokens-auth-react';
 import { frontendConfig } from '@/config/frontend-config';
 import { configureScope } from '@sentry/nextjs';
-import { LAST_VISITED_ORG_KEY, GA_TRACKING_ID, CRISP_WEBSITE_ID } from '@/constants';
+import { LAST_VISITED_ORG_KEY } from '@/constants';
 import { Provider as UrqlProvider } from 'urql';
 import { urqlClient } from '@/lib/urql';
+import { env } from '@/env/frontend';
 
 const theme = extendTheme({ colors });
 
@@ -94,9 +95,12 @@ function App({ Component, pageProps }: AppProps): ReactElement {
   return (
     <>
       <GlobalStylesComponent />
-      {GA_TRACKING_ID && (
+      {env.analytics.googleAnalyticsTrackingId && (
         <>
-          <Script strategy="afterInteractive" src={`https://www.googletagmanager.com/gtag/js?id=${GA_TRACKING_ID}`} />
+          <Script
+            strategy="afterInteractive"
+            src={`https://www.googletagmanager.com/gtag/js?id=${env.analytics.googleAnalyticsTrackingId}`}
+          />
           <Script
             id="gtag-init"
             strategy="afterInteractive"
@@ -105,14 +109,14 @@ function App({ Component, pageProps }: AppProps): ReactElement {
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){dataLayer.push(arguments);}
                 gtag('js', new Date());
-                gtag('config', '${GA_TRACKING_ID}', {
+                gtag('config', '${env.analytics.googleAnalyticsTrackingId}', {
                   page_path: window.location.pathname,
                 });`,
             }}
           />
         </>
       )}
-      {CRISP_WEBSITE_ID && (
+      {env.analytics.crispWebsiteId && (
         <Script
           id="crisp-init"
           strategy="afterInteractive"
@@ -120,7 +124,7 @@ function App({ Component, pageProps }: AppProps): ReactElement {
             __html: `
               if (typeof window !== 'undefined') {
                 window.$crisp = [];
-                window.CRISP_WEBSITE_ID = '${CRISP_WEBSITE_ID}';
+                window.CRISP_WEBSITE_ID = '${env.analytics.crispWebsiteId}';
                 (function () {
                   d = document;
                   s = d.createElement('script');
