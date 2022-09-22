@@ -1,5 +1,11 @@
 # @graphql-hive/client
 
+## 0.18.4
+
+### Patch Changes
+
+- [#379](https://github.com/kamilkisiela/graphql-hive/pull/379) [`2e7c8f3`](https://github.com/kamilkisiela/graphql-hive/commit/2e7c8f3c94013f890f42ca1054287841478ba7a6) Thanks [@dimatill](https://github.com/dimatill)! - Collect input fields from variables (opt-in with `processVariables` flag)
+
 ## 0.18.3
 
 ### Patch Changes
