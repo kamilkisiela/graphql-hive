@@ -4,11 +4,14 @@ import {
   createServer,
   startMetrics,
   ensureEnv,
+  optionalEnv,
   registerShutdown,
   reportReadiness,
   startHeartbeats,
 } from '@hive/service-common';
 import { createIngestor } from './ingestor';
+import ms from 'ms';
+import bytes from 'bytes';
 
 async function main() {
   Sentry.init({
@@ -33,6 +36,8 @@ async function main() {
         port: ensureEnv('CLICKHOUSE_PORT', 'number'),
         username: ensureEnv('CLICKHOUSE_USERNAME'),
         password: ensureEnv('CLICKHOUSE_PASSWORD'),
+        wait_end_of_query: parseInt(optionalEnv('CLICKHOUSE_WAIT_END_OF_QUERY', '1'), 10) as 0 | 1,
+        wait_for_async_insert: parseInt(optionalEnv('CLICKHOUSE_WAIT_FOR_ASYNC_INSERT', '0'), 10) as 0 | 1,
       },
       clickhouseCloud: process.env.CLICKHOUSE_CLOUD_HOST
         ? {
@@ -41,8 +46,14 @@ async function main() {
             port: ensureEnv('CLICKHOUSE_CLOUD_PORT', 'number'),
             username: ensureEnv('CLICKHOUSE_CLOUD_USERNAME'),
             password: ensureEnv('CLICKHOUSE_CLOUD_PASSWORD'),
+            wait_end_of_query: parseInt(optionalEnv('CLICKHOUSE_WAIT_END_OF_QUERY', '1'), 10) as 0 | 1,
+            wait_for_async_insert: parseInt(optionalEnv('CLICKHOUSE_WAIT_FOR_ASYNC_INSERT', '0'), 10) as 0 | 1,
           }
         : null,
+      batching: {
+        intervalInMS: ms(ensureEnv('BATCHING_INTERVAL')),
+        limitInBytes: bytes(ensureEnv('BATCHING_SIZE_LIMIT')),
+      },
       kafka: {
         topic: ensureEnv('KAFKA_TOPIC'),
         consumerGroup: ensureEnv('KAFKA_CONSUMER_GROUP'),

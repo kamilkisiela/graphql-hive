@@ -12,12 +12,6 @@ export async function resetClickHouse() {
     'operations_daily',
     'coordinates_daily',
     'clients_daily',
-    // legacy
-    `operations_registry`,
-    `operations_new_hourly_mv`,
-    `operations_new`,
-    `schema_coordinates_daily`,
-    `client_names_daily`,
   ].map(table => `TRUNCATE TABLE default.${table}`);
 
   for await (const query of queries) {

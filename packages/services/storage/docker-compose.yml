@@ -38,7 +38,7 @@ services:
       - './volumes/redis/db:/bitnami/redis/data'
 
   clickhouse:
-    image: clickhouse/clickhouse-server:22.3.5.5-alpine
+    image: clickhouse/clickhouse-server:22.9.1-alpine
     environment:
       CLICKHOUSE_USER: test
       CLICKHOUSE_PASSWORD: test

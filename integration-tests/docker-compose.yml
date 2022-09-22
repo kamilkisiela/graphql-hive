@@ -18,7 +18,7 @@ services:
       - 'stack'
 
   clickhouse:
-    image: clickhouse/clickhouse-server:22.6.1-alpine
+    image: clickhouse/clickhouse-server:22.9.1-alpine
     volumes:
       - ../packages/services/storage/configs/clickhouse:/etc/clickhouse-server/conf.d
     healthcheck:
@@ -249,7 +249,6 @@ services:
       FEEDBACK_SLACK_CHANNEL: '#hive'
       WEB_APP_URL: https://app.graphql-hive.com
       PORT: 3001
-      FF_CLICKHOUSE_V2_TABLES: ${FF_CLICKHOUSE_V2_TABLES}
       SUPERTOKENS_CONNECTION_URI: http://supertokens:3567
       SUPERTOKENS_API_KEY: bubatzbieber6942096420
 
@@ -373,6 +372,8 @@ services:
       CLICKHOUSE_PORT: 8123
       CLICKHOUSE_USERNAME: test
       CLICKHOUSE_PASSWORD: test
+      BATCHING_INTERVAL: 1s
+      BATCHING_SIZE_LIMIT: 2mb
       PORT: 3007
 
   usage-estimator:
@@ -396,7 +397,6 @@ services:
       CLICKHOUSE_USERNAME: 'test'
       CLICKHOUSE_PASSWORD: 'test'
       PORT: 3008
-      FF_CLICKHOUSE_V2_TABLES: ${FF_CLICKHOUSE_V2_TABLES}
 
   rate-limit:
     image: '${DOCKER_REGISTRY}rate-limit${DOCKER_TAG}'

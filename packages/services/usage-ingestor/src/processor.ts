@@ -4,12 +4,7 @@ import LRU from 'tiny-lru';
 import { createHash } from 'crypto';
 import { cache } from './helpers';
 import { reportSize, totalOperations, reportMessageSize, normalizeCacheMisses, schemaCoordinatesSize } from './metrics';
-import {
-  stringifyOperation,
-  stringifyRegistryRecord,
-  stringifyLegacyOperation,
-  stringifyLegacyRegistryRecord,
-} from './serializer';
+import { stringifyOperation, stringifyRegistryRecord } from './serializer';
 
 import type { FastifyLoggerInstance } from '@hive/service-common';
 import type {
@@ -54,10 +49,6 @@ export function createProcessor(config: { logger: FastifyLoggerInstance }) {
       const serializedOperations: string[] = [];
       const serializedRegistryRecords: string[] = [];
 
-      // legacy
-      const serializedLegacyOperations: string[] = [];
-      const serializedLegacyRegistryRecords: string[] = [];
-
       for (const rawReport of rawReports) {
         reportSize.observe(rawReport.size);
 
@@ -74,11 +65,6 @@ export function createProcessor(config: { logger: FastifyLoggerInstance }) {
 
           serializedOperations.push(stringifyOperation(processedOperation));
 
-          // legacy
-          serializedLegacyOperations.push(
-            stringifyLegacyOperation(processedOperation, processedOperation.legacy.coordinates)
-          );
-
           const sample = operationSample.get(rawOperation.operationMapKey);
 
           // count operations per operationMapKey
@@ -87,17 +73,6 @@ export function createProcessor(config: { logger: FastifyLoggerInstance }) {
               operation: rawOperation,
               size: 1,
             });
-            // legacy
-            serializedLegacyRegistryRecords.push(
-              stringifyLegacyRegistryRecord({
-                target: processedOperation.target,
-                hash: processedOperation.operationHash,
-                name: processedOperation.legacy.name,
-                body: processedOperation.legacy.body,
-                operation_kind: processedOperation.legacy.kind,
-                timestamp: processedOperation.timestamp,
-              })
-            );
           } else {
             sample.size += 1;
           }
@@ -137,10 +112,6 @@ export function createProcessor(config: { logger: FastifyLoggerInstance }) {
       return {
         operations: serializedOperations,
         registryRecords: serializedRegistryRecords,
-        legacy: {
-          operations: serializedLegacyOperations,
-          registryRecords: serializedLegacyRegistryRecords,
-        },
       };
     },
   };

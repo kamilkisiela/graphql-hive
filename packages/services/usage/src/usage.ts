@@ -169,7 +169,7 @@ export function createUsage(config: {
       const numOfOperations = reports.reduce((sum, report) => report.size + sum, 0);
       try {
         const compressLatencyStop = compressLatency.startTimer();
-        const value = await compress(JSON.stringify(reports)).finally(() => {
+        const value = await compress(Buffer.from(JSON.stringify(reports))).finally(() => {
           compressLatencyStop();
         });
         const stopTimer = kafkaLatency.startTimer();

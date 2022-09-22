@@ -1,5 +1,5 @@
 import { Injectable } from 'graphql-modules';
-import { format, addMinutes, subDays, isAfter } from 'date-fns';
+import { format, addMinutes, subDays } from 'date-fns';
 import type { Span } from '@sentry/types';
 import { batch } from '@theguild/buddy';
 import { ClickHouse, RowOf } from './clickhouse-client';
@@ -50,27 +50,6 @@ function ensureNumber(value: number | string): number {
   }
 
   return parseFloat(value);
-}
-
-const FF_CLICKHOUSE_V2_TABLES = process.env.FF_CLICKHOUSE_V2_TABLES === '1';
-
-if (FF_CLICKHOUSE_V2_TABLES) {
-  console.log('Using FF_CLICKHOUSE_V2_TABLES');
-}
-
-// Remove after legacy tables are no longer used
-function canUseV2(period?: DateRange): boolean {
-  if (FF_CLICKHOUSE_V2_TABLES) {
-    return true;
-  }
-
-  if (!period) {
-    return false;
-  }
-
-  // 25.08.2022 - data starts to flow into the new tables
-  // We can gradually switch to the new tables
-  return isAfter(period.from, new Date(2022, 7, 25));
 }
 
 function pickQueryByPeriod(
@@ -128,26 +107,6 @@ function pickQueryByPeriod(
   return queryMap.regular;
 }
 
-// Remove after legacy tables are no longer used
-function canUseHourlyAggTable({ period, resolution }: { period?: DateRange; resolution?: number }): boolean {
-  if (period) {
-    const distance = period.to.getTime() - period.from.getTime();
-    const distanceInHours = distance / 1000 / 60 / 60;
-
-    // We can't show data in 90 time-windows from past 24 hours (based on hourly table)
-    if (resolution && distanceInHours < resolution) {
-      return false;
-    }
-
-    // We can't show data from less past n minutes based on hourly table if the range is less than 1 hours
-    if (distanceInHours < 1) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
 @Injectable({
   global: true,
 })
@@ -196,17 +155,11 @@ export class OperationsReader {
     },
     span?: Span
   ): Promise<Record<string, number>> {
-    const { clientTableName, coordinatesTableName, queryId } = canUseV2(period)
-      ? {
-          clientTableName: 'clients_daily',
-          coordinatesTableName: 'coordinates_daily',
-          queryId: 'count_fields_v2',
-        }
-      : {
-          clientTableName: 'client_names_daily',
-          coordinatesTableName: 'schema_coordinates_daily',
-          queryId: 'count_fields_v2',
-        };
+    const { clientTableName, coordinatesTableName, queryId } = {
+      clientTableName: 'clients_daily',
+      coordinatesTableName: 'coordinates_daily',
+      queryId: 'count_fields_v2',
+    };
 
     const coordinates = fields.map(selector => this.makeId(selector));
     const conditions = [`( coordinate IN ('${coordinates.join(`', '`)}') )`];
@@ -231,18 +184,18 @@ export class OperationsReader {
       coordinate: string;
     }>({
       query: `
-            SELECT
-              coordinate,
-              sum(total) as total
-            FROM ${coordinatesTableName}
-            ${this.createFilter({
-              target,
-              period,
-              operations,
-              extra: conditions,
-            })}
-            GROUP BY coordinate
-          `,
+        SELECT
+          coordinate,
+          sum(total) as total
+        FROM ${coordinatesTableName}
+        ${this.createFilter({
+          target,
+          period,
+          operations,
+          extra: conditions,
+        })}
+        GROUP BY coordinate
+      `,
       queryId: queryId,
       timeout: 30_000,
       span,
@@ -281,67 +234,42 @@ export class OperationsReader {
     ok: number;
     notOk: number;
   }> {
-    const query = canUseV2(period)
-      ? pickQueryByPeriod(
-          {
-            daily: {
-              query: `SELECT sum(total) as total, sum(total_ok) as totalOk FROM operations_daily ${this.createFilter({
-                target,
-                period,
-                operations,
-              })}`,
-              queryId: 'count_operations_daily',
-              timeout: 10_000,
-              span,
-            },
-            hourly: {
-              query: `SELECT sum(total) as total, sum(total_ok) as totalOk FROM operations_hourly ${this.createFilter({
-                target,
-                period,
-                operations,
-              })}`,
-              queryId: 'count_operations_hourly',
-              timeout: 15_000,
-              span,
-            },
-            regular: {
-              query: `SELECT count() as total, sum(ok) as totalOk FROM operations ${this.createFilter({
-                target,
-                period,
-                operations,
-              })}
-  `,
-              queryId: 'count_operations_regular',
-              timeout: 30_000,
-              span,
-            },
-          },
-          period ?? null
-        )
-      : canUseHourlyAggTable({ period })
-      ? {
-          query: `SELECT sum(total) as total, sum(total_ok) as totalOk FROM operations_new_hourly_mv ${this.createFilter(
-            {
-              target,
-              period,
-              operations,
-            }
-          )}`,
-          queryId: 'count_operations_mv',
+    const query = pickQueryByPeriod(
+      {
+        daily: {
+          query: `SELECT sum(total) as total, sum(total_ok) as totalOk FROM operations_daily ${this.createFilter({
+            target,
+            period,
+            operations,
+          })}`,
+          queryId: 'count_operations_daily',
+          timeout: 10_000,
+          span,
+        },
+        hourly: {
+          query: `SELECT sum(total) as total, sum(total_ok) as totalOk FROM operations_hourly ${this.createFilter({
+            target,
+            period,
+            operations,
+          })}`,
+          queryId: 'count_operations_hourly',
           timeout: 15_000,
           span,
-        }
-      : {
-          query: `SELECT count() as total, sum(ok) as totalOk FROM operations_new ${this.createFilter({
+        },
+        regular: {
+          query: `SELECT count() as total, sum(ok) as totalOk FROM operations ${this.createFilter({
             target,
             period,
             operations,
           })}
-  `,
-          queryId: 'count_operations',
+`,
+          queryId: 'count_operations_regular',
           timeout: 30_000,
           span,
-        };
+        },
+      },
+      period ?? null
+    );
 
     const result = await this.clickHouse.query<{
       total: number;
@@ -395,113 +323,56 @@ export class OperationsReader {
     }>
   > {
     const query = pickQueryByPeriod(
-      canUseV2(period)
-        ? {
-            daily: {
-              query: `
-                SELECT sum(total) as total, sum(total_ok) as totalOk, hash 
-                FROM operations_daily
-                ${this.createFilter({
-                  target,
-                  period,
-                  operations,
-                })}
-                GROUP BY hash
-              `,
-              queryId: 'count_unique_documents_daily',
-              timeout: 10_000,
-              span,
-            },
-            hourly: {
-              query: `
-                SELECT 
-                  sum(total) as total,
-                  sum(total_ok) as totalOk,
-                  hash
-                FROM operations_hourly
-                ${this.createFilter({
-                  target,
-                  period,
-                  operations,
-                })}
-                GROUP BY hash
-              `,
-              queryId: 'count_unique_documents_hourly',
-              timeout: 15_000,
-              span,
-            },
-            regular: {
-              query: `
-                SELECT count() as total, sum(ok) as totalOk, hash
-                FROM operations
-                ${this.createFilter({
-                  target,
-                  period,
-                  operations,
-                })}
-                GROUP BY hash
-              `,
-              queryId: 'count_unique_documents',
-              timeout: 15_000,
-              span,
-            },
-          }
-        : {
-            daily: {
-              query: `
-                SELECT 
-                  sum(total) as total,
-                  sum(total_ok) as totalOk,
-                  hash
-                FROM operations_new_hourly_mv
-                ${this.createFilter({
-                  target,
-                  period,
-                  operations,
-                })}
-                GROUP BY hash
-              `,
-              queryId: 'count_unique_documents_mv',
-              timeout: 15_000,
-              span,
-            },
-            hourly: {
-              query: `
-                SELECT 
-                  sum(total) as total,
-                  sum(total_ok) as totalOk,
-                  hash
-                FROM operations_new_hourly_mv
-                ${this.createFilter({
-                  target,
-                  period,
-                  operations,
-                })}
-                GROUP BY hash
-              `,
-              queryId: 'count_unique_documents_mv',
-              timeout: 15_000,
-              span,
-            },
-            regular: {
-              query: `
-                SELECT 
-                  count() as total,
-                  sum(ok) as totalOk,
-                  hash
-                FROM operations_new
-                ${this.createFilter({
-                  target,
-                  period,
-                  operations,
-                })}
-                GROUP BY hash
-              `,
-              queryId: 'count_unique_documents',
-              timeout: 15_000,
-              span,
-            },
-          },
+      {
+        daily: {
+          query: `
+            SELECT sum(total) as total, sum(total_ok) as totalOk, hash 
+            FROM operations_daily
+            ${this.createFilter({
+              target,
+              period,
+              operations,
+            })}
+            GROUP BY hash
+          `,
+          queryId: 'count_unique_documents_daily',
+          timeout: 10_000,
+          span,
+        },
+        hourly: {
+          query: `
+            SELECT 
+              sum(total) as total,
+              sum(total_ok) as totalOk,
+              hash
+            FROM operations_hourly
+            ${this.createFilter({
+              target,
+              period,
+              operations,
+            })}
+            GROUP BY hash
+          `,
+          queryId: 'count_unique_documents_hourly',
+          timeout: 15_000,
+          span,
+        },
+        regular: {
+          query: `
+            SELECT count() as total, sum(ok) as totalOk, hash
+            FROM operations
+            ${this.createFilter({
+              target,
+              period,
+              operations,
+            })}
+            GROUP BY hash
+          `,
+          queryId: 'count_unique_documents',
+          timeout: 15_000,
+          span,
+        },
+      },
       period
     );
 
@@ -517,43 +388,24 @@ export class OperationsReader {
       body: string;
       hash: string;
       operation_kind: string;
-    }>(
-      canUseV2(period)
-        ? {
-            query: `
-            SELECT 
-              name,
-              body,
-              hash,
-              operation_kind
-            FROM operation_collection
-              ${this.createFilter({
-                target,
-                operations,
-              })}
-            GROUP BY name, body, hash, operation_kind`,
-            queryId: 'operations_registry',
-            timeout: 15_000,
-            span,
-          }
-        : {
-            query: `
-            SELECT 
-              name,
-              body,
-              hash,
-              operation as operation_kind
-            FROM operations_registry FINAL
-              ${this.createFilter({
-                target,
-                operations,
-              })}
-            GROUP BY name, body, hash, operation`,
-            queryId: 'operations_registry',
-            timeout: 15_000,
-            span,
-          }
-    );
+    }>({
+      query: `
+        SELECT 
+          name,
+          body,
+          hash,
+          operation_kind
+        FROM operation_collection
+          ${this.createFilter({
+            target,
+            operations,
+          })}
+        GROUP BY name, body, hash, operation_kind
+      `,
+      queryId: 'operations_registry',
+      timeout: 15_000,
+      span,
+    });
 
     const operationsMap = new Map<string, RowOf<typeof registryResult>>();
 
@@ -612,73 +464,15 @@ export class OperationsReader {
       client_name: string;
       client_version: string;
     }>(
-      canUseV2(period)
-        ? pickQueryByPeriod(
-            {
-              daily: {
-                query: `
-                  SELECT 
-                    sum(total) as total,
-                    client_name,
-                    client_version
-                  FROM clients_daily
-                  ${this.createFilter({
-                    target,
-                    period,
-                    operations,
-                  })}
-                  GROUP BY client_name, client_version
-                `,
-                queryId: 'count_clients',
-                timeout: 10_000,
-                span,
-              },
-              hourly: {
-                query: `
-                  SELECT 
-                    count(*) as total,
-                    client_name,
-                    client_version
-                  FROM operations
-                  ${this.createFilter({
-                    target,
-                    period,
-                    operations,
-                  })}
-                  GROUP BY client_name, client_version
-                `,
-                queryId: 'count_clients',
-                timeout: 10_000,
-                span,
-              },
-              regular: {
-                query: `
-                  SELECT 
-                    count(*) as total,
-                    client_name,
-                    client_version
-                  FROM operations
-                  ${this.createFilter({
-                    target,
-                    period,
-                    operations,
-                  })}
-                  GROUP BY client_name, client_version
-                `,
-                queryId: 'count_clients',
-                timeout: 10_000,
-                span,
-              },
-            },
-            period
-          )
-        : {
+      pickQueryByPeriod(
+        {
+          daily: {
             query: `
               SELECT 
-                COUNT(*) as total,
+                sum(total) as total,
                 client_name,
                 client_version
-              FROM operations_new
+              FROM clients_daily
               ${this.createFilter({
                 target,
                 period,
@@ -686,10 +480,49 @@ export class OperationsReader {
               })}
               GROUP BY client_name, client_version
             `,
-            queryId: 'count_unique_clients',
-            timeout: 15_000,
+            queryId: 'count_clients',
+            timeout: 10_000,
             span,
-          }
+          },
+          hourly: {
+            query: `
+              SELECT 
+                count(*) as total,
+                client_name,
+                client_version
+              FROM operations
+              ${this.createFilter({
+                target,
+                period,
+                operations,
+              })}
+              GROUP BY client_name, client_version
+            `,
+            queryId: 'count_clients',
+            timeout: 10_000,
+            span,
+          },
+          regular: {
+            query: `
+              SELECT 
+                count(*) as total,
+                client_name,
+                client_version
+              FROM operations
+              ${this.createFilter({
+                target,
+                period,
+                operations,
+              })}
+              GROUP BY client_name, client_version
+            `,
+            queryId: 'count_clients',
+            timeout: 10_000,
+            span,
+          },
+        },
+        period
+      )
     );
 
     const total = result.data.reduce((sum, row) => sum + parseInt(row.total, 10), 0);
@@ -762,45 +595,24 @@ export class OperationsReader {
     const result = await this.clickHouse.query<{
       count: string;
       client_name: string;
-    }>(
-      canUseV2(period)
-        ? {
-            query: `
-              SELECT 
-                sum(total) as count,
-                client_name
-              FROM clients_daily
-              ${this.createFilter({
-                target,
-                period,
-                operations,
-                extra: ['notEmpty(client_name)'],
-              })}
-              GROUP BY client_name
-            `,
-            queryId: 'count_client_names',
-            timeout: 10_000,
-            span,
-          }
-        : {
-            query: `
-              SELECT 
-                sum(total) as count,
-                client_name
-              FROM client_names_daily
-              ${this.createFilter({
-                target,
-                period,
-                operations,
-                extra: ['notEmpty(client_name)'],
-              })}
-              GROUP BY client_name
-            `,
-            queryId: 'count_unique_client_names',
-            timeout: 15_000,
-            span,
-          }
-    );
+    }>({
+      query: `
+        SELECT 
+          sum(total) as count,
+          client_name
+        FROM clients_daily
+        ${this.createFilter({
+          target,
+          period,
+          operations,
+          extra: ['notEmpty(client_name)'],
+        })}
+        GROUP BY client_name
+      `,
+      queryId: 'count_client_names',
+      timeout: 10_000,
+      span,
+    });
 
     return result.data.map(row => {
       return {
@@ -915,7 +727,7 @@ export class OperationsReader {
         FROM
         (
             SELECT log10(duration) as logDuration
-            FROM operations_new
+            FROM operations
             ${this.createFilter({ target, period, operations })}
         )
         ORDER BY latency
@@ -949,68 +761,44 @@ export class OperationsReader {
     const result = await this.clickHouse.query<{
       percentiles: [number, number, number, number];
     }>(
-      canUseV2(period)
-        ? pickQueryByPeriod(
-            {
-              daily: {
-                query: `
+      pickQueryByPeriod(
+        {
+          daily: {
+            query: `
               SELECT 
                 quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles
               FROM operations_daily
               ${this.createFilter({ target, period, operations })}
             `,
-                queryId: 'general_duration_percentiles_daily',
-                timeout: 15_000,
-                span,
-              },
-              hourly: {
-                query: `
+            queryId: 'general_duration_percentiles_daily',
+            timeout: 15_000,
+            span,
+          },
+          hourly: {
+            query: `
               SELECT 
                 quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles
               FROM operations_hourly
               ${this.createFilter({ target, period, operations })}
             `,
-                queryId: 'general_duration_percentiles_hourly',
-                timeout: 15_000,
-                span,
-              },
-              regular: {
-                query: `
+            queryId: 'general_duration_percentiles_hourly',
+            timeout: 15_000,
+            span,
+          },
+          regular: {
+            query: `
               SELECT 
                 quantiles(0.75, 0.90, 0.95, 0.99)(duration) as percentiles
               FROM operations
               ${this.createFilter({ target, period, operations })}
             `,
-                queryId: 'general_duration_percentiles_regular',
-                timeout: 15_000,
-                span,
-              },
-            },
-            period
-          )
-        : canUseHourlyAggTable({ period })
-        ? {
-            query: `
-              SELECT 
-                quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles
-              FROM operations_new_hourly_mv
-              ${this.createFilter({ target, period, operations })}
-            `,
-            queryId: 'general_duration_percentiles_mv',
+            queryId: 'general_duration_percentiles_regular',
             timeout: 15_000,
             span,
-          }
-        : {
-            query: `
-              SELECT 
-                quantiles(0.75, 0.90, 0.95, 0.99)(duration) as percentiles
-              FROM operations_new
-              ${this.createFilter({ target, period, operations })}
-            `,
-            queryId: 'general_duration_percentiles',
-            timeout: 15_000,
-            span,
-          }
+          },
+        },
+        period
+      )
     );
 
     return toESPercentiles(result.data[0].percentiles);
@@ -1033,78 +821,50 @@ export class OperationsReader {
       hash: string;
       percentiles: [number, number, number, number];
     }>(
-      canUseV2(period)
-        ? pickQueryByPeriod(
-            {
-              daily: {
-                query: `
-                  SELECT 
-                    hash,
-                    quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles
-                  FROM operations_daily
-                  ${this.createFilter({ target, period, operations })}
-                  GROUP BY hash
-                `,
-                queryId: 'duration_percentiles_daily',
-                timeout: 15_000,
-                span,
-              },
-              hourly: {
-                query: `
-                  SELECT 
-                    hash,
-                    quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles
-                  FROM operations_hourly
-                  ${this.createFilter({ target, period, operations })}
-                  GROUP BY hash
-                `,
-                queryId: 'duration_percentiles_hourly',
-                timeout: 15_000,
-                span,
-              },
-              regular: {
-                query: `
-                  SELECT 
-                    hash,
-                    quantiles(0.75, 0.90, 0.95, 0.99)(duration) as percentiles
-                  FROM operations
-                  ${this.createFilter({ target, period, operations })}
-                  GROUP BY hash
-                `,
-                queryId: 'duration_percentiles_regular',
-                timeout: 15_000,
-                span,
-              },
-            },
-            period
-          )
-        : canUseHourlyAggTable({ period })
-        ? {
+      pickQueryByPeriod(
+        {
+          daily: {
             query: `
               SELECT 
                 hash,
                 quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles
-              FROM operations_new_hourly_mv
+              FROM operations_daily
               ${this.createFilter({ target, period, operations })}
               GROUP BY hash
             `,
-            queryId: 'duration_percentiles_mv',
+            queryId: 'duration_percentiles_daily',
             timeout: 15_000,
             span,
-          }
-        : {
+          },
+          hourly: {
+            query: `
+              SELECT 
+                hash,
+                quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles
+              FROM operations_hourly
+              ${this.createFilter({ target, period, operations })}
+              GROUP BY hash
+            `,
+            queryId: 'duration_percentiles_hourly',
+            timeout: 15_000,
+            span,
+          },
+          regular: {
             query: `
               SELECT 
                 hash,
                 quantiles(0.75, 0.90, 0.95, 0.99)(duration) as percentiles
-              FROM operations_new
+              FROM operations
               ${this.createFilter({ target, period, operations })}
               GROUP BY hash
             `,
-            queryId: 'duration_percentiles',
+            queryId: 'duration_percentiles_regular',
             timeout: 15_000,
             span,
-          }
+          },
+        },
+        period
+      )
     );
 
     const collection = new Map<string, ESPercentiles>();
@@ -1119,25 +879,14 @@ export class OperationsReader {
   async getClientNames({ target, period }: { target: string; period: DateRange }): Promise<string[]> {
     const result = await this.clickHouse.query<{
       client_name: string;
-    }>(
-      canUseV2(period)
-        ? {
-            queryId: 'client_names_per_target_v2',
-            query: `SELECT client_name FROM clients_daily ${this.createFilter({
-              target,
-              period,
-            })} GROUP BY client_name`,
-            timeout: 10_000,
-          }
-        : {
-            queryId: 'client_names_per_target',
-            query: `SELECT client_name FROM client_names_daily ${this.createFilter({
-              target,
-              period,
-            })} GROUP BY client_name`,
-            timeout: 10_000,
-          }
-    );
+    }>({
+      queryId: 'client_names_per_target_v2',
+      query: `SELECT client_name FROM clients_daily ${this.createFilter({
+        target,
+        period,
+      })} GROUP BY client_name`,
+      timeout: 10_000,
+    });
 
     return result.data.map(row => row.client_name);
   }
@@ -1164,124 +913,78 @@ export class OperationsReader {
       totalOk: number;
       percentiles: [number, number, number, number];
     }>(
-      canUseV2(period)
-        ? pickQueryByPeriod(
-            {
-              daily: {
-                query: `
-                  SELECT 
-                    multiply(
-                      toUnixTimestamp(
-                        toStartOfInterval(timestamp, INTERVAL ${this.clickHouse.translateWindow(
-                          calculateTimeWindow({ period, resolution })
-                        )}, 'UTC'),
-                      'UTC'),
-                    1000) as date,
-                    quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles,
-                    sum(total) as total,
-                    sum(total_ok) as totalOk
-                  FROM operations_daily
-                  ${this.createFilter({ target, period, operations })}
-                  GROUP BY date
-                  ORDER BY date
-                `,
-                queryId: 'duration_and_count_over_time_daily',
-                timeout: 15_000,
-                span,
-              },
-              hourly: {
-                query: `
-                  SELECT 
-                    multiply(
-                      toUnixTimestamp(
-                        toStartOfInterval(timestamp, INTERVAL ${this.clickHouse.translateWindow(
-                          calculateTimeWindow({ period, resolution })
-                        )}, 'UTC'),
-                      'UTC'),
-                    1000) as date,
-                    quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles,
-                    sum(total) as total,
-                    sum(total_ok) as totalOk
-                  FROM operations_hourly
-                  ${this.createFilter({ target, period, operations })}
-                  GROUP BY date
-                  ORDER BY date
-                `,
-                queryId: 'duration_and_count_over_time_hourly',
-                timeout: 15_000,
-                span,
-              },
-              regular: {
-                query: `
-                  SELECT 
-                    multiply(
-                      toUnixTimestamp(
-                        toStartOfInterval(timestamp, INTERVAL ${this.clickHouse.translateWindow(
-                          calculateTimeWindow({ period, resolution })
-                        )}, 'UTC'),
-                      'UTC'),
-                    1000) as date,
-                    quantiles(0.75, 0.90, 0.95, 0.99)(duration) as percentiles,
-                    count(*) as total,
-                    sum(ok) as totalOk
-                  FROM operations
-                  ${this.createFilter({ target, period, operations })}
-                  GROUP BY date
-                  ORDER BY date
-                `,
-                queryId: 'duration_and_count_over_time_regular',
-                timeout: 15_000,
-                span,
-              },
-            },
-            period,
-            resolution
-          )
-        : canUseHourlyAggTable({ period, resolution })
-        ? {
+      pickQueryByPeriod(
+        {
+          daily: {
             query: `
-          SELECT 
-            multiply(
-              toUnixTimestamp(
-                toStartOfInterval(timestamp, INTERVAL ${this.clickHouse.translateWindow(
-                  calculateTimeWindow({ period, resolution })
-                )}, 'UTC'),
-              'UTC'),
-            1000) as date,
-            quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles,
-            sum(total) as total,
-            sum(total_ok) as totalOk
-          FROM operations_new_hourly_mv
-          ${this.createFilter({ target, period, operations })}
-          GROUP BY date
-          ORDER BY date
-      `,
-            queryId: 'duration_and_count_over_time_mv',
+              SELECT 
+                multiply(
+                  toUnixTimestamp(
+                    toStartOfInterval(timestamp, INTERVAL ${this.clickHouse.translateWindow(
+                      calculateTimeWindow({ period, resolution })
+                    )}, 'UTC'),
+                  'UTC'),
+                1000) as date,
+                quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles,
+                sum(total) as total,
+                sum(total_ok) as totalOk
+              FROM operations_daily
+              ${this.createFilter({ target, period, operations })}
+              GROUP BY date
+              ORDER BY date
+            `,
+            queryId: 'duration_and_count_over_time_daily',
             timeout: 15_000,
             span,
-          }
-        : {
+          },
+          hourly: {
             query: `
-          SELECT 
-            multiply(
-              toUnixTimestamp(
-                toStartOfInterval(timestamp, INTERVAL ${this.clickHouse.translateWindow(
-                  calculateTimeWindow({ period, resolution })
-                )}, 'UTC'),
-              'UTC'),
-            1000) as date,
-            quantiles(0.75, 0.90, 0.95, 0.99)(duration) as percentiles,
-            count(*) as total,
-            sum(ok) as totalOk
-          FROM operations_new
-          ${this.createFilter({ target, period, operations })}
-          GROUP BY date
-          ORDER BY date
-    `,
-            queryId: 'duration_and_count_over_time',
+              SELECT 
+                multiply(
+                  toUnixTimestamp(
+                    toStartOfInterval(timestamp, INTERVAL ${this.clickHouse.translateWindow(
+                      calculateTimeWindow({ period, resolution })
+                    )}, 'UTC'),
+                  'UTC'),
+                1000) as date,
+                quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles,
+                sum(total) as total,
+                sum(total_ok) as totalOk
+              FROM operations_hourly
+              ${this.createFilter({ target, period, operations })}
+              GROUP BY date
+              ORDER BY date
+            `,
+            queryId: 'duration_and_count_over_time_hourly',
             timeout: 15_000,
             span,
-          }
+          },
+          regular: {
+            query: `
+              SELECT 
+                multiply(
+                  toUnixTimestamp(
+                    toStartOfInterval(timestamp, INTERVAL ${this.clickHouse.translateWindow(
+                      calculateTimeWindow({ period, resolution })
+                    )}, 'UTC'),
+                  'UTC'),
+                1000) as date,
+                quantiles(0.75, 0.90, 0.95, 0.99)(duration) as percentiles,
+                count(*) as total,
+                sum(ok) as totalOk
+              FROM operations
+              ${this.createFilter({ target, period, operations })}
+              GROUP BY date
+              ORDER BY date
+            `,
+            queryId: 'duration_and_count_over_time_regular',
+            timeout: 15_000,
+            span,
+          },
+        },
+        period,
+        resolution
+      )
     );
 
     return result.data.map(row => {
@@ -1298,8 +1001,7 @@ export class OperationsReader {
     const result = await this.clickHouse.query<{
       total: string;
     }>({
-      // TODO: use the operations_daily table once the FF_CLICKHOUSE_V2_TABLES is available for everyone
-      query: `SELECT sum(total) as total from operations_hourly WHERE target IN ('${targets.join(`', '`)}')`,
+      query: `SELECT sum(total) as total from operations_daily WHERE target IN ('${targets.join(`', '`)}')`,
       queryId: 'count_operations_for_targets',
       timeout: 15_000,
     });
@@ -1409,10 +1111,8 @@ export class OperationsReader {
     const result = await this.clickHouse.query<{
       coordinate: string;
       total: number;
-    }>(
-      canUseV2(period)
-        ? {
-            query: `
+    }>({
+      query: `
               SELECT coordinate, sum(total) as total FROM coordinates_daily
               ${this.createFilter({
                 target,
@@ -1420,22 +1120,9 @@ export class OperationsReader {
                 extra: [`(${typesFilter})`],
               })}
               GROUP BY coordinate`,
-            queryId: 'coordinates_per_types',
-            timeout: 15_000,
-          }
-        : {
-            query: `
-              SELECT coordinate, sum(total) as total FROM schema_coordinates_daily
-              ${this.createFilter({
-                target,
-                period,
-                extra: [`(${typesFilter})`],
-              })}
-              GROUP BY coordinate`,
-            queryId: 'coordinates_per_types',
-            timeout: 15_000,
-          }
-    );
+      queryId: 'coordinates_per_types',
+      timeout: 15_000,
+    });
 
     return result.data.map(row => ({
       coordinate: row.coordinate,
@@ -1447,10 +1134,8 @@ export class OperationsReader {
     const result = await this.clickHouse.query<{
       coordinate: string;
       total: number;
-    }>(
-      canUseV2(period)
-        ? {
-            query: `
+    }>({
+      query: `
               SELECT coordinate, sum(total) as total FROM coordinates_daily
               ${this.createFilter({
                 target,
@@ -1458,22 +1143,9 @@ export class OperationsReader {
               })}
               GROUP BY coordinate
             `,
-            queryId: 'coordinates_per_target',
-            timeout: 15_000,
-          }
-        : {
-            query: `
-              SELECT coordinate, sum(total) as total FROM schema_coordinates_daily
-              ${this.createFilter({
-                target,
-                period,
-              })}
-              GROUP BY coordinate
-            `,
-            queryId: 'coordinates_per_target',
-            timeout: 15_000,
-          }
-    );
+      queryId: 'coordinates_per_target',
+      timeout: 15_000,
+    });
 
     return result.data.map(row => ({
       coordinate: row.coordinate,
@@ -1485,22 +1157,11 @@ export class OperationsReader {
     const result = await this.clickHouse.query<{
       total: string;
       target: string;
-    }>(
-      canUseV2({
-        from: subDays(new Date(), daysLimit),
-        to: new Date(),
-      })
-        ? {
-            query: `SELECT sum(total) as total, target from operations_daily WHERE timestamp >= subtractDays(NOW(), ${daysLimit}) GROUP BY target`,
-            queryId: 'admin_operations_per_target',
-            timeout: 15_000,
-          }
-        : {
-            query: `SELECT sum(total) as total, target from operations_new_hourly_mv WHERE timestamp >= subtractDays(NOW(), ${daysLimit}) GROUP BY target`,
-            queryId: 'admin_operations_per_target',
-            timeout: 15_000,
-          }
-    );
+    }>({
+      query: `SELECT sum(total) as total, target from operations_daily WHERE timestamp >= subtractDays(NOW(), ${daysLimit}) GROUP BY target`,
+      queryId: 'admin_operations_per_target',
+      timeout: 15_000,
+    });
 
     return result.data.map(row => ({
       total: ensureNumber(row.total),
@@ -1517,56 +1178,28 @@ export class OperationsReader {
     const result = await this.clickHouse.query<{
       date: number;
       total: string;
-    }>(
-      canUseV2(period)
-        ? {
-            query: `
-              SELECT 
-                multiply(
-                  toUnixTimestamp(
-                    toStartOfInterval(timestamp, INTERVAL ${this.clickHouse.translateWindow(
-                      calculateTimeWindow({
-                        period,
-                        resolution,
-                      })
-                    )}, 'UTC'),
-                  'UTC'),
-                1000) as date,
-                sum(total) as total
-              FROM ${daysLimit > 1 && daysLimit >= resolution ? 'operations_daily' : 'operations_hourly'}
-              WHERE timestamp >= subtractDays(NOW(), ${daysLimit})
-              GROUP BY date
-              ORDER BY date
-            `,
-            queryId: 'admin_operations_per_target',
-            timeout: 15_000,
-          }
-        : {
-            query: `
-              SELECT 
-                multiply(
-                  toUnixTimestamp(
-                    toStartOfInterval(timestamp, INTERVAL ${this.clickHouse.translateWindow(
-                      calculateTimeWindow({
-                        period: {
-                          from: subDays(new Date(), daysLimit),
-                          to: new Date(),
-                        },
-                        resolution,
-                      })
-                    )}, 'UTC'),
-                  'UTC'),
-                1000) as date,
-                sum(total) as total
-              FROM operations_new_hourly_mv
-              WHERE timestamp >= subtractDays(NOW(), ${daysLimit})
-              GROUP BY date
-              ORDER BY date
-            `,
-            queryId: 'admin_operations_per_target',
-            timeout: 15_000,
-          }
-    );
+    }>({
+      query: `
+        SELECT 
+          multiply(
+            toUnixTimestamp(
+              toStartOfInterval(timestamp, INTERVAL ${this.clickHouse.translateWindow(
+                calculateTimeWindow({
+                  period,
+                  resolution,
+                })
+              )}, 'UTC'),
+            'UTC'),
+          1000) as date,
+          sum(total) as total
+        FROM ${daysLimit > 1 && daysLimit >= resolution ? 'operations_daily' : 'operations_hourly'}
+        WHERE timestamp >= subtractDays(NOW(), ${daysLimit})
+        GROUP BY date
+        ORDER BY date
+      `,
+      queryId: 'admin_operations_per_target',
+      timeout: 15_000,
+    });
 
     return result.data.map(row => ({
       date: ensureNumber(row.date) as any,

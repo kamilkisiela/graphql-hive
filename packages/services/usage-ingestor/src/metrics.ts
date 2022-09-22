@@ -17,7 +17,37 @@ export const totalOperations = new metrics.Counter({
 
 export const processTime = new metrics.Summary({
   name: 'usage_ingestor_process_time',
-  help: 'Time spent processing and writing reports',
+  help: 'Time spent processing and serializing reports',
+});
+
+export const writeTime = new metrics.Summary({
+  name: 'usage_ingestor_write_time',
+  help: 'Time spent writing reports',
+  labelNames: ['table'],
+});
+
+export const flushes = new metrics.Counter({
+  name: 'usage_ingestor_flushes',
+  help: 'Number of flushes',
+  labelNames: ['reason'],
+});
+
+export const flushSize = new metrics.Summary({
+  name: 'usage_ingestor_flush_bytes',
+  help: 'Size (in bytes) of a flush',
+  labelNames: ['reason'],
+});
+
+export const flushOperationsSize = new metrics.Summary({
+  name: 'usage_ingestor_flush_operations_size',
+  help: 'Size of flushed rows to operations table',
+  labelNames: ['reason'],
+});
+
+export const flushOperationCollectionSize = new metrics.Summary({
+  name: 'usage_ingestor_flush_operation_collection_size',
+  help: 'Size of flushed rows to operation_collection table',
+  labelNames: ['reason'],
 });
 
 export const errors = new metrics.Counter({

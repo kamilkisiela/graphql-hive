@@ -2,7 +2,6 @@ import LRU from 'tiny-lru';
 import { cache } from './helpers';
 import type { ProcessedRegistryRecord, ProcessedOperation } from '@hive/usage-common';
 
-const delimiter = '\n';
 const formatter = Intl.DateTimeFormat('en-GB', {
   year: 'numeric',
   month: '2-digit',
@@ -39,36 +38,21 @@ export const operationsOrder = [
   'client_version',
 ] as const;
 
-export const legacyOperationsOrder = [
-  'target',
-  'timestamp',
-  'expires_at',
-  'hash',
-  'ok',
-  'errors',
-  'duration',
-  'schema',
-  'client_name',
-  'client_version',
-] as const;
+export const operationsFields = Buffer.from(operationsOrder.map(field => `"${field}"`).join(','));
 
 export const registryOrder = [
-  'total',
   'target',
   'hash',
   'name',
   'body',
   'operation_kind',
   'coordinates',
+  'total',
   'timestamp',
   'expires_at',
 ] as const;
 
-export const legacyRegistryOrder = ['target', 'hash', 'name', 'body', 'operation', 'inserted_at'] as const;
-
-export function joinIntoSingleMessage(items: string[]): string {
-  return items.join(delimiter);
-}
+export const registryFields = Buffer.from(registryOrder.map(field => `"${field}"`).join(','));
 
 type KeysOfArray<T extends readonly any[]> = T extends readonly (infer U)[] ? U : never;
 
@@ -88,48 +72,17 @@ export function stringifyOperation(operation: ProcessedOperation): string {
   return Object.values(mapper).join(',');
 }
 
-export function stringifyLegacyOperation(operation: ProcessedOperation, coordinates: string[]): string {
-  const mapper: Record<KeysOfArray<typeof legacyOperationsOrder>, any> = {
-    target: castValue(operation.target),
-    timestamp: castDate(operation.timestamp),
-    expires_at: castDate(operation.expiresAt),
-    hash: castValue(operation.operationHash),
-    ok: castValue(operation.execution.ok),
-    errors: castValue(operation.execution.errorsTotal),
-    duration: castValue(operation.execution.duration),
-    schema: castValue(coordinates),
-    client_name: castValue(operation.metadata?.client?.name),
-    client_version: castValue(operation.metadata?.client?.version),
-  };
-  return Object.values(mapper).join(',');
-}
-
 export function stringifyRegistryRecord(record: ProcessedRegistryRecord): string {
   const mapper: Record<KeysOfArray<typeof registryOrder>, any> = {
-    total: castValue(record.size),
     target: castValue(record.target),
     hash: castValue(record.hash),
     name: castValue(record.name),
     body: castValue(record.body),
     operation_kind: castValue(record.operation_kind),
     coordinates: castValue(record.coordinates),
+    total: castValue(record.size),
     timestamp: castDate(record.timestamp),
     expires_at: castDate(record.expires_at),
-  };
-
-  return Object.values(mapper).join(',');
-}
-
-export function stringifyLegacyRegistryRecord(
-  record: Pick<ProcessedRegistryRecord, 'body' | 'hash' | 'timestamp' | 'name' | 'operation_kind' | 'target'>
-): string {
-  const mapper: Record<KeysOfArray<typeof legacyRegistryOrder>, any> = {
-    target: castValue(record.target),
-    hash: castValue(record.hash),
-    name: castValue(record.name),
-    body: castValue(record.body),
-    operation: castValue(record.operation_kind),
-    inserted_at: castDate(record.timestamp),
   };
 
   return Object.values(mapper).join(',');
@@ -167,5 +120,4 @@ function castValue(value?: any) {
   }
 
   return '\\N'; // NULL is \N
-  // Yes, it's ᴺᵁᴸᴸ not NULL :) This is what JSONStringsEachRow does for NULLs
 }

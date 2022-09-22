@@ -48,13 +48,13 @@ export function createEstimator(config: {
         target: string;
       }>({
         query: `
-      SELECT
-        target,
-        sum(total) as total
-      FROM operations_new_hourly_mv
-       ${filter}
-      GROUP BY target
-    `,
+          SELECT
+            target,
+            sum(total) as total
+          FROM operations_daily
+          ${filter}
+          GROUP BY target
+        `,
         queryId: 'usage_estimator_count_operations_all',
         timeout: 60_000,
       });
@@ -74,7 +74,7 @@ export function createEstimator(config: {
         query: `
       SELECT 
         sum(total) as total
-      FROM operations_new_hourly_mv
+      FROM operations_daily
       ${filter}
     `,
         queryId: 'usage_estimator_count_operations',

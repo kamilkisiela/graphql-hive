@@ -1,19 +1,13 @@
 import { Kafka, KafkaMessage, logLevel } from 'kafkajs';
+import { createClient } from '@clickhouse/client';
 import { decompress } from '@hive/usage-common';
-import {
-  errors,
-  processTime,
-  reportMessageBytes,
-  ingestedOperationsWrites,
-  ingestedOperationsFailures,
-  ingestedOperationRegistryWrites,
-  ingestedOperationRegistryFailures,
-} from './metrics';
+import { errors, processTime, reportMessageBytes } from './metrics';
 import { ClickHouseConfig, createWriter } from './writer';
 import { createProcessor } from './processor';
 
 import type { FastifyLoggerInstance } from '@hive/service-common';
 import type { RawReport } from '@hive/usage-common';
+import { createBatcher } from './batcher';
 
 enum Status {
   Waiting,
@@ -30,16 +24,14 @@ const levelMap = {
   [logLevel.DEBUG]: 'debug',
 } as const;
 
-const retryOnFailureSymbol = Symbol.for('retry-on-failure');
-
-function shouldRetryOnFailure(error: any) {
-  return error[retryOnFailureSymbol] === true;
-}
-
 export function createIngestor(config: {
   logger: FastifyLoggerInstance;
   clickhouse: ClickHouseConfig;
   clickhouseCloud: ClickHouseConfig | null;
+  batching: {
+    intervalInMS: number;
+    limitInBytes: number;
+  };
   kafka: {
     topic: string;
     consumerGroup: string;
@@ -98,17 +90,6 @@ export function createIngestor(config: {
     metadataMaxAge: 180_000,
   });
 
-  async function stop() {
-    logger.info('Started Usage Ingestor shutdown...');
-
-    status = Status.Stopped;
-    await consumer.disconnect();
-    writer.destroy();
-    logger.info(`Consumer disconnected`);
-
-    logger.info('Usage Ingestor stopped');
-  }
-
   consumer.on('consumer.stop', async () => {
     logger.warn('Consumer stopped');
   });
@@ -128,10 +109,84 @@ export function createIngestor(config: {
     logger.warn('Consumer disconnected');
   });
 
+  const client = createClient({
+    host: `${config.clickhouse.protocol ?? 'https'}://${config.clickhouse.host}:${config.clickhouse.port}`,
+    connect_timeout: 10_000,
+    request_timeout: 60_000,
+    max_open_connections: 10,
+
+    compression: {
+      response: false,
+      request: true,
+    },
+
+    username: config.clickhouse.username,
+    password: config.clickhouse.password,
+
+    application: 'usage-ingestor',
+    clickhouse_settings: {
+      wait_end_of_query: config.clickhouse.wait_end_of_query,
+      wait_for_async_insert: config.clickhouse.wait_for_async_insert,
+    },
+  });
+
+  const cloudClient = config.clickhouseCloud
+    ? createClient({
+        host: `${config.clickhouseCloud.protocol ?? 'https'}://${config.clickhouseCloud.host}:${
+          config.clickhouseCloud.port
+        }`,
+        connect_timeout: 10_000,
+        request_timeout: 60_000,
+        max_open_connections: 10,
+
+        compression: {
+          response: false,
+          request: true,
+        },
+
+        username: config.clickhouseCloud.username,
+        password: config.clickhouseCloud.password,
+
+        application: 'usage-ingestor',
+        clickhouse_settings: {
+          wait_end_of_query: config.clickhouseCloud.wait_end_of_query,
+          wait_for_async_insert: config.clickhouseCloud.wait_for_async_insert,
+        },
+      })
+    : null;
+
+  const processor = createProcessor({ logger });
+  const writer = createWriter({
+    clickhouse: client,
+    clickhouseCloud: cloudClient,
+    logger,
+  });
+  const batcher = createBatcher({
+    logger,
+    writer,
+    intervalInMS: config.batching.intervalInMS,
+    limitInBytes: config.batching.limitInBytes,
+  });
+
+  async function stop() {
+    logger.info('Started Usage Ingestor shutdown...');
+
+    status = Status.Stopped;
+    await consumer.disconnect();
+    await batcher.stop();
+    logger.info('Closing ClickHouse clients...');
+    await Promise.all([client.close(), cloudClient?.close()]);
+    logger.info(`Consumer disconnected`);
+
+    logger.info('Usage Ingestor stopped');
+  }
+
   async function start() {
     logger.info('Starting Usage Ingestor...');
 
     status = Status.Waiting;
+
+    batcher.start();
 
     logger.info('Connecting Kafka Consumer');
     await consumer.connect();
@@ -154,7 +209,7 @@ export function createIngestor(config: {
           message,
           logger,
           processor,
-          writer,
+          batcher,
         })
           .catch(error => {
             errors.inc();
@@ -169,13 +224,6 @@ export function createIngestor(config: {
     status = Status.Ready;
   }
 
-  const processor = createProcessor({ logger });
-  const writer = createWriter({
-    clickhouse: config.clickhouse,
-    clickhouseCloud: config.clickhouseCloud,
-    logger,
-  });
-
   let status: Status = Status.Waiting;
 
   return {
@@ -189,12 +237,12 @@ export function createIngestor(config: {
 
 async function processMessage({
   processor,
-  writer,
+  batcher,
   message,
   logger,
 }: {
   processor: ReturnType<typeof createProcessor>;
-  writer: ReturnType<typeof createWriter>;
+  batcher: ReturnType<typeof createBatcher>;
   message: KafkaMessage;
   logger: FastifyLoggerInstance;
 }) {
@@ -202,45 +250,14 @@ async function processMessage({
   // Decompress and parse the message to get a list of reports
   const rawReports: RawReport[] = JSON.parse((await decompress(message.value!)).toString());
 
-  const { operations, registryRecords, legacy } = await processor.processReports(rawReports);
+  const { operations, registryRecords } = await processor.processReports(rawReports);
 
   try {
-    // .then and .catch looks weird but async/await with try/catch and Promise.all is even weirder
-    await Promise.all([
-      writer
-        .writeRegistry(registryRecords)
-        .then(value => {
-          ingestedOperationRegistryWrites.inc(registryRecords.length);
-          return Promise.resolve(value);
-        })
-        .catch(error => {
-          ingestedOperationRegistryFailures.inc(registryRecords.length);
-          return Promise.reject(error);
-        }),
-      writer
-        .writeOperations(operations)
-        .then(value => {
-          ingestedOperationsWrites.inc(operations.length);
-          return Promise.resolve(value);
-        })
-        .catch(error => {
-          ingestedOperationsFailures.inc(operations.length);
-          // We want to retry the kafka message only if the write to operations_new table fails.
-          // Why? Because if we retry the message for operation_registry, we will have duplicate.
-          // One write could succeed, the other one could fail.
-          // Let's stick to the operations_new table for now.
-          error[retryOnFailureSymbol] = true;
-          return Promise.reject(error);
-        }),
-      // legacy
-      writer.legacy.writeRegistry(legacy.registryRecords),
-      writer.legacy.writeOperations(legacy.operations),
-    ]);
+    batcher.add({
+      operations,
+      operation_collection: registryRecords,
+    });
   } catch (error) {
     logger.error(error);
-
-    if (shouldRetryOnFailure(error)) {
-      throw error;
-    }
   }
 }
