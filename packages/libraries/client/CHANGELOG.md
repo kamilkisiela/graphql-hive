@@ -1,5 +1,11 @@
 # @graphql-hive/client
 
+## 0.18.5
+
+### Patch Changes
+
+- [#399](https://github.com/kamilkisiela/graphql-hive/pull/399) [`bd6e500`](https://github.com/kamilkisiela/graphql-hive/commit/bd6e500532ed4878a069883fadeaf3bb00e38aeb) Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Fix the wrong cacheKey from #397
+
 ## 0.18.4
 
 ### Patch Changes
