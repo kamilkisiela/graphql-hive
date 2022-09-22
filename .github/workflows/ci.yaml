@@ -390,6 +390,12 @@ jobs:
       - name: Setup Turbo
         run: node ./scripts/turborepo-setup.js
 
+      - name: Generate Types
+        run: yarn graphql:generate
+
+      - name: Build
+        run: yarn build
+
       - name: Build
         run: yarn workspace integration-tests run build-and-pack
 
@@ -417,7 +423,8 @@ jobs:
         run: |
           docker buildx bake \
             -f docker.hcl \
-            build
+            build \
+            --load
 
       - name: Integration Tests
         run: yarn workspace integration-tests run dockest
@@ -482,6 +489,12 @@ jobs:
         if: steps.feature_flags.outputs.detected == 'true'
         run: node ./scripts/turborepo-setup.js
 
+      - name: Generate Types
+        run: yarn graphql:generate
+
+      - name: Build
+        run: yarn build
+
       - name: Build
         if: steps.feature_flags.outputs.detected == 'true'
         run: yarn workspace integration-tests run build-and-pack
@@ -510,7 +523,8 @@ jobs:
         run: |
           docker buildx bake \
             -f docker.hcl \
-            build
+            build \
+            --load
 
       - name: Integration Tests
         if: steps.feature_flags.outputs.detected == 'true'
