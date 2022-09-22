@@ -2,9 +2,10 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { buildSchema, execute, GraphQLError, parse } from 'graphql';
 import { addMocksToSchema } from '@graphql-tools/mock';
 import { extractAccessTokenFromRequest } from '@/lib/api/extract-access-token-from-request';
+import { env } from '@/env/backend';
 
 async function lab(req: NextApiRequest, res: NextApiResponse) {
-  const url = process.env.GRAPHQL_ENDPOINT;
+  const url = env.graphqlEndpoint;
   const labParams = req.query.lab || [];
 
   if (labParams.length < 3) {
