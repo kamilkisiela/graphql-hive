@@ -18,13 +18,14 @@ variable "BRANCH_NAME" {
   default = ""
 }
 
-variable "CI" {
+variable "BUILD_TYPE" {
+  # Can be "", "ci" or "publish"
   default = ""
 }
 
-function "dev_or_prod" {
+function "get_target" {
   params = []
-  result = notequal("", CI) ? "target-prod" : "target-dev"
+  result = notequal("", BUILD_TYPE) ? notequal("ci", BUILD_TYPE) ? "target-publish" : "target-ci" : "target-dev"
 }
 
 function "image_tag" {
@@ -48,14 +49,19 @@ target "app-base" {
 
 target "target-dev" {}
 
-target "target-prod" {
+target "target-ci" {
+  cache-from = ["type=gha"]
+  cache-to = ["type=gha,mode=max"]
+}
+
+target "target-publish" {
   platforms = ["linux/amd64", "linux/arm64"]
   cache-from = ["type=gha"]
   cache-to = ["type=gha,mode=max"]
 }
 
 target "emails" {
-  inherits = ["service-base", dev_or_prod()]
+  inherits = ["service-base", get_target()]
   context = "${PWD}/packages/services/emails/dist"
   args = {
     IMAGE_TITLE = "graphql-hive/emails"
@@ -69,7 +75,7 @@ target "emails" {
 }
 
 target "rate-limit" {
-  inherits = ["service-base", dev_or_prod()]
+  inherits = ["service-base", get_target()]
   context = "${PWD}/packages/services/rate-limit/dist"
   args = {
     IMAGE_TITLE = "graphql-hive/rate-limit"
@@ -83,7 +89,7 @@ target "rate-limit" {
 }
 
 target "schema" {
-  inherits = ["service-base", dev_or_prod()]
+  inherits = ["service-base", get_target()]
   context = "${PWD}/packages/services/schema/dist"
   args = {
     IMAGE_TITLE = "graphql-hive/rate-limit"
@@ -97,7 +103,7 @@ target "schema" {
 }
 
 target "server" {
-  inherits = ["service-base", dev_or_prod()]
+  inherits = ["service-base", get_target()]
   context = "${PWD}/packages/services/server/dist"
   args = {
     IMAGE_TITLE = "graphql-hive/server"
@@ -111,7 +117,7 @@ target "server" {
 }
 
 target "storage" {
-  inherits = ["service-base", dev_or_prod()]
+  inherits = ["service-base", get_target()]
   context = "${PWD}/packages/services/storage/dist"
   args = {
     IMAGE_TITLE = "graphql-hive/storage"
@@ -124,7 +130,7 @@ target "storage" {
 }
 
 target "stripe-billing" {
-  inherits = ["service-base", dev_or_prod()]
+  inherits = ["service-base", get_target()]
   context = "${PWD}/packages/services/stripe-billing/dist"
   args = {
     IMAGE_TITLE = "graphql-hive/stripe-billing"
@@ -138,7 +144,7 @@ target "stripe-billing" {
 }
 
 target "tokens" {
-  inherits = ["service-base", dev_or_prod()]
+  inherits = ["service-base", get_target()]
   context = "${PWD}/packages/services/tokens/dist"
   args = {
     IMAGE_TITLE = "graphql-hive/tokens"
@@ -152,7 +158,7 @@ target "tokens" {
 }
 
 target "usage-estimator" {
-  inherits = ["service-base", dev_or_prod()]
+  inherits = ["service-base", get_target()]
   context = "${PWD}/packages/services/usage-estimator/dist"
   args = {
     IMAGE_TITLE = "graphql-hive/usage-estimator"
@@ -166,7 +172,7 @@ target "usage-estimator" {
 }
 
 target "usage-ingestor" {
-  inherits = ["service-base", dev_or_prod()]
+  inherits = ["service-base", get_target()]
   context = "${PWD}/packages/services/usage-ingestor/dist"
   args = {
     IMAGE_TITLE = "graphql-hive/usage-ingestor"
@@ -180,7 +186,7 @@ target "usage-ingestor" {
 }
 
 target "usage" {
-  inherits = ["service-base", dev_or_prod()]
+  inherits = ["service-base", get_target()]
   context = "${PWD}/packages/services/usage/dist"
   args = {
     IMAGE_TITLE = "graphql-hive/usage"
@@ -194,7 +200,7 @@ target "usage" {
 }
 
 target "webhooks" {
-  inherits = ["service-base", dev_or_prod()]
+  inherits = ["service-base", get_target()]
   context = "${PWD}/packages/services/webhooks/dist"
   args = {
     IMAGE_TITLE = "graphql-hive/webhooks"
@@ -208,7 +214,7 @@ target "webhooks" {
 }
 
 target "app" {
-  inherits = ["app-base", dev_or_prod()]
+  inherits = ["app-base", get_target()]
   context = "${PWD}/packages/web/app/dist"
   args = {
     IMAGE_TITLE = "graphql-hive/app"
