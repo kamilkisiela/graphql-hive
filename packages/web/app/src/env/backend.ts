@@ -4,7 +4,7 @@
 export const env = globalThis['__backend_env'] ?? noop();
 
 /**
- * Next.js is so kind and tires to pre-render our page without the environment information being available... :)
+ * Next.js is so kind and tries to pre-render our page without the environment information being available... :)
  * Non of our pages can actually be pre-rendered without first running the backend as it requires the runtime environment variables.
  * So we just return a noop. :)
  */
