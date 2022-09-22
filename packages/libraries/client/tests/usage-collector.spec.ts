@@ -239,6 +239,75 @@ test('collect all input fields when `processVariables` has not been passed and i
   expect(info.fields).toContain(`PaginationInput.offset`);
 });
 
+test('should get a cache hit when document is the same but variables are different (by default)', async () => {
+  const collect = createCollector({
+    schema,
+    max: 1,
+  });
+  const doc = parse(/* GraphQL */ `
+    query getProjects($pagination: PaginationInput!, $type: ProjectType!) {
+      projects(filter: { pagination: $pagination, type: $type }) {
+        id
+      }
+    }
+  `);
+  const first = collect(doc, {
+    pagination: {
+      limit: 1,
+    },
+    type: 'STITCHING',
+  });
+
+  const second = collect(doc, {
+    pagination: {
+      offset: 2,
+    },
+    type: 'STITCHING',
+  });
+
+  expect(first.cacheHit).toBe(false);
+  expect(second.cacheHit).toBe(true);
+});
+
+test('(processVariables: true) should get a cache miss when document is the same but variables are different', async () => {
+  const collect = createCollector({
+    schema,
+    max: 1,
+    processVariables: true,
+  });
+  const doc = parse(/* GraphQL */ `
+    query getProjects($pagination: PaginationInput!, $type: ProjectType!) {
+      projects(filter: { pagination: $pagination, type: $type }) {
+        id
+      }
+    }
+  `);
+  const first = collect(doc, {
+    pagination: {
+      limit: 1,
+    },
+    type: 'STITCHING',
+  });
+
+  const second = collect(doc, {
+    pagination: {
+      offset: 2,
+    },
+    type: 'STITCHING',
+  });
+
+  const third = collect(doc, {
+    pagination: {
+      offset: 2,
+    },
+    type: 'STITCHING',
+  });
+
+  expect(first.cacheHit).toBe(false);
+  expect(second.cacheHit).toBe(false);
+  expect(third.cacheHit).toBe(true);
+});
+
 test('(processVariables: true) collect used-only input fields', async () => {
   const collect = createCollector({
     schema,
