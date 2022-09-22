@@ -400,7 +400,6 @@ jobs:
         run: yarn workspace integration-tests run build-and-pack
 
       - name: Pull images
-        if: steps.feature_flags.outputs.detected == 'true'
         run: |
           docker-compose -f integration-tests/docker-compose.yml pull \
             db \
