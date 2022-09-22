@@ -66,7 +66,7 @@ export interface HiveUsagePluginOptions {
    */
   sampleRate?: number;
   /**
-   * Enables collecting Input fields usage based on the variables passed to the operation.
+   * (Experimental) Enables collecting Input fields usage based on the variables passed to the operation.
    *
    * Default: false
    */

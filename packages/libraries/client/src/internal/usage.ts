@@ -158,7 +158,7 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
               ttl: options.ttl,
               processVariables: options.processVariables ?? false,
             });
-            const { key, value: info } = collect(document, args.variableValues);
+            const { key, value: info } = collect(document, args.variableValues ?? null);
 
             agent.capture({
               key,
@@ -196,7 +196,7 @@ export function createCollector({
   schema,
   max,
   ttl,
-  processVariables,
+  processVariables = false,
 }: {
   schema: GraphQLSchema;
   max?: number;
@@ -205,9 +205,15 @@ export function createCollector({
 }) {
   const typeInfo = new TypeInfo(schema);
 
-  function collect(doc: DocumentNode, variables: ExecutionArgs['variableValues']): CacheResult {
+  function collect(
+    doc: DocumentNode,
+    variables: {
+      [key: string]: unknown;
+    } | null
+  ): CacheResult {
     const entries = new Set<string>();
     const collected_entire_named_types = new Set<string>();
+    const shouldAnalyzeVariableValues = processVariables === true && variables !== null;
 
     function markAsUsed(id: string) {
       if (!entries.has(id)) {
@@ -249,11 +255,16 @@ export function createCollector({
       if (node.value.kind === Kind.ENUM) {
         // Collect only a specific enum value
         collectInputType(inputTypeName, node.value.value);
-      } else if (
-        node.value.kind !== Kind.OBJECT &&
-        node.value.kind !== Kind.LIST &&
-        node.value.kind !== Kind.VARIABLE
-      ) {
+      } else if (node.value.kind !== Kind.OBJECT && node.value.kind !== Kind.LIST) {
+        // When processing of variables is enabled,
+        // we want to skip collecting full input types of variables
+        // and only collect specific fields.
+        // That's why the following condition is added.
+        // Otherwise we would mark entire input types as used, and not granular fields.
+        if (node.value.kind === Kind.VARIABLE && shouldAnalyzeVariableValues) {
+          return;
+        }
+
         collectInputType(inputTypeName);
       }
     }
@@ -326,13 +337,17 @@ export function createCollector({
         },
         VariableDefinition(node) {
           const inputType = typeInfo.getInputType()!;
-          if (!variables) {
-            collectInputType(resolveTypeName(inputType));
-          } else {
+
+          if (shouldAnalyzeVariableValues) {
+            // Granular collection of variable values is enabled
             const variableName = node.variable.name.value;
             const variableValue = variables[variableName];
             const namedType = unwrapType(inputType);
+
             collectVariable(namedType, variableValue);
+          } else {
+            // Collect the entire type without processing the variables
+            collectInputType(resolveTypeName(inputType));
           }
         },
         Argument(node) {
@@ -386,12 +401,7 @@ export function createCollector({
     };
   }
 
-  return cache(
-    (doc: DocumentNode, variables: ExecutionArgs['variableValues']) =>
-      collect(doc, processVariables ? variables : undefined),
-    cacheDocumentKey,
-    LRU<CacheResult>(max, ttl)
-  );
+  return cache(collect, cacheDocumentKey, LRU<CacheResult>(max, ttl));
 }
 
 function resolveTypeName(inputType: GraphQLType): string {

@@ -239,7 +239,7 @@ test('collect all input fields when `processVariables` has not been passed and i
   expect(info.fields).toContain(`PaginationInput.offset`);
 });
 
-test('collect used-only input fields if input is passed as a variable', async () => {
+test('(processVariables: true) collect used-only input fields', async () => {
   const collect = createCollector({
     schema,
     max: 1,
@@ -267,7 +267,7 @@ test('collect used-only input fields if input is passed as a variable', async ()
   expect(info.fields).not.toContain(`PaginationInput.offset`);
 });
 
-test('collect used-only input fields if input array is passed as a variable', async () => {
+test('(processVariables: true) collect used-only input type fields from an array', async () => {
   const collect = createCollector({
     schema,
     max: 1,
