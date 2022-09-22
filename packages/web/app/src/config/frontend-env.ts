@@ -11,21 +11,21 @@ import { env as backendEnv } from '@/env/backend';
  * It is because Next.js tries to prerender the page lol and during that time we don't have the environment variables. :)
  */
 export const env = {
-  appBaseUrl: backendEnv?.appBaseUrl,
-  docsUrl: backendEnv?.docsUrl,
+  appBaseUrl: backendEnv.appBaseUrl,
+  docsUrl: backendEnv.docsUrl,
   stripePublicKey: backendEnv?.stripePublicKey,
   auth: {
-    github: !!backendEnv?.auth.github,
-    google: !!backendEnv?.auth.google,
+    github: !!backendEnv.auth.github,
+    google: !!backendEnv.auth.google,
   },
   analytics: {
     googleAnalyticsTrackingId: backendEnv?.analytics.googleAnalyticsTrackingId,
     crispWebsiteId: backendEnv?.analytics.crispWebsiteId,
   },
-  sentry: backendEnv?.sentry,
-  release: backendEnv?.release,
-  environment: backendEnv?.environment,
-  nodeEnv: backendEnv?.nodeEnv,
+  sentry: backendEnv.sentry,
+  release: backendEnv.release,
+  environment: backendEnv.environment,
+  nodeEnv: backendEnv.nodeEnv,
 } as const;
 
 declare global {
