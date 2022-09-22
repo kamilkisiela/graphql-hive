@@ -116,6 +116,52 @@ services:
       POSTGRESQL_PORT: 5432
       API_KEYS: bubatzbieber6942096420
 
+  local_cdn:
+    image: node:16.13.2-alpine3.14
+    entrypoint:
+      - '/bin/sh'
+      - '/run-local-cdn.sh'
+    networks:
+      - 'stack'
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'localhost:3004/_readiness']
+      interval: 5s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
+    ports:
+      - 3004:3004
+    volumes:
+      - '../packages/services/cdn-worker/dist/dev.js:/cdn.js'
+      - './run-local-cdn.sh:/run-local-cdn.sh'
+    environment:
+      NODE_ENV: production
+      PORT: 3004
+      CDN_AUTH_PRIVATE_KEY: 1e1064ef9cda8bf38936b77317e90dc3
+
+  external_composition:
+    image: node:16.13.2-alpine3.14
+    entrypoint:
+      - '/bin/sh'
+      - '/run-external-composition.sh'
+    networks:
+      - 'stack'
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'localhost:3012/_readiness']
+      interval: 5s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
+    ports:
+      - 3012:3012
+    volumes:
+      - '../packages/libraries/external-composition/dist/example.mjs:/example.mjs'
+      - './run-external-composition.sh:/run-external-composition.sh'
+    environment:
+      NODE_ENV: production
+      PORT: 3012
+      SECRET: secretsecret
+
   storage:
     image: '${DOCKER_REGISTRY}storage${DOCKER_TAG}'
     networks:
@@ -242,52 +288,6 @@ services:
       POSTGRES_DB: registry
       ROARR_LOG: 'true'
       PORT: 3003
-
-  local_cdn:
-    image: node:16.13.2-alpine3.14
-    entrypoint:
-      - '/bin/sh'
-      - '/run-local-cdn.sh'
-    networks:
-      - 'stack'
-    healthcheck:
-      test: ['CMD', 'wget', '--spider', '-q', 'localhost:3004/_readiness']
-      interval: 5s
-      timeout: 5s
-      retries: 6
-      start_period: 5s
-    ports:
-      - 3004:3004
-    volumes:
-      - '../packages/services/cdn-worker/dist/dev.js:/cdn.js'
-      - './run-local-cdn.sh:/run-local-cdn.sh'
-    environment:
-      NODE_ENV: production
-      PORT: 3004
-      CDN_AUTH_PRIVATE_KEY: 1e1064ef9cda8bf38936b77317e90dc3
-
-  external_composition:
-    image: node:16.13.2-alpine3.14
-    entrypoint:
-      - '/bin/sh'
-      - '/run-external-composition.sh'
-    networks:
-      - 'stack'
-    healthcheck:
-      test: ['CMD', 'wget', '--spider', '-q', 'localhost:3012/_readiness']
-      interval: 5s
-      timeout: 5s
-      retries: 6
-      start_period: 5s
-    ports:
-      - 3012:3012
-    volumes:
-      - '../packages/libraries/external-composition/dist/example.mjs:/example.mjs'
-      - './run-external-composition.sh:/run-external-composition.sh'
-    environment:
-      NODE_ENV: production
-      PORT: 3012
-      SECRET: secretsecret
 
   webhooks:
     image: '${DOCKER_REGISTRY}webhooks${DOCKER_TAG}'
