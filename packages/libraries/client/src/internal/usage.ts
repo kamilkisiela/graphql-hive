@@ -12,6 +12,7 @@ import {
   GraphQLType,
   GraphQLUnionType,
   isEnumType,
+  isInputObjectType,
   isListType,
   isNonNullType,
   isScalarType,
@@ -155,8 +156,9 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
               schema: args.schema,
               max: options.max ?? 1000,
               ttl: options.ttl,
+              processVariables: options.processVariables ?? false,
             });
-            const { key, value: info } = collect(document);
+            const { key, value: info } = collect(document, args.variableValues);
 
             agent.capture({
               key,
@@ -190,10 +192,20 @@ interface CacheResult {
   fields: string[];
 }
 
-export function createCollector({ schema, max, ttl }: { schema: GraphQLSchema; max?: number; ttl?: number }) {
+export function createCollector({
+  schema,
+  max,
+  ttl,
+  processVariables,
+}: {
+  schema: GraphQLSchema;
+  max?: number;
+  ttl?: number;
+  processVariables?: boolean;
+}) {
   const typeInfo = new TypeInfo(schema);
 
-  function collect(doc: DocumentNode): CacheResult {
+  function collect(doc: DocumentNode, variables: ExecutionArgs['variableValues']): CacheResult {
     const entries = new Set<string>();
     const collected_entire_named_types = new Set<string>();
 
@@ -237,7 +249,11 @@ export function createCollector({ schema, max, ttl }: { schema: GraphQLSchema; m
       if (node.value.kind === Kind.ENUM) {
         // Collect only a specific enum value
         collectInputType(inputTypeName, node.value.value);
-      } else if (node.value.kind !== Kind.OBJECT && node.value.kind !== Kind.LIST) {
+      } else if (
+        node.value.kind !== Kind.OBJECT &&
+        node.value.kind !== Kind.LIST &&
+        node.value.kind !== Kind.VARIABLE
+      ) {
         collectInputType(inputTypeName);
       }
     }
@@ -276,6 +292,29 @@ export function createCollector({ schema, max, ttl }: { schema: GraphQLSchema; m
       }
     }
 
+    function collectVariable(namedType: GraphQLNamedInputType, variableValue: unknown) {
+      const variableValueArray = Array.isArray(variableValue) ? variableValue : [variableValue];
+      if (isInputObjectType(namedType)) {
+        variableValueArray.forEach(variable => {
+          if (variable) {
+            // Collect only the used fields
+            for (const fieldName in variable) {
+              const field = namedType.getFields()[fieldName];
+              if (field) {
+                collectInputType(namedType.name, fieldName);
+                collectVariable(unwrapType(field.type), variable[fieldName]);
+              }
+            }
+          } else {
+            // Collect the entire type
+            collectInputType(namedType.name);
+          }
+        });
+      } else {
+        collectInputType(namedType.name);
+      }
+    }
+
     visit(
       doc,
       visitWithTypeInfo(typeInfo, {
@@ -285,9 +324,16 @@ export function createCollector({ schema, max, ttl }: { schema: GraphQLSchema; m
 
           markAsUsed(makeId(parent.name, field.name));
         },
-        VariableDefinition() {
+        VariableDefinition(node) {
           const inputType = typeInfo.getInputType()!;
-          collectInputType(resolveTypeName(inputType));
+          if (!variables) {
+            collectInputType(resolveTypeName(inputType));
+          } else {
+            const variableName = node.variable.name.value;
+            const variableValue = variables[variableName];
+            const namedType = unwrapType(inputType);
+            collectVariable(namedType, variableValue);
+          }
         },
         Argument(node) {
           const parent = typeInfo.getParentType()!;
@@ -340,7 +386,12 @@ export function createCollector({ schema, max, ttl }: { schema: GraphQLSchema; m
     };
   }
 
-  return cache(collect, cacheDocumentKey, LRU<CacheResult>(max, ttl));
+  return cache(
+    (doc: DocumentNode, variables: ExecutionArgs['variableValues']) =>
+      collect(doc, processVariables ? variables : undefined),
+    cacheDocumentKey,
+    LRU<CacheResult>(max, ttl)
+  );
 }
 
 function resolveTypeName(inputType: GraphQLType): string {
