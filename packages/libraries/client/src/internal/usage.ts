@@ -401,7 +401,13 @@ export function createCollector({
     };
   }
 
-  return cache(collect, cacheDocumentKey, LRU<CacheResult>(max, ttl));
+  return cache(
+    collect,
+    function cacheKey(doc, variables) {
+      return cacheDocumentKey(doc, processVariables === true ? variables : null);
+    },
+    LRU<CacheResult>(max, ttl)
+  );
 }
 
 function resolveTypeName(inputType: GraphQLType): string {
