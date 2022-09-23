@@ -66,7 +66,8 @@ target "emails" {
   args = {
     IMAGE_TITLE = "graphql-hive/emails"
     IMAGE_DESCRIPTION = "The emails service of the GraphQL Hive project."
-    HEALTHCHECK_CMD = "wget --spider -q http://127.0.0.1:3011/_readiness"
+    PORT = "3006"
+    HEALTHCHECK_CMD = "wget --spider -q http://127.0.0.1:$${PORT}/_readiness"
   }
   tags = [
     image_tag("emails", COMMIT_SHA),
@@ -80,7 +81,8 @@ target "rate-limit" {
   args = {
     IMAGE_TITLE = "graphql-hive/rate-limit"
     IMAGE_DESCRIPTION = "The rate limit service of the GraphQL Hive project."
-    HEALTHCHECK_CMD = "wget --spider -q http://127.0.0.1:3009/_readiness"
+    PORT = "3009"
+    HEALTHCHECK_CMD = "wget --spider -q http://127.0.0.1:$${PORT}/_readiness"
   }
   tags = [
     image_tag("rate-limit", COMMIT_SHA),
@@ -94,7 +96,8 @@ target "schema" {
   args = {
     IMAGE_TITLE = "graphql-hive/rate-limit"
     IMAGE_DESCRIPTION = "The schema service of the GraphQL Hive project."
-    HEALTHCHECK_CMD = "wget --spider -q http://127.0.0.1:3002/_readiness"
+    PORT = "3002"
+    HEALTHCHECK_CMD = "wget --spider -q http://127.0.0.1:$${PORT}/_readiness"
   }
   tags = [
     image_tag("schema", COMMIT_SHA),
@@ -108,7 +111,8 @@ target "server" {
   args = {
     IMAGE_TITLE = "graphql-hive/server"
     IMAGE_DESCRIPTION = "The server service of the GraphQL Hive project."
-    HEALTHCHECK_CMD = "wget --spider -q http://127.0.0.1:3001/_readiness"
+    PORT = "3001"
+    HEALTHCHECK_CMD = "wget --spider -q http://127.0.0.1:$${PORT}/_readiness"
   }
   tags = [
     image_tag("server", COMMIT_SHA),
@@ -135,7 +139,8 @@ target "stripe-billing" {
   args = {
     IMAGE_TITLE = "graphql-hive/stripe-billing"
     IMAGE_DESCRIPTION = "The stripe billing service of the GraphQL Hive project."
-    HEALTHCHECK_CMD = "wget --spider -q http://127.0.0.1:3010/_readiness"
+    PORT = "3010"
+    HEALTHCHECK_CMD = "wget --spider -q http://127.0.0.1:$${PORT}/_readiness"
   }
   tags = [
     image_tag("stripe-billing", COMMIT_SHA),
@@ -149,7 +154,8 @@ target "tokens" {
   args = {
     IMAGE_TITLE = "graphql-hive/tokens"
     IMAGE_DESCRIPTION = "The tokens service of the GraphQL Hive project."
-    HEALTHCHECK_CMD = "wget --spider -q http://127.0.0.1:3003/_readiness"
+    PORT = "3003"
+    HEALTHCHECK_CMD = "wget --spider -q http://127.0.0.1:$${PORT}/_readiness"
   }
   tags = [
     image_tag("tokens", COMMIT_SHA),
@@ -163,7 +169,8 @@ target "usage-estimator" {
   args = {
     IMAGE_TITLE = "graphql-hive/usage-estimator"
     IMAGE_DESCRIPTION = "The usage estimator service of the GraphQL Hive project."
-    HEALTHCHECK_CMD = "wget --spider -q http://127.0.0.1:3008/_readiness"
+    PORT = "3008"
+    HEALTHCHECK_CMD = "wget --spider -q http://127.0.0.1:$${PORT}/_readiness"
   }
   tags = [
     image_tag("usage-estimator", COMMIT_SHA),
@@ -177,7 +184,8 @@ target "usage-ingestor" {
   args = {
     IMAGE_TITLE = "graphql-hive/usage-ingestor"
     IMAGE_DESCRIPTION = "The usage ingestor service of the GraphQL Hive project."
-    HEALTHCHECK_CMD = "wget --spider -q http://127.0.0.1:3007/_readiness"
+    PORT = "3007"
+    HEALTHCHECK_CMD = "wget --spider -q http://127.0.0.1:$${PORT}/_readiness"
   }
   tags = [
     image_tag("usage-ingestor", COMMIT_SHA),
@@ -191,7 +199,8 @@ target "usage" {
   args = {
     IMAGE_TITLE = "graphql-hive/usage"
     IMAGE_DESCRIPTION = "The usage ingestor service of the GraphQL Hive project."
-    HEALTHCHECK_CMD = "wget --spider -q http://127.0.0.1:3006/_readiness"
+    PORT = "3006"
+    HEALTHCHECK_CMD = "wget --spider -q http://127.0.0.1:$${PORT}/_readiness"
   }
   tags = [
     image_tag("usage", COMMIT_SHA),
@@ -205,7 +214,8 @@ target "webhooks" {
   args = {
     IMAGE_TITLE = "graphql-hive/webhooks"
     IMAGE_DESCRIPTION = "The webhooks ingestor service of the GraphQL Hive project."
-    HEALTHCHECK_CMD = "wget --spider -q http://127.0.0.1:3005/_readiness"
+    PORT = "3005"
+    HEALTHCHECK_CMD = "wget --spider -q http://127.0.0.1:$${PORT}/_readiness"
   }
   tags = [
     image_tag("webhooks", COMMIT_SHA),
@@ -218,6 +228,7 @@ target "app" {
   context = "${PWD}/packages/web/app/dist"
   args = {
     IMAGE_TITLE = "graphql-hive/app"
+    PORT = "3000"
     IMAGE_DESCRIPTION = "The app of the GraphQL Hive project."
   }
   tags = [
