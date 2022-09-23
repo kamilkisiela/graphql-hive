@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { withSentry, captureException, startTransaction } from '@sentry/nextjs';
+import { captureException, startTransaction } from '@sentry/nextjs';
 import type { Transaction } from '@sentry/types';
 import hyperid from 'hyperid';
 import { extractAccessTokenFromRequest } from '@/lib/api/extract-access-token-from-request';
@@ -134,7 +134,7 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-export default withSentry(graphql);
+export default graphql;
 
 export const config = {
   api: {
