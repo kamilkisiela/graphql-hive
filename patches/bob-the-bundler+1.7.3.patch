@@ -1,5 +1,5 @@
 diff --git a/node_modules/bob-the-bundler/dist/commands/runify.js b/node_modules/bob-the-bundler/dist/commands/runify.js
-index a44025b..0d83a48 100644
+index a44025b..e03c087 100644
 --- a/node_modules/bob-the-bundler/dist/commands/runify.js
 +++ b/node_modules/bob-the-bundler/dist/commands/runify.js
 @@ -83,7 +83,8 @@ async function runify(packagePath, _config, reporter) {
@@ -21,7 +21,7 @@ index a44025b..0d83a48 100644
      await new Promise((resolve, reject) => {
          const child = child_process_1.spawn("next", ["build"], {
              stdio: "inherit",
-@@ -146,7 +147,21 @@ async function buildNext(cwd) {
+@@ -146,7 +147,20 @@ async function buildNext(cwd) {
          child.on("exit", (code) => (code ? reject(code) : resolve(code)));
          child.on("error", reject);
      });
@@ -35,7 +35,6 @@ index a44025b..0d83a48 100644
 +            target: "node16",
 +            format: ["cjs"],
 +            splitting: false,
-+            clean: true,
 +            skipNodeModulesBundle: true,
 +        });
 +    }
@@ -43,7 +42,7 @@ index a44025b..0d83a48 100644
      await Promise.all([
          fs_extra_1.default.copy(path_1.join(cwd, ".next"), path_1.join(cwd, "dist/.next"), {
              filter(src) {
-@@ -159,6 +174,7 @@ async function buildNext(cwd) {
+@@ -159,11 +173,13 @@ async function buildNext(cwd) {
              `#!/usr/bin/env node`,
              `process.on('SIGTERM', () => process.exit(0))`,
              `process.on('SIGINT', () => process.exit(0))`,
@@ -51,3 +50,10 @@ index a44025b..0d83a48 100644
              `
            require('next/dist/server/lib/start-server').startServer({
              dir: __dirname,
+             hostname: '0.0.0.0',
+-            port: parseInt(process.env.PORT)
++            port: parseInt(process.env.PORT),
++            conf: {},
+           }).then(async (app)=>{
+             const appUrl = 'http://' + app.hostname + ':' + app.port;
+             console.log('started server on '+ app.hostname + ':' + app.port + ', url: ' + appUrl);

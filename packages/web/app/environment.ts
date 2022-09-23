@@ -1,4 +1,5 @@
 import zod from 'zod';
+import * as Sentry from '@sentry/nextjs';
 
 const BaseSchema = zod.object({
   NODE_ENV: zod.string(),
@@ -162,3 +163,19 @@ declare global {
 }
 
 globalThis['__backend_env'] = config;
+
+// TODO: I don't like this here, but it seems like it makes most sense here :)
+if (config.sentry) {
+  Sentry.init({
+    serverName: 'app',
+    enabled: true,
+    dsn: config.sentry.dsn,
+    release: config.release,
+    environment: config.environment,
+    integrations: [
+      new Sentry.Integrations.Http({
+        tracing: true,
+      }),
+    ],
+  });
+}

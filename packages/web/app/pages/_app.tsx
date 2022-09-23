@@ -18,6 +18,7 @@ import { LAST_VISITED_ORG_KEY } from '@/constants';
 import { Provider as UrqlProvider } from 'urql';
 import { urqlClient } from '@/lib/urql';
 import { env } from '@/env/frontend';
+import * as Sentry from '@sentry/react';
 
 const theme = extendTheme({ colors });
 
@@ -152,6 +153,14 @@ function App({ Component, pageProps }: AppProps): ReactElement {
 }
 if (globalThis.window) {
   SuperTokens.init(frontendConfig());
+  if (env.sentry) {
+    Sentry.init({
+      dsn: env.sentry.dsn,
+      enabled: true,
+      release: env.release,
+      environment: env.environment,
+    });
+  }
 }
 
 export default App;
