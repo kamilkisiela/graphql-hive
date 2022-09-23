@@ -1,39 +1,29 @@
 import fs from 'node:fs';
-import { withSentryConfig } from '@sentry/nextjs';
 
 const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
 
-/**
- * @type {import('@sentry/webpack-plugin').SentryCliPluginOptions}
- */
-const SentryWebpackPluginOptions = {
-  silent: true,
-  release: packageJson.version,
-};
-
+// For the dev server we want to make sure that the correct environment variables are set :)
+// during build we don't need environment variables!
 if (process.env.BUILD !== '1') {
   await import('./environment');
 }
 
-export default withSentryConfig(
-  {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    eslint: {
-      ignoreDuringBuilds: true,
-    },
-    sentry: {
-      disableServerWebpackPlugin: true,
-      disableClientWebpackPlugin: true,
-    },
-    redirects: () => [
-      // Redirect organization routes
-      {
-        source: '/:orgId/subscription/manage',
-        destination: '/:orgId/subscription',
-        permanent: true,
-      },
-    ],
+export default {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  eslint: {
+    ignoreDuringBuilds: true,
   },
-  SentryWebpackPluginOptions
-);
+  sentry: {
+    disableServerWebpackPlugin: true,
+    disableClientWebpackPlugin: true,
+  },
+  redirects: () => [
+    // Redirect organization routes
+    {
+      source: '/:orgId/subscription/manage',
+      destination: '/:orgId/subscription',
+      permanent: true,
+    },
+  ],
+};
