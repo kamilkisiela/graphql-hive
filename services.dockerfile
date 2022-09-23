@@ -14,13 +14,14 @@ LABEL org.opencontainers.image.authors="The Guild"
 LABEL org.opencontainers.image.vendor="Kamil Kisiela"
 LABEL org.opencontainers.image.url="https://github.com/kamilkisiela/graphql-hive"
 
+ENV ENVIRONMENT production
+ENV RELEASE $RELEASE
+ENV PORT $PORT
+
 HEALTHCHECK --interval=5s \
   --timeout=5s \
   --start-period=5s \
   --retries=6 \
-  CMD ${HEALTHCHECK_CMD}
-
-ENV ENVIRONMENT production
-ENV RELEASE ${RELEASE}
+  CMD $HEALTHCHECK_CMD
 
 CMD ["node", "index.js"]
