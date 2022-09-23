@@ -29,7 +29,7 @@ async function main() {
   }
 
   function listBackendPackages() {
-    const manifestPathCollection = glob.sync('packages/services/*/package.json', {
+    const manifestPathCollection = glob.sync('packages/services/cdn-worker/package.json', {
       cwd,
       absolute: true,
       ignore: ['**/node_modules/**', '**/dist/**'],

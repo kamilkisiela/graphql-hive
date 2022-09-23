@@ -21,6 +21,7 @@
   },
   "scripts": {
     "build-and-pack": "(cd ../ && yarn build:services && yarn build:libraries && yarn build:local) && node ./scripts/pack.mjs",
-    "dockest": "tsup-node dockest.ts --format esm --target node16 && node dist/dockest.js"
+    "build:local": "yarn build-and-pack && (cd ../ && yarn docker:build)",
+    "dockest": "tsup-node dockest.ts --format esm --target node16 && PWD=$PWD/.. node dist/dockest.js"
   }
 }

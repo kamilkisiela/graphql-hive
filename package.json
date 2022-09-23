@@ -33,7 +33,8 @@
     "build:services": "yarn graphql:generate && yarn turbo build  --filter=./packages/services/* --color",
     "build:local": "yarn graphql:generate && yarn turbo build-local --color",
     "env:sync": "node ./scripts/sync-env-files.js",
-    "turbo": "env-cmd --silent turbo run"
+    "turbo": "env-cmd --silent turbo run",
+    "docker:build": "docker buildx bake -f docker.hcl build"
   },
   "devDependencies": {
     "@changesets/cli": "2.24.3",
