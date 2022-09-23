@@ -1,10 +1,6 @@
-import fs from 'node:fs';
-
-const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
-
 // For the dev server we want to make sure that the correct environment variables are set :)
 // during build we don't need environment variables!
-if (process.env.BUILD !== '1') {
+if (globalThis.process.env.BUILD !== '1') {
   await import('./environment');
 }
 
@@ -13,10 +9,6 @@ export default {
   // @ts-ignore
   eslint: {
     ignoreDuringBuilds: true,
-  },
-  sentry: {
-    disableServerWebpackPlugin: true,
-    disableClientWebpackPlugin: true,
   },
   redirects: () => [
     // Redirect organization routes
