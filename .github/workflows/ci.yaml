@@ -390,14 +390,11 @@ jobs:
       - name: Setup Turbo
         run: node ./scripts/turborepo-setup.js
 
-      - name: Generate Types
-        run: yarn graphql:generate
+      - name: Build
+        run: yarn workspace integration-tests run build-and-pack
 
       - name: Build
         run: yarn build
-
-      - name: Build
-        run: yarn workspace integration-tests run build-and-pack
 
       - name: Pull images
         run: |
@@ -488,15 +485,13 @@ jobs:
         if: steps.feature_flags.outputs.detected == 'true'
         run: node ./scripts/turborepo-setup.js
 
-      - name: Generate Types
-        run: yarn graphql:generate
-
-      - name: Build
-        run: yarn build
-
       - name: Build
         if: steps.feature_flags.outputs.detected == 'true'
         run: yarn workspace integration-tests run build-and-pack
+
+      - name: Build
+        if: steps.feature_flags.outputs.detected == 'true'
+        run: yarn build
 
       - name: Pull images
         if: steps.feature_flags.outputs.detected == 'true'
