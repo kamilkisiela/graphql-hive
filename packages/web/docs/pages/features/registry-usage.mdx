@@ -75,12 +75,12 @@ Here's an example of how it could work
 
 ```typescript
 import { createServicesFetcher } from '@graphql-hive/client'
-import { stitchSchemas } from '@graphql-tools/stitch';
-import { UrlLoader } from '@graphql-tools/url-loader';
-import { buildSchema } from 'graphql';
-import { createServer } from '@graphql-yoga/node';
+import { stitchSchemas } from '@graphql-tools/stitch'
+import { UrlLoader } from '@graphql-tools/url-loader'
+import { buildSchema } from 'graphql'
+import { createServer } from '@graphql-yoga/node'
 
-const urlLoader = new UrlLoader();
+const urlLoader = new UrlLoader()
 
 const fetchServices = createServicesFetcher({
   endpoint: process.env.HIVE_CDN_ENDPOINT,
@@ -88,24 +88,24 @@ const fetchServices = createServicesFetcher({
 })
 
 async function main() {
-  const services = await fetchServices();
+  const services = await fetchServices()
   const subschemas = services.map(service => {
-     return {
-        schema: buildSchema(service.sdl),
-        executor: urlLoader.getExecutorAsync(service.url),
-     }
+    return {
+      schema: buildSchema(service.sdl),
+      executor: urlLoader.getExecutorAsync(service.url)
+    }
   })
   const schema = stitchSchemas({
-    subschemas,
-  });
-  
-  const server = createServer({ schema });
-  await server.start();
+    subschemas
+  })
+
+  const server = createServer({ schema })
+  await server.start()
 }
 
 main().catch(err => {
-  console.error(err);
-  process.exit(1);
+  console.error(err)
+  process.exit(1)
 })
 ```
 
