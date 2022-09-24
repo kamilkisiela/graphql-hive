@@ -5,6 +5,12 @@ import { FullLogo } from '@/components/common/Logo';
 import dynamic from 'next/dynamic';
 import SuperTokensReact from 'supertokens-auth-react';
 
+export function getServerSideProps() {
+  return {
+    props: {},
+  };
+}
+
 const SuperTokensComponentNoSSR = dynamic(new Promise(res => res(SuperTokensReact.getRoutingComponent)) as any, {
   ssr: false,
 });
