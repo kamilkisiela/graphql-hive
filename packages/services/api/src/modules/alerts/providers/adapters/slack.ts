@@ -57,6 +57,8 @@ export class SlackCommunicationAdapter implements CommunicationAdapter {
           channel: input.channel.slackChannel!,
           text: `:bee: Hi, I received your *first* schema in project ${projectLink}, target ${targetLink} (${viewLink}):`,
           mrkdwn: true,
+          unfurl_links: false,
+          unfurl_media: false,
         });
       } else {
         await client.chat.postMessage({
@@ -67,6 +69,8 @@ export class SlackCommunicationAdapter implements CommunicationAdapter {
           )}* in project ${projectLink}, target ${targetLink} (${viewLink}):`,
           mrkdwn: true,
           attachments: createAttachments(input.event.changes),
+          unfurl_links: false,
+          unfurl_media: false,
         });
       }
     } catch (error) {
