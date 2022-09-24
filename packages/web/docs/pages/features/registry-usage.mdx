@@ -69,32 +69,43 @@ HIVE_CDN_ENDPOINT="..." HIVE_CDN_KEY="..." ./router
 
 ## Schema Stitching
 
-Stitching could be done in many ways, that's why `@graphql-hive/client` provides generic functions, not something dedicated for stitching. Unfortunately the implementation of gateway + polling is up to you.
+Stitching could be done in many ways, that's why `@graphql-hive/client` provides generic functions, not something dedicated for stitching. Unfortunately the implementation of gateway is up to you.
 
 Here's an example of how it could work
 
 ```typescript
 import { createServicesFetcher } from '@graphql-hive/client'
+import { stitchSchemas } from '@graphql-tools/stitch'
+import { UrlLoader } from '@graphql-tools/url-loader'
+import { buildSchema } from 'graphql'
+import { createServer } from '@graphql-yoga/node'
+
+const urlLoader = new UrlLoader()
 
 const fetchServices = createServicesFetcher({
   endpoint: process.env.HIVE_CDN_ENDPOINT,
   key: process.env.HIVE_CDN_KEY
 })
 
-startMyGraphQLGateway({
-  // a function that resolves a list of services to stitch them together
-  async stitchServices() {
-    const services = await fetchServices()
+async function main() {
+  const services = await fetchServices()
+  const subschemas = services.map(service => {
+    return {
+      schema: buildSchema(service.sdl),
+      executor: urlLoader.getExecutorAsync(service.url)
+    }
+  })
+  const schema = stitchSchemas({
+    subschemas
+  })
 
-    return services.map(service => {
-      return {
-        sdl: service.sdl,
-        url: service.url,
-        checksum: service.id // to check if service's schema was modified
-      }
-    })
-  },
-  pollingInSec: 10 // every 10s
+  const server = createServer({ schema })
+  await server.start()
+}
+
+main().catch(err => {
+  console.error(err)
+  process.exit(1)
 })
 ```
 
@@ -102,8 +113,6 @@ startMyGraphQLGateway({
 - `HIVE_CDN_KEY` - the access key
 
 The `createServicesFetcher` factory function returns another function that is responsible for fetching a list of services from Hive's high-availability endpoint..
-
-The `startMyGraphQLGateway` represents your GraphQL gateway with built-in polling mechanism, in which the `stitchServices` method is called every 10 seconds.
 
 ## Other tools
 
