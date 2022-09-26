@@ -53,6 +53,7 @@ export function deployUsage({
         KAFKA_BUFFER_SIZE: kafka.config.bufferSize,
         KAFKA_BUFFER_INTERVAL: kafka.config.bufferInterval,
         KAFKA_BUFFER_DYNAMIC: kafka.config.bufferDynamic,
+        KAFKA_TOPIC: kafka.config.topic,
         RELEASE: packageHelper.currentReleaseId(),
         TOKENS_ENDPOINT: serviceLocalEndpoint(tokens.service),
         RATE_LIMIT_ENDPOINT: serviceLocalEndpoint(rateLimit.service),
