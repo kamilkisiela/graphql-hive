@@ -71,6 +71,8 @@ export function deployUsageIngestor({
         KAFKA_USER: kafka.config.user,
         KAFKA_BROKER: kafka.config.endpoint,
         KAFKA_CONCURRENCY: `${partitionsConsumedConcurrently}`,
+        KAFKA_TOPIC: kafka.config.topic,
+        KAFKA_CONSUMER_GROUP: kafka.config.consumerGroup,
         RELEASE: packageHelper.currentReleaseId(),
       },
       exposesMetrics: true,
