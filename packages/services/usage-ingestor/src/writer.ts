@@ -3,8 +3,8 @@ import type { FastifyLoggerInstance } from '@hive/service-common';
 import pRetry from 'p-retry';
 import { Readable } from 'node:stream';
 import { registryFields, operationsFields } from './serializer';
-import type { Fallback } from './fallback';
 import { writeTime } from './metrics';
+import type { Fallback } from './fallback';
 
 export interface ClickHouseConfig {
   protocol: string;
@@ -72,7 +72,6 @@ export function createWriter({
           : Promise.resolve(),
       ]).catch(async error => {
         if (fallback) {
-          // Fallback to S3
           return fallback.write(buff, table);
         }
 
@@ -114,7 +113,6 @@ export function createWriter({
           : Promise.resolve(),
       ]).catch(async error => {
         if (fallback) {
-          // Fallback to S3
           return fallback.write(buff, table);
         }
 

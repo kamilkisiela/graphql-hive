@@ -159,17 +159,23 @@ export function createIngestor(config: {
     : null;
 
   const processor = createProcessor({ logger });
+
+  const fallback = config.s3
+    ? createFallback({
+        s3: config.s3,
+        clickhouse: client,
+        logger,
+        intervalInMS: config.batching.intervalInMS,
+      })
+    : null;
+
   const writer = createWriter({
     clickhouse: client,
     clickhouseCloud: cloudClient,
     logger,
-    fallback: config.s3
-      ? createFallback({
-          s3: config.s3,
-          logger,
-        })
-      : null,
+    fallback,
   });
+
   const batcher = createBatcher({
     logger,
     writer,
@@ -177,11 +183,15 @@ export function createIngestor(config: {
     limitInBytes: config.batching.limitInBytes,
   });
 
+  const operationsSync = fallback?.sync('operations');
+  const operationCollectionSync = fallback?.sync('operation_collection');
+
   async function stop() {
     logger.info('Started Usage Ingestor shutdown...');
 
     status = Status.Stopped;
     await consumer.disconnect();
+    await Promise.all([operationsSync?.stop(), operationCollectionSync?.stop()]);
     await batcher.stop();
     logger.info('Closing ClickHouse clients...');
     await Promise.all([client.close(), cloudClient?.close()]);

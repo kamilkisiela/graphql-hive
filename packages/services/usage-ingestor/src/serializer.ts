@@ -66,8 +66,9 @@ export function stringifyOperation(operation: ProcessedOperation): string {
     ok: castValue(operation.execution.ok),
     errors: castValue(operation.execution.errorsTotal),
     duration: castValue(operation.execution.duration),
-    client_name: castValue(operation.metadata?.client?.name),
-    client_version: castValue(operation.metadata?.client?.version),
+    // We convert client_name and client_version to empty string, because those columns are not non-nullable...
+    client_name: convertNullToEmptyString(castValue(operation.metadata?.client?.name)),
+    client_version: convertNullToEmptyString(castValue(operation.metadata?.client?.version)),
   };
   return Object.values(mapper).join(',');
 }
@@ -91,6 +92,8 @@ export function stringifyRegistryRecord(record: ProcessedRegistryRecord): string
 function castDate(date: number): string {
   return cachedFormatDate(date).value;
 }
+
+const NULL = '\\N';
 
 function castValue(value: boolean): number;
 function castValue(value: string): string;
@@ -119,5 +122,9 @@ function castValue(value?: any) {
     return `"[${value.map(val => `'${val}'`).join(',')}]"`;
   }
 
-  return '\\N'; // NULL is \N
+  return NULL; // NULL is \N
+}
+
+function convertNullToEmptyString<T>(value: T): T | string {
+  return value === NULL ? castValue('') : value;
 }
