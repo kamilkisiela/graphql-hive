@@ -67,10 +67,15 @@ const LegacyAuth0Config = zod.union([
 ]);
 
 const configs = {
+  // eslint-disable-next-line no-process-env
   base: BaseSchema.safeParse(process.env),
+  // eslint-disable-next-line no-process-env
   sentry: SentryConfigSchema.safeParse(process.env),
+  // eslint-disable-next-line no-process-env
   authGithub: AuthGitHubConfigSchema.safeParse(process.env),
+  // eslint-disable-next-line no-process-env
   authGoogle: AuthGoogleConfigSchema.safeParse(process.env),
+  // eslint-disable-next-line no-process-env
   authLegacyAuth0: LegacyAuth0Config.safeParse(process.env),
 };
 
