@@ -13,6 +13,8 @@ export function deployKafka() {
       bufferSize: eventhubConfig.require('bufferSize'),
       bufferInterval: eventhubConfig.require('bufferInterval'),
       bufferDynamic: eventhubConfig.require('bufferDynamic'),
+      topic: eventhubConfig.require('topic'),
+      consumerGroup: eventhubConfig.require('consumerGroup'),
     },
   };
 }
