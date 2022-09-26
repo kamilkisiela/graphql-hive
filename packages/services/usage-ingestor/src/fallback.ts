@@ -127,23 +127,23 @@ export function createFallback(config: {
       return {
         async stop() {
           logger.info('Stopping S3 sync for table %s', table);
-          if (timeoutId) {
-            clearTimeout(timeoutId);
-          }
-          await pendingPromise;
-          await performSync(table);
-          logger.info('Stopped S3 sync for table %s', table);
-        },
-      };
+    region: s3.region,
+    apiVersion: s3.apiVersion,
+    credentials: {
+      accessKeyId: s3.accessKeyId,
+      secretAccessKey: s3.secretAccessKey,
     },
-    async write(buffer: Buffer, table: 'operations' | 'operation_collection') {
+  });
+
+  return {
+    async write(buffer: Buffer, table: string) {
       try {
         const Body = await compress(buffer);
         const ChecksumSHA256 = createHash('sha256').update(Body).digest('base64');
         await retry(() =>
           client.send(
             new PutObjectCommand({
-              Bucket: s3.bucket, // `graphql-hive-usage-ingestor`,
+              Bucket: s3.bucket,
               Key: `${table}_${new Date().toISOString()}-${Math.random().toString(16).substring(2)}.gz`,
               Body,
               ChecksumSHA256,
