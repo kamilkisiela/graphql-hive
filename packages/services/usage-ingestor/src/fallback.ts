@@ -1,9 +1,16 @@
 import type { FastifyLoggerInstance } from '@hive/service-common';
 import { compress } from '@hive/usage-common';
+import pRetry from 'p-retry';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { createHash } from 'node:crypto';
 
 export type Fallback = ReturnType<typeof createFallback>;
+
+function retry(run: () => Promise<unknown>) {
+  return pRetry(run, {
+    retries: 2,
+  });
+}
 
 export interface S3Config {
   region: string;
@@ -42,13 +49,15 @@ export function createFallback(config: { s3: S3Config; logger: FastifyLoggerInst
       try {
         const Body = await compress(buffer);
         const ChecksumSHA256 = createHash('sha256').update(Body).digest('base64');
-        await client.send(
-          new PutObjectCommand({
-            Bucket: s3.bucket, // `graphql-hive-usage-ingestor`,
-            Key: `${table}_${new Date().toISOString()}-${Math.random().toString(16).substring(2)}.gz`,
-            Body,
-            ChecksumSHA256,
-          })
+        await retry(() =>
+          client.send(
+            new PutObjectCommand({
+              Bucket: s3.bucket, // `graphql-hive-usage-ingestor`,
+              Key: `${table}_${new Date().toISOString()}-${Math.random().toString(16).substring(2)}.gz`,
+              Body,
+              ChecksumSHA256,
+            })
+          )
         );
       } catch (error) {
         logger.error('Failed to write %s to S3: %s', table, error);

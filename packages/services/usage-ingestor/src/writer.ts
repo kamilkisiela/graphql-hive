@@ -1,5 +1,6 @@
 import type { ClickHouseClient } from '@clickhouse/client';
 import type { FastifyLoggerInstance } from '@hive/service-common';
+import pRetry from 'p-retry';
 import { Readable } from 'node:stream';
 import { registryFields, operationsFields } from './serializer';
 import type { Fallback } from './fallback';
@@ -16,6 +17,12 @@ export interface ClickHouseConfig {
 }
 
 export type Writer = ReturnType<typeof createWriter>;
+
+function retry(run: () => Promise<void>) {
+  return pRetry(run, {
+    retries: 3,
+  });
+}
 
 export function createWriter({
   clickhouse,
@@ -36,15 +43,15 @@ export function createWriter({
       const buff = Buffer.concat(operations);
       const stopTimer = writeTime.startTimer({ table });
       await Promise.all([
-        clickhouse
-          .insert({
+        retry(() =>
+          clickhouse.insert({
             table,
             values: Readable.from(buff, {
               objectMode: false,
             }),
             format: 'CSVWithNames',
           })
-          .finally(() => stopTimer()),
+        ).finally(() => stopTimer()),
         clickhouseCloud
           ? clickhouseCloud
               .insert({
@@ -76,15 +83,15 @@ export function createWriter({
         table,
       });
       await Promise.all([
-        clickhouse
-          .insert({
+        retry(() =>
+          clickhouse.insert({
             table,
             values: Readable.from(buff, {
               objectMode: false,
             }),
             format: 'CSVWithNames',
           })
-          .finally(() => stopTimer()),
+        ).finally(() => stopTimer()),
         clickhouseCloud
           ? clickhouseCloud
               .insert({
