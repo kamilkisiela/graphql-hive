@@ -1,24 +1,23 @@
 #!/usr/bin/env node
 import 'reflect-metadata';
 import * as Sentry from '@sentry/node';
-import { createServer, startMetrics, ensureEnv, registerShutdown, reportReadiness } from '@hive/service-common';
+import { createServer, startMetrics, registerShutdown, reportReadiness } from '@hive/service-common';
 import { createRateLimiter } from './limiter';
 import { createConnectionString } from '@hive/storage';
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify/dist/trpc-server-adapters-fastify.cjs.js';
 import { rateLimitApiRouter } from './api';
-
-const LIMIT_CACHE_UPDATE_INTERVAL_MS = process.env.LIMIT_CACHE_UPDATE_INTERVAL_MS
-  ? parseInt(process.env.LIMIT_CACHE_UPDATE_INTERVAL_MS as string)
-  : 1 * 60_000; // default is every 1m
+import { env } from './environment';
 
 async function main() {
-  Sentry.init({
-    serverName: 'rate-limit',
-    enabled: String(process.env.SENTRY_ENABLED) === '1',
-    environment: process.env.ENVIRONMENT,
-    dsn: process.env.SENTRY_DSN,
-    release: process.env.RELEASE || 'local',
-  });
+  if (env.sentry) {
+    Sentry.init({
+      serverName: 'rate-limit',
+      enabled: !!env.sentry,
+      environment: env.environment,
+      dsn: env.sentry.dsn,
+      release: env.release,
+    });
+  }
 
   const server = await createServer({
     name: 'rate-limit',
@@ -29,18 +28,12 @@ async function main() {
     const ctx = createRateLimiter({
       logger: server.log,
       rateLimitConfig: {
-        interval: LIMIT_CACHE_UPDATE_INTERVAL_MS,
+        interval: env.limitCacheUpdateIntervalMs,
       },
-      rateEstimator: {
-        endpoint: ensureEnv('USAGE_ESTIMATOR_ENDPOINT', 'string'),
-      },
-      emails: process.env.EMAILS_ENDPOINT
-        ? {
-            endpoint: ensureEnv('EMAILS_ENDPOINT', 'string'),
-          }
-        : undefined,
+      rateEstimator: env.hiveServices.usageEstimator,
+      emails: env.hiveServices.emails ?? undefined,
       storage: {
-        connectionString: createConnectionString(process.env as any),
+        connectionString: createConnectionString(env.postgres),
       },
     });
 
@@ -58,8 +51,6 @@ async function main() {
         await Promise.all([ctx.stop(), server.close()]);
       },
     });
-
-    const port = process.env.PORT || 5000;
 
     server.route({
       method: ['GET', 'HEAD'],
@@ -79,10 +70,10 @@ async function main() {
       },
     });
 
-    if (process.env.METRICS_ENABLED === 'true') {
-      await startMetrics();
+    if (env.prometheus) {
+      await startMetrics(env.prometheus.labels.instance);
     }
-    await server.listen(port, '0.0.0.0');
+    await server.listen(env.http.port, '0.0.0.0');
     await ctx.start();
   } catch (error) {
     server.log.fatal(error);
