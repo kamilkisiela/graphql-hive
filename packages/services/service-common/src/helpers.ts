@@ -8,6 +8,7 @@ export function cleanRequestId(requestId?: string | string[] | null): string | u
   }
 }
 
+// eslint-disable-next-line no-process-env
 const isProduction: boolean = process.env.NODE_ENV === 'production';
 const prefix = 'Invariant failed';
 

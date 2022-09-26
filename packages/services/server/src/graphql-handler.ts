@@ -14,6 +14,7 @@ import { useErrorHandler, Plugin } from '@graphql-yoga/node';
 import hyperid from 'hyperid';
 import zod from 'zod';
 import { HiveError } from '@hive/api';
+import type { HiveConfig } from './environment';
 
 const reqIdGenerate = hyperid({ fixedLength: true });
 
@@ -35,6 +36,9 @@ export interface GraphQLHandlerOptions {
     connectionUri: string;
     apiKey: string;
   };
+  isProduction: boolean;
+  hiveConfig: HiveConfig;
+  release: string;
 }
 
 export type SuperTokenSessionPayload = zod.TypeOf<typeof SuperTokenAccessTokenModel>;
@@ -55,19 +59,20 @@ const NoIntrospection: ValidationRule = (context: ValidationContext) => ({
   },
 });
 
-const isNonProductionEnvironment = process.env.ENVIRONMENT !== 'prod';
-
 function hasFastifyRequest(ctx: unknown): ctx is {
   req: FastifyRequest;
 } {
   return !!ctx && typeof ctx === 'object' && 'req' in ctx;
 }
 
-function useNoIntrospection(params: { signature: string }): Plugin<{ req: FastifyRequest }> {
+function useNoIntrospection(params: {
+  signature: string;
+  isNonProductionEnvironment: boolean;
+}): Plugin<{ req: FastifyRequest }> {
   return {
     onValidate({ context, addValidationRule }) {
       const isReadinessCheck = context.req.headers['x-signature'] === params.signature;
-      if (isReadinessCheck || isNonProductionEnvironment) {
+      if (isReadinessCheck || params.isNonProductionEnvironment) {
         return;
       }
       addValidationRule(NoIntrospection);
@@ -172,10 +177,10 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
       }),
       useHive({
         debug: true,
-        enabled: String(process.env.SENTRY_ENABLED) === '1',
-        token: process.env.HIVE_API_TOKEN!,
+        enabled: !!options.hiveConfig,
+        token: options.hiveConfig?.token ?? '',
         usage: {
-          endpoint: process.env.HIVE_USAGE_ENDPOINT,
+          endpoint: options.hiveConfig?.usage?.endpoint ?? undefined,
           clientInfo(ctx: { req: FastifyRequest; reply: FastifyReply }) {
             const name = ctx.req.headers['graphql-client-name'] as string;
             const version = (ctx.req.headers['graphql-client-version'] as string) ?? 'missing';
@@ -189,16 +194,16 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
           exclude: ['readiness'],
         },
         reporting: {
-          endpoint: process.env.HIVE_REPORTING_ENDPOINT,
+          endpoint: options.hiveConfig?.reporting?.endpoint ?? undefined,
           author: 'Hive API',
-          commit: process.env.RELEASE ?? 'local',
+          commit: options.release,
         },
       }),
       useGraphQLModules(options.registry),
-      useNoIntrospection({ signature: options.signature }),
+      useNoIntrospection({ signature: options.signature, isNonProductionEnvironment: options.isProduction === false }),
     ],
     graphiql: request =>
-      isNonProductionEnvironment ? { endpoint: request.headers.get('x-use-proxy') ?? request.url } : false,
+      options.isProduction ? { endpoint: request.headers.get('x-use-proxy') ?? request.url } : false,
   });
 
   return async (req, reply) => {

@@ -9,6 +9,7 @@ config({
 const privateKeyFile = join(process.cwd(), 'github-app.pem');
 
 if (existsSync(privateKeyFile)) {
+  // eslint-disable-next-line no-process-env
   process.env.GITHUB_APP_PRIVATE_KEY = readFileSync(privateKeyFile, 'utf8');
 }
 
