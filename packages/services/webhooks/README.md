@@ -6,6 +6,7 @@ This service takes care of delivering WebHooks.
 
 | Name                                | Required | Description                                                                           | Example Value                                        |
 | ----------------------------------- | -------- | ------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| `PORT`                              | **Yes**  | The port on which this service runs.                                                  | `6250`                                               |
 | `REDIS_HOST`                        | **Yes**  | The host of your redis instance.                                                      | `"127.0.0.1"`                                        |
 | `REDIS_PORT`                        | **Yes**  | The port of your redis instance.                                                      | `6379`                                               |
 | `REDIS_PASSWORD`                    | **Yes**  | The password of your redis instance.                                                  | `"apollorocks"`                                      |
