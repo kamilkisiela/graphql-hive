@@ -24,6 +24,8 @@ function retry(run: () => Promise<void>) {
   });
 }
 
+const format = 'CSVWithNames' as const;
+
 export function createWriter({
   clickhouse,
   clickhouseCloud,
@@ -37,6 +39,7 @@ export function createWriter({
 }) {
   return {
     async writeOperations(operations: Buffer[]) {
+      // Adds the column names to the CSV rows
       operations.unshift(operationsFields, Buffer.from('\n'));
 
       const table = 'operations';
@@ -49,7 +52,7 @@ export function createWriter({
             values: Readable.from(buff, {
               objectMode: false,
             }),
-            format: 'CSVWithNames',
+            format,
           })
         ).finally(() => stopTimer()),
         clickhouseCloud
@@ -59,7 +62,7 @@ export function createWriter({
                 values: Readable.from(buff, {
                   objectMode: false,
                 }),
-                format: 'CSVWithNames',
+                format,
               })
               .catch(error => {
                 logger.error('Failed to write %s to ClickHouse Cloud: %s', table, error);
@@ -69,6 +72,7 @@ export function createWriter({
           : Promise.resolve(),
       ]).catch(async error => {
         if (fallback) {
+          // Fallback to S3
           return fallback.write(buff, table);
         }
 
@@ -76,6 +80,7 @@ export function createWriter({
       });
     },
     async writeRegistry(records: Buffer[]) {
+      // Adds the column names to the CSV rows
       records.unshift(registryFields, Buffer.from('\n'));
       const table = 'operation_collection';
       const buff = Buffer.concat(records);
@@ -89,7 +94,7 @@ export function createWriter({
             values: Readable.from(buff, {
               objectMode: false,
             }),
-            format: 'CSVWithNames',
+            format,
           })
         ).finally(() => stopTimer()),
         clickhouseCloud
@@ -99,7 +104,7 @@ export function createWriter({
                 values: Readable.from(buff, {
                   objectMode: false,
                 }),
-                format: 'CSVWithNames',
+                format,
               })
               .catch(error => {
                 logger.error('Failed to write %s to ClickHouse Cloud: %s', table, error);
@@ -109,6 +114,7 @@ export function createWriter({
           : Promise.resolve(),
       ]).catch(async error => {
         if (fallback) {
+          // Fallback to S3
           return fallback.write(buff, table);
         }
 
