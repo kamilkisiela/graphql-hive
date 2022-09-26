@@ -22,8 +22,8 @@ export interface Storage {
   touchTokens(tokens: Array<{ token: string; date: Date }>): Promise<void>;
 }
 
-export async function createStorage(): Promise<Storage> {
-  const connectionString = createConnectionString(process.env as any);
+export async function createStorage(config: Parameters<typeof createConnectionString>[0]): Promise<Storage> {
+  const connectionString = createConnectionString(config);
   const db = await createTokenStorage(connectionString, 5);
 
   function transformToken(item: tokens): StorageItem {
