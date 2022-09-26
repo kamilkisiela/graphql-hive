@@ -42,6 +42,7 @@ export function createIngestor(config: {
   clickhouseCloud: ClickHouseConfig | null;
   kafka: {
     topic: string;
+    consumerGroup: string;
     concurrency: number;
     connection:
       | {
@@ -87,7 +88,7 @@ export function createIngestor(config: {
     },
   });
   const consumer = kafka.consumer({
-    groupId: `usage-ingestor-v2`,
+    groupId: config.kafka.consumerGroup,
     retry: {
       retries: 2,
     },
