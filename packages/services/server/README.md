@@ -14,7 +14,6 @@ The GraphQL API for GraphQL Hive.
 | `TOKENS_ENDPOINT`                   | **Yes**  | The endpoint of the tokens service.                                                   | `http://127.0.0.1:6001`                              |
 | `WEBHOOKS_ENDPOINT`                 | **Yes**  | The endpoint of the webhooks service.                                                 | `http://127.0.0.1:6250`                              |
 | `SCHEMA_ENDPOINT`                   | **Yes**  | The endpoint of the schema service.                                                   | `http://127.0.0.1:6500`                              |
-| `USAGE_ESTIMATOR_ENDPOINT`          | **Yes**  | The endpoint of the usage estimator service.                                          | `4011`                                               |
 | `POSTGRES_SSL`                      | No       | Whether the postgres connection should be established via SSL.                        | `1` (enabled) or `0` (disabled)                      |
 | `POSTGRES_HOST`                     | **Yes**  | Host of the postgres database                                                         | `127.0.0.1`                                          |
 | `POSTGRES_PORT`                     | **Yes**  | Port of the postgres database                                                         | `5432`                                               |
@@ -43,20 +42,21 @@ The GraphQL API for GraphQL Hive.
 
 If you are self-hosting GraphQL Hive, you can ignore this section. It is only required for the SaaS version.
 
-| Name                                 | Required                                   | Description                                 | Example Value                      |
-| ------------------------------------ | ------------------------------------------ | ------------------------------------------- | ---------------------------------- |
-| `BILLING_ENDPOINT`                   | **Yes**                                    | The endpoint of the Hive Billing service.   | `http://127.0.0.1:4013`            |
-| `CDN_AUTH_PRIVATE_KEY`               | **Yes**                                    | The cdn private key                         | `103df4521212121269213971ce28b5b0` |
-| `CDN_BASE_URL`                       | **Yes**                                    | The endpoint of the Hive Billing service.   | `https://cdn.graphql-hive.com`     |
-| `CDN_CF_BASE_PATH`                   | **Yes**                                    | The endpoint of the Hive Billing service.   | `https://cdn.graphql-hive.com`     |
-| `CDN_CF_ACCOUNT_ID`                  | **Yes**                                    | The endpoint of the Hive Billing service.   | `103df45224310d669213971ce28b5b70` |
-| `CDN_CF_AUTH_TOKEN`                  | **Yes**                                    | The endpoint of the Hive Billing service.   | `85e20c26c03759603c0f45884824a1c3` |
-| `CDN_CF_NAMESPACE_ID`                | **Yes**                                    | The cloudflare namespace name.              | `33b1e3bbb4a4707d05ea0307cbb55c79` |
-| `AUTH_LEGACY_AUTH0`                  | No                                         | Whether the legacy Auth0 import is enabled. | `1` (enabled) or `0` (disabled)    |
-| `AUTH_LEGACY_AUTH0_INTERNAL_API_KEY` | No (**Yes** if `AUTH_LEGACY_AUTH0` is set) | The internal endpoint key.                  | `iliketurtles`                     |
-| `HIVE`                               | No                                         | The internal endpoint key.                  | `iliketurtles`                     |
-| `HIVE_API_TOKEN`                     | No (**Yes** if `HIVE` is set)              | The internal endpoint key.                  | `iliketurtles`                     |
-| `HIVE_USAGE`                         | No                                         | The internal endpoint key.                  | `1` (enabled) or `0` (disabled)    |
-| `HIVE_USAGE_ENDPOINT`                | No                                         | The endpoint used for usage reporting.      | `http://127.0.0.1:4001`            |
-| `HIVE_REPORTING`                     | No                                         | The internal endpoint key.                  | `iliketurtles`                     |
-| `HIVE_REPORTING_ENDPOINT`            | No                                         | The internal endpoint key.                  | `http://127.0.0.1:4000/graphql`    |
+| Name                                 | Required                                   | Description                                  | Example Value                      |
+| ------------------------------------ | ------------------------------------------ | -------------------------------------------- | ---------------------------------- |
+| `BILLING_ENDPOINT`                   | **Yes**                                    | The endpoint of the Hive Billing service.    | `http://127.0.0.1:4013`            |
+| `USAGE_ESTIMATOR_ENDPOINT`           | No                                         | The endpoint of the usage estimator service. | `4011`                             |
+| `CDN_AUTH_PRIVATE_KEY`               | **Yes**                                    | The cdn private key                          | `103df4521212121269213971ce28b5b0` |
+| `CDN_BASE_URL`                       | **Yes**                                    | The endpoint of the Hive Billing service.    | `https://cdn.graphql-hive.com`     |
+| `CDN_CF_BASE_PATH`                   | **Yes**                                    | The endpoint of the Hive Billing service.    | `https://cdn.graphql-hive.com`     |
+| `CDN_CF_ACCOUNT_ID`                  | **Yes**                                    | The endpoint of the Hive Billing service.    | `103df45224310d669213971ce28b5b70` |
+| `CDN_CF_AUTH_TOKEN`                  | **Yes**                                    | The endpoint of the Hive Billing service.    | `85e20c26c03759603c0f45884824a1c3` |
+| `CDN_CF_NAMESPACE_ID`                | **Yes**                                    | The cloudflare namespace name.               | `33b1e3bbb4a4707d05ea0307cbb55c79` |
+| `AUTH_LEGACY_AUTH0`                  | No                                         | Whether the legacy Auth0 import is enabled.  | `1` (enabled) or `0` (disabled)    |
+| `AUTH_LEGACY_AUTH0_INTERNAL_API_KEY` | No (**Yes** if `AUTH_LEGACY_AUTH0` is set) | The internal endpoint key.                   | `iliketurtles`                     |
+| `HIVE`                               | No                                         | The internal endpoint key.                   | `iliketurtles`                     |
+| `HIVE_API_TOKEN`                     | No (**Yes** if `HIVE` is set)              | The internal endpoint key.                   | `iliketurtles`                     |
+| `HIVE_USAGE`                         | No                                         | The internal endpoint key.                   | `1` (enabled) or `0` (disabled)    |
+| `HIVE_USAGE_ENDPOINT`                | No                                         | The endpoint used for usage reporting.       | `http://127.0.0.1:4001`            |
+| `HIVE_REPORTING`                     | No                                         | The internal endpoint key.                   | `iliketurtles`                     |
+| `HIVE_REPORTING_ENDPOINT`            | No                                         | The internal endpoint key.                   | `http://127.0.0.1:4000/graphql`    |
