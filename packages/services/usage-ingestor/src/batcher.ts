@@ -21,6 +21,8 @@ export function createBatcher(config: {
 }) {
   const { logger, limitInBytes, intervalInMS, writer } = config;
 
+  logger.info('Batching is enabled (interval=%s, limit=%s)', intervalInMS, limitInBytes);
+
   let lastFlushedAt = Date.now();
   // Total bytes in current batch
   // It has an underscore as it's meant to be private

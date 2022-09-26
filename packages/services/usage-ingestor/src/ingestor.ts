@@ -3,11 +3,13 @@ import { createClient } from '@clickhouse/client';
 import { decompress } from '@hive/usage-common';
 import { errors, processTime, reportMessageBytes } from './metrics';
 import { ClickHouseConfig, createWriter } from './writer';
+import type { S3Config } from './fallback';
 import { createProcessor } from './processor';
 
 import type { FastifyLoggerInstance } from '@hive/service-common';
 import type { RawReport } from '@hive/usage-common';
 import { createBatcher } from './batcher';
+import { createFallback } from './fallback';
 
 enum Status {
   Waiting,
@@ -48,6 +50,7 @@ export function createIngestor(config: {
           broker: string;
         };
   };
+  s3: S3Config | null;
 }) {
   const { logger } = config;
 
@@ -160,6 +163,12 @@ export function createIngestor(config: {
     clickhouse: client,
     clickhouseCloud: cloudClient,
     logger,
+    fallback: config.s3
+      ? createFallback({
+          s3: config.s3,
+          logger,
+        })
+      : null,
   });
   const batcher = createBatcher({
     logger,

@@ -2,6 +2,7 @@ import type { ClickHouseClient } from '@clickhouse/client';
 import type { FastifyLoggerInstance } from '@hive/service-common';
 import { Readable } from 'node:stream';
 import { registryFields, operationsFields } from './serializer';
+import type { Fallback } from './fallback';
 import { writeTime } from './metrics';
 
 export interface ClickHouseConfig {
@@ -20,20 +21,24 @@ export function createWriter({
   clickhouse,
   clickhouseCloud,
   logger,
+  fallback,
 }: {
   clickhouse: ClickHouseClient;
   clickhouseCloud: ClickHouseClient | null;
   logger: FastifyLoggerInstance;
+  fallback: Fallback | null;
 }) {
   return {
     async writeOperations(operations: Buffer[]) {
       operations.unshift(operationsFields, Buffer.from('\n'));
+
+      const table = 'operations';
       const buff = Buffer.concat(operations);
-      const stopTimer = writeTime.startTimer({ table: 'operations' });
+      const stopTimer = writeTime.startTimer({ table });
       await Promise.all([
         clickhouse
           .insert({
-            table: 'operations',
+            table,
             values: Readable.from(buff, {
               objectMode: false,
             }),
@@ -43,30 +48,37 @@ export function createWriter({
         clickhouseCloud
           ? clickhouseCloud
               .insert({
-                table: 'operations',
+                table,
                 values: Readable.from(buff, {
                   objectMode: false,
                 }),
-                format: 'CSV',
+                format: 'CSVWithNames',
               })
               .catch(error => {
-                logger.error('Failed to write operations to ClickHouse Cloud %s', error);
+                logger.error('Failed to write %s to ClickHouse Cloud: %s', table, error);
                 // Ignore errors from clickhouse cloud
                 return Promise.resolve();
               })
           : Promise.resolve(),
-      ]);
+      ]).catch(async error => {
+        if (fallback) {
+          return fallback.write(buff, table);
+        }
+
+        throw error;
+      });
     },
     async writeRegistry(records: Buffer[]) {
       records.unshift(registryFields, Buffer.from('\n'));
+      const table = 'operation_collection';
       const buff = Buffer.concat(records);
       const stopTimer = writeTime.startTimer({
-        table: 'operation_collection',
+        table,
       });
       await Promise.all([
         clickhouse
           .insert({
-            table: 'operation_collection',
+            table,
             values: Readable.from(buff, {
               objectMode: false,
             }),
@@ -76,19 +88,25 @@ export function createWriter({
         clickhouseCloud
           ? clickhouseCloud
               .insert({
-                table: 'operation_collection',
+                table,
                 values: Readable.from(buff, {
                   objectMode: false,
                 }),
-                format: 'CSV',
+                format: 'CSVWithNames',
               })
               .catch(error => {
-                logger.error('Failed to write operation_collection to ClickHouse Cloud %s', error);
+                logger.error('Failed to write %s to ClickHouse Cloud: %s', table, error);
                 // Ignore errors from clickhouse cloud
                 return Promise.resolve();
               })
           : Promise.resolve(),
-      ]);
+      ]).catch(async error => {
+        if (fallback) {
+          return fallback.write(buff, table);
+        }
+
+        throw error;
+      });
     },
   };
 }

@@ -71,6 +71,15 @@ async function main() {
                 broker: ensureEnv('KAFKA_BROKER'),
               },
       },
+      s3: process.env.S3_API_VERSION
+        ? {
+            apiVersion: ensureEnv('S3_API_VERSION'),
+            region: ensureEnv('S3_REGION'),
+            bucket: ensureEnv('S3_BUCKET'),
+            accessKeyId: ensureEnv('S3_ACCESS_KEY_ID'),
+            secretAccessKey: ensureEnv('S3_SECRET_ACCESS_KEY'),
+          }
+        : null,
     });
 
     const stopHeartbeats =
