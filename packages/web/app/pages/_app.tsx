@@ -22,14 +22,6 @@ import * as Sentry from '@sentry/react';
 
 const theme = extendTheme({ colors });
 
-if (process.env.NODE_ENV === 'development' && 'window' in globalThis) {
-  // Eslint-disable-next-line @typescript-eslint/no-var-requires, import/no-extraneous-dependencies -- only in dev mode
-  // const whyDidYouRender = require('@welldone-software/why-did-you-render');
-  // whyDidYouRender(React, {
-  //   trackAllPureComponents: true,
-  // });
-}
-
 declare global {
   interface Window {
     $crisp: any;
