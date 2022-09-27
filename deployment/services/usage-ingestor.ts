@@ -31,9 +31,9 @@ export function deployUsageIngestor({
   heartbeat?: string;
 }) {
   const numberOfPartitions = 4;
-  const replicas = isProduction(deploymentEnv) ? 2 : 1;
+  const replicas = 1;
   const cpuLimit = isProduction(deploymentEnv) ? '600m' : '300m';
-  const maxReplicas = isProduction(deploymentEnv) ? 4 : 2;
+  const maxReplicas = isProduction(deploymentEnv) ? 2 : 1;
 
   const partitionsConsumedConcurrently = Math.floor(numberOfPartitions / replicas);
 
