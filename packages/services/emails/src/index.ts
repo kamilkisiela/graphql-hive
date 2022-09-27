@@ -2,7 +2,6 @@
 import {
   createServer,
   createErrorHandler,
-  ensureEnv,
   startMetrics,
   registerShutdown,
   reportReadiness,
@@ -15,15 +14,18 @@ import { emailsApiRouter } from './api';
 import { createScheduler } from './scheduler';
 import { createEmailProvider } from './providers';
 import type { Context } from './context';
+import { env } from './environment';
 
 async function main() {
-  Sentry.init({
-    serverName: 'emails',
-    enabled: String(process.env.SENTRY_ENABLED) === '1',
-    environment: process.env.ENVIRONMENT,
-    dsn: process.env.SENTRY_DSN,
-    release: process.env.RELEASE || 'local',
-  });
+  if (env.sentry) {
+    Sentry.init({
+      serverName: 'emails',
+      enabled: !!env.sentry,
+      environment: env.environment,
+      dsn: env.sentry.dsn,
+      release: env.release,
+    });
+  }
 
   const server = await createServer({
     name: 'emails',
@@ -33,30 +35,27 @@ async function main() {
   const errorHandler = createErrorHandler(server);
 
   try {
-    const port = process.env.PORT || 6260;
-
-    const emailProvider = createEmailProvider();
+    const emailProvider = createEmailProvider(env.email.provider, env.email.emailFrom);
     const { schedule, readiness, start, stop } = createScheduler({
       logger: server.log,
       redis: {
-        host: ensureEnv('REDIS_HOST'),
-        port: ensureEnv('REDIS_PORT', 'number'),
-        password: ensureEnv('REDIS_PASSWORD'),
+        host: env.redis.host,
+        port: env.redis.port,
+        password: env.redis.password,
       },
       queueName: 'emails',
       emailProvider,
     });
 
-    const stopHeartbeats =
-      typeof process.env.HEARTBEAT_ENDPOINT === 'string' && process.env.HEARTBEAT_ENDPOINT.length > 0
-        ? startHeartbeats({
-            enabled: true,
-            endpoint: process.env.HEARTBEAT_ENDPOINT,
-            intervalInMS: 20_000,
-            onError: server.log.error,
-            isReady: readiness,
-          })
-        : startHeartbeats({ enabled: false });
+    const stopHeartbeats = env.heartbeat
+      ? startHeartbeats({
+          enabled: true,
+          endpoint: env.heartbeat.endpoint,
+          intervalInMS: 20_000,
+          onError: server.log.error,
+          isReady: readiness,
+        })
+      : startHeartbeats({ enabled: false });
 
     registerShutdown({
       logger: server.log,
@@ -104,10 +103,10 @@ async function main() {
       });
     }
 
-    await server.listen(port, '0.0.0.0');
+    await server.listen(env.http.port, '0.0.0.0');
 
-    if (process.env.METRICS_ENABLED === 'true') {
-      await startMetrics();
+    if (env.prometheus) {
+      await startMetrics(env.prometheus.labels.instance);
     }
 
     await start();
