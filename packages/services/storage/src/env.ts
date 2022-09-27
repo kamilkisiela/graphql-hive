@@ -7,14 +7,16 @@ dotenv({
 
 function ensureVarIf(key: string, condition: boolean) {
   if (condition) {
+    // eslint-disable-next-line no-process-env
     if (!process.env[key]) {
       throw new Error(`Missing env var "${key}"`);
     }
-
+    // eslint-disable-next-line no-process-env
     return process.env[key];
   }
 }
 
+// eslint-disable-next-line no-process-env
 const isClickHouseMigration = process.env.CLICKHOUSE_MIGRATOR === 'up';
 
 export const config = {
