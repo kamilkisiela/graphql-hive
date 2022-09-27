@@ -32,7 +32,7 @@ async function main() {
         syncIntervalMs: env.stripe.syncIntervalMs,
       },
       rateEstimator: {
-        endpoint: env.hive.usageEstimator.endpoint,
+        endpoint: env.hiveServices.usageEstimator.endpoint,
       },
       storage: {
         connectionString: createConnectionString(env.postgres),
