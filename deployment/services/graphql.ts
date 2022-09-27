@@ -111,6 +111,7 @@ export function deployGraphQL({
         CF_ACCOUNT_ID: cloudflareConfig.require('accountId'), // TODO: remove this
         CF_AUTH_TOKEN: cloudflareConfig.requireSecret('apiToken'), // TODO: remove this
         CF_NAMESPACE_ID: cloudflare.cfStorageNamespaceId, // TODO: remove this
+        CDN: '1',
         CDN_CF_BASE_PATH: 'https://api.cloudflare.com/client/v4/accounts',
         CDN_CF_ACCOUNT_ID: cloudflareConfig.require('accountId'),
         CDN_CF_AUTH_TOKEN: cloudflareConfig.requireSecret('apiToken'),
