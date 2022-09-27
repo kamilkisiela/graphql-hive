@@ -13,7 +13,7 @@ const EnvironmentModel = zod.object({
   PORT: NumberFromString.optional(),
   TOKENS_ENDPOINT: zod.string().url(),
   RATE_LIMIT_ENDPOINT: zod.string().url(),
-  ENVIRONMENT: zod.string(),
+  ENVIRONMENT: zod.string().optional(),
   RELEASE: zod.string().optional(),
 });
 
