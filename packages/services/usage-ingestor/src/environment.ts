@@ -126,7 +126,7 @@ export const env = {
       broker: kafka.KAFKA_BROKER,
       isSSL: kafka.KAFKA_SSL === '1',
       sasl:
-        'KAFKA_SASL_MECHANISM' in kafka
+        kafka.KAFKA_SASL_MECHANISM != null
           ? {
               mechanism: kafka.KAFKA_SASL_MECHANISM,
               username: kafka.KAFKA_SASL_USERNAME,

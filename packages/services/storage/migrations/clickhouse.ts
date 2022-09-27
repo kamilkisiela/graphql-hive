@@ -322,6 +322,7 @@ const create_client_names_daily_query = /* SQL */ `
 `;
 
 export async function migrateClickHouse() {
+  // eslint-disable-next-line no-process-env
   if (process.env.CLICKHOUSE_MIGRATOR !== 'up') {
     console.log('Skipping ClickHouse migration');
     return;
