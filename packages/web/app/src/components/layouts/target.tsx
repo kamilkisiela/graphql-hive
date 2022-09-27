@@ -11,6 +11,7 @@ import {
   ProjectFieldsFragment,
   OrganizationFieldsFragment,
 } from '@/graphql';
+import { gql } from 'urql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { useTargetAccess, canAccessTarget, TargetAccessScope } from '@/lib/access/target';
 import { QueryError } from '../common/DataWrapper';
@@ -24,6 +25,12 @@ enum TabValue {
   Laboratory = 'laboratory',
   Settings = 'settings',
 }
+
+const IsCDNEnabledQuery = gql(/* GraphQL */ `
+  query IsCDNEnabledQuery {
+    isCDNEnabled
+  }
+`);
 
 export const TargetLayout = ({
   children,
@@ -69,6 +76,8 @@ export const TargetLayout = ({
     requestPolicy: 'cache-and-network',
   });
 
+  const [isCdnEnabledQuery] = useQuery({ query: IsCDNEnabledQuery });
+
   const targets = targetsQuery.data?.targets;
   const target = targets?.nodes.find(node => node.cleanId === targetId);
   const org = projectQuery.data?.organization?.organization;
@@ -107,6 +116,10 @@ export const TargetLayout = ({
   }
 
   if (!org || !project || !target) {
+    return null;
+  }
+
+  if (!isCdnEnabledQuery.data) {
     return null;
   }
 
@@ -152,15 +165,16 @@ export const TargetLayout = ({
             </div>
             <div className="mb-10 text-xs font-bold text-[#34eab9]">{project?.type}</div>
           </div>
-          {connect ?? (
-            <>
-              <Button size="large" variant="primary" onClick={toggleModalOpen} className="ml-auto">
-                Connect
-                <Link2Icon className="ml-8 h-4 w-4" />
-              </Button>
-              <ConnectSchemaModal isOpen={isModalOpen} toggleModalOpen={toggleModalOpen} />
-            </>
-          )}
+          {connect ??
+            (isCdnEnabledQuery.data.isCDNEnabled ? (
+              <>
+                <Button size="large" variant="primary" onClick={toggleModalOpen} className="ml-auto">
+                  Connect
+                  <Link2Icon className="ml-8 h-4 w-4" />
+                </Button>
+                <ConnectSchemaModal isOpen={isModalOpen} toggleModalOpen={toggleModalOpen} />
+              </>
+            ) : null)}
         </div>
       </SubHeader>
 

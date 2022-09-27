@@ -67,14 +67,20 @@ const GitHubModel = zod.object({
   GITHUB_APP_PRIVATE_KEY: zod.string(),
 });
 
-const CdnModel = zod.object({
-  CDN_AUTH_PRIVATE_KEY: zod.string(),
-  CDN_BASE_URL: zod.string(),
-  CDN_CF_BASE_PATH: zod.string(),
-  CDN_CF_ACCOUNT_ID: zod.string(),
-  CDN_CF_AUTH_TOKEN: zod.string(),
-  CDN_CF_NAMESPACE_ID: zod.string(),
-});
+const CdnModel = zod.union([
+  zod.object({
+    CDN: zod.literal('0').optional(),
+  }),
+  zod.object({
+    CDN: zod.literal('1'),
+    CDN_AUTH_PRIVATE_KEY: zod.string(),
+    CDN_BASE_URL: zod.string(),
+    CDN_CF_BASE_PATH: zod.string(),
+    CDN_CF_ACCOUNT_ID: zod.string(),
+    CDN_CF_AUTH_TOKEN: zod.string(),
+    CDN_CF_NAMESPACE_ID: zod.string(),
+  }),
+]);
 
 const HiveModel = zod.union([
   zod.object({ HIVE: zod.literal('0').optional() }),
@@ -227,18 +233,21 @@ export const env = {
     appId: github.GITHUB_APP_ID,
     privateKey: github.GITHUB_APP_PRIVATE_KEY,
   },
-  cdn: {
-    baseUrl: cdn.CDN_BASE_URL,
-    auth: {
-      privateKey: cdn.CDN_AUTH_PRIVATE_KEY,
-    },
-    cloudflare: {
-      basePath: cdn.CDN_CF_BASE_PATH,
-      accountId: cdn.CDN_CF_ACCOUNT_ID,
-      authToken: cdn.CDN_CF_AUTH_TOKEN,
-      namespaceId: cdn.CDN_CF_NAMESPACE_ID,
-    },
-  },
+  cdn:
+    cdn.CDN === '1'
+      ? {
+          baseUrl: cdn.CDN_BASE_URL,
+          auth: {
+            privateKey: cdn.CDN_AUTH_PRIVATE_KEY,
+          },
+          cloudflare: {
+            basePath: cdn.CDN_CF_BASE_PATH,
+            accountId: cdn.CDN_CF_ACCOUNT_ID,
+            authToken: cdn.CDN_CF_AUTH_TOKEN,
+            namespaceId: cdn.CDN_CF_NAMESPACE_ID,
+          },
+        }
+      : null,
   legacyAuth0:
     authLegacyAuth0.AUTH_LEGACY_AUTH0 === '1'
       ? {
