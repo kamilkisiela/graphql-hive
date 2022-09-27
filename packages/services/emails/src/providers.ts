@@ -1,5 +1,5 @@
 import { fetch } from 'cross-undici-fetch';
-import { ensureEnv } from '@hive/service-common';
+import type { EmailProviderConfig, PostmarkEmailProviderConfig, MockEmailProviderConfig } from './environment';
 
 interface Email {
   to: string;
@@ -18,26 +18,16 @@ export interface EmailProvider {
   history: Email[];
 }
 
-export function createEmailProvider(): EmailProvider {
-  const emailProviderName = ensureEnv('EMAIL_PROVIDER') as keyof typeof emailProviders;
-
-  switch (emailProviderName) {
+export function createEmailProvider(config: EmailProviderConfig, emailFrom: string): EmailProvider {
+  switch (config.provider) {
     case 'mock':
-      return mock();
+      return mock(config, emailFrom);
     case 'postmark':
-      return postmark();
-    default:
-      throw new Error(
-        `Unknown email provider: ${emailProviderName}. Available: ${Object.keys(emailProviders).join(', ')}`
-      );
+      return postmark(config, emailFrom);
   }
 }
 
-function postmark() {
-  const token = ensureEnv('POSTMARK_TOKEN');
-  const messageStream = ensureEnv('POSTMARK_MESSAGE_STREAM');
-  const emailFrom = ensureEnv('EMAIL_FROM');
-
+function postmark(config: PostmarkEmailProviderConfig, emailFrom: string) {
   return {
     id: 'postmark' as const,
     async send(email: Email) {
@@ -46,14 +36,14 @@ function postmark() {
         headers: {
           'Content-Type': 'application/json',
           Accept: 'application/json',
-          'X-Postmark-Server-Token': token,
+          'X-Postmark-Server-Token': config.token,
         },
         body: JSON.stringify({
           From: emailFrom,
           To: email.to,
           Subject: email.subject,
           HtmlBody: email.body,
-          MessageStream: messageStream,
+          MessageStream: config.messageStream,
         }),
       });
 
@@ -66,7 +56,7 @@ function postmark() {
   };
 }
 
-function mock(): EmailProvider {
+function mock(_config: MockEmailProviderConfig, _emailFrom: string): EmailProvider {
   const history: Email[] = [];
 
   return {
