@@ -13,7 +13,6 @@ const EnvironmentModel = zod.object({
   PORT: NumberFromString.optional(),
   ENVIRONMENT: zod.string().optional(),
   RELEASE: zod.string().optional(),
-  ENCRYPTION_SECRET: zod.string(),
   USAGE_ESTIMATOR_ENDPOINT: zod.string().url(),
   EMAILS_ENDPOINT: zod.string().url().optional(),
   LIMIT_CACHE_UPDATE_INTERVAL_MS: NumberFromString.optional(),
@@ -83,7 +82,6 @@ const prometheus = extractConfig(configs.prometheus);
 export const env = {
   environment: base.ENVIRONMENT,
   release: base.RELEASE ?? 'local',
-  encryptionSecret: base.ENCRYPTION_SECRET,
   hiveServices: {
     usageEstimator: { endpoint: base.USAGE_ESTIMATOR_ENDPOINT },
     emails: base.EMAILS_ENDPOINT ? { endpoint: base.EMAILS_ENDPOINT } : null,
