@@ -1,5 +1,6 @@
 import * as pulumi from '@pulumi/pulumi';
 import * as azure from '@pulumi/azure';
+import { parse } from 'pg-connection-string';
 import { RemoteArtifactAsServiceDeployment } from '../utils/remote-artifact-as-service';
 import { PackageHelper } from '../utils/pack';
 import { DeploymentEnvironment } from '../types';
@@ -30,6 +31,9 @@ export function deployRateLimit({
   dbMigrations: DbMigrations;
   emails: Emails;
 }) {
+  const rawConnectionString = apiConfig.requireSecret('postgresConnectionString');
+  const connectionString = rawConnectionString.apply(rawConnectionString => parse(rawConnectionString));
+
   return new RemoteArtifactAsServiceDeployment(
     'rate-limiter',
     {
@@ -40,11 +44,18 @@ export function deployRateLimit({
       env: {
         ...deploymentEnv,
         ...commonEnv,
+        SENTRY: commonEnv.SENTRY_ENABLED,
         LIMIT_CACHE_UPDATE_INTERVAL_MS: rateLimitConfig.require('updateIntervalMs'),
         RELEASE: packageHelper.currentReleaseId(),
         USAGE_ESTIMATOR_ENDPOINT: serviceLocalEndpoint(usageEstimator.service),
         EMAILS_ENDPOINT: serviceLocalEndpoint(emails.service),
-        POSTGRES_CONNECTION_STRING: apiConfig.requireSecret('postgresConnectionString'),
+        POSTGRES_CONNECTION_STRING: rawConnectionString, // TODO: remove this
+        POSTGRES_HOST: connectionString.apply(connection => connection.host ?? ''),
+        POSTGRES_PORT: connectionString.apply(connection => connection.port ?? ''),
+        POSTGRES_PASSWORD: connectionString.apply(connection => connection.password ?? ''),
+        POSTGRES_USER: connectionString.apply(connection => connection.user ?? ''),
+        POSTGRES_DB: connectionString.apply(connection => connection.database ?? ''),
+        POSTGRES_ENABLE_SSL: connectionString.apply(connection => (connection.ssl ? '1' : '0')),
       },
       exposesMetrics: true,
       packageInfo: packageHelper.npmPack('@hive/rate-limit'),

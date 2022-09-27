@@ -35,13 +35,14 @@ export function deployUsageEstimation({
       env: {
         ...deploymentEnv,
         ...commonEnv,
+        SENTRY: commonEnv.SENTRY_ENABLED,
         CLICKHOUSE_PROTOCOL: clickhouse.config.protocol,
         CLICKHOUSE_HOST: clickhouse.config.host,
         CLICKHOUSE_PORT: clickhouse.config.port,
         CLICKHOUSE_USERNAME: clickhouse.config.username,
         CLICKHOUSE_PASSWORD: clickhouse.config.password,
         RELEASE: packageHelper.currentReleaseId(),
-        POSTGRES_CONNECTION_STRING: apiConfig.requireSecret('postgresConnectionString'),
+        POSTGRES_CONNECTION_STRING: apiConfig.requireSecret('postgresConnectionString'), // TODO: remove this
       },
       exposesMetrics: true,
       packageInfo: packageHelper.npmPack('@hive/usage-estimator'),
