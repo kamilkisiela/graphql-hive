@@ -14,7 +14,7 @@ const EnvironmentModel = zod.object({
   ENVIRONMENT: zod.string().optional(),
   RELEASE: zod.string().optional(),
   HEARTBEAT_ENDPOINT: zod.string().url().optional(),
-  HIVE_USAGE_ESTIMATOR_ENDPOINT: zod.string().url(),
+  USAGE_ESTIMATOR_ENDPOINT: zod.string().url(),
 });
 
 const SentryModel = zod.union([
@@ -92,9 +92,9 @@ export const env = {
   http: {
     port: base.PORT ?? 4013,
   },
-  hive: {
+  hiveServices: {
     usageEstimator: {
-      endpoint: base.HIVE_USAGE_ESTIMATOR_ENDPOINT,
+      endpoint: base.USAGE_ESTIMATOR_ENDPOINT,
     },
   },
   postgres: {
