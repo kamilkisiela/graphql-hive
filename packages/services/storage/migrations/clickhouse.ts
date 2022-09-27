@@ -1,5 +1,5 @@
 import { got } from 'got';
-import { config } from '../src/env';
+import { env } from '../src/environment';
 
 const tables = [
   // replaces operations_registry (adds coordinates, total and TTL)
@@ -321,19 +321,18 @@ const create_client_names_daily_query = /* SQL */ `
     timestamp
 `;
 
-export async function migrateClickHouse() {
-  // eslint-disable-next-line no-process-env
-  if (process.env.CLICKHOUSE_MIGRATOR !== 'up') {
+export async function migrateClickHouse(isClickHouseMigrator: boolean) {
+  if (isClickHouseMigrator === false) {
     console.log('Skipping ClickHouse migration');
     return;
   }
 
-  const endpoint = `${config.clickhouse.protocol}://${config.clickhouse.host}:${config.clickhouse.port}`;
+  const endpoint = `${env.clickhouse.protocol}://${env.clickhouse.host}:${env.clickhouse.port}`;
 
   console.log('Migrating ClickHouse');
   console.log('Endpoint:', endpoint);
-  console.log('Username:', config.clickhouse.username);
-  console.log('Password:', config.clickhouse.password?.length);
+  console.log('Username:', env.clickhouse.username);
+  console.log('Password:', env.clickhouse.password?.length);
 
   const queries = [
     create_operations_registry_query,
@@ -357,8 +356,8 @@ export async function migrateClickHouse() {
         headers: {
           Accept: 'text/plain',
         },
-        username: config.clickhouse.username,
-        password: config.clickhouse.password,
+        username: env.clickhouse.username,
+        password: env.clickhouse.password,
       })
       .catch(error => {
         const body = error?.response?.body;

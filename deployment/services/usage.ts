@@ -35,6 +35,7 @@ export function deployUsage({
   const replicas = 1; /*isProduction(deploymentEnv) ? 2 : 1*/
   const cpuLimit = isProduction(deploymentEnv) ? '600m' : '300m';
   const maxReplicas = isProduction(deploymentEnv) ? 4 : 2;
+  const kafkaBufferDynamic = kafka.config.bufferDynamic === 'true' ? '1' : '0';
 
   return new RemoteArtifactAsServiceDeployment(
     'usage-service',
@@ -46,13 +47,14 @@ export function deployUsage({
       env: {
         ...deploymentEnv,
         ...commonEnv,
+        SENTRY: commonEnv.SENTRY_ENABLED,
         KAFKA_CONNECTION_MODE: 'hosted',
         KAFKA_KEY: kafka.config.key,
         KAFKA_USER: kafka.config.user,
         KAFKA_BROKER: kafka.config.endpoint,
         KAFKA_BUFFER_SIZE: kafka.config.bufferSize,
         KAFKA_BUFFER_INTERVAL: kafka.config.bufferInterval,
-        KAFKA_BUFFER_DYNAMIC: kafka.config.bufferDynamic,
+        KAFKA_BUFFER_DYNAMIC: kafkaBufferDynamic,
         KAFKA_TOPIC: kafka.config.topic,
         RELEASE: packageHelper.currentReleaseId(),
         TOKENS_ENDPOINT: serviceLocalEndpoint(tokens.service),
