@@ -3,11 +3,12 @@ import url from 'node:url';
 import path from 'node:path';
 import { SlonikMigrator } from '@slonik/migrator';
 import { createPool } from 'slonik';
-import { config } from '../src/env';
+import { env } from '../src/environment';
 import { migrateClickHouse } from './clickhouse';
+import { createConnectionString } from '../src/db';
 
 const [, , cmd] = process.argv;
-const slonik = await createPool(config.postgresConnectionString);
+const slonik = await createPool(createConnectionString(env.postgres));
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const actionsDirectory = __dirname + path.sep + 'actions';
@@ -26,13 +27,13 @@ const isDownCommand = cmd === 'down';
 
 // This is used by production build of this package.
 // We are building a "cli" out of the package, so we need a workaround to pass the command to run.
-// eslint-disable-next-line no-process-env
-if (process.env.MIGRATOR === 'up' && !isCreateCommand && !isDownCommand) {
+ 
+if (env.isMigrator && !isCreateCommand && !isDownCommand) {
   console.log('Running the UP migrations');
 
   try {
     await migrator.up();
-    await migrateClickHouse();
+    await migrateClickHouse(env.isClickHouseMigrator);
     process.exit(0);
   } catch (error) {
     console.error(error);
