@@ -7,6 +7,7 @@ import { Readable } from 'stream';
 import { devStorage } from './dev-polyfill';
 import { isKeyValid } from './auth';
 
+// eslint-disable-next-line no-process-env
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4010;
 
 function isReadable(responseBody: any): responseBody is Readable {
