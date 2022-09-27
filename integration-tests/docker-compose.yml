@@ -416,7 +416,11 @@ services:
     environment:
       NODE_ENV: production
       LIMIT_CACHE_UPDATE_INTERVAL_MS: 2000
-      POSTGRES_CONNECTION_STRING: 'postgresql://postgres:postgres@db:5432/registry'
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: registry
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
       USAGE_ESTIMATOR_ENDPOINT: http://usage-estimator:3008
       EMAILS_ENDPOINT: http://emails:3011
       ROARR_LOG: 'true'
@@ -438,7 +442,11 @@ services:
     environment:
       NODE_ENV: production
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
-      POSTGRES_CONNECTION_STRING: 'postgresql://postgres:postgres@db:5432/registry'
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: registry
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
       ROARR_LOG: 'true'
       USAGE_ESTIMATOR_ENDPOINT: http://usage-estimator:3008
       PORT: 3010
