@@ -38,7 +38,7 @@ const PostgresModel = zod.object({
 
 const StripeModel = zod.object({
   STRIPE_SECRET_KEY: zod.string(),
-  STRIPE_SYNC_INTERVAL_MS: NumberFromString,
+  STRIPE_SYNC_INTERVAL_MS: NumberFromString.optional(),
 });
 
 const PrometheusModel = zod.object({
