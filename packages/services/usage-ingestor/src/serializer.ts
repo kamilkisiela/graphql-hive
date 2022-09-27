@@ -77,7 +77,7 @@ export function stringifyRegistryRecord(record: ProcessedRegistryRecord): string
   const mapper: Record<KeysOfArray<typeof registryOrder>, any> = {
     target: castValue(record.target),
     hash: castValue(record.hash),
-    name: castValue(record.name),
+    name: convertNullToEmptyString(castValue(record.name)),
     body: castValue(record.body),
     operation_kind: castValue(record.operation_kind),
     coordinates: castValue(record.coordinates),
@@ -125,6 +125,10 @@ function castValue(value?: any) {
   return NULL; // NULL is \N
 }
 
-function convertNullToEmptyString<T>(value: T): T | string {
+function convertNullToEmptyString(value: string): string;
+function convertNullToEmptyString(value: number): number;
+function convertNullToEmptyString(value: undefined): string;
+function convertNullToEmptyString(value: null): string;
+function convertNullToEmptyString(value: any): string | number {
   return value === NULL ? castValue('') : value;
 }

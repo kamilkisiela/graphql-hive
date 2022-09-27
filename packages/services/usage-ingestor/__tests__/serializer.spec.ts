@@ -91,8 +91,8 @@ test('stringify operation in correct format and order', () => {
           ok: 0,
           errors: 1,
           duration: 250,
-          client_name: `\\N`,
-          client_version: `\\N`,
+          client_name: `""`,
+          client_version: `""`,
         },
         operationsOrder
       ),
@@ -147,7 +147,7 @@ test('stringify registry records in correct format and order', () => {
         {
           target: `"my-target"`,
           hash: `"my-hash-1"`,
-          name: `\\N`,
+          name: `""`,
           body: `"{ foo }"`,
           operation_kind: `"query"`,
           coordinates: `"['Query','Query.foo']"`,
