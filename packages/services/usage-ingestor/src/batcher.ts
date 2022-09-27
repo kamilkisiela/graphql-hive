@@ -134,7 +134,7 @@ export function createBatcher(config: {
       track(
         writer
           .writeOperations(drained.operationsBuffers)
-          .then(async function wo() {
+          .then(async () => {
             ingestedOperationsWrites.inc(drained.operationsLength);
           })
           .catch(async error => {
@@ -149,7 +149,7 @@ export function createBatcher(config: {
       track(
         writer
           .writeRegistry(drained.operationCollectionBuffers)
-          .then(async function wr() {
+          .then(async () => {
             ingestedOperationRegistryWrites.inc(drained.operationCollectionLength);
           })
           .catch(async error => {

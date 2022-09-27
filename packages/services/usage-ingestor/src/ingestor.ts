@@ -183,15 +183,14 @@ export function createIngestor(config: {
     limitInBytes: config.batching.limitInBytes,
   });
 
-  const operationsSync = fallback?.sync('operations');
-  const operationCollectionSync = fallback?.sync('operation_collection');
+  const fallbackSync = fallback?.sync();
 
   async function stop() {
     logger.info('Started Usage Ingestor shutdown...');
 
     status = Status.Stopped;
     await consumer.disconnect();
-    await Promise.all([operationsSync?.stop(), operationCollectionSync?.stop()]);
+    await fallbackSync?.stop();
     await batcher.stop();
     logger.info('Closing ClickHouse clients...');
     await Promise.all([client.close(), cloudClient?.close()]);
@@ -226,7 +225,6 @@ export function createIngestor(config: {
         const stopTimer = processTime.startTimer();
         return processMessage({
           message,
-          logger,
           processor,
           batcher,
         })
@@ -258,12 +256,10 @@ async function processMessage({
   processor,
   batcher,
   message,
-  logger,
 }: {
   processor: ReturnType<typeof createProcessor>;
   batcher: ReturnType<typeof createBatcher>;
   message: KafkaMessage;
-  logger: FastifyLoggerInstance;
 }) {
   reportMessageBytes.observe(message.value!.byteLength);
   // Decompress and parse the message to get a list of reports
@@ -271,12 +267,8 @@ async function processMessage({
 
   const { operations, registryRecords } = await processor.processReports(rawReports);
 
-  try {
-    batcher.add({
-      operations,
-      operation_collection: registryRecords,
-    });
-  } catch (error) {
-    logger.error(error);
-  }
+  batcher.add({
+    operations,
+    operation_collection: registryRecords,
+  });
 }
