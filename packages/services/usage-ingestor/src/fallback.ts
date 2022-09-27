@@ -42,8 +42,8 @@ export function createFallback(config: {
   logger.info('Fallback to S3 is enabled');
 
   const client = new S3Client({
-    region: s3.region, // 'us-east-1',
-    apiVersion: s3.apiVersion, // '2006-03-01',
+    region: s3.region,
+    apiVersion: s3.apiVersion,
     credentials: {
       accessKeyId: s3.accessKeyId,
       secretAccessKey: s3.secretAccessKey,
@@ -127,16 +127,16 @@ export function createFallback(config: {
       return {
         async stop() {
           logger.info('Stopping S3 sync for table %s', table);
-    region: s3.region,
-    apiVersion: s3.apiVersion,
-    credentials: {
-      accessKeyId: s3.accessKeyId,
-      secretAccessKey: s3.secretAccessKey,
+          if (timeoutId) {
+            clearTimeout(timeoutId);
+          }
+          await pendingPromise;
+          await performSync(table);
+          logger.info('Stopped S3 sync for table %s', table);
+        },
+      };
     },
-  });
-
-  return {
-    async write(buffer: Buffer, table: string) {
+    async write(buffer: Buffer, table: 'operations' | 'operation_collection') {
       try {
         const Body = await compress(buffer);
         const ChecksumSHA256 = createHash('sha256').update(Body).digest('base64');
