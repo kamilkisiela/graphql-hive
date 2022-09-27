@@ -11,7 +11,7 @@ const NumberFromString = zod.preprocess(numberFromNumberOrNumberString, zod.numb
 
 const EnvironmentModel = zod.object({
   PORT: NumberFromString.optional(),
-  ENVIRONMENT: zod.string(),
+  ENVIRONMENT: zod.string().optional(),
   RELEASE: zod.string().optional(),
   HEARTBEAT_ENDPOINT: zod.string().url().optional(),
   EMAIL_FROM: zod.string().email(),
