@@ -2,7 +2,6 @@
 import {
   createServer,
   createErrorHandler,
-  ensureEnv,
   startMetrics,
   registerShutdown,
   reportReadiness,
@@ -15,7 +14,7 @@ import type { CreateFastifyContextOptions } from '@trpc/server/adapters/fastify'
 import { schemaBuilderApiRouter } from './api';
 import { env } from './environment';
 
-const ENCRYPTION_SECRET = crypto.createHash('md5').update(ensureEnv('ENCRYPTION_SECRET')).digest('hex');
+const ENCRYPTION_SECRET = crypto.createHash('md5').update(env.encryptionSecret).digest('hex');
 
 function decryptFactory() {
   const ALG = 'aes256';
