@@ -27,13 +27,15 @@ const isDownCommand = cmd === 'down';
 
 // This is used by production build of this package.
 // We are building a "cli" out of the package, so we need a workaround to pass the command to run.
- 
+
 if (env.isMigrator && !isCreateCommand && !isDownCommand) {
   console.log('Running the UP migrations');
 
   try {
     await migrator.up();
-    await migrateClickHouse(env.isClickHouseMigrator);
+    if (env.clickhouse) {
+      await migrateClickHouse(env.isClickHouseMigrator, env.clickhouse);
+    }
     process.exit(0);
   } catch (error) {
     console.error(error);

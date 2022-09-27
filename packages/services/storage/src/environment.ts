@@ -30,13 +30,16 @@ const PostgresModel = zod.object({
   POSTGRES_PASSWORD: zod.string(),
 });
 
-const ClickHouseModel = zod.object({
-  CLICKHOUSE_PROTOCOL: zod.union([zod.literal('http'), zod.literal('https')]),
-  CLICKHOUSE_HOST: zod.string(),
-  CLICKHOUSE_PORT: NumberFromString,
-  CLICKHOUSE_USERNAME: zod.string(),
-  CLICKHOUSE_PASSWORD: zod.string(),
-});
+const ClickHouseModel = zod.union([
+  zod.object({}),
+  zod.object({
+    CLICKHOUSE_PROTOCOL: zod.union([zod.literal('http'), zod.literal('https')]),
+    CLICKHOUSE_HOST: zod.string(),
+    CLICKHOUSE_PORT: NumberFromString,
+    CLICKHOUSE_USERNAME: zod.string(),
+    CLICKHOUSE_PASSWORD: zod.string(),
+  }),
+]);
 
 const configs = {
   // eslint-disable-next-line no-process-env
@@ -83,13 +86,16 @@ export const env = {
     password: postgres.POSTGRES_PASSWORD,
     ssl: postgres.POSTGRES_SSL === '1',
   },
-  clickhouse: {
-    protocol: clickhouse.CLICKHOUSE_PROTOCOL,
-    host: clickhouse.CLICKHOUSE_HOST,
-    port: clickhouse.CLICKHOUSE_PORT,
-    username: clickhouse.CLICKHOUSE_USERNAME,
-    password: clickhouse.CLICKHOUSE_PASSWORD,
-  },
+  clickhouse:
+    'CLICKHOUSE_PROTOCOL' in clickhouse
+      ? {
+          protocol: clickhouse.CLICKHOUSE_PROTOCOL,
+          host: clickhouse.CLICKHOUSE_HOST,
+          port: clickhouse.CLICKHOUSE_PORT,
+          username: clickhouse.CLICKHOUSE_USERNAME,
+          password: clickhouse.CLICKHOUSE_PASSWORD,
+        }
+      : null,
   isMigrator: base.MIGRATOR === 'up',
   isClickHouseMigrator: base.CLICKHOUSE_MIGRATOR === 'up',
 } as const;
