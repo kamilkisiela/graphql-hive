@@ -33,17 +33,26 @@ const RedisModel = zod.object({
   REDIS_PASSWORD: zod.string().optional(),
 });
 
-const PostmarkModel = zod.object({
+const PostmarkEmailModel = zod.object({
   EMAIL_PROVIDER: zod.literal('postmark'),
   EMAIL_PROVIDER_POSTMARK_TOKEN: zod.string(),
   EMAIL_PROVIDER_POSTMARK_MESSAGE_STREAM: zod.string(),
 });
 
-const MockProviderModel = zod.object({
+const SMTPEmailModel = zod.object({
+  EMAIL_PROVIDER: zod.literal('smtp'),
+  EMAIL_PROVIDER_SMTP_PROTOCOL: zod.union([zod.literal('smtp'), zod.literal('smtps')]).optional(),
+  EMAIL_PROVIDER_SMTP_HOST: zod.string(),
+  EMAIL_PROVIDER_SMTP_PORT: NumberFromString,
+  EMAIL_PROVIDER_SMTP_AUTH_USERNAME: zod.string(),
+  EMAIL_PROVIDER_SMTP_AUTH_PASSWORD: zod.string(),
+});
+
+const MockEmailProviderModel = zod.object({
   EMAIL_PROVIDER: zod.literal('mock'),
 });
 
-const EmailProviderModel = zod.union([PostmarkModel, MockProviderModel]);
+const EmailProviderModel = zod.union([PostmarkEmailModel, MockEmailProviderModel, SMTPEmailModel]);
 
 const PrometheusModel = zod.object({
   PROMETHEUS_METRICS: zod.union([zod.literal('0'), zod.literal('1')]).optional(),
@@ -97,10 +106,22 @@ const emailProviderConfig =
         token: email.EMAIL_PROVIDER_POSTMARK_TOKEN,
         messageStream: email.EMAIL_PROVIDER_POSTMARK_MESSAGE_STREAM,
       } as const)
+    : email.EMAIL_PROVIDER === 'smtp'
+    ? ({
+        provider: 'smtp' as const,
+        protocol: email.EMAIL_PROVIDER_SMTP_PROTOCOL ?? 'smtp',
+        host: email.EMAIL_PROVIDER_SMTP_HOST,
+        port: email.EMAIL_PROVIDER_SMTP_PORT,
+        auth: {
+          user: email.EMAIL_PROVIDER_SMTP_AUTH_USERNAME,
+          pass: email.EMAIL_PROVIDER_SMTP_AUTH_PASSWORD,
+        },
+      } as const)
     : ({ provider: 'mock' } as const);
 
 export type EmailProviderConfig = typeof emailProviderConfig;
 export type PostmarkEmailProviderConfig = Extract<EmailProviderConfig, { provider: 'postmark' }>;
+export type SMTPEmailProviderConfig = Extract<EmailProviderConfig, { provider: 'smtp' }>;
 export type MockEmailProviderConfig = Extract<EmailProviderConfig, { provider: 'mock' }>;
 
 export const env = {
