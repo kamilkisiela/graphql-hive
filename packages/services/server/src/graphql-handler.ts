@@ -104,7 +104,9 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
 
           // Reduce the number of transactions to avoid overloading Sentry
           const ctx = args.contextValue as Context;
-          const graphqlClientName = ctx.headers['graphql-client-name'];
+          const graphqlClientName = Array.isArray(ctx.headers['graphql-client-name'])
+            ? ctx.headers['graphql-client-name'][0]
+            : ctx.headers['graphql-client-name'];
 
           if (transaction && graphqlClientName !== 'Hive CLI' && graphqlClientName !== 'Hive App') {
             transaction.sampled = false;
@@ -115,6 +117,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
             operationName: args.operationName,
             operation: print(args.document),
             userId: extractUserId(args.contextValue as any),
+            graphqlClientName,
           });
         },
         trackResolvers: false,
