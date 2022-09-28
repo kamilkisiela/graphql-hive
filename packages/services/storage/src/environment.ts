@@ -31,7 +31,6 @@ const PostgresModel = zod.object({
 });
 
 const ClickHouseModel = zod.union([
-  zod.object({}),
   zod.object({
     CLICKHOUSE_PROTOCOL: zod.union([zod.literal('http'), zod.literal('https')]),
     CLICKHOUSE_HOST: zod.string(),
@@ -39,6 +38,7 @@ const ClickHouseModel = zod.union([
     CLICKHOUSE_USERNAME: zod.string(),
     CLICKHOUSE_PASSWORD: zod.string(),
   }),
+  zod.object({}),
 ]);
 
 const configs = {
