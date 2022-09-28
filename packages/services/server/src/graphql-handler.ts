@@ -104,12 +104,12 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
 
           // Reduce the number of transactions to avoid overloading Sentry
           const ctx = args.contextValue as Context;
-          const graphqlClientName = Array.isArray(ctx.headers['graphql-client-name'])
-            ? ctx.headers['graphql-client-name'][0]
-            : ctx.headers['graphql-client-name'];
+          const clientNameHeaderValue = ctx.req.headers['graphql-client-name'];
+          const clientName = Array.isArray(clientNameHeaderValue) ? clientNameHeaderValue[0] : clientNameHeaderValue;
 
-          if (transaction && graphqlClientName !== 'Hive CLI' && graphqlClientName !== 'Hive App') {
-            transaction.sampled = false;
+          if (transaction) {
+            transaction.setTag('graphql_client_name', clientName);
+            transaction.sampled = clientName !== 'Hive Client';
           }
 
           scope.setContext('Extra Info', {
@@ -117,15 +117,17 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
             operationName: args.operationName,
             operation: print(args.document),
             userId: extractUserId(args.contextValue as any),
-            graphqlClientName,
           });
         },
         trackResolvers: false,
         appendTags: ({ contextValue }) => {
           const supertokens_user_id = extractUserId(contextValue as any);
-          const request_id = cleanRequestId((contextValue as any).req.headers['x-request-id']);
+          const request_id = cleanRequestId((contextValue as Context).req.headers['x-request-id']);
 
-          return { supertokens_user_id, request_id };
+          return {
+            supertokens_user_id,
+            request_id,
+          };
         },
         skip(args) {
           // It's the readiness check
