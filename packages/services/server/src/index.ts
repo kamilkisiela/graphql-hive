@@ -165,11 +165,13 @@ export async function main() {
           clickHouseElapsedDuration.labels({ query }).observe(timings.elapsedSeconds);
         },
       },
-      cdn: {
-        authPrivateKey: env.cdn.auth.privateKey,
-        baseUrl: env.cdn.baseUrl,
-        cloudflare: env.cdn.cloudflare,
-      },
+      cdn: env.cdn
+        ? {
+            authPrivateKey: env.cdn.auth.privateKey,
+            baseUrl: env.cdn.baseUrl,
+            cloudflare: env.cdn.cloudflare,
+          }
+        : null,
       encryptionSecret: env.encryptionSecret,
       feedback: {
         token: 'noop',
