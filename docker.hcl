@@ -28,6 +28,11 @@ function "get_target" {
   result = notequal("", BUILD_TYPE) ? notequal("ci", BUILD_TYPE) ? "target-publish" : "target-ci" : "target-dev"
 }
 
+function "local_image_tag" {
+  params = [name]
+  result = equal("", BUILD_TYPE) ? "${DOCKER_REGISTRY}${name}:latest" : ""
+}
+
 function "image_tag" {
   params = [name, tag]
   result = notequal("", tag) ? "${DOCKER_REGISTRY}${name}:${tag}" : ""
@@ -70,6 +75,7 @@ target "emails" {
     HEALTHCHECK_CMD = "wget --spider -q http://127.0.0.1:$${PORT}/_readiness"
   }
   tags = [
+    local_image_tag("emails"),
     image_tag("emails", COMMIT_SHA),
     image_tag("emails", BRANCH_NAME)
   ]
@@ -85,6 +91,7 @@ target "rate-limit" {
     HEALTHCHECK_CMD = "wget --spider -q http://127.0.0.1:$${PORT}/_readiness"
   }
   tags = [
+    local_image_tag("rate-limit"),
     image_tag("rate-limit", COMMIT_SHA),
     image_tag("rate-limit", BRANCH_NAME)
   ]
@@ -100,6 +107,7 @@ target "schema" {
     HEALTHCHECK_CMD = "wget --spider -q http://127.0.0.1:$${PORT}/_readiness"
   }
   tags = [
+    local_image_tag("schema"),
     image_tag("schema", COMMIT_SHA),
     image_tag("schema", BRANCH_NAME)
   ]
@@ -115,6 +123,7 @@ target "server" {
     HEALTHCHECK_CMD = "wget --spider -q http://127.0.0.1:$${PORT}/_readiness"
   }
   tags = [
+    local_image_tag("server"),
     image_tag("server", COMMIT_SHA),
     image_tag("server", BRANCH_NAME)
   ]
@@ -128,6 +137,7 @@ target "storage" {
     IMAGE_DESCRIPTION = "The storage service of the GraphQL Hive project."
   }
   tags = [
+    local_image_tag("storage"),
     image_tag("storage", COMMIT_SHA),
     image_tag("storage", BRANCH_NAME)
   ]
@@ -143,6 +153,7 @@ target "stripe-billing" {
     HEALTHCHECK_CMD = "wget --spider -q http://127.0.0.1:$${PORT}/_readiness"
   }
   tags = [
+    local_image_tag("stripe-billing"),
     image_tag("stripe-billing", COMMIT_SHA),
     image_tag("stripe-billing", BRANCH_NAME)
   ]
@@ -158,6 +169,7 @@ target "tokens" {
     HEALTHCHECK_CMD = "wget --spider -q http://127.0.0.1:$${PORT}/_readiness"
   }
   tags = [
+    local_image_tag("tokens"),
     image_tag("tokens", COMMIT_SHA),
     image_tag("tokens", BRANCH_NAME)
   ]
@@ -173,6 +185,7 @@ target "usage-estimator" {
     HEALTHCHECK_CMD = "wget --spider -q http://127.0.0.1:$${PORT}/_readiness"
   }
   tags = [
+    local_image_tag("usage-estimator"),
     image_tag("usage-estimator", COMMIT_SHA),
     image_tag("usage-estimator", BRANCH_NAME)
   ]
@@ -188,6 +201,7 @@ target "usage-ingestor" {
     HEALTHCHECK_CMD = "wget --spider -q http://127.0.0.1:$${PORT}/_readiness"
   }
   tags = [
+    local_image_tag("usage-ingestor"),
     image_tag("usage-ingestor", COMMIT_SHA),
     image_tag("usage-ingestor", BRANCH_NAME)
   ]
@@ -203,6 +217,7 @@ target "usage" {
     HEALTHCHECK_CMD = "wget --spider -q http://127.0.0.1:$${PORT}/_readiness"
   }
   tags = [
+    local_image_tag("usage"),
     image_tag("usage", COMMIT_SHA),
     image_tag("usage", BRANCH_NAME)
   ]
@@ -218,6 +233,7 @@ target "webhooks" {
     HEALTHCHECK_CMD = "wget --spider -q http://127.0.0.1:$${PORT}/_readiness"
   }
   tags = [
+    local_image_tag("webhooks"),
     image_tag("webhooks", COMMIT_SHA),
     image_tag("webhooks", BRANCH_NAME)
   ]
@@ -232,6 +248,7 @@ target "app" {
     IMAGE_DESCRIPTION = "The app of the GraphQL Hive project."
   }
   tags = [
+    local_image_tag("app"),
     image_tag("app", COMMIT_SHA),
     image_tag("app", BRANCH_NAME)
   ]
