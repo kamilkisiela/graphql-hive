@@ -1,5 +1,12 @@
 import { fetch } from 'cross-undici-fetch';
-import type { EmailProviderConfig, PostmarkEmailProviderConfig, MockEmailProviderConfig } from './environment';
+import nodemailer from 'nodemailer';
+
+import type {
+  EmailProviderConfig,
+  PostmarkEmailProviderConfig,
+  MockEmailProviderConfig,
+  SMTPEmailProviderConfig,
+} from './environment';
 
 interface Email {
   to: string;
@@ -10,6 +17,7 @@ interface Email {
 const emailProviders = {
   postmark,
   mock,
+  smtp,
 };
 
 export interface EmailProvider {
@@ -24,6 +32,8 @@ export function createEmailProvider(config: EmailProviderConfig, emailFrom: stri
       return mock(config, emailFrom);
     case 'postmark':
       return postmark(config, emailFrom);
+    case 'smtp':
+      return smtp(config, emailFrom);
   }
 }
 
@@ -65,5 +75,30 @@ function mock(_config: MockEmailProviderConfig, _emailFrom: string): EmailProvid
       history.push(email);
     },
     history,
+  };
+}
+
+function smtp(config: SMTPEmailProviderConfig, emailFrom: string) {
+  const transporter = nodemailer.createTransport({
+    host: config.host,
+    port: config.port,
+    secure: config.protocol === 'smtps',
+    auth: {
+      user: config.auth.user,
+      pass: config.auth.pass,
+    },
+  });
+
+  return {
+    id: 'smtp' as const,
+    async send(email: Email) {
+      await transporter.sendMail({
+        from: emailFrom,
+        to: email.to,
+        subject: email.subject,
+        html: email.body,
+      });
+    },
+    history: [],
   };
 }
