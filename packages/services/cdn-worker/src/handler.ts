@@ -20,7 +20,13 @@ const artifactTypesHandlers = {
   /**
    * Returns SchemaArtifact or SchemaArtifact[], same way as it's stored in the storage
    */
-  schema: (targetId: string, artifactType: string, rawValue: string) => new Response(rawValue, { status: 200 }),
+  schema: (targetId: string, artifactType: string, rawValue: string) =>
+    new Response(rawValue, {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }),
   /**
    * Returns Federation Supergraph, we store it as-is.
    */

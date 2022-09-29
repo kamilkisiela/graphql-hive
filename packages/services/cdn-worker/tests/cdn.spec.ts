@@ -35,6 +35,40 @@ describe('CDN Worker', () => {
 
   afterEach(clearWorkerEnv);
 
+  test('in /schema and /metadata the response should contain content-type: application/json header', async () => {
+    const SECRET = '123456';
+    const targetId = 'fake-target-id';
+    const map = new Map();
+    map.set(`target:${targetId}:schema`, JSON.stringify({ sdl: `type Query { dummy: String }` }));
+
+    mockWorkerEnv({
+      HIVE_DATA: map,
+      KEY_DATA: SECRET,
+    });
+
+    const token = createToken(SECRET, targetId);
+
+    const schemaRequest = new Request(`https://fake-worker.com/${targetId}/schema`, {
+      headers: {
+        'x-hive-cdn-key': token,
+      },
+    });
+
+    const schemaResponse = await handleRequest(schemaRequest, KeyValidators.Bcrypt);
+    expect(schemaResponse.status).toBe(200);
+    expect(schemaResponse.headers.get('content-type')).toBe('application/json');
+
+    const metadataRequest = new Request(`https://fake-worker.com/${targetId}/schema`, {
+      headers: {
+        'x-hive-cdn-key': token,
+      },
+    });
+
+    const metadataResponse = await handleRequest(metadataRequest, KeyValidators.Bcrypt);
+    expect(metadataResponse.status).toBe(200);
+    expect(metadataResponse.headers.get('content-type')).toBe('application/json');
+  });
+
   describe('Basic parsing errors', () => {
     it('Should throw when target id is missing', async () => {
       mockWorkerEnv({
@@ -117,7 +151,7 @@ describe('CDN Worker', () => {
       expect(response.status).toBe(200);
     });
 
-    it('Should throw on missmatch of token target and actual target', async () => {
+    it('Should throw on mismatch of token target and actual target', async () => {
       const SECRET = '123456';
 
       mockWorkerEnv({
