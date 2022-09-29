@@ -70,7 +70,7 @@ export const backendConfig = (): TypeInput => {
           env.auth.legacyAuth0 ? getAuth0Overrides(env.auth.legacyAuth0) : undefined,
       }),
       EmailVerification.init({
-        mode: 'REQUIRED',
+        mode: env.auth.requireEmailVerification ? 'REQUIRED' : 'OPTIONAL',
         emailDelivery: {
           override: originalImplementation => ({
             ...originalImplementation,

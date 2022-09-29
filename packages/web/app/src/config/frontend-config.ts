@@ -24,7 +24,7 @@ export const frontendConfig = () => {
         },
       }),
       EmailVerification.init({
-        mode: 'REQUIRED',
+        mode: env.auth.requireEmailVerification ? 'REQUIRED' : 'OPTIONAL',
       }),
       SessionReact.init(),
     ],

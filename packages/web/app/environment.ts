@@ -17,6 +17,7 @@ const BaseSchema = zod.object({
   DOCS_URL: zod.string().url().optional(),
   STRIPE_PUBLIC_KEY: zod.string().optional(),
   RELEASE: zod.string().optional(),
+  AUTH_REQUIRE_EMAIL_VERIFICATION: zod.union([zod.literal('1'), zod.literal('0')]).optional(),
 });
 
 const AuthGitHubConfigSchema = zod.union([
@@ -157,6 +158,7 @@ const config = {
             },
           }
         : null,
+    requireEmailVerification: base.AUTH_REQUIRE_EMAIL_VERIFICATION === '1',
   },
   sentry: sentry.SENTRY === '1' ? { dsn: sentry.SENTRY_DSN } : null,
   stripePublicKey: base.STRIPE_PUBLIC_KEY ?? null,
