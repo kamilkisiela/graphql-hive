@@ -48,11 +48,15 @@ const SMTPEmailModel = zod.object({
   EMAIL_PROVIDER_SMTP_AUTH_PASSWORD: zod.string(),
 });
 
+const SendmailEmailModel = zod.object({
+  EMAIL_PROVIDER: zod.literal('sendmail'),
+});
+
 const MockEmailProviderModel = zod.object({
   EMAIL_PROVIDER: zod.literal('mock'),
 });
 
-const EmailProviderModel = zod.union([PostmarkEmailModel, MockEmailProviderModel, SMTPEmailModel]);
+const EmailProviderModel = zod.union([PostmarkEmailModel, MockEmailProviderModel, SMTPEmailModel, SendmailEmailModel]);
 
 const PrometheusModel = zod.object({
   PROMETHEUS_METRICS: zod.union([zod.literal('0'), zod.literal('1')]).optional(),
@@ -117,11 +121,14 @@ const emailProviderConfig =
           pass: email.EMAIL_PROVIDER_SMTP_AUTH_PASSWORD,
         },
       } as const)
+    : email.EMAIL_PROVIDER === 'sendmail'
+    ? ({ provider: 'sendmail' } as const)
     : ({ provider: 'mock' } as const);
 
 export type EmailProviderConfig = typeof emailProviderConfig;
 export type PostmarkEmailProviderConfig = Extract<EmailProviderConfig, { provider: 'postmark' }>;
 export type SMTPEmailProviderConfig = Extract<EmailProviderConfig, { provider: 'smtp' }>;
+export type SendmailEmailProviderConfig = Extract<EmailProviderConfig, { provider: 'sendmail' }>;
 export type MockEmailProviderConfig = Extract<EmailProviderConfig, { provider: 'mock' }>;
 
 export const env = {
