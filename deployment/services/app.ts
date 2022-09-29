@@ -72,7 +72,6 @@ export function deployApp({
         },
         { name: 'SENTRY_DSN', value: commonEnv.SENTRY_DSN },
         { name: 'SENTRY', value: commonEnv.SENTRY_ENABLED },
-        { name: 'SENTRY_ENABLED', value: commonEnv.SENTRY_ENABLED }, // TODO: remove this
         {
           name: 'GRAPHQL_ENDPOINT',
           value: serviceLocalEndpoint(graphql.service).apply(s => `${s}/graphql`),

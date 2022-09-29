@@ -30,7 +30,6 @@ export function deployDbMigrations({
     'db-migrations',
     {
       env: {
-        POSTGRES_CONNECTION_STRING: rawConnectionString, // TODO: remove this
         POSTGRES_HOST: connectionString.apply(connection => connection.host ?? ''),
         POSTGRES_PORT: connectionString.apply(connection => connection.port ?? ''),
         POSTGRES_PASSWORD: connectionString.apply(connection => connection.password ?? ''),

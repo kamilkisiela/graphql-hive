@@ -49,7 +49,6 @@ export function deployRateLimit({
         RELEASE: packageHelper.currentReleaseId(),
         USAGE_ESTIMATOR_ENDPOINT: serviceLocalEndpoint(usageEstimator.service),
         EMAILS_ENDPOINT: serviceLocalEndpoint(emails.service),
-        POSTGRES_CONNECTION_STRING: rawConnectionString, // TODO: remove this
         POSTGRES_HOST: connectionString.apply(connection => connection.host ?? ''),
         POSTGRES_PORT: connectionString.apply(connection => connection.port ?? ''),
         POSTGRES_PASSWORD: connectionString.apply(connection => connection.password ?? ''),

@@ -96,7 +96,6 @@ export function deployGraphQL({
         REDIS_PORT: String(redis.config.port),
         REDIS_PASSWORD: redis.config.password,
         RELEASE: packageHelper.currentReleaseId(),
-        POSTGRES_CONNECTION_STRING: rawConnectionString, // TODO: remove this
         POSTGRES_HOST: connectionString.apply(connection => connection.host ?? ''),
         POSTGRES_PORT: connectionString.apply(connection => connection.port ?? ''),
         POSTGRES_PASSWORD: connectionString.apply(connection => connection.password ?? ''),
@@ -107,10 +106,6 @@ export function deployGraphQL({
         TOKENS_ENDPOINT: serviceLocalEndpoint(tokens.service),
         WEBHOOKS_ENDPOINT: serviceLocalEndpoint(webhooks.service),
         SCHEMA_ENDPOINT: serviceLocalEndpoint(schema.service),
-        CF_BASE_PATH: 'https://api.cloudflare.com/client/v4/accounts', // TODO: remove this
-        CF_ACCOUNT_ID: cloudflareConfig.require('accountId'), // TODO: remove this
-        CF_AUTH_TOKEN: cloudflareConfig.requireSecret('apiToken'), // TODO: remove this
-        CF_NAMESPACE_ID: cloudflare.cfStorageNamespaceId, // TODO: remove this
         CDN: '1',
         CDN_CF_BASE_PATH: 'https://api.cloudflare.com/client/v4/accounts',
         CDN_CF_ACCOUNT_ID: cloudflareConfig.require('accountId'),

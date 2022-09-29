@@ -45,7 +45,6 @@ export function deployStripeBilling({
         RELEASE: packageHelper.currentReleaseId(),
         USAGE_ESTIMATOR_ENDPOINT: serviceLocalEndpoint(usageEstimator.service),
         STRIPE_SECRET_KEY: billingConfig.requireSecret('stripePrivateKey'),
-        POSTGRES_CONNECTION_STRING: rawConnectionString, // TODO: remove this
         POSTGRES_HOST: connectionString.apply(connection => connection.host ?? ''),
         POSTGRES_PORT: connectionString.apply(connection => connection.port ?? ''),
         POSTGRES_PASSWORD: connectionString.apply(connection => connection.password ?? ''),
