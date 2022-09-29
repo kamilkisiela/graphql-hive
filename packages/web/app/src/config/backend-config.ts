@@ -1,6 +1,7 @@
 import ThirdPartyEmailPasswordNode from 'supertokens-node/recipe/thirdpartyemailpassword';
 import SessionNode from 'supertokens-node/recipe/session';
 import type { TypeInput } from 'supertokens-node/types';
+import EmailVerification from 'supertokens-node/recipe/emailverification';
 import type { TypeProvider } from 'supertokens-node/recipe/thirdparty/types';
 import type { TypeInput as ThirdPartEmailPasswordTypeInput } from 'supertokens-node/recipe/thirdpartyemailpassword/types';
 import { fetch } from 'cross-undici-fetch';
@@ -47,17 +48,7 @@ export const backendConfig = (): TypeInput => {
           override: originalImplementation => ({
             ...originalImplementation,
             async sendEmail(input) {
-              if (input.type === 'EMAIL_VERIFICATION') {
-                await trpcService.mutation('sendEmailVerificationEmail', {
-                  user: {
-                    id: input.user.id,
-                    email: input.user.email,
-                  },
-                  emailVerifyLink: input.emailVerifyLink,
-                });
-
-                return Promise.resolve();
-              } else if (input.type === 'PASSWORD_RESET') {
+              if (input.type === 'PASSWORD_RESET') {
                 await trpcService.mutation('sendPasswordResetEmail', {
                   user: {
                     id: input.user.id,
@@ -77,6 +68,27 @@ export const backendConfig = (): TypeInput => {
            * These overrides are only relevant for the legacy Auth0 -> SuperTokens migration (period).
            */
           env.auth.legacyAuth0 ? getAuth0Overrides(env.auth.legacyAuth0) : undefined,
+      }),
+      EmailVerification.init({
+        mode: 'REQUIRED',
+        emailDelivery: {
+          override: originalImplementation => ({
+            ...originalImplementation,
+            sendEmail: async input => {
+              if (input.type === 'EMAIL_VERIFICATION') {
+                await trpcService.mutation('sendEmailVerificationEmail', {
+                  user: {
+                    id: input.user.id,
+                    email: input.user.email,
+                  },
+                  emailVerifyLink: input.emailVerifyLink,
+                });
+
+                return Promise.resolve();
+              }
+            },
+          }),
+        },
       }),
       SessionNode.init({
         override: {
