@@ -1,11 +1,13 @@
 import { fetch } from 'cross-undici-fetch';
 import nodemailer from 'nodemailer';
+import sm from 'sendmail';
 
 import type {
   EmailProviderConfig,
   PostmarkEmailProviderConfig,
   MockEmailProviderConfig,
   SMTPEmailProviderConfig,
+  SendmailEmailProviderConfig,
 } from './environment';
 
 interface Email {
@@ -18,6 +20,7 @@ const emailProviders = {
   postmark,
   mock,
   smtp,
+  sendmail,
 };
 
 export interface EmailProvider {
@@ -34,6 +37,8 @@ export function createEmailProvider(config: EmailProviderConfig, emailFrom: stri
       return postmark(config, emailFrom);
     case 'smtp':
       return smtp(config, emailFrom);
+    case 'sendmail':
+      return sendmail(config, emailFrom);
   }
 }
 
@@ -97,6 +102,34 @@ function smtp(config: SMTPEmailProviderConfig, emailFrom: string) {
         to: email.to,
         subject: email.subject,
         html: email.body,
+      });
+    },
+    history: [],
+  };
+}
+
+function sendmail(_config: SendmailEmailProviderConfig, emailFrom: string) {
+  const client = sm({});
+
+  return {
+    id: 'sendmail' as const,
+    async send(email: Email) {
+      await new Promise((resolve, reject) => {
+        client(
+          {
+            from: emailFrom,
+            to: email.to,
+            subject: email.subject,
+            html: email.body,
+          },
+          (err, reply) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(reply);
+            }
+          }
+        );
       });
     },
     history: [],
