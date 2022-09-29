@@ -203,7 +203,7 @@ export const env = {
     schema: { endpoint: base.SCHEMA_ENDPOINT },
   },
   http: {
-    port: base.PORT ?? 4000,
+    port: base.PORT ?? 3001,
   },
   postgres: {
     host: postgres.POSTGRES_HOST,
