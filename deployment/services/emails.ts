@@ -48,8 +48,6 @@ export function deployEmails({
         EMAIL_PROVIDER: 'postmark',
         EMAIL_PROVIDER_POSTMARK_TOKEN: email.token,
         EMAIL_PROVIDER_POSTMARK_MESSAGE_STREAM: email.messageStream,
-        POSTMARK_TOKEN: email.token, // TODO: remove this
-        POSTMARK_MESSAGE_STREAM: email.messageStream, // TODO: remove this
       },
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
