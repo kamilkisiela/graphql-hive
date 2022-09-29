@@ -69,6 +69,256 @@ describe('CDN Worker', () => {
     expect(metadataResponse.headers.get('content-type')).toBe('application/json');
   });
 
+  test('etag + if-none-match for schema', async () => {
+    const SECRET = '123456';
+    const targetId = 'fake-target-id';
+    const map = new Map();
+    map.set(`target:${targetId}:schema`, JSON.stringify({ sdl: `type Query { dummy: String }` }));
+
+    mockWorkerEnv({
+      HIVE_DATA: map,
+      KEY_DATA: SECRET,
+    });
+
+    const token = createToken(SECRET, targetId);
+
+    const firstRequest = new Request(`https://fake-worker.com/${targetId}/schema`, {
+      headers: {
+        'x-hive-cdn-key': token,
+      },
+    });
+    const firstResponse = await handleRequest(firstRequest, KeyValidators.Bcrypt);
+    const etag = firstResponse.headers.get('etag');
+
+    expect(firstResponse.status).toBe(200);
+    expect(firstResponse.body).toBeDefined();
+    // Every request receives the etag
+    expect(etag).toBeDefined();
+
+    // Sending the etag in the if-none-match header should result in a 304
+    const secondRequest = new Request(`https://fake-worker.com/${targetId}/schema`, {
+      headers: {
+        'x-hive-cdn-key': token,
+        'if-none-match': etag!,
+      },
+    });
+    const secondResponse = await handleRequest(secondRequest, KeyValidators.Bcrypt);
+    expect(secondResponse.status).toBe(304);
+    expect(secondResponse.body).toBeNull();
+
+    // Sending the etag in the if-none-match header should result in a 304
+    const wrongEtagRequest = new Request(`https://fake-worker.com/${targetId}/schema`, {
+      headers: {
+        'x-hive-cdn-key': token,
+        'if-none-match': '"non-existing-etag"',
+      },
+    });
+    const wrongEtagResponse = await handleRequest(wrongEtagRequest, KeyValidators.Bcrypt);
+    expect(wrongEtagResponse.status).toBe(200);
+    expect(wrongEtagResponse.body).toBeDefined();
+  });
+
+  test('etag + if-none-match for supergraph', async () => {
+    const SECRET = '123456';
+    const targetId = 'fake-target-id';
+    const map = new Map();
+    map.set(`target:${targetId}:supergraph`, JSON.stringify({ sdl: `type Query { dummy: String }` }));
+
+    mockWorkerEnv({
+      HIVE_DATA: map,
+      KEY_DATA: SECRET,
+    });
+
+    const token = createToken(SECRET, targetId);
+
+    const firstRequest = new Request(`https://fake-worker.com/${targetId}/supergraph`, {
+      headers: {
+        'x-hive-cdn-key': token,
+      },
+    });
+    const firstResponse = await handleRequest(firstRequest, KeyValidators.Bcrypt);
+    const etag = firstResponse.headers.get('etag');
+
+    expect(firstResponse.status).toBe(200);
+    expect(firstResponse.body).toBeDefined();
+    // Every request receives the etag
+    expect(etag).toBeDefined();
+
+    // Sending the etag in the if-none-match header should result in a 304
+    const secondRequest = new Request(`https://fake-worker.com/${targetId}/supergraph`, {
+      headers: {
+        'x-hive-cdn-key': token,
+        'if-none-match': etag!,
+      },
+    });
+    const secondResponse = await handleRequest(secondRequest, KeyValidators.Bcrypt);
+    expect(secondResponse.status).toBe(304);
+    expect(secondResponse.body).toBeNull();
+
+    // Sending the etag in the if-none-match header should result in a 304
+    const wrongEtagRequest = new Request(`https://fake-worker.com/${targetId}/supergraph`, {
+      headers: {
+        'x-hive-cdn-key': token,
+        'if-none-match': '"non-existing-etag"',
+      },
+    });
+    const wrongEtagResponse = await handleRequest(wrongEtagRequest, KeyValidators.Bcrypt);
+    expect(wrongEtagResponse.status).toBe(200);
+    expect(wrongEtagResponse.body).toBeDefined();
+  });
+
+  test('etag + if-none-match for metadata', async () => {
+    const SECRET = '123456';
+    const targetId = 'fake-target-id';
+    const map = new Map();
+    map.set(`target:${targetId}:metadata`, JSON.stringify({ sdl: `type Query { dummy: String }` }));
+
+    mockWorkerEnv({
+      HIVE_DATA: map,
+      KEY_DATA: SECRET,
+    });
+
+    const token = createToken(SECRET, targetId);
+
+    const firstRequest = new Request(`https://fake-worker.com/${targetId}/metadata`, {
+      headers: {
+        'x-hive-cdn-key': token,
+      },
+    });
+    const firstResponse = await handleRequest(firstRequest, KeyValidators.Bcrypt);
+    const etag = firstResponse.headers.get('etag');
+
+    expect(firstResponse.status).toBe(200);
+    expect(firstResponse.body).toBeDefined();
+    // Every request receives the etag
+    expect(etag).toBeDefined();
+
+    // Sending the etag in the if-none-match header should result in a 304
+    const secondRequest = new Request(`https://fake-worker.com/${targetId}/metadata`, {
+      headers: {
+        'x-hive-cdn-key': token,
+        'if-none-match': etag!,
+      },
+    });
+    const secondResponse = await handleRequest(secondRequest, KeyValidators.Bcrypt);
+    expect(secondResponse.status).toBe(304);
+    expect(secondResponse.body).toBeNull();
+
+    // Sending the etag in the if-none-match header should result in a 304
+    const wrongEtagRequest = new Request(`https://fake-worker.com/${targetId}/metadata`, {
+      headers: {
+        'x-hive-cdn-key': token,
+        'if-none-match': '"non-existing-etag"',
+      },
+    });
+    const wrongEtagResponse = await handleRequest(wrongEtagRequest, KeyValidators.Bcrypt);
+    expect(wrongEtagResponse.status).toBe(200);
+    expect(wrongEtagResponse.body).toBeDefined();
+  });
+
+  test('etag + if-none-match for introspection', async () => {
+    const SECRET = '123456';
+    const targetId = 'fake-target-id';
+    const map = new Map();
+    map.set(`target:${targetId}:schema`, JSON.stringify({ sdl: `type Query { dummy: String }` }));
+
+    mockWorkerEnv({
+      HIVE_DATA: map,
+      KEY_DATA: SECRET,
+    });
+
+    const token = createToken(SECRET, targetId);
+
+    const firstRequest = new Request(`https://fake-worker.com/${targetId}/introspection`, {
+      headers: {
+        'x-hive-cdn-key': token,
+      },
+    });
+    const firstResponse = await handleRequest(firstRequest, KeyValidators.Bcrypt);
+    const etag = firstResponse.headers.get('etag');
+
+    expect(firstResponse.status).toBe(200);
+    expect(firstResponse.body).toBeDefined();
+    // Every request receives the etag
+    expect(etag).toBeDefined();
+
+    // Sending the etag in the if-none-match header should result in a 304
+    const secondRequest = new Request(`https://fake-worker.com/${targetId}/introspection`, {
+      headers: {
+        'x-hive-cdn-key': token,
+        'if-none-match': etag!,
+      },
+    });
+    const secondResponse = await handleRequest(secondRequest, KeyValidators.Bcrypt);
+    expect(secondResponse.status).toBe(304);
+    expect(secondResponse.body).toBeNull();
+
+    // Sending the etag in the if-none-match header should result in a 304
+    const wrongEtagRequest = new Request(`https://fake-worker.com/${targetId}/introspection`, {
+      headers: {
+        'x-hive-cdn-key': token,
+        'if-none-match': '"non-existing-etag"',
+      },
+    });
+    const wrongEtagResponse = await handleRequest(wrongEtagRequest, KeyValidators.Bcrypt);
+    expect(wrongEtagResponse.status).toBe(200);
+    expect(wrongEtagResponse.body).toBeDefined();
+  });
+
+  test('etag + if-none-match for sdl', async () => {
+    const SECRET = '123456';
+    const targetId = 'fake-target-id';
+    const map = new Map();
+    map.set(
+      `target:${targetId}:schema`,
+      JSON.stringify({
+        sdl: `type Query { dummy: String }`,
+      })
+    );
+
+    mockWorkerEnv({
+      HIVE_DATA: map,
+      KEY_DATA: SECRET,
+    });
+
+    const token = createToken(SECRET, targetId);
+
+    const firstRequest = new Request(`https://fake-worker.com/${targetId}/sdl`, {
+      headers: {
+        'x-hive-cdn-key': token,
+      },
+    });
+    const firstResponse = await handleRequest(firstRequest, KeyValidators.Bcrypt);
+    const etag = firstResponse.headers.get('etag');
+
+    expect(firstResponse.status).toBe(200);
+    expect(firstResponse.body).toBeDefined();
+    // Every request receives the etag
+    expect(etag).toBeDefined();
+
+    // Sending the etag in the if-none-match header should result in a 304
+    const secondRequest = new Request(`https://fake-worker.com/${targetId}/sdl`, {
+      headers: {
+        'x-hive-cdn-key': token,
+        'if-none-match': etag!,
+      },
+    });
+    const secondResponse = await handleRequest(secondRequest, KeyValidators.Bcrypt);
+    expect(secondResponse.status).toBe(304);
+    expect(secondResponse.body).toBeNull();
+
+    // Sending the etag in the if-none-match header should result in a 304
+    const wrongEtagRequest = new Request(`https://fake-worker.com/${targetId}/sdl`, {
+      headers: {
+        'x-hive-cdn-key': token,
+        'if-none-match': '"non-existing-etag"',
+      },
+    });
+    const wrongEtagResponse = await handleRequest(wrongEtagRequest, KeyValidators.Bcrypt);
+    expect(wrongEtagResponse.status).toBe(200);
+    expect(wrongEtagResponse.body).toBeDefined();
+  });
+
   describe('Basic parsing errors', () => {
     it('Should throw when target id is missing', async () => {
       mockWorkerEnv({
