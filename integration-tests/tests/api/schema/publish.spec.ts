@@ -1521,6 +1521,12 @@ test('cannot do API request with invalid access token', async () => {
       errors: [
         {
           message: 'Invalid token provided!',
+          locations: [
+            {
+              column: 3,
+              line: 2,
+            },
+          ],
           path: ['schemaPublish'],
         },
       ],
