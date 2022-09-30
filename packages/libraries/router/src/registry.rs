@@ -45,7 +45,7 @@ impl HiveRegistry {
         env::set_var("APOLLO_ROUTER_SUPERGRAPH_PATH", file_name.clone());
         env::set_var("APOLLO_ROUTER_HOT_RELOAD", "true");
 
-        let registry = HiveRegistry {
+        let mut registry = HiveRegistry {
             endpoint,
             key,
             file_name,
@@ -70,17 +70,21 @@ impl HiveRegistry {
         Ok(())
     }
 
-    fn fetch_supergraph(&self, etag: Option<String>) -> Result<Option<String>, String> {
+    fn fetch_supergraph(&mut self, etag: Option<String>) -> Result<Option<String>, String> {
         let client = reqwest::blocking::Client::new();
-        let req = client
-            .get(format!("{}/supergraph", self.endpoint))
-            .header("X-Hive-CDN-Key", self.key.to_string());
+        let mut headers = reqwest::header::HeaderMap::new();
+
+        headers.insert("X-Hive-CDN-Key", self.key.parse().unwrap());
 
         if let Some(checksum) = etag {
-            req.header("If-None-Match", checksum);
+            headers.insert("If-None-Match", checksum.parse().unwrap());
         }
 
-        let resp = req.send().map_err(|e| e.to_string())?;
+        let resp = client
+            .get(format!("{}/supergraph", self.endpoint))
+            .headers(headers)
+            .send()
+            .map_err(|e| e.to_string())?;
 
         match resp.headers().get("etag") {
             Some(checksum) => {
@@ -99,10 +103,20 @@ impl HiveRegistry {
         Ok(Some(resp.text().map_err(|e| e.to_string())?))
     }
 
-    fn initial_supergraph(&self) -> Result<(), String> {
+    fn initial_supergraph(&mut self) -> Result<(), String> {
         let mut file = std::fs::File::create(self.file_name.clone()).map_err(|e| e.to_string())?;
         let resp = self.fetch_supergraph(None)?;
-        file.write_all(resp.as_bytes()).map_err(|e| e.to_string())?;
+
+        match resp {
+            Some(supergraph) => {
+                file.write_all(supergraph.as_bytes())
+                    .map_err(|e| e.to_string())?;
+            }
+            None => {
+                return Err("Failed to fetch supergraph".to_string());
+            }
+        }
+
         Ok(())
     }
 
@@ -110,8 +124,8 @@ impl HiveRegistry {
         self.etag = etag;
     }
 
-    fn poll(&self) {
-        match self.fetch_supergraph(self.etag) {
+    fn poll(&mut self) {
+        match self.fetch_supergraph(self.etag.clone()) {
             Ok(new_supergraph) => {
                 if let Some(new_supergraph) = new_supergraph {
                     let current_file = std::fs::read_to_string(self.file_name.clone())
