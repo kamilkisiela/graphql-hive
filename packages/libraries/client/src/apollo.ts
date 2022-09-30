@@ -7,24 +7,53 @@ import { createHive } from './client';
 import { isHiveClient } from './internal/utils';
 
 export function createSupergraphSDLFetcher({ endpoint, key }: SupergraphSDLFetcherOptions) {
+  let cacheETag: string | null = null;
+  let cached: {
+    id: string;
+    supergraphSdl: string;
+  } | null = null;
+
   return function supergraphSDLFetcher() {
+    const headers: {
+      [key: string]: string;
+    } = {
+      'X-Hive-CDN-Key': key,
+    };
+
+    if (cacheETag) {
+      headers['If-None-Match'] = cacheETag;
+    }
+
     return axios
       .get(endpoint + '/supergraph', {
-        headers: {
-          'X-Hive-CDN-Key': key,
-        },
+        headers,
       })
       .then(response => {
         if (response.status >= 200 && response.status < 300) {
-          return response.data;
+          const supergraphSdl = response.data;
+          const result = {
+            id: createHash('sha256').update(supergraphSdl).digest('base64'),
+            supergraphSdl,
+          };
+
+          const etag = response.headers['etag'];
+          if (etag) {
+            cached = result;
+            cacheETag = etag;
+          }
+
+          return result;
         }
 
         return Promise.reject(new Error(`Failed to fetch supergraph [${response.status}]`));
       })
-      .then(supergraphSdl => ({
-        id: createHash('sha256').update(supergraphSdl).digest('base64'),
-        supergraphSdl,
-      }));
+      .catch(async error => {
+        if (axios.isAxiosError(error) && error.response?.status === 304 && cached !== null) {
+          return cached;
+        }
+
+        throw error;
+      });
   };
 }
 

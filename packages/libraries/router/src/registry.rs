@@ -10,6 +10,7 @@ pub struct HiveRegistry {
     endpoint: String,
     key: String,
     file_name: String,
+    etag: Option<String>,
 }
 
 impl HiveRegistry {
@@ -44,10 +45,11 @@ impl HiveRegistry {
         env::set_var("APOLLO_ROUTER_SUPERGRAPH_PATH", file_name.clone());
         env::set_var("APOLLO_ROUTER_HOT_RELOAD", "true");
 
-        let registry = HiveRegistry {
+        let mut registry = HiveRegistry {
             endpoint,
             key,
             file_name,
+            etag: None,
         };
 
         match registry.initial_supergraph() {
@@ -68,36 +70,75 @@ impl HiveRegistry {
         Ok(())
     }
 
-    fn fetch_supergraph(&self) -> Result<String, String> {
+    fn fetch_supergraph(&mut self, etag: Option<String>) -> Result<Option<String>, String> {
         let client = reqwest::blocking::Client::new();
+        let mut headers = reqwest::header::HeaderMap::new();
+
+        headers.insert("X-Hive-CDN-Key", self.key.parse().unwrap());
+
+        if let Some(checksum) = etag {
+            headers.insert("If-None-Match", checksum.parse().unwrap());
+        }
+
         let resp = client
             .get(format!("{}/supergraph", self.endpoint))
-            .header("X-Hive-CDN-Key", self.key.to_string())
+            .headers(headers)
             .send()
             .map_err(|e| e.to_string())?;
 
-        Ok(resp.text().map_err(|e| e.to_string())?)
+        match resp.headers().get("etag") {
+            Some(checksum) => {
+                let etag = checksum.to_str().map_err(|e| e.to_string())?;
+                self.update_latest_etag(Some(etag.to_string()));
+            }
+            None => {
+                self.update_latest_etag(None);
+            }
+        }
+
+        if resp.status().as_u16() == 304 {
+            return Ok(None);
+        }
+
+        Ok(Some(resp.text().map_err(|e| e.to_string())?))
     }
 
-    fn initial_supergraph(&self) -> Result<(), String> {
+    fn initial_supergraph(&mut self) -> Result<(), String> {
         let mut file = std::fs::File::create(self.file_name.clone()).map_err(|e| e.to_string())?;
-        let resp = self.fetch_supergraph()?;
-        file.write_all(resp.as_bytes()).map_err(|e| e.to_string())?;
+        let resp = self.fetch_supergraph(None)?;
+
+        match resp {
+            Some(supergraph) => {
+                file.write_all(supergraph.as_bytes())
+                    .map_err(|e| e.to_string())?;
+            }
+            None => {
+                return Err("Failed to fetch supergraph".to_string());
+            }
+        }
+
         Ok(())
     }
 
-    fn poll(&self) {
-        let current_file =
-            std::fs::read_to_string(self.file_name.clone()).expect("Could not read file");
-        let current_supergraph_hash = hash(current_file.as_bytes());
+    fn update_latest_etag(&mut self, etag: Option<String>) {
+        self.etag = etag;
+    }
 
-        match self.fetch_supergraph() {
+    fn poll(&mut self) {
+        match self.fetch_supergraph(self.etag.clone()) {
             Ok(new_supergraph) => {
-                let new_supergraph_hash = hash(new_supergraph.as_bytes());
-                if current_supergraph_hash != new_supergraph_hash {
-                    tracing::info!("New supergraph detected!");
-                    std::fs::write(self.file_name.clone(), new_supergraph)
-                        .expect("Could not write file");
+                if let Some(new_supergraph) = new_supergraph {
+                    let current_file = std::fs::read_to_string(self.file_name.clone())
+                        .expect("Could not read file");
+                    let current_supergraph_hash = hash(current_file.as_bytes());
+
+                    let new_supergraph_hash = hash(new_supergraph.as_bytes());
+
+                    if current_supergraph_hash != new_supergraph_hash {
+                        tracing::info!("New supergraph detected!");
+                        std::fs::write(self.file_name.clone(), new_supergraph)
+                            .expect("Could not write file");
+                    }
                 }
             }
             Err(e) => tracing::error!("{}", e),
