@@ -10,6 +10,7 @@ pub struct HiveRegistry {
     endpoint: String,
     key: String,
     file_name: String,
+    etag: Option<String>,
 }
 
 impl HiveRegistry {
@@ -48,6 +49,7 @@ impl HiveRegistry {
             endpoint,
             key,
             file_name,
+            etag: None,
         };
 
         match registry.initial_supergraph() {
@@ -68,36 +70,61 @@ impl HiveRegistry {
         Ok(())
     }
 
-    fn fetch_supergraph(&self) -> Result<String, String> {
+    fn fetch_supergraph(&self, etag: Option<String>) -> Result<Option<String>, String> {
         let client = reqwest::blocking::Client::new();
-        let resp = client
+        let req = client
             .get(format!("{}/supergraph", self.endpoint))
-            .header("X-Hive-CDN-Key", self.key.to_string())
-            .send()
-            .map_err(|e| e.to_string())?;
+            .header("X-Hive-CDN-Key", self.key.to_string());
 
-        Ok(resp.text().map_err(|e| e.to_string())?)
+        if let Some(checksum) = etag {
+            req.header("If-None-Match", checksum);
+        }
+
+        let resp = req.send().map_err(|e| e.to_string())?;
+
+        match resp.headers().get("etag") {
+            Some(checksum) => {
+                let etag = checksum.to_str().map_err(|e| e.to_string())?;
+                self.update_latest_etag(Some(etag.to_string()));
+            }
+            None => {
+                self.update_latest_etag(None);
+            }
+        }
+
+        if resp.status().as_u16() == 304 {
+            return Ok(None);
+        }
+
+        Ok(Some(resp.text().map_err(|e| e.to_string())?))
     }
 
     fn initial_supergraph(&self) -> Result<(), String> {
         let mut file = std::fs::File::create(self.file_name.clone()).map_err(|e| e.to_string())?;
-        let resp = self.fetch_supergraph()?;
+        let resp = self.fetch_supergraph(None)?;
         file.write_all(resp.as_bytes()).map_err(|e| e.to_string())?;
         Ok(())
     }
 
-    fn poll(&self) {
-        let current_file =
-            std::fs::read_to_string(self.file_name.clone()).expect("Could not read file");
-        let current_supergraph_hash = hash(current_file.as_bytes());
+    fn update_latest_etag(&mut self, etag: Option<String>) {
+        self.etag = etag;
+    }
 
-        match self.fetch_supergraph() {
+    fn poll(&self) {
+        match self.fetch_supergraph(self.etag) {
             Ok(new_supergraph) => {
-                let new_supergraph_hash = hash(new_supergraph.as_bytes());
-                if current_supergraph_hash != new_supergraph_hash {
-                    tracing::info!("New supergraph detected!");
-                    std::fs::write(self.file_name.clone(), new_supergraph)
-                        .expect("Could not write file");
+                if let Some(new_supergraph) = new_supergraph {
+                    let current_file = std::fs::read_to_string(self.file_name.clone())
+                        .expect("Could not read file");
+                    let current_supergraph_hash = hash(current_file.as_bytes());
+
+                    let new_supergraph_hash = hash(new_supergraph.as_bytes());
+
+                    if current_supergraph_hash != new_supergraph_hash {
+                        tracing::info!("New supergraph detected!");
+                        std::fs::write(self.file_name.clone(), new_supergraph)
+                            .expect("Could not write file");
+                    }
                 }
             }
             Err(e) => tracing::error!("{}", e),
