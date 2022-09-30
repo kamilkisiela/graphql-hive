@@ -62,9 +62,9 @@ export function createWriter({
       const sql = `INSERT INTO operations (${operationsFields}) FORMAT CSV`;
 
       await Promise.all([
-        writeCsv(clickhouse, agents, sql, compressed, 3),
+        writeCsv(clickhouse, agents, sql, compressed, logger, 3),
         clickhouseCloud
-          ? writeCsv(clickhouseCloud, agents, sql, compressed, 1).catch(error => {
+          ? writeCsv(clickhouseCloud, agents, sql, compressed, logger, 1).catch(error => {
               logger.error('Failed to write operations to ClickHouse Cloud %s', error);
               // Ignore errors from clickhouse cloud
               return Promise.resolve();
@@ -78,9 +78,9 @@ export function createWriter({
       const sql = `INSERT INTO operation_collection (${registryFields}) FORMAT CSV`;
 
       await Promise.all([
-        writeCsv(clickhouse, agents, sql, compressed, 3),
+        writeCsv(clickhouse, agents, sql, compressed, logger, 3),
         clickhouseCloud
-          ? writeCsv(clickhouseCloud, agents, sql, compressed, 1).catch(error => {
+          ? writeCsv(clickhouseCloud, agents, sql, compressed, logger, 1).catch(error => {
               logger.error('Failed to write operation_collection to ClickHouse Cloud %s', error);
               // Ignore errors from clickhouse cloud
               return Promise.resolve();
@@ -97,6 +97,7 @@ export function createWriter({
           agents,
           `INSERT INTO operations_new (${legacyOperationsFields}) FORMAT CSV`,
           await compress(csv),
+          logger,
           3
         );
       },
@@ -107,6 +108,7 @@ export function createWriter({
           agents,
           `INSERT INTO operations_registry (${legacyRegistryFields}) FORMAT CSV`,
           await compress(csv),
+          logger,
           3
         );
       },
@@ -126,6 +128,7 @@ async function writeCsv(
   },
   query: string,
   body: Buffer,
+  logger: FastifyLoggerInstance,
   maxRetry: number
 ) {
   return got
@@ -144,9 +147,12 @@ async function writeCsv(
       retry: {
         calculateDelay(info) {
           if (info.attemptCount >= maxRetry) {
+            logger.warn('Exceeded the retry limit (%s/%s) for %s', info.attemptCount, maxRetry, query);
             // After N retries, stop.
             return 0;
           }
+
+          logger.debug('Retry %s/%s for %s', info.attemptCount, maxRetry, query);
 
           return info.attemptCount * 250;
         },
