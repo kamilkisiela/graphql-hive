@@ -400,15 +400,7 @@ jobs:
 
       - name: Pull images
         run: |
-          docker-compose -f integration-tests/docker-compose.yml pull \
-            db \
-            clickhouse \
-            zookeeper \
-            broker \
-            redis \
-            supertokens \
-            local_cdn \
-            external_composition
+          yarn workspace integration-tests run pull-external-images
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -419,10 +411,7 @@ jobs:
           RELEASE: ${{ github.sha }}
           BUILD_TYPE: 'ci'
         run: |
-          docker buildx bake \
-            -f docker.hcl \
-            build \
-            --load
+          yarn run docker:build
 
       - name: Integration Tests
         run: yarn workspace integration-tests run dockest

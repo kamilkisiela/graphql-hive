@@ -17,7 +17,6 @@ To run integration tests locally, follow:
 
 1. Make sure you have Docker installed. If you are having issues, try to run `docker system prune` to clean the Docker caches.
 2. Install all deps: `yarn install`
-3. Generate types: `yarn graphql:generate`
-4. Build and pack all services: `yarn workspace integration-tests run build-and-pack`
-5. Pull the images: `docker-compose -f integration-tests/docker-compose.yml pull`
-6. Run the tests: `yarn workspace integration-tests run dockest`
+3. Pull external images: `yarn workspace integration-tests run pull-external-images`
+4. Build all services: `yarn workspace integration-tests run build:local`
+5. Run the tests: `yarn workspace integration-tests run dockest`
