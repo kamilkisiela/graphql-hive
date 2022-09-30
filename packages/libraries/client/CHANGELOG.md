@@ -1,5 +1,11 @@
 # @graphql-hive/client
 
+## 0.18.6
+
+### Patch Changes
+
+- [#435](https://github.com/kamilkisiela/graphql-hive/pull/435) [`a79c253`](https://github.com/kamilkisiela/graphql-hive/commit/a79c253253614e44d01fef411016d353ef8c255e) Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Use ETag and If-None-Match to save bandwidth and improve performance
+
 ## 0.18.5
 
 ### Patch Changes

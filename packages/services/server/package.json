@@ -28,7 +28,7 @@
     "cross-undici-fetch": "0.4.3"
   },
   "devDependencies": {
-    "@graphql-hive/client": "0.18.5",
+    "@graphql-hive/client": "0.18.6",
     "@hive/api": "0.0.1",
     "@hive/service-common": "0.0.0",
     "@hive/storage": "0.0.0",
