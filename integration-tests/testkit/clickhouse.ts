@@ -1,5 +1,5 @@
 import * as utils from 'dockest/test-helper';
-import axios from 'axios';
+import { fetch } from '@whatwg-node/fetch';
 
 const clickhouseAddress = utils.getServiceAddress('clickhouse', 8123);
 const endpoint = `http://${clickhouseAddress}/?default_format=JSON`;
@@ -21,9 +21,9 @@ export async function resetClickHouse() {
   ].map(table => `TRUNCATE TABLE default.${table}`);
 
   for await (const query of queries) {
-    await axios.post(endpoint, query, {
+    await fetch(endpoint, {
       method: 'POST',
-      timeout: 10_000,
+      body: query,
       headers: {
         'Accept-Encoding': 'gzip',
         Accept: 'application/json',
@@ -33,18 +33,19 @@ export async function resetClickHouse() {
   }
 }
 
-export async function clickHouseQuery<T>(query: string) {
-  const res = await axios.post<{
-    data: T[];
-    rows: number;
-  }>(endpoint, query, {
-    timeout: 10_000,
+export async function clickHouseQuery<T>(query: string): Promise<{
+  data: T[];
+  rows: number;
+}> {
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    body: query,
     headers: {
+      Accept: 'application/json',
       'Accept-Encoding': 'gzip',
       Authorization: `Basic ${Buffer.from('test:test').toString('base64')}`,
     },
-    responseType: 'json',
   });
 
-  return res.data;
+  return response.json();
 }

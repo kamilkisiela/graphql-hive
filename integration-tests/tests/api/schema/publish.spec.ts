@@ -17,7 +17,7 @@ import {
   inviteToOrganization,
 } from '../../../testkit/flow';
 import { authenticate } from '../../../testkit/auth';
-import axios from 'axios';
+import { fetch } from '@whatwg-node/fetch';
 
 test('cannot publish a schema without target:registry:write access', async () => {
   const { access_token: owner_access_token } = await authenticate('main');
@@ -1236,14 +1236,15 @@ test('CDN data can not be fetched with an invalid access token', async () => {
 
   const cdn = cdnAccessResult.body.data!.createCdnToken;
 
-  await expect(() =>
-    axios.get<{ sdl: string }>(`${cdn.url}/schema`, {
-      headers: {
-        'X-Hive-CDN-Key': 'i-like-turtles',
-      },
-      responseType: 'json',
-    })
-  ).rejects.toThrow(/403/);
+  const res = await fetch(`${cdn.url}/schema`, {
+    method: 'GET',
+    headers: {
+      Accept: 'application/json',
+      'X-Hive-CDN-Key': 'i-like-turtles',
+    },
+  });
+
+  expect(res.status).toEqual(403);
 });
 
 test('CDN data can be fetched with an valid access token', async () => {
@@ -1329,11 +1330,12 @@ test('CDN data can be fetched with an valid access token', async () => {
 
   const cdn = cdnAccessResult.body.data!.createCdnToken;
 
-  const cdnResult = await axios.get<{ sdl: string }>(`${cdn.url}/schema`, {
+  const cdnResult = await fetch(`${cdn.url}/schema`, {
+    method: 'GET',
     headers: {
+      Accept: 'application/json',
       'X-Hive-CDN-Key': cdn.token,
     },
-    responseType: 'json',
   });
 
   expect(cdnResult.status).toEqual(200);
