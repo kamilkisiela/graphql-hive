@@ -1,5 +1,5 @@
 import { gql } from '@app/gql';
-import axios from 'axios';
+import { fetch } from '@whatwg-node/fetch';
 
 import type {
   CreateOrganizationInput,
@@ -717,16 +717,18 @@ export async function fetchSchemaFromCDN(selector: TargetSelectorInput, token: s
 
   const cdn = cdnAccessResult.body.data!.createCdnToken;
 
-  const res = await axios.get<{ sdl: string }>(`${cdn.url}/schema`, {
+  const res = await fetch(`${cdn.url}/schema`, {
     headers: {
+      Accept: 'application/json',
       'Content-Type': 'application/json',
       'X-Hive-CDN-Key': cdn.token,
     },
-    responseType: 'json',
   });
 
+  const jsonBody: { sdl: string } = await res.json();
+
   return {
-    body: res.data,
+    body: jsonBody,
     status: res.status,
   };
 }
@@ -740,15 +742,16 @@ export async function fetchSupergraphFromCDN(selector: TargetSelectorInput, toke
 
   const cdn = cdnAccessResult.body.data!.createCdnToken;
 
-  const res = await axios.get<string>(`${cdn.url}/supergraph`, {
+  const res = await fetch(`${cdn.url}/supergraph`, {
     headers: {
       'X-Hive-CDN-Key': cdn.token,
     },
-    responseType: 'text',
   });
 
+  const textBody = await res.text();
+
   return {
-    body: res.data,
+    body: textBody,
     status: res.status,
   };
 }
@@ -762,16 +765,18 @@ export async function fetchMetadataFromCDN(selector: TargetSelectorInput, token:
 
   const cdn = cdnAccessResult.body.data!.createCdnToken;
 
-  const res = await axios.get(`${cdn.url}/metadata`, {
+  const res = await fetch(`${cdn.url}/metadata`, {
     headers: {
+      Accept: 'application/json',
       'Content-Type': 'application/json',
       'X-Hive-CDN-Key': cdn.token,
     },
-    responseType: 'json',
   });
 
+  const jsonBody = await res.json();
+
   return {
-    body: res.data,
+    body: jsonBody,
     status: res.status,
   };
 }
