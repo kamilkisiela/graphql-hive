@@ -71,7 +71,7 @@ impl Default for Config {
 impl UsagePlugin {
     fn populate_context(config: Config, req: &supergraph::Request) {
         let context = &req.context;
-        let http_request = &req.originating_request;
+        let http_request = &req.supergraph_request;
         let headers = http_request.headers();
         let client_name_header = config
             .client_name_header
@@ -96,9 +96,9 @@ impl UsagePlugin {
             .ok()
             .map(|v| v.to_string());
 
-        let operation_name = req.originating_request.body().operation_name.clone();
+        let operation_name = req.supergraph_request.body().operation_name.clone();
         let operation_body = req
-            .originating_request
+            .supergraph_request
             .body()
             .query
             .clone()

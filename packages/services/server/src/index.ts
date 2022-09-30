@@ -36,9 +36,6 @@ export async function main() {
     environment: process.env.ENVIRONMENT,
     dsn: process.env.SENTRY_DSN,
     tracesSampleRate: 1,
-    tracesSampler() {
-      return 1;
-    },
     release: process.env.RELEASE || 'local',
     integrations: [
       new Sentry.Integrations.Http({ tracing: true }),
