@@ -35,8 +35,6 @@ export function deployUsageIngestor({
   const cpuLimit = isProduction(deploymentEnv) ? '600m' : '300m';
   const maxReplicas = isProduction(deploymentEnv) ? 4 : 2;
 
-  const partitionsConsumedConcurrently = Math.floor(numberOfPartitions / replicas);
-
   const clickhouseEnv = {
     CLICKHOUSE_PROTOCOL: clickhouse.config.protocol,
     CLICKHOUSE_HOST: clickhouse.config.host,
@@ -70,7 +68,7 @@ export function deployUsageIngestor({
         KAFKA_KEY: kafka.config.key,
         KAFKA_USER: kafka.config.user,
         KAFKA_BROKER: kafka.config.endpoint,
-        KAFKA_CONCURRENCY: `${partitionsConsumedConcurrently}`,
+        KAFKA_CONCURRENCY: '1',
         KAFKA_TOPIC: kafka.config.topic,
         KAFKA_CONSUMER_GROUP: kafka.config.consumerGroup,
         RELEASE: packageHelper.currentReleaseId(),
