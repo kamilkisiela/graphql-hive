@@ -38,7 +38,21 @@ export const operationsOrder = [
   'client_version',
 ] as const;
 
+export const legacyOperationsOrder = [
+  'target',
+  'timestamp',
+  'expires_at',
+  'hash',
+  'ok',
+  'errors',
+  'duration',
+  'schema',
+  'client_name',
+  'client_version',
+] as const;
+
 export const operationsFields = Buffer.from(operationsOrder.map(field => `"${field}"`).join(','));
+export const legacyOperationsFields = Buffer.from(legacyOperationsOrder.map(field => `"${field}"`).join(','));
 
 export const registryOrder = [
   'target',
@@ -52,7 +66,10 @@ export const registryOrder = [
   'expires_at',
 ] as const;
 
+export const legacyRegistryOrder = ['target', 'hash', 'name', 'body', 'operation', 'inserted_at'] as const;
+
 export const registryFields = Buffer.from(registryOrder.map(field => `"${field}"`).join(','));
+export const legacyRegistryFields = Buffer.from(legacyRegistryOrder.map(field => `"${field}"`).join(','));
 
 type KeysOfArray<T extends readonly any[]> = T extends readonly (infer U)[] ? U : never;
 
@@ -84,6 +101,37 @@ export function stringifyRegistryRecord(record: ProcessedRegistryRecord): string
     total: castValue(record.size),
     timestamp: castDate(record.timestamp),
     expires_at: castDate(record.expires_at),
+  };
+
+  return Object.values(mapper).join(',');
+}
+
+export function stringifyLegacyOperation(operation: ProcessedOperation, coordinates: string[]): string {
+  const mapper: Record<KeysOfArray<typeof legacyOperationsOrder>, any> = {
+    target: castValue(operation.target),
+    timestamp: castDate(operation.timestamp),
+    expires_at: castDate(operation.expiresAt),
+    hash: castValue(operation.operationHash),
+    ok: castValue(operation.execution.ok),
+    errors: castValue(operation.execution.errorsTotal),
+    duration: castValue(operation.execution.duration),
+    schema: castValue(coordinates),
+    client_name: convertNullToEmptyString(castValue(operation.metadata?.client?.name)),
+    client_version: convertNullToEmptyString(castValue(operation.metadata?.client?.version)),
+  };
+  return Object.values(mapper).join(',');
+}
+
+export function stringifyLegacyRegistryRecord(
+  record: Pick<ProcessedRegistryRecord, 'body' | 'hash' | 'timestamp' | 'name' | 'operation_kind' | 'target'>
+): string {
+  const mapper: Record<KeysOfArray<typeof legacyRegistryOrder>, any> = {
+    target: castValue(record.target),
+    hash: castValue(record.hash),
+    name: convertNullToEmptyString(castValue(record.name)),
+    body: castValue(record.body),
+    operation: castValue(record.operation_kind),
+    inserted_at: castDate(record.timestamp),
   };
 
   return Object.values(mapper).join(',');

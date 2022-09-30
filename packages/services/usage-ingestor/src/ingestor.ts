@@ -265,10 +265,14 @@ async function processMessage({
   // Decompress and parse the message to get a list of reports
   const rawReports: RawReport[] = JSON.parse((await decompress(message.value!)).toString());
 
-  const { operations, registryRecords } = await processor.processReports(rawReports);
+  const { operations, registryRecords, legacy } = await processor.processReports(rawReports);
 
   batcher.add({
     operations,
     operation_collection: registryRecords,
+    legacy: {
+      operations: legacy.operations,
+      operation_collection: legacy.registryRecords,
+    },
   });
 }

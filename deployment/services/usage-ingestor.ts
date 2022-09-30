@@ -6,7 +6,6 @@ import { PackageHelper } from '../utils/pack';
 import { DeploymentEnvironment } from '../types';
 import { Clickhouse } from './clickhouse';
 import { Kafka } from './kafka';
-import { isProduction } from '../utils/helpers';
 
 const commonConfig = new pulumi.Config('common');
 const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
@@ -30,12 +29,7 @@ export function deployUsageIngestor({
   dbMigrations: DbMigrations;
   heartbeat?: string;
 }) {
-  const numberOfPartitions = 4;
   const replicas = 1;
-  const cpuLimit = isProduction(deploymentEnv) ? '600m' : '300m';
-  const maxReplicas = isProduction(deploymentEnv) ? 2 : 1;
-
-  const partitionsConsumedConcurrently = Math.floor(numberOfPartitions / replicas);
 
   const clickhouseEnv = {
     CLICKHOUSE_PROTOCOL: clickhouse.config.protocol,
@@ -70,21 +64,16 @@ export function deployUsageIngestor({
         KAFKA_KEY: kafka.config.key,
         KAFKA_USER: kafka.config.user,
         KAFKA_BROKER: kafka.config.endpoint,
-        KAFKA_CONCURRENCY: `${partitionsConsumedConcurrently}`,
+        KAFKA_CONCURRENCY: `1`,
         KAFKA_TOPIC: kafka.config.topic,
         KAFKA_CONSUMER_GROUP: kafka.config.consumerGroup,
+        BATCHING_INTERVAL: '30s',
+        BATCHING_SIZE_LIMIT: '200mb',
         RELEASE: packageHelper.currentReleaseId(),
       },
       exposesMetrics: true,
       packageInfo: packageHelper.npmPack('@hive/usage-ingestor'),
       port: 4000,
-      autoScaling: {
-        cpu: {
-          cpuAverageToScale: 60,
-          limit: cpuLimit,
-        },
-        maxReplicas: maxReplicas,
-      },
     },
     [clickhouse.deployment, clickhouse.service, dbMigrations]
   ).deploy();

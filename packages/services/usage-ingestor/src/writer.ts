@@ -2,7 +2,7 @@ import type { ClickHouseClient } from '@clickhouse/client';
 import type { FastifyLoggerInstance } from '@hive/service-common';
 import pRetry from 'p-retry';
 import { Readable } from 'node:stream';
-import { registryFields, operationsFields } from './serializer';
+import { registryFields, operationsFields, legacyOperationsFields, legacyRegistryFields } from './serializer';
 import { writeTime } from './metrics';
 import type { Fallback } from './fallback';
 
@@ -118,6 +118,45 @@ export function createWriter({
 
         throw error;
       });
+    },
+    legacy: {
+      async writeOperations(operations: Buffer[]) {
+        // Adds the column names to the CSV rows
+        operations.unshift(legacyOperationsFields, Buffer.from('\n'));
+
+        const table = 'operations_new';
+        const buff = Buffer.concat(operations);
+
+        await retry(() =>
+          clickhouse.insert({
+            table,
+            values: Readable.from(buff, {
+              objectMode: false,
+            }),
+            format,
+          })
+        ).catch(async error => {
+          logger.error('Failed to write to %s (legacy): %s', table, error?.message ?? error);
+        });
+      },
+      async writeRegistry(records: Buffer[]) {
+        // Adds the column names to the CSV rows
+        records.unshift(legacyRegistryFields, Buffer.from('\n'));
+        const table = 'operations_registry';
+        const buff = Buffer.concat(records);
+
+        await retry(() =>
+          clickhouse.insert({
+            table,
+            values: Readable.from(buff, {
+              objectMode: false,
+            }),
+            format,
+          })
+        ).catch(async error => {
+          logger.error('Failed to write to %s (legacy): %s', table, error?.message ?? error);
+        });
+      },
     },
   };
 }

@@ -121,8 +121,10 @@ export function createFallback(config: {
      * INSERTs in ClickHouse are idempotent.
      *
      * We can retry the same INSERT statement multiple times.
-     * Thanks to that, we can allow the ingestor to have more than a single replica
+     * We can't allow the ingestor to have more than a single replica
      * and still safely write data from S3 to ClickHouse.
+     * The reason for it is that those insert statement could run one after another because or race conditions
+     * and data would be duplicated.
      *
      * From the documentation: https://clickhouse.com/docs/en/engines/table-engines/mergetree-family/replication/
      * """

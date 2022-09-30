@@ -4,6 +4,11 @@ import {
   formatDate,
   operationsOrder,
   registryOrder,
+  // legacy
+  stringifyLegacyOperation,
+  stringifyLegacyRegistryRecord,
+  legacyOperationsOrder,
+  legacyRegistryOrder,
 } from '../src/serializer';
 
 const timestamp = {
@@ -163,4 +168,131 @@ test('stringify registry records in correct format and order', () => {
 
 test('formatDate should return formatted date in UTC timezone', () => {
   expect(formatDate(timestamp.asNumber)).toEqual(timestamp.asString);
+});
+
+describe('legacy', () => {
+  test('stringify operation in correct format and order', () => {
+    const serialized = [
+      {
+        target: 'my-target',
+        timestamp: timestamp.asNumber,
+        expiresAt: timestamp.asNumber,
+        operationHash: 'my-hash',
+        fields: ['Query', 'Query.foo'],
+        execution: {
+          ok: true,
+          errorsTotal: 0,
+          duration: 230,
+        },
+        document: `{ foo }`,
+        operationType: 'query' as any,
+        metadata: {
+          client: {
+            name: 'clientName',
+            version: 'clientVersion',
+          },
+        },
+      },
+      {
+        target: 'my-target',
+        timestamp: timestamp.asNumber,
+        expiresAt: timestamp.asNumber,
+        operationHash: 'my-hash-1',
+        fields: ['Query', 'Query.foo'],
+        execution: {
+          ok: false,
+          errorsTotal: 1,
+          duration: 250,
+        },
+        document: `{ foo }`,
+        operationType: 'query' as any,
+        // missing metadata, on purpose
+      },
+    ]
+      .map(op => stringifyLegacyOperation(op, op.fields))
+      .join('\n');
+    expect(serialized).toBe(
+      [
+        renderInOrder(
+          {
+            target: `"my-target"`,
+            timestamp: timestamp.asString,
+            expires_at: timestamp.asString,
+            hash: `"my-hash"`,
+            ok: 1,
+            errors: 0,
+            duration: 230,
+            schema: `"['Query','Query.foo']"`,
+            client_name: `"clientName"`,
+            client_version: `"clientVersion"`,
+          },
+          legacyOperationsOrder
+        ),
+        renderInOrder(
+          {
+            target: `"my-target"`,
+            timestamp: timestamp.asString,
+            expires_at: timestamp.asString,
+            hash: `"my-hash-1"`,
+            ok: 0,
+            errors: 1,
+            duration: 250,
+            schema: `"['Query','Query.foo']"`,
+            client_name: `""`,
+            client_version: `""`,
+          },
+          legacyOperationsOrder
+        ),
+      ].join('\n')
+    );
+  });
+
+  test('stringify registry records in correct format and order', () => {
+    const serialized = [
+      {
+        target: 'my-target',
+        timestamp: timestamp.asNumber,
+        name: 'my-name',
+        hash: 'my-hash',
+        body: `{ foo }`,
+        operation_kind: 'query',
+      },
+      {
+        target: 'my-target',
+        timestamp: timestamp.asNumber,
+        // missing name, on purpose
+        hash: 'my-hash-1',
+        body: `{ foo }`,
+        operation_kind: 'query',
+      },
+    ]
+      .map(stringifyLegacyRegistryRecord)
+      .join('\n');
+    expect(serialized).toBe(
+      [
+        renderInOrder(
+          {
+            target: `"my-target"`,
+            hash: `"my-hash"`,
+            name: `"my-name"`,
+            body: `"{ foo }"`,
+            operation: `"query"`,
+            inserted_at: timestamp.asString,
+          },
+          legacyRegistryOrder
+        ),
+        renderInOrder(
+          {
+            target: `"my-target"`,
+            hash: `"my-hash-1"`,
+            name: `""`,
+            body: `"{ foo }"`,
+            operation: `"query"`,
+            inserted_at: timestamp.asString,
+          },
+          legacyRegistryOrder
+        ),
+      ].join('\n')
+    );
+  });
 });

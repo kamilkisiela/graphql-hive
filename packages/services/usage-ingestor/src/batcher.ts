@@ -31,6 +31,10 @@ export function createBatcher(config: {
   let operationsBuffers: Buffer[] = [];
   // A list of buffers in current batch
   let operationCollectionBuffers: Buffer[] = [];
+  // A list of buffers in current batch
+  let legacyOperationsBuffers: Buffer[] = [];
+  // A list of buffers in current batch
+  let legacyOperationCollectionBuffers: Buffer[] = [];
   // A set of pending writes
   const inFlight = new Set<Promise<void>>();
 
@@ -49,6 +53,8 @@ export function createBatcher(config: {
     _totalBytes = 0;
     operationsBuffers = [];
     operationCollectionBuffers = [];
+    legacyOperationsBuffers = [];
+    legacyOperationCollectionBuffers = [];
   }
 
   function drain() {
@@ -59,6 +65,9 @@ export function createBatcher(config: {
     // Remove the last delimiter in both
     operationsBuffers.pop();
     operationCollectionBuffers.pop();
+    // legacy
+    legacyOperationsBuffers.pop();
+    legacyOperationCollectionBuffers.pop();
 
     const drained = {
       totalBytes: getTotalBytes(),
@@ -66,6 +75,9 @@ export function createBatcher(config: {
       operationsLength,
       operationCollectionBuffers,
       operationCollectionLength,
+      // legacy
+      legacyOperationsBuffers,
+      legacyOperationCollectionBuffers,
     };
 
     resetBatch();
@@ -132,23 +144,23 @@ export function createBatcher(config: {
 
     await Promise.all([
       track(
-        writer
-          .writeOperations(drained.operationsBuffers)
+        Promise.all([
+          writer.writeOperations(drained.operationsBuffers),
+          writer.legacy.writeOperations(drained.legacyOperationsBuffers),
+        ])
           .then(async () => {
             ingestedOperationsWrites.inc(drained.operationsLength);
           })
           .catch(async error => {
-            // TODO: Retry on failure
-            // TODO: Persist it somewhere if it fails to write data, otherwise we will lose it (pod crash, ClickHouse is down, etc).
-            //       Maybe S3 with ability to read from it directly in ClickHouse?
-            //       Or maybe local file system with ability to replay it on pod restart? (but make sure it works with more replicas)
             ingestedOperationsFailures.inc(drained.operationsLength);
             logger.error(error);
           })
       ),
       track(
-        writer
-          .writeRegistry(drained.operationCollectionBuffers)
+        Promise.all([
+          writer.writeRegistry(drained.operationCollectionBuffers),
+          writer.legacy.writeRegistry(drained.legacyOperationCollectionBuffers),
+        ])
           .then(async () => {
             ingestedOperationRegistryWrites.inc(drained.operationCollectionLength);
           })
@@ -160,7 +172,11 @@ export function createBatcher(config: {
     ]);
   }
 
-  function add(serializedRowsPerTable: { operations: string[]; operation_collection: string[] }) {
+  function add(serializedRowsPerTable: {
+    operations: string[];
+    operation_collection: string[];
+    legacy: { operations: string[]; operation_collection: string[] };
+  }) {
     let chunkBytes = 0;
 
     const operations = serializedRowsPerTable.operations
@@ -178,6 +194,20 @@ export function createBatcher(config: {
       })
       .flat(1);
 
+    // legacy
+    const legacy_operations = serializedRowsPerTable.legacy.operations
+      .map(str => {
+        const buff = Buffer.from(str);
+        return [buff, delimiter];
+      })
+      .flat(1);
+    const legacy_operation_collection = serializedRowsPerTable.legacy.operation_collection
+      .map(str => {
+        const buff = Buffer.from(str);
+        return [buff, delimiter];
+      })
+      .flat(1);
+
     // check if buffer will be over the limit
     const bytesAfterAdd = getTotalBytes() + chunkBytes;
 
@@ -191,6 +221,14 @@ export function createBatcher(config: {
 
     for (const op of operation_collection) {
       operationCollectionBuffers.push(op);
+    }
+
+    for (const op of legacy_operations) {
+      legacyOperationsBuffers.push(op);
+    }
+
+    for (const op of legacy_operation_collection) {
+      legacyOperationCollectionBuffers.push(op);
     }
 
     increaseTotalBytes(chunkBytes);
