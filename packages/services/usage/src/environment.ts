@@ -12,7 +12,7 @@ const NumberFromString = zod.preprocess(numberFromNumberOrNumberString, zod.numb
 const EnvironmentModel = zod.object({
   PORT: NumberFromString.optional(),
   TOKENS_ENDPOINT: zod.string().url(),
-  RATE_LIMIT_ENDPOINT: zod.string().url(),
+  RATE_LIMIT_ENDPOINT: zod.string().url().optional(),
   ENVIRONMENT: zod.string().optional(),
   RELEASE: zod.string().optional(),
 });
