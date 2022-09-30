@@ -9,6 +9,14 @@ import {
 import { isKeyValid } from './auth';
 import { buildSchema, introspectionFromSchema } from 'graphql';
 
+async function createETag(value: string) {
+  const myText = new TextEncoder().encode(value);
+  const myDigest = await crypto.subtle.digest({ name: 'SHA-256' }, myText);
+  const hashArray = Array.from(new Uint8Array(myDigest));
+
+  return `"${hashArray.map(b => b.toString(16).padStart(2, '0')).join('')}"`;
+}
+
 type SchemaArtifact = {
   sdl: string;
   url?: string;
@@ -20,37 +28,50 @@ const artifactTypesHandlers = {
   /**
    * Returns SchemaArtifact or SchemaArtifact[], same way as it's stored in the storage
    */
-  schema: (targetId: string, artifactType: string, rawValue: string) =>
+  schema: (targetId: string, artifactType: string, rawValue: string, etag: string) =>
     new Response(rawValue, {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
+        etag,
       },
     }),
   /**
    * Returns Federation Supergraph, we store it as-is.
    */
-  supergraph: (targetId: string, artifactType: string, rawValue: string) => new Response(rawValue, { status: 200 }),
-  sdl: (targetId: string, artifactType: string, rawValue: string) => {
+  supergraph: (targetId: string, artifactType: string, rawValue: string, etag: string) =>
+    new Response(rawValue, {
+      status: 200,
+      headers: {
+        etag,
+      },
+    }),
+  sdl: (targetId: string, artifactType: string, rawValue: string, etag: string) => {
     if (rawValue.startsWith('[')) {
       return new InvalidArtifactMatch(artifactType, targetId);
     }
 
     const parsed = JSON.parse(rawValue) as SchemaArtifact;
 
-    return new Response(parsed.sdl, { status: 200 });
+    return new Response(parsed.sdl, {
+      status: 200,
+      headers: {
+        etag,
+      },
+    });
   },
   /**
    * Returns Metadata same way as it's stored in the storage
    */
-  metadata: (targetId: string, artifactType: string, rawValue: string) =>
+  metadata: (targetId: string, artifactType: string, rawValue: string, etag: string) =>
     new Response(rawValue, {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
+        etag,
       },
     }),
-  introspection: (targetId: string, artifactType: string, rawValue: string) => {
+  introspection: (targetId: string, artifactType: string, rawValue: string, etag: string) => {
     if (rawValue.startsWith('[')) {
       return new InvalidArtifactMatch(artifactType, targetId);
     }
@@ -64,6 +85,7 @@ const artifactTypesHandlers = {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
+        etag,
       },
     });
   },
@@ -142,17 +164,24 @@ export async function handleRequest(request: Request, keyValidator: typeof isKey
   const rawValue = await HIVE_DATA.get(kvStorageKey);
 
   if (rawValue) {
+    const etag = await createETag(`${kvStorageKey}|${rawValue}`);
+    const ifNoneMatch = request.headers.get('if-none-match');
+
+    if (ifNoneMatch && ifNoneMatch === etag) {
+      return new Response(null, { status: 304 });
+    }
+
     switch (artifactType) {
       case 'schema':
-        return artifactTypesHandlers.schema(targetId, artifactType, rawValue);
+        return artifactTypesHandlers.schema(targetId, artifactType, rawValue, etag);
       case 'supergraph':
-        return artifactTypesHandlers.supergraph(targetId, artifactType, rawValue);
+        return artifactTypesHandlers.supergraph(targetId, artifactType, rawValue, etag);
       case 'sdl':
-        return artifactTypesHandlers.sdl(targetId, artifactType, rawValue);
+        return artifactTypesHandlers.sdl(targetId, artifactType, rawValue, etag);
       case 'introspection':
-        return artifactTypesHandlers.introspection(targetId, artifactType, rawValue);
+        return artifactTypesHandlers.introspection(targetId, artifactType, rawValue, etag);
       case 'metadata':
-        return artifactTypesHandlers.metadata(targetId, artifactType, rawValue);
+        return artifactTypesHandlers.metadata(targetId, artifactType, rawValue, etag);
       default:
         return new Response(null, {
           status: 500,

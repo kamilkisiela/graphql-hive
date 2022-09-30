@@ -9,21 +9,50 @@ interface Schema {
 }
 
 function createFetcher<T>({ endpoint, key }: SchemaFetcherOptions & ServicesFetcherOptions) {
+  let cacheETag: string | null = null;
+  let cached: {
+    id: string;
+    supergraphSdl: string;
+  } | null = null;
+
   return function fetcher(): Promise<T> {
+    const headers: {
+      [key: string]: string;
+    } = {
+      'X-Hive-CDN-Key': key,
+      accept: 'application/json',
+    };
+
+    if (cacheETag) {
+      headers['If-None-Match'] = cacheETag;
+    }
+
     return axios
       .get(endpoint + '/schema', {
-        headers: {
-          'X-Hive-CDN-Key': key,
-          accept: 'application/json',
-        },
+        headers,
         responseType: 'json',
       })
       .then(response => {
         if (response.status >= 200 && response.status < 300) {
-          return response.data;
+          const result = response.data;
+
+          const etag = response.headers['etag'];
+          if (etag) {
+            cached = result;
+            cacheETag = etag;
+          }
+
+          return result;
         }
 
         return Promise.reject(new Error(`Failed to fetch [${response.status}]`));
+      })
+      .catch(async error => {
+        if (axios.isAxiosError(error) && error.response?.status === 304 && cached !== null) {
+          return cached;
+        }
+
+        throw error;
       });
   };
 }
