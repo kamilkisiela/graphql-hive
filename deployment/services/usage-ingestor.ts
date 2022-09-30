@@ -9,6 +9,7 @@ import { Kafka } from './kafka';
 
 const commonConfig = new pulumi.Config('common');
 const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
+const usageConfig = new pulumi.Config('usage');
 
 export type UsageIngestor = ReturnType<typeof deployUsageIngestor>;
 
@@ -69,6 +70,13 @@ export function deployUsageIngestor({
         KAFKA_CONSUMER_GROUP: kafka.config.consumerGroup,
         BATCHING_INTERVAL: '30s',
         BATCHING_SIZE_LIMIT: '200mb',
+        CLICKHOUSE_WAIT_END_OF_QUERY: '1',
+        CLICKHOUSE_WAIT_FOR_ASYNC_INSERT: '0',
+        S3_API_VERSION: usageConfig.require('s3ApiVersion'),
+        S3_REGION: usageConfig.require('s3Region'),
+        S3_BUCKET: usageConfig.require('s3Bucket'),
+        S3_ACCESS_KEY_ID: usageConfig.requireSecret('s3AccessKeyId'),
+        S3_SECRET_ACCESS_KEY: usageConfig.requireSecret('s3SecretAccessKey'),
         RELEASE: packageHelper.currentReleaseId(),
       },
       exposesMetrics: true,
