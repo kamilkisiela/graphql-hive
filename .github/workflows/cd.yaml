@@ -107,7 +107,6 @@ jobs:
     if: needs.publish_rust.outputs.rust_changed == 'true'
     name: Publish for Docker
     runs-on: ubuntu-latest
-    timeout-minutes: 40
 
     env:
       REGISTRY: ghcr.io
