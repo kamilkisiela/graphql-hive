@@ -65,7 +65,7 @@ export function deployUsageIngestor({
         KAFKA_KEY: kafka.config.key,
         KAFKA_USER: kafka.config.user,
         KAFKA_BROKER: kafka.config.endpoint,
-        KAFKA_CONCURRENCY: `1`,
+        KAFKA_CONCURRENCY: '1',
         KAFKA_TOPIC: kafka.config.topic,
         KAFKA_CONSUMER_GROUP: kafka.config.consumerGroup,
         BATCHING_INTERVAL: '30s',
