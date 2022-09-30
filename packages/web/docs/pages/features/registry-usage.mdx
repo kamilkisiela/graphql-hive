@@ -169,3 +169,17 @@ Here's a list of available endpoints:
   ```
 
   The value returned is the value you stored, as JSON, with `Content-Type: application/json` header.
+
+## Notes
+
+### ETag and If-None-Match headers
+
+The CDN service accepts the [`ETag`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag) and [`If-None-Match`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-None-Match) headers.
+
+Every successful response from the CDN service (`200 OK`) contains the `ETag` header with a checksum.
+If you send the same checksum in the `If-None-Match` header, the CDN service will return `304 Not Modified`, but only if the data hasn't changed.
+If the data has changed, the CDN service will return `200 OK` with the new data and new `ETag` header.
+
+Using `ETag` and `If-None-Mathc` helps to prevent unnecessary data transfer.
+
+The `@graphql-hive/client` package uses this feature to save bandwidth and improve performance.
