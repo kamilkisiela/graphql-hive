@@ -20,6 +20,9 @@ async function main() {
     environment: process.env.ENVIRONMENT,
     dsn: process.env.SENTRY_DSN,
     release: process.env.RELEASE || 'local',
+    tracesSampleRate: 0,
+    integrations: [],
+    autoSessionTracking: false,
   });
 
   const server = await createServer({

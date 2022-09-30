@@ -26,6 +26,16 @@ export const writeTime = new metrics.Summary({
   labelNames: ['table'],
 });
 
+export const pendingWrites = new metrics.Gauge({
+  name: 'usage_ingestor_pending_writes',
+  help: 'Number of pending writes',
+});
+
+export const pause = new metrics.Gauge({
+  name: 'usage_ingestor_pause',
+  help: 'Is the consumer paused? 1 true, 0 false',
+});
+
 export const flushes = new metrics.Counter({
   name: 'usage_ingestor_flushes',
   help: 'Number of flushes',

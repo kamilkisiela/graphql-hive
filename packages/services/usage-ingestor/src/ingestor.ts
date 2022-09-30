@@ -181,6 +181,7 @@ export function createIngestor(config: {
     writer,
     intervalInMS: config.batching.intervalInMS,
     limitInBytes: config.batching.limitInBytes,
+    consumerTopic: config.kafka.topic,
   });
 
   const fallbackSync = fallback?.sync();
@@ -204,10 +205,12 @@ export function createIngestor(config: {
 
     status = Status.Waiting;
 
-    batcher.start();
-
     logger.info('Connecting Kafka Consumer');
     await consumer.connect();
+
+    batcher.start({
+      consumer,
+    });
 
     status = Status.Connected;
 

@@ -1,4 +1,5 @@
 import type { FastifyLoggerInstance } from '@hive/service-common';
+import type { Consumer } from 'kafkajs';
 import type { Writer } from './writer';
 import {
   ingestedOperationsWrites,
@@ -9,6 +10,8 @@ import {
   flushSize,
   flushOperationsSize,
   flushOperationCollectionSize,
+  pause as pauseMetric,
+  pendingWrites,
 } from './metrics';
 
 const delimiter = Buffer.from('\n');
@@ -18,8 +21,9 @@ export function createBatcher(config: {
   intervalInMS: number;
   limitInBytes: number;
   writer: Writer;
+  consumerTopic: string;
 }) {
-  const { logger, limitInBytes, intervalInMS, writer } = config;
+  const { logger, limitInBytes, intervalInMS, writer, consumerTopic } = config;
 
   logger.info('Batching is enabled (interval=%s, limit=%s)', intervalInMS, limitInBytes);
 
@@ -39,6 +43,20 @@ export function createBatcher(config: {
   const inFlight = new Set<Promise<void>>();
 
   let intervalId: ReturnType<typeof setInterval> | null = null;
+
+  let consumer: Consumer | null = null;
+  let consumerState: 'paused' | 'running' = 'running';
+
+  function shouldPauseConsumer() {
+    // Why 2? Because we want make two promises in parallel, per each write to ClickHouse.
+    // Two promises means two writes, one to operations table and one to operation_collection table.
+    // We might want to make it dependent on the heap size instead.
+    return consumerState === 'running' && inFlight.size > 2;
+  }
+
+  function shouldResumeConsumer() {
+    return consumerState === 'paused' && inFlight.size <= 2;
+  }
 
   function getTotalBytes() {
     // We do the getter to makes sure we're always getting the latest value
@@ -112,6 +130,18 @@ export function createBatcher(config: {
 
   async function track(promise: Promise<void>) {
     inFlight.add(promise);
+    pendingWrites.set(inFlight.size);
+
+    if (shouldPauseConsumer()) {
+      logger.warn('Batched operations are piling up. Pausing Kafka consumer. (pendingRequests=%s', inFlight.size);
+      try {
+        consumerState = 'paused';
+        consumer?.pause([{ topic: consumerTopic }]);
+      } catch (error) {
+        logger.error('Failed to pause Kafka consumer: %s', error);
+      }
+      pauseMetric.set(1);
+    }
 
     try {
       return await promise;
@@ -119,6 +149,17 @@ export function createBatcher(config: {
       // Remove the promise from the set, but not before it's done done
       setImmediate(() => {
         inFlight.delete(promise);
+        pendingWrites.set(inFlight.size);
+        if (shouldResumeConsumer()) {
+          logger.warn('Resuming Kafka consumer (pendingRequests=%s)', inFlight.size);
+          try {
+            consumerState = 'running';
+            consumer?.resume([{ topic: consumerTopic }]);
+          } catch (error) {
+            logger.error('Failed to resume Kafka consumer: %s', error);
+          }
+          pauseMetric.set(0);
+        }
       });
     }
   }
@@ -240,8 +281,10 @@ export function createBatcher(config: {
 
   return {
     add,
-    start() {
+    start(input: { consumer: Consumer }) {
       logger.info('Started Batcher');
+
+      consumer = input.consumer;
 
       intervalId = setInterval(() => {
         const reason = checkIfFlushIsNeeded();
