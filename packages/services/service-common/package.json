@@ -5,7 +5,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "dependencies": {
-    "@whatwg-node/fetch": "0.4.6",
+    "@whatwg-node/fetch": "0.4.7",
     "fastify": "3.29.0",
     "fastify-cors": "6.0.2",
     "fastify-plugin": "3.0.1",

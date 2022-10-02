@@ -15,7 +15,6 @@ import hyperid from 'hyperid';
 import zod from 'zod';
 import { HiveError } from '@hive/api';
 import type { HiveConfig } from './environment';
-import { Readable } from 'stream';
 
 const reqIdGenerate = hyperid({ fixedLength: true });
 
@@ -241,7 +240,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
 
         reply.status(response.status);
 
-        reply.send(Readable.from(response.body!));
+        reply.send(response.body);
 
         return reply;
       }

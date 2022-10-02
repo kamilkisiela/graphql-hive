@@ -19,8 +19,8 @@
     "@hive/service-common": "0.0.0",
     "fastify": "3.29.0",
     "esbuild": "0.14.39",
-    "@whatwg-node/fetch": "0.4.6",
-    "@whatwg-node/server": "0.4.10",
+    "@whatwg-node/fetch": "0.4.7",
+    "@whatwg-node/server": "0.4.11",
     "@types/service-worker-mock": "2.0.1",
     "@cloudflare/workers-types": "3.4.0"
   }

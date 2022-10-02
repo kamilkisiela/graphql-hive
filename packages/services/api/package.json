@@ -9,8 +9,8 @@
     "reflect-metadata": "^0.1.0"
   },
   "dependencies": {
-    "graphql-yoga": "3.0.0-alpha-20220930104854-9dc5d1ca",
-    "@whatwg-node/fetch": "0.4.6",
+    "graphql-yoga": "3.0.0-alpha-20221002194039-ee3b1192",
+    "@whatwg-node/fetch": "0.4.7",
     "@trpc/client": "9.23.2",
     "@graphql-inspector/core": "3.2.0",
     "@graphql-tools/load-files": "6.5.0",
