@@ -1,5 +1,5 @@
 import './dev-polyfill';
-import { createServer } from '@hive/service-common';
+import { createServer } from 'http';
 import { handleRequest } from './handler';
 import { devStorage } from './dev-polyfill';
 import { isKeyValid } from './auth';

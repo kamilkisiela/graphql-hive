@@ -767,7 +767,6 @@ export async function fetchMetadataFromCDN(selector: TargetSelectorInput, token:
   const res = await fetch(`${cdn.url}/metadata`, {
     headers: {
       Accept: 'application/json',
-      'Content-Type': 'application/json',
       'X-Hive-CDN-Key': cdn.token,
     },
   });
