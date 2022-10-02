@@ -720,7 +720,6 @@ export async function fetchSchemaFromCDN(selector: TargetSelectorInput, token: s
   const res = await fetch(`${cdn.url}/schema`, {
     headers: {
       Accept: 'application/json',
-      'Content-Type': 'application/json',
       'X-Hive-CDN-Key': cdn.token,
     },
   });
