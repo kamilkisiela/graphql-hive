@@ -21,6 +21,8 @@
     "esbuild": "0.14.39",
     "@whatwg-node/fetch": "0.4.7",
     "@whatwg-node/server": "0.4.11",
+    "itty-router": "2.4.0",
+    "itty-router-extras": "0.4.2",
     "@types/service-worker-mock": "2.0.1",
     "@cloudflare/workers-types": "3.4.0"
   }

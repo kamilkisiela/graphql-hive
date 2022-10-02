@@ -4,86 +4,63 @@ import { handleRequest } from './handler';
 import { devStorage } from './dev-polyfill';
 import { isKeyValid } from './auth';
 import { createServerAdapter } from '@whatwg-node/server';
-import { FastifyRequest, FastifyReply } from 'fastify';
+import { Router } from 'itty-router';
+import { withParams, json } from 'itty-router-extras';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4010;
 
-async function main() {
-  const server = await createServer({
-    tracing: false,
-    name: 'local_cdn',
-  });
+function main() {
+  const app = createServerAdapter(Router());
 
-  server.route<{
-    Params: {
-      accountId: string;
-      namespaceId: string;
-      key: string;
-    };
-  }>({
-    url: '/:accountId/storage/kv/namespaces/:namespaceId/values/:key',
-    method: 'PUT',
-    handler: async request => {
+  app.put(
+    '/:accountId/storage/kv/namespaces/:namespaceId/values/:key',
+    withParams,
+    async (
+      request: Request & {
+        params: {
+          accountId: string;
+          namespaceId: string;
+          key: string;
+        };
+      }
+    ) => {
       if (!request.params.key) {
         throw new Error(`Missing key`);
       }
 
-      if (!request.body) {
+      const textBody = await request.text();
+
+      if (!textBody) {
         throw new Error(`Missing body value`);
       }
 
       console.log(`Writing to ephermal storage: ${request.params.key}, value: ${request.body}`);
 
-      devStorage.set(request.params.key, request.body as string);
+      devStorage.set(request.params.key, textBody);
 
-      return {
+      return json({
         success: true,
-      };
-    },
-  });
-
-  server.route({
-    url: '/dump',
-    method: 'GET',
-    handler: async () => {
-      return Object.fromEntries(devStorage.entries());
-    },
-  });
-
-  server.route({
-    url: '/_readiness',
-    method: 'GET',
-    handler: async (_, res) => {
-      res.status(200).send();
-    },
-  });
-
-  const serverAdapter = createServerAdapter<{
-    req: FastifyRequest;
-    reply: FastifyReply;
-  }>(req => handleRequest(req, isKeyValid));
-
-  server.route({
-    url: '*',
-    method: ['GET'],
-    handler: async (req, reply) => {
-      const response = await serverAdapter.handleNodeRequest(req, {
-        req,
-        reply,
       });
-      response.headers.forEach((value, key) => {
-        reply.header(key, value);
-      });
+    }
+  );
 
-      reply.status(response.status);
+  app.get('/dump', () => json(Object.fromEntries(devStorage.entries())));
 
-      reply.send(response.body);
+  app.get(
+    '/_readiness',
+    () =>
+      new Response(null, {
+        status: 200,
+      })
+  );
 
-      return reply;
-    },
+  app.get('*', (request: Request) => handleRequest(request, isKeyValid));
+
+  const server = createServer(app);
+
+  return new Promise<void>(resolve => {
+    server.listen(PORT, '0.0.0.0', resolve);
   });
-
-  await server.listen(PORT, '0.0.0.0');
 }
 
 main().catch(e => console.error(e));

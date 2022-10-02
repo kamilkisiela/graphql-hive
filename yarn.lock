@@ -12918,6 +12918,16 @@ isurl@^1.0.0-alpha5:
     has-to-string-tag-x "^1.2.0"
     is-object "^1.0.1"
 
+itty-router-extras@0.4.2:
+  version "0.4.2"
+  resolved "https://registry.yarnpkg.com/itty-router-extras/-/itty-router-extras-0.4.2.tgz#e46891ebea63f09ada74603649d8a6c4ce0c5df7"
+  integrity sha512-ppHaBzcTXs7idFSDISehG+8kif2/4aqLCfyY/Y/uIZv79sfEfNmTq9G+rDeqblun/VZRBiXZD8ztYmMS8EOsKw==
+
+itty-router@2.4.0:
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/itty-router/-/itty-router-2.4.0.tgz#c13f18b04b4789821b10f4c88d3ccf00aabf8924"
+  integrity sha512-FsWLyLm/6s7MMRC55QZJDlDXae+3WPy7ahEbJVKMIrSh7NfZ+zBL32hNUPn9RqTypjmNO3Abi+mqc+VvDvWYtg==
+
 jake@^10.8.5:
   version "10.8.5"
   resolved "https://registry.yarnpkg.com/jake/-/jake-10.8.5.tgz#f2183d2c59382cb274226034543b9c03b8164c46"
