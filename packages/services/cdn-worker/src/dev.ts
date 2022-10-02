@@ -5,7 +5,6 @@ import { devStorage } from './dev-polyfill';
 import { isKeyValid } from './auth';
 import { createServerAdapter } from '@whatwg-node/server';
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { Readable } from 'stream';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4010;
 
@@ -78,8 +77,7 @@ async function main() {
 
       reply.status(response.status);
 
-      // @ts-expect-error because @ardatan told me it's fine
-      reply.send(Readable.from(response.body!));
+      reply.send(response.body);
 
       return reply;
     },

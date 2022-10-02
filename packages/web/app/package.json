@@ -79,7 +79,7 @@
     "supertokens-auth-react": "0.24.6",
     "supertokens-node": "11.1.0",
     "nextjs-cors": "2.1.1",
-    "@whatwg-node/fetch": "0.4.6",
+    "@whatwg-node/fetch": "0.4.7",
     "zod": "3.15.1",
     "@trpc/client": "9.23.2"
   },
