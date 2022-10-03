@@ -530,6 +530,7 @@ export class OperationsReader {
               ${this.createFilter({
                 target,
                 operations,
+                period,
               })}
             GROUP BY name, body, hash, operation_kind`,
             queryId: 'operations_registry',
