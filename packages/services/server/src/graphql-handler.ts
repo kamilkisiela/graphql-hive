@@ -241,6 +241,8 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
         reply.status(response.status);
 
         reply.send(response.body);
+
+        return reply;
       }
     );
   };

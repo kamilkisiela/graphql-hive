@@ -1,10 +1,14 @@
 import * as utils from 'dockest/test-helper';
-import { fetch } from '@whatwg-node/fetch';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { ExecutionResult, print } from 'graphql';
 import { TypedDocumentNode } from '@graphql-typed-document-node/core';
+import { createFetch } from '@whatwg-node/fetch';
 
 const registryAddress = utils.getServiceAddress('server', 3001);
+
+const { fetch } = createFetch({
+  useNodeFetch: true,
+});
 
 export async function execute<TResult, TVariables>(
   params: {
