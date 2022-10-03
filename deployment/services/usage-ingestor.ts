@@ -30,10 +30,10 @@ export function deployUsageIngestor({
   dbMigrations: DbMigrations;
   heartbeat?: string;
 }) {
-  const numberOfPartitions = 4;
-  const replicas = isProduction(deploymentEnv) ? 3 : 1;
+  const numberOfPartitions = 6;
+  const replicas = isProduction(deploymentEnv) ? 4 : 1;
   const cpuLimit = isProduction(deploymentEnv) ? '600m' : '300m';
-  const maxReplicas = isProduction(deploymentEnv) ? 4 : 2;
+  const maxReplicas = isProduction(deploymentEnv) ? numberOfPartitions : 2;
 
   const clickhouseEnv = {
     CLICKHOUSE_PROTOCOL: clickhouse.config.protocol,
