@@ -171,8 +171,16 @@ async function writeCsv(
     .catch(error => {
       Sentry.captureException(error, {
         level: 'error',
+        tags: {
+          clickhouse_host: config.host,
+        },
         extra: {
           query,
+          clickhouse: {
+            protocol: config.protocol,
+            host: config.host,
+            port: config.port,
+          },
         },
       });
       return Promise.reject(error);
