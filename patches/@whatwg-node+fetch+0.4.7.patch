@@ -1,0 +1,35 @@
+diff --git a/node_modules/@whatwg-node/fetch/dist/create-node-ponyfill.js b/node_modules/@whatwg-node/fetch/dist/create-node-ponyfill.js
+index a62bf1e..2d91ef1 100644
+--- a/node_modules/@whatwg-node/fetch/dist/create-node-ponyfill.js
++++ b/node_modules/@whatwg-node/fetch/dist/create-node-ponyfill.js
+@@ -141,12 +141,28 @@ module.exports = function createNodePonyfill(opts = {}) {
+       const fetch = function (requestOrUrl, options) {
+         if (typeof requestOrUrl === "string" || requestOrUrl instanceof URL) {
+           // We cannot use our ctor because it leaks on Node 18's global fetch
+-          return originalFetch(requestOrUrl, options);
++          return originalFetch(requestOrUrl, options).catch(e => {
++            if (e.cause) {
++              throw e.cause + JSON.stringify({
++                requestOrUrl,
++                options
++              })
++            }
++            throw e;
++          });
+         }
+         if (requestOrUrl.url.startsWith('file:')) {
+           return handleFileRequest(requestOrUrl.url, ponyfills.Response);
+         }
+-        return originalFetch(requestOrUrl);
++        return originalFetch(requestOrUrl).catch(e => {
++            if (e.cause) {
++              throw e.cause + JSON.stringify({
++                requestOrUrl,
++                options
++              })
++            }
++            throw e;
++        });
+       };
+ 
+       ponyfills.fetch = fetch;
