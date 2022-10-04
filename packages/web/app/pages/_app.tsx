@@ -14,19 +14,13 @@ import Session from 'supertokens-auth-react/recipe/session';
 import SuperTokens, { SuperTokensWrapper } from 'supertokens-auth-react';
 import { frontendConfig } from '@/config/frontend-config';
 import { configureScope } from '@sentry/nextjs';
-import { LAST_VISITED_ORG_KEY, GA_TRACKING_ID, CRISP_WEBSITE_ID } from '@/constants';
+import { LAST_VISITED_ORG_KEY } from '@/constants';
 import { Provider as UrqlProvider } from 'urql';
 import { urqlClient } from '@/lib/urql';
+import { env } from '@/env/frontend';
+import * as Sentry from '@sentry/react';
 
 const theme = extendTheme({ colors });
-
-if (process.env.NODE_ENV === 'development' && 'window' in globalThis) {
-  // Eslint-disable-next-line @typescript-eslint/no-var-requires, import/no-extraneous-dependencies -- only in dev mode
-  // const whyDidYouRender = require('@welldone-software/why-did-you-render');
-  // whyDidYouRender(React, {
-  //   trackAllPureComponents: true,
-  // });
-}
 
 declare global {
   interface Window {
@@ -94,9 +88,12 @@ function App({ Component, pageProps }: AppProps): ReactElement {
   return (
     <>
       <GlobalStylesComponent />
-      {GA_TRACKING_ID && (
+      {env.analytics.googleAnalyticsTrackingId && (
         <>
-          <Script strategy="afterInteractive" src={`https://www.googletagmanager.com/gtag/js?id=${GA_TRACKING_ID}`} />
+          <Script
+            strategy="afterInteractive"
+            src={`https://www.googletagmanager.com/gtag/js?id=${env.analytics.googleAnalyticsTrackingId}`}
+          />
           <Script
             id="gtag-init"
             strategy="afterInteractive"
@@ -105,14 +102,14 @@ function App({ Component, pageProps }: AppProps): ReactElement {
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){dataLayer.push(arguments);}
                 gtag('js', new Date());
-                gtag('config', '${GA_TRACKING_ID}', {
+                gtag('config', '${env.analytics.googleAnalyticsTrackingId}', {
                   page_path: window.location.pathname,
                 });`,
             }}
           />
         </>
       )}
-      {CRISP_WEBSITE_ID && (
+      {env.analytics.crispWebsiteId && (
         <Script
           id="crisp-init"
           strategy="afterInteractive"
@@ -120,7 +117,7 @@ function App({ Component, pageProps }: AppProps): ReactElement {
             __html: `
               if (typeof window !== 'undefined') {
                 window.$crisp = [];
-                window.CRISP_WEBSITE_ID = '${CRISP_WEBSITE_ID}';
+                window.CRISP_WEBSITE_ID = '${env.analytics.crispWebsiteId}';
                 (function () {
                   d = document;
                   s = d.createElement('script');
@@ -148,6 +145,14 @@ function App({ Component, pageProps }: AppProps): ReactElement {
 }
 if (globalThis.window) {
   SuperTokens.init(frontendConfig());
+  if (env.sentry) {
+    Sentry.init({
+      dsn: env.sentry.dsn,
+      enabled: true,
+      release: env.release,
+      environment: env.environment,
+    });
+  }
 }
 
 export default App;

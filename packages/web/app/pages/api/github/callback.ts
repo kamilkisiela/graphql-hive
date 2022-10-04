@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { graphql } from '@/lib/api/utils';
+import { env } from '@/env/backend';
 
 export async function ensureGithubIntegration(
   req: NextApiRequest,
@@ -10,7 +11,7 @@ export async function ensureGithubIntegration(
 ) {
   const { orgId, installationId } = input;
   await graphql({
-    url: `${process.env['APP_BASE_URL'].replace(/\/$/, '')}/api/proxy`,
+    url: `${env.appBaseUrl.replace(/\/$/, '')}/api/proxy`,
     headers: {
       ...req.headers,
       'content-type': 'application/json',

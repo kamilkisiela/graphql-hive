@@ -8,7 +8,6 @@ import { DbMigrations } from './db-migrations';
 
 const commonConfig = new pulumi.Config('common');
 const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
-const apiConfig = new pulumi.Config('api');
 
 export type UsageEstimator = ReturnType<typeof deployUsageEstimation>;
 
@@ -35,13 +34,13 @@ export function deployUsageEstimation({
       env: {
         ...deploymentEnv,
         ...commonEnv,
+        SENTRY: commonEnv.SENTRY_ENABLED,
         CLICKHOUSE_PROTOCOL: clickhouse.config.protocol,
         CLICKHOUSE_HOST: clickhouse.config.host,
         CLICKHOUSE_PORT: clickhouse.config.port,
         CLICKHOUSE_USERNAME: clickhouse.config.username,
         CLICKHOUSE_PASSWORD: clickhouse.config.password,
         RELEASE: packageHelper.currentReleaseId(),
-        POSTGRES_CONNECTION_STRING: apiConfig.requireSecret('postgresConnectionString'),
       },
       exposesMetrics: true,
       packageInfo: packageHelper.npmPack('@hive/usage-estimator'),

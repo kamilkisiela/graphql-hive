@@ -1,46 +1,25 @@
 import 'regenerator-runtime/runtime';
 import Document, { Html, Head, Main, NextScript, DocumentContext } from 'next/document';
 import { extractCritical } from '@emotion/server';
+// don't remove this import ; it will break the built app ; but not the dev app :)
+import '@/config/frontend-env';
 
-type FrontendEnvironment = {
-  APP_BASE_URL: string | undefined;
-  DOCS_URL: string | undefined;
-  STRIPE_PUBLIC_KEY: string | undefined;
-  AUTH_GITHUB: string | undefined;
-  AUTH_GOOGLE: string | undefined;
-  GA_TRACKING_ID: string | undefined;
-  CRISP_WEBSITE_ID: string | undefined;
-  SENTRY_DSN: string | undefined;
-  RELEASE: string | undefined;
-  ENVIRONMENT: string | undefined;
-  SENTRY_ENABLED: string | undefined;
-};
-
-export default class MyDocument extends Document<{ ids: Array<string>; css: string; __ENV__: FrontendEnvironment }> {
+export default class MyDocument extends Document<{
+  ids: Array<string>;
+  css: string;
+  frontendEnv: typeof import('@/config/frontend-env')['env'];
+}> {
   static async getInitialProps(ctx: DocumentContext) {
+    const { env: frontendEnv } = await import('@/config/frontend-env');
     const initialProps = await Document.getInitialProps(ctx);
     const page = await ctx.renderPage();
     const styles = extractCritical(page.html);
-
-    const __ENV__: FrontendEnvironment = {
-      APP_BASE_URL: process.env['APP_BASE_URL'],
-      DOCS_URL: process.env['DOCS_URL'],
-      STRIPE_PUBLIC_KEY: process.env['STRIPE_PUBLIC_KEY'],
-      AUTH_GITHUB: process.env['AUTH_GITHUB'],
-      AUTH_GOOGLE: process.env['AUTH_GOOGLE'],
-      GA_TRACKING_ID: process.env['GA_TRACKING_ID'],
-      CRISP_WEBSITE_ID: process.env['CRISP_WEBSITE_ID'],
-      SENTRY_DSN: process.env['SENTRY_DSN'],
-      RELEASE: process.env['RELEASE'],
-      ENVIRONMENT: process.env['ENVIRONMENT'],
-      SENTRY_ENABLED: process.env['SENTRY_ENABLED'],
-    };
 
     return {
       ...initialProps,
       ...page,
       ...styles,
-      __ENV__,
+      frontendEnv,
     };
   }
 
@@ -73,7 +52,7 @@ export default class MyDocument extends Document<{ ids: Array<string>; css: stri
           <script
             type="module"
             dangerouslySetInnerHTML={{
-              __html: `globalThis["__ENV__"] = ${JSON.stringify((this.props as any).__ENV__)}`,
+              __html: `globalThis["__frontend_env"] = ${JSON.stringify((this.props as any).frontendEnv)}`,
             }}
           />
         </Head>

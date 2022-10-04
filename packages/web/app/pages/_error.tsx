@@ -1,6 +1,5 @@
 import NextErrorComponent from 'next/error';
 import type { NextPageContext } from 'next';
-
 import * as Sentry from '@sentry/nextjs';
 
 const MyError = ({

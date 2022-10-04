@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { withSentry, captureException } from '@sentry/nextjs';
+import { captureException } from '@sentry/nextjs';
 
 async function joinWaitingList(req: NextApiRequest, res: NextApiResponse) {
   function success(message: string) {
@@ -36,7 +36,7 @@ async function joinWaitingList(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-export default withSentry(joinWaitingList);
+export default joinWaitingList;
 
 export const config = {
   api: {

@@ -12,6 +12,7 @@ import {
 } from './metrics';
 import { ClickHouseConfig, createWriter } from './writer';
 import { createProcessor } from './processor';
+import type { KafkaEnvironment } from './environment';
 
 import type { FastifyLoggerInstance } from '@hive/service-common';
 import type { RawReport } from '@hive/usage-common';
@@ -40,41 +41,40 @@ function shouldRetryOnFailure(error: any) {
 export function createIngestor(config: {
   logger: FastifyLoggerInstance;
   clickhouse: ClickHouseConfig;
-  clickhouseCloud: ClickHouseConfig | null;
+  clickhouseMirror: ClickHouseConfig | null;
   kafka: {
     topic: string;
     consumerGroup: string;
     concurrency: number;
-    connection:
-      | {
-          mode: 'hosted';
-          key: string;
-          user: string;
-          broker: string;
-        }
-      | {
-          mode: 'docker';
-          broker: string;
-        };
+    connection: KafkaEnvironment['connection'];
   };
 }) {
   const { logger } = config;
 
   const kafka = new Kafka({
     clientId: 'usage-ingestor',
-    ...(config.kafka.connection.mode === 'hosted'
-      ? {
-          ssl: true,
-          sasl: {
+    brokers: [config.kafka.connection.broker],
+    ssl: config.kafka.connection.isSSL,
+    sasl:
+      config.kafka.connection.sasl?.mechanism === 'plain'
+        ? {
             mechanism: 'plain',
-            username: config.kafka.connection.user,
-            password: config.kafka.connection.key,
-          },
-          brokers: [config.kafka.connection.broker],
-        }
-      : {
-          brokers: [config.kafka.connection.broker],
-        }),
+            username: config.kafka.connection.sasl.username,
+            password: config.kafka.connection.sasl.password,
+          }
+        : config.kafka.connection.sasl?.mechanism === 'scram-sha-256'
+        ? {
+            mechanism: 'scram-sha-256',
+            username: config.kafka.connection.sasl.username,
+            password: config.kafka.connection.sasl.password,
+          }
+        : config.kafka.connection.sasl?.mechanism === 'scram-sha-512'
+        ? {
+            mechanism: 'scram-sha-512',
+            username: config.kafka.connection.sasl.username,
+            password: config.kafka.connection.sasl.password,
+          }
+        : undefined,
     logLevel: logLevel.INFO,
     logCreator() {
       return entry => {
@@ -175,7 +175,7 @@ export function createIngestor(config: {
   const processor = createProcessor({ logger });
   const writer = createWriter({
     clickhouse: config.clickhouse,
-    clickhouseCloud: config.clickhouseCloud,
+    clickhouseMirror: config.clickhouseMirror,
     logger,
   });
 

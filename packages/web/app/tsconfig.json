@@ -24,6 +24,6 @@
     },
     "incremental": true
   },
-  "include": ["next-env.d.ts", "modules.d.ts", "twin.d.ts", "src", "pages"],
+  "include": ["next-env.d.ts", "modules.d.ts", "twin.d.ts", "src", "pages", "environment.ts"],
   "exclude": ["node_modules"]
 }

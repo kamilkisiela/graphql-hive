@@ -1,5 +1,6 @@
 import * as pulumi from '@pulumi/pulumi';
 import * as azure from '@pulumi/azure';
+import { parse } from 'pg-connection-string';
 import { DbMigrations } from './db-migrations';
 import { RemoteArtifactAsServiceDeployment } from '../utils/remote-artifact-as-service';
 import { DeploymentEnvironment } from '../types';
@@ -24,6 +25,9 @@ export function deployTokens({
   dbMigrations: DbMigrations;
   heartbeat?: string;
 }) {
+  const rawConnectionString = apiConfig.requireSecret('postgresConnectionString');
+  const connectionString = rawConnectionString.apply(rawConnectionString => parse(rawConnectionString));
+
   return new RemoteArtifactAsServiceDeployment(
     'tokens-service',
     {
@@ -31,8 +35,14 @@ export function deployTokens({
       env: {
         ...deploymentEnv,
         ...commonEnv,
+        SENTRY: commonEnv.SENTRY_ENABLED,
         HEARTBEAT_ENDPOINT: heartbeat ?? '',
-        POSTGRES_CONNECTION_STRING: apiConfig.requireSecret('postgresConnectionString'),
+        POSTGRES_HOST: connectionString.apply(connection => connection.host ?? ''),
+        POSTGRES_PORT: connectionString.apply(connection => connection.port ?? ''),
+        POSTGRES_PASSWORD: connectionString.apply(connection => connection.password ?? ''),
+        POSTGRES_USER: connectionString.apply(connection => connection.user ?? ''),
+        POSTGRES_DB: connectionString.apply(connection => connection.database ?? ''),
+        POSTGRES_ENABLE_SSL: connectionString.apply(connection => (connection.ssl ? '1' : '0')),
         RELEASE: packageHelper.currentReleaseId(),
       },
       readinessProbe: '/_readiness',

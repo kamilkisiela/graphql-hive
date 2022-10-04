@@ -25,19 +25,23 @@ export class GitHubIntegrationManager {
     logger: Logger,
     private authManager: AuthManager,
     private storage: Storage,
-    @Inject(GITHUB_APP_CONFIG) private config: GitHubApplicationConfig
+    @Inject(GITHUB_APP_CONFIG) private config: GitHubApplicationConfig | null
   ) {
     this.logger = logger.child({
       source: 'GitHubIntegrationManager',
     });
 
-    if (this.config.appId && this.config.privateKey) {
+    if (this.config) {
       this.app = new App({
         appId: this.config.appId,
         privateKey: this.config.privateKey,
         log: this.logger,
       });
     }
+  }
+
+  isEnabled(): boolean {
+    return !!this.app;
   }
 
   async register(

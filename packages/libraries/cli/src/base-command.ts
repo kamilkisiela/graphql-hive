@@ -12,6 +12,7 @@ export default abstract class extends Command {
     super(argv, config);
 
     this._userConfig = new Config({
+      // eslint-disable-next-line no-process-env
       filepath: process.env.HIVE_CONFIG,
       rootDir: process.cwd(),
     });
@@ -71,7 +72,9 @@ export default abstract class extends Command {
       return args[key];
     }
 
+    // eslint-disable-next-line no-process-env
     if (env && process.env[env]) {
+      // eslint-disable-next-line no-process-env
       return process.env[env] as TArgs[TKey];
     }
 

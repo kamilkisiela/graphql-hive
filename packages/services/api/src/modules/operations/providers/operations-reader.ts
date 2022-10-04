@@ -52,6 +52,7 @@ function ensureNumber(value: number | string): number {
   return parseFloat(value);
 }
 
+// eslint-disable-next-line no-process-env
 const FF_CLICKHOUSE_V2_TABLES = process.env.FF_CLICKHOUSE_V2_TABLES === '1';
 
 if (FF_CLICKHOUSE_V2_TABLES) {
