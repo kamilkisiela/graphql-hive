@@ -24,6 +24,9 @@ export const env = {
     googleAnalyticsTrackingId: backendEnv?.analytics.googleAnalyticsTrackingId,
     crispWebsiteId: backendEnv?.analytics.crispWebsiteId,
   },
+  integrations: {
+    slack: !!backendEnv.slack,
+  },
   sentry: backendEnv.sentry,
   release: backendEnv.release,
   environment: backendEnv.environment,

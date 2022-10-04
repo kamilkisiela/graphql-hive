@@ -9,8 +9,6 @@ const BaseSchema = zod.object({
   EMAILS_ENDPOINT: zod.string().url(),
   SUPERTOKENS_CONNECTION_URI: zod.string().url(),
   SUPERTOKENS_API_KEY: zod.string(),
-  SLACK_CLIENT_ID: zod.string(),
-  SLACK_CLIENT_SECRET: zod.string(),
   INTEGRATION_GITHUB_APP_NAME: zod.string().optional(),
   GA_TRACKING_ID: zod.string().optional(),
   CRISP_WEBSITE_ID: zod.string().optional(),
@@ -19,6 +17,17 @@ const BaseSchema = zod.object({
   RELEASE: zod.string().optional(),
   AUTH_REQUIRE_EMAIL_VERIFICATION: zod.union([zod.literal('1'), zod.literal('0')]).optional(),
 });
+
+const IntegrationSlackSchema = zod.union([
+  zod.object({
+    INTEGRATION_SLACK: zod.literal('0').optional(),
+  }),
+  zod.object({
+    INTEGRATION_SLACK: zod.literal('1'),
+    INTEGRATION_SLACK_CLIENT_ID: zod.string(),
+    INTEGRATION_SLACK_CLIENT_SECRET: zod.string(),
+  }),
+]);
 
 const AuthGitHubConfigSchema = zod.union([
   zod.object({
@@ -71,6 +80,8 @@ const configs = {
   // eslint-disable-next-line no-process-env
   base: BaseSchema.safeParse(process.env),
   // eslint-disable-next-line no-process-env
+  integrationSlack: IntegrationSlackSchema.safeParse(process.env),
+  // eslint-disable-next-line no-process-env
   sentry: SentryConfigSchema.safeParse(process.env),
   // eslint-disable-next-line no-process-env
   authGithub: AuthGitHubConfigSchema.safeParse(process.env),
@@ -102,6 +113,7 @@ function extractConfig<Input, Output>(config: zod.SafeParseReturnType<Input, Out
 }
 
 const base = extractConfig(configs.base);
+const integrationSlack = extractConfig(configs.integrationSlack);
 const sentry = extractConfig(configs.sentry);
 const authGithub = extractConfig(configs.authGithub);
 const authGoogle = extractConfig(configs.authGoogle);
@@ -118,10 +130,13 @@ const config = {
     connectionUri: base.SUPERTOKENS_CONNECTION_URI,
     apiKey: base.SUPERTOKENS_API_KEY,
   },
-  slack: {
-    clientId: base.SLACK_CLIENT_ID,
-    clientSecret: base.SLACK_CLIENT_SECRET,
-  },
+  slack:
+    integrationSlack.INTEGRATION_SLACK === '1'
+      ? {
+          clientId: integrationSlack.INTEGRATION_SLACK_CLIENT_ID,
+          clientSecret: integrationSlack.INTEGRATION_SLACK_CLIENT_SECRET,
+        }
+      : null,
   github: base.INTEGRATION_GITHUB_APP_NAME
     ? {
         appName: base.INTEGRATION_GITHUB_APP_NAME,

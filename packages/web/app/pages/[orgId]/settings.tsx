@@ -8,6 +8,7 @@ import { OrganizationLayout } from '@/components/layouts';
 import { Button, Card, Heading, Input, Spinner, Tag, Title } from '@/components/v2';
 import { AlertTriangleIcon, GitHubIcon, SlackIcon } from '@/components/v2/icon';
 import { DeleteOrganizationModal } from '@/components/v2/modals';
+import { env } from '@/env/frontend';
 import {
   CheckIntegrationsDocument,
   DeleteGitHubIntegrationDocument,
@@ -44,33 +45,35 @@ const Integrations = (): ReactElement => {
 
   return (
     <>
-      <div className="flex items-center gap-x-4">
-        {hasSlackIntegration ? (
-          <Button
-            size="large"
-            danger
-            disabled={deleteSlackMutation.fetching}
-            onClick={() => {
-              deleteSlack({
-                input: {
-                  organization: orgId,
-                },
-              });
-            }}
-          >
-            <SlackIcon className="mr-2" />
-            Disconnect Slack
-          </Button>
-        ) : (
-          <Button variant="secondary" size="large" as="a" href={`/api/slack/connect/${orgId}`}>
-            <SlackIcon className="mr-2" />
-            Connect Slack
-          </Button>
-        )}
-        <Tag>Alerts and notifications</Tag>
-      </div>
-      <div className="flex items-center gap-x-4">
-        {isGitHubIntegrationFeatureEnabled === false ? null : (
+      {env.integrations.slack === false ? null : (
+        <div className="flex items-center gap-x-4">
+          {hasSlackIntegration ? (
+            <Button
+              size="large"
+              danger
+              disabled={deleteSlackMutation.fetching}
+              onClick={() => {
+                deleteSlack({
+                  input: {
+                    organization: orgId,
+                  },
+                });
+              }}
+            >
+              <SlackIcon className="mr-2" />
+              Disconnect Slack
+            </Button>
+          ) : (
+            <Button variant="secondary" size="large" as="a" href={`/api/slack/connect/${orgId}`}>
+              <SlackIcon className="mr-2" />
+              Connect Slack
+            </Button>
+          )}
+          <Tag>Alerts and notifications</Tag>
+        </div>
+      )}
+      {isGitHubIntegrationFeatureEnabled === false ? null : (
+        <div className="flex items-center gap-x-4">
           <>
             {hasGitHubIntegration ? (
               <>
@@ -101,8 +104,8 @@ const Integrations = (): ReactElement => {
             )}
             <Tag>Allow Hive to communicate with GitHub</Tag>
           </>
-        )}
-      </div>
+        </div>
+      )}
     </>
   );
 };
