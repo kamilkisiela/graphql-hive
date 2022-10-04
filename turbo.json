@@ -19,7 +19,7 @@
     },
     "@hive/cdn-script#build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/index.js"]
+      "outputs": ["dist/worker.js"]
     },
     "@hive/cdn-script#build-local": {
       "dependsOn": ["^build"],
