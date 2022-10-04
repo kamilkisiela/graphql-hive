@@ -17,23 +17,40 @@ type CdnResourceType = 'schema' | 'supergraph' | 'metadata';
 export class CdnProvider {
   private logger: Logger;
   private encoder: TextEncoder;
-  private secretKeyData: Uint8Array;
+  private secretKeyData: Uint8Array | null;
 
-  constructor(logger: Logger, private httpClient: HttpClient, @Inject(CDN_CONFIG) private config: CDNConfig) {
+  constructor(logger: Logger, private httpClient: HttpClient, @Inject(CDN_CONFIG) private config: CDNConfig | null) {
     this.logger = logger.child({ source: 'CdnProvider' });
     this.encoder = new TextEncoder();
-    this.secretKeyData = this.encoder.encode(this.config.authPrivateKey);
+    this.secretKeyData = this.config ? this.encoder.encode(this.config.authPrivateKey) : null;
+  }
+
+  isEnabled(): boolean {
+    return this.config !== null;
   }
 
   getCdnUrlForTarget(targetId: string): string {
+    if (this.config === null) {
+      throw new HiveError(`CDN is not configured, cannot resolve CDN target url.`);
+    }
+
     return `${this.config.baseUrl}/${targetId}`;
   }
 
   generateToken(targetId: string): string {
+    if (this.secretKeyData === null) {
+      throw new HiveError(`CDN is not configured, cannot generate a token.`);
+    }
+
     return createHmac('sha256', this.secretKeyData).update(this.encoder.encode(targetId)).digest('base64');
   }
 
-  pushToCDN(url: string, body: string, span?: Span): Promise<{ success: boolean }> {
+  async pushToCDN(url: string, body: string, span?: Span): Promise<{ success: boolean }> {
+    if (this.config === null) {
+      this.logger.info(`Trying to push to the CDN, but CDN is not configured, skipping`);
+      return { success: false };
+    }
+
     return this.httpClient.put<{ success: boolean }>(
       url,
       {
@@ -67,6 +84,11 @@ export class CdnProvider {
     },
     span?: Span
   ): Promise<void> {
+    if (this.config === null) {
+      this.logger.info(`Trying to publish to the CDN, but CDN is not configured, skipping`);
+      return;
+    }
+
     const target = `target:${targetId}`;
     this.logger.info(`Publishing data to CDN based on target: "${target}", resourceType is: ${resourceType} ...`);
     const CDN_SOURCE = `${this.config.cloudflare.basePath}/${this.config.cloudflare.accountId}/storage/kv/namespaces/${this.config.cloudflare.namespaceId}/values/${target}`;

@@ -1,12 +1,11 @@
 import React from 'react';
 import type { ReactNode } from 'react';
-import ThirdPartyEmailPassword from 'supertokens-auth-react/recipe/thirdpartyemailpassword';
 import { captureException } from '@sentry/nextjs';
 import { Header } from './v2';
 import { HiveStripeWrapper } from '@/lib/billing/stripe';
 import type { GetServerSideProps } from 'next';
 import { SessionContainerInterface } from 'supertokens-node/lib/build/recipe/session/types';
-import Session from 'supertokens-auth-react/recipe/session';
+import Session, { SessionAuth } from 'supertokens-auth-react/recipe/session';
 import { useRouter } from 'next/router';
 
 /**
@@ -15,12 +14,12 @@ import { useRouter } from 'next/router';
 export const AuthenticatedContainer = (props: { children: ReactNode }): React.ReactElement => {
   return (
     <>
-      <ThirdPartyEmailPassword.ThirdPartyEmailPasswordAuth>
+      <SessionAuth>
         <HiveStripeWrapper>
           <Header />
           {props.children}
         </HiveStripeWrapper>
-      </ThirdPartyEmailPassword.ThirdPartyEmailPasswordAuth>
+      </SessionAuth>
     </>
   );
 };

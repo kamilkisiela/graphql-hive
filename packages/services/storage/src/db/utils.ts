@@ -1,30 +1,15 @@
 import { sql } from 'slonik';
 
-export function createConnectionString(env: {
-  POSTGRES_HOST: string;
-  POSTGRES_PORT: string;
-  POSTGRES_PASSWORD: string;
-  POSTGRES_USER: string;
-  POSTGRES_DB: string;
-  POSTGRES_CONNECTION_STRING?: string;
-  POSTGRES_ENABLE_SSL?: boolean;
+export function createConnectionString(config: {
+  host: string;
+  port: number;
+  password: string;
+  user: string;
+  db: string;
+  ssl: boolean;
 }) {
-  const {
-    POSTGRES_HOST,
-    POSTGRES_PORT,
-    POSTGRES_PASSWORD,
-    POSTGRES_USER,
-    POSTGRES_DB,
-    POSTGRES_ENABLE_SSL = null,
-    POSTGRES_CONNECTION_STRING = null,
-  } = env;
-
-  return (
-    POSTGRES_CONNECTION_STRING ||
-    `postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}${
-      POSTGRES_ENABLE_SSL ? '' : '?sslmode=disable'
-    }`
-  );
+  // prettier-ignore
+  return `postgres://${config.user}:${config.password}@${config.host}:${config.port}/${config.db}${config.ssl ? '' : '?sslmode=disable'}`;
 }
 
 export function objectToParams<T extends Record<string, any>>(

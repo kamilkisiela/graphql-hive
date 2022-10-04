@@ -1,9 +1,11 @@
+import { env } from '@/env/frontend';
+
 export const getStripePublicKey = () => {
-  const stripePublicUrl = globalThis.process?.env['STRIPE_PUBLIC_KEY'] ?? globalThis['__ENV__']?.['STRIPE_PUBLIC_KEY'];
-  if (!stripePublicUrl) {
+  const stripePublicKey = env.stripePublicKey;
+  if (!stripePublicKey) {
     return null;
   }
-  return stripePublicUrl;
+  return stripePublicKey;
 };
 
 export const getIsStripeEnabled = () => !!getStripePublicKey();

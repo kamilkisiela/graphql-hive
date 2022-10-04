@@ -62,6 +62,7 @@ export function deployUsageIngestor({
       env: {
         ...deploymentEnv,
         ...commonEnv,
+        SENTRY: commonEnv.SENTRY_ENABLED,
         ...clickhouseEnv,
         HEARTBEAT_ENDPOINT: heartbeat ?? '',
         KAFKA_CONNECTION_MODE: 'hosted',

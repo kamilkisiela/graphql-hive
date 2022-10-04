@@ -33,6 +33,7 @@ import { VscChevronUp, VscChevronDown, VscChevronLeft, VscChevronRight } from 'r
 import { DataWrapper } from '@/components/common/DataWrapper';
 import { theme } from '@/lib/charts';
 import { OrganizationType } from '@/graphql';
+import { env } from '@/env/frontend';
 
 interface Organization {
   name: string;
@@ -342,7 +343,7 @@ function OrganizationTable({ data }: { data: Organization[] }) {
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    debugTable: process.env.NODE_ENV !== 'production',
+    debugTable: env.nodeEnv !== 'production',
   });
 
   const firstPage = React.useCallback(() => {

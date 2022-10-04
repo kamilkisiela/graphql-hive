@@ -1,0 +1,314 @@
+version: '3.8'
+
+networks:
+  stack: {}
+
+services:
+  db:
+    image: postgres:13.4-alpine
+    environment:
+      POSTGRES_DB: '${POSTGRES_DB}'
+      POSTGRES_USER: '${POSTGRES_USER}'
+      POSTGRES_PASSWORD: '${POSTGRES_PASSWORD}'
+      PGDATA: /var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}']
+      interval: 5s
+      timeout: 5s
+      retries: 6
+    networks:
+      - 'stack'
+    volumes:
+      - ./.hive/postgres:/var/lib/postgresql/data
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:22.6.1-alpine
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'localhost:8123/ping']
+      interval: 5s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+    environment:
+      CLICKHOUSE_USER: '${CLICKHOUSE_USER}'
+      CLICKHOUSE_PASSWORD: '${CLICKHOUSE_PASSWORD}'
+    networks:
+      - 'stack'
+    volumes:
+      - ./.hive/clickhouse/db:/var/lib/clickhouse
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.1.1-1-ubi8.amd64
+    hostname: zookeeper
+    networks:
+      - 'stack'
+    ulimits:
+      nofile:
+        soft: 20000
+        hard: 40000
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    volumes:
+      - ./.hive/zookeeper/db:/var/lib/zookeeper/data
+
+  broker:
+    image: confluentinc/cp-kafka:7.1.1-1-ubi8.amd64
+    hostname: borker
+    depends_on:
+      zookeeper:
+        condition: service_started
+    networks:
+      - 'stack'
+    ulimits:
+      nofile:
+        soft: 20000
+        hard: 40000
+    healthcheck:
+      test: ['CMD', 'cub', 'kafka-ready', '1', '5', '-b', '127.0.0.1:9092', '-c', '/etc/kafka/kafka.properties']
+      interval: 15s
+      timeout: 10s
+      retries: 6
+      start_period: 15s
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+    volumes:
+      - ./.hive/broker/db:/var/lib/kafka/data
+
+  redis:
+    image: bitnami/redis:6.2
+    networks:
+      - 'stack'
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 10s
+      retries: 6
+      start_period: 5s
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+    volumes:
+      - './.hive/redis/db:/bitnami/redis/data'
+
+  supertokens:
+    image: registry.supertokens.io/supertokens/supertokens-postgresql:4.1
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - 'stack'
+    environment:
+      POSTGRESQL_USER: '${POSTGRES_USER}'
+      POSTGRESQL_PASSWORD: '${POSTGRES_PASSWORD}'
+      POSTGRESQL_DATABASE_NAME: '${POSTGRES_DB}'
+      POSTGRESQL_TABLE_NAMES_PREFIX: 'supertokens'
+      POSTGRESQL_HOST: db
+      POSTGRESQL_PORT: 5432
+      API_KEYS: '${SUPERTOKENS_API_KEY}'
+
+  storage:
+    image: '${DOCKER_REGISTRY}storage${DOCKER_TAG}'
+    networks:
+      - 'stack'
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    environment:
+      MIGRATOR: 'up'
+      CLICKHOUSE_MIGRATOR: 'up'
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: '${POSTGRES_DB}'
+      POSTGRES_USER: '${POSTGRES_USER}'
+      POSTGRES_PASSWORD: '${POSTGRES_PASSWORD}'
+      CLICKHOUSE_PROTOCOL: 'http'
+      CLICKHOUSE_HOST: 'clickhouse'
+      CLICKHOUSE_PORT: '8123'
+      CLICKHOUSE_USERNAME: '${CLICKHOUSE_USER}'
+      CLICKHOUSE_PASSWORD: '${CLICKHOUSE_PASSWORD}'
+    # Tell dockest, we want to wait for the exit code of the migrator to be 0
+    labels:
+      dockest.readiness: 'exit_code'
+
+  server:
+    image: '${DOCKER_REGISTRY}server${DOCKER_TAG}'
+    networks:
+      - 'stack'
+    depends_on:
+      redis:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+      storage:
+        condition: service_completed_successfully
+      tokens:
+        condition: service_healthy
+      webhooks:
+        condition: service_healthy
+      emails:
+        condition: service_healthy
+      schema:
+        condition: service_healthy
+    ports:
+      - 3001:3001
+    environment:
+      NODE_ENV: production
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: '${POSTGRES_DB}'
+      POSTGRES_USER: '${POSTGRES_USER}'
+      POSTGRES_PASSWORD: '${POSTGRES_PASSWORD}'
+      ROARR_LOG: 'true'
+      CLICKHOUSE_PROTOCOL: 'http'
+      CLICKHOUSE_HOST: clickhouse
+      CLICKHOUSE_PORT: 8123
+      CLICKHOUSE_USERNAME: '${CLICKHOUSE_USER}'
+      CLICKHOUSE_PASSWORD: '${CLICKHOUSE_PASSWORD}'
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: '${REDIS_PASSWORD}'
+      TOKENS_ENDPOINT: http://tokens:3003
+      WEBHOOKS_ENDPOINT: http://webhooks:3005
+      SCHEMA_ENDPOINT: http://schema:3002
+      EMAILS_ENDPOINT: http://emails:3011
+      ENCRYPTION_SECRET: '${HIVE_ENCRYPTION_SECRET}'
+      WEB_APP_URL: '${HIVE_APP_BASE_URL}'
+      PORT: 3001
+      SUPERTOKENS_CONNECTION_URI: http://supertokens:3567
+      SUPERTOKENS_API_KEY: '${SUPERTOKENS_API_KEY}'
+
+  schema:
+    image: '${DOCKER_REGISTRY}schema${DOCKER_TAG}'
+    networks:
+      - 'stack'
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3002
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: '${REDIS_PASSWORD}'
+      ENCRYPTION_SECRET: '${HIVE_ENCRYPTION_SECRET}'
+
+  tokens:
+    image: '${DOCKER_REGISTRY}tokens${DOCKER_TAG}'
+    networks:
+      - 'stack'
+    depends_on:
+      storage:
+        condition: service_completed_successfully
+    environment:
+      NODE_ENV: production
+      POSTGRES_HOST: db
+      POSTGRES_USER: '${POSTGRES_USER}'
+      POSTGRES_PASSWORD: '${POSTGRES_PASSWORD}'
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: '${POSTGRES_DB}'
+      ROARR_LOG: 'true'
+      PORT: 3003
+
+  webhooks:
+    image: '${DOCKER_REGISTRY}webhooks${DOCKER_TAG}'
+    networks:
+      - 'stack'
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      BULLMQ_COMMANDS_FROM_ROOT: 'true'
+      PORT: 3005
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: '${REDIS_PASSWORD}'
+
+  emails:
+    image: '${DOCKER_REGISTRY}emails${DOCKER_TAG}'
+    networks:
+      - 'stack'
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      BULLMQ_COMMANDS_FROM_ROOT: 'true'
+      PORT: 3011
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: '${REDIS_PASSWORD}'
+      EMAIL_FROM: no-reply@graphql-hive.com
+      EMAIL_PROVIDER: sendmail
+
+  usage:
+    image: '${DOCKER_REGISTRY}usage${DOCKER_TAG}'
+    networks:
+      - 'stack'
+    depends_on:
+      broker:
+        condition: service_healthy
+      tokens:
+        condition: service_healthy
+    ports:
+      - 8081:3006
+    environment:
+      NODE_ENV: production
+      TOKENS_ENDPOINT: http://tokens:3003
+      KAFKA_CONNECTION_MODE: 'docker'
+      KAFKA_TOPIC: 'usage_reports_v2'
+      KAFKA_BROKER: broker:29092
+      KAFKA_BUFFER_SIZE: 350
+      KAFKA_BUFFER_INTERVAL: 1000
+      KAFKA_BUFFER_DYNAMIC: '1'
+      PORT: 3006
+
+  usage-ingestor:
+    image: '${DOCKER_REGISTRY}usage-ingestor${DOCKER_TAG}'
+    networks:
+      - 'stack'
+    depends_on:
+      broker:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      KAFKA_CONNECTION_MODE: 'docker'
+      KAFKA_BROKER: broker:29092
+      KAFKA_CONCURRENCY: '1'
+      KAFKA_CONSUMER_GROUP: 'usage-ingestor-v2'
+      KAFKA_TOPIC: 'usage_reports_v2'
+      CLICKHOUSE_PROTOCOL: 'http'
+      CLICKHOUSE_HOST: clickhouse
+      CLICKHOUSE_PORT: 8123
+      CLICKHOUSE_USERNAME: '${CLICKHOUSE_USER}'
+      CLICKHOUSE_PASSWORD: '${CLICKHOUSE_PASSWORD}'
+      PORT: 3007
+
+  app:
+    image: '${DOCKER_REGISTRY}app${DOCKER_TAG}'
+    ports:
+      - '8080:3000'
+    networks:
+      - 'stack'
+    environment:
+      PORT: 3000
+      NODE_ENV: production
+      APP_BASE_URL: '${HIVE_APP_BASE_URL}'
+      SUPERTOKENS_CONNECTION_URI: http://supertokens:3567
+      SUPERTOKENS_API_KEY: '${SUPERTOKENS_API_KEY}'
+      EMAILS_ENDPOINT: http://emails:3011
+      GRAPHQL_ENDPOINT: http://server:3001/graphql
+      AUTH_REQUIRE_EMAIL_VERIFICATION: '0'

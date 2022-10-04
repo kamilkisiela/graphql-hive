@@ -29,6 +29,7 @@ export function deploySchema({
       env: {
         ...deploymentEnv,
         ...commonEnv,
+        SENTRY: commonEnv.SENTRY_ENABLED,
         RELEASE: packageHelper.currentReleaseId(),
         REDIS_HOST: redis.config.host,
         REDIS_PORT: String(redis.config.port),

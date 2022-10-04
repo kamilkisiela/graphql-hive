@@ -1,6 +1,7 @@
 import * as pulumi from '@pulumi/pulumi';
 import * as azure from '@pulumi/azure';
 import { Cloudflare } from './cloudflare';
+import { parse } from 'pg-connection-string';
 import { Tokens } from './tokens';
 import { Webhooks } from './webhooks';
 import { Redis } from './redis';
@@ -70,6 +71,9 @@ export function deployGraphQL({
     internalApiKey: Output<string>;
   };
 }) {
+  const rawConnectionString = apiConfig.requireSecret('postgresConnectionString');
+  const connectionString = rawConnectionString.apply(rawConnectionString => parse(rawConnectionString));
+
   return new RemoteArtifactAsServiceDeployment(
     'graphql-api',
     {
@@ -82,6 +86,7 @@ export function deployGraphQL({
         ...deploymentEnv,
         ...apiConfig.requireObject<Record<string, string>>('env'),
         ...commonEnv,
+        SENTRY: commonEnv.SENTRY_ENABLED,
         CLICKHOUSE_PROTOCOL: clickhouse.config.protocol,
         CLICKHOUSE_HOST: clickhouse.config.host,
         CLICKHOUSE_PORT: clickhouse.config.port,
@@ -91,24 +96,31 @@ export function deployGraphQL({
         REDIS_PORT: String(redis.config.port),
         REDIS_PASSWORD: redis.config.password,
         RELEASE: packageHelper.currentReleaseId(),
-        POSTGRES_CONNECTION_STRING: apiConfig.requireSecret('postgresConnectionString'),
+        POSTGRES_HOST: connectionString.apply(connection => connection.host ?? ''),
+        POSTGRES_PORT: connectionString.apply(connection => connection.port ?? ''),
+        POSTGRES_PASSWORD: connectionString.apply(connection => connection.password ?? ''),
+        POSTGRES_USER: connectionString.apply(connection => connection.user ?? ''),
+        POSTGRES_DB: connectionString.apply(connection => connection.database ?? ''),
+        POSTGRES_ENABLE_SSL: connectionString.apply(connection => (connection.ssl ? '1' : '0')),
         BILLING_ENDPOINT: serviceLocalEndpoint(billing.service),
         TOKENS_ENDPOINT: serviceLocalEndpoint(tokens.service),
         WEBHOOKS_ENDPOINT: serviceLocalEndpoint(webhooks.service),
         SCHEMA_ENDPOINT: serviceLocalEndpoint(schema.service),
-        CF_BASE_PATH: 'https://api.cloudflare.com/client/v4/accounts',
-        CF_ACCOUNT_ID: cloudflareConfig.require('accountId'),
-        CF_AUTH_TOKEN: cloudflareConfig.requireSecret('apiToken'),
-        CF_NAMESPACE_ID: cloudflare.cfStorageNamespaceId,
+        CDN: '1',
+        CDN_CF_BASE_PATH: 'https://api.cloudflare.com/client/v4/accounts',
+        CDN_CF_ACCOUNT_ID: cloudflareConfig.require('accountId'),
+        CDN_CF_AUTH_TOKEN: cloudflareConfig.requireSecret('apiToken'),
+        CDN_CF_NAMESPACE_ID: cloudflare.cfStorageNamespaceId,
         CDN_BASE_URL: cloudflare.workerBaseUrl,
         CDN_AUTH_PRIVATE_KEY: cloudflare.authPrivateKey,
         HIVE_USAGE_ENDPOINT: serviceLocalEndpoint(usage.service),
         USAGE_ESTIMATOR_ENDPOINT: serviceLocalEndpoint(usageEstimator.service),
         HIVE_REPORTING_ENDPOINT: 'http://0.0.0.0:4000/graphql',
-        GITHUB_APP_PRIVATE_KEY: githubAppConfig.requireSecret('key'),
+        INTEGRATION_GITHUB: '1',
+        INTEGRATION_GITHUB_APP_ID: githubAppConfig.require('id'),
+        INTEGRATION_GITHUB_APP_PRIVATE_KEY: githubAppConfig.requireSecret('key'),
         RATE_LIMIT_ENDPOINT: serviceLocalEndpoint(rateLimit.service),
         EMAILS_ENDPOINT: serviceLocalEndpoint(emails.service),
-        GITHUB_APP_ID: githubAppConfig.require('id'),
         ENCRYPTION_SECRET: commonConfig.requireSecret('encryptionSecret'),
         // Auth
         SUPERTOKENS_CONNECTION_URI: supertokensConfig.endpoint,
