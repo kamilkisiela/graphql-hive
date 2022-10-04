@@ -1,4 +1,5 @@
 import ThirdPartyEmailPasswordReact from 'supertokens-auth-react/recipe/thirdpartyemailpassword';
+import EmailVerification from 'supertokens-auth-react/recipe/emailverification';
 import SessionReact from 'supertokens-auth-react/recipe/session';
 import Provider from 'supertokens-auth-react/lib/build/recipe/thirdparty/providers';
 import { env } from '@/env/frontend';
@@ -21,9 +22,9 @@ export const frontendConfig = () => {
         signInAndUpFeature: {
           providers,
         },
-        emailVerificationFeature: {
-          mode: 'REQUIRED',
-        },
+      }),
+      EmailVerification.init({
+        mode: env.auth.requireEmailVerification ? 'REQUIRED' : 'OPTIONAL',
       }),
       SessionReact.init(),
     ],

@@ -184,6 +184,11 @@ export function deployApp({
           name: 'AUTH_GOOGLE_CLIENT_SECRET',
           value: googleConfig.clientSecret,
         },
+
+        {
+          name: 'AUTH_REQUIRE_EMAIL_VERIFICATION',
+          value: '1',
+        },
       ],
       port: 3000,
     },

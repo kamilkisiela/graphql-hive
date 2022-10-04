@@ -18,6 +18,7 @@ export const env = {
     github: !!backendEnv.auth.github,
     google: !!backendEnv.auth.google,
     legacyAuth0: !!backendEnv.auth.legacyAuth0,
+    requireEmailVerification: backendEnv.auth.requireEmailVerification,
   },
   analytics: {
     googleAnalyticsTrackingId: backendEnv?.analytics.googleAnalyticsTrackingId,
