@@ -2,7 +2,8 @@
 import type { RouteHandlerMethod, FastifyRequest, FastifyReply } from 'fastify';
 import { Registry } from '@hive/api';
 import { cleanRequestId } from '@hive/service-common';
-import { createYoga, useErrorHandler, Plugin, isGraphQLError } from 'graphql-yoga';
+import { createYoga, useErrorHandler, Plugin } from 'graphql-yoga';
+import { isGraphQLError } from '@envelop/core';
 import { GraphQLError, ValidationContext, ValidationRule, Kind, OperationDefinitionNode, print } from 'graphql';
 import { useGraphQLModules } from '@envelop/graphql-modules';
 import { useGenericAuth } from '@envelop/generic-auth';
