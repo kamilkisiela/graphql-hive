@@ -100,7 +100,7 @@ services:
       - './.hive/redis/db:/bitnami/redis/data'
 
   supertokens:
-    image: registry.supertokens.io/supertokens/supertokens-postgresql:3.16
+    image: registry.supertokens.io/supertokens/supertokens-postgresql:4.1
     depends_on:
       db:
         condition: service_healthy
