@@ -11,7 +11,7 @@ const BaseSchema = zod.object({
   SUPERTOKENS_API_KEY: zod.string(),
   SLACK_CLIENT_ID: zod.string(),
   SLACK_CLIENT_SECRET: zod.string(),
-  GITHUB_APP_NAME: zod.string(),
+  INTEGRATION_GITHUB_APP_NAME: zod.string().optional(),
   GA_TRACKING_ID: zod.string().optional(),
   CRISP_WEBSITE_ID: zod.string().optional(),
   DOCS_URL: zod.string().url().optional(),
@@ -122,9 +122,11 @@ const config = {
     clientId: base.SLACK_CLIENT_ID,
     clientSecret: base.SLACK_CLIENT_SECRET,
   },
-  github: {
-    appName: base.GITHUB_APP_NAME,
-  },
+  github: base.INTEGRATION_GITHUB_APP_NAME
+    ? {
+        appName: base.INTEGRATION_GITHUB_APP_NAME,
+      }
+    : null,
   analytics: {
     googleAnalyticsTrackingId: base.GA_TRACKING_ID,
     crispWebsiteId: base.CRISP_WEBSITE_ID,

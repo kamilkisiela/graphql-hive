@@ -150,10 +150,7 @@ export async function main() {
         port: env.redis.port,
         password: env.redis.password,
       },
-      githubApp: {
-        appId: env.github.appId,
-        privateKey: env.github.privateKey,
-      },
+      githubApp: env.github,
       clickHouse: {
         protocol: env.clickhouse.protocol,
         host: env.clickhouse.host,

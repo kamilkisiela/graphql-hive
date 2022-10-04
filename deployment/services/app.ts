@@ -89,7 +89,7 @@ export function deployApp({
           value: appEnv.SLACK_CLIENT_SECRET,
         },
         {
-          name: 'GITHUB_APP_NAME',
+          name: 'INTEGRATION_GITHUB_APP_NAME',
           value: githubAppConfig.require('name'),
         },
 

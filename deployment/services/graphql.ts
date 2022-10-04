@@ -116,10 +116,11 @@ export function deployGraphQL({
         HIVE_USAGE_ENDPOINT: serviceLocalEndpoint(usage.service),
         USAGE_ESTIMATOR_ENDPOINT: serviceLocalEndpoint(usageEstimator.service),
         HIVE_REPORTING_ENDPOINT: 'http://0.0.0.0:4000/graphql',
-        GITHUB_APP_PRIVATE_KEY: githubAppConfig.requireSecret('key'),
+        INTEGRATION_GITHUB: '1',
+        INTEGRATION_GITHUB_APP_ID: githubAppConfig.require('id'),
+        INTEGRATION_GITHUB_APP_PRIVATE_KEY: githubAppConfig.requireSecret('key'),
         RATE_LIMIT_ENDPOINT: serviceLocalEndpoint(rateLimit.service),
         EMAILS_ENDPOINT: serviceLocalEndpoint(emails.service),
-        GITHUB_APP_ID: githubAppConfig.require('id'),
         ENCRYPTION_SECRET: commonConfig.requireSecret('encryptionSecret'),
         // Auth
         SUPERTOKENS_CONNECTION_URI: supertokensConfig.endpoint,

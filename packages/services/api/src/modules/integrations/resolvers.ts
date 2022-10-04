@@ -65,6 +65,9 @@ export const resolvers: IntegrationsModule.Resolvers = {
     },
   },
   Query: {
+    isGitHubIntegrationFeatureEnabled(_, __, { injector }) {
+      return injector.get(GitHubIntegrationManager).isEnabled();
+    },
     async hasSlackIntegration(_, { selector }, { injector }) {
       const organization = await injector.get(IdTranslator).translateOrganizationId(selector);
 
@@ -74,6 +77,10 @@ export const resolvers: IntegrationsModule.Resolvers = {
     },
     async hasGitHubIntegration(_, { selector }, { injector }) {
       const organization = await injector.get(IdTranslator).translateOrganizationId(selector);
+
+      if (!injector.get(GitHubIntegrationManager).isEnabled()) {
+        return false;
+      }
 
       return injector.get(GitHubIntegrationManager).isAvailable({
         organization,

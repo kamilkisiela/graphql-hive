@@ -1,4 +1,5 @@
 query checkIntegrations($selector: OrganizationSelectorInput!) {
   hasSlackIntegration(selector: $selector)
   hasGitHubIntegration(selector: $selector)
+  isGitHubIntegrationFeatureEnabled
 }

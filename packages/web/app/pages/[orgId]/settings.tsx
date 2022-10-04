@@ -38,6 +38,7 @@ const Integrations = (): ReactElement => {
     return <Spinner />;
   }
 
+  const isGitHubIntegrationFeatureEnabled = checkIntegrations.data?.isGitHubIntegrationFeatureEnabled;
   const hasGitHubIntegration = checkIntegrations.data?.hasGitHubIntegration === true;
   const hasSlackIntegration = checkIntegrations.data?.hasSlackIntegration === true;
 
@@ -69,34 +70,38 @@ const Integrations = (): ReactElement => {
         <Tag>Alerts and notifications</Tag>
       </div>
       <div className="flex items-center gap-x-4">
-        {hasGitHubIntegration ? (
+        {isGitHubIntegrationFeatureEnabled === false ? null : (
           <>
-            <Button
-              size="large"
-              danger
-              disabled={deleteGitHubMutation.fetching}
-              onClick={() => {
-                deleteGitHub({
-                  input: {
-                    organization: orgId,
-                  },
-                });
-              }}
-            >
-              <GitHubIcon className="mr-2" />
-              Disconnect GitHub
-            </Button>
-            <Button size="large" variant="link" as="a" href={`/api/github/connect/${orgId}`}>
-              Adjust permissions
-            </Button>
+            {hasGitHubIntegration ? (
+              <>
+                <Button
+                  size="large"
+                  danger
+                  disabled={deleteGitHubMutation.fetching}
+                  onClick={() => {
+                    deleteGitHub({
+                      input: {
+                        organization: orgId,
+                      },
+                    });
+                  }}
+                >
+                  <GitHubIcon className="mr-2" />
+                  Disconnect GitHub
+                </Button>
+                <Button size="large" variant="link" as="a" href={`/api/github/connect/${orgId}`}>
+                  Adjust permissions
+                </Button>
+              </>
+            ) : (
+              <Button variant="secondary" size="large" as="a" href={`/api/github/connect/${orgId}`}>
+                <GitHubIcon className="mr-2" />
+                Connect GitHub
+              </Button>
+            )}
+            <Tag>Allow Hive to communicate with GitHub</Tag>
           </>
-        ) : (
-          <Button variant="secondary" size="large" as="a" href={`/api/github/connect/${orgId}`}>
-            <GitHubIcon className="mr-2" />
-            Connect GitHub
-          </Button>
         )}
-        <Tag>Allow Hive to communicate with GitHub</Tag>
       </div>
     </>
   );
