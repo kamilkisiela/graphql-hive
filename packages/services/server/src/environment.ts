@@ -62,10 +62,16 @@ const SuperTokensModel = zod.object({
   SUPERTOKENS_API_KEY: zod.string(),
 });
 
-const GitHubModel = zod.object({
-  GITHUB_APP_ID: NumberFromString,
-  GITHUB_APP_PRIVATE_KEY: zod.string(),
-});
+const GitHubModel = zod.union([
+  zod.object({
+    INTEGRATION_GITHUB: zod.literal('0').optional(),
+  }),
+  zod.object({
+    INTEGRATION_GITHUB: zod.literal('1'),
+    INTEGRATION_GITHUB_APP_ID: NumberFromString,
+    INTEGRATION_GITHUB_APP_PRIVATE_KEY: zod.string(),
+  }),
+]);
 
 const CdnModel = zod.union([
   zod.object({
@@ -229,10 +235,13 @@ export const env = {
     connectionURI: supertokens.SUPERTOKENS_CONNECTION_URI,
     apiKey: supertokens.SUPERTOKENS_API_KEY,
   },
-  github: {
-    appId: github.GITHUB_APP_ID,
-    privateKey: github.GITHUB_APP_PRIVATE_KEY,
-  },
+  github:
+    github.INTEGRATION_GITHUB === '1'
+      ? {
+          appId: github.INTEGRATION_GITHUB_APP_ID,
+          privateKey: github.INTEGRATION_GITHUB_APP_PRIVATE_KEY,
+        }
+      : null,
   cdn:
     cdn.CDN === '1'
       ? {

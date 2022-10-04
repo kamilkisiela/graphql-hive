@@ -36,16 +36,6 @@ wget https://github.com/kamilkisiela/graphql-hive/blob/main/docker-compose.commu
 After downloading the file, you need to set some environment variables.
 
 <Callout>
-  **GitHub.** For receiving the `GITHUB_APP_ID` and `GITHUB_APP_PRIVATE_KEY` values follow the [Creating a GitHub
-  App](https://docs.github.com/en/developers/apps/building-github-apps/creating-a-github-app) documentation.
-</Callout>
-
-<Callout>
-  **Slack.** You need to create a new Slack app for receiving the `SLACK_CLIENT_ID` and `SLACK_CLIENT_SECRET` values.
-  [You can create a Slack app here.](https://api.slack.com/apps/)
-</Callout>
-
-<Callout>
   **Docker Tag.** Docker images are built and published for each single commit within the GraphQL Hive repository and
   tagged with the corresponding commit sha. You can also find all available images on the [Hive Docker Registry
   Overview](https://github.com/kamilkisiela?tab=packages&repo_name=graphql-hive). We recommend using one of the latest
@@ -67,11 +57,6 @@ export REDIS_PASSWORD=$(openssl rand -hex 16)
 export POSTGRES_USER="postgres"
 export POSTGRES_PASSWORD=$(openssl rand -hex 16)
 export POSTGRES_DB="registry"
-export GITHUB_APP_NAME="graphql-hive"
-export GITHUB_APP_ID="66666"
-export GITHUB_APP_PRIVATE_KEY=$(openssl rand -hex 16)
-export SLACK_CLIENT_ID=$(openssl rand -hex 16)
-export SLACK_CLIENT_SECRET=$(openssl rand -hex 16)
 ```
 
 <Callout emoji="✅">

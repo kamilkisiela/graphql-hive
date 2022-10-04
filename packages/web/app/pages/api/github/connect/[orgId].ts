@@ -3,6 +3,10 @@ import { env } from '@/env/backend';
 
 export default async function githubConnectOrg(req: NextApiRequest, res: NextApiResponse) {
   console.log('Connect to Github');
+  if (!env.github) {
+    throw new Error('GitHub is not set up.');
+  }
+
   const orgId = req.query.orgId;
   console.log('Organization', orgId);
 

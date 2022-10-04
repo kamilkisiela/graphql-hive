@@ -94,7 +94,7 @@ export function createRegistry({
   schemaService: SchemaServiceConfig;
   usageEstimationService: UsageEstimationServiceConfig;
   rateLimitService: RateLimitServiceConfig;
-  githubApp: GitHubApplicationConfig;
+  githubApp: GitHubApplicationConfig | null;
   cdn: CDNConfig | null;
   encryptionSecret: string;
   feedback: {
