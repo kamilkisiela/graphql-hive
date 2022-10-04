@@ -10,7 +10,7 @@ import {
   legacyRegistryOrder,
   joinIntoSingleMessage,
 } from './serializer';
-import { writeTime } from './metrics';
+import { writeDuration } from './metrics';
 
 function hasResponse(error: unknown): error is {
   response: GotResponse;
@@ -138,7 +138,7 @@ async function writeCsv(
   logger: FastifyLoggerInstance,
   maxRetry: number
 ) {
-  const stopTimer = writeTime.startTimer({
+  const stopTimer = writeDuration.startTimer({
     query,
     destination: config.host,
   });

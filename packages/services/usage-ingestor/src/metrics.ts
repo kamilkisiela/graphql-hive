@@ -20,8 +20,13 @@ export const processTime = new metrics.Summary({
   help: 'Time spent processing and writing reports',
 });
 
-export const writeTime = new metrics.Summary({
-  name: 'usage_ingestor_write_time',
+export const processDuration = new metrics.Histogram({
+  name: 'usage_ingestor_process_duration_seconds',
+  help: 'Time spent processing and writing reports',
+});
+
+export const writeDuration = new metrics.Histogram({
+  name: 'usage_ingestor_write_duration_seconds',
   help: 'Time spent writing reports',
   labelNames: ['query', 'destination', 'status'],
 });

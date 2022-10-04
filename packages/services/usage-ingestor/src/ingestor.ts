@@ -3,6 +3,7 @@ import { decompress } from '@hive/usage-common';
 import {
   errors,
   processTime,
+  processDuration,
   reportMessageBytes,
   ingestedOperationsWrites,
   ingestedOperationsFailures,
@@ -150,6 +151,7 @@ export function createIngestor(config: {
       partitionsConsumedConcurrently: config.kafka.concurrency,
       eachMessage({ message }) {
         const stopTimer = processTime.startTimer();
+        const processDurationStop = processDuration.startTimer();
         return processMessage({
           message,
           logger,
@@ -162,6 +164,7 @@ export function createIngestor(config: {
           })
           .finally(() => {
             stopTimer();
+            processDurationStop();
           });
       },
     });
