@@ -40,7 +40,7 @@ const PostgresModel = zod.object({
   POSTGRES_PASSWORD: zod.string(),
   POSTGRES_USER: zod.string(),
   POSTGRES_DB: zod.string(),
-  POSTGRES_ENABLE_SSL: emptyString(zod.union([zod.literal('1'), zod.literal('0')]).optional()),
+  POSTGRES_SSL: emptyString(zod.union([zod.literal('1'), zod.literal('0')]).optional()),
 });
 
 const PrometheusModel = zod.object({
@@ -97,7 +97,7 @@ export const env = {
     db: postgres.POSTGRES_DB,
     user: postgres.POSTGRES_USER,
     password: postgres.POSTGRES_PASSWORD,
-    ssl: postgres.POSTGRES_ENABLE_SSL === '1',
+    ssl: postgres.POSTGRES_SSL === '1',
   },
   heartbeat: base.HEARTBEAT_ENDPOINT ? { endpoint: base.HEARTBEAT_ENDPOINT } : null,
   sentry: sentry.SENTRY === '1' ? { dsn: sentry.SENTRY_DSN } : null,
