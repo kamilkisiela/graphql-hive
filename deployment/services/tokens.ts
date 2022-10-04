@@ -28,23 +28,27 @@ export function deployTokens({
   const rawConnectionString = apiConfig.requireSecret('postgresConnectionString');
   const connectionString = rawConnectionString.apply(rawConnectionString => parse(rawConnectionString));
 
+  const env: Record<string, string | pulumi.Output<string>> = {
+    ...deploymentEnv,
+    ...commonEnv,
+    SENTRY: commonEnv.SENTRY_ENABLED,
+    POSTGRES_HOST: connectionString.apply(connection => connection.host ?? ''),
+    POSTGRES_PORT: connectionString.apply(connection => connection.port ?? '5432'),
+    POSTGRES_PASSWORD: connectionString.apply(connection => connection.password ?? ''),
+    POSTGRES_USER: connectionString.apply(connection => connection.user ?? ''),
+    POSTGRES_DB: connectionString.apply(connection => connection.database ?? ''),
+    POSTGRES_ENABLE_SSL: connectionString.apply(connection => (connection.ssl ? '1' : '0')),
+    RELEASE: packageHelper.currentReleaseId(),
+  };
+
+  if (heartbeat) {
+    env['heartbeat'] = heartbeat;
+  }
+
   return new RemoteArtifactAsServiceDeployment(
     'tokens-service',
     {
       storageContainer,
-      env: {
-        ...deploymentEnv,
-        ...commonEnv,
-        SENTRY: commonEnv.SENTRY_ENABLED,
-        HEARTBEAT_ENDPOINT: heartbeat ?? '',
-        POSTGRES_HOST: connectionString.apply(connection => connection.host ?? ''),
-        POSTGRES_PORT: connectionString.apply(connection => connection.port ?? '5432'),
-        POSTGRES_PASSWORD: connectionString.apply(connection => connection.password ?? ''),
-        POSTGRES_USER: connectionString.apply(connection => connection.user ?? ''),
-        POSTGRES_DB: connectionString.apply(connection => connection.database ?? ''),
-        POSTGRES_ENABLE_SSL: connectionString.apply(connection => (connection.ssl ? '1' : '0')),
-        RELEASE: packageHelper.currentReleaseId(),
-      },
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
       exposesMetrics: true,

@@ -23,21 +23,27 @@ export function deployWebhooks({
   redis: Redis;
   heartbeat?: string;
 }) {
+  const env: Record<string, string | pulumi.Output<string>> = {
+    ...deploymentEnv,
+    ...commonEnv,
+    SENTRY: commonEnv.SENTRY_ENABLED,
+    HEARTBEAT_ENDPOINT: heartbeat ?? '',
+    RELEASE: packageHelper.currentReleaseId(),
+    REDIS_HOST: redis.config.host,
+    REDIS_PORT: String(redis.config.port),
+    REDIS_PASSWORD: redis.config.password,
+    BULLMQ_COMMANDS_FROM_ROOT: 'true',
+  };
+
+  if (heartbeat) {
+    env['heartbeat'] = heartbeat;
+  }
+
   return new RemoteArtifactAsServiceDeployment(
     'webhooks-service',
     {
       storageContainer,
-      env: {
-        ...deploymentEnv,
-        ...commonEnv,
-        SENTRY: commonEnv.SENTRY_ENABLED,
-        HEARTBEAT_ENDPOINT: heartbeat ?? '',
-        RELEASE: packageHelper.currentReleaseId(),
-        REDIS_HOST: redis.config.host,
-        REDIS_PORT: String(redis.config.port),
-        REDIS_PASSWORD: redis.config.password,
-        BULLMQ_COMMANDS_FROM_ROOT: 'true',
-      },
+      env,
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
       exposesMetrics: true,

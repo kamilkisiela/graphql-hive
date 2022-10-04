@@ -30,25 +30,30 @@ export function deployEmails({
     messageStream: string;
   };
 }) {
+  const env: Record<string, string | pulumi.Output<string>> = {
+    ...deploymentEnv,
+    ...commonEnv,
+    SENTRY: commonEnv.SENTRY_ENABLED,
+    RELEASE: packageHelper.currentReleaseId(),
+    REDIS_HOST: redis.config.host,
+    REDIS_PORT: String(redis.config.port),
+    REDIS_PASSWORD: redis.config.password,
+    BULLMQ_COMMANDS_FROM_ROOT: 'true',
+    EMAIL_FROM: email.from,
+    EMAIL_PROVIDER: 'postmark',
+    EMAIL_PROVIDER_POSTMARK_TOKEN: email.token,
+    EMAIL_PROVIDER_POSTMARK_MESSAGE_STREAM: email.messageStream,
+  };
+
+  if (heartbeat) {
+    env['heartbeat'] = heartbeat;
+  }
+
   const { deployment, service } = new RemoteArtifactAsServiceDeployment(
     'emails-service',
     {
       storageContainer,
-      env: {
-        ...deploymentEnv,
-        ...commonEnv,
-        SENTRY: commonEnv.SENTRY_ENABLED,
-        HEARTBEAT_ENDPOINT: heartbeat ?? '',
-        RELEASE: packageHelper.currentReleaseId(),
-        REDIS_HOST: redis.config.host,
-        REDIS_PORT: String(redis.config.port),
-        REDIS_PASSWORD: redis.config.password,
-        BULLMQ_COMMANDS_FROM_ROOT: 'true',
-        EMAIL_FROM: email.from,
-        EMAIL_PROVIDER: 'postmark',
-        EMAIL_PROVIDER_POSTMARK_TOKEN: email.token,
-        EMAIL_PROVIDER_POSTMARK_MESSAGE_STREAM: email.messageStream,
-      },
+      env,
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
       exposesMetrics: true,
