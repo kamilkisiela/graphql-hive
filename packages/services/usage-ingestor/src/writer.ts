@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/node';
-import { got } from 'got';
+import { got, Response as GotResponse } from 'got';
 import Agent from 'agentkeepalive';
 import type { FastifyLoggerInstance } from '@hive/service-common';
 import { compress } from '@hive/usage-common';
@@ -10,6 +10,13 @@ import {
   legacyRegistryOrder,
   joinIntoSingleMessage,
 } from './serializer';
+import { writeTime } from './metrics';
+
+function hasResponse(error: unknown): error is {
+  response: GotResponse;
+} {
+  return error instanceof Error && 'response' in error;
+}
 
 export interface ClickHouseConfig {
   protocol: string;
@@ -131,6 +138,10 @@ async function writeCsv(
   logger: FastifyLoggerInstance,
   maxRetry: number
 ) {
+  const stopTimer = writeTime.startTimer({
+    query,
+    destination: config.host,
+  });
   return got
     .post(`${config.protocol ?? 'https'}://${config.host}:${config.port}`, {
       body,
@@ -168,7 +179,16 @@ async function writeCsv(
         https: agents.https,
       },
     })
+    .then(response => {
+      stopTimer({
+        status: response.statusCode,
+      });
+      return response;
+    })
     .catch(error => {
+      stopTimer({
+        status: hasResponse(error) && error.response.statusCode ? error.response.statusCode : 'unknown',
+      });
       Sentry.captureException(error, {
         level: 'error',
         tags: {
