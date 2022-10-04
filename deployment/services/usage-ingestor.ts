@@ -52,6 +52,25 @@ export function deployUsageIngestor({
       : {}),
   };
 
+  const env: Record<string, string | pulumi.Output<string>> = {
+    ...deploymentEnv,
+    ...commonEnv,
+    SENTRY: commonEnv.SENTRY_ENABLED,
+    ...clickhouseEnv,
+    KAFKA_CONNECTION_MODE: 'hosted',
+    KAFKA_KEY: kafka.config.key,
+    KAFKA_USER: kafka.config.user,
+    KAFKA_BROKER: kafka.config.endpoint,
+    KAFKA_CONCURRENCY: '1',
+    KAFKA_TOPIC: kafka.config.topic,
+    KAFKA_CONSUMER_GROUP: kafka.config.consumerGroup,
+    RELEASE: packageHelper.currentReleaseId(),
+  };
+
+  if (heartbeat) {
+    env['heartbeat'] = heartbeat;
+  }
+
   return new RemoteArtifactAsServiceDeployment(
     'usage-ingestor-service',
     {
@@ -59,21 +78,7 @@ export function deployUsageIngestor({
       replicas,
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
-      env: {
-        ...deploymentEnv,
-        ...commonEnv,
-        SENTRY: commonEnv.SENTRY_ENABLED,
-        ...clickhouseEnv,
-        HEARTBEAT_ENDPOINT: heartbeat ?? '',
-        KAFKA_CONNECTION_MODE: 'hosted',
-        KAFKA_KEY: kafka.config.key,
-        KAFKA_USER: kafka.config.user,
-        KAFKA_BROKER: kafka.config.endpoint,
-        KAFKA_CONCURRENCY: '1',
-        KAFKA_TOPIC: kafka.config.topic,
-        KAFKA_CONSUMER_GROUP: kafka.config.consumerGroup,
-        RELEASE: packageHelper.currentReleaseId(),
-      },
+      env,
       exposesMetrics: true,
       packageInfo: packageHelper.npmPack('@hive/usage-ingestor'),
       port: 4000,
