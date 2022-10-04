@@ -422,6 +422,7 @@ jobs:
           RELEASE: ${{ github.sha }}
           BRANCH_NAME: ${{ steps.branch-name.outputs.current_branch }}
           BUILD_TYPE: 'publish'
+          BUILD_STABLE: '1'
         run: |
           docker buildx bake \
             -f docker.hcl \
