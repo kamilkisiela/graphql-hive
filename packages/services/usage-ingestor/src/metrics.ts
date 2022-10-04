@@ -20,6 +20,12 @@ export const processTime = new metrics.Summary({
   help: 'Time spent processing and writing reports',
 });
 
+export const writeTime = new metrics.Summary({
+  name: 'usage_ingestor_write_time',
+  help: 'Time spent writing reports',
+  labelNames: ['query', 'destination', 'status'],
+});
+
 export const errors = new metrics.Counter({
   name: 'usage_ingestor_errors',
   help: 'Number of errors occurred during processing and writing reports',
