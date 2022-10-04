@@ -101,7 +101,7 @@ export function deployGraphQL({
         POSTGRES_PASSWORD: connectionString.apply(connection => connection.password ?? ''),
         POSTGRES_USER: connectionString.apply(connection => connection.user ?? ''),
         POSTGRES_DB: connectionString.apply(connection => connection.database ?? ''),
-        POSTGRES_ENABLE_SSL: connectionString.apply(connection => (connection.ssl ? '1' : '0')),
+        POSTGRES_SSL: connectionString.apply(connection => (connection.ssl ? '1' : '0')),
         BILLING_ENDPOINT: serviceLocalEndpoint(billing.service),
         TOKENS_ENDPOINT: serviceLocalEndpoint(tokens.service),
         WEBHOOKS_ENDPOINT: serviceLocalEndpoint(webhooks.service),
