@@ -53,6 +53,7 @@ export function deployTokens({
       livenessProbe: '/_health',
       exposesMetrics: true,
       packageInfo: packageHelper.npmPack('@hive/tokens'),
+      env,
     },
     [dbMigrations]
   ).deploy();
