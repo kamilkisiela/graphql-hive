@@ -2,6 +2,7 @@
 import {
   createServer,
   createErrorHandler,
+  ensureEnv,
   startMetrics,
   registerShutdown,
   reportReadiness,
@@ -12,9 +13,8 @@ import crypto from 'crypto';
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify/dist/trpc-server-adapters-fastify.cjs.js';
 import type { CreateFastifyContextOptions } from '@trpc/server/adapters/fastify';
 import { schemaBuilderApiRouter } from './api';
-import { env } from './environment';
 
-const ENCRYPTION_SECRET = crypto.createHash('md5').update(env.encryptionSecret).digest('hex');
+const ENCRYPTION_SECRET = crypto.createHash('md5').update(ensureEnv('ENCRYPTION_SECRET')).digest('hex');
 
 function decryptFactory() {
   const ALG = 'aes256';
@@ -33,15 +33,13 @@ function decryptFactory() {
 }
 
 async function main() {
-  if (env.sentry) {
-    Sentry.init({
-      serverName: 'schema',
-      enabled: !!env.sentry,
-      environment: env.environment,
-      dsn: env.sentry.dsn,
-      release: env.release,
-    });
-  }
+  Sentry.init({
+    serverName: 'schema',
+    enabled: String(process.env.SENTRY_ENABLED) === '1',
+    environment: process.env.ENVIRONMENT,
+    dsn: process.env.SENTRY_DSN,
+    release: process.env.RELEASE || 'local',
+  });
 
   const server = await createServer({
     name: 'schema',
@@ -59,9 +57,9 @@ async function main() {
   const errorHandler = createErrorHandler(server);
 
   const redis = new Redis({
-    host: env.redis.host,
-    port: env.redis.port,
-    password: env.redis.password,
+    host: ensureEnv('REDIS_HOST'),
+    port: ensureEnv('REDIS_PORT', 'number'),
+    password: ensureEnv('REDIS_PASSWORD'),
     retryStrategy(times) {
       return Math.min(times * 500, 2000);
     },
@@ -95,6 +93,8 @@ async function main() {
       server.log.info('Redis reconnecting in %s', timeToReconnect);
     });
 
+    const port = process.env.PORT || 6500;
+
     const decrypt = decryptFactory();
 
     await server.register(fastifyTRPCPlugin, {
@@ -124,9 +124,9 @@ async function main() {
       },
     });
 
-    await server.listen(env.http.port, '0.0.0.0');
-    if (env.prometheus) {
-      await startMetrics(env.prometheus.labels.instance);
+    await server.listen(port, '0.0.0.0');
+    if (process.env.METRICS_ENABLED === 'true') {
+      await startMetrics();
     }
   } catch (error) {
     server.log.fatal(error);

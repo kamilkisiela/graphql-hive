@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import * as Sentry from '@sentry/node';
-import { createServer, startMetrics, registerShutdown, reportReadiness } from '@hive/service-common';
+import { createServer, startMetrics, ensureEnv, registerShutdown, reportReadiness } from '@hive/service-common';
 import { createTokens } from './tokens';
 import { createUsage } from './usage';
 import {
@@ -14,18 +14,15 @@ import {
 import type { IncomingLegacyReport, IncomingReport } from './types';
 import { createUsageRateLimit } from './rate-limit';
 import { maskToken } from './helpers';
-import { env } from './environment';
 
 async function main() {
-  if (env.sentry) {
-    Sentry.init({
-      serverName: 'usage',
-      enabled: !!env.sentry,
-      environment: env.environment,
-      dsn: env.sentry.dsn,
-      release: env.release,
-    });
-  }
+  Sentry.init({
+    serverName: 'usage',
+    enabled: String(process.env.SENTRY_ENABLED) === '1',
+    environment: process.env.ENVIRONMENT,
+    dsn: process.env.SENTRY_DSN,
+    release: process.env.RELEASE || 'local',
+  });
 
   const server = await createServer({
     name: 'usage',
@@ -36,9 +33,24 @@ async function main() {
     const { collect, readiness, start, stop } = createUsage({
       logger: server.log,
       kafka: {
-        topic: env.kafka.topic,
-        buffer: env.kafka.buffer,
-        connection: env.kafka.connection,
+        topic: ensureEnv('KAFKA_TOPIC'),
+        buffer: {
+          size: ensureEnv('KAFKA_BUFFER_SIZE', 'number'),
+          interval: ensureEnv('KAFKA_BUFFER_INTERVAL', 'number'),
+          dynamic: ensureEnv('KAFKA_BUFFER_DYNAMIC', 'boolean'),
+        },
+        connection:
+          ensureEnv('KAFKA_CONNECTION_MODE') == 'hosted'
+            ? {
+                mode: 'hosted',
+                key: ensureEnv('KAFKA_KEY'),
+                user: ensureEnv('KAFKA_USER'),
+                broker: ensureEnv('KAFKA_BROKER'),
+              }
+            : {
+                mode: 'docker',
+                broker: ensureEnv('KAFKA_BROKER'),
+              },
       },
     });
 
@@ -49,14 +61,16 @@ async function main() {
       },
     });
 
+    const port = process.env.PORT || 5000;
+
     const tokens = createTokens({
-      endpoint: env.hive.tokens.endpoint,
+      endpoint: ensureEnv('TOKENS_ENDPOINT'),
       logger: server.log,
     });
 
-    const rateLimit = env.hive.rateLimit
+    const rateLimit = process.env.RATE_LIMIT_ENDPOINT
       ? createUsageRateLimit({
-          endpoint: env.hive.rateLimit.endpoint,
+          endpoint: ensureEnv('RATE_LIMIT_ENDPOINT'),
           logger: server.log,
         })
       : null;
@@ -159,10 +173,10 @@ async function main() {
       },
     });
 
-    if (env.prometheus) {
-      await startMetrics(env.prometheus.labels.instance ?? undefined);
+    if (process.env.METRICS_ENABLED === 'true') {
+      await startMetrics();
     }
-    await server.listen(env.http.port, '0.0.0.0');
+    await server.listen(port, '0.0.0.0');
     await start();
   } catch (error) {
     server.log.fatal(error);

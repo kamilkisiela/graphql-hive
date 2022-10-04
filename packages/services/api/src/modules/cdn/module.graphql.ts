@@ -9,11 +9,4 @@ export default gql`
     token: String!
     url: String!
   }
-
-  extend type Query {
-    """
-    Whether the CDN integration in Hive is enabled.
-    """
-    isCDNEnabled: Boolean!
-  }
 `;

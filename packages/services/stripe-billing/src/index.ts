@@ -1,23 +1,24 @@
 #!/usr/bin/env node
 import 'reflect-metadata';
 import * as Sentry from '@sentry/node';
-import { createServer, startMetrics, registerShutdown, reportReadiness } from '@hive/service-common';
+import { createServer, startMetrics, ensureEnv, registerShutdown, reportReadiness } from '@hive/service-common';
 import { createConnectionString } from '@hive/storage';
 import { createStripeBilling } from './billing-sync';
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify/dist/trpc-server-adapters-fastify.cjs.js';
 import { stripeBillingApiRouter, Context } from './api';
-import { env } from './environment';
+
+const STRIPE_SYNC_INTERVAL_MS = process.env.STRIPE_SYNC_INTERVAL_MS
+  ? parseInt(process.env.STRIPE_SYNC_INTERVAL_MS as string)
+  : 10 * 60_000; // default is every 10m
 
 async function main() {
-  if (env.sentry) {
-    Sentry.init({
-      serverName: 'stripe-billing',
-      enabled: !!env.sentry,
-      environment: env.environment,
-      dsn: env.sentry.dsn,
-      release: env.release,
-    });
-  }
+  Sentry.init({
+    serverName: 'stripe-billing',
+    enabled: String(process.env.SENTRY_ENABLED) === '1',
+    environment: process.env.ENVIRONMENT,
+    dsn: process.env.SENTRY_DSN,
+    release: process.env.RELEASE || 'local',
+  });
 
   const server = await createServer({
     name: 'stripe-billing',
@@ -28,14 +29,14 @@ async function main() {
     const { readiness, start, stop, stripeApi, postgres$, loadStripeData$ } = createStripeBilling({
       logger: server.log,
       stripe: {
-        token: env.stripe.secretKey,
-        syncIntervalMs: env.stripe.syncIntervalMs,
+        token: ensureEnv('STRIPE_SECRET_KEY', 'string'),
+        syncIntervalMs: STRIPE_SYNC_INTERVAL_MS,
       },
       rateEstimator: {
-        endpoint: env.hiveServices.usageEstimator.endpoint,
+        endpoint: ensureEnv('USAGE_ESTIMATOR_ENDPOINT', 'string'),
       },
       storage: {
-        connectionString: createConnectionString(env.postgres),
+        connectionString: createConnectionString(process.env as any),
       },
     });
 
@@ -45,6 +46,8 @@ async function main() {
         await Promise.all([stop(), server.close()]);
       },
     });
+
+    const port = process.env.PORT || 4013;
 
     const context: Context = {
       storage$: postgres$,
@@ -78,10 +81,10 @@ async function main() {
       },
     });
 
-    if (env.prometheus) {
-      await startMetrics(env.prometheus.labels.instance);
+    if (process.env.METRICS_ENABLED === 'true') {
+      await startMetrics();
     }
-    await server.listen(env.http.port, '0.0.0.0');
+    await server.listen(port, '0.0.0.0');
     await start();
   } catch (error) {
     server.log.fatal(error);

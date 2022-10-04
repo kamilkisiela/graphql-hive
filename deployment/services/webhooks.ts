@@ -30,7 +30,6 @@ export function deployWebhooks({
       env: {
         ...deploymentEnv,
         ...commonEnv,
-        SENTRY: commonEnv.SENTRY_ENABLED,
         HEARTBEAT_ENDPOINT: heartbeat ?? '',
         RELEASE: packageHelper.currentReleaseId(),
         REDIS_HOST: redis.config.host,

@@ -22,7 +22,6 @@ module.exports = {
   plugins: ['@typescript-eslint', 'import', 'hive'],
   extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended'],
   rules: {
-    'no-process-env': 'error',
     'no-restricted-globals': ['error', 'stop'],
     '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', ignoreRestSiblings: true }],
     'no-empty': ['error', { allowEmptyCatch: true }],
@@ -30,7 +29,6 @@ module.exports = {
     'import/no-absolute-path': 'error',
     'import/no-self-import': 'error',
     'import/no-unused-modules': [
-      // eslint-disable-next-line no-process-env
       process.env.CI === 'true' ? 'warn' : 'off',
       {
         unusedExports: true,

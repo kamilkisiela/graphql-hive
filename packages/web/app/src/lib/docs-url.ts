@@ -1,7 +1,5 @@
-import { env } from '@/env/frontend';
-
 export const getDocsUrl = (path = '') => {
-  const docsUrl = env.docsUrl;
+  const docsUrl = globalThis.process?.env['DOCS_URL'] ?? globalThis['__ENV__']?.['DOCS_URL'];
   if (!docsUrl) {
     return null;
   }

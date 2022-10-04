@@ -27,8 +27,7 @@
     "got": "12.5.1",
     "slonik": "30.1.2",
     "slonik-interceptor-query-logging": "1.4.7",
-    "slonik-utilities": "1.9.4",
-    "zod": "3.15.1"
+    "slonik-utilities": "1.9.4"
   },
   "devDependencies": {
     "@tgriesser/schemats": "7.0.0",

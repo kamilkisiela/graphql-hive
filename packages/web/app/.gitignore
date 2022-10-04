@@ -34,6 +34,3 @@ yarn-error.log*
 
 # Graphql
 lib/graphql-operations.ts
-
-next.config.mjs
-environment-*.mjs

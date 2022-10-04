@@ -1,7 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { stringify } from 'querystring';
 import { graphql } from '@/lib/api/utils';
-import { env } from '@/env/backend';
 
 async function fetchData({ url, headers, body }: { url: string; headers: Record<string, any>; body: string }) {
   const response = await fetch(url, {
@@ -15,11 +14,6 @@ async function fetchData({ url, headers, body }: { url: string; headers: Record<
 
 export default async function slackCallback(req: NextApiRequest, res: NextApiResponse) {
   console.log('Slack Integration Callback');
-
-  if (env.slack === null) {
-    throw new Error('The Slack integration is not enabled.');
-  }
-
   const code = req.query.code;
   const orgId = req.query.state;
 
@@ -29,8 +23,8 @@ export default async function slackCallback(req: NextApiRequest, res: NextApiRes
       'content-type': 'application/x-www-form-urlencoded',
     },
     body: stringify({
-      client_id: env.slack.clientId,
-      client_secret: env.slack.clientSecret,
+      client_id: process.env.SLACK_CLIENT_ID,
+      client_secret: process.env.SLACK_CLIENT_SECRET,
       code,
     }),
   });
@@ -38,7 +32,7 @@ export default async function slackCallback(req: NextApiRequest, res: NextApiRes
   const token = slackResponse.access_token;
 
   await graphql({
-    url: `${env.appBaseUrl.replace(/\/$/, '')}/api/proxy`,
+    url: `${process.env['APP_BASE_URL'].replace(/\/$/, '')}/api/proxy`,
     headers: {
       ...req.headers,
       'content-type': 'application/json',

@@ -1,7 +1,12 @@
-import { env } from '@/env/frontend';
+function throwException(msg: string) {
+  throw new Error(msg);
+}
 
 export const appInfo = () => {
-  const appBaseUrl = env.appBaseUrl;
+  const appBaseUrl =
+    globalThis.process?.env?.['APP_BASE_URL'] ??
+    globalThis?.['__ENV__']?.['APP_BASE_URL'] ??
+    throwException('APP_BASE_URL is not defined');
 
   return {
     // learn more about this on https://supertokens.com/docs/thirdpartyemailpassword/appinfo

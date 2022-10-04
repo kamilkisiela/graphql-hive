@@ -15,7 +15,6 @@ jobs:
         env:
           POSTGRES_PASSWORD: postgres
           POSTGRES_USER: postgres
-          POSTGRES_DB: registry
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -30,7 +29,6 @@ jobs:
       POSTGRES_PORT: 5432
       POSTGRES_PASSWORD: postgres
       POSTGRES_USER: postgres
-      POSTGRES_DB: registry
       HIVE_TOKEN: ${{ secrets.HIVE_TOKEN }}
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
       TURBO_TEAM: ${{ secrets.TURBO_TEAM }}

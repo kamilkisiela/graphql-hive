@@ -1,7 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { graphql } from '@/lib/api/utils';
 import { ensureGithubIntegration } from './callback';
-import { env } from '@/env/backend';
 
 export default async function githubSetupCallback(req: NextApiRequest, res: NextApiResponse) {
   console.log('GitHub Integration Setup Callback');
@@ -19,7 +18,7 @@ export default async function githubSetupCallback(req: NextApiRequest, res: Next
         cleanId: string;
       };
     }>({
-      url: `${env.appBaseUrl.replace(/\/$/, '')}/api/proxy`,
+      url: `${process.env['APP_BASE_URL'].replace(/\/$/, '')}/api/proxy`,
       headers: {
         ...req.headers,
         'content-type': 'application/json',

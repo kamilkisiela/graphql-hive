@@ -71,7 +71,7 @@ export function deployApp({
           value: appRelease,
         },
         { name: 'SENTRY_DSN', value: commonEnv.SENTRY_DSN },
-        { name: 'SENTRY', value: commonEnv.SENTRY_ENABLED },
+        { name: 'SENTRY_ENABLED', value: commonEnv.SENTRY_ENABLED },
         {
           name: 'GRAPHQL_ENDPOINT',
           value: serviceLocalEndpoint(graphql.service).apply(s => `${s}/graphql`),
@@ -81,19 +81,15 @@ export function deployApp({
           value: `https://${deploymentEnv.DEPLOYED_DNS}/`,
         },
         {
-          name: 'INTEGRATION_SLACK',
-          value: '1',
-        },
-        {
-          name: 'INTEGRATION_SLACK_CLIENT_ID',
+          name: 'SLACK_CLIENT_ID',
           value: appEnv.SLACK_CLIENT_ID,
         },
         {
-          name: 'INTEGRATION_SLACK_CLIENT_SECRET',
+          name: 'SLACK_CLIENT_SECRET',
           value: appEnv.SLACK_CLIENT_SECRET,
         },
         {
-          name: 'INTEGRATION_GITHUB_APP_NAME',
+          name: 'GITHUB_APP_NAME',
           value: githubAppConfig.require('name'),
         },
 
@@ -187,11 +183,6 @@ export function deployApp({
         {
           name: 'AUTH_GOOGLE_CLIENT_SECRET',
           value: googleConfig.clientSecret,
-        },
-
-        {
-          name: 'AUTH_REQUIRE_EMAIL_VERIFICATION',
-          value: '1',
         },
       ],
       port: 3000,

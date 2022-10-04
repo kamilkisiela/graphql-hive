@@ -1,7 +1,6 @@
 import ThirdPartyEmailPasswordNode from 'supertokens-node/recipe/thirdpartyemailpassword';
 import SessionNode from 'supertokens-node/recipe/session';
 import type { TypeInput } from 'supertokens-node/types';
-import EmailVerification from 'supertokens-node/recipe/emailverification';
 import type { TypeProvider } from 'supertokens-node/recipe/thirdparty/types';
 import type { TypeInput as ThirdPartEmailPasswordTypeInput } from 'supertokens-node/recipe/thirdpartyemailpassword/types';
 import { fetch } from 'cross-undici-fetch';
@@ -10,35 +9,90 @@ import zod from 'zod';
 import * as crypto from 'crypto';
 import { createTRPCClient } from '@trpc/client';
 import type { EmailsApi } from '@hive/emails';
-import { env } from '@/env/backend';
+
+const LegacyAuth0ConfigEnabledModel = zod.object({
+  AUTH_LEGACY_AUTH0: zod.literal('1'),
+  AUTH_LEGACY_AUTH0_AUDIENCE: zod.string(),
+  AUTH_LEGACY_AUTH0_ISSUER_BASE_URL: zod.string(),
+  AUTH_LEGACY_AUTH0_CLIENT_ID: zod.string(),
+  AUTH_LEGACY_AUTH0_CLIENT_SECRET: zod.string(),
+  AUTH_LEGACY_AUTH0_INTERNAL_API_ENDPOINT: zod.string(),
+  AUTH_LEGACY_AUTH0_INTERNAL_API_KEY: zod.string(),
+});
+
+const LegacyAuth0Config = zod.union([
+  zod.object({
+    AUTH_LEGACY_AUTH0: zod.union([zod.void(), zod.literal('0')]),
+  }),
+  LegacyAuth0ConfigEnabledModel,
+]);
+
+const EmailTRPCConfig = zod.object({
+  EMAILS_ENDPOINT: zod.string(),
+});
+
+type LegacyAuth0ConfigEnabled = zod.TypeOf<typeof LegacyAuth0ConfigEnabledModel>;
+
+const GitHubConfigModel = zod.union([
+  zod.object({
+    AUTH_GITHUB: zod.union([zod.void(), zod.literal('0')]),
+  }),
+  zod.object({
+    AUTH_GITHUB: zod.literal('1'),
+    AUTH_GITHUB_CLIENT_ID: zod.string(),
+    AUTH_GITHUB_CLIENT_SECRET: zod.string(),
+  }),
+]);
+
+const GoogleConfigModel = zod.union([
+  zod.object({
+    AUTH_GOOGLE: zod.union([zod.void(), zod.literal('0')]),
+  }),
+  zod.object({
+    AUTH_GOOGLE: zod.literal('1'),
+    AUTH_GOOGLE_CLIENT_ID: zod.string(),
+    AUTH_GOOGLE_CLIENT_SECRET: zod.string(),
+  }),
+]);
+
+const SuperTokensConfigModel = zod.object({
+  SUPERTOKENS_CONNECTION_URI: zod.string(),
+  SUPERTOKENS_API_KEY: zod.string(),
+});
 
 export const backendConfig = (): TypeInput => {
+  const githubConfig = GitHubConfigModel.parse(process.env);
+  const googleConfig = GoogleConfigModel.parse(process.env);
+  const auth0Config = LegacyAuth0Config.parse(process.env);
+  const superTokensConfig = SuperTokensConfigModel.parse(process.env);
+  const emailConfig = EmailTRPCConfig.parse(process.env);
+
   const trpcService = createTRPCClient<EmailsApi>({
-    url: `${env.emailsEndpoint}/trpc`,
+    url: `${emailConfig['EMAILS_ENDPOINT']}/trpc`,
   });
   const providers: Array<TypeProvider> = [];
 
-  if (env.auth.github) {
+  if (githubConfig['AUTH_GITHUB'] === '1') {
     providers.push(
       ThirdPartyEmailPasswordNode.Github({
-        clientId: env.auth.github.clientId,
-        clientSecret: env.auth.github.clientSecret,
+        clientId: githubConfig['AUTH_GITHUB_CLIENT_ID'],
+        clientSecret: githubConfig['AUTH_GITHUB_CLIENT_SECRET'],
       })
     );
   }
-  if (env.auth.google) {
+  if (googleConfig['AUTH_GOOGLE'] === '1') {
     providers.push(
       ThirdPartyEmailPasswordNode.Google({
-        clientId: env.auth.google.clientId,
-        clientSecret: env.auth.google.clientSecret,
+        clientId: googleConfig['AUTH_GOOGLE_CLIENT_ID'],
+        clientSecret: googleConfig['AUTH_GOOGLE_CLIENT_SECRET'],
       })
     );
   }
 
   return {
     supertokens: {
-      connectionURI: env.supertokens.connectionUri,
-      apiKey: env.supertokens.apiKey,
+      connectionURI: superTokensConfig['SUPERTOKENS_CONNECTION_URI'],
+      apiKey: superTokensConfig['SUPERTOKENS_API_KEY'],
     },
     appInfo: appInfo(),
     recipeList: [
@@ -48,7 +102,17 @@ export const backendConfig = (): TypeInput => {
           override: originalImplementation => ({
             ...originalImplementation,
             async sendEmail(input) {
-              if (input.type === 'PASSWORD_RESET') {
+              if (input.type === 'EMAIL_VERIFICATION') {
+                await trpcService.mutation('sendEmailVerificationEmail', {
+                  user: {
+                    id: input.user.id,
+                    email: input.user.email,
+                  },
+                  emailVerifyLink: input.emailVerifyLink,
+                });
+
+                return Promise.resolve();
+              } else if (input.type === 'PASSWORD_RESET') {
                 await trpcService.mutation('sendPasswordResetEmail', {
                   user: {
                     id: input.user.id,
@@ -67,28 +131,7 @@ export const backendConfig = (): TypeInput => {
           /**
            * These overrides are only relevant for the legacy Auth0 -> SuperTokens migration (period).
            */
-          env.auth.legacyAuth0 ? getAuth0Overrides(env.auth.legacyAuth0) : undefined,
-      }),
-      EmailVerification.init({
-        mode: env.auth.requireEmailVerification ? 'REQUIRED' : 'OPTIONAL',
-        emailDelivery: {
-          override: originalImplementation => ({
-            ...originalImplementation,
-            sendEmail: async input => {
-              if (input.type === 'EMAIL_VERIFICATION') {
-                await trpcService.mutation('sendEmailVerificationEmail', {
-                  user: {
-                    id: input.user.id,
-                    email: input.user.email,
-                  },
-                  emailVerifyLink: input.emailVerifyLink,
-                });
-
-                return Promise.resolve();
-              }
-            },
-          }),
-        },
+          auth0Config['AUTH_LEGACY_AUTH0'] === '1' ? getAuth0Overrides(auth0Config) : undefined,
       }),
       SessionNode.init({
         override: {
@@ -136,7 +179,7 @@ export const backendConfig = (): TypeInput => {
 // These are only required for the Auth0 -> SuperTokens migrations and can be removed once the migration (period) is complete.
 //
 
-const getAuth0Overrides = (config: Exclude<typeof env.auth.legacyAuth0, null>) => {
+const getAuth0Overrides = (config: LegacyAuth0ConfigEnabled) => {
   const override: ThirdPartEmailPasswordTypeInput['override'] = {
     apis(originalImplementation) {
       return {
@@ -255,15 +298,14 @@ const getAuth0Overrides = (config: Exclude<typeof env.auth.legacyAuth0, null>) =
 /**
  * Check whether a specific user that SIGNED UP VIA EMAIL and password exists in Auth0.
  */
-async function doesUserExistInAuth0(
-  config: Exclude<typeof env.auth.legacyAuth0, null>,
-  email: string
-): Promise<boolean> {
+async function doesUserExistInAuth0(config: LegacyAuth0ConfigEnabled, email: string): Promise<boolean> {
   const access_token = await generateAuth0AccessToken(config);
 
   // check if a user exists with the input email and is not a Social Account
   const response = await fetch(
-    `${config.audience}users?q=${encodeURIComponent(`identities.isSocial:false AND email:${email}`)}`,
+    `${process.env.AUTH_LEGACY_AUTH0_AUDIENCE}users?q=${encodeURIComponent(
+      `identities.isSocial:false AND email:${email}`
+    )}`,
     {
       method: 'GET',
       headers: { authorization: `Bearer ${access_token}` },
@@ -288,20 +330,20 @@ async function doesUserExistInAuth0(
  * try to authenticate a user with Auth0 and if successful return the user info.
  */
 async function trySignIntoAuth0WithUserCredentialsAndRetrieveUserInfo(
-  config: Exclude<typeof env.auth.legacyAuth0, null>,
+  config: LegacyAuth0ConfigEnabled,
   email: string,
   password: string
 ): Promise<{ sub: string } | null> {
   // generate an user access token using the input credentials
-  const response = await fetch(`${config.issuerBaseUrl}/oauth/token`, {
+  const response = await fetch(`${config['AUTH_LEGACY_AUTH0_ISSUER_BASE_URL']}/oauth/token`, {
     method: 'POST',
     headers: {
       accept: 'application/json',
       'content-type': 'application/json',
     },
     body: JSON.stringify({
-      client_id: config.clientId,
-      client_secret: config.clientSecret,
+      client_id: config['AUTH_LEGACY_AUTH0_CLIENT_ID'],
+      client_secret: config['AUTH_LEGACY_AUTH0_CLIENT_SECRET'],
       grant_type: 'password',
       username: email,
       password: password,
@@ -316,7 +358,7 @@ async function trySignIntoAuth0WithUserCredentialsAndRetrieveUserInfo(
 
   const { access_token: accessToken } = JSON.parse(body);
 
-  const userResponse = await fetch(`${config.issuerBaseUrl}/userInfo`, {
+  const userResponse = await fetch(`${process.env['AUTH_LEGACY_AUTH0_ISSUER_BASE_URL']}/userInfo`, {
     method: 'GET',
     headers: { authorization: `Bearer ${accessToken}` },
   });
@@ -334,14 +376,14 @@ async function trySignIntoAuth0WithUserCredentialsAndRetrieveUserInfo(
  * We do this via an HTTP call to our API service instead of directly connecting to the database here (in a serverless context).
  */
 async function setUserIdMapping(
-  config: Exclude<typeof env.auth.legacyAuth0, null>,
+  config: LegacyAuth0ConfigEnabled,
   params: { auth0UserId: string; supertokensUserId: string }
 ): Promise<void> {
-  const response = await fetch(config.internalApi.endpoint + '/update_user_id_mapping', {
+  const response = await fetch(config['AUTH_LEGACY_AUTH0_INTERNAL_API_ENDPOINT'] + '/update_user_id_mapping', {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
-      'x-authorization': config.internalApi.apiKey,
+      'x-authorization': config['AUTH_LEGACY_AUTH0_INTERNAL_API_KEY'],
     },
     body: JSON.stringify({
       auth0UserId: params.auth0UserId,
@@ -362,16 +404,17 @@ const CheckAuth0EmailUserExistsResponseModel = zod.object({
  * Check whether a specific user that SIGNED UP VIA EMAIL and password THAT DOES NOT YET EXIST IN SUPER TOKENS exists in the database as an Auth0 user.
  */
 async function checkWhetherAuth0EmailUserWithoutAssociatedSuperTokensIdExists(
-  config: Exclude<typeof env.auth.legacyAuth0, null>,
+  config: LegacyAuth0ConfigEnabled,
   params: { email: string }
 ): Promise<zod.TypeOf<typeof CheckAuth0EmailUserExistsResponseModel>['user']> {
   const response = await fetch(
-    config.internalApi.endpoint + '/check_auth0_email_user_without_associated_supertoken_id_exists',
+    config['AUTH_LEGACY_AUTH0_INTERNAL_API_ENDPOINT'] +
+      '/check_auth0_email_user_without_associated_supertoken_id_exists',
     {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
-        'x-authorization': config.internalApi.apiKey,
+        'x-authorization': config['AUTH_LEGACY_AUTH0_INTERNAL_API_KEY'],
       },
       body: JSON.stringify({
         email: params.email,
@@ -395,14 +438,14 @@ async function checkWhetherAuth0EmailUserWithoutAssociatedSuperTokensIdExists(
 /**
  * Generate a Auth0 access token that is required for making API calls to Auth0.
  */
-const generateAuth0AccessToken = async (config: Exclude<typeof env.auth.legacyAuth0, null>): Promise<string> => {
-  const response = await fetch(`${config.issuerBaseUrl}/oauth/token`, {
+const generateAuth0AccessToken = async (config: LegacyAuth0ConfigEnabled): Promise<string> => {
+  const response = await fetch(`${config['AUTH_LEGACY_AUTH0_ISSUER_BASE_URL']}/oauth/token`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({
-      client_id: config.clientId,
-      client_secret: config.clientSecret,
-      audience: config.audience,
+      client_id: config['AUTH_LEGACY_AUTH0_CLIENT_ID'],
+      client_secret: config['AUTH_LEGACY_AUTH0_CLIENT_SECRET'],
+      audience: config['AUTH_LEGACY_AUTH0_AUDIENCE'],
       grant_type: 'client_credentials',
     }),
   });

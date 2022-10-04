@@ -8,7 +8,6 @@ import { OrganizationLayout } from '@/components/layouts';
 import { Button, Card, Heading, Input, Spinner, Tag, Title } from '@/components/v2';
 import { AlertTriangleIcon, GitHubIcon, SlackIcon } from '@/components/v2/icon';
 import { DeleteOrganizationModal } from '@/components/v2/modals';
-import { env } from '@/env/frontend';
 import {
   CheckIntegrationsDocument,
   DeleteGitHubIntegrationDocument,
@@ -39,73 +38,66 @@ const Integrations = (): ReactElement => {
     return <Spinner />;
   }
 
-  const isGitHubIntegrationFeatureEnabled = checkIntegrations.data?.isGitHubIntegrationFeatureEnabled;
   const hasGitHubIntegration = checkIntegrations.data?.hasGitHubIntegration === true;
   const hasSlackIntegration = checkIntegrations.data?.hasSlackIntegration === true;
 
   return (
     <>
-      {env.integrations.slack === false ? null : (
-        <div className="flex items-center gap-x-4">
-          {hasSlackIntegration ? (
+      <div className="flex items-center gap-x-4">
+        {hasSlackIntegration ? (
+          <Button
+            size="large"
+            danger
+            disabled={deleteSlackMutation.fetching}
+            onClick={() => {
+              deleteSlack({
+                input: {
+                  organization: orgId,
+                },
+              });
+            }}
+          >
+            <SlackIcon className="mr-2" />
+            Disconnect Slack
+          </Button>
+        ) : (
+          <Button variant="secondary" size="large" as="a" href={`/api/slack/connect/${orgId}`}>
+            <SlackIcon className="mr-2" />
+            Connect Slack
+          </Button>
+        )}
+        <Tag>Alerts and notifications</Tag>
+      </div>
+      <div className="flex items-center gap-x-4">
+        {hasGitHubIntegration ? (
+          <>
             <Button
               size="large"
               danger
-              disabled={deleteSlackMutation.fetching}
+              disabled={deleteGitHubMutation.fetching}
               onClick={() => {
-                deleteSlack({
+                deleteGitHub({
                   input: {
                     organization: orgId,
                   },
                 });
               }}
             >
-              <SlackIcon className="mr-2" />
-              Disconnect Slack
+              <GitHubIcon className="mr-2" />
+              Disconnect GitHub
             </Button>
-          ) : (
-            <Button variant="secondary" size="large" as="a" href={`/api/slack/connect/${orgId}`}>
-              <SlackIcon className="mr-2" />
-              Connect Slack
+            <Button size="large" variant="link" as="a" href={`/api/github/connect/${orgId}`}>
+              Adjust permissions
             </Button>
-          )}
-          <Tag>Alerts and notifications</Tag>
-        </div>
-      )}
-      {isGitHubIntegrationFeatureEnabled === false ? null : (
-        <div className="flex items-center gap-x-4">
-          <>
-            {hasGitHubIntegration ? (
-              <>
-                <Button
-                  size="large"
-                  danger
-                  disabled={deleteGitHubMutation.fetching}
-                  onClick={() => {
-                    deleteGitHub({
-                      input: {
-                        organization: orgId,
-                      },
-                    });
-                  }}
-                >
-                  <GitHubIcon className="mr-2" />
-                  Disconnect GitHub
-                </Button>
-                <Button size="large" variant="link" as="a" href={`/api/github/connect/${orgId}`}>
-                  Adjust permissions
-                </Button>
-              </>
-            ) : (
-              <Button variant="secondary" size="large" as="a" href={`/api/github/connect/${orgId}`}>
-                <GitHubIcon className="mr-2" />
-                Connect GitHub
-              </Button>
-            )}
-            <Tag>Allow Hive to communicate with GitHub</Tag>
           </>
-        </div>
-      )}
+        ) : (
+          <Button variant="secondary" size="large" as="a" href={`/api/github/connect/${orgId}`}>
+            <GitHubIcon className="mr-2" />
+            Connect GitHub
+          </Button>
+        )}
+        <Tag>Allow Hive to communicate with GitHub</Tag>
+      </div>
     </>
   );
 };

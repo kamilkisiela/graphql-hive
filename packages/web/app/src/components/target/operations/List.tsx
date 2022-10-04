@@ -43,7 +43,6 @@ import { useDecimal } from '@/lib/hooks/use-decimal';
 import { useFormattedDuration } from '@/lib/hooks/use-formatted-duration';
 import { useFormattedNumber } from '@/lib/hooks/use-formatted-number';
 import { OperationsFallback } from './Fallback';
-import { env } from '@/env/frontend';
 
 interface Operation {
   id: string;
@@ -210,7 +209,7 @@ const OperationsTable: React.FC<{
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    debugTable: env.nodeEnv !== 'production',
+    debugTable: process.env.NODE_ENV !== 'production',
   });
 
   const firstPage = React.useCallback(() => {

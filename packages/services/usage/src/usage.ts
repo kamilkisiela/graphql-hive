@@ -20,7 +20,6 @@ import type { FastifyLoggerInstance } from '@hive/service-common';
 import type { RawReport, RawOperationMap } from '@hive/usage-common';
 import type { IncomingReport, IncomingLegacyReport } from './types';
 import type { TokensResponse } from './tokens';
-import type { KafkaEnvironment } from './environment';
 
 const DAY_IN_MS = 86_400_000;
 
@@ -96,35 +95,36 @@ export function createUsage(config: {
        */
       dynamic: boolean;
     };
-    connection: KafkaEnvironment['connection'];
+    connection:
+      | {
+          mode: 'hosted';
+          key: string;
+          user: string;
+          broker: string;
+        }
+      | {
+          mode: 'docker';
+          broker: string;
+        };
   };
 }) {
   const { logger } = config;
 
   const kafka = new Kafka({
     clientId: 'usage',
-    brokers: [config.kafka.connection.broker],
-    ssl: config.kafka.connection.isSSL,
-    sasl:
-      config.kafka.connection.sasl?.mechanism === 'plain'
-        ? {
+    ...(config.kafka.connection.mode === 'hosted'
+      ? {
+          ssl: true,
+          sasl: {
             mechanism: 'plain',
-            username: config.kafka.connection.sasl.username,
-            password: config.kafka.connection.sasl.password,
-          }
-        : config.kafka.connection.sasl?.mechanism === 'scram-sha-256'
-        ? {
-            mechanism: 'scram-sha-256',
-            username: config.kafka.connection.sasl.username,
-            password: config.kafka.connection.sasl.password,
-          }
-        : config.kafka.connection.sasl?.mechanism === 'scram-sha-512'
-        ? {
-            mechanism: 'scram-sha-512',
-            username: config.kafka.connection.sasl.username,
-            password: config.kafka.connection.sasl.password,
-          }
-        : undefined,
+            username: config.kafka.connection.user,
+            password: config.kafka.connection.key,
+          },
+          brokers: [config.kafka.connection.broker],
+        }
+      : {
+          brokers: [config.kafka.connection.broker],
+        }),
     logLevel: logLevel.INFO,
     logCreator() {
       return entry => {

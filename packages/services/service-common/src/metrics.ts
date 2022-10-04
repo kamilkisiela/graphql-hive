@@ -13,9 +13,9 @@ export function reportReadiness(isReady: boolean) {
   readiness.set(isReady ? 1 : 0);
 }
 
-export async function startMetrics(instanceLabel: string | undefined) {
+export async function startMetrics() {
   promClient.collectDefaultMetrics({
-    labels: { instance: instanceLabel },
+    labels: { instance: process.env.POD_NAME },
   });
 
   const server = fastify({

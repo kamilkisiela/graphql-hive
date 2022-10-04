@@ -18,7 +18,6 @@ import {
   TrendingUpIcon,
 } from '@/components/v2/icon';
 import { CreateOrganizationModal } from '@/components/v2/modals';
-import { env } from '@/env/frontend';
 import { MeDocument, OrganizationsDocument, OrganizationsQuery, OrganizationType } from '@/graphql';
 import { getDocsUrl } from '@/lib/docs-url';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
@@ -169,7 +168,7 @@ export const Header = (): ReactElement => {
                   </a>
                 </NextLink>
               )}
-              {env.nodeEnv === 'development' && (
+              {process.env.NODE_ENV === 'development' && (
                 <NextLink href="/dev">
                   <a>
                     <DropdownMenu.Item>

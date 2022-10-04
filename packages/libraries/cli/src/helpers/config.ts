@@ -52,7 +52,6 @@ export class Config<TValue = any> {
   }
 
   private readSpace(content: Record<string, any>) {
-    // eslint-disable-next-line no-process-env
     const space = process.env.HIVE_SPACE;
 
     if (space) {

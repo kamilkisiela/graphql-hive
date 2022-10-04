@@ -1,23 +1,20 @@
 #!/usr/bin/env node
 import 'reflect-metadata';
 import * as Sentry from '@sentry/node';
-import { createServer, startMetrics, registerShutdown, reportReadiness } from '@hive/service-common';
+import { createServer, startMetrics, ensureEnv, registerShutdown, reportReadiness } from '@hive/service-common';
 import { createEstimator } from './estimator';
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify/dist/trpc-server-adapters-fastify.cjs.js';
 import { usageEstimatorApiRouter } from './api';
 import { clickHouseElapsedDuration, clickHouseReadDuration } from './metrics';
-import { env } from './environment';
 
 async function main() {
-  if (env.sentry) {
-    Sentry.init({
-      serverName: 'usage-estimator',
-      enabled: !!env.sentry,
-      environment: env.environment,
-      dsn: env.sentry.dsn,
-      release: env.release,
-    });
-  }
+  Sentry.init({
+    serverName: 'usage-estimator',
+    enabled: String(process.env.SENTRY_ENABLED) === '1',
+    environment: process.env.ENVIRONMENT,
+    dsn: process.env.SENTRY_DSN,
+    release: process.env.RELEASE || 'local',
+  });
 
   const server = await createServer({
     name: 'usage-estimator',
@@ -28,11 +25,11 @@ async function main() {
     const context = createEstimator({
       logger: server.log,
       clickhouse: {
-        protocol: env.clickhouse.protocol,
-        host: env.clickhouse.host,
-        port: env.clickhouse.port,
-        username: env.clickhouse.username,
-        password: env.clickhouse.password,
+        protocol: ensureEnv('CLICKHOUSE_PROTOCOL'),
+        host: ensureEnv('CLICKHOUSE_HOST'),
+        port: ensureEnv('CLICKHOUSE_PORT', 'number'),
+        username: ensureEnv('CLICKHOUSE_USERNAME'),
+        password: ensureEnv('CLICKHOUSE_PASSWORD'),
         onReadEnd(query, timings) {
           clickHouseReadDuration.labels({ query }).observe(timings.totalSeconds);
           clickHouseElapsedDuration.labels({ query }).observe(timings.elapsedSeconds);
@@ -55,6 +52,8 @@ async function main() {
       },
     });
 
+    const port = process.env.PORT || 5000;
+
     server.route({
       method: ['GET', 'HEAD'],
       url: '/_health',
@@ -73,10 +72,10 @@ async function main() {
       },
     });
 
-    if (env.prometheus) {
-      await startMetrics(env.prometheus.labels.instance);
+    if (process.env.METRICS_ENABLED === 'true') {
+      await startMetrics();
     }
-    await server.listen(env.http.port, '0.0.0.0');
+    await server.listen(port, '0.0.0.0');
     await context.start();
   } catch (error) {
     server.log.fatal(error);

@@ -1,14 +1,5 @@
 import { fetch } from 'cross-undici-fetch';
-import nodemailer from 'nodemailer';
-import sm from 'sendmail';
-
-import type {
-  EmailProviderConfig,
-  PostmarkEmailProviderConfig,
-  MockEmailProviderConfig,
-  SMTPEmailProviderConfig,
-  SendmailEmailProviderConfig,
-} from './environment';
+import { ensureEnv } from '@hive/service-common';
 
 interface Email {
   to: string;
@@ -19,8 +10,6 @@ interface Email {
 const emailProviders = {
   postmark,
   mock,
-  smtp,
-  sendmail,
 };
 
 export interface EmailProvider {
@@ -29,20 +18,26 @@ export interface EmailProvider {
   history: Email[];
 }
 
-export function createEmailProvider(config: EmailProviderConfig, emailFrom: string): EmailProvider {
-  switch (config.provider) {
+export function createEmailProvider(): EmailProvider {
+  const emailProviderName = ensureEnv('EMAIL_PROVIDER') as keyof typeof emailProviders;
+
+  switch (emailProviderName) {
     case 'mock':
-      return mock(config, emailFrom);
+      return mock();
     case 'postmark':
-      return postmark(config, emailFrom);
-    case 'smtp':
-      return smtp(config, emailFrom);
-    case 'sendmail':
-      return sendmail(config, emailFrom);
+      return postmark();
+    default:
+      throw new Error(
+        `Unknown email provider: ${emailProviderName}. Available: ${Object.keys(emailProviders).join(', ')}`
+      );
   }
 }
 
-function postmark(config: PostmarkEmailProviderConfig, emailFrom: string) {
+function postmark() {
+  const token = ensureEnv('POSTMARK_TOKEN');
+  const messageStream = ensureEnv('POSTMARK_MESSAGE_STREAM');
+  const emailFrom = ensureEnv('EMAIL_FROM');
+
   return {
     id: 'postmark' as const,
     async send(email: Email) {
@@ -51,14 +46,14 @@ function postmark(config: PostmarkEmailProviderConfig, emailFrom: string) {
         headers: {
           'Content-Type': 'application/json',
           Accept: 'application/json',
-          'X-Postmark-Server-Token': config.token,
+          'X-Postmark-Server-Token': token,
         },
         body: JSON.stringify({
           From: emailFrom,
           To: email.to,
           Subject: email.subject,
           HtmlBody: email.body,
-          MessageStream: config.messageStream,
+          MessageStream: messageStream,
         }),
       });
 
@@ -71,7 +66,7 @@ function postmark(config: PostmarkEmailProviderConfig, emailFrom: string) {
   };
 }
 
-function mock(_config: MockEmailProviderConfig, _emailFrom: string): EmailProvider {
+function mock(): EmailProvider {
   const history: Email[] = [];
 
   return {
@@ -80,58 +75,5 @@ function mock(_config: MockEmailProviderConfig, _emailFrom: string): EmailProvid
       history.push(email);
     },
     history,
-  };
-}
-
-function smtp(config: SMTPEmailProviderConfig, emailFrom: string) {
-  const transporter = nodemailer.createTransport({
-    host: config.host,
-    port: config.port,
-    secure: config.protocol === 'smtps',
-    auth: {
-      user: config.auth.user,
-      pass: config.auth.pass,
-    },
-  });
-
-  return {
-    id: 'smtp' as const,
-    async send(email: Email) {
-      await transporter.sendMail({
-        from: emailFrom,
-        to: email.to,
-        subject: email.subject,
-        html: email.body,
-      });
-    },
-    history: [],
-  };
-}
-
-function sendmail(_config: SendmailEmailProviderConfig, emailFrom: string) {
-  const client = sm({});
-
-  return {
-    id: 'sendmail' as const,
-    async send(email: Email) {
-      await new Promise((resolve, reject) => {
-        client(
-          {
-            from: emailFrom,
-            to: email.to,
-            subject: email.subject,
-            html: email.body,
-          },
-          (err, reply) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(reply);
-            }
-          }
-        );
-      });
-    },
-    history: [],
   };
 }

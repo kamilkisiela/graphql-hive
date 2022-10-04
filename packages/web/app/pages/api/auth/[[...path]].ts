@@ -5,7 +5,6 @@ import { Request, Response } from 'express';
 import supertokens from 'supertokens-node';
 import { backendConfig } from '@/config/backend-config';
 import NextCors from 'nextjs-cors';
-import { env } from '@/env/backend';
 
 supertokens.init(backendConfig());
 
@@ -16,7 +15,7 @@ export default async function superTokens(req: NextApiRequest & Request, res: Ne
   // NOTE: We need CORS only if we are querying the APIs from a different origin
   await NextCors(req, res, {
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
-    origin: env.appBaseUrl,
+    origin: process.env['APP_BASE_URL'],
     credentials: true,
     allowedHeaders: ['content-type', ...supertokens.getAllCORSHeaders()],
   });

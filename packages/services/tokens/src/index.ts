@@ -16,18 +16,15 @@ import { useCache } from './cache';
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify/dist/trpc-server-adapters-fastify.cjs.js';
 import type { CreateFastifyContextOptions } from '@trpc/server/adapters/fastify';
 import { Context, tokensApiRouter } from './api';
-import { env } from './environment';
 
 export async function main() {
-  if (env.sentry) {
-    Sentry.init({
-      serverName: 'tokens',
-      enabled: !!env.sentry,
-      environment: env.environment,
-      dsn: env.sentry.dsn,
-      release: env.release,
-    });
-  }
+  Sentry.init({
+    serverName: 'tokens',
+    enabled: String(process.env.SENTRY_ENABLED) === '1',
+    environment: process.env.ENVIRONMENT,
+    dsn: process.env.SENTRY_DSN,
+    release: process.env.RELEASE || 'local',
+  });
 
   const server = await createServer({
     name: 'tokens',
@@ -37,22 +34,23 @@ export async function main() {
   const errorHandler = createErrorHandler(server);
 
   try {
-    const { start, stop, readiness, getStorage } = useCache(createStorage(env.postgres), server.log);
+    const { start, stop, readiness, getStorage } = useCache(createStorage(), server.log);
     const tokenReadFailuresCache = LRU<{
       error: string;
       checkAt: number;
     }>(50);
     const errorCachingInterval = ms('10m');
 
-    const stopHeartbeats = env.heartbeat
-      ? startHeartbeats({
-          enabled: true,
-          endpoint: env.heartbeat.endpoint,
-          intervalInMS: 20_000,
-          onError: server.log.error,
-          isReady: readiness,
-        })
-      : startHeartbeats({ enabled: false });
+    const stopHeartbeats =
+      typeof process.env.HEARTBEAT_ENDPOINT === 'string' && process.env.HEARTBEAT_ENDPOINT.length > 0
+        ? startHeartbeats({
+            enabled: true,
+            endpoint: process.env.HEARTBEAT_ENDPOINT,
+            intervalInMS: 20_000,
+            onError: server.log.error,
+            isReady: readiness,
+          })
+        : startHeartbeats({ enabled: false });
 
     registerShutdown({
       logger: server.log,
@@ -62,6 +60,8 @@ export async function main() {
         await stop();
       },
     });
+
+    const port = process.env.PORT || 6001;
 
     await server.register(fastifyTRPCPlugin, {
       prefix: '/trpc',
@@ -97,10 +97,10 @@ export async function main() {
       },
     });
 
-    if (env.prometheus) {
-      await startMetrics(env.prometheus.labels.instance);
+    if (process.env.METRICS_ENABLED === 'true') {
+      await startMetrics();
     }
-    await server.listen(env.http.port, '0.0.0.0');
+    await server.listen(port, '0.0.0.0');
     await start();
   } catch (error) {
     server.log.fatal(error);

@@ -1,18 +1,18 @@
 import type { NextWebVitalsMetric } from 'next/app';
-import { env } from '@/env/frontend';
+import { GA_TRACKING_ID } from '@/constants';
 
 export const pageview = (url: string): void => {
-  if (!env.analytics.googleAnalyticsTrackingId) {
+  if (!GA_TRACKING_ID) {
     return;
   }
-  (window as any).gtag('config', env.analytics.googleAnalyticsTrackingId, {
+  (window as any).gtag('config', GA_TRACKING_ID, {
     page_path: url,
   });
 };
 
 // https://developers.google.com/analytics/devguides/collection/gtagjs/events
 export const event = ({ action, category, label, value }: any): void => {
-  if (!env.analytics.googleAnalyticsTrackingId) {
+  if (!GA_TRACKING_ID) {
     return;
   }
   (window as any).gtag('event', action, {
@@ -23,7 +23,7 @@ export const event = ({ action, category, label, value }: any): void => {
 };
 
 export function reportWebVitals({ id, name, label, value }: NextWebVitalsMetric): void {
-  if (!env.analytics.googleAnalyticsTrackingId) {
+  if (!GA_TRACKING_ID) {
     return;
   }
   (window as any).gtag('event', name, {

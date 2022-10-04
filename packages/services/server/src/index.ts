@@ -1,7 +1,14 @@
 #!/usr/bin/env node
 
 import 'reflect-metadata';
-import { createServer, startMetrics, registerShutdown, reportReadiness } from '@hive/service-common';
+import {
+  createServer,
+  startMetrics,
+  ensureEnv,
+  registerShutdown,
+  reportReadiness,
+  optionalEnv,
+} from '@hive/service-common';
 import { createRegistry, LogFn, Logger } from '@hive/api';
 import { createStorage as createPostgreSQLStorage, createConnectionString } from '@hive/storage';
 import got from 'got';
@@ -12,7 +19,6 @@ import { asyncStorage } from './async-storage';
 import { graphqlHandler } from './graphql-handler';
 import { clickHouseReadDuration, clickHouseElapsedDuration } from './metrics';
 import zod from 'zod';
-import { env } from './environment';
 
 const LegacySetUserIdMappingPayloadModel = zod.object({
   auth0UserId: zod.string(),
@@ -24,35 +30,33 @@ const LegacyCheckAuth0EmailUserExistsPayloadModel = zod.object({
 });
 
 export async function main() {
-  if (env.sentry) {
-    Sentry.init({
-      serverName: 'api',
-      enabled: !!env.sentry,
-      environment: env.environment,
-      dsn: env.sentry.dsn,
-      tracesSampleRate: 1,
-      release: env.release,
-      integrations: [
-        new Sentry.Integrations.Http({ tracing: true }),
-        new Sentry.Integrations.ContextLines(),
-        new Sentry.Integrations.LinkedErrors(),
-        new ExtraErrorData({
-          depth: 2,
-        }),
-        new Dedupe(),
-      ],
-      maxBreadcrumbs: 5,
-      defaultIntegrations: false,
-      autoSessionTracking: false,
-    });
-  }
+  Sentry.init({
+    serverName: 'api',
+    enabled: String(process.env.SENTRY_ENABLED) === '1',
+    environment: process.env.ENVIRONMENT,
+    dsn: process.env.SENTRY_DSN,
+    tracesSampleRate: 1,
+    release: process.env.RELEASE || 'local',
+    integrations: [
+      new Sentry.Integrations.Http({ tracing: true }),
+      new Sentry.Integrations.ContextLines(),
+      new Sentry.Integrations.LinkedErrors(),
+      new ExtraErrorData({
+        depth: 2,
+      }),
+      new Dedupe(),
+    ],
+    maxBreadcrumbs: 5,
+    defaultIntegrations: false,
+    autoSessionTracking: false,
+  });
 
   const server = await createServer({
     name: 'graphql-api',
     tracing: true,
   });
 
-  const storage = await createPostgreSQLStorage(createConnectionString(env.postgres), 10);
+  const storage = await createPostgreSQLStorage(createConnectionString(process.env as any), 10);
 
   registerShutdown({
     logger: server.log,
@@ -125,85 +129,89 @@ export async function main() {
     const graphqlLogger = createGraphQLLogger();
     const registry = createRegistry({
       tokens: {
-        endpoint: env.hiveServices.tokens.endpoint,
+        endpoint: ensureEnv('TOKENS_ENDPOINT'),
       },
       billing: {
-        endpoint: env.hiveServices.billing ? env.hiveServices.billing.endpoint : null,
+        endpoint: process.env.BILLING_ENDPOINT ? ensureEnv('BILLING_ENDPOINT').replace(/\/$/g, '') : null,
       },
-      emailsEndpoint: env.hiveServices.emails ? env.hiveServices.emails.endpoint : undefined,
+      emailsEndpoint: process.env.EMAILS_ENDPOINT ? ensureEnv('EMAILS_ENDPOINT').replace(/\/$/g, '') : undefined,
       webhooks: {
-        endpoint: env.hiveServices.webhooks.endpoint,
+        endpoint: ensureEnv('WEBHOOKS_ENDPOINT').replace(/\/$/g, ''),
       },
       schemaService: {
-        endpoint: env.hiveServices.schema.endpoint,
+        endpoint: ensureEnv('SCHEMA_ENDPOINT').replace(/\/$/g, ''),
       },
       usageEstimationService: {
-        endpoint: env.hiveServices.usageEstimator ? env.hiveServices.usageEstimator.endpoint : null,
+        endpoint: process.env.USAGE_ESTIMATOR_ENDPOINT
+          ? ensureEnv('USAGE_ESTIMATOR_ENDPOINT').replace(/\/$/g, '')
+          : null,
       },
       rateLimitService: {
-        endpoint: env.hiveServices.rateLimit ? env.hiveServices.rateLimit.endpoint : null,
+        endpoint: process.env.RATE_LIMIT_ENDPOINT ? ensureEnv('RATE_LIMIT_ENDPOINT').replace(/\/$/g, '') : null,
       },
       logger: graphqlLogger,
       storage,
       redis: {
-        host: env.redis.host,
-        port: env.redis.port,
-        password: env.redis.password,
+        host: ensureEnv('REDIS_HOST'),
+        port: ensureEnv('REDIS_PORT', 'number'),
+        password: ensureEnv('REDIS_PASSWORD'),
       },
-      githubApp: env.github,
+      githubApp: {
+        appId: ensureEnv('GITHUB_APP_ID', 'number'),
+        privateKey: ensureEnv('GITHUB_APP_PRIVATE_KEY'),
+      },
       clickHouse: {
-        protocol: env.clickhouse.protocol,
-        host: env.clickhouse.host,
-        port: env.clickhouse.port,
-        username: env.clickhouse.username,
-        password: env.clickhouse.password,
+        protocol: ensureEnv('CLICKHOUSE_PROTOCOL'),
+        host: ensureEnv('CLICKHOUSE_HOST'),
+        port: ensureEnv('CLICKHOUSE_PORT', 'number'),
+        username: ensureEnv('CLICKHOUSE_USERNAME'),
+        password: ensureEnv('CLICKHOUSE_PASSWORD'),
         onReadEnd(query, timings) {
           clickHouseReadDuration.labels({ query }).observe(timings.totalSeconds);
           clickHouseElapsedDuration.labels({ query }).observe(timings.elapsedSeconds);
         },
       },
-      cdn: env.cdn
-        ? {
-            authPrivateKey: env.cdn.auth.privateKey,
-            baseUrl: env.cdn.baseUrl,
-            cloudflare: env.cdn.cloudflare,
-          }
-        : null,
-      encryptionSecret: env.encryptionSecret,
-      feedback: {
-        token: 'noop',
-        channel: 'noop',
+      cdn: {
+        authPrivateKey: ensureEnv('CDN_AUTH_PRIVATE_KEY'),
+        baseUrl: ensureEnv('CDN_BASE_URL'),
+        cloudflare: {
+          basePath: ensureEnv('CF_BASE_PATH'),
+          accountId: ensureEnv('CF_ACCOUNT_ID'),
+          authToken: ensureEnv('CF_AUTH_TOKEN'),
+          namespaceId: ensureEnv('CF_NAMESPACE_ID'),
+        },
       },
-      schemaConfig: env.hiveServices.webApp
-        ? {
-            schemaPublishLink(input) {
-              let url = `${env.hiveServices.webApp!.url}/${input.organization.cleanId}/${input.project.cleanId}/${
-                input.target.cleanId
-              }`;
+      encryptionSecret: ensureEnv('ENCRYPTION_SECRET'),
+      feedback: {
+        token: ensureEnv('FEEDBACK_SLACK_TOKEN'),
+        channel: ensureEnv('FEEDBACK_SLACK_CHANNEL'),
+      },
+      schemaConfig:
+        typeof process.env.WEB_APP_URL === 'string'
+          ? {
+              schemaPublishLink(input) {
+                let url = `${process.env.WEB_APP_URL}/${input.organization.cleanId}/${input.project.cleanId}/${input.target.cleanId}`;
 
-              if (input.version) {
-                url += `/history/${input.version.id}`;
-              }
+                if (input.version) {
+                  url += `/history/${input.version.id}`;
+                }
 
-              return url;
-            },
-          }
-        : {},
+                return url;
+              },
+            }
+          : {},
     });
     const graphqlPath = '/graphql';
-    const port = env.http.port;
+    const port = process.env.PORT || 4000;
     const signature = Math.random().toString(16).substr(2);
     const graphql = graphqlHandler({
       graphiqlEndpoint: graphqlPath,
       registry,
       signature,
       supertokens: {
-        connectionUri: env.supertokens.connectionURI,
-        apiKey: env.supertokens.apiKey,
+        connectionUri: ensureEnv('SUPERTOKENS_CONNECTION_URI'),
+        apiKey: ensureEnv('SUPERTOKENS_API_KEY'),
       },
-      isProduction: env.environment === 'prod',
-      release: env.release,
-      hiveConfig: env.hive,
     });
 
     server.route({
@@ -273,13 +281,15 @@ export async function main() {
       },
     });
 
-    if (env.legacyAuth0) {
-      const auth0Config = env.legacyAuth0;
+    const authLegacyAuth0 = optionalEnv('AUTH_LEGACY_AUTH0', '0');
+    const authLegacyAPIKey = optionalEnv('AUTH_LEGACY_AUTH0_INTERNAL_API_KEY', '');
+
+    if (authLegacyAuth0 === '1') {
       server.route({
         method: 'POST',
         url: '/__legacy/update_user_id_mapping',
         async handler(req, reply) {
-          if (req.headers['x-authorization'] !== auth0Config.apiKey) {
+          if (req.headers['x-authorization'] !== authLegacyAPIKey) {
             reply.status(401).send({ error: 'Invalid update user id mapping key.', code: 'ERR_INVALID_KEY' }); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
             return;
           }
@@ -298,7 +308,7 @@ export async function main() {
         method: 'POST',
         url: '/__legacy/check_auth0_email_user_without_associated_supertoken_id_exists',
         async handler(req, reply) {
-          if (req.headers['x-authorization'] !== auth0Config.apiKey) {
+          if (req.headers['x-authorization'] !== authLegacyAPIKey) {
             reply.status(401).send({ error: 'Invalid update user id mapping key.', code: 'ERR_INVALID_KEY' }); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
             return;
           }
@@ -322,8 +332,8 @@ export async function main() {
       });
     }
 
-    if (env.prometheus) {
-      await startMetrics(env.prometheus.labels.instance);
+    if (process.env.METRICS_ENABLED === 'true') {
+      await startMetrics();
     }
 
     await server.listen(port, '0.0.0.0');

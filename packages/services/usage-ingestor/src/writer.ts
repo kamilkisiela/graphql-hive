@@ -47,11 +47,11 @@ const agentConfig: Agent.HttpOptions = {
 
 export function createWriter({
   clickhouse,
-  clickhouseMirror,
+  clickhouseCloud,
   logger,
 }: {
   clickhouse: ClickHouseConfig;
-  clickhouseMirror: ClickHouseConfig | null;
+  clickhouseCloud: ClickHouseConfig | null;
   logger: FastifyLoggerInstance;
 }) {
   const httpAgent = new Agent(agentConfig);
@@ -70,8 +70,8 @@ export function createWriter({
 
       await Promise.all([
         writeCsv(clickhouse, agents, sql, compressed, logger, 3),
-        clickhouseMirror
-          ? writeCsv(clickhouseMirror, agents, sql, compressed, logger, 1).catch(error => {
+        clickhouseCloud
+          ? writeCsv(clickhouseCloud, agents, sql, compressed, logger, 1).catch(error => {
               logger.error('Failed to write operations to ClickHouse Cloud %s', error);
               // Ignore errors from clickhouse cloud
               return Promise.resolve();
@@ -86,8 +86,8 @@ export function createWriter({
 
       await Promise.all([
         writeCsv(clickhouse, agents, sql, compressed, logger, 3),
-        clickhouseMirror
-          ? writeCsv(clickhouseMirror, agents, sql, compressed, logger, 1).catch(error => {
+        clickhouseCloud
+          ? writeCsv(clickhouseCloud, agents, sql, compressed, logger, 1).catch(error => {
               logger.error('Failed to write operation_collection to ClickHouse Cloud %s', error);
               // Ignore errors from clickhouse cloud
               return Promise.resolve();

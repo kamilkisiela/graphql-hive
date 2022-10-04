@@ -13,7 +13,6 @@ export default gql`
     hasGitHubIntegration(selector: OrganizationSelectorInput!): Boolean!
     gitHubIntegration(selector: OrganizationSelectorInput!): GitHubIntegration!
     organizationByGitHubInstallationId(installation: ID!): Organization
-    isGitHubIntegrationFeatureEnabled: Boolean!
   }
 
   input AddSlackIntegrationInput {

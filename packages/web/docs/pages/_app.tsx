@@ -5,7 +5,6 @@ import Script from 'next/script';
 import { useRouter } from 'next/router';
 import * as gtag from '../src/gtag';
 
-// eslint-disable-next-line no-process-env
 const CRISP_WEBSITE_ID = process.env.NEXT_PUBLIC_CRISP_WEBSITE_ID;
 
 export default function Nextra({ Component, pageProps }: AppProps) {

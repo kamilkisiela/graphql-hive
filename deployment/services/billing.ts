@@ -1,6 +1,5 @@
 import * as pulumi from '@pulumi/pulumi';
 import * as azure from '@pulumi/azure';
-import { parse } from 'pg-connection-string';
 import { RemoteArtifactAsServiceDeployment } from '../utils/remote-artifact-as-service';
 import { PackageHelper } from '../utils/pack';
 import { DeploymentEnvironment } from '../types';
@@ -28,9 +27,6 @@ export function deployStripeBilling({
   deploymentEnv: DeploymentEnvironment;
   dbMigrations: DbMigrations;
 }) {
-  const rawConnectionString = apiConfig.requireSecret('postgresConnectionString');
-  const connectionString = rawConnectionString.apply(rawConnectionString => parse(rawConnectionString));
-
   return new RemoteArtifactAsServiceDeployment(
     'stripe-billing',
     {
@@ -41,16 +37,10 @@ export function deployStripeBilling({
       env: {
         ...deploymentEnv,
         ...commonEnv,
-        SENTRY: commonEnv.SENTRY_ENABLED,
         RELEASE: packageHelper.currentReleaseId(),
         USAGE_ESTIMATOR_ENDPOINT: serviceLocalEndpoint(usageEstimator.service),
         STRIPE_SECRET_KEY: billingConfig.requireSecret('stripePrivateKey'),
-        POSTGRES_HOST: connectionString.apply(connection => connection.host ?? ''),
-        POSTGRES_PORT: connectionString.apply(connection => connection.port ?? ''),
-        POSTGRES_PASSWORD: connectionString.apply(connection => connection.password ?? ''),
-        POSTGRES_USER: connectionString.apply(connection => connection.user ?? ''),
-        POSTGRES_DB: connectionString.apply(connection => connection.database ?? ''),
-        POSTGRES_ENABLE_SSL: connectionString.apply(connection => (connection.ssl ? '1' : '0')),
+        POSTGRES_CONNECTION_STRING: apiConfig.requireSecret('postgresConnectionString'),
       },
       exposesMetrics: true,
       packageInfo: packageHelper.npmPack('@hive/stripe-billing'),

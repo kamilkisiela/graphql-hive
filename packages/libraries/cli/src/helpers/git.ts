@@ -36,20 +36,16 @@ interface CIRunner {
 function useGitHubAction(): CIRunner {
   return {
     detect() {
-      // eslint-disable-next-line no-process-env
       return Boolean(process.env.GITHUB_ACTIONS);
     },
     env() {
       const isPr =
-        // eslint-disable-next-line no-process-env
         process.env.GITHUB_EVENT_NAME === 'pull_request' || process.env.GITHUB_EVENT_NAME === 'pull_request_target';
 
       if (isPr) {
         try {
-          // eslint-disable-next-line no-process-env
           const event = process.env.GITHUB_EVENT_PATH
-            ? // eslint-disable-next-line no-process-env
-              JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH, 'utf-8'))
+            ? JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH, 'utf-8'))
             : undefined;
 
           if (event?.pull_request) {

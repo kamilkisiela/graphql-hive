@@ -22,7 +22,6 @@ import { Feedback } from './Feedback';
 import { UserSettings } from './UserSettings';
 import ThemeButton from './ThemeButton';
 import { getDocsUrl } from '@/lib/docs-url';
-import { env } from '@/env/frontend';
 
 export interface NavigationItem {
   label: string;
@@ -194,7 +193,7 @@ export function Navigation() {
                   >
                     Support
                   </MenuItem>
-                  {env.nodeEnv === 'development' ? (
+                  {process.env.NODE_ENV === 'development' ? (
                     <MenuItem
                       onClick={() => {
                         window.location.href = '/dev';
