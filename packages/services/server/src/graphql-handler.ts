@@ -2,7 +2,7 @@
 import type { RouteHandlerMethod, FastifyRequest, FastifyReply } from 'fastify';
 import { Registry } from '@hive/api';
 import { cleanRequestId } from '@hive/service-common';
-import { createYoga, useErrorHandler, Plugin } from 'graphql-yoga';
+import { createYoga, useErrorHandler, Plugin, isGraphQLError } from 'graphql-yoga';
 import { GraphQLError, ValidationContext, ValidationRule, Kind, OperationDefinitionNode, print } from 'graphql';
 import { useGraphQLModules } from '@envelop/graphql-modules';
 import { useGenericAuth } from '@envelop/generic-auth';
@@ -135,15 +135,15 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
         },
       }),
       useSentryUser(),
-      useErrorHandler((errors, ctx) => {
+      useErrorHandler(({ errors, context }): void => {
         for (const error of errors) {
           // Only log unexpected errors.
-          if (error.originalError instanceof GraphQLError) {
+          if (isGraphQLError(error) && isGraphQLError(error.originalError)) {
             continue;
           }
 
-          if (hasFastifyRequest(ctx)) {
-            ctx.req.log.error(error);
+          if (hasFastifyRequest(context)) {
+            context.req.log.error(error);
           } else {
             server.logger.error(error);
           }
