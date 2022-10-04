@@ -9,7 +9,7 @@ export function createConnectionString(config: {
   ssl: boolean;
 }) {
   // prettier-ignore
-  return `postgres://${config.user}:${config.password}@${config.host}:${config.port}/${config.db}${config.ssl ? '' : '?sslmode=disable'}`;
+  return `postgres://${config.user}:${config.password}@${config.host}:${config.port}/${config.db}${config.ssl ? '?sslmode=require' : '?sslmode=disable'}`;
 }
 
 export function objectToParams<T extends Record<string, any>>(
