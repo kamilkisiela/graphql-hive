@@ -81,11 +81,15 @@ export function deployApp({
           value: `https://${deploymentEnv.DEPLOYED_DNS}/`,
         },
         {
-          name: 'SLACK_CLIENT_ID',
+          name: 'INTEGRATION_SLACK',
+          value: '1',
+        },
+        {
+          name: 'INTEGRATION_SLACK_CLIENT_ID',
           value: appEnv.SLACK_CLIENT_ID,
         },
         {
-          name: 'SLACK_CLIENT_SECRET',
+          name: 'INTEGRATION_SLACK_CLIENT_SECRET',
           value: appEnv.SLACK_CLIENT_SECRET,
         },
         {

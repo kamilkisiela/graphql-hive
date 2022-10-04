@@ -15,6 +15,11 @@ async function fetchData({ url, headers, body }: { url: string; headers: Record<
 
 export default async function slackCallback(req: NextApiRequest, res: NextApiResponse) {
   console.log('Slack Integration Callback');
+
+  if (env.slack === null) {
+    throw new Error('The Slack integration is not enabled.');
+  }
+
   const code = req.query.code;
   const orgId = req.query.state;
 
