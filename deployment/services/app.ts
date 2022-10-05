@@ -6,6 +6,7 @@ import { RemoteArtifactAsServiceDeployment } from '../utils/remote-artifact-as-s
 import { serviceLocalEndpoint } from '../utils/local-endpoint';
 import { DeploymentEnvironment } from '../types';
 import { PackageHelper } from '../utils/pack';
+import { Docs } from './docs';
 
 const appConfig = new pulumi.Config('app');
 const commonConfig = new pulumi.Config('common');
@@ -18,6 +19,7 @@ export type App = ReturnType<typeof deployApp>;
 
 export function deployApp({
   deploymentEnv,
+  docs,
   graphql,
   dbMigrations,
   storageContainer,
@@ -49,6 +51,7 @@ export function deployApp({
     clientSecret: pulumi.Output<string>;
   };
   emailsEndpoint: pulumi.Output<string>;
+  docs: Docs;
 }) {
   const appRelease = packageHelper.currentReleaseId();
 
@@ -114,7 +117,7 @@ export function deployApp({
 
         {
           name: 'DOCS_URL',
-          value: `https://docs.${deploymentEnv.DEPLOYED_DNS}/`,
+          value: docs.endpoint,
         },
 
         //

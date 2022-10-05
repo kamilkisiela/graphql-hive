@@ -213,8 +213,15 @@ const graphqlApi = deployGraphQL({
   },
 });
 
+const docs = deployDocs({
+  rootDns,
+  packageHelper,
+  storageContainer,
+});
+
 const app = deployApp({
   deploymentEnv,
+  docs,
   graphql: graphqlApi,
   dbMigrations,
   packageHelper,
@@ -232,12 +239,6 @@ const app = deployApp({
 });
 
 const landingPage = deployLandingPage({
-  rootDns,
-  packageHelper,
-  storageContainer,
-});
-
-const docs = deployDocs({
   rootDns,
   packageHelper,
   storageContainer,

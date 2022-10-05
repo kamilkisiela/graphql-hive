@@ -106,6 +106,7 @@ export function deployGraphQL({
         TOKENS_ENDPOINT: serviceLocalEndpoint(tokens.service),
         WEBHOOKS_ENDPOINT: serviceLocalEndpoint(webhooks.service),
         SCHEMA_ENDPOINT: serviceLocalEndpoint(schema.service),
+        // CDN
         CDN: '1',
         CDN_CF_BASE_PATH: 'https://api.cloudflare.com/client/v4/accounts',
         CDN_CF_ACCOUNT_ID: cloudflareConfig.require('accountId'),
@@ -113,9 +114,14 @@ export function deployGraphQL({
         CDN_CF_NAMESPACE_ID: cloudflare.cfStorageNamespaceId,
         CDN_BASE_URL: cloudflare.workerBaseUrl,
         CDN_AUTH_PRIVATE_KEY: cloudflare.authPrivateKey,
+        // Hive
+        HIVE: '1',
+        HIVE_REPORTING: '1',
+        HIVE_USAGE: '1',
         HIVE_USAGE_ENDPOINT: serviceLocalEndpoint(usage.service),
-        USAGE_ESTIMATOR_ENDPOINT: serviceLocalEndpoint(usageEstimator.service),
         HIVE_REPORTING_ENDPOINT: 'http://0.0.0.0:4000/graphql',
+        //
+        USAGE_ESTIMATOR_ENDPOINT: serviceLocalEndpoint(usageEstimator.service),
         INTEGRATION_GITHUB: '1',
         INTEGRATION_GITHUB_APP_ID: githubAppConfig.require('id'),
         INTEGRATION_GITHUB_APP_PRIVATE_KEY: githubAppConfig.requireSecret('key'),
