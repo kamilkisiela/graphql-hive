@@ -1,6 +1,6 @@
 import { ReactElement, useCallback, useState } from 'react';
 import { useFormik } from 'formik';
-import { gql, useMutation, useQuery } from 'urql';
+import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 
 import { authenticated, withSessionProtection } from '@/components/authenticated-container';
@@ -9,6 +9,7 @@ import { Button, Card, Heading, Input, Spinner, Tag, Title } from '@/components/
 import { AlertTriangleIcon, GitHubIcon, SlackIcon } from '@/components/v2/icon';
 import { DeleteOrganizationModal } from '@/components/v2/modals';
 import { env } from '@/env/frontend';
+import { graphql } from '@/gql';
 import {
   CheckIntegrationsDocument,
   DeleteGitHubIntegrationDocument,
@@ -110,7 +111,7 @@ const Integrations = (): ReactElement => {
   );
 };
 
-const UpdateOrganizationNameMutation = gql(/* GraphQL */ `
+const UpdateOrganizationNameMutation = graphql(/* GraphQL */ `
   mutation Settings_UpdateOrganizationName($input: UpdateOrganizationNameInput!) {
     updateOrganizationName(input: $input) {
       ok {

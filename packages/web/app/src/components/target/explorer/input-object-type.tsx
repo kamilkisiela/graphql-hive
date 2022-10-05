@@ -1,7 +1,7 @@
-import { gql, DocumentType } from 'urql';
 import { GraphQLTypeCard, GraphQLInputFields } from './common';
+import { graphql, FragmentType, useFragment } from '@/gql';
 
-export const GraphQLInputObjectTypeComponent_TypeFragment = gql(/* GraphQL */ `
+export const GraphQLInputObjectTypeComponent_TypeFragment = graphql(/* GraphQL */ `
   fragment GraphQLInputObjectTypeComponent_TypeFragment on GraphQLInputObjectType {
     name
     description
@@ -15,12 +15,13 @@ export const GraphQLInputObjectTypeComponent_TypeFragment = gql(/* GraphQL */ `
 `);
 
 export function GraphQLInputObjectTypeComponent(props: {
-  type: DocumentType<typeof GraphQLInputObjectTypeComponent_TypeFragment>;
+  type: FragmentType<typeof GraphQLInputObjectTypeComponent_TypeFragment>;
   totalRequests: number;
 }) {
+  const ttype = useFragment(GraphQLInputObjectTypeComponent_TypeFragment, props.type);
   return (
-    <GraphQLTypeCard kind="input" name={props.type.name} description={props.type.description}>
-      <GraphQLInputFields fields={props.type.fields} totalRequests={props.totalRequests} />
+    <GraphQLTypeCard kind="input" name={ttype.name} description={ttype.description}>
+      <GraphQLInputFields fields={ttype.fields} totalRequests={props.totalRequests} />
     </GraphQLTypeCard>
   );
 }

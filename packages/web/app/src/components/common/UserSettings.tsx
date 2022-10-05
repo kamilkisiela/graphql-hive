@@ -1,6 +1,6 @@
 import * as React from 'react';
 import 'twin.macro';
-import { DocumentType, gql, useMutation } from 'urql';
+import { useMutation } from 'urql';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import {
@@ -16,8 +16,9 @@ import {
   ModalBody,
   FormLabel,
 } from '@chakra-ui/react';
+import { FragmentType, graphql, useFragment } from '@/gql';
 
-const UpdateMeFragment = gql(/* GraphQL */ `
+const UpdateMeFragment = graphql(/* GraphQL */ `
   fragment UpdateMeFragment on User {
     id
     fullName
@@ -25,12 +26,14 @@ const UpdateMeFragment = gql(/* GraphQL */ `
   }
 `);
 
-const UpdateMeMutation = gql(/* GraphQL */ `
+const UpdateMeMutation = graphql(/* GraphQL */ `
   mutation UserSettings_UpdateMeMutation($input: UpdateMeInput!) {
     updateMe(input: $input) {
       ok {
         updatedUser {
           ...UpdateMeFragment
+          fullName
+          displayName
         }
       }
     }
@@ -38,10 +41,11 @@ const UpdateMeMutation = gql(/* GraphQL */ `
 `);
 
 export const UserSettings: React.FC<{
-  me: DocumentType<typeof UpdateMeFragment>;
+  me: FragmentType<typeof UpdateMeFragment>;
   isOpen: boolean;
   onClose(): void;
-}> = ({ me, isOpen, onClose }) => {
+}> = ({ isOpen, onClose, ...props }) => {
+  const me = useFragment(UpdateMeFragment, props.me);
   const [mutation, mutate] = useMutation(UpdateMeMutation);
   const formik = useFormik({
     initialValues: {

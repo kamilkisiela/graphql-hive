@@ -11,11 +11,11 @@ import {
   ProjectFieldsFragment,
   OrganizationFieldsFragment,
 } from '@/graphql';
-import { gql } from 'urql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { useTargetAccess, canAccessTarget, TargetAccessScope } from '@/lib/access/target';
 import { QueryError } from '../common/DataWrapper';
 import { ConnectSchemaModal } from '@/components/v2/modals';
+import { graphql } from '@/gql';
 
 enum TabValue {
   Schema = 'schema',
@@ -26,7 +26,7 @@ enum TabValue {
   Settings = 'settings',
 }
 
-const IsCDNEnabledQuery = gql(/* GraphQL */ `
+const IsCDNEnabledQuery = graphql(/* GraphQL */ `
   query IsCDNEnabledQuery {
     isCDNEnabled
   }

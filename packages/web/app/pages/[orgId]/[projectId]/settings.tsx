@@ -1,7 +1,7 @@
 import { ReactElement, useCallback, useState } from 'react';
 import NextLink from 'next/link';
 import { useFormik } from 'formik';
-import { gql, useMutation, useQuery } from 'urql';
+import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 
 import { authenticated, withSessionProtection } from '@/components/authenticated-container';
@@ -10,6 +10,7 @@ import { ExternalCompositionSettings } from '@/components/project/settings/exter
 import { Button, Card, Heading, Input, Link, Select, Spinner, Tag, Title } from '@/components/v2';
 import { AlertTriangleIcon } from '@/components/v2/icon';
 import { DeleteProjectModal } from '@/components/v2/modals';
+import { graphql } from '@/gql';
 import {
   GetGitHubIntegrationDetailsDocument,
   OrganizationFieldsFragment,
@@ -19,7 +20,7 @@ import {
 import { canAccessProject, ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
-const Settings_UpdateProjectGitRepositoryMutation = gql(/* GraphQL */ `
+const Settings_UpdateProjectGitRepositoryMutation = graphql(/* GraphQL */ `
   mutation Settings_UpdateProjectGitRepository($input: UpdateProjectGitRepositoryInput!) {
     updateProjectGitRepository(input: $input) {
       ok {
@@ -29,6 +30,7 @@ const Settings_UpdateProjectGitRepositoryMutation = gql(/* GraphQL */ `
         }
         updatedProject {
           ...ProjectFields
+          cleanId
         }
       }
       error {
@@ -116,7 +118,7 @@ const GitHubIntegration = ({ gitRepository }: { gitRepository: string | null }):
   );
 };
 
-const Settings_UpdateProjectNameMutation = gql(/* GraphQL */ `
+const Settings_UpdateProjectNameMutation = graphql(/* GraphQL */ `
   mutation Settings_UpdateProjectName($input: UpdateProjectNameInput!) {
     updateProjectName(input: $input) {
       ok {
@@ -126,6 +128,7 @@ const Settings_UpdateProjectNameMutation = gql(/* GraphQL */ `
         }
         updatedProject {
           ...ProjectFields
+          cleanId
         }
       }
       error {

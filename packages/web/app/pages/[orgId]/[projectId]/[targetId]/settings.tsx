@@ -3,7 +3,7 @@ import { Spinner } from '@chakra-ui/react';
 import clsx from 'clsx';
 import { formatISO, subDays } from 'date-fns';
 import { useFormik } from 'formik';
-import { gql, useMutation, useQuery } from 'urql';
+import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 
 import { authenticated, withSessionProtection } from '@/components/authenticated-container';
@@ -13,6 +13,7 @@ import { Button, Card, Checkbox, Heading, Input, Switch, Table, Tag, TimeAgo, Ti
 import { Combobox } from '@/components/v2/combobox';
 import { AlertTriangleIcon } from '@/components/v2/icon';
 import { CreateAccessTokenModal, DeleteTargetModal } from '@/components/v2/modals';
+import { graphql } from '@/gql';
 import {
   DeleteTokensDocument,
   MemberFieldsFragment,
@@ -124,7 +125,7 @@ const Tokens = ({ me }: { me: MemberFieldsFragment }): ReactElement => {
   );
 };
 
-const Settings_UpdateBaseSchemaMutation = gql(/* GraphQL */ `
+const Settings_UpdateBaseSchemaMutation = graphql(/* GraphQL */ `
   mutation Settings_UpdateBaseSchema($input: UpdateBaseSchemaInput!) {
     updateBaseSchema(input: $input) {
       ok {
@@ -195,7 +196,7 @@ const ExtendBaseSchema = (props: { baseSchema: string }): ReactElement => {
   );
 };
 
-const ClientExclusion_AvailableClientNamesQuery = gql(/* GraphQL */ `
+const ClientExclusion_AvailableClientNamesQuery = graphql(/* GraphQL */ `
   query ClientExclusion_AvailableClientNamesQuery($selector: ClientStatsByTargetsInput!) {
     clientStatsByTargets(selector: $selector) {
       nodes {
@@ -256,17 +257,30 @@ function ClientExclusion(
   );
 }
 
-const Settings_TargetSettingsQuery = gql(/* GraphQL */ `
+const Settings_TargetSettingsQuery = graphql(/* GraphQL */ `
   query Settings_TargetSettingsQuery(
     $selector: TargetSelectorInput!
     $targetsSelector: ProjectSelectorInput!
     $organizationSelector: OrganizationSelectorInput!
   ) {
     targetSettings(selector: $selector) {
+      id
+      validation {
+        id
+        enabled
+        period
+        percentage
+        excludedClients
+        targets {
+          id
+        }
+      }
       ...TargetSettingsFields
     }
     targets(selector: $targetsSelector) {
       nodes {
+        id
+        name
         ...TargetEssentials
       }
     }
@@ -281,7 +295,7 @@ const Settings_TargetSettingsQuery = gql(/* GraphQL */ `
   }
 `);
 
-const Settings_UpdateTargetValidationSettingsMutation = gql(/* GraphQL */ `
+const Settings_UpdateTargetValidationSettingsMutation = graphql(/* GraphQL */ `
   mutation Settings_UpdateTargetValidationSettings($input: UpdateTargetValidationSettingsInput!) {
     updateTargetValidationSettings(input: $input) {
       ok {
@@ -520,7 +534,7 @@ const ConditionalBreakingChanges = (): ReactElement => {
   );
 };
 
-const Settings_UpdateTargetNameMutation = gql(/* GraphQL */ `
+const Settings_UpdateTargetNameMutation = graphql(/* GraphQL */ `
   mutation Settings_UpdateTargetName($input: UpdateTargetNameInput!) {
     updateTargetName(input: $input) {
       ok {
@@ -531,6 +545,7 @@ const Settings_UpdateTargetNameMutation = gql(/* GraphQL */ `
         }
         updatedTarget {
           ...TargetFields
+          cleanId
         }
       }
       error {

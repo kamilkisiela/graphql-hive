@@ -1,13 +1,14 @@
 import { ReactElement } from 'react';
 import { useRouter } from 'next/router';
 import { useFormik } from 'formik';
-import { gql, useMutation } from 'urql';
+import { useMutation } from 'urql';
 import * as Yup from 'yup';
 
 import { Button, Heading, Input, Modal } from '@/components/v2';
+import { graphql } from '@/gql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
-const CreateTarget_CreateTargetMutation = gql(/* GraphQL */ `
+const CreateTarget_CreateTargetMutation = graphql(/* GraphQL */ `
   mutation CreateTarget_CreateTarget($input: CreateTargetInput!) {
     createTarget(input: $input) {
       ok {
@@ -18,6 +19,7 @@ const CreateTarget_CreateTargetMutation = gql(/* GraphQL */ `
         }
         createdTarget {
           ...TargetFields
+          cleanId
         }
       }
       error {

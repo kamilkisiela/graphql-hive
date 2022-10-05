@@ -11,10 +11,11 @@ import {
 } from '@chakra-ui/react';
 import clsx from 'clsx';
 import { OrganizationType } from '@/graphql';
-import { gql, DocumentType } from 'urql';
 import { getDocsUrl } from '@/lib/docs-url';
+import { FragmentType, graphql, useFragment } from '@/gql';
+import { ResultOf } from '@graphql-typed-document-node/core';
 
-const GetStartedWizard_GetStartedProgress = gql(/* GraphQL */ `
+const GetStartedWizard_GetStartedProgress = graphql(/* GraphQL */ `
   fragment GetStartedWizard_GetStartedProgress on OrganizationGetStarted {
     creatingProject
     publishingSchema
@@ -25,15 +26,14 @@ const GetStartedWizard_GetStartedProgress = gql(/* GraphQL */ `
   }
 `);
 
-export function GetStartedProgress({
-  tasks,
-  organizationType,
-}: {
-  tasks: DocumentType<typeof GetStartedWizard_GetStartedProgress>;
+export function GetStartedProgress(props: {
+  tasks: FragmentType<typeof GetStartedWizard_GetStartedProgress>;
   organizationType: OrganizationType;
 }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const triggerRef = React.useRef<HTMLButtonElement>(null);
+  const { organizationType } = props;
+  const tasks = useFragment(GetStartedWizard_GetStartedProgress, props.tasks);
 
   if (!tasks) {
     return null;
@@ -93,8 +93,8 @@ function GetStartedWizard({
   onClose(): void;
   triggerRef: React.RefObject<HTMLButtonElement>;
   tasks:
-    | DocumentType<typeof GetStartedWizard_GetStartedProgress>
-    | Omit<DocumentType<typeof GetStartedWizard_GetStartedProgress>, 'invitingMembers'>;
+    | ResultOf<typeof GetStartedWizard_GetStartedProgress>
+    | Omit<ResultOf<typeof GetStartedWizard_GetStartedProgress>, 'invitingMembers'>;
 }) {
   return (
     <Drawer isOpen={isOpen} placement="right" onClose={onClose} finalFocusRef={triggerRef} size="md">

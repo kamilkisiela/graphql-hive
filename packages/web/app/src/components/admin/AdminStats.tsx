@@ -28,12 +28,14 @@ import {
   TableInstance as OriginalTableInstance,
   Table as OriginalTable,
 } from '@tanstack/react-table';
-import { DocumentType, gql, useQuery } from 'urql';
+import { useQuery } from 'urql';
 import { VscChevronUp, VscChevronDown, VscChevronLeft, VscChevronRight } from 'react-icons/vsc';
 import { DataWrapper } from '@/components/common/DataWrapper';
 import { theme } from '@/lib/charts';
 import { OrganizationType } from '@/graphql';
 import { env } from '@/env/frontend';
+import { FragmentType, graphql, useFragment } from '@/gql';
+import { ResultOf } from '@graphql-typed-document-node/core';
 
 interface Organization {
   name: string;
@@ -73,7 +75,7 @@ export type Filters = Partial<{
   'with-collected': boolean;
 }>;
 
-const CollectedOperationsOverTime_OperationFragment = gql(/* GraphQL */ `
+const CollectedOperationsOverTime_OperationFragment = graphql(/* GraphQL */ `
   fragment CollectedOperationsOverTime_OperationFragment on AdminOperationPoint {
     count
     date
@@ -82,7 +84,7 @@ const CollectedOperationsOverTime_OperationFragment = gql(/* GraphQL */ `
 
 const CollectedOperationsOverTime: React.FC<{
   last: number;
-  operations: Array<DocumentType<typeof CollectedOperationsOverTime_OperationFragment>>;
+  operations: Array<FragmentType<typeof CollectedOperationsOverTime_OperationFragment>>;
 }> = ({ last, operations }) => {
   const period = {
     from: new Date(Date.now() - (last === 0 ? 30 : last) * 24 * 60 * 60 * 1000),
@@ -90,7 +92,10 @@ const CollectedOperationsOverTime: React.FC<{
   };
 
   const data = React.useMemo(() => {
-    return operations.map<[string, number]>(node => [node.date, node.count]);
+    return operations.map<[string, number]>(nnode => {
+      const node = useFragment(CollectedOperationsOverTime_OperationFragment, nnode);
+      return [node.date, node.count];
+    });
   }, []);
 
   return (
@@ -176,7 +181,7 @@ const Sortable: React.FC<{
   );
 };
 
-const AdminStatsQuery = gql(/* GraphQL */ `
+const AdminStatsQuery = graphql(/* GraphQL */ `
   query adminStats($last: Int) {
     admin {
       stats(daysLimit: $last) {
@@ -217,10 +222,7 @@ const AdminStatsQuery = gql(/* GraphQL */ `
   }
 `);
 
-function filterStats(
-  row: DocumentType<typeof AdminStatsQuery>['admin']['stats']['organizations'][0],
-  filters: Filters
-) {
+function filterStats(row: ResultOf<typeof AdminStatsQuery>['admin']['stats']['organizations'][0], filters: Filters) {
   if (filters['only-regular'] && row.organization.type !== 'REGULAR') {
     return false;
   }

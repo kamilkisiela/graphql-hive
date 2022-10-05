@@ -1,12 +1,13 @@
 import { useFormik } from 'formik';
-import { gql, useMutation, useQuery } from 'urql';
+import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 
 import { Avatar, Button, SubHeader, Heading, Input, Tabs, Title } from '@/components/v2';
 import { MeDocument } from '@/graphql';
 import { authenticated, withSessionProtection } from '@/components/authenticated-container';
+import { graphql } from '@/gql';
 
-const UpdateMeMutation = gql(/* GraphQL */ `
+const UpdateMeMutation = graphql(/* GraphQL */ `
   mutation updateMe($input: UpdateMeInput!) {
     updateMe(input: $input) {
       ok {

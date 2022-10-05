@@ -1,7 +1,7 @@
-import { gql, DocumentType } from 'urql';
 import { GraphQLTypeCard, GraphQLTypeCardListItem, SchemaExplorerUsageStats } from './common';
+import { FragmentType, graphql, useFragment } from '@/gql';
 
-export const GraphQLEnumTypeComponent_TypeFragment = gql(/* GraphQL */ `
+export const GraphQLEnumTypeComponent_TypeFragment = graphql(/* GraphQL */ `
   fragment GraphQLEnumTypeComponent_TypeFragment on GraphQLEnumType {
     name
     description
@@ -21,13 +21,14 @@ export const GraphQLEnumTypeComponent_TypeFragment = gql(/* GraphQL */ `
 `);
 
 export function GraphQLEnumTypeComponent(props: {
-  type: DocumentType<typeof GraphQLEnumTypeComponent_TypeFragment>;
+  type: FragmentType<typeof GraphQLEnumTypeComponent_TypeFragment>;
   totalRequests: number;
 }) {
+  const ttype = useFragment(GraphQLEnumTypeComponent_TypeFragment, props.type);
   return (
-    <GraphQLTypeCard name={props.type.name} kind="enum" description={props.type.description}>
+    <GraphQLTypeCard name={ttype.name} kind="enum" description={ttype.description}>
       <div className="flex flex-col">
-        {props.type.values.map((value, i) => (
+        {ttype.values.map((value, i) => (
           <GraphQLTypeCardListItem index={i}>
             <div>{value.name}</div>
             <SchemaExplorerUsageStats totalRequests={props.totalRequests} usage={value.usage} />

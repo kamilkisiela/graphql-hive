@@ -1,16 +1,16 @@
 import { ReactElement } from 'react';
 import { Accordion } from '@chakra-ui/react';
 import { useFormik } from 'formik';
-import { gql, useMutation, useQuery } from 'urql';
+import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 
 import { PermissionsSpace, usePermissionsManager } from '@/components/organization/Permissions';
 import { Button, CopyValue, Heading, Input, Modal, Tag } from '@/components/v2';
-import { OrganizationDocument, OrganizationQuery } from '@/graphql';
+import { FragmentType, graphql, useFragment } from '@/gql';
 import { scopes } from '@/lib/access/common';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
-const CreateAccessToken_CreateTokenMutation = gql(/* GraphQL */ `
+const CreateAccessToken_CreateTokenMutation = graphql(/* GraphQL */ `
   mutation CreateAccessToken_CreateToken($input: CreateTokenInput!) {
     createToken(input: $input) {
       ok {
@@ -31,6 +31,17 @@ const CreateAccessToken_CreateTokenMutation = gql(/* GraphQL */ `
   }
 `);
 
+const CreateAccessModal_OrganizationQuery = graphql(/* GraphQL */ `
+  query CreateAccessModal_OrganizationQuery($selector: OrganizationSelectorInput!) {
+    organization(selector: $selector) {
+      organization {
+        id
+        ...ModalContent_OrganizationFragment
+      }
+    }
+  }
+`);
+
 export const CreateAccessTokenModal = ({
   isOpen,
   toggleModalOpen,
@@ -40,7 +51,7 @@ export const CreateAccessTokenModal = ({
 }): ReactElement => {
   const router = useRouteSelector();
   const [organizationQuery] = useQuery({
-    query: OrganizationDocument,
+    query: CreateAccessModal_OrganizationQuery,
     variables: {
       selector: {
         organization: router.organizationId,
@@ -65,13 +76,26 @@ export const CreateAccessTokenModal = ({
   );
 };
 
+const ModalContent_OrganizationFragment = graphql(/* GraphQL */ `
+  fragment ModalContent_OrganizationFragment on Organization {
+    id
+    ...OrganizationFields
+    ...usePermissionManager_OrganizationFragment
+    me {
+      id
+      ...usePermissionManager_MemberFragment
+    }
+  }
+`);
+
 const ModalContent = (props: {
-  organization: Exclude<OrganizationQuery['organization'], null | undefined>['organization'];
+  organization: FragmentType<typeof ModalContent_OrganizationFragment>;
   organizationId: string;
   projectId: string;
   targetId: string;
   toggleModalOpen: () => void;
 }) => {
+  const organization = useFragment(ModalContent_OrganizationFragment, props.organization);
   const [mutation, mutate] = useMutation(CreateAccessToken_CreateTokenMutation);
 
   const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } = useFormik({
@@ -96,8 +120,8 @@ const ModalContent = (props: {
 
   const manager = usePermissionsManager({
     onSuccess() {},
-    organization: props.organization,
-    member: props.organization.me,
+    organization,
+    member: organization.me,
   });
 
   return (

@@ -1,9 +1,14 @@
 import { ReactElement } from 'react';
 import { Accordion } from '@chakra-ui/react';
 
-import { PermissionsSpace, usePermissionsManager } from '@/components/organization/Permissions';
+import {
+  PermissionsSpace,
+  usePermissionManager_MemberFragment,
+  usePermissionManager_OrganizationFragment,
+  usePermissionsManager,
+} from '@/components/organization/Permissions';
 import { Button, Heading, Modal } from '@/components/v2';
-import { MemberFieldsFragment, OrganizationFieldsFragment } from '@/graphql';
+import { FragmentType } from '@/gql';
 import { scopes } from '@/lib/access/common';
 
 export const ChangePermissionsModal = ({
@@ -14,8 +19,8 @@ export const ChangePermissionsModal = ({
 }: {
   isOpen: boolean;
   toggleModalOpen: () => void;
-  organization: OrganizationFieldsFragment;
-  member: MemberFieldsFragment;
+  organization: FragmentType<typeof usePermissionManager_OrganizationFragment>;
+  member: FragmentType<typeof usePermissionManager_MemberFragment>;
 }): ReactElement => {
   const manager = usePermissionsManager({
     onSuccess: toggleModalOpen,

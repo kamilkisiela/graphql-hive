@@ -1,7 +1,6 @@
 import React from 'react';
 import NextLink from 'next/link';
 import clsx from 'clsx';
-import { gql, DocumentType } from 'urql';
 import * as Popover from '@radix-ui/react-popover';
 import { VscCommentDiscussion, VscPulse } from 'react-icons/vsc';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
@@ -9,6 +8,7 @@ import { Link } from '@/components/v2/link';
 import { Markdown } from '@/components/v2/markdown';
 import { formatNumber } from '@/lib/hooks/use-formatted-number';
 import { useArgumentListToggle } from './provider';
+import { FragmentType, graphql, useFragment } from '@/gql';
 
 function useCollapsibleList<T>(list: T[], max: number, defaultValue: boolean) {
   const [collapsed, setCollapsed] = React.useState(defaultValue === true && list.length > max ? true : false);
@@ -44,7 +44,7 @@ function Description(props: { description: string }) {
   );
 }
 
-const SchemaExplorerUsageStats_UsageFragment = gql(/* GraphQL */ `
+const SchemaExplorerUsageStats_UsageFragment = graphql(/* GraphQL */ `
   fragment SchemaExplorerUsageStats_UsageFragment on SchemaCoordinateUsage {
     total
     isUsed
@@ -52,10 +52,11 @@ const SchemaExplorerUsageStats_UsageFragment = gql(/* GraphQL */ `
 `);
 
 export function SchemaExplorerUsageStats(props: {
-  usage: DocumentType<typeof SchemaExplorerUsageStats_UsageFragment>;
+  usage: FragmentType<typeof SchemaExplorerUsageStats_UsageFragment>;
   totalRequests: number;
 }) {
-  const percentage = props.totalRequests ? (props.usage.total / props.totalRequests) * 100 : 0;
+  const usage = useFragment(SchemaExplorerUsageStats_UsageFragment, props.usage);
+  const percentage = props.totalRequests ? (usage.total / props.totalRequests) * 100 : 0;
 
   return (
     <div className="flex flex-row items-center gap-2 text-xs">
@@ -63,8 +64,8 @@ export function SchemaExplorerUsageStats(props: {
         <VscPulse />
       </div>
       <div className="flex-grow">
-        <div className="text-center" title={`${props.usage.total} requests`}>
-          {formatNumber(props.usage.total)}
+        <div className="text-center" title={`${usage.total} requests`}>
+          {formatNumber(usage.total)}
         </div>
         <div
           title={`${percentage.toFixed(2)}% of all requests`}
@@ -86,7 +87,7 @@ export function SchemaExplorerUsageStats(props: {
   );
 }
 
-const GraphQLFields_FieldFragment = gql(/* GraphQL */ `
+const GraphQLFields_FieldFragment = graphql(/* GraphQL */ `
   fragment GraphQLFields_FieldFragment on GraphQLField {
     name
     description
@@ -102,7 +103,7 @@ const GraphQLFields_FieldFragment = gql(/* GraphQL */ `
   }
 `);
 
-const GraphQLArguments_ArgumentFragment = gql(/* GraphQL */ `
+const GraphQLArguments_ArgumentFragment = graphql(/* GraphQL */ `
   fragment GraphQLArguments_ArgumentFragment on GraphQLArgument {
     name
     description
@@ -115,7 +116,7 @@ const GraphQLArguments_ArgumentFragment = gql(/* GraphQL */ `
   }
 `);
 
-const GraphQLInputFields_InputFieldFragment = gql(/* GraphQL */ `
+const GraphQLInputFields_InputFieldFragment = graphql(/* GraphQL */ `
   fragment GraphQLInputFields_InputFieldFragment on GraphQLInputField {
     name
     description
@@ -162,8 +163,8 @@ export function GraphQLTypeCard(
   );
 }
 
-export function GraphQLArguments(props: { args: DocumentType<typeof GraphQLArguments_ArgumentFragment>[] }) {
-  const { args } = props;
+export function GraphQLArguments(props: { args: FragmentType<typeof GraphQLArguments_ArgumentFragment>[] }) {
+  const args = useFragment(GraphQLArguments_ArgumentFragment, props.args);
   const [isCollapsedGlobally] = useArgumentListToggle();
   const [collapsed, setCollapsed] = React.useState(isCollapsedGlobally);
   const hasMoreThanTwo = args.length > 2;
@@ -178,7 +179,8 @@ export function GraphQLArguments(props: { args: DocumentType<typeof GraphQLArgum
       <span className="ml-1">
         <span className="text-gray-400">{'('}</span>
         <div className="pl-4">
-          {props.args.map(arg => {
+          {props.args.map(aarg => {
+            const arg = useFragment(GraphQLArguments_ArgumentFragment, aarg);
             return (
               <div key={arg.name}>
                 {arg.name}
@@ -198,7 +200,8 @@ export function GraphQLArguments(props: { args: DocumentType<typeof GraphQLArgum
     <span className="ml-1">
       <span className="text-gray-400">{'('}</span>
       <span className="space-x-2">
-        {props.args.slice(0, 2).map(arg => {
+        {props.args.slice(0, 2).map(aarg => {
+          const arg = useFragment(GraphQLArguments_ArgumentFragment, aarg);
           return (
             <span key={arg.name}>
               {arg.name}
@@ -243,7 +246,7 @@ export function GraphQLTypeCardListItem(
 }
 
 export function GraphQLFields(props: {
-  fields: DocumentType<typeof GraphQLFields_FieldFragment>[];
+  fields: FragmentType<typeof GraphQLFields_FieldFragment>[];
   totalRequests: number;
   collapsed?: boolean;
 }) {
@@ -252,7 +255,8 @@ export function GraphQLFields(props: {
 
   return (
     <div className="flex flex-col">
-      {fields.map((field, i) => {
+      {fields.map((ffield, i) => {
+        const field = useFragment(GraphQLFields_FieldFragment, ffield);
         return (
           <GraphQLTypeCardListItem key={field.name} index={i}>
             <div>
@@ -282,12 +286,13 @@ export function GraphQLInputFields({
   fields,
   totalRequests,
 }: {
-  fields: DocumentType<typeof GraphQLInputFields_InputFieldFragment>[];
+  fields: FragmentType<typeof GraphQLInputFields_InputFieldFragment>[];
   totalRequests: number;
 }) {
   return (
     <div className="flex flex-col">
-      {fields.map((field, i) => {
+      {fields.map((ffield, i) => {
+        const field = useFragment(GraphQLInputFields_InputFieldFragment, ffield);
         return (
           <GraphQLTypeCardListItem key={field.name} index={i}>
             <div>

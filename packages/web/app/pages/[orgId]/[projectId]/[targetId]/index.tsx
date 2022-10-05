@@ -10,7 +10,7 @@ import {
   Tooltip,
 } from '@chakra-ui/react';
 import { VscClose } from 'react-icons/vsc';
-import { gql, useMutation, useQuery } from 'urql';
+import { useMutation, useQuery } from 'urql';
 import { useDebouncedCallback } from 'use-debounce';
 
 import { authenticated, withSessionProtection } from '@/components/authenticated-container';
@@ -18,17 +18,12 @@ import { TargetLayout } from '@/components/layouts';
 import { MarkAsValid } from '@/components/target/history/MarkAsValid';
 import { Button, DataWrapper, GraphQLBlock, noSchema, Title } from '@/components/v2';
 import { RefreshIcon } from '@/components/v2/icon';
+import { graphql } from '@/gql';
 import { SchemaFieldsFragment } from '@/gql/graphql';
-import {
-  LatestSchemaDocument,
-  OrganizationFieldsFragment,
-  ProjectFieldsFragment,
-  ProjectType,
-  TargetFieldsFragment,
-} from '@/graphql';
+import { OrganizationFieldsFragment, ProjectFieldsFragment, ProjectType, TargetFieldsFragment } from '@/graphql';
 import { TargetAccessScope, useTargetAccess } from '@/lib/access/target';
 
-const SchemaServiceName_UpdateSchemaServiceName = gql(/* GraphQL */ `
+const SchemaServiceName_UpdateSchemaServiceName = graphql(/* GraphQL */ `
   mutation SchemaServiceName_UpdateSchemaServiceName($input: UpdateSchemaServiceNameInput!) {
     updateSchemaServiceName(input: $input) {
       ok {
@@ -157,7 +152,7 @@ const Schemas = ({
   );
 };
 
-const SchemaSyncButton_SchemaSyncCDN = gql(/* GraphQL */ `
+const SchemaSyncButton_SchemaSyncCDN = graphql(/* GraphQL */ `
   mutation schemaSyncCdn($input: SchemaSyncCDNInput!) {
     schemaSyncCDN(input: $input) {
       __typename
@@ -218,6 +213,23 @@ const SyncSchemaButton = ({
   );
 };
 
+const SchemaView_LatestSchemaQuery = graphql(/* GraphQL */ `
+  query LatestSchema($selector: TargetSelectorInput!) {
+    target(selector: $selector) {
+      ...TargetFields
+      latestSchemaVersion {
+        id
+        valid
+        schemas {
+          nodes {
+            ...SchemaFields
+          }
+        }
+      }
+    }
+  }
+`);
+
 const FetchingMessages = {
   idle: 'Update CDN',
   error: 'Failed to synchronize',
@@ -252,7 +264,7 @@ function SchemaView({
   const isDistributed = project.type === ProjectType.Federation || project.type === ProjectType.Stitching;
 
   const [query] = useQuery({
-    query: LatestSchemaDocument,
+    query: SchemaView_LatestSchemaQuery,
     variables: {
       selector: {
         organization: organization.cleanId,

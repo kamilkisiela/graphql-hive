@@ -1,7 +1,7 @@
 import { ReactElement, useCallback, useEffect, useState } from 'react';
 import { Tooltip } from '@chakra-ui/react';
 import { useFormik } from 'formik';
-import { DocumentType, gql, useMutation, useQuery } from 'urql';
+import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 
 import { authenticated, withSessionProtection } from '@/components/authenticated-container';
@@ -9,6 +9,7 @@ import { OrganizationLayout } from '@/components/layouts';
 import { Avatar, Button, Card, Checkbox, DropdownMenu, Input, Title } from '@/components/v2';
 import { CopyIcon, KeyIcon, MoreIcon, SettingsIcon, TrashIcon } from '@/components/v2/icon';
 import { ChangePermissionsModal, DeleteMembersModal } from '@/components/v2/modals';
+import { FragmentType, graphql, useFragment } from '@/gql';
 import { MeDocument, OrganizationFieldsFragment, OrganizationType } from '@/graphql';
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
 import { useClipboard } from '@/lib/hooks/use-clipboard';
@@ -22,7 +23,7 @@ export const DateFormatter = Intl.DateTimeFormat('en', {
   day: 'numeric',
 });
 
-const Members_Invitation = gql(/* GraphQL */ `
+const Members_Invitation = graphql(/* GraphQL */ `
   fragment Members_Invitation on OrganizationInvitation {
     id
     createdAt
@@ -32,11 +33,12 @@ const Members_Invitation = gql(/* GraphQL */ `
   }
 `);
 
-export const MemberInvitationForm_InviteByEmail = gql(/* GraphQL */ `
+export const MemberInvitationForm_InviteByEmail = graphql(/* GraphQL */ `
   mutation MemberInvitationForm_InviteByEmail($input: InviteToOrganizationByEmailInput!) {
     inviteToOrganizationByEmail(input: $input) {
       ok {
         ...Members_Invitation
+        email
       }
       error {
         message
@@ -48,7 +50,7 @@ export const MemberInvitationForm_InviteByEmail = gql(/* GraphQL */ `
   }
 `);
 
-export const InvitationDeleteButton_DeleteInvitation = gql(/* GraphQL */ `
+export const InvitationDeleteButton_DeleteInvitation = graphql(/* GraphQL */ `
   mutation InvitationDeleteButton_DeleteInvitation($input: DeleteOrganizationInvitationInput!) {
     deleteOrganizationInvitation(input: $input) {
       ok {
@@ -140,22 +142,43 @@ const InvitationDeleteButton = ({ email, organizationCleanId }: { email: string;
   );
 };
 
-export const Members_OrganizationMembers = gql(/* GraphQL */ `
+const Members_Fragment = graphql(/* GraphQL */ `
+  fragment Members_Fragment on Member {
+    id
+    user {
+      id
+      displayName
+      email
+      provider
+    }
+  }
+`);
+
+export const Members_OrganizationMembers = graphql(/* GraphQL */ `
   query Members_OrganizationMembers($selector: OrganizationSelectorInput!) {
     organization(selector: $selector) {
       organization {
+        id
+        type
+        cleanId
         ...OrganizationFields
+        ...usePermissionManager_OrganizationFragment
         owner {
+          id
           ...MemberFields
         }
         members {
           nodes {
+            id
             ...MemberFields
+            ...Members_Fragment
+            ...usePermissionManager_MemberFragment
           }
           total
         }
         invitations {
           nodes {
+            id
             ...Members_Invitation
           }
         }
@@ -165,13 +188,14 @@ export const Members_OrganizationMembers = gql(/* GraphQL */ `
 `);
 
 const Invitation = ({
-  invitation,
   organizationCleanId,
+  ...props
 }: {
-  invitation: DocumentType<typeof Members_Invitation>;
+  invitation: FragmentType<typeof Members_Invitation>;
   organizationCleanId: string;
 }) => {
   const copyToClipboard = useClipboard();
+  const invitation = useFragment(Members_Invitation, props.invitation);
   const copyLink = useCallback(async () => {
     await copyToClipboard(`${window.location.origin}/join/${invitation.code}`);
   }, [invitation.code, copyToClipboard]);
@@ -273,7 +297,9 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
           <TrashIcon />
         </Button>
       </div>
-      {members?.map(node => {
+      {members?.map(nnode => {
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        const node = useFragment(Members_Fragment, nnode);
         const IconToUse = KeyIcon;
 
         const isOwner = node.id === org.owner.id;

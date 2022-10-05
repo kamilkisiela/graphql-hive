@@ -3,8 +3,6 @@ import 'twin.macro';
 import { useMutation } from 'urql';
 import { Select, AccordionItem, AccordionButton, AccordionPanel } from '@chakra-ui/react';
 import {
-  MemberFieldsFragment,
-  OrganizationFieldsFragment,
   UpdateOrganizationMemberAccessDocument,
   OrganizationAccessScope,
   ProjectAccessScope,
@@ -15,6 +13,7 @@ import { canAccessOrganization } from '@/lib/access/organization';
 import { canAccessProject } from '@/lib/access/project';
 import { canAccessTarget } from '@/lib/access/target';
 import { useNotifications } from '@/lib/hooks/use-notifications';
+import { FragmentType, graphql, useFragment } from '@/gql';
 
 interface Props<T> {
   title: string;
@@ -140,15 +139,35 @@ function PermissionsSpaceInner<T extends OrganizationAccessScope | ProjectAccess
 
 export const PermissionsSpace = React.memo(PermissionsSpaceInner) as unknown as typeof PermissionsSpaceInner;
 
-export function usePermissionsManager({
-  organization,
-  member,
-  onSuccess,
-}: {
-  organization: OrganizationFieldsFragment;
-  member: MemberFieldsFragment;
+export const usePermissionManager_OrganizationFragment = graphql(/* GraphQL */ `
+  fragment usePermissionManager_OrganizationFragment on Organization {
+    id
+    cleanId
+    me {
+      id
+      targetAccessScopes
+      organizationAccessScopes
+      projectAccessScopes
+    }
+  }
+`);
+
+export const usePermissionManager_MemberFragment = graphql(/* GraphQL */ `
+  fragment usePermissionManager_MemberFragment on Member {
+    id
+    targetAccessScopes
+    projectAccessScopes
+    organizationAccessScopes
+  }
+`);
+
+export function usePermissionsManager(props: {
+  organization: FragmentType<typeof usePermissionManager_OrganizationFragment>;
+  member: FragmentType<typeof usePermissionManager_MemberFragment>;
   onSuccess(): void;
 }) {
+  const organization = useFragment(usePermissionManager_OrganizationFragment, props.organization);
+  const member = useFragment(usePermissionManager_MemberFragment, props.member);
   const [state, setState] = React.useState<'LOADING' | 'IDLE'>('IDLE');
   const notify = useNotifications();
   const [, mutate] = useMutation(UpdateOrganizationMemberAccessDocument);
@@ -176,12 +195,12 @@ export function usePermissionsManager({
         if (result.error) {
           notify(`Failed to change access (reason: ${result.error.message}`, 'error');
         } else {
-          onSuccess();
+          props.onSuccess();
           notify('Member access saved', 'success');
         }
       });
     },
-    [mutate, notify, setState, targetScopes, projectScopes, organizationScopes, organization, member, onSuccess]
+    [mutate, notify, setState, targetScopes, projectScopes, organizationScopes, organization, member, props.onSuccess]
   );
 
   return {

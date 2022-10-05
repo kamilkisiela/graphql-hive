@@ -1,7 +1,7 @@
-import { gql, DocumentType } from 'urql';
+import { graphql, FragmentType, useFragment } from '@/gql';
 import { GraphQLTypeCard, GraphQLTypeCardListItem, SchemaExplorerUsageStats } from './common';
 
-export const GraphQLUnionTypeComponent_TypeFragment = gql(/* GraphQL */ `
+export const GraphQLUnionTypeComponent_TypeFragment = graphql(/* GraphQL */ `
   fragment GraphQLUnionTypeComponent_TypeFragment on GraphQLUnionType {
     name
     description
@@ -18,13 +18,14 @@ export const GraphQLUnionTypeComponent_TypeFragment = gql(/* GraphQL */ `
 `);
 
 export function GraphQLUnionTypeComponent(props: {
-  type: DocumentType<typeof GraphQLUnionTypeComponent_TypeFragment>;
+  type: FragmentType<typeof GraphQLUnionTypeComponent_TypeFragment>;
   totalRequests: number;
 }) {
+  const unionType = useFragment(GraphQLUnionTypeComponent_TypeFragment, props.type);
   return (
-    <GraphQLTypeCard name={props.type.name} kind="union" description={props.type.description}>
+    <GraphQLTypeCard name={unionType.name} kind="union" description={unionType.description}>
       <div className="flex flex-col">
-        {props.type.members.map((member, i) => (
+        {unionType.members.map((member, i) => (
           <GraphQLTypeCardListItem index={i}>
             <div>{member.name}</div>
             <SchemaExplorerUsageStats totalRequests={props.totalRequests} usage={member.usage} />

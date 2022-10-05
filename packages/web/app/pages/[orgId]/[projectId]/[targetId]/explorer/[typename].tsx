@@ -1,39 +1,22 @@
 import { ReactElement } from 'react';
-import { DocumentType, gql, useQuery } from 'urql';
+import { useQuery } from 'urql';
 
 import { authenticated, withSessionProtection } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
-import {
-  GraphQLEnumTypeComponent,
-  GraphQLEnumTypeComponent_TypeFragment,
-} from '@/components/target/explorer/enum-type';
+import { GraphQLEnumTypeComponent } from '@/components/target/explorer/enum-type';
 import { SchemaExplorerFilter } from '@/components/target/explorer/filter';
-import {
-  GraphQLInputObjectTypeComponent,
-  GraphQLInputObjectTypeComponent_TypeFragment,
-} from '@/components/target/explorer/input-object-type';
-import {
-  GraphQLInterfaceTypeComponent,
-  GraphQLInterfaceTypeComponent_TypeFragment,
-} from '@/components/target/explorer/interface-type';
-import {
-  GraphQLObjectTypeComponent,
-  GraphQLObjectTypeComponent_TypeFragment,
-} from '@/components/target/explorer/object-type';
+import { GraphQLInputObjectTypeComponent } from '@/components/target/explorer/input-object-type';
+import { GraphQLInterfaceTypeComponent } from '@/components/target/explorer/interface-type';
+import { GraphQLObjectTypeComponent } from '@/components/target/explorer/object-type';
 import { SchemaExplorerProvider, useSchemaExplorerContext } from '@/components/target/explorer/provider';
-import {
-  GraphQLScalarTypeComponent,
-  GraphQLScalarTypeComponent_TypeFragment,
-} from '@/components/target/explorer/scalar-type';
-import {
-  GraphQLUnionTypeComponent,
-  GraphQLUnionTypeComponent_TypeFragment,
-} from '@/components/target/explorer/union-type';
+import { GraphQLScalarTypeComponent } from '@/components/target/explorer/scalar-type';
+import { GraphQLUnionTypeComponent } from '@/components/target/explorer/union-type';
 import { DataWrapper, noSchema, Title } from '@/components/v2';
+import { FragmentType, graphql, useFragment } from '@/gql';
 import { OrganizationFieldsFragment, ProjectFieldsFragment, TargetFieldsFragment } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
-const SchemaTypeExplorer_Type = gql(/* GraphQL */ `
+const SchemaTypeExplorer_Type = graphql(/* GraphQL */ `
   query SchemaTypeExplorer_Type(
     $organization: ID!
     $project: ID!
@@ -51,12 +34,7 @@ const SchemaTypeExplorer_Type = gql(/* GraphQL */ `
         explorer(usage: { period: $period }) {
           type(name: $typename) {
             __typename
-            ...GraphQLObjectTypeComponent_TypeFragment
-            ...GraphQLInterfaceTypeComponent_TypeFragment
-            ...GraphQLUnionTypeComponent_TypeFragment
-            ...GraphQLEnumTypeComponent_TypeFragment
-            ...GraphQLInputObjectTypeComponent_TypeFragment
-            ...GraphQLScalarTypeComponent_TypeFragment
+            ...TypeRenderer_GraphQLNamedTypeFragment
           }
         }
       }
@@ -67,30 +45,39 @@ const SchemaTypeExplorer_Type = gql(/* GraphQL */ `
   }
 `);
 
-type GraphQLNamedType =
-  | DocumentType<typeof GraphQLEnumTypeComponent_TypeFragment>
-  | DocumentType<typeof GraphQLInputObjectTypeComponent_TypeFragment>
-  | DocumentType<typeof GraphQLInterfaceTypeComponent_TypeFragment>
-  | DocumentType<typeof GraphQLObjectTypeComponent_TypeFragment>
-  | DocumentType<typeof GraphQLScalarTypeComponent_TypeFragment>
-  | DocumentType<typeof GraphQLUnionTypeComponent_TypeFragment>;
+const TypeRenderer_GraphQLNamedTypeFragment = graphql(/* GraphQL */ `
+  fragment TypeRenderer_GraphQLNamedTypeFragment on GraphQLNamedType {
+    __typename
+    ...GraphQLEnumTypeComponent_TypeFragment
+    ...GraphQLInputObjectTypeComponent_TypeFragment
+    ...GraphQLInterfaceTypeComponent_TypeFragment
+    ...GraphQLObjectTypeComponent_TypeFragment
+    ...GraphQLScalarTypeComponent_TypeFragment
+    ...GraphQLUnionTypeComponent_TypeFragment
+  }
+`);
 
-function TypeRenderer({ type, totalRequests }: { type: GraphQLNamedType; totalRequests: number }) {
+function TypeRenderer(props: {
+  type: FragmentType<typeof TypeRenderer_GraphQLNamedTypeFragment>;
+  totalRequests: number;
+}) {
+  const type = useFragment(TypeRenderer_GraphQLNamedTypeFragment, props.type);
   switch (type.__typename) {
     case 'GraphQLObjectType':
-      return <GraphQLObjectTypeComponent type={type} totalRequests={totalRequests} />;
+      return <GraphQLObjectTypeComponent type={type} totalRequests={props.totalRequests} />;
     case 'GraphQLInterfaceType':
-      return <GraphQLInterfaceTypeComponent type={type} totalRequests={totalRequests} />;
+      return <GraphQLInterfaceTypeComponent type={type} totalRequests={props.totalRequests} />;
     case 'GraphQLUnionType':
-      return <GraphQLUnionTypeComponent type={type} totalRequests={totalRequests} />;
+      return <GraphQLUnionTypeComponent type={type} totalRequests={props.totalRequests} />;
     case 'GraphQLEnumType':
-      return <GraphQLEnumTypeComponent type={type} totalRequests={totalRequests} />;
+      return <GraphQLEnumTypeComponent type={type} totalRequests={props.totalRequests} />;
     case 'GraphQLInputObjectType':
-      return <GraphQLInputObjectTypeComponent type={type} totalRequests={totalRequests} />;
+      return <GraphQLInputObjectTypeComponent type={type} totalRequests={props.totalRequests} />;
     case 'GraphQLScalarType':
-      return <GraphQLScalarTypeComponent type={type} totalRequests={totalRequests} />;
+      return <GraphQLScalarTypeComponent type={type} totalRequests={props.totalRequests} />;
     default:
-      return <div>Unknown type: {type.__typename}</div>;
+      // TODO: we need future proof stuff here (in Codegen)
+      return <div>Unknown type: {(type as any).__typename}</div>;
   }
 }
 
@@ -125,9 +112,8 @@ function SchemaTypeExplorer({
           return noSchema;
         }
 
-        const { type } = data.target.latestSchemaVersion.explorer;
         const { totalRequests } = data.operationsStats;
-
+        const { type } = data.target.latestSchemaVersion.explorer;
         if (!type) {
           return <div>No type found</div>;
         }

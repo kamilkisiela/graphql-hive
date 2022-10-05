@@ -1,14 +1,15 @@
 import { ReactElement } from 'react';
 import { useRouter } from 'next/router';
 import { useFormik } from 'formik';
-import { gql, useMutation } from 'urql';
+import { useMutation } from 'urql';
 import * as Yup from 'yup';
 
 import { Button, Heading, Input, Modal, ProjectTypes } from '@/components/v2';
+import { graphql } from '@/gql';
 import { ProjectType } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
-const CreateProjectMutation = gql(/* GraphQL */ `
+const CreateProjectMutation = graphql(/* GraphQL */ `
   mutation CreateProject_CreateProject($input: CreateProjectInput!) {
     createProject(input: $input) {
       ok {
@@ -18,6 +19,7 @@ const CreateProjectMutation = gql(/* GraphQL */ `
         }
         createdProject {
           ...ProjectFields
+          cleanId
         }
         createdTargets {
           ...TargetFields
