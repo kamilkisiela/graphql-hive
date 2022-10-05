@@ -134,6 +134,8 @@ export function GraphQLTypeCard(
     name: string;
     description?: string | null;
     implements?: string[];
+    totalRequests?: number;
+    usage?: DocumentType<typeof SchemaExplorerUsageStats_UsageFragment>;
   }>
 ) {
   return (
@@ -155,6 +157,9 @@ export function GraphQLTypeCard(
               ))}
             </div>
           </div>
+        ) : null}
+        {props.usage && typeof props.totalRequests !== 'undefined' ? (
+          <SchemaExplorerUsageStats totalRequests={props.totalRequests} usage={props.usage} />
         ) : null}
       </div>
       <div>{props.children}</div>

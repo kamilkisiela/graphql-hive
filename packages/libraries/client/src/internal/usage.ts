@@ -317,6 +317,9 @@ export function createCollector({
                 collectVariable(unwrapType(field.type), variable[fieldName]);
               }
             }
+          } else {
+            // Collect type without fields
+            markAsUsed(makeId(namedType.name));
           }
         });
       } else {

@@ -336,7 +336,7 @@ test('(processVariables: true) collect used-only input fields', async () => {
   expect(info.fields).not.toContain(`PaginationInput.offset`);
 });
 
-test('(processVariables: true) should not collect input when corresponding variable is not provided', async () => {
+test('(processVariables: true) should collect input object without fields when corresponding variable is not provided', async () => {
   const collect = createCollector({
     schema,
     max: 1,
@@ -357,6 +357,7 @@ test('(processVariables: true) should not collect input when corresponding varia
 
   expect(info.fields).toContain(`FilterInput.type`);
   expect(info.fields).toContain(`FilterInput.pagination`);
+  expect(info.fields).toContain(`PaginationInput`);
   expect(info.fields).not.toContain(`PaginationInput.limit`);
   expect(info.fields).not.toContain(`PaginationInput.offset`);
 });
