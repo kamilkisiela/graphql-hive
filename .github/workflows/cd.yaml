@@ -3,359 +3,360 @@ on:
   push:
     branches:
       - main
+      - dependencies-lol
 
 jobs:
-  publish:
-    name: 'build'
-    runs-on: ubuntu-latest
+  # publish:
+  #   name: 'build'
+  #   runs-on: ubuntu-latest
 
-    env:
-      HIVE_TOKEN: ${{ secrets.HIVE_TOKEN }}
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-      TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
-      TURBO_API_URL: ${{ secrets.TURBO_API_URL }}
-      TURBO_REMOTE_ONLY: 'true'
+  #   env:
+  #     HIVE_TOKEN: ${{ secrets.HIVE_TOKEN }}
+  #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #     TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  #     TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+  #     TURBO_API_URL: ${{ secrets.TURBO_API_URL }}
+  #     TURBO_REMOTE_ONLY: 'true'
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+  #       with:
+  #         fetch-depth: 0
 
-      - uses: actions/setup-node@v2
-        with:
-          node-version-file: .node-version
+  #     - uses: actions/setup-node@v2
+  #       with:
+  #         node-version-file: .node-version
 
-      - name: Install Dependencies
-        run: yarn --frozen-lockfile
+  #     - name: Install Dependencies
+  #       run: yarn --frozen-lockfile
 
-      - name: Generate GraphQL Types
-        run: yarn graphql:generate
+  #     - name: Generate GraphQL Types
+  #       run: yarn graphql:generate
 
-      - name: Build
-        run: yarn build:libraries
+  #     - name: Build
+  #       run: yarn build:libraries
 
-      - name: Schema Publish
-        run: ./packages/libraries/cli/bin/dev schema:publish "packages/services/api/src/modules/*/module.graphql.ts" --force --github
+  #     - name: Schema Publish
+  #       run: ./packages/libraries/cli/bin/dev schema:publish "packages/services/api/src/modules/*/module.graphql.ts" --force --github
 
-      - name: Prepare NPM Credentials
-        run: |
-          echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> $HOME/.npmrc
-          npm config set always-auth true
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+  #     - name: Prepare NPM Credentials
+  #       run: |
+  #         echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> $HOME/.npmrc
+  #         npm config set always-auth true
+  #       env:
+  #         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Create Release Pull Request or Publish packages
-        id: changesets
-        uses: changesets/action@v1.3.0
-        with:
-          publish: yarn release
-          commit: 'chore(release): update monorepo packages versions'
-          title: 'Upcoming Release Changes'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     - name: Create Release Pull Request or Publish packages
+  #       id: changesets
+  #       uses: changesets/action@v1.3.0
+  #       with:
+  #         publish: yarn release
+  #         commit: 'chore(release): update monorepo packages versions'
+  #         title: 'Upcoming Release Changes'
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract published version
-        if: steps.changesets.outputs.published && contains(steps.changesets.outputs.publishedPackages, '"@graphql-hive/cli"')
-        id: cli
-        run: |
-          echo '${{steps.changesets.outputs.publishedPackages}}' > cli-ver.json
-          VERSION=`echo $(jq -r '.[] | select(.name | endswith("@graphql-hive/cli")).version' cli-ver.json)`
-          echo "::set-output name=version::$VERSION"
-          echo "::set-output name=publish::true"
+  #     - name: Extract published version
+  #       if: steps.changesets.outputs.published && contains(steps.changesets.outputs.publishedPackages, '"@graphql-hive/cli"')
+  #       id: cli
+  #       run: |
+  #         echo '${{steps.changesets.outputs.publishedPackages}}' > cli-ver.json
+  #         VERSION=`echo $(jq -r '.[] | select(.name | endswith("@graphql-hive/cli")).version' cli-ver.json)`
+  #         echo "::set-output name=version::$VERSION"
+  #         echo "::set-output name=publish::true"
 
-      - name: Pack tarballs
-        if: steps.cli.outputs.publish == 'true'
-        working-directory: packages/libraries/cli
-        run: yarn oclif pack tarballs --no-xz
+  #     - name: Pack tarballs
+  #       if: steps.cli.outputs.publish == 'true'
+  #       working-directory: packages/libraries/cli
+  #       run: yarn oclif pack tarballs --no-xz
 
-      - name: Upload tarballs
-        if: steps.cli.outputs.publish == 'true'
-        working-directory: packages/libraries/cli
-        run: yarn oclif upload tarballs --no-xz
+  #     - name: Upload tarballs
+  #       if: steps.cli.outputs.publish == 'true'
+  #       working-directory: packages/libraries/cli
+  #       run: yarn oclif upload tarballs --no-xz
 
-      - name: Promote tarballs
-        if: steps.cli.outputs.publish == 'true'
-        working-directory: packages/libraries/cli
-        env:
-          VERSION: ${{ steps.cli.outputs.version }}
-        run: yarn oclif promote --no-xz --sha ${GITHUB_SHA:0:7} --version $VERSION || yarn oclif promote --no-xz --sha ${GITHUB_SHA:0:8} --version $VERSION
+  #     - name: Promote tarballs
+  #       if: steps.cli.outputs.publish == 'true'
+  #       working-directory: packages/libraries/cli
+  #       env:
+  #         VERSION: ${{ steps.cli.outputs.version }}
+  #       run: yarn oclif promote --no-xz --sha ${GITHUB_SHA:0:7} --version $VERSION || yarn oclif promote --no-xz --sha ${GITHUB_SHA:0:8} --version $VERSION
 
-  publish_rust:
-    name: Publish Rust
-    runs-on: ubuntu-latest
+  # publish_rust:
+  #   name: Publish Rust
+  #   runs-on: ubuntu-latest
 
-    outputs:
-      rust_changed: ${{ steps.rust_changed.outputs.rust_changed }}
+  #   outputs:
+  #     rust_changed: ${{ steps.rust_changed.outputs.rust_changed }}
 
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 2
-      - name: Look for changes
-        id: rust_changed
-        run: |
-          lines=$( git diff HEAD~ HEAD --name-only -- 'packages/libraries/router' | wc -l )
-          if [ $lines -gt 0 ]; then
-              echo '::set-output name=rust_changed::true'
-          fi
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #       with:
+  #         fetch-depth: 2
+  #     - name: Look for changes
+  #       id: rust_changed
+  #       run: |
+  #         lines=$( git diff HEAD~ HEAD --name-only -- 'packages/libraries/router' | wc -l )
+  #         if [ $lines -gt 0 ]; then
+  #             echo '::set-output name=rust_changed::true'
+  #         fi
 
-  publish_rust_docker:
-    needs: publish_rust
-    if: needs.publish_rust.outputs.rust_changed == 'true'
-    name: Publish for Docker
-    runs-on: ubuntu-latest
+  # publish_rust_docker:
+  #   needs: publish_rust
+  #   if: needs.publish_rust.outputs.rust_changed == 'true'
+  #   name: Publish for Docker
+  #   runs-on: ubuntu-latest
 
-    env:
-      REGISTRY: ghcr.io
-      IMAGE_NAME: ${{ github.repository }}/apollo-router
+  #   env:
+  #     REGISTRY: ghcr.io
+  #     IMAGE_NAME: ${{ github.repository }}/apollo-router
 
-    permissions:
-      contents: read
-      packages: write
+  #   permissions:
+  #     contents: read
+  #     packages: write
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-        with:
-          platforms: 'linux/arm64,linux/amd64'
+  #     - name: Set up QEMU
+  #       uses: docker/setup-qemu-action@v2
+  #       with:
+  #         platforms: 'linux/arm64,linux/amd64'
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+  #     - name: Set up Docker Buildx
+  #       uses: docker/setup-buildx-action@v2
 
-      - name: Login to registry
-        uses: docker/login-action@v2
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+  #     - name: Login to registry
+  #       uses: docker/login-action@v2
+  #       with:
+  #         registry: ${{ env.REGISTRY }}
+  #         username: ${{ github.actor }}
+  #         password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata (tags, labels)
-        id: router-extract
-        uses: docker/metadata-action@v4
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=ref,event=branch
-            type=sha,prefix=,format=long
-            type=raw,value=latest,enable={{is_default_branch}}
+  #     - name: Extract metadata (tags, labels)
+  #       id: router-extract
+  #       uses: docker/metadata-action@v4
+  #       with:
+  #         images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+  #         tags: |
+  #           type=ref,event=branch
+  #           type=sha,prefix=,format=long
+  #           type=raw,value=latest,enable={{is_default_branch}}
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v3
-        with:
-          platforms: linux/amd64,linux/arm64
-          file: packages/libraries/router/Dockerfile
-          context: .
-          push: true
-          tags: ${{ steps.router-extract.outputs.tags }}
-          labels: ${{ steps.router-extract.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+  #     - name: Build and push Docker image
+  #       uses: docker/build-push-action@v3
+  #       with:
+  #         platforms: linux/amd64,linux/arm64
+  #         file: packages/libraries/router/Dockerfile
+  #         context: .
+  #         push: true
+  #         tags: ${{ steps.router-extract.outputs.tags }}
+  #         labels: ${{ steps.router-extract.outputs.labels }}
+  #         cache-from: type=gha
+  #         cache-to: type=gha,mode=max
 
-  publish_rust_windows:
-    needs: publish_rust
-    if: needs.publish_rust.outputs.rust_changed == 'true'
-    name: Publish for Windows
-    runs-on: windows-latest
-    timeout-minutes: 40
+  # publish_rust_windows:
+  #   needs: publish_rust
+  #   if: needs.publish_rust.outputs.rust_changed == 'true'
+  #   name: Publish for Windows
+  #   runs-on: windows-latest
+  #   timeout-minutes: 40
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
 
-      - name: Install Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
+  #     - name: Install Rust
+  #       uses: actions-rs/toolchain@v1
+  #       with:
+  #         toolchain: stable
+  #         override: true
 
-      - name: Cache Rust
-        uses: Swatinem/rust-cache@v1
+  #     - name: Cache Rust
+  #       uses: Swatinem/rust-cache@v1
 
-      - name: Build
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release
+  #     - name: Build
+  #       uses: actions-rs/cargo@v1
+  #       with:
+  #         command: build
+  #         args: --release
 
-      - name: Compress
-        run: ./target/release/compress ./target/release/router.exe ./router.tar.gz
+  #     - name: Compress
+  #       run: ./target/release/compress ./target/release/router.exe ./router.tar.gz
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: router-win
-          path: router.tar.gz
+  #     - name: Upload artifacts
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: router-win
+  #         path: router.tar.gz
 
-      - name: Upload to R2
-        uses: randomairborne/r2-release@v1.0.2
-        with:
-          endpoint: https://6d5bc18cd8d13babe7ed321adba3d8ae.r2.cloudflarestorage.com
-          accesskeyid: ${{ secrets.R2_ACCESS_KEY_ID }}
-          secretaccesskey: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          bucket: apollo-router
-          file: router.tar.gz
-          destination: ${{ github.sha }}/win/router.tar.gz
+  #     - name: Upload to R2
+  #       uses: randomairborne/r2-release@v1.0.2
+  #       with:
+  #         endpoint: https://6d5bc18cd8d13babe7ed321adba3d8ae.r2.cloudflarestorage.com
+  #         accesskeyid: ${{ secrets.R2_ACCESS_KEY_ID }}
+  #         secretaccesskey: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+  #         bucket: apollo-router
+  #         file: router.tar.gz
+  #         destination: ${{ github.sha }}/win/router.tar.gz
 
-      - name: Upload to R2 as latest
-        uses: randomairborne/r2-release@v1.0.2
-        with:
-          endpoint: https://6d5bc18cd8d13babe7ed321adba3d8ae.r2.cloudflarestorage.com
-          accesskeyid: ${{ secrets.R2_ACCESS_KEY_ID }}
-          secretaccesskey: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          bucket: apollo-router
-          file: router.tar.gz
-          destination: latest/win/router.tar.gz
+  #     - name: Upload to R2 as latest
+  #       uses: randomairborne/r2-release@v1.0.2
+  #       with:
+  #         endpoint: https://6d5bc18cd8d13babe7ed321adba3d8ae.r2.cloudflarestorage.com
+  #         accesskeyid: ${{ secrets.R2_ACCESS_KEY_ID }}
+  #         secretaccesskey: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+  #         bucket: apollo-router
+  #         file: router.tar.gz
+  #         destination: latest/win/router.tar.gz
 
-  publish_rust_macos:
-    needs: publish_rust
-    if: needs.publish_rust.outputs.rust_changed == 'true'
-    name: Publish for MacOS
-    runs-on: macos-latest
-    timeout-minutes: 40
+  # publish_rust_macos:
+  #   needs: publish_rust
+  #   if: needs.publish_rust.outputs.rust_changed == 'true'
+  #   name: Publish for MacOS
+  #   runs-on: macos-latest
+  #   timeout-minutes: 40
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
 
-      - name: Install Node
-        uses: actions/setup-node@v2
-        with:
-          node-version-file: .node-version
+  #     - name: Install Node
+  #       uses: actions/setup-node@v2
+  #       with:
+  #         node-version-file: .node-version
 
-      - name: Install Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
+  #     - name: Install Rust
+  #       uses: actions-rs/toolchain@v1
+  #       with:
+  #         toolchain: stable
+  #         override: true
 
-      - name: Cache Rust
-        uses: Swatinem/rust-cache@v1
+  #     - name: Cache Rust
+  #       uses: Swatinem/rust-cache@v1
 
-      - name: Build
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release
+  #     - name: Build
+  #       uses: actions-rs/cargo@v1
+  #       with:
+  #         command: build
+  #         args: --release
 
-      - name: Strip binary from debug symbols
-        run: strip target/release/router
+  #     - name: Strip binary from debug symbols
+  #       run: strip target/release/router
 
-      - name: Compress
-        run: ./target/release/compress ./target/release/router ./router.tar.gz
+  #     - name: Compress
+  #       run: ./target/release/compress ./target/release/router ./router.tar.gz
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: router-macos
-          path: router.tar.gz
+  #     - name: Upload artifact
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: router-macos
+  #         path: router.tar.gz
 
-      - name: Upload to R2
-        uses: randomairborne/r2-release@v1.0.2
-        with:
-          endpoint: https://6d5bc18cd8d13babe7ed321adba3d8ae.r2.cloudflarestorage.com
-          accesskeyid: ${{ secrets.R2_ACCESS_KEY_ID }}
-          secretaccesskey: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          bucket: apollo-router
-          file: router.tar.gz
-          destination: ${{ github.sha }}/macos/router.tar.gz
+  #     - name: Upload to R2
+  #       uses: randomairborne/r2-release@v1.0.2
+  #       with:
+  #         endpoint: https://6d5bc18cd8d13babe7ed321adba3d8ae.r2.cloudflarestorage.com
+  #         accesskeyid: ${{ secrets.R2_ACCESS_KEY_ID }}
+  #         secretaccesskey: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+  #         bucket: apollo-router
+  #         file: router.tar.gz
+  #         destination: ${{ github.sha }}/macos/router.tar.gz
 
-      - name: Upload to R2 as latest
-        uses: randomairborne/r2-release@v1.0.2
-        with:
-          endpoint: https://6d5bc18cd8d13babe7ed321adba3d8ae.r2.cloudflarestorage.com
-          accesskeyid: ${{ secrets.R2_ACCESS_KEY_ID }}
-          secretaccesskey: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          bucket: apollo-router
-          file: router.tar.gz
-          destination: latest/macos/router.tar.gz
+  #     - name: Upload to R2 as latest
+  #       uses: randomairborne/r2-release@v1.0.2
+  #       with:
+  #         endpoint: https://6d5bc18cd8d13babe7ed321adba3d8ae.r2.cloudflarestorage.com
+  #         accesskeyid: ${{ secrets.R2_ACCESS_KEY_ID }}
+  #         secretaccesskey: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+  #         bucket: apollo-router
+  #         file: router.tar.gz
+  #         destination: latest/macos/router.tar.gz
 
-  publish_rust_linux:
-    needs: publish_rust
-    if: needs.publish_rust.outputs.rust_changed == 'true'
-    name: Publish for Linux
-    runs-on: ubuntu-latest
-    timeout-minutes: 40
+  # publish_rust_linux:
+  #   needs: publish_rust
+  #   if: needs.publish_rust.outputs.rust_changed == 'true'
+  #   name: Publish for Linux
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 40
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
 
-      - name: Install Node
-        uses: actions/setup-node@v2
-        with:
-          node-version-file: .node-version
+  #     - name: Install Node
+  #       uses: actions/setup-node@v2
+  #       with:
+  #         node-version-file: .node-version
 
-      - name: Install Rust
-        run: |
-          curl https://sh.rustup.rs -sSf | sh -s -- -y
-          rustup target add x86_64-unknown-linux-gnu
+  #     - name: Install Rust
+  #       run: |
+  #         curl https://sh.rustup.rs -sSf | sh -s -- -y
+  #         rustup target add x86_64-unknown-linux-gnu
 
-      - name: Cache Rust
-        uses: Swatinem/rust-cache@v1
-        with:
-          key: rust_linux_cross
+  #     - name: Cache Rust
+  #       uses: Swatinem/rust-cache@v1
+  #       with:
+  #         key: rust_linux_cross
 
-      - name: Build
-        run: cargo build --target x86_64-unknown-linux-gnu --release
+  #     - name: Build
+  #       run: cargo build --target x86_64-unknown-linux-gnu --release
 
-      - name: Strip binary from debug symbols
-        run: strip target/x86_64-unknown-linux-gnu/release/router
+  #     - name: Strip binary from debug symbols
+  #       run: strip target/x86_64-unknown-linux-gnu/release/router
 
-      - name: Compress
-        run: ./target/x86_64-unknown-linux-gnu/release/compress ./target/x86_64-unknown-linux-gnu/release/router ./router.tar.gz
+  #     - name: Compress
+  #       run: ./target/x86_64-unknown-linux-gnu/release/compress ./target/x86_64-unknown-linux-gnu/release/router ./router.tar.gz
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: router-linux
-          path: router.tar.gz
+  #     - name: Upload artifact
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: router-linux
+  #         path: router.tar.gz
 
-      - name: Upload to R2
-        uses: randomairborne/r2-release@v1.0.2
-        with:
-          endpoint: https://6d5bc18cd8d13babe7ed321adba3d8ae.r2.cloudflarestorage.com
-          accesskeyid: ${{ secrets.R2_ACCESS_KEY_ID }}
-          secretaccesskey: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          bucket: apollo-router
-          file: router.tar.gz
-          destination: ${{ github.sha }}/linux/router.tar.gz
+  #     - name: Upload to R2
+  #       uses: randomairborne/r2-release@v1.0.2
+  #       with:
+  #         endpoint: https://6d5bc18cd8d13babe7ed321adba3d8ae.r2.cloudflarestorage.com
+  #         accesskeyid: ${{ secrets.R2_ACCESS_KEY_ID }}
+  #         secretaccesskey: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+  #         bucket: apollo-router
+  #         file: router.tar.gz
+  #         destination: ${{ github.sha }}/linux/router.tar.gz
 
-      - name: Upload to R2 as latest
-        uses: randomairborne/r2-release@v1.0.2
-        with:
-          endpoint: https://6d5bc18cd8d13babe7ed321adba3d8ae.r2.cloudflarestorage.com
-          accesskeyid: ${{ secrets.R2_ACCESS_KEY_ID }}
-          secretaccesskey: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          bucket: apollo-router
-          file: router.tar.gz
-          destination: latest/linux/router.tar.gz
+  #     - name: Upload to R2 as latest
+  #       uses: randomairborne/r2-release@v1.0.2
+  #       with:
+  #         endpoint: https://6d5bc18cd8d13babe7ed321adba3d8ae.r2.cloudflarestorage.com
+  #         accesskeyid: ${{ secrets.R2_ACCESS_KEY_ID }}
+  #         secretaccesskey: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+  #         bucket: apollo-router
+  #         file: router.tar.gz
+  #         destination: latest/linux/router.tar.gz
 
-  deploy:
-    name: 'deploy to staging'
-    needs: publish
-    runs-on: ubuntu-latest
+  # deploy:
+  #   name: 'deploy to staging'
+  #   needs: publish
+  #   runs-on: ubuntu-latest
 
-    steps:
-      - name: Dispatch Deployment
-        run: |
-          curl --request POST \
-            --url 'https://api.github.com/repos/${{ secrets.PRIVATE_REPO_OWNER }}/${{ secrets.PRIVATE_REPO_NAME }}/dispatches' \
-            --header 'Accept: application/vnd.github.everest-preview+json' \
-            --header 'Authorization: token ${{ secrets.GH_PAT }}' \
-            --header 'Content-Type: application/json' \
-            --data '{
-            "event_type": "deploy",
-            "client_payload": {
-              "environment": "staging",
-              "ref": "${{ github.sha }}"
-            }
-          }'
+  #   steps:
+  #     - name: Dispatch Deployment
+  #       run: |
+  #         curl --request POST \
+  #           --url 'https://api.github.com/repos/${{ secrets.PRIVATE_REPO_OWNER }}/${{ secrets.PRIVATE_REPO_NAME }}/dispatches' \
+  #           --header 'Accept: application/vnd.github.everest-preview+json' \
+  #           --header 'Authorization: token ${{ secrets.GH_PAT }}' \
+  #           --header 'Content-Type: application/json' \
+  #           --data '{
+  #           "event_type": "deploy",
+  #           "client_payload": {
+  #             "environment": "staging",
+  #             "ref": "${{ github.sha }}"
+  #           }
+  #         }'
 
   publish-docker-images:
     runs-on: ubuntu-latest
