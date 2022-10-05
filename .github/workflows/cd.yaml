@@ -383,9 +383,6 @@ jobs:
 
       - run: yarn --frozen-lockfile
 
-      - name: Setup Turbo
-        run: node ./scripts/turborepo-setup.js
-
       - name: Generate Types
         run: yarn graphql:generate
 
