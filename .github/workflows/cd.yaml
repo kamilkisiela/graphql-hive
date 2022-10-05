@@ -380,11 +380,7 @@ jobs:
         with:
           node-version-file: .node-version
 
-      - name: Pull node_modules
-        uses: actions/cache@v2
-        with:
-          path: '**/node_modules'
-          key: ${{ github.sha }}
+      - run: yarn --frozen-lockfile
 
       - name: Setup Turbo
         run: node ./scripts/turborepo-setup.js
