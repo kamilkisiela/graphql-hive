@@ -9,16 +9,24 @@ const numberFromNumberOrNumberString = (input: unknown): number | undefined => {
 
 const NumberFromString = zod.preprocess(numberFromNumberOrNumberString, zod.number().min(1));
 
+// treat an empty string (`''`) as undefined
+const emptyString = <T extends zod.ZodType>(input: T) => {
+  return zod.preprocess((value: unknown) => {
+    if (value === '') return undefined;
+    return value;
+  }, input);
+};
+
 const EnvironmentModel = zod.object({
-  PORT: NumberFromString.optional(),
-  ENVIRONMENT: zod.string().optional(),
-  RELEASE: zod.string().optional(),
-  HEARTBEAT_ENDPOINT: zod.string().url().optional(),
+  PORT: emptyString(NumberFromString.optional()),
+  ENVIRONMENT: emptyString(zod.string().optional()),
+  RELEASE: emptyString(zod.string().optional()),
+  HEARTBEAT_ENDPOINT: emptyString(zod.string().url().optional()),
 });
 
 const SentryModel = zod.union([
   zod.object({
-    SENTRY: zod.literal('0').optional(),
+    SENTRY: emptyString(zod.literal('0').optional()),
   }),
   zod.object({
     SENTRY: zod.literal('1'),
@@ -32,12 +40,12 @@ const PostgresModel = zod.object({
   POSTGRES_PASSWORD: zod.string(),
   POSTGRES_USER: zod.string(),
   POSTGRES_DB: zod.string(),
-  POSTGRES_ENABLE_SSL: zod.union([zod.literal('1'), zod.literal('0')]).optional(),
+  POSTGRES_ENABLE_SSL: emptyString(zod.union([zod.literal('1'), zod.literal('0')]).optional()),
 });
 
 const PrometheusModel = zod.object({
-  PROMETHEUS_METRICS: zod.union([zod.literal('0'), zod.literal('1')]).optional(),
-  PROMETHEUS_METRICS_LABEL_INSTANCE: zod.string().optional(),
+  PROMETHEUS_METRICS: emptyString(zod.union([zod.literal('0'), zod.literal('1')]).optional()),
+  PROMETHEUS_METRICS_LABEL_INSTANCE: emptyString(zod.string().optional()),
 });
 
 const configs = {

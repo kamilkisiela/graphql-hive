@@ -9,17 +9,25 @@ const numberFromNumberOrNumberString = (input: unknown): number | undefined => {
 
 const NumberFromString = zod.preprocess(numberFromNumberOrNumberString, zod.number().min(1));
 
+// treat an empty string (`''`) as undefined
+const emptyString = <T extends zod.ZodType>(input: T) => {
+  return zod.preprocess((value: unknown) => {
+    if (value === '') return undefined;
+    return value;
+  }, input);
+};
+
 const EnvironmentModel = zod.object({
-  PORT: NumberFromString.optional(),
-  ENVIRONMENT: zod.string().optional(),
-  RELEASE: zod.string().optional(),
-  HEARTBEAT_ENDPOINT: zod.string().url().optional(),
+  PORT: emptyString(NumberFromString.optional()),
+  ENVIRONMENT: emptyString(zod.string().optional()),
+  RELEASE: emptyString(zod.string().optional()),
+  HEARTBEAT_ENDPOINT: emptyString(zod.string().url().optional()),
   EMAIL_FROM: zod.string().email(),
 });
 
 const SentryModel = zod.union([
   zod.object({
-    SENTRY: zod.literal('0').optional(),
+    SENTRY: emptyString(zod.literal('0').optional()),
   }),
   zod.object({
     SENTRY: zod.literal('1'),
@@ -30,7 +38,7 @@ const SentryModel = zod.union([
 const RedisModel = zod.object({
   REDIS_HOST: zod.string(),
   REDIS_PORT: NumberFromString,
-  REDIS_PASSWORD: zod.string().optional(),
+  REDIS_PASSWORD: emptyString(zod.string().optional()),
 });
 
 const PostmarkEmailModel = zod.object({
@@ -41,7 +49,7 @@ const PostmarkEmailModel = zod.object({
 
 const SMTPEmailModel = zod.object({
   EMAIL_PROVIDER: zod.literal('smtp'),
-  EMAIL_PROVIDER_SMTP_PROTOCOL: zod.union([zod.literal('smtp'), zod.literal('smtps')]).optional(),
+  EMAIL_PROVIDER_SMTP_PROTOCOL: emptyString(zod.union([zod.literal('smtp'), zod.literal('smtps')]).optional()),
   EMAIL_PROVIDER_SMTP_HOST: zod.string(),
   EMAIL_PROVIDER_SMTP_PORT: NumberFromString,
   EMAIL_PROVIDER_SMTP_AUTH_USERNAME: zod.string(),
@@ -59,8 +67,8 @@ const MockEmailProviderModel = zod.object({
 const EmailProviderModel = zod.union([PostmarkEmailModel, MockEmailProviderModel, SMTPEmailModel, SendmailEmailModel]);
 
 const PrometheusModel = zod.object({
-  PROMETHEUS_METRICS: zod.union([zod.literal('0'), zod.literal('1')]).optional(),
-  PROMETHEUS_METRICS_LABEL_INSTANCE: zod.string().optional(),
+  PROMETHEUS_METRICS: emptyString(zod.union([zod.literal('0'), zod.literal('1')]).optional()),
+  PROMETHEUS_METRICS_LABEL_INSTANCE: emptyString(zod.string().optional()),
 });
 
 const configs = {

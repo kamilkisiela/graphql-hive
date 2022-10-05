@@ -9,17 +9,25 @@ const numberFromNumberOrNumberString = (input: unknown): number | undefined => {
 
 const NumberFromString = zod.preprocess(numberFromNumberOrNumberString, zod.number().min(1));
 
+// treat an empty string (`''`) as undefined
+const emptyString = <T extends zod.ZodType>(input: T) => {
+  return zod.preprocess((value: unknown) => {
+    if (value === '') return undefined;
+    return value;
+  }, input);
+};
+
 const EnvironmentModel = zod.object({
-  PORT: NumberFromString.optional(),
+  PORT: emptyString(NumberFromString.optional()),
   TOKENS_ENDPOINT: zod.string().url(),
-  RATE_LIMIT_ENDPOINT: zod.string().url().optional(),
-  ENVIRONMENT: zod.string().optional(),
-  RELEASE: zod.string().optional(),
+  RATE_LIMIT_ENDPOINT: emptyString(zod.string().url().optional()),
+  ENVIRONMENT: emptyString(zod.string().optional()),
+  RELEASE: emptyString(zod.string().optional()),
 });
 
 const SentryModel = zod.union([
   zod.object({
-    SENTRY: zod.literal('0').optional(),
+    SENTRY: emptyString(zod.literal('0').optional()),
   }),
   zod.object({
     SENTRY: zod.literal('1'),
@@ -30,7 +38,7 @@ const SentryModel = zod.union([
 const KafkaBaseModel = zod.object({
   KAFKA_BROKER: zod.string(),
   KAFKA_TOPIC: zod.string(),
-  KAFKA_SSL: zod.union([zod.literal('1'), zod.literal('0')]).optional(),
+  KAFKA_SSL: emptyString(zod.union([zod.literal('1'), zod.literal('0')]).optional()),
   KAFKA_BUFFER_SIZE: NumberFromString,
   KAFKA_BUFFER_INTERVAL: NumberFromString,
   KAFKA_BUFFER_DYNAMIC: zod.union([zod.literal('1'), zod.literal('0')]),
@@ -48,8 +56,8 @@ const KafkaModel = zod.union([
 ]);
 
 const PrometheusModel = zod.object({
-  PROMETHEUS_METRICS: zod.union([zod.literal('0'), zod.literal('1')]).optional(),
-  PROMETHEUS_METRICS_LABEL_INSTANCE: zod.string().optional(),
+  PROMETHEUS_METRICS: emptyString(zod.union([zod.literal('0'), zod.literal('1')]).optional()),
+  PROMETHEUS_METRICS_LABEL_INSTANCE: emptyString(zod.string().optional()),
 });
 
 const configs = {

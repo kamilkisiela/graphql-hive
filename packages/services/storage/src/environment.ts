@@ -14,15 +14,23 @@ const numberFromNumberOrNumberString = (input: unknown): number | undefined => {
 
 const NumberFromString = zod.preprocess(numberFromNumberOrNumberString, zod.number().min(1));
 
+// treat an empty string (`''`) as undefined
+const emptyString = <T extends zod.ZodType>(input: T) => {
+  return zod.preprocess((value: unknown) => {
+    if (value === '') return undefined;
+    return value;
+  }, input);
+};
+
 const EnvironmentModel = zod.object({
-  ENVIRONMENT: zod.string().optional(),
-  RELEASE: zod.string().optional(),
-  MIGRATOR: zod.string().optional(),
-  CLICKHOUSE_MIGRATOR: zod.string().optional(),
+  ENVIRONMENT: emptyString(zod.string().optional()),
+  RELEASE: emptyString(zod.string().optional()),
+  MIGRATOR: emptyString(zod.string().optional()),
+  CLICKHOUSE_MIGRATOR: emptyString(zod.string().optional()),
 });
 
 const PostgresModel = zod.object({
-  POSTGRES_SSL: zod.union([zod.literal('1'), zod.literal('0')]).optional(),
+  POSTGRES_SSL: emptyString(zod.union([zod.literal('1'), zod.literal('0')]).optional()),
   POSTGRES_HOST: zod.string(),
   POSTGRES_PORT: NumberFromString,
   POSTGRES_DB: zod.string(),
