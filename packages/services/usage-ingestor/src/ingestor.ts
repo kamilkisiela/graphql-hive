@@ -2,7 +2,6 @@ import { Kafka, KafkaMessage, logLevel } from 'kafkajs';
 import { decompress } from '@hive/usage-common';
 import {
   errors,
-  processTime,
   processDuration,
   reportMessageBytes,
   ingestedOperationsWrites,
@@ -150,8 +149,7 @@ export function createIngestor(config: {
       autoCommitThreshold: 2,
       partitionsConsumedConcurrently: config.kafka.concurrency,
       eachMessage({ message }) {
-        const stopTimer = processTime.startTimer();
-        const processDurationStop = processDuration.startTimer();
+        const stopTimer = processDuration.startTimer();
         return processMessage({
           message,
           logger,
@@ -164,7 +162,6 @@ export function createIngestor(config: {
           })
           .finally(() => {
             stopTimer();
-            processDurationStop();
           });
       },
     });

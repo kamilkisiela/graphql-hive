@@ -15,11 +15,6 @@ export const totalOperations = new metrics.Counter({
   help: 'Number of raw operations received by usage ingestor service',
 });
 
-export const processTime = new metrics.Summary({
-  name: 'usage_ingestor_process_time',
-  help: 'Time spent processing and writing reports',
-});
-
 export const processDuration = new metrics.Histogram({
   name: 'usage_ingestor_process_duration_seconds',
   help: 'Time spent processing and writing reports',

@@ -66,19 +66,19 @@ export const invalidRawOperations = new metrics.Counter({
   help: 'Number of invalid raw operations dropped by usage service',
 });
 
-export const collectLatency = new metrics.Summary({
-  name: 'usage_raw_collect_latency',
-  help: 'Collect latency',
+export const collectDuration = new metrics.Histogram({
+  name: 'usage_raw_collect_duration_seconds',
+  help: 'Collect duration in seconds',
 });
 
-export const compressLatency = new metrics.Summary({
-  name: 'usage_raw_compress_latency',
-  help: 'Compress latency',
+export const compressDuration = new metrics.Histogram({
+  name: 'usage_raw_compress_duration_seconds',
+  help: 'Compress duration in seconds',
 });
 
-export const kafkaLatency = new metrics.Summary({
-  name: 'usage_raw_kafka_latency',
-  help: 'Kafka latency',
+export const kafkaDuration = new metrics.Histogram({
+  name: 'usage_raw_kafka_duration_seconds',
+  help: 'Kafka duration in seconds',
 });
 
 export const bufferFlushes = new metrics.Counter({

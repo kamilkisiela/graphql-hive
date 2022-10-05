@@ -8,7 +8,7 @@ import {
   httpRequestsWithoutToken,
   httpRequestsWithNonExistingToken,
   httpRequestsWithNoAccess,
-  collectLatency,
+  collectDuration,
   droppedReports,
 } from './metrics';
 import type { IncomingLegacyReport, IncomingReport } from './types';
@@ -124,7 +124,7 @@ async function main() {
 
         const retentionInfo = (await rateLimit?.getRetentionForTargetId?.(tokenInfo.target)) || null;
 
-        const stopTimer = collectLatency.startTimer();
+        const stopTimer = collectDuration.startTimer();
         try {
           await collect(req.body, tokenInfo, retentionInfo);
           stopTimer();
