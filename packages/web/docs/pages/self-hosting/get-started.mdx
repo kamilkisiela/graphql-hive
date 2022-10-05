@@ -41,12 +41,13 @@ After downloading the file, you need to set some environment variables.
   Overview](https://github.com/kamilkisiela?tab=packages&repo_name=graphql-hive). We recommend using one of the latest
   versions. Right now we do not have a stable release strategy yet. However, every commit on the `main` branch can be
   considered as stable as it is the version we are running in production. After picking a version set the `DOCKER_TAG`
-  environment variable to that value (e.g. `export DOCKER_TAG=":3b635063294a4636ee89579f57e531de04ef087f"`).
+  environment variable to that value (e.g. `export DOCKER_TAG=":3b635063294a4636ee89579f57e531de04ef087f"`). We do not
+  recommend using the tag `latest`. Instead use an exact commit from the `main` branch.
 </Callout>
 
 ```bash
 export DOCKER_REGISTRY="ghcr.io/kamilkisiela/graphql-hive/"
-export DOCKER_TAG=":<COMMIT SHA>"
+export DOCKER_TAG=":latest"
 export HIVE_ENCRYPTION_SECRET=$(openssl rand -hex 16)
 export HIVE_APP_BASE_URL="http://localhost:8080"
 export HIVE_EMAIL_FROM="no-reply@graphql-hive.com"
