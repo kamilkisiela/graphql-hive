@@ -317,9 +317,6 @@ export function createCollector({
                 collectVariable(unwrapType(field.type), variable[fieldName]);
               }
             }
-          } else {
-            // Collect the entire type
-            collectInputType(namedType.name);
           }
         });
       } else {
