@@ -52,26 +52,6 @@ export function deployUsageIngestor({
       : {}),
   };
 
-  const env: Record<string, string | pulumi.Output<string>> = {
-    ...deploymentEnv,
-    ...commonEnv,
-    SENTRY: commonEnv.SENTRY_ENABLED,
-    ...clickhouseEnv,
-    KAFKA_SSL: '1',
-    KAFKA_BROKER: kafka.config.endpoint,
-    KAFKA_SASL_MECHANISM: 'plain',
-    KAFKA_SASL_USERNAME: kafka.config.user,
-    KAFKA_SASL_PASSWORD: kafka.config.key,
-    KAFKA_CONCURRENCY: '1',
-    KAFKA_TOPIC: kafka.config.topic,
-    KAFKA_CONSUMER_GROUP: kafka.config.consumerGroup,
-    RELEASE: packageHelper.currentReleaseId(),
-  };
-
-  if (heartbeat) {
-    env['heartbeat'] = heartbeat;
-  }
-
   return new RemoteArtifactAsServiceDeployment(
     'usage-ingestor-service',
     {
@@ -79,7 +59,22 @@ export function deployUsageIngestor({
       replicas,
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
-      env,
+      env: {
+        ...deploymentEnv,
+        ...commonEnv,
+        SENTRY: commonEnv.SENTRY_ENABLED,
+        ...clickhouseEnv,
+        KAFKA_SSL: '1',
+        KAFKA_BROKER: kafka.config.endpoint,
+        KAFKA_SASL_MECHANISM: 'plain',
+        KAFKA_SASL_USERNAME: kafka.config.user,
+        KAFKA_SASL_PASSWORD: kafka.config.key,
+        KAFKA_CONCURRENCY: '1',
+        KAFKA_TOPIC: kafka.config.topic,
+        KAFKA_CONSUMER_GROUP: kafka.config.consumerGroup,
+        RELEASE: packageHelper.currentReleaseId(),
+        HEARTBEAT_ENDPOINT: heartbeat ?? '',
+      },
       exposesMetrics: true,
       packageInfo: packageHelper.npmPack('@hive/usage-ingestor'),
       port: 4000,
