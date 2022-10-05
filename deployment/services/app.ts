@@ -114,7 +114,7 @@ export function deployApp({
 
         {
           name: 'DOCS_URL',
-          value: appEnv.DOCS_URL,
+          value: `https://docs.${deploymentEnv.DEPLOYED_DNS}/`,
         },
 
         //
