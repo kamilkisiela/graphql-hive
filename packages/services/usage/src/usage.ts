@@ -9,8 +9,8 @@ import {
   totalOperations,
   totalReports,
   totalLegacyReports,
-  kafkaLatency,
-  compressLatency,
+  kafkaDuration,
+  compressDuration,
   bufferFlushes,
   estimationError,
 } from './metrics';
@@ -168,11 +168,11 @@ export function createUsage(config: {
     async sender(reports, estimatedSizeInBytes, batchId, validateSize) {
       const numOfOperations = reports.reduce((sum, report) => report.size + sum, 0);
       try {
-        const compressLatencyStop = compressLatency.startTimer();
+        const compressLatencyStop = compressDuration.startTimer();
         const value = await compress(JSON.stringify(reports)).finally(() => {
           compressLatencyStop();
         });
-        const stopTimer = kafkaLatency.startTimer();
+        const stopTimer = kafkaDuration.startTimer();
 
         estimationError.observe(Math.abs(estimatedSizeInBytes - value.byteLength) / value.byteLength);
 
