@@ -65,7 +65,7 @@ const OperationsFilter: React.FC<{
   );
   const [searchTerm, setSearchTerm] = React.useState('');
   const debouncedFilter = useDebouncedCallback((value: string) => {
-    setVisibleOperations(operations.filter(op => op.name.toLocaleLowerCase().includes(value)));
+    setVisibleOperations(operations.filter(op => op.name.toLocaleLowerCase().includes(value.toLocaleLowerCase())));
   }, 500);
 
   const onChange = React.useCallback(
