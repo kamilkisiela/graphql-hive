@@ -9,24 +9,32 @@ const numberFromNumberOrNumberString = (input: unknown): number | undefined => {
 
 const NumberFromString = zod.preprocess(numberFromNumberOrNumberString, zod.number().min(1));
 
+// treat an empty string (`''`) as undefined
+const emptyString = <T extends zod.ZodType>(input: T) => {
+  return zod.preprocess((value: unknown) => {
+    if (value === '') return undefined;
+    return value;
+  }, input);
+};
+
 const EnvironmentModel = zod.object({
-  PORT: NumberFromString.optional(),
-  ENVIRONMENT: zod.string().optional(),
-  RELEASE: zod.string().optional(),
-  ENCRYPTION_SECRET: zod.string(),
-  WEB_APP_URL: zod.string().url().optional(),
-  RATE_LIMIT_ENDPOINT: zod.string().url().optional(),
+  PORT: emptyString(NumberFromString.optional()),
+  ENVIRONMENT: emptyString(zod.string().optional()),
+  RELEASE: emptyString(zod.string().optional()),
+  ENCRYPTION_SECRET: emptyString(zod.string()),
+  WEB_APP_URL: emptyString(zod.string().url().optional()),
+  RATE_LIMIT_ENDPOINT: emptyString(zod.string().url().optional()),
   TOKENS_ENDPOINT: zod.string().url(),
-  USAGE_ESTIMATOR_ENDPOINT: zod.string().url().optional(),
-  BILLING_ENDPOINT: zod.string().url().optional(),
-  EMAILS_ENDPOINT: zod.string().url().optional(),
+  USAGE_ESTIMATOR_ENDPOINT: emptyString(zod.string().url().optional()),
+  BILLING_ENDPOINT: emptyString(zod.string().url().optional()),
+  EMAILS_ENDPOINT: emptyString(zod.string().url().optional()),
   WEBHOOKS_ENDPOINT: zod.string().url(),
   SCHEMA_ENDPOINT: zod.string().url(),
 });
 
 const SentryModel = zod.union([
   zod.object({
-    SENTRY: zod.literal('0').optional(),
+    SENTRY: emptyString(zod.literal('0').optional()),
   }),
   zod.object({
     SENTRY: zod.literal('1'),
@@ -35,7 +43,7 @@ const SentryModel = zod.union([
 ]);
 
 const PostgresModel = zod.object({
-  POSTGRES_SSL: zod.union([zod.literal('1'), zod.literal('0')]).optional(),
+  POSTGRES_SSL: emptyString(zod.union([zod.literal('1'), zod.literal('0')]).optional()),
   POSTGRES_HOST: zod.string(),
   POSTGRES_PORT: NumberFromString,
   POSTGRES_DB: zod.string(),
@@ -54,7 +62,7 @@ const ClickHouseModel = zod.object({
 const RedisModel = zod.object({
   REDIS_HOST: zod.string(),
   REDIS_PORT: NumberFromString,
-  REDIS_PASSWORD: zod.string().optional(),
+  REDIS_PASSWORD: emptyString(zod.string().optional()),
 });
 
 const SuperTokensModel = zod.object({
@@ -64,7 +72,7 @@ const SuperTokensModel = zod.object({
 
 const GitHubModel = zod.union([
   zod.object({
-    INTEGRATION_GITHUB: zod.literal('0').optional(),
+    INTEGRATION_GITHUB: emptyString(zod.literal('0').optional()),
   }),
   zod.object({
     INTEGRATION_GITHUB: zod.literal('1'),
@@ -75,7 +83,7 @@ const GitHubModel = zod.union([
 
 const CdnModel = zod.union([
   zod.object({
-    CDN: zod.literal('0').optional(),
+    CDN: emptyString(zod.literal('0').optional()),
   }),
   zod.object({
     CDN: zod.literal('1'),
@@ -89,7 +97,7 @@ const CdnModel = zod.union([
 ]);
 
 const HiveModel = zod.union([
-  zod.object({ HIVE: zod.literal('0').optional() }),
+  zod.object({ HIVE: emptyString(zod.literal('0').optional()) }),
   zod.object({
     HIVE: zod.literal('1'),
     HIVE_API_TOKEN: zod.string(),
@@ -102,7 +110,7 @@ const HiveModel = zod.union([
 
 const AuthLegacyAuth0Model = zod.union([
   zod.object({
-    AUTH_LEGACY_AUTH0: zod.literal('0').optional(),
+    AUTH_LEGACY_AUTH0: emptyString(zod.literal('0').optional()),
   }),
   zod.object({
     AUTH_LEGACY_AUTH0: zod.literal('1'),
@@ -111,8 +119,8 @@ const AuthLegacyAuth0Model = zod.union([
 ]);
 
 const PrometheusModel = zod.object({
-  PROMETHEUS_METRICS: zod.union([zod.literal('0'), zod.literal('1')]).optional(),
-  PROMETHEUS_METRICS_LABEL_INSTANCE: zod.string().optional(),
+  PROMETHEUS_METRICS: emptyString(zod.union([zod.literal('0'), zod.literal('1')]).optional()),
+  PROMETHEUS_METRICS_LABEL_INSTANCE: emptyString(zod.string().optional()),
 });
 
 const configs = {

@@ -9,15 +9,23 @@ const numberFromNumberOrNumberString = (input: unknown): number | undefined => {
 
 const NumberFromString = zod.preprocess(numberFromNumberOrNumberString, zod.number().min(1));
 
+// treat an empty string (`''`) as undefined
+const emptyString = <T extends zod.ZodType>(input: T) => {
+  return zod.preprocess((value: unknown) => {
+    if (value === '') return undefined;
+    return value;
+  }, input);
+};
+
 const EnvironmentModel = zod.object({
-  PORT: NumberFromString.optional(),
-  ENVIRONMENT: zod.string().optional(),
-  RELEASE: zod.string().optional(),
+  PORT: emptyString(NumberFromString.optional()),
+  ENVIRONMENT: emptyString(zod.string().optional()),
+  RELEASE: emptyString(zod.string().optional()),
 });
 
 const SentryModel = zod.union([
   zod.object({
-    SENTRY: zod.literal('0').optional(),
+    SENTRY: emptyString(zod.literal('0').optional()),
   }),
   zod.object({
     SENTRY: zod.literal('1'),
@@ -26,8 +34,8 @@ const SentryModel = zod.union([
 ]);
 
 const PrometheusModel = zod.object({
-  PROMETHEUS_METRICS: zod.union([zod.literal('0'), zod.literal('1')]).optional(),
-  PROMETHEUS_METRICS_LABEL_INSTANCE: zod.string().optional(),
+  PROMETHEUS_METRICS: emptyString(zod.union([zod.literal('0'), zod.literal('1')]).optional()),
+  PROMETHEUS_METRICS_LABEL_INSTANCE: emptyString(zod.string().optional()),
 });
 
 const ClickHouseModel = zod.object({
