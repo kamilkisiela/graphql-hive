@@ -46,7 +46,7 @@ const KafkaBaseModel = zod.object({
 
 const KafkaModel = zod.union([
   KafkaBaseModel.extend({
-    KAFKA_SASL_MECHANISM: zod.void(),
+    KAFKA_SASL_MECHANISM: zod.void().optional(),
   }),
   KafkaBaseModel.extend({
     KAFKA_SASL_MECHANISM: zod.union([zod.literal('plain'), zod.literal('scram-sha-256'), zod.literal('scram-sha-512')]),

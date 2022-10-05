@@ -13,7 +13,7 @@ export function deployDocs({
   packageHelper: PackageHelper;
   rootDns: string;
 }) {
-  return new RemoteArtifactAsServiceDeployment('docs', {
+  const deployment = new RemoteArtifactAsServiceDeployment('docs', {
     storageContainer,
     readinessProbe: '/api/health',
     livenessProbe: '/api/health',
@@ -25,4 +25,9 @@ export function deployDocs({
     packageInfo: packageHelper.npmPack('@hive/docs'),
     port: 3000,
   }).deploy();
+
+  return {
+    ...deployment,
+    endpoint: `https://docs.${rootDns}/`,
+  };
 }
