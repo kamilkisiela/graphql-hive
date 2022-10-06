@@ -241,7 +241,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
         
         const accept = req.headers.accept;
 
-        if (!accept || accept?.length === 0) {
+        if (!accept) {
           reply.header('content-type', 'application/json');
         }
 
