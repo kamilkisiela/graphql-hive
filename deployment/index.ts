@@ -72,6 +72,7 @@ deployMetrics({ envName });
 const cloudflare = deployCloudflare({
   envName,
   rootDns,
+  packageHelper,
 });
 
 deployCloudflarePolice({ envName, rootDns });
