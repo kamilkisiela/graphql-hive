@@ -118,11 +118,11 @@ function pickQueryByPeriod(
     return queryMap.regular;
   }
 
-  if (distanceInHours > 24) {
+  if (distanceInHours >= 24) {
     return queryMap.daily;
   }
 
-  if (distanceInHours > 1) {
+  if (distanceInHours >= 1) {
     return queryMap.hourly;
   }
 
