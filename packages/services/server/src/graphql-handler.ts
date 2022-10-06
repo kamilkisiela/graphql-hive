@@ -1,16 +1,17 @@
+/* eslint-disable @typescript-eslint/no-floating-promises */
 import type { RouteHandlerMethod, FastifyRequest, FastifyReply } from 'fastify';
 import { Registry } from '@hive/api';
 import { cleanRequestId } from '@hive/service-common';
-import { createServer, GraphQLYogaError } from '@graphql-yoga/node';
+import { createYoga, useErrorHandler, Plugin } from 'graphql-yoga';
+import { isGraphQLError } from '@envelop/core';
 import { GraphQLError, ValidationContext, ValidationRule, Kind, OperationDefinitionNode, print } from 'graphql';
 import { useGraphQLModules } from '@envelop/graphql-modules';
 import { useGenericAuth } from '@envelop/generic-auth';
-import { fetch } from 'cross-undici-fetch';
+import { fetch } from '@whatwg-node/fetch';
 import { useSentry } from '@envelop/sentry';
 import { asyncStorage } from './async-storage';
 import { useSentryUser, extractUserId } from './use-sentry-user';
 import { useHive } from '@graphql-hive/client';
-import { useErrorHandler, Plugin } from '@graphql-yoga/node';
 import hyperid from 'hyperid';
 import zod from 'zod';
 import { HiveError } from '@hive/api';
@@ -81,7 +82,7 @@ function useNoIntrospection(params: {
 }
 
 export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMethod => {
-  const server = createServer<Context>({
+  const server = createYoga<Context>({
     plugins: [
       useSentry({
         startTransaction: false,
@@ -140,15 +141,15 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
         },
       }),
       useSentryUser(),
-      useErrorHandler((errors, ctx) => {
+      useErrorHandler(({ errors, context }): void => {
         for (const error of errors) {
           // Only log unexpected errors.
-          if (error.originalError instanceof GraphQLYogaError) {
+          if (isGraphQLError(error) && isGraphQLError(error.originalError)) {
             continue;
           }
 
-          if (hasFastifyRequest(ctx)) {
-            ctx.req.log.error(error);
+          if (hasFastifyRequest(context)) {
+            context.req.log.error(error);
           } else {
             server.logger.error(error);
           }
@@ -207,8 +208,10 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
       useGraphQLModules(options.registry),
       useNoIntrospection({ signature: options.signature, isNonProductionEnvironment: options.isProduction === false }),
     ],
+    /*
     graphiql: request =>
-      options.isProduction ? { endpoint: request.headers.get('x-use-proxy') ?? request.url } : false,
+      isNonProductionEnvironment ? { endpoint: request.headers.get('x-use-proxy') ?? request.url } : false,
+    */
   });
 
   return async (req, reply) => {
@@ -220,7 +223,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
         requestId,
       },
       async () => {
-        const response = await server.handleIncomingMessage(req, {
+        const response = await server.handleNodeRequest(req, {
           req,
           reply,
           headers: req.headers,
@@ -229,14 +232,18 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
         });
 
         response.headers.forEach((value, key) => {
-          reply.header(key, value); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+          reply.header(key, value);
         });
 
         if (!reply.hasHeader('x-request-id')) {
-          reply.header('x-request-id', requestId || ''); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+          reply.header('x-request-id', requestId || '');
         }
 
-        reply.status(response.status).send(response.body); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+        reply.status(response.status);
+
+        reply.send(response.body);
+
+        return reply;
       }
     );
   };

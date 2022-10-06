@@ -1,4 +1,4 @@
-import { EnvelopError } from '@graphql-yoga/common';
+import { GraphQLError } from 'graphql';
 import { parseDateRangeInput } from '../../shared/helpers';
 import { AuthManager } from '../auth/providers/auth-manager';
 import { OrganizationAccessScope } from '../auth/providers/organization-access';
@@ -71,7 +71,7 @@ export const resolvers: UsageEstimationModule.Resolvers = {
       });
 
       if (!result && result !== 0) {
-        throw new EnvelopError(`Failed to estimate usage, please try again later.`);
+        throw new GraphQLError(`Failed to estimate usage, please try again later.`);
       }
 
       return result;

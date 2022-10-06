@@ -17,13 +17,25 @@ describe('CDN Worker', () => {
   };
 
   function mockWorkerEnv(input: { HIVE_DATA: Map<string, string>; KEY_DATA: string }) {
-    (globalThis as any).HIVE_DATA = input.HIVE_DATA;
-    (globalThis as any).KEY_DATA = input.KEY_DATA;
+    Object.defineProperties(globalThis, {
+      HIVE_DATA: {
+        value: input.HIVE_DATA,
+      },
+      KEY_DATA: {
+        value: input.KEY_DATA,
+      },
+    });
   }
 
   function clearWorkerEnv() {
-    delete (globalThis as any).HIVE_DATA;
-    delete (globalThis as any).KEY_DATA;
+    Object.defineProperties(globalThis, {
+      HIVE_DATA: {
+        value: undefined,
+      },
+      KEY_DATA: {
+        value: undefined,
+      },
+    });
   }
 
   function createToken(secret: string, targetId: string): string {

@@ -1,7 +1,5 @@
-import { fetch } from 'cross-undici-fetch';
 import nodemailer from 'nodemailer';
 import sm from 'sendmail';
-
 import type {
   EmailProviderConfig,
   PostmarkEmailProviderConfig,
@@ -9,6 +7,7 @@ import type {
   SMTPEmailProviderConfig,
   SendmailEmailProviderConfig,
 } from './environment';
+import { fetch } from '@whatwg-node/fetch';
 
 interface Email {
   to: string;

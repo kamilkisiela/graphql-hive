@@ -1,5 +1,5 @@
 import * as utils from 'dockest/test-helper';
-import axios from 'axios';
+import { fetch } from '@whatwg-node/fetch';
 
 const usageAddress = utils.getServiceAddress('usage', 3006);
 
@@ -26,7 +26,9 @@ export async function collect(params: {
   token: string;
   authorizationHeader?: 'x-api-token' | 'authorization';
 }) {
-  const res = await axios.post(`http://${usageAddress}`, params.operations, {
+  const res = await fetch(`http://${usageAddress}`, {
+    method: 'POST',
+    body: JSON.stringify(params.operations),
     headers: {
       'Content-Type': 'application/json',
       ...(params.authorizationHeader === 'x-api-token'

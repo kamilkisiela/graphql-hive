@@ -11,7 +11,7 @@ import type { TokensConfig } from './tokens';
 import { TOKENS_CONFIG } from './tokens';
 import type { TokensApi } from '@hive/tokens';
 import { createTRPCClient } from '@trpc/client';
-import { fetch } from 'cross-undici-fetch';
+import { fetch } from '@whatwg-node/fetch';
 
 function maskToken(token: string) {
   return token.substring(0, 3) + '*'.repeat(token.length - 6) + token.substring(token.length - 3);

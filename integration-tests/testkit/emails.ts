@@ -1,5 +1,5 @@
 import * as utils from 'dockest/test-helper';
-import axios from 'axios';
+import { fetch } from '@whatwg-node/fetch';
 
 const emailsAddress = utils.getServiceAddress('emails', 3011);
 
@@ -9,10 +9,14 @@ export interface Email {
   body: string;
 }
 
-export async function history() {
-  const res = await axios.get<Email[]>(`http://${emailsAddress}/_history`, {
-    responseType: 'json',
+export async function history(): Promise<Email[]> {
+  const response = await fetch(`http://${emailsAddress}/_history`, {
+    method: 'GET',
+    headers: {
+      accept: 'application/json',
+      'content-type': 'application/json',
+    },
   });
 
-  return res.data;
+  return response.json();
 }

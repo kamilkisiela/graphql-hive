@@ -1,9 +1,14 @@
 import * as utils from 'dockest/test-helper';
-import axios from 'axios';
-import type { ExecutionResult } from 'graphql';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { ExecutionResult, print } from 'graphql';
 import { TypedDocumentNode } from '@graphql-typed-document-node/core';
+import { createFetch } from '@whatwg-node/fetch';
 
 const registryAddress = utils.getServiceAddress('server', 3001);
+
+const { fetch } = createFetch({
+  useNodeFetch: true,
+});
 
 export async function execute<TResult, TVariables>(
   params: {
@@ -14,37 +19,34 @@ export async function execute<TResult, TVariables>(
     legacyAuthorizationMode?: boolean;
   } & (TVariables extends Record<string, never> ? { variables?: never } : { variables: TVariables })
 ) {
-  const res = await axios.post<ExecutionResult<TResult>>(
-    `http://${registryAddress}/graphql`,
-    {
-      query: params.document,
+  const response = await fetch(`http://${registryAddress}/graphql`, {
+    method: 'POST',
+    body: JSON.stringify({
+      query: print(params.document),
       operationName: params.operationName,
       variables: params.variables,
-    },
-    {
-      headers: {
-        'content-type': 'application/json',
-        ...(params.authToken
+    }),
+    headers: {
+      accept: 'application/json',
+      'content-type': 'application/json',
+      ...(params.authToken
+        ? {
+            authorization: `Bearer ${params.authToken}`,
+          }
+        : {}),
+      ...(params.token
+        ? params.legacyAuthorizationMode
           ? {
-              authorization: `Bearer ${params.authToken}`,
+              'x-api-token': params.token,
             }
-          : {}),
-        ...(params.token
-          ? params.legacyAuthorizationMode
-            ? {
-                'x-api-token': params.token,
-              }
-            : {
-                authorization: `Bearer ${params.token}`,
-              }
-          : {}),
-      },
-      responseType: 'json',
-    }
-  );
-
+          : {
+              authorization: `Bearer ${params.token}`,
+            }
+        : {}),
+    },
+  });
   return {
-    body: res.data,
-    status: res.status,
+    body: (await response.json()) as ExecutionResult<TResult>,
+    status: response.status,
   };
 }

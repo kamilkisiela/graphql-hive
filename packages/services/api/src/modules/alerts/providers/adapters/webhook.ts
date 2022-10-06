@@ -1,7 +1,7 @@
 import { Injectable, Inject, Scope, CONTEXT } from 'graphql-modules';
 import type { WebhooksApi } from '@hive/webhooks';
 import { createTRPCClient } from '@trpc/client';
-import { fetch } from 'cross-undici-fetch';
+import { fetch } from '@whatwg-node/fetch';
 import type { CommunicationAdapter, SchemaChangeNotificationInput } from './common';
 import { Logger } from '../../../shared/providers/logger';
 import { HttpClient } from '../../../shared/providers/http-client';

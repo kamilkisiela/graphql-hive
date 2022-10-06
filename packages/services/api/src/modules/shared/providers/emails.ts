@@ -1,5 +1,5 @@
 import { Injectable, InjectionToken, Inject, Optional } from 'graphql-modules';
-import { fetch } from 'cross-undici-fetch';
+import { fetch } from '@whatwg-node/fetch';
 import { createTRPCClient, TRPCClient } from '@trpc/client';
 import type { EmailsApi, EmailScheduleInput } from '@hive/emails';
 

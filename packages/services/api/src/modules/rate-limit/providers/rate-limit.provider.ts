@@ -5,7 +5,7 @@ import { RATE_LIMIT_SERVICE_CONFIG } from './tokens';
 import type { RateLimitServiceConfig } from './tokens';
 import type { RateLimitApi, RateLimitQueryInput } from '@hive/rate-limit';
 import { createTRPCClient } from '@trpc/client';
-import { fetch } from 'cross-undici-fetch';
+import { fetch } from '@whatwg-node/fetch';
 import { HiveError } from '../../../shared/errors';
 
 @Injectable({

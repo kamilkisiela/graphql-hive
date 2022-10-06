@@ -1,8 +1,10 @@
 /* eslint-disable-next-line import/no-extraneous-dependencies */
-import { createServer } from '@graphql-yoga/node';
+import { createSchema, createYoga } from 'graphql-yoga';
 /* eslint-disable-next-line import/no-extraneous-dependencies */
 import { ApolloServerBase } from 'apollo-server-core';
 import axios from 'axios';
+import { createServer } from 'node:http';
+import { AddressInfo } from 'node:net';
 import { createHive, useHive, hiveApollo } from '../src';
 import { waitFor } from './test-utils';
 
@@ -60,25 +62,27 @@ test('GraphQL Yoga - should not interrupt the process', async () => {
     },
   });
 
-  const server = createServer({
-    port: 3000,
-    schema: {
+  const yoga = createYoga({
+    schema: createSchema({
       typeDefs,
       resolvers,
-    },
+    }),
     plugins: [useHive(hive) as any],
     logging: false,
   });
 
+  const server = createServer(yoga);
+
   async function stop() {
-    await server.stop();
+    await new Promise(resolve => server.close(resolve));
     await hive.dispose();
   }
 
-  await server.start();
+  await new Promise<void>(resolve => server.listen(0, resolve));
+  const port = (server.address() as AddressInfo).port;
 
   await axios
-    .post('http://localhost:3000/graphql', {
+    .post(`http://localhost:${port}/graphql`, {
       query: /* GraphQL */ `
         {
           hello
