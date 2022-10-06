@@ -147,6 +147,9 @@ async function writeCsv(
       body,
       searchParams: {
         query,
+        async_insert: 1,
+        wait_for_async_insert: 0,
+        async_insert_max_data_size: 2_000_000,
       },
       username: config.username,
       password: config.password,
