@@ -43,11 +43,11 @@ export function deployUsageIngestor({
     CLICKHOUSE_PASSWORD: clickhouse.config.password,
     ...(clickhouse.config.cloud
       ? {
-          CLICKHOUSE_CLOUD_PROTOCOL: clickhouse.config.cloud.protocol,
-          CLICKHOUSE_CLOUD_HOST: clickhouse.config.cloud.host,
-          CLICKHOUSE_CLOUD_PORT: clickhouse.config.cloud.port,
-          CLICKHOUSE_CLOUD_USERNAME: clickhouse.config.cloud.username,
-          CLICKHOUSE_CLOUD_PASSWORD: clickhouse.config.cloud.password,
+          CLICKHOUSE_MIRROR_PROTOCOL: clickhouse.config.cloud.protocol,
+          CLICKHOUSE_MIRROR_HOST: clickhouse.config.cloud.host,
+          CLICKHOUSE_MIRROR_PORT: clickhouse.config.cloud.port,
+          CLICKHOUSE_MIRROR_USERNAME: clickhouse.config.cloud.username,
+          CLICKHOUSE_MIRROR_PASSWORD: clickhouse.config.cloud.password,
         }
       : {}),
   };
