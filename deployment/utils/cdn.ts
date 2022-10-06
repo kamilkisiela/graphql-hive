@@ -5,20 +5,24 @@ import { resolve } from 'path';
 
 export class CloudflareCDN {
   constructor(
-    private envName: string,
-    private zoneId: string,
-    private cdnDnsRecord: string,
-    private authPrivateKey: pulumi.Output<string>
+    private config: {
+      envName: string;
+      zoneId: string;
+      cdnDnsRecord: string;
+      authPrivateKey: pulumi.Output<string>;
+      sentryDsn: string;
+      release: string;
+    }
   ) {}
 
   deploy() {
     const kvStorage = new cf.WorkersKvNamespace('hive-ha-storage', {
-      title: `hive-ha-cdn-${this.envName}`,
+      title: `hive-ha-cdn-${this.config.envName}`,
     });
 
     const script = new cf.WorkerScript('hive-ha-worker', {
       content: readFileSync(resolve(__dirname, '../../packages/services/cdn-worker/dist/worker.js'), 'utf-8'),
-      name: `hive-storage-cdn-${this.envName}`,
+      name: `hive-storage-cdn-${this.config.envName}`,
       kvNamespaceBindings: [
         {
           // HIVE_DATA is in use in cdn-script.js as well, its the name of the global variable
@@ -31,22 +35,34 @@ export class CloudflareCDN {
           // KEY_DATA is in use in cdn-script.js as well, its the name of the global variable,
           // basically it's the private key for the hmac key.
           name: 'KEY_DATA',
-          text: this.authPrivateKey,
+          text: this.config.authPrivateKey,
+        },
+        {
+          name: 'SENTRY_DSN',
+          text: this.config.sentryDsn,
+        },
+        {
+          name: 'SENTRY_ENVIRONMENT',
+          text: this.config.envName,
+        },
+        {
+          name: 'SENTRY_RELEASE',
+          text: this.config.release,
         },
       ],
     });
 
-    const workerBase = this.cdnDnsRecord;
+    const workerBase = this.config.cdnDnsRecord;
     const workerUrl = `https://${workerBase}`;
 
     new cf.WorkerRoute('cf-hive-worker', {
       scriptName: script.name,
       pattern: `${workerBase}/*`,
-      zoneId: this.zoneId,
+      zoneId: this.config.zoneId,
     });
 
     return {
-      authPrivateKey: this.authPrivateKey,
+      authPrivateKey: this.config.authPrivateKey,
       workerBaseUrl: workerUrl,
       cfStorageNamespaceId: kvStorage.id,
     };

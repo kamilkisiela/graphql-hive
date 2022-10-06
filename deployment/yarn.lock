@@ -212,10 +212,10 @@
     moment "2.24.0"
     node-fetch "^2.3.0"
 
-"@pulumi/cloudflare@4.3.0":
-  version "4.3.0"
-  resolved "https://registry.yarnpkg.com/@pulumi/cloudflare/-/cloudflare-4.3.0.tgz#12e603290353ea300bbb919d6a81980217eb706d"
-  integrity sha512-hPnv9O+xEiFsfho75ILAWEdfpewhGyqF+V3ZpQzLH/J/yra0hUtSEnh188bVukZ/My7QBzmdN7MAf+8vc/XMcA==
+"@pulumi/cloudflare@4.12.1":
+  version "4.12.1"
+  resolved "https://registry.yarnpkg.com/@pulumi/cloudflare/-/cloudflare-4.12.1.tgz#62c23059de6528b6be3fac646f7f1ac89d123314"
+  integrity sha512-ee7x+hK3qA+dfwynJ9oFbQ3vGqygIXc/Wf+UjbLPcfezMntIKiJmE5HcXlnpJayOEd8LzIRKutpVf2196A2hbQ==
   dependencies:
     "@pulumi/pulumi" "^3.0.0"
 
