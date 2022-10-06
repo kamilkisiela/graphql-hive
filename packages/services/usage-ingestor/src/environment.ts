@@ -62,7 +62,6 @@ const ClickHouseModel = zod.object({
 });
 
 const ClickHouseMirrorModel = zod.union([
-  zod.object({}),
   zod.object({
     CLICKHOUSE_MIRROR_PROTOCOL: zod.union([zod.literal('http'), zod.literal('https')]),
     CLICKHOUSE_MIRROR_HOST: zod.string(),
@@ -70,6 +69,7 @@ const ClickHouseMirrorModel = zod.union([
     CLICKHOUSE_MIRROR_USERNAME: zod.string(),
     CLICKHOUSE_MIRROR_PASSWORD: zod.string(),
   }),
+  zod.object({}),
 ]);
 
 const PrometheusModel = zod.object({
