@@ -238,6 +238,12 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
         if (!reply.hasHeader('x-request-id')) {
           reply.header('x-request-id', requestId || '');
         }
+        
+        const accept = req.headers.accept;
+
+        if (!accept) {
+          reply.header('content-type', 'application/json');
+        }
 
         reply.status(response.status);
 
