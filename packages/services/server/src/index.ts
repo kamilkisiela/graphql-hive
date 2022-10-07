@@ -14,6 +14,8 @@ import { clickHouseReadDuration, clickHouseElapsedDuration } from './metrics';
 import zod from 'zod';
 import { env } from './environment';
 
+console.log('Release', env.release);
+
 const LegacySetUserIdMappingPayloadModel = zod.object({
   auth0UserId: zod.string(),
   superTokensUserId: zod.string(),
