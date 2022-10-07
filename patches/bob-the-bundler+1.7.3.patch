@@ -1,18 +1,37 @@
 diff --git a/node_modules/bob-the-bundler/dist/commands/runify.js b/node_modules/bob-the-bundler/dist/commands/runify.js
-index a44025b..e03c087 100644
+index a44025b..e4fb5a0 100644
 --- a/node_modules/bob-the-bundler/dist/commands/runify.js
 +++ b/node_modules/bob-the-bundler/dist/commands/runify.js
-@@ -83,7 +83,8 @@ async function runify(packagePath, _config, reporter) {
+@@ -83,11 +83,23 @@ async function runify(packagePath, _config, reporter) {
          return;
      }
      if (isNext(pkg)) {
 -        await buildNext(cwd);
+-        await rewritePackageJson(pkg, cwd, (newPkg) => ({
+-            ...newPkg,
+-            dependencies: pkg.dependencies,
+-        }));
 +        const additionalRequire = pkg?.buildOptions?.runify?.next?.header ?? null
-+        await buildNext(cwd, additionalRequire);
-         await rewritePackageJson(pkg, cwd, (newPkg) => ({
-             ...newPkg,
-             dependencies: pkg.dependencies,
-@@ -137,7 +138,7 @@ function isNext(pkg) {
++        const depsToKeep = await buildNext(cwd, additionalRequire);
++        await rewritePackageJson(pkg, cwd, (newPkg) => {
++            const dependencies = {
++                next: pkg.dependencies["next"],
++            };
++            if (depsToKeep.length > 0) {
++                for (const depName of depsToKeep) {
++                    dependencies[depName] = pkg.dependencies[depName];
++                }
++            }
++
++            return {
++                ...newPkg,
++                dependencies,
++            }
++        });
+     }
+     else {
+         await compile(cwd, (_a = buildOptions.bin) !== null && _a !== void 0 ? _a : "src/index.ts", buildOptions, Object.keys((_b = pkg.dependencies) !== null && _b !== void 0 ? _b : {}), pkg.type === "module");
+@@ -137,7 +149,7 @@ function isNext(pkg) {
      var _a, _b;
      return ((_a = pkg === null || pkg === void 0 ? void 0 : pkg.dependencies) === null || _a === void 0 ? void 0 : _a.next) || ((_b = pkg === null || pkg === void 0 ? void 0 : pkg.devDependencies) === null || _b === void 0 ? void 0 : _b.next);
  }
@@ -21,7 +40,7 @@ index a44025b..e03c087 100644
      await new Promise((resolve, reject) => {
          const child = child_process_1.spawn("next", ["build"], {
              stdio: "inherit",
-@@ -146,7 +147,20 @@ async function buildNext(cwd) {
+@@ -146,35 +158,57 @@ async function buildNext(cwd) {
          child.on("exit", (code) => (code ? reject(code) : resolve(code)));
          child.on("error", reject);
      });
@@ -40,20 +59,65 @@ index a44025b..e03c087 100644
 +    }
 +
      await Promise.all([
-         fs_extra_1.default.copy(path_1.join(cwd, ".next"), path_1.join(cwd, "dist/.next"), {
-             filter(src) {
-@@ -159,11 +173,13 @@ async function buildNext(cwd) {
+-        fs_extra_1.default.copy(path_1.join(cwd, ".next"), path_1.join(cwd, "dist/.next"), {
+-            filter(src) {
+-                // copy without webpack cache (it's 900mb...)
+-                return src.includes("cache/webpack") === false;
+-            },
+-        }),
++        fs_extra_1.default.copy(path_1.join(cwd, ".next/standalone"), path_1.join(cwd, "dist")),
++        fs_extra_1.default.copy(path_1.join(cwd, ".next/static"), path_1.join(cwd, "dist/.next/static")),
+         fs_extra_1.default.copy(path_1.join(cwd, "public"), path_1.join(cwd, "dist/public")),
++    ]);
++    const serverFileLines = (await fs_extra_1.default.readFile(path_1.join(cwd, "dist/server.js"), 'utf-8')).split('\n');
++    
++    await Promise.all([
++        fs_extra_1.default.writeFile(path_1.join(cwd, "dist/server.js"), serverFileLines.map(line => {
++            if (line.includes(' conf:')) {
++                return 'conf: {}';
++            }
++
++            return line;
++        }).join('\n')),
+         fs_extra_1.default.writeFile(path_1.join(cwd, "dist/index.js"), [
              `#!/usr/bin/env node`,
-             `process.on('SIGTERM', () => process.exit(0))`,
-             `process.on('SIGINT', () => process.exit(0))`,
-+            additionalRequire ? `require('${additionalRequire.replace(".ts", '')}')` : ``,
-             `
-           require('next/dist/server/lib/start-server').startServer({
-             dir: __dirname,
-             hostname: '0.0.0.0',
+-            `process.on('SIGTERM', () => process.exit(0))`,
+-            `process.on('SIGINT', () => process.exit(0))`,
+-            `
+-          require('next/dist/server/lib/start-server').startServer({
+-            dir: __dirname,
+-            hostname: '0.0.0.0',
 -            port: parseInt(process.env.PORT)
-+            port: parseInt(process.env.PORT),
-+            conf: {},
-           }).then(async (app)=>{
-             const appUrl = 'http://' + app.hostname + ':' + app.port;
-             console.log('started server on '+ app.hostname + ':' + app.port + ', url: ' + appUrl);
+-          }).then(async (app)=>{
+-            const appUrl = 'http://' + app.hostname + ':' + app.port;
+-            console.log('started server on '+ app.hostname + ':' + app.port + ', url: ' + appUrl);
+-            await app.prepare();
+-          }).catch((err)=>{
+-            console.error(err);
+-            process.exit(1);
+-          })
+-        `,
+-        ].join("\n")),
++            additionalRequire ? `require('${additionalRequire.replace(".ts", '')}')` : ``,
++            `require("./server.js")`,
++        ].join("\n"))
+     ]);
++
++    if (additionalRequire) {
++        const additionalCode = await fs_extra_1.default.readFile(path_1.join(cwd, additionalRequire), 'utf-8');
++        // Finds the import from statement
++        const regex = /^import (.*)from '([^']+)';$/gm;
++        const imports = Array.from(additionalCode.matchAll(regex));
++        const dependenciesToInclude = [];
++
++        for (const [,,mod] of imports) {
++            dependenciesToInclude.push(mod);
++        }
++
++        return dependenciesToInclude;
++    }
++    
++    return [];
+ }
+ async function compile(cwd, entryPoint, buildOptions, dependencies, useEsm = false) {
+     if (buildOptions.tsup) {

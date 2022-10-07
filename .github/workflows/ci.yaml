@@ -200,7 +200,6 @@ jobs:
           path: |
             docker.hcl
             services.dockerfile
-            app.dockerfile
             packages/services/emails/dist
             packages/services/rate-limit/dist
             packages/services/schema/dist

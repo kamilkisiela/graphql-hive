@@ -7,6 +7,8 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /usr/src/app
 COPY . /usr/src/app/
 
+RUN npm install --legacy-peer-deps
+
 LABEL org.opencontainers.image.title=$IMAGE_TITLE
 LABEL org.opencontainers.image.version=$RELEASE
 LABEL org.opencontainers.image.description=$IMAGE_DESCRIPTION

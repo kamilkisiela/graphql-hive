@@ -7,6 +7,7 @@ const withNextra = nextra({
 });
 
 export default withNextra({
+  output: 'standalone',
   swcMinify: true,
   compiler: {
     styledComponents: true,

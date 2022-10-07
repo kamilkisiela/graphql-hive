@@ -59,13 +59,6 @@ target "service-base" {
   }
 }
 
-target "app-base" {
-  dockerfile = "${PWD}/app.dockerfile"
-  args = {
-    RELEASE = "${RELEASE}"
-  }
-}
-
 target "target-dev" {}
 
 target "target-ci" {
@@ -276,12 +269,13 @@ target "webhooks" {
 }
 
 target "app" {
-  inherits = ["app-base", get_target()]
+  inherits = ["service-base", get_target()]
   context = "${PWD}/packages/web/app/dist"
   args = {
     IMAGE_TITLE = "graphql-hive/app"
-    PORT = "3000"
     IMAGE_DESCRIPTION = "The app of the GraphQL Hive project."
+    PORT = "3000"
+    HEALTHCHECK_CMD = "wget --spider -q http://127.0.0.1:$${PORT}/api/health"
   }
   tags = [
     local_image_tag("app"),
