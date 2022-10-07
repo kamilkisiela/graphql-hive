@@ -144,6 +144,64 @@ test('cannot grant an access scope to another user if user has no access to that
   expect(accessResult.body.errors![0].message).toMatch('target:tokens:write');
 });
 
+test('granting no scopes is equal to setting read-only for org, project and target', async () => {
+  const { access_token: owner_access_token } = await authenticate('main');
+  const orgResult = await createOrganization(
+    {
+      name: 'foo',
+    },
+    owner_access_token
+  );
+
+  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+
+  // Join
+  const invitationResult = await inviteToOrganization(
+    {
+      email: 'some@email.com',
+      organization: org.cleanId,
+    },
+    owner_access_token
+  );
+
+  const inviteCode = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
+  expect(inviteCode).toBeDefined();
+
+  const { access_token: member_access_token } = await authenticate('extra');
+
+  const joinResult = await joinOrganization(inviteCode!, member_access_token);
+
+  if (joinResult.body.data!.joinOrganization.__typename !== 'OrganizationPayload') {
+    throw new Error(`Join failed: ${joinResult.body.data!.joinOrganization.message}`);
+  }
+
+  const member = joinResult.body.data!.joinOrganization.organization.me;
+
+  // Grant access to target:tokens:write
+  const accessResult = await updateMemberAccess(
+    {
+      organization: org.cleanId,
+      organizationScopes: [],
+      projectScopes: [],
+      targetScopes: [],
+      user: member.id,
+    },
+    owner_access_token
+  );
+
+  expect(accessResult.body.errors).not.toBeDefined();
+
+  const memberWithAccess = accessResult.body.data?.updateOrganizationMemberAccess.organization.members.nodes.find(
+    m => m.id === member.id
+  );
+  expect(memberWithAccess?.organizationAccessScopes).toHaveLength(1);
+  expect(memberWithAccess?.organizationAccessScopes).toContainEqual(OrganizationAccessScope.Read);
+  expect(memberWithAccess?.projectAccessScopes).toHaveLength(1);
+  expect(memberWithAccess?.projectAccessScopes).toContainEqual(ProjectAccessScope.Read);
+  expect(memberWithAccess?.targetAccessScopes).toHaveLength(1);
+  expect(memberWithAccess?.targetAccessScopes).toContainEqual(TargetAccessScope.Read);
+});
+
 test('email invitation', async () => {
   const { access_token: owner_access_token } = await authenticate('main');
   const createOrgResult = await createOrganization(

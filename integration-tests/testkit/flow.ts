@@ -308,6 +308,43 @@ export function createToken(input: CreateTokenInput, authToken: string) {
   });
 }
 
+export function readTokenInfo(token: string) {
+  return execute({
+    document: gql(/* GraphQL */ `
+      query readTokenInfo {
+        tokenInfo {
+          __typename
+          ... on TokenInfo {
+            hasOrganizationRead: hasOrganizationScope(scope: READ)
+            hasOrganizationDelete: hasOrganizationScope(scope: DELETE)
+            hasOrganizationSettings: hasOrganizationScope(scope: SETTINGS)
+            hasOrganizationIntegrations: hasOrganizationScope(scope: INTEGRATIONS)
+            hasOrganizationMembers: hasOrganizationScope(scope: MEMBERS)
+            hasProjectRead: hasProjectScope(scope: READ)
+            hasProjectDelete: hasProjectScope(scope: DELETE)
+            hasProjectSettings: hasProjectScope(scope: SETTINGS)
+            hasProjectAlerts: hasProjectScope(scope: ALERTS)
+            hasProjectOperationsStoreRead: hasProjectScope(scope: OPERATIONS_STORE_READ)
+            hasProjectOperationsStoreWrite: hasProjectScope(scope: OPERATIONS_STORE_WRITE)
+            hasTargetRead: hasTargetScope(scope: READ)
+            hasTargetDelete: hasTargetScope(scope: DELETE)
+            hasTargetSettings: hasTargetScope(scope: SETTINGS)
+            hasTargetRegistryRead: hasTargetScope(scope: REGISTRY_READ)
+            hasTargetRegistryWrite: hasTargetScope(scope: REGISTRY_WRITE)
+            hasTargetTokensRead: hasTargetScope(scope: TOKENS_READ)
+            hasTargetTokensWrite: hasTargetScope(scope: TOKENS_WRITE)
+          }
+          ... on TokenNotFoundError {
+            message
+          }
+        }
+      }
+    `),
+    token,
+    variables: undefined,
+  });
+}
+
 export function updateMemberAccess(input: OrganizationMemberAccessInput, authToken: string) {
   return execute({
     document: gql(/* GraphQL */ `
@@ -565,6 +602,7 @@ export function fetchLatestSchema(token: string) {
       }
     `),
     token,
+    variables: undefined,
   });
 }
 
@@ -586,6 +624,7 @@ export function fetchLatestValidSchema(token: string) {
       }
     `),
     token,
+    variables: undefined,
   });
 }
 
