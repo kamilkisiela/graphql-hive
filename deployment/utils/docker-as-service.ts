@@ -13,6 +13,10 @@ export class DockerAsServiceDeployment {
       env?: kx.types.Container['env'];
       release: string;
       port?: number;
+      /**
+       * A docker image without a tag.
+       * The tag is added automatically, based on the release.
+       */
       image: string;
       livenessProbe?: string;
       readinessProbe?: string;
