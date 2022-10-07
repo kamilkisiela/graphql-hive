@@ -1,7 +1,7 @@
 import * as pulumi from '@pulumi/pulumi';
 import * as azure from '@pulumi/azure';
 import { parse } from 'pg-connection-string';
-import { RemoteArtifactAsServiceDeployment } from '../utils/remote-artifact-as-service';
+import { DockerAsServiceDeployment } from '../utils/docker-as-service';
 import { Clickhouse } from './clickhouse';
 import { Kafka } from './kafka';
 import { PackageHelper } from '../utils/pack';
@@ -26,9 +26,11 @@ export function deployDbMigrations({
   const rawConnectionString = apiConfig.requireSecret('postgresConnectionString');
   const connectionString = rawConnectionString.apply(rawConnectionString => parse(rawConnectionString));
 
-  const { job } = new RemoteArtifactAsServiceDeployment(
+  const { job } = new DockerAsServiceDeployment(
     'db-migrations',
     {
+      image: 'ghcr.io/kamilkisiela/graphql-hive/storage',
+      release: packageHelper.currentReleaseId(),
       env: {
         POSTGRES_HOST: connectionString.apply(connection => connection.host ?? ''),
         POSTGRES_PORT: connectionString.apply(connection => connection.port ?? '5432'),
@@ -47,7 +49,6 @@ export function deployDbMigrations({
         ...deploymentEnv,
       },
       storageContainer,
-      packageInfo: packageHelper.npmPack('@hive/storage'),
     },
     [clickhouse.deployment, clickhouse.service],
     clickhouse.service

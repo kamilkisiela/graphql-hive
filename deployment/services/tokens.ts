@@ -2,7 +2,7 @@ import * as pulumi from '@pulumi/pulumi';
 import * as azure from '@pulumi/azure';
 import { parse } from 'pg-connection-string';
 import { DbMigrations } from './db-migrations';
-import { RemoteArtifactAsServiceDeployment } from '../utils/remote-artifact-as-service';
+import { DockerAsServiceDeployment } from '../utils/docker-as-service';
 import { DeploymentEnvironment } from '../types';
 import { PackageHelper } from '../utils/pack';
 const commonConfig = new pulumi.Config('common');
@@ -28,14 +28,15 @@ export function deployTokens({
   const rawConnectionString = apiConfig.requireSecret('postgresConnectionString');
   const connectionString = rawConnectionString.apply(rawConnectionString => parse(rawConnectionString));
 
-  return new RemoteArtifactAsServiceDeployment(
+  return new DockerAsServiceDeployment(
     'tokens-service',
     {
+      image: 'ghcr.io/kamilkisiela/graphql-hive/tokens',
+      release: packageHelper.currentReleaseId(),
       storageContainer,
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
       exposesMetrics: true,
-      packageInfo: packageHelper.npmPack('@hive/tokens'),
       env: {
         ...deploymentEnv,
         ...commonEnv,

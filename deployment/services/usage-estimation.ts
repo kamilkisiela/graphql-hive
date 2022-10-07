@@ -1,6 +1,6 @@
 import * as pulumi from '@pulumi/pulumi';
 import * as azure from '@pulumi/azure';
-import { RemoteArtifactAsServiceDeployment } from '../utils/remote-artifact-as-service';
+import { DockerAsServiceDeployment } from '../utils/docker-as-service';
 import { PackageHelper } from '../utils/pack';
 import { DeploymentEnvironment } from '../types';
 import { Clickhouse } from './clickhouse';
@@ -24,9 +24,11 @@ export function deployUsageEstimation({
   clickhouse: Clickhouse;
   dbMigrations: DbMigrations;
 }) {
-  return new RemoteArtifactAsServiceDeployment(
+  return new DockerAsServiceDeployment(
     'usage-estimator',
     {
+      image: 'ghcr.io/kamilkisiela/graphql-hive/usage-estimator',
+      release: packageHelper.currentReleaseId(),
       storageContainer,
       replicas: 1,
       readinessProbe: '/_readiness',
@@ -43,7 +45,6 @@ export function deployUsageEstimation({
         RELEASE: packageHelper.currentReleaseId(),
       },
       exposesMetrics: true,
-      packageInfo: packageHelper.npmPack('@hive/usage-estimator'),
       port: 4000,
     },
     [dbMigrations]

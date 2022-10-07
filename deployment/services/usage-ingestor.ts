@@ -1,7 +1,7 @@
 import * as pulumi from '@pulumi/pulumi';
 import * as azure from '@pulumi/azure';
 import { DbMigrations } from './db-migrations';
-import { RemoteArtifactAsServiceDeployment } from '../utils/remote-artifact-as-service';
+import { DockerAsServiceDeployment } from '../utils/docker-as-service';
 import { PackageHelper } from '../utils/pack';
 import { DeploymentEnvironment } from '../types';
 import { Clickhouse } from './clickhouse';
@@ -52,9 +52,11 @@ export function deployUsageIngestor({
       : {}),
   };
 
-  return new RemoteArtifactAsServiceDeployment(
+  return new DockerAsServiceDeployment(
     'usage-ingestor-service',
     {
+      image: 'ghcr.io/kamilkisiela/graphql-hive/usage-ingestor',
+      release: packageHelper.currentReleaseId(),
       storageContainer,
       replicas,
       readinessProbe: '/_readiness',
@@ -76,7 +78,6 @@ export function deployUsageIngestor({
         HEARTBEAT_ENDPOINT: heartbeat ?? '',
       },
       exposesMetrics: true,
-      packageInfo: packageHelper.npmPack('@hive/usage-ingestor'),
       port: 4000,
       autoScaling: {
         cpu: {

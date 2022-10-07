@@ -1,6 +1,6 @@
 import * as pulumi from '@pulumi/pulumi';
 import * as azure from '@pulumi/azure';
-import { RemoteArtifactAsServiceDeployment } from '../utils/remote-artifact-as-service';
+import { DockerAsServiceDeployment } from '../utils/docker-as-service';
 import { DeploymentEnvironment } from '../types';
 import { Redis } from './redis';
 import { PackageHelper } from '../utils/pack';
@@ -23,9 +23,11 @@ export function deployWebhooks({
   redis: Redis;
   heartbeat?: string;
 }) {
-  return new RemoteArtifactAsServiceDeployment(
+  return new DockerAsServiceDeployment(
     'webhooks-service',
     {
+      image: 'ghcr.io/kamilkisiela/graphql-hive/webhooks',
+      release: packageHelper.currentReleaseId(),
       storageContainer,
       env: {
         ...deploymentEnv,
@@ -41,7 +43,6 @@ export function deployWebhooks({
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
       exposesMetrics: true,
-      packageInfo: packageHelper.npmPack('@hive/webhooks'),
       replicas: 1,
     },
     [redis.deployment, redis.service]

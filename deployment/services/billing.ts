@@ -1,7 +1,7 @@
 import * as pulumi from '@pulumi/pulumi';
 import * as azure from '@pulumi/azure';
 import { parse } from 'pg-connection-string';
-import { RemoteArtifactAsServiceDeployment } from '../utils/remote-artifact-as-service';
+import { DockerAsServiceDeployment } from '../utils/docker-as-service';
 import { PackageHelper } from '../utils/pack';
 import { DeploymentEnvironment } from '../types';
 import { DbMigrations } from './db-migrations';
@@ -31,9 +31,11 @@ export function deployStripeBilling({
   const rawConnectionString = apiConfig.requireSecret('postgresConnectionString');
   const connectionString = rawConnectionString.apply(rawConnectionString => parse(rawConnectionString));
 
-  return new RemoteArtifactAsServiceDeployment(
+  return new DockerAsServiceDeployment(
     'stripe-billing',
     {
+      image: 'ghcr.io/kamilkisiela/graphql-hive/stripe-billing',
+      release: packageHelper.currentReleaseId(),
       storageContainer,
       replicas: 1,
       readinessProbe: '/_readiness',
@@ -53,7 +55,6 @@ export function deployStripeBilling({
         POSTGRES_SSL: connectionString.apply(connection => (connection.ssl ? '1' : '0')),
       },
       exposesMetrics: true,
-      packageInfo: packageHelper.npmPack('@hive/stripe-billing'),
       port: 4000,
     },
     [dbMigrations, usageEstimator.service, usageEstimator.deployment]

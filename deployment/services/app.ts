@@ -2,7 +2,7 @@ import * as pulumi from '@pulumi/pulumi';
 import * as azure from '@pulumi/azure';
 import { GraphQL } from './graphql';
 import { DbMigrations } from './db-migrations';
-import { RemoteArtifactAsServiceDeployment } from '../utils/remote-artifact-as-service';
+import { DockerAsServiceDeployment } from '../utils/docker-as-service';
 import { serviceLocalEndpoint } from '../utils/local-endpoint';
 import { DeploymentEnvironment } from '../types';
 import { PackageHelper } from '../utils/pack';
@@ -55,11 +55,12 @@ export function deployApp({
 }) {
   const appRelease = packageHelper.currentReleaseId();
 
-  return new RemoteArtifactAsServiceDeployment(
+  return new DockerAsServiceDeployment(
     'app',
     {
       storageContainer,
-      packageInfo: packageHelper.npmPack('@hive/app'),
+      image: 'ghcr.io/kamilkisiela/graphql-hive/app',
+      release: packageHelper.currentReleaseId(),
       readinessProbe: '/api/health',
       livenessProbe: '/api/health',
       env: [

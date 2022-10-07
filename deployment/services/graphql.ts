@@ -7,7 +7,7 @@ import { Webhooks } from './webhooks';
 import { Redis } from './redis';
 import { DbMigrations } from './db-migrations';
 import { Schema } from './schema';
-import { RemoteArtifactAsServiceDeployment } from '../utils/remote-artifact-as-service';
+import { DockerAsServiceDeployment } from '../utils/docker-as-service';
 import { serviceLocalEndpoint } from '../utils/local-endpoint';
 import { DeploymentEnvironment } from '../types';
 import { Clickhouse } from './clickhouse';
@@ -74,9 +74,11 @@ export function deployGraphQL({
   const rawConnectionString = apiConfig.requireSecret('postgresConnectionString');
   const connectionString = rawConnectionString.apply(rawConnectionString => parse(rawConnectionString));
 
-  return new RemoteArtifactAsServiceDeployment(
+  return new DockerAsServiceDeployment(
     'graphql-api',
     {
+      image: 'ghcr.io/kamilkisiela/graphql-hive/server',
+      release: packageHelper.currentReleaseId(),
       storageContainer,
       replicas: 2,
       readinessProbe: '/_readiness',
@@ -134,7 +136,6 @@ export function deployGraphQL({
         AUTH_LEGACY_AUTH0: '1',
         AUTH_LEGACY_AUTH0_INTERNAL_API_KEY: auth0Config.internalApiKey,
       },
-      packageInfo: packageHelper.npmPack('@hive/server'),
       exposesMetrics: true,
       port: 4000,
     },

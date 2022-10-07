@@ -1,6 +1,6 @@
 import * as pulumi from '@pulumi/pulumi';
 import * as azure from '@pulumi/azure';
-import { RemoteArtifactAsServiceDeployment } from '../utils/remote-artifact-as-service';
+import { DockerAsServiceDeployment } from '../utils/docker-as-service';
 import { DeploymentEnvironment } from '../types';
 import { Redis } from './redis';
 import { PackageHelper } from '../utils/pack';
@@ -30,9 +30,11 @@ export function deployEmails({
     messageStream: string;
   };
 }) {
-  const { deployment, service } = new RemoteArtifactAsServiceDeployment(
+  const { deployment, service } = new DockerAsServiceDeployment(
     'emails-service',
     {
+      image: 'ghcr.io/kamilkisiela/graphql-hive/emails',
+      release: packageHelper.currentReleaseId(),
       storageContainer,
       env: {
         ...deploymentEnv,
@@ -52,7 +54,6 @@ export function deployEmails({
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
       exposesMetrics: true,
-      packageInfo: packageHelper.npmPack('@hive/emails'),
       replicas: 1,
     },
     [redis.deployment, redis.service]

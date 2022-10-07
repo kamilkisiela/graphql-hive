@@ -1,6 +1,6 @@
 import * as pulumi from '@pulumi/pulumi';
 import * as azure from '@pulumi/azure';
-import { RemoteArtifactAsServiceDeployment } from '../utils/remote-artifact-as-service';
+import { DockerAsServiceDeployment } from '../utils/docker-as-service';
 import { isProduction } from '../utils/helpers';
 import { DeploymentEnvironment } from '../types';
 import { Redis } from './redis';
@@ -22,9 +22,11 @@ export function deploySchema({
   deploymentEnv: DeploymentEnvironment;
   redis: Redis;
 }) {
-  return new RemoteArtifactAsServiceDeployment(
+  return new DockerAsServiceDeployment(
     'schema-service',
     {
+      image: 'ghcr.io/kamilkisiela/graphql-hive/schema',
+      release: packageHelper.currentReleaseId(),
       storageContainer,
       env: {
         ...deploymentEnv,
@@ -39,7 +41,6 @@ export function deploySchema({
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
       exposesMetrics: true,
-      packageInfo: packageHelper.npmPack('@hive/schema'),
       replicas: isProduction(deploymentEnv) ? 2 : 1,
     },
     [redis.deployment, redis.service]
