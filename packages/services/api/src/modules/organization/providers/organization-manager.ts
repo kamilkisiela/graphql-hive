@@ -345,10 +345,19 @@ export class OrganizationManager {
   }
 
   async deleteInvitation(input: { email: string; organization: string }) {
+    await this.authManager.ensureOrganizationAccess({
+      scope: OrganizationAccessScope.MEMBERS,
+      organization: input.organization,
+    });
     return this.storage.deleteOrganizationInvitationByEmail(input);
   }
 
   async inviteByEmail(input: { email: string; organization: string }): Promise<OrganizationInvitation> {
+    await this.authManager.ensureOrganizationAccess({
+      scope: OrganizationAccessScope.MEMBERS,
+      organization: input.organization,
+    });
+
     const { email } = input;
     this.logger.info('Inviting to the organization (email=%s, organization=%s)', email, input.organization);
     const organization = await this.getOrganization({

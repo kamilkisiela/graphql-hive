@@ -153,11 +153,11 @@ export function usePermissionsManager({
   const notify = useNotifications();
   const [, mutate] = useMutation(UpdateOrganizationMemberAccessDocument);
 
-  const [targetScopes, setTargetScopes] = React.useState(member.targetAccessScopes);
+  const [targetScopes, setTargetScopes] = React.useState<TargetAccessScope[]>([]);
 
-  const [projectScopes, setProjectScopes] = React.useState(member.projectAccessScopes);
+  const [projectScopes, setProjectScopes] = React.useState<ProjectAccessScope[]>([]);
 
-  const [organizationScopes, setOrganizationScopes] = React.useState(member.organizationAccessScopes);
+  const [organizationScopes, setOrganizationScopes] = React.useState<OrganizationAccessScope[]>([]);
 
   const submit = React.useCallback(
     evt => {

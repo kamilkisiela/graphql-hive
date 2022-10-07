@@ -10,13 +10,7 @@ export async function createTokenStorage(connection: string, maximumPoolSize: nu
       return pool.end();
     },
     async getTokens({ target }: { target: string }) {
-      const result = await pool.query<
-        Slonik<
-          tokens & {
-            organization_id: string;
-          }
-        >
-      >(
+      const result = await pool.query<Slonik<tokens>>(
         sql`
           SELECT * 
           FROM public.tokens 
