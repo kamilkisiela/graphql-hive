@@ -340,15 +340,15 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Get branch name
         id: branch-name
         uses: tj-actions/branch-names@v6
 
-      - name: Build Docker Images
+      - name: Build and publish Docker images
         env:
           DOCKER_REGISTRY: ${{ env.REGISTRY }}/${{ github.repository }}/
-          COMMIT_SHA: ${{ github.sha }}
+          MERGE_COMMIT_SHA: ${{ github.sha }}
+          COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
           RELEASE: ${{ github.sha }}
           BRANCH_NAME: ${{ steps.branch-name.outputs.current_branch }}
           BUILD_TYPE: 'publish'

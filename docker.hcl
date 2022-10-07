@@ -14,6 +14,10 @@ variable "COMMIT_SHA" {
   default = ""
 }
 
+variable "MERGE_COMMIT_SHA" {
+  default = ""
+}
+
 variable "BRANCH_NAME" {
   default = ""
 }
@@ -88,6 +92,7 @@ target "emails" {
     local_image_tag("emails"),
     stable_image_tag("emails"),
     image_tag("emails", COMMIT_SHA),
+    image_tag("emails", MERGE_COMMIT_SHA),
     image_tag("emails", BRANCH_NAME)
   ]
 }
@@ -105,6 +110,7 @@ target "rate-limit" {
     local_image_tag("rate-limit"),
     stable_image_tag("rate-limit"),
     image_tag("rate-limit", COMMIT_SHA),
+    image_tag("rate-limit", MERGE_COMMIT_SHA),
     image_tag("rate-limit", BRANCH_NAME)
   ]
 }
@@ -122,6 +128,7 @@ target "schema" {
     local_image_tag("schema"),
     stable_image_tag("schema"),
     image_tag("schema", COMMIT_SHA),
+    image_tag("schema", MERGE_COMMIT_SHA),
     image_tag("schema", BRANCH_NAME)
   ]
 }
@@ -139,6 +146,7 @@ target "server" {
     local_image_tag("server"),
     stable_image_tag("server"),
     image_tag("server", COMMIT_SHA),
+    image_tag("server", MERGE_COMMIT_SHA),
     image_tag("server", BRANCH_NAME)
   ]
 }
@@ -154,6 +162,7 @@ target "storage" {
     local_image_tag("storage"),
     stable_image_tag("storage"),
     image_tag("storage", COMMIT_SHA),
+    image_tag("storage", MERGE_COMMIT_SHA),
     image_tag("storage", BRANCH_NAME)
   ]
 }
@@ -171,6 +180,7 @@ target "stripe-billing" {
     local_image_tag("stripe-billing"),
     stable_image_tag("stripe-billing"),
     image_tag("stripe-billing", COMMIT_SHA),
+    image_tag("stripe-billing", MERGE_COMMIT_SHA),
     image_tag("stripe-billing", BRANCH_NAME)
   ]
 }
@@ -188,6 +198,7 @@ target "tokens" {
     local_image_tag("tokens"),
     stable_image_tag("tokens"),
     image_tag("tokens", COMMIT_SHA),
+    image_tag("tokens", MERGE_COMMIT_SHA),
     image_tag("tokens", BRANCH_NAME)
   ]
 }
@@ -205,6 +216,7 @@ target "usage-estimator" {
     local_image_tag("usage-estimator"),
     stable_image_tag("usage-estimator"),
     image_tag("usage-estimator", COMMIT_SHA),
+    image_tag("usage-estimator", MERGE_COMMIT_SHA),
     image_tag("usage-estimator", BRANCH_NAME)
   ]
 }
@@ -222,6 +234,7 @@ target "usage-ingestor" {
     local_image_tag("usage-ingestor"),
     stable_image_tag("usage-ingestor"),
     image_tag("usage-ingestor", COMMIT_SHA),
+    image_tag("usage-ingestor", MERGE_COMMIT_SHA),
     image_tag("usage-ingestor", BRANCH_NAME)
   ]
 }
@@ -239,6 +252,7 @@ target "usage" {
     local_image_tag("usage"),
     stable_image_tag("usage"),
     image_tag("usage", COMMIT_SHA),
+    image_tag("usage", MERGE_COMMIT_SHA),
     image_tag("usage", BRANCH_NAME)
   ]
 }
@@ -256,6 +270,7 @@ target "webhooks" {
     local_image_tag("webhooks"),
     stable_image_tag("webhooks"),
     image_tag("webhooks", COMMIT_SHA),
+    image_tag("webhooks", MERGE_COMMIT_SHA),
     image_tag("webhooks", BRANCH_NAME)
   ]
 }
@@ -272,6 +287,7 @@ target "app" {
     local_image_tag("app"),
     stable_image_tag("app"),
     image_tag("app", COMMIT_SHA),
+    image_tag("app", MERGE_COMMIT_SHA),
     image_tag("app", BRANCH_NAME)
   ]
 }
