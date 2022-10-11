@@ -1,6 +1,8 @@
+import { PackageCmd } from '@theguild/components'
+
 # Integrations
 
-![Integrations](../../public/integrations-view.png)
+![Integrations](/integrations-view.png)
 
 ## Slack
 
@@ -8,13 +10,13 @@ If you want to communicate with Hive and receive notifications, click on the "Co
 
 ## GitHub
 
-GraphQL Hive offers an seamless integration with your GitHub repository.
+GraphQL Hive offers a seamless integration with your GitHub repository.
 
-![GitHub Schema Check](../../public/github-schema-check.png)
+![GitHub Schema Check](/github-schema-check.png)
 
 ### Install GraphQL Hive application
 
-Click on the "Connect GitHub" button and follow the intructions there. Remember to give an access to your repository.
+Click on the "Connect GitHub" button and follow the instructions there. Remember to give an access to your repository.
 
 ### Setting up CI/CD
 
@@ -24,14 +26,11 @@ Use [`@graphql-hive/cli`](https://npmjs.com/package/@graphql-hive/cli) in your C
 
 Install [`@graphql-hive/cli`](https://www.npmjs.com/package/@graphql-hive/cli) package from NPM:
 
-```bash
-npm install @graphql-hive/cli
-yarn add @graphql-hive/cli
-```
+<PackageCmd packages={['-D @graphql-hive/cli']} />
 
 ### Linux / MacOS
 
-Install latest version of GraphQL Hive CLI:
+Install the latest version of GraphQL Hive CLI:
 
 ```bash
 curl -sSL https://graphql-hive.com/install.sh | sh
