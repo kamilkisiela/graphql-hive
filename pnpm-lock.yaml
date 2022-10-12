@@ -410,6 +410,31 @@ importers:
       ioredis-mock: 7.4.0_ioredis@4.28.5
       tslib: 2.4.0
 
+  packages/services/broker-worker:
+    specifiers:
+      '@cloudflare/workers-types': 3.4.0
+      '@types/service-worker-mock': 2.0.1
+      '@whatwg-node/fetch': 0.4.7
+      '@whatwg-node/server': 0.4.11
+      esbuild: 0.14.39
+      itty-router: 2.4.0
+      itty-router-extras: 0.4.2
+      nock: 13.2.4
+      toucan-js: 2.7.0
+      zod: 3.19.1
+    dependencies:
+      toucan-js: 2.7.0
+      zod: 3.19.1
+    devDependencies:
+      '@cloudflare/workers-types': 3.4.0
+      '@types/service-worker-mock': 2.0.1
+      '@whatwg-node/fetch': 0.4.7
+      '@whatwg-node/server': 0.4.11
+      esbuild: 0.14.39
+      itty-router: 2.4.0
+      itty-router-extras: 0.4.2
+      nock: 13.2.4
+
   packages/services/cdn-worker:
     specifiers:
       '@cloudflare/workers-types': 3.4.0
@@ -26572,7 +26597,6 @@ packages:
 
   /zod/3.19.1:
     resolution: {integrity: sha512-LYjZsEDhCdYET9ikFu6dVPGp2YH9DegXjdJToSzD9rO6fy4qiRYFoyEYwps88OseJlPyl2NOe2iJuhEhL7IpEA==}
-    dev: true
 
   /zrender/5.3.1:
     resolution: {integrity: sha512-7olqIjy0gWfznKr6vgfnGBk7y4UtdMvdwFmK92vVQsQeDPyzkHW1OlrLEKg6GHz1W5ePf0FeN1q2vkl/HFqhXw==}

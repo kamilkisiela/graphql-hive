@@ -143,6 +143,29 @@ services:
       PORT: 3004
       CDN_AUTH_PRIVATE_KEY: 1e1064ef9cda8bf38936b77317e90dc3
 
+  local_broker:
+    image: node:16.13.2-alpine3.14
+    entrypoint:
+      - '/bin/sh'
+      - '/run-local-broker.sh'
+    networks:
+      - 'stack'
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'localhost:3013/_readiness']
+      interval: 5s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
+    ports:
+      - 3013:3013
+    volumes:
+      - '../packages/services/broker-worker/dist/dev.js:/broker.js'
+      - './run-local-broker.sh:/run-local-broker.sh'
+    environment:
+      NODE_ENV: production
+      PORT: 3013
+      CF_BROKER_SIGNATURE: secretSignature
+
   external_composition:
     image: node:16.13.2-alpine3.14
     entrypoint:
@@ -219,6 +242,8 @@ services:
         condition: service_healthy
       local_cdn:
         condition: service_healthy
+      local_broker:
+        condition: service_healthy
     ports:
       - 3001:3001
     environment:
@@ -244,6 +269,9 @@ services:
       RATE_LIMIT_ENDPOINT: http://rate-limit:3009
       BILLING_ENDPOINT: http://stripe-billing:3010
       EMAILS_ENDPOINT: http://emails:3011
+      REQUEST_BROKER: '1'
+      REQUEST_BROKER_SIGNATURE: 'secretSignature'
+      REQUEST_BROKER_ENDPOINT: 'http://local_broker:3013'
       CDN: '1'
       CDN_CF_BASE_PATH: http://local_cdn:3004
       CDN_CF_ACCOUNT_ID: 103df45224310d669213971ce28b5b70
@@ -306,6 +334,8 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+      local_broker:
+        condition: service_healthy
     ports:
       - 3005:3005
     environment:
@@ -315,6 +345,9 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: test
+      REQUEST_BROKER: '1'
+      REQUEST_BROKER_SIGNATURE: 'secretSignature'
+      REQUEST_BROKER_ENDPOINT: 'http://local_broker:3013'
 
   emails:
     image: '${DOCKER_REGISTRY}emails${DOCKER_TAG}'
