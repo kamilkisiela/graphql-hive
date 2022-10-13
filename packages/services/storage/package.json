@@ -32,6 +32,7 @@
     "zod": "3.15.1"
   },
   "devDependencies": {
+    "@sentry/types": "7.12.1",
     "@tgriesser/schemats": "7.0.0",
     "@types/pg": "8.6.5",
     "pg-promise": "10.11.1",
