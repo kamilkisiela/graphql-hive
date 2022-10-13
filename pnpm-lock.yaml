@@ -570,6 +570,9 @@ importers:
 
   packages/services/service-common:
     specifiers:
+      '@sentry/node': 7.12.1
+      '@sentry/tracing': 7.12.1
+      '@sentry/utils': 7.12.1
       '@whatwg-node/fetch': 0.4.7
       fastify: 3.29.3
       fastify-cors: 6.0.2
@@ -581,6 +584,10 @@ importers:
       fastify-cors: 6.0.2
       fastify-plugin: 3.0.1
       prom-client: 14.0.1
+    devDependencies:
+      '@sentry/node': 7.12.1
+      '@sentry/tracing': 7.12.1
+      '@sentry/utils': 7.12.1
 
   packages/services/storage:
     specifiers:
@@ -7960,7 +7967,6 @@ packages:
       '@sentry/types': 7.12.1
       '@sentry/utils': 7.12.1
       tslib: 1.14.1
-    dev: false
 
   /@sentry/hub/6.19.6:
     resolution: {integrity: sha512-PuEOBZxvx3bjxcXmWWZfWXG+orojQiWzv9LQXjIgroVMKM/GG4QtZbnWl1hOckUj7WtKNl4hEGO2g/6PyCV/vA==}
@@ -7978,7 +7984,6 @@ packages:
       '@sentry/types': 7.12.1
       '@sentry/utils': 7.12.1
       tslib: 1.14.1
-    dev: false
 
   /@sentry/integrations/7.12.1:
     resolution: {integrity: sha512-35iW3WZ6rnUzjf6kWS5604xtPCtIb4gESoDKIKPKw2q7gI+qA5Ad/Q5yM50cDwoR3uOhXZ4tv3WB2/16wSGWFg==}
@@ -8047,7 +8052,6 @@ packages:
       tslib: 1.14.1
     transitivePeerDependencies:
       - supports-color
-    dev: false
 
   /@sentry/react/7.12.1_react@17.0.2:
     resolution: {integrity: sha512-CmdiRzhPpjD29GxlDJs+VIoLlQcKp1BfISQOfPUZNppWbKyRad+J5Z8tgg5MCNPHjQtcOT+0V+MsSdRNqtXg4g==}
@@ -8071,7 +8075,6 @@ packages:
       '@sentry/types': 7.12.1
       '@sentry/utils': 7.12.1
       tslib: 1.14.1
-    dev: false
 
   /@sentry/types/6.19.6:
     resolution: {integrity: sha512-QH34LMJidEUPZK78l+Frt3AaVFJhEmIi05Zf8WHd9/iTt+OqvCHBgq49DDr1FWFqyYWm/QgW/3bIoikFpfsXyQ==}
@@ -8081,7 +8084,6 @@ packages:
   /@sentry/types/7.12.1:
     resolution: {integrity: sha512-VGZs39SZgMcCGv7H0VyFy1LEFGsnFZH590JUopmz6nG63EpeYQ2xzhIoPNAiLKbyUvBEwukn+faCg3u3MGqhgQ==}
     engines: {node: '>=8'}
-    dev: false
 
   /@sentry/utils/6.19.6:
     resolution: {integrity: sha512-fAMWcsguL0632eWrROp/vhPgI7sBj/JROWVPzpabwVkm9z3m1rQm6iLFn4qfkZL8Ozy6NVZPXOQ7EXmeU24byg==}
@@ -8097,7 +8099,6 @@ packages:
     dependencies:
       '@sentry/types': 7.12.1
       tslib: 1.14.1
-    dev: false
 
   /@sentry/webpack-plugin/1.19.0:
     resolution: {integrity: sha512-qSpdgdGMtdzagGveSWgo2b+t8PdPUscuOjbOyWCsJme9jlTFnNk0rX7JEA55OUozikKHM/+vVh08USLBnPboZw==}
@@ -11351,7 +11352,6 @@ packages:
   /cookie/0.4.2:
     resolution: {integrity: sha512-aSWTXFzaKWkvHO1Ny/s+ePFpvKsPnjc551iI41v3ny/ow6tBG5Vd+FuqGNhh1LxOmVzOlGUriIlOaokOvhaStA==}
     engines: {node: '>= 0.6'}
-    dev: false
 
   /cookie/0.5.0:
     resolution: {integrity: sha512-YZ3GUyn/o8gfKJlnlX7g7xq4gyO6OSuhGPKaaGssGB2qgDUS0gPgtTvoyZLTt9Ab6dC4hfc9dV5arkvc/OCmrw==}
@@ -17016,7 +17016,6 @@ packages:
 
   /lru_map/0.3.3:
     resolution: {integrity: sha512-Pn9cox5CsMYngeDbmChANltQl+5pi6XmTrraMSzhPmMBbmgcxmqWry0U3PGapCU1yB4/LqCcom7qhHZiF/jGfQ==}
-    dev: false
 
   /luxon/3.0.4:
     resolution: {integrity: sha512-aV48rGUwP/Vydn8HT+5cdr26YYQiUZ42NM6ToMoaGKwYfWbfLeRkEu1wXWMHBZT6+KyLfcbbtVcoQFCbbPjKlw==}
