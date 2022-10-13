@@ -43,9 +43,11 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Install Node
+      - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
           node-version-file: .node-version
 
       - name: Install Dependencies
@@ -97,9 +99,11 @@ jobs:
         with:
           fetch-depth: 5
 
-      - name: Install Node
+      - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
           node-version-file: .node-version
 
       - name: Pull node_modules
@@ -137,9 +141,11 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Install Node
+      - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
           node-version-file: .node-version
 
       - name: Pull node_modules
@@ -172,9 +178,11 @@ jobs:
         with:
           fetch-depth: 5
 
-      - name: Install Node
+      - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
           node-version-file: .node-version
 
       - name: Pull node_modules
@@ -225,9 +233,11 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Install Node
+      - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
           node-version-file: .node-version
 
       - name: Install Rust
@@ -273,8 +283,11 @@ jobs:
         with:
           fetch-depth: 5
 
-      - uses: actions/setup-node@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
         with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
           node-version-file: .node-version
 
       - name: Pull node_modules
@@ -385,9 +398,11 @@ jobs:
         with:
           fetch-depth: 5
 
-      - name: Install Node
+      - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
           node-version-file: .node-version
 
       - name: Pull node_modules
@@ -499,10 +514,12 @@ jobs:
         with:
           fetch-depth: 5
 
-      - name: Install Node
+      - name: Use Node.js ${{ matrix.node-version }}
         if: steps.feature_flags.outputs.detected == 'true'
         uses: actions/setup-node@v2
         with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
           node-version-file: .node-version
 
       - name: Pull node_modules

@@ -24,8 +24,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-node@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
         with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
           node-version-file: .node-version
 
       - name: Install Dependencies
@@ -223,9 +226,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Install Node
+      - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
           node-version-file: .node-version
 
       - name: Install Rust
@@ -286,9 +291,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Install Node
+      - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
           node-version-file: .node-version
 
       - name: Install Rust
@@ -375,9 +382,11 @@ jobs:
         with:
           fetch-depth: 5
 
-      - name: Install Node
+      - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
           node-version-file: .node-version
 
       - run: pnpm i
