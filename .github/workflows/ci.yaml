@@ -345,12 +345,19 @@ jobs:
         id: branch-name
         uses: tj-actions/branch-names@v6
 
+      - uses: frabert/replace-string-action@v2.0
+        id: branch_name_fix
+        with:
+          pattern: '/'
+          string: ${{ steps.branch-name.outputs.current_branch }}
+          replace-with: '_'
+
       - name: Build Docker Images
         env:
           DOCKER_REGISTRY: ${{ env.REGISTRY }}/${{ github.repository }}/
           COMMIT_SHA: ${{ github.sha }}
           RELEASE: ${{ github.sha }}
-          BRANCH_NAME: ${{ steps.branch-name.outputs.current_branch }}
+          BRANCH_NAME: ${{ steps.branch_name_fix.outputs.replaced }}
           BUILD_TYPE: 'publish'
         run: |
           docker buildx bake \
