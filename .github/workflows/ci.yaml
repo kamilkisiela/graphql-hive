@@ -309,7 +309,7 @@ jobs:
   docker-build-push:
     needs: build
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 40
     if: ${{ !github.event.pull_request.head.repo.fork }}
 
     env:
