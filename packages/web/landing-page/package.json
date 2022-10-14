@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@radix-ui/react-tooltip": "0.1.7",
-    "@theguild/components": "1.12.1-alpha-bbdd479.0",
+    "@theguild/components": "4.2.4",
     "framer-motion": "^6.3.3",
     "next": "12.3.0",
     "react": "17.0.2",
