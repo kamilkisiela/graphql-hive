@@ -28,6 +28,8 @@ export interface HiveUsagePluginOptions {
   /**
    * Custom endpoint to collect schema usage
    *
+   * @deprecated use `options.selfHosted.usageEndpoint` instead
+   *
    * Points to Hive by default
    */
   endpoint?: string;
@@ -77,6 +79,8 @@ export interface HiveReportingPluginOptions {
   /**
    * Custom endpoint to collect schema reports
    *
+   * @deprecated use `options.selfHosted.usageEndpoint` instead
+   *
    * Points to Hive by default
    */
   endpoint?: string;
@@ -107,6 +111,27 @@ export interface HiveOperationsStorePluginOptions {
   endpoint?: string;
 }
 
+export interface HiveSelfHostingOptions {
+  /**
+   * Point to your own instance of GraphQL Hive API
+   *
+   * Used by schema reporting and token info.
+   */
+  graphqlEndpoint: string;
+  /**
+   * Address of your own GraphQL Hive application
+   *
+   * Used by token info to generate a link to the organization, project and target.
+   */
+  applicationUrl: string;
+  /**
+   * Point to your own instance of GraphQL Hive Usage API
+   *
+   * Used by usage reporting
+   */
+  usageEndpoint?: string;
+}
+
 export interface HivePluginOptions {
   /**
    * Enable/Disable Hive
@@ -124,6 +149,10 @@ export interface HivePluginOptions {
    * Access Token
    */
   token: string;
+  /**
+   * Use when self-hosting GraphQL Hive
+   */
+  selfHosting?: HiveSelfHostingOptions;
   agent?: Omit<AgentOptions, 'endpoint' | 'token' | 'enabled' | 'debug'>;
   /**
    * Collects schema usage based on operations

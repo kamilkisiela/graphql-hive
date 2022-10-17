@@ -12,6 +12,7 @@ export interface OperationsStore {
 
 export function createOperationsStore(pluginOptions: HivePluginOptions): OperationsStore {
   const operationsStoreOptions = pluginOptions.operationsStore;
+  const selfHostingOptions = pluginOptions.selfHosting;
   const token = pluginOptions.token;
 
   if (!operationsStoreOptions || pluginOptions.enabled === false) {
@@ -39,7 +40,7 @@ export function createOperationsStore(pluginOptions: HivePluginOptions): Operati
 
   const load: OperationsStore['load'] = async () => {
     const response = await axios.post(
-      operationsStoreOptions.endpoint ?? 'https://app.graphql-hive.com/graphql',
+      selfHostingOptions?.graphqlEndpoint ?? operationsStoreOptions.endpoint ?? 'https://app.graphql-hive.com/graphql',
       {
         query,
         operationName: 'loadStoredOperations',
