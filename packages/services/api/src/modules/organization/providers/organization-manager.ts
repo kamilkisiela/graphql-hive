@@ -73,10 +73,12 @@ export class OrganizationManager {
     private billingProvider: BillingProvider,
     private emails: Emails
   ) {
+    console.log('LOL org manager is created bruv');
     this.logger = logger.child({ source: 'OrganizationManager' });
-    this.messageBus.on<EnsurePersonalOrganizationEventPayload>(ENSURE_PERSONAL_ORGANIZATION_EVENT, data =>
-      this.ensurePersonalOrganization(data)
-    );
+    this.messageBus.on<EnsurePersonalOrganizationEventPayload>(ENSURE_PERSONAL_ORGANIZATION_EVENT, async data => {
+      console.log('LOL process this shit');
+      await this.ensurePersonalOrganization(data);
+    });
   }
 
   getOrganizationFromToken: () => Promise<Organization | never> = share(async () => {
@@ -589,6 +591,7 @@ export class OrganizationManager {
   }
 
   async ensurePersonalOrganization(payload: EnsurePersonalOrganizationEventPayload) {
+    console.log('LOL ensurePersonalOrganization');
     const myOrg = await this.storage.getMyOrganization({
       user: payload.user.id,
     });

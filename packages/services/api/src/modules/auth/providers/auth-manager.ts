@@ -202,11 +202,13 @@ export class AuthManager {
     email: string;
     externalAuthUserId: string | null;
   }): Promise<User> {
+    console.log('LOL ensuring internal user');
     let internalUser = await this.storage.getUserBySuperTokenId({
       superTokensUserId: input.superTokensUserId,
     });
 
     if (!internalUser) {
+      console.log('LOL no internal user found');
       internalUser = await this.userManager.createUser({
         superTokensUserId: input.superTokensUserId,
         externalAuthUserId: input.externalAuthUserId,
@@ -214,6 +216,7 @@ export class AuthManager {
       });
     }
 
+    console.log('LOL emit user event');
     await this.messageBus.emit<EnsurePersonalOrganizationEventPayload>(ENSURE_PERSONAL_ORGANIZATION_EVENT, {
       name: internalUser.displayName,
       user: {
@@ -221,6 +224,7 @@ export class AuthManager {
         superTokensUserId: input.superTokensUserId,
       },
     });
+    console.log('LOL emit user event done');
 
     return internalUser;
   }
