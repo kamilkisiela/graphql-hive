@@ -2245,10 +2245,10 @@
   dependencies:
     tslib "^2.4.0"
 
-"@envelop/on-resolve@2.0.0-alpha-20220928142730-aa29e80b":
-  version "2.0.0-alpha-20220928142730-aa29e80b"
-  resolved "https://registry.yarnpkg.com/@envelop/on-resolve/-/on-resolve-2.0.0-alpha-20220928142730-aa29e80b.tgz#458c55931dfb0edaca44fb262e29f363a4b7e09a"
-  integrity sha512-3jg58nimWv4kQvOvdF9SiPtqTn5BKGBCmamAAoPqQitJtpCJJYGtKrUvJ242jGHdZJ1GRq9HPhIr2uYSsyjVHA==
+"@envelop/on-resolve@^2.0.2":
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/@envelop/on-resolve/-/on-resolve-2.0.2.tgz#eae549ad0bbd933e81829c7a64601d93b266c104"
+  integrity sha512-EoVdZAQZq/3SyskRKDC6U7Do2r2qB2PzknEkckfisU8Hxi8tf26azddjIUSaMUOg6dhV4RTozrCVgGbWl6zQkw==
 
 "@envelop/parser-cache@5.0.0-alpha-20220928142730-aa29e80b":
   version "5.0.0-alpha-20220928142730-aa29e80b"
@@ -2258,12 +2258,12 @@
     lru-cache "^6.0.0"
     tslib "^2.4.0"
 
-"@envelop/sentry@4.0.0-alpha-20220928142730-aa29e80b":
-  version "4.0.0-alpha-20220928142730-aa29e80b"
-  resolved "https://registry.yarnpkg.com/@envelop/sentry/-/sentry-4.0.0-alpha-20220928142730-aa29e80b.tgz#5a113276f3407726e79cba094fcab4cbbb9c2123"
-  integrity sha512-h/7P8yQ3U0oeSqny2wyoIslI/KdyAO+i3jMEauyzpsdt3FGr9hMaicB3lx/tk8PNdjnhoA0abZUBZFBdDDhYRA==
+"@envelop/sentry@4.0.2":
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/@envelop/sentry/-/sentry-4.0.2.tgz#951c14ffc1624eaaf5b83a3a8843dca285c61a98"
+  integrity sha512-gUGJ/ruji7vDkSUbbajhFW1MNE/TGz+RjmGPFysf4vfvMVmcnjuRQJIFzFvEB+aoKSbKOeQhJvL9e2npkEERrw==
   dependencies:
-    "@envelop/on-resolve" "2.0.0-alpha-20220928142730-aa29e80b"
+    "@envelop/on-resolve" "^2.0.2"
     tslib "^2.4.0"
 
 "@envelop/types@2.4.1-alpha-20220928142730-aa29e80b":
