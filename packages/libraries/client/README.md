@@ -331,3 +331,5 @@ const server = createYoga({
 
 server.start()
 ```
+
+> The `selfHosting` options take precedence over the deprecated `options.hosting.endpoint` and `options.usage.endpoint`.
