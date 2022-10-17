@@ -64,6 +64,7 @@ export const rawOperationFailures = new metrics.Gauge({
 export const invalidRawOperations = new metrics.Counter({
   name: 'usage_operations_invalid',
   help: 'Number of invalid raw operations dropped by usage service',
+  labelNames: ['reason'],
 });
 
 export const collectDuration = new metrics.Histogram({

@@ -64,6 +64,10 @@ export function createWriter({
 
   return {
     async writeOperations(operations: string[]) {
+      if (operations.length === 0) {
+        return;
+      }
+
       const csv = joinIntoSingleMessage(operations);
       const compressed = await compress(csv);
       const sql = `INSERT INTO operations (${operationsFields}) FORMAT CSV`;
@@ -80,6 +84,10 @@ export function createWriter({
       ]);
     },
     async writeRegistry(records: string[]) {
+      if (records.length === 0) {
+        return;
+      }
+
       const csv = joinIntoSingleMessage(records);
       const compressed = await compress(csv);
       const sql = `INSERT INTO operation_collection (${registryFields}) FORMAT CSV`;
@@ -97,6 +105,10 @@ export function createWriter({
     },
     legacy: {
       async writeOperations(operations: string[]) {
+        if (operations.length === 0) {
+          return;
+        }
+
         const csv = joinIntoSingleMessage(operations);
 
         await writeCsv(
@@ -109,6 +121,10 @@ export function createWriter({
         );
       },
       async writeRegistry(records: string[]) {
+        if (records.length === 0) {
+          return;
+        }
+
         const csv = joinIntoSingleMessage(records);
         await writeCsv(
           clickhouse,
