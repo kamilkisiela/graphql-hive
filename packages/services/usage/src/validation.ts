@@ -1,6 +1,8 @@
 import type { IncomingOperation, OperationMap, OperationMapRecord } from './types';
 import Ajv from 'ajv';
 import type { JSONSchemaType } from 'ajv';
+import { parse } from 'graphql';
+import LRU from 'tiny-lru';
 
 const unixTimestampRegex = /^\d{13,}$/;
 
@@ -16,6 +18,8 @@ const ajv = new Ajv({
     },
   },
 });
+
+const validOperationBodyCache = LRU<boolean>(5_000, 300_000 /* 5 minutes */);
 
 const operationMapRecordSchema: JSONSchemaType<OperationMapRecord> = {
   type: 'object',
@@ -69,10 +73,30 @@ export function validateOperationMapRecord(record: OperationMapRecord) {
       valid: true,
     };
   }
+
   return {
     valid: false,
     errors: validate.errors,
   };
+}
+
+function isValidOperationBody(op: OperationMapRecord) {
+  const cached = validOperationBodyCache.get(op.operation);
+
+  if (typeof cached === 'boolean') {
+    return cached;
+  }
+
+  try {
+    parse(op.operation, {
+      noLocation: true,
+    });
+    validOperationBodyCache.set(op.operation, true);
+    return true;
+  } catch (error) {
+    validOperationBodyCache.set(op.operation, false);
+    return false;
+  }
 }
 
 export function validateOperation(operation: IncomingOperation, operationMap: OperationMap) {
@@ -86,14 +110,28 @@ export function validateOperation(operation: IncomingOperation, operationMap: Op
           message: `Operation map key "${operation.operationMapKey}" is not found`,
         },
       ],
+      reason: 'operation_map_key_not_found',
     };
   }
 
   if (validate(operation)) {
+    if (!isValidOperationBody(operationMap[operation.operationMapKey])) {
+      return {
+        valid: false,
+        errors: [
+          {
+            message: 'Failed to parse operation',
+          },
+        ],
+        reason: 'invalid_operation_body',
+      };
+    }
+
     return {
       valid: true,
     };
   }
+
   return {
     valid: false,
     errors: validate.errors,

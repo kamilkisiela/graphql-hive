@@ -29,7 +29,7 @@ interface NormalizationResult {
 }
 type NormalizeFunction = (arg: RawOperationMapRecord) => {
   key: string;
-  value: NormalizationResult;
+  value: NormalizationResult | null;
 };
 
 const DAY_IN_MS = 86_400_000;
@@ -72,6 +72,11 @@ export function createProcessor(config: { logger: FastifyLoggerInstance }) {
         for (const rawOperation of rawReport.operations) {
           const processedOperation = processSingleOperation(rawOperation, rawReport.map, rawReport.target, normalize);
 
+          if (processedOperation === null) {
+            // The operation should be ignored
+            continue;
+          }
+
           serializedOperations.push(stringifyOperation(processedOperation));
 
           // legacy
@@ -111,7 +116,13 @@ export function createProcessor(config: { logger: FastifyLoggerInstance }) {
             continue;
           }
 
-          const { value: normalized } = normalize(operationMapRecord)!;
+          const { value: normalized } = normalize(operationMapRecord);
+
+          if (normalized === null) {
+            // The operation should be ignored
+            continue;
+          }
+
           const operationHash = normalized.hash ?? 'unknown';
           const timestamp =
             typeof group.operation.timestamp === 'string'
@@ -151,18 +162,26 @@ function processSingleOperation(
   operationMap: RawOperationMap,
   target: string,
   normalize: NormalizeFunction
-): ProcessedOperation & {
-  legacy: {
-    coordinates: string[];
-    name?: string | null;
-    body: string;
-    kind: string;
-  };
-} {
+):
+  | (ProcessedOperation & {
+      legacy: {
+        coordinates: string[];
+        name?: string | null;
+        body: string;
+        kind: string;
+      };
+    })
+  | null {
   const operationMapRecord = operationMap[operation.operationMapKey];
   const { execution, metadata } = operation;
 
-  const { value: normalized } = normalize(operationMapRecord)!;
+  const { value: normalized } = normalize(operationMapRecord);
+
+  if (normalized === null) {
+    // The operation should be ignored
+    return null;
+  }
+
   const operationHash = normalized.hash ?? 'unknown';
 
   schemaCoordinatesSize.observe(normalized.coordinates.length);
@@ -195,7 +214,16 @@ function getOperationType(operation: DocumentNode): OperationTypeNode {
 
 function normalizeOperation(operation: RawOperationMapRecord) {
   normalizeCacheMisses.inc();
-  const parsed = parse(operation.operation);
+  let parsed: DocumentNode;
+  try {
+    parsed = parse(operation.operation);
+  } catch (error) {
+    // No need to log this, it's already logged by the usage service
+    // We do check for parse errors here (in addition to the usage service),
+    // because the usage service was not parsing the operations before and we got corrupted documents in the Kafka loop.
+    return null;
+  }
+
   const body = coreNormalizeOperation({
     document: parsed,
     hideLiterals: true,

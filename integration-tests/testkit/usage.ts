@@ -31,6 +31,7 @@ export async function collect(params: {
     body: JSON.stringify(params.operations),
     headers: {
       'Content-Type': 'application/json',
+      Accept: 'application/json',
       ...(params.authorizationHeader === 'x-api-token'
         ? {
             'X-API-Token': params.token,
@@ -43,5 +44,14 @@ export async function collect(params: {
 
   return {
     status: res.status,
+    body:
+      res.status === 200
+        ? ((await res.json()) as {
+            operations: {
+              accepted: number;
+              rejected: number;
+            };
+          })
+        : await res.text(),
   };
 }

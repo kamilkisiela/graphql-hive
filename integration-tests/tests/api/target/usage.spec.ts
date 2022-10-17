@@ -29,6 +29,7 @@ function ensureNumber(value: number | string): number {
   return parseFloat(value);
 }
 
+// eslint-disable-next-line no-process-env
 const FF_CLICKHOUSE_V2_TABLES = process.env.FF_CLICKHOUSE_V2_TABLES === '1';
 
 if (FF_CLICKHOUSE_V2_TABLES) {
@@ -1265,6 +1266,109 @@ test('operations with the same schema coordinates and body but with different na
   );
 
   expect(operationsResult.rows).toEqual(2);
+});
+
+test('ignore operations with syntax errors', async () => {
+  const { access_token: owner_access_token } = await authenticate('main');
+  const orgResult = await createOrganization(
+    {
+      name: 'foo',
+    },
+    owner_access_token
+  );
+
+  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+
+  const projectResult = await createProject(
+    {
+      organization: org.cleanId,
+      type: ProjectType.Single,
+      name: 'foo',
+    },
+    owner_access_token
+  );
+
+  const project = projectResult.body.data!.createProject.ok!.createdProject;
+  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
+
+  const tokenResult = await createToken(
+    {
+      name: 'test',
+      organization: org.cleanId,
+      project: project.cleanId,
+      target: target.cleanId,
+      organizationScopes: [OrganizationAccessScope.Read],
+      projectScopes: [ProjectAccessScope.Read],
+      targetScopes: [TargetAccessScope.Read, TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+    },
+    owner_access_token
+  );
+
+  expect(tokenResult.body.errors).not.toBeDefined();
+
+  const token = tokenResult.body.data!.createToken.ok!.secret;
+
+  const collectResult = await collect({
+    operations: [
+      {
+        operation: 'query pingv2 { pingv2 }',
+        operationName: 'pingv2',
+        fields: ['Query', 'Query.pingv2'],
+        execution: {
+          ok: true,
+          duration: 200000000,
+          errorsTotal: 0,
+        },
+      },
+      {
+        operation: 'query ping ping }',
+        operationName: 'ping',
+        fields: ['Query', 'Query.ping'],
+        execution: {
+          ok: true,
+          duration: 200000000,
+          errorsTotal: 0,
+        },
+      },
+    ],
+    token,
+  });
+
+  expect(collectResult.status).toEqual(200);
+  expect(typeof collectResult.body !== 'string' && collectResult.body.operations).toEqual(
+    expect.objectContaining({
+      rejected: 1,
+      accepted: 1,
+    })
+  );
+
+  await waitFor(5_000);
+
+  const coordinatesResult = await clickHouseQuery<{
+    target: string;
+    client_name: string | null;
+    hash: string;
+    total: number;
+  }>(`
+    SELECT coordinate, hash FROM ${
+      FF_CLICKHOUSE_V2_TABLES ? 'coordinates_daily' : 'schema_coordinates_daily'
+    } GROUP BY coordinate, hash
+  `);
+
+  expect(coordinatesResult.rows).toEqual(2);
+
+  const operationsResult = await clickHouseQuery<{
+    target: string;
+    client_name: string | null;
+    hash: string;
+    total: number;
+  }>(
+    FF_CLICKHOUSE_V2_TABLES
+      ? `SELECT hash FROM operation_collection GROUP BY hash`
+      : `SELECT hash FROM operations_registry FINAL GROUP BY hash`
+  );
+
+  expect(operationsResult.rows).toEqual(1);
 });
 
 test('ensure correct data', async () => {

@@ -233,8 +233,6 @@ export function createUsage(config: {
       totalOperations.inc(size);
       rawOperationsSize.observe(size);
 
-      let invalidOperationSize = 0;
-
       const outgoing: RawReport = {
         id: randomUUID(),
         target: token.target,
@@ -243,11 +241,23 @@ export function createUsage(config: {
         operations: [],
       };
 
-      for (const key in incoming.map) {
-        const record = incoming.map[key];
+      const oldNewKeyMapping = new Map<string, string>();
+
+      for (const rawKey in incoming.map) {
+        const record = incoming.map[rawKey];
         const validationResult = validateOperationMapRecord(record);
 
         if (validationResult.valid) {
+          // The key is used for lru cache (usage-ingestor) so we need to make sure, the record is unique per target, operation body, name and the list of fields
+          const key = createHash('md5')
+            .update(outgoing.target)
+            .update(record.operation)
+            .update(record.operationName ?? '')
+            .update(JSON.stringify(record.fields.sort()))
+            .digest('hex');
+
+          oldNewKeyMapping.set(rawKey, key);
+
           outgoing.map[key] = {
             key,
             operation: record.operation,
@@ -258,6 +268,8 @@ export function createUsage(config: {
       }
 
       for (const operation of incoming.operations) {
+        // The validateOperation function drops the operation if the operationMapKey does not exist, we can safely pass the old key in case the new key is missing.
+        operation.operationMapKey = oldNewKeyMapping.get(operation.operationMapKey) ?? operation.operationMapKey;
         const validationResult = validateOperation(operation, outgoing.map);
 
         if (validationResult.valid) {
@@ -284,16 +296,21 @@ export function createUsage(config: {
           });
         } else {
           logger.warn(`Detected invalid operation (target=%s): %o`, token.target, validationResult.errors);
-          invalidOperationSize += 1;
+          invalidRawOperations
+            .labels({
+              reason: 'reason' in validationResult && validationResult.reason ? validationResult.reason : 'unknown',
+            })
+            .inc(1);
         }
       }
 
-      invalidRawOperations.inc(invalidOperationSize);
-
       buffer.add(outgoing);
       return {
-        size: outgoing.size,
         id: outgoing.id,
+        operations: {
+          rejected: size - outgoing.size,
+          accepted: outgoing.size,
+        },
       };
     },
     readiness() {
