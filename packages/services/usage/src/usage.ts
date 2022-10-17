@@ -248,12 +248,12 @@ export function createUsage(config: {
         const validationResult = validateOperationMapRecord(record);
 
         if (validationResult.valid) {
-          // Make sure
+          // The key is used for lru cache (usage-ingestor) so we need to make sure, the record is unique per target, operation body, name and the list of fields
           const key = createHash('md5')
             .update(outgoing.target)
             .update(record.operation)
             .update(record.operationName ?? '')
-            .update(JSON.stringify(record.fields))
+            .update(JSON.stringify(record.fields.sort()))
             .digest('hex');
 
           oldNewKeyMapping.set(rawKey, key);
