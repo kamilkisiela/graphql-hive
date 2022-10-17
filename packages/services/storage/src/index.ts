@@ -686,7 +686,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       return org ? transformOrganization(org) : null;
     },
     async getOrganizations({ user }) {
-      const results = await pool.many<Slonik<organizations>>(
+      const results = await pool.any<Slonik<organizations>>(
         sql`
           SELECT o.*
           FROM public.organizations as o
