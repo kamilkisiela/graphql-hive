@@ -31,7 +31,7 @@ export function deployUsageIngestor({
   heartbeat?: string;
 }) {
   const numberOfPartitions = 6;
-  const replicas = isProduction(deploymentEnv) ? 4 : 1;
+  const replicas = isProduction(deploymentEnv) ? 6 : 1;
   const cpuLimit = isProduction(deploymentEnv) ? '600m' : '300m';
   const maxReplicas = isProduction(deploymentEnv) ? numberOfPartitions : 2;
 
