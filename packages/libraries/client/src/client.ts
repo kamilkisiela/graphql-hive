@@ -42,10 +42,6 @@ export function createHive(options: HivePluginOptions): HiveClient {
     try {
       let endpoint = 'https://app.graphql-hive.com/graphql';
 
-      if (typeof options.usage === 'object' && options.usage.endpoint) {
-        endpoint = options.usage.endpoint;
-      }
-
       // Look for the reporting.endpoint for the legacy reason.
       if (options.reporting && options.reporting.endpoint) {
         endpoint = options.reporting.endpoint;

@@ -128,6 +128,105 @@ test('should send data to Hive', async () => {
       logger,
     },
     token,
+    selfHosting: {
+      graphqlEndpoint: 'http://localhost/graphql',
+      applicationUrl: 'http://localhost/',
+      usageEndpoint: 'http://localhost/200',
+    },
+    usage: true,
+  });
+
+  const collect = hive.collectUsage({
+    schema,
+    document: op,
+    operationName: 'deleteProject',
+  });
+
+  await waitFor(2000);
+  collect({});
+  await hive.dispose();
+  await waitFor(1000);
+  http.done();
+
+  expect(logger.error).not.toHaveBeenCalled();
+  expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sending (queue 1) (attempt 1)`);
+  expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sent!`);
+
+  // Map
+  expect(report.size).toEqual(1);
+  expect(Object.keys(report.map)).toHaveLength(1);
+
+  const key = Object.keys(report.map)[0];
+  const record = report.map[key];
+
+  // operation
+  expect(record.operation).toMatch('mutation deleteProject');
+  expect(record.operationName).toMatch('deleteProject');
+  // fields
+  expect(record.fields).toHaveLength(13);
+  expect(record.fields).toContainEqual('Mutation.deleteProject');
+  expect(record.fields).toContainEqual('Mutation.deleteProject.selector');
+  expect(record.fields).toContainEqual('DeleteProjectPayload.selector');
+  expect(record.fields).toContainEqual('ProjectSelector.organization');
+  expect(record.fields).toContainEqual('ProjectSelector.project');
+  expect(record.fields).toContainEqual('DeleteProjectPayload.deletedProject');
+  expect(record.fields).toContainEqual('Project.id');
+  expect(record.fields).toContainEqual('Project.cleanId');
+  expect(record.fields).toContainEqual('Project.name');
+  expect(record.fields).toContainEqual('Project.type');
+  expect(record.fields).toContainEqual('ProjectSelectorInput.organization');
+  expect(record.fields).toContainEqual('ID');
+  expect(record.fields).toContainEqual('ProjectSelectorInput.project');
+
+  // Operations
+  const operations = report.operations;
+  expect(operations).toHaveLength(1); // one operation
+  const operation = operations[0];
+
+  expect(operation.operationMapKey).toEqual(key);
+  expect(operation.timestamp).toEqual(expect.any(Number));
+  // execution
+  expect(operation.execution.duration).toBeGreaterThanOrEqual(2000 * 1_000_000); // >=2000ms in microseconds
+  expect(operation.execution.duration).toBeLessThan(3000 * 1_000_000); // <3000ms
+  expect(operation.execution.errorsTotal).toBe(0);
+  expect(operation.execution.errors).toHaveLength(0);
+  expect(operation.execution.ok).toBe(true);
+});
+
+test('should send data to Hive (deprecated endpoint)', async () => {
+  const logger = {
+    error: jest.fn(),
+    info: jest.fn(),
+  };
+
+  const token = 'Token';
+
+  let report: Report = {
+    size: 0,
+    map: {},
+    operations: [],
+  };
+  const http = nock('http://localhost')
+    .post('/200')
+    .matchHeader('Authorization', `Bearer ${token}`)
+    .matchHeader('Content-Type', headers['Content-Type'])
+    .matchHeader('graphql-client-name', headers['graphql-client-name'])
+    .matchHeader('graphql-client-version', headers['graphql-client-version'])
+    .once()
+    .reply((_, _body) => {
+      report = _body as any;
+      return [200];
+    });
+
+  const hive = createHive({
+    enabled: true,
+    debug: true,
+    agent: {
+      timeout: 500,
+      maxRetries: 0,
+      logger,
+    },
+    token,
     usage: {
       endpoint: 'http://localhost/200',
     },
