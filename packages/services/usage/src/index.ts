@@ -126,9 +126,9 @@ async function main() {
 
         const stopTimer = collectDuration.startTimer();
         try {
-          await collect(req.body, tokenInfo, retentionInfo);
+          const result = await collect(req.body, tokenInfo, retentionInfo);
           stopTimer();
-          res.status(200).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+          res.status(200).send(result); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
         } catch (error) {
           stopTimer();
           req.log.error('Failed to collect report (token=%s)', maskedToken);

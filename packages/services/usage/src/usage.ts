@@ -306,8 +306,11 @@ export function createUsage(config: {
 
       buffer.add(outgoing);
       return {
-        size: outgoing.size,
         id: outgoing.id,
+        operations: {
+          rejected: size - outgoing.size,
+          accepted: outgoing.size,
+        },
       };
     },
     readiness() {
