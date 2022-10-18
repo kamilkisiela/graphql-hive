@@ -348,7 +348,7 @@ jobs:
       - uses: frabert/replace-string-action@v2.0
         id: branch_name_fix
         with:
-          pattern: '/'
+          pattern: '(\/|-)'
           string: ${{ steps.branch-name.outputs.current_branch }}
           replace-with: '_'
 
