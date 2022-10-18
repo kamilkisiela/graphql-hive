@@ -34,6 +34,7 @@
     "@sentry/node": "7.12.1",
     "@sentry/react": "7.12.1",
     "@sentry/tracing": "7.12.1",
+    "@sentry/types": "7.12.1",
     "@stripe/react-stripe-js": "1.7.2",
     "@stripe/stripe-js": "1.29.0",
     "@tanstack/react-table": "8.0.0-beta.8",
