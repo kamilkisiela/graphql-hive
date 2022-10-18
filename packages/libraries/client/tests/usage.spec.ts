@@ -186,7 +186,7 @@ test('should send data to Hive', async () => {
   expect(operation.operationMapKey).toEqual(key);
   expect(operation.timestamp).toEqual(expect.any(Number));
   // execution
-  expect(operation.execution.duration).toBeGreaterThanOrEqual(2000 * 1_000_000); // >=2000ms in microseconds
+  expect(operation.execution.duration).toBeGreaterThanOrEqual(1500 * 1_000_000); // >=1500ms in microseconds
   expect(operation.execution.duration).toBeLessThan(3000 * 1_000_000); // <3000ms
   expect(operation.execution.errorsTotal).toBe(0);
   expect(operation.execution.errors).toHaveLength(0);
@@ -282,7 +282,7 @@ test('should send data to Hive (deprecated endpoint)', async () => {
   expect(operation.operationMapKey).toEqual(key);
   expect(operation.timestamp).toEqual(expect.any(Number));
   // execution
-  expect(operation.execution.duration).toBeGreaterThanOrEqual(2000 * 1_000_000); // >=2000ms in microseconds
+  expect(operation.execution.duration).toBeGreaterThanOrEqual(1500 * 1_000_000); // >=1500ms in microseconds
   expect(operation.execution.duration).toBeLessThan(3000 * 1_000_000); // <3000ms
   expect(operation.execution.errorsTotal).toBe(0);
   expect(operation.execution.errors).toHaveLength(0);
