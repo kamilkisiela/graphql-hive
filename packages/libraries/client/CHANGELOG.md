@@ -1,5 +1,11 @@
 # @graphql-hive/client
 
+## 0.20.0
+
+### Minor Changes
+
+- [#499](https://github.com/kamilkisiela/graphql-hive/pull/499) [`682cde8`](https://github.com/kamilkisiela/graphql-hive/commit/682cde81092fcb3a55de7f24035be4f2f64abfb3) Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Add Self-Hosting options
+
 ## 0.19.0
 
 ### Major Changes
