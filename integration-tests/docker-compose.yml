@@ -18,7 +18,7 @@ services:
       - 'stack'
 
   clickhouse:
-    image: clickhouse/clickhouse-server:22.6.1-alpine
+    image: clickhouse/clickhouse-server:22.9-alpine
     volumes:
       - ../packages/services/storage/configs/clickhouse:/etc/clickhouse-server/conf.d
     healthcheck:
@@ -36,7 +36,7 @@ services:
       - 'stack'
 
   zookeeper:
-    image: confluentinc/cp-zookeeper:7.1.1-1-ubi8.amd64
+    image: confluentinc/cp-zookeeper:7.2.2
     hostname: zookeeper
     networks:
       - 'stack'
@@ -46,12 +46,16 @@ services:
       nofile:
         soft: 20000
         hard: 40000
+    healthcheck:
+      test: echo srvr | nc zookeeper 2181 || exit 1
+      retries: 20
+      interval: 10s
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
 
   broker:
-    image: confluentinc/cp-kafka:7.1.1-1-ubi8.amd64
+    image: confluentinc/cp-kafka:7.2.2
     hostname: borker
     depends_on:
       zookeeper:
