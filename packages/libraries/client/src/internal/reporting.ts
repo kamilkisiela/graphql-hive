@@ -20,6 +20,7 @@ export function createReporting(pluginOptions: HivePluginOptions): SchemaReporte
   }
 
   const token = pluginOptions.token;
+  const selfHostingOptions = pluginOptions.selfHosting;
   const reportingOptions = pluginOptions.reporting;
   const logger = pluginOptions.agent?.logger ?? console;
 
@@ -40,7 +41,8 @@ export function createReporting(pluginOptions: HivePluginOptions): SchemaReporte
     {
       logger,
       ...(pluginOptions.agent ?? {}),
-      endpoint: reportingOptions.endpoint ?? 'https://app.graphql-hive.com/graphql',
+      endpoint:
+        selfHostingOptions?.graphqlEndpoint ?? reportingOptions.endpoint ?? 'https://app.graphql-hive.com/graphql',
       token: token,
       enabled: pluginOptions.enabled,
       debug: pluginOptions.debug,

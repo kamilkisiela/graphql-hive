@@ -52,6 +52,7 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
     operations: [],
   };
   const options = typeof pluginOptions.usage === 'boolean' ? ({} as HiveUsagePluginOptions) : pluginOptions.usage;
+  const selfHostingOptions = pluginOptions.selfHosting;
   const logger = pluginOptions.agent?.logger ?? console;
   const collector = memo(createCollector, arg => arg.schema);
   const excludeSet = new Set(options.exclude ?? []);
@@ -61,7 +62,7 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
       ...(pluginOptions.agent ?? {
         maxSize: 1500,
       }),
-      endpoint: options.endpoint ?? 'https://app.graphql-hive.com/usage',
+      endpoint: selfHostingOptions?.usageEndpoint ?? options.endpoint ?? 'https://app.graphql-hive.com/usage',
       token: pluginOptions.token,
       enabled: pluginOptions.enabled,
       debug: pluginOptions.debug,

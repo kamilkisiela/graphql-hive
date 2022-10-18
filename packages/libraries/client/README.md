@@ -304,3 +304,32 @@ const server = new ApolloServer({
   ]
 })
 ```
+
+## Self-Hosting
+
+To align the client with your own instance of GraphQL Hive, you should use `selfHosting` options in the client configuration.
+
+The example is based on GraphQL Yoga, but the same configuration applies to Apollo Server and others.
+
+```ts
+import { createYoga } from '@graphql-yoga/node'
+import { useHive } from '@graphql-hive/client'
+
+const server = createYoga({
+  plugins: [
+    useHive({
+      enabled: true,
+      token: 'YOUR-TOKEN',
+      selfHosting: {
+        graphqlEndpoint: 'https://your-own-graphql-hive.com/graphql',
+        applicationUrl: 'https://your-own-graphql-hive.com',
+        usageEndpoint: 'https://your-own-graphql-hive.com/usage' // optional
+      }
+    })
+  ]
+})
+
+server.start()
+```
+
+> The `selfHosting` options take precedence over the deprecated `options.hosting.endpoint` and `options.usage.endpoint`.

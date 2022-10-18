@@ -42,8 +42,13 @@ export function createHive(options: HivePluginOptions): HiveClient {
     try {
       let endpoint = 'https://app.graphql-hive.com/graphql';
 
+      // Look for the reporting.endpoint for the legacy reason.
       if (options.reporting && options.reporting.endpoint) {
         endpoint = options.reporting.endpoint;
+      }
+
+      if (options.selfHosting?.graphqlEndpoint) {
+        endpoint = options.selfHosting.graphqlEndpoint;
       }
 
       const query = /* GraphQL */ `
@@ -104,7 +109,8 @@ export function createHive(options: HivePluginOptions): HiveClient {
           const { organization, project, target, canReportSchema, canCollectUsage, canReadOperations } = tokenInfo;
           const print = createPrinter([tokenInfo.token.name, organization.name, project.name, target.name]);
 
-          const organizationUrl = `https://app.graphql-hive.com/${organization.cleanId}`;
+          const appUrl = options.selfHosting?.applicationUrl?.replace(/\/$/, '') ?? 'https://app.graphql-hive.com';
+          const organizationUrl = `${appUrl}/${organization.cleanId}`;
           const projectUrl = `${organizationUrl}/${project.cleanId}`;
           const targetUrl = `${projectUrl}/${target.cleanId}`;
 
