@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@envelop/core": "3.0.1",
+    "@envelop/core": "3.0.2",
     "@envelop/graphql-modules": "4.0.2",
     "@envelop/generic-auth": "5.0.0-alpha-20220928142730-aa29e80b",
     "@envelop/sentry": "4.0.2",

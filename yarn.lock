@@ -2214,10 +2214,10 @@
     "@envelop/types" "2.4.1-alpha-20220928142730-aa29e80b"
     tslib "2.4.0"
 
-"@envelop/core@3.0.1":
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/@envelop/core/-/core-3.0.1.tgz#863d23a715972e0dbcf49f26dd4d9935fa16847c"
-  integrity sha512-5tRy0SggFuq8LE8nuWv40UWnn2whlVVdKCMgz1MNyMsF29QifI4uOBnVnSHrSeAi0Hp0vUaDkASuKg0SFtkgFw==
+"@envelop/core@3.0.2":
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/@envelop/core/-/core-3.0.2.tgz#0c74b7cf2a1b3fc15bef29dfbebea084249bf5a3"
+  integrity sha512-0kYBq0gKIARF6vFYw5upUcBgI2oP3wYaDTUfjiX4RhMIkox3DiKPUwRiZHu16ILGr8Qi6p+HTKXRyoSdl9CCqA==
   dependencies:
     "@envelop/types" "3.0.0"
     tslib "2.4.0"
