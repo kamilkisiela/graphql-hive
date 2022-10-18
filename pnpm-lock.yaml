@@ -571,6 +571,7 @@ importers:
     specifiers:
       '@sentry/node': 7.12.1
       '@sentry/tracing': 7.12.1
+      '@sentry/types': 7.12.1
       '@sentry/utils': 7.12.1
       '@whatwg-node/fetch': 0.4.7
       fastify: 3.29.3
@@ -586,6 +587,7 @@ importers:
     devDependencies:
       '@sentry/node': 7.12.1
       '@sentry/tracing': 7.12.1
+      '@sentry/types': 7.12.1
       '@sentry/utils': 7.12.1
 
   packages/services/storage:
