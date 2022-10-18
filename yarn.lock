@@ -2273,6 +2273,13 @@
   dependencies:
     tslib "^2.4.0"
 
+"@envelop/types@2.4.1-alpha-20221011182133-9b601839":
+  version "2.4.1-alpha-20221011182133-9b601839"
+  resolved "https://registry.yarnpkg.com/@envelop/types/-/types-2.4.1-alpha-20221011182133-9b601839.tgz#00b5803ccf706c679f31ac0206f82bd538738361"
+  integrity sha512-VG2LNv3lza0yypiTsmEczGq1DnfCvUaFi7MkbwixFwBg9CpR3wleWtwlGW51jWGCY5GLCn37LfDJLLk1onrjQA==
+  dependencies:
+    tslib "^2.4.0"
+
 "@envelop/types@3.0.0":
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@envelop/types/-/types-3.0.0.tgz#33795a7826a541eff00c0d6fb4eab9c35fef784b"

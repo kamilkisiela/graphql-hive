@@ -15,7 +15,7 @@
     "@envelop/graphql-modules": "4.0.2",
     "@envelop/generic-auth": "5.0.0-alpha-20220928142730-aa29e80b",
     "@envelop/sentry": "4.0.2",
-    "@envelop/types": "2.4.1-alpha-20220928142730-aa29e80b",
+    "@envelop/types": "2.4.1-alpha-20221011182133-9b601839",
     "graphql-yoga": "3.0.0-alpha-20221004031114-3ee5fb48",
     "@sentry/node": "7.12.1",
     "@sentry/integrations": "7.12.1",
