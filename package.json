@@ -116,6 +116,6 @@
   "engines": {
     "node": ">=16"
   },
-  "packageManager": "yarn@1.22.18",
+  "packageManager": "yarn@1.22.19",
   "version": "0.0.0"
 }
