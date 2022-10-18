@@ -86,6 +86,7 @@
     "@trpc/client": "9.23.2"
   },
   "devDependencies": {
+    "@graphql-typed-document-node/core": "3.1.1",
     "@next/eslint-plugin-next": "12.1.6",
     "@tailwindcss/line-clamp": "0.3.1",
     "@types/cookies": "0.7.7",
