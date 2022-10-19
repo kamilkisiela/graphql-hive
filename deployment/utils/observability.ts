@@ -318,7 +318,8 @@ export class Observability {
               envoy_json_logs: {
                 type: 'remap',
                 inputs: ['envoy_logs'],
-                source: '. = parse_json!(.message)',
+                drop_on_error: false,
+                source: '. |= object!(parse_json(.message))',
               },
               envoy_error_logs: {
                 type: 'filter',
