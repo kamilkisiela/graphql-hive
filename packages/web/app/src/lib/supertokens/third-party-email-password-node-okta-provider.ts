@@ -31,7 +31,7 @@ export const createThirdPartyEmailPasswordNodeOktaProvider = (config: OktaConfig
             client_id: config.clientId,
             scope: 'openid email profile okta.users.read.self',
             response_type: 'code',
-            redirect_uri: `${env.appBaseUrl.replace(/\/$/, '')}}/auth/callback/okta`,
+            redirect_uri: `${env.appBaseUrl.replace(/\/$/, '')}/auth/callback/okta`,
           },
         },
         getClientId: () => {
