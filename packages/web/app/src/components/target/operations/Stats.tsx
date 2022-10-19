@@ -6,16 +6,11 @@ import tw from 'twin.macro';
 import { useQuery } from 'urql';
 
 import { Section } from '@/components/common';
-import {
-  DateRangeInput,
-  DurationHistogramDocument,
-  GeneralOperationsStatsDocument,
-  GeneralOperationsStatsQuery,
-} from '@/graphql';
+import { DateRangeInput, GeneralOperationsStatsDocument, GeneralOperationsStatsQuery } from '@/graphql';
 import { theme } from '@/lib/charts';
 import { toDecimal } from '@/lib/hooks/use-decimal';
-import { formatDuration, useFormattedDuration } from '@/lib/hooks/use-formatted-duration';
-import { formatNumber, useFormattedNumber } from '@/lib/hooks/use-formatted-number';
+import { useFormattedDuration } from '@/lib/hooks/use-formatted-duration';
+import { useFormattedNumber } from '@/lib/hooks/use-formatted-number';
 import { formatThroughput, useFormattedThroughput } from '@/lib/hooks/use-formatted-throughput';
 import { OperationsFallback } from './Fallback';
 
@@ -743,113 +738,6 @@ const RpmOverTimeStats: React.FC<{
   );
 };
 
-const LatencyHistogramStats: React.FC<{
-  organization: string;
-  project: string;
-  target: string;
-  period: {
-    from: string;
-    to: string;
-  };
-  operationsFilter: string[];
-}> = ({ organization, project, target, period, operationsFilter }) => {
-  const styles = useChartStyles();
-  const [query, refetch] = useQuery({
-    query: DurationHistogramDocument,
-    variables: {
-      selector: {
-        organization,
-        project,
-        target,
-        period,
-        operations: operationsFilter,
-      },
-      resolution: 90,
-    },
-  });
-
-  const histogram = query.data?.operationsStats?.durationHistogram ?? [];
-
-  const durationHistogram = React.useMemo(() => {
-    if (histogram.length) {
-      return histogram.map(node => [node.duration, node.count]);
-    }
-
-    return [];
-  }, [histogram]);
-
-  const min = histogram.length ? durationHistogram[0][0] : 1;
-  const max = histogram.length ? durationHistogram[durationHistogram.length - 1][0] : 10_000;
-  const totalRequests = durationHistogram.reduce((sum, node) => node[1] + sum, 0);
-
-  return (
-    <OperationsFallback
-      isError={!!query.error}
-      refetch={() => {
-        refetch({
-          requestPolicy: 'cache-and-network',
-        });
-      }}
-    >
-      <div className="rounded-md bg-gray-900/50 p-5 ring-1 ring-gray-800">
-        <Section.Title>Latency histogram</Section.Title>
-        <Section.Subtitle>Distribution of duration of all GraphQL requests</Section.Subtitle>
-        <AutoSizer disableHeight>
-          {size => (
-            <ReactECharts
-              style={{ width: size.width, height: 200 }}
-              theme={theme.theme}
-              option={{
-                ...styles,
-                grid: {
-                  left: 20,
-                  top: 20,
-                  right: 20,
-                  bottom: 20,
-                  containLabel: true,
-                },
-                tooltip: {
-                  trigger: 'axis',
-                  formatter([record]: [{ data: [number, number] }]) {
-                    const [duration, count] = record.data;
-                    const percentage = toDecimal((count * 100) / totalRequests);
-
-                    return `${formatDuration(duration, true)} - ${formatNumber(count)} requests ${percentage}%`;
-                  },
-                },
-                xAxis: [
-                  {
-                    type: 'log',
-                    scale: true,
-                    min,
-                    max,
-                    axisLabel: {
-                      formatter: (value: number) => formatDuration(value, true),
-                    },
-                  },
-                ],
-                yAxis: [{ type: 'value', min: 0 }],
-                series: [
-                  {
-                    type: 'bar',
-                    name: 'Request Duration',
-                    symbol: 'none',
-                    color: 'rgb(234, 179, 8)',
-                    areaStyle: {},
-                    barMaxWidth: 5,
-                    large: true,
-                    data: durationHistogram,
-                  },
-                ],
-              }}
-            />
-          )}
-        </AutoSizer>
-      </div>
-    </OperationsFallback>
-  );
-};
-
 export const OperationsStats: React.FC<{
   organization: string;
   project: string;
@@ -953,15 +841,6 @@ export const OperationsStats: React.FC<{
         <OperationsFallback isError={isError} refetch={refetch}>
           <LatencyOverTimeStats period={period} duration={operationsStats?.durationOverTime} resolution={resolution} />
         </OperationsFallback>
-      </div>
-      <div>
-        <LatencyHistogramStats
-          organization={organization}
-          project={project}
-          target={target}
-          period={period}
-          operationsFilter={operationsFilter}
-        />
       </div>
     </section>
   );
