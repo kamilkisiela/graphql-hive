@@ -12,8 +12,8 @@ module.exports = {
     'packages/web/app/src/graphql/index.ts',
     'packages/libraries/cli/src/sdk.ts',
     'packages/services/storage/src/db/types.ts',
-    'babel.config.cjs',
     'jest.config.js',
+    'babel.config.cjs',
   ],
   parserOptions: {
     ecmaVersion: 2020,
