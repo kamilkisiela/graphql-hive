@@ -319,7 +319,7 @@ export class Observability {
                 type: 'remap',
                 inputs: ['envoy_logs'],
                 drop_on_error: false,
-                source: '. |= object!(parse_json!(.message))',
+                source: '.response_code = object!(parse_json!(.message, max_depth: 1)).response_code',
               },
               envoy_error_logs: {
                 type: 'filter',
