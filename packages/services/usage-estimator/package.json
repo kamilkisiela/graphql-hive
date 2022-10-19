@@ -23,7 +23,8 @@
   "devDependencies": {
     "@hive/api": "0.0.1",
     "@hive/service-common": "0.0.0",
-    "pino-pretty": "6.0.0"
+    "pino-pretty": "6.0.0",
+    "tslib": "2.4.0"
   },
   "buildOptions": {
     "runify": true,

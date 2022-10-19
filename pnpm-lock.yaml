@@ -270,10 +270,12 @@ importers:
     specifiers:
       '@apollo/federation': 0.36.1
       esbuild: 0.14.39
+      fastify: 3.29.3
       graphql: 16.5.0
     devDependencies:
       '@apollo/federation': 0.36.1_graphql@16.5.0
       esbuild: 0.14.39
+      fastify: 3.29.3
       graphql: 16.5.0
     publishDirectory: dist
 
@@ -321,6 +323,7 @@ importers:
       p-timeout: 5.0.2
       param-case: 3.0.4
       supertokens-node: 12.0.2
+      tslib: 2.4.0
       uuid: 8.3.2
       zod: 3.15.1
     dependencies:
@@ -369,6 +372,7 @@ importers:
       '@types/ms': 0.7.31
       '@types/uuid': 8.3.4
       ioredis-mock: 7.4.0_ioredis@4.28.3
+      tslib: 2.4.0
 
   packages/services/cdn-worker:
     specifiers:
@@ -402,6 +406,7 @@ importers:
       '@hive/service-common': 0.0.0
       '@sentry/node': 7.12.1
       '@trpc/server': 9.23.2
+      '@types/ioredis': 4.28.10
       '@types/mjml': 4.7.0
       '@types/nodemailer': 6.4.6
       '@types/sendmail': 1.4.4
@@ -415,6 +420,7 @@ importers:
       p-timeout: 5.0.2
       pino-pretty: 6.0.0
       sendmail: 1.6.1
+      tslib: 2.4.0
       zod: 3.15.1
     dependencies:
       '@sentry/node': 7.12.1
@@ -430,11 +436,13 @@ importers:
       zod: 3.15.1
     devDependencies:
       '@hive/service-common': link:../service-common
+      '@types/ioredis': 4.28.10
       '@types/mjml': 4.7.0
       '@types/nodemailer': 6.4.6
       '@types/sendmail': 1.4.4
       copyfiles: 2.4.1
       pino-pretty: 6.0.0
+      tslib: 2.4.0
 
   packages/services/police-worker:
     specifiers:
@@ -461,6 +469,7 @@ importers:
       got: 12.5.1
       pino-pretty: 6.0.0
       reflect-metadata: 0.1.13
+      tslib: 2.4.0
       zod: 3.15.1
     dependencies:
       '@sentry/node': 7.12.1
@@ -478,6 +487,7 @@ importers:
       '@hive/service-common': link:../service-common
       '@hive/storage': link:../storage
       pino-pretty: 6.0.0
+      tslib: 2.4.0
 
   packages/services/schema:
     specifiers:
@@ -493,6 +503,7 @@ importers:
       '@whatwg-node/fetch': 0.4.7
       async-retry: 1.3.3
       dotenv: 10.0.0
+      fastify: 3.29.3
       graphql: 16.5.0
       ioredis: 4.28.3
       pino-pretty: 6.0.0
@@ -514,6 +525,7 @@ importers:
       '@hive/service-common': link:../service-common
       '@types/async-retry': 1.4.3
       '@types/ioredis': 4.28.7
+      fastify: 3.29.3
       pino-pretty: 6.0.0
 
   packages/services/server:
@@ -534,12 +546,14 @@ importers:
       '@trpc/server': 9.23.2
       '@whatwg-node/fetch': 0.4.7
       dotenv: 10.0.0
+      fastify: 3.29.3
       got: 12.5.1
       graphql: 16.5.0
       graphql-yoga: 3.0.0-next.5
       hyperid: 2.3.1
       pino-pretty: 6.0.0
       reflect-metadata: 0.1.13
+      tslib: 2.4.0
       zod: 3.15.1
     dependencies:
       '@envelop/core': 3.0.2
@@ -565,7 +579,9 @@ importers:
       '@hive/service-common': link:../service-common
       '@hive/storage': link:../storage
       '@swc/core': 1.2.185
+      fastify: 3.29.3
       pino-pretty: 6.0.0
+      tslib: 2.4.0
 
   packages/services/service-common:
     specifiers:
@@ -669,11 +685,13 @@ importers:
       '@trpc/server': 9.23.2
       '@types/ms': 0.7.31
       dotenv: 10.0.0
+      fastify: 3.29.3
       ms: 2.1.3
       p-timeout: 5.0.2
       pino-pretty: 6.0.0
       reflect-metadata: 0.1.13
       tiny-lru: 8.0.2
+      tslib: 2.4.0
       zod: 3.15.1
     dependencies:
       '@sentry/node': 7.12.1
@@ -689,7 +707,9 @@ importers:
       '@hive/service-common': link:../service-common
       '@hive/storage': link:../storage
       '@types/ms': 0.7.31
+      fastify: 3.29.3
       pino-pretty: 6.0.0
+      tslib: 2.4.0
 
   packages/services/usage:
     specifiers:
@@ -744,6 +764,7 @@ importers:
       got: 12.5.1
       pino-pretty: 6.0.0
       reflect-metadata: 0.1.13
+      tslib: 2.4.0
       zod: 3.15.1
     dependencies:
       '@sentry/node': 7.12.1
@@ -758,6 +779,7 @@ importers:
       '@hive/api': link:../api
       '@hive/service-common': link:../service-common
       pino-pretty: 6.0.0
+      tslib: 2.4.0
 
   packages/services/usage-ingestor:
     specifiers:
@@ -774,6 +796,7 @@ importers:
       kafkajs: 2.2.0
       pino-pretty: 6.0.0
       tiny-lru: 8.0.2
+      tslib: 2.4.0
       zod: 3.15.1
     dependencies:
       '@sentry/node': 7.12.1
@@ -791,6 +814,7 @@ importers:
       '@hive/service-common': link:../service-common
       '@hive/usage-common': link:../usage-common
       pino-pretty: 6.0.0
+      tslib: 2.4.0
 
   packages/services/webhooks:
     specifiers:
@@ -798,6 +822,7 @@ importers:
       '@sentry/node': 7.12.1
       '@sentry/tracing': 7.12.1
       '@trpc/server': 9.23.2
+      '@types/ioredis': 4.28.10
       bullmq: 1.81.4
       copyfiles: 2.4.1
       dotenv: 10.0.0
@@ -805,6 +830,7 @@ importers:
       ioredis: 4.28.3
       p-timeout: 5.0.2
       pino-pretty: 6.0.0
+      tslib: 2.4.0
       zod: 3.15.1
     dependencies:
       '@sentry/node': 7.12.1
@@ -818,8 +844,10 @@ importers:
       zod: 3.15.1
     devDependencies:
       '@hive/service-common': link:../service-common
+      '@types/ioredis': 4.28.10
       copyfiles: 2.4.1
       pino-pretty: 6.0.0
+      tslib: 2.4.0
 
   packages/web/app:
     specifiers:
@@ -8700,6 +8728,12 @@ packages:
       '@types/ioredis': 4.28.7
     dev: true
 
+  /@types/ioredis/4.28.10:
+    resolution: {integrity: sha512-69LyhUgrXdgcNDv7ogs1qXZomnfOEnSmrmMFqKgt1XMJxmoOSG/u3wYy13yACIfKuMJ8IhKgHafDO3sx19zVQQ==}
+    dependencies:
+      '@types/node': 18.8.5
+    dev: true
+
   /@types/ioredis/4.28.7:
     resolution: {integrity: sha512-jnSGCD2/TPk02j6v6CGqaCEl0LbmLgK6jUuk/AFaSNUBV+SCHiG7E7fnwJreN6hw9GqtLAFkJs4zFbkJrz11mQ==}
     dependencies:
@@ -10465,7 +10499,7 @@ packages:
     resolution: {integrity: sha512-xq+q3SRMOxGivLhBNaUdC64hDTQwejJ+H0T/NB1XMtTVEwNTrfFF3gAxiyW0Bu/xWEGhjVKgUcMhCrUy2+uCWg==}
     dependencies:
       base64-js: 1.5.1
-      ieee754: 1.1.13
+      ieee754: 1.2.1
       isarray: 1.0.0
 
   /buffer/5.7.1:
@@ -13420,6 +13454,28 @@ packages:
       tiny-lru: 8.0.2
     transitivePeerDependencies:
       - supports-color
+
+  /fastify/3.29.3:
+    resolution: {integrity: sha512-PA5mGkVnAnhysmyAnXMN9gdOlcfIxyGsfj9C7/a3sSfe5mC38euEGRLEB0T7ygbi7TIZ9yIZ/FLiERpwZeWriA==}
+    dependencies:
+      '@fastify/ajv-compiler': 1.1.0
+      '@fastify/error': 2.0.0
+      abstract-logging: 2.0.1
+      avvio: 7.2.5
+      fast-json-stringify: 2.7.13
+      find-my-way: 4.5.1
+      flatstr: 1.0.12
+      light-my-request: 4.12.0
+      pino: 6.14.0
+      process-warning: 1.0.0
+      proxy-addr: 2.0.7
+      rfdc: 1.3.0
+      secure-json-parse: 2.5.0
+      semver: 7.3.8
+      tiny-lru: 8.0.2
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
 
   /fastq/1.13.0:
     resolution: {integrity: sha512-YpkpUnK8od0o1hmeSc7UUs/eB/vIPWJYjKck2QKIzAf71Vm1AAQ3EbuZB3g2JIy+pg+ERD0vqI79KyZiB2e2Nw==}

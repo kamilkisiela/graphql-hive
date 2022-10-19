@@ -27,9 +27,11 @@
     "@types/mjml": "4.7.0",
     "@types/nodemailer": "6.4.6",
     "@types/sendmail": "1.4.4",
+    "@types/ioredis": "4.28.10",
     "@hive/service-common": "0.0.0",
     "copyfiles": "2.4.1",
-    "pino-pretty": "6.0.0"
+    "pino-pretty": "6.0.0",
+    "tslib": "2.4.0"
   },
   "buildOptions": {
     "runify": true,
