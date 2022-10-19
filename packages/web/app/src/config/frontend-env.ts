@@ -17,6 +17,7 @@ export const env = {
   auth: {
     github: !!backendEnv.auth.github,
     google: !!backendEnv.auth.google,
+    okta: backendEnv.auth.okta ? { hidden: backendEnv.auth.okta.hidden } : null,
     legacyAuth0: !!backendEnv.auth.legacyAuth0,
     requireEmailVerification: backendEnv.auth.requireEmailVerification,
   },

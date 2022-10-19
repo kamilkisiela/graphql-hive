@@ -52,6 +52,19 @@ const AuthGoogleConfigSchema = zod.union([
   }),
 ]);
 
+const AuthOktaConfigSchema = zod.union([
+  zod.object({
+    AUTH_OKTA: zod.union([zod.void(), zod.literal('0')]),
+  }),
+  zod.object({
+    AUTH_OKTA: zod.literal('1'),
+    AUTH_OKTA_HIDDEN: zod.union([zod.literal('1'), zod.literal('0')]).optional(),
+    AUTH_OKTA_ENDPOINT: zod.string().url(),
+    AUTH_OKTA_CLIENT_ID: zod.string(),
+    AUTH_OKTA_CLIENT_SECRET: zod.string(),
+  }),
+]);
+
 const SentryConfigSchema = zod.union([
   zod.object({
     SENTRY: zod.union([zod.void(), zod.literal('0')]),
@@ -89,6 +102,8 @@ const configs = {
   // eslint-disable-next-line no-process-env
   authGoogle: AuthGoogleConfigSchema.safeParse(process.env),
   // eslint-disable-next-line no-process-env
+  authOkta: AuthOktaConfigSchema.safeParse(process.env),
+  // eslint-disable-next-line no-process-env
   authLegacyAuth0: LegacyAuth0Config.safeParse(process.env),
 };
 
@@ -118,6 +133,7 @@ const integrationSlack = extractConfig(configs.integrationSlack);
 const sentry = extractConfig(configs.sentry);
 const authGithub = extractConfig(configs.authGithub);
 const authGoogle = extractConfig(configs.authGoogle);
+const authOkta = extractConfig(configs.authOkta);
 const auth0Legacy = extractConfig(configs.authLegacyAuth0);
 
 const config = {
@@ -162,6 +178,15 @@ const config = {
         ? {
             clientId: authGoogle.AUTH_GOOGLE_CLIENT_ID,
             clientSecret: authGoogle.AUTH_GOOGLE_CLIENT_SECRET,
+          }
+        : null,
+    okta:
+      authOkta.AUTH_OKTA === '1'
+        ? {
+            endpoint: authOkta.AUTH_OKTA_ENDPOINT,
+            hidden: authOkta.AUTH_OKTA_HIDDEN === '1',
+            clientId: authOkta.AUTH_OKTA_CLIENT_ID,
+            clientSecret: authOkta.AUTH_OKTA_CLIENT_SECRET,
           }
         : null,
     legacyAuth0:

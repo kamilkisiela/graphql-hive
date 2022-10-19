@@ -3,7 +3,7 @@ import { middleware } from 'supertokens-node/framework/express';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Request, Response } from 'express';
 import supertokens from 'supertokens-node';
-import { backendConfig } from '@/config/backend-config';
+import { backendConfig } from '@/config/supertokens/backend';
 import NextCors from 'nextjs-cors';
 import { env } from '@/env/backend';
 

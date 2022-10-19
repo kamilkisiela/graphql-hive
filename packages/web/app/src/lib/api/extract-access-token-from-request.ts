@@ -2,7 +2,7 @@ import supertokens from 'supertokens-node';
 import { superTokensNextWrapper } from 'supertokens-node/nextjs';
 import { verifySession } from 'supertokens-node/recipe/session/framework/express';
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { backendConfig } from '@/config/backend-config';
+import { backendConfig } from '@/config/supertokens/backend';
 
 supertokens.init(backendConfig());
 

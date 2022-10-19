@@ -59,7 +59,7 @@ export const authenticated =
   };
 
 export const serverSidePropsSessionHandling = async (context: Parameters<GetServerSideProps>[0]) => {
-  const { backendConfig } = await import('@/config/backend-config');
+  const { backendConfig } = await import('@/config/supertokens/backend');
   const SupertokensNode = await import('supertokens-node');
   const Session = await import('supertokens-node/recipe/session');
   SupertokensNode.init(backendConfig());
