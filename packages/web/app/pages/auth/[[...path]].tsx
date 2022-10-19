@@ -5,6 +5,7 @@ import { FullLogo } from '@/components/common/Logo';
 import dynamic from 'next/dynamic';
 import SuperTokensReact from 'supertokens-auth-react';
 import { env } from '@/env/frontend';
+import { startAuthFlowForProvider } from '@/lib/supertokens/start-auth-flow-for-provider';
 
 export function getServerSideProps() {
   return {
@@ -20,6 +21,17 @@ const SuperTokensComponentNoSSR = dynamic(new Promise(res => res(SuperTokensReac
  * Route for showing the SuperTokens login page.
  */
 export default function Auth(): React.ReactElement {
+  React.useEffect(() => {
+    // In case we are directed here from the Okta dashboard we automatically start the login flow.
+    const isOkta =
+      env.auth.okta !== null &&
+      new URLSearchParams(globalThis.window?.location.search ?? '').get('provider') === 'okta';
+
+    if (isOkta) {
+      startAuthFlowForProvider('okta');
+    }
+  }, []);
+
   return (
     <>
       <>
