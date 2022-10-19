@@ -24,19 +24,19 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: pnpm/action-setup@v2.2.2
+      - name: Install Node
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2.2.2
         with:
           version: 7
 
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
-          node-version-file: .node-version
-
-      - name: Install Dependencies
-        run: pnpm i
+      - name: Install deps
+        run: pnpm i --frozen-lockfile
 
       - name: Generate GraphQL Types
         run: pnpm graphql:generate
@@ -299,17 +299,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - uses: pnpm/action-setup@v2.2.2
-        with:
-          version: 7
-
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
-          node-version-file: .node-version
-
       - name: Install Rust
         run: |
           curl https://sh.rustup.rs -sSf | sh -s -- -y
@@ -394,18 +383,19 @@ jobs:
         with:
           fetch-depth: 5
 
-      - uses: pnpm/action-setup@v2.2.2
+      - name: Install Node
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2.2.2
         with:
           version: 7
 
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
-          node-version-file: .node-version
-
-      - run: pnpm i
+      - name: Install deps
+        run: pnpm i --frozen-lockfile
 
       - name: Generate Types
         run: pnpm graphql:generate

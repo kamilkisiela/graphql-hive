@@ -43,19 +43,19 @@ jobs:
         with:
           fetch-depth: 1
 
-      - uses: pnpm/action-setup@v2.2.2
+      - name: Install Node
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2.2.2
         with:
           version: 7
 
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
-          node-version-file: .node-version
-
-      - name: Install Dependencies
-        run: pnpm i
+      - name: Install deps
+        run: pnpm i --frozen-lockfile
 
       - name: Create Database
         working-directory: packages/services/storage
@@ -103,22 +103,19 @@ jobs:
         with:
           fetch-depth: 5
 
-      - uses: pnpm/action-setup@v2.2.2
+      - name: Install Node
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2.2.2
         with:
           version: 7
 
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
-          node-version-file: .node-version
-
-      - name: Pull node_modules
-        uses: actions/cache@v2
-        with:
-          path: '**/node_modules'
-          key: ${{ github.sha }}
+      - name: Install deps
+        run: pnpm i --frozen-lockfile
 
       - name: Generate Types
         run: pnpm graphql:generate
@@ -149,22 +146,19 @@ jobs:
         with:
           fetch-depth: 1
 
-      - uses: pnpm/action-setup@v2.2.2
+      - name: Install Node
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2.2.2
         with:
           version: 7
 
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
-          node-version-file: .node-version
-
-      - name: Pull node_modules
-        uses: actions/cache@v2
-        with:
-          path: '**/node_modules'
-          key: ${{ github.sha }}
+      - name: Install deps
+        run: pnpm i --frozen-lockfile
 
       - name: Generate Types
         run: pnpm graphql:generate
@@ -190,22 +184,19 @@ jobs:
         with:
           fetch-depth: 5
 
-      - uses: pnpm/action-setup@v2.2.2
+      - name: Install Node
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2.2.2
         with:
           version: 7
 
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
-          node-version-file: .node-version
-
-      - name: Pull node_modules
-        uses: actions/cache@v2
-        with:
-          path: '**/node_modules'
-          key: ${{ github.sha }}
+      - name: Install deps
+        run: pnpm i --frozen-lockfile
 
       - name: Setup Turbo
         run: node ./scripts/turborepo-setup.js
@@ -249,16 +240,19 @@ jobs:
         with:
           fetch-depth: 2
 
-      - uses: pnpm/action-setup@v2.2.2
+      - name: Install Node
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2.2.2
         with:
           version: 7
 
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
-          node-version-file: .node-version
+      - name: Install deps
+        run: pnpm i --frozen-lockfile
 
       - name: Install Rust
         run: |
@@ -303,22 +297,19 @@ jobs:
         with:
           fetch-depth: 5
 
-      - uses: pnpm/action-setup@v2.2.2
+      - name: Install Node
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2.2.2
         with:
           version: 7
 
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
-          node-version-file: .node-version
-
-      - name: Pull node_modules
-        uses: actions/cache@v2
-        with:
-          path: '**/node_modules'
-          key: ${{ github.sha }}
+      - name: Install deps
+        run: pnpm i --frozen-lockfile
 
       - name: ESLint cache
         uses: actions/cache@v2
@@ -422,22 +413,19 @@ jobs:
         with:
           fetch-depth: 5
 
-      - uses: pnpm/action-setup@v2.2.2
+      - name: Install Node
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2.2.2
         with:
           version: 7
 
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
-          node-version-file: .node-version
-
-      - name: Pull node_modules
-        uses: actions/cache@v2
-        with:
-          path: '**/node_modules'
-          key: ${{ github.sha }}
+      - name: Install deps
+        run: pnpm i --frozen-lockfile
 
       - name: Setup Turbo
         run: node ./scripts/turborepo-setup.js
@@ -542,24 +530,22 @@ jobs:
         with:
           fetch-depth: 5
 
-      - uses: pnpm/action-setup@v2.2.2
-        with:
-          version: 7
-
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Install Node
         if: steps.feature_flags.outputs.detected == 'true'
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
           node-version-file: .node-version
+          cache: pnpm
 
-      - name: Pull node_modules
+      - name: Install pnpm
         if: steps.feature_flags.outputs.detected == 'true'
-        uses: actions/cache@v2
+        uses: pnpm/action-setup@v2.2.2
         with:
-          path: '**/node_modules'
-          key: ${{ github.sha }}
+          version: 7
+
+      - name: Install deps
+        if: steps.feature_flags.outputs.detected == 'true'
+        run: pnpm i --frozen-lockfile
 
       - name: Setup Turbo
         if: steps.feature_flags.outputs.detected == 'true'
