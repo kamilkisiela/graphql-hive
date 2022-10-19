@@ -315,17 +315,15 @@ export class Observability {
               },
             },
             transforms: {
-              transforms: {
-                envoy_json_logs: {
-                  type: 'remap',
-                  inputs: ['envoy_logs'],
-                  source: '. = parse_json!(.message)',
-                },
-                envoy_error_logs: {
-                  type: 'filter',
-                  inputs: ['envoy_json_logs'],
-                  condition: '.response_code != 200',
-                },
+              envoy_json_logs: {
+                type: 'remap',
+                inputs: ['envoy_logs'],
+                source: '. = parse_json!(.message)',
+              },
+              envoy_error_logs: {
+                type: 'filter',
+                inputs: ['envoy_json_logs'],
+                condition: '.response_code != 200',
               },
             },
             sinks: {
