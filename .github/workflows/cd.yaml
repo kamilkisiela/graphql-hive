@@ -24,16 +24,16 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2.2.2
+        with:
+          version: 7
+
       - name: Install Node
         uses: actions/setup-node@v3
         with:
           node-version-file: .node-version
           cache: pnpm
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2.2.2
-        with:
-          version: 7
 
       - name: Install deps
         run: pnpm i --frozen-lockfile
@@ -383,16 +383,16 @@ jobs:
         with:
           fetch-depth: 5
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2.2.2
+        with:
+          version: 7
+
       - name: Install Node
         uses: actions/setup-node@v3
         with:
           node-version-file: .node-version
           cache: pnpm
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2.2.2
-        with:
-          version: 7
 
       - name: Install deps
         run: pnpm i --frozen-lockfile

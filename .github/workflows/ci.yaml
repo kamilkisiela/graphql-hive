@@ -43,16 +43,16 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2.2.2
+        with:
+          version: 7
+
       - name: Install Node
         uses: actions/setup-node@v3
         with:
           node-version-file: .node-version
           cache: pnpm
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2.2.2
-        with:
-          version: 7
 
       - name: Install deps
         run: pnpm i --frozen-lockfile
@@ -103,16 +103,16 @@ jobs:
         with:
           fetch-depth: 5
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2.2.2
+        with:
+          version: 7
+
       - name: Install Node
         uses: actions/setup-node@v3
         with:
           node-version-file: .node-version
           cache: pnpm
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2.2.2
-        with:
-          version: 7
 
       - name: Install deps
         run: pnpm i --frozen-lockfile
@@ -146,16 +146,16 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2.2.2
+        with:
+          version: 7
+
       - name: Install Node
         uses: actions/setup-node@v3
         with:
           node-version-file: .node-version
           cache: pnpm
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2.2.2
-        with:
-          version: 7
 
       - name: Install deps
         run: pnpm i --frozen-lockfile
@@ -184,16 +184,16 @@ jobs:
         with:
           fetch-depth: 5
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2.2.2
+        with:
+          version: 7
+
       - name: Install Node
         uses: actions/setup-node@v3
         with:
           node-version-file: .node-version
           cache: pnpm
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2.2.2
-        with:
-          version: 7
 
       - name: Install deps
         run: pnpm i --frozen-lockfile
@@ -240,16 +240,16 @@ jobs:
         with:
           fetch-depth: 2
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2.2.2
+        with:
+          version: 7
+
       - name: Install Node
         uses: actions/setup-node@v3
         with:
           node-version-file: .node-version
           cache: pnpm
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2.2.2
-        with:
-          version: 7
 
       - name: Install deps
         run: pnpm i --frozen-lockfile
@@ -297,16 +297,16 @@ jobs:
         with:
           fetch-depth: 5
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2.2.2
+        with:
+          version: 7
+
       - name: Install Node
         uses: actions/setup-node@v3
         with:
           node-version-file: .node-version
           cache: pnpm
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2.2.2
-        with:
-          version: 7
 
       - name: Install deps
         run: pnpm i --frozen-lockfile
@@ -413,16 +413,16 @@ jobs:
         with:
           fetch-depth: 5
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2.2.2
+        with:
+          version: 7
+
       - name: Install Node
         uses: actions/setup-node@v3
         with:
           node-version-file: .node-version
           cache: pnpm
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2.2.2
-        with:
-          version: 7
 
       - name: Install deps
         run: pnpm i --frozen-lockfile
@@ -530,18 +530,18 @@ jobs:
         with:
           fetch-depth: 5
 
+      - name: Install pnpm
+        if: steps.feature_flags.outputs.detected == 'true'
+        uses: pnpm/action-setup@v2.2.2
+        with:
+          version: 7
+
       - name: Install Node
         if: steps.feature_flags.outputs.detected == 'true'
         uses: actions/setup-node@v3
         with:
           node-version-file: .node-version
           cache: pnpm
-
-      - name: Install pnpm
-        if: steps.feature_flags.outputs.detected == 'true'
-        uses: pnpm/action-setup@v2.2.2
-        with:
-          version: 7
 
       - name: Install deps
         if: steps.feature_flags.outputs.detected == 'true'
