@@ -9,7 +9,7 @@ export const startAuthFlowForProvider = async (providerId: 'google' | 'okta' | '
     providerId,
     // This is where Google should redirect the user back after login or error.
     // This URL goes on the Google's dashboard as well.
-    authorisationURL: `${env.appBaseUrl}/auth/callback/${providerId}`,
+    authorisationURL: `${env.appBaseUrl.replace(/\/$/, '')}/auth/callback/${providerId}`,
   });
 
   window.location.assign(authUrl);
