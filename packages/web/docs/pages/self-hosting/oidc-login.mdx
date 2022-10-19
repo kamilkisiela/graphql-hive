@@ -1,0 +1,41 @@
+# OIDC Login
+
+By default GraphQL Hive allows you to login using a email and password.
+However, you can also enable OIDC (often refered to as social login).
+This allows you to login using a third party provider such as GitHub and Google.
+
+## GitHub
+
+First, you need to create a new GitHub application on https://github.com/settings/applications/new
+
+For the `Homepage URL` option full in the web app base url (e.g. `https://myapp.com`).
+For the `Authorization callback URL` option use the web app base url followed by `/auth/callback/github` (e.g. `https://myapp.com/auth/callback/github`)`.
+
+Create the app and generate a new client secret.
+
+Then, you need to add the following environment variables for your GraphQL Hive `app` instance:
+
+```bash
+AUTH_GITHUB=1
+AUTH_GITHUB_CLIENT_ID=741784e6331a404eaXXX                         # use the one of your app
+AUTH_GITHUB_CLIENT_SECRET=e43e123dd54de2b56126dc4afc4491dbbba6bXXX # use the you just created
+```
+
+Now the Sign Up with GitHub button should be visible on the login page.
+
+## Google
+
+First, you need to create a new Google OIDC application following this guide: https://support.google.com/cloud/answer/6158849
+
+For the `Homepage URL` option full in the web app base url (e.g. `https://myapp.com`).
+For the `Authorization callback URL` option use the web app base url followed by `/auth/callback/google` (e.g. `https://myapp.com/auth/callback/google`)`.
+
+Then, you need to add the following environment variables for your GraphQL Hive `app` instance:
+
+```bash
+AUTH_GOOGLE=1
+AUTH_GOOGLE_CLIENT_ID=741784e6331a404eaXXX                         # use the one of your app
+AUTH_GOOGLE_CLIENT_SECRET=e43e123dd54de2b56126dc4afc4491dbbba6bXXX # use the you just created
+```
+
+Now the Sign Up with GitHub button should be visible on the login page.
