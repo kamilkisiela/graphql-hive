@@ -309,6 +309,23 @@ export class Observability {
                 type: 'kubernetes_logs',
                 extra_field_selector: 'metadata.namespace=default',
               },
+              envoy_logs: {
+                type: 'kubernetes_logs',
+                extra_field_selector: 'metadata.namespace=contour',
+              },
+            },
+            transforms: {
+              envoy_json_logs: {
+                type: 'remap',
+                inputs: ['envoy_logs'],
+                drop_on_error: false,
+                source: '. |= object!(parse_json!(.message))',
+              },
+              envoy_error_logs: {
+                type: 'filter',
+                inputs: ['envoy_json_logs'],
+                condition: '.response_code != 200 && .response_code != 401',
+              },
             },
             sinks: {
               // enable if you need to debug the raw vector messages
@@ -319,7 +336,7 @@ export class Observability {
               // },
               grafana_lab: {
                 type: 'loki',
-                inputs: ['kubernetes_logs'],
+                inputs: ['kubernetes_logs', 'envoy_error_logs'],
                 endpoint: interpolate`https://${this.config.loki.endpoint}`,
                 auth: {
                   strategy: 'basic',

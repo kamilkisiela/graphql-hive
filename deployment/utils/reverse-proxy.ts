@@ -109,9 +109,6 @@ export class Proxy {
       },
       // https://github.com/bitnami/charts/tree/master/bitnami/contour
       values: {
-        commonLabels: {
-          'vector.dev/exclude': 'true',
-        },
         configInline: {
           // https://projectcontour.io/docs/main/configuration/
           'accesslog-format': 'json',
@@ -154,9 +151,6 @@ export class Proxy {
             'prometheus.io/port': '8002',
             'prometheus.io/scheme': 'http',
             'prometheus.io/path': '/stats/prometheus',
-          },
-          podLabels: {
-            'vector.dev/exclude': 'true',
           },
           autoscaling:
             options?.replicas && options?.replicas > 1
