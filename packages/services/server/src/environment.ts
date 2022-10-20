@@ -30,6 +30,7 @@ const EnvironmentModel = zod.object({
   EMAILS_ENDPOINT: emptyString(zod.string().url().optional()),
   WEBHOOKS_ENDPOINT: zod.string().url(),
   SCHEMA_ENDPOINT: zod.string().url(),
+  AUTH_ORGANIZATION_OIDC: emptyString(zod.union([zod.literal('1'), zod.literal('0')]).optional()),
 });
 
 const SentryModel = zod.union([
@@ -265,6 +266,7 @@ export const env = {
           },
         }
       : null,
+  organizationOIDC: base.AUTH_ORGANIZATION_OIDC === '1',
   legacyAuth0:
     authLegacyAuth0.AUTH_LEGACY_AUTH0 === '1'
       ? {
