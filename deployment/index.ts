@@ -26,6 +26,7 @@ import * as azure from '@pulumi/azure';
 import { optimizeAzureCluster } from './utils/azure-helpers';
 import { deployRateLimit } from './services/rate-limit';
 import { deployStripeBilling } from './services/billing';
+import { deployCloudFlareSecurityTransform } from './services/cloudflare-security';
 import * as random from '@pulumi/random';
 
 const packageHelper = createPackageHelper();
@@ -254,6 +255,24 @@ const proxy = deployProxy({
   docs,
   graphql: graphqlApi,
   usage: usageApi,
+});
+
+deployCloudFlareSecurityTransform({
+  envName,
+  effectedDomains: [rootDns, appHostname, docsHostname],
+  // Paths used by 3rd-party software.
+  // The CF Page Rules should not affect them.
+  ignoredPaths: [
+    '/api/auth',
+    '/api/health',
+    '/usage',
+    '/graphql',
+    '/registry',
+    '/server',
+    '/api/github',
+    '/api/slack',
+    '/api/lab',
+  ],
 });
 
 export const graphqlApiServiceId = graphqlApi.service.id;
