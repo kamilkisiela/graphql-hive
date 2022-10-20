@@ -55,7 +55,7 @@
     "@graphql-codegen/typescript-resolvers": "2.7.1",
     "@sentry/cli": "2.2.0",
     "@swc/core": "1.2.185",
-    "@theguild/prettier-config": "0.0.2",
+    "@theguild/prettier-config": "0.1.1",
     "@types/jest": "27.5.1",
     "@types/lru-cache": "7.6.1",
     "@types/node": "16.11.22",
