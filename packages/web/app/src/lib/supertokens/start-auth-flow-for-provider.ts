@@ -10,7 +10,5 @@ export const startAuthFlowForProvider = async (providerId: 'google' | 'okta' | '
     authorisationURL: `${env.appBaseUrl.replace(/\/$/, '')}/auth/callback/${providerId}`,
   });
 
-  console.log(authUrl);
-
   window.location.assign(authUrl);
 };
