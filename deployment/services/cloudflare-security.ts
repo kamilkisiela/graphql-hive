@@ -30,7 +30,6 @@ export function deployCloudFlareSecurityTransform(options: {
     'wss://client.relay.crisp.chat',
     'https://storage.crisp.chat',
     'wss://stream.relay.crisp.chat',
-    'cdn.headwayapp.co',
     'www.google-analytics.com',
   ].join(' ');
 
