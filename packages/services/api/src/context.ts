@@ -7,6 +7,10 @@ declare global {
       requestId: string;
       user: any;
       headers: Record<string, string>;
+      internalSignature: {
+        expected: string;
+        received: string | null;
+      };
     }
   }
 }

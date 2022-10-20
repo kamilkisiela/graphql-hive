@@ -45,8 +45,11 @@ export async function execute<TResult, TVariables>(
         : {}),
     },
   });
+
+  const body = (await response.json()) as ExecutionResult<TResult>;
+
   return {
-    body: (await response.json()) as ExecutionResult<TResult>,
+    body,
     status: response.status,
   };
 }

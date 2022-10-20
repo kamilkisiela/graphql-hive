@@ -30,6 +30,7 @@ const EnvironmentModel = zod.object({
   EMAILS_ENDPOINT: emptyString(zod.string().url().optional()),
   WEBHOOKS_ENDPOINT: zod.string().url(),
   SCHEMA_ENDPOINT: zod.string().url(),
+  INTERNAL_ACCESS_SIGNATURE: zod.string().min(1),
 });
 
 const SentryModel = zod.union([
@@ -196,6 +197,7 @@ export const env = {
   environment: base.ENVIRONMENT,
   release: base.RELEASE ?? 'local',
   encryptionSecret: base.ENCRYPTION_SECRET,
+  internalAccessSignature: base.INTERNAL_ACCESS_SIGNATURE,
   hiveServices: {
     webApp: base.WEB_APP_URL
       ? {

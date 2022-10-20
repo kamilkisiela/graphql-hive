@@ -8,7 +8,6 @@ import { Logger } from '../../shared/providers/logger';
 import { Storage } from '../../shared/providers/storage';
 import type { OrganizationSelector } from '../../shared/providers/storage';
 import { share, cache, uuid, diffArrays, pushIfMissing } from '../../../shared/helpers';
-import { MessageBus } from '../../shared/providers/message-bus';
 import { ActivityManager } from '../../activity/providers/activity-manager';
 import { BillingProvider } from '../../billing/providers/billing.provider';
 import { TokenStorage } from '../../token/providers/token-storage';
@@ -16,9 +15,8 @@ import { Emails } from '../../shared/providers/emails';
 import { OrganizationAccessScope } from '../../auth/providers/organization-access';
 import { ProjectAccessScope } from '../../auth/providers/project-access';
 import { TargetAccessScope } from '../../auth/providers/target-access';
-import { EnsurePersonalOrganizationEventPayload, ENSURE_PERSONAL_ORGANIZATION_EVENT } from './events';
 
-const reservedNames = [
+export const reservedNames = [
   'registry',
   'server',
   'usage',
@@ -52,6 +50,12 @@ const reservedNames = [
   'internal',
 ];
 
+export const adminScopes = [
+  ...Object.values(OrganizationAccessScope),
+  ...Object.values(ProjectAccessScope),
+  ...Object.values(TargetAccessScope),
+];
+
 /**
  * Responsible for auth checks.
  * Talks to Storage.
@@ -68,15 +72,11 @@ export class OrganizationManager {
     private storage: Storage,
     private authManager: AuthManager,
     private tokenStorage: TokenStorage,
-    private messageBus: MessageBus,
     private activityManager: ActivityManager,
     private billingProvider: BillingProvider,
     private emails: Emails
   ) {
     this.logger = logger.child({ source: 'OrganizationManager' });
-    this.messageBus.on<EnsurePersonalOrganizationEventPayload>(ENSURE_PERSONAL_ORGANIZATION_EVENT, data =>
-      this.ensurePersonalOrganization(data)
-    );
   }
 
   getOrganizationFromToken: () => Promise<Organization | never> = share(async () => {
@@ -175,22 +175,14 @@ export class OrganizationManager {
   }): Promise<Organization> {
     const { name, type, user } = input;
     this.logger.info('Creating an organization (input=%o)', input);
-    let cleanId = paramCase(name);
-
-    if (reservedNames.includes(cleanId) || (await this.storage.getOrganizationByCleanId({ cleanId }))) {
-      cleanId = paramCase(`${name}-${uuid(4)}`);
-    }
 
     const organization = await this.storage.createOrganization({
       name,
-      cleanId,
+      cleanId: paramCase(name),
       type,
       user: user.id,
-      scopes: [
-        ...Object.values(OrganizationAccessScope),
-        ...Object.values(ProjectAccessScope),
-        ...Object.values(TargetAccessScope),
-      ],
+      scopes: adminScopes,
+      reservedNames,
     });
 
     await this.activityManager.create({
@@ -586,20 +578,5 @@ export class OrganizationManager {
     return this.storage.getOrganization({
       organization: input.organization,
     });
-  }
-
-  async ensurePersonalOrganization(payload: EnsurePersonalOrganizationEventPayload) {
-    const myOrg = await this.storage.getMyOrganization({
-      user: payload.user.id,
-    });
-
-    if (!myOrg) {
-      this.logger.info('Detected missing personal organization (user=%s)', payload.user.id);
-      await this.createOrganization({
-        name: payload.name,
-        user: payload.user,
-        type: OrganizationType.PERSONAL,
-      });
-    }
   }
 }

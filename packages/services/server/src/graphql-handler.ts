@@ -40,6 +40,7 @@ export interface GraphQLHandlerOptions {
   isProduction: boolean;
   hiveConfig: HiveConfig;
   release: string;
+  internalAccessSignature: string;
 }
 
 export type SuperTokenSessionPayload = zod.TypeOf<typeof SuperTokenAccessTokenModel>;
@@ -50,6 +51,10 @@ interface Context {
   headers: Record<string, string | string[] | undefined>;
   requestId?: string | null;
   session: SuperTokenSessionPayload | null;
+  internalSignature: {
+    expected: string;
+    received: string | null;
+  };
 }
 
 const NoIntrospection: ValidationRule = (context: ValidationContext) => ({
@@ -229,6 +234,10 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
           headers: req.headers,
           requestId,
           session: null,
+          internalSignature: {
+            expected: options.internalAccessSignature,
+            received: req.headers['x-internal-signature'] as string,
+          },
         });
 
         response.headers.forEach((value, key) => {

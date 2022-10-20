@@ -24,7 +24,6 @@
     "abort-controller": "3.0.0",
     "dataloader": "2.0.0",
     "date-fns": "2.25.0",
-    "emittery": "0.10.0",
     "got": "12.5.1",
     "graphql-modules": "2.0.0",
     "graphql-parse-resolve-info": "4.12.0",

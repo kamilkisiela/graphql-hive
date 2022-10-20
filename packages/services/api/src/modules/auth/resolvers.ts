@@ -1,11 +1,13 @@
 import { AuthModule } from './__generated__/types';
 import { AuthManager } from './providers/auth-manager';
 import { createConnection } from '../../shared/schema';
+import { Storage } from '../shared/providers/storage';
 import { OrganizationAccessScope } from './providers/organization-access';
 import { ProjectAccessScope } from './providers/project-access';
 import { TargetAccessScope } from './providers/target-access';
 import { z } from 'zod';
 import { displayNameLengthBoundaries, fullNameLengthBoundaries } from './providers/user-manager';
+import { reservedNames, adminScopes } from '../organization/providers/organization-manager';
 
 export const resolvers: AuthModule.Resolvers & {
   OrganizationAccessScope: {
@@ -22,6 +24,20 @@ export const resolvers: AuthModule.Resolvers & {
     me: (_, __, { injector }) => injector.get(AuthManager).getCurrentUser(),
   },
   Mutation: {
+    async ensureMe(_, { input }, { injector, internalSignature }) {
+      if (internalSignature.expected !== internalSignature.received) {
+        throw new Error('Provided internal access signature is invalid.');
+      }
+
+      const storage = injector.get(Storage);
+      const action = await storage.ensureUserExists({
+        ...input,
+        reservedOrgNames: reservedNames,
+        scopes: adminScopes,
+      });
+
+      return action;
+    },
     async updateMe(_, { input }, { injector }) {
       const InputModel = z.object({
         displayName: z.string().min(displayNameLengthBoundaries.min).max(displayNameLengthBoundaries.max),

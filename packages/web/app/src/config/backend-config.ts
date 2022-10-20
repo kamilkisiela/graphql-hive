@@ -12,8 +12,56 @@ import { createTRPCClient } from '@trpc/client';
 import type { EmailsApi } from '@hive/emails';
 import { env } from '@/env/backend';
 
+async function ensureUserCreation(input: {
+  superTokensUserId: string;
+  externalAuthUserId: string | null;
+  email: string;
+}) {
+  const response = await fetch(env.graphqlEndpoint, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      'x-internal-signature': env.internalAccessSignature,
+      'graphql-client-name': 'Hive App',
+      'graphql-client-version': env.release,
+    },
+    body: JSON.stringify({
+      operationName: 'ensureUserCreation',
+      query: /* GraphQL */ `
+        mutation ensureUserCreation($input: EnsureMeInput!) {
+          ensureMe(input: $input)
+        }
+      `,
+      variables: {
+        input,
+      },
+    }),
+  });
+
+  if (response.ok) {
+    const result: {
+      data:
+        | {
+            ensureMe: string;
+          }
+        | {
+            errors: {
+              message: string;
+            }[];
+          };
+    } = await response.json();
+
+    if ('errors' in result.data) {
+      return false;
+    }
+
+    return true;
+  }
+}
+
 export const backendConfig = (): TypeInput => {
-  const trpcService = createTRPCClient<EmailsApi>({
+  const emailsService = createTRPCClient<EmailsApi>({
     url: `${env.emailsEndpoint}/trpc`,
   });
   const providers: Array<TypeProvider> = [];
@@ -49,7 +97,7 @@ export const backendConfig = (): TypeInput => {
             ...originalImplementation,
             async sendEmail(input) {
               if (input.type === 'PASSWORD_RESET') {
-                await trpcService.mutation('sendPasswordResetEmail', {
+                await emailsService.mutation('sendPasswordResetEmail', {
                   user: {
                     id: input.user.id,
                     email: input.user.email,
@@ -63,11 +111,90 @@ export const backendConfig = (): TypeInput => {
             },
           }),
         },
-        override:
-          /**
-           * These overrides are only relevant for the legacy Auth0 -> SuperTokens migration (period).
-           */
-          env.auth.legacyAuth0 ? getAuth0Overrides(env.auth.legacyAuth0) : undefined,
+        override: {
+          // here: https://supertokens.com/docs/thirdpartyemailpassword/common-customizations/handling-signinup-success
+          apis: originalImplementation => {
+            // override the email password sign up API
+            const emailPasswordSignUpPOST: typeof originalImplementation['emailPasswordSignUpPOST'] = async input => {
+              if (!originalImplementation.emailPasswordSignUpPOST) {
+                throw Error('emailPasswordSignUpPOST is not available');
+              }
+
+              const response = await originalImplementation.emailPasswordSignUpPOST(input);
+
+              if (response.status === 'OK') {
+                await ensureUserCreation({
+                  superTokensUserId: response.user.id,
+                  email: response.user.email,
+                  externalAuthUserId: null,
+                });
+              }
+
+              return response;
+            };
+
+            // override the email password sign in API
+            const emailPasswordSignInPOST: typeof originalImplementation['emailPasswordSignInPOST'] = async input => {
+              if (originalImplementation.emailPasswordSignInPOST === undefined) {
+                throw Error('Should never come here');
+              }
+
+              const response = await originalImplementation.emailPasswordSignInPOST(input);
+
+              if (response.status === 'OK') {
+                await ensureUserCreation({
+                  superTokensUserId: response.user.id,
+                  email: response.user.email,
+                  externalAuthUserId: null,
+                });
+              }
+
+              return response;
+            };
+
+            // override the third party sign in API
+            const thirdPartySignInUpPOST: typeof originalImplementation['thirdPartySignInUpPOST'] = async input => {
+              if (originalImplementation.thirdPartySignInUpPOST === undefined) {
+                throw Error('Should never come here');
+              }
+
+              const response = await originalImplementation.thirdPartySignInUpPOST(input);
+
+              if (response.status === 'OK') {
+                await ensureUserCreation({
+                  superTokensUserId: response.user.id,
+                  email: response.user.email,
+                  externalAuthUserId: null,
+                });
+              }
+
+              return response;
+            };
+
+            const newImplementation = {
+              ...originalImplementation,
+              emailPasswordSignUpPOST,
+              emailPasswordSignInPOST,
+              thirdPartySignInUpPOST,
+            };
+
+            if (env.auth.legacyAuth0) {
+              /**
+               * These overrides are only relevant for the legacy Auth0 -> SuperTokens migration (period).
+               */
+              return getAuth0Overrides(env.auth.legacyAuth0).apis(newImplementation);
+            }
+
+            return newImplementation;
+          },
+          functions: originalImplementation => ({
+            ...originalImplementation,
+            /**
+             * These overrides are only relevant for the legacy Auth0 -> SuperTokens migration (period).
+             */
+            ...(env.auth.legacyAuth0 ? getAuth0Overrides(env.auth.legacyAuth0).functions(originalImplementation) : {}),
+          }),
+        },
       }),
       EmailVerification.init({
         mode: env.auth.requireEmailVerification ? 'REQUIRED' : 'OPTIONAL',
@@ -76,7 +203,7 @@ export const backendConfig = (): TypeInput => {
             ...originalImplementation,
             sendEmail: async input => {
               if (input.type === 'EMAIL_VERIFICATION') {
-                await trpcService.mutation('sendEmailVerificationEmail', {
+                await emailsService.mutation('sendEmailVerificationEmail', {
                   user: {
                     id: input.user.id,
                     email: input.user.email,
@@ -137,119 +264,121 @@ export const backendConfig = (): TypeInput => {
 //
 
 const getAuth0Overrides = (config: Exclude<typeof env.auth.legacyAuth0, null>) => {
-  const override: ThirdPartEmailPasswordTypeInput['override'] = {
-    apis(originalImplementation) {
-      return {
-        ...originalImplementation,
-        async generatePasswordResetTokenPOST(input) {
-          const email = input.formFields.find(formField => formField.id === 'email')?.value;
+  const apis: NonNullable<ThirdPartEmailPasswordTypeInput['override']>['apis'] = originalImplementation => {
+    return {
+      ...originalImplementation,
+      async generatePasswordResetTokenPOST(input) {
+        const email = input.formFields.find(formField => formField.id === 'email')?.value;
 
-          if (email) {
-            // We first use the existing implementation for looking for users within supertokens.
-            const users = await ThirdPartyEmailPasswordNode.getUsersByEmail(email);
+        if (email) {
+          // We first use the existing implementation for looking for users within supertokens.
+          const users = await ThirdPartyEmailPasswordNode.getUsersByEmail(email);
 
-            // If there is no email/password SuperTokens user yet, we need to check if there is an Auth0 user for this email.
-            if (users.some(user => user.thirdParty == null) === false) {
-              // RPC call to check if email/password user exists in Auth0
-              const dbUser = await checkWhetherAuth0EmailUserWithoutAssociatedSuperTokensIdExists(config, { email });
+          // If there is no email/password SuperTokens user yet, we need to check if there is an Auth0 user for this email.
+          if (users.some(user => user.thirdParty == null) === false) {
+            // RPC call to check if email/password user exists in Auth0
+            const dbUser = await checkWhetherAuth0EmailUserWithoutAssociatedSuperTokensIdExists(config, { email });
 
-              if (dbUser) {
-                // If we have this user within our database we create our new supertokens user
-                const newUserResult = await ThirdPartyEmailPasswordNode.emailPasswordSignUp(
-                  dbUser.email,
-                  await generateRandomPassword()
-                );
-
-                if (newUserResult.status === 'OK') {
-                  // link the db record to the new supertokens user
-                  await setUserIdMapping(config, {
-                    auth0UserId: dbUser.auth0UserId,
-                    supertokensUserId: newUserResult.user.id,
-                  });
-                }
-              }
-            }
-          }
-
-          return await originalImplementation.generatePasswordResetTokenPOST!(input);
-        },
-      };
-    },
-    functions(originalImplementation) {
-      return {
-        ...originalImplementation,
-        async emailPasswordSignIn(input) {
-          if (await doesUserExistInAuth0(config, input.email)) {
-            // check if user exists in SuperTokens
-            const superTokensUsers = await this.getUsersByEmail({
-              email: input.email,
-              userContext: input.userContext,
-            });
-
-            const emailPasswordUser =
-              // if the thirdParty field in the user object is undefined, then the user is an EmailPassword account.
-              superTokensUsers.find(superTokensUser => superTokensUser.thirdParty === undefined) ?? null;
-
-            // EmailPassword user does not exist in SuperTokens
-            // We first need to verify whether the password is legit,then if so, create a new user in SuperTokens with the same password.
-            if (emailPasswordUser === null) {
-              const auth0UserData = await trySignIntoAuth0WithUserCredentialsAndRetrieveUserInfo(
-                config,
-                input.email,
-                input.password
+            if (dbUser) {
+              // If we have this user within our database we create our new supertokens user
+              const newUserResult = await ThirdPartyEmailPasswordNode.emailPasswordSignUp(
+                dbUser.email,
+                await generateRandomPassword()
               );
 
-              if (auth0UserData === null) {
-                // Invalid credentials -> Sent this to the client.
-                return {
-                  status: 'WRONG_CREDENTIALS_ERROR',
-                };
+              if (newUserResult.status === 'OK') {
+                // link the db record to the new supertokens user
+                await setUserIdMapping(config, {
+                  auth0UserId: dbUser.auth0UserId,
+                  supertokensUserId: newUserResult.user.id,
+                });
               }
-
-              // If the Auth0 credentials are correct we can successfully create the user in supertokens.
-              const response = await this.emailPasswordSignUp(input);
-
-              if (response.status !== 'OK') {
-                return {
-                  status: 'WRONG_CREDENTIALS_ERROR',
-                };
-              }
-              await setUserIdMapping(config, {
-                auth0UserId: auth0UserData.sub,
-                supertokensUserId: response.user.id,
-              });
-
-              return response;
             }
           }
+        }
 
-          return originalImplementation.emailPasswordSignIn(input);
-        },
-        async thirdPartySignInUp(input) {
-          const externalUserId = `${input.thirdPartyId}|${input.thirdPartyUserId}`;
-          // Sign up the user with SuperTokens.
-          const response = await originalImplementation.thirdPartySignInUp(input);
+        return await originalImplementation.generatePasswordResetTokenPOST!(input);
+      },
+    };
+  };
 
-          // Auth0 user exists
-          if (response.status === 'OK') {
-            // We always make sure that we set the user mapping between Auth0 and SuperTokens.
+  const functions: NonNullable<ThirdPartEmailPasswordTypeInput['override']>['functions'] = originalImplementation => {
+    return {
+      ...originalImplementation,
+      async emailPasswordSignIn(input) {
+        if (await doesUserExistInAuth0(config, input.email)) {
+          // check if user exists in SuperTokens
+          const superTokensUsers = await this.getUsersByEmail({
+            email: input.email,
+            userContext: input.userContext,
+          });
+
+          const emailPasswordUser =
+            // if the thirdParty field in the user object is undefined, then the user is an EmailPassword account.
+            superTokensUsers.find(superTokensUser => superTokensUser.thirdParty === undefined) ?? null;
+
+          // EmailPassword user does not exist in SuperTokens
+          // We first need to verify whether the password is legit,then if so, create a new user in SuperTokens with the same password.
+          if (emailPasswordUser === null) {
+            const auth0UserData = await trySignIntoAuth0WithUserCredentialsAndRetrieveUserInfo(
+              config,
+              input.email,
+              input.password
+            );
+
+            if (auth0UserData === null) {
+              // Invalid credentials -> Sent this to the client.
+              return {
+                status: 'WRONG_CREDENTIALS_ERROR',
+              };
+            }
+
+            // If the Auth0 credentials are correct we can successfully create the user in supertokens.
+            const response = await this.emailPasswordSignUp(input);
+
+            if (response.status !== 'OK') {
+              return {
+                status: 'WRONG_CREDENTIALS_ERROR',
+              };
+            }
             await setUserIdMapping(config, {
-              auth0UserId: externalUserId,
+              auth0UserId: auth0UserData.sub,
               supertokensUserId: response.user.id,
             });
-            response.createdNewUser = false;
 
             return response;
           }
+        }
 
-          // Auth0 user does not exist
-          return await originalImplementation.thirdPartySignInUp(input);
-        },
-      };
-    },
+        return originalImplementation.emailPasswordSignIn(input);
+      },
+      async thirdPartySignInUp(input) {
+        const externalUserId = `${input.thirdPartyId}|${input.thirdPartyUserId}`;
+        // Sign up the user with SuperTokens.
+        const response = await originalImplementation.thirdPartySignInUp(input);
+
+        // Auth0 user exists
+        if (response.status === 'OK') {
+          // We always make sure that we set the user mapping between Auth0 and SuperTokens.
+          await setUserIdMapping(config, {
+            auth0UserId: externalUserId,
+            supertokensUserId: response.user.id,
+          });
+          response.createdNewUser = false;
+
+          return response;
+        }
+
+        // Auth0 user does not exist
+        return await originalImplementation.thirdPartySignInUp(input);
+      },
+    };
   };
 
-  return override;
+  return {
+    apis,
+    functions,
+  };
 };
 
 /**

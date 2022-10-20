@@ -1,6 +1,13 @@
-import { fetch } from '@whatwg-node/fetch';
+import * as utils from 'dockest/test-helper';
+import { createFetch } from '@whatwg-node/fetch';
 import zod from 'zod';
 import { ensureEnv } from './env';
+
+const graphqlAddress = utils.getServiceAddress('server', 3001);
+
+const { fetch } = createFetch({
+  useNodeFetch: true,
+});
 
 const SignUpSignInUserResponseModel = zod.object({
   status: zod.literal('OK'),
@@ -49,7 +56,39 @@ const CreateSessionModel = zod.object({
   }),
 });
 
+async function ensureUserCreation(input: { superTokensUserId: string; email: string }) {
+  const response = await fetch(`http://${graphqlAddress}/graphql`, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      'x-internal-signature': ensureEnv('INTERNAL_ACCESS_SIGNATURE'),
+      'graphql-client-name': 'Integration Tests',
+      'graphql-client-version': 'integration-tests',
+    },
+    body: JSON.stringify({
+      operationName: 'ensureUserCreation',
+      query: /* GraphQL */ `
+        mutation ensureUserCreation($input: EnsureMeInput!) {
+          ensureMe(input: $input)
+        }
+      `,
+      variables: {
+        input,
+      },
+    }),
+  });
+
+  const result = await response.json();
+
+  if ('errors' in result) {
+    console.error(result);
+    throw new Error('Failed to ensure user creation');
+  }
+}
+
 const createSession = async (superTokensUserId: string, email: string) => {
+  await ensureUserCreation({ superTokensUserId, email });
   const sessionData = createSessionPayload(superTokensUserId, email);
   const payload = {
     enableAntiCsrf: false,
@@ -91,21 +130,16 @@ export const userEmails: Record<UserID, string> = {
   admin: 'admin@localhost.localhost',
 };
 
-const tokenResponsePromise: Record<UserID, Promise<{ access_token: string }> | null> = {
+const tokenResponsePromise: Record<UserID, Promise<zod.TypeOf<typeof SignUpSignInUserResponseModel>> | null> = {
   main: null,
   extra: null,
   admin: null,
 };
 
-async function signUpAndSignInViaEmail(email: string, password: string): Promise<{ access_token: string }> {
-  const data = await signUpUserViaEmail(email, password);
-  return await createSession(data.user.id, data.user.email);
-}
-
 export function authenticate(userId: UserID): Promise<{ access_token: string }> {
   if (!tokenResponsePromise[userId]) {
-    tokenResponsePromise[userId] = signUpAndSignInViaEmail(userEmails[userId], password);
+    tokenResponsePromise[userId] = signUpUserViaEmail(userEmails[userId], password);
   }
 
-  return tokenResponsePromise[userId]!;
+  return tokenResponsePromise[userId]!.then(data => createSession(data.user.id, data.user.email));
 }

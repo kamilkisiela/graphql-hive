@@ -47,6 +47,7 @@ export function deployGraphQL({
   emails,
   supertokensConfig,
   auth0Config,
+  internalAccessSignature,
 }: {
   storageContainer: azure.storage.Container;
   packageHelper: PackageHelper;
@@ -70,6 +71,7 @@ export function deployGraphQL({
   auth0Config: {
     internalApiKey: Output<string>;
   };
+  internalAccessSignature: pulumi.Output<string>;
 }) {
   const rawConnectionString = apiConfig.requireSecret('postgresConnectionString');
   const connectionString = rawConnectionString.apply(rawConnectionString => parse(rawConnectionString));
@@ -106,6 +108,7 @@ export function deployGraphQL({
         TOKENS_ENDPOINT: serviceLocalEndpoint(tokens.service),
         WEBHOOKS_ENDPOINT: serviceLocalEndpoint(webhooks.service),
         SCHEMA_ENDPOINT: serviceLocalEndpoint(schema.service),
+        INTERNAL_ACCESS_SIGNATURE: internalAccessSignature,
         // CDN
         CDN: '1',
         CDN_CF_BASE_PATH: 'https://api.cloudflare.com/client/v4/accounts',

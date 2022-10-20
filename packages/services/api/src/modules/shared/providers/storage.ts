@@ -45,6 +45,14 @@ export interface PersistedOperationSelector extends ProjectSelector {
 
 export interface Storage {
   destroy(): Promise<void>;
+  ensureUserExists(_: {
+    superTokensUserId: string;
+    externalAuthUserId?: string | null;
+    email: string;
+    reservedOrgNames: string[];
+    scopes: ReadonlyArray<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
+  }): Promise<'created' | 'no_action'>;
+
   getUserBySuperTokenId(_: { superTokensUserId: string }): Promise<User | null>;
   setSuperTokensUserId(_: { auth0UserId: string; superTokensUserId: string; externalUserId: string }): Promise<void>;
   getUserWithoutAssociatedSuperTokenIdByAuth0Email(_: { email: string }): Promise<User | null>;
@@ -70,6 +78,7 @@ export interface Storage {
     _: Pick<Organization, 'cleanId' | 'name' | 'type'> & {
       user: string;
       scopes: ReadonlyArray<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
+      reservedNames: string[];
     }
   ): Promise<Organization | never>;
   deleteOrganization(_: OrganizationSelector): Promise<Organization | never>;

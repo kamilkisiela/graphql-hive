@@ -244,6 +244,7 @@ services:
       RATE_LIMIT_ENDPOINT: http://rate-limit:3009
       BILLING_ENDPOINT: http://stripe-billing:3010
       EMAILS_ENDPOINT: http://emails:3011
+      INTERNAL_ACCESS_SIGNATURE: ${INTERNAL_ACCESS_SIGNATURE}
       CDN: '1'
       CDN_CF_BASE_PATH: http://local_cdn:3004
       CDN_CF_ACCOUNT_ID: 103df45224310d669213971ce28b5b70

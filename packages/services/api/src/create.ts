@@ -13,7 +13,6 @@ import { HttpClient } from './modules/shared/providers/http-client';
 import { IdTranslator } from './modules/shared/providers/id-translator';
 import { IdempotentRunner } from './modules/shared/providers/idempotent-runner';
 import { Logger } from './modules/shared/providers/logger';
-import { MessageBus } from './modules/shared/providers/message-bus';
 import { CryptoProvider, encryptionSecretProvider } from './modules/shared/providers/crypto';
 import { RedisConfig, REDIS_CONFIG, RedisProvider } from './modules/shared/providers/redis';
 import { Storage } from './modules/shared/providers/storage';
@@ -108,7 +107,6 @@ export function createRegistry({
   const providers = [
     HttpClient,
     IdTranslator,
-    MessageBus,
     RedisProvider,
     IdempotentRunner,
     CryptoProvider,
