@@ -111,7 +111,7 @@ export function createScheduler(config: Config) {
         onError('redis:reconnectOnError')(error);
         if (clientCommandMessageReg.test(error.message)) {
           return false;
-        } 
+        }
         return 1;
       },
       db: 0,
