@@ -7,10 +7,10 @@ import { getAuthorisationURLWithQueryParamsAndSetState } from 'supertokens-auth-
 export const startAuthFlowForProvider = async (providerId: 'google' | 'okta' | 'github') => {
   const authUrl = await getAuthorisationURLWithQueryParamsAndSetState({
     providerId,
-    // This is where Google should redirect the user back after login or error.
-    // This URL goes on the Google's dashboard as well.
     authorisationURL: `${env.appBaseUrl.replace(/\/$/, '')}/auth/callback/${providerId}`,
   });
+
+  console.log(authUrl);
 
   window.location.assign(authUrl);
 };
