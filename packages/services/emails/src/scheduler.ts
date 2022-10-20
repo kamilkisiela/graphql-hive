@@ -10,6 +10,8 @@ import type { EmailProvider } from './providers';
 
 const DAY_IN_SECONDS = 86_400;
 
+export const clientCommandMessageReg = /ERR unknown command ['`]\s*client\s*['`]/;
+
 export function createScheduler(config: {
   logger: FastifyLoggerInstance;
   redis: {
@@ -120,7 +122,9 @@ export function createScheduler(config: {
       },
       reconnectOnError(error) {
         onError('redis:reconnectOnError')(error);
-        return 1;
+        if (clientCommandMessageReg.test(error.message)) {
+          return false;
+        } else return 1;
       },
       db: 0,
       maxRetriesPerRequest: null,
