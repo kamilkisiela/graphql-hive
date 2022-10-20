@@ -186,38 +186,6 @@ export class AuthManager {
     return user;
   });
 
-  async ensureInternalUser(input: {
-    superTokensUserId: string;
-    email: string;
-    externalAuthUserId: string | null;
-  }): Promise<User> {
-    let internalUser = await this.storage.getUserBySuperTokenId({
-      superTokensUserId: input.superTokensUserId,
-    });
-
-    if (!internalUser) {
-      // here's where we create a new user
-      internalUser = await this.userManager.createUser({
-        superTokensUserId: input.superTokensUserId,
-        externalAuthUserId: input.externalAuthUserId,
-        email: input.email,
-      });
-    }
-
-    // TODO: create the org here
-    // TODO: create a method in Storage that creates a user and creates the personal org in one transaction (pass there a list of reserved words)
-    // TODO: create a method in Storage that creates an organization in one transaction (pass there a list of reserved words)
-    // await this.messageBus.emit<EnsurePersonalOrganizationEventPayload>(ENSURE_PERSONAL_ORGANIZATION_EVENT, {
-    //   name: internalUser.displayName,
-    //   user: {
-    //     id: internalUser.id,
-    //     superTokensUserId: input.superTokensUserId,
-    //   },
-    // });
-
-    return internalUser;
-  }
-
   async updateCurrentUser(input: { displayName: string; fullName: string }): Promise<User> {
     const user = await this.getCurrentUser();
     return this.userManager.updateUser({
