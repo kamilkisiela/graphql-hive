@@ -224,7 +224,6 @@
 
 "@app/gql@link:./integration-tests/testkit/gql":
   version "0.0.0"
-  uid ""
 
 "@ardatan/relay-compiler@12.0.0":
   version "12.0.0"
@@ -2762,7 +2761,7 @@
     "@graphql-tools/utils" "8.12.0"
     tslib "^2.4.0"
 
-"@graphql-tools/mock@8.4.0":
+"@graphql-tools/mock@8.4.0", "@graphql-tools/mock@^8.1.2":
   version "8.4.0"
   resolved "https://registry.yarnpkg.com/@graphql-tools/mock/-/mock-8.4.0.tgz#c4a5d0c35cc5760b99b3e062145f36ac9cfe9ffb"
   integrity sha512-RKcqmw7P5pC2ULh2/kg/erxxsd7lEV/wnI5jNgahkCw8wiSC8OI3SwNMwjfrlpYogs7eEhiXi7Ix6abCiFUURw==
@@ -2771,16 +2770,6 @@
     "@graphql-tools/utils" "^8.2.3"
     fast-json-stable-stringify "^2.1.0"
     tslib "~2.3.0"
-
-"@graphql-tools/mock@^8.1.2":
-  version "8.7.6"
-  resolved "https://registry.yarnpkg.com/@graphql-tools/mock/-/mock-8.7.6.tgz#701d898f7fe6c22e40d6d80e25874e464359ce11"
-  integrity sha512-cQGPyY6dF4x28552zjAg9En2WWVury62u1/xzipCNUSCdKRVOsAupTNBcAGdMjsKPLcGzzk1cPA8dP0DUfNqzg==
-  dependencies:
-    "@graphql-tools/schema" "9.0.4"
-    "@graphql-tools/utils" "8.12.0"
-    fast-json-stable-stringify "^2.1.0"
-    tslib "^2.4.0"
 
 "@graphql-tools/optimize@^1.3.0":
   version "1.3.0"
@@ -2854,7 +2843,7 @@
     tslib "^2.4.0"
     value-or-promise "1.0.11"
 
-"@graphql-tools/schema@9.0.4", "@graphql-tools/schema@^9.0.0":
+"@graphql-tools/schema@^9.0.0":
   version "9.0.4"
   resolved "https://registry.yarnpkg.com/@graphql-tools/schema/-/schema-9.0.4.tgz#1a74608b57abf90fae6fd929d25e5482c57bc05d"
   integrity sha512-B/b8ukjs18fq+/s7p97P8L1VMrwapYc3N2KvdG/uNThSazRRn8GsBK0Nr+FH+mVKiUfb4Dno79e3SumZVoHuOQ==
@@ -4123,14 +4112,14 @@
     "@babel/runtime" "^7.13.10"
     "@radix-ui/react-primitive" "0.1.4"
 
-"@radix-ui/react-avatar@0.1.3":
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/@radix-ui/react-avatar/-/react-avatar-0.1.3.tgz#202192e55b4e0d0b98f88ad386066ca0f032f756"
-  integrity sha512-hzf8PCV4L34fekjg1Peos+csz3nNtwV2hnZSifmnug1TLBPI/tHXFlr43qp3G4rCB2YOJVW2ZpGBuKpomRyzGw==
+"@radix-ui/react-avatar@0.1.4":
+  version "0.1.4"
+  resolved "https://registry.yarnpkg.com/@radix-ui/react-avatar/-/react-avatar-0.1.4.tgz#36210e629e0eecde44027195c82d2a4101cbd7e9"
+  integrity sha512-RTs3KQTToVKJHHsn/E+vC2MyP0LnA6uMdcD7thwaCJEbI6NAvf56Y+RNJPSsGXz1o2LkD7Iy5SogsrzBwXQk6A==
   dependencies:
     "@babel/runtime" "^7.13.10"
     "@radix-ui/react-context" "0.1.1"
-    "@radix-ui/react-primitive" "0.1.3"
+    "@radix-ui/react-primitive" "0.1.4"
     "@radix-ui/react-use-callback-ref" "0.1.0"
     "@radix-ui/react-use-layout-effect" "0.1.0"
 
