@@ -5,6 +5,8 @@ import pTimeout from 'p-timeout';
 import type { Config } from './types';
 import { scheduleWebhook, createWebhookJob } from './jobs';
 
+export const clientCommandMessageReg = /ERR unknown command ['`]\s*client\s*['`]/;
+
 export interface WebhookInput {
   endpoint: string;
   event: {
@@ -107,6 +109,9 @@ export function createScheduler(config: Config) {
       },
       reconnectOnError(error) {
         onError('redis:reconnectOnError')(error);
+        if (clientCommandMessageReg.test(error.message)) {
+          return false;
+        }
         return 1;
       },
       db: 0,
