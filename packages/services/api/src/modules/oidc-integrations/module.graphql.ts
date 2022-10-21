@@ -88,7 +88,7 @@ export default gql`
   }
 
   type DeleteOIDCIntegrationOk {
-    _: Boolean
+    organization: Organization!
   }
 
   type DeleteOIDCIntegrationError implements Error {

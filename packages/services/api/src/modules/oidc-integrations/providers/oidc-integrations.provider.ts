@@ -161,6 +161,7 @@ export class OIDCIntegrationsProvider {
 
     return {
       type: 'ok',
+      organizationId: integration.linkedOrganizationId,
     } as const;
   }
 }

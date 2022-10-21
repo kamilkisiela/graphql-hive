@@ -72,11 +72,24 @@ export const resolvers: OidcIntegrationsModule.Resolvers = {
       };
     },
     deleteOIDCIntegration: async (_, { input }, { injector }) => {
-      await injector
+      const result = await injector
         .get(OIDCIntegrationsProvider)
         .deleteOIDCIntegration({ oidcIntegrationId: input.oidcIntegrationId });
+
+      if (result.type === 'ok') {
+        return {
+          ok: {
+            organization: await injector
+              .get(OrganizationManager)
+              .getOrganization({ organization: result.organizationId }),
+          },
+        };
+      }
+
       return {
-        ok: {},
+        error: {
+          message: result.message,
+        },
       };
     },
   },
