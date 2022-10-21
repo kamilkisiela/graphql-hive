@@ -191,6 +191,7 @@ export async function main() {
             },
           }
         : {},
+      organizationOIDC: env.organizationOIDC,
     });
     const graphqlPath = '/graphql';
     const port = env.http.port;

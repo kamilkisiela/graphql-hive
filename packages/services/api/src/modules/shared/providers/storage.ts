@@ -15,6 +15,7 @@ import type {
   Alert,
   OrganizationBilling,
   OrganizationInvitation,
+  OIDCIntegration,
 } from '../../../shared/entities';
 import type { CustomOrchestratorConfig } from '../../schema/providers/orchestrators/custom';
 import type { AddAlertChannelInput, AddAlertInput } from '../../../__generated__/types';
@@ -338,6 +339,22 @@ export interface Storage {
       step: Exclude<keyof Organization['getStarted'], 'id'>;
     }
   ): Promise<void>;
+
+  getOIDCIntegrationForOrganization(_: { organizationId: string }): Promise<OIDCIntegration | null>;
+  getOIDCIntegrationById(_: { oidcIntegrationId: string }): Promise<OIDCIntegration | null>;
+  createOIDCIntegrationForOrganization(_: {
+    organizationId: string;
+    clientId: string;
+    encryptedClientSecret: string;
+    domain: string;
+  }): Promise<OIDCIntegration>;
+  updateOIDCIntegration(_: {
+    integrationId: string;
+    clientId: string | null;
+    encryptedClientSecret: string | null;
+    domain: string | null;
+  }): Promise<OIDCIntegration>;
+  deleteOIDCIntegration(_: { oidcIntegrationId: string }): Promise<void>;
 }
 
 @Injectable()

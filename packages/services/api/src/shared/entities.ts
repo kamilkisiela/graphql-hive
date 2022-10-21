@@ -130,6 +130,14 @@ export interface OrganizationBilling {
   billingEmailAddress?: string | null;
 }
 
+export interface OIDCIntegration {
+  id: string;
+  linkedOrganizationId: string;
+  clientId: string;
+  encryptedClientSecret: string;
+  domain: string;
+}
+
 export interface Project {
   id: string;
   cleanId: string;

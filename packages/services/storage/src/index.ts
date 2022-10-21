@@ -42,6 +42,8 @@ import {
 } from './db';
 import { batch } from '@theguild/buddy';
 import type { Slonik } from './shared';
+import zod from 'zod';
+import type { OIDCIntegration } from '../../api/src/shared/entities';
 
 export { createConnectionString } from './db/utils';
 export { createTokenStorage } from './tokens';
@@ -2082,6 +2084,110 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         }
       );
     },
+
+    async getOIDCIntegrationById({ oidcIntegrationId: integrationId }) {
+      const result = await pool.maybeOne<unknown>(sql`
+        SELECT
+          "id"
+          , "linked_organization_id"
+          , "client_id"
+          , "client_secret"
+          , "domain"
+        FROM
+          "public"."oidc_integrations"
+        WHERE
+          "id" = ${integrationId}
+        LIMIT 1
+      `);
+
+      if (result === null) {
+        return null;
+      }
+
+      return decodeOktaIntegrationRecord(result);
+    },
+
+    async getOIDCIntegrationForOrganization({ organizationId }) {
+      const result = await pool.maybeOne<unknown>(sql`
+        SELECT
+          "id"
+          , "linked_organization_id"
+          , "client_id"
+          , "client_secret"
+          , "domain"
+        FROM
+          "public"."oidc_integrations"
+        WHERE
+          "linked_organization_id" = ${organizationId}
+        LIMIT 1
+      `);
+
+      if (result === null) {
+        return null;
+      }
+
+      return decodeOktaIntegrationRecord(result);
+    },
+
+    async createOIDCIntegrationForOrganization(args) {
+      // TODO: handle errors where creating the integration fails because an integration already exists for this account
+      // DB constraint exception :)
+      const result = await pool.maybeOne<unknown>(sql`
+        INSERT INTO "public"."oidc_integrations" (
+          "linked_organization_id",
+          "client_id",
+          "client_secret",
+          "domain"
+        )
+        VALUES (
+          ${args.organizationId},
+          ${args.clientId},
+          ${args.encryptedClientSecret},
+          ${args.domain}
+        )
+        RETURNING
+          "id"
+          , "linked_organization_id"
+          , "client_id"
+          , "client_secret"
+          , "domain"
+      `);
+
+      return decodeOktaIntegrationRecord(result);
+    },
+
+    async updateOIDCIntegration(args) {
+      const result = await pool.maybeOne<unknown>(sql`
+        UPDATE "public"."oidc_integrations" (
+          "client_id",
+          "client_secret",
+          "domain"
+        )
+        SET 
+          ${args.integrationId},
+          ${args.clientId ?? sql`"client_id"`},
+          ${args.encryptedClientSecret ?? sql`"client_secret"`},
+          ${args.domain ?? sql`"okta_domain"`}
+        WHERE
+          "linked_organization_id" = ${args.integrationId}
+        RETURNING
+          "id"
+          , "linked_organization_id"
+          , "client_id"
+          , "client_secret"
+          , "domain"
+      `);
+
+      return decodeOktaIntegrationRecord(result);
+    },
+
+    async deleteOIDCIntegration(args) {
+      await pool.query<unknown>(sql`
+        DELETE FROM "public"."oidc_integrations"
+        WHERE
+          "id" = ${args.oidcIntegrationId}
+      `);
+    },
   };
 
   return storage;
@@ -2090,3 +2196,22 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 function isDefined<T>(val: T | undefined | null): val is T {
   return val !== undefined && val !== null;
 }
+
+const OktaIntegrationModel = zod.object({
+  id: zod.string(),
+  linked_organization_id: zod.string(),
+  client_id: zod.string(),
+  client_secret: zod.string(),
+  domain: zod.string().url(),
+});
+
+const decodeOktaIntegrationRecord = (result: unknown): OIDCIntegration => {
+  const rawRecord = OktaIntegrationModel.parse(result);
+  return {
+    id: rawRecord.id,
+    clientId: rawRecord.client_id,
+    encryptedClientSecret: rawRecord.client_secret,
+    linkedOrganizationId: rawRecord.linked_organization_id,
+    domain: rawRecord.domain,
+  };
+};
