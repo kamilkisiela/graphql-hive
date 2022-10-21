@@ -30,5 +30,6 @@ export function deployCloudflare({
     sentryDsn: commonEnv.SENTRY_DSN,
     release: packageHelper.currentReleaseId(),
   });
+
   return cdn.deploy();
 }

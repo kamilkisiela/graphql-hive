@@ -259,9 +259,8 @@ const proxy = deployProxy({
 
 deployCloudFlareSecurityTransform({
   envName,
-  effectedDomains: [rootDns, appHostname, docsHostname],
   // Paths used by 3rd-party software.
-  // The CF Page Rules should not affect them.
+  // The CF Page Rules should not affect them and do not apply any special security headers.
   ignoredPaths: [
     '/api/auth',
     '/api/health',

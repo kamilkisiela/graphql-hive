@@ -102,20 +102,9 @@ export function Navigation() {
   const [meQuery] = useQuery({
     query: MeDocument,
   });
-  const headway = ((window as any) ?? {}).Headway;
 
   const dropdownBgColor = useColorModeValue('white', 'gray.900');
   const dropdownTextColor = useColorModeValue('gray.700', 'gray.300');
-
-  React.useEffect(() => {
-    if (visible && headway) {
-      (window as any).Headway.init({
-        selector: '.hive-release-notes',
-        account: 'x850Q7',
-        enabled: true,
-      });
-    }
-  }, [visible, headway]);
 
   if (!visible) {
     return null;
