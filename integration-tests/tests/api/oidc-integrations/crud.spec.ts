@@ -73,7 +73,7 @@ describe('create', () => {
             createdOIDCIntegration: {
               id: expect.any(String),
               clientId: 'foo',
-              clientSecretPreview: '********ofoo',
+              clientSecretPreview: 'ofoo',
               domain: 'http://localhost:8888/oauth',
             },
           },
