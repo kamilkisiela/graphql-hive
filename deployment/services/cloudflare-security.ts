@@ -7,7 +7,7 @@ function toExpressionList(items: string[]): string {
   return items.map(v => `"${v}"`).join(' ');
 }
 
-export function deployCloudFlareSecurityTransform(options: { ignoredPaths: string[] }) {
+export function deployCloudFlareSecurityTransform(options: { envName: string; ignoredPaths: string[] }) {
   const expression = `not http.request.uri.path in { ${toExpressionList(options.ignoredPaths)} }`;
 
   const monacoCdnBasePath: `https://${string}/` = `https://cdn.jsdelivr.net/npm/monaco-editor@0.33.0/`;
