@@ -5,6 +5,7 @@ import * as Yup from 'yup';
 
 import { authenticated, withSessionProtection } from '@/components/authenticated-container';
 import { OrganizationLayout } from '@/components/layouts';
+import { OIDCIntegrationSection } from '@/components/organization/settings/oidc-integration-section';
 import { Button, Card, Heading, Input, Spinner, Tag, Title } from '@/components/v2';
 import { AlertTriangleIcon, GitHubIcon, SlackIcon } from '@/components/v2/icon';
 import { DeleteOrganizationModal } from '@/components/v2/modals';
@@ -42,6 +43,7 @@ const Integrations = (): ReactElement => {
   const isGitHubIntegrationFeatureEnabled = checkIntegrations.data?.isGitHubIntegrationFeatureEnabled;
   const hasGitHubIntegration = checkIntegrations.data?.hasGitHubIntegration === true;
   const hasSlackIntegration = checkIntegrations.data?.hasSlackIntegration === true;
+  const isOIDCIntegrationFeatureEnabled = checkIntegrations.data?.isOIDCIntegrationFeatureEnabled;
 
   return (
     <>
@@ -106,6 +108,11 @@ const Integrations = (): ReactElement => {
           </>
         </div>
       )}
+      {isOIDCIntegrationFeatureEnabled === false
+        ? null
+        : checkIntegrations.data?.organization?.organization && (
+            <OIDCIntegrationSection organization={checkIntegrations.data?.organization?.organization} />
+          )}
     </>
   );
 };
