@@ -349,7 +349,7 @@ export interface Storage {
     domain: string;
   }): Promise<OIDCIntegration>;
   updateOIDCIntegration(_: {
-    integrationId: string;
+    oidcIntegrationId: string;
     clientId: string | null;
     encryptedClientSecret: string | null;
     domain: string | null;

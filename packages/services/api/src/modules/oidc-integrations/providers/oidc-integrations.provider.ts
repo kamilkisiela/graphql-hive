@@ -46,13 +46,7 @@ export class OIDCIntegrationsProvider {
 
   async getClientSecretPreview(integration: OIDCIntegration) {
     const decryptedSecret = this.crypto.decrypt(integration.encryptedClientSecret);
-    if (decryptedSecret.length < 4) {
-      return new Array(decryptedSecret.length).fill('*').join('');
-    }
-    console.log('TROLOLOL', decryptedSecret);
-    return (
-      new Array(decryptedSecret.length - 4).fill('*').join('') + decryptedSecret.substring(decryptedSecret.length - 4)
-    );
+    return decryptedSecret.substring(decryptedSecret.length - 4);
   }
 
   async createOIDCIntegrationForOrganization(args: {
@@ -125,7 +119,7 @@ export class OIDCIntegrationsProvider {
 
     if (clientIdResult.success && clientSecretResult.success && domainResult.success) {
       const oidcIntegration = await this.storage.updateOIDCIntegration({
-        integrationId: args.oidcIntegrationId,
+        oidcIntegrationId: args.oidcIntegrationId,
         clientId: clientIdResult.data,
         encryptedClientSecret: clientSecretResult.data ? this.crypto.encrypt(clientSecretResult.data) : null,
         domain: domainResult.data,

@@ -2158,18 +2158,13 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
     async updateOIDCIntegration(args) {
       const result = await pool.maybeOne<unknown>(sql`
-        UPDATE "public"."oidc_integrations" (
-          "client_id",
-          "client_secret",
-          "domain"
-        )
+        UPDATE "public"."oidc_integrations"
         SET 
-          ${args.integrationId},
-          ${args.clientId ?? sql`"client_id"`},
-          ${args.encryptedClientSecret ?? sql`"client_secret"`},
-          ${args.domain ?? sql`"okta_domain"`}
+          "domain" = ${args.domain ?? sql`"domain"`}
+          , "client_id" = ${args.clientId ?? sql`"client_id"`}
+          , "client_secret" = ${args.encryptedClientSecret ?? sql`"client_secret"`}
         WHERE
-          "linked_organization_id" = ${args.integrationId}
+          "id" = ${args.oidcIntegrationId}
         RETURNING
           "id"
           , "linked_organization_id"
