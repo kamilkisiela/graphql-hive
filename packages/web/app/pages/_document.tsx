@@ -44,7 +44,6 @@ export default class MyDocument extends Document<{
             rel="stylesheet"
           />
           <link rel="shortcut icon" href="/just-logo.svg" />
-          <script async src="https://cdn.headwayapp.co/widget.js" />
           <script
             id="force-dark-mode"
             dangerouslySetInnerHTML={{ __html: "localStorage['chakra-ui-color-mode'] = 'dark';" }}

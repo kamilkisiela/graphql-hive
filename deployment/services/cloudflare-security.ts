@@ -37,7 +37,7 @@ export function deployCloudFlareSecurityTransform(options: {
   default-src 'self';
   frame-src ${stripeHost} https://game.crisp.chat;
   worker-src 'self' blob:;
-  style-src 'unsafe-inline';
+  style-src 'self' 'unsafe-inline' ${crispHost} fonts.googleapis.com ${monacoCdnBasePath};
   script-src 'self' 'unsafe-eval' 'unsafe-inline' ${monacoCdnBasePath} ${cspHosts};
   connect-src 'self' ${cspHosts}; 
   media-src ${crispHost};
