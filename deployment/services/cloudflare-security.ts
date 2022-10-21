@@ -1,28 +1,20 @@
 import * as pulumi from '@pulumi/pulumi';
 import * as cf from '@pulumi/cloudflare';
 
-// const cfConfig = new pulumi.Config('cloudflareCustom');
-const cloudflareProviderConfig = new pulumi.Config('cloudflare');
+const cfConfig = new pulumi.Config('cloudflareCustom');
 
 function toExpressionList(items: string[]): string {
   return items.map(v => `"${v}"`).join(' ');
 }
 
-export function deployCloudFlareSecurityTransform(options: {
-  envName: string;
-  effectedDomains: string[];
-  ignoredPaths: string[];
-}) {
-  const hostsExpression = `http.host in { ${toExpressionList(options.effectedDomains)} }`;
-  const ignoredPaths = `not http.request.uri.path in { ${toExpressionList(options.ignoredPaths)} }`;
-  const expression = `(${hostsExpression} and ${ignoredPaths})`;
+export function deployCloudFlareSecurityTransform(options: { ignoredPaths: string[] }) {
+  const expression = `not http.request.uri.path in { ${toExpressionList(options.ignoredPaths)} }`;
 
   const monacoCdnBasePath: `https://${string}/` = `https://cdn.jsdelivr.net/npm/monaco-editor@0.33.0/`;
   const crispHost = 'client.crisp.chat';
   const stripeHost = 'js.stripe.com';
   const gtmHost = 'www.googletagmanager.com';
   const cspHosts = [
-    ...options.effectedDomains,
     crispHost,
     stripeHost,
     gtmHost,
@@ -39,26 +31,32 @@ export function deployCloudFlareSecurityTransform(options: {
   frame-src ${stripeHost} https://game.crisp.chat;
   worker-src 'self' blob:;
   style-src 'self' 'unsafe-inline' ${crispHost} fonts.googleapis.com ${monacoCdnBasePath};
-  script-src 'self' 'unsafe-eval' 'unsafe-inline' ${monacoCdnBasePath} ${cspHosts};
-  connect-src 'self' ${cspHosts}; 
+  script-src 'self' 'unsafe-eval' 'unsafe-inline' {DYNAMIC_HOST_PLACEHOLDER} ${monacoCdnBasePath} ${cspHosts};
+  connect-src 'self' {DYNAMIC_HOST_PLACEHOLDER} ${cspHosts}; 
   media-src ${crispHost};
   style-src-elem 'self' 'unsafe-inline' ${monacoCdnBasePath} fonts.googleapis.com ${crispHost};
   font-src 'self' fonts.gstatic.com ${monacoCdnBasePath} ${crispHost};
   img-src * 'self' data: https: https://image.crisp.chat https://storage.crisp.chat ${gtmHost} ${crispHost};
 `;
 
+  const mergedCsp = contentSecurityPolicy.replace(/\s{2,}/g, ' ').trim();
+  const splitted = mergedCsp
+    .split('{DYNAMIC_HOST_PLACEHOLDER}')
+    .map(v => `"${v}"`)
+    .flatMap((v, index, array) => (array.length - 1 !== index ? [v, 'http.host'] : [v]));
+  const cspExpression = `concat(${splitted.join(', ')})`;
+
   return new cf.Ruleset('cloudflare-security-transform', {
-    // zoneId: cfConfig.require('zoneId'),
-    accountId: cloudflareProviderConfig.require('accountId'),
+    zoneId: cfConfig.require('zoneId'),
     description: 'Enforce security headers and CSP',
-    name: `Security Transform (${options.envName})`,
+    name: `Security Transform (all envs)`,
     kind: 'zone',
     phase: 'http_response_headers_transform',
     rules: [
       {
         expression,
         enabled: true,
-        description: `Security Headers (${options.envName})`,
+        description: `Security Headers (all envs)`,
         action: 'rewrite',
         actionParameters: {
           headers: [
@@ -74,7 +72,7 @@ export function deployCloudFlareSecurityTransform(options: {
             {
               operation: 'set',
               name: 'Content-Security-Policy',
-              value: contentSecurityPolicy.replace(/\s{2,}/g, ' ').trim(),
+              expression: cspExpression,
             },
             {
               operation: 'set',
