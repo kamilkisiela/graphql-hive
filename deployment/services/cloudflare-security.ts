@@ -1,7 +1,8 @@
 import * as pulumi from '@pulumi/pulumi';
 import * as cf from '@pulumi/cloudflare';
 
-const cfConfig = new pulumi.Config('cloudflareCustom');
+// const cfConfig = new pulumi.Config('cloudflareCustom');
+const cloudflareProviderConfig = new pulumi.Config('cloudflare');
 
 function toExpressionList(items: string[]): string {
   return items.map(v => `"${v}"`).join(' ');
@@ -47,7 +48,8 @@ export function deployCloudFlareSecurityTransform(options: {
 `;
 
   return new cf.Ruleset('cloudflare-security-transform', {
-    zoneId: cfConfig.require('zoneId'),
+    // zoneId: cfConfig.require('zoneId'),
+    accountId: cloudflareProviderConfig.require('accountId'),
     description: 'Enforce security headers and CSP',
     name: `Security Transform (${options.envName})`,
     kind: 'zone',
