@@ -8,6 +8,13 @@ function toExpressionList(items: string[]): string {
 }
 
 export function deployCloudFlareSecurityTransform(options: { envName: string; ignoredPaths: string[] }) {
+  // We deploy it only once, because CloudFlare is not super friendly for multiple deployments of "http_response_headers_transform" rules
+  // The single rule, deployed to prod, covers all other envs, and infers the hostname dynamically.
+  if (options.envName !== 'production') {
+    console.warn(`Skipped deploy security headers (see "cloudflare-security.ts") for env ${options.envName}`);
+    return;
+  }
+
   const expression = `not http.request.uri.path in { ${toExpressionList(options.ignoredPaths)} }`;
 
   const monacoCdnBasePath: `https://${string}/` = `https://cdn.jsdelivr.net/npm/monaco-editor@0.33.0/`;
