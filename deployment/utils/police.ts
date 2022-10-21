@@ -7,6 +7,7 @@ export class HivePolice {
   constructor(
     private envName: string,
     private zoneId: string,
+    private accountId: string,
     private cfToken: pulumi.Output<string>,
     private rootDns: string
   ) {}
@@ -48,6 +49,7 @@ export class HivePolice {
     });
 
     new cf.WorkerCronTrigger('cf-police-trigger', {
+      accountId: this.accountId,
       scriptName: script.name,
       // https://developers.cloudflare.com/workers/platform/cron-triggers/#examples
       schedules: [

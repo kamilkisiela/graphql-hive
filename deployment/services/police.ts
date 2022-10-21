@@ -7,6 +7,7 @@ export function deployCloudflarePolice({ envName, rootDns }: { envName: string; 
   const police = new HivePolice(
     envName,
     cfCustomConfig.require('zoneId'),
+    cfCustomConfig.require('accountId'),
     cfCustomConfig.requireSecret('policeApiToken'),
     rootDns
   );
