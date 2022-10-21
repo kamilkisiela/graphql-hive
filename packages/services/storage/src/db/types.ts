@@ -61,6 +61,16 @@ export interface migration {
   name: string;
 }
 
+export interface oidc_integrations {
+  client_id: string;
+  client_secret: string;
+  created_at: Date;
+  domain: string;
+  id: string;
+  linked_organization_id: string;
+  updated_at: Date;
+}
+
 export interface organization_invitations {
   code: string;
   created_at: Date;
