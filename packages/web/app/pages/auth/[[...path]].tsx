@@ -3,15 +3,32 @@ import Head from 'next/head';
 import 'twin.macro';
 import { FullLogo } from '@/components/common/Logo';
 import dynamic from 'next/dynamic';
+import type { GetServerSideProps } from 'next';
 import SuperTokensReact from 'supertokens-auth-react';
 import { env } from '@/env/frontend';
-import { startAuthFlowForProvider } from '@/lib/supertokens/start-auth-flow-for-provider';
+import { startAuthFlowForOIDCProvider, startAuthFlowForProvider } from '@/lib/supertokens/start-auth-flow-for-provider';
 
-export function getServerSideProps() {
+export const getServerSideProps: GetServerSideProps = async context => {
+  // See counter-part in '@/config/supertokens/frontend.ts'
+  if (env.auth.organizationOIDC === true) {
+    const url = new URL(env.appBaseUrl + (context.req.url ?? ''));
+    const oidcProviderId = url.searchParams.get('id');
+
+    if (url.pathname === '/auth/oidc' && oidcProviderId) {
+      return {
+        props: {
+          oidcProviderId,
+        },
+      };
+    }
+  }
+
   return {
-    props: {},
+    props: {
+      oidcProviderId: null,
+    },
   };
-}
+};
 
 const SuperTokensComponentNoSSR = dynamic(new Promise(res => res(SuperTokensReact.getRoutingComponent)) as any, {
   ssr: false,
@@ -20,8 +37,13 @@ const SuperTokensComponentNoSSR = dynamic(new Promise(res => res(SuperTokensReac
 /**
  * Route for showing the SuperTokens login page.
  */
-export default function Auth(): React.ReactElement {
+export default function Auth(props: { oidcProviderId: string | null }): React.ReactElement {
   React.useEffect(() => {
+    if (props.oidcProviderId) {
+      startAuthFlowForOIDCProvider(props.oidcProviderId);
+      return;
+    }
+
     // In case we are directed here from the Okta dashboard we automatically start the login flow.
     const isOkta =
       env.auth.okta !== null &&
@@ -54,7 +76,7 @@ export default function Auth(): React.ReactElement {
         <div>
           <FullLogo className="mx-auto my-5 text-yellow-500" width={150} color={{ main: '#fff', sub: '#fff' }} />
           {env.auth.legacyAuth0 === true ? <LegacyAuth0Notice /> : null}
-          <SuperTokensComponentNoSSR />
+          {props.oidcProviderId ? null : <SuperTokensComponentNoSSR />}
         </div>
       </>
     </>

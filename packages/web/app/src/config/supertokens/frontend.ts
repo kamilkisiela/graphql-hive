@@ -6,6 +6,10 @@ import { env } from '@/env/frontend';
 import { appInfo } from '../../lib/supertokens/app-info';
 import { CustomProviderConfig } from 'supertokens-auth-react/lib/build/recipe/thirdparty/providers/types';
 import { createThirdPartyEmailPasswordReactOktaProvider } from '../../lib/supertokens/third-party-email-password-react-okta-provider';
+import {
+  createThirdPartyEmailPasswordReactOIDCProvider,
+  getOIDCOverrides,
+} from '@/lib/supertokens/third-party-email-password-react-oidc-provider';
 
 export const frontendConfig = () => {
   const providers: Array<Provider | CustomProviderConfig> = [];
@@ -32,6 +36,16 @@ export const frontendConfig = () => {
     }
   }
 
+  const url = new URL(globalThis.window.location.toString());
+
+  if (env.auth.organizationOIDC === true) {
+    // Open ID Connect linked to organization
+    // We only add it conditionally so it does not show a button on the login page
+    if (url.pathname === '/auth/oidc' || url.pathname === '/auth/callback/oidc') {
+      providers.push(createThirdPartyEmailPasswordReactOIDCProvider());
+    }
+  }
+
   return {
     appInfo: appInfo(),
     recipeList: [
@@ -39,6 +53,25 @@ export const frontendConfig = () => {
         signInAndUpFeature: {
           providers,
         },
+        // TODO: this should actually be within 'getOIDCOverrides' - However there seems to be a bug in the library
+        preAPIHook: async options => {
+          if (options.action === 'GET_AUTHORISATION_URL' || options.action === 'THIRD_PARTY_SIGN_IN_UP') {
+            const maybeId: unknown = options.userContext['oidcId'];
+            if (typeof maybeId === 'string') {
+              const url = new URL(options.url);
+              url.searchParams.append('oidc_id', maybeId);
+              return {
+                ...options,
+                url: url.toString(),
+              };
+            }
+          }
+
+          return {
+            ...options,
+          };
+        },
+        override: env.auth.organizationOIDC ? getOIDCOverrides() : undefined,
       }),
       EmailVerification.init({
         mode: env.auth.requireEmailVerification ? 'REQUIRED' : 'OPTIONAL',

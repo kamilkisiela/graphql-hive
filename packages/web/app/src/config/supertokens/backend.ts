@@ -14,6 +14,10 @@ import type { EmailsApi } from '@hive/emails';
 import type { InternalApi } from '@hive/server';
 import { env } from '@/env/backend';
 import { createThirdPartyEmailPasswordNodeOktaProvider } from '../../lib/supertokens/third-party-email-password-node-okta-provider';
+import {
+  createOIDCSuperTokensNoopProvider,
+  getOIDCThirdPartyEmailPasswordNodeOverrides,
+} from '@/lib/supertokens/third-party-email-password-node-oidc-provider';
 
 export const backendConfig = (): TypeInput => {
   const emailsService = createTRPCClient<EmailsApi>({
@@ -43,6 +47,10 @@ export const backendConfig = (): TypeInput => {
 
   if (env.auth.okta) {
     providers.push(createThirdPartyEmailPasswordNodeOktaProvider(env.auth.okta));
+  }
+
+  if (env.auth.organizationOIDC) {
+    providers.push(createOIDCSuperTokensNoopProvider());
   }
 
   return {
@@ -75,6 +83,10 @@ export const backendConfig = (): TypeInput => {
         },
         override: composeSuperTokensOverrides([
           getEnsureUserOverrides(internalApi),
+          /**
+           * These overrides are only relevant for the legacy Auth0 -> SuperTokens migration (period).
+           */
+          env.auth.organizationOIDC ? getOIDCThirdPartyEmailPasswordNodeOverrides() : null,
           env.auth.legacyAuth0 ? getAuth0Overrides(env.auth.legacyAuth0) : null,
         ]),
       }),
@@ -209,6 +221,38 @@ function getEnsureUserOverrides(internalApi: ReturnType<typeof createTRPCClient<
 
   return override;
 }
+/**
+ * Utility function for composing multiple (dynamic SuperTokens overrides).
+ */
+const composeSuperTokensOverrides = (overrides: Array<ThirdPartEmailPasswordTypeInput['override'] | null>) => ({
+  apis: (
+    originalImplementation: ReturnType<
+      Exclude<Exclude<ThirdPartEmailPasswordTypeInput['override'], undefined>['apis'], undefined>
+    >,
+    builder: OverrideableBuilder<ThirdPartyEmailPasswordNode.APIInterface> | undefined
+  ) => {
+    let impl = originalImplementation;
+    for (const override of overrides) {
+      if (typeof override?.apis === 'function') {
+        impl = override.apis(impl, builder);
+      }
+    }
+    return impl;
+  },
+  functions: (
+    originalImplementation: ReturnType<
+      Exclude<Exclude<ThirdPartEmailPasswordTypeInput['override'], undefined>['functions'], undefined>
+    >
+  ) => {
+    let impl = originalImplementation;
+    for (const override of overrides) {
+      if (typeof override?.functions === 'function') {
+        impl = override.functions(impl);
+      }
+    }
+    return impl;
+  },
+});
 
 //
 // LEGACY Auth0 Utilities
@@ -508,34 +552,3 @@ async function generateRandomPassword(): Promise<string> {
     })
   );
 }
-
-/** * Utility function for composing multiple (dynamic SuperTokens overrides). */
-const composeSuperTokensOverrides = (overrides: Array<ThirdPartEmailPasswordTypeInput['override'] | null>) => ({
-  apis: (
-    originalImplementation: ReturnType<
-      Exclude<Exclude<ThirdPartEmailPasswordTypeInput['override'], undefined>['apis'], undefined>
-    >,
-    builder: OverrideableBuilder<ThirdPartyEmailPasswordNode.APIInterface> | undefined
-  ) => {
-    let impl = originalImplementation;
-    for (const override of overrides) {
-      if (typeof override?.apis === 'function') {
-        impl = override.apis(impl, builder);
-      }
-    }
-    return impl;
-  },
-  functions: (
-    originalImplementation: ReturnType<
-      Exclude<Exclude<ThirdPartEmailPasswordTypeInput['override'], undefined>['functions'], undefined>
-    >
-  ) => {
-    let impl = originalImplementation;
-    for (const override of overrides) {
-      if (typeof override?.functions === 'function') {
-        impl = override.functions(impl);
-      }
-    }
-    return impl;
-  },
-});

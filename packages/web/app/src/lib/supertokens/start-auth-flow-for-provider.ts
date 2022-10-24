@@ -12,3 +12,16 @@ export const startAuthFlowForProvider = async (providerId: 'google' | 'okta' | '
 
   window.location.assign(authUrl);
 };
+
+export const startAuthFlowForOIDCProvider = async (oidcId: string) => {
+  const authUrl = await getAuthorisationURLWithQueryParamsAndSetState({
+    providerId: 'oidc',
+    authorisationURL: `${env.appBaseUrl}/auth/callback/oidc`,
+    // The user context is very important - we store the OIDC ID so we can use it later on.
+    userContext: {
+      oidcId,
+    },
+  });
+
+  window.location.assign(authUrl);
+};
