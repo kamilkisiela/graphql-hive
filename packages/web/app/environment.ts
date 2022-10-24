@@ -155,7 +155,7 @@ const config = {
   release: base.RELEASE ?? 'local',
   nodeEnv: base.NODE_ENV,
   environment: base.ENVIRONMENT,
-  appBaseUrl: base.APP_BASE_URL,
+  appBaseUrl: base.APP_BASE_URL.replace(/\/$/, ''),
   graphqlEndpoint: base.GRAPHQL_ENDPOINT,
   serverEndpoint: base.SERVER_ENDPOINT,
   emailsEndpoint: base.EMAILS_ENDPOINT,

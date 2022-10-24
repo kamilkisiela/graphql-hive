@@ -7,7 +7,7 @@ import { getAuthorisationURLWithQueryParamsAndSetState } from 'supertokens-auth-
 export const startAuthFlowForProvider = async (providerId: 'google' | 'okta' | 'github') => {
   const authUrl = await getAuthorisationURLWithQueryParamsAndSetState({
     providerId,
-    authorisationURL: `${env.appBaseUrl.replace(/\/$/, '')}/auth/callback/${providerId}`,
+    authorisationURL: `${env.appBaseUrl}/auth/callback/${providerId}`,
   });
 
   window.location.assign(authUrl);
