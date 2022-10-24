@@ -35,6 +35,7 @@
     "@sentry/types": "7.12.1",
     "@tgriesser/schemats": "7.0.0",
     "@types/pg": "8.6.5",
+    "copyfiles": "2.4.1",
     "pg-promise": "10.11.1",
     "ts-node": "10.9.1",
     "tslib": "2.4.0"

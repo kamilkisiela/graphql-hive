@@ -614,6 +614,7 @@ importers:
       '@tgriesser/schemats': 7.0.0
       '@theguild/buddy': 0.1.0
       '@types/pg': 8.6.5
+      copyfiles: 2.4.1
       dotenv: 10.0.0
       got: 12.5.1
       param-case: 3.0.4
@@ -639,6 +640,7 @@ importers:
       '@sentry/types': 7.12.1
       '@tgriesser/schemats': 7.0.0_u3kbucfchakklx3sci2vh6wjau
       '@types/pg': 8.6.5
+      copyfiles: 2.4.1
       pg-promise: 10.11.1
       ts-node: 10.9.1
       tslib: 2.4.0
