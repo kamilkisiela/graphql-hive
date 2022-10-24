@@ -10,59 +10,15 @@ import zod from 'zod';
 import * as crypto from 'crypto';
 import { createTRPCClient } from '@trpc/client';
 import type { EmailsApi } from '@hive/emails';
+import type { InternalApi } from '@hive/server';
 import { env } from '@/env/backend';
-
-async function ensureUserCreation(input: {
-  superTokensUserId: string;
-  externalAuthUserId: string | null;
-  email: string;
-}) {
-  const response = await fetch(env.graphqlEndpoint, {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      'x-internal-signature': env.internalAccessSignature,
-      'graphql-client-name': 'Hive App',
-      'graphql-client-version': env.release,
-    },
-    body: JSON.stringify({
-      operationName: 'ensureUserCreation',
-      query: /* GraphQL */ `
-        mutation ensureUserCreation($input: EnsureMeInput!) {
-          ensureMe(input: $input)
-        }
-      `,
-      variables: {
-        input,
-      },
-    }),
-  });
-
-  if (response.ok) {
-    const result: {
-      data:
-        | {
-            ensureMe: string;
-          }
-        | {
-            errors: {
-              message: string;
-            }[];
-          };
-    } = await response.json();
-
-    if ('errors' in result.data) {
-      return false;
-    }
-
-    return true;
-  }
-}
 
 export const backendConfig = (): TypeInput => {
   const emailsService = createTRPCClient<EmailsApi>({
     url: `${env.emailsEndpoint}/trpc`,
+  });
+  const internalApi = createTRPCClient<InternalApi>({
+    url: `${env.serverEndpoint}/trpc`,
   });
   const providers: Array<TypeProvider> = [];
 
@@ -123,10 +79,9 @@ export const backendConfig = (): TypeInput => {
               const response = await originalImplementation.emailPasswordSignUpPOST(input);
 
               if (response.status === 'OK') {
-                await ensureUserCreation({
+                await internalApi.mutation('ensureUser', {
                   superTokensUserId: response.user.id,
                   email: response.user.email,
-                  externalAuthUserId: null,
                 });
               }
 
@@ -142,10 +97,9 @@ export const backendConfig = (): TypeInput => {
               const response = await originalImplementation.emailPasswordSignInPOST(input);
 
               if (response.status === 'OK') {
-                await ensureUserCreation({
+                await internalApi.mutation('ensureUser', {
                   superTokensUserId: response.user.id,
                   email: response.user.email,
-                  externalAuthUserId: null,
                 });
               }
 
@@ -161,10 +115,9 @@ export const backendConfig = (): TypeInput => {
               const response = await originalImplementation.thirdPartySignInUpPOST(input);
 
               if (response.status === 'OK') {
-                await ensureUserCreation({
+                await internalApi.mutation('ensureUser', {
                   superTokensUserId: response.user.id,
                   email: response.user.email,
-                  externalAuthUserId: null,
                 });
               }
 

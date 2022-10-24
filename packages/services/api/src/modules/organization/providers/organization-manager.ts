@@ -16,7 +16,7 @@ import { OrganizationAccessScope } from '../../auth/providers/organization-acces
 import { ProjectAccessScope } from '../../auth/providers/project-access';
 import { TargetAccessScope } from '../../auth/providers/target-access';
 
-export const reservedNames = [
+export const reservedOrganizationNames = [
   'registry',
   'server',
   'usage',
@@ -50,7 +50,7 @@ export const reservedNames = [
   'internal',
 ];
 
-export const adminScopes = [
+export const organizationAdminScopes = [
   ...Object.values(OrganizationAccessScope),
   ...Object.values(ProjectAccessScope),
   ...Object.values(TargetAccessScope),
@@ -181,8 +181,8 @@ export class OrganizationManager {
       cleanId: paramCase(name),
       type,
       user: user.id,
-      scopes: adminScopes,
-      reservedNames,
+      scopes: organizationAdminScopes,
+      reservedNames: reservedOrganizationNames,
     });
 
     await this.activityManager.create({

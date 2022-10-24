@@ -2,12 +2,14 @@
 
 import 'reflect-metadata';
 import { createServer, startMetrics, registerShutdown, reportReadiness } from '@hive/service-common';
+import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify/dist/trpc-server-adapters-fastify.cjs.js';
 import { createRegistry, LogFn, Logger } from '@hive/api';
 import { createStorage as createPostgreSQLStorage, createConnectionString } from '@hive/storage';
 import got from 'got';
 import { stripIgnoredCharacters } from 'graphql';
 import * as Sentry from '@sentry/node';
 import { Dedupe, ExtraErrorData } from '@sentry/integrations';
+import { internalApiRouter, createContext } from './api';
 import { asyncStorage } from './async-storage';
 import { graphqlHandler } from './graphql-handler';
 import { clickHouseReadDuration, clickHouseElapsedDuration } from './metrics';
@@ -224,6 +226,16 @@ export async function main() {
         }
       `),
       operationName: 'readiness',
+    });
+
+    await server.register(fastifyTRPCPlugin, {
+      prefix: '/trpc',
+      trpcOptions: {
+        router: internalApiRouter,
+        createContext() {
+          return createContext({ storage });
+        },
+      },
     });
 
     server.route({

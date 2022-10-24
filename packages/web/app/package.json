@@ -103,7 +103,8 @@
     "postcss": "8.4.13",
     "tailwindcss": "2.2.19",
     "tailwindcss-radix": "2.2.0",
-    "@hive/emails": "*"
+    "@hive/emails": "*",
+    "@hive/server": "*"
   },
   "babelMacros": {
     "twin": {

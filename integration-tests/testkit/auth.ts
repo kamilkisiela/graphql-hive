@@ -1,6 +1,8 @@
 import * as utils from 'dockest/test-helper';
 import { createFetch } from '@whatwg-node/fetch';
-import zod from 'zod';
+import { createTRPCClient } from '@trpc/client';
+import type { InternalApi } from '@hive/server';
+import { z } from 'zod';
 import { ensureEnv } from './env';
 
 const graphqlAddress = utils.getServiceAddress('server', 3001);
@@ -9,15 +11,20 @@ const { fetch } = createFetch({
   useNodeFetch: true,
 });
 
-const SignUpSignInUserResponseModel = zod.object({
-  status: zod.literal('OK'),
-  user: zod.object({ email: zod.string(), id: zod.string(), timeJoined: zod.number() }),
+const internalApi = createTRPCClient<InternalApi>({
+  url: `http://${graphqlAddress}/trpc`,
+  fetch,
+});
+
+const SignUpSignInUserResponseModel = z.object({
+  status: z.literal('OK'),
+  user: z.object({ email: z.string(), id: z.string(), timeJoined: z.number() }),
 });
 
 const signUpUserViaEmail = async (
   email: string,
   password: string
-): Promise<zod.TypeOf<typeof SignUpSignInUserResponseModel>> => {
+): Promise<z.TypeOf<typeof SignUpSignInUserResponseModel>> => {
   const response = await fetch(`${ensureEnv('SUPERTOKENS_CONNECTION_URI')}/recipe/signup`, {
     method: 'POST',
     headers: {
@@ -44,51 +51,27 @@ const createSessionPayload = (superTokensUserId: string, email: string) => ({
   email,
 });
 
-const CreateSessionModel = zod.object({
-  accessToken: zod.object({
-    token: zod.string(),
+const CreateSessionModel = z.object({
+  accessToken: z.object({
+    token: z.string(),
   }),
-  refreshToken: zod.object({
-    token: zod.string(),
+  refreshToken: z.object({
+    token: z.string(),
   }),
-  idRefreshToken: zod.object({
-    token: zod.string(),
+  idRefreshToken: z.object({
+    token: z.string(),
   }),
 });
 
-async function ensureUserCreation(input: { superTokensUserId: string; email: string }) {
-  const response = await fetch(`http://${graphqlAddress}/graphql`, {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      'x-internal-signature': ensureEnv('INTERNAL_ACCESS_SIGNATURE'),
-      'graphql-client-name': 'Integration Tests',
-      'graphql-client-version': 'integration-tests',
-    },
-    body: JSON.stringify({
-      operationName: 'ensureUserCreation',
-      query: /* GraphQL */ `
-        mutation ensureUserCreation($input: EnsureMeInput!) {
-          ensureMe(input: $input)
-        }
-      `,
-      variables: {
-        input,
-      },
-    }),
-  });
-
-  const result = await response.json();
-
-  if ('errors' in result) {
-    console.error(result);
-    throw new Error('Failed to ensure user creation');
-  }
-}
-
 const createSession = async (superTokensUserId: string, email: string) => {
-  await ensureUserCreation({ superTokensUserId, email });
+  // I failed to make the TypeScript work here...
+  // It shows that the input type is `undefined`...
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  await internalApi.mutation('ensureUser', {
+    superTokensUserId,
+    email,
+  });
   const sessionData = createSessionPayload(superTokensUserId, email);
   const payload = {
     enableAntiCsrf: false,
@@ -130,7 +113,7 @@ export const userEmails: Record<UserID, string> = {
   admin: 'admin@localhost.localhost',
 };
 
-const tokenResponsePromise: Record<UserID, Promise<zod.TypeOf<typeof SignUpSignInUserResponseModel>> | null> = {
+const tokenResponsePromise: Record<UserID, Promise<z.TypeOf<typeof SignUpSignInUserResponseModel>> | null> = {
   main: null,
   extra: null,
   admin: null,

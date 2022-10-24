@@ -19,6 +19,7 @@
     "jsxImportSource": "@emotion/react",
     "paths": {
       "@hive/emails": ["../../services/emails/src/api.ts"],
+      "@hive/server": ["../../services/server/src/api.ts"],
       "@hive/service-common": ["../../services/service-common/src/index.ts"],
       "@/*": ["src/*"]
     },

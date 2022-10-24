@@ -10,18 +10,7 @@ export default gql`
   }
 
   extend type Mutation {
-    """
-    Ensures that the user exists in the system.
-    Access to this mutation is restricted to internal services.
-    """
-    ensureMe(input: EnsureMeInput!): String!
     updateMe(input: UpdateMeInput!): UpdateMeResult!
-  }
-
-  input EnsureMeInput {
-    superTokensUserId: String!
-    externalAuthUserId: String
-    email: String!
   }
 
   input UpdateMeInput {
