@@ -53,30 +53,34 @@ export default function Auth(): React.ReactElement {
         </Head>
         <div>
           <FullLogo className="mx-auto my-5 text-yellow-500" width={150} color={{ main: '#fff', sub: '#fff' }} />
-          {env.auth.legacyAuth0 === true ? (
-            <div tw="mx-auto bg-yellow-200 text-black sm:width[420px] width[76%] rounded-lg shadow-lg p-5 text-xs">
-              We recently migrated from Auth0 to SuperTokens. If you have any issues, please contact us at{' '}
-              <a href="mailto:kamil@graphql-hive.com" className="underline">
-                kamil@graphql-hive.com
-              </a>{' '}
-              or using the{' '}
-              <a
-                href="#"
-                className="underline"
-                onClick={() => {
-                  if (typeof window !== 'undefined' && (window as any).$crisp) {
-                    (window as any).$crisp.push(['do', 'chat:open']);
-                  }
-                }}
-              >
-                in-app chat
-              </a>
-              .
-            </div>
-          ) : null}
+          {env.auth.legacyAuth0 === true ? <LegacyAuth0Notice /> : null}
           <SuperTokensComponentNoSSR />
         </div>
       </>
     </>
   );
 }
+
+const LegacyAuth0Notice = (): React.ReactElement => {
+  return (
+    <div tw="mx-auto bg-yellow-200 text-black sm:width[420px] width[76%] rounded-lg shadow-lg p-5 text-xs">
+      We recently migrated from Auth0 to SuperTokens. If you have any issues, please contact us at{' '}
+      <a href="mailto:kamil@graphql-hive.com" className="underline">
+        kamil@graphql-hive.com
+      </a>{' '}
+      or using the{' '}
+      <a
+        href="#"
+        className="underline"
+        onClick={() => {
+          if (typeof window !== 'undefined' && (window as any).$crisp) {
+            (window as any).$crisp.push(['do', 'chat:open']);
+          }
+        }}
+      >
+        in-app chat
+      </a>
+      .
+    </div>
+  );
+};
