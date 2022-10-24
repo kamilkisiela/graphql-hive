@@ -1,0 +1,63 @@
+@startuml
+
+actor "UI User" as uiuser
+actor "CLI User" as cliuser
+actor "Running Server" as gqlserver
+
+component zookeeper
+component supertokens
+
+queue kafka
+
+database ClickHouse
+database Postgres
+database redis
+
+component server
+component schema
+component tokens
+component webhooks
+component emails
+component usage
+component "usage-ingestor" as usageing
+component app
+
+component "storage (migrations)" as storageSvc
+storageSvc ---d-> ClickHouse
+storageSvc ---d-> Postgres
+
+kafka -l-> zookeeper
+
+app --> supertokens
+app --> server
+app --> emails
+
+usageing --> ClickHouse
+kafka -> usageing
+usage -d-> kafka
+gqlserver -> usage
+
+emails -d-> redis
+webhooks -d-> redis
+tokens -d-> Postgres
+schema -d-> redis
+
+server -d-> Postgres
+server -d--> ClickHouse
+server -d-> redis
+server -d-> tokens
+server -d-> webhooks
+server -d-> schema
+server -d-> emails
+server -d-> supertokens
+
+supertokens -> Postgres
+
+uiuser --> app
+cliuser --> server
+
+emails -[hidden]-> webhooks
+
+usage ----> tokens
+
+@enduml
