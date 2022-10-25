@@ -6,6 +6,9 @@ import { ReactElement } from 'react';
 
 import { gql, DocumentType, useMutation } from 'urql';
 
+const containerClassName = 'flex flex-col items-stretch gap-5';
+const modalWidthClassName = 'w-[550px]';
+
 const OIDCIntegrationSection_OrganizationFragment = gql(/* GraphQL */ `
   fragment OIDCIntegrationSection_OrganizationFragment on Organization {
     id
@@ -32,8 +35,6 @@ export const OIDCIntegrationSection = (props: {
   const openCreateModalLink = `${router.asPath}#create-oidc-integration`;
   const openEditModalLink = `${router.asPath}#update-oidc-integration`;
   const openDeleteModalLink = `${router.asPath}#delete-oidc-integration`;
-
-  console.log(router.asPath.split('#')[0] + '#update-oidc-integration');
 
   return (
     <>
@@ -123,9 +124,9 @@ const CreateOIDCIntegrationModal = (props: {
   openEditModalLink: string;
 }): ReactElement => {
   return (
-    <Modal open={props.isOpen} onOpenChange={props.close} className="w-[800px]">
+    <Modal open={props.isOpen} onOpenChange={props.close} className={modalWidthClassName}>
       {props.hasOIDCIntegration === true ? (
-        <div className="flex flex-col items-center gap-5">
+        <div className={containerClassName}>
           <Heading>Create OpenID Connect Integration</Heading>
           <p>
             You are trying to create an OpenID Connect integration for an organization that already has a provider
@@ -183,7 +184,7 @@ const CreateOIDCIntegrationForm = (props: { organizationId: string; close: () =>
   });
 
   return (
-    <form className="flex flex-col items-center gap-5" onSubmit={formik.handleSubmit}>
+    <form className={containerClassName} onSubmit={formik.handleSubmit}>
       <Heading>Create OpenID Connect Integration</Heading>
       <p>
         Connecting an OIDC provider to this organization allows users to automatically log in and be part of this
@@ -242,9 +243,9 @@ const UpdateOIDCIntegrationModal = (props: {
   openCreateModalLink: string;
 }): ReactElement => {
   return (
-    <Modal open={props.isOpen} onOpenChange={props.close} className="w-[800px]">
+    <Modal open={props.isOpen} onOpenChange={props.close} className={modalWidthClassName}>
       {props.oidcIntegration === null ? (
-        <div className="flex flex-col items-center gap-5">
+        <div className={containerClassName}>
           <Heading>Update OpenID Connect Integration</Heading>
           <p>You are trying to update an OpenID Connect integration for an organization that has no integration.</p>
           <div className="flex w-full gap-2">
@@ -334,7 +335,7 @@ const UpdateOIDCIntegrationForm = (props: {
   });
 
   return (
-    <form className="flex flex-col items-stretch gap-5" onSubmit={formik.handleSubmit}>
+    <form className={containerClassName} onSubmit={formik.handleSubmit}>
       <Heading>Update OpenID Connect Integration</Heading>
       <Input
         placeholder="Domain (Issuer)"
@@ -409,8 +410,8 @@ const DeleteOIDCIntegrationModal = (props: {
   const { oidcIntegrationId } = props;
 
   return (
-    <Modal open={props.isOpen} onOpenChange={props.close} className="w-[800px]">
-      <div className="flex flex-col items-center gap-5">
+    <Modal open={props.isOpen} onOpenChange={props.close} className={modalWidthClassName}>
+      <div className={containerClassName}>
         <Heading>Delete OpenID Connect Integration</Heading>
         {mutation.data?.deleteOIDCIntegration.ok ? (
           <>
