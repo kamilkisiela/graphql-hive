@@ -3,6 +3,8 @@ import ThirdPartyEmailPasswordNode from 'supertokens-node/recipe/thirdpartyemail
 import type { TypeInput as ThirdPartEmailPasswordTypeInput } from 'supertokens-node/recipe/thirdpartyemailpassword/types';
 import { env } from '@/env/backend';
 import { ExpressRequest } from 'supertokens-node/lib/build/framework/express/framework';
+import type { createTRPCClient } from '@trpc/client';
+import type { InternalApi } from '@hive/server';
 
 const OIDCProfileInfoSchema = zod.object({
   sub: zod.string(),
@@ -79,14 +81,16 @@ const getOIDCIdFromInput = (input: { userContext: any }): string => {
   return oidcId;
 };
 
-export const getOIDCThirdPartyEmailPasswordNodeOverrides = () => {
+export const getOIDCThirdPartyEmailPasswordNodeOverrides = (args: {
+  internalApi: ReturnType<typeof createTRPCClient<InternalApi>>;
+}) => {
   const override: ThirdPartEmailPasswordTypeInput['override'] = {
     apis: originalImplementation => {
       return {
         ...originalImplementation,
         thirdPartySignInUpPOST: async input => {
           const oidcId = getOIDCIdFromInput(input);
-          const config = await fetchOIDCConfig(oidcId);
+          const config = await fetchOIDCConfig(args.internalApi, oidcId);
 
           return originalImplementation.thirdPartySignInUpPOST!({
             ...input,
@@ -95,7 +99,7 @@ export const getOIDCThirdPartyEmailPasswordNodeOverrides = () => {
         },
         async authorisationUrlGET(input) {
           const oidcId = getOIDCIdFromInput(input);
-          const config = await fetchOIDCConfig(oidcId);
+          const config = await fetchOIDCConfig(args.internalApi, oidcId);
 
           const result = originalImplementation.authorisationUrlGET!({
             ...input,
@@ -119,7 +123,12 @@ export const createOIDCSuperTokensNoopProvider = () => ({
 });
 
 const fetchOIDCConfig = async (
-  _oidcConfig: string
+  internalApi: ReturnType<typeof createTRPCClient<InternalApi>>,
+  oidcIntegrationId: string
 ): Promise<{ id: string; clientId: string; clientSecret: string; domain: string }> => {
-  throw new Error('Missing implementation');
+  const result = await internalApi.query('getOIDCIntegrationById', { oidcIntegrationId });
+  if (result === null) {
+    throw new Error('OIDC integration not found.');
+  }
+  return result;
 };

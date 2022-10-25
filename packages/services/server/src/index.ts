@@ -15,6 +15,7 @@ import { graphqlHandler } from './graphql-handler';
 import { clickHouseReadDuration, clickHouseElapsedDuration } from './metrics';
 import zod from 'zod';
 import { env } from './environment';
+import { CryptoProvider } from '@hive/api';
 
 const LegacySetUserIdMappingPayloadModel = zod.object({
   auth0UserId: zod.string(),
@@ -228,12 +229,14 @@ export async function main() {
       operationName: 'readiness',
     });
 
+    const crypto = new CryptoProvider(env.encryptionSecret);
+
     await server.register(fastifyTRPCPlugin, {
       prefix: '/trpc',
       trpcOptions: {
         router: internalApiRouter,
         createContext() {
-          return createContext({ storage });
+          return createContext({ storage, crypto });
         },
       },
     });

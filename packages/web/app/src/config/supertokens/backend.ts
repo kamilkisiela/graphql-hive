@@ -86,7 +86,7 @@ export const backendConfig = (): TypeInput => {
           /**
            * These overrides are only relevant for the legacy Auth0 -> SuperTokens migration (period).
            */
-          env.auth.organizationOIDC ? getOIDCThirdPartyEmailPasswordNodeOverrides() : null,
+          env.auth.organizationOIDC ? getOIDCThirdPartyEmailPasswordNodeOverrides({ internalApi }) : null,
           env.auth.legacyAuth0 ? getAuth0Overrides(env.auth.legacyAuth0) : null,
         ]),
       }),

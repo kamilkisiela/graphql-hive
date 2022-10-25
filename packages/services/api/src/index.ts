@@ -33,3 +33,4 @@ export {
   organizationAdminScopes,
   reservedOrganizationNames,
 } from './modules/organization/providers/organization-config';
+export { CryptoProvider } from './modules/shared/providers/crypto';
