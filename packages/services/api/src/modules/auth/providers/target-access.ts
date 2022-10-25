@@ -2,7 +2,9 @@ import { Injectable, Scope } from 'graphql-modules';
 import Dataloader from 'dataloader';
 import { Logger } from '../../shared/providers/logger';
 import { AccessError } from '../../../shared/errors';
+import { TargetAccessScope } from './scopes';
 import { OrganizationAccess } from './organization-access';
+export { TargetAccessScope } from './scopes';
 
 export interface TargetUserAccessSelector {
   user: string;
@@ -23,37 +25,6 @@ interface TargetTokenAccessSelector {
   project: string;
   target: string;
   scope: TargetAccessScope;
-}
-
-export enum TargetAccessScope {
-  /**
-   * Read target data
-   */
-  READ = 'target:read',
-  /**
-   * Who can delete the target
-   */
-  DELETE = 'target:delete',
-  /**
-   * Who can modify targets's name etc
-   */
-  SETTINGS = 'target:settings',
-  /**
-   * Who can read registry
-   */
-  REGISTRY_READ = 'target:registry:read',
-  /**
-   * Who can manage registry
-   */
-  REGISTRY_WRITE = 'target:registry:write',
-  /**
-   * Who can read tokens
-   */
-  TOKENS_READ = 'target:tokens:read',
-  /**
-   * Who can manage tokens
-   */
-  TOKENS_WRITE = 'target:tokens:write',
 }
 
 const targetAccessScopeValues = Object.values(TargetAccessScope);

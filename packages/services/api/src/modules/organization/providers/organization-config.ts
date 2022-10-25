@@ -1,0 +1,41 @@
+import { OrganizationAccessScope, ProjectAccessScope, TargetAccessScope } from '../../auth/providers/scopes';
+
+export const reservedOrganizationNames = [
+  'registry',
+  'server',
+  'usage',
+  'graphql',
+  'api',
+  'auth',
+  'home',
+  'register',
+  'login',
+  'logout',
+  'signup',
+  'signin',
+  'signout',
+  'sign-up',
+  'sign-in',
+  'sign-out',
+  'manage',
+  'admin',
+  'stats',
+  'internal',
+  'general',
+  'dashboard',
+  'index',
+  'contact',
+  'docs',
+  'documentation',
+  'help',
+  'support',
+  'faq',
+  'knowledge',
+  'internal',
+];
+
+export const organizationAdminScopes = [
+  ...Object.values(OrganizationAccessScope),
+  ...Object.values(ProjectAccessScope),
+  ...Object.values(TargetAccessScope),
+];

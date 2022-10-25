@@ -1,10 +1,10 @@
 import { router } from '@trpc/server';
 import type { inferAsyncReturnType } from '@trpc/server';
 import { reservedOrganizationNames, organizationAdminScopes } from '@hive/api';
-import type { createStorage } from '@hive/storage';
+import type { Storage } from '@hive/api';
 import { z } from 'zod';
 
-export async function createContext({ storage }: { storage: Awaited<ReturnType<typeof createStorage>> }) {
+export async function createContext({ storage }: { storage: Storage }) {
   return {
     storage,
   };

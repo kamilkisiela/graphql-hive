@@ -32,4 +32,4 @@ export { ClickHouse } from './modules/operations/providers/clickhouse-client';
 export {
   organizationAdminScopes,
   reservedOrganizationNames,
-} from './modules/organization/providers/organization-manager';
+} from './modules/organization/providers/organization-config';

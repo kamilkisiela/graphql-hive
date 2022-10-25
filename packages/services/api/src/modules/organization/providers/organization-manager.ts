@@ -15,46 +15,7 @@ import { Emails } from '../../shared/providers/emails';
 import { OrganizationAccessScope } from '../../auth/providers/organization-access';
 import { ProjectAccessScope } from '../../auth/providers/project-access';
 import { TargetAccessScope } from '../../auth/providers/target-access';
-
-export const reservedOrganizationNames = [
-  'registry',
-  'server',
-  'usage',
-  'graphql',
-  'api',
-  'auth',
-  'home',
-  'register',
-  'login',
-  'logout',
-  'signup',
-  'signin',
-  'signout',
-  'sign-up',
-  'sign-in',
-  'sign-out',
-  'manage',
-  'admin',
-  'stats',
-  'internal',
-  'general',
-  'dashboard',
-  'index',
-  'contact',
-  'docs',
-  'documentation',
-  'help',
-  'support',
-  'faq',
-  'knowledge',
-  'internal',
-];
-
-export const organizationAdminScopes = [
-  ...Object.values(OrganizationAccessScope),
-  ...Object.values(ProjectAccessScope),
-  ...Object.values(TargetAccessScope),
-];
+import { reservedOrganizationNames, organizationAdminScopes } from './organization-config';
 
 /**
  * Responsible for auth checks.

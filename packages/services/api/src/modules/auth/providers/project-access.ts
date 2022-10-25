@@ -2,7 +2,9 @@ import { Injectable, Scope } from 'graphql-modules';
 import Dataloader from 'dataloader';
 import { Logger } from '../../shared/providers/logger';
 import { AccessError } from '../../../shared/errors';
+import { ProjectAccessScope } from './scopes';
 import { OrganizationAccess } from './organization-access';
+export { ProjectAccessScope } from './scopes';
 
 export interface ProjectUserAccessSelector {
   user: string;
@@ -21,33 +23,6 @@ interface ProjectTokenAccessSelector {
   organization: string;
   project: string;
   scope: ProjectAccessScope;
-}
-
-export enum ProjectAccessScope {
-  /**
-   * Read project data (targets, etc.)
-   */
-  READ = 'project:read',
-  /**
-   * Who can delete the project
-   */
-  DELETE = 'project:delete',
-  /**
-   * Who can modify projects's name
-   */
-  SETTINGS = 'project:settings',
-  /**
-   * Who can manage alerts
-   */
-  ALERTS = 'project:alerts',
-  /**
-   * Who can read Operations Store
-   */
-  OPERATIONS_STORE_READ = 'project:operations-store:read',
-  /**
-   * Who can write to Operations Store
-   */
-  OPERATIONS_STORE_WRITE = 'project:operations-store:write',
 }
 
 const projectAccessScopeValues = Object.values(ProjectAccessScope);
