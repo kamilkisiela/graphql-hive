@@ -1,4 +1,5 @@
 schema: ./packages/services/api/src/modules/*/module.graphql.ts
+emitLegacyCommonJSImports: true
 generates:
   # API
   ./packages/services/api/src/modules:
