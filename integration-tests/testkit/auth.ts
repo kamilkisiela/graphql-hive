@@ -1,16 +1,30 @@
-import { fetch } from '@whatwg-node/fetch';
-import zod from 'zod';
+import * as utils from '@n1ru4l/dockest/test-helper';
+import { createFetch } from '@whatwg-node/fetch';
+import { createTRPCClient } from '@trpc/client';
+import type { InternalApi } from '@hive/server';
+import { z } from 'zod';
 import { ensureEnv } from './env';
 
-const SignUpSignInUserResponseModel = zod.object({
-  status: zod.literal('OK'),
-  user: zod.object({ email: zod.string(), id: zod.string(), timeJoined: zod.number() }),
+const graphqlAddress = utils.getServiceAddress('server', 3001);
+
+const { fetch } = createFetch({
+  useNodeFetch: true,
+});
+
+const internalApi = createTRPCClient<InternalApi>({
+  url: `http://${graphqlAddress}/trpc`,
+  fetch,
+});
+
+const SignUpSignInUserResponseModel = z.object({
+  status: z.literal('OK'),
+  user: z.object({ email: z.string(), id: z.string(), timeJoined: z.number() }),
 });
 
 const signUpUserViaEmail = async (
   email: string,
   password: string
-): Promise<zod.TypeOf<typeof SignUpSignInUserResponseModel>> => {
+): Promise<z.TypeOf<typeof SignUpSignInUserResponseModel>> => {
   const response = await fetch(`${ensureEnv('SUPERTOKENS_CONNECTION_URI')}/recipe/signup`, {
     method: 'POST',
     headers: {
@@ -37,19 +51,27 @@ const createSessionPayload = (superTokensUserId: string, email: string) => ({
   email,
 });
 
-const CreateSessionModel = zod.object({
-  accessToken: zod.object({
-    token: zod.string(),
+const CreateSessionModel = z.object({
+  accessToken: z.object({
+    token: z.string(),
   }),
-  refreshToken: zod.object({
-    token: zod.string(),
+  refreshToken: z.object({
+    token: z.string(),
   }),
-  idRefreshToken: zod.object({
-    token: zod.string(),
+  idRefreshToken: z.object({
+    token: z.string(),
   }),
 });
 
 const createSession = async (superTokensUserId: string, email: string) => {
+  // I failed to make the TypeScript work here...
+  // It shows that the input type is `undefined`...
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  await internalApi.mutation('ensureUser', {
+    superTokensUserId,
+    email,
+  });
   const sessionData = createSessionPayload(superTokensUserId, email);
   const payload = {
     enableAntiCsrf: false,
@@ -91,21 +113,16 @@ export const userEmails: Record<UserID, string> = {
   admin: 'admin@localhost.localhost',
 };
 
-const tokenResponsePromise: Record<UserID, Promise<{ access_token: string }> | null> = {
+const tokenResponsePromise: Record<UserID, Promise<z.TypeOf<typeof SignUpSignInUserResponseModel>> | null> = {
   main: null,
   extra: null,
   admin: null,
 };
 
-async function signUpAndSignInViaEmail(email: string, password: string): Promise<{ access_token: string }> {
-  const data = await signUpUserViaEmail(email, password);
-  return await createSession(data.user.id, data.user.email);
-}
-
 export function authenticate(userId: UserID): Promise<{ access_token: string }> {
   if (!tokenResponsePromise[userId]) {
-    tokenResponsePromise[userId] = signUpAndSignInViaEmail(userEmails[userId], password);
+    tokenResponsePromise[userId] = signUpUserViaEmail(userEmails[userId], password);
   }
 
-  return tokenResponsePromise[userId]!;
+  return tokenResponsePromise[userId]!.then(data => createSession(data.user.id, data.user.email));
 }

@@ -70,6 +70,8 @@ export function useRouteSelector() {
     [router, push]
   );
 
+  const replace = useCallback((url: string) => router.replace(url), [router.replace]);
+
   // useMemo is necessary because we return new object and on every rerender `router` object will be different
   return useMemo(
     () => ({
@@ -78,7 +80,7 @@ export function useRouteSelector() {
       query: router.query,
       update,
       push,
-      replace: router.replace,
+      replace,
       visitHome,
       organizationId: router.query.orgId as string,
       visitOrganization,

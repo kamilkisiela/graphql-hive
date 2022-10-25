@@ -18,8 +18,9 @@ import type {
   OrganizationType,
   OrganizationInvitation,
 } from '@hive/api';
-import { sql, TaggedTemplateLiteralInvocation } from 'slonik';
+import { DatabasePool, DatabaseTransactionConnection, sql, TaggedTemplateLiteralInvocation } from 'slonik';
 import { update } from 'slonik-utilities';
+import { paramCase } from 'param-case';
 import {
   commits,
   getPool,
@@ -50,6 +51,8 @@ export type WithUrl<T> = T & Pick<version_commit, 'url'>;
 export type WithMaybeMetadata<T> = T & {
   metadata?: string | null;
 };
+
+type Connection = DatabasePool | DatabaseTransactionConnection;
 
 const organizationGetStartedMapping: Record<Exclude<keyof Organization['getStarted'], 'id'>, keyof organizations> = {
   creatingProject: 'get_started_creating_project',
@@ -282,12 +285,9 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     };
   }
 
-  const storage: Storage = {
-    destroy() {
-      return pool.end();
-    },
-    async getUserBySuperTokenId({ superTokensUserId }) {
-      const user = await pool.maybeOne<Slonik<users>>(sql`
+  const shared = {
+    async getUserBySuperTokenId({ superTokensUserId }: { superTokensUserId: string }, connection: Connection) {
+      const user = await connection.maybeOne<Slonik<users>>(sql`
         SELECT
           *
         FROM
@@ -302,6 +302,163 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       }
 
       return null;
+    },
+    async createUser(
+      {
+        superTokensUserId,
+        email,
+        fullName,
+        displayName,
+        externalAuthUserId,
+      }: {
+        superTokensUserId: string;
+        email: string;
+        fullName: string;
+        displayName: string;
+        externalAuthUserId: string | null;
+      },
+      connection: Connection
+    ) {
+      return transformUser(
+        await connection.one<Slonik<users>>(
+          sql`
+            INSERT INTO public.users
+              ("email", "supertoken_user_id", "full_name", "display_name", "external_auth_user_id")
+            VALUES
+              (${email}, ${superTokensUserId}, ${fullName}, ${displayName}, ${externalAuthUserId})
+            RETURNING *
+          `
+        )
+      );
+    },
+    async getOrganization(userId: string, connection: Connection) {
+      const org = await connection.maybeOne<Slonik<organizations>>(
+        sql`SELECT * FROM public.organizations WHERE user_id = ${userId} AND type = ${'PERSONAL'} LIMIT 1`
+      );
+
+      return org ? transformOrganization(org) : null;
+    },
+    async createOrganization(
+      {
+        name,
+        user,
+        cleanId,
+        type,
+        scopes,
+        reservedNames,
+      }: Parameters<Storage['createOrganization']>[0] & {
+        reservedNames: string[];
+      },
+      connection: Connection
+    ) {
+      function addRandomHashToId(id: string) {
+        return `${id}-${Math.random().toString(16).substring(2, 6)}`;
+      }
+
+      async function ensureFreeCleanId(id: string, originalId: string | null): Promise<string> {
+        if (reservedNames.includes(id)) {
+          return ensureFreeCleanId(addRandomHashToId(id), originalId);
+        }
+
+        const orgCleanIdExists = await connection.exists(
+          sql`SELECT 1 FROM public.organizations WHERE clean_id = ${id} LIMIT 1`
+        );
+
+        if (orgCleanIdExists) {
+          return ensureFreeCleanId(addRandomHashToId(id), originalId);
+        }
+
+        return id;
+      }
+      const availableCleanId = await ensureFreeCleanId(cleanId, null);
+
+      const org = await connection.one<Slonik<organizations>>(
+        sql`
+          INSERT INTO public.organizations
+            ("name", "clean_id", "type", "user_id")
+          VALUES
+            (${name}, ${availableCleanId}, ${type}, ${user})
+          RETURNING *
+        `
+      );
+
+      await connection.query<Slonik<organization_member>>(
+        sql`
+          INSERT INTO public.organization_member
+            ("organization_id", "user_id", "scopes")
+          VALUES
+            (${org.id}, ${user}, ${sql.array(scopes, 'text')})
+        `
+      );
+
+      return transformOrganization(org);
+    },
+  };
+
+  function buildUserData(input: { superTokensUserId: string; email: string; externalAuthUserId: string | null }) {
+    const displayName = input.email.split('@')[0].slice(0, 25).padEnd(2, '1');
+    const fullName = input.email.split('@')[0].slice(0, 25).padEnd(2, '1');
+
+    return {
+      superTokensUserId: input.superTokensUserId,
+      email: input.email,
+      displayName,
+      fullName,
+      externalAuthUserId: input.externalAuthUserId,
+    };
+  }
+
+  const storage: Storage = {
+    destroy() {
+      return pool.end();
+    },
+    async ensureUserExists({
+      superTokensUserId,
+      externalAuthUserId,
+      email,
+      scopes,
+      reservedOrgNames,
+    }: {
+      superTokensUserId: string;
+      externalAuthUserId?: string | null;
+      email: string;
+      reservedOrgNames: string[];
+      scopes: Parameters<Storage['createOrganization']>[0]['scopes'];
+    }) {
+      return pool.transaction(async t => {
+        let action: 'created' | 'no_action' = 'no_action';
+        let internalUser = await shared.getUserBySuperTokenId({ superTokensUserId }, t);
+
+        if (!internalUser) {
+          internalUser = await shared.createUser(
+            buildUserData({ superTokensUserId, email, externalAuthUserId: externalAuthUserId ?? null }),
+            t
+          );
+          action = 'created';
+        }
+
+        const personalOrg = await shared.getOrganization(internalUser.id, t);
+
+        if (!personalOrg) {
+          await shared.createOrganization(
+            {
+              name: internalUser.displayName,
+              user: internalUser.id,
+              cleanId: paramCase(internalUser.displayName),
+              type: 'PERSONAL' as OrganizationType,
+              scopes,
+              reservedNames: reservedOrgNames,
+            },
+            t
+          );
+          action = 'created';
+        }
+
+        return action;
+      });
+    },
+    async getUserBySuperTokenId({ superTokensUserId }) {
+      return shared.getUserBySuperTokenId({ superTokensUserId }, pool);
     },
     async getUserWithoutAssociatedSuperTokenIdByAuth0Email({ email }) {
       const user = await pool.maybeOne<Slonik<users>>(sql`
@@ -342,18 +499,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       return null;
     },
-    async createUser({ superTokensUserId, email, fullName, displayName, externalAuthUserId }) {
-      return transformUser(
-        await pool.one<Slonik<users>>(
-          sql`
-            INSERT INTO public.users
-              ("email", "supertoken_user_id", "full_name", "display_name", "external_auth_user_id")
-            VALUES
-              (${email}, ${superTokensUserId}, ${fullName}, ${displayName}, ${externalAuthUserId})
-            RETURNING *
-          `
-        )
-      );
+    createUser(input) {
+      return shared.createUser(input, pool);
     },
     async updateUser({ id, displayName, fullName }) {
       return transformUser(
@@ -365,29 +512,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         `)
       );
     },
-    async createOrganization({ name, cleanId, type, user, scopes }) {
-      const org = transformOrganization(
-        await pool.one<Slonik<organizations>>(
-          sql`
-            INSERT INTO public.organizations
-              ("name", "clean_id", "type", "user_id")
-            VALUES
-              (${name}, ${cleanId}, ${type}, ${user})
-            RETURNING *
-          `
-        )
-      );
-
-      await pool.query<Slonik<organization_member>>(
-        sql`
-          INSERT INTO public.organization_member
-            ("organization_id", "user_id", "scopes")
-          VALUES
-            (${org.id}, ${user}, ${sql.array(scopes, 'text')})
-        `
-      );
-
-      return org;
+    createOrganization(input) {
+      return pool.transaction(t => shared.createOrganization(input, t));
     },
     async deleteOrganization({ organization }) {
       const result = transformOrganization(

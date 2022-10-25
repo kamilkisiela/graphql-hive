@@ -6,6 +6,7 @@ const BaseSchema = zod.object({
   ENVIRONMENT: zod.string(),
   APP_BASE_URL: zod.string().url(),
   GRAPHQL_ENDPOINT: zod.string().url(),
+  SERVER_ENDPOINT: zod.string().url(),
   EMAILS_ENDPOINT: zod.string().url(),
   SUPERTOKENS_CONNECTION_URI: zod.string().url(),
   SUPERTOKENS_API_KEY: zod.string(),
@@ -125,6 +126,7 @@ const config = {
   environment: base.ENVIRONMENT,
   appBaseUrl: base.APP_BASE_URL,
   graphqlEndpoint: base.GRAPHQL_ENDPOINT,
+  serverEndpoint: base.SERVER_ENDPOINT,
   emailsEndpoint: base.EMAILS_ENDPOINT,
   supertokens: {
     connectionUri: base.SUPERTOKENS_CONNECTION_URI,

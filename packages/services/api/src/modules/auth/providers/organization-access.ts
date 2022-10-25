@@ -6,8 +6,10 @@ import { Token } from '../../../shared/entities';
 import { AccessError } from '../../../shared/errors';
 import DataLoader from 'dataloader';
 import { TokenStorage, TokenSelector } from '../../token/providers/token-storage';
+import { OrganizationAccessScope } from './scopes';
 import type { ProjectAccessScope } from './project-access';
 import type { TargetAccessScope } from './target-access';
+export { OrganizationAccessScope } from './scopes';
 
 export interface OrganizationUserScopesSelector {
   user: string;
@@ -24,29 +26,6 @@ interface OrganizationTokenAccessSelector {
   token: string;
   organization: string;
   scope: OrganizationAccessScope;
-}
-
-export enum OrganizationAccessScope {
-  /**
-   * Read organization data (projects, targets, etc.)
-   */
-  READ = 'organization:read',
-  /**
-   * Who can delete the organization
-   */
-  DELETE = 'organization:delete',
-  /**
-   * Who can modify organization's settings
-   */
-  SETTINGS = 'organization:settings',
-  /**
-   * Who can add/remove 3rd-party integrations (Slack, etc.)
-   */
-  INTEGRATIONS = 'organization:integrations',
-  /**
-   * Who can manage members
-   */
-  MEMBERS = 'organization:members',
 }
 
 const organizationAccessScopeValues = Object.values(OrganizationAccessScope);

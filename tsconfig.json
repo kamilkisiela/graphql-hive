@@ -25,7 +25,7 @@
     "paths": {
       "@hive/api": ["./packages/services/api/src/index.ts"],
       "@hive/service-common": ["./packages/services/service-common/src/index.ts"],
-      "@hive/server": ["./packages/services/server/src/index.ts"],
+      "@hive/server": ["./packages/services/server/src/api.ts"],
       "@hive/stripe-billing": ["./packages/services/stripe-billing/src/api.ts"],
       "@hive/schema": ["./packages/services/schema/src/api.ts"],
       "@hive/usage-common": ["./packages/services/usage-common/src/index.ts"],
@@ -39,7 +39,8 @@
       "@hive/storage": ["./packages/services/storage/src/index.ts"],
       "@graphql-hive/client": ["./packages/libraries/client/src/index.ts"],
       "@graphql-hive/external-composition": ["./packages/libraries/external-composition/src/index.ts"],
-      "@graphql-hive/core": ["./packages/libraries/core/src/index.ts"]
+      "@graphql-hive/core": ["./packages/libraries/core/src/index.ts"],
+      "@/*": ["./packages/web/app/src/*"]
     }
   },
   "include": ["packages"],

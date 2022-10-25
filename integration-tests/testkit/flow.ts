@@ -341,7 +341,6 @@ export function readTokenInfo(token: string) {
       }
     `),
     token,
-    variables: undefined,
   });
 }
 
@@ -602,7 +601,6 @@ export function fetchLatestSchema(token: string) {
       }
     `),
     token,
-    variables: undefined,
   });
 }
 
@@ -624,7 +622,6 @@ export function fetchLatestValidSchema(token: string) {
       }
     `),
     token,
-    variables: undefined,
   });
 }
 

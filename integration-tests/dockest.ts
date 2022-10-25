@@ -1,4 +1,4 @@
-import { Dockest, logLevel } from 'dockest';
+import { Dockest, logLevel } from '@n1ru4l/dockest';
 import { cleanDockerContainers, createServices } from './testkit/dockest';
 import dotenv from 'dotenv';
 

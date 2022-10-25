@@ -1,13 +1,12 @@
 {
+  "extends": "../../../tsconfig.json",
   "compilerOptions": {
-    "baseUrl": ".",
-    "target": "es5",
+    "target": "esnext",
     "lib": ["dom", "dom.iterable", "esnext"],
+    "downlevelIteration": true,
     "allowJs": true,
     "skipLibCheck": true,
-
     "strict": true,
-
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "esModuleInterop": true,
@@ -17,11 +16,6 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "jsxImportSource": "@emotion/react",
-    "paths": {
-      "@hive/emails": ["../../services/emails/src/api.ts"],
-      "@hive/service-common": ["../../services/service-common/src/index.ts"],
-      "@/*": ["src/*"]
-    },
     "incremental": true
   },
   "include": ["next-env.d.ts", "modules.d.ts", "twin.d.ts", "src", "pages", "environment.ts"],

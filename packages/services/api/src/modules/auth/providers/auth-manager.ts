@@ -4,13 +4,7 @@ import type { Listify, MapToArray } from '../../../shared/helpers';
 import { AccessError } from '../../../shared/errors';
 import { share } from '../../../shared/helpers';
 import { Storage } from '../../shared/providers/storage';
-import { MessageBus } from '../../shared/providers/message-bus';
-import { IdempotentRunner } from '../../shared/providers/idempotent-runner';
 import { TokenStorage } from '../../token/providers/token-storage';
-import {
-  ENSURE_PERSONAL_ORGANIZATION_EVENT,
-  EnsurePersonalOrganizationEventPayload,
-} from '../../organization/providers/events';
 import { ApiToken } from './tokens';
 import { OrganizationAccess, OrganizationAccessScope, OrganizationUserScopesSelector } from './organization-access';
 import { ProjectAccess, ProjectAccessScope, ProjectUserScopesSelector } from './project-access';
@@ -61,9 +55,7 @@ export class AuthManager {
     private targetAccess: TargetAccess,
     private userManager: UserManager,
     private tokenStorage: TokenStorage,
-    private messageBus: MessageBus,
-    private storage: Storage,
-    private idempotentRunner: IdempotentRunner
+    private storage: Storage
   ) {
     this.session = context.session;
   }
@@ -183,47 +175,16 @@ export class AuthManager {
       throw new AccessError('Authorization token is missing');
     }
 
-    const { session } = this;
-
-    return await this.idempotentRunner.run({
-      identifier: `user:create:${session.superTokensUserId}`,
-      executor: () =>
-        this.ensureInternalUser({
-          superTokensUserId: session.superTokensUserId,
-          email: session.email,
-          externalAuthUserId: session.externalUserId,
-        }),
-      ttl: 60,
-    });
-  });
-
-  private async ensureInternalUser(input: {
-    superTokensUserId: string;
-    email: string;
-    externalAuthUserId: string | null;
-  }): Promise<User> {
-    let internalUser = await this.storage.getUserBySuperTokenId({
-      superTokensUserId: input.superTokensUserId,
+    const user = await this.storage.getUserBySuperTokenId({
+      superTokensUserId: this.session.superTokensUserId,
     });
 
-    if (!internalUser) {
-      internalUser = await this.userManager.createUser({
-        superTokensUserId: input.superTokensUserId,
-        externalAuthUserId: input.externalAuthUserId,
-        email: input.email,
-      });
+    if (!user) {
+      throw new AccessError('User not found');
     }
 
-    await this.messageBus.emit<EnsurePersonalOrganizationEventPayload>(ENSURE_PERSONAL_ORGANIZATION_EVENT, {
-      name: internalUser.displayName,
-      user: {
-        id: internalUser.id,
-        superTokensUserId: input.superTokensUserId,
-      },
-    });
-
-    return internalUser;
-  }
+    return user;
+  });
 
   async updateCurrentUser(input: { displayName: string; fullName: string }): Promise<User> {
     const user = await this.getCurrentUser();

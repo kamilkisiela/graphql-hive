@@ -1,4 +1,4 @@
-import * as utils from 'dockest/test-helper';
+import * as utils from '@n1ru4l/dockest/test-helper';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { ExecutionResult, print } from 'graphql';
 import { TypedDocumentNode } from '@graphql-typed-document-node/core';
@@ -45,8 +45,11 @@ export async function execute<TResult, TVariables>(
         : {}),
     },
   });
+
+  const body = (await response.json()) as ExecutionResult<TResult>;
+
   return {
-    body: (await response.json()) as ExecutionResult<TResult>,
+    body,
     status: response.status,
   };
 }
