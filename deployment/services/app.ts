@@ -80,6 +80,10 @@ export function deployApp({
           value: serviceLocalEndpoint(graphql.service).apply(s => `${s}/graphql`),
         },
         {
+          name: 'SERVER_ENDPOINT',
+          value: serviceLocalEndpoint(graphql.service),
+        },
+        {
           name: 'APP_BASE_URL',
           value: `https://${deploymentEnv.DEPLOYED_DNS}/`,
         },
