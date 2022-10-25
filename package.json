@@ -45,7 +45,7 @@
     "@changesets/changelog-github": "0.4.6",
     "@changesets/cli": "2.24.3",
     "@graphql-codegen/add": "3.2.0",
-    "@graphql-codegen/cli": "2.8.0",
+    "@graphql-codegen/cli": "2.13.7",
     "@graphql-codegen/gql-tag-operations-preset": "1.5.2-alpha-8565e86c3.0",
     "@graphql-codegen/graphql-modules-preset": "2.4.1",
     "@graphql-codegen/typed-document-node": "2.3.1",
