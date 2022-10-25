@@ -28,11 +28,11 @@ export const resolvers: OidcIntegrationsModule.Resolvers = {
 
       return {
         error: {
-          message: 'Failed to create OIDC Integration.',
+          message: result.message ?? 'Failed to create OIDC Integration.',
           details: {
-            clientId: result.fieldErrors.clientId,
-            clientSecret: result.fieldErrors.clientSecret,
-            domain: result.fieldErrors.domain,
+            clientId: result.fieldErrors?.clientId,
+            clientSecret: result.fieldErrors?.clientSecret,
+            domain: result.fieldErrors?.domain,
           },
         },
       };
@@ -58,9 +58,9 @@ export const resolvers: OidcIntegrationsModule.Resolvers = {
         error: {
           message: result.message,
           details: {
-            clientId: result.fieldErrors.clientId,
-            clientSecret: result.fieldErrors.clientSecret,
-            domain: result.fieldErrors.domain,
+            clientId: result.fieldErrors?.clientId,
+            clientSecret: result.fieldErrors?.clientSecret,
+            domain: result.fieldErrors?.domain,
           },
         },
       };
@@ -89,9 +89,10 @@ export const resolvers: OidcIntegrationsModule.Resolvers = {
   },
   Organization: {
     viewerCanManageOIDCIntegration: (organization, _, { injector }) => {
-      return injector
-        .get(OIDCIntegrationsProvider)
-        .canViewerManageIntegrationForOrganization({ organizationId: organization.id });
+      return injector.get(OIDCIntegrationsProvider).canViewerManageIntegrationForOrganization({
+        organizationId: organization.id,
+        organizationType: organization.type,
+      });
     },
     oidcIntegration: async (organization, _, { injector }) => {
       if (injector.get(OIDCIntegrationsProvider).isEnabled() === false) {

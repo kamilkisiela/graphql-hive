@@ -1,5 +1,5 @@
 import { Inject, Injectable, Scope } from 'graphql-modules';
-import { OIDCIntegration } from '../../../shared/entities';
+import { OIDCIntegration, OrganizationType } from '../../../shared/entities';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { OrganizationAccessScope } from '../../auth/providers/organization-access';
 import { CryptoProvider } from '../../shared/providers/crypto';
@@ -29,8 +29,11 @@ export class OIDCIntegrationsProvider {
     return this.enabled;
   }
 
-  async canViewerManageIntegrationForOrganization(args: { organizationId: string }) {
-    if (this.isEnabled() === false) {
+  async canViewerManageIntegrationForOrganization(args: {
+    organizationId: string;
+    organizationType: OrganizationType;
+  }) {
+    if (this.isEnabled() === false || args.organizationType === OrganizationType.PERSONAL) {
       return false;
     }
 
@@ -39,7 +42,6 @@ export class OIDCIntegrationsProvider {
         organization: args.organizationId,
         scope: OrganizationAccessScope.INTEGRATIONS,
       });
-
       return true;
     } catch {
       return false;
@@ -72,10 +74,26 @@ export class OIDCIntegrationsProvider {
     clientSecret: string;
     domain: string;
   }) {
+    if (this.isEnabled() === false) {
+      return {
+        type: 'error',
+        message: 'OIDC integrations are disabled.',
+      } as const;
+    }
+
     await this.authManager.ensureOrganizationAccess({
       organization: args.organizationId,
       scope: OrganizationAccessScope.INTEGRATIONS,
     });
+
+    const organization = await this.storage.getOrganization({ organization: args.organizationId });
+
+    if (organization.type === OrganizationType.PERSONAL) {
+      return {
+        type: 'error',
+        message: 'Personal organizations cannot have OIDC integrations.',
+      } as const;
+    }
 
     const clientIdResult = OIDCIntegrationClientIdModel.safeParse(args.clientId);
     const clientSecretResult = OIDCClientSecretModel.safeParse(args.clientSecret);
@@ -111,6 +129,13 @@ export class OIDCIntegrationsProvider {
     clientSecret: string | null;
     domain: string | null;
   }) {
+    if (this.isEnabled() === false) {
+      return {
+        type: 'error',
+        message: 'OIDC integrations are disabled.',
+      } as const;
+    }
+
     const integration = await this.storage.getOIDCIntegrationById({ oidcIntegrationId: args.oidcIntegrationId });
 
     if (integration === null) {
@@ -160,6 +185,13 @@ export class OIDCIntegrationsProvider {
   }
 
   async deleteOIDCIntegration(args: { oidcIntegrationId: string }) {
+    if (this.isEnabled() === false) {
+      return {
+        type: 'error',
+        message: 'OIDC integrations are disabled.',
+      } as const;
+    }
+
     const integration = await this.storage.getOIDCIntegrationById({ oidcIntegrationId: args.oidcIntegrationId });
 
     if (integration === null) {

@@ -1,4 +1,5 @@
-import { Button, Input, Modal } from '@/components/v2';
+import { Button, Input, Modal, Tag } from '@/components/v2';
+import { AlertTriangleIcon } from '@/components/v2/icon';
 import { Heading } from '@chakra-ui/react';
 import { useFormik } from 'formik';
 import { useRouter } from 'next/router';
@@ -41,25 +42,30 @@ export const OIDCIntegrationSection = (props: {
       <Heading>OpenID Connect Provider</Heading>
       {props.organization.oidcIntegration ? (
         <>
-          <Button
-            as="a"
-            href={openEditModalLink}
-            onClick={() => {
-              router.push(openEditModalLink);
-            }}
-          >
-            Configure
-          </Button>
-          <Button
-            danger
-            as="a"
-            href={openDeleteModalLink}
-            onClick={() => {
-              router.push(openDeleteModalLink);
-            }}
-          >
-            Remove
-          </Button>
+          <div className="flex items-center gap-x-2">
+            <Button
+              as="a"
+              href={openEditModalLink}
+              onClick={() => {
+                router.push(openEditModalLink);
+              }}
+            >
+              Configure ({props.organization.oidcIntegration.domain})
+            </Button>
+            <Button
+              variant="primary"
+              size="large"
+              danger
+              className="px-5"
+              as="a"
+              href={openDeleteModalLink}
+              onClick={() => {
+                router.push(openDeleteModalLink);
+              }}
+            >
+              Remove
+            </Button>
+          </div>
         </>
       ) : (
         <Button
@@ -434,6 +440,10 @@ const DeleteOIDCIntegrationModal = (props: {
         ) : (
           <>
             <p>Do you really want to delete this OIDC integraton?</p>
+            <Tag color="yellow" className="py-2.5 px-4">
+              <AlertTriangleIcon className="h-5 w-5" />
+              This action is not reversible!
+            </Tag>
             <div className="flex w-full gap-2">
               <Button type="button" size="large" block onClick={props.close}>
                 Close
