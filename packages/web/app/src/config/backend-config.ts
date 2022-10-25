@@ -2,6 +2,7 @@ import ThirdPartyEmailPasswordNode from 'supertokens-node/recipe/thirdpartyemail
 import SessionNode from 'supertokens-node/recipe/session';
 import type { TypeInput } from 'supertokens-node/types';
 import EmailVerification from 'supertokens-node/recipe/emailverification';
+import { OverrideableBuilder } from 'supertokens-js-override/lib/build';
 import type { TypeProvider } from 'supertokens-node/recipe/thirdparty/types';
 import type { TypeInput as ThirdPartEmailPasswordTypeInput } from 'supertokens-node/recipe/thirdpartyemailpassword/types';
 import { fetch } from '@whatwg-node/fetch';
@@ -67,87 +68,10 @@ export const backendConfig = (): TypeInput => {
             },
           }),
         },
-        override: {
-          // here: https://supertokens.com/docs/thirdpartyemailpassword/common-customizations/handling-signinup-success
-          apis: originalImplementation => {
-            // override the email password sign up API
-            const emailPasswordSignUpPOST: typeof originalImplementation['emailPasswordSignUpPOST'] = async input => {
-              if (!originalImplementation.emailPasswordSignUpPOST) {
-                throw Error('emailPasswordSignUpPOST is not available');
-              }
-
-              const response = await originalImplementation.emailPasswordSignUpPOST(input);
-
-              if (response.status === 'OK') {
-                await internalApi.mutation('ensureUser', {
-                  superTokensUserId: response.user.id,
-                  email: response.user.email,
-                });
-              }
-
-              return response;
-            };
-
-            // override the email password sign in API
-            const emailPasswordSignInPOST: typeof originalImplementation['emailPasswordSignInPOST'] = async input => {
-              if (originalImplementation.emailPasswordSignInPOST === undefined) {
-                throw Error('Should never come here');
-              }
-
-              const response = await originalImplementation.emailPasswordSignInPOST(input);
-
-              if (response.status === 'OK') {
-                await internalApi.mutation('ensureUser', {
-                  superTokensUserId: response.user.id,
-                  email: response.user.email,
-                });
-              }
-
-              return response;
-            };
-
-            // override the third party sign in API
-            const thirdPartySignInUpPOST: typeof originalImplementation['thirdPartySignInUpPOST'] = async input => {
-              if (originalImplementation.thirdPartySignInUpPOST === undefined) {
-                throw Error('Should never come here');
-              }
-
-              const response = await originalImplementation.thirdPartySignInUpPOST(input);
-
-              if (response.status === 'OK') {
-                await internalApi.mutation('ensureUser', {
-                  superTokensUserId: response.user.id,
-                  email: response.user.email,
-                });
-              }
-
-              return response;
-            };
-
-            const newImplementation = {
-              ...originalImplementation,
-              emailPasswordSignUpPOST,
-              emailPasswordSignInPOST,
-              thirdPartySignInUpPOST,
-            };
-
-            if (env.auth.legacyAuth0) {
-              /**
-               * These overrides are only relevant for the legacy Auth0 -> SuperTokens migration (period).
-               */
-              return getAuth0Overrides(env.auth.legacyAuth0).apis(newImplementation);
-            }
-
-            return newImplementation;
-          },
-          functions: originalImplementation => ({
-            ...originalImplementation,
-            /**
-             * These overrides are only relevant for the legacy Auth0 -> SuperTokens migration (period).
-             */
-            ...(env.auth.legacyAuth0 ? getAuth0Overrides(env.auth.legacyAuth0).functions(originalImplementation) : {}),
-          }),
-        },
+        override: composeSuperTokensOverrides([
+          getEnsureUserOverrides(internalApi),
+          env.auth.legacyAuth0 ? getAuth0Overrides(env.auth.legacyAuth0) : null,
+        ]),
       }),
       EmailVerification.init({
         mode: env.auth.requireEmailVerification ? 'REQUIRED' : 'OPTIONAL',
@@ -210,6 +134,76 @@ export const backendConfig = (): TypeInput => {
     isInServerlessEnv: true,
   };
 };
+
+function getEnsureUserOverrides(internalApi: ReturnType<typeof createTRPCClient<InternalApi>>) {
+  const override: ThirdPartEmailPasswordTypeInput['override'] = {
+    // here: https://supertokens.com/docs/thirdpartyemailpassword/common-customizations/handling-signinup-success
+    apis: originalImplementation => {
+      // override the email password sign up API
+      const emailPasswordSignUpPOST: typeof originalImplementation['emailPasswordSignUpPOST'] = async input => {
+        if (!originalImplementation.emailPasswordSignUpPOST) {
+          throw Error('emailPasswordSignUpPOST is not available');
+        }
+
+        const response = await originalImplementation.emailPasswordSignUpPOST(input);
+
+        if (response.status === 'OK') {
+          await internalApi.mutation('ensureUser', {
+            superTokensUserId: response.user.id,
+            email: response.user.email,
+          });
+        }
+
+        return response;
+      };
+
+      // override the email password sign in API
+      const emailPasswordSignInPOST: typeof originalImplementation['emailPasswordSignInPOST'] = async input => {
+        if (originalImplementation.emailPasswordSignInPOST === undefined) {
+          throw Error('Should never come here');
+        }
+
+        const response = await originalImplementation.emailPasswordSignInPOST(input);
+
+        if (response.status === 'OK') {
+          await internalApi.mutation('ensureUser', {
+            superTokensUserId: response.user.id,
+            email: response.user.email,
+          });
+        }
+
+        return response;
+      };
+
+      // override the third party sign in API
+      const thirdPartySignInUpPOST: typeof originalImplementation['thirdPartySignInUpPOST'] = async input => {
+        if (originalImplementation.thirdPartySignInUpPOST === undefined) {
+          throw Error('Should never come here');
+        }
+
+        const response = await originalImplementation.thirdPartySignInUpPOST(input);
+
+        if (response.status === 'OK') {
+          await internalApi.mutation('ensureUser', {
+            superTokensUserId: response.user.id,
+            email: response.user.email,
+          });
+        }
+
+        return response;
+      };
+
+      return {
+        ...originalImplementation,
+        emailPasswordSignUpPOST,
+        emailPasswordSignInPOST,
+        thirdPartySignInUpPOST,
+      };
+    },
+  };
+
+  return override;
+}
 
 //
 // LEGACY Auth0 Utilities
@@ -509,3 +503,34 @@ async function generateRandomPassword(): Promise<string> {
     })
   );
 }
+
+/** * Utility function for composing multiple (dynamic SuperTokens overrides). */
+const composeSuperTokensOverrides = (overrides: Array<ThirdPartEmailPasswordTypeInput['override'] | null>) => ({
+  apis: (
+    originalImplementation: ReturnType<
+      Exclude<Exclude<ThirdPartEmailPasswordTypeInput['override'], undefined>['apis'], undefined>
+    >,
+    builder: OverrideableBuilder<ThirdPartyEmailPasswordNode.APIInterface> | undefined
+  ) => {
+    let impl = originalImplementation;
+    for (const override of overrides) {
+      if (typeof override?.apis === 'function') {
+        impl = override.apis(impl, builder);
+      }
+    }
+    return impl;
+  },
+  functions: (
+    originalImplementation: ReturnType<
+      Exclude<Exclude<ThirdPartEmailPasswordTypeInput['override'], undefined>['functions'], undefined>
+    >
+  ) => {
+    let impl = originalImplementation;
+    for (const override of overrides) {
+      if (typeof override?.functions === 'function') {
+        impl = override.functions(impl);
+      }
+    }
+    return impl;
+  },
+});
