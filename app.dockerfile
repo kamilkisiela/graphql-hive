@@ -1,22 +1,10 @@
-FROM node:16-slim as install
-
-WORKDIR /usr/src/app
-
-COPY package.json /usr/src/app/
+FROM node:16-slim
 
 ENV NODE_ENV production
 
-# DANGER: there is no lockfile :)
-# in the future this should be improved...
-
-RUN npm install --legacy-peer-deps
-
-FROM node:16-slim as app
-
 WORKDIR /usr/src/app
 
-COPY --from=install /usr/src/app/ /usr/src/app/
-
+# context packages/web/app/dist
 COPY . /usr/src/app/
 
 LABEL org.opencontainers.image.title=$IMAGE_TITLE
