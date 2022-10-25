@@ -9,6 +9,7 @@ import { createThirdPartyEmailPasswordReactOktaProvider } from '../../lib/supert
 import {
   createThirdPartyEmailPasswordReactOIDCProvider,
   getOIDCOverrides,
+  preAPIHook,
 } from '@/lib/supertokens/third-party-email-password-react-oidc-provider';
 
 export const frontendConfig = () => {
@@ -53,24 +54,7 @@ export const frontendConfig = () => {
         signInAndUpFeature: {
           providers,
         },
-        // TODO: this should actually be within 'getOIDCOverrides' - However there seems to be a bug in the library
-        preAPIHook: async options => {
-          if (options.action === 'GET_AUTHORISATION_URL' || options.action === 'THIRD_PARTY_SIGN_IN_UP') {
-            const maybeId: unknown = options.userContext['oidcId'];
-            if (typeof maybeId === 'string') {
-              const url = new URL(options.url);
-              url.searchParams.append('oidc_id', maybeId);
-              return {
-                ...options,
-                url: url.toString(),
-              };
-            }
-          }
-
-          return {
-            ...options,
-          };
-        },
+        preAPIHook: env.auth.organizationOIDC ? preAPIHook : undefined,
         override: env.auth.organizationOIDC ? getOIDCOverrides() : undefined,
       }),
       EmailVerification.init({

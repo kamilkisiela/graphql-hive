@@ -6,7 +6,8 @@ import dynamic from 'next/dynamic';
 import type { GetServerSideProps } from 'next';
 import SuperTokensReact from 'supertokens-auth-react';
 import { env } from '@/env/frontend';
-import { startAuthFlowForOIDCProvider, startAuthFlowForProvider } from '@/lib/supertokens/start-auth-flow-for-provider';
+import { startAuthFlowForProvider } from '@/lib/supertokens/start-auth-flow-for-provider';
+import { startAuthFlowForOIDCProvider } from '@/lib/supertokens/third-party-email-password-react-oidc-provider';
 
 export const getServerSideProps: GetServerSideProps = async context => {
   // See counter-part in '@/config/supertokens/frontend.ts'
