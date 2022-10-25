@@ -336,6 +336,32 @@ test('(processVariables: true) collect used-only input fields', async () => {
   expect(info.fields).not.toContain(`PaginationInput.offset`);
 });
 
+test('(processVariables: true) should collect input object without fields when corresponding variable is not provided', async () => {
+  const collect = createCollector({
+    schema,
+    max: 1,
+    processVariables: true,
+  });
+  const info = collect(
+    parse(/* GraphQL */ `
+      query getProjects($pagination: PaginationInput, $type: ProjectType!) {
+        projects(filter: { pagination: $pagination, type: $type }) {
+          id
+        }
+      }
+    `),
+    {
+      type: 'STITCHING',
+    }
+  ).value;
+
+  expect(info.fields).toContain(`FilterInput.type`);
+  expect(info.fields).toContain(`FilterInput.pagination`);
+  expect(info.fields).toContain(`PaginationInput`);
+  expect(info.fields).not.toContain(`PaginationInput.limit`);
+  expect(info.fields).not.toContain(`PaginationInput.offset`);
+});
+
 test('(processVariables: true) collect used-only input type fields from an array', async () => {
   const collect = createCollector({
     schema,

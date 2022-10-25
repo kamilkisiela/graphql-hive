@@ -19,7 +19,13 @@ export function GraphQLInputObjectTypeComponent(props: {
   totalRequests: number;
 }) {
   return (
-    <GraphQLTypeCard kind="input" name={props.type.name} description={props.type.description}>
+    <GraphQLTypeCard
+      kind="input"
+      name={props.type.name}
+      description={props.type.description}
+      totalRequests={props.totalRequests}
+      usage={props.type.usage}
+    >
       <GraphQLInputFields fields={props.type.fields} totalRequests={props.totalRequests} />
     </GraphQLTypeCard>
   );

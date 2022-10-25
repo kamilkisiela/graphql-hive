@@ -318,8 +318,8 @@ export function createCollector({
               }
             }
           } else {
-            // Collect the entire type
-            collectInputType(namedType.name);
+            // Collect type without fields
+            markAsUsed(makeId(namedType.name));
           }
         });
       } else {
