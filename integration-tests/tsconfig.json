@@ -8,5 +8,5 @@
       "@hive/storage": ["../packages/services/storage/src/index.ts"]
     }
   },
-  "include": ["testkit", "tests"]
+  "include": ["testkit", "tests", "../node_modules/dockest/dist/@types.d.ts"]
 }

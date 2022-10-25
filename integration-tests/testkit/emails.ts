@@ -1,4 +1,4 @@
-import * as utils from 'dockest/test-helper';
+import * as utils from '@n1ru4l/dockest/test-helper';
 import { fetch } from '@whatwg-node/fetch';
 
 const emailsAddress = utils.getServiceAddress('emails', 3011);

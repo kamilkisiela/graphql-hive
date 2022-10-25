@@ -1,5 +1,5 @@
 import { createPool } from 'slonik';
-import * as utils from 'dockest/test-helper';
+import * as utils from '@n1ru4l/dockest/test-helper';
 import { resetDb } from './testkit/db';
 import { resetClickHouse } from './testkit/clickhouse';
 import { resetRedis } from './testkit/redis';

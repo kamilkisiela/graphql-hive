@@ -1,5 +1,5 @@
-import * as utils from 'dockest/test-helper';
-import { execa } from 'dockest';
+import * as utils from '@n1ru4l/dockest/test-helper';
+import { execa } from '@n1ru4l/dockest';
 import { resolve } from 'path';
 
 const registryAddress = utils.getServiceAddress('server', 3001);
