@@ -1,11 +1,12 @@
 {
+  "extends": "../tsconfig.json",
   "compilerOptions": {
     "baseUrl": ".",
+    "esModuleInterop": true,
     "paths": {
       "@hive/server": ["../packages/services/server/src/api.ts"],
       "@hive/storage": ["../packages/services/storage/src/index.ts"]
-    },
-    "esModuleInterop": true
+    }
   },
   "include": ["testkit", "tests"]
 }
