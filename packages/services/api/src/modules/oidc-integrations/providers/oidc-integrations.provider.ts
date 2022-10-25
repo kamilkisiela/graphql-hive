@@ -29,6 +29,23 @@ export class OIDCIntegrationsProvider {
     return this.enabled;
   }
 
+  async canViewerManageIntegrationForOrganization(args: { organizationId: string }) {
+    if (this.isEnabled() === false) {
+      return false;
+    }
+
+    try {
+      await this.authManager.ensureOrganizationAccess({
+        organization: args.organizationId,
+        scope: OrganizationAccessScope.INTEGRATIONS,
+      });
+
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   async getOIDCIntegrationForOrganization(args: { organizationId: string }): Promise<OIDCIntegration | null> {
     this.logger.debug('getting okta integration for organization (organizationId=%s)', args.organizationId);
     if (this.isEnabled() === false) {

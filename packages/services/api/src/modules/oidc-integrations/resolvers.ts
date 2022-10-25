@@ -1,14 +1,8 @@
 import { OrganizationManager } from '../organization/providers/organization-manager';
 import { OIDCIntegrationsProvider } from './providers/oidc-integrations.provider';
-import { OIDC_INTEGRATIONS_ENABLED } from './providers/tokens';
 import { OidcIntegrationsModule } from './__generated__/types';
 
 export const resolvers: OidcIntegrationsModule.Resolvers = {
-  Query: {
-    isOIDCIntegrationFeatureEnabled: (_, __, { injector }) => {
-      return injector.get(OIDC_INTEGRATIONS_ENABLED);
-    },
-  },
   Mutation: {
     createOIDCIntegration: async (_, { input }, { injector }) => {
       const oktaIntegrationsProvider = injector.get(OIDCIntegrationsProvider);
@@ -94,6 +88,11 @@ export const resolvers: OidcIntegrationsModule.Resolvers = {
     },
   },
   Organization: {
+    viewerCanManageOIDCIntegration: (organization, _, { injector }) => {
+      return injector
+        .get(OIDCIntegrationsProvider)
+        .canViewerManageIntegrationForOrganization({ organizationId: organization.id });
+    },
     oidcIntegration: async (organization, _, { injector }) => {
       if (injector.get(OIDCIntegrationsProvider).isEnabled() === false) {
         return null;

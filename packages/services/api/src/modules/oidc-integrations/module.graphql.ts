@@ -1,11 +1,8 @@
 import { gql } from 'graphql-modules';
 
 export default gql`
-  extend type Query {
-    isOIDCIntegrationFeatureEnabled: Boolean!
-  }
-
   extend type Organization {
+    viewerCanManageOIDCIntegration: Boolean!
     oidcIntegration: OIDCIntegration
   }
 

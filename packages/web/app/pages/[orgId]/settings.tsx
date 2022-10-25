@@ -43,7 +43,6 @@ const Integrations = (): ReactElement => {
   const isGitHubIntegrationFeatureEnabled = checkIntegrations.data?.isGitHubIntegrationFeatureEnabled;
   const hasGitHubIntegration = checkIntegrations.data?.hasGitHubIntegration === true;
   const hasSlackIntegration = checkIntegrations.data?.hasSlackIntegration === true;
-  const isOIDCIntegrationFeatureEnabled = checkIntegrations.data?.isOIDCIntegrationFeatureEnabled;
 
   return (
     <>
@@ -108,11 +107,9 @@ const Integrations = (): ReactElement => {
           </>
         </div>
       )}
-      {isOIDCIntegrationFeatureEnabled === false
-        ? null
-        : checkIntegrations.data?.organization?.organization && (
-            <OIDCIntegrationSection organization={checkIntegrations.data?.organization?.organization} />
-          )}
+      {checkIntegrations.data?.organization?.organization.viewerCanManageOIDCIntegration ? (
+        <OIDCIntegrationSection organization={checkIntegrations.data?.organization?.organization} />
+      ) : null}
     </>
   );
 };
