@@ -17,7 +17,6 @@ const BaseSchema = zod.object({
   STRIPE_PUBLIC_KEY: zod.string().optional(),
   RELEASE: zod.string().optional(),
   AUTH_REQUIRE_EMAIL_VERIFICATION: zod.union([zod.literal('1'), zod.literal('0')]).optional(),
-  INTERNAL_ACCESS_SIGNATURE: zod.string().min(1),
 });
 
 const IntegrationSlackSchema = zod.union([
@@ -129,7 +128,6 @@ const config = {
   graphqlEndpoint: base.GRAPHQL_ENDPOINT,
   serverEndpoint: base.SERVER_ENDPOINT,
   emailsEndpoint: base.EMAILS_ENDPOINT,
-  internalAccessSignature: base.INTERNAL_ACCESS_SIGNATURE,
   supertokens: {
     connectionUri: base.SUPERTOKENS_CONNECTION_URI,
     apiKey: base.SUPERTOKENS_API_KEY,

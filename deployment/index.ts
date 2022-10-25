@@ -175,10 +175,6 @@ const schemaApi = deploySchema({
 
 const supertokensApiKey = new random.RandomPassword('supertokens-api-key', { length: 31, special: false });
 const auth0LegacyMigrationKey = new random.RandomPassword('auth0-legacy-migration-key', { length: 69, special: false });
-const internalAccessSignature = new random.RandomPassword('graphql-internal-access-signature', {
-  length: 69,
-  special: false,
-});
 
 const oauthConfig = new pulumi.Config('oauth');
 
@@ -217,7 +213,6 @@ const graphqlApi = deployGraphQL({
   auth0Config: {
     internalApiKey: auth0LegacyMigrationKey.result,
   },
-  internalAccessSignature: internalAccessSignature.result,
 });
 
 const docs = deployDocs({
@@ -243,7 +238,6 @@ const app = deployApp({
   githubConfig,
   googleConfig,
   emailsEndpoint: emailsApi.localEndpoint,
-  internalAccessSignature: internalAccessSignature.result,
 });
 
 const landingPage = deployLandingPage({

@@ -29,7 +29,6 @@ export function deployApp({
   googleConfig,
   githubConfig,
   emailsEndpoint,
-  internalAccessSignature,
 }: {
   storageContainer: azure.storage.Container;
   packageHelper: PackageHelper;
@@ -53,7 +52,6 @@ export function deployApp({
   };
   emailsEndpoint: pulumi.Output<string>;
   docs: Docs;
-  internalAccessSignature: pulumi.Output<string>;
 }) {
   const appRelease = packageHelper.currentReleaseId();
 
@@ -84,10 +82,6 @@ export function deployApp({
         {
           name: 'APP_BASE_URL',
           value: `https://${deploymentEnv.DEPLOYED_DNS}/`,
-        },
-        {
-          name: 'INTERNAL_ACCESS_SIGNATURE',
-          value: internalAccessSignature,
         },
         {
           name: 'INTEGRATION_SLACK',

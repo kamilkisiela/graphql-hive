@@ -206,7 +206,6 @@ export async function main() {
       isProduction: env.environment === 'prod',
       release: env.release,
       hiveConfig: env.hive,
-      internalAccessSignature: env.internalAccessSignature,
     });
 
     server.route({
