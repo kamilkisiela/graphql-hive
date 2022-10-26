@@ -201,7 +201,7 @@ importers:
       mkdirp: 1.0.4
       oclif: ^3.1.2
       ts-node: 10.9.1
-      tslib: 2.3.1
+      tslib: 2.4.0
     dependencies:
       '@graphql-hive/core': link:../core
       '@graphql-inspector/core': 3.2.0_graphql@16.5.0
@@ -223,7 +223,7 @@ importers:
       log-symbols: 4.1.0
       mkdirp: 1.0.4
       ts-node: 10.9.1
-      tslib: 2.3.1
+      tslib: 2.4.0
     devDependencies:
       '@types/env-ci': 3.1.1
       '@types/git-parse': 2.1.2
@@ -949,7 +949,7 @@ importers:
       supertokens-node: 12.0.2
       tailwindcss: 2.2.19
       tailwindcss-radix: 2.2.0
-      tslib: 2.3.1
+      tslib: 2.4.0
       twin.macro: 2.8.2
       urql: 2.0.5
       use-debounce: 6.0.1
@@ -1025,7 +1025,7 @@ importers:
       supertokens-js-override: 0.0.4
       supertokens-node: 12.0.2
       tailwindcss: 2.2.19_cr4sis33dk4di3xnobyqnqmrf4
-      tslib: 2.3.1
+      tslib: 2.4.0
       twin.macro: 2.8.2
       urql: 2.0.5_mnlteiidv5se4zpyvopwg4rohq
       use-debounce: 6.0.1_react@17.0.2

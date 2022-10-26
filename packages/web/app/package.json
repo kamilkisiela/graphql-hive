@@ -72,7 +72,7 @@
     "regenerator-runtime": "0.13.9",
     "snarkdown": "2.0.0",
     "tailwindcss": "2.2.19",
-    "tslib": "2.3.1",
+    "tslib": "2.4.0",
     "twin.macro": "2.8.2",
     "urql": "2.0.5",
     "use-debounce": "6.0.1",
