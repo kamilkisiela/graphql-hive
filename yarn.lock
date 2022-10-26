@@ -3775,10 +3775,10 @@
   resolved "https://registry.yarnpkg.com/@oclif/screen/-/screen-3.0.2.tgz#969054308fe98d130c02844a45cc792199b75670"
   integrity sha512-S/SF/XYJeevwIgHFmVDAFRUvM3m+OjhvCAYMk78ZJQCYCQ5wS7j+LTt1ZEv2jpEEGg2tx/F6TYYWxddNAYHrFQ==
 
-"@octokit/app@12.0.5":
-  version "12.0.5"
-  resolved "https://registry.yarnpkg.com/@octokit/app/-/app-12.0.5.tgz#0b25446daffcb36967b26944410eab1ccbba0c06"
-  integrity sha512-lM3pIfx2h+UbvsXHFVs1ApJ9Rmp8LO4ciFSr5q/9MdHmhsH6WtwayieUn875xwB77IoR9r8czxxxASu2WCtdeA==
+"@octokit/app@12.0.7":
+  version "12.0.7"
+  resolved "https://registry.yarnpkg.com/@octokit/app/-/app-12.0.7.tgz#f20fde4accb4f002eaa17be79fa0823f50e52614"
+  integrity sha512-NqgLlaaf7Yy1s5ghhiiBRGzstICpBYnVX5ce3Klk3iKaGeXJDBLVyrJ6e6sYOiTXolFK56Nx5QWS6oUBgP6rSw==
   dependencies:
     "@octokit/auth-app" "^3.3.0"
     "@octokit/auth-unauthenticated" "^2.0.4"
