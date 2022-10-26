@@ -12,29 +12,6 @@ export const fullNameLengthBoundaries = {
   max: 25,
 } as const;
 
-function buildUserCreatePayloadFromInput(input: {
-  superTokensUserId: string;
-  email: string;
-  externalAuthUserId: string | null;
-}) {
-  const displayName = input.email
-    .split('@')[0]
-    .slice(0, displayNameLengthBoundaries.max)
-    .padEnd(displayNameLengthBoundaries.min, '1');
-  const fullName = input.email
-    .split('@')[0]
-    .slice(0, fullNameLengthBoundaries.max)
-    .padEnd(fullNameLengthBoundaries.min, '1');
-
-  return {
-    superTokensUserId: input.superTokensUserId,
-    email: input.email,
-    displayName,
-    fullName,
-    externalAuthUserId: input.externalAuthUserId,
-  };
-}
-
 /**
  * Responsible for auth checks.
  * Talks to Storage.
@@ -49,13 +26,6 @@ export class UserManager {
     this.logger = logger.child({
       source: 'UserManager',
     });
-  }
-
-  async createUser(input: { superTokensUserId: string; email: string; externalAuthUserId: string | null }) {
-    this.logger.info('Creating new user (input=%o)', input);
-    const user = await this.storage.createUser(buildUserCreatePayloadFromInput(input));
-
-    return user;
   }
 
   updateUser(input: { displayName: string; fullName: string; id: string }) {

@@ -34,3 +34,4 @@ export {
   reservedOrganizationNames,
 } from './modules/organization/providers/organization-config';
 export { CryptoProvider } from './modules/shared/providers/crypto';
+export { OrganizationAccessScope, ProjectAccessScope, TargetAccessScope } from './__generated__/types';

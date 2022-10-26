@@ -183,6 +183,7 @@ export interface User {
   superTokensUserId: string | null;
   isAdmin: boolean;
   externalAuthUserId: string | null;
+  oidcIntegrationId: string | null;
 }
 
 export interface Member {

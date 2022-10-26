@@ -7,3 +7,7 @@ CREATE TABLE IF NOT EXISTS "public"."oidc_integrations" (
   , "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
   , "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
+
+ALTER TABLE "public"."users"
+  ADD COLUMN "oidc_integration_id" uuid REFERENCES "public"."oidc_integrations"("id") ON DELETE CASCADE
+;

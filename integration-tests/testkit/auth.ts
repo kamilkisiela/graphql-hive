@@ -64,14 +64,12 @@ const CreateSessionModel = z.object({
 });
 
 const createSession = async (superTokensUserId: string, email: string) => {
-  // I failed to make the TypeScript work here...
-  // It shows that the input type is `undefined`...
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
   await internalApi.mutation('ensureUser', {
     superTokensUserId,
     email,
+    oidcIntegrationId: null,
   });
+
   const sessionData = createSessionPayload(superTokensUserId, email);
   const payload = {
     enableAntiCsrf: false,

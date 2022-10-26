@@ -178,6 +178,7 @@ export interface users {
   id: string;
   is_admin: boolean | null;
   supertoken_user_id: string | null;
+  oidc_integration_id: string | null;
 }
 
 export interface version_commit {

@@ -1,6 +1,12 @@
 import { router } from '@trpc/server';
 import type { inferAsyncReturnType } from '@trpc/server';
-import { reservedOrganizationNames, organizationAdminScopes } from '@hive/api';
+import {
+  reservedOrganizationNames,
+  organizationAdminScopes,
+  OrganizationAccessScope,
+  ProjectAccessScope,
+  TargetAccessScope,
+} from '@hive/api';
 import type { Storage } from '@hive/api';
 import { z } from 'zod';
 import { CryptoProvider } from 'packages/services/api/src/modules/shared/providers/crypto';
@@ -13,6 +19,13 @@ export async function createContext({ storage, crypto }: { storage: Storage; cry
 }
 
 export type Context = inferAsyncReturnType<typeof createContext>;
+
+const oidcDefaultScopes = [
+  OrganizationAccessScope.READ,
+  ProjectAccessScope.READ,
+  TargetAccessScope.READ,
+  TargetAccessScope.REGISTRY_READ,
+];
 
 export const internalApiRouter = router<Context>()
   .mutation('ensureUser', {
@@ -28,19 +41,13 @@ export const internalApiRouter = router<Context>()
         ...input,
         reservedOrgNames: reservedOrganizationNames,
         scopes: organizationAdminScopes,
+        oidcIntegration: input.oidcIntegrationId
+          ? {
+              id: input.oidcIntegrationId,
+              defaultScopes: oidcDefaultScopes,
+            }
+          : null,
       });
-
-      if (input.oidcIntegrationId) {
-        const user = await ctx.storage.getUserBySuperTokenId({
-          superTokensUserId: input.superTokensUserId,
-        });
-        if (user) {
-          await ctx.storage.addOrganizationMemberViaOIDCIntegrationId({
-            oidcIntegrationId: input.oidcIntegrationId,
-            userId: user.id,
-          });
-        }
-      }
 
       return result;
     },

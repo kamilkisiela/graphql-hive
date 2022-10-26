@@ -17,6 +17,9 @@ import type {
   ProjectType,
   OrganizationType,
   OrganizationInvitation,
+  OrganizationAccessScope,
+  ProjectAccessScope,
+  TargetAccessScope,
 } from '@hive/api';
 import { DatabasePool, DatabaseTransactionConnection, sql, TaggedTemplateLiteralInvocation } from 'slonik';
 import { update } from 'slonik-utilities';
@@ -44,11 +47,6 @@ import { batch } from '@theguild/buddy';
 import type { Slonik } from './shared';
 import zod from 'zod';
 import type { OIDCIntegration } from '../../api/src/shared/entities';
-import {
-  OrganizationAccessScope,
-  ProjectAccessScope,
-  TargetAccessScope,
-} from 'packages/services/api/src/__generated__/types';
 
 export { createConnectionString } from './db/utils';
 export { createTokenStorage } from './tokens';
@@ -95,6 +93,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       displayName: user.display_name,
       isAdmin: user.is_admin ?? false,
       externalAuthUserId: user.external_auth_user_id ?? null,
+      oidcIntegrationId: user.oidc_integration_id ?? null,
     };
   }
 
@@ -317,12 +316,14 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         fullName,
         displayName,
         externalAuthUserId,
+        oidcIntegrationId,
       }: {
         superTokensUserId: string;
         email: string;
         fullName: string;
         displayName: string;
         externalAuthUserId: string | null;
+        oidcIntegrationId: string | null;
       },
       connection: Connection
     ) {
@@ -330,9 +331,9 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         await connection.one<Slonik<users>>(
           sql`
             INSERT INTO public.users
-              ("email", "supertoken_user_id", "full_name", "display_name", "external_auth_user_id")
+              ("email", "supertoken_user_id", "full_name", "display_name", "external_auth_user_id", "oidc_integration_id")
             VALUES
-              (${email}, ${superTokensUserId}, ${fullName}, ${displayName}, ${externalAuthUserId})
+              (${email}, ${superTokensUserId}, ${fullName}, ${displayName}, ${externalAuthUserId}, ${oidcIntegrationId})
             RETURNING *
           `
         )
@@ -400,9 +401,46 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       return transformOrganization(org);
     },
+    async addOrganizationMemberViaOIDCIntegrationId(
+      args: {
+        oidcIntegrationId: string;
+        userId: string;
+        defaultScopes: Array<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
+      },
+      connection: Connection
+    ) {
+      const linkedOrganizationId = await connection.maybeOneFirst<string>(sql`
+          SELECT
+            "linked_organization_id"
+          FROM
+            "public"."oidc_integrations"
+          WHERE
+            "id" = ${args.oidcIntegrationId}
+        `);
+
+      if (linkedOrganizationId === null) {
+        return;
+      }
+
+      await connection.query(
+        sql`
+          INSERT INTO public.organization_member
+            (organization_id, user_id, scopes)
+          VALUES
+            (${linkedOrganizationId}, ${args.userId}, ${sql.array(args.defaultScopes, 'text')})
+          ON CONFLICT DO NOTHING
+          RETURNING *
+        `
+      );
+    },
   };
 
-  function buildUserData(input: { superTokensUserId: string; email: string; externalAuthUserId: string | null }) {
+  function buildUserData(input: {
+    superTokensUserId: string;
+    email: string;
+    externalAuthUserId: string | null;
+    oidcIntegrationId: string | null;
+  }) {
     const displayName = input.email.split('@')[0].slice(0, 25).padEnd(2, '1');
     const fullName = input.email.split('@')[0].slice(0, 25).padEnd(2, '1');
 
@@ -412,6 +450,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       displayName,
       fullName,
       externalAuthUserId: input.externalAuthUserId,
+      oidcIntegrationId: input.oidcIntegrationId,
     };
   }
 
@@ -425,12 +464,17 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       email,
       scopes,
       reservedOrgNames,
+      oidcIntegration,
     }: {
       superTokensUserId: string;
       externalAuthUserId?: string | null;
       email: string;
       reservedOrgNames: string[];
       scopes: Parameters<Storage['createOrganization']>[0]['scopes'];
+      oidcIntegration: null | {
+        id: string;
+        defaultScopes: Array<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
+      };
     }) {
       return pool.transaction(async t => {
         let action: 'created' | 'no_action' = 'no_action';
@@ -438,27 +482,44 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
         if (!internalUser) {
           internalUser = await shared.createUser(
-            buildUserData({ superTokensUserId, email, externalAuthUserId: externalAuthUserId ?? null }),
+            buildUserData({
+              superTokensUserId,
+              email,
+              externalAuthUserId: externalAuthUserId ?? null,
+              oidcIntegrationId: oidcIntegration?.id ?? null,
+            }),
             t
           );
           action = 'created';
         }
 
-        const personalOrg = await shared.getOrganization(internalUser.id, t);
+        if (oidcIntegration === null) {
+          const personalOrg = await shared.getOrganization(internalUser.id, t);
 
-        if (!personalOrg) {
-          await shared.createOrganization(
+          if (!personalOrg) {
+            await shared.createOrganization(
+              {
+                name: internalUser.displayName,
+                user: internalUser.id,
+                cleanId: paramCase(internalUser.displayName),
+                type: 'PERSONAL' as OrganizationType,
+                scopes,
+                reservedNames: reservedOrgNames,
+              },
+              t
+            );
+            action = 'created';
+          }
+        } else {
+          // Add user to OIDC linked integration
+          await shared.addOrganizationMemberViaOIDCIntegrationId(
             {
-              name: internalUser.displayName,
-              user: internalUser.id,
-              cleanId: paramCase(internalUser.displayName),
-              type: 'PERSONAL' as OrganizationType,
-              scopes,
-              reservedNames: reservedOrgNames,
+              oidcIntegrationId: oidcIntegration.id,
+              userId: internalUser.id,
+              defaultScopes: oidcIntegration.defaultScopes,
             },
             t
           );
-          action = 'created';
         }
 
         return action;
@@ -505,9 +566,6 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       }
 
       return null;
-    },
-    createUser(input) {
-      return shared.createUser(input, pool);
     },
     async updateUser({ id, displayName, fullName }) {
       return transformUser(
@@ -734,40 +792,6 @@ export async function createStorage(connection: string, maximumPoolSize: number)
               (organization_id, user_id, scopes)
             VALUES
               (${organization}, ${user}, ${sql.array(scopes, 'text')})
-            RETURNING *
-          `
-        );
-      });
-    },
-    async addOrganizationMemberViaOIDCIntegrationId({ oidcIntegrationId, userId }) {
-      await pool.transaction(async trx => {
-        const linkedOrganizationId = await trx.maybeOneFirst<string>(sql`
-          SELECT
-            "linked_organization_id"
-          FROM
-            "public"."oidc_integrations"
-          WHERE
-            "id" = ${oidcIntegrationId}
-        `);
-
-        if (linkedOrganizationId === null) {
-          return;
-        }
-
-        const defaultScopes = [
-          OrganizationAccessScope.READ,
-          ProjectAccessScope.READ,
-          TargetAccessScope.READ,
-          TargetAccessScope.REGISTRY_READ,
-        ];
-
-        await trx.query(
-          sql`
-            INSERT INTO public.organization_member
-              (organization_id, user_id, scopes)
-            VALUES
-              (${linkedOrganizationId}, ${userId}, ${sql.array(defaultScopes, 'text')})
-            ON CONFLICT DO NOTHING
             RETURNING *
           `
         );

@@ -6,6 +6,10 @@ export default gql`
     oidcIntegration: OIDCIntegration
   }
 
+  extend type User {
+    isLinkedToOIDCIntegration: Boolean!
+  }
+
   type OIDCIntegration {
     id: ID!
     clientId: ID!

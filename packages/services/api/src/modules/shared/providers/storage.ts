@@ -52,6 +52,10 @@ export interface Storage {
     email: string;
     reservedOrgNames: string[];
     scopes: ReadonlyArray<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
+    oidcIntegration: null | {
+      id: string;
+      defaultScopes: Array<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
+    };
   }): Promise<'created' | 'no_action'>;
 
   getUserBySuperTokenId(_: { superTokensUserId: string }): Promise<User | null>;
@@ -59,13 +63,6 @@ export interface Storage {
   getUserWithoutAssociatedSuperTokenIdByAuth0Email(_: { email: string }): Promise<User | null>;
   getUserById(_: { id: string }): Promise<User | null>;
 
-  createUser(_: {
-    email: string;
-    superTokensUserId: string;
-    externalAuthUserId: string | null;
-    displayName: string;
-    fullName: string;
-  }): Promise<User | never>;
   updateUser(_: { id: string; fullName: string; displayName: string }): Promise<User | never>;
 
   getOrganizationId(_: OrganizationSelector): Promise<string | never>;
@@ -112,7 +109,6 @@ export interface Storage {
       scopes: ReadonlyArray<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
     }
   ): Promise<void>;
-  addOrganizationMemberViaOIDCIntegrationId(_: { oidcIntegrationId: string; userId: string }): Promise<void>;
   deleteOrganizationMembers(_: OrganizationSelector & { users: readonly string[] }): Promise<void>;
   updateOrganizationMemberAccess(
     _: OrganizationSelector & {
