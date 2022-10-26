@@ -53,7 +53,7 @@ const storageAccount = new azure.storage.Account(`hive${envName}`, {
   accountReplicationType: 'LRS',
   accountTier: 'Standard',
   accountKind: 'StorageV2',
-  allowBlobPublicAccess: true,
+  publicNetworkAccessEnabled: true,
 });
 
 const storageContainer = new azure.storage.Container('deploy-artifacts', {
