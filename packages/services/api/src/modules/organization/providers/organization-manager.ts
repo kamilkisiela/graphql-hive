@@ -395,7 +395,7 @@ export class OrganizationManager {
 
     const user = await this.authManager.getCurrentUser();
 
-    await this.storage.addOrganizationMember({
+    await this.storage.addOrganizationMemberViaInvitationCode({
       code,
       user: user.id,
       organization: organization.id,
