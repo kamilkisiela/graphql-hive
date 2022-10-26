@@ -6,6 +6,7 @@ import { HiveError } from '../../../shared/errors';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { Logger } from '../../shared/providers/logger';
 import { Storage } from '../../shared/providers/storage';
+import { Tracking } from '../../shared/providers/tracking';
 import type { OrganizationSelector } from '../../shared/providers/storage';
 import { share, cache, uuid, diffArrays, pushIfMissing } from '../../../shared/helpers';
 import { ActivityManager } from '../../activity/providers/activity-manager';
@@ -31,6 +32,7 @@ export class OrganizationManager {
   constructor(
     logger: Logger,
     private storage: Storage,
+    private tracking: Tracking,
     private authManager: AuthManager,
     private tokenStorage: TokenStorage,
     private activityManager: ActivityManager,
@@ -341,9 +343,9 @@ export class OrganizationManager {
     });
 
     await Promise.all([
-      this.storage.completeGetStartedStep({
-        organization: organization.id,
-        step: 'invitingMembers',
+      this.tracking.track({
+        orgId: organization.id,
+        type: 'invitingMembers',
       }),
       // schedule an email
       this.emails.schedule({
@@ -412,9 +414,9 @@ export class OrganizationManager {
     this.authManager.resetAccessCache();
 
     await Promise.all([
-      this.storage.completeGetStartedStep({
-        organization: organization.id,
-        step: 'invitingMembers',
+      this.tracking.track({
+        orgId: organization.id,
+        type: 'invitingMembers',
       }),
       this.activityManager.create({
         type: 'MEMBER_ADDED',

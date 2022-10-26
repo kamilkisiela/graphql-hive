@@ -337,7 +337,7 @@ export interface Storage {
     _: OrganizationSelector & {
       step: Exclude<keyof Organization['getStarted'], 'id'>;
     }
-  ): Promise<void>;
+  ): Promise<boolean>;
 }
 
 @Injectable()

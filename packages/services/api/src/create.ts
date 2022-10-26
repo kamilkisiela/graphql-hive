@@ -17,6 +17,7 @@ import { CryptoProvider, encryptionSecretProvider } from './modules/shared/provi
 import { RedisConfig, REDIS_CONFIG, RedisProvider } from './modules/shared/providers/redis';
 import { Storage } from './modules/shared/providers/storage';
 import { EMAILS_ENDPOINT, Emails } from './modules/shared/providers/emails';
+import { Tracking, TRACKING_KEY } from './modules/shared/providers/tracking';
 import { targetModule } from './modules/target';
 import { integrationsModule } from './modules/integrations';
 import {
@@ -83,6 +84,7 @@ export function createRegistry({
   billing,
   schemaConfig,
   emailsEndpoint,
+  trackingKey,
 }: {
   logger: Logger;
   storage: Storage;
@@ -103,6 +105,7 @@ export function createRegistry({
   billing: BillingConfig;
   schemaConfig: SchemaModuleConfig;
   emailsEndpoint?: string;
+  trackingKey?: string;
 }) {
   const providers = [
     HttpClient,
@@ -111,6 +114,7 @@ export function createRegistry({
     IdempotentRunner,
     CryptoProvider,
     Emails,
+    Tracking,
     {
       provide: Logger,
       useValue: logger,
@@ -189,6 +193,14 @@ export function createRegistry({
     providers.push({
       provide: EMAILS_ENDPOINT,
       useValue: emailsEndpoint,
+      scope: Scope.Singleton,
+    });
+  }
+
+  if (trackingKey) {
+    providers.push({
+      provide: TRACKING_KEY,
+      useValue: trackingKey,
       scope: Scope.Singleton,
     });
   }

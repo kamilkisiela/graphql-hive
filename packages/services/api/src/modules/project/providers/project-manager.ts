@@ -4,6 +4,7 @@ import type { Project, ProjectType } from '../../../shared/entities';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { Logger } from '../../shared/providers/logger';
 import { Storage, OrganizationSelector, ProjectSelector } from '../../shared/providers/storage';
+import { Tracking } from '../../shared/providers/tracking';
 import { NullableAndPartial, share, uuid } from '../../../shared/helpers';
 import { SchemaManager } from '../../schema/providers/schema-manager';
 import type { CustomOrchestratorConfig } from '../../schema/providers/orchestrators/custom';
@@ -26,6 +27,7 @@ export class ProjectManager {
   constructor(
     logger: Logger,
     private storage: Storage,
+    private tracking: Tracking,
     private authManager: AuthManager,
     private schemaManager: SchemaManager,
     private tokenStorage: TokenStorage,
@@ -64,9 +66,9 @@ export class ProjectManager {
     });
 
     await Promise.all([
-      this.storage.completeGetStartedStep({
-        organization,
-        step: 'creatingProject',
+      this.tracking.track({
+        orgId: organization,
+        type: 'creatingProject',
       }),
       this.activityManager.create({
         type: 'PROJECT_CREATED',

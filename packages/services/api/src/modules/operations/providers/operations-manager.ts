@@ -8,6 +8,7 @@ import { TargetAccessScope } from '../../auth/providers/target-access';
 import { Logger } from '../../shared/providers/logger';
 import type { TargetSelector, OrganizationSelector } from '../../shared/providers/storage';
 import { Storage } from '../../shared/providers/storage';
+import { Tracking } from '../../shared/providers/tracking';
 import { OperationsReader } from './operations-reader';
 
 const DAY_IN_MS = 86_400_000;
@@ -62,7 +63,8 @@ export class OperationsManager {
     logger: Logger,
     private authManager: AuthManager,
     private reader: OperationsReader,
-    private storage: Storage
+    private storage: Storage,
+    private tracking: Tracking
   ) {
     this.logger = logger.child({ source: 'OperationsManager' });
   }
@@ -484,9 +486,9 @@ export class OperationsManager {
     });
 
     if (total > 0) {
-      await this.storage.completeGetStartedStep({
-        organization: selector.organization,
-        step: 'reportingOperations',
+      await this.tracking.track({
+        orgId: selector.organization,
+        type: 'reportingOperations',
       });
       return true;
     }

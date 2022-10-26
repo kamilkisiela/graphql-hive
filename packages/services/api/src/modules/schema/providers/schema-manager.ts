@@ -7,6 +7,7 @@ import { HiveError } from '../../../shared/errors';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { Logger } from '../../shared/providers/logger';
 import { Storage, TargetSelector, ProjectSelector, OrganizationSelector } from '../../shared/providers/storage';
+import { Tracking } from '../../shared/providers/tracking';
 import { CustomOrchestrator } from './orchestrators/custom';
 import { FederationOrchestrator } from './orchestrators/federation';
 import { SingleOrchestrator } from './orchestrators/single';
@@ -45,6 +46,7 @@ export class SchemaManager {
     logger: Logger,
     private authManager: AuthManager,
     private storage: Storage,
+    private tracking: Tracking,
     private singleOrchestrator: SingleOrchestrator,
     private stitchingOrchestrator: StitchingOrchestrator,
     private federationOrchestrator: FederationOrchestrator,
@@ -420,7 +422,10 @@ export class SchemaManager {
       step: 'publishingSchema' | 'checkingSchema';
     }
   ): Promise<void> {
-    return this.storage.completeGetStartedStep(selector);
+    return this.tracking.track({
+      orgId: selector.organization,
+      type: selector.step,
+    });
   }
 
   async disableExternalSchemaComposition(input: ProjectSelector) {

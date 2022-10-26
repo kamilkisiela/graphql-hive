@@ -147,6 +147,7 @@ export async function main() {
       },
       logger: graphqlLogger,
       storage,
+      trackingKey: env.tracking.key,
       redis: {
         host: env.redis.host,
         port: env.redis.port,

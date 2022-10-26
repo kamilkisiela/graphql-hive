@@ -2071,7 +2071,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       );
     },
     async completeGetStartedStep({ organization, step }) {
-      await update(
+      const result = await update(
         pool,
         'organizations',
         {
@@ -2081,6 +2081,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           id: organization,
         }
       );
+
+      return result.rowCount >= 1;
     },
   };
 

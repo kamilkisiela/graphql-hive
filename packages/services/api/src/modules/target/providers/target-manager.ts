@@ -5,6 +5,7 @@ import { HiveError } from './../../../shared/errors';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { Logger } from '../../shared/providers/logger';
 import { Storage, ProjectSelector, TargetSelector } from '../../shared/providers/storage';
+import { Tracking } from '../../shared/providers/tracking';
 import { share, uuid } from '../../../shared/helpers';
 import { ActivityManager } from '../../activity/providers/activity-manager';
 import { TokenStorage } from '../../token/providers/token-storage';
@@ -25,6 +26,7 @@ export class TargetManager {
   constructor(
     logger: Logger,
     private storage: Storage,
+    private tracking: Tracking,
     private tokenStorage: TokenStorage,
     private authManager: AuthManager,
     private activityManager: ActivityManager
@@ -176,9 +178,9 @@ export class TargetManager {
       scope: TargetAccessScope.SETTINGS,
     });
 
-    await this.storage.completeGetStartedStep({
-      organization: input.organization,
-      step: 'enablingUsageBasedBreakingChanges',
+    await this.tracking.track({
+      orgId: input.organization,
+      type: 'enablingUsageBasedBreakingChanges',
     });
 
     return this.storage.setTargetValidation(input);
