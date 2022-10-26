@@ -450,3 +450,86 @@ describe('delete', () => {
     });
   });
 });
+
+const UpdateOIDCIntegrationMutation = gql(/* GraphQL */ `
+  mutation UpdateOIDCIntegrationMutation($input: UpdateOIDCIntegrationInput!) {
+    updateOIDCIntegration(input: $input) {
+      ok {
+        updatedOIDCIntegration {
+          id
+          domain
+          clientId
+          clientSecretPreview
+        }
+      }
+      error {
+        message
+        details {
+          clientId
+          clientSecret
+          domain
+        }
+      }
+    }
+  }
+`);
+
+describe('update', () => {
+  describe('permissions="organization:integrations"', () => {
+    test('success', async () => {
+      const { access_token } = await authenticate('main');
+      const orgResult = await createOrganization(
+        {
+          name: 'foo',
+        },
+        access_token
+      );
+
+      const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+
+      const createResult = await execute({
+        document: CreateOIDCIntegrationMutation,
+        variables: {
+          input: {
+            organizationId: org.id,
+            clientId: 'aaaa',
+            clientSecret: 'aaaaaaaaaaaa',
+            domain: 'http://localhost:8888/aaaa',
+          },
+        },
+        authToken: access_token,
+      });
+      expect(createResult.body.errors).toBeUndefined();
+
+      const oidcIntegrationId = createResult.body.data!.createOIDCIntegration.ok!.createdOIDCIntegration.id;
+
+      const updateResult = await execute({
+        document: UpdateOIDCIntegrationMutation,
+        variables: {
+          input: {
+            oidcIntegrationId: oidcIntegrationId,
+            clientId: 'bbbb',
+            clientSecret: 'bbbbbbbbbbbb',
+            domain: 'http://localhost:8888/bbbb',
+          },
+        },
+        authToken: access_token,
+      });
+
+      expect(updateResult.body.errors).toBeUndefined();
+      expect(updateResult.body.data).toEqual({
+        updateOIDCIntegration: {
+          error: null,
+          ok: {
+            updatedOIDCIntegration: {
+              id: oidcIntegrationId,
+              clientId: 'bbbb',
+              clientSecretPreview: 'bbbb',
+              domain: 'http://localhost:8888/bbbb',
+            },
+          },
+        },
+      });
+    });
+  });
+});
