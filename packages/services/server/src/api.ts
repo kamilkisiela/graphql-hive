@@ -6,6 +6,7 @@ import {
   OrganizationAccessScope,
   ProjectAccessScope,
   TargetAccessScope,
+  OrganizationType,
 } from '@hive/api';
 import type { Storage } from '@hive/api';
 import { z } from 'zod';
@@ -50,6 +51,55 @@ export const internalApiRouter = router<Context>()
       });
 
       return result;
+    },
+  })
+  .query('getDefaultOrgForUser', {
+    input: z.object({
+      superTokensUserId: z.string(),
+      lastOrgId: z.union([z.string(), z.null()]),
+    }),
+    async resolve({ input, ctx }) {
+      const user = await ctx.storage.getUserBySuperTokenId({ superTokensUserId: input.superTokensUserId });
+
+      // For an OIDC Integration User we want to return the linked organization
+      if (user?.oidcIntegrationId) {
+        const oidcIntegration = await ctx.storage.getOIDCIntegrationById({ oidcIntegrationId: user.oidcIntegrationId });
+        if (oidcIntegration) {
+          const org = await ctx.storage.getOrganization({ organization: oidcIntegration.linkedOrganizationId });
+
+          return {
+            id: org.id,
+            cleanId: org.cleanId,
+          };
+        }
+      }
+
+      // This is the organizaton that got stored as an cookie
+      // We make sure it actually exists before directing to it.
+      if (input.lastOrgId) {
+        const org = await ctx.storage.getOrganizationByCleanId({ cleanId: input.lastOrgId });
+
+        if (org) {
+          return {
+            id: org.id,
+            cleanId: org.cleanId,
+          };
+        }
+      }
+
+      if (user?.id) {
+        const organizations = await ctx.storage.getOrganizations({ user: user.id });
+        const org = organizations?.find(org => org.type === OrganizationType.PERSONAL);
+
+        if (org) {
+          return {
+            id: org.id,
+            cleanId: org.cleanId,
+          };
+        }
+      }
+
+      return null;
     },
   })
   .query('getOIDCIntegrationById', {

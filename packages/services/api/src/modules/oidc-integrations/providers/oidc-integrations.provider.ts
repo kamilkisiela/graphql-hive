@@ -49,9 +49,9 @@ export class OIDCIntegrationsProvider {
   }
 
   async getOIDCIntegrationForOrganization(args: { organizationId: string }): Promise<OIDCIntegration | null> {
-    this.logger.debug('getting okta integration for organization (organizationId=%s)', args.organizationId);
+    this.logger.debug('getting oidc integration for organization (organizationId=%s)', args.organizationId);
     if (this.isEnabled() === false) {
-      this.logger.debug('okta integrations are disabled.');
+      this.logger.debug('oidc integrations are disabled.');
       return null;
     }
 
