@@ -83,37 +83,35 @@ const getOIDCIdFromInput = (input: { userContext: any }): string => {
 
 export const getOIDCThirdPartyEmailPasswordNodeOverrides = (args: {
   internalApi: ReturnType<typeof createTRPCClient<InternalApi>>;
-}) => {
-  const override: ThirdPartEmailPasswordTypeInput['override'] = {
-    apis: originalImplementation => {
-      return {
-        ...originalImplementation,
-        thirdPartySignInUpPOST: async input => {
-          const oidcId = getOIDCIdFromInput(input);
-          const config = await fetchOIDCConfig(args.internalApi, oidcId);
+}): ThirdPartEmailPasswordTypeInput['override'] => ({
+  apis: originalImplementation => ({
+    ...originalImplementation,
+    thirdPartySignInUpPOST: async input => {
+      const oidcId = getOIDCIdFromInput(input);
+      const config = await fetchOIDCConfig(args.internalApi, oidcId);
 
-          return originalImplementation.thirdPartySignInUpPOST!({
-            ...input,
-            provider: createOIDCSuperTokensProvider(config),
-          });
+      return originalImplementation.thirdPartySignInUpPOST!({
+        ...input,
+        provider: createOIDCSuperTokensProvider(config),
+        userContext: {
+          ...input.userContext,
+          oidcIntegrationId: oidcId,
         },
-        async authorisationUrlGET(input) {
-          const oidcId = getOIDCIdFromInput(input);
-          const config = await fetchOIDCConfig(args.internalApi, oidcId);
-
-          const result = originalImplementation.authorisationUrlGET!({
-            ...input,
-            provider: createOIDCSuperTokensProvider(config),
-          });
-
-          return result;
-        },
-      };
+      });
     },
-  };
+    authorisationUrlGET: async input => {
+      const oidcId = getOIDCIdFromInput(input);
+      const config = await fetchOIDCConfig(args.internalApi, oidcId);
 
-  return override;
-};
+      const result = originalImplementation.authorisationUrlGET!({
+        ...input,
+        provider: createOIDCSuperTokensProvider(config),
+      });
+
+      return result;
+    },
+  }),
+});
 
 export const createOIDCSuperTokensNoopProvider = () => ({
   id: 'oidc',

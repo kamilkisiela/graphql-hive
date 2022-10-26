@@ -44,6 +44,11 @@ import { batch } from '@theguild/buddy';
 import type { Slonik } from './shared';
 import zod from 'zod';
 import type { OIDCIntegration } from '../../api/src/shared/entities';
+import {
+  OrganizationAccessScope,
+  ProjectAccessScope,
+  TargetAccessScope,
+} from 'packages/services/api/src/__generated__/types';
 
 export { createConnectionString } from './db/utils';
 export { createTokenStorage } from './tokens';
@@ -716,7 +721,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       `);
       return deleted ? transformOrganizationInvitation(deleted) : null;
     },
-    async addOrganizationMember({ code, user, organization, scopes }) {
+    async addOrganizationMemberViaInvitationCode({ code, user, organization, scopes }) {
       await pool.transaction(async trx => {
         await trx.query(sql`
           DELETE FROM public.organization_invitations
@@ -729,6 +734,40 @@ export async function createStorage(connection: string, maximumPoolSize: number)
               (organization_id, user_id, scopes)
             VALUES
               (${organization}, ${user}, ${sql.array(scopes, 'text')})
+            RETURNING *
+          `
+        );
+      });
+    },
+    async addOrganizationMemberViaOIDCIntegrationId({ oidcIntegrationId, userId }) {
+      await pool.transaction(async trx => {
+        const linkedOrganizationId = await trx.maybeOneFirst<string>(sql`
+          SELECT
+            "linked_organization_id"
+          FROM
+            "public"."oidc_integrations"
+          WHERE
+            "id" = ${oidcIntegrationId}
+        `);
+
+        if (linkedOrganizationId === null) {
+          return;
+        }
+
+        const defaultScopes = [
+          OrganizationAccessScope.READ,
+          ProjectAccessScope.READ,
+          TargetAccessScope.READ,
+          TargetAccessScope.REGISTRY_READ,
+        ];
+
+        await trx.query(
+          sql`
+            INSERT INTO public.organization_member
+              (organization_id, user_id, scopes)
+            VALUES
+              (${linkedOrganizationId}, ${userId}, ${sql.array(defaultScopes, 'text')})
+            ON CONFLICT DO NOTHING
             RETURNING *
           `
         );

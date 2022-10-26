@@ -83,10 +83,10 @@ export const backendConfig = (): TypeInput => {
         },
         override: composeSuperTokensOverrides([
           getEnsureUserOverrides(internalApi),
+          env.auth.organizationOIDC ? getOIDCThirdPartyEmailPasswordNodeOverrides({ internalApi }) : null,
           /**
            * These overrides are only relevant for the legacy Auth0 -> SuperTokens migration (period).
            */
-          env.auth.organizationOIDC ? getOIDCThirdPartyEmailPasswordNodeOverrides({ internalApi }) : null,
           env.auth.legacyAuth0 ? getAuth0Overrides(env.auth.legacyAuth0) : null,
         ]),
       }),
@@ -152,75 +152,70 @@ export const backendConfig = (): TypeInput => {
   };
 };
 
-function getEnsureUserOverrides(internalApi: ReturnType<typeof createTRPCClient<InternalApi>>) {
-  const override: ThirdPartEmailPasswordTypeInput['override'] = {
-    // here: https://supertokens.com/docs/thirdpartyemailpassword/common-customizations/handling-signinup-success
-    apis: originalImplementation => {
-      // override the email password sign up API
-      const emailPasswordSignUpPOST: typeof originalImplementation['emailPasswordSignUpPOST'] = async input => {
-        if (!originalImplementation.emailPasswordSignUpPOST) {
-          throw Error('emailPasswordSignUpPOST is not available');
-        }
+const getEnsureUserOverrides = (
+  internalApi: ReturnType<typeof createTRPCClient<InternalApi>>
+): ThirdPartEmailPasswordTypeInput['override'] => ({
+  apis: originalImplementation => ({
+    ...originalImplementation,
+    emailPasswordSignUpPOST: async input => {
+      if (!originalImplementation.emailPasswordSignUpPOST) {
+        throw Error('emailPasswordSignUpPOST is not available');
+      }
 
-        const response = await originalImplementation.emailPasswordSignUpPOST(input);
+      const response = await originalImplementation.emailPasswordSignUpPOST(input);
 
-        if (response.status === 'OK') {
-          await internalApi.mutation('ensureUser', {
-            superTokensUserId: response.user.id,
-            email: response.user.email,
-          });
-        }
+      if (response.status === 'OK') {
+        await internalApi.mutation('ensureUser', {
+          superTokensUserId: response.user.id,
+          email: response.user.email,
+          oidcIntegrationId: null,
+        });
+      }
 
-        return response;
-      };
-
-      // override the email password sign in API
-      const emailPasswordSignInPOST: typeof originalImplementation['emailPasswordSignInPOST'] = async input => {
-        if (originalImplementation.emailPasswordSignInPOST === undefined) {
-          throw Error('Should never come here');
-        }
-
-        const response = await originalImplementation.emailPasswordSignInPOST(input);
-
-        if (response.status === 'OK') {
-          await internalApi.mutation('ensureUser', {
-            superTokensUserId: response.user.id,
-            email: response.user.email,
-          });
-        }
-
-        return response;
-      };
-
-      // override the third party sign in API
-      const thirdPartySignInUpPOST: typeof originalImplementation['thirdPartySignInUpPOST'] = async input => {
-        if (originalImplementation.thirdPartySignInUpPOST === undefined) {
-          throw Error('Should never come here');
-        }
-
-        const response = await originalImplementation.thirdPartySignInUpPOST(input);
-
-        if (response.status === 'OK') {
-          await internalApi.mutation('ensureUser', {
-            superTokensUserId: response.user.id,
-            email: response.user.email,
-          });
-        }
-
-        return response;
-      };
-
-      return {
-        ...originalImplementation,
-        emailPasswordSignUpPOST,
-        emailPasswordSignInPOST,
-        thirdPartySignInUpPOST,
-      };
+      return response;
     },
-  };
+    emailPasswordSignInPOST: async input => {
+      if (originalImplementation.emailPasswordSignInPOST === undefined) {
+        throw Error('Should never come here');
+      }
 
-  return override;
-}
+      const response = await originalImplementation.emailPasswordSignInPOST(input);
+
+      if (response.status === 'OK') {
+        await internalApi.mutation('ensureUser', {
+          superTokensUserId: response.user.id,
+          email: response.user.email,
+          oidcIntegrationId: null,
+        });
+      }
+
+      return response;
+    },
+    thirdPartySignInUpPOST: async input => {
+      if (originalImplementation.thirdPartySignInUpPOST === undefined) {
+        throw Error('Should never come here');
+      }
+
+      const response = await originalImplementation.thirdPartySignInUpPOST(input);
+
+      if (response.status === 'OK') {
+        await internalApi.mutation('ensureUser', {
+          superTokensUserId: response.user.id,
+          email: response.user.email,
+          // This is provided via `getOIDCThirdPartyEmailPasswordNodeOverrides` if it is enabled.
+          oidcIntegrationId: input.userContext['oidcIntegrationId'] ?? null,
+        });
+      }
+
+      return response;
+    },
+  }),
+});
+
+const bindObjectFunctions = <T extends { [key: string]: CallableFunction | undefined }>(obj: T, bindTo: any) => {
+  return Object.fromEntries(Object.entries(obj).map(([key, value]) => [key, value?.bind(bindTo)])) as T;
+};
+
 /**
  * Utility function for composing multiple (dynamic SuperTokens overrides).
  */
@@ -234,7 +229,7 @@ const composeSuperTokensOverrides = (overrides: Array<ThirdPartEmailPasswordType
     let impl = originalImplementation;
     for (const override of overrides) {
       if (typeof override?.apis === 'function') {
-        impl = override.apis(impl, builder);
+        impl = bindObjectFunctions(override.apis(impl, builder), originalImplementation);
       }
     }
     return impl;
@@ -247,7 +242,7 @@ const composeSuperTokensOverrides = (overrides: Array<ThirdPartEmailPasswordType
     let impl = originalImplementation;
     for (const override of overrides) {
       if (typeof override?.functions === 'function') {
-        impl = override.functions(impl);
+        impl = bindObjectFunctions(override.functions(impl), originalImplementation);
       }
     }
     return impl;

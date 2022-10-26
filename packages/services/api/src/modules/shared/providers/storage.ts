@@ -105,13 +105,14 @@ export interface Storage {
   ): Promise<ReadonlyArray<ReadonlyArray<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>>>;
   hasOrganizationMemberPairs(_: readonly (OrganizationSelector & { user: string })[]): Promise<readonly boolean[]>;
   hasOrganizationProjectMemberPairs(_: readonly (ProjectSelector & { user: string })[]): Promise<readonly boolean[]>;
-  addOrganizationMember(
+  addOrganizationMemberViaInvitationCode(
     _: OrganizationSelector & {
       code: string;
       user: string;
       scopes: ReadonlyArray<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
     }
   ): Promise<void>;
+  addOrganizationMemberViaOIDCIntegrationId(_: { oidcIntegrationId: string; userId: string }): Promise<void>;
   deleteOrganizationMembers(_: OrganizationSelector & { users: readonly string[] }): Promise<void>;
   updateOrganizationMemberAccess(
     _: OrganizationSelector & {

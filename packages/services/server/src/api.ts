@@ -20,14 +20,29 @@ export const internalApiRouter = router<Context>()
       .object({
         superTokensUserId: z.string().min(1),
         email: z.string().min(1),
+        oidcIntegrationId: z.union([z.string(), z.null()]),
       })
       .required(),
-    resolve({ input, ctx }) {
-      return ctx.storage.ensureUserExists({
+    async resolve({ input, ctx }) {
+      const result = await ctx.storage.ensureUserExists({
         ...input,
         reservedOrgNames: reservedOrganizationNames,
         scopes: organizationAdminScopes,
       });
+
+      if (input.oidcIntegrationId) {
+        const user = await ctx.storage.getUserBySuperTokenId({
+          superTokensUserId: input.superTokensUserId,
+        });
+        if (user) {
+          await ctx.storage.addOrganizationMemberViaOIDCIntegrationId({
+            oidcIntegrationId: input.oidcIntegrationId,
+            userId: user.id,
+          });
+        }
+      }
+
+      return result;
     },
   })
   .query('getOIDCIntegrationById', {
