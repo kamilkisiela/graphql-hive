@@ -5,12 +5,14 @@
     "target": "es2016",
     "module": "commonjs",
     "moduleResolution": "node",
+    "typeRoots": ["./node_modules/@types"],
     "sourceMap": true,
     "experimentalDecorators": true,
     "pretty": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true
   },
-  "files": ["index.ts"]
+  "include": ["types.ts", "index.ts", "utils/*c*/*.ts", "services/**/*.ts"]
 }
