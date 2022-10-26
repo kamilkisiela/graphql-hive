@@ -161,7 +161,7 @@ services:
       schema:
         condition: service_healthy
     ports:
-      - 3001:3001
+      - '8082:3001'
     environment:
       NODE_ENV: production
       POSTGRES_HOST: db
