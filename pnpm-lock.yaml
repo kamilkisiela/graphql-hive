@@ -137,6 +137,7 @@ importers:
       '@graphql-hive/core': 0.2.2
       '@graphql-typed-document-node/core': 3.1.1
       '@hive/server': '*'
+      '@n1ru4l/dockest': 2.1.0-rc.6
       '@trpc/client': 9.23.2
       '@types/ioredis': 4.28.7
       '@whatwg-node/fetch': 0.4.7
@@ -144,7 +145,6 @@ importers:
       axios: 0.27.2
       date-fns: 2.25.0
       dependency-graph: 0.11.0
-      dockest: npm:@n1ru4l/dockest@2.1.0-rc.6
       dotenv: 10.0.0
       ioredis: 4.28.3
       rxjs: ^6.5.4
@@ -157,13 +157,13 @@ importers:
       '@app/gql': link:testkit/gql
       '@graphql-hive/core': link:../packages/libraries/core
       '@graphql-typed-document-node/core': 3.1.1
+      '@n1ru4l/dockest': 2.1.0-rc.6_2borp2lvtycfyctncvbphkqq2a
       '@trpc/client': 9.23.2
       '@whatwg-node/fetch': 0.4.7
       auth0: 2.36.2
       axios: 0.27.2
       date-fns: 2.25.0
       dependency-graph: 0.11.0
-      dockest: /@n1ru4l/dockest/2.1.0-rc.6_2borp2lvtycfyctncvbphkqq2a
       dotenv: 10.0.0
       ioredis: 4.28.3
       rxjs: 6.6.7
