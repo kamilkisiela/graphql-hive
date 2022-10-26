@@ -604,6 +604,7 @@ importers:
       slonik-interceptor-query-logging: 1.4.7
       slonik-utilities: 1.9.4
       ts-node: 10.9.1
+      tslib: 2.4.0
       zod: 3.15.1
     dependencies:
       '@sentry/node': 7.12.1
@@ -621,6 +622,7 @@ importers:
       '@types/pg': 8.6.5
       pg-promise: 10.11.1
       ts-node: 10.9.1
+      tslib: 2.4.0
 
   packages/services/stripe-billing:
     specifiers:
@@ -13777,7 +13779,7 @@ packages:
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
       style-value-types: 4.1.4
-      tslib: 2.3.1
+      tslib: 2.4.0
     optionalDependencies:
       '@emotion/is-prop-valid': 0.8.8
     dev: false

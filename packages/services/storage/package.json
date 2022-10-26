@@ -35,7 +35,8 @@
     "@tgriesser/schemats": "7.0.0",
     "@types/pg": "8.6.5",
     "pg-promise": "10.11.1",
-    "ts-node": "10.9.1"
+    "ts-node": "10.9.1",
+    "tslib": "2.4.0"
   },
   "engines": {
     "node": ">=12"
