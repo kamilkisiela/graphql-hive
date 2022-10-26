@@ -224,7 +224,6 @@
 
 "@app/gql@link:./integration-tests/testkit/gql":
   version "0.0.0"
-  uid ""
 
 "@ardatan/relay-compiler@12.0.0":
   version "12.0.0"
@@ -2762,7 +2761,7 @@
     "@graphql-tools/utils" "8.12.0"
     tslib "^2.4.0"
 
-"@graphql-tools/mock@8.4.0":
+"@graphql-tools/mock@8.4.0", "@graphql-tools/mock@^8.1.2":
   version "8.4.0"
   resolved "https://registry.yarnpkg.com/@graphql-tools/mock/-/mock-8.4.0.tgz#c4a5d0c35cc5760b99b3e062145f36ac9cfe9ffb"
   integrity sha512-RKcqmw7P5pC2ULh2/kg/erxxsd7lEV/wnI5jNgahkCw8wiSC8OI3SwNMwjfrlpYogs7eEhiXi7Ix6abCiFUURw==
@@ -2771,16 +2770,6 @@
     "@graphql-tools/utils" "^8.2.3"
     fast-json-stable-stringify "^2.1.0"
     tslib "~2.3.0"
-
-"@graphql-tools/mock@^8.1.2":
-  version "8.7.6"
-  resolved "https://registry.yarnpkg.com/@graphql-tools/mock/-/mock-8.7.6.tgz#701d898f7fe6c22e40d6d80e25874e464359ce11"
-  integrity sha512-cQGPyY6dF4x28552zjAg9En2WWVury62u1/xzipCNUSCdKRVOsAupTNBcAGdMjsKPLcGzzk1cPA8dP0DUfNqzg==
-  dependencies:
-    "@graphql-tools/schema" "9.0.4"
-    "@graphql-tools/utils" "8.12.0"
-    fast-json-stable-stringify "^2.1.0"
-    tslib "^2.4.0"
 
 "@graphql-tools/optimize@^1.3.0":
   version "1.3.0"
@@ -2854,7 +2843,7 @@
     tslib "^2.4.0"
     value-or-promise "1.0.11"
 
-"@graphql-tools/schema@9.0.4", "@graphql-tools/schema@^9.0.0":
+"@graphql-tools/schema@^9.0.0":
   version "9.0.4"
   resolved "https://registry.yarnpkg.com/@graphql-tools/schema/-/schema-9.0.4.tgz#1a74608b57abf90fae6fd929d25e5482c57bc05d"
   integrity sha512-B/b8ukjs18fq+/s7p97P8L1VMrwapYc3N2KvdG/uNThSazRRn8GsBK0Nr+FH+mVKiUfb4Dno79e3SumZVoHuOQ==
@@ -4628,18 +4617,17 @@
     "@radix-ui/react-use-previous" "0.1.0"
     "@radix-ui/react-use-size" "0.1.0"
 
-"@radix-ui/react-tabs@0.1.4":
-  version "0.1.4"
-  resolved "https://registry.yarnpkg.com/@radix-ui/react-tabs/-/react-tabs-0.1.4.tgz#ee31b413b2d87202f8f194cd5b4827b35c26a7a6"
-  integrity sha512-5UK1j3vcFQTNlsFjgxLHFw2eGLJ5EYL40/YHWWkH8fK6UC9+JSfVSVZQYImoZOeUVWgHJSEBaNdbikncjnUsKw==
+"@radix-ui/react-tabs@0.1.5":
+  version "0.1.5"
+  resolved "https://registry.yarnpkg.com/@radix-ui/react-tabs/-/react-tabs-0.1.5.tgz#ddcf860cc32e186d76477ae767dbb216d1944252"
+  integrity sha512-ieVQS1TFr0dX1XA8B+CsSFKOE7kcgEaNWWEfItxj9D1GZjn1o3WqPkW+FhQWDAWZLSKCH2PezYF3MNyO41lgJg==
   dependencies:
     "@babel/runtime" "^7.13.10"
     "@radix-ui/primitive" "0.1.0"
     "@radix-ui/react-context" "0.1.1"
-    "@radix-ui/react-id" "0.1.4"
-    "@radix-ui/react-primitive" "0.1.3"
-    "@radix-ui/react-roving-focus" "0.1.4"
-    "@radix-ui/react-use-callback-ref" "0.1.0"
+    "@radix-ui/react-id" "0.1.5"
+    "@radix-ui/react-primitive" "0.1.4"
+    "@radix-ui/react-roving-focus" "0.1.5"
     "@radix-ui/react-use-controllable-state" "0.1.0"
 
 "@radix-ui/react-toggle-group@0.1.4":
@@ -7638,12 +7626,7 @@ camelize@^1.0.0:
   resolved "https://registry.yarnpkg.com/camelize/-/camelize-1.0.0.tgz#164a5483e630fa4321e5af07020e531831b2609b"
   integrity sha1-FkpUg+Yw+kMh5a8HAg5TGDGyYJs=
 
-caniuse-lite@^1.0.30001335, caniuse-lite@^1.0.30001400:
-  version "1.0.30001409"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001409.tgz#6135da9dcab34cd9761d9cdb12a68e6740c5e96e"
-  integrity sha512-V0mnJ5dwarmhYv8/MzhJ//aW68UpvnQBXv8lJ2QUsvn2pHcmAuNtu8hQEDz37XnA1iE+lRR9CIfGWWpgJ5QedQ==
-
-caniuse-lite@^1.0.30001406:
+caniuse-lite@^1.0.30001335, caniuse-lite@^1.0.30001400, caniuse-lite@^1.0.30001406:
   version "1.0.30001425"
   resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001425.tgz#52917791a453eb3265143d2cd08d80629e82c735"
   integrity sha512-/pzFv0OmNG6W0ym80P3NtapU0QEiDS3VuYAZMGoLLqiC7f6FJFe1MjpQDREGApeenD9wloeytmVDj+JLXPC6qw==
