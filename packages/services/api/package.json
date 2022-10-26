@@ -20,7 +20,7 @@
     "@sentry/types": "7.12.1",
     "@slack/web-api": "6.4.0",
     "@theguild/buddy": "0.1.0",
-    "agentkeepalive": "4.2.0",
+    "agentkeepalive": "4.2.1",
     "abort-controller": "3.0.0",
     "dataloader": "2.0.0",
     "date-fns": "2.25.0",
