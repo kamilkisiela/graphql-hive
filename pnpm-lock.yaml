@@ -136,38 +136,40 @@ importers:
     specifiers:
       '@app/gql': link:./testkit/gql
       '@graphql-typed-document-node/core': 3.1.1
-      '@hive/server': '*'
-      '@n1ru4l/dockest': 2.1.0-rc.6
       '@trpc/client': 9.23.2
       '@whatwg-node/fetch': 0.4.7
       auth0: 2.36.2
       axios: 0.27.2
       date-fns: 2.25.0
       dependency-graph: 0.11.0
+      dockest: npm:@n1ru4l/dockest@2.1.0-rc.6
       dotenv: 10.0.0
+      ioredis: 5.2.3
       rxjs: ^6.5.4
       slonik: 30.1.2
+      tslib: 2.4.0
       tsup: 5.12.7
       yaml: 2.1.0
       zod: 3.15.1
     dependencies:
       '@app/gql': link:testkit/gql
       '@graphql-typed-document-node/core': 3.1.1
-      '@n1ru4l/dockest': 2.1.0-rc.6_2borp2lvtycfyctncvbphkqq2a
       '@trpc/client': 9.23.2
       '@whatwg-node/fetch': 0.4.7
       auth0: 2.36.2
       axios: 0.27.2
       date-fns: 2.25.0
       dependency-graph: 0.11.0
+      dockest: /@n1ru4l/dockest/2.1.0-rc.6_2borp2lvtycfyctncvbphkqq2a
       dotenv: 10.0.0
+      ioredis: 5.2.3
       rxjs: 6.6.7
       slonik: 30.1.2_wg2hxbo7txnklmvja4aeqnygfi
       tsup: 5.12.7
       yaml: 2.1.0
       zod: 3.15.1
     devDependencies:
-      '@hive/server': link:../packages/services/server
+      tslib: 2.4.0
 
   packages/libraries/cli:
     specifiers:
@@ -4817,7 +4819,7 @@ packages:
     dependencies:
       dependency-graph: 0.11.0
       object-inspect: 1.10.3
-      tslib: 2.3.1
+      tslib: 2.4.0
     dev: false
 
   /@graphql-inspector/core/3.2.0_graphql@16.5.0:
@@ -4828,7 +4830,7 @@ packages:
       dependency-graph: 0.11.0
       graphql: 16.5.0
       object-inspect: 1.10.3
-      tslib: 2.3.1
+      tslib: 2.4.0
     dev: false
 
   /@graphql-tools/apollo-engine-loader/7.3.13_graphql@16.5.0:
@@ -5602,6 +5604,10 @@ packages:
 
   /@iarna/toml/2.2.5:
     resolution: {integrity: sha512-trnsAYxU3xnS1gPHPyU961coFyLkh4gAD/0zQ5mymY4yOZ+CYvsPqUbOFSw0aDM4y0tV7tiFxL/1XfXPNC6IPg==}
+
+  /@ioredis/commands/1.2.0:
+    resolution: {integrity: sha512-Sx1pU8EM64o2BrqNpEO1CNLtKQwyhuXuqyfH7oGKCk+1a33d2r5saW8zNwm3j6BTExtjrv2BxTgzzkMwts6vGg==}
+    dev: false
 
   /@isaacs/string-locale-compare/1.1.0:
     resolution: {integrity: sha512-SQ7Kzhh9+D+ZW9MA0zkYv3VXhIDNx+LzM6EJ+/65I3QY+enU6Itte7E5XX7EWrqLW2FN4n06GWzBnPoC3th2aQ==}
@@ -12003,6 +12009,11 @@ packages:
     resolution: {integrity: sha512-XwE+iZ4D6ZUB7mfYRMb5wByE8L74HCn30FBN7sWnXksWc1LO1bPDl67pBR9o/kC4z/xSNAwkMYcGgqDV3BE3Hw==}
     engines: {node: '>=0.10'}
 
+  /denque/2.1.0:
+    resolution: {integrity: sha512-HVQE3AAb/pxF8fQAoiqpvg9i3evqug3hoiwakOyZAwJm+6vZehbkYXZ0l4JxS+I3QxM97v5aaRNhj8v5oBhekw==}
+    engines: {node: '>=0.10'}
+    dev: false
+
   /depd/1.1.2:
     resolution: {integrity: sha512-7emPTl6Dpo6JRXOXjLRxck+FlLRX5847cLKEn00PLAgc3g2hTZZgr+e4c2v6QpSmLeFP3n5yUo7ft6avBK/5jQ==}
     engines: {node: '>= 0.6'}
@@ -15252,6 +15263,23 @@ packages:
       lodash.isarguments: 3.1.0
       p-map: 2.1.0
       redis-commands: 1.7.0
+      redis-errors: 1.2.0
+      redis-parser: 3.0.0
+      standard-as-callback: 2.1.0
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
+
+  /ioredis/5.2.3:
+    resolution: {integrity: sha512-gQNcMF23/NpvjCaa1b5YycUyQJ9rBNH2xP94LWinNpodMWVUPP5Ai/xXANn/SM7gfIvI62B5CCvZxhg5pOgyMw==}
+    engines: {node: '>=12.22.0'}
+    dependencies:
+      '@ioredis/commands': 1.2.0
+      cluster-key-slot: 1.1.1
+      debug: 4.3.4
+      denque: 2.1.0
+      lodash.defaults: 4.2.0
+      lodash.isarguments: 3.1.0
       redis-errors: 1.2.0
       redis-parser: 3.0.0
       standard-as-callback: 2.1.0
@@ -19092,7 +19120,7 @@ packages:
       normalize-package-data: 3.0.3
       qqjs: 0.3.11
       semver: 7.3.8
-      tslib: 2.3.1
+      tslib: 2.4.0
       yeoman-environment: 3.12.1
       yeoman-generator: 5.7.0_yeoman-environment@3.12.1
       yosay: 2.0.2
@@ -23102,6 +23130,7 @@ packages:
 
   /tslib/2.3.1:
     resolution: {integrity: sha512-77EbyPPpMz+FRFRuAFlWMtmgUWGe9UOG2Z25NqCwiIjRhOf5iKGuzSe5P2w1laq+FkRy4p+PCuVkJSGkzTEKVw==}
+    dev: false
 
   /tslib/2.4.0:
     resolution: {integrity: sha512-d6xOpEDfsi2CZVlPQzGeux8XMwLT9hssAsaPYExaQMuYskwb+x1x7J371tWlbBdWHroy99KnVB6qIkUbs5X3UQ==}
