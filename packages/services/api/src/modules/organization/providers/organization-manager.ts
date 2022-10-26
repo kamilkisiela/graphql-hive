@@ -132,10 +132,16 @@ export class OrganizationManager {
     user: {
       id: string;
       superTokensUserId: string | null;
+      oidcIntegrationId: string | null;
     };
   }): Promise<Organization> {
     const { name, type, user } = input;
     this.logger.info('Creating an organization (input=%o)', input);
+
+    if (user.oidcIntegrationId) {
+      this.logger.debug('Failed to create organization as oidc user is not allowed to do so (input=%o)', input);
+      throw new HiveError('Cannot create organization with OIDC user.');
+    }
 
     const organization = await this.storage.createOrganization({
       name,
