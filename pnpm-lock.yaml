@@ -942,6 +942,7 @@ importers:
       react-virtualized-auto-sizer: 1.0.6
       react-window: 1.8.7
       regenerator-runtime: 0.13.9
+      rimraf: 3.0.2
       snarkdown: 2.0.0
       supertokens-auth-react: 0.26.3
       supertokens-js-override: 0.0.4
@@ -1054,6 +1055,7 @@ importers:
       eslint-plugin-react-hooks: 4.6.0
       eslint-plugin-tailwindcss: 3.5.2
       postcss: 8.4.13
+      rimraf: 3.0.2
       tailwindcss-radix: 2.2.0
 
   packages/web/docs:
