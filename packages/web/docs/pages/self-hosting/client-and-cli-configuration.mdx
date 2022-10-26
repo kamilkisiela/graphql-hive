@@ -1,0 +1,34 @@
+# Client & CLI Configuration
+
+By default the Hive CLI and Hive Client SDK connect to the Hive Cloud version.
+In order to connect to a local Hive Server, you need to configure both the client and SDK.
+
+## Configuring the Client
+
+Instantiate your Hive client with the `selfHosting` option.
+
+```ts filename="hive.ts"
+import { createHive } from '@graphql-hive/client'
+
+const hive = createHive({
+  enabled: true,
+  debug: true,
+  token,
+  selfHosting: {
+    graphqlEndpoint: 'http://localhost:8002/graphql',
+    usageEndpoint: 'http://localhost:8081'
+    applicationUrl: 'http://localhost:8080/',
+  },
+  usage: true
+})
+```
+
+## Configuring the CLI
+
+Place a `hive.json` file within the root of your project.
+
+```json filename="hive.json"
+{
+  "registry": "http://localhost:8002/graphql"
+}
+```
