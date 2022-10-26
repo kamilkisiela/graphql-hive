@@ -297,13 +297,6 @@
   resolved "https://registry.npmjs.org/@protobufjs/utf8/-/utf8-1.1.0.tgz#a777360b5b39a1a2e5106f8e858f2fd2d060c570"
   integrity sha1-p3c2C1s5oaLlEG+OhY8v0tBgxXA=
 
-"@pulumi/azure-native@1.56.0":
-  version "1.56.0"
-  resolved "https://registry.yarnpkg.com/@pulumi/azure-native/-/azure-native-1.56.0.tgz#d72fad1e6358a7b33d69ca586e247bbbaf536bad"
-  integrity sha512-KXH/ORxEuCtcjJNRNPphzRytHJ4HWppjeeUV09SBm9ySlmKEGkHkMmOSzN22JIfECbXzF4IAYKCP36IAePTBDg==
-  dependencies:
-    "@pulumi/pulumi" "^3.0.0"
-
 "@pulumi/azure@4.37.0":
   version "4.37.0"
   resolved "https://registry.yarnpkg.com/@pulumi/azure/-/azure-4.37.0.tgz#455ce5707b26e625ac286e4feb3003fa7163686f"
