@@ -23,9 +23,7 @@
     "@trpc/client": "9.23.2"
   },
   "devDependencies": {
-    "@hive/server": "*"
-  },
-  "devDependencies": {
+    "@hive/server": "*",
     "@types/ioredis": "4.28.7",
     "tslib": "2.4.0"
   },
