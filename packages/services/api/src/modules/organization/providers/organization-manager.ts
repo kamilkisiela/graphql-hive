@@ -387,6 +387,15 @@ export class OrganizationManager {
 
   async joinOrganization({ code }: { code: string }): Promise<Organization | { message: string }> {
     this.logger.info('Joining an organization (code=%s)', code);
+
+    const user = await this.authManager.getCurrentUser();
+
+    if (user.oidcIntegrationId !== null) {
+      return {
+        message: `You cannot join an organization with an OIDC account.`,
+      };
+    }
+
     const organization = await this.getOrganizationByInviteCode({
       code,
     });
@@ -398,8 +407,6 @@ export class OrganizationManager {
     if (organization.type === OrganizationType.PERSONAL) {
       throw new HiveError(`Cannot join a personal organization`);
     }
-
-    const user = await this.authManager.getCurrentUser();
 
     await this.storage.addOrganizationMemberViaInvitationCode({
       code,
