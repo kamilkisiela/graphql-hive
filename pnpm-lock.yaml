@@ -136,6 +136,7 @@ importers:
       '@app/gql': link:./testkit/gql
       '@graphql-hive/core': 0.2.2
       '@graphql-typed-document-node/core': 3.1.1
+      '@hive/server': '*'
       '@trpc/client': 9.23.2
       '@types/ioredis': 4.28.7
       '@whatwg-node/fetch': 0.4.7
@@ -171,6 +172,7 @@ importers:
       yaml: 2.1.0
       zod: 3.15.1
     devDependencies:
+      '@hive/server': link:../packages/services/server
       '@types/ioredis': 4.28.7
       tslib: 2.4.0
 
