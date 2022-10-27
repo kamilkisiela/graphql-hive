@@ -5,8 +5,7 @@
   },
   "devDependencies": {
     "@types/mime-types": "2.1.1",
-    "@types/node": "18.11.5",
-    "typescript": "4.8.4"
+    "@types/node": "18.11.5"
   },
   "dependencies": {
     "@manypkg/get-packages": "1.1.3",
