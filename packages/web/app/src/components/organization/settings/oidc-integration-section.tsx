@@ -1,5 +1,7 @@
 import { Button, Input, Modal, Tag } from '@/components/v2';
-import { AlertTriangleIcon } from '@/components/v2/icon';
+import { AlertTriangleIcon, KeyIcon } from '@/components/v2/icon';
+import { InlineCode } from '@/components/v2/inline-code';
+import { env } from '@/env/frontend';
 import { Heading } from '@chakra-ui/react';
 import { useFormik } from 'formik';
 import { useRouter } from 'next/router';
@@ -20,80 +22,94 @@ const OIDCIntegrationSection_OrganizationFragment = gql(/* GraphQL */ `
   }
 `);
 
+const extractDomain = (rawUrl: string) => {
+  const url = new URL(rawUrl);
+  return url.host;
+};
+
 export const OIDCIntegrationSection = (props: {
   organization: DocumentType<typeof OIDCIntegrationSection_OrganizationFragment>;
 }): ReactElement => {
   const router = useRouter();
 
   const isCreateOIDCIntegrationModalOpen = router.asPath.endsWith('#create-oidc-integration');
-  const isUpdateOIDCIntegrationModalOpen = router.asPath.endsWith('#update-oidc-integration');
-  const isDeleteOIDCIntegrationModalOpen = router.asPath.endsWith('#delete-oidc-integration');
+  const isUpdateOIDCIntegrationModalOpen = router.asPath.endsWith('#manage-oidc-integration');
+  const isDeleteOIDCIntegrationModalOpen = router.asPath.endsWith('#remove-oidc-integration');
 
   const closeModal = () => {
     router.push(router.asPath.split('#')[0]);
   };
 
   const openCreateModalLink = `${router.asPath}#create-oidc-integration`;
-  const openEditModalLink = `${router.asPath}#update-oidc-integration`;
-  const openDeleteModalLink = `${router.asPath}#delete-oidc-integration`;
+  const openEditModalLink = `${router.asPath}#manage-oidc-integration`;
+  const openDeleteModalLink = `${router.asPath}#remove-oidc-integration`;
 
   return (
     <>
-      <Heading>OpenID Connect Provider</Heading>
-      {props.organization.oidcIntegration ? (
-        <>
-          <div className="flex items-center gap-x-2">
+      <div className="flex items-center gap-x-2">
+        {props.organization.oidcIntegration ? (
+          <>
             <Button
               as="a"
+              variant="secondary"
+              size="large"
               href={openEditModalLink}
-              onClick={() => {
+              onClick={ev => {
+                ev.preventDefault();
                 router.push(openEditModalLink);
               }}
             >
-              Configure ({props.organization.oidcIntegration.domain})
+              <KeyIcon className="mr-2" />
+              Manage OIDC Provider ({extractDomain(props.organization.oidcIntegration.domain)})
             </Button>
             <Button
               variant="primary"
-              size="large"
               danger
+              size="large"
               className="px-5"
               as="a"
               href={openDeleteModalLink}
-              onClick={() => {
+              onClick={ev => {
+                ev.preventDefault();
                 router.push(openDeleteModalLink);
               }}
             >
               Remove
             </Button>
-          </div>
-        </>
-      ) : (
-        <Button
-          as="a"
-          href={openCreateModalLink}
-          onClick={() => {
-            router.push(openCreateModalLink);
-          }}
-        >
-          Connect
-        </Button>
-      )}
+          </>
+        ) : (
+          <Button
+            size="large"
+            as="a"
+            href={openCreateModalLink}
+            onClick={ev => {
+              ev.preventDefault();
+              router.push(openCreateModalLink);
+            }}
+          >
+            <KeyIcon className="mr-2" />
+            Connect OIDC Provider
+          </Button>
+        )}
+      </div>
       <CreateOIDCIntegrationModal
         isOpen={isCreateOIDCIntegrationModalOpen}
         close={closeModal}
         hasOIDCIntegration={!!props.organization.oidcIntegration}
         organizationId={props.organization.id}
         openEditModalLink={openEditModalLink}
+        transitionToManageScreen={() => {
+          router.replace(openEditModalLink);
+        }}
       />
-      <UpdateOIDCIntegrationModal
+      <ManageOIDCIntegrationModal
         key={props.organization.oidcIntegration?.id ?? 'noop'}
         oidcIntegration={props.organization.oidcIntegration ?? null}
         isOpen={isUpdateOIDCIntegrationModalOpen}
         close={closeModal}
         openCreateModalLink={openCreateModalLink}
       />
-      <DeleteOIDCIntegrationModal
-        key={props.organization.oidcIntegration?.id ?? 'noop'}
+      <RemoveOIDCIntegrationModal
         isOpen={isDeleteOIDCIntegrationModalOpen}
         close={closeModal}
         oidcIntegrationId={props.organization.oidcIntegration?.id ?? null}
@@ -128,12 +144,13 @@ const CreateOIDCIntegrationModal = (props: {
   hasOIDCIntegration: boolean;
   organizationId: string;
   openEditModalLink: string;
+  transitionToManageScreen: () => void;
 }): ReactElement => {
   return (
     <Modal open={props.isOpen} onOpenChange={props.close} className={modalWidthClassName}>
       {props.hasOIDCIntegration === true ? (
         <div className={containerClassName}>
-          <Heading>Create OpenID Connect Integration</Heading>
+          <Heading>Connect OpenID Connect Provider</Heading>
           <p>
             You are trying to create an OpenID Connect integration for an organization that already has a provider
             attached. Please instead configure the existing provider.
@@ -152,13 +169,18 @@ const CreateOIDCIntegrationModal = (props: {
           organizationId={props.organizationId}
           close={props.close}
           key={props.organizationId}
+          transitionToManageScreen={props.transitionToManageScreen}
         />
       )}
     </Modal>
   );
 };
 
-const CreateOIDCIntegrationForm = (props: { organizationId: string; close: () => void }): ReactElement => {
+const CreateOIDCIntegrationForm = (props: {
+  organizationId: string;
+  close: () => void;
+  transitionToManageScreen: () => void;
+}): ReactElement => {
   const [mutation, mutate] = useMutation(CreateOIDCIntegrationModal_CreateOIDCIntegrationMutation);
 
   const formik = useFormik({
@@ -184,14 +206,14 @@ const CreateOIDCIntegrationForm = (props: { organizationId: string; close: () =>
       }
 
       if (result.data?.createOIDCIntegration.ok) {
-        props.close();
+        props.transitionToManageScreen();
       }
     },
   });
 
   return (
     <form className={containerClassName} onSubmit={formik.handleSubmit}>
-      <Heading>Create OpenID Connect Integration</Heading>
+      <Heading>Connect OpenID Connect Provider</Heading>
       <p>
         Connecting an OIDC provider to this organization allows users to automatically log in and be part of this
         organization.
@@ -235,42 +257,41 @@ const CreateOIDCIntegrationForm = (props: { organizationId: string; close: () =>
           Cancel
         </Button>
         <Button type="submit" size="large" block variant="primary" disabled={mutation.fetching}>
-          Create OIDC Integration
+          Connect OIDC Provider
         </Button>
       </div>
     </form>
   );
 };
 
-const UpdateOIDCIntegrationModal = (props: {
+const ManageOIDCIntegrationModal = (props: {
   isOpen: boolean;
   close: () => void;
   oidcIntegration: DocumentType<typeof UpdateOIDCIntegration_OIDCIntegrationFragment> | null;
   openCreateModalLink: string;
 }): ReactElement => {
-  return (
+  return props.oidcIntegration === null ? (
     <Modal open={props.isOpen} onOpenChange={props.close} className={modalWidthClassName}>
-      {props.oidcIntegration === null ? (
-        <div className={containerClassName}>
-          <Heading>Update OpenID Connect Integration</Heading>
-          <p>You are trying to update an OpenID Connect integration for an organization that has no integration.</p>
-          <div className="flex w-full gap-2">
-            <Button type="button" size="large" block onClick={props.close}>
-              Close
-            </Button>
-            <Button type="submit" size="large" block variant="primary" href={props.openCreateModalLink}>
-              Create OIDC Integration
-            </Button>
-          </div>
+      <div className={containerClassName}>
+        <Heading>Manage OpenID Connect Integration</Heading>
+        <p>You are trying to update an OpenID Connect integration for an organization that has no integration.</p>
+        <div className="flex w-full gap-2">
+          <Button type="button" size="large" block onClick={props.close}>
+            Close
+          </Button>
+          <Button type="submit" size="large" block variant="primary" href={props.openCreateModalLink}>
+            Connect OIDC Provider
+          </Button>
         </div>
-      ) : (
-        <UpdateOIDCIntegrationForm
-          close={props.close}
-          key={props.oidcIntegration.id}
-          oidcIntegration={props.oidcIntegration}
-        />
-      )}
+      </div>
     </Modal>
+  ) : (
+    <UpdateOIDCIntegrationForm
+      close={props.close}
+      isOpen={props.isOpen}
+      key={props.oidcIntegration.id}
+      oidcIntegration={props.oidcIntegration}
+    />
   );
 };
 
@@ -308,6 +329,7 @@ const UpdateOIDCIntegrationForm_UpdateOIDCIntegrationMutation = gql(/* GraphQL *
 
 const UpdateOIDCIntegrationForm = (props: {
   close: () => void;
+  isOpen: boolean;
   oidcIntegration: DocumentType<typeof UpdateOIDCIntegration_OIDCIntegrationFragment>;
 }): ReactElement => {
   const [mutation, mutate] = useMutation(UpdateOIDCIntegrationForm_UpdateOIDCIntegrationMutation);
@@ -341,59 +363,83 @@ const UpdateOIDCIntegrationForm = (props: {
   });
 
   return (
-    <form className={containerClassName} onSubmit={formik.handleSubmit}>
-      <Heading>Update OpenID Connect Integration</Heading>
-      <Input
-        placeholder="Domain (Issuer)"
-        id="domain"
-        name="domain"
-        prefix={<label className="text-sm font-semibold">Domain</label>}
-        onChange={formik.handleChange}
-        value={formik.values.domain}
-        isInvalid={!!mutation.data?.updateOIDCIntegration.error?.details.domain}
-      />
-      <div>{mutation.data?.updateOIDCIntegration.error?.details.domain}</div>
+    <Modal open={props.isOpen} onOpenChange={props.close} className="flex min-h-[600px] w-[960px]">
+      <form className={`${containerClassName} flex-1 gap-12`} onSubmit={formik.handleSubmit}>
+        <Heading>Manage OpenID Connect Integration</Heading>
+        <div className="flex">
+          <div className={`${containerClassName} flex flex-1 flex-col pr-5`}>
+            <Heading size="sm">OIDC Provider Instructions</Heading>
+            <ul className="flex flex-col gap-5">
+              <li>
+                Set your OIDC Provider Sign-in redirect URI to{' '}
+                <InlineCode content={`${env.appBaseUrl}/auth/callback/oidc`} />
+              </li>
+              <li>
+                Set your OIDC Provider Sign-out redirect URI to <InlineCode content={`${env.appBaseUrl}/logout`} />
+              </li>
+              <li>
+                Your users can login to the organization via{' '}
+                <InlineCode content={`${env.appBaseUrl}/auth/oidc?id=${props.oidcIntegration.id}`} />
+              </li>
+            </ul>
+          </div>
+          <div className={`${containerClassName} flex-1 pl-5`}>
+            <Heading size="sm">Properties</Heading>
+            <Input
+              placeholder="Domain (Issuer)"
+              id="domain"
+              name="domain"
+              prefix={<label className="text-sm font-semibold">Domain</label>}
+              onChange={formik.handleChange}
+              value={formik.values.domain}
+              isInvalid={!!mutation.data?.updateOIDCIntegration.error?.details.domain}
+            />
+            <div>{mutation.data?.updateOIDCIntegration.error?.details.domain}</div>
 
-      <Input
-        placeholder="Client ID"
-        id="clientId"
-        name="clientId"
-        prefix={<label className="text-sm font-semibold">Client ID</label>}
-        onChange={formik.handleChange}
-        value={formik.values.clientId}
-        isInvalid={!!mutation.data?.updateOIDCIntegration.error?.details.clientId}
-      />
-      <div>{mutation.data?.updateOIDCIntegration.error?.details.clientId}</div>
+            <Input
+              placeholder="Client ID"
+              id="clientId"
+              name="clientId"
+              prefix={<label className="text-sm font-semibold">Client ID</label>}
+              onChange={formik.handleChange}
+              value={formik.values.clientId}
+              isInvalid={!!mutation.data?.updateOIDCIntegration.error?.details.clientId}
+            />
+            <div>{mutation.data?.updateOIDCIntegration.error?.details.clientId}</div>
 
-      <Input
-        placeholder={
-          'Keep old value. (Ending with ' +
-          props.oidcIntegration.clientSecretPreview.substring(props.oidcIntegration.clientSecretPreview.length - 4) +
-          ')'
-        }
-        id="clientSecret"
-        name="clientSecret"
-        prefix={<label className="text-sm font-semibold">Client Secret</label>}
-        onChange={formik.handleChange}
-        value={formik.values.clientSecret}
-        isInvalid={!!mutation.data?.updateOIDCIntegration.error?.details.clientSecret}
-      />
-      <div>{mutation.data?.updateOIDCIntegration.error?.details.clientSecret}</div>
-
-      <div className="flex w-full gap-2">
-        <Button type="button" size="large" block onClick={props.close}>
-          Cancel
-        </Button>
-        <Button type="submit" size="large" block variant="primary" disabled={mutation.fetching}>
-          Update OIDC Integration
-        </Button>
-      </div>
-    </form>
+            <Input
+              placeholder={
+                'Keep old value. (Ending with ' +
+                props.oidcIntegration.clientSecretPreview.substring(
+                  props.oidcIntegration.clientSecretPreview.length - 4
+                ) +
+                ')'
+              }
+              id="clientSecret"
+              name="clientSecret"
+              prefix={<label className="text-sm font-semibold">Client Secret</label>}
+              onChange={formik.handleChange}
+              value={formik.values.clientSecret}
+              isInvalid={!!mutation.data?.updateOIDCIntegration.error?.details.clientSecret}
+            />
+            <div>{mutation.data?.updateOIDCIntegration.error?.details.clientSecret}</div>
+          </div>
+        </div>
+        <div className="mt-auto flex w-full gap-2 self-end">
+          <Button type="button" size="large" block onClick={props.close} tabIndex={0}>
+            Close
+          </Button>
+          <Button type="submit" size="large" block variant="primary" disabled={mutation.fetching}>
+            Save
+          </Button>
+        </div>
+      </form>
+    </Modal>
   );
 };
 
-const DeleteOIDCIntegrationForm_UpdateOIDCIntegrationMutation = gql(/* GraphQL */ `
-  mutation DeleteOIDCIntegrationForm_UpdateOIDCIntegrationMutation($input: DeleteOIDCIntegrationInput!) {
+const RemoveOIDCIntegrationForm_DeleteOIDCIntegrationMutation = gql(/* GraphQL */ `
+  mutation RemoveOIDCIntegrationForm_DeleteOIDCIntegrationMutation($input: DeleteOIDCIntegrationInput!) {
     deleteOIDCIntegration(input: $input) {
       ok {
         organization {
@@ -407,21 +453,21 @@ const DeleteOIDCIntegrationForm_UpdateOIDCIntegrationMutation = gql(/* GraphQL *
   }
 `);
 
-const DeleteOIDCIntegrationModal = (props: {
+const RemoveOIDCIntegrationModal = (props: {
   isOpen: boolean;
   close: () => void;
   oidcIntegrationId: null | string;
 }) => {
-  const [mutation, mutate] = useMutation(DeleteOIDCIntegrationForm_UpdateOIDCIntegrationMutation);
+  const [mutation, mutate] = useMutation(RemoveOIDCIntegrationForm_DeleteOIDCIntegrationMutation);
   const { oidcIntegrationId } = props;
 
   return (
     <Modal open={props.isOpen} onOpenChange={props.close} className={modalWidthClassName}>
       <div className={containerClassName}>
-        <Heading>Delete OpenID Connect Integration</Heading>
+        <Heading>Remove OpenID Connect Integration</Heading>
         {mutation.data?.deleteOIDCIntegration.ok ? (
           <>
-            <p>The OIDC integration has been deleted successfully.</p>
+            <p>The OIDC integration has been removed successfully.</p>
             <div className="flex w-full gap-2">
               <Button type="button" size="large" block onClick={props.close}>
                 Close
@@ -439,11 +485,15 @@ const DeleteOIDCIntegrationModal = (props: {
           </>
         ) : (
           <>
-            <p>Do you really want to delete this OIDC integraton?</p>
             <Tag color="yellow" className="py-2.5 px-4">
               <AlertTriangleIcon className="h-5 w-5" />
-              This action is not reversible!
+              <p className="ml-3">
+                This action is not reversible and <b>deletes all users</b> that have signed in with this OIDC
+                integration.
+              </p>
             </Tag>
+            <p>Do you really want to proceed?</p>
+
             <div className="flex w-full gap-2">
               <Button type="button" size="large" block onClick={props.close}>
                 Close
