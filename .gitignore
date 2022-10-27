@@ -116,3 +116,6 @@ integration-tests/testkit/gql/
 
 # Rust
 /target
+
+# bob
+.bob
