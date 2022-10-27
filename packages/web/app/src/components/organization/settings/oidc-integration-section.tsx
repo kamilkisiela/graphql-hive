@@ -88,7 +88,7 @@ export const OIDCIntegrationSection = (props: {
             }}
           >
             <KeyIcon className="mr-2" />
-            Connect OIDC Provider
+            Connect Open ID Connect Provider
           </Button>
         )}
       </div>
