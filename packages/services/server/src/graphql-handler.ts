@@ -139,12 +139,13 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
           // It's the readiness check
           return args.operationName === 'readiness';
         },
+        skipError: isGraphQLError,
       }),
       useSentryUser(),
       useErrorHandler(({ errors, context }): void => {
         for (const error of errors) {
           // Only log unexpected errors.
-          if (isGraphQLError(error) && isGraphQLError(error.originalError)) {
+          if (isGraphQLError(error)) {
             continue;
           }
 
