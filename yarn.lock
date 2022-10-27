@@ -10817,10 +10817,10 @@ get-value@^2.0.3, get-value@^2.0.6:
   resolved "https://registry.yarnpkg.com/get-value/-/get-value-2.0.6.tgz#dc15ca1c672387ca76bd37ac0a395ba2042a2c28"
   integrity sha512-Ln0UQDlxH1BapMu3GPtf7CuYNwRZf2gwCuPqbyG6pB8WfmFpzqcy4xtAaAMUhnNqjMKTiCPZG2oMT3YSx8U2NA==
 
-git-parse@*, git-parse@2.1.1:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/git-parse/-/git-parse-2.1.1.tgz#01cf88d17a6adbe1173246f4497849fc5842381b"
-  integrity sha512-jt4pYVdXFFjZMsFohMBYhPsW4j/XBDas7VctxBbRvKCyvQj5pk/+fe2/9Y1hykLSk3lHeVZyScDaW5cZBXDTyw==
+git-parse@*, git-parse@2.1.2:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/git-parse/-/git-parse-2.1.2.tgz#384b89b2af364c91582b41661ab101a7d8dcf4a9"
+  integrity sha512-6ca+n4XdY9NtWiBrzneFsRs9yOGZiQJBA61KefiMaCUiQ92GRB7izSh3ASURuicgN4NFda+eJpsyw8CIshE4DA==
   dependencies:
     byline "5.0.0"
     util.promisify "1.1.1"
