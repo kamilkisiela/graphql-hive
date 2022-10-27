@@ -30,7 +30,7 @@
     "@whatwg-node/fetch": "0.4.7"
   },
   "devDependencies": {
-    "@graphql-hive/client": "0.20.0",
+    "@graphql-hive/client": "0.20.1",
     "@hive/api": "0.0.1",
     "@hive/service-common": "0.0.0",
     "@hive/storage": "0.0.0",
