@@ -1,5 +1,11 @@
 # @graphql-hive/client
 
+## 0.20.1
+
+### Patch Changes
+
+- [#456](https://github.com/kamilkisiela/graphql-hive/pull/456) [`fb9b624`](https://github.com/kamilkisiela/graphql-hive/commit/fb9b624ab80ff39658c9ecd45b55d10d906e15e7) Thanks [@dimatill](https://github.com/dimatill)! - (processVariables: true) do not collect input when corresponding variable is missing
+
 ## 0.20.0
 
 ### Minor Changes
