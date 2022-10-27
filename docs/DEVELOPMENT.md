@@ -5,7 +5,7 @@
 Developing Hive locally requires you to have the following software installed locally:
 
 - Node.js 16 LTS (or `nvm` or `fnm`)
-- yarn v1
+- pnpm v7
 - docker
 - docker-compose
 
@@ -14,10 +14,10 @@ Developing Hive locally requires you to have the following software installed lo
 - Clone the repository locally
 - Make sure to install the recommended VSCode extensions (defined in `.vscode/extensions.json`)
 - In the root of the repo, run `nvm use` to use the same version of node as mentioned
-- Run `yarn` at the root to install all the dependencies and run the hooks
-- Run `yarn setup` to create and apply migrations on the PostgreSQL database
-- Run `yarn generate` to generate the typings from the graphql files (use `yarn graphql:generate` if you only need to run GraphQL Codegen)
-- Run `yarn build` to build all services
+- Run `pnpm i` at the root to install all the dependencies and run the hooks
+- Run `pnpm setup` to create and apply migrations on the PostgreSQL database
+- Run `pnpm generate` to generate the typings from the graphql files (use `pnpm graphql:generate` if you only need to run GraphQL Codegen)
+- Run `pnpm build` to build all services
 - Click on `Start Hive` in the bottom bar of VSCode
 - If you are not added to the list of guest users, request access from The Guild maintainers
   - Alternatively, [configure hive to use your own Auth0 Application](#setting-up-auth0-app-for-developing)
@@ -30,9 +30,9 @@ Developing Hive locally requires you to have the following software installed lo
 We have a script to feed your local instance of Hive.
 
 1. Use `Start Hive` to run your local Hive instance
-2. Make sure `usage` and `usage-ingestor` are running as well (with `yarn dev`)
+2. Make sure `usage` and `usage-ingestor` are running as well (with `pnpm dev`)
 3. Open Hive app, create a project and a target, then create a token
-4. Run the seed script: `TOKEN="MY_TOKEN_HERE" yarn seed`
+4. Run the seed script: `TOKEN="MY_TOKEN_HERE" pnpm seed`
 5. This should report a dummy schema and some dummy usage data to your local instance of Hive, allowing you to test features e2e
 
 > Note: You can set `STAGING=1` in order to target staging env and seed a target there.
@@ -44,8 +44,8 @@ We have a script to feed your local instance of Hive.
 1. Start Hive locally
 2. Create a project and a target
 3. Create a token from that target
-4. Go to `packages/libraries/cli` and run `yarn build`
-5. Inside `packages/libraries/cli`, run: `yarn start schema:publish --token "YOUR_TOKEN_HERE" --registry "http://localhost:4000/graphql" examples/single.graphql`
+4. Go to `packages/libraries/cli` and run `pnpm build`
+5. Inside `packages/libraries/cli`, run: `pnpm start schema:publish --token "YOUR_TOKEN_HERE" --registry "http://localhost:4000/graphql" examples/single.graphql`
 
 ### Setting up Slack App for developing
 

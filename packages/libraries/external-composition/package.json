@@ -32,7 +32,7 @@
   },
   "scripts": {
     "build": "bob build --single",
-    "build-local": "yarn build && node build-example.mjs"
+    "build-local": "pnpm build && node build-example.mjs"
   },
   "peerDependencies": {
     "graphql": "^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0"

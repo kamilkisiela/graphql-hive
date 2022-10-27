@@ -29,13 +29,13 @@ jobs:
           node-version-file: .node-version
 
       - name: Install Dependencies
-        run: yarn --frozen-lockfile
+        run: pnpm i
 
       - name: Generate GraphQL Types
-        run: yarn graphql:generate
+        run: pnpm graphql:generate
 
       - name: Build
-        run: yarn build:libraries
+        run: pnpm build:libraries
 
       - name: Schema Publish
         run: ./packages/libraries/cli/bin/dev schema:publish "packages/services/api/src/modules/*/module.graphql.ts" --force --github
@@ -51,7 +51,7 @@ jobs:
         id: changesets
         uses: changesets/action@v1.3.0
         with:
-          publish: yarn release
+          publish: pnpm release
           commit: 'chore(release): update monorepo packages versions'
           title: 'Upcoming Release Changes'
         env:
@@ -69,19 +69,19 @@ jobs:
       - name: Pack tarballs
         if: steps.cli.outputs.publish == 'true'
         working-directory: packages/libraries/cli
-        run: yarn oclif pack tarballs --no-xz
+        run: pnpm oclif pack tarballs --no-xz
 
       - name: Upload tarballs
         if: steps.cli.outputs.publish == 'true'
         working-directory: packages/libraries/cli
-        run: yarn oclif upload tarballs --no-xz
+        run: pnpm oclif upload tarballs --no-xz
 
       - name: Promote tarballs
         if: steps.cli.outputs.publish == 'true'
         working-directory: packages/libraries/cli
         env:
           VERSION: ${{ steps.cli.outputs.version }}
-        run: yarn oclif promote --no-xz --sha ${GITHUB_SHA:0:7} --version $VERSION || yarn oclif promote --no-xz --sha ${GITHUB_SHA:0:8} --version $VERSION
+        run: pnpm oclif promote --no-xz --sha ${GITHUB_SHA:0:7} --version $VERSION || pnpm oclif promote --no-xz --sha ${GITHUB_SHA:0:8} --version $VERSION
 
   publish_rust:
     name: Publish Rust
@@ -380,13 +380,13 @@ jobs:
         with:
           node-version-file: .node-version
 
-      - run: yarn --frozen-lockfile
+      - run: pnpm i
 
       - name: Generate Types
-        run: yarn graphql:generate
+        run: pnpm graphql:generate
 
       - name: Build
-        run: yarn build
+        run: pnpm build
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2

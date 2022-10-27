@@ -1,0 +1,17 @@
+diff --git a/index.mjs b/index.mjs
+index 7db160e..a94f537 100644
+--- a/index.mjs
++++ b/index.mjs
+@@ -61,10 +61,11 @@ function sharePromise(setter) {
+         return sharedPromise;
+     };
+ }
+-const cacheSymbol = Symbol.for("@cache");
+ function cacheResult(cacheKeyFn) {
+     return (_target, _propertyKey, descriptor) => {
+         const originalMethod = descriptor.value;
++        const cacheSymbol = Symbol('@cache');
++        
+         function ensureCache(obj) {
+             if (!obj[cacheSymbol]) {
+                 obj[cacheSymbol] = new Map();

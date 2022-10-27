@@ -10,7 +10,9 @@ import { createRequire } from 'module';
 
 function patchPackage(name, patchFn) {
   const require = createRequire(import.meta.url);
-  const indexFile = require.resolve(name);
+  const indexFile = require.resolve(name, {
+    paths: [path.join(process.cwd(), 'node_modules', '.pnpm', 'node_modules')],
+  });
   const nameParts = name.split('/');
 
   const packagePath = findPackageJson(path.dirname(indexFile), nameParts[nameParts.length - 1]);

@@ -49,19 +49,19 @@ jobs:
           node-version-file: .node-version
 
       - name: Install Dependencies
-        run: yarn --frozen-lockfile
+        run: pnpm i
 
       - name: Create Database
         working-directory: packages/services/storage
-        run: yarn db:create
+        run: pnpm db:create
 
       - name: Migrate Database
         working-directory: packages/services/storage
-        run: yarn db:migrator up
+        run: pnpm db:migrator up
 
       - name: Generate Database Types
         working-directory: packages/services/storage
-        run: yarn db:generate
+        run: pnpm db:generate
 
       - name: Check if DB types were modified
         run: git diff --exit-code ./packages/services/storage/src/db/types.ts
@@ -109,7 +109,7 @@ jobs:
           key: ${{ github.sha }}
 
       - name: Generate Types
-        run: yarn graphql:generate
+        run: pnpm graphql:generate
 
       - name: Check PR label
         if: contains(github.event.pull_request.labels.*.name, 'non-breaking')
@@ -149,10 +149,10 @@ jobs:
           key: ${{ github.sha }}
 
       - name: Generate Types
-        run: yarn graphql:generate
+        run: pnpm graphql:generate
 
       - name: Test
-        run: yarn test
+        run: pnpm test
 
   build:
     name: Build
@@ -187,10 +187,10 @@ jobs:
         run: node ./scripts/turborepo-setup.js
 
       - name: Generate Types
-        run: yarn graphql:generate
+        run: pnpm graphql:generate
 
       - name: Build
-        run: yarn build
+        run: pnpm build
 
       - uses: actions/upload-artifact@v3
         name: Upload Docker Build Artifacts
@@ -287,7 +287,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: '.eslintcache'
-          key: ${{ runner.os }}-eslint-${{ hashFiles('yarn.lock') }}
+          key: ${{ runner.os }}-eslint-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-eslint
 
@@ -295,16 +295,16 @@ jobs:
         run: node ./scripts/turborepo-setup.js
 
       - name: Generate Types
-        run: yarn graphql:generate
+        run: pnpm graphql:generate
 
       - name: Type Check
-        run: yarn typecheck
+        run: pnpm typecheck
 
       - name: Lint ESLint
-        run: yarn lint
+        run: pnpm lint
 
       - name: Lint Prettier
-        run: yarn lint:prettier
+        run: pnpm lint:prettier
 
   docker-build-push:
     needs: build
@@ -400,10 +400,10 @@ jobs:
         run: node ./scripts/turborepo-setup.js
 
       - name: Build
-        run: yarn workspace integration-tests run build-and-pack
+        run: pnpm --filter integration-tests build-and-pack
 
       - name: Build
-        run: yarn build
+        run: pnpm build
 
       - name: Pull images
         run: |
@@ -432,7 +432,7 @@ jobs:
             --load
 
       - name: Integration Tests
-        run: yarn workspace integration-tests run dockest
+        run: pnpm --filter integration-tests dockest
         timeout-minutes: 15
         env:
           STRIPE_PUBLIC_KEY: ${{ secrets.TEST_STRIPE_PUBLIC_KEY }}
@@ -518,11 +518,11 @@ jobs:
 
       - name: Build
         if: steps.feature_flags.outputs.detected == 'true'
-        run: yarn workspace integration-tests run build-and-pack
+        run: pnpm --filter integration-tests build-and-pack
 
       - name: Build
         if: steps.feature_flags.outputs.detected == 'true'
-        run: yarn build
+        run: pnpm build
 
       - name: Pull images
         if: steps.feature_flags.outputs.detected == 'true'
@@ -553,7 +553,7 @@ jobs:
 
       - name: Integration Tests
         if: steps.feature_flags.outputs.detected == 'true'
-        run: yarn workspace integration-tests run dockest
+        run: pnpm --filter integration-tests dockest
         timeout-minutes: 15
         env:
           STRIPE_PUBLIC_KEY: ${{ secrets.TEST_STRIPE_PUBLIC_KEY }}

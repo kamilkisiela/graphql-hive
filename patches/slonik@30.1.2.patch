@@ -1,7 +1,7 @@
-diff --git a/node_modules/slonik/dist/src/routines/executeQuery.js b/node_modules/slonik/dist/src/routines/executeQuery.js
+diff --git a/dist/src/routines/executeQuery.js b/dist/src/routines/executeQuery.js
 index 007d169..61441f8 100644
---- a/node_modules/slonik/dist/src/routines/executeQuery.js
-+++ b/node_modules/slonik/dist/src/routines/executeQuery.js
+--- a/dist/src/routines/executeQuery.js
++++ b/dist/src/routines/executeQuery.js
 @@ -4,7 +4,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
  };
  Object.defineProperty(exports, "__esModule", { value: true });

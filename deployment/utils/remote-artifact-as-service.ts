@@ -117,7 +117,7 @@ export class RemoteArtifactAsServiceDeployment {
           volumeMounts,
           command:
             this.options.packageInfo.runtime === 'node'
-              ? ['/bin/sh', '-c', artifactUrl.apply(v => `yarn add ${v}`)]
+              ? ['/bin/sh', '-c', artifactUrl.apply(v => `pnpm add ${v}`)]
               : this.options.packageInfo.runtime === 'rust'
               ? ['/bin/sh', '-c', artifactUrl.apply(v => `wget ${v}`)]
               : ['echo missing script!'],
@@ -151,7 +151,7 @@ export class RemoteArtifactAsServiceDeployment {
             : undefined,
           command:
             this.options.packageInfo.runtime === 'node'
-              ? ['yarn', this.options.bin || this.options.packageInfo.bin]
+              ? ['pnpm', this.options.bin || this.options.packageInfo.bin]
               : this.options.packageInfo.runtime === 'rust'
               ? [this.options.packageInfo.bin]
               : [],

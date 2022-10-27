@@ -24,8 +24,8 @@
     "@hive/server": "*"
   },
   "scripts": {
-    "build-and-pack": "(cd ../ && yarn build:services && yarn build:libraries && yarn build:local) && node ./scripts/pack.mjs",
-    "build:local": "yarn build-and-pack && (cd ../ && yarn docker:build)",
+    "build-and-pack": "(cd ../ && pnpm build:services && pnpm build:libraries && pnpm build:local) && node ./scripts/pack.mjs",
+    "build:local": "pnpm build-and-pack && (cd ../ && pnpm docker:build)",
     "dockest": "tsup-node dockest.ts --format esm --target node16 && PWD=$PWD/.. node dist/dockest.js"
   }
 }

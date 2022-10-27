@@ -4,9 +4,9 @@
   "version": "0.0.0",
   "scripts": {
     "build:config": "tsup --out-dir . --loader \".mts=ts\" --format esm --target node16 next.config.mts",
-    "dev": "yarn build:config && next dev",
+    "dev": "pnpm build:config && next dev",
     "start": "node dist/index.js",
-    "build": "yarn build:config && BUILD=1 bob runify --single",
+    "build": "pnpm build:config && BUILD=1 bob runify --single",
     "typecheck": "tsc"
   },
   "dependencies": {

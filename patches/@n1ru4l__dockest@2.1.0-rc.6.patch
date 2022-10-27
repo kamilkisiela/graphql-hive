@@ -1,7 +1,7 @@
-diff --git a/node_modules/@n1ru4l/dockest/dist/run/bootstrap/getParsedComposeFile.js b/node_modules/@n1ru4l/dockest/dist/run/bootstrap/getParsedComposeFile.js
+diff --git a/dist/run/bootstrap/getParsedComposeFile.js b/dist/run/bootstrap/getParsedComposeFile.js
 index 9734743..ae3c5c8 100644
---- a/node_modules/@n1ru4l/dockest/dist/run/bootstrap/getParsedComposeFile.js
-+++ b/node_modules/@n1ru4l/dockest/dist/run/bootstrap/getParsedComposeFile.js
+--- a/dist/run/bootstrap/getParsedComposeFile.js
++++ b/dist/run/bootstrap/getParsedComposeFile.js
 @@ -18,6 +18,22 @@ const PortBinding = io.type({
      published: io.number,
      target: io.number,

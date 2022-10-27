@@ -14,70 +14,70 @@
       "focus": true,
       "open": true,
       "cwd": "packages/services/server",
-      "command": "yarn dev"
+      "command": "pnpm dev"
     },
     {
       "name": "app:dev",
       "description": "Run application",
       "open": true,
       "cwd": "packages/web/app",
-      "command": "yarn dev"
+      "command": "pnpm dev"
     },
     {
       "name": "tokens:dev",
       "description": "Run tokens service",
       "open": true,
       "cwd": "packages/services/tokens",
-      "command": "yarn dev"
+      "command": "pnpm dev"
     },
     {
       "name": "schema:dev",
       "description": "Run schema service",
       "open": true,
       "cwd": "packages/services/schema",
-      "command": "yarn dev"
+      "command": "pnpm dev"
     },
     {
       "name": "usage-estimator:dev",
       "description": "Run Usage Estimator Service",
       "open": true,
       "cwd": "packages/services/usage-estimator",
-      "command": "yarn dev"
+      "command": "pnpm dev"
     },
     {
       "name": "rate-limit:dev",
       "description": "Run Rate Limiter Service",
       "open": true,
       "cwd": "packages/services/rate-limit",
-      "command": "yarn dev"
+      "command": "pnpm dev"
     },
     {
       "name": "cdn:dev",
       "description": "Run Local CDN",
       "open": true,
       "cwd": "packages/services/cdn-worker",
-      "command": "yarn dev"
+      "command": "pnpm dev"
     },
     {
       "name": "emails:dev",
-      "description": "Run Emails serivce",
+      "description": "Run Emails Service",
       "open": true,
       "cwd": "packages/services/emails",
-      "command": "yarn dev"
+      "command": "pnpm dev"
     },
     {
       "name": "usage:dev",
       "description": "Run Usage Service",
       "open": true,
       "cwd": "packages/services/usage",
-      "command": "yarn dev"
+      "command": "pnpm dev"
     },
     {
       "name": "usage-ingestor:dev",
       "description": "Run Usage Ingestor",
       "open": true,
       "cwd": "packages/services/usage-ingestor",
-      "command": "yarn dev"
+      "command": "pnpm dev"
     }
   ]
 }

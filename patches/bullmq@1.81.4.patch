@@ -1,7 +1,7 @@
-diff --git a/node_modules/bullmq/dist/esm/classes/redis-connection.js b/node_modules/bullmq/dist/esm/classes/redis-connection.js
+diff --git a/dist/esm/classes/redis-connection.js b/dist/esm/classes/redis-connection.js
 index 7843e65..3807efe 100644
---- a/node_modules/bullmq/dist/esm/classes/redis-connection.js
-+++ b/node_modules/bullmq/dist/esm/classes/redis-connection.js
+--- a/dist/esm/classes/redis-connection.js
++++ b/dist/esm/classes/redis-connection.js
 @@ -105,7 +105,7 @@ export class RedisConnection extends EventEmitter {
      }
      loadCommands() {
@@ -11,10 +11,10 @@ index 7843e65..3807efe 100644
      }
      async init() {
          if (!this._client) {
-diff --git a/node_modules/bullmq/dist/esm/commands/script-loader.js b/node_modules/bullmq/dist/esm/commands/script-loader.js
+diff --git a/dist/esm/commands/script-loader.js b/dist/esm/commands/script-loader.js
 index 3ed1c00..79e455a 100644
---- a/node_modules/bullmq/dist/esm/commands/script-loader.js
-+++ b/node_modules/bullmq/dist/esm/commands/script-loader.js
+--- a/dist/esm/commands/script-loader.js
++++ b/dist/esm/commands/script-loader.js
 @@ -2,6 +2,7 @@ import { createHash } from 'crypto';
  import { glob, hasMagic } from 'glob';
  import * as path from 'path';
