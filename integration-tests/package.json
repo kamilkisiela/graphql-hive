@@ -12,7 +12,7 @@
     "date-fns": "2.25.0",
     "dependency-graph": "0.11.0",
     "dockest": "npm:@n1ru4l/dockest@2.1.0-rc.6",
-    "ioredis": "5.2.3",
+    "ioredis": "4.28.3",
     "rxjs": "^6.5.4",
     "slonik": "30.1.2",
     "tsup": "5.12.7",
@@ -25,6 +25,7 @@
     "@hive/server": "*"
   },
   "devDependencies": {
+    "@types/ioredis": "4.28.7",
     "tslib": "2.4.0"
   },
   "scripts": {
