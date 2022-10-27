@@ -213,6 +213,9 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Archive @hive/app
+        run: zip -r packages/web/app/dist.zip packages/web/app/dist
+
       - uses: actions/upload-artifact@v3
         name: Upload Docker Build Artifacts
         if: ${{ !github.event.pull_request.head.repo.fork }}
@@ -233,7 +236,7 @@ jobs:
             packages/services/usage-ingestor/dist
             packages/services/usage/dist
             packages/services/webhooks/dist
-            packages/web/app/dist
+            packages/web/app/dist.zip
 
   rust:
     name: Build Rust
@@ -361,6 +364,9 @@ jobs:
         with:
           name: docker-build-sources
           path: ./
+
+      - name: Unarchive @hive/app
+        run: unzip packages/web/app/dist.zip
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
