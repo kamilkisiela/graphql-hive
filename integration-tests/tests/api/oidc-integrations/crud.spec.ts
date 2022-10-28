@@ -448,6 +448,64 @@ describe('delete', () => {
         },
       });
     });
+
+    test("error: user doesn't have permissions", async () => {
+      const { access_token } = await authenticate('main');
+      const orgResult = await createOrganization(
+        {
+          name: 'foo',
+        },
+        access_token
+      );
+
+      const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+
+      const createResult = await execute({
+        document: CreateOIDCIntegrationMutation,
+        variables: {
+          input: {
+            organizationId: org.id,
+            clientId: 'foo',
+            clientSecret: 'foofoofoofoo',
+            domain: 'http://localhost:8888/oauth',
+          },
+        },
+        authToken: access_token,
+      });
+
+      expect(createResult.body.errors).toBeUndefined();
+      const oidcIntegrationId = createResult.body.data!.createOIDCIntegration.ok!.createdOIDCIntegration.id;
+
+      const { access_token: accessTokenExtra } = await authenticate('extra');
+
+      const deleteResult = await execute({
+        document: DeleteOIDCIntegrationMutation,
+        variables: {
+          input: {
+            oidcIntegrationId,
+          },
+        },
+        authToken: accessTokenExtra,
+      });
+
+      expect(deleteResult.body.errors).toBeDefined();
+      expect(deleteResult.body.errors).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "locations": Array [
+              Object {
+                "column": 3,
+                "line": 2,
+              },
+            ],
+            "message": "No access (reason: \\"Missing organization:integrations permission\\")",
+            "path": Array [
+              "deleteOIDCIntegration",
+            ],
+          },
+        ]
+      `);
+    });
   });
 });
 
@@ -530,6 +588,63 @@ describe('update', () => {
           },
         },
       });
+    });
+    test('error: user does not have permissions', async () => {
+      const { access_token } = await authenticate('main');
+      const orgResult = await createOrganization(
+        {
+          name: 'foo',
+        },
+        access_token
+      );
+
+      const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+
+      const createResult = await execute({
+        document: CreateOIDCIntegrationMutation,
+        variables: {
+          input: {
+            organizationId: org.id,
+            clientId: 'foo',
+            clientSecret: 'foofoofoofoo',
+            domain: 'http://localhost:8888/oauth',
+          },
+        },
+        authToken: access_token,
+      });
+
+      expect(createResult.body.errors).toBeUndefined();
+      const oidcIntegrationId = createResult.body.data!.createOIDCIntegration.ok!.createdOIDCIntegration.id;
+
+      const { access_token: accessTokenExtra } = await authenticate('extra');
+
+      const deleteResult = await execute({
+        document: UpdateOIDCIntegrationMutation,
+        variables: {
+          input: {
+            oidcIntegrationId,
+          },
+        },
+        authToken: accessTokenExtra,
+      });
+
+      expect(deleteResult.body.errors).toBeDefined();
+      expect(deleteResult.body.errors).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "locations": Array [
+              Object {
+                "column": 3,
+                "line": 2,
+              },
+            ],
+            "message": "No access (reason: \\"Missing organization:integrations permission\\")",
+            "path": Array [
+              "updateOIDCIntegration",
+            ],
+          },
+        ]
+      `);
     });
   });
 });
