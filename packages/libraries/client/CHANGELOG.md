@@ -1,5 +1,11 @@
 # @graphql-hive/client
 
+## 0.21.0
+
+### Minor Changes
+
+- [#563](https://github.com/kamilkisiela/graphql-hive/pull/563) [`d58a470`](https://github.com/kamilkisiela/graphql-hive/commit/d58a470916b213230f495e896fe99ec0baa225e2) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Fix createServicesFetcher handling null service url
+
 ## 0.20.1
 
 ### Patch Changes
