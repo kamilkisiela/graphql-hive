@@ -44,7 +44,7 @@ jobs:
           fetch-depth: 1
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v2.2.2
+        uses: pnpm/action-setup@v2.2.4
         with:
           version: 7
 
@@ -104,7 +104,7 @@ jobs:
           fetch-depth: 5
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v2.2.2
+        uses: pnpm/action-setup@v2.2.4
         with:
           version: 7
 
@@ -149,7 +149,7 @@ jobs:
           fetch-depth: 1
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v2.2.2
+        uses: pnpm/action-setup@v2.2.4
         with:
           version: 7
 
@@ -189,7 +189,7 @@ jobs:
           fetch-depth: 5
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v2.2.2
+        uses: pnpm/action-setup@v2.2.4
         with:
           version: 7
 
@@ -250,7 +250,7 @@ jobs:
           fetch-depth: 2
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v2.2.2
+        uses: pnpm/action-setup@v2.2.4
         with:
           version: 7
 
@@ -307,7 +307,7 @@ jobs:
           fetch-depth: 5
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v2.2.2
+        uses: pnpm/action-setup@v2.2.4
         with:
           version: 7
 
@@ -427,7 +427,7 @@ jobs:
           fetch-depth: 5
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v2.2.2
+        uses: pnpm/action-setup@v2.2.4
         with:
           version: 7
 
@@ -524,7 +524,7 @@ jobs:
 
       - name: Install pnpm
         if: steps.feature_flags.outputs.detected == 'true'
-        uses: pnpm/action-setup@v2.2.2
+        uses: pnpm/action-setup@v2.2.4
         with:
           version: 7
 
