@@ -49,10 +49,10 @@ If you are self-hosting GraphQL Hive, you can ignore this section. It is only re
 | `USAGE_ESTIMATOR_ENDPOINT`           | No                                         | The endpoint of the usage estimator service. | `4011`                             |
 | `CDN`                                | No                                         | Whether the CDN is enabled.                  | `1` (enabled) or `0` (disabled)    |
 | `CDN_AUTH_PRIVATE_KEY`               | No (**Yes** if `CDN` is `1`)               | The cdn private key                          | `103df4521212121269213971ce28b5b0` |
-| `CDN_BASE_URL`                       | No (**Yes** if `CDN` is `1`)               | The endpoint of the Hive Billing service.    | `https://cdn.graphql-hive.com`     |
-| `CDN_CF_BASE_PATH`                   | No (**Yes** if `CDN` is `1`)               | The endpoint of the Hive Billing service.    | `https://cdn.graphql-hive.com`     |
-| `CDN_CF_ACCOUNT_ID`                  | No (**Yes** if `CDN` is `1`)               | The endpoint of the Hive Billing service.    | `103df45224310d669213971ce28b5b70` |
-| `CDN_CF_AUTH_TOKEN`                  | No (**Yes** if `CDN` is `1`)               | The endpoint of the Hive Billing service.    | `85e20c26c03759603c0f45884824a1c3` |
+| `CDN_BASE_URL`                       | No (**Yes** if `CDN` is `1`)               | The base URL of the cdn.                     | `https://cdn.graphql-hive.com`     |
+| `CDN_CF_BASE_PATH`                   | No (**Yes** if `CDN` is `1`)               | The base path of the cdn.                    | `https://cdn.graphql-hive.com`     |
+| `CDN_CF_ACCOUNT_ID`                  | No (**Yes** if `CDN` is `1`)               | The cloudflare account ID.                   | `103df45224310d669213971ce28b5b70` |
+| `CDN_CF_AUTH_TOKEN`                  | No (**Yes** if `CDN` is `1`)               | The cloudflare authentication token.         | `85e20c26c03759603c0f45884824a1c3` |
 | `CDN_CF_NAMESPACE_ID`                | No (**Yes** if `CDN` is `1`)               | The cloudflare namespace name.               | `33b1e3bbb4a4707d05ea0307cbb55c79` |
 | `AUTH_LEGACY_AUTH0`                  | No                                         | Whether the legacy Auth0 import is enabled.  | `1` (enabled) or `0` (disabled)    |
 | `AUTH_LEGACY_AUTH0_INTERNAL_API_KEY` | No (**Yes** if `AUTH_LEGACY_AUTH0` is set) | The internal endpoint key.                   | `iliketurtles`                     |
