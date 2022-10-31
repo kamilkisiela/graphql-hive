@@ -101,7 +101,7 @@ test('rate limit approaching and reached for organization', async () => {
 
   expect(sent).toContainEqual({
     to: adminEmail,
-    subject: `${org.name} has exceeded its rate limit`,
+    subject: `GraphQL-Hive operations quota for ${org.name} exceeded`,
     body: expect.any(String),
   });
   expect(filterEmailsByOrg(org.name, sent)).toHaveLength(2);
