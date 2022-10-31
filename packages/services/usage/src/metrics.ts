@@ -43,7 +43,7 @@ export const totalReports = new metrics.Counter({
 export const droppedReports = new metrics.Counter({
   name: 'usage_rate_limit_dropped',
   help: 'Number of reports dropped by usage service due to rate-limit',
-  labelNames: ['targetId'],
+  labelNames: ['targetId', 'orgId'],
 });
 
 export const totalLegacyReports = new metrics.Counter({
