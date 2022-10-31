@@ -4,7 +4,7 @@ import type { SchemaFetcherOptions, ServicesFetcherOptions } from './internal/ty
 
 interface Schema {
   sdl: string;
-  url: string;
+  url: string | null;
   name: string;
 }
 
@@ -62,7 +62,11 @@ export function createSchemaFetcher({ endpoint, key }: SchemaFetcherOptions) {
 
   return function schemaFetcher() {
     return fetcher().then(schema => ({
-      id: createHash('sha256').update(schema.sdl).update(schema.url).update(schema.name).digest('base64'),
+      id: createHash('sha256')
+        .update(schema.sdl)
+        .update(schema.url || '')
+        .update(schema.name)
+        .digest('base64'),
       ...schema,
     }));
   };
@@ -74,7 +78,11 @@ export function createServicesFetcher({ endpoint, key }: ServicesFetcherOptions)
   return function schemaFetcher() {
     return fetcher().then(services =>
       services.map(service => ({
-        id: createHash('sha256').update(service.sdl).update(service.url).update(service.name).digest('base64'),
+        id: createHash('sha256')
+          .update(service.sdl)
+          .update(service.url || '')
+          .update(service.name)
+          .digest('base64'),
         ...service,
       }))
     );
