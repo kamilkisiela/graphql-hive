@@ -3,3 +3,4 @@ packages:
   - packages/web/*
   - packages/libraries/*
   - integration-tests
+  - deployment
