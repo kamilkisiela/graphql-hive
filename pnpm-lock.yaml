@@ -542,7 +542,7 @@ importers:
       '@envelop/graphql-modules': 4.0.2
       '@envelop/sentry': 4.0.2
       '@envelop/types': 3.0.0
-      '@graphql-hive/client': 0.20.1
+      '@graphql-hive/client': 0.21.0
       '@hive/api': 0.0.1
       '@hive/service-common': 0.0.0
       '@hive/storage': 0.0.0
