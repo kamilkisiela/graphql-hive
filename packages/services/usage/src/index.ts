@@ -115,7 +115,7 @@ async function main() {
             entityType: 'target',
           })
         ) {
-          droppedReports.labels({ targetId: tokenInfo.target }).inc();
+          droppedReports.labels({ targetId: tokenInfo.target, orgId: tokenInfo.organization }).inc();
           req.log.info('Rate limited (token=%s)', maskedToken);
           res.status(429).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
 
