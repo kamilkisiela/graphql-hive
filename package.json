@@ -109,7 +109,7 @@
     "node": ">=16",
     "pnpm": ">=7"
   },
-  "packageManager": "pnpm@7.13.14",
+  "packageManager": "pnpm@7.14.1",
   "pnpm": {
     "patchedDependencies": {
       "@n1ru4l/dockest@2.1.0-rc.6": "patches/@n1ru4l__dockest@2.1.0-rc.6.patch",
