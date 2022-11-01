@@ -24,7 +24,7 @@
     "ioredis": "4.28.3"
   },
   "devDependencies": {
-    "@hive/service-common": "0.0.0",
+    "@hive/service-common": "workspace:*",
     "@types/async-retry": "1.4.5",
     "@types/ioredis": "4.28.7",
     "pino-pretty": "6.0.0",

@@ -21,8 +21,8 @@
     "reflect-metadata": "0.1.13"
   },
   "devDependencies": {
-    "@hive/service-common": "0.0.0",
-    "@hive/storage": "0.0.0",
+    "@hive/service-common": "workspace:*",
+    "@hive/storage": "workspace:*",
     "@types/ms": "0.7.31",
     "pino-pretty": "6.0.0",
     "fastify": "3.29.3",

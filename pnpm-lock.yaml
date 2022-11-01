@@ -161,7 +161,7 @@ importers:
       '@app/gql': link:./testkit/gql
       '@graphql-hive/core': 0.2.2
       '@graphql-typed-document-node/core': 3.1.1
-      '@hive/server': '*'
+      '@hive/server': workspace:*
       '@n1ru4l/dockest': 2.1.0-rc.6
       '@trpc/client': 9.23.2
       '@types/ioredis': 4.28.7
@@ -317,10 +317,10 @@ importers:
       '@graphql-inspector/core': 3.2.0
       '@graphql-tools/load-files': 6.5.0
       '@graphql-tools/schema': 8.2.0
-      '@hive/emails': 0.0.0
-      '@hive/schema': 0.0.0
-      '@hive/tokens': 0.0.0
-      '@hive/webhooks': 0.0.0
+      '@hive/emails': workspace:*
+      '@hive/schema': workspace:*
+      '@hive/tokens': workspace:*
+      '@hive/webhooks': workspace:*
       '@octokit/app': 12.0.7
       '@sentry/node': 7.12.1
       '@sentry/types': 7.12.1
@@ -409,7 +409,7 @@ importers:
   packages/services/cdn-worker:
     specifiers:
       '@cloudflare/workers-types': 3.4.0
-      '@hive/service-common': 0.0.0
+      '@hive/service-common': workspace:*
       '@types/service-worker-mock': 2.0.1
       '@whatwg-node/fetch': 0.4.7
       '@whatwg-node/server': 0.4.11
@@ -435,7 +435,7 @@ importers:
 
   packages/services/emails:
     specifiers:
-      '@hive/service-common': 0.0.0
+      '@hive/service-common': workspace:*
       '@sentry/node': 7.12.1
       '@trpc/server': 9.23.2
       '@types/ioredis': 4.28.10
@@ -488,9 +488,9 @@ importers:
 
   packages/services/rate-limit:
     specifiers:
-      '@hive/emails': 0.0.0
-      '@hive/service-common': 0.0.0
-      '@hive/storage': 0.0.0
+      '@hive/emails': workspace:*
+      '@hive/service-common': workspace:*
+      '@hive/storage': workspace:*
       '@sentry/node': 7.12.1
       '@sentry/tracing': 7.12.1
       '@trpc/client': 9.23.2
@@ -526,7 +526,7 @@ importers:
       '@apollo/federation': 0.36.1
       '@graphql-tools/stitch': 8.3.1
       '@graphql-tools/stitching-directives': 2.1.1
-      '@hive/service-common': 0.0.0
+      '@hive/service-common': workspace:*
       '@sentry/node': 7.12.1
       '@sentry/tracing': 7.12.1
       '@trpc/server': 9.23.2
@@ -568,9 +568,9 @@ importers:
       '@envelop/sentry': 4.0.2
       '@envelop/types': 3.0.0
       '@graphql-hive/client': 0.21.0
-      '@hive/api': 0.0.1
-      '@hive/service-common': 0.0.0
-      '@hive/storage': 0.0.0
+      '@hive/api': workspace:*
+      '@hive/service-common': workspace:*
+      '@hive/storage': workspace:*
       '@sentry/integrations': 7.12.1
       '@sentry/node': 7.12.1
       '@sentry/tracing': 7.12.1
@@ -679,8 +679,8 @@ importers:
 
   packages/services/stripe-billing:
     specifiers:
-      '@hive/service-common': 0.0.0
-      '@hive/storage': 0.0.0
+      '@hive/service-common': workspace:*
+      '@hive/storage': workspace:*
       '@sentry/node': 7.12.1
       '@sentry/tracing': 7.12.1
       '@trpc/client': 9.23.2
@@ -712,8 +712,8 @@ importers:
 
   packages/services/tokens:
     specifiers:
-      '@hive/service-common': 0.0.0
-      '@hive/storage': 0.0.0
+      '@hive/service-common': workspace:*
+      '@hive/storage': workspace:*
       '@sentry/node': 7.12.1
       '@sentry/tracing': 7.12.1
       '@trpc/server': 9.23.2
@@ -747,9 +747,9 @@ importers:
 
   packages/services/usage:
     specifiers:
-      '@hive/service-common': 0.0.0
-      '@hive/tokens': 0.0.0
-      '@hive/usage-common': 0.0.0
+      '@hive/service-common': workspace:*
+      '@hive/tokens': workspace:*
+      '@hive/usage-common': workspace:*
       '@sentry/node': 7.12.1
       '@sentry/tracing': 7.12.1
       '@trpc/client': 9.23.2
@@ -788,8 +788,8 @@ importers:
 
   packages/services/usage-estimator:
     specifiers:
-      '@hive/api': 0.0.1
-      '@hive/service-common': 0.0.0
+      '@hive/api': workspace:*
+      '@hive/service-common': workspace:*
       '@sentry/node': 7.12.1
       '@sentry/tracing': 7.12.1
       '@trpc/server': 9.23.2
@@ -818,8 +818,8 @@ importers:
   packages/services/usage-ingestor:
     specifiers:
       '@graphql-hive/core': 0.2.2
-      '@hive/service-common': 0.0.0
-      '@hive/usage-common': 0.0.0
+      '@hive/service-common': workspace:*
+      '@hive/usage-common': workspace:*
       '@sentry/node': 7.12.1
       '@sentry/tracing': 7.12.1
       agentkeepalive: 4.2.1
@@ -852,7 +852,7 @@ importers:
 
   packages/services/webhooks:
     specifiers:
-      '@hive/service-common': 0.0.0
+      '@hive/service-common': workspace:*
       '@sentry/node': 7.12.1
       '@sentry/tracing': 7.12.1
       '@trpc/server': 9.23.2
@@ -894,8 +894,8 @@ importers:
       '@graphql-codegen/gql-tag-operations-preset': 1.7.0
       '@graphql-tools/mock': 8.4.0
       '@graphql-typed-document-node/core': 3.1.1
-      '@hive/emails': '*'
-      '@hive/server': '*'
+      '@hive/emails': workspace:*
+      '@hive/server': workspace:*
       '@monaco-editor/react': 4.3.1
       '@n1ru4l/react-time-ago': 1.1.0
       '@next/eslint-plugin-next': 13.0.0
