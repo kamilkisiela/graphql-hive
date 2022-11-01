@@ -5,6 +5,30 @@
     {
       "groupName": "graphql-tools",
       "matchPackagePrefixes": "@graphql-tools"
+    },
+    {
+      "groupName": "envelop",
+      "matchPackagePrefixes": "@envelop"
+    },
+    {
+      "groupName": "graphql-inspector",
+      "matchPackagePrefixes": "@graphql-inspector"
+    },
+    {
+      "groupName": "oclif",
+      "matchPackagePrefixes": "@oclif"
+    },
+    {
+      "groupName": "sentry",
+      "matchPackagePrefixes": "@sentry"
+    },
+    {
+      "groupName": "trpc",
+      "matchPackagePrefixes": "@trpc"
+    },
+    {
+      "groupName": "slonik",
+      "matchPackagePrefixes": "@slonik"
     }
   ],
   "ignorePaths": ["deployment"]
