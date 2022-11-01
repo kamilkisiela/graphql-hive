@@ -18,7 +18,7 @@
     "bullmq": "1.81.4",
     "dotenv": "10.0.0",
     "got": "12.5.1",
-    "ioredis": "4.28.3",
+    "ioredis": "4.28.5",
     "p-timeout": "5.0.2"
   },
   "devDependencies": {

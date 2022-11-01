@@ -21,12 +21,12 @@
     "@sentry/tracing": "7.12.1",
     "dotenv": "10.0.0",
     "graphql": "16.5.0",
-    "ioredis": "4.28.3"
+    "ioredis": "4.28.5"
   },
   "devDependencies": {
     "@hive/service-common": "workspace:*",
     "@types/async-retry": "1.4.5",
-    "@types/ioredis": "4.28.7",
+    "@types/ioredis": "4.28.10",
     "pino-pretty": "6.0.0",
     "fastify": "3.29.3"
   },
