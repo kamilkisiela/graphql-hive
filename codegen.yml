@@ -1,4 +1,5 @@
 schema: ./packages/services/api/src/modules/*/module.graphql.ts
+emitLegacyCommonJSImports: true
 generates:
   # API
   ./packages/services/api/src/modules:
@@ -131,5 +132,5 @@ generates:
 
   # Integration tests
   ./integration-tests/testkit/gql:
-    documents: ./integration-tests/**/*.ts
+    documents: ./integration-tests/(testkit|tests)/**/*.ts
     preset: gql-tag-operations-preset

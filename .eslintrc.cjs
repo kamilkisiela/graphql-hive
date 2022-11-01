@@ -125,6 +125,7 @@ module.exports = {
         'react/prop-types': 'off',
         'react/no-unescaped-entities': 'off',
         'react/jsx-curly-brace-presence': 'error',
+        'react/no-unknown-property': 'off',
         'jsx-a11y/anchor-is-valid': ['off', { components: ['Link', 'NextLink'] }],
         'jsx-a11y/alt-text': ['warn', { elements: ['img'], img: ['Image', 'NextImage'] }],
         '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'no-type-imports' }],

@@ -59,7 +59,7 @@ If you are not self-hosting GraphQL Hive, you can ignore this section. It is onl
 
 ### Building the Docker Image
 
-**Prerequisites:** Make sure you built the mono-repository using `yarn build`.
+**Prerequisites:** Make sure you built the mono-repository using `pnpm build`.
 
 ```bash
 docker build . --build-arg RELEASE=stable-main -t graphql-hive/app

@@ -1,9 +1,10 @@
 {
+  "$schema": "https://turborepo.org/schema.json",
   "baseBranch": "origin/main",
   "globalDependencies": [
     "package.json",
     "codegen.yml",
-    "yarn.lock",
+    "pnpm-lock.yaml",
     "jest.config.js",
     "tsconfig.json",
     "scripts/patch-manifests.js",

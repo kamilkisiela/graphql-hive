@@ -1,7 +1,7 @@
-diff --git a/node_modules/@tgriesser/schemats/bin/schemats.js b/node_modules/@tgriesser/schemats/bin/schemats.js
+diff --git a/bin/schemats.js b/bin/schemats.js
 index f467148..c2e2059 100755
---- a/node_modules/@tgriesser/schemats/bin/schemats.js
-+++ b/node_modules/@tgriesser/schemats/bin/schemats.js
+--- a/bin/schemats.js
++++ b/bin/schemats.js
 @@ -41,6 +41,7 @@ let argv = yargs
      .describe('o', 'output file name')
      .describe('sqlite3', 'For sqlite3 dbs')
@@ -20,10 +20,10 @@ index f467148..c2e2059 100755
          });
          fs.writeFileSync(argv.output, formattedOutput);
      }
-diff --git a/node_modules/@tgriesser/schemats/src/index.js b/node_modules/@tgriesser/schemats/src/index.js
+diff --git a/src/index.js b/src/index.js
 index 27a7b2e..9f47d6e 100644
---- a/node_modules/@tgriesser/schemats/src/index.js
-+++ b/node_modules/@tgriesser/schemats/src/index.js
+--- a/src/index.js
++++ b/src/index.js
 @@ -40,10 +40,9 @@ function buildHeader(db, tables, schema, options) {
      }
      return `

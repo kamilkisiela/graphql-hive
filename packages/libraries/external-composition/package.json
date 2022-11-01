@@ -14,25 +14,45 @@
   },
   "homepage": "https://graphql-hive.com",
   "license": "MIT",
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
-  "typings": "dist/index.d.ts",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "typings": "dist/typings/index.d.ts",
   "typescript": {
-    "definition": "dist/index.d.ts"
+    "definition": "dist/typings/index.d.ts"
   },
   "exports": {
     ".": {
-      "require": "./dist/index.js",
-      "import": "./dist/index.mjs"
+      "require": {
+        "types": "./dist/typings/index.d.cts",
+        "default": "./dist/cjs/index.js"
+      },
+      "import": {
+        "types": "./dist/typings/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "default": {
+        "types": "./dist/typings/index.d.ts",
+        "default": "./dist/esm/index.js"
+      }
     },
     "./*": {
-      "require": "./dist/*.js",
-      "import": "./dist/*.mjs"
+      "require": {
+        "types": "./dist/typings/*.d.cts",
+        "default": "./dist/cjs/*.js"
+      },
+      "import": {
+        "types": "./dist/typings/*.d.ts",
+        "default": "./dist/esm/*.js"
+      },
+      "default": {
+        "types": "./dist/typings/*.d.ts",
+        "default": "./dist/esm/*.js"
+      }
     }
   },
   "scripts": {
-    "build": "bob build --single",
-    "build-local": "yarn build && node build-example.mjs"
+    "build": "bob build",
+    "build-local": "pnpm build && node build-example.mjs"
   },
   "peerDependencies": {
     "graphql": "^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0"
@@ -40,7 +60,8 @@
   "devDependencies": {
     "@apollo/federation": "0.36.1",
     "graphql": "16.5.0",
-    "esbuild": "0.14.39"
+    "esbuild": "0.14.39",
+    "fastify": "3.29.3"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org",

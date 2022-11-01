@@ -5,17 +5,17 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "setup": "yarn db:start && yarn db",
-    "db": "yarn db:create && yarn migration:run",
+    "setup": "pnpm db:start && pnpm db",
+    "db": "pnpm db:create && pnpm migration:run",
     "db:create": "node tools/create-db.mjs",
     "db:migrator": "node --experimental-specifier-resolution=node --loader ts-node/esm migrations/index.ts",
-    "migration:create": "yarn db:migrator create",
-    "migration:run": "yarn db:migrator up",
-    "migration:rollback": "yarn db:migrator down",
+    "migration:create": "pnpm db:migrator create",
+    "migration:run": "pnpm db:migrator up",
+    "migration:rollback": "pnpm db:migrator down",
     "db:generate": "schemats generate --config schemats.cjs -o src/db/types.ts",
     "db:start": "docker-compose up -d --remove-orphans",
     "db:dev": "docker compose up --remove-orphans --abort-on-container-exit",
-    "dev": "yarn db:dev",
+    "dev": "pnpm db:dev",
     "build": "bob runify --single",
     "postbuild": "copyfiles -f \"migrations/actions/*.sql\" dist/actions && copyfiles -f \"migrations/actions/down/*.sql\" dist/actions/down"
   },
@@ -32,10 +32,13 @@
     "zod": "3.15.1"
   },
   "devDependencies": {
+    "@sentry/types": "7.12.1",
     "@tgriesser/schemats": "7.0.0",
     "@types/pg": "8.6.5",
+    "copyfiles": "2.4.1",
     "pg-promise": "10.11.1",
-    "ts-node": "10.9.1"
+    "ts-node": "10.9.1",
+    "tslib": "2.4.0"
   },
   "engines": {
     "node": ">=12"

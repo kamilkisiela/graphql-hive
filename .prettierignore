@@ -17,3 +17,5 @@ __generated__/
 integration-tests/fixtures/init-invalid-schema.graphql
 /target
 tmp
+
+pnpm-lock.yaml

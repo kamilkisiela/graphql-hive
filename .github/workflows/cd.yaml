@@ -24,18 +24,25 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-node@v2
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2.2.2
+        with:
+          version: 7
+
+      - name: Install Node
+        uses: actions/setup-node@v3
         with:
           node-version-file: .node-version
+          cache: pnpm
 
-      - name: Install Dependencies
-        run: yarn --frozen-lockfile
+      - name: Install deps
+        run: pnpm i --frozen-lockfile
 
       - name: Generate GraphQL Types
-        run: yarn graphql:generate
+        run: pnpm graphql:generate
 
       - name: Build
-        run: yarn build:libraries
+        run: pnpm build:libraries
 
       - name: Schema Publish
         run: ./packages/libraries/cli/bin/dev schema:publish "packages/services/api/src/modules/*/module.graphql.ts" --force --github
@@ -51,7 +58,7 @@ jobs:
         id: changesets
         uses: changesets/action@v1.3.0
         with:
-          publish: yarn release
+          publish: pnpm release
           commit: 'chore(release): update monorepo packages versions'
           title: 'Upcoming Release Changes'
         env:
@@ -69,19 +76,19 @@ jobs:
       - name: Pack tarballs
         if: steps.cli.outputs.publish == 'true'
         working-directory: packages/libraries/cli
-        run: yarn oclif pack tarballs --no-xz
+        run: pnpm oclif pack tarballs --no-xz
 
       - name: Upload tarballs
         if: steps.cli.outputs.publish == 'true'
         working-directory: packages/libraries/cli
-        run: yarn oclif upload tarballs --no-xz
+        run: pnpm oclif upload tarballs --no-xz
 
       - name: Promote tarballs
         if: steps.cli.outputs.publish == 'true'
         working-directory: packages/libraries/cli
         env:
           VERSION: ${{ steps.cli.outputs.version }}
-        run: yarn oclif promote --no-xz --sha ${GITHUB_SHA:0:7} --version $VERSION || yarn oclif promote --no-xz --sha ${GITHUB_SHA:0:8} --version $VERSION
+        run: pnpm oclif promote --no-xz --sha ${GITHUB_SHA:0:7} --version $VERSION || pnpm oclif promote --no-xz --sha ${GITHUB_SHA:0:8} --version $VERSION
 
   publish_rust:
     name: Publish Rust
@@ -223,9 +230,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Install Node
-        uses: actions/setup-node@v2
+      - uses: pnpm/action-setup@v2.2.2
         with:
+          version: 7
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
           node-version-file: .node-version
 
       - name: Install Rust
@@ -285,11 +298,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-
-      - name: Install Node
-        uses: actions/setup-node@v2
-        with:
-          node-version-file: .node-version
 
       - name: Install Rust
         run: |
@@ -375,18 +383,25 @@ jobs:
         with:
           fetch-depth: 5
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2.2.2
+        with:
+          version: 7
+
       - name: Install Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version-file: .node-version
+          cache: pnpm
 
-      - run: yarn --frozen-lockfile
+      - name: Install deps
+        run: pnpm i --frozen-lockfile
 
       - name: Generate Types
-        run: yarn graphql:generate
+        run: pnpm graphql:generate
 
       - name: Build
-        run: yarn build
+        run: pnpm build
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2

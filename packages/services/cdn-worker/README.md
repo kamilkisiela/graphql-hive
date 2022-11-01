@@ -4,7 +4,7 @@ Hive comes with a CDN worker (deployed to CF Workers), along with KV cache to st
 
 ### Standalone Development
 
-To run Hive CDN locally, you can use the following command: `yarn dev`.
+To run Hive CDN locally, you can use the following command: `pnpm dev`.
 
 > Note: during dev, KV is mocked using JS `Map`, so it's ephermal and will be deleted with any change in code.
 

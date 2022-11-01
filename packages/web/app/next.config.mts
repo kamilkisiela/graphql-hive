@@ -11,6 +11,11 @@ export default {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  typescript: {
+    // next doesn't need to check because typecheck command will
+    // also next reports false positives (try it...)
+    ignoreBuildErrors: true,
+  },
   redirects: () => [
     // Redirect organization routes
     {

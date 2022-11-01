@@ -4,10 +4,10 @@ import dotenv from 'dotenv';
 
 /**
  * Run only the tests that were specified with a pattern or filename:
- *  $ yarn dockest filenameOrPattern
+ *  $ pnpm dockest filenameOrPattern
  *
  * Run all tests:
- *  $ yarn dockest
+ *  $ pnpm dockest
  */
 const [, , testFile] = process.argv;
 

@@ -1,7 +1,7 @@
-diff --git a/node_modules/atomic-sleep/index.js b/node_modules/atomic-sleep/index.js
+diff --git a/index.js b/index.js
 index fbfc8b2..6169638 100644
---- a/node_modules/atomic-sleep/index.js
-+++ b/node_modules/atomic-sleep/index.js
+--- a/index.js
++++ b/index.js
 @@ -5,7 +5,7 @@
  if (typeof SharedArrayBuffer !== 'undefined' && typeof Atomics !== 'undefined') {
    const nil = new Int32Array(new SharedArrayBuffer(4))

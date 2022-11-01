@@ -1,0 +1,6 @@
+packages:
+  - packages/services/*
+  - packages/web/*
+  - packages/libraries/*
+  - integration-tests
+  - deployment

@@ -32,10 +32,10 @@
     "postpack": "rm -f oclif.manifest.json",
     "prepack": "rimraf lib && tsc -b && oclif manifest && oclif readme",
     "version": "oclif readme && git add README.md",
-    "schema:check:single": "yarn start schema:check examples/single.graphql",
-    "schema:check:stitching": "yarn start schema:check examples/stitching.graphql --service posts",
-    "schema:check:federation": "yarn start schema:check examples/federation.graphql --service reviews",
-    "schema:publish:federation": "yarn start schema:publish --service reviews examples/federation.reviews.graphql"
+    "schema:check:single": "pnpm start schema:check examples/single.graphql",
+    "schema:check:stitching": "pnpm start schema:check examples/stitching.graphql --service posts",
+    "schema:check:federation": "pnpm start schema:check examples/federation.graphql --service reviews",
+    "schema:publish:federation": "pnpm start schema:publish --service reviews examples/federation.reviews.graphql"
   },
   "dependencies": {
     "@graphql-hive/core": "0.2.2",
@@ -57,7 +57,7 @@
     "graphql-tag": "2.12.6",
     "log-symbols": "4.1.0",
     "mkdirp": "1.0.4",
-    "tslib": "2.3.1",
+    "tslib": "2.4.0",
     "ts-node": "10.9.1"
   },
   "devDependencies": {

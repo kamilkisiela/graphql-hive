@@ -5,6 +5,7 @@
   "version": "0.0.0",
   "dependencies": {
     "@app/gql": "link:./testkit/gql",
+    "@graphql-hive/core": "0.2.2",
     "@graphql-typed-document-node/core": "3.1.1",
     "auth0": "2.36.2",
     "axios": "0.27.2",
@@ -12,6 +13,7 @@
     "date-fns": "2.25.0",
     "dependency-graph": "0.11.0",
     "@n1ru4l/dockest": "2.1.0-rc.6",
+    "ioredis": "4.28.3",
     "rxjs": "^6.5.4",
     "slonik": "30.1.2",
     "tsup": "5.12.7",
@@ -21,11 +23,13 @@
     "@trpc/client": "9.23.2"
   },
   "devDependencies": {
-    "@hive/server": "*"
+    "@hive/server": "*",
+    "@types/ioredis": "4.28.7",
+    "tslib": "2.4.0"
   },
   "scripts": {
-    "build-and-pack": "(cd ../ && yarn build:services && yarn build:libraries && yarn build:local) && node ./scripts/pack.mjs",
-    "build:local": "yarn build-and-pack && (cd ../ && yarn docker:build)",
+    "build-and-pack": "(cd ../ && pnpm build:services && pnpm build:libraries && pnpm build:local) && node ./scripts/pack.mjs",
+    "build:local": "pnpm build-and-pack && (cd ../ && pnpm docker:build)",
     "dockest": "tsup-node dockest.ts --format esm --target node16 && PWD=$PWD/.. node dist/dockest.js"
   }
 }
