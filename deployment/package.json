@@ -1,6 +1,6 @@
 {
   "name": "@hive/deployment",
-  "private": "true",
+  "private": true,
   "scripts": {
     "typecheck": "tsc --noEmit"
   },
