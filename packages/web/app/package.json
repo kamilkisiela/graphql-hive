@@ -111,8 +111,8 @@
     "rimraf": "3.0.2",
     "tailwindcss": "2.2.19",
     "tailwindcss-radix": "2.2.0",
-    "@hive/emails": "*",
-    "@hive/server": "*"
+    "@hive/emails": "workspace:*",
+    "@hive/server": "workspace:*"
   },
   "babelMacros": {
     "twin": {

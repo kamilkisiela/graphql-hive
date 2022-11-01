@@ -23,9 +23,9 @@
     "got": "12.5.1"
   },
   "devDependencies": {
-    "@hive/emails": "0.0.0",
-    "@hive/service-common": "0.0.0",
-    "@hive/storage": "0.0.0",
+    "@hive/emails": "workspace:*",
+    "@hive/service-common": "workspace:*",
+    "@hive/storage": "workspace:*",
     "pino-pretty": "6.0.0",
     "tslib": "2.4.0"
   },

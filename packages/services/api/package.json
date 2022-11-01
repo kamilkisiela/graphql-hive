@@ -43,10 +43,10 @@
     "supertokens-node": "12.0.2"
   },
   "devDependencies": {
-    "@hive/emails": "0.0.0",
-    "@hive/schema": "0.0.0",
-    "@hive/tokens": "0.0.0",
-    "@hive/webhooks": "0.0.0",
+    "@hive/emails": "workspace:*",
+    "@hive/schema": "workspace:*",
+    "@hive/tokens": "workspace:*",
+    "@hive/webhooks": "workspace:*",
     "@graphql-hive/core": "0.2.2",
     "@types/ioredis": "4.28.7",
     "@types/lodash": "4.14.182",
