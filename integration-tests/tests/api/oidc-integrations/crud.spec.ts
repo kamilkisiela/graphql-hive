@@ -338,6 +338,73 @@ describe('create', () => {
         }
       `);
     });
+    test('error: multiple integrations per organization', async () => {
+      const { access_token } = await authenticate('main');
+      const orgResult = await createOrganization(
+        {
+          name: 'foo',
+        },
+        access_token
+      );
+
+      const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+
+      let result = await execute({
+        document: CreateOIDCIntegrationMutation,
+        variables: {
+          input: {
+            organizationId: org.id,
+            clientId: 'foo',
+            clientSecret: 'foofoofoofoo',
+            domain: 'http://localhost:8888/oauth',
+          },
+        },
+        authToken: access_token,
+      });
+
+      expect(result.body.errors).toBeUndefined();
+      expect(result.body.data).toEqual({
+        createOIDCIntegration: {
+          error: null,
+          ok: {
+            createdOIDCIntegration: {
+              id: expect.any(String),
+              clientId: 'foo',
+              clientSecretPreview: 'ofoo',
+              domain: 'http://localhost:8888/oauth',
+            },
+          },
+        },
+      });
+
+      result = await execute({
+        document: CreateOIDCIntegrationMutation,
+        variables: {
+          input: {
+            organizationId: org.id,
+            clientId: 'foo',
+            clientSecret: 'foofoofoofoo',
+            domain: 'http://localhost:8888/oauth',
+          },
+        },
+        authToken: access_token,
+      });
+
+      expect(result.body.errors).toBeUndefined();
+      expect(result.body.data).toEqual({
+        createOIDCIntegration: {
+          error: {
+            message: 'An OIDC integration already exists for this organization.',
+            details: {
+              clientId: null,
+              clientSecret: null,
+              domain: null,
+            },
+          },
+          ok: null,
+        },
+      });
+    });
   });
 });
 

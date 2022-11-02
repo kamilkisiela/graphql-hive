@@ -344,7 +344,7 @@ export interface Storage {
     clientId: string;
     encryptedClientSecret: string;
     domain: string;
-  }): Promise<OIDCIntegration>;
+  }): Promise<{ type: 'ok'; oidcIntegration: OIDCIntegration } | { type: 'error'; reason: string }>;
   updateOIDCIntegration(_: {
     oidcIntegrationId: string;
     clientId: string | null;

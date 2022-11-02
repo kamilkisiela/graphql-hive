@@ -21,7 +21,13 @@ import type {
   ProjectAccessScope,
   TargetAccessScope,
 } from '@hive/api';
-import { DatabasePool, DatabaseTransactionConnection, sql, TaggedTemplateLiteralInvocation } from 'slonik';
+import {
+  DatabasePool,
+  DatabaseTransactionConnection,
+  sql,
+  TaggedTemplateLiteralInvocation,
+  UniqueIntegrityConstraintViolationError,
+} from 'slonik';
 import { update } from 'slonik-utilities';
 import { paramCase } from 'param-case';
 import {
@@ -2195,28 +2201,44 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async createOIDCIntegrationForOrganization(args) {
       // TODO: handle errors where creating the integration fails because an integration already exists for this account
       // DB constraint exception :)
-      const result = await pool.maybeOne<unknown>(sql`
-        INSERT INTO "public"."oidc_integrations" (
-          "linked_organization_id",
-          "client_id",
-          "client_secret",
-          "domain"
-        )
-        VALUES (
-          ${args.organizationId},
-          ${args.clientId},
-          ${args.encryptedClientSecret},
-          ${args.domain}
-        )
-        RETURNING
-          "id"
-          , "linked_organization_id"
-          , "client_id"
-          , "client_secret"
-          , "domain"
-      `);
+      try {
+        const result = await pool.maybeOne<unknown>(sql`
+          INSERT INTO "public"."oidc_integrations" (
+            "linked_organization_id",
+            "client_id",
+            "client_secret",
+            "domain"
+          )
+          VALUES (
+            ${args.organizationId},
+            ${args.clientId},
+            ${args.encryptedClientSecret},
+            ${args.domain}
+          )
+          RETURNING
+            "id"
+            , "linked_organization_id"
+            , "client_id"
+            , "client_secret"
+            , "domain"
+        `);
 
-      return decodeOktaIntegrationRecord(result);
+        return {
+          type: 'ok',
+          oidcIntegration: decodeOktaIntegrationRecord(result),
+        };
+      } catch (error) {
+        if (
+          error instanceof UniqueIntegrityConstraintViolationError &&
+          error.constraint === 'oidc_integrations_linked_organization_id_key'
+        ) {
+          return {
+            type: 'error',
+            reason: 'An OIDC integration already exists for this organization.',
+          };
+        }
+        throw error;
+      }
     },
 
     async updateOIDCIntegration(args) {

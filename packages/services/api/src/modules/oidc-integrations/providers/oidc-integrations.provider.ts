@@ -100,21 +100,31 @@ export class OIDCIntegrationsProvider {
     const domainResult = OIDCDomainModel.safeParse(args.domain);
 
     if (clientIdResult.success && clientSecretResult.success && domainResult.success) {
-      const oidcIntegration = await this.storage.createOIDCIntegrationForOrganization({
+      const creationResult = await this.storage.createOIDCIntegrationForOrganization({
         organizationId: args.organizationId,
         clientId: clientIdResult.data,
         encryptedClientSecret: this.crypto.encrypt(clientSecretResult.data),
         domain: domainResult.data,
       });
 
+      if (creationResult.type === 'ok') {
+        return creationResult;
+      }
+
       return {
-        type: 'ok',
-        oidcIntegration,
+        type: 'error',
+        message: creationResult.reason,
+        fieldErrors: {
+          clientId: null,
+          clientSecret: null,
+          domain: null,
+        },
       } as const;
     }
 
     return {
       type: 'error',
+      reason: null,
       fieldErrors: {
         clientId: clientIdResult.success ? null : clientIdResult.error.issues[0].message,
         clientSecret: clientSecretResult.success ? null : clientSecretResult.error.issues[0].message,
