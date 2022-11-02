@@ -117,16 +117,16 @@ describe('create', () => {
       });
 
       expect(result.body.errors).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "locations": Array [
-              Object {
+        [
+          {
+            "locations": [
+              {
                 "column": 3,
                 "line": 2,
               },
             ],
-            "message": "No access (reason: \\"Missing organization:integrations permission\\")",
-            "path": Array [
+            "message": "No access (reason: "Missing organization:integrations permission")",
+            "path": [
               "createOIDCIntegration",
             ],
           },
@@ -159,10 +159,10 @@ describe('create', () => {
 
       expect(result.body.errors).toBeUndefined();
       expect(result.body.data).toMatchInlineSnapshot(`
-        Object {
-          "createOIDCIntegration": Object {
-            "error": Object {
-              "details": Object {
+        {
+          "createOIDCIntegration": {
+            "error": {
+              "details": {
                 "clientId": "Must be at least 3 characters long.",
                 "clientSecret": null,
                 "domain": null,
@@ -200,10 +200,10 @@ describe('create', () => {
 
       expect(result.body.errors).toBeUndefined();
       expect(result.body.data).toMatchInlineSnapshot(`
-        Object {
-          "createOIDCIntegration": Object {
-            "error": Object {
-              "details": Object {
+        {
+          "createOIDCIntegration": {
+            "error": {
+              "details": {
                 "clientId": "Can not be longer than 100 characters.",
                 "clientSecret": null,
                 "domain": null,
@@ -241,10 +241,10 @@ describe('create', () => {
 
       expect(result.body.errors).toBeUndefined();
       expect(result.body.data).toMatchInlineSnapshot(`
-        Object {
-          "createOIDCIntegration": Object {
-            "error": Object {
-              "details": Object {
+        {
+          "createOIDCIntegration": {
+            "error": {
+              "details": {
                 "clientId": null,
                 "clientSecret": "Must be at least 3 characters long.",
                 "domain": null,
@@ -282,10 +282,10 @@ describe('create', () => {
 
       expect(result.body.errors).toBeUndefined();
       expect(result.body.data).toMatchInlineSnapshot(`
-        Object {
-          "createOIDCIntegration": Object {
-            "error": Object {
-              "details": Object {
+        {
+          "createOIDCIntegration": {
+            "error": {
+              "details": {
                 "clientId": null,
                 "clientSecret": "Can not be longer than 200 characters.",
                 "domain": null,
@@ -323,10 +323,10 @@ describe('create', () => {
 
       expect(result.body.errors).toBeUndefined();
       expect(result.body.data).toMatchInlineSnapshot(`
-        Object {
-          "createOIDCIntegration": Object {
-            "error": Object {
-              "details": Object {
+        {
+          "createOIDCIntegration": {
+            "error": {
+              "details": {
                 "clientId": null,
                 "clientSecret": null,
                 "domain": "Must be a valid domain.",
@@ -415,12 +415,12 @@ describe('delete', () => {
 
       expect(deleteResult.body.errors).toBeUndefined();
       expect(deleteResult).toMatchInlineSnapshot(`
-        Object {
-          "body": Object {
-            "data": Object {
-              "deleteOIDCIntegration": Object {
+        {
+          "body": {
+            "data": {
+              "deleteOIDCIntegration": {
                 "error": null,
-                "ok": Object {
+                "ok": {
                   "__typename": "DeleteOIDCIntegrationOk",
                 },
               },
@@ -490,16 +490,16 @@ describe('delete', () => {
 
       expect(deleteResult.body.errors).toBeDefined();
       expect(deleteResult.body.errors).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "locations": Array [
-              Object {
+        [
+          {
+            "locations": [
+              {
                 "column": 3,
                 "line": 2,
               },
             ],
-            "message": "No access (reason: \\"Missing organization:integrations permission\\")",
-            "path": Array [
+            "message": "No access (reason: "Missing organization:integrations permission")",
+            "path": [
               "deleteOIDCIntegration",
             ],
           },
@@ -630,16 +630,16 @@ describe('update', () => {
 
       expect(deleteResult.body.errors).toBeDefined();
       expect(deleteResult.body.errors).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "locations": Array [
-              Object {
+        [
+          {
+            "locations": [
+              {
                 "column": 3,
                 "line": 2,
               },
             ],
-            "message": "No access (reason: \\"Missing organization:integrations permission\\")",
-            "path": Array [
+            "message": "No access (reason: "Missing organization:integrations permission")",
+            "path": [
               "updateOIDCIntegration",
             ],
           },
