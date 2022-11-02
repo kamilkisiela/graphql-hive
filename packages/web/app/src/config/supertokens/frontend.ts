@@ -9,7 +9,6 @@ import { createThirdPartyEmailPasswordReactOktaProvider } from '../../lib/supert
 import {
   createThirdPartyEmailPasswordReactOIDCProvider,
   getOIDCOverrides,
-  preAPIHook,
 } from '@/lib/supertokens/third-party-email-password-react-oidc-provider';
 
 export const frontendConfig = () => {
@@ -54,7 +53,6 @@ export const frontendConfig = () => {
         signInAndUpFeature: {
           providers,
         },
-        preAPIHook: env.auth.organizationOIDC ? preAPIHook : undefined,
         override: env.auth.organizationOIDC ? getOIDCOverrides() : undefined,
       }),
       EmailVerification.init({

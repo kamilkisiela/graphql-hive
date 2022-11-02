@@ -974,7 +974,7 @@ importers:
       regenerator-runtime: 0.13.10
       rimraf: 3.0.2
       snarkdown: 2.0.0
-      supertokens-auth-react: 0.27.0
+      supertokens-auth-react: 0.27.1
       supertokens-js-override: 0.0.4
       supertokens-node: 12.0.5
       tailwindcss: 2.2.19
@@ -1051,7 +1051,7 @@ importers:
       react-window: 1.8.7_sfoxds7t5ydpegc3knd667wn6m
       regenerator-runtime: 0.13.10
       snarkdown: 2.0.0
-      supertokens-auth-react: 0.27.0_k2mvpji5i2ojml6m4ftklg47pa
+      supertokens-auth-react: 0.27.1_k2mvpji5i2ojml6m4ftklg47pa
       supertokens-js-override: 0.0.4
       supertokens-node: 12.0.5
       tailwindcss: 2.2.19_cr4sis33dk4di3xnobyqnqmrf4
@@ -10483,7 +10483,7 @@ packages:
   /axios/0.21.4:
     resolution: {integrity: sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg==}
     dependencies:
-      follow-redirects: 1.15.2
+      follow-redirects: 1.15.2_debug@4.3.4
     transitivePeerDependencies:
       - debug
     dev: false
@@ -14297,16 +14297,6 @@ packages:
 
   /focus-visible/5.2.0:
     resolution: {integrity: sha512-Rwix9pBtC1Nuy5wysTmKy+UjbDJpIfg8eHjw0rjZ1mX4GNLz1Bmd16uDpI3Gk1i70Fgcs8Csg2lPm8HULFg9DQ==}
-    dev: false
-
-  /follow-redirects/1.15.2:
-    resolution: {integrity: sha512-VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==}
-    engines: {node: '>=4.0'}
-    peerDependencies:
-      debug: '*'
-    peerDependenciesMeta:
-      debug:
-        optional: true
     dev: false
 
   /follow-redirects/1.15.2_debug@4.3.4:
@@ -22938,8 +22928,8 @@ packages:
       - supports-color
     dev: false
 
-  /supertokens-auth-react/0.27.0_k2mvpji5i2ojml6m4ftklg47pa:
-    resolution: {integrity: sha512-1TGylB5aoCedFXd5RR5s5oi+lGSE66ynFS7igA2yh/nUXUNU2GlSV6hkrv6zBYjktYkjSBuOhuVaOJejD0njrA==}
+  /supertokens-auth-react/0.27.1_k2mvpji5i2ojml6m4ftklg47pa:
+    resolution: {integrity: sha512-g4a8idSPF1Fa7mN5u0QTNlIHor/1OwRhgKd3IXgEZoDngmm0wDEii97JDTHUr8gGhFBp0pi/UtGka/UQ6MTdFg==}
     engines: {node: '>=16.0.0', npm: ^8}
     peerDependencies:
       react: '>=16.8.0'

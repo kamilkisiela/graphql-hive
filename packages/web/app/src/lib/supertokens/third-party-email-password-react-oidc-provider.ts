@@ -1,9 +1,5 @@
 import { env } from '@/env/frontend';
-import { RecipePreAPIHookFunction } from 'supertokens-auth-react/lib/build/recipe/recipeModule/types';
-import {
-  PreAndPostAPIHookAction,
-  UserInput,
-} from 'supertokens-auth-react/lib/build/recipe/thirdpartyemailpassword/types';
+import { UserInput } from 'supertokens-auth-react/lib/build/recipe/thirdpartyemailpassword/types';
 import { getAuthorisationURLWithQueryParamsAndSetState } from 'supertokens-auth-react/recipe/thirdpartyemailpassword';
 
 export const createThirdPartyEmailPasswordReactOIDCProvider = () => ({
@@ -26,41 +22,52 @@ export const getOIDCOverrides = (): UserInput['override'] => ({
 
       return hash;
     },
+    getAuthorisationURLFromBackend(input) {
+      const maybeId: unknown = input.userContext['oidcId'];
+
+      return originalImplementation.getAuthorisationURLFromBackend(
+        typeof maybeId === 'string'
+          ? {
+              ...input,
+              options: {
+                preAPIHook: async options => {
+                  const url = new URL(options.url);
+                  url.searchParams.append('oidc_id', maybeId);
+                  return {
+                    ...options,
+                    url: url.toString(),
+                  };
+                },
+              },
+            }
+          : input
+      );
+    },
+    thirdPartySignInAndUp(input) {
+      const locationUrl = new URL(window.location.toString());
+      // TODO: maybe there is a better way than getting the state from the URL
+      const [, oidcId] = locationUrl.searchParams.get('state')?.split(delimiter) ?? [];
+
+      return originalImplementation.thirdPartySignInAndUp(
+        typeof oidcId === 'string'
+          ? {
+              ...input,
+              options: {
+                preAPIHook: async options => {
+                  const url = new URL(options.url);
+                  url.searchParams.append('oidc_id', oidcId);
+                  return {
+                    ...options,
+                    url: url.toString(),
+                  };
+                },
+              },
+            }
+          : input
+      );
+    },
   }),
 });
-
-export const preAPIHook: RecipePreAPIHookFunction<PreAndPostAPIHookAction> = async options => {
-  if (options.action === 'GET_AUTHORISATION_URL') {
-    const maybeId: unknown = options.userContext['oidcId'];
-    if (typeof maybeId === 'string') {
-      const url = new URL(options.url);
-      url.searchParams.append('oidc_id', maybeId);
-      return {
-        ...options,
-        url: url.toString(),
-      };
-    }
-  }
-
-  /**
-   * In the callback the oidc_id is within the state parameter.
-   */
-  if (options.action === 'THIRD_PARTY_SIGN_IN_UP') {
-    const locationUrl = new URL(window.location.toString());
-    const url = new URL(options.url);
-    const [, oidcId] = locationUrl.searchParams.get('state')?.split('||') ?? [];
-    if (oidcId) {
-      url.searchParams.append('oidc_id', oidcId);
-    }
-
-    return {
-      ...options,
-      url: url.toString(),
-    };
-  }
-
-  return options;
-};
 
 export const startAuthFlowForOIDCProvider = async (oidcId: string) => {
   const authUrl = await getAuthorisationURLWithQueryParamsAndSetState({
