@@ -99,7 +99,7 @@ export const Header = (): ReactElement => {
                 {me?.displayName}
               </DropdownMenu.Label>
               <DropdownMenu>
-                {me?.isLinkedToOIDCIntegration ? null : (
+                {me?.canSwitchOrganization ? null : (
                   <DropdownMenu.TriggerItem>
                     <GridIcon className="h-5 w-5" />
                     Switch organization

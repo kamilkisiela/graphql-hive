@@ -1,6 +1,6 @@
 query me {
   me {
     ...UserFields
-    isLinkedToOIDCIntegration
+    canSwitchOrganization
   }
 }

@@ -7,7 +7,7 @@ export default gql`
   }
 
   extend type User {
-    isLinkedToOIDCIntegration: Boolean!
+    canSwitchOrganization: Boolean!
   }
 
   type OIDCIntegration {

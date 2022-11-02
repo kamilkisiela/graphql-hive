@@ -112,6 +112,6 @@ export const resolvers: OidcIntegrationsModule.Resolvers = {
       injector.get(OIDCIntegrationsProvider).getClientSecretPreview(oidcIntegration),
   },
   User: {
-    isLinkedToOIDCIntegration: user => !!user.oidcIntegrationId,
+    canSwitchOrganization: user => !!user.oidcIntegrationId,
   },
 };
