@@ -68,7 +68,7 @@
     "@envelop/types": "3.0.0",
     "graphql-yoga": "3.0.0-next.5",
     "@types/async-retry": "1.4.5",
-    "apollo-server-core": "3.7.0",
+    "apollo-server-core": "3.11.0",
     "apollo-server-plugin-base": "3.5.3",
     "nock": "13.2.4"
   },
