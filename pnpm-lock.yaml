@@ -164,14 +164,14 @@ importers:
       '@hive/server': workspace:*
       '@n1ru4l/dockest': 2.1.0-rc.6
       '@trpc/client': 9.23.2
-      '@types/ioredis': 4.28.7
+      '@types/ioredis': 4.28.10
       '@whatwg-node/fetch': 0.4.7
       auth0: 2.36.2
       axios: 0.27.2
       date-fns: 2.25.0
       dependency-graph: 0.11.0
       dotenv: 10.0.0
-      ioredis: 4.28.3
+      ioredis: 4.28.5
       rxjs: ^6.5.4
       slonik: 30.1.2
       tslib: 2.4.0
@@ -190,7 +190,7 @@ importers:
       date-fns: 2.25.0
       dependency-graph: 0.11.0
       dotenv: 10.0.0
-      ioredis: 4.28.3
+      ioredis: 4.28.5
       rxjs: 6.6.7
       slonik: 30.1.2_wg2hxbo7txnklmvja4aeqnygfi
       tsup: 5.12.7
@@ -198,7 +198,7 @@ importers:
       zod: 3.15.1
     devDependencies:
       '@hive/server': link:../packages/services/server
-      '@types/ioredis': 4.28.7
+      '@types/ioredis': 4.28.10
       tslib: 2.4.0
 
   packages/libraries/cli:
@@ -327,7 +327,7 @@ importers:
       '@slack/web-api': 6.4.0
       '@theguild/buddy': 0.1.0
       '@trpc/client': 9.23.2
-      '@types/ioredis': 4.28.7
+      '@types/ioredis': 4.28.10
       '@types/ioredis-mock': 5.6.0
       '@types/lodash': 4.14.182
       '@types/lru-cache': 7.6.1
@@ -344,7 +344,7 @@ importers:
       graphql-scalars: 1.12.0
       graphql-yoga: 3.0.0-next.5
       human-id: 2.0.1
-      ioredis: 4.28.3
+      ioredis: 4.28.5
       ioredis-mock: 7.4.0
       jsonwebtoken: 8.5.1
       jwks-rsa: 2.0.5
@@ -379,7 +379,7 @@ importers:
       graphql-scalars: 1.12.0
       graphql-yoga: 3.0.0-next.5
       human-id: 2.0.1
-      ioredis: 4.28.3
+      ioredis: 4.28.5
       jsonwebtoken: 8.5.1
       jwks-rsa: 2.0.5
       lodash: 4.17.21
@@ -397,13 +397,13 @@ importers:
       '@hive/schema': link:../schema
       '@hive/tokens': link:../tokens
       '@hive/webhooks': link:../webhooks
-      '@types/ioredis': 4.28.7
+      '@types/ioredis': 4.28.10
       '@types/ioredis-mock': 5.6.0
       '@types/lodash': 4.14.182
       '@types/lru-cache': 7.6.1
       '@types/ms': 0.7.31
       '@types/uuid': 8.3.4
-      ioredis-mock: 7.4.0_ioredis@4.28.3
+      ioredis-mock: 7.4.0_ioredis@4.28.5
       tslib: 2.4.0
 
   packages/services/cdn-worker:
@@ -446,7 +446,7 @@ importers:
       bullmq: 1.81.4
       copyfiles: 2.4.1
       dotenv: 10.0.0
-      ioredis: 4.28.3
+      ioredis: 4.28.5
       mjml: 4.13.0
       nodemailer: 6.7.8
       p-timeout: 5.0.2
@@ -460,7 +460,7 @@ importers:
       '@whatwg-node/fetch': 0.4.7
       bullmq: 1.81.4_d7likfulu5mfjaaerbpls6og24
       dotenv: 10.0.0
-      ioredis: 4.28.3
+      ioredis: 4.28.5
       mjml: 4.13.0
       nodemailer: 6.7.8
       p-timeout: 5.0.2
@@ -531,13 +531,13 @@ importers:
       '@sentry/tracing': 7.12.1
       '@trpc/server': 9.23.2
       '@types/async-retry': 1.4.5
-      '@types/ioredis': 4.28.7
+      '@types/ioredis': 4.28.10
       '@whatwg-node/fetch': 0.4.7
       async-retry: 1.3.3
       dotenv: 10.0.0
       fastify: 3.29.3
       graphql: 16.5.0
-      ioredis: 4.28.3
+      ioredis: 4.28.5
       pino-pretty: 6.0.0
       zod: 3.15.1
     dependencies:
@@ -551,12 +551,12 @@ importers:
       async-retry: 1.3.3
       dotenv: 10.0.0
       graphql: 16.5.0
-      ioredis: 4.28.3
+      ioredis: 4.28.5
       zod: 3.15.1
     devDependencies:
       '@hive/service-common': link:../service-common
       '@types/async-retry': 1.4.5
-      '@types/ioredis': 4.28.7
+      '@types/ioredis': 4.28.10
       fastify: 3.29.3
       pino-pretty: 6.0.0
 
@@ -861,7 +861,7 @@ importers:
       copyfiles: 2.4.1
       dotenv: 10.0.0
       got: 12.5.1
-      ioredis: 4.28.3
+      ioredis: 4.28.5
       p-timeout: 5.0.2
       pino-pretty: 6.0.0
       tslib: 2.4.0
@@ -873,7 +873,7 @@ importers:
       bullmq: 1.81.4_d7likfulu5mfjaaerbpls6og24
       dotenv: 10.0.0
       got: 12.5.1
-      ioredis: 4.28.3
+      ioredis: 4.28.5
       p-timeout: 5.0.2
       zod: 3.15.1
     devDependencies:
@@ -9159,12 +9159,6 @@ packages:
       '@types/node': 18.11.5
     dev: true
 
-  /@types/ioredis/4.28.7:
-    resolution: {integrity: sha512-jnSGCD2/TPk02j6v6CGqaCEl0LbmLgK6jUuk/AFaSNUBV+SCHiG7E7fnwJreN6hw9GqtLAFkJs4zFbkJrz11mQ==}
-    dependencies:
-      '@types/node': 18.11.5
-    dev: true
-
   /@types/is-ci/3.0.0:
     resolution: {integrity: sha512-Q0Op0hdWbYd1iahB+IFNQcWXFq4O0Q5MwQP7uN0souuQ4rPg1vEYcnIOfr1gY+M+6rc8FGoRaBO1mOOvL29sEQ==}
     dependencies:
@@ -15710,7 +15704,7 @@ packages:
       fp-ts: 2.12.3
     dev: false
 
-  /ioredis-mock/7.4.0_ioredis@4.28.3:
+  /ioredis-mock/7.4.0_ioredis@4.28.5:
     resolution: {integrity: sha512-jcNG+9YjjBA1p6Hb1nYaC1yhW+n9S5VOgbGZXt59ZmtI2WrPWH+lSD4gE017uaGitPqW7tquFdAfcBPvFEQbew==}
     engines: {node: '>=12'}
     peerDependencies:
@@ -15718,28 +15712,10 @@ packages:
     dependencies:
       fengari: 0.1.4
       fengari-interop: 0.1.3_fengari@0.1.4
-      ioredis: 4.28.3
+      ioredis: 4.28.5
       redis-commands: 1.7.0
       standard-as-callback: 2.1.0
     dev: true
-
-  /ioredis/4.28.3:
-    resolution: {integrity: sha512-9JOWVgBnuSxpIgfpjc1OeY1OLmA4t2KOWWURTDRXky+eWO0LZhI33pQNT9gYxANUXfh5p/zYephYni6GPRsksQ==}
-    engines: {node: '>=6'}
-    dependencies:
-      cluster-key-slot: 1.1.1
-      debug: 4.3.4
-      denque: 1.5.1
-      lodash.defaults: 4.2.0
-      lodash.flatten: 4.4.0
-      lodash.isarguments: 3.1.0
-      p-map: 2.1.0
-      redis-commands: 1.7.0
-      redis-errors: 1.2.0
-      redis-parser: 3.0.0
-      standard-as-callback: 2.1.0
-    transitivePeerDependencies:
-      - supports-color
 
   /ioredis/4.28.5:
     resolution: {integrity: sha512-3GYo0GJtLqgNXj4YhrisLaNNvWSNwSS2wS4OELGfGxH8I69+XfNdnmV1AyN+ZqMh0i7eX+SWjrwFKDBDgfBC1A==}
@@ -15758,7 +15734,6 @@ packages:
       standard-as-callback: 2.1.0
     transitivePeerDependencies:
       - supports-color
-    dev: false
 
   /ip-regex/2.1.0:
     resolution: {integrity: sha512-58yWmlHpp7VYfcdTwMTvwMmqx/Elfxjd9RXTDyMsbL7lLWmhMylLEqiYVLKuLzOZqVgiWXD9MfR62Vv89VRxkw==}
