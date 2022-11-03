@@ -113,3 +113,5 @@ integration-tests/testkit/gql/
 
 # bob
 .bob
+
+.hive
