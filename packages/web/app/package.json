@@ -72,8 +72,6 @@
     "react-window": "1.8.7",
     "regenerator-runtime": "0.13.10",
     "snarkdown": "2.0.0",
-    "tailwindcss": "2.2.19",
-    "tslib": "2.4.0",
     "twin.macro": "2.8.2",
     "urql": "2.0.5",
     "use-debounce": "6.0.1",
@@ -90,6 +88,8 @@
     "@trpc/client": "9.23.2"
   },
   "devDependencies": {
+    "tailwindcss": "2.2.19",
+    "tslib": "2.4.0",
     "@graphql-codegen/gql-tag-operations-preset": "1.7.0",
     "@graphql-typed-document-node/core": "3.1.1",
     "@next/eslint-plugin-next": "13.0.0",

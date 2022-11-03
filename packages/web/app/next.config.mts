@@ -6,8 +6,6 @@ if (globalThis.process.env.BUILD !== '1') {
 
 export default {
   poweredByHeader: false,
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
   eslint: {
     ignoreDuringBuilds: true,
   },
