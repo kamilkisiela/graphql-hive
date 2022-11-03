@@ -1,5 +1,3 @@
-please run CI
-
 # GraphQL Hive
 
 GraphQL Hive provides all the tools the get visibility of your GraphQL architecture at all stages, from standalone APIs to composed schemas (Federation, Stitching).
