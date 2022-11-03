@@ -27,7 +27,7 @@ export const ChangePermissionsModal = ({
     <Modal open={isOpen} onOpenChange={toggleModalOpen} className="w-[600px]">
       <form className="flex flex-col items-center gap-5" onSubmit={manager.submit}>
         <Heading>Permissions</Heading>
-        <Accordion defaultIndex={0}>
+        <Accordion defaultIndex={0} width="100%">
           <PermissionsSpace
             title="Organization"
             scopes={scopes.organization}
