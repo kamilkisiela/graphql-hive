@@ -889,6 +889,7 @@ importers:
   packages/web/app:
     specifiers:
       '@chakra-ui/react': 1.6.10
+      '@emotion/cache': 11.10.3
       '@emotion/css': 11.10.0
       '@emotion/react': 11.10.0
       '@emotion/server': 11.10.0
@@ -990,6 +991,7 @@ importers:
       zod: 3.15.1
     dependencies:
       '@chakra-ui/react': 1.6.10_gmhkuuwdsfuiv4pdpz44jjlaf4
+      '@emotion/cache': 11.10.3
       '@emotion/css': 11.10.0
       '@emotion/react': 11.10.0_hx2b44akkvgcgvvtmk7ds2qk6q
       '@emotion/server': 11.10.0_@emotion+css@11.10.0
