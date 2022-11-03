@@ -977,6 +977,7 @@ importers:
       supertokens-auth-react: 0.27.1
       supertokens-js-override: 0.0.4
       supertokens-node: 12.0.5
+      supertokens-website: 13.1.0
       tailwindcss: 2.2.19
       tailwindcss-radix: 2.2.0
       tslib: 2.4.0
@@ -1054,6 +1055,7 @@ importers:
       supertokens-auth-react: 0.27.1_k2mvpji5i2ojml6m4ftklg47pa
       supertokens-js-override: 0.0.4
       supertokens-node: 12.0.5
+      supertokens-website: 13.1.0
       tailwindcss: 2.2.19_cr4sis33dk4di3xnobyqnqmrf4
       tslib: 2.4.0
       twin.macro: 2.8.2
@@ -10483,7 +10485,7 @@ packages:
   /axios/0.21.4:
     resolution: {integrity: sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg==}
     dependencies:
-      follow-redirects: 1.15.2_debug@4.3.4
+      follow-redirects: 1.15.2
     transitivePeerDependencies:
       - debug
     dev: false
@@ -12837,7 +12839,7 @@ packages:
     dev: false
 
   /ee-first/1.1.1:
-    resolution: {integrity: sha1-WQxhFWsK4vTwJVcyoViyZrxWsh0=}
+    resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
     dev: false
 
   /ejs/3.1.8:
@@ -14297,6 +14299,16 @@ packages:
 
   /focus-visible/5.2.0:
     resolution: {integrity: sha512-Rwix9pBtC1Nuy5wysTmKy+UjbDJpIfg8eHjw0rjZ1mX4GNLz1Bmd16uDpI3Gk1i70Fgcs8Csg2lPm8HULFg9DQ==}
+    dev: false
+
+  /follow-redirects/1.15.2:
+    resolution: {integrity: sha512-VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==}
+    engines: {node: '>=4.0'}
+    peerDependencies:
+      debug: '*'
+    peerDependenciesMeta:
+      debug:
+        optional: true
     dev: false
 
   /follow-redirects/1.15.2_debug@4.3.4:
@@ -17945,7 +17957,7 @@ packages:
     dev: false
 
   /media-typer/0.3.0:
-    resolution: {integrity: sha1-hxDXrwqmJvj/+hzgAWhUUmMlV0g=}
+    resolution: {integrity: sha512-dq+qelQ9akHpcOl/gUVRTxVIOkAJ1wR3QAvb4RsVjS8oVoFjDGTc679wJYmUmknUF5HwMLOgb5O+a3KxfWapPQ==}
     engines: {node: '>= 0.6'}
     dev: false
 
@@ -18959,7 +18971,7 @@ packages:
     engines: {node: '>=4'}
 
   /ms/2.0.0:
-    resolution: {integrity: sha1-VgiurfwAvmwpAd9fmGF4jeDVl8g=}
+    resolution: {integrity: sha512-Tpp60P6IUJDTuOq/5Z8cdskzJujfwqfOTkrwIwj7IRISpnkJnT6SyJ4PCPnGMoFjC9ddhal5KVIYtAt97ix05A==}
 
   /ms/2.1.2:
     resolution: {integrity: sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==}
@@ -23001,6 +23013,13 @@ packages:
       supertokens-website: 14.0.2
     dev: false
 
+  /supertokens-website/13.1.0:
+    resolution: {integrity: sha512-dX5EhkfdPb899EUgD0yAW9d5hWZbXk3iQ4VrP9oZud+CVjk94J5kpyJXN/MLoUAutwwDXebzb+VhOXM9YAslSQ==}
+    dependencies:
+      browser-tabs-lock: 1.2.15
+      supertokens-js-override: 0.0.4
+    dev: false
+
   /supertokens-website/14.0.2:
     resolution: {integrity: sha512-zCHRGF8P1lDnSezIsfdh2LqepBX/7/KfQoYJc0m3zzDGKCYdL9KluNwgowgL8lD7dknQjLRq7L9Fn7lTjNf6BQ==}
     dependencies:
@@ -24270,7 +24289,7 @@ packages:
       normalize-path: 2.1.1
 
   /unpipe/1.0.0:
-    resolution: {integrity: sha1-sr9O6FFKrmFltIF4KdIbLvSZBOw=}
+    resolution: {integrity: sha512-pjy2bYhSsufwWlKwPc+l3cN7+wuJlK6uz0YdJEOlQDbl6jo/YlPi4mb8agUkVC8BF7V8NuzeyPNqRksA3hztKQ==}
     engines: {node: '>= 0.8'}
     dev: false
 

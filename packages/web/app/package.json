@@ -82,6 +82,7 @@
     "supertokens-auth-react": "0.27.1",
     "supertokens-node": "12.0.5",
     "supertokens-js-override": "0.0.4",
+    "supertokens-website": "13.1.0",
     "nextjs-cors": "2.1.1",
     "@whatwg-node/fetch": "0.4.7",
     "zod": "3.15.1",
