@@ -99,11 +99,13 @@ export const Header = (): ReactElement => {
                 {me?.displayName}
               </DropdownMenu.Label>
               <DropdownMenu>
-                <DropdownMenu.TriggerItem>
-                  <GridIcon className="h-5 w-5" />
-                  Switch organization
-                  <ArrowDownIcon className="ml-10 -rotate-90 text-white" />
-                </DropdownMenu.TriggerItem>
+                {me?.canSwitchOrganization ? null : (
+                  <DropdownMenu.TriggerItem>
+                    <GridIcon className="h-5 w-5" />
+                    Switch organization
+                    <ArrowDownIcon className="ml-10 -rotate-90 text-white" />
+                  </DropdownMenu.TriggerItem>
+                )}
                 <DropdownMenu.Content sideOffset={25} className="max-w-[300px]">
                   <DropdownMenu.Label className="px-2 text-xs font-bold text-gray-500">PERSONAL</DropdownMenu.Label>
                   {personal.map(org => (

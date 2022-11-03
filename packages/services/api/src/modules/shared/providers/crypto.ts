@@ -11,7 +11,7 @@ const ENCRYPTION_SECRET = new InjectionToken<string>('ENCRYPTION_SECRET');
 export function encryptionSecretProvider(value: string) {
   return {
     provide: ENCRYPTION_SECRET,
-    useValue: crypto.createHash('md5').update(value).digest('hex'),
+    useValue: value,
     scope: Scope.Singleton,
   };
 }
@@ -20,7 +20,11 @@ export function encryptionSecretProvider(value: string) {
   scope: Scope.Singleton,
 })
 export class CryptoProvider {
-  constructor(@Inject(ENCRYPTION_SECRET) private encryptionSecret: string) {}
+  encryptionSecret: string;
+
+  constructor(@Inject(ENCRYPTION_SECRET) encryptionSecret: string) {
+    this.encryptionSecret = crypto.createHash('md5').update(encryptionSecret).digest('hex');
+  }
 
   encrypt(text: string) {
     const secretBuffer = Buffer.from(this.encryptionSecret, 'latin1');

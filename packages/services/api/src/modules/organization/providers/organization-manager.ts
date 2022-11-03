@@ -132,10 +132,16 @@ export class OrganizationManager {
     user: {
       id: string;
       superTokensUserId: string | null;
+      oidcIntegrationId: string | null;
     };
   }): Promise<Organization> {
     const { name, type, user } = input;
     this.logger.info('Creating an organization (input=%o)', input);
+
+    if (user.oidcIntegrationId) {
+      this.logger.debug('Failed to create organization as oidc user is not allowed to do so (input=%o)', input);
+      throw new HiveError('Cannot create organization with OIDC user.');
+    }
 
     const organization = await this.storage.createOrganization({
       name,
@@ -381,6 +387,15 @@ export class OrganizationManager {
 
   async joinOrganization({ code }: { code: string }): Promise<Organization | { message: string }> {
     this.logger.info('Joining an organization (code=%s)', code);
+
+    const user = await this.authManager.getCurrentUser();
+
+    if (user.oidcIntegrationId !== null) {
+      return {
+        message: `You cannot join an organization with an OIDC account.`,
+      };
+    }
+
     const organization = await this.getOrganizationByInviteCode({
       code,
     });
@@ -393,9 +408,7 @@ export class OrganizationManager {
       throw new HiveError(`Cannot join a personal organization`);
     }
 
-    const user = await this.authManager.getCurrentUser();
-
-    await this.storage.addOrganizationMember({
+    await this.storage.addOrganizationMemberViaInvitationCode({
       code,
       user: user.id,
       organization: organization.id,

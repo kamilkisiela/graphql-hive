@@ -1,6 +1,14 @@
 import zod from 'zod';
 import * as Sentry from '@sentry/nextjs';
 
+// treat an empty string (`''`) as undefined
+const emptyString = <T extends zod.ZodType>(input: T) => {
+  return zod.preprocess((value: unknown) => {
+    if (value === '') return undefined;
+    return value;
+  }, input);
+};
+
 const BaseSchema = zod.object({
   NODE_ENV: zod.string(),
   ENVIRONMENT: zod.string(),
@@ -10,18 +18,18 @@ const BaseSchema = zod.object({
   EMAILS_ENDPOINT: zod.string().url(),
   SUPERTOKENS_CONNECTION_URI: zod.string().url(),
   SUPERTOKENS_API_KEY: zod.string(),
-  INTEGRATION_GITHUB_APP_NAME: zod.string().optional(),
-  GA_TRACKING_ID: zod.string().optional(),
-  CRISP_WEBSITE_ID: zod.string().optional(),
-  DOCS_URL: zod.string().url().optional(),
-  STRIPE_PUBLIC_KEY: zod.string().optional(),
-  RELEASE: zod.string().optional(),
-  AUTH_REQUIRE_EMAIL_VERIFICATION: zod.union([zod.literal('1'), zod.literal('0')]).optional(),
+  INTEGRATION_GITHUB_APP_NAME: emptyString(zod.string().optional()),
+  GA_TRACKING_ID: emptyString(zod.string().optional()),
+  CRISP_WEBSITE_ID: emptyString(zod.string().optional()),
+  DOCS_URL: emptyString(zod.string().url().optional()),
+  STRIPE_PUBLIC_KEY: emptyString(zod.string().optional()),
+  RELEASE: emptyString(zod.string().optional()),
+  AUTH_REQUIRE_EMAIL_VERIFICATION: emptyString(zod.union([zod.literal('1'), zod.literal('0')]).optional()),
 });
 
 const IntegrationSlackSchema = zod.union([
   zod.object({
-    INTEGRATION_SLACK: zod.literal('0').optional(),
+    INTEGRATION_SLACK: emptyString(zod.literal('0').optional()),
   }),
   zod.object({
     INTEGRATION_SLACK: zod.literal('1'),
@@ -51,6 +59,23 @@ const AuthGoogleConfigSchema = zod.union([
     AUTH_GOOGLE_CLIENT_SECRET: zod.string(),
   }),
 ]);
+
+const AuthOktaConfigSchema = zod.union([
+  zod.object({
+    AUTH_OKTA: zod.union([zod.void(), zod.literal('0')]),
+  }),
+  zod.object({
+    AUTH_OKTA: zod.literal('1'),
+    AUTH_OKTA_HIDDEN: emptyString(zod.union([zod.literal('1'), zod.literal('0')]).optional()),
+    AUTH_OKTA_ENDPOINT: zod.string().url(),
+    AUTH_OKTA_CLIENT_ID: zod.string(),
+    AUTH_OKTA_CLIENT_SECRET: zod.string(),
+  }),
+]);
+
+const AuthOktaMultiTenantSchema = zod.object({
+  AUTH_ORGANIZATION_OIDC: emptyString(zod.union([zod.literal('1'), zod.literal('0')]).optional()),
+});
 
 const SentryConfigSchema = zod.union([
   zod.object({
@@ -89,6 +114,10 @@ const configs = {
   // eslint-disable-next-line no-process-env
   authGoogle: AuthGoogleConfigSchema.safeParse(process.env),
   // eslint-disable-next-line no-process-env
+  authOkta: AuthOktaConfigSchema.safeParse(process.env),
+  // eslint-disable-next-line no-process-env
+  authOktaMultiTenant: AuthOktaMultiTenantSchema.safeParse(process.env),
+  // eslint-disable-next-line no-process-env
   authLegacyAuth0: LegacyAuth0Config.safeParse(process.env),
 };
 
@@ -118,13 +147,15 @@ const integrationSlack = extractConfig(configs.integrationSlack);
 const sentry = extractConfig(configs.sentry);
 const authGithub = extractConfig(configs.authGithub);
 const authGoogle = extractConfig(configs.authGoogle);
+const authOkta = extractConfig(configs.authOkta);
+const authOktaMultiTenant = extractConfig(configs.authOktaMultiTenant);
 const auth0Legacy = extractConfig(configs.authLegacyAuth0);
 
 const config = {
   release: base.RELEASE ?? 'local',
   nodeEnv: base.NODE_ENV,
   environment: base.ENVIRONMENT,
-  appBaseUrl: base.APP_BASE_URL,
+  appBaseUrl: base.APP_BASE_URL.replace(/\/$/, ''),
   graphqlEndpoint: base.GRAPHQL_ENDPOINT,
   serverEndpoint: base.SERVER_ENDPOINT,
   emailsEndpoint: base.EMAILS_ENDPOINT,
@@ -164,6 +195,16 @@ const config = {
             clientSecret: authGoogle.AUTH_GOOGLE_CLIENT_SECRET,
           }
         : null,
+    okta:
+      authOkta.AUTH_OKTA === '1'
+        ? {
+            endpoint: authOkta.AUTH_OKTA_ENDPOINT,
+            hidden: authOkta.AUTH_OKTA_HIDDEN === '1',
+            clientId: authOkta.AUTH_OKTA_CLIENT_ID,
+            clientSecret: authOkta.AUTH_OKTA_CLIENT_SECRET,
+          }
+        : null,
+    organizationOIDC: authOktaMultiTenant.AUTH_ORGANIZATION_OIDC === '1',
     legacyAuth0:
       auth0Legacy.AUTH_LEGACY_AUTH0 === '1'
         ? {

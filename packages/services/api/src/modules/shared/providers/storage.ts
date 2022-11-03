@@ -15,6 +15,7 @@ import type {
   Alert,
   OrganizationBilling,
   OrganizationInvitation,
+  OIDCIntegration,
 } from '../../../shared/entities';
 import type { CustomOrchestratorConfig } from '../../schema/providers/orchestrators/custom';
 import type { AddAlertChannelInput, AddAlertInput } from '../../../__generated__/types';
@@ -51,6 +52,10 @@ export interface Storage {
     email: string;
     reservedOrgNames: string[];
     scopes: ReadonlyArray<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
+    oidcIntegration: null | {
+      id: string;
+      defaultScopes: Array<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
+    };
   }): Promise<'created' | 'no_action'>;
 
   getUserBySuperTokenId(_: { superTokensUserId: string }): Promise<User | null>;
@@ -58,13 +63,6 @@ export interface Storage {
   getUserWithoutAssociatedSuperTokenIdByAuth0Email(_: { email: string }): Promise<User | null>;
   getUserById(_: { id: string }): Promise<User | null>;
 
-  createUser(_: {
-    email: string;
-    superTokensUserId: string;
-    externalAuthUserId: string | null;
-    displayName: string;
-    fullName: string;
-  }): Promise<User | never>;
   updateUser(_: { id: string; fullName: string; displayName: string }): Promise<User | never>;
 
   getOrganizationId(_: OrganizationSelector): Promise<string | never>;
@@ -104,7 +102,7 @@ export interface Storage {
   ): Promise<ReadonlyArray<ReadonlyArray<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>>>;
   hasOrganizationMemberPairs(_: readonly (OrganizationSelector & { user: string })[]): Promise<readonly boolean[]>;
   hasOrganizationProjectMemberPairs(_: readonly (ProjectSelector & { user: string })[]): Promise<readonly boolean[]>;
-  addOrganizationMember(
+  addOrganizationMemberViaInvitationCode(
     _: OrganizationSelector & {
       code: string;
       user: string;
@@ -338,6 +336,22 @@ export interface Storage {
       step: Exclude<keyof Organization['getStarted'], 'id'>;
     }
   ): Promise<void>;
+
+  getOIDCIntegrationForOrganization(_: { organizationId: string }): Promise<OIDCIntegration | null>;
+  getOIDCIntegrationById(_: { oidcIntegrationId: string }): Promise<OIDCIntegration | null>;
+  createOIDCIntegrationForOrganization(_: {
+    organizationId: string;
+    clientId: string;
+    encryptedClientSecret: string;
+    oauthApiUrl: string;
+  }): Promise<{ type: 'ok'; oidcIntegration: OIDCIntegration } | { type: 'error'; reason: string }>;
+  updateOIDCIntegration(_: {
+    oidcIntegrationId: string;
+    clientId: string | null;
+    encryptedClientSecret: string | null;
+    oauthApiUrl: string | null;
+  }): Promise<OIDCIntegration>;
+  deleteOIDCIntegration(_: { oidcIntegrationId: string }): Promise<void>;
 }
 
 @Injectable()

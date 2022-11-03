@@ -63,15 +63,13 @@ const CreateSessionModel = z.object({
   }),
 });
 
-const createSession = async (superTokensUserId: string, email: string) => {
-  // I failed to make the TypeScript work here...
-  // It shows that the input type is `undefined`...
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
+const createSession = async (superTokensUserId: string, email: string, oidcIntegrationId: string | null) => {
   await internalApi.mutation('ensureUser', {
     superTokensUserId,
     email,
+    oidcIntegrationId,
   });
+
   const sessionData = createSessionPayload(superTokensUserId, email);
   const payload = {
     enableAntiCsrf: false,
@@ -104,7 +102,7 @@ const createSession = async (superTokensUserId: string, email: string) => {
   };
 };
 
-type UserID = 'main' | 'extra' | 'admin';
+type UserID = 'main' | 'extra' | 'admin' | string;
 const password = 'ilikebigturtlesandicannotlie47';
 
 export const userEmails: Record<UserID, string> = {
@@ -119,10 +117,12 @@ const tokenResponsePromise: Record<UserID, Promise<z.TypeOf<typeof SignUpSignInU
   admin: null,
 };
 
-export function authenticate(userId: UserID): Promise<{ access_token: string }> {
+export function authenticate(userId: UserID, oidcIntegrationId?: string): Promise<{ access_token: string }> {
   if (!tokenResponsePromise[userId]) {
-    tokenResponsePromise[userId] = signUpUserViaEmail(userEmails[userId], password);
+    tokenResponsePromise[userId] = signUpUserViaEmail(userEmails[userId] ?? `${userId}@localhost.localhost`, password);
   }
 
-  return tokenResponsePromise[userId]!.then(data => createSession(data.user.id, data.user.email));
+  return tokenResponsePromise[userId]!.then(data =>
+    createSession(data.user.id, data.user.email, oidcIntegrationId ?? null)
+  );
 }

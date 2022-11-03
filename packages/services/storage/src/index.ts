@@ -17,8 +17,17 @@ import type {
   ProjectType,
   OrganizationType,
   OrganizationInvitation,
+  OrganizationAccessScope,
+  ProjectAccessScope,
+  TargetAccessScope,
 } from '@hive/api';
-import { DatabasePool, DatabaseTransactionConnection, sql, TaggedTemplateLiteralInvocation } from 'slonik';
+import {
+  DatabasePool,
+  DatabaseTransactionConnection,
+  sql,
+  TaggedTemplateLiteralInvocation,
+  UniqueIntegrityConstraintViolationError,
+} from 'slonik';
 import { update } from 'slonik-utilities';
 import { paramCase } from 'param-case';
 import {
@@ -42,6 +51,8 @@ import {
 } from './db';
 import { batch } from '@theguild/buddy';
 import type { Slonik } from './shared';
+import zod from 'zod';
+import type { OIDCIntegration } from '../../api/src/shared/entities';
 
 export { createConnectionString } from './db/utils';
 export { createTokenStorage } from './tokens';
@@ -88,6 +99,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       displayName: user.display_name,
       isAdmin: user.is_admin ?? false,
       externalAuthUserId: user.external_auth_user_id ?? null,
+      oidcIntegrationId: user.oidc_integration_id ?? null,
     };
   }
 
@@ -310,12 +322,14 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         fullName,
         displayName,
         externalAuthUserId,
+        oidcIntegrationId,
       }: {
         superTokensUserId: string;
         email: string;
         fullName: string;
         displayName: string;
         externalAuthUserId: string | null;
+        oidcIntegrationId: string | null;
       },
       connection: Connection
     ) {
@@ -323,9 +337,9 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         await connection.one<Slonik<users>>(
           sql`
             INSERT INTO public.users
-              ("email", "supertoken_user_id", "full_name", "display_name", "external_auth_user_id")
+              ("email", "supertoken_user_id", "full_name", "display_name", "external_auth_user_id", "oidc_integration_id")
             VALUES
-              (${email}, ${superTokensUserId}, ${fullName}, ${displayName}, ${externalAuthUserId})
+              (${email}, ${superTokensUserId}, ${fullName}, ${displayName}, ${externalAuthUserId}, ${oidcIntegrationId})
             RETURNING *
           `
         )
@@ -393,9 +407,46 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       return transformOrganization(org);
     },
+    async addOrganizationMemberViaOIDCIntegrationId(
+      args: {
+        oidcIntegrationId: string;
+        userId: string;
+        defaultScopes: Array<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
+      },
+      connection: Connection
+    ) {
+      const linkedOrganizationId = await connection.maybeOneFirst<string>(sql`
+          SELECT
+            "linked_organization_id"
+          FROM
+            "public"."oidc_integrations"
+          WHERE
+            "id" = ${args.oidcIntegrationId}
+        `);
+
+      if (linkedOrganizationId === null) {
+        return;
+      }
+
+      await connection.query(
+        sql`
+          INSERT INTO public.organization_member
+            (organization_id, user_id, scopes)
+          VALUES
+            (${linkedOrganizationId}, ${args.userId}, ${sql.array(args.defaultScopes, 'text')})
+          ON CONFLICT DO NOTHING
+          RETURNING *
+        `
+      );
+    },
   };
 
-  function buildUserData(input: { superTokensUserId: string; email: string; externalAuthUserId: string | null }) {
+  function buildUserData(input: {
+    superTokensUserId: string;
+    email: string;
+    externalAuthUserId: string | null;
+    oidcIntegrationId: string | null;
+  }) {
     const displayName = input.email.split('@')[0].slice(0, 25).padEnd(2, '1');
     const fullName = input.email.split('@')[0].slice(0, 25).padEnd(2, '1');
 
@@ -405,6 +456,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       displayName,
       fullName,
       externalAuthUserId: input.externalAuthUserId,
+      oidcIntegrationId: input.oidcIntegrationId,
     };
   }
 
@@ -418,12 +470,17 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       email,
       scopes,
       reservedOrgNames,
+      oidcIntegration,
     }: {
       superTokensUserId: string;
       externalAuthUserId?: string | null;
       email: string;
       reservedOrgNames: string[];
       scopes: Parameters<Storage['createOrganization']>[0]['scopes'];
+      oidcIntegration: null | {
+        id: string;
+        defaultScopes: Array<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
+      };
     }) {
       return pool.transaction(async t => {
         let action: 'created' | 'no_action' = 'no_action';
@@ -431,27 +488,44 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
         if (!internalUser) {
           internalUser = await shared.createUser(
-            buildUserData({ superTokensUserId, email, externalAuthUserId: externalAuthUserId ?? null }),
+            buildUserData({
+              superTokensUserId,
+              email,
+              externalAuthUserId: externalAuthUserId ?? null,
+              oidcIntegrationId: oidcIntegration?.id ?? null,
+            }),
             t
           );
           action = 'created';
         }
 
-        const personalOrg = await shared.getOrganization(internalUser.id, t);
+        if (oidcIntegration === null) {
+          const personalOrg = await shared.getOrganization(internalUser.id, t);
 
-        if (!personalOrg) {
-          await shared.createOrganization(
+          if (!personalOrg) {
+            await shared.createOrganization(
+              {
+                name: internalUser.displayName,
+                user: internalUser.id,
+                cleanId: paramCase(internalUser.displayName),
+                type: 'PERSONAL' as OrganizationType,
+                scopes,
+                reservedNames: reservedOrgNames,
+              },
+              t
+            );
+            action = 'created';
+          }
+        } else {
+          // Add user to OIDC linked integration
+          await shared.addOrganizationMemberViaOIDCIntegrationId(
             {
-              name: internalUser.displayName,
-              user: internalUser.id,
-              cleanId: paramCase(internalUser.displayName),
-              type: 'PERSONAL' as OrganizationType,
-              scopes,
-              reservedNames: reservedOrgNames,
+              oidcIntegrationId: oidcIntegration.id,
+              userId: internalUser.id,
+              defaultScopes: oidcIntegration.defaultScopes,
             },
             t
           );
-          action = 'created';
         }
 
         return action;
@@ -498,9 +572,6 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       }
 
       return null;
-    },
-    createUser(input) {
-      return shared.createUser(input, pool);
     },
     async updateUser({ id, displayName, fullName }) {
       return transformUser(
@@ -714,7 +785,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       `);
       return deleted ? transformOrganizationInvitation(deleted) : null;
     },
-    async addOrganizationMember({ code, user, organization, scopes }) {
+    async addOrganizationMemberViaInvitationCode({ code, user, organization, scopes }) {
       await pool.transaction(async trx => {
         await trx.query(sql`
           DELETE FROM public.organization_invitations
@@ -2082,6 +2153,119 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         }
       );
     },
+
+    async getOIDCIntegrationById({ oidcIntegrationId: integrationId }) {
+      const result = await pool.maybeOne<unknown>(sql`
+        SELECT
+          "id"
+          , "linked_organization_id"
+          , "client_id"
+          , "client_secret"
+          , "oauth_api_url"
+        FROM
+          "public"."oidc_integrations"
+        WHERE
+          "id" = ${integrationId}
+        LIMIT 1
+      `);
+
+      if (result === null) {
+        return null;
+      }
+
+      return decodeOktaIntegrationRecord(result);
+    },
+
+    async getOIDCIntegrationForOrganization({ organizationId }) {
+      const result = await pool.maybeOne<unknown>(sql`
+        SELECT
+          "id"
+          , "linked_organization_id"
+          , "client_id"
+          , "client_secret"
+          , "oauth_api_url"
+        FROM
+          "public"."oidc_integrations"
+        WHERE
+          "linked_organization_id" = ${organizationId}
+        LIMIT 1
+      `);
+
+      if (result === null) {
+        return null;
+      }
+
+      return decodeOktaIntegrationRecord(result);
+    },
+
+    async createOIDCIntegrationForOrganization(args) {
+      try {
+        const result = await pool.maybeOne<unknown>(sql`
+          INSERT INTO "public"."oidc_integrations" (
+            "linked_organization_id",
+            "client_id",
+            "client_secret",
+            "oauth_api_url"
+          )
+          VALUES (
+            ${args.organizationId},
+            ${args.clientId},
+            ${args.encryptedClientSecret},
+            ${args.oauthApiUrl}
+          )
+          RETURNING
+            "id"
+            , "linked_organization_id"
+            , "client_id"
+            , "client_secret"
+            , "oauth_api_url"
+        `);
+
+        return {
+          type: 'ok',
+          oidcIntegration: decodeOktaIntegrationRecord(result),
+        };
+      } catch (error) {
+        if (
+          error instanceof UniqueIntegrityConstraintViolationError &&
+          error.constraint === 'oidc_integrations_linked_organization_id_key'
+        ) {
+          return {
+            type: 'error',
+            reason: 'An OIDC integration already exists for this organization.',
+          };
+        }
+        throw error;
+      }
+    },
+
+    async updateOIDCIntegration(args) {
+      const result = await pool.maybeOne<unknown>(sql`
+        UPDATE "public"."oidc_integrations"
+        SET 
+          "oauth_api_url" = ${args.oauthApiUrl ?? sql`"oauth_api_url"`}
+          , "client_id" = ${args.clientId ?? sql`"client_id"`}
+          , "client_secret" = ${args.encryptedClientSecret ?? sql`"client_secret"`}
+        WHERE
+          "id" = ${args.oidcIntegrationId}
+        RETURNING
+          "id"
+          , "linked_organization_id"
+          , "client_id"
+          , "client_secret"
+          , "oauth_api_url"
+      `);
+
+      return decodeOktaIntegrationRecord(result);
+    },
+
+    async deleteOIDCIntegration(args) {
+      await pool.query<unknown>(sql`
+        DELETE FROM "public"."oidc_integrations"
+        WHERE
+          "id" = ${args.oidcIntegrationId}
+      `);
+    },
   };
 
   return storage;
@@ -2090,3 +2274,22 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 function isDefined<T>(val: T | undefined | null): val is T {
   return val !== undefined && val !== null;
 }
+
+const OktaIntegrationModel = zod.object({
+  id: zod.string(),
+  linked_organization_id: zod.string(),
+  client_id: zod.string(),
+  client_secret: zod.string(),
+  oauth_api_url: zod.string().url(),
+});
+
+const decodeOktaIntegrationRecord = (result: unknown): OIDCIntegration => {
+  const rawRecord = OktaIntegrationModel.parse(result);
+  return {
+    id: rawRecord.id,
+    clientId: rawRecord.client_id,
+    encryptedClientSecret: rawRecord.client_secret,
+    linkedOrganizationId: rawRecord.linked_organization_id,
+    oauthApiUrl: rawRecord.oauth_api_url,
+  };
+};

@@ -5,6 +5,7 @@ import * as Yup from 'yup';
 
 import { authenticated, withSessionProtection } from '@/components/authenticated-container';
 import { OrganizationLayout } from '@/components/layouts';
+import { OIDCIntegrationSection } from '@/components/organization/settings/oidc-integration-section';
 import { Button, Card, Heading, Input, Spinner, Tag, Title } from '@/components/v2';
 import { AlertTriangleIcon, GitHubIcon, SlackIcon } from '@/components/v2/icon';
 import { DeleteOrganizationModal } from '@/components/v2/modals';
@@ -106,6 +107,9 @@ const Integrations = (): ReactElement => {
           </>
         </div>
       )}
+      {checkIntegrations.data?.organization?.organization.viewerCanManageOIDCIntegration ? (
+        <OIDCIntegrationSection organization={checkIntegrations.data?.organization?.organization} />
+      ) : null}
     </>
   );
 };

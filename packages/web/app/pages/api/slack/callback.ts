@@ -38,7 +38,7 @@ export default async function slackCallback(req: NextApiRequest, res: NextApiRes
   const token = slackResponse.access_token;
 
   await graphql({
-    url: `${env.appBaseUrl.replace(/\/$/, '')}/api/proxy`,
+    url: `${env.appBaseUrl}/api/proxy`,
     headers: {
       ...req.headers,
       'content-type': 'application/json',

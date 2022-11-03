@@ -12,7 +12,7 @@ import '../public/styles.css';
 import cookies from 'js-cookie';
 import Session from 'supertokens-auth-react/recipe/session';
 import SuperTokens, { SuperTokensWrapper } from 'supertokens-auth-react';
-import { frontendConfig } from '@/config/frontend-config';
+import { frontendConfig } from '@/config/supertokens/frontend';
 import { configureScope } from '@sentry/nextjs';
 import { LAST_VISITED_ORG_KEY } from '@/constants';
 import { Provider as UrqlProvider } from 'urql';

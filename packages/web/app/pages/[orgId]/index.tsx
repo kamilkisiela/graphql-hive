@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import NextLink from 'next/link';
 import { onlyText } from 'react-children-utilities';
 import { useQuery } from 'urql';
@@ -9,6 +9,7 @@ import { Activities, Button, Card, DropdownMenu, EmptyList, Heading, Skeleton, T
 import { getActivity } from '@/components/v2/activities';
 import { LinkIcon, MoreIcon, SettingsIcon } from '@/components/v2/icon';
 import { ProjectActivitiesDocument, ProjectsWithTargetsDocument, ProjectsWithTargetsQuery } from '@/graphql';
+import { writeLastVisitedOrganization } from '@/lib/cookies';
 import { getDocsUrl } from '@/lib/docs-url';
 import { fixDuplicatedFragments } from '@/lib/graphql';
 import { useClipboard } from '@/lib/hooks/use-clipboard';
@@ -141,5 +142,11 @@ function ProjectsPage(): ReactElement {
   );
 }
 
-export const getServerSideProps = withSessionProtection();
+export const getServerSideProps = withSessionProtection(async ({ req, res, resolvedUrl }) => {
+  writeLastVisitedOrganization(req, res, resolvedUrl.substring(1));
+  return {
+    props: {},
+  };
+});
+
 export default authenticated(ProjectsPage);

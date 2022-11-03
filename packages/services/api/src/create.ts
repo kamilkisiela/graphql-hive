@@ -43,6 +43,8 @@ import { rateLimitModule } from './modules/rate-limit';
 import { RateLimitServiceConfig, RATE_LIMIT_SERVICE_CONFIG } from './modules/rate-limit/providers/tokens';
 import { BillingConfig, BILLING_CONFIG } from './modules/billing/providers/tokens';
 import { billingModule } from './modules/billing';
+import { OIDC_INTEGRATIONS_ENABLED } from './modules/oidc-integrations/providers/tokens';
+import { oidcIntegrationsModule } from './modules/oidc-integrations';
 
 const modules = [
   sharedModule,
@@ -64,6 +66,7 @@ const modules = [
   usageEstimationModule,
   rateLimitModule,
   billingModule,
+  oidcIntegrationsModule,
 ];
 
 export function createRegistry({
@@ -83,6 +86,7 @@ export function createRegistry({
   billing,
   schemaConfig,
   emailsEndpoint,
+  organizationOIDC,
 }: {
   logger: Logger;
   storage: Storage;
@@ -103,6 +107,7 @@ export function createRegistry({
   billing: BillingConfig;
   schemaConfig: SchemaModuleConfig;
   emailsEndpoint?: string;
+  organizationOIDC: boolean;
 }) {
   const providers = [
     HttpClient,
@@ -179,6 +184,11 @@ export function createRegistry({
     {
       provide: FEEDBACK_SLACK_TOKEN,
       useValue: feedback.token,
+      scope: Scope.Singleton,
+    },
+    {
+      provide: OIDC_INTEGRATIONS_ENABLED,
+      useValue: organizationOIDC,
       scope: Scope.Singleton,
     },
     encryptionSecretProvider(encryptionSecret),

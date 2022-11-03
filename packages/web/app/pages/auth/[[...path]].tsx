@@ -3,14 +3,33 @@ import Head from 'next/head';
 import 'twin.macro';
 import { FullLogo } from '@/components/common/Logo';
 import dynamic from 'next/dynamic';
+import type { GetServerSideProps } from 'next';
 import SuperTokensReact from 'supertokens-auth-react';
 import { env } from '@/env/frontend';
+import { startAuthFlowForProvider } from '@/lib/supertokens/start-auth-flow-for-provider';
+import { startAuthFlowForOIDCProvider } from '@/lib/supertokens/third-party-email-password-react-oidc-provider';
 
-export function getServerSideProps() {
+export const getServerSideProps: GetServerSideProps = async context => {
+  // See counter-part in '@/config/supertokens/frontend.ts'
+  if (env.auth.organizationOIDC === true) {
+    const url = new URL(env.appBaseUrl + (context.req.url ?? ''));
+    const oidcProviderId = url.searchParams.get('id');
+
+    if (url.pathname === '/auth/oidc' && oidcProviderId) {
+      return {
+        props: {
+          oidcProviderId,
+        },
+      };
+    }
+  }
+
   return {
-    props: {},
+    props: {
+      oidcProviderId: null,
+    },
   };
-}
+};
 
 const SuperTokensComponentNoSSR = dynamic(new Promise(res => res(SuperTokensReact.getRoutingComponent)) as any, {
   ssr: false,
@@ -19,7 +38,23 @@ const SuperTokensComponentNoSSR = dynamic(new Promise(res => res(SuperTokensReac
 /**
  * Route for showing the SuperTokens login page.
  */
-export default function Auth(): React.ReactElement {
+export default function Auth(props: { oidcProviderId: string | null }): React.ReactElement {
+  React.useEffect(() => {
+    if (props.oidcProviderId) {
+      startAuthFlowForOIDCProvider(props.oidcProviderId);
+      return;
+    }
+
+    // In case we are directed here from the Okta dashboard we automatically start the login flow.
+    const isOkta =
+      env.auth.okta !== null &&
+      new URLSearchParams(globalThis.window?.location.search ?? '').get('provider') === 'okta';
+
+    if (isOkta) {
+      startAuthFlowForProvider('okta');
+    }
+  }, []);
+
   return (
     <>
       <>
@@ -41,30 +76,34 @@ export default function Auth(): React.ReactElement {
         </Head>
         <div>
           <FullLogo className="mx-auto my-5 text-yellow-500" width={150} color={{ main: '#fff', sub: '#fff' }} />
-          {env.auth.legacyAuth0 === true ? (
-            <div tw="mx-auto bg-yellow-200 text-black sm:width[420px] width[76%] rounded-lg shadow-lg p-5 text-xs">
-              We recently migrated from Auth0 to SuperTokens. If you have any issues, please contact us at{' '}
-              <a href="mailto:kamil@graphql-hive.com" className="underline">
-                kamil@graphql-hive.com
-              </a>{' '}
-              or using the{' '}
-              <a
-                href="#"
-                className="underline"
-                onClick={() => {
-                  if (typeof window !== 'undefined' && (window as any).$crisp) {
-                    (window as any).$crisp.push(['do', 'chat:open']);
-                  }
-                }}
-              >
-                in-app chat
-              </a>
-              .
-            </div>
-          ) : null}
-          <SuperTokensComponentNoSSR />
+          {env.auth.legacyAuth0 === true ? <LegacyAuth0Notice /> : null}
+          {props.oidcProviderId ? null : <SuperTokensComponentNoSSR />}
         </div>
       </>
     </>
   );
 }
+
+const LegacyAuth0Notice = (): React.ReactElement => {
+  return (
+    <div tw="mx-auto bg-yellow-200 text-black sm:width[420px] width[76%] rounded-lg shadow-lg p-5 text-xs">
+      We recently migrated from Auth0 to SuperTokens. If you have any issues, please contact us at{' '}
+      <a href="mailto:kamil@graphql-hive.com" className="underline">
+        kamil@graphql-hive.com
+      </a>{' '}
+      or using the{' '}
+      <a
+        href="#"
+        className="underline"
+        onClick={() => {
+          if (typeof window !== 'undefined' && (window as any).$crisp) {
+            (window as any).$crisp.push(['do', 'chat:open']);
+          }
+        }}
+      >
+        in-app chat
+      </a>
+      .
+    </div>
+  );
+};

@@ -261,6 +261,7 @@ services:
       FF_CLICKHOUSE_V2_TABLES: ${FF_CLICKHOUSE_V2_TABLES}
       SUPERTOKENS_CONNECTION_URI: http://supertokens:3567
       SUPERTOKENS_API_KEY: bubatzbieber6942096420
+      AUTH_ORGANIZATION_OIDC: '1'
 
   schema:
     image: '${DOCKER_REGISTRY}schema${DOCKER_TAG}'

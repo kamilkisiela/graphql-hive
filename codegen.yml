@@ -75,6 +75,8 @@ generates:
         GraphQLInputField: ../shared/mappers#GraphQLInputFieldMapper
         GraphQLArgument: ../shared/mappers#GraphQLArgumentMapper
         OrganizationInvitation: ../shared/entities#OrganizationInvitation as OrganizationInvitationMapper
+        OIDCIntegration: '../shared/entities#OIDCIntegration as OIDCIntegrationMapper'
+        User: '../shared/entities#User as UserMapper'
     plugins:
       - add:
           content: "import { StripeTypes } from '@hive/stripe-billing';"

@@ -130,6 +130,14 @@ export interface OrganizationBilling {
   billingEmailAddress?: string | null;
 }
 
+export interface OIDCIntegration {
+  id: string;
+  linkedOrganizationId: string;
+  clientId: string;
+  encryptedClientSecret: string;
+  oauthApiUrl: string;
+}
+
 export interface Project {
   id: string;
   cleanId: string;
@@ -175,6 +183,7 @@ export interface User {
   superTokensUserId: string | null;
   isAdmin: boolean;
   externalAuthUserId: string | null;
+  oidcIntegrationId: string | null;
 }
 
 export interface Member {
