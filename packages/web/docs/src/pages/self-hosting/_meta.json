@@ -1,4 +1,5 @@
 {
   "get-started": "Get Started",
-  "oidc-login": "OIDC Login"
+  "oidc-login": "OIDC Login",
+  "client-and-cli-configuration": "Client & CLI Configuration"
 }
