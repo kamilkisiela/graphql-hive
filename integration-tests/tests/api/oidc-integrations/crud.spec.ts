@@ -573,6 +573,93 @@ describe('delete', () => {
         ]
       `);
     });
+
+    test('success: upon integration deletion oidc members are also deleted', async () => {
+      const { access_token } = await authenticate('main');
+      const orgResult = await createOrganization(
+        {
+          name: 'foo',
+        },
+        access_token
+      );
+
+      const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+
+      const createResult = await execute({
+        document: CreateOIDCIntegrationMutation,
+        variables: {
+          input: {
+            organizationId: org.id,
+            clientId: 'foo',
+            clientSecret: 'foofoofoofoo',
+            oauthApiUrl: 'http://localhost:8888/oauth',
+          },
+        },
+        authToken: access_token,
+      });
+
+      expect(createResult.body.errors).toBeUndefined();
+      const oidcIntegrationId = createResult.body.data!.createOIDCIntegration.ok!.createdOIDCIntegration.id;
+
+      const MeQuery = gql(/* GraphQL */ `
+        query Me {
+          me {
+            id
+          }
+        }
+      `);
+
+      // create new member that belongs to oidc integration
+      const { access_token: memberAccessToken } = await authenticate('oidc_member', oidcIntegrationId);
+      let meResult = await execute({
+        document: MeQuery,
+        authToken: memberAccessToken,
+      });
+
+      expect(meResult.body.errors).toBeUndefined();
+      expect(meResult.body.data).toEqual({
+        me: {
+          id: expect.any(String),
+        },
+      });
+
+      const deleteResult = await execute({
+        document: DeleteOIDCIntegrationMutation,
+        variables: {
+          input: {
+            oidcIntegrationId,
+          },
+        },
+        authToken: access_token,
+      });
+
+      expect(deleteResult.body.errors).toBeUndefined();
+
+      meResult = await execute({
+        document: MeQuery,
+        authToken: memberAccessToken,
+      });
+
+      expect(meResult.body).toMatchInlineSnapshot(`
+        {
+          "data": null,
+          "errors": [
+            {
+              "locations": [
+                {
+                  "column": 3,
+                  "line": 2,
+                },
+              ],
+              "message": "No access (reason: "User not found")",
+              "path": [
+                "me",
+              ],
+            },
+          ],
+        }
+      `);
+    });
   });
 });
 
