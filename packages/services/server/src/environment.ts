@@ -281,8 +281,8 @@ export const env = {
           },
         }
       : null,
-  tracking: {
+  tracking: base.TRACKING_KEY ? {
     key: base.TRACKING_KEY,
-  },
+  } : null,
   hive: hiveConfig,
 } as const;
