@@ -10,7 +10,7 @@ export const resolvers: OidcIntegrationsModule.Resolvers = {
         organizationId: input.organizationId,
         clientId: input.clientId,
         clientSecret: input.clientSecret,
-        domain: input.domain,
+        oauthApiUrl: input.oauthApiUrl,
       });
 
       if (result.type === 'ok') {
@@ -32,7 +32,7 @@ export const resolvers: OidcIntegrationsModule.Resolvers = {
           details: {
             clientId: result.fieldErrors?.clientId,
             clientSecret: result.fieldErrors?.clientSecret,
-            domain: result.fieldErrors?.domain,
+            oauthApiUrl: result.fieldErrors?.oauthApiUrl,
           },
         },
       };
@@ -43,7 +43,7 @@ export const resolvers: OidcIntegrationsModule.Resolvers = {
         oidcIntegrationId: input.oidcIntegrationId,
         clientId: input.clientId ?? null,
         clientSecret: input.clientSecret ?? null,
-        domain: input.domain ?? null,
+        oauthApiUrl: input.oauthApiUrl ?? null,
       });
 
       if (result.type === 'ok') {
@@ -60,7 +60,7 @@ export const resolvers: OidcIntegrationsModule.Resolvers = {
           details: {
             clientId: result.fieldErrors?.clientId,
             clientSecret: result.fieldErrors?.clientSecret,
-            domain: result.fieldErrors?.domain,
+            oauthApiUrl: result.fieldErrors?.oauthApiUrl,
           },
         },
       };
@@ -106,7 +106,7 @@ export const resolvers: OidcIntegrationsModule.Resolvers = {
   },
   OIDCIntegration: {
     id: oidcIntegration => oidcIntegration.id,
-    domain: oidcIntegration => oidcIntegration.domain,
+    oauthApiUrl: oidcIntegration => oidcIntegration.oauthApiUrl,
     clientId: oidcIntegration => oidcIntegration.clientId,
     clientSecretPreview: (oidcIntegration, _, { injector }) =>
       injector.get(OIDCIntegrationsProvider).getClientSecretPreview(oidcIntegration),

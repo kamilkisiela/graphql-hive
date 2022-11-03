@@ -343,13 +343,13 @@ export interface Storage {
     organizationId: string;
     clientId: string;
     encryptedClientSecret: string;
-    domain: string;
+    oauthApiUrl: string;
   }): Promise<{ type: 'ok'; oidcIntegration: OIDCIntegration } | { type: 'error'; reason: string }>;
   updateOIDCIntegration(_: {
     oidcIntegrationId: string;
     clientId: string | null;
     encryptedClientSecret: string | null;
-    domain: string | null;
+    oauthApiUrl: string | null;
   }): Promise<OIDCIntegration>;
   deleteOIDCIntegration(_: { oidcIntegrationId: string }): Promise<void>;
 }

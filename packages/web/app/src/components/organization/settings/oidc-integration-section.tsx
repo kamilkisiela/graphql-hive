@@ -60,7 +60,7 @@ export const OIDCIntegrationSection = (props: {
               }}
             >
               <KeyIcon className="mr-2" />
-              Manage OIDC Provider ({extractDomain(props.organization.oidcIntegration.domain)})
+              Manage OIDC Provider ({extractDomain(props.organization.oidcIntegration.oauthApiUrl)})
             </Button>
             <Button
               variant="primary"
@@ -131,7 +131,7 @@ const CreateOIDCIntegrationModal_CreateOIDCIntegrationMutation = gql(/* GraphQL 
         details {
           clientId
           clientSecret
-          domain
+          oauthApiUrl
         }
       }
     }
@@ -185,7 +185,7 @@ const CreateOIDCIntegrationForm = (props: {
 
   const formik = useFormik({
     initialValues: {
-      domain: '',
+      oauthApiUrl: '',
       clientId: '',
       clientSecret: '',
     },
@@ -193,7 +193,7 @@ const CreateOIDCIntegrationForm = (props: {
       const result = await mutate({
         input: {
           organizationId: props.organizationId,
-          domain: values.domain,
+          oauthApiUrl: values.oauthApiUrl,
           clientId: values.clientId,
           clientSecret: values.clientSecret,
         },
@@ -220,15 +220,15 @@ const CreateOIDCIntegrationForm = (props: {
       </p>
       <p>Use Okta, Auth0, Google Workspaces or any other OAuth2 Open ID Connect compatible provider.</p>
       <Input
-        placeholder="Domain (Issuer)"
-        id="domain"
-        name="domain"
-        prefix={<label className="text-sm font-semibold">Domain</label>}
+        placeholder="OAuth API Url (Issuer)"
+        id="oauthApiUrl"
+        name="oauthApiUrl"
+        prefix={<label className="text-sm font-semibold">API Url</label>}
         onChange={formik.handleChange}
-        value={formik.values.domain}
-        isInvalid={!!mutation.data?.createOIDCIntegration.error?.details.domain}
+        value={formik.values.oauthApiUrl}
+        isInvalid={!!mutation.data?.createOIDCIntegration.error?.details.oauthApiUrl}
       />
-      <div>{mutation.data?.createOIDCIntegration.error?.details.domain}</div>
+      <div>{mutation.data?.createOIDCIntegration.error?.details.oauthApiUrl}</div>
 
       <Input
         placeholder="Client ID"
@@ -298,7 +298,7 @@ const ManageOIDCIntegrationModal = (props: {
 const UpdateOIDCIntegration_OIDCIntegrationFragment = gql(/* GraphQL */ `
   fragment UpdateOIDCIntegration_OIDCIntegrationFragment on OIDCIntegration {
     id
-    domain
+    oauthApiUrl
     clientId
     clientSecretPreview
   }
@@ -310,7 +310,7 @@ const UpdateOIDCIntegrationForm_UpdateOIDCIntegrationMutation = gql(/* GraphQL *
       ok {
         updatedOIDCIntegration {
           id
-          domain
+          oauthApiUrl
           clientId
           clientSecretPreview
         }
@@ -320,7 +320,7 @@ const UpdateOIDCIntegrationForm_UpdateOIDCIntegrationMutation = gql(/* GraphQL *
         details {
           clientId
           clientSecret
-          domain
+          oauthApiUrl
         }
       }
     }
@@ -336,7 +336,7 @@ const UpdateOIDCIntegrationForm = (props: {
 
   const formik = useFormik({
     initialValues: {
-      domain: props.oidcIntegration.domain,
+      oauthApiUrl: props.oidcIntegration.oauthApiUrl,
       clientId: props.oidcIntegration.clientId,
       clientSecret: '',
     },
@@ -344,7 +344,7 @@ const UpdateOIDCIntegrationForm = (props: {
       const result = await mutate({
         input: {
           oidcIntegrationId: props.oidcIntegration.id,
-          domain: values.domain,
+          oauthApiUrl: values.oauthApiUrl,
           clientId: values.clientId,
           clientSecret: values.clientSecret === '' ? undefined : values.clientSecret,
         },
@@ -386,15 +386,15 @@ const UpdateOIDCIntegrationForm = (props: {
           <div className={`${containerClassName} flex-1 pl-5`}>
             <Heading size="sm">Properties</Heading>
             <Input
-              placeholder="Domain (Issuer)"
-              id="domain"
-              name="domain"
-              prefix={<label className="text-sm font-semibold">Domain</label>}
+              placeholder="OAuth API Url (Issuer)"
+              id="oauthApiUrl"
+              name="oauthApiUrl"
+              prefix={<label className="text-sm font-semibold">API Url</label>}
               onChange={formik.handleChange}
-              value={formik.values.domain}
-              isInvalid={!!mutation.data?.updateOIDCIntegration.error?.details.domain}
+              value={formik.values.oauthApiUrl}
+              isInvalid={!!mutation.data?.updateOIDCIntegration.error?.details.oauthApiUrl}
             />
-            <div>{mutation.data?.updateOIDCIntegration.error?.details.domain}</div>
+            <div>{mutation.data?.updateOIDCIntegration.error?.details.oauthApiUrl}</div>
 
             <Input
               placeholder="Client ID"

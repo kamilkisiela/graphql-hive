@@ -72,7 +72,7 @@ export class OIDCIntegrationsProvider {
     organizationId: string;
     clientId: string;
     clientSecret: string;
-    domain: string;
+    oauthApiUrl: string;
   }) {
     if (this.isEnabled() === false) {
       return {
@@ -97,14 +97,14 @@ export class OIDCIntegrationsProvider {
 
     const clientIdResult = OIDCIntegrationClientIdModel.safeParse(args.clientId);
     const clientSecretResult = OIDCClientSecretModel.safeParse(args.clientSecret);
-    const domainResult = OIDCDomainModel.safeParse(args.domain);
+    const oauthApiUrlResult = OAuthAPIUrlModel.safeParse(args.oauthApiUrl);
 
-    if (clientIdResult.success && clientSecretResult.success && domainResult.success) {
+    if (clientIdResult.success && clientSecretResult.success && oauthApiUrlResult.success) {
       const creationResult = await this.storage.createOIDCIntegrationForOrganization({
         organizationId: args.organizationId,
         clientId: clientIdResult.data,
         encryptedClientSecret: this.crypto.encrypt(clientSecretResult.data),
-        domain: domainResult.data,
+        oauthApiUrl: oauthApiUrlResult.data,
       });
 
       if (creationResult.type === 'ok') {
@@ -117,7 +117,7 @@ export class OIDCIntegrationsProvider {
         fieldErrors: {
           clientId: null,
           clientSecret: null,
-          domain: null,
+          oauthApiUrl: null,
         },
       } as const;
     }
@@ -128,7 +128,7 @@ export class OIDCIntegrationsProvider {
       fieldErrors: {
         clientId: clientIdResult.success ? null : clientIdResult.error.issues[0].message,
         clientSecret: clientSecretResult.success ? null : clientSecretResult.error.issues[0].message,
-        domain: domainResult.success ? null : domainResult.error.issues[0].message,
+        oauthApiUrl: oauthApiUrlResult.success ? null : oauthApiUrlResult.error.issues[0].message,
       },
     } as const;
   }
@@ -137,7 +137,7 @@ export class OIDCIntegrationsProvider {
     oidcIntegrationId: string;
     clientId: string | null;
     clientSecret: string | null;
-    domain: string | null;
+    oauthApiUrl: string | null;
   }) {
     if (this.isEnabled() === false) {
       return {
@@ -155,7 +155,7 @@ export class OIDCIntegrationsProvider {
         fieldErrors: {
           clientId: null,
           clientSecret: null,
-          domain: null,
+          oauthApiUrl: null,
         },
       } as const;
     }
@@ -167,14 +167,14 @@ export class OIDCIntegrationsProvider {
 
     const clientIdResult = maybe(OIDCIntegrationClientIdModel).safeParse(args.clientId);
     const clientSecretResult = maybe(OIDCClientSecretModel).safeParse(args.clientSecret);
-    const domainResult = maybe(OIDCDomainModel).safeParse(args.domain);
+    const oauthApiUrlResult = maybe(OAuthAPIUrlModel).safeParse(args.oauthApiUrl);
 
-    if (clientIdResult.success && clientSecretResult.success && domainResult.success) {
+    if (clientIdResult.success && clientSecretResult.success && oauthApiUrlResult.success) {
       const oidcIntegration = await this.storage.updateOIDCIntegration({
         oidcIntegrationId: args.oidcIntegrationId,
         clientId: clientIdResult.data,
         encryptedClientSecret: clientSecretResult.data ? this.crypto.encrypt(clientSecretResult.data) : null,
-        domain: domainResult.data,
+        oauthApiUrl: oauthApiUrlResult.data,
       });
 
       return {
@@ -189,7 +189,7 @@ export class OIDCIntegrationsProvider {
       fieldErrors: {
         clientId: clientIdResult.success ? null : clientIdResult.error.issues[0].message,
         clientSecret: clientSecretResult.success ? null : clientSecretResult.error.issues[0].message,
-        domain: domainResult.success ? null : domainResult.error.issues[0].message,
+        oauthApiUrl: oauthApiUrlResult.success ? null : oauthApiUrlResult.error.issues[0].message,
       },
     } as const;
   }
@@ -235,6 +235,6 @@ const OIDCClientSecretModel = zod
   .min(3, 'Must be at least 3 characters long.')
   .max(200, 'Can not be longer than 200 characters.');
 
-const OIDCDomainModel = zod.string().url('Must be a valid domain.');
+const OAuthAPIUrlModel = zod.string().url('Must be a valid OAuth API url.');
 
 const maybe = <TSchema>(schema: zod.ZodSchema<TSchema>) => zod.union([schema, zod.null()]);

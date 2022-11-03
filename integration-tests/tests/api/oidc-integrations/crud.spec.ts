@@ -24,7 +24,7 @@ const CreateOIDCIntegrationMutation = gql(/* GraphQL */ `
           id
           clientId
           clientSecretPreview
-          domain
+          oauthApiUrl
         }
       }
       error {
@@ -32,7 +32,7 @@ const CreateOIDCIntegrationMutation = gql(/* GraphQL */ `
         details {
           clientId
           clientSecret
-          domain
+          oauthApiUrl
         }
       }
     }
@@ -59,7 +59,7 @@ describe('create', () => {
             organizationId: org.id,
             clientId: 'foo',
             clientSecret: 'foofoofoofoo',
-            domain: 'http://localhost:8888/oauth',
+            oauthApiUrl: 'http://localhost:8888/oauth',
           },
         },
         authToken: access_token,
@@ -74,7 +74,7 @@ describe('create', () => {
               id: expect.any(String),
               clientId: 'foo',
               clientSecretPreview: 'ofoo',
-              domain: 'http://localhost:8888/oauth',
+              oauthApiUrl: 'http://localhost:8888/oauth',
             },
           },
         },
@@ -110,7 +110,7 @@ describe('create', () => {
             organizationId: 'i-do-not-exist',
             clientId: 'fo',
             clientSecret: 'foofoofoofoo',
-            domain: 'http://localhost:8888/oauth',
+            oauthApiUrl: 'http://localhost:8888/oauth',
           },
         },
         authToken: access_token,
@@ -151,7 +151,7 @@ describe('create', () => {
             organizationId: org.id,
             clientId: 'fo',
             clientSecret: 'foofoofoofoo',
-            domain: 'http://localhost:8888/oauth',
+            oauthApiUrl: 'http://localhost:8888/oauth',
           },
         },
         authToken: access_token,
@@ -165,7 +165,7 @@ describe('create', () => {
               "details": {
                 "clientId": "Must be at least 3 characters long.",
                 "clientSecret": null,
-                "domain": null,
+                "oauthApiUrl": null,
               },
               "message": "Failed to create OIDC Integration.",
             },
@@ -192,7 +192,7 @@ describe('create', () => {
             organizationId: org.id,
             clientId: new Array(101).fill('a').join(''),
             clientSecret: 'foofoofoofoo',
-            domain: 'http://localhost:8888/oauth',
+            oauthApiUrl: 'http://localhost:8888/oauth',
           },
         },
         authToken: access_token,
@@ -206,7 +206,7 @@ describe('create', () => {
               "details": {
                 "clientId": "Can not be longer than 100 characters.",
                 "clientSecret": null,
-                "domain": null,
+                "oauthApiUrl": null,
               },
               "message": "Failed to create OIDC Integration.",
             },
@@ -233,7 +233,7 @@ describe('create', () => {
             organizationId: org.id,
             clientId: 'foo',
             clientSecret: 'fo',
-            domain: 'http://localhost:8888/oauth',
+            oauthApiUrl: 'http://localhost:8888/oauth',
           },
         },
         authToken: access_token,
@@ -247,7 +247,7 @@ describe('create', () => {
               "details": {
                 "clientId": null,
                 "clientSecret": "Must be at least 3 characters long.",
-                "domain": null,
+                "oauthApiUrl": null,
               },
               "message": "Failed to create OIDC Integration.",
             },
@@ -274,7 +274,7 @@ describe('create', () => {
             organizationId: org.id,
             clientId: 'foo',
             clientSecret: new Array(500).fill('a').join(''),
-            domain: 'http://localhost:8888/oauth',
+            oauthApiUrl: 'http://localhost:8888/oauth',
           },
         },
         authToken: access_token,
@@ -288,7 +288,7 @@ describe('create', () => {
               "details": {
                 "clientId": null,
                 "clientSecret": "Can not be longer than 200 characters.",
-                "domain": null,
+                "oauthApiUrl": null,
               },
               "message": "Failed to create OIDC Integration.",
             },
@@ -297,7 +297,7 @@ describe('create', () => {
         }
       `);
     });
-    test('error: invalid domain', async () => {
+    test('error: invalid oauth api url', async () => {
       const { access_token } = await authenticate('main');
       const orgResult = await createOrganization(
         {
@@ -315,7 +315,7 @@ describe('create', () => {
             organizationId: org.id,
             clientId: 'foo',
             clientSecret: 'foo',
-            domain: 'foo',
+            oauthApiUrl: 'foo',
           },
         },
         authToken: access_token,
@@ -329,7 +329,7 @@ describe('create', () => {
               "details": {
                 "clientId": null,
                 "clientSecret": null,
-                "domain": "Must be a valid domain.",
+                "oauthApiUrl": "Must be a valid OAuth API url.",
               },
               "message": "Failed to create OIDC Integration.",
             },
@@ -356,7 +356,7 @@ describe('create', () => {
             organizationId: org.id,
             clientId: 'foo',
             clientSecret: 'foofoofoofoo',
-            domain: 'http://localhost:8888/oauth',
+            oauthApiUrl: 'http://localhost:8888/oauth',
           },
         },
         authToken: access_token,
@@ -371,7 +371,7 @@ describe('create', () => {
               id: expect.any(String),
               clientId: 'foo',
               clientSecretPreview: 'ofoo',
-              domain: 'http://localhost:8888/oauth',
+              oauthApiUrl: 'http://localhost:8888/oauth',
             },
           },
         },
@@ -384,7 +384,7 @@ describe('create', () => {
             organizationId: org.id,
             clientId: 'foo',
             clientSecret: 'foofoofoofoo',
-            domain: 'http://localhost:8888/oauth',
+            oauthApiUrl: 'http://localhost:8888/oauth',
           },
         },
         authToken: access_token,
@@ -398,7 +398,7 @@ describe('create', () => {
             details: {
               clientId: null,
               clientSecret: null,
-              domain: null,
+              oauthApiUrl: null,
             },
           },
           ok: null,
@@ -441,7 +441,7 @@ describe('delete', () => {
             organizationId: org.id,
             clientId: 'foo',
             clientSecret: 'foofoofoofoo',
-            domain: 'http://localhost:8888/oauth',
+            oauthApiUrl: 'http://localhost:8888/oauth',
           },
         },
         authToken: access_token,
@@ -534,7 +534,7 @@ describe('delete', () => {
             organizationId: org.id,
             clientId: 'foo',
             clientSecret: 'foofoofoofoo',
-            domain: 'http://localhost:8888/oauth',
+            oauthApiUrl: 'http://localhost:8888/oauth',
           },
         },
         authToken: access_token,
@@ -582,7 +582,7 @@ const UpdateOIDCIntegrationMutation = gql(/* GraphQL */ `
       ok {
         updatedOIDCIntegration {
           id
-          domain
+          oauthApiUrl
           clientId
           clientSecretPreview
         }
@@ -592,7 +592,7 @@ const UpdateOIDCIntegrationMutation = gql(/* GraphQL */ `
         details {
           clientId
           clientSecret
-          domain
+          oauthApiUrl
         }
       }
     }
@@ -619,7 +619,7 @@ describe('update', () => {
             organizationId: org.id,
             clientId: 'aaaa',
             clientSecret: 'aaaaaaaaaaaa',
-            domain: 'http://localhost:8888/aaaa',
+            oauthApiUrl: 'http://localhost:8888/aaaa',
           },
         },
         authToken: access_token,
@@ -635,7 +635,7 @@ describe('update', () => {
             oidcIntegrationId: oidcIntegrationId,
             clientId: 'bbbb',
             clientSecret: 'bbbbbbbbbbbb',
-            domain: 'http://localhost:8888/bbbb',
+            oauthApiUrl: 'http://localhost:8888/bbbb',
           },
         },
         authToken: access_token,
@@ -650,7 +650,7 @@ describe('update', () => {
               id: oidcIntegrationId,
               clientId: 'bbbb',
               clientSecretPreview: 'bbbb',
-              domain: 'http://localhost:8888/bbbb',
+              oauthApiUrl: 'http://localhost:8888/bbbb',
             },
           },
         },
@@ -674,7 +674,7 @@ describe('update', () => {
             organizationId: org.id,
             clientId: 'foo',
             clientSecret: 'foofoofoofoo',
-            domain: 'http://localhost:8888/oauth',
+            oauthApiUrl: 'http://localhost:8888/oauth',
           },
         },
         authToken: access_token,

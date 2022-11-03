@@ -65,7 +65,7 @@ export interface oidc_integrations {
   client_id: string;
   client_secret: string;
   created_at: Date;
-  domain: string;
+  oauth_api_url: string;
   id: string;
   linked_organization_id: string;
   updated_at: Date;

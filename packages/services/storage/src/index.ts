@@ -2161,7 +2161,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           , "linked_organization_id"
           , "client_id"
           , "client_secret"
-          , "domain"
+          , "oauth_api_url"
         FROM
           "public"."oidc_integrations"
         WHERE
@@ -2183,7 +2183,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           , "linked_organization_id"
           , "client_id"
           , "client_secret"
-          , "domain"
+          , "oauth_api_url"
         FROM
           "public"."oidc_integrations"
         WHERE
@@ -2205,20 +2205,20 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             "linked_organization_id",
             "client_id",
             "client_secret",
-            "domain"
+            "oauth_api_url"
           )
           VALUES (
             ${args.organizationId},
             ${args.clientId},
             ${args.encryptedClientSecret},
-            ${args.domain}
+            ${args.oauthApiUrl}
           )
           RETURNING
             "id"
             , "linked_organization_id"
             , "client_id"
             , "client_secret"
-            , "domain"
+            , "oauth_api_url"
         `);
 
         return {
@@ -2243,7 +2243,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       const result = await pool.maybeOne<unknown>(sql`
         UPDATE "public"."oidc_integrations"
         SET 
-          "domain" = ${args.domain ?? sql`"domain"`}
+          "oauth_api_url" = ${args.oauthApiUrl ?? sql`"oauth_api_url"`}
           , "client_id" = ${args.clientId ?? sql`"client_id"`}
           , "client_secret" = ${args.encryptedClientSecret ?? sql`"client_secret"`}
         WHERE
@@ -2253,7 +2253,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           , "linked_organization_id"
           , "client_id"
           , "client_secret"
-          , "domain"
+          , "oauth_api_url"
       `);
 
       return decodeOktaIntegrationRecord(result);
@@ -2280,7 +2280,7 @@ const OktaIntegrationModel = zod.object({
   linked_organization_id: zod.string(),
   client_id: zod.string(),
   client_secret: zod.string(),
-  domain: zod.string().url(),
+  oauth_api_url: zod.string().url(),
 });
 
 const decodeOktaIntegrationRecord = (result: unknown): OIDCIntegration => {
@@ -2290,6 +2290,6 @@ const decodeOktaIntegrationRecord = (result: unknown): OIDCIntegration => {
     clientId: rawRecord.client_id,
     encryptedClientSecret: rawRecord.client_secret,
     linkedOrganizationId: rawRecord.linked_organization_id,
-    domain: rawRecord.domain,
+    oauthApiUrl: rawRecord.oauth_api_url,
   };
 };

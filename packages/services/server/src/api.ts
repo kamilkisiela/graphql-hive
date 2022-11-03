@@ -116,7 +116,7 @@ export const internalApiRouter = router<Context>()
         id: result.id,
         clientId: result.clientId,
         clientSecret: ctx.crypto.decrypt(result.encryptedClientSecret),
-        domain: result.domain,
+        oauthApiUrl: result.oauthApiUrl,
       };
     },
   });

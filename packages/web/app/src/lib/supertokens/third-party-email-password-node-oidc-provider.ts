@@ -17,7 +17,7 @@ const createOIDCSuperTokensProvider = (oidcConfig: {
   id: string;
   clientId: string;
   clientSecret: string;
-  domain: string;
+  oauthApiUrl: string;
 }): ThirdPartyEmailPasswordNode.TypeProvider => ({
   id: 'oidc',
   get: (redirectURI, authCodeFromRequest) => ({
@@ -26,7 +26,7 @@ const createOIDCSuperTokensProvider = (oidcConfig: {
     },
     getProfileInfo: async (rawTokenAPIResponse: unknown) => {
       const tokenResponse = OIDCTokenSchema.parse(rawTokenAPIResponse);
-      const rawData: unknown = await fetch(oidcConfig.domain + '/userinfo', {
+      const rawData: unknown = await fetch(oidcConfig.oauthApiUrl + '/userinfo', {
         headers: {
           authorization: `Bearer ${tokenResponse.access_token}`,
           accept: 'application/json',
@@ -46,7 +46,7 @@ const createOIDCSuperTokensProvider = (oidcConfig: {
       };
     },
     accessTokenAPI: {
-      url: `${oidcConfig.domain}/token`,
+      url: `${oidcConfig.oauthApiUrl}/token`,
       params: {
         client_id: oidcConfig.clientId,
         client_secret: oidcConfig.clientSecret,
@@ -57,7 +57,7 @@ const createOIDCSuperTokensProvider = (oidcConfig: {
     },
     authorisationRedirect: {
       // this contains info about forming the authorisation redirect URL without the state params and without the redirect_uri param
-      url: `${oidcConfig.domain}/authorize`,
+      url: `${oidcConfig.oauthApiUrl}/authorize`,
       params: {
         client_id: oidcConfig.clientId,
         scope: 'openid email',
@@ -123,7 +123,7 @@ export const createOIDCSuperTokensNoopProvider = () => ({
 const fetchOIDCConfig = async (
   internalApi: ReturnType<typeof createTRPCClient<InternalApi>>,
   oidcIntegrationId: string
-): Promise<{ id: string; clientId: string; clientSecret: string; domain: string }> => {
+): Promise<{ id: string; clientId: string; clientSecret: string; oauthApiUrl: string }> => {
   const result = await internalApi.query('getOIDCIntegrationById', { oidcIntegrationId });
   if (result === null) {
     throw new Error('OIDC integration not found.');
