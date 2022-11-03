@@ -12,6 +12,7 @@
     "allowSyntheticDefaultImports": true,
     "importHelpers": true,
     "allowJs": true,
+    "skipLibCheck": true,
 
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,

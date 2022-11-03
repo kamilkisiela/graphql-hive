@@ -10,8 +10,7 @@
     "rootDir": "src",
 
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "skipLibCheck": true
+    "allowSyntheticDefaultImports": true
   },
   "include": ["src"]
 }
