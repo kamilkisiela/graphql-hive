@@ -2199,8 +2199,6 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     },
 
     async createOIDCIntegrationForOrganization(args) {
-      // TODO: handle errors where creating the integration fails because an integration already exists for this account
-      // DB constraint exception :)
       try {
         const result = await pool.maybeOne<unknown>(sql`
           INSERT INTO "public"."oidc_integrations" (
