@@ -1,6 +1,7 @@
 lockfileVersion: 5.4
 
 overrides:
+  '@emotion/react': 11.10.0
   '@types/react': 17.0.45
   '@urql/core': 2.3.6
   graphql: 16.5.0
@@ -4452,30 +4453,6 @@ packages:
       react: 17.0.2
     dev: false
 
-  /@emotion/react/11.10.4_hx2b44akkvgcgvvtmk7ds2qk6q:
-    resolution: {integrity: sha512-j0AkMpr6BL8gldJZ6XQsQ8DnS9TxEQu1R+OGmDZiWjBAJtCcbt0tS3I/YffoqHXxH6MjgI7KdMbYKw3MEiU9eA==}
-    peerDependencies:
-      '@babel/core': ^7.0.0
-      '@types/react': '*'
-      react: '>=16.8.0'
-    peerDependenciesMeta:
-      '@babel/core':
-        optional: true
-      '@types/react':
-        optional: true
-    dependencies:
-      '@babel/runtime': 7.19.4
-      '@emotion/babel-plugin': 11.10.2
-      '@emotion/cache': 11.10.3
-      '@emotion/serialize': 1.1.0
-      '@emotion/use-insertion-effect-with-fallbacks': 1.0.0_react@17.0.2
-      '@emotion/utils': 1.2.0
-      '@emotion/weak-memoize': 0.3.0
-      '@types/react': 17.0.45
-      hoist-non-react-statics: 3.3.2
-      react: 17.0.2
-    dev: false
-
   /@emotion/serialize/1.1.0:
     resolution: {integrity: sha512-F1ZZZW51T/fx+wKbVlwsfchr5q97iW8brAnXmsskz4d0hVB4O3M/SiA3SaeH06x02lSNzkkQv+n3AX3kCXKSFA==}
     dependencies:
@@ -4528,7 +4505,7 @@ packages:
       react: 17.0.2
     dev: false
 
-  /@emotion/styled/11.10.4_vg6mvrqtfevznxyjc7pqthspui:
+  /@emotion/styled/11.10.4_gzmmeyirruxiijk6n5qhvczw7u:
     resolution: {integrity: sha512-pRl4R8Ez3UXvOPfc2bzIoV8u9P97UedgHS4FPX594ntwEuAMA114wlaHvOK24HB48uqfXiGlYIZYCxVJ1R1ttQ==}
     peerDependencies:
       '@babel/core': ^7.0.0
@@ -4544,7 +4521,7 @@ packages:
       '@babel/runtime': 7.19.4
       '@emotion/babel-plugin': 11.10.2
       '@emotion/is-prop-valid': 1.2.0
-      '@emotion/react': 11.10.4_hx2b44akkvgcgvvtmk7ds2qk6q
+      '@emotion/react': 11.10.0_hx2b44akkvgcgvvtmk7ds2qk6q
       '@emotion/serialize': 1.1.0
       '@emotion/use-insertion-effect-with-fallbacks': 1.0.0_react@17.0.2
       '@emotion/utils': 1.2.0
@@ -8932,8 +8909,8 @@ packages:
       '@algolia/autocomplete-plugin-algolia-insights': 1.7.1_nl7ecob7oenl7dfhoewptlc4ye
       '@algolia/autocomplete-plugin-query-suggestions': 1.7.1_algoliasearch@4.14.2
       '@algolia/autocomplete-theme-classic': 1.7.1
-      '@emotion/react': 11.10.4_hx2b44akkvgcgvvtmk7ds2qk6q
-      '@emotion/styled': 11.10.4_vg6mvrqtfevznxyjc7pqthspui
+      '@emotion/react': 11.10.0_hx2b44akkvgcgvvtmk7ds2qk6q
+      '@emotion/styled': 11.10.4_gzmmeyirruxiijk6n5qhvczw7u
       '@radix-ui/react-navigation-menu': 0.1.2_sfoxds7t5ydpegc3knd667wn6m
       algoliasearch: 4.14.2
       focus-trap-react: 9.0.2_sfoxds7t5ydpegc3knd667wn6m
@@ -10487,7 +10464,7 @@ packages:
   /axios/0.21.4:
     resolution: {integrity: sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg==}
     dependencies:
-      follow-redirects: 1.15.2
+      follow-redirects: 1.15.2_debug@4.3.4
     transitivePeerDependencies:
       - debug
     dev: false
@@ -14301,16 +14278,6 @@ packages:
 
   /focus-visible/5.2.0:
     resolution: {integrity: sha512-Rwix9pBtC1Nuy5wysTmKy+UjbDJpIfg8eHjw0rjZ1mX4GNLz1Bmd16uDpI3Gk1i70Fgcs8Csg2lPm8HULFg9DQ==}
-    dev: false
-
-  /follow-redirects/1.15.2:
-    resolution: {integrity: sha512-VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==}
-    engines: {node: '>=4.0'}
-    peerDependencies:
-      debug: '*'
-    peerDependenciesMeta:
-      debug:
-        optional: true
     dev: false
 
   /follow-redirects/1.15.2_debug@4.3.4:
@@ -21175,7 +21142,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.19.4
       '@emotion/cache': 11.10.3
-      '@emotion/react': 11.10.4_hx2b44akkvgcgvvtmk7ds2qk6q
+      '@emotion/react': 11.10.0_hx2b44akkvgcgvvtmk7ds2qk6q
       '@types/react-transition-group': 4.4.5
       memoize-one: 5.2.1
       prop-types: 15.8.1
@@ -22948,7 +22915,7 @@ packages:
     peerDependencies:
       react: '>=16.8.0'
     dependencies:
-      '@emotion/react': 11.10.4_hx2b44akkvgcgvvtmk7ds2qk6q
+      '@emotion/react': 11.10.0_hx2b44akkvgcgvvtmk7ds2qk6q
       chroma-js: 2.1.2
       libphonenumber-js: 1.9.43
       prop-types: 15.8.1
