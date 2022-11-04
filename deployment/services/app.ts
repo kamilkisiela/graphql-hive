@@ -195,9 +195,12 @@ export function deployApp({
           name: 'AUTH_GOOGLE_CLIENT_SECRET',
           value: googleConfig.clientSecret,
         },
-
         {
           name: 'AUTH_REQUIRE_EMAIL_VERIFICATION',
+          value: '1',
+        },
+        {
+          name: 'AUTH_ORGANIZATION_OIDC',
           value: '1',
         },
       ],
