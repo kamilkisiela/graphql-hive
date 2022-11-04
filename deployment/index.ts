@@ -188,12 +188,6 @@ const googleConfig = {
   clientSecret: oauthConfig.requireSecret('googleSecret'),
 };
 
-const oktaConfig = {
-  clientId: oauthConfig.requireSecret('oktaClient'),
-  clientSecret: oauthConfig.requireSecret('oktaSecret'),
-  endpoint: oauthConfig.requireSecret('oktaEndpoint'),
-};
-
 const supertokens = deploySuperTokens({ apiKey: supertokensApiKey.result });
 
 const graphqlApi = deployGraphQL({
@@ -243,7 +237,6 @@ const app = deployApp({
   },
   githubConfig,
   googleConfig,
-  oktaConfig,
   emailsEndpoint: emailsApi.localEndpoint,
 });
 
