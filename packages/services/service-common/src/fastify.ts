@@ -5,12 +5,19 @@ import { useSentryTracing } from './sentry';
 
 export type { FastifyLoggerInstance } from 'fastify';
 
-export async function createServer(options: { tracing: boolean; name: string }) {
+export async function createServer(options: {
+  tracing: boolean;
+  name: string;
+  log: {
+    level: string;
+    disableRequestLogging: boolean;
+  };
+}) {
   const server = fastify({
-    disableRequestLogging: true,
+    disableRequestLogging: options.log.disableRequestLogging,
     bodyLimit: 11e6, // 11 mb
     logger: {
-      level: 'debug',
+      level: options.log.level,
     },
     maxParamLength: 5000,
     requestIdHeader: 'x-request-id',

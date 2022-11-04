@@ -30,6 +30,10 @@ async function main() {
   const server = await createServer({
     name: 'usage',
     tracing: false,
+    log: {
+      level: env.log.level,
+      disableRequestLogging: env.log.disableRequestLogging,
+    },
   });
 
   try {
