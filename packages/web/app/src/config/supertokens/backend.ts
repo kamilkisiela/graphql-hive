@@ -431,7 +431,7 @@ async function trySignIntoAuth0WithUserCredentialsAndRetrieveUserInfo(
   const body = await response.text();
 
   if (response.status !== 200) {
-    throw new Error(`Couldn't authenticate user with Auth0. Status: ${response.status} Body: ${await response.text()}`);
+    throw new Error(`Couldn't authenticate user with Auth0. Status: ${response.status} Body: ${body}`);
   }
 
   const { access_token: accessToken } = JSON.parse(body);
