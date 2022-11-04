@@ -13,7 +13,6 @@ import { env } from '@/env/backend';
 import { NextApiRequest, NextApiResponse } from 'next';
 import Session from 'supertokens-node/recipe/session';
 import { writeLastVisitedOrganization } from '@/lib/cookies';
-import SessionError from 'supertokens-node/lib/build/recipe/session/error';
 
 export async function getSuperTokensUserIdFromRequest(
   req: NextApiRequest,
@@ -27,8 +26,9 @@ export async function getSuperTokensUserIdFromRequest(
     console.log('[debug] after session?.getUserId()');
     return userId;
   } catch (e) {
-    if (e instanceof SessionError) {
-      console.log('[debug] SessionError', JSON.stringify(e.payload));
+    console.log('[debug] oh no it throws');
+    if ('payload' in (e as any)) {
+      console.log('[debug] SessionError', JSON.stringify((e as any).payload));
     }
     throw e;
   }
