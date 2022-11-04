@@ -31,14 +31,6 @@ module.exports = {
 
     'import/no-absolute-path': 'error',
     'import/no-self-import': 'error',
-    'import/no-unused-modules': [
-      // eslint-disable-next-line no-process-env
-      process.env.CI === 'true' ? 'warn' : 'off',
-      {
-        unusedExports: true,
-        missingExports: true,
-      },
-    ],
     'import/no-extraneous-dependencies': [
       'error',
       {
@@ -75,12 +67,6 @@ module.exports = {
       parserOptions: {
         // Fixes Parsing error: "parserOptions.project" has been set for @typescript-eslint/parser
         createDefaultProgram: true,
-      },
-    },
-    {
-      files: ['twin.d.ts', 'next-env.d.ts', '*.spec.ts'],
-      rules: {
-        'import/no-unused-modules': 'off',
       },
     },
     {
