@@ -53,6 +53,17 @@ export const frontendConfig = () => {
         signInAndUpFeature: {
           providers,
         },
+        getRedirectionURL: async context => {
+          if (context.action === 'SUCCESS') {
+            // Allow only local pages to be redirected to
+            if (context.redirectToPath !== undefined && /^\/[^/]+/.test(context.redirectToPath)) {
+              // we are navigating back to where the user was before they authenticated
+              return context.redirectToPath;
+            }
+            return '/';
+          }
+          return undefined;
+        },
         override: env.auth.organizationOIDC ? getOIDCOverrides() : undefined,
       }),
       EmailVerification.init({
