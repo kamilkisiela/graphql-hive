@@ -87,6 +87,10 @@ export const getOIDCThirdPartyEmailPasswordNodeOverrides = (args: {
   apis: originalImplementation => ({
     ...originalImplementation,
     thirdPartySignInUpPOST: async input => {
+      if (input.clientId !== 'oidc') {
+        return originalImplementation.thirdPartySignInUpPOST!(input);
+      }
+
       const oidcId = getOIDCIdFromInput(input);
       const config = await fetchOIDCConfig(args.internalApi, oidcId);
 
@@ -100,6 +104,10 @@ export const getOIDCThirdPartyEmailPasswordNodeOverrides = (args: {
       });
     },
     authorisationUrlGET: async input => {
+      if (input.provider.id !== 'oidc') {
+        return originalImplementation.authorisationUrlGET!(input);
+      }
+
       const oidcId = getOIDCIdFromInput(input);
       const config = await fetchOIDCConfig(args.internalApi, oidcId);
 
