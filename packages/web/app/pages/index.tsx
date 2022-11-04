@@ -13,13 +13,25 @@ import { env } from '@/env/backend';
 import { NextApiRequest, NextApiResponse } from 'next';
 import Session from 'supertokens-node/recipe/session';
 import { writeLastVisitedOrganization } from '@/lib/cookies';
+import SessionError from 'supertokens-node/lib/build/recipe/session/error';
 
 export async function getSuperTokensUserIdFromRequest(
   req: NextApiRequest,
   res: NextApiResponse
 ): Promise<string | null> {
-  const session = await Session.getSession(req, res, { sessionRequired: false });
-  return session?.getUserId() ?? null;
+  try {
+    console.log('[debug] before Session.getSession');
+    const session = await Session.getSession(req, res, { sessionRequired: false });
+    console.log('[debug] after Session.getSession');
+    const userId = session?.getUserId() ?? null;
+    console.log('[debug] after session?.getUserId()');
+    return userId;
+  } catch (e) {
+    if (e instanceof SessionError) {
+      console.log('[debug] SessionError', JSON.stringify(e.payload));
+    }
+    throw e;
+  }
 }
 
 export const getServerSideProps = withSessionProtection(async ({ req, res }) => {
