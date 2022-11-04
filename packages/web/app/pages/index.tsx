@@ -18,20 +18,8 @@ export async function getSuperTokensUserIdFromRequest(
   req: NextApiRequest,
   res: NextApiResponse
 ): Promise<string | null> {
-  try {
-    console.log('[debug] before Session.getSession');
-    const session = await Session.getSession(req, res, { sessionRequired: false });
-    console.log('[debug] after Session.getSession');
-    const userId = session?.getUserId() ?? null;
-    console.log('[debug] after session?.getUserId()');
-    return userId;
-  } catch (e) {
-    console.log('[debug] oh no it throws');
-    if ('payload' in (e as any)) {
-      console.log('[debug] SessionError', JSON.stringify((e as any).payload));
-    }
-    throw e;
-  }
+  const session = await Session.getSession(req, res, { sessionRequired: false });
+  return session?.getUserId() ?? null;
 }
 
 export const getServerSideProps = withSessionProtection(async ({ req, res }) => {

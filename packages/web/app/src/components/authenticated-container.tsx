@@ -66,18 +66,20 @@ export const serverSidePropsSessionHandling = async (context: Parameters<GetServ
   let session: SessionContainerInterface | undefined;
 
   try {
-    try {
-      console.log('[debug] before Session.getSession');
-      session = await Session.getSession(context.req, context.res, { sessionRequired: false });
-      console.log('[debug] after Session.getSession');
-    } catch (e) {
-      console.log('[debug] oh no it throws');
-      if ('payload' in (e as any)) {
-        console.log('[debug] SessionError', JSON.stringify((e as any).payload));
-      }
-      throw e;
-    }
+    session = await Session.getSession(context.req, context.res, { sessionRequired: false });
+    // TODO: better error decoding :)
   } catch (err: any) {
+    // Check whether the email is already verified.
+    // If it is not then we need to redirect to the email verification page - which will trigger the email sending.
+    if (err.type === Session.Error.INVALID_CLAIMS) {
+      return {
+        redirect: {
+          destination: '/auth/verify-email',
+          permanent: false,
+        },
+      };
+    }
+
     if (err.type === Session.Error.TRY_REFRESH_TOKEN) {
       return { props: { fromSupertokens: 'needs-refresh' } };
     }
