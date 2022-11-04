@@ -127,6 +127,11 @@ export class TokenStorage {
 
   @atomic<TokenSelector>(({ token }) => token)
   async getToken({ token }: TokenSelector) {
+    // Tokens are MD5 hashes, so they are always 32 characters long
+    if (token.length !== 32) {
+      throw new HiveError('Invalid token provided!');
+    }
+
     this.logger.debug('Fetching token (token=%s)', maskToken(token));
 
     try {
