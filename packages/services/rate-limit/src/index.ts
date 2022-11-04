@@ -22,6 +22,10 @@ async function main() {
   const server = await createServer({
     name: 'rate-limit',
     tracing: false,
+    log: {
+      level: env.log.level,
+      disableRequestLogging: env.log.disableRequestLogging,
+    },
   });
 
   try {

@@ -32,6 +32,10 @@ export async function main() {
   const server = await createServer({
     name: 'tokens',
     tracing: false,
+    log: {
+      level: env.log.level,
+      disableRequestLogging: env.log.disableRequestLogging,
+    },
   });
 
   const errorHandler = createErrorHandler(server);

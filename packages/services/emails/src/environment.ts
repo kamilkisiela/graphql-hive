@@ -71,6 +71,21 @@ const PrometheusModel = zod.object({
   PROMETHEUS_METRICS_LABEL_INSTANCE: emptyString(zod.string().optional()),
 });
 
+const LogModel = zod.object({
+  LOG_LEVEL: zod
+    .union([
+      zod.literal('trace'),
+      zod.literal('debug'),
+      zod.literal('info'),
+      zod.literal('warn'),
+      zod.literal('error'),
+      zod.literal('fatal'),
+      zod.literal('silent'),
+    ])
+    .optional(),
+  LOG_DISABLE_REQUEST_LOGGING: zod.union([zod.literal('1'), zod.literal('0')]).optional(),
+});
+
 const configs = {
   // eslint-disable-next-line no-process-env
   base: EnvironmentModel.safeParse(process.env),
@@ -82,6 +97,8 @@ const configs = {
   redis: RedisModel.safeParse(process.env),
   // eslint-disable-next-line no-process-env
   prometheus: PrometheusModel.safeParse(process.env),
+  // eslint-disable-next-line no-process-env
+  log: LogModel.safeParse(process.env),
 };
 
 const environmentErrors: Array<string> = [];
@@ -110,6 +127,7 @@ const email = extractConfig(configs.email);
 const redis = extractConfig(configs.redis);
 const sentry = extractConfig(configs.sentry);
 const prometheus = extractConfig(configs.prometheus);
+const log = extractConfig(configs.log);
 
 const emailProviderConfig =
   email.EMAIL_PROVIDER === 'postmark'
@@ -156,6 +174,10 @@ export const env = {
   },
   heartbeat: base.HEARTBEAT_ENDPOINT ? { endpoint: base.HEARTBEAT_ENDPOINT } : null,
   sentry: sentry.SENTRY === '1' ? { dsn: sentry.SENTRY_DSN } : null,
+  log: {
+    level: log.LOG_LEVEL ?? 'debug',
+    disableRequestLogging: log.LOG_DISABLE_REQUEST_LOGGING === '1',
+  },
   prometheus:
     prometheus.PROMETHEUS_METRICS === '1'
       ? {
