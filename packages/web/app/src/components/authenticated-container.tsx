@@ -67,7 +67,19 @@ export const serverSidePropsSessionHandling = async (context: Parameters<GetServ
 
   try {
     session = await Session.getSession(context.req, context.res, { sessionRequired: false });
+    // TODO: better error decoding :)
   } catch (err: any) {
+    // Check whether the email is already verified.
+    // If it is not then we need to redirect to the email verification page - which will trigger the email sending.
+    if (err.type === Session.Error.INVALID_CLAIMS) {
+      return {
+        redirect: {
+          destination: '/auth/verify-email',
+          permanent: false,
+        },
+      };
+    }
+
     if (err.type === Session.Error.TRY_REFRESH_TOKEN) {
       return { props: { fromSupertokens: 'needs-refresh' } };
     }
