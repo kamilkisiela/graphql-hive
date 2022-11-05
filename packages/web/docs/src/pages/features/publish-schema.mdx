@@ -1,4 +1,4 @@
-import Callout from 'nextra-theme-docs/callout'
+import { Callout, PackageCmd } from '@theguild/components'
 
 # Publishing new schema
 
@@ -14,10 +14,7 @@ Once you have created the target, the next step would be typically to push the G
 
 Install [`@graphql-hive/cli`](https://www.npmjs.com/package/@graphql-hive/cli) package from NPM:
 
-```bash
-npm install @graphql-hive/cli
-yarn add @graphql-hive/cli
-```
+<PackageCmd packages={['-D @graphql-hive/cli']} />
 
 ### Linux / MacOS
 
@@ -35,7 +32,7 @@ Now, create a config file as `hive.json` and paste there your token:
 }
 ```
 
-<Callout emoji="💡">
+<Callout>
   Having a config file is not mandatory, you can use `--token YOUR-TOKEN` or an environment variable called `HIVE_TOKEN`
   instead.
 </Callout>
@@ -55,7 +52,7 @@ hive schema:publish --service reviews schema.graphql
 hive schema:publish --service reviews --url http://my-service.com/graphql schema.graphql
 ```
 
-<Callout emoji="💡">To force publishing a schema, enable `--force` flag.</Callout>
+<Callout>To force publishing a schema, enable `--force` flag.</Callout>
 
 Once the schema is published, you should be able to see it in: `http://app.graphql-hive.com/<your-org>/<your-project>/<your-target>`.
 
@@ -80,10 +77,7 @@ To fetch the metadata later, use the Hive CDN, see [Using the Registry with any 
 
 Our [`@graphql-hive/client`](https://www.npmjs.com/package/@graphql-hive/client) comes with a generic client and plugins for [Envelop](https://envelop.dev) and [Apollo Server](https://github.com/apollographql/apollo-server).
 
-```bash
-npm install @graphql-hive/client
-yarn add @graphql-hive/client
-```
+<PackageCmd packages={['@graphql-hive/client']} />
 
 ### Apollo Server
 
@@ -198,4 +192,4 @@ More information is available on the `graphql-hive` repository: https://github.c
 
 In case you want to integrate GraphQL Hive with your GitHub repository, follow the [GitHub integration guide](./integrations#github).
 
-![GitHub Schema Check](../../public/github-schema-check.png)
+![GitHub Schema Check](/github-schema-check.png)

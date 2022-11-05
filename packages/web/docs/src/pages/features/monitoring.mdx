@@ -1,8 +1,8 @@
-import Callout from 'nextra-theme-docs/callout'
+import { Callout, PackageCmd } from '@theguild/components'
 
 # Monitoring Operations
 
-With Hive, you can not just persist the schema and documents but you can also measure or collect data against all your GraphQL operations and generate analytics on the same. You can do this by enabling **usage flag available** in the Hive Client.
+With Hive, you can not just persist the schema and documents, but you can also measure or collect data against all your GraphQL operations and generate analytics on the same. You can do this by enabling **usage flag available** in the Hive Client.
 
 ## Requirements
 
@@ -10,10 +10,7 @@ With Hive, you can not just persist the schema and documents but you can also me
 
 [Hive Client](https://www.npmjs.com/package/@graphql-hive/client) comes with a generic client and plugins for [Envelop](https://envelop.dev) and Apollo Server.
 
-```bash
-npm install @graphql-hive/client
-yarn add @graphql-hive/client
-```
+<PackageCmd packages={['@graphql-hive/client']} />
 
 ## Using Hive Client
 
@@ -223,7 +220,7 @@ const server = new ApolloServer({
 
 Once this is done, and you start collecting the analytics as relevant you will be able to find all the analytics collected in the Operations Dashboard as seen below which you can then drill into
 
-![Monitoring view](../../public/monitoring-view.png)
+![Monitoring view](/monitoring-view.png)
 
 ## Other languages
 
@@ -233,11 +230,9 @@ Our [`graphql-hive` gem](https://github.com/charlypoly/graphql-ruby-hive) allows
 
 **1. Install the `graphql-hive` gem**
 
-```
+```sh
 gem install graphql-hive
 ```
-
-<br />
 
 **2. Configure `GraphQL::Hive` in your Schema**
 
@@ -248,14 +243,14 @@ class Schema < GraphQL::Schema
   query QueryType
 
   use(
-      GraphQL::Hive,
-      {
-        token: '<YOUR_TOKEN>',
-        reporting: {
-          author: ENV['GITHUB_USER'],
-          commit: ENV['GITHUB_COMMIT']
-        },
-      }
+    GraphQL::Hive,
+    {
+      token: '<YOUR_TOKEN>',
+      reporting: {
+        author: ENV['GITHUB_USER'],
+        commit: ENV['GITHUB_COMMIT']
+      },
+    }
   )
 end
 ```

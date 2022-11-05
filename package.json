@@ -14,7 +14,7 @@
   "license": "MIT",
   "scripts": {
     "seed": "node scripts/seed-local-env.js",
-    "postinstall": "husky install && node ./scripts/patch-manifests.js && node ./scripts/sync-env-files.js && node ./scripts/turborepo-cleanup.js && node ./scripts/turborepo-setup.js",
+    "postinstall": "husky install && node ./scripts/patch-manifests.js && pnpm env:sync && node ./scripts/turborepo-cleanup.js && node ./scripts/turborepo-setup.js",
     "pre-commit": "lint-staged",
     "prerelease": "pnpm build:libraries",
     "release": "changeset publish",
@@ -110,7 +110,7 @@
     "node": ">=16",
     "pnpm": ">=7"
   },
-  "packageManager": "pnpm@7.14.1",
+  "packageManager": "pnpm@7.14.2",
   "pnpm": {
     "patchedDependencies": {
       "@n1ru4l/dockest@2.1.0-rc.6": "patches/@n1ru4l__dockest@2.1.0-rc.6.patch",

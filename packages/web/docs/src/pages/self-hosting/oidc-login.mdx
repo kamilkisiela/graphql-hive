@@ -50,7 +50,7 @@ For the `Sign-out redirect URIs` option full in the web app base url followed by
 
 For the `Trusted Origins` option full in the web app base url (e.g. `https://app.graphql-hive.com`).
 
-![New web app integration](../../public/docs/pages/self-hosting/oidc-login/okta-new-web-app-integration.png)
+![New web app integration](/docs/pages/self-hosting/oidc-login/okta-new-web-app-integration.png)
 
 Afterwards, open the `General` tab of the created app and adjust the `General settings` as follows:
 
@@ -59,11 +59,11 @@ In the `LOGIN` section, set the `Application visibility` field to `Display appli
 In the `LOGIN` section, set the `Login flow` field to `Redirect to app to initiate login (OIDC Compliant)`.
 In the `LOGIN` section, set the `Login Initiate login URI` field to the web app base url followed by `/auth?provider=okta` (e.g. `https://app.graphql-hive.com/auth?provider=okta`).
 
-![Application general settings](../../public/docs/pages/self-hosting/oidc-login/okta-application-general-settings.png)
+![Application general settings](/docs/pages/self-hosting/oidc-login/okta-application-general-settings.png)
 
 Last, switch over to the `Okta API Scopes` tab and grant access to the `okta.users.read.self` scope.
 
-![Application general settings](../../public/docs/pages/self-hosting/oidc-login/okta-okta-api-scopes.png)
+![Application general settings](/docs/pages/self-hosting/oidc-login/okta-okta-api-scopes.png)
 
 Then, you need to add the following environment variables for your GraphQL Hive `app` instance:
 

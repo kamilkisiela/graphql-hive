@@ -1,4 +1,4 @@
-import Callout from 'nextra-theme-docs/callout'
+import { Callout } from '@theguild/components'
 
 # Self-Hosting GraphQL Hive
 
@@ -60,8 +60,8 @@ export POSTGRES_PASSWORD=$(openssl rand -hex 16)
 export POSTGRES_DB="registry"
 ```
 
-<Callout emoji="✅">
-  **Tip** We recommend saving the environment variables in a file that you can reuse later. E.g. a `.env` file that you
+<Callout type="info">
+  We recommend saving the environment variables in a file that you can reuse later. E.g. a `.env` file that you
   can later on expand using `source .env`. We are using `openssl` here for generating passwords on the fly.
 
 You can also embed the values within a new docker-compose file by running `docker-compose -f docker-compose.community.yml config > docker-compose.with-env.yml` after setting the environment variables.
