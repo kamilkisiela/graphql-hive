@@ -20,7 +20,7 @@
     "release": "changeset publish",
     "upload-sourcemaps": "./scripts/upload-sourcemaps.sh",
     "test": "jest",
-    "lint": "eslint --cache --ignore-path .gitignore \"packages/**/*.{ts,tsx}\"",
+    "lint": "TIMING=1 eslint --cache --ignore-path .gitignore \"packages/**/*.{ts,tsx}\"",
     "prettier": "prettier --cache --write --list-different .",
     "lint:prettier": "prettier --cache --check .",
     "setup": "pnpm --filter @hive/storage setup",
