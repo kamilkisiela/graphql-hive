@@ -93,6 +93,7 @@ module.exports = {
             'line-clamp-3',
             '-z-1',
           ],
+          cssFiles: [],
         },
         react: {
           version: 'detect',
