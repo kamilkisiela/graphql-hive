@@ -5,8 +5,8 @@ import { useRouter } from 'next/router';
 export default defineConfig({
   docsRepositoryBase: 'https://github.com/kamilkisiela/graphql-hive/tree/main/packages/web/docs',
   main({ children }) {
-    const { resolvedTheme } = useTheme()
-    const { route } = useRouter()
+    const { resolvedTheme } = useTheme();
+    const { route } = useRouter();
 
     return (
       <>
@@ -22,7 +22,7 @@ export default defineConfig({
           theme={resolvedTheme}
         />
       </>
-    )
+    );
   },
   siteName: 'HIVE',
 });
