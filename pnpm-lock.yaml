@@ -1125,7 +1125,7 @@ importers:
       react-dom: 17.0.2
       react-icons: 4.4.0
       react-use: ^17.3.2
-      styled-components: 5.3.5
+      styled-components: 5.3.6
       tailwindcss: 2.2.19
       tslib: 2.4.0
       twin.macro: 2.8.2
@@ -1138,7 +1138,7 @@ importers:
       react-dom: 17.0.2_react@17.0.2
       react-icons: 4.4.0_react@17.0.2
       react-use: 17.4.0_sfoxds7t5ydpegc3knd667wn6m
-      styled-components: 5.3.5_sfoxds7t5ydpegc3knd667wn6m
+      styled-components: 5.3.6_sfoxds7t5ydpegc3knd667wn6m
       twin.macro: 2.8.2
     devDependencies:
       '@types/react': 17.0.45
@@ -11093,7 +11093,7 @@ packages:
       - supports-color
     dev: true
 
-  /babel-plugin-styled-components/2.0.7_styled-components@5.3.5:
+  /babel-plugin-styled-components/2.0.7_styled-components@5.3.6:
     resolution: {integrity: sha512-i7YhvPgVqRKfoQ66toiZ06jPNA3p6ierpfUuEWxNF+fV27Uv5gxBkf8KZLHUCc1nFA9j6+80pYoIpqCeyW3/bA==}
     peerDependencies:
       styled-components: '>= 2'
@@ -11103,7 +11103,7 @@ packages:
       babel-plugin-syntax-jsx: 6.18.0
       lodash: 4.17.21
       picomatch: 2.3.1
-      styled-components: 5.3.5_sfoxds7t5ydpegc3knd667wn6m
+      styled-components: 5.3.6_sfoxds7t5ydpegc3knd667wn6m
     dev: false
 
   /babel-plugin-syntax-jsx/6.18.0:
@@ -24149,8 +24149,8 @@ packages:
       tslib: 2.4.0
     dev: false
 
-  /styled-components/5.3.5_sfoxds7t5ydpegc3knd667wn6m:
-    resolution: {integrity: sha512-ndETJ9RKaaL6q41B69WudeqLzOpY1A/ET/glXkNZ2T7dPjPqpPCXXQjDFYZWwNnE5co0wX+gTCqx9mfxTmSIPg==}
+  /styled-components/5.3.6_sfoxds7t5ydpegc3knd667wn6m:
+    resolution: {integrity: sha512-hGTZquGAaTqhGWldX7hhfzjnIYBZ0IXQXkCYdvF1Sq3DsUaLx6+NTHC5Jj1ooM2F68sBiVz3lvhfwQs/S3l6qg==}
     engines: {node: '>=10'}
     requiresBuild: true
     peerDependencies:
@@ -24163,7 +24163,7 @@ packages:
       '@emotion/is-prop-valid': 1.2.0
       '@emotion/stylis': 0.8.5
       '@emotion/unitless': 0.7.5
-      babel-plugin-styled-components: 2.0.7_styled-components@5.3.5
+      babel-plugin-styled-components: 2.0.7_styled-components@5.3.6
       css-to-react-native: 3.0.0
       hoist-non-react-statics: 3.3.2
       react: 17.0.2
