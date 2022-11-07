@@ -4,7 +4,8 @@ import * as Yup from 'yup';
 
 import { Avatar, Button, SubHeader, Heading, Input, Tabs, Title } from '@/components/v2';
 import { MeDocument } from '@/graphql';
-import { authenticated, withSessionProtection } from '@/components/authenticated-container';
+import { authenticated } from '@/components/authenticated-container';
+import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const UpdateMeMutation = gql(/* GraphQL */ `
   mutation updateMe($input: UpdateMeInput!) {

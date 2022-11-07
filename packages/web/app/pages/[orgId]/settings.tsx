@@ -3,7 +3,8 @@ import { useFormik } from 'formik';
 import { gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 
-import { authenticated, withSessionProtection } from '@/components/authenticated-container';
+import { authenticated } from '@/components/authenticated-container';
+import { withSessionProtection } from '@/lib/supertokens/guard';
 import { OrganizationLayout } from '@/components/layouts';
 import { OIDCIntegrationSection } from '@/components/organization/settings/oidc-integration-section';
 import { Button, Card, Heading, Input, Spinner, Tag, Title } from '@/components/v2';

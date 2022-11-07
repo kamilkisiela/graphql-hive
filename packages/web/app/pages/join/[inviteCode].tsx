@@ -7,7 +7,8 @@ import { Button } from '@chakra-ui/react';
 import { Title } from '@/components/common';
 import { DataWrapper } from '@/components/common/DataWrapper';
 import { useNotifications } from '@/lib/hooks/use-notifications';
-import { authenticated, withSessionProtection } from '@/components/authenticated-container';
+import { authenticated } from '@/components/authenticated-container';
+import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const Center = tw.div`w-full h-full flex flex-row items-center justify-center`;
 

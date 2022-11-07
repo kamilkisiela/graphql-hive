@@ -3,7 +3,8 @@ import NextLink from 'next/link';
 import clsx from 'clsx';
 import { useQuery } from 'urql';
 
-import { authenticated, withSessionProtection } from '@/components/authenticated-container';
+import { authenticated } from '@/components/authenticated-container';
+import { withSessionProtection } from '@/lib/supertokens/guard';
 import { ProjectLayout } from '@/components/layouts';
 import { Activities, Badge, Button, Card, DropdownMenu, EmptyList, Heading, TimeAgo, Title } from '@/components/v2';
 import { LinkIcon, MoreIcon, SettingsIcon } from '@/components/v2/icon';

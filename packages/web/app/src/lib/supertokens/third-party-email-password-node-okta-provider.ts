@@ -1,5 +1,5 @@
 import { env } from '@/env/backend';
-import { TypeProvider } from 'supertokens-node/recipe/thirdpartyemailpassword';
+import type { TypeProvider } from 'supertokens-node/recipe/thirdpartyemailpassword';
 import zod from 'zod';
 
 type OktaConfig = Exclude<typeof env['auth']['okta'], null>;

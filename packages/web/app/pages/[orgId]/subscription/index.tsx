@@ -3,7 +3,8 @@ import dynamic from 'next/dynamic';
 import { Stat, StatHelpText, StatLabel, StatNumber } from '@chakra-ui/react';
 import { endOfMonth, startOfMonth } from 'date-fns';
 
-import { authenticated, withSessionProtection } from '@/components/authenticated-container';
+import { authenticated } from '@/components/authenticated-container';
+import { withSessionProtection } from '@/lib/supertokens/guard';
 import { OrganizationLayout } from '@/components/layouts';
 import { BillingView } from '@/components/organization/billing/Billing';
 import { CurrencyFormatter } from '@/components/organization/billing/helpers';
