@@ -98,6 +98,7 @@ const ModalContent = (props: {
     onSuccess() {},
     organization: props.organization,
     member: props.organization.me,
+    passMemberScopes: false,
   });
 
   return (

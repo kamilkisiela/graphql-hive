@@ -21,6 +21,7 @@ export const ChangePermissionsModal = ({
     onSuccess: toggleModalOpen,
     organization,
     member,
+    passMemberScopes: true,
   });
 
   return (

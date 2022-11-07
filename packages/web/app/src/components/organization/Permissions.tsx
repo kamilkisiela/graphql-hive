@@ -144,19 +144,25 @@ export function usePermissionsManager({
   organization,
   member,
   onSuccess,
+  passMemberScopes,
 }: {
   organization: OrganizationFieldsFragment;
   member: MemberFieldsFragment;
+  passMemberScopes: boolean;
   onSuccess(): void;
 }) {
   const [state, setState] = React.useState<'LOADING' | 'IDLE'>('IDLE');
   const notify = useNotifications();
   const [, mutate] = useMutation(UpdateOrganizationMemberAccessDocument);
 
-  const [targetScopes, setTargetScopes] = React.useState<TargetAccessScope[]>(member.targetAccessScopes);
-  const [projectScopes, setProjectScopes] = React.useState<ProjectAccessScope[]>(member.projectAccessScopes);
+  const [targetScopes, setTargetScopes] = React.useState<TargetAccessScope[]>(
+    passMemberScopes ? member.targetAccessScopes : []
+  );
+  const [projectScopes, setProjectScopes] = React.useState<ProjectAccessScope[]>(
+    passMemberScopes ? member.projectAccessScopes : []
+  );
   const [organizationScopes, setOrganizationScopes] = React.useState<OrganizationAccessScope[]>(
-    member.organizationAccessScopes
+    passMemberScopes ? member.organizationAccessScopes : []
   );
 
   const submit = React.useCallback(
