@@ -4,7 +4,8 @@ import { useFormik } from 'formik';
 import { gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 
-import { authenticated, withSessionProtection } from '@/components/authenticated-container';
+import { authenticated } from '@/components/authenticated-container';
+import { withSessionProtection } from '@/lib/supertokens/guard';
 import { ProjectLayout } from '@/components/layouts';
 import { ExternalCompositionSettings } from '@/components/project/settings/external-composition';
 import { Button, Card, Heading, Input, Link, Select, Spinner, Tag, Title } from '@/components/v2';

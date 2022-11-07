@@ -1,7 +1,8 @@
 import { ReactElement } from 'react';
 import { gql, useQuery } from 'urql';
 
-import { authenticated, withSessionProtection } from '@/components/authenticated-container';
+import { authenticated } from '@/components/authenticated-container';
+import { withSessionProtection } from '@/lib/supertokens/guard';
 import { TargetLayout } from '@/components/layouts';
 import { SchemaExplorerFilter } from '@/components/target/explorer/filter';
 import { GraphQLObjectTypeComponent } from '@/components/target/explorer/object-type';

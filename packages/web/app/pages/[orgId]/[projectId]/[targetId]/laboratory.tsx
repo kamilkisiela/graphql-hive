@@ -2,7 +2,8 @@ import { ReactElement, useCallback, useState } from 'react';
 import { createGraphiQLFetcher } from '@graphiql/toolkit';
 import { GraphiQL } from 'graphiql';
 
-import { authenticated, withSessionProtection } from '@/components/authenticated-container';
+import { authenticated } from '@/components/authenticated-container';
+import { withSessionProtection } from '@/lib/supertokens/guard';
 import { TargetLayout } from '@/components/layouts';
 import { Button, Title } from '@/components/v2';
 import { HiveLogo, Link2Icon } from '@/components/v2/icon';

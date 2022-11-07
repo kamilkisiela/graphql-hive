@@ -4,7 +4,8 @@ import { useFormik } from 'formik';
 import { DocumentType, gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 
-import { authenticated, withSessionProtection } from '@/components/authenticated-container';
+import { authenticated } from '@/components/authenticated-container';
+import { withSessionProtection } from '@/lib/supertokens/guard';
 import { OrganizationLayout } from '@/components/layouts';
 import { Avatar, Button, Card, Checkbox, DropdownMenu, Input, Title } from '@/components/v2';
 import { CopyIcon, KeyIcon, MoreIcon, SettingsIcon, TrashIcon } from '@/components/v2/icon';

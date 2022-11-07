@@ -1,7 +1,8 @@
 import { ReactElement, useCallback, useState } from 'react';
 import { useMutation, useQuery } from 'urql';
 
-import { authenticated, withSessionProtection } from '@/components/authenticated-container';
+import { authenticated } from '@/components/authenticated-container';
+import { withSessionProtection } from '@/lib/supertokens/guard';
 import { ProjectLayout } from '@/components/layouts';
 import { Button, Card, Checkbox, Heading, Table, Tag, Title } from '@/components/v2';
 import { CreateAlertModal, CreateChannelModal } from '@/components/v2/modals';

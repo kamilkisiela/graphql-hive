@@ -5,7 +5,8 @@ import { VscChevronDown } from 'react-icons/vsc';
 import { AdminStats, Filters } from '@/components/admin/AdminStats';
 import { Page } from '@/components/common';
 import { DATE_RANGE_OPTIONS } from '@/components/common/TimeFilter';
-import { authenticated, withSessionProtection } from '@/components/authenticated-container';
+import { authenticated } from '@/components/authenticated-container';
+import { withSessionProtection } from '@/lib/supertokens/guard';
 
 function Manage() {
   const [last, setLast] = React.useState(30);

@@ -6,7 +6,8 @@ import { DataWrapper } from '@/components/common/DataWrapper';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import Cookies from 'cookies';
 import { LAST_VISITED_ORG_KEY } from '@/constants';
-import { authenticated, withSessionProtection } from '@/components/authenticated-container';
+import { authenticated } from '@/components/authenticated-container';
+import { withSessionProtection } from '@/lib/supertokens/guard';
 import { createTRPCClient } from '@trpc/client';
 import type { InternalApi } from '@hive/server';
 import { env } from '@/env/backend';
@@ -14,10 +15,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import Session from 'supertokens-node/recipe/session';
 import { writeLastVisitedOrganization } from '@/lib/cookies';
 
-export async function getSuperTokensUserIdFromRequest(
-  req: NextApiRequest,
-  res: NextApiResponse
-): Promise<string | null> {
+async function getSuperTokensUserIdFromRequest(req: NextApiRequest, res: NextApiResponse): Promise<string | null> {
   const session = await Session.getSession(req, res, { sessionRequired: false });
   return session?.getUserId() ?? null;
 }
