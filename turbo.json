@@ -26,6 +26,14 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/dev.js"]
     },
+    "@hive/broker-script#build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/worker.js"]
+    },
+    "@hive/broker-script#build-local": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/dev.js"]
+    },
     "@hive/app#build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]

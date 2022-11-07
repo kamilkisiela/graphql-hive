@@ -1,5 +1,5 @@
 {
-  "name": "@hive/cdn-script",
+  "name": "@hive/broker-script",
   "private": true,
   "version": "0.0.0",
   "license": "MIT",
@@ -9,21 +9,17 @@
     "build": "node build.mjs",
     "typecheck": "tsc --noEmit"
   },
-  "peerDependencies": {
-    "graphql": "^16.0.0"
-  },
   "dependencies": {
-    "graphql": "16.5.0",
-    "toucan-js": "2.7.0"
+    "toucan-js": "2.7.0",
+    "zod": "3.19.1"
   },
   "devDependencies": {
-    "@hive/service-common": "workspace:*",
-    "fastify": "3.29.3",
     "esbuild": "0.14.39",
     "@whatwg-node/fetch": "0.4.7",
     "@whatwg-node/server": "0.4.11",
     "itty-router": "2.4.0",
     "itty-router-extras": "0.4.2",
+    "nock": "13.2.4",
     "@types/service-worker-mock": "2.0.1",
     "@cloudflare/workers-types": "3.4.0"
   }

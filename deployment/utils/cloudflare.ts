@@ -68,3 +68,55 @@ export class CloudflareCDN {
     };
   }
 }
+
+export class CloudflareBroker {
+  constructor(
+    private config: {
+      envName: string;
+      zoneId: string;
+      cdnDnsRecord: string;
+      secretSignature: pulumi.Output<string>;
+      sentryDsn: string;
+      release: string;
+    }
+  ) {}
+
+  deploy() {
+    const script = new cf.WorkerScript('hive-broker-worker', {
+      content: readFileSync(resolve(__dirname, '../../packages/services/broker-worker/dist/worker.js'), 'utf-8'),
+      name: `hive-broker-${this.config.envName}`,
+      secretTextBindings: [
+        {
+          name: 'SIGNATURE',
+          text: this.config.secretSignature,
+        },
+        {
+          name: 'SENTRY_DSN',
+          text: this.config.sentryDsn,
+        },
+        {
+          name: 'SENTRY_ENVIRONMENT',
+          text: this.config.envName,
+        },
+        {
+          name: 'SENTRY_RELEASE',
+          text: this.config.release,
+        },
+      ],
+    });
+
+    const workerBase = this.config.cdnDnsRecord;
+    const workerUrl = `https://${workerBase}`;
+
+    new cf.WorkerRoute('cf-hive-broker-worker', {
+      scriptName: script.name,
+      pattern: `${workerBase}/*`,
+      zoneId: this.config.zoneId,
+    });
+
+    return {
+      secretSignature: this.config.secretSignature,
+      workerBaseUrl: workerUrl,
+    };
+  }
+}

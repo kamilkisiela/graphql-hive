@@ -59,7 +59,7 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['packages/web/**', 'packages/services/cdn-worker/**', 'packages/services/police-worker/**'],
+      files: ['packages/web/**', 'packages/services/*-worker/**'],
       rules: {
         // because this folder is excluded in tsconfig.json
         '@typescript-eslint/no-floating-promises': 'off',

@@ -24,6 +24,10 @@ export const schemaBuilderApiRouter = trpc
     logger: FastifyLoggerInstance;
     redis: Redis;
     decrypt(value: string): string;
+    broker: {
+      endpoint: string;
+      signature: string;
+    } | null;
   }>()
   .mutation('supergraph', {
     input: z
@@ -49,6 +53,11 @@ export const schemaBuilderApiRouter = trpc
       return await pickOrchestrator(input.type, ctx.redis, ctx.logger, ctx.decrypt).supergraph(
         input.schemas,
         input.external
+          ? {
+              ...input.external,
+              broker: ctx.broker,
+            }
+          : null
       );
     },
   })
@@ -69,6 +78,11 @@ export const schemaBuilderApiRouter = trpc
       return await pickOrchestrator(input.type, ctx.redis, ctx.logger, ctx.decrypt).validate(
         input.schemas,
         input.external
+          ? {
+              ...input.external,
+              broker: ctx.broker,
+            }
+          : null
       );
     },
   })
@@ -89,6 +103,11 @@ export const schemaBuilderApiRouter = trpc
       return await pickOrchestrator(input.type, ctx.redis, ctx.logger, ctx.decrypt).build(
         input.schemas,
         input.external
+          ? {
+              ...input.external,
+              broker: ctx.broker,
+            }
+          : null
       );
     },
   });

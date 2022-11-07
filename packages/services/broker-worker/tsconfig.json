@@ -1,0 +1,19 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "module": "commonjs",
+    "target": "esnext",
+    "lib": ["esnext"],
+    "skipLibCheck": true,
+    "alwaysStrict": true,
+    "strict": true,
+    "preserveConstEnums": true,
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "types": ["@cloudflare/workers-types", "@types/service-worker-mock"]
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist", "test", "src/dev.ts", "src/dev-polyfill.ts"]
+}

@@ -461,6 +461,7 @@ jobs:
             redis \
             supertokens \
             local_cdn \
+            local_broker \
             external_composition
 
       - name: Set up Docker Buildx

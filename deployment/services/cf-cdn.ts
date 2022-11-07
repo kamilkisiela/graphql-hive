@@ -1,5 +1,5 @@
 import * as pulumi from '@pulumi/pulumi';
-import { CloudflareCDN } from '../utils/cdn';
+import { CloudflareCDN } from '../utils/cloudflare';
 import { PackageHelper } from '../utils/pack';
 
 const commonConfig = new pulumi.Config('common');
@@ -7,9 +7,9 @@ const cfConfig = new pulumi.Config('cloudflareCustom');
 
 const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
 
-export type Cloudflare = ReturnType<typeof deployCloudflare>;
+export type CDN = ReturnType<typeof deployCFCDN>;
 
-export function deployCloudflare({
+export function deployCFCDN({
   rootDns,
   envName,
   packageHelper,

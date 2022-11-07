@@ -38,17 +38,40 @@ export function createWebhookJob({ config }: { config: Config }) {
         job.attemptsMade + 1,
         config.maxAttempts
       );
-      await got.post(job.data.endpoint, {
-        headers: {
-          Accept: 'application/json',
-          'Accept-Encoding': 'gzip, deflate, br',
-          'Content-Type': 'application/json',
-        },
-        timeout: {
-          request: 10_000,
-        },
-        json: job.data.event,
-      });
+
+      if (config.requestBroker) {
+        await got.post(config.requestBroker.endpoint, {
+          headers: {
+            Accept: 'text/plain',
+            'x-hive-signature': config.requestBroker.signature,
+          },
+          timeout: {
+            request: 10_000,
+          },
+          json: {
+            url: job.data.endpoint,
+            method: 'POST',
+            headers: {
+              Accept: 'application/json',
+              'Accept-Encoding': 'gzip, deflate, br',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(job.data.event),
+          },
+        });
+      } else {
+        await got.post(job.data.endpoint, {
+          headers: {
+            Accept: 'application/json',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Content-Type': 'application/json',
+          },
+          timeout: {
+            request: 10_000,
+          },
+          json: job.data.event,
+        });
+      }
     } else {
       config.logger.warn('Giving up on webhook (job=%s)', job.name);
     }

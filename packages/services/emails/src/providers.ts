@@ -62,7 +62,7 @@ function postmark(config: PostmarkEmailProviderConfig, emailFrom: string) {
       });
 
       if (!response.ok) {
-        const details = await response.json();
+        const details: any = await response.json();
         throw new Error(details.Message ?? response.statusText);
       }
     },

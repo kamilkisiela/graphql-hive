@@ -45,13 +45,5 @@
     }
   },
   "include": ["packages"],
-  "exclude": [
-    "**/node_modules/**",
-    "**/dist",
-    "**/temp",
-    "**/tmp",
-    "packages/web",
-    "packages/services/cdn-worker",
-    "packages/services/police-worker"
-  ]
+  "exclude": ["**/node_modules/**", "**/dist", "**/temp", "**/tmp", "packages/web", "packages/services/*-worker"]
 }
