@@ -7,5 +7,6 @@
   "schema-history": "Schema and History",
   "integrations": "Integrations",
   "alerts-notifications": "Alerts and Notifications",
-  "external-schema-composition": "External Schema Composition"
+  "external-schema-composition": "External Schema Composition",
+  "sso-oidc-provider": "SSO OIDC Provider"
 }
