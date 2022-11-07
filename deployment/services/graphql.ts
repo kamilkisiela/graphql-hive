@@ -133,6 +133,7 @@ export function deployGraphQL({
         SUPERTOKENS_API_KEY: supertokensConfig.apiKey,
         AUTH_LEGACY_AUTH0: '1',
         AUTH_LEGACY_AUTH0_INTERNAL_API_KEY: auth0Config.internalApiKey,
+        AUTH_ORGANIZATION_OIDC: '1',
       },
       packageInfo: packageHelper.npmPack('@hive/server'),
       exposesMetrics: true,

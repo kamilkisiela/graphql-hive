@@ -469,8 +469,10 @@ async function setUserIdMapping(
     }),
   });
 
+  const body = await response.text();
+
   if (response.status !== 200) {
-    throw new Error('Failed to set user id mapping code.');
+    throw new Error(`Failed to set user id mapping code. ${body}`);
   }
 }
 
