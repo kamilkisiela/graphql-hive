@@ -209,6 +209,16 @@ const getEnsureUserOverrides = (
 
       return response;
     },
+    async passwordResetPOST(input) {
+      const result = await originalImplementation.passwordResetPOST!(input);
+
+      // For security reasons we revoke all sessions when a password reset is performed.
+      if (result.status === 'OK' && result.userId) {
+        await SessionNode.revokeAllSessionsForUser(result.userId);
+      }
+
+      return result;
+    },
   }),
 });
 
