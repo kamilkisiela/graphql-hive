@@ -87,7 +87,7 @@ export const getOIDCThirdPartyEmailPasswordNodeOverrides = (args: {
   apis: originalImplementation => ({
     ...originalImplementation,
     thirdPartySignInUpPOST: async input => {
-      if (input.clientId !== 'oidc') {
+      if (input.provider.id !== 'oidc') {
         return originalImplementation.thirdPartySignInUpPOST!(input);
       }
 
