@@ -81,6 +81,9 @@ export class Proxy {
                       },
                     ],
                   },
+                  timeoutPolicy: {
+                    response: '60s',
+                  },
                 }),
           })),
         },
@@ -130,6 +133,7 @@ export class Proxy {
             'user_agent',
             'x_forwarded_for',
           ],
+          debug: true,
         },
         contour: {
           podAnnotations: {
