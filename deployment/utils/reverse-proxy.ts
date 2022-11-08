@@ -94,7 +94,7 @@ export class Proxy {
                     ? {
                         retryPolicy: {
                           count: 2,
-                          retryOn: 'reset',
+                          retryOn: ['reset'],
                         },
                       }
                     : {}),
