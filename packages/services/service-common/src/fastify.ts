@@ -2,6 +2,7 @@ import { fastify } from 'fastify';
 import cors from 'fastify-cors';
 import * as Sentry from '@sentry/node';
 import { useSentryTracing } from './sentry';
+import { useRequestLogging } from './request-logs';
 
 export type { FastifyLoggerInstance } from 'fastify';
 
@@ -14,7 +15,7 @@ export async function createServer(options: {
   };
 }) {
   const server = fastify({
-    disableRequestLogging: options.log.disableRequestLogging,
+    disableRequestLogging: true,
     bodyLimit: 11e6, // 11 mb
     logger: {
       level: options.log.level,
@@ -40,6 +41,10 @@ export async function createServer(options: {
 
   if (options.tracing) {
     await useSentryTracing(server);
+  }
+
+  if (!options.log.disableRequestLogging) {
+    await useRequestLogging(server);
   }
 
   await server.register(cors);
