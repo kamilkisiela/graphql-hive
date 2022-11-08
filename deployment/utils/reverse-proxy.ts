@@ -130,6 +130,9 @@ export class Proxy {
             'user_agent',
             'x_forwarded_for',
           ],
+          timeouts: {
+            'request-timeout': '60s',
+          },
         },
         contour: {
           podAnnotations: {
