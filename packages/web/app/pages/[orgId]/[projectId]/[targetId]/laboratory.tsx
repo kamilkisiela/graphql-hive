@@ -3,12 +3,12 @@ import { createGraphiQLFetcher } from '@graphiql/toolkit';
 import { GraphiQL } from 'graphiql';
 
 import { authenticated } from '@/components/authenticated-container';
-import { withSessionProtection } from '@/lib/supertokens/guard';
 import { TargetLayout } from '@/components/layouts';
 import { Button, Title } from '@/components/v2';
 import { HiveLogo, Link2Icon } from '@/components/v2/icon';
 import { ConnectLabModal } from '@/components/v2/modals/connect-lab';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { withSessionProtection } from '@/lib/supertokens/guard';
 import 'graphiql/graphiql.css';
 
 const Page = ({ endpoint }: { endpoint: string }): ReactElement => {

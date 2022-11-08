@@ -2,13 +2,13 @@ import { ReactElement } from 'react';
 import { gql, useQuery } from 'urql';
 
 import { authenticated } from '@/components/authenticated-container';
-import { withSessionProtection } from '@/lib/supertokens/guard';
 import { TargetLayout } from '@/components/layouts';
 import { SchemaExplorerFilter } from '@/components/target/explorer/filter';
 import { GraphQLObjectTypeComponent } from '@/components/target/explorer/object-type';
 import { SchemaExplorerProvider, useSchemaExplorerContext } from '@/components/target/explorer/provider';
 import { DataWrapper, noSchema, Title } from '@/components/v2';
 import { OrganizationFieldsFragment, ProjectFieldsFragment, TargetFieldsFragment } from '@/graphql';
+import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const SchemaView_SchemaExplorer = gql(/* GraphQL */ `
   query SchemaView_SchemaExplorer($organization: ID!, $project: ID!, $target: ID!, $period: DateRangeInput!) {

@@ -2,7 +2,6 @@ import { ReactElement } from 'react';
 import { DocumentType, gql, useQuery } from 'urql';
 
 import { authenticated } from '@/components/authenticated-container';
-import { withSessionProtection } from '@/lib/supertokens/guard';
 import { TargetLayout } from '@/components/layouts';
 import {
   GraphQLEnumTypeComponent,
@@ -33,6 +32,7 @@ import {
 import { DataWrapper, noSchema, Title } from '@/components/v2';
 import { OrganizationFieldsFragment, ProjectFieldsFragment, TargetFieldsFragment } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const SchemaTypeExplorer_Type = gql(/* GraphQL */ `
   query SchemaTypeExplorer_Type(

@@ -4,7 +4,6 @@ import clsx from 'clsx';
 import { useQuery } from 'urql';
 
 import { authenticated } from '@/components/authenticated-container';
-import { withSessionProtection } from '@/lib/supertokens/guard';
 import { ProjectLayout } from '@/components/layouts';
 import { Activities, Badge, Button, Card, DropdownMenu, EmptyList, Heading, TimeAgo, Title } from '@/components/v2';
 import { LinkIcon, MoreIcon, SettingsIcon } from '@/components/v2/icon';
@@ -12,6 +11,7 @@ import { TargetQuery, TargetsDocument, VersionsDocument } from '@/graphql';
 import { getDocsUrl } from '@/lib/docs-url';
 import { useClipboard } from '@/lib/hooks/use-clipboard';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const TargetCard = ({ target }: { target: Exclude<TargetQuery['target'], null | undefined> }): ReactElement => {
   const router = useRouteSelector();

@@ -2,7 +2,6 @@ import { ReactElement, useCallback, useState } from 'react';
 import { useMutation, useQuery } from 'urql';
 
 import { authenticated } from '@/components/authenticated-container';
-import { withSessionProtection } from '@/lib/supertokens/guard';
 import { ProjectLayout } from '@/components/layouts';
 import { Button, Card, Checkbox, Heading, Table, Tag, Title } from '@/components/v2';
 import { CreateAlertModal, CreateChannelModal } from '@/components/v2/modals';
@@ -17,6 +16,7 @@ import {
 } from '@/graphql';
 import { ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const channelAlertsColumns = [{ key: 'checkbox', width: 'auto' }, { key: 'name' }, { key: 'type' }] as const;
 

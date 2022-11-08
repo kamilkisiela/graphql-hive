@@ -5,7 +5,6 @@ import { DocumentType, gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 
 import { authenticated } from '@/components/authenticated-container';
-import { withSessionProtection } from '@/lib/supertokens/guard';
 import { OrganizationLayout } from '@/components/layouts';
 import { Avatar, Button, Card, Checkbox, DropdownMenu, Input, Title } from '@/components/v2';
 import { CopyIcon, KeyIcon, MoreIcon, SettingsIcon, TrashIcon } from '@/components/v2/icon';
@@ -16,6 +15,7 @@ import { useClipboard } from '@/lib/hooks/use-clipboard';
 import { useNotifications } from '@/lib/hooks/use-notifications';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { useToggle } from '@/lib/hooks/use-toggle';
+import { withSessionProtection } from '@/lib/supertokens/guard';
 
 export const DateFormatter = Intl.DateTimeFormat('en', {
   year: 'numeric',
