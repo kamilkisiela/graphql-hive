@@ -102,7 +102,7 @@ export class Proxy {
 
     const proxyController = new k8s.helm.v3.Chart('contour-proxy', {
       chart: 'contour',
-      version: '7.8.0',
+      version: '10.0.0',
       namespace: ns.metadata.name,
       fetchOpts: {
         repo: 'https://charts.bitnami.com/bitnami',
@@ -130,9 +130,6 @@ export class Proxy {
             'user_agent',
             'x_forwarded_for',
           ],
-          timeouts: {
-            'request-timeout': '60s',
-          },
         },
         contour: {
           podAnnotations: {
