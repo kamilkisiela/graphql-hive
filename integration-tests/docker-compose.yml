@@ -103,7 +103,7 @@ services:
       - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
 
   supertokens:
-    image: registry.supertokens.io/supertokens/supertokens-postgresql:4.1
+    image: registry.supertokens.io/supertokens/supertokens-postgresql:4.2
     depends_on:
       db:
         condition: service_healthy
