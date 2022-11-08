@@ -430,6 +430,10 @@ async function trySignIntoAuth0WithUserCredentialsAndRetrieveUserInfo(
 
   const body = await response.text();
 
+  if (response.status === 403) {
+    return null;
+  }
+
   if (response.status !== 200) {
     throw new Error(`Couldn't authenticate user with Auth0. Status: ${response.status} Body: ${body}`);
   }
@@ -441,11 +445,12 @@ async function trySignIntoAuth0WithUserCredentialsAndRetrieveUserInfo(
     headers: { authorization: `Bearer ${accessToken}` },
   });
 
+  const userBody = await userResponse.text();
+
   if (userResponse.status !== 200) {
     return null;
   }
 
-  const userBody = await userResponse.text();
   return JSON.parse(userBody);
 }
 
