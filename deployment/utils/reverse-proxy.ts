@@ -147,7 +147,6 @@ export class Proxy {
             'user_agent',
             'x_forwarded_for',
           ],
-          debug: true,
         },
         contour: {
           podAnnotations: {
