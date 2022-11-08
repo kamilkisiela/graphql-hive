@@ -1,14 +1,31 @@
 import './dev-polyfill';
 import { createServer } from 'http';
-import { handleRequest } from './handler';
+import { createRequestHandler } from './handler';
 import { devStorage } from './dev-polyfill';
-import { isKeyValid } from './auth';
 import { createServerAdapter } from '@whatwg-node/server';
 import { Router } from 'itty-router';
 import { withParams, json } from 'itty-router-extras';
+import { createIsKeyValid } from './auth';
 
 // eslint-disable-next-line no-process-env
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4010;
+
+/**
+ * KV Storage for the CDN
+ */
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+declare let HIVE_DATA: KVNamespace;
+
+/**
+ * Secret used to sign the CDN keys
+ */
+declare let KEY_DATA: string;
+
+const handleRequest = createRequestHandler({
+  getRawStoreValue: value => HIVE_DATA.get(value),
+  isKeyValid: createIsKeyValid(KEY_DATA),
+});
 
 function main() {
   const app = createServerAdapter(Router());
@@ -55,7 +72,7 @@ function main() {
       }),
   );
 
-  app.get('*', (request: Request) => handleRequest(request, isKeyValid));
+  app.get('*', (request: Request) => handleRequest(request));
 
   const server = createServer(app);
 

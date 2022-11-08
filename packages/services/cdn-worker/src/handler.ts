@@ -6,8 +6,8 @@ import {
   MissingAuthKey,
   MissingTargetIDErrorResponse,
 } from './errors';
-import { isKeyValid } from './auth';
 import { buildSchema, introspectionFromSchema } from 'graphql';
+import type { KeyValidator } from './auth';
 
 async function createETag(value: string) {
   const myText = new TextEncoder().encode(value);
@@ -96,7 +96,7 @@ const AUTH_HEADER_NAME = 'x-hive-cdn-key';
 
 async function parseIncomingRequest(
   request: Request,
-  keyValidator: typeof isKeyValid,
+  keyValidator: KeyValidator,
 ): Promise<
   | { error: Response }
   | {
@@ -151,46 +151,63 @@ async function parseIncomingRequest(
   }
 }
 
-export async function handleRequest(request: Request, keyValidator: typeof isKeyValid) {
-  const parsedRequest = await parseIncomingRequest(request, keyValidator);
+/**
+ * Handler for verifying whether an access key is valid.
+ */
+type IsKeyValid = (targetId: string, headerKey: string) => Promise<boolean>;
 
-  if ('error' in parsedRequest) {
-    return parsedRequest.error;
-  }
+/**
+ * Read a raw value from the store.
+ */
+type GetRawStoreValue = (targetId: string) => Promise<string | null>;
 
-  const { targetId, artifactType, storageKeyType } = parsedRequest;
-
-  const kvStorageKey = `target:${targetId}:${storageKeyType}`;
-  const rawValue = await HIVE_DATA.get(kvStorageKey);
-
-  if (rawValue) {
-    const etag = await createETag(`${kvStorageKey}|${rawValue}`);
-    const ifNoneMatch = request.headers.get('if-none-match');
-
-    if (ifNoneMatch && ifNoneMatch === etag) {
-      return new Response(null, { status: 304 });
-    }
-
-    switch (artifactType) {
-      case 'schema':
-        return artifactTypesHandlers.schema(targetId, artifactType, rawValue, etag);
-      case 'supergraph':
-        return artifactTypesHandlers.supergraph(targetId, artifactType, rawValue, etag);
-      case 'sdl':
-        return artifactTypesHandlers.sdl(targetId, artifactType, rawValue, etag);
-      case 'introspection':
-        return artifactTypesHandlers.introspection(targetId, artifactType, rawValue, etag);
-      case 'metadata':
-        return artifactTypesHandlers.metadata(targetId, artifactType, rawValue, etag);
-      default:
-        return new Response(null, {
-          status: 500,
-        });
-    }
-  } else {
-    console.log(
-      `CDN Artifact not found for targetId=${targetId}, artifactType=${artifactType}, storageKeyType=${storageKeyType}`,
-    );
-    return new CDNArtifactNotFound(artifactType, targetId);
-  }
+interface RequestHandlerDependencies {
+  isKeyValid: IsKeyValid;
+  getRawStoreValue: GetRawStoreValue;
 }
+
+export const createRequestHandler =
+  (deps: RequestHandlerDependencies) =>
+  async (request: Request): Promise<Response> => {
+    const parsedRequest = await parseIncomingRequest(request, deps.isKeyValid);
+
+    if ('error' in parsedRequest) {
+      return parsedRequest.error;
+    }
+
+    const { targetId, artifactType, storageKeyType } = parsedRequest;
+
+    const kvStorageKey = `target:${targetId}:${storageKeyType}`;
+    const rawValue = await deps.getRawStoreValue(kvStorageKey);
+
+    if (rawValue) {
+      const etag = await createETag(`${kvStorageKey}|${rawValue}`);
+      const ifNoneMatch = request.headers.get('if-none-match');
+
+      if (ifNoneMatch && ifNoneMatch === etag) {
+        return new Response(null, { status: 304 });
+      }
+
+      switch (artifactType) {
+        case 'schema':
+          return artifactTypesHandlers.schema(targetId, artifactType, rawValue, etag);
+        case 'supergraph':
+          return artifactTypesHandlers.supergraph(targetId, artifactType, rawValue, etag);
+        case 'sdl':
+          return artifactTypesHandlers.sdl(targetId, artifactType, rawValue, etag);
+        case 'introspection':
+          return artifactTypesHandlers.introspection(targetId, artifactType, rawValue, etag);
+        case 'metadata':
+          return artifactTypesHandlers.metadata(targetId, artifactType, rawValue, etag);
+        default:
+          return new Response(null, {
+            status: 500,
+          });
+      }
+    } else {
+      console.log(
+        `CDN Artifact not found for targetId=${targetId}, artifactType=${artifactType}, storageKeyType=${storageKeyType}`,
+      );
+      return new CDNArtifactNotFound(artifactType, targetId);
+    }
+  };
