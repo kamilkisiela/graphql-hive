@@ -24,9 +24,10 @@ export const serverSidePropsSessionHandling = async (context: Parameters<GetServ
       };
     }
 
-    if (err.type === Session.Error.TRY_REFRESH_TOKEN) {
+    if (err.type === Session.Error.TRY_REFRESH_TOKEN || err.type === Session.Error.UNAUTHORISED) {
       return { props: { fromSupertokens: 'needs-refresh' } };
     }
+
     captureException(err);
     throw err;
   }

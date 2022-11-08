@@ -114,6 +114,7 @@ services:
       POSTGRESQL_HOST: db
       POSTGRESQL_PORT: 5432
       API_KEYS: '${SUPERTOKENS_API_KEY}'
+      ACCESS_TOKEN_BLACKLISTING: 'true'
 
   storage:
     image: '${DOCKER_REGISTRY}storage${DOCKER_TAG}'
