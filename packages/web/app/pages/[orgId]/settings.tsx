@@ -4,7 +4,6 @@ import { gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 
 import { authenticated } from '@/components/authenticated-container';
-import { withSessionProtection } from '@/lib/supertokens/guard';
 import { OrganizationLayout } from '@/components/layouts';
 import { OIDCIntegrationSection } from '@/components/organization/settings/oidc-integration-section';
 import { Button, Card, Heading, Input, Spinner, Tag, Title } from '@/components/v2';
@@ -20,6 +19,7 @@ import {
 } from '@/graphql';
 import { canAccessOrganization, OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const Integrations = (): ReactElement => {
   const router = useRouteSelector();

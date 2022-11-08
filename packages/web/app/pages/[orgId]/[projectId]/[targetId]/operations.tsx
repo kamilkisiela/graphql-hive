@@ -7,7 +7,6 @@ import { VscChevronDown } from 'react-icons/vsc';
 import { useQuery } from 'urql';
 
 import { authenticated } from '@/components/authenticated-container';
-import { withSessionProtection } from '@/lib/supertokens/guard';
 import { TargetLayout } from '@/components/layouts';
 import { OperationsFilterTrigger } from '@/components/target/operations/Filters';
 import { OperationsList } from '@/components/target/operations/List';
@@ -20,6 +19,7 @@ import {
   TargetFieldsFragment,
 } from '@/graphql';
 import { getDocsUrl } from '@/lib/docs-url';
+import { withSessionProtection } from '@/lib/supertokens/guard';
 
 function floorDate(date: Date): Date {
   const time = 1000 * 60;

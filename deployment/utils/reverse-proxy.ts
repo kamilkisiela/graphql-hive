@@ -12,6 +12,8 @@ export class Proxy {
       name: string;
       path: string;
       service: k8s.core.v1.Service;
+      timeoutInSeconds?: number;
+      retryOnReset?: boolean;
       customRewrite?: string;
       virtualHost?: Output<string>;
       httpsUpstream?: boolean;
@@ -81,6 +83,21 @@ export class Proxy {
                       },
                     ],
                   },
+                  ...(route.timeoutInSeconds
+                    ? {
+                        timeoutPolicy: {
+                          response: `${route.timeoutInSeconds}s`,
+                        },
+                      }
+                    : {}),
+                  ...(route.retryOnReset
+                    ? {
+                        retryPolicy: {
+                          count: 2,
+                          retryOn: ['reset'],
+                        },
+                      }
+                    : {}),
                 }),
           })),
         },
@@ -102,7 +119,7 @@ export class Proxy {
 
     const proxyController = new k8s.helm.v3.Chart('contour-proxy', {
       chart: 'contour',
-      version: '7.8.0',
+      version: '10.0.0',
       namespace: ns.metadata.name,
       fetchOpts: {
         repo: 'https://charts.bitnami.com/bitnami',

@@ -7,7 +7,6 @@ import { gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 
 import { authenticated } from '@/components/authenticated-container';
-import { withSessionProtection } from '@/lib/supertokens/guard';
 import { TargetLayout } from '@/components/layouts';
 import { SchemaEditor } from '@/components/schema-editor';
 import { Button, Card, Checkbox, Heading, Input, Switch, Table, Tag, TimeAgo, Title } from '@/components/v2';
@@ -24,6 +23,7 @@ import {
 } from '@/graphql';
 import { canAccessTarget, TargetAccessScope } from '@/lib/access/target';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const columns = [
   { key: 'checkbox' },

@@ -14,7 +14,6 @@ import { gql, useMutation, useQuery } from 'urql';
 import { useDebouncedCallback } from 'use-debounce';
 
 import { authenticated } from '@/components/authenticated-container';
-import { withSessionProtection } from '@/lib/supertokens/guard';
 import { TargetLayout } from '@/components/layouts';
 import { MarkAsValid } from '@/components/target/history/MarkAsValid';
 import { Button, DataWrapper, GraphQLBlock, noSchema, Title } from '@/components/v2';
@@ -28,6 +27,7 @@ import {
   TargetFieldsFragment,
 } from '@/graphql';
 import { TargetAccessScope, useTargetAccess } from '@/lib/access/target';
+import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const SchemaServiceName_UpdateSchemaServiceName = gql(/* GraphQL */ `
   mutation SchemaServiceName_UpdateSchemaServiceName($input: UpdateSchemaServiceNameInput!) {
