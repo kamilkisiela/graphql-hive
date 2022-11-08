@@ -12,6 +12,8 @@ export class Proxy {
       name: string;
       path: string;
       service: k8s.core.v1.Service;
+      timeoutInSeconds?: number;
+      retryOnReset?: boolean;
       customRewrite?: string;
       virtualHost?: Output<string>;
       httpsUpstream?: boolean;
@@ -81,9 +83,21 @@ export class Proxy {
                       },
                     ],
                   },
-                  timeoutPolicy: {
-                    response: '60s',
-                  },
+                  ...(route.timeoutInSeconds
+                    ? {
+                        timeoutPolicy: {
+                          response: `${route.timeoutInSeconds}s`,
+                        },
+                      }
+                    : {}),
+                  ...(route.retryOnReset
+                    ? {
+                        retryPolicy: {
+                          count: 2,
+                          retryOn: 'reset',
+                        },
+                      }
+                    : {}),
                 }),
           })),
         },
