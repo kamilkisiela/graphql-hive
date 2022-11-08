@@ -27,6 +27,16 @@ export const serverSidePropsSessionHandling = async (context: Parameters<GetServ
     if (err.type === Session.Error.TRY_REFRESH_TOKEN) {
       return { props: { fromSupertokens: 'needs-refresh' } };
     }
+
+    if (err.type === Session.Error.UNAUTHORISED) {
+      return {
+        redirect: {
+          destination: '/auth',
+          permanent: false,
+        },
+      };
+    }
+
     captureException(err);
     throw err;
   }
