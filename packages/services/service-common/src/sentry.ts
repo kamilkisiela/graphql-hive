@@ -106,10 +106,12 @@ const plugin: FastifyPluginAsync = async server => {
       Sentry.captureException(err);
 
       // eslint-disable-next-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
-      reply.send({
-        error: 500,
-        message: 'Internal Server Error',
-      });
+      reply.send(
+        JSON.stringify({
+          error: 500,
+          message: 'Internal Server Error',
+        })
+      );
     });
   });
 };
