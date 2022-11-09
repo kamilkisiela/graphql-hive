@@ -1,8 +1,5 @@
 {
   "extends": "./tsconfig.json",
-  "compilerOptions": {
-    // "noEmit": true,
-    // "allowJs": true
-  },
-  "include": ["integration-tests", ".eslintrc.cjs"]
+  "include": ["packages", "integration-tests", ".eslintrc.cjs"],
+  "exclude": ["**/node_modules/**", "**/dist", "**/temp", "**/tmp"]
 }

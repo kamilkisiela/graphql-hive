@@ -18,7 +18,7 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 2020,
     sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.eslint.json', './deployment/tsconfig.json'],
+    project: ['./tsconfig.eslint.json'],
   },
   parser: '@typescript-eslint/parser',
   plugins: ['@typescript-eslint', 'import', 'hive'],
@@ -63,10 +63,6 @@ module.exports = {
       rules: {
         // because this folder is excluded in tsconfig.json
         '@typescript-eslint/no-floating-promises': 'off',
-      },
-      parserOptions: {
-        // Fixes Parsing error: "parserOptions.project" has been set for @typescript-eslint/parser
-        createDefaultProgram: true,
       },
     },
     {
