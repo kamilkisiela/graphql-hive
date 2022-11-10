@@ -997,7 +997,7 @@ importers:
       react-icons: 4.3.1
       react-select: 5.4.0
       react-string-replace: 0.4.4
-      react-virtualized-auto-sizer: 1.0.6
+      react-virtualized-auto-sizer: 1.0.7
       react-window: 1.8.8
       regenerator-runtime: 0.13.10
       rimraf: 3.0.2
@@ -1077,7 +1077,7 @@ importers:
       react-icons: 4.3.1_react@17.0.2
       react-select: 5.4.0_k2mvpji5i2ojml6m4ftklg47pa
       react-string-replace: 0.4.4
-      react-virtualized-auto-sizer: 1.0.6_sfoxds7t5ydpegc3knd667wn6m
+      react-virtualized-auto-sizer: 1.0.7_sfoxds7t5ydpegc3knd667wn6m
       react-window: 1.8.8_sfoxds7t5ydpegc3knd667wn6m
       regenerator-runtime: 0.13.10
       snarkdown: 2.0.0
@@ -22341,12 +22341,12 @@ packages:
       tslib: 2.4.0
     dev: false
 
-  /react-virtualized-auto-sizer/1.0.6_sfoxds7t5ydpegc3knd667wn6m:
-    resolution: {integrity: sha512-7tQ0BmZqfVF6YYEWcIGuoR3OdYe8I/ZFbNclFlGOC3pMqunkYF/oL30NCjSGl9sMEb17AnzixDz98Kqc3N76HQ==}
+  /react-virtualized-auto-sizer/1.0.7_sfoxds7t5ydpegc3knd667wn6m:
+    resolution: {integrity: sha512-Mxi6lwOmjwIjC1X4gABXMJcKHsOo0xWl3E3ugOgufB8GJU+MqrtY35aBuvCYv/razQ1Vbp7h1gWJjGjoNN5pmA==}
     engines: {node: '>8.0.0'}
     peerDependencies:
-      react: ^15.3.0 || ^16.0.0-alpha || ^17.0.0
-      react-dom: ^15.3.0 || ^16.0.0-alpha || ^17.0.0
+      react: ^15.3.0 || ^16.0.0-alpha || ^17.0.0 || ^18.0.0-rc
+      react-dom: ^15.3.0 || ^16.0.0-alpha || ^17.0.0 || ^18.0.0-rc
     dependencies:
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
