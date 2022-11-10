@@ -155,8 +155,8 @@ const InvitationDeleteButton = ({
   return (
     <DropdownMenu.Item
       disabled={mutation.fetching}
-      onClick={() => {
-        mutate({
+      onClick={async () => {
+        await mutate({
           input: {
             organization: organizationCleanId,
             email,
@@ -264,7 +264,7 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
 
   useEffect(() => {
     if (isPersonal) {
-      router.replace(`/${router.organizationId}`);
+      void router.replace(`/${router.organizationId}`);
     } else if (members) {
       // uncheck checkboxes when members were deleted
       setChecked(prev => prev.filter(id => members.some(node => node.id === id)));

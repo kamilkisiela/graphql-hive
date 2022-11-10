@@ -10,8 +10,8 @@ export const MarkAsValid: React.FC<{
 }> = ({ version }) => {
   const router = useRouteSelector();
   const [mutation, mutate] = useMutation(UpdateSchemaVersionStatusDocument);
-  const markAsValid = React.useCallback(() => {
-    mutate({
+  const markAsValid = React.useCallback(async () => {
+    await mutate({
       input: {
         organization: router.organizationId,
         project: router.projectId,

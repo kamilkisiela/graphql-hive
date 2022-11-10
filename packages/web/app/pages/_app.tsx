@@ -75,7 +75,7 @@ function App({ Component, pageProps }: AppProps): ReactElement {
   }, []);
 
   useEffect(() => {
-    Session.doesSessionExist().then(async doesExist => {
+    void Session.doesSessionExist().then(async doesExist => {
       if (!doesExist) {
         return;
       }

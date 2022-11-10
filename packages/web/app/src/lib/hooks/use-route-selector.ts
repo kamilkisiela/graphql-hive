@@ -14,7 +14,7 @@ export function useRouteSelector() {
         shallow?: boolean;
       },
     ) => {
-      router.push(route, as, options);
+      void router.push(route, as, options);
     },
     [router],
   );

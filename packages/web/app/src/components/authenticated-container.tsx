@@ -37,11 +37,11 @@ export const authenticated =
           if (await Session.attemptRefreshingSession()) {
             location.reload();
           } else {
-            router.replace(`/auth?redirectToPath=${router.asPath}`);
+            void router.replace(`/auth?redirectToPath=${router.asPath}`);
           }
         }
       }
-      doRefresh();
+      void doRefresh();
     }, []);
 
     if (props.fromSupertokens) {

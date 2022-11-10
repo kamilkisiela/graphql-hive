@@ -37,7 +37,7 @@ export const ConnectSchemaModal = ({
       return;
     }
 
-    mutate({
+    void mutate({
       selector: {
         organization: router.organizationId,
         project: router.projectId,

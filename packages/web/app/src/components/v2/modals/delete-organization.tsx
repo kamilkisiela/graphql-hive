@@ -47,7 +47,7 @@ export const DeleteOrganizationModal = ({
               },
             });
             toggleModalOpen();
-            replace(`/${organization.cleanId}`);
+            void replace(`/${organization.cleanId}`);
           }}
         >
           Delete

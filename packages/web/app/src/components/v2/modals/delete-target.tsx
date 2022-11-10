@@ -46,7 +46,7 @@ export const DeleteTargetModal = ({
               },
             });
             toggleModalOpen();
-            replace(`/${router.organizationId}/${router.projectId}`);
+            void replace(`/${router.organizationId}/${router.projectId}`);
           }}
         >
           Delete

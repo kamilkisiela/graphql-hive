@@ -71,9 +71,9 @@ const ProjectCard = ({
             </DropdownMenu.Trigger>
             <DropdownMenu.Content sideOffset={5} align="start">
               <DropdownMenu.Item
-                onClick={e => {
+                onClick={async e => {
                   e.stopPropagation();
-                  copyToClipboard(`${window.location.origin}${href}`);
+                  await copyToClipboard(`${window.location.origin}${href}`);
                 }}
               >
                 <LinkIcon />

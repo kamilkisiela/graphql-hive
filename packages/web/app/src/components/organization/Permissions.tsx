@@ -177,10 +177,10 @@ export function usePermissionsManager({
   );
 
   const submit = React.useCallback(
-    evt => {
+    async evt => {
       evt.preventDefault();
       setState('LOADING');
-      mutate({
+      const result = await mutate({
         input: {
           organization: organization.cleanId,
           user: member.id,
@@ -188,15 +188,14 @@ export function usePermissionsManager({
           projectScopes,
           organizationScopes,
         },
-      }).then(result => {
-        setState('IDLE');
-        if (result.error) {
-          notify(`Failed to change access (reason: ${result.error.message}`, 'error');
-        } else {
-          onSuccess();
-          notify('Member access saved', 'success');
-        }
       });
+      setState('IDLE');
+      if (result.error) {
+        notify(`Failed to change access (reason: ${result.error.message}`, 'error');
+      } else {
+        onSuccess();
+        notify('Member access saved', 'success');
+      }
     },
     [
       mutate,

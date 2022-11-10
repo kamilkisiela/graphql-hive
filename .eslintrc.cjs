@@ -62,13 +62,6 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['packages/web/**', 'packages/services/*-worker/**'],
-      rules: {
-        // because this folder is excluded in tsconfig.json
-        '@typescript-eslint/no-floating-promises': 'off',
-      },
-    },
-    {
       // TODO: replace with packages/web/**
       files: ['packages/web/app/src/components/v2/**', 'packages/web/app/pages/\\[orgId\\]/**'],
       extends: [
