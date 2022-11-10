@@ -1,5 +1,13 @@
 # @graphql-hive/cli
 
+## 0.19.4
+
+### Patch Changes
+
+- [#631](https://github.com/kamilkisiela/graphql-hive/pull/631) [`d4ca981`](https://github.com/kamilkisiela/graphql-hive/commit/d4ca98180bd0b2910fb41f623c2f5abb1f4b9214) Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Bump
+
+- [#631](https://github.com/kamilkisiela/graphql-hive/pull/631) [`d4ca981`](https://github.com/kamilkisiela/graphql-hive/commit/d4ca98180bd0b2910fb41f623c2f5abb1f4b9214) Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Bump CLI
+
 ## 0.19.3
 
 ### Patch Changes
