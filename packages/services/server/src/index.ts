@@ -316,6 +316,7 @@ export async function main() {
         async handler(req, reply) {
           if (req.headers['x-authorization'] !== auth0Config.apiKey) {
             void reply.status(401).send({ error: 'Invalid update user id mapping key.', code: 'ERR_INVALID_KEY' });
+            return;
           }
 
           const { email } = LegacyCheckAuth0EmailUserExistsPayloadModel.parse(req.body);
