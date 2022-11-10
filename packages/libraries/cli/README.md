@@ -23,7 +23,7 @@ $ npm install -g @graphql-hive/cli
 $ hive COMMAND
 running command...
 $ hive (--version)
-@graphql-hive/cli/0.18.1 darwin-arm64 node-v16.15.0
+@graphql-hive/cli/0.19.1 darwin-arm64 node-v16.18.0
 $ hive --help [COMMAND]
 USAGE
   $ hive COMMAND
@@ -63,7 +63,7 @@ DESCRIPTION
   deletes specific cli configuration
 ```
 
-_See code: [dist/commands/config/delete.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.18.1/dist/commands/config/delete.js)_
+_See code: [dist/commands/config/delete.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.1/dist/commands/config/delete.js)_
 
 ## `hive config:get KEY`
 
@@ -80,7 +80,7 @@ DESCRIPTION
   prints specific cli configuration
 ```
 
-_See code: [dist/commands/config/get.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.18.1/dist/commands/config/get.js)_
+_See code: [dist/commands/config/get.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.1/dist/commands/config/get.js)_
 
 ## `hive config:reset`
 
@@ -94,7 +94,7 @@ DESCRIPTION
   resets local cli configuration
 ```
 
-_See code: [dist/commands/config/reset.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.18.1/dist/commands/config/reset.js)_
+_See code: [dist/commands/config/reset.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.1/dist/commands/config/reset.js)_
 
 ## `hive config:set KEY VALUE`
 
@@ -112,7 +112,7 @@ DESCRIPTION
   updates specific cli configuration
 ```
 
-_See code: [dist/commands/config/set.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.18.1/dist/commands/config/set.js)_
+_See code: [dist/commands/config/set.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.1/dist/commands/config/set.js)_
 
 ## `hive help [COMMAND]`
 
@@ -132,7 +132,7 @@ DESCRIPTION
   Display help for hive.
 ```
 
-_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.1.12/src/commands/help.ts)_
+_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.1.18/src/commands/help.ts)_
 
 ## `hive operations:check FILE`
 
@@ -154,7 +154,7 @@ DESCRIPTION
   checks operations against a published schema
 ```
 
-_See code: [dist/commands/operations/check.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.18.1/dist/commands/operations/check.js)_
+_See code: [dist/commands/operations/check.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.1/dist/commands/operations/check.js)_
 
 ## `hive operations:publish FILE`
 
@@ -177,7 +177,7 @@ DESCRIPTION
   saves operations to the store
 ```
 
-_See code: [dist/commands/operations/publish.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.18.1/dist/commands/operations/publish.js)_
+_See code: [dist/commands/operations/publish.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.1/dist/commands/operations/publish.js)_
 
 ## `hive schema:check FILE`
 
@@ -204,7 +204,7 @@ DESCRIPTION
   checks schema
 ```
 
-_See code: [dist/commands/schema/check.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.18.1/dist/commands/schema/check.js)_
+_See code: [dist/commands/schema/check.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.1/dist/commands/schema/check.js)_
 
 ## `hive schema:publish FILE`
 
@@ -213,30 +213,33 @@ publishes schema
 ```
 USAGE
   $ hive schema:publish [FILE] [--service <value>] [--url <value>] [--metadata <value>] [--registry <value>]
-    [--token <value>] [--author <value>] [--commit <value>] [--github] [--force] [--require <value>]
+    [--token <value>] [--author <value>] [--commit <value>] [--github] [--force] [--experimental_acceptBreakingChanges]
+    [--require <value>]
 
 ARGUMENTS
   FILE  Path to the schema file(s)
 
 FLAGS
-  --author=<value>      author of the change
-  --commit=<value>      associated commit sha
-  --force               force publish even on breaking changes
-  --github              Connect with GitHub Application
-  --metadata=<value>    additional metadata to attach to the GraphQL schema. This can be a string with a valid JSON, or
-                        a path to a file containing a valid JSON
-  --registry=<value>    registry address
-  --require=<value>...  [default: ] Loads specific require.extensions before running the codegen and reading the
-                        configuration
-  --service=<value>     service name (only for distributed schemas)
-  --token=<value>       api token
-  --url=<value>         service url (only for distributed schemas)
+  --author=<value>                      author of the change
+  --commit=<value>                      associated commit sha
+  --experimental_acceptBreakingChanges  (experimental) accept breaking changes and mark schema as valid (only if
+                                        composable)
+  --force                               force publish even on breaking changes
+  --github                              Connect with GitHub Application
+  --metadata=<value>                    additional metadata to attach to the GraphQL schema. This can be a string with a
+                                        valid JSON, or a path to a file containing a valid JSON
+  --registry=<value>                    registry address
+  --require=<value>...                  [default: ] Loads specific require.extensions before running the codegen and
+                                        reading the configuration
+  --service=<value>                     service name (only for distributed schemas)
+  --token=<value>                       api token
+  --url=<value>                         service url (only for distributed schemas)
 
 DESCRIPTION
   publishes schema
 ```
 
-_See code: [dist/commands/schema/publish.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.18.1/dist/commands/schema/publish.js)_
+_See code: [dist/commands/schema/publish.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.1/dist/commands/schema/publish.js)_
 
 ## `hive update [CHANNEL]`
 
@@ -273,7 +276,7 @@ EXAMPLES
     $ hive update --available
 ```
 
-_See code: [@oclif/plugin-update](https://github.com/oclif/plugin-update/blob/v3.0.0/src/commands/update.ts)_
+_See code: [@oclif/plugin-update](https://github.com/oclif/plugin-update/blob/v3.0.6/src/commands/update.ts)_
 
 ## `hive whoami`
 
@@ -291,7 +294,7 @@ DESCRIPTION
   checks schema
 ```
 
-_See code: [dist/commands/whoami.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.18.1/dist/commands/whoami.js)_
+_See code: [dist/commands/whoami.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.1/dist/commands/whoami.js)_
 
 <!-- commandsstop -->
 
