@@ -65,7 +65,7 @@ export function createSupergraphManager(options: { pollIntervalInMs?: number } &
   return {
     async initialize(hooks: { update(supergraphSdl: string): void }): Promise<{
       supergraphSdl: string;
-      cleanup?: () => Promise<void>;
+      cleanup?: () => void;
     }> {
       const initialResult = await fetchSupergraph();
 
