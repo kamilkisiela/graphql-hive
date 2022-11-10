@@ -23,13 +23,14 @@
   "files": [
     "/bin",
     "/dist",
+    "/npm-shrinkwrap.json",
     "/oclif.manifest.json"
   ],
   "scripts": {
     "start": "./bin/dev",
     "build": "tsc",
     "postpack": "rm -f oclif.manifest.json",
-    "prepack": "rimraf lib && tsc -b && oclif manifest && oclif readme",
+    "prepack": "npm shrinkwrap && rimraf lib && tsc -b && oclif manifest && oclif readme",
     "version": "oclif readme && git add README.md",
     "schema:check:single": "pnpm start schema:check examples/single.graphql",
     "schema:check:stitching": "pnpm start schema:check examples/stitching.graphql --service posts",
