@@ -9,7 +9,12 @@ function generateUnique() {
 }
 
 function filterEmailsByOrg(orgName: string, emails: emails.Email[]) {
-  return emails.filter(email => email.subject.startsWith(orgName));
+  return emails
+    .filter(email => email.subject.includes(orgName))
+    .map(email => ({
+      subject: email.subject,
+      email: email.to,
+    }));
 }
 
 test('rate limit approaching and reached for organization', async () => {
