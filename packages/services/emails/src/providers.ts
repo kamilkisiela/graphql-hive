@@ -75,7 +75,7 @@ function mock(_config: MockEmailProviderConfig, _emailFrom: string): EmailProvid
 
   return {
     id: 'mock' as const,
-    async send(email: Email) {
+    send(email: Email) {
       history.push(email);
     },
     history,

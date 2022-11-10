@@ -63,7 +63,7 @@ export class OIDCIntegrationsProvider {
     return await this.storage.getOIDCIntegrationForOrganization({ organizationId: args.organizationId });
   }
 
-  async getClientSecretPreview(integration: OIDCIntegration) {
+  getClientSecretPreview(integration: OIDCIntegration) {
     const decryptedSecret = this.crypto.decrypt(integration.encryptedClientSecret);
     return decryptedSecret.substring(decryptedSecret.length - 4);
   }

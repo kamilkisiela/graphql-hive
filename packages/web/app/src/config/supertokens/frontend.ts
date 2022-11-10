@@ -53,7 +53,7 @@ export const frontendConfig = () => {
         signInAndUpFeature: {
           providers,
         },
-        getRedirectionURL: async context => {
+        getRedirectionURL: context => {
           if (context.action === 'SUCCESS') {
             // Allow only local pages to be redirected to
             if (context.redirectToPath !== undefined && /^\/[^/]+/.test(context.redirectToPath)) {

@@ -114,13 +114,13 @@ export function useCache(
       async readTarget(target, res) {
         const cachedValue = cache.get(target);
         if (cachedValue) {
-          res?.header('x-cache', 'HIT'); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+          void res?.header('x-cache', 'HIT');
           cacheHits.inc(1);
           return cachedValue;
         }
 
         cacheMisses.inc(1);
-        res?.header('x-cache', 'MISS'); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+        void res?.header('x-cache', 'MISS');
 
         return readAndFill(target);
       },
@@ -144,7 +144,7 @@ export function useCache(
 
             if (item) {
               cacheHits.inc(1);
-              res?.header('x-cache', 'HIT'); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+              void res?.header('x-cache', 'HIT');
               touch.schedule(hashed_token); // mark as used
               return item;
             }
@@ -154,8 +154,7 @@ export function useCache(
         const item = await readToken(hashed_token);
         await readAndFill(item.target).catch(() => {});
         cacheMisses.inc(1);
-        res?.header('x-cache', 'MISS'); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
-
+        void res?.header('x-cache', 'MISS');
         touch.schedule(hashed_token); // mark as used
 
         return item;

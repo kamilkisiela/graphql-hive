@@ -215,7 +215,7 @@ export function createUsage(config: {
   let status: Status = Status.Waiting;
 
   return {
-    async collect(
+    collect(
       incomingReport: IncomingReport | IncomingLegacyReport,
       token: TokensResponse,
       targetRetentionInDays: number | null

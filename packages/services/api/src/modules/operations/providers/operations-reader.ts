@@ -1322,7 +1322,7 @@ export class OperationsReader {
   // It gathers all function calls within the same event loop,
   // and calls the inner function in the next cycle.
   countCoordinatesOfType = batch(
-    async (
+    (
       selectors: Array<{
         target: string;
         period: DateRange;

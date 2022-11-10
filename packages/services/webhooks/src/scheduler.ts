@@ -99,7 +99,7 @@ export function createScheduler(config: Config) {
     await webhookWorker.waitUntilReady();
   }
 
-  async function start() {
+  function start() {
     redisConnection = new Redis({
       host: config.redis.host,
       port: config.redis.port,

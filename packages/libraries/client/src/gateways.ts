@@ -47,7 +47,7 @@ function createFetcher<T>({ endpoint, key }: SchemaFetcherOptions & ServicesFetc
 
         return Promise.reject(new Error(`Failed to fetch [${response.status}]`));
       })
-      .catch(async error => {
+      .catch(error => {
         if (axios.isAxiosError(error) && error.response?.status === 304 && cached !== null) {
           return cached;
         }

@@ -109,7 +109,7 @@ export function createIngestor(config: {
     logger.info('Usage Ingestor stopped');
   }
 
-  consumer.on('consumer.stop', async () => {
+  consumer.on('consumer.stop', () => {
     logger.warn('Consumer stopped');
   });
 
@@ -124,7 +124,7 @@ export function createIngestor(config: {
     await start();
   });
 
-  consumer.on('consumer.disconnect', async () => {
+  consumer.on('consumer.disconnect', () => {
     logger.warn('Consumer disconnected');
   });
 

@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { env } from '@/env/backend';
 
-export default async function slackConnectOrg(req: NextApiRequest, res: NextApiResponse) {
+export default function slackConnectOrg(req: NextApiRequest, res: NextApiResponse) {
   console.log('Connect to Slack');
   if (env.slack === null) {
     throw new Error('The Slack integration is not enabled.');

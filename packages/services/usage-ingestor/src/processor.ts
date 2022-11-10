@@ -43,7 +43,7 @@ export function createProcessor(config: { logger: FastifyLoggerInstance }) {
   );
 
   return {
-    async processReports(rawReports: RawReport[]) {
+    processReports(rawReports: RawReport[]) {
       // Each report has `size` property that tells us the number of operations
       const sizeOfAllReports = rawReports.reduce((acc, r) => acc + r.size, 0);
       reportMessageSize.observe(sizeOfAllReports);

@@ -96,7 +96,7 @@ export class CustomOrchestrator implements Orchestrator {
     }
   }
 
-  async supergraph() {
+  supergraph() {
     return null;
   }
 }

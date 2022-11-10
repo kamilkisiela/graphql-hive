@@ -29,10 +29,10 @@ export function createEstimator(config: {
     readiness() {
       return true;
     },
-    async start() {
+    start() {
       logger.info('Usage Estimator started');
     },
-    async stop() {
+    stop() {
       logger.info('Usage Estimator stopped');
     },
     async estimateOperationsForAllTargets(input: { startTime: Date; endTime: Date }) {

@@ -11,7 +11,7 @@ export function createUsageRateLimit(config: { endpoint: string | null; logger: 
     logger.warn(`Usage service is not configured to use rate-limit (missing config)`);
 
     return {
-      async isRateLimited(_input: RateLimitQueryInput<'checkRateLimit'>): Promise<boolean> {
+      isRateLimited(_input: RateLimitQueryInput<'checkRateLimit'>): boolean {
         return false;
       },
     };

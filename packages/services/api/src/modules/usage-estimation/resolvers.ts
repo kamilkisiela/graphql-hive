@@ -10,7 +10,7 @@ import { UsageEstimationModule } from './__generated__/types';
 
 export const resolvers: UsageEstimationModule.Resolvers = {
   Query: {
-    async usageEstimation(root, args) {
+    usageEstimation(root, args) {
       const parsedRange = parseDateRangeInput(args.range);
 
       return {

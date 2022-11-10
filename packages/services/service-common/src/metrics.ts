@@ -28,12 +28,12 @@ export async function startMetrics(instanceLabel: string | undefined) {
     url: '/metrics',
     async handler(req, res) {
       try {
-        res.header('Content-Type', promClient.register.contentType); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+        void res.header('Content-Type', promClient.register.contentType);
         const result = await promClient.register.metrics();
 
-        res.send(result); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+        void res.send(result);
       } catch (error) {
-        res.status(500).send(error); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+        void res.status(500).send(error);
       }
     },
   });

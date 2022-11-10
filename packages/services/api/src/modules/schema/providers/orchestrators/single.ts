@@ -87,7 +87,7 @@ export class SingleOrchestrator implements Orchestrator {
     }
   }
 
-  async supergraph() {
+  supergraph() {
     return null;
   }
 }

@@ -7,7 +7,7 @@ import type { FastifyInstance, FastifyPluginAsync, FastifyRequest } from 'fastif
 import fp from 'fastify-plugin';
 import { cleanRequestId } from './helpers';
 
-const plugin: FastifyPluginAsync = async server => {
+const plugin: FastifyPluginAsync = server => {
   server.decorateRequest('sentryTransaction', null);
 
   function shouldIgnore(request: FastifyRequest) {
@@ -22,7 +22,7 @@ const plugin: FastifyPluginAsync = async server => {
     return false;
   }
 
-  server.addHook('onRequest', async request => {
+  server.addHook('onRequest', request => {
     if (shouldIgnore(request)) {
       return;
     }
@@ -105,8 +105,7 @@ const plugin: FastifyPluginAsync = async server => {
       console.log('fastify.setErrorHandler error', err);
       Sentry.captureException(err);
 
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
-      reply.send(
+      void reply.send(
         JSON.stringify({
           error: 500,
           message: 'Internal Server Error',

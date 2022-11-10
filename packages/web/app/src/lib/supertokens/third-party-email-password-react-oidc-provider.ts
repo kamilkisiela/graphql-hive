@@ -30,7 +30,7 @@ export const getOIDCOverrides = (): UserInput['override'] => ({
           ? {
               ...input,
               options: {
-                preAPIHook: async options => {
+                preAPIHook: options => {
                   const url = new URL(options.url);
                   url.searchParams.append('oidc_id', maybeId);
                   return {
@@ -53,7 +53,7 @@ export const getOIDCOverrides = (): UserInput['override'] => ({
           ? {
               ...input,
               options: {
-                preAPIHook: async options => {
+                preAPIHook: options => {
                   const url = new URL(options.url);
                   url.searchParams.append('oidc_id', oidcId);
                   return {

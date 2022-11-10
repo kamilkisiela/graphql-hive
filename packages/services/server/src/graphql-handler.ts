@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import type { RouteHandlerMethod, FastifyRequest, FastifyReply } from 'fastify';
 import { Registry } from '@hive/api';
 import { cleanRequestId } from '@hive/service-common';
@@ -233,22 +232,22 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
         });
 
         response.headers.forEach((value, key) => {
-          reply.header(key, value);
+          void reply.header(key, value);
         });
 
         if (!reply.hasHeader('x-request-id')) {
-          reply.header('x-request-id', requestId || '');
+          void reply.header('x-request-id', requestId || '');
         }
 
         const accept = req.headers.accept;
 
         if (!accept || accept === '*/*') {
-          reply.header('content-type', 'application/json');
+          void reply.header('content-type', 'application/json');
         }
 
-        reply.status(response.status);
+        void reply.status(response.status);
 
-        reply.send(response.body);
+        void reply.send(response.body);
 
         return reply;
       }

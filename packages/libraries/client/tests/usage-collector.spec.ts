@@ -86,7 +86,7 @@ const op = parse(/* GraphQL */ `
   }
 `);
 
-test('collect fields', async () => {
+test('collect fields', () => {
   const collect = createCollector({
     schema,
     max: 1,
@@ -97,7 +97,7 @@ test('collect fields', async () => {
   expect(info.fields).toContain(`Project.id`);
 });
 
-test('collect input object types', async () => {
+test('collect input object types', () => {
   const collect = createCollector({
     schema,
     max: 1,
@@ -108,7 +108,7 @@ test('collect input object types', async () => {
   expect(info.fields).toContain(`ProjectSelectorInput.project`);
 });
 
-test('collect enums and scalars as inputs', async () => {
+test('collect enums and scalars as inputs', () => {
   const collect = createCollector({
     schema,
     max: 1,
@@ -131,7 +131,7 @@ test('collect enums and scalars as inputs', async () => {
   expect(info.fields).toContain(`ProjectType.CUSTOM`);
 });
 
-test('collect enum values from object fields', async () => {
+test('collect enum values from object fields', () => {
   const collect = createCollector({
     schema,
     max: 1,
@@ -154,7 +154,7 @@ test('collect enum values from object fields', async () => {
   expect(info.fields).not.toContain(`ProjectType.CUSTOM`);
 });
 
-test('collect enum values from arguments', async () => {
+test('collect enum values from arguments', () => {
   const collect = createCollector({
     schema,
     max: 1,
@@ -176,7 +176,7 @@ test('collect enum values from arguments', async () => {
   expect(info.fields).not.toContain(`ProjectType.CUSTOM`);
 });
 
-test('collect arguments', async () => {
+test('collect arguments', () => {
   const collect = createCollector({
     schema,
     max: 1,
@@ -195,7 +195,7 @@ test('collect arguments', async () => {
   expect(info.fields).toContain(`Query.projects.filter`);
 });
 
-test('collect used-only input fields', async () => {
+test('collect used-only input fields', () => {
   const collect = createCollector({
     schema,
     max: 1,
@@ -217,7 +217,7 @@ test('collect used-only input fields', async () => {
   expect(info.fields).not.toContain(`PaginationInput.offset`);
 });
 
-test('collect all input fields when `processVariables` has not been passed and input is passed as a variable', async () => {
+test('collect all input fields when `processVariables` has not been passed and input is passed as a variable', () => {
   const collect = createCollector({
     schema,
     max: 1,
@@ -239,7 +239,7 @@ test('collect all input fields when `processVariables` has not been passed and i
   expect(info.fields).toContain(`PaginationInput.offset`);
 });
 
-test('should get a cache hit when document is the same but variables are different (by default)', async () => {
+test('should get a cache hit when document is the same but variables are different (by default)', () => {
   const collect = createCollector({
     schema,
     max: 1,
@@ -269,7 +269,7 @@ test('should get a cache hit when document is the same but variables are differe
   expect(second.cacheHit).toBe(true);
 });
 
-test('(processVariables: true) should get a cache miss when document is the same but variables are different', async () => {
+test('(processVariables: true) should get a cache miss when document is the same but variables are different', () => {
   const collect = createCollector({
     schema,
     max: 1,
@@ -308,7 +308,7 @@ test('(processVariables: true) should get a cache miss when document is the same
   expect(third.cacheHit).toBe(true);
 });
 
-test('(processVariables: true) collect used-only input fields', async () => {
+test('(processVariables: true) collect used-only input fields', () => {
   const collect = createCollector({
     schema,
     max: 1,
@@ -336,7 +336,7 @@ test('(processVariables: true) collect used-only input fields', async () => {
   expect(info.fields).not.toContain(`PaginationInput.offset`);
 });
 
-test('(processVariables: true) should collect input object without fields when corresponding variable is not provided', async () => {
+test('(processVariables: true) should collect input object without fields when corresponding variable is not provided', () => {
   const collect = createCollector({
     schema,
     max: 1,
@@ -362,7 +362,7 @@ test('(processVariables: true) should collect input object without fields when c
   expect(info.fields).not.toContain(`PaginationInput.offset`);
 });
 
-test('(processVariables: true) collect used-only input type fields from an array', async () => {
+test('(processVariables: true) collect used-only input type fields from an array', () => {
   const collect = createCollector({
     schema,
     max: 1,

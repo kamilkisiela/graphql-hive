@@ -143,7 +143,7 @@ function ProjectsPage(): ReactElement {
   );
 }
 
-export const getServerSideProps = withSessionProtection(async ({ req, res, resolvedUrl }) => {
+export const getServerSideProps = withSessionProtection(({ req, res, resolvedUrl }) => {
   writeLastVisitedOrganization(req, res, resolvedUrl.substring(1));
   return {
     props: {},

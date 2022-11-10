@@ -9,7 +9,7 @@ import { env } from '@/env/frontend';
 import { startAuthFlowForProvider } from '@/lib/supertokens/start-auth-flow-for-provider';
 import { startAuthFlowForOIDCProvider } from '@/lib/supertokens/third-party-email-password-react-oidc-provider';
 
-export const getServerSideProps: GetServerSideProps = async context => {
+export const getServerSideProps: GetServerSideProps = context => {
   // See counter-part in '@/config/supertokens/frontend.ts'
   if (env.auth.organizationOIDC === true) {
     const url = new URL(env.appBaseUrl + (context.req.url ?? ''));

@@ -50,7 +50,7 @@ test('increase the defaultBytesPerOperation estimation by 5% when over 100 calls
       }
       return reports;
     },
-    async sender(reports, _bytes, _batchId, validateSize) {
+    sender(reports, _bytes, _batchId, validateSize) {
       const receivedSize = reports.reduce((sum, report) => report.size + sum, 0);
       flush(reports.map(r => r.id).join(','));
       if (receivedSize === size.error) {
@@ -173,7 +173,7 @@ test('buffer should split the report into multiple reports when the estimated si
 
       return reports;
     },
-    async sender(reports, _bytes, _batchId, validateSize) {
+    sender(reports, _bytes, _batchId, validateSize) {
       const receivedSize = reports.reduce((sum, report) => report.size + sum, 0);
       flush(reports.map(r => r.id).join(','), receivedSize);
       validateSize(receivedSize * defaultBytesPerUnit);
@@ -263,7 +263,7 @@ test('buffer create two chunks out of one buffer when actual buffer size is too 
     },
     onRetry,
     split,
-    async sender(reports, _bytes, batchId, validateSize) {
+    sender(reports, _bytes, batchId, validateSize) {
       const receivedSize = reports.reduce((sum, report) => report.size + sum, 0);
       validateSize(receivedSize * 2 * defaultBytesPerUnit);
       flush(reports.map(r => r.id).join(','), receivedSize, batchId);

@@ -515,7 +515,7 @@ export const resolvers: SchemaModule.Resolvers = {
         )
       ).raw;
     },
-    async baseSchema(version) {
+    baseSchema(version) {
       return version.base_schema || null;
     },
     async explorer(version, { usage }, { injector }) {
@@ -611,7 +611,7 @@ export const resolvers: SchemaModule.Resolvers = {
     },
   },
   SchemaExplorer: {
-    async type({ schema, usage }, { name }, { injector }) {
+    type({ schema, usage }, { name }, { injector }) {
       const namedType = schema.getType(name);
 
       if (!namedType) {
@@ -630,7 +630,7 @@ export const resolvers: SchemaModule.Resolvers = {
         }),
       };
     },
-    async types({ schema, usage }, _, { injector }) {
+    types({ schema, usage }, _, { injector }) {
       const types: Array<
         | GraphQLObjectTypeMapper
         | GraphQLInterfaceTypeMapper
@@ -668,7 +668,7 @@ export const resolvers: SchemaModule.Resolvers = {
 
       return types;
     },
-    async query({ schema, usage }, _, { injector }) {
+    query({ schema, usage }, _, { injector }) {
       const queryType = schema.getQueryType();
 
       if (!queryType) {
@@ -688,7 +688,7 @@ export const resolvers: SchemaModule.Resolvers = {
         },
       };
     },
-    async mutation({ schema, usage }, _, { injector }) {
+    mutation({ schema, usage }, _, { injector }) {
       const mutationType = schema.getMutationType();
 
       if (!mutationType) {
@@ -708,7 +708,7 @@ export const resolvers: SchemaModule.Resolvers = {
         },
       };
     },
-    async subscription({ schema, usage }, _, { injector }) {
+    subscription({ schema, usage }, _, { injector }) {
       const subscriptionType = schema.getSubscriptionType();
 
       if (!subscriptionType) {

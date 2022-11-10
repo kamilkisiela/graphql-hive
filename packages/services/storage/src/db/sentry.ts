@@ -11,7 +11,7 @@ export const createSentryInterceptor = (): Interceptor => {
 
       return null;
     },
-    async beforeQueryResult(context) {
+    beforeQueryResult(context) {
       if (!connections[context.connectionId]) {
         return null;
       }
@@ -33,7 +33,7 @@ export const createSentryInterceptor = (): Interceptor => {
 
       return null;
     },
-    async beforeQueryExecution(context) {
+    beforeQueryExecution(context) {
       if (!connections[context.connectionId]) {
         return null;
       }

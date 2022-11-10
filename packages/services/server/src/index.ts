@@ -244,16 +244,16 @@ export async function main() {
     server.route({
       method: ['GET', 'HEAD'],
       url: '/_health',
-      async handler(req, res) {
-        res.status(200).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+      handler(req, res) {
+        void res.status(200).send();
       },
     });
 
     server.route({
       method: 'GET',
       url: '/lab/:org/:project/:target',
-      async handler(req, res) {
-        res.status(200).send({ ok: true }); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+      handler(req, res) {
+        void res.status(200).send({ ok: true });
       },
     });
 
@@ -275,7 +275,7 @@ export async function main() {
           if (response.statusCode >= 200 && response.statusCode < 300) {
             if (response.body.includes('"__schema"')) {
               reportReadiness(true);
-              res.status(200).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+              void res.status(200).send();
               return;
             }
           }
@@ -285,7 +285,7 @@ export async function main() {
         }
 
         reportReadiness(false);
-        res.status(500).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+        void res.status(500).send();
       },
     });
 
@@ -296,7 +296,7 @@ export async function main() {
         url: '/__legacy/update_user_id_mapping',
         async handler(req, reply) {
           if (req.headers['x-authorization'] !== auth0Config.apiKey) {
-            reply.status(401).send({ error: 'Invalid update user id mapping key.', code: 'ERR_INVALID_KEY' }); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+            void reply.status(401).send({ error: 'Invalid update user id mapping key.', code: 'ERR_INVALID_KEY' });
             return;
           }
 
@@ -307,7 +307,7 @@ export async function main() {
             superTokensUserId,
             externalUserId: auth0UserId,
           });
-          reply.status(200).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+          void reply.status(200).send();
         },
       });
       server.route({
@@ -315,8 +315,7 @@ export async function main() {
         url: '/__legacy/check_auth0_email_user_without_associated_supertoken_id_exists',
         async handler(req, reply) {
           if (req.headers['x-authorization'] !== auth0Config.apiKey) {
-            reply.status(401).send({ error: 'Invalid update user id mapping key.', code: 'ERR_INVALID_KEY' }); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
-            return;
+            void reply.status(401).send({ error: 'Invalid update user id mapping key.', code: 'ERR_INVALID_KEY' });
           }
 
           const { email } = LegacyCheckAuth0EmailUserExistsPayloadModel.parse(req.body);

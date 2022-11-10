@@ -112,7 +112,7 @@ function SubscriptionPage(): ReactElement {
   );
 }
 
-export const getServerSideProps = withSessionProtection(async context => {
+export const getServerSideProps = withSessionProtection(context => {
   /**
    * If Strive is not enabled we redirect the user to the organization.
    */

@@ -47,7 +47,7 @@ export function createSupergraphSDLFetcher({ endpoint, key }: SupergraphSDLFetch
 
         return Promise.reject(new Error(`Failed to fetch supergraph [${response.status}]`));
       })
-      .catch(async error => {
+      .catch(error => {
         if (axios.isAxiosError(error) && error.response?.status === 304 && cached !== null) {
           return cached;
         }
@@ -87,7 +87,7 @@ export function createSupergraphManager(options: { pollIntervalInMs?: number } &
 
       return {
         supergraphSdl: initialResult.supergraphSdl,
-        cleanup: async () => {
+        cleanup() {
           if (timer) {
             clearTimeout(timer);
           }
@@ -136,7 +136,7 @@ export function hiveApollo(clientOrOptions: HiveClient | HivePluginOptions): Apo
       }
 
       return Promise.resolve({
-        async willSendResponse(ctx) {
+        willSendResponse(ctx) {
           doc = ctx.document!;
           complete(ctx.response);
         },

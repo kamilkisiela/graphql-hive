@@ -17,7 +17,7 @@ export async function createServer(options: { tracing: boolean; name: string }) 
     trustProxy: true,
   });
 
-  server.addHook('onReady', async () => {
+  server.addHook('onReady', () => {
     server.log.info(`Service "${options.name}" is ready`);
   });
 

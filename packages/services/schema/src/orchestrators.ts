@@ -276,7 +276,7 @@ const createFederation: (
 };
 
 const single: Orchestrator = {
-  async validate(schemas) {
+  validate(schemas) {
     const schema = schemas[0];
     const errors = validateSDL(parse(schema.raw)).map(toValidationError);
 
@@ -284,7 +284,7 @@ const single: Orchestrator = {
       errors,
     };
   },
-  async build(schemas) {
+  build(schemas) {
     const schema = schemas[0];
 
     return {
@@ -292,14 +292,14 @@ const single: Orchestrator = {
       raw: print(trimDescriptions(parse(schema.raw))),
     };
   },
-  async supergraph() {
+  supergraph() {
     throw new Error('Single schema orchestrator does not support supergraph');
   },
 };
 
 const createStitching: (redis: RedisInstance, logger: FastifyLoggerInstance) => Orchestrator = (redis, logger) => {
   const stitchAndPrint = reuse(
-    async (schemas: ValidationInput) => {
+    (schemas: ValidationInput) => {
       return printSchema(
         stitchSchemas({
           typeDefs: schemas.map(schema => trimDescriptions(parse(schema.raw))),
@@ -334,7 +334,7 @@ const createStitching: (redis: RedisInstance, logger: FastifyLoggerInstance) => 
         source: emptySource,
       };
     },
-    async supergraph() {
+    supergraph() {
       throw new Error('Stitching schema orchestrator does not support supergraph');
     },
   };

@@ -12,7 +12,7 @@ import type { Storage } from '@hive/api';
 import { z } from 'zod';
 import { CryptoProvider } from 'packages/services/api/src/modules/shared/providers/crypto';
 
-export async function createContext({ storage, crypto }: { storage: Storage; crypto: CryptoProvider }) {
+export function createContext({ storage, crypto }: { storage: Storage; crypto: CryptoProvider }) {
   return {
     storage,
     crypto,

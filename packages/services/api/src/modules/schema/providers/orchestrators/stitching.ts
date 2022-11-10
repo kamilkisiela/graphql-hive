@@ -74,7 +74,7 @@ export class StitchingOrchestrator implements Orchestrator {
     }
   }
 
-  async supergraph() {
+  supergraph() {
     return null;
   }
 }

@@ -112,7 +112,7 @@ export function createScheduler(config: {
     logger.info('BullMQ started');
   }
 
-  async function start() {
+  function start() {
     redisConnection = new Redis({
       host: config.redis.host,
       port: config.redis.port,

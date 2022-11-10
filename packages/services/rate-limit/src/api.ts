@@ -25,13 +25,13 @@ export const rateLimitApiRouter = trpc
         targetId: z.string().nonempty(),
       })
       .required(),
-    async resolve({ ctx, input }) {
+    resolve({ ctx, input }) {
       return ctx.getRetention(input.targetId);
     },
   })
   .query('checkRateLimit', {
     input: VALIDATION,
-    async resolve({ ctx, input }) {
+    resolve({ ctx, input }) {
       return ctx.checkLimit(input);
     },
   });

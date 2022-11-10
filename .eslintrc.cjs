@@ -47,6 +47,10 @@ module.exports = {
       },
     ],
     '@typescript-eslint/no-floating-promises': 'error',
+    'require-await': 'off',
+    // Disallow async functions which have no await expression
+    // https://typescript-eslint.io/rules/require-await/
+    '@typescript-eslint/require-await': 'error',
 
     // 🚨 The following rules needs to be fixed and was temporarily disabled to avoid printing warning
     '@typescript-eslint/no-explicit-any': 'off',
