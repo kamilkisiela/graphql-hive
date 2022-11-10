@@ -998,7 +998,7 @@ importers:
       react-select: 5.4.0
       react-string-replace: 0.4.4
       react-virtualized-auto-sizer: 1.0.6
-      react-window: 1.8.7
+      react-window: 1.8.8
       regenerator-runtime: 0.13.10
       rimraf: 3.0.2
       snarkdown: 2.0.0
@@ -1078,7 +1078,7 @@ importers:
       react-select: 5.4.0_k2mvpji5i2ojml6m4ftklg47pa
       react-string-replace: 0.4.4
       react-virtualized-auto-sizer: 1.0.6_sfoxds7t5ydpegc3knd667wn6m
-      react-window: 1.8.7_sfoxds7t5ydpegc3knd667wn6m
+      react-window: 1.8.8_sfoxds7t5ydpegc3knd667wn6m
       regenerator-runtime: 0.13.10
       snarkdown: 2.0.0
       supertokens-auth-react: 0.27.1_k2mvpji5i2ojml6m4ftklg47pa
@@ -22623,8 +22623,8 @@ packages:
       react-dom: 17.0.2_react@17.0.2
     dev: false
 
-  /react-window/1.8.7_sfoxds7t5ydpegc3knd667wn6m:
-    resolution: {integrity: sha512-JHEZbPXBpKMmoNO1bNhoXOOLg/ujhL/BU4IqVU9r8eQPcy5KQnGHIHDRkJ0ns9IM5+Aq5LNwt3j8t3tIrePQzA==}
+  /react-window/1.8.8_sfoxds7t5ydpegc3knd667wn6m:
+    resolution: {integrity: sha512-D4IiBeRtGXziZ1n0XklnFGu7h9gU684zepqyKzgPNzrsrk7xOCxni+TCckjg2Nr/DiaEEGVVmnhYSlT2rB47dQ==}
     engines: {node: '>8.0.0'}
     peerDependencies:
       react: ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
