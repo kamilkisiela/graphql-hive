@@ -358,7 +358,7 @@ importers:
       p-retry: 5.1.1
       p-timeout: 5.0.2
       param-case: 3.0.4
-      supertokens-node: 12.0.2
+      supertokens-node: 12.0.5
       tslib: 2.4.0
       uuid: 8.3.2
       zod: 3.15.1
@@ -392,7 +392,7 @@ importers:
       p-retry: 5.1.1
       p-timeout: 5.0.2
       param-case: 3.0.4
-      supertokens-node: 12.0.2
+      supertokens-node: 12.0.5
       uuid: 8.3.2
       zod: 3.15.1
     devDependencies:
@@ -24304,26 +24304,6 @@ packages:
 
   /supertokens-js-override/0.0.4:
     resolution: {integrity: sha512-r0JFBjkMIdep3Lbk3JA+MpnpuOtw4RSyrlRAbrzMcxwiYco3GFWl/daimQZ5b1forOiUODpOlXbSOljP/oyurg==}
-    dev: false
-
-  /supertokens-node/12.0.2:
-    resolution: {integrity: sha512-687HBu8zfEW1LgklI65Hr00GKyTSDu4HV+AibzPkBRZ6ssFrVua4br773qhMBxYqHv+BqlYaNK3GhV7AQzL4Sg==}
-    dependencies:
-      axios: 0.21.4_debug@4.3.4
-      body-parser: 1.19.0
-      co-body: 6.1.0
-      cookie: 0.4.0
-      debug: 4.3.4
-      jsonwebtoken: 8.5.1
-      jwks-rsa: 2.0.5
-      libphonenumber-js: 1.10.14
-      nodemailer: 6.8.0
-      psl: 1.8.0
-      supertokens-js-override: 0.0.4
-      twilio: 3.82.2_debug@4.3.4
-      verify-apple-id-token: 2.2.0
-    transitivePeerDependencies:
-      - supports-color
     dev: false
 
   /supertokens-node/12.0.5:
