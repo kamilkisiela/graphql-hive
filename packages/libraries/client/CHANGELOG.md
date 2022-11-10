@@ -1,5 +1,11 @@
 # @graphql-hive/client
 
+## 0.21.1
+
+### Patch Changes
+
+- [#466](https://github.com/kamilkisiela/graphql-hive/pull/466) [`2e036ac`](https://github.com/kamilkisiela/graphql-hive/commit/2e036acc4ce1c27a493e90481bb10f5886c0a00c) Thanks [@ardatan](https://github.com/ardatan)! - Update GraphQL Tools packages
+
 ## 0.21.0
 
 ### Minor Changes
