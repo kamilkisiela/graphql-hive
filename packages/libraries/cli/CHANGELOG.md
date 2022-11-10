@@ -1,5 +1,11 @@
 # @graphql-hive/cli
 
+## 0.19.3
+
+### Patch Changes
+
+- [#629](https://github.com/kamilkisiela/graphql-hive/pull/629) [`750b46d`](https://github.com/kamilkisiela/graphql-hive/commit/750b46d155c5d01ad4b3cee84409793736246603) Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Bump
+
 ## 0.19.2
 
 ### Patch Changes
