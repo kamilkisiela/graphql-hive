@@ -19,3 +19,4 @@ integration-tests/fixtures/init-invalid-schema.graphql
 tmp
 
 pnpm-lock.yaml
+.bob/
