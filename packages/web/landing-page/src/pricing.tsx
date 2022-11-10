@@ -5,7 +5,7 @@ function Tooltip({ content, children }: { content: string; children: ReactNode }
   return (
     <Root>
       <Trigger>{children}</Trigger>
-      <Content sideOffset={5} className="rounded-sm bg-white p-2 text-xs shadow">
+      <Content sideOffset={5} className="rounded-sm bg-white p-2 text-xs font-normal text-black shadow">
         {content}
         <Arrow className="fill-current text-white" />
       </Content>
