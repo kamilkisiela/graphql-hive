@@ -1,2 +1,5 @@
 src
 examples
+npm-shrinkwrap.json
+hive.json
+tsconfig.json
