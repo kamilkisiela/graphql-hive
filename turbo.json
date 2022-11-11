@@ -5,9 +5,9 @@
     "package.json",
     "codegen.yml",
     "pnpm-lock.yaml",
-    "jest.config.js",
     "tsconfig.json",
     "scripts/patch-manifests.js",
+    "scripts/banner.js",
     "patches/*"
   ],
   "pipeline": {
@@ -47,6 +47,7 @@
       "outputs": ["dist/**"]
     },
     "typecheck": {
+      "inputs": ["tsconfig.eslint.json"],
       "outputs": []
     }
   }
