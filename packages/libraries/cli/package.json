@@ -33,7 +33,7 @@
     "postpack": "rm -f oclif.manifest.json",
     "prepack": "rimraf lib && tsc -b && oclif manifest && oclif readme",
     "oclif:pack": "npm pack && pnpm oclif pack tarballs --no-xz",
-    "oclif:publish": "pnpm oclif upload tarballs --no-xz",
+    "oclif:upload": "pnpm oclif upload tarballs --no-xz",
     "version": "oclif readme && git add README.md",
     "schema:check:single": "pnpm start schema:check examples/single.graphql",
     "schema:check:stitching": "pnpm start schema:check examples/stitching.graphql --service posts",
