@@ -20,10 +20,10 @@
   "bin": {
     "hive": "./bin/run"
   },
+  "main": "dist/index.js",
   "files": [
     "/bin",
     "/dist",
-    "/npm-shrinkwrap.json",
     "/oclif.manifest.json"
   ],
   "scripts": {
