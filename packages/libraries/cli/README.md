@@ -23,7 +23,7 @@ $ npm install -g @graphql-hive/cli
 $ hive COMMAND
 running command...
 $ hive (--version)
-@graphql-hive/cli/0.19.1 darwin-arm64 node-v16.18.0
+@graphql-hive/cli/0.19.5 darwin-arm64 node-v16.18.0
 $ hive --help [COMMAND]
 USAGE
   $ hive COMMAND
@@ -63,7 +63,7 @@ DESCRIPTION
   deletes specific cli configuration
 ```
 
-_See code: [dist/commands/config/delete.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.1/dist/commands/config/delete.js)_
+_See code: [dist/commands/config/delete.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.5/dist/commands/config/delete.js)_
 
 ## `hive config:get KEY`
 
@@ -80,7 +80,7 @@ DESCRIPTION
   prints specific cli configuration
 ```
 
-_See code: [dist/commands/config/get.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.1/dist/commands/config/get.js)_
+_See code: [dist/commands/config/get.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.5/dist/commands/config/get.js)_
 
 ## `hive config:reset`
 
@@ -94,7 +94,7 @@ DESCRIPTION
   resets local cli configuration
 ```
 
-_See code: [dist/commands/config/reset.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.1/dist/commands/config/reset.js)_
+_See code: [dist/commands/config/reset.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.5/dist/commands/config/reset.js)_
 
 ## `hive config:set KEY VALUE`
 
@@ -112,7 +112,7 @@ DESCRIPTION
   updates specific cli configuration
 ```
 
-_See code: [dist/commands/config/set.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.1/dist/commands/config/set.js)_
+_See code: [dist/commands/config/set.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.5/dist/commands/config/set.js)_
 
 ## `hive help [COMMAND]`
 
@@ -154,7 +154,7 @@ DESCRIPTION
   checks operations against a published schema
 ```
 
-_See code: [dist/commands/operations/check.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.1/dist/commands/operations/check.js)_
+_See code: [dist/commands/operations/check.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.5/dist/commands/operations/check.js)_
 
 ## `hive operations:publish FILE`
 
@@ -177,7 +177,7 @@ DESCRIPTION
   saves operations to the store
 ```
 
-_See code: [dist/commands/operations/publish.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.1/dist/commands/operations/publish.js)_
+_See code: [dist/commands/operations/publish.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.5/dist/commands/operations/publish.js)_
 
 ## `hive schema:check FILE`
 
@@ -204,7 +204,7 @@ DESCRIPTION
   checks schema
 ```
 
-_See code: [dist/commands/schema/check.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.1/dist/commands/schema/check.js)_
+_See code: [dist/commands/schema/check.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.5/dist/commands/schema/check.js)_
 
 ## `hive schema:publish FILE`
 
@@ -239,7 +239,7 @@ DESCRIPTION
   publishes schema
 ```
 
-_See code: [dist/commands/schema/publish.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.1/dist/commands/schema/publish.js)_
+_See code: [dist/commands/schema/publish.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.5/dist/commands/schema/publish.js)_
 
 ## `hive update [CHANNEL]`
 
@@ -294,7 +294,7 @@ DESCRIPTION
   checks schema
 ```
 
-_See code: [dist/commands/whoami.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.1/dist/commands/whoami.js)_
+_See code: [dist/commands/whoami.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.5/dist/commands/whoami.js)_
 
 <!-- commandsstop -->
 

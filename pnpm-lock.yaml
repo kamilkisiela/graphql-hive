@@ -32,6 +32,9 @@ patchedDependencies:
   bob-the-bundler@4.0.0:
     hash: sum6gc2cezfosivdgsdg22qyja
     path: patches/bob-the-bundler@4.0.0.patch
+  oclif@3.2.25:
+    hash: zdmnkkzcdbpcmhe6nuh2wxowhi
+    path: patches/oclif@3.2.25.patch
 
 importers:
 
@@ -230,6 +233,7 @@ importers:
       log-symbols: 4.1.0
       mkdirp: 1.0.4
       oclif: ^3.2.25
+      rimraf: 3.0.2
       ts-node: 10.9.1
       tslib: 2.4.0
     dependencies:
@@ -252,13 +256,14 @@ importers:
       graphql-tag: 2.12.6_graphql@16.5.0
       log-symbols: 4.1.0
       mkdirp: 1.0.4
+      rimraf: 3.0.2
       ts-node: 10.9.1
       tslib: 2.4.0
     devDependencies:
       '@types/env-ci': 3.1.1
       '@types/git-parse': 2.1.2
       '@types/mkdirp': 1.0.2
-      oclif: 3.2.25
+      oclif: 3.2.25_zdmnkkzcdbpcmhe6nuh2wxowhi
 
   packages/libraries/client:
     specifiers:
@@ -20414,7 +20419,7 @@ packages:
     resolution: {integrity: sha512-PX1wu0AmAdPqOL1mWhqmlOd8kOIZQwGZw6rh7uby9fTc5lhaOWFLX3I6R1hrF9k3zUY40e6igsLGkDXK92LJNg==}
     dev: false
 
-  /oclif/3.2.25:
+  /oclif/3.2.25_zdmnkkzcdbpcmhe6nuh2wxowhi:
     resolution: {integrity: sha512-1nwdWHOBW5DkMBBu3HNrwM+WIAL7kDLBeoM8BNJLbnE4hlxBmeubwQTF0oGzmv+0vUomWMiNSbQF7AfzFbwUwA==}
     engines: {node: '>=12.0.0'}
     hasBin: true
@@ -20442,6 +20447,7 @@ packages:
       - encoding
       - supports-color
     dev: true
+    patched: true
 
   /on-finished/2.3.0:
     resolution: {integrity: sha512-ikqdkGAAyf/X/gPhXGvfgAytDZtDbr+bkNUJ0N9h5MI/dmdgCs3l6hoHrcUv41sRKew3jIwrp4qQDXiK99Utww==}

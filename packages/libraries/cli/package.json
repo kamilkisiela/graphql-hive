@@ -28,9 +28,12 @@
   ],
   "scripts": {
     "start": "./bin/dev",
+    "prebuild": "rimraf dist",
     "build": "tsc",
     "postpack": "rm -f oclif.manifest.json",
-    "prepack": "npm shrinkwrap && rimraf lib && tsc -b && oclif manifest && oclif readme",
+    "prepack": "rimraf lib && tsc -b && oclif manifest && oclif readme",
+    "oclif:pack": "npm pack && pnpm oclif pack tarballs --no-xz",
+    "oclif:publish": "pnpm oclif upload tarballs --no-xz",
     "version": "oclif readme && git add README.md",
     "schema:check:single": "pnpm start schema:check examples/single.graphql",
     "schema:check:stitching": "pnpm start schema:check examples/stitching.graphql --service posts",
@@ -57,6 +60,7 @@
     "graphql-tag": "2.12.6",
     "log-symbols": "4.1.0",
     "mkdirp": "1.0.4",
+    "rimraf": "3.0.2",
     "tslib": "2.4.0",
     "ts-node": "10.9.1"
   },
