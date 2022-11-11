@@ -76,12 +76,12 @@ jobs:
       - name: Pack tarballs
         if: steps.cli.outputs.publish == 'true'
         working-directory: packages/libraries/cli
-        run: pnpm pack && pnpm oclif pack tarballs --no-xz
+        run: pnpm oclif:pack
 
       - name: Upload tarballs
         if: steps.cli.outputs.publish == 'true'
         working-directory: packages/libraries/cli
-        run: pnpm oclif upload tarballs --no-xz
+        run: pnpm oclif:upload
 
       - name: Promote tarballs
         if: steps.cli.outputs.publish == 'true'
