@@ -1,7 +1,7 @@
 {
   "name": "@graphql-hive/cli",
   "description": "A CLI util to manage and control your GraphQL Hive",
-  "version": "0.19.7",
+  "version": "0.19.8",
   "author": {
     "email": "contact@the-guild.dev",
     "name": "The Guild",
