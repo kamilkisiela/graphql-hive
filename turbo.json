@@ -5,9 +5,9 @@
     "package.json",
     "codegen.yml",
     "pnpm-lock.yaml",
-    "jest.config.js",
     "tsconfig.json",
     "scripts/patch-manifests.js",
+    "scripts/banner.js",
     "patches/*"
   ],
   "pipeline": {
@@ -39,15 +39,17 @@
       "outputs": ["dist/**"]
     },
     "@hive/docs#build": {
-      "dependsOn": ["^build", "$NEXT_PUBLIC_APP_LINK", "$NEXT_PUBLIC_CRISP_WEBSITE_ID", "$NEXT_PUBLIC_GA_TRACKING_ID"],
+      "dependsOn": ["^build"],
+      "env": ["NEXT_PUBLIC_APP_LINK", "NEXT_PUBLIC_CRISP_WEBSITE_ID", "NEXT_PUBLIC_GA_TRACKING_ID"],
       "outputs": ["dist/**"]
     },
     "@hive/landing-page#build": {
-      "dependsOn": ["^build", "$NEXT_PUBLIC_CRISP_WEBSITE_ID", "$NEXT_PUBLIC_GA_TRACKING_ID"],
+      "dependsOn": ["^build"],
+      "env": ["NEXT_PUBLIC_CRISP_WEBSITE_ID", "NEXT_PUBLIC_GA_TRACKING_ID"],
       "outputs": ["dist/**"]
     },
     "typecheck": {
-      "outputs": []
+      "outputs": [""]
     }
   }
 }
