@@ -1,5 +1,11 @@
 # @graphql-hive/cli
 
+## 0.19.6
+
+### Patch Changes
+
+- [#645](https://github.com/kamilkisiela/graphql-hive/pull/645) [`7110555`](https://github.com/kamilkisiela/graphql-hive/commit/71105559b67f510087223ada2af23564ff053353) Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Ignore npm-shrinkwrap.json
+
 ## 0.19.5
 
 ### Patch Changes
