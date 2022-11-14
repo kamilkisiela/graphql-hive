@@ -133,7 +133,7 @@ export const Header = (): ReactElement => {
                 </DropdownMenu.Content>
               </DropdownMenu>
               <DropdownMenu.Item asChild>
-                <a href="https://calendly.com/d/zjjt-g8zd/hive-feedback" target="_blank" rel="noreferrer">
+                <a href="https://cal.com/team/the-guild/graphql-hive-15m" target="_blank" rel="noreferrer">
                   <CalendarIcon className="h-5 w-5" />
                   Schedule a meeting
                 </a>
