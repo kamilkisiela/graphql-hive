@@ -1,5 +1,6 @@
 import * as Sentry from '@sentry/node';
 import type { Span } from '@sentry/types';
+import { GraphQLError } from 'graphql';
 
 export type SentryContext = Parameters<Span['startChild']>[0] & {
   captureException?: boolean;
@@ -45,7 +46,9 @@ export function sentry(name: string, addToContext?: (...args: any[]) => SentryCo
           return Promise.resolve(result);
         },
         error => {
-          Sentry.captureException(error);
+          if (!(error instanceof GraphQLError)) {
+            Sentry.captureException(error);
+          }
           span.setStatus('internal_error');
           span.finish();
           return Promise.reject(error);
