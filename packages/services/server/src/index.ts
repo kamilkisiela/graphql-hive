@@ -6,7 +6,7 @@ import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify/dist/trpc-serve
 import { createRegistry, LogFn, Logger } from '@hive/api';
 import { createStorage as createPostgreSQLStorage, createConnectionString } from '@hive/storage';
 import got from 'got';
-import { stripIgnoredCharacters } from 'graphql';
+import { GraphQLError, stripIgnoredCharacters } from 'graphql';
 import * as Sentry from '@sentry/node';
 import { Dedupe, ExtraErrorData } from '@sentry/integrations';
 import { internalApiRouter, createContext } from './api';
@@ -30,7 +30,7 @@ export async function main() {
   if (env.sentry) {
     Sentry.init({
       serverName: 'api',
-      enabled: !!env.sentry,
+      enabled: true,
       environment: env.environment,
       dsn: env.sentry.dsn,
       tracesSampleRate: 1,
@@ -70,6 +70,10 @@ export async function main() {
       server.log.error(error, errorLike, ...args);
 
       const errorObj = error instanceof Error ? error : errorLike instanceof Error ? errorLike : null;
+
+      if (errorObj instanceof GraphQLError) {
+        return;
+      }
 
       if (errorObj instanceof Error) {
         Sentry.captureException(errorObj, {
