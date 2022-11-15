@@ -57,7 +57,6 @@ const LogModel = zod.object({
       zod.literal('silent'),
     ])
     .optional(),
-  LOG_DISABLE_REQUEST_LOGGING: zod.union([zod.literal('1'), zod.literal('0')]).optional(),
 });
 
 const configs = {
@@ -115,7 +114,6 @@ export const env = {
   sentry: sentry.SENTRY === '1' ? { dsn: sentry.SENTRY_DSN } : null,
   log: {
     level: log.LOG_LEVEL ?? 'debug',
-    disableRequestLogging: log.LOG_DISABLE_REQUEST_LOGGING === '1',
   },
   prometheus:
     prometheus.PROMETHEUS_METRICS === '1'

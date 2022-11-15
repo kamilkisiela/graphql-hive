@@ -43,10 +43,7 @@ export async function createServer(options: {
     await useSentryTracing(server);
   }
 
-  if (!options.log.disableRequestLogging) {
-    await useRequestLogging(server);
-  }
-
+  await useRequestLogging(server);
   await server.register(cors);
 
   return server;
