@@ -221,6 +221,14 @@ export class RemoteArtifactAsServiceDeployment {
         parent: this.parent ?? undefined,
       }
     );
+
+    const pdb = new k8s.policy.v1.PodDisruptionBudget(`${this.name}-pdb`, {
+      spec: {
+        minAvailable: this.options.replicas ?? 1,
+        selector: deployment.spec.selector,
+      },
+    });
+
     const service = deployment.createService({});
 
     if (this.options.autoScaling) {
@@ -258,6 +266,6 @@ export class RemoteArtifactAsServiceDeployment {
       );
     }
 
-    return { deployment, service };
+    return { deployment, service, pdb };
   }
 }

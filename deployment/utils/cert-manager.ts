@@ -3,7 +3,7 @@ import * as k8s from '@pulumi/kubernetes';
 export class CertManager {
   public deployCertManagerAndIssuer() {
     const certManager = new k8s.yaml.ConfigFile('cert-manager', {
-      file: 'https://github.com/jetstack/cert-manager/releases/download/v1.8.0/cert-manager.yaml',
+      file: 'https://github.com/jetstack/cert-manager/releases/download/v1.10.0/cert-manager.yaml',
     });
 
     const issuerName = 'letsencrypt-prod';

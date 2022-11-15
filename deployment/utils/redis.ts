@@ -108,6 +108,14 @@ fi
         }
       ),
     });
+
+    new k8s.policy.v1.PodDisruptionBudget('redis-pdb', {
+      spec: {
+        minAvailable: 1,
+        selector: deployment.spec.selector,
+      },
+    });
+
     const service = deployment.createService({});
 
     return { deployment, service, port: PORT };
