@@ -11,16 +11,16 @@ const GraphQLPayloadSchema = z.object({
 
 const plugin: FastifyPluginAsync = async server => {
   function graphqlOperationName(request: FastifyRequest): string | undefined {
-    let payload;
-
+    let requestBody;
     if (request.method === 'GET') {
-      payload = GraphQLPayloadSchema.safeParse(request.query);
+      rawPayload = request.query;
     } else if (request.method === 'POST') {
-      payload = GraphQLPayloadSchema.safeParse(request.body);
+      rawPayload = request.body;
     } else {
       return undefined;
     }
 
+    const payload = GraphQLPayloadSchema.safeParse(requestBody);
     if (!payload.success) {
       return undefined;
     }

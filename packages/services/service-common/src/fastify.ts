@@ -11,7 +11,6 @@ export async function createServer(options: {
   name: string;
   log: {
     level: string;
-    disableRequestLogging: boolean;
   };
 }) {
   const server = fastify({

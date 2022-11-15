@@ -55,7 +55,6 @@ export async function main() {
     tracing: true,
     log: {
       level: env.log.level,
-      disableRequestLogging: env.log.disableRequestLogging,
     },
   });
 

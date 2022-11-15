@@ -20,7 +20,6 @@ async function main() {
     tracing: false,
     log: {
       level: env.log.level,
-      disableRequestLogging: env.log.disableRequestLogging,
     },
   });
 
