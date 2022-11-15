@@ -22,7 +22,7 @@ export async function main() {
   if (env.sentry) {
     Sentry.init({
       serverName: 'tokens',
-      enabled: !!env.sentry,
+      enabled: true,
       environment: env.environment,
       dsn: env.sentry.dsn,
       release: env.release,
@@ -42,6 +42,7 @@ export async function main() {
       error: string;
       checkAt: number;
     }>(50);
+    // Cache failures for 10 minutes
     const errorCachingInterval = ms('10m');
 
     const stopHeartbeats = env.heartbeat
