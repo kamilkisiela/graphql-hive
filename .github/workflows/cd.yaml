@@ -25,7 +25,7 @@ jobs:
           fetch-depth: 0
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v2.2.2
+        uses: pnpm/action-setup@v2.2.4
         with:
           version: 7
 
@@ -76,12 +76,12 @@ jobs:
       - name: Pack tarballs
         if: steps.cli.outputs.publish == 'true'
         working-directory: packages/libraries/cli
-        run: pnpm oclif pack tarballs --no-xz
+        run: pnpm oclif:pack
 
       - name: Upload tarballs
         if: steps.cli.outputs.publish == 'true'
         working-directory: packages/libraries/cli
-        run: pnpm oclif upload tarballs --no-xz
+        run: pnpm oclif:upload
 
       - name: Promote tarballs
         if: steps.cli.outputs.publish == 'true'
@@ -230,7 +230,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - uses: pnpm/action-setup@v2.2.2
+      - uses: pnpm/action-setup@v2.2.4
         with:
           version: 7
 
@@ -384,7 +384,7 @@ jobs:
           fetch-depth: 5
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v2.2.2
+        uses: pnpm/action-setup@v2.2.4
         with:
           version: 7
 

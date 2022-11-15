@@ -6,7 +6,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "dev": "tsup-node src/dev.ts --format esm --target node16 --watch --onSuccess 'node dist/dev.js' | pino-pretty --translateTime HH:MM:ss TT --ignore pid,hostname",
+    "dev": "tsup-node src/dev.ts --format esm --target node16 --watch --sourcemap --onSuccess 'node --enable-source-maps dist/dev.js' | pino-pretty --translateTime HH:MM:ss TT --ignore pid,hostname",
     "build": "bob runify --single",
     "typecheck": "tsc --noEmit"
   },
@@ -21,7 +21,7 @@
     "@sentry/tracing": "7.12.1",
     "dotenv": "10.0.0",
     "date-fns": "2.28.0",
-    "got": "12.5.1"
+    "got": "12.5.2"
   },
   "devDependencies": {
     "@hive/service-common": "workspace:*",

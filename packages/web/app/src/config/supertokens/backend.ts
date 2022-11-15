@@ -209,6 +209,16 @@ const getEnsureUserOverrides = (
 
       return response;
     },
+    async passwordResetPOST(input) {
+      const result = await originalImplementation.passwordResetPOST!(input);
+
+      // For security reasons we revoke all sessions when a password reset is performed.
+      if (result.status === 'OK' && result.userId) {
+        await SessionNode.revokeAllSessionsForUser(result.userId);
+      }
+
+      return result;
+    },
   }),
 });
 
@@ -430,8 +440,12 @@ async function trySignIntoAuth0WithUserCredentialsAndRetrieveUserInfo(
 
   const body = await response.text();
 
+  if (response.status === 403) {
+    return null;
+  }
+
   if (response.status !== 200) {
-    throw new Error(`Couldn't authenticate user with Auth0. Status: ${response.status} Body: ${await response.text()}`);
+    throw new Error(`Couldn't authenticate user with Auth0. Status: ${response.status} Body: ${body}`);
   }
 
   const { access_token: accessToken } = JSON.parse(body);
@@ -441,11 +455,12 @@ async function trySignIntoAuth0WithUserCredentialsAndRetrieveUserInfo(
     headers: { authorization: `Bearer ${accessToken}` },
   });
 
+  const userBody = await userResponse.text();
+
   if (userResponse.status !== 200) {
     return null;
   }
 
-  const userBody = await userResponse.text();
   return JSON.parse(userBody);
 }
 
@@ -469,8 +484,10 @@ async function setUserIdMapping(
     }),
   });
 
+  const body = await response.text();
+
   if (response.status !== 200) {
-    throw new Error('Failed to set user id mapping code.');
+    throw new Error(`Failed to set user id mapping code. ${body}`);
   }
 }
 

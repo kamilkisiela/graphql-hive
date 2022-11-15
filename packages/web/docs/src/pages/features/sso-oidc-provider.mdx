@@ -1,0 +1,43 @@
+import { Callout } from '@theguild/components'
+
+# Single Sign On via Open ID Connect Provider
+
+GraphQL Hive allows you to connect any Open ID Connect provider (e.g. Okta, Auth0 or Google Workspaces) to your organization.
+This allows you to use then existing Open ID Connect provider to authenticate and automatically add your users to your Organization.
+Users signing into your organization will be automatically added to your organization and will be able to access all the resources that you have granted them access to.
+Users that sign using the Open ID Connect provider will only be scoped to that organization and incapable of creating personal organizations or joining any other organizations.
+
+## Connecting the Open ID Connect Provider
+
+<Callout>Your Open ID Connect provider needs to support the `email` claim capability.</Callout>
+
+Visit your organization `Settings` and click on the `Connect Open ID Connect Provider` button.
+
+Alternatively you can visit the following link (and replace `<your-organization-name>` with your organization name):
+
+`https://app.graphql-hive.com/<your-organization-name>/settings#manage-oidc-integration`
+
+For the form fill in the following information:
+
+**OAuth API Url.** The OAuth API url of your Open ID Connect provider. This is the url that you use to sign into your Open ID Connect provider. For example `https://trial-xxxxxx.okta.com/oauth2/v1`if you are using Okta as your OIDC provider.
+
+**Client ID.** The client id of your Open ID COnnect provider.
+
+**Client Secret.** The client id of your Open ID COnnect provider.
+
+Connect the provider by clicking on the `Connect OIDC Provider` button.
+
+## Configuring your Open ID Connect Provider
+
+After creating the Open ID Connect Provider the `Manage OpenID Connect Integration` modal will opened. Alternatively you can click the `Manage OIDC Provider` button on your organization settings or open `http://app.graphql-hive.com/<your-organization-name>/settings#manage-oidc-integration`.
+
+This page will show the `OIDC Provider Sign-in redirect URI` (e.g. `https://app.graphql-hive.com/auth/callback/oidc`) and the `OIDC Provider Sign-out redirect URI` (e.g. `https://app.graphql-hive.com/logout`).
+Go to the dashboard of your OIDC provider and set these values as the `Sign-in redirect URI` and `Sign-out redirect URI` respectively.
+
+## Login via Open ID Connect Provider
+
+After creating the Open ID Connect Provider the `Manage OpenID Connect Integration` modal will opened. Alternatively you can click the `Manage OIDC Provider` button on your organization settings or open `http://app.graphql-hive.com/<your-organization-name>/settings#manage-oidc-integration`.
+
+That page shows the login URL that your users can utilize for logging in via the Open ID Connect Provider. Share this link with your users or add it to your SSO provider dashboard (e.g. Okta), so people will be redirected to it.
+
+E.g. `https://app.graphql-hive.com/auth/oidc?id=xxxxxxxx-1234-1234-1234-xxxxxxxxxxxx`

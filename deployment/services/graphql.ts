@@ -1,6 +1,6 @@
 import * as pulumi from '@pulumi/pulumi';
 import * as azure from '@pulumi/azure';
-import { Cloudflare } from './cloudflare';
+import { CDN } from './cf-cdn';
 import { parse } from 'pg-connection-string';
 import { Tokens } from './tokens';
 import { Webhooks } from './webhooks';
@@ -37,7 +37,7 @@ export function deployGraphQL({
   tokens,
   webhooks,
   schema,
-  cloudflare,
+  cdn,
   redis,
   usage,
   usageEstimator,
@@ -56,7 +56,7 @@ export function deployGraphQL({
   webhooks: Webhooks;
   schema: Schema;
   redis: Redis;
-  cloudflare: Cloudflare;
+  cdn: CDN;
   usage: Usage;
   usageEstimator: UsageEstimator;
   dbMigrations: DbMigrations;
@@ -111,9 +111,9 @@ export function deployGraphQL({
         CDN_CF_BASE_PATH: 'https://api.cloudflare.com/client/v4/accounts',
         CDN_CF_ACCOUNT_ID: cloudflareConfig.require('accountId'),
         CDN_CF_AUTH_TOKEN: cloudflareConfig.requireSecret('apiToken'),
-        CDN_CF_NAMESPACE_ID: cloudflare.cfStorageNamespaceId,
-        CDN_BASE_URL: cloudflare.workerBaseUrl,
-        CDN_AUTH_PRIVATE_KEY: cloudflare.authPrivateKey,
+        CDN_CF_NAMESPACE_ID: cdn.cfStorageNamespaceId,
+        CDN_BASE_URL: cdn.workerBaseUrl,
+        CDN_AUTH_PRIVATE_KEY: cdn.authPrivateKey,
         // Hive
         HIVE: '1',
         HIVE_REPORTING: '1',
@@ -133,6 +133,7 @@ export function deployGraphQL({
         SUPERTOKENS_API_KEY: supertokensConfig.apiKey,
         AUTH_LEGACY_AUTH0: '1',
         AUTH_LEGACY_AUTH0_INTERNAL_API_KEY: auth0Config.internalApiKey,
+        AUTH_ORGANIZATION_OIDC: '1',
       },
       packageInfo: packageHelper.npmPack('@hive/server'),
       exposesMetrics: true,

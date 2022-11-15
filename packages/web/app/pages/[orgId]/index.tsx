@@ -3,7 +3,7 @@ import NextLink from 'next/link';
 import { onlyText } from 'react-children-utilities';
 import { useQuery } from 'urql';
 
-import { authenticated, withSessionProtection } from '@/components/authenticated-container';
+import { authenticated } from '@/components/authenticated-container';
 import { OrganizationLayout } from '@/components/layouts';
 import { Activities, Button, Card, DropdownMenu, EmptyList, Heading, Skeleton, TimeAgo, Title } from '@/components/v2';
 import { getActivity } from '@/components/v2/activities';
@@ -14,6 +14,7 @@ import { getDocsUrl } from '@/lib/docs-url';
 import { fixDuplicatedFragments } from '@/lib/graphql';
 import { useClipboard } from '@/lib/hooks/use-clipboard';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const projectActivitiesDocument = fixDuplicatedFragments(ProjectActivitiesDocument);
 

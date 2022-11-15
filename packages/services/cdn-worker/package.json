@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "dev": "tsup-node src/dev.ts --watch --onSuccess \"node dist/dev.js\"",
+    "dev": "tsup-node src/dev.ts --sourcemap --watch --onSuccess \"node --enable-source-maps dist/dev.js\"",
     "build-local": "BUILD_FOR_LOCAL=1 node build.mjs",
     "build": "node build.mjs",
     "typecheck": "tsc --noEmit"

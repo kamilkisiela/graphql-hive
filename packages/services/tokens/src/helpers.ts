@@ -17,6 +17,8 @@ export function atomic<A extends string, R>(fn: (arg: A) => Promise<R>): (arg: A
   };
 }
 
+// It's used to track the number of requests that are in flight.
+// This is important because we don't want to kill the pod when `DELETE` or `POST` action is in progress.
 export function useActionTracker() {
   let actionsInProgress = 0;
 

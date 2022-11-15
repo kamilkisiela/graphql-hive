@@ -30,6 +30,17 @@ const RedisModel = zod.object({
   REDIS_PASSWORD: emptyString(zod.string().optional()),
 });
 
+const RequestBrokerModel = zod.union([
+  zod.object({
+    REQUEST_BROKER: emptyString(zod.literal('0').optional()),
+  }),
+  zod.object({
+    REQUEST_BROKER: zod.literal('1'),
+    REQUEST_BROKER_ENDPOINT: zod.string().min(1),
+    REQUEST_BROKER_SIGNATURE: zod.string().min(1),
+  }),
+]);
+
 const SentryModel = zod.union([
   zod.object({
     SENTRY: emptyString(zod.literal('0').optional()),
@@ -70,6 +81,8 @@ const configs = {
   prometheus: PrometheusModel.safeParse(process.env),
   // eslint-disable-next-line no-process-env
   log: LogModel.safeParse(process.env),
+  // eslint-disable-next-line no-process-env
+  requestBroker: RequestBrokerModel.safeParse(process.env),
 };
 
 const environmentErrors: Array<string> = [];
@@ -98,6 +111,7 @@ const redis = extractConfig(configs.redis);
 const sentry = extractConfig(configs.sentry);
 const prometheus = extractConfig(configs.prometheus);
 const log = extractConfig(configs.log);
+const requestBroker = extractConfig(configs.requestBroker);
 
 export const env = {
   environment: base.ENVIRONMENT,
@@ -121,6 +135,13 @@ export const env = {
           labels: {
             instance: prometheus.PROMETHEUS_METRICS_LABEL_INSTANCE ?? 'usage-service',
           },
+        }
+      : null,
+  requestBroker:
+    requestBroker.REQUEST_BROKER === '1'
+      ? {
+          endpoint: requestBroker.REQUEST_BROKER_ENDPOINT,
+          signature: requestBroker.REQUEST_BROKER_SIGNATURE,
         }
       : null,
 } as const;

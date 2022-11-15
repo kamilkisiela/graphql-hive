@@ -3,7 +3,7 @@ import { execa } from '@n1ru4l/dockest';
 import { resolve } from 'path';
 
 const registryAddress = utils.getServiceAddress('server', 3001);
-const cliDevLocation = resolve(__dirname, '../../packages/libraries/cli/bin/dev');
+const cliDevLocation = resolve(__dirname, '../../packages/libraries/cli/bin/run');
 
 async function exec(cmd: string) {
   const result = execa(`${cliDevLocation} ${cmd}`);

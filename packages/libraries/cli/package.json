@@ -1,7 +1,7 @@
 {
   "name": "@graphql-hive/cli",
   "description": "A CLI util to manage and control your GraphQL Hive",
-  "version": "0.19.0",
+  "version": "0.19.8",
   "author": {
     "email": "contact@the-guild.dev",
     "name": "The Guild",
@@ -20,17 +20,20 @@
   "bin": {
     "hive": "./bin/run"
   },
+  "main": "dist/index.js",
   "files": [
     "/bin",
     "/dist",
-    "/npm-shrinkwrap.json",
     "/oclif.manifest.json"
   ],
   "scripts": {
     "start": "./bin/dev",
+    "prebuild": "rimraf dist",
     "build": "tsc",
     "postpack": "rm -f oclif.manifest.json",
     "prepack": "rimraf lib && tsc -b && oclif manifest && oclif readme",
+    "oclif:pack": "npm pack && pnpm oclif pack tarballs --no-xz",
+    "oclif:upload": "pnpm oclif upload tarballs --no-xz",
     "version": "oclif readme && git add README.md",
     "schema:check:single": "pnpm start schema:check examples/single.graphql",
     "schema:check:stitching": "pnpm start schema:check examples/stitching.graphql --service posts",
@@ -40,15 +43,15 @@
   "dependencies": {
     "@graphql-hive/core": "0.2.2",
     "@graphql-inspector/core": "~3.2.0",
-    "@graphql-tools/code-file-loader": "~7.2.14",
-    "@graphql-tools/graphql-file-loader": "~7.3.11",
-    "@graphql-tools/json-file-loader": "~7.3.11",
-    "@graphql-tools/url-loader": "~7.9.15",
-    "@graphql-tools/load": "~7.5.10",
-    "@graphql-tools/utils": "8.2.4",
-    "@oclif/core": "^1.13.10",
-    "@oclif/plugin-help": "5.1.16",
-    "@oclif/plugin-update": "3.0.4",
+    "@graphql-tools/code-file-loader": "~7.3.6",
+    "@graphql-tools/graphql-file-loader": "~7.5.5",
+    "@graphql-tools/json-file-loader": "~7.4.6",
+    "@graphql-tools/url-loader": "~7.16.4",
+    "@graphql-tools/load": "~7.7.7",
+    "@graphql-tools/utils": "8.12.0",
+    "@oclif/core": "^1.20.4",
+    "@oclif/plugin-help": "5.1.18",
+    "@oclif/plugin-update": "3.0.6",
     "colors": "1.4.0",
     "env-ci": "7.1.0",
     "git-parse": "2.1.2",
@@ -57,11 +60,12 @@
     "graphql-tag": "2.12.6",
     "log-symbols": "4.1.0",
     "mkdirp": "1.0.4",
+    "rimraf": "3.0.2",
     "tslib": "2.4.0",
     "ts-node": "10.9.1"
   },
   "devDependencies": {
-    "oclif": "^3.1.2",
+    "oclif": "^3.2.25",
     "@types/env-ci": "3.1.1",
     "@types/git-parse": "2.1.2",
     "@types/mkdirp": "1.0.2"

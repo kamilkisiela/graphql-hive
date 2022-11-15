@@ -21,6 +21,14 @@ index 0ebfbf042310483d8f6f7b0220bc0a58bb3f595a..a7c11de9cf79ffc7eab66fcc1b5593cb
      await new Promise((resolve, reject) => {
          const child = (0, child_process_1.spawn)("next", ["build"], {
              stdio: "inherit",
+@@ -90,6 +90,7 @@ async function runify(packagePath, reporter) {
+         await rewritePackageJson(pkg, cwd, (newPkg) => ({
+             ...newPkg,
+             dependencies: pkg.dependencies,
++            type: "commonjs"
+         }));
+     }
+     else {
 @@ -150,6 +151,16 @@ async function buildNext(cwd) {
          child.on("error", reject);
      });

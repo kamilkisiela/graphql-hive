@@ -28,7 +28,6 @@ export function deployApp({
   auth0Config,
   googleConfig,
   githubConfig,
-  oktaConfig,
   emailsEndpoint,
 }: {
   storageContainer: azure.storage.Container;
@@ -46,11 +45,6 @@ export function deployApp({
   googleConfig: {
     clientId: pulumi.Output<string>;
     clientSecret: pulumi.Output<string>;
-  };
-  oktaConfig: {
-    clientId: pulumi.Output<string>;
-    clientSecret: pulumi.Output<string>;
-    endpoint: pulumi.Output<string>;
   };
   githubConfig: {
     clientId: pulumi.Output<string>;
@@ -201,30 +195,12 @@ export function deployApp({
           name: 'AUTH_GOOGLE_CLIENT_SECRET',
           value: googleConfig.clientSecret,
         },
-        // Okta
-        {
-          name: 'AUTH_OKTA',
-          value: '1',
-        },
-        {
-          name: 'AUTH_OKTA_CLIENT_ID',
-          value: oktaConfig.clientId,
-        },
-        {
-          name: 'AUTH_OKTA_CLIENT_SECRET',
-          value: oktaConfig.clientSecret,
-        },
-        {
-          name: 'AUTH_OKTA_ENDPOINT',
-          value: oktaConfig.endpoint,
-        },
-        {
-          name: 'AUTH_OKTA_HIDDEN',
-          value: '1',
-        },
-
         {
           name: 'AUTH_REQUIRE_EMAIL_VERIFICATION',
+          value: '1',
+        },
+        {
+          name: 'AUTH_ORGANIZATION_OIDC',
           value: '1',
         },
       ],

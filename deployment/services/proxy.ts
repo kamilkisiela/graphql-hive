@@ -62,6 +62,7 @@ export function deployProxy({
         name: 'server',
         path: '/server',
         service: graphql.service,
+        timeoutInSeconds: 60,
       },
       {
         name: 'registry-api-health',
@@ -74,17 +75,22 @@ export function deployProxy({
         path: '/registry',
         customRewrite: '/graphql',
         service: graphql.service,
+        timeoutInSeconds: 60,
+        retryOnReset: true,
       },
       {
         name: 'graphql-api',
         path: '/graphql',
         customRewrite: '/graphql',
         service: graphql.service,
+        timeoutInSeconds: 60,
+        retryOnReset: true,
       },
       {
         name: 'usage',
         path: '/usage',
         service: usage.service,
+        retryOnReset: true,
       },
     ])
     .get();

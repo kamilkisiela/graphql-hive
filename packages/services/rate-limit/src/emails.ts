@@ -50,7 +50,7 @@ export function createEmailScheduler(config?: { endpoint: string }) {
             period: input.period,
             limit: input.usage.quota,
           }),
-          subject: `${input.organization.name} has exceeded its rate limit`,
+          subject: `GraphQL-Hive operations quota for ${input.organization.name} exceeded`,
           body: `
           <mjml>
             <mj-body>
@@ -59,7 +59,7 @@ export function createEmailScheduler(config?: { endpoint: string }) {
                   <mj-image width="150px" src="https://graphql-hive.com/logo.png"></mj-image>
                   <mj-divider border-color="#ca8a04"></mj-divider>
                   <mj-text>
-                    Your organization <strong>${
+                    Your Hive organization <strong>${
                       input.organization.name
                     }</strong> has reached over 100% of the operations limit quota.
                     Used ${numberFormatter.format(input.usage.current)} of ${numberFormatter.format(input.usage.quota)}.

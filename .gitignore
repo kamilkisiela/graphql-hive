@@ -108,6 +108,8 @@ integration-tests/testkit/gql/
 
 /.husky/_/
 
+npm-shrinkwrap.json
+
 # Rust
 /target
 

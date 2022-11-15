@@ -341,6 +341,9 @@ jobs:
 
       - name: Lint ESLint
         run: pnpm lint
+        env:
+          TIMING: 'true'
+          DEBUG: 'eslint:cli-engine'
 
       - name: Lint Prettier
         run: pnpm lint:prettier
@@ -461,6 +464,7 @@ jobs:
             redis \
             supertokens \
             local_cdn \
+            local_broker \
             external_composition
 
       - name: Set up Docker Buildx

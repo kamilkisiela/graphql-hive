@@ -141,17 +141,34 @@ const createFederation: (
         );
         const signature = hash(decrypt(external.encryptedSecret), 'sha256', body);
         logger.debug('Calling external composition service (url=%s)', external.endpoint);
+
+        const init = {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            'x-hive-signature-256': signature,
+          },
+          body,
+        };
+
         const response = await retry(
           async () => {
-            const response = await fetch(external.endpoint, {
-              body,
-              method: 'POST',
-              headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-                'x-hive-signature-256': signature,
-              },
-            }).catch(error => {
+            const response = await (external.broker
+              ? fetch(external.broker.endpoint, {
+                  method: 'POST',
+                  headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                    'x-hive-signature': external.broker.signature,
+                  },
+                  body: JSON.stringify({
+                    url: external.endpoint,
+                    ...init,
+                  }),
+                })
+              : fetch(external.endpoint, init)
+            ).catch(error => {
               logger.error(error);
 
               return Promise.reject(error);
@@ -162,15 +179,14 @@ const createFederation: (
               throw new Error(`External composition failure: ${response.status} ${message}`);
             }
 
-            return response;
+            return response.json();
           },
           {
             retries: 3,
           }
         );
 
-        const result = await response.json();
-        const parseResult = EXTERNAL_COMPOSITION_RESULT.safeParse(result);
+        const parseResult = EXTERNAL_COMPOSITION_RESULT.safeParse(await response);
 
         if (!parseResult.success) {
           throw new Error(`External composition failure: invalid shape of data`);

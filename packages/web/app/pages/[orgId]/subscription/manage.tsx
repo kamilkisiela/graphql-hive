@@ -4,7 +4,7 @@ import { Stat, StatHelpText, StatLabel, StatNumber } from '@chakra-ui/react';
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { useMutation, useQuery } from 'urql';
 
-import { authenticated, withSessionProtection } from '@/components/authenticated-container';
+import { authenticated } from '@/components/authenticated-container';
 import { Section } from '@/components/common';
 import { DataWrapper, QueryError } from '@/components/common/DataWrapper';
 import { OrganizationLayout } from '@/components/layouts';
@@ -24,6 +24,7 @@ import {
   UpgradeToProDocument,
 } from '@/graphql';
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
+import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const Inner = ({
   organization,

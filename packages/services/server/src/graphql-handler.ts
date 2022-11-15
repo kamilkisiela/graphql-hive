@@ -114,8 +114,8 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
           const clientName = Array.isArray(clientNameHeaderValue) ? clientNameHeaderValue[0] : clientNameHeaderValue;
 
           if (transaction) {
-            transaction.setTag('graphql_client_name', clientName);
-            transaction.sampled = clientName !== 'Hive Client';
+            transaction.setTag('graphql_client_name', clientName ?? 'unknown');
+            transaction.sampled = !!clientName && clientName !== 'Hive Client';
           }
 
           scope.setContext('Extra Info', {

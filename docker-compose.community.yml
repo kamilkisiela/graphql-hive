@@ -100,7 +100,7 @@ services:
       - './.hive/redis/db:/bitnami/redis/data'
 
   supertokens:
-    image: registry.supertokens.io/supertokens/supertokens-postgresql:4.1
+    image: registry.supertokens.io/supertokens/supertokens-postgresql:4.2
     depends_on:
       db:
         condition: service_healthy
@@ -114,6 +114,7 @@ services:
       POSTGRESQL_HOST: db
       POSTGRESQL_PORT: 5432
       API_KEYS: '${SUPERTOKENS_API_KEY}'
+      ACCESS_TOKEN_BLACKLISTING: 'true'
 
   storage:
     image: '${DOCKER_REGISTRY}storage${DOCKER_TAG}'

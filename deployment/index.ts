@@ -14,7 +14,8 @@ import { deployDocs } from './services/docs';
 import { deployRedis } from './services/redis';
 import { deployKafka } from './services/kafka';
 import { deployMetrics } from './services/observability';
-import { deployCloudflare } from './services/cloudflare';
+import { deployCFCDN } from './services/cf-cdn';
+import { deployCFBroker } from './services/cf-broker';
 import { deployCloudflarePolice } from './services/police';
 import { deployBotKube } from './services/bot-kube';
 import { deployProxy } from './services/proxy';
@@ -70,7 +71,13 @@ const deploymentEnv: DeploymentEnvironment = {
 deployBotKube({ envName });
 deployMetrics({ envName });
 
-const cloudflare = deployCloudflare({
+const cdn = deployCFCDN({
+  envName,
+  rootDns,
+  packageHelper,
+});
+
+const cfBroker = deployCFBroker({
   envName,
   rootDns,
   packageHelper,
@@ -106,6 +113,7 @@ const webhooksApi = deployWebhooks({
   deploymentEnv,
   redis: redisApi,
   heartbeat: heartbeatsConfig.get('webhooks'),
+  broker: cfBroker,
 });
 
 const emailsApi = deployEmails({
@@ -171,6 +179,7 @@ const schemaApi = deploySchema({
   storageContainer,
   deploymentEnv,
   redis: redisApi,
+  broker: cfBroker,
 });
 
 const supertokensApiKey = new random.RandomPassword('supertokens-api-key', { length: 31, special: false });
@@ -188,12 +197,6 @@ const googleConfig = {
   clientSecret: oauthConfig.requireSecret('googleSecret'),
 };
 
-const oktaConfig = {
-  clientId: oauthConfig.requireSecret('oktaClient'),
-  clientSecret: oauthConfig.requireSecret('oktaSecret'),
-  endpoint: oauthConfig.requireSecret('oktaEndpoint'),
-};
-
 const supertokens = deploySuperTokens({ apiKey: supertokensApiKey.result });
 
 const graphqlApi = deployGraphQL({
@@ -207,7 +210,7 @@ const graphqlApi = deployGraphQL({
   dbMigrations,
   redis: redisApi,
   usage: usageApi,
-  cloudflare,
+  cdn,
   usageEstimator: usageEstimationApi,
   rateLimit: rateLimitApi,
   billing: billingApi,
@@ -243,7 +246,6 @@ const app = deployApp({
   },
   githubConfig,
   googleConfig,
-  oktaConfig,
   emailsEndpoint: emailsApi.localEndpoint,
 });
 

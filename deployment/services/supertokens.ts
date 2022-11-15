@@ -11,7 +11,7 @@ export function deploySuperTokens({ apiKey }: { apiKey: Output<string> }) {
     restartPolicy: 'Always',
     containers: [
       {
-        image: 'registry.supertokens.io/supertokens/supertokens-postgresql:4.1',
+        image: 'registry.supertokens.io/supertokens/supertokens-postgresql:4.2',
         name: 'supertokens',
         ports: {
           http: port,
@@ -42,6 +42,7 @@ export function deploySuperTokens({ apiKey }: { apiKey: Output<string> }) {
             .requireSecret('postgresConnectionString')
             .apply(str => str.replace('postgres://', 'postgresql://')),
           API_KEYS: apiKey,
+          ACCESS_TOKEN_BLACKLISTING: 'true',
         },
       },
     ],

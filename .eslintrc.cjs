@@ -18,7 +18,7 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 2020,
     sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.eslint.json', './deployment/tsconfig.json'],
+    project: ['./tsconfig.eslint.json'],
   },
   parser: '@typescript-eslint/parser',
   plugins: ['@typescript-eslint', 'import', 'hive'],
@@ -31,14 +31,6 @@ module.exports = {
 
     'import/no-absolute-path': 'error',
     'import/no-self-import': 'error',
-    'import/no-unused-modules': [
-      // eslint-disable-next-line no-process-env
-      process.env.CI === 'true' ? 'warn' : 'off',
-      {
-        unusedExports: true,
-        missingExports: true,
-      },
-    ],
     'import/no-extraneous-dependencies': [
       'error',
       {
@@ -67,20 +59,10 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['packages/web/**', 'packages/services/cdn-worker/**', 'packages/services/police-worker/**'],
+      files: ['packages/web/**', 'packages/services/*-worker/**'],
       rules: {
         // because this folder is excluded in tsconfig.json
         '@typescript-eslint/no-floating-promises': 'off',
-      },
-      parserOptions: {
-        // Fixes Parsing error: "parserOptions.project" has been set for @typescript-eslint/parser
-        createDefaultProgram: true,
-      },
-    },
-    {
-      files: ['twin.d.ts', 'next-env.d.ts', '*.spec.ts'],
-      rules: {
-        'import/no-unused-modules': 'off',
       },
     },
     {

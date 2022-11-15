@@ -4,7 +4,7 @@ import { useFormik } from 'formik';
 import { gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 
-import { authenticated, withSessionProtection } from '@/components/authenticated-container';
+import { authenticated } from '@/components/authenticated-container';
 import { ProjectLayout } from '@/components/layouts';
 import { ExternalCompositionSettings } from '@/components/project/settings/external-composition';
 import { Button, Card, Heading, Input, Link, Select, Spinner, Tag, Title } from '@/components/v2';
@@ -18,6 +18,7 @@ import {
 } from '@/graphql';
 import { canAccessProject, ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const Settings_UpdateProjectGitRepositoryMutation = gql(/* GraphQL */ `
   mutation Settings_UpdateProjectGitRepository($input: UpdateProjectGitRepositoryInput!) {

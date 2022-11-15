@@ -33,6 +33,10 @@ interface CacheStorage extends Omit<Storage, 'touchTokens'> {
   invalidateOrganization(organization: string): void;
 }
 
+// Cache is a wrapper around the storage that adds a cache layer.
+// It also handles invalidation of the cache.
+// It also handles the "touch" logic to mark tokens as used and update the "lastUsedAt" column in PG.
+// Without the cache we would hit the DB for every request, with the cache we hit it only once (until a token is invalidated).
 export function useCache(
   storagePromise: Promise<Storage>,
   logger: FastifyLoggerInstance
@@ -57,7 +61,8 @@ export function useCache(
 
   async function create() {
     const storage = await storagePromise;
-    const cache = LRU<StorageItem[]>(100);
+    // We might want to make this configurable in the future
+    const cache = LRU<StorageItem[]>(500);
     const relations = useRelations();
     const touch = useTokenTouchScheduler(storage, logger, updateLastUsedAt);
 
@@ -78,12 +83,16 @@ export function useCache(
       }
     }
 
+    // When there's a new token or a token was removed we need to invalidate the cache for the related targets
     function invalidate(target: string): void {
       logger.debug('Invalidating (target=%s)', target);
       cacheInvalidations.inc(1);
       cache.delete(target);
     }
 
+    // Reads the tokens (of a target) from the postgres db and cache them
+    // Thanks to the `atomic` function, every call to this function will only be executed once
+    // and the Promise will be shared (similar thing to the DataLoader).
     const readAndFill = atomic(async function _readAndFill(target: string) {
       const result = await storage.readTarget(target);
 
@@ -94,7 +103,9 @@ export function useCache(
         const organization = result[0].organization;
         const project = result[0].project;
 
+        // Connects a project to an organization
         relations.ensureOrganizationProject(organization, project);
+        // Connects a target to a project
         relations.ensureProjectTarget(project, target);
       }
 
@@ -103,6 +114,8 @@ export function useCache(
       return result;
     });
 
+    // Thanks to the `atomic` function, every call to this function will only be executed once and Promise will be shared.
+    // This is important because we don't want to make multiple requests to the DB for the same token, at the same time.
     const readToken = atomic(async function _readToken(token: string) {
       return storage.readToken(token);
     });
@@ -145,13 +158,15 @@ export function useCache(
             if (item) {
               cacheHits.inc(1);
               res?.header('x-cache', 'HIT'); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
-              touch.schedule(hashed_token); // mark as used
+              // mark as used
+              touch.schedule(hashed_token);
               return item;
             }
           }
         }
 
         const item = await readToken(hashed_token);
+        // Read the tokens of the target and cache them
         await readAndFill(item.target).catch(() => {});
         cacheMisses.inc(1);
         res?.header('x-cache', 'MISS'); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
@@ -188,6 +203,7 @@ export function useCache(
     logger.info('Started Tokens shutdown...');
     started = false;
 
+    // Wait for all the pending operations to finish
     await until(tracker.idle, 10_000).catch(error => {
       logger.error('Failed to wait for tokens being idle', error);
     });

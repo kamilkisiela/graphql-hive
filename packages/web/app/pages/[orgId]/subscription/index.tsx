@@ -3,7 +3,7 @@ import dynamic from 'next/dynamic';
 import { Stat, StatHelpText, StatLabel, StatNumber } from '@chakra-ui/react';
 import { endOfMonth, startOfMonth } from 'date-fns';
 
-import { authenticated, withSessionProtection } from '@/components/authenticated-container';
+import { authenticated } from '@/components/authenticated-container';
 import { OrganizationLayout } from '@/components/layouts';
 import { BillingView } from '@/components/organization/billing/Billing';
 import { CurrencyFormatter } from '@/components/organization/billing/helpers';
@@ -14,6 +14,7 @@ import { Card, Heading, Tabs, Title } from '@/components/v2';
 import { OrganizationFieldsFragment, OrgBillingInfoFieldsFragment, OrgRateLimitFieldsFragment } from '@/graphql';
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
 import { getIsStripeEnabled } from '@/lib/billing/stripe-public-key';
+import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const DateFormatter = Intl.DateTimeFormat('en-US', {
   month: 'short',
