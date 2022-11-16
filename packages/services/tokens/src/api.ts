@@ -197,6 +197,10 @@ export const tokensApiRouter = trpc
         const storage = await ctx.getStorage();
         const result = await storage.readToken(hash);
 
+        if (!result) {
+          return null;
+        }
+
         // removes the token from the failures cache
         ctx.tokenReadFailuresCache.delete(hash);
 

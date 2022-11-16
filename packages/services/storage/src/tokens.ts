@@ -24,7 +24,7 @@ export async function createTokenStorage(connection: string, maximumPoolSize: nu
       return result.rows;
     },
     async getToken({ token }: { token: string }) {
-      return pool.one<Slonik<tokens>>(
+      return pool.maybeOne<Slonik<tokens>>(
         sql`
           SELECT * 
           FROM public.tokens 
