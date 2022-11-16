@@ -1,7 +1,6 @@
 import * as pulumi from '@pulumi/pulumi';
 import * as azure from '@pulumi/azure';
 import { RemoteArtifactAsServiceDeployment } from '../utils/remote-artifact-as-service';
-import { isProduction } from '../utils/helpers';
 import { DeploymentEnvironment } from '../types';
 import { Redis } from './redis';
 import { PackageHelper } from '../utils/pack';
@@ -46,7 +45,8 @@ export function deploySchema({
       livenessProbe: '/_health',
       exposesMetrics: true,
       packageInfo: packageHelper.npmPack('@hive/schema'),
-      replicas: isProduction(deploymentEnv) ? 2 : 1,
+      replicas: 2,
+      pdb: true,
     },
     [redis.deployment, redis.service]
   ).deploy();
