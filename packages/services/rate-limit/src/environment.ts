@@ -51,17 +51,19 @@ const PrometheusModel = zod.object({
 });
 
 const LogModel = zod.object({
-  LOG_LEVEL: zod
-    .union([
-      zod.literal('trace'),
-      zod.literal('debug'),
-      zod.literal('info'),
-      zod.literal('warn'),
-      zod.literal('error'),
-      zod.literal('fatal'),
-      zod.literal('silent'),
-    ])
-    .optional(),
+  LOG_LEVEL: emptyString(
+    zod
+      .union([
+        zod.literal('trace'),
+        zod.literal('debug'),
+        zod.literal('info'),
+        zod.literal('warn'),
+        zod.literal('error'),
+        zod.literal('fatal'),
+        zod.literal('silent'),
+      ])
+      .optional()
+  ),
 });
 
 const configs = {
