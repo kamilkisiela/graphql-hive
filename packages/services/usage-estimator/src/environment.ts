@@ -116,7 +116,7 @@ export const env = {
   },
   sentry: sentry.SENTRY === '1' ? { dsn: sentry.SENTRY_DSN } : null,
   log: {
-    level: log.LOG_LEVEL ?? 'debug',
+    level: log.LOG_LEVEL ?? 'info',
   },
   prometheus:
     prometheus.PROMETHEUS_METRICS === '1'
