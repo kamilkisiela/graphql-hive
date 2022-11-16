@@ -16,6 +16,7 @@ test('createSupergraphSDLFetcher without ETag', async () => {
     .get('/supergraph')
     .once()
     .matchHeader('X-Hive-CDN-Key', key)
+    .matchHeader('content-type', /client-hive\/\d+\.\d+\.\d+/)
     .reply(200, newSupergraphSdl, {
       ETag: 'second',
     });
@@ -54,6 +55,7 @@ test('createSupergraphSDLFetcher', async () => {
     .reply(304)
     .get('/supergraph')
     .matchHeader('X-Hive-CDN-Key', key)
+    .matchHeader('content-type', /client-hive\/\d+\.\d+\.\d+/)
     .matchHeader('If-None-Match', 'first')
     .reply(200, newSupergraphSdl, {
       ETag: 'changed',
