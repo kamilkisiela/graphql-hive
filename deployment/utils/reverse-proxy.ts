@@ -183,6 +183,22 @@ export class Proxy {
 
     this.lbService = proxyController.getResource('v1/Service', 'contour/contour-proxy-envoy');
 
+    const contourDeployment = proxyController.getResource('apps/v1/Deployment', 'contour/contour-proxy-contour');
+    new k8s.policy.v1.PodDisruptionBudget('contour-pdb', {
+      spec: {
+        minAvailable: 1,
+        selector: contourDeployment.spec.selector,
+      },
+    });
+
+    const envoyDaemonset = proxyController.getResource('apps/v1/ReplicaSet', 'contour/contour-proxy-envoy');
+    new k8s.policy.v1.PodDisruptionBudget('envoy-pdb', {
+      spec: {
+        minAvailable: 1,
+        selector: envoyDaemonset.spec.selector,
+      },
+    });
+
     new k8s.apiextensions.CustomResource(
       'secret-delegation',
       {

@@ -79,6 +79,7 @@ export function deployGraphQL({
     {
       storageContainer,
       replicas: 2,
+      pdb: true,
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
       env: {
