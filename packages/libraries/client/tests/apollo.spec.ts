@@ -1,6 +1,7 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import nock from 'nock';
 import { createSupergraphSDLFetcher } from '../src/apollo';
+import { version } from '../src/version';
 
 test('createSupergraphSDLFetcher without ETag', async () => {
   const supergraphSdl = 'type SuperQuery { sdl: String }';
@@ -16,7 +17,7 @@ test('createSupergraphSDLFetcher without ETag', async () => {
     .get('/supergraph')
     .once()
     .matchHeader('X-Hive-CDN-Key', key)
-    .matchHeader('content-type', /client-hive\/\d+\.\d+\.\d+/)
+    .matchHeader('User-Agent', `hive-client/${version}`)
     .reply(200, newSupergraphSdl, {
       ETag: 'second',
     });
@@ -55,7 +56,7 @@ test('createSupergraphSDLFetcher', async () => {
     .reply(304)
     .get('/supergraph')
     .matchHeader('X-Hive-CDN-Key', key)
-    .matchHeader('content-type', /client-hive\/\d+\.\d+\.\d+/)
+    .matchHeader('User-Agent', `hive-client/${version}`)
     .matchHeader('If-None-Match', 'first')
     .reply(200, newSupergraphSdl, {
       ETag: 'changed',

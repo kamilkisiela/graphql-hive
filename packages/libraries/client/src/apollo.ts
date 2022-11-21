@@ -19,7 +19,7 @@ export function createSupergraphSDLFetcher({ endpoint, key }: SupergraphSDLFetch
       [key: string]: string;
     } = {
       'X-Hive-CDN-Key': key,
-      'user-agent': `hive-client/${version}`,
+      'User-Agent': `hive-client/${version}`,
     };
 
     if (cacheETag) {
@@ -105,7 +105,7 @@ export function hiveApollo(clientOrOptions: HiveClient | HivePluginOptions): Apo
     : createHive({
         ...clientOrOptions,
         agent: {
-          name: 'HiveApollo',
+          name: 'hive-client-apollo',
           ...(clientOrOptions.agent ?? {}),
         },
       });

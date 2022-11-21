@@ -22,7 +22,7 @@ function createFetcher<T>({ endpoint, key }: SchemaFetcherOptions & ServicesFetc
     } = {
       'X-Hive-CDN-Key': key,
       accept: 'application/json',
-      'user-agent': `hive-client/${version}`,
+      'User-Agent': `hive-client/${version}`,
     };
 
     if (cacheETag) {
