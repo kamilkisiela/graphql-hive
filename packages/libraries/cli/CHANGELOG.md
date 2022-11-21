@@ -1,5 +1,11 @@
 # @graphql-hive/cli
 
+## 0.19.9
+
+### Patch Changes
+
+- [#655](https://github.com/kamilkisiela/graphql-hive/pull/655) [`2cbf27f`](https://github.com/kamilkisiela/graphql-hive/commit/2cbf27fdc9c18749b8969adb6d1598338762dba2) Thanks [@n1ru4l](https://github.com/n1ru4l)! - Add User-Agent header to all http requests
+
 ## 0.19.8
 
 ### Patch Changes
