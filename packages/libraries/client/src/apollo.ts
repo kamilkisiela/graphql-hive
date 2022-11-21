@@ -5,6 +5,7 @@ import { createHash } from 'crypto';
 import axios from 'axios';
 import { createHive } from './client';
 import { isHiveClient } from './internal/utils';
+import { version } from './version';
 
 export function createSupergraphSDLFetcher({ endpoint, key }: SupergraphSDLFetcherOptions) {
   let cacheETag: string | null = null;
@@ -18,6 +19,7 @@ export function createSupergraphSDLFetcher({ endpoint, key }: SupergraphSDLFetch
       [key: string]: string;
     } = {
       'X-Hive-CDN-Key': key,
+      'User-Agent': `hive-client/${version}`,
     };
 
     if (cacheETag) {
@@ -103,7 +105,7 @@ export function hiveApollo(clientOrOptions: HiveClient | HivePluginOptions): Apo
     : createHive({
         ...clientOrOptions,
         agent: {
-          name: 'HiveApollo',
+          name: 'hive-client-apollo',
           ...(clientOrOptions.agent ?? {}),
         },
       });

@@ -11,7 +11,7 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
     : createHive({
         ...clientOrOptions,
         agent: {
-          name: 'HiveEnvelop',
+          name: 'hive-client-envelop',
           ...(clientOrOptions.agent ?? {}),
         },
       });

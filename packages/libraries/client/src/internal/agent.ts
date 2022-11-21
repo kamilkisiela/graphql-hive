@@ -71,7 +71,7 @@ export function createAgent<TEvent, TResult = void>(
     sendInterval: 10_000,
     maxSize: 25,
     logger: console,
-    name: 'Hive',
+    name: 'hive-client',
     ...pluginOptions,
   };
 
@@ -154,7 +154,7 @@ export function createAgent<TEvent, TResult = void>(
               accept: 'application/json',
               'content-type': 'application/json',
               Authorization: `Bearer ${options.token}`,
-              'User-Agent': `${options.name}@${version}`,
+              'User-Agent': `${options.name}/${version}`,
               ...headers(),
             },
             responseType: 'json',
