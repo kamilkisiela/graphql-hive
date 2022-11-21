@@ -135,11 +135,19 @@ export class TokenStorage {
     this.logger.debug('Fetching token (token=%s)', maskToken(token));
 
     try {
-      return await this.tokensService.query('getToken', { token });
-    } catch (e: any) {
-      this.logger.error(e);
+      const tokenInfo = await this.tokensService.query('getToken', { token });
 
-      throw new HiveError('Invalid token provided!');
+      if (!tokenInfo) {
+        throw new Error('Token not found');
+      }
+
+      return tokenInfo;
+    } catch (error: any) {
+      this.logger.error(error);
+
+      throw new HiveError('Invalid token provided', {
+        originalError: error,
+      });
     }
   }
 }
