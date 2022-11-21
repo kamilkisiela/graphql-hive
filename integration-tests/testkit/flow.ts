@@ -8,6 +8,7 @@ import type {
   CreateProjectInput,
   UpdateProjectNameInput,
   CreateTokenInput,
+  DeleteTokensInput,
   OrganizationMemberAccessInput,
   SchemaCheckInput,
   PublishPersistedOperationInput,
@@ -297,7 +298,26 @@ export function createToken(input: CreateTokenInput, authToken: string) {
         createToken(input: $input) {
           ok {
             secret
+            createdToken {
+              id
+            }
           }
+        }
+      }
+    `),
+    authToken,
+    variables: {
+      input,
+    },
+  });
+}
+
+export function deleteTokens(input: DeleteTokensInput, authToken: string) {
+  return execute({
+    document: gql(/* GraphQL */ `
+      mutation deleteTokens($input: DeleteTokensInput!) {
+        deleteTokens(input: $input) {
+          deletedTokens
         }
       }
     `),
