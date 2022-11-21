@@ -76,7 +76,13 @@ impl HiveRegistry {
         let client = reqwest::blocking::Client::new();
         let mut headers = reqwest::header::HeaderMap::new();
 
-        headers.insert(reqwest::header::USER_AGENT, format!("graphql-hive-router@{}", COMMIT.unwrap_or_else(|| "local")));
+        headers.insert(
+            reqwest::header::USER_AGENT,
+            reqwest::header::HeaderValue::from_str(
+                format!("hive-apollo-router/{}", COMMIT.unwrap_or_else(|| "local")).as_str(),
+            )
+            .unwrap(),
+        );
         headers.insert("X-Hive-CDN-Key", self.key.parse().unwrap());
 
         if let Some(checksum) = etag {

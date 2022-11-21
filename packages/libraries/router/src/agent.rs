@@ -239,7 +239,7 @@ impl UsageAgent {
                 )
                 .header(
                     reqwest::header::USER_AGENT,
-                    format!("graphql-hive-router@{}", COMMIT.unwrap_or_else(|| "local")),
+                    format!("hive-apollo-router/{}", COMMIT.unwrap_or_else(|| "local")),
                 )
                 .json(&report)
                 .send()
