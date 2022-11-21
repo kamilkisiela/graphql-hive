@@ -5,6 +5,7 @@ import { createUsage } from './internal/usage';
 import { createReporting } from './internal/reporting';
 import { createOperationsStore } from './internal/operations-store';
 import { logIf } from './internal/utils';
+import { version } from './version';
 
 export function createHive(options: HivePluginOptions): HiveClient {
   const logger = options?.agent?.logger ?? console;
@@ -93,6 +94,7 @@ export function createHive(options: HivePluginOptions): HiveClient {
           headers: {
             'content-type': 'application/json',
             Authorization: `Bearer ${options.token}`,
+            'user-agent': `hive-client/${version}`,
           },
           timeout: 30_000,
           decompress: true,

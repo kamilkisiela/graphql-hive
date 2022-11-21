@@ -41,10 +41,17 @@ export async function main() {
 
   try {
     const { start, stop, readiness, getStorage } = useCache(createStorage(env.postgres), server.log);
-    const tokenReadFailuresCache = LRU<{
-      error: string;
-      checkAt: number;
-    }>(50);
+    const tokenReadFailuresCache = LRU<
+      | {
+          type: 'error';
+          error: string;
+          checkAt: number;
+        }
+      | {
+          type: 'not-found';
+          checkAt: number;
+        }
+    >(200);
     // Cache failures for 10 minutes
     const errorCachingInterval = ms('10m');
 

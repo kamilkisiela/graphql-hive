@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { createHash } from 'crypto';
 import type { SchemaFetcherOptions, ServicesFetcherOptions } from './internal/types';
+import { version } from './version';
 
 interface Schema {
   sdl: string;
@@ -21,6 +22,7 @@ function createFetcher<T>({ endpoint, key }: SchemaFetcherOptions & ServicesFetc
     } = {
       'X-Hive-CDN-Key': key,
       accept: 'application/json',
+      'User-Agent': `hive-client/${version}`,
     };
 
     if (cacheETag) {

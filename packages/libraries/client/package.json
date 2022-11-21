@@ -1,7 +1,7 @@
 {
   "name": "@graphql-hive/client",
   "description": "A NodeJS client for GraphQL Hive",
-  "version": "0.21.1",
+  "version": "0.21.2",
   "author": {
     "email": "contact@the-guild.dev",
     "name": "The Guild",

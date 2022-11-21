@@ -78,6 +78,7 @@ export function deployUsageIngestor({
       exposesMetrics: true,
       packageInfo: packageHelper.npmPack('@hive/usage-ingestor'),
       port: 4000,
+      pdb: true,
       autoScaling: {
         cpu: {
           cpuAverageToScale: 60,

@@ -27,6 +27,7 @@ export class RemoteArtifactAsServiceDeployment {
        */
       exposesMetrics?: boolean;
       replicas?: number;
+      pdb?: boolean;
       autoScaling?: {
         minReplicas?: number;
         maxReplicas: number;
@@ -221,6 +222,16 @@ export class RemoteArtifactAsServiceDeployment {
         parent: this.parent ?? undefined,
       }
     );
+
+    if (this.options.pdb) {
+      new k8s.policy.v1.PodDisruptionBudget(`${this.name}-pdb`, {
+        spec: {
+          minAvailable: 1,
+          selector: deployment.spec.selector,
+        },
+      });
+    }
+
     const service = deployment.createService({});
 
     if (this.options.autoScaling) {
@@ -248,8 +259,8 @@ export class RemoteArtifactAsServiceDeployment {
                 },
               },
             ],
-            maxReplicas: this.options.autoScaling.maxReplicas,
             minReplicas: this.options.autoScaling.minReplicas || this.options.replicas || 1,
+            maxReplicas: this.options.autoScaling.maxReplicas,
           },
         },
         {

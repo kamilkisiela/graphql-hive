@@ -64,6 +64,7 @@ export function deployUsage({
       exposesMetrics: true,
       packageInfo: packageHelper.npmPack('@hive/usage'),
       port: 4000,
+      pdb: true,
       autoScaling: {
         cpu: {
           cpuAverageToScale: 60,

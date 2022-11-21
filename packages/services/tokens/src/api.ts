@@ -56,10 +56,17 @@ export type Context = {
   logger: FastifyLoggerInstance;
   errorHandler: ReturnType<typeof createErrorHandler>;
   getStorage: ReturnType<typeof useCache>['getStorage'];
-  tokenReadFailuresCache: LruType<{
-    error: string;
-    checkAt: number;
-  }>;
+  tokenReadFailuresCache: LruType<
+    | {
+        type: 'error';
+        error: string;
+        checkAt: number;
+      }
+    | {
+        type: 'not-found';
+        checkAt: number;
+      }
+  >;
   errorCachingInterval: number;
 };
 
@@ -186,9 +193,13 @@ export const tokensApiRouter = trpc
       const failedRead = ctx.tokenReadFailuresCache.get(hash);
 
       if (failedRead) {
-        // let's re-throw the same error
+        // let's re-throw the same error (or return null)
         if (failedRead.checkAt >= Date.now()) {
-          throw new Error(failedRead.error);
+          if (failedRead.type === 'error') {
+            throw new Error(failedRead.error);
+          } else {
+            return null;
+          }
         }
         // or look for it again if last time we checked was 10 minutes ago
       }
@@ -197,15 +208,26 @@ export const tokensApiRouter = trpc
         const storage = await ctx.getStorage();
         const result = await storage.readToken(hash);
 
-        // removes the token from the failures cache
+        // removes the token from the failures cache (in case the value expired)
         ctx.tokenReadFailuresCache.delete(hash);
+
+        if (!result) {
+          // set token read as not found
+          // so we don't try to read it again for next X minutes
+          ctx.tokenReadFailuresCache.set(hash, {
+            type: 'not-found',
+            checkAt: Date.now() + ctx.errorCachingInterval,
+          });
+        }
 
         return result;
       } catch (error) {
         ctx.errorHandler(`Failed to get a token "${alias}"`, error as Error, ctx.logger);
 
         // set token read as failure
+        // so we don't try to read it again for next X minutes
         ctx.tokenReadFailuresCache.set(hash, {
+          type: 'error',
           error: (error as Error).message,
           checkAt: Date.now() + ctx.errorCachingInterval,
         });
