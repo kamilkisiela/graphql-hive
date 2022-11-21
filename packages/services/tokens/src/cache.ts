@@ -166,6 +166,11 @@ export function useCache(
         }
 
         const item = await readToken(hashed_token);
+
+        if (!item) {
+          return null;
+        }
+
         // Read the tokens of the target and cache them
         await readAndFill(item.target).catch(() => {});
         cacheMisses.inc(1);
@@ -184,6 +189,11 @@ export function useCache(
       }),
       deleteToken: tracker.wrap(async hashed_token => {
         const item = await cachedStorage.readToken(hashed_token);
+
+        if (!item) {
+          return;
+        }
+
         invalidate(item.target);
 
         return storage.deleteToken(hashed_token);
