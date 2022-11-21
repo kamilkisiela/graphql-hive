@@ -311,12 +311,12 @@ importers:
     specifiers:
       '@apollo/federation': 0.36.1
       esbuild: 0.14.39
-      fastify: 3.29.3
+      fastify: 3.29.4
       graphql: 16.5.0
     devDependencies:
       '@apollo/federation': 0.36.1_graphql@16.5.0
       esbuild: 0.14.39
-      fastify: 3.29.3
+      fastify: 3.29.4
       graphql: 16.5.0
     publishDirectory: dist
 
@@ -448,7 +448,7 @@ importers:
       '@whatwg-node/fetch': 0.4.7
       '@whatwg-node/server': 0.4.11
       esbuild: 0.14.39
-      fastify: 3.29.3
+      fastify: 3.29.4
       graphql: 16.5.0
       itty-router: 2.4.0
       itty-router-extras: 0.4.2
@@ -463,7 +463,7 @@ importers:
       '@whatwg-node/fetch': 0.4.7
       '@whatwg-node/server': 0.4.11
       esbuild: 0.14.39
-      fastify: 3.29.3
+      fastify: 3.29.4
       itty-router: 2.4.0
       itty-router-extras: 0.4.2
 
@@ -569,7 +569,7 @@ importers:
       '@whatwg-node/fetch': 0.4.7
       async-retry: 1.3.3
       dotenv: 10.0.0
-      fastify: 3.29.3
+      fastify: 3.29.4
       graphql: 16.5.0
       ioredis: 4.28.5
       pino-pretty: 6.0.0
@@ -591,7 +591,7 @@ importers:
       '@hive/service-common': link:../service-common
       '@types/async-retry': 1.4.5
       '@types/ioredis': 4.28.10
-      fastify: 3.29.3
+      fastify: 3.29.4
       pino-pretty: 6.0.0
 
   packages/services/server:
@@ -612,7 +612,7 @@ importers:
       '@trpc/server': 9.23.2
       '@whatwg-node/fetch': 0.4.7
       dotenv: 10.0.0
-      fastify: 3.29.3
+      fastify: 3.29.4
       got: 12.5.2
       graphql: 16.5.0
       graphql-yoga: 3.0.0-next.12
@@ -645,7 +645,7 @@ importers:
       '@hive/service-common': link:../service-common
       '@hive/storage': link:../storage
       '@swc/core': 1.2.185
-      fastify: 3.29.3
+      fastify: 3.29.4
       pino-pretty: 6.0.0
       tslib: 2.4.0
 
@@ -656,13 +656,13 @@ importers:
       '@sentry/types': 7.12.1
       '@sentry/utils': 7.12.1
       '@whatwg-node/fetch': 0.4.7
-      fastify: 3.29.3
+      fastify: 3.29.4
       fastify-cors: 6.0.2
       fastify-plugin: 3.0.1
       prom-client: 14.0.1
     dependencies:
       '@whatwg-node/fetch': 0.4.7
-      fastify: 3.29.3
+      fastify: 3.29.4
       fastify-cors: 6.0.2
       fastify-plugin: 3.0.1
       prom-client: 14.0.1
@@ -753,7 +753,7 @@ importers:
       '@trpc/server': 9.23.2
       '@types/ms': 0.7.31
       dotenv: 10.0.0
-      fastify: 3.29.3
+      fastify: 3.29.4
       ms: 2.1.3
       p-timeout: 5.0.2
       pino-pretty: 6.0.0
@@ -775,7 +775,7 @@ importers:
       '@hive/service-common': link:../service-common
       '@hive/storage': link:../storage
       '@types/ms': 0.7.31
-      fastify: 3.29.3
+      fastify: 3.29.4
       pino-pretty: 6.0.0
       tslib: 2.4.0
 
@@ -14711,13 +14711,14 @@ packages:
     resolution: {integrity: sha512-qKcDXmuZadJqdTm6vlCqioEbyewF60b/0LOFCcYN1B6BIZGlYJumWWOYs70SFYLDAH4YqdE1cxH/RKMG7rFxgA==}
     dev: false
 
-  /fastify/3.29.3:
-    resolution: {integrity: sha512-PA5mGkVnAnhysmyAnXMN9gdOlcfIxyGsfj9C7/a3sSfe5mC38euEGRLEB0T7ygbi7TIZ9yIZ/FLiERpwZeWriA==}
+  /fastify/3.29.4:
+    resolution: {integrity: sha512-BEyKidZQvscNaiF1BLh+YLE7AzHH03NexhPzrwZP6KBQ+jG2czdgq72X+RFB5rK9hbqdaafVb5yiWN+hCvHfYg==}
     dependencies:
       '@fastify/ajv-compiler': 1.1.0
       '@fastify/error': 2.0.0
       abstract-logging: 2.0.1
       avvio: 7.2.5
+      content-type: 1.0.4
       fast-json-stringify: 2.7.13
       find-my-way: 4.5.1
       flatstr: 1.0.12
