@@ -1,33 +1,30 @@
 import type { FastifyInstance, FastifyPluginAsync, FastifyRequest } from 'fastify';
 import fp from 'fastify-plugin';
 import { cleanRequestId } from './helpers';
-import { parse, getOperationAST } from 'graphql';
 import { z } from 'zod';
 
 const GraphQLPayloadSchema = z.object({
-  query: z.string(),
-  operationName: z.string().optional(),
+  operationName: z.string(),
 });
 
 const plugin: FastifyPluginAsync = async server => {
-  function graphqlOperationName(request: FastifyRequest): string | undefined {
+  function graphqlOperationName(request: FastifyRequest): string | null {
     let requestBody;
     if (request.method === 'GET') {
-      rawPayload = request.query;
+      requestBody = request.query;
     } else if (request.method === 'POST') {
-      rawPayload = request.body;
+      requestBody = request.body;
     } else {
-      return undefined;
+      return null;
     }
 
     const payload = GraphQLPayloadSchema.safeParse(requestBody);
+
     if (!payload.success) {
-      return undefined;
+      return null;
     }
 
-    const { operationName, query } = payload.data;
-    const operation = getOperationAST(parse(query), operationName);
-    return operation?.name?.value;
+    return payload.data.operationName;
   }
 
   server.addHook('onResponse', async (request, reply) => {
