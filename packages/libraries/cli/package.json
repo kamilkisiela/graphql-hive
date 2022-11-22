@@ -1,7 +1,7 @@
 {
   "name": "@graphql-hive/cli",
   "description": "A CLI util to manage and control your GraphQL Hive",
-  "version": "0.19.9",
+  "version": "0.19.10",
   "author": {
     "email": "contact@the-guild.dev",
     "name": "The Guild",
@@ -41,7 +41,7 @@
     "schema:publish:federation": "pnpm start schema:publish --service reviews examples/federation.reviews.graphql"
   },
   "dependencies": {
-    "@graphql-hive/core": "0.2.2",
+    "@graphql-hive/core": "0.2.3",
     "@graphql-inspector/core": "~3.2.0",
     "@graphql-tools/code-file-loader": "~7.3.6",
     "@graphql-tools/graphql-file-loader": "~7.5.5",

@@ -1,5 +1,14 @@
 # @graphql-hive/client
 
+## 0.21.3
+
+### Patch Changes
+
+- [#668](https://github.com/kamilkisiela/graphql-hive/pull/668) [`e116841`](https://github.com/kamilkisiela/graphql-hive/commit/e116841a739bfd7f37c4a826544301cf23d61637) Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Fix ESM/CJS issue
+
+- Updated dependencies [[`e116841`](https://github.com/kamilkisiela/graphql-hive/commit/e116841a739bfd7f37c4a826544301cf23d61637)]:
+  - @graphql-hive/core@0.2.3
+
 ## 0.21.2
 
 ### Patch Changes
