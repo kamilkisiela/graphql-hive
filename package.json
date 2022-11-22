@@ -53,7 +53,7 @@
     "@graphql-codegen/typescript-graphql-request": "4.5.7",
     "@graphql-codegen/typescript-operations": "2.5.5",
     "@graphql-codegen/typescript-resolvers": "2.7.5",
-    "@sentry/cli": "2.2.0",
+    "@sentry/cli": "2.9.0",
     "@swc/core": "1.2.185",
     "@theguild/prettier-config": "0.1.1",
     "@types/jest": "29.2.0",
