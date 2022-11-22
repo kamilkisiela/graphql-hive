@@ -218,6 +218,77 @@ test('should send data to Hive (deprecated endpoint)', async () => {
   expect(body.variables.input.force).toBe(true);
 });
 
+test('should send data to app.graphql-hive.com/graphql by default', async () => {
+  const logger = {
+    error: jest.fn(),
+    info: jest.fn(),
+  };
+
+  const author = 'Test';
+  const commit = 'Commit';
+  const token = 'Token';
+
+  let body: any = {};
+  const http = nock('https://app.graphql-hive.com')
+    .post('/graphql')
+    .matchHeader('Authorization', `Bearer ${token}`)
+    .matchHeader('Content-Type', headers['Content-Type'])
+    .matchHeader('graphql-client-name', headers['graphql-client-name'])
+    .matchHeader('graphql-client-version', headers['graphql-client-version'])
+    .once()
+    .reply((_, _body) => {
+      body = _body;
+      return [
+        200,
+        {
+          data: {
+            schemaPublish: {
+              __typename: 'SchemaPublishSuccess',
+              initial: false,
+              valid: true,
+            },
+          },
+        },
+      ];
+    });
+
+  const hive = createHive({
+    enabled: true,
+    debug: true,
+    agent: {
+      timeout: 500,
+      maxRetries: 1,
+      logger,
+    },
+    token,
+    reporting: {
+      author,
+      commit,
+    },
+  });
+
+  hive.reportSchema({
+    schema: buildSchema(/* GraphQL */ `
+      type Query {
+        foo: String
+      }
+    `),
+  });
+
+  await waitFor(2000);
+  await hive.dispose();
+  http.done();
+
+  expect(logger.error).not.toHaveBeenCalled();
+  expect(logger.info).toHaveBeenCalledWith('[hive][reporting] Sending (queue 1) (attempt 1)');
+  expect(logger.info).toHaveBeenCalledWith(`[hive][reporting] Sent!`);
+
+  expect(body.variables.input.sdl).toBe(`type Query{foo:String}`);
+  expect(body.variables.input.author).toBe(author);
+  expect(body.variables.input.commit).toBe(commit);
+  expect(body.variables.input.force).toBe(true);
+});
+
 test('should send data to Hive immediately', async () => {
   const logger = {
     error: jest.fn(),
