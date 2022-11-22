@@ -14,7 +14,7 @@
     "@trpc/client": "9.23.2",
     "@sentry/node": "7.20.1",
     "@sentry/tracing": "7.20.1",
-    "ajv": "8.11.0",
+    "ajv": "8.11.2",
     "dotenv": "10.0.0",
     "got": "12.5.2",
     "graphql": "16.5.0",
