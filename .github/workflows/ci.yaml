@@ -213,6 +213,9 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Test ESM & CJS exports integrity
+        run: pnpm bob check
+
       - name: Archive @hive/app
         run: zip -r packages/web/app/dist.zip packages/web/app/dist
 
