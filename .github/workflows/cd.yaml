@@ -70,8 +70,8 @@ jobs:
         run: |
           echo '${{steps.changesets.outputs.publishedPackages}}' > cli-ver.json
           VERSION=`echo $(jq -r '.[] | select(.name | endswith("@graphql-hive/cli")).version' cli-ver.json)`
-          echo "::set-output name=version::$VERSION"
-          echo "::set-output name=publish::true"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "publish=true" >> $GITHUB_OUTPUT
 
       - name: Pack tarballs
         if: steps.cli.outputs.publish == 'true'
@@ -106,7 +106,7 @@ jobs:
         run: |
           lines=$( git diff HEAD~ HEAD --name-only -- 'packages/libraries/router' | wc -l )
           if [ $lines -gt 0 ]; then
-              echo '::set-output name=rust_changed::true'
+              echo 'rust_changed=true' >> $GITHUB_OUTPUT
           fi
 
   publish_rust_docker:
