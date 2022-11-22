@@ -183,7 +183,7 @@ services:
     ports:
       - 3012:3012
     volumes:
-      - '../packages/libraries/external-composition/dist/example.mjs:/example.mjs'
+      - '../packages/libraries/external-composition/dist/example.js:/example.mjs'
       - './run-external-composition.sh:/run-external-composition.sh'
     environment:
       NODE_ENV: production

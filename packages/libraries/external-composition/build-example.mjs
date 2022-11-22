@@ -8,13 +8,14 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const pkg = JSON.parse(readFileSync(join(__dirname, 'package.json'), 'utf8'));
 
 await tsup({
-  entryPoints: [join(__dirname, 'example.mjs')],
+  entry: [join(__dirname, 'example.mjs')],
   outDir: join(__dirname, 'dist'),
   target: 'node16',
   format: ['esm'],
   splitting: false,
   sourcemap: true,
   clean: true,
+  shims: false,
   skipNodeModulesBundle: false,
   noExternal: Object.keys(pkg.peerDependencies).concat(Object.keys(pkg.devDependencies)),
   banner: {
