@@ -1,7 +1,7 @@
 import type { DocumentNode } from 'graphql';
 import { stripIgnoredCharacters, parse } from 'graphql';
 import axios from 'axios';
-import type { HivePluginOptions } from './types';
+import type { HivePluginOptions } from './types.js';
 
 export interface OperationsStore {
   canHandle(key: string): boolean;

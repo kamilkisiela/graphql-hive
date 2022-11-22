@@ -1,7 +1,7 @@
 import retry from 'async-retry';
 import axios from 'axios';
-import { version } from '../version';
-import type { Logger } from './types';
+import { version } from '../version.js';
+import type { Logger } from './types.js';
 
 export interface AgentOptions {
   enabled?: boolean;

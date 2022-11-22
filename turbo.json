@@ -50,6 +50,9 @@
     },
     "typecheck": {
       "outputs": [""]
+    },
+    "check:build": {
+      "outputs": [""]
     }
   }
 }

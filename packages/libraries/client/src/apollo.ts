@@ -1,11 +1,11 @@
 import type { ApolloServerPlugin } from 'apollo-server-plugin-base';
 import type { DocumentNode } from 'graphql';
-import type { HiveClient, HivePluginOptions, SupergraphSDLFetcherOptions } from './internal/types';
+import type { HiveClient, HivePluginOptions, SupergraphSDLFetcherOptions } from './internal/types.js';
 import { createHash } from 'crypto';
 import axios from 'axios';
-import { createHive } from './client';
-import { isHiveClient } from './internal/utils';
-import { version } from './version';
+import { createHive } from './client.js';
+import { isHiveClient } from './internal/utils.js';
+import { version } from './version.js';
 
 export function createSupergraphSDLFetcher({ endpoint, key }: SupergraphSDLFetcherOptions) {
   let cacheETag: string | null = null;
