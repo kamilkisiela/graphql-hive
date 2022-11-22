@@ -166,7 +166,7 @@ importers:
   integration-tests:
     specifiers:
       '@app/gql': link:./testkit/gql
-      '@graphql-hive/core': 0.2.2
+      '@graphql-hive/core': 0.2.3
       '@graphql-typed-document-node/core': 3.1.1
       '@hive/server': workspace:*
       '@n1ru4l/dockest': 2.1.0-rc.6
@@ -210,7 +210,7 @@ importers:
 
   packages/libraries/cli:
     specifiers:
-      '@graphql-hive/core': 0.2.2
+      '@graphql-hive/core': 0.2.3
       '@graphql-inspector/core': ~3.2.0
       '@graphql-tools/code-file-loader': ~7.3.6
       '@graphql-tools/graphql-file-loader': ~7.5.5
@@ -269,7 +269,7 @@ importers:
     specifiers:
       '@apollo/federation': 0.36.1
       '@envelop/types': 3.0.0
-      '@graphql-hive/core': ^0.2.2
+      '@graphql-hive/core': ^0.2.3
       '@graphql-tools/utils': ^8.12.0
       '@types/async-retry': 1.4.5
       apollo-server-core: 3.11.0
@@ -322,7 +322,7 @@ importers:
 
   packages/services/api:
     specifiers:
-      '@graphql-hive/core': 0.2.2
+      '@graphql-hive/core': 0.2.3
       '@graphql-inspector/core': 3.2.0
       '@graphql-tools/load-files': 6.6.1
       '@graphql-tools/schema': 9.0.9
@@ -601,7 +601,7 @@ importers:
       '@envelop/graphql-modules': 4.0.3
       '@envelop/sentry': 4.0.3
       '@envelop/types': 3.0.0
-      '@graphql-hive/client': 0.21.2
+      '@graphql-hive/client': 0.21.3
       '@hive/api': workspace:*
       '@hive/service-common': workspace:*
       '@hive/storage': workspace:*
@@ -853,7 +853,7 @@ importers:
 
   packages/services/usage-ingestor:
     specifiers:
-      '@graphql-hive/core': 0.2.2
+      '@graphql-hive/core': 0.2.3
       '@hive/service-common': workspace:*
       '@hive/usage-common': workspace:*
       '@sentry/node': 7.20.1
