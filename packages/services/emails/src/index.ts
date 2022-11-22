@@ -30,6 +30,9 @@ async function main() {
   const server = await createServer({
     name: 'emails',
     tracing: false,
+    log: {
+      level: env.log.level,
+    },
   });
 
   const errorHandler = createErrorHandler(server);

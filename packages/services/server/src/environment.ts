@@ -124,6 +124,22 @@ const PrometheusModel = zod.object({
   PROMETHEUS_METRICS_LABEL_INSTANCE: emptyString(zod.string().optional()),
 });
 
+const LogModel = zod.object({
+  LOG_LEVEL: emptyString(
+    zod
+      .union([
+        zod.literal('trace'),
+        zod.literal('debug'),
+        zod.literal('info'),
+        zod.literal('warn'),
+        zod.literal('error'),
+        zod.literal('fatal'),
+        zod.literal('silent'),
+      ])
+      .optional()
+  ),
+});
+
 const configs = {
   // eslint-disable-next-line no-process-env
   base: EnvironmentModel.safeParse(process.env),
@@ -147,6 +163,8 @@ const configs = {
   authLegacyAuth0: AuthLegacyAuth0Model.safeParse(process.env),
   // eslint-disable-next-line no-process-env
   hive: HiveModel.safeParse(process.env),
+  // eslint-disable-next-line no-process-env
+  log: LogModel.safeParse(process.env),
 };
 
 const environmentErrors: Array<string> = [];
@@ -178,6 +196,7 @@ const redis = extractConfig(configs.redis);
 const supertokens = extractConfig(configs.supertokens);
 const github = extractConfig(configs.github);
 const prometheus = extractConfig(configs.prometheus);
+const log = extractConfig(configs.log);
 const cdn = extractConfig(configs.cdn);
 const authLegacyAuth0 = extractConfig(configs.authLegacyAuth0);
 const hive = extractConfig(configs.hive);
@@ -274,6 +293,9 @@ export const env = {
         }
       : null,
   sentry: sentry.SENTRY === '1' ? { dsn: sentry.SENTRY_DSN } : null,
+  log: {
+    level: log.LOG_LEVEL ?? 'info',
+  },
   prometheus:
     prometheus.PROMETHEUS_METRICS === '1'
       ? {

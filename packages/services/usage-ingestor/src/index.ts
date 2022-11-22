@@ -18,6 +18,9 @@ async function main() {
   const server = await createServer({
     name: 'usage-ingestor',
     tracing: false,
+    log: {
+      level: env.log.level,
+    },
   });
 
   try {

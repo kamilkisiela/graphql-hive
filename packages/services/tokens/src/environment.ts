@@ -48,6 +48,22 @@ const PrometheusModel = zod.object({
   PROMETHEUS_METRICS_LABEL_INSTANCE: emptyString(zod.string().optional()),
 });
 
+const LogModel = zod.object({
+  LOG_LEVEL: emptyString(
+    zod
+      .union([
+        zod.literal('trace'),
+        zod.literal('debug'),
+        zod.literal('info'),
+        zod.literal('warn'),
+        zod.literal('error'),
+        zod.literal('fatal'),
+        zod.literal('silent'),
+      ])
+      .optional()
+  ),
+});
+
 const configs = {
   // eslint-disable-next-line no-process-env
   base: EnvironmentModel.safeParse(process.env),
@@ -57,6 +73,8 @@ const configs = {
   postgres: PostgresModel.safeParse(process.env),
   // eslint-disable-next-line no-process-env
   prometheus: PrometheusModel.safeParse(process.env),
+  // eslint-disable-next-line no-process-env
+  log: LogModel.safeParse(process.env),
 };
 
 const environmentErrors: Array<string> = [];
@@ -84,6 +102,7 @@ const base = extractConfig(configs.base);
 const postgres = extractConfig(configs.postgres);
 const sentry = extractConfig(configs.sentry);
 const prometheus = extractConfig(configs.prometheus);
+const log = extractConfig(configs.log);
 
 export const env = {
   environment: base.ENVIRONMENT,
@@ -101,6 +120,9 @@ export const env = {
   },
   heartbeat: base.HEARTBEAT_ENDPOINT ? { endpoint: base.HEARTBEAT_ENDPOINT } : null,
   sentry: sentry.SENTRY === '1' ? { dsn: sentry.SENTRY_DSN } : null,
+  log: {
+    level: log.LOG_LEVEL ?? 'info',
+  },
   prometheus:
     prometheus.PROMETHEUS_METRICS === '1'
       ? {

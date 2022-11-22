@@ -53,6 +53,9 @@ export async function main() {
   const server = await createServer({
     name: 'graphql-api',
     tracing: true,
+    log: {
+      level: env.log.level,
+    },
   });
 
   const storage = await createPostgreSQLStorage(createConnectionString(env.postgres), 10);

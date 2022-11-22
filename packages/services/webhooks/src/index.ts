@@ -29,6 +29,9 @@ async function main() {
   const server = await createServer({
     name: 'webhooks',
     tracing: false,
+    log: {
+      level: env.log.level,
+    },
   });
 
   const errorHandler = createErrorHandler(server);

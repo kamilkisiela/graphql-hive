@@ -38,6 +38,22 @@ const PrometheusModel = zod.object({
   PROMETHEUS_METRICS_LABEL_INSTANCE: emptyString(zod.string().optional()),
 });
 
+const LogModel = zod.object({
+  LOG_LEVEL: emptyString(
+    zod
+      .union([
+        zod.literal('trace'),
+        zod.literal('debug'),
+        zod.literal('info'),
+        zod.literal('warn'),
+        zod.literal('error'),
+        zod.literal('fatal'),
+        zod.literal('silent'),
+      ])
+      .optional()
+  ),
+});
+
 const ClickHouseModel = zod.object({
   CLICKHOUSE_PROTOCOL: zod.union([zod.literal('http'), zod.literal('https')]),
   CLICKHOUSE_HOST: zod.string(),
@@ -55,6 +71,8 @@ const configs = {
   clickhouse: ClickHouseModel.safeParse(process.env),
   // eslint-disable-next-line no-process-env
   prometheus: PrometheusModel.safeParse(process.env),
+  // eslint-disable-next-line no-process-env
+  log: LogModel.safeParse(process.env),
 };
 
 const environmentErrors: Array<string> = [];
@@ -82,6 +100,7 @@ const base = extractConfig(configs.base);
 const clickhouse = extractConfig(configs.clickhouse);
 const sentry = extractConfig(configs.sentry);
 const prometheus = extractConfig(configs.prometheus);
+const log = extractConfig(configs.log);
 
 export const env = {
   environment: base.ENVIRONMENT,
@@ -98,6 +117,9 @@ export const env = {
     password: clickhouse.CLICKHOUSE_PASSWORD,
   },
   sentry: sentry.SENTRY === '1' ? { dsn: sentry.SENTRY_DSN } : null,
+  log: {
+    level: log.LOG_LEVEL ?? 'info',
+  },
   prometheus:
     prometheus.PROMETHEUS_METRICS === '1'
       ? {
