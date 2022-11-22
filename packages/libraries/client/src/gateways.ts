@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { createHash } from 'crypto';
-import type { SchemaFetcherOptions, ServicesFetcherOptions } from './internal/types';
-import { version } from './version';
+import type { SchemaFetcherOptions, ServicesFetcherOptions } from './internal/types.js';
+import { version } from './version.js';
 
 interface Schema {
   sdl: string;

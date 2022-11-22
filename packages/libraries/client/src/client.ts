@@ -1,11 +1,11 @@
 import { GraphQLSchema, ExecutionArgs, ExecutionResult } from 'graphql';
 import axios from 'axios';
-import type { HivePluginOptions, HiveClient } from './internal/types';
-import { createUsage } from './internal/usage';
-import { createReporting } from './internal/reporting';
-import { createOperationsStore } from './internal/operations-store';
-import { logIf } from './internal/utils';
-import { version } from './version';
+import type { HivePluginOptions, HiveClient } from './internal/types.js';
+import { createUsage } from './internal/usage.js';
+import { createReporting } from './internal/reporting.js';
+import { createOperationsStore } from './internal/operations-store.js';
+import { logIf } from './internal/utils.js';
+import { version } from './version.js';
 
 export function createHive(options: HivePluginOptions): HiveClient {
   const logger = options?.agent?.logger ?? console;

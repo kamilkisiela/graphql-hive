@@ -1,10 +1,10 @@
 import { GraphQLSchema, stripIgnoredCharacters, print, Kind, ExecutionResult } from 'graphql';
 import { getDocumentNodeFromSchema } from '@graphql-tools/utils';
-import { createAgent } from './agent';
-import { version } from '../version';
-import type { HivePluginOptions } from './types';
-import type { SchemaPublishMutation } from '../__generated__/types';
-import { logIf } from './utils';
+import { createAgent } from './agent.js';
+import { version } from '../version.js';
+import type { HivePluginOptions } from './types.js';
+import type { SchemaPublishMutation } from '../__generated__/types.js';
+import { logIf } from './utils.js';
 
 export interface SchemaReporter {
   report(args: { schema: GraphQLSchema }): void;

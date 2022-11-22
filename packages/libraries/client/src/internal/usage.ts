@@ -25,11 +25,11 @@ import {
 } from 'graphql';
 import LRU from 'tiny-lru';
 import { normalizeOperation } from '@graphql-hive/core';
-import { createAgent } from './agent';
-import { randomSampling } from './sampling';
-import { version } from '../version';
-import { cache, cacheDocumentKey, measureDuration, memo, isAsyncIterableIterator, logIf } from './utils';
-import type { HivePluginOptions, HiveUsagePluginOptions, CollectUsageCallback, ClientInfo } from './types';
+import { createAgent } from './agent.js';
+import { randomSampling } from './sampling.js';
+import { version } from '../version.js';
+import { cache, cacheDocumentKey, measureDuration, memo, isAsyncIterableIterator, logIf } from './utils.js';
+import type { HivePluginOptions, HiveUsagePluginOptions, CollectUsageCallback, ClientInfo } from './types.js';
 
 interface UsageCollector {
   collect(args: ExecutionArgs): CollectUsageCallback;
