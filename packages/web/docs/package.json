@@ -9,7 +9,7 @@
     "build": "bob runify --single"
   },
   "dependencies": {
-    "@theguild/components": "4.3.0",
+    "@theguild/components": "4.3.6",
     "next": "12.3.1",
     "react": "18.2.0",
     "react-dom": "18.2.0"
