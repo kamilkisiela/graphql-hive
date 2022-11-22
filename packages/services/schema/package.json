@@ -28,7 +28,7 @@
     "@types/async-retry": "1.4.5",
     "@types/ioredis": "4.28.10",
     "pino-pretty": "6.0.0",
-    "fastify": "3.29.3"
+    "fastify": "3.29.4"
   },
   "buildOptions": {
     "runify": true,
