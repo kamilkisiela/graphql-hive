@@ -151,10 +151,11 @@ export class AlertsManager {
     const target = event.target.id;
 
     this.logger.debug(
-      'Triggering Schema Change Notifications (organization=%s, project=%s, target=%s)',
+      'Triggering Schema Change Notifications (organization=%s, project=%s, target=%s, version=%s)',
       organization,
       project,
-      target
+      target,
+      event.schema.id
     );
 
     await this.authManager.ensureTargetAccess({
