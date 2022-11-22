@@ -40,7 +40,8 @@
     "definition": "dist/typings/index.d.ts"
   },
   "scripts": {
-    "build": "node scripts/update-version.mjs && bob build"
+    "build": "node scripts/update-version.mjs && bob build",
+    "check:build": "bob check"
   },
   "peerDependencies": {
     "graphql": "^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0"
