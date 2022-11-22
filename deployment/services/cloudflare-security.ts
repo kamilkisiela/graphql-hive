@@ -31,6 +31,7 @@ export function deployCloudFlareSecurityTransform(options: { envName: string; ig
     'https://storage.crisp.chat',
     'wss://stream.relay.crisp.chat',
     'www.google-analytics.com',
+    '*.google-analytics.com',
   ].join(' ');
 
   const contentSecurityPolicy = `
