@@ -74,14 +74,14 @@ jobs:
         continue-on-error: true
 
       - name: Share node_modules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: '**/node_modules'
           key: ${{ github.sha }}
 
       - name: Check for Presence of Repository Secrets
         id: secrets_present
-        run: echo "::set-output name=hive_token::${{ env.HIVE_TOKEN != '' }}"
+        run: echo "hive_token=${{ env.HIVE_TOKEN != '' }}" >> $GITHUB_OUTPUT
 
   schema-check:
     name: Schema Check
@@ -114,7 +114,7 @@ jobs:
           node-version-file: .node-version
 
       - name: Pull node_modules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: '**/node_modules'
           key: ${{ github.sha }}
@@ -124,7 +124,7 @@ jobs:
 
       - name: Check PR label
         if: contains(github.event.pull_request.labels.*.name, 'non-breaking')
-        run: echo '::set-output name=SAFE_FLAG::--forceSafe'
+        run: echo "SAFE_FLAG=--forceSafe" >> $GITHUB_OUTPUT
         id: pr-label-check
 
       - name: Schema Check
@@ -159,7 +159,7 @@ jobs:
           node-version-file: .node-version
 
       - name: Pull node_modules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: '**/node_modules'
           key: ${{ github.sha }}
@@ -199,7 +199,7 @@ jobs:
           node-version-file: .node-version
 
       - name: Pull node_modules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: '**/node_modules'
           key: ${{ github.sha }}
@@ -317,13 +317,13 @@ jobs:
           node-version-file: .node-version
 
       - name: Pull node_modules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: '**/node_modules'
           key: ${{ github.sha }}
 
       - name: ESLint cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: '.eslintcache'
           key: ${{ runner.os }}-eslint-${{ hashFiles('pnpm-lock.yaml') }}
@@ -440,7 +440,7 @@ jobs:
           node-version-file: .node-version
 
       - name: Pull node_modules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: '**/node_modules'
           key: ${{ github.sha }}
@@ -452,7 +452,7 @@ jobs:
         run: pnpm --filter integration-tests build-and-pack
 
       - name: Build
-        run: pnpm build
+        run: pnpm turbo build --filter=./packages/web/app --color
 
       - name: Pull images
         run: |
@@ -517,7 +517,7 @@ jobs:
         run: |
           total=$(env | grep "FF_.*" -c)
           if [ $total -gt 0 ]; then
-              echo '::set-output name=detected::true'
+              echo 'detected=true' >> $GITHUB_OUTPUT
           fi
 
       - name: Check out repository code
@@ -540,7 +540,7 @@ jobs:
 
       - name: Pull node_modules
         if: steps.feature_flags.outputs.detected == 'true'
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: '**/node_modules'
           key: ${{ github.sha }}
@@ -555,7 +555,7 @@ jobs:
 
       - name: Build
         if: steps.feature_flags.outputs.detected == 'true'
-        run: pnpm build
+        run: pnpm turbo build --filter=./packages/web/app --color
 
       - name: Pull images
         if: steps.feature_flags.outputs.detected == 'true'
