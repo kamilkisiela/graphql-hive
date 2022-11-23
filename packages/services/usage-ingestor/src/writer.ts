@@ -75,7 +75,7 @@ export function createWriter({
       await Promise.all([
         writeCsv(clickhouse, agents, sql, compressed, logger, 3),
         clickhouseMirror
-          ? writeCsv(clickhouseMirror, agents, sql, compressed, logger, 1).catch(error => {
+          ? writeCsv(clickhouseMirror, agents, sql, compressed, logger, 3).catch(error => {
               logger.error('Failed to write operations to ClickHouse Cloud %s', error);
               // Ignore errors from clickhouse cloud
               return Promise.resolve();
@@ -95,7 +95,7 @@ export function createWriter({
       await Promise.all([
         writeCsv(clickhouse, agents, sql, compressed, logger, 3),
         clickhouseMirror
-          ? writeCsv(clickhouseMirror, agents, sql, compressed, logger, 1).catch(error => {
+          ? writeCsv(clickhouseMirror, agents, sql, compressed, logger, 3).catch(error => {
               logger.error('Failed to write operation_collection to ClickHouse Cloud %s', error);
               // Ignore errors from clickhouse cloud
               return Promise.resolve();
@@ -185,7 +185,7 @@ async function writeCsv(
 
           logger.debug('Retry %s/%s for %s', info.attemptCount, maxRetry, query);
 
-          return info.attemptCount * 250;
+          return info.attemptCount * 500;
         },
       },
       timeout: {
