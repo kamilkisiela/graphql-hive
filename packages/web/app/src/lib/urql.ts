@@ -1,6 +1,5 @@
 import { createClient, dedupExchange, errorExchange, fetchExchange } from 'urql';
 import { cacheExchange } from '@urql/exchange-graphcache';
-import { captureException } from '@sentry/nextjs';
 
 import { Mutation } from './urql-cache';
 import { networkStatusExchange } from './urql-exchanges/state';
@@ -49,8 +48,6 @@ export const urqlClient = createClient({
       onError(error) {
         if (error.response?.status === 401) {
           window.location.href = '/logout';
-        } else {
-          captureException(error);
         }
       },
     }),
