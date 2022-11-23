@@ -450,7 +450,12 @@ export const AdminStats: React.FC<{
     return (query.data?.admin?.stats.organizations ?? [])
       .filter(node => filterStats(node, filters))
       .map(node => ({
-        name: `${node.organization.name} (id: ${node.organization.cleanId}, owner: ${node.organization.owner.user.email})`,
+        name: [
+          `<strong style="padding-bottom: 5px;">${node.organization.name}</strong>`,
+          `id:      ${node.organization.id}`,
+          `cleanId: ${node.organization.cleanId}`,
+          `owner:   ${node.organization.owner.user.email}`,
+        ].join('<br />'),
         members: (node.organization.members.nodes || []).map(v => v.user.email).join(', '),
         type: node.organization.type,
         users: node.users,
