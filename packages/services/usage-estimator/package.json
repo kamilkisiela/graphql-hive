@@ -6,7 +6,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "dev": "tsup-node src/dev.ts --format esm --target node16 --watch --sourcemap --onSuccess 'node --enable-source-maps dist/dev.js' | pino-pretty --translateTime HH:MM:ss TT --ignore pid,hostname",
+    "dev": "tsup-node src/dev.ts --format esm --shims --target node16 --watch --sourcemap --onSuccess 'node --enable-source-maps dist/dev.js' | pino-pretty --translateTime HH:MM:ss TT --ignore pid,hostname",
     "build": "bob runify --single",
     "typecheck": "tsc --noEmit"
   },
