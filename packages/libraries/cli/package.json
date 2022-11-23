@@ -61,7 +61,7 @@
     "log-symbols": "4.1.0",
     "mkdirp": "1.0.4",
     "rimraf": "3.0.2",
-    "tslib": "2.4.0",
+    "tslib": "2.4.1",
     "ts-node": "10.9.1"
   },
   "devDependencies": {

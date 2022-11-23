@@ -115,7 +115,7 @@
     "rimraf": "3.0.2",
     "tailwindcss": "2.2.19",
     "tailwindcss-radix": "2.2.0",
-    "tslib": "2.4.0"
+    "tslib": "2.4.1"
   },
   "babelMacros": {
     "twin": {
