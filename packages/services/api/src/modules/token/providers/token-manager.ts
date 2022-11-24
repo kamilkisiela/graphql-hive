@@ -33,7 +33,7 @@ export class TokenManager {
     private authManager: AuthManager,
     private tokenStorage: TokenStorage,
     private storage: Storage,
-    logger: Logger
+    logger: Logger,
   ) {
     this.logger = logger.child({
       source: 'TokenManager',
@@ -62,7 +62,9 @@ export class TokenManager {
     const modifiedScopes = diffArrays(currentMember.scopes, newScopes);
 
     // Check if the current user has rights to set these scopes.
-    const currentUserMissingScopes = modifiedScopes.filter(scope => !currentMember.scopes.includes(scope));
+    const currentUserMissingScopes = modifiedScopes.filter(
+      scope => !currentMember.scopes.includes(scope),
+    );
 
     if (currentUserMissingScopes.length > 0) {
       this.logger.debug(`Logged user scopes: %o`, currentMember.scopes);
@@ -85,7 +87,7 @@ export class TokenManager {
   async deleteTokens(
     input: {
       tokens: readonly string[];
-    } & TargetSelector
+    } & TargetSelector,
   ): Promise<readonly string[]> {
     await this.authManager.ensureTargetAccess({
       project: input.project,

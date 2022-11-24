@@ -2,7 +2,13 @@ import type { DateRange } from '../../../shared/entities';
 
 export const maxResolution = 90;
 
-export function calculateTimeWindow({ period, resolution }: { period: DateRange; resolution: number }): {
+export function calculateTimeWindow({
+  period,
+  resolution,
+}: {
+  period: DateRange;
+  resolution: number;
+}): {
   value: number;
   unit: 'd' | 'h' | 'm';
 } {
@@ -11,7 +17,9 @@ export function calculateTimeWindow({ period, resolution }: { period: DateRange;
   }
 
   if (resolution < 10 || resolution > maxResolution) {
-    throw new Error(`Invalid resolution. Expected 10 <= x <= ${maxResolution}, received ${resolution}`);
+    throw new Error(
+      `Invalid resolution. Expected 10 <= x <= ${maxResolution}, received ${resolution}`,
+    );
   }
 
   const distanceInMinutes = (period.to.getTime() - period.from.getTime()) / 1000 / 60;

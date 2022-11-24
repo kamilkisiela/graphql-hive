@@ -47,10 +47,11 @@ describe('create', () => {
         {
           name: 'foo',
         },
-        access_token
+        access_token,
       );
 
-      const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+      const org =
+        orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
 
       const result = await execute({
         document: CreateOIDCIntegrationMutation,
@@ -139,10 +140,11 @@ describe('create', () => {
         {
           name: 'foo',
         },
-        access_token
+        access_token,
       );
 
-      const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+      const org =
+        orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
 
       const result = await execute({
         document: CreateOIDCIntegrationMutation,
@@ -180,10 +182,11 @@ describe('create', () => {
         {
           name: 'foo',
         },
-        access_token
+        access_token,
       );
 
-      const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+      const org =
+        orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
 
       const result = await execute({
         document: CreateOIDCIntegrationMutation,
@@ -221,10 +224,11 @@ describe('create', () => {
         {
           name: 'foo',
         },
-        access_token
+        access_token,
       );
 
-      const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+      const org =
+        orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
 
       const result = await execute({
         document: CreateOIDCIntegrationMutation,
@@ -262,10 +266,11 @@ describe('create', () => {
         {
           name: 'foo',
         },
-        access_token
+        access_token,
       );
 
-      const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+      const org =
+        orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
 
       const result = await execute({
         document: CreateOIDCIntegrationMutation,
@@ -303,10 +308,11 @@ describe('create', () => {
         {
           name: 'foo',
         },
-        access_token
+        access_token,
       );
 
-      const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+      const org =
+        orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
 
       const result = await execute({
         document: CreateOIDCIntegrationMutation,
@@ -344,10 +350,11 @@ describe('create', () => {
         {
           name: 'foo',
         },
-        access_token
+        access_token,
       );
 
-      const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+      const org =
+        orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
 
       let result = await execute({
         document: CreateOIDCIntegrationMutation,
@@ -429,10 +436,11 @@ describe('delete', () => {
         {
           name: 'foo',
         },
-        access_token
+        access_token,
       );
 
-      const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+      const org =
+        orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
 
       const createResult = await execute({
         document: CreateOIDCIntegrationMutation,
@@ -448,7 +456,8 @@ describe('delete', () => {
       });
 
       expect(createResult.body.errors).toBeUndefined();
-      const oidcIntegrationId = createResult.body.data!.createOIDCIntegration.ok!.createdOIDCIntegration.id;
+      const oidcIntegrationId =
+        createResult.body.data!.createOIDCIntegration.ok!.createdOIDCIntegration.id;
 
       let refetchedOrg = await execute({
         document: OrganizationWithOIDCIntegration,
@@ -522,10 +531,11 @@ describe('delete', () => {
         {
           name: 'foo',
         },
-        access_token
+        access_token,
       );
 
-      const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+      const org =
+        orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
 
       const createResult = await execute({
         document: CreateOIDCIntegrationMutation,
@@ -541,7 +551,8 @@ describe('delete', () => {
       });
 
       expect(createResult.body.errors).toBeUndefined();
-      const oidcIntegrationId = createResult.body.data!.createOIDCIntegration.ok!.createdOIDCIntegration.id;
+      const oidcIntegrationId =
+        createResult.body.data!.createOIDCIntegration.ok!.createdOIDCIntegration.id;
 
       const { access_token: accessTokenExtra } = await authenticate('extra');
 
@@ -580,10 +591,11 @@ describe('delete', () => {
         {
           name: 'foo',
         },
-        access_token
+        access_token,
       );
 
-      const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+      const org =
+        orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
 
       const createResult = await execute({
         document: CreateOIDCIntegrationMutation,
@@ -599,7 +611,8 @@ describe('delete', () => {
       });
 
       expect(createResult.body.errors).toBeUndefined();
-      const oidcIntegrationId = createResult.body.data!.createOIDCIntegration.ok!.createdOIDCIntegration.id;
+      const oidcIntegrationId =
+        createResult.body.data!.createOIDCIntegration.ok!.createdOIDCIntegration.id;
 
       const MeQuery = gql(/* GraphQL */ `
         query Me {
@@ -610,7 +623,10 @@ describe('delete', () => {
       `);
 
       // create new member that belongs to oidc integration
-      const { access_token: memberAccessToken } = await authenticate('oidc_member', oidcIntegrationId);
+      const { access_token: memberAccessToken } = await authenticate(
+        'oidc_member',
+        oidcIntegrationId,
+      );
       let meResult = await execute({
         document: MeQuery,
         authToken: memberAccessToken,
@@ -694,10 +710,11 @@ describe('update', () => {
         {
           name: 'foo',
         },
-        access_token
+        access_token,
       );
 
-      const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+      const org =
+        orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
 
       const createResult = await execute({
         document: CreateOIDCIntegrationMutation,
@@ -713,7 +730,8 @@ describe('update', () => {
       });
       expect(createResult.body.errors).toBeUndefined();
 
-      const oidcIntegrationId = createResult.body.data!.createOIDCIntegration.ok!.createdOIDCIntegration.id;
+      const oidcIntegrationId =
+        createResult.body.data!.createOIDCIntegration.ok!.createdOIDCIntegration.id;
 
       const updateResult = await execute({
         document: UpdateOIDCIntegrationMutation,
@@ -749,10 +767,11 @@ describe('update', () => {
         {
           name: 'foo',
         },
-        access_token
+        access_token,
       );
 
-      const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+      const org =
+        orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
 
       const createResult = await execute({
         document: CreateOIDCIntegrationMutation,
@@ -768,7 +787,8 @@ describe('update', () => {
       });
 
       expect(createResult.body.errors).toBeUndefined();
-      const oidcIntegrationId = createResult.body.data!.createOIDCIntegration.ok!.createdOIDCIntegration.id;
+      const oidcIntegrationId =
+        createResult.body.data!.createOIDCIntegration.ok!.createdOIDCIntegration.id;
 
       const { access_token: accessTokenExtra } = await authenticate('extra');
 

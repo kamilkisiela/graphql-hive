@@ -12,7 +12,7 @@ export class CloudflareCDN {
       authPrivateKey: pulumi.Output<string>;
       sentryDsn: string;
       release: string;
-    }
+    },
   ) {}
 
   deploy() {
@@ -21,7 +21,10 @@ export class CloudflareCDN {
     });
 
     const script = new cf.WorkerScript('hive-ha-worker', {
-      content: readFileSync(resolve(__dirname, '../../packages/services/cdn-worker/dist/worker.js'), 'utf-8'),
+      content: readFileSync(
+        resolve(__dirname, '../../packages/services/cdn-worker/dist/worker.js'),
+        'utf-8',
+      ),
       name: `hive-storage-cdn-${this.config.envName}`,
       kvNamespaceBindings: [
         {
@@ -78,12 +81,15 @@ export class CloudflareBroker {
       secretSignature: pulumi.Output<string>;
       sentryDsn: string;
       release: string;
-    }
+    },
   ) {}
 
   deploy() {
     const script = new cf.WorkerScript('hive-broker-worker', {
-      content: readFileSync(resolve(__dirname, '../../packages/services/broker-worker/dist/worker.js'), 'utf-8'),
+      content: readFileSync(
+        resolve(__dirname, '../../packages/services/broker-worker/dist/worker.js'),
+        'utf-8',
+      ),
       name: `hive-broker-${this.config.envName}`,
       secretTextBindings: [
         {

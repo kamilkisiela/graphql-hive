@@ -16,7 +16,7 @@ test('can check a schema with target:registry:read access', async () => {
     {
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
 
@@ -25,7 +25,7 @@ test('can check a schema with target:registry:read access', async () => {
       email: 'some@email.com',
       organization: org.cleanId,
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const inviteCode = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
@@ -41,7 +41,7 @@ test('can check a schema with target:registry:read access', async () => {
       type: ProjectType.Single,
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
@@ -58,7 +58,7 @@ test('can check a schema with target:registry:read access', async () => {
       projectScopes: [],
       targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
     },
-    owner_access_token
+    owner_access_token,
   );
   expect(writeTokenResult.body.errors).not.toBeDefined();
   const writeToken = writeTokenResult.body.data!.createToken.ok!.secret;
@@ -70,7 +70,7 @@ test('can check a schema with target:registry:read access', async () => {
       commit: 'abc123',
       sdl: `type Query { ping: String }`,
     },
-    writeToken
+    writeToken,
   );
 
   // Schema publish should be successful
@@ -88,7 +88,7 @@ test('can check a schema with target:registry:read access', async () => {
       projectScopes: [],
       targetScopes: [],
     },
-    owner_access_token
+    owner_access_token,
   );
   expect(noAccessTokenResult.body.errors).not.toBeDefined();
 
@@ -103,7 +103,7 @@ test('can check a schema with target:registry:read access', async () => {
       projectScopes: [],
       targetScopes: [TargetAccessScope.RegistryRead],
     },
-    owner_access_token
+    owner_access_token,
   );
   expect(readTokenResult.body.errors).not.toBeDefined();
 
@@ -115,7 +115,7 @@ test('can check a schema with target:registry:read access', async () => {
     {
       sdl: `type Query { ping: String foo: String }`,
     },
-    noAccessToken
+    noAccessToken,
   );
   expect(checkResult.body.errors).toHaveLength(1);
   expect(checkResult.body.errors![0].message).toMatch('target:registry:read');
@@ -125,7 +125,7 @@ test('can check a schema with target:registry:read access', async () => {
     {
       sdl: `type Query { ping: String foo: String }`,
     },
-    readToken
+    readToken,
   );
   expect(checkResult.body.errors).not.toBeDefined();
   expect(checkResult.body.data!.schemaCheck.__typename).toBe('SchemaCheckSuccess');
@@ -137,7 +137,7 @@ test('should match indentation of previous description', async () => {
     {
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
 
@@ -146,7 +146,7 @@ test('should match indentation of previous description', async () => {
       email: 'some@email.com',
       organization: org.cleanId,
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const inviteCode = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
@@ -162,7 +162,7 @@ test('should match indentation of previous description', async () => {
       type: ProjectType.Single,
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
@@ -179,7 +179,7 @@ test('should match indentation of previous description', async () => {
       projectScopes: [],
       targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
     },
-    owner_access_token
+    owner_access_token,
   );
   expect(writeTokenResult.body.errors).not.toBeDefined();
   const writeToken = writeTokenResult.body.data!.createToken.ok!.secret;
@@ -198,7 +198,7 @@ test('should match indentation of previous description', async () => {
         }
       `,
     },
-    writeToken
+    writeToken,
   );
 
   // Schema publish should be successful
@@ -216,7 +216,7 @@ test('should match indentation of previous description', async () => {
       projectScopes: [],
       targetScopes: [TargetAccessScope.RegistryRead],
     },
-    owner_access_token
+    owner_access_token,
   );
   expect(readTokenResult.body.errors).not.toBeDefined();
 
@@ -236,7 +236,7 @@ test('should match indentation of previous description', async () => {
         }
       `,
     },
-    readToken
+    readToken,
   );
   expect(checkResult.body.errors).not.toBeDefined();
 

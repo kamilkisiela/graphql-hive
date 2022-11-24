@@ -182,8 +182,14 @@ const schemaApi = deploySchema({
   broker: cfBroker,
 });
 
-const supertokensApiKey = new random.RandomPassword('supertokens-api-key', { length: 31, special: false });
-const auth0LegacyMigrationKey = new random.RandomPassword('auth0-legacy-migration-key', { length: 69, special: false });
+const supertokensApiKey = new random.RandomPassword('supertokens-api-key', {
+  length: 31,
+  special: false,
+});
+const auth0LegacyMigrationKey = new random.RandomPassword('auth0-legacy-migration-key', {
+  length: 69,
+  special: false,
+});
 
 const oauthConfig = new pulumi.Config('oauth');
 

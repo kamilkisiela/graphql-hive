@@ -39,11 +39,20 @@
       "@hive/emails": ["./packages/services/emails/src/api.ts"],
       "@hive/storage": ["./packages/services/storage/src/index.ts"],
       "@graphql-hive/client": ["./packages/libraries/client/src/index.ts"],
-      "@graphql-hive/external-composition": ["./packages/libraries/external-composition/src/index.ts"],
+      "@graphql-hive/external-composition": [
+        "./packages/libraries/external-composition/src/index.ts"
+      ],
       "@graphql-hive/core": ["./packages/libraries/core/src/index.ts"],
       "@/*": ["./packages/web/app/src/*"]
     }
   },
   "include": ["packages"],
-  "exclude": ["**/node_modules/**", "**/dist", "**/temp", "**/tmp", "packages/web", "packages/services/*-worker"]
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist",
+    "**/temp",
+    "**/tmp",
+    "packages/web",
+    "packages/services/*-worker"
+  ]
 }

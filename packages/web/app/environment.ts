@@ -24,7 +24,9 @@ const BaseSchema = zod.object({
   DOCS_URL: emptyString(zod.string().url().optional()),
   STRIPE_PUBLIC_KEY: emptyString(zod.string().optional()),
   RELEASE: emptyString(zod.string().optional()),
-  AUTH_REQUIRE_EMAIL_VERIFICATION: emptyString(zod.union([zod.literal('1'), zod.literal('0')]).optional()),
+  AUTH_REQUIRE_EMAIL_VERIFICATION: emptyString(
+    zod.union([zod.literal('1'), zod.literal('0')]).optional(),
+  ),
 });
 
 const IntegrationSlackSchema = zod.union([

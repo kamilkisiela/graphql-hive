@@ -33,7 +33,9 @@ export const Feedback: React.FC<{
       feedback: '',
     },
     validationSchema: Yup.object().shape({
-      feedback: Yup.string().min(1).required(`Hey hey hey, you opened the feedback modal and won't even say Hi?`),
+      feedback: Yup.string()
+        .min(1)
+        .required(`Hey hey hey, you opened the feedback modal and won't even say Hi?`),
     }),
     async onSubmit(values) {
       if (formik.isValid && !mutation.fetching) {
@@ -50,13 +52,19 @@ export const Feedback: React.FC<{
     (name: keyof typeof formik.errors) => {
       return formik.touched[name] && !!formik.errors[name];
     },
-    [formik]
+    [formik],
   );
 
   const sending = mutation.fetching;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="xl" closeOnEsc={false} closeOnOverlayClick={false}>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      size="xl"
+      closeOnEsc={false}
+      closeOnOverlayClick={false}
+    >
       <ModalOverlay />
       <ModalContent
         as="form"
@@ -107,7 +115,12 @@ export const Feedback: React.FC<{
               <Button variant="ghost" type="button" onClick={onClose}>
                 Cancel
               </Button>
-              <Button colorScheme="primary" type="submit" isLoading={sending} disabled={sending || !formik.isValid}>
+              <Button
+                colorScheme="primary"
+                type="submit"
+                isLoading={sending}
+                disabled={sending || !formik.isValid}
+              >
                 Send feedback
               </Button>
             </>

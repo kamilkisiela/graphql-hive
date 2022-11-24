@@ -4,7 +4,14 @@ import { Registry } from '@hive/api';
 import { cleanRequestId } from '@hive/service-common';
 import { createYoga, useErrorHandler, Plugin } from 'graphql-yoga';
 import { isGraphQLError } from '@envelop/core';
-import { GraphQLError, ValidationContext, ValidationRule, Kind, OperationDefinitionNode, print } from 'graphql';
+import {
+  GraphQLError,
+  ValidationContext,
+  ValidationRule,
+  Kind,
+  OperationDefinitionNode,
+  print,
+} from 'graphql';
 import { useGraphQLModules } from '@envelop/graphql-modules';
 import { useGenericAuth } from '@envelop/generic-auth';
 import { fetch } from '@whatwg-node/fetch';
@@ -95,7 +102,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
         operationName: () => 'graphql',
         transactionName(args) {
           const rootOperation = args.document.definitions.find(
-            o => o.kind === Kind.OPERATION_DEFINITION
+            o => o.kind === Kind.OPERATION_DEFINITION,
           ) as OperationDefinitionNode;
           const operationType = rootOperation.operation;
           const opName = args.operationName || rootOperation.name?.value || 'anonymous';
@@ -111,7 +118,9 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
           // Reduce the number of transactions to avoid overloading Sentry
           const ctx = args.contextValue as Context;
           const clientNameHeaderValue = ctx.req.headers['graphql-client-name'];
-          const clientName = Array.isArray(clientNameHeaderValue) ? clientNameHeaderValue[0] : clientNameHeaderValue;
+          const clientName = Array.isArray(clientNameHeaderValue)
+            ? clientNameHeaderValue[0]
+            : clientNameHeaderValue;
 
           if (transaction) {
             transaction.setTag('graphql_client_name', clientName ?? 'unknown');
@@ -173,7 +182,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
                 return await verifySuperTokensSession(
                   options.supertokens.connectionUri,
                   options.supertokens.apiKey,
-                  accessToken
+                  accessToken,
                 );
               }
             }
@@ -207,7 +216,10 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
         },
       }),
       useGraphQLModules(options.registry),
-      useNoIntrospection({ signature: options.signature, isNonProductionEnvironment: options.isProduction === false }),
+      useNoIntrospection({
+        signature: options.signature,
+        isNonProductionEnvironment: options.isProduction === false,
+      }),
     ],
     /*
     graphiql: request =>
@@ -251,7 +263,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
         reply.send(response.body);
 
         return reply;
-      }
+      },
     );
   };
 };
@@ -263,7 +275,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
 async function verifySuperTokensSession(
   connectionUri: string,
   apiKey: string,
-  accessToken: string
+  accessToken: string,
 ): Promise<SuperTokenSessionPayload> {
   const response = await fetch(connectionUri + '/recipe/session/verify', {
     method: 'POST',
@@ -280,7 +292,9 @@ async function verifySuperTokensSession(
   });
   const body = await response.text();
   if (response.status !== 200) {
-    console.error(`SuperTokens session verification failed with status ${response.status}.\n` + body);
+    console.error(
+      `SuperTokens session verification failed with status ${response.status}.\n` + body,
+    );
     throw new HiveError(`Invalid token.`);
   }
 

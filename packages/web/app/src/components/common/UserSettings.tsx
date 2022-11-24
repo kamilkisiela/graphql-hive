@@ -76,11 +76,17 @@ export const UserSettings: React.FC<{
     (name: keyof typeof formik.errors) => {
       return formik.touched[name] && !!formik.errors[name];
     },
-    [formik]
+    [formik],
   );
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="xl" closeOnEsc={false} closeOnOverlayClick={false}>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      size="xl"
+      closeOnEsc={false}
+      closeOnOverlayClick={false}
+    >
       <ModalOverlay />
       <ModalContent
         as="form"

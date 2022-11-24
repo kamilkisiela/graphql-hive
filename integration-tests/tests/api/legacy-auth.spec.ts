@@ -18,7 +18,7 @@ test('X-API-Token header should work when calling GraphQL API and collecting usa
     {
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
@@ -29,7 +29,7 @@ test('X-API-Token header should work when calling GraphQL API and collecting usa
       type: ProjectType.Single,
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
@@ -45,7 +45,7 @@ test('X-API-Token header should work when calling GraphQL API and collecting usa
       projectScopes: [],
       targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
     },
-    owner_access_token
+    owner_access_token,
   );
 
   expect(tokenResult.body.errors).not.toBeDefined();
@@ -59,7 +59,7 @@ test('X-API-Token header should work when calling GraphQL API and collecting usa
       sdl: `type Query { ping: String }`,
     },
     token,
-    'x-api-token'
+    'x-api-token',
   );
 
   expect(result.body.errors).not.toBeDefined();
@@ -98,7 +98,7 @@ test('X-API-Token header should work when calling GraphQL API and collecting usa
         to,
       },
     },
-    token
+    token,
   );
 
   expect(operationStatsResult.body.errors).not.toBeDefined();

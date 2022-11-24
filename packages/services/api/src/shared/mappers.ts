@@ -11,7 +11,12 @@ import type {
   GraphQLSchema,
   GraphQLArgument,
 } from 'graphql';
-import type { SchemaChange, SchemaError, OperationStats, ClientStats } from '../__generated__/types';
+import type {
+  SchemaChange,
+  SchemaError,
+  OperationStats,
+  ClientStats,
+} from '../__generated__/types';
 import type {
   Member,
   Organization,
@@ -66,8 +71,12 @@ export type GraphQLInputFieldMapper = WithSchemaCoordinatesUsage<
     entity: GraphQLInputField;
   }>
 >;
-export type GraphQLEnumValueMapper = WithSchemaCoordinatesUsage<WithGraphQLParentInfo<{ entity: GraphQLEnumValue }>>;
-export type GraphQLArgumentMapper = WithSchemaCoordinatesUsage<WithGraphQLParentInfo<{ entity: GraphQLArgument }>>;
+export type GraphQLEnumValueMapper = WithSchemaCoordinatesUsage<
+  WithGraphQLParentInfo<{ entity: GraphQLEnumValue }>
+>;
+export type GraphQLArgumentMapper = WithSchemaCoordinatesUsage<
+  WithGraphQLParentInfo<{ entity: GraphQLArgument }>
+>;
 export type GraphQLUnionTypeMemberMapper = WithSchemaCoordinatesUsage<
   WithGraphQLParentInfo<{
     entity: GraphQLObjectType;
@@ -75,10 +84,14 @@ export type GraphQLUnionTypeMemberMapper = WithSchemaCoordinatesUsage<
 >;
 
 export type GraphQLObjectTypeMapper = WithSchemaCoordinatesUsage<{ entity: GraphQLObjectType }>;
-export type GraphQLInterfaceTypeMapper = WithSchemaCoordinatesUsage<{ entity: GraphQLInterfaceType }>;
+export type GraphQLInterfaceTypeMapper = WithSchemaCoordinatesUsage<{
+  entity: GraphQLInterfaceType;
+}>;
 export type GraphQLUnionTypeMapper = WithSchemaCoordinatesUsage<{ entity: GraphQLUnionType }>;
 export type GraphQLEnumTypeMapper = WithSchemaCoordinatesUsage<{ entity: GraphQLEnumType }>;
-export type GraphQLInputObjectTypeMapper = WithSchemaCoordinatesUsage<{ entity: GraphQLInputObjectType }>;
+export type GraphQLInputObjectTypeMapper = WithSchemaCoordinatesUsage<{
+  entity: GraphQLInputObjectType;
+}>;
 export type GraphQLScalarTypeMapper = WithSchemaCoordinatesUsage<{ entity: GraphQLScalarType }>;
 
 export type SchemaChangeConnection = readonly SchemaChange[];
@@ -92,7 +105,9 @@ export type TargetConnection = readonly Target[];
 export type PersistedOperationConnection = readonly PersistedOperation[];
 export type SchemaConnection = readonly Schema[];
 export type TokenConnection = readonly Token[];
-export type OperationStatsConnection = ReadonlyArray<Omit<OperationStats, 'duration'> & { duration: DurationStats }>;
+export type OperationStatsConnection = ReadonlyArray<
+  Omit<OperationStats, 'duration'> & { duration: DurationStats }
+>;
 export type ClientStatsConnection = readonly ClientStats[];
 export type SchemaVersionConnection = {
   nodes: readonly SchemaVersion[];
@@ -103,7 +118,9 @@ export type SchemaComparePayload =
   | {
       message: string;
     };
-export type SchemaCompareResult = readonly [SchemaObject, SchemaObject] | readonly [undefined | null, SchemaObject];
+export type SchemaCompareResult =
+  | readonly [SchemaObject, SchemaObject]
+  | readonly [undefined | null, SchemaObject];
 export interface Schema {
   id: string;
   author: string;

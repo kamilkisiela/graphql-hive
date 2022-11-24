@@ -136,7 +136,7 @@ const LogModel = zod.object({
         zod.literal('fatal'),
         zod.literal('silent'),
       ])
-      .optional()
+      .optional(),
   ),
 });
 
@@ -205,7 +205,8 @@ const hiveConfig =
   hive.HIVE === '1'
     ? {
         token: hive.HIVE_API_TOKEN,
-        reporting: hive.HIVE_REPORTING === '1' ? { endpoint: hive.HIVE_REPORTING_ENDPOINT ?? null } : null,
+        reporting:
+          hive.HIVE_REPORTING === '1' ? { endpoint: hive.HIVE_REPORTING_ENDPOINT ?? null } : null,
         usage: hive.HIVE_USAGE === '1' ? { endpoint: hive.HIVE_USAGE_ENDPOINT ?? null } : null,
       }
     : null;
@@ -230,7 +231,9 @@ export const env = {
           endpoint: base.RATE_LIMIT_ENDPOINT,
         }
       : null,
-    usageEstimator: base.USAGE_ESTIMATOR_ENDPOINT ? { endpoint: base.USAGE_ESTIMATOR_ENDPOINT } : null,
+    usageEstimator: base.USAGE_ESTIMATOR_ENDPOINT
+      ? { endpoint: base.USAGE_ESTIMATOR_ENDPOINT }
+      : null,
     billing: base.BILLING_ENDPOINT ? { endpoint: base.BILLING_ENDPOINT } : null,
     emails: base.EMAILS_ENDPOINT ? { endpoint: base.EMAILS_ENDPOINT } : null,
     webhooks: { endpoint: base.WEBHOOKS_ENDPOINT },

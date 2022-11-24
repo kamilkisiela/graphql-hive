@@ -40,7 +40,7 @@ export const getOIDCOverrides = (): UserInput['override'] => ({
                 },
               },
             }
-          : input
+          : input,
       );
     },
     thirdPartySignInAndUp(input) {
@@ -63,7 +63,7 @@ export const getOIDCOverrides = (): UserInput['override'] => ({
                 },
               },
             }
-          : input
+          : input,
       );
     },
   }),

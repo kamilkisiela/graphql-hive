@@ -5,7 +5,10 @@ function Tooltip({ content, children }: { content: string; children: ReactNode }
   return (
     <Root>
       <Trigger>{children}</Trigger>
-      <Content sideOffset={5} className="rounded-sm bg-white p-2 text-xs font-normal text-black shadow">
+      <Content
+        sideOffset={5}
+        className="rounded-sm bg-white p-2 text-xs font-normal text-black shadow"
+      >
         {content}
         <Arrow className="fill-current text-white" />
       </Content>
@@ -24,7 +27,9 @@ function Plan(plan: {
     <div className="flex w-full flex-col items-start rounded-md border border-gray-700 p-4 hover:border-gray-600 md:w-1/3">
       <div className="flex h-full flex-col justify-between">
         <div>
-          <h2 className="flex items-center justify-between text-base font-bold text-white">{plan.name}</h2>
+          <h2 className="flex items-center justify-between text-base font-bold text-white">
+            {plan.name}
+          </h2>
           <div className="text-3xl font-bold text-white">{plan.price}</div>
           <div className="mt-3 text-sm text-gray-500">{plan.description}</div>
           <div>
@@ -48,7 +53,8 @@ function Plan(plan: {
   );
 }
 
-const USAGE_DATA_RETENTION_EXPLAINER = 'How long to store GraphQL requests reported to GraphQL Hive';
+const USAGE_DATA_RETENTION_EXPLAINER =
+  'How long to store GraphQL requests reported to GraphQL Hive';
 const OPERATIONS_EXPLAINER = 'GraphQL requests reported to GraphQL Hive';
 
 export function Pricing({ gradient }: { gradient: [string, string] }): ReactElement {
@@ -73,7 +79,9 @@ export function Pricing({ gradient }: { gradient: [string, string] }): ReactElem
               'Unlimited seats',
               'Unlimited schema pushes',
               <Tooltip content={OPERATIONS_EXPLAINER}>Limit of 1M operations monthly</Tooltip>,
-              <Tooltip content={USAGE_DATA_RETENTION_EXPLAINER}>7 days of usage data retention</Tooltip>,
+              <Tooltip content={USAGE_DATA_RETENTION_EXPLAINER}>
+                7 days of usage data retention
+              </Tooltip>,
             ]}
           />
           <Plan
@@ -88,7 +96,9 @@ export function Pricing({ gradient }: { gradient: [string, string] }): ReactElem
               'Unlimited seats',
               'Unlimited schema pushes',
               <Tooltip content={OPERATIONS_EXPLAINER}>$10 per 1M operations monthly</Tooltip>,
-              <Tooltip content={USAGE_DATA_RETENTION_EXPLAINER}>90 days of usage data retention</Tooltip>,
+              <Tooltip content={USAGE_DATA_RETENTION_EXPLAINER}>
+                90 days of usage data retention
+              </Tooltip>,
             ]}
             footer={<div className="mb-2 text-sm font-bold">Free 30 days trial period</div>}
           />
@@ -111,7 +121,9 @@ export function Pricing({ gradient }: { gradient: [string, string] }): ReactElem
               'Unlimited seats',
               'Unlimited schema pushes',
               <Tooltip content={OPERATIONS_EXPLAINER}>Unlimited operations</Tooltip>,
-              <Tooltip content={USAGE_DATA_RETENTION_EXPLAINER}>12 months of usage data retention</Tooltip>,
+              <Tooltip content={USAGE_DATA_RETENTION_EXPLAINER}>
+                12 months of usage data retention
+              </Tooltip>,
               <span className="flex gap-1">
                 Support from
                 <a

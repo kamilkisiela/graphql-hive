@@ -1,6 +1,11 @@
 #!/usr/bin/env node
 import * as Sentry from '@sentry/node';
-import { createServer, startMetrics, registerShutdown, reportReadiness } from '@hive/service-common';
+import {
+  createServer,
+  startMetrics,
+  registerShutdown,
+  reportReadiness,
+} from '@hive/service-common';
 import { createTokens } from './tokens';
 import { createUsage } from './usage';
 import {
@@ -118,14 +123,17 @@ async function main() {
             entityType: 'target',
           })
         ) {
-          droppedReports.labels({ targetId: tokenInfo.target, orgId: tokenInfo.organization }).inc();
+          droppedReports
+            .labels({ targetId: tokenInfo.target, orgId: tokenInfo.organization })
+            .inc();
           req.log.info('Rate limited (token=%s)', maskedToken);
           res.status(429).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
 
           return;
         }
 
-        const retentionInfo = (await rateLimit?.getRetentionForTargetId?.(tokenInfo.target)) || null;
+        const retentionInfo =
+          (await rateLimit?.getRetentionForTargetId?.(tokenInfo.target)) || null;
 
         const stopTimer = collectDuration.startTimer();
         try {

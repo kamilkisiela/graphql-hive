@@ -393,7 +393,11 @@ export function updateMemberAccess(input: OrganizationMemberAccessInput, authTok
   });
 }
 
-export function publishSchema(input: SchemaPublishInput, token: string, authHeader?: 'x-api-token' | 'authorization') {
+export function publishSchema(
+  input: SchemaPublishInput,
+  token: string,
+  authHeader?: 'x-api-token' | 'authorization',
+) {
   return execute({
     document: gql(/* GraphQL */ `
       mutation schemaPublish($input: SchemaPublishInput!) {
@@ -491,7 +495,7 @@ export function setTargetValidation(
       }
     | {
         authToken: string;
-      }
+      },
 ) {
   return execute({
     document: gql(/* GraphQL */ `
@@ -519,7 +523,7 @@ export function updateTargetValidationSettings(
       }
     | {
         authToken: string;
-      }
+      },
 ) {
   return execute({
     document: gql(/* GraphQL */ `
@@ -838,11 +842,14 @@ export async function fetchMetadataFromCDN(selector: TargetSelectorInput, token:
 export async function updateOrgRateLimit(
   selector: OrganizationSelectorInput,
   monthlyLimits: RateLimitInput,
-  authToken: string
+  authToken: string,
 ) {
   return execute({
     document: gql(/* GraphQL */ `
-      mutation updateOrgRateLimit($selector: OrganizationSelectorInput!, $monthlyLimits: RateLimitInput!) {
+      mutation updateOrgRateLimit(
+        $selector: OrganizationSelectorInput!
+        $monthlyLimits: RateLimitInput!
+      ) {
         updateOrgRateLimit(selector: $selector, monthlyLimits: $monthlyLimits) {
           id
         }
@@ -856,7 +863,10 @@ export async function updateOrgRateLimit(
   });
 }
 
-export async function enableExternalSchemaComposition(input: EnableExternalSchemaCompositionInput, token: string) {
+export async function enableExternalSchemaComposition(
+  input: EnableExternalSchemaCompositionInput,
+  token: string,
+) {
   return execute({
     document: gql(/* GraphQL */ `
       mutation enableExternalSchemaComposition($input: EnableExternalSchemaCompositionInput!) {

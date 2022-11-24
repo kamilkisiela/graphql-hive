@@ -4,64 +4,90 @@
 
 ### Patch Changes
 
-- [#668](https://github.com/kamilkisiela/graphql-hive/pull/668) [`e116841`](https://github.com/kamilkisiela/graphql-hive/commit/e116841a739bfd7f37c4a826544301cf23d61637) Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Fix ESM/CJS issue
+- [#668](https://github.com/kamilkisiela/graphql-hive/pull/668)
+  [`e116841`](https://github.com/kamilkisiela/graphql-hive/commit/e116841a739bfd7f37c4a826544301cf23d61637)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Fix ESM/CJS issue
 
-- Updated dependencies [[`e116841`](https://github.com/kamilkisiela/graphql-hive/commit/e116841a739bfd7f37c4a826544301cf23d61637)]:
+- Updated dependencies
+  [[`e116841`](https://github.com/kamilkisiela/graphql-hive/commit/e116841a739bfd7f37c4a826544301cf23d61637)]:
   - @graphql-hive/core@0.2.3
 
 ## 0.21.2
 
 ### Patch Changes
 
-- [#655](https://github.com/kamilkisiela/graphql-hive/pull/655) [`2cbf27f`](https://github.com/kamilkisiela/graphql-hive/commit/2cbf27fdc9c18749b8969adb6d1598338762dba2) Thanks [@n1ru4l](https://github.com/n1ru4l)! - Add User-Agent header to all http requests
+- [#655](https://github.com/kamilkisiela/graphql-hive/pull/655)
+  [`2cbf27f`](https://github.com/kamilkisiela/graphql-hive/commit/2cbf27fdc9c18749b8969adb6d1598338762dba2)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Add User-Agent header to all http requests
 
 ## 0.21.1
 
 ### Patch Changes
 
-- [#466](https://github.com/kamilkisiela/graphql-hive/pull/466) [`2e036ac`](https://github.com/kamilkisiela/graphql-hive/commit/2e036acc4ce1c27a493e90481bb10f5886c0a00c) Thanks [@ardatan](https://github.com/ardatan)! - Update GraphQL Tools packages
+- [#466](https://github.com/kamilkisiela/graphql-hive/pull/466)
+  [`2e036ac`](https://github.com/kamilkisiela/graphql-hive/commit/2e036acc4ce1c27a493e90481bb10f5886c0a00c)
+  Thanks [@ardatan](https://github.com/ardatan)! - Update GraphQL Tools packages
 
 ## 0.21.0
 
 ### Minor Changes
 
-- [#563](https://github.com/kamilkisiela/graphql-hive/pull/563) [`d58a470`](https://github.com/kamilkisiela/graphql-hive/commit/d58a470916b213230f495e896fe99ec0baa225e2) Thanks [@PabloSzx](https://github.com/PabloSzx)! - Fix createServicesFetcher handling null service url
+- [#563](https://github.com/kamilkisiela/graphql-hive/pull/563)
+  [`d58a470`](https://github.com/kamilkisiela/graphql-hive/commit/d58a470916b213230f495e896fe99ec0baa225e2)
+  Thanks [@PabloSzx](https://github.com/PabloSzx)! - Fix createServicesFetcher handling null service
+  url
 
 ## 0.20.1
 
 ### Patch Changes
 
-- [#456](https://github.com/kamilkisiela/graphql-hive/pull/456) [`fb9b624`](https://github.com/kamilkisiela/graphql-hive/commit/fb9b624ab80ff39658c9ecd45b55d10d906e15e7) Thanks [@dimatill](https://github.com/dimatill)! - (processVariables: true) do not collect input when corresponding variable is missing
+- [#456](https://github.com/kamilkisiela/graphql-hive/pull/456)
+  [`fb9b624`](https://github.com/kamilkisiela/graphql-hive/commit/fb9b624ab80ff39658c9ecd45b55d10d906e15e7)
+  Thanks [@dimatill](https://github.com/dimatill)! - (processVariables: true) do not collect input
+  when corresponding variable is missing
 
 ## 0.20.0
 
 ### Minor Changes
 
-- [#499](https://github.com/kamilkisiela/graphql-hive/pull/499) [`682cde8`](https://github.com/kamilkisiela/graphql-hive/commit/682cde81092fcb3a55de7f24035be4f2f64abfb3) Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Add Self-Hosting options
+- [#499](https://github.com/kamilkisiela/graphql-hive/pull/499)
+  [`682cde8`](https://github.com/kamilkisiela/graphql-hive/commit/682cde81092fcb3a55de7f24035be4f2f64abfb3)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Add Self-Hosting options
 
 ## 0.19.0
 
 ### Major Changes
 
-- [#435](https://github.com/kamilkisiela/graphql-hive/pull/435) [`a79c253`](https://github.com/kamilkisiela/graphql-hive/commit/a79c253253614e44d01fef411016d353ef8c255e) Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Use ETag and If-None-Match to save bandwidth and improve performance
+- [#435](https://github.com/kamilkisiela/graphql-hive/pull/435)
+  [`a79c253`](https://github.com/kamilkisiela/graphql-hive/commit/a79c253253614e44d01fef411016d353ef8c255e)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Use ETag and If-None-Match to save
+  bandwidth and improve performance
 
 ## 0.18.5
 
 ### Patch Changes
 
-- [#399](https://github.com/kamilkisiela/graphql-hive/pull/399) [`bd6e500`](https://github.com/kamilkisiela/graphql-hive/commit/bd6e500532ed4878a069883fadeaf3bb00e38aeb) Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Fix the wrong cacheKey from #397
+- [#399](https://github.com/kamilkisiela/graphql-hive/pull/399)
+  [`bd6e500`](https://github.com/kamilkisiela/graphql-hive/commit/bd6e500532ed4878a069883fadeaf3bb00e38aeb)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Fix the wrong cacheKey from #397
 
 ## 0.18.4
 
 ### Patch Changes
 
-- [#379](https://github.com/kamilkisiela/graphql-hive/pull/379) [`2e7c8f3`](https://github.com/kamilkisiela/graphql-hive/commit/2e7c8f3c94013f890f42ca1054287841478ba7a6) Thanks [@dimatill](https://github.com/dimatill)! - Collect input fields from variables (opt-in with `processVariables` flag)
+- [#379](https://github.com/kamilkisiela/graphql-hive/pull/379)
+  [`2e7c8f3`](https://github.com/kamilkisiela/graphql-hive/commit/2e7c8f3c94013f890f42ca1054287841478ba7a6)
+  Thanks [@dimatill](https://github.com/dimatill)! - Collect input fields from variables (opt-in
+  with `processVariables` flag)
 
 ## 0.18.3
 
 ### Patch Changes
 
-- [#308](https://github.com/kamilkisiela/graphql-hive/pull/308) [`5a212f6`](https://github.com/kamilkisiela/graphql-hive/commit/5a212f61f206d7b73f8abf04667480851aa6066e) Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Avoid marking the same type as used twice
+- [#308](https://github.com/kamilkisiela/graphql-hive/pull/308)
+  [`5a212f6`](https://github.com/kamilkisiela/graphql-hive/commit/5a212f61f206d7b73f8abf04667480851aa6066e)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Avoid marking the same type as used
+  twice
 
 ## 0.18.2
 
@@ -348,7 +374,8 @@
 
 ### Minor Changes
 
-- 30da7e7: When disabled, run everything in dry mode (only http agent is disabled). This should help to catch errors in development.
+- 30da7e7: When disabled, run everything in dry mode (only http agent is disabled). This should help
+  to catch errors in development.
 
 ### Patch Changes
 

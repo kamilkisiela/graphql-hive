@@ -23,7 +23,7 @@ const SignUpSignInUserResponseModel = z.object({
 
 const signUpUserViaEmail = async (
   email: string,
-  password: string
+  password: string,
 ): Promise<z.TypeOf<typeof SignUpSignInUserResponseModel>> => {
   const response = await fetch(`${ensureEnv('SUPERTOKENS_CONNECTION_URI')}/recipe/signup`, {
     method: 'POST',
@@ -63,7 +63,11 @@ const CreateSessionModel = z.object({
   }),
 });
 
-const createSession = async (superTokensUserId: string, email: string, oidcIntegrationId: string | null) => {
+const createSession = async (
+  superTokensUserId: string,
+  email: string,
+  oidcIntegrationId: string | null,
+) => {
   await internalApi.mutation('ensureUser', {
     superTokensUserId,
     email,
@@ -111,18 +115,27 @@ export const userEmails: Record<UserID, string> = {
   admin: 'admin@localhost.localhost',
 };
 
-const tokenResponsePromise: Record<UserID, Promise<z.TypeOf<typeof SignUpSignInUserResponseModel>> | null> = {
+const tokenResponsePromise: Record<
+  UserID,
+  Promise<z.TypeOf<typeof SignUpSignInUserResponseModel>> | null
+> = {
   main: null,
   extra: null,
   admin: null,
 };
 
-export function authenticate(userId: UserID, oidcIntegrationId?: string): Promise<{ access_token: string }> {
+export function authenticate(
+  userId: UserID,
+  oidcIntegrationId?: string,
+): Promise<{ access_token: string }> {
   if (!tokenResponsePromise[userId]) {
-    tokenResponsePromise[userId] = signUpUserViaEmail(userEmails[userId] ?? `${userId}@localhost.localhost`, password);
+    tokenResponsePromise[userId] = signUpUserViaEmail(
+      userEmails[userId] ?? `${userId}@localhost.localhost`,
+      password,
+    );
   }
 
   return tokenResponsePromise[userId]!.then(data =>
-    createSession(data.user.id, data.user.email, oidcIntegrationId ?? null)
+    createSession(data.user.id, data.user.email, oidcIntegrationId ?? null),
   );
 }

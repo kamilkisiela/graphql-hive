@@ -10,7 +10,13 @@ import type {
 } from '../__generated__/types';
 import { DateRange } from './entities';
 
-export { msToNs, nsToMs, atomicPromise as atomic, sharePromise as share, cacheResult as cache } from '@theguild/buddy';
+export {
+  msToNs,
+  nsToMs,
+  atomicPromise as atomic,
+  sharePromise as share,
+  cacheResult as cache,
+} from '@theguild/buddy';
 
 export type NullableAndPartial<T> = {
   [P in keyof T]?: T[P] | undefined | null;
@@ -29,14 +35,20 @@ export function uuid(len = 13) {
   return Math.random().toString(16).substr(2, len);
 }
 
-export function filterSelector(kind: 'organization', selector: OrganizationSelector): OrganizationSelector;
+export function filterSelector(
+  kind: 'organization',
+  selector: OrganizationSelector,
+): OrganizationSelector;
 export function filterSelector(kind: 'project', selector: ProjectSelector): ProjectSelector;
 export function filterSelector(kind: 'target', selector: TargetSelector): TargetSelector;
 export function filterSelector(
   kind: 'persistedOperation',
-  selector: PersistedOperationSelector
+  selector: PersistedOperationSelector,
 ): PersistedOperationSelector;
-export function filterSelector(kind: 'organization' | 'project' | 'target' | 'persistedOperation', selector: any): any {
+export function filterSelector(
+  kind: 'organization' | 'project' | 'target' | 'persistedOperation',
+  selector: any,
+): any {
   switch (kind) {
     case 'organization':
       return {
@@ -65,17 +77,18 @@ export function filterSelector(kind: 'organization' | 'project' | 'target' | 'pe
 export function stringifySelector<
   T extends {
     [key: string]: any;
-  }
+  },
 >(obj: T): string {
   return JSON.stringify(
     Object.keys(obj)
       .sort()
-      .map(key => [key, obj[key]])
+      .map(key => [key, obj[key]]),
   );
 }
 
 function validateDateTime(dateTimeString?: string) {
-  dateTimeString = dateTimeString === null || dateTimeString === void 0 ? void 0 : dateTimeString.toUpperCase();
+  dateTimeString =
+    dateTimeString === null || dateTimeString === void 0 ? void 0 : dateTimeString.toUpperCase();
 
   if (!dateTimeString) {
     return false;
@@ -168,7 +181,9 @@ export function parseDateTime(value: number | string | Date): Date {
   }
 
   throw new TypeError(
-    'DateTime cannot be serialized from a non string, ' + 'non numeric or non Date type ' + JSON.stringify(value)
+    'DateTime cannot be serialized from a non string, ' +
+      'non numeric or non Date type ' +
+      JSON.stringify(value),
   );
 }
 

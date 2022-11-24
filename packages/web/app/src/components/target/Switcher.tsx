@@ -36,7 +36,13 @@ export const TargetSwitcher: React.FC<{
 
   return (
     <Menu autoSelect={false}>
-      <MenuButton size="sm" as={Button} rightIcon={<VscChevronDown />} variant="ghost" tw="font-normal">
+      <MenuButton
+        size="sm"
+        as={Button}
+        rightIcon={<VscChevronDown />}
+        variant="ghost"
+        tw="font-normal"
+      >
         {currentTarget.name}
       </MenuButton>
       <MenuList bg={dropdownBgColor} color={dropdownTextColor}>

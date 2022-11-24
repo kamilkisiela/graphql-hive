@@ -51,11 +51,15 @@ test('should not leak the exception', async () => {
   await hive.dispose();
 
   expect(logger.info).toHaveBeenCalledWith('[hive][reporting] Sending (queue 1) (attempt 1)');
-  expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('[hive][reporting] Attempt 1 failed:'));
+  expect(logger.info).toHaveBeenCalledWith(
+    expect.stringContaining('[hive][reporting] Attempt 1 failed:'),
+  );
   expect(logger.info).toHaveBeenCalledWith('[hive][reporting] Sending (queue 1) (attempt 2)');
   expect(logger.error).toHaveBeenCalledTimes(1);
   expect(logger.error).toHaveBeenCalledWith(
-    expect.stringContaining(`[hive][reporting] Failed to report schema: connect ECONNREFUSED 127.0.0.1:55404`)
+    expect.stringContaining(
+      `[hive][reporting] Failed to report schema: connect ECONNREFUSED 127.0.0.1:55404`,
+    ),
   );
 });
 
@@ -426,7 +430,7 @@ test('should send original schema of a federated service', async () => {
         type Query {
           bar: String
         }
-      `)
+      `),
     ),
   });
 
@@ -498,7 +502,9 @@ test('should display SchemaPublishMissingServiceError', async () => {
   http.done();
 
   expect(logger.info).toHaveBeenCalledWith('[hive][reporting] Sending (queue 1) (attempt 1)');
-  expect(logger.error).toHaveBeenCalledWith(`[hive][reporting] Failed to report schema: Service name is not defined`);
+  expect(logger.error).toHaveBeenCalledWith(
+    `[hive][reporting] Failed to report schema: Service name is not defined`,
+  );
 });
 
 test('should display SchemaPublishMissingUrlError', async () => {
@@ -558,5 +564,7 @@ test('should display SchemaPublishMissingUrlError', async () => {
   http.done();
 
   expect(logger.info).toHaveBeenCalledWith('[hive][reporting] Sending (queue 1) (attempt 1)');
-  expect(logger.error).toHaveBeenCalledWith(`[hive][reporting] Failed to report schema: Service url is not defined`);
+  expect(logger.error).toHaveBeenCalledWith(
+    `[hive][reporting] Failed to report schema: Service url is not defined`,
+  );
 });

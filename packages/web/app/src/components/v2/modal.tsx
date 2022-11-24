@@ -61,10 +61,11 @@ const Modal: FC<{
             rounded-md
             bg-black
             p-7`,
-            className
+            className,
           )}
           css={css`
-            box-shadow: hsl(206 22% 7% / 35%) 0 10px 38px -10px, hsl(206 22% 7% / 20%) 0 10px 20px -15px;
+            box-shadow: hsl(206 22% 7% / 35%) 0 10px 38px -10px,
+              hsl(206 22% 7% / 20%) 0 10px 20px -15px;
             transform: translate(-50%, -50%);
             @media (prefers-reduced-motion: no-preference) {
               animation: ${contentShow} 300ms cubic-bezier(0.16, 1, 0.3, 1);

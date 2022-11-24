@@ -24,7 +24,7 @@ export const Radio = ({ children, className, ...props }: RadioGroupItemProps): R
         text-left
         focus:ring
         `,
-        className
+        className,
       )}
       {...props}
     >

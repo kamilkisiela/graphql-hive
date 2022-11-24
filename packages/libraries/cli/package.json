@@ -1,22 +1,22 @@
 {
   "name": "@graphql-hive/cli",
-  "description": "A CLI util to manage and control your GraphQL Hive",
   "version": "0.19.10",
-  "author": {
-    "email": "contact@the-guild.dev",
-    "name": "The Guild",
-    "url": "https://the-guild.dev"
-  },
+  "description": "A CLI util to manage and control your GraphQL Hive",
   "repository": {
     "type": "git",
     "url": "kamilkisiela/graphql-hive",
     "directory": "packages/libraries/cli"
   },
   "homepage": "https://graphql-hive.com",
+  "author": {
+    "email": "contact@the-guild.dev",
+    "name": "The Guild",
+    "url": "https://the-guild.dev"
+  },
   "license": "MIT",
-  "keywords": [
-    "graphql"
-  ],
+  "engines": {
+    "node": ">=14.0.0"
+  },
   "bin": {
     "hive": "./bin/run"
   },
@@ -26,19 +26,22 @@
     "/dist",
     "/oclif.manifest.json"
   ],
+  "keywords": [
+    "graphql"
+  ],
   "scripts": {
-    "start": "./bin/dev",
-    "prebuild": "rimraf dist",
     "build": "tsc",
-    "postpack": "rm -f oclif.manifest.json",
-    "prepack": "rimraf lib && tsc -b && oclif manifest && oclif readme",
     "oclif:pack": "npm pack && pnpm oclif pack tarballs --no-xz",
     "oclif:upload": "pnpm oclif upload tarballs --no-xz",
-    "version": "oclif readme && git add README.md",
+    "postpack": "rm -f oclif.manifest.json",
+    "prebuild": "rimraf dist",
+    "prepack": "rimraf lib && tsc -b && oclif manifest && oclif readme",
+    "schema:check:federation": "pnpm start schema:check examples/federation.graphql --service reviews",
     "schema:check:single": "pnpm start schema:check examples/single.graphql",
     "schema:check:stitching": "pnpm start schema:check examples/stitching.graphql --service posts",
-    "schema:check:federation": "pnpm start schema:check examples/federation.graphql --service reviews",
-    "schema:publish:federation": "pnpm start schema:publish --service reviews examples/federation.reviews.graphql"
+    "schema:publish:federation": "pnpm start schema:publish --service reviews examples/federation.reviews.graphql",
+    "start": "./bin/dev",
+    "version": "oclif readme && git add README.md"
   },
   "dependencies": {
     "@graphql-hive/core": "0.2.3",
@@ -46,8 +49,8 @@
     "@graphql-tools/code-file-loader": "~7.3.6",
     "@graphql-tools/graphql-file-loader": "~7.5.5",
     "@graphql-tools/json-file-loader": "~7.4.6",
-    "@graphql-tools/url-loader": "~7.16.4",
     "@graphql-tools/load": "~7.7.7",
+    "@graphql-tools/url-loader": "~7.16.4",
     "@graphql-tools/utils": "8.12.0",
     "@oclif/core": "^1.20.4",
     "@oclif/plugin-help": "5.1.19",
@@ -61,14 +64,18 @@
     "log-symbols": "4.1.0",
     "mkdirp": "1.0.4",
     "rimraf": "3.0.2",
-    "tslib": "2.4.1",
-    "ts-node": "10.9.1"
+    "ts-node": "10.9.1",
+    "tslib": "2.4.1"
   },
   "devDependencies": {
-    "oclif": "^3.2.25",
     "@types/env-ci": "3.1.1",
     "@types/git-parse": "2.1.2",
-    "@types/mkdirp": "1.0.2"
+    "@types/mkdirp": "1.0.2",
+    "oclif": "^3.2.25"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
   },
   "oclif": {
     "commands": "./dist/commands",
@@ -82,12 +89,5 @@
         "bucket": "graphql-hive-cli"
       }
     }
-  },
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org",
-    "access": "public"
-  },
-  "engines": {
-    "node": ">=14.0.0"
   }
 }

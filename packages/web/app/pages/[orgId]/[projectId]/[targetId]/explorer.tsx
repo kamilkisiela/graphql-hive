@@ -5,13 +5,21 @@ import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
 import { SchemaExplorerFilter } from '@/components/target/explorer/filter';
 import { GraphQLObjectTypeComponent } from '@/components/target/explorer/object-type';
-import { SchemaExplorerProvider, useSchemaExplorerContext } from '@/components/target/explorer/provider';
+import {
+  SchemaExplorerProvider,
+  useSchemaExplorerContext,
+} from '@/components/target/explorer/provider';
 import { DataWrapper, noSchema, Title } from '@/components/v2';
 import { OrganizationFieldsFragment, ProjectFieldsFragment, TargetFieldsFragment } from '@/graphql';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const SchemaView_SchemaExplorer = gql(/* GraphQL */ `
-  query SchemaView_SchemaExplorer($organization: ID!, $project: ID!, $target: ID!, $period: DateRangeInput!) {
+  query SchemaView_SchemaExplorer(
+    $organization: ID!
+    $project: ID!
+    $target: ID!
+    $period: DateRangeInput!
+  ) {
     target(selector: { organization: $organization, project: $project, target: $target }) {
       __typename
       id
@@ -32,7 +40,9 @@ const SchemaView_SchemaExplorer = gql(/* GraphQL */ `
         }
       }
     }
-    operationsStats(selector: { organization: $organization, project: $project, target: $target, period: $period }) {
+    operationsStats(
+      selector: { organization: $organization, project: $project, target: $target, period: $period }
+    ) {
       totalRequests
     }
   }
@@ -75,11 +85,28 @@ function SchemaView({
               <div className="font-light text-gray-500">The latest published schema.</div>
             </div>
             <div className="flex flex-col gap-4">
-              <SchemaExplorerFilter organization={organization} project={project} target={target} period={period} />
-              {query ? <GraphQLObjectTypeComponent type={query} totalRequests={totalRequests} collapsed /> : null}
-              {mutation ? <GraphQLObjectTypeComponent type={mutation} totalRequests={totalRequests} collapsed /> : null}
+              <SchemaExplorerFilter
+                organization={organization}
+                project={project}
+                target={target}
+                period={period}
+              />
+              {query ? (
+                <GraphQLObjectTypeComponent type={query} totalRequests={totalRequests} collapsed />
+              ) : null}
+              {mutation ? (
+                <GraphQLObjectTypeComponent
+                  type={mutation}
+                  totalRequests={totalRequests}
+                  collapsed
+                />
+              ) : null}
               {subscription ? (
-                <GraphQLObjectTypeComponent type={subscription} totalRequests={totalRequests} collapsed />
+                <GraphQLObjectTypeComponent
+                  type={subscription}
+                  totalRequests={totalRequests}
+                  collapsed
+                />
               ) : null}
             </div>
           </>
@@ -95,7 +122,9 @@ function ExplorerPage(): ReactElement {
       <Title title="Schema Explorer" />
       <TargetLayout value="explorer">
         {props => (
-          <SchemaExplorerProvider dataRetentionInDays={props.organization.rateLimit.retentionInDays}>
+          <SchemaExplorerProvider
+            dataRetentionInDays={props.organization.rateLimit.retentionInDays}
+          >
             <SchemaView {...props} />
           </SchemaExplorerProvider>
         )}

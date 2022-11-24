@@ -4,7 +4,10 @@ import type { RateLimitApi, RateLimitQueryInput, RateLimitQueryOutput } from '@h
 import { createTRPCClient } from '@trpc/client';
 import { fetch } from '@whatwg-node/fetch';
 
-export function createUsageRateLimit(config: { endpoint: string | null; logger: FastifyLoggerInstance }) {
+export function createUsageRateLimit(config: {
+  endpoint: string | null;
+  logger: FastifyLoggerInstance;
+}) {
   const logger = config.logger;
 
   if (!config.endpoint) {
@@ -25,13 +28,13 @@ export function createUsageRateLimit(config: { endpoint: string | null; logger: 
   const retentionCache = LRU<Promise<RateLimitQueryOutput<'getRetention'> | null>>(1000, 30_000);
 
   async function fetchFreshRetentionInfo(
-    input: RateLimitQueryInput<'getRetention'>
+    input: RateLimitQueryInput<'getRetention'>,
   ): Promise<RateLimitQueryOutput<'getRetention'> | null> {
     return rateLimit.query('getRetention', input);
   }
 
   async function fetchFreshLimitInfo(
-    input: RateLimitQueryInput<'checkRateLimit'>
+    input: RateLimitQueryInput<'checkRateLimit'>,
   ): Promise<RateLimitQueryOutput<'checkRateLimit'> | null> {
     return rateLimit.query('checkRateLimit', input);
   }

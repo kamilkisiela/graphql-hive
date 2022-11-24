@@ -40,7 +40,10 @@ export async function main() {
   const errorHandler = createErrorHandler(server);
 
   try {
-    const { start, stop, readiness, getStorage } = useCache(createStorage(env.postgres), server.log);
+    const { start, stop, readiness, getStorage } = useCache(
+      createStorage(env.postgres),
+      server.log,
+    );
     const tokenReadFailuresCache = LRU<
       | {
           type: 'error';

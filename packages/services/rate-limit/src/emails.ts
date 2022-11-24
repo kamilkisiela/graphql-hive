@@ -62,12 +62,16 @@ export function createEmailScheduler(config?: { endpoint: string }) {
                     Your Hive organization <strong>${
                       input.organization.name
                     }</strong> has reached over 100% of the operations limit quota.
-                    Used ${numberFormatter.format(input.usage.current)} of ${numberFormatter.format(input.usage.quota)}.
+                    Used ${numberFormatter.format(input.usage.current)} of ${numberFormatter.format(
+            input.usage.quota,
+          )}.
                   </mj-text>.
                   <mj-text>
                     We recommend to increase the limit.
                   </mj-text>
-                  <mj-button href="https://app.graphql-hive.com/${input.organization.cleanId}/subscription">
+                  <mj-button href="https://app.graphql-hive.com/${
+                    input.organization.cleanId
+                  }/subscription">
                     Manage your subscription
                   </mj-button>
                 </mj-column>
@@ -75,7 +79,7 @@ export function createEmailScheduler(config?: { endpoint: string }) {
             </mj-body>
           </mjml>
         `,
-        })
+        }),
       );
     },
 
@@ -122,12 +126,16 @@ export function createEmailScheduler(config?: { endpoint: string }) {
                     Your organization <strong>${
                       input.organization.name
                     }</strong> is approaching its operations limit quota.
-                    Used ${numberFormatter.format(input.usage.current)} of ${numberFormatter.format(input.usage.quota)}.
+                    Used ${numberFormatter.format(input.usage.current)} of ${numberFormatter.format(
+            input.usage.quota,
+          )}.
                   </mj-text>.
                   <mj-text>
                     We recommend to increase the limit.
                   </mj-text>
-                  <mj-button href="https://app.graphql-hive.com/${input.organization.cleanId}/subscription">
+                  <mj-button href="https://app.graphql-hive.com/${
+                    input.organization.cleanId
+                  }/subscription">
                     Manage your subscription
                   </mj-button>
                 </mj-column>
@@ -135,7 +143,7 @@ export function createEmailScheduler(config?: { endpoint: string }) {
             </mj-body>
           </mjml>
         `,
-        })
+        }),
       );
     },
   };

@@ -17,7 +17,7 @@ test('can publish and check a schema with target:registry:read access', async ()
     {
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
 
@@ -26,7 +26,7 @@ test('can publish and check a schema with target:registry:read access', async ()
       email: 'some@email.com',
       organization: org.cleanId,
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const inviteCode = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
@@ -42,7 +42,7 @@ test('can publish and check a schema with target:registry:read access', async ()
       type: ProjectType.Single,
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
@@ -59,7 +59,7 @@ test('can publish and check a schema with target:registry:read access', async ()
       projectScopes: [],
       targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
     },
-    owner_access_token
+    owner_access_token,
   );
   expect(writeTokenResult.body.errors).not.toBeDefined();
   const writeToken = writeTokenResult.body.data!.createToken.ok!.secret;
@@ -76,9 +76,9 @@ test('can publish and check a schema with target:registry:read access', async ()
 
   await schemaCheck(['--token', writeToken, 'fixtures/nonbreaking-schema.graphql']);
 
-  await expect(schemaCheck(['--token', writeToken, 'fixtures/breaking-schema.graphql'])).rejects.toThrowError(
-    /breaking/
-  );
+  await expect(
+    schemaCheck(['--token', writeToken, 'fixtures/breaking-schema.graphql']),
+  ).rejects.toThrowError(/breaking/);
 });
 
 test('publishing a breaking change results in invalid state', async () => {
@@ -87,7 +87,7 @@ test('publishing a breaking change results in invalid state', async () => {
     {
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
 
@@ -96,7 +96,7 @@ test('publishing a breaking change results in invalid state', async () => {
       email: 'some@email.com',
       organization: org.cleanId,
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const inviteCode = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
@@ -112,7 +112,7 @@ test('publishing a breaking change results in invalid state', async () => {
       type: ProjectType.Single,
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
@@ -129,7 +129,7 @@ test('publishing a breaking change results in invalid state', async () => {
       projectScopes: [],
       targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
     },
-    owner_access_token
+    owner_access_token,
   );
   expect(writeTokenResult.body.errors).not.toBeDefined();
   const writeToken = writeTokenResult.body.data!.createToken.ok!.secret;
@@ -144,9 +144,9 @@ test('publishing a breaking change results in invalid state', async () => {
     'fixtures/init-schema.graphql',
   ]);
 
-  await expect(schemaPublish(['--token', writeToken, 'fixtures/breaking-schema.graphql'])).rejects.toThrowError(
-    /breaking/
-  );
+  await expect(
+    schemaPublish(['--token', writeToken, 'fixtures/breaking-schema.graphql']),
+  ).rejects.toThrowError(/breaking/);
 });
 
 test('publishing invalid schema SDL provides meaningful feedback for the user.', async () => {
@@ -155,7 +155,7 @@ test('publishing invalid schema SDL provides meaningful feedback for the user.',
     {
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
 
@@ -164,7 +164,7 @@ test('publishing invalid schema SDL provides meaningful feedback for the user.',
       email: 'some@email.com',
       organization: org.cleanId,
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const code = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
@@ -180,7 +180,7 @@ test('publishing invalid schema SDL provides meaningful feedback for the user.',
       type: ProjectType.Single,
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
@@ -197,7 +197,7 @@ test('publishing invalid schema SDL provides meaningful feedback for the user.',
       projectScopes: [],
       targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
     },
-    owner_access_token
+    owner_access_token,
   );
   expect(writeTokenResult.body.errors).not.toBeDefined();
   const writeToken = writeTokenResult.body.data!.createToken.ok!.secret;
@@ -229,7 +229,7 @@ test('service url should be available in supergraph', async () => {
     {
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
 
@@ -238,7 +238,7 @@ test('service url should be available in supergraph', async () => {
       email: 'some@email.com',
       organization: org.cleanId,
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const code = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
@@ -254,7 +254,7 @@ test('service url should be available in supergraph', async () => {
       type: ProjectType.Federation,
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
@@ -271,7 +271,7 @@ test('service url should be available in supergraph', async () => {
       projectScopes: [],
       targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
     },
-    owner_access_token
+    owner_access_token,
   );
   expect(writeTokenResult.body.errors).not.toBeDefined();
   const writeToken = writeTokenResult.body.data!.createToken.ok!.secret;
@@ -296,7 +296,7 @@ test('service url should be available in supergraph', async () => {
       project: project.cleanId,
       target: target.cleanId,
     },
-    writeToken
+    writeToken,
   );
 
   expect(supergraph.body).toMatch('(name: "users" url: "https://api.com/users-subgraph")');
@@ -308,7 +308,7 @@ test('service url should be required in Federation', async () => {
     {
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
 
@@ -317,7 +317,7 @@ test('service url should be required in Federation', async () => {
       email: 'some@email.com',
       organization: org.cleanId,
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const code = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
@@ -333,7 +333,7 @@ test('service url should be required in Federation', async () => {
       type: ProjectType.Federation,
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
@@ -350,7 +350,7 @@ test('service url should be required in Federation', async () => {
       projectScopes: [],
       targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
     },
-    owner_access_token
+    owner_access_token,
   );
   expect(writeTokenResult.body.errors).not.toBeDefined();
   const writeToken = writeTokenResult.body.data!.createToken.ok!.secret;
@@ -366,7 +366,7 @@ test('service url should be required in Federation', async () => {
       '--service',
       'users',
       'fixtures/federation-init.graphql',
-    ])
+    ]),
   ).rejects.toThrowError(/url/);
 });
 
@@ -376,7 +376,7 @@ test('schema:publish should print a link to the website', async () => {
     {
       name: 'bar',
     },
-    owner_access_token
+    owner_access_token,
   );
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
 
@@ -385,7 +385,7 @@ test('schema:publish should print a link to the website', async () => {
       email: 'some@email.com',
       organization: org.cleanId,
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const code = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
@@ -401,7 +401,7 @@ test('schema:publish should print a link to the website', async () => {
       type: ProjectType.Single,
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
@@ -419,18 +419,18 @@ test('schema:publish should print a link to the website', async () => {
       projectScopes: [],
       targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
     },
-    owner_access_token
+    owner_access_token,
   );
   expect(writeTokenResult.body.errors).not.toBeDefined();
   const writeToken = writeTokenResult.body.data!.createToken.ok!.secret;
 
-  await expect(schemaPublish(['--token', writeToken, 'fixtures/init-schema.graphql'])).resolves.toMatch(
-    'Available at https://app.graphql-hive.com/bar/foo/development'
-  );
+  await expect(
+    schemaPublish(['--token', writeToken, 'fixtures/init-schema.graphql']),
+  ).resolves.toMatch('Available at https://app.graphql-hive.com/bar/foo/development');
 
-  await expect(schemaPublish(['--token', writeToken, 'fixtures/nonbreaking-schema.graphql'])).resolves.toMatch(
-    'Available at https://app.graphql-hive.com/bar/foo/development/history/'
-  );
+  await expect(
+    schemaPublish(['--token', writeToken, 'fixtures/nonbreaking-schema.graphql']),
+  ).resolves.toMatch('Available at https://app.graphql-hive.com/bar/foo/development/history/');
 });
 
 test('schema:check should notify user when registry is empty', async () => {
@@ -439,7 +439,7 @@ test('schema:check should notify user when registry is empty', async () => {
     {
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
 
@@ -448,7 +448,7 @@ test('schema:check should notify user when registry is empty', async () => {
       email: 'some@email.com',
       organization: org.cleanId,
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const code = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
@@ -464,7 +464,7 @@ test('schema:check should notify user when registry is empty', async () => {
       type: ProjectType.Single,
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
@@ -481,12 +481,14 @@ test('schema:check should notify user when registry is empty', async () => {
       projectScopes: [],
       targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
     },
-    owner_access_token
+    owner_access_token,
   );
   expect(writeTokenResult.body.errors).not.toBeDefined();
   const writeToken = writeTokenResult.body.data!.createToken.ok!.secret;
 
-  await expect(schemaCheck(['--token', writeToken, 'fixtures/init-schema.graphql'])).resolves.toMatch('empty');
+  await expect(
+    schemaCheck(['--token', writeToken, 'fixtures/init-schema.graphql']),
+  ).resolves.toMatch('empty');
 });
 
 test('schema:check should throw on corrupted schema', async () => {
@@ -495,7 +497,7 @@ test('schema:check should throw on corrupted schema', async () => {
     {
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
 
@@ -504,7 +506,7 @@ test('schema:check should throw on corrupted schema', async () => {
       email: 'some@email.com',
       organization: org.cleanId,
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const code = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
@@ -520,7 +522,7 @@ test('schema:check should throw on corrupted schema', async () => {
       type: ProjectType.Single,
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
@@ -537,7 +539,7 @@ test('schema:check should throw on corrupted schema', async () => {
       projectScopes: [],
       targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
     },
-    owner_access_token
+    owner_access_token,
   );
   expect(writeTokenResult.body.errors).not.toBeDefined();
   const writeToken = writeTokenResult.body.data!.createToken.ok!.secret;
@@ -553,7 +555,7 @@ test('schema:publish should see Invalid Token error when token is invalid', asyn
     {
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
 
@@ -563,7 +565,7 @@ test('schema:publish should see Invalid Token error when token is invalid', asyn
       type: ProjectType.Single,
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const token = createHash('md5').update('nope').digest('hex').substring(0, 31);
@@ -579,7 +581,7 @@ test('schema:publish should support experimental_acceptBreakingChanges flag', as
     {
       name: 'bar',
     },
-    owner_access_token
+    owner_access_token,
   );
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
   const projectResult = await createProject(
@@ -588,7 +590,7 @@ test('schema:publish should support experimental_acceptBreakingChanges flag', as
       type: ProjectType.Single,
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
@@ -606,16 +608,21 @@ test('schema:publish should support experimental_acceptBreakingChanges flag', as
       projectScopes: [],
       targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
     },
-    owner_access_token
+    owner_access_token,
   );
   expect(writeTokenResult.body.errors).not.toBeDefined();
   const writeToken = writeTokenResult.body.data!.createToken.ok!.secret;
 
-  await expect(schemaPublish(['--token', writeToken, 'fixtures/init-schema.graphql'])).resolves.toMatch(
-    'Available at https://app.graphql-hive.com/bar/foo/development'
-  );
+  await expect(
+    schemaPublish(['--token', writeToken, 'fixtures/init-schema.graphql']),
+  ).resolves.toMatch('Available at https://app.graphql-hive.com/bar/foo/development');
 
   await expect(
-    schemaPublish(['--token', writeToken, '--experimental_acceptBreakingChanges', 'fixtures/breaking-schema.graphql'])
+    schemaPublish([
+      '--token',
+      writeToken,
+      '--experimental_acceptBreakingChanges',
+      'fixtures/breaking-schema.graphql',
+    ]),
   ).resolves.toMatch('Available at https://app.graphql-hive.com/bar/foo/development/history/');
 });

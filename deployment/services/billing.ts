@@ -29,7 +29,9 @@ export function deployStripeBilling({
   dbMigrations: DbMigrations;
 }) {
   const rawConnectionString = apiConfig.requireSecret('postgresConnectionString');
-  const connectionString = rawConnectionString.apply(rawConnectionString => parse(rawConnectionString));
+  const connectionString = rawConnectionString.apply(rawConnectionString =>
+    parse(rawConnectionString),
+  );
 
   return new RemoteArtifactAsServiceDeployment(
     'stripe-billing',
@@ -56,6 +58,6 @@ export function deployStripeBilling({
       packageInfo: packageHelper.npmPack('@hive/stripe-billing'),
       port: 4000,
     },
-    [dbMigrations, usageEstimator.service, usageEstimator.deployment]
+    [dbMigrations, usageEstimator.service, usageEstimator.deployment],
   ).deploy();
 }

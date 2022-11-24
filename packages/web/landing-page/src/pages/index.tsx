@@ -8,9 +8,13 @@ import { Pricing } from '../pricing';
 const classes = {
   link: clsx(
     'inline-block bg-gray-100 hover:bg-gray-200 text-gray-600 px-6 py-3 rounded-lg font-medium shadow-sm',
-    'dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+    'dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700',
   ),
-  feature: clsx('w-full py-24', 'odd:bg-gray-50 odd:dark:bg-gray-900', 'even:bg-white even:dark:bg-black'),
+  feature: clsx(
+    'w-full py-24',
+    'odd:bg-gray-50 odd:dark:bg-gray-900',
+    'even:bg-white even:dark:bg-black',
+  ),
   root: clsx('flex flex-row md:flex-col lg:flex-row flex-1 gap-6'),
   content: clsx('flex flex-col text-black dark:text-white'),
   title: clsx('text-xl font-semibold'),
@@ -85,14 +89,15 @@ function Hero() {
           Take full control of your GraphQL API
         </h1>
         <p className="mx-auto mt-6 max-w-screen-sm text-center text-2xl text-gray-600 dark:text-gray-400">
-          Prevent breaking changes, monitor performance of your GraphQL API, and manage your API gateway
+          Prevent breaking changes, monitor performance of your GraphQL API, and manage your API
+          gateway
         </p>
         <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
           <a
             href="https://app.graphql-hive.com"
             className={clsx(
               'inline-block rounded-lg bg-yellow-500 px-6 py-3 font-medium text-white shadow-sm hover:bg-opacity-75',
-              'dark:bg-yellow-600 dark:hover:bg-yellow-500 dark:hover:bg-opacity-100'
+              'dark:bg-yellow-600 dark:hover:bg-yellow-500 dark:hover:bg-opacity-100',
             )}
           >
             Sign up for free
@@ -133,7 +138,7 @@ function Feature(props: {
         <div
           className={clsx(
             'flex flex-col items-start gap-24 md:gap-12 lg:gap-24',
-            flipped ? 'md:flex-row-reverse' : 'md:flex-row'
+            flipped ? 'md:flex-row-reverse' : 'md:flex-row',
           )}
         >
           <div className="flex w-full flex-shrink-0 flex-col gap-4 md:w-2/5 lg:w-1/3">
@@ -210,13 +215,17 @@ export default function IndexPage(): ReactElement {
             description={
               <div className="flex flex-col gap-y-24">
                 <div>
-                  <p>Be aware of how your GraphQL API is used and what is the experience of its final users.</p>
+                  <p>
+                    Be aware of how your GraphQL API is used and what is the experience of its final
+                    users.
+                  </p>
                 </div>
                 <div className="flex flex-col gap-y-12">
                   {[
                     {
                       title: 'GraphQL Consumers',
-                      description: 'Track every source of GraphQL requests and see how the API is consumed.',
+                      description:
+                        'Track every source of GraphQL requests and see how the API is consumed.',
                     },
                     {
                       title: 'Overall performance',
@@ -275,7 +284,9 @@ export default function IndexPage(): ReactElement {
                 >
                   Open-Source
                 </h2>
-                <p className="text-lg leading-7 text-gray-600 dark:text-gray-400">Built entirely in public.</p>
+                <p className="text-lg leading-7 text-gray-600 dark:text-gray-400">
+                  Built entirely in public.
+                </p>
               </div>
               <div className="mx-auto box-border grid max-w-screen-lg grid-cols-2 gap-12 px-6">
                 {[

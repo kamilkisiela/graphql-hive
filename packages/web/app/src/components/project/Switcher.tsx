@@ -43,7 +43,13 @@ export const ProjectSwitcher: React.FC<{
 
   return (
     <Menu autoSelect={false}>
-      <MenuButton size="sm" as={Button} rightIcon={<VscChevronDown />} variant="ghost" tw="font-normal">
+      <MenuButton
+        size="sm"
+        as={Button}
+        rightIcon={<VscChevronDown />}
+        variant="ghost"
+        tw="font-normal"
+      >
         {refinedData.currentProject.name}
       </MenuButton>
       <MenuList bg={dropdownBgColor} color={dropdownTextColor}>

@@ -26,7 +26,10 @@ module.exports = {
   rules: {
     'no-process-env': 'error',
     'no-restricted-globals': ['error', 'stop'],
-    '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', ignoreRestSiblings: true }],
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      { argsIgnorePattern: '^_', ignoreRestSiblings: true },
+    ],
     'no-empty': ['error', { allowEmptyCatch: true }],
 
     'import/no-absolute-path': 'error',

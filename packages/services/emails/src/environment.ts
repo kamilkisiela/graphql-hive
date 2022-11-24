@@ -49,7 +49,9 @@ const PostmarkEmailModel = zod.object({
 
 const SMTPEmailModel = zod.object({
   EMAIL_PROVIDER: zod.literal('smtp'),
-  EMAIL_PROVIDER_SMTP_PROTOCOL: emptyString(zod.union([zod.literal('smtp'), zod.literal('smtps')]).optional()),
+  EMAIL_PROVIDER_SMTP_PROTOCOL: emptyString(
+    zod.union([zod.literal('smtp'), zod.literal('smtps')]).optional(),
+  ),
   EMAIL_PROVIDER_SMTP_HOST: zod.string(),
   EMAIL_PROVIDER_SMTP_PORT: NumberFromString,
   EMAIL_PROVIDER_SMTP_AUTH_USERNAME: zod.string(),
@@ -64,7 +66,12 @@ const MockEmailProviderModel = zod.object({
   EMAIL_PROVIDER: zod.literal('mock'),
 });
 
-const EmailProviderModel = zod.union([PostmarkEmailModel, MockEmailProviderModel, SMTPEmailModel, SendmailEmailModel]);
+const EmailProviderModel = zod.union([
+  PostmarkEmailModel,
+  MockEmailProviderModel,
+  SMTPEmailModel,
+  SendmailEmailModel,
+]);
 
 const PrometheusModel = zod.object({
   PROMETHEUS_METRICS: emptyString(zod.union([zod.literal('0'), zod.literal('1')]).optional()),
@@ -83,7 +90,7 @@ const LogModel = zod.object({
         zod.literal('fatal'),
         zod.literal('silent'),
       ])
-      .optional()
+      .optional(),
   ),
 });
 

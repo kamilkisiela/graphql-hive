@@ -16,7 +16,7 @@ export function createEstimator(config: {
       timings: {
         totalSeconds: number;
         elapsedSeconds: number;
-      }
+      },
     ) => void;
   };
 }) {
@@ -59,7 +59,11 @@ export function createEstimator(config: {
         timeout: 60_000,
       });
     },
-    async estimateCollectedOperationsForTargets(input: { targets: string[]; startTime: Date; endTime: Date }) {
+    async estimateCollectedOperationsForTargets(input: {
+      targets: string[];
+      startTime: Date;
+      endTime: Date;
+    }) {
       const filter = operationsReader.createFilter({
         target: input.targets,
         period: {

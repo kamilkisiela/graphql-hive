@@ -49,8 +49,8 @@ const NewPage: FC = () => {
             <Card tw="w-[450px] mb-7" />
             <Title>Welcome</Title>
             <p className="mb-10 text-center font-light text-gray-500">
-              Create organization Lorem ipsum dolor sit amet, consectetur adipiscing elit. Turpis et dictum mattis
-              tincidunt quis iaculis arcu proin suspendisse.
+              Create organization Lorem ipsum dolor sit amet, consectetur adipiscing elit. Turpis et
+              dictum mattis tincidunt quis iaculis arcu proin suspendisse.
             </p>
             <Button variant="primary" size="large" block tw="w-[450px]" onClick={handleNext}>
               Create Organization
@@ -63,8 +63,8 @@ const NewPage: FC = () => {
           <Container tw="justify-center pb-0">
             <Title>Welcome</Title>
             <p className="mb-10 text-center font-light text-gray-500">
-              Create organization Lorem ipsum dolor sit amet, consectetur adipiscing elit. Turpis et dictum mattis
-              tincidunt quis iaculis arcu proin suspendisse.
+              Create organization Lorem ipsum dolor sit amet, consectetur adipiscing elit. Turpis et
+              dictum mattis tincidunt quis iaculis arcu proin suspendisse.
             </p>
             <InputWithBorder placeholder="Organization Name" />
           </Container>
@@ -74,8 +74,8 @@ const NewPage: FC = () => {
           <Container tw="mt-8">
             <Title>Create Project</Title>
             <p className="mb-10 text-center font-light text-gray-500">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Turpis et dictum mattis tincidunt quis iaculis
-              arcu proin suspendisse.
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Turpis et dictum mattis
+              tincidunt quis iaculis arcu proin suspendisse.
             </p>
             <InputWithBorder placeholder="Project Name" />
             <span className="mt-5 mb-2.5 text-xs font-bold">CHOOSE PROJECT TYPE</span>
@@ -87,8 +87,8 @@ const NewPage: FC = () => {
           <Container tw="mt-16">
             <Title>Add Members</Title>
             <p className="mb-10 text-center font-light text-gray-500">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Turpis et dictum mattis tincidunt quis iaculis
-              arcu proin suspendisse.
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Turpis et dictum mattis
+              tincidunt quis iaculis arcu proin suspendisse.
             </p>
             <MembersPage />
           </Container>
@@ -98,15 +98,15 @@ const NewPage: FC = () => {
           <Container tw="mt-16">
             <Title>Create Your First Target</Title>
             <p className="mb-10 text-center font-light text-gray-500">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Turpis et dictum mattis tincidunt quis iaculis
-              arcu proin suspendisse.
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Turpis et dictum mattis
+              tincidunt quis iaculis arcu proin suspendisse.
             </p>
             <InputWithBorder placeholder="Target Name" />
             <Card>
               <Heading size="lg">Connect Your Scheme</Heading>
               <p className="text-sm text-gray-500">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Turpis et dictum mattis tincidunt quis iaculis
-                arcu proin suspendisse.
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Turpis et dictum mattis
+                tincidunt quis iaculis arcu proin suspendisse.
               </p>
             </Card>
           </Container>
@@ -117,8 +117,8 @@ const NewPage: FC = () => {
             <Card tw="w-[450px] mb-7" />
             <Title>We are building your project</Title>
             <p className="mb-10 text-center font-light text-gray-500">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Turpis et dictum mattis tincidunt quis iaculis
-              arcu proin suspendisse.
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Turpis et dictum mattis
+              tincidunt quis iaculis arcu proin suspendisse.
             </p>
           </Container>
         );
@@ -157,7 +157,7 @@ const NewPage: FC = () => {
                   key={pageNum}
                   className={clsx(
                     'h-1 w-[13px] rounded-[100px] bg-gray-500 transition-colors',
-                    page >= pageNum && 'bg-orange-500'
+                    page >= pageNum && 'bg-orange-500',
                   )}
                 />
               ))}

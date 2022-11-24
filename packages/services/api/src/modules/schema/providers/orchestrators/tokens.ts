@@ -4,4 +4,6 @@ export interface SchemaServiceConfig {
   endpoint: string;
 }
 
-export const SCHEMA_SERVICE_CONFIG = new InjectionToken<SchemaServiceConfig>('schema-service-config');
+export const SCHEMA_SERVICE_CONFIG = new InjectionToken<SchemaServiceConfig>(
+  'schema-service-config',
+);

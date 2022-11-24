@@ -47,7 +47,8 @@ const OperationsView = ({
 }): ReactElement => {
   const router = useRouter();
   const [href, periodParam] = router.asPath.split('?');
-  const selectedPeriod: PeriodKey = (new URLSearchParams(periodParam).get('period') as PeriodKey) ?? '1d';
+  const selectedPeriod: PeriodKey =
+    (new URLSearchParams(periodParam).get('period') as PeriodKey) ?? '1d';
   const [selectedOperations, setSelectedOperations] = useState<string[]>([]);
 
   const period = useMemo(() => {
@@ -56,7 +57,11 @@ const OperationsView = ({
 
     const value = parseInt(selectedPeriod.replace(sub, ''));
     const from = formatISO(
-      sub === 'h' ? subHours(now, value) : sub === 'm' ? subMinutes(now, value) : subDays(now, value)
+      sub === 'h'
+        ? subHours(now, value)
+        : sub === 'm'
+        ? subMinutes(now, value)
+        : subDays(now, value),
     );
     const to = formatISO(now);
 
@@ -67,7 +72,7 @@ const OperationsView = ({
     ev => {
       router.push(`${href}?period=${ev.target.value}`);
     },
-    [href, router]
+    [href, router],
   );
 
   return (
@@ -75,7 +80,11 @@ const OperationsView = ({
       <div className="absolute top-0 right-0">
         <Stack direction="row" spacing={4}>
           <div>
-            <OperationsFilterTrigger period={period} selected={selectedOperations} onFilter={setSelectedOperations} />
+            <OperationsFilterTrigger
+              period={period}
+              selected={selectedOperations}
+              onFilter={setSelectedOperations}
+            />
           </div>
           <div>
             <Select

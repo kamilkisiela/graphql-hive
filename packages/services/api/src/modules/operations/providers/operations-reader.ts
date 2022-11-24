@@ -96,7 +96,7 @@ function pickQueryByPeriod(
     };
   },
   period: DateRange | null,
-  resolution?: number
+  resolution?: number,
 ) {
   if (!period) {
     return queryMap.daily;
@@ -130,7 +130,13 @@ function pickQueryByPeriod(
 }
 
 // Remove after legacy tables are no longer used
-function canUseHourlyAggTable({ period, resolution }: { period?: DateRange; resolution?: number }): boolean {
+function canUseHourlyAggTable({
+  period,
+  resolution,
+}: {
+  period?: DateRange;
+  resolution?: number;
+}): boolean {
   if (period) {
     const distance = period.to.getTime() - period.from.getTime();
     const distanceInHours = distance / 1000 / 60 / 60;
@@ -195,7 +201,7 @@ export class OperationsReader {
       operations?: readonly string[];
       excludedClients?: readonly string[];
     },
-    span?: Span
+    span?: Span,
   ): Promise<Record<string, number>> {
     const { clientTableName, coordinatesTableName, queryId } = canUseV2(period)
       ? {
@@ -276,7 +282,7 @@ export class OperationsReader {
       period?: DateRange;
       operations?: readonly string[];
     },
-    span?: Span
+    span?: Span,
   ): Promise<{
     total: number;
     ok: number;
@@ -286,38 +292,44 @@ export class OperationsReader {
       ? pickQueryByPeriod(
           {
             daily: {
-              query: `SELECT sum(total) as total, sum(total_ok) as totalOk FROM operations_daily ${this.createFilter({
-                target,
-                period,
-                operations,
-              })}`,
+              query: `SELECT sum(total) as total, sum(total_ok) as totalOk FROM operations_daily ${this.createFilter(
+                {
+                  target,
+                  period,
+                  operations,
+                },
+              )}`,
               queryId: 'count_operations_daily',
               timeout: 10_000,
               span,
             },
             hourly: {
-              query: `SELECT sum(total) as total, sum(total_ok) as totalOk FROM operations_hourly ${this.createFilter({
-                target,
-                period,
-                operations,
-              })}`,
+              query: `SELECT sum(total) as total, sum(total_ok) as totalOk FROM operations_hourly ${this.createFilter(
+                {
+                  target,
+                  period,
+                  operations,
+                },
+              )}`,
               queryId: 'count_operations_hourly',
               timeout: 15_000,
               span,
             },
             regular: {
-              query: `SELECT count() as total, sum(ok) as totalOk FROM operations ${this.createFilter({
-                target,
-                period,
-                operations,
-              })}
+              query: `SELECT count() as total, sum(ok) as totalOk FROM operations ${this.createFilter(
+                {
+                  target,
+                  period,
+                  operations,
+                },
+              )}
   `,
               queryId: 'count_operations_regular',
               timeout: 30_000,
               span,
             },
           },
-          period ?? null
+          period ?? null,
         )
       : canUseHourlyAggTable({ period })
       ? {
@@ -326,18 +338,20 @@ export class OperationsReader {
               target,
               period,
               operations,
-            }
+            },
           )}`,
           queryId: 'count_operations_mv',
           timeout: 15_000,
           span,
         }
       : {
-          query: `SELECT count() as total, sum(ok) as totalOk FROM operations_new ${this.createFilter({
-            target,
-            period,
-            operations,
-          })}
+          query: `SELECT count() as total, sum(ok) as totalOk FROM operations_new ${this.createFilter(
+            {
+              target,
+              period,
+              operations,
+            },
+          )}
   `,
           queryId: 'count_operations',
           timeout: 30_000,
@@ -383,7 +397,7 @@ export class OperationsReader {
       period: DateRange;
       operations?: readonly string[];
     },
-    span?: Span
+    span?: Span,
   ): Promise<
     Array<{
       document: string;
@@ -503,7 +517,7 @@ export class OperationsReader {
               span,
             },
           },
-      period
+      period,
     );
 
     const result = await this.clickHouse.query<{
@@ -554,7 +568,7 @@ export class OperationsReader {
             queryId: 'operations_registry',
             timeout: 15_000,
             span,
-          }
+          },
     );
 
     const operationsMap = new Map<string, RowOf<typeof registryResult>>();
@@ -596,7 +610,7 @@ export class OperationsReader {
       period: DateRange;
       operations?: readonly string[];
     },
-    span?: Span
+    span?: Span,
   ): Promise<
     Array<{
       name: string;
@@ -672,7 +686,7 @@ export class OperationsReader {
                 span,
               },
             },
-            period
+            period,
           )
         : {
             query: `
@@ -691,7 +705,7 @@ export class OperationsReader {
             queryId: 'count_unique_clients',
             timeout: 15_000,
             span,
-          }
+          },
     );
 
     const total = result.data.reduce((sum, row) => sum + parseInt(row.total, 10), 0);
@@ -754,7 +768,7 @@ export class OperationsReader {
       period: DateRange;
       operations?: readonly string[];
     },
-    span?: Span
+    span?: Span,
   ): Promise<
     Array<{
       name: string;
@@ -801,7 +815,7 @@ export class OperationsReader {
             queryId: 'count_unique_client_names',
             timeout: 15_000,
             span,
-          }
+          },
     );
 
     return result.data.map(row => {
@@ -898,7 +912,7 @@ export class OperationsReader {
       period: DateRange;
       operations?: readonly string[];
     },
-    span?: Span
+    span?: Span,
   ): Promise<
     Array<{
       duration: number;
@@ -946,7 +960,7 @@ export class OperationsReader {
       period: DateRange;
       operations?: readonly string[];
     },
-    span?: Span
+    span?: Span,
   ): Promise<ESPercentiles> {
     const result = await this.clickHouse.query<{
       percentiles: [number, number, number, number];
@@ -988,7 +1002,7 @@ export class OperationsReader {
                 span,
               },
             },
-            period
+            period,
           )
         : canUseHourlyAggTable({ period })
         ? {
@@ -1012,7 +1026,7 @@ export class OperationsReader {
             queryId: 'general_duration_percentiles',
             timeout: 15_000,
             span,
-          }
+          },
     );
 
     return toESPercentiles(result.data[0].percentiles);
@@ -1029,7 +1043,7 @@ export class OperationsReader {
       period: DateRange;
       operations?: readonly string[];
     },
-    span?: Span
+    span?: Span,
   ) {
     const result = await this.clickHouse.query<{
       hash: string;
@@ -1078,7 +1092,7 @@ export class OperationsReader {
                 span,
               },
             },
-            period
+            period,
           )
         : canUseHourlyAggTable({ period })
         ? {
@@ -1106,7 +1120,7 @@ export class OperationsReader {
             queryId: 'duration_percentiles',
             timeout: 15_000,
             span,
-          }
+          },
     );
 
     const collection = new Map<string, ESPercentiles>();
@@ -1118,7 +1132,13 @@ export class OperationsReader {
     return collection;
   }
 
-  async getClientNames({ target, period }: { target: string; period: DateRange }): Promise<string[]> {
+  async getClientNames({
+    target,
+    period,
+  }: {
+    target: string;
+    period: DateRange;
+  }): Promise<string[]> {
     const result = await this.clickHouse.query<{
       client_name: string;
     }>(
@@ -1138,7 +1158,7 @@ export class OperationsReader {
               period,
             })} GROUP BY client_name`,
             timeout: 10_000,
-          }
+          },
     );
 
     return result.data.map(row => row.client_name);
@@ -1157,7 +1177,7 @@ export class OperationsReader {
       resolution: number;
       operations?: readonly string[];
     },
-    span?: Span
+    span?: Span,
   ) {
     // multiply by 1000 to convert to milliseconds
     const result = await this.clickHouse.query<{
@@ -1175,7 +1195,7 @@ export class OperationsReader {
                     multiply(
                       toUnixTimestamp(
                         toStartOfInterval(timestamp, INTERVAL ${this.clickHouse.translateWindow(
-                          calculateTimeWindow({ period, resolution })
+                          calculateTimeWindow({ period, resolution }),
                         )}, 'UTC'),
                       'UTC'),
                     1000) as date,
@@ -1197,7 +1217,7 @@ export class OperationsReader {
                     multiply(
                       toUnixTimestamp(
                         toStartOfInterval(timestamp, INTERVAL ${this.clickHouse.translateWindow(
-                          calculateTimeWindow({ period, resolution })
+                          calculateTimeWindow({ period, resolution }),
                         )}, 'UTC'),
                       'UTC'),
                     1000) as date,
@@ -1219,7 +1239,7 @@ export class OperationsReader {
                     multiply(
                       toUnixTimestamp(
                         toStartOfInterval(timestamp, INTERVAL ${this.clickHouse.translateWindow(
-                          calculateTimeWindow({ period, resolution })
+                          calculateTimeWindow({ period, resolution }),
                         )}, 'UTC'),
                       'UTC'),
                     1000) as date,
@@ -1237,7 +1257,7 @@ export class OperationsReader {
               },
             },
             period,
-            resolution
+            resolution,
           )
         : canUseHourlyAggTable({ period, resolution })
         ? {
@@ -1246,7 +1266,7 @@ export class OperationsReader {
             multiply(
               toUnixTimestamp(
                 toStartOfInterval(timestamp, INTERVAL ${this.clickHouse.translateWindow(
-                  calculateTimeWindow({ period, resolution })
+                  calculateTimeWindow({ period, resolution }),
                 )}, 'UTC'),
               'UTC'),
             1000) as date,
@@ -1268,7 +1288,7 @@ export class OperationsReader {
             multiply(
               toUnixTimestamp(
                 toStartOfInterval(timestamp, INTERVAL ${this.clickHouse.translateWindow(
-                  calculateTimeWindow({ period, resolution })
+                  calculateTimeWindow({ period, resolution }),
                 )}, 'UTC'),
               'UTC'),
             1000) as date,
@@ -1283,7 +1303,7 @@ export class OperationsReader {
             queryId: 'duration_and_count_over_time',
             timeout: 15_000,
             span,
-          }
+          },
     );
 
     return result.data.map(row => {
@@ -1301,7 +1321,9 @@ export class OperationsReader {
       total: string;
     }>({
       // TODO: use the operations_daily table once the FF_CLICKHOUSE_V2_TABLES is available for everyone
-      query: `SELECT sum(total) as total from operations_hourly WHERE target IN ('${targets.join(`', '`)}')`,
+      query: `SELECT sum(total) as total from operations_hourly WHERE target IN ('${targets.join(
+        `', '`,
+      )}')`,
       queryId: 'count_operations_for_targets',
       timeout: 15_000,
     });
@@ -1327,7 +1349,7 @@ export class OperationsReader {
         target: string;
         period: DateRange;
         typename: string;
-      }>
+      }>,
     ) => {
       const aggregationMap = new Map<
         string,
@@ -1379,7 +1401,7 @@ export class OperationsReader {
             target: selector.target,
             period: selector.period,
             typenames: selector.typenames,
-          })
+          }),
         );
       }
 
@@ -1395,7 +1417,7 @@ export class OperationsReader {
 
         return value;
       });
-    }
+    },
   );
 
   private async countCoordinatesOfTypes({
@@ -1407,7 +1429,9 @@ export class OperationsReader {
     period: DateRange;
     typenames: string[];
   }) {
-    const typesFilter = typenames.map(t => `coordinate = '${t}' OR coordinate LIKE '${t}.%'`).join(' OR ');
+    const typesFilter = typenames
+      .map(t => `coordinate = '${t}' OR coordinate LIKE '${t}.%'`)
+      .join(' OR ');
     const result = await this.clickHouse.query<{
       coordinate: string;
       total: number;
@@ -1436,7 +1460,7 @@ export class OperationsReader {
               GROUP BY coordinate`,
             queryId: 'coordinates_per_types',
             timeout: 15_000,
-          }
+          },
     );
 
     return result.data.map(row => ({
@@ -1474,7 +1498,7 @@ export class OperationsReader {
             `,
             queryId: 'coordinates_per_target',
             timeout: 15_000,
-          }
+          },
     );
 
     return result.data.map(row => ({
@@ -1501,7 +1525,7 @@ export class OperationsReader {
             query: `SELECT sum(total) as total, target from operations_new_hourly_mv WHERE timestamp >= subtractDays(NOW(), ${daysLimit}) GROUP BY target`,
             queryId: 'admin_operations_per_target',
             timeout: 15_000,
-          }
+          },
     );
 
     return result.data.map(row => ({
@@ -1530,12 +1554,14 @@ export class OperationsReader {
                       calculateTimeWindow({
                         period,
                         resolution,
-                      })
+                      }),
                     )}, 'UTC'),
                   'UTC'),
                 1000) as date,
                 sum(total) as total
-              FROM ${daysLimit > 1 && daysLimit >= resolution ? 'operations_daily' : 'operations_hourly'}
+              FROM ${
+                daysLimit > 1 && daysLimit >= resolution ? 'operations_daily' : 'operations_hourly'
+              }
               WHERE timestamp >= subtractDays(NOW(), ${daysLimit})
               GROUP BY date
               ORDER BY date
@@ -1555,7 +1581,7 @@ export class OperationsReader {
                           to: new Date(),
                         },
                         resolution,
-                      })
+                      }),
                     )}, 'UTC'),
                   'UTC'),
                 1000) as date,
@@ -1567,7 +1593,7 @@ export class OperationsReader {
             `,
             queryId: 'admin_operations_per_target',
             timeout: 15_000,
-          }
+          },
     );
 
     return result.data.map(row => ({
@@ -1615,7 +1641,15 @@ export class OperationsReader {
     return statement;
   }
 
-  private makeId({ type, field, argument }: { type: string; field?: string | null; argument?: string | null }): string {
+  private makeId({
+    type,
+    field,
+    argument,
+  }: {
+    type: string;
+    field?: string | null;
+    argument?: string | null;
+  }): string {
     return [type, field, argument].filter(Boolean).join('.');
   }
 }

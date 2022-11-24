@@ -37,45 +37,47 @@ export const CreateChannelModal = ({
 }): ReactElement => {
   const router = useRouteSelector();
   const [mutation, mutate] = useMutation(CreateChannel_AddAlertChannelMutation);
-  const { errors, values, touched, handleChange, handleBlur, handleSubmit, isSubmitting } = useFormik({
-    initialValues: {
-      name: '',
-      type: '' as AlertChannelType,
-      slackChannel: '',
-      endpoint: '',
-    },
-    validationSchema: Yup.object().shape({
-      name: Yup.string().required('Must enter name'),
-      type: Yup.mixed().oneOf(Object.values(AlertChannelType)).required('Must select type'),
-      slackChannel: Yup.string()
-        .matches(/^[@#]{1}/, 'Must start with a @ or # character')
-        .when('type', {
-          is: AlertChannelType.Slack,
-          then: Yup.string().required('Must enter slack channel'),
-        }),
-      endpoint: Yup.string()
-        .url()
-        .when('type', {
-          is: AlertChannelType.Webhook,
-          then: Yup.string().required('Must enter endpoint'),
-        }),
-    }),
-    async onSubmit(values) {
-      const { data } = await mutate({
-        input: {
-          organization: router.organizationId,
-          project: router.projectId,
-          name: values.name,
-          type: values.type,
-          slack: values.type === AlertChannelType.Slack ? { channel: values.slackChannel } : null,
-          webhook: values.type === AlertChannelType.Webhook ? { endpoint: values.endpoint } : null,
-        },
-      });
-      if (data?.addAlertChannel.ok) {
-        toggleModalOpen();
-      }
-    },
-  });
+  const { errors, values, touched, handleChange, handleBlur, handleSubmit, isSubmitting } =
+    useFormik({
+      initialValues: {
+        name: '',
+        type: '' as AlertChannelType,
+        slackChannel: '',
+        endpoint: '',
+      },
+      validationSchema: Yup.object().shape({
+        name: Yup.string().required('Must enter name'),
+        type: Yup.mixed().oneOf(Object.values(AlertChannelType)).required('Must select type'),
+        slackChannel: Yup.string()
+          .matches(/^[@#]{1}/, 'Must start with a @ or # character')
+          .when('type', {
+            is: AlertChannelType.Slack,
+            then: Yup.string().required('Must enter slack channel'),
+          }),
+        endpoint: Yup.string()
+          .url()
+          .when('type', {
+            is: AlertChannelType.Webhook,
+            then: Yup.string().required('Must enter endpoint'),
+          }),
+      }),
+      async onSubmit(values) {
+        const { data } = await mutate({
+          input: {
+            organization: router.organizationId,
+            project: router.projectId,
+            name: values.name,
+            type: values.type,
+            slack: values.type === AlertChannelType.Slack ? { channel: values.slackChannel } : null,
+            webhook:
+              values.type === AlertChannelType.Webhook ? { endpoint: values.endpoint } : null,
+          },
+        });
+        if (data?.addAlertChannel.ok) {
+          toggleModalOpen();
+        }
+      },
+    });
 
   return (
     <Modal open={isOpen} onOpenChange={toggleModalOpen}>
@@ -97,7 +99,9 @@ export const CreateChannelModal = ({
           />
           {touched.name && errors.name && <div className="text-sm text-red-500">{errors.name}</div>}
           {mutation.data?.addAlertChannel.error?.inputErrors.name && (
-            <div className="text-sm text-red-500">{mutation.data.addAlertChannel.error.inputErrors.name}</div>
+            <div className="text-sm text-red-500">
+              {mutation.data.addAlertChannel.error.inputErrors.name}
+            </div>
           )}
           <p className="text-sm text-gray-500">
             This will be displayed on channels list, we recommend to make it self-explanatory.
@@ -138,7 +142,9 @@ export const CreateChannelModal = ({
               isInvalid={touched.endpoint && Boolean(errors.endpoint)}
               className="grow"
             />
-            {touched.endpoint && errors.endpoint && <div className="text-sm text-red-500">{errors.endpoint}</div>}
+            {touched.endpoint && errors.endpoint && (
+              <div className="text-sm text-red-500">{errors.endpoint}</div>
+            )}
             {mutation.data?.addAlertChannel.error?.inputErrors.webhookEndpoint && (
               <div className="text-sm text-red-500">
                 {mutation.data.addAlertChannel.error.inputErrors.webhookEndpoint}
@@ -167,7 +173,9 @@ export const CreateChannelModal = ({
               <div className="text-sm text-red-500">{errors.slackChannel}</div>
             )}
             {mutation.data?.addAlertChannel.error?.inputErrors.slackChannel && (
-              <div className="text-sm text-red-500">{mutation.data.addAlertChannel.error.inputErrors.slackChannel}</div>
+              <div className="text-sm text-red-500">
+                {mutation.data.addAlertChannel.error.inputErrors.slackChannel}
+              </div>
             )}
             <p className="text-sm text-gray-500">
               Use <Tag>#channel</Tag> or <Tag>@username</Tag> form.

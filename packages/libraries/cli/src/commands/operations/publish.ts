@@ -13,7 +13,8 @@ export default class OperationsPublish extends Command {
       description: 'api token',
     }),
     require: Flags.string({
-      description: 'Loads specific require.extensions before running the codegen and reading the configuration',
+      description:
+        'Loads specific require.extensions before running the codegen and reading the configuration',
       default: [],
       multiple: true,
     }),
@@ -54,9 +55,11 @@ export default class OperationsPublish extends Command {
       const noMissingHashes = operations.some(op => !!op.operationHash);
 
       if (noMissingHashes) {
-        const comparisonResult = await this.registryApi(registry, token).comparePersistedOperations({
-          hashes: operations.map(op => op.operationHash!),
-        });
+        const comparisonResult = await this.registryApi(registry, token).comparePersistedOperations(
+          {
+            hashes: operations.map(op => op.operationHash!),
+          },
+        );
 
         const operationsToPublish = comparisonResult.comparePersistedOperations;
 
@@ -67,9 +70,13 @@ export default class OperationsPublish extends Command {
 
       if (!operations.length) {
         return this.success(
-          [`Nothing to publish`, '', `  Total: ${collectedOperationsTotal}`, `  Unchanged: ${unchangedTotal}`, ''].join(
-            '\n'
-          )
+          [
+            `Nothing to publish`,
+            '',
+            `  Total: ${collectedOperationsTotal}`,
+            `  Unchanged: ${unchangedTotal}`,
+            '',
+          ].join('\n'),
         );
       }
 
@@ -86,7 +93,7 @@ export default class OperationsPublish extends Command {
             `  Total: ${summary.total}`,
             `  Unchanged: ${summary.unchanged}`,
             '',
-          ].join('\n')
+          ].join('\n'),
         );
       } else {
         this.error('OOPS! An error occurred in publishing the operation(s)');

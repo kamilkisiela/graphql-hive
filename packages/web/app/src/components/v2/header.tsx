@@ -49,11 +49,13 @@ export const Header = (): ReactElement => {
       }
       return acc;
     },
-    { personal: [], organizations: [] }
+    { personal: [], organizations: [] },
   );
 
   const currentOrg =
-    typeof router.organizationId === 'string' ? allOrgs.find(org => org.cleanId === router.organizationId) : null;
+    typeof router.organizationId === 'string'
+      ? allOrgs.find(org => org.cleanId === router.organizationId)
+      : null;
 
   // Copied from tailwindcss website
   // https://github.com/tailwindlabs/tailwindcss.com/blob/94971856747c159b4896621c3308bcfa629bb736/src/components/Header.js#L149
@@ -79,13 +81,15 @@ export const Header = (): ReactElement => {
     <header
       className={clsx(
         'fixed top-0 z-40 w-full border-b border-b-transparent transition',
-        isOpaque && 'border-b-gray-900 bg-black/80 backdrop-blur'
+        isOpaque && 'border-b-gray-900 bg-black/80 backdrop-blur',
       )}
     >
       <div className="container flex h-[84px] items-center justify-between">
         <HiveLink />
         <div className="flex flex-row gap-8">
-          {currentOrg ? <GetStartedProgress organizationType={currentOrg.type} tasks={currentOrg.getStarted} /> : null}
+          {currentOrg ? (
+            <GetStartedProgress organizationType={currentOrg.type} tasks={currentOrg.getStarted} />
+          ) : null}
           <DropdownMenu>
             <DropdownMenu.Trigger asChild>
               <Button>
@@ -107,7 +111,9 @@ export const Header = (): ReactElement => {
                   </DropdownMenu.TriggerItem>
                 ) : null}
                 <DropdownMenu.Content sideOffset={25} className="max-w-[300px]">
-                  <DropdownMenu.Label className="px-2 text-xs font-bold text-gray-500">PERSONAL</DropdownMenu.Label>
+                  <DropdownMenu.Label className="px-2 text-xs font-bold text-gray-500">
+                    PERSONAL
+                  </DropdownMenu.Label>
                   {personal.map(org => (
                     <NextLink href={`/${org.cleanId}`} key={org.cleanId}>
                       <a>
@@ -133,7 +139,11 @@ export const Header = (): ReactElement => {
                 </DropdownMenu.Content>
               </DropdownMenu>
               <DropdownMenu.Item asChild>
-                <a href="https://cal.com/team/the-guild/graphql-hive-15m" target="_blank" rel="noreferrer">
+                <a
+                  href="https://cal.com/team/the-guild/graphql-hive-15m"
+                  target="_blank"
+                  rel="noreferrer"
+                >
                   <CalendarIcon className="h-5 w-5" />
                   Schedule a meeting
                 </a>

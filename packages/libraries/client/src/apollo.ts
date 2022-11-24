@@ -1,6 +1,10 @@
 import type { ApolloServerPlugin } from 'apollo-server-plugin-base';
 import type { DocumentNode } from 'graphql';
-import type { HiveClient, HivePluginOptions, SupergraphSDLFetcherOptions } from './internal/types.js';
+import type {
+  HiveClient,
+  HivePluginOptions,
+  SupergraphSDLFetcherOptions,
+} from './internal/types.js';
 import { createHash } from 'crypto';
 import axios from 'axios';
 import { createHive } from './client.js';
@@ -59,9 +63,14 @@ export function createSupergraphSDLFetcher({ endpoint, key }: SupergraphSDLFetch
   };
 }
 
-export function createSupergraphManager(options: { pollIntervalInMs?: number } & SupergraphSDLFetcherOptions) {
+export function createSupergraphManager(
+  options: { pollIntervalInMs?: number } & SupergraphSDLFetcherOptions,
+) {
   const pollIntervalInMs = options.pollIntervalInMs ?? 30_000;
-  const fetchSupergraph = createSupergraphSDLFetcher({ endpoint: options.endpoint, key: options.key });
+  const fetchSupergraph = createSupergraphSDLFetcher({
+    endpoint: options.endpoint,
+    key: options.key,
+  });
   let timer: ReturnType<typeof setTimeout> | null = null;
 
   return {
@@ -79,7 +88,9 @@ export function createSupergraphManager(options: { pollIntervalInMs?: number } &
               hooks.update?.(result.supergraphSdl);
             }
           } catch (error) {
-            console.error(`Failed to update supergraph: ${error instanceof Error ? error.message : error}`);
+            console.error(
+              `Failed to update supergraph: ${error instanceof Error ? error.message : error}`,
+            );
           }
           poll();
         }, pollIntervalInMs);

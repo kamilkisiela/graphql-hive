@@ -3,7 +3,13 @@ import { Kind, parse } from 'graphql';
 import LRU from 'tiny-lru';
 import { createHash } from 'crypto';
 import { cache } from './helpers';
-import { reportSize, totalOperations, reportMessageSize, normalizeCacheMisses, schemaCoordinatesSize } from './metrics';
+import {
+  reportSize,
+  totalOperations,
+  reportMessageSize,
+  normalizeCacheMisses,
+  schemaCoordinatesSize,
+} from './metrics';
 import {
   stringifyOperation,
   stringifyRegistryRecord,
@@ -19,7 +25,12 @@ import type {
   RawOperationMapRecord,
   ProcessedOperation,
 } from '@hive/usage-common';
-import type { DefinitionNode, DocumentNode, OperationDefinitionNode, OperationTypeNode } from 'graphql';
+import type {
+  DefinitionNode,
+  DocumentNode,
+  OperationDefinitionNode,
+  OperationTypeNode,
+} from 'graphql';
 
 interface NormalizationResult {
   type: OperationTypeNode;
@@ -39,7 +50,7 @@ export function createProcessor(config: { logger: FastifyLoggerInstance }) {
   const normalize = cache(
     normalizeOperation,
     op => op.key,
-    LRU<NormalizationResult>(10_000, 1_800_000 /* 30 minutes */)
+    LRU<NormalizationResult>(10_000, 1_800_000 /* 30 minutes */),
   );
 
   return {
@@ -70,7 +81,12 @@ export function createProcessor(config: { logger: FastifyLoggerInstance }) {
         >();
 
         for (const rawOperation of rawReport.operations) {
-          const processedOperation = processSingleOperation(rawOperation, rawReport.map, rawReport.target, normalize);
+          const processedOperation = processSingleOperation(
+            rawOperation,
+            rawReport.map,
+            rawReport.target,
+            normalize,
+          );
 
           if (processedOperation === null) {
             // The operation should be ignored
@@ -81,7 +97,7 @@ export function createProcessor(config: { logger: FastifyLoggerInstance }) {
 
           // legacy
           serializedLegacyOperations.push(
-            stringifyLegacyOperation(processedOperation, processedOperation.legacy.coordinates)
+            stringifyLegacyOperation(processedOperation, processedOperation.legacy.coordinates),
           );
 
           const sample = operationSample.get(rawOperation.operationMapKey);
@@ -101,7 +117,7 @@ export function createProcessor(config: { logger: FastifyLoggerInstance }) {
                 body: processedOperation.legacy.body,
                 operation_kind: processedOperation.legacy.kind,
                 timestamp: processedOperation.timestamp,
-              })
+              }),
             );
           } else {
             sample.size += 1;
@@ -140,7 +156,7 @@ export function createProcessor(config: { logger: FastifyLoggerInstance }) {
               coordinates: normalized.coordinates,
               expires_at: group.operation.expiresAt || timestamp + 30 * DAY_IN_MS,
               timestamp: timestamp,
-            })
+            }),
           );
         }
       }
@@ -161,7 +177,7 @@ function processSingleOperation(
   operation: RawOperation,
   operationMap: RawOperationMap,
   target: string,
-  normalize: NormalizeFunction
+  normalize: NormalizeFunction,
 ):
   | (ProcessedOperation & {
       legacy: {
@@ -186,7 +202,10 @@ function processSingleOperation(
 
   schemaCoordinatesSize.observe(normalized.coordinates.length);
 
-  const timestamp = typeof operation.timestamp === 'string' ? parseInt(operation.timestamp, 10) : operation.timestamp;
+  const timestamp =
+    typeof operation.timestamp === 'string'
+      ? parseInt(operation.timestamp, 10)
+      : operation.timestamp;
 
   return {
     timestamp: timestamp,

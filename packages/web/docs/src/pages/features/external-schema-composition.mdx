@@ -3,11 +3,13 @@ import { Callout } from '@theguild/components'
 # External Schema Composition
 
 External Schema Composition allows you to build and validate GraphQL Schema outside of GraphQL Hive.
-When enabled, GraphQL Hive will send necessary information over HTTP to your HTTP endpoint and expect a composition result in return.
+When enabled, GraphQL Hive will send necessary information over HTTP to your HTTP endpoint and
+expect a composition result in return.
 
 You most likely don't need this feature, but in some rare cases, it can be useful.
 
-The most common reasons for using the external schema composition are licensing and limited language support (GraphQL Hive runs on NodeJS).
+The most common reasons for using the external schema composition are licensing and limited language
+support (GraphQL Hive runs on NodeJS).
 
 ## Configuration
 
@@ -30,7 +32,8 @@ Your HTTP endpoint must be a POST endpoint that accepts JSON and returns JSON.
 
 ### Securing your endpoint
 
-To make sure your server is only receiving requests from GraphQL Hive, you can use the secret provided in the configuration and verify the signature of the request.
+To make sure your server is only receiving requests from GraphQL Hive, you can use the secret
+provided in the configuration and verify the signature of the request.
 
 > Please contact us if you wish to limit access by an IP address.
 
@@ -38,8 +41,10 @@ The logic of verifying the signature is as follows:
 
 1. Get the value of `X-Hive-Signature-256` header.
 1. Take the raw body of the request.
-1. Use an HMAC hex digest (`sha256`) to compute the hash (body with the secret provided in the configuration).
-1. Compare the result with the value of the `X-Hive-Signature-256` header (use "constant-time" comparison).
+1. Use an HMAC hex digest (`sha256`) to compute the hash (body with the secret provided in the
+   configuration).
+1. Compare the result with the value of the `X-Hive-Signature-256` header (use "constant-time"
+   comparison).
 
 A NodeJS example of the verification process:
 
@@ -153,15 +158,16 @@ Example response:
 
 ### Apollo Federation v1 example
 
-The following example shows how to implement an external composition endpoint for Apollo Federation v1 in NodeJS.
+The following example shows how to implement an external composition endpoint for Apollo Federation
+v1 in NodeJS.
 
 ```bash
 npm install @graphql-hive/external-composition
 ```
 
 <Callout>
-  The `@graphql-hive/external-composition` library provides a thin `compose` function to bring auto-completion and
-  type-safety to your IDE.
+  The `@graphql-hive/external-composition` library provides a thin `compose` function to bring
+  auto-completion and type-safety to your IDE.
 </Callout>
 
 ```javascript
@@ -234,15 +240,16 @@ await server.listen({
 
 ### Apollo Federation v2 example
 
-The following example shows how to implement an external composition endpoint for Apollo Federation v2 in NodeJS.
+The following example shows how to implement an external composition endpoint for Apollo Federation
+v2 in NodeJS.
 
 ```bash
 npm install @graphql-hive/external-composition
 ```
 
 <Callout>
-  The `@graphql-hive/external-composition` library provides a thin `compose` function to bring auto-completion and
-  type-safety to your IDE.
+  The `@graphql-hive/external-composition` library provides a thin `compose` function to bring
+  auto-completion and type-safety to your IDE.
 </Callout>
 
 ```javascript

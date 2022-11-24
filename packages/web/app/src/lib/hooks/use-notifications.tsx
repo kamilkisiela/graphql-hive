@@ -12,6 +12,6 @@ export function useNotifications() {
     (title: string, status: 'success' | 'error' | 'warning' | 'info') => {
       toast({ title, status });
     },
-    [toast]
+    [toast],
   );
 }

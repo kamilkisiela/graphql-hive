@@ -206,6 +206,6 @@ export function deployApp({
       ],
       port: 3000,
     },
-    [graphql.service, graphql.deployment, dbMigrations]
+    [graphql.service, graphql.deployment, dbMigrations],
   ).deploy();
 }

@@ -1,26 +1,26 @@
 {
-  "private": true,
-  "type": "module",
   "name": "@hive/rate-limit",
-  "description": "A microservice for Hive SaaS, that exposes information about rate limits per given org/target.",
   "version": "0.0.0",
+  "type": "module",
+  "description": "A microservice for Hive SaaS, that exposes information about rate limits per given org/target.",
   "license": "MIT",
+  "private": true,
   "scripts": {
-    "dev": "tsup-node src/dev.ts --watch --format esm --target node16 --onSuccess 'node dist/dev.js' | pino-pretty --translateTime HH:MM:ss TT --ignore pid,hostname",
     "build": "bob runify --single",
+    "dev": "tsup-node src/dev.ts --watch --format esm --target node16 --onSuccess 'node dist/dev.js' | pino-pretty --translateTime HH:MM:ss TT --ignore pid,hostname",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@whatwg-node/fetch": "0.4.7",
-    "zod": "3.15.1",
-    "@trpc/server": "9.23.2",
-    "@trpc/client": "9.23.2",
-    "reflect-metadata": "0.1.13",
     "@sentry/node": "7.20.1",
     "@sentry/tracing": "7.20.1",
-    "dotenv": "10.0.0",
+    "@trpc/client": "9.23.2",
+    "@trpc/server": "9.23.2",
+    "@whatwg-node/fetch": "0.4.7",
     "date-fns": "2.28.0",
-    "got": "12.5.3"
+    "dotenv": "10.0.0",
+    "got": "12.5.3",
+    "reflect-metadata": "0.1.13",
+    "zod": "3.15.1"
   },
   "devDependencies": {
     "@hive/emails": "workspace:*",

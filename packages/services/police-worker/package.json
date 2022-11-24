@@ -1,15 +1,15 @@
 {
   "name": "@hive/police-script",
-  "private": true,
   "version": "0.0.0",
   "license": "MIT",
+  "private": true,
   "scripts": {
     "build": "node build.mjs",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "esbuild": "0.14.39",
+    "@cloudflare/workers-types": "3.4.0",
     "@types/service-worker-mock": "2.0.1",
-    "@cloudflare/workers-types": "3.4.0"
+    "esbuild": "0.14.39"
   }
 }

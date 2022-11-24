@@ -11,7 +11,9 @@ export interface GitHubApplicationConfig {
   privateKey: string;
 }
 
-export const GITHUB_APP_CONFIG = new InjectionToken<GitHubApplicationConfig>('GitHubApplicationConfig');
+export const GITHUB_APP_CONFIG = new InjectionToken<GitHubApplicationConfig>(
+  'GitHubApplicationConfig',
+);
 
 @Injectable({
   scope: Scope.Operation,
@@ -25,7 +27,7 @@ export class GitHubIntegrationManager {
     logger: Logger,
     private authManager: AuthManager,
     private storage: Storage,
-    @Inject(GITHUB_APP_CONFIG) private config: GitHubApplicationConfig | null
+    @Inject(GITHUB_APP_CONFIG) private config: GitHubApplicationConfig | null,
   ) {
     this.logger = logger.child({
       source: 'GitHubIntegrationManager',
@@ -47,7 +49,7 @@ export class GitHubIntegrationManager {
   async register(
     input: OrganizationSelector & {
       installationId: string;
-    }
+    },
   ): Promise<void> {
     this.logger.debug('Registering GitHub integration (organization=%s)', input.organization);
     await this.authManager.ensureOrganizationAccess({
@@ -88,7 +90,9 @@ export class GitHubIntegrationManager {
     });
   }
 
-  async getRepositories(selector: OrganizationSelector): Promise<IntegrationsModule.GitHubIntegration['repositories']> {
+  async getRepositories(
+    selector: OrganizationSelector,
+  ): Promise<IntegrationsModule.GitHubIntegration['repositories']> {
     const installationId = await this.getInstallationId(selector);
     this.logger.debug('Fetching repositories');
 
@@ -106,7 +110,7 @@ export class GitHubIntegrationManager {
             return {
               nameWithOwner: repo.full_name,
             };
-          })
+          }),
         )
         .catch(e => {
           this.logger.warn('Failed to fetch repositories', e);
@@ -148,20 +152,22 @@ export class GitHubIntegrationManager {
         /** The summary of the check run. This parameter supports Markdown. */
         summary: string;
       };
-    }
+    },
   ) {
     this.logger.debug(
       'Creating check-run (owner=%s, name=%s, sha=%s)',
       input.repositoryOwner,
       input.repositoryName,
-      input.sha
+      input.sha,
     );
     const installationId = await this.getInstallationId({
       organization: input.organization,
     });
 
     if (!installationId) {
-      throw new Error('GitHub Integration not found. Please install our GraphQL Hive GitHub Application.');
+      throw new Error(
+        'GitHub Integration not found. Please install our GraphQL Hive GitHub Application.',
+      );
     }
 
     if (!this.app) {

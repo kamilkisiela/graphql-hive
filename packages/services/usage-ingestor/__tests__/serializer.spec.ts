@@ -55,7 +55,7 @@ test('stringify operation in correct format and order', () => {
         operationType: 'query' as any,
         // missing metadata, on purpose
       },
-    ].map(stringifyOperation)
+    ].map(stringifyOperation),
   );
   expect(serialized).toBe(
     [
@@ -81,7 +81,7 @@ test('stringify operation in correct format and order', () => {
         /* client_name */ `\\N`,
         /* client_version */ `\\N`,
       ].join(','),
-    ].join('\n')
+    ].join('\n'),
   );
 });
 
@@ -110,7 +110,7 @@ test('stringify registry records in correct format and order', () => {
         operation_kind: 'query',
         coordinates: ['Query', 'Query.foo'],
       },
-    ].map(stringifyRegistryRecord)
+    ].map(stringifyRegistryRecord),
   );
   expect(serialized).toBe(
     [
@@ -136,7 +136,7 @@ test('stringify registry records in correct format and order', () => {
         /* timestamp */ timestamp.asString,
         /* expires_at */ expiresAt.asString,
       ].join(','),
-    ].join('\n')
+    ].join('\n'),
   );
 });
 
@@ -179,7 +179,7 @@ describe('legacy', () => {
           operationType: 'query' as any,
           // missing metadata, on purpose
         },
-      ].map(op => stringifyLegacyOperation(op, op.fields))
+      ].map(op => stringifyLegacyOperation(op, op.fields)),
     );
     expect(serialized).toBe(
       [
@@ -207,7 +207,7 @@ describe('legacy', () => {
           /* client_name */ `\\N`,
           /* client_version */ `\\N`,
         ].join(','),
-      ].join('\n')
+      ].join('\n'),
     );
   });
 
@@ -230,7 +230,7 @@ describe('legacy', () => {
           body: `{ foo }`,
           operation_kind: 'query',
         },
-      ].map(stringifyLegacyRegistryRecord)
+      ].map(stringifyLegacyRegistryRecord),
     );
     expect(serialized).toBe(
       [
@@ -250,7 +250,7 @@ describe('legacy', () => {
           /* operation */ `"query"`,
           /* inserted_at */ timestamp.asString,
         ].join(','),
-      ].join('\n')
+      ].join('\n'),
     );
   });
 });

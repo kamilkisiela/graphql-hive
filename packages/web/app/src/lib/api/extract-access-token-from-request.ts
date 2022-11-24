@@ -7,14 +7,17 @@ import type { SessionContainerInterface } from 'supertokens-node/lib/build/recip
 
 supertokens.init(backendConfig());
 
-export async function extractAccessTokenFromRequest(req: NextApiRequest, res: NextApiResponse): Promise<string> {
+export async function extractAccessTokenFromRequest(
+  req: NextApiRequest,
+  res: NextApiResponse,
+): Promise<string> {
   await superTokensNextWrapper(
     async next =>
       await verifySession({
         sessionRequired: false,
       })(req as any, res as any, next),
     req,
-    res
+    res,
   );
   const session: SessionContainerInterface | undefined = (req as any).session;
   // Session can be undefined in case no access token was sent.

@@ -21,7 +21,11 @@ export const DeleteOrganizationModal = ({
   const { replace } = useRouter();
 
   return (
-    <Modal open={isOpen} onOpenChange={toggleModalOpen} className="flex flex-col items-center gap-5">
+    <Modal
+      open={isOpen}
+      onOpenChange={toggleModalOpen}
+      className="flex flex-col items-center gap-5"
+    >
       <TrashIcon className="h-24 w-24 text-red-500 opacity-70" />
       <Heading>Delete organization</Heading>
       <p className="text-sm text-gray-500">

@@ -14,7 +14,7 @@ export function normalizeEnv(env: kx.types.Container['env']): any[] {
 export class PodBuilder extends kx.PodBuilder {
   public asExtendedDeploymentSpec(
     args?: kx.types.PodBuilderDeploymentSpec,
-    metadata?: k8s.types.input.meta.v1.ObjectMeta
+    metadata?: k8s.types.input.meta.v1.ObjectMeta,
   ): pulumi.Output<k8s.types.input.apps.v1.DeploymentSpec> {
     const podName = this.podSpec.containers.apply((containers: any) => {
       return pulumi.output(containers[0].name);

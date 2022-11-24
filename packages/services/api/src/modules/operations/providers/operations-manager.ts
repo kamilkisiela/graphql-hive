@@ -62,7 +62,7 @@ export class OperationsManager {
     logger: Logger,
     private authManager: AuthManager,
     private reader: OperationsReader,
-    private storage: Storage
+    private storage: Storage,
   ) {
     this.logger = logger.child({ source: 'OperationsManager' });
   }
@@ -105,7 +105,7 @@ export class OperationsManager {
         .countOperations({
           target,
         })
-        .then(r => r.total > 0)
+        .then(r => r.total > 0),
     );
   }
 
@@ -156,7 +156,9 @@ export class OperationsManager {
   }
 
   async readFieldStats(input: ReadFieldStatsInput): Promise<ReadFieldStatsOutput>;
-  async readFieldStats(input: Optional<ReadFieldStatsInput, 'field'>): Promise<Optional<ReadFieldStatsOutput, 'field'>>;
+  async readFieldStats(
+    input: Optional<ReadFieldStatsInput, 'field'>,
+  ): Promise<Optional<ReadFieldStatsOutput, 'field'>>;
   async readFieldStats(input: ReadFieldStatsInput): Promise<ReadFieldStatsOutput> {
     const { type, field, argument, period, organization, project, target } = input;
     this.logger.info('Counting a field (period=%o, target=%s)', period, target);
@@ -215,7 +217,7 @@ export class OperationsManager {
       'Counting fields (period=%o, target=%s, excludedClients=%s)',
       period,
       target,
-      excludedClients?.join(', ') ?? 'none'
+      excludedClients?.join(', ') ?? 'none',
     );
 
     if (!unsafe__itIsMeInspector) {
@@ -289,7 +291,12 @@ export class OperationsManager {
     resolution: number;
     operations?: readonly string[];
   } & TargetSelector) {
-    this.logger.info('Reading requests over time (period=%o, resolution=%s, target=%s)', period, resolution, target);
+    this.logger.info(
+      'Reading requests over time (period=%o, resolution=%s, target=%s)',
+      period,
+      resolution,
+      target,
+    );
     await this.authManager.ensureTargetAccess({
       organization,
       project,
@@ -317,7 +324,12 @@ export class OperationsManager {
     resolution: number;
     operations?: readonly string[];
   } & TargetSelector) {
-    this.logger.info('Reading failures over time (period=%o, resolution=%s, target=%s)', period, resolution, target);
+    this.logger.info(
+      'Reading failures over time (period=%o, resolution=%s, target=%s)',
+      period,
+      resolution,
+      target,
+    );
     await this.authManager.ensureTargetAccess({
       organization,
       project,
@@ -345,7 +357,12 @@ export class OperationsManager {
     resolution: number;
     operations?: readonly string[];
   } & TargetSelector) {
-    this.logger.info('Reading duration over time (period=%o, resolution=%s, target=%s)', period, resolution, target);
+    this.logger.info(
+      'Reading duration over time (period=%o, resolution=%s, target=%s)',
+      period,
+      resolution,
+      target,
+    );
     await this.authManager.ensureTargetAccess({
       organization,
       project,
@@ -391,7 +408,11 @@ export class OperationsManager {
     target,
     operations,
   }: { period: DateRange; operations?: readonly string[] } & TargetSelector) {
-    this.logger.info('Reading detailed duration percentiles (period=%o, target=%s)', period, target);
+    this.logger.info(
+      'Reading detailed duration percentiles (period=%o, target=%s)',
+      period,
+      target,
+    );
     await this.authManager.ensureTargetAccess({
       organization,
       project,

@@ -14,5 +14,5 @@ export const Card = forwardRef<any, { children: ReactNode; className?: string; a
         {children}
       </TagToUse>
     );
-  }
+  },
 );

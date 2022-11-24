@@ -29,7 +29,7 @@ export class ProjectManager {
     private authManager: AuthManager,
     private schemaManager: SchemaManager,
     private tokenStorage: TokenStorage,
-    private activityManager: ActivityManager
+    private activityManager: ActivityManager,
   ) {
     this.logger = logger.child({ source: 'ProjectManager' });
   }
@@ -39,7 +39,7 @@ export class ProjectManager {
       name: string;
       type: ProjectType;
     } & OrganizationSelector &
-      NullableAndPartial<CustomOrchestratorConfig>
+      NullableAndPartial<CustomOrchestratorConfig>,
   ): Promise<Project> {
     const { name, type, organization, buildUrl, validationUrl } = input;
     this.logger.info('Creating a project (input=%o)', input);
@@ -144,7 +144,7 @@ export class ProjectManager {
   async updateName(
     input: {
       name: string;
-    } & ProjectSelector
+    } & ProjectSelector,
   ): Promise<Project> {
     const { name, organization, project } = input;
     this.logger.info('Updating a project name (input=%o)', input);
@@ -185,7 +185,7 @@ export class ProjectManager {
   async updateGitRepository(
     input: {
       gitRepository?: string | null;
-    } & ProjectSelector
+    } & ProjectSelector,
   ): Promise<Project> {
     const { gitRepository, organization, project } = input;
     this.logger.info('Updating a project git repository (input=%o)', input);

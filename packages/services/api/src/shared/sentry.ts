@@ -6,7 +6,10 @@ export type SentryContext = Parameters<Span['startChild']>[0] & {
   captureException?: boolean;
 };
 
-export function sentry(name: string, addToContext?: (...args: any[]) => SentryContext): MethodDecorator {
+export function sentry(
+  name: string,
+  addToContext?: (...args: any[]) => SentryContext,
+): MethodDecorator {
   return function sentryDecorator(_target, _prop, descriptor) {
     const originalMethod = descriptor.value;
 
@@ -31,7 +34,7 @@ export function sentry(name: string, addToContext?: (...args: any[]) => SentryCo
           ? {
               op: context,
             }
-          : context
+          : context,
       );
 
       if (!span) {
@@ -40,7 +43,9 @@ export function sentry(name: string, addToContext?: (...args: any[]) => SentryCo
 
       const argsWithoutSpan = passedSpan ? args.slice(0, args.length - 1) : args;
 
-      return ((originalMethod as any).apply(this, argsWithoutSpan.concat(span)) as Promise<any>).then(
+      return (
+        (originalMethod as any).apply(this, argsWithoutSpan.concat(span)) as Promise<any>
+      ).then(
         result => {
           span.finish();
           return Promise.resolve(result);
@@ -52,7 +57,7 @@ export function sentry(name: string, addToContext?: (...args: any[]) => SentryCo
           span.setStatus('internal_error');
           span.finish();
           return Promise.reject(error);
-        }
+        },
       );
     } as any;
   };

@@ -46,13 +46,17 @@ export class OrganizationAccess {
     ReadonlyArray<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>,
     string
   >;
-  private scopes: DataLoader<OrganizationUserScopesSelector, readonly OrganizationAccessScope[], string>;
+  private scopes: DataLoader<
+    OrganizationUserScopesSelector,
+    readonly OrganizationAccessScope[],
+    string
+  >;
   tokenInfo: DataLoader<TokenSelector, Token | null, string>;
 
   constructor(
     logger: Logger,
     private storage: Storage,
-    @Inject(forwardRef(() => TokenStorage)) private tokenStorage: TokenStorage
+    @Inject(forwardRef(() => TokenStorage)) private tokenStorage: TokenStorage,
   ) {
     this.logger = logger.child({
       source: 'OrganizationAccess',
@@ -65,7 +69,11 @@ export class OrganizationAccess {
           const scopesForSelector = scopes[i];
 
           if (scopesForSelector instanceof Error) {
-            this.logger.warn(`OrganizationAccess:user (error=%s, selector=%o)`, scopesForSelector.message, selector);
+            this.logger.warn(
+              `OrganizationAccess:user (error=%s, selector=%o)`,
+              scopesForSelector.message,
+              selector,
+            );
             return false;
           }
 
@@ -81,7 +89,7 @@ export class OrganizationAccess {
             scope: selector.scope,
           });
         },
-      }
+      },
     );
     this.tokenAccess = new Dataloader(
       selectors =>
@@ -94,7 +102,7 @@ export class OrganizationAccess {
             }
 
             return false;
-          })
+          }),
         ),
       {
         cacheKeyFn(selector) {
@@ -105,7 +113,7 @@ export class OrganizationAccess {
             scope: selector.scope,
           });
         },
-      }
+      },
     );
     this.allScopes = new Dataloader(
       async selectors => {
@@ -121,7 +129,7 @@ export class OrganizationAccess {
             user: selector.user,
           });
         },
-      }
+      },
     );
     this.scopes = new Dataloader(
       async selectors => {
@@ -131,7 +139,11 @@ export class OrganizationAccess {
           const scopes = scopesPerSelector[i];
 
           if (scopes instanceof Error) {
-            this.logger.warn(`OrganizationAccess:scopes (error=%s, selector=%o)`, scopes.message, selector);
+            this.logger.warn(
+              `OrganizationAccess:scopes (error=%s, selector=%o)`,
+              scopes.message,
+              selector,
+            );
             return [];
           }
 
@@ -146,7 +158,7 @@ export class OrganizationAccess {
             user: selector.user,
           });
         },
-      }
+      },
     );
     this.tokenInfo = new Dataloader(
       selectors => Promise.all(selectors.map(selector => this.tokenStorage.getToken(selector))),
@@ -154,7 +166,7 @@ export class OrganizationAccess {
         cacheKeyFn(selector) {
           return selector.token;
         },
-      }
+      },
     );
   }
 

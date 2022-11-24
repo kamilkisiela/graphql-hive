@@ -6,7 +6,8 @@ Hive comes with a CDN worker (deployed to CF Workers), along with KV cache to st
 
 To run Hive CDN locally, you can use the following command: `pnpm dev`.
 
-> Note: during dev, KV is mocked using JS `Map`, so it's ephermal and will be deleted with any change in code.
+> Note: during dev, KV is mocked using JS `Map`, so it's ephermal and will be deleted with any
+> change in code.
 
 To publish manually a schema, for target id `1`:
 
@@ -34,7 +35,8 @@ curl http://localhost:4010/1/introspection -H "x-hive-cdn-key: fake"
 
 Hive server has `CF_BASE_PATH` env var that tells is where to send the published schemas.
 
-To connect your server to the local, mocked CDN, make sure you have the following in `packages/server/.env`:
+To connect your server to the local, mocked CDN, make sure you have the following in
+`packages/server/.env`:
 
 ```dotenv
 CF_BASE_PATH=http://localhost:4010

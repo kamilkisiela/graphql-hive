@@ -21,9 +21,12 @@ generates:
         DateTime: string
         SafeInt: number
       mappers:
-        SchemaChangeConnection: ../shared/mappers#SchemaChangeConnection as SchemaChangeConnectionMapper
-        SchemaErrorConnection: ../shared/mappers#SchemaErrorConnection as SchemaErrorConnectionMapper
-        OrganizationConnection: ../shared/mappers#OrganizationConnection as OrganizationConnectionMapper
+        SchemaChangeConnection:
+          ../shared/mappers#SchemaChangeConnection as SchemaChangeConnectionMapper
+        SchemaErrorConnection:
+          ../shared/mappers#SchemaErrorConnection as SchemaErrorConnectionMapper
+        OrganizationConnection:
+          ../shared/mappers#OrganizationConnection as OrganizationConnectionMapper
         UserConnection: ../shared/mappers#UserConnection as UserConnectionMapper
         ActivityConnection: ../shared/mappers#ActivityConnection as ActivityConnectionMapper
         MemberConnection: ../shared/mappers#MemberConnection as MemberConnectionMapper
@@ -31,16 +34,20 @@ generates:
         TargetConnection: ../shared/mappers#TargetConnection as TargetConnectionMapper
         SchemaConnection: ../shared/mappers#SchemaConnection as SchemaConnectionMapper
         TokenConnection: ../shared/mappers#TokenConnection as TokenConnectionMapper
-        OperationStatsConnection: ../shared/mappers#OperationStatsConnection as OperationStatsConnectionMapper
-        ClientStatsConnection: ../shared/mappers#ClientStatsConnection as ClientStatsConnectionMapper
+        OperationStatsConnection:
+          ../shared/mappers#OperationStatsConnection as OperationStatsConnectionMapper
+        ClientStatsConnection:
+          ../shared/mappers#ClientStatsConnection as ClientStatsConnectionMapper
         OperationsStats: ../shared/mappers#OperationsStats as OperationsStatsMapper
         DurationStats: ../shared/mappers#DurationStats as DurationStatsMapper
         SchemaComparePayload: ../shared/mappers#SchemaComparePayload as SchemaComparePayloadMapper
         SchemaCompareResult: ../shared/mappers#SchemaCompareResult as SchemaCompareResultMapper
-        SchemaVersionConnection: ../shared/mappers#SchemaVersionConnection as SchemaVersionConnectionMapper
+        SchemaVersionConnection:
+          ../shared/mappers#SchemaVersionConnection as SchemaVersionConnectionMapper
         SchemaVersion: ../shared/mappers#SchemaVersion as SchemaVersionMapper
         Schema: ../shared/mappers#Schema as SchemaMapper
-        PersistedOperationConnection: ../shared/mappers#PersistedOperationConnection as PersistedOperationMapper
+        PersistedOperationConnection:
+          ../shared/mappers#PersistedOperationConnection as PersistedOperationMapper
         Organization: ../shared/entities#Organization as OrganizationMapper
         Project: ../shared/entities#Project as ProjectMapper
         Target: ../shared/entities#Target as TargetMapper
@@ -55,13 +62,15 @@ generates:
         AdminQuery: '{}'
         AdminStats: '{ daysLimit?: number | null }'
         AdminGeneralStats: '{ daysLimit?: number | null }'
-        AdminOrganizationStats: ../shared/entities#AdminOrganizationStats as AdminOrganizationStatsMapper
+        AdminOrganizationStats:
+          ../shared/entities#AdminOrganizationStats as AdminOrganizationStatsMapper
         UsageEstimation: '../shared/mappers#TargetsEstimationFilter'
         UsageEstimationScope: '../shared/mappers#TargetsEstimationDateFilter'
         BillingPaymentMethod: 'StripeTypes.PaymentMethod.Card'
         BillingDetails: 'StripeTypes.PaymentMethod.BillingDetails'
         BillingInvoice: 'StripeTypes.Invoice'
-        OrganizationGetStarted: ../shared/entities#OrganizationGetStarted as OrganizationGetStartedMapper
+        OrganizationGetStarted:
+          ../shared/entities#OrganizationGetStarted as OrganizationGetStartedMapper
         SchemaExplorer: ../shared/mappers#SchemaExplorerMapper
         GraphQLObjectType: ../shared/mappers#GraphQLObjectTypeMapper
         GraphQLInterfaceType: ../shared/mappers#GraphQLInterfaceTypeMapper
@@ -74,7 +83,8 @@ generates:
         GraphQLField: ../shared/mappers#GraphQLFieldMapper
         GraphQLInputField: ../shared/mappers#GraphQLInputFieldMapper
         GraphQLArgument: ../shared/mappers#GraphQLArgumentMapper
-        OrganizationInvitation: ../shared/entities#OrganizationInvitation as OrganizationInvitationMapper
+        OrganizationInvitation:
+          ../shared/entities#OrganizationInvitation as OrganizationInvitationMapper
         OIDCIntegration: '../shared/entities#OIDCIntegration as OIDCIntegrationMapper'
         User: '../shared/entities#User as UserMapper'
     plugins:

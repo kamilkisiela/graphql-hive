@@ -24,7 +24,9 @@ export function deployDbMigrations({
   kafka: Kafka;
 }) {
   const rawConnectionString = apiConfig.requireSecret('postgresConnectionString');
-  const connectionString = rawConnectionString.apply(rawConnectionString => parse(rawConnectionString));
+  const connectionString = rawConnectionString.apply(rawConnectionString =>
+    parse(rawConnectionString),
+  );
 
   const { job } = new RemoteArtifactAsServiceDeployment(
     'db-migrations',
@@ -50,7 +52,7 @@ export function deployDbMigrations({
       packageInfo: packageHelper.npmPack('@hive/storage'),
     },
     [clickhouse.deployment, clickhouse.service],
-    clickhouse.service
+    clickhouse.service,
   ).deployAsJob();
 
   return job;

@@ -50,6 +50,6 @@ export function deployWebhooks({
       packageInfo: packageHelper.npmPack('@hive/webhooks'),
       replicas: 1,
     },
-    [redis.deployment, redis.service]
+    [redis.deployment, redis.service],
   ).deploy();
 }

@@ -101,7 +101,7 @@ export const Select = ({
           active:bg-gray-900
         `,
           isInvalid ? 'text-red-500' : value ? 'text-white' : 'text-gray-500',
-          isInvalid ? 'border-red-500' : 'border-transparent'
+          isInvalid ? 'border-red-500' : 'border-transparent',
         )}
         {...props}
       >

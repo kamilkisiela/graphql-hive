@@ -1,5 +1,16 @@
-import { TargetAccessScope, ProjectType, ProjectAccessScope, OrganizationAccessScope } from '@app/gql/graphql';
-import { createOrganization, createProject, createToken, updateOrgRateLimit, waitFor } from '../../../testkit/flow';
+import {
+  TargetAccessScope,
+  ProjectType,
+  ProjectAccessScope,
+  OrganizationAccessScope,
+} from '@app/gql/graphql';
+import {
+  createOrganization,
+  createProject,
+  createToken,
+  updateOrgRateLimit,
+  waitFor,
+} from '../../../testkit/flow';
 import * as emails from '../../../testkit/emails';
 import { authenticate, userEmails } from '../../../testkit/auth';
 import { collect } from '../../../testkit/usage';
@@ -24,7 +35,7 @@ test('rate limit approaching and reached for organization', async () => {
     {
       name: generateUnique(),
     },
-    access_token
+    access_token,
   );
 
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
@@ -34,11 +45,13 @@ test('rate limit approaching and reached for organization', async () => {
       type: ProjectType.Single,
       name: 'bar',
     },
-    access_token
+    access_token,
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTargets.find(t => t.name === 'production')!;
+  const target = projectResult.body.data!.createProject.ok!.createdTargets.find(
+    t => t.name === 'production',
+  )!;
 
   await updateOrgRateLimit(
     {
@@ -47,7 +60,7 @@ test('rate limit approaching and reached for organization', async () => {
     {
       operations: 11,
     },
-    access_token
+    access_token,
   );
 
   const tokenResult = await createToken(
@@ -58,9 +71,13 @@ test('rate limit approaching and reached for organization', async () => {
       target: target.cleanId,
       organizationScopes: [OrganizationAccessScope.Read],
       projectScopes: [ProjectAccessScope.Read],
-      targetScopes: [TargetAccessScope.Read, TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      targetScopes: [
+        TargetAccessScope.Read,
+        TargetAccessScope.RegistryRead,
+        TargetAccessScope.RegistryWrite,
+      ],
     },
-    access_token
+    access_token,
   );
 
   expect(tokenResult.body.errors).not.toBeDefined();

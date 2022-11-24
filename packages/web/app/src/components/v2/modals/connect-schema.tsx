@@ -70,13 +70,16 @@ export const ConnectSchemaModal = ({
       {project && !generating && mutation.data && (
         <>
           <p className="text-sm text-gray-500">
-            With high-availability and multi-zone CDN service based on Cloudflare, Hive allows you to access the
-            {taxonomy[project.type] ?? 'schema'} of your API, through a secured external service, that's always up
-            regardless of Hive.
+            With high-availability and multi-zone CDN service based on Cloudflare, Hive allows you
+            to access the
+            {taxonomy[project.type] ?? 'schema'} of your API, through a secured external service,
+            that's always up regardless of Hive.
           </p>
           <span className="text-sm text-gray-500">You can use the following endpoint:</span>
           <CopyValue value={mutation.data.createCdnToken.url} />
-          <span className="text-sm text-gray-500">To authenticate, use the following HTTP headers:</span>
+          <span className="text-sm text-gray-500">
+            To authenticate, use the following HTTP headers:
+          </span>
           <Tag>X-Hive-CDN-Key: {mutation.data.createCdnToken.token}</Tag>
           <p className="text-sm text-gray-500">
             Read the{' '}
@@ -92,7 +95,13 @@ export const ConnectSchemaModal = ({
           </p>
         </>
       )}
-      <Button type="button" variant="secondary" size="large" onClick={toggleModalOpen} className="self-end">
+      <Button
+        type="button"
+        variant="secondary"
+        size="large"
+        onClick={toggleModalOpen}
+        className="self-end"
+      >
         Close
       </Button>
     </Modal>

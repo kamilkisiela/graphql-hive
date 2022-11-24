@@ -51,7 +51,7 @@ const plugin: FastifyPluginAsync = async server => {
         name: `${request.method} ${request.url}`,
         ...traceparentData,
       },
-      { request: extractedRequestData }
+      { request: extractedRequestData },
     );
     (request as any).sentryTransaction = transaction;
 
@@ -74,7 +74,10 @@ const plugin: FastifyPluginAsync = async server => {
       transaction.setData('query', request.query);
 
       transaction.setData('authorization', replaceAuthorization(request.headers.authorization));
-      transaction.setData('x-api-token', replaceAuthorization(request.headers['x-api-token'] as any));
+      transaction.setData(
+        'x-api-token',
+        replaceAuthorization(request.headers['x-api-token'] as any),
+      );
 
       transaction.setHttpStatus(reply.statusCode);
       transaction.finish();
@@ -110,7 +113,7 @@ const plugin: FastifyPluginAsync = async server => {
         JSON.stringify({
           error: 500,
           message: 'Internal Server Error',
-        })
+        }),
       );
     });
   });
@@ -123,7 +126,10 @@ const sentryPlugin = fp(plugin, {
 /** Default request keys that'll be used to extract data from the request */
 const DEFAULT_REQUEST_KEYS = ['data', 'headers', 'method', 'query_string', 'url'];
 
-function extractRequestData(req: FastifyRequest, keys: string[] = DEFAULT_REQUEST_KEYS): ExtractedNodeRequestData {
+function extractRequestData(
+  req: FastifyRequest,
+  keys: string[] = DEFAULT_REQUEST_KEYS,
+): ExtractedNodeRequestData {
   const requestData: { [key: string]: any } = {};
 
   const headers = req.headers;
@@ -152,7 +158,8 @@ function extractRequestData(req: FastifyRequest, keys: string[] = DEFAULT_REQUES
           break;
         }
         if (req.body !== undefined) {
-          requestData.data = typeof req.body === 'string' ? req.body : JSON.stringify(normalize(req.body));
+          requestData.data =
+            typeof req.body === 'string' ? req.body : JSON.stringify(normalize(req.body));
         }
         break;
       default:

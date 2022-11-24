@@ -54,7 +54,7 @@ export default abstract class extends Command {
     TArgs extends {
       [key: string]: any;
     },
-    TKey extends keyof TArgs
+    TKey extends keyof TArgs,
   >({
     key,
     args,
@@ -104,7 +104,7 @@ export default abstract class extends Command {
     TArgs extends {
       [key: string]: any;
     },
-    TKey extends keyof TArgs
+    TKey extends keyof TArgs,
   >(key: TKey, args: TArgs): TArgs[TKey] | undefined {
     if (args[key]) {
       return args[key];
@@ -129,7 +129,7 @@ export default abstract class extends Command {
           'graphql-client-name': 'Hive CLI',
           'graphql-client-version': this.config.version,
         },
-      })
+      }),
     );
   }
 
@@ -163,10 +163,12 @@ export default abstract class extends Command {
     TFlags extends {
       require: string[];
       [key: string]: any;
-    }
+    },
   >(flags: TFlags) {
     if (flags.require && flags.require.length > 0) {
-      await Promise.all(flags.require.map(mod => import(require.resolve(mod, { paths: [process.cwd()] }))));
+      await Promise.all(
+        flags.require.map(mod => import(require.resolve(mod, { paths: [process.cwd()] }))),
+      );
     }
   }
 }

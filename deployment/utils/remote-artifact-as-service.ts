@@ -38,7 +38,7 @@ export class RemoteArtifactAsServiceDeployment {
       };
     },
     protected dependencies?: Array<pulumi.Resource | undefined | null>,
-    protected parent?: pulumi.Resource | null
+    protected parent?: pulumi.Resource | null,
   ) {}
 
   deployAsJob() {
@@ -50,7 +50,7 @@ export class RemoteArtifactAsServiceDeployment {
       {
         spec: pb.asJobSpec(),
       },
-      { dependsOn: this.dependencies?.filter(isDefined) }
+      { dependsOn: this.dependencies?.filter(isDefined) },
     );
 
     return { job };
@@ -214,13 +214,13 @@ export class RemoteArtifactAsServiceDeployment {
           },
           {
             annotations: metadata.annotations,
-          }
+          },
         ),
       },
       {
         dependsOn: this.dependencies?.filter(isDefined),
         parent: this.parent ?? undefined,
-      }
+      },
     );
 
     if (this.options.pdb) {
@@ -265,7 +265,7 @@ export class RemoteArtifactAsServiceDeployment {
         },
         {
           dependsOn: [deployment, service],
-        }
+        },
       );
     }
 

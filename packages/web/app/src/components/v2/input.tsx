@@ -10,12 +10,16 @@ export const Input = forwardRef<
     size?: 'large' | 'medium' | 'small';
     isInvalid?: boolean;
   } & Omit<ComponentProps<'input'>, 'prefix' | 'size'>
->(({ prefix, suffix, placeholder, type, className, size = 'large', isInvalid, ...props }, forwardedRef) => {
-  return (
-    <div
-      ref={forwardedRef}
-      className={clsx(
-        `
+>(
+  (
+    { prefix, suffix, placeholder, type, className, size = 'large', isInvalid, ...props },
+    forwardedRef,
+  ) => {
+    return (
+      <div
+        ref={forwardedRef}
+        className={clsx(
+          `
         flex
         items-center
         gap-4
@@ -26,30 +30,31 @@ export const Input = forwardRef<
         ring-1
         ring-gray-700
         focus-within:ring`,
-        isInvalid ? 'text-red-500 caret-white ring-red-500' : 'text-white',
-        {
-          large: 'h-[50px] py-[18px] px-4',
-          medium: 'py-2.5 px-4',
-          small: 'py-[5px] px-4',
-        }[size],
-        className
-      )}
-    >
-      {prefix}
+          isInvalid ? 'text-red-500 caret-white ring-red-500' : 'text-white',
+          {
+            large: 'h-[50px] py-[18px] px-4',
+            medium: 'py-2.5 px-4',
+            small: 'py-[5px] px-4',
+          }[size],
+          className,
+        )}
+      >
+        {prefix}
 
-      <input
-        // eslint-disable-next-line tailwindcss/migration-from-tailwind-2 -- refactor in tailwindcss v3
-        className="w-full bg-transparent placeholder-gray-500 disabled:cursor-not-allowed"
-        placeholder={placeholder}
-        type={type}
-        style={{ fontWeight: 'inherit' }}
-        {...props}
-      />
+        <input
+          // eslint-disable-next-line tailwindcss/migration-from-tailwind-2 -- refactor in tailwindcss v3
+          className="w-full bg-transparent placeholder-gray-500 disabled:cursor-not-allowed"
+          placeholder={placeholder}
+          type={type}
+          style={{ fontWeight: 'inherit' }}
+          {...props}
+        />
 
-      {suffix}
-    </div>
-  );
-});
+        {suffix}
+      </div>
+    );
+  },
+);
 
 // ({
 //   prefix,

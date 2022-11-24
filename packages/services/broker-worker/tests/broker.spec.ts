@@ -183,7 +183,7 @@ test('GET application/json', async () => {
   expect(await response.text()).toBe(
     JSON.stringify({
       message: 'OK',
-    })
+    }),
   );
 });
 
@@ -257,7 +257,7 @@ test('POST application/json', async () => {
   expect(await response.text()).toBe(
     JSON.stringify({
       message: 'OK',
-    })
+    }),
   );
 });
 
@@ -305,7 +305,7 @@ test('POST application/json + body', async () => {
       receivedBody: JSON.stringify({
         message: 'OK',
       }),
-    })
+    }),
   );
 });
 

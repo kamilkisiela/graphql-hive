@@ -63,7 +63,9 @@ export class SchemaValidator {
         target: schema.target,
       };
     });
-    const afterSchemasWithBase: SchemaObject[] = afterWithBase.map(s => this.helper.createSchemaObject(s));
+    const afterSchemasWithBase: SchemaObject[] = afterWithBase.map(s =>
+      this.helper.createSchemaObject(s),
+    );
     const afterSchemas: SchemaObject[] = after.map(s => this.helper.createSchemaObject(s));
     const beforeSchemas: SchemaObject[] = before.map(s => this.helper.createSchemaObject(s));
 
@@ -80,7 +82,7 @@ export class SchemaValidator {
 
     const errors = await orchestrator.validate(
       afterSchemasWithBase,
-      project.externalComposition.enabled ? project.externalComposition : null
+      project.externalComposition.enabled ? project.externalComposition : null,
     );
 
     if (isInitialSchema) {
@@ -99,13 +101,19 @@ export class SchemaValidator {
         orchestrator.build(afterSchemas, project.externalComposition),
       ]);
       if (existingSchema) {
-        changes = await this.inspector.diff(buildSchema(existingSchema), buildSchema(incomingSchema), selector);
+        changes = await this.inspector.diff(
+          buildSchema(existingSchema),
+          buildSchema(incomingSchema),
+          selector,
+        );
 
         const hasBreakingChanges = changes.some(change => change.criticality === 'Breaking');
 
         if (hasBreakingChanges) {
           if (experimental_acceptBreakingChanges) {
-            this.logger.debug('Schema contains breaking changes, but the experimental safe mode is enabled');
+            this.logger.debug(
+              'Schema contains breaking changes, but the experimental safe mode is enabled',
+            );
           } else {
             changes.forEach(change => {
               if (change.criticality === 'Breaking') {

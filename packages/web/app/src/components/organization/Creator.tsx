@@ -40,19 +40,20 @@ export const OrganizationCreator: React.FC<{
 
           onClose();
           router.visitOrganization({
-            organizationId: result.data.createOrganization.ok.createdOrganizationPayload.organization.cleanId,
+            organizationId:
+              result.data.createOrganization.ok.createdOrganizationPayload.organization.cleanId,
           });
         });
       }
     },
-    [mutate, router, name]
+    [mutate, router, name],
   );
 
   const onNameChange = React.useCallback(
     evt => {
       setName(evt.target.value);
     },
-    [setName]
+    [setName],
   );
 
   return (

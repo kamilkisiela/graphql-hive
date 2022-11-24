@@ -37,7 +37,7 @@ export class CertManager {
       },
       {
         dependsOn: [certManager],
-      }
+      },
     );
 
     return {

@@ -8,7 +8,7 @@ export function invariant(
   condition: any,
   // Can provide a string, or a function that returns a string for cases where
   // the message takes a fair amount of effort to compute
-  message?: string | (() => string)
+  message?: string | (() => string),
 ): asserts condition {
   if (condition) {
     return;
@@ -32,6 +32,7 @@ export function ensureEnv(key: string, valueType: 'string'): string;
 export function ensureEnv(key: string, valueType: 'number'): number;
 export function ensureEnv(key: string, valueType: 'boolean'): boolean;
 export function ensureEnv(key: string, valueType?: ValueType) {
+  // eslint-disable-next-line no-process-env
   let value = process.env[key];
 
   if (value === '<sync>') {

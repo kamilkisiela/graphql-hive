@@ -70,7 +70,10 @@ export default gql`
   extend type Mutation {
     upgradeToPro(input: UpgradeToProInput!): ChangePlanResult!
     downgradeToHobby(input: DowngradeToHobbyInput!): ChangePlanResult!
-    updateOrgRateLimit(selector: OrganizationSelectorInput!, monthlyLimits: RateLimitInput!): Organization!
+    updateOrgRateLimit(
+      selector: OrganizationSelectorInput!
+      monthlyLimits: RateLimitInput!
+    ): Organization!
   }
 
   input DowngradeToHobbyInput {

@@ -8,7 +8,13 @@ const NotFoundPage = () => {
     <>
       <Header />
       <div className="flex h-screen flex-col items-center justify-center gap-2.5">
-        <Image src={ghost} alt="Ghost illustration" width="200" height="200" className="drag-none" />
+        <Image
+          src={ghost}
+          alt="Ghost illustration"
+          width="200"
+          height="200"
+          className="drag-none"
+        />
         <h2 className="text-5xl font-bold">404</h2>
         <h3 className="text-xl font-semibold">Page Not Found</h3>
         <Button variant="link" onClick={Router.back}>

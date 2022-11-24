@@ -14,7 +14,9 @@ const readPkgUp = require('eslint-module-utils/readPkgUp').default;
 const moduleVisitor = require('eslint-module-utils/moduleVisitor').default;
 
 function isHivePackage(packageName, scopes) {
-  return typeof packageName === 'string' && scopes.some(scope => packageName.startsWith(`${scope}/`));
+  return (
+    typeof packageName === 'string' && scopes.some(scope => packageName.startsWith(`${scope}/`))
+  );
 }
 
 const depFieldCache = new Map();
@@ -62,7 +64,7 @@ function getDependencies(context, packageDir) {
         }
         const _packageContent = depFieldCache.get(packageJsonPath);
         Object.keys(packageContent).forEach(depsKey =>
-          Object.assign(packageContent[depsKey], _packageContent[depsKey])
+          Object.assign(packageContent[depsKey], _packageContent[depsKey]),
         );
       });
     } else {
@@ -71,10 +73,12 @@ function getDependencies(context, packageDir) {
         packageContent,
         extractDepFields(
           readPkgUp({
-            cwd: context.getPhysicalFilename ? context.getPhysicalFilename() : context.getFilename(),
+            cwd: context.getPhysicalFilename
+              ? context.getPhysicalFilename()
+              : context.getFilename(),
             normalize: false,
-          }).pkg
-        )
+          }).pkg,
+        ),
       );
     }
 
@@ -202,11 +206,14 @@ module.exports = {
     const deps = getDependencies(context, options.packageDir) || extractDepFields({});
 
     if (Array.isArray(options.ignored)) {
-      const filepath = context.getPhysicalFilename ? context.getPhysicalFilename() : context.getFilename();
+      const filepath = context.getPhysicalFilename
+        ? context.getPhysicalFilename()
+        : context.getFilename();
 
       if (
         options.ignored.some(
-          ignored => minimatch(filepath, ignored) || minimatch(filepath, path.join(process.cwd(), ignored))
+          ignored =>
+            minimatch(filepath, ignored) || minimatch(filepath, path.join(process.cwd(), ignored)),
         )
       ) {
         return {};
@@ -221,7 +228,7 @@ module.exports = {
       (source, node) => {
         reportIfMissing(context, deps, node, source.value, options.scopes);
       },
-      { commonjs: true }
+      { commonjs: true },
     );
   },
 };

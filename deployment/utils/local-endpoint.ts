@@ -6,7 +6,9 @@ export function serviceLocalEndpoint(service: k8s.types.input.core.v1.Service) {
     const defaultPort = (spec?.ports || [])[0];
     const portText = defaultPort ? `:${defaultPort.port}` : '';
 
-    return `http://${metadata?.name}.${metadata?.namespace || 'default'}.svc.cluster.local${portText}`;
+    return `http://${metadata?.name}.${
+      metadata?.namespace || 'default'
+    }.svc.cluster.local${portText}`;
   });
 }
 

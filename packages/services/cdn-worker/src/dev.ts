@@ -23,7 +23,7 @@ function main() {
           namespaceId: string;
           key: string;
         };
-      }
+      },
     ) => {
       if (!request.params.key) {
         throw new Error(`Missing key`);
@@ -42,7 +42,7 @@ function main() {
       return json({
         success: true,
       });
-    }
+    },
   );
 
   app.get('/dump', () => json(Object.fromEntries(devStorage.entries())));
@@ -52,7 +52,7 @@ function main() {
     () =>
       new Response(null, {
         status: 200,
-      })
+      }),
   );
 
   app.get('*', (request: Request) => handleRequest(request, isKeyValid));

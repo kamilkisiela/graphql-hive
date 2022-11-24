@@ -30,7 +30,7 @@ export const Badge = ({
           // purple: 'border-purple-900 bg-purple-500',
           // blue: 'border-blue-900 bg-blue-500',
           // magenta: 'bg-magenta-500 border-magenta-900',
-        }[color]
+        }[color],
       )}
       {...props}
     >

@@ -9,14 +9,18 @@ async function main() {
     enabled: true,
     reporting: {
       enabled: true,
-      endpoint: process.env.STAGING ? 'https://app.staging.graphql-hive.com/registry' : 'http://localhost:4000/graphql',
+      endpoint: process.env.STAGING
+        ? 'https://app.staging.graphql-hive.com/registry'
+        : 'http://localhost:4000/graphql',
       author: 'Hive Seed Script',
       commit: '1',
     },
     usage: {
       enabled: true,
       clientInfo: 'Fake Hive Client',
-      endpoint: process.env.STAGING ? 'https://app.staging.graphql-hive.com/usage' : 'http://localhost:4001',
+      endpoint: process.env.STAGING
+        ? 'https://app.staging.graphql-hive.com/usage'
+        : 'http://localhost:4001',
       max: 10,
       sampleRate: 1,
     },
@@ -76,11 +80,11 @@ async function main() {
             : {
                 data: undefined,
                 errors: [{ message: 'oops' }],
-              }
+              },
         );
       }
     },
-    process.env.INTERVAL ? parseInt(process.env.INTERVAL) : 1000
+    process.env.INTERVAL ? parseInt(process.env.INTERVAL) : 1000,
   );
 }
 

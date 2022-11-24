@@ -12,8 +12,12 @@ export default gql`
     deleteOrganization(selector: OrganizationSelectorInput!): OrganizationPayload!
     deleteOrganizationMembers(selector: OrganizationMembersSelectorInput!): OrganizationPayload!
     joinOrganization(code: String!): JoinOrganizationPayload!
-    inviteToOrganizationByEmail(input: InviteToOrganizationByEmailInput!): InviteToOrganizationByEmailResult!
-    deleteOrganizationInvitation(input: DeleteOrganizationInvitationInput!): DeleteOrganizationInvitationResult!
+    inviteToOrganizationByEmail(
+      input: InviteToOrganizationByEmailInput!
+    ): InviteToOrganizationByEmailResult!
+    deleteOrganizationInvitation(
+      input: DeleteOrganizationInvitationInput!
+    ): DeleteOrganizationInvitationResult!
     updateOrganizationName(input: UpdateOrganizationNameInput!): UpdateOrganizationNameResult!
     updateOrganizationMemberAccess(input: OrganizationMemberAccessInput!): OrganizationPayload!
   }
@@ -154,7 +158,9 @@ export default gql`
 
   union JoinOrganizationPayload = OrganizationInvitationError | OrganizationPayload
 
-  union OrganizationByInviteCodePayload = OrganizationInvitationError | OrganizationInvitationPayload
+  union OrganizationByInviteCodePayload =
+      OrganizationInvitationError
+    | OrganizationInvitationPayload
 
   type OrganizationPayload {
     selector: OrganizationSelector!

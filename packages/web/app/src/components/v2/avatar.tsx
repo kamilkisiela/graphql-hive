@@ -34,7 +34,7 @@ export const Avatar = ({
           md: 'h-10 w-10',
           lg: 'h-[50px] w-[50px]',
         }[size],
-        className
+        className,
       )}
       {...props}
     >

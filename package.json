@@ -1,7 +1,7 @@
 {
   "name": "graphql-hive",
+  "version": "0.0.0",
   "type": "module",
-  "private": true,
   "repository": {
     "type": "git",
     "url": "kamilkisiela/graphql-hive"
@@ -12,29 +12,35 @@
     "url": "https://the-guild.dev"
   },
   "license": "MIT",
+  "private": true,
+  "packageManager": "pnpm@7.14.2",
+  "engines": {
+    "node": ">=16",
+    "pnpm": ">=7"
+  },
   "scripts": {
-    "seed": "node scripts/seed-local-env.js",
+    "build": "pnpm graphql:generate && pnpm turbo build --color",
+    "build:libraries": "pnpm graphql:generate && pnpm turbo build --filter=./packages/libraries/* --color",
+    "build:local": "pnpm graphql:generate && pnpm turbo build-local --color",
+    "build:services": "pnpm graphql:generate && pnpm turbo build  --filter=./packages/services/* --color",
+    "build:web": "pnpm graphql:generate && pnpm turbo build --filter=./packages/web/* --color",
+    "docker:build": "docker buildx bake -f docker.hcl --load build",
+    "env:sync": "node ./scripts/sync-env-files.js",
+    "generate": "pnpm --filter @hive/storage db:generate && pnpm graphql:generate",
+    "graphql:generate": "graphql-codegen",
+    "lint": "eslint --cache --ignore-path .gitignore \"packages/**/*.{ts,tsx}\"",
+    "lint:prettier": "prettier --cache --check .",
     "postinstall": "husky install && node ./scripts/patch-manifests.js && pnpm env:sync && node ./scripts/turborepo-cleanup.js && node ./scripts/turborepo-setup.js",
     "pre-commit": "lint-staged",
     "prerelease": "pnpm build:libraries",
-    "release": "changeset publish",
-    "upload-sourcemaps": "./scripts/upload-sourcemaps.sh",
-    "test": "jest",
-    "lint": "eslint --cache --ignore-path .gitignore \"packages/**/*.{ts,tsx}\"",
     "prettier": "prettier --cache --write --list-different .",
-    "lint:prettier": "prettier --cache --check .",
+    "release": "changeset publish",
+    "seed": "node scripts/seed-local-env.js",
     "setup": "pnpm --filter @hive/storage setup",
-    "generate": "pnpm --filter @hive/storage db:generate && pnpm graphql:generate",
-    "graphql:generate": "graphql-codegen",
-    "typecheck": "pnpm turbo typecheck --color",
-    "build": "pnpm graphql:generate && pnpm turbo build --color",
-    "build:libraries": "pnpm graphql:generate && pnpm turbo build --filter=./packages/libraries/* --color",
-    "build:web": "pnpm graphql:generate && pnpm turbo build --filter=./packages/web/* --color",
-    "build:services": "pnpm graphql:generate && pnpm turbo build  --filter=./packages/services/* --color",
-    "build:local": "pnpm graphql:generate && pnpm turbo build-local --color",
-    "env:sync": "node ./scripts/sync-env-files.js",
+    "test": "jest",
     "turbo": "env-cmd --silent turbo run",
-    "docker:build": "docker buildx bake -f docker.hcl --load build"
+    "typecheck": "pnpm turbo typecheck --color",
+    "upload-sourcemaps": "./scripts/upload-sourcemaps.sh"
   },
   "devDependencies": {
     "@babel/core": "7.19.1",
@@ -106,11 +112,6 @@
       "eslint --fix"
     ]
   },
-  "engines": {
-    "node": ">=16",
-    "pnpm": ">=7"
-  },
-  "packageManager": "pnpm@7.14.2",
   "pnpm": {
     "patchedDependencies": {
       "@n1ru4l/dockest@2.1.0-rc.6": "patches/@n1ru4l__dockest@2.1.0-rc.6.patch",
@@ -123,6 +124,5 @@
       "bob-the-bundler@4.0.0": "patches/bob-the-bundler@4.0.0.patch",
       "oclif@3.2.25": "patches/oclif@3.2.25.patch"
     }
-  },
-  "version": "0.0.0"
+  }
 }

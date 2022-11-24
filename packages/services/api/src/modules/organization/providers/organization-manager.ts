@@ -35,7 +35,7 @@ export class OrganizationManager {
     private tokenStorage: TokenStorage,
     private activityManager: ActivityManager,
     private billingProvider: BillingProvider,
-    private emails: Emails
+    private emails: Emails,
   ) {
     this.logger = logger.child({ source: 'OrganizationManager' });
   }
@@ -78,7 +78,11 @@ export class OrganizationManager {
     return this.storage.getOrganizations({ user: user.id });
   }
 
-  async getOrganizationByInviteCode({ code }: { code: string }): Promise<Organization | { message: string } | never> {
+  async getOrganizationByInviteCode({
+    code,
+  }: {
+    code: string;
+  }): Promise<Organization | { message: string } | never> {
     this.logger.debug('Fetching organization (inviteCode=%s)', code);
     const organization = await this.storage.getOrganizationByInviteCode({
       inviteCode: code,
@@ -139,7 +143,10 @@ export class OrganizationManager {
     this.logger.info('Creating an organization (input=%o)', input);
 
     if (user.oidcIntegrationId) {
-      this.logger.debug('Failed to create organization as oidc user is not allowed to do so (input=%o)', input);
+      this.logger.debug(
+        'Failed to create organization as oidc user is not allowed to do so (input=%o)',
+        input,
+      );
       throw new HiveError('Cannot create organization with OIDC user.');
     }
 
@@ -196,7 +203,7 @@ export class OrganizationManager {
   async updatePlan(
     input: {
       plan: string;
-    } & OrganizationSelector
+    } & OrganizationSelector,
   ): Promise<Organization> {
     const { plan } = input;
     this.logger.info('Updating an organization plan (input=%o)', input);
@@ -227,7 +234,9 @@ export class OrganizationManager {
     return result;
   }
 
-  async updateRateLimits(input: Pick<Organization, 'monthlyRateLimit'> & OrganizationSelector): Promise<Organization> {
+  async updateRateLimits(
+    input: Pick<Organization, 'monthlyRateLimit'> & OrganizationSelector,
+  ): Promise<Organization> {
     const { monthlyRateLimit } = input;
     this.logger.info('Updating an organization plan (input=%o)', input);
     await this.authManager.ensureOrganizationAccess({
@@ -258,7 +267,7 @@ export class OrganizationManager {
   async updateName(
     input: {
       name: string;
-    } & OrganizationSelector
+    } & OrganizationSelector,
   ): Promise<Organization> {
     const { name } = input;
     this.logger.info('Updating an organization name (input=%o)', input);
@@ -311,14 +320,21 @@ export class OrganizationManager {
     return this.storage.deleteOrganizationInvitationByEmail(input);
   }
 
-  async inviteByEmail(input: { email: string; organization: string }): Promise<OrganizationInvitation> {
+  async inviteByEmail(input: {
+    email: string;
+    organization: string;
+  }): Promise<OrganizationInvitation> {
     await this.authManager.ensureOrganizationAccess({
       scope: OrganizationAccessScope.MEMBERS,
       organization: input.organization,
     });
 
     const { email } = input;
-    this.logger.info('Inviting to the organization (email=%s, organization=%s)', email, input.organization);
+    this.logger.info(
+      'Inviting to the organization (email=%s, organization=%s)',
+      email,
+      input.organization,
+    );
     const organization = await this.getOrganization({
       organization: input.organization,
     });
@@ -444,7 +460,7 @@ export class OrganizationManager {
   async deleteMembers(
     selector: {
       users: readonly string[];
-    } & OrganizationSelector
+    } & OrganizationSelector,
   ): Promise<Organization> {
     this.logger.info('Deleting a member from an organization (selector=%o)', selector);
     await this.authManager.ensureOrganizationAccess({
@@ -482,7 +498,7 @@ export class OrganizationManager {
             },
           });
         }
-      })
+      }),
     );
 
     // Because we checked the access before, it's stale by now
@@ -499,7 +515,7 @@ export class OrganizationManager {
       organizationScopes: readonly OrganizationAccessScope[];
       projectScopes: readonly ProjectAccessScope[];
       targetScopes: readonly TargetAccessScope[];
-    } & OrganizationSelector
+    } & OrganizationSelector,
   ) {
     this.logger.info('Updating a member access in an organization (input=%o)', input);
     await this.authManager.ensureOrganizationAccess({
@@ -527,7 +543,9 @@ export class OrganizationManager {
 
     // Check if the current user has rights to update these member scopes
     // User can't manage other user's scope if he's missing the scope as well
-    const currentUserMissingScopes = modifiedScopes.filter(scope => !currentMember.scopes.includes(scope));
+    const currentUserMissingScopes = modifiedScopes.filter(
+      scope => !currentMember.scopes.includes(scope),
+    );
 
     if (currentUserMissingScopes.length > 0) {
       this.logger.debug(`Logged user scopes: %o`, currentMember.scopes);

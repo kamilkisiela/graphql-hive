@@ -20,7 +20,10 @@ import {
   GraphQLObjectTypeComponent,
   GraphQLObjectTypeComponent_TypeFragment,
 } from '@/components/target/explorer/object-type';
-import { SchemaExplorerProvider, useSchemaExplorerContext } from '@/components/target/explorer/provider';
+import {
+  SchemaExplorerProvider,
+  useSchemaExplorerContext,
+} from '@/components/target/explorer/provider';
 import {
   GraphQLScalarTypeComponent,
   GraphQLScalarTypeComponent_TypeFragment,
@@ -62,7 +65,9 @@ const SchemaTypeExplorer_Type = gql(/* GraphQL */ `
         }
       }
     }
-    operationsStats(selector: { organization: $organization, project: $project, target: $target, period: $period }) {
+    operationsStats(
+      selector: { organization: $organization, project: $project, target: $target, period: $period }
+    ) {
       totalRequests
     }
   }
@@ -163,7 +168,9 @@ function ExplorerPage(): ReactElement | null {
       <Title title={`Type ${typename}`} />
       <TargetLayout value="explorer">
         {props => (
-          <SchemaExplorerProvider dataRetentionInDays={props.organization.rateLimit.retentionInDays}>
+          <SchemaExplorerProvider
+            dataRetentionInDays={props.organization.rateLimit.retentionInDays}
+          >
             <SchemaTypeExplorer {...props} typename={typename} />
           </SchemaExplorerProvider>
         )}

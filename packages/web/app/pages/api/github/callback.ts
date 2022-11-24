@@ -7,7 +7,7 @@ export async function ensureGithubIntegration(
   input: {
     installationId: string;
     orgId: string;
-  }
+  },
 ) {
   const { orgId, installationId } = input;
   await graphql({

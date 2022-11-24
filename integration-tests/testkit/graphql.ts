@@ -17,7 +17,9 @@ export async function execute<TResult, TVariables>(
     authToken?: string;
     token?: string;
     legacyAuthorizationMode?: boolean;
-  } & (TVariables extends Record<string, never> ? { variables?: never } : { variables: TVariables })
+  } & (TVariables extends Record<string, never>
+    ? { variables?: never }
+    : { variables: TVariables }),
 ) {
   const response = await fetch(`http://${registryAddress}/graphql`, {
     method: 'POST',

@@ -174,7 +174,9 @@ export function createUsage(config: {
         });
         const stopTimer = kafkaDuration.startTimer();
 
-        estimationError.observe(Math.abs(estimatedSizeInBytes - value.byteLength) / value.byteLength);
+        estimationError.observe(
+          Math.abs(estimatedSizeInBytes - value.byteLength) / value.byteLength,
+        );
 
         validateSize(value.byteLength);
         bufferFlushes.inc();
@@ -218,7 +220,7 @@ export function createUsage(config: {
     async collect(
       incomingReport: IncomingReport | IncomingLegacyReport,
       token: TokensResponse,
-      targetRetentionInDays: number | null
+      targetRetentionInDays: number | null,
     ) {
       if (status !== Status.Ready) {
         throw new Error('Usage is not ready yet');
@@ -269,7 +271,8 @@ export function createUsage(config: {
 
       for (const operation of incoming.operations) {
         // The validateOperation function drops the operation if the operationMapKey does not exist, we can safely pass the old key in case the new key is missing.
-        operation.operationMapKey = oldNewKeyMapping.get(operation.operationMapKey) ?? operation.operationMapKey;
+        operation.operationMapKey =
+          oldNewKeyMapping.get(operation.operationMapKey) ?? operation.operationMapKey;
         const validationResult = validateOperation(operation, outgoing.map);
 
         if (validationResult.valid) {
@@ -295,10 +298,17 @@ export function createUsage(config: {
             },
           });
         } else {
-          logger.warn(`Detected invalid operation (target=%s): %o`, token.target, validationResult.errors);
+          logger.warn(
+            `Detected invalid operation (target=%s): %o`,
+            token.target,
+            validationResult.errors,
+          );
           invalidRawOperations
             .labels({
-              reason: 'reason' in validationResult && validationResult.reason ? validationResult.reason : 'unknown',
+              reason:
+                'reason' in validationResult && validationResult.reason
+                  ? validationResult.reason
+                  : 'unknown',
             })
             .inc(1);
         }
@@ -337,7 +347,9 @@ export function createUsage(config: {
   };
 }
 
-function isLegacyReport(report: IncomingReport | IncomingLegacyReport): report is IncomingLegacyReport {
+function isLegacyReport(
+  report: IncomingReport | IncomingLegacyReport,
+): report is IncomingLegacyReport {
   return Array.isArray(report);
 }
 
@@ -361,7 +373,10 @@ function convertLegacyReport(legacy: IncomingLegacyReport): IncomingReport {
     let operationMapKey = hashMap.get(op.operation);
 
     if (!operationMapKey) {
-      operationMapKey = createHash('sha256').update(op.operation).update(JSON.stringify(op.fields)).digest('hex');
+      operationMapKey = createHash('sha256')
+        .update(op.operation)
+        .update(JSON.stringify(op.fields))
+        .digest('hex');
       report.map[operationMapKey] = {
         operation: op.operation,
         operationName: op.operationName,

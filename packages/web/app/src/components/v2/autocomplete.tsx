@@ -66,7 +66,7 @@ export function Autocomplete(
     defaultValue?: Option | null;
     disabled?: boolean;
     loading?: boolean;
-  }>
+  }>,
 ) {
   return (
     <Select

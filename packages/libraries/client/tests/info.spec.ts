@@ -88,13 +88,15 @@ test('should use selfHosting.graphqlEndpoint if provided', async () => {
   expect(logger.info).toHaveBeenCalledWith(expect.stringContaining(`[hive][info] Token details`));
   expect(logger.info).toHaveBeenCalledWith(expect.stringMatching(/Token name: \s+ My Token/));
   expect(logger.info).toHaveBeenCalledWith(
-    expect.stringMatching(/Organization: \s+ Org \s+ http:\/\/localhost\/org-id/)
+    expect.stringMatching(/Organization: \s+ Org \s+ http:\/\/localhost\/org-id/),
   );
   expect(logger.info).toHaveBeenCalledWith(
-    expect.stringMatching(/Project: \s+ Project \s+ http:\/\/localhost\/org-id\/project-id/)
+    expect.stringMatching(/Project: \s+ Project \s+ http:\/\/localhost\/org-id\/project-id/),
   );
   expect(logger.info).toHaveBeenCalledWith(
-    expect.stringMatching(/Target: \s+ Target \s+ http:\/\/localhost\/org-id\/project-id\/target-id/)
+    expect.stringMatching(
+      /Target: \s+ Target \s+ http:\/\/localhost\/org-id\/project-id\/target-id/,
+    ),
   );
   expect(logger.info).toHaveBeenCalledWith(expect.stringMatching(/Can report schema\? \s+ Yes/));
   expect(logger.info).toHaveBeenCalledWith(expect.stringMatching(/Can collect usage\? \s+ Yes/));

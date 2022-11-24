@@ -73,7 +73,7 @@ export const NavigationProvider = ({ children }: { children: React.ReactNode }) 
       setState(state);
       show();
     },
-    [show, setState]
+    [show, setState],
   );
 
   return (
@@ -136,7 +136,11 @@ export function Navigation() {
                 {project && target && organization && (
                   <>
                     <div tw="text-xl text-gray-200 font-normal select-none">/</div>
-                    <TargetSwitcher organizationId={organization} projectId={project} targetId={target} />
+                    <TargetSwitcher
+                      organizationId={organization}
+                      projectId={project}
+                      targetId={target}
+                    />
                   </>
                 )}
               </div>
@@ -158,7 +162,13 @@ export function Navigation() {
                   as={Button}
                   tw="font-normal"
                   variant="ghost"
-                  rightIcon={<img tw="h-6 w-6 rounded-full" src={undefined} alt={me?.displayName ?? undefined} />}
+                  rightIcon={
+                    <img
+                      tw="h-6 w-6 rounded-full"
+                      src={undefined}
+                      alt={me?.displayName ?? undefined}
+                    />
+                  }
                 >
                   {me?.displayName}
                 </MenuButton>

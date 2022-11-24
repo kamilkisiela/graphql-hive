@@ -69,26 +69,36 @@ const MemberInvitationForm = ({
 }) => {
   const notify = useNotifications();
   const [invitation, invite] = useMutation(MemberInvitationForm_InviteByEmail);
-  const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched, isValid, dirty, resetForm } =
-    useFormik({
-      initialValues: { email: '' },
-      validationSchema: Yup.object().shape({
-        email: Yup.string().email().required('Email is required'),
-      }),
-      async onSubmit(values) {
-        const result = await invite({
-          input: {
-            organization: organizationCleanId,
-            email: values.email,
-          },
-        });
+  const {
+    handleSubmit,
+    values,
+    handleChange,
+    handleBlur,
+    isSubmitting,
+    errors,
+    touched,
+    isValid,
+    dirty,
+    resetForm,
+  } = useFormik({
+    initialValues: { email: '' },
+    validationSchema: Yup.object().shape({
+      email: Yup.string().email().required('Email is required'),
+    }),
+    async onSubmit(values) {
+      const result = await invite({
+        input: {
+          organization: organizationCleanId,
+          email: values.email,
+        },
+      });
 
-        if (result.data?.inviteToOrganizationByEmail?.ok?.email) {
-          notify(`Invited ${result.data.inviteToOrganizationByEmail.ok.email}`, 'success');
-          resetForm();
-        }
-      },
-    });
+      if (result.data?.inviteToOrganizationByEmail?.ok?.email) {
+        notify(`Invited ${result.data.inviteToOrganizationByEmail.ok.email}`, 'success');
+        resetForm();
+      }
+    },
+  });
 
   const errorMessage =
     touched.email && (errors.email || invitation.error)
@@ -99,7 +109,13 @@ const MemberInvitationForm = ({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-row gap-2">
-      <Tooltip hasArrow placement="top" label={errorMessage} isOpen={typeof errorMessage === 'string'} bg="red.600">
+      <Tooltip
+        hasArrow
+        placement="top"
+        label={errorMessage}
+        isOpen={typeof errorMessage === 'string'}
+        bg="red.600"
+      >
         <Input
           style={{
             minWidth: '200px',
@@ -114,14 +130,26 @@ const MemberInvitationForm = ({
           isInvalid={touched.email && Boolean(errors.email)}
         />
       </Tooltip>
-      <Button type="submit" size="large" block variant="primary" disabled={isSubmitting || !isValid || !dirty}>
+      <Button
+        type="submit"
+        size="large"
+        block
+        variant="primary"
+        disabled={isSubmitting || !isValid || !dirty}
+      >
         Send an invite
       </Button>
     </form>
   );
 };
 
-const InvitationDeleteButton = ({ email, organizationCleanId }: { email: string; organizationCleanId: string }) => {
+const InvitationDeleteButton = ({
+  email,
+  organizationCleanId,
+}: {
+  email: string;
+  organizationCleanId: string;
+}) => {
   const [mutation, mutate] = useMutation(InvitationDeleteButton_DeleteInvitation);
 
   return (
@@ -196,7 +224,10 @@ const Invitation = ({
             <CopyIcon />
             Copy invite link
           </DropdownMenu.Item>
-          <InvitationDeleteButton organizationCleanId={organizationCleanId} email={invitation.email} />
+          <InvitationDeleteButton
+            organizationCleanId={organizationCleanId}
+            email={invitation.email}
+          />
         </DropdownMenu.Content>
       </DropdownMenu>
     </Card>
@@ -243,11 +274,15 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
   if (!org || isPersonal) return null;
 
   const me = meQuery.data?.me;
-  const selectedMember = selectedMemberId ? members?.find(node => node.id === selectedMemberId) : null;
+  const selectedMember = selectedMemberId
+    ? members?.find(node => node.id === selectedMemberId)
+    : null;
 
   return (
     <>
-      <p className="mb-3 font-light text-gray-300">Invite others to your organization and manage access</p>
+      <p className="mb-3 font-light text-gray-300">
+        Invite others to your organization and manage access
+      </p>
       {selectedMember && (
         <ChangePermissionsModal
           isOpen={isPermissionsModalOpen}

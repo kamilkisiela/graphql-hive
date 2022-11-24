@@ -80,7 +80,7 @@ export class BotKube {
       },
       {
         dependsOn: [ns],
-      }
+      },
     );
   }
 }

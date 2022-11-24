@@ -32,7 +32,9 @@ import { withSessionProtection } from '@/lib/supertokens/guard';
 function labelize(message: string) {
   const findSingleQuotes = /'([^']+)'/gim;
 
-  return reactStringReplace(message, findSingleQuotes, (match, i) => <Label key={i}>{match}</Label>);
+  return reactStringReplace(message, findSingleQuotes, (match, i) => (
+    <Label key={i}>{match}</Label>
+  ));
 }
 
 const titleMap: Record<CriticalityLevel, string> = {
@@ -61,7 +63,9 @@ const ChangesBlock = ({
 
   return (
     <div>
-      <h2 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">{titleMap[criticality]}</h2>
+      <h2 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">
+        {titleMap[criticality]}
+      </h2>
       <ul className="list-inside list-disc pl-3 text-base leading-relaxed">
         {filteredChanges.map((change, key) => (
           <li key={key} className={clsx(criticalityLevelMapping[criticality] ?? 'text-red-400')}>
@@ -73,7 +77,13 @@ const ChangesBlock = ({
   );
 };
 
-const DiffView = ({ view, versionId }: { view: 'sdl' | 'list'; versionId: string }): ReactElement | null => {
+const DiffView = ({
+  view,
+  versionId,
+}: {
+  view: 'sdl' | 'list';
+  versionId: string;
+}): ReactElement | null => {
   const router = useRouteSelector();
   const [compareQuery] = useQuery({
     query: CompareDocument,
@@ -97,7 +107,9 @@ const DiffView = ({ view, versionId }: { view: 'sdl' | 'list'; versionId: string
           <VscBug className="h-8 w-8 text-red-500" />
           <h2 className="text-lg font-medium text-white">Failed to build GraphQL Schema</h2>
         </div>
-        <p className="text-base text-gray-500">Schema is most likely incomplete and was force published</p>
+        <p className="text-base text-gray-500">
+          Schema is most likely incomplete and was force published
+        </p>
       </div>
     );
   }
@@ -160,7 +172,7 @@ const ListPage = ({
           <a
             className={clsx(
               'flex flex-col rounded-md p-2.5 hover:bg-gray-800/40',
-              versionId === version.id && 'bg-gray-800/40'
+              versionId === version.id && 'bg-gray-800/40',
             )}
           >
             <h3 className="truncate font-bold">{version.commit.commit}</h3>
@@ -169,7 +181,8 @@ const ListPage = ({
             </div>
             <div className="mt-2.5 mb-1.5 flex align-middle text-xs font-medium text-[#c4c4c4]">
               <div className={clsx('w-1/2 ', !version.valid && 'text-red-500')}>
-                <Badge color={version.valid ? 'green' : 'red'} /> Published <TimeAgo date={version.date} />
+                <Badge color={version.valid ? 'green' : 'red'} /> Published{' '}
+                <TimeAgo date={version.date} />
               </div>
 
               {version.commit.service && (
@@ -275,7 +288,10 @@ function HistoryPage(): ReactElement {
   return (
     <>
       <Title title="History" />
-      <TargetLayout value="history" className={versionId ? 'flex h-full items-stretch gap-x-5' : ''}>
+      <TargetLayout
+        value="history"
+        className={versionId ? 'flex h-full items-stretch gap-x-5' : ''}
+      >
         {() => (versionId ? <Page versionId={versionId} /> : noSchema)}
       </TargetLayout>
     </>

@@ -27,7 +27,7 @@ export class TargetManager {
     private storage: Storage,
     private tokenStorage: TokenStorage,
     private authManager: AuthManager,
-    private activityManager: ActivityManager
+    private activityManager: ActivityManager,
   ) {
     this.logger = logger.child({ source: 'TargetManager' });
   }
@@ -39,7 +39,12 @@ export class TargetManager {
   }: {
     name: string;
   } & ProjectSelector): Promise<Target> {
-    this.logger.info('Creating a target (name=%s, project=%s, organization=%s)', name, project, organization);
+    this.logger.info(
+      'Creating a target (name=%s, project=%s, organization=%s)',
+      name,
+      project,
+      organization,
+    );
     await this.authManager.ensureProjectAccess({
       project,
       organization,
@@ -73,7 +78,12 @@ export class TargetManager {
   }
 
   async deleteTarget({ organization, project, target }: TargetSelector): Promise<Target> {
-    this.logger.info('Deleting a target (target=%s, project=%s, organization=%s)', target, project, organization);
+    this.logger.info(
+      'Deleting a target (target=%s, project=%s, organization=%s)',
+      target,
+      project,
+      organization,
+    );
     await this.authManager.ensureTargetAccess({
       project,
       organization,
@@ -168,7 +178,7 @@ export class TargetManager {
   async setTargetValidation(
     input: {
       enabled: boolean;
-    } & TargetSelector
+    } & TargetSelector,
   ): Promise<TargetSettings['validation']> {
     this.logger.debug('Setting target validation (input=%o)', input);
     await this.authManager.ensureTargetAccess({
@@ -185,7 +195,7 @@ export class TargetManager {
   }
 
   async updateTargetValidationSettings(
-    input: Omit<TargetSettings['validation'], 'enabled'> & TargetSelector
+    input: Omit<TargetSettings['validation'], 'enabled'> & TargetSelector,
   ): Promise<TargetSettings['validation']> {
     this.logger.debug('Updating target validation settings (input=%o)', input);
     await this.authManager.ensureTargetAccess({
@@ -203,7 +213,7 @@ export class TargetManager {
   async updateName(
     input: {
       name: string;
-    } & TargetSelector
+    } & TargetSelector,
   ): Promise<Target> {
     const { name, organization, project, target } = input;
     this.logger.info('Updating a target name (input=%o)', input);

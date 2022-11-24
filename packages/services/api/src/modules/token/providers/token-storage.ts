@@ -3,7 +3,11 @@ import { atomic } from '../../../shared/helpers';
 import { HiveError } from '../../../shared/errors';
 import type { Token } from '../../../shared/entities';
 import { Logger } from '../../shared/providers/logger';
-import { TargetSelector, ProjectSelector, OrganizationSelector } from '../../shared/providers/storage';
+import {
+  TargetSelector,
+  ProjectSelector,
+  OrganizationSelector,
+} from '../../shared/providers/storage';
 import type { TargetAccessScope } from '../../auth/providers/target-access';
 import type { ProjectAccessScope } from '../../auth/providers/project-access';
 import type { OrganizationAccessScope } from '../../auth/providers/organization-access';
@@ -41,7 +45,7 @@ export class TokenStorage {
   constructor(
     logger: Logger,
     @Inject(TOKENS_CONFIG) tokensConfig: TokensConfig,
-    @Inject(CONTEXT) context: GraphQLModules.ModuleContext
+    @Inject(CONTEXT) context: GraphQLModules.ModuleContext,
   ) {
     this.logger = logger.child({ source: 'TokenStorage' });
     this.tokensService = createTRPCClient<TokensApi>({
@@ -70,11 +74,13 @@ export class TokenStorage {
   async deleteTokens(
     input: {
       tokens: readonly string[];
-    } & TargetSelector
+    } & TargetSelector,
   ): Promise<readonly string[]> {
     this.logger.debug('Deleting tokens (input=%o)', input);
 
-    await Promise.all(input.tokens.map(token => this.tokensService.mutation('deleteToken', { token })));
+    await Promise.all(
+      input.tokens.map(token => this.tokensService.mutation('deleteToken', { token })),
+    );
 
     return input.tokens;
   }

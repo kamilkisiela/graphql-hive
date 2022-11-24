@@ -20,7 +20,7 @@ export class OIDCIntegrationsProvider {
     private storage: Storage,
     private authManager: AuthManager,
     private crypto: CryptoProvider,
-    @Inject(OIDC_INTEGRATIONS_ENABLED) private enabled: boolean
+    @Inject(OIDC_INTEGRATIONS_ENABLED) private enabled: boolean,
   ) {
     this.logger = logger.child({ source: 'OIDCIntegrationsProvider' });
   }
@@ -48,8 +48,13 @@ export class OIDCIntegrationsProvider {
     }
   }
 
-  async getOIDCIntegrationForOrganization(args: { organizationId: string }): Promise<OIDCIntegration | null> {
-    this.logger.debug('getting oidc integration for organization (organizationId=%s)', args.organizationId);
+  async getOIDCIntegrationForOrganization(args: {
+    organizationId: string;
+  }): Promise<OIDCIntegration | null> {
+    this.logger.debug(
+      'getting oidc integration for organization (organizationId=%s)',
+      args.organizationId,
+    );
     if (this.isEnabled() === false) {
       this.logger.debug('oidc integrations are disabled.');
       return null;
@@ -60,7 +65,9 @@ export class OIDCIntegrationsProvider {
       scope: OrganizationAccessScope.INTEGRATIONS,
     });
 
-    return await this.storage.getOIDCIntegrationForOrganization({ organizationId: args.organizationId });
+    return await this.storage.getOIDCIntegrationForOrganization({
+      organizationId: args.organizationId,
+    });
   }
 
   async getClientSecretPreview(integration: OIDCIntegration) {
@@ -127,7 +134,9 @@ export class OIDCIntegrationsProvider {
       reason: null,
       fieldErrors: {
         clientId: clientIdResult.success ? null : clientIdResult.error.issues[0].message,
-        clientSecret: clientSecretResult.success ? null : clientSecretResult.error.issues[0].message,
+        clientSecret: clientSecretResult.success
+          ? null
+          : clientSecretResult.error.issues[0].message,
         oauthApiUrl: oauthApiUrlResult.success ? null : oauthApiUrlResult.error.issues[0].message,
       },
     } as const;
@@ -146,7 +155,9 @@ export class OIDCIntegrationsProvider {
       } as const;
     }
 
-    const integration = await this.storage.getOIDCIntegrationById({ oidcIntegrationId: args.oidcIntegrationId });
+    const integration = await this.storage.getOIDCIntegrationById({
+      oidcIntegrationId: args.oidcIntegrationId,
+    });
 
     if (integration === null) {
       return {
@@ -173,7 +184,9 @@ export class OIDCIntegrationsProvider {
       const oidcIntegration = await this.storage.updateOIDCIntegration({
         oidcIntegrationId: args.oidcIntegrationId,
         clientId: clientIdResult.data,
-        encryptedClientSecret: clientSecretResult.data ? this.crypto.encrypt(clientSecretResult.data) : null,
+        encryptedClientSecret: clientSecretResult.data
+          ? this.crypto.encrypt(clientSecretResult.data)
+          : null,
         oauthApiUrl: oauthApiUrlResult.data,
       });
 
@@ -188,7 +201,9 @@ export class OIDCIntegrationsProvider {
       message: "Couldn't update integration.",
       fieldErrors: {
         clientId: clientIdResult.success ? null : clientIdResult.error.issues[0].message,
-        clientSecret: clientSecretResult.success ? null : clientSecretResult.error.issues[0].message,
+        clientSecret: clientSecretResult.success
+          ? null
+          : clientSecretResult.error.issues[0].message,
         oauthApiUrl: oauthApiUrlResult.success ? null : oauthApiUrlResult.error.issues[0].message,
       },
     } as const;
@@ -202,7 +217,9 @@ export class OIDCIntegrationsProvider {
       } as const;
     }
 
-    const integration = await this.storage.getOIDCIntegrationById({ oidcIntegrationId: args.oidcIntegrationId });
+    const integration = await this.storage.getOIDCIntegrationById({
+      oidcIntegrationId: args.oidcIntegrationId,
+    });
 
     if (integration === null) {
       return {

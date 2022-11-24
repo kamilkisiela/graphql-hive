@@ -5,7 +5,7 @@ export function cache<R, A, K>(
     has(key: K): boolean;
     set(key: K, value: R): void;
     get(key: K): R | undefined;
-  }
+  },
 ) {
   return (arg: A) => {
     const key = cacheKeyFn(arg);

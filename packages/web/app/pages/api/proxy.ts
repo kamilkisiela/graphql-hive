@@ -37,7 +37,9 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
   const url = env.graphqlEndpoint;
 
   const requestIdHeader = req.headers['x-request-id'];
-  const requestId = Array.isArray(requestIdHeader) ? requestIdHeader[0] : requestIdHeader ?? reqIdGenerate();
+  const requestId = Array.isArray(requestIdHeader)
+    ? requestIdHeader[0]
+    : requestIdHeader ?? reqIdGenerate();
 
   if (req.method === 'GET') {
     const response = await fetch(url, {

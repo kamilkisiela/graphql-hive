@@ -10,7 +10,7 @@ export class MissingTargetIDErrorResponse extends Response {
       }),
       {
         status: 400,
-      }
+      },
     );
   }
 }
@@ -25,7 +25,7 @@ export class InvalidArtifactTypeResponse extends Response {
       }),
       {
         status: 400,
-      }
+      },
     );
   }
 }
@@ -40,7 +40,7 @@ export class MissingAuthKey extends Response {
       }),
       {
         status: 400,
-      }
+      },
     );
   }
 }
@@ -55,7 +55,7 @@ export class InvalidAuthKey extends Response {
       }),
       {
         status: 403,
-      }
+      },
     );
   }
 }
@@ -70,7 +70,7 @@ export class CDNArtifactNotFound extends Response {
       }),
       {
         status: 404,
-      }
+      },
     );
   }
 }
@@ -85,7 +85,7 @@ export class InvalidArtifactMatch extends Response {
       }),
       {
         status: 400,
-      }
+      },
     );
   }
 }
@@ -100,7 +100,7 @@ export class UnexpectedError extends Response {
       }),
       {
         status: 500,
-      }
+      },
     );
   }
 }

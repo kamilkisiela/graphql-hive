@@ -1,7 +1,12 @@
 #!/usr/bin/env node
 
 import 'reflect-metadata';
-import { createServer, startMetrics, registerShutdown, reportReadiness } from '@hive/service-common';
+import {
+  createServer,
+  startMetrics,
+  registerShutdown,
+  reportReadiness,
+} from '@hive/service-common';
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify/dist/trpc-server-adapters-fastify.cjs.js';
 import { createRegistry, LogFn, Logger } from '@hive/api';
 import { createStorage as createPostgreSQLStorage, createConnectionString } from '@hive/storage';
@@ -72,7 +77,8 @@ export async function main() {
     return (error: any, errorLike?: any, ...args: any[]) => {
       server.log.error(error, errorLike, ...args);
 
-      const errorObj = error instanceof Error ? error : errorLike instanceof Error ? errorLike : null;
+      const errorObj =
+        error instanceof Error ? error : errorLike instanceof Error ? errorLike : null;
 
       if (errorObj instanceof GraphQLError) {
         return;
@@ -187,9 +193,9 @@ export async function main() {
       schemaConfig: env.hiveServices.webApp
         ? {
             schemaPublishLink(input) {
-              let url = `${env.hiveServices.webApp!.url}/${input.organization.cleanId}/${input.project.cleanId}/${
-                input.target.cleanId
-              }`;
+              let url = `${env.hiveServices.webApp!.url}/${input.organization.cleanId}/${
+                input.project.cleanId
+              }/${input.target.cleanId}`;
 
               if (input.version) {
                 url += `/history/${input.version.id}`;
@@ -303,11 +309,15 @@ export async function main() {
         url: '/__legacy/update_user_id_mapping',
         async handler(req, reply) {
           if (req.headers['x-authorization'] !== auth0Config.apiKey) {
-            reply.status(401).send({ error: 'Invalid update user id mapping key.', code: 'ERR_INVALID_KEY' }); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+            void reply
+              .status(401)
+              .send({ error: 'Invalid update user id mapping key.', code: 'ERR_INVALID_KEY' });
             return;
           }
 
-          const { auth0UserId, superTokensUserId } = LegacySetUserIdMappingPayloadModel.parse(req.body);
+          const { auth0UserId, superTokensUserId } = LegacySetUserIdMappingPayloadModel.parse(
+            req.body,
+          );
 
           await storage.setSuperTokensUserId({
             auth0UserId: auth0UserId.replace('google|', 'google-oauth2|'),
@@ -322,7 +332,9 @@ export async function main() {
         url: '/__legacy/check_auth0_email_user_without_associated_supertoken_id_exists',
         async handler(req, reply) {
           if (req.headers['x-authorization'] !== auth0Config.apiKey) {
-            reply.status(401).send({ error: 'Invalid update user id mapping key.', code: 'ERR_INVALID_KEY' }); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+            void reply
+              .status(401)
+              .send({ error: 'Invalid update user id mapping key.', code: 'ERR_INVALID_KEY' });
             return;
           }
 

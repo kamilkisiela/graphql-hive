@@ -35,30 +35,31 @@ const ExternalCompositionForm = ({
 }) => {
   const notify = useNotifications();
   const [mutation, enable] = useMutation(ExternalCompositionForm_EnableMutation);
-  const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } = useFormik({
-    enableReinitialize: true,
-    initialValues: {
-      endpoint: endpoint ?? '',
-      secret: '',
-    },
-    validationSchema: Yup.object().shape({
-      endpoint: Yup.string().required(),
-      secret: Yup.string().required(),
-    }),
-    onSubmit: values =>
-      enable({
-        input: {
-          project: project.cleanId,
-          organization: organization.cleanId,
-          endpoint: values.endpoint,
-          secret: values.secret,
-        },
-      }).then(result => {
-        if (result.data?.enableExternalSchemaComposition?.ok) {
-          notify('External composition enabled', 'success');
-        }
+  const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } =
+    useFormik({
+      enableReinitialize: true,
+      initialValues: {
+        endpoint: endpoint ?? '',
+        secret: '',
+      },
+      validationSchema: Yup.object().shape({
+        endpoint: Yup.string().required(),
+        secret: Yup.string().required(),
       }),
-  });
+      onSubmit: values =>
+        enable({
+          input: {
+            project: project.cleanId,
+            organization: organization.cleanId,
+            endpoint: values.endpoint,
+            secret: values.secret,
+          },
+        }).then(result => {
+          if (result.data?.enableExternalSchemaComposition?.ok) {
+            notify('External composition enabled', 'success');
+          }
+        }),
+    });
 
   const mutationError = mutation.data?.enableExternalSchemaComposition.error;
 
@@ -78,13 +79,17 @@ const ExternalCompositionForm = ({
           className="w-96"
         />
         {touched.endpoint && (errors.endpoint || mutationError?.inputErrors?.endpoint) && (
-          <div className="mt-2 text-xs text-red-500">{errors.endpoint ?? mutationError?.inputErrors?.endpoint}</div>
+          <div className="mt-2 text-xs text-red-500">
+            {errors.endpoint ?? mutationError?.inputErrors?.endpoint}
+          </div>
         )}
       </div>
 
       <div>
         <span>Secret</span>
-        <p className="pb-2 text-xs text-gray-300">The secret is needed to sign and verify the request.</p>
+        <p className="pb-2 text-xs text-gray-300">
+          The secret is needed to sign and verify the request.
+        </p>
         <Input
           placeholder="Secret"
           name="secret"
@@ -97,12 +102,20 @@ const ExternalCompositionForm = ({
           className="w-96"
         />
         {touched.secret && (errors.secret || mutationError?.inputErrors?.secret) && (
-          <div className="mt-2 text-xs text-red-500">{errors.secret ?? mutationError?.inputErrors?.secret}</div>
+          <div className="mt-2 text-xs text-red-500">
+            {errors.secret ?? mutationError?.inputErrors?.secret}
+          </div>
         )}
       </div>
       {mutation.error && <div className="mt-2 text-xs text-red-500">{mutation.error}</div>}
       <div>
-        <Button type="submit" variant="primary" size="large" className="px-10" disabled={isSubmitting}>
+        <Button
+          type="submit"
+          variant="primary"
+          size="large"
+          className="px-10"
+          disabled={isSubmitting}
+        >
           Save
         </Button>
       </div>
@@ -163,7 +176,8 @@ export const ExternalCompositionSettings = ({
             organization: organization.cleanId,
           },
         }).then(result => {
-          const error = result.error?.message || result.data?.disableExternalSchemaComposition.error;
+          const error =
+            result.error?.message || result.data?.disableExternalSchemaComposition.error;
           if (error) {
             notify(error, 'error');
             // fallback to the previous state
@@ -172,7 +186,7 @@ export const ExternalCompositionSettings = ({
         });
       }
     },
-    [disableComposition, setEnabled, notify]
+    [disableComposition, setEnabled, notify],
   );
 
   const externalCompositionConfig = projectQuery.data?.project?.externalSchemaComposition;
@@ -198,7 +212,9 @@ export const ExternalCompositionSettings = ({
           )}
         </div>
       </Heading>
-      <p className="mb-3 font-light text-gray-300">Compose and validate schema outside GraphQL Hive</p>
+      <p className="mb-3 font-light text-gray-300">
+        Compose and validate schema outside GraphQL Hive
+      </p>
       {isFormVisible ? (
         <ExternalCompositionForm
           project={project}

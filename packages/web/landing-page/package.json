@@ -1,11 +1,11 @@
 {
   "name": "@hive/landing-page",
-  "private": true,
   "version": "0.0.0",
   "type": "module",
+  "private": true,
   "scripts": {
-    "dev": "next",
-    "build": "bob runify --single"
+    "build": "bob runify --single",
+    "dev": "next"
   },
   "dependencies": {
     "@radix-ui/react-tooltip": "1.0.2",

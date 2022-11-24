@@ -52,7 +52,7 @@ export const resolvers: UsageEstimationModule.Resolvers = {
               organization: organizationId,
               project: project.id,
             });
-          })
+          }),
         )
       ).flat();
 

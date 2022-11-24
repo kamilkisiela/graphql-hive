@@ -13,5 +13,12 @@ export const schemaModule = createModule({
   dirname: __dirname,
   typeDefs,
   resolvers,
-  providers: [SchemaManager, SchemaValidator, SchemaPublisher, Inspector, SchemaHelper, ...orchestrators],
+  providers: [
+    SchemaManager,
+    SchemaValidator,
+    SchemaPublisher,
+    Inspector,
+    SchemaHelper,
+    ...orchestrators,
+  ],
 });

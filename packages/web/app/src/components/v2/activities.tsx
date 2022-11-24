@@ -4,7 +4,13 @@ import { useQuery } from 'urql';
 
 import { ActivityNode } from '@/components/common/activities/common';
 import { Heading, Link, Skeleton, TimeAgo } from '@/components/v2';
-import { ArrowDownIcon, EditIcon, PlusIcon, TrashIcon, UserPlusMinusIcon } from '@/components/v2/icon';
+import {
+  ArrowDownIcon,
+  EditIcon,
+  PlusIcon,
+  TrashIcon,
+  UserPlusMinusIcon,
+} from '@/components/v2/icon';
 import {
   MemberDeletedActivity,
   OrganizationActivitiesDocument,
@@ -20,7 +26,7 @@ import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 const organizationActivitiesDocument = fixDuplicatedFragments(OrganizationActivitiesDocument);
 
 export const getActivity = (
-  activity: ActivityNode
+  activity: ActivityNode,
 ): {
   icon: ReactElement;
   content: ReactElement | string;
@@ -105,7 +111,8 @@ export const getActivity = (
       return {
         content: (
           <>
-            {user.displayName} removed <b className="text-gray-300">{(activity as MemberDeletedActivity).email}</b> from
+            {user.displayName} removed{' '}
+            <b className="text-gray-300">{(activity as MemberDeletedActivity).email}</b> from
             organization
           </>
         ),
@@ -125,8 +132,8 @@ export const getActivity = (
       return {
         content: (
           <>
-            {user.displayName} removed <b className="text-gray-300">{(activity as ProjectDeletedActivity).name}</b>{' '}
-            project
+            {user.displayName} removed{' '}
+            <b className="text-gray-300">{(activity as ProjectDeletedActivity).name}</b> project
           </>
         ),
         icon: <TrashIcon className="h-5 w-5" />,
@@ -164,8 +171,8 @@ export const getActivity = (
       return {
         content: (
           <>
-            {user.displayName} removed <b className="text-gray-300">{activity.name}</b> target from {projectLink}{' '}
-            project
+            {user.displayName} removed <b className="text-gray-300">{activity.name}</b> target from{' '}
+            {projectLink} project
           </>
         ),
         icon: <TrashIcon className="h-5 w-5" />,
@@ -187,7 +194,8 @@ export const getActivity = (
       return {
         content: (
           <>
-            {user.displayName} changed target id to <b className="text-gray-300">{activity.value}</b>
+            {user.displayName} changed target id to{' '}
+            <b className="text-gray-300">{activity.value}</b>
           </>
         ),
         icon: <EditIcon className="h-3.5 w-3.5" />,

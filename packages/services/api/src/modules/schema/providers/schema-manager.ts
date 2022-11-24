@@ -6,7 +6,12 @@ import { atomic, stringifySelector } from '../../../shared/helpers';
 import { HiveError } from '../../../shared/errors';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { Logger } from '../../shared/providers/logger';
-import { Storage, TargetSelector, ProjectSelector, OrganizationSelector } from '../../shared/providers/storage';
+import {
+  Storage,
+  TargetSelector,
+  ProjectSelector,
+  OrganizationSelector,
+} from '../../shared/providers/storage';
 import { CustomOrchestrator } from './orchestrators/custom';
 import { FederationOrchestrator } from './orchestrators/federation';
 import { SingleOrchestrator } from './orchestrators/single';
@@ -49,7 +54,7 @@ export class SchemaManager {
     private stitchingOrchestrator: StitchingOrchestrator,
     private federationOrchestrator: FederationOrchestrator,
     private customOrchestrator: CustomOrchestrator,
-    private crypto: CryptoProvider
+    private crypto: CryptoProvider,
   ) {
     this.logger = logger.child({ source: 'SchemaManager' });
   }
@@ -67,7 +72,7 @@ export class SchemaManager {
     selector: {
       version: string;
       includeMetadata?: boolean;
-    } & TargetSelector
+    } & TargetSelector,
   ) {
     this.logger.debug('Fetching schemas (selector=%o)', selector);
     await this.authManager.ensureTargetAccess({
@@ -80,7 +85,7 @@ export class SchemaManager {
   async getSchemasOfPreviousVersion(
     selector: {
       version: string;
-    } & TargetSelector
+    } & TargetSelector,
   ) {
     this.logger.debug('Fetching schemas from the previous version (selector=%o)', selector);
     await this.authManager.ensureTargetAccess({
@@ -204,7 +209,9 @@ export class SchemaManager {
     };
   }
 
-  async updateSchemaVersionStatus(input: TargetSelector & { version: string; valid: boolean }): Promise<SchemaVersion> {
+  async updateSchemaVersionStatus(
+    input: TargetSelector & { version: string; valid: boolean },
+  ): Promise<SchemaVersion> {
     this.logger.debug('Updating schema version status (input=%o)', input);
     await this.authManager.ensureTargetAccess({
       ...input,
@@ -224,7 +231,7 @@ export class SchemaManager {
       version: string;
       commit: string;
       url?: string | null;
-    }
+    },
   ) {
     this.logger.debug('Updating schema version status (input=%o)', input);
     await this.authManager.ensureTargetAccess({
@@ -267,10 +274,11 @@ export class SchemaManager {
       url?: string | null;
       base_schema: string | null;
       metadata: string | null;
-    } & TargetSelector
+    } & TargetSelector,
   ) {
     this.logger.info('Creating a new version (input=%o)', lodash.omit(input, ['schema']));
-    const { valid, project, organization, target, commit, schema, author, commits, url, metadata } = input;
+    const { valid, project, organization, target, commit, schema, author, commits, url, metadata } =
+      input;
     let service = input.service;
 
     await this.authManager.ensureTargetAccess({
@@ -338,7 +346,7 @@ export class SchemaManager {
       service?: string | null;
       url?: string | null;
       metadata: string | null;
-    } & TargetSelector
+    } & TargetSelector,
   ) {
     this.logger.info('Inserting schema (input=%o)', lodash.omit(input, ['schema']));
     await this.authManager.ensureTargetAccess({
@@ -371,7 +379,7 @@ export class SchemaManager {
       name: string;
       newName: string;
       projectType: ProjectType;
-    }
+    },
   ) {
     this.logger.debug('Updating service name (input=%o)', input);
     await this.authManager.ensureTargetAccess({
@@ -379,8 +387,13 @@ export class SchemaManager {
       scope: TargetAccessScope.REGISTRY_WRITE,
     });
 
-    if (input.projectType !== ProjectType.FEDERATION && input.projectType !== ProjectType.STITCHING) {
-      throw new HiveError(`Project type "${input.projectType}" doesn't support service name updates`);
+    if (
+      input.projectType !== ProjectType.FEDERATION &&
+      input.projectType !== ProjectType.STITCHING
+    ) {
+      throw new HiveError(
+        `Project type "${input.projectType}" doesn't support service name updates`,
+      );
     }
 
     const schemas = await this.storage.getSchemasOfVersion({
@@ -418,7 +431,7 @@ export class SchemaManager {
   completeGetStartedCheck(
     selector: OrganizationSelector & {
       step: 'publishingSchema' | 'checkingSchema';
-    }
+    },
   ): Promise<void> {
     return this.storage.completeGetStartedStep(selector);
   }
@@ -441,7 +454,7 @@ export class SchemaManager {
     input: ProjectSelector & {
       endpoint: string;
       secret: string;
-    }
+    },
   ) {
     this.logger.debug('Enabling external composition (input=%o)', lodash.omit(input, ['secret']));
     await this.authManager.ensureProjectAccess({

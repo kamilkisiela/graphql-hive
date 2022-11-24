@@ -22,7 +22,13 @@ import {
   Tr,
   useDisclosure,
 } from '@chakra-ui/react';
-import { VscChevronDown, VscChevronLeft, VscChevronRight, VscChevronUp, VscWarning } from 'react-icons/vsc';
+import {
+  VscChevronDown,
+  VscChevronLeft,
+  VscChevronRight,
+  VscChevronUp,
+  VscWarning,
+} from 'react-icons/vsc';
 import {
   createTable,
   useTableInstance,
@@ -420,9 +426,11 @@ const OperationsTableContainer: React.FC<{
         }
         return state;
       };
-      setPagination(typeof state === 'function' ? value => handleValue(state(value)) : handleValue(state));
+      setPagination(
+        typeof state === 'function' ? value => handleValue(state(value)) : handleValue(state),
+      );
     },
-    [pagination, setPagination, data]
+    [pagination, setPagination, data],
   );
 
   return (
@@ -469,7 +477,11 @@ export const OperationsList: React.FC<{
         })
       }
     >
-      <OperationsTableContainer operations={operations} operationsFilter={operationsFilter} className={className} />
+      <OperationsTableContainer
+        operations={operations}
+        operationsFilter={operationsFilter}
+        className={className}
+      />
     </OperationsFallback>
   );
 };

@@ -94,10 +94,13 @@ const SchemaServiceName = ({
         },
       });
     },
-    [mutate, organization.cleanId, project.cleanId, schema.service, target.cleanId, version]
+    [mutate, organization.cleanId, project.cleanId, schema.service, target.cleanId, version],
   );
 
-  if ((project.type !== ProjectType.Federation && project.type !== ProjectType.Stitching) || !hasAccess) {
+  if (
+    (project.type !== ProjectType.Federation && project.type !== ProjectType.Stitching) ||
+    !hasAccess
+  ) {
     return <>{schema.service}</>;
   }
 
@@ -195,7 +198,9 @@ const SyncSchemaButton = ({
       if (result.error) {
         setStatus('error');
       } else {
-        setStatus(result.data?.schemaSyncCDN.__typename === 'SchemaSyncCDNError' ? 'error' : 'success');
+        setStatus(
+          result.data?.schemaSyncCDN.__typename === 'SchemaSyncCDNError' ? 'error' : 'success',
+        );
       }
       setTimeout(() => {
         setStatus('idle');
@@ -208,8 +213,17 @@ const SyncSchemaButton = ({
   }
 
   return (
-    <Tooltip label="Re-upload the latest valid version to Hive CDN" fontSize="xs" placement="bottom-start">
-      <Button variant="primary" size="large" onClick={sync} disabled={status !== 'idle' || mutation.fetching}>
+    <Tooltip
+      label="Re-upload the latest valid version to Hive CDN"
+      fontSize="xs"
+      placement="bottom-start"
+    >
+      <Button
+        variant="primary"
+        size="large"
+        onClick={sync}
+        disabled={status !== 'idle' || mutation.fetching}
+      >
         {mutation.fetching
           ? 'Syncing…'
           : FetchingMessages[status as keyof typeof FetchingMessages] ?? 'CDN is up to date'}
@@ -243,14 +257,15 @@ function SchemaView({
       debouncedFilter(event.target.value);
       setTerm(event.target.value);
     },
-    [debouncedFilter, setTerm]
+    [debouncedFilter, setTerm],
   );
   const reset = useCallback(() => {
     setFilterService('');
     setTerm('');
   }, [setFilterService]);
 
-  const isDistributed = project.type === ProjectType.Federation || project.type === ProjectType.Stitching;
+  const isDistributed =
+    project.type === ProjectType.Federation || project.type === ProjectType.Stitching;
 
   const [query] = useQuery({
     query: LatestSchemaDocument,
@@ -289,9 +304,20 @@ function SchemaView({
                     }}
                   >
                     <InputGroup size="sm" variant="filled">
-                      <Input type="text" placeholder="Find service" value={term} onChange={handleChange} />
+                      <Input
+                        type="text"
+                        placeholder="Find service"
+                        value={term}
+                        onChange={handleChange}
+                      />
                       <InputRightElement>
-                        <IconButton aria-label="Reset" size="xs" variant="ghost" onClick={reset} icon={<VscClose />} />
+                        <IconButton
+                          aria-label="Reset"
+                          size="xs"
+                          variant="ghost"
+                          onClick={reset}
+                          icon={<VscClose />}
+                        />
                       </InputRightElement>
                     </InputGroup>
                   </form>
@@ -299,7 +325,11 @@ function SchemaView({
                 {canManage ? (
                   <>
                     <MarkAsValid version={query.data.target.latestSchemaVersion} />{' '}
-                    <SyncSchemaButton target={target} project={project} organization={organization} />
+                    <SyncSchemaButton
+                      target={target}
+                      project={project}
+                      organization={organization}
+                    />
                   </>
                 ) : null}
               </div>

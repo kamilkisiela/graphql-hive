@@ -83,7 +83,9 @@ export const stripeBillingApiRouter = trpc
         throw new Error(`Organization does not have a subscription record!`);
       }
 
-      const customer = await ctx.stripe.customers.retrieve(organizationBillingRecord.externalBillingReference);
+      const customer = await ctx.stripe.customers.retrieve(
+        organizationBillingRecord.externalBillingReference,
+      );
 
       if (customer.deleted === true) {
         await storage.deleteOrganizationBilling({
@@ -158,10 +160,15 @@ export const stripeBillingApiRouter = trpc
         }
 
         if (Object.keys(updateParams).length > 0) {
-          await ctx.stripe.customers.update(organizationBillingRecord.externalBillingReference, updateParams);
+          await ctx.stripe.customers.update(
+            organizationBillingRecord.externalBillingReference,
+            updateParams,
+          );
         }
       } else {
-        throw new Error(`Failed to sync subscription for organization: failed to find find active record`);
+        throw new Error(
+          `Failed to sync subscription for organization: failed to find find active record`,
+        );
       }
     },
   })
@@ -176,7 +183,9 @@ export const stripeBillingApiRouter = trpc
       });
 
       if (organizationBillingRecord === null) {
-        throw new Error(`Failed to cancel subscription for organization: no existing participant record`);
+        throw new Error(
+          `Failed to cancel subscription for organization: no existing participant record`,
+        );
       }
 
       const subscriptions = await ctx.stripe.subscriptions
@@ -186,7 +195,9 @@ export const stripeBillingApiRouter = trpc
         .then(v => v.data.filter(r => r.metadata?.hive_subscription));
 
       if (subscriptions.length === 0) {
-        throw new Error(`Failed to cancel subscription for organization: failed to find linked Stripe subscriptions`);
+        throw new Error(
+          `Failed to cancel subscription for organization: failed to find linked Stripe subscriptions`,
+        );
       }
 
       const actualSubscription = subscriptions[0];
@@ -252,7 +263,9 @@ export const stripeBillingApiRouter = trpc
       let paymentMethodId: string | null = null;
 
       if (input.paymentMethodId) {
-        const paymentMethodConfiguredAlready = existingPaymentMethods.find(v => v.id === input.paymentMethodId);
+        const paymentMethodConfiguredAlready = existingPaymentMethods.find(
+          v => v.id === input.paymentMethodId,
+        );
 
         if (paymentMethodConfiguredAlready) {
           paymentMethodId = paymentMethodConfiguredAlready.id;
@@ -268,7 +281,9 @@ export const stripeBillingApiRouter = trpc
       }
 
       if (!paymentMethodId) {
-        throw new Error(`Payment method is not specified, and customer does not have it configured.`);
+        throw new Error(
+          `Payment method is not specified, and customer does not have it configured.`,
+        );
       }
 
       const stripePrices = await ctx.stripeData$;
@@ -305,17 +320,14 @@ export const stripeBillingApiRouter = trpc
 export type StripeBillingApi = typeof stripeBillingApiRouter;
 
 export type StripeBillingApiQuery = keyof StripeBillingApi['_def']['queries'];
-export type StripeBillingQueryOutput<TRouteKey extends StripeBillingApiQuery> = inferProcedureOutput<
-  StripeBillingApi['_def']['queries'][TRouteKey]
->;
+export type StripeBillingQueryOutput<TRouteKey extends StripeBillingApiQuery> =
+  inferProcedureOutput<StripeBillingApi['_def']['queries'][TRouteKey]>;
 export type StripeBillingQueryInput<TRouteKey extends StripeBillingApiQuery> = inferProcedureInput<
   StripeBillingApi['_def']['queries'][TRouteKey]
 >;
 
 export type StripeBillingApiMutation = keyof StripeBillingApi['_def']['mutations'];
-export type StripeBillingMutationOutput<TRouteKey extends StripeBillingApiMutation> = inferProcedureOutput<
-  StripeBillingApi['_def']['mutations'][TRouteKey]
->;
-export type StripeBillingMutationInput<TRouteKey extends StripeBillingApiMutation> = inferProcedureInput<
-  StripeBillingApi['_def']['mutations'][TRouteKey]
->;
+export type StripeBillingMutationOutput<TRouteKey extends StripeBillingApiMutation> =
+  inferProcedureOutput<StripeBillingApi['_def']['mutations'][TRouteKey]>;
+export type StripeBillingMutationInput<TRouteKey extends StripeBillingApiMutation> =
+  inferProcedureInput<StripeBillingApi['_def']['mutations'][TRouteKey]>;

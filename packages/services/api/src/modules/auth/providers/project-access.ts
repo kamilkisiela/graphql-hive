@@ -52,7 +52,11 @@ export class ProjectAccess {
           const scopesForSelector = scopes[i];
 
           if (scopesForSelector instanceof Error) {
-            this.logger.warn(`ProjectAccess:user (error=%s, selector=%o)`, scopesForSelector.message, selector);
+            this.logger.warn(
+              `ProjectAccess:user (error=%s, selector=%o)`,
+              scopesForSelector.message,
+              selector,
+            );
             return false;
           }
 
@@ -69,7 +73,7 @@ export class ProjectAccess {
             scope: selector.scope,
           });
         },
-      }
+      },
     );
     this.tokenAccess = new Dataloader(
       selectors =>
@@ -77,12 +81,15 @@ export class ProjectAccess {
           selectors.map(async selector => {
             const tokenInfo = await this.organizationAccess.tokenInfo.load(selector);
 
-            if (tokenInfo?.organization === selector.organization && tokenInfo?.project === selector.project) {
+            if (
+              tokenInfo?.organization === selector.organization &&
+              tokenInfo?.project === selector.project
+            ) {
               return tokenInfo.scopes.includes(selector.scope);
             }
 
             return false;
-          })
+          }),
         ),
       {
         cacheKeyFn(selector) {
@@ -94,7 +101,7 @@ export class ProjectAccess {
             scope: selector.scope,
           });
         },
-      }
+      },
     );
     this.scopes = new Dataloader(
       async selectors => {
@@ -104,7 +111,11 @@ export class ProjectAccess {
           const scopes = scopesPerSelector[i];
 
           if (scopes instanceof Error) {
-            this.logger.debug(`ProjectAccess:scopes (error=%s, selector=%o)`, scopes.message, selector);
+            this.logger.debug(
+              `ProjectAccess:scopes (error=%s, selector=%o)`,
+              scopes.message,
+              selector,
+            );
             return [];
           }
 
@@ -119,7 +130,7 @@ export class ProjectAccess {
             user: selector.user,
           });
         },
-      }
+      },
     );
   }
 

@@ -1,20 +1,19 @@
 {
   "name": "@graphql-hive/core",
   "version": "0.2.3",
-  "author": {
-    "email": "contact@the-guild.dev",
-    "name": "The Guild",
-    "url": "https://the-guild.dev"
-  },
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "kamilkisiela/graphql-hive",
     "directory": "packages/libraries/core"
   },
   "homepage": "https://graphql-hive.com",
+  "author": {
+    "email": "contact@the-guild.dev",
+    "name": "The Guild",
+    "url": "https://the-guild.dev"
+  },
   "license": "MIT",
-  "type": "module",
-  "sideEffects": false,
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "exports": {
@@ -35,14 +34,6 @@
     "./package.json": "./package.json"
   },
   "typings": "dist/typings/index.d.ts",
-  "typescript": {
-    "definition": "dist/typings/index.d.ts"
-  },
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org",
-    "access": "public",
-    "directory": "dist"
-  },
   "scripts": {
     "build": "bob build",
     "check:build": "bob check"
@@ -56,5 +47,14 @@
   "devDependencies": {
     "@types/lodash.sortby": "4.7.7",
     "tslib": "2.4.1"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public",
+    "directory": "dist"
+  },
+  "sideEffects": false,
+  "typescript": {
+    "definition": "dist/typings/index.d.ts"
   }
 }

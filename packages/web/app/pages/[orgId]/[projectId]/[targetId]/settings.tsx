@@ -9,7 +9,18 @@ import * as Yup from 'yup';
 import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
 import { SchemaEditor } from '@/components/schema-editor';
-import { Button, Card, Checkbox, Heading, Input, Switch, Table, Tag, TimeAgo, Title } from '@/components/v2';
+import {
+  Button,
+  Card,
+  Checkbox,
+  Heading,
+  Input,
+  Switch,
+  Table,
+  Tag,
+  TimeAgo,
+  Title,
+} from '@/components/v2';
 import { Combobox } from '@/components/v2/combobox';
 import { AlertTriangleIcon } from '@/components/v2/icon';
 import { CreateAccessTokenModal, DeleteTargetModal } from '@/components/v2/modals';
@@ -120,7 +131,9 @@ const Tokens = ({ me }: { me: MemberFieldsFragment }): ReactElement => {
         }))}
         columns={columns}
       />
-      {isModalOpen && <CreateAccessTokenModal isOpen={isModalOpen} toggleModalOpen={toggleModalOpen} />}
+      {isModalOpen && (
+        <CreateAccessTokenModal isOpen={isModalOpen} toggleModalOpen={toggleModalOpen} />
+      )}
     </Card>
   );
 };
@@ -166,7 +179,9 @@ const ExtendBaseSchema = (props: { baseSchema: string }): ReactElement => {
         <div className="text-red-500">{mutation.data.updateBaseSchema.error.message}</div>
       )}
       {mutation.error && (
-        <div className="text-red-500">{mutation.error?.graphQLErrors[0]?.message ?? mutation.error.message}</div>
+        <div className="text-red-500">
+          {mutation.error?.graphQLErrors[0]?.message ?? mutation.error.message}
+        </div>
       )}
       <div className="mt-3 flex items-center gap-x-3">
         <Button
@@ -187,7 +202,12 @@ const ExtendBaseSchema = (props: { baseSchema: string }): ReactElement => {
         >
           Save
         </Button>
-        <Button size="large" variant="secondary" className="px-5" onClick={() => setBaseSchema(props.baseSchema)}>
+        <Button
+          size="large"
+          variant="secondary"
+          className="px-5"
+          onClick={() => setBaseSchema(props.baseSchema)}
+        >
           Reset
         </Button>
         {isUnsaved && <span className="text-green-500">Unsaved changes!</span>}
@@ -216,7 +236,7 @@ function ClientExclusion(
       clientsFromSettings: string[];
       value: string[];
     } & Pick<React.ComponentProps<typeof Combobox>, 'name' | 'disabled' | 'onBlur' | 'onChange'>
-  >
+  >,
 ) {
   const now = floorDate(new Date());
   const [availableClientNamesQuery] = useQuery({
@@ -234,9 +254,10 @@ function ClientExclusion(
     },
   });
 
-  const clientNamesFromStats = availableClientNamesQuery.data?.clientStatsByTargets.nodes.map(n => n.name) ?? [];
+  const clientNamesFromStats =
+    availableClientNamesQuery.data?.clientStatsByTargets.nodes.map(n => n.name) ?? [];
   const allClientNames = clientNamesFromStats.concat(
-    props.clientsFromSettings.filter(clientName => !clientNamesFromStats.includes(clientName))
+    props.clientsFromSettings.filter(clientName => !clientNamesFromStats.includes(clientName)),
   );
 
   return (
@@ -398,7 +419,7 @@ const ConditionalBreakingChanges = (): ReactElement => {
         <div
           className={clsx(
             'mb-3 flex flex-col items-start gap-3 font-light text-gray-300',
-            !isEnabled && 'pointer-events-none opacity-25'
+            !isEnabled && 'pointer-events-none opacity-25',
           )}
         >
           <div>
@@ -432,7 +453,9 @@ const ConditionalBreakingChanges = (): ReactElement => {
             />
             days
           </div>
-          {touched.percentage && errors.percentage && <div className="text-red-500">{errors.percentage}</div>}
+          {touched.percentage && errors.percentage && (
+            <div className="text-red-500">{errors.percentage}</div>
+          )}
           {mutation.data?.updateTargetValidationSettings.error?.inputErrors.percentage && (
             <div className="text-red-500">
               {mutation.data.updateTargetValidationSettings.error.inputErrors.percentage}
@@ -440,12 +463,16 @@ const ConditionalBreakingChanges = (): ReactElement => {
           )}
           {touched.period && errors.period && <div className="text-red-500">{errors.period}</div>}
           {mutation.data?.updateTargetValidationSettings.error?.inputErrors.period && (
-            <div className="text-red-500">{mutation.data.updateTargetValidationSettings.error.inputErrors.period}</div>
+            <div className="text-red-500">
+              {mutation.data.updateTargetValidationSettings.error.inputErrors.period}
+            </div>
           )}
           <div className="my-4 flex flex-col gap-2">
             <div>
               <div>Exclude these clients:</div>
-              <div className="text-xs">Marks a breaking change as safe when it only affects the following clients.</div>
+              <div className="text-xs">
+                Marks a breaking change as safe when it only affects the following clients.
+              </div>
             </div>
             <div>
               {values.targets.length > 0 ? (
@@ -460,7 +487,7 @@ const ConditionalBreakingChanges = (): ReactElement => {
                   onChange={options => {
                     setFieldValue(
                       'excludedClients',
-                      options.map(o => o.value)
+                      options.map(o => o.value),
                     );
                   }}
                   disabled={isSubmitting}
@@ -481,7 +508,9 @@ const ConditionalBreakingChanges = (): ReactElement => {
                 onCheckedChange={isChecked => {
                   setFieldValue(
                     'targets',
-                    isChecked ? [...values.targets, pt.id] : values.targets.filter(value => value !== pt.id)
+                    isChecked
+                      ? [...values.targets, pt.id]
+                      : values.targets.filter(value => value !== pt.id),
                   );
                 }}
                 onBlur={() => setFieldTouched('targets', true)}
@@ -489,7 +518,9 @@ const ConditionalBreakingChanges = (): ReactElement => {
               {pt.name}
             </div>
           ))}
-          {touched.targets && errors.targets && <div className="text-red-500">{errors.targets}</div>}
+          {touched.targets && errors.targets && (
+            <div className="text-red-500">{errors.targets}</div>
+          )}
           <Tag className="mt-5 flex-col !items-start gap-1">
             Example settings: Removal of a field is considered breaking if
             <div>
@@ -506,7 +537,13 @@ const ConditionalBreakingChanges = (): ReactElement => {
             </div>
           </Tag>
           <div>
-            <Button type="submit" className="px-5" variant="primary" size="large" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              className="px-5"
+              variant="primary"
+              size="large"
+              disabled={isSubmitting}
+            >
               Save
             </Button>
             {mutation.error && (
@@ -544,7 +581,13 @@ const Settings_UpdateTargetNameMutation = gql(/* GraphQL */ `
   }
 `);
 
-const Page = ({ target, organization }: { target: TargetFieldsFragment; organization: OrganizationFieldsFragment }) => {
+const Page = ({
+  target,
+  organization,
+}: {
+  target: TargetFieldsFragment;
+  organization: OrganizationFieldsFragment;
+}) => {
   const router = useRouteSelector();
   const [isModalOpen, setModalOpen] = useState(false);
   const toggleModalOpen = useCallback(() => {
@@ -552,29 +595,30 @@ const Page = ({ target, organization }: { target: TargetFieldsFragment; organiza
   }, []);
 
   const [mutation, mutate] = useMutation(Settings_UpdateTargetNameMutation);
-  const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } = useFormik({
-    enableReinitialize: true,
-    initialValues: {
-      name: target?.name || '',
-    },
-    validationSchema: Yup.object().shape({
-      name: Yup.string().required('Target name is required'),
-    }),
-    onSubmit: values =>
-      mutate({
-        input: {
-          organization: router.organizationId,
-          project: router.projectId,
-          target: router.targetId,
-          name: values.name,
-        },
-      }).then(result => {
-        if (result?.data?.updateTargetName?.ok) {
-          const newTargetId = result.data.updateTargetName.ok.updatedTarget.cleanId;
-          router.replace(`/${router.organizationId}/${router.projectId}/${newTargetId}/settings`);
-        }
+  const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } =
+    useFormik({
+      enableReinitialize: true,
+      initialValues: {
+        name: target?.name || '',
+      },
+      validationSchema: Yup.object().shape({
+        name: Yup.string().required('Target name is required'),
       }),
-  });
+      onSubmit: values =>
+        mutate({
+          input: {
+            organization: router.organizationId,
+            project: router.projectId,
+            target: router.targetId,
+            name: values.name,
+          },
+        }).then(result => {
+          if (result?.data?.updateTargetName?.ok) {
+            const newTargetId = result.data.updateTargetName.ok.updatedTarget.cleanId;
+            router.replace(`/${router.organizationId}/${router.projectId}/${newTargetId}/settings`);
+          }
+        }),
+    });
 
   const me = organization?.me;
 
@@ -585,7 +629,9 @@ const Page = ({ target, organization }: { target: TargetFieldsFragment; organiza
     <>
       <Card>
         <Heading className="mb-2">Target Info</Heading>
-        <p className="mb-3 font-light text-gray-300">Name of your target visible within organization.</p>
+        <p className="mb-3 font-light text-gray-300">
+          Name of your target visible within organization.
+        </p>
         <form onSubmit={handleSubmit} className="flex gap-x-2">
           <Input
             placeholder="Target name"
@@ -597,7 +643,13 @@ const Page = ({ target, organization }: { target: TargetFieldsFragment; organiza
             isInvalid={touched.name && Boolean(errors.name)}
             className="w-96"
           />
-          <Button type="submit" variant="primary" size="large" disabled={isSubmitting} className="px-10">
+          <Button
+            type="submit"
+            variant="primary"
+            size="large"
+            disabled={isSubmitting}
+            className="px-10"
+          >
             Save
           </Button>
         </form>
@@ -607,7 +659,9 @@ const Page = ({ target, organization }: { target: TargetFieldsFragment; organiza
           </div>
         )}
         {mutation.data?.updateTargetName.error?.inputErrors?.name && (
-          <div className="mt-2 text-red-500">{mutation.data.updateTargetName.error.inputErrors.name}</div>
+          <div className="mt-2 text-red-500">
+            {mutation.data.updateTargetName.error.inputErrors.name}
+          </div>
         )}
       </Card>
 
@@ -622,7 +676,13 @@ const Page = ({ target, organization }: { target: TargetFieldsFragment; organiza
           <Heading className="mb-2">Delete Target</Heading>
           <p className="mb-3 font-light text-gray-300">Permanently remove your Target</p>
           <div className="flex items-center gap-x-2">
-            <Button variant="primary" size="large" danger onClick={toggleModalOpen} className="px-5">
+            <Button
+              variant="primary"
+              size="large"
+              danger
+              onClick={toggleModalOpen}
+              className="px-5"
+            >
               Delete Target
             </Button>
             <Tag color="yellow" className="py-2.5 px-4">

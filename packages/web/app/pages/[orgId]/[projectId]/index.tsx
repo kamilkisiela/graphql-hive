@@ -5,7 +5,17 @@ import { useQuery } from 'urql';
 
 import { authenticated } from '@/components/authenticated-container';
 import { ProjectLayout } from '@/components/layouts';
-import { Activities, Badge, Button, Card, DropdownMenu, EmptyList, Heading, TimeAgo, Title } from '@/components/v2';
+import {
+  Activities,
+  Badge,
+  Button,
+  Card,
+  DropdownMenu,
+  EmptyList,
+  Heading,
+  TimeAgo,
+  Title,
+} from '@/components/v2';
 import { LinkIcon, MoreIcon, SettingsIcon } from '@/components/v2/icon';
 import { TargetQuery, TargetsDocument, VersionsDocument } from '@/graphql';
 import { getDocsUrl } from '@/lib/docs-url';
@@ -13,7 +23,11 @@ import { useClipboard } from '@/lib/hooks/use-clipboard';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
-const TargetCard = ({ target }: { target: Exclude<TargetQuery['target'], null | undefined> }): ReactElement => {
+const TargetCard = ({
+  target,
+}: {
+  target: Exclude<TargetQuery['target'], null | undefined>;
+}): ReactElement => {
   const router = useRouteSelector();
   const copyToClipboard = useClipboard();
   const [versionsQuery] = useQuery({
@@ -57,7 +71,9 @@ const TargetCard = ({ target }: { target: Exclude<TargetQuery['target'], null | 
                 <LinkIcon />
                 Share Link
               </DropdownMenu.Item>
-              <NextLink href={`/${router.organizationId}/${router.projectId}/${target.cleanId}#settings`}>
+              <NextLink
+                href={`/${router.organizationId}/${router.projectId}/${target.cleanId}#settings`}
+              >
                 <a>
                   <DropdownMenu.Item>
                     <SettingsIcon />

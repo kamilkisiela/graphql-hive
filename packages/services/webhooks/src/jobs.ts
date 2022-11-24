@@ -36,7 +36,7 @@ export function createWebhookJob({ config }: { config: Config }) {
         'Calling webhook (job=%s, attempt=%d of %d)',
         job.name,
         job.attemptsMade + 1,
-        config.maxAttempts
+        config.maxAttempts,
       );
 
       if (config.requestBroker) {

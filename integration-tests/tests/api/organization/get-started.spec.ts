@@ -12,7 +12,12 @@ import {
 } from '../../../testkit/flow';
 import { authenticate } from '../../../testkit/auth';
 import { collect } from '../../../testkit/usage';
-import { TargetAccessScope, ProjectType, ProjectAccessScope, OrganizationAccessScope } from '@app/gql/graphql';
+import {
+  TargetAccessScope,
+  ProjectType,
+  ProjectAccessScope,
+  OrganizationAccessScope,
+} from '@app/gql/graphql';
 
 async function getSteps({ organization, token }: { organization: string; token: string }) {
   const result = await getOrganization(organization, token);
@@ -28,7 +33,7 @@ test('freshly created organization has Get Started progress at 0%', async () => 
     {
       name: 'foo',
     },
-    access_token
+    access_token,
   );
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
 
@@ -51,7 +56,7 @@ test('completing each step should result in updated Get Started progress', async
     {
       name: 'foo',
     },
-    access_token
+    access_token,
   );
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
 
@@ -63,7 +68,7 @@ test('completing each step should result in updated Get Started progress', async
       name: 'foo',
       type: ProjectType.Single,
     },
-    access_token
+    access_token,
   );
 
   let steps = await getSteps({
@@ -80,7 +85,9 @@ test('completing each step should result in updated Get Started progress', async
 
   expect(projectResult.body.errors).not.toBeDefined();
 
-  const target = projectResult.body.data?.createProject.ok?.createdTargets.find(t => t.name === 'production');
+  const target = projectResult.body.data?.createProject.ok?.createdTargets.find(
+    t => t.name === 'production',
+  );
   const project = projectResult.body.data?.createProject.ok?.createdProject;
 
   if (!target || !project) {
@@ -102,7 +109,7 @@ test('completing each step should result in updated Get Started progress', async
         TargetAccessScope.Settings,
       ],
     },
-    access_token
+    access_token,
   );
 
   expect(tokenResult.body.errors).not.toBeDefined();
@@ -117,7 +124,7 @@ test('completing each step should result in updated Get Started progress', async
       commit: 'test',
       sdl: 'type Query { foo: String }',
     },
-    token
+    token,
   );
 
   steps = await getSteps({
@@ -138,7 +145,7 @@ test('completing each step should result in updated Get Started progress', async
     {
       sdl: 'type Query { foo: String bar: String }',
     },
-    token
+    token,
   );
 
   steps = await getSteps({
@@ -160,7 +167,7 @@ test('completing each step should result in updated Get Started progress', async
       email: 'some@email.com',
       organization: org.cleanId,
     },
-    access_token
+    access_token,
   );
 
   const inviteCode = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
@@ -224,7 +231,7 @@ test('completing each step should result in updated Get Started progress', async
     },
     {
       token,
-    }
+    },
   );
 
   steps = await getSteps({

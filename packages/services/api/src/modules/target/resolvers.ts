@@ -65,8 +65,8 @@ export const resolvers: TargetModule.Resolvers = {
                 organization,
                 project,
                 target: tid,
-              })
-            )
+              }),
+            ),
           ),
         },
       };
@@ -222,8 +222,8 @@ export const resolvers: TargetModule.Resolvers = {
               organization,
               project,
               target: tid,
-            })
-          )
+            }),
+          ),
         ),
       };
     },
@@ -280,8 +280,8 @@ export const resolvers: TargetModule.Resolvers = {
                   organization,
                   project,
                   target: tid,
-                })
-              )
+                }),
+              ),
             ),
           },
         },

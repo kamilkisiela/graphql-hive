@@ -20,7 +20,7 @@ const RequestModelSchema = z.union([
 
 export async function parseIncomingRequest(
   request: Request,
-  keyValidator: typeof isSignatureValid
+  keyValidator: typeof isSignatureValid,
 ): Promise<{ error: Response } | z.infer<typeof RequestModelSchema>> {
   if (request.method !== 'POST') {
     return {

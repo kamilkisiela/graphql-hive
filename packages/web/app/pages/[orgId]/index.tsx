@@ -5,10 +5,24 @@ import { useQuery } from 'urql';
 
 import { authenticated } from '@/components/authenticated-container';
 import { OrganizationLayout } from '@/components/layouts';
-import { Activities, Button, Card, DropdownMenu, EmptyList, Heading, Skeleton, TimeAgo, Title } from '@/components/v2';
+import {
+  Activities,
+  Button,
+  Card,
+  DropdownMenu,
+  EmptyList,
+  Heading,
+  Skeleton,
+  TimeAgo,
+  Title,
+} from '@/components/v2';
 import { getActivity } from '@/components/v2/activities';
 import { LinkIcon, MoreIcon, SettingsIcon } from '@/components/v2/icon';
-import { ProjectActivitiesDocument, ProjectsWithTargetsDocument, ProjectsWithTargetsQuery } from '@/graphql';
+import {
+  ProjectActivitiesDocument,
+  ProjectsWithTargetsDocument,
+  ProjectsWithTargetsQuery,
+} from '@/graphql';
 import { writeLastVisitedOrganization } from '@/lib/cookies';
 import { getDocsUrl } from '@/lib/docs-url';
 import { fixDuplicatedFragments } from '@/lib/graphql';
@@ -18,7 +32,11 @@ import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const projectActivitiesDocument = fixDuplicatedFragments(ProjectActivitiesDocument);
 
-const ProjectCard = ({ project }: { project: ProjectsWithTargetsQuery['projects']['nodes'][number] }): ReactElement => {
+const ProjectCard = ({
+  project,
+}: {
+  project: ProjectsWithTargetsQuery['projects']['nodes'][number];
+}): ReactElement => {
   const copyToClipboard = useClipboard();
   const router = useRouteSelector();
   const [projectActivitiesQuery] = useQuery({

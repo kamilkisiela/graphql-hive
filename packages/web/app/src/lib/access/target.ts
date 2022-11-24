@@ -5,7 +5,7 @@ export { TargetAccessScope } from '../../graphql';
 
 export function canAccessTarget(
   scope: TargetAccessScope,
-  member: Pick<MemberFieldsFragment, 'targetAccessScopes'> | null | undefined
+  member: Pick<MemberFieldsFragment, 'targetAccessScopes'> | null | undefined,
 ) {
   if (!member) {
     return false;

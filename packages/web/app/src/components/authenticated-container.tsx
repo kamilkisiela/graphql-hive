@@ -26,7 +26,7 @@ export const AuthenticatedContainer = (props: { children: ReactNode }): React.Re
  */
 export const authenticated =
   <TProps extends { fromSupertokens?: 'needs-refresh' }>(
-    Component: (props: Omit<TProps, 'fromSupertokens'>) => React.ReactElement | null
+    Component: (props: Omit<TProps, 'fromSupertokens'>) => React.ReactElement | null,
   ) =>
   (props: TProps) => {
     const router = useRouter();

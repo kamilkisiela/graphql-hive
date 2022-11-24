@@ -1,27 +1,27 @@
 {
-  "private": true,
-  "type": "module",
   "name": "@hive/stripe-billing",
-  "description": "A microservice for Hive SaaS, that syncs usage information to Stripe (metered billing)",
   "version": "0.0.0",
+  "type": "module",
+  "description": "A microservice for Hive SaaS, that syncs usage information to Stripe (metered billing)",
   "license": "MIT",
+  "private": true,
   "scripts": {
-    "dev": "tsup-node src/dev.ts --format esm --shims --target node16 --watch --sourcemap --onSuccess 'node --enable-source-maps dist/dev.js' | pino-pretty --translateTime HH:MM:ss TT --ignore pid,hostname",
     "build": "bob runify --single",
+    "dev": "tsup-node src/dev.ts --format esm --shims --target node16 --watch --sourcemap --onSuccess 'node --enable-source-maps dist/dev.js' | pino-pretty --translateTime HH:MM:ss TT --ignore pid,hostname",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@whatwg-node/fetch": "0.4.7",
-    "@trpc/client": "9.23.2",
-    "@trpc/server": "9.23.2",
-    "zod": "3.15.1",
-    "stripe": "8.220.0",
-    "reflect-metadata": "0.1.13",
     "@sentry/node": "7.20.1",
     "@sentry/tracing": "7.20.1",
-    "dotenv": "10.0.0",
+    "@trpc/client": "9.23.2",
+    "@trpc/server": "9.23.2",
+    "@whatwg-node/fetch": "0.4.7",
     "date-fns": "2.28.0",
-    "got": "12.5.3"
+    "dotenv": "10.0.0",
+    "got": "12.5.3",
+    "reflect-metadata": "0.1.13",
+    "stripe": "8.220.0",
+    "zod": "3.15.1"
   },
   "devDependencies": {
     "@hive/service-common": "workspace:*",

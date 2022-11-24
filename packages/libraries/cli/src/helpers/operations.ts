@@ -10,7 +10,7 @@ export async function loadOperations(
   file: string,
   options?: {
     normalize?: boolean;
-  }
+  },
 ): Promise<
   Array<{
     operationHash?: string;
@@ -24,7 +24,7 @@ export async function loadOperations(
     const output: Record<string, string> = JSON.parse(
       await fs.readFile(file, {
         encoding: 'utf-8',
-      })
+      }),
     );
 
     const operations: Array<{

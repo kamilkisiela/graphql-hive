@@ -8,7 +8,7 @@ export class Clickhouse {
     protected options: {
       env?: kx.types.Container['env'];
       sentryDsn: string;
-    }
+    },
   ) {}
 
   deploy() {
@@ -79,7 +79,7 @@ export class Clickhouse {
         },
         {
           annotations: metadata.annotations,
-        }
+        },
       ),
     });
     const service = deployment.createService({});

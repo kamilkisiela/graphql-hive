@@ -16,7 +16,7 @@ test('setting no scopes equals to readonly for organization, project, target', a
     {
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
@@ -27,7 +27,7 @@ test('setting no scopes equals to readonly for organization, project, target', a
       type: ProjectType.Single,
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
@@ -44,7 +44,7 @@ test('setting no scopes equals to readonly for organization, project, target', a
       projectScopes: [],
       targetScopes: [],
     },
-    owner_access_token
+    owner_access_token,
   );
 
   expect(tokenResult.body.errors).not.toBeDefined();
@@ -88,7 +88,7 @@ test('cannot set a scope on a token if user has no access to that scope', async 
     {
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   // Join
@@ -100,7 +100,7 @@ test('cannot set a scope on a token if user has no access to that scope', async 
       email: 'some@email.com',
       organization: org.cleanId,
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const inviteCode = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
@@ -114,7 +114,7 @@ test('cannot set a scope on a token if user has no access to that scope', async 
       type: ProjectType.Single,
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   if (joinResult.body.data!.joinOrganization.__typename !== 'OrganizationPayload') {
@@ -139,7 +139,7 @@ test('cannot set a scope on a token if user has no access to that scope', async 
       ],
       user: member.id,
     },
-    owner_access_token
+    owner_access_token,
   );
 
   // member should not have access to target:registry:write
@@ -153,7 +153,7 @@ test('cannot set a scope on a token if user has no access to that scope', async 
       projectScopes: [],
       targetScopes: [TargetAccessScope.RegistryWrite],
     },
-    member_access_token
+    member_access_token,
   );
 
   expect(tokenResult.body.errors).toHaveLength(1);

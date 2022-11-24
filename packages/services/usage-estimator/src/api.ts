@@ -41,15 +41,15 @@ export const usageEstimatorApiRouter = trpc
         endTime: new Date(input.endTime),
       });
 
-      return Object.fromEntries(estimationResponse.data.map(item => [item.target, parseInt(item.total)]));
+      return Object.fromEntries(
+        estimationResponse.data.map(item => [item.target, parseInt(item.total)]),
+      );
     },
   });
 
 export type UsageEstimatorApi = typeof usageEstimatorApiRouter;
 export type UsageEstimatorApiQuery = keyof UsageEstimatorApi['_def']['queries'];
-export type UsageEstimatorQueryOutput<TRouteKey extends UsageEstimatorApiQuery> = inferProcedureOutput<
-  UsageEstimatorApi['_def']['queries'][TRouteKey]
->;
-export type UsageEstimatorQueryInput<TRouteKey extends UsageEstimatorApiQuery> = inferProcedureInput<
-  UsageEstimatorApi['_def']['queries'][TRouteKey]
->;
+export type UsageEstimatorQueryOutput<TRouteKey extends UsageEstimatorApiQuery> =
+  inferProcedureOutput<UsageEstimatorApi['_def']['queries'][TRouteKey]>;
+export type UsageEstimatorQueryInput<TRouteKey extends UsageEstimatorApiQuery> =
+  inferProcedureInput<UsageEstimatorApi['_def']['queries'][TRouteKey]>;

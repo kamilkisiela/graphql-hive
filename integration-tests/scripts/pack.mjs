@@ -25,7 +25,9 @@ async function main() {
   fsExtra.mkdirSync(tarballDir, { recursive: true });
 
   function isBackendPackage(manifestPath) {
-    return JSON.parse(fs.readFileSync(manifestPath, 'utf-8')).buildOptions?.tags.includes('backend');
+    return JSON.parse(fs.readFileSync(manifestPath, 'utf-8')).buildOptions?.tags.includes(
+      'backend',
+    );
   }
 
   function listBackendPackages() {
@@ -35,11 +37,15 @@ async function main() {
       ignore: ['**/node_modules/**', '**/dist/**'],
     });
 
-    return manifestPathCollection.filter(isBackendPackage).map(filepath => path.relative(cwd, path.dirname(filepath)));
+    return manifestPathCollection
+      .filter(isBackendPackage)
+      .map(filepath => path.relative(cwd, path.dirname(filepath)));
   }
 
   async function pack(location) {
-    const { version, name } = JSON.parse(await fsExtra.readFile(path.join(cwd, location, 'package.json'), 'utf-8'));
+    const { version, name } = JSON.parse(
+      await fsExtra.readFile(path.join(cwd, location, 'package.json'), 'utf-8'),
+    );
     const stdout = await new Promise((resolve, reject) => {
       exec(
         `npm pack ${path.join(cwd, location, 'dist')}`,
@@ -54,7 +60,7 @@ async function main() {
           } else {
             resolve(stdout);
           }
-        }
+        },
       );
     });
 
@@ -86,7 +92,7 @@ async function main() {
         console.error('[pack] Maybe you forgot to build the packages first?');
         process.exit(1);
       }
-    })
+    }),
   );
 }
 

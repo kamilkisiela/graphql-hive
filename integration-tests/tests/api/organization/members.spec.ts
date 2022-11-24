@@ -1,5 +1,10 @@
 import { OrganizationAccessScope, ProjectAccessScope, TargetAccessScope } from '@app/gql/graphql';
-import { createOrganization, inviteToOrganization, joinOrganization, updateMemberAccess } from '../../../testkit/flow';
+import {
+  createOrganization,
+  inviteToOrganization,
+  joinOrganization,
+  updateMemberAccess,
+} from '../../../testkit/flow';
 import { authenticate } from '../../../testkit/auth';
 import { history } from '../../../testkit/emails';
 
@@ -9,12 +14,13 @@ test('owner of an organization should have all scopes', async () => {
     {
       name: 'foo',
     },
-    access_token
+    access_token,
   );
 
   expect(result.body.errors).not.toBeDefined();
 
-  const owner = result.body.data!.createOrganization.ok!.createdOrganizationPayload.organization.owner;
+  const owner =
+    result.body.data!.createOrganization.ok!.createdOrganizationPayload.organization.owner;
 
   Object.values(OrganizationAccessScope).forEach(scope => {
     expect(owner.organizationAccessScopes).toContain(scope);
@@ -35,7 +41,7 @@ test('regular member of an organization should have basic scopes', async () => {
     {
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
@@ -46,7 +52,7 @@ test('regular member of an organization should have basic scopes', async () => {
       email: 'some@email.com',
       organization: org.cleanId,
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const inviteCode = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
@@ -89,7 +95,7 @@ test('cannot grant an access scope to another user if user has no access to that
     {
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
@@ -100,7 +106,7 @@ test('cannot grant an access scope to another user if user has no access to that
       email: 'some@email.com',
       organization: org.cleanId,
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const inviteCode = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
@@ -125,7 +131,7 @@ test('cannot grant an access scope to another user if user has no access to that
       targetScopes: [],
       user: member.id,
     },
-    owner_access_token
+    owner_access_token,
   );
 
   // Grant access to target:tokens:write
@@ -137,7 +143,7 @@ test('cannot grant an access scope to another user if user has no access to that
       targetScopes: [TargetAccessScope.TokensWrite],
       user: member.id,
     },
-    member_access_token
+    member_access_token,
   );
 
   expect(accessResult.body.errors).toHaveLength(1);
@@ -150,7 +156,7 @@ test('granting no scopes is equal to setting read-only for org, project and targ
     {
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
@@ -161,7 +167,7 @@ test('granting no scopes is equal to setting read-only for org, project and targ
       email: 'some@email.com',
       organization: org.cleanId,
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const inviteCode = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
@@ -186,14 +192,15 @@ test('granting no scopes is equal to setting read-only for org, project and targ
       targetScopes: [],
       user: member.id,
     },
-    owner_access_token
+    owner_access_token,
   );
 
   expect(accessResult.body.errors).not.toBeDefined();
 
-  const memberWithAccess = accessResult.body.data?.updateOrganizationMemberAccess.organization.members.nodes.find(
-    m => m.id === member.id
-  );
+  const memberWithAccess =
+    accessResult.body.data?.updateOrganizationMemberAccess.organization.members.nodes.find(
+      m => m.id === member.id,
+    );
   expect(memberWithAccess?.organizationAccessScopes).toHaveLength(1);
   expect(memberWithAccess?.organizationAccessScopes).toContainEqual(OrganizationAccessScope.Read);
   expect(memberWithAccess?.projectAccessScopes).toHaveLength(1);
@@ -208,9 +215,10 @@ test('email invitation', async () => {
     {
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
-  const org = createOrgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+  const org =
+    createOrgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
 
   // Invite
   const email = 'invited@invited.com';
@@ -219,7 +227,7 @@ test('email invitation', async () => {
       email,
       organization: org.cleanId,
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const inviteCode = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
@@ -235,9 +243,10 @@ test('cannot join organization twice using the same invitation code', async () =
     {
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
-  const org = createOrgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+  const org =
+    createOrgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
 
   // Invite
   const invitationResult = await inviteToOrganization(
@@ -245,7 +254,7 @@ test('cannot join organization twice using the same invitation code', async () =
       email: 'some@email.com',
       organization: org.cleanId,
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const inviteCode = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
@@ -264,5 +273,7 @@ test('cannot join organization twice using the same invitation code', async () =
 
   const { access_token: another_access_token } = await authenticate('admin');
   const secondJoinResult = await joinOrganization(inviteCode!, another_access_token);
-  expect(secondJoinResult.body.data?.joinOrganization.__typename).toBe('OrganizationInvitationError');
+  expect(secondJoinResult.body.data?.joinOrganization.__typename).toBe(
+    'OrganizationInvitationError',
+  );
 });

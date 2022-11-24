@@ -42,10 +42,12 @@ export default class SchemaPublish extends Command {
       default: false,
     }),
     experimental_acceptBreakingChanges: Flags.boolean({
-      description: '(experimental) accept breaking changes and mark schema as valid (only if composable)',
+      description:
+        '(experimental) accept breaking changes and mark schema as valid (only if composable)',
     }),
     require: Flags.string({
-      description: 'Loads specific require.extensions before running the codegen and reading the configuration',
+      description:
+        'Loads specific require.extensions before running the codegen and reading the configuration',
       default: [],
       multiple: true,
     }),
@@ -76,7 +78,7 @@ export default class SchemaPublish extends Command {
 
       if (!exists) {
         throw new Error(
-          `Failed to load metadata from "${metadata}": Please specify a path to an existing file, or a string with valid JSON.`
+          `Failed to load metadata from "${metadata}": Please specify a path to an existing file, or a string with valid JSON.`,
         );
       }
 
@@ -87,7 +89,7 @@ export default class SchemaPublish extends Command {
         return fileContent;
       } catch (e) {
         throw new Error(
-          `Failed to load metadata from file "${metadata}": Please make sure the file is readable and contains a valid JSON`
+          `Failed to load metadata from file "${metadata}": Please make sure the file is readable and contains a valid JSON`,
         );
       }
     }
@@ -114,7 +116,10 @@ export default class SchemaPublish extends Command {
         env: 'HIVE_TOKEN',
       });
       const force = this.maybe('force', flags);
-      const experimental_acceptBreakingChanges = this.maybe('experimental_acceptBreakingChanges', flags);
+      const experimental_acceptBreakingChanges = this.maybe(
+        'experimental_acceptBreakingChanges',
+        flags,
+      );
       const metadata = this.resolveMetadata(this.maybe('metadata', flags));
       const usesGitHubApp = this.maybe('github', flags) === true;
 
@@ -152,7 +157,9 @@ export default class SchemaPublish extends Command {
       } catch (err) {
         if (err instanceof GraphQLError) {
           const location = err.locations?.[0];
-          const locationString = location ? ` at line ${location.line}, column ${location.column}` : '';
+          const locationString = location
+            ? ` at line ${location.line}, column ${location.column}`
+            : '';
           throw new Error(`The SDL is not valid${locationString}:\n ${err.message}`);
         }
         throw err;
@@ -191,10 +198,14 @@ export default class SchemaPublish extends Command {
           this.info(`Available at ${result.schemaPublish.linkToWebsite}`);
         }
       } else if (result.schemaPublish.__typename === 'SchemaPublishMissingServiceError') {
-        this.fail(`${result.schemaPublish.missingServiceError} Please use the '--service <name>' parameter.`);
+        this.fail(
+          `${result.schemaPublish.missingServiceError} Please use the '--service <name>' parameter.`,
+        );
         this.exit(1);
       } else if (result.schemaPublish.__typename === 'SchemaPublishMissingUrlError') {
-        this.fail(`${result.schemaPublish.missingUrlError} Please use the '--url <url>' parameter.`);
+        this.fail(
+          `${result.schemaPublish.missingUrlError} Please use the '--url <url>' parameter.`,
+        );
         this.exit(1);
       } else if (result.schemaPublish.__typename === 'SchemaPublishError') {
         const changes = result.schemaPublish.changes;
@@ -220,7 +231,9 @@ export default class SchemaPublish extends Command {
       } else if (result.schemaPublish.__typename === 'GitHubSchemaPublishSuccess') {
         this.success(result.schemaPublish.message);
       } else {
-        this.error('message' in result.schemaPublish ? result.schemaPublish.message : 'Unknown error');
+        this.error(
+          'message' in result.schemaPublish ? result.schemaPublish.message : 'Unknown error',
+        );
       }
     } catch (error) {
       if (error instanceof Errors.ExitError) {

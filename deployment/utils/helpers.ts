@@ -5,7 +5,9 @@ export function isProduction(deploymentEnv: DeploymentEnvironment | string): boo
 }
 
 export function isStaging(deploymentEnv: DeploymentEnvironment | string): boolean {
-  return isDeploymentEnvironment(deploymentEnv) ? deploymentEnv.ENVIRONMENT === 'staging' : deploymentEnv === 'staging';
+  return isDeploymentEnvironment(deploymentEnv)
+    ? deploymentEnv.ENVIRONMENT === 'staging'
+    : deploymentEnv === 'staging';
 }
 
 export function isDeploymentEnvironment(value: any): value is DeploymentEnvironment {

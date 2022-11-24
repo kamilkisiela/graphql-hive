@@ -60,7 +60,7 @@ export function createAgent<TEvent, TResult = void>(
     };
     body(): Buffer | string | Promise<string | Buffer>;
     headers?(): Record<string, string>;
-  }
+  },
 ) {
   const options: Required<AgentOptions> = {
     timeout: 30_000,
@@ -117,9 +117,18 @@ export function createAgent<TEvent, TResult = void>(
     return send({ runOnce: true, throwOnError: true });
   }
 
-  async function send<T>(sendOptions: { runOnce?: boolean; throwOnError: true }): Promise<T | null | never>;
-  async function send<T>(sendOptions: { runOnce?: boolean; throwOnError: false }): Promise<T | null>;
-  async function send<T>(sendOptions?: { runOnce?: boolean; throwOnError: boolean }): Promise<T | null | never> {
+  async function send<T>(sendOptions: {
+    runOnce?: boolean;
+    throwOnError: true;
+  }): Promise<T | null | never>;
+  async function send<T>(sendOptions: {
+    runOnce?: boolean;
+    throwOnError: false;
+  }): Promise<T | null>;
+  async function send<T>(sendOptions?: {
+    runOnce?: boolean;
+    throwOnError: boolean;
+  }): Promise<T | null | never> {
     const runOnce = sendOptions?.runOnce ?? false;
 
     if (!data.size()) {
@@ -180,7 +189,9 @@ export function createAgent<TEvent, TResult = void>(
       });
 
       if (response.status < 200 || response.status >= 300) {
-        throw new Error(`[hive][${prefix}] Failed to send data (HTTP status ${response.status}): ${response.data}`);
+        throw new Error(
+          `[hive][${prefix}] Failed to send data (HTTP status ${response.status}): ${response.data}`,
+        );
       }
 
       debugLog(`Sent!`);

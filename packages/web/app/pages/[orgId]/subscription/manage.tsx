@@ -43,13 +43,17 @@ const Inner = ({
     query: BillingPlansDocument,
   });
 
-  const [paymentDetailsValid, setPaymentDetailsValid] = useState(!!organization.billingConfiguration?.paymentMethod);
+  const [paymentDetailsValid, setPaymentDetailsValid] = useState(
+    !!organization.billingConfiguration?.paymentMethod,
+  );
   const upgradeToProMutation = useMutation(UpgradeToProDocument);
   const downgradeToHobbyMutation = useMutation(DowngradeToHobbyDocument);
   const updateOrgRateLimitMutation = useMutation(UpdateOrgRateLimitDocument);
   const planSummaryRef = useRef<HTMLDivElement>(null);
 
-  const [plan, setPlan] = useState<BillingPlanType>((organization?.plan || 'HOBBY') as BillingPlanType);
+  const [plan, setPlan] = useState<BillingPlanType>(
+    (organization?.plan || 'HOBBY') as BillingPlanType,
+  );
   const onPlan = useCallback(
     (plan: BillingPlanType) => {
       setPlan(plan);
@@ -63,18 +67,18 @@ const Inner = ({
         }, 50);
       }
     },
-    [setPlan, planSummaryRef]
+    [setPlan, planSummaryRef],
   );
   const [couponCode, setCouponCode] = useState<string>('');
   const [operationsRateLimit, setOperationsRateLimit] = useState<number>(
-    Math.floor((organization.rateLimit.operations || 1_000_000) / 1_000_000)
+    Math.floor((organization.rateLimit.operations || 1_000_000) / 1_000_000),
   );
 
   const onOperationsRateLimitChange = useCallback(
     (limit: number) => {
       setOperationsRateLimit(limit);
     },
-    [setOperationsRateLimit]
+    [setOperationsRateLimit],
   );
 
   useEffect(() => {
@@ -82,7 +86,9 @@ const Inner = ({
       if (organization.plan !== plan) {
         const actualPlan = query.data.billingPlans.find(v => v.planType === plan);
 
-        setOperationsRateLimit(Math.floor((actualPlan?.includedOperationsLimit || 1_000_000) / 1_000_000));
+        setOperationsRateLimit(
+          Math.floor((actualPlan?.includedOperationsLimit || 1_000_000) / 1_000_000),
+        );
       } else {
         setOperationsRateLimit(Math.floor((organization.rateLimit.operations || 0) / 1_000_000));
       }
@@ -194,7 +200,9 @@ const Inner = ({
   };
 
   const error =
-    upgradeToProMutation[0].error || downgradeToHobbyMutation[0].error || updateOrgRateLimitMutation[0].error;
+    upgradeToProMutation[0].error ||
+    downgradeToHobbyMutation[0].error ||
+    updateOrgRateLimitMutation[0].error;
 
   return (
     <DataWrapper
@@ -207,7 +215,8 @@ const Inner = ({
     >
       {result => {
         // TODO: this is also not safe as billingPlans might be an empty list.
-        const selectedPlan = result.data.billingPlans.find(v => v.planType === plan) ?? result.data.billingPlans[0];
+        const selectedPlan =
+          result.data.billingPlans.find(v => v.planType === plan) ?? result.data.billingPlans[0];
 
         return (
           <div className="flex w-full flex-col gap-5">
@@ -249,9 +258,12 @@ const Inner = ({
                         Pro plan requires to defined quota of reported operations.
                       </p>
                       <p className="text-sm text-gray-500">
-                        Pick a volume a little higher than you think you'll need to avoid being rate limited.
+                        Pick a volume a little higher than you think you'll need to avoid being rate
+                        limited.
                       </p>
-                      <p className="text-sm text-gray-500">Don't worry, you can always adjust it later.</p>
+                      <p className="text-sm text-gray-500">
+                        Don't worry, you can always adjust it later.
+                      </p>
                       <div className="mt-5 pl-2.5">
                         <LimitSlider
                           title="Monthly operations limit"

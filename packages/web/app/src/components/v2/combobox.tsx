@@ -55,7 +55,7 @@ export function Combobox(
     onBlur: (el: unknown) => void;
     disabled?: boolean;
     loading?: boolean;
-  }>
+  }>,
 ) {
   return (
     <Select

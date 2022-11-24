@@ -77,7 +77,7 @@ export function createRateLimiter(config: {
       endTime: endOfMonth(now).toUTCString(),
     };
     config.logger.info(
-      `Calculating rate-limit information based on window: ${windowAsString.startTime} -> ${windowAsString.endTime}`
+      `Calculating rate-limit information based on window: ${windowAsString.startTime} -> ${windowAsString.endTime}`,
     );
     const storage = await postgres$;
 
@@ -87,7 +87,9 @@ export function createRateLimiter(config: {
     ]);
 
     logger.debug(`Fetched total of ${Object.keys(records).length} targets from the DB`);
-    logger.debug(`Fetched total of ${Object.keys(operations).length} targets with usage information`);
+    logger.debug(
+      `Fetched total of ${Object.keys(operations).length} targets with usage information`,
+    );
 
     const newTargetIdToOrgLookup = new Map<TargetId, OrganizationId>();
     const newCachedResult = new Map<OrganizationId, CachedRateLimitInfo>();
@@ -110,18 +112,21 @@ export function createRateLimiter(config: {
       }
 
       const orgRecord = newCachedResult.get(pairRecord.organization)!;
-      orgRecord.operations.current = (orgRecord.operations.current || 0) + (operations[pairRecord.target] || 0);
+      orgRecord.operations.current =
+        (orgRecord.operations.current || 0) + (operations[pairRecord.target] || 0);
     }
 
     newCachedResult.forEach((orgRecord, orgId) => {
       const orgName = orgRecord.orgName;
       const noLimits = orgRecord.operations.quota === 0;
-      orgRecord.operations.limited = noLimits ? false : orgRecord.operations.current > orgRecord.operations.quota;
+      orgRecord.operations.limited = noLimits
+        ? false
+        : orgRecord.operations.current > orgRecord.operations.quota;
 
       if (orgRecord.operations.limited) {
         rateLimitOperationsEventOrg.labels({ orgId, orgName }).inc();
         logger.info(
-          `Organization "${orgName}"/"${orgId}" is now being rate-limited for operations (${orgRecord.operations.current}/${orgRecord.operations.quota})`
+          `Organization "${orgName}"/"${orgId}" is now being rate-limited for operations (${orgRecord.operations.current}/${orgRecord.operations.quota})`,
         );
 
         emails.limitExceeded({
@@ -162,7 +167,10 @@ export function createRateLimiter(config: {
 
     cachedResult = newCachedResult;
     targetIdToOrgLookup = newTargetIdToOrgLookup;
-    logger.info(`Built a new rate-limit map: %s`, JSON.stringify(Array.from(newCachedResult.entries())));
+    logger.info(
+      `Built a new rate-limit map: %s`,
+      JSON.stringify(Array.from(newCachedResult.entries())),
+    );
 
     const scheduledEmails = emails.drain();
     if (scheduledEmails.length > 0) {
@@ -192,11 +200,12 @@ export function createRateLimiter(config: {
       return orgData.retentionInDays;
     },
     checkLimit(input: RateLimitInput): RateLimitCheckResponse {
-      const orgId = input.entityType === 'organization' ? input.id : targetIdToOrgLookup.get(input.id);
+      const orgId =
+        input.entityType === 'organization' ? input.id : targetIdToOrgLookup.get(input.id);
 
       if (!orgId) {
         logger.warn(
-          `Failed to resolve/find rate limit information for entityId=${input.id} (type=${input.entityType})`
+          `Failed to resolve/find rate limit information for entityId=${input.id} (type=${input.entityType})`,
         );
 
         return UNKNOWN_RATE_LIMIT_OBJ;
@@ -216,7 +225,7 @@ export function createRateLimiter(config: {
     },
     async start() {
       logger.info(
-        `Rate Limiter starting, will update rate-limit information every ${config.rateLimitConfig.interval}ms`
+        `Rate Limiter starting, will update rate-limit information every ${config.rateLimitConfig.interval}ms`,
       );
       await fetchAndCalculateUsageInformation().catch(e => {
         logger.error(e, `Failed to fetch rate-limit info from usage-estimator, error: `);

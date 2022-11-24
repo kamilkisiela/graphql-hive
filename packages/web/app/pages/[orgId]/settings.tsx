@@ -17,7 +17,11 @@ import {
   OrganizationFieldsFragment,
   OrganizationType,
 } from '@/graphql';
-import { canAccessOrganization, OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
+import {
+  canAccessOrganization,
+  OrganizationAccessScope,
+  useOrganizationAccess,
+} from '@/lib/access/organization';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
@@ -41,7 +45,8 @@ const Integrations = (): ReactElement => {
     return <Spinner />;
   }
 
-  const isGitHubIntegrationFeatureEnabled = checkIntegrations.data?.isGitHubIntegrationFeatureEnabled;
+  const isGitHubIntegrationFeatureEnabled =
+    checkIntegrations.data?.isGitHubIntegrationFeatureEnabled;
   const hasGitHubIntegration = checkIntegrations.data?.hasGitHubIntegration === true;
   const hasSlackIntegration = checkIntegrations.data?.hasSlackIntegration === true;
 
@@ -150,34 +155,39 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
 
   const [mutation, mutate] = useMutation(UpdateOrganizationNameMutation);
 
-  const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } = useFormik({
-    enableReinitialize: true,
-    initialValues: {
-      name: organization?.name,
-    },
-    validationSchema: Yup.object().shape({
-      name: Yup.string().required('Organization name is required'),
-    }),
-    onSubmit: values =>
-      mutate({
-        input: {
-          organization: router.organizationId,
-          name: values.name,
-        },
-      }).then(result => {
-        if (result.data?.updateOrganizationName?.ok) {
-          const newOrgId = result.data?.updateOrganizationName?.ok.updatedOrganizationPayload.selector.organization;
-          router.replace(`/${newOrgId}/settings`);
-        }
+  const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } =
+    useFormik({
+      enableReinitialize: true,
+      initialValues: {
+        name: organization?.name,
+      },
+      validationSchema: Yup.object().shape({
+        name: Yup.string().required('Organization name is required'),
       }),
-  });
+      onSubmit: values =>
+        mutate({
+          input: {
+            organization: router.organizationId,
+            name: values.name,
+          },
+        }).then(result => {
+          if (result.data?.updateOrganizationName?.ok) {
+            const newOrgId =
+              result.data?.updateOrganizationName?.ok.updatedOrganizationPayload.selector
+                .organization;
+            router.replace(`/${newOrgId}/settings`);
+          }
+        }),
+    });
 
   return (
     <>
       {isRegularOrg && (
         <Card>
           <Heading className="mb-2">Organization Name</Heading>
-          <p className="mb-3 font-light text-gray-300">Name of your organization visible within Hive</p>
+          <p className="mb-3 font-light text-gray-300">
+            Name of your organization visible within Hive
+          </p>
           <form onSubmit={handleSubmit} className="flex gap-x-2">
             <Input
               placeholder="Organization name"
@@ -189,7 +199,13 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
               isInvalid={touched.name && Boolean(errors.name)}
               className="w-96"
             />
-            <Button type="submit" variant="primary" size="large" disabled={isSubmitting} className="px-10">
+            <Button
+              type="submit"
+              variant="primary"
+              size="large"
+              disabled={isSubmitting}
+              className="px-10"
+            >
               Save
             </Button>
           </form>
@@ -197,9 +213,13 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
             <div className="mt-2 text-red-500">{errors.name || mutation.error?.message}</div>
           )}
           {mutation.data?.updateOrganizationName?.error && (
-            <div className="mt-2 text-red-500">{mutation.data?.updateOrganizationName.error.message}</div>
+            <div className="mt-2 text-red-500">
+              {mutation.data?.updateOrganizationName.error.message}
+            </div>
           )}
-          {mutation.error && <div>{mutation.error.graphQLErrors[0]?.message ?? mutation.error.message}</div>}
+          {mutation.error && (
+            <div>{mutation.error.graphQLErrors[0]?.message ?? mutation.error.message}</div>
+          )}
         </Card>
       )}
 
@@ -220,7 +240,13 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
             Permanently remove your Organization and all projects from the Hive
           </p>
           <div className="flex items-center gap-x-2">
-            <Button variant="primary" size="large" danger onClick={toggleModalOpen} className="px-5">
+            <Button
+              variant="primary"
+              size="large"
+              danger
+              onClick={toggleModalOpen}
+              className="px-5"
+            >
               Delete Organization
             </Button>
             <Tag color="yellow" className="py-2.5 px-4">

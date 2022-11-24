@@ -328,7 +328,7 @@ export async function migrateClickHouse(
     port: number;
     username: string;
     password: string;
-  }
+  },
 ) {
   if (isClickHouseMigrator === false) {
     console.log('Skipping ClickHouse migration');

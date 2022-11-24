@@ -89,7 +89,8 @@ export const scopes: {
     },
     {
       name: 'Registry',
-      description: 'Manage schema registry (publish new schemas, run schema checks, report usage, etc.)',
+      description:
+        'Manage schema registry (publish new schemas, run schema checks, report usage, etc.)',
       mapping: {
         'read-only': TargetAccessScope.RegistryRead,
         'read-write': TargetAccessScope.RegistryWrite,

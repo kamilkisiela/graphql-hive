@@ -1,5 +1,10 @@
 import { ProjectType, ProjectAccessScope } from '@app/gql/graphql';
-import { createOrganization, publishPersistedOperations, createProject, createToken } from '../../../testkit/flow';
+import {
+  createOrganization,
+  publishPersistedOperations,
+  createProject,
+  createToken,
+} from '../../../testkit/flow';
 import { authenticate } from '../../../testkit/auth';
 
 test('can publish persisted operations only with project:operations-store:write', async () => {
@@ -8,7 +13,7 @@ test('can publish persisted operations only with project:operations-store:write'
     {
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
 
@@ -18,7 +23,7 @@ test('can publish persisted operations only with project:operations-store:write'
       type: ProjectType.Single,
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
@@ -35,7 +40,7 @@ test('can publish persisted operations only with project:operations-store:write'
       projectScopes: [],
       targetScopes: [],
     },
-    owner_access_token
+    owner_access_token,
   );
   expect(noAccessTokenResult.body.errors).not.toBeDefined();
 
@@ -50,7 +55,7 @@ test('can publish persisted operations only with project:operations-store:write'
       projectScopes: [ProjectAccessScope.OperationsStoreRead],
       targetScopes: [],
     },
-    owner_access_token
+    owner_access_token,
   );
   expect(readTokenResult.body.errors).not.toBeDefined();
 
@@ -62,10 +67,13 @@ test('can publish persisted operations only with project:operations-store:write'
       project: project.cleanId,
       target: target.cleanId,
       organizationScopes: [],
-      projectScopes: [ProjectAccessScope.OperationsStoreRead, ProjectAccessScope.OperationsStoreWrite],
+      projectScopes: [
+        ProjectAccessScope.OperationsStoreRead,
+        ProjectAccessScope.OperationsStoreWrite,
+      ],
       targetScopes: [],
     },
-    owner_access_token
+    owner_access_token,
   );
   expect(writeTokenResult.body.errors).not.toBeDefined();
 
@@ -113,7 +121,7 @@ test('should skip on already persisted operations', async () => {
     {
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
 
@@ -123,7 +131,7 @@ test('should skip on already persisted operations', async () => {
       type: ProjectType.Single,
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
@@ -137,10 +145,13 @@ test('should skip on already persisted operations', async () => {
       project: project.cleanId,
       target: target.cleanId,
       organizationScopes: [],
-      projectScopes: [ProjectAccessScope.OperationsStoreRead, ProjectAccessScope.OperationsStoreWrite],
+      projectScopes: [
+        ProjectAccessScope.OperationsStoreRead,
+        ProjectAccessScope.OperationsStoreWrite,
+      ],
       targetScopes: [],
     },
-    owner_access_token
+    owner_access_token,
   );
   expect(writeTokenResult.body.errors).not.toBeDefined();
 
@@ -181,8 +192,12 @@ test('should skip on already persisted operations', async () => {
   expect(persisted.summary.unchanged).toEqual(1);
   expect(persisted.operations).toHaveLength(2);
 
-  const meOperation = persisted.operations.find(op => op.operationHash === operations[0].operationHash);
-  const userOperation = persisted.operations.find(op => op.operationHash === operations[1].operationHash);
+  const meOperation = persisted.operations.find(
+    op => op.operationHash === operations[0].operationHash,
+  );
+  const userOperation = persisted.operations.find(
+    op => op.operationHash === operations[1].operationHash,
+  );
 
   expect(meOperation?.operationHash).toEqual(operations[0].operationHash);
   expect(userOperation?.operationHash).toEqual(operations[1].operationHash);

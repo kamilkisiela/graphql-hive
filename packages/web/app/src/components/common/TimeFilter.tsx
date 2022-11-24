@@ -75,7 +75,7 @@ export function calculatePeriod(period: PeriodKey) {
   const sub = period.endsWith('h') ? 'h' : period.endsWith('m') ? 'm' : 'd';
   const value = parseInt(period.replace(sub, ''));
   const from = formatISO(
-    sub === 'h' ? subHours(now, value) : sub === 'm' ? subMinutes(now, value) : subDays(now, value)
+    sub === 'h' ? subHours(now, value) : sub === 'm' ? subMinutes(now, value) : subDays(now, value),
   );
 
   return {

@@ -1,4 +1,8 @@
-import type { OrganizationActivitiesQuery, ProjectActivitiesQuery, TargetActivitiesQuery } from '@/graphql';
+import type {
+  OrganizationActivitiesQuery,
+  ProjectActivitiesQuery,
+  TargetActivitiesQuery,
+} from '@/graphql';
 
 export type ActivityNode =
   | OrganizationActivitiesQuery['organizationActivities']['nodes'][0]

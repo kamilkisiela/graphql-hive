@@ -51,7 +51,7 @@ export function createScheduler(config: Config) {
         await pTimeout(
           Promise.all([webhookQueue?.close(), webhookQueueScheduler?.close()]),
           5000,
-          'BullMQ close timeout'
+          'BullMQ close timeout',
         );
     } catch (e) {
       logger.error('Failed to stop queues', e);
@@ -160,7 +160,12 @@ export function createScheduler(config: Config) {
   }
 
   function onFailed(job: Job, error: Error) {
-    logger.debug(`Job %s failed after %s attempts, reason: %s`, job.name, job.attemptsMade, job.failedReason);
+    logger.debug(
+      `Job %s failed after %s attempts, reason: %s`,
+      job.name,
+      job.attemptsMade,
+      job.failedReason,
+    );
     logger.error(error);
   }
 
@@ -202,7 +207,9 @@ export function createScheduler(config: Config) {
         return false;
       }
 
-      return webhookQueue !== null && redisConnection !== null && redisConnection?.status === 'ready';
+      return (
+        webhookQueue !== null && redisConnection !== null && redisConnection?.status === 'ready'
+      );
     },
   };
 }

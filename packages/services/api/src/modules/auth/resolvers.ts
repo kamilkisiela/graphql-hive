@@ -24,7 +24,10 @@ export const resolvers: AuthModule.Resolvers & {
   Mutation: {
     async updateMe(_, { input }, { injector }) {
       const InputModel = z.object({
-        displayName: z.string().min(displayNameLengthBoundaries.min).max(displayNameLengthBoundaries.max),
+        displayName: z
+          .string()
+          .min(displayNameLengthBoundaries.min)
+          .max(displayNameLengthBoundaries.max),
         fullName: z.string().min(fullNameLengthBoundaries.min).max(fullNameLengthBoundaries.max),
       });
       const result = InputModel.safeParse(input);

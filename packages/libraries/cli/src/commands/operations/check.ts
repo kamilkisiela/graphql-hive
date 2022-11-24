@@ -74,7 +74,7 @@ export default class OperationsCheck extends Command {
 
       const invalidOperations = validate(
         schema,
-        operations.map(s => new Source(s.content, s.location))
+        operations.map(s => new Source(s.content, s.location)),
       );
 
       if (invalidOperations.length === 0) {
@@ -85,7 +85,9 @@ export default class OperationsCheck extends Command {
 
       this.fail('Some operations are invalid');
 
-      this.log(['', `Total: ${operations.length}`, `Invalid: ${invalidOperations.length}`, ''].join('\n'));
+      this.log(
+        ['', `Total: ${operations.length}`, `Invalid: ${invalidOperations.length}`, ''].join('\n'),
+      );
 
       this.printInvalidDocuments(invalidOperations, 'errors');
     } catch (error) {
@@ -98,7 +100,10 @@ export default class OperationsCheck extends Command {
     }
   }
 
-  private printInvalidDocuments(invalidDocuments: InvalidDocument[], listKey: 'errors' | 'deprecated'): void {
+  private printInvalidDocuments(
+    invalidDocuments: InvalidDocument[],
+    listKey: 'errors' | 'deprecated',
+  ): void {
     invalidDocuments.forEach(doc => {
       if (doc.errors.length) {
         this.renderErrors(doc.source.name, doc[listKey]).forEach(line => {

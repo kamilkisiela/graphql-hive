@@ -50,7 +50,7 @@ export function deployProxy({
           path: '/',
           service: docs.service,
         },
-      ]
+      ],
     )
     .registerService({ record: appHostname }, [
       {

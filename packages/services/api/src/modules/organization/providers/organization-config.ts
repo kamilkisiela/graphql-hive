@@ -1,4 +1,8 @@
-import { OrganizationAccessScope, ProjectAccessScope, TargetAccessScope } from '../../auth/providers/scopes';
+import {
+  OrganizationAccessScope,
+  ProjectAccessScope,
+  TargetAccessScope,
+} from '../../auth/providers/scopes';
 
 export const reservedOrganizationNames = [
   'registry',

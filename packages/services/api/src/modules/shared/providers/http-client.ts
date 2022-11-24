@@ -66,7 +66,7 @@ export class HttpClient {
         span.setStatus(error instanceof TimeoutError ? 'deadline_exceeded' : 'internal_error');
         span.finish();
         return Promise.reject(error);
-      }
+      },
     );
   }
 }

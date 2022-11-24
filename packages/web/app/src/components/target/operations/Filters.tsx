@@ -61,11 +61,13 @@ const OperationsFilter: React.FC<{
         setSelectedItems(selectedItems.filter(hash => hash !== operationHash));
       }
     },
-    [selectedItems, setSelectedItems]
+    [selectedItems, setSelectedItems],
   );
   const [searchTerm, setSearchTerm] = React.useState('');
   const debouncedFilter = useDebouncedCallback((value: string) => {
-    setVisibleOperations(operations.filter(op => op.name.toLocaleLowerCase().includes(value.toLocaleLowerCase())));
+    setVisibleOperations(
+      operations.filter(op => op.name.toLocaleLowerCase().includes(value.toLocaleLowerCase())),
+    );
   }, 500);
 
   const onChange = React.useCallback(
@@ -75,7 +77,7 @@ const OperationsFilter: React.FC<{
       setSearchTerm(value);
       debouncedFilter(value);
     },
-    [setSearchTerm, debouncedFilter]
+    [setSearchTerm, debouncedFilter],
   );
 
   const [visibleOperations, setVisibleOperations] = React.useState(operations);
@@ -101,7 +103,7 @@ const OperationsFilter: React.FC<{
         />
       );
     },
-    [visibleOperations, selectedItems, onSelect]
+    [visibleOperations, selectedItems, onSelect],
   );
 
   return (
@@ -113,7 +115,12 @@ const OperationsFilter: React.FC<{
         <DrawerBody bgColor="gray.900">
           <div tw="flex flex-col h-full space-y-3">
             <InputGroup>
-              <Input pr="3rem" placeholder="Search for operation..." onChange={onChange} value={searchTerm} />
+              <Input
+                pr="3rem"
+                placeholder="Search for operation..."
+                onChange={onChange}
+                value={searchTerm}
+              />
               <InputRightElement width="3rem">
                 <IconButton
                   variant="ghost"

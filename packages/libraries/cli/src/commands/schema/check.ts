@@ -25,7 +25,8 @@ export default class SchemaCheck extends Command {
       default: false,
     }),
     require: Flags.string({
-      description: 'Loads specific require.extensions before running the codegen and reading the configuration',
+      description:
+        'Loads specific require.extensions before running the codegen and reading the configuration',
       default: [],
       multiple: true,
     }),
@@ -70,7 +71,10 @@ export default class SchemaCheck extends Command {
       invariant(typeof sdl === 'string' && sdl.length > 0, 'Schema seems empty');
 
       if (usesGitHubApp) {
-        invariant(typeof commit === 'string', `Couldn't resolve commit sha required for GitHub Application`);
+        invariant(
+          typeof commit === 'string',
+          `Couldn't resolve commit sha required for GitHub Application`,
+        );
       }
 
       const result = await this.registryApi(registry, token).schemaCheck({

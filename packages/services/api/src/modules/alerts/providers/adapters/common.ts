@@ -1,5 +1,12 @@
 import type * as Types from '../../../../__generated__/types';
-import { Alert, AlertChannel, Organization, Project, Target, SchemaVersion } from '../../../../shared/entities';
+import {
+  Alert,
+  AlertChannel,
+  Organization,
+  Project,
+  Target,
+  SchemaVersion,
+} from '../../../../shared/entities';
 
 export interface SchemaChangeNotificationInput {
   event: {

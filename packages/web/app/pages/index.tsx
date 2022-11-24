@@ -15,7 +15,10 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import Session from 'supertokens-node/recipe/session';
 import { writeLastVisitedOrganization } from '@/lib/cookies';
 
-async function getSuperTokensUserIdFromRequest(req: NextApiRequest, res: NextApiResponse): Promise<string | null> {
+async function getSuperTokensUserIdFromRequest(
+  req: NextApiRequest,
+  res: NextApiResponse,
+): Promise<string | null> {
   const session = await Session.getSession(req, res, { sessionRequired: false });
   return session?.getUserId() ?? null;
 }
@@ -63,7 +66,9 @@ function Home(): ReactElement {
   useEffect(() => {
     // Just in case server-side redirect wasn't working
     if (query.data) {
-      const org = query.data.organizations.nodes.find(node => node.type === OrganizationType.Personal);
+      const org = query.data.organizations.nodes.find(
+        node => node.type === OrganizationType.Personal,
+      );
       if (org) {
         router.visitOrganization({ organizationId: org.cleanId });
       }

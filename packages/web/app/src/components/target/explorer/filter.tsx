@@ -7,7 +7,12 @@ import { Switch } from '@/components/v2/switch';
 import { useArgumentListToggle, usePeriodSelector } from './provider';
 
 const SchemaExplorerFilter_AllTypes = gql(/* GraphQL */ `
-  query SchemaExplorerFilter_AllTypes($organization: ID!, $project: ID!, $target: ID!, $period: DateRangeInput!) {
+  query SchemaExplorerFilter_AllTypes(
+    $organization: ID!
+    $project: ID!
+    $target: ID!
+    $period: DateRangeInput!
+  ) {
     target(selector: { organization: $organization, project: $project, target: $target }) {
       __typename
       id
@@ -99,7 +104,9 @@ export function SchemaExplorerFilter({
           defaultValue={typename ? { value: typename, label: typename } : null}
           options={types}
           onChange={option => {
-            router.push(`/${organization.cleanId}/${project.cleanId}/${target.cleanId}/explorer/${option.value}`);
+            router.push(
+              `/${organization.cleanId}/${project.cleanId}/${target.cleanId}/explorer/${option.value}`,
+            );
           }}
           loading={query.fetching}
         />

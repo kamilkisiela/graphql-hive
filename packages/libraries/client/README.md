@@ -1,9 +1,12 @@
 # GraphQL Hive Client
 
-[GraphQL Hive](https://graphql-hive.com) is a GraphQL schemas registry where you can host, manage and collaborate on all your GraphQL schemas and operations, compatible with all architecture: schema stitching, federation, or just a good old monolith.
+[GraphQL Hive](https://graphql-hive.com) is a GraphQL schemas registry where you can host, manage
+and collaborate on all your GraphQL schemas and operations, compatible with all architecture: schema
+stitching, federation, or just a good old monolith.
 
-GraphQL Hive is currently available as a hosted service to be used by all.
-We take care of the heavy lifting behind the scenes be managing the registry, scaling it for your needs, to free your time to focus on the most important things at hand.
+GraphQL Hive is currently available as a hosted service to be used by all. We take care of the heavy
+lifting behind the scenes be managing the registry, scaling it for your needs, to free your time to
+focus on the most important things at hand.
 
 ## Installation
 
@@ -13,11 +16,13 @@ npm install @graphql-hive/client
 
 ## Basic Usage
 
-Hive Client comes with generic client and plugins for [Envelop](https://envelop.dev) and [Apollo Server](https://github.com/apollographql/apollo-server)
+Hive Client comes with generic client and plugins for [Envelop](https://envelop.dev) and
+[Apollo Server](https://github.com/apollographql/apollo-server)
 
 ### With GraphQL Yoga
 
-[GraphQL Yoga](https://www.the-guild.dev/graphql/yoga-server) is a cross-platform GraphQL sever built on top of the envelop engine.
+[GraphQL Yoga](https://www.the-guild.dev/graphql/yoga-server) is a cross-platform GraphQL sever
+built on top of the envelop engine.
 
 ```ts
 import { createYoga } from '@graphql-yoga/node'
@@ -45,7 +50,9 @@ server.start()
 
 ### With Envelop
 
-If you're not familiar with Envelop - in "short" it's a lightweight JavaScript library for wrapping GraphQL execution layer and flow, allowing developers to develop, share and collaborate on GraphQL-related plugins, while filling the missing pieces in GraphQL implementations.
+If you're not familiar with Envelop - in "short" it's a lightweight JavaScript library for wrapping
+GraphQL execution layer and flow, allowing developers to develop, share and collaborate on
+GraphQL-related plugins, while filling the missing pieces in GraphQL implementations.
 
 Here's [more](https://github.com/dotansimha/envelop#envelop) on that topic.
 
@@ -102,10 +109,12 @@ const server = new ApolloServer({
 
 First you need to instantiate the Hive Client.
 
-The `collectUsage` method accepts the same arguments as execute function of graphql-js and returns a function that expects the execution result object.
+The `collectUsage` method accepts the same arguments as execute function of graphql-js and returns a
+function that expects the execution result object.
 
 - `collectUsage(args)` - should be called when a GraphQL execution starts.
-- `finish(result)` (function returned by `collectUsage(args)`) - has to be invoked right after execution finishes.
+- `finish(result)` (function returned by `collectUsage(args)`) - has to be invoked right after
+  execution finishes.
 
 ```ts
 import express from 'express'
@@ -145,14 +154,17 @@ app.post(
 
 ### Using the registry when Stitching
 
-Stitching could be done in many ways, that's why `@graphql-hive/client` provide generic functions, not something dedicated for stitching. Unfortunately the implementation of gateway + polling is up to you.
+Stitching could be done in many ways, that's why `@graphql-hive/client` provide generic functions,
+not something dedicated for stitching. Unfortunately the implementation of gateway + polling is up
+to you.
 
 Prerequisites:
 
 - `HIVE_CDN_ENDPOINT` - the endpoint Hive generated for you in the previous step
 - `HIVE_CDN_KEY` - the access key
 
-The `createServicesFetcher` factory function returns another function that is responsible for fetching a list of services from Hive's high-availability endpoint.
+The `createServicesFetcher` factory function returns another function that is responsible for
+fetching a list of services from Hive's high-availability endpoint.
 
 ```ts
 import { createServicesFetcher } from '@graphql-hive/client'
@@ -214,7 +226,9 @@ server.listen().then(({ url }) => {
 
 ### Client Info
 
-The schema usage operation information can be enriched with meta information that will be displayed on the Hive dashboard in order to get a better understanding of the origin of an executed GraphQL operation.
+The schema usage operation information can be enriched with meta information that will be displayed
+on the Hive dashboard in order to get a better understanding of the origin of an executed GraphQL
+operation.
 
 ### GraphQL Yoga Example
 
@@ -307,9 +321,11 @@ const server = new ApolloServer({
 
 ## Self-Hosting
 
-To align the client with your own instance of GraphQL Hive, you should use `selfHosting` options in the client configuration.
+To align the client with your own instance of GraphQL Hive, you should use `selfHosting` options in
+the client configuration.
 
-The example is based on GraphQL Yoga, but the same configuration applies to Apollo Server and others.
+The example is based on GraphQL Yoga, but the same configuration applies to Apollo Server and
+others.
 
 ```ts
 import { createYoga } from '@graphql-yoga/node'
@@ -332,4 +348,5 @@ const server = createYoga({
 server.start()
 ```
 
-> The `selfHosting` options take precedence over the deprecated `options.hosting.endpoint` and `options.usage.endpoint`.
+> The `selfHosting` options take precedence over the deprecated `options.hosting.endpoint` and
+> `options.usage.endpoint`.

@@ -1,5 +1,11 @@
 import { ProjectType } from '@app/gql/graphql';
-import { createOrganization, createProject, createToken, readTokenInfo, deleteTokens } from '../../testkit/flow';
+import {
+  createOrganization,
+  createProject,
+  createToken,
+  readTokenInfo,
+  deleteTokens,
+} from '../../testkit/flow';
 import { authenticate } from '../../testkit/auth';
 
 test('deleting a token should clear the cache', async () => {
@@ -8,7 +14,7 @@ test('deleting a token should clear the cache', async () => {
     {
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
@@ -19,7 +25,7 @@ test('deleting a token should clear the cache', async () => {
       type: ProjectType.Single,
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
@@ -36,7 +42,7 @@ test('deleting a token should clear the cache', async () => {
       projectScopes: [],
       targetScopes: [],
     },
-    owner_access_token
+    owner_access_token,
   );
 
   expect(tokenResult.body.errors).not.toBeDefined();
@@ -83,7 +89,7 @@ test('deleting a token should clear the cache', async () => {
       target: target.cleanId,
       tokens: [createdToken.id],
     },
-    owner_access_token
+    owner_access_token,
   );
 
   tokenInfoResult = await readTokenInfo(secret!);

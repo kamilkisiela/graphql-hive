@@ -21,7 +21,11 @@ const criticalityMap: Record<CriticalityLevel, Types.CriticalityLevel> = {
 export class Inspector {
   private logger: Logger;
 
-  constructor(logger: Logger, private operationsManager: OperationsManager, private targetManager: TargetManager) {
+  constructor(
+    logger: Logger,
+    private operationsManager: OperationsManager,
+    private targetManager: TargetManager,
+  ) {
     this.logger = logger.child({ service: 'Inspector' });
   }
 
@@ -29,7 +33,7 @@ export class Inspector {
   async diff(
     existing: GraphQLSchema,
     incoming: GraphQLSchema,
-    selector?: Types.TargetSelector
+    selector?: Types.TargetSelector,
   ): Promise<Types.SchemaChange[]> {
     this.logger.debug('Comparing Schemas');
 
@@ -65,8 +69,18 @@ export class Inspector {
 
         this.logger.debug('Got the stats');
 
-        function useStats({ type, field, argument }: { type: string; field?: string; argument?: string }) {
-          const stats = statsList!.find(s => s.field === field && s.type === type && s.argument === argument);
+        function useStats({
+          type,
+          field,
+          argument,
+        }: {
+          type: string;
+          field?: string;
+          argument?: string;
+        }) {
+          const stats = statsList!.find(
+            s => s.field === field && s.type === type && s.argument === argument,
+          );
 
           if (!stats) {
             return NOT_BREAKING;

@@ -100,7 +100,9 @@ export const resolvers: OrganizationModule.Resolvers = {
       if (!result.success) {
         return {
           error: {
-            message: result.error.formErrors.fieldErrors.name?.[0] ?? 'Changing the organization name failed.',
+            message:
+              result.error.formErrors.fieldErrors.name?.[0] ??
+              'Changing the organization name failed.',
           },
         };
       }
@@ -215,16 +217,22 @@ export const resolvers: OrganizationModule.Resolvers = {
       return !!organization.id;
     },
     owner(organization, _, { injector }) {
-      return injector.get(OrganizationManager).getOrganizationOwner({ organization: organization.id });
+      return injector
+        .get(OrganizationManager)
+        .getOrganizationOwner({ organization: organization.id });
     },
     async me(organization, _, { injector }) {
       const me = await injector.get(AuthManager).getCurrentUser();
-      const members = await injector.get(OrganizationManager).getOrganizationMembers({ organization: organization.id });
+      const members = await injector
+        .get(OrganizationManager)
+        .getOrganizationMembers({ organization: organization.id });
 
       return members.find(m => m.id === me.id)!;
     },
     members(organization, _, { injector }) {
-      return injector.get(OrganizationManager).getOrganizationMembers({ organization: organization.id });
+      return injector
+        .get(OrganizationManager)
+        .getOrganizationMembers({ organization: organization.id });
     },
     async invitations(organization, _, { injector }) {
       const invitations = await injector.get(OrganizationManager).getInvitations({
@@ -239,7 +247,9 @@ export const resolvers: OrganizationModule.Resolvers = {
   },
   OrganizationInvitation: {
     id(invitation) {
-      return Buffer.from([invitation.organization_id, invitation.email, invitation.code].join(':')).toString('hex');
+      return Buffer.from(
+        [invitation.organization_id, invitation.email, invitation.code].join(':'),
+      ).toString('hex');
     },
     createdAt(invitation) {
       return invitation.created_at;
