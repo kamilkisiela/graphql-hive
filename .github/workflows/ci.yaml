@@ -613,10 +613,7 @@ jobs:
     timeout-minutes: 25
 
     env:
-      DOCKER_REGISTRY: 'local-graphql-hive-'
-      DOCKER_TAG: ''
       HIVE_ENCRYPTION_SECRET: wowverysecuremuchsecret
-      HIVE_APP_BASE_URL: http://localhost:8080
       HIVE_EMAIL_FROM: no-reply@graphql-hive.com
       SUPERTOKENS_API_KEY: wowverysecuremuchsecret
       CLICKHOUSE_USER: clickhouse

@@ -1,5 +1,5 @@
 {
   "extends": "./tsconfig.json",
-  "include": ["deployment", "packages", "integration-tests", ".eslintrc.cjs"],
+  "include": ["deployment", "packages", "integration-tests", "cypress", ".eslintrc.cjs"],
   "exclude": ["**/node_modules/**", "**/dist", "**/temp", "**/tmp"]
 }
