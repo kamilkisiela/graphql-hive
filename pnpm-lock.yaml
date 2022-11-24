@@ -349,7 +349,7 @@ importers:
       date-fns: 2.25.0
       got: 12.5.2
       graphql-modules: 2.0.0
-      graphql-parse-resolve-info: 4.12.0
+      graphql-parse-resolve-info: 4.12.3
       graphql-scalars: 1.12.0
       graphql-yoga: 3.0.0-next.12
       human-id: 2.0.1
@@ -384,7 +384,7 @@ importers:
       date-fns: 2.25.0
       got: 12.5.2
       graphql-modules: 2.0.0
-      graphql-parse-resolve-info: 4.12.0
+      graphql-parse-resolve-info: 4.12.3
       graphql-scalars: 1.12.0
       graphql-yoga: 3.0.0-next.12
       human-id: 2.0.1
@@ -15607,14 +15607,14 @@ packages:
       ramda: 0.27.2
     dev: false
 
-  /graphql-parse-resolve-info/4.12.0:
-    resolution: {integrity: sha512-sQyJeWCzFQwLj8SdgrWeAQG46Nc+VLxof91/AtvEVdbvFCvb+S6OoA4OtIp5OpWBrFo+JzW6LIKifNHXtRKPpA==}
+  /graphql-parse-resolve-info/4.12.3:
+    resolution: {integrity: sha512-Lxb+v+SCxzBZHKohK4xje3CBQ1iZ968DiKuFtmwzSaI45oP8FgPJjJv35TOzgv73QLijEdgH4NDZGwIvwJM7Kw==}
     engines: {node: '>=8.6'}
     peerDependencies:
       graphql: '>=0.9 <0.14 || ^14.0.2 || ^15.4.0'
     dependencies:
       debug: 4.3.4
-      tslib: 2.4.0
+      tslib: 2.4.1
     transitivePeerDependencies:
       - supports-color
     dev: false
