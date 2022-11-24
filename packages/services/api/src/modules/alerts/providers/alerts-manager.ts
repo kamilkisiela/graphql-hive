@@ -31,7 +31,7 @@ export class AlertsManager {
     private webhook: WebhookCommunicationAdapter,
     private organizationManager: OrganizationManager,
     private projectManager: ProjectManager,
-    private storage: Storage
+    private storage: Storage,
   ) {
     this.logger = logger.child({
       source: 'AlertsManager',
@@ -43,7 +43,7 @@ export class AlertsManager {
       'Adding Alert Channel (organization=%s, project=%s, type=%s)',
       input.organization,
       input.project,
-      input.type
+      input.type,
     );
     await this.authManager.ensureProjectAccess({
       ...input,
@@ -65,13 +65,13 @@ export class AlertsManager {
   async deleteChannels(
     input: ProjectSelector & {
       channels: readonly string[];
-    }
+    },
   ): Promise<readonly AlertChannel[]> {
     this.logger.debug(
       'Deleting Alert Channels (organization=%s, project=%s, size=%s)',
       input.organization,
       input.project,
-      input.channels.length
+      input.channels.length,
     );
     await this.authManager.ensureProjectAccess({
       ...input,
@@ -86,8 +86,8 @@ export class AlertsManager {
           channel,
           organization: input.organization,
           project: input.project,
-        })
-      )
+        }),
+      ),
     );
 
     return channels;
@@ -95,7 +95,11 @@ export class AlertsManager {
 
   @cache<ProjectSelector>(selector => selector.project + selector.organization)
   async getChannels(selector: ProjectSelector): Promise<readonly AlertChannel[]> {
-    this.logger.debug('Fetching Alert Channels (organization=%s, project=%s)', selector.organization, selector.project);
+    this.logger.debug(
+      'Fetching Alert Channels (organization=%s, project=%s)',
+      selector.organization,
+      selector.project,
+    );
     await this.authManager.ensureProjectAccess({
       ...selector,
       scope: ProjectAccessScope.READ,
@@ -108,7 +112,7 @@ export class AlertsManager {
       'Adding Alert (organization=%s, project=%s, type=%s)',
       input.organization,
       input.project,
-      input.type
+      input.type,
     );
     await this.authManager.ensureProjectAccess({
       ...input,
@@ -121,13 +125,13 @@ export class AlertsManager {
   async deleteAlerts(
     input: ProjectSelector & {
       alerts: readonly string[];
-    }
+    },
   ): Promise<readonly Alert[]> {
     this.logger.debug(
       'Deleting Alerts (organization=%s, project=%s, size=%s)',
       input.organization,
       input.project,
-      input.alerts.length
+      input.alerts.length,
     );
     await this.authManager.ensureProjectAccess({
       ...input,
@@ -137,7 +141,11 @@ export class AlertsManager {
   }
 
   async getAlerts(selector: ProjectSelector): Promise<readonly Alert[]> {
-    this.logger.debug('Fetching Alerts (organization=%s, project=%s)', selector.organization, selector.project);
+    this.logger.debug(
+      'Fetching Alerts (organization=%s, project=%s)',
+      selector.organization,
+      selector.project,
+    );
     await this.authManager.ensureProjectAccess({
       ...selector,
       scope: ProjectAccessScope.READ,
@@ -155,7 +163,7 @@ export class AlertsManager {
       organization,
       project,
       target,
-      event.schema.id
+      event.schema.id,
     );
 
     await this.authManager.ensureTargetAccess({
@@ -177,7 +185,7 @@ export class AlertsManager {
     ]);
 
     const matchingAlerts = alerts.filter(
-      alert => alert.type === 'SCHEMA_CHANGE_NOTIFICATIONS' && alert.targetId === target
+      alert => alert.type === 'SCHEMA_CHANGE_NOTIFICATIONS' && alert.targetId === target,
     );
     const pairs = matchingAlerts.map(alert => {
       return {
@@ -243,7 +251,7 @@ export class AlertsManager {
           channel,
           integrations,
         });
-      })
+      }),
     );
   }
 

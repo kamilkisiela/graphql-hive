@@ -41,7 +41,9 @@ export function createStripeBilling(config: {
       .then(r => r.data.filter(v => v.metadata?.hive_plan && v.active === true));
 
     if (relevantProducts.length !== 1) {
-      throw new Error(`Invalid count of Hive products configured in Stripe: ${relevantProducts.length}`);
+      throw new Error(
+        `Invalid count of Hive products configured in Stripe: ${relevantProducts.length}`,
+      );
     }
 
     const prices = (await stripeApi.prices.list({
@@ -169,7 +171,9 @@ export function createStripeBilling(config: {
       return true;
     },
     async start() {
-      logger.info(`Stripe Billing Sync starting, will sync Stripe every ${config.stripe.syncIntervalMs}ms...`);
+      logger.info(
+        `Stripe Billing Sync starting, will sync Stripe every ${config.stripe.syncIntervalMs}ms...`,
+      );
 
       const stripeData = await loadStripeData$;
       logger.info(`Stripe is configured correctly, prices info: %o`, stripeData);

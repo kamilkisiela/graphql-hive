@@ -46,7 +46,16 @@ export const CreateProjectModal = ({
   const { push } = useRouter();
   const router = useRouteSelector();
 
-  const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, setFieldValue, touched } = useFormik({
+  const {
+    handleSubmit,
+    values,
+    handleChange,
+    handleBlur,
+    isSubmitting,
+    errors,
+    setFieldValue,
+    touched,
+  } = useFormik({
     initialValues: {
       name: '',
       type: '' as ProjectType,
@@ -94,9 +103,9 @@ export const CreateProjectModal = ({
       <form onSubmit={handleSubmit} className="flex flex-col gap-8">
         <Heading className="text-center">Create a project</Heading>
         <p className="text-sm text-gray-500">
-          A project is built on top of <b>Targets</b>, which are just your environments. We will also create a default
-          stacks named <b>production</b>, <b>staging</b> and <b>development</b> for you (don't worry, you can change it
-          later).
+          A project is built on top of <b>Targets</b>, which are just your environments. We will
+          also create a default stacks named <b>production</b>, <b>staging</b> and{' '}
+          <b>development</b> for you (don't worry, you can change it later).
         </p>
 
         <div className="flex flex-col gap-4">
@@ -115,7 +124,9 @@ export const CreateProjectModal = ({
           />
           {touched.name && errors.name && <div className="text-sm text-red-500">{errors.name}</div>}
           {mutation.data?.createProject.error?.inputErrors.name && (
-            <div className="text-sm text-red-500">{mutation.data?.createProject.error.inputErrors.name}</div>
+            <div className="text-sm text-red-500">
+              {mutation.data?.createProject.error.inputErrors.name}
+            </div>
           )}
         </div>
 
@@ -170,9 +181,13 @@ export const CreateProjectModal = ({
                 isInvalid={touched.buildUrl && Boolean(errors.buildUrl)}
                 className="grow"
               />
-              {touched.buildUrl && errors.buildUrl && <div className="text-sm text-red-500">{errors.buildUrl}</div>}
+              {touched.buildUrl && errors.buildUrl && (
+                <div className="text-sm text-red-500">{errors.buildUrl}</div>
+              )}
               {mutation.data?.createProject.error?.inputErrors.buildUrl && (
-                <div className="text-sm text-red-500">{mutation.data?.createProject.error.inputErrors.buildUrl}</div>
+                <div className="text-sm text-red-500">
+                  {mutation.data?.createProject.error.inputErrors.buildUrl}
+                </div>
               )}
               <p className="text-sm text-gray-500">
                 In Custom mode, Hive will ask you to validate GraphQL Schemas.

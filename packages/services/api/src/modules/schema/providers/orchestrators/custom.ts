@@ -47,7 +47,10 @@ export class CustomOrchestrator implements Orchestrator {
   }
 
   @sentry('CustomOrchestrator.validate')
-  async validate(schemas: SchemaObject[], config: CustomOrchestratorConfig): Promise<SchemaError[]> {
+  async validate(
+    schemas: SchemaObject[],
+    config: CustomOrchestratorConfig,
+  ): Promise<SchemaError[]> {
     this.logger.debug('Validating Custom Schemas');
     return this.http.post(config.validationUrl, {
       responseType: 'json',
@@ -80,7 +83,9 @@ export class CustomOrchestrator implements Orchestrator {
 
       if (hasErrors(response)) {
         throw new HiveError(
-          [`Schema couldn't be build:`, response.errors.map(error => `\t - ${error.message}`)].join('\n')
+          [`Schema couldn't be build:`, response.errors.map(error => `\t - ${error.message}`)].join(
+            '\n',
+          ),
         );
       }
 

@@ -12,8 +12,8 @@ export const RateLimitWarn: React.FC<{
         <Box flex="1">
           <AlertTitle>Your organization is being rate-limited for operations.</AlertTitle>
           <AlertDescription display="block">
-            Since you reached your organization rate-limit and data ingestion limitation, your organization{' '}
-            <strong>{organization.name}</strong> is currently unable to ingest data.
+            Since you reached your organization rate-limit and data ingestion limitation, your
+            organization <strong>{organization.name}</strong> is currently unable to ingest data.
             <br />
           </AlertDescription>
         </Box>

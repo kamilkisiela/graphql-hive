@@ -134,7 +134,10 @@ describe('CDN Worker', () => {
     const SECRET = '123456';
     const targetId = 'fake-target-id';
     const map = new Map();
-    map.set(`target:${targetId}:supergraph`, JSON.stringify({ sdl: `type Query { dummy: String }` }));
+    map.set(
+      `target:${targetId}:supergraph`,
+      JSON.stringify({ sdl: `type Query { dummy: String }` }),
+    );
 
     mockWorkerEnv({
       HIVE_DATA: map,
@@ -285,7 +288,7 @@ describe('CDN Worker', () => {
       `target:${targetId}:schema`,
       JSON.stringify({
         sdl: `type Query { dummy: String }`,
-      })
+      }),
     );
 
     mockWorkerEnv({

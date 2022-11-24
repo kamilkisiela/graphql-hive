@@ -45,7 +45,9 @@ jobs:
         run: pnpm build:libraries
 
       - name: Schema Publish
-        run: ./packages/libraries/cli/bin/dev schema:publish "packages/services/api/src/modules/*/module.graphql.ts" --force --github
+        run:
+          ./packages/libraries/cli/bin/dev schema:publish
+          "packages/services/api/src/modules/*/module.graphql.ts" --force --github
 
       - name: Prepare NPM Credentials
         run: |
@@ -65,7 +67,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract published version
-        if: steps.changesets.outputs.published && contains(steps.changesets.outputs.publishedPackages, '"@graphql-hive/cli"')
+        if:
+          steps.changesets.outputs.published && contains(steps.changesets.outputs.publishedPackages,
+          '"@graphql-hive/cli"')
         id: cli
         run: |
           echo '${{steps.changesets.outputs.publishedPackages}}' > cli-ver.json
@@ -88,7 +92,9 @@ jobs:
         working-directory: packages/libraries/cli
         env:
           VERSION: ${{ steps.cli.outputs.version }}
-        run: pnpm oclif promote --no-xz --sha ${GITHUB_SHA:0:7} --version $VERSION || pnpm oclif promote --no-xz --sha ${GITHUB_SHA:0:8} --version $VERSION
+        run:
+          pnpm oclif promote --no-xz --sha ${GITHUB_SHA:0:7} --version $VERSION || pnpm oclif
+          promote --no-xz --sha ${GITHUB_SHA:0:8} --version $VERSION
 
   publish_rust:
     name: Publish Rust
@@ -316,7 +322,9 @@ jobs:
         run: strip target/x86_64-unknown-linux-gnu/release/router
 
       - name: Compress
-        run: ./target/x86_64-unknown-linux-gnu/release/compress ./target/x86_64-unknown-linux-gnu/release/router ./router.tar.gz
+        run:
+          ./target/x86_64-unknown-linux-gnu/release/compress
+          ./target/x86_64-unknown-linux-gnu/release/router ./router.tar.gz
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3

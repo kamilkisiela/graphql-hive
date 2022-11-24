@@ -8,7 +8,7 @@ test('renaming a target should result changing its cleanId', async () => {
     {
       name: 'foo',
     },
-    access_token
+    access_token,
   );
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
 
@@ -18,11 +18,13 @@ test('renaming a target should result changing its cleanId', async () => {
       type: ProjectType.Single,
       name: 'foo',
     },
-    access_token
+    access_token,
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data?.createProject.ok?.createdTargets.find(t => t.name === 'production');
+  const target = projectResult.body.data?.createProject.ok?.createdTargets.find(
+    t => t.name === 'production',
+  );
 
   expect(target).toBeDefined();
 
@@ -33,7 +35,7 @@ test('renaming a target should result changing its cleanId', async () => {
       target: target!.cleanId,
       name: 'bar',
     },
-    access_token
+    access_token,
   );
 
   expect(renamedTargetResult.body.errors).not.toBeDefined();

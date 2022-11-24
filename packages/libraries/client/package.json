@@ -1,21 +1,20 @@
 {
   "name": "@graphql-hive/client",
-  "description": "A NodeJS client for GraphQL Hive",
   "version": "0.21.3",
-  "author": {
-    "email": "contact@the-guild.dev",
-    "name": "The Guild",
-    "url": "https://the-guild.dev"
-  },
+  "type": "module",
+  "description": "A NodeJS client for GraphQL Hive",
   "repository": {
     "type": "git",
     "url": "kamilkisiela/graphql-hive",
     "directory": "packages/libraries/client"
   },
   "homepage": "https://graphql-hive.com",
+  "author": {
+    "email": "contact@the-guild.dev",
+    "name": "The Guild",
+    "url": "https://the-guild.dev"
+  },
   "license": "MIT",
-  "sideEffects": false,
-  "type": "module",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "exports": {
@@ -36,9 +35,6 @@
     "./package.json": "./package.json"
   },
   "typings": "dist/typings/index.d.ts",
-  "typescript": {
-    "definition": "dist/typings/index.d.ts"
-  },
   "scripts": {
     "build": "node scripts/update-version.mjs && bob build",
     "check:build": "bob check"
@@ -56,15 +52,19 @@
   "devDependencies": {
     "@apollo/federation": "0.38.1",
     "@envelop/types": "3.0.0",
-    "graphql-yoga": "3.0.0-next.12",
     "@types/async-retry": "1.4.5",
     "apollo-server-core": "3.11.1",
     "apollo-server-plugin-base": "3.5.3",
+    "graphql-yoga": "3.0.0-next.12",
     "nock": "13.2.4"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org",
     "access": "public",
     "directory": "dist"
+  },
+  "sideEffects": false,
+  "typescript": {
+    "definition": "dist/typings/index.d.ts"
   }
 }

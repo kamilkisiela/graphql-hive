@@ -99,8 +99,8 @@ export const PlanSummary = ({
         <div className="mb-6">
           Enterprise plan is for organizations that needs to ship and ingest large amount of data.
           <br />
-          If you wish to upgrade to Enterprise, or you can't find the plan for you, please contact us and we'll find the
-          right plan for your organization.
+          If you wish to upgrade to Enterprise, or you can't find the plan for you, please contact
+          us and we'll find the right plan for your organization.
         </div>
       </>
     );

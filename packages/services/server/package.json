@@ -1,41 +1,41 @@
 {
   "name": "@hive/server",
-  "type": "module",
-  "private": true,
   "version": "0.0.0",
+  "type": "module",
   "license": "MIT",
+  "private": true,
   "scripts": {
-    "dev": "tsup-node src/dev.ts --format esm --shims --target node16 --watch --sourcemap --onSuccess 'node --enable-source-maps dist/dev.js' | pino-pretty --translateTime HH:MM:ss TT --ignore pid,hostname",
     "build": "bob runify --single",
+    "dev": "tsup-node src/dev.ts --format esm --shims --target node16 --watch --sourcemap --onSuccess 'node --enable-source-maps dist/dev.js' | pino-pretty --translateTime HH:MM:ss TT --ignore pid,hostname",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@envelop/core": "3.0.3",
-    "@envelop/graphql-modules": "4.0.3",
     "@envelop/generic-auth": "5.0.3",
+    "@envelop/graphql-modules": "4.0.3",
     "@envelop/sentry": "4.0.3",
     "@envelop/types": "3.0.0",
-    "graphql-yoga": "3.0.0-next.12",
-    "@sentry/node": "7.20.1",
     "@sentry/integrations": "7.20.1",
+    "@sentry/node": "7.20.1",
     "@sentry/tracing": "7.20.1",
+    "@trpc/server": "9.23.2",
+    "@whatwg-node/fetch": "0.4.7",
     "dotenv": "10.0.0",
     "got": "12.5.3",
     "graphql": "16.5.0",
+    "graphql-yoga": "3.0.0-next.12",
     "hyperid": "2.3.1",
     "reflect-metadata": "0.1.13",
-    "@trpc/server": "9.23.2",
-    "zod": "3.15.1",
-    "@whatwg-node/fetch": "0.4.7"
+    "zod": "3.15.1"
   },
   "devDependencies": {
     "@graphql-hive/client": "0.21.3",
     "@hive/api": "workspace:*",
     "@hive/service-common": "workspace:*",
     "@hive/storage": "workspace:*",
-    "pino-pretty": "6.0.0",
     "@swc/core": "1.2.185",
     "fastify": "3.29.4",
+    "pino-pretty": "6.0.0",
     "tslib": "2.4.1"
   },
   "buildOptions": {

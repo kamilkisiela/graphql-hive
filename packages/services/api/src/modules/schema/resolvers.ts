@@ -53,9 +53,10 @@ async function usage(
             name: string;
           };
         }>
-      >
+      >,
 ) {
-  const coordinate = 'parent' in source ? `${source.parent.coordinate}.${source.entity.name}` : source.entity.name;
+  const coordinate =
+    'parent' in source ? `${source.parent.coordinate}.${source.entity.name}` : source.entity.name;
   const usage = (await source.usage)[coordinate];
 
   return usage
@@ -97,7 +98,10 @@ export const resolvers: SchemaModule.Resolvers = {
       ]);
       const token = injector.get(AuthManager).ensureApiToken();
 
-      const checksum = createHash('md5').update(JSON.stringify(input)).update(token).digest('base64');
+      const checksum = createHash('md5')
+        .update(JSON.stringify(input))
+        .update(token)
+        .digest('base64');
 
       // We only want to resolve to SchemaPublishMissingUrlError if it is selected by the operation.
       // NOTE: This should be removed once the usage of cli versions that don't request on 'SchemaPublishMissingUrlError' is becomes pretty low.
@@ -140,7 +144,8 @@ export const resolvers: SchemaModule.Resolvers = {
       if (!result.success) {
         return {
           error: {
-            message: result.error.formErrors.fieldErrors?.newBase?.[0] ?? 'Please check your input.',
+            message:
+              result.error.formErrors.fieldErrors?.newBase?.[0] ?? 'Please check your input.',
           },
         };
       }
@@ -304,11 +309,11 @@ export const resolvers: SchemaModule.Resolvers = {
       return Promise.all([
         orchestrator.build(
           schemasBefore.map(s => helper.createSchemaObject(s)),
-          project.externalComposition
+          project.externalComposition,
         ),
         orchestrator.build(
           schemasAfter.map(s => helper.createSchemaObject(s)),
-          project.externalComposition
+          project.externalComposition,
         ),
       ]).catch(reason => {
         if (reason instanceof SchemaBuildError) {
@@ -358,12 +363,12 @@ export const resolvers: SchemaModule.Resolvers = {
         schemasBefore.length
           ? orchestrator.build(
               schemasBefore.map(s => helper.createSchemaObject(s)),
-              project.externalComposition
+              project.externalComposition,
             )
           : null,
         orchestrator.build(
           schemasAfter.map(s => helper.createSchemaObject(s)),
-          project.externalComposition
+          project.externalComposition,
         ),
       ]).catch(reason => {
         if (reason instanceof SchemaBuildError) {
@@ -488,7 +493,7 @@ export const resolvers: SchemaModule.Resolvers = {
 
       return orchestrator.supergraph(
         schemas.map(s => helper.createSchemaObject(s)),
-        project.externalComposition
+        project.externalComposition,
       );
     },
     async sdl(version, _, { injector }) {
@@ -511,7 +516,7 @@ export const resolvers: SchemaModule.Resolvers = {
       return (
         await orchestrator.build(
           schemas.map(s => helper.createSchemaObject(s)),
-          project.externalComposition
+          project.externalComposition,
         )
       ).raw;
     },
@@ -537,7 +542,7 @@ export const resolvers: SchemaModule.Resolvers = {
 
       const schema = await orchestrator.build(
         schemas.map(s => helper.createSchemaObject(s)),
-        project.externalComposition
+        project.externalComposition,
       );
 
       return {

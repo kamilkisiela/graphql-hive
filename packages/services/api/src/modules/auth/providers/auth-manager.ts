@@ -6,7 +6,11 @@ import { share } from '../../../shared/helpers';
 import { Storage } from '../../shared/providers/storage';
 import { TokenStorage } from '../../token/providers/token-storage';
 import { ApiToken } from './tokens';
-import { OrganizationAccess, OrganizationAccessScope, OrganizationUserScopesSelector } from './organization-access';
+import {
+  OrganizationAccess,
+  OrganizationAccessScope,
+  OrganizationUserScopesSelector,
+} from './organization-access';
 import { ProjectAccess, ProjectAccessScope, ProjectUserScopesSelector } from './project-access';
 import { TargetAccess, TargetAccessScope, TargetUserScopesSelector } from './target-access';
 import { UserManager } from './user-manager';
@@ -55,12 +59,14 @@ export class AuthManager {
     private targetAccess: TargetAccess,
     private userManager: UserManager,
     private tokenStorage: TokenStorage,
-    private storage: Storage
+    private storage: Storage,
   ) {
     this.session = context.session;
   }
 
-  async ensureTargetAccess(selector: Listify<TargetAccessSelector, 'target'>): Promise<void | never> {
+  async ensureTargetAccess(
+    selector: Listify<TargetAccessSelector, 'target'>,
+  ): Promise<void | never> {
     if (this.apiToken) {
       if (hasManyTargets(selector)) {
         await Promise.all(
@@ -68,8 +74,8 @@ export class AuthManager {
             this.ensureTargetAccess({
               ...selector,
               target,
-            })
-          )
+            }),
+          ),
         );
       } else {
         await this.targetAccess.ensureAccessForToken({
@@ -84,8 +90,8 @@ export class AuthManager {
             this.ensureTargetAccess({
               ...selector,
               target,
-            })
-          )
+            }),
+          ),
         );
       } else {
         const user = await this.getCurrentUser();
@@ -218,7 +224,7 @@ export class AuthManager {
 }
 
 function hasManyTargets(
-  selector: Listify<TargetAccessSelector, 'target'>
+  selector: Listify<TargetAccessSelector, 'target'>,
 ): selector is MapToArray<TargetAccessSelector, 'target'> {
   return Array.isArray(selector.target);
 }

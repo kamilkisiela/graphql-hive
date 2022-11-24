@@ -22,7 +22,7 @@ export const Heading = ({
           xl: 'text-xl font-bold',
           '2xl': 'text-[28px] font-extrabold leading-snug',
         }[size],
-        className
+        className,
       )}
       {...props}
     >

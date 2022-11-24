@@ -48,6 +48,6 @@ export function deploySchema({
       replicas: 2,
       pdb: true,
     },
-    [redis.deployment, redis.service]
+    [redis.deployment, redis.service],
   ).deploy();
 }

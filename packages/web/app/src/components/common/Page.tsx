@@ -44,7 +44,9 @@ const Menu = {
       <li tw="px-3 pb-2">
         <div tw="flex flex-row items-center h-8">
           <span tw="inline-flex justify-center items-center">{icon}</span>
-          <div tw="ml-4 text-sm font-semibold text-gray-500 dark:text-gray-300 tracking-wide">{children}</div>
+          <div tw="ml-4 text-sm font-semibold text-gray-500 dark:text-gray-300 tracking-wide">
+            {children}
+          </div>
         </div>
       </li>
     );
@@ -75,7 +77,13 @@ const WithNavigation: React.FC<{}> = ({ children }) => {
 
   const menuTitle = router.targetId ? `Target` : router.projectId ? `Project` : 'Organization';
 
-  const menuIcon = router.targetId ? <FiTarget /> : router.projectId ? <VscFolder /> : <VscOrganization />;
+  const menuIcon = router.targetId ? (
+    <FiTarget />
+  ) : router.projectId ? (
+    <VscFolder />
+  ) : (
+    <VscOrganization />
+  );
 
   return (
     <PageContainer>

@@ -119,7 +119,9 @@ export const OIDCIntegrationSection = (props: {
 };
 
 const CreateOIDCIntegrationModal_CreateOIDCIntegrationMutation = gql(/* GraphQL */ `
-  mutation CreateOIDCIntegrationModal_CreateOIDCIntegrationMutation($input: CreateOIDCIntegrationInput!) {
+  mutation CreateOIDCIntegrationModal_CreateOIDCIntegrationMutation(
+    $input: CreateOIDCIntegrationInput!
+  ) {
     createOIDCIntegration(input: $input) {
       ok {
         organization {
@@ -152,14 +154,20 @@ const CreateOIDCIntegrationModal = (props: {
         <div className={containerClassName}>
           <Heading>Connect OpenID Connect Provider</Heading>
           <p>
-            You are trying to create an OpenID Connect integration for an organization that already has a provider
-            attached. Please instead configure the existing provider.
+            You are trying to create an OpenID Connect integration for an organization that already
+            has a provider attached. Please instead configure the existing provider.
           </p>
           <div className="flex w-full gap-2">
             <Button type="button" size="large" block onClick={props.close}>
               Close
             </Button>
-            <Button type="submit" size="large" block variant="primary" href={props.openEditModalLink}>
+            <Button
+              type="submit"
+              size="large"
+              block
+              variant="primary"
+              href={props.openEditModalLink}
+            >
               Edit OIDC Integration
             </Button>
           </div>
@@ -215,10 +223,12 @@ const CreateOIDCIntegrationForm = (props: {
     <form className={containerClassName} onSubmit={formik.handleSubmit}>
       <Heading>Connect OpenID Connect Provider</Heading>
       <p>
-        Connecting an OIDC provider to this organization allows users to automatically log in and be part of this
-        organization.
+        Connecting an OIDC provider to this organization allows users to automatically log in and be
+        part of this organization.
       </p>
-      <p>Use Okta, Auth0, Google Workspaces or any other OAuth2 Open ID Connect compatible provider.</p>
+      <p>
+        Use Okta, Auth0, Google Workspaces or any other OAuth2 Open ID Connect compatible provider.
+      </p>
       <Input
         placeholder="OAuth API Url (Issuer)"
         id="oauthApiUrl"
@@ -274,12 +284,21 @@ const ManageOIDCIntegrationModal = (props: {
     <Modal open={props.isOpen} onOpenChange={props.close} className={modalWidthClassName}>
       <div className={containerClassName}>
         <Heading>Manage OpenID Connect Integration</Heading>
-        <p>You are trying to update an OpenID Connect integration for an organization that has no integration.</p>
+        <p>
+          You are trying to update an OpenID Connect integration for an organization that has no
+          integration.
+        </p>
         <div className="flex w-full gap-2">
           <Button type="button" size="large" block onClick={props.close}>
             Close
           </Button>
-          <Button type="submit" size="large" block variant="primary" href={props.openCreateModalLink}>
+          <Button
+            type="submit"
+            size="large"
+            block
+            variant="primary"
+            href={props.openCreateModalLink}
+          >
             Connect OIDC Provider
           </Button>
         </div>
@@ -305,7 +324,9 @@ const UpdateOIDCIntegration_OIDCIntegrationFragment = gql(/* GraphQL */ `
 `);
 
 const UpdateOIDCIntegrationForm_UpdateOIDCIntegrationMutation = gql(/* GraphQL */ `
-  mutation UpdateOIDCIntegrationForm_UpdateOIDCIntegrationMutation($input: UpdateOIDCIntegrationInput!) {
+  mutation UpdateOIDCIntegrationForm_UpdateOIDCIntegrationMutation(
+    $input: UpdateOIDCIntegrationInput!
+  ) {
     updateOIDCIntegration(input: $input) {
       ok {
         updatedOIDCIntegration {
@@ -375,11 +396,14 @@ const UpdateOIDCIntegrationForm = (props: {
                 <InlineCode content={`${env.appBaseUrl}/auth/callback/oidc`} />
               </li>
               <li>
-                Set your OIDC Provider Sign-out redirect URI to <InlineCode content={`${env.appBaseUrl}/logout`} />
+                Set your OIDC Provider Sign-out redirect URI to{' '}
+                <InlineCode content={`${env.appBaseUrl}/logout`} />
               </li>
               <li>
                 Your users can login to the organization via{' '}
-                <InlineCode content={`${env.appBaseUrl}/auth/oidc?id=${props.oidcIntegration.id}`} />
+                <InlineCode
+                  content={`${env.appBaseUrl}/auth/oidc?id=${props.oidcIntegration.id}`}
+                />
               </li>
             </ul>
           </div>
@@ -411,7 +435,7 @@ const UpdateOIDCIntegrationForm = (props: {
               placeholder={
                 'Keep old value. (Ending with ' +
                 props.oidcIntegration.clientSecretPreview.substring(
-                  props.oidcIntegration.clientSecretPreview.length - 4
+                  props.oidcIntegration.clientSecretPreview.length - 4,
                 ) +
                 ')'
               }
@@ -439,7 +463,9 @@ const UpdateOIDCIntegrationForm = (props: {
 };
 
 const RemoveOIDCIntegrationForm_DeleteOIDCIntegrationMutation = gql(/* GraphQL */ `
-  mutation RemoveOIDCIntegrationForm_DeleteOIDCIntegrationMutation($input: DeleteOIDCIntegrationInput!) {
+  mutation RemoveOIDCIntegrationForm_DeleteOIDCIntegrationMutation(
+    $input: DeleteOIDCIntegrationInput!
+  ) {
     deleteOIDCIntegration(input: $input) {
       ok {
         organization {
@@ -488,8 +514,8 @@ const RemoveOIDCIntegrationModal = (props: {
             <Tag color="yellow" className="py-2.5 px-4">
               <AlertTriangleIcon className="h-5 w-5" />
               <p className="ml-3">
-                This action is not reversible and <b>deletes all users</b> that have signed in with this OIDC
-                integration.
+                This action is not reversible and <b>deletes all users</b> that have signed in with
+                this OIDC integration.
               </p>
             </Tag>
             <p>Do you really want to proceed?</p>

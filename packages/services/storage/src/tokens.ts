@@ -18,7 +18,7 @@ export async function createTokenStorage(connection: string, maximumPoolSize: nu
             target_id = ${target} 
             AND deleted_at IS NULL 
           ORDER BY created_at DESC
-        `
+        `,
       );
 
       return result.rows;
@@ -30,7 +30,7 @@ export async function createTokenStorage(connection: string, maximumPoolSize: nu
           FROM public.tokens 
           WHERE token = ${token} AND deleted_at IS NULL
           LIMIT 1
-        `
+        `,
       );
     },
     createToken({
@@ -55,16 +55,19 @@ export async function createTokenStorage(connection: string, maximumPoolSize: nu
           INSERT INTO public.tokens
             (name, token, token_alias, target_id, project_id, organization_id, scopes)
           VALUES
-            (${name}, ${token}, ${tokenAlias}, ${target}, ${project}, ${organization}, ${sql.array(scopes, 'text')})
+            (${name}, ${token}, ${tokenAlias}, ${target}, ${project}, ${organization}, ${sql.array(
+          scopes,
+          'text',
+        )})
           RETURNING *
-        `
+        `,
       );
     },
     async deleteToken({ token }: { token: string }) {
       await pool.query(
         sql`
           UPDATE public.tokens SET deleted_at = NOW() WHERE token = ${token}
-        `
+        `,
       );
     },
     async touchTokens({ tokens }: { tokens: Array<{ token: string; date: Date }> }) {
@@ -75,7 +78,7 @@ export async function createTokenStorage(connection: string, maximumPoolSize: nu
             VALUES
               (${sql.join(
                 tokens.map(t => sql`${t.token}, ${toDate(t.date)}`),
-                sql`), (`
+                sql`), (`,
               )})
         ) as c(token, last_used_at) 
         WHERE c.token = t.token;

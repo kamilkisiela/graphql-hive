@@ -12,7 +12,14 @@ self.addEventListener('fetch', event => {
       environment: SENTRY_ENVIRONMENT,
       release: SENTRY_RELEASE,
       context: event,
-      allowedHeaders: ['user-agent', 'cf-ipcountry', 'accept-encoding', 'accept', 'x-real-ip', 'cf-connecting-ip'],
+      allowedHeaders: [
+        'user-agent',
+        'cf-ipcountry',
+        'accept-encoding',
+        'accept',
+        'x-real-ip',
+        'cf-connecting-ip',
+      ],
       allowedSearchParams: /(.*)/,
     });
     const eventId = sentry.captureException(error);

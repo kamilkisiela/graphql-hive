@@ -1,12 +1,12 @@
 {
   "name": "@hive/docs",
-  "private": true,
   "version": "0.0.0",
   "type": "module",
+  "private": true,
   "scripts": {
+    "build": "bob runify --single",
     "dev": "next",
-    "start": "next start",
-    "build": "bob runify --single"
+    "start": "next start"
   },
   "dependencies": {
     "@theguild/components": "4.3.6",

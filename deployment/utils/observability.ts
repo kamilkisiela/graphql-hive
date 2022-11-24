@@ -210,7 +210,10 @@ export class Observability {
                         regex: '(.+)',
                       },
                       {
-                        source_labels: ['__address__', '__meta_kubernetes_pod_annotation_prometheus_io_port'],
+                        source_labels: [
+                          '__address__',
+                          '__meta_kubernetes_pod_annotation_prometheus_io_port',
+                        ],
                         action: 'replace',
                         regex: '([^:]+)(?::d+)?;(d+)',
                         replacement: '$1:$2',
@@ -358,7 +361,7 @@ export class Observability {
       },
       {
         dependsOn: [ns],
-      }
+      },
     );
   }
 }

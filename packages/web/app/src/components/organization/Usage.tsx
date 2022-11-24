@@ -1,5 +1,9 @@
 import React from 'react';
-import { OrganizationFieldsFragment, OrgBillingInfoFieldsFragment, UsageEstimationDocument } from '@/graphql';
+import {
+  OrganizationFieldsFragment,
+  OrgBillingInfoFieldsFragment,
+  UsageEstimationDocument,
+} from '@/graphql';
 import { useQuery } from 'urql';
 import { Scale } from '../common';
 import { DataWrapper } from '../common/DataWrapper';
@@ -42,7 +46,9 @@ export const OrganizationUsageEstimationView: React.FC<{
                 <Tbody>
                   <Tr>
                     <Td>Operations</Td>
-                    <Td isNumeric>{NumericFormatter.format(result.data.usageEstimation.org.operations)}</Td>
+                    <Td isNumeric>
+                      {NumericFormatter.format(result.data.usageEstimation.org.operations)}
+                    </Td>
                     <Td isNumeric>{NumericFormatter.format(organization.rateLimit.operations)}</Td>
                     <Td isNumeric>
                       <Scale

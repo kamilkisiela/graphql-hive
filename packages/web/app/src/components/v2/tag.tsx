@@ -17,7 +17,9 @@ export const Tag = ({
   children: ReactNode;
 }): ReactElement => {
   return (
-    <span className={clsx('inline-flex items-center gap-x-1 rounded-sm p-2', colors[color], className)}>
+    <span
+      className={clsx('inline-flex items-center gap-x-1 rounded-sm p-2', colors[color], className)}
+    >
       {children}
     </span>
   );

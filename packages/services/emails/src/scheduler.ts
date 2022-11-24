@@ -42,7 +42,12 @@ export function createScheduler(config: {
   }
 
   function onFailed(job: Job, error: Error) {
-    logger.debug(`Job %s failed after %s attempts, reason: %s`, job.name, job.attemptsMade, job.failedReason);
+    logger.debug(
+      `Job %s failed after %s attempts, reason: %s`,
+      job.name,
+      job.attemptsMade,
+      job.failedReason,
+    );
     logger.error(error);
     emailsFailuresTotal.inc();
   }
@@ -100,7 +105,7 @@ export function createScheduler(config: {
         prefix,
         connection: redisConnection,
         sharedConnection: true,
-      }
+      },
     );
 
     worker.on('error', onError('emailsWorker'));
@@ -167,7 +172,11 @@ export function createScheduler(config: {
     try {
       queue?.removeAllListeners();
       queueScheduler?.removeAllListeners(),
-        await pTimeout(Promise.all([queue?.close(), queueScheduler?.close()]), 5000, 'BullMQ close timeout');
+        await pTimeout(
+          Promise.all([queue?.close(), queueScheduler?.close()]),
+          5000,
+          'BullMQ close timeout',
+        );
     } catch (e) {
       logger.error('Failed to stop queues', e);
     } finally {

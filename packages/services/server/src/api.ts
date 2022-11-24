@@ -12,7 +12,13 @@ import type { Storage } from '@hive/api';
 import { z } from 'zod';
 import { CryptoProvider } from 'packages/services/api/src/modules/shared/providers/crypto';
 
-export async function createContext({ storage, crypto }: { storage: Storage; crypto: CryptoProvider }) {
+export async function createContext({
+  storage,
+  crypto,
+}: {
+  storage: Storage;
+  crypto: CryptoProvider;
+}) {
   return {
     storage,
     crypto,
@@ -59,13 +65,19 @@ export const internalApiRouter = router<Context>()
       lastOrgId: z.union([z.string(), z.null()]),
     }),
     async resolve({ input, ctx }) {
-      const user = await ctx.storage.getUserBySuperTokenId({ superTokensUserId: input.superTokensUserId });
+      const user = await ctx.storage.getUserBySuperTokenId({
+        superTokensUserId: input.superTokensUserId,
+      });
 
       // For an OIDC Integration User we want to return the linked organization
       if (user?.oidcIntegrationId) {
-        const oidcIntegration = await ctx.storage.getOIDCIntegrationById({ oidcIntegrationId: user.oidcIntegrationId });
+        const oidcIntegration = await ctx.storage.getOIDCIntegrationById({
+          oidcIntegrationId: user.oidcIntegrationId,
+        });
         if (oidcIntegration) {
-          const org = await ctx.storage.getOrganization({ organization: oidcIntegration.linkedOrganizationId });
+          const org = await ctx.storage.getOrganization({
+            organization: oidcIntegration.linkedOrganizationId,
+          });
 
           return {
             id: org.id,
@@ -107,7 +119,9 @@ export const internalApiRouter = router<Context>()
       oidcIntegrationId: z.string().min(1),
     }),
     async resolve({ input, ctx }) {
-      const result = await ctx.storage.getOIDCIntegrationById({ oidcIntegrationId: input.oidcIntegrationId });
+      const result = await ctx.storage.getOIDCIntegrationById({
+        oidcIntegrationId: input.oidcIntegrationId,
+      });
       if (result == null) {
         return null;
       }

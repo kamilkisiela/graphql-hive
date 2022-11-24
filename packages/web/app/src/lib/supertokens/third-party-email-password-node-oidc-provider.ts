@@ -130,7 +130,7 @@ export const createOIDCSuperTokensNoopProvider = () => ({
 
 const fetchOIDCConfig = async (
   internalApi: ReturnType<typeof createTRPCClient<InternalApi>>,
-  oidcIntegrationId: string
+  oidcIntegrationId: string,
 ): Promise<{ id: string; clientId: string; clientSecret: string; oauthApiUrl: string }> => {
   const result = await internalApi.query('getOIDCIntegrationById', { oidcIntegrationId });
   if (result === null) {

@@ -5,7 +5,7 @@ export { ProjectAccessScope } from '../../graphql';
 
 export function canAccessProject(
   scope: ProjectAccessScope,
-  member: Pick<MemberFieldsFragment, 'projectAccessScopes'> | null | undefined
+  member: Pick<MemberFieldsFragment, 'projectAccessScopes'> | null | undefined,
 ) {
   if (!member) {
     return false;

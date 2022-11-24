@@ -16,7 +16,7 @@ function main() {
     () =>
       new Response(null, {
         status: 200,
-      })
+      }),
   );
 
   app.all('*', (request: Request) => handleRequest(request, isSignatureValid));

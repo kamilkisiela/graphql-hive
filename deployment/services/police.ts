@@ -10,7 +10,7 @@ export function deployCloudflarePolice({ envName, rootDns }: { envName: string; 
     cfCustomConfig.require('zoneId'),
     cloudflareProviderConfig.require('accountId'),
     cfCustomConfig.requireSecret('policeApiToken'),
-    rootDns
+    rootDns,
   );
 
   return police.deploy();

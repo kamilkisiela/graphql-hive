@@ -18,13 +18,15 @@ export async function getPool(connection: string, maximumPoolSize: number) {
     maximumPoolSize,
   });
 
-  function interceptError<K extends Exclude<keyof CommonQueryMethods, 'transaction'>>(methodName: K) {
+  function interceptError<K extends Exclude<keyof CommonQueryMethods, 'transaction'>>(
+    methodName: K,
+  ) {
     const original: CommonQueryMethods[K] = pool[methodName];
 
     function interceptor<T extends QueryResultRow>(
       this: any,
       sql: TaggedTemplateLiteralInvocation<T>,
-      values?: QueryResultRowColumn[]
+      values?: QueryResultRowColumn[],
     ): any {
       return (original as any).call(this, sql, values).catch((error: any) => {
         error.sql = sql.sql;

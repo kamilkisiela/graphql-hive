@@ -18,7 +18,7 @@ export class Proxy {
       virtualHost?: Output<string>;
       httpsUpstream?: boolean;
       withWwwDomain?: boolean;
-    }[]
+    }[],
   ) {
     const cert = new k8s.apiextensions.CustomResource(`cert-${dns.record}`, {
       apiVersion: 'cert-manager.io/v1',
@@ -104,7 +104,7 @@ export class Proxy {
       },
       {
         dependsOn: [cert, this.lbService!],
-      }
+      },
     );
 
     return this;
@@ -183,7 +183,10 @@ export class Proxy {
 
     this.lbService = proxyController.getResource('v1/Service', 'contour/contour-proxy-envoy');
 
-    const contourDeployment = proxyController.getResource('apps/v1/Deployment', 'contour/contour-proxy-contour');
+    const contourDeployment = proxyController.getResource(
+      'apps/v1/Deployment',
+      'contour/contour-proxy-contour',
+    );
     new k8s.policy.v1.PodDisruptionBudget('contour-pdb', {
       spec: {
         minAvailable: 1,
@@ -191,7 +194,10 @@ export class Proxy {
       },
     });
 
-    const envoyDaemonset = proxyController.getResource('apps/v1/ReplicaSet', 'contour/contour-proxy-envoy');
+    const envoyDaemonset = proxyController.getResource(
+      'apps/v1/ReplicaSet',
+      'contour/contour-proxy-envoy',
+    );
     new k8s.policy.v1.PodDisruptionBudget('envoy-pdb', {
       spec: {
         minAvailable: 1,
@@ -219,7 +225,7 @@ export class Proxy {
       },
       {
         dependsOn: [this.lbService],
-      }
+      },
     );
 
     return this;

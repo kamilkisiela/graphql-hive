@@ -11,7 +11,11 @@ import { InvoicesList } from '@/components/organization/billing/InvoicesList';
 import { RateLimitWarn } from '@/components/organization/billing/RateLimitWarn';
 import { OrganizationUsageEstimationView } from '@/components/organization/Usage';
 import { Card, Heading, Tabs, Title } from '@/components/v2';
-import { OrganizationFieldsFragment, OrgBillingInfoFieldsFragment, OrgRateLimitFieldsFragment } from '@/graphql';
+import {
+  OrganizationFieldsFragment,
+  OrgBillingInfoFieldsFragment,
+  OrgRateLimitFieldsFragment,
+} from '@/graphql';
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
 import { getIsStripeEnabled } from '@/lib/billing/stripe-public-key';
 import { withSessionProtection } from '@/lib/supertokens/guard';
@@ -27,7 +31,9 @@ const ManagePage = dynamic(() => import('./manage'));
 const Page = ({
   organization,
 }: {
-  organization: OrganizationFieldsFragment & OrgBillingInfoFieldsFragment & OrgRateLimitFieldsFragment;
+  organization: OrganizationFieldsFragment &
+    OrgBillingInfoFieldsFragment &
+    OrgRateLimitFieldsFragment;
 }): ReactElement | null => {
   const canAccess = useOrganizationAccess({
     scope: OrganizationAccessScope.Settings,
@@ -66,10 +72,14 @@ const Page = ({
                 <Stat className="mb-4">
                   <StatLabel>Next Invoice</StatLabel>
                   <StatNumber>
-                    {CurrencyFormatter.format(organization.billingConfiguration.upcomingInvoice.amount)}
+                    {CurrencyFormatter.format(
+                      organization.billingConfiguration.upcomingInvoice.amount,
+                    )}
                   </StatNumber>
                   <StatHelpText>
-                    {DateFormatter.format(new Date(organization.billingConfiguration.upcomingInvoice.date))}
+                    {DateFormatter.format(
+                      new Date(organization.billingConfiguration.upcomingInvoice.date),
+                    )}
                   </StatHelpText>
                 </Stat>
               )}

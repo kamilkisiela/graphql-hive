@@ -7,24 +7,30 @@ const db = pgp(cn('postgres'));
 
 const dbName = 'registry';
 
+// eslint-disable-next-line no-undef
+const log = console.log;
+
 probe().then(() =>
   db
     .query(`SELECT 1 FROM pg_database WHERE datname = '${dbName}'`)
     .then(result => {
       if (!result.length) {
-        console.log(`Creating "${dbName}" database`);
+        log(`Creating "${dbName}" database`);
         return db.query(`CREATE DATABASE ${dbName}`);
       }
 
-      console.log(`Database "${dbName}" already exists`);
+      log(`Database "${dbName}" already exists`);
     })
     .then(() => {
+      // eslint-disable-next-line no-undef
       process.exit(0);
     })
     .catch(error => {
+      // eslint-disable-next-line no-undef
       console.error(error);
+      // eslint-disable-next-line no-undef
       process.exit(1);
-    })
+    }),
 );
 
 /**
@@ -37,7 +43,8 @@ function probe(numberOfRetries = 0) {
     if (numberOfRetries === 15) {
       throw new Error('Database not ready after 15 retries. Exiting.');
     }
-    console.log('Database not ready. Retry in 1000ms\nReason:\n' + err);
+    log('Database not ready. Retry in 1000ms\nReason:\n' + err);
+    // eslint-disable-next-line no-undef
     await new Promise(res => setTimeout(res, 1000));
     return probe(numberOfRetries + 1);
   });

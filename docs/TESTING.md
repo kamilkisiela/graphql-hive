@@ -15,7 +15,8 @@ We are using Dockest to test the following concerns:
 
 To run integration tests locally, follow:
 
-1. Make sure you have Docker installed. If you are having issues, try to run `docker system prune` to clean the Docker caches.
+1. Make sure you have Docker installed. If you are having issues, try to run `docker system prune`
+   to clean the Docker caches.
 2. Install all deps: `pnpm i`
 3. Generate types: `pnpm graphql:generate`
 4. Build and pack all services: `pnpm --filter integration-tests build-and-pack`

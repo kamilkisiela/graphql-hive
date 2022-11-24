@@ -1,6 +1,12 @@
 #!/usr/bin/env node
 import * as Sentry from '@sentry/node';
-import { createServer, startMetrics, registerShutdown, reportReadiness, startHeartbeats } from '@hive/service-common';
+import {
+  createServer,
+  startMetrics,
+  registerShutdown,
+  reportReadiness,
+  startHeartbeats,
+} from '@hive/service-common';
 import { createIngestor } from './ingestor';
 import { env } from './environment';
 

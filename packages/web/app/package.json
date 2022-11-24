@@ -1,14 +1,14 @@
 {
   "name": "@hive/app",
-  "private": true,
   "version": "0.0.0",
+  "private": true,
   "scripts": {
+    "analyze": "pnpm build:config && ANALYZE=1 next build",
+    "build": "pnpm build:config && BUILD=1 bob runify --single",
     "build:config": "tsup-node --no-splitting --out-dir . --loader \".mts=ts\" --format esm --target node16 next.config.mts",
     "dev": "pnpm build:config && next dev",
-    "start": "node dist/index.js",
-    "build": "pnpm build:config && BUILD=1 bob runify --single",
-    "analyze": "pnpm build:config && ANALYZE=1 next build",
     "postbuild": "pnpm --filter @hive/app deploy dist/deploy && rimraf dist/node_modules && mv dist/deploy/node_modules dist && rimraf dist/deploy",
+    "start": "node dist/index.js",
     "typecheck": "tsc"
   },
   "dependencies": {

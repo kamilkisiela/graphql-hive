@@ -68,7 +68,7 @@ const LogModel = zod.object({
         zod.literal('fatal'),
         zod.literal('silent'),
       ])
-      .optional()
+      .optional(),
   ),
 });
 

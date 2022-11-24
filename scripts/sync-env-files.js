@@ -94,7 +94,7 @@ function findLocalEnvFiles() {
         } else {
           resolve(files);
         }
-      }
+      },
     );
   });
 }

@@ -99,7 +99,7 @@ export function createHive(options: HivePluginOptions): HiveClient {
           timeout: 30_000,
           decompress: true,
           responseType: 'json',
-        }
+        },
       );
 
       if (response.status >= 200 && response.status < 300) {
@@ -108,10 +108,24 @@ export function createHive(options: HivePluginOptions): HiveClient {
         if (result.data?.tokenInfo.__typename === 'TokenInfo') {
           const { tokenInfo } = result.data;
 
-          const { organization, project, target, canReportSchema, canCollectUsage, canReadOperations } = tokenInfo;
-          const print = createPrinter([tokenInfo.token.name, organization.name, project.name, target.name]);
+          const {
+            organization,
+            project,
+            target,
+            canReportSchema,
+            canCollectUsage,
+            canReadOperations,
+          } = tokenInfo;
+          const print = createPrinter([
+            tokenInfo.token.name,
+            organization.name,
+            project.name,
+            target.name,
+          ]);
 
-          const appUrl = options.selfHosting?.applicationUrl?.replace(/\/$/, '') ?? 'https://app.graphql-hive.com';
+          const appUrl =
+            options.selfHosting?.applicationUrl?.replace(/\/$/, '') ??
+            'https://app.graphql-hive.com';
           const organizationUrl = `${appUrl}/${organization.cleanId}`;
           const projectUrl = `${organizationUrl}/${project.cleanId}`;
           const targetUrl = `${projectUrl}/${target.cleanId}`;
@@ -129,14 +143,18 @@ export function createHive(options: HivePluginOptions): HiveClient {
               `Can collect usage?     ${print(canCollectUsage ? 'Yes' : 'No')}`,
               `Can read operations?   ${print(canReadOperations ? 'Yes' : 'No')}`,
               '',
-            ].join('\n')
+            ].join('\n'),
           );
         } else if (result.data?.tokenInfo.message) {
           logger.error(`[hive][info] Token not found. Reason: ${result.data?.tokenInfo.message}`);
-          logger.info(`[hive][info] How to create a token? https://docs.graphql-hive.com/features/tokens`);
+          logger.info(
+            `[hive][info] How to create a token? https://docs.graphql-hive.com/features/tokens`,
+          );
         } else {
           logger.error(`[hive][info] ${result.errors![0].message}`);
-          logger.info(`[hive][info] How to create a token? https://docs.graphql-hive.com/features/tokens`);
+          logger.info(
+            `[hive][info] How to create a token? https://docs.graphql-hive.com/features/tokens`,
+          );
         }
       } else {
         logger.error(`[hive][info] Error ${response.status}: ${response.statusText}`);

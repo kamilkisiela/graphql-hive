@@ -7,7 +7,7 @@ export class InvalidRequestFormat extends Response {
       }),
       {
         status: 400,
-      }
+      },
     );
   }
 }
@@ -21,7 +21,7 @@ export class MissingSignature extends Response {
       }),
       {
         status: 401,
-      }
+      },
     );
   }
 }
@@ -35,7 +35,7 @@ export class InvalidSignature extends Response {
       }),
       {
         status: 403,
-      }
+      },
     );
   }
 }
@@ -49,7 +49,7 @@ export class UnexpectedError extends Response {
       }),
       {
         status: 500,
-      }
+      },
     );
   }
 }

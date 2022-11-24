@@ -8,7 +8,7 @@ test('creating a project should result in creating the development, staging and 
     {
       name: 'foo',
     },
-    access_token
+    access_token,
   );
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
 
@@ -18,7 +18,7 @@ test('creating a project should result in creating the development, staging and 
       type: ProjectType.Single,
       name: 'foo',
     },
-    access_token
+    access_token,
   );
 
   const targets = projectResult.body.data!.createProject.ok!.createdTargets;
@@ -28,19 +28,19 @@ test('creating a project should result in creating the development, staging and 
     expect.objectContaining({
       cleanId: 'development',
       name: 'development',
-    })
+    }),
   );
   expect(targets).toContainEqual(
     expect.objectContaining({
       cleanId: 'staging',
       name: 'staging',
-    })
+    }),
   );
   expect(targets).toContainEqual(
     expect.objectContaining({
       cleanId: 'production',
       name: 'production',
-    })
+    }),
   );
 });
 
@@ -50,7 +50,7 @@ test('renaming a project should result changing its cleanId', async () => {
     {
       name: 'foo',
     },
-    access_token
+    access_token,
   );
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
 
@@ -60,7 +60,7 @@ test('renaming a project should result changing its cleanId', async () => {
       type: ProjectType.Single,
       name: 'foo',
     },
-    access_token
+    access_token,
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
@@ -71,7 +71,7 @@ test('renaming a project should result changing its cleanId', async () => {
       project: project.cleanId,
       name: 'bar',
     },
-    access_token
+    access_token,
   );
 
   expect(renamedProjectResult.body.errors).not.toBeDefined();

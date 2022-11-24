@@ -16,7 +16,11 @@ export function isBufferTooBigError(error: unknown): error is BufferTooBigError 
  * @param numOfChunks How many chunks to split the list into
  * @param chunkIndex The index of the chunk to split the list into (0-based)
  */
-export function calculateChunkSize(totalLength: number, numOfChunks: number, chunkIndex: number): number {
+export function calculateChunkSize(
+  totalLength: number,
+  numOfChunks: number,
+  chunkIndex: number,
+): number {
   // If x % n == 0 then the minimum, difference is 0 and all numbers are x / n
   if (totalLength % numOfChunks == 0) {
     return totalLength / numOfChunks;
@@ -62,8 +66,15 @@ export function createEstimator(config: {
     if (increaseBy) {
       // increase the default estimation by X ratio
       // but don't go higher than 50% of original estimation
-      defaultBytesPerUnit = Math.min((1 + increaseBy) * defaultBytesPerUnit, 1.5 * config.defaultBytesPerUnit);
-      config.logger.info('Increasing default bytes per unit (ratio=%s, new=%s)', increaseBy, defaultBytesPerUnit);
+      defaultBytesPerUnit = Math.min(
+        (1 + increaseBy) * defaultBytesPerUnit,
+        1.5 * config.defaultBytesPerUnit,
+      );
+      config.logger.info(
+        'Increasing default bytes per unit (ratio=%s, new=%s)',
+        increaseBy,
+        defaultBytesPerUnit,
+      );
     }
   }
 
@@ -124,7 +135,7 @@ export function createKVBuffer<T>(config: {
     reports: readonly T[],
     estimatedSizeInBytes: number,
     batchId: string,
-    validateSize: (actualSizeInBytes: number) => void | never
+    validateSize: (actualSizeInBytes: number) => void | never,
   ): Promise<void>;
 }) {
   const { logger } = config;
@@ -156,7 +167,12 @@ export function createKVBuffer<T>(config: {
     return buffer.reduce((sum, report) => sum + (report as any).size, 0);
   }
 
-  async function flushBuffer(reports: readonly T[], size: number, batchId: string, isRetry = false) {
+  async function flushBuffer(
+    reports: readonly T[],
+    size: number,
+    batchId: string,
+    isRetry = false,
+  ) {
     logger.info(`Flushing (reports=%s, bufferSize=%s, id=%s)`, reports.length, size, batchId);
     const estimatedSizeInBytes = estimator.estimate(size);
     buffer = [];
@@ -172,7 +188,7 @@ export function createKVBuffer<T>(config: {
           bytes,
           (Math.abs(estimatedSizeInBytes - bytes) / bytes).toFixed(4),
           estimator.getDefaultBytesPerUnit(),
-          batchId
+          batchId,
         );
 
         estimator.teach({
@@ -210,8 +226,13 @@ export function createKVBuffer<T>(config: {
 
           return Promise.all(
             chunks.map((chunk, chunkIndex) =>
-              flushBuffer(chunk, calculateBufferSize(chunk), batchId + '--retry-chunk-' + chunkIndex, true)
-            )
+              flushBuffer(
+                chunk,
+                calculateBufferSize(chunk),
+                batchId + '--retry-chunk-' + chunkIndex,
+                true,
+              ),
+            ),
           );
         }
 

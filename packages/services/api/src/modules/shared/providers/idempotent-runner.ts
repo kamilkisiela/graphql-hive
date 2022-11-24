@@ -73,7 +73,11 @@ export class IdempotentRunner {
     });
   }
 
-  private async set<T>(identifier: string, job: JobPending | JobCompleted<T>, ttl: number): Promise<boolean> {
+  private async set<T>(
+    identifier: string,
+    job: JobPending | JobCompleted<T>,
+    ttl: number,
+  ): Promise<boolean> {
     // Set the job as pending
     if (job.status === JobStatus.PENDING) {
       // SET if Not eXists
@@ -124,13 +128,18 @@ export class IdempotentRunner {
     ttl: number;
     context: JobExecutorContext;
   }): Promise<T> {
-    this.logger.debug('Starting new job (id=%s, traceId=%s, attempt=%s)', identifier, traceId, context.attempt);
+    this.logger.debug(
+      'Starting new job (id=%s, traceId=%s, attempt=%s)',
+      identifier,
+      traceId,
+      context.attempt,
+    );
     if (context.attempt > 3) {
       this.logger.error(
         'Job failed after 3 attempts (id=%s, traceId=%s, attempt=%s)',
         identifier,
         traceId,
-        context.attempt
+        context.attempt,
       );
       throw new Error(`Job failed after 3 attempts`);
     }
@@ -138,14 +147,24 @@ export class IdempotentRunner {
     let job = await this.get<T>(identifier);
 
     if (!job) {
-      this.logger.debug('Job not found (id=%s, traceId=%s, attempt=%s)', identifier, traceId, context.attempt);
-      this.logger.debug('Trying to create a job (id=%s, traceId=%s, attempt=%s)', identifier, traceId, context.attempt);
+      this.logger.debug(
+        'Job not found (id=%s, traceId=%s, attempt=%s)',
+        identifier,
+        traceId,
+        context.attempt,
+      );
+      this.logger.debug(
+        'Trying to create a job (id=%s, traceId=%s, attempt=%s)',
+        identifier,
+        traceId,
+        context.attempt,
+      );
       const created = await this.set(
         identifier,
         {
           status: JobStatus.PENDING,
         },
-        ttl
+        ttl,
       );
 
       if (!created) {
@@ -164,13 +183,33 @@ export class IdempotentRunner {
           ttl,
         });
       } else {
-        this.logger.debug('Job created (id=%s, traceId=%s, attempt=%s)', identifier, traceId, context.attempt);
+        this.logger.debug(
+          'Job created (id=%s, traceId=%s, attempt=%s)',
+          identifier,
+          traceId,
+          context.attempt,
+        );
       }
 
-      this.logger.debug('Executing job (id=%s, traceId=%s, attempt=%s)', identifier, traceId, context.attempt);
+      this.logger.debug(
+        'Executing job (id=%s, traceId=%s, attempt=%s)',
+        identifier,
+        traceId,
+        context.attempt,
+      );
       const payload = await executor(context).catch(async error => {
-        this.logger.debug('Job execution failed (id=%s, traceId=%s, error=%s)', identifier, traceId, error.message);
-        this.logger.debug('Deleting the job (id=%s, traceId=%s, attempt=%s)', identifier, traceId, context.attempt);
+        this.logger.debug(
+          'Job execution failed (id=%s, traceId=%s, error=%s)',
+          identifier,
+          traceId,
+          error.message,
+        );
+        this.logger.debug(
+          'Deleting the job (id=%s, traceId=%s, attempt=%s)',
+          identifier,
+          traceId,
+          context.attempt,
+        );
         await this.del(identifier);
         return await Promise.reject(error);
       });
@@ -179,7 +218,7 @@ export class IdempotentRunner {
         'Marking job as completed (id=%s, traceId=%s, attempt=%s)',
         identifier,
         traceId,
-        context.attempt
+        context.attempt,
       );
       await this.set<T>(
         identifier,
@@ -187,7 +226,7 @@ export class IdempotentRunner {
           status: JobStatus.COMPLETED,
           payload,
         },
-        ttl
+        ttl,
       );
       this.logger.debug('Job completed (id=%s, traceId=%s)', identifier, traceId);
 
@@ -211,7 +250,7 @@ export class IdempotentRunner {
         'Job not found, probably failed to complete (id=%s, traceId=%s, attempt=%s)',
         identifier,
         traceId,
-        context.attempt
+        context.attempt,
       );
 
       context.attempt++;
@@ -234,7 +273,7 @@ export class IdempotentRunner {
       identifier,
       traceId,
       context.attempt,
-      job.status
+      job.status,
     );
     return job.payload;
   }

@@ -41,7 +41,7 @@ export class ClickHouse {
   constructor(
     @Inject(CLICKHOUSE_CONFIG) private config: ClickHouseConfig,
     private httpClient: HttpClient,
-    logger: Logger
+    logger: Logger,
   ) {
     this.logger = logger.child({
       service: 'ClickHouse',
@@ -104,7 +104,7 @@ export class ClickHouse {
                 `Failed to run ClickHouse query, code: %s , error name: %s, message: %s`,
                 info.error.code,
                 info.error.name,
-                info.error.message
+                info.error.message,
               );
 
               this.logger.debug(
@@ -112,7 +112,7 @@ export class ClickHouse {
                 delayBy,
                 info.attemptCount,
                 info.error.message,
-                queryId
+                queryId,
               );
 
               return delayBy;
@@ -125,7 +125,7 @@ export class ClickHouse {
           },
         },
 
-        span
+        span,
       )
       .finally(() => {
         span?.finish();

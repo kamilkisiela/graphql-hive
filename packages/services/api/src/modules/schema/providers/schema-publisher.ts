@@ -31,7 +31,8 @@ import { SCHEMA_MODULE_CONFIG } from './config';
 import { SchemaHelper } from './schema-helper';
 import { HiveError } from '../../../shared/errors';
 
-type CheckInput = Omit<Types.SchemaCheckInput, 'project' | 'organization' | 'target'> & TargetSelector;
+type CheckInput = Omit<Types.SchemaCheckInput, 'project' | 'organization' | 'target'> &
+  TargetSelector;
 
 type PublishInput = Types.SchemaPublishInput &
   TargetSelector & {
@@ -62,7 +63,7 @@ export class SchemaPublisher {
     private gitHubIntegrationManager: GitHubIntegrationManager,
     private idempotentRunner: IdempotentRunner,
     private helper: SchemaHelper,
-    @Inject(SCHEMA_MODULE_CONFIG) private schemaModuleConfig: SchemaModuleConfig
+    @Inject(SCHEMA_MODULE_CONFIG) private schemaModuleConfig: SchemaModuleConfig,
   ) {
     this.logger = logger.child({ service: 'SchemaPublisher' });
   }
@@ -152,7 +153,9 @@ export class SchemaPublisher {
             summary = this.changesToMarkdown(validationResult.changes);
           }
         } else {
-          title = `Detected ${validationResult.errors.length} error${validationResult.errors.length === 1 ? '' : 's'}`;
+          title = `Detected ${validationResult.errors.length} error${
+            validationResult.errors.length === 1 ? '' : 's'
+          }`;
           summary = [
             validationResult.errors ? this.errorsToMarkdown(validationResult.errors) : null,
             validationResult.changes ? this.changesToMarkdown(validationResult.changes) : null,
@@ -242,12 +245,12 @@ export class SchemaPublisher {
             project.type === ProjectType.FEDERATION
               ? await this.schemaManager.matchOrchestrator(project.type).supergraph(
                   schemas.map(s => this.helper.createSchemaObject(s)),
-                  project.externalComposition
+                  project.externalComposition,
                 )
               : null,
           schemas,
         },
-        span
+        span,
       );
     } catch (error) {
       this.logger.error(`Failed to sync with CDN ` + String(error), error);
@@ -296,7 +299,7 @@ export class SchemaPublisher {
             project.type === ProjectType.FEDERATION
               ? await this.schemaManager.matchOrchestrator(project.type).supergraph(
                   schemas.map(s => this.helper.createSchemaObject(s)),
-                  project.externalComposition
+                  project.externalComposition,
                 )
               : null,
           schemas,
@@ -312,7 +315,9 @@ export class SchemaPublisher {
       try {
         return JSON.parse(metadataRaw);
       } catch (e) {
-        throw new Error(`Failed to parse schema metadata JSON: ${e instanceof Error ? e.message : e}`);
+        throw new Error(
+          `Failed to parse schema metadata JSON: ${e instanceof Error ? e.message : e}`,
+        );
       }
     }
 
@@ -402,7 +407,10 @@ export class SchemaPublisher {
       };
     }
 
-    if (project.type === ProjectType.FEDERATION && (lodash.isNil(input.url) || input.url?.trim() === '')) {
+    if (
+      project.type === ProjectType.FEDERATION &&
+      (lodash.isNil(input.url) || input.url?.trim() === '')
+    ) {
       this.logger.debug('Detected missing service url');
       const missingServiceUrlMessage = `Can not publish schema for a '${project.type.toLowerCase()}' project without a service url.`;
 
@@ -440,7 +448,10 @@ export class SchemaPublisher {
       metadata: this.validateMetadata(input.metadata),
     };
 
-    const { schemas: newSchemas, swappedSchema: previousSchema } = updateSchemas(schemas, incomingSchema);
+    const { schemas: newSchemas, swappedSchema: previousSchema } = updateSchemas(
+      schemas,
+      incomingSchema,
+    );
 
     this.logger.debug(`Produced ${newSchemas.length} new schemas`);
 
@@ -473,7 +484,9 @@ export class SchemaPublisher {
     const { changes, errors, valid } = result;
 
     const hasNewUrl =
-      !!latest.version && !!previousSchema && (previousSchema.url ?? null) !== (incomingSchema.url ?? null);
+      !!latest.version &&
+      !!previousSchema &&
+      (previousSchema.url ?? null) !== (incomingSchema.url ?? null);
     const hasSchemaChanges = changes.length > 0;
     const hasErrors = errors.length > 0;
     const isForced = input.force === true;
@@ -559,7 +572,9 @@ export class SchemaPublisher {
 
     if (valid && hasNewUrl) {
       updates.push(
-        `Updated: New service url: ${incomingSchema.url ?? 'empty'} (previously: ${previousSchema!.url ?? 'empty'})`
+        `Updated: New service url: ${incomingSchema.url ?? 'empty'} (previously: ${
+          previousSchema!.url ?? 'empty'
+        })`,
       );
     }
 
@@ -577,7 +592,8 @@ export class SchemaPublisher {
     }
 
     const linkToWebsite =
-      typeof this.schemaModuleConfig.schemaPublishLink === 'function' && typeof newVersionId === 'string'
+      typeof this.schemaModuleConfig.schemaPublishLink === 'function' &&
+      typeof newVersionId === 'string'
         ? this.schemaModuleConfig.schemaPublishLink({
             organization: {
               cleanId: organization.cleanId,
@@ -702,7 +718,7 @@ export class SchemaPublisher {
             project.type === ProjectType.FEDERATION
               ? await orchestrator.supergraph(
                   schemas.map(s => this.helper.createSchemaObject(s)),
-                  project.externalComposition
+                  project.externalComposition,
                 )
               : null,
         });
@@ -724,7 +740,7 @@ export class SchemaPublisher {
       schemas: readonly Schema[];
       supergraph?: string | null;
     },
-    span?: Span
+    span?: Span,
   ) {
     const publishMetadata = async () => {
       const metadata: Array<Record<string, any>> = [];
@@ -741,7 +757,7 @@ export class SchemaPublisher {
             resourceType: 'metadata',
             value: JSON.stringify(metadata.length === 1 ? metadata[0] : metadata),
           },
-          span
+          span,
         );
       }
     };
@@ -764,10 +780,10 @@ export class SchemaPublisher {
                   url: schemas[0].url,
                   name: schemas[0].service,
                   date: schemas[0].date,
-                }
+                },
           ),
         },
-        span
+        span,
       );
     };
 
@@ -784,8 +800,8 @@ export class SchemaPublisher {
               resourceType: 'supergraph',
               value: supergraph,
             },
-            span
-          )
+            span,
+          ),
         );
       }
     }
@@ -837,7 +853,10 @@ export class SchemaPublisher {
         }
       } else {
         title = `Detected ${errors.length} error${errors.length === 1 ? '' : 's'}`;
-        summary = [errors ? this.errorsToMarkdown(errors) : null, changes ? this.changesToMarkdown(changes) : null]
+        summary = [
+          errors ? this.errorsToMarkdown(errors) : null,
+          changes ? this.changesToMarkdown(changes) : null,
+        ]
           .filter(Boolean)
           .join('\n\n');
       }
@@ -883,7 +902,10 @@ export class SchemaPublisher {
     const dangerousChanges = changes.filter(filterChangesByLevel('Dangerous'));
     const safeChanges = changes.filter(filterChangesByLevel('Safe'));
 
-    const lines: string[] = [`## Found ${changes.length} change${changes.length > 1 ? 's' : ''}`, ''];
+    const lines: string[] = [
+      `## Found ${changes.length} change${changes.length > 1 ? 's' : ''}`,
+      '',
+    ];
 
     if (breakingChanges.length) {
       lines.push(`Breaking: ${breakingChanges.length}`);
@@ -918,5 +940,7 @@ function filterChangesByLevel(level: Types.CriticalityLevel) {
 }
 
 function writeChanges(type: string, changes: readonly Types.SchemaChange[], lines: string[]): void {
-  lines.push(...['', `### ${type} changes`].concat(changes.map(change => ` - ${bolderize(change.message)}`)));
+  lines.push(
+    ...['', `### ${type} changes`].concat(changes.map(change => ` - ${bolderize(change.message)}`)),
+  );
 }

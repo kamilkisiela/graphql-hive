@@ -47,7 +47,11 @@ const KafkaModel = zod.union([
     KAFKA_SASL_MECHANISM: zod.void(),
   }),
   KafkaBaseModel.extend({
-    KAFKA_SASL_MECHANISM: zod.union([zod.literal('plain'), zod.literal('scram-sha-256'), zod.literal('scram-sha-512')]),
+    KAFKA_SASL_MECHANISM: zod.union([
+      zod.literal('plain'),
+      zod.literal('scram-sha-256'),
+      zod.literal('scram-sha-512'),
+    ]),
     KAFKA_SASL_USERNAME: zod.string(),
     KAFKA_SASL_PASSWORD: zod.string(),
   }),
@@ -89,7 +93,7 @@ const LogModel = zod.object({
         zod.literal('fatal'),
         zod.literal('silent'),
       ])
-      .optional()
+      .optional(),
   ),
 });
 

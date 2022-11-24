@@ -24,7 +24,12 @@ interface Props<T> {
   checkAccess: (scope: T) => boolean;
 }
 
-function matchScope<T>(list: readonly T[], defaultValue: string, lowerPriority?: T, higherPriority?: T) {
+function matchScope<T>(
+  list: readonly T[],
+  defaultValue: string,
+  lowerPriority?: T,
+  higherPriority?: T,
+) {
   let hasHigher = false;
   let hasLower = false;
 
@@ -54,9 +59,9 @@ function isDefined<T>(value: T | null | undefined): value is T {
 function PermissionsSpaceInner(props: Props<OrganizationAccessScope>): React.ReactElement<any, any>;
 function PermissionsSpaceInner(props: Props<ProjectAccessScope>): React.ReactElement<any, any>;
 function PermissionsSpaceInner(props: Props<TargetAccessScope>): React.ReactElement<any, any>;
-function PermissionsSpaceInner<T extends OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>(
-  props: Props<T>
-) {
+function PermissionsSpaceInner<
+  T extends OrganizationAccessScope | ProjectAccessScope | TargetAccessScope,
+>(props: Props<T>) {
   const { title, scopes, initialScopes, onChange, checkAccess } = props;
 
   return (
@@ -65,7 +70,9 @@ function PermissionsSpaceInner<T extends OrganizationAccessScope | ProjectAccess
       <AccordionPanel pb={4}>
         <div tw="divide-y-2 divide-gray-100">
           {scopes.map(scope => {
-            const possibleScope = [scope.mapping['read-only'], scope.mapping['read-write']].filter(isDefined);
+            const possibleScope = [scope.mapping['read-only'], scope.mapping['read-write']].filter(
+              isDefined,
+            );
             const canManageScope = possibleScope.some(checkAccess);
 
             if (!canManageScope) {
@@ -79,7 +86,7 @@ function PermissionsSpaceInner<T extends OrganizationAccessScope | ProjectAccess
               initialScopes,
               NoAccess,
               scope.mapping['read-only'],
-              scope.mapping['read-write']
+              scope.mapping['read-write'],
             );
 
             return (
@@ -102,7 +109,9 @@ function PermissionsSpaceInner<T extends OrganizationAccessScope | ProjectAccess
                         const isReadWrite = value === scope.mapping['read-write'];
 
                         // Remove possible scopes
-                        const newScopes = initialScopes.filter(scope => !possibleScope.includes(scope));
+                        const newScopes = initialScopes.filter(
+                          scope => !possibleScope.includes(scope),
+                        );
 
                         if (isReadWrite) {
                           newScopes.push(scope.mapping['read-write']);
@@ -138,7 +147,9 @@ function PermissionsSpaceInner<T extends OrganizationAccessScope | ProjectAccess
   );
 }
 
-export const PermissionsSpace = React.memo(PermissionsSpaceInner) as unknown as typeof PermissionsSpaceInner;
+export const PermissionsSpace = React.memo(
+  PermissionsSpaceInner,
+) as unknown as typeof PermissionsSpaceInner;
 
 export function usePermissionsManager({
   organization,
@@ -156,13 +167,13 @@ export function usePermissionsManager({
   const [, mutate] = useMutation(UpdateOrganizationMemberAccessDocument);
 
   const [targetScopes, setTargetScopes] = React.useState<TargetAccessScope[]>(
-    passMemberScopes ? member.targetAccessScopes : []
+    passMemberScopes ? member.targetAccessScopes : [],
   );
   const [projectScopes, setProjectScopes] = React.useState<ProjectAccessScope[]>(
-    passMemberScopes ? member.projectAccessScopes : []
+    passMemberScopes ? member.projectAccessScopes : [],
   );
   const [organizationScopes, setOrganizationScopes] = React.useState<OrganizationAccessScope[]>(
-    passMemberScopes ? member.organizationAccessScopes : []
+    passMemberScopes ? member.organizationAccessScopes : [],
   );
 
   const submit = React.useCallback(
@@ -187,7 +198,17 @@ export function usePermissionsManager({
         }
       });
     },
-    [mutate, notify, setState, targetScopes, projectScopes, organizationScopes, organization, member, onSuccess]
+    [
+      mutate,
+      notify,
+      setState,
+      targetScopes,
+      projectScopes,
+      organizationScopes,
+      organization,
+      member,
+      onSuccess,
+    ],
   );
 
   return {
@@ -204,15 +225,15 @@ export function usePermissionsManager({
     // Methods
     canAccessOrganization: React.useCallback(
       (scope: OrganizationAccessScope) => canAccessOrganization(scope, organization.me),
-      [organization]
+      [organization],
     ),
     canAccessProject: React.useCallback(
       (scope: ProjectAccessScope) => canAccessProject(scope, organization.me),
-      [organization]
+      [organization],
     ),
     canAccessTarget: React.useCallback(
       (scope: TargetAccessScope) => canAccessTarget(scope, organization.me),
-      [organization]
+      [organization],
     ),
   };
 }

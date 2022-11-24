@@ -1,27 +1,22 @@
 {
   "name": "@graphql-hive/external-composition",
-  "description": "Compose schemas outside GraphQL Hive",
   "version": "0.0.1",
-  "author": {
-    "email": "contact@the-guild.dev",
-    "name": "The Guild",
-    "url": "https://the-guild.dev"
-  },
+  "type": "module",
+  "description": "Compose schemas outside GraphQL Hive",
   "repository": {
     "type": "git",
     "url": "kamilkisiela/graphql-hive",
     "directory": "packages/libraries/external-composition"
   },
   "homepage": "https://graphql-hive.com",
+  "author": {
+    "email": "contact@the-guild.dev",
+    "name": "The Guild",
+    "url": "https://the-guild.dev"
+  },
   "license": "MIT",
-  "type": "module",
-  "sideEffects": false,
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
-  "typings": "dist/typings/index.d.ts",
-  "typescript": {
-    "definition": "dist/typings/index.d.ts"
-  },
   "exports": {
     ".": {
       "require": {
@@ -52,6 +47,7 @@
       }
     }
   },
+  "typings": "dist/typings/index.d.ts",
   "scripts": {
     "build": "bob build",
     "build-local": "pnpm build && node build-example.mjs",
@@ -62,13 +58,17 @@
   },
   "devDependencies": {
     "@apollo/federation": "0.38.1",
-    "graphql": "16.5.0",
     "esbuild": "0.14.39",
-    "fastify": "3.29.4"
+    "fastify": "3.29.4",
+    "graphql": "16.5.0"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org",
     "access": "public",
     "directory": "dist"
+  },
+  "sideEffects": false,
+  "typescript": {
+    "definition": "dist/typings/index.d.ts"
   }
 }

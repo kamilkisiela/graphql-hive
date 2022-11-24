@@ -23,7 +23,9 @@ export const resolvers: IntegrationsModule.Resolvers = {
       const result = AddSlackTokenIntegrationModel.safeParse(input);
 
       if (!result.success) {
-        throw new HiveError(result.error.formErrors.fieldErrors.token?.[0] ?? 'Please check your input.');
+        throw new HiveError(
+          result.error.formErrors.fieldErrors.token?.[0] ?? 'Please check your input.',
+        );
       }
 
       const organization = await injector.get(IdTranslator).translateOrganizationId(input);

@@ -28,7 +28,10 @@ import { tokenModule } from './modules/token';
 import { feedbackModule } from './modules/feedback';
 import { TokensConfig, TOKENS_CONFIG } from './modules/token/providers/tokens';
 import { WebhooksConfig, WEBHOOKS_CONFIG } from './modules/alerts/providers/tokens';
-import { SchemaServiceConfig, SCHEMA_SERVICE_CONFIG } from './modules/schema/providers/orchestrators/tokens';
+import {
+  SchemaServiceConfig,
+  SCHEMA_SERVICE_CONFIG,
+} from './modules/schema/providers/orchestrators/tokens';
 import { provideSchemaModuleConfig, SchemaModuleConfig } from './modules/schema/providers/config';
 import { CDN_CONFIG, CDNConfig } from './modules/cdn/providers/tokens';
 import { cdnModule } from './modules/cdn';
@@ -40,7 +43,10 @@ import {
   USAGE_ESTIMATION_SERVICE_CONFIG,
 } from './modules/usage-estimation/providers/tokens';
 import { rateLimitModule } from './modules/rate-limit';
-import { RateLimitServiceConfig, RATE_LIMIT_SERVICE_CONFIG } from './modules/rate-limit/providers/tokens';
+import {
+  RateLimitServiceConfig,
+  RATE_LIMIT_SERVICE_CONFIG,
+} from './modules/rate-limit/providers/tokens';
 import { BillingConfig, BILLING_CONFIG } from './modules/billing/providers/tokens';
 import { billingModule } from './modules/billing';
 import { OIDC_INTEGRATIONS_ENABLED } from './modules/oidc-integrations/providers/tokens';

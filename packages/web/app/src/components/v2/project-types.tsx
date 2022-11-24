@@ -56,7 +56,10 @@ export const ProjectTypes = ({ children, className, ...props }: RadioGroupProps)
             />
             <div className="grow p-2.5">
               <h4
-                className={clsx('text-xs font-medium', title === 'DISTRIBUTED' ? 'text-[#1cc8ee]' : 'text-orange-500')}
+                className={clsx(
+                  'text-xs font-medium',
+                  title === 'DISTRIBUTED' ? 'text-[#1cc8ee]' : 'text-orange-500',
+                )}
               >
                 {title}
               </h4>

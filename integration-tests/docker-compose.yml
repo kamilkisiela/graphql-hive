@@ -70,7 +70,18 @@ services:
         soft: 20000
         hard: 40000
     healthcheck:
-      test: ['CMD', 'cub', 'kafka-ready', '1', '5', '-b', '127.0.0.1:9092', '-c', '/etc/kafka/kafka.properties']
+      test:
+        [
+          'CMD',
+          'cub',
+          'kafka-ready',
+          '1',
+          '5',
+          '-b',
+          '127.0.0.1:9092',
+          '-c',
+          '/etc/kafka/kafka.properties',
+        ]
       interval: 15s
       timeout: 10s
       retries: 6

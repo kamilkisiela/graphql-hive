@@ -18,7 +18,11 @@ import { ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
-const channelAlertsColumns = [{ key: 'checkbox', width: 'auto' }, { key: 'name' }, { key: 'type' }] as const;
+const channelAlertsColumns = [
+  { key: 'checkbox', width: 'auto' },
+  { key: 'name' },
+  { key: 'type' },
+] as const;
 
 const alertsColumns = [
   { key: 'checkbox', width: 'auto' },
@@ -59,13 +63,19 @@ const Channels = (): ReactElement => {
           checkbox: (
             <Checkbox
               onCheckedChange={isChecked =>
-                setChecked(isChecked ? [...checked, channelAlert.id] : checked.filter(k => k !== channelAlert.id))
+                setChecked(
+                  isChecked
+                    ? [...checked, channelAlert.id]
+                    : checked.filter(k => k !== channelAlert.id),
+                )
               }
               checked={checked.includes(channelAlert.id)}
             />
           ),
           type: (
-            <Tag color={channelAlert.type === AlertChannelType.Webhook ? 'green' : 'yellow'}>{channelAlert.type}</Tag>
+            <Tag color={channelAlert.type === AlertChannelType.Webhook ? 'green' : 'yellow'}>
+              {channelAlert.type}
+            </Tag>
           ),
         }))}
         columns={channelAlertsColumns}
@@ -99,7 +109,10 @@ const Channels = (): ReactElement => {
   );
 };
 
-const Page = (props: { organization: OrganizationFieldsFragment; project: ProjectFieldsFragment }) => {
+const Page = (props: {
+  organization: OrganizationFieldsFragment;
+  project: ProjectFieldsFragment;
+}) => {
   useProjectAccess({
     scope: ProjectAccessScope.Alerts,
     member: props.organization.me,
@@ -133,11 +146,15 @@ const Page = (props: { organization: OrganizationFieldsFragment; project: Projec
         <Table
           dataSource={alerts.map(alert => ({
             id: alert.id,
-            type: <span className="capitalize">{alert.type.replaceAll('_', ' ').toLowerCase()}</span>,
+            type: (
+              <span className="capitalize">{alert.type.replaceAll('_', ' ').toLowerCase()}</span>
+            ),
             checkbox: (
               <Checkbox
                 onCheckedChange={isChecked =>
-                  setChecked(isChecked ? [...checked, alert.id] : checked.filter(k => k !== alert.id))
+                  setChecked(
+                    isChecked ? [...checked, alert.id] : checked.filter(k => k !== alert.id),
+                  )
                 }
                 checked={checked.includes(alert.id)}
               />

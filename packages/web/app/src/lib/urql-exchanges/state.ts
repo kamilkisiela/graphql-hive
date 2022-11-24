@@ -43,7 +43,7 @@ export const networkStatusExchange: Exchange = ({ forward }) => {
         }
 
         return op;
-      })
+      }),
     );
 
     return pipe(
@@ -52,7 +52,7 @@ export const networkStatusExchange: Exchange = ({ forward }) => {
         setTimeout(() => {
           end(getUniqueKey(result.operation));
         }, 100);
-      })
+      }),
     );
   };
 };

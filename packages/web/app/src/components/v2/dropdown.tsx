@@ -30,7 +30,7 @@ const Content: FC<DropdownMenuContentProps> = ({ children, className, ...props }
     font-semibold
     text-gray-300
   `,
-      className
+      className,
     )}
     css={css`
       box-shadow: 0 10px 38px -10px rgba(22, 23, 24, 0.35), 0 10px 20px -15px rgba(22, 23, 24, 0.2);
@@ -91,7 +91,7 @@ const Item: FC<DropdownMenuItemProps> = ({ children, className, ...props }) => (
       hover:text-white
       focus:bg-gray-500/50
       focus:text-white`,
-      className
+      className,
     )}
     {...props}
   >
@@ -117,7 +117,7 @@ const TriggerItem: FC<DropdownMenuTriggerItemProps> = ({ children, className, ..
       hover:text-white
       focus:bg-gray-500/50
       focus:text-white`,
-      className
+      className,
     )}
     {...props}
   >

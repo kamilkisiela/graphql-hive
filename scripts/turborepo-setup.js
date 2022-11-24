@@ -43,9 +43,9 @@ function main() {
         apiUrl: env.TURBO_API_URL,
       },
       null,
-      2
+      2,
     ),
-    'utf-8'
+    'utf-8',
   );
 
   console.log('[turborepo-setup] Config created.');

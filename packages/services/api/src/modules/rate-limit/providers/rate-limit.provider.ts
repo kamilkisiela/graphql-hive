@@ -19,7 +19,7 @@ export class RateLimitProvider {
   constructor(
     logger: Logger,
     @Inject(RATE_LIMIT_SERVICE_CONFIG)
-    rateLimitServiceConfig: RateLimitServiceConfig
+    rateLimitServiceConfig: RateLimitServiceConfig,
   ) {
     this.logger = logger.child({ service: 'RateLimitProvider' });
     this.rateLimit = rateLimitServiceConfig.endpoint
@@ -43,7 +43,10 @@ export class RateLimitProvider {
   @sentry('RateLimitProvider.checkRateLimit')
   async checkRateLimit(input: RateLimitQueryInput<'checkRateLimit'>) {
     if (this.rateLimit === null) {
-      this.logger.warn(`Unable to check rate-limit for input: %o , service information is not available`, input);
+      this.logger.warn(
+        `Unable to check rate-limit for input: %o , service information is not available`,
+        input,
+      );
 
       return {
         limited: false,

@@ -15,7 +15,7 @@ test('call an external service to compose and validate services', async () => {
     {
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
 
@@ -25,7 +25,7 @@ test('call an external service to compose and validate services', async () => {
       type: ProjectType.Federation,
       name: 'bar',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
@@ -42,7 +42,7 @@ test('call an external service to compose and validate services', async () => {
       projectScopes: [ProjectAccessScope.Settings, ProjectAccessScope.Read],
       targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
     },
-    owner_access_token
+    owner_access_token,
   );
   expect(writeTokenResult.body.errors).not.toBeDefined();
   const writeToken = writeTokenResult.body.data!.createToken.ok!.secret;
@@ -56,7 +56,7 @@ test('call an external service to compose and validate services', async () => {
       sdl: `type Query { me: User } type User @key(fields: "id") { id: ID! name: String }`,
       service: usersServiceName,
     },
-    writeToken
+    writeToken,
   );
 
   // Schema publish should be successful
@@ -70,15 +70,16 @@ test('call an external service to compose and validate services', async () => {
   const externalCompositionResult = await enableExternalSchemaComposition(
     {
       endpoint: `http://${dockerAddress}/compose`,
+      // eslint-disable-next-line no-process-env
       secret: process.env.EXTERNAL_COMPOSITION_SECRET!,
       project: project.cleanId,
       organization: org.cleanId,
     },
-    writeToken
+    writeToken,
   );
   expect(externalCompositionResult.body.errors).not.toBeDefined();
   expect(externalCompositionResult.body.data!.enableExternalSchemaComposition.ok?.endpoint).toBe(
-    `http://${dockerAddress}/compose`
+    `http://${dockerAddress}/compose`,
   );
 
   const productsServiceName = Math.random().toString(16).substring(2);
@@ -90,7 +91,7 @@ test('call an external service to compose and validate services', async () => {
       sdl: `type Query { products: [Product] } type Product @key(fields: "id") { id: ID! name: String }`,
       service: productsServiceName,
     },
-    writeToken
+    writeToken,
   );
 
   // Schema publish should be successful

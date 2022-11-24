@@ -3,7 +3,15 @@ import { stringify } from 'querystring';
 import { graphql } from '@/lib/api/utils';
 import { env } from '@/env/backend';
 
-async function fetchData({ url, headers, body }: { url: string; headers: Record<string, any>; body: string }) {
+async function fetchData({
+  url,
+  headers,
+  body,
+}: {
+  url: string;
+  headers: Record<string, any>;
+  body: string;
+}) {
   const response = await fetch(url, {
     headers,
     method: 'POST',

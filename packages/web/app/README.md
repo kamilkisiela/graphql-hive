@@ -51,7 +51,8 @@ This is only important if you are hosting Hive for getting 💰.
 
 ### Legacy Auth0 Configuration
 
-If you are not self-hosting GraphQL Hive, you can ignore this section. It is only required for the legacy Auth0 compatibility layer.
+If you are not self-hosting GraphQL Hive, you can ignore this section. It is only required for the
+legacy Auth0 compatibility layer.
 
 | Name                                      | Required                                   | Description                                                                                               | Example Value                               |
 | ----------------------------------------- | ------------------------------------------ | --------------------------------------------------------------------------------------------------------- | ------------------------------------------- |

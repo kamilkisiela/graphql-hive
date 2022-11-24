@@ -15,7 +15,7 @@ test('marking only the most recent version as valid result in an update of CDN',
     {
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
@@ -26,7 +26,7 @@ test('marking only the most recent version as valid result in an update of CDN',
       type: ProjectType.Single,
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
@@ -42,7 +42,7 @@ test('marking only the most recent version as valid result in an update of CDN',
       projectScopes: [],
       targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
     },
-    owner_access_token
+    owner_access_token,
   );
 
   expect(tokenResult.body.errors).not.toBeDefined();
@@ -56,7 +56,7 @@ test('marking only the most recent version as valid result in an update of CDN',
       commit: 'c0',
       sdl: `type Query { ping: String }`,
     },
-    token
+    token,
   );
 
   expect(publishResult.body.errors).not.toBeDefined();
@@ -79,7 +79,7 @@ test('marking only the most recent version as valid result in an update of CDN',
       project: project.cleanId,
       target: target.cleanId,
     },
-    token
+    token,
   );
 
   expect(syncResult.body.errors).not.toBeDefined();

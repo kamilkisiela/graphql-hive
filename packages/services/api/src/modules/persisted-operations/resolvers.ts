@@ -74,7 +74,9 @@ export const resolvers: PersistedOperationsModule.Resolvers = {
         injector.get(ProjectManager).getProjectIdByToken(),
       ]);
 
-      return injector.get(PersistedOperationManager).createPersistedOperations(input, project, organization);
+      return injector
+        .get(PersistedOperationManager)
+        .createPersistedOperations(input, project, organization);
     },
     async deletePersistedOperation(_, { selector }, { injector }) {
       const translator = injector.get(IdTranslator);
@@ -84,11 +86,13 @@ export const resolvers: PersistedOperationsModule.Resolvers = {
         translator.translatePersistedOperationHash(selector),
       ]);
 
-      const persistedOperation = await injector.get(PersistedOperationManager).deletePersistedOperation({
-        organization: organizationId,
-        project: projectId,
-        operation: operationId,
-      });
+      const persistedOperation = await injector
+        .get(PersistedOperationManager)
+        .deletePersistedOperation({
+          organization: organizationId,
+          project: projectId,
+          operation: operationId,
+        });
 
       return {
         selector: {

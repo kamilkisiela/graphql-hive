@@ -5,7 +5,9 @@ export function fixDuplicatedFragments<T, V>(doc: DocumentNode<T, V>): DocumentN
     ...doc,
     definitions: doc.definitions.filter((def, i, all) => {
       if (def.kind === 'FragmentDefinition') {
-        const at = all.findIndex(d => d.kind === 'FragmentDefinition' && d.name.value === def.name.value);
+        const at = all.findIndex(
+          d => d.kind === 'FragmentDefinition' && d.name.value === def.name.value,
+        );
 
         return at === i;
       }

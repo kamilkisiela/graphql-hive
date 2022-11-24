@@ -1,7 +1,7 @@
 # Rate Limit
 
-The rate limit service is responsible of enforcing account limitations.
-If you are self-hosting Hive you don't need this service.
+The rate limit service is responsible of enforcing account limitations. If you are self-hosting Hive
+you don't need this service.
 
 ## Configuration
 

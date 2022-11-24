@@ -74,25 +74,26 @@ const ModalContent = (props: {
 }) => {
   const [mutation, mutate] = useMutation(CreateAccessToken_CreateTokenMutation);
 
-  const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } = useFormik({
-    initialValues: { name: '' },
-    validationSchema: Yup.object().shape({
-      name: Yup.string().required('Must enter name'),
-    }),
-    async onSubmit(values) {
-      await mutate({
-        input: {
-          organization: props.organizationId,
-          project: props.projectId,
-          target: props.targetId,
-          name: values.name,
-          organizationScopes: manager.organizationScopes,
-          projectScopes: manager.projectScopes,
-          targetScopes: manager.targetScopes,
-        },
-      });
-    },
-  });
+  const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } =
+    useFormik({
+      initialValues: { name: '' },
+      validationSchema: Yup.object().shape({
+        name: Yup.string().required('Must enter name'),
+      }),
+      async onSubmit(values) {
+        await mutate({
+          input: {
+            organization: props.organizationId,
+            project: props.projectId,
+            target: props.targetId,
+            name: values.name,
+            organizationScopes: manager.organizationScopes,
+            projectScopes: manager.projectScopes,
+            targetScopes: manager.targetScopes,
+          },
+        });
+      },
+    });
 
   const manager = usePermissionsManager({
     onSuccess() {},
@@ -108,10 +109,15 @@ const ModalContent = (props: {
           <Heading className="text-center">Token successfully created!</Heading>
           <CopyValue value={mutation.data.createToken.ok.secret} />
           <Tag color="green">
-            This is your unique API key and it is non-recoverable. If you lose this key, you will need to create a new
-            one.
+            This is your unique API key and it is non-recoverable. If you lose this key, you will
+            need to create a new one.
           </Tag>
-          <Button variant="primary" size="large" className="ml-auto" onClick={props.toggleModalOpen}>
+          <Button
+            variant="primary"
+            size="large"
+            className="ml-auto"
+            onClick={props.toggleModalOpen}
+          >
             Ok, got it!
           </Button>
         </div>

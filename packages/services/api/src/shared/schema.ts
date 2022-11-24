@@ -29,7 +29,7 @@ export function buildSchema(schema: SchemaObject): GraphQLSchema {
     buildASTSchema(schema.document, {
       assumeValid: true,
       assumeValidSDL: true,
-    })
+    }),
   );
 }
 
@@ -39,7 +39,7 @@ export function findSchema(schemas: readonly Schema[], expected: Schema): Schema
 
 export function updateSchemas(
   schemas: Schema[],
-  incoming: Schema
+  incoming: Schema,
 ): {
   schemas: Schema[];
   swappedSchema: Schema | null;
@@ -218,17 +218,23 @@ export function sortDocumentNode(doc: DocumentNode): DocumentNode {
 }
 
 function sortNodes(nodes: readonly DefinitionNode[]): readonly DefinitionNode[];
-function sortNodes(nodes: readonly ConstDirectiveNode[] | undefined): readonly ConstDirectiveNode[] | undefined;
 function sortNodes(
-  nodes: readonly OperationTypeDefinitionNode[] | undefined
+  nodes: readonly ConstDirectiveNode[] | undefined,
+): readonly ConstDirectiveNode[] | undefined;
+function sortNodes(
+  nodes: readonly OperationTypeDefinitionNode[] | undefined,
 ): readonly OperationTypeDefinitionNode[] | undefined;
-function sortNodes(nodes: readonly FieldDefinitionNode[] | undefined): readonly FieldDefinitionNode[] | undefined;
-function sortNodes(nodes: readonly NamedTypeNode[] | undefined): readonly NamedTypeNode[] | undefined;
 function sortNodes(
-  nodes: readonly EnumValueDefinitionNode[] | undefined
+  nodes: readonly FieldDefinitionNode[] | undefined,
+): readonly FieldDefinitionNode[] | undefined;
+function sortNodes(
+  nodes: readonly NamedTypeNode[] | undefined,
+): readonly NamedTypeNode[] | undefined;
+function sortNodes(
+  nodes: readonly EnumValueDefinitionNode[] | undefined,
 ): readonly EnumValueDefinitionNode[] | undefined;
 function sortNodes(
-  nodes: readonly InputValueDefinitionNode[] | undefined
+  nodes: readonly InputValueDefinitionNode[] | undefined,
 ): readonly InputValueDefinitionNode[] | undefined;
 function sortNodes(nodes: readonly any[] | undefined): readonly any[] | undefined {
   if (nodes) {

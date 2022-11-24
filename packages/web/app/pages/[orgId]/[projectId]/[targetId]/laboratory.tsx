@@ -51,7 +51,11 @@ function LaboratoryPage(): ReactElement {
               Connect
               <Link2Icon className="ml-8 h-4 w-4" />
             </Button>
-            <ConnectLabModal isOpen={isModalOpen} toggleModalOpen={toggleModalOpen} endpoint={endpoint} />
+            <ConnectLabModal
+              isOpen={isModalOpen}
+              toggleModalOpen={toggleModalOpen}
+              endpoint={endpoint}
+            />
           </>
         }
       >

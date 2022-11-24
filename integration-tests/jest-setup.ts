@@ -16,5 +16,5 @@ beforeEach(() =>
     host: redisAddress.replace(':6379', ''),
     port: 6379,
     password: 'test',
-  })
+  }),
 );

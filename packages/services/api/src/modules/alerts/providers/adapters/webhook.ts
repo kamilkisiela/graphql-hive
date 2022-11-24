@@ -19,7 +19,7 @@ export class WebhookCommunicationAdapter implements CommunicationAdapter {
     logger: Logger,
     private http: HttpClient,
     @Inject(WEBHOOKS_CONFIG) private config: WebhooksConfig,
-    @Inject(CONTEXT) context: GraphQLModules.ModuleContext
+    @Inject(CONTEXT) context: GraphQLModules.ModuleContext,
   ) {
     this.logger = logger.child({ service: 'WebhookCommunicationAdapter' });
     this.webhooksService = createTRPCClient<WebhooksApi>({
@@ -36,7 +36,7 @@ export class WebhookCommunicationAdapter implements CommunicationAdapter {
       `Sending Schema Change Notifications over Webhook (organization=%s, project=%s, target=%s)`,
       input.event.organization.id,
       input.event.project.id,
-      input.event.target.id
+      input.event.target.id,
     );
     try {
       await this.webhooksService.mutation('schedule', {

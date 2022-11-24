@@ -1,13 +1,23 @@
 import React from 'react';
 import { CombinedError, UseQueryState } from 'urql';
-import { Box, AlertDescription, Center, Alert, Code, AlertIcon, Link, AlertTitle } from '@chakra-ui/react';
+import {
+  Box,
+  AlertDescription,
+  Center,
+  Alert,
+  Code,
+  AlertIcon,
+  Link,
+  AlertTitle,
+} from '@chakra-ui/react';
 import { Spinner } from './Spinner';
 
 export const QueryError: React.FC<{
   error?: Error | CombinedError;
   showError?: boolean;
 }> = ({ error, showError }) => {
-  let requestId = error instanceof CombinedError ? error.response?.headers?.get('x-request-id') : null;
+  let requestId =
+    error instanceof CombinedError ? error.response?.headers?.get('x-request-id') : null;
 
   if (requestId) {
     requestId = requestId.split(',')[0].trim();
@@ -31,8 +41,8 @@ export const QueryError: React.FC<{
             </AlertDescription>
           ) : (
             <AlertDescription display="block" textColor="black">
-              Don't worry, our technical support got this error reported automatically. If you wish to track it later or
-              share more details with us,{' '}
+              Don't worry, our technical support got this error reported automatically. If you wish
+              to track it later or share more details with us,{' '}
               <strong>
                 <Link onClick={openChatSupport}>you can use the support chat.</Link>{' '}
               </strong>

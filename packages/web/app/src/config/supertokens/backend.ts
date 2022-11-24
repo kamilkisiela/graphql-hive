@@ -33,7 +33,7 @@ export const backendConfig = (): TypeInput => {
       ThirdPartyEmailPasswordNode.Github({
         clientId: env.auth.github.clientId,
         clientSecret: env.auth.github.clientSecret,
-      })
+      }),
     );
   }
   if (env.auth.google) {
@@ -41,7 +41,7 @@ export const backendConfig = (): TypeInput => {
       ThirdPartyEmailPasswordNode.Google({
         clientId: env.auth.google.clientId,
         clientSecret: env.auth.google.clientSecret,
-      })
+      }),
     );
   }
 
@@ -83,7 +83,9 @@ export const backendConfig = (): TypeInput => {
         },
         override: composeSuperTokensOverrides([
           getEnsureUserOverrides(internalApi),
-          env.auth.organizationOIDC ? getOIDCThirdPartyEmailPasswordNodeOverrides({ internalApi }) : null,
+          env.auth.organizationOIDC
+            ? getOIDCThirdPartyEmailPasswordNodeOverrides({ internalApi })
+            : null,
           /**
            * These overrides are only relevant for the legacy Auth0 -> SuperTokens migration (period).
            */
@@ -121,11 +123,13 @@ export const backendConfig = (): TypeInput => {
 
                 if (!user) {
                   throw new Error(
-                    `SuperTokens: Creating a new session failed. Could not find user with id ${input.userId}.`
+                    `SuperTokens: Creating a new session failed. Could not find user with id ${input.userId}.`,
                   );
                 }
 
-                const externalUserId = user.thirdParty ? `${user.thirdParty.id}|${user.thirdParty.userId}` : null;
+                const externalUserId = user.thirdParty
+                  ? `${user.thirdParty.id}|${user.thirdParty.userId}`
+                  : null;
 
                 input.accessTokenPayload = {
                   version: '1',
@@ -153,7 +157,7 @@ export const backendConfig = (): TypeInput => {
 };
 
 const getEnsureUserOverrides = (
-  internalApi: ReturnType<typeof createTRPCClient<InternalApi>>
+  internalApi: ReturnType<typeof createTRPCClient<InternalApi>>,
 ): ThirdPartEmailPasswordTypeInput['override'] => ({
   apis: originalImplementation => ({
     ...originalImplementation,
@@ -222,19 +226,26 @@ const getEnsureUserOverrides = (
   }),
 });
 
-const bindObjectFunctions = <T extends { [key: string]: CallableFunction | undefined }>(obj: T, bindTo: any) => {
-  return Object.fromEntries(Object.entries(obj).map(([key, value]) => [key, value?.bind(bindTo)])) as T;
+const bindObjectFunctions = <T extends { [key: string]: CallableFunction | undefined }>(
+  obj: T,
+  bindTo: any,
+) => {
+  return Object.fromEntries(
+    Object.entries(obj).map(([key, value]) => [key, value?.bind(bindTo)]),
+  ) as T;
 };
 
 /**
  * Utility function for composing multiple (dynamic SuperTokens overrides).
  */
-const composeSuperTokensOverrides = (overrides: Array<ThirdPartEmailPasswordTypeInput['override'] | null>) => ({
+const composeSuperTokensOverrides = (
+  overrides: Array<ThirdPartEmailPasswordTypeInput['override'] | null>,
+) => ({
   apis: (
     originalImplementation: ReturnType<
       Exclude<Exclude<ThirdPartEmailPasswordTypeInput['override'], undefined>['apis'], undefined>
     >,
-    builder: OverrideableBuilder<ThirdPartyEmailPasswordNode.APIInterface> | undefined
+    builder: OverrideableBuilder<ThirdPartyEmailPasswordNode.APIInterface> | undefined,
   ) => {
     let impl = originalImplementation;
     for (const override of overrides) {
@@ -246,8 +257,11 @@ const composeSuperTokensOverrides = (overrides: Array<ThirdPartEmailPasswordType
   },
   functions: (
     originalImplementation: ReturnType<
-      Exclude<Exclude<ThirdPartEmailPasswordTypeInput['override'], undefined>['functions'], undefined>
-    >
+      Exclude<
+        Exclude<ThirdPartEmailPasswordTypeInput['override'], undefined>['functions'],
+        undefined
+      >
+    >,
   ) => {
     let impl = originalImplementation;
     for (const override of overrides) {
@@ -265,7 +279,9 @@ const composeSuperTokensOverrides = (overrides: Array<ThirdPartEmailPasswordType
 //
 
 const getAuth0Overrides = (config: Exclude<typeof env.auth.legacyAuth0, null>) => {
-  const apis: NonNullable<ThirdPartEmailPasswordTypeInput['override']>['apis'] = originalImplementation => {
+  const apis: NonNullable<
+    ThirdPartEmailPasswordTypeInput['override']
+  >['apis'] = originalImplementation => {
     return {
       ...originalImplementation,
       async generatePasswordResetTokenPOST(input) {
@@ -278,13 +294,16 @@ const getAuth0Overrides = (config: Exclude<typeof env.auth.legacyAuth0, null>) =
           // If there is no email/password SuperTokens user yet, we need to check if there is an Auth0 user for this email.
           if (users.some(user => user.thirdParty == null) === false) {
             // RPC call to check if email/password user exists in Auth0
-            const dbUser = await checkWhetherAuth0EmailUserWithoutAssociatedSuperTokensIdExists(config, { email });
+            const dbUser = await checkWhetherAuth0EmailUserWithoutAssociatedSuperTokensIdExists(
+              config,
+              { email },
+            );
 
             if (dbUser) {
               // If we have this user within our database we create our new supertokens user
               const newUserResult = await ThirdPartyEmailPasswordNode.emailPasswordSignUp(
                 dbUser.email,
-                await generateRandomPassword()
+                await generateRandomPassword(),
               );
 
               if (newUserResult.status === 'OK') {
@@ -303,7 +322,9 @@ const getAuth0Overrides = (config: Exclude<typeof env.auth.legacyAuth0, null>) =
     };
   };
 
-  const functions: NonNullable<ThirdPartEmailPasswordTypeInput['override']>['functions'] = originalImplementation => {
+  const functions: NonNullable<
+    ThirdPartEmailPasswordTypeInput['override']
+  >['functions'] = originalImplementation => {
     return {
       ...originalImplementation,
       async emailPasswordSignIn(input) {
@@ -316,7 +337,8 @@ const getAuth0Overrides = (config: Exclude<typeof env.auth.legacyAuth0, null>) =
 
           const emailPasswordUser =
             // if the thirdParty field in the user object is undefined, then the user is an EmailPassword account.
-            superTokensUsers.find(superTokensUser => superTokensUser.thirdParty === undefined) ?? null;
+            superTokensUsers.find(superTokensUser => superTokensUser.thirdParty === undefined) ??
+            null;
 
           // EmailPassword user does not exist in SuperTokens
           // We first need to verify whether the password is legit,then if so, create a new user in SuperTokens with the same password.
@@ -324,7 +346,7 @@ const getAuth0Overrides = (config: Exclude<typeof env.auth.legacyAuth0, null>) =
             const auth0UserData = await trySignIntoAuth0WithUserCredentialsAndRetrieveUserInfo(
               config,
               input.email,
-              input.password
+              input.password,
             );
 
             if (auth0UserData === null) {
@@ -387,22 +409,26 @@ const getAuth0Overrides = (config: Exclude<typeof env.auth.legacyAuth0, null>) =
  */
 async function doesUserExistInAuth0(
   config: Exclude<typeof env.auth.legacyAuth0, null>,
-  email: string
+  email: string,
 ): Promise<boolean> {
   const access_token = await generateAuth0AccessToken(config);
 
   // check if a user exists with the input email and is not a Social Account
   const response = await fetch(
-    `${config.audience}users?q=${encodeURIComponent(`identities.isSocial:false AND email:${email}`)}`,
+    `${config.audience}users?q=${encodeURIComponent(
+      `identities.isSocial:false AND email:${email}`,
+    )}`,
     {
       method: 'GET',
       headers: { authorization: `Bearer ${access_token}` },
-    }
+    },
   );
 
   if (response.status !== 200) {
     throw new Error(
-      `Could not check whether user exists in Auth0. Status: ${response.status} Body: ${await response.text()}`
+      `Could not check whether user exists in Auth0. Status: ${
+        response.status
+      } Body: ${await response.text()}`,
     );
   }
 
@@ -420,7 +446,7 @@ async function doesUserExistInAuth0(
 async function trySignIntoAuth0WithUserCredentialsAndRetrieveUserInfo(
   config: Exclude<typeof env.auth.legacyAuth0, null>,
   email: string,
-  password: string
+  password: string,
 ): Promise<{ sub: string } | null> {
   // generate an user access token using the input credentials
   const response = await fetch(`${config.issuerBaseUrl}/oauth/token`, {
@@ -445,7 +471,9 @@ async function trySignIntoAuth0WithUserCredentialsAndRetrieveUserInfo(
   }
 
   if (response.status !== 200) {
-    throw new Error(`Couldn't authenticate user with Auth0. Status: ${response.status} Body: ${body}`);
+    throw new Error(
+      `Couldn't authenticate user with Auth0. Status: ${response.status} Body: ${body}`,
+    );
   }
 
   const { access_token: accessToken } = JSON.parse(body);
@@ -470,7 +498,7 @@ async function trySignIntoAuth0WithUserCredentialsAndRetrieveUserInfo(
  */
 async function setUserIdMapping(
   config: Exclude<typeof env.auth.legacyAuth0, null>,
-  params: { auth0UserId: string; supertokensUserId: string }
+  params: { auth0UserId: string; supertokensUserId: string },
 ): Promise<void> {
   const response = await fetch(config.internalApi.endpoint + '/update_user_id_mapping', {
     method: 'POST',
@@ -492,7 +520,9 @@ async function setUserIdMapping(
 }
 
 const CheckAuth0EmailUserExistsResponseModel = zod.object({
-  user: zod.nullable(zod.object({ id: zod.string(), email: zod.string(), auth0UserId: zod.string() })),
+  user: zod.nullable(
+    zod.object({ id: zod.string(), email: zod.string(), auth0UserId: zod.string() }),
+  ),
 });
 
 /**
@@ -500,7 +530,7 @@ const CheckAuth0EmailUserExistsResponseModel = zod.object({
  */
 async function checkWhetherAuth0EmailUserWithoutAssociatedSuperTokensIdExists(
   config: Exclude<typeof env.auth.legacyAuth0, null>,
-  params: { email: string }
+  params: { email: string },
 ): Promise<zod.TypeOf<typeof CheckAuth0EmailUserExistsResponseModel>['user']> {
   const response = await fetch(
     config.internalApi.endpoint + '/check_auth0_email_user_without_associated_supertoken_id_exists',
@@ -513,14 +543,14 @@ async function checkWhetherAuth0EmailUserWithoutAssociatedSuperTokensIdExists(
       body: JSON.stringify({
         email: params.email,
       }),
-    }
+    },
   );
 
   const body = await response.text();
 
   if (response.status !== 200) {
     throw new Error(
-      `Failed to check whether the Auth0 email user without an associated supertokenId exists. Status: ${response.status}. Body: ${body}`
+      `Failed to check whether the Auth0 email user without an associated supertokenId exists. Status: ${response.status}. Body: ${body}`,
     );
   }
 
@@ -532,7 +562,9 @@ async function checkWhetherAuth0EmailUserWithoutAssociatedSuperTokensIdExists(
 /**
  * Generate a Auth0 access token that is required for making API calls to Auth0.
  */
-const generateAuth0AccessToken = async (config: Exclude<typeof env.auth.legacyAuth0, null>): Promise<string> => {
+const generateAuth0AccessToken = async (
+  config: Exclude<typeof env.auth.legacyAuth0, null>,
+): Promise<string> => {
   const response = await fetch(`${config.issuerBaseUrl}/oauth/token`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
@@ -547,7 +579,9 @@ const generateAuth0AccessToken = async (config: Exclude<typeof env.auth.legacyAu
   const body = await response.text();
 
   if (response.status !== 200) {
-    throw new Error(`Couldn't generate access token for Auth0. Status: ${response.status} Body: ${body}`);
+    throw new Error(
+      `Couldn't generate access token for Auth0. Status: ${response.status} Body: ${body}`,
+    );
   }
 
   return JSON.parse(body).access_token;
@@ -561,6 +595,6 @@ async function generateRandomPassword(): Promise<string> {
         return;
       }
       resolve(buf.toString('hex'));
-    })
+    }),
   );
 }

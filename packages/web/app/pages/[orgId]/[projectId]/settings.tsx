@@ -51,23 +51,24 @@ const GitHubIntegration = ({ gitRepository }: { gitRepository: string | null }):
   });
 
   const [mutation, mutate] = useMutation(Settings_UpdateProjectGitRepositoryMutation);
-  const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } = useFormik({
-    enableReinitialize: true,
-    initialValues: {
-      gitRepository,
-    },
-    validationSchema: Yup.object().shape({
-      gitRepository: Yup.string(),
-    }),
-    onSubmit: values =>
-      mutate({
-        input: {
-          organization: router.organizationId,
-          project: router.projectId,
-          gitRepository: values.gitRepository,
-        },
+  const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } =
+    useFormik({
+      enableReinitialize: true,
+      initialValues: {
+        gitRepository,
+      },
+      validationSchema: Yup.object().shape({
+        gitRepository: Yup.string(),
       }),
-  });
+      onSubmit: values =>
+        mutate({
+          input: {
+            organization: router.organizationId,
+            project: router.projectId,
+            gitRepository: values.gitRepository,
+          },
+        }),
+    });
 
   if (integrationQuery.fetching) {
     return <Spinner />;
@@ -90,17 +91,27 @@ const GitHubIntegration = ({ gitRepository }: { gitRepository: string | null }):
             onBlur={handleBlur}
             isInvalid={!!touched.gitRepository && Boolean(errors.gitRepository)}
           />
-          <Button type="submit" variant="primary" size="large" className="px-10" disabled={isSubmitting}>
+          <Button
+            type="submit"
+            variant="primary"
+            size="large"
+            className="px-10"
+            disabled={isSubmitting}
+          >
             Save
           </Button>
         </form>
         {touched.gitRepository && (errors.gitRepository || mutation.error) && (
           <div className="mt-2 text-red-500">
-            {errors.gitRepository ?? mutation.error?.graphQLErrors[0]?.message ?? mutation.error?.message}
+            {errors.gitRepository ??
+              mutation.error?.graphQLErrors[0]?.message ??
+              mutation.error?.message}
           </div>
         )}
         {mutation.data?.updateProjectGitRepository.error && (
-          <div className="mt-2 text-red-500">{mutation.data.updateProjectGitRepository.error.message}</div>
+          <div className="mt-2 text-red-500">
+            {mutation.data.updateProjectGitRepository.error.message}
+          </div>
         )}
       </>
     );
@@ -156,34 +167,37 @@ const Page = ({
 
   const [mutation, mutate] = useMutation(Settings_UpdateProjectNameMutation);
 
-  const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } = useFormik({
-    enableReinitialize: true,
-    initialValues: {
-      name: project?.name,
-    },
-    validationSchema: Yup.object().shape({
-      name: Yup.string().required('Project name is required'),
-    }),
-    onSubmit: values =>
-      mutate({
-        input: {
-          organization: router.organizationId,
-          project: router.projectId,
-          name: values.name,
-        },
-      }).then(result => {
-        if (result?.data?.updateProjectName?.ok) {
-          const newProjectId = result.data.updateProjectName.ok.updatedProject.cleanId;
-          router.replace(`/${router.organizationId}/${newProjectId}/settings`);
-        }
+  const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } =
+    useFormik({
+      enableReinitialize: true,
+      initialValues: {
+        name: project?.name,
+      },
+      validationSchema: Yup.object().shape({
+        name: Yup.string().required('Project name is required'),
       }),
-  });
+      onSubmit: values =>
+        mutate({
+          input: {
+            organization: router.organizationId,
+            project: router.projectId,
+            name: values.name,
+          },
+        }).then(result => {
+          if (result?.data?.updateProjectName?.ok) {
+            const newProjectId = result.data.updateProjectName.ok.updatedProject.cleanId;
+            router.replace(`/${router.organizationId}/${newProjectId}/settings`);
+          }
+        }),
+    });
 
   return (
     <>
       <Card>
         <Heading className="mb-2">Project Name</Heading>
-        <p className="mb-3 font-light text-gray-300">Name of your project visible within organization</p>
+        <p className="mb-3 font-light text-gray-300">
+          Name of your project visible within organization
+        </p>
         <form onSubmit={handleSubmit} className="flex gap-x-2">
           <Input
             placeholder="Project name"
@@ -195,7 +209,13 @@ const Page = ({
             isInvalid={touched.name && Boolean(errors.name)}
             className="w-96"
           />
-          <Button type="submit" variant="primary" size="large" className="px-10" disabled={isSubmitting}>
+          <Button
+            type="submit"
+            variant="primary"
+            size="large"
+            className="px-10"
+            disabled={isSubmitting}
+          >
             Save
           </Button>
         </form>
@@ -211,7 +231,9 @@ const Page = ({
 
       <Card>
         <Heading className="mb-2">Git Repository</Heading>
-        <p className="mb-3 font-light text-gray-300">Connect the project with your Git repository</p>
+        <p className="mb-3 font-light text-gray-300">
+          Connect the project with your Git repository
+        </p>
         <GitHubIntegration gitRepository={project.gitRepository ?? null} />
       </Card>
 
@@ -226,7 +248,13 @@ const Page = ({
             Permanently remove your Project and all targets from the Organization
           </p>
           <div className="flex items-center gap-x-2">
-            <Button variant="primary" size="large" danger onClick={toggleModalOpen} className="px-5">
+            <Button
+              variant="primary"
+              size="large"
+              danger
+              onClick={toggleModalOpen}
+              className="px-5"
+            >
               Delete Project
             </Button>
             <Tag color="yellow" className="py-2.5 px-4">

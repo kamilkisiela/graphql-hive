@@ -22,7 +22,9 @@ export const ConnectLabModal = ({
       </p>
       <span className="text-sm text-gray-500">You can use the following endpoint:</span>
       <CopyValue value={endpoint} />
-      <span className="text-sm text-gray-500">To authenticate, use the following HTTP headers:</span>
+      <span className="text-sm text-gray-500">
+        To authenticate, use the following HTTP headers:
+      </span>
       <Tag>
         X-Hive-Key:{' '}
         <Link variant="secondary" target="_blank" rel="noreferrer" href={docsUrl ?? undefined}>
@@ -36,7 +38,13 @@ export const ConnectLabModal = ({
         </Link>{' '}
         chapter in our documentation.
       </p>
-      <Button type="button" variant="secondary" size="large" onClick={toggleModalOpen} className="self-end">
+      <Button
+        type="button"
+        variant="secondary"
+        size="large"
+        onClick={toggleModalOpen}
+        className="self-end"
+      >
         Close
       </Button>
     </Modal>

@@ -27,7 +27,7 @@ export class FederationOrchestrator implements Orchestrator {
   constructor(
     logger: Logger,
     @Inject(SCHEMA_SERVICE_CONFIG) serviceConfig: SchemaServiceConfig,
-    @Inject(CONTEXT) context: GraphQLModules.ModuleContext
+    @Inject(CONTEXT) context: GraphQLModules.ModuleContext,
   ) {
     this.logger = logger.child({ service: 'FederationOrchestrator' });
     this.schemaService = createTRPCClient<SchemaBuilderApi>({

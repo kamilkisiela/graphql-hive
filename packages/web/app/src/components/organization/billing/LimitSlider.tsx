@@ -1,4 +1,11 @@
-import { Slider, SliderFilledTrack, SliderMark, SliderThumb, SliderTrack, Tooltip } from '@chakra-ui/react';
+import {
+  Slider,
+  SliderFilledTrack,
+  SliderMark,
+  SliderThumb,
+  SliderTrack,
+  Tooltip,
+} from '@chakra-ui/react';
 import { ReactElement, useState } from 'react';
 import { Section } from '@/components/common';
 import clsx from 'clsx';

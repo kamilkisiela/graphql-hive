@@ -39,7 +39,7 @@ export const schemaBuilderApiRouter = trpc
               ...SCHEMA_OBJECT_VALIDATION,
               url: z.string().nullish(),
             })
-            .required()
+            .required(),
         ),
         external: EXTERNAL_VALIDATION.optional(),
       })
@@ -57,7 +57,7 @@ export const schemaBuilderApiRouter = trpc
               ...input.external,
               broker: ctx.broker,
             }
-          : null
+          : null,
       );
     },
   })
@@ -82,7 +82,7 @@ export const schemaBuilderApiRouter = trpc
               ...input.external,
               broker: ctx.broker,
             }
-          : null
+          : null,
       );
     },
   })
@@ -107,7 +107,7 @@ export const schemaBuilderApiRouter = trpc
               ...input.external,
               broker: ctx.broker,
             }
-          : null
+          : null,
       );
     },
   });
@@ -115,6 +115,5 @@ export const schemaBuilderApiRouter = trpc
 export type SchemaBuilderApi = typeof schemaBuilderApiRouter;
 export type SchemaBuilderApiMutate = keyof SchemaBuilderApi['_def']['mutations'];
 
-export type SchemaBuilderMutationInput<TRouteKey extends SchemaBuilderApiMutate> = inferProcedureInput<
-  SchemaBuilderApi['_def']['mutations'][TRouteKey]
->;
+export type SchemaBuilderMutationInput<TRouteKey extends SchemaBuilderApiMutate> =
+  inferProcedureInput<SchemaBuilderApi['_def']['mutations'][TRouteKey]>;

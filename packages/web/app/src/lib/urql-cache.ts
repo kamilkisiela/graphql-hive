@@ -58,7 +58,11 @@ type TypedDocumentNodeUpdateResolver<TNode extends TypedDocumentNode<any, any>> 
   VariablesOf<TNode>
 >;
 
-const deleteAlerts: TypedDocumentNodeUpdateResolver<typeof DeleteAlertsDocument> = ({ deleteAlerts }, _args, cache) => {
+const deleteAlerts: TypedDocumentNodeUpdateResolver<typeof DeleteAlertsDocument> = (
+  { deleteAlerts },
+  _args,
+  cache,
+) => {
   deleteAlerts.forEach(alert => {
     cache.invalidate({
       __typename: alert.__typename,
@@ -70,7 +74,7 @@ const deleteAlerts: TypedDocumentNodeUpdateResolver<typeof DeleteAlertsDocument>
 const createOrganization: TypedDocumentNodeUpdateResolver<typeof CreateOrganizationDocument> = (
   { createOrganization },
   _args,
-  cache
+  cache,
 ) => {
   updateQuery(
     cache,
@@ -79,17 +83,19 @@ const createOrganization: TypedDocumentNodeUpdateResolver<typeof CreateOrganizat
     },
     data => {
       if (createOrganization.ok) {
-        data.organizations.nodes.unshift(createOrganization.ok.createdOrganizationPayload.organization);
+        data.organizations.nodes.unshift(
+          createOrganization.ok.createdOrganizationPayload.organization,
+        );
         data.organizations.total += 1;
       }
-    }
+    },
   );
 };
 
 const deleteOrganization: TypedDocumentNodeUpdateResolver<typeof DeleteOrganizationDocument> = (
   { deleteOrganization },
   _args,
-  cache
+  cache,
 ) => {
   const organization = deleteOrganization.organization;
 
@@ -102,7 +108,7 @@ const deleteOrganization: TypedDocumentNodeUpdateResolver<typeof DeleteOrganizat
 const createProject: TypedDocumentNodeUpdateResolver<typeof CreateProjectDocument> = (
   { createProject },
   _args,
-  cache
+  cache,
 ) => {
   if (!createProject.ok) {
     return;
@@ -123,14 +129,14 @@ const createProject: TypedDocumentNodeUpdateResolver<typeof CreateProjectDocumen
     data => {
       data.projects.nodes.unshift(project);
       data.projects.total += 1;
-    }
+    },
   );
 };
 
 const deleteProject: TypedDocumentNodeUpdateResolver<typeof DeleteProjectDocument> = (
   { deleteProject },
   _args,
-  cache
+  cache,
 ) => {
   const project = deleteProject.deletedProject;
 
@@ -140,7 +146,11 @@ const deleteProject: TypedDocumentNodeUpdateResolver<typeof DeleteProjectDocumen
   });
 };
 
-const createTarget: TypedDocumentNodeUpdateResolver<typeof CreateTargetDocument> = ({ createTarget }, _args, cache) => {
+const createTarget: TypedDocumentNodeUpdateResolver<typeof CreateTargetDocument> = (
+  { createTarget },
+  _args,
+  cache,
+) => {
   if (!createTarget.ok) {
     return;
   }
@@ -162,11 +172,15 @@ const createTarget: TypedDocumentNodeUpdateResolver<typeof CreateTargetDocument>
     data => {
       data.targets.nodes.unshift(target);
       data.targets.total += 1;
-    }
+    },
   );
 };
 
-const deleteTarget: TypedDocumentNodeUpdateResolver<typeof DeleteTargetDocument> = ({ deleteTarget }, _args, cache) => {
+const deleteTarget: TypedDocumentNodeUpdateResolver<typeof DeleteTargetDocument> = (
+  { deleteTarget },
+  _args,
+  cache,
+) => {
   const target = deleteTarget.deletedTarget;
 
   cache.invalidate({
@@ -175,7 +189,11 @@ const deleteTarget: TypedDocumentNodeUpdateResolver<typeof DeleteTargetDocument>
   });
 };
 
-const createToken: TypedDocumentNodeUpdateResolver<typeof CreateTokenDocument> = ({ createToken }, _args, cache) => {
+const createToken: TypedDocumentNodeUpdateResolver<typeof CreateTokenDocument> = (
+  { createToken },
+  _args,
+  cache,
+) => {
   if (!createToken.ok) {
     return;
   }
@@ -196,11 +214,15 @@ const createToken: TypedDocumentNodeUpdateResolver<typeof CreateTokenDocument> =
     data => {
       data.tokens.nodes.unshift(createdToken);
       data.tokens.total += 1;
-    }
+    },
   );
 };
 
-const deleteTokens: TypedDocumentNodeUpdateResolver<typeof DeleteTokensDocument> = ({ deleteTokens }, _args, cache) => {
+const deleteTokens: TypedDocumentNodeUpdateResolver<typeof DeleteTokensDocument> = (
+  { deleteTokens },
+  _args,
+  cache,
+) => {
   const selector = deleteTokens.selector;
 
   updateQuery(
@@ -216,16 +238,18 @@ const deleteTokens: TypedDocumentNodeUpdateResolver<typeof DeleteTokensDocument>
       },
     },
     data => {
-      data.tokens.nodes = data.tokens.nodes.filter(node => !deleteTokens.deletedTokens.includes(node.id));
+      data.tokens.nodes = data.tokens.nodes.filter(
+        node => !deleteTokens.deletedTokens.includes(node.id),
+      );
       data.tokens.total = data.tokens.nodes.length;
-    }
+    },
   );
 };
 
 const addAlertChannel: TypedDocumentNodeUpdateResolver<typeof AddAlertChannelDocument> = (
   { addAlertChannel },
   args,
-  cache
+  cache,
 ) => {
   if (!addAlertChannel.ok) {
     return;
@@ -246,13 +270,13 @@ const addAlertChannel: TypedDocumentNodeUpdateResolver<typeof AddAlertChannelDoc
     },
     data => {
       data.alertChannels.unshift(addedAlertChannel);
-    }
+    },
   );
 };
 const deleteAlertChannels: TypedDocumentNodeUpdateResolver<typeof DeleteAlertChannelsDocument> = (
   { deleteAlertChannels },
   _args,
-  cache
+  cache,
 ) => {
   deleteAlertChannels.forEach(channel => {
     cache.invalidate({
@@ -261,7 +285,11 @@ const deleteAlertChannels: TypedDocumentNodeUpdateResolver<typeof DeleteAlertCha
     });
   });
 };
-const addAlert: TypedDocumentNodeUpdateResolver<typeof AddAlertDocument> = ({ addAlert }, args, cache) => {
+const addAlert: TypedDocumentNodeUpdateResolver<typeof AddAlertDocument> = (
+  { addAlert },
+  args,
+  cache,
+) => {
   updateQuery(
     cache,
     {
@@ -275,14 +303,12 @@ const addAlert: TypedDocumentNodeUpdateResolver<typeof AddAlertDocument> = ({ ad
     },
     data => {
       data.alerts.unshift(addAlert);
-    }
+    },
   );
 };
-const deletePersistedOperation: TypedDocumentNodeUpdateResolver<typeof DeletePersistedOperationDocument> = (
-  { deletePersistedOperation },
-  _args,
-  cache
-) => {
+const deletePersistedOperation: TypedDocumentNodeUpdateResolver<
+  typeof DeletePersistedOperationDocument
+> = ({ deletePersistedOperation }, _args, cache) => {
   const operation = deletePersistedOperation.deletedPersistedOperation;
 
   cache.invalidate({
@@ -290,11 +316,9 @@ const deletePersistedOperation: TypedDocumentNodeUpdateResolver<typeof DeletePer
     id: operation.id,
   });
 };
-const deleteSlackIntegration: TypedDocumentNodeUpdateResolver<typeof DeleteSlackIntegrationDocument> = (
-  _,
-  args,
-  cache
-) => {
+const deleteSlackIntegration: TypedDocumentNodeUpdateResolver<
+  typeof DeleteSlackIntegrationDocument
+> = (_, args, cache) => {
   cache.updateQuery(
     {
       query: CheckIntegrationsDocument,
@@ -312,14 +336,12 @@ const deleteSlackIntegration: TypedDocumentNodeUpdateResolver<typeof DeleteSlack
         ...data,
         hasSlackIntegration: false,
       };
-    }
+    },
   );
 };
-const deleteGitHubIntegration: TypedDocumentNodeUpdateResolver<typeof DeleteGitHubIntegrationDocument> = (
-  _,
-  args,
-  cache
-) => {
+const deleteGitHubIntegration: TypedDocumentNodeUpdateResolver<
+  typeof DeleteGitHubIntegrationDocument
+> = (_, args, cache) => {
   cache.updateQuery(
     {
       query: CheckIntegrationsDocument,
@@ -337,15 +359,13 @@ const deleteGitHubIntegration: TypedDocumentNodeUpdateResolver<typeof DeleteGitH
         ...data,
         hasGitHubIntegration: false,
       };
-    }
+    },
   );
 };
 
-const inviteToOrganizationByEmail: TypedDocumentNodeUpdateResolver<typeof MemberInvitationForm_InviteByEmail> = (
-  { inviteToOrganizationByEmail },
-  args,
-  cache
-) => {
+const inviteToOrganizationByEmail: TypedDocumentNodeUpdateResolver<
+  typeof MemberInvitationForm_InviteByEmail
+> = ({ inviteToOrganizationByEmail }, args, cache) => {
   if (inviteToOrganizationByEmail.ok) {
     cache.updateQuery(
       {
@@ -371,16 +391,14 @@ const inviteToOrganizationByEmail: TypedDocumentNodeUpdateResolver<typeof Member
         }
 
         return data;
-      }
+      },
     );
   }
 };
 
-const deleteOrganizationInvitation: TypedDocumentNodeUpdateResolver<typeof InvitationDeleteButton_DeleteInvitation> = (
-  { deleteOrganizationInvitation },
-  args,
-  cache
-) => {
+const deleteOrganizationInvitation: TypedDocumentNodeUpdateResolver<
+  typeof InvitationDeleteButton_DeleteInvitation
+> = ({ deleteOrganizationInvitation }, args, cache) => {
   if (deleteOrganizationInvitation.ok) {
     cache.updateQuery(
       {
@@ -400,14 +418,15 @@ const deleteOrganizationInvitation: TypedDocumentNodeUpdateResolver<typeof Invit
 
         if (invitation) {
           if (data.organization?.organization?.invitations.nodes) {
-            data.organization.organization.invitations.nodes = data.organization.organization.invitations.nodes.filter(
-              node => node.id !== invitation.id
-            );
+            data.organization.organization.invitations.nodes =
+              data.organization.organization.invitations.nodes.filter(
+                node => node.id !== invitation.id,
+              );
           }
         }
 
         return data;
-      }
+      },
     );
   }
 };
@@ -441,16 +460,14 @@ const enableExternalSchemaComposition: TypedDocumentNodeUpdateResolver<
         }
 
         return data;
-      }
+      },
     );
   }
 };
 
-const disableExternalSchemaComposition: TypedDocumentNodeUpdateResolver<typeof ExternalComposition_DisableMutation> = (
-  { disableExternalSchemaComposition },
-  args,
-  cache
-) => {
+const disableExternalSchemaComposition: TypedDocumentNodeUpdateResolver<
+  typeof ExternalComposition_DisableMutation
+> = ({ disableExternalSchemaComposition }, args, cache) => {
   if (disableExternalSchemaComposition.ok) {
     cache.updateQuery(
       {
@@ -474,7 +491,7 @@ const disableExternalSchemaComposition: TypedDocumentNodeUpdateResolver<typeof E
         }
 
         return data;
-      }
+      },
     );
   }
 };

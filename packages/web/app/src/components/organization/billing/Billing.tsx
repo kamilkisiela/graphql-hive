@@ -1,5 +1,9 @@
 import React from 'react';
-import { BillingPlansDocument, OrganizationFieldsFragment, OrgBillingInfoFieldsFragment } from '@/graphql';
+import {
+  BillingPlansDocument,
+  OrganizationFieldsFragment,
+  OrgBillingInfoFieldsFragment,
+} from '@/graphql';
 import 'twin.macro';
 import { PlanSummary } from './PlanSummary';
 import { useQuery } from 'urql';

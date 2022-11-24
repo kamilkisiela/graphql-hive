@@ -11,7 +11,9 @@ import { formatNumber } from '@/lib/hooks/use-formatted-number';
 import { useArgumentListToggle } from './provider';
 
 function useCollapsibleList<T>(list: T[], max: number, defaultValue: boolean) {
-  const [collapsed, setCollapsed] = React.useState(defaultValue === true && list.length > max ? true : false);
+  const [collapsed, setCollapsed] = React.useState(
+    defaultValue === true && list.length > max ? true : false,
+  );
   const expand = React.useCallback(() => {
     setCollapsed(false);
   }, [setCollapsed]);
@@ -28,7 +30,10 @@ function Description(props: { description: string }) {
   return (
     <Popover.Root>
       <Popover.Trigger asChild>
-        <button title="Description is available" className="m-0 h-6 p-0 text-gray-500 hover:text-white">
+        <button
+          title="Description is available"
+          className="m-0 h-6 p-0 text-gray-500 hover:text-white"
+        >
           <VscCommentDiscussion className="w-full" />
         </button>
       </Popover.Trigger>
@@ -136,7 +141,7 @@ export function GraphQLTypeCard(
     implements?: string[];
     totalRequests?: number;
     usage?: DocumentType<typeof SchemaExplorerUsageStats_UsageFragment>;
-  }>
+  }>,
 ) {
   return (
     <div className="rounded-md border-2">
@@ -167,7 +172,9 @@ export function GraphQLTypeCard(
   );
 }
 
-export function GraphQLArguments(props: { args: DocumentType<typeof GraphQLArguments_ArgumentFragment>[] }) {
+export function GraphQLArguments(props: {
+  args: DocumentType<typeof GraphQLArguments_ArgumentFragment>[];
+}) {
   const { args } = props;
   const [isCollapsedGlobally] = useArgumentListToggle();
   const [collapsed, setCollapsed] = React.useState(isCollapsedGlobally);
@@ -231,7 +238,7 @@ export function GraphQLTypeCardListItem(
     index: number;
     className?: string;
     onClick?: () => void;
-  }>
+  }>,
 ) {
   return (
     <div
@@ -239,7 +246,7 @@ export function GraphQLTypeCardListItem(
       className={clsx(
         'flex flex-row items-center justify-between p-4 text-sm',
         props.index % 2 ? '' : 'bg-gray-900 bg-opacity-50',
-        props.className
+        props.className,
       )}
     >
       {props.children}
@@ -313,7 +320,10 @@ export function GraphQLTypeAsLink(props: { type: string }) {
   const typename = props.type.replace(/[[\]!]+/g, '');
 
   return (
-    <NextLink href={`/${router.organizationId}/${router.projectId}/${router.targetId}/explorer/${typename}`} passHref>
+    <NextLink
+      href={`/${router.organizationId}/${router.projectId}/${router.targetId}/explorer/${typename}`}
+      passHref
+    >
       <Link className="text-orange-500">{props.type}</Link>
     </NextLink>
   );

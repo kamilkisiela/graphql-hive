@@ -26,7 +26,7 @@ export const Button = forwardRef<any, ButtonProps>(
       as,
       ...props
     },
-    forwardedRef
+    forwardedRef,
   ) => {
     const TagToUse = as || Toolbar.Button;
 
@@ -56,12 +56,15 @@ export const Button = forwardRef<any, ButtonProps>(
               ? 'bg-red-500 text-white hover:brightness-110 active:bg-red-600'
               : {
                   primary: 'bg-orange-600 active:bg-orange-700 text-white hover:brightness-110',
-                  secondary: 'hover:text-orange-600 bg-gray-800 text-gray-500 hover:brightness-110 active:bg-gray-900',
-                  default: 'hover:text-orange-600 bg-transparent text-gray-500 hover:border-gray-800',
+                  secondary:
+                    'hover:text-orange-600 bg-gray-800 text-gray-500 hover:brightness-110 active:bg-gray-900',
+                  default:
+                    'hover:text-orange-600 bg-transparent text-gray-500 hover:border-gray-800',
                   link: 'text-orange-600 hover:underline',
                 }[variant],
-            variant !== 'link' && 'inline-flex items-center border border-transparent text-sm font-bold',
-            className
+            variant !== 'link' &&
+              'inline-flex items-center border border-transparent text-sm font-bold',
+            className,
           )}
           css={
             rotate > 0 &&
@@ -81,5 +84,5 @@ export const Button = forwardRef<any, ButtonProps>(
         </TagToUse>
       </Toolbar.Root>
     );
-  }
+  },
 );

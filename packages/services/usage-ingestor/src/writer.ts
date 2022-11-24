@@ -117,7 +117,7 @@ export function createWriter({
           `INSERT INTO operations_new (${legacyOperationsFields}) FORMAT CSV`,
           await compress(csv),
           logger,
-          3
+          3,
         );
       },
       async writeRegistry(records: string[]) {
@@ -132,7 +132,7 @@ export function createWriter({
           `INSERT INTO operations_registry (${legacyRegistryFields}) FORMAT CSV`,
           await compress(csv),
           logger,
-          3
+          3,
         );
       },
     },
@@ -152,7 +152,7 @@ async function writeCsv(
   query: string,
   body: Buffer,
   logger: FastifyLoggerInstance,
-  maxRetry: number
+  maxRetry: number,
 ) {
   const stopTimer = writeDuration.startTimer({
     query,
@@ -178,7 +178,12 @@ async function writeCsv(
       retry: {
         calculateDelay(info) {
           if (info.attemptCount >= maxRetry) {
-            logger.warn('Exceeded the retry limit (%s/%s) for %s', info.attemptCount, maxRetry, query);
+            logger.warn(
+              'Exceeded the retry limit (%s/%s) for %s',
+              info.attemptCount,
+              maxRetry,
+              query,
+            );
             // After N retries, stop.
             return 0;
           }
@@ -207,7 +212,8 @@ async function writeCsv(
     })
     .catch(error => {
       stopTimer({
-        status: hasResponse(error) && error.response.statusCode ? error.response.statusCode : 'unknown',
+        status:
+          hasResponse(error) && error.response.statusCode ? error.response.statusCode : 'unknown',
       });
       Sentry.captureException(error, {
         level: 'error',

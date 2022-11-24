@@ -32,7 +32,9 @@ export function deployRateLimit({
   emails: Emails;
 }) {
   const rawConnectionString = apiConfig.requireSecret('postgresConnectionString');
-  const connectionString = rawConnectionString.apply(rawConnectionString => parse(rawConnectionString));
+  const connectionString = rawConnectionString.apply(rawConnectionString =>
+    parse(rawConnectionString),
+  );
 
   return new RemoteArtifactAsServiceDeployment(
     'rate-limiter',
@@ -60,6 +62,6 @@ export function deployRateLimit({
       packageInfo: packageHelper.npmPack('@hive/rate-limit'),
       port: 4000,
     },
-    [dbMigrations, usageEstimator.service, usageEstimator.deployment]
+    [dbMigrations, usageEstimator.service, usageEstimator.deployment],
   ).deploy();
 }

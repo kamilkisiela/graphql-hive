@@ -40,7 +40,9 @@ export function createOperationsStore(pluginOptions: HivePluginOptions): Operati
 
   const load: OperationsStore['load'] = async () => {
     const response = await axios.post(
-      selfHostingOptions?.graphqlEndpoint ?? operationsStoreOptions.endpoint ?? 'https://app.graphql-hive.com/graphql',
+      selfHostingOptions?.graphqlEndpoint ??
+        operationsStoreOptions.endpoint ??
+        'https://app.graphql-hive.com/graphql',
       {
         query,
         operationName: 'loadStoredOperations',
@@ -51,7 +53,7 @@ export function createOperationsStore(pluginOptions: HivePluginOptions): Operati
           'content-type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
 
     const parsedData: {
@@ -70,7 +72,7 @@ export function createOperationsStore(pluginOptions: HivePluginOptions): Operati
         key,
         parse(document, {
           noLocation: true,
-        })
+        }),
       );
     });
   };

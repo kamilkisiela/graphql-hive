@@ -5,11 +5,15 @@ export default gql`
     """
     Requires API Token
     """
-    publishPersistedOperations(input: [PublishPersistedOperationInput!]!): PublishPersistedOperationPayload!
+    publishPersistedOperations(
+      input: [PublishPersistedOperationInput!]!
+    ): PublishPersistedOperationPayload!
     """
     Requires API Token
     """
-    deletePersistedOperation(selector: PersistedOperationSelectorInput!): DeletePersistedOperationPayload!
+    deletePersistedOperation(
+      selector: PersistedOperationSelectorInput!
+    ): DeletePersistedOperationPayload!
   }
 
   extend type Query {

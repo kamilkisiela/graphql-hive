@@ -32,18 +32,19 @@ const SettingsPage = (): React.ReactElement => {
 
   const me = meQuery.data?.me;
 
-  const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } = useFormik({
-    enableReinitialize: true,
-    initialValues: {
-      fullName: me?.fullName || '',
-      displayName: me?.displayName || '',
-    },
-    validationSchema: Yup.object().shape({
-      fullName: Yup.string().required('Full name is required'),
-      displayName: Yup.string().required('Display name is required'),
-    }),
-    onSubmit: values => mutate({ input: values }),
-  });
+  const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } =
+    useFormik({
+      enableReinitialize: true,
+      initialValues: {
+        fullName: me?.fullName || '',
+        displayName: me?.displayName || '',
+      },
+      validationSchema: Yup.object().shape({
+        fullName: Yup.string().required('Full name is required'),
+        displayName: Yup.string().required('Display name is required'),
+      }),
+      onSubmit: values => mutate({ input: values }),
+    });
 
   return (
     <>
@@ -86,9 +87,13 @@ const SettingsPage = (): React.ReactElement => {
                 disabled={isSubmitting}
                 isInvalid={touched.fullName && Boolean(errors.fullName)}
               />
-              {touched.fullName && errors.fullName && <span className="text-red-500">{errors.fullName}</span>}
+              {touched.fullName && errors.fullName && (
+                <span className="text-red-500">{errors.fullName}</span>
+              )}
               {mutation.data?.updateMe.error?.inputErrors.fullName && (
-                <span className="text-red-500">{mutation.data.updateMe.error.inputErrors.fullName}</span>
+                <span className="text-red-500">
+                  {mutation.data.updateMe.error.inputErrors.fullName}
+                </span>
               )}
             </div>
 
@@ -105,9 +110,13 @@ const SettingsPage = (): React.ReactElement => {
                 disabled={isSubmitting}
                 isInvalid={touched.displayName && Boolean(errors.displayName)}
               />
-              {touched.displayName && errors.displayName && <span className="text-red-500">{errors.displayName}</span>}
+              {touched.displayName && errors.displayName && (
+                <span className="text-red-500">{errors.displayName}</span>
+              )}
               {mutation.data?.updateMe.error?.inputErrors.displayName && (
-                <span className="text-red-500">{mutation.data.updateMe.error.inputErrors.displayName}</span>
+                <span className="text-red-500">
+                  {mutation.data.updateMe.error.inputErrors.displayName}
+                </span>
               )}
             </div>
 

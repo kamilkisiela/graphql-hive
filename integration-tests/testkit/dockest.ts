@@ -14,7 +14,7 @@ export const startReadinessCheck: ReadinessCheck = ({ runner }) => {
   return runner.dockerEventStream$.pipe(
     filter(ev => ev.action === 'start'),
     mapTo(undefined),
-    take(1)
+    take(1),
   );
 };
 
@@ -82,7 +82,9 @@ export function createServices() {
 }
 
 export function cleanDockerContainers() {
-  const output = execa(`docker ps --all --filter "name=integration-tests" --format={{.ID}}:{{.Status}}`);
+  const output = execa(
+    `docker ps --all --filter "name=integration-tests" --format={{.ID}}:{{.Status}}`,
+  );
 
   if (output.stdout.length) {
     const runningContainers = output.stdout.split('\n');

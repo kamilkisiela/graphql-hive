@@ -1,6 +1,7 @@
 # `@hive/schema`
 
-Service for validating schemas or verifying whether a composite GraphQL schema can be composed out of subschemas.
+Service for validating schemas or verifying whether a composite GraphQL schema can be composed out
+of subschemas.
 
 ## Configuration
 

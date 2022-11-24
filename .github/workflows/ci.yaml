@@ -17,10 +17,7 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_DB: registry
         options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     outputs:
       hive_token_present: ${{ steps.secrets_present.outputs.hive_token }}
@@ -128,7 +125,10 @@ jobs:
         id: pr-label-check
 
       - name: Schema Check
-        run: ./packages/libraries/cli/bin/dev schema:check "packages/services/api/src/modules/*/module.graphql.ts" ${{ steps.pr-label-check.outputs.SAFE_FLAG }} --github
+        run:
+          ./packages/libraries/cli/bin/dev schema:check
+          "packages/services/api/src/modules/*/module.graphql.ts" ${{
+          steps.pr-label-check.outputs.SAFE_FLAG }} --github
 
   test:
     name: Tests
@@ -283,7 +283,9 @@ jobs:
         run: strip target/x86_64-unknown-linux-gnu/release/router
 
       - name: Compress
-        run: ./target/x86_64-unknown-linux-gnu/release/compress ./target/x86_64-unknown-linux-gnu/release/router ./router.tar.gz
+        run:
+          ./target/x86_64-unknown-linux-gnu/release/compress
+          ./target/x86_64-unknown-linux-gnu/release/router ./router.tar.gz
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3

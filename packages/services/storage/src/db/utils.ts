@@ -14,11 +14,11 @@ export function createConnectionString(config: {
 
 export function objectToParams<T extends Record<string, any>>(
   obj: T,
-  transformArray?: <K extends keyof T>(key: K, value: T[K]) => any
+  transformArray?: <K extends keyof T>(key: K, value: T[K]) => any,
 ) {
   const identifiers = sql.join(
     Object.keys(obj).map(k => sql.identifier([k])),
-    sql`, `
+    sql`, `,
   );
 
   const values = sql.join(
@@ -34,7 +34,7 @@ export function objectToParams<T extends Record<string, any>>(
       }
       return obj[key];
     }),
-    sql`, `
+    sql`, `,
   );
 
   return { identifiers, values };
@@ -43,7 +43,7 @@ export function objectToParams<T extends Record<string, any>>(
 export function objectToUpdateParams(obj: Record<string, any>) {
   return sql.join(
     Object.keys(obj).map(key => sql`${sql.identifier([key])} = ${obj[key]}`),
-    sql`, `
+    sql`, `,
   );
 }
 

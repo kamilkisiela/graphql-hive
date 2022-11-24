@@ -4,76 +4,102 @@
 
 ### Patch Changes
 
-- Updated dependencies [[`e116841`](https://github.com/kamilkisiela/graphql-hive/commit/e116841a739bfd7f37c4a826544301cf23d61637)]:
+- Updated dependencies
+  [[`e116841`](https://github.com/kamilkisiela/graphql-hive/commit/e116841a739bfd7f37c4a826544301cf23d61637)]:
   - @graphql-hive/core@0.2.3
 
 ## 0.19.9
 
 ### Patch Changes
 
-- [#655](https://github.com/kamilkisiela/graphql-hive/pull/655) [`2cbf27f`](https://github.com/kamilkisiela/graphql-hive/commit/2cbf27fdc9c18749b8969adb6d1598338762dba2) Thanks [@n1ru4l](https://github.com/n1ru4l)! - Add User-Agent header to all http requests
+- [#655](https://github.com/kamilkisiela/graphql-hive/pull/655)
+  [`2cbf27f`](https://github.com/kamilkisiela/graphql-hive/commit/2cbf27fdc9c18749b8969adb6d1598338762dba2)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Add User-Agent header to all http requests
 
 ## 0.19.8
 
 ### Patch Changes
 
-- [#648](https://github.com/kamilkisiela/graphql-hive/pull/648) [`84a78fc`](https://github.com/kamilkisiela/graphql-hive/commit/84a78fc2a4061e05b1bbe4a8d11006601c767384) Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - bump
+- [#648](https://github.com/kamilkisiela/graphql-hive/pull/648)
+  [`84a78fc`](https://github.com/kamilkisiela/graphql-hive/commit/84a78fc2a4061e05b1bbe4a8d11006601c767384)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - bump
 
 ## 0.19.7
 
 ### Patch Changes
 
-- [#646](https://github.com/kamilkisiela/graphql-hive/pull/646) [`65f3372`](https://github.com/kamilkisiela/graphql-hive/commit/65f3372dfa047238352beee113ccb8506cc180ca) Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - I hope it's final bump
+- [#646](https://github.com/kamilkisiela/graphql-hive/pull/646)
+  [`65f3372`](https://github.com/kamilkisiela/graphql-hive/commit/65f3372dfa047238352beee113ccb8506cc180ca)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - I hope it's final bump
 
 ## 0.19.6
 
 ### Patch Changes
 
-- [#645](https://github.com/kamilkisiela/graphql-hive/pull/645) [`7110555`](https://github.com/kamilkisiela/graphql-hive/commit/71105559b67f510087223ada2af23564ff053353) Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Ignore npm-shrinkwrap.json
+- [#645](https://github.com/kamilkisiela/graphql-hive/pull/645)
+  [`7110555`](https://github.com/kamilkisiela/graphql-hive/commit/71105559b67f510087223ada2af23564ff053353)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Ignore npm-shrinkwrap.json
 
 ## 0.19.5
 
 ### Patch Changes
 
-- [#641](https://github.com/kamilkisiela/graphql-hive/pull/641) [`ce55b72`](https://github.com/kamilkisiela/graphql-hive/commit/ce55b724b00ff7fc93f3df4089e698e6f9d5086b) Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Do not include npm-shrinkwrap.json
+- [#641](https://github.com/kamilkisiela/graphql-hive/pull/641)
+  [`ce55b72`](https://github.com/kamilkisiela/graphql-hive/commit/ce55b724b00ff7fc93f3df4089e698e6f9d5086b)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Do not include npm-shrinkwrap.json
 
 ## 0.19.4
 
 ### Patch Changes
 
-- [#631](https://github.com/kamilkisiela/graphql-hive/pull/631) [`d4ca981`](https://github.com/kamilkisiela/graphql-hive/commit/d4ca98180bd0b2910fb41f623c2f5abb1f4b9214) Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Bump
+- [#631](https://github.com/kamilkisiela/graphql-hive/pull/631)
+  [`d4ca981`](https://github.com/kamilkisiela/graphql-hive/commit/d4ca98180bd0b2910fb41f623c2f5abb1f4b9214)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Bump
 
-- [#631](https://github.com/kamilkisiela/graphql-hive/pull/631) [`d4ca981`](https://github.com/kamilkisiela/graphql-hive/commit/d4ca98180bd0b2910fb41f623c2f5abb1f4b9214) Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Bump CLI
+- [#631](https://github.com/kamilkisiela/graphql-hive/pull/631)
+  [`d4ca981`](https://github.com/kamilkisiela/graphql-hive/commit/d4ca98180bd0b2910fb41f623c2f5abb1f4b9214)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Bump CLI
 
 ## 0.19.3
 
 ### Patch Changes
 
-- [#629](https://github.com/kamilkisiela/graphql-hive/pull/629) [`750b46d`](https://github.com/kamilkisiela/graphql-hive/commit/750b46d155c5d01ad4b3cee84409793736246603) Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Bump
+- [#629](https://github.com/kamilkisiela/graphql-hive/pull/629)
+  [`750b46d`](https://github.com/kamilkisiela/graphql-hive/commit/750b46d155c5d01ad4b3cee84409793736246603)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Bump
 
 ## 0.19.2
 
 ### Patch Changes
 
-- [#627](https://github.com/kamilkisiela/graphql-hive/pull/627) [`78096dc`](https://github.com/kamilkisiela/graphql-hive/commit/78096dcfbd37059fbb309e8faa6bae1d14e18c79) Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - bump
+- [#627](https://github.com/kamilkisiela/graphql-hive/pull/627)
+  [`78096dc`](https://github.com/kamilkisiela/graphql-hive/commit/78096dcfbd37059fbb309e8faa6bae1d14e18c79)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - bump
 
 ## 0.19.1
 
 ### Patch Changes
 
-- [#466](https://github.com/kamilkisiela/graphql-hive/pull/466) [`2e036ac`](https://github.com/kamilkisiela/graphql-hive/commit/2e036acc4ce1c27a493e90481bb10f5886c0a00c) Thanks [@ardatan](https://github.com/ardatan)! - Update GraphQL Tools packages
+- [#466](https://github.com/kamilkisiela/graphql-hive/pull/466)
+  [`2e036ac`](https://github.com/kamilkisiela/graphql-hive/commit/2e036acc4ce1c27a493e90481bb10f5886c0a00c)
+  Thanks [@ardatan](https://github.com/ardatan)! - Update GraphQL Tools packages
 
 ## 0.19.0
 
 ### Minor Changes
 
-- [#357](https://github.com/kamilkisiela/graphql-hive/pull/357) [`30f11c4`](https://github.com/kamilkisiela/graphql-hive/commit/30f11c40054debfcbd8b6090316d129eb7851046) Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Adds experimental_acceptBreakingChanges
+- [#357](https://github.com/kamilkisiela/graphql-hive/pull/357)
+  [`30f11c4`](https://github.com/kamilkisiela/graphql-hive/commit/30f11c40054debfcbd8b6090316d129eb7851046)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Adds experimental_acceptBreakingChanges
 
 ## 0.18.2
 
 ### Patch Changes
 
-- [#292](https://github.com/kamilkisiela/graphql-hive/pull/292) [`efb03e1`](https://github.com/kamilkisiela/graphql-hive/commit/efb03e184d5a878dbcca83295b2d1d53b3c9f8e3) Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Bump @oclif/core dependency range to ^1.13.10
+- [#292](https://github.com/kamilkisiela/graphql-hive/pull/292)
+  [`efb03e1`](https://github.com/kamilkisiela/graphql-hive/commit/efb03e184d5a878dbcca83295b2d1d53b3c9f8e3)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Bump @oclif/core dependency range to
+  ^1.13.10
 
 ## 0.18.1
 
@@ -187,9 +213,11 @@
 
 - c5bfa4c9: Add a new `metadata` flag for publishing schema metadata (JSON) to Hive.
 
-  The `--metadata` can contain anything you wish to have attached to your GraphQL schema, and can support your runtime needs.
+  The `--metadata` can contain anything you wish to have attached to your GraphQL schema, and can
+  support your runtime needs.
 
-  You can either specify a path to a file: `--metadata my-file.json`, or an inline JSON object: `--metadata '{"test": 1}'`.
+  You can either specify a path to a file: `--metadata my-file.json`, or an inline JSON object:
+  `--metadata '{"test": 1}'`.
 
   Metadata published to Hive will be available as part of Hive CDN, under `/metadata` route.
 
@@ -403,7 +431,8 @@
 ### Minor Changes
 
 - 078e758: Token per Target
-- 1dd9cdb: --file flag is now replaced with a positional arg at the end, comments in graphql sdl files are now converted to descriptions, docs are updated to mention wildcard file uploads
+- 1dd9cdb: --file flag is now replaced with a positional arg at the end, comments in graphql sdl
+  files are now converted to descriptions, docs are updated to mention wildcard file uploads
 
 ### Patch Changes
 

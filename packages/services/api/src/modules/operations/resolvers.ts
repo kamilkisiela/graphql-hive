@@ -108,7 +108,11 @@ export const resolvers: OperationsModule.Resolvers = {
     },
   },
   OperationsStats: {
-    async operations({ organization, project, target, period, operations: operationsFilter }, _, { injector }) {
+    async operations(
+      { organization, project, target, period, operations: operationsFilter },
+      _,
+      { injector },
+    ) {
       const operationsManager = injector.get(OperationsManager);
       const [operations, durations] = await Promise.all([
         operationsManager.readOperationsStats({
@@ -152,7 +156,11 @@ export const resolvers: OperationsModule.Resolvers = {
         operations,
       });
     },
-    totalFailures({ organization, project, target, period, operations: operationsFilter }, _, { injector }) {
+    totalFailures(
+      { organization, project, target, period, operations: operationsFilter },
+      _,
+      { injector },
+    ) {
       return injector.get(OperationsManager).countFailures({
         organization,
         project,
@@ -161,7 +169,11 @@ export const resolvers: OperationsModule.Resolvers = {
         operations: operationsFilter,
       });
     },
-    totalOperations({ organization, project, target, period, operations: operationsFilter }, _, { injector }) {
+    totalOperations(
+      { organization, project, target, period, operations: operationsFilter },
+      _,
+      { injector },
+    ) {
       return injector.get(OperationsManager).countUniqueOperations({
         organization,
         project,
@@ -173,7 +185,7 @@ export const resolvers: OperationsModule.Resolvers = {
     requestsOverTime(
       { organization, project, target, period, operations: operationsFilter },
       { resolution },
-      { injector }
+      { injector },
     ) {
       return injector.get(OperationsManager).readRequestsOverTime({
         target,
@@ -187,7 +199,7 @@ export const resolvers: OperationsModule.Resolvers = {
     failuresOverTime(
       { organization, project, target, period, operations: operationsFilter },
       { resolution },
-      { injector }
+      { injector },
     ) {
       return injector.get(OperationsManager).readFailuresOverTime({
         target,
@@ -201,7 +213,7 @@ export const resolvers: OperationsModule.Resolvers = {
     durationOverTime(
       { organization, project, target, period, operations: operationsFilter },
       { resolution },
-      { injector }
+      { injector },
     ) {
       return injector.get(OperationsManager).readDurationOverTime({
         target,
@@ -212,7 +224,11 @@ export const resolvers: OperationsModule.Resolvers = {
         operations: operationsFilter,
       });
     },
-    clients({ organization, project, target, period, operations: operationsFilter }, _, { injector }) {
+    clients(
+      { organization, project, target, period, operations: operationsFilter },
+      _,
+      { injector },
+    ) {
       return injector.get(OperationsManager).readUniqueClients({
         target,
         project,
@@ -221,7 +237,11 @@ export const resolvers: OperationsModule.Resolvers = {
         operations: operationsFilter,
       });
     },
-    duration({ organization, project, target, period, operations: operationsFilter }, _, { injector }) {
+    duration(
+      { organization, project, target, period, operations: operationsFilter },
+      _,
+      { injector },
+    ) {
       return injector.get(OperationsManager).readGeneralDurationPercentiles({
         organization,
         project,
@@ -230,7 +250,11 @@ export const resolvers: OperationsModule.Resolvers = {
         operations: operationsFilter,
       });
     },
-    async durationHistogram({ organization, project, target, period, operations: operationsFilter }, _, { injector }) {
+    async durationHistogram(
+      { organization, project, target, period, operations: operationsFilter },
+      _,
+      { injector },
+    ) {
       const histogram = await injector.get(OperationsManager).readDurationHistogram({
         organization,
         project,

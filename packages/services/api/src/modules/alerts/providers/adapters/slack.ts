@@ -27,7 +27,7 @@ export class SlackCommunicationAdapter implements CommunicationAdapter {
       `Sending Schema Change Notifications over Slack (organization=%s, project=%s, target=%s)`,
       input.event.organization.id,
       input.event.project.id,
-      input.event.target.id
+      input.event.target.id,
     );
 
     if (!input.integrations.slack.token) {
@@ -65,7 +65,7 @@ export class SlackCommunicationAdapter implements CommunicationAdapter {
           channel: input.channel.slackChannel!,
           text: `:bee: Hi, I found *${totalChanges} ${this.pluralize(
             'change',
-            totalChanges
+            totalChanges,
           )}* in project ${projectLink}, target ${targetLink} (${viewLink}):`,
           mrkdwn: true,
           attachments: createAttachments(input.event.changes),
@@ -82,7 +82,7 @@ export class SlackCommunicationAdapter implements CommunicationAdapter {
     this.logger.debug(
       `Sending Channel Confirmation over Slack (organization=%s, project=%s)`,
       input.event.organization.id,
-      input.event.project.id
+      input.event.project.id,
     );
 
     const token = input.integrations.slack.token;
@@ -93,7 +93,9 @@ export class SlackCommunicationAdapter implements CommunicationAdapter {
     }
 
     const actionMessage =
-      input.event.kind === 'created' ? `I will send here notifications` : `I will no longer send here notifications`;
+      input.event.kind === 'created'
+        ? `I will send here notifications`
+        : `I will no longer send here notifications`;
 
     try {
       const projectLink = this.createLink({
@@ -104,9 +106,10 @@ export class SlackCommunicationAdapter implements CommunicationAdapter {
       const client = new WebClient(token);
       await client.chat.postMessage({
         channel: input.channel.slackChannel!,
-        text: [`:wave: Hi! I'm the notification :bee:.`, `${actionMessage} about your ${projectLink} project.`].join(
-          '\n'
-        ),
+        text: [
+          `:wave: Hi! I'm the notification :bee:.`,
+          `${actionMessage} about your ${projectLink} project.`,
+        ].join('\n'),
       });
     } catch (error) {
       this.logger.error(`Failed to send Slack notification`, error);
@@ -131,7 +134,7 @@ function createAttachments(changes: readonly Types.SchemaChange[]) {
         color: '#E74C3B',
         title: 'Breaking changes',
         changes: breakingChanges,
-      })
+      }),
     );
   }
 
@@ -141,7 +144,7 @@ function createAttachments(changes: readonly Types.SchemaChange[]) {
         color: '#F0C418',
         title: 'Dangerous changes',
         changes: dangerousChanges,
-      })
+      }),
     );
   }
 
@@ -151,7 +154,7 @@ function createAttachments(changes: readonly Types.SchemaChange[]) {
         color: '#23B99A',
         title: 'Safe changes',
         changes: safeChanges,
-      })
+      }),
     );
   }
 

@@ -11,7 +11,7 @@ export interface ClickHouseConfig {
     timings: {
       totalSeconds: number;
       elapsedSeconds: number;
-    }
+    },
   ) => void;
 }
 

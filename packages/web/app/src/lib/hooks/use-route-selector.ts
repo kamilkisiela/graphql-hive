@@ -12,11 +12,11 @@ export function useRouteSelector() {
       as: string,
       options?: {
         shallow?: boolean;
-      }
+      },
     ) => {
       router.push(route, as, options);
     },
-    [router]
+    [router],
   );
 
   const visitHome = useCallback(() => {
@@ -27,26 +27,35 @@ export function useRouteSelector() {
     ({ organizationId }: { organizationId: string }) => {
       push('/[orgId]', `/${organizationId}`);
     },
-    [push]
+    [push],
   );
 
   const visitProject = useCallback(
     ({ organizationId, projectId }: { organizationId: string; projectId: string }) => {
       push('/[orgId]/[projectId]', `/${organizationId}/${projectId}`);
     },
-    [push]
+    [push],
   );
 
   const visitTarget = useCallback(
-    ({ organizationId, projectId, targetId }: { organizationId: string; projectId: string; targetId: string }) => {
+    ({
+      organizationId,
+      projectId,
+      targetId,
+    }: {
+      organizationId: string;
+      projectId: string;
+      targetId: string;
+    }) => {
       push('/[orgId]/[projectId]/[targetId]', `/${organizationId}/${projectId}/${targetId}`);
     },
-    [push]
+    [push],
   );
 
   const update = useCallback(
     (params: Record<string, string | number>) => {
-      const routeParams = router.route.match(/\[[a-z]+\]/gi)?.map(p => p.replace('[', '').replace(']', '')) ?? [];
+      const routeParams =
+        router.route.match(/\[[a-z]+\]/gi)?.map(p => p.replace('[', '').replace(']', '')) ?? [];
       const query = {
         ...router.query,
         ...params,
@@ -63,11 +72,12 @@ export function useRouteSelector() {
         : '';
 
       const route =
-        router.route.replace(/\[([a-z]+)\]/gi, (_, param) => router.query[param] as string) + attributesPath;
+        router.route.replace(/\[([a-z]+)\]/gi, (_, param) => router.query[param] as string) +
+        attributesPath;
 
       push(router.route + attributesPath, route, { shallow: true });
     },
-    [router, push]
+    [router, push],
   );
 
   const replace = useCallback((url: string) => router.replace(url), [router.replace]);
@@ -91,6 +101,6 @@ export function useRouteSelector() {
       operationHash: router.query.hash as string,
       versionId: router.query.versionId as string,
     }),
-    [router]
+    [router],
   );
 }

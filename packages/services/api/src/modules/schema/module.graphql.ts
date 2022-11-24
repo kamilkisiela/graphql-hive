@@ -160,7 +160,11 @@ export default gql`
     github: Boolean
   }
 
-  union SchemaCheckPayload = SchemaCheckSuccess | SchemaCheckError | GitHubSchemaCheckSuccess | GitHubSchemaCheckError
+  union SchemaCheckPayload =
+      SchemaCheckSuccess
+    | SchemaCheckError
+    | GitHubSchemaCheckSuccess
+    | GitHubSchemaCheckError
 
   enum CriticalityLevel {
     Breaking

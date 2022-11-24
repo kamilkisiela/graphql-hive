@@ -63,7 +63,8 @@ DESCRIPTION
   deletes specific cli configuration
 ```
 
-_See code: [dist/commands/config/delete.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.5/dist/commands/config/delete.js)_
+_See code:
+[dist/commands/config/delete.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.5/dist/commands/config/delete.js)_
 
 ## `hive config:get KEY`
 
@@ -80,7 +81,8 @@ DESCRIPTION
   prints specific cli configuration
 ```
 
-_See code: [dist/commands/config/get.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.5/dist/commands/config/get.js)_
+_See code:
+[dist/commands/config/get.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.5/dist/commands/config/get.js)_
 
 ## `hive config:reset`
 
@@ -94,7 +96,8 @@ DESCRIPTION
   resets local cli configuration
 ```
 
-_See code: [dist/commands/config/reset.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.5/dist/commands/config/reset.js)_
+_See code:
+[dist/commands/config/reset.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.5/dist/commands/config/reset.js)_
 
 ## `hive config:set KEY VALUE`
 
@@ -112,7 +115,8 @@ DESCRIPTION
   updates specific cli configuration
 ```
 
-_See code: [dist/commands/config/set.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.5/dist/commands/config/set.js)_
+_See code:
+[dist/commands/config/set.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.5/dist/commands/config/set.js)_
 
 ## `hive help [COMMAND]`
 
@@ -132,7 +136,8 @@ DESCRIPTION
   Display help for hive.
 ```
 
-_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.1.18/src/commands/help.ts)_
+_See code:
+[@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.1.18/src/commands/help.ts)_
 
 ## `hive operations:check FILE`
 
@@ -154,7 +159,8 @@ DESCRIPTION
   checks operations against a published schema
 ```
 
-_See code: [dist/commands/operations/check.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.5/dist/commands/operations/check.js)_
+_See code:
+[dist/commands/operations/check.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.5/dist/commands/operations/check.js)_
 
 ## `hive operations:publish FILE`
 
@@ -177,7 +183,8 @@ DESCRIPTION
   saves operations to the store
 ```
 
-_See code: [dist/commands/operations/publish.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.5/dist/commands/operations/publish.js)_
+_See code:
+[dist/commands/operations/publish.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.5/dist/commands/operations/publish.js)_
 
 ## `hive schema:check FILE`
 
@@ -204,7 +211,8 @@ DESCRIPTION
   checks schema
 ```
 
-_See code: [dist/commands/schema/check.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.5/dist/commands/schema/check.js)_
+_See code:
+[dist/commands/schema/check.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.5/dist/commands/schema/check.js)_
 
 ## `hive schema:publish FILE`
 
@@ -239,7 +247,8 @@ DESCRIPTION
   publishes schema
 ```
 
-_See code: [dist/commands/schema/publish.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.5/dist/commands/schema/publish.js)_
+_See code:
+[dist/commands/schema/publish.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.5/dist/commands/schema/publish.js)_
 
 ## `hive update [CHANNEL]`
 
@@ -276,7 +285,8 @@ EXAMPLES
     $ hive update --available
 ```
 
-_See code: [@oclif/plugin-update](https://github.com/oclif/plugin-update/blob/v3.0.6/src/commands/update.ts)_
+_See code:
+[@oclif/plugin-update](https://github.com/oclif/plugin-update/blob/v3.0.6/src/commands/update.ts)_
 
 ## `hive whoami`
 
@@ -294,7 +304,8 @@ DESCRIPTION
   checks schema
 ```
 
-_See code: [dist/commands/whoami.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.5/dist/commands/whoami.js)_
+_See code:
+[dist/commands/whoami.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.5/dist/commands/whoami.js)_
 
 <!-- commandsstop -->
 
@@ -302,7 +313,8 @@ _See code: [dist/commands/whoami.js](https://github.com/kamilkisiela/graphql-hiv
 
 # Config
 
-In addition to using the CLI args, you can also define your configuration in a JSON file which the CLI would pick up when it runs.
+In addition to using the CLI args, you can also define your configuration in a JSON file which the
+CLI would pick up when it runs.
 
 You can use the `HIVE_CONFIG` environment variable to define the path to the JSON file as follows:
 

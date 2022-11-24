@@ -1,4 +1,8 @@
-export function renderEmailVerificationEmail(params: { subject: string; verificationLink: string; toEmail: string }) {
+export function renderEmailVerificationEmail(params: {
+  subject: string;
+  verificationLink: string;
+  toEmail: string;
+}) {
   return `
 <!doctype html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml"

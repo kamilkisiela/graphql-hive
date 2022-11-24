@@ -57,7 +57,11 @@ export function GetStartedProgress({
 
   return (
     <>
-      <button onClick={onOpen} className="cursor-pointer rounded px-4 py-2 text-left hover:opacity-80" ref={triggerRef}>
+      <button
+        onClick={onOpen}
+        className="cursor-pointer rounded px-4 py-2 text-left hover:opacity-80"
+        ref={triggerRef}
+      >
         <div className="text-sm font-medium">Get Started</div>
         <div className="text-xs text-gray-500">
           {remaining} remaining task{remaining > 1 ? 's' : ''}
@@ -78,7 +82,12 @@ export function GetStartedProgress({
           </div>
         </div>
       </button>
-      <GetStartedWizard isOpen={isOpen} onClose={onClose} triggerRef={triggerRef} tasks={processedTasks} />
+      <GetStartedWizard
+        isOpen={isOpen}
+        onClose={onClose}
+        triggerRef={triggerRef}
+        tasks={processedTasks}
+      />
     </>
   );
 }
@@ -97,7 +106,13 @@ function GetStartedWizard({
     | Omit<DocumentType<typeof GetStartedWizard_GetStartedProgress>, 'invitingMembers'>;
 }) {
   return (
-    <Drawer isOpen={isOpen} placement="right" onClose={onClose} finalFocusRef={triggerRef} size="md">
+    <Drawer
+      isOpen={isOpen}
+      placement="right"
+      onClose={onClose}
+      finalFocusRef={triggerRef}
+      size="md"
+    >
       <DrawerOverlay />
       <DrawerContent bgColor={'gray.800'}>
         <DrawerCloseButton />
@@ -115,7 +130,10 @@ function GetStartedWizard({
               Check a schema
             </Task>
             {'invitingMembers' in tasks && typeof tasks.invitingMembers === 'boolean' ? (
-              <Task link={getDocsUrl(`/get-started/organizations#members`)} completed={tasks.invitingMembers}>
+              <Task
+                link={getDocsUrl(`/get-started/organizations#members`)}
+                completed={tasks.invitingMembers}
+              >
                 Invite members
               </Task>
             ) : null}
@@ -148,7 +166,10 @@ function Task({
       href={link ?? undefined}
       target="_blank"
       rel="noreferrer"
-      className={clsx('flex flex-row items-center gap-4 p-3 text-left', completed ? 'opacity-50' : 'hover:opacity-80')}
+      className={clsx(
+        'flex flex-row items-center gap-4 p-3 text-left',
+        completed ? 'opacity-50' : 'hover:opacity-80',
+      )}
     >
       {completed ? (
         <VscIssues className="h-[20px] w-[20px] text-green-400" />

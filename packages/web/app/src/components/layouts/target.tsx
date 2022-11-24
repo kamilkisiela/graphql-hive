@@ -152,12 +152,15 @@ export const TargetLayout = ({
                     {targets.nodes.map(
                       node =>
                         node.cleanId !== targetId && (
-                          <NextLink href={`/${orgId}/${projectId}/${node.cleanId}`} key={node.cleanId}>
+                          <NextLink
+                            href={`/${orgId}/${projectId}/${node.cleanId}`}
+                            key={node.cleanId}
+                          >
                             <a className="line-clamp-1 max-w-2xl">
                               <DropdownMenu.Item>{node.name}</DropdownMenu.Item>
                             </a>
                           </NextLink>
-                        )
+                        ),
                     )}
                   </DropdownMenu.Content>
                 </DropdownMenu>
@@ -168,7 +171,12 @@ export const TargetLayout = ({
           {connect ??
             (isCdnEnabledQuery.data.isCDNEnabled ? (
               <>
-                <Button size="large" variant="primary" onClick={toggleModalOpen} className="ml-auto">
+                <Button
+                  size="large"
+                  variant="primary"
+                  onClick={toggleModalOpen}
+                  className="ml-auto"
+                >
                   Connect
                   <Link2Icon className="ml-8 h-4 w-4" />
                 </Button>

@@ -7,7 +7,7 @@ test('renaming an organization should result changing its cleanId', async () => 
     {
       name: 'foo',
     },
-    access_token
+    access_token,
   );
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
 
@@ -16,19 +16,22 @@ test('renaming an organization should result changing its cleanId', async () => 
       organization: org.cleanId,
       name: 'bar',
     },
-    access_token
+    access_token,
   );
 
   expect(renamedOrganizationResult.body.errors).not.toBeDefined();
 
   expect(renamedOrganizationResult.body.data?.updateOrganizationName.error).toBeNull();
   expect(
-    renamedOrganizationResult.body.data?.updateOrganizationName.ok?.updatedOrganizationPayload.organization.name
+    renamedOrganizationResult.body.data?.updateOrganizationName.ok?.updatedOrganizationPayload
+      .organization.name,
   ).toBe('bar');
   expect(
-    renamedOrganizationResult.body.data?.updateOrganizationName.ok?.updatedOrganizationPayload.organization.cleanId
+    renamedOrganizationResult.body.data?.updateOrganizationName.ok?.updatedOrganizationPayload
+      .organization.cleanId,
   ).toBe('bar');
   expect(
-    renamedOrganizationResult.body.data?.updateOrganizationName.ok?.updatedOrganizationPayload.selector.organization
+    renamedOrganizationResult.body.data?.updateOrganizationName.ok?.updatedOrganizationPayload
+      .selector.organization,
   ).toBe('bar');
 });

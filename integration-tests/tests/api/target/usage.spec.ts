@@ -1,4 +1,9 @@
-import { TargetAccessScope, ProjectType, ProjectAccessScope, OrganizationAccessScope } from '@app/gql/graphql';
+import {
+  TargetAccessScope,
+  ProjectType,
+  ProjectAccessScope,
+  OrganizationAccessScope,
+} from '@app/gql/graphql';
 import formatISO from 'date-fns/formatISO';
 import subHours from 'date-fns/subHours';
 import {
@@ -16,7 +21,7 @@ import {
 import { authenticate } from '../../../testkit/auth';
 import { collect, CollectedOperation } from '../../../testkit/usage';
 import { clickHouseQuery } from '../../../testkit/clickhouse';
-// eslint-disable-next-line hive/enforce-deps-in-dev, import/no-extraneous-dependencies
+// eslint-disable-next-line hive/enforce-deps-in-dev
 import { normalizeOperation } from '@graphql-hive/core';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { parse, print } from 'graphql';
@@ -49,7 +54,7 @@ test('collect operation', async () => {
     {
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
@@ -60,7 +65,7 @@ test('collect operation', async () => {
       type: ProjectType.Single,
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
@@ -76,7 +81,7 @@ test('collect operation', async () => {
       projectScopes: [ProjectAccessScope.Read],
       targetScopes: [TargetAccessScope.Read, TargetAccessScope.Settings],
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const tokenResult = await createToken(
@@ -87,9 +92,13 @@ test('collect operation', async () => {
       target: target.cleanId,
       organizationScopes: [OrganizationAccessScope.Read],
       projectScopes: [ProjectAccessScope.Read],
-      targetScopes: [TargetAccessScope.Read, TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      targetScopes: [
+        TargetAccessScope.Read,
+        TargetAccessScope.RegistryRead,
+        TargetAccessScope.RegistryWrite,
+      ],
     },
-    owner_access_token
+    owner_access_token,
   );
 
   expect(settingsTokenResult.body.errors).not.toBeDefined();
@@ -104,7 +113,7 @@ test('collect operation', async () => {
       commit: 'abc123',
       sdl: `type Query { ping: String me: String }`,
     },
-    token
+    token,
   );
 
   expect(schemaPublishResult.body.errors).not.toBeDefined();
@@ -119,7 +128,7 @@ test('collect operation', async () => {
     },
     {
       token: tokenForSettings,
-    }
+    },
   );
 
   expect(targetValidationResult.body.errors).not.toBeDefined();
@@ -132,7 +141,7 @@ test('collect operation', async () => {
     {
       sdl: `type Query { me: String }`,
     },
-    token
+    token,
   );
   expect(unusedCheckResult.body.errors).not.toBeDefined();
   expect(unusedCheckResult.body.data!.schemaCheck.__typename).toEqual('SchemaCheckSuccess');
@@ -162,11 +171,13 @@ test('collect operation', async () => {
     {
       sdl: `type Query { me: String }`,
     },
-    token
+    token,
   );
 
   if (usedCheckResult.body.data!.schemaCheck.__typename !== 'SchemaCheckError') {
-    throw new Error(`Expected SchemaCheckError, got ${usedCheckResult.body.data!.schemaCheck.__typename}`);
+    throw new Error(
+      `Expected SchemaCheckError, got ${usedCheckResult.body.data!.schemaCheck.__typename}`,
+    );
   }
 
   expect(usedCheckResult.body.data!.schemaCheck.valid).toEqual(false);
@@ -183,7 +194,7 @@ test('collect operation', async () => {
         to,
       },
     },
-    token
+    token,
   );
 
   expect(operationStatsResult.body.errors).not.toBeDefined();
@@ -212,7 +223,7 @@ test('normalize and collect operation without breaking its syntax', async () => 
     {
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
@@ -223,7 +234,7 @@ test('normalize and collect operation without breaking its syntax', async () => 
       type: ProjectType.Single,
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
@@ -239,7 +250,7 @@ test('normalize and collect operation without breaking its syntax', async () => 
       projectScopes: [ProjectAccessScope.Read],
       targetScopes: [TargetAccessScope.Read, TargetAccessScope.Settings],
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const tokenResult = await createToken(
@@ -250,9 +261,13 @@ test('normalize and collect operation without breaking its syntax', async () => 
       target: target.cleanId,
       organizationScopes: [OrganizationAccessScope.Read],
       projectScopes: [ProjectAccessScope.Read],
-      targetScopes: [TargetAccessScope.Read, TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      targetScopes: [
+        TargetAccessScope.Read,
+        TargetAccessScope.RegistryRead,
+        TargetAccessScope.RegistryWrite,
+      ],
     },
-    owner_access_token
+    owner_access_token,
   );
 
   expect(settingsTokenResult.body.errors).not.toBeDefined();
@@ -357,7 +372,7 @@ test('normalize and collect operation without breaking its syntax', async () => 
         to,
       },
     },
-    token
+    token,
   );
 
   expect(operationStatsResult.body.errors).not.toBeDefined();
@@ -389,7 +404,7 @@ test('number of produced and collected operations should match (no errors)', asy
     {
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
@@ -400,7 +415,7 @@ test('number of produced and collected operations should match (no errors)', asy
       type: ProjectType.Single,
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
@@ -414,9 +429,13 @@ test('number of produced and collected operations should match (no errors)', asy
       target: target.cleanId,
       organizationScopes: [OrganizationAccessScope.Read],
       projectScopes: [ProjectAccessScope.Read],
-      targetScopes: [TargetAccessScope.Read, TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      targetScopes: [
+        TargetAccessScope.Read,
+        TargetAccessScope.RegistryRead,
+        TargetAccessScope.RegistryWrite,
+      ],
     },
-    owner_access_token
+    owner_access_token,
   );
 
   expect(tokenResult.body.errors).not.toBeDefined();
@@ -439,7 +458,7 @@ test('number of produced and collected operations should match (no errors)', asy
           errorsTotal: 0,
         },
       },
-      token
+      token,
     );
   }
 
@@ -457,7 +476,7 @@ test('number of produced and collected operations should match (no errors)', asy
         to,
       },
     },
-    token
+    token,
   );
 
   expect(operationStatsResult.body.errors).not.toBeDefined();
@@ -487,7 +506,7 @@ test('check usage from two selected targets', async () => {
     {
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
@@ -498,7 +517,7 @@ test('check usage from two selected targets', async () => {
       type: ProjectType.Single,
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
@@ -510,7 +529,7 @@ test('check usage from two selected targets', async () => {
       organization: org.cleanId,
       project: project.cleanId,
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const production = productionTargetResult.body.data!.createTarget.ok!.createdTarget;
@@ -523,9 +542,13 @@ test('check usage from two selected targets', async () => {
       target: staging.cleanId,
       organizationScopes: [OrganizationAccessScope.Read],
       projectScopes: [ProjectAccessScope.Read],
-      targetScopes: [TargetAccessScope.Read, TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      targetScopes: [
+        TargetAccessScope.Read,
+        TargetAccessScope.RegistryRead,
+        TargetAccessScope.RegistryWrite,
+      ],
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const productionTokenResult = await createToken(
@@ -536,9 +559,13 @@ test('check usage from two selected targets', async () => {
       target: production.cleanId,
       organizationScopes: [OrganizationAccessScope.Read],
       projectScopes: [ProjectAccessScope.Read],
-      targetScopes: [TargetAccessScope.Read, TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      targetScopes: [
+        TargetAccessScope.Read,
+        TargetAccessScope.RegistryRead,
+        TargetAccessScope.RegistryWrite,
+      ],
     },
-    owner_access_token
+    owner_access_token,
   );
 
   expect(stagingTokenResult.body.errors).not.toBeDefined();
@@ -553,7 +580,7 @@ test('check usage from two selected targets', async () => {
       commit: 'usage-check-2',
       sdl: `type Query { ping: String me: String }`,
     },
-    tokenForStaging
+    tokenForStaging,
   );
 
   expect(schemaPublishResult.body.errors).not.toBeDefined();
@@ -568,7 +595,7 @@ test('check usage from two selected targets', async () => {
     },
     {
       authToken: owner_access_token,
-    }
+    },
   );
 
   expect(targetValidationResult.body.errors).not.toBeDefined();
@@ -625,7 +652,7 @@ test('check usage from two selected targets', async () => {
     {
       sdl: `type Query { me: String }`, // ping is used but on production
     },
-    tokenForStaging
+    tokenForStaging,
   );
   expect(unusedCheckResult.body.errors).not.toBeDefined();
   expect(unusedCheckResult.body.data!.schemaCheck.__typename).toEqual('SchemaCheckSuccess');
@@ -643,19 +670,22 @@ test('check usage from two selected targets', async () => {
     },
     {
       authToken: owner_access_token,
-    }
+    },
   );
 
   expect(updateValidationResult.body.errors).not.toBeDefined();
   expect(updateValidationResult.body.data!.updateTargetValidationSettings.error).toBeNull();
   expect(
-    updateValidationResult.body.data!.updateTargetValidationSettings.ok!.updatedTargetValidationSettings.percentage
+    updateValidationResult.body.data!.updateTargetValidationSettings.ok!
+      .updatedTargetValidationSettings.percentage,
   ).toEqual(50);
   expect(
-    updateValidationResult.body.data!.updateTargetValidationSettings.ok!.updatedTargetValidationSettings.period
+    updateValidationResult.body.data!.updateTargetValidationSettings.ok!
+      .updatedTargetValidationSettings.period,
   ).toEqual(2);
   expect(
-    updateValidationResult.body.data!.updateTargetValidationSettings.ok!.updatedTargetValidationSettings.targets
+    updateValidationResult.body.data!.updateTargetValidationSettings.ok!
+      .updatedTargetValidationSettings.targets,
   ).toHaveLength(2);
 
   // should be non-breaking because the field is used in production and we are checking staging and production now
@@ -664,11 +694,13 @@ test('check usage from two selected targets', async () => {
     {
       sdl: `type Query { me: String }`, // ping is used on production and we do check production now
     },
-    tokenForStaging
+    tokenForStaging,
   );
 
   if (usedCheckResult.body.data!.schemaCheck.__typename !== 'SchemaCheckSuccess') {
-    throw new Error(`Expected SchemaCheckSuccess, got ${usedCheckResult.body.data!.schemaCheck.__typename}`);
+    throw new Error(
+      `Expected SchemaCheckSuccess, got ${usedCheckResult.body.data!.schemaCheck.__typename}`,
+    );
   }
 
   expect(usedCheckResult.body.data!.schemaCheck.valid).toEqual(true);
@@ -681,7 +713,7 @@ test('check usage not from excluded client names', async () => {
     {
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
@@ -692,11 +724,13 @@ test('check usage not from excluded client names', async () => {
       type: ProjectType.Single,
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const production = projectResult.body.data!.createProject.ok!.createdTargets.find(t => t.name === 'production');
+  const production = projectResult.body.data!.createProject.ok!.createdTargets.find(
+    t => t.name === 'production',
+  );
 
   if (!production) {
     throw new Error('No production target');
@@ -710,9 +744,13 @@ test('check usage not from excluded client names', async () => {
       target: production.cleanId,
       organizationScopes: [OrganizationAccessScope.Read],
       projectScopes: [ProjectAccessScope.Read],
-      targetScopes: [TargetAccessScope.Read, TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      targetScopes: [
+        TargetAccessScope.Read,
+        TargetAccessScope.RegistryRead,
+        TargetAccessScope.RegistryWrite,
+      ],
     },
-    owner_access_token
+    owner_access_token,
   );
 
   expect(productionTokenResult.body.errors).not.toBeDefined();
@@ -725,7 +763,7 @@ test('check usage not from excluded client names', async () => {
       commit: 'usage-check-2',
       sdl: `type Query { ping: String me: String }`,
     },
-    tokenForProduction
+    tokenForProduction,
   );
 
   expect(schemaPublishResult.body.errors).not.toBeDefined();
@@ -740,7 +778,7 @@ test('check usage not from excluded client names', async () => {
     },
     {
       authToken: owner_access_token,
-    }
+    },
   );
 
   expect(targetValidationResult.body.errors).not.toBeDefined();
@@ -814,7 +852,7 @@ test('check usage not from excluded client names', async () => {
     {
       sdl: `type Query { ping: String }`, // Query.me is used
     },
-    tokenForProduction
+    tokenForProduction,
   );
   expect(unusedCheckResult.body.errors).not.toBeDefined();
   expect(unusedCheckResult.body.data!.schemaCheck.__typename).toEqual('SchemaCheckError');
@@ -832,19 +870,22 @@ test('check usage not from excluded client names', async () => {
     },
     {
       authToken: owner_access_token,
-    }
+    },
   );
 
   expect(updateValidationResult.body.errors).not.toBeDefined();
   expect(updateValidationResult.body.data!.updateTargetValidationSettings.error).toBeNull();
   expect(
-    updateValidationResult.body.data!.updateTargetValidationSettings.ok!.updatedTargetValidationSettings.enabled
+    updateValidationResult.body.data!.updateTargetValidationSettings.ok!
+      .updatedTargetValidationSettings.enabled,
   ).toBe(true);
   expect(
-    updateValidationResult.body.data!.updateTargetValidationSettings.ok!.updatedTargetValidationSettings.excludedClients
+    updateValidationResult.body.data!.updateTargetValidationSettings.ok!
+      .updatedTargetValidationSettings.excludedClients,
   ).toHaveLength(1);
   expect(
-    updateValidationResult.body.data!.updateTargetValidationSettings.ok!.updatedTargetValidationSettings.excludedClients
+    updateValidationResult.body.data!.updateTargetValidationSettings.ok!
+      .updatedTargetValidationSettings.excludedClients,
   ).toContainEqual('app');
 
   // should be safe because the field was not used by the non-excluded clients (cli never requested `Query.me`, but app did)
@@ -852,11 +893,13 @@ test('check usage not from excluded client names', async () => {
     {
       sdl: `type Query { ping: String }`,
     },
-    tokenForProduction
+    tokenForProduction,
   );
 
   if (usedCheckResult.body.data!.schemaCheck.__typename !== 'SchemaCheckSuccess') {
-    throw new Error(`Expected SchemaCheckSuccess, got ${usedCheckResult.body.data!.schemaCheck.__typename}`);
+    throw new Error(
+      `Expected SchemaCheckSuccess, got ${usedCheckResult.body.data!.schemaCheck.__typename}`,
+    );
   }
 
   expect(usedCheckResult.body.data!.schemaCheck.valid).toEqual(true);
@@ -869,7 +912,7 @@ test('number of produced and collected operations should match', async () => {
     {
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
@@ -880,7 +923,7 @@ test('number of produced and collected operations should match', async () => {
       type: ProjectType.Single,
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
@@ -894,9 +937,13 @@ test('number of produced and collected operations should match', async () => {
       target: target.cleanId,
       organizationScopes: [OrganizationAccessScope.Read],
       projectScopes: [ProjectAccessScope.Read],
-      targetScopes: [TargetAccessScope.Read, TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      targetScopes: [
+        TargetAccessScope.Read,
+        TargetAccessScope.RegistryRead,
+        TargetAccessScope.RegistryWrite,
+      ],
     },
-    owner_access_token
+    owner_access_token,
   );
 
   expect(tokenResult.body.errors).not.toBeDefined();
@@ -935,7 +982,7 @@ test('number of produced and collected operations should match', async () => {
               },
             },
           },
-      token
+      token,
     );
   }
 
@@ -963,7 +1010,7 @@ test('number of produced and collected operations should match', async () => {
       client_name: 'web',
       hash: expect.any(String),
       total: expect.stringMatching('5000'),
-    })
+    }),
   );
   expect(result.data).toContainEqual(
     expect.objectContaining({
@@ -971,7 +1018,7 @@ test('number of produced and collected operations should match', async () => {
       client_name: '',
       hash: expect.any(String),
       total: expect.stringMatching('5000'),
-    })
+    }),
   );
 });
 
@@ -981,7 +1028,7 @@ test('different order of schema coordinates should not result in different hash'
     {
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
@@ -992,7 +1039,7 @@ test('different order of schema coordinates should not result in different hash'
       type: ProjectType.Single,
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
@@ -1006,9 +1053,13 @@ test('different order of schema coordinates should not result in different hash'
       target: target.cleanId,
       organizationScopes: [OrganizationAccessScope.Read],
       projectScopes: [ProjectAccessScope.Read],
-      targetScopes: [TargetAccessScope.Read, TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      targetScopes: [
+        TargetAccessScope.Read,
+        TargetAccessScope.RegistryRead,
+        TargetAccessScope.RegistryWrite,
+      ],
     },
-    owner_access_token
+    owner_access_token,
   );
 
   expect(tokenResult.body.errors).not.toBeDefined();
@@ -1064,7 +1115,7 @@ test('different order of schema coordinates should not result in different hash'
   }>(
     FF_CLICKHOUSE_V2_TABLES
       ? `SELECT hash FROM operation_collection GROUP BY hash`
-      : `SELECT hash FROM operations_registry FINAL GROUP BY hash`
+      : `SELECT hash FROM operations_registry FINAL GROUP BY hash`,
   );
 
   expect(operationCollectionResult.rows).toEqual(1);
@@ -1076,7 +1127,7 @@ test('same operation but with different schema coordinates should result in diff
     {
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
@@ -1087,7 +1138,7 @@ test('same operation but with different schema coordinates should result in diff
       type: ProjectType.Single,
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
@@ -1101,9 +1152,13 @@ test('same operation but with different schema coordinates should result in diff
       target: target.cleanId,
       organizationScopes: [OrganizationAccessScope.Read],
       projectScopes: [ProjectAccessScope.Read],
-      targetScopes: [TargetAccessScope.Read, TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      targetScopes: [
+        TargetAccessScope.Read,
+        TargetAccessScope.RegistryRead,
+        TargetAccessScope.RegistryWrite,
+      ],
     },
-    owner_access_token
+    owner_access_token,
   );
 
   expect(tokenResult.body.errors).not.toBeDefined();
@@ -1154,7 +1209,7 @@ test('same operation but with different schema coordinates should result in diff
   }>(
     FF_CLICKHOUSE_V2_TABLES
       ? `SELECT hash FROM operation_collection GROUP BY hash`
-      : `SELECT hash FROM operations_registry FINAL GROUP BY hash`
+      : `SELECT hash FROM operations_registry FINAL GROUP BY hash`,
   );
 
   expect(operationCollectionResult.rows).toEqual(2);
@@ -1167,7 +1222,7 @@ test('same operation but with different schema coordinates should result in diff
   }>(
     FF_CLICKHOUSE_V2_TABLES
       ? `SELECT hash FROM operation_collection GROUP BY hash`
-      : `SELECT hash FROM operations_registry FINAL GROUP BY hash`
+      : `SELECT hash FROM operations_registry FINAL GROUP BY hash`,
   );
 
   expect(operationsResult.rows).toEqual(2);
@@ -1179,7 +1234,7 @@ test('operations with the same schema coordinates and body but with different na
     {
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
@@ -1190,7 +1245,7 @@ test('operations with the same schema coordinates and body but with different na
       type: ProjectType.Single,
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
@@ -1204,9 +1259,13 @@ test('operations with the same schema coordinates and body but with different na
       target: target.cleanId,
       organizationScopes: [OrganizationAccessScope.Read],
       projectScopes: [ProjectAccessScope.Read],
-      targetScopes: [TargetAccessScope.Read, TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      targetScopes: [
+        TargetAccessScope.Read,
+        TargetAccessScope.RegistryRead,
+        TargetAccessScope.RegistryWrite,
+      ],
     },
-    owner_access_token
+    owner_access_token,
   );
 
   expect(tokenResult.body.errors).not.toBeDefined();
@@ -1262,7 +1321,7 @@ test('operations with the same schema coordinates and body but with different na
   }>(
     FF_CLICKHOUSE_V2_TABLES
       ? `SELECT hash FROM operation_collection GROUP BY hash`
-      : `SELECT hash FROM operations_registry FINAL GROUP BY hash`
+      : `SELECT hash FROM operations_registry FINAL GROUP BY hash`,
   );
 
   expect(operationsResult.rows).toEqual(2);
@@ -1274,7 +1333,7 @@ test('ignore operations with syntax errors', async () => {
     {
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
@@ -1285,7 +1344,7 @@ test('ignore operations with syntax errors', async () => {
       type: ProjectType.Single,
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
@@ -1299,9 +1358,13 @@ test('ignore operations with syntax errors', async () => {
       target: target.cleanId,
       organizationScopes: [OrganizationAccessScope.Read],
       projectScopes: [ProjectAccessScope.Read],
-      targetScopes: [TargetAccessScope.Read, TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      targetScopes: [
+        TargetAccessScope.Read,
+        TargetAccessScope.RegistryRead,
+        TargetAccessScope.RegistryWrite,
+      ],
     },
-    owner_access_token
+    owner_access_token,
   );
 
   expect(tokenResult.body.errors).not.toBeDefined();
@@ -1339,7 +1402,7 @@ test('ignore operations with syntax errors', async () => {
     expect.objectContaining({
       rejected: 1,
       accepted: 1,
-    })
+    }),
   );
 
   await waitFor(5_000);
@@ -1365,7 +1428,7 @@ test('ignore operations with syntax errors', async () => {
   }>(
     FF_CLICKHOUSE_V2_TABLES
       ? `SELECT hash FROM operation_collection GROUP BY hash`
-      : `SELECT hash FROM operations_registry FINAL GROUP BY hash`
+      : `SELECT hash FROM operations_registry FINAL GROUP BY hash`,
   );
 
   expect(operationsResult.rows).toEqual(1);
@@ -1377,7 +1440,7 @@ test('ensure correct data', async () => {
     {
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
@@ -1388,7 +1451,7 @@ test('ensure correct data', async () => {
       type: ProjectType.Single,
       name: 'foo',
     },
-    owner_access_token
+    owner_access_token,
   );
 
   const project = projectResult.body.data!.createProject.ok!.createdProject;
@@ -1402,9 +1465,13 @@ test('ensure correct data', async () => {
       target: target.cleanId,
       organizationScopes: [OrganizationAccessScope.Read],
       projectScopes: [ProjectAccessScope.Read],
-      targetScopes: [TargetAccessScope.Read, TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      targetScopes: [
+        TargetAccessScope.Read,
+        TargetAccessScope.RegistryRead,
+        TargetAccessScope.RegistryWrite,
+      ],
     },
-    owner_access_token
+    owner_access_token,
   );
 
   expect(tokenResult.body.errors).not.toBeDefined();
@@ -1637,7 +1704,9 @@ test('ensure correct data', async () => {
     expect(dailyAggOfKnownClient.hash).toHaveLength(32);
     expect(dailyAggOfKnownClient.target).toEqual(target.id);
 
-    const dailyAggOfUnknownClient = clientsDailyResult.data.find(c => c.client_name !== 'test-name')!;
+    const dailyAggOfUnknownClient = clientsDailyResult.data.find(
+      c => c.client_name !== 'test-name',
+    )!;
     expect(dailyAggOfUnknownClient).toBeDefined();
     expect(ensureNumber(dailyAggOfUnknownClient.total)).toEqual(1);
     expect(dailyAggOfUnknownClient.client_version).toHaveLength(0);
@@ -1799,7 +1868,9 @@ test('ensure correct data', async () => {
     expect(dailyAggOfKnownClient.hash).toHaveLength(32);
     expect(dailyAggOfKnownClient.target).toEqual(target.id);
 
-    const dailyAggOfUnknownClient = clientsDailyResult.data.find(c => c.client_name !== 'test-name')!;
+    const dailyAggOfUnknownClient = clientsDailyResult.data.find(
+      c => c.client_name !== 'test-name',
+    )!;
     expect(dailyAggOfUnknownClient).toBeDefined();
     expect(ensureNumber(dailyAggOfUnknownClient.total)).toEqual(1);
     expect(dailyAggOfUnknownClient.hash).toHaveLength(32);

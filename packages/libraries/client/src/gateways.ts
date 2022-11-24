@@ -86,7 +86,7 @@ export function createServicesFetcher({ endpoint, key }: ServicesFetcherOptions)
           .update(service.name)
           .digest('base64'),
         ...service,
-      }))
+      })),
     );
   };
 }

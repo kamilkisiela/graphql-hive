@@ -4,10 +4,6 @@
   "scripts": {
     "typecheck": "tsc --noEmit"
   },
-  "devDependencies": {
-    "@types/mime-types": "2.1.1",
-    "@types/node": "18.11.5"
-  },
   "dependencies": {
     "@manypkg/get-packages": "1.1.3",
     "@pulumi/azure": "5.23.0",
@@ -17,5 +13,9 @@
     "@pulumi/pulumi": "3.44.1",
     "@pulumi/random": "4.8.2",
     "pg-connection-string": "2.5.0"
+  },
+  "devDependencies": {
+    "@types/mime-types": "2.1.1",
+    "@types/node": "18.11.5"
   }
 }

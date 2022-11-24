@@ -53,6 +53,6 @@ export function until(fn: () => boolean, timeout: number): Promise<void> {
         }
       }, 200);
     }),
-    timeout
+    timeout,
   );
 }

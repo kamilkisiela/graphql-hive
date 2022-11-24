@@ -41,27 +41,28 @@ export const CreateTargetModal = ({
   const { push } = useRouter();
   const router = useRouteSelector();
 
-  const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } = useFormik({
-    initialValues: { name: '' },
-    validationSchema: Yup.object().shape({
-      name: Yup.string().required('Target name is required'),
-    }),
-    async onSubmit(values) {
-      const { projectId, organizationId } = router;
-      const { data } = await mutate({
-        input: {
-          project: projectId,
-          organization: organizationId,
-          name: values.name,
-        },
-      });
-      if (data?.createTarget.ok) {
-        toggleModalOpen();
-        const targetId = data.createTarget.ok.createdTarget.cleanId;
-        push(`/${organizationId}/${projectId}/${targetId}`);
-      }
-    },
-  });
+  const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } =
+    useFormik({
+      initialValues: { name: '' },
+      validationSchema: Yup.object().shape({
+        name: Yup.string().required('Target name is required'),
+      }),
+      async onSubmit(values) {
+        const { projectId, organizationId } = router;
+        const { data } = await mutate({
+          input: {
+            project: projectId,
+            organization: organizationId,
+            name: values.name,
+          },
+        });
+        if (data?.createTarget.ok) {
+          toggleModalOpen();
+          const targetId = data.createTarget.ok.createdTarget.cleanId;
+          push(`/${organizationId}/${projectId}/${targetId}`);
+        }
+      },
+    });
 
   return (
     <Modal open={isOpen} onOpenChange={toggleModalOpen}>
@@ -84,7 +85,9 @@ export const CreateTargetModal = ({
           <div className="-mt-2 text-sm text-red-500">{errors.name || mutation.error?.message}</div>
         )}
         {mutation.data?.createTarget.error?.inputErrors.name && (
-          <div className="-mt-2 text-sm text-red-500">{mutation.data.createTarget.error.inputErrors.name}</div>
+          <div className="-mt-2 text-sm text-red-500">
+            {mutation.data.createTarget.error.inputErrors.name}
+          </div>
         )}
         <div className="flex gap-2">
           <Button type="button" size="large" block onClick={toggleModalOpen}>

@@ -4,7 +4,12 @@ import { AuthManager } from '../../auth/providers/auth-manager';
 import { OrganizationAccessScope } from '../../auth/providers/organization-access';
 import { ProjectAccessScope } from '../../auth/providers/project-access';
 import { Logger } from '../../shared/providers/logger';
-import { Storage, OrganizationSelector, ProjectSelector, TargetSelector } from '../../shared/providers/storage';
+import {
+  Storage,
+  OrganizationSelector,
+  ProjectSelector,
+  TargetSelector,
+} from '../../shared/providers/storage';
 import { Activity } from './activities';
 
 interface PaginationSelector {
@@ -46,7 +51,7 @@ export class ActivityManager {
   }
 
   public async getByOrganization(
-    selector: OrganizationSelector & PaginationSelector
+    selector: OrganizationSelector & PaginationSelector,
   ): Promise<readonly ActivityObject[]> {
     await this.authManager.ensureOrganizationAccess({
       ...selector,
@@ -55,7 +60,9 @@ export class ActivityManager {
     return this.storage.getActivities(selector);
   }
 
-  public async getByProject(selector: ProjectSelector & PaginationSelector): Promise<readonly ActivityObject[]> {
+  public async getByProject(
+    selector: ProjectSelector & PaginationSelector,
+  ): Promise<readonly ActivityObject[]> {
     await this.authManager.ensureProjectAccess({
       ...selector,
       scope: ProjectAccessScope.READ,
@@ -63,7 +70,9 @@ export class ActivityManager {
     return this.storage.getActivities(selector);
   }
 
-  public async getByTarget(selector: TargetSelector & PaginationSelector): Promise<readonly ActivityObject[]> {
+  public async getByTarget(
+    selector: TargetSelector & PaginationSelector,
+  ): Promise<readonly ActivityObject[]> {
     await this.authManager.ensureProjectAccess({
       ...selector,
       scope: ProjectAccessScope.READ,

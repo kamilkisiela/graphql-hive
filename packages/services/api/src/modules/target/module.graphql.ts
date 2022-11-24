@@ -11,7 +11,9 @@ export default gql`
     createTarget(input: CreateTargetInput!): CreateTargetResult!
     updateTargetName(input: UpdateTargetNameInput!): UpdateTargetNameResult!
     deleteTarget(selector: TargetSelectorInput!): DeleteTargetPayload!
-    updateTargetValidationSettings(input: UpdateTargetValidationSettingsInput!): UpdateTargetValidationSettingsResult!
+    updateTargetValidationSettings(
+      input: UpdateTargetValidationSettingsInput!
+    ): UpdateTargetValidationSettingsResult!
     setTargetValidation(input: SetTargetValidationInput!): TargetValidationSettings!
   }
 

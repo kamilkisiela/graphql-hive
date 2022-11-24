@@ -30,7 +30,7 @@ function Manage() {
 
       setFilters(newFilters);
     },
-    [setFilters, filters]
+    [setFilters, filters],
   );
 
   return (
@@ -42,7 +42,9 @@ function Manage() {
               <CheckboxGroup
                 colorScheme="teal"
                 size="sm"
-                defaultValue={Object.keys(filters).filter(key => !!filters[key as keyof typeof filters])}
+                defaultValue={Object.keys(filters).filter(
+                  key => !!filters[key as keyof typeof filters],
+                )}
                 onChange={onFiltersChange}
               >
                 <Checkbox tw="whitespace-nowrap align-middle" value="only-regular">
@@ -66,7 +68,10 @@ function Manage() {
                   With Collected
                 </Checkbox>
               </CheckboxGroup>
-              <Tooltip label="Date filter applies only to collected operations data" placement="left">
+              <Tooltip
+                label="Date filter applies only to collected operations data"
+                placement="left"
+              >
                 <Select
                   defaultValue={last}
                   onChange={ev => setLast(parseInt(ev.target.value, 10))}

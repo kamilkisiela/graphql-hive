@@ -12,7 +12,10 @@ supertokens.init(backendConfig());
 /**
  * Route for proxying to the underlying SuperTokens backend.
  */
-export default async function superTokens(req: NextApiRequest & Request, res: NextApiResponse & Response) {
+export default async function superTokens(
+  req: NextApiRequest & Request,
+  res: NextApiResponse & Response,
+) {
   // NOTE: We need CORS only if we are querying the APIs from a different origin
   await NextCors(req, res, {
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
@@ -26,7 +29,7 @@ export default async function superTokens(req: NextApiRequest & Request, res: Ne
       await middleware()(req, res, next);
     },
     req,
-    res
+    res,
   );
 
   if (!res.writableEnded) {

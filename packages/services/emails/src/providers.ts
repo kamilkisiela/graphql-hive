@@ -127,7 +127,7 @@ function sendmail(_config: SendmailEmailProviderConfig, emailFrom: string) {
             } else {
               resolve(reply);
             }
-          }
+          },
         );
       });
     },

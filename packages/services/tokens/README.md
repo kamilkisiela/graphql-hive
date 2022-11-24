@@ -1,6 +1,7 @@
 # `@hive/tokens`
 
-This service takes care of validating and issuing tokens used for accessing the public facing hive APIs (usage service and GraphQL API).
+This service takes care of validating and issuing tokens used for accessing the public facing hive
+APIs (usage service and GraphQL API).
 
 ## Configuration
 

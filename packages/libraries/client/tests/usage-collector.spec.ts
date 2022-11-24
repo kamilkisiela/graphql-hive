@@ -121,7 +121,7 @@ test('collect enums and scalars as inputs', async () => {
         }
       }
     `),
-    {}
+    {},
   ).value;
 
   expect(info.fields).toContain(`Int`);
@@ -144,7 +144,7 @@ test('collect enum values from object fields', async () => {
         }
       }
     `),
-    {}
+    {},
   ).value;
 
   expect(info.fields).toContain(`Int`);
@@ -167,7 +167,7 @@ test('collect enum values from arguments', async () => {
         }
       }
     `),
-    {}
+    {},
   ).value;
 
   expect(info.fields).toContain(`ProjectType.FEDERATION`);
@@ -189,7 +189,7 @@ test('collect arguments', async () => {
         }
       }
     `),
-    {}
+    {},
   ).value;
 
   expect(info.fields).toContain(`Query.projects.filter`);
@@ -208,7 +208,7 @@ test('collect used-only input fields', async () => {
         }
       }
     `),
-    {}
+    {},
   ).value;
 
   expect(info.fields).toContain(`FilterInput.pagination`);
@@ -230,7 +230,7 @@ test('collect all input fields when `processVariables` has not been passed and i
         }
       }
     `),
-    {}
+    {},
   ).value;
 
   expect(info.fields).toContain(`FilterInput.pagination`);
@@ -327,7 +327,7 @@ test('(processVariables: true) collect used-only input fields', async () => {
         limit: 1,
       },
       type: 'STITCHING',
-    }
+    },
   ).value;
 
   expect(info.fields).toContain(`FilterInput.pagination`);
@@ -352,7 +352,7 @@ test('(processVariables: true) should collect input object without fields when c
     `),
     {
       type: 'STITCHING',
-    }
+    },
   ).value;
 
   expect(info.fields).toContain(`FilterInput.type`);
@@ -391,7 +391,7 @@ test('(processVariables: true) collect used-only input type fields from an array
           limit: 10,
         },
       },
-    }
+    },
   ).value;
 
   expect(info.fields).toContain(`FilterInput.pagination`);

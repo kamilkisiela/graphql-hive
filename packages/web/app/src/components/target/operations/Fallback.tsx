@@ -10,7 +10,9 @@ export const OperationsFallback = ({
 }: PropsWithChildren<{ isError: boolean; isFetching?: boolean; refetch: () => void }>) => {
   return (
     <div className="relative">
-      <div className={clsx(isError ? 'blur-sm	' : null, isFetching ? 'opacity-50' : 'opacity-100')}>{children}</div>
+      <div className={clsx(isError ? 'blur-sm	' : null, isFetching ? 'opacity-50' : 'opacity-100')}>
+        {children}
+      </div>
       {isError ? (
         <div className="absolute inset-0 flex items-center justify-center">
           <Button danger onClick={refetch}>

@@ -2,7 +2,8 @@ import { Callout, PackageCmd } from '@theguild/components'
 
 # Publishing new schema
 
-Once you have created the target, the next step would be typically to push the GraphQL schema to Hive against the respective target.
+Once you have created the target, the next step would be typically to push the GraphQL schema to
+Hive against the respective target.
 
 ## Requirements
 
@@ -33,8 +34,8 @@ Now, create a config file as `hive.json` and paste there your token:
 ```
 
 <Callout>
-  Having a config file is not mandatory, you can use `--token YOUR-TOKEN` or an environment variable called `HIVE_TOKEN`
-  instead.
+  Having a config file is not mandatory, you can use `--token YOUR-TOKEN` or an environment variable
+  called `HIVE_TOKEN` instead.
 </Callout>
 
 To publish a schema, use `hive schema:publish` command:
@@ -54,11 +55,13 @@ hive schema:publish --service reviews --url http://my-service.com/graphql schema
 
 <Callout>To force publishing a schema, enable `--force` flag.</Callout>
 
-Once the schema is published, you should be able to see it in: `http://app.graphql-hive.com/<your-org>/<your-project>/<your-target>`.
+Once the schema is published, you should be able to see it in:
+`http://app.graphql-hive.com/<your-org>/<your-project>/<your-target>`.
 
 ### Publishing Metadata
 
-If your GraphQL schema runtime requires any metadata to run, you can attach metadata to your schema publication.
+If your GraphQL schema runtime requires any metadata to run, you can attach metadata to your schema
+publication.
 
 Metadata published to Hive must be a valid JSON, and limited to 25MB.
 
@@ -71,11 +74,14 @@ hive schema:publish schema.graphql --metadata metadata.json
 hive schema:publish schema.graphql --metadata '{ "someData": true }'
 ```
 
-To fetch the metadata later, use the Hive CDN, see [Using the Registry with any tool](./registry-usage#other-tools).
+To fetch the metadata later, use the Hive CDN, see
+[Using the Registry with any tool](./registry-usage#other-tools).
 
 ## Using Hive Client
 
-Our [`@graphql-hive/client`](https://www.npmjs.com/package/@graphql-hive/client) comes with a generic client and plugins for [Envelop](https://envelop.dev) and [Apollo Server](https://github.com/apollographql/apollo-server).
+Our [`@graphql-hive/client`](https://www.npmjs.com/package/@graphql-hive/client) comes with a
+generic client and plugins for [Envelop](https://envelop.dev) and
+[Apollo Server](https://github.com/apollographql/apollo-server).
 
 <PackageCmd packages={['@graphql-hive/client']} />
 
@@ -111,7 +117,9 @@ const server = new ApolloServer({
 
 ### Envelop
 
-If you're not familiar with Envelop - in "short" it's a lightweight JavaScript library for wrapping GraphQL execution layer and flow, allowing developers to develop, share and collaborate on GraphQL-related plugins, while filling the missing pieces in GraphQL implementations.
+If you're not familiar with Envelop - in "short" it's a lightweight JavaScript library for wrapping
+GraphQL execution layer and flow, allowing developers to develop, share and collaborate on
+GraphQL-related plugins, while filling the missing pieces in GraphQL implementations.
 
 Here's [more](https://www.envelop.dev/docs) on that topic.
 
@@ -186,10 +194,12 @@ end
 
 ```
 
-More information is available on the `graphql-hive` repository: https://github.com/charlypoly/graphql-ruby-hive
+More information is available on the `graphql-hive` repository:
+https://github.com/charlypoly/graphql-ruby-hive
 
 ## GitHub Integration
 
-In case you want to integrate GraphQL Hive with your GitHub repository, follow the [GitHub integration guide](./integrations#github).
+In case you want to integrate GraphQL Hive with your GitHub repository, follow the
+[GitHub integration guide](./integrations#github).
 
 ![GitHub Schema Check](/github-schema-check.png)

@@ -21,7 +21,7 @@ export function Table<TColumns extends string>({
                 className={clsx(
                   'break-all px-5 py-4',
                   column.align === 'right' && 'text-right',
-                  column.width === 'auto' && 'w-1'
+                  column.width === 'auto' && 'w-1',
                 )}
               >
                 {row[column.key]}

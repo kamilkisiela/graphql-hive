@@ -27,14 +27,18 @@ export function createReporting(pluginOptions: HivePluginOptions): SchemaReporte
   logIf(
     typeof reportingOptions.author !== 'string' || reportingOptions.author.length === 0,
     '[hive][reporting] author is missing',
-    logger.error
+    logger.error,
   );
   logIf(
     typeof reportingOptions.commit !== 'string' || reportingOptions.commit.length === 0,
     '[hive][reporting] commit is missing',
-    logger.error
+    logger.error,
   );
-  logIf(typeof token !== 'string' || token.length === 0, '[hive][reporting] token is missing', logger.error);
+  logIf(
+    typeof token !== 'string' || token.length === 0,
+    '[hive][reporting] token is missing',
+    logger.error,
+  );
 
   let currentSchema: GraphQLSchema | null = null;
   const agent = createAgent<GraphQLSchema, ExecutionResult<SchemaPublishMutation>>(
@@ -42,7 +46,9 @@ export function createReporting(pluginOptions: HivePluginOptions): SchemaReporte
       logger,
       ...(pluginOptions.agent ?? {}),
       endpoint:
-        selfHostingOptions?.graphqlEndpoint ?? reportingOptions.endpoint ?? 'https://app.graphql-hive.com/graphql',
+        selfHostingOptions?.graphqlEndpoint ??
+        reportingOptions.endpoint ??
+        'https://app.graphql-hive.com/graphql',
       token: token,
       enabled: pluginOptions.enabled,
       debug: pluginOptions.debug,
@@ -83,7 +89,7 @@ export function createReporting(pluginOptions: HivePluginOptions): SchemaReporte
           },
         });
       },
-    }
+    },
   );
 
   return {
@@ -113,7 +119,9 @@ export function createReporting(pluginOptions: HivePluginOptions): SchemaReporte
             throw new Error('Service url is not defined');
           }
           case 'SchemaPublishError': {
-            logger.info(`[hive][reporting] Published schema (forced with ${data.errors.total} errors)`);
+            logger.info(
+              `[hive][reporting] Published schema (forced with ${data.errors.total} errors)`,
+            );
             data.errors.nodes.slice(0, 5).forEach(error => {
               logger.info(` - ${error.message}`);
             });
@@ -124,7 +132,7 @@ export function createReporting(pluginOptions: HivePluginOptions): SchemaReporte
         logger.error(
           `[hive][reporting] Failed to report schema: ${
             error instanceof Error && 'message' in error ? error.message : error
-          }`
+          }`,
         );
       }
     },
@@ -226,6 +234,8 @@ function printSchemaWithDirectives(schema: GraphQLSchema) {
 
 async function printToSDL(schema: GraphQLSchema) {
   return stripIgnoredCharacters(
-    isFederatedSchema(schema) ? await extractFederationServiceSDL(schema) : printSchemaWithDirectives(schema)
+    isFederatedSchema(schema)
+      ? await extractFederationServiceSDL(schema)
+      : printSchemaWithDirectives(schema),
   );
 }

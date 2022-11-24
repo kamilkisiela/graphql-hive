@@ -74,7 +74,13 @@ export const OrganizationSwitcher: React.FC<{
     <>
       <OrganizationCreator isOpen={isOpen} onClose={onClose} />
       <Menu autoSelect={false}>
-        <MenuButton size="sm" as={Button} rightIcon={<VscChevronDown />} variant="ghost" tw="font-normal">
+        <MenuButton
+          size="sm"
+          as={Button}
+          rightIcon={<VscChevronDown />}
+          variant="ghost"
+          tw="font-normal"
+        >
           {menu.currentOrganization.name}
         </MenuButton>
         <MenuList bg={dropdownBgColor} color={dropdownTextColor}>

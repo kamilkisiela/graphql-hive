@@ -46,6 +46,6 @@ export function deployUsageEstimation({
       packageInfo: packageHelper.npmPack('@hive/usage-estimator'),
       port: 4000,
     },
-    [dbMigrations]
+    [dbMigrations],
   ).deploy();
 }

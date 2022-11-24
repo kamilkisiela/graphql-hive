@@ -6,7 +6,12 @@ import { useQuery } from 'urql';
 import { Button, DropdownMenu, Heading, Link, Tabs, SubHeader } from '@/components/v2';
 import { ArrowDownIcon, TargetIcon } from '@/components/v2/icon';
 import { CreateTargetModal } from '@/components/v2/modals';
-import { ProjectDocument, ProjectsDocument, ProjectFieldsFragment, OrganizationFieldsFragment } from '@/graphql';
+import {
+  ProjectDocument,
+  ProjectsDocument,
+  ProjectFieldsFragment,
+  OrganizationFieldsFragment,
+} from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { useProjectAccess, ProjectAccessScope, canAccessProject } from '@/lib/access/project';
 
@@ -21,7 +26,10 @@ export const ProjectLayout = ({
   value,
   className,
 }: {
-  children(props: { project: ProjectFieldsFragment; organization: OrganizationFieldsFragment }): ReactNode;
+  children(props: {
+    project: ProjectFieldsFragment;
+    organization: OrganizationFieldsFragment;
+  }): ReactNode;
   value: 'targets' | 'alerts' | 'settings';
   className?: string;
 }): ReactElement | null => {
@@ -107,7 +115,7 @@ export const ProjectLayout = ({
                               <DropdownMenu.Item>{node.name}</DropdownMenu.Item>
                             </a>
                           </NextLink>
-                        )
+                        ),
                     )}
                   </DropdownMenu.Content>
                 </DropdownMenu>
@@ -115,7 +123,12 @@ export const ProjectLayout = ({
             </div>
             <span className="text-xs font-bold text-[#34eab9]">{project?.type}</span>
           </div>
-          <Button className="ml-auto shrink-0" variant="primary" size="large" onClick={toggleModalOpen}>
+          <Button
+            className="ml-auto shrink-0"
+            variant="primary"
+            size="large"
+            onClick={toggleModalOpen}
+          >
             New Target
             <TargetIcon className="ml-6" />
           </Button>

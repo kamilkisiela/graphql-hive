@@ -72,7 +72,9 @@ export function deployGraphQL({
   };
 }) {
   const rawConnectionString = apiConfig.requireSecret('postgresConnectionString');
-  const connectionString = rawConnectionString.apply(rawConnectionString => parse(rawConnectionString));
+  const connectionString = rawConnectionString.apply(rawConnectionString =>
+    parse(rawConnectionString),
+  );
 
   return new RemoteArtifactAsServiceDeployment(
     'graphql-api',
@@ -148,6 +150,6 @@ export function deployGraphQL({
       clickhouse.service,
       rateLimit.deployment,
       rateLimit.service,
-    ]
+    ],
   ).deploy();
 }

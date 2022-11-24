@@ -59,7 +59,7 @@ function sumByKey<
   T extends {
     [key in K]: number;
   },
-  K extends keyof T
+  K extends keyof T,
 >(list: T[], key: K): number {
   return list.reduce((total, node) => total + node[key], 0);
 }
@@ -219,7 +219,7 @@ const AdminStatsQuery = gql(/* GraphQL */ `
 
 function filterStats(
   row: DocumentType<typeof AdminStatsQuery>['admin']['stats']['organizations'][0],
-  filters: Filters
+  filters: Filters,
 ) {
   if (filters['only-regular'] && row.organization.type !== 'REGULAR') {
     return false;
@@ -325,11 +325,14 @@ function OrganizationTable({ data }: { data: Organization[] }) {
         },
       }),
     ],
-    []
+    [],
   );
 
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [pagination, setPagination] = React.useState<PaginationState>({ pageIndex: 0, pageSize: 20 });
+  const [pagination, setPagination] = React.useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 20,
+  });
 
   const tableInstance = useTableInstance(table, {
     data,
@@ -492,7 +495,10 @@ export const AdminStats: React.FC<{
             <OverallStat label="Persisted Ops" value={overall.persistedOperations} />
             <OverallStat label="Collected Ops" value={overall.operations} />
           </StatGroup>
-          <CollectedOperationsOverTime last={last} operations={data.admin.stats.general.operationsOverTime} />
+          <CollectedOperationsOverTime
+            last={last}
+            operations={data.admin.stats.general.operationsOverTime}
+          />
           <OrganizationTable data={tableData} />
         </div>
       )}

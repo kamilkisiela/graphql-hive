@@ -39,7 +39,7 @@ interface CacheStorage extends Omit<Storage, 'touchTokens'> {
 // Without the cache we would hit the DB for every request, with the cache we hit it only once (until a token is invalidated).
 export function useCache(
   storagePromise: Promise<Storage>,
-  logger: FastifyLoggerInstance
+  logger: FastifyLoggerInstance,
 ): {
   start(): Promise<void>;
   stop(): Promise<void>;
@@ -141,10 +141,14 @@ export function useCache(
         invalidate(target);
       },
       invalidateProject(project) {
-        relations.getTargetsOfProject(project).forEach(target => cachedStorage.invalidateTarget(target));
+        relations
+          .getTargetsOfProject(project)
+          .forEach(target => cachedStorage.invalidateTarget(target));
       },
       invalidateOrganization(organization) {
-        relations.getTargetsOfOrganization(organization).forEach(target => cachedStorage.invalidateTarget(target));
+        relations
+          .getTargetsOfOrganization(organization)
+          .forEach(target => cachedStorage.invalidateTarget(target));
       },
       async readToken(hashed_token, res) {
         const targetIds = cache.keys();
@@ -288,7 +292,7 @@ function useRelations() {
 function useTokenTouchScheduler(
   storage: Storage,
   logger: FastifyLoggerInstance,
-  onTouch: (token: string, date: Date) => void
+  onTouch: (token: string, date: Date) => void,
 ) {
   const scheduledTokens = new Map<string, Date>();
 

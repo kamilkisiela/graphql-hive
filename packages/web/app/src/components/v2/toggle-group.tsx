@@ -20,7 +20,7 @@ export const ToggleGroupItem = (props: ItemProps) => {
       {...props}
       className={clsx(
         'flex items-center justify-center p-2 first:ml-0 first:rounded-l-md last:rounded-r-md',
-        props.className
+        props.className,
       )}
     >
       {props.children}

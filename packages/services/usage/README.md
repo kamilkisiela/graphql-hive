@@ -2,7 +2,8 @@
 
 This service takes care of handling HTTP requests for usage reporting.
 
-The data is written to a Kafka broker, form Kafka the data is feed into clickhouse via the `usage-ingestor` service.
+The data is written to a Kafka broker, form Kafka the data is feed into clickhouse via the
+`usage-ingestor` service.
 
 ## Configuration
 

@@ -5,7 +5,11 @@ import { PersistedOperationsModule } from '../__generated__/types';
 import type { PersistedOperation } from '../../../shared/entities';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { Logger } from '../../shared/providers/logger';
-import { PersistedOperationSelector, ProjectSelector, Storage } from '../../shared/providers/storage';
+import {
+  PersistedOperationSelector,
+  ProjectSelector,
+  Storage,
+} from '../../shared/providers/storage';
 import { ProjectAccessScope } from '../../auth/providers/project-access';
 
 /**
@@ -25,13 +29,13 @@ export class PersistedOperationManager {
   async createPersistedOperations(
     operationList: readonly PersistedOperationsModule.PublishPersistedOperationInput[],
     project: string,
-    organization: string
+    organization: string,
   ): Promise<PersistedOperationsModule.PublishPersistedOperationPayload> {
     this.logger.info(
       'Creating persisted operations (project=%s, organization=%s, size=%s)',
       project,
       organization,
-      operationList.length
+      operationList.length,
     );
     await this.authManager.ensureProjectAccess({
       project,
@@ -68,12 +72,14 @@ export class PersistedOperationManager {
     const publishedOperations = await Promise.all(
       operations
         .filter(op => hashesToPublish.includes(op.operationHash))
-        .map(operation => this.storage.insertPersistedOperation(operation))
+        .map(operation => this.storage.insertPersistedOperation(operation)),
     );
 
     const unchangedOperations = await this.getSelectedPersistedOperations(
       { organization, project },
-      operations.filter(op => !hashesToPublish.includes(op.operationHash)).map(op => op.operationHash)
+      operations
+        .filter(op => !hashesToPublish.includes(op.operationHash))
+        .map(op => op.operationHash),
     );
     const total = operations.length;
     const unchanged = total - hashesToPublish.length;
@@ -96,7 +102,7 @@ export class PersistedOperationManager {
       'Deleting an operation (operation=%s, project=%s, organization=%s)',
       operation,
       project,
-      organization
+      organization,
     );
     await this.authManager.ensureProjectAccess({
       project,
@@ -116,7 +122,7 @@ export class PersistedOperationManager {
   async comparePersistedOperations(
     selector: ProjectSelector & {
       hashes: readonly string[];
-    }
+    },
   ): Promise<readonly string[]> {
     this.logger.debug('Fetching persisted operations (selector=%o)', selector);
     await this.authManager.ensureProjectAccess({
@@ -146,9 +152,13 @@ export class PersistedOperationManager {
 
   private async getSelectedPersistedOperations(
     selector: ProjectSelector,
-    hashes: readonly string[]
+    hashes: readonly string[],
   ): Promise<readonly PersistedOperation[]> {
-    this.logger.debug('Fetching selected persisted operations (selector=%o, size=%s)', selector, hashes.length);
+    this.logger.debug(
+      'Fetching selected persisted operations (selector=%o, size=%s)',
+      selector,
+      hashes.length,
+    );
     await this.authManager.ensureProjectAccess({
       ...selector,
       scope: ProjectAccessScope.OPERATIONS_STORE_READ,

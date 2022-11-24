@@ -16,7 +16,13 @@ export const EmptyList = ({
 }): ReactElement => {
   return (
     <Card className="flex grow flex-col items-center gap-y-2">
-      <Image src={magnifier} alt="Magnifier illustration" width="200" height="200" className="drag-none" />
+      <Image
+        src={magnifier}
+        alt="Magnifier illustration"
+        width="200"
+        height="200"
+        className="drag-none"
+      />
       <Heading>{title}</Heading>
       <span className="text-center text-sm font-medium text-gray-500">{description}</span>
       {docsUrl === null ? null : (

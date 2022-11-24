@@ -55,7 +55,7 @@ export function deployEmails({
       packageInfo: packageHelper.npmPack('@hive/emails'),
       replicas: 1,
     },
-    [redis.deployment, redis.service]
+    [redis.deployment, redis.service],
   ).deploy();
 
   return { deployment, service, localEndpoint: serviceLocalEndpoint(service) };

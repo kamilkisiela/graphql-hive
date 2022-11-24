@@ -64,7 +64,14 @@ export const registryOrder = [
   'expires_at',
 ] as const;
 
-export const legacyRegistryOrder = ['target', 'hash', 'name', 'body', 'operation', 'inserted_at'] as const;
+export const legacyRegistryOrder = [
+  'target',
+  'hash',
+  'name',
+  'body',
+  'operation',
+  'inserted_at',
+] as const;
 
 export function joinIntoSingleMessage(items: string[]): string {
   return items.join(delimiter);
@@ -88,7 +95,10 @@ export function stringifyOperation(operation: ProcessedOperation): string {
   return Object.values(mapper).join(',');
 }
 
-export function stringifyLegacyOperation(operation: ProcessedOperation, coordinates: string[]): string {
+export function stringifyLegacyOperation(
+  operation: ProcessedOperation,
+  coordinates: string[],
+): string {
   const mapper: Record<KeysOfArray<typeof legacyOperationsOrder>, any> = {
     target: castValue(operation.target),
     timestamp: castDate(operation.timestamp),
@@ -121,7 +131,10 @@ export function stringifyRegistryRecord(record: ProcessedRegistryRecord): string
 }
 
 export function stringifyLegacyRegistryRecord(
-  record: Pick<ProcessedRegistryRecord, 'body' | 'hash' | 'timestamp' | 'name' | 'operation_kind' | 'target'>
+  record: Pick<
+    ProcessedRegistryRecord,
+    'body' | 'hash' | 'timestamp' | 'name' | 'operation_kind' | 'target'
+  >,
 ): string {
   const mapper: Record<KeysOfArray<typeof legacyRegistryOrder>, any> = {
     target: castValue(record.target),

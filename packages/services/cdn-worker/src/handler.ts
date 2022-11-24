@@ -96,7 +96,7 @@ const AUTH_HEADER_NAME = 'x-hive-cdn-key';
 
 async function parseIncomingRequest(
   request: Request,
-  keyValidator: typeof isKeyValid
+  keyValidator: typeof isKeyValid,
 ): Promise<
   | { error: Response }
   | {
@@ -189,7 +189,7 @@ export async function handleRequest(request: Request, keyValidator: typeof isKey
     }
   } else {
     console.log(
-      `CDN Artifact not found for targetId=${targetId}, artifactType=${artifactType}, storageKeyType=${storageKeyType}`
+      `CDN Artifact not found for targetId=${targetId}, artifactType=${artifactType}, storageKeyType=${storageKeyType}`,
     );
     return new CDNArtifactNotFound(artifactType, targetId);
   }

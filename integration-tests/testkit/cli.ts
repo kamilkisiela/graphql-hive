@@ -16,9 +16,13 @@ async function exec(cmd: string) {
 }
 
 export async function schemaPublish(args: string[]) {
-  return exec(['schema:publish', `--registry`, `http://${registryAddress}/graphql`, ...args].join(' '));
+  return exec(
+    ['schema:publish', `--registry`, `http://${registryAddress}/graphql`, ...args].join(' '),
+  );
 }
 
 export async function schemaCheck(args: string[]) {
-  return exec(['schema:check', `--registry`, `http://${registryAddress}/graphql`, ...args].join(' '));
+  return exec(
+    ['schema:check', `--registry`, `http://${registryAddress}/graphql`, ...args].join(' '),
+  );
 }

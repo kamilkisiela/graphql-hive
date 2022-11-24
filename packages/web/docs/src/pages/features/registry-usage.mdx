@@ -2,11 +2,14 @@
 
 ## CDN Access
 
-With high-availability and multi-zone CDN service based on Cloudflare, Hive allows you to access the registry, through a secured external service, that's always up regardless of Hive services.
+With high-availability and multi-zone CDN service based on Cloudflare, Hive allows you to access the
+registry, through a secured external service, that's always up regardless of Hive services.
 
-To connect your GraphQL Gateway or any other tool with GraphQL Hive you need to generate an access key to our CDN.
+To connect your GraphQL Gateway or any other tool with GraphQL Hive you need to generate an access
+key to our CDN.
 
-Go to the schema view of your target https://app.graphql-hive.com/:org/:project/:target and click "Connect".
+Go to the schema view of your target https://app.graphql-hive.com/:org/:project/:target and click
+"Connect".
 
 ![Connect button](/schema-view-connect-button.png)
 
@@ -16,7 +19,8 @@ GraphQL Hive will now generate a unique key:
 
 ## Apollo Federation
 
-There are gateways maintained by Apollo team, [Apollo Gateway](#apollo-gateway) and [Apollo Router](#apollo-router). GraphQL Hive supports both!
+There are gateways maintained by Apollo team, [Apollo Gateway](#apollo-gateway) and
+[Apollo Router](#apollo-router). GraphQL Hive supports both!
 
 ### Apollo Gateway
 
@@ -48,7 +52,9 @@ server.listen().then(({ url }) => {
 
 ### Apollo Router
 
-GraphQL Hive ships a custom version of [Apollo Router](https://www.apollographql.com/docs/router/). The reason is that in order to extend Apollo Router, we need to write [a native Rust plugin](https://www.apollographql.com/docs/router/customizations/native).
+GraphQL Hive ships a custom version of [Apollo Router](https://www.apollographql.com/docs/router/).
+The reason is that in order to extend Apollo Router, we need to write
+[a native Rust plugin](https://www.apollographql.com/docs/router/customizations/native).
 
 Download Apollo Router for Linux (x86_64), MacOS (x86_64) or Windows (x86_64):
 
@@ -65,11 +71,13 @@ HIVE_CDN_ENDPOINT="..." HIVE_CDN_KEY="..." ./router
 - `HIVE_CDN_ENDPOINT` - the endpoint Hive generated for you in the previous step
 - `HIVE_CDN_KEY` - the access key
 
-> Apollo Router polls schema from the registry every 10 seconds. In order to change it to 15 seconds pass: `HIVE_CDN_POLL_INTERVAL=15`.
+> Apollo Router polls schema from the registry every 10 seconds. In order to change it to 15 seconds
+> pass: `HIVE_CDN_POLL_INTERVAL=15`.
 
 ## Schema Stitching
 
-Stitching could be done in many ways, that's why `@graphql-hive/client` provides generic functions, not something dedicated for stitching. Unfortunately the implementation of gateway is up to you.
+Stitching could be done in many ways, that's why `@graphql-hive/client` provides generic functions,
+not something dedicated for stitching. Unfortunately the implementation of gateway is up to you.
 
 Here's an example of how it could work
 
@@ -112,7 +120,8 @@ main().catch(err => {
 - `HIVE_CDN_ENDPOINT` - the endpoint Hive generated for you in the previous step
 - `HIVE_CDN_KEY` - the access key
 
-The `createServicesFetcher` factory function returns another function that is responsible for fetching a list of services from Hive's high-availability endpoint..
+The `createServicesFetcher` factory function returns another function that is responsible for
+fetching a list of services from Hive's high-availability endpoint..
 
 ## Other tools
 
@@ -151,16 +160,19 @@ Here's a list of available endpoints:
 
 - Raw SDL `<endpoint>/sdl`
 
-  If you wish to get the raw SDL, without a wrapping JSON object, you can specify `/sdl` as suffix to your request.
+  If you wish to get the raw SDL, without a wrapping JSON object, you can specify `/sdl` as suffix
+  to your request.
 
 - Introspection JSON `<endpoint>/introspection`
 
-  If you wish to get the introspection JSON for your GraphQL schema, without a wrapping JSON object, you can specify `/introspection` as suffix to your request.
-  This could be useful for tools that need to get the introspection as-is, like GraphQL Codegen, or GraphQL-Config.
+  If you wish to get the introspection JSON for your GraphQL schema, without a wrapping JSON object,
+  you can specify `/introspection` as suffix to your request. This could be useful for tools that
+  need to get the introspection as-is, like GraphQL Codegen, or GraphQL-Config.
 
 - Metadata `<endpoint>/metadata`
 
-  To fetch metadata published along with your GraphQL schema (using `--metadata`), use `/metadata` endpoint
+  To fetch metadata published along with your GraphQL schema (using `--metadata`), use `/metadata`
+  endpoint
 
   ```bash
   curl --request GET \
@@ -174,11 +186,14 @@ Here's a list of available endpoints:
 
 ### ETag and If-None-Match headers
 
-The CDN service accepts the [`ETag`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag) and [`If-None-Match`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-None-Match) headers.
+The CDN service accepts the [`ETag`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag)
+and [`If-None-Match`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-None-Match)
+headers.
 
-Every successful response from the CDN service (`200 OK`) contains the `ETag` header with a checksum.
-If you send the same checksum in the `If-None-Match` header, the CDN service will return `304 Not Modified`, but only if the data hasn't changed.
-If the data has changed, the CDN service will return `200 OK` with the new data and new `ETag` header.
+Every successful response from the CDN service (`200 OK`) contains the `ETag` header with a
+checksum. If you send the same checksum in the `If-None-Match` header, the CDN service will return
+`304 Not Modified`, but only if the data hasn't changed. If the data has changed, the CDN service
+will return `200 OK` with the new data and new `ETag` header.
 
 Using `ETag` and `If-None-Mathc` helps to prevent unnecessary data transfer.
 

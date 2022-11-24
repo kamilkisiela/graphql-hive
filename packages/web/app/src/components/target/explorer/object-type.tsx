@@ -27,7 +27,11 @@ export function GraphQLObjectTypeComponent(props: {
       description={props.type.description}
       implements={props.type.interfaces}
     >
-      <GraphQLFields fields={props.type.fields} totalRequests={props.totalRequests} collapsed={props.collapsed} />
+      <GraphQLFields
+        fields={props.type.fields}
+        totalRequests={props.totalRequests}
+        collapsed={props.collapsed}
+      />
     </GraphQLTypeCard>
   );
 }

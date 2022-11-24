@@ -1,7 +1,9 @@
 import { createHash } from 'crypto';
 import type { HiveClient, HivePluginOptions, AsyncIterableIteratorOrValue } from './types.js';
 
-export function isAsyncIterableIterator<T>(value: AsyncIterableIteratorOrValue<T>): value is AsyncIterableIterator<T> {
+export function isAsyncIterableIterator<T>(
+  value: AsyncIterableIteratorOrValue<T>,
+): value is AsyncIterableIterator<T> {
   return typeof (value as any)?.[Symbol.asyncIterator] === 'function';
 }
 
@@ -29,7 +31,7 @@ export function cache<R, A, K, V>(
     has(key: K): boolean;
     set(key: K, value: R): void;
     get(key: K): R | undefined;
-  }
+  },
 ) {
   return (arg: A, arg2: V) => {
     const key = cacheKeyFn(arg, arg2);
@@ -68,7 +70,7 @@ export function cacheDocumentKey<T, V>(doc: T, variables: V | null) {
         }
 
         return '';
-      })
+      }),
     );
   }
 
@@ -102,11 +104,15 @@ export function addProperty<T, K extends string>(key: K, value: undefined | null
 export function addProperty<T, K extends string, V>(
   key: K,
   value: V,
-  obj: T
+  obj: T,
 ): T & {
   [k in K]: V;
 };
-export function addProperty<T, K extends string, V>(key: K, value: V | undefined | null, obj: T): any {
+export function addProperty<T, K extends string, V>(
+  key: K,
+  value: V | undefined | null,
+  obj: T,
+): any {
   if (value === null || typeof value === 'undefined') {
     return obj;
   }
@@ -117,7 +123,9 @@ export function addProperty<T, K extends string, V>(key: K, value: V | undefined
   };
 }
 
-export function isHiveClient(clientOrOptions: HiveClient | HivePluginOptions): clientOrOptions is HiveClient {
+export function isHiveClient(
+  clientOrOptions: HiveClient | HivePluginOptions,
+): clientOrOptions is HiveClient {
   return 'operationsStore' in clientOrOptions;
 }
 

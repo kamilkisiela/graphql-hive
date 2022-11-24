@@ -20,7 +20,9 @@ export function GraphQLScalarTypeComponent(props: {
     <GraphQLTypeCard name={props.type.name} kind="scalar">
       <div className="flex flex-row gap-4 p-4">
         <div className="flex-grow text-sm">
-          {typeof props.type.description === 'string' ? <Markdown content={props.type.description} /> : null}
+          {typeof props.type.description === 'string' ? (
+            <Markdown content={props.type.description} />
+          ) : null}
         </div>
         <SchemaExplorerUsageStats totalRequests={props.totalRequests} usage={props.type.usage} />
       </div>

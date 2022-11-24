@@ -54,7 +54,11 @@ export class TargetAccess {
           const scopesForSelector = scopes[i];
 
           if (scopesForSelector instanceof Error) {
-            this.logger.warn(`TargetAccess:user (error=%s, selector=%o)`, scopesForSelector.message, selector);
+            this.logger.warn(
+              `TargetAccess:user (error=%s, selector=%o)`,
+              scopesForSelector.message,
+              selector,
+            );
             return false;
           }
 
@@ -72,7 +76,7 @@ export class TargetAccess {
             scope: selector.scope,
           });
         },
-      }
+      },
     );
     this.tokenAccess = new Dataloader(
       selectors =>
@@ -89,7 +93,7 @@ export class TargetAccess {
             }
 
             return false;
-          })
+          }),
         ),
       {
         cacheKeyFn(selector) {
@@ -102,7 +106,7 @@ export class TargetAccess {
             scope: selector.scope,
           });
         },
-      }
+      },
     );
 
     this.scopes = new Dataloader(
@@ -113,7 +117,11 @@ export class TargetAccess {
           const scopes = scopesPerSelector[i];
 
           if (scopes instanceof Error) {
-            this.logger.warn(`TargetAccess:scopes (error=%s, selector=%o)`, scopes.message, selector);
+            this.logger.warn(
+              `TargetAccess:scopes (error=%s, selector=%o)`,
+              scopes.message,
+              selector,
+            );
             return [];
           }
 
@@ -128,7 +136,7 @@ export class TargetAccess {
             user: selector.user,
           });
         },
-      }
+      },
     );
   }
 

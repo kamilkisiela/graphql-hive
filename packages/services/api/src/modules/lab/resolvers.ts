@@ -53,7 +53,7 @@ export const resolvers: LabModule.Resolvers = {
 
       const schema = await orchestrator.build(
         schemas.map(s => helper.createSchemaObject(s)),
-        externalComposition
+        externalComposition,
       );
 
       return {

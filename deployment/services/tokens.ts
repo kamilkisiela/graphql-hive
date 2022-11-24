@@ -26,7 +26,9 @@ export function deployTokens({
   heartbeat?: string;
 }) {
   const rawConnectionString = apiConfig.requireSecret('postgresConnectionString');
-  const connectionString = rawConnectionString.apply(rawConnectionString => parse(rawConnectionString));
+  const connectionString = rawConnectionString.apply(rawConnectionString =>
+    parse(rawConnectionString),
+  );
 
   return new RemoteArtifactAsServiceDeployment(
     'tokens-service',
@@ -50,6 +52,6 @@ export function deployTokens({
         HEARTBEAT_ENDPOINT: heartbeat ?? '',
       },
     },
-    [dbMigrations]
+    [dbMigrations],
   ).deploy();
 }

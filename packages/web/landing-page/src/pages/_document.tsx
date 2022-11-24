@@ -18,8 +18,13 @@ export default class MyDocument extends Document {
     return (
       <Html>
         <Head>
-          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(richData) }} />
-          {GA_TRACKING_ID && <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA_TRACKING_ID}`} />}
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(richData) }}
+          />
+          {GA_TRACKING_ID && (
+            <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA_TRACKING_ID}`} />
+          )}
           {GA_TRACKING_ID && (
             <script
               dangerouslySetInnerHTML={{

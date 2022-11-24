@@ -42,11 +42,17 @@ const SchemaExplorerContext = React.createContext<{
 export function SchemaExplorerProvider(
   props: React.PropsWithChildren<{
     dataRetentionInDays: number;
-  }>
+  }>,
 ) {
   const { dataRetentionInDays } = props;
-  const [isArgumentListCollapsed, setArgumentListCollapsed] = useLocalStorage('hive:schema-explorer:collapsed', true);
-  const [periodOption, setPeriodOption] = useLocalStorage<PeriodOption>('hive:schema-explorer:period', '30d');
+  const [isArgumentListCollapsed, setArgumentListCollapsed] = useLocalStorage(
+    'hive:schema-explorer:collapsed',
+    true,
+  );
+  const [periodOption, setPeriodOption] = useLocalStorage<PeriodOption>(
+    'hive:schema-explorer:period',
+    '30d',
+  );
   const [period, setPeriod] = React.useState(createPeriod(periodOption));
 
   React.useEffect(() => {
@@ -61,7 +67,7 @@ export function SchemaExplorerProvider(
       setPeriodOption(option);
       setPeriod(createPeriod(option));
     },
-    [setPeriodOption, setPeriod]
+    [setPeriodOption, setPeriod],
   );
 
   const availablePeriodOptions = React.useMemo(() => {

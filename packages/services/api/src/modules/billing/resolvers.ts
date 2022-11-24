@@ -7,7 +7,10 @@ import { IdTranslator } from '../shared/providers/id-translator';
 import { BillingProvider } from './providers/billing.provider';
 import { BillingModule } from './__generated__/types';
 
-const USAGE_DEFAULT_LIMITATIONS: Record<'HOBBY' | 'PRO' | 'ENTERPRISE', { operations: number; retention: number }> = {
+const USAGE_DEFAULT_LIMITATIONS: Record<
+  'HOBBY' | 'PRO' | 'ENTERPRISE',
+  { operations: number; retention: number }
+> = {
   HOBBY: {
     operations: 1_000_000,
     retention: 7,
@@ -119,7 +122,8 @@ export const resolvers: BillingModule.Resolvers = {
           planType: 'PRO',
           basePrice: availablePrices.basePrice.unit_amount! / 100,
           name: 'Pro',
-          description: 'For production-ready applications that requires long retention, high ingestion capacity.',
+          description:
+            'For production-ready applications that requires long retention, high ingestion capacity.',
           includedOperationsLimit: USAGE_DEFAULT_LIMITATIONS.PRO.operations,
           pricePerOperationsUnit: availablePrices.operationsPrice.tiers![1].unit_amount! / 100,
           retentionInDays: USAGE_DEFAULT_LIMITATIONS.PRO.retention,
@@ -129,7 +133,8 @@ export const resolvers: BillingModule.Resolvers = {
           id: 'ENTERPRISE',
           planType: 'ENTERPRISE',
           name: 'Enterprise',
-          description: 'For enterprise and organization that requires custom setup and custom data ingestion rates.',
+          description:
+            'For enterprise and organization that requires custom setup and custom data ingestion rates.',
           includedOperationsLimit: USAGE_DEFAULT_LIMITATIONS.ENTERPRISE.operations,
           retentionInDays: USAGE_DEFAULT_LIMITATIONS.ENTERPRISE.retention,
           rateLimit: 'UNLIMITED',
@@ -226,7 +231,8 @@ export const resolvers: BillingModule.Resolvers = {
           organization: organizationId,
           monthlyRateLimit: {
             retentionInDays: USAGE_DEFAULT_LIMITATIONS.PRO.retention,
-            operations: args.input.monthlyLimits.operations || USAGE_DEFAULT_LIMITATIONS.PRO.operations,
+            operations:
+              args.input.monthlyLimits.operations || USAGE_DEFAULT_LIMITATIONS.PRO.operations,
           },
         });
 

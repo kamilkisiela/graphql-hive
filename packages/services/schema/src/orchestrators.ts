@@ -119,7 +119,7 @@ function hash(secret: string, alg: string, value: string) {
 const createFederation: (
   redis: RedisInstance,
   logger: FastifyLoggerInstance,
-  decrypt: (value: string) => string
+  decrypt: (value: string) => string,
 ) => Orchestrator = (redis, logger, decrypt) => {
   const compose = reuse<
     {
@@ -137,7 +137,7 @@ const createFederation: (
               name: schema.source,
               url: 'url' in schema && typeof schema.url === 'string' ? schema.url : undefined,
             };
-          })
+          }),
         );
         const signature = hash(decrypt(external.encryptedSecret), 'sha256', body);
         logger.debug('Calling external composition service (url=%s)', external.endpoint);
@@ -175,7 +175,9 @@ const createFederation: (
             });
 
             if (!response.ok) {
-              const message = await response.text().catch(_ => Promise.resolve(response.statusText));
+              const message = await response
+                .text()
+                .catch(_ => Promise.resolve(response.statusText));
               throw new Error(`External composition failure: ${response.status} ${message}`);
             }
 
@@ -183,7 +185,7 @@ const createFederation: (
           },
           {
             retries: 3,
-          }
+          },
         );
 
         const parseResult = EXTERNAL_COMPOSITION_RESULT.safeParse(await response);
@@ -212,7 +214,7 @@ const createFederation: (
             name: schema.source,
             url: 'url' in schema && typeof schema.url === 'string' ? schema.url : undefined,
           };
-        })
+        }),
       );
 
       if (compositionHasErrors(result)) {
@@ -234,7 +236,7 @@ const createFederation: (
     },
     'federation',
     redis,
-    logger
+    logger,
   );
 
   return {
@@ -256,7 +258,10 @@ const createFederation: (
 
       if (result.type === 'failure') {
         throw new Error(
-          [`Schemas couldn't be merged:`, result.result.errors.map(error => `\t - ${error.message}`)].join('\n')
+          [
+            `Schemas couldn't be merged:`,
+            result.result.errors.map(error => `\t - ${error.message}`),
+          ].join('\n'),
         );
       }
 
@@ -297,18 +302,21 @@ const single: Orchestrator = {
   },
 };
 
-const createStitching: (redis: RedisInstance, logger: FastifyLoggerInstance) => Orchestrator = (redis, logger) => {
+const createStitching: (redis: RedisInstance, logger: FastifyLoggerInstance) => Orchestrator = (
+  redis,
+  logger,
+) => {
   const stitchAndPrint = reuse(
     async (schemas: ValidationInput) => {
       return printSchema(
         stitchSchemas({
           typeDefs: schemas.map(schema => trimDescriptions(parse(schema.raw))),
-        })
+        }),
       );
     },
     'stitching',
     redis,
-    logger
+    logger,
   );
 
   return {
@@ -343,14 +351,16 @@ const createStitching: (redis: RedisInstance, logger: FastifyLoggerInstance) => 
 function validateStitchedSchema(doc: DocumentNode) {
   const { allStitchingDirectivesTypeDefs } = stitchingDirectives();
 
-  return validateSDL(concatAST([parse(allStitchingDirectivesTypeDefs), doc])).map(toValidationError);
+  return validateSDL(concatAST([parse(allStitchingDirectivesTypeDefs), doc])).map(
+    toValidationError,
+  );
 }
 
 export function pickOrchestrator(
   type: SchemaType,
   redis: RedisInstance,
   logger: FastifyLoggerInstance,
-  decrypt: (value: string) => string
+  decrypt: (value: string) => string,
 ) {
   switch (type) {
     case 'federation':
@@ -374,12 +384,15 @@ interface ActionCompleted<T> {
 }
 
 function createChecksum<TInput>(input: TInput, uniqueKey: string): string {
-  return createHash('sha256').update(JSON.stringify(input)).update(`key:${uniqueKey}`).digest('hex');
+  return createHash('sha256')
+    .update(JSON.stringify(input))
+    .update(`key:${uniqueKey}`)
+    .digest('hex');
 }
 
 async function readAction<O>(
   checksum: string,
-  redis: RedisInstance
+  redis: RedisInstance,
 ): Promise<ActionStarted | ActionCompleted<O> | null> {
   const action = await redis.get(`schema-service:${checksum}`);
 
@@ -390,7 +403,11 @@ async function readAction<O>(
   return null;
 }
 
-async function startAction(checksum: string, redis: RedisInstance, logger: FastifyLoggerInstance): Promise<boolean> {
+async function startAction(
+  checksum: string,
+  redis: RedisInstance,
+  logger: FastifyLoggerInstance,
+): Promise<boolean> {
   const key = `schema-service:${checksum}`;
   logger.debug('Starting action (checksum=%s)', checksum);
   // Set and lock + expire
@@ -411,7 +428,7 @@ async function completeAction<O>(
   checksum: string,
   data: O,
   redis: RedisInstance,
-  logger: FastifyLoggerInstance
+  logger: FastifyLoggerInstance,
 ): Promise<void> {
   const key = `schema-service:${checksum}`;
   logger.debug('Completing action (checksum=%s)', checksum);
@@ -421,11 +438,15 @@ async function completeAction<O>(
     JSON.stringify({
       status: 'completed',
       result: data,
-    })
+    }),
   );
 }
 
-async function removeAction(checksum: string, redis: RedisInstance, logger: FastifyLoggerInstance): Promise<void> {
+async function removeAction(
+  checksum: string,
+  redis: RedisInstance,
+  logger: FastifyLoggerInstance,
+): Promise<void> {
   logger.debug('Removing action (checksum=%s)', checksum);
   const key = `schema-service:${checksum}`;
   await redis.del(key);
@@ -435,7 +456,7 @@ function reuse<I, O>(
   factory: (input: I) => Promise<O>,
   key: string,
   redis: RedisInstance,
-  logger: FastifyLoggerInstance
+  logger: FastifyLoggerInstance,
 ): (input: I) => Promise<O> {
   async function reuseFactory(input: I, attempt = 0): Promise<O> {
     const checksum = createChecksum(input, key);
@@ -465,7 +486,11 @@ function reuse<I, O>(
 
     const startedAt = Date.now();
     while (cached && cached.status !== 'completed') {
-      logger.debug('Waiting action to complete (checksum=%s, time=%s)', checksum, Date.now() - startedAt);
+      logger.debug(
+        'Waiting action to complete (checksum=%s, time=%s)',
+        checksum,
+        Date.now() - startedAt,
+      );
       await new Promise(resolve => setTimeout(resolve, 500));
       cached = await readAction<O>(checksum, redis);
 

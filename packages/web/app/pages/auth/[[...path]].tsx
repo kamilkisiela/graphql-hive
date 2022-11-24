@@ -31,9 +31,12 @@ export const getServerSideProps: GetServerSideProps = async context => {
   };
 };
 
-const SuperTokensComponentNoSSR = dynamic(new Promise(res => res(SuperTokensReact.getRoutingComponent)) as any, {
-  ssr: false,
-});
+const SuperTokensComponentNoSSR = dynamic(
+  new Promise(res => res(SuperTokensReact.getRoutingComponent)) as any,
+  {
+    ssr: false,
+  },
+);
 
 /**
  * Route for showing the SuperTokens login page.
@@ -75,7 +78,11 @@ export default function Auth(props: { oidcProviderId: string | null }): React.Re
           />
         </Head>
         <div>
-          <FullLogo className="mx-auto my-5 text-yellow-500" width={150} color={{ main: '#fff', sub: '#fff' }} />
+          <FullLogo
+            className="mx-auto my-5 text-yellow-500"
+            width={150}
+            color={{ main: '#fff', sub: '#fff' }}
+          />
           {env.auth.legacyAuth0 === true ? <LegacyAuth0Notice /> : null}
           {props.oidcProviderId ? null : <SuperTokensComponentNoSSR />}
         </div>

@@ -104,7 +104,10 @@ export const UserPlusMinusIcon: FC<IconProps & { isPlus: boolean }> = ({ classNa
     xmlns="http://www.w3.org/2000/svg"
     className={className}
   >
-    <path d="M16 21V19C16 16.7909 14.2091 15 12 15H5C2.79086 15 1 16.7909 1 19V21" {...DEFAULT_PATH_PROPS} />
+    <path
+      d="M16 21V19C16 16.7909 14.2091 15 12 15H5C2.79086 15 1 16.7909 1 19V21"
+      {...DEFAULT_PATH_PROPS}
+    />
     <path
       fillRule="evenodd"
       clipRule="evenodd"
@@ -117,7 +120,12 @@ export const UserPlusMinusIcon: FC<IconProps & { isPlus: boolean }> = ({ classNa
 );
 
 export const MoreIcon: FC<IconProps> = props => (
-  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" tw="w-6 h-6 stroke-current" {...props}>
+  <svg
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+    tw="w-6 h-6 stroke-current"
+    {...props}
+  >
     <path
       d="M12 13C12.5523 13 13 12.5523 13 12C13 11.4477 12.5523 11 12 11C11.4477 11 11 11.4477 11 12C11 12.5523 11.4477 13 12 13Z"
       {...DEFAULT_PATH_PROPS}
@@ -313,14 +321,22 @@ export const LogOutIcon = ({ className }: IconProps): ReactElement => (
     stroke="currentColor"
     className={className}
   >
-    <path d="M9 21H5C3.89543 21 3 20.1046 3 19V5C3 3.89543 3.89543 3 5 3H9" {...DEFAULT_PATH_PROPS} />
+    <path
+      d="M9 21H5C3.89543 21 3 20.1046 3 19V5C3 3.89543 3.89543 3 5 3H9"
+      {...DEFAULT_PATH_PROPS}
+    />
     <path d="M16 17L21 12L16 7" {...DEFAULT_PATH_PROPS} />
     <path d="M21 12H9" {...DEFAULT_PATH_PROPS} />
   </svg>
 );
 
 export const LinkIcon: FC<IconProps> = props => (
-  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" tw="w-6 h-6 stroke-current fill-none" {...props}>
+  <svg
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+    tw="w-6 h-6 stroke-current fill-none"
+    {...props}
+  >
     <path
       d="M10 13C10.869 14.1617 12.1996 14.8887 13.6466 14.9923C15.0937 15.0959 16.5144 14.566 17.54 13.54L20.54 10.54C22.4349 8.57807 22.4078 5.45954 20.4791 3.53087C18.5504 1.6022 15.4319 1.57511 13.47 3.46997L11.75 5.17997"
       {...DEFAULT_PATH_PROPS}

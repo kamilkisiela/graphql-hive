@@ -21,7 +21,7 @@ const List: FC<TabsListProps> = ({ children, className, ...props }) => (
       text-xl
       text-gray-700
     `,
-      className
+      className,
     )}
     {...props}
   >
@@ -30,7 +30,10 @@ const List: FC<TabsListProps> = ({ children, className, ...props }) => (
 );
 
 const Trigger: FC<TabsTriggerProps & { hasBorder?: boolean }> = forwardRef(
-  ({ children, className, hasBorder = true, ...props }, forwardedRef /* when has asChild prop */) => (
+  (
+    { children, className, hasBorder = true, ...props },
+    forwardedRef /* when has asChild prop */,
+  ) => (
     <TabsTrigger
       ref={forwardedRef as any}
       className={clsx(
@@ -45,13 +48,13 @@ const Trigger: FC<TabsTriggerProps & { hasBorder?: boolean }> = forwardRef(
   radix-state-active:border-b-orange-500
   border-b-[5px]
   border-b-transparent
-  pb-3`
+  pb-3`,
       )}
       {...props}
     >
       {children}
     </TabsTrigger>
-  )
+  ),
 );
 
 const Content: FC<TabsContentProps> = ({ children, className, ...props }) => (

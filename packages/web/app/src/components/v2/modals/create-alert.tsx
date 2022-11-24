@@ -52,13 +52,13 @@ export const CreateAlertModal = ({
         Yup.string()
           .min(1)
           .equals(channels.map(channel => channel.id))
-          .required('Must select channel')
+          .required('Must select channel'),
       ),
       target: Yup.lazy(() =>
         Yup.string()
           .min(1)
           .equals(targets.map(target => target.cleanId))
-          .required('Must select target')
+          .required('Must select target'),
       ),
     }),
     async onSubmit(values) {
@@ -117,7 +117,9 @@ export const CreateAlertModal = ({
             onChange={handleChange}
             isInvalid={!!touched.channel && Boolean(errors.channel)}
           />
-          {touched.channel && errors.channel && <div className="text-sm text-red-500">{errors.channel}</div>}
+          {touched.channel && errors.channel && (
+            <div className="text-sm text-red-500">{errors.channel}</div>
+          )}
         </div>
 
         <div className="flex flex-col gap-4">
@@ -135,7 +137,9 @@ export const CreateAlertModal = ({
             onChange={handleChange}
             isInvalid={!!touched.target && Boolean(errors.target)}
           />
-          {touched.target && errors.target && <div className="text-sm text-red-500">{errors.target}</div>}
+          {touched.target && errors.target && (
+            <div className="text-sm text-red-500">{errors.target}</div>
+          )}
         </div>
 
         {mutation.error && <div className="text-sm text-red-500">{mutation.error.message}</div>}

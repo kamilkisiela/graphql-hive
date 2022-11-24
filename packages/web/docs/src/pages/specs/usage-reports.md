@@ -1,9 +1,9 @@
 # Usage reports
 
-The official JavaScript Hive Client (`@graphql-hive/client`) collects executed operations and sends them in batches (as a single report, when a buffer is full or every few seconds) over HTTP.
+The official JavaScript Hive Client (`@graphql-hive/client`) collects executed operations and sends
+them in batches (as a single report, when a buffer is full or every few seconds) over HTTP.
 
-> It's recommended to send a report for more than 1 operation.
-> The maximum payload size is 1 MB.
+> It's recommended to send a report for more than 1 operation. The maximum payload size is 1 MB.
 
 | Name     | Value                                |
 | -------- | ------------------------------------ |

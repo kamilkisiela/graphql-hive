@@ -19,7 +19,7 @@ export class AdminManager {
     logger: Logger,
     private storage: Storage,
     private authManager: AuthManager,
-    private operationsReader: OperationsReader
+    private operationsReader: OperationsReader,
   ) {
     this.logger = logger.child({ source: 'AdminManager' });
   }
@@ -55,7 +55,10 @@ export class AdminManager {
 
   @atomic((arg: { daysLimit: number }) => arg.daysLimit + '')
   async countOperationsPerOrganization({ daysLimit }: { daysLimit: number }) {
-    this.logger.info('Counting collected operations per organization (admin, daysLimit=%s)', daysLimit);
+    this.logger.info(
+      'Counting collected operations per organization (admin, daysLimit=%s)',
+      daysLimit,
+    );
     const user = await this.authManager.getCurrentUser();
 
     if (user.isAdmin) {
@@ -65,7 +68,9 @@ export class AdminManager {
       });
 
       const organizationCountMap = new Map<string, number>();
-      const targetOrganizationMap = new Map<string, string>(pairs.map(p => [p.target, p.organization]));
+      const targetOrganizationMap = new Map<string, string>(
+        pairs.map(p => [p.target, p.organization]),
+      );
 
       for (const op of operations) {
         const organizationId = targetOrganizationMap.get(op.target);

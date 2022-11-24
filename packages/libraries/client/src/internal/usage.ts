@@ -28,8 +28,20 @@ import { normalizeOperation } from '@graphql-hive/core';
 import { createAgent } from './agent.js';
 import { randomSampling } from './sampling.js';
 import { version } from '../version.js';
-import { cache, cacheDocumentKey, measureDuration, memo, isAsyncIterableIterator, logIf } from './utils.js';
-import type { HivePluginOptions, HiveUsagePluginOptions, CollectUsageCallback, ClientInfo } from './types.js';
+import {
+  cache,
+  cacheDocumentKey,
+  measureDuration,
+  memo,
+  isAsyncIterableIterator,
+  logIf,
+} from './utils.js';
+import type {
+  HivePluginOptions,
+  HiveUsagePluginOptions,
+  CollectUsageCallback,
+  ClientInfo,
+} from './types.js';
 
 interface UsageCollector {
   collect(args: ExecutionArgs): CollectUsageCallback;
@@ -51,7 +63,8 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
     map: {},
     operations: [],
   };
-  const options = typeof pluginOptions.usage === 'boolean' ? ({} as HiveUsagePluginOptions) : pluginOptions.usage;
+  const options =
+    typeof pluginOptions.usage === 'boolean' ? ({} as HiveUsagePluginOptions) : pluginOptions.usage;
   const selfHostingOptions = pluginOptions.selfHosting;
   const logger = pluginOptions.agent?.logger ?? console;
   const collector = memo(createCollector, arg => arg.schema);
@@ -62,7 +75,10 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
       ...(pluginOptions.agent ?? {
         maxSize: 1500,
       }),
-      endpoint: selfHostingOptions?.usageEndpoint ?? options.endpoint ?? 'https://app.graphql-hive.com/usage',
+      endpoint:
+        selfHostingOptions?.usageEndpoint ??
+        options.endpoint ??
+        'https://app.graphql-hive.com/usage',
       token: pluginOptions.token,
       enabled: pluginOptions.enabled,
       debug: pluginOptions.debug,
@@ -116,13 +132,13 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
       body() {
         return JSON.stringify(report);
       },
-    }
+    },
   );
 
   logIf(
     typeof pluginOptions.token !== 'string' || pluginOptions.token.length === 0,
     '[hive][usage] token is missing',
-    logger.error
+    logger.error,
   );
 
   const shouldInclude = randomSampling(options.sampleRate ?? 1.0);
@@ -141,7 +157,7 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
           }
 
           const rootOperation = args.document.definitions.find(
-            o => o.kind === Kind.OPERATION_DEFINITION
+            o => o.kind === Kind.OPERATION_DEFINITION,
           ) as OperationDefinitionNode;
           const document = args.document;
           const operationName = args.operationName || rootOperation.name?.value || 'anonymous';
@@ -175,7 +191,8 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
               },
               // TODO: operationHash is ready to accept hashes of persisted operations
               client:
-                typeof args.contextValue !== 'undefined' && typeof options.clientInfo !== 'undefined'
+                typeof args.contextValue !== 'undefined' &&
+                typeof options.clientInfo !== 'undefined'
                   ? options.clientInfo(args.contextValue)
                   : null,
             });
@@ -210,7 +227,7 @@ export function createCollector({
     doc: DocumentNode,
     variables: {
       [key: string]: unknown;
-    } | null
+    } | null,
   ): CacheResult {
     const entries = new Set<string>();
     const collected_entire_named_types = new Set<string>();
@@ -377,7 +394,7 @@ export function createCollector({
           collectNode(node);
           collectInputType(parentInputTypeName, node.name.value);
         },
-      })
+      }),
     );
 
     for (const inputTypeName in collectedInputTypes) {
@@ -407,7 +424,7 @@ export function createCollector({
     function cacheKey(doc, variables) {
       return cacheDocumentKey(doc, processVariables === true ? variables : null);
     },
-    LRU<CacheResult>(max, ttl)
+    LRU<CacheResult>(max, ttl),
   );
 }
 
@@ -426,7 +443,10 @@ function unwrapType(type: GraphQLType): GraphQLNamedType {
   return type;
 }
 
-type GraphQLNamedInputType = Exclude<GraphQLNamedType, GraphQLObjectType | GraphQLInterfaceType | GraphQLUnionType>;
+type GraphQLNamedInputType = Exclude<
+  GraphQLNamedType,
+  GraphQLObjectType | GraphQLInterfaceType | GraphQLUnionType
+>;
 type GraphQLNamedOutputType = Exclude<GraphQLNamedType, GraphQLInputObjectType>;
 
 export interface Report {

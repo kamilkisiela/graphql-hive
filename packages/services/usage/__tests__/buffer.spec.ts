@@ -75,7 +75,9 @@ test('increase the defaultBytesPerOperation estimation by 5% when over 100 calls
   // Interval passes
   await waitFor(interval + 50);
 
-  expect(logger.info).not.toHaveBeenCalledWith(expect.stringContaining('Increasing default bytes per unit'));
+  expect(logger.info).not.toHaveBeenCalledWith(
+    expect.stringContaining('Increasing default bytes per unit'),
+  );
 
   expect(flush).toBeCalledTimes(100);
 
@@ -92,7 +94,9 @@ test('increase the defaultBytesPerOperation estimation by 5% when over 100 calls
 
   expect(flush).toBeCalledTimes(112);
 
-  expect(logger.info).not.toHaveBeenCalledWith(expect.stringContaining('Increasing default bytes per unit'));
+  expect(logger.info).not.toHaveBeenCalledWith(
+    expect.stringContaining('Increasing default bytes per unit'),
+  );
 
   await waitFor(1000);
 
@@ -109,7 +113,7 @@ test('increase the defaultBytesPerOperation estimation by 5% when over 100 calls
   expect(logger.info).toHaveBeenCalledWith(
     expect.stringContaining('Increasing default bytes per unit (ratio=%s, new=%s)'),
     0.05,
-    newDefault
+    newDefault,
   );
   const flushedTimes = 114;
   expect(flush).toHaveBeenCalledTimes(flushedTimes);
@@ -288,8 +292,18 @@ test('buffer create two chunks out of one buffer when actual buffer size is too 
   // Flush should be retried because the buffer size was too big (twice as big)
   expect(onRetry).toBeCalledTimes(1);
   // Buffer should flush two reports, the big report splitted in half
-  expect(flush).toHaveBeenNthCalledWith(1, 'big-0', bufferSize / 2, expect.stringContaining('--retry-chunk-0'));
-  expect(flush).toHaveBeenNthCalledWith(2, 'big-1', bufferSize / 2, expect.stringContaining('--retry-chunk-1'));
+  expect(flush).toHaveBeenNthCalledWith(
+    1,
+    'big-0',
+    bufferSize / 2,
+    expect.stringContaining('--retry-chunk-0'),
+  );
+  expect(flush).toHaveBeenNthCalledWith(
+    2,
+    'big-1',
+    bufferSize / 2,
+    expect.stringContaining('--retry-chunk-1'),
+  );
 
   await buffer.stop();
 });

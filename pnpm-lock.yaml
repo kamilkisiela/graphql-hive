@@ -58,7 +58,7 @@ importers:
       '@graphql-codegen/typescript-resolvers': 2.7.5
       '@sentry/cli': 2.9.0
       '@swc/core': 1.2.185
-      '@theguild/prettier-config': 0.1.1
+      '@theguild/prettier-config': 1.0.0
       '@types/jest': 29.2.0
       '@types/lru-cache': 7.6.1
       '@types/node': 16.11.22
@@ -107,7 +107,7 @@ importers:
       '@graphql-codegen/typescript-resolvers': 2.7.5_graphql@16.5.0
       '@sentry/cli': 2.9.0
       '@swc/core': 1.2.185
-      '@theguild/prettier-config': 0.1.1_prettier@2.7.1
+      '@theguild/prettier-config': 1.0.0_prettier@2.7.1
       '@types/jest': 29.2.0
       '@types/lru-cache': 7.6.1
       '@types/node': 16.11.22
@@ -9149,12 +9149,13 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@theguild/prettier-config/0.1.1_prettier@2.7.1:
-    resolution: {integrity: sha512-vZ0DtusRtMWIM4Bmztq+FimDcKftncteEsKhfDeTj7Oos3+lv8bT4e2VR5HKVKVXZn/cLv6eRwR65/puUakOAQ==}
+  /@theguild/prettier-config/1.0.0_prettier@2.7.1:
+    resolution: {integrity: sha512-EdPbtrXN1Z0QqmFJZXGj4n/xLZTCJtDxb+jeNGmOccrv0cJTB46d+lsvCO8j7SmuUhyt/gv9B6nnVKt66D2X1w==}
     peerDependencies:
       prettier: ^2
     dependencies:
       prettier: 2.7.1
+      prettier-plugin-pkg: 0.17.1_prettier@2.7.1
       prettier-plugin-sh: 0.12.8_prettier@2.7.1
     dev: true
 
@@ -21281,6 +21282,15 @@ packages:
     resolution: {integrity: sha512-ravE6m9Atw9Z/jjttRUZ+clIXogdghyZAuWJ3qEzjT+jI/dL1ifAqhZeC5VHzQp1MSt1+jxKkFNemj/iO7tVUA==}
     engines: {node: '>=4'}
     dev: false
+
+  /prettier-plugin-pkg/0.17.1_prettier@2.7.1:
+    resolution: {integrity: sha512-XPRRMQR5oseJXdfK8kQDj2LCV1UjmTuDlPbbJ8C2WLaATNhdvZLhQO0+NtWnRrQTP+erLR5cVxfcwyqF+3R8SA==}
+    engines: {node: ^12.20.0 || ^14.18.0 || >=16.0.0}
+    peerDependencies:
+      prettier: ^2.0.0
+    dependencies:
+      prettier: 2.7.1
+    dev: true
 
   /prettier-plugin-sh/0.12.8_prettier@2.7.1:
     resolution: {integrity: sha512-VOq8h2Gn5UzrCIKm4p/nAScXJbN09HdyFDknAcxt6Qu/tv/juu9bahxSrcnM9XWYA+Spz1F1ANJ4LhfwB7+Q1Q==}

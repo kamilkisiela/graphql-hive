@@ -17,6 +17,6 @@ export function useClipboard() {
         notify('Failed to copy!', 'error');
       }
     },
-    [notify]
+    [notify],
   );
 }

@@ -61,10 +61,14 @@ async function handleSchedule() {
         for (const headerName of headerNames) {
           // if header value is 'empty', block all requests without the header
           if (headerValue === 'empty' || headerValue === 'undefined') {
-            headerRules.push(`not any(lower(http.request.headers.names[*])[*] contains "${headerName}")`);
+            headerRules.push(
+              `not any(lower(http.request.headers.names[*])[*] contains "${headerName}")`,
+            );
           } else {
             // if header value not 'empty', block all requests with the header of the given value
-            headerRules.push(`any(http.request.headers["${headerName}"][*] contains "${headerValue}")`);
+            headerRules.push(
+              `any(http.request.headers["${headerName}"][*] contains "${headerValue}")`,
+            );
           }
         }
 

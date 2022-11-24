@@ -19,7 +19,11 @@ export class CdnProvider {
   private encoder: TextEncoder;
   private secretKeyData: Uint8Array | null;
 
-  constructor(logger: Logger, private httpClient: HttpClient, @Inject(CDN_CONFIG) private config: CDNConfig | null) {
+  constructor(
+    logger: Logger,
+    private httpClient: HttpClient,
+    @Inject(CDN_CONFIG) private config: CDNConfig | null,
+  ) {
     this.logger = logger.child({ source: 'CdnProvider' });
     this.encoder = new TextEncoder();
     this.secretKeyData = this.config ? this.encoder.encode(this.config.authPrivateKey) : null;
@@ -42,7 +46,9 @@ export class CdnProvider {
       throw new HiveError(`CDN is not configured, cannot generate a token.`);
     }
 
-    return createHmac('sha256', this.secretKeyData).update(this.encoder.encode(targetId)).digest('base64');
+    return createHmac('sha256', this.secretKeyData)
+      .update(this.encoder.encode(targetId))
+      .digest('base64');
   }
 
   async pushToCDN(url: string, body: string, span?: Span): Promise<{ success: boolean }> {
@@ -67,7 +73,7 @@ export class CdnProvider {
           request: 10_000,
         },
       },
-      span
+      span,
     );
   }
 
@@ -82,7 +88,7 @@ export class CdnProvider {
       resourceType: CdnResourceType;
       value: string;
     },
-    span?: Span
+    span?: Span,
   ): Promise<void> {
     if (this.config === null) {
       this.logger.info(`Trying to publish to the CDN, but CDN is not configured, skipping`);
@@ -90,19 +96,23 @@ export class CdnProvider {
     }
 
     const target = `target:${targetId}`;
-    this.logger.info(`Publishing data to CDN based on target: "${target}", resourceType is: ${resourceType} ...`);
+    this.logger.info(
+      `Publishing data to CDN based on target: "${target}", resourceType is: ${resourceType} ...`,
+    );
     const CDN_SOURCE = `${this.config.cloudflare.basePath}/${this.config.cloudflare.accountId}/storage/kv/namespaces/${this.config.cloudflare.namespaceId}/values/${target}`;
 
     this.logger.info(`Data published to CDN: ${value}`);
     const result = await this.pushToCDN(`${CDN_SOURCE}:${resourceType}`, value, span);
 
     if (!result.success) {
-      return Promise.reject(new HiveError(`Failed to publish to CDN, response: ${JSON.stringify(result)}`));
+      return Promise.reject(
+        new HiveError(`Failed to publish to CDN, response: ${JSON.stringify(result)}`),
+      );
     }
 
     this.logger.info(
       `Published to CDN based on target: "${target}", resourceType is: ${resourceType} is done, response: %o`,
-      result
+      result,
     );
   }
 }

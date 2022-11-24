@@ -2,7 +2,9 @@ import { captureException } from '@sentry/nextjs';
 import type { GetServerSideProps } from 'next';
 import type { SessionContainerInterface } from 'supertokens-node/lib/build/recipe/session/types';
 
-export const serverSidePropsSessionHandling = async (context: Parameters<GetServerSideProps>[0]) => {
+export const serverSidePropsSessionHandling = async (
+  context: Parameters<GetServerSideProps>[0],
+) => {
   const { backendConfig } = await import('@/config/supertokens/backend');
   const SupertokensNode = await import('supertokens-node');
   const Session = await import('supertokens-node/recipe/session');

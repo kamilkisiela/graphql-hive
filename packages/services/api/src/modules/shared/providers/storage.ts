@@ -59,7 +59,11 @@ export interface Storage {
   }): Promise<'created' | 'no_action'>;
 
   getUserBySuperTokenId(_: { superTokensUserId: string }): Promise<User | null>;
-  setSuperTokensUserId(_: { auth0UserId: string; superTokensUserId: string; externalUserId: string }): Promise<void>;
+  setSuperTokensUserId(_: {
+    auth0UserId: string;
+    superTokensUserId: string;
+    externalUserId: string;
+  }): Promise<void>;
   getUserWithoutAssociatedSuperTokenIdByAuth0Email(_: { email: string }): Promise<User | null>;
   getUserById(_: { id: string }): Promise<User | null>;
 
@@ -68,7 +72,9 @@ export interface Storage {
   getOrganizationId(_: OrganizationSelector): Promise<string | never>;
   getOrganizationByInviteCode(_: { inviteCode: string }): Promise<Organization | null>;
   getOrganizationByCleanId(_: { cleanId: string }): Promise<Organization | null>;
-  getOrganizationByGitHubInstallationId(_: { installationId: string }): Promise<Organization | null>;
+  getOrganizationByGitHubInstallationId(_: {
+    installationId: string;
+  }): Promise<Organization | null>;
   getOrganization(_: OrganizationSelector): Promise<Organization | never>;
   getMyOrganization(_: { user: string }): Promise<Organization | null>;
   getOrganizations(_: { user: string }): Promise<readonly Organization[] | never>;
@@ -77,19 +83,23 @@ export interface Storage {
       user: string;
       scopes: ReadonlyArray<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
       reservedNames: string[];
-    }
+    },
   ): Promise<Organization | never>;
   deleteOrganization(_: OrganizationSelector): Promise<Organization | never>;
   updateOrganizationName(
-    _: OrganizationSelector & Pick<Organization, 'name' | 'cleanId'> & { user: string }
+    _: OrganizationSelector & Pick<Organization, 'name' | 'cleanId'> & { user: string },
   ): Promise<Organization | never>;
-  updateOrganizationPlan(_: OrganizationSelector & Pick<Organization, 'billingPlan'>): Promise<Organization | never>;
+  updateOrganizationPlan(
+    _: OrganizationSelector & Pick<Organization, 'billingPlan'>,
+  ): Promise<Organization | never>;
   updateOrganizationRateLimits(
-    _: OrganizationSelector & Pick<Organization, 'monthlyRateLimit'>
+    _: OrganizationSelector & Pick<Organization, 'monthlyRateLimit'>,
   ): Promise<Organization | never>;
-  createOrganizationInvitation(_: OrganizationSelector & { email: string }): Promise<OrganizationInvitation | never>;
+  createOrganizationInvitation(
+    _: OrganizationSelector & { email: string },
+  ): Promise<OrganizationInvitation | never>;
   deleteOrganizationInvitationByEmail(
-    _: OrganizationSelector & { email: string }
+    _: OrganizationSelector & { email: string },
   ): Promise<OrganizationInvitation | null>;
 
   getOrganizationMembers(_: OrganizationSelector): Promise<readonly Member[] | never>;
@@ -98,23 +108,29 @@ export interface Storage {
   getOrganizationOwner(_: OrganizationSelector): Promise<Member | never>;
   getOrganizationMember(_: OrganizationSelector & { user: string }): Promise<Member | never>;
   getOrganizationMemberAccessPairs(
-    _: readonly (OrganizationSelector & { user: string })[]
-  ): Promise<ReadonlyArray<ReadonlyArray<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>>>;
-  hasOrganizationMemberPairs(_: readonly (OrganizationSelector & { user: string })[]): Promise<readonly boolean[]>;
-  hasOrganizationProjectMemberPairs(_: readonly (ProjectSelector & { user: string })[]): Promise<readonly boolean[]>;
+    _: readonly (OrganizationSelector & { user: string })[],
+  ): Promise<
+    ReadonlyArray<ReadonlyArray<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>>
+  >;
+  hasOrganizationMemberPairs(
+    _: readonly (OrganizationSelector & { user: string })[],
+  ): Promise<readonly boolean[]>;
+  hasOrganizationProjectMemberPairs(
+    _: readonly (ProjectSelector & { user: string })[],
+  ): Promise<readonly boolean[]>;
   addOrganizationMemberViaInvitationCode(
     _: OrganizationSelector & {
       code: string;
       user: string;
       scopes: ReadonlyArray<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
-    }
+    },
   ): Promise<void>;
   deleteOrganizationMembers(_: OrganizationSelector & { users: readonly string[] }): Promise<void>;
   updateOrganizationMemberAccess(
     _: OrganizationSelector & {
       user: string;
       scopes: ReadonlyArray<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
-    }
+    },
   ): Promise<void>;
 
   getPersistedOperationId(_: PersistedOperationSelector): Promise<string | never>;
@@ -124,18 +140,22 @@ export interface Storage {
   getProjectByCleanId(_: { cleanId: string } & OrganizationSelector): Promise<Project | null>;
   getProjects(_: OrganizationSelector): Promise<Project[] | never>;
   createProject(
-    _: Pick<Project, 'name' | 'cleanId' | 'type'> & NullableAndPartial<CustomOrchestratorConfig> & OrganizationSelector
+    _: Pick<Project, 'name' | 'cleanId' | 'type'> &
+      NullableAndPartial<CustomOrchestratorConfig> &
+      OrganizationSelector,
   ): Promise<Project | never>;
   deleteProject(_: ProjectSelector): Promise<Project | never>;
   updateProjectName(
-    _: ProjectSelector & Pick<Project, 'name' | 'cleanId'> & { user: string }
+    _: ProjectSelector & Pick<Project, 'name' | 'cleanId'> & { user: string },
   ): Promise<Project | never>;
-  updateProjectGitRepository(_: ProjectSelector & Pick<Project, 'gitRepository'>): Promise<Project | never>;
+  updateProjectGitRepository(
+    _: ProjectSelector & Pick<Project, 'gitRepository'>,
+  ): Promise<Project | never>;
   enableExternalSchemaComposition(
     _: ProjectSelector & {
       endpoint: string;
       encryptedSecret: string;
-    }
+    },
   ): Promise<Project>;
   disableExternalSchemaComposition(_: ProjectSelector): Promise<Project>;
 
@@ -143,25 +163,29 @@ export interface Storage {
   getTargetByCleanId(
     _: {
       cleanId: string;
-    } & ProjectSelector
+    } & ProjectSelector,
   ): Promise<Target | null>;
   createTarget(_: Pick<Target, 'cleanId' | 'name'> & ProjectSelector): Promise<Target | never>;
-  updateTargetName(_: TargetSelector & Pick<Project, 'name' | 'cleanId'> & { user: string }): Promise<Target | never>;
+  updateTargetName(
+    _: TargetSelector & Pick<Project, 'name' | 'cleanId'> & { user: string },
+  ): Promise<Target | never>;
   deleteTarget(_: TargetSelector): Promise<Target | never>;
   getTarget(_: TargetSelector): Promise<Target | never>;
   getTargets(_: ProjectSelector): Promise<readonly Target[]>;
   getTargetIdsOfOrganization(_: OrganizationSelector): Promise<readonly string[]>;
   getTargetSettings(_: TargetSelector): Promise<TargetSettings | never>;
-  setTargetValidation(_: TargetSelector & { enabled: boolean }): Promise<TargetSettings['validation'] | never>;
+  setTargetValidation(
+    _: TargetSelector & { enabled: boolean },
+  ): Promise<TargetSettings['validation'] | never>;
   updateTargetValidationSettings(
-    _: TargetSelector & Omit<TargetSettings['validation'], 'enabled'>
+    _: TargetSelector & Omit<TargetSettings['validation'], 'enabled'>,
   ): Promise<TargetSettings['validation'] | never>;
 
   hasSchema(_: TargetSelector): Promise<boolean>;
   getLatestSchemas(
     _: {
       version?: string;
-    } & TargetSelector
+    } & TargetSelector,
   ): Promise<
     | {
         schemas: Schema[];
@@ -178,12 +202,12 @@ export interface Storage {
     _: {
       version: string;
       includeMetadata?: boolean;
-    } & TargetSelector
+    } & TargetSelector,
   ): Promise<Schema[] | never>;
   getSchemasOfPreviousVersion(
     _: {
       version: string;
-    } & TargetSelector
+    } & TargetSelector,
   ): Promise<readonly Schema[] | never>;
   getVersions(_: Paginated<TargetSelector>): Promise<
     | {
@@ -194,7 +218,9 @@ export interface Storage {
   >;
   getVersion(_: TargetSelector & { version: string }): Promise<SchemaVersion | never>;
 
-  updateSchemaUrlOfVersion(_: TargetSelector & { version: string; url?: string | null; commit: string }): Promise<void>;
+  updateSchemaUrlOfVersion(
+    _: TargetSelector & { version: string; url?: string | null; commit: string },
+  ): Promise<void>;
   updateServiceName(_: TargetSelector & { commit: string; name: string }): Promise<void>;
 
   insertSchema(
@@ -205,7 +231,7 @@ export interface Storage {
       service?: string | null;
       url?: string | null;
       metadata: string | null;
-    } & TargetSelector
+    } & TargetSelector,
   ): Promise<Schema | never>;
 
   createVersion(
@@ -215,14 +241,14 @@ export interface Storage {
       commit: string;
       commits: string[];
       base_schema: string | null;
-    } & TargetSelector
+    } & TargetSelector,
   ): Promise<SchemaVersion | never>;
 
   updateVersionStatus(
     _: {
       valid: boolean;
       version: string;
-    } & TargetSelector
+    } & TargetSelector,
   ): Promise<SchemaVersion | never>;
 
   getSchema(_: { commit: string; target: string }): Promise<Schema | never>;
@@ -233,25 +259,25 @@ export interface Storage {
       type: string;
       meta: object;
     } & OrganizationSelector &
-      Partial<Pick<TargetSelector, 'project' | 'target'>>
+      Partial<Pick<TargetSelector, 'project' | 'target'>>,
   ): Promise<void>;
 
   getActivities(
     _: (OrganizationSelector | ProjectSelector | TargetSelector) & {
       limit: number;
-    }
+    },
   ): Promise<readonly ActivityObject[]>;
 
   getPersistedOperations(_: ProjectSelector): Promise<readonly PersistedOperation[]>;
 
   getSelectedPersistedOperations(
-    _: ProjectSelector & { hashes: readonly string[] }
+    _: ProjectSelector & { hashes: readonly string[] },
   ): Promise<readonly PersistedOperation[]>;
 
   comparePersistedOperations(
     _: ProjectSelector & {
       hashes: readonly string[];
-    }
+    },
   ): Promise<readonly string[]>;
 
   getPersistedOperation(_: PersistedOperationSelector): Promise<PersistedOperation | never>;
@@ -262,7 +288,7 @@ export interface Storage {
       name: string;
       kind: string;
       content: string;
-    } & ProjectSelector
+    } & ProjectSelector,
   ): Promise<PersistedOperation | never>;
 
   deletePersistedOperation(_: PersistedOperationSelector): Promise<PersistedOperation | never>;
@@ -279,7 +305,7 @@ export interface Storage {
   deleteAlertChannels(
     _: ProjectSelector & {
       channels: readonly string[];
-    }
+    },
   ): Promise<readonly AlertChannel[]>;
   getAlertChannels(_: ProjectSelector): Promise<readonly AlertChannel[]>;
 
@@ -287,7 +313,7 @@ export interface Storage {
   deleteAlerts(
     _: ProjectSelector & {
       alerts: readonly string[];
-    }
+    },
   ): Promise<readonly Alert[]>;
   getAlerts(_: ProjectSelector): Promise<readonly Alert[]>;
 
@@ -334,7 +360,7 @@ export interface Storage {
   completeGetStartedStep(
     _: OrganizationSelector & {
       step: Exclude<keyof Organization['getStarted'], 'id'>;
-    }
+    },
   ): Promise<void>;
 
   getOIDCIntegrationForOrganization(_: { organizationId: string }): Promise<OIDCIntegration | null>;

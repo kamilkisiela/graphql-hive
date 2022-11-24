@@ -32,7 +32,7 @@ const composeFederation = compose(services => {
         name: service.name,
         url: service.url,
       };
-    })
+    }),
   );
 
   if (compositionHasErrors(result)) {

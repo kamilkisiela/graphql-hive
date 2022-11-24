@@ -87,6 +87,6 @@ export function deployUsageIngestor({
         maxReplicas: maxReplicas,
       },
     },
-    [clickhouse.deployment, clickhouse.service, dbMigrations]
+    [clickhouse.deployment, clickhouse.service, dbMigrations],
   ).deploy();
 }

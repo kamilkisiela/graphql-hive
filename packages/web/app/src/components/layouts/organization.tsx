@@ -14,7 +14,11 @@ import {
   OrgRateLimitFieldsFragment,
 } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
-import { canAccessOrganization, OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
+import {
+  canAccessOrganization,
+  OrganizationAccessScope,
+  useOrganizationAccess,
+} from '@/lib/access/organization';
 import cookies from 'js-cookie';
 import { LAST_VISITED_ORG_KEY } from '@/constants';
 import { getIsStripeEnabled } from '@/lib/billing/stripe-public-key';
@@ -33,16 +37,16 @@ type OrganizationLayout<T, P> = {
 } & P;
 
 export function OrganizationLayout(
-  props: OrganizationLayout<OrgBillingInfoFieldsFragment, { includeBilling: true }>
+  props: OrganizationLayout<OrgBillingInfoFieldsFragment, { includeBilling: true }>,
 ): ReactElement;
 export function OrganizationLayout(
-  props: OrganizationLayout<OrgRateLimitFieldsFragment, { includeRateLimit: true }>
+  props: OrganizationLayout<OrgRateLimitFieldsFragment, { includeRateLimit: true }>,
 ): ReactElement;
 export function OrganizationLayout(
   props: OrganizationLayout<
     OrgBillingInfoFieldsFragment & OrgRateLimitFieldsFragment,
     { includeBilling: true; includeRateLimit: true }
-  >
+  >,
 ): ReactElement;
 export function OrganizationLayout(props: OrganizationLayout<{}, {}>): ReactElement;
 export function OrganizationLayout({

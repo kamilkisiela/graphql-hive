@@ -17,7 +17,7 @@ export class UsageEstimationProvider {
   constructor(
     logger: Logger,
     @Inject(USAGE_ESTIMATION_SERVICE_CONFIG)
-    usageEstimationConfig: UsageEstimationServiceConfig
+    usageEstimationConfig: UsageEstimationServiceConfig,
   ) {
     this.logger = logger.child({ service: 'UsageEstimationProvider' });
     this.usageEstimator = usageEstimationConfig.endpoint
@@ -29,7 +29,9 @@ export class UsageEstimationProvider {
   }
 
   @sentry('UsageEstimation.estimateOperations')
-  async estimateOperations(input: UsageEstimatorQueryInput<'estimateOperationsForTarget'>): Promise<number | null> {
+  async estimateOperations(
+    input: UsageEstimatorQueryInput<'estimateOperationsForTarget'>,
+  ): Promise<number | null> {
     this.logger.debug('Estimation operations, input: %o', input);
 
     if (input.targetIds.length === 0) {

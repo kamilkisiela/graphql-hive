@@ -164,7 +164,8 @@ export const resolvers: ProjectModule.Resolvers & { ProjectType: any } = {
       if (!result.success) {
         return {
           error: {
-            message: result.error.formErrors.fieldErrors.gitRepository?.[0] ?? 'Please check your input.',
+            message:
+              result.error.formErrors.fieldErrors.gitRepository?.[0] ?? 'Please check your input.',
           },
         };
       }

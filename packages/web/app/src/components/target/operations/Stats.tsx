@@ -6,7 +6,11 @@ import tw from 'twin.macro';
 import { useQuery } from 'urql';
 
 import { Section } from '@/components/common';
-import { DateRangeInput, GeneralOperationsStatsDocument, GeneralOperationsStatsQuery } from '@/graphql';
+import {
+  DateRangeInput,
+  GeneralOperationsStatsDocument,
+  GeneralOperationsStatsQuery,
+} from '@/graphql';
 import { theme } from '@/lib/charts';
 import { toDecimal } from '@/lib/hooks/use-decimal';
 import { useFormattedDuration } from '@/lib/hooks/use-formatted-duration';
@@ -19,9 +23,10 @@ function resolutionToMilliseconds(
   period: {
     from: string;
     to: string;
-  }
+  },
 ) {
-  const distanceInMinutes = (new Date(period.to).getTime() - new Date(period.from).getTime()) / 1000 / 60;
+  const distanceInMinutes =
+    (new Date(period.to).getTime() - new Date(period.from).getTime()) / 1000 / 60;
 
   return Math.round(distanceInMinutes / resolution) * 1000 * 60;
 }
@@ -35,7 +40,7 @@ function fullSeries(
   period: {
     from: string;
     to: string;
-  }
+  },
 ): Array<[string, number]> {
   if (!data.length) {
     return createEmptySeries({ interval, period });
@@ -144,7 +149,7 @@ function useChartStyles() {
           color: '#fff',
         },
       },
-    }
+    },
   );
 }
 
@@ -210,7 +215,10 @@ const SuccessRateStats: React.FC<{
   requests?: number;
   totalFailures?: number;
 }> = ({ requests = 0, totalFailures = 0 }) => {
-  const rate = requests || totalFailures ? `${toDecimal(((requests - totalFailures) * 100) / requests)}%` : '-';
+  const rate =
+    requests || totalFailures
+      ? `${toDecimal(((requests - totalFailures) * 100) / requests)}%`
+      : '-';
 
   return (
     <Stats.Root>
@@ -247,7 +255,7 @@ const OverTimeStats: React.FC<{
       return fullSeries(
         requestsOverTime.map<[string, number]>(node => [node.date, node.value]),
         interval,
-        period
+        period,
       );
     }
 
@@ -259,7 +267,7 @@ const OverTimeStats: React.FC<{
       return fullSeries(
         failuresOverTime.map<[string, number]>(node => [node.date, node.value]),
         interval,
-        period
+        period,
       );
     }
 
@@ -371,7 +379,11 @@ const ClientsStats: React.FC<{
         } else {
           if (!labels[4]) {
             counts.push(client.count);
-            labels.push(sortedClients.length === 5 ? client.name : `Other clients (${sortedClients.length - 4})`);
+            labels.push(
+              sortedClients.length === 5
+                ? client.name
+                : `Other clients (${sortedClients.length - 4})`,
+            );
           } else {
             counts[4] += client.percentage;
           }
@@ -418,7 +430,9 @@ const ClientsStats: React.FC<{
         } else {
           if (!labels[4]) {
             counts.push(version.count);
-            labels.push(versions.length === 5 ? version.name : `Other versions (${versions.length - 4})`);
+            labels.push(
+              versions.length === 5 ? version.name : `Other versions (${versions.length - 4})`,
+            );
           } else {
             counts[4] += version.count;
           }
@@ -533,7 +547,7 @@ const LatencyOverTimeStats: React.FC<{
       return fullSeries(
         duration.map<[string, number]>(node => [node.date, node.duration.p75]),
         interval,
-        period
+        period,
       );
     }
 
@@ -544,7 +558,7 @@ const LatencyOverTimeStats: React.FC<{
       return fullSeries(
         duration.map<[string, number]>(node => [node.date, node.duration.p90]),
         interval,
-        period
+        period,
       );
     }
 
@@ -555,7 +569,7 @@ const LatencyOverTimeStats: React.FC<{
       return fullSeries(
         duration.map<[string, number]>(node => [node.date, node.duration.p95]),
         interval,
-        period
+        period,
       );
     }
 
@@ -566,7 +580,7 @@ const LatencyOverTimeStats: React.FC<{
       return fullSeries(
         duration.map<[string, number]>(node => [node.date, node.duration.p99]),
         interval,
-        period
+        period,
       );
     }
 
@@ -665,9 +679,12 @@ const RpmOverTimeStats: React.FC<{
   const rpmOverTime = React.useMemo(() => {
     if (requests.length) {
       return fullSeries(
-        requests.map<[string, number]>(node => [node.date, parseFloat((node.value / windowInM).toFixed(4))]),
+        requests.map<[string, number]>(node => [
+          node.date,
+          parseFloat((node.value / windowInM).toFixed(4)),
+        ]),
         interval,
-        period
+        period,
       );
     }
 
@@ -839,7 +856,11 @@ export const OperationsStats: React.FC<{
       </div>
       <div>
         <OperationsFallback isError={isError} refetch={refetch}>
-          <LatencyOverTimeStats period={period} duration={operationsStats?.durationOverTime} resolution={resolution} />
+          <LatencyOverTimeStats
+            period={period}
+            duration={operationsStats?.durationOverTime}
+            resolution={resolution}
+          />
         </OperationsFallback>
       </div>
     </section>

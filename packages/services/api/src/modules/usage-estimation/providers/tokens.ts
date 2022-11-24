@@ -5,5 +5,5 @@ export interface UsageEstimationServiceConfig {
 }
 
 export const USAGE_ESTIMATION_SERVICE_CONFIG = new InjectionToken<UsageEstimationServiceConfig>(
-  'usage-estimation-service-config'
+  'usage-estimation-service-config',
 );
