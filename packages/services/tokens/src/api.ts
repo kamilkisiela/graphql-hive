@@ -1,4 +1,4 @@
-import { createErrorHandler } from '@hive/service-common';
+import { createErrorHandler, metrics } from '@hive/service-common';
 import * as trpc from '@trpc/server';
 import { inferProcedureInput, inferProcedureOutput } from '@trpc/server';
 import type { FastifyLoggerInstance } from 'fastify';
@@ -6,6 +6,12 @@ import { z } from 'zod';
 import { useCache } from './cache';
 import { createHash } from 'crypto';
 import { Lru as LruType } from 'tiny-lru';
+
+const httpRequests = new metrics.Counter({
+  name: 'tokens_http_requests',
+  help: 'Number of http requests',
+  labelNames: ['path'],
+});
 
 const TARGET_VALIDATION = z
   .object({
@@ -75,6 +81,7 @@ export const tokensApiRouter = trpc
   .query('targetTokens', {
     input: TARGET_VALIDATION,
     async resolve({ ctx, input }) {
+      httpRequests.labels({ path: 'targetTokens' }).inc();
       try {
         const storage = await ctx.getStorage();
 
@@ -89,6 +96,7 @@ export const tokensApiRouter = trpc
   .mutation('invalidateTokenByTarget', {
     input: TARGET_VALIDATION,
     async resolve({ ctx, input }) {
+      httpRequests.labels({ path: 'invalidateTokenByTarget' }).inc();
       try {
         const storage = await ctx.getStorage();
         storage.invalidateTarget(input.targetId);
@@ -104,6 +112,7 @@ export const tokensApiRouter = trpc
   .mutation('invalidateTokenByProject', {
     input: PROJECT_VALIDATION,
     async resolve({ ctx, input }) {
+      httpRequests.labels({ path: 'invalidateTokenByProject' }).inc();
       try {
         const storage = await ctx.getStorage();
         storage.invalidateProject(input.projectId);
@@ -119,6 +128,7 @@ export const tokensApiRouter = trpc
   .mutation('invalidateTokenByOrganization', {
     input: ORG_VALIDATION,
     async resolve({ ctx, input }) {
+      httpRequests.labels({ path: 'invalidateTokenByOrganization' }).inc();
       try {
         const storage = await ctx.getStorage();
         storage.invalidateProject(input.organizationId);
@@ -142,6 +152,7 @@ export const tokensApiRouter = trpc
       })
       .required(),
     async resolve({ ctx, input }) {
+      httpRequests.labels({ path: 'createToken' }).inc();
       try {
         const { target, project, organization, name, scopes } = input;
         const storage = await ctx.getStorage();
@@ -170,6 +181,7 @@ export const tokensApiRouter = trpc
   .mutation('deleteToken', {
     input: TOKEN_VALIDATION,
     async resolve({ ctx, input }) {
+      httpRequests.labels({ path: 'deleteToken' }).inc();
       try {
         const hashed_token = input.token;
         const storage = await ctx.getStorage();
@@ -186,6 +198,7 @@ export const tokensApiRouter = trpc
   .query('getToken', {
     input: TOKEN_VALIDATION,
     async resolve({ ctx, input }) {
+      httpRequests.labels({ path: 'getToken' }).inc();
       const hash = hashToken(input.token);
       const alias = maskToken(input.token);
 

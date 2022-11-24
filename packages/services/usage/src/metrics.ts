@@ -10,6 +10,12 @@ export const tokenRequests = new metrics.Counter({
   help: 'Number of requests to Tokens service',
 });
 
+export const tokensDuration = new metrics.Histogram({
+  name: 'usage_tokens_duration_seconds',
+  help: 'Duration of an HTTP Request to Tokens service in seconds',
+  labelNames: ['status'],
+});
+
 export const httpRequests = new metrics.Counter({
   name: 'usage_http_requests',
   help: 'Number of http requests',
