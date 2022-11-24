@@ -25,7 +25,7 @@
   "devDependencies": {
     "@hive/server": "workspace:*",
     "@types/ioredis": "4.28.10",
-    "tslib": "2.4.0"
+    "tslib": "2.4.1"
   },
   "scripts": {
     "build-and-pack": "(cd ../ && pnpm build:services && pnpm build:libraries && pnpm build:local) && node ./scripts/pack.mjs",

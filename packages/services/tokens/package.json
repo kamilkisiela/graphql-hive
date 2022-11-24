@@ -26,7 +26,7 @@
     "@types/ms": "0.7.31",
     "pino-pretty": "6.0.0",
     "fastify": "3.29.4",
-    "tslib": "2.4.0"
+    "tslib": "2.4.1"
   },
   "buildOptions": {
     "runify": true,
