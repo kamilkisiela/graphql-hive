@@ -992,7 +992,7 @@ importers:
       monaco-editor: 0.27.0
       monaco-themes: 0.3.3
       next: 12.3.1
-      nextjs-cors: 2.1.1
+      nextjs-cors: 2.1.2
       node-crisp-api: 1.12.3
       postcss: 8.4.13
       react: 17.0.2
@@ -1073,7 +1073,7 @@ importers:
       monaco-editor: 0.27.0
       monaco-themes: 0.3.3
       next: 12.3.1_sfoxds7t5ydpegc3knd667wn6m
-      nextjs-cors: 2.1.1_next@12.3.1
+      nextjs-cors: 2.1.2_next@12.3.1
       node-crisp-api: 1.12.3
       react: 17.0.2
       react-children-utilities: 2.7.1_react@17.0.2
@@ -19600,10 +19600,10 @@ packages:
       - babel-plugin-macros
     dev: false
 
-  /nextjs-cors/2.1.1_next@12.3.1:
-    resolution: {integrity: sha512-HxE4w4Wng5VdTtnn0DWPphuWKwd1Ty+lpyTZ/sQGgaNnd5demYMchKf+W1LtI8YFYxu2HnRb3MrxERRV0QKLKA==}
+  /nextjs-cors/2.1.2_next@12.3.1:
+    resolution: {integrity: sha512-2yOVivaaf2ILe4f/qY32hnj3oC77VCOsUQJQfhVMGsXE/YMEWUY2zy78sH9FKUCM7eG42/l3pDofIzMD781XGA==}
     peerDependencies:
-      next: ^8.1.1-canary.54 || ^9.0.0 || ^10.0.0-0 || ^11.0.0 || ^12.0.0
+      next: ^8.1.1-canary.54 || ^9.0.0 || ^10.0.0-0 || ^11.0.0 || ^12.0.0 || ^13.0.0
     dependencies:
       cors: 2.8.5
       next: 12.3.1_sfoxds7t5ydpegc3knd667wn6m
