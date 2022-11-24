@@ -18,7 +18,7 @@
     "@sentry/node": "7.20.1",
     "@sentry/tracing": "7.20.1",
     "dotenv": "10.0.0",
-    "got": "12.5.2"
+    "got": "12.5.3"
   },
   "devDependencies": {
     "@hive/api": "workspace:*",
