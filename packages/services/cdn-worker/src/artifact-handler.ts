@@ -3,6 +3,8 @@ import { type Request, createFetch } from '@whatwg-node/fetch';
 import itty from 'itty-router';
 import zod from 'zod';
 import { InvalidAuthKeyResponse, MissingAuthKeyResponse } from './errors';
+import type { Analytics } from './analytics';
+import { createAnalytics } from './analytics';
 import type { ArtifactsType } from '@hive/api/src/modules/schema/providers/artifact-storage-reader';
 
 const { Response } = createFetch({ useNodeFetch: true });
@@ -16,6 +18,7 @@ type ArtifactRequestHandler = {
     { type: 'notModified' } | { type: 'notFound' } | { type: 'redirect'; location: string }
   >;
   isKeyValid: KeyValidator;
+  analytics?: Analytics;
   fallback?: (
     request: Request,
     params: { targetId: string; artifactType: string },
@@ -38,6 +41,7 @@ const authHeaderName = 'x-hive-cdn-key' as const;
 
 export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
   const router = itty.Router<itty.Request & Request>();
+  const analytics = deps.analytics ?? createAnalytics();
 
   const authenticate = async (
     request: itty.Request & Request,
@@ -45,7 +49,7 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
   ): Promise<Response | null> => {
     const headerKey = request.headers.get(authHeaderName);
     if (headerKey === null) {
-      return new MissingAuthKeyResponse();
+      return new MissingAuthKeyResponse(analytics);
     }
 
     const isValid = await deps.isKeyValid(targetId, headerKey);
@@ -54,7 +58,7 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
       return null;
     }
 
-    return new InvalidAuthKeyResponse();
+    return new InvalidAuthKeyResponse(analytics);
   };
 
   router.get(
@@ -73,6 +77,11 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
       if (maybeResponse !== null) {
         return maybeResponse;
       }
+
+      analytics.track(
+        { type: 'artifact', value: params.artifactType, version: 'v1' },
+        params.targetId,
+      );
 
       const eTag = request.headers.get('if-none-match');
 
