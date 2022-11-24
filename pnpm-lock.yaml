@@ -597,7 +597,7 @@ importers:
       '@envelop/core': 3.0.3
       '@envelop/generic-auth': 5.0.3
       '@envelop/graphql-modules': 4.0.3
-      '@envelop/sentry': 4.0.3
+      '@envelop/sentry': 5.0.0-alpha-20221124161914-24cce7d7
       '@envelop/types': 3.0.0
       '@graphql-hive/client': 0.21.3
       '@hive/api': workspace:*
@@ -623,7 +623,7 @@ importers:
       '@envelop/core': 3.0.3
       '@envelop/generic-auth': 5.0.3_wh5yvahv2yiw2ssopdfjqknqjy
       '@envelop/graphql-modules': 4.0.3_wh5yvahv2yiw2ssopdfjqknqjy
-      '@envelop/sentry': 4.0.3_ofzijcqooblt2ygeqgbeybzoqa
+      '@envelop/sentry': 5.0.0-alpha-20221124161914-24cce7d7_ofzijcqooblt2ygeqgbeybzoqa
       '@envelop/types': 3.0.0
       '@sentry/integrations': 7.20.1
       '@sentry/node': 7.20.1
@@ -4539,16 +4539,6 @@ packages:
       tslib: 2.4.1
     dev: false
 
-  /@envelop/on-resolve/2.0.3_wh5yvahv2yiw2ssopdfjqknqjy:
-    resolution: {integrity: sha512-qA7OFeJmNdmMyITkNxIRYm8mpaFa5M7TJo0rRon09jYWDfPK/Sn29JrnXCynxbzbx+8pgzH8OaClLEI/sTVLtQ==}
-    peerDependencies:
-      '@envelop/core': ^3.0.3
-      graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
-    dependencies:
-      '@envelop/core': 3.0.3
-      graphql: 16.5.0
-    dev: false
-
   /@envelop/parser-cache/5.0.3_@envelop+core@3.0.3:
     resolution: {integrity: sha512-3H3PZI//1ConuD0MmkKl3Sm9j7vRQvI/fIgvzXbE0n/OuuVV7D9rmtnSEqTkXufAgxKv674T2DJF4QPQHOy9Ag==}
     peerDependencies:
@@ -4571,15 +4561,14 @@ packages:
       tslib: 2.4.1
     dev: false
 
-  /@envelop/sentry/4.0.3_ofzijcqooblt2ygeqgbeybzoqa:
-    resolution: {integrity: sha512-dFZNeKE+7Vz0rP988dELD4GFE0ryyEUSwp0pulzaezy9r+egfeTBletSiv1IhAmwcul3bAwrMFFCkugx43ZAdA==}
+  /@envelop/sentry/5.0.0-alpha-20221124161914-24cce7d7_ofzijcqooblt2ygeqgbeybzoqa:
+    resolution: {integrity: sha512-bL8yzc+WfjjsIbb0lAdZ4EIlomFdQZi5JG8aNUbfv7PjMoIn8JatJo6HX6G9kQTuwfDHwSjr0HHXJ+nijC/BAQ==}
     peerDependencies:
-      '@envelop/core': ^3.0.3
+      '@envelop/core': ^3.0.4
       '@sentry/node': ^6 || ^7
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
       '@envelop/core': 3.0.3
-      '@envelop/on-resolve': 2.0.3_wh5yvahv2yiw2ssopdfjqknqjy
       '@sentry/node': 7.20.1
       graphql: 16.5.0
       tslib: 2.4.1
