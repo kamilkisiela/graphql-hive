@@ -347,7 +347,7 @@ importers:
       agentkeepalive: 4.2.1
       dataloader: 2.0.0
       date-fns: 2.25.0
-      got: 12.5.2
+      got: 12.5.3
       graphql-modules: 2.0.0
       graphql-parse-resolve-info: 4.12.0
       graphql-scalars: 1.12.0
@@ -382,7 +382,7 @@ importers:
       agentkeepalive: 4.2.1
       dataloader: 2.0.0
       date-fns: 2.25.0
-      got: 12.5.2
+      got: 12.5.3
       graphql-modules: 2.0.0
       graphql-parse-resolve-info: 4.12.0
       graphql-scalars: 1.12.0
@@ -530,7 +530,7 @@ importers:
       '@whatwg-node/fetch': 0.4.7
       date-fns: 2.28.0
       dotenv: 10.0.0
-      got: 12.5.2
+      got: 12.5.3
       pino-pretty: 6.0.0
       reflect-metadata: 0.1.13
       tslib: 2.4.1
@@ -543,7 +543,7 @@ importers:
       '@whatwg-node/fetch': 0.4.7
       date-fns: 2.28.0
       dotenv: 10.0.0
-      got: 12.5.2
+      got: 12.5.3
       reflect-metadata: 0.1.13
       zod: 3.15.1
     devDependencies:
@@ -611,7 +611,7 @@ importers:
       '@whatwg-node/fetch': 0.4.7
       dotenv: 10.0.0
       fastify: 3.29.4
-      got: 12.5.2
+      got: 12.5.3
       graphql: 16.5.0
       graphql-yoga: 3.0.0-next.12
       hyperid: 2.3.1
@@ -631,7 +631,7 @@ importers:
       '@trpc/server': 9.23.2
       '@whatwg-node/fetch': 0.4.7
       dotenv: 10.0.0
-      got: 12.5.2
+      got: 12.5.3
       graphql: 16.5.0
       graphql-yoga: 3.0.0-next.12_graphql@16.5.0
       hyperid: 2.3.1
@@ -682,7 +682,7 @@ importers:
       '@types/pg': 8.6.5
       copyfiles: 2.4.1
       dotenv: 10.0.0
-      got: 12.5.2
+      got: 12.5.3
       param-case: 3.0.4
       pg-promise: 10.11.1
       slonik: 30.1.2
@@ -696,7 +696,7 @@ importers:
       '@slonik/migrator': 0.8.5_slonik@30.1.2
       '@theguild/buddy': 0.1.0_by7lpfnfs364rrj52jl5kihtv4
       dotenv: 10.0.0
-      got: 12.5.2
+      got: 12.5.3
       param-case: 3.0.4
       slonik: 30.1.2_wg2hxbo7txnklmvja4aeqnygfi
       slonik-interceptor-query-logging: 1.4.7_slonik@30.1.2
@@ -722,7 +722,7 @@ importers:
       '@whatwg-node/fetch': 0.4.7
       date-fns: 2.28.0
       dotenv: 10.0.0
-      got: 12.5.2
+      got: 12.5.3
       pino-pretty: 6.0.0
       reflect-metadata: 0.1.13
       stripe: 8.220.0
@@ -735,7 +735,7 @@ importers:
       '@whatwg-node/fetch': 0.4.7
       date-fns: 2.28.0
       dotenv: 10.0.0
-      got: 12.5.2
+      got: 12.5.3
       reflect-metadata: 0.1.13
       stripe: 8.220.0
       zod: 3.15.1
@@ -790,7 +790,7 @@ importers:
       '@whatwg-node/fetch': 0.4.7
       ajv: 8.11.2
       dotenv: 10.0.0
-      got: 12.5.2
+      got: 12.5.3
       graphql: 16.5.0
       kafkajs: 2.2.2
       pino-pretty: 6.0.0
@@ -803,7 +803,7 @@ importers:
       '@whatwg-node/fetch': 0.4.7
       ajv: 8.11.2
       dotenv: 10.0.0
-      got: 12.5.2
+      got: 12.5.3
       graphql: 16.5.0
       kafkajs: 2.2.2
       tiny-lru: 8.0.2
@@ -829,7 +829,7 @@ importers:
       '@trpc/server': 9.23.2
       '@whatwg-node/fetch': 0.4.7
       dotenv: 10.0.0
-      got: 12.5.2
+      got: 12.5.3
       pino-pretty: 6.0.0
       reflect-metadata: 0.1.13
       tslib: 2.4.1
@@ -840,7 +840,7 @@ importers:
       '@trpc/server': 9.23.2
       '@whatwg-node/fetch': 0.4.7
       dotenv: 10.0.0
-      got: 12.5.2
+      got: 12.5.3
       reflect-metadata: 0.1.13
       zod: 3.15.1
     devDependencies:
@@ -859,7 +859,7 @@ importers:
       agentkeepalive: 4.2.1
       date-fns: 2.25.0
       dotenv: 10.0.0
-      got: 12.5.2
+      got: 12.5.3
       graphql: 16.5.0
       kafkajs: 2.2.2
       pino-pretty: 6.0.0
@@ -872,7 +872,7 @@ importers:
       agentkeepalive: 4.2.1
       date-fns: 2.25.0
       dotenv: 10.0.0
-      got: 12.5.2
+      got: 12.5.3
       graphql: 16.5.0
       kafkajs: 2.2.2
       tiny-lru: 8.0.2
@@ -894,7 +894,7 @@ importers:
       bullmq: 1.81.4
       copyfiles: 2.4.1
       dotenv: 10.0.0
-      got: 12.5.2
+      got: 12.5.3
       ioredis: 4.28.5
       p-timeout: 5.0.2
       pino-pretty: 6.0.0
@@ -906,7 +906,7 @@ importers:
       '@trpc/server': 9.23.2
       bullmq: 1.81.4_d7likfulu5mfjaaerbpls6og24
       dotenv: 10.0.0
-      got: 12.5.2
+      got: 12.5.3
       ioredis: 4.28.5
       p-timeout: 5.0.2
       zod: 3.15.1
@@ -15357,8 +15357,8 @@ packages:
     resolution: {integrity: sha512-3MSOYFO5U9mPGikIYCzK0SaThypfGgS6bHqrUGXG3DPHCrb+txNqeEcns1W0lkGfk0rCyNXm7xB9rMxnCiZOoA==}
     dev: false
 
-  /got/12.5.2:
-    resolution: {integrity: sha512-guHGMSEcsA5m1oPRweXUJnug0vuvlkX9wx5hzOka+ZBrBUOJHU0Z1JcNu3QE5IPGnA5aXUsQHdWOD4eJg9/v3A==}
+  /got/12.5.3:
+    resolution: {integrity: sha512-8wKnb9MGU8IPGRIo+/ukTy9XLJBwDiCpIf5TVzQ9Cpol50eMTpBq2GAuDsuDIz7hTYmZgMgC1e9ydr6kSDWs3w==}
     engines: {node: '>=14.16'}
     dependencies:
       '@sindresorhus/is': 5.3.0

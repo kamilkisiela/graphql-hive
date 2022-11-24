@@ -16,7 +16,7 @@
     "@sentry/tracing": "7.20.1",
     "ajv": "8.11.2",
     "dotenv": "10.0.0",
-    "got": "12.5.2",
+    "got": "12.5.3",
     "graphql": "16.5.0",
     "kafkajs": "2.2.2",
     "tiny-lru": "8.0.2",
