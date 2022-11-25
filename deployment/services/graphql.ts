@@ -47,6 +47,7 @@ export function deployGraphQL({
   emails,
   supertokensConfig,
   auth0Config,
+  s3Config,
 }: {
   storageContainer: azure.storage.Container;
   packageHelper: PackageHelper;
@@ -69,6 +70,12 @@ export function deployGraphQL({
   };
   auth0Config: {
     internalApiKey: Output<string>;
+  };
+  s3Config: {
+    endpoint: string;
+    bucketName: string;
+    accessKeyId: Output<string>;
+    secretAccessKey: Output<string>;
   };
 }) {
   const rawConnectionString = apiConfig.requireSecret('postgresConnectionString');
@@ -105,10 +112,10 @@ export function deployGraphQL({
         POSTGRES_USER: connectionString.apply(connection => connection.user ?? ''),
         POSTGRES_DB: connectionString.apply(connection => connection.database ?? ''),
         POSTGRES_SSL: connectionString.apply(connection => (connection.ssl ? '1' : '0')),
-        S3_ENDPOINT: 'TODO PLACEHOLDER',
-        S3_ACCESS_KEY_ID: 'TODO PLACEHOLDER',
-        S3_SECRET_ACCESS_KEY: 'TODO PLACEHOLDER',
-        S3_BUCKET_NAME: 'TODO PLACEHOLDER',
+        S3_ENDPOINT: s3Config.endpoint,
+        S3_ACCESS_KEY_ID: s3Config.accessKeyId,
+        S3_SECRET_ACCESS_KEY: s3Config.secretAccessKey,
+        S3_BUCKET_NAME: s3Config.bucketName,
         BILLING_ENDPOINT: serviceLocalEndpoint(billing.service),
         TOKENS_ENDPOINT: serviceLocalEndpoint(tokens.service),
         WEBHOOKS_ENDPOINT: serviceLocalEndpoint(webhooks.service),
