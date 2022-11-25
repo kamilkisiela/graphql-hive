@@ -238,19 +238,22 @@ export class SchemaPublisher {
         includeMetadata: true,
       });
 
+      const orchestrator = this.schemaManager.matchOrchestrator(project.type);
+      const sschemas = schemas.map(s => this.helper.createSchemaObject(s));
+      const schema = await orchestrator.build(sschemas, project.externalComposition);
+
       this.logger.info('Deploying version to CDN (version=%s)', latestVersion.id);
+
       await this.updateCDN(
         {
           target,
           project,
           supergraph:
             project.type === ProjectType.FEDERATION
-              ? await this.schemaManager.matchOrchestrator(project.type).supergraph(
-                  schemas.map(s => this.helper.createSchemaObject(s)),
-                  project.externalComposition,
-                )
+              ? await orchestrator.supergraph(sschemas, project.externalComposition)
               : null,
           schemas,
+          fullSchemaSdl: schema.raw,
         },
         span,
       );
@@ -293,18 +296,23 @@ export class SchemaPublisher {
           }),
         ]);
 
+        const orchestrator = this.schemaManager.matchOrchestrator(project.type);
+        const sschemas = schemas.map(s => this.helper.createSchemaObject(s));
+        const schema = await orchestrator.build(sschemas, project.externalComposition);
+
         this.logger.info('Deploying version to CDN (version=%s)', latestVersion.id);
         await this.updateCDN({
           target,
           project,
           supergraph:
             project.type === ProjectType.FEDERATION
-              ? await this.schemaManager.matchOrchestrator(project.type).supergraph(
+              ? await orchestrator.supergraph(
                   schemas.map(s => this.helper.createSchemaObject(s)),
                   project.externalComposition,
                 )
               : null,
           schemas,
+          fullSchemaSdl: schema.raw,
         });
       }
     }
@@ -712,6 +720,9 @@ export class SchemaPublisher {
   }) {
     try {
       if (valid) {
+        const sschemas = schemas.map(s => this.helper.createSchemaObject(s));
+        const schema = await orchestrator.build(sschemas, project.externalComposition);
+
         await this.updateCDN({
           target,
           project,
@@ -723,6 +734,7 @@ export class SchemaPublisher {
                   project.externalComposition,
                 )
               : null,
+          fullSchemaSdl: schema.raw,
         });
       }
     } catch (e) {
@@ -736,11 +748,13 @@ export class SchemaPublisher {
       project,
       supergraph,
       schemas,
+      fullSchemaSdl,
     }: {
       target: Target;
       project: Project;
       schemas: readonly Schema[];
       supergraph?: string | null;
+      fullSchemaSdl: string;
     },
     span?: Span,
   ) {
@@ -782,14 +796,11 @@ export class SchemaPublisher {
             url: s.url,
           })),
         }),
-        /** Write schema of single service project */
-        schemas.length === 1
-          ? this.artifactStorageWriter.writeArtifact({
-              targetId: target.id,
-              artifactType: 'sdl',
-              artifact: schemas[0].source,
-            })
-          : undefined,
+        this.artifactStorageWriter.writeArtifact({
+          targetId: target.id,
+          artifactType: 'sdl',
+          artifact: fullSchemaSdl,
+        }),
         this.cdn.publish(
           {
             targetId: target.id,
