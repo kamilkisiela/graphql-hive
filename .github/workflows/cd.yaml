@@ -58,7 +58,7 @@ jobs:
 
       - name: Create Release Pull Request or Publish packages
         id: changesets
-        uses: changesets/action@v1.3.0
+        uses: changesets/action@v1.4.1
         with:
           publish: pnpm release
           commit: 'chore(release): update monorepo packages versions'
