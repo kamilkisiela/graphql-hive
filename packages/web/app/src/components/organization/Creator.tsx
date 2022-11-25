@@ -26,23 +26,22 @@ export const OrganizationCreator: React.FC<{
   const [{ fetching }, mutate] = useMutation(CreateOrganizationDocument);
   const [name, setName] = React.useState('');
   const submit = React.useCallback(
-    evt => {
+    async evt => {
       evt.preventDefault();
       if (name) {
-        mutate({
+        const result = await mutate({
           input: {
             name,
           },
-        }).then(result => {
-          if (!result.data?.createOrganization.ok) {
-            return;
-          }
+        });
+        if (!result.data?.createOrganization.ok) {
+          return;
+        }
 
-          onClose();
-          router.visitOrganization({
-            organizationId:
-              result.data.createOrganization.ok.createdOrganizationPayload.organization.cleanId,
-          });
+        onClose();
+        router.visitOrganization({
+          organizationId:
+            result.data.createOrganization.ok.createdOrganizationPayload.organization.cleanId,
         });
       }
     },

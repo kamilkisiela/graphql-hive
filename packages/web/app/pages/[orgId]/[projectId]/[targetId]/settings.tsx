@@ -189,8 +189,8 @@ const ExtendBaseSchema = (props: { baseSchema: string }): ReactElement => {
           variant="primary"
           className="px-5"
           disabled={mutation.fetching}
-          onClick={() => {
-            mutate({
+          onClick={async () => {
+            await mutate({
               input: {
                 organization: router.organizationId,
                 project: router.projectId,
@@ -402,8 +402,8 @@ const ConditionalBreakingChanges = (): ReactElement => {
             <Switch
               className="shrink-0"
               checked={isEnabled}
-              onCheckedChange={enabled => {
-                setValidation({
+              onCheckedChange={async enabled => {
+                await setValidation({
                   input: {
                     target: router.targetId,
                     project: router.projectId,
@@ -484,8 +484,8 @@ const ConditionalBreakingChanges = (): ReactElement => {
                   name="excludedClients"
                   value={values.excludedClients}
                   onBlur={() => setFieldTouched('excludedClients')}
-                  onChange={options => {
-                    setFieldValue(
+                  onChange={async options => {
+                    await setFieldValue(
                       'excludedClients',
                       options.map(o => o.value),
                     );
@@ -505,8 +505,8 @@ const ConditionalBreakingChanges = (): ReactElement => {
             <div key={pt.id} className="flex items-center gap-2 pl-5">
               <Checkbox
                 checked={values.targets.includes(pt.id)}
-                onCheckedChange={isChecked => {
-                  setFieldValue(
+                onCheckedChange={async isChecked => {
+                  await setFieldValue(
                     'targets',
                     isChecked
                       ? [...values.targets, pt.id]
@@ -615,7 +615,9 @@ const Page = ({
         }).then(result => {
           if (result?.data?.updateTargetName?.ok) {
             const newTargetId = result.data.updateTargetName.ok.updatedTarget.cleanId;
-            router.replace(`/${router.organizationId}/${router.projectId}/${newTargetId}/settings`);
+            void router.replace(
+              `/${router.organizationId}/${router.projectId}/${newTargetId}/settings`,
+            );
           }
         }),
     });

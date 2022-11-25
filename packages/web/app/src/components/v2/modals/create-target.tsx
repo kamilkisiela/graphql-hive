@@ -59,7 +59,7 @@ export const CreateTargetModal = ({
         if (data?.createTarget.ok) {
           toggleModalOpen();
           const targetId = data.createTarget.ok.createdTarget.cleanId;
-          push(`/${organizationId}/${projectId}/${targetId}`);
+          void push(`/${organizationId}/${projectId}/${targetId}`);
         }
       },
     });

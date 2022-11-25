@@ -165,25 +165,23 @@ export const ExternalCompositionSettings = ({
   });
 
   const handleSwitch = useCallback(
-    (status: boolean) => {
+    async (status: boolean) => {
       if (status) {
         setEnabled(true);
       } else {
         setEnabled(false);
-        disableComposition({
+        const result = await disableComposition({
           input: {
             project: project.cleanId,
             organization: organization.cleanId,
           },
-        }).then(result => {
-          const error =
-            result.error?.message || result.data?.disableExternalSchemaComposition.error;
-          if (error) {
-            notify(error, 'error');
-            // fallback to the previous state
-            setEnabled(true);
-          }
         });
+        const error = result.error?.message || result.data?.disableExternalSchemaComposition.error;
+        if (error) {
+          notify(error, 'error');
+          // fallback to the previous state
+          setEnabled(true);
+        }
       }
     },
     [disableComposition, setEnabled, notify],

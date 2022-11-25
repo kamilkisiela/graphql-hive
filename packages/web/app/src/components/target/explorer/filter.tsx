@@ -104,7 +104,7 @@ export function SchemaExplorerFilter({
           defaultValue={typename ? { value: typename, label: typename } : null}
           options={types}
           onChange={option => {
-            router.push(
+            void router.push(
               `/${organization.cleanId}/${project.cleanId}/${target.cleanId}/explorer/${option.value}`,
             );
           }}
