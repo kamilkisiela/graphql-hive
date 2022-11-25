@@ -7,14 +7,19 @@ import { InvalidAuthKeyResponse, MissingAuthKeyResponse } from './errors';
 type ArtifactRequestHandler = {
   getArtifactUrl: (
     targetId: string,
-    artifactType: 'metadata' | 'sdl' | 'services',
+    artifactType: 'metadata' | 'sdl' | 'services' | 'supergraph',
   ) => Promise<string | null>;
   isKeyValid: KeyValidator;
 };
 
 const ParamsModel = zod.object({
   targetId: zod.string(),
-  artifactType: zod.union([zod.literal('metadata'), zod.literal('sdl'), zod.literal('services')]),
+  artifactType: zod.union([
+    zod.literal('metadata'),
+    zod.literal('sdl'),
+    zod.literal('services'),
+    zod.literal('supergraph'),
+  ]),
 });
 
 const authHeaderName = 'x-hive-cdn-key' as const;
