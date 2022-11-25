@@ -13,6 +13,12 @@ const httpRequests = new metrics.Counter({
   labelNames: ['path'],
 });
 
+const httpRequestDuration = new metrics.Histogram({
+  name: 'tokens_http_request_duration_seconds',
+  help: 'Duration of an http request',
+  labelNames: ['path'],
+});
+
 const TARGET_VALIDATION = z
   .object({
     targetId: z.string().nonempty(),
@@ -78,10 +84,18 @@ export type Context = {
 
 export const tokensApiRouter = trpc
   .router<Context>()
+  .middleware(async ({ path, next }) => {
+    const stopTimer = httpRequestDuration.startTimer({ path });
+    httpRequests.inc({ path });
+    try {
+      return await next();
+    } finally {
+      stopTimer();
+    }
+  })
   .query('targetTokens', {
     input: TARGET_VALIDATION,
     async resolve({ ctx, input }) {
-      httpRequests.labels({ path: 'targetTokens' }).inc();
       try {
         const storage = await ctx.getStorage();
 
@@ -96,7 +110,6 @@ export const tokensApiRouter = trpc
   .mutation('invalidateTokenByTarget', {
     input: TARGET_VALIDATION,
     async resolve({ ctx, input }) {
-      httpRequests.labels({ path: 'invalidateTokenByTarget' }).inc();
       try {
         const storage = await ctx.getStorage();
         storage.invalidateTarget(input.targetId);
@@ -112,7 +125,6 @@ export const tokensApiRouter = trpc
   .mutation('invalidateTokenByProject', {
     input: PROJECT_VALIDATION,
     async resolve({ ctx, input }) {
-      httpRequests.labels({ path: 'invalidateTokenByProject' }).inc();
       try {
         const storage = await ctx.getStorage();
         storage.invalidateProject(input.projectId);
@@ -128,7 +140,6 @@ export const tokensApiRouter = trpc
   .mutation('invalidateTokenByOrganization', {
     input: ORG_VALIDATION,
     async resolve({ ctx, input }) {
-      httpRequests.labels({ path: 'invalidateTokenByOrganization' }).inc();
       try {
         const storage = await ctx.getStorage();
         storage.invalidateProject(input.organizationId);
@@ -152,7 +163,6 @@ export const tokensApiRouter = trpc
       })
       .required(),
     async resolve({ ctx, input }) {
-      httpRequests.labels({ path: 'createToken' }).inc();
       try {
         const { target, project, organization, name, scopes } = input;
         const storage = await ctx.getStorage();
@@ -181,7 +191,6 @@ export const tokensApiRouter = trpc
   .mutation('deleteToken', {
     input: TOKEN_VALIDATION,
     async resolve({ ctx, input }) {
-      httpRequests.labels({ path: 'deleteToken' }).inc();
       try {
         const hashed_token = input.token;
         const storage = await ctx.getStorage();
@@ -198,7 +207,6 @@ export const tokensApiRouter = trpc
   .query('getToken', {
     input: TOKEN_VALIDATION,
     async resolve({ ctx, input }) {
-      httpRequests.labels({ path: 'getToken' }).inc();
       const hash = hashToken(input.token);
       const alias = maskToken(input.token);
 
