@@ -6,6 +6,10 @@ const artifactMeta = {
     contentType: 'text/plain',
     preprocessor: (rawValue: unknown) => String(rawValue),
   },
+  supergraph: {
+    contentType: 'text/plain',
+    preprocessor: (rawValue: unknown) => String(rawValue),
+  },
   metadata: {
     contentType: 'application/json',
     preprocessor: (rawValue: unknown) => JSON.stringify(rawValue),
@@ -24,7 +28,7 @@ export class ArtifactStorageWriter {
 
   async writeArtifact(args: {
     targetId: string;
-    artifactType: 'sdl' | 'metadata' | 'services';
+    artifactType: keyof typeof artifactMeta;
     artifact: unknown;
   }) {
     const key = buildArtifactStorageKey(args.targetId, args.artifactType);

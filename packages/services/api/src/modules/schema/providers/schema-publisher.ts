@@ -821,9 +821,6 @@ export class SchemaPublisher {
       if (supergraph) {
         this.logger.debug('Publishing supergraph to CDN');
 
-        // TODO: PUBLISH SUPERGRAPH TO S3
-        // DO WE REALLY NEED TO PUBLISH SUPERGRAPH?
-
         actions.push(
           this.cdn.publish(
             {
@@ -833,6 +830,11 @@ export class SchemaPublisher {
             },
             span,
           ),
+          this.artifactStorageWriter.writeArtifact({
+            targetId: target.id,
+            artifactType: 'supergraph',
+            artifact: supergraph,
+          }),
         );
       }
     }
