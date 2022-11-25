@@ -792,7 +792,7 @@ importers:
       dotenv: 10.0.0
       got: 12.5.3
       graphql: 16.5.0
-      kafkajs: 2.2.2
+      kafkajs: 2.2.3
       pino-pretty: 6.0.0
       tiny-lru: 8.0.2
       zod: 3.15.1
@@ -805,7 +805,7 @@ importers:
       dotenv: 10.0.0
       got: 12.5.3
       graphql: 16.5.0
-      kafkajs: 2.2.2
+      kafkajs: 2.2.3
       tiny-lru: 8.0.2
       zod: 3.15.1
     devDependencies:
@@ -861,7 +861,7 @@ importers:
       dotenv: 10.0.0
       got: 12.5.3
       graphql: 16.5.0
-      kafkajs: 2.2.2
+      kafkajs: 2.2.3
       pino-pretty: 6.0.0
       tiny-lru: 8.0.2
       tslib: 2.4.1
@@ -874,7 +874,7 @@ importers:
       dotenv: 10.0.0
       got: 12.5.3
       graphql: 16.5.0
-      kafkajs: 2.2.2
+      kafkajs: 2.2.3
       tiny-lru: 8.0.2
       zod: 3.15.1
     devDependencies:
@@ -17499,8 +17499,8 @@ packages:
       jwa: 1.4.1
       safe-buffer: 5.2.1
 
-  /kafkajs/2.2.2:
-    resolution: {integrity: sha512-9wpGLAwRVbVtSew3xwi2f2BMuYLXWhYcoYB/O7gd1JYOYuYTAEC60CeFgRQugI016MxqvOKnOOA+l1jx+4b84g==}
+  /kafkajs/2.2.3:
+    resolution: {integrity: sha512-JmzIiLHE/TdQ7b4I2B/DNMtfhTh66fmEaEg7gGkyQXBC6f1A7I2jSjeUsVIJfC8d9YcEIURyBjtOEKBO5OHVhg==}
     engines: {node: '>=14.0.0'}
     dev: false
 
