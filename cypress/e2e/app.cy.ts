@@ -14,7 +14,7 @@ it('should redirect anon to auth', () => {
   cy.url().should('eq', baseUrl + '/auth?redirectToPath=%2F');
 });
 
-it.only('should allow signups', () => {
+it('should allow signups', () => {
   cy.visit(baseUrl);
 
   cy.get('span[data-supertokens="link"]', { includeShadowDom: true }).contains('Sign Up').click();
