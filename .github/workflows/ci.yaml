@@ -468,6 +468,7 @@ jobs:
             broker \
             redis \
             supertokens \
+            s3 \
             local_cdn \
             local_broker \
             external_composition
