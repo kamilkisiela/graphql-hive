@@ -1,5 +1,4 @@
-// cypress SHOULD be a dev dependency
-// eslint-disable-next-line import/no-extraneous-dependencies
+// eslint-disable-next-line import/no-extraneous-dependencies -- cypress SHOULD be a dev dependency
 import { defineConfig } from 'cypress';
 
 export default defineConfig({
