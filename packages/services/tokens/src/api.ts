@@ -1,4 +1,4 @@
-import { createErrorHandler } from '@hive/service-common';
+import { createErrorHandler, metrics } from '@hive/service-common';
 import * as trpc from '@trpc/server';
 import { inferProcedureInput, inferProcedureOutput } from '@trpc/server';
 import type { FastifyLoggerInstance } from 'fastify';
@@ -6,6 +6,18 @@ import { z } from 'zod';
 import { useCache } from './cache';
 import { createHash } from 'crypto';
 import { Lru as LruType } from 'tiny-lru';
+
+const httpRequests = new metrics.Counter({
+  name: 'tokens_http_requests',
+  help: 'Number of http requests',
+  labelNames: ['path'],
+});
+
+const httpRequestDuration = new metrics.Histogram({
+  name: 'tokens_http_request_duration_seconds',
+  help: 'Duration of an http request',
+  labelNames: ['path'],
+});
 
 const TARGET_VALIDATION = z
   .object({
@@ -72,6 +84,15 @@ export type Context = {
 
 export const tokensApiRouter = trpc
   .router<Context>()
+  .middleware(async ({ path, next }) => {
+    const stopTimer = httpRequestDuration.startTimer({ path });
+    httpRequests.inc({ path });
+    try {
+      return await next();
+    } finally {
+      stopTimer();
+    }
+  })
   .query('targetTokens', {
     input: TARGET_VALIDATION,
     async resolve({ ctx, input }) {

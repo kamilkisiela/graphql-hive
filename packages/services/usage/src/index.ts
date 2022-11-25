@@ -15,6 +15,7 @@ import {
   httpRequestsWithNoAccess,
   collectDuration,
   droppedReports,
+  tokensDuration,
 } from './metrics';
 import type { IncomingLegacyReport, IncomingReport } from './types';
 import { createUsageRateLimit } from './rate-limit';
@@ -96,11 +97,14 @@ async function main() {
           return;
         }
 
+        const stopTokensDurationTimer = tokensDuration.startTimer();
         const tokenInfo = await tokens.fetch(token);
-
         const maskedToken = maskToken(token);
 
         if (tokens.isNotFound(tokenInfo)) {
+          stopTokensDurationTimer({
+            status: 'not_found',
+          });
           httpRequestsWithNonExistingToken.inc();
           req.log.info('Token not found (token=%s)', maskedToken);
           res.status(400).send('Missing token'); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
@@ -109,11 +113,18 @@ async function main() {
 
         // We treat collected operations as part of registry
         if (tokens.isNoAccess(tokenInfo)) {
+          stopTokensDurationTimer({
+            status: 'no_access',
+          });
           httpRequestsWithNoAccess.inc();
           req.log.info('No access (token=%s)', maskedToken);
           res.status(403).send('No access'); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
           return;
         }
+
+        stopTokensDurationTimer({
+          status: 'success',
+        });
 
         if (
           await rateLimit?.isRateLimited({
