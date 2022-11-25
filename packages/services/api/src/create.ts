@@ -51,6 +51,8 @@ import { BillingConfig, BILLING_CONFIG } from './modules/billing/providers/token
 import { billingModule } from './modules/billing';
 import { OIDC_INTEGRATIONS_ENABLED } from './modules/oidc-integrations/providers/tokens';
 import { oidcIntegrationsModule } from './modules/oidc-integrations';
+import { ArtifactStorageWriter } from './modules/schema/providers/artifact-storage-writer';
+import { S3Client } from '@aws-sdk/client-s3';
 
 const modules = [
   sharedModule,
@@ -87,6 +89,7 @@ export function createRegistry({
   redis,
   githubApp,
   cdn,
+  s3,
   encryptionSecret,
   feedback,
   billing,
@@ -105,6 +108,10 @@ export function createRegistry({
   rateLimitService: RateLimitServiceConfig;
   githubApp: GitHubApplicationConfig | null;
   cdn: CDNConfig | null;
+  s3: {
+    client: S3Client;
+    bucketName: string;
+  };
   encryptionSecret: string;
   feedback: {
     token: string;
@@ -115,6 +122,8 @@ export function createRegistry({
   emailsEndpoint?: string;
   organizationOIDC: boolean;
 }) {
+  const artifactStorageWriter = new ArtifactStorageWriter(s3.client, s3.bucketName);
+
   const providers = [
     HttpClient,
     IdTranslator,
@@ -122,6 +131,10 @@ export function createRegistry({
     IdempotentRunner,
     CryptoProvider,
     Emails,
+    {
+      provide: ArtifactStorageWriter,
+      useValue: artifactStorageWriter,
+    },
     {
       provide: Logger,
       useValue: logger,

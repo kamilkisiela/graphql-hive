@@ -37,6 +37,23 @@ services:
     volumes:
       - './volumes/redis/db:/bitnami/redis/data'
 
+  s3:
+    image: quay.io/minio/minio:RELEASE.2022-11-17T23-20-09Z
+    command: server /data --console-address ":9001"
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - './volumes/s3:/data'
+
   clickhouse:
     image: clickhouse/clickhouse-server:22.11-alpine
     environment:

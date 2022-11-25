@@ -14,13 +14,16 @@
   },
   "dependencies": {
     "graphql": "16.6.0",
-    "toucan-js": "2.7.0"
+    "toucan-js": "2.7.0",
+    "@aws-sdk/client-s3": "3.216.0",
+    "zod": "3.15.1"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "3.4.0",
+    "@hive/api": "workspace:*",
     "@types/service-worker-mock": "2.0.1",
-    "@whatwg-node/fetch": "0.4.7",
-    "@whatwg-node/server": "0.4.11",
+    "@whatwg-node/fetch": "0.5.3",
+    "@whatwg-node/server": "0.4.17",
     "esbuild": "0.14.39",
     "fastify": "3.29.4",
     "itty-router": "2.4.0",

@@ -105,6 +105,10 @@ export function deployGraphQL({
         POSTGRES_USER: connectionString.apply(connection => connection.user ?? ''),
         POSTGRES_DB: connectionString.apply(connection => connection.database ?? ''),
         POSTGRES_SSL: connectionString.apply(connection => (connection.ssl ? '1' : '0')),
+        S3_ENDPOINT: 'TODO PLACEHOLDER',
+        S3_ACCESS_KEY_ID: 'TODO PLACEHOLDER',
+        S3_SECRET_ACCESS_KEY: 'TODO PLACEHOLDER',
+        S3_BUCKET_NAME: 'TODO PLACEHOLDER',
         BILLING_ENDPOINT: serviceLocalEndpoint(billing.service),
         TOKENS_ENDPOINT: serviceLocalEndpoint(tokens.service),
         WEBHOOKS_ENDPOINT: serviceLocalEndpoint(webhooks.service),
@@ -116,7 +120,9 @@ export function deployGraphQL({
         CDN_CF_AUTH_TOKEN: cloudflareConfig.requireSecret('apiToken'),
         CDN_CF_NAMESPACE_ID: cdn.cfStorageNamespaceId,
         CDN_BASE_URL: cdn.workerBaseUrl,
+        // TODO: remove this
         CDN_AUTH_PRIVATE_KEY: cdn.authPrivateKey,
+        ARTIFACT_AUTH_PRIVATE_KEY: cdn.authPrivateKey,
         // Hive
         HIVE: '1',
         HIVE_REPORTING: '1',

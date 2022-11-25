@@ -2,11 +2,11 @@ import '../src/dev-polyfill';
 import { createRequestHandler } from '../src/handler';
 import {
   InvalidArtifactTypeResponse,
-  InvalidAuthKey,
-  MissingAuthKey,
+  InvalidAuthKeyResponse,
+  MissingAuthKeyResponse,
   MissingTargetIDErrorResponse,
 } from '../src/errors';
-import { createIsKeyValid, KeyValidator } from '../src/auth';
+import { createIsKeyValid, KeyValidator } from '../src/key-validation';
 import { createHmac } from 'crypto';
 
 describe('CDN Worker', () => {
@@ -29,7 +29,7 @@ describe('CDN Worker', () => {
     map.set(`target:${targetId}:schema`, JSON.stringify({ sdl: `type Query { dummy: String }` }));
 
     const handleRequest = createRequestHandler({
-      isKeyValid: createIsKeyValid(SECRET),
+      isKeyValid: createIsKeyValid({ keyData: SECRET }),
       getRawStoreValue: (key: string) => map.get(key),
     });
 
@@ -63,7 +63,7 @@ describe('CDN Worker', () => {
     map.set(`target:${targetId}:schema`, JSON.stringify({ sdl: `type Query { dummy: String }` }));
 
     const handleRequest = createRequestHandler({
-      isKeyValid: createIsKeyValid(SECRET),
+      isKeyValid: createIsKeyValid({ keyData: SECRET }),
       getRawStoreValue: (key: string) => map.get(key),
     });
 
@@ -115,7 +115,7 @@ describe('CDN Worker', () => {
     );
 
     const handleRequest = createRequestHandler({
-      isKeyValid: createIsKeyValid(SECRET),
+      isKeyValid: createIsKeyValid({ keyData: SECRET }),
       getRawStoreValue: (key: string) => map.get(key),
     });
 
@@ -164,7 +164,7 @@ describe('CDN Worker', () => {
     map.set(`target:${targetId}:metadata`, JSON.stringify({ sdl: `type Query { dummy: String }` }));
 
     const handleRequest = createRequestHandler({
-      isKeyValid: createIsKeyValid(SECRET),
+      isKeyValid: createIsKeyValid({ keyData: SECRET }),
       getRawStoreValue: (key: string) => map.get(key),
     });
 
@@ -213,7 +213,7 @@ describe('CDN Worker', () => {
     map.set(`target:${targetId}:schema`, JSON.stringify({ sdl: `type Query { dummy: String }` }));
 
     const handleRequest = createRequestHandler({
-      isKeyValid: createIsKeyValid(SECRET),
+      isKeyValid: createIsKeyValid({ keyData: SECRET }),
       getRawStoreValue: (key: string) => map.get(key),
     });
 
@@ -267,7 +267,7 @@ describe('CDN Worker', () => {
     );
 
     const handleRequest = createRequestHandler({
-      isKeyValid: createIsKeyValid(SECRET),
+      isKeyValid: createIsKeyValid({ keyData: SECRET }),
       getRawStoreValue: (key: string) => map.get(key),
     });
 
@@ -345,7 +345,7 @@ describe('CDN Worker', () => {
       const request = new Request('https://fake-worker.com/fake-target-id/sdl', {});
 
       const response = await handleRequest(request);
-      expect(response instanceof MissingAuthKey).toBeTruthy();
+      expect(response instanceof MissingAuthKeyResponse).toBeTruthy();
       expect(response.status).toBe(400);
     });
 
@@ -362,7 +362,7 @@ describe('CDN Worker', () => {
       });
 
       const response = await handleRequest(request);
-      expect(response instanceof InvalidAuthKey).toBeTruthy();
+      expect(response instanceof InvalidAuthKeyResponse).toBeTruthy();
       expect(response.status).toBe(403);
     });
   });
@@ -375,7 +375,7 @@ describe('CDN Worker', () => {
       map.set(`target:${targetId}:schema`, JSON.stringify({ sdl: `type Query { dummy: String }` }));
 
       const handleRequest = createRequestHandler({
-        isKeyValid: createIsKeyValid(SECRET),
+        isKeyValid: createIsKeyValid({ keyData: SECRET }),
         getRawStoreValue: (key: string) => map.get(key),
       });
 
@@ -396,7 +396,7 @@ describe('CDN Worker', () => {
       const map = new Map();
 
       const handleRequest = createRequestHandler({
-        isKeyValid: createIsKeyValid(SECRET),
+        isKeyValid: createIsKeyValid({ keyData: SECRET }),
         getRawStoreValue: (key: string) => map.get(key),
       });
 
@@ -409,13 +409,13 @@ describe('CDN Worker', () => {
       });
 
       const response = await handleRequest(request);
-      expect(response instanceof InvalidAuthKey).toBeTruthy();
+      expect(response instanceof InvalidAuthKeyResponse).toBeTruthy();
       expect(response.status).toBe(403);
     });
 
     it('Should throw on invalid token hash', async () => {
       const handleRequest = createRequestHandler({
-        isKeyValid: createIsKeyValid('123456'),
+        isKeyValid: createIsKeyValid({ keyData: '123456' }),
         getRawStoreValue: (key: string) => new Map().get(key),
       });
 
@@ -426,7 +426,7 @@ describe('CDN Worker', () => {
       });
 
       const response = await handleRequest(request);
-      expect(response instanceof InvalidAuthKey).toBeTruthy();
+      expect(response instanceof InvalidAuthKeyResponse).toBeTruthy();
       expect(response.status).toBe(403);
     });
   });

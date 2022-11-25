@@ -52,6 +52,22 @@ export class CloudflareCDN {
           name: 'SENTRY_RELEASE',
           text: this.config.release,
         },
+        {
+          name: 'S3_ENDPOINT',
+          text: 'TODO PLACEHOLDER',
+        },
+        {
+          name: 'S3_ACCESS_KEY_ID',
+          text: 'TODO PLACEHOLDER',
+        },
+        {
+          name: 'S3_SECRET_ACCESS_KEY',
+          text: 'TODO PLACEHOLDER',
+        },
+        {
+          name: 'S3_BUCKET_NAME',
+          text: 'TODO PLACEHOLDER',
+        },
       ],
     });
 

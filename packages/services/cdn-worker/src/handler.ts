@@ -2,12 +2,12 @@ import {
   CDNArtifactNotFound,
   InvalidArtifactMatch,
   InvalidArtifactTypeResponse,
-  InvalidAuthKey,
-  MissingAuthKey,
+  InvalidAuthKeyResponse,
+  MissingAuthKeyResponse,
   MissingTargetIDErrorResponse,
 } from './errors';
 import { buildSchema, introspectionFromSchema } from 'graphql';
-import type { KeyValidator } from './auth';
+import type { KeyValidator } from './key-validation';
 
 async function createETag(value: string) {
   const myText = new TextEncoder().encode(value);
@@ -123,7 +123,7 @@ async function parseIncomingRequest(
   const headerKey = request.headers.get(AUTH_HEADER_NAME);
 
   if (!headerKey) {
-    return { error: new MissingAuthKey() };
+    return { error: new MissingAuthKeyResponse() };
   }
 
   try {
@@ -131,7 +131,7 @@ async function parseIncomingRequest(
 
     if (!keyValid) {
       return {
-        error: new InvalidAuthKey(),
+        error: new InvalidAuthKeyResponse(),
       };
     }
 
@@ -146,7 +146,7 @@ async function parseIncomingRequest(
   } catch (e) {
     console.warn(`Failed to validate key for ${targetId}, error:`, e);
     return {
-      error: new InvalidAuthKey(),
+      error: new InvalidAuthKeyResponse(),
     };
   }
 }

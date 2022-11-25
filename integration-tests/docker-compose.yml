@@ -115,6 +115,18 @@ services:
       - REDIS_PASSWORD=test
       - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
 
+  s3:
+    image: quay.io/minio/minio:RELEASE.2022-11-17T23-20-09Z
+    command: server --console-address ":9001"
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
   supertokens:
     image: registry.supertokens.io/supertokens/supertokens-postgresql:4.2
     depends_on:
@@ -155,7 +167,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3004
-      CDN_AUTH_PRIVATE_KEY: 1e1064ef9cda8bf38936b77317e90dc3
+      ARTIFACT_AUTH_PRIVATE_KEY: 1e1064ef9cda8bf38936b77317e90dc3
 
   local_broker:
     image: node:16.13.2-alpine3.14
@@ -276,6 +288,10 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: test
+      S3_ENDPOINT: 'http://minio:9000'
+      S3_ACCESS_KEY: minioadmin
+      S3_SECRET_KEY: minioadmin
+      S3_BUCKET_NAME: artifacts
       TOKENS_ENDPOINT: http://tokens:3003
       WEBHOOKS_ENDPOINT: http://webhooks:3005
       SCHEMA_ENDPOINT: http://schema:3002
@@ -291,7 +307,7 @@ services:
       CDN_CF_ACCOUNT_ID: 103df45224310d669213971ce28b5b70
       CDN_CF_AUTH_TOKEN: 85e20c26c03759603c0f45884824a1c3
       CDN_CF_NAMESPACE_ID: 33b1e3bbb4a4707d05ea0307cbb55c79
-      CDN_AUTH_PRIVATE_KEY: 1e1064ef9cda8bf38936b77317e90dc3
+      ARTIFACT_AUTH_PRIVATE_KEY: 1e1064ef9cda8bf38936b77317e90dc3
       CDN_BASE_URL: http://localhost:3004
       GITHUB_APP_ID: 123123
       GITHUB_APP_PRIVATE_KEY: 5f938d51a065476c4dc1b04aeba13afb

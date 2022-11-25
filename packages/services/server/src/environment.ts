@@ -88,7 +88,6 @@ const CdnModel = zod.union([
   }),
   zod.object({
     CDN: zod.literal('1'),
-    CDN_AUTH_PRIVATE_KEY: zod.string(),
     CDN_BASE_URL: zod.string(),
     CDN_CF_BASE_PATH: zod.string(),
     CDN_CF_ACCOUNT_ID: zod.string(),
@@ -122,6 +121,14 @@ const AuthLegacyAuth0Model = zod.union([
 const PrometheusModel = zod.object({
   PROMETHEUS_METRICS: emptyString(zod.union([zod.literal('0'), zod.literal('1')]).optional()),
   PROMETHEUS_METRICS_LABEL_INSTANCE: emptyString(zod.string().optional()),
+});
+
+const S3Model = zod.object({
+  S3_ENDPOINT: zod.string().url(),
+  S3_ACCESS_KEY_ID: zod.string(),
+  S3_SECRET_ACCESS_KEY: zod.string(),
+  S3_BUCKET_NAME: zod.string(),
+  ARTIFACT_AUTH_PRIVATE_KEY: zod.string(),
 });
 
 const LogModel = zod.object({
@@ -164,6 +171,8 @@ const configs = {
   // eslint-disable-next-line no-process-env
   hive: HiveModel.safeParse(process.env),
   // eslint-disable-next-line no-process-env
+  s3: S3Model.safeParse(process.env),
+  // eslint-disable-next-line no-process-env
   log: LogModel.safeParse(process.env),
 };
 
@@ -200,6 +209,7 @@ const log = extractConfig(configs.log);
 const cdn = extractConfig(configs.cdn);
 const authLegacyAuth0 = extractConfig(configs.authLegacyAuth0);
 const hive = extractConfig(configs.hive);
+const s3 = extractConfig(configs.s3);
 
 const hiveConfig =
   hive.HIVE === '1'
@@ -277,9 +287,6 @@ export const env = {
     cdn.CDN === '1'
       ? {
           baseUrl: cdn.CDN_BASE_URL,
-          auth: {
-            privateKey: cdn.CDN_AUTH_PRIVATE_KEY,
-          },
           cloudflare: {
             basePath: cdn.CDN_CF_BASE_PATH,
             accountId: cdn.CDN_CF_ACCOUNT_ID,
@@ -288,6 +295,19 @@ export const env = {
           },
         }
       : null,
+  s3: {
+    bucketName: s3.S3_BUCKET_NAME,
+    endpoint: s3.S3_ENDPOINT,
+    credentials: {
+      accessKeyId: s3.S3_ACCESS_KEY_ID,
+      secretAccessKey: s3.S3_SECRET_ACCESS_KEY,
+    },
+  },
+  artifacts: {
+    auth: {
+      privateKey: s3.ARTIFACT_AUTH_PRIVATE_KEY,
+    },
+  },
   organizationOIDC: base.AUTH_ORGANIZATION_OIDC === '1',
   legacyAuth0:
     authLegacyAuth0.AUTH_LEGACY_AUTH0 === '1'

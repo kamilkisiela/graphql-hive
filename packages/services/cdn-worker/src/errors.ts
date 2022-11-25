@@ -1,3 +1,5 @@
+import { Response } from '@whatwg-node/fetch';
+
 const description = `Please refer to the documentation for more details: https://docs.graphql-hive.com/features/registry-usage`;
 
 export class MissingTargetIDErrorResponse extends Response {
@@ -30,7 +32,7 @@ export class InvalidArtifactTypeResponse extends Response {
   }
 }
 
-export class MissingAuthKey extends Response {
+export class MissingAuthKeyResponse extends Response {
   constructor() {
     super(
       JSON.stringify({
@@ -45,7 +47,7 @@ export class MissingAuthKey extends Response {
   }
 }
 
-export class InvalidAuthKey extends Response {
+export class InvalidAuthKeyResponse extends Response {
   constructor() {
     super(
       JSON.stringify({

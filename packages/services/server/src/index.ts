@@ -13,6 +13,7 @@ import { createStorage as createPostgreSQLStorage, createConnectionString } from
 import got from 'got';
 import { GraphQLError, stripIgnoredCharacters } from 'graphql';
 import * as Sentry from '@sentry/node';
+import { S3Client } from '@aws-sdk/client-s3';
 import { Dedupe, ExtraErrorData } from '@sentry/integrations';
 import { internalApiRouter, createContext } from './api';
 import { asyncStorage } from './async-storage';
@@ -21,6 +22,11 @@ import { clickHouseReadDuration, clickHouseElapsedDuration } from './metrics';
 import zod from 'zod';
 import { env } from './environment';
 import { CryptoProvider } from '@hive/api';
+import { ArtifactStorageReader } from '@hive/api/src/modules/schema/providers/artifact-storage-reader';
+import { createArtifactRequestHandler } from '@hive/cdn-script/artifact-handler';
+import { createIsKeyValid } from '@hive/cdn-script/key-validation';
+import { createServerAdapter } from '@whatwg-node/server';
+import { Readable } from 'node:stream';
 
 const LegacySetUserIdMappingPayloadModel = zod.object({
   auth0UserId: zod.string(),
@@ -138,6 +144,26 @@ export async function main() {
       };
     }
 
+    const s3Client = new S3Client({
+      endpoint: env.s3.endpoint,
+      credentials: {
+        accessKeyId: env.s3.credentials.accessKeyId,
+        secretAccessKey: env.s3.credentials.secretAccessKey,
+      },
+      forcePathStyle: true,
+      region: 'auto',
+    });
+
+    const artifactStorageReader = new ArtifactStorageReader(s3Client, env.s3.bucketName);
+
+    const artifactHandler = createArtifactRequestHandler({
+      isKeyValid: createIsKeyValid({ keyData: env.artifacts.auth.privateKey }),
+      async getArtifactUrl(targetId, artifactType) {
+        return artifactStorageReader.generateArtifactReadUrl(targetId, artifactType);
+      },
+    });
+    const artifactRouteHandler = createServerAdapter(artifactHandler);
+
     const graphqlLogger = createGraphQLLogger();
     const registry = createRegistry({
       tokens: {
@@ -180,11 +206,15 @@ export async function main() {
       },
       cdn: env.cdn
         ? {
-            authPrivateKey: env.cdn.auth.privateKey,
+            authPrivateKey: env.artifacts.auth.privateKey,
             baseUrl: env.cdn.baseUrl,
             cloudflare: env.cdn.cloudflare,
           }
         : null,
+      s3: {
+        client: s3Client,
+        bucketName: env.s3.bucketName,
+      },
       encryptionSecret: env.encryptionSecret,
       feedback: {
         token: 'noop',
@@ -207,6 +237,7 @@ export async function main() {
         : {},
       organizationOIDC: env.organizationOIDC,
     });
+
     const graphqlPath = '/graphql';
     const port = env.http.port;
     const signature = Math.random().toString(16).substr(2);
@@ -299,6 +330,30 @@ export async function main() {
 
         reportReadiness(false);
         res.status(500).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+      },
+    });
+
+    /** Artifacts API */
+    server.route({
+      method: ['GET'],
+      url: '/artifacts/v1/*',
+      async handler(req, reply) {
+        const response = await artifactRouteHandler.handleNodeRequest(req);
+
+        if (response === undefined) {
+          reply.status(404).send('Not found.'); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+          return reply;
+        }
+
+        response.headers.forEach((value, key) => {
+          reply.header(key, value); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+        });
+
+        reply.status(response.status); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+
+        reply.send(Readable.from(response.body!)); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+
+        return reply;
       },
     });
 

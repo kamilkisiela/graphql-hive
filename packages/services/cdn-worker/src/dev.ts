@@ -5,7 +5,7 @@ import { devStorage } from './dev-polyfill';
 import { createServerAdapter } from '@whatwg-node/server';
 import { Router } from 'itty-router';
 import { withParams, json } from 'itty-router-extras';
-import { createIsKeyValid } from './auth';
+import { createIsKeyValid } from './key-validation';
 
 // eslint-disable-next-line no-process-env
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4010;
@@ -24,7 +24,7 @@ declare let KEY_DATA: string;
 
 const handleRequest = createRequestHandler({
   getRawStoreValue: value => HIVE_DATA.get(value),
-  isKeyValid: createIsKeyValid(KEY_DATA),
+  isKeyValid: createIsKeyValid({ keyData: KEY_DATA }),
 });
 
 function main() {

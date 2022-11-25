@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "3.216.0",
     "@envelop/core": "3.0.3",
     "@envelop/generic-auth": "5.0.3",
     "@envelop/graphql-modules": "4.0.3",
@@ -19,7 +20,8 @@
     "@sentry/node": "7.21.1",
     "@sentry/tracing": "7.21.1",
     "@trpc/server": "10.4.2",
-    "@whatwg-node/fetch": "0.4.7",
+    "@whatwg-node/fetch": "0.5.3",
+    "@whatwg-node/server": "0.4.17",
     "dotenv": "10.0.0",
     "got": "12.5.3",
     "graphql": "16.6.0",
@@ -31,6 +33,7 @@
   "devDependencies": {
     "@graphql-hive/client": "0.21.4",
     "@hive/api": "workspace:*",
+    "@hive/cdn-script": "workspace:*",
     "@hive/service-common": "workspace:*",
     "@hive/storage": "workspace:*",
     "@swc/core": "1.2.185",
