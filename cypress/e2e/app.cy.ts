@@ -1,5 +1,9 @@
 const baseUrl = 'http://localhost:8080';
-const user = { email: 'john@doe.coma', password: 'JohnatanD0e' };
+
+const user = { email: '<RANDOMISED BEFORE EACH TEST>', password: 'Loc@l.h0st' };
+beforeEach(() => {
+  user.email = `${crypto.randomUUID()}@local.host`;
+});
 
 it('should be visitable', () => {
   cy.visit(baseUrl);
@@ -17,9 +21,12 @@ it.only('should allow signups', () => {
 
   cy.get('form', { includeShadowDom: true }).within(() => {
     cy.get('input[name="email"]').type(user.email);
-    cy.get('input[name="password"]').type(user.password);
+    cy.get('input[name="password"]')
+      .focus()
+      .should('be.enabled') // wait for enabled after focusing (async email input)
+      .type(user.password);
     cy.root().submit();
   });
 
-  cy.get('button').contains('Create Project').should('be.visible');
+  cy.contains('Create Project');
 });
