@@ -615,6 +615,7 @@ jobs:
       HIVE_ENCRYPTION_SECRET: wowverysecuremuchsecret
       HIVE_EMAIL_FROM: no-reply@graphql-hive.com
       HIVE_APP_BASE_URL: http://localhost:8080
+      CYPRESS_BASE_URL: ${{ env.HIVE_APP_BASE_URL }}
       SUPERTOKENS_API_KEY: wowverysecuremuchsecret
       CLICKHOUSE_USER: clickhouse
       CLICKHOUSE_PASSWORD: wowverysecuremuchsecret

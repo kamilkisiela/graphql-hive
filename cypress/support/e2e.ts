@@ -1,1 +1,1 @@
-// noop
+import './commands';
