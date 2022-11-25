@@ -648,8 +648,8 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Bake
-        run: docker buildx bake -f docker.hcl --load build # NOTE: intentionally not using `pnpm build:docker` because it fails in the CI
+      - name: Build Docker Images
+        run: pnpm docker:build
 
       - name: Up
         run: docker compose -f docker-compose.community.yml up -d --wait
