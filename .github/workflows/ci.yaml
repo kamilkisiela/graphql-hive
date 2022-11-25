@@ -646,7 +646,10 @@ jobs:
         uses: docker/setup-buildx-action@v2
 
       - name: Build
-        run: pnpm build && pnpm build:docker
+        run: pnpm build
+
+      - name: Bake
+        run: docker buildx bake -f docker.hcl --load build # NOTE: intentionally not using `pnpm build:docker` because it fails in the CI
 
       - name: Up
         run: docker compose -f docker-compose.community.yml up -d --wait
