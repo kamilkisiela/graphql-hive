@@ -1,5 +1,5 @@
 import type { KeyValidator } from './key-validation';
-import { Response } from '@whatwg-node/fetch';
+import { Response, type Request } from '@whatwg-node/fetch';
 import itty from 'itty-router';
 import zod from 'zod';
 import { InvalidAuthKeyResponse, MissingAuthKeyResponse } from './errors';
@@ -20,13 +20,13 @@ const ParamsModel = zod.object({
 const authHeaderName = 'x-hive-cdn-key' as const;
 
 export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
-  const router = itty.Router();
+  const router = itty.Router<itty.Request & Request>();
 
   const authenticate = async (
-    request: Request | itty.Request,
+    request: itty.Request & Request,
     targetId: string,
   ): Promise<Response | null> => {
-    const headerKey = (request as Request).headers.get(authHeaderName);
+    const headerKey = request.headers.get(authHeaderName);
     if (headerKey === null) {
       return new MissingAuthKeyResponse();
     }
@@ -40,7 +40,7 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
     return new InvalidAuthKeyResponse();
   };
 
-  router.get('/artifacts/v1/:targetId/:artifactType', async request => {
+  router.get('/artifacts/v1/:targetId/:artifactType', async (request: itty.Request & Request) => {
     const params = ParamsModel.parse(request.params);
     const maybeResponse = await authenticate(request, params.targetId);
     if (maybeResponse !== null) {
