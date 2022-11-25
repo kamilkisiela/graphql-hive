@@ -662,6 +662,9 @@ jobs:
 
       - name: Up
         run: docker compose -f docker-compose.community.yml up -d --wait
+      - name: Docker PS
+        if: always()
+        run: docker compose -f docker-compose.community.yml ps
 
       - name: Cypress run
         uses: cypress-io/github-action@v4
