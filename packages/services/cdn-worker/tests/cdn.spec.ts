@@ -1,42 +1,19 @@
 import '../src/dev-polyfill';
-import { handleRequest } from '../src/handler';
+import { createRequestHandler } from '../src/handler';
 import {
   InvalidArtifactTypeResponse,
   InvalidAuthKey,
   MissingAuthKey,
   MissingTargetIDErrorResponse,
 } from '../src/errors';
-import { isKeyValid } from '../src/auth';
+import { createIsKeyValid, KeyValidator } from '../src/auth';
 import { createHmac } from 'crypto';
 
 describe('CDN Worker', () => {
-  const KeyValidators: Record<string, typeof isKeyValid> = {
+  const KeyValidators: Record<string, KeyValidator> = {
     AlwaysTrue: () => Promise.resolve(true),
     AlwaysFalse: () => Promise.resolve(false),
-    Bcrypt: isKeyValid,
   };
-
-  function mockWorkerEnv(input: { HIVE_DATA: Map<string, string>; KEY_DATA: string }) {
-    Object.defineProperties(globalThis, {
-      HIVE_DATA: {
-        value: input.HIVE_DATA,
-      },
-      KEY_DATA: {
-        value: input.KEY_DATA,
-      },
-    });
-  }
-
-  function clearWorkerEnv() {
-    Object.defineProperties(globalThis, {
-      HIVE_DATA: {
-        value: undefined,
-      },
-      KEY_DATA: {
-        value: undefined,
-      },
-    });
-  }
 
   function createToken(secret: string, targetId: string): string {
     const encoder = new TextEncoder();
@@ -45,17 +22,15 @@ describe('CDN Worker', () => {
     return createHmac('sha256', secretKeyData).update(encoder.encode(targetId)).digest('base64');
   }
 
-  afterEach(clearWorkerEnv);
-
   test('in /schema and /metadata the response should contain content-type: application/json header', async () => {
     const SECRET = '123456';
     const targetId = 'fake-target-id';
     const map = new Map();
     map.set(`target:${targetId}:schema`, JSON.stringify({ sdl: `type Query { dummy: String }` }));
 
-    mockWorkerEnv({
-      HIVE_DATA: map,
-      KEY_DATA: SECRET,
+    const handleRequest = createRequestHandler({
+      isKeyValid: createIsKeyValid(SECRET),
+      getRawStoreValue: (key: string) => map.get(key),
     });
 
     const token = createToken(SECRET, targetId);
@@ -66,7 +41,7 @@ describe('CDN Worker', () => {
       },
     });
 
-    const schemaResponse = await handleRequest(schemaRequest, KeyValidators.Bcrypt);
+    const schemaResponse = await handleRequest(schemaRequest);
     expect(schemaResponse.status).toBe(200);
     expect(schemaResponse.headers.get('content-type')).toBe('application/json');
 
@@ -76,7 +51,7 @@ describe('CDN Worker', () => {
       },
     });
 
-    const metadataResponse = await handleRequest(metadataRequest, KeyValidators.Bcrypt);
+    const metadataResponse = await handleRequest(metadataRequest);
     expect(metadataResponse.status).toBe(200);
     expect(metadataResponse.headers.get('content-type')).toBe('application/json');
   });
@@ -87,9 +62,9 @@ describe('CDN Worker', () => {
     const map = new Map();
     map.set(`target:${targetId}:schema`, JSON.stringify({ sdl: `type Query { dummy: String }` }));
 
-    mockWorkerEnv({
-      HIVE_DATA: map,
-      KEY_DATA: SECRET,
+    const handleRequest = createRequestHandler({
+      isKeyValid: createIsKeyValid(SECRET),
+      getRawStoreValue: (key: string) => map.get(key),
     });
 
     const token = createToken(SECRET, targetId);
@@ -99,7 +74,7 @@ describe('CDN Worker', () => {
         'x-hive-cdn-key': token,
       },
     });
-    const firstResponse = await handleRequest(firstRequest, KeyValidators.Bcrypt);
+    const firstResponse = await handleRequest(firstRequest);
     const etag = firstResponse.headers.get('etag');
 
     expect(firstResponse.status).toBe(200);
@@ -114,7 +89,7 @@ describe('CDN Worker', () => {
         'if-none-match': etag!,
       },
     });
-    const secondResponse = await handleRequest(secondRequest, KeyValidators.Bcrypt);
+    const secondResponse = await handleRequest(secondRequest);
     expect(secondResponse.status).toBe(304);
     expect(secondResponse.body).toBeNull();
 
@@ -125,7 +100,7 @@ describe('CDN Worker', () => {
         'if-none-match': '"non-existing-etag"',
       },
     });
-    const wrongEtagResponse = await handleRequest(wrongEtagRequest, KeyValidators.Bcrypt);
+    const wrongEtagResponse = await handleRequest(wrongEtagRequest);
     expect(wrongEtagResponse.status).toBe(200);
     expect(wrongEtagResponse.body).toBeDefined();
   });
@@ -139,9 +114,9 @@ describe('CDN Worker', () => {
       JSON.stringify({ sdl: `type Query { dummy: String }` }),
     );
 
-    mockWorkerEnv({
-      HIVE_DATA: map,
-      KEY_DATA: SECRET,
+    const handleRequest = createRequestHandler({
+      isKeyValid: createIsKeyValid(SECRET),
+      getRawStoreValue: (key: string) => map.get(key),
     });
 
     const token = createToken(SECRET, targetId);
@@ -151,7 +126,7 @@ describe('CDN Worker', () => {
         'x-hive-cdn-key': token,
       },
     });
-    const firstResponse = await handleRequest(firstRequest, KeyValidators.Bcrypt);
+    const firstResponse = await handleRequest(firstRequest);
     const etag = firstResponse.headers.get('etag');
 
     expect(firstResponse.status).toBe(200);
@@ -166,7 +141,7 @@ describe('CDN Worker', () => {
         'if-none-match': etag!,
       },
     });
-    const secondResponse = await handleRequest(secondRequest, KeyValidators.Bcrypt);
+    const secondResponse = await handleRequest(secondRequest);
     expect(secondResponse.status).toBe(304);
     expect(secondResponse.body).toBeNull();
 
@@ -177,7 +152,7 @@ describe('CDN Worker', () => {
         'if-none-match': '"non-existing-etag"',
       },
     });
-    const wrongEtagResponse = await handleRequest(wrongEtagRequest, KeyValidators.Bcrypt);
+    const wrongEtagResponse = await handleRequest(wrongEtagRequest);
     expect(wrongEtagResponse.status).toBe(200);
     expect(wrongEtagResponse.body).toBeDefined();
   });
@@ -188,9 +163,9 @@ describe('CDN Worker', () => {
     const map = new Map();
     map.set(`target:${targetId}:metadata`, JSON.stringify({ sdl: `type Query { dummy: String }` }));
 
-    mockWorkerEnv({
-      HIVE_DATA: map,
-      KEY_DATA: SECRET,
+    const handleRequest = createRequestHandler({
+      isKeyValid: createIsKeyValid(SECRET),
+      getRawStoreValue: (key: string) => map.get(key),
     });
 
     const token = createToken(SECRET, targetId);
@@ -200,7 +175,7 @@ describe('CDN Worker', () => {
         'x-hive-cdn-key': token,
       },
     });
-    const firstResponse = await handleRequest(firstRequest, KeyValidators.Bcrypt);
+    const firstResponse = await handleRequest(firstRequest);
     const etag = firstResponse.headers.get('etag');
 
     expect(firstResponse.status).toBe(200);
@@ -215,7 +190,7 @@ describe('CDN Worker', () => {
         'if-none-match': etag!,
       },
     });
-    const secondResponse = await handleRequest(secondRequest, KeyValidators.Bcrypt);
+    const secondResponse = await handleRequest(secondRequest);
     expect(secondResponse.status).toBe(304);
     expect(secondResponse.body).toBeNull();
 
@@ -226,7 +201,7 @@ describe('CDN Worker', () => {
         'if-none-match': '"non-existing-etag"',
       },
     });
-    const wrongEtagResponse = await handleRequest(wrongEtagRequest, KeyValidators.Bcrypt);
+    const wrongEtagResponse = await handleRequest(wrongEtagRequest);
     expect(wrongEtagResponse.status).toBe(200);
     expect(wrongEtagResponse.body).toBeDefined();
   });
@@ -237,9 +212,9 @@ describe('CDN Worker', () => {
     const map = new Map();
     map.set(`target:${targetId}:schema`, JSON.stringify({ sdl: `type Query { dummy: String }` }));
 
-    mockWorkerEnv({
-      HIVE_DATA: map,
-      KEY_DATA: SECRET,
+    const handleRequest = createRequestHandler({
+      isKeyValid: createIsKeyValid(SECRET),
+      getRawStoreValue: (key: string) => map.get(key),
     });
 
     const token = createToken(SECRET, targetId);
@@ -249,7 +224,7 @@ describe('CDN Worker', () => {
         'x-hive-cdn-key': token,
       },
     });
-    const firstResponse = await handleRequest(firstRequest, KeyValidators.Bcrypt);
+    const firstResponse = await handleRequest(firstRequest);
     const etag = firstResponse.headers.get('etag');
 
     expect(firstResponse.status).toBe(200);
@@ -264,7 +239,7 @@ describe('CDN Worker', () => {
         'if-none-match': etag!,
       },
     });
-    const secondResponse = await handleRequest(secondRequest, KeyValidators.Bcrypt);
+    const secondResponse = await handleRequest(secondRequest);
     expect(secondResponse.status).toBe(304);
     expect(secondResponse.body).toBeNull();
 
@@ -275,7 +250,7 @@ describe('CDN Worker', () => {
         'if-none-match': '"non-existing-etag"',
       },
     });
-    const wrongEtagResponse = await handleRequest(wrongEtagRequest, KeyValidators.Bcrypt);
+    const wrongEtagResponse = await handleRequest(wrongEtagRequest);
     expect(wrongEtagResponse.status).toBe(200);
     expect(wrongEtagResponse.body).toBeDefined();
   });
@@ -291,9 +266,9 @@ describe('CDN Worker', () => {
       }),
     );
 
-    mockWorkerEnv({
-      HIVE_DATA: map,
-      KEY_DATA: SECRET,
+    const handleRequest = createRequestHandler({
+      isKeyValid: createIsKeyValid(SECRET),
+      getRawStoreValue: (key: string) => map.get(key),
     });
 
     const token = createToken(SECRET, targetId);
@@ -303,7 +278,7 @@ describe('CDN Worker', () => {
         'x-hive-cdn-key': token,
       },
     });
-    const firstResponse = await handleRequest(firstRequest, KeyValidators.Bcrypt);
+    const firstResponse = await handleRequest(firstRequest);
     const etag = firstResponse.headers.get('etag');
 
     expect(firstResponse.status).toBe(200);
@@ -318,7 +293,7 @@ describe('CDN Worker', () => {
         'if-none-match': etag!,
       },
     });
-    const secondResponse = await handleRequest(secondRequest, KeyValidators.Bcrypt);
+    const secondResponse = await handleRequest(secondRequest);
     expect(secondResponse.status).toBe(304);
     expect(secondResponse.body).toBeNull();
 
@@ -329,55 +304,55 @@ describe('CDN Worker', () => {
         'if-none-match': '"non-existing-etag"',
       },
     });
-    const wrongEtagResponse = await handleRequest(wrongEtagRequest, KeyValidators.Bcrypt);
+    const wrongEtagResponse = await handleRequest(wrongEtagRequest);
     expect(wrongEtagResponse.status).toBe(200);
     expect(wrongEtagResponse.body).toBeDefined();
   });
 
   describe('Basic parsing errors', () => {
     it('Should throw when target id is missing', async () => {
-      mockWorkerEnv({
-        HIVE_DATA: new Map(),
-        KEY_DATA: '',
+      const handleRequest = createRequestHandler({
+        isKeyValid: KeyValidators.AlwaysTrue,
+        getRawStoreValue: (_key: string) => Promise.resolve(null),
       });
 
       const request = new Request('https://fake-worker.com/', {});
 
-      const response = await handleRequest(request, KeyValidators.AlwaysTrue);
+      const response = await handleRequest(request);
       expect(response instanceof MissingTargetIDErrorResponse).toBeTruthy();
       expect(response.status).toBe(400);
     });
 
     it('Should throw when requested resource is not valid', async () => {
-      mockWorkerEnv({
-        HIVE_DATA: new Map(),
-        KEY_DATA: '',
+      const handleRequest = createRequestHandler({
+        isKeyValid: KeyValidators.AlwaysTrue,
+        getRawStoreValue: (_key: string) => Promise.resolve(null),
       });
 
       const request = new Request('https://fake-worker.com/fake-target-id/error', {});
 
-      const response = await handleRequest(request, KeyValidators.AlwaysTrue);
+      const response = await handleRequest(request);
       expect(response instanceof InvalidArtifactTypeResponse).toBeTruthy();
       expect(response.status).toBe(400);
     });
 
     it('Should throw when auth key is missing', async () => {
-      mockWorkerEnv({
-        HIVE_DATA: new Map(),
-        KEY_DATA: '',
+      const handleRequest = createRequestHandler({
+        isKeyValid: KeyValidators.AlwaysTrue,
+        getRawStoreValue: (_key: string) => Promise.resolve(null),
       });
 
       const request = new Request('https://fake-worker.com/fake-target-id/sdl', {});
 
-      const response = await handleRequest(request, KeyValidators.AlwaysTrue);
+      const response = await handleRequest(request);
       expect(response instanceof MissingAuthKey).toBeTruthy();
       expect(response.status).toBe(400);
     });
 
     it('Should throw when key validation function fails', async () => {
-      mockWorkerEnv({
-        HIVE_DATA: new Map(),
-        KEY_DATA: '',
+      const handleRequest = createRequestHandler({
+        isKeyValid: KeyValidators.AlwaysFalse,
+        getRawStoreValue: (_key: string) => Promise.resolve(null),
       });
 
       const request = new Request('https://fake-worker.com/fake-target-id/sdl', {
@@ -386,7 +361,7 @@ describe('CDN Worker', () => {
         },
       });
 
-      const response = await handleRequest(request, KeyValidators.AlwaysFalse);
+      const response = await handleRequest(request);
       expect(response instanceof InvalidAuthKey).toBeTruthy();
       expect(response.status).toBe(403);
     });
@@ -399,9 +374,9 @@ describe('CDN Worker', () => {
       const map = new Map();
       map.set(`target:${targetId}:schema`, JSON.stringify({ sdl: `type Query { dummy: String }` }));
 
-      mockWorkerEnv({
-        HIVE_DATA: map,
-        KEY_DATA: SECRET,
+      const handleRequest = createRequestHandler({
+        isKeyValid: createIsKeyValid(SECRET),
+        getRawStoreValue: (key: string) => map.get(key),
       });
 
       const token = createToken(SECRET, targetId);
@@ -412,16 +387,17 @@ describe('CDN Worker', () => {
         },
       });
 
-      const response = await handleRequest(request, KeyValidators.Bcrypt);
+      const response = await handleRequest(request);
       expect(response.status).toBe(200);
     });
 
     it('Should throw on mismatch of token target and actual target', async () => {
       const SECRET = '123456';
+      const map = new Map();
 
-      mockWorkerEnv({
-        HIVE_DATA: new Map(),
-        KEY_DATA: SECRET,
+      const handleRequest = createRequestHandler({
+        isKeyValid: createIsKeyValid(SECRET),
+        getRawStoreValue: (key: string) => map.get(key),
       });
 
       const token = createToken(SECRET, 'fake-target-id');
@@ -432,15 +408,15 @@ describe('CDN Worker', () => {
         },
       });
 
-      const response = await handleRequest(request, KeyValidators.Bcrypt);
+      const response = await handleRequest(request);
       expect(response instanceof InvalidAuthKey).toBeTruthy();
       expect(response.status).toBe(403);
     });
 
     it('Should throw on invalid token hash', async () => {
-      mockWorkerEnv({
-        HIVE_DATA: new Map(),
-        KEY_DATA: '123456',
+      const handleRequest = createRequestHandler({
+        isKeyValid: createIsKeyValid('123456'),
+        getRawStoreValue: (key: string) => new Map().get(key),
       });
 
       const request = new Request(`https://fake-worker.com/some-target/sdl`, {
@@ -449,7 +425,7 @@ describe('CDN Worker', () => {
         },
       });
 
-      const response = await handleRequest(request, KeyValidators.Bcrypt);
+      const response = await handleRequest(request);
       expect(response instanceof InvalidAuthKey).toBeTruthy();
       expect(response.status).toBe(403);
     });
