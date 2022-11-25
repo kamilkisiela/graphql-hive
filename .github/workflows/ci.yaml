@@ -469,6 +469,7 @@ jobs:
             redis \
             supertokens \
             s3 \
+            s3_provision_buckets \
             local_cdn \
             local_broker \
             external_composition
