@@ -134,7 +134,6 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
             userId: extractUserId(args.contextValue as any),
           });
         },
-        trackResolvers: false,
         appendTags: ({ contextValue }) => {
           const supertokens_user_id = extractUserId(contextValue as any);
           const request_id = cleanRequestId((contextValue as Context).req.headers['x-request-id']);
