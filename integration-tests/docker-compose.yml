@@ -18,7 +18,7 @@ services:
       - 'stack'
 
   clickhouse:
-    image: clickhouse/clickhouse-server:22.9-alpine
+    image: clickhouse/clickhouse-server:22.11-alpine
     volumes:
       - ../packages/services/storage/configs/clickhouse:/etc/clickhouse-server/conf.d
     healthcheck:
