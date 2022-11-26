@@ -79,7 +79,7 @@ services:
       - ./volumes/zookeeper/log:/var/lib/zookeeper/log
 
   broker:
-    image: confluentinc/cp-kafka:7.2.2
+    image: confluentinc/cp-kafka:7.3.0
     hostname: borker
     depends_on:
       zookeeper:
