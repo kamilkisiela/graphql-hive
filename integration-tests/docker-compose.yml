@@ -18,8 +18,10 @@ services:
       - 'stack'
 
   clickhouse:
-    image: clickhouse/clickhouse-server:22.9-alpine
+    image: clickhouse/clickhouse-server:22.11-alpine
     volumes:
+      - ./volumes/clickhouse/logs:/var/log/clickhouse-server
+      - ./volumes/clickhouse/db:/var/lib/clickhouse
       - ../packages/services/storage/configs/clickhouse:/etc/clickhouse-server/conf.d
     healthcheck:
       test: ['CMD', 'wget', '--spider', '-q', 'localhost:8123/ping']
@@ -428,6 +430,8 @@ services:
       CLICKHOUSE_PORT: 8123
       CLICKHOUSE_USERNAME: test
       CLICKHOUSE_PASSWORD: test
+      CLICKHOUSE_ASYNC_INSERT_BUSY_TIMEOUT_MS: 500
+      CLICKHOUSE_ASYNC_INSERT_MAX_DATA_SIZE: 1000
       PORT: 3007
 
   usage-estimator:

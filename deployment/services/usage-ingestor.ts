@@ -41,6 +41,8 @@ export function deployUsageIngestor({
     CLICKHOUSE_PORT: clickhouse.config.port,
     CLICKHOUSE_USERNAME: clickhouse.config.username,
     CLICKHOUSE_PASSWORD: clickhouse.config.password,
+    CLICKHOUSE_ASYNC_INSERT_BUSY_TIMEOUT_MS: '30000', // flush data after max 30 seconds
+    CLICKHOUSE_ASYNC_INSERT_MAX_DATA_SIZE: '200000000', // flush data when the buffer reaches 200MB
     ...(clickhouse.config.cloud
       ? {
           CLICKHOUSE_MIRROR_PROTOCOL: clickhouse.config.cloud.protocol,

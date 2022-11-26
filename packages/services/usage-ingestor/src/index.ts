@@ -32,13 +32,7 @@ async function main() {
   try {
     const { readiness, start, stop } = createIngestor({
       logger: server.log,
-      clickhouse: {
-        protocol: env.clickhouse.protocol,
-        host: env.clickhouse.host,
-        port: env.clickhouse.port,
-        username: env.clickhouse.username,
-        password: env.clickhouse.password,
-      },
+      clickhouse: env.clickhouse,
       clickhouseMirror: env.clickhouseMirror,
       kafka: {
         topic: env.kafka.topic,
