@@ -119,10 +119,8 @@ export function Navigation() {
       <div tw="mx-auto px-2 sm:px-6 lg:px-8">
         <div tw="relative flex flex-row items-center justify-between h-12">
           <div tw="flex-1 flex items-center justify-center sm:items-stretch sm:justify-start">
-            <Link href="/" passHref>
-              <a tw="flex-shrink-0 flex text-yellow-500 items-center hover:opacity-50">
-                <Logo tw="w-6 h-6" />
-              </a>
+            <Link href="/" tw="flex-shrink-0 flex text-yellow-500 items-center hover:opacity-50">
+              <Logo tw="w-6 h-6" />
             </Link>
             <div tw="hidden sm:block sm:ml-6">
               <div tw="flex space-x-4 items-center ">

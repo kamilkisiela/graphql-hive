@@ -113,9 +113,7 @@ export const Header = (): ReactElement => {
                   </DropdownMenu.Label>
                   {personal.map(org => (
                     <NextLink href={`/${org.cleanId}`} key={org.cleanId}>
-                      <a>
-                        <DropdownMenu.Item>{org.name}</DropdownMenu.Item>
-                      </a>
+                      <DropdownMenu.Item>{org.name}</DropdownMenu.Item>
                     </NextLink>
                   ))}
                   <DropdownMenu.Label className="px-2 text-xs font-bold text-gray-500">
@@ -123,9 +121,7 @@ export const Header = (): ReactElement => {
                   </DropdownMenu.Label>
                   {organizations.map(org => (
                     <NextLink href={`/${org.cleanId}`} key={org.cleanId}>
-                      <a>
-                        <DropdownMenu.Item>{org.name}</DropdownMenu.Item>
-                      </a>
+                      <DropdownMenu.Item>{org.name}</DropdownMenu.Item>
                     </NextLink>
                   ))}
                   <DropdownMenu.Separator />
@@ -147,12 +143,10 @@ export const Header = (): ReactElement => {
               </DropdownMenu.Item>
 
               <NextLink href="/settings">
-                <a>
-                  <DropdownMenu.Item>
-                    <SettingsIcon className="h-5 w-5" />
-                    Profile settings
-                  </DropdownMenu.Item>
-                </a>
+                <DropdownMenu.Item>
+                  <SettingsIcon className="h-5 w-5" />
+                  Profile settings
+                </DropdownMenu.Item>
               </NextLink>
               {docsUrl ? (
                 <DropdownMenu.Item asChild>
@@ -170,22 +164,18 @@ export const Header = (): ReactElement => {
               </DropdownMenu.Item>
               {meQuery.data?.me?.isAdmin && (
                 <NextLink href="/manage">
-                  <a>
-                    <DropdownMenu.Item>
-                      <TrendingUpIcon className="h-5 w-5" />
-                      Manage Instance
-                    </DropdownMenu.Item>
-                  </a>
+                  <DropdownMenu.Item>
+                    <TrendingUpIcon className="h-5 w-5" />
+                    Manage Instance
+                  </DropdownMenu.Item>
                 </NextLink>
               )}
               {env.nodeEnv === 'development' && (
                 <NextLink href="/dev">
-                  <a>
-                    <DropdownMenu.Item>
-                      <GraphQLIcon className="h-5 w-5" />
-                      Dev GraphiQL
-                    </DropdownMenu.Item>
-                  </a>
+                  <DropdownMenu.Item>
+                    <GraphQLIcon className="h-5 w-5" />
+                    Dev GraphiQL
+                  </DropdownMenu.Item>
                 </NextLink>
               )}
               <DropdownMenu.Item asChild>
