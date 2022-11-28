@@ -24,13 +24,20 @@ export function hashSchema(schema: Schema): string {
 /**
  * Builds GraphQLSchema without validation of SDL
  */
-export function buildSchema(schema: SchemaObject): GraphQLSchema {
-  return lexicographicSortSchema(
-    buildASTSchema(schema.document, {
-      assumeValid: true,
-      assumeValidSDL: true,
-    }),
-  );
+export function buildSchema(
+  schema: SchemaObject,
+  transformError = (error: unknown) => error,
+): GraphQLSchema {
+  try {
+    return lexicographicSortSchema(
+      buildASTSchema(schema.document, {
+        assumeValid: true,
+        assumeValidSDL: true,
+      }),
+    );
+  } catch (error) {
+    throw transformError(error);
+  }
 }
 
 export function findSchema(schemas: readonly Schema[], expected: Schema): Schema | undefined {

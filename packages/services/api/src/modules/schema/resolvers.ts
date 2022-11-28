@@ -8,6 +8,7 @@ import {
   isInputObjectType,
   isScalarType,
   GraphQLNamedType,
+  GraphQLError,
 } from 'graphql';
 import type { SchemaModule } from './__generated__/types';
 import { SchemaManager } from './providers/schema-manager';
@@ -575,7 +576,26 @@ export const resolvers: SchemaModule.Resolvers = {
         return [];
       }
 
-      return injector.get(Inspector).diff(buildSchema(before), buildSchema(after));
+      const previousSchema = buildSchema(
+        before,
+        error =>
+          new GraphQLError(
+            `Failed to build the previous version: ${
+              error instanceof GraphQLError ? error.message : error
+            }`,
+          ),
+      );
+      const currentSchema = buildSchema(
+        after,
+        error =>
+          new GraphQLError(
+            `Failed to build the selected version: ${
+              error instanceof GraphQLError ? error.message : error
+            }`,
+          ),
+      );
+
+      return injector.get(Inspector).diff(previousSchema, currentSchema);
     },
     diff([before, after]) {
       return {
