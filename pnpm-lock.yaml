@@ -597,7 +597,7 @@ importers:
       '@envelop/core': 3.0.3
       '@envelop/generic-auth': 5.0.3
       '@envelop/graphql-modules': 4.0.3
-      '@envelop/sentry': 5.0.0-alpha-20221124161914-24cce7d7
+      '@envelop/sentry': 5.0.0
       '@envelop/types': 3.0.0
       '@graphql-hive/client': 0.21.3
       '@hive/api': workspace:*
@@ -623,7 +623,7 @@ importers:
       '@envelop/core': 3.0.3
       '@envelop/generic-auth': 5.0.3_wh5yvahv2yiw2ssopdfjqknqjy
       '@envelop/graphql-modules': 4.0.3_wh5yvahv2yiw2ssopdfjqknqjy
-      '@envelop/sentry': 5.0.0-alpha-20221124161914-24cce7d7_ofzijcqooblt2ygeqgbeybzoqa
+      '@envelop/sentry': 5.0.0_ofzijcqooblt2ygeqgbeybzoqa
       '@envelop/types': 3.0.0
       '@sentry/integrations': 7.20.1
       '@sentry/node': 7.20.1
@@ -4568,8 +4568,8 @@ packages:
       tslib: 2.4.1
     dev: false
 
-  /@envelop/sentry/5.0.0-alpha-20221124161914-24cce7d7_ofzijcqooblt2ygeqgbeybzoqa:
-    resolution: {integrity: sha512-bL8yzc+WfjjsIbb0lAdZ4EIlomFdQZi5JG8aNUbfv7PjMoIn8JatJo6HX6G9kQTuwfDHwSjr0HHXJ+nijC/BAQ==}
+  /@envelop/sentry/5.0.0_ofzijcqooblt2ygeqgbeybzoqa:
+    resolution: {integrity: sha512-LSgfyH9A5A7nJWlZQFVQscKN5GCMJf+FN51gNKUzxVb4CT4/46gpg53v0L23FFq6NpQ+llG0KyFqh1EofNz1Uw==}
     peerDependencies:
       '@envelop/core': ^3.0.4
       '@sentry/node': ^6 || ^7
