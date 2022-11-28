@@ -43,6 +43,8 @@ services:
     ports:
       - '9000:9000'
       - '9001:9001'
+    networks:
+      - 'stack'
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
       interval: 30s
@@ -51,16 +53,17 @@ services:
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
-    volumes:
-      - './volumes/s3:/data'
 
   s3_provision_buckets:
     image: quay.io/minio/mc:RELEASE.2022-11-17T21-20-39Z
     depends_on:
-      - s3
+      s3:
+        condition: service_healthy
+    networks:
+      - 'stack'
     entrypoint: >
-      /bin/sh -c " /usr/bin/mc alias set myminio http://minio:9000 minioadmin minioadmin;
-      /usr/bin/mc mb myminio/artifacts; exit 0; "
+      /bin/sh -c " /usr/bin/mc alias set myminio http://s3:9000 minioadmin minioadmin; /usr/bin/mc
+      mb myminio/artifacts; exit 0; "
 
   clickhouse:
     image: clickhouse/clickhouse-server:22.11-alpine

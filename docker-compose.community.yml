@@ -127,6 +127,34 @@ services:
       API_KEYS: '${SUPERTOKENS_API_KEY}'
       ACCESS_TOKEN_BLACKLISTING: 'true'
 
+  s3:
+    image: quay.io/minio/minio:RELEASE.2022-11-17T23-20-09Z
+    command: server /data --console-address ":9001"
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    networks:
+      - 'stack'
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+
+  s3_provision_buckets:
+    image: quay.io/minio/mc:RELEASE.2022-11-17T21-20-39Z
+    depends_on:
+      s3:
+        condition: service_healthy
+    networks:
+      - 'stack'
+    entrypoint: >
+      /bin/sh -c " /usr/bin/mc alias set myminio http://s3:9000 ${MINIO_ROOT_USER}
+      ${MINIO_ROOT_PASSWORD}; /usr/bin/mc mb myminio/artifacts; exit 0; "
+
   storage:
     image: '${DOCKER_REGISTRY}storage${DOCKER_TAG}'
     networks:
@@ -164,6 +192,8 @@ services:
         condition: service_healthy
       storage:
         condition: service_completed_successfully
+      s3_provision_buckets:
+        condition: service_completed_successfully
       tokens:
         condition: service_healthy
       webhooks:
@@ -199,6 +229,11 @@ services:
       PORT: 3001
       SUPERTOKENS_CONNECTION_URI: http://supertokens:3567
       SUPERTOKENS_API_KEY: '${SUPERTOKENS_API_KEY}'
+      S3_ENDPOINT: 'http://s3:9000'
+      S3_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
+      S3_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
+      S3_BUCKET_NAME: artifacts
+      ARTIFACT_AUTH_PRIVATE_KEY: 1e1064ef9cda8bf38936b77317e90dc3
 
   schema:
     image: '${DOCKER_REGISTRY}schema${DOCKER_TAG}'
