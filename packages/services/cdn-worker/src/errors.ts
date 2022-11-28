@@ -12,6 +12,9 @@ export class MissingTargetIDErrorResponse extends Response {
       }),
       {
         status: 400,
+        headers: {
+          'content-type': 'application/json',
+        },
       },
     );
   }
@@ -27,6 +30,9 @@ export class InvalidArtifactTypeResponse extends Response {
       }),
       {
         status: 400,
+        headers: {
+          'content-type': 'application/json',
+        },
       },
     );
   }
@@ -42,6 +48,9 @@ export class MissingAuthKeyResponse extends Response {
       }),
       {
         status: 400,
+        headers: {
+          'content-type': 'application/json',
+        },
       },
     );
   }
@@ -57,6 +66,9 @@ export class InvalidAuthKeyResponse extends Response {
       }),
       {
         status: 403,
+        headers: {
+          'content-type': 'application/json',
+        },
       },
     );
   }
@@ -72,6 +84,9 @@ export class CDNArtifactNotFound extends Response {
       }),
       {
         status: 404,
+        headers: {
+          'content-type': 'application/json',
+        },
       },
     );
   }
@@ -87,6 +102,9 @@ export class InvalidArtifactMatch extends Response {
       }),
       {
         status: 400,
+        headers: {
+          'content-type': 'application/json',
+        },
       },
     );
   }
@@ -102,6 +120,9 @@ export class UnexpectedError extends Response {
       }),
       {
         status: 500,
+        headers: {
+          'content-type': 'application/json',
+        },
       },
     );
   }

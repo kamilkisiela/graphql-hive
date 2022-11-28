@@ -222,6 +222,116 @@ function runArtifactsCDNTests(name: string, endpointBaseUrl: string) {
         }"
       `);
     });
+
+    test('access services artifact with valid credentials', async () => {
+      const { access_token } = await authenticate('main');
+
+      // Create Organization
+
+      const orgResult = await createOrganization(
+        {
+          name: 'foo',
+        },
+        access_token,
+      );
+
+      const org =
+        orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+
+      // Create Project
+
+      const projectResult = await createProject(
+        {
+          organization: org.cleanId,
+          type: ProjectType.Single,
+          name: 'foo',
+        },
+        access_token,
+      );
+
+      const project = projectResult.body.data!.createProject.ok!.createdProject;
+      const target = projectResult.body.data?.createProject.ok?.createdTargets.find(
+        t => t.name === 'production',
+      );
+
+      // Create Schema Publish Token
+
+      const tokenResult = await createToken(
+        {
+          name: 'test',
+          organization: org.cleanId,
+          project: project.cleanId,
+          target: target!.cleanId,
+          organizationScopes: [],
+          projectScopes: [],
+          targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+        },
+        access_token,
+      );
+
+      expect(tokenResult.body.errors).not.toBeDefined();
+
+      const token = tokenResult.body.data!.createToken.ok!.secret;
+
+      // Publish Schema
+
+      const publishSchemaResult = await publishSchema(
+        {
+          author: 'Kamil',
+          commit: 'abc123',
+          sdl: `type Query { ping: String }`,
+        },
+        token,
+      );
+
+      expect(publishSchemaResult.body.data?.schemaPublish.__typename).toEqual(
+        'SchemaPublishSuccess',
+      );
+
+      const schemaSyncCDNResult = await schemaSyncCDN(
+        {
+          organization: org.cleanId,
+          project: project.cleanId,
+          target: target!.cleanId,
+        },
+        access_token,
+      );
+
+      expect(schemaSyncCDNResult.body.errors).not.toBeDefined();
+      expect(schemaSyncCDNResult.body.data!.schemaSyncCDN.__typename).toBe('SchemaSyncCDNSuccess');
+
+      const cdnAccessResult = await createCdnAccess(
+        {
+          organization: org.cleanId,
+          project: project.cleanId,
+          target: target!.cleanId,
+        },
+        access_token,
+      );
+
+      expect(cdnAccessResult.body.errors).toBeUndefined();
+
+      const url = buildEndpointUrl(endpointBaseUrl, target!.id, 'services');
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'x-hive-cdn-key': cdnAccessResult.body.data!.createCdnToken.token,
+        },
+        redirect: 'manual',
+      });
+
+      expect(response.status).toMatchInlineSnapshot(`302`);
+      expect(await response.text()).toMatchInlineSnapshot(`"Found."`);
+      expect(response.headers.get('location')).toBeDefined();
+
+      const artifactContents = await fetchS3ObjectArtifact(
+        'artifacts',
+        `artifact/${target!.id}/services`,
+      );
+      expect(artifactContents).toMatchInlineSnapshot(
+        `"[{"name":null,"sdl":"type Query { ping: String }","url":null}]"`,
+      );
+    });
   });
 }
 
