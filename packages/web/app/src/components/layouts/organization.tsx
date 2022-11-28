@@ -86,7 +86,7 @@ export function OrganizationLayout({
     if (organizationQuery.error) {
       cookies.remove(LAST_VISITED_ORG_KEY);
       // url with # provoke error Maximum update depth exceeded
-      push('/404', router.asPath.replace(/#.*/, ''));
+      void push('/404', router.asPath.replace(/#.*/, ''));
     }
   }, [organizationQuery.error, router]);
 

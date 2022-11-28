@@ -30,22 +30,19 @@ function OrganizationPage() {
     },
   });
   const [mutation, mutate] = useMutation(JoinOrganizationDocument);
-  const accept = React.useCallback(() => {
-    mutate({
-      code,
-    }).then(result => {
-      if (result.data) {
-        if (result.data.joinOrganization.__typename === 'OrganizationInvitationError') {
-          notify(result.data.joinOrganization.message, 'error');
-        } else {
-          const org = result.data.joinOrganization.organization;
-          notify(`You joined "${org.name}" organization`, 'success');
-          router.visitOrganization({
-            organizationId: org.cleanId,
-          });
-        }
+  const accept = React.useCallback(async () => {
+    const result = await mutate({ code });
+    if (result.data) {
+      if (result.data.joinOrganization.__typename === 'OrganizationInvitationError') {
+        notify(result.data.joinOrganization.message, 'error');
+      } else {
+        const org = result.data.joinOrganization.organization;
+        notify(`You joined "${org.name}" organization`, 'success');
+        router.visitOrganization({
+          organizationId: org.cleanId,
+        });
       }
-    });
+    }
   }, [mutate, code, router, notify]);
 
   const goBack = React.useCallback(() => {

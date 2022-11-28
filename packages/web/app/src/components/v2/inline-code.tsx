@@ -8,9 +8,9 @@ export const InlineCode = (props: { content: string }) => {
       <code>{props.content}</code>
       <button
         className="hover:text-orange-600 cursor-pointer p-2 pr-1 pl-2"
-        onClick={ev => {
+        onClick={async ev => {
           ev.preventDefault();
-          window.navigator.clipboard.writeText(props.content);
+          await navigator.clipboard.writeText(props.content);
           post('Copied to clipboard', 'success');
         }}
         title="Copy to clipboard"

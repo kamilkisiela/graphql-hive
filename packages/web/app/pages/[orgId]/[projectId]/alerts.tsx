@@ -89,8 +89,8 @@ const Channels = (): ReactElement => {
             size="large"
             danger
             disabled={checked.length === 0 || mutation.fetching}
-            onClick={() => {
-              mutate({
+            onClick={async () => {
+              await mutate({
                 input: {
                   organization: router.organizationId,
                   project: router.projectId,
@@ -173,8 +173,8 @@ const Page = (props: {
               size="large"
               danger
               disabled={checked.length === 0 || mutation.fetching}
-              onClick={() => {
-                mutate({
+              onClick={async () => {
+                await mutate({
                   input: {
                     organization: router.organizationId,
                     project: router.projectId,

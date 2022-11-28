@@ -13,7 +13,6 @@
   "editor.codeActionsOnSave": {
     "source.organizeImports": false
   },
-  "files.autoSave": "off",
   "eslint.format.enable": true,
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",

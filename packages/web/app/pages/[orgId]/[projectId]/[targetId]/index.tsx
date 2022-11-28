@@ -74,7 +74,7 @@ const SchemaServiceName = ({
   });
 
   const submit = useCallback(
-    (newName: string) => {
+    async (newName: string) => {
       if (schema.service === newName) {
         return;
       }
@@ -83,7 +83,7 @@ const SchemaServiceName = ({
         return;
       }
 
-      mutate({
+      await mutate({
         input: {
           organization: organization.cleanId,
           project: project.cleanId,
@@ -187,25 +187,24 @@ const SyncSchemaButton = ({
   const [status, setStatus] = useState<'idle' | 'error' | 'success'>('idle');
   const [mutation, mutate] = useMutation(SchemaSyncButton_SchemaSyncCDN);
 
-  const sync = useCallback(() => {
-    mutate({
+  const sync = useCallback(async () => {
+    const result = await mutate({
       input: {
         organization: organization.cleanId,
         project: project.cleanId,
         target: target.cleanId,
       },
-    }).then(result => {
-      if (result.error) {
-        setStatus('error');
-      } else {
-        setStatus(
-          result.data?.schemaSyncCDN.__typename === 'SchemaSyncCDNError' ? 'error' : 'success',
-        );
-      }
-      setTimeout(() => {
-        setStatus('idle');
-      }, 5000);
     });
+    if (result.error) {
+      setStatus('error');
+    } else {
+      setStatus(
+        result.data?.schemaSyncCDN.__typename === 'SchemaSyncCDNError' ? 'error' : 'success',
+      );
+    }
+    setTimeout(() => {
+      setStatus('idle');
+    }, 5000);
   }, [mutate, organization.cleanId, project.cleanId, target.cleanId]);
 
   if (!target.hasSchema) {

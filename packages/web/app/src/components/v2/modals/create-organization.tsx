@@ -54,7 +54,7 @@ export const CreateOrganizationModal = ({
 
         if (mutation.data?.createOrganization.ok) {
           toggleModalOpen();
-          push(
+          void push(
             `/${mutation.data.createOrganization.ok.createdOrganizationPayload.organization.cleanId}`,
           );
         }

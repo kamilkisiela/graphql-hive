@@ -37,7 +37,7 @@ export const OIDCIntegrationSection = (props: {
   const isDeleteOIDCIntegrationModalOpen = router.asPath.endsWith('#remove-oidc-integration');
 
   const closeModal = () => {
-    router.push(router.asPath.split('#')[0]);
+    void router.push(router.asPath.split('#')[0]);
   };
 
   const openCreateModalLink = `${router.asPath}#create-oidc-integration`;
@@ -56,7 +56,7 @@ export const OIDCIntegrationSection = (props: {
               href={openEditModalLink}
               onClick={ev => {
                 ev.preventDefault();
-                router.push(openEditModalLink);
+                void router.push(openEditModalLink);
               }}
             >
               <KeyIcon className="mr-2" />
@@ -71,7 +71,7 @@ export const OIDCIntegrationSection = (props: {
               href={openDeleteModalLink}
               onClick={ev => {
                 ev.preventDefault();
-                router.push(openDeleteModalLink);
+                void router.push(openDeleteModalLink);
               }}
             >
               Remove
@@ -84,7 +84,7 @@ export const OIDCIntegrationSection = (props: {
             href={openCreateModalLink}
             onClick={ev => {
               ev.preventDefault();
-              router.push(openCreateModalLink);
+              void router.push(openCreateModalLink);
             }}
           >
             <KeyIcon className="mr-2" />
@@ -99,7 +99,7 @@ export const OIDCIntegrationSection = (props: {
         organizationId={props.organization.id}
         openEditModalLink={openEditModalLink}
         transitionToManageScreen={() => {
-          router.replace(openEditModalLink);
+          void router.replace(openEditModalLink);
         }}
       />
       <ManageOIDCIntegrationModal
@@ -529,8 +529,8 @@ const RemoveOIDCIntegrationModal = (props: {
                 block
                 danger
                 disabled={mutation.fetching}
-                onClick={() => {
-                  mutate({
+                onClick={async () => {
+                  await mutate({
                     input: { oidcIntegrationId },
                   });
                 }}

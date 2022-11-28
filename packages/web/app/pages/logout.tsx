@@ -11,8 +11,8 @@ export function getServerSideProps() {
 export default function LogOutPage() {
   const router = useRouter();
   React.useEffect(() => {
-    signOut().then(() => {
-      router.replace('/');
+    void signOut().then(() => {
+      void router.replace('/');
     });
   });
 

@@ -97,7 +97,7 @@ export async function main() {
       method: ['GET', 'HEAD'],
       url: '/_health',
       handler(req, res) {
-        res.status(200).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+        void res.status(200).send();
       },
     });
 
@@ -107,7 +107,7 @@ export async function main() {
       handler(_, res) {
         const isReady = readiness();
         reportReadiness(isReady);
-        res.status(isReady ? 200 : 400).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+        void res.status(isReady ? 200 : 400).send();
       },
     });
 

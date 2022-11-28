@@ -114,7 +114,7 @@ async function main() {
       method: ['GET', 'HEAD'],
       url: '/_health',
       handler(_, res) {
-        res.status(200).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+        void res.status(200).send();
       },
     });
 
@@ -123,7 +123,7 @@ async function main() {
       url: '/_readiness',
       handler(_, res) {
         reportReadiness(true);
-        res.status(200).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+        void res.status(200).send();
       },
     });
 

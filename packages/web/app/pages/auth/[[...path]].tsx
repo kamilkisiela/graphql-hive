@@ -44,7 +44,7 @@ const SuperTokensComponentNoSSR = dynamic(
 export default function Auth(props: { oidcProviderId: string | null }): React.ReactElement {
   React.useEffect(() => {
     if (props.oidcProviderId) {
-      startAuthFlowForOIDCProvider(props.oidcProviderId);
+      void startAuthFlowForOIDCProvider(props.oidcProviderId);
       return;
     }
 
@@ -54,7 +54,7 @@ export default function Auth(props: { oidcProviderId: string | null }): React.Re
       new URLSearchParams(globalThis.window?.location.search ?? '').get('provider') === 'okta';
 
     if (isOkta) {
-      startAuthFlowForProvider('okta');
+      void startAuthFlowForProvider('okta');
     }
   }, []);
 

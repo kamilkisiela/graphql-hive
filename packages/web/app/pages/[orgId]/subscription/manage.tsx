@@ -131,7 +131,7 @@ const Inner = ({
       paymentMethodId = paymentMethod.id;
     }
 
-    upgradeToProMutation[1]({
+    await upgradeToProMutation[1]({
       organization: organization.cleanId,
       monthlyLimits: {
         operations: operationsRateLimit * 1_000_000,
@@ -141,14 +141,14 @@ const Inner = ({
     });
   };
 
-  const downgrade = () => {
-    downgradeToHobbyMutation[1]({
+  const downgrade = async () => {
+    await downgradeToHobbyMutation[1]({
       organization: organization.cleanId,
     });
   };
 
-  const updateLimits = () => {
-    updateOrgRateLimitMutation[1]({
+  const updateLimits = async () => {
+    await updateOrgRateLimitMutation[1]({
       organization: organization.cleanId,
       monthlyLimits: {
         operations: operationsRateLimit * 1_000_000,

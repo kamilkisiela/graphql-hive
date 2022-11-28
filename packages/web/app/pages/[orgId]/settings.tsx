@@ -59,8 +59,8 @@ const Integrations = (): ReactElement => {
               size="large"
               danger
               disabled={deleteSlackMutation.fetching}
-              onClick={() => {
-                deleteSlack({
+              onClick={async () => {
+                await deleteSlack({
                   input: {
                     organization: orgId,
                   },
@@ -88,8 +88,8 @@ const Integrations = (): ReactElement => {
                   size="large"
                   danger
                   disabled={deleteGitHubMutation.fetching}
-                  onClick={() => {
-                    deleteGitHub({
+                  onClick={async () => {
+                    await deleteGitHub({
                       input: {
                         organization: orgId,
                       },
@@ -175,7 +175,7 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
             const newOrgId =
               result.data?.updateOrganizationName?.ok.updatedOrganizationPayload.selector
                 .organization;
-            router.replace(`/${newOrgId}/settings`);
+            void router.replace(`/${newOrgId}/settings`);
           }
         }),
     });
