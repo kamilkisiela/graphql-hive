@@ -95,6 +95,24 @@ const DiffView = ({
     },
   });
   const comparison = compareQuery.data?.schemaCompareToPrevious;
+  const error = compareQuery.error;
+
+  if (error) {
+    return (
+      <div className="m-3 rounded-lg bg-red-500/20 p-8">
+        <div className="mb-3 flex items-center gap-3">
+          <VscBug className="h-8 w-8 text-red-500" />
+          <h2 className="text-lg font-medium text-white">Failed to compare schemas</h2>
+        </div>
+        <p className="text-base text-gray-500">
+          Previous or current schema is most likely incomplete and was force published
+        </p>
+        <pre className="mt-5 rounded-lg bg-red-900 p-3 text-xs text-white">
+          {error.graphQLErrors[0].message}
+        </pre>
+      </div>
+    );
+  }
 
   if (!comparison) {
     return null;
@@ -108,8 +126,11 @@ const DiffView = ({
           <h2 className="text-lg font-medium text-white">Failed to build GraphQL Schema</h2>
         </div>
         <p className="text-base text-gray-500">
-          Schema is most likely incomplete and was force published
+          Previous or current schema is most likely incomplete and was force published
         </p>
+        <pre className="mt-5 rounded-lg bg-red-900 p-3 text-xs text-white">
+          {comparison.message}
+        </pre>
       </div>
     );
   }
