@@ -27,8 +27,6 @@ declare let SENTRY_ENVIRONMENT: string;
  */
 declare let SENTRY_RELEASE: string;
 
-const router = itty.Router();
-
 const isKeyValid = createIsKeyValid({ keyData: KEY_DATA });
 
 const handleRequest = createRequestHandler({
@@ -60,12 +58,13 @@ const handleArtifactRequest = createArtifactRequestHandler({
   },
 });
 
-router
+const router = itty
+  .Router()
   .get('*', handleArtifactRequest)
   // Legacy CDN Handlers
   .get('*', handleRequest);
 
-self.addEventListener('fetch', event => {
+self.addEventListener('fetch', (event: FetchEvent) => {
   try {
     event.respondWith(router.handle(event.request));
   } catch (error) {
