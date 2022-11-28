@@ -13,7 +13,7 @@
     "@envelop/core": "3.0.3",
     "@envelop/generic-auth": "5.0.3",
     "@envelop/graphql-modules": "4.0.3",
-    "@envelop/sentry": "5.0.0-alpha-20221124161914-24cce7d7",
+    "@envelop/sentry": "5.0.0",
     "@envelop/types": "3.0.0",
     "@sentry/integrations": "7.20.1",
     "@sentry/node": "7.20.1",
