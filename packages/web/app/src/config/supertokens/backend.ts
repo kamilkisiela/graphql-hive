@@ -9,7 +9,7 @@ import { fetch } from '@whatwg-node/fetch';
 import { appInfo } from '../../lib/supertokens/app-info';
 import zod from 'zod';
 import * as crypto from 'crypto';
-import { createTRPCClient } from '@trpc/client';
+import { createTRPCProxyClient, httpLink, inferRouterProxyClient } from '@trpc/client';
 import type { EmailsApi } from '@hive/emails';
 import type { InternalApi } from '@hive/server';
 import { env } from '@/env/backend';
@@ -20,11 +20,19 @@ import {
 } from '@/lib/supertokens/third-party-email-password-node-oidc-provider';
 
 export const backendConfig = (): TypeInput => {
-  const emailsService = createTRPCClient<EmailsApi>({
-    url: `${env.emailsEndpoint}/trpc`,
+  const emailsService = createTRPCProxyClient<EmailsApi>({
+    links: [
+      httpLink({
+        url: `${env.emailsEndpoint}/trpc`,
+      }),
+    ],
   });
-  const internalApi = createTRPCClient<InternalApi>({
-    url: `${env.serverEndpoint}/trpc`,
+  const internalApi = createTRPCProxyClient<InternalApi>({
+    links: [
+      httpLink({
+        url: `${env.serverEndpoint}/trpc`,
+      }),
+    ],
   });
   const providers: Array<TypeProvider> = [];
 
@@ -67,7 +75,7 @@ export const backendConfig = (): TypeInput => {
             ...originalImplementation,
             async sendEmail(input) {
               if (input.type === 'PASSWORD_RESET') {
-                await emailsService.mutation('sendPasswordResetEmail', {
+                await emailsService.sendPasswordResetEmail.mutate({
                   user: {
                     id: input.user.id,
                     email: input.user.email,
@@ -99,7 +107,7 @@ export const backendConfig = (): TypeInput => {
             ...originalImplementation,
             sendEmail: async input => {
               if (input.type === 'EMAIL_VERIFICATION') {
-                await emailsService.mutation('sendEmailVerificationEmail', {
+                await emailsService.sendEmailVerificationEmail.mutate({
                   user: {
                     id: input.user.id,
                     email: input.user.email,
@@ -157,7 +165,7 @@ export const backendConfig = (): TypeInput => {
 };
 
 const getEnsureUserOverrides = (
-  internalApi: ReturnType<typeof createTRPCClient<InternalApi>>,
+  internalApi: inferRouterProxyClient<InternalApi>,
 ): ThirdPartEmailPasswordTypeInput['override'] => ({
   apis: originalImplementation => ({
     ...originalImplementation,
@@ -169,7 +177,7 @@ const getEnsureUserOverrides = (
       const response = await originalImplementation.emailPasswordSignUpPOST(input);
 
       if (response.status === 'OK') {
-        await internalApi.mutation('ensureUser', {
+        await internalApi.ensureUser.mutate({
           superTokensUserId: response.user.id,
           email: response.user.email,
           oidcIntegrationId: null,
@@ -186,7 +194,7 @@ const getEnsureUserOverrides = (
       const response = await originalImplementation.emailPasswordSignInPOST(input);
 
       if (response.status === 'OK') {
-        await internalApi.mutation('ensureUser', {
+        await internalApi.ensureUser.mutate({
           superTokensUserId: response.user.id,
           email: response.user.email,
           oidcIntegrationId: null,
@@ -203,7 +211,7 @@ const getEnsureUserOverrides = (
       const response = await originalImplementation.thirdPartySignInUpPOST(input);
 
       if (response.status === 'OK') {
-        await internalApi.mutation('ensureUser', {
+        await internalApi.ensureUser.mutate({
           superTokensUserId: response.user.id,
           email: response.user.email,
           // This is provided via `getOIDCThirdPartyEmailPasswordNodeOverrides` if it is enabled.

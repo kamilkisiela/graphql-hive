@@ -1,4 +1,4 @@
-import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
+import type { inferRouterInputs } from '@trpc/server';
 import { initTRPC } from '@trpc/server';
 import { z } from 'zod';
 import { createStorage } from '@hive/storage';
@@ -326,4 +326,3 @@ export const stripeBillingApiRouter = t.router({
 export type StripeBillingApi = typeof stripeBillingApiRouter;
 
 export type StripeBillingApiInput = inferRouterInputs<StripeBillingApi>;
-export type StripeBillingApiOutput = inferRouterOutputs<StripeBillingApi>;

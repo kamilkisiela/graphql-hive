@@ -2,7 +2,7 @@ import { FastifyLoggerInstance } from '@hive/service-common';
 import LRU from 'tiny-lru';
 
 import type { TokensApi } from '@hive/tokens';
-import { createTRPCClient } from '@trpc/client';
+import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import { fetch } from '@whatwg-node/fetch';
 import { tokenCacheHits, tokenRequests } from './metrics';
 
@@ -23,13 +23,17 @@ type Token = TokensResponse | TokenStatus;
 export function createTokens(config: { endpoint: string; logger: FastifyLoggerInstance }) {
   const endpoint = config.endpoint.replace(/\/$/, '');
   const tokens = LRU<Promise<Token>>(1000, 30_000);
-  const tokensApi = createTRPCClient<TokensApi>({
-    url: `${endpoint}/trpc`,
-    fetch,
+  const tokensApi = createTRPCProxyClient<TokensApi>({
+    links: [
+      httpLink({
+        url: `${endpoint}/trpc`,
+        fetch,
+      }),
+    ],
   });
   async function fetchFreshToken(token: string) {
     try {
-      const info = await tokensApi.query('getToken', {
+      const info = await tokensApi.getToken.query({
         token,
       });
 

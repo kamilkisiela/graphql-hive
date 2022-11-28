@@ -1,4 +1,4 @@
-import { router } from '@trpc/server';
+import { initTRPC } from '@trpc/server';
 import type { inferAsyncReturnType } from '@trpc/server';
 import {
   reservedOrganizationNames,
@@ -34,16 +34,20 @@ const oidcDefaultScopes = [
   TargetAccessScope.REGISTRY_READ,
 ];
 
-export const internalApiRouter = router<Context>()
-  .mutation('ensureUser', {
-    input: z
-      .object({
-        superTokensUserId: z.string().min(1),
-        email: z.string().min(1),
-        oidcIntegrationId: z.union([z.string(), z.null()]),
-      })
-      .required(),
-    async resolve({ input, ctx }) {
+const t = initTRPC.context<Context>().create();
+
+export const internalApiRouter = t.router({
+  ensureUser: t.procedure
+    .input(
+      z
+        .object({
+          superTokensUserId: z.string().min(1),
+          email: z.string().min(1),
+          oidcIntegrationId: z.union([z.string(), z.null()]),
+        })
+        .required(),
+    )
+    .mutation(async ({ input, ctx }) => {
       const result = await ctx.storage.ensureUserExists({
         ...input,
         reservedOrgNames: reservedOrganizationNames,
@@ -57,14 +61,15 @@ export const internalApiRouter = router<Context>()
       });
 
       return result;
-    },
-  })
-  .query('getDefaultOrgForUser', {
-    input: z.object({
-      superTokensUserId: z.string(),
-      lastOrgId: z.union([z.string(), z.null()]),
     }),
-    async resolve({ input, ctx }) {
+  getDefaultOrgForUser: t.procedure
+    .input(
+      z.object({
+        superTokensUserId: z.string(),
+        lastOrgId: z.union([z.string(), z.null()]),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
       const user = await ctx.storage.getUserBySuperTokenId({
         superTokensUserId: input.superTokensUserId,
       });
@@ -112,13 +117,14 @@ export const internalApiRouter = router<Context>()
       }
 
       return null;
-    },
-  })
-  .query('getOIDCIntegrationById', {
-    input: z.object({
-      oidcIntegrationId: z.string().min(1),
     }),
-    async resolve({ input, ctx }) {
+  getOIDCIntegrationById: t.procedure
+    .input(
+      z.object({
+        oidcIntegrationId: z.string().min(1),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
       const result = await ctx.storage.getOIDCIntegrationById({
         oidcIntegrationId: input.oidcIntegrationId,
       });
@@ -132,7 +138,7 @@ export const internalApiRouter = router<Context>()
         clientSecret: ctx.crypto.decrypt(result.encryptedClientSecret),
         oauthApiUrl: result.oauthApiUrl,
       };
-    },
-  });
+    }),
+});
 
 export type InternalApi = typeof internalApiRouter;

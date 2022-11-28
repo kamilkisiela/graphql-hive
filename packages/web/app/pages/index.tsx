@@ -8,7 +8,7 @@ import Cookies from 'cookies';
 import { LAST_VISITED_ORG_KEY } from '@/constants';
 import { authenticated } from '@/components/authenticated-container';
 import { withSessionProtection } from '@/lib/supertokens/guard';
-import { createTRPCClient } from '@trpc/client';
+import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import type { InternalApi } from '@hive/server';
 import { env } from '@/env/backend';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -24,8 +24,12 @@ async function getSuperTokensUserIdFromRequest(
 }
 
 export const getServerSideProps = withSessionProtection(async ({ req, res }) => {
-  const internalApi = createTRPCClient<InternalApi>({
-    url: `${env.serverEndpoint}/trpc`,
+  const internalApi = createTRPCProxyClient<InternalApi>({
+    links: [
+      httpLink({
+        url: `${env.serverEndpoint}/trpc`,
+      }),
+    ],
   });
 
   const superTokensId = await getSuperTokensUserIdFromRequest(req as any, res as any);
@@ -34,7 +38,7 @@ export const getServerSideProps = withSessionProtection(async ({ req, res }) => 
     const lastOrgIdInCookies = cookies.get(LAST_VISITED_ORG_KEY) ?? null;
 
     if (superTokensId) {
-      const defaultOrganization = await internalApi.query('getDefaultOrgForUser', {
+      const defaultOrganization = await internalApi.getDefaultOrgForUser.query({
         superTokensUserId: superTokensId,
         lastOrgId: lastOrgIdInCookies,
       });

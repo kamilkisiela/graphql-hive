@@ -1,5 +1,5 @@
-import type { UsageEstimatorApi, UsageEstimatorQueryInput } from '@hive/usage-estimator';
-import { createTRPCClient } from '@trpc/client';
+import type { UsageEstimatorApi, UsageEstimatorApiInput } from '@hive/usage-estimator';
+import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import { sentry } from '../../../shared/sentry';
 import { Logger } from '../../shared/providers/logger';
@@ -21,16 +21,20 @@ export class UsageEstimationProvider {
   ) {
     this.logger = logger.child({ service: 'UsageEstimationProvider' });
     this.usageEstimator = usageEstimationConfig.endpoint
-      ? createTRPCClient<UsageEstimatorApi>({
-          url: `${usageEstimationConfig.endpoint}/trpc`,
-          fetch,
+      ? createTRPCProxyClient<UsageEstimatorApi>({
+          links: [
+            httpLink({
+              url: `${usageEstimationConfig.endpoint}/trpc`,
+              fetch,
+            }),
+          ],
         })
       : null;
   }
 
   @sentry('UsageEstimation.estimateOperations')
   async estimateOperations(
-    input: UsageEstimatorQueryInput<'estimateOperationsForTarget'>,
+    input: UsageEstimatorApiInput['estimateOperationsForTarget'],
   ): Promise<number | null> {
     this.logger.debug('Estimation operations, input: %o', input);
 
@@ -44,7 +48,7 @@ export class UsageEstimationProvider {
       return null;
     }
 
-    const result = await this.usageEstimator.query('estimateOperationsForTarget', input);
+    const result = await this.usageEstimator.estimateOperationsForTarget.query(input);
 
     return result.totalOperations;
   }

@@ -1,7 +1,7 @@
 import { initTRPC } from '@trpc/server';
 import type { Limiter } from './limiter';
 import { z } from 'zod';
-import type { inferRouterInputs } from '@trpc/server';
+import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
 
 const t = initTRPC.context<Limiter>().create();
 
@@ -38,3 +38,4 @@ export const rateLimitApiRouter = t.router({
 
 export type RateLimitApi = typeof rateLimitApiRouter;
 export type RateLimitApiInput = inferRouterInputs<RateLimitApi>;
+export type RateLimitApiOutput = inferRouterOutputs<RateLimitApi>;

@@ -1,6 +1,6 @@
 import { Injectable, Inject, Scope, CONTEXT } from 'graphql-modules';
 import type { WebhooksApi } from '@hive/webhooks';
-import { createTRPCClient } from '@trpc/client';
+import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import { fetch } from '@whatwg-node/fetch';
 import type { CommunicationAdapter, SchemaChangeNotificationInput } from './common';
 import { Logger } from '../../../shared/providers/logger';
@@ -22,12 +22,16 @@ export class WebhookCommunicationAdapter implements CommunicationAdapter {
     @Inject(CONTEXT) context: GraphQLModules.ModuleContext,
   ) {
     this.logger = logger.child({ service: 'WebhookCommunicationAdapter' });
-    this.webhooksService = createTRPCClient<WebhooksApi>({
-      url: `${config.endpoint}/trpc`,
-      fetch,
-      headers: {
-        'x-request-id': context.requestId,
-      },
+    this.webhooksService = createTRPCProxyClient<WebhooksApi>({
+      links: [
+        httpLink({
+          url: `${config.endpoint}/trpc`,
+          fetch,
+          headers: {
+            'x-request-id': context.requestId,
+          },
+        }),
+      ],
     });
   }
 
@@ -39,7 +43,7 @@ export class WebhookCommunicationAdapter implements CommunicationAdapter {
       input.event.target.id,
     );
     try {
-      await this.webhooksService.mutation('schedule', {
+      await this.webhooksService.schedule.mutate({
         endpoint: input.channel.webhookEndpoint!,
         event: input.event,
       });

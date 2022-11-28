@@ -3,7 +3,7 @@ import ThirdPartyEmailPasswordNode from 'supertokens-node/recipe/thirdpartyemail
 import type { TypeInput as ThirdPartEmailPasswordTypeInput } from 'supertokens-node/recipe/thirdpartyemailpassword/types';
 import { env } from '@/env/backend';
 import { ExpressRequest } from 'supertokens-node/lib/build/framework/express/framework';
-import type { createTRPCClient } from '@trpc/client';
+import type { inferRouterProxyClient } from '@trpc/client';
 import type { InternalApi } from '@hive/server';
 
 const OIDCProfileInfoSchema = zod.object({
@@ -82,7 +82,7 @@ const getOIDCIdFromInput = (input: { userContext: any }): string => {
 };
 
 export const getOIDCThirdPartyEmailPasswordNodeOverrides = (args: {
-  internalApi: ReturnType<typeof createTRPCClient<InternalApi>>;
+  internalApi: inferRouterProxyClient<InternalApi>;
 }): ThirdPartEmailPasswordTypeInput['override'] => ({
   apis: originalImplementation => ({
     ...originalImplementation,
@@ -129,10 +129,10 @@ export const createOIDCSuperTokensNoopProvider = () => ({
 });
 
 const fetchOIDCConfig = async (
-  internalApi: ReturnType<typeof createTRPCClient<InternalApi>>,
+  internalApi: inferRouterProxyClient<InternalApi>,
   oidcIntegrationId: string,
 ): Promise<{ id: string; clientId: string; clientSecret: string; oauthApiUrl: string }> => {
-  const result = await internalApi.query('getOIDCIntegrationById', { oidcIntegrationId });
+  const result = await internalApi.getOIDCIntegrationById.query({ oidcIntegrationId });
   if (result === null) {
     throw new Error('OIDC integration not found.');
   }

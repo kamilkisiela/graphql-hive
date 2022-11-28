@@ -1,6 +1,6 @@
 import * as utils from '@n1ru4l/dockest/test-helper';
 import { createFetch } from '@whatwg-node/fetch';
-import { createTRPCClient } from '@trpc/client';
+import { createTRPCProxyClient, httpBatchLink } from '@trpc/client';
 import type { InternalApi } from '@hive/server';
 import { z } from 'zod';
 import { ensureEnv } from './env';
@@ -11,9 +11,13 @@ const { fetch } = createFetch({
   useNodeFetch: true,
 });
 
-const internalApi = createTRPCClient<InternalApi>({
-  url: `http://${graphqlAddress}/trpc`,
-  fetch,
+const internalApi = createTRPCProxyClient<InternalApi>({
+  links: [
+    httpBatchLink({
+      url: `http://${graphqlAddress}/trpc`,
+      fetch,
+    }),
+  ],
 });
 
 const SignUpSignInUserResponseModel = z.object({
@@ -68,7 +72,7 @@ const createSession = async (
   email: string,
   oidcIntegrationId: string | null,
 ) => {
-  await internalApi.mutation('ensureUser', {
+  await internalApi.ensureUser.mutate({
     superTokensUserId,
     email,
     oidcIntegrationId,

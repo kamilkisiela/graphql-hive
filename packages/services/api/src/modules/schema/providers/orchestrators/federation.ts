@@ -6,7 +6,7 @@ import { Orchestrator, ProjectType, SchemaObject } from '../../../../shared/enti
 import { SchemaBuildError } from './errors';
 import { SCHEMA_SERVICE_CONFIG } from './tokens';
 import type { SchemaServiceConfig } from './tokens';
-import { createTRPCClient } from '@trpc/client';
+import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import { fetch } from '@whatwg-node/fetch';
 import type { SchemaBuilderApi } from '@hive/schema';
 
@@ -30,12 +30,16 @@ export class FederationOrchestrator implements Orchestrator {
     @Inject(CONTEXT) context: GraphQLModules.ModuleContext,
   ) {
     this.logger = logger.child({ service: 'FederationOrchestrator' });
-    this.schemaService = createTRPCClient<SchemaBuilderApi>({
-      url: `${serviceConfig.endpoint}/trpc`,
-      fetch,
-      headers: {
-        'x-request-id': context.requestId,
-      },
+    this.schemaService = createTRPCProxyClient<SchemaBuilderApi>({
+      links: [
+        httpLink({
+          url: `${serviceConfig.endpoint}/trpc`,
+          fetch,
+          headers: {
+            'x-request-id': context.requestId,
+          },
+        }),
+      ],
     });
   }
 
@@ -55,7 +59,7 @@ export class FederationOrchestrator implements Orchestrator {
   async validate(schemas: SchemaObject[], external: ExternalComposition) {
     this.logger.debug('Validating Federated Schemas');
 
-    const result = await this.schemaService.mutation('validate', {
+    const result = await this.schemaService.validate.mutate({
       type: 'federation',
       schemas: schemas.map(s => ({
         raw: s.raw,
@@ -72,7 +76,7 @@ export class FederationOrchestrator implements Orchestrator {
     this.logger.debug('Building Federated Schemas');
 
     try {
-      const result = await this.schemaService.mutation('build', {
+      const result = await this.schemaService.build.mutate({
         type: 'federation',
         schemas: schemas.map(s => ({
           raw: s.raw,
@@ -95,7 +99,7 @@ export class FederationOrchestrator implements Orchestrator {
   async supergraph(schemas: SchemaObject[], external: ExternalComposition): Promise<string | null> {
     this.logger.debug('Generating Federated Supergraph');
 
-    const result = await this.schemaService.mutation('supergraph', {
+    const result = await this.schemaService.supergraph.mutate({
       type: 'federation',
       schemas: schemas.map(s => ({
         raw: s.raw,
