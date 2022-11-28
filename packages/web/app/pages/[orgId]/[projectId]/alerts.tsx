@@ -1,4 +1,4 @@
-import { ReactElement, useCallback, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useMutation, useQuery } from 'urql';
 
 import { authenticated } from '@/components/authenticated-container';
@@ -15,7 +15,7 @@ import {
   ProjectFieldsFragment,
 } from '@/graphql';
 import { ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useRouteSelector, useToggle } from '@/lib/hooks';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const channelAlertsColumns = [
@@ -44,10 +44,7 @@ const Channels = (): ReactElement => {
     },
     requestPolicy: 'cache-and-network',
   });
-  const [isModalOpen, setModalOpen] = useState(false);
-  const toggleModalOpen = useCallback(() => {
-    setModalOpen(prevOpen => !prevOpen);
-  }, []);
+  const [isModalOpen, toggleModalOpen] = useToggle();
   const [mutation, mutate] = useMutation(DeleteAlertChannelsDocument);
 
   const channelAlerts = channelAlertsQuery.data?.alertChannels || [];
@@ -120,10 +117,7 @@ const Page = (props: {
   });
   const [checked, setChecked] = useState<string[]>([]);
   const router = useRouteSelector();
-  const [isModalOpen, setModalOpen] = useState(false);
-  const toggleModalOpen = useCallback(() => {
-    setModalOpen(prevOpen => !prevOpen);
-  }, []);
+  const [isModalOpen, toggleModalOpen] = useToggle();
   const [mutation, mutate] = useMutation(DeleteAlertsDocument);
   const [alertsQuery] = useQuery({
     query: AlertsDocument,

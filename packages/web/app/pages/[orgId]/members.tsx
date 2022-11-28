@@ -242,9 +242,9 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
   });
 
   const [checked, setChecked] = useState<string[]>([]);
-  const [selectedMemberId, setSelectedMemberId] = useState<string>('');
-  const [isPermissionsModalOpen, togglePermissionsModalOpen] = useToggle(false);
-  const [isDeleteMembersModalOpen, toggleDeleteMembersModalOpen] = useToggle(false);
+  const [selectedMemberId, setSelectedMemberId] = useState('');
+  const [isPermissionsModalOpen, togglePermissionsModalOpen] = useToggle();
+  const [isDeleteMembersModalOpen, toggleDeleteMembersModalOpen] = useToggle();
 
   const [meQuery] = useQuery({ query: MeDocument });
   const router = useRouteSelector();

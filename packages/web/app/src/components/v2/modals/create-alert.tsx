@@ -5,7 +5,7 @@ import * as Yup from 'yup';
 
 import { Button, Heading, Modal, Select } from '@/components/v2';
 import { AddAlertDocument, AlertChannelsDocument, AlertType, TargetsDocument } from '@/graphql';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useRouteSelector } from '@/lib/hooks';
 
 export const CreateAlertModal = ({
   isOpen,

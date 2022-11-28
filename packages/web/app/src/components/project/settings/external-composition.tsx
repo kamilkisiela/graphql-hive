@@ -5,7 +5,7 @@ import * as Yup from 'yup';
 
 import { Button, Card, Heading, Input, Spinner, Switch } from '@/components/v2';
 import { OrganizationFieldsFragment, ProjectFieldsFragment } from '@/graphql';
-import { useNotifications } from '@/lib/hooks/use-notifications';
+import { useNotifications } from '@/lib/hooks';
 
 export const ExternalCompositionForm_EnableMutation = gql(`
   mutation ExternalCompositionForm_EnableMutation($input: EnableExternalSchemaCompositionInput!) {

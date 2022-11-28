@@ -8,30 +8,30 @@ overrides:
   ts-node: 10.9.1
 
 patchedDependencies:
-  bullmq@1.81.4:
-    hash: d7likfulu5mfjaaerbpls6og24
-    path: patches/bullmq@1.81.4.patch
+  '@tgriesser/schemats@7.0.0':
+    hash: u3kbucfchakklx3sci2vh6wjau
+    path: patches/@tgriesser__schemats@7.0.0.patch
   '@n1ru4l/dockest@2.1.0-rc.6':
     hash: 2borp2lvtycfyctncvbphkqq2a
     path: patches/@n1ru4l__dockest@2.1.0-rc.6.patch
+  '@theguild/buddy@0.1.0':
+    hash: by7lpfnfs364rrj52jl5kihtv4
+    path: patches/@theguild__buddy@0.1.0.patch
+  bullmq@1.81.4:
+    hash: d7likfulu5mfjaaerbpls6og24
+    path: patches/bullmq@1.81.4.patch
   mjml-core@4.13.0:
     hash: zxxsxbqejjmcwuzpigutzzq6wa
     path: patches/mjml-core@4.13.0.patch
   slonik@30.1.2:
     hash: wg2hxbo7txnklmvja4aeqnygfi
     path: patches/slonik@30.1.2.patch
-  bob-the-bundler@4.0.0:
-    hash: sum6gc2cezfosivdgsdg22qyja
-    path: patches/bob-the-bundler@4.0.0.patch
   atomic-sleep@1.0.0:
     hash: ofrh3divoxil53fpajpmtnq43q
     path: patches/atomic-sleep@1.0.0.patch
-  '@tgriesser/schemats@7.0.0':
-    hash: u3kbucfchakklx3sci2vh6wjau
-    path: patches/@tgriesser__schemats@7.0.0.patch
-  '@theguild/buddy@0.1.0':
-    hash: by7lpfnfs364rrj52jl5kihtv4
-    path: patches/@theguild__buddy@0.1.0.patch
+  bob-the-bundler@4.0.0:
+    hash: sum6gc2cezfosivdgsdg22qyja
+    path: patches/bob-the-bundler@4.0.0.patch
   oclif@3.2.25:
     hash: zdmnkkzcdbpcmhe6nuh2wxowhi
     path: patches/oclif@3.2.25.patch
@@ -984,7 +984,7 @@ importers:
       eslint-plugin-tailwindcss: 3.6.2
       formik: 2.2.9
       framer-motion: 4.1.17
-      graphiql: 1.7.2
+      graphiql: 2.2.0
       graphql: 16.6.0
       hyperid: 2.3.1
       immer: 9.0.16
@@ -1065,7 +1065,7 @@ importers:
       echarts-for-react: 3.0.2_echarts@5.3.2+react@17.0.2
       formik: 2.2.9_react@17.0.2
       framer-motion: 4.1.17_sfoxds7t5ydpegc3knd667wn6m
-      graphiql: 1.7.2_4acpsgwrblrf7yma4ztoevvkgq
+      graphiql: 2.2.0_yw6veynvoxc2n44gl6g5u6zfru
       graphql: 16.6.0
       hyperid: 2.3.1
       immer: 9.0.16
@@ -4702,8 +4702,39 @@ packages:
       react-dom: 18.2.0_react@18.2.0
     dev: false
 
-  /@graphiql/toolkit/0.4.5_graphql@16.6.0:
-    resolution: {integrity: sha512-QXuuMSSK/0GfBS7tltrGZdyhIvm6oe9TK4VW9pfa8dALYttpzyJ64Q4Sx9I1Ng++yOMJWziM/ksa043zkNHsjQ==}
+  /@graphiql/react/0.15.0_yw6veynvoxc2n44gl6g5u6zfru:
+    resolution: {integrity: sha512-kJqkdf6d4Cck05Wt5yCDZXWfs7HZgcpuoWq/v8nOa698qVaNMM3qdG4CpRsZEexku0DSSJzWWuanxd5x+sRcFg==}
+    peerDependencies:
+      graphql: ^15.5.0 || ^16.0.0
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+    dependencies:
+      '@graphiql/toolkit': 0.8.0_graphql@16.6.0
+      '@reach/combobox': 0.17.0_sfoxds7t5ydpegc3knd667wn6m
+      '@reach/dialog': 0.17.0_k2mvpji5i2ojml6m4ftklg47pa
+      '@reach/listbox': 0.17.0_sfoxds7t5ydpegc3knd667wn6m
+      '@reach/menu-button': 0.17.0_sfoxds7t5ydpegc3knd667wn6m
+      '@reach/tooltip': 0.17.0_sfoxds7t5ydpegc3knd667wn6m
+      '@reach/visually-hidden': 0.17.0_sfoxds7t5ydpegc3knd667wn6m
+      codemirror: 5.65.9
+      codemirror-graphql: 2.0.2_jei7j5ousrsupd5srb5vzlhguq
+      copy-to-clipboard: 3.3.2
+      graphql: 16.6.0
+      graphql-language-service: 5.1.0_graphql@16.6.0
+      markdown-it: 12.3.2
+      react: 17.0.2
+      react-dom: 17.0.2_react@17.0.2
+      set-value: 4.1.0
+    transitivePeerDependencies:
+      - '@codemirror/language'
+      - '@types/node'
+      - '@types/react'
+      - graphql-ws
+      - react-is
+    dev: false
+
+  /@graphiql/toolkit/0.6.0_graphql@16.6.0:
+    resolution: {integrity: sha512-mbAwbt4lw2bFp9QW3NLVmh/r/ymczlcqvXk1HfvuC7Ma4h0yzrJiQauJyh1/gF5kjqevcRSquvP/YQJSvh1u6w==}
     peerDependencies:
       graphql: ^15.5.0 || ^16.0.0
       graphql-ws: '>= 4.5.0'
@@ -4715,11 +4746,14 @@ packages:
       - '@types/node'
     dev: false
 
-  /@graphiql/toolkit/0.6.0_graphql@16.6.0:
-    resolution: {integrity: sha512-mbAwbt4lw2bFp9QW3NLVmh/r/ymczlcqvXk1HfvuC7Ma4h0yzrJiQauJyh1/gF5kjqevcRSquvP/YQJSvh1u6w==}
+  /@graphiql/toolkit/0.8.0_graphql@16.6.0:
+    resolution: {integrity: sha512-DbMFhEKejpPzB6k8W3Mj+Rl8geXiw49USDF9Wdi06EEk1XLVh1iebDqveYY+4lViITsV4+BeGikxlqi8umfP4g==}
     peerDependencies:
       graphql: ^15.5.0 || ^16.0.0
       graphql-ws: '>= 4.5.0'
+    peerDependenciesMeta:
+      graphql-ws:
+        optional: true
     dependencies:
       '@n1ru4l/push-pull-async-iterable-iterator': 3.2.0
       graphql: 16.6.0
@@ -8454,6 +8488,174 @@ packages:
       tslib: 2.4.1
     dev: false
 
+  /@reach/auto-id/0.17.0_sfoxds7t5ydpegc3knd667wn6m:
+    resolution: {integrity: sha512-ud8iPwF52RVzEmkHq1twuqGuPA+moreumUHdtgvU3sr3/15BNhwp3KyDLrKKSz0LP1r3V4pSdyF9MbYM8BoSjA==}
+    peerDependencies:
+      react: ^16.8.0 || 17.x
+      react-dom: ^16.8.0 || 17.x
+    dependencies:
+      '@reach/utils': 0.17.0_sfoxds7t5ydpegc3knd667wn6m
+      react: 17.0.2
+      react-dom: 17.0.2_react@17.0.2
+      tslib: 2.4.1
+    dev: false
+
+  /@reach/combobox/0.17.0_sfoxds7t5ydpegc3knd667wn6m:
+    resolution: {integrity: sha512-2mYvU5agOBCQBMdlM4cri+P1BbNwp05P1OuDyc33xJSNiBG7BMy4+ZSHJ0X4fyle6rHwSgCAOCLOeWV1XUYjoQ==}
+    peerDependencies:
+      react: ^16.8.0 || 17.x
+      react-dom: ^16.8.0 || 17.x
+    dependencies:
+      '@reach/auto-id': 0.17.0_sfoxds7t5ydpegc3knd667wn6m
+      '@reach/descendants': 0.17.0_sfoxds7t5ydpegc3knd667wn6m
+      '@reach/popover': 0.17.0_sfoxds7t5ydpegc3knd667wn6m
+      '@reach/portal': 0.17.0_sfoxds7t5ydpegc3knd667wn6m
+      '@reach/utils': 0.17.0_sfoxds7t5ydpegc3knd667wn6m
+      prop-types: 15.8.1
+      react: 17.0.2
+      react-dom: 17.0.2_react@17.0.2
+      tiny-warning: 1.0.3
+      tslib: 2.4.1
+    dev: false
+
+  /@reach/descendants/0.17.0_sfoxds7t5ydpegc3knd667wn6m:
+    resolution: {integrity: sha512-c7lUaBfjgcmKFZiAWqhG+VnXDMEhPkI4kAav/82XKZD6NVvFjsQOTH+v3tUkskrAPV44Yuch0mFW/u5Ntifr7Q==}
+    peerDependencies:
+      react: ^16.8.0 || 17.x
+      react-dom: ^16.8.0 || 17.x
+    dependencies:
+      '@reach/utils': 0.17.0_sfoxds7t5ydpegc3knd667wn6m
+      react: 17.0.2
+      react-dom: 17.0.2_react@17.0.2
+      tslib: 2.4.1
+    dev: false
+
+  /@reach/dialog/0.17.0_k2mvpji5i2ojml6m4ftklg47pa:
+    resolution: {integrity: sha512-AnfKXugqDTGbeG3c8xDcrQDE4h9b/vnc27Sa118oQSquz52fneUeX9MeFb5ZEiBJK8T5NJpv7QUTBIKnFCAH5A==}
+    peerDependencies:
+      react: ^16.8.0 || 17.x
+      react-dom: ^16.8.0 || 17.x
+    dependencies:
+      '@reach/portal': 0.17.0_sfoxds7t5ydpegc3knd667wn6m
+      '@reach/utils': 0.17.0_sfoxds7t5ydpegc3knd667wn6m
+      prop-types: 15.8.1
+      react: 17.0.2
+      react-dom: 17.0.2_react@17.0.2
+      react-focus-lock: 2.9.2_hx2b44akkvgcgvvtmk7ds2qk6q
+      react-remove-scroll: 2.5.5_hx2b44akkvgcgvvtmk7ds2qk6q
+      tslib: 2.4.1
+    transitivePeerDependencies:
+      - '@types/react'
+    dev: false
+
+  /@reach/dropdown/0.17.0_sfoxds7t5ydpegc3knd667wn6m:
+    resolution: {integrity: sha512-qBTIGInhxtPHtdj4Pl2XZgZMz3e37liydh0xR3qc48syu7g71sL4nqyKjOzThykyfhA3Pb3/wFgsFJKGTSdaig==}
+    peerDependencies:
+      react: ^16.8.0 || 17.x
+      react-dom: ^16.8.0 || 17.x
+    dependencies:
+      '@reach/auto-id': 0.17.0_sfoxds7t5ydpegc3knd667wn6m
+      '@reach/descendants': 0.17.0_sfoxds7t5ydpegc3knd667wn6m
+      '@reach/popover': 0.17.0_sfoxds7t5ydpegc3knd667wn6m
+      '@reach/utils': 0.17.0_sfoxds7t5ydpegc3knd667wn6m
+      react: 17.0.2
+      react-dom: 17.0.2_react@17.0.2
+      tslib: 2.4.1
+    dev: false
+
+  /@reach/listbox/0.17.0_sfoxds7t5ydpegc3knd667wn6m:
+    resolution: {integrity: sha512-AMnH1P6/3VKy2V/nPb4Es441arYR+t4YRdh9jdcFVrCOD6y7CQrlmxsYjeg9Ocdz08XpdoEBHM3PKLJqNAUr7A==}
+    peerDependencies:
+      react: ^16.8.0 || 17.x
+      react-dom: ^16.8.0 || 17.x
+    dependencies:
+      '@reach/auto-id': 0.17.0_sfoxds7t5ydpegc3knd667wn6m
+      '@reach/descendants': 0.17.0_sfoxds7t5ydpegc3knd667wn6m
+      '@reach/machine': 0.17.0_sfoxds7t5ydpegc3knd667wn6m
+      '@reach/popover': 0.17.0_sfoxds7t5ydpegc3knd667wn6m
+      '@reach/utils': 0.17.0_sfoxds7t5ydpegc3knd667wn6m
+      prop-types: 15.8.1
+      react: 17.0.2
+      react-dom: 17.0.2_react@17.0.2
+    dev: false
+
+  /@reach/machine/0.17.0_sfoxds7t5ydpegc3knd667wn6m:
+    resolution: {integrity: sha512-9EHnuPgXzkbRENvRUzJvVvYt+C2jp7PGN0xon7ffmKoK8rTO6eA/bb7P0xgloyDDQtu88TBUXKzW0uASqhTXGA==}
+    peerDependencies:
+      react: ^16.8.0 || 17.x
+      react-dom: ^16.8.0 || 17.x
+    dependencies:
+      '@reach/utils': 0.17.0_sfoxds7t5ydpegc3knd667wn6m
+      '@xstate/fsm': 1.4.0
+      react: 17.0.2
+      react-dom: 17.0.2_react@17.0.2
+      tslib: 2.4.1
+    dev: false
+
+  /@reach/menu-button/0.17.0_sfoxds7t5ydpegc3knd667wn6m:
+    resolution: {integrity: sha512-YyuYVyMZKamPtivoEI6D0UEILYH3qZtg4kJzEAuzPmoR/aHN66NZO75Fx0gtjG1S6fZfbiARaCOZJC0VEiDOtQ==}
+    peerDependencies:
+      react: ^16.8.0 || 17.x
+      react-dom: ^16.8.0 || 17.x
+      react-is: ^16.8.0 || 17.x
+    dependencies:
+      '@reach/dropdown': 0.17.0_sfoxds7t5ydpegc3knd667wn6m
+      '@reach/popover': 0.17.0_sfoxds7t5ydpegc3knd667wn6m
+      '@reach/utils': 0.17.0_sfoxds7t5ydpegc3knd667wn6m
+      prop-types: 15.8.1
+      react: 17.0.2
+      react-dom: 17.0.2_react@17.0.2
+      tiny-warning: 1.0.3
+      tslib: 2.4.1
+    dev: false
+
+  /@reach/observe-rect/1.2.0:
+    resolution: {integrity: sha512-Ba7HmkFgfQxZqqaeIWWkNK0rEhpxVQHIoVyW1YDSkGsGIXzcaW4deC8B0pZrNSSyLTdIk7y+5olKt5+g0GmFIQ==}
+    dev: false
+
+  /@reach/popover/0.17.0_sfoxds7t5ydpegc3knd667wn6m:
+    resolution: {integrity: sha512-yYbBF4fMz4Ml4LB3agobZjcZ/oPtPsNv70ZAd7lEC2h7cvhF453pA+zOBGYTPGupKaeBvgAnrMjj7RnxDU5hoQ==}
+    peerDependencies:
+      react: ^16.8.0 || 17.x
+      react-dom: ^16.8.0 || 17.x
+    dependencies:
+      '@reach/portal': 0.17.0_sfoxds7t5ydpegc3knd667wn6m
+      '@reach/rect': 0.17.0_sfoxds7t5ydpegc3knd667wn6m
+      '@reach/utils': 0.17.0_sfoxds7t5ydpegc3knd667wn6m
+      react: 17.0.2
+      react-dom: 17.0.2_react@17.0.2
+      tabbable: 4.0.0
+      tslib: 2.4.1
+    dev: false
+
+  /@reach/portal/0.17.0_sfoxds7t5ydpegc3knd667wn6m:
+    resolution: {integrity: sha512-+IxsgVycOj+WOeNPL2NdgooUdHPSY285wCtj/iWID6akyr4FgGUK7sMhRM9aGFyrGpx2vzr+eggbUmAVZwOz+A==}
+    peerDependencies:
+      react: ^16.8.0 || 17.x
+      react-dom: ^16.8.0 || 17.x
+    dependencies:
+      '@reach/utils': 0.17.0_sfoxds7t5ydpegc3knd667wn6m
+      react: 17.0.2
+      react-dom: 17.0.2_react@17.0.2
+      tiny-warning: 1.0.3
+      tslib: 2.4.1
+    dev: false
+
+  /@reach/rect/0.17.0_sfoxds7t5ydpegc3knd667wn6m:
+    resolution: {integrity: sha512-3YB7KA5cLjbLc20bmPkJ06DIfXSK06Cb5BbD2dHgKXjUkT9WjZaLYIbYCO8dVjwcyO3GCNfOmPxy62VsPmZwYA==}
+    peerDependencies:
+      react: ^16.8.0 || 17.x
+      react-dom: ^16.8.0 || 17.x
+    dependencies:
+      '@reach/observe-rect': 1.2.0
+      '@reach/utils': 0.17.0_sfoxds7t5ydpegc3knd667wn6m
+      prop-types: 15.8.1
+      react: 17.0.2
+      react-dom: 17.0.2_react@17.0.2
+      tiny-warning: 1.0.3
+      tslib: 2.4.1
+    dev: false
+
   /@reach/skip-nav/0.17.0_biqbaboplfbrettd7655fr4n2y:
     resolution: {integrity: sha512-wkkpQK3ffczzGHis6TaUvpOabuAL9n9Kh5vr4h56XPIJP3X77VcHUDk7MK3HbV1mTgamGxc9Hbd1sXKSWLu3yA==}
     peerDependencies:
@@ -8463,6 +8665,24 @@ packages:
       '@reach/utils': 0.17.0_biqbaboplfbrettd7655fr4n2y
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
+      tslib: 2.4.1
+    dev: false
+
+  /@reach/tooltip/0.17.0_sfoxds7t5ydpegc3knd667wn6m:
+    resolution: {integrity: sha512-HP8Blordzqb/Cxg+jnhGmWQfKgypamcYLBPlcx6jconyV5iLJ5m93qipr1giK7MqKT2wlsKWy44ZcOrJ+Wrf8w==}
+    peerDependencies:
+      react: ^16.8.0 || 17.x
+      react-dom: ^16.8.0 || 17.x
+    dependencies:
+      '@reach/auto-id': 0.17.0_sfoxds7t5ydpegc3knd667wn6m
+      '@reach/portal': 0.17.0_sfoxds7t5ydpegc3knd667wn6m
+      '@reach/rect': 0.17.0_sfoxds7t5ydpegc3knd667wn6m
+      '@reach/utils': 0.17.0_sfoxds7t5ydpegc3knd667wn6m
+      '@reach/visually-hidden': 0.17.0_sfoxds7t5ydpegc3knd667wn6m
+      prop-types: 15.8.1
+      react: 17.0.2
+      react-dom: 17.0.2_react@17.0.2
+      tiny-warning: 1.0.3
       tslib: 2.4.1
     dev: false
 
@@ -8491,8 +8711,32 @@ packages:
       tslib: 2.4.1
     dev: false
 
+  /@reach/utils/0.17.0_sfoxds7t5ydpegc3knd667wn6m:
+    resolution: {integrity: sha512-M5y8fCBbrWeIsxedgcSw6oDlAMQDkl5uv3VnMVJ7guwpf4E48Xlh1v66z/1BgN/WYe2y8mB/ilFD2nysEfdGeA==}
+    peerDependencies:
+      react: ^16.8.0 || 17.x
+      react-dom: ^16.8.0 || 17.x
+    dependencies:
+      react: 17.0.2
+      react-dom: 17.0.2_react@17.0.2
+      tiny-warning: 1.0.3
+      tslib: 2.4.1
+    dev: false
+
   /@reach/visually-hidden/0.13.2_sfoxds7t5ydpegc3knd667wn6m:
     resolution: {integrity: sha512-sPZwNS0/duOuG0mYwE5DmgEAzW9VhgU3aIt1+mrfT/xiT9Cdncqke+kRBQgU708q/Ttm9tWsoHni03nn/SuPTQ==}
+    peerDependencies:
+      react: ^16.8.0 || 17.x
+      react-dom: ^16.8.0 || 17.x
+    dependencies:
+      prop-types: 15.8.1
+      react: 17.0.2
+      react-dom: 17.0.2_react@17.0.2
+      tslib: 2.4.1
+    dev: false
+
+  /@reach/visually-hidden/0.17.0_sfoxds7t5ydpegc3knd667wn6m:
+    resolution: {integrity: sha512-T6xF3Nv8vVnjVkGU6cm0+kWtvliLqPAo8PcZ+WxkKacZsaHTjaZb4v1PaCcyQHmuTNT/vtTVNOJLG0SjQOIb7g==}
     peerDependencies:
       react: ^16.8.0 || 17.x
       react-dom: ^16.8.0 || 17.x
@@ -10019,6 +10263,10 @@ packages:
 
   /@xobotyi/scrollbar-width/1.9.5:
     resolution: {integrity: sha512-N8tkAACJx2ww8vFMneJmaAgmjAG1tnVBZJRLRcx061tmsLRZHSEZSLuGWnwPtunsSLvSqXQ2wfp7Mgqg1I+2dQ==}
+    dev: false
+
+  /@xstate/fsm/1.4.0:
+    resolution: {integrity: sha512-uTHDeu2xI5E1IFwf37JFQM31RrH7mY7877RqPBS4ZqSNUwoLDuct8AhBWaXGnVizBAYyimVwgCyGa9z/NiRhXA==}
     dev: false
 
   /abbrev/1.1.1:
@@ -11809,10 +12057,10 @@ packages:
     resolution: {integrity: sha512-RpAVKQA5T63xEj6/giIbUEtZwJ4UFIc3ZtvEkiaUERylqe8xb5IvqcgOurZLahv93CLKfxcw5YI+DZcUBRyLXA==}
     engines: {node: '>=0.10.0'}
 
-  /codemirror-graphql/1.3.2_jei7j5ousrsupd5srb5vzlhguq:
-    resolution: {integrity: sha512-glwFsEVlH5TvxjSKGymZ1sNy37f3Mes58CB4fXOd0zy9+JzDL08Wti1b5ycy4vFZYghMDK1/Or/zRSjMAGtC2w==}
+  /codemirror-graphql/2.0.2_jei7j5ousrsupd5srb5vzlhguq:
+    resolution: {integrity: sha512-9c1cItR+8lG7thmTnDDQ3zI8YesNKiFCp2BnLFkYWCtdhSSuCUHebU/Vurew6ayyUl8MBCldNx3Ev66QAWM5Kw==}
     peerDependencies:
-      '@codemirror/language': ^0.20.0
+      '@codemirror/language': 6.0.0
       codemirror: ^5.65.3
       graphql: ^15.5.0 || ^16.0.0
     dependencies:
@@ -14142,10 +14390,6 @@ packages:
     engines: {node: '>=10'}
     dev: false
 
-  /escape-html/1.0.3:
-    resolution: {integrity: sha512-NiSupZ4OeuGwr68lGIeym/ksIZMJodUGOSCZ/FSnTxcrekbvqrgdUxlJOMpijaKZVjAJrWrGs/6Jy8OMuyj9ow==}
-    dev: false
-
   /escape-string-regexp/1.0.5:
     resolution: {integrity: sha512-vbRorB5FUQWvla16U8R/qgaFIya2qGzwDrNmCZuYKrbdSUMG6I1ZCGQRefkRVhuOkIGVne7BQ35DSfo1qvJqFg==}
     engines: {node: '>=0.8.0'}
@@ -14877,6 +15121,13 @@ packages:
     resolution: {integrity: sha512-XGozTsMPYkm+6b5QL3Z9wQcJjNYxp0CYn3U1gO7dwD6PAqU1SVWZxI9CCg3z+ml3YfqdPnrBehaBrnH2AGKbNA==}
     dev: false
 
+  /focus-lock/0.11.4:
+    resolution: {integrity: sha512-LzZWJcOBIcHslQ46N3SUu/760iLPSrUtp8omM4gh9du438V2CQdks8TcOu1yvmu2C68nVOBnl1WFiKGPbQ8L6g==}
+    engines: {node: '>=10'}
+    dependencies:
+      tslib: 2.4.1
+    dev: false
+
   /focus-lock/0.8.1:
     resolution: {integrity: sha512-/LFZOIo82WDsyyv7h7oc0MJF9ACOvDRdx9rWPZ2pgMfNWu/z8hQDBtOchuB/0BVLmuFOZjV02YwUVzNsWx/EzA==}
     engines: {node: '>=10'}
@@ -15418,29 +15669,27 @@ packages:
     resolution: {integrity: sha512-bzh50DW9kTPM00T8y4o8vQg89Di9oLJVLW/KaOGIXJWP/iqCN6WKYkbNOF04vFLJhwcpYUh9ydh/+5vpOqV4YQ==}
     dev: true
 
-  /graphiql/1.7.2_4acpsgwrblrf7yma4ztoevvkgq:
-    resolution: {integrity: sha512-ZgWBMQgDSDzVHwAOKUqG+ZL6jTmglGiH96o4qKnmpgfk+JDrrJpiEFEJbEhk8D/ZkKuXO9EZBrSfbGz3aoKerQ==}
+  /graphiql/2.2.0_yw6veynvoxc2n44gl6g5u6zfru:
+    resolution: {integrity: sha512-w1ujpCKMlkwkoUjeg0HpRiBBTm1WHAjHNkFv1TbMu6trjzz63mQ48GLZlmyQY1yhwmc+diCcvmmAt+AyvKLWWA==}
     peerDependencies:
       graphql: ^15.5.0 || ^16.0.0
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
-      '@graphiql/toolkit': 0.4.5_graphql@16.6.0
-      codemirror: 5.65.9
-      codemirror-graphql: 1.3.2_jei7j5ousrsupd5srb5vzlhguq
-      copy-to-clipboard: 3.3.2
-      dset: 3.1.2
+      '@graphiql/react': 0.15.0_yw6veynvoxc2n44gl6g5u6zfru
+      '@graphiql/toolkit': 0.8.0_graphql@16.6.0
       entities: 2.2.0
-      escape-html: 1.0.3
       graphql: 16.6.0
-      graphql-language-service: 5.0.6_graphql@16.6.0
+      graphql-language-service: 5.1.0_graphql@16.6.0
       markdown-it: 12.3.2
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
     transitivePeerDependencies:
       - '@codemirror/language'
       - '@types/node'
+      - '@types/react'
       - graphql-ws
+      - react-is
     dev: false
 
   /graphlib/2.1.8:
@@ -15605,6 +15854,17 @@ packages:
 
   /graphql-language-service/5.0.6_graphql@16.6.0:
     resolution: {integrity: sha512-FjE23aTy45Lr5metxCv3ZgSKEZOzN7ERR+OFC1isV5mHxI0Ob8XxayLTYjQKrs8b3kOpvgTYmSmu6AyXOzYslg==}
+    hasBin: true
+    peerDependencies:
+      graphql: ^15.5.0 || ^16.0.0
+    dependencies:
+      graphql: 16.6.0
+      nullthrows: 1.1.1
+      vscode-languageserver-types: 3.17.2
+    dev: false
+
+  /graphql-language-service/5.1.0_graphql@16.6.0:
+    resolution: {integrity: sha512-APffigZ/l2me6soek+Yq5Us3HBwmfw4vns4QoqsTePXkK3knVO8rn0uAC6PmTyglb1pmFFPbYaRIzW4wmcnnGQ==}
     hasBin: true
     peerDependencies:
       graphql: ^15.5.0 || ^16.0.0
@@ -16553,9 +16813,21 @@ packages:
     engines: {node: '>=12'}
     dev: false
 
+  /is-plain-object/2.0.4:
+    resolution: {integrity: sha512-h5PpgXkWitc38BBMYawTYMWJHFZJVnBquFE57xFpjB8pJFiF6gZ+bU+WyI/yqXiFR5mdLsgYNaPe8uao6Uv9Og==}
+    engines: {node: '>=0.10.0'}
+    dependencies:
+      isobject: 3.0.1
+    dev: false
+
   /is-plain-object/5.0.0:
     resolution: {integrity: sha512-VRSzKkbMm5jMDoKLbltAkFQ5Qr7VDiTFGXxYFXXowVj387GeGNOCsOH6Msy00SGZ3Fp84b1Naa1psqgcCIEP5Q==}
     engines: {node: '>=0.10.0'}
+
+  /is-primitive/3.0.1:
+    resolution: {integrity: sha512-GljRxhWvlCNRfZyORiH77FwdFwGcMO620o37EOYC0ORWdq+WYNVqW0w2Juzew4M+L81l6/QS3t5gkkihyRqv9w==}
+    engines: {node: '>=0.10.0'}
+    dev: false
 
   /is-reference/3.0.0:
     resolution: {integrity: sha512-Eo1W3wUoHWoCoVM4GVl/a+K0IgiqE5aIo4kJABFyMum1ZORlPkC+UC357sSQUL5w5QCE5kCC9upl75b7+7CY/Q==}
@@ -21687,6 +21959,25 @@ packages:
       - '@types/react'
     dev: false
 
+  /react-focus-lock/2.9.2_hx2b44akkvgcgvvtmk7ds2qk6q:
+    resolution: {integrity: sha512-5JfrsOKyA5Zn3h958mk7bAcfphr24jPoMoznJ8vaJF6fUrPQ8zrtEd3ILLOK8P5jvGxdMd96OxWNjDzATfR2qw==}
+    peerDependencies:
+      '@types/react': ^16.8.0 || ^17.0.0 || ^18.0.0
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+    dependencies:
+      '@babel/runtime': 7.19.4
+      '@types/react': 17.0.45
+      focus-lock: 0.11.4
+      prop-types: 15.8.1
+      react: 17.0.2
+      react-clientside-effect: 1.2.6_react@17.0.2
+      use-callback-ref: 1.3.0_hx2b44akkvgcgvvtmk7ds2qk6q
+      use-sidecar: 1.1.2_hx2b44akkvgcgvvtmk7ds2qk6q
+    dev: false
+
   /react-icons/4.3.1_react@17.0.2:
     resolution: {integrity: sha512-cB10MXLTs3gVuXimblAdI71jrJx8njrJZmNMEMC+sQu5B/BIOmlsAjskdqpn81y8UBVEGuHODd7/ci5DvoSzTQ==}
     peerDependencies:
@@ -22756,6 +23047,14 @@ packages:
     engines: {node: '>=6.9'}
     dev: false
 
+  /set-value/4.1.0:
+    resolution: {integrity: sha512-zTEg4HL0RwVrqcWs3ztF+x1vkxfm0lP+MQQFPiMJTKVceBwEV0A569Ou8l9IYQG8jOZdMVI1hGsc0tmeD2o/Lw==}
+    engines: {node: '>=11.0'}
+    dependencies:
+      is-plain-object: 2.0.4
+      is-primitive: 3.0.1
+    dev: false
+
   /setimmediate/1.0.5:
     resolution: {integrity: sha512-MATJdZp8sLqDl/68LfQmbP8zKPLQNV6BIZoIgrscFDQ+RsvK/BxeDQOgyxKKoh0y/8h3BqVFnCqQ/gd+reiIXA==}
 
@@ -23662,6 +23961,10 @@ packages:
       '@pkgr/utils': 2.3.1
       tslib: 2.4.1
     dev: true
+
+  /tabbable/4.0.0:
+    resolution: {integrity: sha512-H1XoH1URcBOa/rZZWxLxHCtOdVUEev+9vo5YdYhC9tCY4wnybX+VQrCYuy9ubkg69fCBxCONJOSLGfw0DWMffQ==}
+    dev: false
 
   /tabbable/6.0.1:
     resolution: {integrity: sha512-SYJSIgeyXW7EuX1ytdneO5e8jip42oHWg9xl/o3oTYhmXusZVgiA+VlPvjIN+kHii9v90AmzTZEBcsEvuAY+TA==}

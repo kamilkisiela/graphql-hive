@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useMutation } from 'urql';
 import { Tooltip } from '@chakra-ui/react';
 import { Button } from '@/components/v2';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useRouteSelector } from '@/lib/hooks';
 import { SchemaVersionFieldsFragment, UpdateSchemaVersionStatusDocument } from '@/graphql';
 
 export const MarkAsValid: React.FC<{

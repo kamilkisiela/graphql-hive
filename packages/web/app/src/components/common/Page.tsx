@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { FiTarget } from 'react-icons/fi';
 import { VscOrganization, VscFolder } from 'react-icons/vsc';
 import { useNavigation, Navigation, NavigationItem } from './Navigation';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useRouteSelector } from '@/lib/hooks';
 
 const PageContainer = tw.div`flex flex-col flex-1 overflow-y-auto relative`;
 

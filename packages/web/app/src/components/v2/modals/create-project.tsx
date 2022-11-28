@@ -6,7 +6,7 @@ import * as Yup from 'yup';
 
 import { Button, Heading, Input, Modal, ProjectTypes } from '@/components/v2';
 import { ProjectType } from '@/graphql';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useRouteSelector } from '@/lib/hooks';
 
 const CreateProjectMutation = gql(/* GraphQL */ `
   mutation CreateProject_CreateProject($input: CreateProjectInput!) {

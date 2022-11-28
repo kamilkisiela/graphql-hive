@@ -23,8 +23,7 @@ import { useDebouncedCallback } from 'use-debounce';
 
 import { Spinner } from '@/components/common/Spinner';
 import { DateRangeInput, OperationsStatsDocument, OperationStatsFieldsFragment } from '@/graphql';
-import { useFormattedNumber } from '@/lib/hooks/use-formatted-number';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useRouteSelector, useFormattedNumber } from '@/lib/hooks';
 
 const OperationsFilter: React.FC<{
   onClose(): void;

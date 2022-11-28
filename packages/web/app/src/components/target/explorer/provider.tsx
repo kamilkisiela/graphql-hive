@@ -1,6 +1,6 @@
 import React from 'react';
 import { formatISO, subDays } from 'date-fns';
-import { useLocalStorage } from '@/lib/hooks/use-local-storage';
+import { useLocalStorage } from '@/lib/hooks';
 
 export type PeriodOption = '365d' | '180d' | '90d' | '30d' | '14d' | '7d';
 export type Period = {

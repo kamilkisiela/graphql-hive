@@ -16,6 +16,7 @@ Developing Hive locally requires you to have the following software installed lo
 - In the root of the repo, run `nvm use` to use the same version of node as mentioned
 - Run `pnpm i` at the root to install all the dependencies and run the hooks
 - Run `pnpm setup` to create and apply migrations on the PostgreSQL database
+- Run `pnpm run --filter @hive/storage setup`
 - Run `pnpm generate` to generate the typings from the graphql files (use `pnpm graphql:generate` if
   you only need to run GraphQL Codegen)
 - Run `pnpm build` to build all services
@@ -93,7 +94,7 @@ We have a script to feed your local instance of Hive.
 Since we migrated from Auth0 to SuperTokens there is a compatibility layer for importing/migrating
 accounts from Auth0 to SuperTokens.
 
-By default you don't need to set this up and can just use SuperTokens locally. However, if you need
+By default, you don't need to set this up and can just use SuperTokens locally. However, if you need
 to test some stuff or fix the Auth0 -> SuperTokens migration flow you have to set up some stuff.
 
 1. Create your own Auth0 application
@@ -109,9 +110,9 @@ to test some stuff or fix the Auth0 -> SuperTokens migration flow you have to se
       1. This can be done from the "Auth Pipeline -> Rules" section on the left navigation bar.
          - [`https://manage.auth0.com/dashboard/<REGION>/<DOMAIN>/rules`](https://manage.auth0.com/dashboard/us/dev-azj17nyp/rules)
       2. Enter the following code:
-         ```javascript
+         ```js
          function (user, context, callback) {
-           var namespace = 'https://graphql-hive.com';
+           const namespace = 'https://graphql-hive.com';
            context.accessToken[namespace + '/metadata'] = user.user_metadata;
            context.idToken[namespace + '/metadata'] = user.user_metadata;
            context.accessToken[namespace + '/userinfo'] = {

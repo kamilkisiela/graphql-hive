@@ -1,4 +1,4 @@
-import { useNotifications } from '@/lib/hooks/use-notifications';
+import { useNotifications } from '@/lib/hooks';
 import { CopyIcon } from './icon';
 
 export const InlineCode = (props: { content: string }) => {

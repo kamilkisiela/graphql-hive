@@ -15,7 +15,7 @@ import {
 import 'twin.macro';
 import { OrganizationsDocument, OrganizationsQuery, OrganizationType } from '@/graphql';
 import { OrganizationCreator } from './Creator';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useRouteSelector } from '@/lib/hooks';
 
 export const OrganizationSwitcher: React.FC<{
   organizationId: string;

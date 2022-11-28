@@ -1,4 +1,4 @@
-import { ReactElement, useCallback, useState } from 'react';
+import { ReactElement } from 'react';
 import { createGraphiQLFetcher } from '@graphiql/toolkit';
 import { GraphiQL } from 'graphiql';
 
@@ -7,7 +7,7 @@ import { TargetLayout } from '@/components/layouts';
 import { Button, Title } from '@/components/v2';
 import { HiveLogo, Link2Icon } from '@/components/v2/icon';
 import { ConnectLabModal } from '@/components/v2/modals/connect-lab';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useRouteSelector, useToggle } from '@/lib/hooks';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 import 'graphiql/graphiql.css';
 
@@ -19,12 +19,7 @@ const Page = ({ endpoint }: { endpoint: string }): ReactElement => {
       </p>
       <GraphiQL fetcher={createGraphiQLFetcher({ url: endpoint })}>
         <GraphiQL.Logo>
-          <HiveLogo className="h-6 w-6 brightness-0" />
-          <style jsx global>{`
-            .graphiql-container {
-              filter: invert(1);
-            }
-          `}</style>
+          <HiveLogo className="h-6 w-6" />
         </GraphiQL.Logo>
       </GraphiQL>
     </>
@@ -32,12 +27,9 @@ const Page = ({ endpoint }: { endpoint: string }): ReactElement => {
 };
 
 function LaboratoryPage(): ReactElement {
-  const [isModalOpen, setModalOpen] = useState(false);
-  const toggleModalOpen = useCallback(() => {
-    setModalOpen(prevOpen => !prevOpen);
-  }, []);
+  const [isModalOpen, toggleModalOpen] = useToggle();
   const router = useRouteSelector();
-  const endpoint = `${window.location.origin}/api/lab/${router.organizationId}/${router.projectId}/${router.targetId}`;
+  const endpoint = `${location.origin}/api/lab/${router.organizationId}/${router.projectId}/${router.targetId}`;
 
   return (
     <>

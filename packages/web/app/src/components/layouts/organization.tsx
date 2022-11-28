@@ -1,4 +1,4 @@
-import { ReactElement, ReactNode, useCallback, useEffect, useState } from 'react';
+import { ReactElement, ReactNode, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useQuery } from 'urql';
 import NextLink from 'next/link';
@@ -13,7 +13,7 @@ import {
   OrgBillingInfoFieldsFragment,
   OrgRateLimitFieldsFragment,
 } from '@/graphql';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useRouteSelector, useToggle } from '@/lib/hooks';
 import {
   canAccessOrganization,
   OrganizationAccessScope,
@@ -64,10 +64,7 @@ export function OrganizationLayout({
 >): ReactElement | null {
   const router = useRouteSelector();
   const { push } = useRouter();
-  const [isModalOpen, setModalOpen] = useState(false);
-  const toggleModalOpen = useCallback(() => {
-    setModalOpen(prevOpen => !prevOpen);
-  }, []);
+  const [isModalOpen, toggleModalOpen] = useToggle();
 
   const orgId = router.organizationId;
 

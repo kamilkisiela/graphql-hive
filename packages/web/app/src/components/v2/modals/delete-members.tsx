@@ -4,7 +4,7 @@ import { useMutation } from 'urql';
 import { Button, Heading, Modal } from '@/components/v2';
 import { TrashIcon } from '@/components/v2/icon';
 import { DeleteOrganizationMembersDocument } from '@/graphql';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useRouteSelector } from '@/lib/hooks';
 
 export const DeleteMembersModal = ({
   isOpen,
