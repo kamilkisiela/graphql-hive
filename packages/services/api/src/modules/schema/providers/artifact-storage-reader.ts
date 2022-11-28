@@ -31,7 +31,7 @@ export class ArtifactStorageReader {
   /** Generate a pre-signed url for reading an artifact from a bucket for a limited time period. */
   async generateArtifactReadUrl(
     targetId: string,
-    artifactType: 'sdl' | 'metadata' | 'services',
+    artifactType: 'sdl' | 'metadata' | 'services' | 'supergraph',
   ): Promise<string | null> {
     const key = buildArtifactStorageKey(targetId, artifactType);
 
