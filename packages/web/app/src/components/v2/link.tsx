@@ -1,4 +1,4 @@
-import { ReactElement, ReactNode } from 'react';
+import { ReactElement, ReactNode, ComponentProps } from 'react';
 import NextLink, { LinkProps } from 'next/link';
 import clsx from 'clsx';
 
@@ -11,6 +11,8 @@ export function Link({
   variant?: 'primary' | 'secondary';
   className?: string;
   children: ReactNode;
+  target?: ComponentProps<'a'>['target']
+  rel?: ComponentProps<'a'>['rel']
 }): ReactElement {
   return (
     <NextLink
