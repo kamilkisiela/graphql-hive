@@ -1,4 +1,5 @@
 import { Injectable, Scope } from 'graphql-modules';
+import { GraphQLError } from 'graphql';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { Logger } from '../../shared/providers/logger';
 import { Storage } from '../../shared/providers/storage';
@@ -29,7 +30,7 @@ export class AdminManager {
     const user = await this.authManager.getCurrentUser();
 
     if (!user.isAdmin) {
-      throw new Error('GO AWAY');
+      throw new GraphQLError('GO AWAY');
     }
 
     return this.storage.adminGetStats(daysLimit);
@@ -40,7 +41,7 @@ export class AdminManager {
     const user = await this.authManager.getCurrentUser();
 
     if (!user.isAdmin) {
-      throw new Error('GO AWAY');
+      throw new GraphQLError('GO AWAY');
     }
 
     const points = await this.operationsReader.adminOperationsOverTime({
@@ -87,6 +88,6 @@ export class AdminManager {
       }));
     }
 
-    throw new Error('Go away');
+    throw new GraphQLError('Go away');
   }
 }
