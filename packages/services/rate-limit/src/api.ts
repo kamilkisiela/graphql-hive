@@ -1,7 +1,9 @@
-import * as trpc from '@trpc/server';
+import { initTRPC } from '@trpc/server';
 import type { Limiter } from './limiter';
 import { z } from 'zod';
-import { inferProcedureInput, inferProcedureOutput } from '@trpc/server';
+import type { inferRouterInputs } from '@trpc/server';
+
+const t = initTRPC.context<Limiter>().create();
 
 export type RateLimitInput = z.infer<typeof VALIDATION>;
 
@@ -17,30 +19,22 @@ const VALIDATION = z
   })
   .required();
 
-export const rateLimitApiRouter = trpc
-  .router<Limiter>()
-  .query('getRetention', {
-    input: z
-      .object({
-        targetId: z.string().nonempty(),
-      })
-      .required(),
-    async resolve({ ctx, input }) {
+export const rateLimitApiRouter = t.router({
+  getRetention: t.procedure
+    .input(
+      z
+        .object({
+          targetId: z.string().nonempty(),
+        })
+        .required(),
+    )
+    .query(({ ctx, input }) => {
       return ctx.getRetention(input.targetId);
-    },
-  })
-  .query('checkRateLimit', {
-    input: VALIDATION,
-    async resolve({ ctx, input }) {
-      return ctx.checkLimit(input);
-    },
-  });
+    }),
+  checkRateLimit: t.procedure.input(VALIDATION).query(({ ctx, input }) => {
+    return ctx.checkLimit(input);
+  }),
+});
 
 export type RateLimitApi = typeof rateLimitApiRouter;
-export type RateLimitApiQuery = keyof RateLimitApi['_def']['queries'];
-export type RateLimitQueryOutput<TRouteKey extends RateLimitApiQuery> = inferProcedureOutput<
-  RateLimitApi['_def']['queries'][TRouteKey]
->;
-export type RateLimitQueryInput<TRouteKey extends RateLimitApiQuery> = inferProcedureInput<
-  RateLimitApi['_def']['queries'][TRouteKey]
->;
+export type RateLimitApiInput = inferRouterInputs<RateLimitApi>;

@@ -18,8 +18,8 @@ export interface Config {
   };
 }
 
-export interface Context {
+export type Context = {
   logger: FastifyLoggerInstance;
   errorHandler(message: string, error: Error, logger?: FastifyLoggerInstance | undefined): void;
   schedule(webhook: WebhookInput): Promise<Job<any, any, string>>;
-}
+};

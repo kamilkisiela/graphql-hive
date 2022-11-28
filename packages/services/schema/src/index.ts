@@ -9,7 +9,7 @@ import {
 import * as Sentry from '@sentry/node';
 import Redis from 'ioredis';
 import crypto from 'crypto';
-import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify/dist/trpc-server-adapters-fastify.cjs.js';
+import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
 import type { CreateFastifyContextOptions } from '@trpc/server/adapters/fastify';
 import { schemaBuilderApiRouter } from './api';
 import { env } from './environment';

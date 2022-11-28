@@ -1,10 +1,22 @@
-import * as trpc from '@trpc/server';
-import { inferProcedureInput } from '@trpc/server';
+import type { inferRouterInputs } from '@trpc/server';
+import { initTRPC } from '@trpc/server';
 import type { FastifyLoggerInstance } from 'fastify';
 import { z } from 'zod';
 import { buildCounter, supergraphCounter, validateCounter } from './metrics';
 import { pickOrchestrator } from './orchestrators';
 import { Redis } from 'ioredis';
+
+const t = initTRPC
+  .context<{
+    logger: FastifyLoggerInstance;
+    redis: Redis;
+    decrypt(value: string): string;
+    broker: {
+      endpoint: string;
+      signature: string;
+    } | null;
+  }>()
+  .create();
 
 const TYPE_VALIDATION = z.enum(['single', 'federation', 'stitching']);
 const SCHEMA_OBJECT_VALIDATION = {
@@ -19,32 +31,25 @@ const EXTERNAL_VALIDATION = z
   })
   .nullable();
 
-export const schemaBuilderApiRouter = trpc
-  .router<{
-    logger: FastifyLoggerInstance;
-    redis: Redis;
-    decrypt(value: string): string;
-    broker: {
-      endpoint: string;
-      signature: string;
-    } | null;
-  }>()
-  .mutation('supergraph', {
-    input: z
-      .object({
-        type: TYPE_VALIDATION,
-        schemas: z.array(
-          z
-            .object({
-              ...SCHEMA_OBJECT_VALIDATION,
-              url: z.string().nullish(),
-            })
-            .required(),
-        ),
-        external: EXTERNAL_VALIDATION.optional(),
-      })
-      .required(),
-    async resolve({ ctx, input }) {
+export const schemaBuilderApiRouter = t.router({
+  supergraph: t.procedure
+    .input(
+      z
+        .object({
+          type: TYPE_VALIDATION,
+          schemas: z.array(
+            z
+              .object({
+                ...SCHEMA_OBJECT_VALIDATION,
+                url: z.string().nullish(),
+              })
+              .required(),
+          ),
+          external: EXTERNAL_VALIDATION.optional(),
+        })
+        .required(),
+    )
+    .mutation(async ({ ctx, input }) => {
       supergraphCounter
         .labels({
           type: input.type,
@@ -59,17 +64,18 @@ export const schemaBuilderApiRouter = trpc
             }
           : null,
       );
-    },
-  })
-  .mutation('validate', {
-    input: z
-      .object({
-        type: TYPE_VALIDATION,
-        schemas: SCHEMAS_VALIDATION,
-        external: EXTERNAL_VALIDATION,
-      })
-      .required(),
-    async resolve({ ctx, input }) {
+    }),
+  validate: t.procedure
+    .input(
+      z
+        .object({
+          type: TYPE_VALIDATION,
+          schemas: SCHEMAS_VALIDATION,
+          external: EXTERNAL_VALIDATION,
+        })
+        .required(),
+    )
+    .mutation(async ({ ctx, input }) => {
       validateCounter
         .labels({
           type: input.type,
@@ -84,17 +90,18 @@ export const schemaBuilderApiRouter = trpc
             }
           : null,
       );
-    },
-  })
-  .mutation('build', {
-    input: z
-      .object({
-        type: TYPE_VALIDATION,
-        schemas: SCHEMAS_VALIDATION,
-        external: EXTERNAL_VALIDATION,
-      })
-      .required(),
-    async resolve({ ctx, input }) {
+    }),
+  build: t.procedure
+    .input(
+      z
+        .object({
+          type: TYPE_VALIDATION,
+          schemas: SCHEMAS_VALIDATION,
+          external: EXTERNAL_VALIDATION,
+        })
+        .required(),
+    )
+    .mutation(async ({ ctx, input }) => {
       buildCounter
         .labels({
           type: input.type,
@@ -109,11 +116,8 @@ export const schemaBuilderApiRouter = trpc
             }
           : null,
       );
-    },
-  });
+    }),
+});
 
 export type SchemaBuilderApi = typeof schemaBuilderApiRouter;
-export type SchemaBuilderApiMutate = keyof SchemaBuilderApi['_def']['mutations'];
-
-export type SchemaBuilderMutationInput<TRouteKey extends SchemaBuilderApiMutate> =
-  inferProcedureInput<SchemaBuilderApi['_def']['mutations'][TRouteKey]>;
+export type SchemaBuilderApiInput = inferRouterInputs<SchemaBuilderApi>;

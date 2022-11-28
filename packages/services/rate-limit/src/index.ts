@@ -9,7 +9,7 @@ import {
 } from '@hive/service-common';
 import { createRateLimiter } from './limiter';
 import { createConnectionString } from '@hive/storage';
-import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify/dist/trpc-server-adapters-fastify.cjs.js';
+import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
 import { rateLimitApiRouter } from './api';
 import { env } from './environment';
 

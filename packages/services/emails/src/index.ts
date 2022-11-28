@@ -8,7 +8,7 @@ import {
   startHeartbeats,
 } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
-import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify/dist/trpc-server-adapters-fastify.cjs.js';
+import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
 import type { CreateFastifyContextOptions } from '@trpc/server/adapters/fastify';
 import { emailsApiRouter } from './api';
 import { createScheduler } from './scheduler';

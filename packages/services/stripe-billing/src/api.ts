@@ -1,6 +1,6 @@
-import * as trpc from '@trpc/server';
+import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
+import { initTRPC } from '@trpc/server';
 import { z } from 'zod';
-import { inferProcedureInput, inferProcedureOutput } from '@trpc/server';
 import { createStorage } from '@hive/storage';
 import { Stripe } from 'stripe';
 import { addDays, startOfMonth } from 'date-fns';
@@ -16,18 +16,19 @@ export type Context = {
 
 export { Stripe as StripeTypes };
 
-export const stripeBillingApiRouter = trpc
-  .router<Context>()
-  .query('availablePrices', {
-    async resolve({ ctx }) {
-      return await ctx.stripeData$;
-    },
-  })
-  .query('invoices', {
-    input: z.object({
-      organizationId: z.string().nonempty(),
-    }),
-    async resolve({ ctx, input }) {
+const t = initTRPC.context<Context>().create();
+
+export const stripeBillingApiRouter = t.router({
+  availablePrices: t.procedure.query(async ({ ctx }) => {
+    return await ctx.stripeData$;
+  }),
+  invoices: t.procedure
+    .input(
+      z.object({
+        organizationId: z.string().nonempty(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
       const storage = await ctx.storage$;
       const organizationBillingRecord = await storage.getOrganizationBilling({
         organization: input.organizationId,
@@ -42,13 +43,14 @@ export const stripeBillingApiRouter = trpc
       });
 
       return invoices.data;
-    },
-  })
-  .query('upcomingInvoice', {
-    input: z.object({
-      organizationId: z.string().nonempty(),
     }),
-    async resolve({ ctx, input }) {
+  upcomingInvoice: t.procedure
+    .input(
+      z.object({
+        organizationId: z.string().nonempty(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
       const storage = await ctx.storage$;
       const organizationBillingRecord = await storage.getOrganizationBilling({
         organization: input.organizationId,
@@ -67,13 +69,14 @@ export const stripeBillingApiRouter = trpc
       } catch (e) {
         return null;
       }
-    },
-  })
-  .query('activeSubscription', {
-    input: z.object({
-      organizationId: z.string().nonempty(),
     }),
-    async resolve({ ctx, input }) {
+  activeSubscription: t.procedure
+    .input(
+      z.object({
+        organizationId: z.string().nonempty(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
       const storage = await ctx.storage$;
       const organizationBillingRecord = await storage.getOrganizationBilling({
         organization: input.organizationId,
@@ -112,19 +115,20 @@ export const stripeBillingApiRouter = trpc
         paymentMethod: paymentMethod.data[0] || null,
         subscription: actualSubscription,
       };
-    },
-  })
-  .mutation('syncOrganizationToStripe', {
-    input: z.object({
-      organizationId: z.string().nonempty(),
-      reserved: z
-        .object({
-          /** in millions, value 1 is actually 1_000_000 */
-          operations: z.number().nonnegative(),
-        })
-        .required(),
     }),
-    async resolve({ ctx, input }) {
+  syncOrganizationToStripe: t.procedure
+    .input(
+      z.object({
+        organizationId: z.string().nonempty(),
+        reserved: z
+          .object({
+            /** in millions, value 1 is actually 1_000_000 */
+            operations: z.number().nonnegative(),
+          })
+          .required(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
       const storage = await ctx.storage$;
       const [organizationBillingRecord, organization, stripePrices] = await Promise.all([
         storage.getOrganizationBilling({
@@ -170,13 +174,14 @@ export const stripeBillingApiRouter = trpc
           `Failed to sync subscription for organization: failed to find find active record`,
         );
       }
-    },
-  })
-  .mutation('cancelSubscriptionForOrganization', {
-    input: z.object({
-      organizationId: z.string().nonempty(),
     }),
-    async resolve({ ctx, input }) {
+  cancelSubscriptionForOrganization: t.procedure
+    .input(
+      z.object({
+        organizationId: z.string().nonempty(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
       const storage = await ctx.storage$;
       const organizationBillingRecord = await storage.getOrganizationBilling({
         organization: input.organizationId,
@@ -206,21 +211,22 @@ export const stripeBillingApiRouter = trpc
       });
 
       return response;
-    },
-  })
-  .mutation('createSubscriptionForOrganization', {
-    input: z.object({
-      paymentMethodId: z.string().nullish(),
-      organizationId: z.string().nonempty(),
-      couponCode: z.string().nullish(),
-      reserved: z
-        .object({
-          /** in millions, value 1 is actually 1_000_000 */
-          operations: z.number().nonnegative(),
-        })
-        .required(),
     }),
-    async resolve({ ctx, input }) {
+  createSubscriptionForOrganization: t.procedure
+    .input(
+      z.object({
+        paymentMethodId: z.string().nullish(),
+        organizationId: z.string().nonempty(),
+        couponCode: z.string().nullish(),
+        reserved: z
+          .object({
+            /** in millions, value 1 is actually 1_000_000 */
+            operations: z.number().nonnegative(),
+          })
+          .required(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
       const storage = await ctx.storage$;
       let organizationBillingRecord = await storage.getOrganizationBilling({
         organization: input.organizationId,
@@ -314,20 +320,10 @@ export const stripeBillingApiRouter = trpc
         stripeCustomer: customerId,
         stripeSubscription: subscription,
       };
-    },
-  });
+    }),
+});
 
 export type StripeBillingApi = typeof stripeBillingApiRouter;
 
-export type StripeBillingApiQuery = keyof StripeBillingApi['_def']['queries'];
-export type StripeBillingQueryOutput<TRouteKey extends StripeBillingApiQuery> =
-  inferProcedureOutput<StripeBillingApi['_def']['queries'][TRouteKey]>;
-export type StripeBillingQueryInput<TRouteKey extends StripeBillingApiQuery> = inferProcedureInput<
-  StripeBillingApi['_def']['queries'][TRouteKey]
->;
-
-export type StripeBillingApiMutation = keyof StripeBillingApi['_def']['mutations'];
-export type StripeBillingMutationOutput<TRouteKey extends StripeBillingApiMutation> =
-  inferProcedureOutput<StripeBillingApi['_def']['mutations'][TRouteKey]>;
-export type StripeBillingMutationInput<TRouteKey extends StripeBillingApiMutation> =
-  inferProcedureInput<StripeBillingApi['_def']['mutations'][TRouteKey]>;
+export type StripeBillingApiInput = inferRouterInputs<StripeBillingApi>;
+export type StripeBillingApiOutput = inferRouterOutputs<StripeBillingApi>;
