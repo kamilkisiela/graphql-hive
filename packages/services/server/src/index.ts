@@ -341,7 +341,7 @@ export async function main() {
         const response = await artifactRouteHandler.handleNodeRequest(req);
 
         if (response === undefined) {
-          reply.status(404).send('Not found.'); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+          void reply.status(404).send('Not found.');
           return reply;
         }
 
