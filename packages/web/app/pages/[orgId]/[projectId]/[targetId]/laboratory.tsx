@@ -17,6 +17,12 @@ const Page = ({ endpoint }: { endpoint: string }): ReactElement => {
       <p className="mb-5 font-light text-gray-500">
         Experiment, mock and create live environment for your schema, without running any backend.
       </p>
+      <style global jsx>{`
+        body.graphiql-dark .graphiql-container {
+          --color-base: transparent;
+          --color-primary: 40, 89%, 60%;
+        }
+      `}</style>
       <GraphiQL fetcher={createGraphiQLFetcher({ url: endpoint })}>
         <GraphiQL.Logo>
           <HiveLogo className="h-6 w-6" />

@@ -7,6 +7,12 @@ import 'graphiql/graphiql.css';
 export default function DevPage(): ReactElement {
   return (
     <div className="mt-20 h-full w-full">
+      <style global jsx>{`
+        body.graphiql-dark .graphiql-container {
+          --color-base: transparent;
+          --color-primary: 40, 89%, 60%;
+        }
+      `}</style>
       {process.browser && (
         <GraphiQL fetcher={createGraphiQLFetcher({ url: `${location.origin}/api/proxy` })}>
           <GraphiQL.Logo>
