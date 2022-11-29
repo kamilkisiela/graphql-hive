@@ -14,7 +14,7 @@ import type { OrganizationAccessScope } from '../../auth/providers/organization-
 import type { TokensConfig } from './tokens';
 import { TOKENS_CONFIG } from './tokens';
 import type { TokensApi } from '@hive/tokens';
-import { createTRPCClient } from '@trpc/client';
+import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import { fetch } from '@whatwg-node/fetch';
 
 function maskToken(token: string) {
@@ -48,19 +48,23 @@ export class TokenStorage {
     @Inject(CONTEXT) context: GraphQLModules.ModuleContext,
   ) {
     this.logger = logger.child({ source: 'TokenStorage' });
-    this.tokensService = createTRPCClient<TokensApi>({
-      url: `${tokensConfig.endpoint}/trpc`,
-      fetch,
-      headers: {
-        'x-request-id': context.requestId,
-      },
+    this.tokensService = createTRPCProxyClient<TokensApi>({
+      links: [
+        httpLink({
+          url: `${tokensConfig.endpoint}/trpc`,
+          fetch,
+          headers: {
+            'x-request-id': context.requestId,
+          },
+        }),
+      ],
     });
   }
 
   async createToken(input: CreateTokenInput) {
     this.logger.debug('Creating new token (input=%o)', input);
 
-    const response = await this.tokensService.mutation('createToken', {
+    const response = await this.tokensService.createToken.mutate({
       name: input.name,
       target: input.target,
       project: input.project,
@@ -78,9 +82,7 @@ export class TokenStorage {
   ): Promise<readonly string[]> {
     this.logger.debug('Deleting tokens (input=%o)', input);
 
-    await Promise.all(
-      input.tokens.map(token => this.tokensService.mutation('deleteToken', { token })),
-    );
+    await Promise.all(input.tokens.map(token => this.tokensService.deleteToken.mutate({ token })));
 
     return input.tokens;
   }
@@ -88,8 +90,8 @@ export class TokenStorage {
   async invalidateTarget(input: TargetSelector) {
     this.logger.debug('Invalidating target tokens (input=%o)', input);
 
-    await this.tokensService
-      .mutation('invalidateTokenByTarget', {
+    await this.tokensService.invalidateTokenByTarget
+      .mutate({
         targetId: input.target,
       })
       .catch(error => {
@@ -100,8 +102,8 @@ export class TokenStorage {
   async invalidateProject(input: ProjectSelector) {
     this.logger.debug('Invalidating project tokens (input=%o)', input);
 
-    await this.tokensService
-      .mutation('invalidateTokenByProject', {
+    await this.tokensService.invalidateTokenByProject
+      .mutate({
         projectId: input.project,
       })
       .catch(error => {
@@ -112,8 +114,8 @@ export class TokenStorage {
   async invalidateOrganization(input: OrganizationSelector) {
     this.logger.debug('Invalidating organization tokens (input=%o)', input);
 
-    await this.tokensService
-      .mutation('invalidateTokenByOrganization', {
+    await this.tokensService.invalidateTokenByOrganization
+      .mutate({
         organizationId: input.organization,
       })
       .catch(error => {
@@ -124,7 +126,7 @@ export class TokenStorage {
   async getTokens(selector: TargetSelector) {
     this.logger.debug('Fetching tokens (selector=%o)', selector);
 
-    const response = await this.tokensService.query('targetTokens', {
+    const response = await this.tokensService.targetTokens.query({
       targetId: selector.target,
     });
 
@@ -141,7 +143,7 @@ export class TokenStorage {
     this.logger.debug('Fetching token (token=%s)', maskToken(token));
 
     try {
-      const tokenInfo = await this.tokensService.query('getToken', { token });
+      const tokenInfo = await this.tokensService.getToken.query({ token });
 
       if (!tokenInfo) {
         throw new Error('Token not found');

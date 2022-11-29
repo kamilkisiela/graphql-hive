@@ -7,7 +7,7 @@ import { SchemaBuildError } from './errors';
 import { SCHEMA_SERVICE_CONFIG } from './tokens';
 import type { SchemaServiceConfig } from './tokens';
 import { sentry } from '../../../../shared/sentry';
-import { createTRPCClient } from '@trpc/client';
+import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import { fetch } from '@whatwg-node/fetch';
 import type { SchemaBuilderApi } from '@hive/schema';
 
@@ -25,12 +25,16 @@ export class SingleOrchestrator implements Orchestrator {
     @Inject(CONTEXT) context: GraphQLModules.ModuleContext,
   ) {
     this.logger = logger.child({ service: 'SingleOrchestrator' });
-    this.schemaService = createTRPCClient<SchemaBuilderApi>({
-      url: `${serviceConfig.endpoint}/trpc`,
-      fetch,
-      headers: {
-        'x-request-id': context.requestId,
-      },
+    this.schemaService = createTRPCProxyClient<SchemaBuilderApi>({
+      links: [
+        httpLink({
+          url: `${serviceConfig.endpoint}/trpc`,
+          fetch,
+          headers: {
+            'x-request-id': context.requestId,
+          },
+        }),
+      ],
     });
   }
 
@@ -46,7 +50,7 @@ export class SingleOrchestrator implements Orchestrator {
       throw new HiveError('too many schemas');
     }
 
-    const result = await this.schemaService.mutation('validate', {
+    const result = await this.schemaService.validate.mutate({
       type: 'single',
       schemas: schemas.map(s => ({
         raw: s.raw,
@@ -68,7 +72,7 @@ export class SingleOrchestrator implements Orchestrator {
         throw new HiveError('too many schemas');
       }
 
-      const result = await this.schemaService.mutation('build', {
+      const result = await this.schemaService.build.mutate({
         type: 'single',
         schemas: schemas.map(s => ({
           raw: s.raw,

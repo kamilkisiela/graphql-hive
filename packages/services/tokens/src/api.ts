@@ -1,6 +1,6 @@
 import { createErrorHandler, metrics } from '@hive/service-common';
-import * as trpc from '@trpc/server';
-import { inferProcedureInput, inferProcedureOutput } from '@trpc/server';
+import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
+import { initTRPC } from '@trpc/server';
 import type { FastifyLoggerInstance } from 'fastify';
 import { z } from 'zod';
 import { useCache } from './cache';
@@ -82,64 +82,59 @@ export type Context = {
   errorCachingInterval: number;
 };
 
-export const tokensApiRouter = trpc
-  .router<Context>()
-  .middleware(async ({ path, next }) => {
-    const stopTimer = httpRequestDuration.startTimer({ path });
-    httpRequests.inc({ path });
+const t = initTRPC.context<Context>().create();
+
+const prometheusMiddleware = t.middleware(async ({ next, path }) => {
+  const stopTimer = httpRequestDuration.startTimer({ path });
+  httpRequests.inc({ path });
+  try {
+    return await next();
+  } finally {
+    stopTimer();
+  }
+});
+
+const procedure = t.procedure.use(prometheusMiddleware);
+
+export const tokensApiRouter = t.router({
+  targetTokens: procedure.input(TARGET_VALIDATION).query(async ({ ctx, input }) => {
     try {
-      return await next();
-    } finally {
-      stopTimer();
+      const storage = await ctx.getStorage();
+
+      return await storage.readTarget(input.targetId);
+    } catch (error) {
+      ctx.errorHandler('Failed to get tokens of a target', error as Error);
+
+      throw error;
     }
-  })
-  .query('targetTokens', {
-    input: TARGET_VALIDATION,
-    async resolve({ ctx, input }) {
-      try {
-        const storage = await ctx.getStorage();
+  }),
+  invalidateTokenByTarget: procedure.input(TARGET_VALIDATION).mutation(async ({ ctx, input }) => {
+    try {
+      const storage = await ctx.getStorage();
+      storage.invalidateTarget(input.targetId);
 
-        return await storage.readTarget(input.targetId);
-      } catch (error) {
-        ctx.errorHandler('Failed to get tokens of a target', error as Error);
+      return true;
+    } catch (error) {
+      ctx.errorHandler('Failed to invalidate tokens of a target', error as Error);
 
-        throw error;
-      }
-    },
-  })
-  .mutation('invalidateTokenByTarget', {
-    input: TARGET_VALIDATION,
-    async resolve({ ctx, input }) {
-      try {
-        const storage = await ctx.getStorage();
-        storage.invalidateTarget(input.targetId);
+      throw error;
+    }
+  }),
+  invalidateTokenByProject: procedure.input(PROJECT_VALIDATION).mutation(async ({ ctx, input }) => {
+    try {
+      const storage = await ctx.getStorage();
+      storage.invalidateProject(input.projectId);
 
-        return true;
-      } catch (error) {
-        ctx.errorHandler('Failed to invalidate tokens of a target', error as Error);
+      return true;
+    } catch (error) {
+      ctx.errorHandler('Failed to invalidate tokens of a project', error as Error);
 
-        throw error;
-      }
-    },
-  })
-  .mutation('invalidateTokenByProject', {
-    input: PROJECT_VALIDATION,
-    async resolve({ ctx, input }) {
-      try {
-        const storage = await ctx.getStorage();
-        storage.invalidateProject(input.projectId);
-
-        return true;
-      } catch (error) {
-        ctx.errorHandler('Failed to invalidate tokens of a project', error as Error);
-
-        throw error;
-      }
-    },
-  })
-  .mutation('invalidateTokenByOrganization', {
-    input: ORG_VALIDATION,
-    async resolve({ ctx, input }) {
+      throw error;
+    }
+  }),
+  invalidateTokenByOrganization: procedure
+    .input(ORG_VALIDATION)
+    .mutation(async ({ ctx, input }) => {
       try {
         const storage = await ctx.getStorage();
         storage.invalidateProject(input.organizationId);
@@ -150,19 +145,20 @@ export const tokensApiRouter = trpc
 
         throw error;
       }
-    },
-  })
-  .mutation('createToken', {
-    input: z
-      .object({
-        name: z.string().nonempty(),
-        target: z.string().nonempty(),
-        project: z.string().nonempty(),
-        organization: z.string().nonempty(),
-        scopes: z.array(z.string().nonempty()),
-      })
-      .required(),
-    async resolve({ ctx, input }) {
+    }),
+  createToken: procedure
+    .input(
+      z
+        .object({
+          name: z.string().nonempty(),
+          target: z.string().nonempty(),
+          project: z.string().nonempty(),
+          organization: z.string().nonempty(),
+          scopes: z.array(z.string().nonempty()),
+        })
+        .required(),
+    )
+    .mutation(async ({ ctx, input }) => {
       try {
         const { target, project, organization, name, scopes } = input;
         const storage = await ctx.getStorage();
@@ -186,90 +182,72 @@ export const tokensApiRouter = trpc
 
         throw error;
       }
-    },
-  })
-  .mutation('deleteToken', {
-    input: TOKEN_VALIDATION,
-    async resolve({ ctx, input }) {
-      try {
-        const hashed_token = input.token;
-        const storage = await ctx.getStorage();
-        await storage.deleteToken(hashed_token);
+    }),
+  deleteToken: procedure.input(TOKEN_VALIDATION).mutation(async ({ ctx, input }) => {
+    try {
+      const hashed_token = input.token;
+      const storage = await ctx.getStorage();
+      await storage.deleteToken(hashed_token);
 
-        return true;
-      } catch (error) {
-        ctx.errorHandler('Failed to delete a token', error as Error);
+      return true;
+    } catch (error) {
+      ctx.errorHandler('Failed to delete a token', error as Error);
 
-        throw error;
-      }
-    },
-  })
-  .query('getToken', {
-    input: TOKEN_VALIDATION,
-    async resolve({ ctx, input }) {
-      const hash = hashToken(input.token);
-      const alias = maskToken(input.token);
+      throw error;
+    }
+  }),
+  getToken: procedure.input(TOKEN_VALIDATION).query(async ({ ctx, input }) => {
+    const hash = hashToken(input.token);
+    const alias = maskToken(input.token);
 
-      // In case the token was not found (or we failed to fetch it)
-      const failedRead = ctx.tokenReadFailuresCache.get(hash);
+    // In case the token was not found (or we failed to fetch it)
+    const failedRead = ctx.tokenReadFailuresCache.get(hash);
 
-      if (failedRead) {
-        // let's re-throw the same error (or return null)
-        if (failedRead.checkAt >= Date.now()) {
-          if (failedRead.type === 'error') {
-            throw new Error(failedRead.error);
-          } else {
-            return null;
-          }
+    if (failedRead) {
+      // let's re-throw the same error (or return null)
+      if (failedRead.checkAt >= Date.now()) {
+        if (failedRead.type === 'error') {
+          throw new Error(failedRead.error);
+        } else {
+          return null;
         }
-        // or look for it again if last time we checked was 10 minutes ago
       }
+      // or look for it again if last time we checked was 10 minutes ago
+    }
 
-      try {
-        const storage = await ctx.getStorage();
-        const result = await storage.readToken(hash);
+    try {
+      const storage = await ctx.getStorage();
+      const result = await storage.readToken(hash);
 
-        // removes the token from the failures cache (in case the value expired)
-        ctx.tokenReadFailuresCache.delete(hash);
+      // removes the token from the failures cache (in case the value expired)
+      ctx.tokenReadFailuresCache.delete(hash);
 
-        if (!result) {
-          // set token read as not found
-          // so we don't try to read it again for next X minutes
-          ctx.tokenReadFailuresCache.set(hash, {
-            type: 'not-found',
-            checkAt: Date.now() + ctx.errorCachingInterval,
-          });
-        }
-
-        return result;
-      } catch (error) {
-        ctx.errorHandler(`Failed to get a token "${alias}"`, error as Error, ctx.logger);
-
-        // set token read as failure
+      if (!result) {
+        // set token read as not found
         // so we don't try to read it again for next X minutes
         ctx.tokenReadFailuresCache.set(hash, {
-          type: 'error',
-          error: (error as Error).message,
+          type: 'not-found',
           checkAt: Date.now() + ctx.errorCachingInterval,
         });
-
-        throw error;
       }
-    },
-  });
+
+      return result;
+    } catch (error) {
+      ctx.errorHandler(`Failed to get a token "${alias}"`, error as Error, ctx.logger);
+
+      // set token read as failure
+      // so we don't try to read it again for next X minutes
+      ctx.tokenReadFailuresCache.set(hash, {
+        type: 'error',
+        error: (error as Error).message,
+        checkAt: Date.now() + ctx.errorCachingInterval,
+      });
+
+      throw error;
+    }
+  }),
+});
 
 export type TokensApi = typeof tokensApiRouter;
-export type TokensApiMutate = keyof TokensApi['_def']['mutations'];
-export type TokensApiQuery = keyof TokensApi['_def']['queries'];
-
-export type TokensMutationInput<TRouteKey extends TokensApiMutate> = inferProcedureInput<
-  TokensApi['_def']['mutations'][TRouteKey]
->;
-
-export type TokensQueryInput<TRouteKey extends TokensApiQuery> = inferProcedureInput<
-  TokensApi['_def']['queries'][TRouteKey]
->;
-
-export type TokensQueryOutput<TRouteKey extends TokensApiQuery> = inferProcedureOutput<
-  TokensApi['_def']['queries'][TRouteKey]
->;
+export type TokensApiInput = inferRouterInputs<TokensApi>;
+export type TokensApiOutput = inferRouterOutputs<TokensApi>;

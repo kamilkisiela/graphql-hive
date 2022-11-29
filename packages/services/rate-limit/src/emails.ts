@@ -1,12 +1,16 @@
 import { fetch } from '@whatwg-node/fetch';
-import { createTRPCClient } from '@trpc/client';
+import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import type { EmailsApi } from '@hive/emails';
 
 export function createEmailScheduler(config?: { endpoint: string }) {
   const api = config?.endpoint
-    ? createTRPCClient<EmailsApi>({
-        url: `${config.endpoint}/trpc`,
-        fetch,
+    ? createTRPCProxyClient<EmailsApi>({
+        links: [
+          httpLink({
+            url: `${config.endpoint}/trpc`,
+            fetch,
+          }),
+        ],
       })
     : null;
 
@@ -40,7 +44,7 @@ export function createEmailScheduler(config?: { endpoint: string }) {
       }
 
       return scheduledEmails.push(
-        api.mutation('schedule', {
+        api.schedule.mutate({
           email: input.organization.email,
           // If the jobId would include only the period and org id, then we would be able to notify the user once per month.
           // There's a chance that an organization will increase the limit and we might need to notify them again.
@@ -104,7 +108,7 @@ export function createEmailScheduler(config?: { endpoint: string }) {
       }
 
       return scheduledEmails.push(
-        api.mutation('schedule', {
+        api.schedule.mutate({
           email: input.organization.email,
           // If the jobId would include only the period and org id, then we would be able to notify the user once per month.
           // There's a chance that an organization will increase the limit and we might need to notify them again.

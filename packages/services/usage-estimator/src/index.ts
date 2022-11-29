@@ -8,7 +8,7 @@ import {
   reportReadiness,
 } from '@hive/service-common';
 import { createEstimator } from './estimator';
-import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify/dist/trpc-server-adapters-fastify.cjs.js';
+import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
 import { usageEstimatorApiRouter } from './api';
 import { clickHouseElapsedDuration, clickHouseReadDuration } from './metrics';
 import { env } from './environment';
