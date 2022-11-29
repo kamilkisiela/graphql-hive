@@ -7,6 +7,9 @@ export interface HiveClient {
   info(): Promise<void>;
   reportSchema: SchemaReporter['report'];
   collectUsage(args: ExecutionArgs): CollectUsageCallback;
+  /**
+   * @deprecated https://github.com/kamilkisiela/graphql-hive/issues/659
+   */
   operationsStore: OperationsStore;
   dispose(): Promise<void>;
 }
@@ -134,45 +137,55 @@ export interface HiveSelfHostingOptions {
   usageEndpoint?: string;
 }
 
-export interface HivePluginOptions {
-  /**
-   * Enable/Disable Hive
-   *
-   * Default: true
-   */
-  enabled?: boolean;
-  /**
-   * Debugging mode
-   *
-   * Default: false
-   */
-  debug?: boolean;
-  /**
-   * Access Token
-   */
-  token: string;
-  /**
-   * Use when self-hosting GraphQL Hive
-   */
-  selfHosting?: HiveSelfHostingOptions;
-  agent?: Omit<AgentOptions, 'endpoint' | 'token' | 'enabled' | 'debug'>;
-  /**
-   * Collects schema usage based on operations
-   *
-   * Disabled by default
-   */
-  usage?: HiveUsagePluginOptions | boolean;
-  /**
-   * Schema reporting
-   *
-   * Disabled by default
-   */
-  reporting?: HiveReportingPluginOptions | false;
-  /**
-   * Operations Store
-   */
-  operationsStore?: HiveOperationsStorePluginOptions;
-}
+type OptionalWhenFalse<T, KCond extends keyof T, KExcluded extends keyof T> =
+  // untouched by default or when true
+  | T
+  // when false, make KExcluded optional
+  | (Omit<T, KExcluded> & { [P in KCond]: false } & { [P in KExcluded]?: T[KExcluded] });
+
+export type HivePluginOptions = OptionalWhenFalse<
+  {
+    /**
+     * Enable/Disable Hive
+     *
+     * Default: true
+     */
+    enabled?: boolean;
+    /**
+     * Debugging mode
+     *
+     * Default: false
+     */
+    debug?: boolean;
+    /**
+     * Access Token
+     */
+    token: string;
+    /**
+     * Use when self-hosting GraphQL Hive
+     */
+    selfHosting?: HiveSelfHostingOptions;
+    agent?: Omit<AgentOptions, 'endpoint' | 'token' | 'enabled' | 'debug'>;
+    /**
+     * Collects schema usage based on operations
+     *
+     * Disabled by default
+     */
+    usage?: HiveUsagePluginOptions | boolean;
+    /**
+     * Schema reporting
+     *
+     * Disabled by default
+     */
+    reporting?: HiveReportingPluginOptions | false;
+    /**
+     * Operations Store
+     */
+    operationsStore?: HiveOperationsStorePluginOptions;
+  },
+  'enabled',
+  'token'
+>;
 
 export type Maybe<T> = null | undefined | T;
 

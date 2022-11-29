@@ -36,7 +36,29 @@ test("should not log that it's not enabled", async () => {
     agent: {
       logger,
     },
-    token: '',
+  });
+
+  const result = await hive
+    .info()
+    .then(() => 'OK')
+    .catch(() => 'ERROR');
+
+  expect(logger.info).not.toBeCalled();
+  expect(result).toBe('OK');
+});
+
+test('should not throw exception about missing token when disabled', async () => {
+  const logger = {
+    error: jest.fn(),
+    info: jest.fn(),
+  };
+
+  const hive = createHive({
+    enabled: false,
+    debug: false,
+    agent: {
+      logger,
+    },
   });
 
   const result = await hive
