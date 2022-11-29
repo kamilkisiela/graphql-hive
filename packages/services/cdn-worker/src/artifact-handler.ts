@@ -3,12 +3,10 @@ import { Response, type Request } from '@whatwg-node/fetch';
 import itty from 'itty-router';
 import zod from 'zod';
 import { InvalidAuthKeyResponse, MissingAuthKeyResponse } from './errors';
+import type { ArtifactsType } from '@hive/api/src/modules/schema/providers/artifact-storage-reader';
 
 type ArtifactRequestHandler = {
-  getArtifactUrl: (
-    targetId: string,
-    artifactType: 'metadata' | 'sdl' | 'services' | 'supergraph',
-  ) => Promise<string | null>;
+  getArtifactUrl: (targetId: string, artifactType: ArtifactsType) => Promise<string | null>;
   isKeyValid: KeyValidator;
 };
 
@@ -17,6 +15,8 @@ const ParamsModel = zod.object({
   artifactType: zod.union([
     zod.literal('metadata'),
     zod.literal('sdl'),
+    zod.literal('sdl.graphql'),
+    zod.literal('sdl.graphqls'),
     zod.literal('services'),
     zod.literal('supergraph'),
   ]),
@@ -46,7 +46,14 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
   };
 
   router.get('/artifacts/v1/:targetId/:artifactType', async (request: itty.Request & Request) => {
-    const params = ParamsModel.parse(request.params);
+    const parseResult = ParamsModel.safeParse(request.params);
+
+    if (parseResult.success === false) {
+      return new Response('Not found.', { status: 404 });
+    }
+
+    const params = parseResult.data;
+
     const maybeResponse = await authenticate(request, params.targetId);
     if (maybeResponse !== null) {
       return maybeResponse;

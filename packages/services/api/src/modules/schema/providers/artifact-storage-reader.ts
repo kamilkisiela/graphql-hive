@@ -10,6 +10,10 @@ const presignedUrlExpirationSeconds = 60;
 export const buildArtifactStorageKey = (targetId: string, artifactType: string) =>
   `artifact/${targetId}/${artifactType}`;
 
+type SDLArtifactTypes = `sdl${'.graphql' | '.graphqls' | ''}`;
+
+export type ArtifactsType = SDLArtifactTypes | 'metadata' | 'services' | 'supergraph';
+
 /**
  * Read an Artifact to an S3 bucket.
  */
@@ -30,8 +34,12 @@ export class ArtifactStorageReader {
   /** Generate a pre-signed url for reading an artifact from a bucket for a limited time period. */
   async generateArtifactReadUrl(
     targetId: string,
-    artifactType: 'sdl' | 'metadata' | 'services' | 'supergraph',
+    artifactType: ArtifactsType,
   ): Promise<string | null> {
+    if (artifactType.startsWith('sdl')) {
+      artifactType = 'sdl';
+    }
+
     const key = buildArtifactStorageKey(targetId, artifactType);
 
     // In case you are wondering why we generate a pre-signed URL for doing the HEAD
