@@ -239,8 +239,8 @@ export class SchemaPublisher {
       });
 
       const orchestrator = this.schemaManager.matchOrchestrator(project.type);
-      const sschemas = schemas.map(s => this.helper.createSchemaObject(s));
-      const schema = await orchestrator.build(sschemas, project.externalComposition);
+      const schemaObjects = schemas.map(s => this.helper.createSchemaObject(s));
+      const schema = await orchestrator.build(schemaObjects, project.externalComposition);
 
       this.logger.info('Deploying version to CDN (version=%s)', latestVersion.id);
 
@@ -250,7 +250,7 @@ export class SchemaPublisher {
           project,
           supergraph:
             project.type === ProjectType.FEDERATION
-              ? await orchestrator.supergraph(sschemas, project.externalComposition)
+              ? await orchestrator.supergraph(schemaObjects, project.externalComposition)
               : null,
           schemas,
           fullSchemaSdl: schema.raw,
@@ -297,8 +297,8 @@ export class SchemaPublisher {
         ]);
 
         const orchestrator = this.schemaManager.matchOrchestrator(project.type);
-        const sschemas = schemas.map(s => this.helper.createSchemaObject(s));
-        const schema = await orchestrator.build(sschemas, project.externalComposition);
+        const schemaObjects = schemas.map(s => this.helper.createSchemaObject(s));
+        const schema = await orchestrator.build(schemaObjects, project.externalComposition);
 
         this.logger.info('Deploying version to CDN (version=%s)', latestVersion.id);
         await this.updateCDN({
@@ -720,8 +720,8 @@ export class SchemaPublisher {
   }) {
     try {
       if (valid) {
-        const sschemas = schemas.map(s => this.helper.createSchemaObject(s));
-        const schema = await orchestrator.build(sschemas, project.externalComposition);
+        const schemaObjects = schemas.map(s => this.helper.createSchemaObject(s));
+        const schema = await orchestrator.build(schemaObjects, project.externalComposition);
 
         await this.updateCDN({
           target,
