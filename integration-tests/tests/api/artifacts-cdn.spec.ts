@@ -11,7 +11,6 @@ import {
   createProject,
   createToken,
   publishSchema,
-  schemaSyncCDN,
   createCdnAccess,
 } from '../../testkit/flow';
 import { ProjectType, TargetAccessScope } from '../../testkit/gql/graphql';
@@ -287,18 +286,6 @@ function runArtifactsCDNTests(name: string, endpointBaseUrl: string) {
       expect(publishSchemaResult.body.data?.schemaPublish.__typename).toEqual(
         'SchemaPublishSuccess',
       );
-
-      const schemaSyncCDNResult = await schemaSyncCDN(
-        {
-          organization: org.cleanId,
-          project: project.cleanId,
-          target: target!.cleanId,
-        },
-        access_token,
-      );
-
-      expect(schemaSyncCDNResult.body.errors).not.toBeDefined();
-      expect(schemaSyncCDNResult.body.data!.schemaSyncCDN.__typename).toBe('SchemaSyncCDNSuccess');
 
       const cdnAccessResult = await createCdnAccess(
         {
