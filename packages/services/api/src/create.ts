@@ -52,7 +52,7 @@ import { billingModule } from './modules/billing';
 import { OIDC_INTEGRATIONS_ENABLED } from './modules/oidc-integrations/providers/tokens';
 import { oidcIntegrationsModule } from './modules/oidc-integrations';
 import { ArtifactStorageWriter } from './modules/schema/providers/artifact-storage-writer';
-import { S3Client } from '@aws-sdk/client-s3';
+import type { S3Client } from '@aws-sdk/client-s3';
 
 const modules = [
   sharedModule,
