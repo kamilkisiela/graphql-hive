@@ -1,0 +1,23 @@
+global:
+  image:
+    tag: 59b64c36c866b3555c135c70de76a884e63f8619
+  apiKey:
+    # -- list of API Keys to load and use with supertokens-core
+    key: "yourApiKey"
+  app_base_url: localhost:8080
+
+image:
+  name: ghcr.io/kamilkisiela/graphql-hive/app
+  pullPolicy: Always
+
+app_name: hive-app
+server_port: 8080
+
+supertokens_connection_uri: http://supertokens:3567
+emails_endpoint: http://emails-svc:80
+graphql_endpoint: http://server-svc:80/graphql
+server_endpoint: http://server-svc:80
+
+auth_require_email_verification: 0
+
+replicaCount: 1

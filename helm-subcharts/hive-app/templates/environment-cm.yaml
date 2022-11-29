@@ -1,0 +1,22 @@
+---
+{{- $app_base_url := printf "http://%s" .Values.global.app_base_url }}
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-env-cm
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: hive
+    service: {{ .Values.app_name }}
+    release: {{ .Release.Name }}
+data:
+  NODE_ENV: '{{ .Values.node_env }}'
+  PORT: '{{ .Values.server_port }}'
+  APP_BASE_URL: '{{ $app_base_url }}'
+  SUPERTOKENS_CONNECTION_URI: '{{ .Values.supertokens_connection_uri }}'
+  SUPERTOKENS_API_KEY: '{{ .Values.global.apiKey.key }}'
+  EMAILS_ENDPOINT: '{{ .Values.emails_endpoint }}'
+  GRAPHQL_ENDPOINT: '{{ .Values.graphql_endpoint }}'
+  SERVER_ENDPOINT: '{{ .Values.server_endpoint }}'
+  AUTH_REQUIRE_EMAIL_VERIFICATION: '{{ .Values.auth_require_email_verification }}'

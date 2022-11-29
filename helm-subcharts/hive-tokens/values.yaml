@@ -1,0 +1,27 @@
+global:
+  image:
+    tag: 59b64c36c866b3555c135c70de76a884e63f8619
+  postgresql:
+    auth:
+      database: engage-hive
+      user: postgres
+
+image:
+  name: ghcr.io/kamilkisiela/graphql-hive/tokens
+  pullPolicy: Always
+
+app_name: hive-tokens
+server_port: 8080
+node_env: production
+
+postgres_host: postgres-postgresql
+postgres_port: 5432
+
+roarr_log: true
+
+replicaCount: 1
+
+rate_limit_endpoint: ''
+
+sentry: 0
+sentry_dsn: ''

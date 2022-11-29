@@ -1,0 +1,55 @@
+global:
+  image:
+    tag: 59b64c36c866b3555c135c70de76a884e63f8619
+  clickhouse_username: hive
+  postgresql:
+    auth:
+      database: engage-hive
+      user: postgres
+  apiKey:
+    # -- list of API Keys to load and use with supertokens-core
+    key: "yourApiKey"
+  encryption_secret: yourEncryptionSecret
+
+image:
+  name: ghcr.io/kamilkisiela/graphql-hive/server
+  pullPolicy: Always
+
+app_name: hive-server
+server_port: 8080
+node_env: production
+
+postgres_host: postgres-postgresql
+postgres_port: 5432
+
+roarr_log: true
+
+clickhouse_protocol: http
+clickhouse_host: clickhouse
+clickhouse_port: 8123
+
+redis_host: redis-master
+redis_port: 6379
+
+tokens_endpoint: http://tokens-svc:80
+webhooks_endpoint: http://webhooks-svc:80
+schema_endpoint: http://schema-svc:80
+emails_endpoint: http://emails-svc:80
+web_app_url: http://app-svc:80
+supertokens_connection_uri: http://supertokens:3567
+
+replicaCount: 1
+
+rate_limit_endpoint: ''
+
+integration_github: 0
+integration_github_github_app_id: ''
+integration_github_github_app_private_key: ''
+
+auth_organization_oidc: 0
+
+sentry: 0
+sentry_dsn: ''
+
+prometheus_metrics: 0
+prometheus_metrics_label_instance: ''

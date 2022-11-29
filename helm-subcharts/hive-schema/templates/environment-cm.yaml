@@ -1,0 +1,24 @@
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: schema-env-cm
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: hive
+    service: {{ .Values.app_name }}
+    release: {{ .Release.Name }}
+data:
+  NODE_ENV: '{{ .Values.node_env }}'
+  PORT: '{{ .Values.server_port }}'
+  REDIS_HOST: '{{ .Values.redis_host }}'
+  REDIS_PORT: '{{ .Values.redis_port }}'
+  ENCRYPTION_SECRET: '{{ .Values.global.encryption_secret }}'
+  SENTRY: '{{ .Values.sentry }}'
+  SENTRY_DSN: '{{ .Values.sentry_dsn }}'
+  PROMETHEUS_METRICS: '{{ .Values.prometheus_metrics }}'
+  PROMETHEUS_METRICS_LABEL_INSTANCE: '{{ .Values.prometheus_metrics_label_instance }}'
+  REQUEST_BROKER: '{{ .Values.request_broker }}'
+  REQUEST_BROKER_ENDPOINT: '{{ .Values.request_broker_endpoint }}'
+  REQUEST_BROKER_SIGNATURE: '{{ .Values.request_broker_signature }}'

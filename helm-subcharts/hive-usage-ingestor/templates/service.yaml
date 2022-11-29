@@ -1,0 +1,21 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: usage-ingestor-svc
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: hive
+    service: {{ .Values.app_name }}
+    release: {{ .Release.Name }}
+
+spec:
+  selector:
+    app: hive
+    service: {{ .Values.app_name }}
+    release: {{ .Release.Name }}
+  ports:
+    - port: 80
+      targetPort: {{ .Values.server_port }}
+      protocol: TCP
+      name: http-main

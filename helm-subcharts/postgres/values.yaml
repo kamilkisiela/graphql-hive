@@ -1,0 +1,7 @@
+global:
+  postgresql:
+    auth:
+      database: engage-hive
+
+postgresql:
+  fullnameOverride: postgres-postgresql

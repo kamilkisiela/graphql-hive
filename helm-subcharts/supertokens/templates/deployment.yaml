@@ -1,0 +1,118 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "supertokens.fullname" . }}
+  labels:
+    {{- include "supertokens.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "supertokens.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- if .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "supertokens.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "supertokens.serviceAccountName" . }}
+      {{- if .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- end }}  
+      containers:
+        - name: {{ .Chart.Name }}
+          {{- if .Values.securityContext }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          # {{ else }} 
+          # securityContext:
+          #   readOnlyRootFilesystem: true
+          {{- end }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default "latest" }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: "POSTGRESQL_DATABASE_NAME"
+              value: {{ quote .Values.global.postgresql.auth.database }}
+            - name: "POSTGRESQL_PORT"
+              value: {{ quote .Values.database.port }}
+            - name: "POSTGRESQL_HOST"
+              value: {{ quote .Values.database.host }}
+            - name: "POSTGRESQL_USER"
+              value: {{ quote .Values.global.postgresql.auth.user }}
+            - name: "POSTGRESQL_PASSWORD"
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-postgresql
+                  key: postgres-password
+            - name: "POSTGRESQL_TABLE_SCHEMA"
+              value: {{ quote .Values.database.schema }}
+            - name: "POSTGRESQL_CONNECTION_POOL_SIZE"
+              value: {{ quote .Values.database.connectionPoolSize }}
+            - name: "SUPERTOKENS_PORT"
+              value: {{ quote .Values.service.port }}
+            - name: "ACCESS_TOKEN_VALIDITY"
+              value: {{ quote .Values.accessTokenValidity }}
+            - name: "ACCESS_TOKEN_BLACKLISTING"
+              value: {{ quote .Values.accessTokenBlacklisting }}
+            - name: "ACCESS_TOKEN_SIGNING_KEY_DYNAMIC"
+              value: {{ quote .Values.accessTokenSigningKeyDynamic }}
+            - name: "ACCESS_TOKEN_SIGNING_KEY_UPDATE_INTERVAL"
+              value: {{ quote .Values.accessTokenSigningKeyUpdateInterval }}
+            - name: "REFRESH_TOKEN_VALIDITY"
+              value: {{ quote .Values.refreshTokenValidity }}
+            - name: "PASSWORD_RESET_TOKEN_LIFETIME"
+              value: {{ quote .Values.passwordResetTokenLifetime }}
+            - name: "EMAIL_VERIFICATION_TOKEN_LIFETIME"
+              value: {{ quote .Values.emailVerificationTokenLifetime }}
+            - name: "PASSWORDLESS_MAX_CODE_INPUT_ATTEMPTS"
+              value: {{ quote .Values.passwordlessMaxCodeInputAttempts }}
+            - name: "PASSWORDLESS_CODE_LIFETIME"
+              value: {{ quote .Values.passwordlessCodeLifetime }}
+            - name: "BASE_PATH"
+              value: {{ quote .Values.basePath }}
+            - name: "DISABLE_TELEMETRY"
+              value: {{ quote .Values.disableTelemetry }}
+            - name: "MAX_SERVER_POOL_SIZE"
+              value: {{ quote .Values.maxServerPoolSize }}
+            {{- if .Values.global.apiKey.enabled }}
+            - name: "API_KEYS"
+              value: "{{ .Values.global.apiKey.key }}"
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: 3567
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /hello
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /hello
+              port: http
+          {{ if .Values.resources }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          {{- end -}}
+      {{- if .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end -}}
+      {{- if .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end -}}
+      {{- if .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end -}}

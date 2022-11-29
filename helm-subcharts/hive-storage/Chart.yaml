@@ -1,0 +1,6 @@
+---
+apiVersion: v2
+name: hive-storage
+version: 1.0.0
+description: Deploy hive-storage
+home: https://github.com/kamilkisiela/graphql-hive/pkgs/container/graphql-hive%2Fstorage

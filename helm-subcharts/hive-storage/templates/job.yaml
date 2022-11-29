@@ -1,0 +1,58 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: hive-storage-job
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: hive
+    service: {{ .Values.app_name }}
+    release: {{ .Release.Name }}
+
+spec:
+  backoffLimit: 6
+  activeDeadlineSeconds: 300
+  template:
+    metadata:
+      name: hive-storage-job
+      namespace: {{ .Release.Namespace }}
+      labels:
+        app: hive
+        tier: {{ .Values.app_name }}
+        release: {{ .Release.Name }}
+    spec:
+      initContainers:
+        - name: wait-for-postgres
+          image: actions/pg_isready
+          command: [ 'sh', '-c', 'pg_isready -h postgres-postgresql -p 5432' ]
+        - name: wait-for-clickhouse
+          image: curlimages/curl
+          command: [ 'sh', '-c', 'curl clickhouse:8123' ]
+      restartPolicy: OnFailure
+      containers:
+        - name: {{ .Values.app_name }}-job
+          image: "{{ .Values.image.name }}:{{ .Values.global.image.tag }}"
+          envFrom:
+            - configMapRef:
+                name: storage-env-cm
+          env:
+            - name: APP_INSTANCE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: INSTANCE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: CLICKHOUSE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: clickhouse
+                  key: admin-password
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-postgresql
+                  key: postgres-password
+          ports:
+            - containerPort: {{ .Values.server_port }}

@@ -117,3 +117,8 @@ npm-shrinkwrap.json
 .bob
 
 .hive
+
+# Helm chart files
+**/Chart.lock
+/helm-charts/hive/charts
+**.tgz

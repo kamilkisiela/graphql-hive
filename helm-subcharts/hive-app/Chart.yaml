@@ -1,0 +1,5 @@
+---
+apiVersion: v2
+name: hive-app
+version: 1.0.0
+description: Deploy hive-app

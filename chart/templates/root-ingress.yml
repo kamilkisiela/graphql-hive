@@ -1,0 +1,32 @@
+{{- $url := printf "%s" .Values.global.app_base_url }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: root-ingress
+  namespace: graphql-hive
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod-dns
+    dblc.io/dns.class: private
+    nginx.ingress.kubernetes.io/backend-protocol: HTTP
+    {{ if eq .Values.ingress.use_secure_protocol "true" }}
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    {{ else }}
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-cookie-path: |
+      / "/; HTTPOnly; Secure; SameSite=strict"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_headers "Content-Security-Policy: upgrade-insecure-requests";
+    {{ end }}
+spec:
+  ingressClassName: private
+  rules:
+    - host: {{ $url }}
+      http:
+        paths:
+          - backend:
+              service:
+                name: app-svc
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
