@@ -11,8 +11,8 @@ export function Link({
   variant?: 'primary' | 'secondary';
   className?: string;
   children: ReactNode;
-  target?: ComponentProps<'a'>['target']
-  rel?: ComponentProps<'a'>['rel']
+  target?: ComponentProps<'a'>['target'];
+  rel?: ComponentProps<'a'>['rel'];
 }): ReactElement {
   return (
     <NextLink
