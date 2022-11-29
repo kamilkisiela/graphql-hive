@@ -303,9 +303,7 @@ function runArtifactsCDNTests(name: string, endpointBaseUrl: string) {
         'artifacts',
         `artifact/${target!.id}/services`,
       );
-      expect(artifactContents).toMatchInlineSnapshot(
-        `"[{"name":null,"sdl":"type Query { ping: String }","url":null}]"`,
-      );
+      expect(artifactContents).toMatchInlineSnapshot(`"[{"sdl":"type Query { ping: String }"}]"`);
     });
   });
 }
