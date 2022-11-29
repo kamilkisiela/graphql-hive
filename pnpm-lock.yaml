@@ -599,7 +599,7 @@ importers:
       '@envelop/graphql-modules': 4.0.3
       '@envelop/sentry': 5.0.0
       '@envelop/types': 3.0.0
-      '@graphql-hive/client': 0.21.3
+      '@graphql-hive/client': 0.21.4
       '@hive/api': workspace:*
       '@hive/service-common': workspace:*
       '@hive/storage': workspace:*
