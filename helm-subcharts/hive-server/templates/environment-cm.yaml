@@ -1,0 +1,55 @@
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: server-env-cm
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: hive
+    service: {{ .Values.app_name }}
+    release: {{ .Release.Name }}
+data:
+  NODE_ENV: '{{ .Values.node_env }}'
+  PORT: '{{ .Values.server_port }}'
+
+  POSTGRES_HOST: '{{ .Values.postgres_host }}'
+  POSTGRES_PORT: '{{ .Values.postgres_port }}'
+  POSTGRES_DB: '{{ .Values.global.postgresql.auth.database }}'
+  POSTGRES_USER: '{{ .Values.global.postgresql.auth.user }}'
+
+  ROARR_LOG: '{{ .Values.roarr_log }}'
+
+  CLICKHOUSE_PROTOCOL: '{{ .Values.clickhouse_protocol }}'
+  CLICKHOUSE_HOST: '{{ .Values.clickhouse_host }}'
+  CLICKHOUSE_PORT: '{{ .Values.clickhouse_port }}'
+  CLICKHOUSE_USERNAME: '{{ .Values.global.clickhouse_username }}'
+
+  REDIS_HOST: '{{ .Values.redis_host }}'
+  REDIS_PORT: '{{ .Values.redis_port }}'
+
+  TOKENS_ENDPOINT: '{{ .Values.tokens_endpoint }}'
+  WEBHOOKS_ENDPOINT: '{{ .Values.webhooks_endpoint }}'
+  SCHEMA_ENDPOINT: '{{ .Values.schema_endpoint }}'
+  EMAILS_ENDPOINT: '{{ .Values.emails_endpoint }}'
+
+  ENCRYPTION_SECRET: '{{ .Values.global.encryption_secret }}'
+
+  WEB_APP_URL: '{{ .Values.web_app_url }}'
+
+  SUPERTOKENS_CONNECTION_URI: '{{ .Values.supertokens_connection_uri }}'
+  SUPERTOKENS_API_KEY: '{{ .Values.global.apiKey.key }}'
+
+  INTEGRATION_GITHUB: '{{ .Values.integration_github }}'
+  INTEGRATION_GITHUB_GITHUB_APP_ID: '{{ .Values.integration_github_github_app_id }}'
+  INTEGRATION_GITHUB_GITHUB_APP_PRIVATE_KEY: '{{ .Values.integration_github_github_app_private_key }}'
+
+  AUTH_ORGANIZATION_OIDC: '{{ .Values.auth_organization_oidc }}'
+
+  SENTRY: '{{ .Values.sentry }}'
+  SENTRY_DSN: '{{ .Values.sentry_dsn }}'
+
+  PROMETHEUS_METRICS: '{{ .Values.prometheus_metrics }}'
+  PROMETHEUS_METRICS_LABEL_INSTANCE: '{{ .Values.prometheus_metrics_label_instance }}'
+
+  RATE_LIMIT_ENDPOINT: '{{ .Values.rate_limit_endpoint }}'

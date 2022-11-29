@@ -1,0 +1,27 @@
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: usage-env-cm
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: hive
+    service: {{ .Values.app_name }}
+    release: {{ .Release.Name }}
+data:
+  NODE_ENV: '{{ .Values.node_env }}'
+  PORT: '{{ .Values.server_port }}'
+  TOKENS_ENDPOINT: '{{ .Values.tokens_endpoint }}'
+  KAFKA_CONNECTION_MODE: '{{ .Values.kafka_connection_mode }}'
+  KAFKA_TOPIC: '{{ .Values.kafka_topic }}'
+  KAFKA_BROKER: '{{ .Values.kafka_broker }}'
+  KAFKA_BUFFER_SIZE: '{{ .Values.kafka_buffer_size }}'
+  KAFKA_BUFFER_INTERVAL: '{{ .Values.kafka_buffer_interval }}'
+  KAFKA_BUFFER_DYNAMIC: '{{ .Values.kafka_buffer_dynamic }}'
+
+  SENTRY: '{{ .Values.sentry }}'
+  SENTRY_DSN: '{{ .Values.sentry_dsn }}'
+
+  PROMETHEUS_METRICS: '{{ .Values.prometheus_metrics }}'
+  PROMETHEUS_METRICS_LABEL_INSTANCE: '{{ .Values.prometheus_metrics_label_instance }}'

@@ -1,0 +1,10 @@
+---
+apiVersion: v2
+name: postgres
+version: 1.0.0
+description: Deploy postgres
+home: https://artifacthub.io/packages/helm/bitnami/postgresql
+dependencies:
+  - name: postgresql
+    version: 12.1.2
+    repository: https://charts.bitnami.com/bitnami

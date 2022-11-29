@@ -1,0 +1,4 @@
+clickhouse:
+  fullnameOverride: clickhouse
+  auth:
+    username: hive

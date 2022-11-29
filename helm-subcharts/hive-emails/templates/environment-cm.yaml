@@ -1,0 +1,36 @@
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: emails-env-cm
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: hive
+    service: {{ .Values.app_name }}
+    release: {{ .Release.Name }}
+data:
+  NODE_ENV: '{{ .Values.node_env }}'
+  PORT: '{{ .Values.server_port }}'
+  REDIS_HOST: '{{ .Values.redis_host }}'
+  REDIS_PORT: '{{ .Values.redis_port }}'
+  BULLMQ_COMMANDS_FROM_ROOT: '{{ .Values.bullmq_commands_from_root }}'
+  EMAIL_FROM: '{{ .Values.global.email.from }}'
+  EMAIL_PROVIDER: '{{ .Values.global.email.provider }}'
+  EMAIL_PROVIDER_SMTP_PROTOCOL: '{{ .Values.email_provider_smtp_protocol }}'
+  EMAIL_PROVIDER_SMTP_HOST: '{{ .Values.email_provider_smtp_host }}'
+  EMAIL_PROVIDER_SMTP_PORT: '{{ .Values.email_provider_smtp_port }}'
+  EMAIL_PROVIDER_SMTP_AUTH_USERNAME: '{{ .Values.email_provider_smtp_auth_username }}'
+  EMAIL_PROVIDER_SMTP_AUTH_PASSWORD: '{{ .Values.email_provider_smtp_auth_password }}'
+  EMAIL_PROVIDER_POSTMARK_TOKEN: '{{ .Values.email_provider_postmark_token }}'
+  EMAIL_PROVIDER_POSTMARK_MESSAGE_STREAM: '{{ .Values.email_provider_postmark_message_stream }}'
+  EMAIL_PROVIDER_SMTP_REJECT_UNAUTHORIZED: '{{ .Values.email_provider_smtp_reject_unauthorized }}'
+
+
+  SENTRY: '{{ .Values.sentry }}'
+  SENTRY_DSN: '{{ .Values.sentry_dsn }}'
+
+  PROMETHEUS_METRICS: '{{ .Values.prometheus_metrics }}'
+  PROMETHEUS_METRICS_LABEL_INSTANCE: '{{ .Values.prometheus_metrics_label_instance }}'
+
+  RATE_LIMIT_ENDPOINT: '{{ .Values.rate_limit_endpoint }}'

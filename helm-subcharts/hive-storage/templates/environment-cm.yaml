@@ -1,0 +1,24 @@
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: storage-env-cm
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: hive
+    service: {{ .Values.app_name }}
+    release: {{ .Release.Name }}
+data:
+  MIGRATOR: {{ .Values.migrator }}
+  CLICKHOUSE_MIGRATOR: {{ .Values.clickhouse_migrator }}
+  POSTGRES_HOST: {{ .Values.postgres_host }}
+  POSTGRES_PORT: "{{ .Values.postgres_port }}"
+  POSTGRES_DB: {{ .Values.global.postgresql.auth.database }}
+  POSTGRES_USER: {{ .Values.global.postgresql.auth.user }}
+  CLICKHOUSE_PROTOCOL: {{ .Values.clickhouse_protocol }}
+  CLICKHOUSE_HOST: {{ .Values.clickhouse_host }}
+  CLICKHOUSE_PORT: "{{ .Values.clickhouse_port }}"
+  CLICKHOUSE_USERNAME: {{ .Values.global.clickhouse_username }}
+  SENTRY_DNS: "{{ .Values.sentry_dns }}"
+  SENTRY_ENABLED: "{{ .Values.sentry_enabled }}"

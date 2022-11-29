@@ -1,0 +1,6 @@
+---
+apiVersion: v2
+name: hive-tokens
+version: 1.0.0
+description: Deploy hive-tokens
+home: https://github.com/kamilkisiela/graphql-hive/blob/main/packages/services/tokens/README.md

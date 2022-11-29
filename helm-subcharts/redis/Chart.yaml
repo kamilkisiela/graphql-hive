@@ -1,0 +1,10 @@
+---
+apiVersion: v2
+name: redis
+version: 1.0.0
+description: Deploy redis
+home: https://artifacthub.io/packages/helm/bitnami/redis
+dependencies:
+  - name: redis
+    version: 17.3.11
+    repository: https://charts.bitnami.com/bitnami

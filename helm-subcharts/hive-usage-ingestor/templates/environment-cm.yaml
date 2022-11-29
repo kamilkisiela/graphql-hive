@@ -1,0 +1,31 @@
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: usage-ingestor-env-cm
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: hive
+    service: {{ .Values.app_name }}
+    release: {{ .Release.Name }}
+data:
+  NODE_ENV: '{{ .Values.node_env }}'
+  PORT: '{{ .Values.server_port }}'
+  KAFKA_CONNECTION_MODE: '{{ .Values.kafka_connection_mode }}'
+  KAFKA_BROKER: '{{ .Values.kafka_broker }}'
+  KAFKA_CONCURRENCY: '{{ .Values.kafka_concurrency }}'
+  KAFKA_CONSUMER_GROUP: '{{ .Values.kafka_consumer_group }}'
+  KAFKA_TOPIC: '{{ .Values.kafka_topic }}'
+  CLICKHOUSE_PROTOCOL: '{{ .Values.clickhouse_protocol }}'
+  CLICKHOUSE_HOST: '{{ .Values.clickhouse_host }}'
+  CLICKHOUSE_PORT: '{{ .Values.clickhouse_port }}'
+  CLICKHOUSE_USERNAME: '{{ .Values.global.clickhouse_username }}'
+
+  HEARTBEAT_ENDPOINT: '{{ .Values.heartbeat_endpoint }}'
+
+  SENTRY: '{{ .Values.sentry }}'
+  SENTRY_DSN: '{{ .Values.sentry_dsn }}'
+
+  PROMETHEUS_METRICS: '{{ .Values.prometheus_metrics }}'
+  PROMETHEUS_METRICS_LABEL_INSTANCE: '{{ .Values.prometheus_metrics_label_instance }}'

@@ -1,0 +1,6 @@
+---
+apiVersion: v2
+name: hive-webhooks
+version: 1.0.0
+description: Deploy hive-webhooks
+home: https://github.com/kamilkisiela/graphql-hive/blob/main/packages/services/webhooks/README.md

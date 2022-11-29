@@ -1,0 +1,27 @@
+global:
+  image:
+    tag: 59b64c36c866b3555c135c70de76a884e63f8619
+  encryption_secret: yourEncryptionSecret
+
+image:
+  name: ghcr.io/kamilkisiela/graphql-hive/schema
+  pullPolicy: Always
+
+app_name: hive-schema
+server_port: 8080
+node_env: production
+
+redis_host: redis-master
+redis_port: 6379
+
+replicaCount: 1
+
+sentry: 0
+sentry_dsn: ''
+
+prometheus_metrics: 0
+prometheus_metrics_label_instance: ''
+
+request_broker: 0
+request_broker_endpoint: ''
+request_broker_signature: ''

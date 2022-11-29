@@ -1,0 +1,22 @@
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tokens-env-cm
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: hive
+    service: {{ .Values.app_name }}
+    release: {{ .Release.Name }}
+data:
+  NODE_ENV: '{{ .Values.node_env }}'
+  PORT: '{{ .Values.server_port }}'
+  POSTGRES_HOST: '{{ .Values.postgres_host }}'
+  POSTGRES_USER: '{{ .Values.global.postgresql.auth.user }}'
+  POSTGRES_PORT: '{{ .Values.postgres_port }}'
+  POSTGRES_DB: '{{ .Values.global.postgresql.auth.database }}'
+  ROARR_LOG: '{{ .Values.roarr_log }}'
+  SENTRY: '{{ .Values.sentry }}'
+  SENTRY_DSN: '{{ .Values.sentry_dsn }}'
+  RATE_LIMIT_ENDPOINT: '{{ .Values.rate_limit_endpoint }}'
