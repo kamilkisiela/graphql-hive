@@ -1,4 +1,4 @@
-import { ReactElement, ReactNode, ComponentProps } from 'react';
+import { ComponentProps, ReactElement, ReactNode } from 'react';
 import NextLink, { LinkProps } from 'next/link';
 import clsx from 'clsx';
 
