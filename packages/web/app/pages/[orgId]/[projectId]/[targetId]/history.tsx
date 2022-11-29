@@ -107,7 +107,7 @@ const DiffView = ({
         <p className="text-base text-gray-500">
           Previous or current schema is most likely incomplete and was force published
         </p>
-        <pre className="mt-5 rounded-lg bg-red-900 p-3 text-xs text-white whitespace-pre-wrap">
+        <pre className="mt-5 whitespace-pre-wrap rounded-lg bg-red-900 p-3 text-xs text-white">
           {error.graphQLErrors[0].message}
         </pre>
       </div>
