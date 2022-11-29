@@ -152,3 +152,10 @@ export type TargetsEstimationDateFilter = {
 export type TargetsEstimationFilter = TargetsEstimationDateFilter & {
   targets: string[];
 };
+
+export type AdminStats = {
+  period: {
+    from: string;
+    to: string;
+  };
+};

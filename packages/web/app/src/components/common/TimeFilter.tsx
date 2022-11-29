@@ -4,7 +4,7 @@ import subDays from 'date-fns/subDays';
 import subHours from 'date-fns/subHours';
 import subMinutes from 'date-fns/subMinutes';
 
-function floorDate(date: Date) {
+export function floorToMinute(date: Date) {
   const time = 1000 * 60 * 1;
   return new Date(Math.floor(date.getTime() / time) * time);
 }
@@ -52,10 +52,10 @@ type KeyOf<T> = T extends Array<{
   ? K
   : never;
 
-type PeriodKey = KeyOf<typeof DATE_RANGE_OPTIONS>;
+export type PeriodKey = KeyOf<typeof DATE_RANGE_OPTIONS>;
 
 export function calculatePeriod(period: PeriodKey) {
-  const now = floorDate(new Date());
+  const now = floorToMinute(new Date());
   const to = formatISO(now);
 
   if (period === 'all') {

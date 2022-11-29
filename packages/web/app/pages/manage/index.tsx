@@ -2,14 +2,30 @@ import React from 'react';
 import 'twin.macro';
 import { Select, CheckboxGroup, Checkbox, Tooltip } from '@chakra-ui/react';
 import { VscChevronDown } from 'react-icons/vsc';
+import startOfMonth from 'date-fns/startOfMonth';
+import subDays from 'date-fns/subDays';
+import subHours from 'date-fns/subHours';
 import { AdminStats, Filters } from '@/components/admin/AdminStats';
 import { Page } from '@/components/common';
-import { DATE_RANGE_OPTIONS } from '@/components/common/TimeFilter';
+import { DATE_RANGE_OPTIONS, floorToMinute } from '@/components/common/TimeFilter';
 import { authenticated } from '@/components/authenticated-container';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
+type DateRangeOptions = Exclude<
+  typeof DATE_RANGE_OPTIONS[number],
+  {
+    key: 'all';
+  }
+>;
+
+function isNotAllOption(option: typeof DATE_RANGE_OPTIONS[number]): option is DateRangeOptions {
+  return option.key !== 'all';
+}
+
+const dateRangeOptions = DATE_RANGE_OPTIONS.filter(isNotAllOption);
+
 function Manage() {
-  const [last, setLast] = React.useState(30);
+  const [dateRangeKey, setDateRangeKey] = React.useState<DateRangeOptions['key']>('30d');
   const [filters, setFilters] = React.useState<Filters>({});
   const onFiltersChange = React.useCallback(
     (keys: Array<keyof Filters>) => {
@@ -32,6 +48,25 @@ function Manage() {
     },
     [setFilters, filters],
   );
+
+  const dateRange = React.useMemo(() => {
+    const to = floorToMinute(new Date());
+
+    if (dateRangeKey === 'month') {
+      return {
+        from: startOfMonth(new Date()),
+        to,
+      };
+    }
+
+    const unit = dateRangeKey.endsWith('d') ? 'd' : 'h';
+    const value = parseInt(dateRangeKey.replace(unit, ''));
+
+    return {
+      from: unit === 'd' ? subDays(to, value) : subHours(to, value),
+      to,
+    };
+  }, [dateRangeKey]);
 
   return (
     <Page title="Hive Stats">
@@ -73,16 +108,16 @@ function Manage() {
                 placement="left"
               >
                 <Select
-                  defaultValue={last}
-                  onChange={ev => setLast(parseInt(ev.target.value, 10))}
+                  defaultValue={dateRangeKey}
+                  onChange={ev => setDateRangeKey(ev.target.value as DateRangeOptions['key'])}
                   iconSize="16"
                   icon={<VscChevronDown />}
                   size="sm"
                   tw="inline-block align-middle"
                 >
-                  {DATE_RANGE_OPTIONS.filter(v => v.asDays).map(item => {
+                  {dateRangeOptions.map(item => {
                     return (
-                      <option key={item.key} value={item.asDays}>
+                      <option key={item.key} value={item.key}>
                         {item.label}
                       </option>
                     );
@@ -91,7 +126,7 @@ function Manage() {
               </Tooltip>
             </div>
           </div>
-          <AdminStats last={last} filters={filters} />
+          <AdminStats dateRange={dateRange} filters={filters} />
         </div>
       </div>
     </Page>

@@ -1,5 +1,5 @@
 import { Injectable } from 'graphql-modules';
-import { format, addMinutes, subDays, isAfter } from 'date-fns';
+import { format, addMinutes, isAfter, differenceInDays } from 'date-fns';
 import type { Span } from '@sentry/types';
 import { batch } from '@theguild/buddy';
 import { ClickHouse, RowOf } from './clickhouse-client';
@@ -1507,22 +1507,32 @@ export class OperationsReader {
     }));
   }
 
-  async adminCountOperationsPerTarget({ daysLimit }: { daysLimit: number }) {
+  async adminCountOperationsPerTarget({
+    period,
+  }: {
+    period: {
+      from: Date;
+      to: Date;
+    };
+  }) {
+    const dateRangeFilter = `
+      timestamp >= FROM_UNIXTIME(${Math.floor(period.from.getTime() / 1000)})
+      AND
+      timestamp < FROM_UNIXTIME(${Math.floor(period.to.getTime() / 1000)})
+    `;
+
     const result = await this.clickHouse.query<{
       total: string;
       target: string;
     }>(
-      canUseV2({
-        from: subDays(new Date(), daysLimit),
-        to: new Date(),
-      })
+      canUseV2(period)
         ? {
-            query: `SELECT sum(total) as total, target from operations_daily WHERE timestamp >= subtractDays(NOW(), ${daysLimit}) GROUP BY target`,
+            query: `SELECT sum(total) as total, target from operations_daily WHERE ${dateRangeFilter} GROUP BY target`,
             queryId: 'admin_operations_per_target',
             timeout: 15_000,
           }
         : {
-            query: `SELECT sum(total) as total, target from operations_new_hourly_mv WHERE timestamp >= subtractDays(NOW(), ${daysLimit}) GROUP BY target`,
+            query: `SELECT sum(total) as total, target from operations_new_hourly_mv WHERE ${dateRangeFilter} GROUP BY target`,
             queryId: 'admin_operations_per_target',
             timeout: 15_000,
           },
@@ -1534,12 +1544,21 @@ export class OperationsReader {
     }));
   }
 
-  async adminOperationsOverTime({ daysLimit }: { daysLimit: number }) {
-    const period = {
-      from: subDays(new Date(), daysLimit),
-      to: new Date(),
+  async adminOperationsOverTime({
+    period,
+  }: {
+    period: {
+      from: Date;
+      to: Date;
     };
+  }) {
+    const days = differenceInDays(period.to, period.from);
     const resolution = 90;
+    const dateRangeFilter = `
+      timestamp >= FROM_UNIXTIME(${Math.floor(period.from.getTime() / 1000)})
+      AND
+      timestamp < FROM_UNIXTIME(${Math.floor(period.to.getTime() / 1000)})
+    `;
     const result = await this.clickHouse.query<{
       date: number;
       total: string;
@@ -1559,10 +1578,8 @@ export class OperationsReader {
                   'UTC'),
                 1000) as date,
                 sum(total) as total
-              FROM ${
-                daysLimit > 1 && daysLimit >= resolution ? 'operations_daily' : 'operations_hourly'
-              }
-              WHERE timestamp >= subtractDays(NOW(), ${daysLimit})
+              FROM ${days > 1 && days >= resolution ? 'operations_daily' : 'operations_hourly'}
+              WHERE ${dateRangeFilter}
               GROUP BY date
               ORDER BY date
             `,
@@ -1576,10 +1593,7 @@ export class OperationsReader {
                   toUnixTimestamp(
                     toStartOfInterval(timestamp, INTERVAL ${this.clickHouse.translateWindow(
                       calculateTimeWindow({
-                        period: {
-                          from: subDays(new Date(), daysLimit),
-                          to: new Date(),
-                        },
+                        period,
                         resolution,
                       }),
                     )}, 'UTC'),
@@ -1587,7 +1601,7 @@ export class OperationsReader {
                 1000) as date,
                 sum(total) as total
               FROM operations_new_hourly_mv
-              WHERE timestamp >= subtractDays(NOW(), ${daysLimit})
+              WHERE ${dateRangeFilter}
               GROUP BY date
               ORDER BY date
             `,

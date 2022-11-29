@@ -18,9 +18,9 @@
     "zod": "3.15.1"
   },
   "devDependencies": {
-    "@sentry/node": "7.20.1",
-    "@sentry/tracing": "7.20.1",
-    "@sentry/types": "7.20.1",
-    "@sentry/utils": "7.20.1"
+    "@sentry/node": "7.21.1",
+    "@sentry/tracing": "7.21.1",
+    "@sentry/types": "7.21.1",
+    "@sentry/utils": "7.21.1"
   }
 }

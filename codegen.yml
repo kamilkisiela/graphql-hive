@@ -60,8 +60,8 @@ generates:
         AlertWebhookChannel: AlertChannelMapper
         Alert: ../shared/entities#Alert as AlertMapper
         AdminQuery: '{}'
-        AdminStats: '{ daysLimit?: number | null }'
-        AdminGeneralStats: '{ daysLimit?: number | null }'
+        AdminStats: ../shared/mappers#AdminStats as AdminStatsMapper
+        AdminGeneralStats: ../shared/mappers#AdminStats as AdminGeneralStatsMapper
         AdminOrganizationStats:
           ../shared/entities#AdminOrganizationStats as AdminOrganizationStatsMapper
         UsageEstimation: '../shared/mappers#TargetsEstimationFilter'

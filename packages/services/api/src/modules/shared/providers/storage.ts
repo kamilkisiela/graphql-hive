@@ -317,7 +317,7 @@ export interface Storage {
   ): Promise<readonly Alert[]>;
   getAlerts(_: ProjectSelector): Promise<readonly Alert[]>;
 
-  adminGetStats(daysLimit?: number | null): Promise<
+  adminGetStats(period: { from: Date; to: Date }): Promise<
     ReadonlyArray<{
       organization: Organization;
       versions: number;
@@ -325,7 +325,10 @@ export interface Storage {
       projects: number;
       targets: number;
       persistedOperations: number;
-      daysLimit?: number | null;
+      period: {
+        from: Date;
+        to: Date;
+      };
     }>
   >;
 
