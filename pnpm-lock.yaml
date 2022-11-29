@@ -970,7 +970,7 @@ importers:
       '@emotion/react': 11.10.5
       '@emotion/server': 11.10.0
       '@emotion/styled': 11.10.5
-      '@graphiql/toolkit': 0.6.0
+      '@graphiql/toolkit': 0.8.0
       '@graphql-codegen/gql-tag-operations-preset': 1.7.0
       '@graphql-tools/mock': 8.7.6
       '@graphql-typed-document-node/core': 3.1.1
@@ -1075,7 +1075,7 @@ importers:
       '@emotion/react': 11.10.5_pihaayrhg2ylu5pcyghfouutvq
       '@emotion/server': 11.10.0_@emotion+css@11.10.5
       '@emotion/styled': 11.10.5_xeuojq2bwveqvz2yeua5s5kfvu
-      '@graphiql/toolkit': 0.6.0_graphql@16.6.0
+      '@graphiql/toolkit': 0.8.0_graphql@16.6.0
       '@graphql-tools/mock': 8.7.6_graphql@16.6.0
       '@headlessui/react': 1.7.4_biqbaboplfbrettd7655fr4n2y
       '@monaco-editor/react': 4.4.6_jvipfxa73ntvmo6bim7qoogjo4
@@ -5850,19 +5850,6 @@ packages:
       - '@types/react'
       - graphql-ws
       - react-is
-    dev: false
-
-  /@graphiql/toolkit/0.6.0_graphql@16.6.0:
-    resolution: {integrity: sha512-mbAwbt4lw2bFp9QW3NLVmh/r/ymczlcqvXk1HfvuC7Ma4h0yzrJiQauJyh1/gF5kjqevcRSquvP/YQJSvh1u6w==}
-    peerDependencies:
-      graphql: ^15.5.0 || ^16.0.0
-      graphql-ws: '>= 4.5.0'
-    dependencies:
-      '@n1ru4l/push-pull-async-iterable-iterator': 3.2.0
-      graphql: 16.6.0
-      meros: 1.2.1
-    transitivePeerDependencies:
-      - '@types/node'
     dev: false
 
   /@graphiql/toolkit/0.8.0_graphql@16.6.0:
