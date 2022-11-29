@@ -39,7 +39,9 @@ export class ArtifactStorageReader {
       }),
     );
 
-    const response = await fetch(headCommand);
+    const response = await fetch(headCommand, {
+      method: 'HEAD',
+    });
 
     if (response.status === 200) {
       return await this.generatePresignedGetUrl(key);
