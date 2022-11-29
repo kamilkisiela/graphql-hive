@@ -1,9 +1,4 @@
-import {
-  GetObjectCommand,
-  HeadObjectCommand,
-  NotFound as S3NotFoundError,
-  type S3Client,
-} from '@aws-sdk/client-s3';
+import { GetObjectCommand, HeadObjectCommand, type S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 const presignedUrlExpirationSeconds = 60;
@@ -17,7 +12,7 @@ export const buildArtifactStorageKey = (targetId: string, artifactType: string) 
 export class ArtifactStorageReader {
   constructor(private s3Client: S3Client, private bucketName: string) {}
 
-  private async generatePresignedUrl(key: string): Promise<string> {
+  private async generatePresignedGetUrl(key: string): Promise<string> {
     const command = new GetObjectCommand({
       Bucket: this.bucketName,
       Key: key,
@@ -35,26 +30,23 @@ export class ArtifactStorageReader {
   ): Promise<string | null> {
     const key = buildArtifactStorageKey(targetId, artifactType);
 
-    const headCommand = new HeadObjectCommand({
-      Bucket: this.bucketName,
-      Key: key,
-    });
+    const headCommand = await getSignedUrl(
+      this.s3Client,
+      new HeadObjectCommand({
+        Bucket: this.bucketName,
+        Key: key,
+      }),
+    );
 
-    const result = await this.s3Client
-      .send(headCommand)
-      .then(result => ({ type: 'success', result } as const))
-      .catch(error => {
-        if (error instanceof S3NotFoundError) {
-          return { type: 'error', error } as const;
-        }
-        // Anything else is an unexpected error.
-        throw error;
-      });
+    const response = await fetch(headCommand);
 
-    if (result.type === 'error') {
+    if (response.status === 200) {
+      return await this.generatePresignedGetUrl(key);
+    } else if (response.status === 404) {
       return null;
+    } else {
+      const body = await response.text();
+      throw new Error(`HEAD request failed with status ${response.status}: ${body}`);
     }
-
-    return await this.generatePresignedUrl(key);
   }
 }
