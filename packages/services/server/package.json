@@ -29,7 +29,7 @@
     "zod": "3.15.1"
   },
   "devDependencies": {
-    "@graphql-hive/client": "0.21.3",
+    "@graphql-hive/client": "0.21.4",
     "@hive/api": "workspace:*",
     "@hive/service-common": "workspace:*",
     "@hive/storage": "workspace:*",

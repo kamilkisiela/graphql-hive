@@ -1,5 +1,14 @@
 # @graphql-hive/client
 
+## 0.21.4
+
+### Patch Changes
+
+- [#710](https://github.com/kamilkisiela/graphql-hive/pull/710)
+  [`d0357ee`](https://github.com/kamilkisiela/graphql-hive/commit/d0357ee93ae2bca4d8978d990972204ac2d79521)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Make token optional when Hive is
+  disabled
+
 ## 0.21.3
 
 ### Patch Changes
