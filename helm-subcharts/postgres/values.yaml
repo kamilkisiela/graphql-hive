@@ -1,7 +1,7 @@
 global:
   postgresql:
     auth:
-      database: engage-hive
+      database: graphql-hive
 
 postgresql:
   fullnameOverride: postgres-postgresql
