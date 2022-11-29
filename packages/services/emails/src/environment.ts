@@ -56,7 +56,7 @@ const SMTPEmailModel = zod.object({
   EMAIL_PROVIDER_SMTP_PORT: NumberFromString,
   EMAIL_PROVIDER_SMTP_AUTH_USERNAME: zod.string(),
   EMAIL_PROVIDER_SMTP_AUTH_PASSWORD: zod.string(),
-  EMAIL_PROVIDER_SMTP_REJECT_UNAUTHORIZED: zod.string(),
+  EMAIL_PROVIDER_SMTP_REJECT_UNAUTHORIZED: zod.string().optional(),
 });
 
 const SendmailEmailModel = zod.object({
