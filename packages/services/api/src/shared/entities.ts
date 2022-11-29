@@ -248,5 +248,8 @@ export interface AdminOrganizationStats {
   projects: number;
   targets: number;
   persistedOperations: number;
-  daysLimit?: number | null;
+  period: {
+    from: Date;
+    to: Date;
+  };
 }

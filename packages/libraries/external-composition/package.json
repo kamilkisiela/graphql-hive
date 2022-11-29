@@ -60,7 +60,7 @@
     "@apollo/federation": "0.38.1",
     "esbuild": "0.14.39",
     "fastify": "3.29.4",
-    "graphql": "16.5.0"
+    "graphql": "16.6.0"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org",

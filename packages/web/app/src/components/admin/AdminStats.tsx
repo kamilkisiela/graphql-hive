@@ -29,6 +29,7 @@ import {
   Table as OriginalTable,
 } from '@tanstack/react-table';
 import { DocumentType, gql, useQuery } from 'urql';
+import { formatISO } from 'date-fns';
 import { VscChevronUp, VscChevronDown, VscChevronLeft, VscChevronRight } from 'react-icons/vsc';
 import { DataWrapper } from '@/components/common/DataWrapper';
 import { theme } from '@/lib/charts';
@@ -36,7 +37,7 @@ import { OrganizationType } from '@/graphql';
 import { env } from '@/env/frontend';
 
 interface Organization {
-  name: string;
+  name: React.ReactElement;
   members: string;
   type: OrganizationType;
   users: number;
@@ -81,14 +82,12 @@ const CollectedOperationsOverTime_OperationFragment = gql(/* GraphQL */ `
 `);
 
 const CollectedOperationsOverTime: React.FC<{
-  last: number;
-  operations: Array<DocumentType<typeof CollectedOperationsOverTime_OperationFragment>>;
-}> = ({ last, operations }) => {
-  const period = {
-    from: new Date(Date.now() - (last === 0 ? 30 : last) * 24 * 60 * 60 * 1000),
-    to: new Date(),
+  dateRange: {
+    from: Date;
+    to: Date;
   };
-
+  operations: Array<DocumentType<typeof CollectedOperationsOverTime_OperationFragment>>;
+}> = ({ dateRange, operations }) => {
   const data = React.useMemo(() => {
     return operations.map<[string, number]>(node => [node.date, node.count]);
   }, []);
@@ -114,8 +113,8 @@ const CollectedOperationsOverTime: React.FC<{
               {
                 type: 'time',
                 boundaryGap: false,
-                min: period.from,
-                max: period.to,
+                min: dateRange.from,
+                max: dateRange.to,
               },
             ],
             yAxis: [
@@ -177,9 +176,9 @@ const Sortable: React.FC<{
 };
 
 const AdminStatsQuery = gql(/* GraphQL */ `
-  query adminStats($last: Int) {
+  query adminStats($period: DateRangeInput!) {
     admin {
-      stats(daysLimit: $last) {
+      stats(period: $period) {
         organizations {
           organization {
             id
@@ -253,13 +252,19 @@ function OrganizationTableRow({ row }: { row: ReturnType<TableInstance['getRow']
     <Tr key={row.id}>
       {row.getVisibleCells().map(cell => {
         const isNumeric = typeof cell.getValue() === 'number';
+        const isReact =
+          typeof cell.getValue() === 'object' && React.isValidElement(cell.getValue());
         return (
           <Td
             key={cell.id}
             isNumeric={isNumeric}
             align={(cell.column.columnDef.meta as { align: 'right' } | undefined)?.align ?? 'left'}
           >
-            {isNumeric ? formatNumber(cell.getValue() as number) : cell.renderCell()}
+            {isNumeric
+              ? formatNumber(cell.getValue() as number)
+              : isReact
+              ? cell.getValue()
+              : cell.renderCell()}
           </Td>
         );
       })}
@@ -273,6 +278,7 @@ function OrganizationTable({ data }: { data: Organization[] }) {
       table.createDataColumn('name', {
         header: 'Organization',
         footer: props => props.column.id,
+        enableSorting: false,
       }),
       table.createDataColumn('type', {
         header: 'Type',
@@ -439,13 +445,19 @@ function OrganizationTable({ data }: { data: Organization[] }) {
 }
 
 export const AdminStats: React.FC<{
-  last: number;
+  dateRange: {
+    from: Date;
+    to: Date;
+  };
   filters: Filters;
-}> = ({ last, filters }) => {
+}> = ({ dateRange, filters }) => {
   const [query] = useQuery({
     query: AdminStatsQuery,
     variables: {
-      last: last === 0 ? null : last,
+      period: {
+        from: formatISO(dateRange.from),
+        to: formatISO(dateRange.to),
+      },
     },
   });
 
@@ -453,12 +465,14 @@ export const AdminStats: React.FC<{
     return (query.data?.admin?.stats.organizations ?? [])
       .filter(node => filterStats(node, filters))
       .map(node => ({
-        name: [
-          `<strong style="padding-bottom: 5px;">${node.organization.name}</strong>`,
-          `id:      ${node.organization.id}`,
-          `cleanId: ${node.organization.cleanId}`,
-          `owner:   ${node.organization.owner.user.email}`,
-        ].join('<br />'),
+        name: (
+          <div>
+            <div style={{ paddingBottom: 5, fontWeight: 'bold' }}>{node.organization.name}</div>
+            <pre title="id">{node.organization.id}</pre>
+            <pre title="clean id">{node.organization.cleanId}</pre>
+            <pre title="owner">{node.organization.owner.user.email}</pre>
+          </div>
+        ),
         members: (node.organization.members.nodes || []).map(v => v.user.email).join(', '),
         type: node.organization.type,
         users: node.users,
@@ -496,7 +510,7 @@ export const AdminStats: React.FC<{
             <OverallStat label="Collected Ops" value={overall.operations} />
           </StatGroup>
           <CollectedOperationsOverTime
-            last={last}
+            dateRange={dateRange}
             operations={data.admin.stats.general.operationsOverTime}
           />
           <OrganizationTable data={tableData} />

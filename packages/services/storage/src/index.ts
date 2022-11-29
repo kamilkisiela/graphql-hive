@@ -2056,7 +2056,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       );
       return results.rows;
     },
-    async adminGetStats(daysLimit?: number | null) {
+    async adminGetStats(period: { from: Date; to: Date }) {
       // count schema versions by organization
       const versionsResult = pool.query<
         Slonik<
@@ -2072,7 +2072,10 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         LEFT JOIN targets AS t ON (t.id = v.target_id)
         LEFT JOIN projects AS p ON (p.id = t.project_id)
         LEFT JOIN organizations AS o ON (o.id = p.org_id)
-        ${daysLimit ? sql`WHERE v.created_at > NOW() - (INTERVAL '1 days' * ${daysLimit})` : sql``}
+        WHERE 
+          v.created_at >= ${period.from.toISOString()}
+          AND
+          v.created_at < ${period.to.toISOString()}
         GROUP by o.id
       `);
 
@@ -2125,38 +2128,18 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         GROUP by o.id
       `);
 
-      // count persisted operations by organization
-      const persistedOperationsResult = pool.query<
-        Slonik<
-          Pick<organizations, 'id'> & {
-            total: number;
-          }
-        >
-      >(sql`
-        SELECT
-          COUNT(*) as total,
-          o.id
-        FROM persisted_operations AS po
-        LEFT JOIN projects AS p ON (p.id = po.project_id)
-        LEFT JOIN organizations AS o ON (o.id = p.org_id)
-        ${daysLimit ? sql`WHERE po.created_at > NOW() - (INTERVAL '1 days' * ${daysLimit})` : sql``}
-        GROUP by o.id
-      `);
-
       // get organizations data
       const organizationsResult = pool.query<Slonik<organizations>>(sql`
         SELECT * FROM organizations
       `);
 
-      const [versions, users, projects, targets, persistedOperations, organizations] =
-        await Promise.all([
-          versionsResult,
-          usersResult,
-          projectsResult,
-          targetsResult,
-          persistedOperationsResult,
-          organizationsResult,
-        ]);
+      const [versions, users, projects, targets, organizations] = await Promise.all([
+        versionsResult,
+        usersResult,
+        projectsResult,
+        targetsResult,
+        organizationsResult,
+      ]);
 
       const rows: Array<{
         organization: Organization;
@@ -2165,7 +2148,10 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         projects: number;
         targets: number;
         persistedOperations: number;
-        daysLimit?: number | null;
+        period: {
+          from: Date;
+          to: Date;
+        };
       }> = [];
 
       function extractTotal<
@@ -2184,8 +2170,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           users: extractTotal(users.rows, organization.id),
           projects: extractTotal(projects.rows, organization.id),
           targets: extractTotal(targets.rows, organization.id),
-          persistedOperations: extractTotal(persistedOperations.rows, organization.id),
-          daysLimit,
+          persistedOperations: 0,
+          period,
         });
       }
 

@@ -25,7 +25,7 @@ export class AdminManager {
     this.logger = logger.child({ source: 'AdminManager' });
   }
 
-  async getStats(daysLimit?: number | null) {
+  async getStats(period: { from: Date; to: Date }) {
     this.logger.debug('Fetching admin stats');
     const user = await this.authManager.getCurrentUser();
 
@@ -33,11 +33,22 @@ export class AdminManager {
       throw new GraphQLError('GO AWAY');
     }
 
-    return this.storage.adminGetStats(daysLimit);
+    return this.storage.adminGetStats(period);
   }
 
-  async getOperationsOverTime({ daysLimit }: { daysLimit: number }) {
-    this.logger.debug('Fetching collected operations over time (admin, daysLimit=%s)', daysLimit);
+  async getOperationsOverTime({
+    period,
+  }: {
+    period: {
+      from: Date;
+      to: Date;
+    };
+  }) {
+    this.logger.debug(
+      'Fetching collected operations over time (admin, from=%s, to=%s)',
+      period.from,
+      period.to,
+    );
     const user = await this.authManager.getCurrentUser();
 
     if (!user.isAdmin) {
@@ -45,7 +56,7 @@ export class AdminManager {
     }
 
     const points = await this.operationsReader.adminOperationsOverTime({
-      daysLimit,
+      period,
     });
 
     return points.map(point => ({
@@ -55,17 +66,18 @@ export class AdminManager {
   }
 
   @atomic((arg: { daysLimit: number }) => arg.daysLimit + '')
-  async countOperationsPerOrganization({ daysLimit }: { daysLimit: number }) {
+  async countOperationsPerOrganization({ period }: { period: { from: Date; to: Date } }) {
     this.logger.info(
-      'Counting collected operations per organization (admin, daysLimit=%s)',
-      daysLimit,
+      'Counting collected operations per organization (admin, from=%s, to=%s)',
+      period.from,
+      period.to,
     );
     const user = await this.authManager.getCurrentUser();
 
     if (user.isAdmin) {
       const pairs = await this.storage.adminGetOrganizationsTargetPairs();
       const operations = await this.operationsReader.adminCountOperationsPerTarget({
-        daysLimit,
+        period,
       });
 
       const organizationCountMap = new Map<string, number>();

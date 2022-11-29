@@ -8,33 +8,37 @@ export const resolvers: AdminModule.Resolvers = {
     },
   },
   AdminQuery: {
-    stats(_, { daysLimit }) {
+    stats(_, { period }) {
       return {
-        daysLimit,
+        period,
       };
     },
   },
   AdminStats: {
-    organizations({ daysLimit }, __, { injector }) {
-      return injector.get(AdminManager).getStats(daysLimit);
+    organizations({ period }, __, { injector }) {
+      return injector.get(AdminManager).getStats({
+        from: new Date(period.from),
+        to: new Date(period.to),
+      });
     },
-    general({ daysLimit }) {
-      return { daysLimit };
+    general({ period }) {
+      return { period };
     },
   },
   AdminGeneralStats: {
-    operationsOverTime({ daysLimit }, _, { injector }) {
+    operationsOverTime({ period }, _, { injector }) {
       return injector.get(AdminManager).getOperationsOverTime({
-        // Max days limit is 30 (that's the default TTL in ClickHouse table)
-        daysLimit: daysLimit ?? 30,
+        period: {
+          from: new Date(period.from),
+          to: new Date(period.to),
+        },
       });
     },
   },
   AdminOrganizationStats: {
     async operations(stats, _, { injector }) {
       const results = await injector.get(AdminManager).countOperationsPerOrganization({
-        // Max days limit is 30 (that's the default TTL in ClickHouse table)
-        daysLimit: stats.daysLimit ?? 30,
+        period: stats.period,
       });
 
       return results.find(r => r.organization === stats.organization.id)?.total ?? 0;
