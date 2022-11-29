@@ -1,4 +1,4 @@
-import { ReactElement, useCallback, useEffect, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import NextLink from 'next/link';
 import clsx from 'clsx';
 import { useQuery } from 'urql';
@@ -21,7 +21,7 @@ import { CreateOrganizationModal } from '@/components/v2/modals';
 import { env } from '@/env/frontend';
 import { MeDocument, OrganizationsDocument, OrganizationsQuery, OrganizationType } from '@/graphql';
 import { getDocsUrl } from '@/lib/docs-url';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useRouteSelector, useToggle } from '@/lib/hooks';
 
 type DropdownOrganization = OrganizationsQuery['organizations']['nodes'];
 
@@ -29,11 +29,8 @@ export const Header = (): ReactElement => {
   const router = useRouteSelector();
   const [meQuery] = useQuery({ query: MeDocument });
   const [organizationsQuery] = useQuery({ query: OrganizationsDocument });
-  const [isModalOpen, setModalOpen] = useState(false);
+  const [isModalOpen, toggleModalOpen] = useToggle();
   const [isOpaque, setIsOpaque] = useState(false);
-  const toggleModalOpen = useCallback(() => {
-    setModalOpen(prevOpen => !prevOpen);
-  }, []);
 
   const me = meQuery.data?.me;
   const allOrgs = organizationsQuery.data?.organizations.nodes || [];

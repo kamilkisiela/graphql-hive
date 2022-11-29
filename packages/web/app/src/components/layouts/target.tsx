@@ -1,4 +1,4 @@
-import { ReactElement, ReactNode, useCallback, useEffect, useState } from 'react';
+import { ReactElement, ReactNode, useEffect } from 'react';
 import NextLink from 'next/link';
 import { useQuery } from 'urql';
 
@@ -12,7 +12,7 @@ import {
   OrganizationFieldsFragment,
 } from '@/graphql';
 import { gql } from 'urql';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useRouteSelector, useToggle } from '@/lib/hooks';
 import { useTargetAccess, canAccessTarget, TargetAccessScope } from '@/lib/access/target';
 import { QueryError } from '../common/DataWrapper';
 import { ConnectSchemaModal } from '@/components/v2/modals';
@@ -47,10 +47,7 @@ export const TargetLayout = ({
   className?: string;
   connect?: ReactNode;
 }): ReactElement | null => {
-  const [isModalOpen, setModalOpen] = useState(false);
-  const toggleModalOpen = useCallback(() => {
-    setModalOpen(prevOpen => !prevOpen);
-  }, []);
+  const [isModalOpen, toggleModalOpen] = useToggle();
 
   const router = useRouteSelector();
 

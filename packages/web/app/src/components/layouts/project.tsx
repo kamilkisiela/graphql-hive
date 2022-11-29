@@ -1,4 +1,4 @@
-import { ReactElement, ReactNode, useCallback, useEffect, useState } from 'react';
+import { ReactElement, ReactNode, useEffect } from 'react';
 import NextLink from 'next/link';
 import 'twin.macro';
 import { useQuery } from 'urql';
@@ -12,7 +12,7 @@ import {
   ProjectFieldsFragment,
   OrganizationFieldsFragment,
 } from '@/graphql';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useRouteSelector, useToggle } from '@/lib/hooks';
 import { useProjectAccess, ProjectAccessScope, canAccessProject } from '@/lib/access/project';
 
 enum TabValue {
@@ -34,10 +34,7 @@ export const ProjectLayout = ({
   className?: string;
 }): ReactElement | null => {
   const router = useRouteSelector();
-  const [isModalOpen, setModalOpen] = useState(false);
-  const toggleModalOpen = useCallback(() => {
-    setModalOpen(prevOpen => !prevOpen);
-  }, []);
+  const [isModalOpen, toggleModalOpen] = useToggle();
 
   const { organizationId: orgId, projectId } = router;
 

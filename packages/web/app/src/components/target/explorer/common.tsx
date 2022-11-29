@@ -4,10 +4,9 @@ import clsx from 'clsx';
 import { gql, DocumentType } from 'urql';
 import * as Popover from '@radix-ui/react-popover';
 import { VscCommentDiscussion, VscPulse } from 'react-icons/vsc';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useRouteSelector, formatNumber } from '@/lib/hooks';
 import { Link } from '@/components/v2/link';
 import { Markdown } from '@/components/v2/markdown';
-import { formatNumber } from '@/lib/hooks/use-formatted-number';
 import { useArgumentListToggle } from './provider';
 
 function useCollapsibleList<T>(list: T[], max: number, defaultValue: boolean) {

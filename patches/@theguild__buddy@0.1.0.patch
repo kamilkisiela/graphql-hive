@@ -1,8 +1,24 @@
+diff --git a/index.js b/index.js
+index f8b4b959baf4010ff4e38cea8b43d99364a30a3b..eabb5cc98d39a8ea4d83e4c41020491eb45e343a 100644
+--- a/index.js
++++ b/index.js
+@@ -65,10 +65,10 @@ function sharePromise(setter) {
+         return sharedPromise;
+     };
+ }
+-const cacheSymbol = Symbol.for("@cache");
+ function cacheResult(cacheKeyFn) {
+     return (_target, _propertyKey, descriptor) => {
+         const originalMethod = descriptor.value;
++        const cacheSymbol = Symbol.for("@cache");
+         function ensureCache(obj) {
+             if (!obj[cacheSymbol]) {
+                 obj[cacheSymbol] = new Map();
 diff --git a/index.mjs b/index.mjs
-index 7db160e..a94f537 100644
+index 7db160e5b92587f8655ee04052272e08879dea58..b9de7170da38136b70d68aa495305f03bce6b4ae 100644
 --- a/index.mjs
 +++ b/index.mjs
-@@ -61,10 +61,11 @@ function sharePromise(setter) {
+@@ -61,10 +61,10 @@ function sharePromise(setter) {
          return sharedPromise;
      };
  }
@@ -11,7 +27,6 @@ index 7db160e..a94f537 100644
      return (_target, _propertyKey, descriptor) => {
          const originalMethod = descriptor.value;
 +        const cacheSymbol = Symbol('@cache');
-+        
          function ensureCache(obj) {
              if (!obj[cacheSymbol]) {
                  obj[cacheSymbol] = new Map();

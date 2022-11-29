@@ -33,7 +33,7 @@ import {
   TokensDocument,
 } from '@/graphql';
 import { canAccessTarget, TargetAccessScope } from '@/lib/access/target';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useRouteSelector, useToggle } from '@/lib/hooks';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const columns = [
@@ -48,10 +48,7 @@ const Tokens = ({ me }: { me: MemberFieldsFragment }): ReactElement => {
   const router = useRouteSelector();
   const [{ fetching: deleting }, mutate] = useMutation(DeleteTokensDocument);
   const [checked, setChecked] = useState<string[]>([]);
-  const [isModalOpen, setModalOpen] = useState(false);
-  const toggleModalOpen = useCallback(() => {
-    setModalOpen(prevOpen => !prevOpen);
-  }, []);
+  const [isModalOpen, toggleModalOpen] = useToggle();
 
   const [tokensQuery] = useQuery({
     query: TokensDocument,
@@ -589,10 +586,7 @@ const Page = ({
   organization: OrganizationFieldsFragment;
 }) => {
   const router = useRouteSelector();
-  const [isModalOpen, setModalOpen] = useState(false);
-  const toggleModalOpen = useCallback(() => {
-    setModalOpen(prevOpen => !prevOpen);
-  }, []);
+  const [isModalOpen, toggleModalOpen] = useToggle();
 
   const [mutation, mutate] = useMutation(Settings_UpdateTargetNameMutation);
   const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } =

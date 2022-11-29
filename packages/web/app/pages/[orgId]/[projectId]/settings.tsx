@@ -1,4 +1,4 @@
-import { ReactElement, useCallback, useState } from 'react';
+import { ReactElement } from 'react';
 import NextLink from 'next/link';
 import { useFormik } from 'formik';
 import { gql, useMutation, useQuery } from 'urql';
@@ -17,7 +17,7 @@ import {
   ProjectType,
 } from '@/graphql';
 import { canAccessProject, ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useRouteSelector, useToggle } from '@/lib/hooks';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const Settings_UpdateProjectGitRepositoryMutation = gql(/* GraphQL */ `
@@ -160,10 +160,7 @@ const Page = ({
     redirect: true,
   });
   const router = useRouteSelector();
-  const [isModalOpen, setModalOpen] = useState(false);
-  const toggleModalOpen = useCallback(() => {
-    setModalOpen(prevOpen => !prevOpen);
-  }, []);
+  const [isModalOpen, toggleModalOpen] = useToggle();
 
   const [mutation, mutate] = useMutation(Settings_UpdateProjectNameMutation);
 

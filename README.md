@@ -4,8 +4,8 @@ GraphQL Hive provides all the tools the get visibility of your GraphQL architect
 from standalone APIs to composed schemas (Federation, Stitching).
 
 - Visit [graphql-hive.com](https://graphql-hive.com)
-  ([status page](https://status.graphql-hive.com/))
-- [Read the announcement blog post](https://www.the-guild.dev/blog/announcing-graphql-hive-public)
+  ([status page](https://status.graphql-hive.com))
+- [Read the announcement blog post](https://the-guild.dev/blog/announcing-graphql-hive-public)
 - [Read the docs](https://docs.graphql-hive.com)
 
 ## Built for the community, for all GraphQL APIs
@@ -77,7 +77,7 @@ See you in Hive! 🐝
 - App: React, Next.js, Tailwind CSS, Radix Primitives
 - CLI: Oclif
 - Deployment: Pulumi, K8s, Nginx Proxy, Azure Cloud, CloudFlare Workers + KV Cache
-- Monitoring: Promthues, Grafana, Sentry
+- Monitoring: Prometheus, Grafana, Sentry
 - DB: Postgres, Redis, ClickHouse
 
 ## Docs

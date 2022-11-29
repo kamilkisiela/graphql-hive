@@ -65,9 +65,9 @@ export interface oidc_integrations {
   client_id: string;
   client_secret: string;
   created_at: Date;
-  oauth_api_url: string;
   id: string;
   linked_organization_id: string;
+  oauth_api_url: string;
   updated_at: Date;
 }
 
@@ -177,8 +177,8 @@ export interface users {
   full_name: string;
   id: string;
   is_admin: boolean | null;
-  supertoken_user_id: string | null;
   oidc_integration_id: string | null;
+  supertoken_user_id: string | null;
 }
 
 export interface version_commit {

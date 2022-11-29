@@ -1,5 +1,5 @@
 import React from 'react';
-import { Router, useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { Router, useRouteSelector } from '@/lib/hooks';
 import { OrganizationAccessScope, ProjectAccessScope, TargetAccessScope } from '../../graphql';
 
 export interface Scope<T> {

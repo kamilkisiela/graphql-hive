@@ -5,7 +5,7 @@ import 'twin.macro';
 import { VscChevronDown } from 'react-icons/vsc';
 import { Button, Menu, MenuButton, MenuList, MenuItem } from '@chakra-ui/react';
 import { TargetsDocument } from '@/graphql';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useRouteSelector } from '@/lib/hooks';
 
 export const TargetSwitcher: React.FC<{
   organizationId: string;

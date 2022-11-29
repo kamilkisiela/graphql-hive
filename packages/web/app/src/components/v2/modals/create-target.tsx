@@ -5,7 +5,7 @@ import { gql, useMutation } from 'urql';
 import * as Yup from 'yup';
 
 import { Button, Heading, Input, Modal } from '@/components/v2';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useRouteSelector } from '@/lib/hooks';
 
 const CreateTarget_CreateTargetMutation = gql(/* GraphQL */ `
   mutation CreateTarget_CreateTarget($input: CreateTargetInput!) {

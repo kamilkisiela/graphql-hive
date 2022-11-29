@@ -21,7 +21,7 @@ import {
   ProjectIdUpdatedActivity,
 } from '@/graphql';
 import { fixDuplicatedFragments } from '@/lib/graphql';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useRouteSelector } from '@/lib/hooks';
 
 const organizationActivitiesDocument = fixDuplicatedFragments(OrganizationActivitiesDocument);
 
