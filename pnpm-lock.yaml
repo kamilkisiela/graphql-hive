@@ -11,24 +11,24 @@ patchedDependencies:
   '@tgriesser/schemats@7.0.0':
     hash: u3kbucfchakklx3sci2vh6wjau
     path: patches/@tgriesser__schemats@7.0.0.patch
-  '@n1ru4l/dockest@2.1.0-rc.6':
-    hash: 2borp2lvtycfyctncvbphkqq2a
-    path: patches/@n1ru4l__dockest@2.1.0-rc.6.patch
+  atomic-sleep@1.0.0:
+    hash: ofrh3divoxil53fpajpmtnq43q
+    path: patches/atomic-sleep@1.0.0.patch
+  mjml-core@4.13.0:
+    hash: zxxsxbqejjmcwuzpigutzzq6wa
+    path: patches/mjml-core@4.13.0.patch
   '@theguild/buddy@0.1.0':
-    hash: by7lpfnfs364rrj52jl5kihtv4
+    hash: ryylgra5xglhidfoiaxehn22hq
     path: patches/@theguild__buddy@0.1.0.patch
   bullmq@1.81.4:
     hash: d7likfulu5mfjaaerbpls6og24
     path: patches/bullmq@1.81.4.patch
-  mjml-core@4.13.0:
-    hash: zxxsxbqejjmcwuzpigutzzq6wa
-    path: patches/mjml-core@4.13.0.patch
   slonik@30.1.2:
     hash: wg2hxbo7txnklmvja4aeqnygfi
     path: patches/slonik@30.1.2.patch
-  atomic-sleep@1.0.0:
-    hash: ofrh3divoxil53fpajpmtnq43q
-    path: patches/atomic-sleep@1.0.0.patch
+  '@n1ru4l/dockest@2.1.0-rc.6':
+    hash: 2borp2lvtycfyctncvbphkqq2a
+    path: patches/@n1ru4l__dockest@2.1.0-rc.6.patch
   bob-the-bundler@4.0.0:
     hash: sum6gc2cezfosivdgsdg22qyja
     path: patches/bob-the-bundler@4.0.0.patch
@@ -375,7 +375,7 @@ importers:
       '@sentry/node': 7.21.1
       '@sentry/types': 7.21.1
       '@slack/web-api': 6.4.0
-      '@theguild/buddy': 0.1.0_by7lpfnfs364rrj52jl5kihtv4
+      '@theguild/buddy': 0.1.0_ryylgra5xglhidfoiaxehn22hq
       '@trpc/client': 9.23.2
       '@whatwg-node/fetch': 0.4.7
       abort-controller: 3.0.0
@@ -694,7 +694,7 @@ importers:
     dependencies:
       '@sentry/node': 7.21.1
       '@slonik/migrator': 0.8.5_slonik@30.1.2
-      '@theguild/buddy': 0.1.0_by7lpfnfs364rrj52jl5kihtv4
+      '@theguild/buddy': 0.1.0_ryylgra5xglhidfoiaxehn22hq
       dotenv: 10.0.0
       got: 12.5.3
       param-case: 3.0.4
@@ -9297,7 +9297,7 @@ packages:
     dev: true
     patched: true
 
-  /@theguild/buddy/0.1.0_by7lpfnfs364rrj52jl5kihtv4:
+  /@theguild/buddy/0.1.0_ryylgra5xglhidfoiaxehn22hq:
     resolution: {integrity: sha512-eaABtwy4vzvU8H+ocjph0lrCguza8vS3DKhc5gfFtHOzBimLJa9N2qYjrTJkslkoB7XNSkU6UYlSDvUJBieh+g==}
     dev: false
     patched: true
