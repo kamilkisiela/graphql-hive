@@ -175,18 +175,6 @@ function runArtifactsCDNTests(name: string, endpointBaseUrl: string) {
         'SchemaPublishSuccess',
       );
 
-      const schemaSyncCDNResult = await schemaSyncCDN(
-        {
-          organization: org.cleanId,
-          project: project.cleanId,
-          target: target!.cleanId,
-        },
-        access_token,
-      );
-
-      expect(schemaSyncCDNResult.body.errors).not.toBeDefined();
-      expect(schemaSyncCDNResult.body.data!.schemaSyncCDN.__typename).toBe('SchemaSyncCDNSuccess');
-
       const cdnAccessResult = await createCdnAccess(
         {
           organization: org.cleanId,
