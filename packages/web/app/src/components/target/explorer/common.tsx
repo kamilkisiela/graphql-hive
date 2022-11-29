@@ -1,5 +1,4 @@
 import React from 'react';
-import NextLink from 'next/link';
 import clsx from 'clsx';
 import { gql, DocumentType } from 'urql';
 import * as Popover from '@radix-ui/react-popover';
@@ -319,11 +318,11 @@ export function GraphQLTypeAsLink(props: { type: string }) {
   const typename = props.type.replace(/[[\]!]+/g, '');
 
   return (
-    <NextLink
+    <Link
+      className="text-orange-500"
       href={`/${router.organizationId}/${router.projectId}/${router.targetId}/explorer/${typename}`}
-      passHref
     >
-      <Link className="text-orange-500">{props.type}</Link>
-    </NextLink>
+      {props.type}
+    </Link>
   );
 }

@@ -43,7 +43,7 @@ MyError.getInitialProps = async (props: NextPageContext) => {
   //
   //  - a page's `getInitialProps` threw or returned a Promise that rejected
   //  - an exception was thrown somewhere in the React lifecycle (render,
-  //    componentDidMount, etc) that was caught by Next.js's React Error
+  //    componentDidMount, etc.) that was caught by Next.js' React Error
   //    Boundary. Read more about what types of exceptions are caught by Error
   //    Boundaries: https://reactjs.org/docs/error-boundaries.html
 

@@ -55,52 +55,48 @@ const ProjectCard = ({
   const lastActivity = projectActivitiesQuery.data?.projectActivities.nodes[0];
 
   return (
-    <NextLink key={project.id} passHref href={href}>
-      <Card as="a" className="self-start hover:bg-gray-800/40">
-        <div className="flex items-start gap-x-2">
-          <div className="grow">
-            <h3 className="text-xs font-medium text-[#34EAB9]">{project.type}</h3>
-            <h4 className="line-clamp-2 text-lg font-bold">{project.name}</h4>
-          </div>
-
-          <DropdownMenu>
-            <DropdownMenu.Trigger asChild>
-              <Button rotate={90}>
-                <MoreIcon />
-              </Button>
-            </DropdownMenu.Trigger>
-            <DropdownMenu.Content sideOffset={5} align="start">
-              <DropdownMenu.Item
-                onClick={async e => {
-                  e.stopPropagation();
-                  await copyToClipboard(`${window.location.origin}${href}`);
-                }}
-              >
-                <LinkIcon />
-                Share Link
-              </DropdownMenu.Item>
-              <NextLink href={`/${router.organizationId}/${project.cleanId}#settings`}>
-                <a>
-                  <DropdownMenu.Item>
-                    <SettingsIcon />
-                    Settings
-                  </DropdownMenu.Item>
-                </a>
-              </NextLink>
-            </DropdownMenu.Content>
-          </DropdownMenu>
+    <Card as={NextLink} key={project.id} href={href} className="self-start hover:bg-gray-800/40">
+      <div className="flex items-start gap-x-2">
+        <div className="grow">
+          <h3 className="text-xs font-medium text-[#34EAB9]">{project.type}</h3>
+          <h4 className="line-clamp-2 text-lg font-bold">{project.name}</h4>
         </div>
-        {lastActivity && (
-          <div className="mt-5 text-xs font-medium text-gray-500">
-            <span className="line-clamp-3">
-              {/* fixes Warning: validateDOMNesting(...): <a> cannot appear as a descendant of <a> */}
-              {onlyText(getActivity(lastActivity).content)}{' '}
-              <TimeAgo date={lastActivity.createdAt} className="text-gray-300" />
-            </span>
-          </div>
-        )}
-      </Card>
-    </NextLink>
+
+        <DropdownMenu>
+          <DropdownMenu.Trigger asChild>
+            <Button rotate={90}>
+              <MoreIcon />
+            </Button>
+          </DropdownMenu.Trigger>
+          <DropdownMenu.Content sideOffset={5} align="start">
+            <DropdownMenu.Item
+              onClick={async e => {
+                e.stopPropagation();
+                await copyToClipboard(`${location.origin}${href}`);
+              }}
+            >
+              <LinkIcon />
+              Share Link
+            </DropdownMenu.Item>
+            <NextLink href={`/${router.organizationId}/${project.cleanId}#settings`}>
+              <DropdownMenu.Item>
+                <SettingsIcon />
+                Settings
+              </DropdownMenu.Item>
+            </NextLink>
+          </DropdownMenu.Content>
+        </DropdownMenu>
+      </div>
+      {lastActivity && (
+        <div className="mt-5 text-xs font-medium text-gray-500">
+          <span className="line-clamp-3">
+            {/* fixes Warning: validateDOMNesting(...): <a> cannot appear as a descendant of <a> */}
+            {onlyText(getActivity(lastActivity).content)}{' '}
+            <TimeAgo date={lastActivity.createdAt} className="text-gray-300" />
+          </span>
+        </div>
+      )}
+    </Card>
   );
 };
 

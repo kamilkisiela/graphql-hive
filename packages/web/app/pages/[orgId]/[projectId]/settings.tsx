@@ -1,5 +1,4 @@
 import { ReactElement } from 'react';
-import NextLink from 'next/link';
 import { useFormik } from 'formik';
 import { gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
@@ -120,9 +119,9 @@ const GitHubIntegration = ({ gitRepository }: { gitRepository: string | null }):
   return (
     <Tag className="!p-4">
       The organization is not connected to our GitHub Application.
-      <NextLink passHref href={`/${router.organizationId}#settings`}>
-        <Link variant="primary">Visit settings</Link>
-      </NextLink>
+      <Link variant="primary" href={`/${router.organizationId}#settings`}>
+        Visit settings
+      </Link>
       to configure it.
     </Tag>
   );
