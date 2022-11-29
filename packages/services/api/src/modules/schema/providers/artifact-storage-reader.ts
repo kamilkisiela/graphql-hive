@@ -1,3 +1,6 @@
+/**
+ * IMPORTANT NOTE: This file needs to be kept platform-agnostic, don't use any Node.js specific APIs.
+ */
 import { GetObjectCommand, HeadObjectCommand, type S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { fetch } from '@whatwg-node/fetch';
@@ -30,6 +33,14 @@ export class ArtifactStorageReader {
     artifactType: 'sdl' | 'metadata' | 'services' | 'supergraph',
   ): Promise<string | null> {
     const key = buildArtifactStorageKey(targetId, artifactType);
+
+    // In case you are wondering why we generate a pre-signed URL for doing the HEAD
+    // request instead of just run the command with the AWS SDK:
+    // The S3 client is not platform agnostic and will fail when
+    // executed from within a Cloudflare Worker.
+    // Signing, on the other hand, is platform agnostic.
+    // AWS does not seem to fix this any time soon.
+    // See https://github.com/aws/aws-sdk-js-v3/issues/3104
 
     const headCommand = await getSignedUrl(
       this.s3Client,
