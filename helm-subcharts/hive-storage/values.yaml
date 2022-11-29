@@ -4,7 +4,7 @@ global:
   clickhouse_username: default
   postgresql:
     auth:
-      database: engage-hive
+      database: graphql-hive
       user: postgres
 
 image:

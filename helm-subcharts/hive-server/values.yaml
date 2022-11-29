@@ -4,7 +4,7 @@ global:
   clickhouse_username: hive
   postgresql:
     auth:
-      database: engage-hive
+      database: graphql-hive
       user: postgres
   apiKey:
     # -- list of API Keys to load and use with supertokens-core

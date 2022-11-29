@@ -12,7 +12,7 @@ fullnameOverride: ""
 global:
   postgresql:
     auth:
-      database: engage-hive
+      database: graphql-hive
       user: postgres
 
   apiKey:
