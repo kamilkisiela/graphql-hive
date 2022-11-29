@@ -91,6 +91,9 @@ function smtp(config: SMTPEmailProviderConfig, emailFrom: string) {
       user: config.auth.user,
       pass: config.auth.pass,
     },
+    tls: {
+      rejectUnauthorized: config.tls.rejectUnauthorized
+    }
   });
 
   return {
