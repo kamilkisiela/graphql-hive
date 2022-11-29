@@ -46,24 +46,17 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
   };
 
   router.get('/artifacts/v1/:targetId/:artifactType', async (request: itty.Request & Request) => {
-    console.log("4.1 - it's in the router");
     const params = ParamsModel.parse(request.params);
     const maybeResponse = await authenticate(request, params.targetId);
     if (maybeResponse !== null) {
       return maybeResponse;
     }
 
-    console.log("4.1 - it's authenticated");
-
     const artifactUrl = await deps.getArtifactUrl(params.targetId, params.artifactType);
-
-    console.log('4.1 - we got the artifact url');
 
     if (!artifactUrl) {
       return new Response('Not found.', { status: 404 });
     }
-
-    console.log('4.1 - we made it');
 
     return new Response('Found.', { status: 302, headers: { Location: artifactUrl } });
   });

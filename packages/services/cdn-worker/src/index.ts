@@ -7,8 +7,6 @@ import { UnexpectedError } from './errors';
 import { createRequestHandler } from './handler';
 import { createArtifactRequestHandler } from './artifact-handler';
 
-console.log('1 - It exists');
-
 /**
  * KV Storage for the CDN
  */
@@ -41,8 +39,6 @@ declare let S3_ACCESS_KEY_ID: string;
 declare let S3_SECRET_ACCESS_KEY: string;
 declare let S3_BUCKET_NAME: string;
 
-console.log('2 - It creates handlers');
-
 const s3Client = new S3Client({
   endpoint: S3_ENDPOINT,
   credentials: {
@@ -52,8 +48,6 @@ const s3Client = new S3Client({
   forcePathStyle: true,
   region: 'auto',
 });
-
-console.log('2 - It creates S3 SDKs');
 
 const artifactStorageReader = new ArtifactStorageReader(s3Client, S3_BUCKET_NAME);
 
@@ -71,8 +65,6 @@ const router = itty
   .get('*', handleRequest);
 
 self.addEventListener('fetch', async (event: FetchEvent) => {
-  console.log('3 - It handles requests');
-
   const sentry = new Toucan({
     dsn: SENTRY_DSN,
     environment: SENTRY_ENVIRONMENT,
@@ -89,8 +81,6 @@ self.addEventListener('fetch', async (event: FetchEvent) => {
     allowedSearchParams: /(.*)/,
   });
 
-  console.log('4 - it initializes error stuff');
-
   try {
     event.respondWith(
       router
@@ -99,11 +89,9 @@ self.addEventListener('fetch', async (event: FetchEvent) => {
           if (response) {
             return response;
           }
-          console.log('5 - lol there is no response');
           return new Response('Not found', { status: 404 });
         })
         .catch(err => {
-          console.log('5 - it throws');
           console.error(err);
           sentry.captureException(err);
           return new UnexpectedError();
