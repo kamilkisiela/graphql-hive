@@ -1,6 +1,6 @@
 import * as utils from '@n1ru4l/dockest/test-helper';
 import { createFetch } from '@whatwg-node/fetch';
-import { createTRPCProxyClient, httpBatchLink } from '@trpc/client';
+import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import type { InternalApi } from '@hive/server';
 import { z } from 'zod';
 import { ensureEnv } from './env';
@@ -13,7 +13,7 @@ const { fetch } = createFetch({
 
 const internalApi = createTRPCProxyClient<InternalApi>({
   links: [
-    httpBatchLink({
+    httpLink({
       url: `http://${graphqlAddress}/trpc`,
       fetch,
     }),
