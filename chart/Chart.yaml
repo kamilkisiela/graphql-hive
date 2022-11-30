@@ -1,6 +1,6 @@
 ---
 apiVersion: v2
-name: hive
+name: graphql-hive
 version: 1.0.0
 description: Deploy hive
 home: https://docs.graphql-hive.com/self-hosting/get-started

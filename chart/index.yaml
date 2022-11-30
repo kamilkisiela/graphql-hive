@@ -5,7 +5,7 @@ entries:
       category: Database
     apiVersion: v2
     appVersion: 22.9.4
-    created: "2022-11-30T17:09:57.386543771+01:00"
+    created: "2022-11-30T17:17:08.053219432+01:00"
     dependencies:
     - condition: zookeeper.enabled
       name: zookeeper
@@ -35,9 +35,9 @@ entries:
     urls:
     - charts/clickhouse-1.0.3.tgz
     version: 1.0.3
-  hive:
+  graphql-hive:
   - apiVersion: v2
-    created: "2022-11-30T17:09:57.383171967+01:00"
+    created: "2022-11-30T17:17:08.048947586+01:00"
     dependencies:
     - name: hive-app
       repository: https://diabolocom.github.io/graphql-hive/helm-subcharts/
@@ -82,15 +82,15 @@ entries:
       repository: https://diabolocom.github.io/graphql-hive/helm-subcharts/
       version: 1.0.0
     description: Deploy hive
-    digest: a5e45a4d1897d298937c13c46a9c2c33a1694433458de6ca40a9bc387a7c6169
+    digest: 2ad3c9c222966d9cb8afbd1fea0e6b2894bde6f227cd25b8f0936cf7b894c030
     home: https://docs.graphql-hive.com/self-hosting/get-started
-    name: hive
+    name: graphql-hive
     urls:
-    - hive-1.0.0.tgz
+    - graphql-hive-1.0.0.tgz
     version: 1.0.0
   hive-app:
   - apiVersion: v2
-    created: "2022-11-30T17:09:57.386668264+01:00"
+    created: "2022-11-30T17:17:08.053354108+01:00"
     description: Deploy hive-app
     digest: de7989a5fae0f8eb84c9cf16b606af1bcd0c69c44a4b3740512efc0e8bd4a1e8
     name: hive-app
@@ -99,7 +99,7 @@ entries:
     version: 1.0.0
   hive-emails:
   - apiVersion: v2
-    created: "2022-11-30T17:09:57.386803553+01:00"
+    created: "2022-11-30T17:17:08.053489968+01:00"
     description: Deploy hive-emails
     digest: f21574dd5d509cbd662026e122d98514fb7c3d39609fbe743d21e1af2ff1d8ee
     home: https://github.com/kamilkisiela/graphql-hive/blob/main/packages/services/emails/README.md
@@ -109,7 +109,7 @@ entries:
     version: 1.0.0
   hive-schema:
   - apiVersion: v2
-    created: "2022-11-30T17:09:57.386927439+01:00"
+    created: "2022-11-30T17:17:08.053603451+01:00"
     description: Deploy hive-schema
     digest: 85c2fc47eb15983ae598b8553ca1599c0af08168373c0c474d718f42648b30c3
     home: https://github.com/kamilkisiela/graphql-hive/blob/main/packages/services/schema/README.md
@@ -119,7 +119,7 @@ entries:
     version: 1.0.0
   hive-server:
   - apiVersion: v2
-    created: "2022-11-30T17:09:57.387095344+01:00"
+    created: "2022-11-30T17:17:08.053764692+01:00"
     description: Deploy hive-server
     digest: 94b73647b17d1a2db3a3e9856296117fbbf47d1b930c740c521abbc2c00bdbdd
     home: https://github.com/kamilkisiela/graphql-hive/blob/main/packages/services/server/README.md
@@ -129,7 +129,7 @@ entries:
     version: 1.0.0
   hive-storage:
   - apiVersion: v2
-    created: "2022-11-30T17:09:57.387211629+01:00"
+    created: "2022-11-30T17:17:08.053868184+01:00"
     description: Deploy hive-storage
     digest: 44e87666f038e09b3f3ff52b04b7df6b0f1425bbdda0561a166f6be39efb1f83
     home: https://github.com/kamilkisiela/graphql-hive/pkgs/container/graphql-hive%2Fstorage
@@ -139,7 +139,7 @@ entries:
     version: 1.0.0
   hive-tokens:
   - apiVersion: v2
-    created: "2022-11-30T17:09:57.387681667+01:00"
+    created: "2022-11-30T17:17:08.053969645+01:00"
     description: Deploy hive-tokens
     digest: 77cd405a1dda2c4cc220eebfaddc73a7e0b9c309cafce85f824a876f920927a5
     home: https://github.com/kamilkisiela/graphql-hive/blob/main/packages/services/tokens/README.md
@@ -149,7 +149,7 @@ entries:
     version: 1.0.0
   hive-usage:
   - apiVersion: v2
-    created: "2022-11-30T17:09:57.388219546+01:00"
+    created: "2022-11-30T17:17:08.054077512+01:00"
     description: Deploy hive-usage
     digest: 182d7c48c3829685646feb21f7a2813c59ec6c5228d9c7b376d504d5b868813c
     home: https://github.com/kamilkisiela/graphql-hive/blob/main/packages/services/usage/README.md
@@ -159,7 +159,7 @@ entries:
     version: 1.0.0
   hive-usage-ingestor:
   - apiVersion: v2
-    created: "2022-11-30T17:09:57.388454405+01:00"
+    created: "2022-11-30T17:17:08.054201368+01:00"
     description: Deploy hive-usage-ingestor
     digest: 3f27cd878633788e4edc26aa204239d43da967edbb2fbe15e43e3f5fc574838c
     home: https://github.com/kamilkisiela/graphql-hive/blob/main/packages/services/usage-ingestor/README.md
@@ -169,7 +169,7 @@ entries:
     version: 1.0.0
   hive-webhooks:
   - apiVersion: v2
-    created: "2022-11-30T17:09:57.388697318+01:00"
+    created: "2022-11-30T17:17:08.054306343+01:00"
     description: Deploy hive-webhooks
     digest: 428af002abd048fcb9b504987a6e9f04f8ec391028bf7d1f99da72b968296c7b
     home: https://github.com/kamilkisiela/graphql-hive/blob/main/packages/services/webhooks/README.md
@@ -182,7 +182,7 @@ entries:
       category: Infrastructure
     apiVersion: v2
     appVersion: 3.3.1
-    created: "2022-11-30T17:09:57.395117842+01:00"
+    created: "2022-11-30T17:17:08.059262668+01:00"
     dependencies:
     - condition: zookeeper.enabled
       name: zookeeper
@@ -220,7 +220,7 @@ entries:
       category: Database
     apiVersion: v2
     appVersion: 15.1.0
-    created: "2022-11-30T17:09:57.398351166+01:00"
+    created: "2022-11-30T17:17:08.061472983+01:00"
     dependencies:
     - name: common
       repository: https://charts.bitnami.com/bitnami
@@ -255,7 +255,7 @@ entries:
       category: Database
     apiVersion: v2
     appVersion: 7.0.5
-    created: "2022-11-30T17:09:57.402679268+01:00"
+    created: "2022-11-30T17:17:08.064415591+01:00"
     dependencies:
     - name: common
       repository: https://charts.bitnami.com/bitnami
@@ -284,7 +284,7 @@ entries:
   supertokens:
   - apiVersion: v2
     appVersion: 3.14.0
-    created: "2022-11-30T17:09:57.403307265+01:00"
+    created: "2022-11-30T17:17:08.065269981+01:00"
     description: SuperTokens Core Deployment
     digest: 2e105d1486ec6c7fa135bba98983c568ede020b45e3b9664e67696433bef0754
     name: supertokens
@@ -292,4 +292,4 @@ entries:
     urls:
     - charts/supertokens-1.0.0.tgz
     version: 1.0.0
-generated: "2022-11-30T17:09:57.358948559+01:00"
+generated: "2022-11-30T17:17:08.030951496+01:00"
