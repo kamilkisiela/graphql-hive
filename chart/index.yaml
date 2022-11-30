@@ -1,0 +1,295 @@
+apiVersion: v1
+entries:
+  clickhouse:
+  - annotations:
+      category: Database
+    apiVersion: v2
+    appVersion: 22.9.4
+    created: "2022-11-30T17:09:57.386543771+01:00"
+    dependencies:
+    - condition: zookeeper.enabled
+      name: zookeeper
+      repository: https://charts.bitnami.com/bitnami
+      version: 10.x.x
+    - name: common
+      repository: https://charts.bitnami.com/bitnami
+      tags:
+      - bitnami-common
+      version: 2.x.x
+    description: ClickHouse is an open-source column-oriented OLAP database management
+      system. Use it to boost your database performance while providing linear scalability
+      and hardware efficiency.
+    digest: 4abb024bb6031ae6c1a5236634e1d8e0112add36515e60ca7dfd883a3aca4ce4
+    home: https://clickhouse.com/
+    icon: https://bitnami.com/assets/stacks/clickhouse/img/clickhouse-stack-220x234.png
+    keywords:
+    - database
+    - sharding
+    maintainers:
+    - name: Bitnami
+      url: https://github.com/bitnami/charts
+    name: clickhouse
+    sources:
+    - https://github.com/bitnami/containers/tree/main/bitnami/clickhouse
+    - https://github.com/ClickHouse/ClickHouse
+    urls:
+    - charts/clickhouse-1.0.3.tgz
+    version: 1.0.3
+  hive:
+  - apiVersion: v2
+    created: "2022-11-30T17:09:57.383171967+01:00"
+    dependencies:
+    - name: hive-app
+      repository: https://diabolocom.github.io/graphql-hive/helm-subcharts/
+      version: 1.0.0
+    - name: clickhouse
+      repository: https://charts.bitnami.com/bitnami
+      version: 1.0.3
+    - name: hive-emails
+      repository: https://diabolocom.github.io/graphql-hive/helm-subcharts/
+      version: 1.0.0
+    - name: kafka
+      repository: https://charts.bitnami.com/bitnami
+      version: 19.1.3
+    - name: postgresql
+      repository: https://charts.bitnami.com/bitnami
+      version: 12.1.2
+    - name: redis
+      repository: https://charts.bitnami.com/bitnami
+      version: 17.3.11
+    - name: hive-schema
+      repository: https://diabolocom.github.io/graphql-hive/helm-subcharts/
+      version: 1.0.0
+    - name: hive-server
+      repository: https://diabolocom.github.io/graphql-hive/helm-subcharts/
+      version: 1.0.0
+    - name: hive-storage
+      repository: https://diabolocom.github.io/graphql-hive/helm-subcharts/
+      version: 1.0.0
+    - name: supertokens
+      repository: https://diabolocom.github.io/graphql-hive/helm-subcharts/
+      version: 1.0.0
+    - name: hive-tokens
+      repository: https://diabolocom.github.io/graphql-hive/helm-subcharts/
+      version: 1.0.0
+    - name: hive-usage
+      repository: https://diabolocom.github.io/graphql-hive/helm-subcharts/
+      version: 1.0.0
+    - name: hive-usage-ingestor
+      repository: https://diabolocom.github.io/graphql-hive/helm-subcharts/
+      version: 1.0.0
+    - name: hive-webhooks
+      repository: https://diabolocom.github.io/graphql-hive/helm-subcharts/
+      version: 1.0.0
+    description: Deploy hive
+    digest: a5e45a4d1897d298937c13c46a9c2c33a1694433458de6ca40a9bc387a7c6169
+    home: https://docs.graphql-hive.com/self-hosting/get-started
+    name: hive
+    urls:
+    - hive-1.0.0.tgz
+    version: 1.0.0
+  hive-app:
+  - apiVersion: v2
+    created: "2022-11-30T17:09:57.386668264+01:00"
+    description: Deploy hive-app
+    digest: de7989a5fae0f8eb84c9cf16b606af1bcd0c69c44a4b3740512efc0e8bd4a1e8
+    name: hive-app
+    urls:
+    - charts/hive-app-1.0.0.tgz
+    version: 1.0.0
+  hive-emails:
+  - apiVersion: v2
+    created: "2022-11-30T17:09:57.386803553+01:00"
+    description: Deploy hive-emails
+    digest: f21574dd5d509cbd662026e122d98514fb7c3d39609fbe743d21e1af2ff1d8ee
+    home: https://github.com/kamilkisiela/graphql-hive/blob/main/packages/services/emails/README.md
+    name: hive-emails
+    urls:
+    - charts/hive-emails-1.0.0.tgz
+    version: 1.0.0
+  hive-schema:
+  - apiVersion: v2
+    created: "2022-11-30T17:09:57.386927439+01:00"
+    description: Deploy hive-schema
+    digest: 85c2fc47eb15983ae598b8553ca1599c0af08168373c0c474d718f42648b30c3
+    home: https://github.com/kamilkisiela/graphql-hive/blob/main/packages/services/schema/README.md
+    name: hive-schema
+    urls:
+    - charts/hive-schema-1.0.0.tgz
+    version: 1.0.0
+  hive-server:
+  - apiVersion: v2
+    created: "2022-11-30T17:09:57.387095344+01:00"
+    description: Deploy hive-server
+    digest: 94b73647b17d1a2db3a3e9856296117fbbf47d1b930c740c521abbc2c00bdbdd
+    home: https://github.com/kamilkisiela/graphql-hive/blob/main/packages/services/server/README.md
+    name: hive-server
+    urls:
+    - charts/hive-server-1.0.0.tgz
+    version: 1.0.0
+  hive-storage:
+  - apiVersion: v2
+    created: "2022-11-30T17:09:57.387211629+01:00"
+    description: Deploy hive-storage
+    digest: 44e87666f038e09b3f3ff52b04b7df6b0f1425bbdda0561a166f6be39efb1f83
+    home: https://github.com/kamilkisiela/graphql-hive/pkgs/container/graphql-hive%2Fstorage
+    name: hive-storage
+    urls:
+    - charts/hive-storage-1.0.0.tgz
+    version: 1.0.0
+  hive-tokens:
+  - apiVersion: v2
+    created: "2022-11-30T17:09:57.387681667+01:00"
+    description: Deploy hive-tokens
+    digest: 77cd405a1dda2c4cc220eebfaddc73a7e0b9c309cafce85f824a876f920927a5
+    home: https://github.com/kamilkisiela/graphql-hive/blob/main/packages/services/tokens/README.md
+    name: hive-tokens
+    urls:
+    - charts/hive-tokens-1.0.0.tgz
+    version: 1.0.0
+  hive-usage:
+  - apiVersion: v2
+    created: "2022-11-30T17:09:57.388219546+01:00"
+    description: Deploy hive-usage
+    digest: 182d7c48c3829685646feb21f7a2813c59ec6c5228d9c7b376d504d5b868813c
+    home: https://github.com/kamilkisiela/graphql-hive/blob/main/packages/services/usage/README.md
+    name: hive-usage
+    urls:
+    - charts/hive-usage-1.0.0.tgz
+    version: 1.0.0
+  hive-usage-ingestor:
+  - apiVersion: v2
+    created: "2022-11-30T17:09:57.388454405+01:00"
+    description: Deploy hive-usage-ingestor
+    digest: 3f27cd878633788e4edc26aa204239d43da967edbb2fbe15e43e3f5fc574838c
+    home: https://github.com/kamilkisiela/graphql-hive/blob/main/packages/services/usage-ingestor/README.md
+    name: hive-usage-ingestor
+    urls:
+    - charts/hive-usage-ingestor-1.0.0.tgz
+    version: 1.0.0
+  hive-webhooks:
+  - apiVersion: v2
+    created: "2022-11-30T17:09:57.388697318+01:00"
+    description: Deploy hive-webhooks
+    digest: 428af002abd048fcb9b504987a6e9f04f8ec391028bf7d1f99da72b968296c7b
+    home: https://github.com/kamilkisiela/graphql-hive/blob/main/packages/services/webhooks/README.md
+    name: hive-webhooks
+    urls:
+    - charts/hive-webhooks-1.0.0.tgz
+    version: 1.0.0
+  kafka:
+  - annotations:
+      category: Infrastructure
+    apiVersion: v2
+    appVersion: 3.3.1
+    created: "2022-11-30T17:09:57.395117842+01:00"
+    dependencies:
+    - condition: zookeeper.enabled
+      name: zookeeper
+      repository: https://charts.bitnami.com/bitnami
+      version: 10.x.x
+    - name: common
+      repository: https://charts.bitnami.com/bitnami
+      tags:
+      - bitnami-common
+      version: 2.x.x
+    description: Apache Kafka is a distributed streaming platform designed to build
+      real-time pipelines and can be used as a message broker or as a replacement
+      for a log aggregation solution for big data applications.
+    digest: 8ef2e2edac596039bc3a86f7a913741114ba2e92b386e9f03b39123c9eb40add
+    home: https://github.com/bitnami/charts/tree/main/bitnami/kafka
+    icon: https://bitnami.com/assets/stacks/kafka/img/kafka-stack-220x234.png
+    keywords:
+    - kafka
+    - zookeeper
+    - streaming
+    - producer
+    - consumer
+    maintainers:
+    - name: Bitnami
+      url: https://github.com/bitnami/charts
+    name: kafka
+    sources:
+    - https://github.com/bitnami/containers/tree/main/bitnami/kafka
+    - https://kafka.apache.org/
+    urls:
+    - charts/kafka-19.1.3.tgz
+    version: 19.1.3
+  postgresql:
+  - annotations:
+      category: Database
+    apiVersion: v2
+    appVersion: 15.1.0
+    created: "2022-11-30T17:09:57.398351166+01:00"
+    dependencies:
+    - name: common
+      repository: https://charts.bitnami.com/bitnami
+      tags:
+      - bitnami-common
+      version: 2.x.x
+    description: PostgreSQL (Postgres) is an open source object-relational database
+      known for reliability and data integrity. ACID-compliant, it supports foreign
+      keys, joins, views, triggers and stored procedures.
+    digest: 6706df44c06603a6e43d8ff250e5587e2d9223518259825d73ba4f98b1ef0ea7
+    home: https://github.com/bitnami/charts/tree/main/bitnami/postgresql
+    icon: https://bitnami.com/assets/stacks/postgresql/img/postgresql-stack-220x234.png
+    keywords:
+    - postgresql
+    - postgres
+    - database
+    - sql
+    - replication
+    - cluster
+    maintainers:
+    - name: Bitnami
+      url: https://github.com/bitnami/charts
+    name: postgresql
+    sources:
+    - https://github.com/bitnami/containers/tree/main/bitnami/postgresql
+    - https://www.postgresql.org/
+    urls:
+    - charts/postgresql-12.1.2.tgz
+    version: 12.1.2
+  redis:
+  - annotations:
+      category: Database
+    apiVersion: v2
+    appVersion: 7.0.5
+    created: "2022-11-30T17:09:57.402679268+01:00"
+    dependencies:
+    - name: common
+      repository: https://charts.bitnami.com/bitnami
+      tags:
+      - bitnami-common
+      version: 2.x.x
+    description: Redis(R) is an open source, advanced key-value store. It is often
+      referred to as a data structure server since keys can contain strings, hashes,
+      lists, sets and sorted sets.
+    digest: ceeaecfb2219b385a957ed32fc4e91adfb0c748a5b930086146784a5b4b482dd
+    home: https://github.com/bitnami/charts/tree/main/bitnami/redis
+    icon: https://bitnami.com/assets/stacks/redis/img/redis-stack-220x234.png
+    keywords:
+    - redis
+    - keyvalue
+    - database
+    maintainers:
+    - name: Bitnami
+      url: https://github.com/bitnami/charts
+    name: redis
+    sources:
+    - https://github.com/bitnami/containers/tree/main/bitnami/redis
+    urls:
+    - charts/redis-17.3.11.tgz
+    version: 17.3.11
+  supertokens:
+  - apiVersion: v2
+    appVersion: 3.14.0
+    created: "2022-11-30T17:09:57.403307265+01:00"
+    description: SuperTokens Core Deployment
+    digest: 2e105d1486ec6c7fa135bba98983c568ede020b45e3b9664e67696433bef0754
+    name: supertokens
+    type: application
+    urls:
+    - charts/supertokens-1.0.0.tgz
+    version: 1.0.0
+generated: "2022-11-30T17:09:57.358948559+01:00"
