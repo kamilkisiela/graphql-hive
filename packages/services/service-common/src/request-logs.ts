@@ -35,8 +35,8 @@ const plugin: FastifyPluginAsync = async server => {
       `(${request.ip})`,
       request.method,
       request.url,
-      operationName ? `'${operationName}'` : undefined,
-      `(${requestId})`,
+      operationName ? `'${operationName}'` : null,
+      requestId ? `(reqId=${requestId})` : null,
     ]
       .filter(s => s)
       .join(' ');
