@@ -1128,7 +1128,7 @@ importers:
 
   packages/web/docs:
     specifiers:
-      '@theguild/components': 4.3.6
+      '@theguild/components': 4.3.7
       '@theguild/tailwind-config': 0.2.1
       '@types/react': 17.0.45
       next: 12.3.1
@@ -1136,7 +1136,7 @@ importers:
       react-dom: 18.2.0
       tailwindcss: 3.2.1
     dependencies:
-      '@theguild/components': 4.3.6_azq6kxkn3od7qdylwkyksrwopy
+      '@theguild/components': 4.3.7_azq6kxkn3od7qdylwkyksrwopy
       next: 12.3.1_biqbaboplfbrettd7655fr4n2y
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
@@ -1148,7 +1148,7 @@ importers:
   packages/web/landing-page:
     specifiers:
       '@radix-ui/react-tooltip': 1.0.2
-      '@theguild/components': 4.3.6
+      '@theguild/components': 4.3.7
       '@theguild/tailwind-config': 0.2.1
       '@types/react': 17.0.45
       clsx: 1.2.1
@@ -1160,7 +1160,7 @@ importers:
       tailwindcss: 3.2.3
     dependencies:
       '@radix-ui/react-tooltip': 1.0.2_spprgxbbbwrf7revoq66vrfk2y
-      '@theguild/components': 4.3.6_axequwibc5yadwk55bo7ehxsoe
+      '@theguild/components': 4.3.7_axequwibc5yadwk55bo7ehxsoe
       clsx: 1.2.1
       next: 12.3.3_biqbaboplfbrettd7655fr4n2y
       next-themes: 0.2.1_axequwibc5yadwk55bo7ehxsoe
@@ -1194,14 +1194,14 @@ packages:
       - algoliasearch
     dev: false
 
-  /@algolia/autocomplete-plugin-algolia-insights/1.7.3_nl7ecob7oenl7dfhoewptlc4ye:
+  /@algolia/autocomplete-plugin-algolia-insights/1.7.3_wd2wzt4bf7iuzlckz6x72hohrm:
     resolution: {integrity: sha512-sbOwAoH74n8Rwzhlg3oj8zNmUDfn3N3MQI7QVkUqqAL3QrMkb1rvMlj8eWvb180zxRYT6OgfJbJyOhhh489QAg==}
     peerDependencies:
       search-insights: '>= 1 < 3'
     dependencies:
       '@algolia/autocomplete-js': 1.7.3_algoliasearch@4.14.2
       '@algolia/autocomplete-shared': 1.7.3
-      search-insights: 2.2.1
+      search-insights: 2.2.3
     transitivePeerDependencies:
       - '@algolia/client-search'
       - algoliasearch
@@ -9343,15 +9343,15 @@ packages:
     dev: false
     patched: true
 
-  /@theguild/components/4.3.6_axequwibc5yadwk55bo7ehxsoe:
-    resolution: {integrity: sha512-d31sH22IqolPMzjuOOnbEw6DRp6j+6Pkf3u4fZZlG9fh87lKma/VyH2TL5SvGxQipyy3tF1oojUMW3i4GMioXA==}
+  /@theguild/components/4.3.7_axequwibc5yadwk55bo7ehxsoe:
+    resolution: {integrity: sha512-3SgIOfl7rJZC49nVNQIiLSITzAEhV95bFFZbDWPrXwyhUXDtCTLRdYUyN+qj41ZeX3e7gbkJgGkWr2uDBcx65A==}
     peerDependencies:
       next: ^12.3.1
       react: ^18.2.0
       react-dom: ^18.2.0
     dependencies:
       '@algolia/autocomplete-js': 1.7.3_algoliasearch@4.14.2
-      '@algolia/autocomplete-plugin-algolia-insights': 1.7.3_nl7ecob7oenl7dfhoewptlc4ye
+      '@algolia/autocomplete-plugin-algolia-insights': 1.7.3_wd2wzt4bf7iuzlckz6x72hohrm
       '@algolia/autocomplete-plugin-query-suggestions': 1.7.3_algoliasearch@4.14.2
       '@algolia/autocomplete-theme-classic': 1.7.3
       '@giscus/react': 2.2.3_biqbaboplfbrettd7655fr4n2y
@@ -9360,7 +9360,7 @@ packages:
       '@radix-ui/react-navigation-menu': 1.1.1_biqbaboplfbrettd7655fr4n2y
       algoliasearch: 4.14.2
       clsx: 1.2.1
-      focus-trap-react: 10.0.0_biqbaboplfbrettd7655fr4n2y
+      focus-trap-react: 10.0.1_biqbaboplfbrettd7655fr4n2y
       mermaid: 9.1.7
       next: 12.3.3_biqbaboplfbrettd7655fr4n2y
       next-videos: 1.5.0
@@ -9372,7 +9372,7 @@ packages:
       react-paginate: 8.1.4_react@18.2.0
       react-player: 2.11.0_react@18.2.0
       remark-mdx-disable-explicit-jsx: 0.1.0
-      search-insights: 2.2.1
+      search-insights: 2.2.3
       semver: 7.3.8
       unist-util-visit: 4.1.1
       use-debounce: 8.0.4_react@18.2.0
@@ -9385,15 +9385,15 @@ packages:
       - webpack
     dev: false
 
-  /@theguild/components/4.3.6_azq6kxkn3od7qdylwkyksrwopy:
-    resolution: {integrity: sha512-d31sH22IqolPMzjuOOnbEw6DRp6j+6Pkf3u4fZZlG9fh87lKma/VyH2TL5SvGxQipyy3tF1oojUMW3i4GMioXA==}
+  /@theguild/components/4.3.7_azq6kxkn3od7qdylwkyksrwopy:
+    resolution: {integrity: sha512-3SgIOfl7rJZC49nVNQIiLSITzAEhV95bFFZbDWPrXwyhUXDtCTLRdYUyN+qj41ZeX3e7gbkJgGkWr2uDBcx65A==}
     peerDependencies:
       next: ^12.3.1
       react: ^18.2.0
       react-dom: ^18.2.0
     dependencies:
       '@algolia/autocomplete-js': 1.7.3_algoliasearch@4.14.2
-      '@algolia/autocomplete-plugin-algolia-insights': 1.7.3_nl7ecob7oenl7dfhoewptlc4ye
+      '@algolia/autocomplete-plugin-algolia-insights': 1.7.3_wd2wzt4bf7iuzlckz6x72hohrm
       '@algolia/autocomplete-plugin-query-suggestions': 1.7.3_algoliasearch@4.14.2
       '@algolia/autocomplete-theme-classic': 1.7.3
       '@giscus/react': 2.2.3_biqbaboplfbrettd7655fr4n2y
@@ -9402,7 +9402,7 @@ packages:
       '@radix-ui/react-navigation-menu': 1.1.1_biqbaboplfbrettd7655fr4n2y
       algoliasearch: 4.14.2
       clsx: 1.2.1
-      focus-trap-react: 10.0.0_biqbaboplfbrettd7655fr4n2y
+      focus-trap-react: 10.0.1_biqbaboplfbrettd7655fr4n2y
       mermaid: 9.1.7
       next: 12.3.1_biqbaboplfbrettd7655fr4n2y
       next-videos: 1.5.0
@@ -9414,7 +9414,7 @@ packages:
       react-paginate: 8.1.4_react@18.2.0
       react-player: 2.11.0_react@18.2.0
       remark-mdx-disable-explicit-jsx: 0.1.0
-      search-insights: 2.2.1
+      search-insights: 2.2.3
       semver: 7.3.8
       unist-util-visit: 4.1.1
       use-debounce: 8.0.4_react@18.2.0
@@ -15179,21 +15179,21 @@ packages:
       tslib: 1.14.1
     dev: false
 
-  /focus-trap-react/10.0.0_biqbaboplfbrettd7655fr4n2y:
-    resolution: {integrity: sha512-I0tReLdpmCwWuVb6YAmOD+S9KHj0GrlIWmnVJf61j2NHxiIg7DbrsabPmtPC+1yzGJrsy+/iTZiqXtStjlBQcA==}
+  /focus-trap-react/10.0.1_biqbaboplfbrettd7655fr4n2y:
+    resolution: {integrity: sha512-Av+O4JCT4/WnY25jnaOu1rysqhaD9aAhqAxxcrJbgKciZToIFmPng/WOrLJ1yHe6ntNmx1g0WhdeDfNCL1dmfA==}
     peerDependencies:
       prop-types: ^15.8.1
       react: '>=16.3.0'
       react-dom: '>=16.3.0'
     dependencies:
-      focus-trap: 7.0.0
+      focus-trap: 7.1.0
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
       tabbable: 6.0.1
     dev: false
 
-  /focus-trap/7.0.0:
-    resolution: {integrity: sha512-uT4Bl8TwU+5vVAx/DHil/1eVS54k9unqhK/vGy2KSh7esPmqgC0koAB9J2sJ+vtj8+vmiFyGk2unLkhNLQaxoA==}
+  /focus-trap/7.1.0:
+    resolution: {integrity: sha512-CuJvwUBfJCWcU6fc4xr3UwMF5vWnox4isXAixCwrPzCsPKOQjP9T+nTlYT2t+vOmQL8MOQ16eim99XhjQHAuiQ==}
     dependencies:
       tabbable: 6.0.1
     dev: false
@@ -22953,8 +22953,8 @@ packages:
     resolution: {integrity: sha512-MuCAyrGZcTLfQoH2XoBlQ8C6bzwN88XT/0slOGz0pn8+gIP85BOAfYa44ZXQUTOwRwPU0QvgU+V+OSajl/59Xg==}
     dev: true
 
-  /search-insights/2.2.1:
-    resolution: {integrity: sha512-JDfVGZbKqTtiKVZjAVbkNw9C9f0ib80yx6Ea17M3z4RvPmuD0GYWXuFwA9++dpbreBEMH4TC3lQ29Zq7O4b5oA==}
+  /search-insights/2.2.3:
+    resolution: {integrity: sha512-fXwC0QzkBGZuGTb6FoQG+iLS81wljYuBU4Sco4TGTgp5boVkiKZeFqPV0e5h5++5QncTU2FQrQ+G3ILnqEa3yA==}
     engines: {node: '>=8.16.0'}
     dev: false
 
