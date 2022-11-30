@@ -1,0 +1,103 @@
+apiVersion: v1
+entries:
+  hive-app:
+  - apiVersion: v2
+    created: "2022-11-30T16:44:24.673086377+01:00"
+    description: Deploy hive-app
+    digest: de7989a5fae0f8eb84c9cf16b606af1bcd0c69c44a4b3740512efc0e8bd4a1e8
+    name: hive-app
+    urls:
+    - hive-app-1.0.0.tgz
+    version: 1.0.0
+  hive-emails:
+  - apiVersion: v2
+    created: "2022-11-30T16:44:24.673364637+01:00"
+    description: Deploy hive-emails
+    digest: f21574dd5d509cbd662026e122d98514fb7c3d39609fbe743d21e1af2ff1d8ee
+    home: https://github.com/kamilkisiela/graphql-hive/blob/main/packages/services/emails/README.md
+    name: hive-emails
+    urls:
+    - hive-emails-1.0.0.tgz
+    version: 1.0.0
+  hive-schema:
+  - apiVersion: v2
+    created: "2022-11-30T16:44:24.67357365+01:00"
+    description: Deploy hive-schema
+    digest: 85c2fc47eb15983ae598b8553ca1599c0af08168373c0c474d718f42648b30c3
+    home: https://github.com/kamilkisiela/graphql-hive/blob/main/packages/services/schema/README.md
+    name: hive-schema
+    urls:
+    - hive-schema-1.0.0.tgz
+    version: 1.0.0
+  hive-server:
+  - apiVersion: v2
+    created: "2022-11-30T16:44:24.673897899+01:00"
+    description: Deploy hive-server
+    digest: 94b73647b17d1a2db3a3e9856296117fbbf47d1b930c740c521abbc2c00bdbdd
+    home: https://github.com/kamilkisiela/graphql-hive/blob/main/packages/services/server/README.md
+    name: hive-server
+    urls:
+    - hive-server-1.0.0.tgz
+    version: 1.0.0
+  hive-storage:
+  - apiVersion: v2
+    created: "2022-11-30T16:44:24.674105744+01:00"
+    description: Deploy hive-storage
+    digest: 44e87666f038e09b3f3ff52b04b7df6b0f1425bbdda0561a166f6be39efb1f83
+    home: https://github.com/kamilkisiela/graphql-hive/pkgs/container/graphql-hive%2Fstorage
+    name: hive-storage
+    urls:
+    - hive-storage-1.0.0.tgz
+    version: 1.0.0
+  hive-tokens:
+  - apiVersion: v2
+    created: "2022-11-30T16:44:24.674314786+01:00"
+    description: Deploy hive-tokens
+    digest: 77cd405a1dda2c4cc220eebfaddc73a7e0b9c309cafce85f824a876f920927a5
+    home: https://github.com/kamilkisiela/graphql-hive/blob/main/packages/services/tokens/README.md
+    name: hive-tokens
+    urls:
+    - hive-tokens-1.0.0.tgz
+    version: 1.0.0
+  hive-usage:
+  - apiVersion: v2
+    created: "2022-11-30T16:44:24.674558559+01:00"
+    description: Deploy hive-usage
+    digest: 182d7c48c3829685646feb21f7a2813c59ec6c5228d9c7b376d504d5b868813c
+    home: https://github.com/kamilkisiela/graphql-hive/blob/main/packages/services/usage/README.md
+    name: hive-usage
+    urls:
+    - hive-usage-1.0.0.tgz
+    version: 1.0.0
+  hive-usage-ingestor:
+  - apiVersion: v2
+    created: "2022-11-30T16:44:24.674835298+01:00"
+    description: Deploy hive-usage-ingestor
+    digest: 3f27cd878633788e4edc26aa204239d43da967edbb2fbe15e43e3f5fc574838c
+    home: https://github.com/kamilkisiela/graphql-hive/blob/main/packages/services/usage-ingestor/README.md
+    name: hive-usage-ingestor
+    urls:
+    - hive-usage-ingestor-1.0.0.tgz
+    version: 1.0.0
+  hive-webhooks:
+  - apiVersion: v2
+    created: "2022-11-30T16:44:24.675087403+01:00"
+    description: Deploy hive-webhooks
+    digest: 428af002abd048fcb9b504987a6e9f04f8ec391028bf7d1f99da72b968296c7b
+    home: https://github.com/kamilkisiela/graphql-hive/blob/main/packages/services/webhooks/README.md
+    name: hive-webhooks
+    urls:
+    - hive-webhooks-1.0.0.tgz
+    version: 1.0.0
+  supertokens:
+  - apiVersion: v2
+    appVersion: 3.14.0
+    created: "2022-11-30T16:44:24.677458508+01:00"
+    description: SuperTokens Core Deployment
+    digest: 2e105d1486ec6c7fa135bba98983c568ede020b45e3b9664e67696433bef0754
+    name: supertokens
+    type: application
+    urls:
+    - supertokens-1.0.0.tgz
+    version: 1.0.0
+generated: "2022-11-30T16:44:24.672496968+01:00"
