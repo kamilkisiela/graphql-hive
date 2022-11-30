@@ -275,6 +275,13 @@ function runArtifactsCDNTests(name: string, endpointBaseUrl: string) {
         'SchemaPublishSuccess',
       );
 
+      // check if artifact exists in bucket
+      const artifactContents = await fetchS3ObjectArtifact(
+        'artifacts',
+        `artifact/${target!.id}/services`,
+      );
+      expect(artifactContents).toMatchInlineSnapshot(`"[{"sdl":"type Query { ping: String }"}]"`);
+
       const cdnAccessResult = await createCdnAccess(
         {
           organization: org.cleanId,
@@ -287,7 +294,7 @@ function runArtifactsCDNTests(name: string, endpointBaseUrl: string) {
       expect(cdnAccessResult.body.errors).toBeUndefined();
 
       const url = buildEndpointUrl(endpointBaseUrl, target!.id, 'services');
-      const response = await fetch(url, {
+      let response = await fetch(url, {
         method: 'GET',
         headers: {
           'x-hive-cdn-key': cdnAccessResult.body.data!.createCdnToken.token,
@@ -297,13 +304,20 @@ function runArtifactsCDNTests(name: string, endpointBaseUrl: string) {
 
       expect(response.status).toMatchInlineSnapshot(`302`);
       expect(await response.text()).toMatchInlineSnapshot(`"Found."`);
-      expect(response.headers.get('location')).toBeDefined();
+      const locationHeader = response.headers.get('location');
+      expect(locationHeader).toBeDefined();
+      const locationUrl = new URL(locationHeader!);
+      expect(locationUrl.protocol).toEqual('http:');
+      expect(locationUrl.hostname).toEqual('localhost');
+      expect(locationUrl.port).toEqual('9002');
 
-      const artifactContents = await fetchS3ObjectArtifact(
-        'artifacts',
-        `artifact/${target!.id}/services`,
-      );
-      expect(artifactContents).toMatchInlineSnapshot(`"[{"sdl":"type Query { ping: String }"}]"`);
+      response = await fetch(locationHeader!, {
+        method: 'GET',
+        redirect: 'manual',
+      });
+      const body = await response.text();
+      expect(response.status).toEqual(200);
+      expect(body).toMatchInlineSnapshot(`"[{"sdl":"type Query { ping: String }"}]"`);
     });
   });
 }

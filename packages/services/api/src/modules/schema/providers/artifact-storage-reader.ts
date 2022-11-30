@@ -18,7 +18,16 @@ export type ArtifactsType = SDLArtifactTypes | 'metadata' | 'services' | 'superg
  * Read an Artifact to an S3 bucket.
  */
 export class ArtifactStorageReader {
-  constructor(private s3Client: S3Client, private bucketName: string) {}
+  private publicUrl: URL | null;
+
+  constructor(
+    private s3Client: S3Client,
+    private bucketName: string,
+    /** The public URL in case the public S3 endpoint differs from the internal S3 endpoint. E.g. within a docker network. */
+    publicUrl: string | null,
+  ) {
+    this.publicUrl = publicUrl ? new URL(publicUrl) : null;
+  }
 
   private async generatePresignedGetUrl(key: string): Promise<string> {
     const command = new GetObjectCommand({
@@ -26,9 +35,20 @@ export class ArtifactStorageReader {
       Key: key,
     });
 
-    return await getSignedUrl(this.s3Client, command, {
+    const presignedUrl = await getSignedUrl(this.s3Client, command, {
       expiresIn: presignedUrlExpirationSeconds,
     });
+
+    if (!this.publicUrl) {
+      return presignedUrl;
+    }
+
+    const publicUrl = new URL(presignedUrl);
+    publicUrl.protocol = this.publicUrl.protocol;
+    publicUrl.host = this.publicUrl.host;
+    publicUrl.port = this.publicUrl.port;
+
+    return publicUrl.toString();
   }
 
   /** Generate a pre-signed url for reading an artifact from a bucket for a limited time period. */

@@ -49,7 +49,7 @@ const s3Client = new S3Client({
   region: 'auto',
 });
 
-const artifactStorageReader = new ArtifactStorageReader(s3Client, S3_BUCKET_NAME);
+const artifactStorageReader = new ArtifactStorageReader(s3Client, S3_BUCKET_NAME, null);
 
 const handleArtifactRequest = createArtifactRequestHandler({
   isKeyValid,

@@ -154,7 +154,11 @@ export async function main() {
       region: 'auto',
     });
 
-    const artifactStorageReader = new ArtifactStorageReader(s3Client, env.s3.bucketName);
+    const artifactStorageReader = new ArtifactStorageReader(
+      s3Client,
+      env.s3.bucketName,
+      env.s3.publicUrl,
+    );
 
     const artifactHandler = createArtifactRequestHandler({
       isKeyValid: createIsKeyValid({ keyData: env.artifacts.auth.privateKey }),
