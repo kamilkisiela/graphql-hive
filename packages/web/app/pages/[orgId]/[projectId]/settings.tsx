@@ -1,5 +1,4 @@
-import { ReactElement, useCallback, useState } from 'react';
-import NextLink from 'next/link';
+import { ReactElement } from 'react';
 import { useFormik } from 'formik';
 import { gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
@@ -17,7 +16,7 @@ import {
   ProjectType,
 } from '@/graphql';
 import { canAccessProject, ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useRouteSelector, useToggle } from '@/lib/hooks';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const Settings_UpdateProjectGitRepositoryMutation = gql(/* GraphQL */ `
@@ -120,9 +119,9 @@ const GitHubIntegration = ({ gitRepository }: { gitRepository: string | null }):
   return (
     <Tag className="!p-4">
       The organization is not connected to our GitHub Application.
-      <NextLink passHref href={`/${router.organizationId}#settings`}>
-        <Link variant="primary">Visit settings</Link>
-      </NextLink>
+      <Link variant="primary" href={`/${router.organizationId}#settings`}>
+        Visit settings
+      </Link>
       to configure it.
     </Tag>
   );
@@ -160,10 +159,7 @@ const Page = ({
     redirect: true,
   });
   const router = useRouteSelector();
-  const [isModalOpen, setModalOpen] = useState(false);
-  const toggleModalOpen = useCallback(() => {
-    setModalOpen(prevOpen => !prevOpen);
-  }, []);
+  const [isModalOpen, toggleModalOpen] = useToggle();
 
   const [mutation, mutate] = useMutation(Settings_UpdateProjectNameMutation);
 

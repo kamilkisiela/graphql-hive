@@ -1,5 +1,4 @@
 import React, { ReactElement, ReactNode } from 'react';
-import NextLink from 'next/link';
 import { useQuery } from 'urql';
 
 import { ActivityNode } from '@/components/common/activities/common';
@@ -21,7 +20,7 @@ import {
   ProjectIdUpdatedActivity,
 } from '@/graphql';
 import { fixDuplicatedFragments } from '@/lib/graphql';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useRouteSelector } from '@/lib/hooks';
 
 const organizationActivitiesDocument = fixDuplicatedFragments(OrganizationActivitiesDocument);
 
@@ -35,7 +34,8 @@ export const getActivity = (
   const organization = (activity as any).organization;
   const user = (activity as any).user;
   const projectLink = 'project' in activity && (
-    <NextLink
+    <Link
+      variant="primary"
       href={{
         pathname: '/[orgId]/[projectId]',
         query: {
@@ -43,10 +43,9 @@ export const getActivity = (
           projectId: activity.project.cleanId,
         },
       }}
-      passHref
     >
-      <Link variant="primary">{activity.project.name}</Link>
-    </NextLink>
+      {activity.project.name}
+    </Link>
   );
 
   const targetHref = 'target' in activity && {
@@ -60,9 +59,9 @@ export const getActivity = (
 
   const targetLink = 'target' in activity && (
     /* TODO: figure out what is going on with targetHref... */
-    <NextLink href={targetHref as any} passHref>
-      <Link variant="primary">{activity.target.name}</Link>
-    </NextLink>
+    <Link variant="primary" href={targetHref as any}>
+      {activity.target.name}
+    </Link>
   );
 
   switch (type) {
@@ -182,9 +181,9 @@ export const getActivity = (
         content: (
           <>
             {user.displayName} changed {/* TODO: figure out what is going on with targetHref... */}
-            <NextLink href={targetHref as any} passHref>
-              <Link variant="primary">{activity.value}</Link>
-            </NextLink>{' '}
+            <Link variant="primary" href={targetHref as any}>
+              {activity.value}
+            </Link>{' '}
             target name in {projectLink} project
           </>
         ),

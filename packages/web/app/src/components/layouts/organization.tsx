@@ -1,4 +1,4 @@
-import { ReactElement, ReactNode, useCallback, useEffect, useState } from 'react';
+import { ReactElement, ReactNode, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useQuery } from 'urql';
 import NextLink from 'next/link';
@@ -13,7 +13,7 @@ import {
   OrgBillingInfoFieldsFragment,
   OrgRateLimitFieldsFragment,
 } from '@/graphql';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useRouteSelector, useToggle } from '@/lib/hooks';
 import {
   canAccessOrganization,
   OrganizationAccessScope,
@@ -64,10 +64,7 @@ export function OrganizationLayout({
 >): ReactElement | null {
   const router = useRouteSelector();
   const { push } = useRouter();
-  const [isModalOpen, setModalOpen] = useState(false);
-  const toggleModalOpen = useCallback(() => {
-    setModalOpen(prevOpen => !prevOpen);
-  }, []);
+  const [isModalOpen, toggleModalOpen] = useToggle();
 
   const orgId = router.organizationId;
 
@@ -132,31 +129,23 @@ export function OrganizationLayout({
 
       <Tabs className="container" value={value}>
         <Tabs.List>
-          <NextLink passHref href={`/${orgId}`}>
-            <Tabs.Trigger value={TabValue.Overview} asChild>
-              <a>Overview</a>
-            </Tabs.Trigger>
-          </NextLink>
+          <Tabs.Trigger value={TabValue.Overview} asChild>
+            <NextLink href={`/${orgId}`}>Overview</NextLink>
+          </Tabs.Trigger>
           {isRegularOrg && canAccessOrganization(OrganizationAccessScope.Members, me) && (
-            <NextLink passHref href={`/${orgId}/${TabValue.Members}`}>
-              <Tabs.Trigger value={TabValue.Members} asChild>
-                <a>Members</a>
-              </Tabs.Trigger>
-            </NextLink>
+            <Tabs.Trigger value={TabValue.Members} asChild>
+              <NextLink href={`/${orgId}/${TabValue.Members}`}>Members</NextLink>
+            </Tabs.Trigger>
           )}
           {canAccessOrganization(OrganizationAccessScope.Settings, me) && (
-            <NextLink passHref href={`/${orgId}/${TabValue.Settings}`}>
-              <Tabs.Trigger value={TabValue.Settings} asChild>
-                <a>Settings</a>
-              </Tabs.Trigger>
-            </NextLink>
+            <Tabs.Trigger value={TabValue.Settings} asChild>
+              <NextLink href={`/${orgId}/${TabValue.Settings}`}>Settings</NextLink>
+            </Tabs.Trigger>
           )}
           {getIsStripeEnabled() && canAccessOrganization(OrganizationAccessScope.Settings, me) && (
-            <NextLink passHref href={`/${orgId}/${TabValue.Subscription}`}>
-              <Tabs.Trigger value={TabValue.Subscription} asChild>
-                <a>Subscription</a>
-              </Tabs.Trigger>
-            </NextLink>
+            <Tabs.Trigger value={TabValue.Subscription} asChild>
+              <NextLink href={`/${orgId}/${TabValue.Subscription}`}>Subscription</NextLink>
+            </Tabs.Trigger>
           )}
         </Tabs.List>
         <Tabs.Content value={value} className={className}>

@@ -49,60 +49,56 @@ const TargetCard = ({
   const href = `/${router.organizationId}/${router.projectId}/${target.cleanId}`;
 
   return (
-    <NextLink passHref href={href}>
-      <Card as="a" key={target.id} className="hover:bg-gray-800/40">
-        <div className="flex items-start justify-between gap-2">
-          <div>
-            <h2 className="line-clamp-2 text-lg font-bold">{target.name}</h2>
-          </div>
-          <DropdownMenu>
-            <DropdownMenu.Trigger asChild>
-              <Button rotate={90}>
-                <MoreIcon />
-              </Button>
-            </DropdownMenu.Trigger>
-            <DropdownMenu.Content sideOffset={5} align="start">
-              <DropdownMenu.Item
-                onClick={async e => {
-                  e.stopPropagation();
-                  await copyToClipboard(`${window.location.origin}${href}`);
-                }}
-              >
-                <LinkIcon />
-                Share Link
-              </DropdownMenu.Item>
-              <NextLink
-                href={`/${router.organizationId}/${router.projectId}/${target.cleanId}#settings`}
-              >
-                <a>
-                  <DropdownMenu.Item>
-                    <SettingsIcon />
-                    Settings
-                  </DropdownMenu.Item>
-                </a>
-              </NextLink>
-            </DropdownMenu.Content>
-          </DropdownMenu>
+    <Card as={NextLink} key={target.id} className="hover:bg-gray-800/40" href={href}>
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <h2 className="line-clamp-2 text-lg font-bold">{target.name}</h2>
         </div>
-        {author && (
-          <>
-            <div className={clsx('mt-2.5 mb-1.5 flex items-center gap-x-2 text-sm text-gray-500')}>
-              {lastVersion ? (
-                <>
-                  <Badge color={isValid ? 'green' : 'red'} />
-                  <span>{lastVersion.commit.commit.substring(0, 7)}</span>
-                  <span>
-                    - Published <TimeAgo date={lastVersion.date} />
-                  </span>
-                </>
-              ) : (
-                <Badge color="yellow" />
-              )}
-            </div>
-          </>
-        )}
-      </Card>
-    </NextLink>
+        <DropdownMenu>
+          <DropdownMenu.Trigger asChild>
+            <Button rotate={90}>
+              <MoreIcon />
+            </Button>
+          </DropdownMenu.Trigger>
+          <DropdownMenu.Content sideOffset={5} align="start">
+            <DropdownMenu.Item
+              onClick={async e => {
+                e.stopPropagation();
+                await copyToClipboard(`${location.origin}${href}`);
+              }}
+            >
+              <LinkIcon />
+              Share Link
+            </DropdownMenu.Item>
+            <NextLink
+              href={`/${router.organizationId}/${router.projectId}/${target.cleanId}#settings`}
+            >
+              <DropdownMenu.Item>
+                <SettingsIcon />
+                Settings
+              </DropdownMenu.Item>
+            </NextLink>
+          </DropdownMenu.Content>
+        </DropdownMenu>
+      </div>
+      {author && (
+        <>
+          <div className={clsx('mt-2.5 mb-1.5 flex items-center gap-x-2 text-sm text-gray-500')}>
+            {lastVersion ? (
+              <>
+                <Badge color={isValid ? 'green' : 'red'} />
+                <span>{lastVersion.commit.commit.substring(0, 7)}</span>
+                <span>
+                  - Published <TimeAgo date={lastVersion.date} />
+                </span>
+              </>
+            ) : (
+              <Badge color="yellow" />
+            )}
+          </div>
+        </>
+      )}
+    </Card>
   );
 };
 

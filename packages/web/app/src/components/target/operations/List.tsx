@@ -45,9 +45,7 @@ import { useDebouncedCallback } from 'use-debounce';
 import { Scale, Section } from '@/components/common';
 import { GraphQLHighlight } from '@/components/common/GraphQLSDLBlock';
 import { DateRangeInput, OperationsStatsDocument, OperationStatsFieldsFragment } from '@/graphql';
-import { useDecimal } from '@/lib/hooks/use-decimal';
-import { useFormattedDuration } from '@/lib/hooks/use-formatted-duration';
-import { useFormattedNumber } from '@/lib/hooks/use-formatted-number';
+import { useDecimal, useFormattedDuration, useFormattedNumber } from '@/lib/hooks';
 import { OperationsFallback } from './Fallback';
 import { env } from '@/env/frontend';
 

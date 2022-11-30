@@ -8,7 +8,7 @@ import { PermissionsSpace, usePermissionsManager } from '@/components/organizati
 import { Button, CopyValue, Heading, Input, Modal, Tag } from '@/components/v2';
 import { OrganizationDocument, OrganizationQuery } from '@/graphql';
 import { scopes } from '@/lib/access/common';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useRouteSelector } from '@/lib/hooks';
 
 const CreateAccessToken_CreateTokenMutation = gql(/* GraphQL */ `
   mutation CreateAccessToken_CreateToken($input: CreateTokenInput!) {

@@ -5,7 +5,7 @@ import 'twin.macro';
 import { VscChevronDown } from 'react-icons/vsc';
 import { Button, Menu, MenuButton, MenuList, MenuItem } from '@chakra-ui/react';
 import { ProjectsDocument } from '@/graphql';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useRouteSelector } from '@/lib/hooks';
 
 export const ProjectSwitcher: React.FC<{
   organizationId: string;

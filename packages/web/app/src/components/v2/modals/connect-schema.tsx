@@ -5,7 +5,7 @@ import { useMutation, useQuery } from 'urql';
 import { Button, CopyValue, Heading, Link, Modal, Tag } from '@/components/v2';
 import { CreateCdnTokenDocument, ProjectDocument, ProjectType } from '@/graphql';
 import { getDocsUrl } from '@/lib/docs-url';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useRouteSelector } from '@/lib/hooks';
 
 const taxonomy = {
   [ProjectType.Federation]: 'supergraph schema',
@@ -87,7 +87,7 @@ export const ConnectSchemaModal = ({
               variant="primary"
               target="_blank"
               rel="noreferrer"
-              href={getDocsUrl(`/features/registry-usage#apollo-federation`) ?? undefined}
+              href={getDocsUrl(`/features/registry-usage#apollo-federation`) ?? ''}
             >
               Using the Registry with a Apollo Gateway
             </Link>{' '}

@@ -1,4 +1,4 @@
-import { ReactElement, ReactNode, useCallback, useEffect, useState } from 'react';
+import { ReactElement, ReactNode, useEffect } from 'react';
 import NextLink from 'next/link';
 import { useQuery } from 'urql';
 
@@ -12,7 +12,7 @@ import {
   OrganizationFieldsFragment,
 } from '@/graphql';
 import { gql } from 'urql';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useRouteSelector, useToggle } from '@/lib/hooks';
 import { useTargetAccess, canAccessTarget, TargetAccessScope } from '@/lib/access/target';
 import { QueryError } from '../common/DataWrapper';
 import { ConnectSchemaModal } from '@/components/v2/modals';
@@ -47,10 +47,7 @@ export const TargetLayout = ({
   className?: string;
   connect?: ReactNode;
 }): ReactElement | null => {
-  const [isModalOpen, setModalOpen] = useState(false);
-  const toggleModalOpen = useCallback(() => {
-    setModalOpen(prevOpen => !prevOpen);
-  }, []);
+  const [isModalOpen, toggleModalOpen] = useToggle();
 
   const router = useRouteSelector();
 
@@ -129,13 +126,13 @@ export const TargetLayout = ({
         <div className="container flex items-center">
           <div>
             <div className="flex items-center text-xs font-medium text-gray-500">
-              <NextLink href={`/${orgId}`} passHref>
-                <Link className="line-clamp-1 max-w-[250px]">{org.name}</Link>
-              </NextLink>
+              <Link href={`/${orgId}`} className="line-clamp-1 max-w-[250px]">
+                {org.name}
+              </Link>
               <ArrowDownIcon className="mx-1 h-4 w-4 -rotate-90 stroke-[1px]" />
-              <NextLink href={`/${orgId}/${projectId}`} passHref>
-                <Link className="line-clamp-1 max-w-[250px]">{project.name}</Link>
-              </NextLink>
+              <Link href={`/${orgId}/${projectId}`} className="line-clamp-1 max-w-[250px]">
+                {project.name}
+              </Link>
             </div>
             <div className="flex items-center gap-2.5">
               <Heading size="2xl" className="line-clamp-1 max-w-2xl">
@@ -153,12 +150,11 @@ export const TargetLayout = ({
                       node =>
                         node.cleanId !== targetId && (
                           <NextLink
-                            href={`/${orgId}/${projectId}/${node.cleanId}`}
                             key={node.cleanId}
+                            href={`/${orgId}/${projectId}/${node.cleanId}`}
+                            className="line-clamp-1 max-w-2xl"
                           >
-                            <a className="line-clamp-1 max-w-2xl">
-                              <DropdownMenu.Item>{node.name}</DropdownMenu.Item>
-                            </a>
+                            <DropdownMenu.Item>{node.name}</DropdownMenu.Item>
                           </NextLink>
                         ),
                     )}
@@ -190,39 +186,31 @@ export const TargetLayout = ({
         <Tabs.List>
           {canAccessSchema && (
             <>
-              <NextLink passHref href={`/${orgId}/${projectId}/${targetId}`}>
-                <Tabs.Trigger value={TabValue.Schema} asChild>
-                  <a>Schema</a>
-                </Tabs.Trigger>
-              </NextLink>
-              <NextLink passHref href={`/${orgId}/${projectId}/${targetId}/explorer`}>
-                <Tabs.Trigger value={TabValue.Explorer} asChild>
-                  <a>Explorer</a>
-                </Tabs.Trigger>
-              </NextLink>
-              <NextLink passHref href={`/${orgId}/${projectId}/${targetId}/history`}>
-                <Tabs.Trigger value={TabValue.History} asChild>
-                  <a>History</a>
-                </Tabs.Trigger>
-              </NextLink>
-              <NextLink passHref href={`/${orgId}/${projectId}/${targetId}/operations`}>
-                <Tabs.Trigger value={TabValue.Operations} asChild>
-                  <a>Operations</a>
-                </Tabs.Trigger>
-              </NextLink>
-              <NextLink passHref href={`/${orgId}/${projectId}/${targetId}/laboratory`}>
-                <Tabs.Trigger value={TabValue.Laboratory} asChild>
-                  <a>Laboratory</a>
-                </Tabs.Trigger>
-              </NextLink>
+              <Tabs.Trigger value={TabValue.Schema} asChild>
+                <NextLink href={`/${orgId}/${projectId}/${targetId}`}>Schema</NextLink>
+              </Tabs.Trigger>
+              <Tabs.Trigger value={TabValue.Explorer} asChild>
+                <NextLink href={`/${orgId}/${projectId}/${targetId}/explorer`}>Explorer</NextLink>
+              </Tabs.Trigger>
+              <Tabs.Trigger value={TabValue.History} asChild>
+                <NextLink href={`/${orgId}/${projectId}/${targetId}/history`}>History</NextLink>
+              </Tabs.Trigger>
+              <Tabs.Trigger value={TabValue.Operations} asChild>
+                <NextLink href={`/${orgId}/${projectId}/${targetId}/operations`}>
+                  Operations
+                </NextLink>
+              </Tabs.Trigger>
+              <Tabs.Trigger value={TabValue.Laboratory} asChild>
+                <NextLink href={`/${orgId}/${projectId}/${targetId}/laboratory`}>
+                  Laboratory
+                </NextLink>
+              </Tabs.Trigger>
             </>
           )}
           {canAccessSettings && (
-            <NextLink passHref href={`/${orgId}/${projectId}/${targetId}/settings`}>
-              <Tabs.Trigger value={TabValue.Settings} asChild>
-                <a>Settings</a>
-              </Tabs.Trigger>
-            </NextLink>
+            <Tabs.Trigger value={TabValue.Settings} asChild>
+              <NextLink href={`/${orgId}/${projectId}/${targetId}/settings`}>Settings</NextLink>
+            </Tabs.Trigger>
           )}
         </Tabs.List>
 

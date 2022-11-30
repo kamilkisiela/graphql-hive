@@ -1,4 +1,4 @@
-import { ReactElement, useCallback, useEffect, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import NextLink from 'next/link';
 import clsx from 'clsx';
 import { useQuery } from 'urql';
@@ -21,7 +21,7 @@ import { CreateOrganizationModal } from '@/components/v2/modals';
 import { env } from '@/env/frontend';
 import { MeDocument, OrganizationsDocument, OrganizationsQuery, OrganizationType } from '@/graphql';
 import { getDocsUrl } from '@/lib/docs-url';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useRouteSelector, useToggle } from '@/lib/hooks';
 
 type DropdownOrganization = OrganizationsQuery['organizations']['nodes'];
 
@@ -29,11 +29,8 @@ export const Header = (): ReactElement => {
   const router = useRouteSelector();
   const [meQuery] = useQuery({ query: MeDocument });
   const [organizationsQuery] = useQuery({ query: OrganizationsDocument });
-  const [isModalOpen, setModalOpen] = useState(false);
+  const [isModalOpen, toggleModalOpen] = useToggle();
   const [isOpaque, setIsOpaque] = useState(false);
-  const toggleModalOpen = useCallback(() => {
-    setModalOpen(prevOpen => !prevOpen);
-  }, []);
 
   const me = meQuery.data?.me;
   const allOrgs = organizationsQuery.data?.organizations.nodes || [];
@@ -116,9 +113,7 @@ export const Header = (): ReactElement => {
                   </DropdownMenu.Label>
                   {personal.map(org => (
                     <NextLink href={`/${org.cleanId}`} key={org.cleanId}>
-                      <a>
-                        <DropdownMenu.Item>{org.name}</DropdownMenu.Item>
-                      </a>
+                      <DropdownMenu.Item>{org.name}</DropdownMenu.Item>
                     </NextLink>
                   ))}
                   <DropdownMenu.Label className="px-2 text-xs font-bold text-gray-500">
@@ -126,9 +121,7 @@ export const Header = (): ReactElement => {
                   </DropdownMenu.Label>
                   {organizations.map(org => (
                     <NextLink href={`/${org.cleanId}`} key={org.cleanId}>
-                      <a>
-                        <DropdownMenu.Item>{org.name}</DropdownMenu.Item>
-                      </a>
+                      <DropdownMenu.Item>{org.name}</DropdownMenu.Item>
                     </NextLink>
                   ))}
                   <DropdownMenu.Separator />
@@ -150,12 +143,10 @@ export const Header = (): ReactElement => {
               </DropdownMenu.Item>
 
               <NextLink href="/settings">
-                <a>
-                  <DropdownMenu.Item>
-                    <SettingsIcon className="h-5 w-5" />
-                    Profile settings
-                  </DropdownMenu.Item>
-                </a>
+                <DropdownMenu.Item>
+                  <SettingsIcon className="h-5 w-5" />
+                  Profile settings
+                </DropdownMenu.Item>
               </NextLink>
               {docsUrl ? (
                 <DropdownMenu.Item asChild>
@@ -173,22 +164,18 @@ export const Header = (): ReactElement => {
               </DropdownMenu.Item>
               {meQuery.data?.me?.isAdmin && (
                 <NextLink href="/manage">
-                  <a>
-                    <DropdownMenu.Item>
-                      <TrendingUpIcon className="h-5 w-5" />
-                      Manage Instance
-                    </DropdownMenu.Item>
-                  </a>
+                  <DropdownMenu.Item>
+                    <TrendingUpIcon className="h-5 w-5" />
+                    Manage Instance
+                  </DropdownMenu.Item>
                 </NextLink>
               )}
               {env.nodeEnv === 'development' && (
                 <NextLink href="/dev">
-                  <a>
-                    <DropdownMenu.Item>
-                      <GraphQLIcon className="h-5 w-5" />
-                      Dev GraphiQL
-                    </DropdownMenu.Item>
-                  </a>
+                  <DropdownMenu.Item>
+                    <GraphQLIcon className="h-5 w-5" />
+                    Dev GraphiQL
+                  </DropdownMenu.Item>
                 </NextLink>
               )}
               <DropdownMenu.Item asChild>

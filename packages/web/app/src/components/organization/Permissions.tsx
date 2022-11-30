@@ -14,7 +14,7 @@ import { Scope, NoAccess } from '@/lib/access/common';
 import { canAccessOrganization } from '@/lib/access/organization';
 import { canAccessProject } from '@/lib/access/project';
 import { canAccessTarget } from '@/lib/access/target';
-import { useNotifications } from '@/lib/hooks/use-notifications';
+import { useNotifications } from '@/lib/hooks';
 
 interface Props<T> {
   title: string;

@@ -1,29 +1,25 @@
-import React from 'react';
-import 'twin.macro';
-
-import dynamic from 'next/dynamic';
+import { ReactElement } from 'react';
+import { GraphiQL } from 'graphiql';
+import { createGraphiQLFetcher } from '@graphiql/toolkit';
+import { HiveLogo } from '@/components/v2/icon';
 import 'graphiql/graphiql.css';
 
-const GraphiQL = dynamic(() => import('graphiql'), {
-  ssr: false,
-});
-
-const fetcher = process.browser
-  ? // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('@graphiql/toolkit').createGraphiQLFetcher({
-      url: window.location.origin + '/api/proxy',
-    })
-  : null;
-
-export default function Dev() {
+export default function DevPage(): ReactElement {
   return (
-    <div tw="mt-20 h-full w-full">
-      <GraphiQL fetcher={fetcher} headerEditorEnabled={true} />
-      <style jsx global>{`
-        .graphiql-container {
-          filter: invert(1);
+    <div className="mt-20 h-full w-full">
+      <style global jsx>{`
+        body.graphiql-dark .graphiql-container {
+          --color-base: transparent;
+          --color-primary: 40, 89%, 60%;
         }
       `}</style>
+      {process.browser && (
+        <GraphiQL fetcher={createGraphiQLFetcher({ url: `${location.origin}/api/proxy` })}>
+          <GraphiQL.Logo>
+            <HiveLogo className="h-6 w-6" />
+          </GraphiQL.Logo>
+        </GraphiQL>
+      )}
     </div>
   );
 }

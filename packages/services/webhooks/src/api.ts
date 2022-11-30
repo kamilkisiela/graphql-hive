@@ -1,5 +1,5 @@
-import * as trpc from '@trpc/server';
-import { inferProcedureInput } from '@trpc/server';
+import type { inferRouterInputs } from '@trpc/server';
+import { initTRPC } from '@trpc/server';
 import { z } from 'zod';
 import type { Context } from './types';
 
@@ -43,9 +43,10 @@ const webhookInput = z
   })
   .required();
 
-export const webhooksApiRouter = trpc.router<Context>().mutation('schedule', {
-  input: webhookInput,
-  async resolve({ ctx, input }) {
+const t = initTRPC.context<Context>().create();
+
+export const webhooksApiRouter = t.router({
+  schedule: t.procedure.input(webhookInput).mutation(async ({ ctx, input }) => {
     try {
       const job = await ctx.schedule(input);
 
@@ -54,14 +55,8 @@ export const webhooksApiRouter = trpc.router<Context>().mutation('schedule', {
       ctx.errorHandler('Failed to schedule a webhook', error as Error, ctx.logger);
       throw error;
     }
-  },
+  }),
 });
 
 export type WebhooksApi = typeof webhooksApiRouter;
-export type WebhooksApiMutate = keyof WebhooksApi['_def']['mutations'];
-
-export type WebhooksMutationInput<TRouteKey extends WebhooksApiMutate> = inferProcedureInput<
-  WebhooksApi['_def']['mutations'][TRouteKey]
->;
-
-export type WebhookInput = WebhooksMutationInput<'schedule'>;
+export type WebhooksApiInput = inferRouterInputs<WebhooksApi>;

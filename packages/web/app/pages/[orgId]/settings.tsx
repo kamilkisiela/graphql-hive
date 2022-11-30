@@ -1,4 +1,4 @@
-import { ReactElement, useCallback, useState } from 'react';
+import { ReactElement } from 'react';
 import { useFormik } from 'formik';
 import { gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
@@ -22,7 +22,7 @@ import {
   OrganizationAccessScope,
   useOrganizationAccess,
 } from '@/lib/access/organization';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useRouteSelector, useToggle } from '@/lib/hooks';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const Integrations = (): ReactElement => {
@@ -148,10 +148,7 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
   });
   const router = useRouteSelector();
   const isRegularOrg = organization?.type === OrganizationType.Regular;
-  const [isModalOpen, setModalOpen] = useState(false);
-  const toggleModalOpen = useCallback(() => {
-    setModalOpen(prevOpen => !prevOpen);
-  }, []);
+  const [isModalOpen, toggleModalOpen] = useToggle();
 
   const [mutation, mutate] = useMutation(UpdateOrganizationNameMutation);
 

@@ -7,7 +7,6 @@ import GlobalStylesComponent from '@/components/common/GlobalStyles';
 import * as gtag from '@/lib/gtag';
 import { colors } from '@/lib/theme';
 import { LoadingAPIIndicator } from '@/components/common/LoadingAPI';
-import '@/lib/graphiql.css';
 import '../public/styles.css';
 import cookies from 'js-cookie';
 import Session from 'supertokens-auth-react/recipe/session';

@@ -16,7 +16,7 @@ import {
 } from '@chakra-ui/react';
 import { CreateOrganizationDocument } from '@/graphql';
 import { Label, Description } from '@/components/common';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useRouteSelector } from '@/lib/hooks';
 
 export const OrganizationCreator: React.FC<{
   isOpen: boolean;

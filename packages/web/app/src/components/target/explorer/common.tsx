@@ -1,13 +1,11 @@
 import React from 'react';
-import NextLink from 'next/link';
 import clsx from 'clsx';
 import { gql, DocumentType } from 'urql';
 import * as Popover from '@radix-ui/react-popover';
 import { VscCommentDiscussion, VscPulse } from 'react-icons/vsc';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useRouteSelector, formatNumber } from '@/lib/hooks';
 import { Link } from '@/components/v2/link';
 import { Markdown } from '@/components/v2/markdown';
-import { formatNumber } from '@/lib/hooks/use-formatted-number';
 import { useArgumentListToggle } from './provider';
 
 function useCollapsibleList<T>(list: T[], max: number, defaultValue: boolean) {
@@ -320,11 +318,11 @@ export function GraphQLTypeAsLink(props: { type: string }) {
   const typename = props.type.replace(/[[\]!]+/g, '');
 
   return (
-    <NextLink
+    <Link
+      className="text-orange-500"
       href={`/${router.organizationId}/${router.projectId}/${router.targetId}/explorer/${typename}`}
-      passHref
     >
-      <Link className="text-orange-500">{props.type}</Link>
-    </NextLink>
+      {props.type}
+    </Link>
   );
 }

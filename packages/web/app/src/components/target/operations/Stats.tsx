@@ -12,10 +12,13 @@ import {
   GeneralOperationsStatsQuery,
 } from '@/graphql';
 import { theme } from '@/lib/charts';
-import { toDecimal } from '@/lib/hooks/use-decimal';
-import { useFormattedDuration } from '@/lib/hooks/use-formatted-duration';
-import { useFormattedNumber } from '@/lib/hooks/use-formatted-number';
-import { formatThroughput, useFormattedThroughput } from '@/lib/hooks/use-formatted-throughput';
+import {
+  toDecimal,
+  useFormattedDuration,
+  useFormattedNumber,
+  formatThroughput,
+  useFormattedThroughput,
+} from '@/lib/hooks';
 import { OperationsFallback } from './Fallback';
 
 function resolutionToMilliseconds(

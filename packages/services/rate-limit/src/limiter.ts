@@ -4,7 +4,7 @@ import { createStorage as createPostgreSQLStorage } from '@hive/storage';
 
 import { startOfMonth, endOfMonth } from 'date-fns';
 import * as Sentry from '@sentry/node';
-import { createTRPCClient } from '@trpc/client';
+import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import type { UsageEstimatorApi } from '@hive/usage-estimator';
 import type { RateLimitInput } from './api';
 import { rateLimitOperationsEventOrg } from './metrics';
@@ -52,9 +52,13 @@ export function createRateLimiter(config: {
     connectionString: string;
   };
 }) {
-  const rateEstimator = createTRPCClient<UsageEstimatorApi>({
-    url: `${config.rateEstimator.endpoint}/trpc`,
-    fetch,
+  const rateEstimator = createTRPCProxyClient<UsageEstimatorApi>({
+    links: [
+      httpLink({
+        url: `${config.rateEstimator.endpoint}/trpc`,
+        fetch,
+      }),
+    ],
   });
   const emails = createEmailScheduler(config.emails);
 
@@ -83,7 +87,7 @@ export function createRateLimiter(config: {
 
     const [records, operations] = await Promise.all([
       storage.getGetOrganizationsAndTargetPairsWithLimitInfo(),
-      rateEstimator.query('estimateOperationsForAllTargets', windowAsString),
+      rateEstimator.estimateOperationsForAllTargets.query(windowAsString),
     ]);
 
     logger.debug(`Fetched total of ${Object.keys(records).length} targets from the DB`);

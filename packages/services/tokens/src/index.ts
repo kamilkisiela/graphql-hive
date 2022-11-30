@@ -13,7 +13,7 @@ import LRU from 'tiny-lru';
 import ms from 'ms';
 import { createStorage } from './storage';
 import { useCache } from './cache';
-import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify/dist/trpc-server-adapters-fastify.cjs.js';
+import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
 import type { CreateFastifyContextOptions } from '@trpc/server/adapters/fastify';
 import { Context, tokensApiRouter } from './api';
 import { env } from './environment';

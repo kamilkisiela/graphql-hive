@@ -6,7 +6,7 @@ import { SchemaBuildError } from './errors';
 import { SCHEMA_SERVICE_CONFIG } from './tokens';
 import type { SchemaServiceConfig } from './tokens';
 import { sentry } from '../../../../shared/sentry';
-import { createTRPCClient } from '@trpc/client';
+import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import { fetch } from '@whatwg-node/fetch';
 import type { SchemaBuilderApi } from '@hive/schema';
 
@@ -24,12 +24,16 @@ export class StitchingOrchestrator implements Orchestrator {
     @Inject(CONTEXT) context: GraphQLModules.ModuleContext,
   ) {
     this.logger = logger.child({ service: 'StitchingOrchestrator' });
-    this.schemaService = createTRPCClient<SchemaBuilderApi>({
-      url: `${serviceConfig.endpoint}/trpc`,
-      fetch,
-      headers: {
-        'x-request-id': context.requestId,
-      },
+    this.schemaService = createTRPCProxyClient<SchemaBuilderApi>({
+      links: [
+        httpLink({
+          url: `${serviceConfig.endpoint}/trpc`,
+          fetch,
+          headers: {
+            'x-request-id': context.requestId,
+          },
+        }),
+      ],
     });
   }
 
@@ -39,7 +43,7 @@ export class StitchingOrchestrator implements Orchestrator {
   async validate(schemas: SchemaObject[]) {
     this.logger.debug('Validating Stitched Schemas');
 
-    const result = await this.schemaService.mutation('validate', {
+    const result = await this.schemaService.validate.mutate({
       type: 'stitching',
       schemas: schemas.map(s => ({
         raw: s.raw,
@@ -55,7 +59,7 @@ export class StitchingOrchestrator implements Orchestrator {
   async build(schemas: SchemaObject[]): Promise<SchemaObject> {
     this.logger.debug('Building Stitched Schemas');
     try {
-      const result = await this.schemaService.mutation('build', {
+      const result = await this.schemaService.build.mutate({
         type: 'stitching',
         schemas: schemas.map(s => ({
           raw: s.raw,

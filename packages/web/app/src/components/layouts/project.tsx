@@ -1,4 +1,4 @@
-import { ReactElement, ReactNode, useCallback, useEffect, useState } from 'react';
+import { ReactElement, ReactNode, useEffect } from 'react';
 import NextLink from 'next/link';
 import 'twin.macro';
 import { useQuery } from 'urql';
@@ -12,7 +12,7 @@ import {
   ProjectFieldsFragment,
   OrganizationFieldsFragment,
 } from '@/graphql';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useRouteSelector, useToggle } from '@/lib/hooks';
 import { useProjectAccess, ProjectAccessScope, canAccessProject } from '@/lib/access/project';
 
 enum TabValue {
@@ -34,10 +34,7 @@ export const ProjectLayout = ({
   className?: string;
 }): ReactElement | null => {
   const router = useRouteSelector();
-  const [isModalOpen, setModalOpen] = useState(false);
-  const toggleModalOpen = useCallback(() => {
-    setModalOpen(prevOpen => !prevOpen);
-  }, []);
+  const [isModalOpen, toggleModalOpen] = useToggle();
 
   const { organizationId: orgId, projectId } = router;
 
@@ -89,11 +86,12 @@ export const ProjectLayout = ({
         <div className="container flex items-center pb-4">
           <div>
             {org && (
-              <NextLink href={`/${orgId}`} passHref>
-                <Link className="line-clamp-1 flex max-w-[250px] items-center text-xs font-medium text-gray-500">
-                  {org.name}
-                </Link>
-              </NextLink>
+              <Link
+                href={`/${orgId}`}
+                className="line-clamp-1 flex max-w-[250px] items-center text-xs font-medium text-gray-500"
+              >
+                {org.name}
+              </Link>
             )}
             <div className="flex items-center gap-2.5">
               <Heading size="2xl" className="line-clamp-1 max-w-2xl">
@@ -110,10 +108,12 @@ export const ProjectLayout = ({
                     {projects.nodes.map(
                       node =>
                         node.cleanId !== projectId && (
-                          <NextLink href={`/${orgId}/${node.cleanId}`} key={node.cleanId}>
-                            <a className="line-clamp-1 max-w-2xl">
-                              <DropdownMenu.Item>{node.name}</DropdownMenu.Item>
-                            </a>
+                          <NextLink
+                            key={node.cleanId}
+                            href={`/${orgId}/${node.cleanId}`}
+                            className="line-clamp-1 max-w-2xl"
+                          >
+                            <DropdownMenu.Item>{node.name}</DropdownMenu.Item>
                           </NextLink>
                         ),
                     )}
@@ -138,24 +138,18 @@ export const ProjectLayout = ({
 
       <Tabs className="container" value={value}>
         <Tabs.List>
-          <NextLink passHref href={`/${orgId}/${projectId}`}>
-            <Tabs.Trigger value={TabValue.Targets} asChild>
-              <a>Targets</a>
-            </Tabs.Trigger>
-          </NextLink>
+          <Tabs.Trigger value={TabValue.Targets} asChild>
+            <NextLink href={`/${orgId}/${projectId}`}>Targets</NextLink>
+          </Tabs.Trigger>
           {canAccessProject(ProjectAccessScope.Alerts, org.me) && (
-            <NextLink passHref href={`/${orgId}/${projectId}/alerts`}>
-              <Tabs.Trigger value={TabValue.Alerts} asChild>
-                <a>Alerts</a>
-              </Tabs.Trigger>
-            </NextLink>
+            <Tabs.Trigger value={TabValue.Alerts} asChild>
+              <NextLink href={`/${orgId}/${projectId}/alerts`}>Alerts</NextLink>
+            </Tabs.Trigger>
           )}
           {canAccessProject(ProjectAccessScope.Settings, org.me) && (
-            <NextLink passHref href={`/${orgId}/${projectId}/settings`}>
-              <Tabs.Trigger value={TabValue.Settings} asChild>
-                <a>Settings</a>
-              </Tabs.Trigger>
-            </NextLink>
+            <Tabs.Trigger value={TabValue.Settings} asChild>
+              <NextLink href={`/${orgId}/${projectId}/settings`}>Settings</NextLink>
+            </Tabs.Trigger>
           )}
         </Tabs.List>
         <Tabs.Content value={value} className={className}>

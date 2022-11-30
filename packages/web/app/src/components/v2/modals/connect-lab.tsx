@@ -12,7 +12,7 @@ export const ConnectLabModal = ({
   toggleModalOpen: () => void;
   endpoint: string;
 }): ReactElement => {
-  const docsUrl = getDocsUrl('/features/tokens');
+  const docsUrl = getDocsUrl('/features/tokens') || '';
 
   return (
     <Modal open={isOpen} onOpenChange={toggleModalOpen} className="flex w-[650px] flex-col gap-5">
@@ -27,13 +27,13 @@ export const ConnectLabModal = ({
       </span>
       <Tag>
         X-Hive-Key:{' '}
-        <Link variant="secondary" target="_blank" rel="noreferrer" href={docsUrl ?? undefined}>
+        <Link variant="secondary" target="_blank" rel="noreferrer" href={docsUrl}>
           YOUR_TOKEN_HERE
         </Link>
       </Tag>
       <p className="text-sm text-gray-500">
         Read the{' '}
-        <Link variant="primary" target="_blank" rel="noreferrer" href={docsUrl ?? undefined}>
+        <Link variant="primary" target="_blank" rel="noreferrer" href={docsUrl}>
           Managing Tokens
         </Link>{' '}
         chapter in our documentation.
