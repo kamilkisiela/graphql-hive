@@ -639,7 +639,8 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version-file: .node-version
-          cache: pnpm
+          # TODO: using the cache breaks cypress run
+          # cache: pnpm
 
       - name: Install dependencies
         run: pnpm i --frozen-lockfile
