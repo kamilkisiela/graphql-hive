@@ -49,14 +49,14 @@ function "image_tag" {
 }
 
 target "service-base" {
-  dockerfile = "${PWD}/services.dockerfile"
+  dockerfile = "services.dockerfile"
   args = {
     RELEASE = "${RELEASE}"
   }
 }
 
 target "app-base" {
-  dockerfile = "${PWD}/app.dockerfile"
+  dockerfile = "app.dockerfile"
   args = {
     RELEASE = "${RELEASE}"
   }
@@ -77,7 +77,7 @@ target "target-publish" {
 
 target "emails" {
   inherits = ["service-base", get_target()]
-  context = "${PWD}/packages/services/emails/dist"
+  context = "packages/services/emails/dist"
   args = {
     IMAGE_TITLE = "graphql-hive/emails"
     IMAGE_DESCRIPTION = "The emails service of the GraphQL Hive project."
@@ -94,7 +94,7 @@ target "emails" {
 
 target "rate-limit" {
   inherits = ["service-base", get_target()]
-  context = "${PWD}/packages/services/rate-limit/dist"
+  context = "packages/services/rate-limit/dist"
   args = {
     IMAGE_TITLE = "graphql-hive/rate-limit"
     IMAGE_DESCRIPTION = "The rate limit service of the GraphQL Hive project."
@@ -111,7 +111,7 @@ target "rate-limit" {
 
 target "schema" {
   inherits = ["service-base", get_target()]
-  context = "${PWD}/packages/services/schema/dist"
+  context = "packages/services/schema/dist"
   args = {
     IMAGE_TITLE = "graphql-hive/rate-limit"
     IMAGE_DESCRIPTION = "The schema service of the GraphQL Hive project."
@@ -128,7 +128,7 @@ target "schema" {
 
 target "server" {
   inherits = ["service-base", get_target()]
-  context = "${PWD}/packages/services/server/dist"
+  context = "packages/services/server/dist"
   args = {
     IMAGE_TITLE = "graphql-hive/server"
     IMAGE_DESCRIPTION = "The server service of the GraphQL Hive project."
@@ -145,7 +145,7 @@ target "server" {
 
 target "storage" {
   inherits = ["service-base", get_target()]
-  context = "${PWD}/packages/services/storage/dist"
+  context = "packages/services/storage/dist"
   args = {
     IMAGE_TITLE = "graphql-hive/storage"
     IMAGE_DESCRIPTION = "The storage service of the GraphQL Hive project."
@@ -160,7 +160,7 @@ target "storage" {
 
 target "stripe-billing" {
   inherits = ["service-base", get_target()]
-  context = "${PWD}/packages/services/stripe-billing/dist"
+  context = "packages/services/stripe-billing/dist"
   args = {
     IMAGE_TITLE = "graphql-hive/stripe-billing"
     IMAGE_DESCRIPTION = "The stripe billing service of the GraphQL Hive project."
@@ -177,7 +177,7 @@ target "stripe-billing" {
 
 target "tokens" {
   inherits = ["service-base", get_target()]
-  context = "${PWD}/packages/services/tokens/dist"
+  context = "packages/services/tokens/dist"
   args = {
     IMAGE_TITLE = "graphql-hive/tokens"
     IMAGE_DESCRIPTION = "The tokens service of the GraphQL Hive project."
@@ -194,7 +194,7 @@ target "tokens" {
 
 target "usage-estimator" {
   inherits = ["service-base", get_target()]
-  context = "${PWD}/packages/services/usage-estimator/dist"
+  context = "packages/services/usage-estimator/dist"
   args = {
     IMAGE_TITLE = "graphql-hive/usage-estimator"
     IMAGE_DESCRIPTION = "The usage estimator service of the GraphQL Hive project."
@@ -211,7 +211,7 @@ target "usage-estimator" {
 
 target "usage-ingestor" {
   inherits = ["service-base", get_target()]
-  context = "${PWD}/packages/services/usage-ingestor/dist"
+  context = "packages/services/usage-ingestor/dist"
   args = {
     IMAGE_TITLE = "graphql-hive/usage-ingestor"
     IMAGE_DESCRIPTION = "The usage ingestor service of the GraphQL Hive project."
@@ -228,7 +228,7 @@ target "usage-ingestor" {
 
 target "usage" {
   inherits = ["service-base", get_target()]
-  context = "${PWD}/packages/services/usage/dist"
+  context = "packages/services/usage/dist"
   args = {
     IMAGE_TITLE = "graphql-hive/usage"
     IMAGE_DESCRIPTION = "The usage ingestor service of the GraphQL Hive project."
@@ -245,7 +245,7 @@ target "usage" {
 
 target "webhooks" {
   inherits = ["service-base", get_target()]
-  context = "${PWD}/packages/services/webhooks/dist"
+  context = "packages/services/webhooks/dist"
   args = {
     IMAGE_TITLE = "graphql-hive/webhooks"
     IMAGE_DESCRIPTION = "The webhooks ingestor service of the GraphQL Hive project."
@@ -262,7 +262,7 @@ target "webhooks" {
 
 target "app" {
   inherits = ["app-base", get_target()]
-  context = "${PWD}/packages/web/app/dist"
+  context = "packages/web/app/dist"
   args = {
     IMAGE_TITLE = "graphql-hive/app"
     PORT = "3000"
