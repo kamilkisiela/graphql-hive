@@ -663,7 +663,7 @@ jobs:
         run: pnpm docker:build
 
       - name: Up
-        timeout-minutes: 3
+        timeout-minutes: 5
         run: docker compose -f docker-compose.community.yml up -d --wait
       - name: Docker PS
         if: always()
