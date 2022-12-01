@@ -623,7 +623,6 @@ jobs:
       POSTGRES_USER: postgres
       POSTGRES_DB: registry
       CYPRESS_CACHE_FOLDER: /home/runner/setup-pnpm/node_modules/.cache/Cypress # same place as pnpm cache
-      CYPRESS_BASE_URL: ${{ env.HIVE_APP_BASE_URL }}
 
     steps:
       - name: Check out repository code
@@ -684,6 +683,8 @@ jobs:
 
       - name: Cypress run
         uses: cypress-io/github-action@v4
+        env:
+          CYPRESS_BASE_URL: ${{ env.HIVE_APP_BASE_URL }}
         with:
           install: false
           command: pnpm test:e2e

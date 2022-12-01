@@ -38,7 +38,7 @@
     "seed": "node scripts/seed-local-env.js",
     "setup": "pnpm --filter @hive/storage setup",
     "test": "jest",
-    "test:e2e": "cypress run",
+    "test:e2e": "CYPRESS_BASE_URL=$HIVE_APP_BASE_URL cypress run",
     "turbo": "env-cmd --silent turbo run",
     "typecheck": "pnpm turbo typecheck --color",
     "upload-sourcemaps": "./scripts/upload-sourcemaps.sh"
