@@ -638,19 +638,11 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version-file: .node-version
-          cache: pnpm
-
-      - name: Set Cypress cache folder
-        run: echo "CYPRESS_CACHE_FOLDER=$(pnpm store path)/Cypress" >> $GITHUB_ENV
-
-      - name: ls pnpm store folder
-        run: ls -la $(pnpm store path)
+          # TODO: cypress binary in pnpm store gets lost during caching :)
+          # cache: pnpm
 
       - name: Install dependencies
         run: pnpm i --frozen-lockfile
-
-      - name: ls pnpm store folder
-        run: ls -la $(pnpm store path)
 
       - name: Turbo Cache
         id: turbo-cache
