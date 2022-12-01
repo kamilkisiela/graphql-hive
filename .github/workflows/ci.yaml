@@ -663,8 +663,7 @@ jobs:
       - name: Bake
         uses: docker/bake-action@v2
         with:
-          files:
-            - docker.hcl
+          files: ['docker.hcl']
           load: true
 
       # TODO: mounting volumes in the CI causes permission problems for services
