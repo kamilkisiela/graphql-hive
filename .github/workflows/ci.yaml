@@ -663,6 +663,12 @@ jobs:
       - name: Build Docker Images
         run: pnpm docker:build
 
+      # TODO: mounting volumes in the CI causes permission problems for services
+      - name: Remove volume mounts from compose file
+        uses: mikefarah/yq@v4.30.5
+        with:
+          cmd: yq -i 'del(.services.*.volumes)' docker-compose.community.yml
+
       - name: Up
         timeout-minutes: 5
         run: docker compose -f docker-compose.community.yml up -d --wait
