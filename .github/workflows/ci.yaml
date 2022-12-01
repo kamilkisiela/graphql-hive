@@ -683,8 +683,6 @@ jobs:
 
       - name: Cypress run
         uses: cypress-io/github-action@v4
-        env:
-          CYPRESS_BASE_URL: ${{ env.HIVE_APP_BASE_URL }}
         with:
           install: false
           command: pnpm test:e2e
