@@ -666,12 +666,6 @@ jobs:
       - name: Up
         timeout-minutes: 5
         run: docker compose -f docker-compose.community.yml up -d --wait
-      - name: Docker PS
-        if: always()
-        run: docker compose -f docker-compose.community.yml ps
-      - name: Docker Logs
-        if: always()
-        run: docker compose -f docker-compose.community.yml logs
 
       - name: Cypress run
         uses: cypress-io/github-action@v4
