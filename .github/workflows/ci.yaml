@@ -623,7 +623,7 @@ jobs:
       POSTGRES_USER: postgres
       POSTGRES_DB: registry
       CYPRESS_BASE_URL: $HIVE_APP_BASE_URL
-      CYPRESS_CACHE_FOLDER: /home/runner/setup-pnpm/node_modules/.cache/Cypress
+      CYPRESS_CACHE_FOLDER: /home/runner/setup-pnpm/node_modules/.cache/Cypress # same place as pnpm cache
 
     steps:
       - name: Check out repository code
