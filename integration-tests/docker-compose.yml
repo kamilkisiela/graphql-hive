@@ -195,6 +195,11 @@ services:
       NODE_ENV: production
       PORT: 3004
       ARTIFACT_AUTH_PRIVATE_KEY: 1e1064ef9cda8bf38936b77317e90dc3
+      S3_ENDPOINT: 'http://s3:9000'
+      S3_ACCESS_KEY_ID: minioadmin
+      S3_SECRET_ACCESS_KEY: minioadmin
+      S3_BUCKET_NAME: artifacts
+      S3_PUBLIC_URL: 'http://localhost:9002'
 
   local_broker:
     image: node:16.13.2-alpine3.14

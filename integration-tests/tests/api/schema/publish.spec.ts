@@ -1109,7 +1109,7 @@ test('marking only the most recent version as valid result in an update of CDN',
 
   // the initial version should available on CDN
   let cdnResult = await fetchSchemaFromCDN(targetSelector, token);
-  expect(cdnResult.body.sdl).toContain('ping');
+  expect(cdnResult.body).toContain('ping');
 
   let cdnMetadataResult = await fetchMetadataFromCDN(targetSelector, token);
   expect(cdnMetadataResult.status).toEqual(200);
@@ -1133,7 +1133,7 @@ test('marking only the most recent version as valid result in an update of CDN',
   );
 
   cdnResult = await fetchSchemaFromCDN(targetSelector, token);
-  expect(cdnResult.body.sdl).toContain('tennis');
+  expect(cdnResult.body).toContain('tennis');
 
   cdnMetadataResult = await fetchMetadataFromCDN(targetSelector, token);
   expect(cdnMetadataResult.status).toEqual(200);
@@ -1154,7 +1154,7 @@ test('marking only the most recent version as valid result in an update of CDN',
   // console.log(JSON.stringify(updateSchemaVersionStatusResult));
 
   cdnResult = await fetchSchemaFromCDN(targetSelector, token);
-  expect(cdnResult.body.sdl).toContain('tennis');
+  expect(cdnResult.body).toContain('tennis');
 
   cdnMetadataResult = await fetchMetadataFromCDN(targetSelector, token);
   expect(cdnMetadataResult.status).toEqual(200);
@@ -1244,10 +1244,9 @@ test('CDN data can not be fetched with an invalid access token', async () => {
 
   const cdn = cdnAccessResult.body.data!.createCdnToken;
 
-  const res = await fetch(`${cdn.url}/schema`, {
+  const res = await fetch(cdn.url, {
     method: 'GET',
     headers: {
-      Accept: 'application/json',
       'X-Hive-CDN-Key': 'i-like-turtles',
     },
   });
@@ -1338,10 +1337,9 @@ test('CDN data can be fetched with an valid access token', async () => {
 
   const cdn = cdnAccessResult.body.data!.createCdnToken;
 
-  const cdnResult = await fetch(`${cdn.url}/schema`, {
+  const cdnResult = await fetch(cdn.url, {
     method: 'GET',
     headers: {
-      Accept: 'application/json',
       'X-Hive-CDN-Key': cdn.token,
     },
   });
