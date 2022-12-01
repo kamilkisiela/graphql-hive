@@ -21,6 +21,7 @@ export const reservedOrganizationNames = [
   'sign-up',
   'sign-in',
   'sign-out',
+  'settings',
   'manage',
   'admin',
   'stats',
@@ -28,6 +29,7 @@ export const reservedOrganizationNames = [
   'general',
   'dashboard',
   'index',
+  'dev',
   'contact',
   'docs',
   'documentation',
@@ -36,6 +38,15 @@ export const reservedOrganizationNames = [
   'faq',
   'knowledge',
   'internal',
+  'action',
+  'form',
+  'make',
+  'in',
+  'i',
+  'to',
+  'from',
+  'call',
+  'join',
 ];
 
 export const organizationAdminScopes = [
