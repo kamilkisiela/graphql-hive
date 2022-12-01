@@ -642,9 +642,6 @@ jobs:
           node-version-file: .node-version
           cache: pnpm
 
-      - name: Prune pnpm store
-        run: pnpm store prune
-
       - name: Install dependencies
         run: pnpm i --frozen-lockfile
 
