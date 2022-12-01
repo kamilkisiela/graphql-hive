@@ -1032,7 +1032,7 @@ importers:
       regenerator-runtime: 0.13.10
       rimraf: 3.0.2
       snarkdown: 2.0.0
-      supertokens-auth-react: 0.27.1
+      supertokens-auth-react: 0.27.3
       supertokens-js-override: 0.0.4
       supertokens-node: 12.0.5
       supertokens-website: 14.0.2
@@ -1112,7 +1112,7 @@ importers:
       react-window: 1.8.8_biqbaboplfbrettd7655fr4n2y
       regenerator-runtime: 0.13.10
       snarkdown: 2.0.0
-      supertokens-auth-react: 0.27.1_spprgxbbbwrf7revoq66vrfk2y
+      supertokens-auth-react: 0.27.3_spprgxbbbwrf7revoq66vrfk2y
       supertokens-js-override: 0.0.4
       supertokens-node: 12.0.5
       supertokens-website: 14.0.2
@@ -24823,8 +24823,8 @@ packages:
       - supports-color
     dev: false
 
-  /supertokens-auth-react/0.27.1_spprgxbbbwrf7revoq66vrfk2y:
-    resolution: {integrity: sha512-g4a8idSPF1Fa7mN5u0QTNlIHor/1OwRhgKd3IXgEZoDngmm0wDEii97JDTHUr8gGhFBp0pi/UtGka/UQ6MTdFg==}
+  /supertokens-auth-react/0.27.3_spprgxbbbwrf7revoq66vrfk2y:
+    resolution: {integrity: sha512-lFyk7dFfc7G06NdNpr2m0P65k2CvAW9fDU+6s590dG6G07RanBhZX2izy6OgXwnAl/Nxp6NH5jwwhxCMSXiyQA==}
     engines: {node: '>=16.0.0', npm: ^8}
     peerDependencies:
       react: '>=16.8.0'
