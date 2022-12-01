@@ -1,7 +1,7 @@
 global:
   image:
     tag: 59b64c36c866b3555c135c70de76a884e63f8619
-  clickhouse_username: hive
+  clickhouse_username: default
 
 image:
   name: ghcr.io/kamilkisiela/graphql-hive/usage-ingestor
