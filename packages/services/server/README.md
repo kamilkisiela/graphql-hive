@@ -33,7 +33,9 @@ The GraphQL API for GraphQL Hive.
 | `S3_SECRET_ACCESS_KEY`                      | **Yes**                                        | The S3 secret access key.                                                                     | `minioadmin`                                         |
 | `S3_BUCKET_NAME`                            | **Yes**                                        | The S3 bucket name.                                                                           | `artifacts`                                          |
 | `S3_PUBLIC_URL`                             | No                                             | The public URL of the S3, in case it differs from the `S#_ENDPOINT`.                          | `http://localhost:8083`                              |
-| `ARTIFACT_AUTH_PRIVATE_KEY`                 | **Yes**                                        | The artifacts private key                                                                     | `103df4521212121269213971ce28b5b0`                   |
+| `CDN_AUTH_PRIVATE_KEY`                      | **Yes**                                        | The artifacts private key                                                                     | `103df4521212121269213971ce28b5b0`                   |
+| `CDN_API`                                   | No                                             | Whether the CDN exposed via API is enabled.                                                   | `1` (enabled) or `0` (disabled)                      |
+| `CDN_API_BASE_URL`                          | No (Yes if `CDN_API` is set to `1`)            | The public base url of the API service.                                                       | `http://localhost:8082`                              |
 | `SUPERTOKENS_CONNECTION_URI`                | **Yes**                                        | The URI of the SuperTokens instance.                                                          | `http://127.0.0.1:3567`                              |
 | `SUPERTOKENS_API_KEY`                       | **Yes**                                        | The API KEY of the SuperTokens instance.                                                      | `iliketurtlesandicannotlie`                          |
 | `INTEGRATION_GITHUB`                        | No                                             | Whether the GitHub integration is enabled                                                     | `1` (enabled) or `0` (disabled)                      |
@@ -55,8 +57,8 @@ version.
 | ------------------------------------ | ------------------------------------------ | -------------------------------------------- | ---------------------------------- |
 | `BILLING_ENDPOINT`                   | **Yes**                                    | The endpoint of the Hive Billing service.    | `http://127.0.0.1:4013`            |
 | `USAGE_ESTIMATOR_ENDPOINT`           | No                                         | The endpoint of the usage estimator service. | `4011`                             |
-| `CDN`                                | No                                         | Whether the CDN is enabled.                  | `1` (enabled) or `0` (disabled)    |
-| `CDN_BASE_URL`                       | No (**Yes** if `CDN` is `1`)               | The base URL of the cdn.                     | `https://cdn.graphql-hive.com`     |
+| `CDN_CF`                             | No                                         | Whether the CDN is enabled.                  | `1` (enabled) or `0` (disabled)    |
+| `CDN_CF_BASE_URL`                    | No (**Yes** if `CDN` is `1`)               | The base URL of the cdn.                     | `https://cdn.graphql-hive.com`     |
 | `CDN_CF_BASE_PATH`                   | No (**Yes** if `CDN` is `1`)               | The base path of the cdn.                    | `https://cdn.graphql-hive.com`     |
 | `CDN_CF_ACCOUNT_ID`                  | No (**Yes** if `CDN` is `1`)               | The cloudflare account ID.                   | `103df45224310d669213971ce28b5b70` |
 | `CDN_CF_AUTH_TOKEN`                  | No (**Yes** if `CDN` is `1`)               | The cloudflare authentication token.         | `85e20c26c03759603c0f45884824a1c3` |

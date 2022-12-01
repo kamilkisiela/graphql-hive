@@ -154,20 +154,6 @@ export async function main() {
       region: 'auto',
     });
 
-    const artifactStorageReader = new ArtifactStorageReader(
-      s3Client,
-      env.s3.bucketName,
-      env.s3.publicUrl,
-    );
-
-    const artifactHandler = createArtifactRequestHandler({
-      isKeyValid: createIsKeyValid({ keyData: env.artifacts.auth.privateKey }),
-      async getArtifactUrl(targetId, artifactType) {
-        return artifactStorageReader.generateArtifactReadUrl(targetId, artifactType);
-      },
-    });
-    const artifactRouteHandler = createServerAdapter(artifactHandler);
-
     const graphqlLogger = createGraphQLLogger();
     const registry = createRegistry({
       tokens: {
@@ -208,13 +194,7 @@ export async function main() {
           clickHouseElapsedDuration.labels({ query }).observe(timings.elapsedSeconds);
         },
       },
-      cdn: env.cdn
-        ? {
-            authPrivateKey: env.artifacts.auth.privateKey,
-            baseUrl: env.cdn.baseUrl,
-            cloudflare: env.cdn.cloudflare,
-          }
-        : null,
+      cdn: env.cdn,
       s3: {
         client: s3Client,
         bucketName: env.s3.bucketName,
@@ -337,29 +317,43 @@ export async function main() {
       },
     });
 
-    /** Artifacts API */
-    server.route({
-      method: ['GET'],
-      url: '/artifacts/v1/*',
-      async handler(req, reply) {
-        const response = await artifactRouteHandler.handleNodeRequest(req);
+    if (env.cdn.providers.api !== null) {
+      const artifactStorageReader = new ArtifactStorageReader(
+        s3Client,
+        env.s3.bucketName,
+        env.s3.publicUrl,
+      );
 
-        if (response === undefined) {
-          void reply.status(404).send('Not found.');
+      const artifactHandler = createArtifactRequestHandler({
+        isKeyValid: createIsKeyValid({ keyData: env.cdn.authPrivateKey }),
+        async getArtifactUrl(targetId, artifactType) {
+          return artifactStorageReader.generateArtifactReadUrl(targetId, artifactType);
+        },
+      });
+      const artifactRouteHandler = createServerAdapter(artifactHandler);
+
+      /** Artifacts API */
+      server.route({
+        method: ['GET'],
+        url: '/artifacts/v1/*',
+        async handler(req, reply) {
+          const response = await artifactRouteHandler.handleNodeRequest(req);
+
+          if (response === undefined) {
+            void reply.status(404).send('Not found.');
+            return reply;
+          }
+
+          response.headers.forEach((value, key) => {
+            void reply.header(key, value);
+          });
+
+          void reply.status(response.status);
+          void reply.send(Readable.from(response.body!));
           return reply;
-        }
-
-        response.headers.forEach((value, key) => {
-          reply.header(key, value); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
-        });
-
-        reply.status(response.status); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
-
-        reply.send(Readable.from(response.body!)); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
-
-        return reply;
-      },
-    });
+        },
+      });
+    }
 
     if (env.legacyAuth0) {
       const auth0Config = env.legacyAuth0;

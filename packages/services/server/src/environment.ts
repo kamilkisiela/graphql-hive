@@ -82,17 +82,27 @@ const GitHubModel = zod.union([
   }),
 ]);
 
-const CdnModel = zod.union([
+const CdnCFModel = zod.union([
   zod.object({
-    CDN: emptyString(zod.literal('0').optional()),
+    CDN_CF: emptyString(zod.literal('0').optional()),
   }),
   zod.object({
-    CDN: zod.literal('1'),
-    CDN_BASE_URL: zod.string(),
+    CDN_CF: zod.literal('1'),
+    CDN_CF_BASE_URL: zod.string(),
     CDN_CF_BASE_PATH: zod.string(),
     CDN_CF_ACCOUNT_ID: zod.string(),
     CDN_CF_AUTH_TOKEN: zod.string(),
     CDN_CF_NAMESPACE_ID: zod.string(),
+  }),
+]);
+
+const CdnApiModel = zod.union([
+  zod.object({
+    CDN_API: emptyString(zod.literal('0').optional()),
+  }),
+  zod.object({
+    CDN_API: zod.literal('1'),
+    CDN_API_BASE_URL: zod.string(),
   }),
 ]);
 
@@ -129,7 +139,7 @@ const S3Model = zod.object({
   S3_SECRET_ACCESS_KEY: zod.string(),
   S3_BUCKET_NAME: zod.string(),
   S3_PUBLIC_URL: emptyString(zod.string().url().optional()),
-  ARTIFACT_AUTH_PRIVATE_KEY: zod.string(),
+  CDN_AUTH_PRIVATE_KEY: zod.string(),
 });
 
 const LogModel = zod.object({
@@ -164,7 +174,9 @@ const configs = {
   // eslint-disable-next-line no-process-env
   github: GitHubModel.safeParse(process.env),
   // eslint-disable-next-line no-process-env
-  cdn: CdnModel.safeParse(process.env),
+  cdnCf: CdnCFModel.safeParse(process.env),
+  // eslint-disable-next-line no-process-env
+  cdnApi: CdnApiModel.safeParse(process.env),
   // eslint-disable-next-line no-process-env
   prometheus: PrometheusModel.safeParse(process.env),
   // eslint-disable-next-line no-process-env
@@ -207,7 +219,8 @@ const supertokens = extractConfig(configs.supertokens);
 const github = extractConfig(configs.github);
 const prometheus = extractConfig(configs.prometheus);
 const log = extractConfig(configs.log);
-const cdn = extractConfig(configs.cdn);
+const cdnCf = extractConfig(configs.cdnCf);
+const cdnApi = extractConfig(configs.cdnApi);
 const authLegacyAuth0 = extractConfig(configs.authLegacyAuth0);
 const hive = extractConfig(configs.hive);
 const s3 = extractConfig(configs.s3);
@@ -284,18 +297,22 @@ export const env = {
           privateKey: github.INTEGRATION_GITHUB_APP_PRIVATE_KEY,
         }
       : null,
-  cdn:
-    cdn.CDN === '1'
-      ? {
-          baseUrl: cdn.CDN_BASE_URL,
-          cloudflare: {
-            basePath: cdn.CDN_CF_BASE_PATH,
-            accountId: cdn.CDN_CF_ACCOUNT_ID,
-            authToken: cdn.CDN_CF_AUTH_TOKEN,
-            namespaceId: cdn.CDN_CF_NAMESPACE_ID,
-          },
-        }
-      : null,
+  cdn: {
+    authPrivateKey: s3.CDN_AUTH_PRIVATE_KEY,
+    providers: {
+      cloudflare:
+        cdnCf.CDN_CF === '1'
+          ? {
+              basePath: cdnCf.CDN_CF_BASE_PATH,
+              accountId: cdnCf.CDN_CF_ACCOUNT_ID,
+              authToken: cdnCf.CDN_CF_AUTH_TOKEN,
+              namespaceId: cdnCf.CDN_CF_NAMESPACE_ID,
+              baseUrl: cdnCf.CDN_CF_BASE_URL,
+            }
+          : null,
+      api: cdnApi.CDN_API === '1' ? { baseUrl: cdnApi.CDN_API_BASE_URL } : null,
+    },
+  },
   s3: {
     bucketName: s3.S3_BUCKET_NAME,
     endpoint: s3.S3_ENDPOINT,
@@ -303,11 +320,6 @@ export const env = {
     credentials: {
       accessKeyId: s3.S3_ACCESS_KEY_ID,
       secretAccessKey: s3.S3_SECRET_ACCESS_KEY,
-    },
-  },
-  artifacts: {
-    auth: {
-      privateKey: s3.ARTIFACT_AUTH_PRIVATE_KEY,
     },
   },
   organizationOIDC: base.AUTH_ORGANIZATION_OIDC === '1',
