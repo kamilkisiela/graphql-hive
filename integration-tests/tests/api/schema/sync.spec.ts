@@ -70,7 +70,7 @@ test('marking only the most recent version as valid result in an update of CDN',
 
   // the initial version should available on CDN
   let cdnResult = await fetchSchemaFromCDN(targetSelector, token);
-  expect(cdnResult.body.sdl).toContain('ping');
+  expect(cdnResult.body).toContain('ping');
 
   // Force a re-upload of the schema to CDN
   const syncResult = await schemaSyncCDN(
@@ -87,5 +87,5 @@ test('marking only the most recent version as valid result in an update of CDN',
 
   // the initial version should available on CDN
   cdnResult = await fetchSchemaFromCDN(targetSelector, token);
-  expect(cdnResult.body.sdl).toContain('ping');
+  expect(cdnResult.body).toContain('ping');
 });

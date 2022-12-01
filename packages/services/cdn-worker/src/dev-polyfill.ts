@@ -26,7 +26,7 @@ export const devStorage = new Map<string, string>();
 // eslint-disable-next-line no-process-env
 (globalThis as any).S3_ACCESS_KEY_ID = process.env.S3_ACCESS_KEY_ID || '';
 // eslint-disable-next-line no-process-env
-(globalThis as any).S3_SECRET_ACCESS_KEY = process.env.SECRET_ACCESS_KEY || '';
+(globalThis as any).S3_SECRET_ACCESS_KEY = process.env.S3_SECRET_ACCESS_KEY || '';
 // eslint-disable-next-line no-process-env
 (globalThis as any).S3_BUCKET_NAME = process.env.S3_BUCKET_NAME || '';
 // eslint-disable-next-line no-process-env
