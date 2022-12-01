@@ -798,7 +798,7 @@ export async function fetchSupergraphFromCDN(selector: TargetSelectorInput, toke
 
   const cdn = cdnAccessResult.body.data!.createCdnToken;
 
-  const res = await fetch(`${cdn.url}/supergraph`, {
+  const res = await fetch(cdn.url.replace('/sdl', '/supergraph'), {
     headers: {
       'X-Hive-CDN-Key': cdn.token,
     },
