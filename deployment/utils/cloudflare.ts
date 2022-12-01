@@ -12,6 +12,12 @@ export class CloudflareCDN {
       authPrivateKey: pulumi.Output<string>;
       sentryDsn: string;
       release: string;
+      s3Config: {
+        endpoint: string;
+        bucketName: string;
+        accessKeyId: pulumi.Output<string>;
+        secretAccessKey: pulumi.Output<string>;
+      };
     },
   ) {}
 
@@ -51,6 +57,22 @@ export class CloudflareCDN {
         {
           name: 'SENTRY_RELEASE',
           text: this.config.release,
+        },
+        {
+          name: 'S3_ENDPOINT',
+          text: this.config.s3Config.endpoint,
+        },
+        {
+          name: 'S3_ACCESS_KEY_ID',
+          text: this.config.s3Config.accessKeyId,
+        },
+        {
+          name: 'S3_SECRET_ACCESS_KEY',
+          text: this.config.s3Config.secretAccessKey,
+        },
+        {
+          name: 'S3_BUCKET_NAME',
+          text: this.config.s3Config.bucketName,
         },
       ],
     });

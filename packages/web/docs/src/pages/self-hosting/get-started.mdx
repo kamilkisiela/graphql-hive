@@ -64,6 +64,8 @@ export REDIS_PASSWORD=$(openssl rand -hex 16)
 export POSTGRES_USER="postgres"
 export POSTGRES_PASSWORD=$(openssl rand -hex 16)
 export POSTGRES_DB="registry"
+export MINIO_ROOT_USER="minioadmin"
+export MINIO_ROOT_PASSWORD="minioadmin"
 ```
 
 <Callout type="info">
@@ -90,7 +92,8 @@ Wait until all the services are up and running.
 Congratulations 🥳, you just started your own GraphQL Hive instance.
 
 Visit `http://localhost:8080` in your browser and start using GraphQL Hive! The usage reporting
-endpoint is bound to `http://localhost:8081`.
+endpoint is bound to `http://localhost:8081`. The GraphQL API is bound to `http://localhost:8082`.
+The artifacts bucket is bound to `http://localhost:8083`.
 
 ## Next Steps
 

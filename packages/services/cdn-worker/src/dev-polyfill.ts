@@ -19,5 +19,5 @@ if (!globalThis.crypto) {
 export const devStorage = new Map<string, string>();
 
 // eslint-disable-next-line no-process-env
-(globalThis as any).KEY_DATA = process.env.CDN_AUTH_PRIVATE_KEY || '';
+(globalThis as any).KEY_DATA = process.env.ARTIFACT_AUTH_PRIVATE_KEY || '';
 (globalThis as any).HIVE_DATA = devStorage;

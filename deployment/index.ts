@@ -44,6 +44,14 @@ const docsHostname = `${docsDns}.${rootDns}`;
 
 const heartbeatsConfig = new pulumi.Config('heartbeats');
 const emailConfig = new pulumi.Config('email');
+const r2Config = new pulumi.Config('r2');
+
+const s3Config = {
+  endpoint: r2Config.require('endpoint'),
+  bucketName: r2Config.require('bucketName'),
+  accessKeyId: r2Config.requireSecret('accessKeyId'),
+  secretAccessKey: r2Config.requireSecret('secretAccessKey'),
+};
 
 const resourceGroup = new azure.core.ResourceGroup(`hive-${envName}-rg`, {
   location: azure.Locations.EastUS,
@@ -75,6 +83,7 @@ const cdn = deployCFCDN({
   envName,
   rootDns,
   packageHelper,
+  s3Config,
 });
 
 const cfBroker = deployCFBroker({
@@ -228,6 +237,7 @@ const graphqlApi = deployGraphQL({
   auth0Config: {
     internalApiKey: auth0LegacyMigrationKey.result,
   },
+  s3Config,
 });
 
 const docs = deployDocs({

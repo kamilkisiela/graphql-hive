@@ -115,6 +115,45 @@ services:
       - REDIS_PASSWORD=test
       - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
 
+  s3:
+    image: quay.io/minio/minio:RELEASE.2022-11-17T23-20-09Z
+    command: server /data --console-address ":9001"
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    networks:
+      - 'stack'
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+
+  s3_provision_buckets:
+    image: quay.io/minio/mc:RELEASE.2022-11-17T21-20-39Z
+    depends_on:
+      s3:
+        condition: service_healthy
+    networks:
+      - 'stack'
+    entrypoint: >
+      /bin/sh -c " /usr/bin/mc alias set myminio http://s3:9000 minioadmin minioadmin; /usr/bin/mc
+      mb myminio/artifacts; exit 0; "
+
+  s3_reverse_proxy:
+    image: caddy:2.6.2-alpine
+    depends_on:
+      s3:
+        condition: service_healthy
+    networks:
+      - 'stack'
+    ports:
+      - '9002:9002'
+    command: caddy reverse-proxy --from :9002 --to s3:9000 --change-host-header
+
   supertokens:
     image: registry.supertokens.io/supertokens/supertokens-postgresql:4.2
     depends_on:
@@ -155,7 +194,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3004
-      CDN_AUTH_PRIVATE_KEY: 1e1064ef9cda8bf38936b77317e90dc3
+      ARTIFACT_AUTH_PRIVATE_KEY: 1e1064ef9cda8bf38936b77317e90dc3
 
   local_broker:
     image: node:16.13.2-alpine3.14
@@ -240,6 +279,8 @@ services:
         condition: service_healthy
       storage:
         condition: service_completed_successfully
+      s3_provision_buckets:
+        condition: service_completed_successfully
       tokens:
         condition: service_healthy
       webhooks:
@@ -276,6 +317,11 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: test
+      S3_ENDPOINT: 'http://s3:9000'
+      S3_ACCESS_KEY_ID: minioadmin
+      S3_SECRET_ACCESS_KEY: minioadmin
+      S3_BUCKET_NAME: artifacts
+      S3_PUBLIC_URL: 'http://localhost:9002'
       TOKENS_ENDPOINT: http://tokens:3003
       WEBHOOKS_ENDPOINT: http://webhooks:3005
       SCHEMA_ENDPOINT: http://schema:3002
@@ -291,7 +337,7 @@ services:
       CDN_CF_ACCOUNT_ID: 103df45224310d669213971ce28b5b70
       CDN_CF_AUTH_TOKEN: 85e20c26c03759603c0f45884824a1c3
       CDN_CF_NAMESPACE_ID: 33b1e3bbb4a4707d05ea0307cbb55c79
-      CDN_AUTH_PRIVATE_KEY: 1e1064ef9cda8bf38936b77317e90dc3
+      ARTIFACT_AUTH_PRIVATE_KEY: 1e1064ef9cda8bf38936b77317e90dc3
       CDN_BASE_URL: http://localhost:3004
       GITHUB_APP_ID: 123123
       GITHUB_APP_PRIVATE_KEY: 5f938d51a065476c4dc1b04aeba13afb

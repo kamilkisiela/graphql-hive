@@ -37,6 +37,34 @@ services:
     volumes:
       - './volumes/redis/db:/bitnami/redis/data'
 
+  s3:
+    image: quay.io/minio/minio:RELEASE.2022-11-17T23-20-09Z
+    command: server /data --console-address ":9001"
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    networks:
+      - 'stack'
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+
+  s3_provision_buckets:
+    image: quay.io/minio/mc:RELEASE.2022-11-17T21-20-39Z
+    depends_on:
+      s3:
+        condition: service_healthy
+    networks:
+      - 'stack'
+    entrypoint: >
+      /bin/sh -c " /usr/bin/mc alias set myminio http://s3:9000 minioadmin minioadmin; /usr/bin/mc
+      mb myminio/artifacts; exit 0; "
+
   clickhouse:
     image: clickhouse/clickhouse-server:22.11-alpine
     environment:

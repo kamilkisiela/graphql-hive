@@ -1,3 +1,5 @@
+import { crypto } from '@whatwg-node/fetch';
+
 const encoder = new TextEncoder();
 
 export function byteStringToUint8Array(byteString: string) {
@@ -12,11 +14,15 @@ export function byteStringToUint8Array(byteString: string) {
 
 export type KeyValidator = (targetId: string, headerKey: string) => Promise<boolean>;
 
+type CreateKeyValidatorDeps = {
+  keyData: string;
+};
+
 export const createIsKeyValid =
-  (keyData: string): KeyValidator =>
+  (deps: CreateKeyValidatorDeps): KeyValidator =>
   async (targetId: string, headerKey: string): Promise<boolean> => {
     const headerData = byteStringToUint8Array(atob(headerKey));
-    const secretKeyData = encoder.encode(keyData);
+    const secretKeyData = encoder.encode(deps.keyData);
     const secretKey = await crypto.subtle.importKey(
       'raw',
       secretKeyData,

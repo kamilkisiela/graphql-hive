@@ -13,10 +13,17 @@ export function deployCFCDN({
   rootDns,
   envName,
   packageHelper,
+  s3Config,
 }: {
   rootDns: string;
   envName: string;
   packageHelper: PackageHelper;
+  s3Config: {
+    endpoint: string;
+    bucketName: string;
+    accessKeyId: pulumi.Output<string>;
+    secretAccessKey: pulumi.Output<string>;
+  };
 }) {
   const cdnAuthPrivateKey = commonConfig.requireSecret('cdnAuthPrivateKey');
   const cdn = new CloudflareCDN({
@@ -29,6 +36,7 @@ export function deployCFCDN({
     authPrivateKey: cdnAuthPrivateKey,
     sentryDsn: commonEnv.SENTRY_DSN,
     release: packageHelper.currentReleaseId(),
+    s3Config,
   });
 
   return cdn.deploy();

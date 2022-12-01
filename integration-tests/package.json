@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@app/gql": "link:./testkit/gql",
+    "@aws-sdk/client-s3": "3.218.0",
     "@graphql-hive/core": "0.2.3",
     "@graphql-typed-document-node/core": "3.1.1",
     "@n1ru4l/dockest": "2.1.0-rc.6",

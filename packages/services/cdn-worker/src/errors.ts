@@ -1,3 +1,5 @@
+import { Response } from '@whatwg-node/fetch';
+
 const description = `Please refer to the documentation for more details: https://docs.graphql-hive.com/features/registry-usage`;
 
 export class MissingTargetIDErrorResponse extends Response {
@@ -10,6 +12,9 @@ export class MissingTargetIDErrorResponse extends Response {
       }),
       {
         status: 400,
+        headers: {
+          'content-type': 'application/json',
+        },
       },
     );
   }
@@ -25,12 +30,15 @@ export class InvalidArtifactTypeResponse extends Response {
       }),
       {
         status: 400,
+        headers: {
+          'content-type': 'application/json',
+        },
       },
     );
   }
 }
 
-export class MissingAuthKey extends Response {
+export class MissingAuthKeyResponse extends Response {
   constructor() {
     super(
       JSON.stringify({
@@ -40,12 +48,15 @@ export class MissingAuthKey extends Response {
       }),
       {
         status: 400,
+        headers: {
+          'content-type': 'application/json',
+        },
       },
     );
   }
 }
 
-export class InvalidAuthKey extends Response {
+export class InvalidAuthKeyResponse extends Response {
   constructor() {
     super(
       JSON.stringify({
@@ -55,6 +66,9 @@ export class InvalidAuthKey extends Response {
       }),
       {
         status: 403,
+        headers: {
+          'content-type': 'application/json',
+        },
       },
     );
   }
@@ -70,6 +84,9 @@ export class CDNArtifactNotFound extends Response {
       }),
       {
         status: 404,
+        headers: {
+          'content-type': 'application/json',
+        },
       },
     );
   }
@@ -85,6 +102,9 @@ export class InvalidArtifactMatch extends Response {
       }),
       {
         status: 400,
+        headers: {
+          'content-type': 'application/json',
+        },
       },
     );
   }
@@ -100,6 +120,9 @@ export class UnexpectedError extends Response {
       }),
       {
         status: 500,
+        headers: {
+          'content-type': 'application/json',
+        },
       },
     );
   }

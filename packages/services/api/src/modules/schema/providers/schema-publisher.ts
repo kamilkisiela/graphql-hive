@@ -30,6 +30,7 @@ import type { SchemaModuleConfig } from './config';
 import { SCHEMA_MODULE_CONFIG } from './config';
 import { SchemaHelper } from './schema-helper';
 import { HiveError } from '../../../shared/errors';
+import { ArtifactStorageWriter } from './artifact-storage-writer';
 
 type CheckInput = Omit<Types.SchemaCheckInput, 'project' | 'organization' | 'target'> &
   TargetSelector;
@@ -63,6 +64,7 @@ export class SchemaPublisher {
     private gitHubIntegrationManager: GitHubIntegrationManager,
     private idempotentRunner: IdempotentRunner,
     private helper: SchemaHelper,
+    private artifactStorageWriter: ArtifactStorageWriter,
     @Inject(SCHEMA_MODULE_CONFIG) private schemaModuleConfig: SchemaModuleConfig,
   ) {
     this.logger = logger.child({ service: 'SchemaPublisher' });
@@ -236,19 +238,22 @@ export class SchemaPublisher {
         includeMetadata: true,
       });
 
+      const orchestrator = this.schemaManager.matchOrchestrator(project.type);
+      const schemaObjects = schemas.map(s => this.helper.createSchemaObject(s));
+      const schema = await orchestrator.build(schemaObjects, project.externalComposition);
+
       this.logger.info('Deploying version to CDN (version=%s)', latestVersion.id);
+
       await this.updateCDN(
         {
           target,
           project,
           supergraph:
             project.type === ProjectType.FEDERATION
-              ? await this.schemaManager.matchOrchestrator(project.type).supergraph(
-                  schemas.map(s => this.helper.createSchemaObject(s)),
-                  project.externalComposition,
-                )
+              ? await orchestrator.supergraph(schemaObjects, project.externalComposition)
               : null,
           schemas,
+          fullSchemaSdl: schema.raw,
         },
         span,
       );
@@ -291,18 +296,23 @@ export class SchemaPublisher {
           }),
         ]);
 
+        const orchestrator = this.schemaManager.matchOrchestrator(project.type);
+        const schemaObjects = schemas.map(s => this.helper.createSchemaObject(s));
+        const schema = await orchestrator.build(schemaObjects, project.externalComposition);
+
         this.logger.info('Deploying version to CDN (version=%s)', latestVersion.id);
         await this.updateCDN({
           target,
           project,
           supergraph:
             project.type === ProjectType.FEDERATION
-              ? await this.schemaManager.matchOrchestrator(project.type).supergraph(
+              ? await orchestrator.supergraph(
                   schemas.map(s => this.helper.createSchemaObject(s)),
                   project.externalComposition,
                 )
               : null,
           schemas,
+          fullSchemaSdl: schema.raw,
         });
       }
     }
@@ -710,6 +720,9 @@ export class SchemaPublisher {
   }) {
     try {
       if (valid) {
+        const schemaObjects = schemas.map(s => this.helper.createSchemaObject(s));
+        const schema = await orchestrator.build(schemaObjects, project.externalComposition);
+
         await this.updateCDN({
           target,
           project,
@@ -721,6 +734,7 @@ export class SchemaPublisher {
                   project.externalComposition,
                 )
               : null,
+          fullSchemaSdl: schema.raw,
         });
       }
     } catch (e) {
@@ -734,11 +748,13 @@ export class SchemaPublisher {
       project,
       supergraph,
       schemas,
+      fullSchemaSdl,
     }: {
       target: Target;
       project: Project;
       schemas: readonly Schema[];
       supergraph?: string | null;
+      fullSchemaSdl: string;
     },
     span?: Span,
   ) {
@@ -751,40 +767,63 @@ export class SchemaPublisher {
         metadata.push(schema.metadata);
       }
       if (metadata.length > 0) {
-        await this.cdn.publish(
-          {
+        await Promise.all([
+          this.artifactStorageWriter.writeArtifact({
             targetId: target.id,
-            resourceType: 'metadata',
-            value: JSON.stringify(metadata.length === 1 ? metadata[0] : metadata),
-          },
-          span,
-        );
+            artifact: metadata,
+            artifactType: 'metadata',
+          }),
+          this.cdn.publish(
+            {
+              targetId: target.id,
+              resourceType: 'metadata',
+              value: JSON.stringify(metadata.length === 1 ? metadata[0] : metadata),
+            },
+            span,
+          ),
+        ]);
       }
     };
 
     const publishSchema = async () => {
-      await this.cdn.publish(
-        {
+      await Promise.all([
+        this.artifactStorageWriter.writeArtifact({
           targetId: target.id,
-          resourceType: 'schema',
-          value: JSON.stringify(
-            schemas.length > 1
-              ? schemas.map(s => ({
-                  sdl: s.source,
-                  url: s.url,
-                  name: s.service,
-                  date: s.date,
-                }))
-              : {
-                  sdl: schemas[0].source,
-                  url: schemas[0].url,
-                  name: schemas[0].service,
-                  date: schemas[0].date,
-                },
-          ),
-        },
-        span,
-      );
+          artifactType: 'services',
+          artifact: schemas.map(s => ({
+            name: s.service,
+            sdl: s.source,
+            url: s.url,
+          })),
+        }),
+        this.artifactStorageWriter.writeArtifact({
+          targetId: target.id,
+          artifactType: 'sdl',
+          artifact: fullSchemaSdl,
+        }),
+        this.cdn.publish(
+          {
+            targetId: target.id,
+            resourceType: 'schema',
+            value: JSON.stringify(
+              schemas.length > 1
+                ? schemas.map(s => ({
+                    sdl: s.source,
+                    url: s.url,
+                    name: s.service,
+                    date: s.date,
+                  }))
+                : {
+                    sdl: schemas[0].source,
+                    url: schemas[0].url,
+                    name: schemas[0].service,
+                    date: schemas[0].date,
+                  },
+            ),
+          },
+          span,
+        ),
+      ]);
     };
 
     const actions = [publishSchema(), publishMetadata()];
@@ -802,6 +841,11 @@ export class SchemaPublisher {
             },
             span,
           ),
+          this.artifactStorageWriter.writeArtifact({
+            targetId: target.id,
+            artifactType: 'supergraph',
+            artifact: supergraph,
+          }),
         );
       }
     }
