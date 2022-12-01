@@ -643,9 +643,6 @@ jobs:
       - name: Set Cypress cache folder
         run: echo "CYPRESS_CACHE_FOLDER=$(pnpm store path)/Cypress" >> $GITHUB_ENV
 
-      - name: ls pnpm store folder
-        run: ls -la $(pnpm store path)
-
       - name: Install dependencies
         run: pnpm i --frozen-lockfile
 
