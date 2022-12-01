@@ -631,12 +631,12 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Install pnpm
+      - name: Set up pnpm
         uses: pnpm/action-setup@v2.2.4
         with:
           version: 7
 
-      - name: Install Node
+      - name: Set up Node
         uses: actions/setup-node@v3
         with:
           node-version-file: .node-version
