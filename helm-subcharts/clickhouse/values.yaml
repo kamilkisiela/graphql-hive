@@ -2,3 +2,5 @@ clickhouse:
   fullnameOverride: clickhouse
   auth:
     username: default
+  shards: 1
+  replicaCount: 1

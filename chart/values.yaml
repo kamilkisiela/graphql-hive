@@ -18,6 +18,8 @@ clickhouse:
   fullnameOverride: clickhouse
   zookeeper:
     fullnameOverride: clickhouse-zookeeper
+  shards: 1
+  replicaCount: 1
 
 kafka:
   fullnameOverride: kafka
