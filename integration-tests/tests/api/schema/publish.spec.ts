@@ -1113,7 +1113,7 @@ test('marking only the most recent version as valid result in an update of CDN',
 
   let cdnMetadataResult = await fetchMetadataFromCDN(targetSelector, token);
   expect(cdnMetadataResult.status).toEqual(200);
-  expect(cdnMetadataResult.body).toEqual({ c0: 1 });
+  expect(cdnMetadataResult.body).toEqual([{ c0: 1 }]);
 
   const versionsResult = await fetchVersions(targetSelector, 3, token);
 
@@ -1137,7 +1137,7 @@ test('marking only the most recent version as valid result in an update of CDN',
 
   cdnMetadataResult = await fetchMetadataFromCDN(targetSelector, token);
   expect(cdnMetadataResult.status).toEqual(200);
-  expect(cdnMetadataResult.body).toEqual({ c2: 1 });
+  expect(cdnMetadataResult.body).toEqual([{ c2: 1 }]);
 
   // marking the second (not the most recent) version as valid should NOT promote it to be the latest valid version
   // const updateSchemaVersionStatusResult =
@@ -1158,7 +1158,7 @@ test('marking only the most recent version as valid result in an update of CDN',
 
   cdnMetadataResult = await fetchMetadataFromCDN(targetSelector, token);
   expect(cdnMetadataResult.status).toEqual(200);
-  expect(cdnMetadataResult.body).toEqual({ c2: 1 });
+  expect(cdnMetadataResult.body).toEqual([{ c2: 1 }]);
 });
 
 test('CDN data can not be fetched with an invalid access token', async () => {

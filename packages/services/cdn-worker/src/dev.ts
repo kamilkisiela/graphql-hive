@@ -4,7 +4,6 @@ import { createRequestHandler } from './handler';
 import { createArtifactRequestHandler } from './artifact-handler';
 import { devStorage } from './dev-polyfill';
 import { createServerAdapter } from '@whatwg-node/server';
-import { Router } from 'itty-router';
 import { withParams, json } from 'itty-router-extras';
 import { createIsKeyValid } from './key-validation';
 import itty from 'itty-router';
@@ -57,7 +56,7 @@ const handleArtifactRequest = createArtifactRequestHandler({
 });
 
 function main() {
-  const app = createServerAdapter(Router());
+  const app = createServerAdapter(itty.Router());
 
   app.put(
     '/:accountId/storage/kv/namespaces/:namespaceId/values/:key',
@@ -100,6 +99,7 @@ function main() {
         status: 200,
       }),
   );
+
   const router = itty
     .Router()
     .get('*', handleArtifactRequest)

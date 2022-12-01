@@ -97,7 +97,7 @@ export class CdnProvider {
     this.logger.info(
       `Publishing data to CDN based on target: "${target}", resourceType is: ${resourceType} ...`,
     );
-    const CDN_SOURCE = `${this.config.providers.cloudflare.baseUrl}/${this.config.providers.cloudflare.accountId}/storage/kv/namespaces/${this.config.providers.cloudflare.namespaceId}/values/${target}`;
+    const CDN_SOURCE = `${this.config.providers.cloudflare.basePath}/${this.config.providers.cloudflare.accountId}/storage/kv/namespaces/${this.config.providers.cloudflare.namespaceId}/values/${target}`;
 
     this.logger.info(`Data published to CDN: ${value}`);
     const result = await this.pushToCloudflareCDN(`${CDN_SOURCE}:${resourceType}`, value, span);
