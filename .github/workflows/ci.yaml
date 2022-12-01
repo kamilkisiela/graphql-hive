@@ -639,7 +639,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version-file: .node-version
-          cache: pnpm
 
       - name: Install dependencies
         run: pnpm i --frozen-lockfile
@@ -674,3 +673,6 @@ jobs:
 
       - name: Cypress run
         uses: cypress-io/github-action@v4
+        with:
+          install: false
+          command: pnpm test:e2e
