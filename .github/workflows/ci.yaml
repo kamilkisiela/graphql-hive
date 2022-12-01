@@ -668,6 +668,9 @@ jobs:
           files: docker.hcl
           load: true
           targets: build
+          set: |
+            *.cache-from=type=gha
+            *.cache-to=type=gha,mode=max
 
       # TODO: mounting volumes in the CI causes permission problems for services
       - name: Remove volume mounts from compose file
