@@ -660,12 +660,16 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
+      # TODO: docker/bake-action cannot be used because it runs in a different PWD
+      # - name: Bake
+      #   uses: docker/bake-action@v2
+      #   with:
+      #     files: docker.hcl
+      #     load: true
+      #     targets: build
+
       - name: Bake
-        uses: docker/bake-action@v2
-        with:
-          files: docker.hcl
-          load: true
-          targets: build
+        uses: pnpm docker:build
 
       # TODO: mounting volumes in the CI causes permission problems for services
       - name: Remove volume mounts from compose file
