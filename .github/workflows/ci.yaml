@@ -642,11 +642,11 @@ jobs:
           node-version-file: .node-version
           cache: pnpm
 
-      - name: Install dependencies
-        run: pnpm i --frozen-lockfile
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
+
+      - name: Install dependencies
+        run: pnpm i --frozen-lockfile
 
       - name: Turbo Cache
         id: turbo-cache
