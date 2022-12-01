@@ -642,9 +642,6 @@ jobs:
           node-version-file: .node-version
           cache: pnpm
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
       - name: Install dependencies
         run: pnpm i --frozen-lockfile
 
@@ -659,6 +656,9 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
       - name: Bake
         uses: docker/bake-action@v2
