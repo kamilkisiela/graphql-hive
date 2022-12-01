@@ -630,7 +630,7 @@ jobs:
           fetch-depth: 1
 
       - name: Set up pnpm
-        uses: pnpm/action-setup@v2.2.4
+        uses: pnpm/action-setup@v2
         with:
           version: 7
 
