@@ -649,6 +649,9 @@ jobs:
       - name: Install dependencies
         run: pnpm i --frozen-lockfile
 
+      - name: ls pnpm store folder
+        run: ls -la $(pnpm store path)
+
       - name: Turbo Cache
         id: turbo-cache
         uses: actions/cache@v3
