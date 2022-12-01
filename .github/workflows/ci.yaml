@@ -660,8 +660,11 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Build Docker Images
-        run: pnpm docker:build
+      - name: Bake
+        uses: docker/bake-action@v2
+        with:
+          files: [docker.hcl]
+          load: true
 
       # TODO: mounting volumes in the CI causes permission problems for services
       - name: Remove volume mounts from compose file
