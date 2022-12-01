@@ -623,7 +623,7 @@ jobs:
       POSTGRES_USER: postgres
       POSTGRES_DB: registry
       CYPRESS_BASE_URL: http://localhost:8080
-      CYPRESS_CACHE_FOLDER: /home/runner/setup-pnpm/node_modules/.cache/Cypress
+      CYPRESS_CACHE_FOLDER: ${{ github.workspace }}/node_modules/.cache/Cypress
 
     steps:
       - name: Check out repository code
@@ -660,16 +660,14 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      # TODO: docker/bake-action cannot be used because it runs in a different PWD
-      # - name: Bake
-      #   uses: docker/bake-action@v2
-      #   with:
-      #     files: docker.hcl
-      #     load: true
-      #     targets: build
-
       - name: Bake
-        run: pnpm docker:build
+        uses: docker/bake-action@v2
+        env:
+          PWD: ${{ github.workspace }}
+        with:
+          files: docker.hcl
+          load: true
+          targets: build
 
       # TODO: mounting volumes in the CI causes permission problems for services
       - name: Remove volume mounts from compose file
