@@ -30,3 +30,10 @@ spec:
                   number: 80
             path: /
             pathType: Prefix
+          - backend:
+              service:
+                name: server-svc
+                port:
+                  number: 80
+            path: /graphql
+            pathType: Prefix
