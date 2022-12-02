@@ -152,6 +152,18 @@ export class AuthManager {
     });
   }
 
+  async ensureOrganizationOwnership(selector: { organization: string }): Promise<void | never> {
+    const user = await this.getCurrentUser();
+    const isOwner = await this.organizationAccess.checkOwnershipForUser({
+      organization: selector.organization,
+      user: user.id,
+    });
+
+    if (!isOwner) {
+      throw new AccessError('You are not an owner or organization does not exist');
+    }
+  }
+
   ensureApiToken(): string | never {
     if (this.apiToken) {
       return this.apiToken;

@@ -208,10 +208,8 @@ export function createScheduler(config: {
       throw new Error('Queue not initialized');
     }
 
-    const jobName = email.id;
-
-    return queue.add(jobName, email, {
-      jobId: jobName,
+    return queue.add(email.id ?? email.subject, email, {
+      jobId: email.id,
       // We don't want to remove completed jobs, because it tells us that the job has been processed
       // and we avoid sending the same email twice.
       removeOnComplete: {

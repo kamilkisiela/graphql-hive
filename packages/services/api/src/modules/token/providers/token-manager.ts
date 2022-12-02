@@ -56,6 +56,10 @@ export class TokenManager {
       user: currentUser.id,
     });
 
+    if (!currentMember) {
+      throw new HiveError('User is not a member of the organization');
+    }
+
     const newScopes = [...input.organizationScopes, ...input.projectScopes, ...input.targetScopes];
 
     // See what scopes were removed or added

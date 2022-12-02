@@ -5,6 +5,9 @@ export default gql`
     organization(selector: OrganizationSelectorInput!): OrganizationPayload
     organizationByInviteCode(code: String!): OrganizationByInviteCodePayload
     organizations: OrganizationConnection!
+    organizationTransferRequest(
+      selector: OrganizationTransferRequestSelector!
+    ): OrganizationTransfer
   }
 
   extend type Mutation {
@@ -20,6 +23,12 @@ export default gql`
     ): DeleteOrganizationInvitationResult!
     updateOrganizationName(input: UpdateOrganizationNameInput!): UpdateOrganizationNameResult!
     updateOrganizationMemberAccess(input: OrganizationMemberAccessInput!): OrganizationPayload!
+    requestOrganizationTransfer(
+      input: RequestOrganizationTransferInput!
+    ): RequestOrganizationTransferResult!
+    answerOrganizationTransferRequest(
+      input: AnswerOrganizationTransferRequestInput!
+    ): AnswerOrganizationTransferRequestResult!
   }
 
   type UpdateOrganizationNameResult {
@@ -48,6 +57,49 @@ export default gql`
     inputErrors: CreateOrganizationInputErrors!
   }
 
+  input OrganizationTransferRequestSelector {
+    organization: ID!
+    code: String!
+  }
+
+  input AnswerOrganizationTransferRequestInput {
+    organization: ID!
+    answer: Boolean!
+    code: String!
+  }
+
+  """
+  @oneOf
+  """
+  type AnswerOrganizationTransferRequestResult {
+    ok: AnswerOrganizationTransferRequestOk
+    error: AnswerOrganizationTransferRequestError
+  }
+
+  type AnswerOrganizationTransferRequestOk {
+    answer: Boolean!
+  }
+
+  type AnswerOrganizationTransferRequestError implements Error {
+    message: String!
+  }
+
+  """
+  @oneOf
+  """
+  type RequestOrganizationTransferResult {
+    ok: RequestOrganizationTransferOk
+    error: RequestOrganizationTransferError
+  }
+
+  type RequestOrganizationTransferOk {
+    email: String!
+  }
+
+  type RequestOrganizationTransferError implements Error {
+    message: String!
+  }
+
   type CreateOrganizationResult {
     ok: CreateOrganizationOk
     error: CreateOrganizationError
@@ -72,6 +124,11 @@ export default gql`
     organizationScopes: [OrganizationAccessScope!]!
     projectScopes: [ProjectAccessScope!]!
     targetScopes: [TargetAccessScope!]!
+  }
+
+  input RequestOrganizationTransferInput {
+    organization: ID!
+    user: ID!
   }
 
   input CreateOrganizationInput {
@@ -111,6 +168,10 @@ export default gql`
   type InviteToOrganizationByEmailResult {
     ok: OrganizationInvitation
     error: InviteToOrganizationByEmailError
+  }
+
+  type OrganizationTransfer {
+    organization: Organization!
   }
 
   enum OrganizationType {
