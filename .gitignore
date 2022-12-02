@@ -114,6 +114,6 @@ npm-shrinkwrap.json
 /target
 
 # bob
-.bob
+.bob/
 
 .hive

@@ -1,5 +1,18 @@
 {
+  // https://typescript-eslint.io/docs/linting/typed-linting/monorepos/#one-root-tsconfigjson
+  // extend your base config to share compilerOptions, etc
   "extends": "./tsconfig.json",
-  "include": ["deployment", "packages", "integration-tests", ".eslintrc.cjs"],
+  "compilerOptions": {
+    // ensure that nobody can accidentally use this config for a build
+    "noEmit": true
+  },
+  "include": [
+    "deployment",
+    "packages",
+    "integration-tests",
+    "cypress",
+    "cypress.config.ts",
+    ".eslintrc.cjs"
+  ],
   "exclude": ["**/node_modules/**", "**/dist", "**/temp", "**/tmp"]
 }

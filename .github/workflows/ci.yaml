@@ -605,3 +605,90 @@ jobs:
       - name: Dockest logs
         if: steps.feature_flags.outputs.detected == 'true' && always()
         run: cat integration-tests/*.log
+
+  e2e-tests:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    env:
+      HIVE_ENCRYPTION_SECRET: wowverysecuremuchsecret
+      HIVE_EMAIL_FROM: no-reply@graphql-hive.com
+      HIVE_APP_BASE_URL: http://localhost:8080
+      SUPERTOKENS_API_KEY: wowverysecuremuchsecret
+      CLICKHOUSE_USER: clickhouse
+      CLICKHOUSE_PASSWORD: wowverysecuremuchsecret
+      REDIS_PASSWORD: wowverysecuremuchsecret
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: registry
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+      CDN_AUTH_PRIVATE_KEY: 6b4721a99bd2ef6c00ce4328f34d95d7
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 7
+
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: .node-version
+          # TODO: cypress binary in pnpm store gets lost during caching :)
+          # cache: pnpm
+
+      - name: Set Cypress cache folder
+        run: echo "CYPRESS_CACHE_FOLDER=$(pnpm store path)/Cypress" >> $GITHUB_ENV
+
+      - name: Install dependencies
+        run: pnpm i --frozen-lockfile
+
+      - name: Turbo Cache
+        id: turbo-cache
+        uses: actions/cache@v3
+        with:
+          path: node_modules/.cache/turbo
+          key: turbo-cache-${{ github.sha }}
+          restore-keys: |
+            turbo-cache-
+
+      - name: Build
+        run: pnpm build
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Bake
+        uses: docker/bake-action@v2
+        env:
+          PWD: ${{ github.workspace }}
+        with:
+          files: docker.hcl
+          load: true
+          targets: build
+          set: |
+            *.cache-from=type=gha
+            *.cache-to=type=gha,mode=max
+
+      # TODO: mounting volumes in the CI causes permission problems for services
+      - name: Remove volume mounts from compose file
+        uses: mikefarah/yq@v4.30.5
+        with:
+          cmd: yq -i 'del(.services.*.volumes)' docker-compose.community.yml
+
+      - name: Up
+        timeout-minutes: 5
+        run: docker compose -f docker-compose.community.yml up -d --wait
+
+      - name: Cypress run
+        uses: cypress-io/github-action@v4
+        with:
+          install: false
+          command: pnpm test:e2e
