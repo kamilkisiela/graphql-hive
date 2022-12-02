@@ -40,7 +40,8 @@
     "test": "jest",
     "turbo": "env-cmd --silent turbo run",
     "typecheck": "pnpm turbo typecheck --color",
-    "upload-sourcemaps": "./scripts/upload-sourcemaps.sh"
+    "upload-sourcemaps": "./scripts/upload-sourcemaps.sh",
+    "workspace": "pnpm run --filter $1 $2"
   },
   "devDependencies": {
     "@babel/core": "7.19.1",
