@@ -625,7 +625,6 @@ jobs:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
       CDN_AUTH_PRIVATE_KEY: 6b4721a99bd2ef6c00ce4328f34d95d7
-      
 
     steps:
       - name: Check out repository code
