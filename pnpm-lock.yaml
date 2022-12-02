@@ -72,6 +72,7 @@ importers:
       dotenv: 16.0.3
       env-cmd: 10.1.0
       eslint: 8.27.0
+      eslint-plugin-cypress: 2.12.1
       eslint-plugin-hive: file:./rules
       eslint-plugin-import: 2.26.0
       eslint-plugin-simple-import-sort: 8.0.0
@@ -122,6 +123,7 @@ importers:
       dotenv: 16.0.3
       env-cmd: 10.1.0
       eslint: 8.27.0
+      eslint-plugin-cypress: 2.12.1_eslint@8.27.0
       eslint-plugin-hive: file:rules
       eslint-plugin-import: 2.26.0_jnohwm7eexgw7uduhweedcbnpe
       eslint-plugin-simple-import-sort: 8.0.0_eslint@8.27.0
@@ -15654,6 +15656,15 @@ packages:
       eslint-import-resolver-node: 0.3.6
     transitivePeerDependencies:
       - supports-color
+    dev: true
+
+  /eslint-plugin-cypress/2.12.1_eslint@8.27.0:
+    resolution: {integrity: sha512-c2W/uPADl5kospNDihgiLc7n87t5XhUbFDoTl6CfVkmG+kDAb5Ux10V9PoLPu9N+r7znpc+iQlcmAqT1A/89HA==}
+    peerDependencies:
+      eslint: '>= 3.2.1'
+    dependencies:
+      eslint: 8.27.0
+      globals: 11.12.0
     dev: true
 
   /eslint-plugin-import/2.26.0_jnohwm7eexgw7uduhweedcbnpe:
