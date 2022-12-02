@@ -18,10 +18,22 @@ type CreateKeyValidatorDeps = {
   keyData: string;
 };
 
+const atobMaybe = (str: string): string | null => {
+  try {
+    return atob(str);
+  } catch {
+    return null;
+  }
+};
+
 export const createIsKeyValid =
   (deps: CreateKeyValidatorDeps): KeyValidator =>
-  async (targetId: string, headerKey: string): Promise<boolean> => {
-    const headerData = byteStringToUint8Array(atob(headerKey));
+  async (targetId: string, accessHeaderValue: string): Promise<boolean> => {
+    const headerBinary = atobMaybe(accessHeaderValue);
+    if (headerBinary === null) {
+      return false;
+    }
+    const headerData = byteStringToUint8Array(headerBinary);
     const secretKeyData = encoder.encode(deps.keyData);
     const secretKey = await crypto.subtle.importKey(
       'raw',

@@ -121,15 +121,13 @@ export function deployGraphQL({
         WEBHOOKS_ENDPOINT: serviceLocalEndpoint(webhooks.service),
         SCHEMA_ENDPOINT: serviceLocalEndpoint(schema.service),
         // CDN
-        CDN: '1',
+        CDN_CF: '1',
         CDN_CF_BASE_PATH: 'https://api.cloudflare.com/client/v4/accounts',
         CDN_CF_ACCOUNT_ID: cloudflareConfig.require('accountId'),
         CDN_CF_AUTH_TOKEN: cloudflareConfig.requireSecret('apiToken'),
         CDN_CF_NAMESPACE_ID: cdn.cfStorageNamespaceId,
-        CDN_BASE_URL: cdn.workerBaseUrl,
-        // TODO: remove this
+        CDN_CF_BASE_URL: cdn.workerBaseUrl,
         CDN_AUTH_PRIVATE_KEY: cdn.authPrivateKey,
-        ARTIFACT_AUTH_PRIVATE_KEY: cdn.authPrivateKey,
         // Hive
         HIVE: '1',
         HIVE_REPORTING: '1',

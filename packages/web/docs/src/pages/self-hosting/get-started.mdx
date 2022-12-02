@@ -66,6 +66,7 @@ export POSTGRES_PASSWORD=$(openssl rand -hex 16)
 export POSTGRES_DB="registry"
 export MINIO_ROOT_USER="minioadmin"
 export MINIO_ROOT_PASSWORD="minioadmin"
+export CDN_AUTH_PRIVATE_KEY=$(openssl rand -hex 16)
 ```
 
 <Callout type="info">

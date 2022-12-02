@@ -1109,11 +1109,11 @@ test('marking only the most recent version as valid result in an update of CDN',
 
   // the initial version should available on CDN
   let cdnResult = await fetchSchemaFromCDN(targetSelector, token);
-  expect(cdnResult.body.sdl).toContain('ping');
+  expect(cdnResult.body).toContain('ping');
 
   let cdnMetadataResult = await fetchMetadataFromCDN(targetSelector, token);
   expect(cdnMetadataResult.status).toEqual(200);
-  expect(cdnMetadataResult.body).toEqual({ c0: 1 });
+  expect(cdnMetadataResult.body).toEqual([{ c0: 1 }]);
 
   const versionsResult = await fetchVersions(targetSelector, 3, token);
 
@@ -1133,11 +1133,11 @@ test('marking only the most recent version as valid result in an update of CDN',
   );
 
   cdnResult = await fetchSchemaFromCDN(targetSelector, token);
-  expect(cdnResult.body.sdl).toContain('tennis');
+  expect(cdnResult.body).toContain('tennis');
 
   cdnMetadataResult = await fetchMetadataFromCDN(targetSelector, token);
   expect(cdnMetadataResult.status).toEqual(200);
-  expect(cdnMetadataResult.body).toEqual({ c2: 1 });
+  expect(cdnMetadataResult.body).toEqual([{ c2: 1 }]);
 
   // marking the second (not the most recent) version as valid should NOT promote it to be the latest valid version
   // const updateSchemaVersionStatusResult =
@@ -1154,11 +1154,11 @@ test('marking only the most recent version as valid result in an update of CDN',
   // console.log(JSON.stringify(updateSchemaVersionStatusResult));
 
   cdnResult = await fetchSchemaFromCDN(targetSelector, token);
-  expect(cdnResult.body.sdl).toContain('tennis');
+  expect(cdnResult.body).toContain('tennis');
 
   cdnMetadataResult = await fetchMetadataFromCDN(targetSelector, token);
   expect(cdnMetadataResult.status).toEqual(200);
-  expect(cdnMetadataResult.body).toEqual({ c2: 1 });
+  expect(cdnMetadataResult.body).toEqual([{ c2: 1 }]);
 });
 
 test('CDN data can not be fetched with an invalid access token', async () => {
@@ -1244,10 +1244,9 @@ test('CDN data can not be fetched with an invalid access token', async () => {
 
   const cdn = cdnAccessResult.body.data!.createCdnToken;
 
-  const res = await fetch(`${cdn.url}/schema`, {
+  const res = await fetch(cdn.url, {
     method: 'GET',
     headers: {
-      Accept: 'application/json',
       'X-Hive-CDN-Key': 'i-like-turtles',
     },
   });
@@ -1338,10 +1337,9 @@ test('CDN data can be fetched with an valid access token', async () => {
 
   const cdn = cdnAccessResult.body.data!.createCdnToken;
 
-  const cdnResult = await fetch(`${cdn.url}/schema`, {
+  const cdnResult = await fetch(cdn.url, {
     method: 'GET',
     headers: {
-      Accept: 'application/json',
       'X-Hive-CDN-Key': cdn.token,
     },
   });

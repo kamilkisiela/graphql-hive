@@ -17,42 +17,40 @@ type CdnResourceType = 'schema' | 'supergraph' | 'metadata';
 export class CdnProvider {
   private logger: Logger;
   private encoder: TextEncoder;
-  private secretKeyData: Uint8Array | null;
+  private secretKeyData: Uint8Array;
 
   constructor(
     logger: Logger,
     private httpClient: HttpClient,
-    @Inject(CDN_CONFIG) private config: CDNConfig | null,
+    @Inject(CDN_CONFIG) private config: CDNConfig,
   ) {
     this.logger = logger.child({ source: 'CdnProvider' });
     this.encoder = new TextEncoder();
-    this.secretKeyData = this.config ? this.encoder.encode(this.config.authPrivateKey) : null;
+    this.secretKeyData = this.encoder.encode(this.config.authPrivateKey);
   }
 
   isEnabled(): boolean {
-    return this.config !== null;
+    return this.config.providers.api !== null || this.config.providers.cloudflare !== null;
   }
 
   getCdnUrlForTarget(targetId: string): string {
-    if (this.config === null) {
-      throw new HiveError(`CDN is not configured, cannot resolve CDN target url.`);
+    if (this.config.providers.cloudflare) {
+      return `${this.config.providers.cloudflare.baseUrl}/artifacts/v1/${targetId}/sdl`;
+    } else if (this.config.providers.api) {
+      return `${this.config.providers.api.baseUrl}/artifacts/v1/${targetId}/sdl`;
     }
 
-    return `${this.config.baseUrl}/${targetId}`;
+    throw new HiveError(`CDN is not configured, cannot resolve CDN target url.`);
   }
 
   generateToken(targetId: string): string {
-    if (this.secretKeyData === null) {
-      throw new HiveError(`CDN is not configured, cannot generate a token.`);
-    }
-
     return createHmac('sha256', this.secretKeyData)
       .update(this.encoder.encode(targetId))
       .digest('base64');
   }
 
-  async pushToCDN(url: string, body: string, span?: Span): Promise<{ success: boolean }> {
-    if (this.config === null) {
+  async pushToCloudflareCDN(url: string, body: string, span?: Span): Promise<{ success: boolean }> {
+    if (this.config.providers.cloudflare === null) {
       this.logger.info(`Trying to push to the CDN, but CDN is not configured, skipping`);
       return { success: false };
     }
@@ -62,7 +60,7 @@ export class CdnProvider {
       {
         headers: {
           'content-type': 'text/plain',
-          authorization: `Bearer ${this.config.cloudflare.authToken}`,
+          authorization: `Bearer ${this.config.providers.cloudflare.authToken}`,
         },
         body,
         responseType: 'json',
@@ -90,7 +88,7 @@ export class CdnProvider {
     },
     span?: Span,
   ): Promise<void> {
-    if (this.config === null) {
+    if (this.config.providers.cloudflare === null) {
       this.logger.info(`Trying to publish to the CDN, but CDN is not configured, skipping`);
       return;
     }
@@ -99,10 +97,10 @@ export class CdnProvider {
     this.logger.info(
       `Publishing data to CDN based on target: "${target}", resourceType is: ${resourceType} ...`,
     );
-    const CDN_SOURCE = `${this.config.cloudflare.basePath}/${this.config.cloudflare.accountId}/storage/kv/namespaces/${this.config.cloudflare.namespaceId}/values/${target}`;
+    const CDN_SOURCE = `${this.config.providers.cloudflare.basePath}/${this.config.providers.cloudflare.accountId}/storage/kv/namespaces/${this.config.providers.cloudflare.namespaceId}/values/${target}`;
 
     this.logger.info(`Data published to CDN: ${value}`);
-    const result = await this.pushToCDN(`${CDN_SOURCE}:${resourceType}`, value, span);
+    const result = await this.pushToCloudflareCDN(`${CDN_SOURCE}:${resourceType}`, value, span);
 
     if (!result.success) {
       return Promise.reject(

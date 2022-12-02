@@ -143,6 +143,8 @@ services:
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - './.hive/minio/db:/data'
 
   s3_provision_buckets:
     image: quay.io/minio/mc:RELEASE.2022-11-17T21-20-39Z
@@ -245,7 +247,9 @@ services:
       S3_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
       S3_BUCKET_NAME: artifacts
       S3_PUBLIC_URL: 'http://localhost:8083'
-      ARTIFACT_AUTH_PRIVATE_KEY: 1e1064ef9cda8bf38936b77317e90dc3
+      CDN_AUTH_PRIVATE_KEY: ${CDN_AUTH_PRIVATE_KEY}
+      CDN_API: '1'
+      CDN_API_BASE_URL: 'http://localhost:8082'
 
   schema:
     image: '${DOCKER_REGISTRY}schema${DOCKER_TAG}'
