@@ -11,7 +11,7 @@
     "build": "bob runify --single",
     "db": "pnpm db:create && pnpm migration:run",
     "db:create": "node tools/create-db.mjs",
-    "db:dev": "docker compose up --remove-orphans --abort-on-container-exit",
+    "db:dev": "docker compose up --remove-orphans",
     "db:generate": "schemats generate --config schemats.cjs -o src/db/types.ts",
     "db:migrator": "node --experimental-specifier-resolution=node --loader ts-node/esm migrations/index.ts",
     "db:start": "docker-compose up -d --remove-orphans",

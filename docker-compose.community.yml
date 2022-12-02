@@ -128,7 +128,7 @@ services:
       ACCESS_TOKEN_BLACKLISTING: 'true'
 
   s3:
-    image: quay.io/minio/minio:RELEASE.2022-11-17T23-20-09Z
+    image: quay.io/minio/minio:RELEASE.2022-11-29T23-40-49Z
     command: server /data --console-address ":9001"
     ports:
       - '9000:9000'
@@ -155,7 +155,8 @@ services:
       - 'stack'
     entrypoint: >
       /bin/sh -c " /usr/bin/mc alias set myminio http://s3:9000 ${MINIO_ROOT_USER}
-      ${MINIO_ROOT_PASSWORD}; /usr/bin/mc mb myminio/artifacts; exit 0; "
+      ${MINIO_ROOT_PASSWORD}; /usr/bin/mc ls myminio/artifacts >/dev/null 2>&1 || /usr/bin/mc mb
+      myminio/artifacts; exit 0"
 
   s3_reverse_proxy:
     image: caddy:2.6.2-alpine
