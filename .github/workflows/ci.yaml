@@ -18,7 +18,7 @@ jobs:
           fetch-depth: 1
 
       - name: Setup
-        uses: ./.github/workflows/setup.yml
+        uses: ./.github/actions/setup
 
       - name: Build CLI
         run: pnpm turbo build --filter=./packages/libraries/cli --color
@@ -45,7 +45,7 @@ jobs:
           fetch-depth: 1
 
       - name: Setup
-        uses: ./.github/workflows/setup.
+        uses: ./.github/actions/setup
 
       - name: Test
         run: pnpm test
@@ -81,7 +81,7 @@ jobs:
           fetch-depth: 1
 
       - name: Setup
-        uses: ./.github/workflows/setup.
+        uses: ./.github/actions/setup
 
       - name: Install Rust
         run: |
@@ -122,7 +122,7 @@ jobs:
           fetch-depth: 5
 
       - name: Setup
-        uses: ./.github/workflows/setup.
+        uses: ./.github/actions/setup
 
       - name: ESLint cache
         uses: actions/cache@v3
@@ -169,7 +169,7 @@ jobs:
           fetch-depth: 5
 
       - name: Setup
-        uses: ./.github/workflows/setup.
+        uses: ./.github/actions/setup
 
       - name: Build
         run: pnpm build
@@ -228,7 +228,7 @@ jobs:
           fetch-depth: 1
 
       - name: Setup
-        uses: ./.github/workflows/setup.
+        uses: ./.github/actions/setup
 
       - name: Build
         run: pnpm run --filter integration-tests build-and-pack
@@ -307,7 +307,7 @@ jobs:
 
       - name: Setup
         if: steps.feature_flags.outputs.detected == 'true'
-        uses: ./.github/workflows/setup.
+        uses: ./.github/actions/setup
 
       - name: Build
         if: steps.feature_flags.outputs.detected == 'true'
@@ -389,7 +389,7 @@ jobs:
           fetch-depth: 5
 
       - name: Setup
-        uses: ./.github/workflows/setup.
+        uses: ./.github/actions/setup
         with:
           cache: ''
 
