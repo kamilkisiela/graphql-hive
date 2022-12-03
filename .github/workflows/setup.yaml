@@ -1,14 +1,8 @@
 name: Setup
 
 on:
-  workflow_call:
-    cacheBy:
-      type: string
-      required: false
-      default: pnpm
-    secrets:
-      HIVE_TOKEN:
-        required: true
+  workflow_call: {}
+
 jobs:
   ci:
     runs-on: ubuntu-latest
@@ -42,7 +36,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version-file: .node-version
-          cache: ${{ inputs.cacheBy }}
+          cache: pnpm
 
       - name: Install dependencies
         run: pnpm i --frozen-lockfile
