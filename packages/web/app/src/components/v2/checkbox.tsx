@@ -5,6 +5,8 @@ export const Checkbox = (props: CheckboxProps): ReactElement => {
   return (
     <Root
       className="
+      border-orange-500
+      text-orange-500
       flex
       h-5
       w-5
@@ -13,9 +15,7 @@ export const Checkbox = (props: CheckboxProps): ReactElement => {
       justify-center
       rounded-sm
       border
-      border-orange-500
       bg-gray-800
-      text-orange-500
       focus:ring
       disabled:cursor-not-allowed
       disabled:border-gray-900

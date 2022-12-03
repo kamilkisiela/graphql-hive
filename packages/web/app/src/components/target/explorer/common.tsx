@@ -71,14 +71,14 @@ export function SchemaExplorerUsageStats(props: {
         </div>
         <div
           title={`${percentage.toFixed(2)}% of all requests`}
-          className="relative mt-1 w-full overflow-hidden rounded bg-orange-500 bg-opacity-20"
+          className="bg-orange-500 relative mt-1 w-full overflow-hidden rounded bg-opacity-20"
           style={{
             width: 50,
             height: 5,
           }}
         >
           <div
-            className="h-full bg-orange-500"
+            className="bg-orange-500 h-full"
             style={{
               width: `${percentage}%`,
             }}
