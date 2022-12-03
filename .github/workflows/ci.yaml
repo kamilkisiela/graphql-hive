@@ -2,122 +2,24 @@ name: CI
 on: [pull_request]
 
 jobs:
-  setup:
-    name: Setup
+  schema-check:
+    name: Schema Check
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    services:
-      postgres:
-        image: postgres:13.1-alpine
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_USER: postgres
-          POSTGRES_DB: registry
-        options: >-
-          --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
-
-    outputs:
-      hive_token_present: ${{ steps.secrets_present.outputs.hive_token }}
-
-    env:
-      POSTGRES_HOST: localhost
-      POSTGRES_PORT: 5432
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_USER: postgres
-      POSTGRES_DB: registry
-      HIVE_TOKEN: ${{ secrets.HIVE_TOKEN }}
-      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-      TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
-      TURBO_API_URL: ${{ secrets.TURBO_API_URL }}
-      TURBO_REMOTE_ONLY: 'true'
+    if: needs.setup.outputs.hive_token_present == 'true'
+    timeout-minutes: 5
 
     steps:
-      - name: Check out repository code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 1
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2.2.4
-        with:
-          version: 7
-
-      - name: Install Node
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: .node-version
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm i --frozen-lockfile
-
-      - name: Create Database
-        working-directory: packages/services/storage
-        run: pnpm db:create
-
-      - name: Migrate Database
-        working-directory: packages/services/storage
-        run: pnpm db:migrator up
-
-      - name: Generate Database Types
-        working-directory: packages/services/storage
-        run: pnpm db:generate
-
-      - name: Check if DB types were modified
-        run: git diff --exit-code ./packages/services/storage/src/db/types.ts
-        continue-on-error: true
-
-      - name: Share node_modules
-        uses: actions/cache@v3
-        with:
-          path: '**/node_modules'
-          key: ${{ github.sha }}
-
       - name: Check for Presence of Repository Secrets
         id: secrets_present
         run: echo "hive_token=${{ env.HIVE_TOKEN != '' }}" >> $GITHUB_OUTPUT
 
-  schema-check:
-    name: Schema Check
-    runs-on: ubuntu-latest
-    needs: setup
-    if: needs.setup.outputs.hive_token_present == 'true'
-    timeout-minutes: 5
+      - name: Setup
+        uses: ./.github/actions/setup.yml
+        if: steps.secrets_present.outputs.hive_token == 'true'
 
-    env:
-      HIVE_TOKEN: ${{ secrets.HIVE_TOKEN }}
-      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-      TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
-      TURBO_API_URL: ${{ secrets.TURBO_API_URL }}
-      TURBO_REMOTE_ONLY: 'true'
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 5
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2.2.4
-        with:
-          version: 7
-
-      - name: Install Node
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: .node-version
-
-      - name: Pull node_modules
-        uses: actions/cache@v3
-        with:
-          path: '**/node_modules'
-          key: ${{ github.sha }}
-
-      - name: Generate Types
-        run: pnpm graphql:generate
+      - name: Build CLI
+        run: pnpm turbo build --filter=./packages/libraries/cli --color
+        if: steps.secrets_present.outputs.hive_token == 'true'
 
       - name: Check PR label
         if: contains(github.event.pull_request.labels.*.name, 'non-breaking')
@@ -125,6 +27,7 @@ jobs:
         id: pr-label-check
 
       - name: Schema Check
+        if: steps.secrets_present.outputs.hive_token == 'true'
         run:
           ./packages/libraries/cli/bin/dev schema:check
           "packages/services/api/src/modules/*/module.graphql.ts" ${{
@@ -133,39 +36,10 @@ jobs:
   test:
     name: Tests
     runs-on: ubuntu-latest
-    needs: setup
-    timeout-minutes: 5
-
-    env:
-      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-      TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
-      TURBO_API_URL: ${{ secrets.TURBO_API_URL }}
-      TURBO_REMOTE_ONLY: 'true'
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 1
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2.2.4
-        with:
-          version: 7
-
-      - name: Install Node
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: .node-version
-
-      - name: Pull node_modules
-        uses: actions/cache@v3
-        with:
-          path: '**/node_modules'
-          key: ${{ github.sha }}
-
-      - name: Generate Types
-        run: pnpm graphql:generate
+      - name: Setup
+        uses: ./.github/actions/setup.yml
 
       - name: Test
         run: pnpm test
@@ -173,42 +47,10 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    needs: setup
-    timeout-minutes: 15
-
-    env:
-      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-      TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
-      TURBO_API_URL: ${{ secrets.TURBO_API_URL }}
-      TURBO_REMOTE_ONLY: 'true'
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 5
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2.2.4
-        with:
-          version: 7
-
-      - name: Install Node
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: .node-version
-
-      - name: Pull node_modules
-        uses: actions/cache@v3
-        with:
-          path: '**/node_modules'
-          key: ${{ github.sha }}
-
-      - name: Setup Turbo
-        run: node ./scripts/turborepo-setup.js
-
-      - name: Generate Types
-        run: pnpm graphql:generate
+      - name: Setup
+        uses: ./.github/actions/setup.yml
 
       - name: Build
         run: pnpm build
@@ -216,55 +58,14 @@ jobs:
       - name: Test ESM & CJS exports integrity
         run: pnpm turbo check:build
 
-      - name: Archive @hive/app
-        run: zip -r packages/web/app/dist.zip packages/web/app/dist
-
-      - uses: actions/upload-artifact@v3
-        name: Upload Docker Build Artifacts
-        if: ${{ !github.event.pull_request.head.repo.fork }}
-        with:
-          name: docker-build-sources
-          path: |
-            docker.hcl
-            services.dockerfile
-            app.dockerfile
-            packages/services/emails/dist
-            packages/services/rate-limit/dist
-            packages/services/schema/dist
-            packages/services/server/dist
-            packages/services/storage/dist
-            packages/services/stripe-billing/dist
-            packages/services/tokens/dist
-            packages/services/usage-estimator/dist
-            packages/services/usage-ingestor/dist
-            packages/services/usage/dist
-            packages/services/webhooks/dist
-            packages/web/app/dist.zip
-
   rust:
     name: Build Rust
     runs-on: ubuntu-latest
     timeout-minutes: 40
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 2
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2.2.4
-        with:
-          version: 7
-
-      - name: Install Node
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: .node-version
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm i --frozen-lockfile
+      - name: Setup
+        uses: ./.github/actions/setup.yml
 
       - name: Install Rust
         run: |
@@ -296,36 +97,11 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
-    needs: setup
-    timeout-minutes: 25
-
-    env:
-      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-      TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
-      TURBO_API_URL: ${{ secrets.TURBO_API_URL }}
-      TURBO_REMOTE_ONLY: 'true'
+    timeout-minutes: 10
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 5
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2.2.4
-        with:
-          version: 7
-
-      - name: Install Node
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: .node-version
-
-      - name: Pull node_modules
-        uses: actions/cache@v3
-        with:
-          path: '**/node_modules'
-          key: ${{ github.sha }}
+      - name: Setup
+        uses: ./.github/actions/setup.yml
 
       - name: ESLint cache
         uses: actions/cache@v3
@@ -334,12 +110,6 @@ jobs:
           key: ${{ runner.os }}-eslint-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-eslint
-
-      - name: Setup Turbo
-        run: node ./scripts/turborepo-setup.js
-
-      - name: Generate Types
-        run: pnpm graphql:generate
 
       - name: Type Check
         run: pnpm typecheck
@@ -373,8 +143,11 @@ jobs:
           name: docker-build-sources
           path: ./
 
-      - name: Unarchive @hive/app
-        run: unzip packages/web/app/dist.zip
+      - name: Setup
+        uses: ./.github/actions/setup.yml
+
+      - name: Build
+        run: pnpm build
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -417,46 +190,20 @@ jobs:
   integration-tests:
     name: Integration Tests
     runs-on: ubuntu-latest
-    needs: setup
     timeout-minutes: 25
 
     env:
-      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-      TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
-      TURBO_API_URL: ${{ secrets.TURBO_API_URL }}
-      TURBO_REMOTE_ONLY: 'true'
       DOCKER_REGISTRY: ghcr.io/${{ github.repository }}/
       DOCKER_TAG: :${{ github.sha }}
 
     steps:
-      - name: Check out repository code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 5
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2.2.4
-        with:
-          version: 7
-
-      - name: Install Node
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: .node-version
-
-      - name: Pull node_modules
-        uses: actions/cache@v3
-        with:
-          path: '**/node_modules'
-          key: ${{ github.sha }}
-
-      - name: Setup Turbo
-        run: node ./scripts/turborepo-setup.js
+      - name: Setup
+        uses: ./.github/actions/setup.yml
 
       - name: Build
-        run: pnpm --filter integration-tests build-and-pack
+        run: pnpm run --filter integration-tests build-and-pack
 
-      - name: Build
+      - name: Build App
         run: pnpm turbo build --filter=./packages/web/app --color
 
       - name: Pull images
@@ -505,14 +252,9 @@ jobs:
   integration-tests-ff:
     name: Integration Tests (with Feature Flags enabled)
     runs-on: ubuntu-latest
-    needs: setup
     timeout-minutes: 25
 
     env:
-      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-      TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
-      TURBO_API_URL: ${{ secrets.TURBO_API_URL }}
-      TURBO_REMOTE_ONLY: 'true'
       DOCKER_REGISTRY: ghcr.io/${{ github.repository }}/
       DOCKER_TAG: :${{ github.sha }}
       # Feature Flags
@@ -527,40 +269,15 @@ jobs:
               echo 'detected=true' >> $GITHUB_OUTPUT
           fi
 
-      - name: Check out repository code
+      - name: Setup
         if: steps.feature_flags.outputs.detected == 'true'
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 5
-
-      - name: Install pnpm
-        if: steps.feature_flags.outputs.detected == 'true'
-        uses: pnpm/action-setup@v2.2.4
-        with:
-          version: 7
-
-      - name: Install Node
-        if: steps.feature_flags.outputs.detected == 'true'
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: .node-version
-
-      - name: Pull node_modules
-        if: steps.feature_flags.outputs.detected == 'true'
-        uses: actions/cache@v3
-        with:
-          path: '**/node_modules'
-          key: ${{ github.sha }}
-
-      - name: Setup Turbo
-        if: steps.feature_flags.outputs.detected == 'true'
-        run: node ./scripts/turborepo-setup.js
+        uses: ./.github/actions/setup.yml
 
       - name: Build
         if: steps.feature_flags.outputs.detected == 'true'
         run: pnpm --filter integration-tests build-and-pack
 
-      - name: Build
+      - name: Build App
         if: steps.feature_flags.outputs.detected == 'true'
         run: pnpm turbo build --filter=./packages/web/app --color
 
@@ -627,37 +344,14 @@ jobs:
       CDN_AUTH_PRIVATE_KEY: 6b4721a99bd2ef6c00ce4328f34d95d7
 
     steps:
-      - name: Check out repository code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 1
-
-      - name: Set up pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 7
-
-      - name: Set up Node
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: .node-version
-          # TODO: cypress binary in pnpm store gets lost during caching :)
-          # cache: pnpm
-
       - name: Set Cypress cache folder
         run: echo "CYPRESS_CACHE_FOLDER=$(pnpm store path)/Cypress" >> $GITHUB_ENV
 
-      - name: Install dependencies
-        run: pnpm i --frozen-lockfile
-
-      - name: Turbo Cache
-        id: turbo-cache
-        uses: actions/cache@v3
+      - name: Setup
+        if: steps.feature_flags.outputs.detected == 'true'
+        uses: ./.github/actions/setup.yml
         with:
-          path: node_modules/.cache/turbo
-          key: turbo-cache-${{ github.sha }}
-          restore-keys: |
-            turbo-cache-
+          cache: ''
 
       - name: Build
         run: pnpm build
