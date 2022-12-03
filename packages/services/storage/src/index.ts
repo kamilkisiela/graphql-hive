@@ -659,7 +659,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         sql`
         SELECT id, user_id
         FROM public.organizations
-        WHERE o.id IN (${sql.join(organizations, sql`, `)})`,
+        WHERE id IN (${sql.join(organizations, sql`, `)})`,
       );
 
       return organizations.map(async organization => {
@@ -971,6 +971,27 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           return;
         }
 
+        // copy access scopes from the new owner
+        await tsx.query(sql`
+          UPDATE public.organization_member
+          SET scopes = (
+            SELECT scopes
+            FROM public.organization_member
+            WHERE organization_id = ${organization} AND user_id = ${owner.user_id}
+            LIMIT 1
+          )
+          WHERE organization_id = ${organization} AND user_id = ${user}
+        `);
+
+        // assign new access scopes to the old owner
+        await pool.query<Slonik<organization_member>>(
+          sql`
+            UPDATE public.organization_member
+            SET scopes = ${sql.array(oldAdminAccessScopes, 'text')}
+            WHERE organization_id = ${organization} AND user_id = ${owner.user_id}
+          `,
+        );
+
         // NULL out the transfer request
         // assign the new owner
         await tsx.query(sql`
@@ -982,28 +1003,6 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             user_id = ${user}
           WHERE id = ${organization}
         `);
-
-        // copy access scopes from the new owner
-        await tsx.query(sql`
-          UPDATE public.organization_member
-          SET scopes = (
-            SELECT scopes
-            FROM public.organization_member
-            WHERE organization_id = ${organization} AND user_id = ${owner.user_id}
-            LIMIT 1
-          )
-          FROM public.organization_member
-          WHERE organization_id = ${organization} AND user_id = ${user}
-        `);
-
-        // assign new access scopes to the old owner
-        await pool.one<Slonik<organization_member>>(
-          sql`
-            UPDATE public.organization_member
-            SET scopes = ${sql.array(oldAdminAccessScopes, 'text')}
-            WHERE organization_id = ${organization} AND user_id = ${owner.user_id}
-          `,
-        );
       });
     },
     async deleteOrganizationMembers({ users, organization }) {

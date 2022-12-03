@@ -496,11 +496,11 @@ export class OrganizationManager {
       throw new HiveError(`Personal organizations cannot be transferred`);
     }
 
-    // TODO: generate a transfer code
-    const code = '1ng7shb2s';
-    // TODO: persist the request in the DB
+    const { code } = await this.storage.createOrganizationTransferRequest({
+      organization: organization.id,
+      user: member.id,
+    });
 
-    // TODO: send an email
     await this.emails.schedule({
       email: member.user.email,
       subject: `Organization transfer from ${currentUser.displayName} (${organization.name})`,
