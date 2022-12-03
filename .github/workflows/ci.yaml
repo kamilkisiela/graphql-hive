@@ -9,23 +9,16 @@ jobs:
     timeout-minutes: 5
 
     steps:
-      - name: Check for Presence of Repository Secrets
-        id: secrets_present
-        run: echo "hive_token=${{ env.HIVE_TOKEN != '' }}" >> $GITHUB_OUTPUT
-
       - name: Check out repository code
         uses: actions/checkout@v3
-        if: steps.secrets_present.outputs.hive_token == 'true'
         with:
           fetch-depth: 1
 
       - name: Setup
         uses: ./.github/actions/setup.yml
-        if: steps.secrets_present.outputs.hive_token == 'true'
 
       - name: Build CLI
         run: pnpm turbo build --filter=./packages/libraries/cli --color
-        if: steps.secrets_present.outputs.hive_token == 'true'
 
       - name: Check PR label
         if: contains(github.event.pull_request.labels.*.name, 'non-breaking')
@@ -33,7 +26,6 @@ jobs:
         id: pr-label-check
 
       - name: Schema Check
-        if: steps.secrets_present.outputs.hive_token == 'true'
         run:
           ./packages/libraries/cli/bin/dev schema:check
           "packages/services/api/src/modules/*/module.graphql.ts" ${{
