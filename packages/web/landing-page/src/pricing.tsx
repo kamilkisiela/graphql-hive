@@ -59,7 +59,7 @@ const OPERATIONS_EXPLAINER = 'GraphQL requests reported to GraphQL Hive';
 
 export function Pricing({ gradient }: { gradient: [string, string] }): ReactElement {
   return (
-    <div className="bg-neutral-900 w-full">
+    <div className="w-full bg-neutral-900">
       <div className="mx-auto my-12 box-border w-full max-w-[1024px] px-6">
         <h2
           className="bg-clip-text text-2xl font-bold leading-normal text-white text-transparent dark:text-transparent md:text-3xl"
@@ -130,7 +130,7 @@ export function Pricing({ gradient }: { gradient: [string, string] }): ReactElem
                   href="https://the-guild.dev"
                   target="_blank"
                   rel="noreferrer"
-                  className="text-orange-500 font-medium transition-colors hover:underline"
+                  className="font-medium text-orange-500 transition-colors hover:underline"
                 >
                   The Guild
                 </a>
