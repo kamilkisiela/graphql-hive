@@ -15,7 +15,8 @@ jobs:
           fetch-depth: 1
 
       - name: Setup
-        uses: ./.github/actions/setup.yml
+        uses: ./.github/workflows/setup.yml
+        secrets: inherit
 
       - name: Build CLI
         run: pnpm turbo build --filter=./packages/libraries/cli --color
@@ -42,7 +43,8 @@ jobs:
           fetch-depth: 1
 
       - name: Setup
-        uses: ./.github/actions/setup.yml
+        uses: ./.github/workflows/setup.yml
+        secrets: inherit
 
       - name: Test
         run: pnpm test
@@ -58,7 +60,8 @@ jobs:
           fetch-depth: 1
 
       - name: Setup
-        uses: ./.github/actions/setup.yml
+        uses: ./.github/workflows/setup.yml
+        secrets: inherit
 
       - name: Build
         run: pnpm build
@@ -78,7 +81,8 @@ jobs:
           fetch-depth: 1
 
       - name: Setup
-        uses: ./.github/actions/setup.yml
+        uses: ./.github/workflows/setup.yml
+        secrets: inherit
 
       - name: Install Rust
         run: |
@@ -119,7 +123,8 @@ jobs:
           fetch-depth: 5
 
       - name: Setup
-        uses: ./.github/actions/setup.yml
+        uses: ./.github/workflows/setup.yml
+        secrets: inherit
 
       - name: ESLint cache
         uses: actions/cache@v3
@@ -166,7 +171,8 @@ jobs:
           fetch-depth: 5
 
       - name: Setup
-        uses: ./.github/actions/setup.yml
+        uses: ./.github/workflows/setup.yml
+        secrets: inherit
 
       - name: Build
         run: pnpm build
@@ -225,7 +231,8 @@ jobs:
           fetch-depth: 1
 
       - name: Setup
-        uses: ./.github/actions/setup.yml
+        uses: ./.github/workflows/setup.yml
+        secrets: inherit
 
       - name: Build
         run: pnpm run --filter integration-tests build-and-pack
@@ -304,7 +311,8 @@ jobs:
 
       - name: Setup
         if: steps.feature_flags.outputs.detected == 'true'
-        uses: ./.github/actions/setup.yml
+        uses: ./.github/workflows/setup.yml
+        secrets: inherit
 
       - name: Build
         if: steps.feature_flags.outputs.detected == 'true'
@@ -386,7 +394,8 @@ jobs:
           fetch-depth: 5
 
       - name: Setup
-        uses: ./.github/actions/setup.yml
+        uses: ./.github/workflows/setup.yml
+        secrets: inherit
         with:
           cache: ''
 
