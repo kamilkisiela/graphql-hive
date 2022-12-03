@@ -57,6 +57,7 @@ export function deployRateLimit({
         POSTGRES_USER: connectionString.apply(connection => connection.user ?? ''),
         POSTGRES_DB: connectionString.apply(connection => connection.database ?? ''),
         POSTGRES_SSL: connectionString.apply(connection => (connection.ssl ? '1' : '0')),
+        WEB_APP_URL: `https://${deploymentEnv.DEPLOYED_DNS}/`,
       },
       exposesMetrics: true,
       packageInfo: packageHelper.npmPack('@hive/rate-limit'),

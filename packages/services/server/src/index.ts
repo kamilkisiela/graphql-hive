@@ -156,6 +156,11 @@ export async function main() {
 
     const graphqlLogger = createGraphQLLogger();
     const registry = createRegistry({
+      app: env.hiveServices.webApp
+        ? {
+            baseUrl: env.hiveServices.webApp.url,
+          }
+        : null,
       tokens: {
         endpoint: env.hiveServices.tokens.endpoint,
       },
