@@ -5,13 +5,19 @@ jobs:
   schema-check:
     name: Schema Check
     runs-on: ubuntu-latest
-    if: needs.setup.outputs.hive_token_present == 'true'
+    if: ${{ !github.event.pull_request.head.repo.fork }}
     timeout-minutes: 5
 
     steps:
       - name: Check for Presence of Repository Secrets
         id: secrets_present
         run: echo "hive_token=${{ env.HIVE_TOKEN != '' }}" >> $GITHUB_OUTPUT
+
+      - name: Check out repository code
+        uses: actions/checkout@v3
+        if: steps.secrets_present.outputs.hive_token == 'true'
+        with:
+          fetch-depth: 1
 
       - name: Setup
         uses: ./.github/actions/setup.yml
@@ -38,6 +44,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
       - name: Setup
         uses: ./.github/actions/setup.yml
 
@@ -49,6 +60,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
       - name: Setup
         uses: ./.github/actions/setup.yml
 
@@ -64,6 +80,11 @@ jobs:
     timeout-minutes: 40
 
     steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
       - name: Setup
         uses: ./.github/actions/setup.yml
 
@@ -100,6 +121,11 @@ jobs:
     timeout-minutes: 10
 
     steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 5
+
       - name: Setup
         uses: ./.github/actions/setup.yml
 
@@ -124,7 +150,6 @@ jobs:
         run: pnpm lint:prettier
 
   docker-build-push:
-    needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 40
     if: ${{ !github.event.pull_request.head.repo.fork }}
@@ -142,6 +167,11 @@ jobs:
         with:
           name: docker-build-sources
           path: ./
+
+      - name: Check out repository code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 5
 
       - name: Setup
         uses: ./.github/actions/setup.yml
@@ -197,6 +227,11 @@ jobs:
       DOCKER_TAG: :${{ github.sha }}
 
     steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
       - name: Setup
         uses: ./.github/actions/setup.yml
 
@@ -268,6 +303,12 @@ jobs:
           if [ $total -gt 0 ]; then
               echo 'detected=true' >> $GITHUB_OUTPUT
           fi
+
+      - name: Check out repository code
+        uses: actions/checkout@v3
+        if: steps.feature_flags.outputs.detected == 'true'
+        with:
+          fetch-depth: 5
 
       - name: Setup
         if: steps.feature_flags.outputs.detected == 'true'
@@ -347,8 +388,12 @@ jobs:
       - name: Set Cypress cache folder
         run: echo "CYPRESS_CACHE_FOLDER=$(pnpm store path)/Cypress" >> $GITHUB_ENV
 
+      - name: Check out repository code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 5
+
       - name: Setup
-        if: steps.feature_flags.outputs.detected == 'true'
         uses: ./.github/actions/setup.yml
         with:
           cache: ''

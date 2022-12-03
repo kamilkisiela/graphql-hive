@@ -34,11 +34,6 @@ jobs:
           --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
-      - name: Check out repository code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 5
-
       - name: Install pnpm
         uses: pnpm/action-setup@v2.2.4
         with:
