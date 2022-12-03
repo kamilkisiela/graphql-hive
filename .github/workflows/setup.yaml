@@ -60,3 +60,9 @@ jobs:
 
       - name: Setup Turbo
         run: node ./scripts/turborepo-setup.js
+
+      - name: node_modules
+        uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ github.sha }}
