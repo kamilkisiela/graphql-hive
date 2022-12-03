@@ -6,6 +6,9 @@ on:
       type: string
       required: false
       default: pnpm
+    secrets:
+      HIVE_TOKEN:
+        required: true
 jobs:
   ci:
     runs-on: ubuntu-latest
@@ -17,11 +20,6 @@ jobs:
       POSTGRES_PASSWORD: postgres
       POSTGRES_USER: postgres
       POSTGRES_DB: registry
-      HIVE_TOKEN: ${{ secrets.HIVE_TOKEN }}
-      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-      TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
-      TURBO_API_URL: ${{ secrets.TURBO_API_URL }}
-      TURBO_REMOTE_ONLY: 'true'
 
     services:
       postgres:
