@@ -4,7 +4,7 @@ on: [pull_request]
 jobs:
   setup:
     name: Setup
-    uses: ./.github/workflows/setup.yml
+    uses: ./.github/workflows/setup.yaml
 
   schema-check:
     name: Schema Check
