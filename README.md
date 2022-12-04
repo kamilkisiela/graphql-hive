@@ -82,6 +82,6 @@ See you in Hive! 🐝
 
 ## Docs
 
-- [Deployment](./docs/DEPLOYMENT.md)
-- [Development](./docs/DEVELOPMENT.md)
-- [Testing](./docs/TESTING.md)
+- [Deployment](./docs/deployment.md)
+- [Development](./docs/development.md)
+- [Testing](./docs/testing.md)
