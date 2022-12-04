@@ -1,6 +1,5 @@
 import { ReactElement, useState } from 'react';
 import { useMutation, useQuery } from 'urql';
-
 import { authenticated } from '@/components/authenticated-container';
 import { ProjectLayout } from '@/components/layouts';
 import { Button, Card, Checkbox, Heading, Table, Tag, Title } from '@/components/v2';

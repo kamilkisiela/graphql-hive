@@ -1,15 +1,15 @@
-import ThirdPartyEmailPasswordReact from 'supertokens-auth-react/recipe/thirdpartyemailpassword';
+import Provider from 'supertokens-auth-react/lib/build/recipe/thirdparty/providers';
+import { CustomProviderConfig } from 'supertokens-auth-react/lib/build/recipe/thirdparty/providers/types';
 import EmailVerification from 'supertokens-auth-react/recipe/emailverification';
 import SessionReact from 'supertokens-auth-react/recipe/session';
-import Provider from 'supertokens-auth-react/lib/build/recipe/thirdparty/providers';
+import ThirdPartyEmailPasswordReact from 'supertokens-auth-react/recipe/thirdpartyemailpassword';
 import { env } from '@/env/frontend';
 import { appInfo } from '@/lib/supertokens/app-info';
-import { CustomProviderConfig } from 'supertokens-auth-react/lib/build/recipe/thirdparty/providers/types';
-import { createThirdPartyEmailPasswordReactOktaProvider } from '@/lib/supertokens/third-party-email-password-react-okta-provider';
 import {
   createThirdPartyEmailPasswordReactOIDCProvider,
   getOIDCOverrides,
 } from '@/lib/supertokens/third-party-email-password-react-oidc-provider';
+import { createThirdPartyEmailPasswordReactOktaProvider } from '@/lib/supertokens/third-party-email-password-react-okta-provider';
 
 export const frontendConfig = () => {
   const providers: Array<Provider | CustomProviderConfig> = [];

@@ -1,7 +1,7 @@
-import { Flags, Errors } from '@oclif/core';
+import { Errors, Flags } from '@oclif/core';
 import Command from '../../base-command';
-import { loadOperations } from '../../helpers/operations';
 import { graphqlEndpoint } from '../../helpers/config';
+import { loadOperations } from '../../helpers/operations';
 
 export default class OperationsPublish extends Command {
   static description = 'saves operations to the store';

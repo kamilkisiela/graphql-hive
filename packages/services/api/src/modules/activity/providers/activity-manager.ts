@@ -5,9 +5,9 @@ import { OrganizationAccessScope } from '../../auth/providers/organization-acces
 import { ProjectAccessScope } from '../../auth/providers/project-access';
 import { Logger } from '../../shared/providers/logger';
 import {
-  Storage,
   OrganizationSelector,
   ProjectSelector,
+  Storage,
   TargetSelector,
 } from '../../shared/providers/storage';
 import { Activity } from './activities';

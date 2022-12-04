@@ -1,19 +1,18 @@
+import 'twin.macro';
 import { ReactElement, ReactNode, useEffect } from 'react';
 import NextLink from 'next/link';
-import 'twin.macro';
 import { useQuery } from 'urql';
-
-import { Button, DropdownMenu, Heading, Link, Tabs, SubHeader } from '@/components/v2';
+import { Button, DropdownMenu, Heading, Link, SubHeader, Tabs } from '@/components/v2';
 import { ArrowDownIcon, TargetIcon } from '@/components/v2/icon';
 import { CreateTargetModal } from '@/components/v2/modals';
 import {
-  ProjectDocument,
-  ProjectsDocument,
-  ProjectFieldsFragment,
   OrganizationFieldsFragment,
+  ProjectDocument,
+  ProjectFieldsFragment,
+  ProjectsDocument,
 } from '@/graphql';
+import { canAccessProject, ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
-import { useProjectAccess, ProjectAccessScope, canAccessProject } from '@/lib/access/project';
 
 enum TabValue {
   Targets = 'targets',

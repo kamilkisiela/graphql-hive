@@ -1,8 +1,8 @@
-import * as Sentry from '@sentry/node';
 import '@sentry/tracing';
+import * as Sentry from '@sentry/node';
 import { Transaction } from '@sentry/tracing';
-import { extractTraceparentData, normalize } from '@sentry/utils';
 import type { ExtractedNodeRequestData, TraceparentData } from '@sentry/types';
+import { extractTraceparentData, normalize } from '@sentry/utils';
 import type { FastifyInstance, FastifyPluginAsync, FastifyRequest } from 'fastify';
 import fp from 'fastify-plugin';
 import { cleanRequestId } from './helpers';

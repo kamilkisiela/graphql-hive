@@ -1,6 +1,6 @@
-import { env } from '@/env/frontend';
 import { UserInput } from 'supertokens-auth-react/lib/build/recipe/thirdpartyemailpassword/types';
 import { getAuthorisationURLWithQueryParamsAndSetState } from 'supertokens-auth-react/recipe/thirdpartyemailpassword';
+import { env } from '@/env/frontend';
 
 export const createThirdPartyEmailPasswordReactOIDCProvider = () => ({
   id: 'oidc',

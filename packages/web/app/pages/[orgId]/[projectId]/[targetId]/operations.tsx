@@ -1,11 +1,10 @@
+import 'twin.macro';
 import { ComponentProps, ReactElement, useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
-import 'twin.macro';
 import { Select, Stack } from '@chakra-ui/react';
 import { formatISO, subDays, subHours, subMinutes } from 'date-fns';
 import { VscChevronDown } from 'react-icons/vsc';
 import { useQuery } from 'urql';
-
 import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
 import { OperationsFilterTrigger } from '@/components/target/operations/Filters';

@@ -1,11 +1,11 @@
 import { createModule } from 'graphql-modules';
-import { resolvers } from './resolvers';
+import { Inspector } from './providers/inspector';
+import { orchestrators } from './providers/orchestrators';
+import { SchemaHelper } from './providers/schema-helper';
 import { SchemaManager } from './providers/schema-manager';
 import { SchemaPublisher } from './providers/schema-publisher';
 import { SchemaValidator } from './providers/schema-validator';
-import { SchemaHelper } from './providers/schema-helper';
-import { orchestrators } from './providers/orchestrators';
-import { Inspector } from './providers/inspector';
+import { resolvers } from './resolvers';
 import typeDefs from './module.graphql';
 
 export const schemaModule = createModule({

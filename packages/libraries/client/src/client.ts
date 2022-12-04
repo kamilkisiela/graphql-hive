@@ -1,9 +1,9 @@
-import { GraphQLSchema, ExecutionArgs, ExecutionResult } from 'graphql';
 import axios from 'axios';
-import type { HivePluginOptions, HiveClient } from './internal/types.js';
-import { createUsage } from './internal/usage.js';
-import { createReporting } from './internal/reporting.js';
+import { ExecutionArgs, ExecutionResult, GraphQLSchema } from 'graphql';
 import { createOperationsStore } from './internal/operations-store.js';
+import { createReporting } from './internal/reporting.js';
+import type { HiveClient, HivePluginOptions } from './internal/types.js';
+import { createUsage } from './internal/usage.js';
 import { logIf } from './internal/utils.js';
 import { version } from './version.js';
 

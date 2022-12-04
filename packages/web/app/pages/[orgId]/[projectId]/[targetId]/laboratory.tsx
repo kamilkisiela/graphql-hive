@@ -1,7 +1,6 @@
 import { ReactElement } from 'react';
 import { createGraphiQLFetcher } from '@graphiql/toolkit';
 import { GraphiQL } from 'graphiql';
-
 import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
 import { Button, Title } from '@/components/v2';

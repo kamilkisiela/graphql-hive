@@ -1,12 +1,12 @@
-import * as Sentry from '@sentry/node';
 import type { FastifyLoggerInstance } from '@hive/service-common';
-import { Queue, QueueScheduler, Worker, Job } from 'bullmq';
+import * as Sentry from '@sentry/node';
+import { Job, Queue, QueueScheduler, Worker } from 'bullmq';
 import Redis, { Redis as RedisInstance } from 'ioredis';
-import pTimeout from 'p-timeout';
 import mjml2html from 'mjml';
-import { emailsTotal, emailsFailuresTotal } from './metrics';
-import type { EmailInput } from './shapes';
+import pTimeout from 'p-timeout';
+import { emailsFailuresTotal, emailsTotal } from './metrics';
 import type { EmailProvider } from './providers';
+import type { EmailInput } from './shapes';
 
 const DAY_IN_SECONDS = 86_400;
 

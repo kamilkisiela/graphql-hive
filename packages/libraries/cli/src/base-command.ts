@@ -1,7 +1,7 @@
 import { Command, Config as OclifConfig, Errors } from '@oclif/core';
 import colors from 'colors';
+import { ClientError, GraphQLClient } from 'graphql-request';
 import symbols from 'log-symbols';
-import { GraphQLClient, ClientError } from 'graphql-request';
 import { Config } from './helpers/config';
 import { getSdk } from './sdk';
 

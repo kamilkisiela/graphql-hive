@@ -1,6 +1,5 @@
 import React, { ReactElement, ReactNode } from 'react';
 import { useQuery } from 'urql';
-
 import { ActivityNode } from '@/components/common/activities/common';
 import { Heading, Link, Skeleton, TimeAgo } from '@/components/v2';
 import {

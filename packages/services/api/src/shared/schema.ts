@@ -1,21 +1,21 @@
-import lodash from 'lodash';
 import { createHash } from 'crypto';
 import {
   buildASTSchema,
-  GraphQLSchema,
-  lexicographicSortSchema,
-  visit,
-  DocumentNode,
-  Kind,
-  DefinitionNode,
   ConstDirectiveNode,
-  OperationTypeDefinitionNode,
-  FieldDefinitionNode,
-  NamedTypeNode,
+  DefinitionNode,
+  DocumentNode,
   EnumValueDefinitionNode,
+  FieldDefinitionNode,
+  GraphQLSchema,
   InputValueDefinitionNode,
+  Kind,
+  lexicographicSortSchema,
+  NamedTypeNode,
+  OperationTypeDefinitionNode,
+  visit,
 } from 'graphql';
-import { Schema, SchemaObject, emptySource } from './entities';
+import lodash from 'lodash';
+import { emptySource, Schema, SchemaObject } from './entities';
 
 export function hashSchema(schema: Schema): string {
   return createHash('md5').update(schema.source, 'utf-8').digest('hex');

@@ -1,13 +1,13 @@
 import '../src/dev-polyfill';
-import { createRequestHandler } from '../src/handler';
+import { createHmac } from 'crypto';
 import {
   InvalidArtifactTypeResponse,
   InvalidAuthKeyResponse,
   MissingAuthKeyResponse,
   MissingTargetIDErrorResponse,
 } from '../src/errors';
+import { createRequestHandler } from '../src/handler';
 import { createIsKeyValid, KeyValidator } from '../src/key-validation';
-import { createHmac } from 'crypto';
 
 describe('CDN Worker', () => {
   const KeyValidators: Record<string, KeyValidator> = {

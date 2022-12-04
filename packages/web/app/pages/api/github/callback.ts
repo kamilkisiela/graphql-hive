@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { graphql } from '@/lib/api/utils';
 import { env } from '@/env/backend';
+import { graphql } from '@/lib/api/utils';
 
 export async function ensureGithubIntegration(
   req: NextApiRequest,

@@ -4,7 +4,6 @@ import { gql } from '@urql/core';
 import { useFormik } from 'formik';
 import { useMutation } from 'urql';
 import * as Yup from 'yup';
-
 import { Button, Heading, Input, Modal } from '@/components/v2';
 
 const CreateOrganizationMutation = gql(/* GraphQL */ `

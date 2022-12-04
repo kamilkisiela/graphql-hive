@@ -1,19 +1,19 @@
-import { useEffect, ReactElement } from 'react';
+import { ReactElement, useEffect } from 'react';
+import { NextApiRequest, NextApiResponse } from 'next';
+import type { InternalApi } from '@hive/server';
+import { createTRPCProxyClient, httpLink } from '@trpc/client';
+import Cookies from 'cookies';
+import Session from 'supertokens-node/recipe/session';
 import { useQuery } from 'urql';
-import { OrganizationsDocument, OrganizationType } from '@/graphql';
+import { authenticated } from '@/components/authenticated-container';
 import { Title } from '@/components/common';
 import { DataWrapper } from '@/components/common/DataWrapper';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
-import Cookies from 'cookies';
 import { LAST_VISITED_ORG_KEY } from '@/constants';
-import { authenticated } from '@/components/authenticated-container';
-import { withSessionProtection } from '@/lib/supertokens/guard';
-import { createTRPCProxyClient, httpLink } from '@trpc/client';
-import type { InternalApi } from '@hive/server';
 import { env } from '@/env/backend';
-import { NextApiRequest, NextApiResponse } from 'next';
-import Session from 'supertokens-node/recipe/session';
+import { OrganizationsDocument, OrganizationType } from '@/graphql';
 import { writeLastVisitedOrganization } from '@/lib/cookies';
+import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { withSessionProtection } from '@/lib/supertokens/guard';
 
 async function getSuperTokensUserIdFromRequest(
   req: NextApiRequest,

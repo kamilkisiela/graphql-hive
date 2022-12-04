@@ -1,6 +1,4 @@
 /* eslint-env node */
-/* eslint-disable-next-line @typescript-eslint/no-var-requires */
-const { builtinModules } = require('module');
 
 module.exports = {
   reportUnusedDisableDirectives: true,
@@ -109,37 +107,6 @@ module.exports = {
         'jsx-a11y/alt-text': ['warn', { elements: ['img'], img: ['Image', 'NextImage'] }],
         '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'no-type-imports' }],
         'simple-import-sort/exports': 'error',
-        'simple-import-sort/imports': [
-          'error',
-          {
-            groups: [
-              [
-                // Node.js builtins
-                `^(node:)?(${builtinModules
-                  .filter(mod => !mod.startsWith('_') && !mod.includes('/'))
-                  .join('|')})(/.*|$)`,
-                '^react(-dom)?$',
-                '^next(/.*|$)',
-                '^graphql(/.*|$)',
-                // Side effect imports.
-                '^\\u0000',
-                // Packages.
-                // Things that start with a letter (or digit or underscore), or `@` followed by a letter.
-                '^@?\\w',
-              ],
-              [
-                // Absolute imports and other imports such as Vue-style `@/foo`.
-                // Anything not matched in another group.
-                '^',
-                // Relative imports.
-                // Anything that starts with a dot.
-                '^\\.',
-                // Style imports.
-                '^.+\\.css$',
-              ],
-            ],
-          },
-        ],
       },
     },
     {

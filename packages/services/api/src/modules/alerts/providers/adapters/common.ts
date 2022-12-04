@@ -4,8 +4,8 @@ import {
   AlertChannel,
   Organization,
   Project,
-  Target,
   SchemaVersion,
+  Target,
 } from '../../../../shared/entities';
 
 export interface SchemaChangeNotificationInput {

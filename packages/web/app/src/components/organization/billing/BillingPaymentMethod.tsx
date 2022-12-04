@@ -1,9 +1,9 @@
 import { ReactElement } from 'react';
+import { CardElement } from '@stripe/react-stripe-js';
 import clsx from 'clsx';
 import { Section } from '@/components/common';
+import { Heading, Link } from '@/components/v2';
 import { BillingPlanType, OrgBillingInfoFieldsFragment } from '@/graphql';
-import { Link, Heading } from '@/components/v2';
-import { CardElement } from '@stripe/react-stripe-js';
 
 export const BillingPaymentMethod = ({
   plan,

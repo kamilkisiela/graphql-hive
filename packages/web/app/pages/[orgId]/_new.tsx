@@ -1,7 +1,6 @@
 import { FC, useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 import tw, { css, styled } from 'twin.macro';
-
 import { Button, Heading, HiveLink, Input, ProjectTypes, ShineBackground } from '@/components/v2';
 import MembersPage from './members';
 

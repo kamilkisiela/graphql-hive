@@ -1,6 +1,6 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import nock from 'nock';
-import { createServicesFetcher, createSchemaFetcher } from '../src/gateways';
+import { createSchemaFetcher, createServicesFetcher } from '../src/gateways';
 
 afterEach(() => {
   nock.cleanAll();

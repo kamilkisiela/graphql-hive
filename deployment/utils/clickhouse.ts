@@ -1,5 +1,5 @@
-import * as kx from '@pulumi/kubernetesx';
 import * as k8s from '@pulumi/kubernetes';
+import * as kx from '@pulumi/kubernetesx';
 import { PodBuilder } from './pod-builder';
 import { getLocalComposeConfig } from './local-config';
 

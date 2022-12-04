@@ -1,3 +1,4 @@
+import { normalizeOperation } from '@graphql-hive/core';
 import {
   ArgumentNode,
   DocumentNode,
@@ -24,24 +25,23 @@ import {
   visitWithTypeInfo,
 } from 'graphql';
 import LRU from 'tiny-lru';
-import { normalizeOperation } from '@graphql-hive/core';
+import { version } from '../version.js';
 import { createAgent } from './agent.js';
 import { randomSampling } from './sampling.js';
-import { version } from '../version.js';
+import type {
+  ClientInfo,
+  CollectUsageCallback,
+  HivePluginOptions,
+  HiveUsagePluginOptions,
+} from './types.js';
 import {
   cache,
   cacheDocumentKey,
-  measureDuration,
-  memo,
   isAsyncIterableIterator,
   logIf,
+  measureDuration,
+  memo,
 } from './utils.js';
-import type {
-  HivePluginOptions,
-  HiveUsagePluginOptions,
-  CollectUsageCallback,
-  ClientInfo,
-} from './types.js';
 
 interface UsageCollector {
   collect(args: ExecutionArgs): CollectUsageCallback;

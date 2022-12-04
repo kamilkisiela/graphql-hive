@@ -1,19 +1,19 @@
 #!/usr/bin/env node
 import {
-  createServer,
   createErrorHandler,
-  startMetrics,
+  createServer,
   registerShutdown,
   reportReadiness,
   startHeartbeats,
+  startMetrics,
 } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
-import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
 import type { CreateFastifyContextOptions } from '@trpc/server/adapters/fastify';
-import { createScheduler } from './scheduler';
+import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
 import { webhooksApiRouter } from './api';
-import type { Context } from './types';
 import { env } from './environment';
+import { createScheduler } from './scheduler';
+import type { Context } from './types';
 
 async function main() {
   if (env.sentry) {

@@ -1,21 +1,21 @@
+import 'twin.macro';
 import React from 'react';
-import { useQuery } from 'urql';
-import { VscChevronDown, VscAdd } from 'react-icons/vsc';
 import {
   Button,
   Menu,
   MenuButton,
-  MenuList,
-  MenuItem,
-  MenuGroup,
   MenuDivider,
-  useDisclosure,
+  MenuGroup,
+  MenuItem,
+  MenuList,
   useColorModeValue,
+  useDisclosure,
 } from '@chakra-ui/react';
-import 'twin.macro';
+import { VscAdd, VscChevronDown } from 'react-icons/vsc';
+import { useQuery } from 'urql';
 import { OrganizationsDocument, OrganizationsQuery, OrganizationType } from '@/graphql';
-import { OrganizationCreator } from './Creator';
 import { useRouteSelector } from '@/lib/hooks';
+import { OrganizationCreator } from './Creator';
 
 export const OrganizationSwitcher: React.FC<{
   organizationId: string;

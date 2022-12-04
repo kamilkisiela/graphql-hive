@@ -1,6 +1,6 @@
 import { OrganizationManager } from '../organization/providers/organization-manager';
-import { OIDCIntegrationsProvider } from './providers/oidc-integrations.provider';
 import { OidcIntegrationsModule } from './__generated__/types';
+import { OIDCIntegrationsProvider } from './providers/oidc-integrations.provider';
 
 export const resolvers: OidcIntegrationsModule.Resolvers = {
   Mutation: {

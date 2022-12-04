@@ -1,10 +1,10 @@
 import type { inferRouterInputs } from '@trpc/server';
 import { initTRPC } from '@trpc/server';
+import { z } from 'zod';
 import type { Context } from './context';
 import { EmailInputShape } from './shapes';
-import { z } from 'zod';
-import { renderPasswordResetEmail } from './templates/password-reset';
 import { renderEmailVerificationEmail } from './templates/email-verification';
+import { renderPasswordResetEmail } from './templates/password-reset';
 
 const t = initTRPC.context<Context>().create();
 

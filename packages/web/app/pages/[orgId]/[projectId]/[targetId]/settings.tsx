@@ -5,7 +5,6 @@ import { formatISO, subDays } from 'date-fns';
 import { useFormik } from 'formik';
 import { gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
-
 import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
 import { SchemaEditor } from '@/components/schema-editor';

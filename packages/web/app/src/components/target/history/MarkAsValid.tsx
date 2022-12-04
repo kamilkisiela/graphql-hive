@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { useMutation } from 'urql';
 import { Tooltip } from '@chakra-ui/react';
+import { useMutation } from 'urql';
 import { Button } from '@/components/v2';
-import { useRouteSelector } from '@/lib/hooks';
 import { SchemaVersionFieldsFragment, UpdateSchemaVersionStatusDocument } from '@/graphql';
+import { useRouteSelector } from '@/lib/hooks';
 
 export const MarkAsValid: React.FC<{
   version: Pick<SchemaVersionFieldsFragment, 'id' | 'valid'>;

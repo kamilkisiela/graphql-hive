@@ -1,8 +1,8 @@
-import { ReactElement, useState, useCallback, ReactNode } from 'react';
-import { useMounted } from '@theguild/components';
+import { ReactElement, ReactNode, useCallback, useState } from 'react';
 import * as Tooltip from '@radix-ui/react-tooltip';
+import { useMounted } from '@theguild/components';
 import clsx from 'clsx';
-import { FiServer, FiGlobe, FiRadio, FiGithub } from 'react-icons/fi';
+import { FiGithub, FiGlobe, FiRadio, FiServer } from 'react-icons/fi';
 import { Pricing } from '../pricing';
 import schemaHistoryImage from '../../public/features/schema-history.png';
 import monitoringImage from '../../public/features/monitoring-preview.png';

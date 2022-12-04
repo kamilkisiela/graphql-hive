@@ -1,7 +1,7 @@
 /**
  * IMPORTANT NOTE: This file needs to be kept platform-agnostic, don't use any Node.js specific APIs.
  */
-import { GetObjectCommand, HeadObjectCommand, type S3Client } from '@aws-sdk/client-s3';
+import { type S3Client, GetObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { fetch } from '@whatwg-node/fetch';
 

@@ -3,7 +3,6 @@ import { useRouter } from 'next/router';
 import { useFormik } from 'formik';
 import { gql, useMutation } from 'urql';
 import * as Yup from 'yup';
-
 import { Button, Heading, Input, Modal, ProjectTypes } from '@/components/v2';
 import { ProjectType } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks';

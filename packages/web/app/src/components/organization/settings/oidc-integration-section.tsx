@@ -1,13 +1,12 @@
+import { ReactElement } from 'react';
+import { useRouter } from 'next/router';
+import { Heading } from '@chakra-ui/react';
+import { useFormik } from 'formik';
+import { DocumentType, gql, useMutation } from 'urql';
 import { Button, Input, Modal, Tag } from '@/components/v2';
 import { AlertTriangleIcon, KeyIcon } from '@/components/v2/icon';
 import { InlineCode } from '@/components/v2/inline-code';
 import { env } from '@/env/frontend';
-import { Heading } from '@chakra-ui/react';
-import { useFormik } from 'formik';
-import { useRouter } from 'next/router';
-import { ReactElement } from 'react';
-
-import { gql, DocumentType, useMutation } from 'urql';
 
 const containerClassName = 'flex flex-col items-stretch gap-5';
 const modalWidthClassName = 'w-[550px]';

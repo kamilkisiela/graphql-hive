@@ -1,5 +1,5 @@
-import { ReactNode, ReactElement } from 'react';
-import { Root, Trigger, Content, Arrow } from '@radix-ui/react-tooltip';
+import { ReactElement, ReactNode } from 'react';
+import { Arrow, Content, Root, Trigger } from '@radix-ui/react-tooltip';
 
 function Tooltip({ content, children }: { content: string; children: ReactNode }) {
   return (

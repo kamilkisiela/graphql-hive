@@ -1,14 +1,15 @@
-import { Injectable, Scope, Inject, forwardRef } from 'graphql-modules';
 import Dataloader from 'dataloader';
-import { Logger } from '../../shared/providers/logger';
-import { Storage } from '../../shared/providers/storage';
+import DataLoader from 'dataloader';
+import { forwardRef, Inject, Injectable, Scope } from 'graphql-modules';
 import { Token } from '../../../shared/entities';
 import { AccessError } from '../../../shared/errors';
-import DataLoader from 'dataloader';
-import { TokenStorage, TokenSelector } from '../../token/providers/token-storage';
-import { OrganizationAccessScope } from './scopes';
+import { Logger } from '../../shared/providers/logger';
+import { Storage } from '../../shared/providers/storage';
+import { TokenSelector, TokenStorage } from '../../token/providers/token-storage';
 import type { ProjectAccessScope } from './project-access';
+import { OrganizationAccessScope } from './scopes';
 import type { TargetAccessScope } from './target-access';
+
 export { OrganizationAccessScope } from './scopes';
 
 export interface OrganizationOwnershipSelector {

@@ -1,10 +1,10 @@
-import { Injectable, Scope } from 'graphql-modules';
-import { print } from 'graphql';
 import { createHash } from 'crypto';
-import { createSchemaObject } from '../../../shared/entities';
+import { print } from 'graphql';
+import { Injectable, Scope } from 'graphql-modules';
 import type { Schema, SchemaObject } from '../../../shared/entities';
-import { sortDocumentNode } from '../../../shared/schema';
+import { createSchemaObject } from '../../../shared/entities';
 import { cache } from '../../../shared/helpers';
+import { sortDocumentNode } from '../../../shared/schema';
 
 @Injectable({
   scope: Scope.Operation,

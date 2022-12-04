@@ -1,12 +1,12 @@
-import { Injectable, Inject, Scope } from 'graphql-modules';
 import { createHmac } from 'crypto';
 import type { Span } from '@sentry/types';
+import { Inject, Injectable, Scope } from 'graphql-modules';
 import { HiveError } from '../../../shared/errors';
+import { sentry } from '../../../shared/sentry';
 import { HttpClient } from '../../shared/providers/http-client';
 import { Logger } from '../../shared/providers/logger';
-import { sentry } from '../../../shared/sentry';
-import { CDN_CONFIG } from './tokens';
 import type { CDNConfig } from './tokens';
+import { CDN_CONFIG } from './tokens';
 
 type CdnResourceType = 'schema' | 'supergraph' | 'metadata';
 

@@ -1,10 +1,9 @@
 import { useFormik } from 'formik';
 import { gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
-
-import { Avatar, Button, SubHeader, Heading, Input, Tabs, Title } from '@/components/v2';
-import { MeDocument } from '@/graphql';
 import { authenticated } from '@/components/authenticated-container';
+import { Avatar, Button, Heading, Input, SubHeader, Tabs, Title } from '@/components/v2';
+import { MeDocument } from '@/graphql';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const UpdateMeMutation = gql(/* GraphQL */ `

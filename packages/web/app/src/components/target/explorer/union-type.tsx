@@ -1,4 +1,4 @@
-import { gql, DocumentType } from 'urql';
+import { DocumentType, gql } from 'urql';
 import { GraphQLTypeCard, GraphQLTypeCardListItem, SchemaExplorerUsageStats } from './common';
 
 export const GraphQLUnionTypeComponent_TypeFragment = gql(/* GraphQL */ `

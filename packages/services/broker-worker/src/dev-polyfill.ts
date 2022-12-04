@@ -1,4 +1,4 @@
-import { createFetch, Response, Request, Headers, ReadableStream } from '@whatwg-node/fetch';
+import { createFetch, Headers, ReadableStream, Request, Response } from '@whatwg-node/fetch';
 
 const nodeFetch = createFetch({
   useNodeFetch: true,

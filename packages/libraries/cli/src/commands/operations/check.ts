@@ -1,9 +1,9 @@
-import { Flags, Errors } from '@oclif/core';
-import { buildSchema, Source, GraphQLError } from 'graphql';
-import { validate, InvalidDocument } from '@graphql-inspector/core';
+import { InvalidDocument, validate } from '@graphql-inspector/core';
+import { Errors, Flags } from '@oclif/core';
+import { buildSchema, GraphQLError, Source } from 'graphql';
 import Command from '../../base-command';
-import { loadOperations } from '../../helpers/operations';
 import { graphqlEndpoint } from '../../helpers/config';
+import { loadOperations } from '../../helpers/operations';
 
 export default class OperationsCheck extends Command {
   static description = 'checks operations against a published schema';

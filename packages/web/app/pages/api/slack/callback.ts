@@ -1,7 +1,7 @@
-import { NextApiRequest, NextApiResponse } from 'next';
 import { stringify } from 'querystring';
-import { graphql } from '@/lib/api/utils';
+import { NextApiRequest, NextApiResponse } from 'next';
 import { env } from '@/env/backend';
+import { graphql } from '@/lib/api/utils';
 
 async function fetchData({
   url,
