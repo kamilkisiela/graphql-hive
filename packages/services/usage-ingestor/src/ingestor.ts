@@ -94,7 +94,7 @@ export function createIngestor(config: {
     },
     // Recommended by Azure EventHub https://docs.microsoft.com/en-us/azure/event-hubs/apache-kafka-configurations
     sessionTimeout: 30_000,
-    heartbeatInterval: 3_000,
+    heartbeatInterval: 3000,
     metadataMaxAge: 180_000,
   });
 

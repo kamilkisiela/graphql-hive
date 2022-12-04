@@ -8,7 +8,7 @@ test('correct operation should be valid', () => {
         timestamp: Date.now(),
         execution: {
           ok: true,
-          duration: 12405,
+          duration: 12_405,
           errorsTotal: 0,
         },
         metadata: {},
@@ -31,7 +31,7 @@ test('operation with missing timestamp should be valid', () => {
         operationMapKey: 'a',
         execution: {
           ok: true,
-          duration: 12405,
+          duration: 12_405,
           errorsTotal: 0,
         },
       },
@@ -53,7 +53,7 @@ test('operation with missing operationName should be valid', () => {
         operationMapKey: 'a',
         execution: {
           ok: true,
-          duration: 12405,
+          duration: 12_405,
           errorsTotal: 0,
         },
         metadata: {},
@@ -75,7 +75,7 @@ test('operation with missing metadata should be valid', () => {
         operationMapKey: 'a',
         execution: {
           ok: true,
-          duration: 12405,
+          duration: 12_405,
           errorsTotal: 0,
         },
         metadata: {},
@@ -97,7 +97,7 @@ test('operation with empty metadata.client should be valid', () => {
         operationMapKey: 'a',
         execution: {
           ok: true,
-          duration: 12405,
+          duration: 12_405,
           errorsTotal: 0,
         },
         metadata: {
@@ -121,7 +121,7 @@ test('operation with empty metadata.client.name should be valid', () => {
         operationMapKey: 'a',
         execution: {
           ok: true,
-          duration: 12405,
+          duration: 12_405,
           errorsTotal: 0,
         },
         metadata: {
@@ -147,7 +147,7 @@ test('operation with empty metadata.client.version should be valid', () => {
         operationMapKey: 'a',
         execution: {
           ok: true,
-          duration: 12405,
+          duration: 12_405,
           errorsTotal: 0,
         },
         metadata: {
@@ -173,7 +173,7 @@ test('operation with empty list in metadata.client.errors should be valid', () =
         operationMapKey: 'a',
         execution: {
           ok: true,
-          duration: 12405,
+          duration: 12_405,
           errorsTotal: 1,
           errors: [],
         } as any,
@@ -195,7 +195,7 @@ test('operation with empty metadata.client.errors.path should be valid', () => {
         operationMapKey: 'a',
         execution: {
           ok: true,
-          duration: 12405,
+          duration: 12_405,
           errorsTotal: 1,
           errors: [
             {
@@ -221,7 +221,7 @@ test.skip('operation with empty metadata.client.errors.message should NOT be val
         operationMapKey: 'a',
         execution: {
           ok: true,
-          duration: 12405,
+          duration: 12_405,
           errorsTotal: 1,
           errors: [{} as any],
         } as any,
@@ -259,7 +259,7 @@ test('operation with empty in execution.ok should NOT be valid', () => {
       {
         operationMapKey: 'a',
         execution: {
-          duration: 12405,
+          duration: 12_405,
           errorsTotal: 1,
         } as any,
       },

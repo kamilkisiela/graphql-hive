@@ -160,7 +160,7 @@ export class RemoteArtifactAsServiceDeployment {
             http: port,
             ...(this.options.exposesMetrics
               ? {
-                  metrics: 10254,
+                  metrics: 10_254,
                 }
               : {}),
           },
