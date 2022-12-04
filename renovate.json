@@ -29,6 +29,15 @@
     {
       "groupName": "slonik",
       "matchPackagePrefixes": "@slonik"
+    },
+    {
+      "groupName": "supertokens",
+      "matchPackageNames": [
+        "supertokens-node",
+        "supertokens-auth-react",
+        "supertokens-js-override",
+        "supertokens-website"
+      ]
     }
   ],
   "ignorePaths": ["deployment"]
