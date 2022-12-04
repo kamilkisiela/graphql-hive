@@ -330,7 +330,7 @@ jobs:
       - name: ESLint cache
         uses: actions/cache@v3
         with:
-          path: '.eslintcache'
+          path: .eslintcache
           key: ${{ runner.os }}-eslint-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-eslint
@@ -400,7 +400,7 @@ jobs:
         with:
           pattern: '(\/|-)'
           string: ${{ steps.branch-name.outputs.current_branch }}
-          replace-with: '_'
+          replace-with: _
 
       - name: Build Docker Images
         env:
@@ -408,7 +408,7 @@ jobs:
           COMMIT_SHA: ${{ github.sha }}
           RELEASE: ${{ github.sha }}
           BRANCH_NAME: ${{ steps.branch_name_fix.outputs.replaced }}
-          BUILD_TYPE: 'publish'
+          BUILD_TYPE: publish
         run: |
           docker buildx bake \
             -f docker.hcl \
@@ -481,7 +481,7 @@ jobs:
         env:
           COMMIT_SHA: ${{ github.sha }}
           RELEASE: ${{ github.sha }}
-          BUILD_TYPE: 'ci'
+          BUILD_TYPE: ci
         run: |
           docker buildx bake \
             -f docker.hcl \
@@ -584,7 +584,7 @@ jobs:
         env:
           COMMIT_SHA: ${{ github.sha }}
           RELEASE: ${{ github.sha }}
-          BUILD_TYPE: 'ci'
+          BUILD_TYPE: ci
         run: |
           docker buildx bake \
             -f docker.hcl \
