@@ -363,7 +363,7 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
       })}
       {invitations?.length ? (
         <div className="pt-3">
-          <div className="border-t-4 border-solid pb-6"></div>
+          <div className="border-t-4 border-solid pb-6" />
           {invitations.map(node => (
             <Invitation key={node.id} invitation={node} organizationCleanId={org.cleanId} />
           ))}

@@ -222,9 +222,8 @@ export function createRateLimiter(config: {
 
       if (input.type === 'operations-reporting') {
         return orgData.operations;
-      } else {
-        return UNKNOWN_RATE_LIMIT_OBJ;
       }
+      return UNKNOWN_RATE_LIMIT_OBJ;
     },
     async start() {
       logger.info(

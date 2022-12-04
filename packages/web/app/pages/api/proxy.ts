@@ -130,7 +130,7 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
     const message = (error as Record<string, unknown | undefined>)?.['message'] ?? '';
 
     res.status(status).json({
-      code: code,
+      code,
       error: message,
     });
   }

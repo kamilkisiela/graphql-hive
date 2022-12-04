@@ -84,8 +84,10 @@ export class ServiceDeployment {
     }
 
     if (this.options.exposesMetrics) {
-      additionalEnv.push({ name: 'METRICS_ENABLED', value: 'true' }); // TODO: remove this
-      additionalEnv.push({ name: 'PROMETHEUS_METRICS', value: '1' });
+      additionalEnv.push(
+        { name: 'METRICS_ENABLED', value: 'true' }, // TODO: remove this
+        { name: 'PROMETHEUS_METRICS', value: '1' },
+      );
     }
 
     const pb = new PodBuilder({

@@ -40,7 +40,7 @@ export const OrganizationUsageEstimationView: React.FC<{
                     <Th>Feature</Th>
                     <Th isNumeric>Used</Th>
                     <Th isNumeric>Limit</Th>
-                    <Th></Th>
+                    <Th />
                   </Tr>
                 </Thead>
                 <Tbody>

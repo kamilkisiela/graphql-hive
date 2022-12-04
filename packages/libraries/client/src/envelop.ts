@@ -12,7 +12,7 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
         ...clientOrOptions,
         agent: {
           name: 'hive-client-envelop',
-          ...(clientOrOptions.agent ?? {}),
+          ...clientOrOptions.agent,
         },
       });
 

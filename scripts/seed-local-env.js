@@ -66,7 +66,7 @@ async function main() {
   setInterval(
     () => {
       for (let i = 0; i < operationsPerBatch; i++) {
-        let randNumber = Math.random() * 100;
+        const randNumber = Math.random() * 100;
         console.log(`Reporting usage query...`);
 
         const done = hiveInstance.collectUsage({

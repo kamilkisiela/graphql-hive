@@ -126,7 +126,7 @@ export const backendConfig = (): TypeInput => {
           functions: originalImplementation => {
             return {
               ...originalImplementation,
-              createNewSession: async function (input) {
+              async createNewSession(input) {
                 const user = await ThirdPartyEmailPasswordNode.getUserById(input.userId);
 
                 if (!user) {
@@ -468,7 +468,7 @@ async function trySignIntoAuth0WithUserCredentialsAndRetrieveUserInfo(
       client_secret: config.clientSecret,
       grant_type: 'password',
       username: email,
-      password: password,
+      password,
     }),
   });
 

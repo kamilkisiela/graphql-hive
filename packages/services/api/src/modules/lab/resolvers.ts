@@ -17,8 +17,8 @@ export const resolvers: LabModule.Resolvers = {
       ]);
 
       await injector.get(AuthManager).ensureTargetAccess({
-        organization: organization,
-        project: project,
+        organization,
+        project,
         target,
         scope: TargetAccessScope.REGISTRY_READ,
       });

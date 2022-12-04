@@ -378,17 +378,15 @@ const ClientsStats: React.FC<{
         if (i < 4) {
           counts.push(client.count);
           labels.push(client.name);
+        } else if (!labels[4]) {
+          counts.push(client.count);
+          labels.push(
+            sortedClients.length === 5
+              ? client.name
+              : `Other clients (${sortedClients.length - 4})`,
+          );
         } else {
-          if (!labels[4]) {
-            counts.push(client.count);
-            labels.push(
-              sortedClients.length === 5
-                ? client.name
-                : `Other clients (${sortedClients.length - 4})`,
-            );
-          } else {
-            counts[4] += client.percentage;
-          }
+          counts[4] += client.percentage;
         }
       }
 
@@ -429,15 +427,13 @@ const ClientsStats: React.FC<{
         if (i < 4) {
           counts.push(version.count);
           labels.push(version.name);
+        } else if (!labels[4]) {
+          counts.push(version.count);
+          labels.push(
+            versions.length === 5 ? version.name : `Other versions (${versions.length - 4})`,
+          );
         } else {
-          if (!labels[4]) {
-            counts.push(version.count);
-            labels.push(
-              versions.length === 5 ? version.name : `Other versions (${versions.length - 4})`,
-            );
-          } else {
-            counts[4] += version.count;
-          }
+          counts[4] += version.count;
         }
       }
 

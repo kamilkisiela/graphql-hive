@@ -25,7 +25,7 @@ export async function ensureGithubIntegration(
     variables: {
       input: {
         organization: orgId,
-        installationId: installationId,
+        installationId,
       },
     },
   });

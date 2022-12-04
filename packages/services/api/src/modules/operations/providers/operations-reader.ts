@@ -250,7 +250,7 @@ export class OperationsReader {
             })}
             GROUP BY coordinate
           `,
-      queryId: queryId,
+      queryId,
       timeout: 30_000,
       span,
     });
@@ -1638,8 +1638,10 @@ export class OperationsReader {
     }
 
     if (period) {
-      where.push(`timestamp >= toDateTime('${formatDate(period.from)}', 'UTC')`);
-      where.push(`timestamp <= toDateTime('${formatDate(period.to)}', 'UTC')`);
+      where.push(
+        `timestamp >= toDateTime('${formatDate(period.from)}', 'UTC')`,
+        `timestamp <= toDateTime('${formatDate(period.to)}', 'UTC')`,
+      );
     }
 
     if (operations?.length) {

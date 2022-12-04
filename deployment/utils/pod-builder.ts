@@ -27,7 +27,7 @@ export class PodBuilder extends kx.PodBuilder {
       selector: { matchLabels: appLabels },
       replicas: _args.replicas ?? 1,
       template: {
-        metadata: { labels: appLabels, ...(metadata || {}) },
+        metadata: { labels: appLabels, ...metadata },
         spec: this.podSpec,
       },
     };

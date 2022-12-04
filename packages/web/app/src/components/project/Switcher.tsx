@@ -58,7 +58,7 @@ export const ProjectSwitcher: React.FC<{
             <MenuItem
               onClick={() => {
                 router.visitProject({
-                  organizationId: organizationId,
+                  organizationId,
                   projectId: item.cleanId,
                 });
               }}
