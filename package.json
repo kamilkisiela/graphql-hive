@@ -22,7 +22,7 @@
     "build": "pnpm graphql:generate && pnpm turbo build --color",
     "build:libraries": "pnpm graphql:generate && pnpm turbo build --filter=./packages/libraries/* --color",
     "build:local": "pnpm graphql:generate && pnpm turbo build-local --color",
-    "build:services": "pnpm graphql:generate && pnpm turbo build  --filter=./packages/services/* --color",
+    "build:services": "pnpm graphql:generate && pnpm turbo build  --filter=./packages/services/**/* --color",
     "build:web": "pnpm graphql:generate && pnpm turbo build --filter=./packages/web/* --color",
     "docker:build": "docker buildx bake -f docker.hcl --load build",
     "env:sync": "node ./scripts/sync-env-files.js",
