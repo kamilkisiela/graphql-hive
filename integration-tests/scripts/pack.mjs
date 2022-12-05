@@ -21,7 +21,7 @@ const cwd = path.resolve(__dirname, '../..');
 const tarballDir = path.resolve(cwd, 'integration-tests/tarballs');
 
 async function main() {
-  rimraf.sync(`${tarballDir}`, {});
+  rimraf.sync(String(tarballDir), {});
   fsExtra.mkdirSync(tarballDir, { recursive: true });
 
   function isBackendPackage(manifestPath) {

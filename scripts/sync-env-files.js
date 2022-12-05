@@ -8,7 +8,7 @@ import { join, dirname, relative } from 'path';
 import { parse } from 'dotenv';
 import glob from 'glob';
 
-if (!!process.env.CI) {
+if (Boolean(process.env.CI)) {
   console.log('[sync-env-files] CI Detected, skipping');
   process.exit(0);
 }

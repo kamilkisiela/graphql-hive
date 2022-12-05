@@ -50,8 +50,8 @@ function maskToken(token: string) {
 
 function generateToken() {
   const token = createHash('md5')
-    .update(Math.random() + '')
-    .update(Date.now() + '')
+    .update(String(Math.random()))
+    .update(String(Date.now()))
     .digest('hex');
 
   const hash = hashToken(token);

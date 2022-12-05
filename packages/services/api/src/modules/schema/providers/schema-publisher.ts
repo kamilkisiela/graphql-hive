@@ -344,7 +344,7 @@ export class SchemaPublisher {
       sdl: input.sdl.length,
       checksum: input.checksum,
       experimental_accept_breaking_changes: input.experimental_acceptBreakingChanges === true,
-      metadata: !!input.metadata,
+      metadata: Boolean(input.metadata),
     });
 
     await this.authManager.ensureTargetAccess({
@@ -494,15 +494,14 @@ export class SchemaPublisher {
     const { changes, errors, valid } = result;
 
     const hasNewUrl =
-      !!latest.version &&
-      !!previousSchema &&
+      Boolean(latest.version && previousSchema) &&
       (previousSchema.url ?? null) !== (incomingSchema.url ?? null);
     const hasSchemaChanges = changes.length > 0;
     const hasErrors = errors.length > 0;
     const isForced = input.force === true;
     let hasDifferentChecksum = false;
 
-    if (!!latest.version && !!previousSchema) {
+    if (Boolean(latest.version) && Boolean(previousSchema)) {
       const before = this.helper
         .sortSchemas(schemas)
         .map(s => this.helper.createChecksum(this.helper.createSchemaObject(s)))

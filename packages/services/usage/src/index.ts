@@ -26,7 +26,7 @@ async function main() {
   if (env.sentry) {
     Sentry.init({
       serverName: 'usage',
-      enabled: !!env.sentry,
+      enabled: Boolean(env.sentry),
       environment: env.environment,
       dsn: env.sentry.dsn,
       release: env.release,

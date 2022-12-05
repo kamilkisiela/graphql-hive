@@ -97,7 +97,7 @@ export const CreateAlertModal = ({
             ]}
             value={values.type}
             onChange={handleChange}
-            isInvalid={!!touched.type && Boolean(errors.type)}
+            isInvalid={Boolean(touched.type && errors.type)}
           />
           {touched.type && errors.type && <div className="text-sm text-red-500">{errors.type}</div>}
         </div>
@@ -115,7 +115,7 @@ export const CreateAlertModal = ({
             }))}
             value={values.channel}
             onChange={handleChange}
-            isInvalid={!!touched.channel && Boolean(errors.channel)}
+            isInvalid={Boolean(touched.channel && errors.channel)}
           />
           {touched.channel && errors.channel && (
             <div className="text-sm text-red-500">{errors.channel}</div>
@@ -135,7 +135,7 @@ export const CreateAlertModal = ({
             }))}
             value={values.target}
             onChange={handleChange}
-            isInvalid={!!touched.target && Boolean(errors.target)}
+            isInvalid={Boolean(touched.target && errors.target)}
           />
           {touched.target && errors.target && (
             <div className="text-sm text-red-500">{errors.target}</div>

@@ -128,11 +128,11 @@ export const getServerSideProps = withSessionProtection(async context => {
    */
   const isStripeEnabled = getIsStripeEnabled();
   if (isStripeEnabled === false) {
-    const parts = `${context.resolvedUrl}`.split('/');
+    const parts = String(context.resolvedUrl).split('/');
     parts.pop();
     return {
       redirect: {
-        destination: `${parts.join('/')}`,
+        destination: parts.join('/'),
         permanent: false,
       },
     };

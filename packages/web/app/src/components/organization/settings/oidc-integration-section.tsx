@@ -95,7 +95,7 @@ export const OIDCIntegrationSection = (props: {
       <CreateOIDCIntegrationModal
         isOpen={isCreateOIDCIntegrationModalOpen}
         close={closeModal}
-        hasOIDCIntegration={!!props.organization.oidcIntegration}
+        hasOIDCIntegration={Boolean(props.organization.oidcIntegration)}
         organizationId={props.organization.id}
         openEditModalLink={openEditModalLink}
         transitionToManageScreen={() => {
@@ -236,7 +236,7 @@ const CreateOIDCIntegrationForm = (props: {
         prefix={<label className="text-sm font-semibold">API Url</label>}
         onChange={formik.handleChange}
         value={formik.values.oauthApiUrl}
-        isInvalid={!!mutation.data?.createOIDCIntegration.error?.details.oauthApiUrl}
+        isInvalid={Boolean(mutation.data?.createOIDCIntegration.error?.details.oauthApiUrl)}
       />
       <div>{mutation.data?.createOIDCIntegration.error?.details.oauthApiUrl}</div>
 
@@ -247,7 +247,7 @@ const CreateOIDCIntegrationForm = (props: {
         prefix={<label className="text-sm font-semibold">Client ID</label>}
         onChange={formik.handleChange}
         value={formik.values.clientId}
-        isInvalid={!!mutation.data?.createOIDCIntegration.error?.details.clientId}
+        isInvalid={Boolean(mutation.data?.createOIDCIntegration.error?.details.clientId)}
       />
       <div>{mutation.data?.createOIDCIntegration.error?.details.clientId}</div>
 
@@ -258,7 +258,7 @@ const CreateOIDCIntegrationForm = (props: {
         prefix={<label className="text-sm font-semibold">Client Secret</label>}
         onChange={formik.handleChange}
         value={formik.values.clientSecret}
-        isInvalid={!!mutation.data?.createOIDCIntegration.error?.details.clientSecret}
+        isInvalid={Boolean(mutation.data?.createOIDCIntegration.error?.details.clientSecret)}
       />
       <div>{mutation.data?.createOIDCIntegration.error?.details.clientSecret}</div>
 
@@ -416,7 +416,7 @@ const UpdateOIDCIntegrationForm = (props: {
               prefix={<label className="text-sm font-semibold">API Url</label>}
               onChange={formik.handleChange}
               value={formik.values.oauthApiUrl}
-              isInvalid={!!mutation.data?.updateOIDCIntegration.error?.details.oauthApiUrl}
+              isInvalid={Boolean(mutation.data?.updateOIDCIntegration.error?.details.oauthApiUrl)}
             />
             <div>{mutation.data?.updateOIDCIntegration.error?.details.oauthApiUrl}</div>
 
@@ -427,7 +427,7 @@ const UpdateOIDCIntegrationForm = (props: {
               prefix={<label className="text-sm font-semibold">Client ID</label>}
               onChange={formik.handleChange}
               value={formik.values.clientId}
-              isInvalid={!!mutation.data?.updateOIDCIntegration.error?.details.clientId}
+              isInvalid={Boolean(mutation.data?.updateOIDCIntegration.error?.details.clientId)}
             />
             <div>{mutation.data?.updateOIDCIntegration.error?.details.clientId}</div>
 
@@ -444,7 +444,7 @@ const UpdateOIDCIntegrationForm = (props: {
               prefix={<label className="text-sm font-semibold">Client Secret</label>}
               onChange={formik.handleChange}
               value={formik.values.clientSecret}
-              isInvalid={!!mutation.data?.updateOIDCIntegration.error?.details.clientSecret}
+              isInvalid={Boolean(mutation.data?.updateOIDCIntegration.error?.details.clientSecret)}
             />
             <div>{mutation.data?.updateOIDCIntegration.error?.details.clientSecret}</div>
           </div>

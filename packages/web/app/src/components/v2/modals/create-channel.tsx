@@ -117,7 +117,7 @@ export const CreateChannelModal = ({
             value={values.type}
             onChange={handleChange}
             onBlur={handleBlur}
-            isInvalid={!!touched.type && Boolean(errors.type)}
+            isInvalid={Boolean(touched.type && errors.type)}
             placeholder="Select channel type"
             options={[
               { value: AlertChannelType.Slack, name: 'Slack' },

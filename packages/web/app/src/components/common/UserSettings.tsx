@@ -74,7 +74,7 @@ export const UserSettings: React.FC<{
 
   const isValid = React.useCallback(
     (name: keyof typeof formik.errors) => {
-      return formik.touched[name] && !!formik.errors[name];
+      return formik.touched[name] && Boolean(formik.errors[name]);
     },
     [formik],
   );

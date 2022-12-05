@@ -188,7 +188,7 @@ export const ExternalCompositionSettings = ({
   );
 
   const externalCompositionConfig = projectQuery.data?.project?.externalSchemaComposition;
-  const initialEnabled = !!externalCompositionConfig;
+  const initialEnabled = Boolean(externalCompositionConfig);
   const isEnabled = typeof enabled === 'boolean' ? enabled : initialEnabled;
   const isLoading = projectQuery.fetching || mutation.fetching;
   const isFormVisible = isEnabled && !isLoading;
