@@ -12,8 +12,8 @@
     "reflect-metadata": "^0.1.0"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "3.218.0",
-    "@aws-sdk/s3-request-presigner": "3.218.0",
+    "@aws-sdk/client-s3": "3.224.0",
+    "@aws-sdk/s3-request-presigner": "3.224.0",
     "@graphql-inspector/core": "3.2.0",
     "@graphql-tools/load-files": "6.6.1",
     "@graphql-tools/schema": "9.0.9",
