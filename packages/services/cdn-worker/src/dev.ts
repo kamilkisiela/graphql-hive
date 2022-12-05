@@ -50,8 +50,8 @@ const artifactStorageReader = new ArtifactStorageReader(s3Client, S3_BUCKET_NAME
 
 const handleArtifactRequest = createArtifactRequestHandler({
   isKeyValid: createIsKeyValid({ keyData: KEY_DATA }),
-  async getArtifactUrl(targetId, artifactType) {
-    return artifactStorageReader.generateArtifactReadUrl(targetId, artifactType);
+  async getArtifactAction(targetId, artifactType, eTag) {
+    return artifactStorageReader.generateArtifactReadUrl(targetId, artifactType, eTag);
   },
 });
 
