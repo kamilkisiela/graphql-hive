@@ -26,6 +26,9 @@ import type {
   RateLimitInput,
   InviteToOrganizationByEmailInput,
   EnableExternalSchemaCompositionInput,
+  OrganizationTransferRequestSelector,
+  RequestOrganizationTransferInput,
+  AnswerOrganizationTransferRequestInput,
 } from './gql/graphql';
 import { execute } from './graphql';
 
@@ -181,6 +184,75 @@ export function joinOrganization(code: string, authToken: string) {
     authToken,
     variables: {
       code,
+    },
+  });
+}
+
+export function getOrganizationTransferRequest(
+  selector: OrganizationTransferRequestSelector,
+  authToken: string,
+) {
+  return execute({
+    document: gql(/* GraphQL */ `
+      query getOrganizationTransferRequest($selector: OrganizationTransferRequestSelector!) {
+        organizationTransferRequest(selector: $selector) {
+          organization {
+            id
+          }
+        }
+      }
+    `),
+    authToken,
+    variables: {
+      selector,
+    },
+  });
+}
+
+export function requestOrganizationTransfer(
+  input: RequestOrganizationTransferInput,
+  authToken: string,
+) {
+  return execute({
+    document: gql(/* GraphQL */ `
+      mutation requestOrganizationTransfer($input: RequestOrganizationTransferInput!) {
+        requestOrganizationTransfer(input: $input) {
+          ok {
+            email
+          }
+          error {
+            message
+          }
+        }
+      }
+    `),
+    authToken,
+    variables: {
+      input,
+    },
+  });
+}
+
+export function answerOrganizationTransferRequest(
+  input: AnswerOrganizationTransferRequestInput,
+  authToken: string,
+) {
+  return execute({
+    document: gql(/* GraphQL */ `
+      mutation answerOrganizationTransferRequest($input: AnswerOrganizationTransferRequestInput!) {
+        answerOrganizationTransferRequest(input: $input) {
+          ok {
+            answer
+          }
+          error {
+            message
+          }
+        }
+      }
+    `),
+    authToken,
+    variables: {
+      input,
     },
   });
 }
