@@ -501,7 +501,7 @@ export class SchemaPublisher {
     const isForced = input.force === true;
     let hasDifferentChecksum = false;
 
-    if (Boolean(latest.version) && Boolean(previousSchema)) {
+    if (latest.version && previousSchema) {
       const before = this.helper
         .sortSchemas(schemas)
         .map(s => this.helper.createChecksum(this.helper.createSchemaObject(s)))
