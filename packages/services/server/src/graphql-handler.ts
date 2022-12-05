@@ -69,7 +69,7 @@ const NoIntrospection: ValidationRule = (context: ValidationContext) => ({
 function hasFastifyRequest(ctx: unknown): ctx is {
   req: FastifyRequest;
 } {
-  return Boolean(ctx) && typeof ctx === 'object' && 'req' in ctx;
+  return Boolean(ctx) && typeof ctx === 'object' && 'req' in ctx!;
 }
 
 function useNoIntrospection(params: {

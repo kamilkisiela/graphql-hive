@@ -495,7 +495,7 @@ export class SchemaPublisher {
 
     const hasNewUrl =
       Boolean(latest.version && previousSchema) &&
-      (previousSchema.url ?? null) !== (incomingSchema.url ?? null);
+      (previousSchema!.url ?? null) !== (incomingSchema.url ?? null);
     const hasSchemaChanges = changes.length > 0;
     const hasErrors = errors.length > 0;
     const isForced = input.force === true;
