@@ -4,7 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "build": "bob runify --single",
+    "build": "next build && next-sitemap --config next-sitemap.config.cjs",
     "dev": "next"
   },
   "dependencies": {
@@ -20,12 +20,7 @@
   "devDependencies": {
     "@theguild/tailwind-config": "0.2.1",
     "@types/react": "18.0.25",
+    "next-sitemap": "3.1.32",
     "tailwindcss": "3.2.3"
-  },
-  "buildOptions": {
-    "runify": true,
-    "tags": [
-      "frontend"
-    ]
   }
 }
