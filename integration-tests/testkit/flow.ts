@@ -188,6 +188,34 @@ export function joinOrganization(code: string, authToken: string) {
   });
 }
 
+export function getOrganizationMembers(selector: OrganizationSelectorInput, authToken: string) {
+  return execute({
+    document: gql(/* GraphQL */ `
+      query getOrganizationMembers($selector: OrganizationSelectorInput!) {
+        organization(selector: $selector) {
+          organization {
+            members {
+              nodes {
+                id
+                user {
+                  email
+                }
+                organizationAccessScopes
+                projectAccessScopes
+                targetAccessScopes
+              }
+            }
+          }
+        }
+      }
+    `),
+    authToken,
+    variables: {
+      selector,
+    },
+  });
+}
+
 export function getOrganizationTransferRequest(
   selector: OrganizationTransferRequestSelector,
   authToken: string,
@@ -219,6 +247,7 @@ export function requestOrganizationTransfer(
         requestOrganizationTransfer(input: $input) {
           ok {
             email
+            code
           }
           error {
             message

@@ -110,12 +110,14 @@ const createSession = async (
   };
 };
 
-type UserID = 'main' | 'extra' | 'admin' | string;
+type UserID = 'main' | 'extra' | 'admin' | 'foo' | string;
 const password = 'ilikebigturtlesandicannotlie47';
 
 export const userEmails: Record<UserID, string> = {
   main: 'main@localhost.localhost',
   extra: 'extra@localhost.localhost',
+  lonely: 'lonely@localhost.localhost',
+  foo: 'foo@localhost.localhost',
   admin: 'admin@localhost.localhost',
 };
 
@@ -126,6 +128,8 @@ const tokenResponsePromise: Record<
   main: null,
   extra: null,
   admin: null,
+  foo: null,
+  lonely: null,
 };
 
 export function authenticate(

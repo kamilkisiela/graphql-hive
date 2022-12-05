@@ -94,6 +94,7 @@ export default gql`
 
   type RequestOrganizationTransferOk {
     email: String!
+    code: String!
   }
 
   type RequestOrganizationTransferError implements Error {

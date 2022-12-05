@@ -473,7 +473,11 @@ export class OrganizationManager {
     const currentUser = await this.authManager.getCurrentUser();
 
     if (currentUser.id === selector.user) {
-      throw new HiveError('Cannot transfer ownership to yourself');
+      return {
+        error: {
+          message: 'Cannot transfer ownership to yourself',
+        },
+      };
     }
 
     await this.authManager.ensureOrganizationOwnership({
@@ -493,7 +497,11 @@ export class OrganizationManager {
     const organization = await this.getOrganization(selector);
 
     if (organization.type === OrganizationType.PERSONAL) {
-      throw new HiveError(`Personal organizations cannot be transferred`);
+      return {
+        error: {
+          message: `Personal organizations cannot be transferred`,
+        },
+      };
     }
 
     const { code } = await this.storage.createOrganizationTransferRequest({
@@ -530,6 +538,7 @@ export class OrganizationManager {
     return {
       ok: {
         email: member.user.email,
+        code,
       },
     };
   }
