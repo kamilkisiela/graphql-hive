@@ -60,6 +60,13 @@ const handleArtifactRequest = createArtifactRequestHandler({
 
 const router = itty
   .Router()
+  .get(
+    '/_health',
+    () =>
+      new Response('OK', {
+        status: 200,
+      }),
+  )
   .get('*', handleArtifactRequest)
   // Legacy CDN Handlers
   .get('*', handleRequest);
