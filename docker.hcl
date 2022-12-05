@@ -260,6 +260,23 @@ target "webhooks" {
   ]
 }
 
+target "composition-federation-2" {
+  inherits = ["service-base", get_target()]
+  context = "${PWD}/packages/services/external-composition/federation-2/dist"
+  args = {
+    IMAGE_TITLE = "graphql-hive/composition-federation-2"
+    IMAGE_DESCRIPTION = "Federation 2 Composition Service for GraphQL Hive."
+    PORT = "3069"
+    HEALTHCHECK_CMD = "wget --spider -q http://127.0.0.1:$${PORT}/_readiness"
+  }
+  tags = [
+    local_image_tag("composition-federation-2"),
+    stable_image_tag("composition-federation-2"),
+    image_tag("composition-federation-2", COMMIT_SHA),
+    image_tag("composition-federation-2", BRANCH_NAME)
+  ]
+}
+
 target "app" {
   inherits = ["app-base", get_target()]
   context = "${PWD}/packages/web/app/dist"
@@ -291,6 +308,7 @@ group "build" {
     "webhooks",
     "server",
     "stripe-billing",
+    "composition-federation-2",
     "app"
   ]
 }
