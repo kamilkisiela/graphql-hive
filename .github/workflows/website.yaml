@@ -43,5 +43,5 @@ jobs:
           prId: ${{ github.event.pull_request.number }}
           mainBranch: main
           websiteDirectory: ./
-          buildScript: pnpm build && pnpm next export
-          artifactDir: packages/web/landing-page/next.config.js
+          buildScript: cd packages/web/landing-page && pnpm build && pnpm next export
+          artifactDir: packages/web/landing-page/out
