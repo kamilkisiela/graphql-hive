@@ -1,9 +1,11 @@
 import type { KeyValidator } from './key-validation';
-import { Response, type Request } from '@whatwg-node/fetch';
+import { type Request, createFetch } from '@whatwg-node/fetch';
 import itty from 'itty-router';
 import zod from 'zod';
 import { InvalidAuthKeyResponse, MissingAuthKeyResponse } from './errors';
 import type { ArtifactsType } from '@hive/api/src/modules/schema/providers/artifact-storage-reader';
+
+const { Response } = createFetch({ useNodeFetch: true });
 
 type ArtifactRequestHandler = {
   getArtifactAction: (
