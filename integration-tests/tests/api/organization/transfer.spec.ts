@@ -8,6 +8,11 @@ import {
   answerOrganizationTransferRequest,
 } from '../../../testkit/flow';
 import { authenticate, userEmails } from '../../../testkit/auth';
+import {
+  OrganizationAccessScope,
+  ProjectAccessScope,
+  TargetAccessScope,
+} from '../../../testkit/gql/graphql';
 
 async function prepareOrganization() {
   const accessTokens = {
@@ -343,6 +348,123 @@ test('non-member should not be able to answer the ownership transfer', async () 
   expect(answerResult.body.data?.answerOrganizationTransferRequest.error?.message).toBeDefined();
 });
 
-test.todo('previous owner should keep the ownership until the new owner accepts the transfer');
-test.todo('previous owner should lose only "delete" rights');
-test.todo('new owner should have all the rights');
+test('previous owner should keep the ownership until the new owner accepts the transfer', async () => {
+  const { organization, accessTokens, member, owner } = await prepareOrganization();
+
+  const requestTransferResult = await requestOrganizationTransfer(
+    {
+      organization: organization.cleanId,
+      user: member.id,
+    },
+    accessTokens.owner,
+  );
+
+  const code = requestTransferResult.body.data?.requestOrganizationTransfer.ok?.code;
+
+  if (!code) {
+    throw new Error('Could not create transfer request');
+  }
+
+  const membersResult = await getOrganizationMembers(
+    {
+      organization: organization.cleanId,
+    },
+    accessTokens.owner,
+  );
+
+  const members = membersResult.body.data?.organization?.organization.members.nodes;
+
+  if (!members) {
+    throw new Error('Could not get members');
+  }
+
+  // current owner
+  expect(members.find(m => m.id === owner.id)).toEqual(
+    expect.objectContaining({
+      organizationAccessScopes: owner.organizationAccessScopes,
+      projectAccessScopes: owner.projectAccessScopes,
+      targetAccessScopes: owner.targetAccessScopes,
+    }),
+  );
+
+  // potential new owner
+  expect(members.find(m => m.id === member.id)).toEqual(
+    expect.objectContaining({
+      organizationAccessScopes: member.organizationAccessScopes,
+      projectAccessScopes: member.projectAccessScopes,
+      targetAccessScopes: member.targetAccessScopes,
+    }),
+  );
+});
+
+test('previous owner should lose only "delete" rights, new owner should get all access', async () => {
+  const { organization, accessTokens, member, owner, lonelyMember } = await prepareOrganization();
+
+  const requestTransferResult = await requestOrganizationTransfer(
+    {
+      organization: organization.cleanId,
+      user: member.id,
+    },
+    accessTokens.owner,
+  );
+
+  const code = requestTransferResult.body.data?.requestOrganizationTransfer.ok?.code;
+
+  if (!code) {
+    throw new Error('Could not create transfer request');
+  }
+
+  const membersResult = await getOrganizationMembers(
+    {
+      organization: organization.cleanId,
+    },
+    accessTokens.owner,
+  );
+
+  const answerResult = await answerOrganizationTransferRequest(
+    {
+      organization: organization.cleanId,
+      code,
+      accept: true,
+    },
+    accessTokens.member,
+  );
+
+  expect(answerResult.body.errors).not.toBeDefined();
+  expect(answerResult.body.data?.answerOrganizationTransferRequest.ok?.accepted).toBe(true);
+
+  const members = membersResult.body.data?.organization?.organization.members.nodes;
+
+  if (!members) {
+    throw new Error('Could not get members');
+  }
+
+  // previous owner should lose only "delete" rights
+  expect(members.find(m => m.id === owner.id)).toEqual(
+    expect.objectContaining({
+      organizationAccessScopes: owner.organizationAccessScopes.filter(
+        s => s !== OrganizationAccessScope.Delete,
+      ),
+      projectAccessScopes: owner.projectAccessScopes.filter(s => s !== ProjectAccessScope.Delete),
+      targetAccessScopes: owner.targetAccessScopes.filter(s => s !== TargetAccessScope.Delete),
+    }),
+  );
+
+  // new owner should get all access
+  expect(members.find(m => m.id === member.id)).toEqual(
+    expect.objectContaining({
+      organizationAccessScopes: owner.organizationAccessScopes,
+      projectAccessScopes: owner.projectAccessScopes,
+      targetAccessScopes: owner.targetAccessScopes,
+    }),
+  );
+
+  // other members should not be affected
+  expect(members.find(m => m.id === lonelyMember.id)).toEqual(
+    expect.objectContaining({
+      organizationAccessScopes: lonelyMember.organizationAccessScopes,
+      projectAccessScopes: lonelyMember.projectAccessScopes,
+      targetAccessScopes: lonelyMember.targetAccessScopes,
+    }),
+  );
+});
