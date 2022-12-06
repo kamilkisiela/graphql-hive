@@ -1,4 +1,4 @@
-import { Injectable, Scope } from 'graphql-modules';
+import { Injectable, Inject, Scope } from 'graphql-modules';
 import { paramCase } from 'param-case';
 import { createHash } from 'crypto';
 import { Organization, OrganizationType, OrganizationInvitation } from '../../../shared/entities';
@@ -6,6 +6,7 @@ import { HiveError } from '../../../shared/errors';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { Logger } from '../../shared/providers/logger';
 import { Storage } from '../../shared/providers/storage';
+import { WEB_APP_URL } from '../../shared/providers/tokens';
 import type { OrganizationSelector } from '../../shared/providers/storage';
 import { share, cache, uuid, diffArrays, pushIfMissing } from '../../../shared/helpers';
 import { ActivityManager } from '../../activity/providers/activity-manager';
@@ -36,6 +37,7 @@ export class OrganizationManager {
     private activityManager: ActivityManager,
     private billingProvider: BillingProvider,
     private emails: Emails,
+    @Inject(WEB_APP_URL) private appBaseUrl: string,
   ) {
     this.logger = logger.child({ source: 'OrganizationManager' });
   }
@@ -386,7 +388,7 @@ export class OrganizationManager {
                   <mj-text>
                     Someone from <strong>${organization.name}</strong> invited you to join GraphQL Hive.
                   </mj-text>.
-                  <mj-button href="https://app.graphql-hive.com/join/${invitation.code}">
+                  <mj-button href="${this.appBaseUrl}/join/${invitation.code}">
                     Accept the invitation
                   </mj-button>
                 </mj-column>

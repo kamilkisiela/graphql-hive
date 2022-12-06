@@ -24,6 +24,7 @@ const EnvironmentModel = zod.object({
   USAGE_ESTIMATOR_ENDPOINT: zod.string().url(),
   EMAILS_ENDPOINT: emptyString(zod.string().url().optional()),
   LIMIT_CACHE_UPDATE_INTERVAL_MS: emptyString(NumberFromString.optional()),
+  WEB_APP_URL: emptyString(zod.string().url().optional()),
 });
 
 const SentryModel = zod.union([
@@ -112,6 +113,7 @@ export const env = {
   hiveServices: {
     usageEstimator: { endpoint: base.USAGE_ESTIMATOR_ENDPOINT },
     emails: base.EMAILS_ENDPOINT ? { endpoint: base.EMAILS_ENDPOINT } : null,
+    webAppUrl: base.WEB_APP_URL ?? 'http://localhost:3000',
   },
   limitCacheUpdateIntervalMs: base.LIMIT_CACHE_UPDATE_INTERVAL_MS ?? 60_000,
   http: {

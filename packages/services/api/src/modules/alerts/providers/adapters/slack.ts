@@ -1,4 +1,4 @@
-import { Injectable } from 'graphql-modules';
+import { Inject, Injectable } from 'graphql-modules';
 import { WebClient, MessageAttachment } from '@slack/web-api';
 import {
   CommunicationAdapter,
@@ -9,12 +9,13 @@ import {
 } from './common';
 import type * as Types from '../../../../__generated__/types';
 import { Logger } from '../../../shared/providers/logger';
+import { WEB_APP_URL } from '../../../shared/providers/tokens';
 
 @Injectable()
 export class SlackCommunicationAdapter implements CommunicationAdapter {
   private logger: Logger;
 
-  constructor(logger: Logger) {
+  constructor(logger: Logger, @Inject(WEB_APP_URL) private appBaseUrl: string) {
     this.logger = logger.child({ service: 'SlackCommunicationAdapter' });
   }
 
@@ -41,15 +42,15 @@ export class SlackCommunicationAdapter implements CommunicationAdapter {
       const totalChanges = input.event.changes.length;
       const projectLink = this.createLink({
         text: input.event.project.name,
-        url: `https://app.graphql-hive.com/${input.event.organization.cleanId}/${input.event.project.cleanId}`,
+        url: `${this.appBaseUrl}/${input.event.organization.cleanId}/${input.event.project.cleanId}`,
       });
       const targetLink = this.createLink({
         text: input.event.target.name,
-        url: `https://app.graphql-hive.com/${input.event.organization.cleanId}/${input.event.project.cleanId}/${input.event.target.cleanId}`,
+        url: `${this.appBaseUrl}/${input.event.organization.cleanId}/${input.event.project.cleanId}/${input.event.target.cleanId}`,
       });
       const viewLink = this.createLink({
         text: 'view details',
-        url: `http://app.graphql-hive.com/${input.event.organization.cleanId}/${input.event.project.cleanId}/${input.event.target.cleanId}/history/${input.event.schema.id}`,
+        url: `${this.appBaseUrl}/${input.event.organization.cleanId}/${input.event.project.cleanId}/${input.event.target.cleanId}/history/${input.event.schema.id}`,
       });
 
       if (input.event.initial) {
@@ -100,7 +101,7 @@ export class SlackCommunicationAdapter implements CommunicationAdapter {
     try {
       const projectLink = this.createLink({
         text: input.event.project.name,
-        url: `https://app.graphql-hive.com/${input.event.organization.cleanId}/${input.event.project.cleanId}`,
+        url: `${this.appBaseUrl}/${input.event.organization.cleanId}/${input.event.project.cleanId}`,
       });
 
       const client = new WebClient(token);

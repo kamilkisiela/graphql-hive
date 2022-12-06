@@ -21,3 +21,4 @@ you don't need this service.
 | `SENTRY_DSN`                        | No                                                 | The DSN for reporting errors to Sentry.                                               | `https://dooobars@o557896.ingest.sentry.io/12121212` |
 | `PROMETHEUS_METRICS`                | No                                                 | Whether Prometheus metrics should be enabled                                          | `1` (enabled) or `0` (disabled)                      |
 | `PROMETHEUS_METRICS_LABEL_INSTANCE` | No                                                 | The instance label added for the prometheus metrics.                                  | `rate-limit`                                         |
+| `WEB_APP_URL`                       | No                                                 | The base url of the web app                                                           | `https://your-instance.com`                          |
