@@ -75,7 +75,7 @@
     "react-string-replace": "0.4.4",
     "react-virtualized-auto-sizer": "1.0.7",
     "react-window": "1.8.8",
-    "regenerator-runtime": "0.13.10",
+    "regenerator-runtime": "0.13.11",
     "snarkdown": "2.0.0",
     "supertokens-auth-react": "0.27.3",
     "supertokens-js-override": "0.0.4",
