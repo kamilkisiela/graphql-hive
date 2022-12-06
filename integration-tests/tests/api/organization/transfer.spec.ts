@@ -5,6 +5,7 @@ import {
   inviteToOrganization,
   joinOrganization,
   requestOrganizationTransfer,
+  answerOrganizationTransferRequest,
 } from '../../../testkit/flow';
 import { authenticate, userEmails } from '../../../testkit/auth';
 
@@ -222,9 +223,125 @@ test('recipient should be able to access the transfer request', async () => {
   expect(requestResult.body.data?.organizationTransferRequest).not.toBeNull();
 });
 
-test.todo('recipient should be able to answer the ownership transfer');
-test.todo('non-member should not be able to answer the ownership transfer');
-test.todo('owner should not be able to answer the ownership transfer');
+test('recipient should be able to answer the ownership transfer', async () => {
+  const { organization, accessTokens, member } = await prepareOrganization();
+
+  const requestTransferResult = await requestOrganizationTransfer(
+    {
+      organization: organization.cleanId,
+      user: member.id,
+    },
+    accessTokens.owner,
+  );
+
+  const code = requestTransferResult.body.data?.requestOrganizationTransfer.ok?.code;
+
+  if (!code) {
+    throw new Error('Could not create transfer request');
+  }
+
+  const answerResult = await answerOrganizationTransferRequest(
+    {
+      organization: organization.cleanId,
+      code,
+      accept: true,
+    },
+    accessTokens.member,
+  );
+
+  expect(answerResult.body.errors).not.toBeDefined();
+  expect(answerResult.body.data?.answerOrganizationTransferRequest.ok?.accepted).toBe(true);
+});
+
+test('non-member should not be able to answer the ownership transfer', async () => {
+  const { organization, accessTokens, member } = await prepareOrganization();
+
+  const requestTransferResult = await requestOrganizationTransfer(
+    {
+      organization: organization.cleanId,
+      user: member.id,
+    },
+    accessTokens.owner,
+  );
+
+  const code = requestTransferResult.body.data?.requestOrganizationTransfer.ok?.code;
+
+  if (!code) {
+    throw new Error('Could not create transfer request');
+  }
+
+  const answerResult = await answerOrganizationTransferRequest(
+    {
+      organization: organization.cleanId,
+      code,
+      accept: true,
+    },
+    accessTokens.lonelyMember,
+  );
+
+  expect(answerResult.body.errors).not.toBeDefined();
+  expect(answerResult.body.data?.answerOrganizationTransferRequest.error?.message).toBeDefined();
+});
+
+test('owner should not be able to answer the ownership transfer', async () => {
+  const { organization, accessTokens, member } = await prepareOrganization();
+
+  const requestTransferResult = await requestOrganizationTransfer(
+    {
+      organization: organization.cleanId,
+      user: member.id,
+    },
+    accessTokens.owner,
+  );
+
+  const code = requestTransferResult.body.data?.requestOrganizationTransfer.ok?.code;
+
+  if (!code) {
+    throw new Error('Could not create transfer request');
+  }
+
+  const answerResult = await answerOrganizationTransferRequest(
+    {
+      organization: organization.cleanId,
+      code,
+      accept: true,
+    },
+    accessTokens.owner,
+  );
+
+  expect(answerResult.body.errors).not.toBeDefined();
+  expect(answerResult.body.data?.answerOrganizationTransferRequest.error?.message).toBeDefined();
+});
+
+test('non-member should not be able to answer the ownership transfer', async () => {
+  const { organization, accessTokens, member } = await prepareOrganization();
+
+  const requestTransferResult = await requestOrganizationTransfer(
+    {
+      organization: organization.cleanId,
+      user: member.id,
+    },
+    accessTokens.owner,
+  );
+
+  const code = requestTransferResult.body.data?.requestOrganizationTransfer.ok?.code;
+
+  if (!code) {
+    throw new Error('Could not create transfer request');
+  }
+
+  const answerResult = await answerOrganizationTransferRequest(
+    {
+      organization: organization.cleanId,
+      code,
+      accept: true,
+    },
+    accessTokens.nonMember,
+  );
+
+  expect(answerResult.body.errors).not.toBeDefined();
+  expect(answerResult.body.data?.answerOrganizationTransferRequest.error?.message).toBeDefined();
+});
 
 test.todo('previous owner should keep the ownership until the new owner accepts the transfer');
 test.todo('previous owner should lose only "delete" rights');

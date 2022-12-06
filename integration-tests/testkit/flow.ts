@@ -271,7 +271,7 @@ export function answerOrganizationTransferRequest(
       mutation answerOrganizationTransferRequest($input: AnswerOrganizationTransferRequestInput!) {
         answerOrganizationTransferRequest(input: $input) {
           ok {
-            answer
+            accepted
           }
           error {
             message

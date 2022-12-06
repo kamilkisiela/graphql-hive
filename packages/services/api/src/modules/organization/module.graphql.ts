@@ -64,7 +64,7 @@ export default gql`
 
   input AnswerOrganizationTransferRequestInput {
     organization: ID!
-    answer: Boolean!
+    accept: Boolean!
     code: String!
   }
 
@@ -77,7 +77,7 @@ export default gql`
   }
 
   type AnswerOrganizationTransferRequestOk {
-    answer: Boolean!
+    accepted: Boolean!
   }
 
   type AnswerOrganizationTransferRequestError implements Error {

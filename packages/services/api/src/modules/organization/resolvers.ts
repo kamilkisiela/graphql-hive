@@ -245,12 +245,12 @@ export const resolvers: OrganizationModule.Resolvers = {
         await injector.get(OrganizationManager).answerOwnershipTransferRequest({
           organization,
           code: input.code,
-          accept: input.answer,
+          accept: input.accept,
         });
 
         return {
           ok: {
-            answer: input.answer,
+            accepted: input.accept,
           },
         };
       } catch (error) {

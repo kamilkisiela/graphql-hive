@@ -41,7 +41,7 @@ const OrganizationTransferPage_AnswerRequest = gql(`
   mutation OrganizationTransferPage_AnswerRequest($input: AnswerOrganizationTransferRequestInput!) {
     answerOrganizationTransferRequest(input: $input) {
       ok {
-        answer
+        accepted
       }
       error {
         message
@@ -71,7 +71,7 @@ function OrganizationTransferPage() {
         input: {
           code,
           organization: orgId,
-          answer: accept,
+          accept,
         },
       });
       if (result.data?.answerOrganizationTransferRequest) {
