@@ -110,16 +110,17 @@ const createSession = async (
   };
 };
 
-type UserID = 'main' | 'extra' | 'admin' | 'foo' | string;
 const password = 'ilikebigturtlesandicannotlie47';
 
-export const userEmails: Record<UserID, string> = {
+export const userEmails = {
   main: 'main@localhost.localhost',
   extra: 'extra@localhost.localhost',
   lonely: 'lonely@localhost.localhost',
   foo: 'foo@localhost.localhost',
   admin: 'admin@localhost.localhost',
 };
+
+type UserID = keyof typeof userEmails;
 
 const tokenResponsePromise: Record<
   UserID,
