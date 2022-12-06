@@ -414,13 +414,6 @@ test('previous owner should lose only "delete" rights, new owner should get all 
     throw new Error('Could not create transfer request');
   }
 
-  const membersResult = await getOrganizationMembers(
-    {
-      organization: organization.cleanId,
-    },
-    accessTokens.owner,
-  );
-
   const answerResult = await answerOrganizationTransferRequest(
     {
       organization: organization.cleanId,
@@ -432,6 +425,13 @@ test('previous owner should lose only "delete" rights, new owner should get all 
 
   expect(answerResult.body.errors).not.toBeDefined();
   expect(answerResult.body.data?.answerOrganizationTransferRequest.ok?.accepted).toBe(true);
+
+  const membersResult = await getOrganizationMembers(
+    {
+      organization: organization.cleanId,
+    },
+    accessTokens.owner,
+  );
 
   const members = membersResult.body.data?.organization?.organization.members.nodes;
 
