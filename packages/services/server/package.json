@@ -25,7 +25,7 @@
     "dotenv": "10.0.0",
     "got": "12.5.3",
     "graphql": "16.6.0",
-    "graphql-yoga": "3.1.0",
+    "graphql-yoga": "3.1.1",
     "hyperid": "2.3.1",
     "reflect-metadata": "0.1.13",
     "zod": "3.15.1"
