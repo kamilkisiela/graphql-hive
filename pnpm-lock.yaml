@@ -284,7 +284,7 @@ importers:
       apollo-server-plugin-base: 3.5.3
       async-retry: 1.3.3
       axios: ^0.27.0
-      graphql-yoga: 3.1.0
+      graphql-yoga: 3.1.1
       nock: 13.2.4
       tiny-lru: 8.0.2
     dependencies:
@@ -299,7 +299,7 @@ importers:
       '@types/async-retry': 1.4.5
       apollo-server-core: 3.11.1
       apollo-server-plugin-base: 3.5.3
-      graphql-yoga: 3.1.0
+      graphql-yoga: 3.1.1
       nock: 13.2.4
     publishDirectory: dist
 
@@ -362,7 +362,7 @@ importers:
       graphql-modules: 2.0.0
       graphql-parse-resolve-info: 4.12.3
       graphql-scalars: 1.12.0
-      graphql-yoga: 3.1.0
+      graphql-yoga: 3.1.1
       human-id: 2.0.1
       ioredis: 4.28.5
       ioredis-mock: 7.4.0
@@ -400,7 +400,7 @@ importers:
       graphql-modules: 2.0.0
       graphql-parse-resolve-info: 4.12.3
       graphql-scalars: 1.12.0
-      graphql-yoga: 3.1.0
+      graphql-yoga: 3.1.1
       human-id: 2.0.1
       ioredis: 4.28.5
       jsonwebtoken: 8.5.1
@@ -636,7 +636,7 @@ importers:
       fastify: 3.29.4
       got: 12.5.3
       graphql: 16.6.0
-      graphql-yoga: 3.1.0
+      graphql-yoga: 3.1.1
       hyperid: 2.3.1
       pino-pretty: 6.0.0
       reflect-metadata: 0.1.13
@@ -658,7 +658,7 @@ importers:
       dotenv: 10.0.0
       got: 12.5.3
       graphql: 16.6.0
-      graphql-yoga: 3.1.0_graphql@16.6.0
+      graphql-yoga: 3.1.1_graphql@16.6.0
       hyperid: 2.3.1
       reflect-metadata: 0.1.13
       zod: 3.15.1
@@ -17246,8 +17246,8 @@ packages:
     dependencies:
       graphql: 16.6.0
 
-  /graphql-yoga/3.1.0:
-    resolution: {integrity: sha512-rZpg1rvS8qUm5eqSS/0rDncjRmpD5ZUFediOLSuMY38rVAmlcVjpChdQ0aUVlPAgImBd/AOeVYNNRFBayjp6/Q==}
+  /graphql-yoga/3.1.1:
+    resolution: {integrity: sha512-XgqQM1IurPPsO0HU00evqhiHIta8oghJ/1bSkHOPbTZeGELqb0VV/j7ureGHz5S+vCvNHulzW+YuIfaaph00iQ==}
     peerDependencies:
       graphql: ^15.2.0 || ^16.0.0
     dependencies:
@@ -17256,7 +17256,7 @@ packages:
       '@envelop/validation-cache': 5.0.4_@envelop+core@3.0.4
       '@graphql-tools/executor': 0.0.9
       '@graphql-tools/schema': 9.0.9
-      '@graphql-tools/utils': 9.1.0
+      '@graphql-tools/utils': 9.1.1
       '@graphql-yoga/subscription': 3.0.0
       '@whatwg-node/fetch': 0.5.3
       '@whatwg-node/server': 0.4.17
@@ -17266,8 +17266,8 @@ packages:
       - '@types/node'
       - encoding
 
-  /graphql-yoga/3.1.0_graphql@16.6.0:
-    resolution: {integrity: sha512-rZpg1rvS8qUm5eqSS/0rDncjRmpD5ZUFediOLSuMY38rVAmlcVjpChdQ0aUVlPAgImBd/AOeVYNNRFBayjp6/Q==}
+  /graphql-yoga/3.1.1_graphql@16.6.0:
+    resolution: {integrity: sha512-XgqQM1IurPPsO0HU00evqhiHIta8oghJ/1bSkHOPbTZeGELqb0VV/j7ureGHz5S+vCvNHulzW+YuIfaaph00iQ==}
     peerDependencies:
       graphql: ^15.2.0 || ^16.0.0
     dependencies:
@@ -17276,7 +17276,7 @@ packages:
       '@envelop/validation-cache': 5.0.4_a6sekiasy2tqr6d5gj7n2wtjli
       '@graphql-tools/executor': 0.0.9_graphql@16.6.0
       '@graphql-tools/schema': 9.0.9_graphql@16.6.0
-      '@graphql-tools/utils': 9.1.0_graphql@16.6.0
+      '@graphql-tools/utils': 9.1.1_graphql@16.6.0
       '@graphql-yoga/subscription': 3.0.0
       '@whatwg-node/fetch': 0.5.3
       '@whatwg-node/server': 0.4.17
