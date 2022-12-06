@@ -225,7 +225,7 @@ export class SchemaPublisher {
         }
 
         await this.gitHubIntegrationManager.createCheckRun({
-          name: 'GraphQL Hive - schema:check',
+          name: buildGitHubActionCheckName(input.target, input.service ?? null),
           conclusion: validationResult.valid ? 'success' : 'failure',
           sha: input.github.commit,
           organization: input.organization,
@@ -1060,4 +1060,8 @@ function writeChanges(type: string, changes: readonly Types.SchemaChange[], line
   lines.push(
     ...['', `### ${type} changes`].concat(changes.map(change => ` - ${bolderize(change.message)}`)),
   );
+}
+
+function buildGitHubActionCheckName(target: string, service: string | null) {
+  return `GraphQL Hive > schema:check > ${target}` + (service ? ` > ${service}` : '');
 }
