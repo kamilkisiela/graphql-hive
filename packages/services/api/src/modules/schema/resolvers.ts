@@ -10,6 +10,7 @@ import {
   GraphQLNamedType,
   GraphQLError,
 } from 'graphql';
+import { AbortController } from '@whatwg-node/fetch';
 import type { SchemaModule } from './__generated__/types';
 import { SchemaManager } from './providers/schema-manager';
 import { SchemaPublisher } from './providers/schema-publisher';
@@ -91,7 +92,7 @@ export const resolvers: SchemaModule.Resolvers = {
         target,
       });
     },
-    async schemaPublish(_, { input }, { injector }, info) {
+    async schemaPublish(_, { input }, { injector, req }, info) {
       const [organization, project, target] = await Promise.all([
         injector.get(OrganizationManager).getOrganizationIdByToken(),
         injector.get(ProjectManager).getProjectIdByToken(),
@@ -110,14 +111,23 @@ export const resolvers: SchemaModule.Resolvers = {
       const isSchemaPublishMissingUrlErrorSelected =
         !!parsedResolveInfoFragment?.fieldsByTypeName['SchemaPublishMissingUrlError'];
 
-      return injector.get(SchemaPublisher).publish({
-        ...input,
-        checksum,
-        organization,
-        project,
-        target,
-        isSchemaPublishMissingUrlErrorSelected,
+      const abortController = new AbortController();
+
+      req.on('close', () => {
+        abortController.abort();
       });
+
+      return injector.get(SchemaPublisher).publish(
+        {
+          ...input,
+          checksum,
+          organization,
+          project,
+          target,
+          isSchemaPublishMissingUrlErrorSelected,
+        },
+        abortController.signal,
+      );
     },
     async updateSchemaVersionStatus(_, { input }, { injector }) {
       const translator = injector.get(IdTranslator);

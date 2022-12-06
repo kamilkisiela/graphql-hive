@@ -374,6 +374,7 @@ importers:
       p-retry: 5.1.1
       p-timeout: 5.0.2
       param-case: 3.0.4
+      redlock: v5.0.0-beta.2
       supertokens-node: 12.1.1
       tslib: 2.4.1
       uuid: 8.3.2
@@ -411,6 +412,7 @@ importers:
       p-retry: 5.1.1
       p-timeout: 5.0.2
       param-case: 3.0.4
+      redlock: 5.0.0-beta.2
       supertokens-node: 12.1.1
       uuid: 8.3.2
       zod: 3.15.1
@@ -21501,7 +21503,6 @@ packages:
 
   /node-abort-controller/3.0.1:
     resolution: {integrity: sha512-/ujIVxthRs+7q6hsdjHMaj8hRG9NuWmwrz+JdRwZ14jdFoKSkm+vDsCbF9PLpnSqjaWQJuTmVtcWHNLr+vrOFw==}
-    dev: true
 
   /node-crisp-api/1.12.3:
     resolution: {integrity: sha512-a1dXhhkk6pxx9d4Txqk22npvYvhORCavwbpuvE/NjVQyqjSL0TphoJoEL+XcNtc4PXB8hhySMGEeEQldwJ8M1A==}
@@ -23904,6 +23905,13 @@ packages:
     engines: {node: '>=4'}
     dependencies:
       redis-errors: 1.2.0
+
+  /redlock/5.0.0-beta.2:
+    resolution: {integrity: sha512-2RDWXg5jgRptDrB1w9O/JgSZC0j7y4SlaXnor93H/UJm/QyDiFgBKNtrh0TI6oCXqYSaSoXxFh6Sd3VtYfhRXw==}
+    engines: {node: '>=12'}
+    dependencies:
+      node-abort-controller: 3.0.1
+    dev: false
 
   /reduce-css-calc/2.1.8:
     resolution: {integrity: sha512-8liAVezDmUcH+tdzoEGrhfbGcP7nOV4NkGE3a74+qqvE7nt9i4sKLGBuZNOnpI4WiGksiNPklZxva80061QiPg==}

@@ -31,6 +31,13 @@ import { SCHEMA_MODULE_CONFIG } from './config';
 import { SchemaHelper } from './schema-helper';
 import { HiveError } from '../../../shared/errors';
 import { ArtifactStorageWriter } from './artifact-storage-writer';
+import { GraphQLError } from 'graphql';
+
+import Redlock from 'redlock';
+
+const redlock = new Redlock([null as any], {
+  retryCount: 0,
+});
 
 type CheckInput = Omit<Types.SchemaCheckInput, 'project' | 'organization' | 'target'> &
   TargetSelector;
@@ -197,13 +204,41 @@ export class SchemaPublisher {
   }
 
   @sentry('SchemaPublisher.publish')
-  async publish(input: PublishInput, span?: Span): Promise<PublishResult> {
-    this.logger.debug('Schema publication (checksum=%s)', input.checksum);
-    return this.idempotentRunner.run({
-      identifier: `schema:publish:${input.checksum}`,
-      executor: () => this.internalPublish(input),
-      ttl: 60,
-      span,
+  async publish(input: PublishInput, signal: AbortSignal): Promise<PublishResult> {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const instance = this;
+    return new Promise((resolve, reject) => {
+      this.logger.debug('Schema publication (checksum=%s)', input.checksum);
+      let timeout: NodeJS.Timeout;
+
+      signal.addEventListener('abort', () => {
+        clearTimeout(timeout);
+        reject(new GraphQLError('Aborted.'));
+      });
+
+      async function tryRun() {
+        // acquire lock
+        const lock = await redlock.acquire([input.target], 1000).catch(() => null);
+
+        if (lock === null) {
+          if (signal.aborted === false) {
+            timeout = setTimeout(() => tryRun().catch(reject), 1000);
+          }
+          return;
+        }
+
+        try {
+          timeout = setInterval(() => lock.extend(1000), 500);
+          resolve(await instance.internalPublish(input));
+        } catch (err) {
+          reject(err);
+        } finally {
+          clearTimeout(timeout);
+          await lock.release();
+        }
+      }
+
+      tryRun().catch(reject);
     });
   }
 
