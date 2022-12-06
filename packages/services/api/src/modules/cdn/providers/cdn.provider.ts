@@ -35,9 +35,9 @@ export class CdnProvider {
 
   getCdnUrlForTarget(targetId: string): string {
     if (this.config.providers.cloudflare) {
-      return `${this.config.providers.cloudflare.baseUrl}/artifacts/v1/${targetId}/sdl`;
+      return `${this.config.providers.cloudflare.baseUrl}/artifacts/v1/${targetId}`;
     } else if (this.config.providers.api) {
-      return `${this.config.providers.api.baseUrl}/artifacts/v1/${targetId}/sdl`;
+      return `${this.config.providers.api.baseUrl}/artifacts/v1/${targetId}`;
     }
 
     throw new HiveError(`CDN is not configured, cannot resolve CDN target url.`);
