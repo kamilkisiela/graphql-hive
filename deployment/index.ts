@@ -9,7 +9,6 @@ import { deployUsage } from './services/usage';
 import { deployUsageIngestor } from './services/usage-ingestor';
 import { deployGraphQL } from './services/graphql';
 import { deployApp } from './services/app';
-import { deployLandingPage } from './services/landing-page';
 import { deployDocs } from './services/docs';
 import { deployRedis } from './services/redis';
 import { deployKafka } from './services/kafka';
@@ -265,18 +264,10 @@ const app = deployApp({
   emailsEndpoint: emailsApi.localEndpoint,
 });
 
-const landingPage = deployLandingPage({
-  rootDns,
-  packageHelper,
-  storageContainer,
-});
-
 const proxy = deployProxy({
-  rootDns,
   appHostname,
   docsHostname,
   app,
-  landingPage,
   docs,
   graphql: graphqlApi,
   usage: usageApi,
