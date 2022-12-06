@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@radix-ui/react-tooltip": "1.0.2",
-    "@theguild/components": "4.4.1",
+    "@theguild/components": "4.4.2",
     "clsx": "1.2.1",
     "next": "13.0.6",
     "next-themes": "*",
