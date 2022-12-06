@@ -1244,7 +1244,7 @@ test('CDN data can not be fetched with an invalid access token', async () => {
 
   const cdn = cdnAccessResult.body.data!.createCdnToken;
 
-  const res = await fetch(cdn.url, {
+  const res = await fetch(cdn.url + '/sdl', {
     method: 'GET',
     headers: {
       'X-Hive-CDN-Key': 'i-like-turtles',
@@ -1337,7 +1337,7 @@ test('CDN data can be fetched with an valid access token', async () => {
 
   const cdn = cdnAccessResult.body.data!.createCdnToken;
 
-  const cdnResult = await fetch(cdn.url, {
+  const cdnResult = await fetch(cdn.url + '/sdl', {
     method: 'GET',
     headers: {
       'X-Hive-CDN-Key': cdn.token,

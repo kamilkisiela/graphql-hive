@@ -777,7 +777,7 @@ export async function fetchSchemaFromCDN(selector: TargetSelectorInput, token: s
 
   const cdn = cdnAccessResult.body.data!.createCdnToken;
 
-  const res = await fetch(cdn.url, {
+  const res = await fetch(cdn.url + '/sdl', {
     headers: {
       'X-Hive-CDN-Key': cdn.token,
     },
@@ -798,7 +798,7 @@ export async function fetchSupergraphFromCDN(selector: TargetSelectorInput, toke
 
   const cdn = cdnAccessResult.body.data!.createCdnToken;
 
-  const res = await fetch(cdn.url.replace('/sdl', '/supergraph'), {
+  const res = await fetch(cdn.url + '/supergraph', {
     headers: {
       'X-Hive-CDN-Key': cdn.token,
     },
@@ -821,7 +821,7 @@ export async function fetchMetadataFromCDN(selector: TargetSelectorInput, token:
 
   const cdn = cdnAccessResult.body.data!.createCdnToken;
 
-  const res = await fetch(cdn.url.replace('/sdl', `/metadata`), {
+  const res = await fetch(cdn.url + '/metadata', {
     headers: {
       'X-Hive-CDN-Key': cdn.token,
     },
