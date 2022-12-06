@@ -224,6 +224,23 @@ services:
       PORT: 3013
       CF_BROKER_SIGNATURE: secretSignature
 
+  composition_federation_2:
+    image: '${DOCKER_REGISTRY}composition-federation-2${DOCKER_TAG}'
+    networks:
+      - 'stack'
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'localhost:3069/_readiness']
+      interval: 5s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
+    ports:
+      - 3069:3069
+    environment:
+      NODE_ENV: production
+      PORT: 3069
+      SECRET: secretsecret
+
   external_composition:
     image: node:16.15.1-alpine3.14
     entrypoint:
@@ -307,7 +324,7 @@ services:
     ports:
       - 3001:3001
     environment:
-      NODE_ENV: production
+      NODE_ENV: development
       POSTGRES_HOST: db
       POSTGRES_PORT: 5432
       POSTGRES_DB: registry

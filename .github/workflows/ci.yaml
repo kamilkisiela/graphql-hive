@@ -239,6 +239,7 @@ jobs:
             packages/services/usage-ingestor/dist
             packages/services/usage/dist
             packages/services/webhooks/dist
+            packages/services/external-composition/federation-2/dist
             packages/web/app/dist.zip
 
   rust:
