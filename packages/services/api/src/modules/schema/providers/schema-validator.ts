@@ -67,9 +67,8 @@ export class SchemaValidator {
       this.helper.createSchemaObject(s),
     );
     const afterSchemas: SchemaObject[] = after.map(s => this.helper.createSchemaObject(s));
-    const beforeSchemas: SchemaObject[] = before.map(s => this.helper.createSchemaObject(s));
 
-    const isInitialSchema = beforeSchemas.length === 0;
+    const isInitialSchema = before.length === 0;
     const areIdentical = existing && hashSchema(existing) === hashSchema(incoming);
 
     if (areIdentical) {
@@ -94,6 +93,8 @@ export class SchemaValidator {
     }
 
     let changes: Types.SchemaChange[] = [];
+
+    const beforeSchemas: SchemaObject[] = before.map(s => this.helper.createSchemaObject(s));
 
     try {
       const [existingSchema, incomingSchema] = await Promise.all([

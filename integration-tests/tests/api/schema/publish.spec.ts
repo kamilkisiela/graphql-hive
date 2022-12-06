@@ -1728,3 +1728,135 @@ test('(experimental_acceptBreakingChanges) accept breaking changes if schema is 
     'composable-but-breaking',
   );
 });
+
+test('(experimental_acceptBreakingChanges and force) publishing composable schema on second attempt', async () => {
+  const { access_token: owner_access_token } = await authenticate('main');
+  const orgResult = await createOrganization(
+    {
+      name: 'foo',
+    },
+    owner_access_token,
+  );
+  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+
+  const projectResult = await createProject(
+    {
+      organization: org.cleanId,
+      type: ProjectType.Federation,
+      name: 'foo',
+    },
+    owner_access_token,
+  );
+
+  const project = projectResult.body.data!.createProject.ok!.createdProject;
+  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
+
+  const writeTokenResult = await createToken(
+    {
+      name: 'test',
+      organization: org.cleanId,
+      project: project.cleanId,
+      target: target.cleanId,
+      organizationScopes: [],
+      projectScopes: [],
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+    },
+    owner_access_token,
+  );
+  expect(writeTokenResult.body.errors).not.toBeDefined();
+  const writeToken = writeTokenResult.body.data!.createToken.ok!.secret;
+
+  await publishSchema(
+    {
+      service: 'reviews',
+      author: 'Kamil',
+      commit: 'reviews',
+      url: 'https://api.com/reviews',
+      experimental_acceptBreakingChanges: true,
+      force: true,
+      sdl: /* GraphQL */ `
+        extend type Product @key(fields: "id") {
+          id: ID! @external
+          reviews: [Review]
+          reviewSummary: ReviewSummary
+        }
+
+        type Review @key(fields: "id") {
+          id: ID!
+          rating: Float
+        }
+
+        type ReviewSummary {
+          totalReviews: Int
+        }
+      `,
+    },
+    writeToken,
+  );
+
+  await publishSchema(
+    {
+      service: 'products',
+      author: 'Kamil',
+      commit: 'products',
+      url: 'https://api.com/products',
+      experimental_acceptBreakingChanges: true,
+      force: true,
+      sdl: /* GraphQL */ `
+        enum CURRENCY_CODE {
+          USD
+        }
+
+        type Department {
+          category: ProductCategory
+          url: String
+        }
+
+        type Money {
+          amount: Float
+          currencyCode: CURRENCY_CODE
+        }
+
+        type Price {
+          cost: Money
+          deal: Float
+          dealSavings: Money
+        }
+
+        type Product @key(fields: "id") {
+          id: ID!
+          title: String
+          url: String
+          description: String
+          price: Price
+          salesRank(category: ProductCategory = ALL): Int
+          salesRankOverall: Int
+          salesRankInCategory: Int
+          category: ProductCategory
+          images(size: Int = 1000): [String]
+          primaryImage(size: Int = 1000): String
+        }
+
+        enum ProductCategory {
+          ALL
+          GIFT_CARDS
+          ELECTRONICS
+          CAMERA_N_PHOTO
+          VIDEO_GAMES
+          BOOKS
+          CLOTHING
+        }
+
+        extend type Query {
+          categories: [Department]
+          product(id: ID!): Product
+        }
+      `,
+    },
+    writeToken,
+  );
+
+  const latestValid = await fetchLatestValidSchema(writeToken);
+
+  expect(latestValid.body.data?.latestValidVersion.schemas.nodes[0].commit).toBe('products');
+});
