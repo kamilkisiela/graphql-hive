@@ -1921,7 +1921,29 @@ test('publishing composable schema without the definition of the Query type, but
     writeToken,
   );
 
+  await publishSchema(
+    {
+      service: 'users',
+      author: 'Kamil',
+      commit: 'users',
+      url: 'https://api.com/users',
+      experimental_acceptBreakingChanges: true,
+      force: true,
+      sdl: /* GraphQL */ `
+        type User @key(fields: "id") {
+          id: ID!
+          name: String!
+        }
+
+        extend type Query {
+          user(id: ID!): User
+        }
+      `,
+    },
+    writeToken,
+  );
+
   const latestValid = await fetchLatestValidSchema(writeToken);
 
-  expect(latestValid.body.data?.latestValidVersion.schemas.nodes[0].commit).toBe('products');
+  expect(latestValid.body.data?.latestValidVersion.schemas.nodes[0].commit).toBe('users');
 });
