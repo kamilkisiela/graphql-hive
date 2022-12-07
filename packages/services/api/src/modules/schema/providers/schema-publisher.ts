@@ -45,6 +45,8 @@ type BreakPromise<T> = T extends Promise<infer U> ? U : never;
 
 type PublishResult = BreakPromise<ReturnType<SchemaPublisher['internalPublish']>>;
 
+const publishMtx = createIdMtx();
+
 @Injectable({
   scope: Scope.Operation,
 })
@@ -202,7 +204,14 @@ export class SchemaPublisher {
     this.logger.debug('Schema publication (checksum=%s)', input.checksum);
     return this.idempotentRunner.run({
       identifier: `schema:publish:${input.checksum}`,
-      executor: () => this.internalPublish(input),
+      executor: async () => {
+        await publishMtx.lock(input.target);
+        try {
+          return await this.internalPublish(input);
+        } finally {
+          publishMtx.unlock(input.target);
+        }
+      },
       ttl: 60,
       span,
     });
@@ -989,4 +998,44 @@ function writeChanges(type: string, changes: readonly Types.SchemaChange[], line
   lines.push(
     ...['', `### ${type} changes`].concat(changes.map(change => ` - ${bolderize(change.message)}`)),
   );
+}
+
+interface IdMtx {
+  lock(id: string): Promise<void>;
+  unlock(id: string): void;
+}
+
+// TODO: sync across processes
+function createIdMtx(): IdMtx {
+  type Lock = {
+    p: Promise<void>;
+    release: () => void;
+  };
+  const locks = new Map<string, Lock>();
+
+  return {
+    async lock(id) {
+      let lock;
+      while ((lock = locks.get(id))) {
+        // wait while there's a lock
+        await lock.p;
+      }
+
+      // only one can acquire
+      let release!: () => void;
+      const p = new Promise<void>(resolve => (release = resolve));
+      locks.set(id, {
+        p,
+        release,
+      });
+    },
+    unlock(id) {
+      const lock = locks.get(id);
+      if (!lock) {
+        throw new Error(`Cannot unlock ${id}, mutex was never locked`);
+      }
+      locks.delete(id);
+      lock.release();
+    },
+  };
 }
