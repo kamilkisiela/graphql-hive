@@ -6,7 +6,8 @@
   "scripts": {
     "build-and-pack": "(cd ../ && pnpm build:services && pnpm build:libraries && pnpm build:local) && node ./scripts/pack.mjs",
     "build:local": "pnpm build-and-pack && (cd ../ && pnpm docker:build)",
-    "dockest": "tsup-node dockest.ts --format esm --target node16 && PWD=$PWD/.. node dist/dockest.js"
+    "dockest": "tsup-node dockest.ts --format esm --target node16 && PWD=$PWD/.. node dist/dockest.js",
+    "filter-logs": "node ./scripts/filter-log.mjs"
   },
   "dependencies": {
     "@app/gql": "link:./testkit/gql",
