@@ -12,7 +12,7 @@ import {
   waitFor,
 } from '../../../testkit/flow';
 import * as emails from '../../../testkit/emails';
-import { authenticate, userEmails } from '../../../testkit/auth';
+import { authenticate, userEmail } from '../../../testkit/auth';
 import { collect } from '../../../testkit/usage';
 
 function generateUnique() {
@@ -29,7 +29,7 @@ function filterEmailsByOrg(orgName: string, emails: emails.Email[]) {
 }
 
 test('rate limit approaching and reached for organization', async () => {
-  const adminEmail = userEmails.admin;
+  const adminEmail = userEmail('admin');
   const { access_token } = await authenticate('admin');
   const orgResult = await createOrganization(
     {

@@ -7,7 +7,7 @@ import {
   requestOrganizationTransfer,
   answerOrganizationTransferRequest,
 } from '../../../testkit/flow';
-import { authenticate, userEmails } from '../../../testkit/auth';
+import { authenticate, userEmail } from '../../../testkit/auth';
 import {
   OrganizationAccessScope,
   ProjectAccessScope,
@@ -54,8 +54,8 @@ async function prepareOrganization() {
     }
   }
 
-  await join(userEmails['extra'], accessTokens.member);
-  await join(userEmails['lonely'], accessTokens.lonelyMember);
+  await join(userEmail('extra'), accessTokens.member);
+  await join(userEmail('lonely'), accessTokens.lonelyMember);
 
   const membersResult = await getOrganizationMembers(
     { organization: organization.cleanId },
@@ -71,9 +71,9 @@ async function prepareOrganization() {
   return {
     organization,
     accessTokens,
-    owner: members.find(m => m.user.email === userEmails['main'])!,
-    member: members.find(m => m.user.email === userEmails['extra'])!,
-    lonelyMember: members.find(m => m.user.email === userEmails['lonely'])!,
+    owner: members.find(m => m.user.email === userEmail('main'))!,
+    member: members.find(m => m.user.email === userEmail('extra'))!,
+    lonelyMember: members.find(m => m.user.email === userEmail('lonely'))!,
   };
 }
 

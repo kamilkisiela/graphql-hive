@@ -112,36 +112,25 @@ const createSession = async (
 
 const password = 'ilikebigturtlesandicannotlie47';
 
-export const userEmails = {
-  main: 'main@localhost.localhost',
-  extra: 'extra@localhost.localhost',
-  lonely: 'lonely@localhost.localhost',
-  foo: 'foo@localhost.localhost',
-  admin: 'admin@localhost.localhost',
-};
+export function userEmail(userId: string) {
+  return `${userId}@localhost.localhost`;
+}
 
-type UserID = keyof typeof userEmails;
+const tokenResponsePromise: {
+  [key: string]: Promise<z.TypeOf<typeof SignUpSignInUserResponseModel>> | null;
+} = {};
 
-const tokenResponsePromise: Record<
-  UserID,
-  Promise<z.TypeOf<typeof SignUpSignInUserResponseModel>> | null
-> = {
-  main: null,
-  extra: null,
-  admin: null,
-  foo: null,
-  lonely: null,
-};
-
+export function authenticate(userId: string): Promise<{ access_token: string }>;
 export function authenticate(
-  userId: UserID,
+  userId: string,
+  oidcIntegrationId?: string,
+): Promise<{ access_token: string }>;
+export function authenticate(
+  userId: string | string,
   oidcIntegrationId?: string,
 ): Promise<{ access_token: string }> {
   if (!tokenResponsePromise[userId]) {
-    tokenResponsePromise[userId] = signUpUserViaEmail(
-      userEmails[userId] ?? `${userId}@localhost.localhost`,
-      password,
-    );
+    tokenResponsePromise[userId] = signUpUserViaEmail(userEmail(userId), password);
   }
 
   return tokenResponsePromise[userId]!.then(data =>
