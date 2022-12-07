@@ -1860,3 +1860,68 @@ test('(experimental_acceptBreakingChanges and force) publishing composable schem
 
   expect(latestValid.body.data?.latestValidVersion.schemas.nodes[0].commit).toBe('products');
 });
+
+test('publishing composable schema without the definition of the Query type, but only extension, should work', async () => {
+  const { access_token: owner_access_token } = await authenticate('main');
+  const orgResult = await createOrganization(
+    {
+      name: 'foo',
+    },
+    owner_access_token,
+  );
+  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+
+  const projectResult = await createProject(
+    {
+      organization: org.cleanId,
+      type: ProjectType.Federation,
+      name: 'foo',
+    },
+    owner_access_token,
+  );
+
+  const project = projectResult.body.data!.createProject.ok!.createdProject;
+  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
+
+  const writeTokenResult = await createToken(
+    {
+      name: 'test',
+      organization: org.cleanId,
+      project: project.cleanId,
+      target: target.cleanId,
+      organizationScopes: [],
+      projectScopes: [],
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+    },
+    owner_access_token,
+  );
+  expect(writeTokenResult.body.errors).not.toBeDefined();
+  const writeToken = writeTokenResult.body.data!.createToken.ok!.secret;
+
+  await publishSchema(
+    {
+      service: 'products',
+      author: 'Kamil',
+      commit: 'products',
+      url: 'https://api.com/products',
+      experimental_acceptBreakingChanges: true,
+      force: true,
+      sdl: /* GraphQL */ `
+        type Product @key(fields: "id") {
+          id: ID!
+          title: String
+          url: String
+        }
+
+        extend type Query {
+          product(id: ID!): Product
+        }
+      `,
+    },
+    writeToken,
+  );
+
+  const latestValid = await fetchLatestValidSchema(writeToken);
+
+  expect(latestValid.body.data?.latestValidVersion.schemas.nodes[0].commit).toBe('products');
+});
