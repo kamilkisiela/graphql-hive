@@ -213,8 +213,12 @@ export interface Storage {
     } & TargetSelector,
   ): Promise<
     | {
+        schemas: [];
+      }
+    | {
         schemas: Schema[];
-        version?: string;
+        version: string;
+        valid: boolean;
       }
     | never
   >;

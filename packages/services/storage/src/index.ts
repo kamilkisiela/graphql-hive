@@ -1569,8 +1569,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       };
     },
     async getLatestSchemas({ organization, project, target }) {
-      const latest = await pool.maybeOne<Pick<versions, 'id'>>(sql`
-        SELECT v.id FROM public.versions as v
+      const latest = await pool.maybeOne<Pick<versions, 'id' | 'valid'>>(sql`
+        SELECT v.id, v.valid FROM public.versions as v
         LEFT JOIN public.targets as t ON (t.id = v.target_id)
         WHERE t.id = ${target} AND t.project_id = ${project}
         ORDER BY v.created_at DESC
@@ -1592,6 +1592,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       return {
         version: latest.id,
+        valid: latest.valid,
         schemas,
       };
     },
