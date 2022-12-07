@@ -107,10 +107,11 @@ export async function createStorage(connection: string, maximumPoolSize: number)
   }
 
   function transformMember(
-    user: users & Pick<organization_member, 'scopes' | 'organization_id'>,
+    user: users & Pick<organization_member, 'scopes' | 'organization_id'> & { is_owner: boolean },
   ): Member {
     return {
       id: user.id,
+      isOwner: user.is_owner,
       user: transformUser(user),
       scopes: (user.scopes as Member['scopes']) || [],
       organization: user.organization_id,
@@ -652,6 +653,25 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       return result.id as string;
     },
+    getOrganizationOwnerId: batch(async selectors => {
+      const organizations = selectors.map(s => s.organization);
+      const owners = await pool.query<Slonik<Pick<organizations, 'user_id' | 'id'>>>(
+        sql`
+        SELECT id, user_id
+        FROM public.organizations
+        WHERE id IN (${sql.join(organizations, sql`, `)})`,
+      );
+
+      return organizations.map(async organization => {
+        const owner = owners.rows.find(row => row.id === organization);
+
+        if (owner) {
+          return owner.user_id;
+        }
+
+        return null;
+      });
+    }),
     getOrganizationOwner: batch(async selectors => {
       const organizations = selectors.map(s => s.organization);
       const owners = await pool.query<
@@ -668,7 +688,12 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         const owner = owners.rows.find(row => row.organization_id === organization);
 
         if (owner) {
-          return Promise.resolve(transformMember(owner));
+          return Promise.resolve(
+            transformMember({
+              ...owner,
+              is_owner: true,
+            }),
+          );
         }
 
         return Promise.reject(new Error(`Owner not found (organization=${organization})`));
@@ -677,10 +702,21 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     getOrganizationMembers: batch(async selectors => {
       const organizations = selectors.map(s => s.organization);
       const allMembers = await pool.query<
-        Slonik<users & Pick<organization_member, 'scopes' | 'organization_id'>>
+        Slonik<
+          users &
+            Pick<organization_member, 'scopes' | 'organization_id'> & {
+              is_owner: boolean;
+            }
+        >
       >(
         sql`
-        SELECT u.*, om.scopes, om.organization_id FROM public.organization_member as om
+        SELECT 
+          u.*,
+          om.scopes,
+          om.organization_id,
+          CASE WHEN o.user_id = om.user_id THEN true ELSE false END AS is_owner
+        FROM public.organization_member as om
+        LEFT JOIN public.organizations as o ON (o.id = om.organization_id)
         LEFT JOIN public.users as u ON (u.id = om.user_id)
         WHERE om.organization_id IN (${sql.join(
           organizations,
@@ -699,14 +735,29 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       });
     }),
     async getOrganizationMember({ organization, user }) {
-      const member = await pool.one<
-        Slonik<users & Pick<organization_member, 'organization_id' | 'scopes'>>
+      const member = await pool.maybeOne<
+        Slonik<
+          users &
+            Pick<organization_member, 'organization_id' | 'scopes'> & {
+              is_owner: boolean;
+            }
+        >
       >(
         sql`
-          SELECT u.*, om.scopes, om.organization_id FROM public.organization_member as om
+          SELECT 
+            u.*,
+            om.scopes,
+            om.organization_id,
+            CASE WHEN o.user_id = om.user_id THEN true ELSE false END AS is_owner
+          FROM public.organization_member as om
+          LEFT JOIN public.organizations as o ON (o.id = om.organization_id)
           LEFT JOIN public.users as u ON (u.id = om.user_id)
           WHERE om.organization_id = ${organization} AND om.user_id = ${user} ORDER BY u.created_at DESC LIMIT 1`,
       );
+
+      if (!member) {
+        return null;
+      }
 
       return transformMember(member);
     },
@@ -851,6 +902,107 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             RETURNING *
           `,
         );
+      });
+    },
+    async createOrganizationTransferRequest({ organization, user }) {
+      const code = Math.random().toString(16).substring(2, 12);
+
+      await pool.query<Slonik<Pick<organizations, 'ownership_transfer_code'>>>(
+        sql`
+          UPDATE public.organizations
+          SET 
+            ownership_transfer_user_id = ${user},
+            ownership_transfer_code = ${code},
+            ownership_transfer_expires_at = NOW() + INTERVAL '1 day'
+          WHERE id = ${organization}
+        `,
+      );
+
+      return {
+        code,
+      };
+    },
+    async getOrganizationTransferRequest({ code, user, organization }) {
+      return pool.maybeOne<{
+        code: string;
+      }>(sql`
+        SELECT ownership_transfer_code as code FROM public.organizations
+        WHERE 
+          ownership_transfer_user_id = ${user}
+          AND id = ${organization}
+          AND ownership_transfer_code = ${code}
+          AND ownership_transfer_expires_at > NOW()
+      `);
+    },
+    async answerOrganizationTransferRequest({
+      organization,
+      user,
+      code,
+      accept,
+      oldAdminAccessScopes,
+    }) {
+      await pool.transaction(async tsx => {
+        const owner = await tsx.maybeOne<Slonik<Pick<organizations, 'user_id'>>>(sql`
+          SELECT user_id
+          FROM public.organizations
+          WHERE 
+            id = ${organization}
+            AND ownership_transfer_user_id = ${user}
+            AND ownership_transfer_code = ${code}
+            AND ownership_transfer_expires_at > NOW()
+        `);
+
+        if (!owner) {
+          throw new Error('No organization transfer request found');
+        }
+
+        if (!accept) {
+          // NULL out the transfer request
+          await tsx.query(sql`
+            UPDATE public.organizations
+            SET
+              ownership_transfer_user_id = NULL,
+              ownership_transfer_code = NULL,
+              ownership_transfer_expires_at = NULL
+            WHERE id = ${organization}
+          `);
+
+          // because it's a rejection, we don't need to do anything else other than null out the transfer request
+          return;
+        }
+
+        // copy access scopes from the new owner
+        await tsx.query(sql`
+          UPDATE public.organization_member
+          SET scopes = (
+            SELECT scopes
+            FROM public.organization_member
+            WHERE organization_id = ${organization} AND user_id = ${owner.user_id}
+            LIMIT 1
+          )
+          WHERE organization_id = ${organization} AND user_id = ${user}
+        `);
+
+        // assign new access scopes to the old owner
+        await pool.query<Slonik<organization_member>>(
+          sql`
+            UPDATE public.organization_member
+            SET scopes = ${sql.array(oldAdminAccessScopes, 'text')}
+            WHERE organization_id = ${organization} AND user_id = ${owner.user_id}
+          `,
+        );
+
+        // NULL out the transfer request
+        // assign the new owner
+        await tsx.query(sql`
+          UPDATE public.organizations
+          SET
+            ownership_transfer_user_id = NULL,
+            ownership_transfer_code = NULL,
+            ownership_transfer_expires_at = NULL,
+            user_id = ${user}
+          WHERE id = ${organization}
+        `);
       });
     },
     async deleteOrganizationMembers({ users, organization }) {

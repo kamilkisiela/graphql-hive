@@ -100,6 +100,9 @@ export interface organizations {
   limit_operations_monthly: string;
   limit_retention_days: string;
   name: string;
+  ownership_transfer_code: string | null;
+  ownership_transfer_expires_at: Date | null;
+  ownership_transfer_user_id: string | null;
   plan_name: string;
   slack_token: string | null;
   type: organization_type;

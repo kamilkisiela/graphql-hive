@@ -65,6 +65,7 @@ fragment MemberFields on Member {
   user {
     ...UserFields
   }
+  isOwner
   organizationAccessScopes
   projectAccessScopes
   targetAccessScopes

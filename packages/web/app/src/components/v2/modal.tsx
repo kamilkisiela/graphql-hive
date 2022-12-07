@@ -28,15 +28,22 @@ const contentShow = keyframes({
   '100%': { opacity: 1, transform: 'translate(-50%, -50%) scale(1)' },
 });
 
+const widthBySize = {
+  sm: 'w-[450px]',
+  md: 'w-[600px]',
+  lg: 'w-[800px]',
+};
+
 const Modal: FC<{
   trigger?: ReactElement;
   open?: boolean;
+  size?: 'sm' | 'md' | 'lg';
   onOpenChange?: (isOpen: boolean) => void;
   className?: string;
 }> & {
   Title?: FC<DialogTitleProps>;
   Description?: FC<DialogDescriptionProps>;
-} = ({ trigger, open, onOpenChange, children, className }) => (
+} = ({ trigger, open, onOpenChange, children, className, size = 'sm' }) => (
   <Root open={open} onOpenChange={onOpenChange}>
     <Trigger asChild>{trigger}</Trigger>
     <Portal>
@@ -55,13 +62,13 @@ const Modal: FC<{
             top-1/2
             left-1/2
             max-h-[95%]
-            w-[450px]
             max-w-[95%]
             overflow-auto
             rounded-md
             bg-black
             p-7`,
             className,
+            widthBySize[size],
           )}
           css={css`
             box-shadow: hsl(206 22% 7% / 35%) 0 10px 38px -10px,

@@ -110,33 +110,27 @@ const createSession = async (
   };
 };
 
-type UserID = 'main' | 'extra' | 'admin' | string;
 const password = 'ilikebigturtlesandicannotlie47';
 
-export const userEmails: Record<UserID, string> = {
-  main: 'main@localhost.localhost',
-  extra: 'extra@localhost.localhost',
-  admin: 'admin@localhost.localhost',
-};
+export function userEmail(userId: string) {
+  return `${userId}@localhost.localhost`;
+}
 
-const tokenResponsePromise: Record<
-  UserID,
-  Promise<z.TypeOf<typeof SignUpSignInUserResponseModel>> | null
-> = {
-  main: null,
-  extra: null,
-  admin: null,
-};
+const tokenResponsePromise: {
+  [key: string]: Promise<z.TypeOf<typeof SignUpSignInUserResponseModel>> | null;
+} = {};
 
+export function authenticate(userId: string): Promise<{ access_token: string }>;
 export function authenticate(
-  userId: UserID,
+  userId: string,
+  oidcIntegrationId?: string,
+): Promise<{ access_token: string }>;
+export function authenticate(
+  userId: string | string,
   oidcIntegrationId?: string,
 ): Promise<{ access_token: string }> {
   if (!tokenResponsePromise[userId]) {
-    tokenResponsePromise[userId] = signUpUserViaEmail(
-      userEmails[userId] ?? `${userId}@localhost.localhost`,
-      password,
-    );
+    tokenResponsePromise[userId] = signUpUserViaEmail(userEmail(userId), password);
   }
 
   return tokenResponsePromise[userId]!.then(data =>

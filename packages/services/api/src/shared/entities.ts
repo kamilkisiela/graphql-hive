@@ -188,6 +188,7 @@ export interface User {
 
 export interface Member {
   id: string;
+  isOwner: boolean;
   user: User;
   organization: string;
   scopes: Array<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
