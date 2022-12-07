@@ -123,6 +123,7 @@ export class SchemaPublisher {
       incoming: incomingSchema,
       before: schemas,
       after: newSchemas,
+      beforeState: 'valid' in latest ? (latest.valid ? 'valid' : 'invalid') : null,
       selector: {
         organization: input.organization,
         project: input.project,
@@ -475,6 +476,7 @@ export class SchemaPublisher {
         incoming: incomingSchema,
         before: schemas,
         after: newSchemas,
+        beforeState: 'valid' in latest ? (latest.valid ? 'valid' : 'invalid') : null,
         selector: {
           organization: organizationId,
           project: projectId,
@@ -491,10 +493,11 @@ export class SchemaPublisher {
       throw err;
     }
 
-    const { changes, errors, valid } = result;
+    const { changes, errors, valid, messages } = result;
 
+    const hasPreviousVersion = 'version' in latest && !!latest.version;
     const hasNewUrl =
-      !!latest.version &&
+      hasPreviousVersion &&
       !!previousSchema &&
       (previousSchema.url ?? null) !== (incomingSchema.url ?? null);
     const hasSchemaChanges = changes.length > 0;
@@ -502,7 +505,7 @@ export class SchemaPublisher {
     const isForced = input.force === true;
     let hasDifferentChecksum = false;
 
-    if (!!latest.version && !!previousSchema) {
+    if (hasPreviousVersion) {
       const before = this.helper
         .sortSchemas(schemas)
         .map(s => this.helper.createChecksum(this.helper.createSchemaObject(s)))
@@ -522,7 +525,7 @@ export class SchemaPublisher {
     this.logger.debug('Changes: %s', changes.length);
     this.logger.debug('Forced: %s', isForced ? 'yes' : 'false');
     this.logger.debug('New url: %s', hasNewUrl ? 'yes' : 'false');
-    this.logger.debug('Checksums comparison:', hasDifferentChecksum ? 'different' : 'same');
+    this.logger.debug('Checksums comparison: %s', hasDifferentChecksum ? 'different' : 'same');
 
     // if the schema is not modified, we don't need to do anything, just return the success
     if (!isModified && !isInitialSchema) {
@@ -537,6 +540,7 @@ export class SchemaPublisher {
           valid: true,
           changes: [],
           errors: [],
+          messages,
         });
       }
 
@@ -578,10 +582,8 @@ export class SchemaPublisher {
       });
     }
 
-    const updates: string[] = [];
-
     if (valid && hasNewUrl) {
-      updates.push(
+      messages.push(
         `Updated: New service url: ${incomingSchema.url ?? 'empty'} (previously: ${
           previousSchema!.url ?? 'empty'
         })`,
@@ -597,7 +599,7 @@ export class SchemaPublisher {
         valid,
         changes,
         errors,
-        updates,
+        messages,
       });
     }
 
@@ -628,7 +630,7 @@ export class SchemaPublisher {
       valid,
       errors,
       changes,
-      message: updates.length ? updates.join('\n') : null,
+      message: messages.length ? messages.join('\n') : null,
       linkToWebsite,
     };
   }
@@ -861,7 +863,7 @@ export class SchemaPublisher {
     valid,
     changes,
     errors,
-    updates,
+    messages,
   }: {
     initial: boolean;
     force?: boolean | null;
@@ -870,7 +872,7 @@ export class SchemaPublisher {
     valid: boolean;
     changes: readonly Types.SchemaChange[];
     errors: readonly Types.SchemaError[];
-    updates?: string[];
+    messages?: string[];
   }) {
     if (!project.gitRepository) {
       return {
@@ -905,8 +907,8 @@ export class SchemaPublisher {
           .join('\n\n');
       }
 
-      if (updates?.length) {
-        summary += `\n\n${updates.map(val => `- ${val}`).join('\n')}`;
+      if (messages?.length) {
+        summary += `\n\n${messages.map(val => `- ${val}`).join('\n')}`;
       }
 
       if (valid === false && force === true) {
