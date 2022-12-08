@@ -6,7 +6,7 @@ on:
 
 jobs:
   publish:
-    name: build
+    name: 'build'
     runs-on: ubuntu-latest
 
     env:
@@ -62,7 +62,7 @@ jobs:
         with:
           publish: pnpm release
           commit: 'chore(release): update monorepo packages versions'
-          title: Upcoming Release Changes
+          title: 'Upcoming Release Changes'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -244,7 +244,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-          cache: pnpm
+          cache: 'pnpm'
           node-version-file: .node-version
 
       - name: Install Rust
@@ -353,7 +353,7 @@ jobs:
           destination: latest/linux/router.tar.gz
 
   deploy:
-    name: deploy to staging
+    name: 'deploy to staging'
     needs: publish
     runs-on: ubuntu-latest
 
@@ -436,7 +436,7 @@ jobs:
           COMMIT_SHA: ${{ github.sha }}
           RELEASE: ${{ github.sha }}
           BRANCH_NAME: ${{ steps.branch-name.outputs.current_branch }}
-          BUILD_TYPE: publish
+          BUILD_TYPE: 'publish'
           BUILD_STABLE: '1'
         run: |
           docker buildx bake \
