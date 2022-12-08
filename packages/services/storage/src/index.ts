@@ -2553,17 +2553,17 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       async lock(id) {
         const lockConn = await getLockConn();
 
+        // postgres advisory locks uses bigints as lock keys,
+        // we therefore hash the provided lock id and use the hash
         const idInt = hashFnv32a(id);
 
-        // wait while there's a lock
+        // wait if there's a lock in the process
         let lock;
         while ((lock = locks.get(id))) {
-          // first db then process
-          await lockConn.query(sql`select pg_advisory_lock(${idInt})`);
           await lock.p;
         }
 
-        // only one can acquire
+        // only one lock can be acquired per process
         let release!: () => void;
         const p = new Promise<void>(resolve => (release = resolve));
         locks.set(id, {
@@ -2571,11 +2571,13 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           release,
         });
 
+        // wait and acquire lock on the database (intra-process sync)
+        await lockConn.query(sql`select pg_advisory_lock(${idInt})`);
+
         return async function unlock() {
-          locks.delete(id);
-          // first process then db
-          release();
-          await lockConn.query(sql`select pg_advisory_unlock(${idInt})`);
+          locks.delete(id); // delete the lock first so that the while loop in lock can break
+          release(); // release the process first (guarantees unlock if query below fails)
+          await lockConn.query(sql`select pg_advisory_unlock(${idInt})`); // finally release the advisory lock
         };
       },
     },
