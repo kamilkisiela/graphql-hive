@@ -1,58 +1,59 @@
 import type {
-  User,
+  ActivityObject,
+  Alert,
+  AlertChannel,
+  AuthProvider,
+  Member,
   Organization,
+  OrganizationAccessScope,
+  OrganizationBilling,
+  OrganizationInvitation,
+  OrganizationType,
+  PersistedOperation,
   Project,
-  Target,
+  ProjectAccessScope,
+  ProjectType,
   Schema,
   SchemaVersion,
-  Member,
-  ActivityObject,
-  TargetSettings,
-  PersistedOperation,
-  AlertChannel,
-  Alert,
-  AuthProvider,
-  OrganizationBilling,
   Storage,
-  ProjectType,
-  OrganizationType,
-  OrganizationInvitation,
-  OrganizationAccessScope,
-  ProjectAccessScope,
+  Target,
   TargetAccessScope,
+  TargetSettings,
+  User,
 } from '@hive/api';
+import { batch } from '@theguild/buddy';
+import { paramCase } from 'param-case';
 import {
   DatabasePool,
+  DatabasePoolConnection,
   DatabaseTransactionConnection,
   sql,
   TaggedTemplateLiteralInvocation,
   UniqueIntegrityConstraintViolationError,
 } from 'slonik';
 import { update } from 'slonik-utilities';
-import { paramCase } from 'param-case';
-import {
-  commits,
-  getPool,
-  organizations,
-  organization_member,
-  projects,
-  targets,
-  target_validation,
-  users,
-  versions,
-  version_commit,
-  objectToParams,
-  activities,
-  persisted_operations,
-  alert_channels,
-  alerts,
-  organizations_billing,
-  organization_invitations,
-} from './db';
-import { batch } from '@theguild/buddy';
-import type { Slonik } from './shared';
 import zod from 'zod';
 import type { OIDCIntegration } from '../../api/src/shared/entities';
+import {
+  activities,
+  alert_channels,
+  alerts,
+  commits,
+  getPool,
+  objectToParams,
+  organization_invitations,
+  organization_member,
+  organizations,
+  organizations_billing,
+  persisted_operations,
+  projects,
+  target_validation,
+  targets,
+  users,
+  version_commit,
+  versions,
+} from './db';
+import type { Slonik } from './shared';
 
 export { createConnectionString } from './db/utils';
 export { createTokenStorage } from './tokens';
@@ -92,6 +93,36 @@ function getProviderBasedOnExternalId(externalId: string): AuthProvider {
 export async function createStorage(connection: string, maximumPoolSize: number): Promise<Storage> {
   const pool = await getPool(connection, maximumPoolSize);
 
+  // use a single connection for locks because postgres advisory locks are bound
+  // to sessions and if the session is disposed, so will be the lock. by using
+  // a single connection for locks always, we guarantee the locks database
+  // persistance throughout its whole lifecycle
+  const getLockConn = (() => {
+    let lockConn: DatabasePoolConnection | null;
+    return () =>
+      new Promise<DatabasePoolConnection>((resolve, reject) => {
+        if (lockConn) {
+          return resolve(lockConn);
+        }
+        pool
+          .connect(conn => {
+            lockConn = conn;
+            resolve(lockConn);
+            return new Promise(() => {
+              // keep the connection alive indefinitely
+            });
+          })
+          .then(() => {
+            lockConn = null;
+            reject(new Error('Lock connection ended'));
+          })
+          .catch(err => {
+            lockConn = null;
+            reject(err);
+          });
+      });
+  })();
+
   function transformUser(user: users): User {
     return {
       id: user.id,
@@ -107,10 +138,11 @@ export async function createStorage(connection: string, maximumPoolSize: number)
   }
 
   function transformMember(
-    user: users & Pick<organization_member, 'scopes' | 'organization_id'>,
+    user: users & Pick<organization_member, 'scopes' | 'organization_id'> & { is_owner: boolean },
   ): Member {
     return {
       id: user.id,
+      isOwner: user.is_owner,
       user: transformUser(user),
       scopes: (user.scopes as Member['scopes']) || [],
       organization: user.organization_id,
@@ -483,6 +515,12 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     };
   }
 
+  type Lock = {
+    p: Promise<void>;
+    release: () => void;
+  };
+  const locks = new Map<string, Lock>();
+
   const storage: Storage = {
     destroy() {
       return pool.end();
@@ -652,6 +690,25 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       return result.id as string;
     },
+    getOrganizationOwnerId: batch(async selectors => {
+      const organizations = selectors.map(s => s.organization);
+      const owners = await pool.query<Slonik<Pick<organizations, 'user_id' | 'id'>>>(
+        sql`
+        SELECT id, user_id
+        FROM public.organizations
+        WHERE id IN (${sql.join(organizations, sql`, `)})`,
+      );
+
+      return organizations.map(async organization => {
+        const owner = owners.rows.find(row => row.id === organization);
+
+        if (owner) {
+          return owner.user_id;
+        }
+
+        return null;
+      });
+    }),
     getOrganizationOwner: batch(async selectors => {
       const organizations = selectors.map(s => s.organization);
       const owners = await pool.query<
@@ -668,7 +725,12 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         const owner = owners.rows.find(row => row.organization_id === organization);
 
         if (owner) {
-          return Promise.resolve(transformMember(owner));
+          return Promise.resolve(
+            transformMember({
+              ...owner,
+              is_owner: true,
+            }),
+          );
         }
 
         return Promise.reject(new Error(`Owner not found (organization=${organization})`));
@@ -677,10 +739,21 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     getOrganizationMembers: batch(async selectors => {
       const organizations = selectors.map(s => s.organization);
       const allMembers = await pool.query<
-        Slonik<users & Pick<organization_member, 'scopes' | 'organization_id'>>
+        Slonik<
+          users &
+            Pick<organization_member, 'scopes' | 'organization_id'> & {
+              is_owner: boolean;
+            }
+        >
       >(
         sql`
-        SELECT u.*, om.scopes, om.organization_id FROM public.organization_member as om
+        SELECT
+          u.*,
+          om.scopes,
+          om.organization_id,
+          CASE WHEN o.user_id = om.user_id THEN true ELSE false END AS is_owner
+        FROM public.organization_member as om
+        LEFT JOIN public.organizations as o ON (o.id = om.organization_id)
         LEFT JOIN public.users as u ON (u.id = om.user_id)
         WHERE om.organization_id IN (${sql.join(
           organizations,
@@ -699,14 +772,29 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       });
     }),
     async getOrganizationMember({ organization, user }) {
-      const member = await pool.one<
-        Slonik<users & Pick<organization_member, 'organization_id' | 'scopes'>>
+      const member = await pool.maybeOne<
+        Slonik<
+          users &
+            Pick<organization_member, 'organization_id' | 'scopes'> & {
+              is_owner: boolean;
+            }
+        >
       >(
         sql`
-          SELECT u.*, om.scopes, om.organization_id FROM public.organization_member as om
+          SELECT
+            u.*,
+            om.scopes,
+            om.organization_id,
+            CASE WHEN o.user_id = om.user_id THEN true ELSE false END AS is_owner
+          FROM public.organization_member as om
+          LEFT JOIN public.organizations as o ON (o.id = om.organization_id)
           LEFT JOIN public.users as u ON (u.id = om.user_id)
           WHERE om.organization_id = ${organization} AND om.user_id = ${user} ORDER BY u.created_at DESC LIMIT 1`,
       );
+
+      if (!member) {
+        return null;
+      }
 
       return transformMember(member);
     },
@@ -851,6 +939,107 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             RETURNING *
           `,
         );
+      });
+    },
+    async createOrganizationTransferRequest({ organization, user }) {
+      const code = Math.random().toString(16).substring(2, 12);
+
+      await pool.query<Slonik<Pick<organizations, 'ownership_transfer_code'>>>(
+        sql`
+          UPDATE public.organizations
+          SET
+            ownership_transfer_user_id = ${user},
+            ownership_transfer_code = ${code},
+            ownership_transfer_expires_at = NOW() + INTERVAL '1 day'
+          WHERE id = ${organization}
+        `,
+      );
+
+      return {
+        code,
+      };
+    },
+    async getOrganizationTransferRequest({ code, user, organization }) {
+      return pool.maybeOne<{
+        code: string;
+      }>(sql`
+        SELECT ownership_transfer_code as code FROM public.organizations
+        WHERE
+          ownership_transfer_user_id = ${user}
+          AND id = ${organization}
+          AND ownership_transfer_code = ${code}
+          AND ownership_transfer_expires_at > NOW()
+      `);
+    },
+    async answerOrganizationTransferRequest({
+      organization,
+      user,
+      code,
+      accept,
+      oldAdminAccessScopes,
+    }) {
+      await pool.transaction(async tsx => {
+        const owner = await tsx.maybeOne<Slonik<Pick<organizations, 'user_id'>>>(sql`
+          SELECT user_id
+          FROM public.organizations
+          WHERE
+            id = ${organization}
+            AND ownership_transfer_user_id = ${user}
+            AND ownership_transfer_code = ${code}
+            AND ownership_transfer_expires_at > NOW()
+        `);
+
+        if (!owner) {
+          throw new Error('No organization transfer request found');
+        }
+
+        if (!accept) {
+          // NULL out the transfer request
+          await tsx.query(sql`
+            UPDATE public.organizations
+            SET
+              ownership_transfer_user_id = NULL,
+              ownership_transfer_code = NULL,
+              ownership_transfer_expires_at = NULL
+            WHERE id = ${organization}
+          `);
+
+          // because it's a rejection, we don't need to do anything else other than null out the transfer request
+          return;
+        }
+
+        // copy access scopes from the new owner
+        await tsx.query(sql`
+          UPDATE public.organization_member
+          SET scopes = (
+            SELECT scopes
+            FROM public.organization_member
+            WHERE organization_id = ${organization} AND user_id = ${owner.user_id}
+            LIMIT 1
+          )
+          WHERE organization_id = ${organization} AND user_id = ${user}
+        `);
+
+        // assign new access scopes to the old owner
+        await pool.query<Slonik<organization_member>>(
+          sql`
+            UPDATE public.organization_member
+            SET scopes = ${sql.array(oldAdminAccessScopes, 'text')}
+            WHERE organization_id = ${organization} AND user_id = ${owner.user_id}
+          `,
+        );
+
+        // NULL out the transfer request
+        // assign the new owner
+        await tsx.query(sql`
+          UPDATE public.organizations
+          SET
+            ownership_transfer_user_id = NULL,
+            ownership_transfer_code = NULL,
+            ownership_transfer_expires_at = NULL,
+            user_id = ${user}
+          WHERE id = ${organization}
+        `);
       });
     },
     async deleteOrganizationMembers({ users, organization }) {
@@ -1183,7 +1372,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async getTargetIdsOfOrganization({ organization }) {
       const results = await pool.query<Slonik<Pick<targets, 'id'>>>(
         sql`
-          SELECT t.id as id FROM public.targets as t 
+          SELECT t.id as id FROM public.targets as t
           LEFT JOIN public.projects as p ON (p.id = t.project_id)
           WHERE p.org_id = ${organization}
           GROUP BY t.id
@@ -1326,7 +1515,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         Slonik<versions & Pick<commits, 'author' | 'service' | 'commit'>>
       >(
         sql`
-          SELECT v.*, c.author, c.service, c.commit FROM public.versions as v 
+          SELECT v.*, c.author, c.service, c.commit FROM public.versions as v
           LEFT JOIN public.commits as c ON (c.id = v.commit_id)
           WHERE v.target_id = ${target} AND v.valid IS TRUE
           ORDER BY v.created_at DESC
@@ -1351,7 +1540,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         Slonik<versions & Pick<commits, 'author' | 'service' | 'commit'>>
       >(
         sql`
-          SELECT v.*, c.author, c.service, c.commit FROM public.versions as v 
+          SELECT v.*, c.author, c.service, c.commit FROM public.versions as v
           LEFT JOIN public.commits as c ON (c.id = v.commit_id)
           WHERE v.target_id = ${target} AND v.valid IS TRUE
           ORDER BY v.created_at DESC
@@ -1372,7 +1561,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         Slonik<versions & Pick<commits, 'author' | 'service' | 'commit' | 'created_at'>>
       >(
         sql`
-          SELECT v.*, c.author, c.service, c.commit FROM public.versions as v 
+          SELECT v.*, c.author, c.service, c.commit FROM public.versions as v
           LEFT JOIN public.commits as c ON (c.id = v.commit_id)
           LEFT JOIN public.targets as t ON (t.id = v.target_id)
           WHERE v.target_id = ${target} AND t.project_id = ${project}
@@ -1395,7 +1584,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         Slonik<versions & Pick<commits, 'author' | 'service' | 'commit' | 'created_at'>>
       >(
         sql`
-          SELECT v.*, c.author, c.service, c.commit FROM public.versions as v 
+          SELECT v.*, c.author, c.service, c.commit FROM public.versions as v
           LEFT JOIN public.commits as c ON (c.id = v.commit_id)
           LEFT JOIN public.targets as t ON (t.id = v.target_id)
           WHERE v.target_id = ${target} AND t.project_id = ${project}
@@ -1417,8 +1606,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       };
     },
     async getLatestSchemas({ organization, project, target }) {
-      const latest = await pool.maybeOne<Pick<versions, 'id'>>(sql`
-        SELECT v.id FROM public.versions as v
+      const latest = await pool.maybeOne<Pick<versions, 'id' | 'valid'>>(sql`
+        SELECT v.id, v.valid FROM public.versions as v
         LEFT JOIN public.targets as t ON (t.id = v.target_id)
         WHERE t.id = ${target} AND t.project_id = ${project}
         ORDER BY v.created_at DESC
@@ -1440,6 +1629,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       return {
         version: latest.id,
+        valid: latest.valid,
         schemas,
       };
     },
@@ -1478,7 +1668,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           FROM
             public.version_commit AS vc
               LEFT JOIN
-                public.commits AS c 
+                public.commits AS c
                   ON c.id = vc.commit_id
           WHERE
             vc.version_id = ${version}
@@ -1529,7 +1719,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       const result = await pool.one<
         Slonik<versions & Pick<commits, 'author' | 'service' | 'commit' | 'created_at'>>
       >(sql`
-        SELECT v.*, c.author, c.service, c.commit FROM public.versions as v 
+        SELECT v.*, c.author, c.service, c.commit FROM public.versions as v
         LEFT JOIN public.commits as c ON (c.id = v.commit_id)
         LEFT JOIN public.targets as t ON (t.id = v.target_id)
         WHERE v.target_id = ${target} AND t.project_id = ${project} AND v.id = ${version} LIMIT 1
@@ -1548,7 +1738,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
     async getVersions({ project, target, after, limit }) {
       const query = sql`
-      SELECT v.*, c.author, c.service, c.commit FROM public.versions as v 
+      SELECT v.*, c.author, c.service, c.commit FROM public.versions as v
       LEFT JOIN public.commits as c ON (c.id = v.commit_id)
       LEFT JOIN public.targets as t ON (t.id = v.target_id)
       WHERE v.target_id = ${target} AND t.project_id = ${project} AND v.created_at < ${
@@ -1701,7 +1891,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     getSchema: batch(async selectors => {
       const rows = await pool.many<Slonik<WithUrl<commits>>>(
         sql`
-            SELECT c.* 
+            SELECT c.*
             FROM public.commits as c
             WHERE (c.id, c.target_id) IN ((${sql.join(
               selectors.map(s => sql`${s.commit}, ${s.target}`),
@@ -1958,8 +2148,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       const result = await pool.query<Slonik<alert_channels>>(
         sql`
           DELETE FROM public.alert_channels
-          WHERE 
-            project_id = ${project} AND 
+          WHERE
+            project_id = ${project} AND
             id IN (${sql.join(channels, sql`, `)})
           RETURNING *
         `,
@@ -1993,8 +2183,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       const result = await pool.query<Slonik<alerts>>(
         sql`
           DELETE FROM public.alerts
-          WHERE 
-            project_id = ${project} AND 
+          WHERE
+            project_id = ${project} AND
             id IN (${sql.join(alerts, sql`, `)})
           RETURNING *
         `,
@@ -2017,7 +2207,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         }>
       >(
         sql`
-          SELECT 
+          SELECT
             o.id as organization,
             t.id as target
           FROM public.targets AS t
@@ -2040,7 +2230,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         }>
       >(
         sql`
-          SELECT 
+          SELECT
             o.id as organization,
             o.clean_id as org_clean_id,
             o.name as org_name,
@@ -2072,7 +2262,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         LEFT JOIN targets AS t ON (t.id = v.target_id)
         LEFT JOIN projects AS p ON (p.id = t.project_id)
         LEFT JOIN organizations AS o ON (o.id = p.org_id)
-        WHERE 
+        WHERE
           v.created_at >= ${period.from.toISOString()}
           AND
           v.created_at < ${period.to.toISOString()}
@@ -2254,6 +2444,9 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           , "client_id"
           , "client_secret"
           , "oauth_api_url"
+          , "token_endpoint"
+          , "userinfo_endpoint"
+          , "authorization_endpoint"
         FROM
           "public"."oidc_integrations"
         WHERE
@@ -2276,6 +2469,9 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           , "client_id"
           , "client_secret"
           , "oauth_api_url"
+          , "token_endpoint"
+          , "userinfo_endpoint"
+          , "authorization_endpoint"
         FROM
           "public"."oidc_integrations"
         WHERE
@@ -2297,13 +2493,17 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             "linked_organization_id",
             "client_id",
             "client_secret",
-            "oauth_api_url"
+            "token_endpoint",
+            "userinfo_endpoint",
+            "authorization_endpoint"
           )
           VALUES (
             ${args.organizationId},
             ${args.clientId},
             ${args.encryptedClientSecret},
-            ${args.oauthApiUrl}
+            ${args.tokenEndpoint},
+            ${args.userinfoEndpoint},
+            ${args.authorizationEndpoint}
           )
           RETURNING
             "id"
@@ -2311,6 +2511,9 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             , "client_id"
             , "client_secret"
             , "oauth_api_url"
+            , "token_endpoint"
+            , "userinfo_endpoint"
+            , "authorization_endpoint"
         `);
 
         return {
@@ -2334,10 +2537,25 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async updateOIDCIntegration(args) {
       const result = await pool.maybeOne<unknown>(sql`
         UPDATE "public"."oidc_integrations"
-        SET 
-          "oauth_api_url" = ${args.oauthApiUrl ?? sql`"oauth_api_url"`}
-          , "client_id" = ${args.clientId ?? sql`"client_id"`}
+        SET
+          "client_id" = ${args.clientId ?? sql`"client_id"`}
           , "client_secret" = ${args.encryptedClientSecret ?? sql`"client_secret"`}
+          , "token_endpoint" = ${
+            args.tokenEndpoint ??
+            /** update existing columns to the old legacy values if not yet stored */
+            sql`COALESCE("token_endpoint", CONCAT("oauth_api_url", "/token"))`
+          }
+          , "userinfo_endpoint" = ${
+            args.userinfoEndpoint ??
+            /** update existing columns to the old legacy values if not yet stored */
+            sql`COALESCE("userinfo_endpoint", CONCAT("oauth_api_url", "/userinfo"))`
+          }
+          , "authorization_endpoint" = ${
+            args.authorizationEndpoint ??
+            /** update existing columns to the old legacy values if not yet stored */
+            sql`COALESCE("authorization_endpoint", CONCAT("oauth_api_url", "/authorize"))`
+          }
+          , "oauth_api_url" = NULL
         WHERE
           "id" = ${args.oidcIntegrationId}
         RETURNING
@@ -2346,6 +2564,9 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           , "client_id"
           , "client_secret"
           , "oauth_api_url"
+          , "token_endpoint"
+          , "userinfo_endpoint"
+          , "authorization_endpoint"
       `);
 
       return decodeOktaIntegrationRecord(result);
@@ -2358,6 +2579,109 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           "id" = ${args.oidcIntegrationId}
       `);
     },
+
+    idMutex: {
+      async lock(id, { signal }) {
+        return Promise.race([
+          new Promise<never>((_, reject) => {
+            const listener = () => {
+              signal.removeEventListener('abort', listener);
+              reject(new Error('Locking aborted'));
+            };
+            signal.addEventListener('abort', listener);
+          }),
+          (async () => {
+            const lockConn = await getLockConn();
+            if (signal.aborted) {
+              throw new Error('Locking aborted');
+            }
+
+            // postgres advisory locks uses bigints as lock keys,
+            // we therefore hash the provided lock id and use the hash
+            const idInt = hashFnv32a(id);
+
+            // wait if there's a lock in the process
+            let lock;
+            while ((lock = locks.get(id))) {
+              await lock.p;
+              if (signal.aborted) {
+                throw new Error('Locking aborted');
+              }
+            }
+
+            // only one lock can be acquired per process
+            let release!: () => void;
+            const p = new Promise<void>(resolve => (release = resolve));
+            locks.set(id, {
+              p,
+              release,
+            });
+
+            // wait and acquire lock on the database (intra-process sync)
+            let advisoryLock = false;
+            try {
+              let i = 0;
+              while (!advisoryLock) {
+                i++;
+                if (i > 30) {
+                  // 30 seconds is already too much
+                  throw new Error('Lock was never acquired');
+                }
+                advisoryLock = await lockConn.oneFirst<boolean>(
+                  sql`select pg_try_advisory_lock(${idInt}) as advisoryLock`,
+                );
+                if (!advisoryLock) {
+                  // only sleep if not locked so that the loop can resolve fast if locked
+                  await new Promise(resolve => setTimeout(resolve, 1_000));
+                }
+                if (signal.aborted) {
+                  throw new Error('Locking aborted');
+                }
+              }
+            } catch (err) {
+              locks.delete(id);
+              release();
+              if (advisoryLock) {
+                lockConn.query(sql`select pg_advisory_unlock(${idInt})`).catch(err => {
+                  // warn for now, we'll rethink if it happens to much
+                  console.warn(
+                    `Error while unlocking advisory lock ${idInt} with id ${id} after error`,
+                    err,
+                  );
+                });
+              }
+              throw err;
+            }
+
+            const listener = () => {
+              signal.removeEventListener('abort', listener);
+              if (locks.get(id)) {
+                // unlock if aborted because the lock _was_ acquired at this time
+                locks.delete(id);
+                release();
+                lockConn.query(sql`select pg_advisory_unlock(${idInt})`).catch(err => {
+                  // warn for now, we'll rethink if it happens to much
+                  console.warn(
+                    `Error while unlocking advisory lock ${idInt} with id ${id} after abort`,
+                    err,
+                  );
+                });
+              }
+            };
+            signal.addEventListener('abort', listener);
+
+            return async function unlock() {
+              signal.removeEventListener('abort', listener);
+              if (locks.get(id)) {
+                locks.delete(id); // delete the lock first so that the while loop in lock can break
+                release(); // release the process first (guarantees unlock if query below fails)
+                await lockConn.query(sql`select pg_advisory_unlock(${idInt})`); // finally release the advisory lock
+              }
+            };
+          })(),
+        ]);
+      },
+    },
   };
 
   return storage;
@@ -2367,21 +2691,72 @@ function isDefined<T>(val: T | undefined | null): val is T {
   return val !== undefined && val !== null;
 }
 
-const OktaIntegrationModel = zod.object({
+const OktaIntegrationBaseModel = zod.object({
   id: zod.string(),
   linked_organization_id: zod.string(),
   client_id: zod.string(),
   client_secret: zod.string(),
-  oauth_api_url: zod.string().url(),
 });
 
+const OktaIntegrationLegacyModel = zod.intersection(
+  OktaIntegrationBaseModel,
+  zod.object({
+    oauth_api_url: zod.string().url(),
+  }),
+);
+
+const OktaIntegrationModel = zod.intersection(
+  OktaIntegrationBaseModel,
+  zod.object({
+    token_endpoint: zod.string().url(),
+    userinfo_endpoint: zod.string().url(),
+    authorization_endpoint: zod.string().url(),
+  }),
+);
+
+const OktaIntegrationModelUnion = zod.union([OktaIntegrationLegacyModel, OktaIntegrationModel]);
+
 const decodeOktaIntegrationRecord = (result: unknown): OIDCIntegration => {
-  const rawRecord = OktaIntegrationModel.parse(result);
+  const rawRecord = OktaIntegrationModelUnion.parse(result);
+
+  // handle legacy case
+  if ('oauth_api_url' in rawRecord) {
+    return {
+      id: rawRecord.id,
+      clientId: rawRecord.client_id,
+      encryptedClientSecret: rawRecord.client_secret,
+      linkedOrganizationId: rawRecord.linked_organization_id,
+      tokenEndpoint: `${rawRecord.oauth_api_url}/token`,
+      userinfoEndpoint: `${rawRecord.oauth_api_url}/userinfo`,
+      authorizationEndpoint: `${rawRecord.oauth_api_url}/authorize`,
+    };
+  }
+
   return {
     id: rawRecord.id,
     clientId: rawRecord.client_id,
     encryptedClientSecret: rawRecord.client_secret,
     linkedOrganizationId: rawRecord.linked_organization_id,
-    oauthApiUrl: rawRecord.oauth_api_url,
+    tokenEndpoint: rawRecord.token_endpoint,
+    userinfoEndpoint: rawRecord.userinfo_endpoint,
+    authorizationEndpoint: rawRecord.authorization_endpoint,
   };
 };
+
+/**
+ * Calculate a 32 bit FNV-1a hash
+ * Found here: https://gist.github.com/vaiorabbit/5657561
+ * Ref.: http://isthe.com/chongo/tech/comp/fnv/
+ *
+ * @param str - The input string value to be hashed
+ */
+function hashFnv32a(str: string): number {
+  let i,
+    l,
+    hval = 0x811c9dc5;
+  for (i = 0, l = str.length; i < l; i++) {
+    hval ^= str.charCodeAt(i);
+    hval += (hval << 1) + (hval << 4) + (hval << 7) + (hval << 8) + (hval << 24);
+  }
+  return hval >>> 0;
+}

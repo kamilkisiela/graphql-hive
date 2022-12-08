@@ -1,45 +1,38 @@
 import * as pulumi from '@pulumi/pulumi';
-import { Proxy } from '../utils/reverse-proxy';
+import { DeploymentEnvironment } from '../types';
 import { CertManager } from '../utils/cert-manager';
-import { GraphQL } from './graphql';
-import { LandingPage } from './landing-page';
+import { isProduction } from '../utils/helpers';
+import { Proxy } from '../utils/reverse-proxy';
 import { App } from './app';
-import { Usage } from './usage';
 import { Docs } from './docs';
+import { GraphQL } from './graphql';
+import { Usage } from './usage';
 
 const commonConfig = new pulumi.Config('common');
 
 export function deployProxy({
   appHostname,
   docsHostname,
-  rootDns,
   graphql,
   app,
   docs,
   usage,
-  landingPage,
+  deploymentEnv,
 }: {
+  deploymentEnv: DeploymentEnvironment;
   appHostname: string;
   docsHostname: string;
-  rootDns: string;
   graphql: GraphQL;
   app: App;
   usage: Usage;
   docs: Docs;
-  landingPage: LandingPage;
 }) {
   const { tlsIssueName } = new CertManager().deployCertManagerAndIssuer();
   return new Proxy(tlsIssueName, {
     address: commonConfig.get('staticIp'),
+    aksReservedIpResourceGroup: commonConfig.get('aksReservedIpResourceGroup'),
   })
-    .deployProxy({ replicas: 2 })
-    .registerService({ record: rootDns, apex: true }, [
-      {
-        name: 'landing-page',
-        path: '/',
-        service: landingPage.service,
-      },
-    ])
+    .deployProxy({ replicas: isProduction(deploymentEnv) ? 2 : 1 })
     .registerService(
       {
         record: docsHostname,

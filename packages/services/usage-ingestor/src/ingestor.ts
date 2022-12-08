@@ -1,20 +1,19 @@
-import { Kafka, KafkaMessage, logLevel } from 'kafkajs';
-import { decompress } from '@hive/usage-common';
-import {
-  errors,
-  processDuration,
-  reportMessageBytes,
-  ingestedOperationsWrites,
-  ingestedOperationsFailures,
-  ingestedOperationRegistryWrites,
-  ingestedOperationRegistryFailures,
-} from './metrics';
-import { ClickHouseConfig, createWriter } from './writer';
-import { createProcessor } from './processor';
-import type { KafkaEnvironment } from './environment';
-
 import type { FastifyLoggerInstance } from '@hive/service-common';
 import type { RawReport } from '@hive/usage-common';
+import { decompress } from '@hive/usage-common';
+import { Kafka, KafkaMessage, logLevel } from 'kafkajs';
+import type { KafkaEnvironment } from './environment';
+import {
+  errors,
+  ingestedOperationRegistryFailures,
+  ingestedOperationRegistryWrites,
+  ingestedOperationsFailures,
+  ingestedOperationsWrites,
+  processDuration,
+  reportMessageBytes,
+} from './metrics';
+import { createProcessor } from './processor';
+import { ClickHouseConfig, createWriter } from './writer';
 
 enum Status {
   Waiting,
@@ -94,7 +93,7 @@ export function createIngestor(config: {
     },
     // Recommended by Azure EventHub https://docs.microsoft.com/en-us/azure/event-hubs/apache-kafka-configurations
     sessionTimeout: 30_000,
-    heartbeatInterval: 3_000,
+    heartbeatInterval: 3000,
     metadataMaxAge: 180_000,
   });
 

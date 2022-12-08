@@ -68,7 +68,7 @@ generates:
         UsageEstimationScope: '../shared/mappers#TargetsEstimationDateFilter'
         BillingPaymentMethod: 'StripeTypes.PaymentMethod.Card'
         BillingDetails: 'StripeTypes.PaymentMethod.BillingDetails'
-        BillingInvoice: 'StripeTypes.Invoice'
+        BillingInvoice: 'StripeTypes.Invoice | StripeTypes.UpcomingInvoice'
         OrganizationGetStarted:
           ../shared/entities#OrganizationGetStarted as OrganizationGetStartedMapper
         SchemaExplorer: ../shared/mappers#SchemaExplorerMapper

@@ -1,27 +1,33 @@
-import type { RouteHandlerMethod, FastifyRequest, FastifyReply } from 'fastify';
-import { Registry } from '@hive/api';
-import { cleanRequestId } from '@hive/service-common';
-import { createYoga, useErrorHandler, Plugin } from 'graphql-yoga';
 import { isGraphQLError } from '@envelop/core';
+import { useGenericAuth } from '@envelop/generic-auth';
+import { useGraphQLModules } from '@envelop/graphql-modules';
+import { useSentry } from '@envelop/sentry';
+import { useHive } from '@graphql-hive/client';
+import { Registry, RegistryContext } from '@hive/api';
+import { HiveError } from '@hive/api';
+import { cleanRequestId } from '@hive/service-common';
+import { fetch } from '@whatwg-node/fetch';
+import type {
+  FastifyLoggerInstance,
+  FastifyReply,
+  FastifyRequest,
+  RouteHandlerMethod,
+} from 'fastify';
 import {
   GraphQLError,
-  ValidationContext,
-  ValidationRule,
   Kind,
   OperationDefinitionNode,
   print,
+  ValidationContext,
+  ValidationRule,
 } from 'graphql';
-import { useGraphQLModules } from '@envelop/graphql-modules';
-import { useGenericAuth } from '@envelop/generic-auth';
-import { fetch } from '@whatwg-node/fetch';
-import { useSentry } from '@envelop/sentry';
-import { asyncStorage } from './async-storage';
-import { useSentryUser, extractUserId } from './use-sentry-user';
-import { useHive } from '@graphql-hive/client';
+import { createYoga, Plugin, useErrorHandler } from 'graphql-yoga';
 import hyperid from 'hyperid';
 import zod from 'zod';
-import { HiveError } from '@hive/api';
+import { asyncStorage } from './async-storage';
 import type { HiveConfig } from './environment';
+import { useArmor } from './use-armor';
+import { extractUserId, useSentryUser } from './use-sentry-user';
 
 const reqIdGenerate = hyperid({ fixedLength: true });
 
@@ -46,15 +52,14 @@ export interface GraphQLHandlerOptions {
   isProduction: boolean;
   hiveConfig: HiveConfig;
   release: string;
+  logger: FastifyLoggerInstance;
 }
 
 export type SuperTokenSessionPayload = zod.TypeOf<typeof SuperTokenAccessTokenModel>;
 
-interface Context {
+interface Context extends RegistryContext {
   req: FastifyRequest;
   reply: FastifyReply;
-  headers: Record<string, string | string[] | undefined>;
-  requestId?: string | null;
   session: SuperTokenSessionPayload | null;
 }
 
@@ -89,7 +94,9 @@ function useNoIntrospection(params: {
 
 export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMethod => {
   const server = createYoga<Context>({
+    logging: options.logger,
     plugins: [
+      useArmor(),
       useSentry({
         startTransaction: false,
         renameTransaction: true,
@@ -228,6 +235,15 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
   return async (req, reply) => {
     const requestIdHeader = req.headers['x-request-id'] ?? reqIdGenerate();
     const requestId = cleanRequestId(requestIdHeader);
+    const controller = new AbortController();
+
+    // we use the socket.close over req.close because req.close is emitted
+    // when the request gets processed (not canceled)
+    // see more: https://github.com/nodejs/node/issues/38924
+    // TODO: socket.once might break for http/2 because
+    req.raw.socket.once('close', () => {
+      controller.abort();
+    });
 
     await asyncStorage.run(
       {
@@ -240,6 +256,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
           headers: req.headers,
           requestId,
           session: null,
+          abortSignal: controller.signal,
         });
 
         response.headers.forEach((value, key) => {
@@ -257,7 +274,6 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
         }
 
         void reply.status(response.status);
-
         void reply.send(response.body);
 
         return reply;

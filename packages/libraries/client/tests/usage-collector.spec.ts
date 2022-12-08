@@ -1,4 +1,4 @@
-import { parse, buildSchema } from 'graphql';
+import { buildSchema, parse } from 'graphql';
 import { createCollector } from '../src/internal/usage';
 
 const schema = buildSchema(/* GraphQL */ `

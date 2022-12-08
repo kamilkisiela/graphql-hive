@@ -1,5 +1,5 @@
-import axios from 'axios';
 import { createHash } from 'crypto';
+import axios from 'axios';
 import type { SchemaFetcherOptions, ServicesFetcherOptions } from './internal/types.js';
 import { version } from './version.js';
 
@@ -30,7 +30,7 @@ function createFetcher<T>({ endpoint, key }: SchemaFetcherOptions & ServicesFetc
     }
 
     return axios
-      .get(endpoint + '/schema', {
+      .get(endpoint + '/services', {
         headers,
         responseType: 'json',
       })

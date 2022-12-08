@@ -1,5 +1,5 @@
-import * as kx from '@pulumi/kubernetesx';
 import * as k8s from '@pulumi/kubernetes';
+import * as kx from '@pulumi/kubernetesx';
 import * as pulumi from '@pulumi/pulumi';
 
 export function normalizeEnv(env: kx.types.Container['env']): any[] {

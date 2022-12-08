@@ -1,9 +1,9 @@
-import type { FastifyLoggerInstance } from 'fastify';
-import LRU from 'tiny-lru';
-import ms from 'ms';
 import { metrics } from '@hive/service-common';
+import type { FastifyLoggerInstance } from 'fastify';
+import ms from 'ms';
+import LRU from 'tiny-lru';
+import { atomic, until, useActionTracker } from './helpers';
 import type { Storage, StorageItem } from './storage';
-import { atomic, useActionTracker, until } from './helpers';
 
 const cacheHits = new metrics.Counter({
   name: 'tokens_cache_hits',

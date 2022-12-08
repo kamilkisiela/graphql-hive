@@ -1,9 +1,9 @@
 import * as Sentry from '@sentry/node';
-import { Queue, QueueScheduler, Worker, Job } from 'bullmq';
+import { Job, Queue, QueueScheduler, Worker } from 'bullmq';
 import Redis, { Redis as RedisInstance } from 'ioredis';
 import pTimeout from 'p-timeout';
+import { createWebhookJob, scheduleWebhook } from './jobs';
 import type { Config } from './types';
-import { scheduleWebhook, createWebhookJob } from './jobs';
 
 export const clientCommandMessageReg = /ERR unknown command ['`]\s*client\s*['`]/;
 
@@ -48,11 +48,10 @@ export function createScheduler(config: Config) {
     try {
       webhookQueue?.removeAllListeners();
       webhookQueueScheduler?.removeAllListeners(),
-        await pTimeout(
-          Promise.all([webhookQueue?.close(), webhookQueueScheduler?.close()]),
-          5000,
-          'BullMQ close timeout',
-        );
+        await pTimeout(Promise.all([webhookQueue?.close(), webhookQueueScheduler?.close()]), {
+          milliseconds: 5000,
+          message: 'BullMQ close timeout',
+        });
     } catch (e) {
       logger.error('Failed to stop queues', e);
     } finally {
@@ -161,10 +160,14 @@ export function createScheduler(config: Config) {
 
   function onFailed(job: Job, error: Error) {
     logger.debug(
-      `Job %s failed after %s attempts, reason: %s`,
+      `Job %s failed after %s attempts, reason: %s (orgId=%s, projectId=%s, targetId=%s, schemaId=%s)`,
       job.name,
       job.attemptsMade,
       job.failedReason,
+      job.data?.event?.organization?.id,
+      job.data?.event?.project?.id,
+      job.data?.event?.target?.id,
+      job.data?.event?.schema?.id,
     );
     logger.error(error);
   }

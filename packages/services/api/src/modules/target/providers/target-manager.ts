@@ -1,15 +1,15 @@
 import { Injectable, Scope } from 'graphql-modules';
 import { paramCase } from 'param-case';
 import type { Target, TargetSettings } from '../../../shared/entities';
-import { HiveError } from './../../../shared/errors';
-import { AuthManager } from '../../auth/providers/auth-manager';
-import { Logger } from '../../shared/providers/logger';
-import { Storage, ProjectSelector, TargetSelector } from '../../shared/providers/storage';
 import { share, uuid } from '../../../shared/helpers';
 import { ActivityManager } from '../../activity/providers/activity-manager';
-import { TokenStorage } from '../../token/providers/token-storage';
+import { AuthManager } from '../../auth/providers/auth-manager';
 import { ProjectAccessScope } from '../../auth/providers/project-access';
 import { TargetAccessScope } from '../../auth/providers/target-access';
+import { Logger } from '../../shared/providers/logger';
+import { ProjectSelector, Storage, TargetSelector } from '../../shared/providers/storage';
+import { TokenStorage } from '../../token/providers/token-storage';
+import { HiveError } from './../../../shared/errors';
 
 /**
  * Responsible for auth checks.

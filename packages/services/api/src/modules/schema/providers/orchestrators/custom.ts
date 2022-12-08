@@ -1,12 +1,12 @@
-import { Injectable } from 'graphql-modules';
 import { parse } from 'graphql';
-import { Logger } from '../../../shared/providers/logger';
-import { HiveError } from '../../../../shared/errors';
-import { HttpClient } from '../../../shared/providers/http-client';
-import { Orchestrator, ProjectType, emptySource, SchemaObject } from '../../../../shared/entities';
+import { Injectable } from 'graphql-modules';
 import type { SchemaError } from '../../../../__generated__/types';
-import { SchemaBuildError } from './errors';
+import { emptySource, Orchestrator, ProjectType, SchemaObject } from '../../../../shared/entities';
+import { HiveError } from '../../../../shared/errors';
 import { sentry } from '../../../../shared/sentry';
+import { HttpClient } from '../../../shared/providers/http-client';
+import { Logger } from '../../../shared/providers/logger';
+import { SchemaBuildError } from './errors';
 
 export interface CustomOrchestratorConfig {
   validationUrl: string;

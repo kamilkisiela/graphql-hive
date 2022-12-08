@@ -1,10 +1,9 @@
+import * as k8s from '@pulumi/kubernetes';
 import * as pulumi from '@pulumi/pulumi';
-import * as azure from '@pulumi/azure';
-import { RemoteArtifactAsServiceDeployment } from '../utils/remote-artifact-as-service';
 import { DeploymentEnvironment } from '../types';
-import { Redis } from './redis';
-import { PackageHelper } from '../utils/pack';
+import { ServiceDeployment } from '../utils/service-deployment';
 import type { Broker } from './cf-broker';
+import { Redis } from './redis';
 
 const commonConfig = new pulumi.Config('common');
 const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
@@ -12,30 +11,32 @@ const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
 export type Webhooks = ReturnType<typeof deployWebhooks>;
 
 export function deployWebhooks({
-  storageContainer,
-  packageHelper,
   deploymentEnv,
   redis,
   heartbeat,
   broker,
+  image,
+  release,
+  imagePullSecret,
 }: {
-  storageContainer: azure.storage.Container;
-  packageHelper: PackageHelper;
+  image: string;
+  release: string;
   deploymentEnv: DeploymentEnvironment;
   redis: Redis;
   broker: Broker;
   heartbeat?: string;
+  imagePullSecret: k8s.core.v1.Secret;
 }) {
-  return new RemoteArtifactAsServiceDeployment(
+  return new ServiceDeployment(
     'webhooks-service',
     {
-      storageContainer,
+      imagePullSecret,
       env: {
         ...deploymentEnv,
         ...commonEnv,
         SENTRY: commonEnv.SENTRY_ENABLED,
         HEARTBEAT_ENDPOINT: heartbeat ?? '',
-        RELEASE: packageHelper.currentReleaseId(),
+        RELEASE: release,
         REDIS_HOST: redis.config.host,
         REDIS_PORT: String(redis.config.port),
         REDIS_PASSWORD: redis.config.password,
@@ -47,8 +48,8 @@ export function deployWebhooks({
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
       exposesMetrics: true,
-      packageInfo: packageHelper.npmPack('@hive/webhooks'),
       replicas: 1,
+      image,
     },
     [redis.deployment, redis.service],
   ).deploy();

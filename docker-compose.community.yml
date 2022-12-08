@@ -1,7 +1,8 @@
 version: '3.8'
 
 networks:
-  stack: {}
+  stack:
+    name: hive
 
 services:
   db:
@@ -22,7 +23,7 @@ services:
       - ./.hive/postgres:/var/lib/postgresql/data
 
   clickhouse:
-    image: clickhouse/clickhouse-server:22.11-alpine
+    image: clickhouse/clickhouse-server:22.12-alpine
     healthcheck:
       test: ['CMD', 'wget', '--spider', '-q', 'localhost:8123/ping']
       interval: 5s
@@ -38,7 +39,7 @@ services:
       - ./.hive/clickhouse/db:/var/lib/clickhouse
 
   zookeeper:
-    image: confluentinc/cp-zookeeper:7.3.0
+    image: confluentinc/cp-zookeeper:7.3.1
     hostname: zookeeper
     networks:
       - 'stack'
@@ -53,7 +54,7 @@ services:
       - ./.hive/zookeeper/db:/var/lib/zookeeper/data
 
   broker:
-    image: confluentinc/cp-kafka:7.3.0
+    image: confluentinc/cp-kafka:7.3.1
     hostname: broker
     depends_on:
       zookeeper:
@@ -191,9 +192,6 @@ services:
       CLICKHOUSE_PORT: '8123'
       CLICKHOUSE_USERNAME: '${CLICKHOUSE_USER}'
       CLICKHOUSE_PASSWORD: '${CLICKHOUSE_PASSWORD}'
-    # Tell dockest, we want to wait for the exit code of the migrator to be 0
-    labels:
-      dockest.readiness: 'exit_code'
 
   server:
     image: '${DOCKER_REGISTRY}server${DOCKER_TAG}'

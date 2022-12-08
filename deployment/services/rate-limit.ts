@@ -1,13 +1,12 @@
+import * as k8s from '@pulumi/kubernetes';
 import * as pulumi from '@pulumi/pulumi';
-import * as azure from '@pulumi/azure';
 import { parse } from 'pg-connection-string';
-import { RemoteArtifactAsServiceDeployment } from '../utils/remote-artifact-as-service';
-import { PackageHelper } from '../utils/pack';
 import { DeploymentEnvironment } from '../types';
-import { DbMigrations } from './db-migrations';
-import { UsageEstimator } from './usage-estimation';
-import { Emails } from './emails';
 import { serviceLocalEndpoint } from '../utils/local-endpoint';
+import { ServiceDeployment } from '../utils/service-deployment';
+import { DbMigrations } from './db-migrations';
+import { Emails } from './emails';
+import { UsageEstimator } from './usage-estimation';
 
 const rateLimitConfig = new pulumi.Config('rateLimit');
 const commonConfig = new pulumi.Config('common');
@@ -17,29 +16,31 @@ const apiConfig = new pulumi.Config('api');
 export type RateLimitService = ReturnType<typeof deployRateLimit>;
 
 export function deployRateLimit({
-  storageContainer,
-  packageHelper,
   deploymentEnv,
   dbMigrations,
   usageEstimator,
   emails,
+  release,
+  image,
+  imagePullSecret,
 }: {
   usageEstimator: UsageEstimator;
-  storageContainer: azure.storage.Container;
-  packageHelper: PackageHelper;
   deploymentEnv: DeploymentEnvironment;
   dbMigrations: DbMigrations;
   emails: Emails;
+  release: string;
+  image: string;
+  imagePullSecret: k8s.core.v1.Secret;
 }) {
   const rawConnectionString = apiConfig.requireSecret('postgresConnectionString');
   const connectionString = rawConnectionString.apply(rawConnectionString =>
     parse(rawConnectionString),
   );
 
-  return new RemoteArtifactAsServiceDeployment(
+  return new ServiceDeployment(
     'rate-limiter',
     {
-      storageContainer,
+      imagePullSecret,
       replicas: 1,
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
@@ -48,7 +49,7 @@ export function deployRateLimit({
         ...commonEnv,
         SENTRY: commonEnv.SENTRY_ENABLED,
         LIMIT_CACHE_UPDATE_INTERVAL_MS: rateLimitConfig.require('updateIntervalMs'),
-        RELEASE: packageHelper.currentReleaseId(),
+        RELEASE: release,
         USAGE_ESTIMATOR_ENDPOINT: serviceLocalEndpoint(usageEstimator.service),
         EMAILS_ENDPOINT: serviceLocalEndpoint(emails.service),
         POSTGRES_HOST: connectionString.apply(connection => connection.host ?? ''),
@@ -57,10 +58,11 @@ export function deployRateLimit({
         POSTGRES_USER: connectionString.apply(connection => connection.user ?? ''),
         POSTGRES_DB: connectionString.apply(connection => connection.database ?? ''),
         POSTGRES_SSL: connectionString.apply(connection => (connection.ssl ? '1' : '0')),
+        WEB_APP_URL: `https://${deploymentEnv.DEPLOYED_DNS}/`,
       },
       exposesMetrics: true,
-      packageInfo: packageHelper.npmPack('@hive/rate-limit'),
       port: 4000,
+      image,
     },
     [dbMigrations, usageEstimator.service, usageEstimator.deployment],
   ).deploy();

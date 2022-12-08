@@ -1,10 +1,10 @@
+import { z } from 'zod';
+import { createConnection } from '../../shared/schema';
 import { AuthModule } from './__generated__/types';
 import { AuthManager } from './providers/auth-manager';
-import { createConnection } from '../../shared/schema';
 import { OrganizationAccessScope } from './providers/organization-access';
 import { ProjectAccessScope } from './providers/project-access';
 import { TargetAccessScope } from './providers/target-access';
-import { z } from 'zod';
 import { displayNameLengthBoundaries, fullNameLengthBoundaries } from './providers/user-manager';
 
 export const resolvers: AuthModule.Resolvers & {

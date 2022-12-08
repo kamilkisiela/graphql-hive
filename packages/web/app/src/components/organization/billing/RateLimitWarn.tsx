@@ -1,6 +1,6 @@
-import { OrgRateLimitFieldsFragment } from '@/graphql';
-import { Alert, AlertDescription, AlertIcon, AlertTitle, Box } from '@chakra-ui/react';
 import React from 'react';
+import { Alert, AlertDescription, AlertIcon, AlertTitle, Box } from '@chakra-ui/react';
+import { OrgRateLimitFieldsFragment } from '@/graphql';
 
 export const RateLimitWarn: React.FC<{
   organization: OrgRateLimitFieldsFragment;

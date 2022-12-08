@@ -1,12 +1,11 @@
+import * as k8s from '@pulumi/kubernetes';
 import * as pulumi from '@pulumi/pulumi';
-import * as azure from '@pulumi/azure';
-import { DbMigrations } from './db-migrations';
-import { RemoteArtifactAsServiceDeployment } from '../utils/remote-artifact-as-service';
-import { PackageHelper } from '../utils/pack';
 import { DeploymentEnvironment } from '../types';
-import { Clickhouse } from './clickhouse';
-import { Kafka } from './kafka';
 import { isProduction } from '../utils/helpers';
+import { ServiceDeployment } from '../utils/service-deployment';
+import { Clickhouse } from './clickhouse';
+import { DbMigrations } from './db-migrations';
+import { Kafka } from './kafka';
 
 const commonConfig = new pulumi.Config('common');
 const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
@@ -14,21 +13,23 @@ const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
 export type UsageIngestor = ReturnType<typeof deployUsageIngestor>;
 
 export function deployUsageIngestor({
-  storageContainer,
-  packageHelper,
   deploymentEnv,
   clickhouse,
   kafka,
   dbMigrations,
   heartbeat,
+  image,
+  release,
+  imagePullSecret,
 }: {
-  storageContainer: azure.storage.Container;
-  packageHelper: PackageHelper;
+  image: string;
+  release: string;
   deploymentEnv: DeploymentEnvironment;
   clickhouse: Clickhouse;
   kafka: Kafka;
   dbMigrations: DbMigrations;
   heartbeat?: string;
+  imagePullSecret: k8s.core.v1.Secret;
 }) {
   const numberOfPartitions = 6;
   const replicas = isProduction(deploymentEnv) ? 6 : 1;
@@ -54,10 +55,11 @@ export function deployUsageIngestor({
       : {}),
   };
 
-  return new RemoteArtifactAsServiceDeployment(
+  return new ServiceDeployment(
     'usage-ingestor-service',
     {
-      storageContainer,
+      image,
+      imagePullSecret,
       replicas,
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
@@ -66,19 +68,14 @@ export function deployUsageIngestor({
         ...commonEnv,
         SENTRY: commonEnv.SENTRY_ENABLED,
         ...clickhouseEnv,
-        KAFKA_SSL: '1',
+        ...kafka.connectionEnv,
         KAFKA_BROKER: kafka.config.endpoint,
-        KAFKA_SASL_MECHANISM: 'plain',
-        KAFKA_SASL_USERNAME: kafka.config.user,
-        KAFKA_SASL_PASSWORD: kafka.config.key,
-        KAFKA_CONCURRENCY: '1',
         KAFKA_TOPIC: kafka.config.topic,
         KAFKA_CONSUMER_GROUP: kafka.config.consumerGroup,
-        RELEASE: packageHelper.currentReleaseId(),
+        RELEASE: release,
         HEARTBEAT_ENDPOINT: heartbeat ?? '',
       },
       exposesMetrics: true,
-      packageInfo: packageHelper.npmPack('@hive/usage-ingestor'),
       port: 4000,
       pdb: true,
       autoScaling: {
@@ -89,6 +86,12 @@ export function deployUsageIngestor({
         maxReplicas: maxReplicas,
       },
     },
-    [clickhouse.deployment, clickhouse.service, dbMigrations],
+    [
+      clickhouse.deployment,
+      clickhouse.service,
+      dbMigrations,
+      kafka.deployment,
+      kafka.service,
+    ].filter(Boolean),
   ).deploy();
 }

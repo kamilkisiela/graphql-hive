@@ -1,21 +1,20 @@
 import { ReactElement, ReactNode, useEffect } from 'react';
 import NextLink from 'next/link';
 import { useQuery } from 'urql';
-
-import { Button, DropdownMenu, Heading, Link, Tabs, SubHeader, Spinner } from '@/components/v2';
-import { ArrowDownIcon, Link2Icon } from '@/components/v2/icon';
-import {
-  ProjectDocument,
-  TargetsDocument,
-  TargetFieldsFragment,
-  ProjectFieldsFragment,
-  OrganizationFieldsFragment,
-} from '@/graphql';
 import { gql } from 'urql';
-import { useRouteSelector, useToggle } from '@/lib/hooks';
-import { useTargetAccess, canAccessTarget, TargetAccessScope } from '@/lib/access/target';
-import { QueryError } from '../common/DataWrapper';
+import { Button, DropdownMenu, Heading, Link, Spinner, SubHeader, Tabs } from '@/components/v2';
+import { ArrowDownIcon, Link2Icon } from '@/components/v2/icon';
 import { ConnectSchemaModal } from '@/components/v2/modals';
+import {
+  OrganizationFieldsFragment,
+  ProjectDocument,
+  ProjectFieldsFragment,
+  TargetFieldsFragment,
+  TargetsDocument,
+} from '@/graphql';
+import { canAccessTarget, TargetAccessScope, useTargetAccess } from '@/lib/access/target';
+import { useRouteSelector, useToggle } from '@/lib/hooks';
+import { QueryError } from '../common/DataWrapper';
 
 enum TabValue {
   Schema = 'schema',

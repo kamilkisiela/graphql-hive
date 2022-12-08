@@ -1,4 +1,4 @@
-import { gzip, gunzip } from 'node:zlib';
+import { gunzip, gzip } from 'node:zlib';
 
 export async function compress(data: string): Promise<Buffer> {
   return new Promise((resolve, reject) => {

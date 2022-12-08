@@ -1,11 +1,12 @@
-import Toucan from 'toucan-js';
-import itty from 'itty-router';
-import { ArtifactStorageReader } from '@hive/api/src/modules/schema/providers/artifact-storage-reader';
 import { S3Client } from '@aws-sdk/client-s3';
-import { createIsKeyValid } from './key-validation';
+import { ArtifactStorageReader } from '@hive/api/src/modules/schema/providers/artifact-storage-reader';
+import itty from 'itty-router';
+import Toucan from 'toucan-js';
+import { AnalyticsEngine, createAnalytics } from './analytics';
+import { createArtifactRequestHandler } from './artifact-handler';
 import { UnexpectedError } from './errors';
 import { createRequestHandler } from './handler';
-import { createArtifactRequestHandler } from './artifact-handler';
+import { createIsKeyValid } from './key-validation';
 
 /**
  * KV Storage for the CDN
@@ -27,12 +28,10 @@ declare let SENTRY_ENVIRONMENT: string;
  */
 declare let SENTRY_RELEASE: string;
 
-const isKeyValid = createIsKeyValid({ keyData: KEY_DATA });
+declare let USAGE_ANALYTICS: AnalyticsEngine;
+declare let ERROR_ANALYTICS: AnalyticsEngine;
 
-const handleRequest = createRequestHandler({
-  getRawStoreValue: value => HIVE_DATA.get(value),
-  isKeyValid,
-});
+const isKeyValid = createIsKeyValid({ keyData: KEY_DATA });
 
 declare let S3_ENDPOINT: string;
 declare let S3_ACCESS_KEY_ID: string;
@@ -49,17 +48,56 @@ const s3Client = new S3Client({
   region: 'auto',
 });
 
+const analytics = createAnalytics({
+  usage: USAGE_ANALYTICS,
+  error: ERROR_ANALYTICS,
+});
+
+const handleRequest = createRequestHandler({
+  getRawStoreValue: value => HIVE_DATA.get(value),
+  isKeyValid,
+  analytics,
+});
+
 const artifactStorageReader = new ArtifactStorageReader(s3Client, S3_BUCKET_NAME, null);
 
 const handleArtifactRequest = createArtifactRequestHandler({
   isKeyValid,
-  async getArtifactUrl(targetId, artifactType) {
-    return artifactStorageReader.generateArtifactReadUrl(targetId, artifactType);
+  analytics,
+  async getArtifactAction(targetId, artifactType, eTag) {
+    return artifactStorageReader.generateArtifactReadUrl(targetId, artifactType, eTag);
+  },
+  async fallback(request: Request, params: { targetId: string; artifactType: string }) {
+    const artifactTypeMap: Record<string, string> = {
+      metadata: 'metadata',
+      sdl: 'sdl',
+      services: 'schema',
+      supergraph: 'supergraph',
+    };
+    const artifactType = artifactTypeMap[params.artifactType];
+
+    if (artifactType) {
+      const url = request.url.replace(
+        `/artifacts/v1/${params.targetId}/${params.artifactType}`,
+        `/${params.targetId}/${artifactType}`,
+      );
+
+      return handleRequest(new Request(url, request));
+    }
+
+    return;
   },
 });
 
 const router = itty
   .Router()
+  .get(
+    '/_health',
+    () =>
+      new Response('OK', {
+        status: 200,
+      }),
+  )
   .get('*', handleArtifactRequest)
   // Legacy CDN Handlers
   .get('*', handleRequest);
@@ -84,7 +122,7 @@ self.addEventListener('fetch', async (event: FetchEvent) => {
   try {
     event.respondWith(
       router
-        .handle(event.request)
+        .handle(event.request, sentry.captureException)
         .then(response => {
           if (response) {
             return response;
@@ -94,11 +132,11 @@ self.addEventListener('fetch', async (event: FetchEvent) => {
         .catch(err => {
           console.error(err);
           sentry.captureException(err);
-          return new UnexpectedError();
+          return new UnexpectedError(analytics);
         }),
     );
   } catch (error) {
     sentry.captureException(error);
-    event.respondWith(new UnexpectedError());
+    event.respondWith(new UnexpectedError(analytics));
   }
 });

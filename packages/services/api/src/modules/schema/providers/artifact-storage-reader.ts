@@ -1,7 +1,7 @@
 /**
  * IMPORTANT NOTE: This file needs to be kept platform-agnostic, don't use any Node.js specific APIs.
  */
-import { GetObjectCommand, HeadObjectCommand, type S3Client } from '@aws-sdk/client-s3';
+import { type S3Client, GetObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { fetch } from '@whatwg-node/fetch';
 
@@ -55,7 +55,8 @@ export class ArtifactStorageReader {
   async generateArtifactReadUrl(
     targetId: string,
     artifactType: ArtifactsType,
-  ): Promise<string | null> {
+    etagValue: string | null,
+  ) {
     if (artifactType.startsWith('sdl')) {
       artifactType = 'sdl';
     }
@@ -83,9 +84,13 @@ export class ArtifactStorageReader {
     });
 
     if (response.status === 200) {
-      return await this.generatePresignedGetUrl(key);
+      if (etagValue && response.headers.get('etag') === etagValue) {
+        return { type: 'notModified' } as const;
+      }
+
+      return { type: 'redirect', location: await this.generatePresignedGetUrl(key) } as const;
     } else if (response.status === 404) {
-      return null;
+      return { type: 'notFound' } as const;
     } else {
       const body = await response.text();
       throw new Error(`HEAD request failed with status ${response.status}: ${body}`);

@@ -1,13 +1,12 @@
+import { ReactElement } from 'react';
+import { useRouter } from 'next/router';
+import { Heading } from '@chakra-ui/react';
+import { useFormik } from 'formik';
+import { DocumentType, gql, useMutation } from 'urql';
 import { Button, Input, Modal, Tag } from '@/components/v2';
 import { AlertTriangleIcon, KeyIcon } from '@/components/v2/icon';
 import { InlineCode } from '@/components/v2/inline-code';
 import { env } from '@/env/frontend';
-import { Heading } from '@chakra-ui/react';
-import { useFormik } from 'formik';
-import { useRouter } from 'next/router';
-import { ReactElement } from 'react';
-
-import { gql, DocumentType, useMutation } from 'urql';
 
 const containerClassName = 'flex flex-col items-stretch gap-5';
 const modalWidthClassName = 'w-[550px]';
@@ -60,7 +59,8 @@ export const OIDCIntegrationSection = (props: {
               }}
             >
               <KeyIcon className="mr-2" />
-              Manage OIDC Provider ({extractDomain(props.organization.oidcIntegration.oauthApiUrl)})
+              Manage OIDC Provider (
+              {extractDomain(props.organization.oidcIntegration.authorizationEndpoint)})
             </Button>
             <Button
               variant="primary"
@@ -95,7 +95,7 @@ export const OIDCIntegrationSection = (props: {
       <CreateOIDCIntegrationModal
         isOpen={isCreateOIDCIntegrationModalOpen}
         close={closeModal}
-        hasOIDCIntegration={Boolean(props.organization.oidcIntegration)}
+        hasOIDCIntegration={!!props.organization.oidcIntegration}
         organizationId={props.organization.id}
         openEditModalLink={openEditModalLink}
         transitionToManageScreen={() => {
@@ -133,7 +133,9 @@ const CreateOIDCIntegrationModal_CreateOIDCIntegrationMutation = gql(/* GraphQL 
         details {
           clientId
           clientSecret
-          oauthApiUrl
+          tokenEndpoint
+          userinfoEndpoint
+          authorizationEndpoint
         }
       }
     }
@@ -193,7 +195,9 @@ const CreateOIDCIntegrationForm = (props: {
 
   const formik = useFormik({
     initialValues: {
-      oauthApiUrl: '',
+      tokenEndpoint: '',
+      userinfoEndpoint: '',
+      authorizationEndpoint: '',
       clientId: '',
       clientSecret: '',
     },
@@ -201,7 +205,9 @@ const CreateOIDCIntegrationForm = (props: {
       const result = await mutate({
         input: {
           organizationId: props.organizationId,
-          oauthApiUrl: values.oauthApiUrl,
+          tokenEndpoint: values.tokenEndpoint,
+          userinfoEndpoint: values.userinfoEndpoint,
+          authorizationEndpoint: values.authorizationEndpoint,
           clientId: values.clientId,
           clientSecret: values.clientSecret,
         },
@@ -229,16 +235,39 @@ const CreateOIDCIntegrationForm = (props: {
       <p>
         Use Okta, Auth0, Google Workspaces or any other OAuth2 Open ID Connect compatible provider.
       </p>
+
       <Input
-        placeholder="OAuth API Url (Issuer)"
-        id="oauthApiUrl"
-        name="oauthApiUrl"
-        prefix={<label className="text-sm font-semibold">API Url</label>}
+        placeholder="OAuth Token Endpoint API"
+        id="tokenEndpoint"
+        name="tokenEndpoint"
+        prefix={<label className="text-sm font-semibold">Token Endpoint</label>}
         onChange={formik.handleChange}
-        value={formik.values.oauthApiUrl}
-        isInvalid={Boolean(mutation.data?.createOIDCIntegration.error?.details.oauthApiUrl)}
+        value={formik.values.tokenEndpoint}
+        isInvalid={!!mutation.data?.createOIDCIntegration.error?.details.tokenEndpoint}
       />
-      <div>{mutation.data?.createOIDCIntegration.error?.details.oauthApiUrl}</div>
+      <div>{mutation.data?.createOIDCIntegration.error?.details.tokenEndpoint}</div>
+
+      <Input
+        placeholder="OAuth User Info Endpoint API"
+        id="userinfoEndpoint"
+        name="userinfoEndpoint"
+        prefix={<label className="text-sm font-semibold">User Info Endpoint</label>}
+        onChange={formik.handleChange}
+        value={formik.values.userinfoEndpoint}
+        isInvalid={!!mutation.data?.createOIDCIntegration.error?.details.userinfoEndpoint}
+      />
+      <div>{mutation.data?.createOIDCIntegration.error?.details.userinfoEndpoint}</div>
+
+      <Input
+        placeholder="OAuth Authorization Endpoint API"
+        id="authorizationEndpoint"
+        name="authorizationEndpoint"
+        prefix={<label className="text-sm font-semibold">Authorization Endpoint</label>}
+        onChange={formik.handleChange}
+        value={formik.values.authorizationEndpoint}
+        isInvalid={!!mutation.data?.createOIDCIntegration.error?.details.authorizationEndpoint}
+      />
+      <div>{mutation.data?.createOIDCIntegration.error?.details.authorizationEndpoint}</div>
 
       <Input
         placeholder="Client ID"
@@ -247,7 +276,7 @@ const CreateOIDCIntegrationForm = (props: {
         prefix={<label className="text-sm font-semibold">Client ID</label>}
         onChange={formik.handleChange}
         value={formik.values.clientId}
-        isInvalid={Boolean(mutation.data?.createOIDCIntegration.error?.details.clientId)}
+        isInvalid={!!mutation.data?.createOIDCIntegration.error?.details.clientId}
       />
       <div>{mutation.data?.createOIDCIntegration.error?.details.clientId}</div>
 
@@ -258,7 +287,7 @@ const CreateOIDCIntegrationForm = (props: {
         prefix={<label className="text-sm font-semibold">Client Secret</label>}
         onChange={formik.handleChange}
         value={formik.values.clientSecret}
-        isInvalid={Boolean(mutation.data?.createOIDCIntegration.error?.details.clientSecret)}
+        isInvalid={!!mutation.data?.createOIDCIntegration.error?.details.clientSecret}
       />
       <div>{mutation.data?.createOIDCIntegration.error?.details.clientSecret}</div>
 
@@ -317,7 +346,9 @@ const ManageOIDCIntegrationModal = (props: {
 const UpdateOIDCIntegration_OIDCIntegrationFragment = gql(/* GraphQL */ `
   fragment UpdateOIDCIntegration_OIDCIntegrationFragment on OIDCIntegration {
     id
-    oauthApiUrl
+    tokenEndpoint
+    userinfoEndpoint
+    authorizationEndpoint
     clientId
     clientSecretPreview
   }
@@ -331,7 +362,9 @@ const UpdateOIDCIntegrationForm_UpdateOIDCIntegrationMutation = gql(/* GraphQL *
       ok {
         updatedOIDCIntegration {
           id
-          oauthApiUrl
+          tokenEndpoint
+          userinfoEndpoint
+          authorizationEndpoint
           clientId
           clientSecretPreview
         }
@@ -341,7 +374,9 @@ const UpdateOIDCIntegrationForm_UpdateOIDCIntegrationMutation = gql(/* GraphQL *
         details {
           clientId
           clientSecret
-          oauthApiUrl
+          tokenEndpoint
+          userinfoEndpoint
+          authorizationEndpoint
         }
       }
     }
@@ -357,7 +392,9 @@ const UpdateOIDCIntegrationForm = (props: {
 
   const formik = useFormik({
     initialValues: {
-      oauthApiUrl: props.oidcIntegration.oauthApiUrl,
+      tokenEndpoint: props.oidcIntegration.tokenEndpoint,
+      userinfoEndpoint: props.oidcIntegration.userinfoEndpoint,
+      authorizationEndpoint: props.oidcIntegration.authorizationEndpoint,
       clientId: props.oidcIntegration.clientId,
       clientSecret: '',
     },
@@ -365,7 +402,9 @@ const UpdateOIDCIntegrationForm = (props: {
       const result = await mutate({
         input: {
           oidcIntegrationId: props.oidcIntegration.id,
-          oauthApiUrl: values.oauthApiUrl,
+          tokenEndpoint: values.tokenEndpoint,
+          userinfoEndpoint: values.userinfoEndpoint,
+          authorizationEndpoint: values.authorizationEndpoint,
           clientId: values.clientId,
           clientSecret: values.clientSecret === '' ? undefined : values.clientSecret,
         },
@@ -409,16 +448,41 @@ const UpdateOIDCIntegrationForm = (props: {
           </div>
           <div className={`${containerClassName} flex-1 pl-5`}>
             <Heading size="sm">Properties</Heading>
+
             <Input
-              placeholder="OAuth API Url (Issuer)"
-              id="oauthApiUrl"
-              name="oauthApiUrl"
-              prefix={<label className="text-sm font-semibold">API Url</label>}
+              placeholder="OAuth Token Endpoint API"
+              id="tokenEndpoint"
+              name="tokenEndpoint"
+              prefix={<label className="text-sm font-semibold">Token Endpoint</label>}
               onChange={formik.handleChange}
-              value={formik.values.oauthApiUrl}
-              isInvalid={Boolean(mutation.data?.updateOIDCIntegration.error?.details.oauthApiUrl)}
+              value={formik.values.tokenEndpoint}
+              isInvalid={!!mutation.data?.updateOIDCIntegration.error?.details.tokenEndpoint}
             />
-            <div>{mutation.data?.updateOIDCIntegration.error?.details.oauthApiUrl}</div>
+            <div>{mutation.data?.updateOIDCIntegration.error?.details.tokenEndpoint}</div>
+
+            <Input
+              placeholder="OAuth User Info Endpoint API"
+              id="userinfoEndpoint"
+              name="userinfoEndpoint"
+              prefix={<label className="text-sm font-semibold">User Info Endpoint</label>}
+              onChange={formik.handleChange}
+              value={formik.values.userinfoEndpoint}
+              isInvalid={!!mutation.data?.updateOIDCIntegration.error?.details.userinfoEndpoint}
+            />
+            <div>{mutation.data?.updateOIDCIntegration.error?.details.userinfoEndpoint}</div>
+
+            <Input
+              placeholder="OAuth Authorization Endpoint API"
+              id="authorizationEndpoint"
+              name="authorizationEndpoint"
+              prefix={<label className="text-sm font-semibold">Authorization Endpoint</label>}
+              onChange={formik.handleChange}
+              value={formik.values.authorizationEndpoint}
+              isInvalid={
+                !!mutation.data?.updateOIDCIntegration.error?.details.authorizationEndpoint
+              }
+            />
+            <div>{mutation.data?.updateOIDCIntegration.error?.details.authorizationEndpoint}</div>
 
             <Input
               placeholder="Client ID"
@@ -427,7 +491,7 @@ const UpdateOIDCIntegrationForm = (props: {
               prefix={<label className="text-sm font-semibold">Client ID</label>}
               onChange={formik.handleChange}
               value={formik.values.clientId}
-              isInvalid={Boolean(mutation.data?.updateOIDCIntegration.error?.details.clientId)}
+              isInvalid={!!mutation.data?.updateOIDCIntegration.error?.details.clientId}
             />
             <div>{mutation.data?.updateOIDCIntegration.error?.details.clientId}</div>
 
@@ -444,7 +508,7 @@ const UpdateOIDCIntegrationForm = (props: {
               prefix={<label className="text-sm font-semibold">Client Secret</label>}
               onChange={formik.handleChange}
               value={formik.values.clientSecret}
-              isInvalid={Boolean(mutation.data?.updateOIDCIntegration.error?.details.clientSecret)}
+              isInvalid={!!mutation.data?.updateOIDCIntegration.error?.details.clientSecret}
             />
             <div>{mutation.data?.updateOIDCIntegration.error?.details.clientSecret}</div>
           </div>

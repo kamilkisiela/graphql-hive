@@ -1,6 +1,6 @@
 import type { Plugin } from '@envelop/types';
-import type { HiveClient, HivePluginOptions } from './internal/types.js';
 import { createHive } from './client.js';
+import type { HiveClient, HivePluginOptions } from './internal/types.js';
 import { isHiveClient } from './internal/utils.js';
 
 export function useHive(clientOrOptions: HiveClient): Plugin;

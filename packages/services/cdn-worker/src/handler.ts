@@ -1,3 +1,5 @@
+import { buildSchema, introspectionFromSchema } from 'graphql';
+import { Analytics, createAnalytics } from './analytics';
 import {
   CDNArtifactNotFound,
   InvalidArtifactMatch,
@@ -6,7 +8,6 @@ import {
   MissingAuthKeyResponse,
   MissingTargetIDErrorResponse,
 } from './errors';
-import { buildSchema, introspectionFromSchema } from 'graphql';
 import type { KeyValidator } from './key-validation';
 
 async function createETag(value: string) {
@@ -24,7 +25,15 @@ type SchemaArtifact = {
   date?: string;
 };
 
-const artifactTypesHandlers = {
+type ArtifactType = 'schema' | 'supergraph' | 'sdl' | 'metadata' | 'introspection';
+const artifactTypes = ['schema', 'supergraph', 'sdl', 'metadata', 'introspection'] as const;
+
+const createArtifactTypesHandlers = (
+  analytics: Analytics,
+): Record<
+  ArtifactType,
+  (targetId: string, artifactType: string, rawValue: string, etag: string) => Response
+> => ({
   /**
    * Returns SchemaArtifact or SchemaArtifact[], same way as it's stored in the storage
    */
@@ -48,7 +57,7 @@ const artifactTypesHandlers = {
     }),
   sdl: (targetId: string, artifactType: string, rawValue: string, etag: string) => {
     if (rawValue.startsWith('[')) {
-      return new InvalidArtifactMatch(artifactType, targetId);
+      return new InvalidArtifactMatch(artifactType, targetId, analytics);
     }
 
     const parsed = JSON.parse(rawValue) as SchemaArtifact;
@@ -73,7 +82,7 @@ const artifactTypesHandlers = {
     }),
   introspection: (targetId: string, artifactType: string, rawValue: string, etag: string) => {
     if (rawValue.startsWith('[')) {
-      return new InvalidArtifactMatch(artifactType, targetId);
+      return new InvalidArtifactMatch(artifactType, targetId, analytics);
     }
 
     const parsed = JSON.parse(rawValue) as SchemaArtifact;
@@ -89,19 +98,20 @@ const artifactTypesHandlers = {
       },
     });
   },
-};
+});
 
-const VALID_ARTIFACT_TYPES = Object.keys(artifactTypesHandlers);
+const VALID_ARTIFACT_TYPES = artifactTypes;
 const AUTH_HEADER_NAME = 'x-hive-cdn-key';
 
 async function parseIncomingRequest(
   request: Request,
   keyValidator: KeyValidator,
+  analytics: Analytics,
 ): Promise<
   | { error: Response }
   | {
       targetId: string;
-      artifactType: keyof typeof artifactTypesHandlers;
+      artifactType: ArtifactType;
       storageKeyType: string;
     }
 > {
@@ -110,20 +120,20 @@ async function parseIncomingRequest(
 
   if (!targetId) {
     return {
-      error: new MissingTargetIDErrorResponse(),
+      error: new MissingTargetIDErrorResponse(analytics),
     };
   }
 
-  const artifactType = (params[1] || 'schema') as keyof typeof artifactTypesHandlers;
+  const artifactType = (params[1] || 'schema') as ArtifactType;
 
   if (!VALID_ARTIFACT_TYPES.includes(artifactType)) {
-    return { error: new InvalidArtifactTypeResponse(artifactType) };
+    return { error: new InvalidArtifactTypeResponse(artifactType, analytics) };
   }
 
   const headerKey = request.headers.get(AUTH_HEADER_NAME);
 
   if (!headerKey) {
-    return { error: new MissingAuthKeyResponse() };
+    return { error: new MissingAuthKeyResponse(analytics) };
   }
 
   try {
@@ -131,7 +141,7 @@ async function parseIncomingRequest(
 
     if (!keyValid) {
       return {
-        error: new InvalidAuthKeyResponse(),
+        error: new InvalidAuthKeyResponse(analytics),
       };
     }
 
@@ -146,7 +156,7 @@ async function parseIncomingRequest(
   } catch (e) {
     console.warn(`Failed to validate key for ${targetId}, error:`, e);
     return {
-      error: new InvalidAuthKeyResponse(),
+      error: new InvalidAuthKeyResponse(analytics),
     };
   }
 }
@@ -164,18 +174,23 @@ type GetRawStoreValue = (targetId: string) => Promise<string | null>;
 interface RequestHandlerDependencies {
   isKeyValid: IsKeyValid;
   getRawStoreValue: GetRawStoreValue;
+  analytics?: Analytics;
 }
 
-export const createRequestHandler =
-  (deps: RequestHandlerDependencies) =>
-  async (request: Request): Promise<Response> => {
-    const parsedRequest = await parseIncomingRequest(request, deps.isKeyValid);
+export const createRequestHandler = (deps: RequestHandlerDependencies) => {
+  const analytics = deps.analytics ?? createAnalytics();
+  const artifactTypesHandlers = createArtifactTypesHandlers(analytics);
+
+  return async (request: Request): Promise<Response> => {
+    const parsedRequest = await parseIncomingRequest(request, deps.isKeyValid, analytics);
 
     if ('error' in parsedRequest) {
       return parsedRequest.error;
     }
 
     const { targetId, artifactType, storageKeyType } = parsedRequest;
+
+    analytics.track({ type: 'artifact', value: artifactType, version: 'v0' }, targetId);
 
     const kvStorageKey = `target:${targetId}:${storageKeyType}`;
     const rawValue = await deps.getRawStoreValue(kvStorageKey);
@@ -208,6 +223,7 @@ export const createRequestHandler =
       console.log(
         `CDN Artifact not found for targetId=${targetId}, artifactType=${artifactType}, storageKeyType=${storageKeyType}`,
       );
-      return new CDNArtifactNotFound(artifactType, targetId);
+      return new CDNArtifactNotFound(artifactType, targetId, analytics);
     }
   };
+};

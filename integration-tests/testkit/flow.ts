@@ -1,31 +1,33 @@
 import { gql } from '@app/gql';
 import { fetch } from '@whatwg-node/fetch';
-
 import type {
+  AnswerOrganizationTransferRequestInput,
   CreateOrganizationInput,
-  UpdateOrganizationNameInput,
-  SchemaPublishInput,
   CreateProjectInput,
-  UpdateProjectNameInput,
+  CreateTargetInput,
   CreateTokenInput,
   DeleteTokensInput,
-  OrganizationMemberAccessInput,
-  SchemaCheckInput,
-  PublishPersistedOperationInput,
-  SetTargetValidationInput,
-  UpdateTargetValidationSettingsInput,
-  OperationsStatsSelectorInput,
-  UpdateBaseSchemaInput,
-  SchemaVersionsInput,
-  CreateTargetInput,
-  UpdateTargetNameInput,
-  SchemaVersionUpdateInput,
-  TargetSelectorInput,
-  OrganizationSelectorInput,
-  SchemaSyncCdnInput,
-  RateLimitInput,
-  InviteToOrganizationByEmailInput,
   EnableExternalSchemaCompositionInput,
+  InviteToOrganizationByEmailInput,
+  OperationsStatsSelectorInput,
+  OrganizationMemberAccessInput,
+  OrganizationSelectorInput,
+  OrganizationTransferRequestSelector,
+  PublishPersistedOperationInput,
+  RateLimitInput,
+  RequestOrganizationTransferInput,
+  SchemaCheckInput,
+  SchemaPublishInput,
+  SchemaSyncCdnInput,
+  SchemaVersionsInput,
+  SchemaVersionUpdateInput,
+  SetTargetValidationInput,
+  TargetSelectorInput,
+  UpdateBaseSchemaInput,
+  UpdateOrganizationNameInput,
+  UpdateProjectNameInput,
+  UpdateTargetNameInput,
+  UpdateTargetValidationSettingsInput,
 } from './gql/graphql';
 import { execute } from './graphql';
 
@@ -185,6 +187,104 @@ export function joinOrganization(code: string, authToken: string) {
   });
 }
 
+export function getOrganizationMembers(selector: OrganizationSelectorInput, authToken: string) {
+  return execute({
+    document: gql(/* GraphQL */ `
+      query getOrganizationMembers($selector: OrganizationSelectorInput!) {
+        organization(selector: $selector) {
+          organization {
+            members {
+              nodes {
+                id
+                user {
+                  email
+                }
+                organizationAccessScopes
+                projectAccessScopes
+                targetAccessScopes
+              }
+            }
+          }
+        }
+      }
+    `),
+    authToken,
+    variables: {
+      selector,
+    },
+  });
+}
+
+export function getOrganizationTransferRequest(
+  selector: OrganizationTransferRequestSelector,
+  authToken: string,
+) {
+  return execute({
+    document: gql(/* GraphQL */ `
+      query getOrganizationTransferRequest($selector: OrganizationTransferRequestSelector!) {
+        organizationTransferRequest(selector: $selector) {
+          organization {
+            id
+          }
+        }
+      }
+    `),
+    authToken,
+    variables: {
+      selector,
+    },
+  });
+}
+
+export function requestOrganizationTransfer(
+  input: RequestOrganizationTransferInput,
+  authToken: string,
+) {
+  return execute({
+    document: gql(/* GraphQL */ `
+      mutation requestOrganizationTransfer($input: RequestOrganizationTransferInput!) {
+        requestOrganizationTransfer(input: $input) {
+          ok {
+            email
+            code
+          }
+          error {
+            message
+          }
+        }
+      }
+    `),
+    authToken,
+    variables: {
+      input,
+    },
+  });
+}
+
+export function answerOrganizationTransferRequest(
+  input: AnswerOrganizationTransferRequestInput,
+  authToken: string,
+) {
+  return execute({
+    document: gql(/* GraphQL */ `
+      mutation answerOrganizationTransferRequest($input: AnswerOrganizationTransferRequestInput!) {
+        answerOrganizationTransferRequest(input: $input) {
+          ok {
+            accepted
+          }
+          error {
+            message
+          }
+        }
+      }
+    `),
+    authToken,
+    variables: {
+      input,
+    },
+  });
+}
+
 export function createProject(input: CreateProjectInput, authToken: string) {
   return execute({
     document: gql(/* GraphQL */ `
@@ -250,6 +350,9 @@ export function createTarget(input: CreateTargetInput, authToken: string) {
               id
               cleanId
             }
+          }
+          error {
+            message
           }
         }
       }
@@ -769,15 +872,13 @@ export function createCdnAccess(selector: TargetSelectorInput, token: string) {
 }
 
 export async function fetchSchemaFromCDN(selector: TargetSelectorInput, token: string) {
-  const cdnAccessResult = await createCdnAccess(selector, token);
+  const cdnAccessResult = await createCdnAccess(selector, token).then(r =>
+    r.expectNoGraphQLErrors(),
+  );
 
-  if (cdnAccessResult.body.errors) {
-    throw new Error(cdnAccessResult.body.errors[0].message);
-  }
+  const cdn = cdnAccessResult.createCdnToken;
 
-  const cdn = cdnAccessResult.body.data!.createCdnToken;
-
-  const res = await fetch(cdn.url, {
+  const res = await fetch(cdn.url + '/sdl', {
     headers: {
       'X-Hive-CDN-Key': cdn.token,
     },
@@ -790,15 +891,13 @@ export async function fetchSchemaFromCDN(selector: TargetSelectorInput, token: s
 }
 
 export async function fetchSupergraphFromCDN(selector: TargetSelectorInput, token: string) {
-  const cdnAccessResult = await createCdnAccess(selector, token);
+  const cdnAccessResult = await createCdnAccess(selector, token).then(r =>
+    r.expectNoGraphQLErrors(),
+  );
 
-  if (cdnAccessResult.body.errors) {
-    throw new Error(cdnAccessResult.body.errors[0].message);
-  }
+  const cdn = cdnAccessResult.createCdnToken;
 
-  const cdn = cdnAccessResult.body.data!.createCdnToken;
-
-  const res = await fetch(cdn.url.replace('/sdl', '/supergraph'), {
+  const res = await fetch(cdn.url + '/supergraph', {
     headers: {
       'X-Hive-CDN-Key': cdn.token,
     },
@@ -813,15 +912,13 @@ export async function fetchSupergraphFromCDN(selector: TargetSelectorInput, toke
 }
 
 export async function fetchMetadataFromCDN(selector: TargetSelectorInput, token: string) {
-  const cdnAccessResult = await createCdnAccess(selector, token);
+  const cdnAccessResult = await createCdnAccess(selector, token).then(r =>
+    r.expectNoGraphQLErrors(),
+  );
 
-  if (cdnAccessResult.body.errors) {
-    throw new Error(cdnAccessResult.body.errors[0].message);
-  }
+  const cdn = cdnAccessResult.createCdnToken;
 
-  const cdn = cdnAccessResult.body.data!.createCdnToken;
-
-  const res = await fetch(cdn.url.replace('/sdl', `/metadata`), {
+  const res = await fetch(cdn.url + '/metadata', {
     headers: {
       'X-Hive-CDN-Key': cdn.token,
     },

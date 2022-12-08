@@ -2,7 +2,6 @@ import { ReactElement, useEffect, useState } from 'react';
 import NextLink from 'next/link';
 import clsx from 'clsx';
 import { useQuery } from 'urql';
-
 import { GetStartedProgress } from '@/components/get-started/wizard';
 import { Avatar, Button, DropdownMenu, HiveLink } from '@/components/v2';
 import {

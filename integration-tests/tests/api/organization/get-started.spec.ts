@@ -1,81 +1,31 @@
 import {
-  createOrganization,
-  getOrganization,
-  createProject,
-  createToken,
-  publishSchema,
-  checkSchema,
-  joinOrganization,
-  inviteToOrganization,
-  waitFor,
-  setTargetValidation,
-} from '../../../testkit/flow';
-import { authenticate } from '../../../testkit/auth';
-import { collect } from '../../../testkit/usage';
-import {
-  TargetAccessScope,
-  ProjectType,
-  ProjectAccessScope,
   OrganizationAccessScope,
+  ProjectAccessScope,
+  ProjectType,
+  TargetAccessScope,
 } from '@app/gql/graphql';
+import { waitFor } from '../../../testkit/flow';
+import { initSeed } from '../../../testkit/seed';
 
-async function getSteps({ organization, token }: { organization: string; token: string }) {
-  const result = await getOrganization(organization, token);
+test.concurrent('freshly created organization has Get Started progress at 0%', async () => {
+  const { createOrg } = await initSeed().createOwner();
+  const { fetchOrganizationInfo } = await createOrg();
+  const { getStarted: steps1 } = await fetchOrganizationInfo();
 
-  expect(result.body.errors).not.toBeDefined();
-
-  return result.body.data?.organization?.organization.getStarted;
-}
-
-test('freshly created organization has Get Started progress at 0%', async () => {
-  const { access_token } = await authenticate('main');
-  const orgResult = await createOrganization(
-    {
-      name: 'foo',
-    },
-    access_token,
-  );
-  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
-
-  const steps = await getSteps({
-    organization: org.cleanId,
-    token: access_token,
-  });
-
-  expect(steps?.creatingProject).toBe(false);
-  expect(steps?.publishingSchema).toBe(false);
-  expect(steps?.checkingSchema).toBe(false);
-  expect(steps?.invitingMembers).toBe(false);
-  expect(steps?.reportingOperations).toBe(false);
-  expect(steps?.enablingUsageBasedBreakingChanges).toBe(false);
+  expect(steps1?.creatingProject).toBe(false);
+  expect(steps1?.publishingSchema).toBe(false);
+  expect(steps1?.checkingSchema).toBe(false);
+  expect(steps1?.invitingMembers).toBe(false);
+  expect(steps1?.reportingOperations).toBe(false);
+  expect(steps1?.enablingUsageBasedBreakingChanges).toBe(false);
 });
 
-test('completing each step should result in updated Get Started progress', async () => {
-  const { access_token } = await authenticate('main');
-  const orgResult = await createOrganization(
-    {
-      name: 'foo',
-    },
-    access_token,
-  );
-  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+test.concurrent('completing each step should result in updated Get Started progress', async () => {
+  const { createOrg } = await initSeed().createOwner();
+  const { inviteAndJoinMember, fetchOrganizationInfo, createProject } = await createOrg();
+  const { target, project, createToken } = await createProject(ProjectType.Single);
 
-  // Step: creating project
-
-  const projectResult = await createProject(
-    {
-      organization: org.cleanId,
-      name: 'foo',
-      type: ProjectType.Single,
-    },
-    access_token,
-  );
-
-  let steps = await getSteps({
-    organization: org.cleanId,
-    token: access_token,
-  });
-
+  const { getStarted: steps } = await fetchOrganizationInfo();
   expect(steps?.creatingProject).toBe(true); // modified
   expect(steps?.publishingSchema).toBe(false);
   expect(steps?.checkingSchema).toBe(false);
@@ -83,166 +33,81 @@ test('completing each step should result in updated Get Started progress', async
   expect(steps?.reportingOperations).toBe(false);
   expect(steps?.enablingUsageBasedBreakingChanges).toBe(false);
 
-  expect(projectResult.body.errors).not.toBeDefined();
-
-  const target = projectResult.body.data?.createProject.ok?.createdTargets.find(
-    t => t.name === 'production',
-  );
-  const project = projectResult.body.data?.createProject.ok?.createdProject;
-
   if (!target || !project) {
     throw new Error('Failed to create project');
   }
 
-  const tokenResult = await createToken(
-    {
-      name: 'test',
-      organization: org.cleanId,
-      project: project.cleanId,
-      target: target.cleanId,
-      organizationScopes: [OrganizationAccessScope.Read],
-      projectScopes: [ProjectAccessScope.Read],
+  const { publishSchema, checkSchema, collectOperations, toggleTargetValidation } =
+    await createToken({
       targetScopes: [
         TargetAccessScope.Read,
         TargetAccessScope.RegistryRead,
         TargetAccessScope.RegistryWrite,
         TargetAccessScope.Settings,
       ],
-    },
-    access_token,
-  );
+      projectScopes: [ProjectAccessScope.Read],
+      organizationScopes: [OrganizationAccessScope.Read],
+    });
 
-  expect(tokenResult.body.errors).not.toBeDefined();
-
-  const token = tokenResult.body.data!.createToken.ok!.secret;
-
-  // Step: publishing schema
-
-  await publishSchema(
-    {
-      author: 'test',
-      commit: 'test',
-      sdl: 'type Query { foo: String }',
-    },
-    token,
-  );
-
-  steps = await getSteps({
-    organization: org.cleanId,
-    token: access_token,
-  });
-
-  expect(steps?.creatingProject).toBe(true);
-  expect(steps?.publishingSchema).toBe(true); // modified
-  expect(steps?.checkingSchema).toBe(false);
-  expect(steps?.invitingMembers).toBe(false);
-  expect(steps?.reportingOperations).toBe(false);
-  expect(steps?.enablingUsageBasedBreakingChanges).toBe(false);
+  // Step: publish schema
+  await publishSchema({ sdl: 'type Query { foo: String }' }).then(r => r.expectNoGraphQLErrors());
+  const { getStarted: steps2 } = await fetchOrganizationInfo();
+  expect(steps2?.creatingProject).toBe(true);
+  expect(steps2?.publishingSchema).toBe(true); // modified
+  expect(steps2?.checkingSchema).toBe(false);
+  expect(steps2?.invitingMembers).toBe(false);
+  expect(steps2?.reportingOperations).toBe(false);
+  expect(steps2?.enablingUsageBasedBreakingChanges).toBe(false);
 
   // Step: checking schema
-
-  await checkSchema(
-    {
-      sdl: 'type Query { foo: String bar: String }',
-    },
-    token,
-  );
-
-  steps = await getSteps({
-    organization: org.cleanId,
-    token: access_token,
-  });
-
-  expect(steps?.creatingProject).toBe(true);
-  expect(steps?.publishingSchema).toBe(true);
-  expect(steps?.checkingSchema).toBe(true); // modified
-  expect(steps?.invitingMembers).toBe(false);
-  expect(steps?.reportingOperations).toBe(false);
-  expect(steps?.enablingUsageBasedBreakingChanges).toBe(false);
+  await checkSchema('type Query { foo: String bar: String }');
+  const { getStarted: steps3 } = await fetchOrganizationInfo();
+  expect(steps3?.creatingProject).toBe(true);
+  expect(steps3?.publishingSchema).toBe(true);
+  expect(steps3?.checkingSchema).toBe(true); // modified
+  expect(steps3?.invitingMembers).toBe(false);
+  expect(steps3?.reportingOperations).toBe(false);
+  expect(steps3?.enablingUsageBasedBreakingChanges).toBe(false);
 
   // Step: inviting members
-
-  const invitationResult = await inviteToOrganization(
-    {
-      email: 'some@email.com',
-      organization: org.cleanId,
-    },
-    access_token,
-  );
-
-  const inviteCode = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
-  expect(inviteCode).toBeDefined();
-
-  const { access_token: member_access_token } = await authenticate('extra');
-  await joinOrganization(inviteCode!, member_access_token);
-
-  steps = await getSteps({
-    organization: org.cleanId,
-    token: access_token,
-  });
-
-  expect(steps?.creatingProject).toBe(true);
-  expect(steps?.publishingSchema).toBe(true);
-  expect(steps?.checkingSchema).toBe(true);
-  expect(steps?.invitingMembers).toBe(true); // modified
-  expect(steps?.reportingOperations).toBe(false);
-  expect(steps?.enablingUsageBasedBreakingChanges).toBe(false);
+  await inviteAndJoinMember();
+  const { getStarted: steps4 } = await fetchOrganizationInfo();
+  expect(steps4?.creatingProject).toBe(true);
+  expect(steps4?.publishingSchema).toBe(true);
+  expect(steps4?.checkingSchema).toBe(true);
+  expect(steps4?.invitingMembers).toBe(true); // modified
+  expect(steps4?.reportingOperations).toBe(false);
+  expect(steps4?.enablingUsageBasedBreakingChanges).toBe(false);
 
   // Step: reporting operations
-
-  await collect({
-    operations: [
-      {
-        operationName: 'foo',
-        operation: 'query foo { foo }',
-        fields: ['Query', 'Query.foo'],
-        execution: {
-          duration: 2_000_000,
-          ok: true,
-          errorsTotal: 0,
-        },
+  await collectOperations([
+    {
+      operationName: 'foo',
+      operation: 'query foo { foo }',
+      fields: ['Query', 'Query.foo'],
+      execution: {
+        duration: 2_000_000,
+        ok: true,
+        errorsTotal: 0,
       },
-    ],
-    token,
-    authorizationHeader: 'authorization',
-  });
-  await waitFor(5_000);
-
-  steps = await getSteps({
-    organization: org.cleanId,
-    token: access_token,
-  });
-
-  expect(steps?.creatingProject).toBe(true);
-  expect(steps?.publishingSchema).toBe(true);
-  expect(steps?.checkingSchema).toBe(true);
-  expect(steps?.invitingMembers).toBe(true);
-  expect(steps?.reportingOperations).toBe(true); // modified
-  expect(steps?.enablingUsageBasedBreakingChanges).toBe(false);
-
-  // Step: reporting operations
-
-  await setTargetValidation(
-    {
-      enabled: true,
-      target: target.cleanId,
-      project: project.cleanId,
-      organization: org.cleanId,
     },
-    {
-      token,
-    },
-  );
+  ]);
+  await waitFor(5000);
+  const { getStarted: steps5 } = await fetchOrganizationInfo();
+  expect(steps5?.creatingProject).toBe(true);
+  expect(steps5?.publishingSchema).toBe(true);
+  expect(steps5?.checkingSchema).toBe(true);
+  expect(steps5?.invitingMembers).toBe(true);
+  expect(steps5?.reportingOperations).toBe(true); // modified
+  expect(steps5?.enablingUsageBasedBreakingChanges).toBe(false);
 
-  steps = await getSteps({
-    organization: org.cleanId,
-    token: access_token,
-  });
-
-  expect(steps?.creatingProject).toBe(true);
-  expect(steps?.publishingSchema).toBe(true);
-  expect(steps?.checkingSchema).toBe(true);
-  expect(steps?.invitingMembers).toBe(true);
-  expect(steps?.reportingOperations).toBe(true);
-  expect(steps?.enablingUsageBasedBreakingChanges).toBe(true); // modified
+  // Step: target validation
+  await toggleTargetValidation(true);
+  const { getStarted: steps6 } = await fetchOrganizationInfo();
+  expect(steps6?.creatingProject).toBe(true);
+  expect(steps6?.publishingSchema).toBe(true);
+  expect(steps6?.checkingSchema).toBe(true);
+  expect(steps6?.invitingMembers).toBe(true);
+  expect(steps6?.reportingOperations).toBe(true);
+  expect(steps6?.enablingUsageBasedBreakingChanges).toBe(true); // modified
 });

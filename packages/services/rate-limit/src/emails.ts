@@ -1,6 +1,7 @@
-import { fetch } from '@whatwg-node/fetch';
-import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import type { EmailsApi } from '@hive/emails';
+import { createTRPCProxyClient, httpLink } from '@trpc/client';
+import { fetch } from '@whatwg-node/fetch';
+import { env } from './environment';
 
 export function createEmailScheduler(config?: { endpoint: string }) {
   const api = config?.endpoint
@@ -73,9 +74,9 @@ export function createEmailScheduler(config?: { endpoint: string }) {
                   <mj-text>
                     We recommend to increase the limit.
                   </mj-text>
-                  <mj-button href="https://app.graphql-hive.com/${
-                    input.organization.cleanId
-                  }/subscription">
+                  <mj-button href="${env.hiveServices.webAppUrl}/${
+            input.organization.cleanId
+          }/subscription">
                     Manage your subscription
                   </mj-button>
                 </mj-column>
@@ -137,9 +138,9 @@ export function createEmailScheduler(config?: { endpoint: string }) {
                   <mj-text>
                     We recommend to increase the limit.
                   </mj-text>
-                  <mj-button href="https://app.graphql-hive.com/${
-                    input.organization.cleanId
-                  }/subscription">
+                  <mj-button href="${env.hiveServices.webAppUrl}/${
+            input.organization.cleanId
+          }/subscription">
                     Manage your subscription
                   </mj-button>
                 </mj-column>

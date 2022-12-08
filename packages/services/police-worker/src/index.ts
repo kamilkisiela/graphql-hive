@@ -4,7 +4,10 @@ addEventListener('scheduled', event => {
   event.waitUntil(handleSchedule());
 });
 
-async function execute(url: string, options: Request | RequestInit = {}): Promise<any> {
+async function execute(
+  url: string,
+  options: RequestInit<RequestInitCfProperties> = {},
+): Promise<any> {
   const config = {
     headers: {
       Authorization: `Bearer ${CF_BEARER_TOKEN}`,

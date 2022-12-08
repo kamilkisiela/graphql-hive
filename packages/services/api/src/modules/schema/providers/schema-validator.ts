@@ -1,16 +1,18 @@
 import { Injectable, Scope } from 'graphql-modules';
-import { Orchestrator, Schema, SchemaObject, Project } from '../../../shared/entities';
-import { buildSchema, findSchema, hashSchema } from '../../../shared/schema';
 import * as Types from '../../../__generated__/types';
-import { Logger } from '../../shared/providers/logger';
+import { Orchestrator, Project, Schema, SchemaObject } from '../../../shared/entities';
+import { buildSchema, findSchema, hashSchema } from '../../../shared/schema';
 import { sentry } from '../../../shared/sentry';
-import { SchemaHelper } from './schema-helper';
+import { Logger } from '../../shared/providers/logger';
 import { Inspector } from './inspector';
+import { SchemaBuildError } from './orchestrators/errors';
+import { SchemaHelper } from './schema-helper';
 
 export type ValidationResult = {
   valid: boolean;
-  errors: Array<Types.SchemaError>;
-  changes: Array<Types.SchemaChange>;
+  errors: Types.SchemaError[];
+  changes: Types.SchemaChange[];
+  messages: string[];
 };
 
 @Injectable({
@@ -30,6 +32,7 @@ export class SchemaValidator {
     incoming,
     before,
     after,
+    beforeState,
     baseSchema,
     experimental_acceptBreakingChanges,
     project,
@@ -38,6 +41,7 @@ export class SchemaValidator {
     incoming: Schema;
     before: readonly Schema[];
     after: readonly Schema[];
+    beforeState: 'valid' | 'invalid' | null;
     selector: Types.TargetSelector;
     baseSchema: string | null;
     experimental_acceptBreakingChanges: boolean;
@@ -67,9 +71,8 @@ export class SchemaValidator {
       this.helper.createSchemaObject(s),
     );
     const afterSchemas: SchemaObject[] = after.map(s => this.helper.createSchemaObject(s));
-    const beforeSchemas: SchemaObject[] = before.map(s => this.helper.createSchemaObject(s));
 
-    const isInitialSchema = beforeSchemas.length === 0;
+    const isInitialSchema = before.length === 0;
     const areIdentical = existing && hashSchema(existing) === hashSchema(incoming);
 
     if (areIdentical) {
@@ -77,6 +80,7 @@ export class SchemaValidator {
         valid: true,
         errors: [],
         changes: [],
+        messages: [],
       };
     }
 
@@ -90,16 +94,35 @@ export class SchemaValidator {
         valid: errors.length === 0,
         errors: errors,
         changes: [],
+        messages: [],
       };
     }
 
     let changes: Types.SchemaChange[] = [];
+    const messages: string[] = [];
+
+    const beforeSchemas: SchemaObject[] = before.map(s => this.helper.createSchemaObject(s));
 
     try {
       const [existingSchema, incomingSchema] = await Promise.all([
-        orchestrator.build(beforeSchemas, project.externalComposition),
+        orchestrator.build(beforeSchemas, project.externalComposition).catch(async error => {
+          if (
+            beforeState === 'invalid' &&
+            error instanceof SchemaBuildError &&
+            experimental_acceptBreakingChanges
+          ) {
+            this.logger.debug(
+              'Failed to build previous schema, but the experimental_acceptBreakingChanges is enabled. Skipping breaking changes check.',
+            );
+            messages.push('Failed to build previous schema. Skipping changes check.');
+            return null;
+          }
+
+          throw error;
+        }),
         orchestrator.build(afterSchemas, project.externalComposition),
       ]);
+
       if (existingSchema) {
         changes = await this.inspector.diff(
           buildSchema(existingSchema),
@@ -139,6 +162,7 @@ export class SchemaValidator {
       valid,
       errors,
       changes,
+      messages,
     };
   }
 }

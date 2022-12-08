@@ -1,5 +1,5 @@
-import * as pulumi from '@pulumi/pulumi';
 import * as cf from '@pulumi/cloudflare';
+import * as pulumi from '@pulumi/pulumi';
 
 const cfConfig = new pulumi.Config('cloudflareCustom');
 
@@ -10,6 +10,7 @@ function toExpressionList(items: string[]): string {
 export function deployCloudFlareSecurityTransform(options: {
   envName: string;
   ignoredPaths: string[];
+  ignoredHosts: string[];
 }) {
   // We deploy it only once, because CloudFlare is not super friendly for multiple deployments of "http_response_headers_transform" rules
   // The single rule, deployed to prod, covers all other envs, and infers the hostname dynamically.
@@ -20,7 +21,9 @@ export function deployCloudFlareSecurityTransform(options: {
     return;
   }
 
-  const expression = `not http.request.uri.path in { ${toExpressionList(options.ignoredPaths)} }`;
+  const expression = `not http.request.uri.path in { ${toExpressionList(
+    options.ignoredPaths,
+  )} } and not http.host in { ${toExpressionList(options.ignoredHosts)} }`;
 
   const monacoCdnBasePath: `https://${string}/` = `https://cdn.jsdelivr.net/npm/monaco-editor@0.33.0/`;
   const crispHost = 'client.crisp.chat';
@@ -41,7 +44,7 @@ export function deployCloudFlareSecurityTransform(options: {
 
   const contentSecurityPolicy = `
   default-src 'self';
-  frame-src ${stripeHost} https://game.crisp.chat https://giscus.app;
+  frame-src ${stripeHost} https://game.crisp.chat https://giscus.app https://www.youtube.com;
   worker-src 'self' blob:;
   style-src 'self' 'unsafe-inline' ${crispHost} fonts.googleapis.com ${monacoCdnBasePath};
   script-src 'self' 'unsafe-eval' 'unsafe-inline' {DYNAMIC_HOST_PLACEHOLDER} ${monacoCdnBasePath} ${cspHosts};

@@ -4,7 +4,6 @@ import ReactECharts from 'echarts-for-react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import tw from 'twin.macro';
 import { useQuery } from 'urql';
-
 import { Section } from '@/components/common';
 import {
   DateRangeInput,
@@ -13,10 +12,10 @@ import {
 } from '@/graphql';
 import { theme } from '@/lib/charts';
 import {
+  formatThroughput,
   toDecimal,
   useFormattedDuration,
   useFormattedNumber,
-  formatThroughput,
   useFormattedThroughput,
 } from '@/lib/hooks';
 import { OperationsFallback } from './Fallback';

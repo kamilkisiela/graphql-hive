@@ -1,0 +1,34 @@
+on:
+  workflow_call:
+
+jobs:
+  deployment:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: setup environment
+        uses: ./.github/actions/setup
+        with:
+          codegen: false
+
+      - uses: the-guild-org/shared-config/website-cf@main
+        name: build and deploy website
+        env:
+          NEXT_BASE_PATH: ${{ github.ref == 'refs/heads/main' && '/graphql/hive' || '' }}
+          SITE_URL:
+            ${{ github.ref == 'refs/heads/main' && 'https://the-guild.dev/graphql/hive' || '' }}
+          NEXT_PUBLIC_ALGOLIA_INDEX_NAME: ${{ secrets.NEXT_PUBLIC_ALGOLIA_INDEX_NAME }}
+          NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY: ${{ secrets.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY }}
+          NEXT_PUBLIC_ALGOLIA_APP_ID: ${{ secrets.NEXT_PUBLIC_ALGOLIA_APP_ID }}
+        with:
+          cloudflareApiToken: ${{ secrets.WEBSITE_CLOUDFLARE_API_TOKEN }}
+          cloudflareAccountId: ${{ secrets.WEBSITE_CLOUDFLARE_ACCOUNT_ID }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          projectName: hive-landing-page
+          prId: ${{ github.event.pull_request.number }}
+          mainBranch: main
+          websiteDirectory: ./
+          buildScript: cd packages/web/landing-page && pnpm build && pnpm next export
+          artifactDir: packages/web/landing-page/out

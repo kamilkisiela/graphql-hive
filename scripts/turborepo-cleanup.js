@@ -6,11 +6,11 @@
  * The goal here is to delete it once a week.
  */
 
-import path from 'path';
 import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import fsExtra from 'fs-extra';
 import rimraf from 'rimraf';
-import { fileURLToPath } from 'url';
 
 const cwd = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 

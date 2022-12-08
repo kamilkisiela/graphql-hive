@@ -1,23 +1,12 @@
-import * as utils from '@n1ru4l/dockest/test-helper';
-import { createFetch } from '@whatwg-node/fetch';
-import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import type { InternalApi } from '@hive/server';
+import { createTRPCProxyClient, httpLink } from '@trpc/client';
+import { createFetch } from '@whatwg-node/fetch';
 import { z } from 'zod';
 import { ensureEnv } from './env';
-
-const graphqlAddress = utils.getServiceAddress('server', 3001);
+import { getServiceHost } from './utils';
 
 const { fetch } = createFetch({
   useNodeFetch: true,
-});
-
-const internalApi = createTRPCProxyClient<InternalApi>({
-  links: [
-    httpLink({
-      url: `http://${graphqlAddress}/trpc`,
-      fetch,
-    }),
-  ],
 });
 
 const SignUpSignInUserResponseModel = z.object({
@@ -29,23 +18,30 @@ const signUpUserViaEmail = async (
   email: string,
   password: string,
 ): Promise<z.TypeOf<typeof SignUpSignInUserResponseModel>> => {
-  const response = await fetch(`${ensureEnv('SUPERTOKENS_CONNECTION_URI')}/recipe/signup`, {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json; charset=UTF-8',
-      'api-key': ensureEnv('SUPERTOKENS_API_KEY'),
-    },
-    body: JSON.stringify({
-      email,
-      password,
-    }),
-  });
-  const body = await response.text();
-  if (response.status !== 200) {
-    throw new Error(`Signup failed. ${response.status}.\n ${body}`);
-  }
+  try {
+    const response = await fetch(`${ensureEnv('SUPERTOKENS_CONNECTION_URI')}/recipe/signup`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json; charset=UTF-8',
+        'api-key': ensureEnv('SUPERTOKENS_API_KEY'),
+      },
+      body: JSON.stringify({
+        email,
+        password,
+      }),
+    });
+    const body = await response.text();
 
-  return SignUpSignInUserResponseModel.parse(JSON.parse(body));
+    if (response.status !== 200) {
+      throw new Error(`Signup failed. ${response.status}.\n ${body}`);
+    }
+
+    return SignUpSignInUserResponseModel.parse(JSON.parse(body));
+  } catch (e) {
+    console.warn(`Failed to sign up:`, e);
+
+    throw e;
+  }
 };
 
 const createSessionPayload = (superTokensUserId: string, email: string) => ({
@@ -72,74 +68,85 @@ const createSession = async (
   email: string,
   oidcIntegrationId: string | null,
 ) => {
-  await internalApi.ensureUser.mutate({
-    superTokensUserId,
-    email,
-    oidcIntegrationId,
-  });
+  try {
+    const graphqlAddress = await getServiceHost('server', 8082);
 
-  const sessionData = createSessionPayload(superTokensUserId, email);
-  const payload = {
-    enableAntiCsrf: false,
-    userId: superTokensUserId,
-    userDataInDatabase: sessionData,
-    userDataInJWT: sessionData,
-  };
+    const internalApi = createTRPCProxyClient<InternalApi>({
+      links: [
+        httpLink({
+          url: `http://${graphqlAddress}/trpc`,
+          fetch,
+        }),
+      ],
+    });
 
-  const response = await fetch(`${ensureEnv('SUPERTOKENS_CONNECTION_URI')}/recipe/session`, {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json; charset=UTF-8',
-      'api-key': ensureEnv('SUPERTOKENS_API_KEY'),
-      rid: 'session',
-    },
-    body: JSON.stringify(payload),
-  });
-  const body = await response.text();
-  if (response.status !== 200) {
-    throw new Error(`Create session failed. ${response.status}.\n ${body}`);
+    await internalApi.ensureUser.mutate({
+      superTokensUserId,
+      email,
+      oidcIntegrationId,
+    });
+
+    const sessionData = createSessionPayload(superTokensUserId, email);
+    const payload = {
+      enableAntiCsrf: false,
+      userId: superTokensUserId,
+      userDataInDatabase: sessionData,
+      userDataInJWT: sessionData,
+    };
+
+    const response = await fetch(`${ensureEnv('SUPERTOKENS_CONNECTION_URI')}/recipe/session`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json; charset=UTF-8',
+        'api-key': ensureEnv('SUPERTOKENS_API_KEY'),
+        rid: 'session',
+      },
+      body: JSON.stringify(payload),
+    });
+    const body = await response.text();
+
+    if (response.status !== 200) {
+      throw new Error(`Create session failed. ${response.status}.\n ${body}`);
+    }
+
+    const data = CreateSessionModel.parse(JSON.parse(body));
+
+    /**
+     * These are the required cookies that need to be set.
+     */
+    return {
+      access_token: data.accessToken.token,
+    };
+  } catch (e) {
+    console.warn(`Failed to create session:`, e);
+    throw e;
   }
-
-  const data = CreateSessionModel.parse(JSON.parse(body));
-
-  /**
-   * These are the required cookies that need to be set.
-   */
-  return {
-    access_token: data.accessToken.token,
-  };
 };
 
-type UserID = 'main' | 'extra' | 'admin' | string;
 const password = 'ilikebigturtlesandicannotlie47';
 
-export const userEmails: Record<UserID, string> = {
-  main: 'main@localhost.localhost',
-  extra: 'extra@localhost.localhost',
-  admin: 'admin@localhost.localhost',
-};
+export function userEmail(userId: string) {
+  return `${userId}-${Date.now()}@localhost.localhost`;
+}
 
-const tokenResponsePromise: Record<
-  UserID,
-  Promise<z.TypeOf<typeof SignUpSignInUserResponseModel>> | null
-> = {
-  main: null,
-  extra: null,
-  admin: null,
-};
+const tokenResponsePromise: {
+  [key: string]: Promise<z.TypeOf<typeof SignUpSignInUserResponseModel>> | null;
+} = {};
 
+export function authenticate(email: string): Promise<{ access_token: string }>;
 export function authenticate(
-  userId: UserID,
+  email: string,
+  oidcIntegrationId?: string,
+): Promise<{ access_token: string }>;
+export function authenticate(
+  email: string | string,
   oidcIntegrationId?: string,
 ): Promise<{ access_token: string }> {
-  if (!tokenResponsePromise[userId]) {
-    tokenResponsePromise[userId] = signUpUserViaEmail(
-      userEmails[userId] ?? `${userId}@localhost.localhost`,
-      password,
-    );
+  if (!tokenResponsePromise[email]) {
+    tokenResponsePromise[email] = signUpUserViaEmail(email, password);
   }
 
-  return tokenResponsePromise[userId]!.then(data =>
+  return tokenResponsePromise[email]!.then(data =>
     createSession(data.user.id, data.user.email, oidcIntegrationId ?? null),
   );
 }

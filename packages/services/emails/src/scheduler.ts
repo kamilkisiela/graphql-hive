@@ -1,12 +1,12 @@
-import * as Sentry from '@sentry/node';
 import type { FastifyLoggerInstance } from '@hive/service-common';
-import { Queue, QueueScheduler, Worker, Job } from 'bullmq';
+import * as Sentry from '@sentry/node';
+import { Job, Queue, QueueScheduler, Worker } from 'bullmq';
 import Redis, { Redis as RedisInstance } from 'ioredis';
-import pTimeout from 'p-timeout';
 import mjml2html from 'mjml';
-import { emailsTotal, emailsFailuresTotal } from './metrics';
-import type { EmailInput } from './shapes';
+import pTimeout from 'p-timeout';
+import { emailsFailuresTotal, emailsTotal } from './metrics';
 import type { EmailProvider } from './providers';
+import type { EmailInput } from './shapes';
 
 const DAY_IN_SECONDS = 86_400;
 
@@ -172,11 +172,10 @@ export function createScheduler(config: {
     try {
       queue?.removeAllListeners();
       queueScheduler?.removeAllListeners(),
-        await pTimeout(
-          Promise.all([queue?.close(), queueScheduler?.close()]),
-          5000,
-          'BullMQ close timeout',
-        );
+        await pTimeout(Promise.all([queue?.close(), queueScheduler?.close()]), {
+          milliseconds: 5000,
+          message: 'BullMQ close timeout',
+        });
     } catch (e) {
       logger.error('Failed to stop queues', e);
     } finally {
@@ -208,10 +207,8 @@ export function createScheduler(config: {
       throw new Error('Queue not initialized');
     }
 
-    const jobName = email.id;
-
-    return queue.add(jobName, email, {
-      jobId: jobName,
+    return queue.add(email.id ?? email.subject, email, {
+      jobId: email.id,
       // We don't want to remove completed jobs, because it tells us that the job has been processed
       // and we avoid sending the same email twice.
       removeOnComplete: {

@@ -1,11 +1,11 @@
 import React from 'react';
-import clsx from 'clsx';
-import { gql, DocumentType } from 'urql';
 import * as Popover from '@radix-ui/react-popover';
+import clsx from 'clsx';
 import { VscCommentDiscussion, VscPulse } from 'react-icons/vsc';
-import { useRouteSelector, formatNumber } from '@/lib/hooks';
+import { DocumentType, gql } from 'urql';
 import { Link } from '@/components/v2/link';
 import { Markdown } from '@/components/v2/markdown';
+import { formatNumber, useRouteSelector } from '@/lib/hooks';
 import { useArgumentListToggle } from './provider';
 
 function useCollapsibleList<T>(list: T[], max: number, defaultValue: boolean) {
@@ -71,14 +71,14 @@ export function SchemaExplorerUsageStats(props: {
         </div>
         <div
           title={`${percentage.toFixed(2)}% of all requests`}
-          className="bg-orange-500 relative mt-1 w-full overflow-hidden rounded bg-opacity-20"
+          className="relative mt-1 w-full overflow-hidden rounded bg-orange-500 bg-opacity-20"
           style={{
             width: 50,
             height: 5,
           }}
         >
           <div
-            className="bg-orange-500 h-full"
+            className="h-full bg-orange-500"
             style={{
               width: `${percentage}%`,
             }}

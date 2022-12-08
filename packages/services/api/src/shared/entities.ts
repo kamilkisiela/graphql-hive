@@ -1,14 +1,14 @@
 import { DocumentNode, GraphQLError, SourceLocation } from 'graphql';
+import { parse } from 'graphql';
 import type {
-  SchemaError,
   AlertChannelType,
   AlertType,
   AuthProvider,
   OrganizationAccessScope,
   ProjectAccessScope,
+  SchemaError,
   TargetAccessScope,
 } from '../__generated__/types';
-import { parse } from 'graphql';
 
 export interface Schema {
   id: string;
@@ -135,7 +135,9 @@ export interface OIDCIntegration {
   linkedOrganizationId: string;
   clientId: string;
   encryptedClientSecret: string;
-  oauthApiUrl: string;
+  tokenEndpoint: string;
+  userinfoEndpoint: string;
+  authorizationEndpoint: string;
 }
 
 export interface Project {
@@ -188,6 +190,7 @@ export interface User {
 
 export interface Member {
   id: string;
+  isOwner: boolean;
   user: User;
   organization: string;
   scopes: Array<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;

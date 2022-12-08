@@ -1,4 +1,4 @@
-import { FC, ReactElement } from 'react';
+import { PropsWithChildren, ReactElement } from 'react';
 import { keyframes } from '@emotion/react';
 import {
   Close,
@@ -14,7 +14,6 @@ import {
 } from '@radix-ui/react-dialog';
 import clsx from 'clsx';
 import { css } from 'twin.macro';
-
 import { Button } from '@/components/v2';
 import { XIcon } from '@/components/v2/icon';
 
@@ -28,15 +27,26 @@ const contentShow = keyframes({
   '100%': { opacity: 1, transform: 'translate(-50%, -50%) scale(1)' },
 });
 
-const Modal: FC<{
+const widthBySize = {
+  sm: 'w-[450px]',
+  md: 'w-[600px]',
+  lg: 'w-[800px]',
+};
+
+const Modal = ({
+  trigger,
+  open,
+  onOpenChange,
+  children,
+  className,
+  size = 'sm',
+}: PropsWithChildren<{
   trigger?: ReactElement;
   open?: boolean;
+  size?: 'sm' | 'md' | 'lg';
   onOpenChange?: (isOpen: boolean) => void;
   className?: string;
-}> & {
-  Title?: FC<DialogTitleProps>;
-  Description?: FC<DialogDescriptionProps>;
-} = ({ trigger, open, onOpenChange, children, className }) => (
+}>) => (
   <Root open={open} onOpenChange={onOpenChange}>
     <Trigger asChild>{trigger}</Trigger>
     <Portal>
@@ -55,13 +65,13 @@ const Modal: FC<{
             top-1/2
             left-1/2
             max-h-[95%]
-            w-[450px]
             max-w-[95%]
             overflow-auto
             rounded-md
             bg-black
             p-7`,
             className,
+            widthBySize[size],
           )}
           css={css`
             box-shadow: hsl(206 22% 7% / 35%) 0 10px 38px -10px,
@@ -75,7 +85,7 @@ const Modal: FC<{
           {children}
 
           <Close asChild>
-            <Button className="hover:text-orange-500 absolute top-5 right-5 text-gray-500 hover:border-gray-500">
+            <Button className="absolute top-5 right-5 text-gray-500 hover:border-gray-500 hover:text-orange-500">
               <XIcon />
             </Button>
           </Close>
@@ -85,7 +95,7 @@ const Modal: FC<{
   </Root>
 );
 
-Modal.Title = ({ className, children, ...props }) => {
+Modal.Title = ({ className, children, ...props }: PropsWithChildren<DialogTitleProps>) => {
   return (
     <Title className={clsx('text-2xl font-extrabold', className)} {...props}>
       {children}
@@ -93,7 +103,11 @@ Modal.Title = ({ className, children, ...props }) => {
   );
 };
 
-Modal.Description = ({ children, className, ...props }) => {
+Modal.Description = ({
+  children,
+  className,
+  ...props
+}: PropsWithChildren<DialogDescriptionProps>) => {
   return (
     <Description className={clsx('text-sm font-medium text-gray-500', className)} {...props}>
       {children}

@@ -1,36 +1,36 @@
-import { Injectable, Inject, Scope } from 'graphql-modules';
-import lodash from 'lodash';
 import type { Span } from '@sentry/types';
+import { Inject, Injectable, Scope } from 'graphql-modules';
+import lodash from 'lodash';
+import * as Types from '../../../__generated__/types';
 import {
-  Schema,
-  Target,
+  GraphQLDocumentStringInvalidError,
+  Orchestrator,
   Project,
   ProjectType,
-  Orchestrator,
-  GraphQLDocumentStringInvalidError,
+  Schema,
+  Target,
 } from '../../../shared/entities';
-import * as Types from '../../../__generated__/types';
-import { ProjectManager } from '../../project/providers/project-manager';
-import { Logger } from '../../shared/providers/logger';
-import { updateSchemas } from '../../../shared/schema';
-import { SchemaManager } from './schema-manager';
-import { SchemaValidator, ValidationResult } from './schema-validator';
-import { sentry } from '../../../shared/sentry';
-import type { TargetSelector } from '../../shared/providers/storage';
-import { IdempotentRunner } from '../../shared/providers/idempotent-runner';
+import { HiveError } from '../../../shared/errors';
 import { bolderize } from '../../../shared/markdown';
+import { updateSchemas } from '../../../shared/schema';
+import { sentry } from '../../../shared/sentry';
 import { AlertsManager } from '../../alerts/providers/alerts-manager';
-import { TargetManager } from '../../target/providers/target-manager';
-import { CdnProvider } from '../../cdn/providers/cdn.provider';
-import { OrganizationManager } from '../../organization/providers/organization-manager';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { TargetAccessScope } from '../../auth/providers/target-access';
+import { CdnProvider } from '../../cdn/providers/cdn.provider';
 import { GitHubIntegrationManager } from '../../integrations/providers/github-integration-manager';
+import { OrganizationManager } from '../../organization/providers/organization-manager';
+import { ProjectManager } from '../../project/providers/project-manager';
+import { IdempotentRunner } from '../../shared/providers/idempotent-runner';
+import { Logger } from '../../shared/providers/logger';
+import { type TargetSelector, Storage } from '../../shared/providers/storage';
+import { TargetManager } from '../../target/providers/target-manager';
+import { ArtifactStorageWriter } from './artifact-storage-writer';
 import type { SchemaModuleConfig } from './config';
 import { SCHEMA_MODULE_CONFIG } from './config';
 import { SchemaHelper } from './schema-helper';
-import { HiveError } from '../../../shared/errors';
-import { ArtifactStorageWriter } from './artifact-storage-writer';
+import { SchemaManager } from './schema-manager';
+import { SchemaValidator, ValidationResult } from './schema-validator';
 
 type CheckInput = Omit<Types.SchemaCheckInput, 'project' | 'organization' | 'target'> &
   TargetSelector;
@@ -54,6 +54,7 @@ export class SchemaPublisher {
   constructor(
     logger: Logger,
     private authManager: AuthManager,
+    private storage: Storage,
     private schemaManager: SchemaManager,
     private targetManager: TargetManager,
     private projectManager: ProjectManager,
@@ -123,6 +124,7 @@ export class SchemaPublisher {
       incoming: incomingSchema,
       before: schemas,
       after: newSchemas,
+      beforeState: 'valid' in latest ? (latest.valid ? 'valid' : 'invalid') : null,
       selector: {
         organization: input.organization,
         project: input.project,
@@ -197,11 +199,24 @@ export class SchemaPublisher {
   }
 
   @sentry('SchemaPublisher.publish')
-  async publish(input: PublishInput, span?: Span): Promise<PublishResult> {
+  async publish(
+    input: PublishInput,
+    signal: AbortSignal,
+    span?: Span | undefined,
+  ): Promise<PublishResult> {
     this.logger.debug('Schema publication (checksum=%s)', input.checksum);
     return this.idempotentRunner.run({
       identifier: `schema:publish:${input.checksum}`,
-      executor: () => this.internalPublish(input),
+      executor: async () => {
+        const unlock = await this.storage.idMutex.lock(`schema:publish:${input.target}`, {
+          signal,
+        });
+        try {
+          return await this.internalPublish(input);
+        } finally {
+          await unlock();
+        }
+      },
       ttl: 60,
       span,
     });
@@ -344,7 +359,7 @@ export class SchemaPublisher {
       sdl: input.sdl.length,
       checksum: input.checksum,
       experimental_accept_breaking_changes: input.experimental_acceptBreakingChanges === true,
-      metadata: Boolean(input.metadata),
+      metadata: !!input.metadata,
     });
 
     await this.authManager.ensureTargetAccess({
@@ -475,6 +490,7 @@ export class SchemaPublisher {
         incoming: incomingSchema,
         before: schemas,
         after: newSchemas,
+        beforeState: 'valid' in latest ? (latest.valid ? 'valid' : 'invalid') : null,
         selector: {
           organization: organizationId,
           project: projectId,
@@ -491,17 +507,19 @@ export class SchemaPublisher {
       throw err;
     }
 
-    const { changes, errors, valid } = result;
+    const { changes, errors, valid, messages } = result;
 
+    const hasPreviousVersion = 'version' in latest && !!latest.version;
     const hasNewUrl =
-      Boolean(latest.version && previousSchema) &&
-      (previousSchema!.url ?? null) !== (incomingSchema.url ?? null);
+      hasPreviousVersion &&
+      !!previousSchema &&
+      (previousSchema.url ?? null) !== (incomingSchema.url ?? null);
     const hasSchemaChanges = changes.length > 0;
     const hasErrors = errors.length > 0;
     const isForced = input.force === true;
     let hasDifferentChecksum = false;
 
-    if (latest.version && previousSchema) {
+    if (hasPreviousVersion) {
       const before = this.helper
         .sortSchemas(schemas)
         .map(s => this.helper.createChecksum(this.helper.createSchemaObject(s)))
@@ -521,7 +539,7 @@ export class SchemaPublisher {
     this.logger.debug('Changes: %s', changes.length);
     this.logger.debug('Forced: %s', isForced ? 'yes' : 'false');
     this.logger.debug('New url: %s', hasNewUrl ? 'yes' : 'false');
-    this.logger.debug('Checksums comparison:', hasDifferentChecksum ? 'different' : 'same');
+    this.logger.debug('Checksums comparison: %s', hasDifferentChecksum ? 'different' : 'same');
 
     // if the schema is not modified, we don't need to do anything, just return the success
     if (!isModified && !isInitialSchema) {
@@ -536,6 +554,7 @@ export class SchemaPublisher {
           valid: true,
           changes: [],
           errors: [],
+          messages,
         });
       }
 
@@ -577,10 +596,8 @@ export class SchemaPublisher {
       });
     }
 
-    const updates: string[] = [];
-
     if (valid && hasNewUrl) {
-      updates.push(
+      messages.push(
         `Updated: New service url: ${incomingSchema.url ?? 'empty'} (previously: ${
           previousSchema!.url ?? 'empty'
         })`,
@@ -596,7 +613,7 @@ export class SchemaPublisher {
         valid,
         changes,
         errors,
-        updates,
+        messages,
       });
     }
 
@@ -627,7 +644,7 @@ export class SchemaPublisher {
       valid,
       errors,
       changes,
-      message: updates.length ? updates.join('\n') : null,
+      message: messages.length ? messages.join('\n') : null,
       linkToWebsite,
     };
   }
@@ -860,7 +877,7 @@ export class SchemaPublisher {
     valid,
     changes,
     errors,
-    updates,
+    messages,
   }: {
     initial: boolean;
     force?: boolean | null;
@@ -869,7 +886,7 @@ export class SchemaPublisher {
     valid: boolean;
     changes: readonly Types.SchemaChange[];
     errors: readonly Types.SchemaError[];
-    updates?: string[];
+    messages?: string[];
   }) {
     if (!project.gitRepository) {
       return {
@@ -904,8 +921,8 @@ export class SchemaPublisher {
           .join('\n\n');
       }
 
-      if (updates?.length) {
-        summary += `\n\n${updates.map(val => `- ${val}`).join('\n')}`;
+      if (messages?.length) {
+        summary += `\n\n${messages.map(val => `- ${val}`).join('\n')}`;
       }
 
       if (valid === false && force === true) {

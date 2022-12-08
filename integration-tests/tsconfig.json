@@ -1,6 +1,7 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
+    "rootDir": ".",
     "baseUrl": ".",
     "esModuleInterop": true,
     "paths": {
@@ -8,5 +9,5 @@
       "@hive/storage": ["../packages/services/storage/src/index.ts"]
     }
   },
-  "include": ["testkit", "tests", "../node_modules/dockest/dist/@types.d.ts"]
+  "include": ["testkit", "tests"]
 }

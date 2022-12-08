@@ -1,15 +1,21 @@
-import { Injectable, Scope, Inject, forwardRef } from 'graphql-modules';
 import Dataloader from 'dataloader';
-import { Logger } from '../../shared/providers/logger';
-import { Storage } from '../../shared/providers/storage';
+import DataLoader from 'dataloader';
+import { forwardRef, Inject, Injectable, Scope } from 'graphql-modules';
 import { Token } from '../../../shared/entities';
 import { AccessError } from '../../../shared/errors';
-import DataLoader from 'dataloader';
-import { TokenStorage, TokenSelector } from '../../token/providers/token-storage';
-import { OrganizationAccessScope } from './scopes';
+import { Logger } from '../../shared/providers/logger';
+import { Storage } from '../../shared/providers/storage';
+import { TokenSelector, TokenStorage } from '../../token/providers/token-storage';
 import type { ProjectAccessScope } from './project-access';
+import { OrganizationAccessScope } from './scopes';
 import type { TargetAccessScope } from './target-access';
+
 export { OrganizationAccessScope } from './scopes';
+
+export interface OrganizationOwnershipSelector {
+  user: string;
+  organization: string;
+}
 
 export interface OrganizationUserScopesSelector {
   user: string;
@@ -52,6 +58,13 @@ export class OrganizationAccess {
     string
   >;
   tokenInfo: DataLoader<TokenSelector, Token | null, string>;
+  ownership: DataLoader<
+    {
+      organization: string;
+    },
+    string | null,
+    string
+  >;
 
   constructor(
     logger: Logger,
@@ -160,6 +173,25 @@ export class OrganizationAccess {
         },
       },
     );
+
+    this.ownership = new Dataloader(
+      async selectors => {
+        const ownerPerSelector = await Promise.all(
+          selectors.map(selector => this.storage.getOrganizationOwnerId(selector)),
+        );
+
+        return selectors.map((_, i) => ownerPerSelector[i]);
+      },
+      {
+        cacheKeyFn(selector) {
+          return JSON.stringify({
+            type: 'OrganizationAccess:ownership',
+            organization: selector.organization,
+          });
+        },
+      },
+    );
+
     this.tokenInfo = new Dataloader(
       selectors => Promise.all(selectors.map(selector => this.tokenStorage.getToken(selector))),
       {
@@ -188,6 +220,16 @@ export class OrganizationAccess {
 
   async checkAccessForUser(selector: OrganizationUserAccessSelector): Promise<boolean> {
     return this.userAccess.load(selector);
+  }
+
+  async checkOwnershipForUser(selector: OrganizationOwnershipSelector) {
+    const owner = await this.ownership.load(selector);
+
+    if (!owner) {
+      return false;
+    }
+
+    return owner === selector.user;
   }
 
   async getMemberScopes(selector: OrganizationUserScopesSelector) {

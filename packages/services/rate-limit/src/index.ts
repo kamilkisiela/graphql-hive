@@ -1,17 +1,17 @@
 #!/usr/bin/env node
 import 'reflect-metadata';
-import * as Sentry from '@sentry/node';
 import {
   createServer,
-  startMetrics,
   registerShutdown,
   reportReadiness,
+  startMetrics,
 } from '@hive/service-common';
-import { createRateLimiter } from './limiter';
 import { createConnectionString } from '@hive/storage';
+import * as Sentry from '@sentry/node';
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
 import { rateLimitApiRouter } from './api';
 import { env } from './environment';
+import { createRateLimiter } from './limiter';
 
 async function main() {
   if (env.sentry) {

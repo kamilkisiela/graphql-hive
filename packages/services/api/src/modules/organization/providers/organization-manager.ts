@@ -1,21 +1,22 @@
-import { Injectable, Scope } from 'graphql-modules';
-import { paramCase } from 'param-case';
 import { createHash } from 'crypto';
-import { Organization, OrganizationType, OrganizationInvitation } from '../../../shared/entities';
+import { Inject, Injectable, Scope } from 'graphql-modules';
+import { paramCase } from 'param-case';
+import { Organization, OrganizationInvitation, OrganizationType } from '../../../shared/entities';
 import { HiveError } from '../../../shared/errors';
-import { AuthManager } from '../../auth/providers/auth-manager';
-import { Logger } from '../../shared/providers/logger';
-import { Storage } from '../../shared/providers/storage';
-import type { OrganizationSelector } from '../../shared/providers/storage';
-import { share, cache, uuid, diffArrays, pushIfMissing } from '../../../shared/helpers';
+import { cache, diffArrays, pushIfMissing, share, uuid } from '../../../shared/helpers';
 import { ActivityManager } from '../../activity/providers/activity-manager';
-import { BillingProvider } from '../../billing/providers/billing.provider';
-import { TokenStorage } from '../../token/providers/token-storage';
-import { Emails } from '../../shared/providers/emails';
+import { AuthManager } from '../../auth/providers/auth-manager';
 import { OrganizationAccessScope } from '../../auth/providers/organization-access';
 import { ProjectAccessScope } from '../../auth/providers/project-access';
 import { TargetAccessScope } from '../../auth/providers/target-access';
-import { reservedOrganizationNames, organizationAdminScopes } from './organization-config';
+import { BillingProvider } from '../../billing/providers/billing.provider';
+import { Emails } from '../../shared/providers/emails';
+import { Logger } from '../../shared/providers/logger';
+import type { OrganizationSelector } from '../../shared/providers/storage';
+import { Storage } from '../../shared/providers/storage';
+import { WEB_APP_URL } from '../../shared/providers/tokens';
+import { TokenStorage } from '../../token/providers/token-storage';
+import { organizationAdminScopes, reservedOrganizationNames } from './organization-config';
 
 /**
  * Responsible for auth checks.
@@ -36,6 +37,7 @@ export class OrganizationManager {
     private activityManager: ActivityManager,
     private billingProvider: BillingProvider,
     private emails: Emails,
+    @Inject(WEB_APP_URL) private appBaseUrl: string,
   ) {
     this.logger = logger.child({ source: 'OrganizationManager' });
   }
@@ -114,7 +116,13 @@ export class OrganizationManager {
   }
 
   async getOrganizationMember(selector: OrganizationSelector & { user: string }) {
-    return this.storage.getOrganizationMember(selector);
+    const member = await this.storage.getOrganizationMember(selector);
+
+    if (!member) {
+      throw new HiveError('Member not found');
+    }
+
+    return member;
   }
 
   @cache((selector: OrganizationSelector) => selector.organization)
@@ -386,7 +394,7 @@ export class OrganizationManager {
                   <mj-text>
                     Someone from <strong>${organization.name}</strong> invited you to join GraphQL Hive.
                   </mj-text>.
-                  <mj-button href="https://app.graphql-hive.com/join/${invitation.code}">
+                  <mj-button href="${this.appBaseUrl}/join/${invitation.code}">
                     Accept the invitation
                   </mj-button>
                 </mj-column>
@@ -455,6 +463,132 @@ export class OrganizationManager {
     ]);
 
     return organization;
+  }
+
+  async requestOwnershipTransfer(
+    selector: {
+      user: string;
+    } & OrganizationSelector,
+  ) {
+    const currentUser = await this.authManager.getCurrentUser();
+
+    if (currentUser.id === selector.user) {
+      return {
+        error: {
+          message: 'Cannot transfer ownership to yourself',
+        },
+      };
+    }
+
+    await this.authManager.ensureOrganizationOwnership({
+      organization: selector.organization,
+    });
+
+    const member = await this.storage.getOrganizationMember(selector);
+
+    if (!member) {
+      return {
+        error: {
+          message: 'Member not found',
+        },
+      };
+    }
+
+    const organization = await this.getOrganization(selector);
+
+    if (organization.type === OrganizationType.PERSONAL) {
+      return {
+        error: {
+          message: `Personal organizations cannot be transferred`,
+        },
+      };
+    }
+
+    const { code } = await this.storage.createOrganizationTransferRequest({
+      organization: organization.id,
+      user: member.id,
+    });
+
+    await this.emails.schedule({
+      email: member.user.email,
+      subject: `Organization transfer from ${currentUser.displayName} (${organization.name})`,
+      body: `
+        <mjml>
+          <mj-body>
+            <mj-section>
+              <mj-column>
+                <mj-image width="150px" src="https://graphql-hive.com/logo.png"></mj-image>
+                <mj-divider border-color="#ca8a04"></mj-divider>
+                <mj-text>
+                  ${member.user.displayName} wants to transfer the ownership of the <strong>${organization.name}</strong> organization.
+                </mj-text>
+                <mj-button href="https://app.graphql-hive.com/action/transfer/${organization.cleanId}/${code}">
+                  Accept the transfer
+                </mj-button>
+                <mj-text align="center">
+                  This link will expire in a day.
+                </mj-text>
+              </mj-column>
+            </mj-section>
+          </mj-body>
+        </mjml>
+      `,
+    });
+
+    return {
+      ok: {
+        email: member.user.email,
+        code,
+      },
+    };
+  }
+
+  async getOwnershipTransferRequest(
+    selector: {
+      code: string;
+    } & OrganizationSelector,
+  ) {
+    await this.authManager.ensureOrganizationAccess({
+      organization: selector.organization,
+      scope: OrganizationAccessScope.READ,
+    });
+    const currentUser = await this.authManager.getCurrentUser();
+
+    return this.storage.getOrganizationTransferRequest({
+      organization: selector.organization,
+      code: selector.code,
+      user: currentUser.id,
+    });
+  }
+
+  async answerOwnershipTransferRequest(
+    input: {
+      code: string;
+      accept: boolean;
+    } & OrganizationSelector,
+  ) {
+    await this.authManager.ensureOrganizationAccess({
+      organization: input.organization,
+      scope: OrganizationAccessScope.READ,
+    });
+    const currentUser = await this.authManager.getCurrentUser();
+
+    await this.storage.answerOrganizationTransferRequest({
+      organization: input.organization,
+      code: input.code,
+      user: currentUser.id,
+      accept: input.accept,
+      oldAdminAccessScopes:
+        // pass every scope except *.DELETE
+        organizationAdminScopes.filter(
+          scope =>
+            [
+              OrganizationAccessScope.DELETE,
+              ProjectAccessScope.DELETE,
+              TargetAccessScope.DELETE,
+            ].includes(scope) === false,
+        ),
+    });
   }
 
   async deleteMembers(

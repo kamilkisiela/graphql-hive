@@ -1,6 +1,5 @@
 import { ReactElement } from 'react';
 import { useMutation } from 'urql';
-
 import { Button, Heading, Modal } from '@/components/v2';
 import { TrashIcon } from '@/components/v2/icon';
 import { DeleteOrganizationMembersDocument } from '@/graphql';

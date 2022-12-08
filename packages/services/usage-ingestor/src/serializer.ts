@@ -1,6 +1,6 @@
+import type { ProcessedOperation, ProcessedRegistryRecord } from '@hive/usage-common';
 import LRU from 'tiny-lru';
 import { cache } from './helpers';
-import type { ProcessedRegistryRecord, ProcessedOperation } from '@hive/usage-common';
 
 const delimiter = '\n';
 const formatter = Intl.DateTimeFormat('en-GB', {

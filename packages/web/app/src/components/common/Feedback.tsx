@@ -1,25 +1,25 @@
-import * as React from 'react';
 import 'twin.macro';
-import { useMutation } from 'urql';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
+import * as React from 'react';
 import {
+  Alert,
+  AlertDescription,
+  AlertIcon,
+  AlertTitle,
   Button,
   FormControl,
   FormErrorMessage,
-  Textarea,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
   FormLabel,
-  Alert,
-  AlertIcon,
-  AlertTitle,
-  AlertDescription,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  Textarea,
 } from '@chakra-ui/react';
+import { useFormik } from 'formik';
+import { useMutation } from 'urql';
+import * as Yup from 'yup';
 import { SendFeedbackDocument } from '@/graphql';
 
 export const Feedback: React.FC<{

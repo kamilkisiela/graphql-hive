@@ -1,8 +1,8 @@
-import type { IncomingOperation, OperationMap, OperationMapRecord } from './types';
-import Ajv from 'ajv';
 import type { JSONSchemaType } from 'ajv';
+import Ajv from 'ajv';
 import { parse } from 'graphql';
 import LRU from 'tiny-lru';
+import type { IncomingOperation, OperationMap, OperationMapRecord } from './types';
 
 const unixTimestampRegex = /^\d{13,}$/;
 
@@ -19,7 +19,7 @@ const ajv = new Ajv({
   },
 });
 
-const validOperationBodyCache = LRU<boolean>(5_000, 300_000 /* 5 minutes */);
+const validOperationBodyCache = LRU<boolean>(5000, 300_000 /* 5 minutes */);
 
 const operationMapRecordSchema: JSONSchemaType<OperationMapRecord> = {
   type: 'object',

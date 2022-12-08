@@ -1,6 +1,6 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import nock from 'nock';
-import { createServicesFetcher, createSchemaFetcher } from '../src/gateways';
+import { createSchemaFetcher, createServicesFetcher } from '../src/gateways';
 
 afterEach(() => {
   nock.cleanAll();
@@ -19,12 +19,12 @@ test('createServicesFetcher without ETag', async () => {
   };
   const key = 'secret-key';
   nock('http://localhost')
-    .get('/schema')
+    .get('/services')
     .once()
     .matchHeader('X-Hive-CDN-Key', key)
     .matchHeader('accept', 'application/json')
     .reply(() => [200, [schema]])
-    .get('/schema')
+    .get('/services')
     .once()
     .matchHeader('X-Hive-CDN-Key', key)
     .matchHeader('accept', 'application/json')
@@ -65,20 +65,20 @@ test('createServicesFetcher with ETag', async () => {
   };
   const key = 'secret-key';
   nock('http://localhost')
-    .get('/schema')
+    .get('/services')
     .once()
     .matchHeader('X-Hive-CDN-Key', key)
     .matchHeader('accept', 'application/json')
     .reply(200, [schema], {
       ETag: 'first',
     })
-    .get('/schema')
+    .get('/services')
     .once()
     .matchHeader('X-Hive-CDN-Key', key)
     .matchHeader('accept', 'application/json')
     .matchHeader('If-None-Match', 'first')
     .reply(304)
-    .get('/schema')
+    .get('/services')
     .once()
     .matchHeader('X-Hive-CDN-Key', key)
     .matchHeader('accept', 'application/json')
@@ -130,12 +130,12 @@ test('createSchemaFetcher without ETag (older versions)', async () => {
   };
   const key = 'secret-key';
   nock('http://localhost')
-    .get('/schema')
+    .get('/services')
     .once()
     .matchHeader('X-Hive-CDN-Key', key)
     .matchHeader('accept', 'application/json')
     .reply(() => [200, schema])
-    .get('/schema')
+    .get('/services')
     .once()
     .matchHeader('X-Hive-CDN-Key', key)
     .matchHeader('accept', 'application/json')
@@ -174,20 +174,20 @@ test('createSchemaFetcher with ETag', async () => {
   };
   const key = 'secret-key';
   nock('http://localhost')
-    .get('/schema')
+    .get('/services')
     .once()
     .matchHeader('X-Hive-CDN-Key', key)
     .matchHeader('accept', 'application/json')
     .reply(200, schema, {
       ETag: 'first',
     })
-    .get('/schema')
+    .get('/services')
     .once()
     .matchHeader('X-Hive-CDN-Key', key)
     .matchHeader('accept', 'application/json')
     .matchHeader('If-None-Match', 'first')
     .reply(304)
-    .get('/schema')
+    .get('/services')
     .once()
     .matchHeader('X-Hive-CDN-Key', key)
     .matchHeader('accept', 'application/json')

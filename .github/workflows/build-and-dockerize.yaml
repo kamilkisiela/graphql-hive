@@ -1,0 +1,110 @@
+on:
+  workflow_call:
+    inputs:
+      dockerize:
+        default: true
+        type: boolean
+      registry:
+        default: ghcr.io
+        type: string
+      imageName:
+        default: ${{ github.repository }}
+        type: string
+      imageTag:
+        required: true
+        type: string
+      publishSourceMaps:
+        default: false
+        type: boolean
+
+jobs:
+  build-and-dockerize:
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      packages: write
+      pull-requests: write
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: setup environment
+        uses: ./.github/actions/setup
+
+      - name: build packages and applications
+        run: pnpm build
+
+      - name: test ESM & CJS exports integrity
+        run: pnpm turbo check:build
+
+      - name: configure eqemu
+        if: ${{ inputs.dockerize }}
+        uses: docker/setup-qemu-action@v2
+        with:
+          platforms: 'linux/arm64,linux/amd64'
+
+      - name: configure docker buildx
+        if: ${{ inputs.dockerize }}
+        uses: docker/setup-buildx-action@v2
+
+      - name: login to docker registry
+        if: ${{ inputs.dockerize }}
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ inputs.registry }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: frabert/replace-string-action@v2.4
+        id: branch_name_fix
+        name: sanitize branch name
+        if: ${{ inputs.dockerize }}
+        with:
+          pattern: '(\/|-)'
+          string: ${{ github.head_ref || github.ref_name }}
+          replace-with: '_'
+
+      - name: build docker images
+        timeout-minutes: 25
+        id: docker-bake
+        if: ${{ inputs.dockerize }}
+        uses: docker/bake-action@v2
+        env:
+          DOCKER_REGISTRY: ${{ inputs.registry }}/${{ inputs.imageName }}/
+          COMMIT_SHA: ${{ inputs.imageTag }}
+          RELEASE: ${{ inputs.imageTag }}
+          BRANCH_NAME: ${{ steps.branch_name_fix.outputs.replaced }}
+          BUILD_TYPE: 'publish'
+          PWD: ${{ github.workspace }}
+        with:
+          push: true
+          files: docker.hcl
+          targets: build
+          set: |
+            *.cache-from=type=gha
+            *.cache-to=type=gha,mode=max
+
+      - name: docker details pr comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        if: ${{ inputs.dockerize && github.event_name == 'pull_request' }}
+        with:
+          message: |
+            🐋 This PR was built and pushed to the following [Docker images](https://github.com/kamilkisiela?ecosystem=container&tab=packages&visibility=public&tab=packages&ecosystem=container&visibility=public&q=graphql-hive) (tag: `${{ inputs.imageTag }}`):
+
+            <details>
+              <summary>Docker Bake metadata</summary>
+              
+              ```json
+              ${{ steps.docker-bake.outputs.metadata }}
+              ```
+            </details>
+
+      - name: upload sourcemaps to Sentry
+        if: ${{ inputs.publishSourceMaps }}
+        env:
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          SENTRY_ORG: the-guild-z4
+          SENTRY_PROJECT: graphql-hive
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_RELEASE: ${{ github.sha }}
+        run: pnpm upload-sourcemaps

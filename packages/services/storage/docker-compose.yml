@@ -67,7 +67,7 @@ services:
       ls myminio/artifacts >/dev/null 2>&1 || /usr/bin/mc mb myminio/artifacts; exit 0"
 
   clickhouse:
-    image: clickhouse/clickhouse-server:22.11-alpine
+    image: clickhouse/clickhouse-server:22.12-alpine
     environment:
       CLICKHOUSE_USER: test
       CLICKHOUSE_PASSWORD: test
@@ -86,7 +86,7 @@ services:
       - 'stack'
 
   zookeeper:
-    image: confluentinc/cp-zookeeper:7.3.0
+    image: confluentinc/cp-zookeeper:7.3.1
     hostname: zookeeper
     networks:
       - 'stack'
@@ -108,7 +108,7 @@ services:
       - ./volumes/zookeeper/log:/var/lib/zookeeper/log
 
   broker:
-    image: confluentinc/cp-kafka:7.3.0
+    image: confluentinc/cp-kafka:7.3.1
     hostname: borker
     depends_on:
       zookeeper:

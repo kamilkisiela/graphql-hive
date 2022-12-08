@@ -1,44 +1,42 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import { getOperationName, TypedDocumentNode } from 'urql';
 import { ResultOf, VariablesOf } from '@graphql-typed-document-node/core';
-import { Cache, UpdateResolver, QueryInput } from '@urql/exchange-graphcache';
+import { Cache, QueryInput, UpdateResolver } from '@urql/exchange-graphcache';
 import produce from 'immer';
+import { getOperationName, TypedDocumentNode } from 'urql';
 import {
-  TokensDocument,
+  ExternalComposition_DisableMutation,
+  ExternalComposition_ProjectConfigurationQuery,
+  ExternalCompositionForm_EnableMutation,
+} from '@/components/project/settings/external-composition';
+import {
+  InvitationDeleteButton_DeleteInvitation,
+  MemberInvitationForm_InviteByEmail,
+  Members_OrganizationMembers,
+} from '../../pages/[orgId]/members';
+import {
+  AddAlertChannelDocument,
+  AddAlertDocument,
+  AlertChannelsDocument,
+  AlertsDocument,
+  CheckIntegrationsDocument,
+  CreateOrganizationDocument,
+  CreateProjectDocument,
+  CreateTargetDocument,
+  CreateTokenDocument,
+  DeleteAlertChannelsDocument,
+  DeleteAlertsDocument,
+  DeleteGitHubIntegrationDocument,
+  DeleteOrganizationDocument,
+  DeletePersistedOperationDocument,
+  DeleteProjectDocument,
+  DeleteSlackIntegrationDocument,
+  DeleteTargetDocument,
+  DeleteTokensDocument,
   OrganizationsDocument,
   ProjectsDocument,
   TargetsDocument,
-  CheckIntegrationsDocument,
-  CreateTokenDocument,
-  AlertChannelsDocument,
-  AddAlertChannelDocument,
-  DeleteAlertChannelsDocument,
-  AlertsDocument,
-  AddAlertDocument,
-  DeleteAlertsDocument,
-  DeleteTokensDocument,
-  CreateOrganizationDocument,
-  DeleteOrganizationDocument,
-  CreateProjectDocument,
-  DeleteProjectDocument,
-  CreateTargetDocument,
-  DeleteTargetDocument,
-  DeletePersistedOperationDocument,
-  DeleteSlackIntegrationDocument,
-  DeleteGitHubIntegrationDocument,
+  TokensDocument,
 } from '../graphql';
-
-import {
-  MemberInvitationForm_InviteByEmail,
-  InvitationDeleteButton_DeleteInvitation,
-  Members_OrganizationMembers,
-} from '../../pages/[orgId]/members';
-
-import {
-  ExternalCompositionForm_EnableMutation,
-  ExternalComposition_DisableMutation,
-  ExternalComposition_ProjectConfigurationQuery,
-} from '@/components/project/settings/external-composition';
 
 function updateQuery<T, V>(cache: Cache, input: QueryInput<T, V>, recipe: (obj: T) => void) {
   return cache.updateQuery(input, (data: T | null) => {

@@ -1,12 +1,12 @@
-import { Inject, Injectable, Scope } from 'graphql-modules';
-import { sentry } from '../../../shared/sentry';
-import { Logger } from '../../shared/providers/logger';
-import { RATE_LIMIT_SERVICE_CONFIG } from './tokens';
-import type { RateLimitServiceConfig } from './tokens';
 import type { RateLimitApi, RateLimitApiInput } from '@hive/rate-limit';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import { fetch } from '@whatwg-node/fetch';
+import { Inject, Injectable, Scope } from 'graphql-modules';
 import { HiveError } from '../../../shared/errors';
+import { sentry } from '../../../shared/sentry';
+import { Logger } from '../../shared/providers/logger';
+import type { RateLimitServiceConfig } from './tokens';
+import { RATE_LIMIT_SERVICE_CONFIG } from './tokens';
 
 @Injectable({
   global: true,

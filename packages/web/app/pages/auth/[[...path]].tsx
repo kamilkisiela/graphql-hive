@@ -1,10 +1,10 @@
-import React from 'react';
-import Head from 'next/head';
 import 'twin.macro';
-import { FullLogo } from '@/components/common/Logo';
+import React from 'react';
 import dynamic from 'next/dynamic';
+import Head from 'next/head';
 import type { GetServerSideProps } from 'next';
 import SuperTokensReact from 'supertokens-auth-react';
+import { FullLogo } from '@/components/common/Logo';
 import { env } from '@/env/frontend';
 import { startAuthFlowForProvider } from '@/lib/supertokens/start-auth-flow-for-provider';
 import { startAuthFlowForOIDCProvider } from '@/lib/supertokens/third-party-email-password-react-oidc-provider';
@@ -83,34 +83,9 @@ export default function Auth(props: { oidcProviderId: string | null }): React.Re
             width={150}
             color={{ main: '#fff', sub: '#fff' }}
           />
-          {env.auth.legacyAuth0 === true ? <LegacyAuth0Notice /> : null}
           {props.oidcProviderId ? null : <SuperTokensComponentNoSSR />}
         </div>
       </>
     </>
   );
 }
-
-const LegacyAuth0Notice = (): React.ReactElement => {
-  return (
-    <div tw="mx-auto bg-yellow-200 text-black sm:width[420px] width[76%] rounded-lg shadow-lg p-5 text-xs">
-      We recently migrated from Auth0 to SuperTokens. If you have any issues, please contact us at{' '}
-      <a href="mailto:kamil@graphql-hive.com" className="underline">
-        kamil@graphql-hive.com
-      </a>{' '}
-      or using the{' '}
-      <a
-        href="#"
-        className="underline"
-        onClick={() => {
-          if (typeof window !== 'undefined' && (window as any).$crisp) {
-            (window as any).$crisp.push(['do', 'chat:open']);
-          }
-        }}
-      >
-        in-app chat
-      </a>
-      .
-    </div>
-  );
-};

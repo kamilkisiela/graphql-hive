@@ -1,5 +1,5 @@
-import * as kx from '@pulumi/kubernetesx';
 import * as k8s from '@pulumi/kubernetes';
+import * as kx from '@pulumi/kubernetesx';
 import { normalizeEnv, PodBuilder } from './pod-builder';
 
 const DEFAULT_IMAGE = 'bitnami/redis:6.2.6';

@@ -117,3 +117,5 @@ npm-shrinkwrap.json
 .bob/
 
 .hive
+
+cypress

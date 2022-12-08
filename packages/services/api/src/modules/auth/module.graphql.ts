@@ -60,6 +60,7 @@ export default gql`
   type Member {
     id: ID!
     user: User!
+    isOwner: Boolean!
     organizationAccessScopes: [OrganizationAccessScope!]!
     projectAccessScopes: [ProjectAccessScope!]!
     targetAccessScopes: [TargetAccessScope!]!

@@ -1,11 +1,11 @@
-/* eslint-disable-next-line import/no-extraneous-dependencies */
-import { createSchema, createYoga } from 'graphql-yoga';
+import { createServer } from 'node:http';
+import { AddressInfo } from 'node:net';
 /* eslint-disable-next-line import/no-extraneous-dependencies */
 import { ApolloServerBase } from 'apollo-server-core';
 import axios from 'axios';
-import { createServer } from 'node:http';
-import { AddressInfo } from 'node:net';
-import { createHive, useHive, hiveApollo } from '../src';
+/* eslint-disable-next-line import/no-extraneous-dependencies */
+import { createSchema, createYoga } from 'graphql-yoga';
+import { createHive, hiveApollo, useHive } from '../src';
 import { waitFor } from './test-utils';
 
 const typeDefs = /* GraphQL */ `
@@ -94,7 +94,7 @@ test('GraphQL Yoga - should not interrupt the process', async () => {
       return Promise.reject(error);
     });
 
-  await waitFor(5_000);
+  await waitFor(5000);
   await stop();
   expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('[hive][info]'));
   expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('[hive][usage]'));
@@ -142,7 +142,7 @@ test('Apollo Server - should not interrupt the process', async () => {
       }
     `,
   });
-  await waitFor(5_000);
+  await waitFor(5000);
   await apollo.stop();
   clean();
   expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('[hive][info]'));

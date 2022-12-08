@@ -1,58 +1,59 @@
+import type { S3Client } from '@aws-sdk/client-s3';
 import { createApplication, Scope } from 'graphql-modules';
 import { activityModule } from './modules/activity';
+import { adminModule } from './modules/admin';
+import { alertsModule } from './modules/alerts';
+import { WEBHOOKS_CONFIG, WebhooksConfig } from './modules/alerts/providers/tokens';
 import { authModule } from './modules/auth';
-import { labModule } from './modules/lab';
-import { operationsModule } from './modules/operations';
-import { ClickHouseConfig, CLICKHOUSE_CONFIG } from './modules/operations/providers/tokens';
-import { organizationModule } from './modules/organization';
-import { persistedOperationModule } from './modules/persisted-operations';
-import { projectModule } from './modules/project';
-import { schemaModule } from './modules/schema';
-import { sharedModule } from './modules/shared';
-import { HttpClient } from './modules/shared/providers/http-client';
-import { IdTranslator } from './modules/shared/providers/id-translator';
-import { IdempotentRunner } from './modules/shared/providers/idempotent-runner';
-import { Logger } from './modules/shared/providers/logger';
-import { CryptoProvider, encryptionSecretProvider } from './modules/shared/providers/crypto';
-import { RedisConfig, REDIS_CONFIG, RedisProvider } from './modules/shared/providers/redis';
-import { Storage } from './modules/shared/providers/storage';
-import { EMAILS_ENDPOINT, Emails } from './modules/shared/providers/emails';
-import { targetModule } from './modules/target';
+import { billingModule } from './modules/billing';
+import { BILLING_CONFIG, BillingConfig } from './modules/billing/providers/tokens';
+import { cdnModule } from './modules/cdn';
+import { CDN_CONFIG, CDNConfig } from './modules/cdn/providers/tokens';
+import { feedbackModule } from './modules/feedback';
+import { FEEDBACK_SLACK_CHANNEL, FEEDBACK_SLACK_TOKEN } from './modules/feedback/providers/tokens';
 import { integrationsModule } from './modules/integrations';
 import {
   GITHUB_APP_CONFIG,
   GitHubApplicationConfig,
 } from './modules/integrations/providers/github-integration-manager';
-import { alertsModule } from './modules/alerts';
-import { tokenModule } from './modules/token';
-import { feedbackModule } from './modules/feedback';
-import { TokensConfig, TOKENS_CONFIG } from './modules/token/providers/tokens';
-import { WebhooksConfig, WEBHOOKS_CONFIG } from './modules/alerts/providers/tokens';
-import {
-  SchemaServiceConfig,
-  SCHEMA_SERVICE_CONFIG,
-} from './modules/schema/providers/orchestrators/tokens';
-import { provideSchemaModuleConfig, SchemaModuleConfig } from './modules/schema/providers/config';
-import { CDN_CONFIG, CDNConfig } from './modules/cdn/providers/tokens';
-import { cdnModule } from './modules/cdn';
-import { adminModule } from './modules/admin';
-import { FEEDBACK_SLACK_CHANNEL, FEEDBACK_SLACK_TOKEN } from './modules/feedback/providers/tokens';
-import { usageEstimationModule } from './modules/usage-estimation';
-import {
-  UsageEstimationServiceConfig,
-  USAGE_ESTIMATION_SERVICE_CONFIG,
-} from './modules/usage-estimation/providers/tokens';
+import { labModule } from './modules/lab';
+import { oidcIntegrationsModule } from './modules/oidc-integrations';
+import { OIDC_INTEGRATIONS_ENABLED } from './modules/oidc-integrations/providers/tokens';
+import { operationsModule } from './modules/operations';
+import { CLICKHOUSE_CONFIG, ClickHouseConfig } from './modules/operations/providers/tokens';
+import { organizationModule } from './modules/organization';
+import { persistedOperationModule } from './modules/persisted-operations';
+import { projectModule } from './modules/project';
 import { rateLimitModule } from './modules/rate-limit';
 import {
-  RateLimitServiceConfig,
   RATE_LIMIT_SERVICE_CONFIG,
+  RateLimitServiceConfig,
 } from './modules/rate-limit/providers/tokens';
-import { BillingConfig, BILLING_CONFIG } from './modules/billing/providers/tokens';
-import { billingModule } from './modules/billing';
-import { OIDC_INTEGRATIONS_ENABLED } from './modules/oidc-integrations/providers/tokens';
-import { oidcIntegrationsModule } from './modules/oidc-integrations';
+import { schemaModule } from './modules/schema';
 import { ArtifactStorageWriter } from './modules/schema/providers/artifact-storage-writer';
-import type { S3Client } from '@aws-sdk/client-s3';
+import { provideSchemaModuleConfig, SchemaModuleConfig } from './modules/schema/providers/config';
+import {
+  SCHEMA_SERVICE_CONFIG,
+  SchemaServiceConfig,
+} from './modules/schema/providers/orchestrators/tokens';
+import { sharedModule } from './modules/shared';
+import { CryptoProvider, encryptionSecretProvider } from './modules/shared/providers/crypto';
+import { Emails, EMAILS_ENDPOINT } from './modules/shared/providers/emails';
+import { HttpClient } from './modules/shared/providers/http-client';
+import { IdTranslator } from './modules/shared/providers/id-translator';
+import { IdempotentRunner } from './modules/shared/providers/idempotent-runner';
+import { Logger } from './modules/shared/providers/logger';
+import { REDIS_CONFIG, RedisConfig, RedisProvider } from './modules/shared/providers/redis';
+import { Storage } from './modules/shared/providers/storage';
+import { WEB_APP_URL } from './modules/shared/providers/tokens';
+import { targetModule } from './modules/target';
+import { tokenModule } from './modules/token';
+import { TOKENS_CONFIG, TokensConfig } from './modules/token/providers/tokens';
+import { usageEstimationModule } from './modules/usage-estimation';
+import {
+  USAGE_ESTIMATION_SERVICE_CONFIG,
+  UsageEstimationServiceConfig,
+} from './modules/usage-estimation/providers/tokens';
 
 const modules = [
   sharedModule,
@@ -78,6 +79,7 @@ const modules = [
 ];
 
 export function createRegistry({
+  app,
   tokens,
   webhooks,
   schemaService,
@@ -117,6 +119,9 @@ export function createRegistry({
     token: string;
     channel: string;
   };
+  app: {
+    baseUrl: string;
+  } | null;
   billing: BillingConfig;
   schemaConfig: SchemaModuleConfig;
   emailsEndpoint?: string;
@@ -208,6 +213,11 @@ export function createRegistry({
     {
       provide: OIDC_INTEGRATIONS_ENABLED,
       useValue: organizationOIDC,
+      scope: Scope.Singleton,
+    },
+    {
+      provide: WEB_APP_URL,
+      useValue: app?.baseUrl.replace(/\/$/, '') ?? 'http://localhost:3000',
       scope: Scope.Singleton,
     },
     encryptionSecretProvider(encryptionSecret),

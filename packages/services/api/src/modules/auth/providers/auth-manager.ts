@@ -1,11 +1,10 @@
-import { Injectable, Inject, Scope, CONTEXT } from 'graphql-modules';
+import { CONTEXT, Inject, Injectable, Scope } from 'graphql-modules';
 import type { User } from '../../../shared/entities';
-import type { Listify, MapToArray } from '../../../shared/helpers';
 import { AccessError } from '../../../shared/errors';
+import type { Listify, MapToArray } from '../../../shared/helpers';
 import { share } from '../../../shared/helpers';
 import { Storage } from '../../shared/providers/storage';
 import { TokenStorage } from '../../token/providers/token-storage';
-import { ApiToken } from './tokens';
 import {
   OrganizationAccess,
   OrganizationAccessScope,
@@ -13,6 +12,7 @@ import {
 } from './organization-access';
 import { ProjectAccess, ProjectAccessScope, ProjectUserScopesSelector } from './project-access';
 import { TargetAccess, TargetAccessScope, TargetUserScopesSelector } from './target-access';
+import { ApiToken } from './tokens';
 import { UserManager } from './user-manager';
 
 export interface OrganizationAccessSelector {
@@ -150,6 +150,18 @@ export class AuthManager {
       ...selector,
       user: user.id,
     });
+  }
+
+  async ensureOrganizationOwnership(selector: { organization: string }): Promise<void | never> {
+    const user = await this.getCurrentUser();
+    const isOwner = await this.organizationAccess.checkOwnershipForUser({
+      organization: selector.organization,
+      user: user.id,
+    });
+
+    if (!isOwner) {
+      throw new AccessError('You are not an owner or organization does not exist');
+    }
   }
 
   ensureApiToken(): string | never {

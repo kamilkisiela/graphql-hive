@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 import 'reflect-metadata';
-import * as Sentry from '@sentry/node';
 import {
   createServer,
-  startMetrics,
   registerShutdown,
   reportReadiness,
+  startMetrics,
 } from '@hive/service-common';
 import { createConnectionString } from '@hive/storage';
-import { createStripeBilling } from './billing-sync';
+import * as Sentry from '@sentry/node';
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
-import { stripeBillingApiRouter, Context } from './api';
+import { Context, stripeBillingApiRouter } from './api';
+import { createStripeBilling } from './billing-sync';
 import { env } from './environment';
 
 async function main() {

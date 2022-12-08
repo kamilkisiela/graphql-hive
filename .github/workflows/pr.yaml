@@ -1,0 +1,106 @@
+name: pr
+on: [pull_request]
+
+env:
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+  TURBO_API_URL: ${{ secrets.TURBO_API_URL }}
+  TURBO_REMOTE_ONLY: 'true'
+  HIVE_TOKEN: ${{ secrets.HIVE_TOKEN }}
+
+jobs:
+  # Database Types Diff Check
+  # We are committing the database types located under the "storage" package, to make it easier to maintain.
+  # This workflow validates that the types are up to date in the repository, and fails in case of a change that is not committed.
+  db-types:
+    uses: ./.github/workflows/db-types-diff.yaml
+
+  # GraphQL Breaking Changes Check
+  # This workflow validates that the GraphQL schema is not breaking, and fails in case of a breaking change.
+  # To allow a GraphQL breaking change in a PR, you may add the "non-breaking" label to the PR.
+  graphql-breaking-changes:
+    uses: ./.github/workflows/graphql-schema-check.yaml
+    secrets:
+      hiveToken: ${{ secrets.HIVE_TOKEN }}
+
+  # Unit tests using Jest
+  build-rust:
+    name: build
+    uses: ./.github/workflows/build-rust.yaml
+
+  # Build all packages and applications, and creates Docker images
+  build:
+    name: build
+    uses: ./.github/workflows/build-and-dockerize.yaml
+    with:
+      dockerize: ${{ !github.event.pull_request.head.repo.fork }}
+      imageTag: ${{ github.event.pull_request.head.sha }}
+    secrets: inherit
+
+  # Unit tests using Jest
+  unit-tests:
+    name: test
+    uses: ./.github/workflows/tests-unit.yaml
+
+  # Integration tests that are based on Docker images created during build step.
+  integration-tests:
+    name: integration
+    needs: build
+    uses: ./.github/workflows/tests-integration.yaml
+    secrets:
+      stripeTestPublicKey: ${{ secrets.TEST_STRIPE_PUBLIC_KEY }}
+      stripeTestSecretKey: ${{ secrets.TEST_STRIPE_SECRET_KEY }}
+    with:
+      imageTag: ${{ github.event.pull_request.head.sha }}
+
+  # Integration tests that are based on Docker images created during build step.
+  # This runs the same intergration tests, but with feature flags enabled.
+  integration-tests-ff:
+    name: integration-feature-flags
+    needs: build
+    uses: ./.github/workflows/tests-integration.yaml
+    secrets:
+      stripeTestPublicKey: ${{ secrets.TEST_STRIPE_PUBLIC_KEY }}
+      stripeTestSecretKey: ${{ secrets.TEST_STRIPE_SECRET_KEY }}
+    with:
+      imageTag: ${{ github.event.pull_request.head.sha }}
+      configureEnv: |
+        echo "FF_CLICKHOUSE_V2_TABLES=1" >> $GITHUB_ENV
+
+  # e2e tests using Cypress, runs Hive from pre-built Docker images.
+  e2e:
+    name: test
+    needs: build
+    uses: ./.github/workflows/tests-e2e.yaml
+    with:
+      imageTag: ${{ github.event.pull_request.head.sha }}
+
+  # ESLint and Prettier
+  code-style:
+    uses: ./.github/workflows/lint.yaml
+
+  # CodeQL
+  static-analysis:
+    uses: ./.github/workflows/codeql-analysis.yml
+
+  # TypeScript Typecheck and compiler checks
+  typescript:
+    uses: ./.github/workflows/typescript-typecheck.yaml
+
+  # Deploy Website preview to CloudFlare Pages
+  website-preview:
+    uses: ./.github/workflows/website.yaml
+    if: ${{ !github.event.pull_request.head.repo.fork }}
+    secrets: inherit
+
+  # Release alpha version on NPM for Hive libraries
+  release:
+    uses: the-guild-org/shared-config/.github/workflows/release-snapshot.yml@main
+    with:
+      npmTag: alpha
+      buildScript: build:libraries
+      nodeVersion: 18
+      packageManager: pnpm
+    secrets:
+      githubToken: ${{ secrets.GITHUB_TOKEN }}
+      npmToken: ${{ secrets.NPM_TOKEN }}

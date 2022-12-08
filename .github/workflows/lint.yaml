@@ -1,0 +1,43 @@
+on:
+  workflow_call:
+
+jobs:
+  eslint-and-prettier:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: setup environment
+        uses: ./.github/actions/setup
+
+      - name: eslint cache
+        uses: actions/cache@v3
+        with:
+          path: '.eslintcache'
+          key: ${{ runner.os }}-eslint-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-eslint
+
+      - name: eslint
+        run: pnpm lint
+        env:
+          TIMING: 'true'
+          DEBUG: 'eslint:cli-engine'
+
+      - name: prettier
+        run: pnpm lint:prettier
+
+      - name: Generate Types
+        run: yarn graphql:generate
+
+      - name: Operation Check
+        run: |
+          npx graphql-inspector validate \
+            "packages/web/app/**/*.graphql|packages/libraries/cli/**/*.graphql|packages/web/app/**/*.ts(x)" \
+            "packages/**/module.graphql.ts" \
+            --maxDepth=20 \
+            --maxAliasCount=20 \
+            --maxDirectiveCount=20 \
+            --maxTokenCount=800

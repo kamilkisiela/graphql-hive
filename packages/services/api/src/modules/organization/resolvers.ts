@@ -1,10 +1,11 @@
-import type { OrganizationModule } from './__generated__/types';
-import { createConnection } from '../../shared/schema';
-import { OrganizationType } from '../../shared/entities';
-import { IdTranslator } from '../shared/providers/id-translator';
-import { OrganizationManager } from './providers/organization-manager';
-import { AuthManager } from '../auth/providers/auth-manager';
 import { z } from 'zod';
+import { OrganizationType } from '../../shared/entities';
+import { createConnection } from '../../shared/schema';
+import { AuthManager } from '../auth/providers/auth-manager';
+import { IdTranslator } from '../shared/providers/id-translator';
+import { Logger } from '../shared/providers/logger';
+import type { OrganizationModule } from './__generated__/types';
+import { OrganizationManager } from './providers/organization-manager';
 
 const OrganizationNameModel = z.string().min(2).max(50);
 
@@ -35,6 +36,25 @@ export const resolvers: OrganizationModule.Resolvers = {
       return {
         __typename: 'OrganizationInvitationPayload',
         name: organization.name,
+      };
+    },
+    async organizationTransferRequest(_, { selector }, { injector }) {
+      const organizationId = await injector.get(IdTranslator).translateOrganizationId(selector);
+      const organizationManager = injector.get(OrganizationManager);
+
+      const transferRequest = await organizationManager.getOwnershipTransferRequest({
+        organization: organizationId,
+        code: selector.code,
+      });
+
+      if (!transferRequest) {
+        return null;
+      }
+
+      return {
+        organization: await organizationManager.getOrganization({
+          organization: organizationId,
+        }),
       };
     },
   },
@@ -210,6 +230,38 @@ export const resolvers: OrganizationModule.Resolvers = {
       return {
         ok: invitation,
       };
+    },
+    async requestOrganizationTransfer(_, { input }, { injector }) {
+      const organization = await injector.get(IdTranslator).translateOrganizationId(input);
+      return injector.get(OrganizationManager).requestOwnershipTransfer({
+        organization,
+        user: input.user,
+      });
+    },
+    async answerOrganizationTransferRequest(_, { input }, { injector }) {
+      const organization = await injector.get(IdTranslator).translateOrganizationId(input);
+
+      try {
+        await injector.get(OrganizationManager).answerOwnershipTransferRequest({
+          organization,
+          code: input.code,
+          accept: input.accept,
+        });
+
+        return {
+          ok: {
+            accepted: input.accept,
+          },
+        };
+      } catch (error) {
+        injector.get(Logger).error(error as any);
+
+        return {
+          error: {
+            message: 'Failed to answer the request',
+          },
+        };
+      }
     },
   },
   Organization: {

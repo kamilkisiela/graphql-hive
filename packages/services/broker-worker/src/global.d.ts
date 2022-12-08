@@ -1,5 +1,9 @@
 export {};
 
+interface AnalyticsEngine {
+  writeDataPoint(input: { blobs?: string[]; doubles?: number[]; indexes?: string[] }): void;
+}
+
 declare global {
   /**
    * Signature used to verify the origin of the request

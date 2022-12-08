@@ -1,8 +1,8 @@
 import * as pulumi from '@pulumi/pulumi';
+import { DeploymentEnvironment } from '../types';
+import { isProduction } from '../utils/helpers';
 import { serviceLocalHost } from '../utils/local-endpoint';
 import { Redis as RedisStore } from '../utils/redis';
-import { isStaging } from '../utils/helpers';
-import { DeploymentEnvironment } from '../types';
 
 const redisConfig = new pulumi.Config('redis');
 
@@ -13,14 +13,14 @@ export function deployRedis({ deploymentEnv }: { deploymentEnv: DeploymentEnviro
   const redisApi = new RedisStore({
     password: redisPassword,
   }).deploy({
-    limits: isStaging(deploymentEnv)
+    limits: isProduction(deploymentEnv)
       ? {
-          memory: '80Mi',
-          cpu: '50m',
-        }
-      : {
           memory: '800Mi',
           cpu: '1000m',
+        }
+      : {
+          memory: '80Mi',
+          cpu: '50m',
         },
   });
 

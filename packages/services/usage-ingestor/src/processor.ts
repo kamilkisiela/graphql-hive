@@ -1,29 +1,12 @@
-import { normalizeOperation as coreNormalizeOperation } from '@graphql-hive/core';
-import { Kind, parse } from 'graphql';
-import LRU from 'tiny-lru';
 import { createHash } from 'crypto';
-import { cache } from './helpers';
-import {
-  reportSize,
-  totalOperations,
-  reportMessageSize,
-  normalizeCacheMisses,
-  schemaCoordinatesSize,
-} from './metrics';
-import {
-  stringifyOperation,
-  stringifyRegistryRecord,
-  stringifyLegacyOperation,
-  stringifyLegacyRegistryRecord,
-} from './serializer';
-
+import { normalizeOperation as coreNormalizeOperation } from '@graphql-hive/core';
 import type { FastifyLoggerInstance } from '@hive/service-common';
 import type {
-  RawReport,
+  ProcessedOperation,
   RawOperation,
   RawOperationMap,
   RawOperationMapRecord,
-  ProcessedOperation,
+  RawReport,
 } from '@hive/usage-common';
 import type {
   DefinitionNode,
@@ -31,6 +14,22 @@ import type {
   OperationDefinitionNode,
   OperationTypeNode,
 } from 'graphql';
+import { Kind, parse } from 'graphql';
+import LRU from 'tiny-lru';
+import { cache } from './helpers';
+import {
+  normalizeCacheMisses,
+  reportMessageSize,
+  reportSize,
+  schemaCoordinatesSize,
+  totalOperations,
+} from './metrics';
+import {
+  stringifyLegacyOperation,
+  stringifyLegacyRegistryRecord,
+  stringifyOperation,
+  stringifyRegistryRecord,
+} from './serializer';
 
 interface NormalizationResult {
   type: OperationTypeNode;

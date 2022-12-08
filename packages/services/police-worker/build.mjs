@@ -1,6 +1,6 @@
-import { build } from 'esbuild';
-import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+import { build } from 'esbuild';
 
 (async function main() {
   const __dirname = dirname(fileURLToPath(import.meta.url));

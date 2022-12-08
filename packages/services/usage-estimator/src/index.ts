@@ -1,17 +1,17 @@
 #!/usr/bin/env node
 import 'reflect-metadata';
-import * as Sentry from '@sentry/node';
 import {
   createServer,
-  startMetrics,
   registerShutdown,
   reportReadiness,
+  startMetrics,
 } from '@hive/service-common';
-import { createEstimator } from './estimator';
+import * as Sentry from '@sentry/node';
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
 import { usageEstimatorApiRouter } from './api';
-import { clickHouseElapsedDuration, clickHouseReadDuration } from './metrics';
 import { env } from './environment';
+import { createEstimator } from './estimator';
+import { clickHouseElapsedDuration, clickHouseReadDuration } from './metrics';
 
 async function main() {
   if (env.sentry) {

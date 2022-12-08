@@ -2,13 +2,15 @@ import { ReactElement } from 'react';
 import { useFormik } from 'formik';
 import { gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
-
 import { authenticated } from '@/components/authenticated-container';
 import { OrganizationLayout } from '@/components/layouts';
 import { OIDCIntegrationSection } from '@/components/organization/settings/oidc-integration-section';
 import { Button, Card, Heading, Input, Spinner, Tag, Title } from '@/components/v2';
 import { AlertTriangleIcon, GitHubIcon, SlackIcon } from '@/components/v2/icon';
-import { DeleteOrganizationModal } from '@/components/v2/modals';
+import {
+  DeleteOrganizationModal,
+  TransferOrganizationOwnershipModal,
+} from '@/components/v2/modals';
 import { env } from '@/env/frontend';
 import {
   CheckIntegrationsDocument,
@@ -148,7 +150,8 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
   });
   const router = useRouteSelector();
   const isRegularOrg = organization?.type === OrganizationType.Regular;
-  const [isModalOpen, toggleModalOpen] = useToggle();
+  const [isDeleteModalOpen, toggleDeleteModalOpen] = useToggle();
+  const [isTransferModalOpen, toggleTransferModalOpen] = useToggle();
 
   const [mutation, mutate] = useMutation(UpdateOrganizationNameMutation);
 
@@ -230,31 +233,60 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
         </Card>
       )}
 
+      {isRegularOrg && organization.me.isOwner && (
+        <Card>
+          <div className="flex items-center justify-between">
+            <div>
+              <Heading className="mb-2">Transfer Ownership</Heading>
+              <p className="font-light text-gray-300">Transfer this organization to another user</p>
+            </div>
+            <div>
+              <Button
+                variant="primary"
+                size="large"
+                danger
+                onClick={toggleTransferModalOpen}
+                className="px-5"
+              >
+                Transfer
+              </Button>
+              <TransferOrganizationOwnershipModal
+                isOpen={isTransferModalOpen}
+                toggleModalOpen={toggleTransferModalOpen}
+                organization={organization}
+              />
+            </div>
+          </div>
+        </Card>
+      )}
+
       {isRegularOrg && canAccessOrganization(OrganizationAccessScope.Delete, organization.me) && (
         <Card>
-          <Heading className="mb-2">Delete Organization</Heading>
-          <p className="mb-3 font-light text-gray-300">
-            Permanently remove your Organization and all projects from the Hive
-          </p>
-          <div className="flex items-center gap-x-2">
-            <Button
-              variant="primary"
-              size="large"
-              danger
-              onClick={toggleModalOpen}
-              className="px-5"
-            >
-              Delete Organization
-            </Button>
-            <Tag color="yellow" className="py-2.5 px-4">
-              <AlertTriangleIcon className="h-5 w-5" />
-              This action is not reversible!
-            </Tag>
-            <DeleteOrganizationModal
-              isOpen={isModalOpen}
-              toggleModalOpen={toggleModalOpen}
-              organization={organization}
-            />
+          <div className="flex items-center justify-between">
+            <div>
+              <Heading className="mb-2">Delete Organization</Heading>
+              <p className="font-light text-gray-300">Permanently remove your organization</p>
+            </div>
+            <div className="flex items-center gap-x-2">
+              <Tag color="yellow" className="py-2.5 px-4">
+                <AlertTriangleIcon className="h-5 w-5" />
+                This action is not reversible!
+              </Tag>
+              <Button
+                variant="primary"
+                size="large"
+                danger
+                onClick={toggleDeleteModalOpen}
+                className="px-5"
+              >
+                Delete Organization
+              </Button>
+              <DeleteOrganizationModal
+                isOpen={isDeleteModalOpen}
+                toggleModalOpen={toggleDeleteModalOpen}
+                organization={organization}
+              />
+            </div>
           </div>
         </Card>
       )}

@@ -1,8 +1,12 @@
-import { ReactElement, useState, useCallback, ReactNode } from 'react';
-import { useMounted } from '@theguild/components';
+import { ReactElement, ReactNode, useCallback, useState } from 'react';
+import Image, { StaticImageData } from 'next/image';
 import * as Tooltip from '@radix-ui/react-tooltip';
+import { useMounted } from '@theguild/components';
 import clsx from 'clsx';
-import { FiServer, FiGlobe, FiRadio, FiGithub } from 'react-icons/fi';
+import { FiGithub, FiGlobe, FiRadio, FiServer } from 'react-icons/fi';
+import cicdImage from '../../public/any-ci-cd.svg';
+import monitoringImage from '../../public/features/monitoring-preview.png';
+import schemaHistoryImage from '../../public/features/schema-history.png';
 import { Pricing } from '../pricing';
 
 const classes = {
@@ -40,11 +44,14 @@ const CookiesConsent = (): ReactElement => {
         <p>If you continue to use our services, you are agreeing to the use of such cookies.</p>
       </div>
       <div className="flex flex-shrink-0 items-center gap-4 lg:pr-24">
-        <a href="/privacy-policy.pdf" className="whitespace-nowrap text-yellow-600 hover:underline">
+        <a
+          href="https://the-guild.dev/graphql/hive/privacy-policy.pdf"
+          className="whitespace-nowrap text-yellow-600 hover:underline"
+        >
           Privacy Policy
         </a>
         <button
-          className="focus:outline-none rounded-md bg-yellow-500 px-5 py-2 text-white hover:bg-yellow-700"
+          className="rounded-md bg-yellow-500 px-5 py-2 text-white hover:bg-yellow-700 focus:outline-none"
           onClick={accept}
         >
           Allow Cookies
@@ -85,7 +92,7 @@ function Hero() {
   return (
     <div className="w-full">
       <div className="my-6 py-20 px-2 sm:py-24 lg:py-32">
-        <h1 className="to-orange-600 dark:to-orange-500 mx-auto max-w-screen-md bg-gradient-to-r from-yellow-500 bg-clip-text text-center text-5xl font-extrabold text-transparent dark:from-yellow-400 sm:text-5xl lg:text-6xl">
+        <h1 className="mx-auto max-w-screen-md bg-gradient-to-r from-yellow-500 to-orange-600 bg-clip-text text-center text-5xl font-extrabold text-transparent dark:from-yellow-400 dark:to-orange-500 sm:text-5xl lg:text-6xl">
           Take full control of your GraphQL API
         </h1>
         <p className="mx-auto mt-6 max-w-screen-sm text-center text-2xl text-gray-600 dark:text-gray-400">
@@ -125,7 +132,7 @@ function Feature(props: {
     description: ReactNode;
     icon?: ReactNode;
   }[];
-  image: string;
+  image: StaticImageData;
   gradient: number;
   flipped?: boolean;
 }) {
@@ -154,7 +161,7 @@ function Feature(props: {
             className="relative flex flex-grow flex-col items-center justify-center overflow-hidden rounded-3xl p-8"
             style={{ backgroundImage: `linear-gradient(70deg, ${start}, ${end})` }}
           >
-            <img src={image} className="rounded-2xl" alt={title} />
+            <Image {...image} className="rounded-2xl" alt={title} />
           </div>
         </div>
         {Array.isArray(highlights) && highlights.length > 0 && (
@@ -207,7 +214,7 @@ export default function IndexPage(): ReactElement {
                 icon: <FiRadio className="h-full w-full" />,
               },
             ]}
-            image="/features/schema-history.png"
+            image={schemaHistoryImage}
             gradient={0}
           />
           <Feature
@@ -239,7 +246,7 @@ export default function IndexPage(): ReactElement {
                 </div>
               </div>
             }
-            image="/features/monitoring-preview.png"
+            image={monitoringImage}
             gradient={1}
             flipped
           />
@@ -270,7 +277,7 @@ export default function IndexPage(): ReactElement {
                 </div>
               </div>
             }
-            image="/any-ci-cd.svg"
+            image={cicdImage}
             gradient={2}
           />
           <div className={classes.feature}>

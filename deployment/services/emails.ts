@@ -1,10 +1,9 @@
+import * as k8s from '@pulumi/kubernetes';
 import * as pulumi from '@pulumi/pulumi';
-import * as azure from '@pulumi/azure';
-import { RemoteArtifactAsServiceDeployment } from '../utils/remote-artifact-as-service';
 import { DeploymentEnvironment } from '../types';
-import { Redis } from './redis';
-import { PackageHelper } from '../utils/pack';
 import { serviceLocalEndpoint } from '../utils/local-endpoint';
+import { ServiceDeployment } from '../utils/service-deployment';
+import { Redis } from './redis';
 
 const commonConfig = new pulumi.Config('common');
 const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
@@ -12,15 +11,16 @@ const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
 export type Emails = ReturnType<typeof deployEmails>;
 
 export function deployEmails({
-  storageContainer,
-  packageHelper,
   deploymentEnv,
   redis,
   heartbeat,
   email,
+  release,
+  image,
+  imagePullSecret,
 }: {
-  storageContainer: azure.storage.Container;
-  packageHelper: PackageHelper;
+  release: string;
+  image: string;
   deploymentEnv: DeploymentEnvironment;
   redis: Redis;
   heartbeat?: string;
@@ -29,16 +29,17 @@ export function deployEmails({
     from: string;
     messageStream: string;
   };
+  imagePullSecret: k8s.core.v1.Secret;
 }) {
-  const { deployment, service } = new RemoteArtifactAsServiceDeployment(
+  const { deployment, service } = new ServiceDeployment(
     'emails-service',
     {
-      storageContainer,
+      imagePullSecret,
       env: {
         ...deploymentEnv,
         ...commonEnv,
         SENTRY: commonEnv.SENTRY_ENABLED,
-        RELEASE: packageHelper.currentReleaseId(),
+        RELEASE: release,
         REDIS_HOST: redis.config.host,
         REDIS_PORT: String(redis.config.port),
         REDIS_PASSWORD: redis.config.password,
@@ -52,7 +53,7 @@ export function deployEmails({
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
       exposesMetrics: true,
-      packageInfo: packageHelper.npmPack('@hive/emails'),
+      image,
       replicas: 1,
     },
     [redis.deployment, redis.service],

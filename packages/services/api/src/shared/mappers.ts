@@ -1,23 +1,25 @@
 import type {
+  GraphQLArgument,
+  GraphQLEnumType,
+  GraphQLEnumValue,
   GraphQLField,
   GraphQLInputField,
-  GraphQLObjectType,
-  GraphQLInterfaceType,
-  GraphQLUnionType,
-  GraphQLEnumType,
   GraphQLInputObjectType,
+  GraphQLInterfaceType,
+  GraphQLObjectType,
   GraphQLScalarType,
-  GraphQLEnumValue,
   GraphQLSchema,
-  GraphQLArgument,
+  GraphQLUnionType,
 } from 'graphql';
 import type {
+  ClientStats,
+  OperationStats,
   SchemaChange,
   SchemaError,
-  OperationStats,
-  ClientStats,
 } from '../__generated__/types';
 import type {
+  ActivityObject,
+  DateRange,
   Member,
   Organization,
   PersistedOperation,
@@ -27,8 +29,6 @@ import type {
   Target,
   Token,
   User,
-  ActivityObject,
-  DateRange,
 } from './entities';
 
 export interface SchemaVersion extends SchemaVersionEntity {

@@ -1,38 +1,51 @@
 import * as pulumi from '@pulumi/pulumi';
-import { DeploymentEnvironment } from './types';
-import { deployDbMigrations } from './services/db-migrations';
-import { deployTokens } from './services/tokens';
-import { deployWebhooks } from './services/webhooks';
-import { deployEmails } from './services/emails';
-import { deploySchema } from './services/schema';
-import { deployUsage } from './services/usage';
-import { deployUsageIngestor } from './services/usage-ingestor';
-import { deployGraphQL } from './services/graphql';
+import * as random from '@pulumi/random';
 import { deployApp } from './services/app';
-import { deployLandingPage } from './services/landing-page';
+import { deployStripeBilling } from './services/billing';
+import { deployBotKube } from './services/bot-kube';
+import { deployCFBroker } from './services/cf-broker';
+import { deployCFCDN } from './services/cf-cdn';
+import { deployClickhouse } from './services/clickhouse';
+import { deployCloudFlareSecurityTransform } from './services/cloudflare-security';
+import { deployDbMigrations } from './services/db-migrations';
 import { deployDocs } from './services/docs';
-import { deployRedis } from './services/redis';
+import { deployEmails } from './services/emails';
+import { deployGraphQL } from './services/graphql';
 import { deployKafka } from './services/kafka';
 import { deployMetrics } from './services/observability';
-import { deployCFCDN } from './services/cf-cdn';
-import { deployCFBroker } from './services/cf-broker';
 import { deployCloudflarePolice } from './services/police';
-import { deployBotKube } from './services/bot-kube';
 import { deployProxy } from './services/proxy';
-import { deployClickhouse } from './services/clickhouse';
-import { deployUsageEstimation } from './services/usage-estimation';
-import { deploySuperTokens } from './services/supertokens';
-import { createPackageHelper } from './utils/pack';
-import * as azure from '@pulumi/azure';
-import { optimizeAzureCluster } from './utils/azure-helpers';
 import { deployRateLimit } from './services/rate-limit';
-import { deployStripeBilling } from './services/billing';
-import { deployCloudFlareSecurityTransform } from './services/cloudflare-security';
-import * as random from '@pulumi/random';
-
-const packageHelper = createPackageHelper();
+import { deployRedis } from './services/redis';
+import { deploySchema } from './services/schema';
+import { deploySuperTokens } from './services/supertokens';
+import { deployTokens } from './services/tokens';
+import { deployUsage } from './services/usage';
+import { deployUsageEstimation } from './services/usage-estimation';
+import { deployUsageIngestor } from './services/usage-ingestor';
+import { deployWebhooks } from './services/webhooks';
+import { DeploymentEnvironment } from './types';
+import { optimizeAzureCluster } from './utils/azure-helpers';
+import { createDockerImageFactory } from './utils/docker-images';
 
 optimizeAzureCluster();
+
+const dockerConfig = new pulumi.Config('docker');
+const dockerImages = createDockerImageFactory({
+  registryHostname: dockerConfig.require('registryUrl'),
+  imagesPrefix: dockerConfig.require('imagesPrefix'),
+});
+
+const imagePullSecret = dockerImages.createRepositorySecret(
+  dockerConfig.requireSecret('registryAuthBase64'),
+);
+
+// eslint-disable-next-line no-process-env
+const imagesTag = process.env.DOCKER_IMAGE_TAG as string;
+
+if (!imagesTag) {
+  throw new Error(`DOCKER_IMAGE_TAG env variable is not set.`);
+}
 
 const envName = pulumi.getStack();
 const commonConfig = new pulumi.Config('common');
@@ -53,23 +66,6 @@ const s3Config = {
   secretAccessKey: r2Config.requireSecret('secretAccessKey'),
 };
 
-const resourceGroup = new azure.core.ResourceGroup(`hive-${envName}-rg`, {
-  location: azure.Locations.EastUS,
-});
-
-const storageAccount = new azure.storage.Account(`hive${envName}`, {
-  resourceGroupName: resourceGroup.name,
-  accountReplicationType: 'LRS',
-  accountTier: 'Standard',
-  accountKind: 'StorageV2',
-  publicNetworkAccessEnabled: true,
-});
-
-const storageContainer = new azure.storage.Container('deploy-artifacts', {
-  storageAccountName: storageAccount.name,
-  containerAccessType: 'blob',
-});
-
 const deploymentEnv: DeploymentEnvironment = {
   ENVIRONMENT: envName,
   NODE_ENV: 'production',
@@ -82,43 +78,43 @@ deployMetrics({ envName });
 const cdn = deployCFCDN({
   envName,
   rootDns,
-  packageHelper,
   s3Config,
+  release: imagesTag,
 });
 
 const cfBroker = deployCFBroker({
   envName,
   rootDns,
-  packageHelper,
+  release: imagesTag,
 });
 
 deployCloudflarePolice({ envName, rootDns });
 
 const redisApi = deployRedis({ deploymentEnv });
-
 const kafkaApi = deployKafka();
-
 const clickhouseApi = deployClickhouse();
 
 const dbMigrations = deployDbMigrations({
-  storageContainer,
-  packageHelper,
   clickhouse: clickhouseApi,
   kafka: kafkaApi,
   deploymentEnv,
+  image: dockerImages.getImageId('storage', imagesTag),
+  imagePullSecret,
 });
 
 const tokensApi = deployTokens({
-  packageHelper,
-  storageContainer,
+  image: dockerImages.getImageId('tokens', imagesTag),
+  release: imagesTag,
   deploymentEnv,
   dbMigrations,
   heartbeat: heartbeatsConfig.get('tokens'),
+  imagePullSecret,
 });
 
 const webhooksApi = deployWebhooks({
-  packageHelper,
-  storageContainer,
+  image: dockerImages.getImageId('webhooks', imagesTag),
+  imagePullSecret,
+  release: imagesTag,
   deploymentEnv,
   redis: redisApi,
   heartbeat: heartbeatsConfig.get('webhooks'),
@@ -126,8 +122,9 @@ const webhooksApi = deployWebhooks({
 });
 
 const emailsApi = deployEmails({
-  packageHelper,
-  storageContainer,
+  image: dockerImages.getImageId('emails', imagesTag),
+  imagePullSecret,
+  release: imagesTag,
   deploymentEnv,
   redis: redisApi,
   email: {
@@ -139,24 +136,27 @@ const emailsApi = deployEmails({
 });
 
 const usageEstimationApi = deployUsageEstimation({
-  packageHelper,
-  storageContainer,
+  image: dockerImages.getImageId('usage-estimator', imagesTag),
+  imagePullSecret,
+  release: imagesTag,
   deploymentEnv,
   clickhouse: clickhouseApi,
   dbMigrations,
 });
 
 const billingApi = deployStripeBilling({
-  packageHelper,
-  storageContainer,
+  image: dockerImages.getImageId('stripe-billing', imagesTag),
+  imagePullSecret,
+  release: imagesTag,
   deploymentEnv,
   dbMigrations,
   usageEstimator: usageEstimationApi,
 });
 
 const rateLimitApi = deployRateLimit({
-  packageHelper,
-  storageContainer,
+  image: dockerImages.getImageId('rate-limit', imagesTag),
+  imagePullSecret,
+  release: imagesTag,
   deploymentEnv,
   dbMigrations,
   usageEstimator: usageEstimationApi,
@@ -164,8 +164,9 @@ const rateLimitApi = deployRateLimit({
 });
 
 const usageApi = deployUsage({
-  packageHelper,
-  storageContainer,
+  image: dockerImages.getImageId('usage', imagesTag),
+  imagePullSecret,
+  release: imagesTag,
   deploymentEnv,
   tokens: tokensApi,
   kafka: kafkaApi,
@@ -174,18 +175,20 @@ const usageApi = deployUsage({
 });
 
 const usageIngestorApi = deployUsageIngestor({
+  image: dockerImages.getImageId('usage-ingestor', imagesTag),
+  imagePullSecret,
+  release: imagesTag,
   clickhouse: clickhouseApi,
   kafka: kafkaApi,
-  packageHelper,
-  storageContainer,
   deploymentEnv,
   dbMigrations,
   heartbeat: heartbeatsConfig.get('usageIngestor'),
 });
 
 const schemaApi = deploySchema({
-  packageHelper,
-  storageContainer,
+  image: dockerImages.getImageId('schema', imagesTag),
+  imagePullSecret,
+  release: imagesTag,
   deploymentEnv,
   redis: redisApi,
   broker: cfBroker,
@@ -212,12 +215,16 @@ const googleConfig = {
   clientSecret: oauthConfig.requireSecret('googleSecret'),
 };
 
-const supertokens = deploySuperTokens({ apiKey: supertokensApiKey.result });
+const supertokens = deploySuperTokens(
+  { apiKey: supertokensApiKey.result },
+  { dependencies: [dbMigrations] },
+);
 
 const graphqlApi = deployGraphQL({
   clickhouse: clickhouseApi,
-  packageHelper,
-  storageContainer,
+  image: dockerImages.getImageId('server', imagesTag),
+  imagePullSecret,
+  release: imagesTag,
   deploymentEnv,
   tokens: tokensApi,
   webhooks: webhooksApi,
@@ -242,8 +249,9 @@ const graphqlApi = deployGraphQL({
 
 const docs = deployDocs({
   rootDns,
-  packageHelper,
-  storageContainer,
+  image: dockerImages.getImageId('docs', imagesTag),
+  imagePullSecret,
+  release: imagesTag,
 });
 
 const app = deployApp({
@@ -251,8 +259,9 @@ const app = deployApp({
   docs,
   graphql: graphqlApi,
   dbMigrations,
-  packageHelper,
-  storageContainer,
+  image: dockerImages.getImageId('app', imagesTag),
+  imagePullSecret,
+  release: imagesTag,
   supertokensConfig: {
     apiKey: supertokensApiKey.result,
     endpoint: supertokens.localEndpoint,
@@ -265,21 +274,14 @@ const app = deployApp({
   emailsEndpoint: emailsApi.localEndpoint,
 });
 
-const landingPage = deployLandingPage({
-  rootDns,
-  packageHelper,
-  storageContainer,
-});
-
 const proxy = deployProxy({
-  rootDns,
   appHostname,
   docsHostname,
   app,
-  landingPage,
   docs,
   graphql: graphqlApi,
   usage: usageApi,
+  deploymentEnv,
 });
 
 deployCloudFlareSecurityTransform({
@@ -297,6 +299,7 @@ deployCloudFlareSecurityTransform({
     '/api/slack',
     '/api/lab',
   ],
+  ignoredHosts: ['cdn.graphql-hive.com', 'cdn.staging.graphql-hive.com'],
 });
 
 export const graphqlApiServiceId = graphqlApi.service.id;

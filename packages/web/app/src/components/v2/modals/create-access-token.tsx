@@ -3,7 +3,6 @@ import { Accordion } from '@chakra-ui/react';
 import { useFormik } from 'formik';
 import { gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
-
 import { PermissionsSpace, usePermissionsManager } from '@/components/organization/Permissions';
 import { Button, CopyValue, Heading, Input, Modal, Tag } from '@/components/v2';
 import { OrganizationDocument, OrganizationQuery } from '@/graphql';

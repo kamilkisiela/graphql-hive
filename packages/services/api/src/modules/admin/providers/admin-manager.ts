@@ -1,10 +1,10 @@
-import { Injectable, Scope } from 'graphql-modules';
 import { GraphQLError } from 'graphql';
+import { Injectable, Scope } from 'graphql-modules';
+import { atomic } from '../../../shared/helpers';
 import { AuthManager } from '../../auth/providers/auth-manager';
+import { OperationsReader } from '../../operations/providers/operations-reader';
 import { Logger } from '../../shared/providers/logger';
 import { Storage } from '../../shared/providers/storage';
-import { atomic } from '../../../shared/helpers';
-import { OperationsReader } from '../../operations/providers/operations-reader';
 
 /**
  * Responsible for auth checks.
