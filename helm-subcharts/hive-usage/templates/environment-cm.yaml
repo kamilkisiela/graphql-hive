@@ -7,21 +7,21 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: hive
-    service: {{ .Values.app_name }}
+    service: {{ .Values.appName }}
     release: {{ .Release.Name }}
 data:
-  NODE_ENV: '{{ .Values.node_env }}'
-  PORT: '{{ .Values.server_port }}'
-  TOKENS_ENDPOINT: '{{ .Values.tokens_endpoint }}'
-  KAFKA_CONNECTION_MODE: '{{ .Values.kafka_connection_mode }}'
-  KAFKA_TOPIC: '{{ .Values.kafka_topic }}'
-  KAFKA_BROKER: '{{ .Values.kafka_broker }}'
-  KAFKA_BUFFER_SIZE: '{{ .Values.kafka_buffer_size }}'
-  KAFKA_BUFFER_INTERVAL: '{{ .Values.kafka_buffer_interval }}'
-  KAFKA_BUFFER_DYNAMIC: '{{ .Values.kafka_buffer_dynamic }}'
+  NODE_ENV: '{{ .Values.nodeEnv }}'
+  PORT: '{{ .Values.serverPort }}'
+  TOKENS_ENDPOINT: '{{ .Values.tokensEndpoint }}'
+  KAFKA_CONNECTION_MODE: '{{ .Values.kafkaConnectionMode }}'
+  KAFKA_TOPIC: '{{ .Values.kafkaTopic }}'
+  KAFKA_BROKER: '{{ .Values.kafkaBroker }}'
+  KAFKA_BUFFER_SIZE: '{{ .Values.kafkaBufferSize }}'
+  KAFKA_BUFFER_INTERVAL: '{{ .Values.kafkaBufferInterval }}'
+  KAFKA_BUFFER_DYNAMIC: '{{ .Values.kafkaBufferDynamic }}'
 
   SENTRY: '{{ .Values.sentry }}'
-  SENTRY_DSN: '{{ .Values.sentry_dsn }}'
+  SENTRY_DSN: '{{ .Values.sentryDsn }}'
 
-  PROMETHEUS_METRICS: '{{ .Values.prometheus_metrics }}'
-  PROMETHEUS_METRICS_LABEL_INSTANCE: '{{ .Values.prometheus_metrics_label_instance }}'
+  PROMETHEUS_METRICS: '{{ .Values.prometheusMetrics }}'
+  PROMETHEUS_METRICS_LABEL_INSTANCE: '{{ .Values.prometheusMetricsLabelInstance }}'

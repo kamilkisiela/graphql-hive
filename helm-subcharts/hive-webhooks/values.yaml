@@ -6,25 +6,25 @@ image:
   name: ghcr.io/kamilkisiela/graphql-hive/webhooks
   pullPolicy: Always
 
-app_name: hive-webhooks
-node_env: production
-server_port: 8080
+appName: hive-webhooks
+nodeEnv: production
+serverPort: 8080
 
-redis_host: redis-master
-redis_port: 6379
+redisHost: redis-master
+redisPort: 6379
 
-bullmq_commands_from_root: true
+bullmqCommandsFromRoot: true
 
 replicaCount: 1
 
-heartbeat_endpoint: ''
+heartbeatEndpoint: ''
 
-request_broker: 0
-request_broker_endpoint: ''
-request_broker_signature: ''
+requestBroker: 0
+requestBrokerEndpoint: ''
+requestBrokerSignature: ''
 
 sentry: 0
-sentry_dsn: ''
+sentryDsn: ''
 
-prometheus_metrics: 0
-prometheus_metrics_label_instance: ''
+prometheusMetrics: 0
+prometheusMetricsLabelInstance: ''

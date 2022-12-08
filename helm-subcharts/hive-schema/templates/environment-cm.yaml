@@ -7,18 +7,18 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: hive
-    service: {{ .Values.app_name }}
+    service: {{ .Values.appName }}
     release: {{ .Release.Name }}
 data:
-  NODE_ENV: '{{ .Values.node_env }}'
-  PORT: '{{ .Values.server_port }}'
-  REDIS_HOST: '{{ .Values.redis_host }}'
-  REDIS_PORT: '{{ .Values.redis_port }}'
-  ENCRYPTION_SECRET: '{{ .Values.global.encryption_secret }}'
+  NODE_ENV: '{{ .Values.nodeEnv }}'
+  PORT: '{{ .Values.serverPort }}'
+  REDIS_HOST: '{{ .Values.redisHost }}'
+  REDIS_PORT: '{{ .Values.redisPort }}'
+  ENCRYPTION_SECRET: '{{ .Values.global.encryptionSecret }}'
   SENTRY: '{{ .Values.sentry }}'
-  SENTRY_DSN: '{{ .Values.sentry_dsn }}'
-  PROMETHEUS_METRICS: '{{ .Values.prometheus_metrics }}'
-  PROMETHEUS_METRICS_LABEL_INSTANCE: '{{ .Values.prometheus_metrics_label_instance }}'
-  REQUEST_BROKER: '{{ .Values.request_broker }}'
-  REQUEST_BROKER_ENDPOINT: '{{ .Values.request_broker_endpoint }}'
-  REQUEST_BROKER_SIGNATURE: '{{ .Values.request_broker_signature }}'
+  SENTRY_DSN: '{{ .Values.sentryDsn }}'
+  PROMETHEUS_METRICS: '{{ .Values.prometheusMetrics }}'
+  PROMETHEUS_METRICS_LABEL_INSTANCE: '{{ .Values.prometheusMetricsLabelInstance }}'
+  REQUEST_BROKER: '{{ .Values.requestBroker }}'
+  REQUEST_BROKER_ENDPOINT: '{{ .Values.requestBrokerEndpoint }}'
+  REQUEST_BROKER_SIGNATURE: '{{ .Values.requestBrokerSignature }}'

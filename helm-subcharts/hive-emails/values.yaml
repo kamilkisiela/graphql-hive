@@ -9,30 +9,32 @@ image:
   name: ghcr.io/kamilkisiela/graphql-hive/emails
   pullPolicy: Always
 
-app_name: hive-emails
-server_port: 8080
-node_env: production
+appName: hive-emails
+serverPort: 8080
+nodeEnv: production
 
-redis_host: redis-master
-redis_port: 6379
+redisHost: redis-master
+redisPort: 6379
 
-bullmq_commands_from_root: true
+bullmqCommandsFromRoot: true
 
 replicaCount: 1
 
-email_provider_smtp_protocol: ''
-email_provider_smtp_host: ''
-email_provider_smtp_port: ''
-email_provider_smtp_auth_username: ''
-email_provider_smtp_auth_password: ''
-email_provider_postmark_token: ''
-email_provider_postmark_message_stream: ''
-email_provider_smtp_reject_unauthorized: ''
+emailProviderSmtpProtocol: ''
+emailProviderSmtpHost: ''
+emailProviderSmtpPort: ''
+emailProviderSmtpAuthUsername: ''
+emailProviderSmtpAuthPassword: ''
+emailProviderPostmarkToken: ''
+emailProviderPostmarkMessageStream: ''
+emailProviderSmtpRejectUnauthorized: ''
 
-heartbeat_endpoint: ''
+heartbeatEndpoint: ''
 
 sentry: 0
-sentry_dsn: ''
+sentryDsn: ''
 
-prometheus_metrics: 0
-prometheus_metrics_label_instance: ''
+prometheusMetrics: 0
+prometheusMetricsLabelInstance: ''
+
+rateLimitEndpoint: ''

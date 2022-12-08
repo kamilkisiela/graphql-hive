@@ -1,12 +1,13 @@
-{{- $url := printf "%s" .Values.global.app_base_url }}
+{{- $url := printf "%s" .Values.global.appBaseUrl }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: root-ingress
   namespace: graphql-hive
   annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-prod-dns
-    dblc.io/dns.class: private
+    {{- with .Values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
     nginx.ingress.kubernetes.io/backend-protocol: HTTP
     {{ if eq .Values.ingress.use_secure_protocol "true" }}
     nginx.ingress.kubernetes.io/ssl-redirect: "true"

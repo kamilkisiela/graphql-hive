@@ -6,23 +6,23 @@ image:
   name: ghcr.io/kamilkisiela/graphql-hive/usage
   pullPolicy: Always
 
-app_name: hive-usage
-server_port: 8080
-node_env: production
+appName: hive-usage
+serverPort: 8080
+nodeEnv: production
 
-tokens_endpoint: http://tokens-svc:80
+tokensEndpoint: http://tokens-svc:80
 
-kafka_connection_mode: hosted
-kafka_topic: usage_reports_v2
-kafka_broker: kafka:9092
-kafka_buffer_size: 350
-kafka_buffer_interval: 1000
-kafka_buffer_dynamic: 1
+kafkaConnectionMode: hosted
+kafkaTopic: usage_reports_v2
+kafkaBroker: kafka:9092
+kafkaBufferSize: 350
+kafkaBufferInterval: 1000
+kafkaBufferDynamic: 1
 
 replicaCount: 1
 
 sentry: 0
-sentry_dsn: ''
+sentryDsn: ''
 
-prometheus_metrics: 0
-prometheus_metrics_label_instance: ''
+prometheusMetrics: 0
+prometheusMetricsLabelInstance: ''

@@ -1,32 +1,32 @@
 global:
   image:
     tag: 59b64c36c866b3555c135c70de76a884e63f8619
-  clickhouse_username: default
+  clickhouseUsername: default
 
 image:
   name: ghcr.io/kamilkisiela/graphql-hive/usage-ingestor
   pullPolicy: Always
 
-app_name: hive-usage-ingestor
-server_port: 8080
-node_env: production
+appName: hive-usage-ingestor
+serverPort: 8080
+nodeEnv: production
 
-kafka_connection_mode: hosted
-kafka_topic: usage_reports_v2
-kafka_consumer_group: usage-ingestor-v2
-kafka_concurrency: 1
-kafka_broker: kafka:9092
+kafkaConnectionMode: hosted
+kafkaTopic: usage_reports_v2
+kafkaConsumerGroup: usage-ingestor-v2
+kafkaConcurrency: 1
+kafkaBroker: kafka:9092
 
-clickhouse_protocol: http
-clickhouse_host: clickhouse
-clickhouse_port: 8123
+clickhouseProtocol: http
+clickhouseHost: clickhouse
+clickhousePort: 8123
 
 replicaCount: 1
 
-heartbeat_endpoint: ''
+heartbeatEndpoint: ''
 
 sentry: 0
-sentry_dsn: ''
+sentryDsn: ''
 
-prometheus_metrics: 0
-prometheus_metrics_label_instance: ''
+prometheusMetrics: 0
+prometheusMetricsLabelInstance: ''

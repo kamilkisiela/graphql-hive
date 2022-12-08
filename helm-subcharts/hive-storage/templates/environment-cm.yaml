@@ -7,18 +7,18 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: hive
-    service: {{ .Values.app_name }}
+    service: {{ .Values.appName }}
     release: {{ .Release.Name }}
 data:
   MIGRATOR: {{ .Values.migrator }}
-  CLICKHOUSE_MIGRATOR: {{ .Values.clickhouse_migrator }}
-  POSTGRES_HOST: {{ .Values.postgres_host }}
-  POSTGRES_PORT: "{{ .Values.postgres_port }}"
+  CLICKHOUSE_MIGRATOR: {{ .Values.clickhouseMigrator }}
+  POSTGRES_HOST: {{ .Values.postgresHost }}
+  POSTGRES_PORT: "{{ .Values.postgresPort }}"
   POSTGRES_DB: {{ .Values.global.postgresql.auth.database }}
   POSTGRES_USER: {{ .Values.global.postgresql.auth.user }}
-  CLICKHOUSE_PROTOCOL: {{ .Values.clickhouse_protocol }}
-  CLICKHOUSE_HOST: {{ .Values.clickhouse_host }}
-  CLICKHOUSE_PORT: "{{ .Values.clickhouse_port }}"
-  CLICKHOUSE_USERNAME: {{ .Values.global.clickhouse_username }}
-  SENTRY_DNS: "{{ .Values.sentry_dns }}"
-  SENTRY_ENABLED: "{{ .Values.sentry_enabled }}"
+  CLICKHOUSE_PROTOCOL: {{ .Values.clickhouseProtocol }}
+  CLICKHOUSE_HOST: {{ .Values.clickhouseHost }}
+  CLICKHOUSE_PORT: "{{ .Values.clickhousePort }}"
+  CLICKHOUSE_USERNAME: {{ .Values.global.clickhouseUsername }}
+  SENTRY_DNS: "{{ .Values.sentryDns }}"
+  SENTRY_ENABLED: "{{ .Values.sentryEnabled }}"

@@ -6,16 +6,16 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: hive
-    service: {{ .Values.app_name }}
+    service: {{ .Values.appName }}
     release: {{ .Release.Name }}
 
 spec:
   selector:
     app: hive
-    service: {{ .Values.app_name }}
+    service: {{ .Values.appName }}
     release: {{ .Release.Name }}
   ports:
     - port: 80
-      targetPort: {{ .Values.server_port }}
+      targetPort: {{ .Values.serverPort }}
       protocol: TCP
       name: http-main

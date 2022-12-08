@@ -6,40 +6,24 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: hive
-    service: {{ .Values.app_name }}
+    service: {{ .Values.appName }}
     release: {{ .Release.Name }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       app: hive
-      service: {{ .Values.app_name }}
+      service: {{ .Values.appName }}
       release: {{ .Release.Name }}
   template:
     metadata:
       labels:
         app: hive
-        service: {{ .Values.app_name }}
+        service: {{ .Values.appName }}
         release: {{ .Release.Name }}
     spec:
-{{- if gt (int .Values.replicaCount) 1 }}
-      affinity:
-        podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            - labelSelector:
-                matchExpressions:
-                  - key: app
-                    operator: In
-                    values:
-                      - {{ .Values.app_name }}
-                  - key: release
-                    operator: In
-                    values:
-                      - {{ .Release.Name }}
-              topologyKey: "kubernetes.io/hostname"
-{{- end }}
       containers:
-        - name: {{ .Values.app_name }}
+        - name: {{ .Values.appName }}
           image: "{{ .Values.image.name }}:{{ .Values.global.image.tag }}"
           imagePullPolicy: "{{ .Values.image.pullPolicy }}"
           envFrom:
@@ -60,4 +44,4 @@ spec:
                   name: postgres-postgresql
                   key: postgres-password
           ports:
-            - containerPort: {{ .Values.server_port }}
+            - containerPort: {{ .Values.serverPort }}

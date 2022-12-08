@@ -1,7 +1,0 @@
-global:
-  postgresql:
-    auth:
-      database: graphql-hive
-
-postgresql:
-  fullnameOverride: postgres-postgresql

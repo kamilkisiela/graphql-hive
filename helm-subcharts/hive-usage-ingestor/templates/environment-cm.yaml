@@ -7,25 +7,25 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: hive
-    service: {{ .Values.app_name }}
+    service: {{ .Values.appName }}
     release: {{ .Release.Name }}
 data:
-  NODE_ENV: '{{ .Values.node_env }}'
-  PORT: '{{ .Values.server_port }}'
-  KAFKA_CONNECTION_MODE: '{{ .Values.kafka_connection_mode }}'
-  KAFKA_BROKER: '{{ .Values.kafka_broker }}'
-  KAFKA_CONCURRENCY: '{{ .Values.kafka_concurrency }}'
-  KAFKA_CONSUMER_GROUP: '{{ .Values.kafka_consumer_group }}'
-  KAFKA_TOPIC: '{{ .Values.kafka_topic }}'
-  CLICKHOUSE_PROTOCOL: '{{ .Values.clickhouse_protocol }}'
-  CLICKHOUSE_HOST: '{{ .Values.clickhouse_host }}'
-  CLICKHOUSE_PORT: '{{ .Values.clickhouse_port }}'
-  CLICKHOUSE_USERNAME: '{{ .Values.global.clickhouse_username }}'
+  NODE_ENV: '{{ .Values.nodeEnv }}'
+  PORT: '{{ .Values.serverPort }}'
+  KAFKA_CONNECTION_MODE: '{{ .Values.kafkaConnectionMode }}'
+  KAFKA_BROKER: '{{ .Values.kafkaBroker }}'
+  KAFKA_CONCURRENCY: '{{ .Values.kafkaConcurrency }}'
+  KAFKA_CONSUMER_GROUP: '{{ .Values.kafkaConsumerGroup }}'
+  KAFKA_TOPIC: '{{ .Values.kafkaTopic }}'
+  CLICKHOUSE_PROTOCOL: '{{ .Values.clickhouseProtocol }}'
+  CLICKHOUSE_HOST: '{{ .Values.clickhouseHost }}'
+  CLICKHOUSE_PORT: '{{ .Values.clickhousePort }}'
+  CLICKHOUSE_USERNAME: '{{ .Values.global.clickhouseUsername }}'
 
-  HEARTBEAT_ENDPOINT: '{{ .Values.heartbeat_endpoint }}'
+  HEARTBEAT_ENDPOINT: '{{ .Values.heartbeatEndpoint }}'
 
   SENTRY: '{{ .Values.sentry }}'
-  SENTRY_DSN: '{{ .Values.sentry_dsn }}'
+  SENTRY_DSN: '{{ .Values.sentryDsn }}'
 
-  PROMETHEUS_METRICS: '{{ .Values.prometheus_metrics }}'
-  PROMETHEUS_METRICS_LABEL_INSTANCE: '{{ .Values.prometheus_metrics_label_instance }}'
+  PROMETHEUS_METRICS: '{{ .Values.prometheusMetrics }}'
+  PROMETHEUS_METRICS_LABEL_INSTANCE: '{{ .Values.prometheusMetricsLabelInstance }}'

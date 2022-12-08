@@ -6,7 +6,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: hive
-    service: {{ .Values.app_name }}
+    service: {{ .Values.appName }}
     release: {{ .Release.Name }}
 
 spec:
@@ -18,7 +18,7 @@ spec:
       namespace: {{ .Release.Namespace }}
       labels:
         app: hive
-        tier: {{ .Values.app_name }}
+        tier: {{ .Values.appName }}
         release: {{ .Release.Name }}
     spec:
       initContainers:
@@ -30,7 +30,7 @@ spec:
           command: [ 'sh', '-c', 'curl clickhouse:8123' ]
       restartPolicy: OnFailure
       containers:
-        - name: {{ .Values.app_name }}-job
+        - name: {{ .Values.appName }}-job
           image: "{{ .Values.image.name }}:{{ .Values.global.image.tag }}"
           envFrom:
             - configMapRef:
@@ -55,4 +55,4 @@ spec:
                   name: postgres-postgresql
                   key: postgres-password
           ports:
-            - containerPort: {{ .Values.server_port }}
+            - containerPort: {{ .Values.serverPort }}

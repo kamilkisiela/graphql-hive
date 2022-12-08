@@ -1,7 +1,7 @@
 global:
   image:
     tag: 59b64c36c866b3555c135c70de76a884e63f8619
-  clickhouse_username: default
+  clickhouseUsername: default
   postgresql:
     auth:
       database: graphql-hive
@@ -11,18 +11,18 @@ image:
   name: ghcr.io/kamilkisiela/graphql-hive/storage
   pullPolicy: Always
 
-server_port: 8080
-app_name: hive-storage
+serverPort: 8080
+appName: hive-storage
 
 migrator: up
-clickhouse_migrator: up
+clickhouseMigrator: up
 
-postgres_host: postgres-postgresql
-postgres_port: 5432
+postgresHost: postgres-postgresql
+postgresPort: 5432
 
-clickhouse_protocol: http
-clickhouse_host: clickhouse
-clickhouse_port: 8123
+clickhouseProtocol: http
+clickhouseHost: clickhouse
+clickhousePort: 8123
 
-sentry_dns: ''
-sentry_enabled: 0
+sentryDns: ''
+sentryEnabled: 0

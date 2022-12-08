@@ -7,49 +7,49 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: hive
-    service: {{ .Values.app_name }}
+    service: {{ .Values.appName }}
     release: {{ .Release.Name }}
 data:
-  NODE_ENV: '{{ .Values.node_env }}'
-  PORT: '{{ .Values.server_port }}'
+  NODE_ENV: '{{ .Values.nodeEnv }}'
+  PORT: '{{ .Values.serverPort }}'
 
-  POSTGRES_HOST: '{{ .Values.postgres_host }}'
-  POSTGRES_PORT: '{{ .Values.postgres_port }}'
+  POSTGRES_HOST: '{{ .Values.postgresHost }}'
+  POSTGRES_PORT: '{{ .Values.postgresPort }}'
   POSTGRES_DB: '{{ .Values.global.postgresql.auth.database }}'
   POSTGRES_USER: '{{ .Values.global.postgresql.auth.user }}'
 
-  ROARR_LOG: '{{ .Values.roarr_log }}'
+  ROARR_LOG: '{{ .Values.roarrLog }}'
 
-  CLICKHOUSE_PROTOCOL: '{{ .Values.clickhouse_protocol }}'
-  CLICKHOUSE_HOST: '{{ .Values.clickhouse_host }}'
-  CLICKHOUSE_PORT: '{{ .Values.clickhouse_port }}'
-  CLICKHOUSE_USERNAME: '{{ .Values.global.clickhouse_username }}'
+  CLICKHOUSE_PROTOCOL: '{{ .Values.clickhouseProtocol }}'
+  CLICKHOUSE_HOST: '{{ .Values.clickhouseHost }}'
+  CLICKHOUSE_PORT: '{{ .Values.clickhousePort }}'
+  CLICKHOUSE_USERNAME: '{{ .Values.global.clickhouseUsername }}'
 
-  REDIS_HOST: '{{ .Values.redis_host }}'
-  REDIS_PORT: '{{ .Values.redis_port }}'
+  REDIS_HOST: '{{ .Values.redisHost }}'
+  REDIS_PORT: '{{ .Values.redisPort }}'
 
-  TOKENS_ENDPOINT: '{{ .Values.tokens_endpoint }}'
-  WEBHOOKS_ENDPOINT: '{{ .Values.webhooks_endpoint }}'
-  SCHEMA_ENDPOINT: '{{ .Values.schema_endpoint }}'
-  EMAILS_ENDPOINT: '{{ .Values.emails_endpoint }}'
+  TOKENS_ENDPOINT: '{{ .Values.tokensEndpoint }}'
+  WEBHOOKS_ENDPOINT: '{{ .Values.webhooksEndpoint }}'
+  SCHEMA_ENDPOINT: '{{ .Values.schemaEndpoint }}'
+  EMAILS_ENDPOINT: '{{ .Values.emailsEndpoint }}'
 
-  ENCRYPTION_SECRET: '{{ .Values.global.encryption_secret }}'
+  ENCRYPTION_SECRET: '{{ .Values.global.encryptionSecret }}'
 
-  WEB_APP_URL: '{{ .Values.web_app_url }}'
+  WEB_APP_URL: '{{ .Values.webAppUrl }}'
 
-  SUPERTOKENS_CONNECTION_URI: '{{ .Values.supertokens_connection_uri }}'
+  SUPERTOKENS_CONNECTION_URI: '{{ .Values.supertokensConnectionUri }}'
   SUPERTOKENS_API_KEY: '{{ .Values.global.apiKey.key }}'
 
-  INTEGRATION_GITHUB: '{{ .Values.integration_github }}'
-  INTEGRATION_GITHUB_GITHUB_APP_ID: '{{ .Values.integration_github_github_app_id }}'
-  INTEGRATION_GITHUB_GITHUB_APP_PRIVATE_KEY: '{{ .Values.integration_github_github_app_private_key }}'
+  INTEGRATION_GITHUB: '{{ .Values.integrationGithub }}'
+  INTEGRATION_GITHUB_GITHUB_APP_ID: '{{ .Values.integrationGithubGithubAppId }}'
+  INTEGRATION_GITHUB_GITHUB_APP_PRIVATE_KEY: '{{ .Values.integrationGithubGithubAppPrivateKey }}'
 
-  AUTH_ORGANIZATION_OIDC: '{{ .Values.auth_organization_oidc }}'
+  AUTH_ORGANIZATION_OIDC: '{{ .Values.authOrganizationOidc }}'
 
   SENTRY: '{{ .Values.sentry }}'
-  SENTRY_DSN: '{{ .Values.sentry_dsn }}'
+  SENTRY_DSN: '{{ .Values.sentryDsn }}'
 
-  PROMETHEUS_METRICS: '{{ .Values.prometheus_metrics }}'
-  PROMETHEUS_METRICS_LABEL_INSTANCE: '{{ .Values.prometheus_metrics_label_instance }}'
+  PROMETHEUS_METRICS: '{{ .Values.prometheusMetrics }}'
+  PROMETHEUS_METRICS_LABEL_INSTANCE: '{{ .Values.prometheusMetricsLabelInstance }}'
 
-  RATE_LIMIT_ENDPOINT: '{{ .Values.rate_limit_endpoint }}'
+  RATE_LIMIT_ENDPOINT: '{{ .Values.rateLimitEndpoint }}'

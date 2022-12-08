@@ -1,5 +1,0 @@
-kafka:
-  fullnameOverride: kafka
-  zookeeper:
-    fullnameOverride: kafka-zookeeper
-  minBrokerId: 1

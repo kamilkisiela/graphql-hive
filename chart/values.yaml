@@ -1,40 +1,75 @@
 global:
   image:
     tag: 59b64c36c866b3555c135c70de76a884e63f8619
-  app_base_url: base.url.io
-  clickhouse_username: default
+  appBaseUrl: base.url.io
+  clickhouseUsername: default
   postgresql:
     auth:
       database: graphql-hive
       user: postgres
   apiKey:
     key: "yourApiKey"
-  encryption_secret: yourEncryptionSecret
+  encryptionSecret: yourEncryptionSecret
   email:
     provider: sendmail
     from: no-reply@yourDomain.com
 
 clickhouse:
+  enabled: true
   fullnameOverride: clickhouse
+  auth:
+    username: default
   zookeeper:
     fullnameOverride: clickhouse-zookeeper
   shards: 1
   replicaCount: 1
 
 kafka:
+  enabled: true
   fullnameOverride: kafka
   zookeeper:
     fullnameOverride: kafka-zookeeper
   minBrokerId: 1
 
 postgresql:
+  enabled: true
   fullnameOverride: postgres-postgresql
 
 redis:
+  enabled: true
   fullnameOverride: redis
 
 supertokens:
+  enabled: true
   fullnameOverride: supertokens
 
 ingress:
   use_secure_protocol: "false"
+  annotations: {}
+
+hive-app:
+  enabled: true
+
+hive-emails:
+  enabled: true
+
+hive-schema:
+  enabled: true
+
+hive-server:
+  enabled: true
+
+hive-storage:
+  enabled: true
+
+hive-tokens:
+  enabled: true
+
+hive-usage:
+  enabled: true
+
+hive-usage-ingestor:
+  enabled: true
+
+hive-webhooks:
+  enabled: true
