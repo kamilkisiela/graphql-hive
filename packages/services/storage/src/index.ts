@@ -710,7 +710,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         >
       >(
         sql`
-        SELECT 
+        SELECT
           u.*,
           om.scopes,
           om.organization_id,
@@ -744,7 +744,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         >
       >(
         sql`
-          SELECT 
+          SELECT
             u.*,
             om.scopes,
             om.organization_id,
@@ -910,7 +910,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       await pool.query<Slonik<Pick<organizations, 'ownership_transfer_code'>>>(
         sql`
           UPDATE public.organizations
-          SET 
+          SET
             ownership_transfer_user_id = ${user},
             ownership_transfer_code = ${code},
             ownership_transfer_expires_at = NOW() + INTERVAL '1 day'
@@ -927,7 +927,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         code: string;
       }>(sql`
         SELECT ownership_transfer_code as code FROM public.organizations
-        WHERE 
+        WHERE
           ownership_transfer_user_id = ${user}
           AND id = ${organization}
           AND ownership_transfer_code = ${code}
@@ -945,7 +945,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         const owner = await tsx.maybeOne<Slonik<Pick<organizations, 'user_id'>>>(sql`
           SELECT user_id
           FROM public.organizations
-          WHERE 
+          WHERE
             id = ${organization}
             AND ownership_transfer_user_id = ${user}
             AND ownership_transfer_code = ${code}
@@ -1335,7 +1335,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async getTargetIdsOfOrganization({ organization }) {
       const results = await pool.query<Slonik<Pick<targets, 'id'>>>(
         sql`
-          SELECT t.id as id FROM public.targets as t 
+          SELECT t.id as id FROM public.targets as t
           LEFT JOIN public.projects as p ON (p.id = t.project_id)
           WHERE p.org_id = ${organization}
           GROUP BY t.id
@@ -1478,7 +1478,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         Slonik<versions & Pick<commits, 'author' | 'service' | 'commit'>>
       >(
         sql`
-          SELECT v.*, c.author, c.service, c.commit FROM public.versions as v 
+          SELECT v.*, c.author, c.service, c.commit FROM public.versions as v
           LEFT JOIN public.commits as c ON (c.id = v.commit_id)
           WHERE v.target_id = ${target} AND v.valid IS TRUE
           ORDER BY v.created_at DESC
@@ -1503,7 +1503,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         Slonik<versions & Pick<commits, 'author' | 'service' | 'commit'>>
       >(
         sql`
-          SELECT v.*, c.author, c.service, c.commit FROM public.versions as v 
+          SELECT v.*, c.author, c.service, c.commit FROM public.versions as v
           LEFT JOIN public.commits as c ON (c.id = v.commit_id)
           WHERE v.target_id = ${target} AND v.valid IS TRUE
           ORDER BY v.created_at DESC
@@ -1524,7 +1524,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         Slonik<versions & Pick<commits, 'author' | 'service' | 'commit' | 'created_at'>>
       >(
         sql`
-          SELECT v.*, c.author, c.service, c.commit FROM public.versions as v 
+          SELECT v.*, c.author, c.service, c.commit FROM public.versions as v
           LEFT JOIN public.commits as c ON (c.id = v.commit_id)
           LEFT JOIN public.targets as t ON (t.id = v.target_id)
           WHERE v.target_id = ${target} AND t.project_id = ${project}
@@ -1547,7 +1547,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         Slonik<versions & Pick<commits, 'author' | 'service' | 'commit' | 'created_at'>>
       >(
         sql`
-          SELECT v.*, c.author, c.service, c.commit FROM public.versions as v 
+          SELECT v.*, c.author, c.service, c.commit FROM public.versions as v
           LEFT JOIN public.commits as c ON (c.id = v.commit_id)
           LEFT JOIN public.targets as t ON (t.id = v.target_id)
           WHERE v.target_id = ${target} AND t.project_id = ${project}
@@ -1631,7 +1631,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           FROM
             public.version_commit AS vc
               LEFT JOIN
-                public.commits AS c 
+                public.commits AS c
                   ON c.id = vc.commit_id
           WHERE
             vc.version_id = ${version}
@@ -1682,7 +1682,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       const result = await pool.one<
         Slonik<versions & Pick<commits, 'author' | 'service' | 'commit' | 'created_at'>>
       >(sql`
-        SELECT v.*, c.author, c.service, c.commit FROM public.versions as v 
+        SELECT v.*, c.author, c.service, c.commit FROM public.versions as v
         LEFT JOIN public.commits as c ON (c.id = v.commit_id)
         LEFT JOIN public.targets as t ON (t.id = v.target_id)
         WHERE v.target_id = ${target} AND t.project_id = ${project} AND v.id = ${version} LIMIT 1
@@ -1701,7 +1701,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
     async getVersions({ project, target, after, limit }) {
       const query = sql`
-      SELECT v.*, c.author, c.service, c.commit FROM public.versions as v 
+      SELECT v.*, c.author, c.service, c.commit FROM public.versions as v
       LEFT JOIN public.commits as c ON (c.id = v.commit_id)
       LEFT JOIN public.targets as t ON (t.id = v.target_id)
       WHERE v.target_id = ${target} AND t.project_id = ${project} AND v.created_at < ${
@@ -1854,7 +1854,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     getSchema: batch(async selectors => {
       const rows = await pool.many<Slonik<WithUrl<commits>>>(
         sql`
-            SELECT c.* 
+            SELECT c.*
             FROM public.commits as c
             WHERE (c.id, c.target_id) IN ((${sql.join(
               selectors.map(s => sql`${s.commit}, ${s.target}`),
@@ -2111,8 +2111,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       const result = await pool.query<Slonik<alert_channels>>(
         sql`
           DELETE FROM public.alert_channels
-          WHERE 
-            project_id = ${project} AND 
+          WHERE
+            project_id = ${project} AND
             id IN (${sql.join(channels, sql`, `)})
           RETURNING *
         `,
@@ -2146,8 +2146,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       const result = await pool.query<Slonik<alerts>>(
         sql`
           DELETE FROM public.alerts
-          WHERE 
-            project_id = ${project} AND 
+          WHERE
+            project_id = ${project} AND
             id IN (${sql.join(alerts, sql`, `)})
           RETURNING *
         `,
@@ -2170,7 +2170,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         }>
       >(
         sql`
-          SELECT 
+          SELECT
             o.id as organization,
             t.id as target
           FROM public.targets AS t
@@ -2193,7 +2193,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         }>
       >(
         sql`
-          SELECT 
+          SELECT
             o.id as organization,
             o.clean_id as org_clean_id,
             o.name as org_name,
@@ -2225,7 +2225,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         LEFT JOIN targets AS t ON (t.id = v.target_id)
         LEFT JOIN projects AS p ON (p.id = t.project_id)
         LEFT JOIN organizations AS o ON (o.id = p.org_id)
-        WHERE 
+        WHERE
           v.created_at >= ${period.from.toISOString()}
           AND
           v.created_at < ${period.to.toISOString()}
@@ -2487,7 +2487,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async updateOIDCIntegration(args) {
       const result = await pool.maybeOne<unknown>(sql`
         UPDATE "public"."oidc_integrations"
-        SET 
+        SET
           "oauth_api_url" = ${args.oauthApiUrl ?? sql`"oauth_api_url"`}
           , "client_id" = ${args.clientId ?? sql`"client_id"`}
           , "client_secret" = ${args.encryptedClientSecret ?? sql`"client_secret"`}
