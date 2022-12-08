@@ -1,4 +1,9 @@
-import type { RouteHandlerMethod, FastifyRequest, FastifyReply } from 'fastify';
+import type {
+  RouteHandlerMethod,
+  FastifyRequest,
+  FastifyReply,
+  FastifyLoggerInstance,
+} from 'fastify';
 import { Registry } from '@hive/api';
 import { cleanRequestId } from '@hive/service-common';
 import { createYoga, useErrorHandler, Plugin } from 'graphql-yoga';
@@ -46,6 +51,7 @@ export interface GraphQLHandlerOptions {
   isProduction: boolean;
   hiveConfig: HiveConfig;
   release: string;
+  logger: FastifyLoggerInstance;
 }
 
 export type SuperTokenSessionPayload = zod.TypeOf<typeof SuperTokenAccessTokenModel>;
@@ -89,6 +95,7 @@ function useNoIntrospection(params: {
 
 export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMethod => {
   const server = createYoga<Context>({
+    logging: options.logger,
     plugins: [
       useSentry({
         startTransaction: false,

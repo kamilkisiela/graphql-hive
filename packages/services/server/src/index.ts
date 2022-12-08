@@ -241,6 +241,7 @@ export async function main() {
       isProduction: env.environment === 'prod',
       release: env.release,
       hiveConfig: env.hive,
+      logger: graphqlLogger as any,
     });
 
     server.route({
