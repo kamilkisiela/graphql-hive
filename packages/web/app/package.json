@@ -18,7 +18,7 @@
     "@emotion/react": "11.10.5",
     "@emotion/server": "11.10.0",
     "@emotion/styled": "11.10.5",
-    "@graphiql/toolkit": "0.6.0",
+    "@graphiql/toolkit": "0.8.0",
     "@graphql-tools/mock": "8.7.6",
     "@headlessui/react": "1.7.4",
     "@monaco-editor/react": "4.4.6",
