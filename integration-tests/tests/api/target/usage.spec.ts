@@ -154,7 +154,7 @@ test('collect operation', async () => {
         fields: ['Query', 'Query.ping'],
         execution: {
           ok: true,
-          duration: 200000000,
+          duration: 200_000_000,
           errorsTotal: 0,
         },
       },
@@ -164,7 +164,7 @@ test('collect operation', async () => {
 
   expect(collectResult.status).toEqual(200);
 
-  await waitFor(5_000);
+  await waitFor(5000);
 
   // should be breaking because the field is used now
   const usedCheckResult = await checkSchema(
@@ -348,7 +348,7 @@ test('normalize and collect operation without breaking its syntax', async () => 
         fields: ['Query', 'Query.ping'],
         execution: {
           ok: true,
-          duration: 200000000,
+          duration: 200_000_000,
           errorsTotal: 0,
         },
       },
@@ -358,7 +358,7 @@ test('normalize and collect operation without breaking its syntax', async () => 
 
   expect(collectResult.status).toEqual(200);
 
-  await waitFor(5_000);
+  await waitFor(5000);
 
   const from = formatISO(subHours(Date.now(), 6));
   const to = formatISO(Date.now());
@@ -454,7 +454,7 @@ test('number of produced and collected operations should match (no errors)', asy
         fields: ['Query', 'Query.ping'],
         execution: {
           ok: true,
-          duration: 200000000,
+          duration: 200_000_000,
           errorsTotal: 0,
         },
       },
@@ -462,7 +462,7 @@ test('number of produced and collected operations should match (no errors)', asy
     );
   }
 
-  await waitFor(5_000);
+  await waitFor(5000);
 
   const from = formatISO(subHours(Date.now(), 6));
   const to = formatISO(Date.now());
@@ -612,7 +612,7 @@ test('check usage from two selected targets', async () => {
         fields: ['Query', 'Query.ping'],
         execution: {
           ok: true,
-          duration: 200000000,
+          duration: 200_000_000,
           errorsTotal: 0,
         },
         metadata: {},
@@ -624,7 +624,7 @@ test('check usage from two selected targets', async () => {
         fields: ['Query', 'Query.me'],
         execution: {
           ok: true,
-          duration: 200000000,
+          duration: 200_000_000,
           errorsTotal: 0,
         },
       },
@@ -635,7 +635,7 @@ test('check usage from two selected targets', async () => {
         fields: ['Query', 'Query.me'],
         execution: {
           ok: true,
-          duration: 200000000,
+          duration: 200_000_000,
           errorsTotal: 0,
         },
       },
@@ -645,7 +645,7 @@ test('check usage from two selected targets', async () => {
 
   expect(collectResult.status).toEqual(200);
 
-  await waitFor(5_000);
+  await waitFor(5000);
 
   // should not be breaking because the field is unused on staging
   const unusedCheckResult = await checkSchema(
@@ -795,7 +795,7 @@ test('check usage not from excluded client names', async () => {
         fields: ['Query', 'Query.ping'],
         execution: {
           ok: true,
-          duration: 200000000,
+          duration: 200_000_000,
           errorsTotal: 0,
         },
         metadata: {
@@ -812,7 +812,7 @@ test('check usage not from excluded client names', async () => {
         fields: ['Query', 'Query.me'],
         execution: {
           ok: true,
-          duration: 200000000,
+          duration: 200_000_000,
           errorsTotal: 0,
         },
         metadata: {
@@ -829,7 +829,7 @@ test('check usage not from excluded client names', async () => {
         fields: ['Query', 'Query.me'],
         execution: {
           ok: true,
-          duration: 200000000,
+          duration: 200_000_000,
           errorsTotal: 0,
         },
         metadata: {
@@ -845,7 +845,7 @@ test('check usage not from excluded client names', async () => {
 
   expect(collectResult.status).toEqual(200);
 
-  await waitFor(5_000);
+  await waitFor(5000);
 
   // should be breaking because the field is used
   const unusedCheckResult = await checkSchema(
@@ -962,7 +962,7 @@ test('number of produced and collected operations should match', async () => {
             fields: ['Query', 'Query.ping'],
             execution: {
               ok: true,
-              duration: 200000000,
+              duration: 200_000_000,
               errorsTotal: 0,
             },
           }
@@ -972,7 +972,7 @@ test('number of produced and collected operations should match', async () => {
             fields: ['Query', 'Query.ping'],
             execution: {
               ok: true,
-              duration: 200000000,
+              duration: 200_000_000,
               errorsTotal: 0,
             },
             metadata: {
@@ -986,7 +986,7 @@ test('number of produced and collected operations should match', async () => {
     );
   }
 
-  await waitFor(5_000);
+  await waitFor(5000);
 
   const result = await clickHouseQuery<{
     target: string;
@@ -1074,7 +1074,7 @@ test('different order of schema coordinates should not result in different hash'
         fields: ['Query', 'Query.ping'],
         execution: {
           ok: true,
-          duration: 200000000,
+          duration: 200_000_000,
           errorsTotal: 0,
         },
       },
@@ -1084,7 +1084,7 @@ test('different order of schema coordinates should not result in different hash'
         fields: ['Query.ping', 'Query'],
         execution: {
           ok: true,
-          duration: 200000000,
+          duration: 200_000_000,
           errorsTotal: 0,
         },
       },
@@ -1092,7 +1092,7 @@ test('different order of schema coordinates should not result in different hash'
     token,
   });
 
-  await waitFor(5_000);
+  await waitFor(5000);
 
   const coordinatesResult = await clickHouseQuery<{
     target: string;
@@ -1173,7 +1173,7 @@ test('same operation but with different schema coordinates should result in diff
         fields: ['Query', 'Query.ping'],
         execution: {
           ok: true,
-          duration: 200000000,
+          duration: 200_000_000,
           errorsTotal: 0,
         },
       },
@@ -1183,7 +1183,7 @@ test('same operation but with different schema coordinates should result in diff
         fields: ['RootQuery', 'RootQuery.ping'],
         execution: {
           ok: true,
-          duration: 200000000,
+          duration: 200_000_000,
           errorsTotal: 0,
         },
       },
@@ -1191,7 +1191,7 @@ test('same operation but with different schema coordinates should result in diff
     token,
   });
 
-  await waitFor(5_000);
+  await waitFor(5000);
 
   const coordinatesResult = await clickHouseQuery<{
     coordinate: string;
@@ -1280,7 +1280,7 @@ test('operations with the same schema coordinates and body but with different na
         fields: ['Query', 'Query.ping'],
         execution: {
           ok: true,
-          duration: 200000000,
+          duration: 200_000_000,
           errorsTotal: 0,
         },
       },
@@ -1290,7 +1290,7 @@ test('operations with the same schema coordinates and body but with different na
         fields: ['Query', 'Query.ping'],
         execution: {
           ok: true,
-          duration: 200000000,
+          duration: 200_000_000,
           errorsTotal: 0,
         },
       },
@@ -1298,7 +1298,7 @@ test('operations with the same schema coordinates and body but with different na
     token,
   });
 
-  await waitFor(5_000);
+  await waitFor(5000);
 
   const coordinatesResult = await clickHouseQuery<{
     target: string;
@@ -1379,7 +1379,7 @@ test('ignore operations with syntax errors', async () => {
         fields: ['Query', 'Query.pingv2'],
         execution: {
           ok: true,
-          duration: 200000000,
+          duration: 200_000_000,
           errorsTotal: 0,
         },
       },
@@ -1389,7 +1389,7 @@ test('ignore operations with syntax errors', async () => {
         fields: ['Query', 'Query.ping'],
         execution: {
           ok: true,
-          duration: 200000000,
+          duration: 200_000_000,
           errorsTotal: 0,
         },
       },
@@ -1405,7 +1405,7 @@ test('ignore operations with syntax errors', async () => {
     }),
   );
 
-  await waitFor(5_000);
+  await waitFor(5000);
 
   const coordinatesResult = await clickHouseQuery<{
     target: string;
@@ -1486,7 +1486,7 @@ test('ensure correct data', async () => {
         fields: ['Query', 'Query.ping'],
         execution: {
           ok: true,
-          duration: 200000000,
+          duration: 200_000_000,
           errorsTotal: 0,
         },
       },
@@ -1496,7 +1496,7 @@ test('ensure correct data', async () => {
         fields: ['Query', 'Query.ping'],
         execution: {
           ok: true,
-          duration: 200000000,
+          duration: 200_000_000,
           errorsTotal: 0,
         },
         metadata: {
@@ -1510,7 +1510,7 @@ test('ensure correct data', async () => {
     token,
   });
 
-  await waitFor(5_000);
+  await waitFor(5000);
 
   if (FF_CLICKHOUSE_V2_TABLES) {
     // operation_collection

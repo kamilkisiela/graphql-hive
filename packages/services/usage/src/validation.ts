@@ -19,7 +19,7 @@ const ajv = new Ajv({
   },
 });
 
-const validOperationBodyCache = LRU<boolean>(5_000, 300_000 /* 5 minutes */);
+const validOperationBodyCache = LRU<boolean>(5000, 300_000 /* 5 minutes */);
 
 const operationMapRecordSchema: JSONSchemaType<OperationMapRecord> = {
   type: 'object',

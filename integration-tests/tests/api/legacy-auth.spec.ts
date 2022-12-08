@@ -73,7 +73,7 @@ test('X-API-Token header should work when calling GraphQL API and collecting usa
         fields: ['Query', 'Query.ping'],
         execution: {
           ok: true,
-          duration: 200000000,
+          duration: 200_000_000,
           errorsTotal: 0,
         },
       },
@@ -84,7 +84,7 @@ test('X-API-Token header should work when calling GraphQL API and collecting usa
 
   expect(collectResult.status).toEqual(200);
 
-  await waitFor(5_000);
+  await waitFor(5000);
 
   const from = formatISO(subHours(Date.now(), 6));
   const to = formatISO(Date.now());

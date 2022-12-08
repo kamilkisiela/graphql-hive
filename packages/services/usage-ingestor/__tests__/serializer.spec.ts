@@ -8,12 +8,12 @@ import {
 } from '../src/serializer';
 
 const timestamp = {
-  asNumber: 1643892203027,
+  asNumber: 1_643_892_203_027,
   asString: '2022-02-03 12:43:23', // date as string in UTC timezone
 };
 
 const expiresAt = {
-  asNumber: 1643892206037,
+  asNumber: 1_643_892_206_037,
   asString: '2022-02-03 12:43:26', // date as string in UTC timezone
 };
 

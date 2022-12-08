@@ -94,7 +94,7 @@ test('GraphQL Yoga - should not interrupt the process', async () => {
       return Promise.reject(error);
     });
 
-  await waitFor(5_000);
+  await waitFor(5000);
   await stop();
   expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('[hive][info]'));
   expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('[hive][usage]'));
@@ -142,7 +142,7 @@ test('Apollo Server - should not interrupt the process', async () => {
       }
     `,
   });
-  await waitFor(5_000);
+  await waitFor(5000);
   await apollo.stop();
   clean();
   expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('[hive][info]'));

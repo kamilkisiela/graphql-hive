@@ -90,7 +90,7 @@ test('teach estimator multiple times', () => {
   });
 
   estimator.teach({
-    bytes: 1_000,
+    bytes: 1000,
     operations: 10,
   });
 
@@ -120,7 +120,7 @@ test('reset after N milliseconds', async () => {
   });
 
   estimator.teach({
-    bytes: 1_000,
+    bytes: 1000,
     operations: 10,
   });
 
