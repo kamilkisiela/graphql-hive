@@ -120,6 +120,7 @@ export function deployGraphQL({
         TOKENS_ENDPOINT: serviceLocalEndpoint(tokens.service),
         WEBHOOKS_ENDPOINT: serviceLocalEndpoint(webhooks.service),
         SCHEMA_ENDPOINT: serviceLocalEndpoint(schema.service),
+        WEB_APP_URL: `https://${deploymentEnv.DEPLOYED_DNS}/`,
         // CDN
         CDN_CF: '1',
         CDN_CF_BASE_PATH: 'https://api.cloudflare.com/client/v4/accounts',

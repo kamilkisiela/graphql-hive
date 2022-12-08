@@ -163,7 +163,7 @@ services:
       ACCESS_TOKEN_BLACKLISTING: 'true'
 
   local_cdn:
-    image: node:16.13.2-alpine3.14
+    image: node:16.15.1-alpine3.14
     entrypoint:
       - /bin/sh
       - /run-local-cdn.sh
@@ -183,6 +183,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3004
+      LOG_LEVEL: debug
       CDN_AUTH_PRIVATE_KEY: 1e1064ef9cda8bf38936b77317e90dc3
       S3_ENDPOINT: 'http://s3:9000'
       S3_ACCESS_KEY_ID: minioadmin
@@ -191,7 +192,7 @@ services:
       S3_PUBLIC_URL: 'http://localhost:9002'
 
   local_broker:
-    image: node:16.13.2-alpine3.14
+    image: node:16.15.1-alpine3.14
     entrypoint:
       - /bin/sh
       - /run-local-broker.sh
@@ -211,10 +212,29 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3013
+      LOG_LEVEL: debug
       CF_BROKER_SIGNATURE: secretSignature
 
+  composition_federation_2:
+    image: '${DOCKER_REGISTRY}composition-federation-2${DOCKER_TAG}'
+    networks:
+      - 'stack'
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'localhost:3069/_readiness']
+      interval: 5s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
+    ports:
+      - 3069:3069
+    environment:
+      NODE_ENV: production
+      PORT: 3069
+      LOG_LEVEL: debug
+      SECRET: secretsecret
+
   external_composition:
-    image: node:16.13.2-alpine3.14
+    image: node:16.15.1-alpine3.14
     entrypoint:
       - /bin/sh
       - /run-external-composition.sh
@@ -234,6 +254,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3012
+      LOG_LEVEL: debug
       SECRET: secretsecret
 
   storage:
@@ -296,13 +317,13 @@ services:
     ports:
       - 3001:3001
     environment:
-      NODE_ENV: production
+      NODE_ENV: development
+      LOG_LEVEL: debug
       POSTGRES_HOST: db
       POSTGRES_PORT: 5432
       POSTGRES_DB: registry
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      ROARR_LOG: 'true'
       CLICKHOUSE_PROTOCOL: http
       CLICKHOUSE_HOST: clickhouse
       CLICKHOUSE_PORT: 8123
@@ -359,6 +380,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3002
+      LOG_LEVEL: debug
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: test
@@ -375,12 +397,12 @@ services:
       - 3003:3003
     environment:
       NODE_ENV: production
+      LOG_LEVEL: debug
       POSTGRES_HOST: db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_PORT: 5432
       POSTGRES_DB: registry
-      ROARR_LOG: 'true'
       PORT: 3003
 
   webhooks:
@@ -396,6 +418,7 @@ services:
       - 3005:3005
     environment:
       NODE_ENV: production
+      LOG_LEVEL: debug
       BULLMQ_COMMANDS_FROM_ROOT: 'true'
       PORT: 3005
       REDIS_HOST: redis
@@ -416,6 +439,7 @@ services:
       - 3011:3011
     environment:
       NODE_ENV: production
+      LOG_LEVEL: debug
       BULLMQ_COMMANDS_FROM_ROOT: 'true'
       PORT: 3011
       REDIS_HOST: redis
@@ -439,6 +463,7 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: production
+      LOG_LEVEL: debug
       TOKENS_ENDPOINT: http://tokens:3003
       RATE_LIMIT_ENDPOINT: http://rate-limit:3009
       KAFKA_CONNECTION_MODE: docker
@@ -462,6 +487,7 @@ services:
       - 3007:3007
     environment:
       NODE_ENV: production
+      LOG_LEVEL: debug
       KAFKA_CONNECTION_MODE: docker
       KAFKA_BROKER: broker:29092
       KAFKA_CONCURRENCY: '1'
@@ -489,7 +515,7 @@ services:
         condition: service_completed_successfully
     environment:
       NODE_ENV: production
-      ROARR_LOG: 'true'
+      LOG_LEVEL: debug
       CLICKHOUSE_PROTOCOL: http
       CLICKHOUSE_HOST: clickhouse
       CLICKHOUSE_PORT: '8123'
@@ -515,6 +541,7 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: production
+      LOG_LEVEL: debug
       LIMIT_CACHE_UPDATE_INTERVAL_MS: 2000
       POSTGRES_HOST: db
       POSTGRES_PORT: 5432
@@ -523,7 +550,6 @@ services:
       POSTGRES_PASSWORD: postgres
       USAGE_ESTIMATOR_ENDPOINT: http://usage-estimator:3008
       EMAILS_ENDPOINT: http://emails:3011
-      ROARR_LOG: 'true'
       PORT: 3009
 
   stripe-billing:
@@ -541,13 +567,13 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: production
+      LOG_LEVEL: debug
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
       POSTGRES_HOST: db
       POSTGRES_PORT: 5432
       POSTGRES_DB: registry
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      ROARR_LOG: 'true'
       USAGE_ESTIMATOR_ENDPOINT: http://usage-estimator:3008
       PORT: 3010
 

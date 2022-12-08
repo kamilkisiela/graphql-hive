@@ -4,6 +4,10 @@ import * as Tooltip from '@radix-ui/react-tooltip';
 import clsx from 'clsx';
 import { FiServer, FiGlobe, FiRadio, FiGithub } from 'react-icons/fi';
 import { Pricing } from '../pricing';
+import schemaHistoryImage from '../../public/features/schema-history.png';
+import monitoringImage from '../../public/features/monitoring-preview.png';
+import cicdImage from '../../public/any-ci-cd.svg';
+import Image, { StaticImageData } from 'next/image';
 
 const classes = {
   link: clsx(
@@ -125,7 +129,7 @@ function Feature(props: {
     description: ReactNode;
     icon?: ReactNode;
   }[];
-  image: string;
+  image: StaticImageData;
   gradient: number;
   flipped?: boolean;
 }) {
@@ -154,7 +158,7 @@ function Feature(props: {
             className="relative flex flex-grow flex-col items-center justify-center overflow-hidden rounded-3xl p-8"
             style={{ backgroundImage: `linear-gradient(70deg, ${start}, ${end})` }}
           >
-            <img src={image} className="rounded-2xl" alt={title} />
+            <Image {...image} className="rounded-2xl" alt={title} />
           </div>
         </div>
         {Array.isArray(highlights) && highlights.length > 0 && (
@@ -207,7 +211,7 @@ export default function IndexPage(): ReactElement {
                 icon: <FiRadio className="h-full w-full" />,
               },
             ]}
-            image="/features/schema-history.png"
+            image={schemaHistoryImage}
             gradient={0}
           />
           <Feature
@@ -239,7 +243,7 @@ export default function IndexPage(): ReactElement {
                 </div>
               </div>
             }
-            image="/features/monitoring-preview.png"
+            image={monitoringImage}
             gradient={1}
             flipped
           />
@@ -270,7 +274,7 @@ export default function IndexPage(): ReactElement {
                 </div>
               </div>
             }
-            image="/any-ci-cd.svg"
+            image={cicdImage}
             gradient={2}
           />
           <div className={classes.feature}>

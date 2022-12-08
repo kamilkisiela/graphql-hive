@@ -53,13 +53,20 @@ const artifactStorageReader = new ArtifactStorageReader(s3Client, S3_BUCKET_NAME
 
 const handleArtifactRequest = createArtifactRequestHandler({
   isKeyValid,
-  async getArtifactUrl(targetId, artifactType) {
-    return artifactStorageReader.generateArtifactReadUrl(targetId, artifactType);
+  async getArtifactAction(targetId, artifactType, eTag) {
+    return artifactStorageReader.generateArtifactReadUrl(targetId, artifactType, eTag);
   },
 });
 
 const router = itty
   .Router()
+  .get(
+    '/_health',
+    () =>
+      new Response('OK', {
+        status: 200,
+      }),
+  )
   .get('*', handleArtifactRequest)
   // Legacy CDN Handlers
   .get('*', handleRequest);

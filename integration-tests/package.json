@@ -6,16 +6,17 @@
   "scripts": {
     "build-and-pack": "(cd ../ && pnpm build:services && pnpm build:libraries && pnpm build:local) && node ./scripts/pack.mjs",
     "build:local": "pnpm build-and-pack && (cd ../ && pnpm docker:build)",
-    "dockest": "tsup-node dockest.ts --format esm --target node16 && PWD=$PWD/.. node dist/dockest.js"
+    "dockest": "tsup-node dockest.ts --format esm --target node16 && PWD=$PWD/.. node dist/dockest.js",
+    "filter-logs": "node ./scripts/filter-log.mjs"
   },
   "dependencies": {
     "@app/gql": "link:./testkit/gql",
-    "@aws-sdk/client-s3": "3.218.0",
+    "@aws-sdk/client-s3": "3.224.0",
     "@graphql-hive/core": "0.2.3",
     "@graphql-typed-document-node/core": "3.1.1",
     "@n1ru4l/dockest": "2.1.0-rc.6",
-    "@trpc/client": "10.4.2",
-    "@trpc/server": "10.4.2",
+    "@trpc/client": "10.4.3",
+    "@trpc/server": "10.4.3",
     "@whatwg-node/fetch": "0.4.7",
     "auth0": "2.36.2",
     "axios": "0.27.2",

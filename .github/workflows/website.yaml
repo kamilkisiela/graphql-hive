@@ -1,0 +1,47 @@
+name: website
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  deployment:
+    runs-on: ubuntu-latest
+    if:
+      github.event.pull_request.head.repo.full_name == github.repository || github.event_name ==
+      'push'
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: the-guild-org/shared-config/setup@main
+        name: setup env
+        with:
+          nodeVersion: 16
+          packageManager: pnpm
+
+      - uses: the-guild-org/shared-config/website-cf@main
+        name: build and deploy website
+        env:
+          NEXT_BASE_PATH: ${{ github.ref == 'refs/heads/main' && '/graphql/hive' || '' }}
+          SITE_URL:
+            ${{ github.ref == 'refs/heads/main' && 'https://the-guild.dev/graphql/hive' || '' }}
+          NEXT_PUBLIC_ALGOLIA_INDEX_NAME: ${{ secrets.NEXT_PUBLIC_ALGOLIA_INDEX_NAME }}
+          NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY: ${{ secrets.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY }}
+          NEXT_PUBLIC_ALGOLIA_APP_ID: ${{ secrets.NEXT_PUBLIC_ALGOLIA_APP_ID }}
+        with:
+          cloudflareApiToken: ${{ secrets.WEBSITE_CLOUDFLARE_API_TOKEN }}
+          cloudflareAccountId: ${{ secrets.WEBSITE_CLOUDFLARE_ACCOUNT_ID }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          projectName: hive-landing-page
+          prId: ${{ github.event.pull_request.number }}
+          mainBranch: main
+          websiteDirectory: ./
+          buildScript: cd packages/web/landing-page && pnpm build && pnpm next export
+          artifactDir: packages/web/landing-page/out

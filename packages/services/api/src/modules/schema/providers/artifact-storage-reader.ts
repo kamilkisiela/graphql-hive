@@ -55,7 +55,8 @@ export class ArtifactStorageReader {
   async generateArtifactReadUrl(
     targetId: string,
     artifactType: ArtifactsType,
-  ): Promise<string | null> {
+    etagValue: string | null,
+  ) {
     if (artifactType.startsWith('sdl')) {
       artifactType = 'sdl';
     }
@@ -83,9 +84,13 @@ export class ArtifactStorageReader {
     });
 
     if (response.status === 200) {
-      return await this.generatePresignedGetUrl(key);
+      if (etagValue && response.headers.get('etag') === etagValue) {
+        return { type: 'notModified' } as const;
+      }
+
+      return { type: 'redirect', location: await this.generatePresignedGetUrl(key) } as const;
     } else if (response.status === 404) {
-      return null;
+      return { type: 'notFound' } as const;
     } else {
       const body = await response.text();
       throw new Error(`HEAD request failed with status ${response.status}: ${body}`);

@@ -101,12 +101,37 @@ export interface Storage {
   deleteOrganizationInvitationByEmail(
     _: OrganizationSelector & { email: string },
   ): Promise<OrganizationInvitation | null>;
+  createOrganizationTransferRequest(
+    _: OrganizationSelector & {
+      user: string;
+    },
+  ): Promise<{
+    code: string;
+  }>;
+  getOrganizationTransferRequest(
+    _: OrganizationSelector & {
+      code: string;
+      user: string;
+    },
+  ): Promise<{
+    code: string;
+  } | null>;
+  answerOrganizationTransferRequest(
+    _: OrganizationSelector & {
+      code: string;
+      user: string;
+      accept: boolean;
+      oldAdminAccessScopes: ReadonlyArray<
+        OrganizationAccessScope | ProjectAccessScope | TargetAccessScope
+      >;
+    },
+  ): Promise<void>;
 
   getOrganizationMembers(_: OrganizationSelector): Promise<readonly Member[] | never>;
   getOrganizationInvitations(_: OrganizationSelector): Promise<readonly OrganizationInvitation[]>;
+  getOrganizationOwnerId(_: OrganizationSelector): Promise<string | null>;
   getOrganizationOwner(_: OrganizationSelector): Promise<Member | never>;
-  getOrganizationOwner(_: OrganizationSelector): Promise<Member | never>;
-  getOrganizationMember(_: OrganizationSelector & { user: string }): Promise<Member | never>;
+  getOrganizationMember(_: OrganizationSelector & { user: string }): Promise<Member | null>;
   getOrganizationMemberAccessPairs(
     _: readonly (OrganizationSelector & { user: string })[],
   ): Promise<
@@ -188,8 +213,12 @@ export interface Storage {
     } & TargetSelector,
   ): Promise<
     | {
+        schemas: [];
+      }
+    | {
         schemas: Schema[];
-        version?: string;
+        version: string;
+        valid: boolean;
       }
     | never
   >;

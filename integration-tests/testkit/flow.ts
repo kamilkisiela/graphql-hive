@@ -26,6 +26,9 @@ import type {
   RateLimitInput,
   InviteToOrganizationByEmailInput,
   EnableExternalSchemaCompositionInput,
+  OrganizationTransferRequestSelector,
+  RequestOrganizationTransferInput,
+  AnswerOrganizationTransferRequestInput,
 } from './gql/graphql';
 import { execute } from './graphql';
 
@@ -181,6 +184,104 @@ export function joinOrganization(code: string, authToken: string) {
     authToken,
     variables: {
       code,
+    },
+  });
+}
+
+export function getOrganizationMembers(selector: OrganizationSelectorInput, authToken: string) {
+  return execute({
+    document: gql(/* GraphQL */ `
+      query getOrganizationMembers($selector: OrganizationSelectorInput!) {
+        organization(selector: $selector) {
+          organization {
+            members {
+              nodes {
+                id
+                user {
+                  email
+                }
+                organizationAccessScopes
+                projectAccessScopes
+                targetAccessScopes
+              }
+            }
+          }
+        }
+      }
+    `),
+    authToken,
+    variables: {
+      selector,
+    },
+  });
+}
+
+export function getOrganizationTransferRequest(
+  selector: OrganizationTransferRequestSelector,
+  authToken: string,
+) {
+  return execute({
+    document: gql(/* GraphQL */ `
+      query getOrganizationTransferRequest($selector: OrganizationTransferRequestSelector!) {
+        organizationTransferRequest(selector: $selector) {
+          organization {
+            id
+          }
+        }
+      }
+    `),
+    authToken,
+    variables: {
+      selector,
+    },
+  });
+}
+
+export function requestOrganizationTransfer(
+  input: RequestOrganizationTransferInput,
+  authToken: string,
+) {
+  return execute({
+    document: gql(/* GraphQL */ `
+      mutation requestOrganizationTransfer($input: RequestOrganizationTransferInput!) {
+        requestOrganizationTransfer(input: $input) {
+          ok {
+            email
+            code
+          }
+          error {
+            message
+          }
+        }
+      }
+    `),
+    authToken,
+    variables: {
+      input,
+    },
+  });
+}
+
+export function answerOrganizationTransferRequest(
+  input: AnswerOrganizationTransferRequestInput,
+  authToken: string,
+) {
+  return execute({
+    document: gql(/* GraphQL */ `
+      mutation answerOrganizationTransferRequest($input: AnswerOrganizationTransferRequestInput!) {
+        answerOrganizationTransferRequest(input: $input) {
+          ok {
+            accepted
+          }
+          error {
+            message
+          }
+        }
+      }
+    `),
+    authToken,
+    variables: {
+      input,
     },
   });
 }
@@ -777,7 +878,7 @@ export async function fetchSchemaFromCDN(selector: TargetSelectorInput, token: s
 
   const cdn = cdnAccessResult.body.data!.createCdnToken;
 
-  const res = await fetch(cdn.url, {
+  const res = await fetch(cdn.url + '/sdl', {
     headers: {
       'X-Hive-CDN-Key': cdn.token,
     },
@@ -798,7 +899,7 @@ export async function fetchSupergraphFromCDN(selector: TargetSelectorInput, toke
 
   const cdn = cdnAccessResult.body.data!.createCdnToken;
 
-  const res = await fetch(cdn.url.replace('/sdl', '/supergraph'), {
+  const res = await fetch(cdn.url + '/supergraph', {
     headers: {
       'X-Hive-CDN-Key': cdn.token,
     },
@@ -821,7 +922,7 @@ export async function fetchMetadataFromCDN(selector: TargetSelectorInput, token:
 
   const cdn = cdnAccessResult.body.data!.createCdnToken;
 
-  const res = await fetch(cdn.url.replace('/sdl', `/metadata`), {
+  const res = await fetch(cdn.url + '/metadata', {
     headers: {
       'X-Hive-CDN-Key': cdn.token,
     },

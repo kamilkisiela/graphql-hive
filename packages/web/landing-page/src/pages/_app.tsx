@@ -18,7 +18,6 @@ export default function App({ Component, pageProps }: AppProps): ReactElement {
         <meta property="og:title" content={TITLE} key="title" />
         <meta name="description" content={DESCRIPTION} key="description" />
         <meta name="og:description" content={DESCRIPTION} key="og:description" />
-        <meta property="og:url" key="og:url" content="https://graphql-hive.com" />
         <meta property="og:type" key="og:type" content="website" />
         <meta
           property="og:image"
@@ -29,7 +28,6 @@ export default function App({ Component, pageProps }: AppProps): ReactElement {
         <meta property="og:locale" content="en" />
         <meta name="twitter:card" key="twitter:card" content="summary_large_image" />
         <meta name="twitter:site" key="twitter:site" content="@TheGuildDev" />
-        <link rel="canonical" href="https://graphql-hive.com" />
       </Head>
 
       <Header accentColor="#d49605" search={false} />

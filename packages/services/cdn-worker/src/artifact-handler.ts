@@ -1,12 +1,20 @@
 import type { KeyValidator } from './key-validation';
-import { Response, type Request } from '@whatwg-node/fetch';
+import { type Request, createFetch } from '@whatwg-node/fetch';
 import itty from 'itty-router';
 import zod from 'zod';
 import { InvalidAuthKeyResponse, MissingAuthKeyResponse } from './errors';
 import type { ArtifactsType } from '@hive/api/src/modules/schema/providers/artifact-storage-reader';
 
+const { Response } = createFetch({ useNodeFetch: true });
+
 type ArtifactRequestHandler = {
-  getArtifactUrl: (targetId: string, artifactType: ArtifactsType) => Promise<string | null>;
+  getArtifactAction: (
+    targetId: string,
+    artifactType: ArtifactsType,
+    eTag: string | null,
+  ) => Promise<
+    { type: 'notModified' } | { type: 'notFound' } | { type: 'redirect'; location: string }
+  >;
   isKeyValid: KeyValidator;
 };
 
@@ -55,17 +63,24 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
     const params = parseResult.data;
 
     const maybeResponse = await authenticate(request, params.targetId);
+
     if (maybeResponse !== null) {
       return maybeResponse;
     }
 
-    const artifactUrl = await deps.getArtifactUrl(params.targetId, params.artifactType);
+    const eTag = request.headers.get('if-none-match');
 
-    if (!artifactUrl) {
+    const result = await deps.getArtifactAction(params.targetId, params.artifactType, eTag);
+
+    if (result.type === 'notModified') {
+      return new Response('', {
+        status: 304,
+      });
+    } else if (result.type === 'notFound') {
       return new Response('Not found.', { status: 404 });
+    } else if (result.type === 'redirect') {
+      return new Response('Found.', { status: 302, headers: { Location: result.location } });
     }
-
-    return new Response('Found.', { status: 302, headers: { Location: artifactUrl } });
   });
 
   return (request: Request) => router.handle(request);

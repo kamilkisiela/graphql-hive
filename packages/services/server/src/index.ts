@@ -156,6 +156,11 @@ export async function main() {
 
     const graphqlLogger = createGraphQLLogger();
     const registry = createRegistry({
+      app: env.hiveServices.webApp
+        ? {
+            baseUrl: env.hiveServices.webApp.url,
+          }
+        : null,
       tokens: {
         endpoint: env.hiveServices.tokens.endpoint,
       },
@@ -326,8 +331,8 @@ export async function main() {
 
       const artifactHandler = createArtifactRequestHandler({
         isKeyValid: createIsKeyValid({ keyData: env.cdn.authPrivateKey }),
-        async getArtifactUrl(targetId, artifactType) {
-          return artifactStorageReader.generateArtifactReadUrl(targetId, artifactType);
+        async getArtifactAction(targetId, artifactType, eTag) {
+          return artifactStorageReader.generateArtifactReadUrl(targetId, artifactType, eTag);
         },
       });
       const artifactRouteHandler = createServerAdapter(artifactHandler);

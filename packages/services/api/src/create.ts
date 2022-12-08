@@ -52,6 +52,7 @@ import { billingModule } from './modules/billing';
 import { OIDC_INTEGRATIONS_ENABLED } from './modules/oidc-integrations/providers/tokens';
 import { oidcIntegrationsModule } from './modules/oidc-integrations';
 import { ArtifactStorageWriter } from './modules/schema/providers/artifact-storage-writer';
+import { WEB_APP_URL } from './modules/shared/providers/tokens';
 import type { S3Client } from '@aws-sdk/client-s3';
 
 const modules = [
@@ -78,6 +79,7 @@ const modules = [
 ];
 
 export function createRegistry({
+  app,
   tokens,
   webhooks,
   schemaService,
@@ -117,6 +119,9 @@ export function createRegistry({
     token: string;
     channel: string;
   };
+  app: {
+    baseUrl: string;
+  } | null;
   billing: BillingConfig;
   schemaConfig: SchemaModuleConfig;
   emailsEndpoint?: string;
@@ -208,6 +213,11 @@ export function createRegistry({
     {
       provide: OIDC_INTEGRATIONS_ENABLED,
       useValue: organizationOIDC,
+      scope: Scope.Singleton,
+    },
+    {
+      provide: WEB_APP_URL,
+      useValue: app?.baseUrl.replace(/\/$/, '') ?? 'http://localhost:3000',
       scope: Scope.Singleton,
     },
     encryptionSecretProvider(encryptionSecret),

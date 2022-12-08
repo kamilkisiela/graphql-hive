@@ -41,7 +41,7 @@ export function deployCloudFlareSecurityTransform(options: {
 
   const contentSecurityPolicy = `
   default-src 'self';
-  frame-src ${stripeHost} https://game.crisp.chat https://giscus.app;
+  frame-src ${stripeHost} https://game.crisp.chat https://giscus.app https://www.youtube.com;
   worker-src 'self' blob:;
   style-src 'self' 'unsafe-inline' ${crispHost} fonts.googleapis.com ${monacoCdnBasePath};
   script-src 'self' 'unsafe-eval' 'unsafe-inline' {DYNAMIC_HOST_PLACEHOLDER} ${monacoCdnBasePath} ${cspHosts};

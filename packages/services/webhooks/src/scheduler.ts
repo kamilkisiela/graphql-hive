@@ -161,10 +161,14 @@ export function createScheduler(config: Config) {
 
   function onFailed(job: Job, error: Error) {
     logger.debug(
-      `Job %s failed after %s attempts, reason: %s`,
+      `Job %s failed after %s attempts, reason: %s (orgId=%s, projectId=%s, targetId=%s, schemaId=%s)`,
       job.name,
       job.attemptsMade,
       job.failedReason,
+      job.data?.event?.organization?.id,
+      job.data?.event?.project?.id,
+      job.data?.event?.target?.id,
+      job.data?.event?.schema?.id,
     );
     logger.error(error);
   }
