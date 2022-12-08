@@ -374,7 +374,7 @@ importers:
       p-retry: 5.1.2
       p-timeout: 5.0.2
       param-case: 3.0.4
-      supertokens-node: 12.1.1
+      supertokens-node: 12.1.2
       tslib: 2.4.1
       uuid: 8.3.2
       zod: 3.15.1
@@ -411,7 +411,7 @@ importers:
       p-retry: 5.1.2
       p-timeout: 5.0.2
       param-case: 3.0.4
-      supertokens-node: 12.1.1
+      supertokens-node: 12.1.2
       uuid: 8.3.2
       zod: 3.15.1
     devDependencies:
@@ -1054,9 +1054,9 @@ importers:
       regenerator-runtime: 0.13.11
       rimraf: 3.0.2
       snarkdown: 2.0.0
-      supertokens-auth-react: 0.27.3
+      supertokens-auth-react: 0.27.4
       supertokens-js-override: 0.0.4
-      supertokens-node: 12.1.1
+      supertokens-node: 12.1.2
       supertokens-website: 14.0.3
       tailwindcss: 2.2.19
       tailwindcss-radix: 2.2.0
@@ -1135,9 +1135,9 @@ importers:
       react-window: 1.8.8_biqbaboplfbrettd7655fr4n2y
       regenerator-runtime: 0.13.11
       snarkdown: 2.0.0
-      supertokens-auth-react: 0.27.3_spprgxbbbwrf7revoq66vrfk2y
+      supertokens-auth-react: 0.27.4_spprgxbbbwrf7revoq66vrfk2y
       supertokens-js-override: 0.0.4
-      supertokens-node: 12.1.1
+      supertokens-node: 12.1.2
       supertokens-website: 14.0.3
       twin.macro: 2.8.2
       urql: 2.0.5_onqnqwb3ubg5opvemcqf7c2qhy
@@ -25312,8 +25312,8 @@ packages:
       - supports-color
     dev: false
 
-  /supertokens-auth-react/0.27.3_spprgxbbbwrf7revoq66vrfk2y:
-    resolution: {integrity: sha512-lFyk7dFfc7G06NdNpr2m0P65k2CvAW9fDU+6s590dG6G07RanBhZX2izy6OgXwnAl/Nxp6NH5jwwhxCMSXiyQA==}
+  /supertokens-auth-react/0.27.4_spprgxbbbwrf7revoq66vrfk2y:
+    resolution: {integrity: sha512-6pC7mVz8hMPVXqZ+aMurSDdylvrkHYHuYJwiF6WZU/EQK17BMAwJIqARt9zf3JS8eiew09pVIn6i/ZW1Iiz8HQ==}
     engines: {node: '>=16.0.0', npm: ^8}
     peerDependencies:
       react: '>=16.8.0'
@@ -25338,8 +25338,8 @@ packages:
     resolution: {integrity: sha512-r0JFBjkMIdep3Lbk3JA+MpnpuOtw4RSyrlRAbrzMcxwiYco3GFWl/daimQZ5b1forOiUODpOlXbSOljP/oyurg==}
     dev: false
 
-  /supertokens-node/12.1.1:
-    resolution: {integrity: sha512-TrO4cNrMwmRVHjvHQVODui1TfSAXvTSEz1ZthrxbZrwoDH9qOan9ZCYEAtqCYDfyrX9vWq3k5V8pEx14lcRebQ==}
+  /supertokens-node/12.1.2:
+    resolution: {integrity: sha512-4XrFK2riKJDdjgIErtfAoqp0l1IiQLuBES04RFX6r8GVxZXNzDBECeO9B1QAg4D0HhzdtRJQ2aRqmB2VaJfhyw==}
     dependencies:
       axios: 0.21.4_debug@4.3.4
       body-parser: 1.19.0
