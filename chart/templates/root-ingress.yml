@@ -9,7 +9,7 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
     nginx.ingress.kubernetes.io/backend-protocol: HTTP
-    {{ if eq .Values.ingress.use_secure_protocol "true" }}
+    {{ if eq .Values.ingress.useSecureProtocol "true" }}
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     {{ else }}
     nginx.ingress.kubernetes.io/ssl-redirect: "false"

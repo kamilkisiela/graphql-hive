@@ -44,7 +44,7 @@ supertokens:
   fullnameOverride: supertokens
 
 ingress:
-  use_secure_protocol: "false"
+  useSecureProtocol: "false"
   annotations: {}
 
 hive-app:
