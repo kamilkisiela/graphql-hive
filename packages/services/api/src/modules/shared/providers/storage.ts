@@ -44,6 +44,28 @@ export interface PersistedOperationSelector extends ProjectSelector {
   operation: string;
 }
 
+export interface IdMutex {
+  /**
+   * Acquires a mutual exclusion lock using the provided argument
+   * as the key.
+   *
+   * If there is already a lock with the supplied key, the promise
+   * will wait until that lock is released.
+   *
+   * The lock exists until the function that is resolved (unlock) is called.
+   *
+   * Locks are acquired on the database and within the running process,
+   * meaning the lock mechanism works across multiple services running
+   * in parallel.
+   *
+   * @param id - Mutual exclusion lock key
+   */
+  lock(id: string): Promise<
+    // unlock
+    () => Promise<void>
+  >;
+}
+
 export interface Storage {
   destroy(): Promise<void>;
   ensureUserExists(_: {
@@ -410,6 +432,7 @@ export interface Storage {
     oauthApiUrl: string | null;
   }): Promise<OIDCIntegration>;
   deleteOIDCIntegration(_: { oidcIntegrationId: string }): Promise<void>;
+  idMutex: IdMutex;
 }
 
 @Injectable()
