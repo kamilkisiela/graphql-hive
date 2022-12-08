@@ -15,7 +15,7 @@ export const resetDb = async (conn: DatabasePoolConnection) => {
 
   if (tablenames.length) {
     await conn.query(sql`
-      TRUNCATE TABLE 
+      TRUNCATE TABLE
         ${sql.join(
           tablenames.map(name => sql.identifier([name])),
           sql`,`,

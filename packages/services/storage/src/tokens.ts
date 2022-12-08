@@ -12,11 +12,11 @@ export async function createTokenStorage(connection: string, maximumPoolSize: nu
     async getTokens({ target }: { target: string }) {
       const result = await pool.query<Slonik<tokens>>(
         sql`
-          SELECT * 
-          FROM public.tokens 
-          WHERE 
-            target_id = ${target} 
-            AND deleted_at IS NULL 
+          SELECT *
+          FROM public.tokens
+          WHERE
+            target_id = ${target}
+            AND deleted_at IS NULL
           ORDER BY created_at DESC
         `,
       );
@@ -26,8 +26,8 @@ export async function createTokenStorage(connection: string, maximumPoolSize: nu
     async getToken({ token }: { token: string }) {
       return pool.maybeOne<Slonik<tokens>>(
         sql`
-          SELECT * 
-          FROM public.tokens 
+          SELECT *
+          FROM public.tokens
           WHERE token = ${token} AND deleted_at IS NULL
           LIMIT 1
         `,
@@ -80,7 +80,7 @@ export async function createTokenStorage(connection: string, maximumPoolSize: nu
                 tokens.map(t => sql`${t.token}, ${toDate(t.date)}`),
                 sql`), (`,
               )})
-        ) as c(token, last_used_at) 
+        ) as c(token, last_used_at)
         WHERE c.token = t.token;
       `);
     },
