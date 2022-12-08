@@ -3,9 +3,9 @@ services:
   db:
     image: postgres:13.4-alpine
     networks:
-      - 'stack'
+      - stack
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}']
+      test: [CMD-SHELL, 'pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -22,9 +22,9 @@ services:
   redis:
     image: docker.io/bitnami/redis:6.2
     networks:
-      - 'stack'
+      - stack
     healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
+      test: [CMD, redis-cli, ping]
       interval: 30s
       timeout: 10s
       retries: 10
@@ -44,9 +44,9 @@ services:
       - '9000:9000'
       - '9001:9001'
     networks:
-      - 'stack'
+      - stack
     healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
+      test: [CMD, curl, -f, 'http://localhost:9000/minio/health/live']
       interval: 30s
       timeout: 20s
       retries: 3
@@ -59,9 +59,9 @@ services:
     depends_on:
       s3:
         condition: service_healthy
-    restart: 'no'
+    restart: no
     networks:
-      - 'stack'
+      - stack
     entrypoint: >
       /bin/sh -c " /usr/bin/mc alias set myminio http://s3:9000 minioadmin minioadmin; /usr/bin/mc
       ls myminio/artifacts >/dev/null 2>&1 || /usr/bin/mc mb myminio/artifacts; exit 0"
@@ -72,7 +72,7 @@ services:
       CLICKHOUSE_USER: test
       CLICKHOUSE_PASSWORD: test
     healthcheck:
-      test: ['CMD', 'wget', '--spider', '-q', 'localhost:8123/ping']
+      test: [CMD, wget, --spider, -q, 'localhost:8123/ping']
       interval: 30s
       timeout: 5s
       retries: 3
@@ -83,13 +83,13 @@ services:
     ports:
       - '8123:8123'
     networks:
-      - 'stack'
+      - stack
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.3.0
     hostname: zookeeper
     networks:
-      - 'stack'
+      - stack
     ports:
       - '2181:2181'
     ulimits:
@@ -114,7 +114,7 @@ services:
       zookeeper:
         condition: service_started
     networks:
-      - 'stack'
+      - stack
     ports:
       - '29092:29092'
       - '9092:9092'
@@ -123,18 +123,7 @@ services:
         soft: 20000
         hard: 40000
     healthcheck:
-      test:
-        [
-          'CMD',
-          'cub',
-          'kafka-ready',
-          '1',
-          '5',
-          '-b',
-          '127.0.0.1:9092',
-          '-c',
-          '/etc/kafka/kafka.properties',
-        ]
+      test: [CMD, cub, kafka-ready, '1', '5', -b, '127.0.0.1:9092', -c, /etc/kafka/kafka.properties]
       interval: 15s
       timeout: 10s
       retries: 6
@@ -158,14 +147,14 @@ services:
       db:
         condition: service_healthy
     networks:
-      - 'stack'
+      - stack
     ports:
       - '3567:3567'
     environment:
       POSTGRESQL_USER: postgres
       POSTGRESQL_PASSWORD: postgres
       POSTGRESQL_DATABASE_NAME: registry
-      POSTGRESQL_TABLE_NAMES_PREFIX: 'supertokens'
+      POSTGRESQL_TABLE_NAMES_PREFIX: supertokens
       POSTGRESQL_HOST: db
       POSTGRESQL_PORT: 5432
       API_KEYS: bubatzbieber6942096420
