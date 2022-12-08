@@ -1,17 +1,17 @@
 version: '3.8'
 services:
   app:
-    image: app
+    image: 'app'
     ports:
       - '3000:3000'
     networks:
-      - stack
+      - 'stack'
     environment:
       PORT: 3000
       NODE_ENV: production
       APP_BASE_URL: 'http://localhost:3000'
       SUPERTOKENS_CONNECTION_URI: http://supertokens:3567
-      SUPERTOKENS_API_KEY: bubatzbieber6942096420
+      SUPERTOKENS_API_KEY: 'bubatzbieber6942096420'
       EMAILS_ENDPOINT: http://emails:3011
       GRAPHQL_ENDPOINT: http://server:3001/graphql
       SERVER_ENDPOINT: http://server:3001

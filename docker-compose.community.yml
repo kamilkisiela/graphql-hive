@@ -12,19 +12,19 @@ services:
       POSTGRES_PASSWORD: '${POSTGRES_PASSWORD}'
       PGDATA: /var/lib/postgresql/data
     healthcheck:
-      test: [CMD-SHELL, 'pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}']
+      test: ['CMD-SHELL', 'pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}']
       interval: 5s
       timeout: 5s
       retries: 6
     networks:
-      - stack
+      - 'stack'
     volumes:
       - ./.hive/postgres:/var/lib/postgresql/data
 
   clickhouse:
     image: clickhouse/clickhouse-server:22.11-alpine
     healthcheck:
-      test: [CMD, wget, --spider, -q, 'localhost:8123/ping']
+      test: ['CMD', 'wget', '--spider', '-q', 'localhost:8123/ping']
       interval: 5s
       timeout: 5s
       retries: 6
@@ -33,7 +33,7 @@ services:
       CLICKHOUSE_USER: '${CLICKHOUSE_USER}'
       CLICKHOUSE_PASSWORD: '${CLICKHOUSE_PASSWORD}'
     networks:
-      - stack
+      - 'stack'
     volumes:
       - ./.hive/clickhouse/db:/var/lib/clickhouse
 
@@ -41,7 +41,7 @@ services:
     image: confluentinc/cp-zookeeper:7.3.0
     hostname: zookeeper
     networks:
-      - stack
+      - 'stack'
     ulimits:
       nofile:
         soft: 20000
@@ -59,13 +59,24 @@ services:
       zookeeper:
         condition: service_started
     networks:
-      - stack
+      - 'stack'
     ulimits:
       nofile:
         soft: 20000
         hard: 40000
     healthcheck:
-      test: [CMD, cub, kafka-ready, '1', '5', -b, '127.0.0.1:9092', -c, /etc/kafka/kafka.properties]
+      test:
+        [
+          'CMD',
+          'cub',
+          'kafka-ready',
+          '1',
+          '5',
+          '-b',
+          '127.0.0.1:9092',
+          '-c',
+          '/etc/kafka/kafka.properties',
+        ]
       interval: 15s
       timeout: 10s
       retries: 6
@@ -86,9 +97,9 @@ services:
   redis:
     image: bitnami/redis:6.2
     networks:
-      - stack
+      - 'stack'
     healthcheck:
-      test: [CMD, redis-cli, ping]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 5s
       timeout: 10s
       retries: 6
@@ -105,12 +116,12 @@ services:
       db:
         condition: service_healthy
     networks:
-      - stack
+      - 'stack'
     environment:
       POSTGRESQL_USER: '${POSTGRES_USER}'
       POSTGRESQL_PASSWORD: '${POSTGRES_PASSWORD}'
       POSTGRESQL_DATABASE_NAME: '${POSTGRES_DB}'
-      POSTGRESQL_TABLE_NAMES_PREFIX: supertokens
+      POSTGRESQL_TABLE_NAMES_PREFIX: 'supertokens'
       POSTGRESQL_HOST: db
       POSTGRESQL_PORT: 5432
       API_KEYS: '${SUPERTOKENS_API_KEY}'
@@ -123,9 +134,9 @@ services:
       - '9000:9000'
       - '9001:9001'
     networks:
-      - stack
+      - 'stack'
     healthcheck:
-      test: [CMD, curl, -f, 'http://localhost:9000/minio/health/live']
+      test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
       interval: 30s
       timeout: 20s
       retries: 3
@@ -141,7 +152,7 @@ services:
       s3:
         condition: service_healthy
     networks:
-      - stack
+      - 'stack'
     entrypoint: >
       /bin/sh -c " /usr/bin/mc alias set myminio http://s3:9000 ${MINIO_ROOT_USER}
       ${MINIO_ROOT_PASSWORD}; /usr/bin/mc ls myminio/artifacts >/dev/null 2>&1 || /usr/bin/mc mb
@@ -153,7 +164,7 @@ services:
       s3:
         condition: service_healthy
     networks:
-      - stack
+      - 'stack'
     ports:
       - '8083:8083'
     command: caddy reverse-proxy --from :8083 --to s3:9000 --change-host-header
@@ -161,33 +172,33 @@ services:
   storage:
     image: '${DOCKER_REGISTRY}storage${DOCKER_TAG}'
     networks:
-      - stack
+      - 'stack'
     depends_on:
       clickhouse:
         condition: service_healthy
       db:
         condition: service_healthy
     environment:
-      MIGRATOR: up
-      CLICKHOUSE_MIGRATOR: up
+      MIGRATOR: 'up'
+      CLICKHOUSE_MIGRATOR: 'up'
       POSTGRES_HOST: db
       POSTGRES_PORT: 5432
       POSTGRES_DB: '${POSTGRES_DB}'
       POSTGRES_USER: '${POSTGRES_USER}'
       POSTGRES_PASSWORD: '${POSTGRES_PASSWORD}'
-      CLICKHOUSE_PROTOCOL: http
-      CLICKHOUSE_HOST: clickhouse
+      CLICKHOUSE_PROTOCOL: 'http'
+      CLICKHOUSE_HOST: 'clickhouse'
       CLICKHOUSE_PORT: '8123'
       CLICKHOUSE_USERNAME: '${CLICKHOUSE_USER}'
       CLICKHOUSE_PASSWORD: '${CLICKHOUSE_PASSWORD}'
     # Tell dockest, we want to wait for the exit code of the migrator to be 0
     labels:
-      dockest.readiness: exit_code
+      dockest.readiness: 'exit_code'
 
   server:
     image: '${DOCKER_REGISTRY}server${DOCKER_TAG}'
     networks:
-      - stack
+      - 'stack'
     depends_on:
       redis:
         condition: service_healthy
@@ -215,7 +226,7 @@ services:
       POSTGRES_USER: '${POSTGRES_USER}'
       POSTGRES_PASSWORD: '${POSTGRES_PASSWORD}'
       ROARR_LOG: 'true'
-      CLICKHOUSE_PROTOCOL: http
+      CLICKHOUSE_PROTOCOL: 'http'
       CLICKHOUSE_HOST: clickhouse
       CLICKHOUSE_PORT: 8123
       CLICKHOUSE_USERNAME: '${CLICKHOUSE_USER}'
@@ -244,7 +255,7 @@ services:
   schema:
     image: '${DOCKER_REGISTRY}schema${DOCKER_TAG}'
     networks:
-      - stack
+      - 'stack'
     depends_on:
       redis:
         condition: service_healthy
@@ -259,7 +270,7 @@ services:
   tokens:
     image: '${DOCKER_REGISTRY}tokens${DOCKER_TAG}'
     networks:
-      - stack
+      - 'stack'
     depends_on:
       storage:
         condition: service_completed_successfully
@@ -276,7 +287,7 @@ services:
   webhooks:
     image: '${DOCKER_REGISTRY}webhooks${DOCKER_TAG}'
     networks:
-      - stack
+      - 'stack'
     depends_on:
       redis:
         condition: service_healthy
@@ -291,7 +302,7 @@ services:
   emails:
     image: '${DOCKER_REGISTRY}emails${DOCKER_TAG}'
     networks:
-      - stack
+      - 'stack'
     depends_on:
       redis:
         condition: service_healthy
@@ -308,7 +319,7 @@ services:
   usage:
     image: '${DOCKER_REGISTRY}usage${DOCKER_TAG}'
     networks:
-      - stack
+      - 'stack'
     depends_on:
       broker:
         condition: service_healthy
@@ -319,8 +330,8 @@ services:
     environment:
       NODE_ENV: production
       TOKENS_ENDPOINT: http://tokens:3003
-      KAFKA_CONNECTION_MODE: docker
-      KAFKA_TOPIC: usage_reports_v2
+      KAFKA_CONNECTION_MODE: 'docker'
+      KAFKA_TOPIC: 'usage_reports_v2'
       KAFKA_BROKER: broker:29092
       KAFKA_BUFFER_SIZE: 350
       KAFKA_BUFFER_INTERVAL: 1000
@@ -330,7 +341,7 @@ services:
   usage-ingestor:
     image: '${DOCKER_REGISTRY}usage-ingestor${DOCKER_TAG}'
     networks:
-      - stack
+      - 'stack'
     depends_on:
       broker:
         condition: service_healthy
@@ -338,12 +349,12 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: production
-      KAFKA_CONNECTION_MODE: docker
+      KAFKA_CONNECTION_MODE: 'docker'
       KAFKA_BROKER: broker:29092
       KAFKA_CONCURRENCY: '1'
-      KAFKA_CONSUMER_GROUP: usage-ingestor-v2
-      KAFKA_TOPIC: usage_reports_v2
-      CLICKHOUSE_PROTOCOL: http
+      KAFKA_CONSUMER_GROUP: 'usage-ingestor-v2'
+      KAFKA_TOPIC: 'usage_reports_v2'
+      CLICKHOUSE_PROTOCOL: 'http'
       CLICKHOUSE_HOST: clickhouse
       CLICKHOUSE_PORT: 8123
       CLICKHOUSE_USERNAME: '${CLICKHOUSE_USER}'
@@ -355,7 +366,7 @@ services:
     ports:
       - '8080:3000'
     networks:
-      - stack
+      - 'stack'
     environment:
       PORT: 3000
       NODE_ENV: production
