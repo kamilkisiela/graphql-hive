@@ -2573,7 +2573,16 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
         // wait and acquire lock on the database (intra-process sync)
         try {
-          await lockConn.query(sql`select pg_advisory_lock(${idInt})`);
+          let locked = false;
+          while (!locked) {
+            ({ locked } = await lockConn.one<{ locked: boolean }>(
+              sql`select pg_try_advisory_lock(${idInt}) as locked`,
+            ));
+            if (!locked) {
+              // only sleep if not locked so that the loop can resolve fast if locked
+              await new Promise(resolve => setTimeout(resolve, 1_000));
+            }
+          }
         } catch (err) {
           // lock not acquired in database, unlock and bubble error
           locks.delete(id);
