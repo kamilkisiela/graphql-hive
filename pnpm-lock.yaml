@@ -998,7 +998,7 @@ importers:
       '@sentry/tracing': 7.21.1
       '@sentry/types': 7.21.1
       '@stripe/react-stripe-js': 1.15.0
-      '@stripe/stripe-js': 1.29.0
+      '@stripe/stripe-js': 1.46.0
       '@tailwindcss/line-clamp': 0.3.1
       '@tanstack/react-table': 8.0.0-beta.8
       '@theguild/editor': 0.4.1
@@ -1096,8 +1096,8 @@ importers:
       '@sentry/react': 7.21.1_react@18.2.0
       '@sentry/tracing': 7.21.1
       '@sentry/types': 7.21.1
-      '@stripe/react-stripe-js': 1.15.0_dg7sxx6zmh46madajf2p7xt5xa
-      '@stripe/stripe-js': 1.29.0
+      '@stripe/react-stripe-js': 1.15.0_keartrz7uyerl3wkpjpue4xbhy
+      '@stripe/stripe-js': 1.46.0
       '@tanstack/react-table': 8.0.0-beta.8_biqbaboplfbrettd7655fr4n2y
       '@theguild/editor': 0.4.1_m3acdzultzo2owbx5gwkccg4tm
       '@trpc/client': 10.4.3_@trpc+server@10.4.3
@@ -10257,21 +10257,21 @@ packages:
       umzug: 3.0.0-beta.15
     dev: false
 
-  /@stripe/react-stripe-js/1.15.0_dg7sxx6zmh46madajf2p7xt5xa:
+  /@stripe/react-stripe-js/1.15.0_keartrz7uyerl3wkpjpue4xbhy:
     resolution: {integrity: sha512-nqIOuAbbAN1p/zj2d2vykMzd097ZiHbu0+EpPRcfiswBRQIQIZaPrUwmj6HGD8BRA6Wp89mZen1UJbqtsfc3ZA==}
     peerDependencies:
       '@stripe/stripe-js': ^1.44.1
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
-      '@stripe/stripe-js': 1.29.0
+      '@stripe/stripe-js': 1.46.0
       prop-types: 15.8.1
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
     dev: false
 
-  /@stripe/stripe-js/1.29.0:
-    resolution: {integrity: sha512-OsUxk0VLlum8E2d6onlEdKuQcvLMs7qTrOXCnl/BGV3fAm65qr6h3e1IZ5AX4lgUlPRrzRcddSOA5DvkKKYLvg==}
+  /@stripe/stripe-js/1.46.0:
+    resolution: {integrity: sha512-dkm0zCEoRLu5rTnsIgwDf/QG2DKcalOT2dk1IVgMySOHWTChLyOvQwMYhEduGgLvyYWTwNhAUV4WOLPQvjwLwA==}
     dev: false
 
   /@swc/core-android-arm-eabi/1.2.185:
