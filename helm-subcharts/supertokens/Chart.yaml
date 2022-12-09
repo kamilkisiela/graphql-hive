@@ -3,4 +3,4 @@ name: supertokens
 description: SuperTokens Core Deployment
 type: application
 version: 1.0.0
-appVersion: "3.14.0"
+appVersion: '3.14.0'

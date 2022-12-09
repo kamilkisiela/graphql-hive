@@ -38,5 +38,10 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
+            - name: SUPERTOKENS_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: supertokens-secret
+                  key: SUPERTOKENS_API_KEY
           ports:
             - containerPort: {{ .Values.serverPort }}

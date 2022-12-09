@@ -5,7 +5,7 @@ global:
   postgresql:
     auth:
       database: graphql-hive
-      user: postgres
+      username: hive
 
 image:
   name: ghcr.io/kamilkisiela/graphql-hive/storage

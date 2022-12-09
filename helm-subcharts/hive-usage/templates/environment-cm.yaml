@@ -12,7 +12,9 @@ metadata:
 data:
   NODE_ENV: '{{ .Values.nodeEnv }}'
   PORT: '{{ .Values.serverPort }}'
+
   TOKENS_ENDPOINT: '{{ .Values.tokensEndpoint }}'
+
   KAFKA_CONNECTION_MODE: '{{ .Values.kafkaConnectionMode }}'
   KAFKA_TOPIC: '{{ .Values.kafkaTopic }}'
   KAFKA_BROKER: '{{ .Values.kafkaBroker }}'

@@ -24,8 +24,8 @@ spec:
     spec:
       containers:
         - name: {{ .Values.appName }}
-          image: "{{ .Values.image.name }}:{{ .Values.global.image.tag }}"
-          imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+          image: '{{ .Values.image.name }}:{{ .Values.global.image.tag }}'
+          imagePullPolicy: '{{ .Values.image.pullPolicy }}'
           envFrom:
             - configMapRef:
                 name: tokens-env-cm
@@ -41,7 +41,7 @@ spec:
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: postgres-postgresql
-                  key: postgres-password
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
           ports:
             - containerPort: {{ .Values.serverPort }}

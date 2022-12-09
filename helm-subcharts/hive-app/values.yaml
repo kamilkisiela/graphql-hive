@@ -1,9 +1,6 @@
 global:
   image:
     tag: 59b64c36c866b3555c135c70de76a884e63f8619
-  apiKey:
-    # -- list of API Keys to load and use with supertokens-core
-    key: "yourApiKey"
   appBaseUrl: localhost:8080
 
 image:

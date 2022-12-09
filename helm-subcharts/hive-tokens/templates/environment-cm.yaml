@@ -12,11 +12,15 @@ metadata:
 data:
   NODE_ENV: '{{ .Values.nodeEnv }}'
   PORT: '{{ .Values.serverPort }}'
+
   POSTGRES_HOST: '{{ .Values.postgresHost }}'
-  POSTGRES_USER: '{{ .Values.global.postgresql.auth.user }}'
+  POSTGRES_USER: '{{ .Values.global.postgresql.auth.username }}'
   POSTGRES_PORT: '{{ .Values.postgresPort }}'
   POSTGRES_DB: '{{ .Values.global.postgresql.auth.database }}'
+
   ROARR_LOG: '{{ .Values.roarrLog }}'
+
   SENTRY: '{{ .Values.sentry }}'
   SENTRY_DSN: '{{ .Values.sentryDsn }}'
+
   RATE_LIMIT_ENDPOINT: '{{ .Values.rateLimitEndpoint }}'

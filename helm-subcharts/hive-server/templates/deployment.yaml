@@ -24,8 +24,8 @@ spec:
     spec:
       containers:
         - name: {{ .Values.appName }}
-          image: "{{ .Values.image.name }}:{{ .Values.global.image.tag }}"
-          imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+          image: '{{ .Values.image.name }}:{{ .Values.global.image.tag }}'
+          imagePullPolicy: '{{ .Values.image.pullPolicy }}'
           envFrom:
             - configMapRef:
                 name: server-env-cm
@@ -48,10 +48,20 @@ spec:
                 secretKeyRef:
                   name: clickhouse
                   key: admin-password
+            - name: SUPERTOKENS_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: supertokens-secret
+                  key: SUPERTOKENS_API_KEY
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: postgres-postgresql
-                  key: postgres-password
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+            - name: ENCRYPTION_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: encryption-secret
+                  key: ENCRYPTION_SECRET
           ports:
             - containerPort: {{ .Values.serverPort }}

@@ -12,11 +12,13 @@ metadata:
 data:
   NODE_ENV: '{{ .Values.nodeEnv }}'
   PORT: '{{ .Values.serverPort }}'
+
   KAFKA_CONNECTION_MODE: '{{ .Values.kafkaConnectionMode }}'
   KAFKA_BROKER: '{{ .Values.kafkaBroker }}'
   KAFKA_CONCURRENCY: '{{ .Values.kafkaConcurrency }}'
   KAFKA_CONSUMER_GROUP: '{{ .Values.kafkaConsumerGroup }}'
   KAFKA_TOPIC: '{{ .Values.kafkaTopic }}'
+
   CLICKHOUSE_PROTOCOL: '{{ .Values.clickhouseProtocol }}'
   CLICKHOUSE_HOST: '{{ .Values.clickhouseHost }}'
   CLICKHOUSE_PORT: '{{ .Values.clickhousePort }}'

@@ -16,7 +16,7 @@ data:
   POSTGRES_HOST: '{{ .Values.postgresHost }}'
   POSTGRES_PORT: '{{ .Values.postgresPort }}'
   POSTGRES_DB: '{{ .Values.global.postgresql.auth.database }}'
-  POSTGRES_USER: '{{ .Values.global.postgresql.auth.user }}'
+  POSTGRES_USER: '{{ .Values.global.postgresql.auth.username }}'
 
   ROARR_LOG: '{{ .Values.roarrLog }}'
 
@@ -33,12 +33,9 @@ data:
   SCHEMA_ENDPOINT: '{{ .Values.schemaEndpoint }}'
   EMAILS_ENDPOINT: '{{ .Values.emailsEndpoint }}'
 
-  ENCRYPTION_SECRET: '{{ .Values.global.encryptionSecret }}'
-
   WEB_APP_URL: '{{ .Values.webAppUrl }}'
 
   SUPERTOKENS_CONNECTION_URI: '{{ .Values.supertokensConnectionUri }}'
-  SUPERTOKENS_API_KEY: '{{ .Values.global.apiKey.key }}'
 
   INTEGRATION_GITHUB: '{{ .Values.integrationGithub }}'
   INTEGRATION_GITHUB_GITHUB_APP_ID: '{{ .Values.integrationGithubGithubAppId }}'

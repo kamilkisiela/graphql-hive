@@ -12,8 +12,10 @@ metadata:
 data:
   NODE_ENV: '{{ .Values.nodeEnv }}'
   PORT: '{{ .Values.serverPort }}'
+
   REDIS_HOST: '{{ .Values.redisHost }}'
   REDIS_PORT: '{{ .Values.redisPort }}'
+
   BULLMQ_COMMANDS_FROM_ROOT: '{{ .Values.bullmqCommandsFromRoot }}'
 
   SENTRY: '{{ .Values.sentry }}'

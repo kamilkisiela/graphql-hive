@@ -12,13 +12,16 @@ metadata:
 data:
   NODE_ENV: '{{ .Values.nodeEnv }}'
   PORT: '{{ .Values.serverPort }}'
+
   REDIS_HOST: '{{ .Values.redisHost }}'
   REDIS_PORT: '{{ .Values.redisPort }}'
-  ENCRYPTION_SECRET: '{{ .Values.global.encryptionSecret }}'
+
   SENTRY: '{{ .Values.sentry }}'
   SENTRY_DSN: '{{ .Values.sentryDsn }}'
+
   PROMETHEUS_METRICS: '{{ .Values.prometheusMetrics }}'
   PROMETHEUS_METRICS_LABEL_INSTANCE: '{{ .Values.prometheusMetricsLabelInstance }}'
+
   REQUEST_BROKER: '{{ .Values.requestBroker }}'
   REQUEST_BROKER_ENDPOINT: '{{ .Values.requestBrokerEndpoint }}'
   REQUEST_BROKER_SIGNATURE: '{{ .Values.requestBrokerSignature }}'

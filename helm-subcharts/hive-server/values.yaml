@@ -5,11 +5,7 @@ global:
   postgresql:
     auth:
       database: graphql-hive
-      user: postgres
-  apiKey:
-    # -- list of API Keys to load and use with supertokens-core
-    key: "yourApiKey"
-  encryptionSecret: yourEncryptionSecret
+      username: hive
 
 image:
   name: ghcr.io/kamilkisiela/graphql-hive/server

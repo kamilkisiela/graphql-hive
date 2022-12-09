@@ -13,10 +13,14 @@ metadata:
 data:
   NODE_ENV: '{{ .Values.nodeEnv }}'
   PORT: '{{ .Values.serverPort }}'
+
   APP_BASE_URL: '{{ $appBaseUrl }}'
+
   SUPERTOKENS_CONNECTION_URI: '{{ .Values.supertokensConnectionUri }}'
   SUPERTOKENS_API_KEY: '{{ .Values.global.apiKey.key }}'
+
   EMAILS_ENDPOINT: '{{ .Values.emailsEndpoint }}'
   GRAPHQL_ENDPOINT: '{{ .Values.graphqlEndpoint }}'
   SERVER_ENDPOINT: '{{ .Values.serverEndpoint }}'
+
   AUTH_REQUIRE_EMAIL_VERIFICATION: '{{ .Values.authRequireEmailVerification }}'

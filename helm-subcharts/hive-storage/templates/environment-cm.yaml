@@ -12,13 +12,16 @@ metadata:
 data:
   MIGRATOR: {{ .Values.migrator }}
   CLICKHOUSE_MIGRATOR: {{ .Values.clickhouseMigrator }}
+
   POSTGRES_HOST: {{ .Values.postgresHost }}
-  POSTGRES_PORT: "{{ .Values.postgresPort }}"
+  POSTGRES_PORT: '{{ .Values.postgresPort }}'
   POSTGRES_DB: {{ .Values.global.postgresql.auth.database }}
-  POSTGRES_USER: {{ .Values.global.postgresql.auth.user }}
+  POSTGRES_USER: {{ .Values.global.postgresql.auth.username }}
+
   CLICKHOUSE_PROTOCOL: {{ .Values.clickhouseProtocol }}
   CLICKHOUSE_HOST: {{ .Values.clickhouseHost }}
-  CLICKHOUSE_PORT: "{{ .Values.clickhousePort }}"
+  CLICKHOUSE_PORT: '{{ .Values.clickhousePort }}'
   CLICKHOUSE_USERNAME: {{ .Values.global.clickhouseUsername }}
-  SENTRY_DNS: "{{ .Values.sentryDns }}"
-  SENTRY_ENABLED: "{{ .Values.sentryEnabled }}"
+
+  SENTRY_DNS: '{{ .Values.sentryDns }}'
+  SENTRY_ENABLED: '{{ .Values.sentryEnabled }}'

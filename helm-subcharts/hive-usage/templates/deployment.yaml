@@ -24,8 +24,8 @@ spec:
     spec:
       containers:
         - name: {{ .Values.appName }}
-          image: "{{ .Values.image.name }}:{{ .Values.global.image.tag }}"
-          imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+          image: '{{ .Values.image.name }}:{{ .Values.global.image.tag }}'
+          imagePullPolicy: '{{ .Values.image.pullPolicy }}'
           envFrom:
             - configMapRef:
                 name: usage-env-cm

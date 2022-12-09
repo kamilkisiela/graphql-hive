@@ -12,9 +12,12 @@ metadata:
 data:
   NODE_ENV: '{{ .Values.nodeEnv }}'
   PORT: '{{ .Values.serverPort }}'
+
   REDIS_HOST: '{{ .Values.redisHost }}'
   REDIS_PORT: '{{ .Values.redisPort }}'
+
   BULLMQ_COMMANDS_FROM_ROOT: '{{ .Values.bullmqCommandsFromRoot }}'
+
   EMAIL_FROM: '{{ .Values.global.email.from }}'
   EMAIL_PROVIDER: '{{ .Values.global.email.provider }}'
   EMAIL_PROVIDER_SMTP_PROTOCOL: '{{ .Values.emailProviderSmtpProtocol }}'
@@ -25,7 +28,6 @@ data:
   EMAIL_PROVIDER_POSTMARK_TOKEN: '{{ .Values.emailProviderPostmarkToken }}'
   EMAIL_PROVIDER_POSTMARK_MESSAGE_STREAM: '{{ .Values.emailProviderPostmarkMessageStream }}'
   EMAIL_PROVIDER_SMTP_REJECT_UNAUTHORIZED: '{{ .Values.emailProviderSmtpRejectUnauthorized }}'
-
 
   SENTRY: '{{ .Values.sentry }}'
   SENTRY_DSN: '{{ .Values.sentryDsn }}'

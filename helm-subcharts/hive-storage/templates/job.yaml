@@ -31,7 +31,7 @@ spec:
       restartPolicy: OnFailure
       containers:
         - name: {{ .Values.appName }}-job
-          image: "{{ .Values.image.name }}:{{ .Values.global.image.tag }}"
+          image: '{{ .Values.image.name }}:{{ .Values.global.image.tag }}'
           envFrom:
             - configMapRef:
                 name: storage-env-cm
@@ -52,7 +52,7 @@ spec:
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: postgres-postgresql
-                  key: postgres-password
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
           ports:
             - containerPort: {{ .Values.serverPort }}

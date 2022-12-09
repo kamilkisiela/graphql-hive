@@ -2,24 +2,22 @@ image:
   repository: supertokens/supertokens-postgresql
   pullPolicy: IfNotPresent
   # -- Overrides the image tag whose default is the chart appVersion.
-  tag: "3.14"
+  tag: '3.14'
 
 replicaCount: 1
 imagePullSecrets: []
-nameOverride: ""
-fullnameOverride: ""
+nameOverride: ''
+fullnameOverride: ''
 
 global:
   postgresql:
     auth:
       database: graphql-hive
-      user: postgres
+      username: hive
 
   apiKey:
     # -- enable the use of API Keys with supertokens-core
     enabled: true
-    # -- list of API Keys to load and use with supertokens-core
-    key: "yourApiKey"
 
 database:
   # -- database port
@@ -31,7 +29,7 @@ database:
 service:
   port: 3567
   targetPort: 3567
-  nodePort: ""
+  nodePort: ''
   type: ClusterIP
 
 # -- Time in seconds for how long an access token is valid for
@@ -61,7 +59,7 @@ passwordlessMaxCodeInputAttempts: 5
 # -- Time in milliseconds for how long a passwordless code is valid for.
 passwordlessCodeLifetime: 900000
 
-basePath: ""
+basePath: ''
 
 disableTelemetry: false
 
@@ -74,7 +72,7 @@ serviceAccount:
   annotations: {}
   # -- The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
-  name: ""
+  name: ''
 
 podAnnotations: {}
 

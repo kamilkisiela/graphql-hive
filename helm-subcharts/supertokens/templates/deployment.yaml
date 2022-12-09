@@ -52,8 +52,8 @@ spec:
             - name: "POSTGRESQL_PASSWORD"
               valueFrom:
                 secretKeyRef:
-                  name: postgres-postgresql
-                  key: postgres-password
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
             - name: "POSTGRESQL_TABLE_SCHEMA"
               value: {{ quote .Values.database.schema }}
             - name: "POSTGRESQL_CONNECTION_POOL_SIZE"
@@ -86,7 +86,10 @@ spec:
               value: {{ quote .Values.maxServerPoolSize }}
             {{- if .Values.global.apiKey.enabled }}
             - name: "API_KEYS"
-              value: "{{ .Values.global.apiKey.key }}"
+              valueFrom:
+                secretKeyRef:
+                  name: supertokens-secret
+                  key: SUPERTOKENS_API_KEY
             {{- end }}
           ports:
             - name: http

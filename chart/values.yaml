@@ -6,10 +6,10 @@ global:
   postgresql:
     auth:
       database: graphql-hive
-      user: postgres
-  apiKey:
-    key: "yourApiKey"
-  encryptionSecret: yourEncryptionSecret
+      username: hive
+      existingSecret: postgres-secret
+      secretKeys:
+        userPasswordKey: POSTGRES_PASSWORD
   email:
     provider: sendmail
     from: no-reply@yourDomain.com
@@ -44,7 +44,7 @@ supertokens:
   fullnameOverride: supertokens
 
 ingress:
-  useSecureProtocol: "false"
+  useSecureProtocol: 'false'
   annotations: {}
 
 hive-app:
