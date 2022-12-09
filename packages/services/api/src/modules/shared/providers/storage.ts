@@ -60,7 +60,10 @@ export interface IdMutex {
    *
    * @param id - Mutual exclusion lock key
    */
-  lock(id: string): Promise<
+  lock(
+    id: string,
+    opts?: { signal?: AbortSignal },
+  ): Promise<
     // unlock
     () => Promise<void>
   >;

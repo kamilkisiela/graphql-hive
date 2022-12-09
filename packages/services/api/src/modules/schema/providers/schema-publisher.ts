@@ -199,12 +199,14 @@ export class SchemaPublisher {
   }
 
   @sentry('SchemaPublisher.publish')
-  async publish(input: PublishInput, span?: Span): Promise<PublishResult> {
+  async publish(input: PublishInput, span?: Span, signal?: AbortSignal): Promise<PublishResult> {
     this.logger.debug('Schema publication (checksum=%s)', input.checksum);
     return this.idempotentRunner.run({
       identifier: `schema:publish:${input.checksum}`,
       executor: async () => {
-        const unlock = await this.storage.idMutex.lock(`schema:publish:${input.target}`);
+        const unlock = await this.storage.idMutex.lock(`schema:publish:${input.target}`, {
+          signal,
+        });
         try {
           return await this.internalPublish(input);
         } finally {

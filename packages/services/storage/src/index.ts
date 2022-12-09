@@ -2550,51 +2550,91 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     },
 
     idMutex: {
-      async lock(id) {
-        const lockConn = await getLockConn();
-
-        // postgres advisory locks uses bigints as lock keys,
-        // we therefore hash the provided lock id and use the hash
-        const idInt = hashFnv32a(id);
-
-        // wait if there's a lock in the process
-        let lock;
-        while ((lock = locks.get(id))) {
-          await lock.p;
-        }
-
-        // only one lock can be acquired per process
-        let release!: () => void;
-        const p = new Promise<void>(resolve => (release = resolve));
-        locks.set(id, {
-          p,
-          release,
-        });
-
-        // wait and acquire lock on the database (intra-process sync)
-        try {
-          let locked = false;
-          while (!locked) {
-            ({ locked } = await lockConn.one<{ locked: boolean }>(
-              sql`select pg_try_advisory_lock(${idInt}) as locked`,
-            ));
-            if (!locked) {
-              // only sleep if not locked so that the loop can resolve fast if locked
-              await new Promise(resolve => setTimeout(resolve, 1_000));
+      async lock(id, { signal } = {}) {
+        return Promise.race([
+          new Promise<never>((_, reject) => {
+            const listener = () => {
+              signal?.removeEventListener('abort', listener);
+              reject(new Error('Locking aborted'));
+            };
+            signal?.addEventListener('abort', listener);
+          }),
+          (async () => {
+            const lockConn = await getLockConn();
+            if (signal?.aborted) {
+              throw new Error('Locking aborted');
             }
-          }
-        } catch (err) {
-          // lock not acquired in database, unlock and bubble error
-          locks.delete(id);
-          release();
-          throw err;
-        }
 
-        return async function unlock() {
-          locks.delete(id); // delete the lock first so that the while loop in lock can break
-          release(); // release the process first (guarantees unlock if query below fails)
-          await lockConn.query(sql`select pg_advisory_unlock(${idInt})`); // finally release the advisory lock
-        };
+            // postgres advisory locks uses bigints as lock keys,
+            // we therefore hash the provided lock id and use the hash
+            const idInt = hashFnv32a(id);
+
+            // wait if there's a lock in the process
+            let lock;
+            while ((lock = locks.get(id))) {
+              await lock.p;
+              if (signal?.aborted) {
+                throw new Error('Locking aborted');
+              }
+            }
+
+            // only one lock can be acquired per process
+            let release!: () => void;
+            const p = new Promise<void>(resolve => (release = resolve));
+            locks.set(id, {
+              p,
+              release,
+            });
+
+            // wait and acquire lock on the database (intra-process sync)
+            try {
+              let locked = false;
+              while (!locked) {
+                ({ locked } = await lockConn.one<{ locked: boolean }>(
+                  sql`select pg_try_advisory_lock(${idInt}) as locked`,
+                ));
+                if (!locked) {
+                  // only sleep if not locked so that the loop can resolve fast if locked
+                  await new Promise(resolve => setTimeout(resolve, 1_000));
+                }
+                if (signal?.aborted) {
+                  throw new Error('Locking aborted');
+                }
+              }
+            } catch (err) {
+              // lock not acquired in database, unlock and bubble error
+              locks.delete(id);
+              release();
+              throw err;
+            }
+
+            const listener = () => {
+              signal?.removeEventListener('abort', listener);
+              if (locks.get(id)) {
+                // unlock if aborted because the lock _was_ acquired at this time
+                locks.delete(id);
+                release();
+                lockConn.query(sql`select pg_advisory_unlock(${idInt})`).catch(err => {
+                  // TODO: what to do instead?
+                  console.error(
+                    `Error while unlocking advisory lock ${idInt} with id ${id} after abort`,
+                    err,
+                  );
+                });
+              }
+            };
+            signal?.addEventListener('abort', listener);
+
+            return async function unlock() {
+              signal?.removeEventListener('abort', listener);
+              if (locks.get(id)) {
+                locks.delete(id); // delete the lock first so that the while loop in lock can break
+                release(); // release the process first (guarantees unlock if query below fails)
+                await lockConn.query(sql`select pg_advisory_unlock(${idInt})`); // finally release the advisory lock
+              }
+            };
+          })(),
+        ]);
       },
     },
   };

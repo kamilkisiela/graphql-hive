@@ -91,7 +91,7 @@ export const resolvers: SchemaModule.Resolvers = {
         target,
       });
     },
-    async schemaPublish(_, { input }, { injector }, info) {
+    async schemaPublish(_, { input }, { injector, req }, info) {
       const [organization, project, target] = await Promise.all([
         injector.get(OrganizationManager).getOrganizationIdByToken(),
         injector.get(ProjectManager).getProjectIdByToken(),
@@ -104,20 +104,27 @@ export const resolvers: SchemaModule.Resolvers = {
         .update(token)
         .digest('base64');
 
+      const ctrl = new AbortController();
+      req.raw.on('close', () => ctrl.abort());
+
       // We only want to resolve to SchemaPublishMissingUrlError if it is selected by the operation.
       // NOTE: This should be removed once the usage of cli versions that don't request on 'SchemaPublishMissingUrlError' is becomes pretty low.
       const parsedResolveInfoFragment = parseResolveInfo(info);
       const isSchemaPublishMissingUrlErrorSelected =
         !!parsedResolveInfoFragment?.fieldsByTypeName['SchemaPublishMissingUrlError'];
 
-      return injector.get(SchemaPublisher).publish({
-        ...input,
-        checksum,
-        organization,
-        project,
-        target,
-        isSchemaPublishMissingUrlErrorSelected,
-      });
+      return injector.get(SchemaPublisher).publish(
+        {
+          ...input,
+          checksum,
+          organization,
+          project,
+          target,
+          isSchemaPublishMissingUrlErrorSelected,
+        },
+        undefined,
+        ctrl.signal,
+      );
     },
     async updateSchemaVersionStatus(_, { input }, { injector }) {
       const translator = injector.get(IdTranslator);
