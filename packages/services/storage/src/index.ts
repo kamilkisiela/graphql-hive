@@ -2587,13 +2587,13 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             });
 
             // wait and acquire lock on the database (intra-process sync)
+            let advisoryLock = false;
             try {
-              let locked = false;
-              while (!locked) {
-                ({ locked } = await lockConn.one<{ locked: boolean }>(
-                  sql`select pg_try_advisory_lock(${idInt}) as locked`,
+              while (!advisoryLock) {
+                ({ advisoryLock } = await lockConn.one<{ advisoryLock: boolean }>(
+                  sql`select pg_try_advisory_lock(${idInt}) as advisoryLock`,
                 ));
-                if (!locked) {
+                if (!advisoryLock) {
                   // only sleep if not locked so that the loop can resolve fast if locked
                   await new Promise(resolve => setTimeout(resolve, 1_000));
                 }
@@ -2605,6 +2605,15 @@ export async function createStorage(connection: string, maximumPoolSize: number)
               // lock not acquired in database, unlock and bubble error
               locks.delete(id);
               release();
+              if (advisoryLock) {
+                lockConn.query(sql`select pg_advisory_unlock(${idInt})`).catch(err => {
+                  // TODO: what to do instead?
+                  console.error(
+                    `Error while unlocking advisory lock ${idInt} with id ${id} after error`,
+                    err,
+                  );
+                });
+              }
               throw err;
             }
 
