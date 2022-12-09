@@ -2550,18 +2550,18 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     },
 
     idMutex: {
-      async lock(id, { signal } = {}) {
+      async lock(id, { signal }) {
         return Promise.race([
           new Promise<never>((_, reject) => {
             const listener = () => {
-              signal?.removeEventListener('abort', listener);
+              signal.removeEventListener('abort', listener);
               reject(new Error('Locking aborted'));
             };
-            signal?.addEventListener('abort', listener);
+            signal.addEventListener('abort', listener);
           }),
           (async () => {
             const lockConn = await getLockConn();
-            if (signal?.aborted) {
+            if (signal.aborted) {
               throw new Error('Locking aborted');
             }
 
@@ -2573,7 +2573,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             let lock;
             while ((lock = locks.get(id))) {
               await lock.p;
-              if (signal?.aborted) {
+              if (signal.aborted) {
                 throw new Error('Locking aborted');
               }
             }
@@ -2597,7 +2597,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
                   // only sleep if not locked so that the loop can resolve fast if locked
                   await new Promise(resolve => setTimeout(resolve, 1_000));
                 }
-                if (signal?.aborted) {
+                if (signal.aborted) {
                   throw new Error('Locking aborted');
                 }
               }
@@ -2609,7 +2609,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             }
 
             const listener = () => {
-              signal?.removeEventListener('abort', listener);
+              signal.removeEventListener('abort', listener);
               if (locks.get(id)) {
                 // unlock if aborted because the lock _was_ acquired at this time
                 locks.delete(id);
@@ -2623,10 +2623,10 @@ export async function createStorage(connection: string, maximumPoolSize: number)
                 });
               }
             };
-            signal?.addEventListener('abort', listener);
+            signal.addEventListener('abort', listener);
 
             return async function unlock() {
-              signal?.removeEventListener('abort', listener);
+              signal.removeEventListener('abort', listener);
               if (locks.get(id)) {
                 locks.delete(id); // delete the lock first so that the while loop in lock can break
                 release(); // release the process first (guarantees unlock if query below fails)

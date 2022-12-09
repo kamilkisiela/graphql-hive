@@ -199,7 +199,11 @@ export class SchemaPublisher {
   }
 
   @sentry('SchemaPublisher.publish')
-  async publish(input: PublishInput, span?: Span, signal?: AbortSignal): Promise<PublishResult> {
+  async publish(
+    input: PublishInput,
+    span: Span | undefined,
+    signal: AbortSignal,
+  ): Promise<PublishResult> {
     this.logger.debug('Schema publication (checksum=%s)', input.checksum);
     return this.idempotentRunner.run({
       identifier: `schema:publish:${input.checksum}`,

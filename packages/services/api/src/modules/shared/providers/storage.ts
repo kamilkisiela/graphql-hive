@@ -62,7 +62,7 @@ export interface IdMutex {
    */
   lock(
     id: string,
-    opts?: { signal?: AbortSignal },
+    opts: { signal: AbortSignal },
   ): Promise<
     // unlock
     () => Promise<void>
