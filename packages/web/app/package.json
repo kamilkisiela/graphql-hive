@@ -45,7 +45,7 @@
     "@theguild/editor": "0.4.1",
     "@trpc/client": "10.4.3",
     "@trpc/server": "10.4.3",
-    "@urql/core": "2.3.6",
+    "@urql/core": "2.6.1",
     "@urql/devtools": "2.0.3",
     "@urql/exchange-graphcache": "4.3.6",
     "@whatwg-node/fetch": "0.4.7",
