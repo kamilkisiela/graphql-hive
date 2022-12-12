@@ -223,7 +223,6 @@ services:
       POSTGRES_DB: '${POSTGRES_DB}'
       POSTGRES_USER: '${POSTGRES_USER}'
       POSTGRES_PASSWORD: '${POSTGRES_PASSWORD}'
-      ROARR_LOG: 'true'
       CLICKHOUSE_PROTOCOL: 'http'
       CLICKHOUSE_HOST: clickhouse
       CLICKHOUSE_PORT: 8123
@@ -279,7 +278,6 @@ services:
       POSTGRES_PASSWORD: '${POSTGRES_PASSWORD}'
       POSTGRES_PORT: 5432
       POSTGRES_DB: '${POSTGRES_DB}'
-      ROARR_LOG: 'true'
       PORT: 3003
 
   webhooks:

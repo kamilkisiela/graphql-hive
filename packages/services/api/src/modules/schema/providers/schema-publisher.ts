@@ -3,17 +3,9 @@ import type { Span } from '@sentry/types';
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import lodash from 'lodash';
 import * as Types from '../../../__generated__/types';
-import {
-  GraphQLDocumentStringInvalidError,
-  Orchestrator,
-  Project,
-  ProjectType,
-  Schema,
-  Target,
-} from '../../../shared/entities';
+import { Orchestrator, Project, ProjectType, Schema, Target } from '../../../shared/entities';
 import { HiveError } from '../../../shared/errors';
 import { bolderize } from '../../../shared/markdown';
-import { updateSchemas } from '../../../shared/schema';
 import { sentry } from '../../../shared/sentry';
 import { AlertsManager } from '../../alerts/providers/alerts-manager';
 import { AuthManager } from '../../auth/providers/auth-manager';
@@ -29,14 +21,26 @@ import { TargetManager } from '../../target/providers/target-manager';
 import { ArtifactStorageWriter } from './artifact-storage-writer';
 import type { SchemaModuleConfig } from './config';
 import { SCHEMA_MODULE_CONFIG } from './config';
-import { SchemaHelper } from './schema-helper';
+import { FederationModel } from './models/federation';
+import { FederationLegacyModel } from './models/federation-legacy';
+import {
+  CheckFailureReasonCode,
+  getReasonByCode,
+  PublishFailureReasonCode,
+  SchemaCheckConclusion,
+  SchemaPublishConclusion,
+} from './models/shared';
+import { SingleModel } from './models/single';
+import { SingleLegacyModel } from './models/single-legacy';
+import { StitchingModel } from './models/stitching';
+import { StitchingLegacyModel } from './models/stitching-legacy';
+import { ensureCompositeSchemas, ensureSingleSchema, SchemaHelper } from './schema-helper';
 import { SchemaManager } from './schema-manager';
-import { SchemaValidator, ValidationResult } from './schema-validator';
 
-type CheckInput = Omit<Types.SchemaCheckInput, 'project' | 'organization' | 'target'> &
+export type CheckInput = Omit<Types.SchemaCheckInput, 'project' | 'organization' | 'target'> &
   TargetSelector;
 
-type PublishInput = Types.SchemaPublishInput &
+export type PublishInput = Types.SchemaPublishInput &
   TargetSelector & {
     checksum: string;
     isSchemaPublishMissingUrlErrorSelected: boolean;
@@ -60,13 +64,18 @@ export class SchemaPublisher {
     private targetManager: TargetManager,
     private projectManager: ProjectManager,
     private organizationManager: OrganizationManager,
-    private schemaValidator: SchemaValidator,
     private alertsManager: AlertsManager,
     private cdn: CdnProvider,
     private gitHubIntegrationManager: GitHubIntegrationManager,
     private idempotentRunner: IdempotentRunner,
     private helper: SchemaHelper,
     private artifactStorageWriter: ArtifactStorageWriter,
+    private federationModel: FederationModel,
+    private federationLegacyModel: FederationLegacyModel,
+    private singleModel: SingleModel,
+    private singleLegacyModel: SingleLegacyModel,
+    private stitchingModel: StitchingModel,
+    private stitchingLegacyModel: StitchingLegacyModel,
     @Inject(SCHEMA_MODULE_CONFIG) private schemaModuleConfig: SchemaModuleConfig,
   ) {
     this.logger = logger.child({ service: 'SchemaPublisher' });
@@ -83,7 +92,7 @@ export class SchemaPublisher {
       scope: TargetAccessScope.REGISTRY_READ,
     });
 
-    const [project, latest] = await Promise.all([
+    const [project, latestVersion] = await Promise.all([
       this.projectManager.getProject({
         organization: input.organization,
         project: input.project,
@@ -95,64 +104,6 @@ export class SchemaPublisher {
       }),
     ]);
 
-    const schemas = latest.schemas;
-    const isInitialSchema = schemas.length === 0;
-
-    if (
-      (project.type === ProjectType.STITCHING || project.type === ProjectType.FEDERATION) &&
-      (lodash.isNil(input.service) || input.service?.trim() === '')
-    ) {
-      this.logger.debug('Detected missing service name');
-      const missingServiceNameMessage = `Can not check schema without a service name.`;
-
-      if (input.github) {
-        if (!project.gitRepository) {
-          return {
-            __typename: 'GitHubSchemaCheckError' as const,
-            message: 'Git repository is not configured for this project',
-          };
-        }
-
-        const [repositoryOwner, repositoryName] = project.gitRepository.split('/');
-
-        try {
-          await this.gitHubIntegrationManager.createCheckRun({
-            name: 'GraphQL Hive - schema:check',
-            conclusion: 'failure',
-            sha: input.github.commit,
-            organization: input.organization,
-            repositoryOwner,
-            repositoryName,
-            output: {
-              title: 'Missing service name',
-              summary: missingServiceNameMessage,
-            },
-          });
-
-          return {
-            __typename: 'GitHubSchemaCheckSuccess' as const,
-            message: 'Check-run created',
-          };
-        } catch (error) {
-          Sentry.captureException(error);
-          return {
-            __typename: 'GitHubSchemaCheckError' as const,
-            message: `Failed to create the check-run`,
-          };
-        }
-      }
-
-      return {
-        valid: false,
-        errors: [
-          {
-            message: missingServiceNameMessage,
-          },
-        ],
-        initial: isInitialSchema,
-      };
-    }
-
     await this.schemaManager.completeGetStartedCheck({
       organization: project.orgId,
       step: 'checkingSchema',
@@ -163,95 +114,276 @@ export class SchemaPublisher {
       project: input.project,
       target: input.target,
     });
-    const orchestrator = this.schemaManager.matchOrchestrator(project.type);
-    const incomingSchema: Schema = {
-      id: 'temp',
-      author: 'temp',
-      source: input.sdl,
-      service: input.service,
-      target: input.target,
-      commit: 'temp',
-      date: new Date().toISOString(),
-    };
-    const { schemas: newSchemas } = updateSchemas(schemas, incomingSchema);
 
-    const validationResult = await this.schemaValidator.validate({
-      orchestrator,
-      incoming: incomingSchema,
-      before: schemas,
-      after: newSchemas,
-      beforeState: 'valid' in latest ? (latest.valid ? 'valid' : 'invalid') : null,
-      selector: {
-        organization: input.organization,
-        project: input.project,
-        target: input.target,
-      },
-      baseSchema,
-      experimental_acceptBreakingChanges: false,
-      project,
-    });
+    const selector = {
+      organization: input.organization,
+      project: input.project,
+      target: input.target,
+    };
+
+    const mode: 'legacy' | 'modern' = project.legacyRegistryModel ? 'legacy' : 'modern';
+
+    const runCheck = () => {
+      switch (`${project.type}:${mode}` as const) {
+        case `${ProjectType.SINGLE}:modern`:
+          return this.singleModel.check({
+            input,
+            selector,
+            latest:
+              'version' in latestVersion
+                ? {
+                    isComposable: latestVersion.valid,
+                    schemas: [ensureSingleSchema(latestVersion.schemas)],
+                  }
+                : null,
+            baseSchema,
+            project,
+          });
+        case `${ProjectType.FEDERATION}:modern`:
+          return this.federationModel.check({
+            input: {
+              sdl: input.sdl,
+              serviceName: input.service,
+            },
+            selector,
+            latest:
+              'version' in latestVersion
+                ? {
+                    isComposable: latestVersion.valid,
+                    schemas: ensureCompositeSchemas(latestVersion.schemas),
+                  }
+                : null,
+            baseSchema,
+            project,
+          });
+        case `${ProjectType.STITCHING}:modern`:
+          return this.stitchingModel.check({
+            input: {
+              sdl: input.sdl,
+              serviceName: input.service,
+            },
+            selector,
+            latest:
+              'version' in latestVersion
+                ? {
+                    isComposable: latestVersion.valid,
+                    schemas: ensureCompositeSchemas(latestVersion.schemas),
+                  }
+                : null,
+            baseSchema,
+            project,
+          });
+        case `${ProjectType.SINGLE}:legacy`:
+          return this.singleLegacyModel.check({
+            input: {
+              sdl: input.sdl,
+            },
+            selector,
+            latest:
+              'version' in latestVersion
+                ? {
+                    isComposable: latestVersion.valid,
+                    schemas: [ensureSingleSchema(latestVersion.schemas)],
+                  }
+                : null,
+            baseSchema,
+            project,
+          });
+        case `${ProjectType.FEDERATION}:legacy`:
+          return this.federationLegacyModel.check({
+            input: {
+              sdl: input.sdl,
+              serviceName: input.service,
+            },
+            selector,
+            latest:
+              'version' in latestVersion
+                ? {
+                    isComposable: latestVersion.valid,
+                    schemas: ensureCompositeSchemas(latestVersion.schemas),
+                  }
+                : null,
+            baseSchema,
+            project,
+          });
+        case `${ProjectType.STITCHING}:legacy`:
+          return this.stitchingLegacyModel.check({
+            input: {
+              sdl: input.sdl,
+              serviceName: input.service,
+            },
+            selector,
+            latest:
+              'version' in latestVersion
+                ? {
+                    isComposable: latestVersion.valid,
+                    schemas: ensureCompositeSchemas(latestVersion.schemas),
+                  }
+                : null,
+            baseSchema,
+            project,
+          });
+        default:
+          throw new HiveError(`${project.type} project (${mode}) not supported`);
+      }
+    };
+
+    const checkResult = await runCheck();
 
     if (input.github) {
-      if (!project.gitRepository) {
-        return {
-          __typename: 'GitHubSchemaCheckError' as const,
-          message: 'Git repository is not configured for this project',
-        };
-      }
-      const [repositoryOwner, repositoryName] = project.gitRepository.split('/');
-
-      try {
-        let title: string;
-        let summary: string;
-
-        if (validationResult.valid) {
-          if (validationResult.changes.length === 0) {
-            title = 'No changes';
-            summary = 'No changes detected';
-          } else {
-            title = 'No breaking changes';
-            summary = this.changesToMarkdown(validationResult.changes);
-          }
-        } else {
-          title = `Detected ${validationResult.errors.length} error${
-            validationResult.errors.length === 1 ? '' : 's'
-          }`;
-          summary = [
-            validationResult.errors ? this.errorsToMarkdown(validationResult.errors) : null,
-            validationResult.changes ? this.changesToMarkdown(validationResult.changes) : null,
-          ]
-            .filter(Boolean)
-            .join('\n\n');
-        }
-
-        await this.gitHubIntegrationManager.createCheckRun({
-          name: 'GraphQL Hive - schema:check',
-          conclusion: validationResult.valid ? 'success' : 'failure',
+      if (checkResult.conclusion === SchemaCheckConclusion.Success) {
+        return this.githubCheck({
+          project,
           sha: input.github.commit,
-          organization: input.organization,
-          repositoryOwner,
-          repositoryName,
-          output: {
-            title,
-            summary,
-          },
+          conclusion: checkResult.conclusion,
+          changes: checkResult.state.changes ?? null,
+          breakingChanges: null,
+          compositionErrors: null,
+          errors: null,
         });
-        return {
-          __typename: 'GitHubSchemaCheckSuccess' as const,
-          message: 'Check-run created',
-        };
-      } catch (error: any) {
-        return {
-          __typename: 'GitHubSchemaCheckError' as const,
-          message: `Failed to create the check-run`,
-        };
       }
+      return this.githubCheck({
+        project,
+        sha: input.github.commit,
+        conclusion: checkResult.conclusion,
+        changes:
+          getReasonByCode(checkResult, CheckFailureReasonCode.BreakingChanges)?.changes ?? null,
+        breakingChanges:
+          getReasonByCode(checkResult, CheckFailureReasonCode.BreakingChanges)?.breakingChanges ??
+          null,
+        compositionErrors:
+          getReasonByCode(checkResult, CheckFailureReasonCode.CompositionFailure)
+            ?.compositionErrors ?? null,
+        errors: (
+          [] as Array<{
+            message: string;
+          }>
+        ).concat(
+          getReasonByCode(checkResult, CheckFailureReasonCode.MissingServiceName)
+            ? [
+                {
+                  message: 'Missing service name',
+                },
+              ]
+            : [],
+        ),
+      });
+    }
+
+    if (checkResult.conclusion === SchemaCheckConclusion.Success) {
+      return {
+        __typename: 'SchemaCheckSuccess' as const,
+        valid: true,
+        changes: checkResult.state.changes ?? [],
+        initial: checkResult.state.initial,
+      } satisfies Types.ResolversTypes['SchemaCheckSuccess'];
     }
 
     return {
-      ...validationResult,
-      initial: isInitialSchema,
-    };
+      __typename: 'SchemaCheckError' as const,
+      valid: false,
+      changes: getReasonByCode(checkResult, CheckFailureReasonCode.BreakingChanges)?.changes ?? [],
+      errors: (
+        [] as Array<{
+          message: string;
+        }>
+      ).concat(
+        getReasonByCode(checkResult, CheckFailureReasonCode.MissingServiceName)
+          ? [
+              {
+                message: 'Missing service name',
+              },
+            ]
+          : [],
+        getReasonByCode(checkResult, CheckFailureReasonCode.BreakingChanges)?.breakingChanges ?? [],
+        getReasonByCode(checkResult, CheckFailureReasonCode.CompositionFailure)
+          ?.compositionErrors ?? [],
+      ),
+    } satisfies Types.ResolversTypes['SchemaCheckError'];
+  }
+
+  async githubCheck({
+    project,
+    sha,
+    conclusion,
+    changes,
+    breakingChanges,
+    compositionErrors,
+    errors,
+  }: {
+    project: Project;
+    sha: string;
+    conclusion: SchemaCheckConclusion;
+    changes: Types.SchemaChange[] | null;
+    breakingChanges: Array<{
+      message: string;
+    }> | null;
+    compositionErrors: Array<{
+      message: string;
+    }> | null;
+    errors: Array<{
+      message: string;
+    }> | null;
+  }) {
+    if (!project.gitRepository) {
+      return {
+        __typename: 'GitHubSchemaCheckError' as const,
+        message: 'Git repository is not configured for this project',
+      };
+    }
+    const [repositoryOwner, repositoryName] = project.gitRepository.split('/');
+
+    try {
+      let title: string;
+      let summary: string;
+
+      if (conclusion === SchemaCheckConclusion.Success) {
+        if (!changes || changes.length === 0) {
+          title = 'No changes';
+          summary = 'No changes detected';
+        } else {
+          title = 'No breaking changes';
+          summary = this.changesToMarkdown(changes);
+        }
+      } else {
+        const total =
+          (compositionErrors?.length ?? 0) + (breakingChanges?.length ?? 0) + (errors?.length ?? 0);
+
+        title = `Detected ${total} error${total === 1 ? '' : 's'}`;
+        summary = [
+          errors ? this.errorsToMarkdown(errors) : null,
+          compositionErrors ? this.errorsToMarkdown(compositionErrors) : null,
+          breakingChanges ? this.errorsToMarkdown(breakingChanges) : null,
+          changes ? this.changesToMarkdown(changes) : null,
+        ]
+          .filter(Boolean)
+          .join('\n\n');
+      }
+
+      await this.gitHubIntegrationManager.createCheckRun({
+        name: 'GraphQL Hive - schema:check',
+        conclusion: conclusion === SchemaCheckConclusion.Success ? 'success' : 'failure',
+        sha,
+        organization: project.orgId,
+        repositoryOwner,
+        repositoryName,
+        output: {
+          title,
+          summary,
+        },
+      });
+
+      return {
+        __typename: 'GitHubSchemaCheckSuccess' as const,
+        message: 'Check-run created',
+      };
+    } catch (error: any) {
+      Sentry.captureException(error);
+      return {
+        __typename: 'GitHubSchemaCheckError' as const,
+        message: `Failed to create the check-run`,
+      };
+    }
   }
 
   @sentry('SchemaPublisher.publish')
@@ -313,7 +445,7 @@ export class SchemaPublisher {
       const schemaObjects = schemas.map(s => this.helper.createSchemaObject(s));
       const schema = await orchestrator.build(schemaObjects, project.externalComposition);
 
-      this.logger.info('Deploying version to CDN (version=%s)', latestVersion.id);
+      this.logger.info('Deploying version to CDN (reason="sync", version=%s)', latestVersion.id);
 
       await this.updateCDN(
         {
@@ -371,7 +503,11 @@ export class SchemaPublisher {
         const schemaObjects = schemas.map(s => this.helper.createSchemaObject(s));
         const schema = await orchestrator.build(schemaObjects, project.externalComposition);
 
-        this.logger.info('Deploying version to CDN (version=%s)', latestVersion.id);
+        this.logger.info(
+          'Deploying version to CDN (reason="status_change" version=%s)',
+          latestVersion.id,
+        );
+
         await this.updateCDN({
           target,
           project,
@@ -389,20 +525,6 @@ export class SchemaPublisher {
     }
 
     return updateResult;
-  }
-
-  private validateMetadata(metadataRaw: string | null | undefined): Record<string, any> | null {
-    if (metadataRaw) {
-      try {
-        return JSON.parse(metadataRaw);
-      } catch (e) {
-        throw new Error(
-          `Failed to parse schema metadata JSON: ${e instanceof Error ? e.message : e}`,
-        );
-      }
-    }
-
-    return null;
   }
 
   private async internalPublish(input: PublishInput) {
@@ -425,7 +547,7 @@ export class SchemaPublisher {
       scope: TargetAccessScope.REGISTRY_WRITE,
     });
 
-    const [organization, project, target, latest, baseSchema] = await Promise.all([
+    const [organization, project, target, latestVersion, baseSchema] = await Promise.all([
       this.organizationManager.getOrganization({
         organization: organizationId,
       }),
@@ -451,231 +573,209 @@ export class SchemaPublisher {
       }),
     ]);
 
-    const schemas = latest.schemas;
+    // const schemas = latest.schemas;
 
     await this.schemaManager.completeGetStartedCheck({
       organization: project.orgId,
       step: 'publishingSchema',
     });
 
-    this.logger.debug(`Found ${schemas.length} most recent schemas`);
+    this.logger.debug(`Found ${latestVersion.schemas.length} most recent schemas`);
 
-    if (
-      (project.type === ProjectType.STITCHING || project.type === ProjectType.FEDERATION) &&
-      (lodash.isNil(input.service) || input.service?.trim() === '')
-    ) {
-      this.logger.debug('Detected missing service name');
-      const missingServiceNameMessage = `Can not publish schema for a '${project.type.toLowerCase()}' project without a service name.`;
+    const mode: 'legacy' | 'modern' = project.legacyRegistryModel ? 'legacy' : 'modern';
 
-      if (input.github) {
-        return this.createPublishCheckRun({
-          force: false,
-          initial: false,
-          input,
-          project,
-          valid: false,
-          changes: [],
-          errors: [
-            {
-              message: missingServiceNameMessage,
-            },
-          ],
-        });
+    const runPublish = () => {
+      switch (`${project.type}:${mode}` as const) {
+        case `${ProjectType.SINGLE}:modern`:
+          return this.singleModel.publish({
+            input,
+            latest:
+              'version' in latestVersion
+                ? {
+                    isComposable: latestVersion.valid,
+                    schemas: [ensureSingleSchema(latestVersion.schemas)],
+                  }
+                : null,
+            project,
+            target,
+            baseSchema,
+          });
+        case `${ProjectType.FEDERATION}:modern`:
+          this.logger.debug('Using Federation model');
+          return this.federationModel.publish({
+            input,
+            latest:
+              'version' in latestVersion
+                ? {
+                    isComposable: latestVersion.valid,
+                    schemas: ensureCompositeSchemas(latestVersion.schemas),
+                  }
+                : null,
+            project,
+            target,
+          });
+        case `${ProjectType.STITCHING}:modern`:
+          return this.stitchingModel.publish({
+            input,
+            latest:
+              'version' in latestVersion
+                ? {
+                    isComposable: latestVersion.valid,
+                    schemas: ensureCompositeSchemas(latestVersion.schemas),
+                  }
+                : null,
+            project,
+            target,
+          });
+        case `${ProjectType.SINGLE}:legacy`:
+          this.logger.debug('Using Single (legacy) model');
+          return this.singleLegacyModel.publish({
+            input,
+            latest:
+              'version' in latestVersion
+                ? {
+                    isComposable: latestVersion.valid,
+                    schemas: [ensureSingleSchema(latestVersion.schemas)],
+                  }
+                : null,
+            project,
+            target,
+            baseSchema,
+          });
+        case `${ProjectType.FEDERATION}:legacy`:
+          this.logger.debug('Using Federation (legacy) model');
+          return this.federationLegacyModel.publish({
+            input,
+            latest:
+              'version' in latestVersion
+                ? {
+                    isComposable: latestVersion.valid,
+                    schemas: ensureCompositeSchemas(latestVersion.schemas),
+                  }
+                : null,
+            project,
+            target,
+          });
+        case `${ProjectType.STITCHING}:legacy`:
+          this.logger.debug('Using Stitching (legacy) model');
+          return this.stitchingLegacyModel.publish({
+            input,
+            latest:
+              'version' in latestVersion
+                ? {
+                    isComposable: latestVersion.valid,
+                    schemas: ensureCompositeSchemas(latestVersion.schemas),
+                  }
+                : null,
+            project,
+            target,
+          });
+        default:
+          throw new HiveError(`${project.type} project (${mode}) not supported`);
       }
-      return {
-        __typename: 'SchemaPublishMissingServiceError' as const,
-        message: missingServiceNameMessage,
-      };
-    }
-
-    if (
-      project.type === ProjectType.FEDERATION &&
-      (lodash.isNil(input.url) || input.url?.trim() === '')
-    ) {
-      this.logger.debug('Detected missing service url');
-      const missingServiceUrlMessage = `Can not publish schema for a '${project.type.toLowerCase()}' project without a service url.`;
-
-      if (input.github) {
-        return this.createPublishCheckRun({
-          force: false,
-          initial: false,
-          input,
-          project,
-          valid: false,
-          changes: [],
-          errors: [
-            {
-              message: missingServiceUrlMessage,
-            },
-          ],
-        });
-      }
-      return {
-        __typename: 'SchemaPublishMissingUrlError' as const,
-        message: missingServiceUrlMessage,
-      };
-    }
-
-    const orchestrator = this.schemaManager.matchOrchestrator(project.type);
-    const incomingSchema: Schema = {
-      id: 'new-schema',
-      author: input.author,
-      source: input.sdl,
-      service: input.service,
-      commit: input.commit,
-      target: targetId,
-      date: new Date().toISOString(),
-      url: input.url,
-      metadata: this.validateMetadata(input.metadata),
     };
 
-    const { schemas: newSchemas, swappedSchema: previousSchema } = updateSchemas(
-      schemas,
-      incomingSchema,
-    );
+    const publishResult = await runPublish();
 
-    this.logger.debug(`Produced ${newSchemas.length} new schemas`);
-
-    const isInitialSchema = schemas.length === 0;
-
-    let result: ValidationResult;
-
-    try {
-      result = await this.schemaValidator.validate({
-        orchestrator,
-        incoming: incomingSchema,
-        before: schemas,
-        after: newSchemas,
-        beforeState: 'valid' in latest ? (latest.valid ? 'valid' : 'invalid') : null,
-        selector: {
-          organization: organizationId,
-          project: projectId,
-          target: targetId,
-        },
-        baseSchema,
-        experimental_acceptBreakingChanges: input.experimental_acceptBreakingChanges === true,
-        project,
-      });
-    } catch (err) {
-      if (err instanceof GraphQLDocumentStringInvalidError) {
-        throw new HiveError(err.message);
-      }
-      throw err;
-    }
-
-    const { changes, errors, valid, messages } = result;
-
-    const hasPreviousVersion = 'version' in latest && Boolean(latest.version);
-    const hasNewUrl =
-      hasPreviousVersion &&
-      previousSchema != null &&
-      (previousSchema.url ?? null) !== (incomingSchema.url ?? null);
-    const hasSchemaChanges = changes.length > 0;
-    const hasErrors = errors.length > 0;
-    const isForced = input.force === true;
-    let hasDifferentChecksum = false;
-
-    if (hasPreviousVersion) {
-      const before = this.helper
-        .sortSchemas(schemas)
-        .map(s => this.helper.createChecksum(this.helper.createSchemaObject(s)))
-        .join(',');
-      const after = this.helper
-        .sortSchemas(newSchemas)
-        .map(s => this.helper.createChecksum(this.helper.createSchemaObject(s)))
-        .join(',');
-
-      hasDifferentChecksum = before !== after;
-    }
-
-    const isModified = hasNewUrl || hasSchemaChanges || hasErrors || hasDifferentChecksum;
-
-    this.logger.debug('Is initial: %s', isInitialSchema ? 'yes' : 'false');
-    this.logger.debug('Errors: %s', errors.length);
-    this.logger.debug('Changes: %s', changes.length);
-    this.logger.debug('Forced: %s', isForced ? 'yes' : 'false');
-    this.logger.debug('New url: %s', hasNewUrl ? 'yes' : 'false');
-    this.logger.debug('Checksums comparison: %s', hasDifferentChecksum ? 'different' : 'same');
-
-    // if the schema is not modified, we don't need to do anything, just return the success
-    if (!isModified && !isInitialSchema) {
-      this.logger.debug('Schema is not modified');
-
-      if (input.github === true) {
+    if (publishResult.conclusion === SchemaPublishConclusion.Ignore) {
+      this.logger.debug('Publish ignored (reasons=%s)', publishResult.reason);
+      if (input.github) {
         return this.createPublishCheckRun({
-          force: input.force,
-          initial: isInitialSchema,
+          force: false,
+          initial: false,
           input,
           project,
           valid: true,
           changes: [],
           errors: [],
-          messages,
         });
       }
 
       return {
         __typename: 'SchemaPublishSuccess' as const,
-        initial: isInitialSchema,
+        initial: false,
         valid: true,
-        errors: [],
         changes: [],
-      };
+      } satisfies Types.ResolversTypes['SchemaPublishSuccess'];
     }
 
-    let newVersionId: string | null = null;
-
-    // if the schema is valid or the user is forcing the publish, we can go ahead and publish
-    if (!hasErrors || isForced) {
-      this.logger.debug('Publishing new version');
-      const newVersion = await this.publishNewVersion({
-        input,
-        valid,
-        schemas: newSchemas,
-        newSchema: incomingSchema,
-        organizationId,
-        target,
-        project,
-        changes,
-        errors,
-        initial: isInitialSchema,
-      });
-
-      newVersionId = newVersion.id;
-
-      await this.publishToCDN({
-        valid,
-        target,
-        project,
-        orchestrator,
-        schemas: newSchemas,
-      });
-    }
-
-    if (valid && hasNewUrl) {
-      messages.push(
-        `Updated: New service url: ${incomingSchema.url ?? 'empty'} (previously: ${
-          previousSchema!.url ?? 'empty'
-        })`,
+    if (publishResult.conclusion === SchemaPublishConclusion.Reject) {
+      this.logger.debug(
+        'Publish rejected (reasons=%s)',
+        publishResult.reasons.map(r => r.code).join(', '),
       );
+      if (getReasonByCode(publishResult, PublishFailureReasonCode.MissingServiceName)) {
+        return {
+          __typename: 'SchemaPublishMissingServiceError' as const,
+          message: 'Missing service name',
+        } satisfies Types.ResolversTypes['SchemaPublishMissingServiceError'];
+      }
+
+      if (getReasonByCode(publishResult, PublishFailureReasonCode.MissingServiceUrl)) {
+        return {
+          __typename: 'SchemaPublishMissingUrlError' as const,
+          message: 'Missing service url',
+        } satisfies Types.ResolversTypes['SchemaPublishMissingUrlError'];
+      }
+
+      return {
+        __typename: 'SchemaPublishError' as const,
+        valid: false,
+        changes:
+          getReasonByCode(publishResult, PublishFailureReasonCode.BreakingChanges)?.changes ?? [],
+        errors: (
+          [] as Array<{
+            message: string;
+          }>
+        ).concat(
+          getReasonByCode(publishResult, PublishFailureReasonCode.BreakingChanges)?.changes ?? [],
+          getReasonByCode(publishResult, PublishFailureReasonCode.CompositionFailure)
+            ?.compositionErrors ?? [],
+          getReasonByCode(publishResult, PublishFailureReasonCode.MetadataParsingFailure)
+            ? [
+                {
+                  message: 'Failed to parse metadata',
+                },
+              ]
+            : [],
+        ),
+      } satisfies Types.ResolversTypes['SchemaPublishError'];
     }
 
-    if (input.github) {
-      return this.createPublishCheckRun({
-        force: input.force,
-        initial: isInitialSchema,
-        input,
-        project,
-        valid,
-        changes,
-        errors,
-        messages,
-      });
-    }
+    const errors = (
+      [] as Array<{
+        message: string;
+      }>
+    ).concat(
+      publishResult.state.compositionErrors ?? [],
+      publishResult.state.breakingChanges ?? [],
+    );
+
+    this.logger.debug('Publishing new version');
+
+    const newVersion = await this.publishNewVersion({
+      input,
+      valid: publishResult.state.composable,
+      schemas: publishResult.state.schemas,
+      newSchema: publishResult.state.schema,
+      organizationId,
+      target,
+      project,
+      changes: publishResult.state.changes ?? [],
+      errors,
+      initial: publishResult.state.initial,
+    });
+
+    await this.publishToCDN({
+      valid: newVersion.valid,
+      target,
+      project,
+      orchestrator: publishResult.state.orchestrator,
+      schemas: publishResult.state.schemas,
+    });
 
     const linkToWebsite =
-      typeof this.schemaModuleConfig.schemaPublishLink === 'function' &&
-      typeof newVersionId === 'string'
+      typeof this.schemaModuleConfig.schemaPublishLink === 'function'
         ? this.schemaModuleConfig.schemaPublishLink({
             organization: {
               cleanId: organization.cleanId,
@@ -686,23 +786,31 @@ export class SchemaPublisher {
             target: {
               cleanId: target.cleanId,
             },
-            version: isInitialSchema
-              ? undefined
-              : {
-                  id: newVersionId,
-                },
+            version: 'version' in latestVersion ? newVersion : undefined,
           })
         : null;
 
+    if (input.github) {
+      return this.createPublishCheckRun({
+        force: false,
+        initial: publishResult.state.initial,
+        input,
+        project,
+        valid: publishResult.state.composable,
+        changes: publishResult.state.changes ?? [],
+        errors,
+        messages: publishResult.state.messages ?? [],
+      });
+    }
+
     return {
-      __typename: valid ? ('SchemaPublishSuccess' as const) : ('SchemaPublishError' as const),
-      initial: isInitialSchema,
-      valid,
-      errors,
-      changes,
-      message: messages.length ? messages.join('\n') : null,
+      __typename: 'SchemaPublishSuccess' as const,
+      initial: publishResult.state.initial,
+      valid: publishResult.state.composable,
+      changes: publishResult.state.changes ?? [],
+      message: (publishResult.state.messages ?? []).join('\n'),
       linkToWebsite,
-    };
+    } satisfies Types.ResolversTypes['SchemaPublishSuccess'];
   }
 
   @sentry('SchemaPublisher.publishNewVersion')
@@ -833,10 +941,9 @@ export class SchemaPublisher {
     const publishMetadata = async () => {
       const metadata: Array<Record<string, any>> = [];
       for (const schema of schemas) {
-        if (!schema.metadata) {
-          continue;
+        if (typeof schema.metadata === 'string') {
+          metadata.push(JSON.parse(schema.metadata));
         }
-        metadata.push(schema.metadata);
       }
       if (metadata.length > 0) {
         await Promise.all([
@@ -857,15 +964,17 @@ export class SchemaPublisher {
       }
     };
 
-    const publishSchema = async () => {
+    const publishCompositeSchema = async () => {
+      const compositeSchema = ensureCompositeSchemas(schemas);
+
       await Promise.all([
         this.artifactStorageWriter.writeArtifact({
           targetId: target.id,
           artifactType: 'services',
-          artifact: schemas.map(s => ({
-            name: s.service,
-            sdl: s.source,
-            url: s.url,
+          artifact: compositeSchema.map(s => ({
+            name: s.service_name,
+            sdl: s.sdl,
+            url: s.service_url,
           })),
         }),
         this.artifactStorageWriter.writeArtifact({
@@ -879,17 +988,17 @@ export class SchemaPublisher {
             resourceType: 'schema',
             value: JSON.stringify(
               schemas.length > 1
-                ? schemas.map(s => ({
-                    sdl: s.source,
-                    url: s.url,
-                    name: s.service,
+                ? compositeSchema.map(s => ({
+                    sdl: s.sdl,
+                    url: s.service_url,
+                    name: s.service_name,
                     date: s.date,
                   }))
                 : {
-                    sdl: schemas[0].source,
-                    url: schemas[0].url,
-                    name: schemas[0].service,
-                    date: schemas[0].date,
+                    sdl: compositeSchema[0].sdl,
+                    url: compositeSchema[0].service_url,
+                    name: compositeSchema[0].service_name,
+                    date: compositeSchema[0].date,
                   },
             ),
           },
@@ -898,7 +1007,31 @@ export class SchemaPublisher {
       ]);
     };
 
-    const actions = [publishSchema(), publishMetadata()];
+    const publishSingleSchema = async () => {
+      await Promise.all([
+        this.artifactStorageWriter.writeArtifact({
+          targetId: target.id,
+          artifactType: 'sdl',
+          artifact: fullSchemaSdl,
+        }),
+        this.cdn.publish(
+          {
+            targetId: target.id,
+            resourceType: 'schema',
+            value: JSON.stringify({
+              sdl: schemas[0].sdl,
+              date: schemas[0].date,
+            }),
+          },
+          span,
+        ),
+      ]);
+    };
+
+    const actions = [
+      project.type === ProjectType.SINGLE ? publishSingleSchema() : publishCompositeSchema(),
+      publishMetadata(),
+    ];
 
     if (project.type === ProjectType.FEDERATION) {
       if (supergraph) {

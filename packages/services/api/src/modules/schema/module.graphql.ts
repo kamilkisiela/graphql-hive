@@ -20,6 +20,9 @@ export default gql`
     disableExternalSchemaComposition(
       input: DisableExternalSchemaCompositionInput!
     ): DisableExternalSchemaCompositionResult!
+    updateProjectRegistryModel(
+      input: UpdateProjectRegistryModelInput!
+    ): UpdateProjectRegistryModelResult!
   }
 
   extend type Query {
@@ -69,8 +72,32 @@ export default gql`
     endpoint: String!
   }
 
+  input UpdateProjectRegistryModelInput {
+    organization: ID!
+    project: ID!
+    model: RegistryModel!
+  }
+
+  enum RegistryModel {
+    LEGACY
+    MODERN
+  }
+
+  """
+  @oneOf
+  """
+  type UpdateProjectRegistryModelResult {
+    ok: Project
+    error: UpdateProjectRegistryModelError
+  }
+
+  type UpdateProjectRegistryModelError implements Error {
+    message: String!
+  }
+
   extend type Project {
     externalSchemaComposition: ExternalSchemaComposition
+    registryModel: RegistryModel!
   }
 
   type EnableExternalSchemaCompositionError implements Error {

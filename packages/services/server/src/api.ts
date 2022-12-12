@@ -9,8 +9,8 @@ import {
 } from '@hive/api';
 import type { inferAsyncReturnType } from '@trpc/server';
 import { initTRPC } from '@trpc/server';
-import { CryptoProvider } from 'packages/services/api/src/modules/shared/providers/crypto';
 import { z } from 'zod';
+import { CryptoProvider } from '../../api/src/modules/shared/providers/crypto';
 
 export async function createContext({
   storage,

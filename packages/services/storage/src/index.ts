@@ -38,7 +38,6 @@ import {
   activities,
   alert_channels,
   alerts,
-  commits,
   getPool,
   objectToParams,
   organization_invitations,
@@ -47,22 +46,17 @@ import {
   organizations_billing,
   persisted_operations,
   projects,
+  schema_log,
+  schema_versions,
   target_validation,
   targets,
   users,
-  version_commit,
-  versions,
 } from './db';
 import type { Slonik } from './shared';
 
 export { createConnectionString } from './db/utils';
 export { createTokenStorage } from './tokens';
 export type { tokens } from './db/types';
-
-export type WithUrl<T> = T & Pick<version_commit, 'url'>;
-export type WithMaybeMetadata<T> = T & {
-  metadata?: string | null;
-};
 
 type Connection = DatabasePool | DatabaseTransactionConnection;
 
@@ -77,6 +71,14 @@ const organizationGetStartedMapping: Record<
   reportingOperations: 'get_started_reporting_operations',
   enablingUsageBasedBreakingChanges: 'get_started_usage_breaking',
 };
+
+function ensureDefined<T>(value: T | null | undefined, propertyName: string): T {
+  if (value == null) {
+    throw new Error(`${propertyName} is null or undefined`);
+  }
+
+  return value;
+}
 
 function getProviderBasedOnExternalId(externalId: string): AuthProvider {
   if (externalId.startsWith('github')) {
@@ -194,6 +196,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       buildUrl: project.build_url,
       validationUrl: project.validation_url,
       gitRepository: project.git_repository,
+      legacyRegistryModel: project.legacy_registry_model,
       externalComposition: {
         enabled: project.external_composition_enabled,
         endpoint: project.external_composition_endpoint,
@@ -213,45 +216,44 @@ export async function createStorage(connection: string, maximumPoolSize: number)
   }
 
   function transformSchema(
-    schema: WithUrl<
-      WithMaybeMetadata<
-        Pick<
-          commits,
-          | 'id'
-          | 'commit'
-          | 'author'
-          | 'content'
-          | 'created_at'
-          | 'project_id'
-          | 'service'
-          | 'target_id'
-        >
-      >
+    schema: Pick<
+      schema_log,
+      | 'id'
+      | 'action'
+      | 'commit'
+      | 'author'
+      | 'sdl'
+      | 'created_at'
+      | 'project_id'
+      | 'service_name'
+      | 'service_url'
+      | 'target_id'
+      | 'metadata'
     >,
   ): Schema {
     const record: Schema = {
+      kind: schema.service_name ? 'composite' : 'single', // maybe we should check it based on project's type
       id: schema.id,
       author: schema.author,
-      source: schema.content,
+      sdl: ensureDefined(schema.sdl, 'sdl'),
       commit: schema.commit,
       date: schema.created_at as any,
-      service: schema.service,
-      url: schema.url,
+      service_name: schema.service_name!,
+      service_url: schema.service_url,
       target: schema.target_id,
+      action: schema.action as any,
+      metadata: schema.metadata ?? null,
     };
-    if (schema.metadata != null) {
-      record.metadata = JSON.parse(schema.metadata);
-    }
 
     return record;
   }
 
-  function transformSchemaVersion(version: versions): SchemaVersion {
+  function transformSchemaVersion(version: schema_versions): SchemaVersion {
     return {
       id: version.id,
-      valid: version.valid,
+      valid: version.is_composable,
       date: version.created_at as any,
-      commit: version.commit_id,
+      commit: version.action_id,
       base_schema: version.base_schema,
     };
   }
@@ -1247,6 +1249,18 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         `),
       );
     },
+    async updateProjectRegistryModel({ project, model }) {
+      const isLegacyModel = model === 'LEGACY';
+
+      return transformProject(
+        await pool.one<projects>(sql`
+          UPDATE public.projects
+          SET legacy_registry_model = ${isLegacyModel}
+          WHERE id = ${project}
+          RETURNING *
+        `),
+      );
+    },
 
     async deleteProject({ organization, project }) {
       const result = transformProject(
@@ -1298,7 +1312,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         organization,
       );
 
-      await pool.query(sql`DELETE FROM public.versions WHERE target_id = ${target}`);
+      await pool.query(sql`DELETE FROM public.schema_versions WHERE target_id = ${target}`);
 
       return result;
     },
@@ -1506,19 +1520,21 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async hasSchema({ target }) {
       return pool.exists(
         sql`
-          SELECT 1 FROM public.versions as v WHERE v.target_id = ${target} LIMIT 1
+          SELECT 1 FROM public.schema_versions as v WHERE v.target_id = ${target} LIMIT 1
         `,
       );
     },
     async getMaybeLatestValidVersion({ target }) {
       const version = await pool.maybeOne<
-        Slonik<versions & Pick<commits, 'author' | 'service' | 'commit'>>
+        Slonik<
+          Pick<schema_versions, 'id' | 'is_composable' | 'created_at' | 'action_id' | 'base_schema'>
+        >
       >(
         sql`
-          SELECT v.*, c.author, c.service, c.commit FROM public.versions as v
-          LEFT JOIN public.commits as c ON (c.id = v.commit_id)
-          WHERE v.target_id = ${target} AND v.valid IS TRUE
-          ORDER BY v.created_at DESC
+          SELECT sv.id, sv.is_composable, sv.created_at, sv.action_id, sv.base_schema
+          FROM public.schema_versions as sv
+          WHERE sv.target_id = ${target} AND sv.is_composable IS TRUE
+          ORDER BY sv.created_at DESC
           LIMIT 1
         `,
       );
@@ -1529,66 +1545,72 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       return {
         id: version.id,
-        valid: version.valid,
+        valid: version.is_composable,
         date: version.created_at as any,
-        commit: version.commit_id,
+        commit: version.action_id,
         base_schema: version.base_schema,
       };
     },
     async getLatestValidVersion({ target }) {
       const version = await pool.one<
-        Slonik<versions & Pick<commits, 'author' | 'service' | 'commit'>>
+        Slonik<
+          Pick<schema_versions, 'id' | 'is_composable' | 'created_at' | 'action_id' | 'base_schema'>
+        >
       >(
         sql`
-          SELECT v.*, c.author, c.service, c.commit FROM public.versions as v
-          LEFT JOIN public.commits as c ON (c.id = v.commit_id)
-          WHERE v.target_id = ${target} AND v.valid IS TRUE
-          ORDER BY v.created_at DESC
+          SELECT sv.id, sv.is_composable, sv.created_at, sv.action_id, sv.base_schema
+          FROM public.schema_versions as sv
+          WHERE sv.target_id = ${target} AND sv.is_composable IS TRUE
+          ORDER BY sv.created_at DESC
           LIMIT 1
         `,
       );
 
       return {
         id: version.id,
-        valid: version.valid,
+        valid: version.is_composable,
         date: version.created_at as any,
-        commit: version.commit_id,
+        commit: version.action_id,
         base_schema: version.base_schema,
       };
     },
     async getLatestVersion({ project, target }) {
       const version = await pool.one<
-        Slonik<versions & Pick<commits, 'author' | 'service' | 'commit' | 'created_at'>>
+        Slonik<
+          Pick<schema_versions, 'id' | 'is_composable' | 'created_at' | 'action_id' | 'base_schema'>
+        >
       >(
         sql`
-          SELECT v.*, c.author, c.service, c.commit FROM public.versions as v
-          LEFT JOIN public.commits as c ON (c.id = v.commit_id)
-          LEFT JOIN public.targets as t ON (t.id = v.target_id)
-          WHERE v.target_id = ${target} AND t.project_id = ${project}
-          ORDER BY v.created_at DESC
+          SELECT sv.id, sv.is_composable, sv.created_at, sv.action_id, sv.base_schema
+          FROM public.schema_versions as sv
+          LEFT JOIN public.targets as t ON (t.id = sv.target_id)
+          WHERE sv.target_id = ${target} AND t.project_id = ${project}
+          ORDER BY sv.created_at DESC
           LIMIT 1
         `,
       );
 
       return {
         id: version.id,
-        valid: version.valid,
+        valid: version.is_composable,
         date: version.created_at as any,
-        commit: version.commit_id,
+        commit: version.action_id,
         base_schema: version.base_schema,
       };
     },
 
     async getMaybeLatestVersion({ project, target }) {
       const version = await pool.maybeOne<
-        Slonik<versions & Pick<commits, 'author' | 'service' | 'commit' | 'created_at'>>
+        Slonik<
+          Pick<schema_versions, 'id' | 'is_composable' | 'created_at' | 'action_id' | 'base_schema'>
+        >
       >(
         sql`
-          SELECT v.*, c.author, c.service, c.commit FROM public.versions as v
-          LEFT JOIN public.commits as c ON (c.id = v.commit_id)
-          LEFT JOIN public.targets as t ON (t.id = v.target_id)
-          WHERE v.target_id = ${target} AND t.project_id = ${project}
-          ORDER BY v.created_at DESC
+          SELECT sv.id, sv.is_composable, sv.created_at, sv.action_id, sv.base_schema
+          FROM public.schema_versions as sv
+          LEFT JOIN public.targets as t ON (t.id = sv.target_id)
+          WHERE sv.target_id = ${target} AND t.project_id = ${project}
+          ORDER BY sv.created_at DESC
           LIMIT 1
         `,
       );
@@ -1599,18 +1621,19 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       return {
         id: version.id,
-        valid: version.valid,
+        valid: version.is_composable,
         date: version.created_at as any,
-        commit: version.commit_id,
+        commit: version.action_id,
         base_schema: version.base_schema,
       };
     },
     async getLatestSchemas({ organization, project, target }) {
-      const latest = await pool.maybeOne<Pick<versions, 'id' | 'valid'>>(sql`
-        SELECT v.id, v.valid FROM public.versions as v
-        LEFT JOIN public.targets as t ON (t.id = v.target_id)
+      const latest = await pool.maybeOne<Pick<schema_versions, 'id' | 'is_composable'>>(sql`
+        SELECT sv.id, sv.is_composable
+        FROM public.schema_versions as sv
+        LEFT JOIN public.targets as t ON (t.id = sv.target_id)
         WHERE t.id = ${target} AND t.project_id = ${project}
-        ORDER BY v.created_at DESC
+        ORDER BY sv.created_at DESC
         LIMIT 1
       `);
 
@@ -1629,65 +1652,62 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       return {
         version: latest.id,
-        valid: latest.valid,
+        valid: latest.is_composable,
         schemas,
       };
     },
     async getSchemasOfVersion({ version, includeMetadata = false }) {
       const results = await pool.many<
         Slonik<
-          WithUrl<
-            WithMaybeMetadata<
-              Pick<
-                commits,
-                | 'id'
-                | 'commit'
-                | 'author'
-                | 'content'
-                | 'created_at'
-                | 'project_id'
-                | 'service'
-                | 'target_id'
-              >
-            >
+          Pick<
+            schema_log,
+            | 'id'
+            | 'commit'
+            | 'action'
+            | 'author'
+            | 'sdl'
+            | 'created_at'
+            | 'project_id'
+            | 'service_name'
+            | 'service_url'
+            | 'target_id'
+            | 'metadata'
           >
         >
       >(
         sql`
           SELECT
-            c.id,
-            c.commit,
-            c.author,
-            c.content,
-            c.created_at,
-            c.project_id,
-            c.service,
-            c.target_id,
-            ${includeMetadata ? sql`c.metadata,` : sql``}
-            vc.url
-          FROM
-            public.version_commit AS vc
-              LEFT JOIN
-                public.commits AS c
-                  ON c.id = vc.commit_id
+            sl.id,
+            sl.commit,
+            sl.author,
+            sl.action,
+            sl.sdl,
+            sl.created_at,
+            sl.project_id,
+            sl.service_name,
+            sl.service_url,
+            ${includeMetadata ? sql`sl.metadata,` : sql``}
+            sl.target_id
+          FROM public.schema_version_to_log AS svl
+          LEFT JOIN public.schema_log AS sl ON sl.id = svl.action_id
           WHERE
-            vc.version_id = ${version}
+            svl.version_id = ${version}
           ORDER BY
-            c.created_at DESC
+            sl.created_at DESC
         `,
       );
 
       return results.map(transformSchema);
     },
     async getSchemasOfPreviousVersion({ version, target }) {
-      const results = await pool.query<Slonik<WithUrl<commits>>>(
+      const results = await pool.query<Slonik<schema_log>>(
         sql`
-          SELECT c.*, vc.url FROM public.version_commit as vc
-          LEFT JOIN public.commits as c ON (c.id = vc.commit_id)
-          WHERE vc.version_id = (
-            SELECT v.id FROM public.versions as v WHERE v.created_at < (
-              SELECT vi.created_at FROM public.versions as vi WHERE vi.id = ${version}
-            ) AND v.target_id = ${target} ORDER BY v.created_at DESC LIMIT 1
+          SELECT sl.* FROM public.schema_version_to_log as svl
+          LEFT JOIN public.schema_log as sl ON (sl.id = svl.action_id)
+          WHERE svl.version_id = (
+            SELECT sv.id FROM public.schema_versions as sv WHERE sv.created_at < (
+              SELECT svi.created_at FROM public.schema_versions as svi WHERE svi.id = ${version}
+            ) AND sv.target_id = ${target} ORDER BY sv.created_at DESC LIMIT 1
           )
           ORDER BY c.created_at DESC
         `,
@@ -1695,12 +1715,13 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       return results.rows.map(transformSchema);
     },
-    async updateSchemaUrlOfVersion({ version, commit, url }) {
+    async updateSchemaUrlOfVersion({ commit, url }) {
+      // TODO: new registry should create a new version
       await pool.query(
         sql`
-          UPDATE public.version_commit
-          SET url = ${url ?? null}
-          WHERE version_id = ${version} AND commit_id = ${commit}
+          UPDATE public.schema_log
+          SET service_url = ${url ?? null}
+          WHERE id = ${commit}
         `,
       );
     },
@@ -1708,8 +1729,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async updateServiceName({ commit, name }) {
       await pool.query(
         sql`
-          UPDATE public.commits
-          SET service = ${name ?? null}
+          UPDATE public.schema_log
+          SET service_name = ${name ?? null}
           WHERE id = ${commit}
         `,
       );
@@ -1717,49 +1738,68 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
     async getVersion({ project, target, version }) {
       const result = await pool.one<
-        Slonik<versions & Pick<commits, 'author' | 'service' | 'commit' | 'created_at'>>
+        Slonik<
+          Pick<
+            schema_versions,
+            'id' | 'is_composable' | 'created_at' | 'base_schema' | 'action_id'
+          > &
+            Pick<schema_log, 'author' | 'service_name'>
+        >
       >(sql`
-        SELECT v.*, c.author, c.service, c.commit FROM public.versions as v
-        LEFT JOIN public.commits as c ON (c.id = v.commit_id)
-        LEFT JOIN public.targets as t ON (t.id = v.target_id)
-        WHERE v.target_id = ${target} AND t.project_id = ${project} AND v.id = ${version} LIMIT 1
+        SELECT 
+          sv.id, sv.is_composable, sv.created_at, sv.base_schema, sv.action_id,
+          sl.author, sl.service_name
+        FROM public.schema_versions as sv
+        LEFT JOIN public.schema_log as sl ON (sl.id = sv.action_id)
+        LEFT JOIN public.targets as t ON (t.id = sv.target_id)
+        WHERE sv.target_id = ${target} AND t.project_id = ${project} AND sv.id = ${version} LIMIT 1
       `);
 
       return {
         id: result.id,
-        valid: result.valid,
+        valid: result.is_composable,
         date: result.created_at as any,
-        commit: result.commit_id,
+        commit: result.action_id,
         base_schema: result.base_schema,
         author: result.author,
-        service: result.service,
+        service: result.service_name,
       };
     },
 
     async getVersions({ project, target, after, limit }) {
       const query = sql`
-      SELECT v.*, c.author, c.service, c.commit FROM public.versions as v
-      LEFT JOIN public.commits as c ON (c.id = v.commit_id)
-      LEFT JOIN public.targets as t ON (t.id = v.target_id)
-      WHERE v.target_id = ${target} AND t.project_id = ${project} AND v.created_at < ${
+      SELECT 
+        sv.id, sv.is_composable, sv.created_at, sv.base_schema, sv.action_id,
+        sl.author, sl.service_name
+      FROM public.schema_versions as sv
+      LEFT JOIN public.schema_log as sl ON (sl.id = sv.action_id)
+      LEFT JOIN public.targets as t ON (t.id = sv.target_id)
+      WHERE sv.target_id = ${target} AND t.project_id = ${project} AND sv.created_at < ${
         after
-          ? sql`(SELECT va.created_at FROM public.versions as va WHERE va.id = ${after})`
+          ? sql`(SELECT svi.created_at FROM public.schema_versions as svi WHERE svi.id = ${after})`
           : sql`NOW()`
       }
-      ORDER BY v.created_at DESC
+      ORDER BY sv.created_at DESC
       LIMIT ${limit + 1}
     `;
       const result = await pool.query<
-        Slonik<versions & Pick<commits, 'author' | 'service' | 'commit' | 'created_at'>>
+        Pick<schema_versions, 'id' | 'is_composable' | 'created_at' | 'base_schema' | 'action_id'> &
+          Pick<schema_log, 'author' | 'service_name'>
       >(query);
+
+      const vers = await pool.query(
+        sql`SELECT * FROM public.schema_versions WHERE target_id = ${target}`,
+      );
+
+      console.log(JSON.stringify(vers, null, 2));
 
       const hasMore = result.rows.length > limit;
 
       const versions = result.rows.slice(0, limit).map(version => ({
         id: version.id,
-        valid: version.valid,
+        valid: version.is_composable,
         date: version.created_at as any,
-        commit: version.commit_id,
+        commit: version.action_id,
         base_schema: version.base_schema,
       }));
 
@@ -1778,49 +1818,45 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       url = null,
       metadata,
     }) {
-      const result = await pool.one<Slonik<commits>>(sql`
-        INSERT INTO public.commits
+      const result = await pool.one<Slonik<schema_log>>(sql`
+        INSERT INTO public.schema_log
           (
             author,
-            service,
+            service_name,
+            service_url,
             commit,
-            content,
+            sdl,
             project_id,
             target_id,
-            metadata
+            metadata,
+            action
           )
         VALUES
           (
             ${author},
             ${service}::text,
+            ${url}::text,
             ${commit}::text,
             ${schema}::text,
             ${project},
             ${target},
-            ${metadata}
+            ${metadata},
+            'PUSH'
           )
         RETURNING *
       `);
 
-      return transformSchema({ ...result, url });
+      return transformSchema(result);
     },
     async createVersion(input) {
       const newVersion = await pool.transaction(async trx => {
-        // look for latest version in order to fetch urls of commits associated with that version
-        const previousVersion = await trx.maybeOne<Slonik<versions>>(sql`
-          SELECT v.id FROM public.versions as v
-          LEFT JOIN public.targets as t ON (t.id = v.target_id)
-          WHERE t.id = ${input.target} AND t.project_id = ${input.project}
-          ORDER BY v.created_at DESC
-          LIMIT 1
-        `);
         // creates a new version
-        const newVersion = await trx.one<Slonik<Pick<versions, 'id' | 'created_at'>>>(sql`
-          INSERT INTO public.versions
+        const newVersion = await trx.one<Slonik<Pick<schema_versions, 'id' | 'created_at'>>>(sql`
+          INSERT INTO public.schema_versions
             (
-              valid,
+              is_composable,
               target_id,
-              commit_id,
+              action_id,
               base_schema
             )
           VALUES
@@ -1835,31 +1871,13 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             created_at
         `);
 
-        // we want to write new url, so fill up the array with provided data
-        let commits: Array<{ commit_id: string; url?: string | null }> = [
-          {
-            commit_id: input.commit,
-            url: input.url,
-          },
-        ];
-
-        if (previousVersion?.id) {
-          const vid = previousVersion.id;
-          // fetch the rest of commits
-          const otherCommits = await trx.many<Pick<version_commit, 'commit_id' | 'url'>>(
-            sql`SELECT commit_id, url FROM public.version_commit WHERE version_id = ${vid} AND commit_id != ${input.commit}`,
-          );
-
-          commits = commits.concat(otherCommits);
-        }
-
         await Promise.all(
           input.commits.map(async cid => {
             await trx.query(sql`
-              INSERT INTO public.version_commit
-                (version_id, commit_id, url)
+              INSERT INTO public.schema_version_to_log
+                (version_id, action_id)
               VALUES
-              (${newVersion.id}, ${cid}, ${commits.find(c => c.commit_id === cid)?.url || null})
+              (${newVersion.id}, ${cid})
             `);
           }),
         );
@@ -1879,9 +1897,9 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
     async updateVersionStatus({ version, valid }) {
       return transformSchemaVersion(
-        await pool.one<Slonik<versions>>(sql`
-          UPDATE public.versions
-          SET valid = ${valid}
+        await pool.one<Slonik<schema_versions>>(sql`
+          UPDATE public.schema_versions
+          SET is_composable = ${valid}
           WHERE id = ${version}
           RETURNING *
         `),
@@ -1889,11 +1907,11 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     },
 
     getSchema: batch(async selectors => {
-      const rows = await pool.many<Slonik<WithUrl<commits>>>(
+      const rows = await pool.many<Slonik<schema_log>>(
         sql`
-            SELECT c.*
-            FROM public.commits as c
-            WHERE (c.id, c.target_id) IN ((${sql.join(
+            SELECT sl.*
+            FROM public.schema_log as sl
+            WHERE (sl.id, sl.target_id) IN ((${sql.join(
               selectors.map(s => sql`${s.commit}, ${s.target}`),
               sql`), (`,
             )}))

@@ -1,10 +1,9 @@
 /* eslint-disable */
 /// @ts-check
 
-import { verifyRequest, compose, signatureHeaderName } from './src/index';
 import { composeAndValidate, compositionHasErrors } from '@apollo/federation';
+import { verifyRequest, compose, signatureHeaderName } from './src/index';
 import { parse, printSchema } from 'graphql';
-
 import fastify from 'fastify';
 
 if (typeof process.env.PORT === 'undefined') {

@@ -1,74 +1,19 @@
 import { ProjectType } from '@app/gql/graphql';
-import { createCLI } from '../../testkit/cli';
 import { prepareProject } from '../../testkit/registry-models';
+import { createCLI } from '../../testkit/cli';
 
 describe('publish', () => {
   test.concurrent('accepted: composable', async () => {
     const { publish } = await prepare();
     await publish({
-      sdl: /* GraphQL */ `
-        type Query {
-          topProductName: String
-        }
-      `,
+      sdl: `type Query { topProductName: String }`,
       serviceName: 'products',
       serviceUrl: 'http://products:3000/graphql',
       expect: 'latest-composable',
     });
   });
 
-  test.concurrent('rejected: composable, breaking changes', async () => {
-    const { publish } = await prepare();
-    await publish({
-      sdl: /* GraphQL */ `
-        type Query {
-          topProductName: String
-        }
-      `,
-      serviceName: 'products',
-      serviceUrl: 'http://products:3000/graphql',
-      expect: 'latest-composable',
-    });
-
-    await publish({
-      sdl: /* GraphQL */ `
-        type Query {
-          nooooo: String
-        }
-      `,
-      serviceName: 'products',
-      serviceUrl: 'http://products:3000/graphql',
-      expect: 'rejected',
-    });
-  });
-
-  test.concurrent('accepted (invalid): composable, breaking changes (force)', async () => {
-    const { publish } = await prepare();
-    await publish({
-      sdl: /* GraphQL */ `
-        type Query {
-          topProductName: String
-        }
-      `,
-      serviceName: 'products',
-      serviceUrl: 'http://products:3000/graphql',
-      expect: 'latest-composable',
-    });
-
-    await publish({
-      sdl: /* GraphQL */ `
-        type Query {
-          nooooo: String
-        }
-      `,
-      serviceName: 'products',
-      serviceUrl: 'http://products:3000/graphql',
-      force: true,
-      expect: 'latest',
-    });
-  });
-
-  test.concurrent('accepted: composable, breaking changes (acceptBreakingChanges)', async () => {
+  test.concurrent('accepted: composable, breaking changes', async () => {
     const { publish } = await prepare();
     await publish({
       sdl: /* GraphQL */ `
@@ -90,7 +35,6 @@ describe('publish', () => {
       serviceName: 'products',
       serviceUrl: 'http://products:3000/graphql',
       expect: 'latest-composable',
-      acceptBreakingChanges: true,
     });
   });
 
@@ -101,28 +45,22 @@ describe('publish', () => {
     await publish({
       sdl: /* GraphQL */ `
         type Query {
-          product(id: ID!): Product
-        }
-        type Product @key(fields: "it") {
-          id: ID!
-          name: String
+          topProduct: Product
         }
       `,
       serviceName: 'products',
       serviceUrl: 'http://products:3000/graphql',
       expect: 'latest',
-      force: true,
     });
 
     // composable
     await publish({
       sdl: /* GraphQL */ `
         type Query {
-          product(id: ID!): Product
+          topProduct: Product
         }
-        type Product @key(fields: "id") {
+        type Product {
           id: ID!
-          name: String
         }
       `,
       serviceName: 'products',
@@ -131,48 +69,7 @@ describe('publish', () => {
     });
   });
 
-  test.concurrent(
-    'accepted: composable, previous version was not (acceptBreakingChanges)',
-    async () => {
-      const { publish } = await prepare();
-
-      // non-composable
-      await publish({
-        sdl: /* GraphQL */ `
-          type Query {
-            product(id: ID!): Product
-          }
-          type Product @key(fields: "it") {
-            id: ID!
-            name: String
-          }
-        `,
-        serviceName: 'products',
-        serviceUrl: 'http://products:3000/graphql',
-        expect: 'latest',
-        force: true,
-      });
-
-      // composable
-      await publish({
-        sdl: /* GraphQL */ `
-          type Query {
-            product(id: ID!): Product
-          }
-          type Product @key(fields: "id") {
-            id: ID!
-            name: String
-          }
-        `,
-        serviceName: 'products',
-        serviceUrl: 'http://products:3000/graphql',
-        expect: 'latest-composable',
-        acceptBreakingChanges: true,
-      });
-    },
-  );
-
-  test.concurrent('accepted (ignored): composable, no changes', async () => {
+  test.concurrent('accepted: composable, no changes', async () => {
     const { publish } = await prepare();
 
     // composable
@@ -291,38 +188,28 @@ describe('check', () => {
   test.concurrent('accepted: composable, previous version was not', async () => {
     const { publish, check } = await prepare();
 
-    // non-composable
     await publish({
       sdl: /* GraphQL */ `
         type Query {
-          product(id: ID!): Product
-        }
-        type Product @key(fields: "it") {
-          id: ID!
-          name: String
+          topProduct: Str
         }
       `,
       serviceName: 'products',
       serviceUrl: 'http://products:3000/graphql',
       expect: 'latest',
-      force: true,
     });
 
     const message = await check({
       sdl: /* GraphQL */ `
         type Query {
-          product(id: ID!): Product
-        }
-        type Product @key(fields: "id") {
-          id: ID!
-          name: String
+          topProduct: String
         }
       `,
       serviceName: 'products',
       expect: 'approved',
     });
 
-    expect(message).toMatch('No changes');
+    expect(message).toMatch('topProduct');
   });
 
   test.concurrent('accepted: no changes', async () => {
@@ -351,24 +238,12 @@ describe('check', () => {
   });
 
   test.concurrent('rejected: missing service name', async () => {
-    const { check, publish } = await prepare();
-
-    await publish({
-      sdl: /* GraphQL */ `
-        type Query {
-          topProduct: String
-        }
-      `,
-      serviceName: 'products',
-      serviceUrl: 'http://products:3000/graphql',
-      expect: 'latest-composable',
-    });
+    const { check } = await prepare();
 
     const message = await check({
       sdl: /* GraphQL */ `
         type Query {
           topProduct: String
-          product(id: ID!): String
         }
       `,
       expect: 'rejected',
@@ -410,11 +285,7 @@ describe('check', () => {
     await publish({
       sdl: /* GraphQL */ `
         type Query {
-          product(id: ID!): Product
-        }
-        type Product @key(fields: "id") {
-          id: ID!
-          name: String
+          topProduct: String
         }
       `,
       serviceName: 'products',
@@ -425,19 +296,15 @@ describe('check', () => {
     const message = await check({
       sdl: /* GraphQL */ `
         type Query {
-          product(id: ID!): Product
-          topProduct: Product
-        }
-        type Product @key(fields: "it") {
-          id: ID!
-          name: String
+          topProduct: String
+          topProductName: Strin
         }
       `,
       serviceName: 'products',
       expect: 'rejected',
     });
 
-    expect(message).toMatch('Product.it');
+    expect(message).toMatch('Strin');
   });
 
   test.concurrent('rejected: not composable, breaking changes', async () => {
@@ -446,8 +313,9 @@ describe('check', () => {
     await publish({
       sdl: /* GraphQL */ `
         type Query {
-          product(id: ID!): Product
+          topProduct: Product
         }
+
         type Product @key(fields: "id") {
           id: ID!
           name: String
@@ -463,8 +331,10 @@ describe('check', () => {
         type Query {
           product(id: ID!): Product
         }
+
         type Product @key(fields: "it") {
           id: ID!
+          name: String
         }
       `,
       serviceName: 'products',
@@ -472,7 +342,7 @@ describe('check', () => {
     });
 
     expect(message).toMatch('Product.it');
-    expect(message).toMatch('name');
+    expect(message).toMatch('topProduct');
   });
 });
 

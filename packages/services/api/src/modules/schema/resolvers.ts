@@ -137,7 +137,7 @@ export const resolvers: SchemaModule.Resolvers = {
         organization,
         project,
         target,
-      });
+      }) as any;
     },
     async updateBaseSchema(_, { input }, { injector }) {
       const UpdateBaseSchemaModel = z.object({
@@ -273,6 +273,19 @@ export const resolvers: SchemaModule.Resolvers = {
         organization,
         endpoint: input.endpoint,
         secret: input.secret,
+      });
+    },
+    async updateProjectRegistryModel(_, { input }, { injector }) {
+      const translator = injector.get(IdTranslator);
+      const [organization, project] = await Promise.all([
+        translator.translateOrganizationId(input),
+        translator.translateProjectId(input),
+      ]);
+
+      return injector.get(SchemaManager).updateRegistryModel({
+        project,
+        organization,
+        model: input.model,
       });
     },
   },
@@ -460,20 +473,46 @@ export const resolvers: SchemaModule.Resolvers = {
   },
   SchemaVersion: {
     commit(version, _, { injector }) {
-      return injector.get(SchemaManager).getCommit({
-        commit: version.commit,
-        organization: version.organization,
-        project: version.project,
-        target: version.target,
-      });
+      return injector
+        .get(SchemaManager)
+        .getCommit({
+          commit: version.commit,
+          organization: version.organization,
+          project: version.project,
+          target: version.target,
+        })
+        .then(commit => ({
+          id: commit.id,
+          author: commit.author,
+          date: commit.date as any,
+          source: commit.sdl,
+          commit: commit.commit,
+          metadata: commit.metadata,
+          service: 'service_name' in commit ? commit.service_name : null,
+          url: 'service_url' in commit ? commit.service_url : null,
+        }));
     },
     schemas(version, _, { injector }) {
-      return injector.get(SchemaManager).getCommits({
-        version: version.id,
-        organization: version.organization,
-        project: version.project,
-        target: version.target,
-      });
+      return injector
+        .get(SchemaManager)
+        .getCommits({
+          version: version.id,
+          organization: version.organization,
+          project: version.project,
+          target: version.target,
+        })
+        .then(schemas =>
+          schemas.map(s => ({
+            id: s.id,
+            author: s.author,
+            date: s.date as any,
+            source: s.sdl,
+            commit: s.commit,
+            metadata: s.metadata,
+            service: 'service_name' in s ? s.service_name : null,
+            url: 'service_url' in s ? s.service_url : null,
+          })),
+        );
     },
     async supergraph(version, _, { injector }) {
       const project = await injector.get(ProjectManager).getProject({
@@ -637,6 +676,9 @@ export const resolvers: SchemaModule.Resolvers = {
       }
 
       return null;
+    },
+    registryModel(project) {
+      return project.legacyRegistryModel ? 'LEGACY' : 'MODERN';
     },
   },
   SchemaExplorer: {

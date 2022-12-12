@@ -1,6 +1,7 @@
 import { Injectable, Scope } from 'graphql-modules';
 import lodash from 'lodash';
 import { z } from 'zod';
+import { RegistryModel } from '../../../__generated__/types';
 import { Orchestrator, ProjectType } from '../../../shared/entities';
 import { HiveError } from '../../../shared/errors';
 import { atomic, stringifySelector } from '../../../shared/helpers';
@@ -292,6 +293,8 @@ export class SchemaManager {
       service = service.toLowerCase();
     }
 
+    // TODO: turn it into a single transaction
+
     // insert new schema
     const insertedSchema = await this.insertSchema({
       organization,
@@ -313,7 +316,6 @@ export class SchemaManager {
       target,
       commit: insertedSchema.id,
       commits: commits.concat(insertedSchema.id),
-      url,
       base_schema: input.base_schema,
     });
   }
@@ -374,58 +376,59 @@ export class SchemaManager {
   }
 
   async updateServiceName(
-    input: TargetSelector & {
+    _input: TargetSelector & {
       version: string;
       name: string;
       newName: string;
       projectType: ProjectType;
     },
   ) {
-    this.logger.debug('Updating service name (input=%o)', input);
-    await this.authManager.ensureTargetAccess({
-      ...input,
-      scope: TargetAccessScope.REGISTRY_WRITE,
-    });
+    throw new Error('Not implemented');
+    // this.logger.debug('Updating service name (input=%o)', input);
+    // await this.authManager.ensureTargetAccess({
+    //   ...input,
+    //   scope: TargetAccessScope.REGISTRY_WRITE,
+    // });
 
-    if (
-      input.projectType !== ProjectType.FEDERATION &&
-      input.projectType !== ProjectType.STITCHING
-    ) {
-      throw new HiveError(
-        `Project type "${input.projectType}" doesn't support service name updates`,
-      );
-    }
+    // if (
+    //   input.projectType !== ProjectType.FEDERATION &&
+    //   input.projectType !== ProjectType.STITCHING
+    // ) {
+    //   throw new HiveError(
+    //     `Project type "${input.projectType}" doesn't support service name updates`,
+    //   );
+    // }
 
-    const schemas = await this.storage.getSchemasOfVersion({
-      version: input.version,
-      target: input.target,
-      project: input.project,
-      organization: input.organization,
-    });
+    // const schemas = await this.storage.getSchemasOfVersion({
+    //   version: input.version,
+    //   target: input.target,
+    //   project: input.project,
+    //   organization: input.organization,
+    // });
 
-    const schema = schemas.find(s => s.service === input.name);
+    // const schema = schemas.find(s => s.service === input.name);
 
-    if (!schema) {
-      throw new HiveError(`Couldn't find service "${input.name}"`);
-    }
+    // if (!schema) {
+    //   throw new HiveError(`Couldn't find service "${input.name}"`);
+    // }
 
-    if (input.newName.trim().length === 0) {
-      throw new HiveError(`Service name can't be empty`);
-    }
+    // if (input.newName.trim().length === 0) {
+    //   throw new HiveError(`Service name can't be empty`);
+    // }
 
-    const duplicatedSchema = schemas.find(s => s.service === input.newName);
+    // const duplicatedSchema = schemas.find(s => s.service === input.newName);
 
-    if (duplicatedSchema) {
-      throw new HiveError(`Service "${input.newName}" already exists`);
-    }
+    // if (duplicatedSchema) {
+    //   throw new HiveError(`Service "${input.newName}" already exists`);
+    // }
 
-    await this.storage.updateServiceName({
-      organization: input.organization,
-      project: input.project,
-      target: input.target,
-      commit: schema.id,
-      name: input.newName,
-    });
+    // await this.storage.updateServiceName({
+    //   organization: input.organization,
+    //   project: input.project,
+    //   target: input.target,
+    //   commit: schema.id,
+    //   name: input.newName,
+    // });
   }
 
   completeGetStartedCheck(
@@ -492,6 +495,22 @@ export class SchemaManager {
       ok: {
         endpoint: input.endpoint,
       },
+    };
+  }
+
+  async updateRegistryModel(
+    input: ProjectSelector & {
+      model: RegistryModel;
+    },
+  ) {
+    this.logger.debug('Updating registry model (input=%o)', input);
+    await this.authManager.ensureProjectAccess({
+      ...input,
+      scope: ProjectAccessScope.SETTINGS,
+    });
+
+    return {
+      ok: this.storage.updateProjectRegistryModel(input),
     };
   }
 }

@@ -28,6 +28,7 @@ import type {
   UpdateProjectNameInput,
   UpdateTargetNameInput,
   UpdateTargetValidationSettingsInput,
+  UpdateProjectRegistryModelInput,
 } from './gql/graphql';
 import { execute } from './graphql';
 
@@ -326,6 +327,29 @@ export function renameProject(input: UpdateProjectNameInput, authToken: string) 
               cleanId
               name
             }
+          }
+          error {
+            message
+          }
+        }
+      }
+    `),
+    authToken,
+    variables: {
+      input,
+    },
+  });
+}
+
+export function updateRegistryModel(input: UpdateProjectRegistryModelInput, authToken: string) {
+  return execute({
+    document: gql(/* GraphQL */ `
+      mutation updateRegistryModel($input: UpdateProjectRegistryModelInput!) {
+        updateProjectRegistryModel(input: $input) {
+          ok {
+            id
+            cleanId
+            name
           }
           error {
             message
@@ -928,6 +952,7 @@ export async function fetchMetadataFromCDN(selector: TargetSelectorInput, token:
 
   const res = await fetch(cdn.url + '/metadata', {
     headers: {
+      Accept: 'application/json',
       'X-Hive-CDN-Key': cdn.token,
     },
   });

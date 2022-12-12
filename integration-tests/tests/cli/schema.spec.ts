@@ -28,7 +28,7 @@ test.concurrent('can publish and check a schema with target:registry:read access
   ).rejects.toThrowError(/breaking/i);
 });
 
-test.concurrent('publishing a breaking change results in invalid state', async () => {
+test.concurrent.skip('publishing a breaking change results in invalid state', async () => {
   const { createOrg } = await initSeed().createOwner();
   const { inviteAndJoinMember, createProject } = await createOrg();
   await inviteAndJoinMember();

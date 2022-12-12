@@ -6,7 +6,7 @@ import type { FastifyLoggerInstance } from '@hive/service-common';
 import { fetch } from '@whatwg-node/fetch';
 import retry from 'async-retry';
 import type { DocumentNode } from 'graphql';
-import { ASTNode, concatAST, parse, print, printSchema, visit } from 'graphql';
+import { ASTNode, buildASTSchema, concatAST, parse, print, printSchema, visit } from 'graphql';
 import { validateSDL } from 'graphql/validation/validate.js';
 import type { Redis as RedisInstance } from 'ioredis';
 import { z } from 'zod';
@@ -267,6 +267,14 @@ const createFederation: (
       }
 
       if (result.type === 'failure') {
+        // If `raw` SDL is present, it means that we were able to build a schema, but it still has composition errors
+        if (result.result.raw) {
+          return {
+            raw: result.result.raw,
+            source: emptySource,
+          };
+        }
+
         throw new Error(
           [
             `Schemas couldn't be merged:`,
@@ -359,11 +367,22 @@ const createStitching: (redis: RedisInstance, logger: FastifyLoggerInstance) => 
 };
 
 function validateStitchedSchema(doc: DocumentNode) {
-  const { allStitchingDirectivesTypeDefs } = stitchingDirectives();
+  const { allStitchingDirectivesTypeDefs, stitchingDirectivesValidator } = stitchingDirectives();
+  const fullDoc = concatAST([parse(allStitchingDirectivesTypeDefs), doc]);
+  const errors = validateSDL(fullDoc).map(toValidationError);
 
-  return validateSDL(concatAST([parse(allStitchingDirectivesTypeDefs), doc])).map(
-    toValidationError,
-  );
+  try {
+    stitchingDirectivesValidator(
+      buildASTSchema(fullDoc, {
+        assumeValid: false,
+        assumeValidSDL: false,
+      }),
+    );
+  } catch (error) {
+    errors.push(toValidationError(error));
+  }
+
+  return errors;
 }
 
 export function pickOrchestrator(
@@ -400,11 +419,15 @@ function createChecksum<TInput>(input: TInput, uniqueKey: string): string {
     .digest('hex');
 }
 
+function createActionKey(checksum: string): string {
+  return `schema-service:${checksum}`;
+}
+
 async function readAction<O>(
   checksum: string,
   redis: RedisInstance,
 ): Promise<ActionStarted | ActionCompleted<O> | null> {
-  const action = await redis.get(`schema-service:${checksum}`);
+  const action = await redis.get(createActionKey(checksum));
 
   if (action) {
     return JSON.parse(action);
@@ -418,7 +441,7 @@ async function startAction(
   redis: RedisInstance,
   logger: FastifyLoggerInstance,
 ): Promise<boolean> {
-  const key = `schema-service:${checksum}`;
+  const key = createActionKey(checksum);
   logger.debug('Starting action (checksum=%s)', checksum);
   // Set and lock + expire
   const inserted = await redis.setnx(key, JSON.stringify({ status: 'started' }));
@@ -440,7 +463,7 @@ async function completeAction<O>(
   redis: RedisInstance,
   logger: FastifyLoggerInstance,
 ): Promise<void> {
-  const key = `schema-service:${checksum}`;
+  const key = createActionKey(checksum);
   logger.debug('Completing action (checksum=%s)', checksum);
   await redis.setex(
     key,
@@ -458,7 +481,7 @@ async function removeAction(
   logger: FastifyLoggerInstance,
 ): Promise<void> {
   logger.debug('Removing action (checksum=%s)', checksum);
-  const key = `schema-service:${checksum}`;
+  const key = createActionKey(checksum);
   await redis.del(key);
 }
 

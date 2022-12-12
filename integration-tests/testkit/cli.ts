@@ -20,6 +20,36 @@ async function generateTmpFile(content: string, extension: string) {
   return filepath;
 }
 
+async function exec(cmd: string) {
+  const outout = await execaCommand(`${binPath} ${cmd}`, {
+    shell: true,
+    env: {
+      OCLIF_CLI_CUSTOM_PATH: cliDir,
+    },
+  });
+
+  if (outout.failed) {
+    throw new Error(outout.stderr);
+  }
+
+  return outout.stdout;
+}
+
+export async function schemaPublish(args: string[]) {
+  const registryAddress = await getServiceHost('server', 8082);
+  return await exec(
+    ['schema:publish', `--registry`, `http://${registryAddress}/graphql`, ...args].join(' '),
+  );
+}
+
+export async function schemaCheck(args: string[]) {
+  const registryAddress = await getServiceHost('server', 8082);
+
+  return await exec(
+    ['schema:check', `--registry`, `http://${registryAddress}/graphql`, ...args].join(' '),
+  );
+}
+
 export async function createCLI(token: string) {
   let publishCount = 0;
 
@@ -29,16 +59,16 @@ export async function createCLI(token: string) {
     serviceUrl,
     metadata,
     expect: expectedStatus,
-    force,
-    acceptBreakingChanges,
+    legacy_force,
+    legacy_acceptBreakingChanges,
   }: {
     sdl: string;
     commit?: string;
     serviceName?: string;
     serviceUrl?: string;
     metadata?: string;
-    force?: boolean;
-    acceptBreakingChanges?: boolean;
+    legacy_force?: boolean;
+    legacy_acceptBreakingChanges?: boolean;
     expect: 'latest' | 'latest-composable' | 'ignored' | 'rejected';
   }) {
     const publishName = ` #${++publishCount}`;
@@ -54,8 +84,8 @@ export async function createCLI(token: string) {
       ...(serviceName ? ['--service', serviceName] : []),
       ...(serviceUrl ? ['--url', serviceUrl] : []),
       ...(metadata ? ['--metadata', metadata] : []),
-      ...(force ? ['--force'] : []),
-      ...(acceptBreakingChanges ? ['--experimental_acceptBreakingChanges'] : []),
+      ...(legacy_force ? ['--force'] : []),
+      ...(legacy_acceptBreakingChanges ? ['--experimental_acceptBreakingChanges'] : []),
       await generateTmpFile(sdl, 'graphql'),
     ]);
 
@@ -79,11 +109,7 @@ export async function createCLI(token: string) {
     }
 
     // throw if the command fails
-    try {
-      await cmd;
-    } catch (error) {
-      throw new Error(`${publishName} failed: ${String(error)}`);
-    }
+    await cmd;
 
     const latestSchemaResult = await fetchLatestSchema(token).then(r => r.expectNoGraphQLErrors());
     const latestSchemaCommit = latestSchemaResult.latestVersion?.commit;
@@ -95,11 +121,12 @@ export async function createCLI(token: string) {
         `${publishName} was expected to be ignored but it was published`,
       ).not.toEqual(expectedCommit);
       return;
+    } else {
+      // Check if the schema was published
+      expect(latestSchemaCommit, `${publishName} was expected to be published`).toEqual(
+        expectedCommit,
+      );
     }
-    // Check if the schema was published
-    expect(latestSchemaCommit, `${publishName} was expected to be published`).toEqual(
-      expectedCommit,
-    );
 
     const latestComposableSchemaResult = await fetchLatestValidSchema(token).then(r =>
       r.expectNoGraphQLErrors(),
@@ -142,42 +169,13 @@ export async function createCLI(token: string) {
     if (expectedStatus === 'rejected') {
       await expect(cmd).rejects.toThrow();
       return cmd.catch(reason => Promise.resolve(reason.message));
+    } else {
+      return cmd;
     }
-    return cmd;
   }
 
   return {
     publish,
     check,
   };
-}
-
-async function exec(cmd: string) {
-  const outout = await execaCommand(`${binPath} ${cmd}`, {
-    shell: true,
-    env: {
-      OCLIF_CLI_CUSTOM_PATH: cliDir,
-    },
-  });
-
-  if (outout.failed) {
-    throw new Error(outout.stderr);
-  }
-
-  return outout.stdout;
-}
-
-export async function schemaPublish(args: string[]) {
-  const registryAddress = await getServiceHost('server', 8082);
-  return await exec(
-    ['schema:publish', `--registry`, `http://${registryAddress}/graphql`, ...args].join(' '),
-  );
-}
-
-export async function schemaCheck(args: string[]) {
-  const registryAddress = await getServiceHost('server', 8082);
-
-  return await exec(
-    ['schema:check', `--registry`, `http://${registryAddress}/graphql`, ...args].join(' '),
-  );
 }

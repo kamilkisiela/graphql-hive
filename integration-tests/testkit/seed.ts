@@ -2,6 +2,7 @@ import {
   OrganizationAccessScope,
   ProjectAccessScope,
   ProjectType,
+  RegistryModel,
   TargetAccessScope,
 } from '@app/gql/graphql';
 import { authenticate, userEmail } from './auth';
@@ -30,6 +31,7 @@ import {
   updateBaseSchema,
   updateMemberAccess,
   updateSchemaVersionStatus,
+  updateRegistryModel,
 } from './flow';
 import { collect, CollectedOperation } from './usage';
 import { generateUnique } from './utils';
@@ -91,7 +93,13 @@ export function initSeed() {
 
               return members;
             },
-            async createProject(projectType: ProjectType) {
+            async createProject(
+              projectType: ProjectType,
+              options?: {
+                useLegacyRegistryModels?: boolean;
+              },
+            ) {
+              const useLegacyRegistryModels = options?.useLegacyRegistryModels === true;
               const projectResult = await createProject(
                 {
                   organization: organization.cleanId,
@@ -104,6 +112,17 @@ export function initSeed() {
               const targets = projectResult.createProject.ok!.createdTargets;
               const target = targets[0];
               const project = projectResult.createProject.ok!.createdProject;
+
+              if (useLegacyRegistryModels) {
+                await updateRegistryModel(
+                  {
+                    organization: organization.cleanId,
+                    project: projectResult.createProject.ok!.createdProject.cleanId,
+                    model: RegistryModel.Legacy,
+                  },
+                  ownerToken,
+                ).then(r => r.expectNoGraphQLErrors());
+              }
 
               return {
                 project,

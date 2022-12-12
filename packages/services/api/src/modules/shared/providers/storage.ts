@@ -1,5 +1,9 @@
 import { Injectable } from 'graphql-modules';
-import type { AddAlertChannelInput, AddAlertInput } from '../../../__generated__/types';
+import type {
+  AddAlertChannelInput,
+  AddAlertInput,
+  RegistryModel,
+} from '../../../__generated__/types';
 import type {
   ActivityObject,
   Alert,
@@ -208,6 +212,11 @@ export interface Storage {
     },
   ): Promise<Project>;
   disableExternalSchemaComposition(_: ProjectSelector): Promise<Project>;
+  updateProjectRegistryModel(
+    _: ProjectSelector & {
+      model: RegistryModel;
+    },
+  ): Promise<Project>;
 
   getTargetId(_: TargetSelector & { useIds?: boolean }): Promise<string | never>;
   getTargetByCleanId(

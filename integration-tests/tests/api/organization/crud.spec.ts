@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { renameOrganization } from '../../../testkit/flow';
 import { initSeed } from '../../../testkit/seed';
 
@@ -5,10 +6,12 @@ test.concurrent('renaming an organization should result changing its cleanId', a
   const { ownerToken, createOrg } = await initSeed().createOwner();
   const { organization } = await createOrg();
 
+  const name = randomUUID();
+  const partialCleanId = name.split('-')[0];
   const renamedOrganizationResult = await renameOrganization(
     {
       organization: organization.cleanId,
-      name: 'bar',
+      name: name,
     },
     ownerToken,
   ).then(r => r.expectNoGraphQLErrors());
@@ -17,13 +20,13 @@ test.concurrent('renaming an organization should result changing its cleanId', a
   expect(
     renamedOrganizationResult.updateOrganizationName.ok?.updatedOrganizationPayload.organization
       .name,
-  ).toBe('bar');
+  ).toBe(name);
   expect(
     renamedOrganizationResult.updateOrganizationName.ok?.updatedOrganizationPayload.organization
       .cleanId,
-  ).toBe('bar');
+  ).toEqual(expect.stringContaining(partialCleanId));
   expect(
     renamedOrganizationResult.updateOrganizationName.ok?.updatedOrganizationPayload.selector
       .organization,
-  ).toBe('bar');
+  ).toEqual(expect.stringContaining(partialCleanId));
 });
