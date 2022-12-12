@@ -23,6 +23,7 @@ const composeFederation = compose(services => {
         result: {
           errors: result.errors.map(error => ({
             message: error.message,
+            source: typeof error.extensions?.code === 'string' ? 'composition' : 'graphql',
           })),
         },
       };
@@ -31,7 +32,12 @@ const composeFederation = compose(services => {
       return {
         type: 'failure',
         result: {
-          errors: [{ message: 'supergraphSdl not defined' }],
+          errors: [
+            {
+              message: 'supergraphSdl not defined',
+              source: 'graphql',
+            },
+          ],
         },
       };
     }
@@ -50,6 +56,7 @@ const composeFederation = compose(services => {
         errors: [
           {
             message: (e as Error).message,
+            source: 'graphql',
           },
         ],
       },

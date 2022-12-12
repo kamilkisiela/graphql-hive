@@ -7,7 +7,7 @@ Hive against the respective target.
 
 ## Requirements
 
-- An active [token](./tokens)
+- An active [token](./tokens) with "Read & Write" permissions to the Registry.
 
 ## Using Hive CLI
 
@@ -46,14 +46,9 @@ hive schema:publish schema.graphql
 # or
 hive schema:publish "src/*.graphql"
 
-# Federation or Stitching
-hive schema:publish --service reviews schema.graphql
-
-# If you need service endpoint details (Federation/Stitching), add --url:
+# Federation/Stitching
 hive schema:publish --service reviews --url http://my-service.com/graphql schema.graphql
 ```
-
-<Callout>To force publishing a schema, enable `--force` flag.</Callout>
 
 Once the schema is published, you should be able to see it in:
 `http://app.graphql-hive.com/<your-org>/<your-project>/<your-target>`.

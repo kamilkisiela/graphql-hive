@@ -1,6 +1,7 @@
 import { Injectable, Scope } from 'graphql-modules';
 import lodash from 'lodash';
 import { z } from 'zod';
+import { RegistryModel } from '../../../__generated__/types';
 import { Orchestrator, ProjectType } from '../../../shared/entities';
 import { HiveError } from '../../../shared/errors';
 import { atomic, stringifySelector } from '../../../shared/helpers';
@@ -16,7 +17,6 @@ import {
   Storage,
   TargetSelector,
 } from '../../shared/providers/storage';
-import { CustomOrchestrator } from './orchestrators/custom';
 import { FederationOrchestrator } from './orchestrators/federation';
 import { SingleOrchestrator } from './orchestrators/single';
 import { StitchingOrchestrator } from './orchestrators/stitching';
@@ -25,10 +25,6 @@ const ENABLE_EXTERNAL_COMPOSITION_SCHEMA = z.object({
   endpoint: z.string().url().nonempty(),
   secret: z.string().nonempty(),
 });
-
-interface VersionSelector extends TargetSelector {
-  version: string;
-}
 
 type Paginated<T> = T & {
   after?: string | null;
@@ -53,7 +49,6 @@ export class SchemaManager {
     private singleOrchestrator: SingleOrchestrator,
     private stitchingOrchestrator: StitchingOrchestrator,
     private federationOrchestrator: FederationOrchestrator,
-    private customOrchestrator: CustomOrchestrator,
     private crypto: CryptoProvider,
   ) {
     this.logger = logger.child({ source: 'SchemaManager' });
@@ -68,6 +63,7 @@ export class SchemaManager {
     return this.storage.hasSchema(selector);
   }
 
+  @atomic(stringifySelector)
   async getSchemasOfVersion(
     selector: {
       version: string;
@@ -218,49 +214,33 @@ export class SchemaManager {
       scope: TargetAccessScope.REGISTRY_WRITE,
     });
 
-    return {
-      ...(await this.storage.updateVersionStatus(input)),
+    const project = await this.storage.getProject({
       organization: input.organization,
       project: input.project,
-      target: input.target,
-    };
-  }
-
-  async updateSchemaUrl(
-    input: TargetSelector & {
-      version: string;
-      commit: string;
-      url?: string | null;
-    },
-  ) {
-    this.logger.debug('Updating schema version status (input=%o)', input);
-    await this.authManager.ensureTargetAccess({
-      ...input,
-      scope: TargetAccessScope.REGISTRY_WRITE,
     });
-    await this.storage.updateSchemaUrlOfVersion(input);
+
+    if (project.legacyRegistryModel) {
+      return {
+        ...(await this.storage.updateVersionStatus(input)),
+        organization: input.organization,
+        project: input.project,
+        target: input.target,
+      };
+    }
+
+    throw new HiveError(`Updating the status is supported only by legacy projects`);
   }
 
-  async getCommit(selector: { commit: string } & TargetSelector) {
-    this.logger.debug('Fetching schema (selector=%o)', selector);
+  async getSchemaLog(selector: { commit: string } & TargetSelector) {
+    this.logger.debug('Fetching schema log (selector=%o)', selector);
     await this.authManager.ensureTargetAccess({
       ...selector,
       scope: TargetAccessScope.REGISTRY_READ,
     });
-    return this.storage.getSchema({
+    return this.storage.getSchemaLog({
       commit: selector.commit,
       target: selector.target,
     });
-  }
-
-  @atomic(stringifySelector)
-  async getCommits(selector: VersionSelector) {
-    this.logger.debug('Fetching schemas (selector=%o)', selector);
-    await this.authManager.ensureTargetAccess({
-      ...selector,
-      scope: TargetAccessScope.REGISTRY_READ,
-    });
-    return this.storage.getSchemasOfVersion(selector);
   }
 
   async createVersion(
@@ -274,12 +254,24 @@ export class SchemaManager {
       url?: string | null;
       base_schema: string | null;
       metadata: string | null;
+      projectType: ProjectType;
     } & TargetSelector,
   ) {
     this.logger.info('Creating a new version (input=%o)', lodash.omit(input, ['schema']));
-    const { valid, project, organization, target, commit, schema, author, commits, url, metadata } =
-      input;
-    let service = input.service;
+    const {
+      valid,
+      project,
+      organization,
+      target,
+      commit,
+      schema,
+      author,
+      commits,
+      url,
+      metadata,
+      projectType,
+    } = input;
+    const service = input.service;
 
     await this.authManager.ensureTargetAccess({
       project,
@@ -287,10 +279,6 @@ export class SchemaManager {
       target,
       scope: TargetAccessScope.REGISTRY_WRITE,
     });
-
-    if (service) {
-      service = service.toLowerCase();
-    }
 
     // insert new schema
     const insertedSchema = await this.insertSchema({
@@ -303,6 +291,7 @@ export class SchemaManager {
       author,
       url,
       metadata,
+      projectType,
     });
 
     // finally create a version
@@ -313,7 +302,6 @@ export class SchemaManager {
       target,
       commit: insertedSchema.id,
       commits: commits.concat(insertedSchema.id),
-      url,
       base_schema: input.base_schema,
     });
   }
@@ -329,9 +317,6 @@ export class SchemaManager {
       case ProjectType.FEDERATION: {
         return this.federationOrchestrator;
       }
-      case ProjectType.CUSTOM: {
-        return this.customOrchestrator;
-      }
       default: {
         throw new HiveError(`Couldn't find an orchestrator for project type "${projectType}"`);
       }
@@ -346,6 +331,7 @@ export class SchemaManager {
       service?: string | null;
       url?: string | null;
       metadata: string | null;
+      projectType: ProjectType;
     } & TargetSelector,
   ) {
     this.logger.info('Inserting schema (input=%o)', lodash.omit(input, ['schema']));
@@ -371,61 +357,6 @@ export class SchemaManager {
       scope: TargetAccessScope.REGISTRY_READ,
     });
     await this.storage.updateBaseSchema(selector, newBaseSchema);
-  }
-
-  async updateServiceName(
-    input: TargetSelector & {
-      version: string;
-      name: string;
-      newName: string;
-      projectType: ProjectType;
-    },
-  ) {
-    this.logger.debug('Updating service name (input=%o)', input);
-    await this.authManager.ensureTargetAccess({
-      ...input,
-      scope: TargetAccessScope.REGISTRY_WRITE,
-    });
-
-    if (
-      input.projectType !== ProjectType.FEDERATION &&
-      input.projectType !== ProjectType.STITCHING
-    ) {
-      throw new HiveError(
-        `Project type "${input.projectType}" doesn't support service name updates`,
-      );
-    }
-
-    const schemas = await this.storage.getSchemasOfVersion({
-      version: input.version,
-      target: input.target,
-      project: input.project,
-      organization: input.organization,
-    });
-
-    const schema = schemas.find(s => s.service === input.name);
-
-    if (!schema) {
-      throw new HiveError(`Couldn't find service "${input.name}"`);
-    }
-
-    if (input.newName.trim().length === 0) {
-      throw new HiveError(`Service name can't be empty`);
-    }
-
-    const duplicatedSchema = schemas.find(s => s.service === input.newName);
-
-    if (duplicatedSchema) {
-      throw new HiveError(`Service "${input.newName}" already exists`);
-    }
-
-    await this.storage.updateServiceName({
-      organization: input.organization,
-      project: input.project,
-      target: input.target,
-      commit: schema.id,
-      name: input.newName,
-    });
   }
 
   completeGetStartedCheck(
@@ -492,6 +423,22 @@ export class SchemaManager {
       ok: {
         endpoint: input.endpoint,
       },
+    };
+  }
+
+  async updateRegistryModel(
+    input: ProjectSelector & {
+      model: RegistryModel;
+    },
+  ) {
+    this.logger.debug('Updating registry model (input=%o)', input);
+    await this.authManager.ensureProjectAccess({
+      ...input,
+      scope: ProjectAccessScope.SETTINGS,
+    });
+
+    return {
+      ok: this.storage.updateProjectRegistryModel(input),
     };
   }
 }

@@ -11,6 +11,7 @@ export type alert_channel_type = "SLACK" | "WEBHOOK";
 export type alert_type = "SCHEMA_CHANGE_NOTIFICATIONS";
 export type operation_kind = "mutation" | "query" | "subscription";
 export type organization_type = "PERSONAL" | "REGULAR";
+export type schema_registry_action = "DELETE" | "PUSH";
 export type user_role = "ADMIN" | "MEMBER";
 
 export interface activities {
@@ -147,10 +148,39 @@ export interface projects {
   external_composition_secret: string | null;
   git_repository: string | null;
   id: string;
+  legacy_registry_model: boolean;
   name: string;
   org_id: string;
   type: string;
   validation_url: string | null;
+}
+
+export interface schema_log {
+  action: schema_registry_action;
+  author: string;
+  commit: string;
+  created_at: Date;
+  id: string;
+  metadata: string | null;
+  project_id: string;
+  sdl: string | null;
+  service_name: string | null;
+  service_url: string | null;
+  target_id: string;
+}
+
+export interface schema_version_to_log {
+  action_id: string;
+  version_id: string;
+}
+
+export interface schema_versions {
+  action_id: string;
+  base_schema: string | null;
+  created_at: Date;
+  id: string;
+  is_composable: boolean;
+  target_id: string;
 }
 
 export interface target_validation {

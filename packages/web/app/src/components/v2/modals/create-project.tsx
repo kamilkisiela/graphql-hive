@@ -58,36 +58,16 @@ export const CreateProjectModal = ({
     initialValues: {
       name: '',
       type: '' as ProjectType,
-      validationUrl: '',
-      buildUrl: '',
     },
     validationSchema: Yup.object().shape({
       name: Yup.string().required('Project name is required'),
       type: Yup.mixed().oneOf(Object.values(ProjectType)).required('Project type is required'),
-      validationUrl: Yup.string()
-        .url()
-        .when('type', {
-          is: ProjectType.Custom,
-          then: Yup.string().required('Validation url is required'),
-        }),
-      buildUrl: Yup.string()
-        .url()
-        .when('type', {
-          is: ProjectType.Custom,
-          then: Yup.string().required('Build url is required'),
-        }),
     }),
     async onSubmit(values) {
       const { data } = await mutate({
         input: {
           organization: router.organizationId,
           ...values,
-          ...(values.type === ProjectType.Custom
-            ? {}
-            : {
-                buildUrl: null,
-                validationUrl: null,
-              }),
         },
       });
       if (data?.createProject.ok) {
@@ -136,65 +116,6 @@ export const CreateProjectModal = ({
           <ProjectTypes value={values.type} onValueChange={type => setFieldValue('type', type)} />
           {touched.type && errors.type && <div className="text-sm text-red-500">{errors.type}</div>}
         </div>
-
-        {values.type === ProjectType.Custom && (
-          <>
-            <div className="flex flex-col gap-4">
-              <label className="text-sm font-semibold" htmlFor="validationUrl">
-                Validation endpoint
-              </label>
-              <Input
-                placeholder="Where validation should happen"
-                name="validationUrl"
-                value={values.validationUrl}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                disabled={isSubmitting}
-                isInvalid={touched.validationUrl && !!errors.validationUrl}
-                className="grow"
-              />
-              {touched.validationUrl && errors.validationUrl && (
-                <div className="text-sm text-red-500">{errors.validationUrl}</div>
-              )}
-              {mutation.data?.createProject.error?.inputErrors.validationUrl && (
-                <div className="text-sm text-red-500">
-                  {mutation.data?.createProject.error.inputErrors.validationUrl}
-                </div>
-              )}
-              <p className="text-sm text-gray-500">
-                In Custom mode, Hive will ask you to validate GraphQL Schemas.
-                <br />A POST request containing schemas will be made to the endpoint above.
-              </p>
-            </div>
-            <div className="flex flex-col gap-4">
-              <label className="text-sm font-semibold" htmlFor="buildUrl">
-                Schema building endpoint
-              </label>
-              <Input
-                placeholder="Where building should happen"
-                name="buildUrl"
-                value={values.buildUrl}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                disabled={isSubmitting}
-                isInvalid={touched.buildUrl && !!errors.buildUrl}
-                className="grow"
-              />
-              {touched.buildUrl && errors.buildUrl && (
-                <div className="text-sm text-red-500">{errors.buildUrl}</div>
-              )}
-              {mutation.data?.createProject.error?.inputErrors.buildUrl && (
-                <div className="text-sm text-red-500">
-                  {mutation.data?.createProject.error.inputErrors.buildUrl}
-                </div>
-              )}
-              <p className="text-sm text-gray-500">
-                In Custom mode, Hive will ask you to validate GraphQL Schemas.
-                <br />A POST request containing schemas will be made to the endpoint above.
-              </p>
-            </div>
-          </>
-        )}
 
         {mutation.error && <div className="text-sm text-red-500">{mutation.error.message}</div>}
         {mutation.data?.createProject.error && (

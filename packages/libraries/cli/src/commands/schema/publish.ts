@@ -40,10 +40,17 @@ export default class SchemaPublish extends Command {
     force: Flags.boolean({
       description: 'force publish even on breaking changes',
       default: false,
+      deprecated: {
+        message: '--force is enabled by default for newly created projects',
+      },
     }),
     experimental_acceptBreakingChanges: Flags.boolean({
       description:
         '(experimental) accept breaking changes and mark schema as valid (only if composable)',
+      deprecated: {
+        message:
+          '--experimental_acceptBreakingChanges is enabled by default for newly created projects',
+      },
     }),
     require: Flags.string({
       description:

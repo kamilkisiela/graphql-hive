@@ -41,6 +41,7 @@ export interface CompositionFailure {
   result: {
     errors: Array<{
       message: string;
+      source: 'graphql' | 'composition';
     }>;
   };
 }

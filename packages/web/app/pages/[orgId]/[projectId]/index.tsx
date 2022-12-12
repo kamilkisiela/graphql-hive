@@ -43,7 +43,7 @@ const TargetCard = ({
   });
   const versions = versionsQuery.data?.schemaVersions;
   const lastVersion = versions?.nodes[0];
-  const author = lastVersion?.commit.author;
+  const author = lastVersion?.log && 'author' in lastVersion.log ? lastVersion.log.author : null;
   const isValid = lastVersion?.valid;
   const href = `/${router.organizationId}/${router.projectId}/${target.cleanId}`;
 
@@ -86,7 +86,9 @@ const TargetCard = ({
             {lastVersion ? (
               <>
                 <Badge color={isValid ? 'green' : 'red'} />
-                <span>{lastVersion.commit.commit.substring(0, 7)}</span>
+                <span>
+                  {'commit' in lastVersion.log ? lastVersion.log.commit.substring(0, 7) : ''}
+                </span>
                 <span>
                   - Published <TimeAgo date={lastVersion.date} />
                 </span>

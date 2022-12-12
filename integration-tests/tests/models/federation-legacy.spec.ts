@@ -1,19 +1,75 @@
-import { ProjectType } from '@app/gql/graphql';
-import { createCLI } from '../../testkit/cli';
+import { ProjectType, RegistryModel } from '@app/gql/graphql';
+import { createCLI, schemaPublish } from '../../testkit/cli';
 import { prepareProject } from '../../testkit/registry-models';
+import { initSeed } from '../../testkit/seed';
 
 describe('publish', () => {
   test.concurrent('accepted: composable', async () => {
     const { publish } = await prepare();
     await publish({
-      sdl: `type Query { topProductName: String }`,
+      sdl: /* GraphQL */ `
+        type Query {
+          topProductName: String
+        }
+      `,
       serviceName: 'products',
       serviceUrl: 'http://products:3000/graphql',
       expect: 'latest-composable',
     });
   });
 
-  test.concurrent('accepted: composable, breaking changes', async () => {
+  test.concurrent('rejected: composable, breaking changes', async () => {
+    const { publish } = await prepare();
+    await publish({
+      sdl: /* GraphQL */ `
+        type Query {
+          topProductName: String
+        }
+      `,
+      serviceName: 'products',
+      serviceUrl: 'http://products:3000/graphql',
+      expect: 'latest-composable',
+    });
+
+    await publish({
+      sdl: /* GraphQL */ `
+        type Query {
+          nooooo: String
+        }
+      `,
+      serviceName: 'products',
+      serviceUrl: 'http://products:3000/graphql',
+      expect: 'rejected',
+    });
+  });
+
+  test.concurrent('accepted (invalid): composable, breaking changes (force)', async () => {
+    const { publish } = await prepare();
+    await publish({
+      sdl: /* GraphQL */ `
+        type Query {
+          topProductName: String
+        }
+      `,
+      serviceName: 'products',
+      serviceUrl: 'http://products:3000/graphql',
+      expect: 'latest-composable',
+    });
+
+    await publish({
+      sdl: /* GraphQL */ `
+        type Query {
+          nooooo: String
+        }
+      `,
+      serviceName: 'products',
+      serviceUrl: 'http://products:3000/graphql',
+      legacy_force: true,
+      expect: 'latest',
+    });
+  });
+
+  test.concurrent('accepted: composable, breaking changes (acceptBreakingChanges)', async () => {
     const { publish } = await prepare();
     await publish({
       sdl: /* GraphQL */ `
@@ -35,20 +91,7 @@ describe('publish', () => {
       serviceName: 'products',
       serviceUrl: 'http://products:3000/graphql',
       expect: 'latest-composable',
-    });
-  });
-
-  test.concurrent('rejected: not composable (build errors)', async () => {
-    const { publish } = await prepare();
-    await publish({
-      sdl: /* GraphQL */ `
-        type Query {
-          topProductName: UnknownType
-        }
-      `,
-      serviceName: 'products',
-      serviceUrl: 'http://products:3000/graphql',
-      expect: 'rejected',
+      legacy_acceptBreakingChanges: true,
     });
   });
 
@@ -61,8 +104,7 @@ describe('publish', () => {
         type Query {
           product(id: ID!): Product
         }
-
-        type Product @key(selectionSet: "{ id") {
+        type Product @key(fields: "it") {
           id: ID!
           name: String
         }
@@ -70,6 +112,7 @@ describe('publish', () => {
       serviceName: 'products',
       serviceUrl: 'http://products:3000/graphql',
       expect: 'latest',
+      legacy_force: true,
     });
 
     // composable
@@ -78,8 +121,7 @@ describe('publish', () => {
         type Query {
           product(id: ID!): Product
         }
-
-        type Product @key(selectionSet: "{ id }") {
+        type Product @key(fields: "id") {
           id: ID!
           name: String
         }
@@ -90,7 +132,48 @@ describe('publish', () => {
     });
   });
 
-  test.concurrent('accepted: composable, no changes', async () => {
+  test.concurrent(
+    'accepted: composable, previous version was not (acceptBreakingChanges)',
+    async () => {
+      const { publish } = await prepare();
+
+      // non-composable
+      await publish({
+        sdl: /* GraphQL */ `
+          type Query {
+            product(id: ID!): Product
+          }
+          type Product @key(fields: "it") {
+            id: ID!
+            name: String
+          }
+        `,
+        serviceName: 'products',
+        serviceUrl: 'http://products:3000/graphql',
+        expect: 'latest',
+        legacy_force: true,
+      });
+
+      // composable
+      await publish({
+        sdl: /* GraphQL */ `
+          type Query {
+            product(id: ID!): Product
+          }
+          type Product @key(fields: "id") {
+            id: ID!
+            name: String
+          }
+        `,
+        serviceName: 'products',
+        serviceUrl: 'http://products:3000/graphql',
+        expect: 'latest-composable',
+        legacy_acceptBreakingChanges: true,
+      });
+    },
+  );
+
+  test.concurrent('accepted (ignored): composable, no changes', async () => {
     const { publish } = await prepare();
 
     // composable
@@ -209,13 +292,13 @@ describe('check', () => {
   test.concurrent('accepted: composable, previous version was not', async () => {
     const { publish, check } = await prepare();
 
+    // non-composable
     await publish({
       sdl: /* GraphQL */ `
         type Query {
           product(id: ID!): Product
         }
-
-        type Product @key(selectionSet: "{ id") {
+        type Product @key(fields: "it") {
           id: ID!
           name: String
         }
@@ -223,6 +306,7 @@ describe('check', () => {
       serviceName: 'products',
       serviceUrl: 'http://products:3000/graphql',
       expect: 'latest',
+      legacy_force: true,
     });
 
     const message = await check({
@@ -230,8 +314,7 @@ describe('check', () => {
         type Query {
           product(id: ID!): Product
         }
-
-        type Product @key(selectionSet: "{ id }") {
+        type Product @key(fields: "id") {
           id: ID!
           name: String
         }
@@ -269,12 +352,24 @@ describe('check', () => {
   });
 
   test.concurrent('rejected: missing service name', async () => {
-    const { check } = await prepare();
+    const { check, publish } = await prepare();
+
+    await publish({
+      sdl: /* GraphQL */ `
+        type Query {
+          topProduct: String
+        }
+      `,
+      serviceName: 'products',
+      serviceUrl: 'http://products:3000/graphql',
+      expect: 'latest-composable',
+    });
 
     const message = await check({
       sdl: /* GraphQL */ `
         type Query {
           topProduct: String
+          product(id: ID!): String
         }
       `,
       expect: 'rejected',
@@ -316,7 +411,11 @@ describe('check', () => {
     await publish({
       sdl: /* GraphQL */ `
         type Query {
-          topProduct: String
+          product(id: ID!): Product
+        }
+        type Product @key(fields: "id") {
+          id: ID!
+          name: String
         }
       `,
       serviceName: 'products',
@@ -327,15 +426,19 @@ describe('check', () => {
     const message = await check({
       sdl: /* GraphQL */ `
         type Query {
-          topProduct: String
-          topProductName: Strin
+          product(id: ID!): Product
+          topProduct: Product
+        }
+        type Product @key(fields: "it") {
+          id: ID!
+          name: String
         }
       `,
       serviceName: 'products',
       expect: 'rejected',
     });
 
-    expect(message).toMatch('Str');
+    expect(message).toMatch('Product.it');
   });
 
   test.concurrent('rejected: not composable, breaking changes', async () => {
@@ -344,10 +447,9 @@ describe('check', () => {
     await publish({
       sdl: /* GraphQL */ `
         type Query {
-          topProduct: Product
+          product(id: ID!): Product
         }
-
-        type Product @key(selectionSet: "{ id }") {
+        type Product @key(fields: "id") {
           id: ID!
           name: String
         }
@@ -362,18 +464,16 @@ describe('check', () => {
         type Query {
           product(id: ID!): Product
         }
-
-        type Product @key(selectionSet: "{ id") {
+        type Product @key(fields: "it") {
           id: ID!
-          name: String
         }
       `,
       serviceName: 'products',
       expect: 'rejected',
     });
 
-    expect(message).toMatch('topProduct');
-    expect(message).toMatch('Expected Name');
+    expect(message).toMatch('Product.it');
+    expect(message).toMatch('name');
   });
 });
 
@@ -387,7 +487,7 @@ describe('delete', () => {
           topProduct: Product
         }
 
-        type Product @key(selectionSet: "{ id }") {
+        type Product @key(fields: "id") {
           id: ID!
           name: String
         }
@@ -403,7 +503,7 @@ describe('delete', () => {
           topReview: Review
         }
 
-        type Review @key(selectionSet: "{ id }") {
+        type Review @key(fields: "id") {
           id: ID!
           title: String
         }
@@ -430,7 +530,7 @@ describe('delete', () => {
           topProduct: Product
         }
 
-        type Product @key(selectionSet: "{ id }") {
+        type Product @key(fields: "id") {
           id: ID!
           name: String
         }
@@ -450,103 +550,35 @@ describe('delete', () => {
 });
 
 describe('other', () => {
-  test.concurrent(
-    'publish new schema when a field is moved from one service to another',
-    async () => {
-      const { tokens, fetchVersions } = await prepareProject(ProjectType.Stitching);
+  test.concurrent('service url should be available in supergraph', async () => {
+    const { createOrg } = await initSeed().createOwner();
+    const { inviteAndJoinMember, createProject } = await createOrg();
+    await inviteAndJoinMember();
+    const { createToken } = await createProject(ProjectType.Federation, {
+      useLegacyRegistryModels: true,
+    });
+    const { secret, fetchSupergraph } = await createToken({});
 
-      const { publish } = await createCLI(tokens.registry);
+    await schemaPublish([
+      '--token',
+      secret,
+      '--author',
+      'Kamil',
+      '--commit',
+      'abc123',
+      '--service',
+      'users',
+      '--url',
+      'https://api.com/users-subgraph',
+      'fixtures/federation-init.graphql',
+    ]);
 
-      // cats service has only one field
-      await publish({
-        sdl: /* GraphQL */ `
-          type Query {
-            randomCat: String
-          }
-        `,
-        serviceName: 'cats',
-        serviceUrl: 'http://cats.com/graphql',
-        expect: 'latest-composable',
-      });
-
-      // dogs service has two fields
-      await publish({
-        sdl: /* GraphQL */ `
-          type Query {
-            randomDog: String
-            randomAnimal: String
-          }
-        `,
-        serviceName: 'dogs',
-        serviceUrl: 'http://dogs.com/graphql',
-        expect: 'latest-composable',
-      });
-
-      // cats service has now two fields, randomAnimal is borrowed from dogs service
-      await publish({
-        sdl: /* GraphQL */ `
-          type Query {
-            randomCat: String
-            randomAnimal: String
-          }
-        `,
-        serviceName: 'cats',
-        serviceUrl: 'http://cats.com/graphql',
-        expect: 'latest-composable', // We expect to have a new version, even tough the schema (merged) is the same
-      });
-
-      const versionsResult = await fetchVersions(3);
-      expect(versionsResult).toHaveLength(3);
-    },
-  );
-
-  test.concurrent(
-    'ignore stitching directive validation if the service overrides the stitching directive',
-    async () => {
-      const [spec, custom] = await Promise.all([prepare(), prepare()]);
-
-      // Make sure validation works by publishing a schema
-      // with a stitching directive with incomplete selectionSet argument
-      await spec.publish({
-        sdl: /* GraphQL */ `
-          type Query {
-            topProduct: Product
-          }
-
-          type Product @key(selectionSet: "{ id ") {
-            id: ID!
-            name: String
-          }
-        `,
-        serviceName: 'products',
-        serviceUrl: 'http://products:3000/graphql',
-        expect: 'latest', // it's not composable because of the invalid selectionSet
-      });
-
-      // Stitching directive with incomplete selectionSet argument but a definition of @key
-      await custom.publish({
-        sdl: /* GraphQL */ `
-          directive @key(selectionSet: String) on OBJECT
-
-          type Query {
-            topProduct: Product
-          }
-
-          type Product @key(selectionSet: "{ id ") {
-            id: ID!
-            name: String
-          }
-        `,
-        serviceName: 'products',
-        serviceUrl: 'http://products:3000/graphql',
-        expect: 'latest-composable', // it should be composable because the validation is skipped
-      });
-    },
-  );
+    const supergraph = await fetchSupergraph();
+    expect(supergraph).toMatch('(name: "users" url: "https://api.com/users-subgraph")');
+  });
 });
 
 async function prepare() {
-  const { tokens } = await prepareProject(ProjectType.Stitching);
-
+  const { tokens } = await prepareProject(ProjectType.Federation, RegistryModel.Legacy);
   return createCLI(tokens.registry);
 }

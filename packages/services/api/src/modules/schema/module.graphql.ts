@@ -10,16 +10,21 @@ export default gql`
     Requires API Token
     """
     schemaCheck(input: SchemaCheckInput!): SchemaCheckPayload!
+    """
+    Requires API Token
+    """
+    schemaDelete(input: SchemaDeleteInput!): SchemaDeleteResult!
     updateSchemaVersionStatus(input: SchemaVersionUpdateInput!): SchemaVersion!
     updateBaseSchema(input: UpdateBaseSchemaInput!): UpdateBaseSchemaResult!
-    updateSchemaServiceName(input: UpdateSchemaServiceNameInput!): UpdateSchemaServiceNameResult!
-    schemaSyncCDN(input: SchemaSyncCDNInput!): SchemaSyncCDNPayload!
     enableExternalSchemaComposition(
       input: EnableExternalSchemaCompositionInput!
     ): EnableExternalSchemaCompositionResult!
     disableExternalSchemaComposition(
       input: DisableExternalSchemaCompositionInput!
     ): DisableExternalSchemaCompositionResult!
+    updateProjectRegistryModel(
+      input: UpdateProjectRegistryModelInput!
+    ): UpdateProjectRegistryModelResult!
   }
 
   extend type Query {
@@ -69,8 +74,32 @@ export default gql`
     endpoint: String!
   }
 
+  input UpdateProjectRegistryModelInput {
+    organization: ID!
+    project: ID!
+    model: RegistryModel!
+  }
+
+  enum RegistryModel {
+    LEGACY
+    MODERN
+  }
+
+  """
+  @oneOf
+  """
+  type UpdateProjectRegistryModelResult {
+    ok: Project
+    error: UpdateProjectRegistryModelError
+  }
+
+  type UpdateProjectRegistryModelError implements Error {
+    message: String!
+  }
+
   extend type Project {
     externalSchemaComposition: ExternalSchemaComposition
+    registryModel: RegistryModel!
   }
 
   type EnableExternalSchemaCompositionError implements Error {
@@ -84,19 +113,6 @@ export default gql`
   type EnableExternalSchemaCompositionInputErrors {
     endpoint: String
     secret: String
-  }
-
-  type UpdateSchemaServiceNameResult {
-    ok: UpdateSchemaServiceNameOk
-    error: UpdateSchemaServiceNameError
-  }
-
-  type UpdateSchemaServiceNameOk {
-    updatedTarget: Target!
-  }
-
-  type UpdateSchemaServiceNameError implements Error {
-    message: String!
   }
 
   type UpdateBaseSchemaResult {
@@ -123,7 +139,34 @@ export default gql`
     total: Int!
   }
 
-  type Schema {
+  union RegistryLog = PushedSchemaLog | DeletedSchemaLog
+
+  type PushedSchemaLog {
+    id: ID!
+    author: String!
+    date: DateTime!
+    commit: ID!
+    service: String
+  }
+
+  type DeletedSchemaLog {
+    id: ID!
+    date: DateTime!
+    service: String!
+  }
+
+  union Schema = SingleSchema | CompositeSchema
+
+  type SingleSchema {
+    id: ID!
+    author: String!
+    source: String!
+    date: DateTime!
+    commit: ID!
+    metadata: String
+  }
+
+  type CompositeSchema {
     id: ID!
     author: String!
     source: String!
@@ -148,11 +191,12 @@ export default gql`
     sdl: String!
     author: String!
     commit: String!
-    force: Boolean
+    force: Boolean @deprecated(reason: "Enabled by default for newly created projects")
     """
     Accept breaking changes and mark schema as valid (if composable)
     """
     experimental_acceptBreakingChanges: Boolean
+      @deprecated(reason: "Enabled by default for newly created projects")
     metadata: String
     """
     Talk to GitHub Application and create a check-run
@@ -165,6 +209,19 @@ export default gql`
     | SchemaCheckError
     | GitHubSchemaCheckSuccess
     | GitHubSchemaCheckError
+
+  union SchemaDeleteResult = SchemaDeleteSuccess | SchemaDeleteError
+
+  type SchemaDeleteSuccess {
+    valid: Boolean!
+    changes: SchemaChangeConnection
+    errors: SchemaErrorConnection!
+  }
+
+  type SchemaDeleteError {
+    valid: Boolean!
+    errors: SchemaErrorConnection!
+  }
 
   enum CriticalityLevel {
     Breaking
@@ -250,6 +307,11 @@ export default gql`
     github: GitHubSchemaCheckInput
   }
 
+  input SchemaDeleteInput {
+    serviceName: ID!
+    dryRun: Boolean
+  }
+
   input GitHubSchemaCheckInput {
     commit: String!
   }
@@ -314,20 +376,11 @@ export default gql`
     newBase: String
   }
 
-  input UpdateSchemaServiceNameInput {
-    organization: ID!
-    project: ID!
-    target: ID!
-    version: ID!
-    name: String!
-    newName: String!
-  }
-
   type SchemaVersion {
     id: ID!
     valid: Boolean!
     date: DateTime!
-    commit: Schema!
+    log: RegistryLog!
     baseSchema: String
     schemas: SchemaConnection!
     supergraph: String
@@ -342,22 +395,6 @@ export default gql`
     nodes: [SchemaVersion!]!
     pageInfo: PageInfo!
   }
-
-  input SchemaSyncCDNInput {
-    organization: ID!
-    project: ID!
-    target: ID!
-  }
-
-  type SchemaSyncCDNSuccess {
-    message: String!
-  }
-
-  type SchemaSyncCDNError {
-    message: String!
-  }
-
-  union SchemaSyncCDNPayload = SchemaSyncCDNSuccess | SchemaSyncCDNError
 
   input SchemaExplorerUsageInput {
     period: DateRangeInput!

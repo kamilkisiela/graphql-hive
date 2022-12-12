@@ -4,13 +4,12 @@ import clsx from 'clsx';
 import { Radio, RadioGroup } from '@/components/v2';
 import { ProjectType } from '@/graphql';
 import { RadioGroupProps } from '@radix-ui/react-radio-group';
-import custom from '../../../public/images/figures/custom.svg';
 import federation from '../../../public/images/figures/federation.svg';
 import single from '../../../public/images/figures/single.svg';
 import stitching from '../../../public/images/figures/stitching.svg';
 
 const PROJECTS: {
-  title: 'REGULAR' | 'DISTRIBUTED' | 'CUSTOM';
+  title: 'REGULAR' | 'DISTRIBUTED';
   type: ProjectType;
   image: ImageProps['src'];
   description: string;
@@ -32,12 +31,6 @@ const PROJECTS: {
     type: ProjectType.Stitching,
     image: stitching,
     description: 'Built using Schema Stitching',
-  },
-  {
-    title: 'CUSTOM',
-    type: ProjectType.Custom,
-    image: custom,
-    description: 'Own validation and schema building',
   },
 ];
 
