@@ -2602,7 +2602,6 @@ export async function createStorage(connection: string, maximumPoolSize: number)
                 }
               }
             } catch (err) {
-              // lock not acquired in database, unlock and bubble error
               locks.delete(id);
               release();
               if (advisoryLock) {
