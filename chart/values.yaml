@@ -9,7 +9,7 @@ global:
       username: hive
       existingSecret: postgres-secret
       secretKeys:
-        userPasswordKey: POSTGRES_PASSWORD
+        userPasswordKey: postgres-password
   email:
     provider: sendmail
     from: no-reply@yourDomain.com
