@@ -48,7 +48,7 @@ spec:
             - name: "POSTGRESQL_HOST"
               value: {{ quote .Values.database.host }}
             - name: "POSTGRESQL_USER"
-              value: {{ quote .Values.global.postgresql.auth.user }}
+              value: {{ quote .Values.global.postgresql.auth.username }}
             - name: "POSTGRESQL_PASSWORD"
               valueFrom:
                 secretKeyRef:
