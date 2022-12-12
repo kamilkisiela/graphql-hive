@@ -1,5 +1,5 @@
 import type { RouteHandlerMethod, FastifyRequest, FastifyReply } from 'fastify';
-import { Registry } from '@hive/api';
+import { Registry, RegistryContext } from '@hive/api';
 import { cleanRequestId } from '@hive/service-common';
 import { createYoga, useErrorHandler, Plugin } from 'graphql-yoga';
 import { isGraphQLError } from '@envelop/core';
@@ -50,11 +50,9 @@ export interface GraphQLHandlerOptions {
 
 export type SuperTokenSessionPayload = zod.TypeOf<typeof SuperTokenAccessTokenModel>;
 
-interface Context {
+interface Context extends RegistryContext {
   req: FastifyRequest;
   reply: FastifyReply;
-  headers: Record<string, string | string[] | undefined>;
-  requestId?: string | null;
   session: SuperTokenSessionPayload | null;
 }
 
@@ -228,6 +226,11 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
   return async (req, reply) => {
     const requestIdHeader = req.headers['x-request-id'] ?? reqIdGenerate();
     const requestId = cleanRequestId(requestIdHeader);
+    const controller = new AbortController();
+
+    req.raw.once('close', () => {
+      controller.abort();
+    });
 
     await asyncStorage.run(
       {
@@ -240,6 +243,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
           headers: req.headers,
           requestId,
           session: null,
+          abortSignal: controller.signal,
         });
 
         response.headers.forEach((value, key) => {
@@ -257,7 +261,6 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
         }
 
         void reply.status(response.status);
-
         void reply.send(response.body);
 
         return reply;
