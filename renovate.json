@@ -7,6 +7,14 @@
       "matchPackagePrefixes": "@graphql-tools"
     },
     {
+      "groupName": "stripe",
+      "matchPackagePrefixes": "@stripe"
+    },
+    {
+      "groupName": "urql",
+      "matchPackagePrefixes": "@urql"
+    },
+    {
       "groupName": "envelop",
       "matchPackagePrefixes": "@envelop"
     },
