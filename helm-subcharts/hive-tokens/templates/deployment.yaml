@@ -42,6 +42,6 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: postgres-secret
-                  key: POSTGRES_PASSWORD
+                  key: postgres-password
           ports:
             - containerPort: {{ .Values.serverPort }}

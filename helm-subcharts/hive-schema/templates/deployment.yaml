@@ -47,6 +47,6 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: encryption-secret
-                  key: ENCRYPTION_SECRET
+                  key: encryption-secret
           ports:
             - containerPort: {{ .Values.serverPort }}

@@ -42,6 +42,6 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: supertokens-secret
-                  key: SUPERTOKENS_API_KEY
+                  key: supertokens-api-key
           ports:
             - containerPort: {{ .Values.serverPort }}
