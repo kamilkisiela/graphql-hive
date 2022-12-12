@@ -44,6 +44,7 @@ supertokens:
   fullnameOverride: supertokens
 
 ingress:
+  namespace: graphql-hive
   useSecureProtocol: 'false'
   annotations: {}
 
