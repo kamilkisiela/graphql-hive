@@ -1,6 +1,6 @@
 export interface RegistryContext {
   req: any;
-  requestId?: string | null;
+  requestId: string;
   user: any;
   headers: Record<string, string | string[] | undefined>;
   abortSignal: AbortSignal;
@@ -8,6 +8,7 @@ export interface RegistryContext {
 
 declare global {
   namespace GraphQLModules {
-    type GlobalContext = RegistryContext
+    // eslint-disable-next-line @typescript-eslint/no-empty-interface
+    interface GlobalContext extends RegistryContext {}
   }
 }
