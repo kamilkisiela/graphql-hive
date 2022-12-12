@@ -17,7 +17,6 @@ data:
   APP_BASE_URL: '{{ $appBaseUrl }}'
 
   SUPERTOKENS_CONNECTION_URI: '{{ .Values.supertokensConnectionUri }}'
-  SUPERTOKENS_API_KEY: '{{ .Values.global.apiKey.key }}'
 
   EMAILS_ENDPOINT: '{{ .Values.emailsEndpoint }}'
   GRAPHQL_ENDPOINT: '{{ .Values.graphqlEndpoint }}'
