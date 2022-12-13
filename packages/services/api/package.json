@@ -24,7 +24,7 @@
     "@theguild/buddy": "0.1.0",
     "@trpc/client": "10.4.3",
     "@trpc/server": "10.4.3",
-    "@whatwg-node/fetch": "0.4.7",
+    "@whatwg-node/fetch": "0.5.3",
     "abort-controller": "3.0.0",
     "agentkeepalive": "4.2.1",
     "dataloader": "2.0.0",

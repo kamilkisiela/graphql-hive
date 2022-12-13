@@ -178,7 +178,7 @@ importers:
       '@trpc/client': 10.4.3
       '@trpc/server': 10.4.3
       '@types/ioredis': 4.28.10
-      '@whatwg-node/fetch': 0.4.7
+      '@whatwg-node/fetch': 0.5.3
       auth0: 2.36.2
       axios: 0.27.2
       date-fns: 2.25.0
@@ -199,7 +199,7 @@ importers:
       '@n1ru4l/dockest': 2.1.0-rc.6_2borp2lvtycfyctncvbphkqq2a
       '@trpc/client': 10.4.3_@trpc+server@10.4.3
       '@trpc/server': 10.4.3
-      '@whatwg-node/fetch': 0.4.7
+      '@whatwg-node/fetch': 0.5.3
       auth0: 2.36.2
       axios: 0.27.2
       date-fns: 2.25.0
@@ -353,7 +353,7 @@ importers:
       '@types/lru-cache': 7.6.1
       '@types/ms': 0.7.31
       '@types/uuid': 8.3.4
-      '@whatwg-node/fetch': 0.4.7
+      '@whatwg-node/fetch': 0.5.3
       abort-controller: 3.0.0
       agentkeepalive: 4.2.1
       dataloader: 2.0.0
@@ -391,7 +391,7 @@ importers:
       '@theguild/buddy': 0.1.0_ryylgra5xglhidfoiaxehn22hq
       '@trpc/client': 10.4.3_@trpc+server@10.4.3
       '@trpc/server': 10.4.3
-      '@whatwg-node/fetch': 0.4.7
+      '@whatwg-node/fetch': 0.5.3
       abort-controller: 3.0.0
       agentkeepalive: 4.2.1
       dataloader: 2.0.0
@@ -494,7 +494,7 @@ importers:
       '@types/mjml': 4.7.0
       '@types/nodemailer': 6.4.6
       '@types/sendmail': 1.4.4
-      '@whatwg-node/fetch': 0.4.7
+      '@whatwg-node/fetch': 0.5.3
       bullmq: 1.81.4
       copyfiles: 2.4.1
       dotenv: 10.0.0
@@ -509,7 +509,7 @@ importers:
     dependencies:
       '@sentry/node': 7.21.1
       '@trpc/server': 10.4.3
-      '@whatwg-node/fetch': 0.4.7
+      '@whatwg-node/fetch': 0.5.3
       bullmq: 1.81.4_d7likfulu5mfjaaerbpls6og24
       dotenv: 10.0.0
       ioredis: 4.28.5
@@ -564,7 +564,7 @@ importers:
       '@sentry/tracing': 7.21.1
       '@trpc/client': 10.4.3
       '@trpc/server': 10.4.3
-      '@whatwg-node/fetch': 0.4.7
+      '@whatwg-node/fetch': 0.5.3
       date-fns: 2.28.0
       dotenv: 10.0.0
       got: 12.5.3
@@ -577,7 +577,7 @@ importers:
       '@sentry/tracing': 7.21.1
       '@trpc/client': 10.4.3_@trpc+server@10.4.3
       '@trpc/server': 10.4.3
-      '@whatwg-node/fetch': 0.4.7
+      '@whatwg-node/fetch': 0.5.3
       date-fns: 2.28.0
       dotenv: 10.0.0
       got: 12.5.3
@@ -601,7 +601,7 @@ importers:
       '@trpc/server': 10.4.3
       '@types/async-retry': 1.4.5
       '@types/ioredis': 4.28.10
-      '@whatwg-node/fetch': 0.4.7
+      '@whatwg-node/fetch': 0.5.3
       async-retry: 1.3.3
       dotenv: 10.0.0
       fastify: 3.29.4
@@ -616,7 +616,7 @@ importers:
       '@sentry/node': 7.21.1
       '@sentry/tracing': 7.21.1
       '@trpc/server': 10.4.3
-      '@whatwg-node/fetch': 0.4.7
+      '@whatwg-node/fetch': 0.5.3
       async-retry: 1.3.3
       dotenv: 10.0.0
       graphql: 16.6.0
@@ -696,14 +696,14 @@ importers:
       '@sentry/tracing': 7.21.1
       '@sentry/types': 7.21.1
       '@sentry/utils': 7.21.1
-      '@whatwg-node/fetch': 0.4.7
+      '@whatwg-node/fetch': 0.5.3
       fastify: 3.29.4
       fastify-cors: 6.0.2
       fastify-plugin: 3.0.1
       prom-client: 14.0.1
       zod: 3.15.1
     dependencies:
-      '@whatwg-node/fetch': 0.4.7
+      '@whatwg-node/fetch': 0.5.3
       fastify: 3.29.4
       fastify-cors: 6.0.2
       fastify-plugin: 3.0.1
@@ -762,7 +762,7 @@ importers:
       '@sentry/tracing': 7.21.1
       '@trpc/client': 10.4.3
       '@trpc/server': 10.4.3
-      '@whatwg-node/fetch': 0.4.7
+      '@whatwg-node/fetch': 0.5.3
       date-fns: 2.28.0
       dotenv: 10.0.0
       got: 12.5.3
@@ -775,7 +775,7 @@ importers:
       '@sentry/tracing': 7.21.1
       '@trpc/client': 10.4.3_@trpc+server@10.4.3
       '@trpc/server': 10.4.3
-      '@whatwg-node/fetch': 0.4.7
+      '@whatwg-node/fetch': 0.5.3
       date-fns: 2.28.0
       dotenv: 10.0.0
       got: 12.5.3
@@ -831,7 +831,7 @@ importers:
       '@sentry/tracing': 7.21.1
       '@trpc/client': 10.4.3
       '@trpc/server': 10.4.3
-      '@whatwg-node/fetch': 0.4.7
+      '@whatwg-node/fetch': 0.5.3
       ajv: 8.11.2
       dotenv: 10.0.0
       got: 12.5.3
@@ -845,7 +845,7 @@ importers:
       '@sentry/tracing': 7.21.1
       '@trpc/client': 10.4.3_@trpc+server@10.4.3
       '@trpc/server': 10.4.3
-      '@whatwg-node/fetch': 0.4.7
+      '@whatwg-node/fetch': 0.5.3
       ajv: 8.11.2
       dotenv: 10.0.0
       got: 12.5.3
@@ -872,7 +872,7 @@ importers:
       '@sentry/node': 7.21.1
       '@sentry/tracing': 7.21.1
       '@trpc/server': 10.4.3
-      '@whatwg-node/fetch': 0.4.7
+      '@whatwg-node/fetch': 0.5.3
       dotenv: 10.0.0
       got: 12.5.3
       pino-pretty: 6.0.0
@@ -883,7 +883,7 @@ importers:
       '@sentry/node': 7.21.1
       '@sentry/tracing': 7.21.1
       '@trpc/server': 10.4.3
-      '@whatwg-node/fetch': 0.4.7
+      '@whatwg-node/fetch': 0.5.3
       dotenv: 10.0.0
       got: 12.5.3
       reflect-metadata: 0.1.13
@@ -1017,7 +1017,7 @@ importers:
       '@urql/devtools': 2.0.3
       '@urql/exchange-graphcache': 4.3.6
       '@welldone-software/why-did-you-render': 7.0.1
-      '@whatwg-node/fetch': 0.4.7
+      '@whatwg-node/fetch': 0.5.3
       autoprefixer: 10.4.13
       clsx: 1.2.1
       cookies: 0.8.0
@@ -1105,7 +1105,7 @@ importers:
       '@urql/core': 2.6.1_graphql@16.6.0
       '@urql/devtools': 2.0.3_xjrygy3ln734yc6gtgbaa34b4a
       '@urql/exchange-graphcache': 4.3.6_graphql@16.6.0
-      '@whatwg-node/fetch': 0.4.7
+      '@whatwg-node/fetch': 0.5.3
       clsx: 1.2.1
       cookies: 0.8.0
       date-fns: 2.25.0
@@ -11417,7 +11417,7 @@ packages:
       form-data-encoder: 1.7.2
       formdata-node: 4.4.1
       node-fetch: 2.6.7
-      undici: 5.11.0
+      undici: 5.12.0
       web-streams-polyfill: 3.2.1
     transitivePeerDependencies:
       - encoding
@@ -26428,12 +26428,6 @@ packages:
   /underscore/1.13.6:
     resolution: {integrity: sha512-+A5Sja4HP1M08MaXya7p5LvjuM7K6q/2EaC0+iovj/wOcMsTzMvDFbasi/oSapiwOlt252IqsKqPjCl7huKS0A==}
     dev: false
-
-  /undici/5.11.0:
-    resolution: {integrity: sha512-oWjWJHzFet0Ow4YZBkyiJwiK5vWqEYoH7BINzJAJOLedZ++JpAlCbUktW2GQ2DS2FpKmxD/JMtWUUWl1BtghGw==}
-    engines: {node: '>=12.18'}
-    dependencies:
-      busboy: 1.6.0
 
   /undici/5.12.0:
     resolution: {integrity: sha512-zMLamCG62PGjd9HHMpo05bSLvvwWOZgGeiWlN/vlqu3+lRo3elxktVGEyLMX+IO7c2eflLjcW74AlkhEZm15mg==}

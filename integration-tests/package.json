@@ -17,7 +17,7 @@
     "@n1ru4l/dockest": "2.1.0-rc.6",
     "@trpc/client": "10.4.3",
     "@trpc/server": "10.4.3",
-    "@whatwg-node/fetch": "0.4.7",
+    "@whatwg-node/fetch": "0.5.3",
     "auth0": "2.36.2",
     "axios": "0.27.2",
     "date-fns": "2.25.0",
