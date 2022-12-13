@@ -16,6 +16,10 @@ type ArtifactRequestHandler = {
     { type: 'notModified' } | { type: 'notFound' } | { type: 'redirect'; location: string }
   >;
   isKeyValid: KeyValidator;
+  fallback?: (
+    request: Request,
+    params: { targetId: string; artifactType: string },
+  ) => Promise<Response | undefined>;
 };
 
 const ParamsModel = zod.object({
@@ -75,36 +79,23 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
       const result = await deps
         .getArtifactAction(params.targetId, params.artifactType, eTag)
         .catch(error => {
-          if (captureException) {
-            captureException(error);
-          } else {
-            console.error(error);
+          if (deps.fallback) {
+            if (captureException) {
+              captureException(error);
+            } else {
+              console.error(error);
+            }
+            return null;
           }
-          return null;
+
+          return Promise.reject(error);
         });
 
       if (!result) {
-        const artifactTypeMap = {
-          metadata: 'metadata',
-          sdl: 'sdl',
-          services: 'schema',
-          supergraph: 'supergraph',
-          'sdl.graphql': null,
-          'sdl.graphqls': null,
-        };
-        const artifactType = artifactTypeMap[params.artifactType];
-
-        if (artifactType) {
-          return fetch(
-            request.url.replace(
-              `/artifacts/v1/${params.targetId}/${params.artifactType}`,
-              `/${params.targetId}/${artifactType}`,
-            ),
-            request,
-          );
-        }
-
-        return;
+        return (
+          deps.fallback?.(request, params) ??
+          new Response('Something went wrong, really wrong.', { status: 500 })
+        );
       }
 
       if (result.type === 'notModified') {
