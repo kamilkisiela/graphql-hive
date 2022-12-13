@@ -99,7 +99,7 @@
   "resolutions": {
     "@emotion/react": "11.10.5",
     "@types/react": "17.0.45",
-    "@urql/core": "2.3.6",
+    "@urql/core": "2.6.1",
     "graphql": "16.6.0",
     "ts-node": "10.9.1"
   },

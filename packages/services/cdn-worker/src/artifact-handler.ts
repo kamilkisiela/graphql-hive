@@ -16,6 +16,10 @@ type ArtifactRequestHandler = {
     { type: 'notModified' } | { type: 'notFound' } | { type: 'redirect'; location: string }
   >;
   isKeyValid: KeyValidator;
+  fallback?: (
+    request: Request,
+    params: { targetId: string; artifactType: string },
+  ) => Promise<Response | undefined>;
 };
 
 const ParamsModel = zod.object({
@@ -53,35 +57,59 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
     return new InvalidAuthKeyResponse();
   };
 
-  router.get('/artifacts/v1/:targetId/:artifactType', async (request: itty.Request & Request) => {
-    const parseResult = ParamsModel.safeParse(request.params);
+  router.get(
+    '/artifacts/v1/:targetId/:artifactType',
+    async (request: itty.Request & Request, captureException?: (error: unknown) => void) => {
+      const parseResult = ParamsModel.safeParse(request.params);
 
-    if (parseResult.success === false) {
-      return new Response('Not found.', { status: 404 });
-    }
+      if (parseResult.success === false) {
+        return new Response('Not found.', { status: 404 });
+      }
 
-    const params = parseResult.data;
+      const params = parseResult.data;
 
-    const maybeResponse = await authenticate(request, params.targetId);
+      const maybeResponse = await authenticate(request, params.targetId);
 
-    if (maybeResponse !== null) {
-      return maybeResponse;
-    }
+      if (maybeResponse !== null) {
+        return maybeResponse;
+      }
 
-    const eTag = request.headers.get('if-none-match');
+      const eTag = request.headers.get('if-none-match');
 
-    const result = await deps.getArtifactAction(params.targetId, params.artifactType, eTag);
+      const result = await deps
+        .getArtifactAction(params.targetId, params.artifactType, eTag)
+        .catch(error => {
+          if (deps.fallback) {
+            if (captureException) {
+              captureException(error);
+            } else {
+              console.error(error);
+            }
+            return null;
+          }
 
-    if (result.type === 'notModified') {
-      return new Response('', {
-        status: 304,
-      });
-    } else if (result.type === 'notFound') {
-      return new Response('Not found.', { status: 404 });
-    } else if (result.type === 'redirect') {
-      return new Response('Found.', { status: 302, headers: { Location: result.location } });
-    }
-  });
+          return Promise.reject(error);
+        });
 
-  return (request: Request) => router.handle(request);
+      if (!result) {
+        return (
+          deps.fallback?.(request, params) ??
+          new Response('Something went wrong, really wrong.', { status: 500 })
+        );
+      }
+
+      if (result.type === 'notModified') {
+        return new Response('', {
+          status: 304,
+        });
+      } else if (result.type === 'notFound') {
+        return new Response('Not found.', { status: 404 });
+      } else if (result.type === 'redirect') {
+        return new Response('Found.', { status: 302, headers: { Location: result.location } });
+      }
+    },
+  );
+
+  return (request: Request, captureException?: (error: unknown) => void) =>
+    router.handle(request, captureException);
 };

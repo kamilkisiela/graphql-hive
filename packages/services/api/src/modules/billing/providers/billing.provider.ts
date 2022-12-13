@@ -37,6 +37,7 @@ export class BillingProvider {
   }
 
   upgradeToPro(input: StripeBillingApiInput['createSubscriptionForOrganization']) {
+    this.logger.debug('Upgrading to PRO (input=%o)', input);
     if (!this.billingService) {
       throw new Error(`Billing service is not configured!`);
     }
@@ -53,6 +54,7 @@ export class BillingProvider {
   }
 
   async getAvailablePrices() {
+    this.logger.debug('Getting available prices');
     if (!this.billingService) {
       return null;
     }
@@ -71,6 +73,7 @@ export class BillingProvider {
   }
 
   getActiveSubscription(input: StripeBillingApiInput['activeSubscription']) {
+    this.logger.debug('Fetching active subscription (input=%o)', input);
     if (!this.billingService) {
       throw new Error(`Billing service is not configured!`);
     }
@@ -79,6 +82,7 @@ export class BillingProvider {
   }
 
   invoices(input: StripeBillingApiInput['invoices']) {
+    this.logger.debug('Fetching invoices (input=%o)', input);
     if (!this.billingService) {
       throw new Error(`Billing service is not configured!`);
     }
@@ -87,6 +91,7 @@ export class BillingProvider {
   }
 
   upcomingInvoice(input: StripeBillingApiInput['upcomingInvoice']) {
+    this.logger.debug('Fetching upcoming invoices (input=%o)', input);
     if (!this.billingService) {
       throw new Error(`Billing service is not configured!`);
     }
@@ -95,6 +100,7 @@ export class BillingProvider {
   }
 
   async downgradeToHobby(input: StripeBillingApiInput['cancelSubscriptionForOrganization']) {
+    this.logger.debug('Downgrading to Hobby (input=%o)', input);
     if (!this.billingService) {
       throw new Error(`Billing service is not configured!`);
     }

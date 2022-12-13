@@ -288,6 +288,7 @@ deployCloudFlareSecurityTransform({
     '/api/slack',
     '/api/lab',
   ],
+  ignoredHosts: ['cdn.graphql-hive.com', 'cdn.staging.graphql-hive.com'],
 });
 
 export const graphqlApiServiceId = graphqlApi.service.id;
