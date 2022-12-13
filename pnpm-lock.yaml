@@ -535,13 +535,13 @@ importers:
       '@whatwg-node/fetch': ^0.5.3
       '@whatwg-node/server': ^0.4.17
       graphql: 16.6.0
-      zod: ^3.15.1
+      zod: ^3.20.2
     dependencies:
       '@apollo/composition': 2.2.1_graphql@16.6.0
       '@whatwg-node/fetch': 0.5.3
       '@whatwg-node/server': 0.4.17
       graphql: 16.6.0
-      zod: 3.19.1
+      zod: 3.20.2
     devDependencies:
       '@graphql-hive/external-composition': link:../../../libraries/external-composition
 
@@ -12572,7 +12572,7 @@ packages:
       tsup: 5.12.7_typescript@4.8.4
       typescript: 4.8.4
       yargs: 17.6.0
-      zod: 3.19.1
+      zod: 3.20.2
     transitivePeerDependencies:
       - postcss
       - supports-color
@@ -27530,6 +27530,10 @@ packages:
 
   /zod/3.19.1:
     resolution: {integrity: sha512-LYjZsEDhCdYET9ikFu6dVPGp2YH9DegXjdJToSzD9rO6fy4qiRYFoyEYwps88OseJlPyl2NOe2iJuhEhL7IpEA==}
+    dev: false
+
+  /zod/3.20.2:
+    resolution: {integrity: sha512-1MzNQdAvO+54H+EaK5YpyEy0T+Ejo/7YLHS93G3RnYWh5gaotGHwGeN/ZO687qEDU2y4CdStQYXVHIgrUl5UVQ==}
 
   /zrender/5.3.1:
     resolution: {integrity: sha512-7olqIjy0gWfznKr6vgfnGBk7y4UtdMvdwFmK92vVQsQeDPyzkHW1OlrLEKg6GHz1W5ePf0FeN1q2vkl/HFqhXw==}
