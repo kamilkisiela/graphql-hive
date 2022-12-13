@@ -227,8 +227,8 @@ importers:
       '@graphql-tools/url-loader': ~7.16.4
       '@graphql-tools/utils': 8.12.0
       '@oclif/core': ^1.20.4
-      '@oclif/plugin-help': 5.1.19
-      '@oclif/plugin-update': 3.0.7
+      '@oclif/plugin-help': 5.1.20
+      '@oclif/plugin-update': 3.0.8
       '@types/env-ci': 3.1.1
       '@types/git-parse': 2.1.2
       '@types/mkdirp': 1.0.2
@@ -254,8 +254,8 @@ importers:
       '@graphql-tools/url-loader': 7.16.4_graphql@16.6.0
       '@graphql-tools/utils': 8.12.0_graphql@16.6.0
       '@oclif/core': 1.20.4
-      '@oclif/plugin-help': 5.1.19
-      '@oclif/plugin-update': 3.0.7
+      '@oclif/plugin-help': 5.1.20
+      '@oclif/plugin-update': 3.0.8
       colors: 1.4.0
       env-ci: 7.1.0
       git-parse: 2.1.2
@@ -8097,31 +8097,64 @@ packages:
       widest-line: 3.1.0
       wrap-ansi: 7.0.0
 
+  /@oclif/core/1.21.0:
+    resolution: {integrity: sha512-B/AKYfHcNRAbb6Xz2kj0FlH9gWEi8aFS4iEr7EzguP3E2DpDk4wcf7eOMOfJYEmhuVd9sOpVWSnI2yP+FL/3Sg==}
+    engines: {node: '>=14.0.0'}
+    dependencies:
+      '@oclif/linewrap': 1.0.0
+      '@oclif/screen': 3.0.3
+      ansi-escapes: 4.3.2
+      ansi-styles: 4.3.0
+      cardinal: 2.1.1
+      chalk: 4.1.2
+      clean-stack: 3.0.1
+      cli-progress: 3.11.2
+      debug: 4.3.4_supports-color@8.1.1
+      ejs: 3.1.8
+      fs-extra: 9.1.0
+      get-package-type: 0.1.0
+      globby: 11.1.0
+      hyperlinker: 1.0.0
+      indent-string: 4.0.0
+      is-wsl: 2.2.0
+      js-yaml: 3.14.1
+      natural-orderby: 2.0.3
+      object-treeify: 1.1.33
+      password-prompt: 1.1.2
+      semver: 7.3.8
+      string-width: 4.2.3
+      strip-ansi: 6.0.1
+      supports-color: 8.1.1
+      supports-hyperlinks: 2.3.0
+      tslib: 2.4.1
+      widest-line: 3.1.0
+      wrap-ansi: 7.0.0
+
   /@oclif/linewrap/1.0.0:
     resolution: {integrity: sha512-Ups2dShK52xXa8w6iBWLgcjPJWjais6KPJQq3gQ/88AY6BXoTX+MIGFPrWQO1KLMiQfoTpcLnUwloN4brrVUHw==}
 
-  /@oclif/plugin-help/5.1.19:
-    resolution: {integrity: sha512-eQVRCFJOwRj8Tbqz8Lzd9GN38egwLCg+ohJ0xfg12CoXml03WqkfcFiAWkVwSWmLVrZUlUVrxfXKKkmpUaXZHg==}
+  /@oclif/plugin-help/5.1.20:
+    resolution: {integrity: sha512-N8xRxE/isFcdBDI8cobixEZA5toxIK5jbxpwALNTr4s8KNAtBA3ORQrSiY0fWGkcv0sCGMwZw7rJ0Izh18JPsw==}
     engines: {node: '>=12.0.0'}
     dependencies:
-      '@oclif/core': 1.20.4
+      '@oclif/core': 1.21.0
 
   /@oclif/plugin-not-found/2.3.8:
     resolution: {integrity: sha512-PfUVr67dHORFSeQthUwrPMJB/mRRNT4ENNdbafCOlL0HqC+WTuFy5nih+qnHBEli15RaOuMNoW3kR5MyBH82hA==}
     engines: {node: '>=12.0.0'}
     dependencies:
       '@oclif/color': 1.0.2
-      '@oclif/core': 1.20.4
+      '@oclif/core': 1.21.0
       fast-levenshtein: 3.0.0
       lodash: 4.17.21
     dev: true
 
-  /@oclif/plugin-update/3.0.7:
-    resolution: {integrity: sha512-ANYyOhvl3OrFSYE6HJGI34Cjcqy775Zw9q/V70vFnK8oymjD5D7sahRPsyoU6t+m3lhK9Mh5kMAxplJXeMM/Rw==}
+  /@oclif/plugin-update/3.0.8:
+    resolution: {integrity: sha512-l/WtIJZLeBJKzD72EzooS6u8YoMyqqJZrFYaERdqrLfw6g42TzMaABiz0kFnkR8jy65vCn60j177D9LP2nXA+w==}
     engines: {node: '>=12.0.0'}
     dependencies:
       '@oclif/color': 1.0.2
-      '@oclif/core': 1.20.4
+      '@oclif/core': 1.21.0
       cross-spawn: 7.0.3
       debug: 4.3.4
       filesize: 6.4.0
@@ -8140,7 +8173,7 @@ packages:
     resolution: {integrity: sha512-UDmxMtCq8GDCxVV0P9Kjm257RfcPe6+jY8PPMLYXFYdn20Er8c6vuy8AMD1Z6lO03vACDs+Vsw8gEpCTI7b5Fw==}
     engines: {node: '>=12.0.0'}
     dependencies:
-      '@oclif/core': 1.20.4
+      '@oclif/core': 1.21.0
       chalk: 4.1.2
       debug: 4.3.4
       fs-extra: 9.1.0
@@ -12144,7 +12177,7 @@ packages:
   /axios/0.21.4:
     resolution: {integrity: sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg==}
     dependencies:
-      follow-redirects: 1.15.2_debug@4.3.4
+      follow-redirects: 1.15.2
     transitivePeerDependencies:
       - debug
     dev: false
@@ -16563,6 +16596,16 @@ packages:
 
   /focus-visible/5.2.0:
     resolution: {integrity: sha512-Rwix9pBtC1Nuy5wysTmKy+UjbDJpIfg8eHjw0rjZ1mX4GNLz1Bmd16uDpI3Gk1i70Fgcs8Csg2lPm8HULFg9DQ==}
+    dev: false
+
+  /follow-redirects/1.15.2:
+    resolution: {integrity: sha512-VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==}
+    engines: {node: '>=4.0'}
+    peerDependencies:
+      debug: '*'
+    peerDependenciesMeta:
+      debug:
+        optional: true
     dev: false
 
   /follow-redirects/1.15.2_debug@4.3.4:
@@ -21944,7 +21987,7 @@ packages:
     hasBin: true
     dependencies:
       '@oclif/core': 1.20.4
-      '@oclif/plugin-help': 5.1.19
+      '@oclif/plugin-help': 5.1.20
       '@oclif/plugin-not-found': 2.3.8
       '@oclif/plugin-warn-if-update-available': 2.0.8
       aws-sdk: 2.1231.0
