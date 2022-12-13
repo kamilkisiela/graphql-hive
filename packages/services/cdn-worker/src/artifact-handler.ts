@@ -53,35 +53,72 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
     return new InvalidAuthKeyResponse();
   };
 
-  router.get('/artifacts/v1/:targetId/:artifactType', async (request: itty.Request & Request) => {
-    const parseResult = ParamsModel.safeParse(request.params);
+  router.get(
+    '/artifacts/v1/:targetId/:artifactType',
+    async (request: itty.Request & Request, captureException?: (error: unknown) => void) => {
+      const parseResult = ParamsModel.safeParse(request.params);
 
-    if (parseResult.success === false) {
-      return new Response('Not found.', { status: 404 });
-    }
+      if (parseResult.success === false) {
+        return new Response('Not found.', { status: 404 });
+      }
 
-    const params = parseResult.data;
+      const params = parseResult.data;
 
-    const maybeResponse = await authenticate(request, params.targetId);
+      const maybeResponse = await authenticate(request, params.targetId);
 
-    if (maybeResponse !== null) {
-      return maybeResponse;
-    }
+      if (maybeResponse !== null) {
+        return maybeResponse;
+      }
 
-    const eTag = request.headers.get('if-none-match');
+      const eTag = request.headers.get('if-none-match');
 
-    const result = await deps.getArtifactAction(params.targetId, params.artifactType, eTag);
+      const result = await deps
+        .getArtifactAction(params.targetId, params.artifactType, eTag)
+        .catch(error => {
+          if (captureException) {
+            captureException(error);
+          } else {
+            console.error(error);
+          }
+          return null;
+        });
 
-    if (result.type === 'notModified') {
-      return new Response('', {
-        status: 304,
-      });
-    } else if (result.type === 'notFound') {
-      return new Response('Not found.', { status: 404 });
-    } else if (result.type === 'redirect') {
-      return new Response('Found.', { status: 302, headers: { Location: result.location } });
-    }
-  });
+      if (!result) {
+        const artifactTypeMap = {
+          metadata: 'metadata',
+          sdl: 'sdl',
+          services: 'schema',
+          supergraph: 'supergraph',
+          'sdl.graphql': null,
+          'sdl.graphqls': null,
+        };
+        const artifactType = artifactTypeMap[params.artifactType];
 
-  return (request: Request) => router.handle(request);
+        if (artifactType) {
+          return fetch(
+            request.url.replace(
+              `/artifacts/v1/${params.targetId}/${params.artifactType}`,
+              `/${params.targetId}/${artifactType}`,
+            ),
+            request,
+          );
+        }
+
+        return;
+      }
+
+      if (result.type === 'notModified') {
+        return new Response('', {
+          status: 304,
+        });
+      } else if (result.type === 'notFound') {
+        return new Response('Not found.', { status: 404 });
+      } else if (result.type === 'redirect') {
+        return new Response('Found.', { status: 302, headers: { Location: result.location } });
+      }
+    },
+  );
+
+  return (request: Request, captureException?: (error: unknown) => void) =>
+    router.handle(request, captureException);
 };

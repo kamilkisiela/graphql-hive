@@ -91,7 +91,7 @@ self.addEventListener('fetch', async (event: FetchEvent) => {
   try {
     event.respondWith(
       router
-        .handle(event.request)
+        .handle(event.request, sentry.captureException)
         .then(response => {
           if (response) {
             return response;
