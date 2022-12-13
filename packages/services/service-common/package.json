@@ -10,7 +10,7 @@
     "@sentry/utils": "^7.0.0"
   },
   "dependencies": {
-    "@whatwg-node/fetch": "0.4.7",
+    "@whatwg-node/fetch": "0.5.3",
     "fastify": "3.29.4",
     "fastify-cors": "6.0.2",
     "fastify-plugin": "3.0.1",
