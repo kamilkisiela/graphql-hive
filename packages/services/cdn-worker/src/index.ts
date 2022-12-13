@@ -29,11 +29,6 @@ declare let SENTRY_RELEASE: string;
 
 const isKeyValid = createIsKeyValid({ keyData: KEY_DATA });
 
-const handleRequest = createRequestHandler({
-  getRawStoreValue: value => HIVE_DATA.get(value),
-  isKeyValid,
-});
-
 declare let S3_ENDPOINT: string;
 declare let S3_ACCESS_KEY_ID: string;
 declare let S3_SECRET_ACCESS_KEY: string;
@@ -49,12 +44,37 @@ const s3Client = new S3Client({
   region: 'auto',
 });
 
+const handleRequest = createRequestHandler({
+  getRawStoreValue: value => HIVE_DATA.get(value),
+  isKeyValid,
+});
+
 const artifactStorageReader = new ArtifactStorageReader(s3Client, S3_BUCKET_NAME, null);
 
 const handleArtifactRequest = createArtifactRequestHandler({
   isKeyValid,
   async getArtifactAction(targetId, artifactType, eTag) {
     return artifactStorageReader.generateArtifactReadUrl(targetId, artifactType, eTag);
+  },
+  async fallback(request: Request, params: { targetId: string; artifactType: string }) {
+    const artifactTypeMap: Record<string, string> = {
+      metadata: 'metadata',
+      sdl: 'sdl',
+      services: 'schema',
+      supergraph: 'supergraph',
+    };
+    const artifactType = artifactTypeMap[params.artifactType];
+
+    if (artifactType) {
+      const url = request.url.replace(
+        `/artifacts/v1/${params.targetId}/${params.artifactType}`,
+        `/${params.targetId}/${artifactType}`,
+      );
+
+      return handleRequest(new Request(url, request));
+    }
+
+    return;
   },
 });
 
@@ -91,7 +111,7 @@ self.addEventListener('fetch', async (event: FetchEvent) => {
   try {
     event.respondWith(
       router
-        .handle(event.request)
+        .handle(event.request, sentry.captureException)
         .then(response => {
           if (response) {
             return response;
