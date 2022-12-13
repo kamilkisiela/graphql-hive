@@ -27,17 +27,24 @@ const composeFederation = compose(services => {
         })),
       },
     };
-  } else {
+  }
+
+  if (!result.supergraphSdl) {
     return {
-      type: 'success',
+      type: 'failure',
       result: {
-        // TODO: verify why supergraphSdl can be undefine :)
-        supergraph: result.supergraphSdl!,
-        // TODO: verify why schema can be undefine :)
-        sdl: printSchema(result.schema!.toGraphQLJSSchema()),
+        errors: [{ message: 'supergraphSdl not defined' }],
       },
     };
   }
+
+  return {
+    type: 'success',
+    result: {
+      supergraph: result.supergraphSdl,
+      sdl: printSchema(result.schema.toGraphQLJSSchema()),
+    },
+  };
 });
 
 const requestListener = createServerAdapter(async request => {
