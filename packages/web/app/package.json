@@ -53,7 +53,7 @@
     "cookies": "0.8.0",
     "date-fns": "2.25.0",
     "dompurify": "2.4.1",
-    "echarts": "5.3.2",
+    "echarts": "5.4.1",
     "echarts-for-react": "3.0.2",
     "formik": "2.2.9",
     "framer-motion": "4.1.17",
