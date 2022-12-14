@@ -72,13 +72,15 @@ See you in Hive! 🐝
 
 ## Project Stack
 
-- General: Auth0, TypeScript, GraphQL, GraphQL-Codegen, GraphQL Inspector
-- Server: Node.js, GraphQL-Modules
+- General: NodeJS, TypeScript
+- Authentication: SuperTokens
+- HTTP Server: Fastify
+- APIs: GraphQL, GraphQL-Yoga, GraphQL-Codegen, GraphQL Inspector, GraphQL-Modules
 - App: React, Next.js, Tailwind CSS, Radix Primitives
 - CLI: Oclif
-- Deployment: Pulumi, K8s, Nginx Proxy, Azure Cloud, CloudFlare Workers + KV Cache
+- Deployment (SaaS): Pulumi, K8s, Contour (Envoy), Azure Cloud, CloudFlare Workers, KV Cache, R2
 - Monitoring: Prometheus, Grafana, Sentry
-- DB: Postgres, Redis, ClickHouse
+- Databases: Postgres, Redis, ClickHouse
 
 ## Docs
 
