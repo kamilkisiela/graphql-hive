@@ -530,18 +530,18 @@ importers:
 
   packages/services/external-composition/federation-2:
     specifiers:
-      '@apollo/composition': ^2.2.1
+      '@apollo/composition': ^2.2.2
       '@graphql-hive/external-composition': workspace:*
       '@whatwg-node/fetch': ^0.5.3
       '@whatwg-node/server': ^0.4.17
       graphql: 16.6.0
-      zod: ^3.15.1
+      zod: ^3.20.2
     dependencies:
-      '@apollo/composition': 2.2.1_graphql@16.6.0
+      '@apollo/composition': 2.2.2_graphql@16.6.0
       '@whatwg-node/fetch': 0.5.3
       '@whatwg-node/server': 0.4.17
       graphql: 16.6.0
-      zod: 3.19.1
+      zod: 3.20.2
     devDependencies:
       '@graphql-hive/external-composition': link:../../../libraries/external-composition
 
@@ -1404,19 +1404,19 @@ packages:
     dependencies:
       graphql: 16.6.0
 
-  /@apollo/composition/2.2.1_graphql@16.6.0:
-    resolution: {integrity: sha512-xmd4NiCU+rW6elTZuIflR+GzZf626fJX7NVraTHXgDL8pZ7eluPal/T6vsQEg+Cb9tlAUjDhCB4RqVYPgV69RQ==}
+  /@apollo/composition/2.2.2_graphql@16.6.0:
+    resolution: {integrity: sha512-5wj9FqDu4E4xfOOLz4SKib8eJQgamHCgOdxwmrGj9N3B8o6P2A+zMfKEVHvEnSpRMKRm9HVcdSGdYV6QcjDIdQ==}
     engines: {node: '>=14.15.0'}
     peerDependencies:
       graphql: ^16.5.0
     dependencies:
-      '@apollo/federation-internals': 2.2.1_graphql@16.6.0
-      '@apollo/query-graphs': 2.2.1_graphql@16.6.0
+      '@apollo/federation-internals': 2.2.2_graphql@16.6.0
+      '@apollo/query-graphs': 2.2.2_graphql@16.6.0
       graphql: 16.6.0
     dev: false
 
-  /@apollo/federation-internals/2.2.1_graphql@16.6.0:
-    resolution: {integrity: sha512-T+nxIhppu/5jNFIhfzYERIhgDvp2QqbSqnQpViDNEmK/iPKsXLFtOedZZgsAUpMIQoUedNNNuceTE9+lDUn+bA==}
+  /@apollo/federation-internals/2.2.2_graphql@16.6.0:
+    resolution: {integrity: sha512-Q16I75qZ6jA8lCoZedM5938oZONrJyL7Pk6TOqw44fndea0As0pb2Ug8dV3pAWq4HhJ+/vBu2WoP14CFcxA9Yw==}
     engines: {node: '>=14.15.0'}
     peerDependencies:
       graphql: ^16.5.0
@@ -1471,13 +1471,13 @@ packages:
       '@types/node': 10.17.60
       long: 4.0.0
 
-  /@apollo/query-graphs/2.2.1_graphql@16.6.0:
-    resolution: {integrity: sha512-lDK1HfsJlM4P2AcdhNYxXnq5zWohyLiWVyhC0SEnhR/BRfoP2UOC31MHK0waRLAQP5SBMBVolRn6AhtSFNmEyA==}
+  /@apollo/query-graphs/2.2.2_graphql@16.6.0:
+    resolution: {integrity: sha512-NHxqfDEsMNFqwxSQ8lqj9APP0jGQAvxt0LOEb4WZgVdw303g1qxu2BapUS4YjxKVRqHDap/EAzBHgwg4J2zfjA==}
     engines: {node: '>=14.15.0'}
     peerDependencies:
       graphql: ^16.5.0
     dependencies:
-      '@apollo/federation-internals': 2.2.1_graphql@16.6.0
+      '@apollo/federation-internals': 2.2.2_graphql@16.6.0
       '@types/uuid': 8.3.4
       deep-equal: 2.1.0
       graphql: 16.6.0
@@ -12177,7 +12177,7 @@ packages:
   /axios/0.21.4:
     resolution: {integrity: sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg==}
     dependencies:
-      follow-redirects: 1.15.2_debug@4.3.4
+      follow-redirects: 1.15.2
     transitivePeerDependencies:
       - debug
     dev: false
@@ -12572,7 +12572,7 @@ packages:
       tsup: 5.12.7_typescript@4.8.4
       typescript: 4.8.4
       yargs: 17.6.0
-      zod: 3.19.1
+      zod: 3.20.2
     transitivePeerDependencies:
       - postcss
       - supports-color
@@ -16590,6 +16590,16 @@ packages:
 
   /focus-visible/5.2.0:
     resolution: {integrity: sha512-Rwix9pBtC1Nuy5wysTmKy+UjbDJpIfg8eHjw0rjZ1mX4GNLz1Bmd16uDpI3Gk1i70Fgcs8Csg2lPm8HULFg9DQ==}
+    dev: false
+
+  /follow-redirects/1.15.2:
+    resolution: {integrity: sha512-VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==}
+    engines: {node: '>=4.0'}
+    peerDependencies:
+      debug: '*'
+    peerDependenciesMeta:
+      debug:
+        optional: true
     dev: false
 
   /follow-redirects/1.15.2_debug@4.3.4:
@@ -27530,6 +27540,10 @@ packages:
 
   /zod/3.19.1:
     resolution: {integrity: sha512-LYjZsEDhCdYET9ikFu6dVPGp2YH9DegXjdJToSzD9rO6fy4qiRYFoyEYwps88OseJlPyl2NOe2iJuhEhL7IpEA==}
+    dev: false
+
+  /zod/3.20.2:
+    resolution: {integrity: sha512-1MzNQdAvO+54H+EaK5YpyEy0T+Ejo/7YLHS93G3RnYWh5gaotGHwGeN/ZO687qEDU2y4CdStQYXVHIgrUl5UVQ==}
 
   /zrender/5.3.1:
     resolution: {integrity: sha512-7olqIjy0gWfznKr6vgfnGBk7y4UtdMvdwFmK92vVQsQeDPyzkHW1OlrLEKg6GHz1W5ePf0FeN1q2vkl/HFqhXw==}

@@ -1,13 +1,5 @@
 import zod from 'zod';
 
-// treat an empty string (`''`) as undefined
-const emptyString = <T extends zod.ZodType>(input: T) => {
-  return zod.preprocess((value: unknown) => {
-    if (value === '') return undefined;
-    return value;
-  }, input);
-};
-
 function extractConfig<Input, Output>(config: zod.SafeParseReturnType<Input, Output>): Output {
   if (!config.success) {
     throw new Error('Something went wrong.');
@@ -16,39 +8,42 @@ function extractConfig<Input, Output>(config: zod.SafeParseReturnType<Input, Out
 }
 
 const BaseSchema = zod.object({
-  NODE_ENV: zod.string(),
-  ENVIRONMENT: zod.string(),
-  RELEASE: emptyString(zod.string().optional()),
-  PORT: zod.string(),
+  NODE_ENV: zod.string().default('production'),
+  ENVIRONMENT: zod.string().default('production'),
+  RELEASE: zod.string().default(''),
+  PORT: zod.coerce.number(),
   SECRET: zod.string(),
 });
 
-const configs = {
-  // eslint-disable-next-line no-process-env
-  base: BaseSchema.safeParse(process.env),
-};
+export function resolveEnv(env: Record<string, string | undefined>) {
+  const configs = {
+    base: BaseSchema.safeParse(env),
+  };
 
-const environmentErrors: Array<string> = [];
+  const environmentErrors: Array<string> = [];
 
-for (const config of Object.values(configs)) {
-  if (config.success === false) {
-    environmentErrors.push(JSON.stringify(config.error.format(), null, 4));
+  for (const config of Object.values(configs)) {
+    if (config.success === false) {
+      environmentErrors.push(JSON.stringify(config.error.format(), null, 4));
+    }
   }
+
+  if (environmentErrors.length) {
+    const fullError = environmentErrors.join(`\n`);
+    console.error('❌ Invalid environment variables:', fullError);
+    process.exit(1);
+  }
+
+  const base = extractConfig(configs.base);
+
+  return {
+    environment: base.ENVIRONMENT,
+    release: base.RELEASE ?? 'local',
+    http: {
+      port: base.PORT ?? 3069,
+    },
+    secret: base.SECRET,
+  };
 }
 
-if (environmentErrors.length) {
-  const fullError = environmentErrors.join(`\n`);
-  console.error('❌ Invalid environment variables:', fullError);
-  process.exit(1);
-}
-
-const base = extractConfig(configs.base);
-
-export const env = {
-  environment: base.ENVIRONMENT,
-  release: base.RELEASE ?? 'local',
-  http: {
-    port: base.PORT ?? 5000,
-  },
-  secret: base.SECRET,
-};
+export type ResolvedEnv = ReturnType<typeof resolveEnv>;
