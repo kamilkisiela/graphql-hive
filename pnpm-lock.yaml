@@ -356,7 +356,7 @@ importers:
       '@whatwg-node/fetch': 0.5.3
       abort-controller: 3.0.0
       agentkeepalive: 4.2.1
-      dataloader: 2.0.0
+      dataloader: 2.1.0
       date-fns: 2.25.0
       got: 12.5.3
       graphql-modules: 2.0.0
@@ -394,7 +394,7 @@ importers:
       '@whatwg-node/fetch': 0.5.3
       abort-controller: 3.0.0
       agentkeepalive: 4.2.1
-      dataloader: 2.0.0
+      dataloader: 2.1.0
       date-fns: 2.25.0
       got: 12.5.3
       graphql-modules: 2.0.0
@@ -12177,7 +12177,7 @@ packages:
   /axios/0.21.4:
     resolution: {integrity: sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg==}
     dependencies:
-      follow-redirects: 1.15.2
+      follow-redirects: 1.15.2_debug@4.3.4
     transitivePeerDependencies:
       - debug
     dev: false
@@ -14473,10 +14473,6 @@ packages:
     resolution: {integrity: sha512-68s5jYdlvasItOJnCuI2Q9s4q98g0pCyL3HrcKJu8KNugUl8ahgmZYg38ysLTgQjjXX3H8CJLkAvWrclWfcalw==}
     dev: true
 
-  /dataloader/2.0.0:
-    resolution: {integrity: sha512-YzhyDAwA4TaQIhM5go+vCLmU0UikghC/t9DTQYZR2M/UvZ1MdOhPezSDZcjj9uqQJOMqjLcpWtyW2iNINdlatQ==}
-    dev: false
-
   /dataloader/2.1.0:
     resolution: {integrity: sha512-qTcEYLen3r7ojZNgVUaRggOI+KM7jrKxXeSHhogh/TWxYMeONEMqY+hmkobiYQozsGIyg9OYVzO4ZIfoB4I0pQ==}
 
@@ -16594,16 +16590,6 @@ packages:
 
   /focus-visible/5.2.0:
     resolution: {integrity: sha512-Rwix9pBtC1Nuy5wysTmKy+UjbDJpIfg8eHjw0rjZ1mX4GNLz1Bmd16uDpI3Gk1i70Fgcs8Csg2lPm8HULFg9DQ==}
-    dev: false
-
-  /follow-redirects/1.15.2:
-    resolution: {integrity: sha512-VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==}
-    engines: {node: '>=4.0'}
-    peerDependencies:
-      debug: '*'
-    peerDependenciesMeta:
-      debug:
-        optional: true
     dev: false
 
   /follow-redirects/1.15.2_debug@4.3.4:
