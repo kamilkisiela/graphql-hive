@@ -20,7 +20,7 @@
     "@whatwg-node/fetch": "0.5.3",
     "auth0": "2.44.1",
     "axios": "0.27.2",
-    "date-fns": "2.25.0",
+    "date-fns": "2.29.3",
     "dependency-graph": "0.11.0",
     "dotenv": "10.0.0",
     "ioredis": "4.28.5",
