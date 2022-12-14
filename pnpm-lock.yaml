@@ -1022,7 +1022,7 @@ importers:
       clsx: 1.2.1
       cookies: 0.8.0
       date-fns: 2.25.0
-      dompurify: 2.3.10
+      dompurify: 2.4.1
       echarts: 5.3.2
       echarts-for-react: 3.0.2
       eslint-plugin-jsx-a11y: 6.6.1
@@ -1109,7 +1109,7 @@ importers:
       clsx: 1.2.1
       cookies: 0.8.0
       date-fns: 2.25.0
-      dompurify: 2.3.10
+      dompurify: 2.4.1
       echarts: 5.3.2
       echarts-for-react: 3.0.2_echarts@5.3.2+react@18.2.0
       formik: 2.2.9_react@18.2.0
@@ -12177,7 +12177,7 @@ packages:
   /axios/0.21.4:
     resolution: {integrity: sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg==}
     dependencies:
-      follow-redirects: 1.15.2
+      follow-redirects: 1.15.2_debug@4.3.4
     transitivePeerDependencies:
       - debug
     dev: false
@@ -14855,12 +14855,12 @@ packages:
     dependencies:
       domelementtype: 2.3.0
 
-  /dompurify/2.3.10:
-    resolution: {integrity: sha512-o7Fg/AgC7p/XpKjf/+RC3Ok6k4St5F7Q6q6+Nnm3p2zGWioAY6dh0CbbuwOhH2UcSzKsdniE/YnE2/92JcsA+g==}
-    dev: false
-
   /dompurify/2.4.0:
     resolution: {integrity: sha512-Be9tbQMZds4a3C6xTmz68NlMfeONA//4dOavl/1rNw50E+/QO0KVpbcU0PcaW0nsQxurXls9ZocqFxk8R2mWEA==}
+    dev: false
+
+  /dompurify/2.4.1:
+    resolution: {integrity: sha512-ewwFzHzrrneRjxzmK6oVz/rZn9VWspGFRDb4/rRtIsM1n36t9AKma/ye8syCpcw+XJ25kOK/hOG7t1j2I2yBqA==}
     dev: false
 
   /domutils/2.8.0:
@@ -16598,16 +16598,6 @@ packages:
 
   /focus-visible/5.2.0:
     resolution: {integrity: sha512-Rwix9pBtC1Nuy5wysTmKy+UjbDJpIfg8eHjw0rjZ1mX4GNLz1Bmd16uDpI3Gk1i70Fgcs8Csg2lPm8HULFg9DQ==}
-    dev: false
-
-  /follow-redirects/1.15.2:
-    resolution: {integrity: sha512-VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==}
-    engines: {node: '>=4.0'}
-    peerDependencies:
-      debug: '*'
-    peerDependenciesMeta:
-      debug:
-        optional: true
     dev: false
 
   /follow-redirects/1.15.2_debug@4.3.4:
