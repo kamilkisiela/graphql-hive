@@ -6,7 +6,7 @@ Developing Hive locally requires you to have the following software installed lo
 
 - Node.js 16 LTS (or `nvm` or `fnm`)
 - pnpm v7
-- docker
+- Docker
 - docker-compose
 
 ## Setup Instructions
@@ -15,8 +15,7 @@ Developing Hive locally requires you to have the following software installed lo
 - Make sure to install the recommended VSCode extensions (defined in `.vscode/extensions.json`)
 - In the root of the repo, run `nvm use` to use the same version of node as mentioned
 - Run `pnpm i` at the root to install all the dependencies and run the hooks
-- Run `pnpm setup` to create and apply migrations on the PostgreSQL database
-- Run `pnpm run --filter @hive/storage setup`
+- Run `pnpm run --filter @hive/storage setup` to create local databases
 - Run `pnpm generate` to generate the typings from the graphql files (use `pnpm graphql:generate` if
   you only need to run GraphQL Codegen)
 - Run `pnpm build` to build all services
