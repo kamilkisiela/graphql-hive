@@ -333,7 +333,7 @@ importers:
       '@aws-sdk/client-s3': 3.229.0
       '@aws-sdk/s3-request-presigner': 3.229.0
       '@graphql-hive/core': 0.2.3
-      '@graphql-inspector/core': 3.2.0
+      '@graphql-inspector/core': 3.3.0
       '@graphql-tools/load-files': 6.6.1
       '@graphql-tools/schema': 9.0.9
       '@hive/emails': workspace:*
@@ -381,7 +381,7 @@ importers:
     dependencies:
       '@aws-sdk/client-s3': 3.229.0
       '@aws-sdk/s3-request-presigner': 3.229.0
-      '@graphql-inspector/core': 3.2.0
+      '@graphql-inspector/core': 3.3.0
       '@graphql-tools/load-files': 6.6.1
       '@graphql-tools/schema': 9.0.9
       '@octokit/app': 12.0.7
@@ -6247,16 +6247,6 @@ packages:
       - supports-color
     dev: true
 
-  /@graphql-inspector/core/3.2.0:
-    resolution: {integrity: sha512-tBdjCd025+YNGAGzp1QgpM0KTLnX7hNdKhx6a+PB4bTPilx50A5Jz7BGiDLujEpHSkHzBoElagDZHUutEdfzuA==}
-    peerDependencies:
-      graphql: ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
-    dependencies:
-      dependency-graph: 0.11.0
-      object-inspect: 1.10.3
-      tslib: 2.4.1
-    dev: false
-
   /@graphql-inspector/core/3.2.0_graphql@16.6.0:
     resolution: {integrity: sha512-tBdjCd025+YNGAGzp1QgpM0KTLnX7hNdKhx6a+PB4bTPilx50A5Jz7BGiDLujEpHSkHzBoElagDZHUutEdfzuA==}
     peerDependencies:
@@ -6264,6 +6254,16 @@ packages:
     dependencies:
       dependency-graph: 0.11.0
       graphql: 16.6.0
+      object-inspect: 1.10.3
+      tslib: 2.4.1
+    dev: false
+
+  /@graphql-inspector/core/3.3.0:
+    resolution: {integrity: sha512-LRtk9sHgj9qqVPIkkThAVq3iZ7QxgHCx6elEwd0eesZBCmaIYQxD/BFu+VT8jr10YfOURBZuAnVdyGu64vYpBg==}
+    peerDependencies:
+      graphql: ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
+    dependencies:
+      dependency-graph: 0.11.0
       object-inspect: 1.10.3
       tslib: 2.4.1
     dev: false
