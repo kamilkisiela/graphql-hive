@@ -28,7 +28,7 @@
     "abort-controller": "3.0.0",
     "agentkeepalive": "4.2.1",
     "dataloader": "2.1.0",
-    "date-fns": "2.25.0",
+    "date-fns": "2.29.3",
     "got": "12.5.3",
     "graphql-modules": "2.0.0",
     "graphql-parse-resolve-info": "4.12.3",
