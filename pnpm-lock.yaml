@@ -1177,7 +1177,7 @@ importers:
 
   packages/web/docs:
     specifiers:
-      '@theguild/components': 4.4.2
+      '@theguild/components': 4.4.3
       '@theguild/tailwind-config': 0.2.1
       '@types/react': 17.0.45
       next: 12.3.1
@@ -1185,7 +1185,7 @@ importers:
       react-dom: 18.2.0
       tailwindcss: 3.2.1
     dependencies:
-      '@theguild/components': 4.4.2_azq6kxkn3od7qdylwkyksrwopy
+      '@theguild/components': 4.4.3_azq6kxkn3od7qdylwkyksrwopy
       next: 12.3.1_biqbaboplfbrettd7655fr4n2y
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
@@ -1197,7 +1197,7 @@ importers:
   packages/web/landing-page:
     specifiers:
       '@radix-ui/react-tooltip': 1.0.2
-      '@theguild/components': 4.4.2
+      '@theguild/components': 4.4.3
       '@theguild/tailwind-config': 0.2.1
       '@types/react': 17.0.45
       clsx: 1.2.1
@@ -1210,7 +1210,7 @@ importers:
       tailwindcss: 3.2.3
     dependencies:
       '@radix-ui/react-tooltip': 1.0.2_spprgxbbbwrf7revoq66vrfk2y
-      '@theguild/components': 4.4.2_6jx7hpii6hgsrmhxgqrmo3277u
+      '@theguild/components': 4.4.3_6jx7hpii6hgsrmhxgqrmo3277u
       clsx: 1.2.1
       next: 13.0.6_biqbaboplfbrettd7655fr4n2y
       next-themes: 0.2.1_6jx7hpii6hgsrmhxgqrmo3277u
@@ -10527,8 +10527,8 @@ packages:
     dev: false
     patched: true
 
-  /@theguild/components/4.4.2_6jx7hpii6hgsrmhxgqrmo3277u:
-    resolution: {integrity: sha512-UQXkJ63CBIRvxz8XDj39wpy7JU3ztxfof9KXoUGelFOV520GT+h9b//dM5+fawbHAL5ucm6KMsz+hoGOwvV8PQ==}
+  /@theguild/components/4.4.3_6jx7hpii6hgsrmhxgqrmo3277u:
+    resolution: {integrity: sha512-qamPepdT898Y0qHYpn/su7Q7PEUIqKh0SDEyN3fBDora6JKIqB2MWt/T//9xKx53Lp9dEzcoYgnXAsmjYViHZg==}
     peerDependencies:
       next: ^12.3.1 || ^13.0.0
       react: ^18.2.0
@@ -10569,8 +10569,8 @@ packages:
       - webpack
     dev: false
 
-  /@theguild/components/4.4.2_azq6kxkn3od7qdylwkyksrwopy:
-    resolution: {integrity: sha512-UQXkJ63CBIRvxz8XDj39wpy7JU3ztxfof9KXoUGelFOV520GT+h9b//dM5+fawbHAL5ucm6KMsz+hoGOwvV8PQ==}
+  /@theguild/components/4.4.3_azq6kxkn3od7qdylwkyksrwopy:
+    resolution: {integrity: sha512-qamPepdT898Y0qHYpn/su7Q7PEUIqKh0SDEyN3fBDora6JKIqB2MWt/T//9xKx53Lp9dEzcoYgnXAsmjYViHZg==}
     peerDependencies:
       next: ^12.3.1 || ^13.0.0
       react: ^18.2.0
