@@ -179,7 +179,7 @@ importers:
       '@trpc/server': 10.4.3
       '@types/ioredis': 4.28.10
       '@whatwg-node/fetch': 0.5.3
-      auth0: 2.36.2
+      auth0: 2.44.1
       axios: 0.27.2
       date-fns: 2.25.0
       dependency-graph: 0.11.0
@@ -200,7 +200,7 @@ importers:
       '@trpc/client': 10.4.3_@trpc+server@10.4.3
       '@trpc/server': 10.4.3
       '@whatwg-node/fetch': 0.5.3
-      auth0: 2.36.2
+      auth0: 2.44.1
       axios: 0.27.2
       date-fns: 2.25.0
       dependency-graph: 0.11.0
@@ -12083,11 +12083,11 @@ packages:
     engines: {node: '>=8.0.0'}
     patched: true
 
-  /auth0/2.36.2:
-    resolution: {integrity: sha512-kgs3l3c2RKO79hn8VAwTXwKy2+9uf054zrBj2YYUgMEKvyIhxStS8pTMovUbQP2TVy1cjGfllfQT6M0xS8VWxg==}
+  /auth0/2.44.1:
+    resolution: {integrity: sha512-+/lloZ2YGa8Epf2e1TRhyeXNEN1xHd4mw7arhYvD0ZY83ZOZxsHtaVyaOXuSL+rp0uqXHjyNjAbkGeyYxTUe7Q==}
+    engines: {node: '>=8.3.0'}
     dependencies:
-      axios: 0.21.4
-      es6-promisify: 6.1.1
+      axios: 0.27.2
       form-data: 3.0.1
       jsonwebtoken: 8.5.1
       jwks-rsa: 1.12.3
@@ -12201,7 +12201,7 @@ packages:
   /axios/0.27.2:
     resolution: {integrity: sha512-t+yRIyySRTp/wua5xEr+z1q60QmLq8ABsS5O9Me1AsE5dfKqgnCFzwiCZZ/cGNd1lq4/7akDWMxdhVlucjmnOQ==}
     dependencies:
-      follow-redirects: 1.15.2_debug@4.3.4
+      follow-redirects: 1.15.2
       form-data: 4.0.0
     transitivePeerDependencies:
       - debug
@@ -15156,10 +15156,6 @@ packages:
 
   /es6-error/4.1.1:
     resolution: {integrity: sha512-Um/+FxMr9CISWh0bi5Zv0iOD+4cFh5qLeks1qhAopKVAJw3drgKbKySikp7wGhDL0HPeaja0P5ULZrxLkniUVg==}
-    dev: false
-
-  /es6-promisify/6.1.1:
-    resolution: {integrity: sha512-HBL8I3mIki5C1Cc9QjKUenHtnG0A5/xA8Q/AllRcfiwl2CZFXGK7ddBiCoRwAix4i2KxcQfjtIVcrVbB3vbmwg==}
     dev: false
 
   /esbuild-android-64/0.14.39:
