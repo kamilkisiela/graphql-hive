@@ -293,7 +293,21 @@ target "app" {
   ]
 }
 
-
+target "docs" {
+  inherits = ["app-base", get_target()]
+  context = "${PWD}/packages/web/docs/dist"
+  args = {
+    IMAGE_TITLE = "graphql-hive/docs"
+    PORT = "3000"
+    IMAGE_DESCRIPTION = "The docs of the GraphQL Hive project."
+  }
+  tags = [
+    local_image_tag("docs"),
+    stable_image_tag("docs"),
+    image_tag("docs", COMMIT_SHA),
+    image_tag("docs", BRANCH_NAME)
+  ]
+}
 
 group "build" {
   targets = [
@@ -309,6 +323,7 @@ group "build" {
     "server",
     "stripe-billing",
     "composition-federation-2",
-    "app"
+    "app",
+    "docs"
   ]
 }

@@ -104,7 +104,7 @@ export class FederationOrchestrator implements Orchestrator {
       schemas: schemas.map(s => ({
         raw: s.raw,
         source: s.source,
-        url: s.url,
+        url: s.url || null,
       })),
       external: external?.enabled ? external : null,
     });

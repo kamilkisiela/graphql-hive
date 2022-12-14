@@ -13,6 +13,7 @@ export const resolvers: RateLimitModule.Resolvers = {
           entityType: 'organization',
           id: org.id,
           type: 'operations-reporting',
+          token: null,
         });
 
         logger.debug('Fetched rate-limit info:', { orgId: org.id, operationsRateLimit });

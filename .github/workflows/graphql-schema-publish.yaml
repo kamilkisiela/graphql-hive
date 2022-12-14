@@ -1,0 +1,28 @@
+on:
+  workflow_call:
+    secrets:
+      hiveToken:
+        required: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: setup environment
+        uses: ./.github/actions/setup
+        with:
+          turborepo: true
+          codegen: true
+
+      - name: build core package
+        run: pnpm build --filter @graphql-hive/core
+
+      - name: schema check
+        env:
+          HIVE_TOKEN: ${{ secrets.hiveToken }}
+        run:
+          ./packages/libraries/cli/bin/dev schema:publish
+          "packages/services/api/src/modules/*/module.graphql.ts" --force --github

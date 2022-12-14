@@ -1,0 +1,57 @@
+# Note: This is a composite GitHub Action.
+# Docs: https://docs.github.com/en/actions/creating-actions/creating-a-composite-action
+
+name: setup
+description: Hive CI environment setup
+
+inputs:
+  turborepo:
+    description: Should setup Turbo repo?
+    default: 'true'
+  codegen:
+    description: Should run GraphQL Codegen?
+    default: 'true'
+  installDependencies:
+    description: Should run pnpm install?
+    default: 'true'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: install nodejs
+      uses: actions/setup-node@v3.5.1
+      with:
+        node-version-file: .node-version
+
+    - name: install pnpm
+      uses: pnpm/action-setup@v2.2.4
+      with:
+        version: 7.18.2
+
+    - name: pnpm store path
+      id: pnpm-cache
+      shell: bash
+      run: echo "pnpm_cache_dir=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+    - uses: actions/cache@v3
+      name: restore pnpm cache
+      with:
+        path: ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
+        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-
+
+    - name: pnpm install
+      if: ${{ inputs.installDependencies == 'true' }}
+      shell: bash
+      run: pnpm install --frozen-lockfile
+
+    - name: turborepo setup
+      if: ${{ inputs.turborepo == 'true' }}
+      shell: bash
+      run: node ./scripts/turborepo-setup.js
+
+    - name: generate graphql types
+      if: ${{ inputs.codegen == 'true' }}
+      shell: bash
+      run: pnpm graphql:generate

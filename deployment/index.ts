@@ -21,17 +21,31 @@ import { deployProxy } from './services/proxy';
 import { deployClickhouse } from './services/clickhouse';
 import { deployUsageEstimation } from './services/usage-estimation';
 import { deploySuperTokens } from './services/supertokens';
-import { createPackageHelper } from './utils/pack';
-import * as azure from '@pulumi/azure';
 import { optimizeAzureCluster } from './utils/azure-helpers';
 import { deployRateLimit } from './services/rate-limit';
 import { deployStripeBilling } from './services/billing';
 import { deployCloudFlareSecurityTransform } from './services/cloudflare-security';
+import { createDockerImageFactory } from './utils/docker-images';
 import * as random from '@pulumi/random';
 
-const packageHelper = createPackageHelper();
-
 optimizeAzureCluster();
+
+const dockerConfig = new pulumi.Config('docker');
+const dockerImages = createDockerImageFactory({
+  registryHostname: dockerConfig.require('registryUrl'),
+  imagesPrefix: dockerConfig.require('imagesPrefix'),
+});
+
+const imagePullSecret = dockerImages.createRepositorySecret(
+  dockerConfig.requireSecret('registryAuthBase64'),
+);
+
+// eslint-disable-next-line no-process-env
+const imagesTag = process.env.DOCKER_IMAGE_TAG;
+
+if (!imagesTag) {
+  throw new Error(`DOCKER_IMAGE_TAG env variable is not set.`);
+}
 
 const envName = pulumi.getStack();
 const commonConfig = new pulumi.Config('common');
@@ -52,23 +66,6 @@ const s3Config = {
   secretAccessKey: r2Config.requireSecret('secretAccessKey'),
 };
 
-const resourceGroup = new azure.core.ResourceGroup(`hive-${envName}-rg`, {
-  location: azure.Locations.EastUS,
-});
-
-const storageAccount = new azure.storage.Account(`hive${envName}`, {
-  resourceGroupName: resourceGroup.name,
-  accountReplicationType: 'LRS',
-  accountTier: 'Standard',
-  accountKind: 'StorageV2',
-  publicNetworkAccessEnabled: true,
-});
-
-const storageContainer = new azure.storage.Container('deploy-artifacts', {
-  storageAccountName: storageAccount.name,
-  containerAccessType: 'blob',
-});
-
 const deploymentEnv: DeploymentEnvironment = {
   ENVIRONMENT: envName,
   NODE_ENV: 'production',
@@ -81,14 +78,14 @@ deployMetrics({ envName });
 const cdn = deployCFCDN({
   envName,
   rootDns,
-  packageHelper,
   s3Config,
+  release: imagesTag,
 });
 
 const cfBroker = deployCFBroker({
   envName,
   rootDns,
-  packageHelper,
+  release: imagesTag,
 });
 
 deployCloudflarePolice({ envName, rootDns });
@@ -100,24 +97,26 @@ const kafkaApi = deployKafka();
 const clickhouseApi = deployClickhouse();
 
 const dbMigrations = deployDbMigrations({
-  storageContainer,
-  packageHelper,
   clickhouse: clickhouseApi,
   kafka: kafkaApi,
   deploymentEnv,
+  image: dockerImages.getImageId('storage', imagesTag),
+  imagePullSecret,
 });
 
 const tokensApi = deployTokens({
-  packageHelper,
-  storageContainer,
+  image: dockerImages.getImageId('tokens', imagesTag),
+  release: imagesTag,
   deploymentEnv,
   dbMigrations,
   heartbeat: heartbeatsConfig.get('tokens'),
+  imagePullSecret,
 });
 
 const webhooksApi = deployWebhooks({
-  packageHelper,
-  storageContainer,
+  image: dockerImages.getImageId('webhooks', imagesTag),
+  imagePullSecret,
+  release: imagesTag,
   deploymentEnv,
   redis: redisApi,
   heartbeat: heartbeatsConfig.get('webhooks'),
@@ -125,8 +124,9 @@ const webhooksApi = deployWebhooks({
 });
 
 const emailsApi = deployEmails({
-  packageHelper,
-  storageContainer,
+  image: dockerImages.getImageId('emails', imagesTag),
+  imagePullSecret,
+  release: imagesTag,
   deploymentEnv,
   redis: redisApi,
   email: {
@@ -138,24 +138,27 @@ const emailsApi = deployEmails({
 });
 
 const usageEstimationApi = deployUsageEstimation({
-  packageHelper,
-  storageContainer,
+  image: dockerImages.getImageId('usage-estimator', imagesTag),
+  imagePullSecret,
+  release: imagesTag,
   deploymentEnv,
   clickhouse: clickhouseApi,
   dbMigrations,
 });
 
 const billingApi = deployStripeBilling({
-  packageHelper,
-  storageContainer,
+  image: dockerImages.getImageId('stripe-billing', imagesTag),
+  imagePullSecret,
+  release: imagesTag,
   deploymentEnv,
   dbMigrations,
   usageEstimator: usageEstimationApi,
 });
 
 const rateLimitApi = deployRateLimit({
-  packageHelper,
-  storageContainer,
+  image: dockerImages.getImageId('rate-limit', imagesTag),
+  imagePullSecret,
+  release: imagesTag,
   deploymentEnv,
   dbMigrations,
   usageEstimator: usageEstimationApi,
@@ -163,8 +166,9 @@ const rateLimitApi = deployRateLimit({
 });
 
 const usageApi = deployUsage({
-  packageHelper,
-  storageContainer,
+  image: dockerImages.getImageId('usage', imagesTag),
+  imagePullSecret,
+  release: imagesTag,
   deploymentEnv,
   tokens: tokensApi,
   kafka: kafkaApi,
@@ -173,18 +177,20 @@ const usageApi = deployUsage({
 });
 
 const usageIngestorApi = deployUsageIngestor({
+  image: dockerImages.getImageId('usage-ingestor', imagesTag),
+  imagePullSecret,
+  release: imagesTag,
   clickhouse: clickhouseApi,
   kafka: kafkaApi,
-  packageHelper,
-  storageContainer,
   deploymentEnv,
   dbMigrations,
   heartbeat: heartbeatsConfig.get('usageIngestor'),
 });
 
 const schemaApi = deploySchema({
-  packageHelper,
-  storageContainer,
+  image: dockerImages.getImageId('schema', imagesTag),
+  imagePullSecret,
+  release: imagesTag,
   deploymentEnv,
   redis: redisApi,
   broker: cfBroker,
@@ -215,8 +221,9 @@ const supertokens = deploySuperTokens({ apiKey: supertokensApiKey.result });
 
 const graphqlApi = deployGraphQL({
   clickhouse: clickhouseApi,
-  packageHelper,
-  storageContainer,
+  image: dockerImages.getImageId('server', imagesTag),
+  imagePullSecret,
+  release: imagesTag,
   deploymentEnv,
   tokens: tokensApi,
   webhooks: webhooksApi,
@@ -241,8 +248,9 @@ const graphqlApi = deployGraphQL({
 
 const docs = deployDocs({
   rootDns,
-  packageHelper,
-  storageContainer,
+  image: dockerImages.getImageId('docs', imagesTag),
+  imagePullSecret,
+  release: imagesTag,
 });
 
 const app = deployApp({
@@ -250,8 +258,9 @@ const app = deployApp({
   docs,
   graphql: graphqlApi,
   dbMigrations,
-  packageHelper,
-  storageContainer,
+  image: dockerImages.getImageId('app', imagesTag),
+  imagePullSecret,
+  release: imagesTag,
   supertokensConfig: {
     apiKey: supertokensApiKey.result,
     endpoint: supertokens.localEndpoint,

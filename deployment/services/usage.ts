@@ -1,14 +1,13 @@
 import * as pulumi from '@pulumi/pulumi';
-import * as azure from '@pulumi/azure';
 import { Tokens } from './tokens';
 import { DbMigrations } from './db-migrations';
-import { RemoteArtifactAsServiceDeployment } from '../utils/remote-artifact-as-service';
-import { PackageHelper } from '../utils/pack';
+import { ServiceDeployment } from '../utils/service-deployment';
 import { serviceLocalEndpoint } from '../utils/local-endpoint';
 import { DeploymentEnvironment } from '../types';
 import { Kafka } from './kafka';
 import { RateLimitService } from './rate-limit';
 import { isProduction } from '../utils/helpers';
+import * as k8s from '@pulumi/kubernetes';
 
 const commonConfig = new pulumi.Config('common');
 const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
@@ -16,31 +15,34 @@ const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
 export type Usage = ReturnType<typeof deployUsage>;
 
 export function deployUsage({
-  storageContainer,
-  packageHelper,
   deploymentEnv,
   tokens,
   kafka,
   dbMigrations,
   rateLimit,
+  image,
+  release,
+  imagePullSecret,
 }: {
-  storageContainer: azure.storage.Container;
-  packageHelper: PackageHelper;
+  image: string;
+  release: string;
   deploymentEnv: DeploymentEnvironment;
   tokens: Tokens;
   kafka: Kafka;
   dbMigrations: DbMigrations;
   rateLimit: RateLimitService;
+  imagePullSecret: k8s.core.v1.Secret;
 }) {
   const replicas = 1; /*isProduction(deploymentEnv) ? 2 : 1*/
   const cpuLimit = isProduction(deploymentEnv) ? '600m' : '300m';
   const maxReplicas = isProduction(deploymentEnv) ? 4 : 2;
   const kafkaBufferDynamic = kafka.config.bufferDynamic === 'true' ? '1' : '0';
 
-  return new RemoteArtifactAsServiceDeployment(
+  return new ServiceDeployment(
     'usage-service',
     {
-      storageContainer,
+      image,
+      imagePullSecret,
       replicas,
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
@@ -57,12 +59,11 @@ export function deployUsage({
         KAFKA_BUFFER_INTERVAL: kafka.config.bufferInterval,
         KAFKA_BUFFER_DYNAMIC: kafkaBufferDynamic,
         KAFKA_TOPIC: kafka.config.topic,
-        RELEASE: packageHelper.currentReleaseId(),
+        RELEASE: release,
         TOKENS_ENDPOINT: serviceLocalEndpoint(tokens.service),
         RATE_LIMIT_ENDPOINT: serviceLocalEndpoint(rateLimit.service),
       },
       exposesMetrics: true,
-      packageInfo: packageHelper.npmPack('@hive/usage'),
       port: 4000,
       pdb: true,
       autoScaling: {

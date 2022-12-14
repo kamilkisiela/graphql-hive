@@ -1,22 +1,17 @@
 import * as kx from '@pulumi/kubernetesx';
 import * as k8s from '@pulumi/kubernetes';
-import * as azure from '@pulumi/azure';
 import * as pulumi from '@pulumi/pulumi';
 import { PodBuilder, normalizeEnv } from './pod-builder';
-import { PackageInfo } from './pack';
 import { isDefined } from './helpers';
 
-const DEFAULT_IMAGE = 'node:16.13.2-alpine3.15';
-
-export class RemoteArtifactAsServiceDeployment {
+export class ServiceDeployment {
   constructor(
     protected name: string,
     protected options: {
-      storageContainer: azure.storage.Container;
+      imagePullSecret: k8s.core.v1.Secret;
       env?: kx.types.Container['env'];
-      packageInfo: PackageInfo;
+      image: string;
       port?: number;
-      image?: string;
       livenessProbe?: string;
       readinessProbe?: string;
       memoryLimit?: string;
@@ -42,8 +37,7 @@ export class RemoteArtifactAsServiceDeployment {
   ) {}
 
   deployAsJob() {
-    const artifactUrl = this.makeArtifactUrl();
-    const { pb } = this.createPod(artifactUrl, true);
+    const { pb } = this.createPod(true);
 
     const job = new kx.Job(
       this.name,
@@ -56,7 +50,7 @@ export class RemoteArtifactAsServiceDeployment {
     return { job };
   }
 
-  createPod(artifactUrl: pulumi.Output<string>, asJob: boolean) {
+  createPod(asJob: boolean) {
     const port = this.options.port || 3000;
     const additionalEnv: any[] = normalizeEnv(this.options.env);
 
@@ -89,14 +83,6 @@ export class RemoteArtifactAsServiceDeployment {
       };
     }
 
-    const image = this.options.image || DEFAULT_IMAGE;
-    const appVolume = {
-      mountPath: '/app',
-      name: 'app',
-    };
-
-    const volumeMounts = [appVolume];
-
     if (this.options.exposesMetrics) {
       additionalEnv.push({ name: 'METRICS_ENABLED', value: 'true' }); // TODO: remove this
       additionalEnv.push({ name: 'PROMETHEUS_METRICS', value: '1' });
@@ -104,30 +90,14 @@ export class RemoteArtifactAsServiceDeployment {
 
     const pb = new PodBuilder({
       restartPolicy: asJob ? 'Never' : 'Always',
-      volumes: [
-        {
-          name: appVolume.name,
-          emptyDir: {},
-        },
-      ],
-      initContainers: [
-        {
-          name: `${this.name}-init`,
-          image,
-          workingDir: appVolume.mountPath,
-          volumeMounts,
-          command:
-            this.options.packageInfo.runtime === 'node'
-              ? ['/bin/sh', '-c', artifactUrl.apply(v => `yarn add ${v}`)]
-              : this.options.packageInfo.runtime === 'rust'
-              ? ['/bin/sh', '-c', artifactUrl.apply(v => `wget ${v}`)]
-              : ['echo missing script!'],
-        },
-      ],
+      imagePullSecrets: this.options.imagePullSecret
+        ? [{ name: this.options.imagePullSecret.metadata.name }]
+        : undefined,
       containers: [
         {
           livenessProbe,
           readinessProbe,
+          imagePullPolicy: 'Always',
           env: [
             { name: 'PORT', value: String(port) },
             {
@@ -140,9 +110,7 @@ export class RemoteArtifactAsServiceDeployment {
             },
           ].concat(additionalEnv),
           name: this.name,
-          image,
-          workingDir: appVolume.mountPath,
-          volumeMounts: [appVolume],
+          image: this.options.image,
           resources: this.options?.autoScaling?.cpu.limit
             ? {
                 limits: {
@@ -150,12 +118,6 @@ export class RemoteArtifactAsServiceDeployment {
                 },
               }
             : undefined,
-          command:
-            this.options.packageInfo.runtime === 'node'
-              ? ['yarn', this.options.bin || this.options.packageInfo.bin]
-              : this.options.packageInfo.runtime === 'rust'
-              ? [this.options.packageInfo.bin]
-              : [],
           ports: {
             http: port,
             ...(this.options.exposesMetrics
@@ -171,20 +133,8 @@ export class RemoteArtifactAsServiceDeployment {
     return { pb };
   }
 
-  private makeArtifactUrl() {
-    const azureStaticFile = new azure.storage.Blob(`${this.name}-artifact`, {
-      storageAccountName: this.options.storageContainer.storageAccountName,
-      storageContainerName: this.options.storageContainer.name,
-      type: 'Block',
-      source: new pulumi.asset.FileAsset(this.options.packageInfo.file),
-    });
-
-    return azureStaticFile.url;
-  }
-
   deploy() {
-    const artifactUrl = this.makeArtifactUrl();
-    const { pb } = this.createPod(artifactUrl, false);
+    const { pb } = this.createPod(false);
 
     const metadata: k8s.types.input.meta.v1.ObjectMeta = {
       annotations: {},

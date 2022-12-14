@@ -14,5 +14,5 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true
   },
-  "include": ["types.ts", "index.ts", "utils/*c*/*.ts", "services/**/*.ts"]
+  "include": ["services/**/*.ts", "utils/*c*/*.ts", "index.ts", "types.ts"]
 }

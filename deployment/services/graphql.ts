@@ -1,5 +1,4 @@
 import * as pulumi from '@pulumi/pulumi';
-import * as azure from '@pulumi/azure';
 import { CDN } from './cf-cdn';
 import { parse } from 'pg-connection-string';
 import { Tokens } from './tokens';
@@ -7,17 +6,17 @@ import { Webhooks } from './webhooks';
 import { Redis } from './redis';
 import { DbMigrations } from './db-migrations';
 import { Schema } from './schema';
-import { RemoteArtifactAsServiceDeployment } from '../utils/remote-artifact-as-service';
+import { ServiceDeployment } from '../utils/service-deployment';
 import { serviceLocalEndpoint } from '../utils/local-endpoint';
 import { DeploymentEnvironment } from '../types';
 import { Clickhouse } from './clickhouse';
 import { Usage } from './usage';
-import { PackageHelper } from '../utils/pack';
 import { UsageEstimator } from './usage-estimation';
 import { RateLimitService } from './rate-limit';
 import { Emails } from './emails';
 import { StripeBillingService } from './billing';
 import { Output } from '@pulumi/pulumi';
+import * as k8s from '@pulumi/kubernetes';
 
 const commonConfig = new pulumi.Config('common');
 const cloudflareConfig = new pulumi.Config('cloudflare');
@@ -31,8 +30,8 @@ export type GraphQL = ReturnType<typeof deployGraphQL>;
 
 export function deployGraphQL({
   clickhouse,
-  packageHelper,
-  storageContainer,
+  release,
+  image,
   deploymentEnv,
   tokens,
   webhooks,
@@ -48,9 +47,10 @@ export function deployGraphQL({
   supertokensConfig,
   auth0Config,
   s3Config,
+  imagePullSecret,
 }: {
-  storageContainer: azure.storage.Container;
-  packageHelper: PackageHelper;
+  release: string;
+  image: string;
   clickhouse: Clickhouse;
   deploymentEnv: DeploymentEnvironment;
   tokens: Tokens;
@@ -77,16 +77,18 @@ export function deployGraphQL({
     accessKeyId: Output<string>;
     secretAccessKey: Output<string>;
   };
+  imagePullSecret: k8s.core.v1.Secret;
 }) {
   const rawConnectionString = apiConfig.requireSecret('postgresConnectionString');
   const connectionString = rawConnectionString.apply(rawConnectionString =>
     parse(rawConnectionString),
   );
 
-  return new RemoteArtifactAsServiceDeployment(
+  return new ServiceDeployment(
     'graphql-api',
     {
-      storageContainer,
+      imagePullSecret,
+      image,
       replicas: 2,
       pdb: true,
       readinessProbe: '/_readiness',
@@ -105,7 +107,7 @@ export function deployGraphQL({
         REDIS_HOST: redis.config.host,
         REDIS_PORT: String(redis.config.port),
         REDIS_PASSWORD: redis.config.password,
-        RELEASE: packageHelper.currentReleaseId(),
+        RELEASE: release,
         POSTGRES_HOST: connectionString.apply(connection => connection.host ?? ''),
         POSTGRES_PORT: connectionString.apply(connection => connection.port ?? '5432'),
         POSTGRES_PASSWORD: connectionString.apply(connection => connection.password ?? ''),
@@ -150,7 +152,6 @@ export function deployGraphQL({
         AUTH_LEGACY_AUTH0_INTERNAL_API_KEY: auth0Config.internalApiKey,
         AUTH_ORGANIZATION_OIDC: '1',
       },
-      packageInfo: packageHelper.npmPack('@hive/server'),
       exposesMetrics: true,
       port: 4000,
     },

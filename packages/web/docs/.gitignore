@@ -32,3 +32,5 @@ npm-debug.log*
 
 # Graphql
 lib/graphql-operations.ts
+
+./packages

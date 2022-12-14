@@ -1,12 +1,11 @@
 import * as pulumi from '@pulumi/pulumi';
-import * as azure from '@pulumi/azure';
 import { parse } from 'pg-connection-string';
-import { RemoteArtifactAsServiceDeployment } from '../utils/remote-artifact-as-service';
-import { PackageHelper } from '../utils/pack';
+import { ServiceDeployment } from '../utils/service-deployment';
 import { DeploymentEnvironment } from '../types';
 import { DbMigrations } from './db-migrations';
 import { UsageEstimator } from './usage-estimation';
 import { serviceLocalEndpoint } from '../utils/local-endpoint';
+import * as k8s from '@pulumi/kubernetes';
 
 const billingConfig = new pulumi.Config('billing');
 const commonConfig = new pulumi.Config('common');
@@ -16,27 +15,30 @@ const apiConfig = new pulumi.Config('api');
 export type StripeBillingService = ReturnType<typeof deployStripeBilling>;
 
 export function deployStripeBilling({
-  storageContainer,
-  packageHelper,
   deploymentEnv,
   dbMigrations,
   usageEstimator,
+  image,
+  release,
+  imagePullSecret,
 }: {
   usageEstimator: UsageEstimator;
-  storageContainer: azure.storage.Container;
-  packageHelper: PackageHelper;
+  image: string;
+  release: string;
   deploymentEnv: DeploymentEnvironment;
   dbMigrations: DbMigrations;
+  imagePullSecret: k8s.core.v1.Secret;
 }) {
   const rawConnectionString = apiConfig.requireSecret('postgresConnectionString');
   const connectionString = rawConnectionString.apply(rawConnectionString =>
     parse(rawConnectionString),
   );
 
-  return new RemoteArtifactAsServiceDeployment(
+  return new ServiceDeployment(
     'stripe-billing',
     {
-      storageContainer,
+      image,
+      imagePullSecret,
       replicas: 1,
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
@@ -44,7 +46,7 @@ export function deployStripeBilling({
         ...deploymentEnv,
         ...commonEnv,
         SENTRY: commonEnv.SENTRY_ENABLED,
-        RELEASE: packageHelper.currentReleaseId(),
+        RELEASE: release,
         USAGE_ESTIMATOR_ENDPOINT: serviceLocalEndpoint(usageEstimator.service),
         STRIPE_SECRET_KEY: billingConfig.requireSecret('stripePrivateKey'),
         POSTGRES_HOST: connectionString.apply(connection => connection.host ?? ''),
@@ -55,7 +57,6 @@ export function deployStripeBilling({
         POSTGRES_SSL: connectionString.apply(connection => (connection.ssl ? '1' : '0')),
       },
       exposesMetrics: true,
-      packageInfo: packageHelper.npmPack('@hive/stripe-billing'),
       port: 4000,
     },
     [dbMigrations, usageEstimator.service, usageEstimator.deployment],

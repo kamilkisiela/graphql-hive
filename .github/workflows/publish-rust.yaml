@@ -1,104 +1,9 @@
-name: CD
 on:
-  push:
-    branches:
-      - main
+  workflow_call:
 
 jobs:
   publish:
-    name: 'build'
-    runs-on: ubuntu-latest
-
-    env:
-      HIVE_TOKEN: ${{ secrets.HIVE_TOKEN }}
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-      TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
-      TURBO_API_URL: ${{ secrets.TURBO_API_URL }}
-      TURBO_REMOTE_ONLY: 'true'
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2.2.4
-        with:
-          version: 7
-
-      - name: Install Node
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: .node-version
-          cache: pnpm
-
-      - name: Install deps
-        run: pnpm i --frozen-lockfile
-
-      - name: Generate GraphQL Types
-        run: pnpm graphql:generate
-
-      - name: Build
-        run: pnpm build:libraries
-
-      - name: Schema Publish
-        run:
-          ./packages/libraries/cli/bin/dev schema:publish
-          "packages/services/api/src/modules/*/module.graphql.ts" --force --github
-
-      - name: Prepare NPM Credentials
-        run: |
-          echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> $HOME/.npmrc
-          npm config set always-auth true
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Create Release Pull Request or Publish packages
-        id: changesets
-        uses: changesets/action@v1.4.1
-        with:
-          publish: pnpm release
-          commit: 'chore(release): update monorepo packages versions'
-          title: 'Upcoming Release Changes'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract published version
-        if:
-          steps.changesets.outputs.published && contains(steps.changesets.outputs.publishedPackages,
-          '"@graphql-hive/cli"')
-        id: cli
-        run: |
-          echo '${{steps.changesets.outputs.publishedPackages}}' > cli-ver.json
-          VERSION=`echo $(jq -r '.[] | select(.name | endswith("@graphql-hive/cli")).version' cli-ver.json)`
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "publish=true" >> $GITHUB_OUTPUT
-
-      - name: Pack tarballs
-        if: steps.cli.outputs.publish == 'true'
-        working-directory: packages/libraries/cli
-        run: pnpm oclif:pack
-
-      - name: Upload tarballs
-        if: steps.cli.outputs.publish == 'true'
-        working-directory: packages/libraries/cli
-        run: pnpm oclif:upload
-
-      - name: Promote tarballs
-        if: steps.cli.outputs.publish == 'true'
-        working-directory: packages/libraries/cli
-        env:
-          VERSION: ${{ steps.cli.outputs.version }}
-        run:
-          pnpm oclif promote --no-xz --sha ${GITHUB_SHA:0:7} --version $VERSION || pnpm oclif
-          promote --no-xz --sha ${GITHUB_SHA:0:8} --version $VERSION
-
-  publish_rust:
-    name: Publish Rust
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     outputs:
       rust_changed: ${{ steps.rust_changed.outputs.rust_changed }}
@@ -119,7 +24,7 @@ jobs:
     needs: publish_rust
     if: needs.publish_rust.outputs.rust_changed == 'true'
     name: Publish for Docker
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     env:
       REGISTRY: ghcr.io
@@ -298,7 +203,7 @@ jobs:
     needs: publish_rust
     if: needs.publish_rust.outputs.rust_changed == 'true'
     name: Publish for Linux
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 40
 
     steps:
@@ -351,94 +256,3 @@ jobs:
           bucket: apollo-router
           file: router.tar.gz
           destination: latest/linux/router.tar.gz
-
-  deploy:
-    name: 'deploy to staging'
-    needs: publish
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Dispatch Deployment
-        run: |
-          curl --request POST \
-            --url 'https://api.github.com/repos/${{ secrets.PRIVATE_REPO_OWNER }}/${{ secrets.PRIVATE_REPO_NAME }}/dispatches' \
-            --header 'Accept: application/vnd.github.everest-preview+json' \
-            --header 'Authorization: token ${{ secrets.GH_PAT }}' \
-            --header 'Content-Type: application/json' \
-            --data '{
-            "event_type": "deploy",
-            "client_payload": {
-              "environment": "staging",
-              "ref": "${{ github.sha }}"
-            }
-          }'
-
-  publish-docker-images:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-
-    env:
-      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-      TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
-      TURBO_API_URL: ${{ secrets.TURBO_API_URL }}
-      TURBO_REMOTE_ONLY: 'true'
-      REGISTRY: ghcr.io
-      IMAGE_NAME: ${{ github.repository }}
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 5
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2.2.4
-        with:
-          version: 7
-
-      - name: Install Node
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: .node-version
-          cache: pnpm
-
-      - name: Install deps
-        run: pnpm i --frozen-lockfile
-
-      - name: Generate Types
-        run: pnpm graphql:generate
-
-      - name: Build
-        run: pnpm build
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-        with:
-          platforms: 'linux/arm64,linux/amd64'
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Login to registry
-        uses: docker/login-action@v2
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Get branch name
-        id: branch-name
-        uses: tj-actions/branch-names@v6
-
-      - name: Build Docker Images
-        env:
-          DOCKER_REGISTRY: ${{ env.REGISTRY }}/${{ github.repository }}/
-          COMMIT_SHA: ${{ github.sha }}
-          RELEASE: ${{ github.sha }}
-          BRANCH_NAME: ${{ steps.branch-name.outputs.current_branch }}
-          BUILD_TYPE: 'publish'
-          BUILD_STABLE: '1'
-        run: |
-          docker buildx bake \
-            -f docker.hcl \
-            build --push
