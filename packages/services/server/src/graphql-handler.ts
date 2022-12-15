@@ -235,7 +235,11 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
     const requestId = cleanRequestId(requestIdHeader);
     const controller = new AbortController();
 
-    req.raw.once('close', () => {
+    // we use the socket.close over req.close because req.close is emitted
+    // when the request gets processed (not canceled)
+    // see more: https://github.com/nodejs/node/issues/38924
+    // TODO: socket.once might break for http/2 because
+    req.raw.socket.once('close', () => {
       controller.abort();
     });
 
