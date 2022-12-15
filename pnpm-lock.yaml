@@ -233,7 +233,7 @@ importers:
       '@types/git-parse': 2.1.2
       '@types/mkdirp': 1.0.2
       colors: 1.4.0
-      env-ci: 7.1.0
+      env-ci: 7.3.0
       git-parse: 2.1.2
       graphql: 16.6.0
       graphql-request: 4.1.0
@@ -257,7 +257,7 @@ importers:
       '@oclif/plugin-help': 5.1.20
       '@oclif/plugin-update': 3.0.8
       colors: 1.4.0
-      env-ci: 7.1.0
+      env-ci: 7.3.0
       git-parse: 2.1.2
       graphql: 16.6.0
       graphql-request: 4.1.0_graphql@16.6.0
@@ -15040,8 +15040,8 @@ packages:
   /entities/2.2.0:
     resolution: {integrity: sha512-p92if5Nz619I0w+akJrLZH0MX0Pb5DX39XOwQTtXSdQQOaYH03S1uIQp4mhOZtAXrxq4ViO67YTiLBo2638o9A==}
 
-  /env-ci/7.1.0:
-    resolution: {integrity: sha512-zyRGZQkjp5lgYYRUJS7hbEAhEtfslzwN5ScSnLXhaF2OEtiVC8LW+5mbaIqlFpIE95iFhukrKaLm0Rdt/w2lNg==}
+  /env-ci/7.3.0:
+    resolution: {integrity: sha512-L8vK54CSjKB4pwlwx0YaqeBdUSGufaLHl/pEgD+EqnMrYCVUA8HzMjURALSyvOlC57e953yN7KyXS63qDoc3Rg==}
     engines: {node: '>=12.20'}
     dependencies:
       execa: 5.1.1
