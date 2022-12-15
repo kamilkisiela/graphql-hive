@@ -236,7 +236,7 @@ importers:
       env-ci: 7.1.0
       git-parse: 2.1.2
       graphql: 16.6.0
-      graphql-request: 4.1.0
+      graphql-request: 4.3.0
       graphql-tag: 2.12.6
       log-symbols: 4.1.0
       mkdirp: 1.0.4
@@ -260,7 +260,7 @@ importers:
       env-ci: 7.1.0
       git-parse: 2.1.2
       graphql: 16.6.0
-      graphql-request: 4.1.0_graphql@16.6.0
+      graphql-request: 4.3.0_graphql@16.6.0
       graphql-tag: 2.12.6_graphql@16.6.0
       log-symbols: 4.1.0
       mkdirp: 1.0.4
@@ -17364,8 +17364,8 @@ packages:
       - supports-color
     dev: false
 
-  /graphql-request/4.1.0_graphql@16.6.0:
-    resolution: {integrity: sha512-CBFcO6LP7cg+aBMc+x9C1dZEQsKTBZKR2J+HzuB0cR/6aaU4K4/tRXTQu8CDMp5195ZU+DTNKZZOSK1WRbTeAg==}
+  /graphql-request/4.3.0_graphql@16.6.0:
+    resolution: {integrity: sha512-2v6hQViJvSsifK606AliqiNiijb1uwWp6Re7o0RTyH+uRTv/u7Uqm2g4Fjq/LgZIzARB38RZEvVBFOQOVdlBow==}
     peerDependencies:
       graphql: 14 - 16
     dependencies:
