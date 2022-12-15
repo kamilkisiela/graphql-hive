@@ -52,6 +52,7 @@
     "@graphql-hive/core": "0.2.3",
     "@hive/emails": "workspace:*",
     "@hive/schema": "workspace:*",
+    "@hive/storage": "workspace:*",
     "@hive/tokens": "workspace:*",
     "@hive/webhooks": "workspace:*",
     "@types/ioredis": "4.28.10",

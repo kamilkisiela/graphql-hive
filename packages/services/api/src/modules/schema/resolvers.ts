@@ -91,7 +91,7 @@ export const resolvers: SchemaModule.Resolvers = {
         target,
       });
     },
-    async schemaPublish(_, { input }, { injector }, info) {
+    async schemaPublish(_, { input }, { injector, abortSignal }, info) {
       const [organization, project, target] = await Promise.all([
         injector.get(OrganizationManager).getOrganizationIdByToken(),
         injector.get(ProjectManager).getProjectIdByToken(),
@@ -110,14 +110,17 @@ export const resolvers: SchemaModule.Resolvers = {
       const isSchemaPublishMissingUrlErrorSelected =
         !!parsedResolveInfoFragment?.fieldsByTypeName['SchemaPublishMissingUrlError'];
 
-      return injector.get(SchemaPublisher).publish({
-        ...input,
-        checksum,
-        organization,
-        project,
-        target,
-        isSchemaPublishMissingUrlErrorSelected,
-      });
+      return injector.get(SchemaPublisher).publish(
+        {
+          ...input,
+          checksum,
+          organization,
+          project,
+          target,
+          isSchemaPublishMissingUrlErrorSelected,
+        },
+        abortSignal,
+      );
     },
     async updateSchemaVersionStatus(_, { input }, { injector }) {
       const translator = injector.get(IdTranslator);

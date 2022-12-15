@@ -23,6 +23,7 @@ import type {
 } from '@hive/api';
 import {
   DatabasePool,
+  DatabasePoolConnection,
   DatabaseTransactionConnection,
   sql,
   TaggedTemplateLiteralInvocation,
@@ -91,6 +92,36 @@ function getProviderBasedOnExternalId(externalId: string): AuthProvider {
 
 export async function createStorage(connection: string, maximumPoolSize: number): Promise<Storage> {
   const pool = await getPool(connection, maximumPoolSize);
+
+  // use a single connection for locks because postgres advisory locks are bound
+  // to sessions and if the session is disposed, so will be the lock. by using
+  // a single connection for locks always, we guarantee the locks database
+  // persistance throughout its whole lifecycle
+  const getLockConn = (() => {
+    let lockConn: DatabasePoolConnection | null;
+    return () =>
+      new Promise<DatabasePoolConnection>((resolve, reject) => {
+        if (lockConn) {
+          return resolve(lockConn);
+        }
+        pool
+          .connect(conn => {
+            lockConn = conn;
+            resolve(lockConn);
+            return new Promise(() => {
+              // keep the connection alive indefinitely
+            });
+          })
+          .then(() => {
+            lockConn = null;
+            reject(new Error('Lock connection ended'));
+          })
+          .catch(err => {
+            lockConn = null;
+            reject(err);
+          });
+      });
+  })();
 
   function transformUser(user: users): User {
     return {
@@ -483,6 +514,12 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       oidcIntegrationId: input.oidcIntegrationId,
     };
   }
+
+  type Lock = {
+    p: Promise<void>;
+    release: () => void;
+  };
+  const locks = new Map<string, Lock>();
 
   const storage: Storage = {
     destroy() {
@@ -2511,6 +2548,109 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           "id" = ${args.oidcIntegrationId}
       `);
     },
+
+    idMutex: {
+      async lock(id, { signal }) {
+        return Promise.race([
+          new Promise<never>((_, reject) => {
+            const listener = () => {
+              signal.removeEventListener('abort', listener);
+              reject(new Error('Locking aborted'));
+            };
+            signal.addEventListener('abort', listener);
+          }),
+          (async () => {
+            const lockConn = await getLockConn();
+            if (signal.aborted) {
+              throw new Error('Locking aborted');
+            }
+
+            // postgres advisory locks uses bigints as lock keys,
+            // we therefore hash the provided lock id and use the hash
+            const idInt = hashFnv32a(id);
+
+            // wait if there's a lock in the process
+            let lock;
+            while ((lock = locks.get(id))) {
+              await lock.p;
+              if (signal.aborted) {
+                throw new Error('Locking aborted');
+              }
+            }
+
+            // only one lock can be acquired per process
+            let release!: () => void;
+            const p = new Promise<void>(resolve => (release = resolve));
+            locks.set(id, {
+              p,
+              release,
+            });
+
+            // wait and acquire lock on the database (intra-process sync)
+            let advisoryLock = false;
+            try {
+              let i = 0;
+              while (!advisoryLock) {
+                i++;
+                if (i > 30) {
+                  // 30 seconds is already too much
+                  throw new Error('Lock was never acquired');
+                }
+                advisoryLock = await lockConn.oneFirst<boolean>(
+                  sql`select pg_try_advisory_lock(${idInt}) as advisoryLock`,
+                );
+                if (!advisoryLock) {
+                  // only sleep if not locked so that the loop can resolve fast if locked
+                  await new Promise(resolve => setTimeout(resolve, 1_000));
+                }
+                if (signal.aborted) {
+                  throw new Error('Locking aborted');
+                }
+              }
+            } catch (err) {
+              locks.delete(id);
+              release();
+              if (advisoryLock) {
+                lockConn.query(sql`select pg_advisory_unlock(${idInt})`).catch(err => {
+                  // warn for now, we'll rethink if it happens to much
+                  console.warn(
+                    `Error while unlocking advisory lock ${idInt} with id ${id} after error`,
+                    err,
+                  );
+                });
+              }
+              throw err;
+            }
+
+            const listener = () => {
+              signal.removeEventListener('abort', listener);
+              if (locks.get(id)) {
+                // unlock if aborted because the lock _was_ acquired at this time
+                locks.delete(id);
+                release();
+                lockConn.query(sql`select pg_advisory_unlock(${idInt})`).catch(err => {
+                  // warn for now, we'll rethink if it happens to much
+                  console.warn(
+                    `Error while unlocking advisory lock ${idInt} with id ${id} after abort`,
+                    err,
+                  );
+                });
+              }
+            };
+            signal.addEventListener('abort', listener);
+
+            return async function unlock() {
+              signal.removeEventListener('abort', listener);
+              if (locks.get(id)) {
+                locks.delete(id); // delete the lock first so that the while loop in lock can break
+                release(); // release the process first (guarantees unlock if query below fails)
+                await lockConn.query(sql`select pg_advisory_unlock(${idInt})`); // finally release the advisory lock
+              }
+            };
+          })(),
+        ]);
+      },
+    },
   };
 
   return storage;
@@ -2538,3 +2678,21 @@ const decodeOktaIntegrationRecord = (result: unknown): OIDCIntegration => {
     oauthApiUrl: rawRecord.oauth_api_url,
   };
 };
+
+/**
+ * Calculate a 32 bit FNV-1a hash
+ * Found here: https://gist.github.com/vaiorabbit/5657561
+ * Ref.: http://isthe.com/chongo/tech/comp/fnv/
+ *
+ * @param str - The input string value to be hashed
+ */
+function hashFnv32a(str: string): number {
+  let i,
+    l,
+    hval = 0x811c9dc5;
+  for (i = 0, l = str.length; i < l; i++) {
+    hval ^= str.charCodeAt(i);
+    hval += (hval << 1) + (hval << 4) + (hval << 7) + (hval << 8) + (hval << 24);
+  }
+  return hval >>> 0;
+}

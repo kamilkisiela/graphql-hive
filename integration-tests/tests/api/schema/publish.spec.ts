@@ -1947,3 +1947,70 @@ test('publishing composable schema without the definition of the Query type, but
 
   expect(latestValid.body.data?.latestValidVersion.schemas.nodes[0].commit).toBe('users');
 });
+
+it('should publish only one schema if multiple same publishes are started in parallel', async () => {
+  const { access_token: owner_access_token } = await authenticate('main');
+
+  const orgResult = await createOrganization(
+    {
+      name: 'foo',
+    },
+    owner_access_token,
+  );
+  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+
+  const projectResult = await createProject(
+    {
+      organization: org.cleanId,
+      type: ProjectType.Single,
+      name: 'foo',
+    },
+    owner_access_token,
+  );
+  const project = projectResult.body.data!.createProject.ok!.createdProject;
+  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
+
+  const tokenResult = await createToken(
+    {
+      name: 'test',
+      organization: org.cleanId,
+      project: project.cleanId,
+      target: target.cleanId,
+      organizationScopes: [],
+      projectScopes: [],
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+    },
+    owner_access_token,
+  );
+  expect(tokenResult.body.errors).not.toBeDefined();
+  const token = tokenResult.body.data!.createToken.ok!.secret;
+
+  const commits = ['a1', 'a2', 'a3', 'a4', 'a5', 'a6'];
+  const publishes = await Promise.all(
+    commits.map(commit =>
+      publishSchema(
+        {
+          author: 'John',
+          commit,
+          sdl: 'type Query { ping: String }',
+        },
+        token,
+      ),
+    ),
+  );
+  expect(
+    publishes.every(({ body }) => body.data?.schemaPublish.__typename === 'SchemaPublishSuccess'),
+  ).toBeTruthy();
+
+  const versionsResult = await fetchVersions(
+    {
+      organization: org.cleanId,
+      project: project.cleanId,
+      target: target.cleanId,
+    },
+    commits.length,
+    token,
+  );
+  expect(versionsResult.body.errors).toBeUndefined();
+  expect(versionsResult.body.data?.schemaVersions.nodes.length).toBe(1); // all publishes have same schema
+});

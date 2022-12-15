@@ -16,7 +16,7 @@ import { updateSchemas } from '../../../shared/schema';
 import { SchemaManager } from './schema-manager';
 import { SchemaValidator, ValidationResult } from './schema-validator';
 import { sentry } from '../../../shared/sentry';
-import type { TargetSelector } from '../../shared/providers/storage';
+import { Storage, type TargetSelector } from '../../shared/providers/storage';
 import { IdempotentRunner } from '../../shared/providers/idempotent-runner';
 import { bolderize } from '../../../shared/markdown';
 import { AlertsManager } from '../../alerts/providers/alerts-manager';
@@ -54,6 +54,7 @@ export class SchemaPublisher {
   constructor(
     logger: Logger,
     private authManager: AuthManager,
+    private storage: Storage,
     private schemaManager: SchemaManager,
     private targetManager: TargetManager,
     private projectManager: ProjectManager,
@@ -198,11 +199,24 @@ export class SchemaPublisher {
   }
 
   @sentry('SchemaPublisher.publish')
-  async publish(input: PublishInput, span?: Span): Promise<PublishResult> {
+  async publish(
+    input: PublishInput,
+    signal: AbortSignal,
+    span?: Span | undefined,
+  ): Promise<PublishResult> {
     this.logger.debug('Schema publication (checksum=%s)', input.checksum);
     return this.idempotentRunner.run({
       identifier: `schema:publish:${input.checksum}`,
-      executor: () => this.internalPublish(input),
+      executor: async () => {
+        const unlock = await this.storage.idMutex.lock(`schema:publish:${input.target}`, {
+          signal,
+        });
+        try {
+          return await this.internalPublish(input);
+        } finally {
+          await unlock();
+        }
+      },
       ttl: 60,
       span,
     });
