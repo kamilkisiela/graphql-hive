@@ -2612,8 +2612,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
               release();
               if (advisoryLock) {
                 lockConn.query(sql`select pg_advisory_unlock(${idInt})`).catch(err => {
-                  // TODO: what to do instead?
-                  console.error(
+                  // warn for now, we'll rethink if it happens to much
+                  console.warn(
                     `Error while unlocking advisory lock ${idInt} with id ${id} after error`,
                     err,
                   );
@@ -2629,8 +2629,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
                 locks.delete(id);
                 release();
                 lockConn.query(sql`select pg_advisory_unlock(${idInt})`).catch(err => {
-                  // TODO: what to do instead?
-                  console.error(
+                  // warn for now, we'll rethink if it happens to much
+                  console.warn(
                     `Error while unlocking advisory lock ${idInt} with id ${id} after abort`,
                     err,
                   );
