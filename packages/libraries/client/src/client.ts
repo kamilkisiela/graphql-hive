@@ -9,22 +9,25 @@ import { version } from './version.js';
 
 export function createHive(options: HivePluginOptions): HiveClient {
   const logger = options?.agent?.logger ?? console;
+  let enabled = options.enabled ?? true;
 
-  if (!options.enabled) {
+  if (enabled === false) {
     logIf(options.debug === true, '[hive] is not enabled.', logger.info);
   }
 
-  if (!options.token && options.enabled) {
-    options.enabled = false;
+  if (!options.token && enabled) {
+    enabled = false;
     logger.info('[hive] Missing token, disabling.');
   }
 
-  const usage = createUsage(options);
-  const schemaReporter = createReporting(options);
-  const operationsStore = createOperationsStore(options);
+  const mergedOptions: HivePluginOptions = { ...options, enabled } as HivePluginOptions;
+
+  const usage = createUsage(mergedOptions);
+  const schemaReporter = createReporting(mergedOptions);
+  const operationsStore = createOperationsStore(mergedOptions);
 
   function reportSchema({ schema }: { schema: GraphQLSchema }) {
-    void schemaReporter.report({ schema });
+    schemaReporter.report({ schema });
   }
 
   function collectUsage(args: ExecutionArgs) {
@@ -36,7 +39,7 @@ export function createHive(options: HivePluginOptions): HiveClient {
   }
 
   async function info(): Promise<void> {
-    if (options.enabled !== true) {
+    if (enabled === false) {
       return;
     }
 
