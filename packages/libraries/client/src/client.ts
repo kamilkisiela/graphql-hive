@@ -27,16 +27,10 @@ export function createHive(options: HivePluginOptions): HiveClient {
   const operationsStore = createOperationsStore(mergedOptions);
 
   function reportSchema({ schema }: { schema: GraphQLSchema }) {
-    if (enabled === false) {
-      return;
-    }
     schemaReporter.report({ schema });
   }
 
   function collectUsage(args: ExecutionArgs) {
-    if (enabled === false) {
-      return noop;
-    }
     return usage.collect(args);
   }
 
@@ -181,8 +175,6 @@ export function createHive(options: HivePluginOptions): HiveClient {
     dispose,
   };
 }
-
-function noop() {}
 
 function createPrinter(values: string[]) {
   const maxLen = Math.max(...values.map(v => v.length)) + 4;
