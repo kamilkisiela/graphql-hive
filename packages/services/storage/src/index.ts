@@ -2589,10 +2589,16 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             // wait and acquire lock on the database (intra-process sync)
             let advisoryLock = false;
             try {
+              let i = 0;
               while (!advisoryLock) {
-                ({ advisoryLock } = await lockConn.one<{ advisoryLock: boolean }>(
+                i++;
+                if (i > 30) {
+                  // 30 seconds is already too much
+                  throw new Error('Lock was never acquired');
+                }
+                advisoryLock = await lockConn.oneFirst<boolean>(
                   sql`select pg_try_advisory_lock(${idInt}) as advisoryLock`,
-                ));
+                );
                 if (!advisoryLock) {
                   // only sleep if not locked so that the loop can resolve fast if locked
                   await new Promise(resolve => setTimeout(resolve, 1_000));
