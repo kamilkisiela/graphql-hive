@@ -45,7 +45,6 @@ supertokens:
 
 ingress:
   namespace: graphql-hive
-  useSecureProtocol: 'false'
   annotations: {}
 
 hive-app:
