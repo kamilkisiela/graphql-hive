@@ -20,7 +20,7 @@
     "@emotion/styled": "11.10.5",
     "@graphiql/toolkit": "0.8.0",
     "@graphql-tools/mock": "8.7.6",
-    "@headlessui/react": "1.7.5",
+    "@headlessui/react": "1.7.6",
     "@monaco-editor/react": "4.4.6",
     "@n1ru4l/react-time-ago": "1.1.0",
     "@radix-ui/react-avatar": "0.1.4",
