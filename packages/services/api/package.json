@@ -37,7 +37,7 @@
     "human-id": "2.0.1",
     "ioredis": "4.28.5",
     "jsonwebtoken": "8.5.1",
-    "jwks-rsa": "2.0.5",
+    "jwks-rsa": "2.1.5",
     "lodash": "4.17.21",
     "lru-cache": "7.9.0",
     "ms": "2.1.3",
