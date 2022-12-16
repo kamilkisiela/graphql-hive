@@ -976,7 +976,7 @@ importers:
       '@graphql-codegen/gql-tag-operations-preset': 1.7.0
       '@graphql-tools/mock': 8.7.6
       '@graphql-typed-document-node/core': 3.1.1
-      '@headlessui/react': 1.7.6
+      '@headlessui/react': 1.7.7
       '@hive/emails': workspace:*
       '@hive/server': workspace:*
       '@monaco-editor/react': 4.4.6
@@ -1079,7 +1079,7 @@ importers:
       '@emotion/styled': 11.10.5_xeuojq2bwveqvz2yeua5s5kfvu
       '@graphiql/toolkit': 0.8.0_graphql@16.6.0
       '@graphql-tools/mock': 8.7.6_graphql@16.6.0
-      '@headlessui/react': 1.7.6_biqbaboplfbrettd7655fr4n2y
+      '@headlessui/react': 1.7.7_biqbaboplfbrettd7655fr4n2y
       '@monaco-editor/react': 4.4.6_jvipfxa73ntvmo6bim7qoogjo4
       '@n1ru4l/react-time-ago': 1.1.0_react@18.2.0
       '@radix-ui/react-avatar': 0.1.4_react@18.2.0
@@ -6899,8 +6899,8 @@ packages:
     resolution: {integrity: sha512-i1BpaNDVLJdRBEKeJWkVO6tYX6DMFBuwMhSuWqLsY4ufeTKGVuV5rBsUhxPayXqnnWHgXUAmWK16H/ykO5Wj4Q==}
     dev: true
 
-  /@headlessui/react/1.7.6_biqbaboplfbrettd7655fr4n2y:
-    resolution: {integrity: sha512-yM/IOGCRaS/DaQRchElrTiH0jOfYWbBX5wkZTAbPDu4OMYdQ1ateM/UgApOcv+7DNpeRaMjUz4bZ4xxNgTGNLA==}
+  /@headlessui/react/1.7.7_biqbaboplfbrettd7655fr4n2y:
+    resolution: {integrity: sha512-BqDOd/tB9u2tA0T3Z0fn18ktw+KbVwMnkxxsGPIH2hzssrQhKB5n/6StZOyvLYP/FsYtvuXfi9I0YowKPv2c1w==}
     engines: {node: '>=10'}
     peerDependencies:
       react: ^16 || ^17 || ^18
@@ -10540,7 +10540,7 @@ packages:
       '@algolia/autocomplete-plugin-query-suggestions': 1.7.3_algoliasearch@4.14.2
       '@algolia/autocomplete-theme-classic': 1.7.3
       '@giscus/react': 2.2.4_biqbaboplfbrettd7655fr4n2y
-      '@headlessui/react': 1.7.6_biqbaboplfbrettd7655fr4n2y
+      '@headlessui/react': 1.7.7_biqbaboplfbrettd7655fr4n2y
       '@next/bundle-analyzer': 13.0.6
       '@radix-ui/react-navigation-menu': 1.1.1_biqbaboplfbrettd7655fr4n2y
       algoliasearch: 4.14.2
@@ -10583,7 +10583,7 @@ packages:
       '@algolia/autocomplete-plugin-query-suggestions': 1.7.3_algoliasearch@4.14.2
       '@algolia/autocomplete-theme-classic': 1.7.3
       '@giscus/react': 2.2.4_biqbaboplfbrettd7655fr4n2y
-      '@headlessui/react': 1.7.6_biqbaboplfbrettd7655fr4n2y
+      '@headlessui/react': 1.7.7_biqbaboplfbrettd7655fr4n2y
       '@next/bundle-analyzer': 13.0.6
       '@radix-ui/react-navigation-menu': 1.1.1_biqbaboplfbrettd7655fr4n2y
       algoliasearch: 4.14.2
@@ -21427,7 +21427,7 @@ packages:
       react: '>=16.13.1'
       react-dom: '>=16.13.1'
     dependencies:
-      '@headlessui/react': 1.7.6_biqbaboplfbrettd7655fr4n2y
+      '@headlessui/react': 1.7.7_biqbaboplfbrettd7655fr4n2y
       '@mdx-js/react': 2.1.5_react@18.2.0
       '@popperjs/core': 2.11.6
       '@reach/skip-nav': 0.17.0_biqbaboplfbrettd7655fr4n2y
@@ -21453,7 +21453,7 @@ packages:
       react: '>=16.13.1'
       react-dom: '>=16.13.1'
     dependencies:
-      '@headlessui/react': 1.7.6_biqbaboplfbrettd7655fr4n2y
+      '@headlessui/react': 1.7.7_biqbaboplfbrettd7655fr4n2y
       '@mdx-js/react': 2.1.5_react@18.2.0
       '@popperjs/core': 2.11.6
       '@reach/skip-nav': 0.17.0_biqbaboplfbrettd7655fr4n2y
