@@ -1,8 +1,8 @@
-{{- $url := printf "%s" .Values.global.appBaseUrl }}
+{{- $url := printf "usage-%s" .Values.global.appBaseUrl }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ .Values.ingress.namespace }}-root-ingress
+  name: {{ .Values.ingress.namespace }}-usage-ingress
   namespace: {{ .Values.ingress.namespace }}
   annotations:
     {{- with .Values.ingress.annotations }}
@@ -16,15 +16,8 @@ spec:
         paths:
           - backend:
               service:
-                name: app-svc
+                name: usage-svc
                 port:
                   number: 80
             path: /
-            pathType: Prefix
-          - backend:
-              service:
-                name: server-svc
-                port:
-                  number: 80
-            path: /graphql
             pathType: Prefix
