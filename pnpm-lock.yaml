@@ -362,7 +362,7 @@ importers:
       got: 12.5.3
       graphql-modules: 2.1.0
       graphql-parse-resolve-info: 4.12.3
-      graphql-scalars: 1.12.0
+      graphql-scalars: 1.20.1
       graphql-yoga: 3.1.1
       human-id: 2.0.1
       ioredis: 4.28.5
@@ -400,7 +400,7 @@ importers:
       got: 12.5.3
       graphql-modules: 2.1.0
       graphql-parse-resolve-info: 4.12.3
-      graphql-scalars: 1.12.0
+      graphql-scalars: 1.20.1
       graphql-yoga: 3.1.1
       human-id: 2.0.1
       ioredis: 4.28.5
@@ -17392,13 +17392,13 @@ packages:
       - encoding
     dev: true
 
-  /graphql-scalars/1.12.0:
-    resolution: {integrity: sha512-/SIT+GwEPP67x0ftOxSyZq5dZlAoK3rHKaTisAcUK2hWaTKJyE0lT0TJu2mzOMFAjxQV01pEH+w+dtMBOmPDgA==}
+  /graphql-scalars/1.20.1:
+    resolution: {integrity: sha512-HCSosMh8l/DVYL3/wCesnZOb+gbiaO/XlZQEIKOkWDJUGBrc15xWAs5TCQVmrycT0tbEInii+J8eoOyMwxx8zg==}
     engines: {node: '>=10'}
     peerDependencies:
-      graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0
+      graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
-      tslib: 2.3.1
+      tslib: 2.4.1
     dev: false
 
   /graphql-tag/2.12.6:
@@ -26019,10 +26019,6 @@ packages:
 
   /tslib/2.3.0:
     resolution: {integrity: sha512-N82ooyxVNm6h1riLCoyS9e3fuJ3AMG2zIZs2Gd1ATcSFjSA23Q0fzjjZeh0jbJvWVDZ0cJT8yaNNaaXHzueNjg==}
-    dev: false
-
-  /tslib/2.3.1:
-    resolution: {integrity: sha512-77EbyPPpMz+FRFRuAFlWMtmgUWGe9UOG2Z25NqCwiIjRhOf5iKGuzSe5P2w1laq+FkRy4p+PCuVkJSGkzTEKVw==}
     dev: false
 
   /tslib/2.4.0:
