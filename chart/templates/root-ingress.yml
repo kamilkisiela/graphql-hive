@@ -28,3 +28,10 @@ spec:
                   number: 80
             path: /graphql
             pathType: Prefix
+          - backend:
+              service:
+                name: usage-svc
+                port:
+                  number: 80
+            path: /usage
+            pathType: Prefix
