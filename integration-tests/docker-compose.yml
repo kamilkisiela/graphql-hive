@@ -18,7 +18,7 @@ services:
       - 'stack'
 
   clickhouse:
-    image: clickhouse/clickhouse-server:22.11-alpine
+    image: clickhouse/clickhouse-server:22.12-alpine
     volumes:
       - ./volumes/clickhouse/logs:/var/log/clickhouse-server
       - ./volumes/clickhouse/db:/var/lib/clickhouse
