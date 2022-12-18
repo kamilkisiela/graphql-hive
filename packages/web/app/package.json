@@ -62,7 +62,7 @@
     "hyperid": "2.3.1",
     "immer": "9.0.16",
     "js-cookie": "3.0.1",
-    "monaco-editor": "0.27.0",
+    "monaco-editor": "0.34.1",
     "monaco-themes": "0.3.3",
     "next": "13.0.5",
     "nextjs-cors": "2.1.2",
