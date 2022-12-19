@@ -42,11 +42,11 @@ export class CloudflareCDN {
       analyticsEngineBindings: [
         {
           name: 'USAGE_ANALYTICS',
-          dataset: `hive-ha-cdn-usage-analytics-${this.config.envName}`,
+          dataset: `hive_ha_cdn_usage_analytics_${this.config.envName}`,
         },
         {
           name: 'ERROR_ANALYTICS',
-          dataset: `hive-ha-cdn-error-analytics-${this.config.envName}`,
+          dataset: `hive_ha_cdn_error_analytics_${this.config.envName}`,
         },
       ],
       secretTextBindings: [
