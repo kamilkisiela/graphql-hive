@@ -1,0 +1,23 @@
+{{- $url := printf "api-%s" .Values.global.appBaseUrl }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.ingress.namespace }}-api-ingress
+  namespace: {{ .Values.ingress.namespace }}
+  annotations:
+    {{- with .Values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  ingressClassName: private
+  rules:
+    - host: {{ $url }}
+      http:
+        paths:
+          - backend:
+              service:
+                name: server-svc
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
