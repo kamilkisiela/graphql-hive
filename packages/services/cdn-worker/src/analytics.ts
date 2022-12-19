@@ -38,12 +38,12 @@ export function createAnalytics(
       switch (event.type) {
         case 'artifact':
           return engines.usage.writeDataPoint({
-            blobs: [event.type, event.version, event.value, targetId],
-            indexes: [targetId],
+            blobs: [event.version, event.value, targetId],
+            indexes: [targetId.substr(0, 32)],
           });
         case 'error':
           return engines.error.writeDataPoint({
-            blobs: [event.type, ...event.value],
+            blobs: event.value,
           });
       }
     },
