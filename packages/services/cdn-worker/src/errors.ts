@@ -1,9 +1,10 @@
 import { Response } from '@whatwg-node/fetch';
+import { Analytics } from './analytics';
 
 const description = `Please refer to the documentation for more details: https://docs.graphql-hive.com/features/registry-usage`;
 
 export class MissingTargetIDErrorResponse extends Response {
-  constructor() {
+  constructor(analytics: Analytics) {
     super(
       JSON.stringify({
         code: 'MISSING_TARGET_ID',
@@ -17,11 +18,13 @@ export class MissingTargetIDErrorResponse extends Response {
         },
       },
     );
+
+    analytics.track({ type: 'error', value: ['missing_target_id'] }, 'unknown');
   }
 }
 
 export class InvalidArtifactTypeResponse extends Response {
-  constructor(artifactType: string) {
+  constructor(artifactType: string, analytics: Analytics) {
     super(
       JSON.stringify({
         code: 'INVALID_ARTIFACT_TYPE',
@@ -35,11 +38,12 @@ export class InvalidArtifactTypeResponse extends Response {
         },
       },
     );
+    analytics.track({ type: 'error', value: ['invalid_artifact_type', artifactType] }, 'unknown');
   }
 }
 
 export class MissingAuthKeyResponse extends Response {
-  constructor() {
+  constructor(analytics: Analytics) {
     super(
       JSON.stringify({
         code: 'MISSING_AUTH_KEY',
@@ -53,11 +57,12 @@ export class MissingAuthKeyResponse extends Response {
         },
       },
     );
+    analytics.track({ type: 'error', value: ['missing_auth_key'] }, 'unknown');
   }
 }
 
 export class InvalidAuthKeyResponse extends Response {
-  constructor() {
+  constructor(analytics: Analytics) {
     super(
       JSON.stringify({
         code: 'INVALID_AUTH_KEY',
@@ -71,11 +76,12 @@ export class InvalidAuthKeyResponse extends Response {
         },
       },
     );
+    analytics.track({ type: 'error', value: ['invalid_auth_key'] }, 'unknown');
   }
 }
 
 export class CDNArtifactNotFound extends Response {
-  constructor(artifactType: string, targetId: string) {
+  constructor(artifactType: string, targetId: string, analytics: Analytics) {
     super(
       JSON.stringify({
         code: 'NOT_FOUND',
@@ -89,11 +95,12 @@ export class CDNArtifactNotFound extends Response {
         },
       },
     );
+    analytics.track({ type: 'error', value: ['artifact_not_found', artifactType] }, targetId);
   }
 }
 
 export class InvalidArtifactMatch extends Response {
-  constructor(artifactType: string, targetId: string) {
+  constructor(artifactType: string, targetId: string, analytics: Analytics) {
     super(
       JSON.stringify({
         code: 'INVALID_ARTIFACT_MATCH',
@@ -107,11 +114,12 @@ export class InvalidArtifactMatch extends Response {
         },
       },
     );
+    analytics.track({ type: 'error', value: ['invalid_artifact_match', artifactType] }, targetId);
   }
 }
 
 export class UnexpectedError extends Response {
-  constructor() {
+  constructor(analytics: Analytics) {
     super(
       JSON.stringify({
         code: 'UNEXPECTED_ERROR',
@@ -125,5 +133,6 @@ export class UnexpectedError extends Response {
         },
       },
     );
+    analytics.track({ type: 'error', value: ['unexpected_error'] }, 'unknown');
   }
 }
