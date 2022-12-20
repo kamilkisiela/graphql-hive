@@ -177,11 +177,11 @@ describe('create', () => {
           "createOIDCIntegration": {
             "error": {
               "details": {
+                "authorizationEndpoint": null,
                 "clientId": "Must be at least 3 characters long.",
                 "clientSecret": null,
                 "tokenEndpoint": null,
                 "userinfoEndpoint": null,
-                "authorizationEndpoint": null,
               },
               "message": "Failed to create OIDC Integration.",
             },
@@ -223,11 +223,11 @@ describe('create', () => {
           "createOIDCIntegration": {
             "error": {
               "details": {
+                "authorizationEndpoint": null,
                 "clientId": "Can not be longer than 100 characters.",
                 "clientSecret": null,
                 "tokenEndpoint": null,
                 "userinfoEndpoint": null,
-                "authorizationEndpoint": null,
               },
               "message": "Failed to create OIDC Integration.",
             },
@@ -269,11 +269,11 @@ describe('create', () => {
           "createOIDCIntegration": {
             "error": {
               "details": {
+                "authorizationEndpoint": null,
                 "clientId": null,
                 "clientSecret": "Must be at least 3 characters long.",
                 "tokenEndpoint": null,
                 "userinfoEndpoint": null,
-                "authorizationEndpoint": null,
               },
               "message": "Failed to create OIDC Integration.",
             },
@@ -315,11 +315,11 @@ describe('create', () => {
           "createOIDCIntegration": {
             "error": {
               "details": {
+                "authorizationEndpoint": null,
                 "clientId": null,
                 "clientSecret": "Can not be longer than 200 characters.",
                 "tokenEndpoint": null,
                 "userinfoEndpoint": null,
-                "authorizationEndpoint": null,
               },
               "message": "Failed to create OIDC Integration.",
             },
@@ -361,11 +361,11 @@ describe('create', () => {
           "createOIDCIntegration": {
             "error": {
               "details": {
+                "authorizationEndpoint": "Must be a valid OAuth API url.",
                 "clientId": null,
                 "clientSecret": null,
                 "tokenEndpoint": "Must be a valid OAuth API url.",
                 "userinfoEndpoint": "Must be a valid OAuth API url.",
-                "authorizationEndpoint": "Must be a valid OAuth API url.",
               },
               "message": "Failed to create OIDC Integration.",
             },
