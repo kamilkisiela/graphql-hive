@@ -18,4 +18,6 @@ serverEndpoint: http://server-svc:80
 
 authRequireEmailVerification: 0
 
+authGoogle: 0
+
 replicaCount: 1

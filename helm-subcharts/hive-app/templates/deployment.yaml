@@ -43,5 +43,15 @@ spec:
                 secretKeyRef:
                   name: supertokens-secret
                   key: supertokens-api-key
+            - name: AUTH_GOOGLE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: auth-google-secret
+                  key: auth-google-client-id
+            - name: AUTH_GOOGLE_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: auth-google-secret
+                  key: auth-google-client-secret
           ports:
             - containerPort: {{ .Values.serverPort }}
