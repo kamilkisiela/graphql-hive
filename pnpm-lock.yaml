@@ -20,21 +20,21 @@ patchedDependencies:
   atomic-sleep@1.0.0:
     hash: ofrh3divoxil53fpajpmtnq43q
     path: patches/atomic-sleep@1.0.0.patch
+  bob-the-bundler@4.0.0:
+    hash: sum6gc2cezfosivdgsdg22qyja
+    path: patches/bob-the-bundler@4.0.0.patch
+  slonik@30.1.2:
+    hash: wg2hxbo7txnklmvja4aeqnygfi
+    path: patches/slonik@30.1.2.patch
+  oclif@3.2.25:
+    hash: zdmnkkzcdbpcmhe6nuh2wxowhi
+    path: patches/oclif@3.2.25.patch
   bullmq@1.81.4:
     hash: d7likfulu5mfjaaerbpls6og24
     path: patches/bullmq@1.81.4.patch
   mjml-core@4.13.0:
     hash: zxxsxbqejjmcwuzpigutzzq6wa
     path: patches/mjml-core@4.13.0.patch
-  slonik@30.1.2:
-    hash: wg2hxbo7txnklmvja4aeqnygfi
-    path: patches/slonik@30.1.2.patch
-  bob-the-bundler@4.0.0:
-    hash: sum6gc2cezfosivdgsdg22qyja
-    path: patches/bob-the-bundler@4.0.0.patch
-  oclif@3.2.25:
-    hash: zdmnkkzcdbpcmhe6nuh2wxowhi
-    path: patches/oclif@3.2.25.patch
 
 importers:
 
