@@ -944,6 +944,7 @@ importers:
       '@sentry/tracing': 7.21.1
       '@trpc/server': 10.4.3
       '@types/ioredis': 4.28.10
+      '@valu/trpc-fetch-api-adapter': ^0.0.3
       '@whatwg-node/server': ^0.4.17
       bullmq: 1.81.4
       copyfiles: 2.4.1
@@ -959,6 +960,7 @@ importers:
       '@sentry/node': 7.21.1
       '@sentry/tracing': 7.21.1
       '@trpc/server': 10.4.3
+      '@valu/trpc-fetch-api-adapter': 0.0.3
       '@whatwg-node/server': 0.4.17_@types+node@18.11.5
       bullmq: 1.81.4_d7likfulu5mfjaaerbpls6og24
       dotenv: 10.0.0
@@ -11333,6 +11335,10 @@ packages:
       '@urql/core': 2.6.1_graphql@16.6.0
       graphql: 16.6.0
       wonka: 4.0.15
+    dev: false
+
+  /@valu/trpc-fetch-api-adapter/0.0.3:
+    resolution: {integrity: sha512-yKIptrFLyEoTP1FlXGRGLvGsIFzCF9A4ClntTuC/RWA2lj+FAEnSkeEfgCUllBOnmZjx/qa/YL2XR0nzBFOGeA==}
     dev: false
 
   /@vercel/ncc/0.34.0:
