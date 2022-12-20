@@ -22,6 +22,6 @@ data:
   GRAPHQL_ENDPOINT: '{{ .Values.graphqlEndpoint }}'
   SERVER_ENDPOINT: '{{ .Values.serverEndpoint }}'
 
-  AUTH_GOOGLE: {{ .Values.authGoogle }}
+  AUTH_GOOGLE: '{{ .Values.authGoogle }}'
 
   AUTH_REQUIRE_EMAIL_VERIFICATION: '{{ .Values.authRequireEmailVerification }}'
