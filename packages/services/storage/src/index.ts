@@ -2541,18 +2541,18 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           "client_id" = ${args.clientId ?? sql`"client_id"`}
           , "client_secret" = ${args.encryptedClientSecret ?? sql`"client_secret"`}
           , "token_endpoint" = ${
-            /** TODO: handle NULL token_endpoint */
             args.tokenEndpoint ??
+            /** update existing columns to the old legacy values if not yet stored */
             sql`COALESCE("token_endpoint", CONCAT("oauth_api_url", "/token"))}`
           }
           , "userinfo_endpoint" = ${
-            /** TODO: handle NULL userinfo_endpoint */
             args.userinfoEndpoint ??
+            /** update existing columns to the old legacy values if not yet stored */
             sql`COALESCE("userinfo_endpoint", CONCAT("oauth_api_url", "/userinfo"))}`
           }
           , "authorization_endpoint" = ${
-            /** TODO: handle NULL authorization_endpoint */
             args.authorizationEndpoint ??
+            /** update existing columns to the old legacy values if not yet stored */
             sql`COALESCE("authorization_endpoint", CONCAT("oauth_api_url", "/authorize"))}`
           }
           , "oauth_api_url" = NULL
