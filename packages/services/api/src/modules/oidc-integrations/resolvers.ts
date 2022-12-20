@@ -10,7 +10,9 @@ export const resolvers: OidcIntegrationsModule.Resolvers = {
         organizationId: input.organizationId,
         clientId: input.clientId,
         clientSecret: input.clientSecret,
-        oauthApiUrl: input.oauthApiUrl,
+        tokenEndpoint: input.tokenEndpoint,
+        userinfoEndpoint: input.userinfoEndpoint,
+        authorizationEndpoint: input.authorizationEndpoint,
       });
 
       if (result.type === 'ok') {
@@ -32,7 +34,9 @@ export const resolvers: OidcIntegrationsModule.Resolvers = {
           details: {
             clientId: result.fieldErrors?.clientId,
             clientSecret: result.fieldErrors?.clientSecret,
-            oauthApiUrl: result.fieldErrors?.oauthApiUrl,
+            tokenEndpoint: result.fieldErrors?.tokenEndpoint,
+            userinfoEndpoint: result.fieldErrors?.userinfoEndpoint,
+            authorizationEndpoint: result.fieldErrors?.authorizationEndpoint,
           },
         },
       };
@@ -43,7 +47,9 @@ export const resolvers: OidcIntegrationsModule.Resolvers = {
         oidcIntegrationId: input.oidcIntegrationId,
         clientId: input.clientId ?? null,
         clientSecret: input.clientSecret ?? null,
-        oauthApiUrl: input.oauthApiUrl ?? null,
+        tokenEndpoint: input.tokenEndpoint ?? null,
+        userinfoEndpoint: input.userinfoEndpoint ?? null,
+        authorizationEndpoint: input.authorizationEndpoint ?? null,
       });
 
       if (result.type === 'ok') {
@@ -61,6 +67,9 @@ export const resolvers: OidcIntegrationsModule.Resolvers = {
             clientId: result.fieldErrors?.clientId,
             clientSecret: result.fieldErrors?.clientSecret,
             oauthApiUrl: result.fieldErrors?.oauthApiUrl,
+            tokenEndpoint: result.fieldErrors?.tokenEndpoint,
+            userinfoEndpoint: result.fieldErrors?.userinfoEndpoint,
+            authorizationEndpoint: result.fieldErrors?.authorizationEndpoint,
           },
         },
       };
@@ -106,7 +115,9 @@ export const resolvers: OidcIntegrationsModule.Resolvers = {
   },
   OIDCIntegration: {
     id: oidcIntegration => oidcIntegration.id,
-    oauthApiUrl: oidcIntegration => oidcIntegration.oauthApiUrl,
+    tokenEndpoint: oidcIntegration => oidcIntegration.tokenEndpoint,
+    userinfoEndpoint: oidcIntegration => oidcIntegration.userinfoEndpoint,
+    authorizationEndpoint: oidcIntegration => oidcIntegration.authorizationEndpoint,
     clientId: oidcIntegration => oidcIntegration.clientId,
     clientSecretPreview: (oidcIntegration, _, { injector }) =>
       injector.get(OIDCIntegrationsProvider).getClientSecretPreview(oidcIntegration),

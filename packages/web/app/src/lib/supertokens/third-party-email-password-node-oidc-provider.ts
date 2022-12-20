@@ -17,7 +17,9 @@ const createOIDCSuperTokensProvider = (oidcConfig: {
   id: string;
   clientId: string;
   clientSecret: string;
-  oauthApiUrl: string;
+  tokenEndpoint: string;
+  userinfoEndpoint: string;
+  authorizationEndpoint: string;
 }): ThirdPartyEmailPasswordNode.TypeProvider => ({
   id: 'oidc',
   get: (redirectURI, authCodeFromRequest) => ({
@@ -26,7 +28,7 @@ const createOIDCSuperTokensProvider = (oidcConfig: {
     },
     getProfileInfo: async (rawTokenAPIResponse: unknown) => {
       const tokenResponse = OIDCTokenSchema.parse(rawTokenAPIResponse);
-      const rawData: unknown = await fetch(oidcConfig.oauthApiUrl + '/userinfo', {
+      const rawData: unknown = await fetch(oidcConfig.userinfoEndpoint, {
         headers: {
           authorization: `Bearer ${tokenResponse.access_token}`,
           accept: 'application/json',
@@ -46,7 +48,7 @@ const createOIDCSuperTokensProvider = (oidcConfig: {
       };
     },
     accessTokenAPI: {
-      url: `${oidcConfig.oauthApiUrl}/token`,
+      url: oidcConfig.tokenEndpoint,
       params: {
         client_id: oidcConfig.clientId,
         client_secret: oidcConfig.clientSecret,
@@ -57,7 +59,7 @@ const createOIDCSuperTokensProvider = (oidcConfig: {
     },
     authorisationRedirect: {
       // this contains info about forming the authorisation redirect URL without the state params and without the redirect_uri param
-      url: `${oidcConfig.oauthApiUrl}/authorize`,
+      url: oidcConfig.authorizationEndpoint,
       params: {
         client_id: oidcConfig.clientId,
         scope: 'openid email',
@@ -131,7 +133,14 @@ export const createOIDCSuperTokensNoopProvider = () => ({
 const fetchOIDCConfig = async (
   internalApi: inferRouterProxyClient<InternalApi>,
   oidcIntegrationId: string,
-): Promise<{ id: string; clientId: string; clientSecret: string; oauthApiUrl: string }> => {
+): Promise<{
+  id: string;
+  clientId: string;
+  clientSecret: string;
+  tokenEndpoint: string;
+  userinfoEndpoint: string;
+  authorizationEndpoint: string;
+}> => {
   const result = await internalApi.getOIDCIntegrationById.query({ oidcIntegrationId });
   if (result === null) {
     throw new Error('OIDC integration not found.');

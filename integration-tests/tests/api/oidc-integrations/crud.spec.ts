@@ -24,7 +24,9 @@ const CreateOIDCIntegrationMutation = gql(/* GraphQL */ `
           id
           clientId
           clientSecretPreview
-          oauthApiUrl
+          tokenEndpoint
+          userinfoEndpoint
+          authorizationEndpoint
         }
       }
       error {
@@ -32,7 +34,9 @@ const CreateOIDCIntegrationMutation = gql(/* GraphQL */ `
         details {
           clientId
           clientSecret
-          oauthApiUrl
+          tokenEndpoint
+          userinfoEndpoint
+          authorizationEndpoint
         }
       }
     }
@@ -60,7 +64,9 @@ describe('create', () => {
             organizationId: org.id,
             clientId: 'foo',
             clientSecret: 'foofoofoofoo',
-            oauthApiUrl: 'http://localhost:8888/oauth',
+            tokenEndpoint: 'http://localhost:8888/oauth/token',
+            userinfoEndpoint: 'http://localhost:8888/oauth/userinfo',
+            authorizationEndpoint: 'http://localhost:8888/oauth/authorize',
           },
         },
         authToken: access_token,
@@ -75,7 +81,9 @@ describe('create', () => {
               id: expect.any(String),
               clientId: 'foo',
               clientSecretPreview: 'ofoo',
-              oauthApiUrl: 'http://localhost:8888/oauth',
+              tokenEndpoint: 'http://localhost:8888/oauth/token',
+              userinfoEndpoint: 'http://localhost:8888/oauth/userinfo',
+              authorizationEndpoint: 'http://localhost:8888/oauth/authorize',
             },
           },
         },
@@ -111,7 +119,9 @@ describe('create', () => {
             organizationId: 'i-do-not-exist',
             clientId: 'fo',
             clientSecret: 'foofoofoofoo',
-            oauthApiUrl: 'http://localhost:8888/oauth',
+            tokenEndpoint: 'http://localhost:8888/oauth/token',
+            userinfoEndpoint: 'http://localhost:8888/oauth/userinfo',
+            authorizationEndpoint: 'http://localhost:8888/oauth/authorize',
           },
         },
         authToken: access_token,
@@ -153,7 +163,9 @@ describe('create', () => {
             organizationId: org.id,
             clientId: 'fo',
             clientSecret: 'foofoofoofoo',
-            oauthApiUrl: 'http://localhost:8888/oauth',
+            tokenEndpoint: 'http://localhost:8888/oauth/token',
+            userinfoEndpoint: 'http://localhost:8888/oauth/userinfo',
+            authorizationEndpoint: 'http://localhost:8888/oauth/authorize',
           },
         },
         authToken: access_token,
@@ -165,9 +177,11 @@ describe('create', () => {
           "createOIDCIntegration": {
             "error": {
               "details": {
+                "authorizationEndpoint": null,
                 "clientId": "Must be at least 3 characters long.",
                 "clientSecret": null,
-                "oauthApiUrl": null,
+                "tokenEndpoint": null,
+                "userinfoEndpoint": null,
               },
               "message": "Failed to create OIDC Integration.",
             },
@@ -195,7 +209,9 @@ describe('create', () => {
             organizationId: org.id,
             clientId: new Array(101).fill('a').join(''),
             clientSecret: 'foofoofoofoo',
-            oauthApiUrl: 'http://localhost:8888/oauth',
+            tokenEndpoint: 'http://localhost:8888/oauth/token',
+            userinfoEndpoint: 'http://localhost:8888/oauth/userinfo',
+            authorizationEndpoint: 'http://localhost:8888/oauth/authorize',
           },
         },
         authToken: access_token,
@@ -207,9 +223,11 @@ describe('create', () => {
           "createOIDCIntegration": {
             "error": {
               "details": {
+                "authorizationEndpoint": null,
                 "clientId": "Can not be longer than 100 characters.",
                 "clientSecret": null,
-                "oauthApiUrl": null,
+                "tokenEndpoint": null,
+                "userinfoEndpoint": null,
               },
               "message": "Failed to create OIDC Integration.",
             },
@@ -237,7 +255,9 @@ describe('create', () => {
             organizationId: org.id,
             clientId: 'foo',
             clientSecret: 'fo',
-            oauthApiUrl: 'http://localhost:8888/oauth',
+            tokenEndpoint: 'http://localhost:8888/oauth/token',
+            userinfoEndpoint: 'http://localhost:8888/oauth/userinfo',
+            authorizationEndpoint: 'http://localhost:8888/oauth/authorize',
           },
         },
         authToken: access_token,
@@ -249,9 +269,11 @@ describe('create', () => {
           "createOIDCIntegration": {
             "error": {
               "details": {
+                "authorizationEndpoint": null,
                 "clientId": null,
                 "clientSecret": "Must be at least 3 characters long.",
-                "oauthApiUrl": null,
+                "tokenEndpoint": null,
+                "userinfoEndpoint": null,
               },
               "message": "Failed to create OIDC Integration.",
             },
@@ -279,7 +301,9 @@ describe('create', () => {
             organizationId: org.id,
             clientId: 'foo',
             clientSecret: new Array(500).fill('a').join(''),
-            oauthApiUrl: 'http://localhost:8888/oauth',
+            tokenEndpoint: 'http://localhost:8888/oauth/token',
+            userinfoEndpoint: 'http://localhost:8888/oauth/userinfo',
+            authorizationEndpoint: 'http://localhost:8888/oauth/authorize',
           },
         },
         authToken: access_token,
@@ -291,9 +315,11 @@ describe('create', () => {
           "createOIDCIntegration": {
             "error": {
               "details": {
+                "authorizationEndpoint": null,
                 "clientId": null,
                 "clientSecret": "Can not be longer than 200 characters.",
-                "oauthApiUrl": null,
+                "tokenEndpoint": null,
+                "userinfoEndpoint": null,
               },
               "message": "Failed to create OIDC Integration.",
             },
@@ -321,7 +347,9 @@ describe('create', () => {
             organizationId: org.id,
             clientId: 'foo',
             clientSecret: 'foo',
-            oauthApiUrl: 'foo',
+            tokenEndpoint: 'foo',
+            userinfoEndpoint: 'foo',
+            authorizationEndpoint: 'foo',
           },
         },
         authToken: access_token,
@@ -333,9 +361,11 @@ describe('create', () => {
           "createOIDCIntegration": {
             "error": {
               "details": {
+                "authorizationEndpoint": "Must be a valid OAuth API url.",
                 "clientId": null,
                 "clientSecret": null,
-                "oauthApiUrl": "Must be a valid OAuth API url.",
+                "tokenEndpoint": "Must be a valid OAuth API url.",
+                "userinfoEndpoint": "Must be a valid OAuth API url.",
               },
               "message": "Failed to create OIDC Integration.",
             },
@@ -363,7 +393,9 @@ describe('create', () => {
             organizationId: org.id,
             clientId: 'foo',
             clientSecret: 'foofoofoofoo',
-            oauthApiUrl: 'http://localhost:8888/oauth',
+            tokenEndpoint: 'http://localhost:8888/oauth/token',
+            userinfoEndpoint: 'http://localhost:8888/oauth/userinfo',
+            authorizationEndpoint: 'http://localhost:8888/oauth/authorize',
           },
         },
         authToken: access_token,
@@ -378,7 +410,9 @@ describe('create', () => {
               id: expect.any(String),
               clientId: 'foo',
               clientSecretPreview: 'ofoo',
-              oauthApiUrl: 'http://localhost:8888/oauth',
+              tokenEndpoint: 'http://localhost:8888/oauth/token',
+              userinfoEndpoint: 'http://localhost:8888/oauth/userinfo',
+              authorizationEndpoint: 'http://localhost:8888/oauth/authorize',
             },
           },
         },
@@ -391,7 +425,9 @@ describe('create', () => {
             organizationId: org.id,
             clientId: 'foo',
             clientSecret: 'foofoofoofoo',
-            oauthApiUrl: 'http://localhost:8888/oauth',
+            tokenEndpoint: 'http://localhost:8888/oauth/token',
+            userinfoEndpoint: 'http://localhost:8888/oauth/userinfo',
+            authorizationEndpoint: 'http://localhost:8888/oauth/authorize',
           },
         },
         authToken: access_token,
@@ -405,7 +441,9 @@ describe('create', () => {
             details: {
               clientId: null,
               clientSecret: null,
-              oauthApiUrl: null,
+              tokenEndpoint: null,
+              userinfoEndpoint: null,
+              authorizationEndpoint: null,
             },
           },
           ok: null,
@@ -449,7 +487,9 @@ describe('delete', () => {
             organizationId: org.id,
             clientId: 'foo',
             clientSecret: 'foofoofoofoo',
-            oauthApiUrl: 'http://localhost:8888/oauth',
+            tokenEndpoint: 'http://localhost:8888/oauth/token',
+            userinfoEndpoint: 'http://localhost:8888/oauth/userinfo',
+            authorizationEndpoint: 'http://localhost:8888/oauth/authorize',
           },
         },
         authToken: access_token,
@@ -544,7 +584,9 @@ describe('delete', () => {
             organizationId: org.id,
             clientId: 'foo',
             clientSecret: 'foofoofoofoo',
-            oauthApiUrl: 'http://localhost:8888/oauth',
+            tokenEndpoint: 'http://localhost:8888/oauth/token',
+            userinfoEndpoint: 'http://localhost:8888/oauth/userinfo',
+            authorizationEndpoint: 'http://localhost:8888/oauth/authorize',
           },
         },
         authToken: access_token,
@@ -604,7 +646,9 @@ describe('delete', () => {
             organizationId: org.id,
             clientId: 'foo',
             clientSecret: 'foofoofoofoo',
-            oauthApiUrl: 'http://localhost:8888/oauth',
+            tokenEndpoint: 'http://localhost:8888/oauth/token',
+            userinfoEndpoint: 'http://localhost:8888/oauth/userinfo',
+            authorizationEndpoint: 'http://localhost:8888/oauth/authorize',
           },
         },
         authToken: access_token,
@@ -685,7 +729,9 @@ const UpdateOIDCIntegrationMutation = gql(/* GraphQL */ `
       ok {
         updatedOIDCIntegration {
           id
-          oauthApiUrl
+          tokenEndpoint
+          userinfoEndpoint
+          authorizationEndpoint
           clientId
           clientSecretPreview
         }
@@ -695,7 +741,9 @@ const UpdateOIDCIntegrationMutation = gql(/* GraphQL */ `
         details {
           clientId
           clientSecret
-          oauthApiUrl
+          tokenEndpoint
+          userinfoEndpoint
+          authorizationEndpoint
         }
       }
     }
@@ -723,7 +771,9 @@ describe('update', () => {
             organizationId: org.id,
             clientId: 'aaaa',
             clientSecret: 'aaaaaaaaaaaa',
-            oauthApiUrl: 'http://localhost:8888/aaaa',
+            tokenEndpoint: 'http://localhost:8888/aaaa/token',
+            userinfoEndpoint: 'http://localhost:8888/aaaa/userinfo',
+            authorizationEndpoint: 'http://localhost:8888/aaaa/authorize',
           },
         },
         authToken: access_token,
@@ -740,7 +790,9 @@ describe('update', () => {
             oidcIntegrationId: oidcIntegrationId,
             clientId: 'bbbb',
             clientSecret: 'bbbbbbbbbbbb',
-            oauthApiUrl: 'http://localhost:8888/bbbb',
+            tokenEndpoint: 'http://localhost:8888/bbbb/token',
+            userinfoEndpoint: 'http://localhost:8888/bbbb/userinfo',
+            authorizationEndpoint: 'http://localhost:8888/bbbb/authorize',
           },
         },
         authToken: access_token,
@@ -755,7 +807,9 @@ describe('update', () => {
               id: oidcIntegrationId,
               clientId: 'bbbb',
               clientSecretPreview: 'bbbb',
-              oauthApiUrl: 'http://localhost:8888/bbbb',
+              tokenEndpoint: 'http://localhost:8888/bbbb/token',
+              userinfoEndpoint: 'http://localhost:8888/bbbb/userinfo',
+              authorizationEndpoint: 'http://localhost:8888/bbbb/authorize',
             },
           },
         },
@@ -780,7 +834,9 @@ describe('update', () => {
             organizationId: org.id,
             clientId: 'foo',
             clientSecret: 'foofoofoofoo',
-            oauthApiUrl: 'http://localhost:8888/oauth',
+            tokenEndpoint: 'http://localhost:8888/oauth/token',
+            userinfoEndpoint: 'http://localhost:8888/oauth/userinfo',
+            authorizationEndpoint: 'http://localhost:8888/oauth/authorize',
           },
         },
         authToken: access_token,
