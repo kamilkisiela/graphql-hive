@@ -4,7 +4,7 @@ on:
 jobs:
   publish_rust:
     runs-on: ubuntu-22.04
-
+    name: find-changes
     outputs:
       rust_changed: ${{ steps.rust_changed.outputs.rust_changed }}
 
@@ -23,7 +23,7 @@ jobs:
   publish_rust_docker:
     needs: publish_rust
     if: needs.publish_rust.outputs.rust_changed == 'true'
-    name: Publish for Docker
+    name: docker
     runs-on: ubuntu-22.04
 
     env:
@@ -78,7 +78,7 @@ jobs:
   publish_rust_windows:
     needs: publish_rust
     if: needs.publish_rust.outputs.rust_changed == 'true'
-    name: Publish for Windows
+    name: windows
     runs-on: windows-latest
     timeout-minutes: 40
 
@@ -133,7 +133,7 @@ jobs:
   publish_rust_macos:
     needs: publish_rust
     if: needs.publish_rust.outputs.rust_changed == 'true'
-    name: Publish for MacOS
+    name: macos
     runs-on: macos-latest
     timeout-minutes: 40
 
@@ -202,7 +202,7 @@ jobs:
   publish_rust_linux:
     needs: publish_rust
     if: needs.publish_rust.outputs.rust_changed == 'true'
-    name: Publish for Linux
+    name: linux
     runs-on: ubuntu-22.04
     timeout-minutes: 40
 
