@@ -7,7 +7,7 @@ export const createThirdPartyEmailPasswordReactOIDCProvider = () => ({
   name: 'OIDC',
 });
 
-const delimiter = '||';
+const delimiter = '--';
 
 export const getOIDCOverrides = (): UserInput['override'] => ({
   functions: originalImplementation => ({
