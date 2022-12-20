@@ -16,7 +16,7 @@
     "@aws-sdk/client-s3": "3.231.0",
     "graphql": "16.6.0",
     "toucan-js": "2.7.0",
-    "zod": "3.15.1"
+    "zod": "3.20.2"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "4.20221111.1",

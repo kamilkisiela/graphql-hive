@@ -1,6 +1,5 @@
 import * as pulumi from '@pulumi/pulumi';
 import { CloudflareCDN } from '../utils/cloudflare';
-import { PackageHelper } from '../utils/pack';
 
 const commonConfig = new pulumi.Config('common');
 const cfConfig = new pulumi.Config('cloudflareCustom');
@@ -11,13 +10,13 @@ export type CDN = ReturnType<typeof deployCFCDN>;
 
 export function deployCFCDN({
   rootDns,
+  release,
   envName,
-  packageHelper,
   s3Config,
 }: {
   rootDns: string;
   envName: string;
-  packageHelper: PackageHelper;
+  release: string;
   s3Config: {
     endpoint: string;
     bucketName: string;
@@ -35,7 +34,7 @@ export function deployCFCDN({
     cdnDnsRecord: envName === 'staging' ? `cdn-${rootDns}` : `cdn.${rootDns}`,
     authPrivateKey: cdnAuthPrivateKey,
     sentryDsn: commonEnv.SENTRY_DSN,
-    release: packageHelper.currentReleaseId(),
+    release,
     s3Config,
   });
 

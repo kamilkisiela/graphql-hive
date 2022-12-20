@@ -1,30 +1,18 @@
-name: website
-
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  workflow_call:
 
 jobs:
   deployment:
-    runs-on: ubuntu-latest
-    if:
-      github.event.pull_request.head.repo.full_name == github.repository || github.event_name ==
-      'push'
+    runs-on: ubuntu-22.04
     steps:
       - name: checkout
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
 
-      - uses: the-guild-org/shared-config/setup@main
-        name: setup env
+      - name: setup environment
+        uses: ./.github/actions/setup
         with:
-          nodeVersion: 16
-          packageManager: pnpm
+          turborepo: false
+          codegen: false
 
       - uses: the-guild-org/shared-config/website-cf@main
         name: build and deploy website

@@ -41,7 +41,7 @@ export const schemaBuilderApiRouter = t.router({
             z
               .object({
                 ...SCHEMA_OBJECT_VALIDATION,
-                url: z.string().nullish(),
+                url: z.string().nullish().optional(),
               })
               .required(),
           ),

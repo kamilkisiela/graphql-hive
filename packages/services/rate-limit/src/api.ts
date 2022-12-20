@@ -15,7 +15,7 @@ const VALIDATION = z
     /**
      * Token is optional, and used only when an additional blocking (WAF) process is needed.
      */
-    token: z.string().nullish(),
+    token: z.string().nullish().optional(),
   })
   .required();
 

@@ -1,6 +1,5 @@
 import * as pulumi from '@pulumi/pulumi';
 import { CloudflareBroker } from '../utils/cloudflare';
-import { PackageHelper } from '../utils/pack';
 
 const commonConfig = new pulumi.Config('common');
 const cfConfig = new pulumi.Config('cloudflareCustom');
@@ -12,11 +11,11 @@ export type Broker = ReturnType<typeof deployCFBroker>;
 export function deployCFBroker({
   rootDns,
   envName,
-  packageHelper,
+  release,
 }: {
   rootDns: string;
   envName: string;
-  packageHelper: PackageHelper;
+  release: string;
 }) {
   const cfBrokerSignature = commonConfig.requireSecret('cfBrokerSignature');
   const broker = new CloudflareBroker({
@@ -28,7 +27,7 @@ export function deployCFBroker({
     cdnDnsRecord: envName === 'staging' ? `broker-${rootDns}` : `broker.${rootDns}`,
     secretSignature: cfBrokerSignature,
     sentryDsn: commonEnv.SENTRY_DSN,
-    release: packageHelper.currentReleaseId(),
+    release,
   });
   return broker.deploy();
 }

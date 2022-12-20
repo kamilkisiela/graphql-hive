@@ -1,10 +1,9 @@
 import * as pulumi from '@pulumi/pulumi';
-import * as azure from '@pulumi/azure';
-import { RemoteArtifactAsServiceDeployment } from '../utils/remote-artifact-as-service';
+import { ServiceDeployment } from '../utils/service-deployment';
 import { DeploymentEnvironment } from '../types';
 import { Redis } from './redis';
-import { PackageHelper } from '../utils/pack';
 import type { Broker } from './cf-broker';
+import * as k8s from '@pulumi/kubernetes';
 
 const commonConfig = new pulumi.Config('common');
 const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
@@ -14,25 +13,28 @@ export type Schema = ReturnType<typeof deploySchema>;
 export function deploySchema({
   deploymentEnv,
   redis,
-  packageHelper,
-  storageContainer,
   broker,
+  release,
+  image,
+  imagePullSecret,
 }: {
-  storageContainer: azure.storage.Container;
-  packageHelper: PackageHelper;
+  image: string;
+  release: string;
   deploymentEnv: DeploymentEnvironment;
   redis: Redis;
   broker: Broker;
+  imagePullSecret: k8s.core.v1.Secret;
 }) {
-  return new RemoteArtifactAsServiceDeployment(
+  return new ServiceDeployment(
     'schema-service',
     {
-      storageContainer,
+      image,
+      imagePullSecret,
       env: {
         ...deploymentEnv,
         ...commonEnv,
         SENTRY: commonEnv.SENTRY_ENABLED,
-        RELEASE: packageHelper.currentReleaseId(),
+        RELEASE: release,
         REDIS_HOST: redis.config.host,
         REDIS_PORT: String(redis.config.port),
         REDIS_PASSWORD: redis.config.password,
@@ -44,7 +46,6 @@ export function deploySchema({
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
       exposesMetrics: true,
-      packageInfo: packageHelper.npmPack('@hive/schema'),
       replicas: 2,
       pdb: true,
     },

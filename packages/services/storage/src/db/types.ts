@@ -62,13 +62,16 @@ export interface migration {
 }
 
 export interface oidc_integrations {
+  authorization_endpoint: string | null;
   client_id: string;
   client_secret: string;
   created_at: Date;
   id: string;
   linked_organization_id: string;
-  oauth_api_url: string;
+  oauth_api_url: string | null;
+  token_endpoint: string | null;
   updated_at: Date;
+  userinfo_endpoint: string | null;
 }
 
 export interface organization_invitations {

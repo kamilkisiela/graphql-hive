@@ -1,0 +1,18 @@
+on:
+  workflow_call:
+
+jobs:
+  unit:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: setup environment
+        uses: ./.github/actions/setup
+        with:
+          turborepo: true
+          codegen: true
+
+      - name: unit tests
+        run: pnpm test

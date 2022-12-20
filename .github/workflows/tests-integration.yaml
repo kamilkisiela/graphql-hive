@@ -1,0 +1,74 @@
+on:
+  workflow_call:
+    secrets:
+      stripeTestPublicKey:
+        required: true
+      stripeTestSecretKey:
+        required: true
+    inputs:
+      registry:
+        default: ghcr.io
+        type: string
+      imageName:
+        default: ${{ github.repository }}
+        type: string
+      imageTag:
+        required: true
+        type: string
+      configureEnv:
+        default: ''
+        type: string
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+
+    env:
+      DOCKER_REGISTRY: ${{ inputs.registry }}/${{ inputs.imageName }}/
+      DOCKER_TAG: :${{ inputs.imageTag }}
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: configure env vars
+        if: ${{ inputs.configureEnv != '' }}
+        run: ${{ inputs.configureEnv }}
+
+      - name: setup environment
+        uses: ./.github/actions/setup
+        with:
+          turborepo: true
+          codegen: true
+
+      - name: prepare packages
+        run: pnpm --filter integration-tests prepare:env
+
+      - name: warnup docker images
+        run: |
+          docker-compose -f integration-tests/docker-compose.yml pull \
+            db \
+            clickhouse \
+            zookeeper \
+            broker \
+            redis \
+            supertokens \
+            s3 \
+            s3_provision_buckets \
+            local_cdn \
+            local_broker \
+            external_composition
+
+      - name: integration tests
+        run: pnpm --filter integration-tests dockest
+        timeout-minutes: 15
+        env:
+          STRIPE_PUBLIC_KEY: ${{ secrets.stripeTestPublicKey }}
+          STRIPE_SECRET_KEY: ${{ secrets.stripeTestSecretKey }}
+          SUPERTOKENS_CONNECTION_URI: http://127.0.0.1:3567
+          SUPERTOKENS_API_KEY: bubatzbieber6942096420
+          EXTERNAL_COMPOSITION_SECRET: secretsecret
+
+      - name: Dockest logs
+        if: always()
+        run: cat integration-tests/*.log
