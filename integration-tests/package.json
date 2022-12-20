@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "build:local": "cd ../ && pnpm docker:build",
-    "dockest": "tsup-node dockest.ts --format esm --target node16 && PWD=$PWD/.. node dist/dockest.js",
+    "dockest": "tsup-node dockest.ts --format esm --target node18 && PWD=$PWD/.. node dist/dockest.js",
     "filter-logs": "node ./scripts/filter-log.mjs",
     "prepare:env": "cd ../ && pnpm build:services && pnpm build:libraries && pnpm build:local"
   },

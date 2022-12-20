@@ -16,9 +16,8 @@ if (!globalThis.Headers) {
 if (!globalThis.ReadableStream) {
   globalThis.ReadableStream = ReadableStream;
 }
-if (!globalThis.fetch) {
-  globalThis.fetch = nodeFetch.fetch;
-}
+
+globalThis.fetch = nodeFetch.fetch;
 
 // eslint-disable-next-line no-process-env
 (globalThis as any).SIGNATURE = process.env.CF_BROKER_SIGNATURE || '';
