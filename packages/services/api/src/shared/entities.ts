@@ -135,7 +135,9 @@ export interface OIDCIntegration {
   linkedOrganizationId: string;
   clientId: string;
   encryptedClientSecret: string;
-  oauthApiUrl: string;
+  tokenEndpoint: string;
+  userinfoEndpoint: string;
+  authorizationEndpoint: string;
 }
 
 export interface Project {

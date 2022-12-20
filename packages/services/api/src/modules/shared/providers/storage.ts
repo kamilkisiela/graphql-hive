@@ -426,13 +426,17 @@ export interface Storage {
     organizationId: string;
     clientId: string;
     encryptedClientSecret: string;
-    oauthApiUrl: string;
+    tokenEndpoint: string;
+    userinfoEndpoint: string;
+    authorizationEndpoint: string;
   }): Promise<{ type: 'ok'; oidcIntegration: OIDCIntegration } | { type: 'error'; reason: string }>;
   updateOIDCIntegration(_: {
     oidcIntegrationId: string;
     clientId: string | null;
     encryptedClientSecret: string | null;
-    oauthApiUrl: string | null;
+    tokenEndpoint: string | null;
+    userinfoEndpoint: string | null;
+    authorizationEndpoint: string | null;
   }): Promise<OIDCIntegration>;
   deleteOIDCIntegration(_: { oidcIntegrationId: string }): Promise<void>;
   idMutex: IdMutex;

@@ -79,7 +79,9 @@ export class OIDCIntegrationsProvider {
     organizationId: string;
     clientId: string;
     clientSecret: string;
-    oauthApiUrl: string;
+    tokenEndpoint: string;
+    userinfoEndpoint: string;
+    authorizationEndpoint: string;
   }) {
     if (this.isEnabled() === false) {
       return {
@@ -104,14 +106,24 @@ export class OIDCIntegrationsProvider {
 
     const clientIdResult = OIDCIntegrationClientIdModel.safeParse(args.clientId);
     const clientSecretResult = OIDCClientSecretModel.safeParse(args.clientSecret);
-    const oauthApiUrlResult = OAuthAPIUrlModel.safeParse(args.oauthApiUrl);
+    const tokenEndpointResult = OAuthAPIUrlModel.safeParse(args.tokenEndpoint);
+    const userinfoEndpointResult = OAuthAPIUrlModel.safeParse(args.userinfoEndpoint);
+    const authorizationEndpointResult = OAuthAPIUrlModel.safeParse(args.authorizationEndpoint);
 
-    if (clientIdResult.success && clientSecretResult.success && oauthApiUrlResult.success) {
+    if (
+      clientIdResult.success &&
+      clientSecretResult.success &&
+      tokenEndpointResult.success &&
+      userinfoEndpointResult.success &&
+      authorizationEndpointResult.success
+    ) {
       const creationResult = await this.storage.createOIDCIntegrationForOrganization({
         organizationId: args.organizationId,
         clientId: clientIdResult.data,
         encryptedClientSecret: this.crypto.encrypt(clientSecretResult.data),
-        oauthApiUrl: oauthApiUrlResult.data,
+        tokenEndpoint: tokenEndpointResult.data,
+        userinfoEndpoint: userinfoEndpointResult.data,
+        authorizationEndpoint: authorizationEndpointResult.data,
       });
 
       if (creationResult.type === 'ok') {
@@ -124,7 +136,9 @@ export class OIDCIntegrationsProvider {
         fieldErrors: {
           clientId: null,
           clientSecret: null,
-          oauthApiUrl: null,
+          tokenEndpoint: null,
+          userinfoEndpoint: null,
+          authorizationEndpoint: null,
         },
       } as const;
     }
@@ -137,7 +151,15 @@ export class OIDCIntegrationsProvider {
         clientSecret: clientSecretResult.success
           ? null
           : clientSecretResult.error.issues[0].message,
-        oauthApiUrl: oauthApiUrlResult.success ? null : oauthApiUrlResult.error.issues[0].message,
+        tokenEndpoint: tokenEndpointResult.success
+          ? null
+          : tokenEndpointResult.error.issues[0].message,
+        userinfoEndpoint: userinfoEndpointResult.success
+          ? null
+          : userinfoEndpointResult.error.issues[0].message,
+        authorizationEndpoint: authorizationEndpointResult.success
+          ? null
+          : authorizationEndpointResult.error.issues[0].message,
       },
     } as const;
   }
@@ -146,7 +168,9 @@ export class OIDCIntegrationsProvider {
     oidcIntegrationId: string;
     clientId: string | null;
     clientSecret: string | null;
-    oauthApiUrl: string | null;
+    tokenEndpoint: string | null;
+    userinfoEndpoint: string | null;
+    authorizationEndpoint: string | null;
   }) {
     if (this.isEnabled() === false) {
       return {
@@ -178,16 +202,28 @@ export class OIDCIntegrationsProvider {
 
     const clientIdResult = maybe(OIDCIntegrationClientIdModel).safeParse(args.clientId);
     const clientSecretResult = maybe(OIDCClientSecretModel).safeParse(args.clientSecret);
-    const oauthApiUrlResult = maybe(OAuthAPIUrlModel).safeParse(args.oauthApiUrl);
+    const tokenEndpointResult = maybe(OAuthAPIUrlModel).safeParse(args.tokenEndpoint);
+    const userinfoEndpointResult = maybe(OAuthAPIUrlModel).safeParse(args.userinfoEndpoint);
+    const authorizationEndpointResult = maybe(OAuthAPIUrlModel).safeParse(
+      args.authorizationEndpoint,
+    );
 
-    if (clientIdResult.success && clientSecretResult.success && oauthApiUrlResult.success) {
+    if (
+      clientIdResult.success &&
+      clientSecretResult.success &&
+      tokenEndpointResult.success &&
+      userinfoEndpointResult.success &&
+      authorizationEndpointResult.success
+    ) {
       const oidcIntegration = await this.storage.updateOIDCIntegration({
         oidcIntegrationId: args.oidcIntegrationId,
         clientId: clientIdResult.data,
         encryptedClientSecret: clientSecretResult.data
           ? this.crypto.encrypt(clientSecretResult.data)
           : null,
-        oauthApiUrl: oauthApiUrlResult.data,
+        tokenEndpoint: tokenEndpointResult.data,
+        userinfoEndpoint: userinfoEndpointResult.data,
+        authorizationEndpoint: authorizationEndpointResult.data,
       });
 
       return {
@@ -204,7 +240,15 @@ export class OIDCIntegrationsProvider {
         clientSecret: clientSecretResult.success
           ? null
           : clientSecretResult.error.issues[0].message,
-        oauthApiUrl: oauthApiUrlResult.success ? null : oauthApiUrlResult.error.issues[0].message,
+        tokenEndpoint: tokenEndpointResult.success
+          ? null
+          : tokenEndpointResult.error.issues[0].message,
+        userinfoEndpoint: userinfoEndpointResult.success
+          ? null
+          : userinfoEndpointResult.error.issues[0].message,
+        authorizationEndpoint: authorizationEndpointResult.success
+          ? null
+          : authorizationEndpointResult.error.issues[0].message,
       },
     } as const;
   }

@@ -136,7 +136,9 @@ export const internalApiRouter = t.router({
         id: result.id,
         clientId: result.clientId,
         clientSecret: ctx.crypto.decrypt(result.encryptedClientSecret),
-        oauthApiUrl: result.oauthApiUrl,
+        tokenEndpoint: result.tokenEndpoint,
+        userinfoEndpoint: result.userinfoEndpoint,
+        authorizationEndpoint: result.authorizationEndpoint,
       };
     }),
 });
