@@ -2,7 +2,7 @@ on:
   workflow_call:
 
 jobs:
-  publish:
+  publish_rust:
     runs-on: ubuntu-22.04
 
     outputs:
