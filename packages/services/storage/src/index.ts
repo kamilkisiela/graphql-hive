@@ -2543,17 +2543,17 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           , "token_endpoint" = ${
             args.tokenEndpoint ??
             /** update existing columns to the old legacy values if not yet stored */
-            sql`COALESCE("token_endpoint", CONCAT("oauth_api_url", "/token"))}`
+            sql`COALESCE("token_endpoint", CONCAT("oauth_api_url", "/token"))`
           }
           , "userinfo_endpoint" = ${
             args.userinfoEndpoint ??
             /** update existing columns to the old legacy values if not yet stored */
-            sql`COALESCE("userinfo_endpoint", CONCAT("oauth_api_url", "/userinfo"))}`
+            sql`COALESCE("userinfo_endpoint", CONCAT("oauth_api_url", "/userinfo"))`
           }
           , "authorization_endpoint" = ${
             args.authorizationEndpoint ??
             /** update existing columns to the old legacy values if not yet stored */
-            sql`COALESCE("authorization_endpoint", CONCAT("oauth_api_url", "/authorize"))}`
+            sql`COALESCE("authorization_endpoint", CONCAT("oauth_api_url", "/authorize"))`
           }
           , "oauth_api_url" = NULL
         WHERE
