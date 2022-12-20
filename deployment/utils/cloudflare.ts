@@ -39,6 +39,16 @@ export class CloudflareCDN {
           namespaceId: kvStorage.id,
         },
       ],
+      analyticsEngineBindings: [
+        {
+          name: 'USAGE_ANALYTICS',
+          dataset: `hive_ha_cdn_usage_${this.config.envName}`,
+        },
+        {
+          name: 'ERROR_ANALYTICS',
+          dataset: `hive_ha_cdn_error_${this.config.envName}`,
+        },
+      ],
       secretTextBindings: [
         {
           // KEY_DATA is in use in cdn-script.js as well, its the name of the global variable,

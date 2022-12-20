@@ -31,3 +31,10 @@ export const devStorage = new Map<string, string>();
 (globalThis as any).S3_BUCKET_NAME = process.env.S3_BUCKET_NAME || '';
 // eslint-disable-next-line no-process-env
 (globalThis as any).S3_PUBLIC_URL = process.env.S3_PUBLIC_URL || '';
+
+(globalThis as any).USAGE_ANALYTICS = {
+  writeDataPoint(_input: any) {},
+};
+(globalThis as any).ERROR_ANALYTICS = {
+  writeDataPoint(_input: any) {},
+};

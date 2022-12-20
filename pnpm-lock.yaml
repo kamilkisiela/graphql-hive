@@ -146,7 +146,7 @@ importers:
     specifiers:
       '@manypkg/get-packages': 1.1.3
       '@pulumi/azure': 5.27.0
-      '@pulumi/cloudflare': 4.13.0
+      '@pulumi/cloudflare': 4.14.0
       '@pulumi/kubernetes': 3.23.0
       '@pulumi/kubernetesx': 0.1.6
       '@pulumi/pulumi': 3.49.0
@@ -157,7 +157,7 @@ importers:
     dependencies:
       '@manypkg/get-packages': 1.1.3
       '@pulumi/azure': 5.27.0_@types+node@18.11.5
-      '@pulumi/cloudflare': 4.13.0_@types+node@18.11.5
+      '@pulumi/cloudflare': 4.14.0_@types+node@18.11.5
       '@pulumi/kubernetes': 3.23.0_@types+node@18.11.5
       '@pulumi/kubernetesx': 0.1.6_puxfobbytwebdjj5c7rtoyrjxu
       '@pulumi/pulumi': 3.49.0_@types+node@18.11.5
@@ -467,7 +467,7 @@ importers:
   packages/services/cdn-worker:
     specifiers:
       '@aws-sdk/client-s3': 3.231.0
-      '@cloudflare/workers-types': 3.4.0
+      '@cloudflare/workers-types': 4.20221111.1
       '@hive/api': workspace:*
       '@types/service-worker-mock': 2.0.1
       '@whatwg-node/fetch': 0.5.3
@@ -484,7 +484,7 @@ importers:
       toucan-js: 2.7.0
       zod: 3.15.1
     devDependencies:
-      '@cloudflare/workers-types': 3.4.0
+      '@cloudflare/workers-types': 4.20221111.1
       '@hive/api': link:../api
       '@types/service-worker-mock': 2.0.1
       '@whatwg-node/fetch': 0.5.3
@@ -8667,8 +8667,8 @@ packages:
       - supports-color
     dev: false
 
-  /@pulumi/cloudflare/4.13.0_@types+node@18.11.5:
-    resolution: {integrity: sha512-11mNWVH4gdpO+YLcXvfomOiAuWJaiLqSnxMZ8TtT1rWQBe+lZOwNEUhhHb/0tbYheIBvezXbug4R/oQ6z7kK8g==}
+  /@pulumi/cloudflare/4.14.0_@types+node@18.11.5:
+    resolution: {integrity: sha512-NdU6tMzc8SNv/g3lyg9hjIT8cTIawUQnj7D135WK9+gYiJ6cKW34LSbzSPgU0+pC6qAvv3r4edRJDpBG7XbRbg==}
     requiresBuild: true
     dependencies:
       '@pulumi/pulumi': 3.49.0_@types+node@18.11.5
