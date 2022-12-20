@@ -35,8 +35,7 @@ jobs:
     with:
       dockerize: ${{ !github.event.pull_request.head.repo.fork }}
       imageTag: ${{ github.event.pull_request.head.sha }}
-    secrets:
-      githubToken: ${{ secrets.GITHUB_TOKEN }}
+    secrets: inherit
 
   # Unit tests using Jest
   unit-tests:

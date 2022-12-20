@@ -1,7 +1,5 @@
 on:
   workflow_call:
-    secrets:
-      githubToken:
     inputs:
       dockerize:
         default: true

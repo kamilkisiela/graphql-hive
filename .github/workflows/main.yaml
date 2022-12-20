@@ -7,10 +7,8 @@ on:
 jobs:
   # Build all packages and applications, and creates Docker images.
   build:
-    name: build
     uses: ./.github/workflows/build-and-dockerize.yaml
     with:
-      dockerize: true
       imageTag: ${{ github.sha }}
       publishSourceMaps: true
     secrets: inherit
@@ -22,7 +20,7 @@ jobs:
 
   # Trigger deployment
   deploy:
-    name: deploy
+    name: trigger staging deployment
     needs:
       - build
     runs-on: ubuntu-22.04
