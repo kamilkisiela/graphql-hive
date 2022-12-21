@@ -17,6 +17,7 @@ import { Emails } from './emails';
 import { StripeBillingService } from './billing';
 import { Output } from '@pulumi/pulumi';
 import * as k8s from '@pulumi/kubernetes';
+import { isProduction } from '../utils/helpers';
 
 const commonConfig = new pulumi.Config('common');
 const cloudflareConfig = new pulumi.Config('cloudflare');
@@ -89,7 +90,7 @@ export function deployGraphQL({
     {
       imagePullSecret,
       image,
-      replicas: 2,
+      replicas: isProduction(deploymentEnv) ? 2 : 1,
       pdb: true,
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',

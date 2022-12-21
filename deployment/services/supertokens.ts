@@ -3,7 +3,12 @@ import * as kx from '@pulumi/kubernetesx';
 import { serviceLocalEndpoint } from '../utils/local-endpoint';
 import { Output } from '@pulumi/pulumi';
 
-export function deploySuperTokens({ apiKey }: { apiKey: Output<string> }) {
+export function deploySuperTokens(
+  { apiKey }: { apiKey: Output<string> },
+  resourceOptions: {
+    dependencies: pulumi.Resource[];
+  },
+) {
   const apiConfig = new pulumi.Config('api');
 
   const port = 3567;
@@ -48,9 +53,15 @@ export function deploySuperTokens({ apiKey }: { apiKey: Output<string> }) {
     ],
   });
 
-  const deployment = new kx.Deployment('supertokens', {
-    spec: pb.asDeploymentSpec({ replicas: 1 }), // <-- here,
-  });
+  const deployment = new kx.Deployment(
+    'supertokens',
+    {
+      spec: pb.asDeploymentSpec({ replicas: 1 }), // <-- here,
+    },
+    {
+      dependsOn: resourceOptions.dependencies,
+    },
+  );
 
   const service = deployment.createService({});
 

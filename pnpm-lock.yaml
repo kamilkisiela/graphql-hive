@@ -151,8 +151,10 @@ importers:
       '@pulumi/kubernetesx': 0.1.6
       '@pulumi/pulumi': 3.49.0
       '@pulumi/random': 4.8.2
+      '@types/js-yaml': 4.0.5
       '@types/mime-types': 2.1.1
       '@types/node': 18.11.5
+      js-yaml: 4.1.0
       pg-connection-string: 2.5.0
     dependencies:
       '@manypkg/get-packages': 1.1.3
@@ -162,8 +164,10 @@ importers:
       '@pulumi/kubernetesx': 0.1.6_puxfobbytwebdjj5c7rtoyrjxu
       '@pulumi/pulumi': 3.49.0_@types+node@18.11.5
       '@pulumi/random': 4.8.2_@types+node@18.11.5
+      js-yaml: 4.1.0
       pg-connection-string: 2.5.0
     devDependencies:
+      '@types/js-yaml': 4.0.5
       '@types/mime-types': 2.1.1
       '@types/node': 18.11.5
 
@@ -18749,7 +18753,6 @@ packages:
     hasBin: true
     dependencies:
       argparse: 2.0.1
-    dev: true
 
   /jsbn/0.1.1:
     resolution: {integrity: sha512-UVU9dibq2JcFWxQPA6KCqj5O42VOmAY3zQUfEKxU0KpTGXwNoCjkX1e13eHNvw/xPynt6pU0rZ1htjWTNTSXsg==}

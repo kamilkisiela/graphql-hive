@@ -41,7 +41,7 @@ const imagePullSecret = dockerImages.createRepositorySecret(
 );
 
 // eslint-disable-next-line no-process-env
-const imagesTag = process.env.DOCKER_IMAGE_TAG;
+const imagesTag = process.env.DOCKER_IMAGE_TAG as string;
 
 if (!imagesTag) {
   throw new Error(`DOCKER_IMAGE_TAG env variable is not set.`);
@@ -91,9 +91,7 @@ const cfBroker = deployCFBroker({
 deployCloudflarePolice({ envName, rootDns });
 
 const redisApi = deployRedis({ deploymentEnv });
-
 const kafkaApi = deployKafka();
-
 const clickhouseApi = deployClickhouse();
 
 const dbMigrations = deployDbMigrations({
@@ -217,7 +215,10 @@ const googleConfig = {
   clientSecret: oauthConfig.requireSecret('googleSecret'),
 };
 
-const supertokens = deploySuperTokens({ apiKey: supertokensApiKey.result });
+const supertokens = deploySuperTokens(
+  { apiKey: supertokensApiKey.result },
+  { dependencies: [dbMigrations] },
+);
 
 const graphqlApi = deployGraphQL({
   clickhouse: clickhouseApi,
@@ -280,6 +281,7 @@ const proxy = deployProxy({
   docs,
   graphql: graphqlApi,
   usage: usageApi,
+  deploymentEnv,
 });
 
 deployCloudFlareSecurityTransform({
