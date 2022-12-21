@@ -39,7 +39,7 @@ export function useArmor<
 
       ctx.addValidationRule(
         maxAliasesRule({
-          n: 10,
+          n: 20,
           onReject: [
             (_, error) => {
               rejectedRequests.inc({
