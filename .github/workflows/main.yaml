@@ -24,7 +24,6 @@ jobs:
     needs:
       - build
     runs-on: ubuntu-22.04
-
     steps:
       - name: Dispatch Deployment
         run: |
@@ -34,9 +33,9 @@ jobs:
             --header 'Authorization: token ${{ secrets.GH_PAT }}' \
             --header 'Content-Type: application/json' \
             --data '{
-            "event_type": "deploy",
+            "event_type": "deploy-staging",
             "client_payload": {
-              "environment": "staging",
+              "actor": "${{ github.actor }}",
               "ref": "${{ github.sha }}"
             }
           }'
