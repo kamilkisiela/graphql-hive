@@ -31,8 +31,7 @@ jobs:
       - name: setup environment
         uses: ./.github/actions/setup
         with:
-          turborepo: false
-          codegen: false
+          codegen: false # no need to run codegen in this case, we can skip
 
       - name: create database
         working-directory: packages/services/storage

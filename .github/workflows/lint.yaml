@@ -11,9 +11,6 @@ jobs:
 
       - name: setup environment
         uses: ./.github/actions/setup
-        with:
-          turborepo: true
-          codegen: true
 
       - name: eslint cache
         uses: actions/cache@v3

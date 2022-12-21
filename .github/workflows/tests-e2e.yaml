@@ -39,7 +39,6 @@ jobs:
       - name: setup environment
         uses: ./.github/actions/setup
         with:
-          turborepo: false
           codegen: false
 
       - name: patch compose file volumes

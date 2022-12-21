@@ -5,9 +5,6 @@ name: setup
 description: Hive CI environment setup
 
 inputs:
-  turborepo:
-    description: Should setup Turbo repo?
-    default: 'true'
   codegen:
     description: Should run GraphQL Codegen?
     default: 'true'
@@ -47,11 +44,6 @@ runs:
       if: ${{ inputs.installDependencies == 'true' }}
       shell: bash
       run: pnpm install --frozen-lockfile
-
-    - name: turborepo setup
-      if: ${{ inputs.turborepo == 'true' }}
-      shell: bash
-      run: node ./scripts/turborepo-setup.js
 
     - name: generate graphql types
       if: ${{ inputs.codegen == 'true' }}

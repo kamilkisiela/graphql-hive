@@ -10,9 +10,6 @@ jobs:
 
       - name: setup environment
         uses: ./.github/actions/setup
-        with:
-          turborepo: true
-          codegen: true
 
       - name: unit tests
         run: pnpm test

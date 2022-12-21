@@ -29,9 +29,6 @@ jobs:
 
       - name: setup environment
         uses: ./.github/actions/setup
-        with:
-          turborepo: true
-          codegen: true
 
       - name: build packages and applications
         run: pnpm build
@@ -67,6 +64,7 @@ jobs:
           replace-with: '_'
 
       - name: build docker images
+        id: docker-bake
         if: ${{ inputs.dockerize }}
         uses: docker/bake-action@v2
         env:
@@ -83,6 +81,17 @@ jobs:
           set: |
             *.cache-from=type=gha
             *.cache-to=type=gha,mode=max
+
+      - name: docker details pr comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        if: ${{ inputs.dockerize && github.event_name == 'pull_request' }}
+        with:
+          message: |
+            🐋 This PR was built and pushed to the following docker images (tag: `${{ inputs.imageTag }}`):
+
+            ```
+            ${{ steps.docker-bake.outputs.metadata }}
+            ```
 
       - name: upload sourcemaps to Sentry
         if: ${{ inputs.publishSourceMaps }}
