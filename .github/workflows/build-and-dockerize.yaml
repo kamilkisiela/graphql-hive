@@ -23,6 +23,7 @@ jobs:
     permissions:
       contents: read
       packages: write
+      pull-requests: write
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -87,9 +88,9 @@ jobs:
         if: ${{ inputs.dockerize && github.event_name == 'pull_request' }}
         with:
           message: |
-            🐋 This PR was built and pushed to the following docker images (tag: `${{ inputs.imageTag }}`):
+            🐋 This PR was built and pushed to the following [Docker images](https://github.com/kamilkisiela?ecosystem=container&tab=packages&visibility=public&tab=packages&ecosystem=container&visibility=public&q=graphql-hive) (tag: `${{ inputs.imageTag }}`):
 
-            ```
+            ```json
             ${{ steps.docker-bake.outputs.metadata }}
             ```
 
