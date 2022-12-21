@@ -11,6 +11,9 @@ inputs:
   installDependencies:
     description: Should run pnpm install?
     default: 'true'
+  workingDirectory:
+    description: Working dir
+    default: ${{ github.workspace }}
 
 runs:
   using: 'composite'
@@ -43,17 +46,11 @@ runs:
     - name: pnpm install
       if: ${{ inputs.installDependencies == 'true' }}
       shell: bash
+      working-directory: ${{ inputs.workingDirectory }}
       run: pnpm install --frozen-lockfile
 
     - name: generate graphql types
       if: ${{ inputs.codegen == 'true' }}
       shell: bash
+      working-directory: ${{ inputs.workingDirectory }}
       run: pnpm graphql:generate
-
-    - uses: actions/upload-artifact@v3.1.1
-      if: ${{ failure() }}
-      with:
-        name: cypress
-        path: |
-          ./cypress/videos/**/*
-          ./cypress/screenshots/**/*

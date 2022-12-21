@@ -62,3 +62,11 @@ jobs:
         with:
           command: pnpm test:e2e
           install: false
+
+      - uses: actions/upload-artifact@v3.1.1
+        if: ${{ failure() }}
+        with:
+          name: cypress
+          path: |
+            ./cypress/videos/**/*
+            ./cypress/screenshots/**/*
