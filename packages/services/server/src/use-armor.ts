@@ -5,6 +5,7 @@ import { maxDepthRule } from '@escape.tech/graphql-armor-max-depth';
 import { maxDirectivesRule } from '@escape.tech/graphql-armor-max-directives';
 import { MaxTokensParserWLexer } from '@escape.tech/graphql-armor-max-tokens';
 import promClient from 'prom-client';
+import * as Sentry from '@sentry/node';
 
 const rejectedRequests = new promClient.Counter({
   name: 'graphql_armor_rejected_requests',
@@ -40,7 +41,7 @@ export function useArmor<
         maxAliasesRule({
           n: 10,
           onReject: [
-            () => {
+            (_, error) => {
               rejectedRequests.inc({
                 reason: 'maxAliases',
               });
@@ -49,6 +50,10 @@ export function useArmor<
                 failedClientRequests.inc({
                   clientVersion: hiveClientVersion,
                   reason: 'maxAliases',
+                });
+
+                Sentry.captureException(error, {
+                  level: 'fatal',
                 });
               }
             },
@@ -59,7 +64,7 @@ export function useArmor<
         maxDirectivesRule({
           n: 20,
           onReject: [
-            () => {
+            (_, error) => {
               rejectedRequests.inc({
                 reason: 'maxDirectives',
               });
@@ -68,6 +73,10 @@ export function useArmor<
                 failedClientRequests.inc({
                   clientVersion: hiveClientVersion,
                   reason: 'maxDirectives',
+                });
+
+                Sentry.captureException(error, {
+                  level: 'fatal',
                 });
               }
             },
@@ -78,7 +87,7 @@ export function useArmor<
         maxDepthRule({
           n: 20,
           onReject: [
-            () => {
+            (_, error) => {
               rejectedRequests.inc({
                 reason: 'maxDepth',
               });
@@ -87,6 +96,10 @@ export function useArmor<
                 failedClientRequests.inc({
                   clientVersion: hiveClientVersion,
                   reason: 'maxDepth',
+                });
+
+                Sentry.captureException(error, {
+                  level: 'fatal',
                 });
               }
             },
@@ -100,7 +113,7 @@ export function useArmor<
           ...options,
           n: 800,
           onReject: [
-            () => {
+            (_, error) => {
               rejectedRequests.inc({
                 reason: 'maxTokenCount',
               });
@@ -112,6 +125,10 @@ export function useArmor<
                 failedClientRequests.inc({
                   clientVersion: hiveClientVersion,
                   reason: 'maxTokenCount',
+                });
+
+                Sentry.captureException(error, {
+                  level: 'fatal',
                 });
               }
             },
