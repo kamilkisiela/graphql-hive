@@ -27,6 +27,7 @@ import hyperid from 'hyperid';
 import zod from 'zod';
 import { HiveError } from '@hive/api';
 import type { HiveConfig } from './environment';
+import { useArmor } from './use-armor';
 
 const reqIdGenerate = hyperid({ fixedLength: true });
 
@@ -95,6 +96,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
   const server = createYoga<Context>({
     logging: options.logger,
     plugins: [
+      useArmor(),
       useSentry({
         startTransaction: false,
         renameTransaction: true,
