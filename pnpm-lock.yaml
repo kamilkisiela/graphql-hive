@@ -228,7 +228,7 @@ importers:
       '@graphql-tools/utils': 8.12.0
       '@oclif/core': ^1.20.4
       '@oclif/plugin-help': 5.1.20
-      '@oclif/plugin-update': 3.0.8
+      '@oclif/plugin-update': 3.0.9
       '@types/env-ci': 3.1.1
       '@types/git-parse': 2.1.2
       '@types/mkdirp': 1.0.2
@@ -255,7 +255,7 @@ importers:
       '@graphql-tools/utils': 8.12.0_graphql@16.6.0
       '@oclif/core': 1.20.4
       '@oclif/plugin-help': 5.1.20
-      '@oclif/plugin-update': 3.0.8
+      '@oclif/plugin-update': 3.0.9
       colors: 1.4.0
       env-ci: 7.3.0
       git-parse: 2.1.2
@@ -7895,6 +7895,39 @@ packages:
       widest-line: 3.1.0
       wrap-ansi: 7.0.0
 
+  /@oclif/core/1.22.0:
+    resolution: {integrity: sha512-Bvyi6uFbmpkFl9XUATsGMlqEDGfqMKWL0Mu5VQTuPg7/NIyfygYkaburn11uGkOp0a8yG6fPpyVBfGmztjNPGA==}
+    engines: {node: '>=14.0.0'}
+    dependencies:
+      '@oclif/linewrap': 1.0.0
+      '@oclif/screen': 3.0.3
+      ansi-escapes: 4.3.2
+      ansi-styles: 4.3.0
+      cardinal: 2.1.1
+      chalk: 4.1.2
+      clean-stack: 3.0.1
+      cli-progress: 3.11.2
+      debug: 4.3.4_supports-color@8.1.1
+      ejs: 3.1.8
+      fs-extra: 9.1.0
+      get-package-type: 0.1.0
+      globby: 11.1.0
+      hyperlinker: 1.0.0
+      indent-string: 4.0.0
+      is-wsl: 2.2.0
+      js-yaml: 3.14.1
+      natural-orderby: 2.0.3
+      object-treeify: 1.1.33
+      password-prompt: 1.1.2
+      semver: 7.3.8
+      string-width: 4.2.3
+      strip-ansi: 6.0.1
+      supports-color: 8.1.1
+      supports-hyperlinks: 2.3.0
+      tslib: 2.4.1
+      widest-line: 3.1.0
+      wrap-ansi: 7.0.0
+
   /@oclif/linewrap/1.0.0:
     resolution: {integrity: sha512-Ups2dShK52xXa8w6iBWLgcjPJWjais6KPJQq3gQ/88AY6BXoTX+MIGFPrWQO1KLMiQfoTpcLnUwloN4brrVUHw==}
 
@@ -7909,17 +7942,17 @@ packages:
     engines: {node: '>=12.0.0'}
     dependencies:
       '@oclif/color': 1.0.2
-      '@oclif/core': 1.21.0
+      '@oclif/core': 1.22.0
       fast-levenshtein: 3.0.0
       lodash: 4.17.21
     dev: true
 
-  /@oclif/plugin-update/3.0.8:
-    resolution: {integrity: sha512-l/WtIJZLeBJKzD72EzooS6u8YoMyqqJZrFYaERdqrLfw6g42TzMaABiz0kFnkR8jy65vCn60j177D9LP2nXA+w==}
+  /@oclif/plugin-update/3.0.9:
+    resolution: {integrity: sha512-CLlMyQI87kQi0sfB7R0ysJSXO6E8pEs5/bx0cSOUd5WL54QXC2HhHOuTl66uEJxH2pGCdLacoDtD7JX8rufSZg==}
     engines: {node: '>=12.0.0'}
     dependencies:
       '@oclif/color': 1.0.2
-      '@oclif/core': 1.21.0
+      '@oclif/core': 1.22.0
       cross-spawn: 7.0.3
       debug: 4.3.4
       filesize: 6.4.0
@@ -7938,7 +7971,7 @@ packages:
     resolution: {integrity: sha512-UDmxMtCq8GDCxVV0P9Kjm257RfcPe6+jY8PPMLYXFYdn20Er8c6vuy8AMD1Z6lO03vACDs+Vsw8gEpCTI7b5Fw==}
     engines: {node: '>=12.0.0'}
     dependencies:
-      '@oclif/core': 1.21.0
+      '@oclif/core': 1.22.0
       chalk: 4.1.2
       debug: 4.3.4
       fs-extra: 9.1.0
