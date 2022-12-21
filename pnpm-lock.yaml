@@ -60,7 +60,7 @@ importers:
       '@swc/core': 1.2.185
       '@theguild/prettier-config': 1.0.0
       '@types/jest': 29.2.0
-      '@types/lru-cache': 7.6.1
+      '@types/lru-cache': 7.10.9
       '@types/node': 18.11.15
       '@typescript-eslint/eslint-plugin': 5.42.1
       '@typescript-eslint/parser': 5.42.1
@@ -111,7 +111,7 @@ importers:
       '@swc/core': 1.2.185
       '@theguild/prettier-config': 1.0.0_prettier@2.7.1
       '@types/jest': 29.2.0
-      '@types/lru-cache': 7.6.1
+      '@types/lru-cache': 7.10.9
       '@types/node': 18.11.15
       '@typescript-eslint/eslint-plugin': 5.42.1_2udltptbznfmezdozpdoa2aemq
       '@typescript-eslint/parser': 5.42.1_rmayb2veg2btbq6mbmnyivgasy
@@ -351,7 +351,7 @@ importers:
       '@types/ioredis': 4.28.10
       '@types/ioredis-mock': 5.6.0
       '@types/lodash': 4.14.182
-      '@types/lru-cache': 7.6.1
+      '@types/lru-cache': 7.10.9
       '@types/ms': 0.7.31
       '@types/uuid': 8.3.4
       '@whatwg-node/fetch': 0.5.3
@@ -370,7 +370,7 @@ importers:
       jsonwebtoken: 8.5.1
       jwks-rsa: 2.1.5
       lodash: 4.17.21
-      lru-cache: 7.9.0
+      lru-cache: 7.14.1
       ms: 2.1.3
       p-retry: 5.1.2
       p-timeout: 5.0.2
@@ -407,7 +407,7 @@ importers:
       jsonwebtoken: 8.5.1
       jwks-rsa: 2.1.5
       lodash: 4.17.21
-      lru-cache: 7.9.0
+      lru-cache: 7.14.1
       ms: 2.1.3
       p-retry: 5.1.2
       p-timeout: 5.0.2
@@ -425,7 +425,7 @@ importers:
       '@types/ioredis': 4.28.10
       '@types/ioredis-mock': 5.6.0
       '@types/lodash': 4.14.182
-      '@types/lru-cache': 7.6.1
+      '@types/lru-cache': 7.10.9
       '@types/ms': 0.7.31
       '@types/uuid': 8.3.4
       ioredis-mock: 7.4.0_ioredis@4.28.5
@@ -1518,7 +1518,7 @@ packages:
     resolution: {integrity: sha512-nLgYLomqjVimEzQ4cdvVQkcryi970NDvcRVPfd0OPeXhBfda38WjBq+WhQFk+czSHrmrSp34YHBxpat0EtiowA==}
     dependencies:
       '@apollo/utils.logger': 1.0.0
-      lru-cache: 7.14.0
+      lru-cache: 7.14.1
 
   /@apollo/utils.logger/1.0.0:
     resolution: {integrity: sha512-dx9XrjyisD2pOa+KsB5RcDbWIAdgC91gJfeyLCgy0ctJMjQe7yZK5kdWaWlaOoCeX0z6YI9iYlg7vMPyMpQF3Q==}
@@ -10736,8 +10736,10 @@ packages:
     resolution: {integrity: sha512-ssE3Vlrys7sdIzs5LOxCzTVMsU7i9oa/IaW92wF32JFb3CVczqOkru2xspuKczHEbG3nvmPY7IFqVmGGHdNbYw==}
     dev: false
 
-  /@types/lru-cache/7.6.1:
-    resolution: {integrity: sha512-69x+Dhrm2aShFkTqUuPgUXbKYwvq4FH/DVeeQH7MBfTjbKjPX51NGLERxVV1vf33N71dzLvXCko4OLqRvsq53Q==}
+  /@types/lru-cache/7.10.9:
+    resolution: {integrity: sha512-wrwgkdJ0xr8AbzKhVaRI8SXZN9saapPwwLoydBEr4HqMZET1LUTi1gdoaj82XmRJ9atqN7MtB0aja29iiK+7ag==}
+    dependencies:
+      lru-cache: 7.14.1
     dev: true
 
   /@types/mdast/3.0.10:
@@ -12572,7 +12574,7 @@ packages:
       fs-minipass: 2.1.0
       glob: 8.0.3
       infer-owner: 1.0.4
-      lru-cache: 7.14.0
+      lru-cache: 7.14.1
       minipass: 3.3.4
       minipass-collect: 1.0.2
       minipass-flush: 1.0.5
@@ -19442,14 +19444,9 @@ packages:
     dependencies:
       yallist: 4.0.0
 
-  /lru-cache/7.14.0:
-    resolution: {integrity: sha512-EIRtP1GrSJny0dqb50QXRUNBxHJhcpxHC++M5tD7RYbvLLn5KVWKsbyswSSqDuU15UFi3bgTQIY8nhDMeF6aDQ==}
+  /lru-cache/7.14.1:
+    resolution: {integrity: sha512-ysxwsnTKdAx96aTRdhDOCQfDgbHnt8SK0KY8SEjO0wHinhWOFTESbjVCMPbU1uGXg/ch4lifqx0wfjOawU2+WA==}
     engines: {node: '>=12'}
-
-  /lru-cache/7.9.0:
-    resolution: {integrity: sha512-lkcNMUKqdJk96TuIXUidxaPuEg5sJo/+ZyVE2BDFnuZGzwXem7d8582eG8vbu4todLfT14snP6iHriCHXXi5Rw==}
-    engines: {node: '>=12'}
-    dev: false
 
   /lru-memoizer/2.1.4:
     resolution: {integrity: sha512-IXAq50s4qwrOBrXJklY+KhgZF+5y98PDaNo0gi/v2KQBFLyWr+JyFvijZXkGKjQj/h9c0OwoE+JZbwUXce76hQ==}
@@ -19502,7 +19499,7 @@ packages:
       http-proxy-agent: 5.0.0
       https-proxy-agent: 5.0.1
       is-lambda: 1.0.1
-      lru-cache: 7.14.0
+      lru-cache: 7.14.1
       minipass: 3.3.4
       minipass-collect: 1.0.2
       minipass-fetch: 2.1.2
