@@ -5,9 +5,6 @@ name: setup
 description: Hive CI environment setup
 
 inputs:
-  turborepo:
-    description: Should setup Turbo repo?
-    default: 'true'
   codegen:
     description: Should run GraphQL Codegen?
     default: 'true'
@@ -36,22 +33,27 @@ runs:
     - uses: actions/cache@v3
       name: restore pnpm cache
       with:
-        path: ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
-        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+        path: |
+          ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
+          ~/.cache/Cypress
+        key: ${{ runner.os }}-pnpm-store-n18-${{ hashFiles('**/pnpm-lock.yaml') }}
         restore-keys: |
-          ${{ runner.os }}-pnpm-store-
+          ${{ runner.os }}-pnpm-store-n18-
 
     - name: pnpm install
       if: ${{ inputs.installDependencies == 'true' }}
       shell: bash
       run: pnpm install --frozen-lockfile
 
-    - name: turborepo setup
-      if: ${{ inputs.turborepo == 'true' }}
-      shell: bash
-      run: node ./scripts/turborepo-setup.js
-
     - name: generate graphql types
       if: ${{ inputs.codegen == 'true' }}
       shell: bash
       run: pnpm graphql:generate
+
+    - uses: actions/upload-artifact@v3.1.1
+      if: ${{ failure() }}
+      with:
+        name: cypress
+        path: |
+          ./cypress/videos/**/*
+          ./cypress/screenshots/**/*

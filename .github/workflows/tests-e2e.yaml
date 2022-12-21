@@ -39,8 +39,6 @@ jobs:
       - name: setup environment
         uses: ./.github/actions/setup
         with:
-          installDependencies: false
-          turborepo: false
           codegen: false
 
       - name: patch compose file volumes
@@ -63,3 +61,4 @@ jobs:
         uses: cypress-io/github-action@v5
         with:
           command: pnpm test:e2e
+          install: false

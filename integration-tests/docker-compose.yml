@@ -174,7 +174,7 @@ services:
       ACCESS_TOKEN_BLACKLISTING: 'true'
 
   local_cdn:
-    image: node:16.15.1-alpine3.14
+    image: node:18.12.1-alpine3.16
     entrypoint:
       - '/bin/sh'
       - '/run-local-cdn.sh'
@@ -203,7 +203,7 @@ services:
       S3_PUBLIC_URL: 'http://localhost:9002'
 
   local_broker:
-    image: node:16.15.1-alpine3.14
+    image: node:18.12.1-alpine3.16
     entrypoint:
       - '/bin/sh'
       - '/run-local-broker.sh'
@@ -245,7 +245,7 @@ services:
       SECRET: secretsecret
 
   external_composition:
-    image: node:16.15.1-alpine3.14
+    image: node:18.12.1-alpine3.16
     entrypoint:
       - '/bin/sh'
       - '/run-external-composition.sh'

@@ -17,7 +17,7 @@ jobs:
       - name: setup environment
         uses: ./.github/actions/setup
         with:
-          codegen: false
+          codegen: false # no need to run because release script will run it anyway
 
       - name: prepare npm credentials
         run: |
