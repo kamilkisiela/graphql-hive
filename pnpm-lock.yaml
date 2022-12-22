@@ -147,7 +147,7 @@ importers:
       '@manypkg/get-packages': 1.1.3
       '@pulumi/azure': 5.27.0
       '@pulumi/cloudflare': 4.14.0
-      '@pulumi/kubernetes': 3.23.0
+      '@pulumi/kubernetes': 3.23.1
       '@pulumi/kubernetesx': 0.1.6
       '@pulumi/pulumi': 3.49.0
       '@pulumi/random': 4.8.2
@@ -158,8 +158,8 @@ importers:
       '@manypkg/get-packages': 1.1.3
       '@pulumi/azure': 5.27.0_@types+node@18.11.5
       '@pulumi/cloudflare': 4.14.0_@types+node@18.11.5
-      '@pulumi/kubernetes': 3.23.0_@types+node@18.11.5
-      '@pulumi/kubernetesx': 0.1.6_puxfobbytwebdjj5c7rtoyrjxu
+      '@pulumi/kubernetes': 3.23.1_@types+node@18.11.5
+      '@pulumi/kubernetesx': 0.1.6_hvd5eubukcs2flgygpqfaedeiy
       '@pulumi/pulumi': 3.49.0_@types+node@18.11.5
       '@pulumi/random': 4.8.2_@types+node@18.11.5
       pg-connection-string: 2.5.0
@@ -8552,8 +8552,8 @@ packages:
       - supports-color
     dev: false
 
-  /@pulumi/kubernetes/3.23.0_@types+node@18.11.5:
-    resolution: {integrity: sha512-BKtBMBaS8WwM6REwi9+CkE7NvFshJ4jsWXyCfMNWGdiPFL0ho37JVDu01aY23sXCGM186SbPCrmkKOd93ytLqQ==}
+  /@pulumi/kubernetes/3.23.1_@types+node@18.11.5:
+    resolution: {integrity: sha512-tT7vqvefOGSTAold9n2ej5rJBsbn+RtwxoDHLG0f4lR/VP68Z3P48lI1ziPMMqWPIBYJrBDyS3V/Fv1QWbyNDg==}
     requiresBuild: true
     dependencies:
       '@pulumi/pulumi': 3.49.0_@types+node@18.11.5
@@ -8572,13 +8572,13 @@ packages:
       - supports-color
     dev: false
 
-  /@pulumi/kubernetesx/0.1.6_puxfobbytwebdjj5c7rtoyrjxu:
+  /@pulumi/kubernetesx/0.1.6_hvd5eubukcs2flgygpqfaedeiy:
     resolution: {integrity: sha512-9VL4Yi4b4aLC/obBarJuNkm86kABByUZICYPSTdV396MGZtOc066o2brsB+kWVQcVfkYVXTPrpjIkAwBXXnzGw==}
     peerDependencies:
       '@pulumi/kubernetes': ^3.0.0
       '@pulumi/pulumi': ^3.0.0
     dependencies:
-      '@pulumi/kubernetes': 3.23.0_@types+node@18.11.5
+      '@pulumi/kubernetes': 3.23.1_@types+node@18.11.5
       '@pulumi/pulumi': 3.49.0_@types+node@18.11.5
     dev: false
 
