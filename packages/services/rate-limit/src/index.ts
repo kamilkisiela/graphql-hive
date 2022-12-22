@@ -1,17 +1,16 @@
 #!/usr/bin/env node
+import { createServerAdapter } from '@whatwg-node/server';
 import 'reflect-metadata';
 import * as Sentry from '@sentry/node';
 import {
-  createServer,
   startMetrics,
   registerShutdown,
-  reportReadiness,
+  createLogger,
+  FastifyLoggerInstance,
 } from '@hive/service-common';
-import { createRateLimiter } from './limiter';
-import { createConnectionString } from '@hive/storage';
-import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
-import { rateLimitApiRouter } from './api';
 import { env } from './environment';
+import { createServer } from 'http';
+import { rateLimitCtX, rateLimitRouter } from './router';
 
 async function main() {
   if (env.sentry) {
@@ -24,67 +23,28 @@ async function main() {
     });
   }
 
-  const server = await createServer({
-    name: 'rate-limit',
-    tracing: false,
-    log: {
-      level: env.log.level,
-    },
-  });
+  const logger = createLogger() as FastifyLoggerInstance;
+
+  const app = createServerAdapter(rateLimitRouter);
+  const server = createServer(app);
 
   try {
-    const ctx = createRateLimiter({
-      logger: server.log,
-      rateLimitConfig: {
-        interval: env.limitCacheUpdateIntervalMs,
-      },
-      rateEstimator: env.hiveServices.usageEstimator,
-      emails: env.hiveServices.emails ?? undefined,
-      storage: {
-        connectionString: createConnectionString(env.postgres),
-      },
-    });
-
-    await server.register(fastifyTRPCPlugin, {
-      prefix: '/trpc',
-      trpcOptions: {
-        router: rateLimitApiRouter,
-        createContext: () => ctx,
-      },
-    });
-
     registerShutdown({
-      logger: server.log,
+      logger,
       async onShutdown() {
-        await Promise.all([ctx.stop(), server.close()]);
-      },
-    });
-
-    server.route({
-      method: ['GET', 'HEAD'],
-      url: '/_health',
-      handler(_, res) {
-        void res.status(200).send();
-      },
-    });
-
-    server.route({
-      method: ['GET', 'HEAD'],
-      url: '/_readiness',
-      handler(_, res) {
-        const isReady = ctx.readiness();
-        reportReadiness(isReady);
-        void res.status(isReady ? 200 : 400).send();
+        await Promise.all([rateLimitCtX.stop(), server.close()]);
       },
     });
 
     if (env.prometheus) {
       await startMetrics(env.prometheus.labels.instance);
     }
-    await server.listen(env.http.port, '0.0.0.0');
-    await ctx.start();
+    await rateLimitCtX.start();
+    return new Promise<void>(resolve => {
+      server.listen(env.http.port, '0.0.0.0', resolve);
+    });
   } catch (error) {
-    server.log.fatal(error);
+    logger.fatal(error);
     Sentry.captureException(error, {
       level: 'fatal',
     });
