@@ -47,7 +47,7 @@ jobs:
           cmd: yq -i 'del(.services.*.volumes)' docker-compose.community.yml
 
       - name: run containers
-        timeout-minutes: 8
+        timeout-minutes: 10
         run: docker compose -f docker-compose.community.yml up -d --wait
 
       - name: troubleshoot containers
@@ -57,7 +57,7 @@ jobs:
           docker compose -f docker-compose.community.yml logs
 
       - name: cypress
-        timeout-minutes: 5
+        timeout-minutes: 6
         uses: cypress-io/github-action@v5
         with:
           command: pnpm test:e2e

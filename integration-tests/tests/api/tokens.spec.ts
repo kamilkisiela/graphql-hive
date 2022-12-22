@@ -1,64 +1,21 @@
 import { ProjectType } from '@app/gql/graphql';
-import {
-  createOrganization,
-  createProject,
-  createToken,
-  readTokenInfo,
-  deleteTokens,
-} from '../../testkit/flow';
-import { authenticate } from '../../testkit/auth';
+import { initSeed } from '../../testkit/seed';
 
-test('deleting a token should clear the cache', async () => {
-  const { access_token: owner_access_token } = await authenticate('main');
-  const orgResult = await createOrganization(
-    {
-      name: 'foo',
-    },
-    owner_access_token,
-  );
-
-  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
-
-  const projectResult = await createProject(
-    {
-      organization: org.cleanId,
-      type: ProjectType.Single,
-      name: 'foo',
-    },
-    owner_access_token,
-  );
-
-  const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
-
-  // member should not have access to target:registry:write
-  const tokenResult = await createToken(
-    {
-      name: 'test',
-      organization: org.cleanId,
-      project: project.cleanId,
-      target: target.cleanId,
-      organizationScopes: [],
-      projectScopes: [],
-      targetScopes: [],
-    },
-    owner_access_token,
-  );
-
-  expect(tokenResult.body.errors).not.toBeDefined();
-  const secret = tokenResult.body.data?.createToken.ok?.secret;
-  const createdToken = tokenResult.body.data?.createToken.ok?.createdToken;
+test.concurrent('deleting a token should clear the cache', async () => {
+  const { createOrg } = await initSeed().createOwner();
+  const { inviteAndJoinMember, createProject } = await createOrg();
+  await inviteAndJoinMember();
+  const { createToken, removeTokens } = await createProject(ProjectType.Single);
+  const { secret, token: createdToken, fetchTokenInfo } = await createToken([], [], []);
 
   expect(secret).toBeDefined();
 
-  let tokenInfoResult = await readTokenInfo(secret!);
-  expect(tokenInfoResult.body.errors).not.toBeDefined();
+  const tokenInfo = await fetchTokenInfo();
 
-  if (tokenInfoResult.body.data?.tokenInfo.__typename === 'TokenNotFoundError' || !createdToken) {
+  if (tokenInfo.__typename === 'TokenNotFoundError' || !createdToken) {
     throw new Error('Token not found');
   }
 
-  const tokenInfo = tokenInfoResult.body.data?.tokenInfo;
   // organization
   expect(tokenInfo?.hasOrganizationRead).toBe(true);
   expect(tokenInfo?.hasOrganizationDelete).toBe(false);
@@ -81,17 +38,6 @@ test('deleting a token should clear the cache', async () => {
   expect(tokenInfo?.hasTargetTokensRead).toBe(false);
   expect(tokenInfo?.hasTargetTokensWrite).toBe(false);
 
-  // test invalidation
-  await deleteTokens(
-    {
-      organization: org.cleanId,
-      project: project.cleanId,
-      target: target.cleanId,
-      tokens: [createdToken.id],
-    },
-    owner_access_token,
-  );
-
-  tokenInfoResult = await readTokenInfo(secret!);
-  expect(tokenInfoResult.body.errors).toHaveLength(1);
+  await removeTokens([createdToken.id]);
+  await expect(fetchTokenInfo()).rejects.toThrow();
 });

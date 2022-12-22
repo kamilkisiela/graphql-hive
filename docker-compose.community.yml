@@ -1,7 +1,8 @@
 version: '3.8'
 
 networks:
-  stack: {}
+  stack:
+    name: hive
 
 services:
   db:
@@ -191,9 +192,6 @@ services:
       CLICKHOUSE_PORT: '8123'
       CLICKHOUSE_USERNAME: '${CLICKHOUSE_USER}'
       CLICKHOUSE_PASSWORD: '${CLICKHOUSE_PASSWORD}'
-    # Tell dockest, we want to wait for the exit code of the migrator to be 0
-    labels:
-      dockest.readiness: 'exit_code'
 
   server:
     image: '${DOCKER_REGISTRY}server${DOCKER_TAG}'

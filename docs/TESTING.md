@@ -2,11 +2,13 @@
 
 ## Unit tests
 
-We are using Jest. Simply run `pnpm test` to run all the tests.
+We are using Jest.
+
+Simply run `pnpm test` to run all the tests locally.
 
 ## Integration Tests
 
-We are using Dockest to test the following concerns:
+We are using Jest to test the following concerns:
 
 1. Main application flows and integration of different services
 2. Containerize execution of all services
@@ -16,10 +18,11 @@ Integration tests are based pre-built Docker images, so you can run it in 2 mode
 
 #### Running from source code
 
-To run integration tests locally, from the local source code, follow:
+To run integration tests locally, from the local source code, you need to build a valid Docker
+image.
 
-1. Make sure you have Docker installed. If you are having issues, try to run `docker system prune`
-   to clean the Docker caches.
+To do so, follow these instructions:
+
 2. Install all deps: `pnpm i`
 3. Generate types: `pnpm graphql:generate`
 4. Build source code: `pnpm build`
@@ -34,28 +37,38 @@ export DOCKER_TAG=":local"
 ```
 
 6. Compile a local Docker image by running: `docker buildx bake -f docker.hcl build --load`
-7. Pull the images: `docker-compose -f integration-tests/docker-compose.yml pull`
-8. Run the tests: `pnpm --filter integration-tests dockest`
+7. Use Docker Compose to run the built containers (based on `community` compose file), along with
+   the extra containers:
+
+```
+export DOCKER_TAG=":local"
+export DOCKER_REGISTRY=""
+
+docker compose -f docker-compose.community.yml -f ./integration-tests/docker-compose.integration.yaml --env-file ./integration-tests/.env up -d --wait
+```
+
+8. Run the tests: `pnpm --filter integration-tests test:integration`
 
 #### Running from pre-built Docker image
 
 To run integration tests locally, from the pre-build Docker image, follow:
 
-1. Make sure you have Docker installed. If you are having issues, try to run `docker system prune`
-   to clean the Docker caches.
-2. Install all deps: `pnpm i`
-3. Generate types: `pnpm graphql:generate`
-4. Build source code: `pnpm build`
-5. Decide on the commit ID / Docker image tag you would like to use.
-6. Set the needed env vars:
+1. Install all deps: `pnpm i`
+2. Generate types: `pnpm graphql:generate`
+3. Build only addition, local CF Workers source code, by running:
+   `pnpm --filter integration-tests prepare:env`
+4. Decide on the commit ID / Docker image tag you would like to use (make sure `build-and-dockerize`
+   is done successfully)
+5. Set the needed env vars, and use Docker Compose to run all local services:
 
 ```
 export DOCKER_REGISTRY="ghcr.io/kamilkisiela/graphql-hive/"
 export DOCKER_TAG=":IMAGE_TAG_HERE"
+
+docker compose -f docker-compose.community.yml -f ./integration-tests/docker-compose.integration.yaml --env-file ./integration-tests/.env up -d --wait
 ```
 
-7. Pull the images: `docker-compose -f integration-tests/docker-compose.yml pull`
-8. Run the tests: `pnpm --filter integration-tests dockest`
+6. Run the tests: `pnpm --filter integration-tests test:integration`
 
 ## e2e Tests
 
@@ -79,24 +92,11 @@ export RELEASE="local"
 export BRANCH_NAME="local"
 export BUILD_TYPE=""
 export DOCKER_TAG=":local"
-export HIVE_ENCRYPTION_SECRET=wowverysecuremuchsecret
-export HIVE_EMAIL_FROM=no-reply@graphql-hive.com
-export HIVE_APP_BASE_URL=http://localhost:8080
-export SUPERTOKENS_API_KEY=wowverysecuremuchsecret
-export CLICKHOUSE_USER=clickhouse
-export CLICKHOUSE_PASSWORD=wowverysecuremuchsecret
-export REDIS_PASSWORD=wowverysecuremuchsecret
-export POSTGRES_PASSWORD=postgres
-export POSTGRES_USER=postgres
-export POSTGRES_DB=registry
-export MINIO_ROOT_USER=minioadmin
-export MINIO_ROOT_PASSWORD=minioadmin
-export CDN_AUTH_PRIVATE_KEY=6b4721a99bd2ef6c00ce4328f34d95d7
 ```
 
 6. Compile a local Docker image by running: `docker buildx bake -f docker.hcl build --load`
 7. Run the e2e environment, by running:
-   `docker compose -f docker-compose.community.yml up -d --wait`
+   `docker compose -f docker-compose.community.yml --env-file ./integration-tests/.env up -d --wait`
 8. Run Cypress: `pnpm test:e2e`
 
 #### Running from pre-built Docker image
@@ -109,26 +109,28 @@ To run integration tests locally, from the pre-build Docker image, follow:
 3. Generate types: `pnpm graphql:generate`
 4. Build source code: `pnpm build`
 5. Decide on the commit ID / Docker image tag you would like to use.
-6. Set the needed env vars:
+6. Run the e2e environment, by running:
+   `docker compose -f docker-compose.community.yml --env-file ./integration-tests/.env up -d --wait`
+7. Run Cypress: `pnpm test:e2e`
 
-```
-export DOCKER_REGISTRY="ghcr.io/kamilkisiela/graphql-hive/"
-export DOCKER_TAG=":IMAGE_TAG_HERE"
-export HIVE_ENCRYPTION_SECRET=wowverysecuremuchsecret
-export HIVE_EMAIL_FROM=no-reply@graphql-hive.com
-export HIVE_APP_BASE_URL=http://localhost:8080
-export SUPERTOKENS_API_KEY=wowverysecuremuchsecret
-export CLICKHOUSE_USER=clickhouse
-export CLICKHOUSE_PASSWORD=wowverysecuremuchsecret
-export REDIS_PASSWORD=wowverysecuremuchsecret
-export POSTGRES_PASSWORD=postgres
-export POSTGRES_USER=postgres
-export POSTGRES_DB=registry
-export MINIO_ROOT_USER=minioadmin
-export MINIO_ROOT_PASSWORD=minioadmin
-export CDN_AUTH_PRIVATE_KEY=6b4721a99bd2ef6c00ce4328f34d95d7
-```
+#### Docker Compose configuration
 
-7. Run the e2e environment, by running:
-   `docker compose -f docker-compose.community.yml up -d --wait`
-8. Run Cypress: `pnpm test:e2e`
+Keep in mind that integration tests are running a combination of 2 Docker Compose files:
+
+1. `docker-compose.community.yml` - this is also used for self-hosting Hive, so this file contains
+   all services and configurations needed for running Hive core (without SaaS-specific services,
+   like billing).
+2. `docker-compose.integration.yaml` - An extension and overrides file: we are using that file to
+   run local services such as CloudFlare CDN mock, external composition service and so on - this is
+   done in order to mock a complete Hive SaaS environment and test all features. **This file also
+   includes overrides such as environment variables that are specific only for integration testing -
+   so make sure to choose wisely where to add environment variables!**
+
+## Troubleshoot
+
+If you are having issues with running Docker images, follow these instructions:
+
+1. Make sure you have latest Docker installed.
+1. Make sure no containers are running (`docker ps` and then `docker stop CONTAINER_ID`).
+1. Delete the local volume used for testing, it's located under `.hive` directory.
+1. Try to run `docker system prune` to clean all the Docker images, containers, networks and caches.
