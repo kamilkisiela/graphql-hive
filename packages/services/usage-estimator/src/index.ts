@@ -1,17 +1,12 @@
 #!/usr/bin/env node
+import { createServerAdapter } from '@whatwg-node/server';
 import 'reflect-metadata';
 import * as Sentry from '@sentry/node';
-import {
-  createServer,
-  startMetrics,
-  registerShutdown,
-  reportReadiness,
-} from '@hive/service-common';
-import { createEstimator } from './estimator';
-import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
-import { usageEstimatorApiRouter } from './api';
-import { clickHouseElapsedDuration, clickHouseReadDuration } from './metrics';
+import { startMetrics, registerShutdown, FastifyLoggerInstance } from '@hive/service-common';
 import { env } from './environment';
+import { createLogger } from 'packages/services/service-common/src/logger';
+import { estimatorContext, usageEstimatorRouter } from './router';
+import { createServer } from 'http';
 
 async function main() {
   if (env.sentry) {
@@ -24,70 +19,29 @@ async function main() {
     });
   }
 
-  const server = await createServer({
-    name: 'usage-estimator',
-    tracing: false,
-    log: {
-      level: env.log.level,
-    },
-  });
+  const logger = createLogger() as FastifyLoggerInstance;
+
+  const app = createServerAdapter(usageEstimatorRouter);
+  const server = createServer(app);
 
   try {
-    const context = createEstimator({
-      logger: server.log,
-      clickhouse: {
-        protocol: env.clickhouse.protocol,
-        host: env.clickhouse.host,
-        port: env.clickhouse.port,
-        username: env.clickhouse.username,
-        password: env.clickhouse.password,
-        onReadEnd(query, timings) {
-          clickHouseReadDuration.labels({ query }).observe(timings.totalSeconds);
-          clickHouseElapsedDuration.labels({ query }).observe(timings.elapsedSeconds);
-        },
-      },
-    });
-
     registerShutdown({
-      logger: server.log,
+      logger,
       async onShutdown() {
-        await Promise.all([context.stop(), server.close()]);
-      },
-    });
-
-    await server.register(fastifyTRPCPlugin, {
-      prefix: '/trpc',
-      trpcOptions: {
-        router: usageEstimatorApiRouter,
-        createContext: () => context,
-      },
-    });
-
-    server.route({
-      method: ['GET', 'HEAD'],
-      url: '/_health',
-      handler(_, res) {
-        void res.status(200).send();
-      },
-    });
-
-    server.route({
-      method: ['GET', 'HEAD'],
-      url: '/_readiness',
-      handler(_, res) {
-        const isReady = context.readiness();
-        reportReadiness(isReady);
-        void res.status(isReady ? 200 : 400).send();
+        await Promise.all([estimatorContext.stop(), server.close()]);
       },
     });
 
     if (env.prometheus) {
       await startMetrics(env.prometheus.labels.instance);
     }
-    await server.listen(env.http.port, '0.0.0.0');
-    await context.start();
+
+    await estimatorContext.start();
+    return new Promise<void>(resolve => {
+      server.listen(env.http.port, '0.0.0.0', resolve);
+    });
   } catch (error) {
-    server.log.fatal(error);
+    logger.fatal(error);
     Sentry.captureException(error, {
       level: 'fatal',
     });

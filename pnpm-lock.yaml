@@ -880,9 +880,12 @@ importers:
       '@sentry/node': 7.21.1
       '@sentry/tracing': 7.21.1
       '@trpc/server': 10.4.3
+      '@valu/trpc-fetch-api-adapter': ^0.0.3
       '@whatwg-node/fetch': 0.5.3
+      '@whatwg-node/server': ^0.4.17
       dotenv: 10.0.0
       got: 12.5.3
+      itty-router: 2.6.6
       pino-pretty: 6.0.0
       reflect-metadata: 0.1.13
       tslib: 2.4.1
@@ -891,9 +894,12 @@ importers:
       '@sentry/node': 7.21.1
       '@sentry/tracing': 7.21.1
       '@trpc/server': 10.4.3
+      '@valu/trpc-fetch-api-adapter': 0.0.3
       '@whatwg-node/fetch': 0.5.3
+      '@whatwg-node/server': 0.4.17_@types+node@18.11.5
       dotenv: 10.0.0
       got: 12.5.3
+      itty-router: 2.6.6
       reflect-metadata: 0.1.13
       zod: 3.15.1
     devDependencies:
