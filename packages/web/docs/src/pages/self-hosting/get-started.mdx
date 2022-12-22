@@ -29,7 +29,7 @@ proceeding.
 
 ## Quick Start Video
 
-Int this video you will learn how to run GraphQL Hive and publish your first schema on your machine
+In this video you will learn how to run GraphQL Hive and publish your first schema on your machine
 in less than 15 minutes.
 
 <iframe
@@ -41,13 +41,19 @@ in less than 15 minutes.
 
 First download the `docker-compose.community.yml` file from the
 [GitHub repository](https://github.com/kamilkisiela/graphql-hive/blob/main/docker-compose.community.yml)
-using `wget`.
+using `wget`. This's gonna download the latest version available.
+
+<Callout type="info">
+  Note: make sure you've docker installed to be able to continue with the setup process.
+</Callout>
 
 ```bash
 wget https://raw.githubusercontent.com/kamilkisiela/graphql-hive/main/docker-compose.community.yml
 ```
 
-After downloading the file, you need to set some environment variables.
+After downloading the `docker-compose.community.yml` file, this includes all the services required
+for running Hive locally in a self hosted environment. But before we can spin it up, we first need
+to set some environment variables.
 
 <Callout>
   **Docker Tag.** Docker images are built and published for each single commit within the GraphQL
@@ -63,7 +69,7 @@ After downloading the file, you need to set some environment variables.
 
 ```bash
 export DOCKER_REGISTRY="ghcr.io/kamilkisiela/graphql-hive/"
-export DOCKER_TAG=":latest"
+export DOCKER_TAG=":latest" # Pin this to an exact commit hash from our `main` branch
 export HIVE_ENCRYPTION_SECRET=$(openssl rand -hex 16)
 export HIVE_APP_BASE_URL="http://localhost:8080"
 export HIVE_EMAIL_FROM="no-reply@graphql-hive.com"
@@ -89,22 +95,125 @@ the environment variables.
 
 </Callout>
 
-After setting the environment variables, you can start the GraphQL Hive services using
-`docker-compose`.
+After setting the environment variables, pull the required images for GraphQL Hive services. This's
+gonna take some time if you're doing it for the first time.
 
 ```bash
-docker-compose -f docker-compose.community.yml up
+docker compose -f docker-compose.community.yml pull
+```
+
+After it's done, you can start the GraphQL Hive services using `docker compose`.
+
+```bash
+docker compose -f docker-compose.community.yml up
 # or of you embedded the environment variables
-docker-compose -f docker-compose.with-env.yml up
+docker compose -f docker-compose.with-env.yml up
 ```
 
 Wait until all the services are up and running.
 
 Congratulations 🥳, you just started your own GraphQL Hive instance.
 
+You'll notice the folder named `.hive` at your root directory that has been mounted from docker
+representing the volumes for the different storages used by Hive services like `postgres` and
+`minio`, etc.. So yes data are currently local but we'll discuss that further more in the
+`Next Steps` section.
+
+## Testing GraphQL Hive
+
 Visit `http://localhost:8080` in your browser and start using GraphQL Hive! The usage reporting
 endpoint is bound to `http://localhost:8081`. The GraphQL API is bound to `http://localhost:8082`.
 The artifacts bucket is bound to `http://localhost:8083`.
+
+Firstly, you can head to `http://localhost:8080` in your browser and start using GraphQL Hive!
+You'll need to Sign Up for an account by inputting your email and password. And once you do you'll
+see your personal organization that has been automatically created for you by default.
+
+### Creating first project and target
+
+Now that we have GraphQL Hive setup locally, signed up and logged into our dashboard. We can start
+creating our first project which we're gonna push graphql schemas to.
+
+So you're gonna click on the `Create a Project` button on the top right, give it a name and choose
+your project type. You're gonna see all sorts of types `Single` which is the most common and
+there're also `Federation` and `Stitching` but what's also nice is that you can define your own
+custom endpoints for schema validation and schema building. I'm gonna go with `Single` but you can
+choose what best suits your scenario. Then click `Create Project`, you're gonna be redirected to
+your project page where you're gonna see 3 listed targets created for you by default:
+
+- `development`
+- `production`
+- `staging`
+
+We're gonna use the `development` target in this guide and as soon as you click it you'll see this
+message:
+
+> Hive is waiting for your first schema.
+>
+> You can publish a schema with Hive CLI and Hive Client
+
+If you already have a Nodejs project with a graphql schema that's great you can skip over the next
+step, but if not so we're gonna initialize a new package in our directory, you can use your
+preferred package manager to do so:
+
+```bash
+# you can do the same with npm or yarn
+pnpm init
+```
+
+Then create a `schema.graphql` file whenever you want, you can put it at the root for example with
+any simple graphql schema like the following:
+
+```graphql
+type Query {
+  hello: String!
+}
+```
+
+Now that you've your Nodejs project setup, start by installing the GraphQL Hive CLI which we're
+gonna use to interact with Hive's server.
+
+```bash
+# you can do the same with npm or yarn
+pnpm i -D @graphql-hive/cli
+```
+
+<Callout type="info">
+  We recommend that you install the GraphQL Hive CLI as a dev dependency
+</Callout>
+
+After installing it, the CLI's bin is set to `hive` which means you can check if it was installed by
+using this command:
+
+```bash
+# you can do the same with npm or yarn
+pnpm hive --version
+```
+
+Make sure you get a output specifiying the installed version for your CLI.
+
+And since we're using the Self Hosted version, we need to configure the Hive CLI to use our local
+endpoint, by creating a `hive.json` file at the root of your directory. Then specify the `registry`
+key to point it our local registry instead of the cloud version one and the value is gonna be
+`http://localhost:8082/graphql` where its running.
+
+Additionally the schemas registry only allows trusted sources to be able to push to them, so we have
+to create an access token by heading back to our project page, specifically on the target(in this
+guide it's `development`) then go to the settings tab, if you scroll donw a bit you're gonna see the
+`Tokens` section, click the `Generate New Token` button, give it a name then we'll have to set some
+permissions for that token, so expand the `All targets` section then give the `Registry` a
+`Read & Write` access. Click the `Generate Token` button, then copy the token value. Head back to
+the `hive.json` config file then add a new key `token` and paste the value from your clipboard.
+
+Now we're all setup to use the GraphQL Hive CLI against our Setup!
+
+We can publish our first schema by using:
+
+```bash
+pnpm hive schema:publish ./schema.graphql
+```
+
+Go to the `Schema` tab in your project target and you're gonna see your latest published schema.
 
 ## Next Steps
 
