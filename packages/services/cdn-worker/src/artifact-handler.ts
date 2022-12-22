@@ -33,6 +33,7 @@ const ParamsModel = zod.object({
     zod.literal('sdl.graphql'),
     zod.literal('sdl.graphqls'),
     zod.literal('services'),
+    zod.literal('schema'),
     zod.literal('supergraph'),
   ]),
 });
@@ -71,6 +72,16 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
       }
 
       const params = parseResult.data;
+
+      /** Legacy handling for old client SDK versions. */
+      if (params.artifactType === 'schema') {
+        return new Response('Found.', {
+          status: 301,
+          headers: {
+            Location: request.url.replace('/schema', '/services'),
+          },
+        });
+      }
 
       const maybeResponse = await authenticate(request, params.targetId);
 
