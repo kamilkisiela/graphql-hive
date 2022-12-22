@@ -20,21 +20,21 @@ patchedDependencies:
   atomic-sleep@1.0.0:
     hash: ofrh3divoxil53fpajpmtnq43q
     path: patches/atomic-sleep@1.0.0.patch
-  bob-the-bundler@4.0.0:
-    hash: sum6gc2cezfosivdgsdg22qyja
-    path: patches/bob-the-bundler@4.0.0.patch
-  slonik@30.1.2:
-    hash: wg2hxbo7txnklmvja4aeqnygfi
-    path: patches/slonik@30.1.2.patch
-  oclif@3.2.25:
-    hash: zdmnkkzcdbpcmhe6nuh2wxowhi
-    path: patches/oclif@3.2.25.patch
   bullmq@1.81.4:
     hash: d7likfulu5mfjaaerbpls6og24
     path: patches/bullmq@1.81.4.patch
   mjml-core@4.13.0:
     hash: zxxsxbqejjmcwuzpigutzzq6wa
     path: patches/mjml-core@4.13.0.patch
+  slonik@30.1.2:
+    hash: wg2hxbo7txnklmvja4aeqnygfi
+    path: patches/slonik@30.1.2.patch
+  bob-the-bundler@4.0.0:
+    hash: sum6gc2cezfosivdgsdg22qyja
+    path: patches/bob-the-bundler@4.0.0.patch
+  oclif@3.2.25:
+    hash: zdmnkkzcdbpcmhe6nuh2wxowhi
+    path: patches/oclif@3.2.25.patch
 
 importers:
 
@@ -146,7 +146,7 @@ importers:
     specifiers:
       '@manypkg/get-packages': 1.1.3
       '@pulumi/azure': 5.27.0
-      '@pulumi/cloudflare': 4.14.0
+      '@pulumi/cloudflare': 4.13.0
       '@pulumi/kubernetes': 3.23.0
       '@pulumi/kubernetesx': 0.1.6
       '@pulumi/pulumi': 3.49.0
@@ -157,7 +157,7 @@ importers:
     dependencies:
       '@manypkg/get-packages': 1.1.3
       '@pulumi/azure': 5.27.0_@types+node@18.11.5
-      '@pulumi/cloudflare': 4.14.0_@types+node@18.11.5
+      '@pulumi/cloudflare': 4.13.0_@types+node@18.11.5
       '@pulumi/kubernetes': 3.23.0_@types+node@18.11.5
       '@pulumi/kubernetesx': 0.1.6_puxfobbytwebdjj5c7rtoyrjxu
       '@pulumi/pulumi': 3.49.0_@types+node@18.11.5
@@ -459,7 +459,7 @@ importers:
   packages/services/cdn-worker:
     specifiers:
       '@aws-sdk/client-s3': 3.231.0
-      '@cloudflare/workers-types': 4.20221111.1
+      '@cloudflare/workers-types': 3.4.0
       '@hive/api': workspace:*
       '@types/service-worker-mock': 2.0.1
       '@whatwg-node/fetch': 0.5.3
@@ -477,7 +477,7 @@ importers:
       toucan-js: 2.7.0
       zod: 3.15.1
     devDependencies:
-      '@cloudflare/workers-types': 4.20221111.1
+      '@cloudflare/workers-types': 3.4.0
       '@hive/api': link:../api
       '@types/service-worker-mock': 2.0.1
       '@whatwg-node/fetch': 0.5.3
@@ -5420,10 +5420,6 @@ packages:
     resolution: {integrity: sha512-i/3czUrt6YqbOWl44OtIqd0cSZvEVXp/1oD/DZylC4PHZL3q/BhbamdEVeVhc/HPk4iD/7MZ2HGaIMO4Z4b12A==}
     dev: true
 
-  /@cloudflare/workers-types/4.20221111.1:
-    resolution: {integrity: sha512-BNV2wN8V6Zduvo7UzxcdjBbLQ906D2KhS804PDufLgx/sanGJCHVJMOIaLvS/b61JKtot1U7P/l1fjrjZ7/E3A==}
-    dev: true
-
   /@colors/colors/1.5.0:
     resolution: {integrity: sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==}
     engines: {node: '>=0.1.90'}
@@ -8747,9 +8743,8 @@ packages:
       - supports-color
     dev: false
 
-  /@pulumi/cloudflare/4.14.0_@types+node@18.11.5:
-    resolution: {integrity: sha512-NdU6tMzc8SNv/g3lyg9hjIT8cTIawUQnj7D135WK9+gYiJ6cKW34LSbzSPgU0+pC6qAvv3r4edRJDpBG7XbRbg==}
-    requiresBuild: true
+  /@pulumi/cloudflare/4.13.0_@types+node@18.11.5:
+    resolution: {integrity: sha512-11mNWVH4gdpO+YLcXvfomOiAuWJaiLqSnxMZ8TtT1rWQBe+lZOwNEUhhHb/0tbYheIBvezXbug4R/oQ6z7kK8g==}    requiresBuild: true
     dependencies:
       '@pulumi/pulumi': 3.49.0_@types+node@18.11.5
     transitivePeerDependencies:
