@@ -1,17 +1,16 @@
 #!/usr/bin/env node
+import { createServerAdapter } from '@whatwg-node/server';
 import 'reflect-metadata';
 import * as Sentry from '@sentry/node';
 import {
-  createServer,
   startMetrics,
   registerShutdown,
-  reportReadiness,
+  createLogger,
+  FastifyLoggerInstance,
 } from '@hive/service-common';
-import { createConnectionString } from '@hive/storage';
-import { createStripeBilling } from './billing-sync';
-import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
-import { stripeBillingApiRouter, Context } from './api';
 import { env } from './environment';
+import { createServer } from 'http';
+import { startStripeBilling, stopStripeBilling, stripeBillingRouter } from './router';
 
 async function main() {
   if (env.sentry) {
@@ -24,75 +23,28 @@ async function main() {
     });
   }
 
-  const server = await createServer({
-    name: 'stripe-billing',
-    tracing: false,
-    log: {
-      level: env.log.level,
-    },
-  });
+  const logger = createLogger() as FastifyLoggerInstance;
+
+  const app = createServerAdapter(stripeBillingRouter);
+  const server = createServer(app);
 
   try {
-    const { readiness, start, stop, stripeApi, postgres$, loadStripeData$ } = createStripeBilling({
-      logger: server.log,
-      stripe: {
-        token: env.stripe.secretKey,
-        syncIntervalMs: env.stripe.syncIntervalMs,
-      },
-      rateEstimator: {
-        endpoint: env.hiveServices.usageEstimator.endpoint,
-      },
-      storage: {
-        connectionString: createConnectionString(env.postgres),
-      },
-    });
-
     registerShutdown({
-      logger: server.log,
+      logger,
       async onShutdown() {
-        await Promise.all([stop(), server.close()]);
-      },
-    });
-
-    const context: Context = {
-      storage$: postgres$,
-      stripe: stripeApi,
-      stripeData$: loadStripeData$,
-    };
-
-    await server.register(fastifyTRPCPlugin, {
-      prefix: '/trpc',
-      trpcOptions: {
-        router: stripeBillingApiRouter,
-        createContext: () => context,
-      },
-    });
-
-    server.route({
-      method: ['GET', 'HEAD'],
-      url: '/_health',
-      handler(_, res) {
-        void res.status(200).send();
-      },
-    });
-
-    server.route({
-      method: ['GET', 'HEAD'],
-      url: '/_readiness',
-      handler(_, res) {
-        const isReady = readiness();
-        reportReadiness(isReady);
-        void res.status(isReady ? 200 : 400).send();
+        await Promise.all([stopStripeBilling(), server.close()]);
       },
     });
 
     if (env.prometheus) {
       await startMetrics(env.prometheus.labels.instance);
     }
-    await server.listen(env.http.port, '0.0.0.0');
-    await start();
+    await startStripeBilling();
+    return new Promise<void>(resolve => {
+      server.listen(env.http.port, '0.0.0.0', resolve);
+    });
   } catch (error) {
-    server.log.fatal(error);
+    logger.fatal(error);
     Sentry.captureException(error, {
       level: 'fatal',
     });
