@@ -138,8 +138,8 @@ So you're gonna click on the `Create a Project` button on the top right, give it
 your project type. You're gonna see all sorts of types `Single` which is the most common and
 there're also `Federation` and `Stitching` but what's also nice is that you can define your own
 custom endpoints for schema validation and schema building. I'm gonna go with `Single` but you can
-choose what best suits your scenario. Then click `Create Project`, you're gonna be redirected to
-your project page where you're gonna see 3 listed targets created for you by default:
+choose what best suits your needs. Then click `Create Project`, you're gonna be redirected to your
+project page where you're gonna see 3 listed targets created for you by default:
 
 - `development`
 - `production`
@@ -161,13 +161,38 @@ preferred package manager to do so:
 pnpm init
 ```
 
-Then create a `schema.graphql` file whenever you want, you can put it at the root for example with
+Then create a `schema.graphql` file wherever you want, you can put it at the root for example with
 any simple graphql schema like the following:
 
 ```graphql
 type Query {
   hello: String!
 }
+```
+
+You also need to have a git repository initilaized for your project, because Hive automatically uses
+the last commit hash to determine who the author is and the commit hash the schema is tied to. So
+we're gonna do that.
+
+```bash
+git init
+```
+
+Make sure you exclude the following in your `.gitignore` file, because you don't wanna push those in
+your commits:
+
+```
+node_modules
+.hive
+hive.json
+.env
+```
+
+Make sure to at least have a single commit so that Hive can associate the schema with it.
+
+```bash
+git add .
+git commit -m"init"
 ```
 
 Now that you've your Nodejs project setup, start by installing the GraphQL Hive CLI which we're
