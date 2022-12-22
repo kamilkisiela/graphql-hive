@@ -28,3 +28,16 @@ jobs:
 
       - name: prettier
         run: pnpm lint:prettier
+
+      - name: Generate Types
+        run: yarn graphql:generate
+
+      - name: Operation Check
+        run: |
+          npx graphql-inspector validate \
+            "packages/web/app/**/*.graphql|packages/libraries/cli/**/*.graphql|packages/web/app/**/*.ts(x)" \
+            "packages/**/module.graphql.ts" \
+            --maxDepth=20 \
+            --maxAliasCount=20 \
+            --maxDirectiveCount=20 \
+            --maxTokenCount=800

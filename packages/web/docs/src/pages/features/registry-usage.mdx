@@ -129,22 +129,22 @@ Here's a list of available endpoints:
 
 ### Federation
 
-- list of services - `<endpoint>/schema`
+- list of services - `<endpoint>/services`
 - supergraph - `<endpoint>/supergraph`
 
 ### Stitching
 
-- list of services - `<endpoint>/schema`
+- list of services - `<endpoint>/services`
 
 ### Single schema project
 
-- Schema Information `<endpoint>/schema`
+- Services Information `<endpoint>/services`
 
   Here's an example of how it could work via cURL for a single schema project:
 
   ```bash
   curl --request GET \
-    --url https://cdn.graphql-hive.com/asce7c12-753d-hive-bee-d7f2c803e232/schema \
+    --url https://cdn.graphql-hive.com/artifacts/v1/asce7c12-753d-hive-bee-d7f2c803e232/schema \
     --header 'X-Hive-CDN-Key: aabTxbEyC78NvSPQNO+qLrrRnBvODJJ8k4sL/2EtIwc=' \
     --header 'Accept: application/json'
   ```
@@ -158,16 +158,10 @@ Here's a list of available endpoints:
   }
   ```
 
-- Raw SDL `<endpoint>/sdl`
+- Raw SDL `<endpoint>/sdl` (`<endpoint>/sdl.graphql`, `<endpoint>/sdl.graphqls`)
 
-  If you wish to get the raw SDL, without a wrapping JSON object, you can specify `/sdl` as suffix
-  to your request.
-
-- Introspection JSON `<endpoint>/introspection`
-
-  If you wish to get the introspection JSON for your GraphQL schema, without a wrapping JSON object,
-  you can specify `/introspection` as suffix to your request. This could be useful for tools that
-  need to get the introspection as-is, like GraphQL Codegen, or GraphQL-Config.
+  If you wish to get the raw SDL, without a wrapping JSON object, you can specify `/sdl` (or
+  `/sdl.graphql`/ or `/sdl.graphqls`) as suffix to your request.
 
 - Metadata `<endpoint>/metadata`
 
@@ -176,7 +170,7 @@ Here's a list of available endpoints:
 
   ```bash
   curl --request GET \
-    --url https://cdn.graphql-hive.com/asce7c12-753d-hive-bee-d7f2c803e232/metadata \
+    --url https://cdn.graphql-hive.com/artifacts/v1/asce7c12-753d-hive-bee-d7f2c803e232/metadata \
     --header 'X-Hive-CDN-Key: YOUR_KEY_HERE'
   ```
 
