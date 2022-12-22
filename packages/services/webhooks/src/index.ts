@@ -1,23 +1,19 @@
 #!/usr/bin/env node
 import {
+  createServer,
   createErrorHandler,
   startMetrics,
   registerShutdown,
   reportReadiness,
   startHeartbeats,
-  FastifyLoggerInstance,
 } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
+import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
 import type { CreateFastifyContextOptions } from '@trpc/server/adapters/fastify';
 import { createScheduler } from './scheduler';
 import { webhooksApiRouter } from './api';
 import type { Context } from './types';
 import { env } from './environment';
-import { Router } from 'itty-router';
-import { createServerAdapter } from '@whatwg-node/server';
-import { createServer } from 'http';
-import { createLogger } from 'packages/services/service-common/src/logger';
-import * as trpcNode from '@trpc/server/adapters/node-http';
 
 async function main() {
   if (env.sentry) {
@@ -30,14 +26,19 @@ async function main() {
     });
   }
 
-  const app = createServerAdapter(Router());
+  const server = await createServer({
+    name: 'webhooks',
+    tracing: false,
+    log: {
+      level: env.log.level,
+    },
+  });
 
-  const logger = createLogger(env.log.level) as FastifyLoggerInstance;
-  const errorHandler = createErrorHandler({ log: { error: logger.error } } as any);
+  const errorHandler = createErrorHandler(server);
 
   try {
     const { schedule, readiness, start, stop } = createScheduler({
-      logger,
+      logger: server.log,
       redis: {
         host: env.redis.host,
         port: env.redis.port,
@@ -54,58 +55,56 @@ async function main() {
           enabled: true,
           endpoint: env.heartbeat.endpoint,
           intervalInMS: 20_000,
-          onError: logger.error,
+          onError: server.log.error,
           isReady: readiness,
         })
       : startHeartbeats({ enabled: false });
 
     registerShutdown({
-      logger,
+      logger: server.log,
       async onShutdown() {
         stopHeartbeats();
         await stop();
       },
     });
 
-    app.all('/trpc', (req: any, res) => {
-      return trpcNode.nodeHTTPRequestHandler({
-        req,
-        res,
-        path: '/trpc',
+    await server.register(fastifyTRPCPlugin, {
+      prefix: '/trpc',
+      trpcOptions: {
         router: webhooksApiRouter,
         createContext({ req }: CreateFastifyContextOptions): Context {
           return { logger: req.log, errorHandler, schedule };
         },
-      });
+      },
     });
 
-    app.get('/_health', () => {
-      return new Response(null, {
-        status: 200,
-      });
+    server.route({
+      method: ['GET', 'HEAD'],
+      url: '/_health',
+      handler(req, res) {
+        void res.status(200).send();
+      },
     });
 
-    app.get('/_readiness', () => {
-      const isReady = readiness();
-      reportReadiness(isReady);
-
-      return new Response(null, {
-        status: isReady ? 200 : 400,
-      });
+    server.route({
+      method: ['GET', 'HEAD'],
+      url: '/_readiness',
+      handler(_, res) {
+        const isReady = readiness();
+        reportReadiness(isReady);
+        void res.status(isReady ? 200 : 400).send();
+      },
     });
 
-    const server = createServer(app);
+    await server.listen(env.http.port, '0.0.0.0');
 
     if (env.prometheus) {
       await startMetrics(env.prometheus.labels.instance);
     }
 
     await start();
-    return new Promise<void>(resolve => {
-      server.listen(env.http.port, '0.0.0.0', resolve);
-    });
   } catch (error) {
-    logger.error(error);
+    server.log.fatal(error);
     Sentry.captureException(error, {
       level: 'fatal',
     });

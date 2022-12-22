@@ -14,12 +14,10 @@
     "@sentry/node": "7.21.1",
     "@sentry/tracing": "7.21.1",
     "@trpc/server": "10.4.3",
-    "@whatwg-node/server": "^0.4.17",
     "bullmq": "1.81.4",
     "dotenv": "10.0.0",
     "got": "12.5.3",
     "ioredis": "4.28.5",
-    "itty-router": "2.6.6",
     "p-timeout": "5.0.2",
     "zod": "3.15.1"
   },
