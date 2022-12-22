@@ -8744,7 +8744,8 @@ packages:
     dev: false
 
   /@pulumi/cloudflare/4.13.0_@types+node@18.11.5:
-    resolution: {integrity: sha512-11mNWVH4gdpO+YLcXvfomOiAuWJaiLqSnxMZ8TtT1rWQBe+lZOwNEUhhHb/0tbYheIBvezXbug4R/oQ6z7kK8g==}    requiresBuild: true
+    resolution: {integrity: sha512-11mNWVH4gdpO+YLcXvfomOiAuWJaiLqSnxMZ8TtT1rWQBe+lZOwNEUhhHb/0tbYheIBvezXbug4R/oQ6z7kK8g==}
+    requiresBuild: true
     dependencies:
       '@pulumi/pulumi': 3.49.0_@types+node@18.11.5
     transitivePeerDependencies:
