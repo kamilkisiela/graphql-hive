@@ -65,6 +65,7 @@ jobs:
           replace-with: '_'
 
       - name: build docker images
+        timeout-minutes: 25
         id: docker-bake
         if: ${{ inputs.dockerize }}
         uses: docker/bake-action@v2
