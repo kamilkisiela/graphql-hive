@@ -1,7 +1,7 @@
 import { createErrorHandler, FastifyLoggerInstance, reportReadiness } from '@hive/service-common';
 import { createFetchAPIHandler } from '@valu/trpc-fetch-api-adapter';
 import { Router } from 'itty-router';
-import { createLogger } from 'packages/services/service-common/src/logger';
+import { createLogger } from '@hive/service-common';
 import { webhooksApiRouter } from './api';
 import { Context } from './types';
 import { env } from './environment';

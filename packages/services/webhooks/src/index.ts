@@ -4,13 +4,13 @@ import {
   registerShutdown,
   FastifyLoggerInstance,
   startHeartbeats,
+  createLogger,
 } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
 import { env } from './environment';
 import { createServerAdapter } from '@whatwg-node/server';
 import { createServer } from 'http';
 import { webhooksRouter, startSchedular, stopSchedular, schedularReadiness } from './router';
-import { createLogger } from 'packages/services/service-common/src/logger';
 
 async function main() {
   if (env.sentry) {
