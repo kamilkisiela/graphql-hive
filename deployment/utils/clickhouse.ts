@@ -1,6 +1,7 @@
 import * as kx from '@pulumi/kubernetesx';
 import * as k8s from '@pulumi/kubernetes';
 import { PodBuilder } from './pod-builder';
+import { getLocalComposeConfig } from './local-config';
 
 export class Clickhouse {
   constructor(
@@ -12,7 +13,7 @@ export class Clickhouse {
   ) {}
 
   deploy() {
-    const image = 'clickhouse/clickhouse-server:22.3.5.5-alpine';
+    const clickhouseService = getLocalComposeConfig().service('clickhouse');
     const port = 8123;
 
     const env: any[] = Array.isArray(this.options.env)
@@ -35,7 +36,7 @@ export class Clickhouse {
       containers: [
         {
           name: this.name,
-          image,
+          image: clickhouseService.image,
           env,
           volumeMounts: [cm.mount('/etc/clickhouse-server/conf.d')],
           ports: {

@@ -4,6 +4,7 @@ import { DeploymentEnvironment } from '../types';
 import { Redis } from './redis';
 import type { Broker } from './cf-broker';
 import * as k8s from '@pulumi/kubernetes';
+import { isProduction } from '../utils/helpers';
 
 const commonConfig = new pulumi.Config('common');
 const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
@@ -46,7 +47,7 @@ export function deploySchema({
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
       exposesMetrics: true,
-      replicas: 2,
+      replicas: isProduction(deploymentEnv) ? 2 : 1,
       pdb: true,
     },
     [redis.deployment, redis.service],

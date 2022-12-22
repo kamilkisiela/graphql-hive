@@ -68,12 +68,8 @@ export function deployUsageIngestor({
         ...commonEnv,
         SENTRY: commonEnv.SENTRY_ENABLED,
         ...clickhouseEnv,
-        KAFKA_SSL: '1',
+        ...kafka.connectionEnv,
         KAFKA_BROKER: kafka.config.endpoint,
-        KAFKA_SASL_MECHANISM: 'plain',
-        KAFKA_SASL_USERNAME: kafka.config.user,
-        KAFKA_SASL_PASSWORD: kafka.config.key,
-        KAFKA_CONCURRENCY: '1',
         KAFKA_TOPIC: kafka.config.topic,
         KAFKA_CONSUMER_GROUP: kafka.config.consumerGroup,
         RELEASE: release,
@@ -90,6 +86,12 @@ export function deployUsageIngestor({
         maxReplicas: maxReplicas,
       },
     },
-    [clickhouse.deployment, clickhouse.service, dbMigrations],
+    [
+      clickhouse.deployment,
+      clickhouse.service,
+      dbMigrations,
+      kafka.deployment,
+      kafka.service,
+    ].filter(Boolean),
   ).deploy();
 }

@@ -4,7 +4,10 @@ import { Output } from '@pulumi/pulumi';
 export class Proxy {
   private lbService: Output<k8s.core.v1.Service> | null = null;
 
-  constructor(private tlsSecretName: string, private staticIp?: { address?: string }) {}
+  constructor(
+    private tlsSecretName: string,
+    private staticIp?: { address?: string; aksReservedIpResourceGroup?: string },
+  ) {}
 
   registerService(
     dns: { record: string; apex?: boolean },
@@ -162,6 +165,13 @@ export class Proxy {
         envoy: {
           service: {
             loadBalancerIP: this.staticIp?.address,
+            annotations:
+              this.staticIp?.address && this.staticIp?.aksReservedIpResourceGroup
+                ? {
+                    'service.beta.kubernetes.io/azure-load-balancer-resource-group':
+                      this.staticIp?.aksReservedIpResourceGroup,
+                  }
+                : undefined,
           },
           podAnnotations: {
             'prometheus.io/scrape': 'true',

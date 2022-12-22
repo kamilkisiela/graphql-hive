@@ -36,7 +36,8 @@ export function deployUsage({
   const replicas = 1; /*isProduction(deploymentEnv) ? 2 : 1*/
   const cpuLimit = isProduction(deploymentEnv) ? '600m' : '300m';
   const maxReplicas = isProduction(deploymentEnv) ? 4 : 2;
-  const kafkaBufferDynamic = kafka.config.bufferDynamic === 'true' ? '1' : '0';
+  const kafkaBufferDynamic =
+    kafka.config.bufferDynamic === 'true' || kafka.config.bufferDynamic === '1' ? '1' : '0';
 
   return new ServiceDeployment(
     'usage-service',
@@ -50,11 +51,8 @@ export function deployUsage({
         ...deploymentEnv,
         ...commonEnv,
         SENTRY: commonEnv.SENTRY_ENABLED,
-        KAFKA_SSL: '1',
+        ...kafka.connectionEnv,
         KAFKA_BROKER: kafka.config.endpoint,
-        KAFKA_SASL_MECHANISM: 'plain',
-        KAFKA_SASL_USERNAME: kafka.config.user,
-        KAFKA_SASL_PASSWORD: kafka.config.key,
         KAFKA_BUFFER_SIZE: kafka.config.bufferSize,
         KAFKA_BUFFER_INTERVAL: kafka.config.bufferInterval,
         KAFKA_BUFFER_DYNAMIC: kafkaBufferDynamic,
@@ -74,6 +72,14 @@ export function deployUsage({
         maxReplicas: maxReplicas,
       },
     },
-    [dbMigrations, tokens.deployment, tokens.service, rateLimit.deployment, rateLimit.service],
+    [
+      dbMigrations,
+      tokens.deployment,
+      tokens.service,
+      rateLimit.deployment,
+      rateLimit.service,
+      kafka.deployment,
+      kafka.service,
+    ].filter(Boolean),
   ).deploy();
 }
