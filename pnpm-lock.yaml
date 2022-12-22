@@ -494,7 +494,7 @@ importers:
       '@trpc/server': 10.4.3
       '@types/ioredis': 4.28.10
       '@types/mjml': 4.7.0
-      '@types/nodemailer': 6.4.6
+      '@types/nodemailer': 6.4.7
       '@types/sendmail': 1.4.4
       '@whatwg-node/fetch': 0.5.3
       bullmq: 1.81.4
@@ -502,7 +502,7 @@ importers:
       dotenv: 10.0.0
       ioredis: 4.28.5
       mjml: 4.13.0
-      nodemailer: 6.7.8
+      nodemailer: 6.8.0
       p-timeout: 5.0.2
       pino-pretty: 6.0.0
       sendmail: 1.6.1
@@ -516,7 +516,7 @@ importers:
       dotenv: 10.0.0
       ioredis: 4.28.5
       mjml: 4.13.0
-      nodemailer: 6.7.8
+      nodemailer: 6.8.0
       p-timeout: 5.0.2
       sendmail: 1.6.1
       zod: 3.20.2
@@ -524,7 +524,7 @@ importers:
       '@hive/service-common': link:../service-common
       '@types/ioredis': 4.28.10
       '@types/mjml': 4.7.0
-      '@types/nodemailer': 6.4.6
+      '@types/nodemailer': 6.4.7
       '@types/sendmail': 1.4.4
       copyfiles: 2.4.1
       pino-pretty: 6.0.0
@@ -10816,10 +10816,10 @@ packages:
   /@types/node/18.11.5:
     resolution: {integrity: sha512-3JRwhbjI+cHLAkUorhf8RnqUbFXajvzX4q6fMn5JwkgtuwfYtRQYI3u4V92vI6NJuTsbBQWWh3RZjFsuevyMGQ==}
 
-  /@types/nodemailer/6.4.6:
-    resolution: {integrity: sha512-pD6fL5GQtUKvD2WnPmg5bC2e8kWCAPDwMPmHe/ohQbW+Dy0EcHgZ2oCSuPlWNqk74LS5BVMig1SymQbFMPPK3w==}
+  /@types/nodemailer/6.4.7:
+    resolution: {integrity: sha512-f5qCBGAn/f0qtRcd4SEn88c8Fp3Swct1731X4ryPKqS61/A3LmmzN8zaEz7hneJvpjFbUUgY7lru/B/7ODTazg==}
     dependencies:
-      '@types/node': 18.11.5
+      '@types/node': 18.11.15
     dev: true
 
   /@types/normalize-package-data/2.4.1:
@@ -21169,11 +21169,6 @@ packages:
     resolution: {integrity: sha512-68xW5LSyPWv8R0GLm6veAvm7E+XFXkVgvE3FW0FGxNMMZqMkPFeGDVALfR1DPdSfcoO36PnW7q5AAOgFImEZGg==}
     dependencies:
       nodemailer-fetch: 1.6.0
-    dev: false
-
-  /nodemailer/6.7.8:
-    resolution: {integrity: sha512-2zaTFGqZixVmTxpJRCFC+Vk5eGRd/fYtvIR+dl5u9QXLTQWGIf48x/JXvo58g9sa0bU6To04XUv554Paykum3g==}
-    engines: {node: '>=6.0.0'}
     dev: false
 
   /nodemailer/6.8.0:

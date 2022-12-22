@@ -18,7 +18,7 @@
     "dotenv": "10.0.0",
     "ioredis": "4.28.5",
     "mjml": "4.13.0",
-    "nodemailer": "6.7.8",
+    "nodemailer": "6.8.0",
     "p-timeout": "5.0.2",
     "sendmail": "1.6.1",
     "zod": "3.20.2"
@@ -27,7 +27,7 @@
     "@hive/service-common": "workspace:*",
     "@types/ioredis": "4.28.10",
     "@types/mjml": "4.7.0",
-    "@types/nodemailer": "6.4.6",
+    "@types/nodemailer": "6.4.7",
     "@types/sendmail": "1.4.4",
     "copyfiles": "2.4.1",
     "pino-pretty": "6.0.0",
