@@ -55,7 +55,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: frabert/replace-string-action@v2.0
+      - uses: frabert/replace-string-action@v2.4
         id: branch_name_fix
         name: sanitize branch name
         if: ${{ inputs.dockerize }}
