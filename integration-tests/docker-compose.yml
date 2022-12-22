@@ -38,7 +38,7 @@ services:
       - 'stack'
 
   zookeeper:
-    image: confluentinc/cp-zookeeper:7.3.0
+    image: confluentinc/cp-zookeeper:7.3.1
     hostname: zookeeper
     networks:
       - 'stack'
