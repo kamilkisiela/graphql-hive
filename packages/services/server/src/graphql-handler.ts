@@ -196,30 +196,30 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
           return null;
         },
       }),
-      useHive({
-        debug: true,
-        enabled: !!options.hiveConfig,
-        token: options.hiveConfig?.token ?? '',
-        usage: {
-          endpoint: options.hiveConfig?.usage?.endpoint ?? undefined,
-          clientInfo(ctx: { req: FastifyRequest; reply: FastifyReply }) {
-            const name = ctx.req.headers['graphql-client-name'] as string;
-            const version = (ctx.req.headers['graphql-client-version'] as string) ?? 'missing';
+      // useHive({
+      //   debug: true,
+      //   enabled: false,
+      //   token: options.hiveConfig?.token ?? '',
+      //   usage: {
+      //     endpoint: options.hiveConfig?.usage?.endpoint ?? undefined,
+      //     clientInfo(ctx: { req: FastifyRequest; reply: FastifyReply }) {
+      //       const name = ctx.req.headers['graphql-client-name'] as string;
+      //       const version = (ctx.req.headers['graphql-client-version'] as string) ?? 'missing';
 
-            if (name) {
-              return { name, version };
-            }
+      //       if (name) {
+      //         return { name, version };
+      //       }
 
-            return null;
-          },
-          exclude: ['readiness'],
-        },
-        reporting: {
-          endpoint: options.hiveConfig?.reporting?.endpoint ?? undefined,
-          author: 'Hive API',
-          commit: options.release,
-        },
-      }),
+      //       return null;
+      //     },
+      //     exclude: ['readiness'],
+      //   },
+      //   reporting: {
+      //     endpoint: options.hiveConfig?.reporting?.endpoint ?? undefined,
+      //     author: 'Hive API',
+      //     commit: options.release,
+      //   },
+      // }),
       useGraphQLModules(options.registry),
       useNoIntrospection({
         signature: options.signature,
