@@ -208,14 +208,14 @@ export class SchemaPublisher {
     return this.idempotentRunner.run({
       identifier: `schema:publish:${input.checksum}`,
       executor: async () => {
-        const unlock = await this.storage.idMutex.lock(`schema:publish:${input.target}`, {
-          signal,
-        });
-        try {
-          return await this.internalPublish(input);
-        } finally {
-          await unlock();
-        }
+        // const unlock = await this.storage.idMutex.lock(`schema:publish:${input.target}`, {
+        //   signal,
+        // });
+        // try {
+        return await this.internalPublish(input);
+        // } finally {
+        //   await unlock();
+        // }
       },
       ttl: 60,
       span,
