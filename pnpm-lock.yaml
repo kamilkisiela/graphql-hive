@@ -1061,7 +1061,7 @@ importers:
       node-crisp-api: 1.12.3
       postcss: 8.4.19
       react: 18.2.0
-      react-children-utilities: 2.7.1
+      react-children-utilities: 2.8.0
       react-date-range: 1.4.0
       react-dom: 18.2.0
       react-icons: 4.3.1
@@ -1143,7 +1143,7 @@ importers:
       nextjs-cors: 2.1.2_next@13.0.7
       node-crisp-api: 1.12.3
       react: 18.2.0
-      react-children-utilities: 2.7.1_react@18.2.0
+      react-children-utilities: 2.8.0_react@18.2.0
       react-date-range: 1.4.0_r6j3756ioqf5pjc2u22wj25rla
       react-dom: 18.2.0_react@18.2.0
       react-icons: 4.3.1_react@18.2.0
@@ -23415,10 +23415,10 @@ packages:
       unpipe: 1.0.0
     dev: false
 
-  /react-children-utilities/2.7.1_react@18.2.0:
-    resolution: {integrity: sha512-olV2IcUcARN/VrgYnijbxEtvc2P07BcmAWKdLI0txZgAqs8YODxbYu68GMDv/uretA1sVlPMCQXRgY0Msh4dmA==}
+  /react-children-utilities/2.8.0_react@18.2.0:
+    resolution: {integrity: sha512-g42oRsZLrFJgCcIdK1lad1CWujNH4gh1Cp1lsMQpHWdDjWQ8gUlaBebgy2iXofyPEpfJ4T/xt4qWrvDkgVCCNg==}
     peerDependencies:
-      react: 17.x.x || 16.x.x || 15.x.x
+      react: 18 || 17 || 16 || 15
     dependencies:
       react: 18.2.0
     dev: false
