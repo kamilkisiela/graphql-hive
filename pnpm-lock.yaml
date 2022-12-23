@@ -366,7 +366,7 @@ importers:
       dataloader: 2.1.0
       date-fns: 2.29.3
       got: 12.5.3
-      graphql-modules: 2.1.0
+      graphql-modules: 2.0.0
       graphql-parse-resolve-info: 4.12.3
       graphql-scalars: 1.20.1
       graphql-yoga: 3.1.1
@@ -404,7 +404,7 @@ importers:
       dataloader: 2.1.0
       date-fns: 2.29.3
       got: 12.5.3
-      graphql-modules: 2.1.0
+      graphql-modules: 2.0.0
       graphql-parse-resolve-info: 4.12.3
       graphql-scalars: 1.20.1
       graphql-yoga: 3.1.1
@@ -17589,15 +17589,15 @@ packages:
       vscode-languageserver-types: 3.17.2
     dev: false
 
-  /graphql-modules/2.1.0:
-    resolution: {integrity: sha512-fOUc4i5xNLkRxqx234MIr+kolrxk1tZ2onTeRIcB73mCY4NeKxej7FMLb5St+UcNLzhqM4L6Mf47rN9MPVDmgA==}
+  /graphql-modules/2.0.0:
+    resolution: {integrity: sha512-CM5CIJp428+ripgcLyrioBmAKB3ucvIEOgJG4WMjnOgScHY/eCZh/8I51cF8oc+pqebOgBCR3HH//IH5v7kv+w==}
     peerDependencies:
-      graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
+      graphql: ^14.0.0 || ^15.0.0
     dependencies:
       '@graphql-tools/schema': 8.5.1
       '@graphql-tools/wrap': 8.5.1
       '@graphql-typed-document-node/core': 3.1.1
-      ramda: 0.28.0
+      ramda: 0.27.2
     dev: false
 
   /graphql-parse-resolve-info/4.12.3:
@@ -23401,8 +23401,8 @@ packages:
     resolution: {integrity: sha512-WuyALRjWPDGtt/wzJiadO5AXY+8hZ80hVpe6MyivgraREW751X3SbhRvG3eLKOYN+8VEvqLcf3wdnt44Z4S4SA==}
     engines: {node: '>=10'}
 
-  /ramda/0.28.0:
-    resolution: {integrity: sha512-9QnLuG/kPVgWvMQ4aODhsBUFKOUmnbUnsSXACv+NCQZcHbeb+v8Lodp8OVxtRULN1/xOyYLLaL6npE6dMq5QTA==}
+  /ramda/0.27.2:
+    resolution: {integrity: sha512-SbiLPU40JuJniHexQSAgad32hfwd+DRUdwF2PlVuI5RZD0/vahUco7R8vD86J/tcEKKF9vZrUVwgtmGCqlCKyA==}
     dev: false
 
   /raw-body/2.5.1:
