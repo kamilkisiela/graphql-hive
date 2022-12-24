@@ -20,7 +20,7 @@
     "dotenv": "10.0.0",
     "got": "12.5.3",
     "reflect-metadata": "0.1.13",
-    "stripe": "8.220.0",
+    "stripe": "8.222.0",
     "zod": "3.20.2"
   },
   "devDependencies": {
