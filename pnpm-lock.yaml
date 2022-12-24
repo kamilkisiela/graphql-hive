@@ -288,7 +288,7 @@ importers:
       apollo-server-plugin-base: 3.5.3
       async-retry: 1.3.3
       axios: ^0.27.0
-      graphql-yoga: 3.1.1
+      graphql-yoga: 3.1.2
       nock: 13.2.4
       tiny-lru: 8.0.2
     dependencies:
@@ -303,7 +303,7 @@ importers:
       '@types/async-retry': 1.4.5
       apollo-server-core: 3.11.1
       apollo-server-plugin-base: 3.5.3
-      graphql-yoga: 3.1.1
+      graphql-yoga: 3.1.2
       nock: 13.2.4
     publishDirectory: dist
 
@@ -367,7 +367,7 @@ importers:
       graphql-modules: 2.1.0
       graphql-parse-resolve-info: 4.12.3
       graphql-scalars: 1.20.1
-      graphql-yoga: 3.1.1
+      graphql-yoga: 3.1.2
       human-id: 2.0.1
       ioredis: 4.28.5
       ioredis-mock: 7.4.0
@@ -405,7 +405,7 @@ importers:
       graphql-modules: 2.1.0
       graphql-parse-resolve-info: 4.12.3
       graphql-scalars: 1.20.1
-      graphql-yoga: 3.1.1
+      graphql-yoga: 3.1.2
       human-id: 2.0.1
       ioredis: 4.28.5
       jsonwebtoken: 8.5.1
@@ -663,7 +663,7 @@ importers:
       fastify: 3.29.4
       got: 12.5.3
       graphql: 16.6.0
-      graphql-yoga: 3.1.1
+      graphql-yoga: 3.1.2
       hyperid: 2.3.1
       pino-pretty: 6.0.0
       prom-client: 14.1.0
@@ -690,7 +690,7 @@ importers:
       dotenv: 10.0.0
       got: 12.5.3
       graphql: 16.6.0
-      graphql-yoga: 3.1.1_graphql@16.6.0
+      graphql-yoga: 3.1.2_graphql@16.6.0
       hyperid: 2.3.1
       prom-client: 14.1.0
       reflect-metadata: 0.1.13
@@ -5671,8 +5671,8 @@ packages:
       tslib: 2.4.1
     dev: true
 
-  /@envelop/validation-cache/5.0.4_@envelop+core@3.0.4:
-    resolution: {integrity: sha512-7b4BWtNMxSdXspwzFN2qmkEaaHfmuDz60uMlVFaMN4nA1Vc5duAV7GQWfAKl56VoePU6UwQ0i49Dm/plJfwxIQ==}
+  /@envelop/validation-cache/5.0.5_@envelop+core@3.0.4:
+    resolution: {integrity: sha512-69sq5H7hvxE+7VV60i0bgnOiV1PX9GEJHKrBrVvyEZAXqYojKO3DP9jnLGryiPgVaBjN5yw12ge0l0s2gXbolQ==}
     peerDependencies:
       '@envelop/core': ^3.0.4
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
@@ -5681,8 +5681,8 @@ packages:
       lru-cache: 6.0.0
       tslib: 2.4.1
 
-  /@envelop/validation-cache/5.0.4_a6sekiasy2tqr6d5gj7n2wtjli:
-    resolution: {integrity: sha512-7b4BWtNMxSdXspwzFN2qmkEaaHfmuDz60uMlVFaMN4nA1Vc5duAV7GQWfAKl56VoePU6UwQ0i49Dm/plJfwxIQ==}
+  /@envelop/validation-cache/5.0.5_a6sekiasy2tqr6d5gj7n2wtjli:
+    resolution: {integrity: sha512-69sq5H7hvxE+7VV60i0bgnOiV1PX9GEJHKrBrVvyEZAXqYojKO3DP9jnLGryiPgVaBjN5yw12ge0l0s2gXbolQ==}
     peerDependencies:
       '@envelop/core': ^3.0.4
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
@@ -17488,14 +17488,14 @@ packages:
     dependencies:
       graphql: 16.6.0
 
-  /graphql-yoga/3.1.1:
-    resolution: {integrity: sha512-XgqQM1IurPPsO0HU00evqhiHIta8oghJ/1bSkHOPbTZeGELqb0VV/j7ureGHz5S+vCvNHulzW+YuIfaaph00iQ==}
+  /graphql-yoga/3.1.2:
+    resolution: {integrity: sha512-kn5VIH8f461xlMy4WZBBqS03e5Mre200juoHCMJoJhoAN/1Mu8MiLuGY2SBcEE/ROkF57QC63o2JjYTJ37L6zA==}
     peerDependencies:
       graphql: ^15.2.0 || ^16.0.0
     dependencies:
       '@envelop/core': 3.0.4
       '@envelop/parser-cache': 5.0.4_@envelop+core@3.0.4
-      '@envelop/validation-cache': 5.0.4_@envelop+core@3.0.4
+      '@envelop/validation-cache': 5.0.5_@envelop+core@3.0.4
       '@graphql-tools/executor': 0.0.9
       '@graphql-tools/schema': 9.0.9
       '@graphql-tools/utils': 9.1.1
@@ -17508,14 +17508,14 @@ packages:
       - '@types/node'
       - encoding
 
-  /graphql-yoga/3.1.1_graphql@16.6.0:
-    resolution: {integrity: sha512-XgqQM1IurPPsO0HU00evqhiHIta8oghJ/1bSkHOPbTZeGELqb0VV/j7ureGHz5S+vCvNHulzW+YuIfaaph00iQ==}
+  /graphql-yoga/3.1.2_graphql@16.6.0:
+    resolution: {integrity: sha512-kn5VIH8f461xlMy4WZBBqS03e5Mre200juoHCMJoJhoAN/1Mu8MiLuGY2SBcEE/ROkF57QC63o2JjYTJ37L6zA==}
     peerDependencies:
       graphql: ^15.2.0 || ^16.0.0
     dependencies:
       '@envelop/core': 3.0.4
       '@envelop/parser-cache': 5.0.4_a6sekiasy2tqr6d5gj7n2wtjli
-      '@envelop/validation-cache': 5.0.4_a6sekiasy2tqr6d5gj7n2wtjli
+      '@envelop/validation-cache': 5.0.5_a6sekiasy2tqr6d5gj7n2wtjli
       '@graphql-tools/executor': 0.0.9_graphql@16.6.0
       '@graphql-tools/schema': 9.0.9_graphql@16.6.0
       '@graphql-tools/utils': 9.1.1_graphql@16.6.0
