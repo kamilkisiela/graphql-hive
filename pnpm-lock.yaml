@@ -1062,7 +1062,7 @@ importers:
       react-children-utilities: 2.8.0
       react-date-range: 1.4.0
       react-dom: 18.2.0
-      react-icons: 4.3.1
+      react-icons: 4.7.1
       react-select: 5.7.0
       react-string-replace: 0.4.4
       react-virtualized-auto-sizer: 1.0.7
@@ -1144,7 +1144,7 @@ importers:
       react-children-utilities: 2.8.0_react@18.2.0
       react-date-range: 1.4.0_r6j3756ioqf5pjc2u22wj25rla
       react-dom: 18.2.0_react@18.2.0
-      react-icons: 4.3.1_react@18.2.0
+      react-icons: 4.7.1_react@18.2.0
       react-select: 5.7.0_4c3rps5tc2yowtcrqid3cuwlea
       react-string-replace: 0.4.4
       react-virtualized-auto-sizer: 1.0.7_biqbaboplfbrettd7655fr4n2y
@@ -1224,7 +1224,7 @@ importers:
       next-themes: '*'
       react: 18.2.0
       react-dom: 18.2.0
-      react-icons: 4.6.0
+      react-icons: 4.7.1
       tailwindcss: 3.2.3
     dependencies:
       '@radix-ui/react-tooltip': 1.0.2_4c3rps5tc2yowtcrqid3cuwlea
@@ -1234,7 +1234,7 @@ importers:
       next-themes: 0.2.1_gvvct4imq5upoiloat43sswrza
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
-      react-icons: 4.6.0_react@18.2.0
+      react-icons: 4.7.1_react@18.2.0
     devDependencies:
       '@theguild/tailwind-config': 0.2.1
       '@types/react': 17.0.52
@@ -23308,16 +23308,8 @@ packages:
       use-sidecar: 1.1.2_dsvndo4wjx7umk5x4kyqypffly
     dev: false
 
-  /react-icons/4.3.1_react@18.2.0:
-    resolution: {integrity: sha512-cB10MXLTs3gVuXimblAdI71jrJx8njrJZmNMEMC+sQu5B/BIOmlsAjskdqpn81y8UBVEGuHODd7/ci5DvoSzTQ==}
-    peerDependencies:
-      react: '*'
-    dependencies:
-      react: 18.2.0
-    dev: false
-
-  /react-icons/4.6.0_react@18.2.0:
-    resolution: {integrity: sha512-rR/L9m9340yO8yv1QT1QurxWQvWpbNHqVX0fzMln2HEb9TEIrQRGsqiNFQfiv9/JEUbyHmHPlNTB2LWm2Ttz0g==}
+  /react-icons/4.7.1_react@18.2.0:
+    resolution: {integrity: sha512-yHd3oKGMgm7zxo3EA7H2n7vxSoiGmHk5t6Ou4bXsfcgWyhfDKMpyKfhHR6Bjnn63c+YXBLBPUql9H4wPJM6sXw==}
     peerDependencies:
       react: '*'
     dependencies:
