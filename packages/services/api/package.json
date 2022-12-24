@@ -33,7 +33,7 @@
     "graphql-modules": "2.1.0",
     "graphql-parse-resolve-info": "4.12.3",
     "graphql-scalars": "1.20.1",
-    "graphql-yoga": "3.1.1",
+    "graphql-yoga": "3.1.2",
     "human-id": "2.0.1",
     "ioredis": "4.28.5",
     "jsonwebtoken": "8.5.1",
