@@ -18,7 +18,7 @@
     "dotenv": "10.0.0",
     "got": "12.5.3",
     "ioredis": "4.28.5",
-    "p-timeout": "5.0.2",
+    "p-timeout": "5.1.0",
     "zod": "3.20.2"
   },
   "devDependencies": {
