@@ -38,17 +38,13 @@ const context: Context = {
   stripeData$: loadStripeData$,
 };
 
-const respondWithTRPC = createFetchAPIHandler({
-  router: stripeBillingApiRouter,
-  createContext: async (): Promise<Context> => context,
-});
-
-stripeBillingRouter.all('/trpc/:path+',  createFetchAPIHandler({
-  router: stripeBillingApiRouter,
-  createContext: async (): Promise<Context> => context,
-}))
-  return await respondWithTRPC(req);
-});
+stripeBillingRouter.all(
+  '/trpc/:path+',
+  createFetchAPIHandler({
+    router: stripeBillingApiRouter,
+    createContext: async (): Promise<Context> => context,
+  }),
+);
 
 stripeBillingRouter.all('/_health', req => {
   const method = req.method.toUpperCase();
