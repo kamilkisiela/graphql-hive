@@ -43,7 +43,10 @@ const respondWithTRPC = createFetchAPIHandler({
   createContext: async (): Promise<Context> => context,
 });
 
-stripeBillingRouter.all('/trpc/:path+', async (req: any) => {
+stripeBillingRouter.all('/trpc/:path+',  createFetchAPIHandler({
+  router: stripeBillingApiRouter,
+  createContext: async (): Promise<Context> => context,
+}))
   return await respondWithTRPC(req);
 });
 
