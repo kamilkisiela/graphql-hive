@@ -1078,7 +1078,7 @@ importers:
       tailwindcss-radix: 2.2.0
       tslib: 2.4.1
       twin.macro: 2.8.2
-      urql: 2.0.5
+      urql: 2.2.3
       use-debounce: 6.0.1
       valtio: 1.2.5
       wonka: 4.0.15
@@ -1156,7 +1156,7 @@ importers:
       supertokens-node: 12.1.3
       supertokens-website: 14.0.3
       twin.macro: 2.8.2
-      urql: 2.0.5_onqnqwb3ubg5opvemcqf7c2qhy
+      urql: 2.2.3_onqnqwb3ubg5opvemcqf7c2qhy
       use-debounce: 6.0.1_react@18.2.0
       valtio: 1.2.5_react@18.2.0
       wonka: 4.0.15
@@ -26464,10 +26464,10 @@ packages:
       punycode: 1.3.2
       querystring: 0.2.0
 
-  /urql/2.0.5_onqnqwb3ubg5opvemcqf7c2qhy:
-    resolution: {integrity: sha512-UOl37CkNO1sfhw8jPihq+9NKUpTLnsRjpK7vmOVqPceqSO0rYXHOAEJp2TWDhyLjn2lYDlDlAfDaxNyK5m1FOA==}
+  /urql/2.2.3_onqnqwb3ubg5opvemcqf7c2qhy:
+    resolution: {integrity: sha512-XMkSYJKW9s4ZlbSuxcUz3fTBIykOn0sGileRXQeyZpaRBXJPVz5saSY05k7jdefNxShZtTI+/nr7PYUWQertfg==}
     peerDependencies:
-      graphql: ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0
+      graphql: ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
       react: '>= 16.8.0'
     dependencies:
       '@urql/core': 2.6.1_graphql@16.6.0

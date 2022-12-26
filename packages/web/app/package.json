@@ -83,7 +83,7 @@
     "supertokens-node": "12.1.3",
     "supertokens-website": "14.0.3",
     "twin.macro": "2.8.2",
-    "urql": "2.0.5",
+    "urql": "2.2.3",
     "use-debounce": "6.0.1",
     "valtio": "1.2.5",
     "wonka": "4.0.15",
