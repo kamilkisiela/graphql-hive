@@ -784,7 +784,7 @@ importers:
       got: 12.5.3
       pino-pretty: 6.0.0
       reflect-metadata: 0.1.13
-      stripe: 8.220.0
+      stripe: 8.222.0
       zod: 3.20.2
     dependencies:
       '@sentry/node': 7.21.1
@@ -796,7 +796,7 @@ importers:
       dotenv: 10.0.0
       got: 12.5.3
       reflect-metadata: 0.1.13
-      stripe: 8.220.0
+      stripe: 8.222.0
       zod: 3.20.2
     devDependencies:
       '@hive/service-common': link:../service-common
@@ -25036,11 +25036,11 @@ packages:
     engines: {node: '>=8'}
     dev: true
 
-  /stripe/8.220.0:
-    resolution: {integrity: sha512-hE3NapEqNCiiQD1lMQPccKgJsu2aANR+oDudUHcuvRnNUJ3GrbntwACs7Op45PvHpJ/RY4l46XDwTMgdWJAm3w==}
+  /stripe/8.222.0:
+    resolution: {integrity: sha512-hrA79fjmN2Eb6K3kxkDzU4ODeVGGjXQsuVaAPSUro6I9MM3X+BvIsVqdphm3BXWfimAGFvUqWtPtHy25mICY1w==}
     engines: {node: ^8.1 || >=10.*}
     dependencies:
-      '@types/node': 18.11.5
+      '@types/node': 18.11.15
       qs: 6.11.0
     dev: false
 
