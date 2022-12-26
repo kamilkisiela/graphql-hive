@@ -100,7 +100,7 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
 
   redis:
-    image: bitnami/redis:6.2
+    image: bitnami/redis:7.0
     networks:
       - 'stack'
     healthcheck:
