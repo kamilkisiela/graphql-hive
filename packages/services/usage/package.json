@@ -12,8 +12,8 @@
   "dependencies": {
     "@sentry/node": "7.21.1",
     "@sentry/tracing": "7.21.1",
-    "@trpc/client": "10.4.3",
-    "@trpc/server": "10.4.3",
+    "@trpc/client": "10.7.0",
+    "@trpc/server": "10.7.0",
     "@whatwg-node/fetch": "0.5.3",
     "ajv": "8.11.2",
     "dotenv": "10.0.0",
