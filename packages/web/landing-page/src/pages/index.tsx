@@ -44,7 +44,10 @@ const CookiesConsent = (): ReactElement => {
         <p>If you continue to use our services, you are agreeing to the use of such cookies.</p>
       </div>
       <div className="flex flex-shrink-0 items-center gap-4 lg:pr-24">
-        <a href="/privacy-policy.pdf" className="whitespace-nowrap text-yellow-600 hover:underline">
+        <a
+          href="https://the-guild.dev/graphql/hive/privacy-policy.pdf"
+          className="whitespace-nowrap text-yellow-600 hover:underline"
+        >
           Privacy Policy
         </a>
         <button
