@@ -379,7 +379,7 @@ importers:
       p-retry: 5.1.2
       p-timeout: 5.1.0
       param-case: 3.0.4
-      supertokens-node: 12.1.3
+      supertokens-node: 12.1.4
       tslib: 2.4.1
       uuid: 8.3.2
       zod: 3.20.2
@@ -416,7 +416,7 @@ importers:
       p-retry: 5.1.2
       p-timeout: 5.1.0
       param-case: 3.0.4
-      supertokens-node: 12.1.3
+      supertokens-node: 12.1.4
       uuid: 8.3.2
       zod: 3.20.2
     devDependencies:
@@ -1072,7 +1072,7 @@ importers:
       snarkdown: 2.0.0
       supertokens-auth-react: 0.28.1
       supertokens-js-override: 0.0.4
-      supertokens-node: 12.1.3
+      supertokens-node: 12.1.4
       supertokens-website: 14.0.3
       tailwindcss: 2.2.19
       tailwindcss-radix: 2.2.0
@@ -1153,7 +1153,7 @@ importers:
       snarkdown: 2.0.0
       supertokens-auth-react: 0.28.1_4c3rps5tc2yowtcrqid3cuwlea
       supertokens-js-override: 0.0.4
-      supertokens-node: 12.1.3
+      supertokens-node: 12.1.4
       supertokens-website: 14.0.3
       twin.macro: 2.8.2
       urql: 2.0.5_onqnqwb3ubg5opvemcqf7c2qhy
@@ -25150,8 +25150,8 @@ packages:
     resolution: {integrity: sha512-r0JFBjkMIdep3Lbk3JA+MpnpuOtw4RSyrlRAbrzMcxwiYco3GFWl/daimQZ5b1forOiUODpOlXbSOljP/oyurg==}
     dev: false
 
-  /supertokens-node/12.1.3:
-    resolution: {integrity: sha512-qGoPSFhqYoJD+7tQKTLzV3uDAW5I3Fnxvjt/d3q5NdNjSfg8Iwgwr2VCT7bpJ35ShACnfYBiB2AOR5sVyFiOIg==}
+  /supertokens-node/12.1.4:
+    resolution: {integrity: sha512-C7pbK/gjpUt5edyC03iP7Xgbdwc3RwlNNWXvNi9f77DnRtF3UEVpT7v3LmQXbV0T7xiXbt++nEu25mVniD+hSw==}
     dependencies:
       axios: 0.21.4_debug@4.3.4
       body-parser: 1.20.1
