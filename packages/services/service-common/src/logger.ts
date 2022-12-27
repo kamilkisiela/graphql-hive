@@ -1,5 +1,3 @@
- 
-
 const ansiCodes = {
   red: '\x1b[31m',
   yellow: '\x1b[33m',
@@ -27,7 +25,6 @@ const logLevelScores: Record<LogLevel | 'silent', number> = {
   fatal: 6,
 };
 
- 
 const noop = () => {};
 
 const consoleLog =
@@ -57,5 +54,6 @@ export const createLogger = (
     info: score > logLevelScores.info ? noop : infoLog,
     warn: score > logLevelScores.warn ? noop : warnLog,
     error: score > logLevelScores.error ? noop : errorLog,
+    fatal: consoleLog,
   };
 };

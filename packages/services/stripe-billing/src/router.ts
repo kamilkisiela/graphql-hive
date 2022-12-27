@@ -1,4 +1,4 @@
-import { FastifyLoggerInstance, reportReadiness } from '@hive/service-common';
+import { reportReadiness } from '@hive/service-common';
 import { createFetchAPIHandler } from '@valu/trpc-fetch-api-adapter';
 import { Router } from 'itty-router';
 import { createLogger } from '@hive/service-common';
@@ -9,7 +9,7 @@ import { createStripeBilling } from './billing-sync';
 
 const stripeBillingRouter: Router = Router();
 
-const logger = createLogger(env.log.level) as FastifyLoggerInstance;
+const logger = createLogger(env.log.level);
 
 const {
   readiness: stripeBillingReadiness,
