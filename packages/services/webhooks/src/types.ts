@@ -1,9 +1,9 @@
-import type { FastifyLoggerInstance } from '@hive/service-common';
+import type { createLogger, FastifyLoggerInstance } from '@hive/service-common';
 import type { Job } from 'bullmq';
 import type { WebhookInput } from './scheduler';
 
 export interface Config {
-  logger: FastifyLoggerInstance;
+  logger: FastifyLoggerInstance | ReturnType<typeof createLogger>;
   redis: {
     host: string;
     port: number;

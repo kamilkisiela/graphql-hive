@@ -2,7 +2,6 @@
 import {
   startMetrics,
   registerShutdown,
-  FastifyLoggerInstance,
   startHeartbeats,
   createLogger,
 } from '@hive/service-common';
@@ -23,7 +22,7 @@ async function main() {
     });
   }
 
-  const logger = createLogger(env.log.level) as FastifyLoggerInstance;
+  const logger = createLogger(env.log.level);
   const app = createServerAdapter(webhooksRouter);
 
   try {

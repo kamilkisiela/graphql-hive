@@ -1,4 +1,4 @@
-import { createErrorHandler, FastifyLoggerInstance, reportReadiness } from '@hive/service-common';
+import { createErrorHandler, reportReadiness } from '@hive/service-common';
 import { createFetchAPIHandler } from '@valu/trpc-fetch-api-adapter';
 import { Router } from 'itty-router';
 import { createLogger } from '@hive/service-common';
@@ -9,7 +9,7 @@ import { createScheduler } from './scheduler';
 
 const webhooksRouter: Router = Router();
 
-const logger = createLogger(env.log.level) as FastifyLoggerInstance;
+const logger = createLogger(env.log.level);
 
 const {
   schedule,
