@@ -38,11 +38,13 @@
   "devDependencies": {
     "@sentry/types": "7.28.1",
     "@tgriesser/schemats": "7.0.1",
+    "@types/node": "18.11.18",
     "@types/pg": "8.6.6",
     "copyfiles": "2.4.1",
     "pg-promise": "10.15.4",
     "ts-node": "10.9.1",
-    "tslib": "2.4.1"
+    "tslib": "2.4.1",
+    "typescript": "4.9.4"
   },
   "buildOptions": {
     "runify": true,
