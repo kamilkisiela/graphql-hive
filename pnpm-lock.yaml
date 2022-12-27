@@ -1080,7 +1080,7 @@ importers:
       twin.macro: 2.8.2
       urql: 2.0.5
       use-debounce: 6.0.1
-      valtio: 1.7.6
+      valtio: 1.8.0
       wonka: 4.0.15
       yup: 0.32.11
       zod: 3.20.2
@@ -1158,7 +1158,7 @@ importers:
       twin.macro: 2.8.2
       urql: 2.0.5_onqnqwb3ubg5opvemcqf7c2qhy
       use-debounce: 6.0.1_react@18.2.0
-      valtio: 1.7.6_react@18.2.0
+      valtio: 1.8.0_react@18.2.0
       wonka: 4.0.15
       yup: 0.32.11
       zod: 3.20.2
@@ -26746,8 +26746,8 @@ packages:
       builtins: 1.0.3
     dev: true
 
-  /valtio/1.7.6_react@18.2.0:
-    resolution: {integrity: sha512-zsGrCCYOIpy8egQxftduFyJusF/BMu3CganhHKUOE/I6t6V6yA1MDfZZkrYoWYCGkC3rSBYcIHEEsoYQM9lV2w==}
+  /valtio/1.8.0_react@18.2.0:
+    resolution: {integrity: sha512-lNw7wM0Qb9iBzXMju+XCn+UiIlf5uCe5pcI8XRqcvxEZ/mnRXyKXoOodPDKB8cIAVekA3Q3zWA7rboCdS4ea7g==}
     engines: {node: '>=12.7.0'}
     peerDependencies:
       '@babel/helper-module-imports': '>=7.12'
