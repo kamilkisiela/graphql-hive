@@ -1,5 +1,5 @@
 import 'twin.macro';
-import React from 'react';
+import React, { PropsWithChildren, ReactNode } from 'react';
 import {
   Table,
   Thead,
@@ -157,11 +157,16 @@ const OverallStat: React.FC<{
   );
 };
 
-const Sortable: React.FC<{
+const Sortable = ({
+  children,
+  isSorted,
+  isSortedDesc,
+  align = 'left',
+}: PropsWithChildren<{
   align?: 'center' | 'right' | 'left';
   isSortedDesc?: boolean;
   isSorted?: boolean;
-}> = ({ children, isSorted, isSortedDesc, align = 'left' }) => {
+}>) => {
   return (
     <Flex
       direction="row"
@@ -263,7 +268,7 @@ function OrganizationTableRow({ row }: { row: ReturnType<TableInstance['getRow']
             {isNumeric
               ? formatNumber(cell.getValue() as number)
               : isReact
-              ? cell.getValue()
+              ? (cell.getValue() as ReactNode)
               : cell.renderCell()}
           </Td>
         );

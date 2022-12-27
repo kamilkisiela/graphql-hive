@@ -172,11 +172,10 @@ export function createScheduler(config: {
     try {
       queue?.removeAllListeners();
       queueScheduler?.removeAllListeners(),
-        await pTimeout(
-          Promise.all([queue?.close(), queueScheduler?.close()]),
-          5000,
-          'BullMQ close timeout',
-        );
+        await pTimeout(Promise.all([queue?.close(), queueScheduler?.close()]), {
+          milliseconds: 5000,
+          message: 'BullMQ close timeout',
+        });
     } catch (e) {
       logger.error('Failed to stop queues', e);
     } finally {

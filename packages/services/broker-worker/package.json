@@ -14,13 +14,13 @@
     "zod": "3.20.2"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "3.4.0",
+    "@cloudflare/workers-types": "4.20221111.1",
     "@types/service-worker-mock": "2.0.1",
     "@whatwg-node/fetch": "0.5.3",
     "@whatwg-node/server": "0.5.0",
-    "esbuild": "0.14.39",
+    "esbuild": "0.16.11",
     "itty-router": "2.6.6",
     "itty-router-extras": "0.4.2",
-    "nock": "13.2.4"
+    "nock": "13.2.9"
   }
 }

@@ -74,7 +74,7 @@ export function GetStartedProgress({
             }}
           >
             <div
-              className="bg-orange-500 h-full"
+              className="h-full bg-orange-500"
               style={{
                 width: `${(completed / total) * 100}%`,
               }}

@@ -23,14 +23,16 @@ function createPeriod(option: PeriodOption): Period {
   };
 }
 
-const SchemaExplorerContext = React.createContext<{
+type SchemaExplorerContextType = {
   isArgumentListCollapsed: boolean;
   setArgumentListCollapsed(isCollapsed: boolean): void;
   setPeriodOption(option: PeriodOption): void;
   periodOption: PeriodOption;
   availablePeriodOptions: PeriodOption[];
   period: Period;
-}>({
+};
+
+const SchemaExplorerContext = React.createContext<SchemaExplorerContextType>({
   isArgumentListCollapsed: true,
   setArgumentListCollapsed: () => {},
   periodOption: '7d',
@@ -62,7 +64,7 @@ export function SchemaExplorerProvider(
     }
   }, [periodOption, setPeriodOption]);
 
-  const updatePeriod = React.useCallback(
+  const updatePeriod = React.useCallback<SchemaExplorerContextType['setPeriodOption']>(
     option => {
       setPeriodOption(option);
       setPeriod(createPeriod(option));

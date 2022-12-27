@@ -10,11 +10,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@sentry/node": "7.21.1",
-    "@sentry/tracing": "7.21.1",
+    "@sentry/node": "7.28.1",
+    "@sentry/tracing": "7.28.1",
     "agentkeepalive": "4.2.1",
     "date-fns": "2.29.3",
-    "dotenv": "10.0.0",
+    "dotenv": "16.0.3",
     "got": "12.5.3",
     "graphql": "16.6.0",
     "kafkajs": "2.2.3",
@@ -25,7 +25,7 @@
     "@graphql-hive/core": "0.2.3",
     "@hive/service-common": "workspace:*",
     "@hive/usage-common": "workspace:*",
-    "pino-pretty": "6.0.0",
+    "pino-pretty": "9.1.1",
     "tslib": "2.4.1"
   },
   "buildOptions": {

@@ -8,6 +8,7 @@ module.exports = {
     'scripts',
     'rules',
     'out',
+    '.hive',
     'public',
     'packages/web/app/src/graphql/index.ts',
     'packages/libraries/cli/src/sdk.ts',

@@ -107,7 +107,7 @@ const ExternalCompositionForm = ({
           </div>
         )}
       </div>
-      {mutation.error && <div className="mt-2 text-xs text-red-500">{mutation.error}</div>}
+      {mutation.error && <div className="mt-2 text-xs text-red-500">{mutation.error.message}</div>}
       <div>
         <Button
           type="submit"

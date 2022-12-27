@@ -1,4 +1,4 @@
-import { ReactElement, useCallback, useState } from 'react';
+import { ChangeEventHandler, ReactElement, useCallback, useState } from 'react';
 import {
   Editable,
   EditableInput,
@@ -251,7 +251,7 @@ function SchemaView({
   const debouncedFilter = useDebouncedCallback((value: string) => {
     setFilterService(value);
   }, 500);
-  const handleChange = useCallback(
+  const handleChange = useCallback<ChangeEventHandler<HTMLInputElement>>(
     event => {
       debouncedFilter(event.target.value);
       setTerm(event.target.value);

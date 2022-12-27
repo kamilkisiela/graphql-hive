@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ChangeEventHandler, FormEventHandler } from 'react';
 import 'twin.macro';
 import { useMutation } from 'urql';
 import {
@@ -25,7 +25,7 @@ export const OrganizationCreator: React.FC<{
   const router = useRouteSelector();
   const [{ fetching }, mutate] = useMutation(CreateOrganizationDocument);
   const [name, setName] = React.useState('');
-  const submit = React.useCallback(
+  const submit = React.useCallback<FormEventHandler<HTMLElement>>(
     async evt => {
       evt.preventDefault();
       if (name) {
@@ -48,7 +48,7 @@ export const OrganizationCreator: React.FC<{
     [mutate, router, name],
   );
 
-  const onNameChange = React.useCallback(
+  const onNameChange = React.useCallback<ChangeEventHandler<HTMLInputElement>>(
     evt => {
       setName(evt.target.value);
     },

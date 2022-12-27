@@ -27,7 +27,7 @@ const USAGE_DEFAULT_LIMITATIONS: Record<
 
 export const resolvers: BillingModule.Resolvers = {
   BillingInvoice: {
-    id: i => i.id || 'upcoming',
+    id: i => (i && 'id' in i ? i.id : 'upcoming'),
     amount: i => parseFloat((i.total / 100).toFixed(2)),
     pdfLink: i => i.invoice_pdf || null,
     date: i => new Date(i.created * 1000).toISOString(),

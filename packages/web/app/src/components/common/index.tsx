@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import tw, { styled } from 'twin.macro';
 import Head from 'next/head';
 
@@ -22,13 +22,20 @@ const PageContent = styled.div(({ scrollable }: { scrollable: boolean }) => [
   scrollable ? tw`flex-grow overflow-y-auto` : tw`h-full`,
 ]);
 
-export const Page: React.FC<{
+export const Page = ({
+  title,
+  subtitle = '',
+  scrollable = false,
+  actions,
+  children,
+  noPadding,
+}: PropsWithChildren<{
   title: string;
   subtitle?: string;
   actions?: React.ReactElement;
   scrollable?: boolean;
   noPadding?: boolean;
-}> = ({ title, subtitle = '', scrollable = false, actions, children, noPadding }) => {
+}>) => {
   return (
     <div tw="flex flex-col relative h-full dark:bg-gray-900">
       <div tw="p-4 flex-shrink-0 flex flex-row justify-between items-center">
