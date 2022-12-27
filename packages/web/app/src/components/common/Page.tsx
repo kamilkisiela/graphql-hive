@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import React, { PropsWithChildren, ReactElement } from 'react';
 import tw, { styled } from 'twin.macro';
 import Link from 'next/link';
 import { FiTarget } from 'react-icons/fi';
@@ -67,7 +67,7 @@ const Menu = {
   },
 };
 
-const WithNavigation: React.FC<{}> = ({ children }) => {
+const WithNavigation = ({ children }: PropsWithChildren) => {
   const navigation = useNavigation();
   const router = useRouteSelector();
 
@@ -116,6 +116,6 @@ const WithNavigation: React.FC<{}> = ({ children }) => {
   );
 };
 
-export const Page: React.FC = ({ children }) => {
+export const Page = ({ children }: PropsWithChildren) => {
   return <WithNavigation>{children}</WithNavigation>;
 };

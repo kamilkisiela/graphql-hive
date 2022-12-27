@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import 'twin.macro';
 import {
   Button,
@@ -62,11 +62,16 @@ interface Operation {
   document: string;
 }
 
-const Sortable: React.FC<{
+const Sortable = ({
+  children,
+  isSorted,
+  isSortedDesc,
+  align = 'left',
+}: PropsWithChildren<{
   align?: 'center' | 'right' | 'left';
   isSortedDesc?: boolean;
   isSorted?: boolean;
-}> = ({ children, isSorted, isSortedDesc, align = 'left' }) => {
+}>) => {
   return (
     <Flex
       direction="row"

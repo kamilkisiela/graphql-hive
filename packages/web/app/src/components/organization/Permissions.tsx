@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { FormEventHandler } from 'react';
 import 'twin.macro';
 import { useMutation } from 'urql';
 import { Select, AccordionItem, AccordionButton, AccordionPanel } from '@chakra-ui/react';
@@ -176,7 +176,7 @@ export function usePermissionsManager({
     passMemberScopes ? member.organizationAccessScopes : [],
   );
 
-  const submit = React.useCallback(
+  const submit = React.useCallback<FormEventHandler<HTMLElement>>(
     async evt => {
       evt.preventDefault();
       setState('LOADING');

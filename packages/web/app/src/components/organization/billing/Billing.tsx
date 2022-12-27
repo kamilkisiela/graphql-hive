@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import {
   BillingPlansDocument,
   OrganizationFieldsFragment,
@@ -9,9 +9,12 @@ import { PlanSummary } from './PlanSummary';
 import { useQuery } from 'urql';
 import { DataWrapper } from '@/components/common/DataWrapper';
 
-export const BillingView: React.FC<{
+export const BillingView = ({
+  organization,
+  children,
+}: PropsWithChildren<{
   organization: OrganizationFieldsFragment & OrgBillingInfoFieldsFragment;
-}> = ({ organization, children }) => {
+}>) => {
   const [query] = useQuery({
     query: BillingPlansDocument,
   });

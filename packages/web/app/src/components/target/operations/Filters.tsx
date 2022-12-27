@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ComponentType } from 'react';
 import 'twin.macro';
 import {
   Button,
@@ -17,7 +17,7 @@ import {
 } from '@chakra-ui/react';
 import { VscChevronDown, VscChromeClose } from 'react-icons/vsc';
 import AutoSizer from 'react-virtualized-auto-sizer';
-import { FixedSizeList } from 'react-window';
+import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import { useQuery } from 'urql';
 import { useDebouncedCallback } from 'use-debounce';
 
@@ -88,7 +88,7 @@ const OperationsFilter: React.FC<{
     setSelectedItems([]);
   }, [setSelectedItems]);
 
-  const renderRow = React.useCallback(
+  const renderRow = React.useCallback<ComponentType<ListChildComponentProps>>(
     ({ index, style }) => {
       const operation = visibleOperations[index];
 

@@ -1,4 +1,4 @@
-import { FC, ReactElement } from 'react';
+import { PropsWithChildren, ReactElement } from 'react';
 import { keyframes } from '@emotion/react';
 import {
   Close,
@@ -34,16 +34,20 @@ const widthBySize = {
   lg: 'w-[800px]',
 };
 
-const Modal: FC<{
+const Modal = ({
+  trigger,
+  open,
+  onOpenChange,
+  children,
+  className,
+  size = 'sm',
+}: PropsWithChildren<{
   trigger?: ReactElement;
   open?: boolean;
   size?: 'sm' | 'md' | 'lg';
   onOpenChange?: (isOpen: boolean) => void;
   className?: string;
-}> & {
-  Title?: FC<DialogTitleProps>;
-  Description?: FC<DialogDescriptionProps>;
-} = ({ trigger, open, onOpenChange, children, className, size = 'sm' }) => (
+}>) => (
   <Root open={open} onOpenChange={onOpenChange}>
     <Trigger asChild>{trigger}</Trigger>
     <Portal>
@@ -92,7 +96,7 @@ const Modal: FC<{
   </Root>
 );
 
-Modal.Title = ({ className, children, ...props }) => {
+Modal.Title = ({ className, children, ...props }: PropsWithChildren<DialogTitleProps>) => {
   return (
     <Title className={clsx('text-2xl font-extrabold', className)} {...props}>
       {children}
@@ -100,7 +104,11 @@ Modal.Title = ({ className, children, ...props }) => {
   );
 };
 
-Modal.Description = ({ children, className, ...props }) => {
+Modal.Description = ({
+  children,
+  className,
+  ...props
+}: PropsWithChildren<DialogDescriptionProps>) => {
   return (
     <Description className={clsx('text-sm font-medium text-gray-500', className)} {...props}>
       {children}
