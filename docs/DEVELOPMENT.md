@@ -14,6 +14,15 @@ Developing Hive locally requires you to have the following software installed lo
 - Clone the repository locally
 - Make sure to install the recommended VSCode extensions (defined in `.vscode/extensions.json`)
 - In the root of the repo, run `nvm use` to use the same version of node as mentioned
+- Create `.env` file in the root, and use the following:
+-
+
+```
+SERVER_ENDPOINT=http://localhost:3001
+ENVIRONMENT=local
+CDN_AUTH_PRIVATE_KEY=$(openssl rand -hex 16)
+```
+
 - Run `pnpm i` at the root to install all the dependencies and run the hooks
 - Run `pnpm run --filter @hive/storage setup` to create local databases
 - Run `pnpm generate` to generate the typings from the graphql files (use `pnpm graphql:generate` if
