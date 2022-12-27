@@ -1080,7 +1080,7 @@ importers:
       twin.macro: 2.8.2
       urql: 2.0.5
       use-debounce: 6.0.1
-      valtio: 1.2.5
+      valtio: 1.7.6
       wonka: 4.0.15
       yup: 0.32.11
       zod: 3.20.2
@@ -1158,7 +1158,7 @@ importers:
       twin.macro: 2.8.2
       urql: 2.0.5_onqnqwb3ubg5opvemcqf7c2qhy
       use-debounce: 6.0.1_react@18.2.0
-      valtio: 1.2.5_react@18.2.0
+      valtio: 1.7.6_react@18.2.0
       wonka: 4.0.15
       yup: 0.32.11
       zod: 3.20.2
@@ -23098,8 +23098,8 @@ packages:
       forwarded: 0.2.0
       ipaddr.js: 1.9.1
 
-  /proxy-compare/2.0.2:
-    resolution: {integrity: sha512-3qUXJBariEj3eO90M3Rgqq3+/P5Efl0t/dl9g/1uVzIQmO3M+ql4hvNH3mYdu8H+1zcKv07YvL55tsY74jmH1A==}
+  /proxy-compare/2.3.0:
+    resolution: {integrity: sha512-c3L2CcAi7f7pvlD0D7xsF+2CQIW8C3HaYx2Pfgq8eA4HAl3GAH6/dVYsyBbYF/0XJs2ziGLrzmz5fmzPm6A0pQ==}
     dev: false
 
   /proxy-from-env/1.0.0:
@@ -26538,6 +26538,14 @@ packages:
       tslib: 2.4.1
     dev: false
 
+  /use-sync-external-store/1.2.0_react@18.2.0:
+    resolution: {integrity: sha512-eEgnFxGQ1Ife9bzYs6VLi8/4X6CObHMw9Qr9tPY43iKwsPw8xE8+EFsf/2cFZ5S3esXgpWgtSCtLNS41F+sKPA==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    dependencies:
+      react: 18.2.0
+    dev: false
+
   /util-deprecate/1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
 
@@ -26622,26 +26630,33 @@ packages:
       builtins: 1.0.3
     dev: true
 
-  /valtio/1.2.5_react@18.2.0:
-    resolution: {integrity: sha512-2r6ijmG5+YfS+sfEkoHB6C1czgn7MXzxPwY/3u0t/wmsr2N4B1yF57i0J/hBOCYkdYkbsYfBRVi7xRK+CAEsyA==}
+  /valtio/1.7.6_react@18.2.0:
+    resolution: {integrity: sha512-zsGrCCYOIpy8egQxftduFyJusF/BMu3CganhHKUOE/I6t6V6yA1MDfZZkrYoWYCGkC3rSBYcIHEEsoYQM9lV2w==}
     engines: {node: '>=12.7.0'}
     peerDependencies:
       '@babel/helper-module-imports': '>=7.12'
       '@babel/types': '>=7.13'
+      aslemammad-vite-plugin-macro: '>=1.0.0-alpha.1'
       babel-plugin-macros: '>=3.0'
       react: '>=16.8'
+      vite: '>=2.8.6'
     peerDependenciesMeta:
       '@babel/helper-module-imports':
         optional: true
       '@babel/types':
         optional: true
+      aslemammad-vite-plugin-macro:
+        optional: true
       babel-plugin-macros:
         optional: true
       react:
         optional: true
+      vite:
+        optional: true
     dependencies:
-      proxy-compare: 2.0.2
+      proxy-compare: 2.3.0
       react: 18.2.0
+      use-sync-external-store: 1.2.0_react@18.2.0
     dev: false
 
   /value-or-promise/1.0.11:
