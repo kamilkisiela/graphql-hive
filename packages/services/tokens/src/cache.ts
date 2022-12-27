@@ -1,7 +1,7 @@
 import type { FastifyLoggerInstance } from 'fastify';
 import LRU from 'tiny-lru';
 import ms from 'ms';
-import { metrics } from '@hive/service-common';
+import { createLogger, metrics } from '@hive/service-common';
 import type { Storage, StorageItem } from './storage';
 import { atomic, useActionTracker, until } from './helpers';
 
@@ -39,7 +39,7 @@ interface CacheStorage extends Omit<Storage, 'touchTokens'> {
 // Without the cache we would hit the DB for every request, with the cache we hit it only once (until a token is invalidated).
 export function useCache(
   storagePromise: Promise<Storage>,
-  logger: FastifyLoggerInstance,
+  logger: FastifyLoggerInstance | ReturnType<typeof createLogger>,
 ): {
   start(): Promise<void>;
   stop(): Promise<void>;
@@ -291,7 +291,7 @@ function useRelations() {
 
 function useTokenTouchScheduler(
   storage: Storage,
-  logger: FastifyLoggerInstance,
+  logger: FastifyLoggerInstance | ReturnType<typeof createLogger>,
   onTouch: (token: string, date: Date) => void,
 ) {
   const scheduledTokens = new Map<string, Date>();

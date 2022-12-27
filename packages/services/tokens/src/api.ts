@@ -1,4 +1,4 @@
-import { createErrorHandler, metrics } from '@hive/service-common';
+import { createErrorHandler, createLogger, metrics } from '@hive/service-common';
 import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
 import { initTRPC } from '@trpc/server';
 import type { FastifyLoggerInstance } from 'fastify';
@@ -65,7 +65,7 @@ function generateToken() {
 }
 
 export type Context = {
-  logger: FastifyLoggerInstance;
+  logger: FastifyLoggerInstance | ReturnType<typeof createLogger>;
   errorHandler: ReturnType<typeof createErrorHandler>;
   getStorage: ReturnType<typeof useCache>['getStorage'];
   tokenReadFailuresCache: LruType<

@@ -54,5 +54,6 @@ export const createLogger = (
     info: score > logLevelScores.info ? noop : infoLog,
     warn: score > logLevelScores.warn ? noop : warnLog,
     error: score > logLevelScores.error ? noop : errorLog,
+    fatal: consoleLog,
   };
 };

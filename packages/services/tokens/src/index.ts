@@ -5,7 +5,6 @@ import {
   startMetrics,
   registerShutdown,
   startHeartbeats,
-  FastifyLoggerInstance,
   createLogger,
 } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
@@ -24,7 +23,7 @@ export async function main() {
     });
   }
 
-  const logger = createLogger() as FastifyLoggerInstance;
+  const logger = createLogger();
 
   const app = createServerAdapter(tokensRouter);
   const server = createServer(app);
@@ -56,7 +55,7 @@ export async function main() {
     return new Promise<void>(resolve => {
       server.listen(env.http.port, '0.0.0.0', resolve);
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.fatal(error);
     Sentry.captureException(error, {
       level: 'fatal',
