@@ -40,7 +40,8 @@ We have a script to feed your local instance of Hive.
 5. This should report a dummy schema and some dummy usage data to your local instance of Hive,
    allowing you to test features e2e
 
-> Note: You can set `STAGING=1` in order to target staging env and seed a target there.
+> Note: You can set `STAGING=1` in order to target staging env and seed a target there. Same for
+> development env, you can use `DEV=1`
 
 > To send more operations and test heavy load on Hive instance, you can also set `OPERATIONS`
 > (amount of operations in each interval round, default is `1`) and `INTERVAL` (frequency of sending
