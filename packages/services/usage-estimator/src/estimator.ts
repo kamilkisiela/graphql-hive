@@ -1,10 +1,10 @@
-import type { FastifyLoggerInstance } from '@hive/service-common';
+import type { createLogger, FastifyLoggerInstance } from '@hive/service-common';
 import { HttpClient, ClickHouse, OperationsReader } from '@hive/api';
 
 export type Estimator = ReturnType<typeof createEstimator>;
 
 export function createEstimator(config: {
-  logger: FastifyLoggerInstance;
+  logger: FastifyLoggerInstance | ReturnType<typeof createLogger>;
   clickhouse: {
     protocol: string;
     host: string;

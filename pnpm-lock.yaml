@@ -342,6 +342,7 @@ importers:
       '@graphql-tools/schema': 9.0.9
       '@hive/emails': workspace:*
       '@hive/schema': workspace:*
+      '@hive/service-common': workspace:*
       '@hive/storage': workspace:*
       '@hive/tokens': workspace:*
       '@hive/webhooks': workspace:*
@@ -427,6 +428,7 @@ importers:
       '@graphql-hive/core': link:../../libraries/core
       '@hive/emails': link:../emails
       '@hive/schema': link:../schema
+      '@hive/service-common': link:../service-common
       '@hive/storage': link:../storage
       '@hive/tokens': link:../tokens
       '@hive/webhooks': link:../webhooks

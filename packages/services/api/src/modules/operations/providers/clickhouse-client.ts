@@ -6,6 +6,7 @@ import type { ClickHouseConfig } from './tokens';
 import { HttpClient } from '../../shared/providers/http-client';
 import { atomic } from '../../../shared/helpers';
 import { Logger } from '../../shared/providers/logger';
+import { createLogger } from '@hive/service-common';
 
 export interface QueryResponse<T> {
   data: readonly T[];
@@ -36,16 +37,20 @@ const httpsAgent = new Agent.HttpsAgent(agentConfig);
 
 @Injectable()
 export class ClickHouse {
-  private logger: Logger;
+  private logger: Logger | ReturnType<typeof createLogger>;
 
   constructor(
     @Inject(CLICKHOUSE_CONFIG) private config: ClickHouseConfig,
     private httpClient: HttpClient,
-    logger: Logger,
+    logger: Logger | ReturnType<typeof createLogger>,
   ) {
-    this.logger = logger.child({
-      service: 'ClickHouse',
-    });
+    if ('child' in logger) {
+      this.logger = logger.child({
+        service: 'ClickHouse',
+      });
+    } else {
+      this.logger = logger;
+    }
   }
 
   @atomic(({ query }: { query: string }) => query)
