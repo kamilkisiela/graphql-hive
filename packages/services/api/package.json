@@ -16,7 +16,7 @@
     "@aws-sdk/s3-request-presigner": "3.238.0",
     "@graphql-inspector/core": "3.4.0",
     "@graphql-tools/load-files": "6.6.1",
-    "@graphql-tools/schema": "9.0.9",
+    "@graphql-tools/schema": "9.0.12",
     "@octokit/app": "12.0.7",
     "@sentry/node": "7.21.1",
     "@sentry/types": "7.21.1",
