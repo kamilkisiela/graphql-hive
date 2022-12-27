@@ -440,7 +440,7 @@ importers:
       '@cloudflare/workers-types': 3.4.0
       '@types/service-worker-mock': 2.0.1
       '@whatwg-node/fetch': 0.5.3
-      '@whatwg-node/server': 0.4.17
+      '@whatwg-node/server': 0.5.0
       esbuild: 0.14.39
       itty-router: 2.6.6
       itty-router-extras: 0.4.2
@@ -454,7 +454,7 @@ importers:
       '@cloudflare/workers-types': 3.4.0
       '@types/service-worker-mock': 2.0.1
       '@whatwg-node/fetch': 0.5.3
-      '@whatwg-node/server': 0.4.17
+      '@whatwg-node/server': 0.5.0
       esbuild: 0.14.39
       itty-router: 2.6.6
       itty-router-extras: 0.4.2
@@ -467,7 +467,7 @@ importers:
       '@hive/api': workspace:*
       '@types/service-worker-mock': 2.0.1
       '@whatwg-node/fetch': 0.5.3
-      '@whatwg-node/server': 0.4.17
+      '@whatwg-node/server': 0.5.0
       esbuild: 0.14.39
       fastify: 3.29.4
       graphql: 16.6.0
@@ -485,7 +485,7 @@ importers:
       '@hive/api': link:../api
       '@types/service-worker-mock': 2.0.1
       '@whatwg-node/fetch': 0.5.3
-      '@whatwg-node/server': 0.4.17
+      '@whatwg-node/server': 0.5.0
       esbuild: 0.14.39
       fastify: 3.29.4
       itty-router: 2.6.6
@@ -539,13 +539,13 @@ importers:
       '@apollo/composition': ^2.2.2
       '@graphql-hive/external-composition': workspace:*
       '@whatwg-node/fetch': ^0.5.3
-      '@whatwg-node/server': ^0.4.17
+      '@whatwg-node/server': ^0.5.0
       graphql: 16.6.0
       zod: 3.20.2
     dependencies:
       '@apollo/composition': 2.2.2_graphql@16.6.0
       '@whatwg-node/fetch': 0.5.3
-      '@whatwg-node/server': 0.4.17
+      '@whatwg-node/server': 0.5.0
       graphql: 16.6.0
       zod: 3.20.2
     devDependencies:
@@ -658,7 +658,7 @@ importers:
       '@swc/core': 1.2.185
       '@trpc/server': 10.7.0
       '@whatwg-node/fetch': 0.5.3
-      '@whatwg-node/server': 0.4.17
+      '@whatwg-node/server': 0.5.0
       dotenv: 10.0.0
       fastify: 3.29.4
       got: 12.5.3
@@ -686,7 +686,7 @@ importers:
       '@sentry/tracing': 7.21.1
       '@trpc/server': 10.7.0
       '@whatwg-node/fetch': 0.5.3
-      '@whatwg-node/server': 0.4.17
+      '@whatwg-node/server': 0.5.0
       dotenv: 10.0.0
       got: 12.5.3
       graphql: 16.6.0
@@ -11555,6 +11555,16 @@ packages:
 
   /@whatwg-node/server/0.4.17:
     resolution: {integrity: sha512-kq1AHyi87VWfiDqiSTAOY+py83HMJg42+fI8JAe1wjmMkJ8v/E5mKq5NpLNRM9Cnf7NHsQR0AwQgvX/RFuptaA==}
+    peerDependencies:
+      '@types/node': ^18.0.6
+    dependencies:
+      '@whatwg-node/fetch': 0.5.3
+      tslib: 2.4.1
+    transitivePeerDependencies:
+      - encoding
+
+  /@whatwg-node/server/0.5.0:
+    resolution: {integrity: sha512-zvtgGJhuwCtXM0nU/nqDPHjD4QxAl5HK708vJmGdYjETsmB9/JGJaCWjrUuojC14uN4ExoqGaJh34wNopr/jew==}
     peerDependencies:
       '@types/node': ^18.0.6
     dependencies:
