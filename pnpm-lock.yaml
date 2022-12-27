@@ -1064,7 +1064,7 @@ importers:
       react-dom: 18.2.0
       react-icons: 4.7.1
       react-select: 5.7.0
-      react-string-replace: 0.4.4
+      react-string-replace: 0.5.1
       react-virtualized-auto-sizer: 1.0.7
       react-window: 1.8.8
       regenerator-runtime: 0.13.11
@@ -1146,7 +1146,7 @@ importers:
       react-dom: 18.2.0_react@18.2.0
       react-icons: 4.7.1_react@18.2.0
       react-select: 5.7.0_4c3rps5tc2yowtcrqid3cuwlea
-      react-string-replace: 0.4.4
+      react-string-replace: 0.5.1
       react-virtualized-auto-sizer: 1.0.7_biqbaboplfbrettd7655fr4n2y
       react-window: 1.8.8_biqbaboplfbrettd7655fr4n2y
       regenerator-runtime: 0.13.11
@@ -23511,11 +23511,9 @@ packages:
       react-use: 15.3.8_biqbaboplfbrettd7655fr4n2y
     dev: false
 
-  /react-string-replace/0.4.4:
-    resolution: {integrity: sha512-FAMkhxmDpCsGTwTZg7p/2v+/GTmxAp73so3fbSvlAcBBX36ujiGRNEaM/1u+jiYQrArhns+7eE92g2pi5E5FUA==}
+  /react-string-replace/0.5.1:
+    resolution: {integrity: sha512-lX09Grn4dXHED2EwrX57TuatK1qYMbYEXERFsvN0JE1hBUiNAR+cghbKqCgzSP5VKxIpAtrgKW8cFJzb7zCnYg==}
     engines: {node: '>=0.12.0'}
-    dependencies:
-      lodash: 4.17.21
     dev: false
 
   /react-style-singleton/2.2.1_dsvndo4wjx7umk5x4kyqypffly:
