@@ -1,4 +1,4 @@
-import { createHive } from '@graphql-hive/client';
+import { createHive } from '../packages/libraries/client/dist/cjs/index.js';
 import { buildSchema, parse } from 'graphql';
 
 async function main() {
@@ -11,6 +11,8 @@ async function main() {
       enabled: true,
       endpoint: process.env.STAGING
         ? 'https://app.staging.graphql-hive.com/registry'
+        : process.env.DEV
+        ? 'https://app.dev.graphql-hive.com/registry'
         : 'http://localhost:4000/graphql',
       author: 'Hive Seed Script',
       commit: '1',
@@ -20,6 +22,8 @@ async function main() {
       clientInfo: 'Fake Hive Client',
       endpoint: process.env.STAGING
         ? 'https://app.staging.graphql-hive.com/usage'
+        : process.env.DEV
+        ? 'https://app.dev.graphql-hive.com/usage'
         : 'http://localhost:4001',
       max: 10,
       sampleRate: 1,
