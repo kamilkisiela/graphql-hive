@@ -714,14 +714,14 @@ importers:
       '@sentry/utils': 7.21.1
       '@whatwg-node/fetch': 0.5.3
       fastify: 3.29.4
-      fastify-cors: 6.0.2
+      fastify-cors: 6.1.0
       fastify-plugin: 3.0.1
       prom-client: 14.1.0
       zod: 3.20.2
     dependencies:
       '@whatwg-node/fetch': 0.5.3
       fastify: 3.29.4
-      fastify-cors: 6.0.2
+      fastify-cors: 6.1.0
       fastify-plugin: 3.0.1
       prom-client: 14.1.0
       zod: 3.20.2
@@ -16398,11 +16398,18 @@ packages:
     resolution: {integrity: sha512-bijHueCGd0LqqNK9b5oCMHc0MluJAx0cwqASgbWMvkO01lCYgIhacVRLcaDz3QnyYIRNJRDwMb41VuT6pHJ91Q==}
     dev: false
 
-  /fastify-cors/6.0.2:
-    resolution: {integrity: sha512-sE0AOyzmj5hLLRRVgenjA6G2iOGX35/1S3QGYB9rr9TXelMZB3lFrXy4CzwYVOMiujJeMiLgO4J7eRm8sQSv8Q==}
+  /fastify-cors/6.0.3:
+    resolution: {integrity: sha512-fMbXubKKyBHHCfSBtsCi3+7VyVRdhJQmGes5gM+eGKkRErCdm0NaYO0ozd31BQBL1ycoTIjbqOZhJo4RTF/Vlg==}
     dependencies:
       fastify-plugin: 3.0.1
       vary: 1.1.2
+    dev: false
+
+  /fastify-cors/6.1.0:
+    resolution: {integrity: sha512-QBKz32IoY/iuT74CunRY1XOSpjSTIOh9E3FxulXIBhd0D2vdgG0kDvy0eG6HA/88sRfWHeba43LkGEXPz0Rh8g==}
+    dependencies:
+      fastify-cors-deprecated: /fastify-cors/6.0.3
+      process-warning: 1.0.0
     dev: false
 
   /fastify-plugin/3.0.1:
