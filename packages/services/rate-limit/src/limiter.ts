@@ -1,5 +1,5 @@
 import { fetch } from '@whatwg-node/fetch';
-import type { FastifyLoggerInstance } from '@hive/service-common';
+import type { createLogger, FastifyLoggerInstance } from '@hive/service-common';
 import { createStorage as createPostgreSQLStorage } from '@hive/storage';
 
 import { startOfMonth, endOfMonth } from 'date-fns';
@@ -38,7 +38,7 @@ type OrganizationId = string;
 type TargetId = string;
 
 export function createRateLimiter(config: {
-  logger: FastifyLoggerInstance;
+  logger: FastifyLoggerInstance | ReturnType<typeof createLogger>;
   rateLimitConfig: {
     interval: number;
   };

@@ -2,12 +2,7 @@
 import { createServerAdapter } from '@whatwg-node/server';
 import 'reflect-metadata';
 import * as Sentry from '@sentry/node';
-import {
-  startMetrics,
-  registerShutdown,
-  createLogger,
-  FastifyLoggerInstance,
-} from '@hive/service-common';
+import { startMetrics, registerShutdown, createLogger } from '@hive/service-common';
 import { env } from './environment';
 import { createServer } from 'http';
 import { rateLimitCtX, rateLimitRouter } from './router';
@@ -23,7 +18,7 @@ async function main() {
     });
   }
 
-  const logger = createLogger() as FastifyLoggerInstance;
+  const logger = createLogger();
 
   const app = createServerAdapter(rateLimitRouter);
   const server = createServer(app);
@@ -43,7 +38,7 @@ async function main() {
     return new Promise<void>(resolve => {
       server.listen(env.http.port, '0.0.0.0', resolve);
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.fatal(error);
     Sentry.captureException(error, {
       level: 'fatal',

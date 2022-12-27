@@ -1,5 +1,5 @@
 import { Router } from 'itty-router';
-import { createLogger, FastifyLoggerInstance, reportReadiness } from '@hive/service-common';
+import { createLogger, reportReadiness } from '@hive/service-common';
 import { createConnectionString } from '@hive/storage';
 import { createRateLimiter } from './limiter';
 import { env } from './environment';
@@ -8,7 +8,7 @@ import { rateLimitApiRouter } from './api';
 
 const rateLimitRouter: Router = Router();
 
-const logger = createLogger(env.log.level) as FastifyLoggerInstance;
+const logger = createLogger(env.log.level);
 
 const ctx = createRateLimiter({
   logger,
