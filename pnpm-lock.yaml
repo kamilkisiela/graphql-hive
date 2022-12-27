@@ -1053,7 +1053,7 @@ importers:
       immer: 9.0.16
       js-cookie: 3.0.1
       monaco-editor: 0.27.0
-      monaco-themes: 0.3.3
+      monaco-themes: 0.4.3
       next: 13.0.7
       nextjs-cors: 2.1.2
       node-crisp-api: 1.12.3
@@ -1136,7 +1136,7 @@ importers:
       immer: 9.0.16
       js-cookie: 3.0.1
       monaco-editor: 0.27.0
-      monaco-themes: 0.3.3
+      monaco-themes: 0.4.3
       next: 13.0.7_biqbaboplfbrettd7655fr4n2y
       nextjs-cors: 2.1.2_next@13.0.7
       node-crisp-api: 1.12.3
@@ -21183,8 +21183,8 @@ packages:
     resolution: {integrity: sha512-UhwP78Wb8w0ZSYoKXQNTV/0CHObp6NS3nCt51QfKE6sKyBo5PBsvuDOHoI2ooBakc6uIwByRLHVeT7+yXQe2fQ==}
     dev: false
 
-  /monaco-themes/0.3.3:
-    resolution: {integrity: sha512-0yygYHg3hZhMhlYkP2eMAMurLSyVDqA7ZOjHJSz0LNxra2hxuAGjKFdoBGXnG+VykT6u8bc5uZWF8G35NMC3Gw==}
+  /monaco-themes/0.4.3:
+    resolution: {integrity: sha512-Ajt8osGYtdxPLp5CeLljWijm6GZZukK9t8b2JuVKlSleiwrVDEd/n47uQdm/uxYKCsWvSFmngAOhqZvC/wcxQg==}
     dependencies:
       fast-plist: 0.1.2
     dev: false

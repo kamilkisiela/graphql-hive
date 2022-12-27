@@ -63,7 +63,7 @@
     "immer": "9.0.16",
     "js-cookie": "3.0.1",
     "monaco-editor": "0.27.0",
-    "monaco-themes": "0.3.3",
+    "monaco-themes": "0.4.3",
     "next": "13.0.7",
     "nextjs-cors": "2.1.2",
     "node-crisp-api": "1.12.3",
