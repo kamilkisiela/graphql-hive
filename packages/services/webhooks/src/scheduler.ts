@@ -48,11 +48,10 @@ export function createScheduler(config: Config) {
     try {
       webhookQueue?.removeAllListeners();
       webhookQueueScheduler?.removeAllListeners(),
-        await pTimeout(
-          Promise.all([webhookQueue?.close(), webhookQueueScheduler?.close()]),
-          5000,
-          'BullMQ close timeout',
-        );
+        await pTimeout(Promise.all([webhookQueue?.close(), webhookQueueScheduler?.close()]), {
+          milliseconds: 5000,
+          message: 'BullMQ close timeout',
+        });
     } catch (e) {
       logger.error('Failed to stop queues', e);
     } finally {

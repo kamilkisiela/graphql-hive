@@ -11,26 +11,25 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@sentry/node": "7.21.1",
+    "@sentry/node": "7.28.1",
     "@trpc/server": "10.7.0",
     "@whatwg-node/fetch": "0.5.3",
     "bullmq": "1.81.4",
-    "dotenv": "10.0.0",
-    "ioredis": "4.28.5",
+    "dotenv": "16.0.3",
+    "ioredis": "5.2.4",
     "mjml": "4.13.0",
     "nodemailer": "6.8.0",
-    "p-timeout": "5.1.0",
+    "p-timeout": "6.0.0",
     "sendmail": "1.6.1",
     "zod": "3.20.2"
   },
   "devDependencies": {
     "@hive/service-common": "workspace:*",
-    "@types/ioredis": "4.28.10",
     "@types/mjml": "4.7.0",
     "@types/nodemailer": "6.4.7",
     "@types/sendmail": "1.4.4",
     "copyfiles": "2.4.1",
-    "pino-pretty": "6.0.0",
+    "pino-pretty": "9.1.1",
     "tslib": "2.4.1"
   },
   "buildOptions": {
