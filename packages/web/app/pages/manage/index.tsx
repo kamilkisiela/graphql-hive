@@ -78,7 +78,7 @@ function Manage() {
                 colorScheme="teal"
                 size="sm"
                 defaultValue={Object.keys(filters).filter(key =>
-                  Boolean(filters[key as keyof typeof filters]),
+                 filters[key as keyof typeof filters],
                 )}
                 onChange={onFiltersChange}
               >

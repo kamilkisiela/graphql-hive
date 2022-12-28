@@ -52,7 +52,7 @@ export default class OperationsPublish extends Command {
         normalize: true,
       });
       const collectedOperationsTotal = operations.length;
-      const noMissingHashes = operations.some(op => Boolean(op.operationHash));
+      const noMissingHashes = operations.some(op => op.operationHash);
 
       if (noMissingHashes) {
         const comparisonResult = await this.registryApi(registry, token).comparePersistedOperations(
