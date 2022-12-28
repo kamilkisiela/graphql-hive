@@ -1,8 +1,8 @@
-import * as kx from '@pulumi/kubernetesx';
 import * as k8s from '@pulumi/kubernetes';
+import * as kx from '@pulumi/kubernetesx';
 import * as pulumi from '@pulumi/pulumi';
-import { PodBuilder, normalizeEnv } from './pod-builder';
 import { isDefined } from './helpers';
+import { normalizeEnv, PodBuilder } from './pod-builder';
 
 export class ServiceDeployment {
   constructor(

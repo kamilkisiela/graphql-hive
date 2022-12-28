@@ -1,4 +1,4 @@
-import { TargetAccessScope, ProjectType } from '@app/gql/graphql';
+import { ProjectType, TargetAccessScope } from '@app/gql/graphql';
 import { initSeed } from '../../../testkit/seed';
 
 test.concurrent('can check a schema with target:registry:read access', async () => {

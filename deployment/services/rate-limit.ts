@@ -1,12 +1,12 @@
+import * as k8s from '@pulumi/kubernetes';
 import * as pulumi from '@pulumi/pulumi';
 import { parse } from 'pg-connection-string';
-import { ServiceDeployment } from '../utils/service-deployment';
 import { DeploymentEnvironment } from '../types';
-import { DbMigrations } from './db-migrations';
-import { UsageEstimator } from './usage-estimation';
-import { Emails } from './emails';
 import { serviceLocalEndpoint } from '../utils/local-endpoint';
-import * as k8s from '@pulumi/kubernetes';
+import { ServiceDeployment } from '../utils/service-deployment';
+import { DbMigrations } from './db-migrations';
+import { Emails } from './emails';
+import { UsageEstimator } from './usage-estimation';
 
 const rateLimitConfig = new pulumi.Config('rateLimit');
 const commonConfig = new pulumi.Config('common');

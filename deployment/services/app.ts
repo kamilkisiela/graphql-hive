@@ -1,11 +1,11 @@
-import * as pulumi from '@pulumi/pulumi';
-import { GraphQL } from './graphql';
-import { DbMigrations } from './db-migrations';
-import { ServiceDeployment } from '../utils/service-deployment';
-import { serviceLocalEndpoint } from '../utils/local-endpoint';
-import { DeploymentEnvironment } from '../types';
-import { Docs } from './docs';
 import * as k8s from '@pulumi/kubernetes';
+import * as pulumi from '@pulumi/pulumi';
+import { DeploymentEnvironment } from '../types';
+import { serviceLocalEndpoint } from '../utils/local-endpoint';
+import { ServiceDeployment } from '../utils/service-deployment';
+import { DbMigrations } from './db-migrations';
+import { Docs } from './docs';
+import { GraphQL } from './graphql';
 
 const appConfig = new pulumi.Config('app');
 const commonConfig = new pulumi.Config('common');

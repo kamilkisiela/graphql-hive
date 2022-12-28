@@ -1,9 +1,9 @@
+import * as k8s from '@pulumi/kubernetes';
 import * as pulumi from '@pulumi/pulumi';
-import { ServiceDeployment } from '../utils/service-deployment';
 import { DeploymentEnvironment } from '../types';
+import { ServiceDeployment } from '../utils/service-deployment';
 import { Clickhouse } from './clickhouse';
 import { DbMigrations } from './db-migrations';
-import * as k8s from '@pulumi/kubernetes';
 
 const commonConfig = new pulumi.Config('common');
 const commonEnv = commonConfig.requireObject<Record<string, string>>('env');

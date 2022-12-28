@@ -1,10 +1,10 @@
-import { waitFor } from '../../../testkit/flow';
 import {
-  TargetAccessScope,
-  ProjectType,
-  ProjectAccessScope,
   OrganizationAccessScope,
+  ProjectAccessScope,
+  ProjectType,
+  TargetAccessScope,
 } from '@app/gql/graphql';
+import { waitFor } from '../../../testkit/flow';
 import { initSeed } from '../../../testkit/seed';
 
 test.concurrent('freshly created organization has Get Started progress at 0%', async () => {

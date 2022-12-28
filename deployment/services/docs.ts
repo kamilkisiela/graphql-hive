@@ -1,5 +1,5 @@
-import { ServiceDeployment } from '../utils/service-deployment';
 import * as k8s from '@pulumi/kubernetes';
+import { ServiceDeployment } from '../utils/service-deployment';
 
 export type Docs = ReturnType<typeof deployDocs>;
 

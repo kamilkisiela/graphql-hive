@@ -1,8 +1,8 @@
-import { TargetAccessScope, ProjectType, ProjectAccessScope } from '@app/gql/graphql';
-import { enableExternalSchemaComposition } from '../../../testkit/flow';
+import { ProjectAccessScope, ProjectType, TargetAccessScope } from '@app/gql/graphql';
 import { history, serviceName, servicePort } from '../../../testkit/external-composition';
-import { generateUnique } from '../../../testkit/utils';
+import { enableExternalSchemaComposition } from '../../../testkit/flow';
 import { initSeed } from '../../../testkit/seed';
+import { generateUnique } from '../../../testkit/utils';
 
 test.concurrent('call an external service to compose and validate services', async () => {
   const { createOrg } = await initSeed().createOwner();

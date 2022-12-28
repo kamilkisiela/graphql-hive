@@ -1,7 +1,7 @@
 /* eslint-disable no-process-env */
-import { TargetAccessScope, ProjectType } from '@app/gql/graphql';
-import { createTarget, publishSchema } from '../../../testkit/flow';
+import { ProjectType, TargetAccessScope } from '@app/gql/graphql';
 import { fetch } from '@whatwg-node/fetch';
+import { createTarget, publishSchema } from '../../../testkit/flow';
 import { initSeed } from '../../../testkit/seed';
 
 test.concurrent('cannot publish a schema without target:registry:write access', async () => {

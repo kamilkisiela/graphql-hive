@@ -1,6 +1,6 @@
 import { resolve } from 'path';
-import { getServiceHost } from './utils';
 import { execaCommand } from '@esm2cjs/execa';
+import { getServiceHost } from './utils';
 
 const binPath = resolve(__dirname, '../../packages/libraries/cli/bin/dev');
 

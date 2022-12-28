@@ -1,12 +1,12 @@
 import * as pulumi from '@pulumi/pulumi';
-import { Proxy } from '../utils/reverse-proxy';
-import { CertManager } from '../utils/cert-manager';
-import { GraphQL } from './graphql';
-import { App } from './app';
-import { Usage } from './usage';
-import { Docs } from './docs';
-import { isProduction } from '../utils/helpers';
 import { DeploymentEnvironment } from '../types';
+import { CertManager } from '../utils/cert-manager';
+import { isProduction } from '../utils/helpers';
+import { Proxy } from '../utils/reverse-proxy';
+import { App } from './app';
+import { Docs } from './docs';
+import { GraphQL } from './graphql';
+import { Usage } from './usage';
 
 const commonConfig = new pulumi.Config('common');
 
