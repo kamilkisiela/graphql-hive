@@ -122,16 +122,19 @@ export function initSeed() {
                     .then(r => r.expectNoGraphQLErrors())
                     .then(r => r.deleteTokens.deletedTokens);
                 },
-                async createToken(
-                  targetScopes: TargetAccessScope[] = [
-                    TargetAccessScope.RegistryRead,
-                    TargetAccessScope.RegistryWrite,
-                  ],
-                  projectScopes: ProjectAccessScope[] = [],
-                  organizationScopes: OrganizationAccessScope[] = [],
+                async createToken({
+                  targetScopes = [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+                  projectScopes = [],
+                  organizationScopes = [],
                   targetId = target.cleanId,
                   actorToken = ownerToken,
-                ) {
+                }: {
+                  targetScopes?: TargetAccessScope[];
+                  projectScopes?: ProjectAccessScope[];
+                  organizationScopes?: OrganizationAccessScope[];
+                  targetId?: string;
+                  actorToken?: string;
+                }) {
                   const tokenResult = await createToken(
                     {
                       name: generateUnique(),

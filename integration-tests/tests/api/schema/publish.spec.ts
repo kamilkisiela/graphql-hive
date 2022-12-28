@@ -8,7 +8,11 @@ test.concurrent('cannot publish a schema without target:registry:write access', 
   const { createOrg } = await initSeed().createOwner();
   const { createProject } = await createOrg();
   const { createToken } = await createProject(ProjectType.Federation);
-  const readToken = await createToken([TargetAccessScope.RegistryRead], [], []);
+  const readToken = await createToken({
+    targetScopes: [TargetAccessScope.RegistryRead],
+    projectScopes: [],
+    organizationScopes: [],
+  });
 
   const resultErrors = await readToken
     .publishSchema({
@@ -28,11 +32,11 @@ test.concurrent('can publish a schema with target:registry:write access', async 
   const { createOrg } = await initSeed().createOwner();
   const { createProject } = await createOrg();
   const { createToken } = await createProject(ProjectType.Single);
-  const readWriteToken = await createToken(
-    [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-    [],
-    [],
-  );
+  const readWriteToken = await createToken({
+    targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+    projectScopes: [],
+    organizationScopes: [],
+  });
 
   const result1 = await readWriteToken
     .publishSchema({
@@ -67,11 +71,11 @@ test.concurrent('base schema should not affect the output schema persisted in db
   const { createOrg } = await initSeed().createOwner();
   const { createProject } = await createOrg();
   const { createToken } = await createProject(ProjectType.Single);
-  const readWriteToken = await createToken(
-    [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-    [],
-    [],
-  );
+  const readWriteToken = await createToken({
+    targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+    projectScopes: [],
+    organizationScopes: [],
+  });
 
   // Publish schema with write rights
   const publishResult = await readWriteToken
@@ -115,11 +119,11 @@ test.concurrent('directives should not be removed (federation)', async () => {
   const { createOrg } = await initSeed().createOwner();
   const { createProject } = await createOrg();
   const { createToken } = await createProject(ProjectType.Federation);
-  const readWriteToken = await createToken(
-    [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-    [],
-    [],
-  );
+  const readWriteToken = await createToken({
+    targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+    projectScopes: [],
+    organizationScopes: [],
+  });
 
   // Publish schema with write rights
   const publishResult = await readWriteToken
@@ -150,11 +154,11 @@ test.concurrent(
     const { createOrg } = await initSeed().createOwner();
     const { createProject } = await createOrg();
     const { createToken } = await createProject(ProjectType.Federation);
-    const readWriteToken = await createToken(
-      [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-      [],
-      [],
-    );
+    const readWriteToken = await createToken({
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      projectScopes: [],
+      organizationScopes: [],
+    });
 
     const basePublishParams = {
       service: 'test',
@@ -205,11 +209,11 @@ test.concurrent(
     const { createOrg } = await initSeed().createOwner();
     const { createProject } = await createOrg();
     const { createToken } = await createProject(ProjectType.Federation);
-    const readWriteToken = await createToken(
-      [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-      [],
-      [],
-    );
+    const readWriteToken = await createToken({
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      projectScopes: [],
+      organizationScopes: [],
+    });
 
     const basePublishParams = {
       service: 'test',
@@ -254,11 +258,11 @@ test.concurrent('directives should not be removed (stitching)', async () => {
   const { createOrg } = await initSeed().createOwner();
   const { createProject } = await createOrg();
   const { createToken } = await createProject(ProjectType.Stitching);
-  const readWriteToken = await createToken(
-    [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-    [],
-    [],
-  );
+  const readWriteToken = await createToken({
+    targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+    projectScopes: [],
+    organizationScopes: [],
+  });
 
   // Publish schema with write rights
   const publishResult = await readWriteToken
@@ -289,11 +293,11 @@ test.concurrent('directives should not be removed (single)', async () => {
   const { createOrg } = await initSeed().createOwner();
   const { createProject } = await createOrg();
   const { createToken } = await createProject(ProjectType.Single);
-  const readWriteToken = await createToken(
-    [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-    [],
-    [],
-  );
+  const readWriteToken = await createToken({
+    targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+    projectScopes: [],
+    organizationScopes: [],
+  });
   // Publish schema with write rights
   const publishResult = await readWriteToken
     .publishSchema({
@@ -323,11 +327,11 @@ test.concurrent('share publication of schema using redis', async () => {
   const { createOrg } = await initSeed().createOwner();
   const { createProject } = await createOrg();
   const { createToken } = await createProject(ProjectType.Single);
-  const readWriteToken = await createToken(
-    [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-    [],
-    [],
-  );
+  const readWriteToken = await createToken({
+    targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+    projectScopes: [],
+    organizationScopes: [],
+  });
 
   // Publish schema with write rights
   const publishResult = await readWriteToken
@@ -365,11 +369,11 @@ test("Two targets with the same commit id shouldn't return an error", async () =
   const { createOrg, ownerToken } = await initSeed().createOwner();
   const { organization, createProject } = await createOrg();
   const { project, createToken } = await createProject(ProjectType.Single);
-  const readWriteToken = await createToken(
-    [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-    [],
-    [],
-  );
+  const readWriteToken = await createToken({
+    targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+    projectScopes: [],
+    organizationScopes: [],
+  });
 
   const publishResult = await readWriteToken
     .publishSchema({
@@ -387,12 +391,12 @@ test("Two targets with the same commit id shouldn't return an error", async () =
     ownerToken,
   ).then(r => r.expectNoGraphQLErrors());
   const target2 = createTargetResult.createTarget.ok!.createdTarget;
-  const writeTokenResult2 = await createToken(
-    [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-    [],
-    [],
-    target2.cleanId,
-  );
+  const writeTokenResult2 = await createToken({
+    targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+    projectScopes: [],
+    organizationScopes: [],
+    targetId: target2.cleanId,
+  });
   const publishResult2 = await writeTokenResult2
     .publishSchema({
       author: 'gilad',
@@ -410,11 +414,11 @@ test.concurrent('marking versions as valid', async () => {
   const { createOrg } = await initSeed().createOwner();
   const { createProject } = await createOrg();
   const { createToken } = await createProject(ProjectType.Single);
-  const readWriteToken = await createToken(
-    [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-    [],
-    [],
-  );
+  const readWriteToken = await createToken({
+    targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+    projectScopes: [],
+    organizationScopes: [],
+  });
 
   // Initial schema
   let result = await readWriteToken
@@ -485,11 +489,11 @@ test.concurrent(
     const { createOrg } = await initSeed().createOwner();
     const { createProject } = await createOrg();
     const { createToken } = await createProject(ProjectType.Single);
-    const readWriteToken = await createToken(
-      [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-      [],
-      [],
-    );
+    const readWriteToken = await createToken({
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      projectScopes: [],
+      organizationScopes: [],
+    });
 
     // Initial schema
     let result = await readWriteToken
@@ -564,11 +568,11 @@ test.concurrent('CDN data can not be fetched with an invalid access token', asyn
   const { createOrg } = await initSeed().createOwner();
   const { createProject } = await createOrg();
   const { createToken } = await createProject(ProjectType.Single);
-  const readWriteToken = await createToken(
-    [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-    [],
-    [],
-  );
+  const readWriteToken = await createToken({
+    targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+    projectScopes: [],
+    organizationScopes: [],
+  });
 
   // Initial schema
   const result = await readWriteToken
@@ -597,11 +601,11 @@ test.concurrent('CDN data can be fetched with an valid access token', async () =
   const { createOrg } = await initSeed().createOwner();
   const { createProject } = await createOrg();
   const { createToken } = await createProject(ProjectType.Single);
-  const readWriteToken = await createToken(
-    [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-    [],
-    [],
-  );
+  const readWriteToken = await createToken({
+    targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+    projectScopes: [],
+    organizationScopes: [],
+  });
 
   // Initial schema
   const result = await readWriteToken
@@ -632,11 +636,11 @@ test.concurrent('linkToWebsite should be available when publishing initial schem
   const { createOrg } = await initSeed().createOwner();
   const { createProject, organization } = await createOrg();
   const { project, target, createToken } = await createProject(ProjectType.Single);
-  const readWriteToken = await createToken(
-    [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-    [],
-    [],
-  );
+  const readWriteToken = await createToken({
+    targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+    projectScopes: [],
+    organizationScopes: [],
+  });
 
   const result = await readWriteToken
     .publishSchema({
@@ -664,11 +668,11 @@ test.concurrent(
     const { createOrg } = await initSeed().createOwner();
     const { createProject, organization } = await createOrg();
     const { createToken, project, target } = await createProject(ProjectType.Single);
-    const readWriteToken = await createToken(
-      [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-      [],
-      [],
-    );
+    const readWriteToken = await createToken({
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      projectScopes: [],
+      organizationScopes: [],
+    });
 
     let result = await readWriteToken
       .publishSchema({
@@ -732,11 +736,11 @@ test.concurrent(
     const { createOrg } = await initSeed().createOwner();
     const { createProject } = await createOrg();
     const { createToken } = await createProject(ProjectType.Stitching);
-    const readWriteToken = await createToken(
-      [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-      [],
-      [],
-    );
+    const readWriteToken = await createToken({
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      projectScopes: [],
+      organizationScopes: [],
+    });
 
     // cats service has only one field
     let result = await readWriteToken
@@ -800,11 +804,11 @@ test.concurrent(
     const { createOrg } = await initSeed().createOwner();
     const { createProject } = await createOrg();
     const { createToken } = await createProject(ProjectType.Federation);
-    const readWriteToken = await createToken(
-      [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-      [],
-      [],
-    );
+    const readWriteToken = await createToken({
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      projectScopes: [],
+      organizationScopes: [],
+    });
 
     const basePublishParams = {
       service: 'test',
@@ -847,11 +851,11 @@ test.concurrent(
     const { createOrg } = await initSeed().createOwner();
     const { createProject } = await createOrg();
     const { createToken } = await createProject(ProjectType.Federation);
-    const readWriteToken = await createToken(
-      [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-      [],
-      [],
-    );
+    const readWriteToken = await createToken({
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      projectScopes: [],
+      organizationScopes: [],
+    });
 
     await readWriteToken.publishSchema({
       service: 'reviews',
@@ -948,11 +952,11 @@ test.concurrent(
     const { createOrg } = await initSeed().createOwner();
     const { createProject } = await createOrg();
     const { createToken } = await createProject(ProjectType.Federation);
-    const readWriteToken = await createToken(
-      [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-      [],
-      [],
-    );
+    const readWriteToken = await createToken({
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      projectScopes: [],
+      organizationScopes: [],
+    });
 
     await readWriteToken.publishSchema({
       service: 'products',
@@ -1004,11 +1008,11 @@ test.concurrent(
     const { createOrg } = await initSeed().createOwner();
     const { createProject } = await createOrg();
     const { createToken } = await createProject(ProjectType.Single);
-    const readWriteToken = await createToken(
-      [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-      [],
-      [],
-    );
+    const readWriteToken = await createToken({
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      projectScopes: [],
+      organizationScopes: [],
+    });
 
     const commits = ['a1', 'a2', 'a3', 'a4', 'a5', 'a6'];
     const publishes = await Promise.all(

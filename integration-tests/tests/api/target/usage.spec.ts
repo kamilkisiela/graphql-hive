@@ -11,7 +11,7 @@ import { CollectedOperation } from '../../../testkit/usage';
 import { clickHouseQuery } from '../../../testkit/clickhouse';
 // eslint-disable-next-line hive/enforce-deps-in-dev
 import { normalizeOperation } from '@graphql-hive/core';
-// eslint-disable-next-line import/no-extraneous-dependencies
+ 
 import { parse, print } from 'graphql';
 import { initSeed } from '../../../testkit/seed';
 
@@ -38,17 +38,21 @@ test.concurrent('collect operation', async () => {
   const { createOrg } = await initSeed().createOwner();
   const { createProject } = await createOrg();
   const { createToken } = await createProject(ProjectType.Single);
-  const settingsToken = await createToken(
-    [TargetAccessScope.Read, TargetAccessScope.Settings],
-    [ProjectAccessScope.Read],
-    [OrganizationAccessScope.Read],
-  );
+  const settingsToken = await createToken({
+    targetScopes: [TargetAccessScope.Read, TargetAccessScope.Settings],
+    projectScopes: [ProjectAccessScope.Read],
+    organizationScopes: [OrganizationAccessScope.Read],
+  });
 
-  const writeToken = await createToken(
-    [TargetAccessScope.Read, TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-    [ProjectAccessScope.Read],
-    [OrganizationAccessScope.Read],
-  );
+  const writeToken = await createToken({
+    targetScopes: [
+      TargetAccessScope.Read,
+      TargetAccessScope.RegistryRead,
+      TargetAccessScope.RegistryWrite,
+    ],
+    projectScopes: [ProjectAccessScope.Read],
+    organizationScopes: [OrganizationAccessScope.Read],
+  });
 
   const schemaPublishResult = await writeToken
     .publishSchema({
@@ -120,11 +124,15 @@ test.concurrent('normalize and collect operation without breaking its syntax', a
   const { createOrg } = await initSeed().createOwner();
   const { createProject } = await createOrg();
   const { createToken } = await createProject(ProjectType.Single);
-  const writeToken = await createToken(
-    [TargetAccessScope.Read, TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-    [ProjectAccessScope.Read],
-    [OrganizationAccessScope.Read],
-  );
+  const writeToken = await createToken({
+    targetScopes: [
+      TargetAccessScope.Read,
+      TargetAccessScope.RegistryRead,
+      TargetAccessScope.RegistryWrite,
+    ],
+    projectScopes: [ProjectAccessScope.Read],
+    organizationScopes: [OrganizationAccessScope.Read],
+  });
 
   const raw_document = `
     query outfit {
@@ -233,11 +241,15 @@ test.concurrent(
     const { createOrg } = await initSeed().createOwner();
     const { createProject } = await createOrg();
     const { createToken } = await createProject(ProjectType.Single);
-    const writeToken = await createToken(
-      [TargetAccessScope.Read, TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-      [ProjectAccessScope.Read],
-      [OrganizationAccessScope.Read],
-    );
+    const writeToken = await createToken({
+      targetScopes: [
+        TargetAccessScope.Read,
+        TargetAccessScope.RegistryRead,
+        TargetAccessScope.RegistryWrite,
+      ],
+      projectScopes: [ProjectAccessScope.Read],
+      organizationScopes: [OrganizationAccessScope.Read],
+    });
 
     const batchSize = 1000;
     const totalAmount = 10_000;
@@ -298,23 +310,27 @@ test.concurrent('check usage from two selected targets', async () => {
   expect(productionTargetResult.createTarget.error).toBeNull();
   const productionTarget = productionTargetResult.createTarget.ok!.createdTarget;
 
-  const stagingToken = await createToken(
-    [
+  const stagingToken = await createToken({
+    targetScopes: [
       TargetAccessScope.Read,
       TargetAccessScope.RegistryRead,
       TargetAccessScope.RegistryWrite,
       TargetAccessScope.Settings,
     ],
-    [ProjectAccessScope.Read],
-    [OrganizationAccessScope.Read, OrganizationAccessScope.Settings],
-  );
+    projectScopes: [ProjectAccessScope.Read],
+    organizationScopes: [OrganizationAccessScope.Read, OrganizationAccessScope.Settings],
+  });
 
-  const productionToken = await createToken(
-    [TargetAccessScope.Read, TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-    [ProjectAccessScope.Read],
-    [OrganizationAccessScope.Read],
-    productionTarget.cleanId,
-  );
+  const productionToken = await createToken({
+    targetScopes: [
+      TargetAccessScope.Read,
+      TargetAccessScope.RegistryRead,
+      TargetAccessScope.RegistryWrite,
+    ],
+    projectScopes: [ProjectAccessScope.Read],
+    organizationScopes: [OrganizationAccessScope.Read],
+    targetId: productionTarget.cleanId,
+  });
 
   const schemaPublishResult = await stagingToken
     .publishSchema({
@@ -426,16 +442,16 @@ test.concurrent('check usage not from excluded client names', async () => {
   const { organization, createProject } = await createOrg();
   const { project, target, createToken } = await createProject(ProjectType.Single);
 
-  const token = await createToken(
-    [
+  const token = await createToken({
+    targetScopes: [
       TargetAccessScope.Read,
       TargetAccessScope.RegistryRead,
       TargetAccessScope.RegistryWrite,
       TargetAccessScope.Settings,
     ],
-    [ProjectAccessScope.Read],
-    [OrganizationAccessScope.Read],
-  );
+    projectScopes: [ProjectAccessScope.Read],
+    organizationScopes: [OrganizationAccessScope.Read],
+  });
 
   const schemaPublishResult = await token
     .publishSchema({
@@ -560,11 +576,15 @@ test.concurrent('number of produced and collected operations should match', asyn
   const { createOrg } = await initSeed().createOwner();
   const { createProject } = await createOrg();
   const { target, createToken } = await createProject(ProjectType.Single);
-  const writeToken = await createToken(
-    [TargetAccessScope.Read, TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-    [ProjectAccessScope.Read],
-    [OrganizationAccessScope.Read],
-  );
+  const writeToken = await createToken({
+    targetScopes: [
+      TargetAccessScope.Read,
+      TargetAccessScope.RegistryRead,
+      TargetAccessScope.RegistryWrite,
+    ],
+    projectScopes: [ProjectAccessScope.Read],
+    organizationScopes: [OrganizationAccessScope.Read],
+  });
 
   const batchSize = 1000;
   const totalAmount = 10_000;
@@ -647,11 +667,15 @@ test.concurrent(
     const { createOrg } = await initSeed().createOwner();
     const { createProject } = await createOrg();
     const { target, createToken } = await createProject(ProjectType.Single);
-    const writeToken = await createToken(
-      [TargetAccessScope.Read, TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-      [ProjectAccessScope.Read],
-      [OrganizationAccessScope.Read],
-    );
+    const writeToken = await createToken({
+      targetScopes: [
+        TargetAccessScope.Read,
+        TargetAccessScope.RegistryRead,
+        TargetAccessScope.RegistryWrite,
+      ],
+      projectScopes: [ProjectAccessScope.Read],
+      organizationScopes: [OrganizationAccessScope.Read],
+    });
 
     await writeToken.collectOperations([
       {
@@ -712,11 +736,15 @@ test.concurrent(
     const { createOrg } = await initSeed().createOwner();
     const { createProject } = await createOrg();
     const { target, createToken } = await createProject(ProjectType.Single);
-    const writeToken = await createToken(
-      [TargetAccessScope.Read, TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-      [ProjectAccessScope.Read],
-      [OrganizationAccessScope.Read],
-    );
+    const writeToken = await createToken({
+      targetScopes: [
+        TargetAccessScope.Read,
+        TargetAccessScope.RegistryRead,
+        TargetAccessScope.RegistryWrite,
+      ],
+      projectScopes: [ProjectAccessScope.Read],
+      organizationScopes: [OrganizationAccessScope.Read],
+    });
 
     await writeToken.collectOperations([
       {
@@ -785,11 +813,15 @@ test.concurrent(
     const { createOrg } = await initSeed().createOwner();
     const { createProject } = await createOrg();
     const { target, createToken } = await createProject(ProjectType.Single);
-    const writeToken = await createToken(
-      [TargetAccessScope.Read, TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-      [ProjectAccessScope.Read],
-      [OrganizationAccessScope.Read],
-    );
+    const writeToken = await createToken({
+      targetScopes: [
+        TargetAccessScope.Read,
+        TargetAccessScope.RegistryRead,
+        TargetAccessScope.RegistryWrite,
+      ],
+      projectScopes: [ProjectAccessScope.Read],
+      organizationScopes: [OrganizationAccessScope.Read],
+    });
 
     await writeToken.collectOperations([
       {
@@ -848,11 +880,15 @@ test.concurrent('ignore operations with syntax errors', async () => {
   const { createOrg } = await initSeed().createOwner();
   const { createProject } = await createOrg();
   const { target, createToken } = await createProject(ProjectType.Single);
-  const writeToken = await createToken(
-    [TargetAccessScope.Read, TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-    [ProjectAccessScope.Read],
-    [OrganizationAccessScope.Read],
-  );
+  const writeToken = await createToken({
+    targetScopes: [
+      TargetAccessScope.Read,
+      TargetAccessScope.RegistryRead,
+      TargetAccessScope.RegistryWrite,
+    ],
+    projectScopes: [ProjectAccessScope.Read],
+    organizationScopes: [OrganizationAccessScope.Read],
+  });
 
   const collectResult = await writeToken.collectOperations([
     {
@@ -918,11 +954,15 @@ test.concurrent('ensure correct data', async () => {
   const { createOrg } = await initSeed().createOwner();
   const { createProject } = await createOrg();
   const { target, createToken } = await createProject(ProjectType.Single);
-  const writeToken = await createToken(
-    [TargetAccessScope.Read, TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-    [ProjectAccessScope.Read],
-    [OrganizationAccessScope.Read],
-  );
+  const writeToken = await createToken({
+    targetScopes: [
+      TargetAccessScope.Read,
+      TargetAccessScope.RegistryRead,
+      TargetAccessScope.RegistryWrite,
+    ],
+    projectScopes: [ProjectAccessScope.Read],
+    organizationScopes: [OrganizationAccessScope.Read],
+  });
 
   await writeToken.collectOperations([
     {

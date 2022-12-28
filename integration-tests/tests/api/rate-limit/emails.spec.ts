@@ -32,11 +32,15 @@ test.only('rate limit approaching and reached for organization', async () => {
     ownerToken,
   );
 
-  const { collectOperations } = await createToken(
-    [TargetAccessScope.Read, TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-    [ProjectAccessScope.Read],
-    [OrganizationAccessScope.Read],
-  );
+  const { collectOperations } = await createToken({
+    targetScopes: [
+      TargetAccessScope.Read,
+      TargetAccessScope.RegistryRead,
+      TargetAccessScope.RegistryWrite,
+    ],
+    projectScopes: [ProjectAccessScope.Read],
+    organizationScopes: [OrganizationAccessScope.Read],
+  });
 
   const op = {
     operation: 'query ping { ping }',

@@ -9,7 +9,11 @@ test.concurrent(
     const { createToken } = await createProject(ProjectType.Single);
 
     // member should not have access to target:registry:write
-    const token = await createToken([], [], []);
+    const token = await createToken({
+      targetScopes: [],
+      projectScopes: [],
+      organizationScopes: [],
+    });
     const tokenInfo = await token.fetchTokenInfo();
     if (tokenInfo.__typename === 'TokenNotFoundError') {
       throw new Error('Token not found');
@@ -58,13 +62,13 @@ test.concurrent('cannot set a scope on a token if user has no access to that sco
   );
 
   // member should not have access to target:registry:write
-  const tokenResult = createToken(
-    [TargetAccessScope.RegistryWrite],
-    [],
-    [],
-    target.cleanId,
-    memberToken,
-  );
+  const tokenResult = createToken({
+    targetScopes: [TargetAccessScope.RegistryWrite],
+    projectScopes: [],
+    organizationScopes: [],
+    targetId: target.cleanId,
+    actorToken: memberToken,
+  });
 
   await expect(tokenResult).rejects.toThrowError('target:registry:write');
 });
