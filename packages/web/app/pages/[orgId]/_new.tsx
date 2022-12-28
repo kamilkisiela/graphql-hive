@@ -78,7 +78,7 @@ const NewPage: FC = () => {
             </p>
             <InputWithBorder placeholder="Project Name" />
             <span className="mt-5 mb-2.5 text-xs font-bold">CHOOSE PROJECT TYPE</span>
-            <ProjectTypes className="w-[450px]" />
+            <ProjectTypes />
           </Container>
         );
       case 3:
