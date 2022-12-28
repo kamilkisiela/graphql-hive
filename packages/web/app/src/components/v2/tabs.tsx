@@ -29,11 +29,8 @@ const List: FC<TabsListProps> = ({ children, className, ...props }) => (
   </TabsList>
 );
 
-const Trigger: FC<TabsTriggerProps & { hasBorder?: boolean }> = forwardRef(
-  (
-    { children, className, hasBorder = true, ...props },
-    forwardedRef /* when has asChild prop */,
-  ) => (
+const Trigger: FC<Omit<TabsTriggerProps, 'className'> & { hasBorder?: boolean }> = forwardRef(
+  ({ children, hasBorder = true, ...props }, forwardedRef /* when has asChild prop */) => (
     <TabsTrigger
       ref={forwardedRef as any}
       className={clsx(

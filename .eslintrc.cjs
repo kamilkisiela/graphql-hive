@@ -1,5 +1,4 @@
 /* eslint-env node */
-
 const guildConfig = require('@theguild/eslint-config/base');
 
 const rulesToExtends = Object.fromEntries(

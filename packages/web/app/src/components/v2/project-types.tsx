@@ -41,7 +41,9 @@ const PROJECTS: {
   },
 ];
 
-export const ProjectTypes = ({ children, className, ...props }: RadioGroupProps): ReactElement => {
+export const ProjectTypes = (
+  props: Omit<RadioGroupProps, 'children' | 'className'>,
+): ReactElement => {
   return (
     <RadioGroup {...props}>
       {PROJECTS.map(({ type, image, title, description }) => {

@@ -16,9 +16,8 @@ function prettify(sdl: string) {
 const GraphQLHighlight: React.FC<
   Omit<SchemaEditorProps, 'schema'> & {
     code: string;
-    light?: boolean;
   }
-> = ({ code, light, ...props }) => {
+> = ({ code, ...props }) => {
   const pretty = React.useMemo(() => prettify(code), [code]);
 
   return (
