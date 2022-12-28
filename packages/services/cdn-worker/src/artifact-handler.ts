@@ -122,9 +122,11 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
         return new Response('', {
           status: 304,
         });
-      } else if (result.type === 'notFound') {
+      }
+      if (result.type === 'notFound') {
         return new Response('Not found.', { status: 404 });
-      } else if (result.type === 'redirect') {
+      }
+      if (result.type === 'redirect') {
         return new Response('Found.', { status: 302, headers: { Location: result.location } });
       }
     },

@@ -182,14 +182,13 @@ export class IdempotentRunner {
           },
           ttl,
         });
-      } else {
-        this.logger.debug(
-          'Job created (id=%s, traceId=%s, attempt=%s)',
-          identifier,
-          traceId,
-          context.attempt,
-        );
       }
+      this.logger.debug(
+        'Job created (id=%s, traceId=%s, attempt=%s)',
+        identifier,
+        traceId,
+        context.attempt,
+      );
 
       this.logger.debug(
         'Executing job (id=%s, traceId=%s, attempt=%s)',

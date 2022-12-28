@@ -117,7 +117,7 @@ export function hiveApollo(clientOrOptions: HiveClient | HivePluginOptions): Apo
         ...clientOrOptions,
         agent: {
           name: 'hive-client-apollo',
-          ...(clientOrOptions.agent ?? {}),
+          ...clientOrOptions.agent,
         },
       });
 

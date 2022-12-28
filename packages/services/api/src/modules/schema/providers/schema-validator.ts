@@ -59,7 +59,7 @@ export class SchemaValidator {
       return {
         id: schema.id,
         author: schema.author,
-        source: source,
+        source,
         date: schema.date,
         commit: schema.commit,
         url: schema.url,
@@ -92,7 +92,7 @@ export class SchemaValidator {
     if (isInitialSchema) {
       return {
         valid: errors.length === 0,
-        errors: errors,
+        errors,
         changes: [],
         messages: [],
       };

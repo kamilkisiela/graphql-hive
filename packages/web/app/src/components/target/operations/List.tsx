@@ -423,7 +423,8 @@ const OperationsTableContainer: React.FC<{
         const maxPageIndex = Math.ceil(data.length / state.pageSize) - 1;
         if (state.pageIndex < 0) {
           return { ...state, pageIndex: 0 };
-        } else if (state.pageIndex > maxPageIndex) {
+        }
+        if (state.pageIndex > maxPageIndex) {
           return { ...state, pageIndex: maxPageIndex };
         }
         return state;

@@ -57,7 +57,7 @@ export function deployClickhouse() {
     protocol: 'http',
     host: serviceLocalHost(chApi.service),
     port: String(chApi.port),
-    password: password,
+    password,
     username,
     cloud: null,
   };

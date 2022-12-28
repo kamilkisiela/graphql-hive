@@ -26,24 +26,23 @@ const composeFederation = compose(services => {
           })),
         },
       };
-    } else {
-      if (!result.supergraphSdl) {
-        return {
-          type: 'failure',
-          result: {
-            errors: [{ message: 'supergraphSdl not defined' }],
-          },
-        };
-      }
-
+    }
+    if (!result.supergraphSdl) {
       return {
-        type: 'success',
+        type: 'failure',
         result: {
-          supergraph: result.supergraphSdl,
-          sdl: printSchema(result.schema.toGraphQLJSSchema()),
+          errors: [{ message: 'supergraphSdl not defined' }],
         },
       };
     }
+
+    return {
+      type: 'success',
+      result: {
+        supergraph: result.supergraphSdl,
+        sdl: printSchema(result.schema.toGraphQLJSSchema()),
+      },
+    };
   } catch (e) {
     return {
       type: 'failure',
@@ -87,15 +86,14 @@ export const createRequestListener = (env: ResolvedEnv): ReturnType<typeof creat
 
       if (error) {
         return new Response(error, { status: 500 });
-      } else {
-        const result = composeFederation(JSON.parse(body));
-        return new Response(JSON.stringify(result), {
-          status: 200,
-          headers: {
-            'content-type': 'application/json',
-          },
-        });
       }
+      const result = composeFederation(JSON.parse(body));
+      return new Response(JSON.stringify(result), {
+        status: 200,
+        headers: {
+          'content-type': 'application/json',
+        },
+      });
     }
 
     return new Response('', {

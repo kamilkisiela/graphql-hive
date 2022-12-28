@@ -293,11 +293,10 @@ export function createCollector({
       if (collected_entire_named_types.has(namedType.name)) {
         // No need to mark this type as used again
         return;
-      } else {
-        // Add this type to the set of types that have been marked as used
-        // to avoid infinite loops
-        collected_entire_named_types.add(namedType.name);
       }
+      // Add this type to the set of types that have been marked as used
+      // to avoid infinite loops
+      collected_entire_named_types.add(namedType.name);
 
       if (isScalarType(namedType)) {
         markAsUsed(makeId(namedType.name));

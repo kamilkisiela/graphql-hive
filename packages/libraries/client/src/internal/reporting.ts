@@ -44,12 +44,12 @@ export function createReporting(pluginOptions: HivePluginOptions): SchemaReporte
   const agent = createAgent<GraphQLSchema, ExecutionResult<SchemaPublishMutation>>(
     {
       logger,
-      ...(pluginOptions.agent ?? {}),
+      ...pluginOptions.agent,
       endpoint:
         selfHostingOptions?.graphqlEndpoint ??
         reportingOptions.endpoint ??
         'https://app.graphql-hive.com/graphql',
-      token: token,
+      token,
       enabled: pluginOptions.enabled,
       debug: pluginOptions.debug,
     },

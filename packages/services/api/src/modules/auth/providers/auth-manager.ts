@@ -83,23 +83,21 @@ export class AuthManager {
           token: this.apiToken,
         });
       }
+    } else if (hasManyTargets(selector)) {
+      await Promise.all(
+        selector.target.map(target =>
+          this.ensureTargetAccess({
+            ...selector,
+            target,
+          }),
+        ),
+      );
     } else {
-      if (hasManyTargets(selector)) {
-        await Promise.all(
-          selector.target.map(target =>
-            this.ensureTargetAccess({
-              ...selector,
-              target,
-            }),
-          ),
-        );
-      } else {
-        const user = await this.getCurrentUser();
-        await this.targetAccess.ensureAccessForUser({
-          ...(selector as TargetAccessSelector),
-          user: user.id,
-        });
-      }
+      const user = await this.getCurrentUser();
+      await this.targetAccess.ensureAccessForUser({
+        ...(selector as TargetAccessSelector),
+        user: user.id,
+      });
     }
   }
 

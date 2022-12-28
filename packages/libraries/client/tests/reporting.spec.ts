@@ -481,7 +481,7 @@ test('should display SchemaPublishMissingServiceError', async () => {
       maxRetries: 1,
       logger,
     },
-    token: token,
+    token,
     reporting: {
       author: 'Test',
       commit: 'Commit',
@@ -543,7 +543,7 @@ test('should display SchemaPublishMissingUrlError', async () => {
       maxRetries: 1,
       logger,
     },
-    token: token,
+    token,
     reporting: {
       author: 'Test',
       commit: 'Commit',

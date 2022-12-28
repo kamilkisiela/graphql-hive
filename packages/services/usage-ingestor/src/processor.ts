@@ -154,7 +154,7 @@ export function createProcessor(config: { logger: FastifyLoggerInstance }) {
               operation_kind: normalized.type,
               coordinates: normalized.coordinates,
               expires_at: group.operation.expiresAt || timestamp + 30 * DAY_IN_MS,
-              timestamp: timestamp,
+              timestamp,
             }),
           );
         }
@@ -207,7 +207,7 @@ function processSingleOperation(
       : operation.timestamp;
 
   return {
-    timestamp: timestamp,
+    timestamp,
     expiresAt: operation.expiresAt || timestamp + 30 * DAY_IN_MS,
     target,
     execution,

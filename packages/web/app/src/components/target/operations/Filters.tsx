@@ -96,7 +96,7 @@ const OperationsFilter: React.FC<{
           style={style}
           key={operation.id}
           operation={operation}
-          selected={selectedItems.some(operationHash => operationHash === operation.operationHash)}
+          selected={selectedItems.includes(operation.operationHash || '')}
           onSelect={onSelect}
         />
       );

@@ -604,7 +604,7 @@ export class OrganizationManager {
     const owner = await this.getOrganizationOwner(selector);
     const { users, organization } = selector;
 
-    if (users.some(user => user === owner.id)) {
+    if (users.includes(owner.id)) {
       throw new HiveError(`Cannot remove the owner from the organization`);
     }
 
