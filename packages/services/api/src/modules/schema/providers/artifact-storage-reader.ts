@@ -89,11 +89,11 @@ export class ArtifactStorageReader {
       }
 
       return { type: 'redirect', location: await this.generatePresignedGetUrl(key) } as const;
-    } else if (response.status === 404) {
-      return { type: 'notFound' } as const;
-    } else {
-      const body = await response.text();
-      throw new Error(`HEAD request failed with status ${response.status}: ${body}`);
     }
+    if (response.status === 404) {
+      return { type: 'notFound' } as const;
+    }
+    const body = await response.text();
+    throw new Error(`HEAD request failed with status ${response.status}: ${body}`);
   }
 }

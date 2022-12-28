@@ -36,7 +36,8 @@ export class CdnProvider {
   getCdnUrlForTarget(targetId: string): string {
     if (this.config.providers.cloudflare) {
       return `${this.config.providers.cloudflare.baseUrl}/artifacts/v1/${targetId}`;
-    } else if (this.config.providers.api) {
+    }
+    if (this.config.providers.api) {
       return `${this.config.providers.api.baseUrl}/artifacts/v1/${targetId}`;
     }
 
