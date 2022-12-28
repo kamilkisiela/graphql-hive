@@ -77,8 +77,8 @@ function Manage() {
               <CheckboxGroup
                 colorScheme="teal"
                 size="sm"
-                defaultValue={Object.keys(filters).filter(key =>
-                 filters[key as keyof typeof filters],
+                defaultValue={Object.keys(filters).filter(
+                  key => filters[key as keyof typeof filters],
                 )}
                 onChange={onFiltersChange}
               >
