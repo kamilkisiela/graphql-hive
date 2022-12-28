@@ -40,6 +40,7 @@ importers:
       '@graphql-codegen/typescript-operations': 2.5.11
       '@graphql-codegen/typescript-resolvers': 2.7.11
       '@graphql-inspector/cli': 3.4.0
+      '@next/eslint-plugin-next': 13.1.1
       '@sentry/cli': 2.11.0
       '@swc/core': 1.3.24
       '@theguild/eslint-config': 0.4.0
@@ -89,6 +90,7 @@ importers:
       '@graphql-codegen/typescript-operations': 2.5.11_graphql@16.6.0
       '@graphql-codegen/typescript-resolvers': 2.7.11_graphql@16.6.0
       '@graphql-inspector/cli': 3.4.0_jwu2wi6x3ji7ggupbvyruied7a
+      '@next/eslint-plugin-next': 13.1.1
       '@sentry/cli': 2.11.0
       '@swc/core': 1.3.24
       '@theguild/eslint-config': 0.4.0_lzzuuodtsqwxnvqeq4g4likcqa

@@ -76,8 +76,7 @@ module.exports = {
   },
   overrides: [
     {
-      // TODO: replace with packages/web/**
-      files: ['packages/web/app/src/components/v2/**', 'packages/web/app/pages/\\[orgId\\]/**'],
+      files: ['packages/web/**'],
       extends: [
         'plugin:react/recommended',
         'plugin:react-hooks/recommended',
@@ -86,19 +85,6 @@ module.exports = {
         'plugin:@next/next/recommended',
       ],
       settings: {
-        tailwindcss: {
-          config: 'packages/app/tailwind.config.js',
-          whitelist: [
-            'drag-none',
-            'placeholder-gray-500',
-            'fill-none',
-            'wrapper',
-            'line-clamp-1',
-            'line-clamp-2',
-            'line-clamp-3',
-            '-z-1',
-          ],
-        },
         react: {
           version: 'detect',
         },
@@ -121,6 +107,49 @@ module.exports = {
         'jsx-a11y/alt-text': ['warn', { elements: ['img'], img: ['Image', 'NextImage'] }],
         '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'no-type-imports' }],
         'simple-import-sort/exports': 'error',
+      },
+    },
+    {
+      files: ['packages/web/app/**'],
+      settings: {
+        next: {
+          rootDir: 'packages/web/app',
+        },
+        tailwindcss: {
+          config: 'packages/web/app/tailwind.config.js',
+          whitelist: [
+            'drag-none',
+            'placeholder-gray-500',
+            'fill-none',
+            'wrapper',
+            'line-clamp-1',
+            'line-clamp-2',
+            'line-clamp-3',
+            '-z-1',
+          ],
+        },
+      },
+    },
+    {
+      files: ['packages/web/docs/**'],
+      settings: {
+        next: {
+          rootDir: 'packages/web/docs',
+        },
+        tailwindcss: {
+          config: 'packages/web/docs/tailwind.config.cjs',
+        },
+      },
+    },
+    {
+      files: ['packages/web/landing-page/**'],
+      settings: {
+        next: {
+          rootDir: 'packages/web/landing-page',
+        },
+        tailwindcss: {
+          config: 'packages/web/landing-page/tailwind.config.cjs',
+        },
       },
     },
     {
