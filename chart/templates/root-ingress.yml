@@ -28,3 +28,6 @@ spec:
                   number: 80
             path: /graphql
             pathType: Prefix
+  {{- with .Values.ingress.tls.root }}
+  {{- toYaml . | nindent 4 }}
+  {{- end }}

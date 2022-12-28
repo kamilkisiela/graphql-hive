@@ -21,3 +21,6 @@ spec:
                   number: 80
             path: /
             pathType: Prefix
+  {{- with .Values.ingress.tls.usage }}
+  {{- toYaml . | nindent 4 }}
+  {{- end }}

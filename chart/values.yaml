@@ -45,6 +45,10 @@ supertokens:
 
 ingress:
   namespace: graphql-hive
+  tls:
+    root: {}
+    api: {}
+    usage: {}
   annotations: {}
 
 hive-app:
