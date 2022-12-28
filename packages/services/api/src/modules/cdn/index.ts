@@ -1,7 +1,7 @@
 import { createModule } from 'graphql-modules';
+import typeDefs from './module.graphql';
 import { CdnProvider } from './providers/cdn.provider';
 import { resolvers } from './resolvers';
-import typeDefs from './module.graphql';
 
 export const cdnModule = createModule({
   id: 'cdn',

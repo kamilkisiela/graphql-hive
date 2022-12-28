@@ -1,5 +1,5 @@
-import axios from 'axios';
 import { ExecutionArgs, ExecutionResult, GraphQLSchema } from 'graphql';
+import axios from 'axios';
 import { createOperationsStore } from './internal/operations-store.js';
 import { createReporting } from './internal/reporting.js';
 import type { HiveClient, HivePluginOptions } from './internal/types.js';

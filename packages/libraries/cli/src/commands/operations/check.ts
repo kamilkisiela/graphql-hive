@@ -1,6 +1,6 @@
+import { buildSchema, GraphQLError, Source } from 'graphql';
 import { InvalidDocument, validate } from '@graphql-inspector/core';
 import { Errors, Flags } from '@oclif/core';
-import { buildSchema, GraphQLError, Source } from 'graphql';
 import Command from '../../base-command';
 import { graphqlEndpoint } from '../../helpers/config';
 import { loadOperations } from '../../helpers/operations';

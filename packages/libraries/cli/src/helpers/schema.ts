@@ -1,10 +1,10 @@
+import { concatAST, print } from 'graphql';
 import { CodeFileLoader } from '@graphql-tools/code-file-loader';
 import { GraphQLFileLoader } from '@graphql-tools/graphql-file-loader';
 import { JsonFileLoader } from '@graphql-tools/json-file-loader';
 import { loadTypedefs } from '@graphql-tools/load';
 import { UrlLoader } from '@graphql-tools/url-loader';
 import colors from 'colors';
-import { concatAST, print } from 'graphql';
 import baseCommand from '../base-command';
 import { CriticalityLevel, SchemaChangeConnection, SchemaErrorConnection } from '../sdk';
 
