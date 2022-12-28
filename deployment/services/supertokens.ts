@@ -1,7 +1,7 @@
-import * as pulumi from '@pulumi/pulumi';
 import * as kx from '@pulumi/kubernetesx';
-import { serviceLocalEndpoint } from '../utils/local-endpoint';
+import * as pulumi from '@pulumi/pulumi';
 import { Output } from '@pulumi/pulumi';
+import { serviceLocalEndpoint } from '../utils/local-endpoint';
 
 export function deploySuperTokens(
   { apiKey }: { apiKey: Output<string> },

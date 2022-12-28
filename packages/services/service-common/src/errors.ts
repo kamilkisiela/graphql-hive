@@ -1,5 +1,5 @@
-import type { FastifyInstance, FastifyLoggerInstance } from 'fastify';
 import * as Sentry from '@sentry/node';
+import type { FastifyInstance, FastifyLoggerInstance } from 'fastify';
 
 export function createErrorHandler(server: FastifyInstance) {
   return function errorHandler(message: string, error: Error, logger?: FastifyLoggerInstance) {

@@ -1,14 +1,14 @@
 import { DocumentNode, GraphQLError, SourceLocation } from 'graphql';
+import { parse } from 'graphql';
 import type {
-  SchemaError,
   AlertChannelType,
   AlertType,
   AuthProvider,
   OrganizationAccessScope,
   ProjectAccessScope,
+  SchemaError,
   TargetAccessScope,
 } from '../__generated__/types';
-import { parse } from 'graphql';
 
 export interface Schema {
   id: string;

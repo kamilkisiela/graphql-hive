@@ -1,10 +1,10 @@
-import { parse, buildSchema } from 'graphql';
+import { buildSchema, parse } from 'graphql';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import nock from 'nock';
 import { createHive } from '../src/client';
+import type { Report } from '../src/internal/usage';
 import { version } from '../src/version';
 import { waitFor } from './test-utils';
-import type { Report } from '../src/internal/usage';
 
 const headers = {
   'Content-Type': 'application/json',

@@ -1,5 +1,5 @@
+import { ClickHouse, HttpClient, OperationsReader } from '@hive/api';
 import type { FastifyLoggerInstance } from '@hive/service-common';
-import { HttpClient, ClickHouse, OperationsReader } from '@hive/api';
 
 export type Estimator = ReturnType<typeof createEstimator>;
 

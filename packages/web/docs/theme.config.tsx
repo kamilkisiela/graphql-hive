@@ -1,6 +1,6 @@
 /* eslint sort-keys: error */
-import { defineConfig, useTheme, Giscus } from '@theguild/components';
 import { useRouter } from 'next/router';
+import { defineConfig, Giscus, useTheme } from '@theguild/components';
 
 export default defineConfig({
   docsRepositoryBase: 'https://github.com/kamilkisiela/graphql-hive/tree/main/packages/web/docs',

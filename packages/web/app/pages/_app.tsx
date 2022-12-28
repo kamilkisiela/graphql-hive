@@ -1,23 +1,23 @@
 import { ReactElement, useEffect } from 'react';
 import { AppProps } from 'next/app';
-import Script from 'next/script';
 import Router from 'next/router';
+import Script from 'next/script';
 import { ChakraProvider, extendTheme } from '@chakra-ui/react';
+import { configureScope } from '@sentry/nextjs';
+import * as Sentry from '@sentry/react';
+import cookies from 'js-cookie';
+import SuperTokens, { SuperTokensWrapper } from 'supertokens-auth-react';
+import Session from 'supertokens-auth-react/recipe/session';
+import { Provider as UrqlProvider } from 'urql';
 import GlobalStylesComponent from '@/components/common/GlobalStyles';
+import { LoadingAPIIndicator } from '@/components/common/LoadingAPI';
+import { frontendConfig } from '@/config/supertokens/frontend';
+import { LAST_VISITED_ORG_KEY } from '@/constants';
+import { env } from '@/env/frontend';
 import * as gtag from '@/lib/gtag';
 import { colors } from '@/lib/theme';
-import { LoadingAPIIndicator } from '@/components/common/LoadingAPI';
-import '../public/styles.css';
-import cookies from 'js-cookie';
-import Session from 'supertokens-auth-react/recipe/session';
-import SuperTokens, { SuperTokensWrapper } from 'supertokens-auth-react';
-import { frontendConfig } from '@/config/supertokens/frontend';
-import { configureScope } from '@sentry/nextjs';
-import { LAST_VISITED_ORG_KEY } from '@/constants';
-import { Provider as UrqlProvider } from 'urql';
 import { urqlClient } from '@/lib/urql';
-import { env } from '@/env/frontend';
-import * as Sentry from '@sentry/react';
+import '../public/styles.css';
 
 const theme = extendTheme({ colors });
 

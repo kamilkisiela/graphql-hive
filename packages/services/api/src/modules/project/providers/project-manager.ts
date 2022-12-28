@@ -1,16 +1,16 @@
 import { Injectable, Scope } from 'graphql-modules';
 import { paramCase } from 'param-case';
 import type { Project, ProjectType } from '../../../shared/entities';
-import { AuthManager } from '../../auth/providers/auth-manager';
-import { Logger } from '../../shared/providers/logger';
-import { Storage, OrganizationSelector, ProjectSelector } from '../../shared/providers/storage';
 import { NullableAndPartial, share, uuid } from '../../../shared/helpers';
-import { SchemaManager } from '../../schema/providers/schema-manager';
-import type { CustomOrchestratorConfig } from '../../schema/providers/orchestrators/custom';
 import { ActivityManager } from '../../activity/providers/activity-manager';
-import { TokenStorage } from '../../token/providers/token-storage';
+import { AuthManager } from '../../auth/providers/auth-manager';
 import { OrganizationAccessScope } from '../../auth/providers/organization-access';
 import { ProjectAccessScope } from '../../auth/providers/project-access';
+import type { CustomOrchestratorConfig } from '../../schema/providers/orchestrators/custom';
+import { SchemaManager } from '../../schema/providers/schema-manager';
+import { Logger } from '../../shared/providers/logger';
+import { OrganizationSelector, ProjectSelector, Storage } from '../../shared/providers/storage';
+import { TokenStorage } from '../../token/providers/token-storage';
 
 /**
  * Responsible for auth checks.

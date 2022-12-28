@@ -1,6 +1,5 @@
 import { ReactElement } from 'react';
 import { gql, useQuery } from 'urql';
-
 import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
 import { SchemaExplorerFilter } from '@/components/target/explorer/filter';

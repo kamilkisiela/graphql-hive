@@ -1,12 +1,12 @@
+import { createHash } from 'crypto';
 import type { InjectionToken } from 'graphql-modules';
 import ms from 'ms';
-import { createHash } from 'crypto';
 import type {
+  DateRangeInput,
   OrganizationSelector,
   PersistedOperationSelector,
   ProjectSelector,
   TargetSelector,
-  DateRangeInput,
 } from '../__generated__/types';
 import { DateRange } from './entities';
 

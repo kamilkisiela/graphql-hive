@@ -1,6 +1,6 @@
 import React, { PropsWithChildren } from 'react';
-import tw, { styled } from 'twin.macro';
 import Head from 'next/head';
+import tw, { styled } from 'twin.macro';
 
 export const Title: React.FC<{ title: string }> = ({ title }) => (
   <Head>

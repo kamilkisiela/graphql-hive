@@ -1,4 +1,4 @@
-import { Response, Request, Headers, ReadableStream, crypto } from '@whatwg-node/fetch';
+import { crypto, Headers, ReadableStream, Request, Response } from '@whatwg-node/fetch';
 
 if (!globalThis.Response) {
   globalThis.Response = Response;

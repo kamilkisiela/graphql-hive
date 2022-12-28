@@ -1,28 +1,28 @@
+import 'twin.macro';
 import * as React from 'react';
 import Link from 'next/link';
-import 'twin.macro';
 import {
   Button,
+  Divider,
+  Link as ChakraLink,
   Menu,
   MenuButton,
-  MenuList,
   MenuItem,
-  Link as ChakraLink,
-  Divider,
-  useDisclosure,
+  MenuList,
   useColorModeValue,
+  useDisclosure,
 } from '@chakra-ui/react';
 import { useQuery } from 'urql';
+import { env } from '@/env/frontend';
 import { MeDocument } from '@/graphql';
+import { getDocsUrl } from '@/lib/docs-url';
 import { OrganizationSwitcher } from '../organization/Switcher';
 import { ProjectSwitcher } from '../project/Switcher';
 import { TargetSwitcher } from '../target/Switcher';
-import { Logo } from './Logo';
 import { Feedback } from './Feedback';
-import { UserSettings } from './UserSettings';
+import { Logo } from './Logo';
 import ThemeButton from './ThemeButton';
-import { getDocsUrl } from '@/lib/docs-url';
-import { env } from '@/env/frontend';
+import { UserSettings } from './UserSettings';
 
 export interface NavigationItem {
   label: string;

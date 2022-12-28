@@ -1,8 +1,8 @@
 /* eslint-disable no-process-env */
 import { createHash } from 'node:crypto';
-import { schemaPublish, schemaCheck } from '../../testkit/cli';
-import { initSeed } from '../../testkit/seed';
+import { schemaCheck, schemaPublish } from '../../testkit/cli';
 import { ProjectType } from '../../testkit/gql/graphql';
+import { initSeed } from '../../testkit/seed';
 
 test.concurrent('can publish and check a schema with target:registry:read access', async () => {
   const { createOrg } = await initSeed().createOwner();

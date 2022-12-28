@@ -1,10 +1,10 @@
-import * as pulumi from '@pulumi/pulumi';
 import * as k8s from '@pulumi/kubernetes';
+import * as pulumi from '@pulumi/pulumi';
 import { parse } from 'pg-connection-string';
+import { DeploymentEnvironment } from '../types';
 import { ServiceDeployment } from '../utils/service-deployment';
 import { Clickhouse } from './clickhouse';
 import { Kafka } from './kafka';
-import { DeploymentEnvironment } from '../types';
 const apiConfig = new pulumi.Config('api');
 
 export type DbMigrations = ReturnType<typeof deployDbMigrations>;

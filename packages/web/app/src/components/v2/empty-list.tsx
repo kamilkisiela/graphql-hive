@@ -1,6 +1,5 @@
 import { ReactElement } from 'react';
 import Image from 'next/image';
-
 import { Card, Heading, Link } from '@/components/v2/index';
 import { getDocsUrl } from '@/lib/docs-url';
 import magnifier from '../../../public/images/figures/magnifier.svg';

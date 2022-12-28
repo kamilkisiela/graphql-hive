@@ -1,11 +1,11 @@
-import type { Plugin } from 'graphql-yoga';
-import type { Source, ParseOptions } from 'graphql';
 import { maxAliasesRule } from '@escape.tech/graphql-armor-max-aliases';
 import { maxDepthRule } from '@escape.tech/graphql-armor-max-depth';
 import { maxDirectivesRule } from '@escape.tech/graphql-armor-max-directives';
 import { MaxTokensParserWLexer } from '@escape.tech/graphql-armor-max-tokens';
-import promClient from 'prom-client';
 import * as Sentry from '@sentry/node';
+import type { ParseOptions, Source } from 'graphql';
+import type { Plugin } from 'graphql-yoga';
+import promClient from 'prom-client';
 
 const rejectedRequests = new promClient.Counter({
   name: 'graphql_armor_rejected_requests',

@@ -1,9 +1,9 @@
-import { CdnModule } from './__generated__/types';
-import { CdnProvider } from './providers/cdn.provider';
-import { IdTranslator } from '../shared/providers/id-translator';
+import { HiveError } from '../../shared/errors';
 import { AuthManager } from '../auth/providers/auth-manager';
 import { TargetAccessScope } from '../auth/providers/target-access';
-import { HiveError } from '../../shared/errors';
+import { IdTranslator } from '../shared/providers/id-translator';
+import { CdnModule } from './__generated__/types';
+import { CdnProvider } from './providers/cdn.provider';
 
 export const resolvers: CdnModule.Resolvers = {
   Mutation: {

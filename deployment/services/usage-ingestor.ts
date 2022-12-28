@@ -1,11 +1,11 @@
-import * as pulumi from '@pulumi/pulumi';
-import { DbMigrations } from './db-migrations';
-import { ServiceDeployment } from '../utils/service-deployment';
-import { DeploymentEnvironment } from '../types';
-import { Clickhouse } from './clickhouse';
-import { Kafka } from './kafka';
-import { isProduction } from '../utils/helpers';
 import * as k8s from '@pulumi/kubernetes';
+import * as pulumi from '@pulumi/pulumi';
+import { DeploymentEnvironment } from '../types';
+import { isProduction } from '../utils/helpers';
+import { ServiceDeployment } from '../utils/service-deployment';
+import { Clickhouse } from './clickhouse';
+import { DbMigrations } from './db-migrations';
+import { Kafka } from './kafka';
 
 const commonConfig = new pulumi.Config('common');
 const commonEnv = commonConfig.requireObject<Record<string, string>>('env');

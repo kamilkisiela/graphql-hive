@@ -1,15 +1,15 @@
 import React from 'react';
-import { CombinedError, UseQueryState } from 'urql';
 import {
-  Box,
-  AlertDescription,
-  Center,
   Alert,
-  Code,
+  AlertDescription,
   AlertIcon,
-  Link,
   AlertTitle,
+  Box,
+  Center,
+  Code,
+  Link,
 } from '@chakra-ui/react';
+import { CombinedError, UseQueryState } from 'urql';
 import { Spinner } from './Spinner';
 
 export const QueryError: React.FC<{

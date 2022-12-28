@@ -1,9 +1,9 @@
 import React from 'react';
-import type { ReactNode } from 'react';
-import { Header } from './v2';
-import { HiveStripeWrapper } from '@/lib/billing/stripe';
-import Session, { SessionAuth } from 'supertokens-auth-react/recipe/session';
 import { useRouter } from 'next/router';
+import type { ReactNode } from 'react';
+import Session, { SessionAuth } from 'supertokens-auth-react/recipe/session';
+import { HiveStripeWrapper } from '@/lib/billing/stripe';
+import { Header } from './v2';
 
 /**
  * Wrapper component for a authenticated route.

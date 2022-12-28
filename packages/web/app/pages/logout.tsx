@@ -1,6 +1,6 @@
 import React from 'react';
-import { signOut } from 'supertokens-auth-react/recipe/thirdpartyemailpassword';
 import { useRouter } from 'next/router';
+import { signOut } from 'supertokens-auth-react/recipe/thirdpartyemailpassword';
 
 export function getServerSideProps() {
   return {

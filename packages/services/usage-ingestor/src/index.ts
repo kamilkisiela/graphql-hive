@@ -1,14 +1,14 @@
 #!/usr/bin/env node
-import * as Sentry from '@sentry/node';
 import {
   createServer,
-  startMetrics,
   registerShutdown,
   reportReadiness,
   startHeartbeats,
+  startMetrics,
 } from '@hive/service-common';
-import { createIngestor } from './ingestor';
+import * as Sentry from '@sentry/node';
 import { env } from './environment';
+import { createIngestor } from './ingestor';
 
 async function main() {
   if (env.sentry) {

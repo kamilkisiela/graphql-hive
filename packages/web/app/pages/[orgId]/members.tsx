@@ -3,7 +3,6 @@ import { Tooltip } from '@chakra-ui/react';
 import { useFormik } from 'formik';
 import { DocumentType, gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
-
 import { authenticated } from '@/components/authenticated-container';
 import { OrganizationLayout } from '@/components/layouts';
 import { Avatar, Button, Card, Checkbox, DropdownMenu, Input, Title } from '@/components/v2';

@@ -1,5 +1,4 @@
 import { ReactElement, useCallback, useEffect, useState } from 'react';
-
 import { Button, Input } from '@/components/v2';
 import { CheckIcon, CopyIcon } from '@/components/v2/icon';
 import { useClipboard } from '@/lib/hooks';

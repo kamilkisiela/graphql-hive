@@ -1,6 +1,6 @@
 import fs from 'fs';
-import mkdirp from 'mkdirp';
 import path from 'path';
+import mkdirp from 'mkdirp';
 
 export const graphqlEndpoint = 'https://app.graphql-hive.com/graphql';
 

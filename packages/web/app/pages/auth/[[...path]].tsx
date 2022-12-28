@@ -1,10 +1,10 @@
-import React from 'react';
-import Head from 'next/head';
 import 'twin.macro';
-import { FullLogo } from '@/components/common/Logo';
+import React from 'react';
 import dynamic from 'next/dynamic';
+import Head from 'next/head';
 import type { GetServerSideProps } from 'next';
 import SuperTokensReact from 'supertokens-auth-react';
+import { FullLogo } from '@/components/common/Logo';
 import { env } from '@/env/frontend';
 import { startAuthFlowForProvider } from '@/lib/supertokens/start-auth-flow-for-provider';
 import { startAuthFlowForOIDCProvider } from '@/lib/supertokens/third-party-email-password-react-oidc-provider';

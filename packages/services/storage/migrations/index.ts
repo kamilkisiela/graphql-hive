@@ -1,11 +1,11 @@
 #!/usr/bin/env node
-import url from 'node:url';
 import path from 'node:path';
+import url from 'node:url';
 import { SlonikMigrator } from '@slonik/migrator';
 import { createPool } from 'slonik';
+import { createConnectionString } from '../src/db';
 import { env } from '../src/environment';
 import { migrateClickHouse } from './clickhouse';
-import { createConnectionString } from '../src/db';
 
 const [, , cmd] = process.argv;
 const slonik = await createPool(createConnectionString(env.postgres));

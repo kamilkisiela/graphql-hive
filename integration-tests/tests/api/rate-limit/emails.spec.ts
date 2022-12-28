@@ -1,11 +1,11 @@
 import {
-  TargetAccessScope,
-  ProjectType,
-  ProjectAccessScope,
   OrganizationAccessScope,
+  ProjectAccessScope,
+  ProjectType,
+  TargetAccessScope,
 } from '@app/gql/graphql';
-import { updateOrgRateLimit, waitFor } from '../../../testkit/flow';
 import * as emails from '../../../testkit/emails';
+import { updateOrgRateLimit, waitFor } from '../../../testkit/flow';
 import { initSeed } from '../../../testkit/seed';
 
 function filterEmailsByOrg(orgName: string, emails: emails.Email[]) {

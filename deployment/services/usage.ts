@@ -1,13 +1,13 @@
+import * as k8s from '@pulumi/kubernetes';
 import * as pulumi from '@pulumi/pulumi';
-import { Tokens } from './tokens';
-import { DbMigrations } from './db-migrations';
-import { ServiceDeployment } from '../utils/service-deployment';
-import { serviceLocalEndpoint } from '../utils/local-endpoint';
 import { DeploymentEnvironment } from '../types';
+import { isProduction } from '../utils/helpers';
+import { serviceLocalEndpoint } from '../utils/local-endpoint';
+import { ServiceDeployment } from '../utils/service-deployment';
+import { DbMigrations } from './db-migrations';
 import { Kafka } from './kafka';
 import { RateLimitService } from './rate-limit';
-import { isProduction } from '../utils/helpers';
-import * as k8s from '@pulumi/kubernetes';
+import { Tokens } from './tokens';
 
 const commonConfig = new pulumi.Config('common');
 const commonEnv = commonConfig.requireObject<Record<string, string>>('env');

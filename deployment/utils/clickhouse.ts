@@ -1,7 +1,7 @@
-import * as kx from '@pulumi/kubernetesx';
 import * as k8s from '@pulumi/kubernetes';
-import { PodBuilder } from './pod-builder';
+import * as kx from '@pulumi/kubernetesx';
 import { getLocalComposeConfig } from './local-config';
+import { PodBuilder } from './pod-builder';
 
 export class Clickhouse {
   constructor(

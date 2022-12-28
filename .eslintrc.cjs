@@ -1,6 +1,16 @@
 /* eslint-env node */
-/* eslint-disable-next-line @typescript-eslint/no-var-requires */
-const { builtinModules } = require('module');
+const guildConfig = require('@theguild/eslint-config/base');
+
+const rulesToExtends = Object.fromEntries(
+  Object.entries(guildConfig.rules).filter(([key]) =>
+    [
+      'simple-import-sort/imports',
+      'import/first',
+      'no-restricted-globals',
+      '@typescript-eslint/no-unused-vars',
+    ].includes(key),
+  ),
+);
 
 module.exports = {
   reportUnusedDisableDirectives: true,
@@ -22,17 +32,11 @@ module.exports = {
     project: ['./tsconfig.eslint.json'],
   },
   parser: '@typescript-eslint/parser',
-  plugins: ['@typescript-eslint', 'import', 'hive'],
-  extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended'],
+  plugins: [...guildConfig.plugins, 'hive'],
+  extends: guildConfig.extends,
   rules: {
     'no-process-env': 'error',
-    'no-restricted-globals': ['error', 'stop'],
-    '@typescript-eslint/no-unused-vars': [
-      'error',
-      { argsIgnorePattern: '^_', ignoreRestSiblings: true },
-    ],
     'no-empty': ['error', { allowEmptyCatch: true }],
-
     'import/no-absolute-path': 'error',
     'import/no-self-import': 'error',
     'import/no-extraneous-dependencies': [
@@ -42,7 +46,6 @@ module.exports = {
         optionalDependencies: false,
       },
     ],
-    'import/first': 'error',
     'hive/enforce-deps-in-dev': [
       'error',
       {
@@ -51,6 +54,7 @@ module.exports = {
       },
     ],
     '@typescript-eslint/no-floating-promises': 'error',
+    ...rulesToExtends,
 
     // 🚨 The following rules needs to be fixed and was temporarily disabled to avoid printing warning
     '@typescript-eslint/no-explicit-any': 'off',
@@ -72,7 +76,6 @@ module.exports = {
         'plugin:jsx-a11y/recommended',
         'plugin:@next/next/recommended',
       ],
-      plugins: ['simple-import-sort'],
       settings: {
         tailwindcss: {
           config: 'packages/app/tailwind.config.js',
@@ -109,37 +112,6 @@ module.exports = {
         'jsx-a11y/alt-text': ['warn', { elements: ['img'], img: ['Image', 'NextImage'] }],
         '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'no-type-imports' }],
         'simple-import-sort/exports': 'error',
-        'simple-import-sort/imports': [
-          'error',
-          {
-            groups: [
-              [
-                // Node.js builtins
-                `^(node:)?(${builtinModules
-                  .filter(mod => !mod.startsWith('_') && !mod.includes('/'))
-                  .join('|')})(/.*|$)`,
-                '^react(-dom)?$',
-                '^next(/.*|$)',
-                '^graphql(/.*|$)',
-                // Side effect imports.
-                '^\\u0000',
-                // Packages.
-                // Things that start with a letter (or digit or underscore), or `@` followed by a letter.
-                '^@?\\w',
-              ],
-              [
-                // Absolute imports and other imports such as Vue-style `@/foo`.
-                // Anything not matched in another group.
-                '^',
-                // Relative imports.
-                // Anything that starts with a dot.
-                '^\\.',
-                // Style imports.
-                '^.+\\.css$',
-              ],
-            ],
-          },
-        ],
       },
     },
     {

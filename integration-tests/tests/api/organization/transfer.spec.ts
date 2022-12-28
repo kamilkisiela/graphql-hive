@@ -1,14 +1,14 @@
-import { initSeed } from '../../../testkit/seed';
 import {
+  answerOrganizationTransferRequest,
   getOrganizationTransferRequest,
   requestOrganizationTransfer,
-  answerOrganizationTransferRequest,
 } from '../../../testkit/flow';
 import {
   OrganizationAccessScope,
   ProjectAccessScope,
   TargetAccessScope,
 } from '../../../testkit/gql/graphql';
+import { initSeed } from '../../../testkit/seed';
 
 test.concurrent(
   'accessing non-existing ownership transfer request should result in null',

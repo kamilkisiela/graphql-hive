@@ -1,4 +1,5 @@
 import { Inject, Injectable, Scope } from 'graphql-modules';
+import zod from 'zod';
 import { OIDCIntegration, OrganizationType } from '../../../shared/entities';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { OrganizationAccessScope } from '../../auth/providers/organization-access';
@@ -6,7 +7,6 @@ import { CryptoProvider } from '../../shared/providers/crypto';
 import { Logger } from '../../shared/providers/logger';
 import { Storage } from '../../shared/providers/storage';
 import { OIDC_INTEGRATIONS_ENABLED } from './tokens';
-import zod from 'zod';
 
 @Injectable({
   global: true,

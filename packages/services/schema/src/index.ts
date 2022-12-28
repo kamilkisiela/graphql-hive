@@ -1,16 +1,16 @@
 #!/usr/bin/env node
+import crypto from 'crypto';
 import {
-  createServer,
   createErrorHandler,
-  startMetrics,
+  createServer,
   registerShutdown,
   reportReadiness,
+  startMetrics,
 } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
-import Redis from 'ioredis';
-import crypto from 'crypto';
-import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
 import type { CreateFastifyContextOptions } from '@trpc/server/adapters/fastify';
+import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
+import Redis from 'ioredis';
 import { schemaBuilderApiRouter } from './api';
 import { env } from './environment';
 

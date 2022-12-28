@@ -1,6 +1,5 @@
 import { FC, useState } from 'react';
 import clsx from 'clsx';
-
 import { Button, Heading, HiveLink, Input, Link, ShineBackground } from '@/components/v2';
 import { GitHubIcon, GoogleIcon, LinkedInIcon } from '@/components/v2/icon';
 

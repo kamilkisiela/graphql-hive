@@ -1,4 +1,4 @@
-import { ProjectType, ProjectAccessScope } from '@app/gql/graphql';
+import { ProjectAccessScope, ProjectType } from '@app/gql/graphql';
 import { publishPersistedOperations } from '../../../testkit/flow';
 import { initSeed } from '../../../testkit/seed';
 

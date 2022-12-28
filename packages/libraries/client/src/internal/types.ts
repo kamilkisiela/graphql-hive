@@ -1,7 +1,7 @@
 import type { ExecutionArgs } from 'graphql';
 import type { AgentOptions } from './agent.js';
-import type { SchemaReporter } from './reporting.js';
 import type { OperationsStore } from './operations-store.js';
+import type { SchemaReporter } from './reporting.js';
 
 export interface HiveClient {
   info(): Promise<void>;

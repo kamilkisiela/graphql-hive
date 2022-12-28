@@ -1,17 +1,17 @@
 import React from 'react';
-import { VscIssues, VscError } from 'react-icons/vsc';
 import {
-  useDisclosure,
   Drawer,
   DrawerBody,
+  DrawerCloseButton,
+  DrawerContent,
   DrawerHeader,
   DrawerOverlay,
-  DrawerContent,
-  DrawerCloseButton,
+  useDisclosure,
 } from '@chakra-ui/react';
 import clsx from 'clsx';
+import { VscError, VscIssues } from 'react-icons/vsc';
+import { DocumentType, gql } from 'urql';
 import { OrganizationType } from '@/graphql';
-import { gql, DocumentType } from 'urql';
 import { getDocsUrl } from '@/lib/docs-url';
 
 const GetStartedWizard_GetStartedProgress = gql(/* GraphQL */ `

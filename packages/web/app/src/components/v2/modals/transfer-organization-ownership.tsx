@@ -4,7 +4,6 @@ import clsx from 'clsx';
 import { useFormik } from 'formik';
 import { gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
-
 import { Button, Heading, Input, Modal } from '@/components/v2';
 import { ArrowDownIcon, CheckIcon } from '@/components/v2/icon';
 import { MemberFieldsFragment, OrganizationFieldsFragment } from '@/graphql';

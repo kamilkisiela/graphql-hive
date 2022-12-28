@@ -1,6 +1,6 @@
 import { ReactElement } from 'react';
+import { css, Global } from '@emotion/react';
 import tw, { GlobalStyles } from 'twin.macro';
-import { Global, css } from '@emotion/react';
 
 const customStyles = css`
   *:active,

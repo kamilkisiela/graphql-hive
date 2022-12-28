@@ -1,32 +1,32 @@
 #!/usr/bin/env node
 
 import 'reflect-metadata';
-import {
-  createServer,
-  startMetrics,
-  registerShutdown,
-  reportReadiness,
-} from '@hive/service-common';
-import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
-import { createRegistry, LogFn, Logger } from '@hive/api';
-import { createStorage as createPostgreSQLStorage, createConnectionString } from '@hive/storage';
-import got from 'got';
-import { GraphQLError, stripIgnoredCharacters } from 'graphql';
-import * as Sentry from '@sentry/node';
+import { Readable } from 'node:stream';
 import { S3Client } from '@aws-sdk/client-s3';
-import { Dedupe, ExtraErrorData } from '@sentry/integrations';
-import { internalApiRouter, createContext } from './api';
-import { asyncStorage } from './async-storage';
-import { graphqlHandler } from './graphql-handler';
-import { clickHouseReadDuration, clickHouseElapsedDuration } from './metrics';
-import zod from 'zod';
-import { env } from './environment';
+import { createRegistry, LogFn, Logger } from '@hive/api';
 import { CryptoProvider } from '@hive/api';
 import { ArtifactStorageReader } from '@hive/api/src/modules/schema/providers/artifact-storage-reader';
 import { createArtifactRequestHandler } from '@hive/cdn-script/artifact-handler';
 import { createIsKeyValid } from '@hive/cdn-script/key-validation';
+import {
+  createServer,
+  registerShutdown,
+  reportReadiness,
+  startMetrics,
+} from '@hive/service-common';
+import { createConnectionString, createStorage as createPostgreSQLStorage } from '@hive/storage';
+import { Dedupe, ExtraErrorData } from '@sentry/integrations';
+import * as Sentry from '@sentry/node';
+import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
 import { createServerAdapter } from '@whatwg-node/server';
-import { Readable } from 'node:stream';
+import got from 'got';
+import { GraphQLError, stripIgnoredCharacters } from 'graphql';
+import zod from 'zod';
+import { createContext, internalApiRouter } from './api';
+import { asyncStorage } from './async-storage';
+import { env } from './environment';
+import { graphqlHandler } from './graphql-handler';
+import { clickHouseElapsedDuration, clickHouseReadDuration } from './metrics';
 
 const LegacySetUserIdMappingPayloadModel = zod.object({
   auth0UserId: zod.string(),

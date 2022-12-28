@@ -1,5 +1,5 @@
-import { Progress } from '@chakra-ui/react';
 import React from 'react';
+import { Progress } from '@chakra-ui/react';
 import { useInflightRequests } from '@/lib/urql-exchanges/state';
 
 export const LoadingAPIIndicator = React.memo(() => {

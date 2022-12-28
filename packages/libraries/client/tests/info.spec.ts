@@ -1,6 +1,6 @@
-import { createHive } from '../src/client';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import nock from 'nock';
+import { createHive } from '../src/client';
 
 test('should not leak the exception', async () => {
   const logger = {

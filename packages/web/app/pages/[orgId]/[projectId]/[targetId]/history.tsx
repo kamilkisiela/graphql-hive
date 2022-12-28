@@ -4,7 +4,6 @@ import clsx from 'clsx';
 import { VscBug, VscDiff, VscListFlat } from 'react-icons/vsc';
 import reactStringReplace from 'react-string-replace';
 import { useQuery } from 'urql';
-
 import { authenticated } from '@/components/authenticated-container';
 import { Label } from '@/components/common';
 import { TargetLayout } from '@/components/layouts';

@@ -1,6 +1,5 @@
 import { Component, ReactNode } from 'react';
 import { UseQueryState } from 'urql';
-
 import { QueryError } from '@/components/common/DataWrapper';
 import { Spinner } from '@/components/v2';
 

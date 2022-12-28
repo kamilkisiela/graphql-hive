@@ -1,13 +1,13 @@
+import 'twin.macro';
 import React, { PropsWithChildren } from 'react';
+import { useQuery } from 'urql';
+import { DataWrapper } from '@/components/common/DataWrapper';
 import {
   BillingPlansDocument,
   OrganizationFieldsFragment,
   OrgBillingInfoFieldsFragment,
 } from '@/graphql';
-import 'twin.macro';
 import { PlanSummary } from './PlanSummary';
-import { useQuery } from 'urql';
-import { DataWrapper } from '@/components/common/DataWrapper';
 
 export const BillingView = ({
   organization,

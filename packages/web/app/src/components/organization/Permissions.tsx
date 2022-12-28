@@ -1,16 +1,16 @@
-import React, { FormEventHandler } from 'react';
 import 'twin.macro';
+import React, { FormEventHandler } from 'react';
+import { AccordionButton, AccordionItem, AccordionPanel, Select } from '@chakra-ui/react';
 import { useMutation } from 'urql';
-import { Select, AccordionItem, AccordionButton, AccordionPanel } from '@chakra-ui/react';
 import {
   MemberFieldsFragment,
-  OrganizationFieldsFragment,
-  UpdateOrganizationMemberAccessDocument,
   OrganizationAccessScope,
+  OrganizationFieldsFragment,
   ProjectAccessScope,
   TargetAccessScope,
+  UpdateOrganizationMemberAccessDocument,
 } from '@/graphql';
-import { Scope, NoAccess } from '@/lib/access/common';
+import { NoAccess, Scope } from '@/lib/access/common';
 import { canAccessOrganization } from '@/lib/access/organization';
 import { canAccessProject } from '@/lib/access/project';
 import { canAccessTarget } from '@/lib/access/target';

@@ -1,9 +1,9 @@
 import * as Sentry from '@sentry/node';
-import { Queue, QueueScheduler, Worker, Job } from 'bullmq';
+import { Job, Queue, QueueScheduler, Worker } from 'bullmq';
 import Redis, { Redis as RedisInstance } from 'ioredis';
 import pTimeout from 'p-timeout';
+import { createWebhookJob, scheduleWebhook } from './jobs';
 import type { Config } from './types';
-import { scheduleWebhook, createWebhookJob } from './jobs';
 
 export const clientCommandMessageReg = /ERR unknown command ['`]\s*client\s*['`]/;
 

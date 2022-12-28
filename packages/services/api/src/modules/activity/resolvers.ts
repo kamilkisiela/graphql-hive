@@ -1,8 +1,8 @@
-import { ActivityModule } from './__generated__/types';
-import { IdTranslator } from '../shared/providers/id-translator';
-import { ActivityManager } from './providers/activity-manager';
 import { ActivityObject } from '../../shared/entities';
 import { createConnection } from '../../shared/schema';
+import { IdTranslator } from '../shared/providers/id-translator';
+import { ActivityModule } from './__generated__/types';
+import { ActivityManager } from './providers/activity-manager';
 
 export const resolvers: ActivityModule.Resolvers = {
   Query: {

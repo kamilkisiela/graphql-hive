@@ -1,5 +1,5 @@
 import { createHash } from 'crypto';
-import type { HiveClient, HivePluginOptions, AsyncIterableIteratorOrValue } from './types.js';
+import type { AsyncIterableIteratorOrValue, HiveClient, HivePluginOptions } from './types.js';
 
 export function isAsyncIterableIterator<T>(
   value: AsyncIterableIteratorOrValue<T>,

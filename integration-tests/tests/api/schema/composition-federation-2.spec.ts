@@ -1,7 +1,7 @@
+import { ProjectAccessScope, ProjectType, TargetAccessScope } from '@app/gql/graphql';
 import { enableExternalSchemaComposition } from '../../../testkit/flow';
-import { TargetAccessScope, ProjectType, ProjectAccessScope } from '@app/gql/graphql';
-import { generateUnique } from '../../../testkit/utils';
 import { initSeed } from '../../../testkit/seed';
+import { generateUnique } from '../../../testkit/utils';
 
 // We do not resolve this to a host address, because we are calling this through a different flow:
 // GraphQL API -> Schema service -> Composition service

@@ -14,7 +14,6 @@ import {
 } from '@radix-ui/react-dialog';
 import clsx from 'clsx';
 import { css } from 'twin.macro';
-
 import { Button } from '@/components/v2';
 import { XIcon } from '@/components/v2/icon';
 

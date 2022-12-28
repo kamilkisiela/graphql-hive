@@ -1,7 +1,7 @@
 import { createServer } from 'node:http';
 import process from 'node:process';
-import { createRequestListener } from './server';
 import { resolveEnv } from './environment';
+import { createRequestListener } from './server';
 
 // eslint-disable-next-line no-process-env
 const env = resolveEnv(process.env);

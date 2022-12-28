@@ -1,19 +1,18 @@
 import {
-  TargetAccessScope,
-  ProjectType,
-  ProjectAccessScope,
   OrganizationAccessScope,
+  ProjectAccessScope,
+  ProjectType,
+  TargetAccessScope,
 } from '@app/gql/graphql';
-import formatISO from 'date-fns/formatISO';
-import subHours from 'date-fns/subHours';
-import { createTarget, updateTargetValidationSettings, waitFor } from '../../../testkit/flow';
-import { CollectedOperation } from '../../../testkit/usage';
-import { clickHouseQuery } from '../../../testkit/clickhouse';
 // eslint-disable-next-line hive/enforce-deps-in-dev
 import { normalizeOperation } from '@graphql-hive/core';
-
+import formatISO from 'date-fns/formatISO';
+import subHours from 'date-fns/subHours';
 import { parse, print } from 'graphql';
+import { clickHouseQuery } from '../../../testkit/clickhouse';
+import { createTarget, updateTargetValidationSettings, waitFor } from '../../../testkit/flow';
 import { initSeed } from '../../../testkit/seed';
+import { CollectedOperation } from '../../../testkit/usage';
 
 function ensureNumber(value: number | string): number {
   if (typeof value === 'number') {

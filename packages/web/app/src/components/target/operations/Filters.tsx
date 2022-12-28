@@ -1,5 +1,5 @@
-import React, { ComponentType } from 'react';
 import 'twin.macro';
+import React, { ComponentType } from 'react';
 import {
   Button,
   Checkbox,
@@ -20,10 +20,9 @@ import AutoSizer from 'react-virtualized-auto-sizer';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import { useQuery } from 'urql';
 import { useDebouncedCallback } from 'use-debounce';
-
 import { Spinner } from '@/components/common/Spinner';
 import { DateRangeInput, OperationsStatsDocument, OperationStatsFieldsFragment } from '@/graphql';
-import { useRouteSelector, useFormattedNumber } from '@/lib/hooks';
+import { useFormattedNumber, useRouteSelector } from '@/lib/hooks';
 
 const OperationsFilter: React.FC<{
   onClose(): void;

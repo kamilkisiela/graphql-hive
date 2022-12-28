@@ -2,7 +2,6 @@ import { ReactElement } from 'react';
 import { useFormik } from 'formik';
 import { gql, useMutation } from 'urql';
 import * as Yup from 'yup';
-
 import { Button, Heading, Input, Modal, Select, Tag } from '@/components/v2';
 import { AlertChannelType } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks';

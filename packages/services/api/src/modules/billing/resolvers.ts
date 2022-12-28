@@ -4,8 +4,8 @@ import { AuthManager } from '../auth/providers/auth-manager';
 import { OrganizationAccessScope } from '../auth/providers/organization-access';
 import { OrganizationManager } from '../organization/providers/organization-manager';
 import { IdTranslator } from '../shared/providers/id-translator';
-import { BillingProvider } from './providers/billing.provider';
 import { BillingModule } from './__generated__/types';
+import { BillingProvider } from './providers/billing.provider';
 
 const USAGE_DEFAULT_LIMITATIONS: Record<
   'HOBBY' | 'PRO' | 'ENTERPRISE',

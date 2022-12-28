@@ -1,8 +1,8 @@
 import '../src/dev-polyfill';
-import { handleRequest } from '../src/handler';
-import { InvalidSignature, MissingSignature, InvalidRequestFormat } from '../src/errors';
-import { isSignatureValid } from '../src/auth';
 import nock from 'nock';
+import { isSignatureValid } from '../src/auth';
+import { InvalidRequestFormat, InvalidSignature, MissingSignature } from '../src/errors';
+import { handleRequest } from '../src/handler';
 
 const SignatureValidators = {
   AlwaysTrue: () => true,

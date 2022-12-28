@@ -1,27 +1,26 @@
 import { ReactElement, ReactNode, useEffect } from 'react';
-import { useRouter } from 'next/router';
-import { useQuery } from 'urql';
 import NextLink from 'next/link';
-
-import { Button, Heading, Tabs, SubHeader } from '@/components/v2';
+import { useRouter } from 'next/router';
+import cookies from 'js-cookie';
+import { useQuery } from 'urql';
+import { Button, Heading, SubHeader, Tabs } from '@/components/v2';
 import { PlusIcon } from '@/components/v2/icon';
 import { CreateProjectModal } from '@/components/v2/modals';
+import { LAST_VISITED_ORG_KEY } from '@/constants';
 import {
   OrganizationDocument,
-  OrganizationType,
   OrganizationFieldsFragment,
+  OrganizationType,
   OrgBillingInfoFieldsFragment,
   OrgRateLimitFieldsFragment,
 } from '@/graphql';
-import { useRouteSelector, useToggle } from '@/lib/hooks';
 import {
   canAccessOrganization,
   OrganizationAccessScope,
   useOrganizationAccess,
 } from '@/lib/access/organization';
-import cookies from 'js-cookie';
-import { LAST_VISITED_ORG_KEY } from '@/constants';
 import { getIsStripeEnabled } from '@/lib/billing/stripe-public-key';
+import { useRouteSelector, useToggle } from '@/lib/hooks';
 
 enum TabValue {
   Overview = 'overview',

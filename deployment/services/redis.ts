@@ -1,8 +1,8 @@
 import * as pulumi from '@pulumi/pulumi';
-import { serviceLocalHost } from '../utils/local-endpoint';
-import { Redis as RedisStore } from '../utils/redis';
 import { DeploymentEnvironment } from '../types';
 import { isProduction } from '../utils/helpers';
+import { serviceLocalHost } from '../utils/local-endpoint';
+import { Redis as RedisStore } from '../utils/redis';
 
 const redisConfig = new pulumi.Config('redis');
 

@@ -1,5 +1,5 @@
-import { FC, ReactElement } from 'react';
 import 'twin.macro';
+import { FC, ReactElement } from 'react';
 import clsx from 'clsx';
 
 const DEFAULT_PATH_PROPS = {

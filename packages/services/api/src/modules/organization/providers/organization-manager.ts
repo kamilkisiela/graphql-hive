@@ -1,22 +1,22 @@
-import { Injectable, Inject, Scope } from 'graphql-modules';
-import { paramCase } from 'param-case';
 import { createHash } from 'crypto';
-import { Organization, OrganizationType, OrganizationInvitation } from '../../../shared/entities';
+import { Inject, Injectable, Scope } from 'graphql-modules';
+import { paramCase } from 'param-case';
+import { Organization, OrganizationInvitation, OrganizationType } from '../../../shared/entities';
 import { HiveError } from '../../../shared/errors';
-import { AuthManager } from '../../auth/providers/auth-manager';
-import { Logger } from '../../shared/providers/logger';
-import { Storage } from '../../shared/providers/storage';
-import { WEB_APP_URL } from '../../shared/providers/tokens';
-import type { OrganizationSelector } from '../../shared/providers/storage';
-import { share, cache, uuid, diffArrays, pushIfMissing } from '../../../shared/helpers';
+import { cache, diffArrays, pushIfMissing, share, uuid } from '../../../shared/helpers';
 import { ActivityManager } from '../../activity/providers/activity-manager';
-import { BillingProvider } from '../../billing/providers/billing.provider';
-import { TokenStorage } from '../../token/providers/token-storage';
-import { Emails } from '../../shared/providers/emails';
+import { AuthManager } from '../../auth/providers/auth-manager';
 import { OrganizationAccessScope } from '../../auth/providers/organization-access';
 import { ProjectAccessScope } from '../../auth/providers/project-access';
 import { TargetAccessScope } from '../../auth/providers/target-access';
-import { reservedOrganizationNames, organizationAdminScopes } from './organization-config';
+import { BillingProvider } from '../../billing/providers/billing.provider';
+import { Emails } from '../../shared/providers/emails';
+import { Logger } from '../../shared/providers/logger';
+import type { OrganizationSelector } from '../../shared/providers/storage';
+import { Storage } from '../../shared/providers/storage';
+import { WEB_APP_URL } from '../../shared/providers/tokens';
+import { TokenStorage } from '../../token/providers/token-storage';
+import { organizationAdminScopes, reservedOrganizationNames } from './organization-config';
 
 /**
  * Responsible for auth checks.

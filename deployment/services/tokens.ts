@@ -1,9 +1,9 @@
+import * as k8s from '@pulumi/kubernetes';
 import * as pulumi from '@pulumi/pulumi';
 import { parse } from 'pg-connection-string';
-import { DbMigrations } from './db-migrations';
-import { ServiceDeployment } from '../utils/service-deployment';
 import { DeploymentEnvironment } from '../types';
-import * as k8s from '@pulumi/kubernetes';
+import { ServiceDeployment } from '../utils/service-deployment';
+import { DbMigrations } from './db-migrations';
 
 const commonConfig = new pulumi.Config('common');
 const apiConfig = new pulumi.Config('api');
