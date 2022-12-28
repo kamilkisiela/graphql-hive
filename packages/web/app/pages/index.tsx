@@ -1,6 +1,6 @@
 import { ReactElement, useEffect } from 'react';
 import { NextApiRequest, NextApiResponse } from 'next';
-import type { InternalApi } from '@hive/server';
+import { InternalApi } from '@hive/server';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import Cookies from 'cookies';
 import Session from 'supertokens-node/recipe/session';

@@ -1,4 +1,4 @@
-import type { TypeProvider } from 'supertokens-node/recipe/thirdpartyemailpassword';
+import { TypeProvider } from 'supertokens-node/recipe/thirdpartyemailpassword';
 import zod from 'zod';
 import { env } from '@/env/backend';
 

@@ -114,7 +114,7 @@ function GetStartedWizard({
       size="md"
     >
       <DrawerOverlay />
-      <DrawerContent bgColor={'gray.800'}>
+      <DrawerContent bgColor="gray.800">
         <DrawerCloseButton />
         <DrawerHeader>Get Started</DrawerHeader>
         <DrawerBody>

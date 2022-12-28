@@ -1,4 +1,4 @@
-import type { ExecutionResult } from 'graphql';
+import { ExecutionResult } from 'graphql';
 import { stripIgnoredCharacters } from 'graphql';
 
 export async function graphql<T = any>({

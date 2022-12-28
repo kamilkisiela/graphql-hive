@@ -186,7 +186,7 @@ export function GraphQLArguments(props: {
   if (showAll) {
     return (
       <span className="ml-1">
-        <span className="text-gray-400">{'('}</span>
+        <span className="text-gray-400">(</span>
         <div className="pl-4">
           {props.args.map(arg => {
             return (
@@ -199,14 +199,14 @@ export function GraphQLArguments(props: {
             );
           })}
         </div>
-        <span className="text-gray-400">{')'}</span>
+        <span className="text-gray-400">)</span>
       </span>
     );
   }
 
   return (
     <span className="ml-1">
-      <span className="text-gray-400">{'('}</span>
+      <span className="text-gray-400">(</span>
       <span className="space-x-2">
         {props.args.slice(0, 2).map(arg => {
           return (
@@ -226,7 +226,7 @@ export function GraphQLArguments(props: {
           </span>
         ) : null}
       </span>
-      <span className="text-gray-400">{')'}</span>
+      <span className="text-gray-400">)</span>
     </span>
   );
 }
@@ -268,7 +268,7 @@ export function GraphQLFields(props: {
             <div>
               {field.name}
               {field.args.length > 0 ? <GraphQLArguments args={field.args} /> : null}
-              <span className="mr-1">{':'}</span>
+              <span className="mr-1">:</span>
               <GraphQLTypeAsLink type={field.type} />
             </div>
             <SchemaExplorerUsageStats totalRequests={totalRequests} usage={field.usage} />
@@ -302,7 +302,7 @@ export function GraphQLInputFields({
           <GraphQLTypeCardListItem key={field.name} index={i}>
             <div>
               {field.name}
-              <span className="mr-1">{':'}</span>
+              <span className="mr-1">:</span>
               <GraphQLTypeAsLink type={field.type} />
             </div>
             <SchemaExplorerUsageStats totalRequests={totalRequests} usage={field.usage} />

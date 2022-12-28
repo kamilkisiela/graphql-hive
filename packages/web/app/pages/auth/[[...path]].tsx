@@ -2,7 +2,7 @@ import 'twin.macro';
 import React from 'react';
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
-import type { GetServerSideProps } from 'next';
+import { GetServerSideProps } from 'next';
 import SuperTokensReact from 'supertokens-auth-react';
 import { FullLogo } from '@/components/common/Logo';
 import { env } from '@/env/frontend';

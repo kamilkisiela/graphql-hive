@@ -1,4 +1,4 @@
-import type { NextWebVitalsMetric } from 'next/app';
+import { NextWebVitalsMetric } from 'next/app';
 import { env } from '@/env/frontend';
 
 export const pageview = (url: string): void => {
