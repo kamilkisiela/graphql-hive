@@ -11,7 +11,7 @@ import { CollectedOperation } from '../../../testkit/usage';
 import { clickHouseQuery } from '../../../testkit/clickhouse';
 // eslint-disable-next-line hive/enforce-deps-in-dev
 import { normalizeOperation } from '@graphql-hive/core';
- 
+
 import { parse, print } from 'graphql';
 import { initSeed } from '../../../testkit/seed';
 
