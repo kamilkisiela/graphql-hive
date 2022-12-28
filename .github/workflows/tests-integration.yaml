@@ -41,31 +41,32 @@ jobs:
       - name: prepare packages
         run: pnpm --filter integration-tests prepare:env
 
-      - name: warnup docker images
+      - name: patch compose file volumes
+        uses: mikefarah/yq@v4.30.6
+        with:
+          cmd: yq -i 'del(.services.*.volumes)' docker-compose.community.yml
+
+      - name: get cpu count for jest
+        id: cpu-cores
+        uses: SimenB/github-actions-cpu-cores@v1
+
+      - name: run containers
+        timeout-minutes: 6
         run: |
-          docker-compose -f integration-tests/docker-compose.yml pull \
-            db \
-            clickhouse \
-            zookeeper \
-            broker \
-            redis \
-            supertokens \
-            s3 \
-            s3_provision_buckets \
-            local_cdn \
-            local_broker \
-            external_composition
+          docker compose -f docker-compose.community.yml -f ./integration-tests/docker-compose.integration.yaml --env-file ./integration-tests/.env up -d --wait
 
-      - name: integration tests
-        run: pnpm --filter integration-tests dockest
-        timeout-minutes: 15
-        env:
-          STRIPE_PUBLIC_KEY: ${{ secrets.stripeTestPublicKey }}
-          STRIPE_SECRET_KEY: ${{ secrets.stripeTestSecretKey }}
-          SUPERTOKENS_CONNECTION_URI: http://127.0.0.1:3567
-          SUPERTOKENS_API_KEY: bubatzbieber6942096420
-          EXTERNAL_COMPOSITION_SECRET: secretsecret
+      - name: troubleshoot containers
+        if: ${{ failure() }}
+        run: |
+          docker compose -f docker-compose.community.yml -f ./integration-tests/docker-compose.integration.yaml --env-file ./integration-tests/.env ps
+          docker compose -f docker-compose.community.yml -f ./integration-tests/docker-compose.integration.yaml --env-file ./integration-tests/.env logs
 
-      - name: Dockest logs
-        if: always()
-        run: cat integration-tests/*.log
+      - name: run integration tests
+        timeout-minutes: 10
+        run: |
+          pnpm --filter integration-tests test:integration --max-workers ${{ steps.cpu-cores.outputs.count }}
+
+      - name: log dump
+        if: ${{ failure() }}
+        run: |
+          docker compose -f docker-compose.community.yml -f ./integration-tests/docker-compose.integration.yaml --env-file ./integration-tests/.env logs

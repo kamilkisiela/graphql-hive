@@ -1,72 +1,19 @@
-import { TargetAccessScope, ProjectType } from '@app/gql/graphql';
+/* eslint-disable no-process-env */
 import { createHash } from 'node:crypto';
 import { schemaPublish, schemaCheck } from '../../testkit/cli';
-import { authenticate } from '../../testkit/auth';
-import {
-  createOrganization,
-  joinOrganization,
-  createProject,
-  createToken,
-  fetchSupergraphFromCDN,
-  inviteToOrganization,
-} from '../../testkit/flow';
+import { initSeed } from '../../testkit/seed';
+import { ProjectType } from '../../testkit/gql/graphql';
 
-test('can publish and check a schema with target:registry:read access', async () => {
-  const { access_token: owner_access_token } = await authenticate('main');
-  const orgResult = await createOrganization(
-    {
-      name: 'foo',
-    },
-    owner_access_token,
-  );
-  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
-
-  const invitationResult = await inviteToOrganization(
-    {
-      email: 'some@email.com',
-      organization: org.cleanId,
-    },
-    owner_access_token,
-  );
-
-  const inviteCode = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
-  expect(inviteCode).toBeDefined();
-
-  // Join
-  const { access_token: member_access_token } = await authenticate('extra');
-  await joinOrganization(inviteCode!, member_access_token);
-
-  const projectResult = await createProject(
-    {
-      organization: org.cleanId,
-      type: ProjectType.Single,
-      name: 'foo',
-    },
-    owner_access_token,
-  );
-
-  const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
-
-  // Create a token with write rights
-  const writeTokenResult = await createToken(
-    {
-      name: 'test',
-      organization: org.cleanId,
-      project: project.cleanId,
-      target: target.cleanId,
-      organizationScopes: [],
-      projectScopes: [],
-      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-    },
-    owner_access_token,
-  );
-  expect(writeTokenResult.body.errors).not.toBeDefined();
-  const writeToken = writeTokenResult.body.data!.createToken.ok!.secret;
+test.concurrent('can publish and check a schema with target:registry:read access', async () => {
+  const { createOrg } = await initSeed().createOwner();
+  const { inviteAndJoinMember, createProject } = await createOrg();
+  await inviteAndJoinMember();
+  const { createToken } = await createProject(ProjectType.Single);
+  const { secret } = await createToken();
 
   await schemaPublish([
     '--token',
-    writeToken,
+    secret,
     '--author',
     'Kamil',
     '--commit',
@@ -74,69 +21,23 @@ test('can publish and check a schema with target:registry:read access', async ()
     'fixtures/init-schema.graphql',
   ]);
 
-  await schemaCheck(['--token', writeToken, 'fixtures/nonbreaking-schema.graphql']);
+  await schemaCheck(['--token', secret, 'fixtures/nonbreaking-schema.graphql']);
 
   await expect(
-    schemaCheck(['--token', writeToken, 'fixtures/breaking-schema.graphql']),
-  ).rejects.toThrowError(/breaking/);
+    schemaCheck(['--token', secret, 'fixtures/breaking-schema.graphql']),
+  ).rejects.toThrowError(/breaking/i);
 });
 
-test('publishing a breaking change results in invalid state', async () => {
-  const { access_token: owner_access_token } = await authenticate('main');
-  const orgResult = await createOrganization(
-    {
-      name: 'foo',
-    },
-    owner_access_token,
-  );
-  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
-
-  const invitationResult = await inviteToOrganization(
-    {
-      email: 'some@email.com',
-      organization: org.cleanId,
-    },
-    owner_access_token,
-  );
-
-  const inviteCode = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
-  expect(inviteCode).toBeDefined();
-
-  // Join
-  const { access_token: member_access_token } = await authenticate('extra');
-  await joinOrganization(inviteCode!, member_access_token);
-
-  const projectResult = await createProject(
-    {
-      organization: org.cleanId,
-      type: ProjectType.Single,
-      name: 'foo',
-    },
-    owner_access_token,
-  );
-
-  const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
-
-  // Create a token with write rights
-  const writeTokenResult = await createToken(
-    {
-      name: 'test',
-      organization: org.cleanId,
-      project: project.cleanId,
-      target: target.cleanId,
-      organizationScopes: [],
-      projectScopes: [],
-      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-    },
-    owner_access_token,
-  );
-  expect(writeTokenResult.body.errors).not.toBeDefined();
-  const writeToken = writeTokenResult.body.data!.createToken.ok!.secret;
+test.concurrent('publishing a breaking change results in invalid state', async () => {
+  const { createOrg } = await initSeed().createOwner();
+  const { inviteAndJoinMember, createProject } = await createOrg();
+  await inviteAndJoinMember();
+  const { createToken } = await createProject(ProjectType.Single);
+  const { secret } = await createToken();
 
   await schemaPublish([
     '--token',
-    writeToken,
+    secret,
     '--author',
     'Kamil',
     '--commit',
@@ -145,140 +46,51 @@ test('publishing a breaking change results in invalid state', async () => {
   ]);
 
   await expect(
-    schemaPublish(['--token', writeToken, 'fixtures/breaking-schema.graphql']),
-  ).rejects.toThrowError(/breaking/);
+    schemaPublish(['--token', secret, 'fixtures/breaking-schema.graphql']),
+  ).rejects.toThrowError(/breaking/i);
 });
 
-test('publishing invalid schema SDL provides meaningful feedback for the user.', async () => {
-  const { access_token: owner_access_token } = await authenticate('main');
-  const orgResult = await createOrganization(
-    {
-      name: 'foo',
-    },
-    owner_access_token,
-  );
-  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+test.concurrent(
+  'publishing invalid schema SDL provides meaningful feedback for the user.',
+  async () => {
+    const { createOrg } = await initSeed().createOwner();
+    const { inviteAndJoinMember, createProject } = await createOrg();
+    await inviteAndJoinMember();
+    const { createToken } = await createProject(ProjectType.Single);
+    const { secret } = await createToken();
 
-  const invitationResult = await inviteToOrganization(
-    {
-      email: 'some@email.com',
-      organization: org.cleanId,
-    },
-    owner_access_token,
-  );
-
-  const code = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
-  expect(code).toBeDefined();
-
-  // Join
-  const { access_token: member_access_token } = await authenticate('extra');
-  await joinOrganization(code!, member_access_token);
-
-  const projectResult = await createProject(
-    {
-      organization: org.cleanId,
-      type: ProjectType.Single,
-      name: 'foo',
-    },
-    owner_access_token,
-  );
-
-  const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
-
-  // Create a token with write rights
-  const writeTokenResult = await createToken(
-    {
-      name: 'test',
-      organization: org.cleanId,
-      project: project.cleanId,
-      target: target.cleanId,
-      organizationScopes: [],
-      projectScopes: [],
-      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-    },
-    owner_access_token,
-  );
-  expect(writeTokenResult.body.errors).not.toBeDefined();
-  const writeToken = writeTokenResult.body.data!.createToken.ok!.secret;
-
-  const allocatedError = new Error('Should have thrown.');
-  try {
-    await schemaPublish([
-      '--token',
-      writeToken,
-      '--author',
-      'Kamil',
-      '--commit',
-      'abc123',
-      'fixtures/init-invalid-schema.graphql',
-    ]);
-    throw allocatedError;
-  } catch (err) {
-    if (err === allocatedError) {
-      throw err;
+    const allocatedError = new Error('Should have thrown.');
+    try {
+      await schemaPublish([
+        '--token',
+        secret,
+        '--author',
+        'Kamil',
+        '--commit',
+        'abc123',
+        'fixtures/init-invalid-schema.graphql',
+      ]);
+      throw allocatedError;
+    } catch (err) {
+      if (err === allocatedError) {
+        throw err;
+      }
+      expect(String(err)).toMatch(`The SDL is not valid at line 1, column 1:`);
+      expect(String(err)).toMatch(`Syntax Error: Unexpected Name "iliketurtles"`);
     }
-    expect(String(err)).toMatch(`The SDL is not valid at line 1, column 1:`);
-    expect(String(err)).toMatch(`Syntax Error: Unexpected Name "iliketurtles"`);
-  }
-});
+  },
+);
 
-test('service url should be available in supergraph', async () => {
-  const { access_token: owner_access_token } = await authenticate('main');
-  const orgResult = await createOrganization(
-    {
-      name: 'foo',
-    },
-    owner_access_token,
-  );
-  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
-
-  const invitationResult = await inviteToOrganization(
-    {
-      email: 'some@email.com',
-      organization: org.cleanId,
-    },
-    owner_access_token,
-  );
-
-  const code = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
-  expect(code).toBeDefined();
-
-  // Join
-  const { access_token: member_access_token } = await authenticate('extra');
-  await joinOrganization(code!, member_access_token);
-
-  const projectResult = await createProject(
-    {
-      organization: org.cleanId,
-      type: ProjectType.Federation,
-      name: 'foo',
-    },
-    owner_access_token,
-  );
-
-  const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
-
-  // Create a token with write rights
-  const writeTokenResult = await createToken(
-    {
-      name: 'test',
-      organization: org.cleanId,
-      project: project.cleanId,
-      target: target.cleanId,
-      organizationScopes: [],
-      projectScopes: [],
-      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-    },
-    owner_access_token,
-  );
-  expect(writeTokenResult.body.errors).not.toBeDefined();
-  const writeToken = writeTokenResult.body.data!.createToken.ok!.secret;
+test.concurrent('service url should be available in supergraph', async () => {
+  const { createOrg } = await initSeed().createOwner();
+  const { inviteAndJoinMember, createProject } = await createOrg();
+  await inviteAndJoinMember();
+  const { createToken } = await createProject(ProjectType.Federation);
+  const { secret, fetchSupergraph } = await createToken();
 
   await schemaPublish([
     '--token',
-    writeToken,
+    secret,
     '--author',
     'Kamil',
     '--commit',
@@ -290,75 +102,21 @@ test('service url should be available in supergraph', async () => {
     'fixtures/federation-init.graphql',
   ]);
 
-  const supergraph = await fetchSupergraphFromCDN(
-    {
-      organization: org.cleanId,
-      project: project.cleanId,
-      target: target.cleanId,
-    },
-    writeToken,
-  );
-
-  expect(supergraph.body).toMatch('(name: "users" url: "https://api.com/users-subgraph")');
+  const supergraph = await fetchSupergraph();
+  expect(supergraph).toMatch('(name: "users" url: "https://api.com/users-subgraph")');
 });
 
-test('service url should be required in Federation', async () => {
-  const { access_token: owner_access_token } = await authenticate('main');
-  const orgResult = await createOrganization(
-    {
-      name: 'foo',
-    },
-    owner_access_token,
-  );
-  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
-
-  const invitationResult = await inviteToOrganization(
-    {
-      email: 'some@email.com',
-      organization: org.cleanId,
-    },
-    owner_access_token,
-  );
-
-  const code = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
-  expect(code).toBeDefined();
-
-  // Join
-  const { access_token: member_access_token } = await authenticate('extra');
-  await joinOrganization(code!, member_access_token);
-
-  const projectResult = await createProject(
-    {
-      organization: org.cleanId,
-      type: ProjectType.Federation,
-      name: 'foo',
-    },
-    owner_access_token,
-  );
-
-  const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
-
-  // Create a token with write rights
-  const writeTokenResult = await createToken(
-    {
-      name: 'test',
-      organization: org.cleanId,
-      project: project.cleanId,
-      target: target.cleanId,
-      organizationScopes: [],
-      projectScopes: [],
-      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-    },
-    owner_access_token,
-  );
-  expect(writeTokenResult.body.errors).not.toBeDefined();
-  const writeToken = writeTokenResult.body.data!.createToken.ok!.secret;
+test.concurrent('service url should be required in Federation', async () => {
+  const { createOrg } = await initSeed().createOwner();
+  const { inviteAndJoinMember, createProject } = await createOrg();
+  await inviteAndJoinMember();
+  const { createToken } = await createProject(ProjectType.Federation);
+  const { secret } = await createToken();
 
   await expect(
     schemaPublish([
       '--token',
-      writeToken,
+      secret,
       '--author',
       'Kamil',
       '--commit',
@@ -370,259 +128,78 @@ test('service url should be required in Federation', async () => {
   ).rejects.toThrowError(/url/);
 });
 
-test('schema:publish should print a link to the website', async () => {
-  const { access_token: owner_access_token } = await authenticate('main');
-  const orgResult = await createOrganization(
-    {
-      name: 'bar',
-    },
-    owner_access_token,
+test.concurrent('schema:publish should print a link to the website', async () => {
+  const { createOrg } = await initSeed().createOwner();
+  const { organization, inviteAndJoinMember, createProject } = await createOrg();
+  await inviteAndJoinMember();
+  const { project, target, createToken } = await createProject(ProjectType.Single);
+  const { secret } = await createToken();
+
+  await expect(schemaPublish(['--token', secret, 'fixtures/init-schema.graphql'])).resolves.toMatch(
+    `Available at ${process.env.HIVE_APP_BASE_URL}/${organization.cleanId}/${project.cleanId}/${target.cleanId}`,
   );
-  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
-
-  const invitationResult = await inviteToOrganization(
-    {
-      email: 'some@email.com',
-      organization: org.cleanId,
-    },
-    owner_access_token,
-  );
-
-  const code = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
-  expect(code).toBeDefined();
-
-  // Join
-  const { access_token: member_access_token } = await authenticate('extra');
-  await joinOrganization(code!, member_access_token);
-
-  const projectResult = await createProject(
-    {
-      organization: org.cleanId,
-      type: ProjectType.Single,
-      name: 'foo',
-    },
-    owner_access_token,
-  );
-
-  const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const targets = projectResult.body.data!.createProject.ok!.createdTargets;
-  const target = targets.find(t => t.name === 'development')!;
-
-  // Create a token with write rights
-  const writeTokenResult = await createToken(
-    {
-      name: 'test',
-      organization: org.cleanId,
-      project: project.cleanId,
-      target: target.cleanId,
-      organizationScopes: [],
-      projectScopes: [],
-      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-    },
-    owner_access_token,
-  );
-  expect(writeTokenResult.body.errors).not.toBeDefined();
-  const writeToken = writeTokenResult.body.data!.createToken.ok!.secret;
 
   await expect(
-    schemaPublish(['--token', writeToken, 'fixtures/init-schema.graphql']),
-  ).resolves.toMatch('Available at https://app.graphql-hive.com/bar/foo/development');
-
-  await expect(
-    schemaPublish(['--token', writeToken, 'fixtures/nonbreaking-schema.graphql']),
-  ).resolves.toMatch('Available at https://app.graphql-hive.com/bar/foo/development/history/');
+    schemaPublish(['--token', secret, 'fixtures/nonbreaking-schema.graphql']),
+  ).resolves.toMatch(
+    `Available at ${process.env.HIVE_APP_BASE_URL}/${organization.cleanId}/${project.cleanId}/${target.cleanId}/history/`,
+  );
 });
 
-test('schema:check should notify user when registry is empty', async () => {
-  const { access_token: owner_access_token } = await authenticate('main');
-  const orgResult = await createOrganization(
-    {
-      name: 'foo',
-    },
-    owner_access_token,
+test.concurrent('schema:check should notify user when registry is empty', async () => {
+  const { createOrg } = await initSeed().createOwner();
+  const { inviteAndJoinMember, createProject } = await createOrg();
+  await inviteAndJoinMember();
+  const { createToken } = await createProject(ProjectType.Single);
+  const { secret } = await createToken();
+
+  await expect(schemaCheck(['--token', secret, 'fixtures/init-schema.graphql'])).resolves.toMatch(
+    'empty',
   );
-  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
-
-  const invitationResult = await inviteToOrganization(
-    {
-      email: 'some@email.com',
-      organization: org.cleanId,
-    },
-    owner_access_token,
-  );
-
-  const code = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
-  expect(code).toBeDefined();
-
-  // Join
-  const { access_token: member_access_token } = await authenticate('extra');
-  await joinOrganization(code!, member_access_token);
-
-  const projectResult = await createProject(
-    {
-      organization: org.cleanId,
-      type: ProjectType.Single,
-      name: 'foo',
-    },
-    owner_access_token,
-  );
-
-  const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
-
-  // Create a token with write rights
-  const writeTokenResult = await createToken(
-    {
-      name: 'test',
-      organization: org.cleanId,
-      project: project.cleanId,
-      target: target.cleanId,
-      organizationScopes: [],
-      projectScopes: [],
-      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-    },
-    owner_access_token,
-  );
-  expect(writeTokenResult.body.errors).not.toBeDefined();
-  const writeToken = writeTokenResult.body.data!.createToken.ok!.secret;
-
-  await expect(
-    schemaCheck(['--token', writeToken, 'fixtures/init-schema.graphql']),
-  ).resolves.toMatch('empty');
 });
 
-test('schema:check should throw on corrupted schema', async () => {
-  const { access_token: owner_access_token } = await authenticate('main');
-  const orgResult = await createOrganization(
-    {
-      name: 'foo',
-    },
-    owner_access_token,
-  );
-  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+test.concurrent('schema:check should throw on corrupted schema', async () => {
+  const { createOrg } = await initSeed().createOwner();
+  const { inviteAndJoinMember, createProject } = await createOrg();
+  await inviteAndJoinMember();
+  const { createToken } = await createProject(ProjectType.Single);
+  const { secret } = await createToken();
 
-  const invitationResult = await inviteToOrganization(
-    {
-      email: 'some@email.com',
-      organization: org.cleanId,
-    },
-    owner_access_token,
-  );
-
-  const code = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
-  expect(code).toBeDefined();
-
-  // Join
-  const { access_token: member_access_token } = await authenticate('extra');
-  await joinOrganization(code!, member_access_token);
-
-  const projectResult = await createProject(
-    {
-      organization: org.cleanId,
-      type: ProjectType.Single,
-      name: 'foo',
-    },
-    owner_access_token,
-  );
-
-  const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
-
-  // Create a token with write rights
-  const writeTokenResult = await createToken(
-    {
-      name: 'test',
-      organization: org.cleanId,
-      project: project.cleanId,
-      target: target.cleanId,
-      organizationScopes: [],
-      projectScopes: [],
-      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-    },
-    owner_access_token,
-  );
-  expect(writeTokenResult.body.errors).not.toBeDefined();
-  const writeToken = writeTokenResult.body.data!.createToken.ok!.secret;
-
-  const output = schemaCheck(['--token', writeToken, 'fixtures/missing-type.graphql']);
-
+  const output = schemaCheck(['--token', secret, 'fixtures/missing-type.graphql']);
   await expect(output).rejects.toThrowError('Unknown type');
 });
 
-test('schema:publish should see Invalid Token error when token is invalid', async () => {
-  const { access_token: owner_access_token } = await authenticate('main');
-  const orgResult = await createOrganization(
-    {
-      name: 'foo',
-    },
-    owner_access_token,
-  );
-  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
-
-  await createProject(
-    {
-      organization: org.cleanId,
-      type: ProjectType.Single,
-      name: 'foo',
-    },
-    owner_access_token,
-  );
-
-  const token = createHash('md5').update('nope').digest('hex').substring(0, 31);
-
-  const output = schemaPublish(['--token', token, 'fixtures/init-schema.graphql']);
+test.concurrent('schema:publish should see Invalid Token error when token is invalid', async () => {
+  const invalidToken = createHash('md5').update('nope').digest('hex').substring(0, 31);
+  const output = schemaPublish(['--token', invalidToken, 'fixtures/init-schema.graphql']);
 
   await expect(output).rejects.toThrowError('Invalid token provided');
 });
 
-test('schema:publish should support experimental_acceptBreakingChanges flag', async () => {
-  const { access_token: owner_access_token } = await authenticate('main');
-  const orgResult = await createOrganization(
-    {
-      name: 'bar',
-    },
-    owner_access_token,
-  );
-  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
-  const projectResult = await createProject(
-    {
-      organization: org.cleanId,
-      type: ProjectType.Single,
-      name: 'foo',
-    },
-    owner_access_token,
-  );
+test.concurrent(
+  'schema:publish should support experimental_acceptBreakingChanges flag',
+  async () => {
+    const { createOrg } = await initSeed().createOwner();
+    const { organization, inviteAndJoinMember, createProject } = await createOrg();
+    await inviteAndJoinMember();
+    const { project, target, createToken } = await createProject(ProjectType.Single);
+    const { secret } = await createToken();
 
-  const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const targets = projectResult.body.data!.createProject.ok!.createdTargets;
-  const target = targets.find(t => t.name === 'development')!;
+    await expect(
+      schemaPublish(['--token', secret, 'fixtures/init-schema.graphql']),
+    ).resolves.toMatch(
+      `Available at ${process.env.HIVE_APP_BASE_URL}/${organization.cleanId}/${project.cleanId}/${target.cleanId}`,
+    );
 
-  // Create a token with write rights
-  const writeTokenResult = await createToken(
-    {
-      name: 'test',
-      organization: org.cleanId,
-      project: project.cleanId,
-      target: target.cleanId,
-      organizationScopes: [],
-      projectScopes: [],
-      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-    },
-    owner_access_token,
-  );
-  expect(writeTokenResult.body.errors).not.toBeDefined();
-  const writeToken = writeTokenResult.body.data!.createToken.ok!.secret;
-
-  await expect(
-    schemaPublish(['--token', writeToken, 'fixtures/init-schema.graphql']),
-  ).resolves.toMatch('Available at https://app.graphql-hive.com/bar/foo/development');
-
-  await expect(
-    schemaPublish([
-      '--token',
-      writeToken,
-      '--experimental_acceptBreakingChanges',
-      'fixtures/breaking-schema.graphql',
-    ]),
-  ).resolves.toMatch('Available at https://app.graphql-hive.com/bar/foo/development/history/');
-});
+    await expect(
+      schemaPublish([
+        '--token',
+        secret,
+        '--experimental_acceptBreakingChanges',
+        'fixtures/breaking-schema.graphql',
+      ]),
+    ).resolves.toMatch(
+      `Available at ${process.env.HIVE_APP_BASE_URL}/${organization.cleanId}/${project.cleanId}/${target.cleanId}/history/`,
+    );
+  },
+);

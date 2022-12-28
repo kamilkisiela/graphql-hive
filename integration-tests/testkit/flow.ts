@@ -352,6 +352,9 @@ export function createTarget(input: CreateTargetInput, authToken: string) {
               cleanId
             }
           }
+          error {
+            message
+          }
         }
       }
     `),
@@ -870,13 +873,11 @@ export function createCdnAccess(selector: TargetSelectorInput, token: string) {
 }
 
 export async function fetchSchemaFromCDN(selector: TargetSelectorInput, token: string) {
-  const cdnAccessResult = await createCdnAccess(selector, token);
+  const cdnAccessResult = await createCdnAccess(selector, token).then(r =>
+    r.expectNoGraphQLErrors(),
+  );
 
-  if (cdnAccessResult.body.errors) {
-    throw new Error(cdnAccessResult.body.errors[0].message);
-  }
-
-  const cdn = cdnAccessResult.body.data!.createCdnToken;
+  const cdn = cdnAccessResult.createCdnToken;
 
   const res = await fetch(cdn.url + '/sdl', {
     headers: {
@@ -891,13 +892,11 @@ export async function fetchSchemaFromCDN(selector: TargetSelectorInput, token: s
 }
 
 export async function fetchSupergraphFromCDN(selector: TargetSelectorInput, token: string) {
-  const cdnAccessResult = await createCdnAccess(selector, token);
+  const cdnAccessResult = await createCdnAccess(selector, token).then(r =>
+    r.expectNoGraphQLErrors(),
+  );
 
-  if (cdnAccessResult.body.errors) {
-    throw new Error(cdnAccessResult.body.errors[0].message);
-  }
-
-  const cdn = cdnAccessResult.body.data!.createCdnToken;
+  const cdn = cdnAccessResult.createCdnToken;
 
   const res = await fetch(cdn.url + '/supergraph', {
     headers: {
@@ -914,13 +913,11 @@ export async function fetchSupergraphFromCDN(selector: TargetSelectorInput, toke
 }
 
 export async function fetchMetadataFromCDN(selector: TargetSelectorInput, token: string) {
-  const cdnAccessResult = await createCdnAccess(selector, token);
+  const cdnAccessResult = await createCdnAccess(selector, token).then(r =>
+    r.expectNoGraphQLErrors(),
+  );
 
-  if (cdnAccessResult.body.errors) {
-    throw new Error(cdnAccessResult.body.errors[0].message);
-  }
-
-  const cdn = cdnAccessResult.body.data!.createCdnToken;
+  const cdn = cdnAccessResult.createCdnToken;
 
   const res = await fetch(cdn.url + '/metadata', {
     headers: {

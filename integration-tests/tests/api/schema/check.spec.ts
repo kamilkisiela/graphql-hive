@@ -1,195 +1,80 @@
 import { TargetAccessScope, ProjectType } from '@app/gql/graphql';
-import {
-  createOrganization,
-  joinOrganization,
-  publishSchema,
-  checkSchema,
-  createProject,
-  createToken,
-  inviteToOrganization,
-} from '../../../testkit/flow';
-import { authenticate } from '../../../testkit/auth';
+import { initSeed } from '../../../testkit/seed';
 
-test('can check a schema with target:registry:read access', async () => {
-  const { access_token: owner_access_token } = await authenticate('main');
-  const orgResult = await createOrganization(
-    {
-      name: 'foo',
-    },
-    owner_access_token,
-  );
-  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
-
-  const invitationResult = await inviteToOrganization(
-    {
-      email: 'some@email.com',
-      organization: org.cleanId,
-    },
-    owner_access_token,
-  );
-
-  const inviteCode = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
-  expect(inviteCode).toBeDefined();
-
-  // Join
-  const { access_token: member_access_token } = await authenticate('extra');
-  await joinOrganization(inviteCode!, member_access_token);
-
-  const projectResult = await createProject(
-    {
-      organization: org.cleanId,
-      type: ProjectType.Single,
-      name: 'foo',
-    },
-    owner_access_token,
-  );
-
-  const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
+test.concurrent('can check a schema with target:registry:read access', async () => {
+  const { createOrg } = await initSeed().createOwner();
+  const { createProject } = await createOrg();
+  const { createToken } = await createProject(ProjectType.Single);
 
   // Create a token with write rights
-  const writeTokenResult = await createToken(
-    {
-      name: 'test',
-      organization: org.cleanId,
-      project: project.cleanId,
-      target: target.cleanId,
-      organizationScopes: [],
-      projectScopes: [],
-      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-    },
-    owner_access_token,
-  );
-  expect(writeTokenResult.body.errors).not.toBeDefined();
-  const writeToken = writeTokenResult.body.data!.createToken.ok!.secret;
+  const writeToken = await createToken([
+    TargetAccessScope.RegistryRead,
+    TargetAccessScope.RegistryWrite,
+  ]);
 
   // Publish schema with write rights
-  const publishResult = await publishSchema(
-    {
-      author: 'Kamil',
-      commit: 'abc123',
-      sdl: `type Query { ping: String }`,
-    },
-    writeToken,
-  );
-
+  const publishResult = await writeToken
+    .publishSchema({
+      sdl: /* GraphQL */ `
+        type Query {
+          ping: String
+        }
+      `,
+    })
+    .then(r => r.expectNoGraphQLErrors());
   // Schema publish should be successful
-  expect(publishResult.body.errors).not.toBeDefined();
-  expect(publishResult.body.data!.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+  expect(publishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
 
   // Create a token with no rights
-  const noAccessTokenResult = await createToken(
-    {
-      name: 'test',
-      organization: org.cleanId,
-      project: project.cleanId,
-      target: target.cleanId,
-      organizationScopes: [],
-      projectScopes: [],
-      targetScopes: [],
-    },
-    owner_access_token,
-  );
-  expect(noAccessTokenResult.body.errors).not.toBeDefined();
+  const noAccessToken = await createToken([], [], []);
 
   // Create a token with read rights
-  const readTokenResult = await createToken(
-    {
-      name: 'test',
-      organization: org.cleanId,
-      project: project.cleanId,
-      target: target.cleanId,
-      organizationScopes: [],
-      projectScopes: [],
-      targetScopes: [TargetAccessScope.RegistryRead],
-    },
-    owner_access_token,
-  );
-  expect(readTokenResult.body.errors).not.toBeDefined();
-
-  const readToken = readTokenResult.body.data!.createToken.ok!.secret;
-  const noAccessToken = noAccessTokenResult.body.data!.createToken.ok!.secret;
+  const readToken = await createToken([TargetAccessScope.RegistryRead], [], []);
 
   // Check schema with no read and write rights
-  let checkResult = await checkSchema(
-    {
-      sdl: `type Query { ping: String foo: String }`,
-    },
-    noAccessToken,
-  );
-  expect(checkResult.body.errors).toHaveLength(1);
-  expect(checkResult.body.errors![0].message).toMatch('target:registry:read');
+  const checkResultErrors = await noAccessToken
+    .checkSchema(
+      /* GraphQL */ `
+        type Query {
+          ping: String
+          foo: String
+        }
+      `,
+    )
+    .then(r => r.expectGraphQLErrors());
+  expect(checkResultErrors).toHaveLength(1);
+  expect(checkResultErrors[0].message).toMatch('target:registry:read');
 
   // Check schema with read rights
-  checkResult = await checkSchema(
-    {
-      sdl: `type Query { ping: String foo: String }`,
-    },
-    readToken,
-  );
-  expect(checkResult.body.errors).not.toBeDefined();
-  expect(checkResult.body.data!.schemaCheck.__typename).toBe('SchemaCheckSuccess');
+  const checkResultValid = await readToken
+    .checkSchema(
+      /* GraphQL */ `
+        type Query {
+          ping: String
+          foo: String
+        }
+      `,
+    )
+    .then(r => r.expectNoGraphQLErrors());
+  expect(checkResultValid.schemaCheck.__typename).toBe('SchemaCheckSuccess');
 });
 
-test('should match indentation of previous description', async () => {
-  const { access_token: owner_access_token } = await authenticate('main');
-  const orgResult = await createOrganization(
-    {
-      name: 'foo',
-    },
-    owner_access_token,
-  );
-  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
-
-  const invitationResult = await inviteToOrganization(
-    {
-      email: 'some@email.com',
-      organization: org.cleanId,
-    },
-    owner_access_token,
-  );
-
-  const inviteCode = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
-  expect(inviteCode).toBeDefined();
-
-  // Join
-  const { access_token: member_access_token } = await authenticate('extra');
-  await joinOrganization(inviteCode!, member_access_token);
-
-  const projectResult = await createProject(
-    {
-      organization: org.cleanId,
-      type: ProjectType.Single,
-      name: 'foo',
-    },
-    owner_access_token,
-  );
-
-  const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
+test.concurrent('should match indentation of previous description', async () => {
+  const { createOrg } = await initSeed().createOwner();
+  const { createProject } = await createOrg();
+  const { createToken } = await createProject(ProjectType.Single);
 
   // Create a token with write rights
-  const writeTokenResult = await createToken(
-    {
-      name: 'test',
-      organization: org.cleanId,
-      project: project.cleanId,
-      target: target.cleanId,
-      organizationScopes: [],
-      projectScopes: [],
-      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-    },
-    owner_access_token,
+  const writeToken = await createToken(
+    [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+    [],
+    [],
   );
-  expect(writeTokenResult.body.errors).not.toBeDefined();
-  const writeToken = writeTokenResult.body.data!.createToken.ok!.secret;
 
   // Publish schema with write rights
-  const publishResult = await publishSchema(
-    {
-      author: 'Kamil',
-      commit: 'abc123',
-      sdl: `
+  const publishResult = await writeToken
+    .publishSchema({
+      sdl: /* GraphQL */ `
         type Query {
           " ping-ping  "
           ping: String
@@ -197,35 +82,19 @@ test('should match indentation of previous description', async () => {
           pong: String
         }
       `,
-    },
-    writeToken,
-  );
+    })
+    .then(r => r.expectNoGraphQLErrors());
 
   // Schema publish should be successful
-  expect(publishResult.body.errors).not.toBeDefined();
-  expect(publishResult.body.data!.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+  expect(publishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
 
   // Create a token with read rights
-  const readTokenResult = await createToken(
-    {
-      name: 'test',
-      organization: org.cleanId,
-      project: project.cleanId,
-      target: target.cleanId,
-      organizationScopes: [],
-      projectScopes: [],
-      targetScopes: [TargetAccessScope.RegistryRead],
-    },
-    owner_access_token,
-  );
-  expect(readTokenResult.body.errors).not.toBeDefined();
-
-  const readToken = readTokenResult.body.data!.createToken.ok!.secret;
+  const readToken = await createToken([TargetAccessScope.RegistryRead], [], []);
 
   // Check schema with read rights
-  const checkResult = await checkSchema(
-    {
-      sdl: `
+  const checkResult = await readToken
+    .checkSchema(
+      /* GraphQL */ `
         type Query {
           """
           ping-ping
@@ -235,12 +104,9 @@ test('should match indentation of previous description', async () => {
           pong: String
         }
       `,
-    },
-    readToken,
-  );
-  expect(checkResult.body.errors).not.toBeDefined();
-
-  const check = checkResult.body.data!.schemaCheck;
+    )
+    .then(r => r.expectNoGraphQLErrors());
+  const check = checkResult.schemaCheck;
 
   if (check.__typename !== 'SchemaCheckSuccess') {
     throw new Error(`Expected SchemaCheckSuccess, got ${check.__typename}`);
