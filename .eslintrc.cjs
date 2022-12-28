@@ -1,5 +1,18 @@
 /* eslint-env node */
 
+const guildConfig = require('@theguild/eslint-config/base');
+
+const rulesToExtends = Object.fromEntries(
+  Object.entries(guildConfig.rules).filter(([key]) =>
+    [
+      'simple-import-sort/imports',
+      'import/first',
+      'no-restricted-globals',
+      '@typescript-eslint/no-unused-vars',
+    ].includes(key),
+  ),
+);
+
 module.exports = {
   reportUnusedDisableDirectives: true,
   ignorePatterns: [
@@ -20,17 +33,11 @@ module.exports = {
     project: ['./tsconfig.eslint.json'],
   },
   parser: '@typescript-eslint/parser',
-  plugins: ['@typescript-eslint', 'import', 'hive'],
-  extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended'],
+  plugins: [...guildConfig.plugins, 'hive'],
+  extends: guildConfig.extends,
   rules: {
     'no-process-env': 'error',
-    'no-restricted-globals': ['error', 'stop'],
-    '@typescript-eslint/no-unused-vars': [
-      'error',
-      { argsIgnorePattern: '^_', ignoreRestSiblings: true },
-    ],
     'no-empty': ['error', { allowEmptyCatch: true }],
-
     'import/no-absolute-path': 'error',
     'import/no-self-import': 'error',
     'import/no-extraneous-dependencies': [
@@ -40,7 +47,6 @@ module.exports = {
         optionalDependencies: false,
       },
     ],
-    'import/first': 'error',
     'hive/enforce-deps-in-dev': [
       'error',
       {
@@ -49,6 +55,7 @@ module.exports = {
       },
     ],
     '@typescript-eslint/no-floating-promises': 'error',
+    ...rulesToExtends,
 
     // 🚨 The following rules needs to be fixed and was temporarily disabled to avoid printing warning
     '@typescript-eslint/no-explicit-any': 'off',
@@ -70,7 +77,6 @@ module.exports = {
         'plugin:jsx-a11y/recommended',
         'plugin:@next/next/recommended',
       ],
-      plugins: ['simple-import-sort'],
       settings: {
         tailwindcss: {
           config: 'packages/app/tailwind.config.js',
