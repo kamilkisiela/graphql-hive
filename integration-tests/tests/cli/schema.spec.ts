@@ -9,7 +9,7 @@ test.concurrent('can publish and check a schema with target:registry:read access
   const { inviteAndJoinMember, createProject } = await createOrg();
   await inviteAndJoinMember();
   const { createToken } = await createProject(ProjectType.Single);
-  const { secret } = await createToken();
+  const { secret } = await createToken({});
 
   await schemaPublish([
     '--token',
@@ -33,7 +33,7 @@ test.concurrent('publishing a breaking change results in invalid state', async (
   const { inviteAndJoinMember, createProject } = await createOrg();
   await inviteAndJoinMember();
   const { createToken } = await createProject(ProjectType.Single);
-  const { secret } = await createToken();
+  const { secret } = await createToken({});
 
   await schemaPublish([
     '--token',
@@ -57,7 +57,7 @@ test.concurrent(
     const { inviteAndJoinMember, createProject } = await createOrg();
     await inviteAndJoinMember();
     const { createToken } = await createProject(ProjectType.Single);
-    const { secret } = await createToken();
+    const { secret } = await createToken({});
 
     const allocatedError = new Error('Should have thrown.');
     try {
@@ -86,7 +86,7 @@ test.concurrent('service url should be available in supergraph', async () => {
   const { inviteAndJoinMember, createProject } = await createOrg();
   await inviteAndJoinMember();
   const { createToken } = await createProject(ProjectType.Federation);
-  const { secret, fetchSupergraph } = await createToken();
+  const { secret, fetchSupergraph } = await createToken({});
 
   await schemaPublish([
     '--token',
@@ -111,7 +111,7 @@ test.concurrent('service url should be required in Federation', async () => {
   const { inviteAndJoinMember, createProject } = await createOrg();
   await inviteAndJoinMember();
   const { createToken } = await createProject(ProjectType.Federation);
-  const { secret } = await createToken();
+  const { secret } = await createToken({});
 
   await expect(
     schemaPublish([
@@ -133,7 +133,7 @@ test.concurrent('schema:publish should print a link to the website', async () =>
   const { organization, inviteAndJoinMember, createProject } = await createOrg();
   await inviteAndJoinMember();
   const { project, target, createToken } = await createProject(ProjectType.Single);
-  const { secret } = await createToken();
+  const { secret } = await createToken({});
 
   await expect(schemaPublish(['--token', secret, 'fixtures/init-schema.graphql'])).resolves.toMatch(
     `Available at ${process.env.HIVE_APP_BASE_URL}/${organization.cleanId}/${project.cleanId}/${target.cleanId}`,
@@ -151,7 +151,7 @@ test.concurrent('schema:check should notify user when registry is empty', async 
   const { inviteAndJoinMember, createProject } = await createOrg();
   await inviteAndJoinMember();
   const { createToken } = await createProject(ProjectType.Single);
-  const { secret } = await createToken();
+  const { secret } = await createToken({});
 
   await expect(schemaCheck(['--token', secret, 'fixtures/init-schema.graphql'])).resolves.toMatch(
     'empty',
@@ -163,7 +163,7 @@ test.concurrent('schema:check should throw on corrupted schema', async () => {
   const { inviteAndJoinMember, createProject } = await createOrg();
   await inviteAndJoinMember();
   const { createToken } = await createProject(ProjectType.Single);
-  const { secret } = await createToken();
+  const { secret } = await createToken({});
 
   const output = schemaCheck(['--token', secret, 'fixtures/missing-type.graphql']);
   await expect(output).rejects.toThrowError('Unknown type');
@@ -183,7 +183,7 @@ test.concurrent(
     const { organization, inviteAndJoinMember, createProject } = await createOrg();
     await inviteAndJoinMember();
     const { project, target, createToken } = await createProject(ProjectType.Single);
-    const { secret } = await createToken();
+    const { secret } = await createToken({});
 
     await expect(
       schemaPublish(['--token', secret, 'fixtures/init-schema.graphql']),

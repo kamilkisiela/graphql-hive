@@ -10,11 +10,11 @@ test.concurrent('call an external service to compose and validate services', asy
   const { createToken, project } = await createProject(ProjectType.Federation);
 
   // Create a token with write rights
-  const writeToken = await createToken(
-    [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-    [ProjectAccessScope.Settings, ProjectAccessScope.Read],
-    [],
-  );
+  const writeToken = await createToken({
+    targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+    projectScopes: [ProjectAccessScope.Settings, ProjectAccessScope.Read],
+    organizationScopes: [],
+  });
 
   const usersServiceName = generateUnique();
   const publishUsersResult = await writeToken

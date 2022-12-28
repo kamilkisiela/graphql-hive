@@ -38,16 +38,16 @@ test.concurrent('completing each step should result in updated Get Started progr
   }
 
   const { publishSchema, checkSchema, collectOperations, toggleTargetValidation } =
-    await createToken(
-      [
+    await createToken({
+      targetScopes: [
         TargetAccessScope.Read,
         TargetAccessScope.RegistryRead,
         TargetAccessScope.RegistryWrite,
         TargetAccessScope.Settings,
       ],
-      [ProjectAccessScope.Read],
-      [OrganizationAccessScope.Read],
-    );
+      projectScopes: [ProjectAccessScope.Read],
+      organizationScopes: [OrganizationAccessScope.Read],
+    });
 
   // Step: publish schema
   await publishSchema({ sdl: 'type Query { foo: String }' }).then(r => r.expectNoGraphQLErrors());

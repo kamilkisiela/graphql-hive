@@ -121,11 +121,9 @@ function runArtifactsCDNTests(
       const { createOrg } = await initSeed().createOwner();
       const { createProject } = await createOrg();
       const { createToken, target } = await createProject(ProjectType.Single);
-      const writeToken = await createToken(
-        [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-        [],
-        [],
-      );
+      const writeToken = await createToken({
+        targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      });
 
       // Publish Schema
       const publishSchemaResult = await writeToken
@@ -167,11 +165,9 @@ function runArtifactsCDNTests(
       const { createOrg } = await initSeed().createOwner();
       const { createProject } = await createOrg();
       const { createToken, target } = await createProject(ProjectType.Single);
-      const writeToken = await createToken(
-        [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-        [],
-        [],
-      );
+      const writeToken = await createToken({
+        targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      });
 
       // Publish Schema
       const publishSchemaResult = await writeToken
@@ -226,11 +222,9 @@ function runArtifactsCDNTests(
       const { createOrg } = await initSeed().createOwner();
       const { createProject } = await createOrg();
       const { createToken, target } = await createProject(ProjectType.Single);
-      const writeToken = await createToken(
-        [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-        [],
-        [],
-      );
+      const writeToken = await createToken({
+        targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      });
 
       // Publish Schema
 

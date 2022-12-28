@@ -6,7 +6,11 @@ test.concurrent('deleting a token should clear the cache', async () => {
   const { inviteAndJoinMember, createProject } = await createOrg();
   await inviteAndJoinMember();
   const { createToken, removeTokens } = await createProject(ProjectType.Single);
-  const { secret, token: createdToken, fetchTokenInfo } = await createToken([], [], []);
+  const {
+    secret,
+    token: createdToken,
+    fetchTokenInfo,
+  } = await createToken({ targetScopes: [], projectScopes: [], organizationScopes: [] });
 
   expect(secret).toBeDefined();
 

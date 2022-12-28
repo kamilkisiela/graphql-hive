@@ -9,19 +9,26 @@ test.concurrent(
     const { createProject } = await createOrg();
     const { createToken } = await createProject(ProjectType.Single);
     // Create a token with no rights
-    const { secret: noAccessToken } = await createToken([], [], []);
+    const { secret: noAccessToken } = await createToken({
+      targetScopes: [],
+      projectScopes: [],
+      organizationScopes: [],
+    });
     // Create a token with read rights
-    const { secret: readToken } = await createToken(
-      [],
-      [ProjectAccessScope.OperationsStoreRead],
-      [],
-    );
+    const { secret: readToken } = await createToken({
+      targetScopes: [],
+      projectScopes: [ProjectAccessScope.OperationsStoreRead],
+      organizationScopes: [],
+    });
     // Create a token with write rights
-    const { secret: writeToken } = await createToken(
-      [],
-      [ProjectAccessScope.OperationsStoreRead, ProjectAccessScope.OperationsStoreWrite],
-      [],
-    );
+    const { secret: writeToken } = await createToken({
+      targetScopes: [],
+      projectScopes: [
+        ProjectAccessScope.OperationsStoreRead,
+        ProjectAccessScope.OperationsStoreWrite,
+      ],
+      organizationScopes: [],
+    });
 
     const operations = [
       {
@@ -68,11 +75,14 @@ test.concurrent('should skip on already persisted operations', async () => {
   const { createToken } = await createProject(ProjectType.Single);
 
   // Create a token with write rights
-  const { secret: writeToken } = await createToken(
-    [],
-    [ProjectAccessScope.OperationsStoreRead, ProjectAccessScope.OperationsStoreWrite],
-    [],
-  );
+  const { secret: writeToken } = await createToken({
+    targetScopes: [],
+    projectScopes: [
+      ProjectAccessScope.OperationsStoreRead,
+      ProjectAccessScope.OperationsStoreWrite,
+    ],
+    organizationScopes: [],
+  });
 
   const operations = [
     {

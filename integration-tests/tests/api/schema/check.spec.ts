@@ -7,10 +7,9 @@ test.concurrent('can check a schema with target:registry:read access', async () 
   const { createToken } = await createProject(ProjectType.Single);
 
   // Create a token with write rights
-  const writeToken = await createToken([
-    TargetAccessScope.RegistryRead,
-    TargetAccessScope.RegistryWrite,
-  ]);
+  const writeToken = await createToken({
+    targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+  });
 
   // Publish schema with write rights
   const publishResult = await writeToken
@@ -26,10 +25,18 @@ test.concurrent('can check a schema with target:registry:read access', async () 
   expect(publishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
 
   // Create a token with no rights
-  const noAccessToken = await createToken([], [], []);
+  const noAccessToken = await createToken({
+    targetScopes: [],
+    projectScopes: [],
+    organizationScopes: [],
+  });
 
   // Create a token with read rights
-  const readToken = await createToken([TargetAccessScope.RegistryRead], [], []);
+  const readToken = await createToken({
+    targetScopes: [TargetAccessScope.RegistryRead],
+    projectScopes: [],
+    organizationScopes: [],
+  });
 
   // Check schema with no read and write rights
   const checkResultErrors = await noAccessToken
@@ -65,11 +72,11 @@ test.concurrent('should match indentation of previous description', async () => 
   const { createToken } = await createProject(ProjectType.Single);
 
   // Create a token with write rights
-  const writeToken = await createToken(
-    [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-    [],
-    [],
-  );
+  const writeToken = await createToken({
+    targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+    projectScopes: [],
+    organizationScopes: [],
+  });
 
   // Publish schema with write rights
   const publishResult = await writeToken
@@ -89,7 +96,11 @@ test.concurrent('should match indentation of previous description', async () => 
   expect(publishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
 
   // Create a token with read rights
-  const readToken = await createToken([TargetAccessScope.RegistryRead], [], []);
+  const readToken = await createToken({
+    targetScopes: [TargetAccessScope.RegistryRead],
+    projectScopes: [],
+    organizationScopes: [],
+  });
 
   // Check schema with read rights
   const checkResult = await readToken

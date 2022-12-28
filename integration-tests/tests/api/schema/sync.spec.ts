@@ -7,11 +7,11 @@ test.concurrent(
     const { createOrg } = await initSeed().createOwner();
     const { createProject } = await createOrg();
     const { createToken } = await createProject(ProjectType.Single);
-    const readWriteToken = await createToken(
-      [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-      [],
-      [],
-    );
+    const readWriteToken = await createToken({
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      projectScopes: [],
+      organizationScopes: [],
+    });
 
     // Initial schema
     const publishResult = await readWriteToken
