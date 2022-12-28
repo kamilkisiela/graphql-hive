@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'fs';
-import { GraphQLError, print } from 'graphql';
 import { transformCommentsToDescriptions } from '@graphql-tools/utils';
 import { Errors, Flags } from '@oclif/core';
+import { GraphQLError, print } from 'graphql';
 import Command from '../../base-command';
 import { graphqlEndpoint } from '../../helpers/config';
 import { gitInfo } from '../../helpers/git';

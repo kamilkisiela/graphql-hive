@@ -1,10 +1,10 @@
 import { promises as fs } from 'fs';
 import { relative } from 'path';
-import { parse } from 'graphql';
 import { normalizeOperation } from '@graphql-hive/core';
 import { CodeFileLoader } from '@graphql-tools/code-file-loader';
 import { GraphQLFileLoader } from '@graphql-tools/graphql-file-loader';
 import { loadDocuments } from '@graphql-tools/load';
+import { parse } from 'graphql';
 
 export async function loadOperations(
   file: string,

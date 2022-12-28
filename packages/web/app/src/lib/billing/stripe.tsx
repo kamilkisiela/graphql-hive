@@ -1,7 +1,7 @@
-import { Elements as ElementsProvider } from '@stripe/react-stripe-js';
 import React, { PropsWithChildren } from 'react';
-import { getStripePublicKey } from './stripe-public-key';
+import { Elements as ElementsProvider } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
+import { getStripePublicKey } from './stripe-public-key';
 
 export const HiveStripeWrapper = ({ children }: PropsWithChildren) => {
   const [stripe] = React.useState(() => {

@@ -1,13 +1,13 @@
 import { ReactElement, ReactNode, useCallback, useState } from 'react';
+import Image, { StaticImageData } from 'next/image';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { useMounted } from '@theguild/components';
 import clsx from 'clsx';
 import { FiGithub, FiGlobe, FiRadio, FiServer } from 'react-icons/fi';
-import { Pricing } from '../pricing';
-import schemaHistoryImage from '../../public/features/schema-history.png';
-import monitoringImage from '../../public/features/monitoring-preview.png';
 import cicdImage from '../../public/any-ci-cd.svg';
-import Image, { StaticImageData } from 'next/image';
+import monitoringImage from '../../public/features/monitoring-preview.png';
+import schemaHistoryImage from '../../public/features/schema-history.png';
+import { Pricing } from '../pricing';
 
 const classes = {
   link: clsx(

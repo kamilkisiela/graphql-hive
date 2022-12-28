@@ -1,6 +1,6 @@
-import { parse, stripIgnoredCharacters } from 'graphql';
 import axios from 'axios';
 import type { DocumentNode } from 'graphql';
+import { parse, stripIgnoredCharacters } from 'graphql';
 import type { HivePluginOptions } from './types.js';
 
 export interface OperationsStore {

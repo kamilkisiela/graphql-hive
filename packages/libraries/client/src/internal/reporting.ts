@@ -1,5 +1,5 @@
-import { ExecutionResult, GraphQLSchema, Kind, print, stripIgnoredCharacters } from 'graphql';
 import { getDocumentNodeFromSchema } from '@graphql-tools/utils';
+import { ExecutionResult, GraphQLSchema, Kind, print, stripIgnoredCharacters } from 'graphql';
 import type { SchemaPublishMutation } from '../__generated__/types.js';
 import { version } from '../version.js';
 import { createAgent } from './agent.js';

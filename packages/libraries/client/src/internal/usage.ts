@@ -1,3 +1,4 @@
+import { normalizeOperation } from '@graphql-hive/core';
 import {
   ArgumentNode,
   DocumentNode,
@@ -23,7 +24,6 @@ import {
   visit,
   visitWithTypeInfo,
 } from 'graphql';
-import { normalizeOperation } from '@graphql-hive/core';
 import LRU from 'tiny-lru';
 import { version } from '../version.js';
 import { createAgent } from './agent.js';

@@ -1,12 +1,12 @@
 import { Injectable, Scope } from 'graphql-modules';
-import { Orchestrator, Schema, SchemaObject, Project } from '../../../shared/entities';
-import { buildSchema, findSchema, hashSchema } from '../../../shared/schema';
 import * as Types from '../../../__generated__/types';
-import { Logger } from '../../shared/providers/logger';
+import { Orchestrator, Project, Schema, SchemaObject } from '../../../shared/entities';
+import { buildSchema, findSchema, hashSchema } from '../../../shared/schema';
 import { sentry } from '../../../shared/sentry';
-import { SchemaHelper } from './schema-helper';
+import { Logger } from '../../shared/providers/logger';
 import { Inspector } from './inspector';
 import { SchemaBuildError } from './orchestrators/errors';
+import { SchemaHelper } from './schema-helper';
 
 export type ValidationResult = {
   valid: boolean;

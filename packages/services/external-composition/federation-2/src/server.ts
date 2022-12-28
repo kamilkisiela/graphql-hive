@@ -1,8 +1,8 @@
-import { verifyRequest, compose, signatureHeaderName } from '@graphql-hive/external-composition';
 import { composeServices } from '@apollo/composition';
-import { parse, printSchema } from 'graphql';
-import { createServerAdapter } from '@whatwg-node/server';
+import { compose, signatureHeaderName, verifyRequest } from '@graphql-hive/external-composition';
 import { Response } from '@whatwg-node/fetch';
+import { createServerAdapter } from '@whatwg-node/server';
+import { parse, printSchema } from 'graphql';
 import { ResolvedEnv } from './environment';
 
 const composeFederation = compose(services => {

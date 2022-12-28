@@ -1,36 +1,36 @@
-import { Injectable, Inject, Scope } from 'graphql-modules';
-import lodash from 'lodash';
 import type { Span } from '@sentry/types';
+import { Inject, Injectable, Scope } from 'graphql-modules';
+import lodash from 'lodash';
+import * as Types from '../../../__generated__/types';
 import {
-  Schema,
-  Target,
+  GraphQLDocumentStringInvalidError,
+  Orchestrator,
   Project,
   ProjectType,
-  Orchestrator,
-  GraphQLDocumentStringInvalidError,
+  Schema,
+  Target,
 } from '../../../shared/entities';
-import * as Types from '../../../__generated__/types';
-import { ProjectManager } from '../../project/providers/project-manager';
-import { Logger } from '../../shared/providers/logger';
-import { updateSchemas } from '../../../shared/schema';
-import { SchemaManager } from './schema-manager';
-import { SchemaValidator, ValidationResult } from './schema-validator';
-import { sentry } from '../../../shared/sentry';
-import { Storage, type TargetSelector } from '../../shared/providers/storage';
-import { IdempotentRunner } from '../../shared/providers/idempotent-runner';
+import { HiveError } from '../../../shared/errors';
 import { bolderize } from '../../../shared/markdown';
+import { updateSchemas } from '../../../shared/schema';
+import { sentry } from '../../../shared/sentry';
 import { AlertsManager } from '../../alerts/providers/alerts-manager';
-import { TargetManager } from '../../target/providers/target-manager';
-import { CdnProvider } from '../../cdn/providers/cdn.provider';
-import { OrganizationManager } from '../../organization/providers/organization-manager';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { TargetAccessScope } from '../../auth/providers/target-access';
+import { CdnProvider } from '../../cdn/providers/cdn.provider';
 import { GitHubIntegrationManager } from '../../integrations/providers/github-integration-manager';
+import { OrganizationManager } from '../../organization/providers/organization-manager';
+import { ProjectManager } from '../../project/providers/project-manager';
+import { IdempotentRunner } from '../../shared/providers/idempotent-runner';
+import { Logger } from '../../shared/providers/logger';
+import { type TargetSelector, Storage } from '../../shared/providers/storage';
+import { TargetManager } from '../../target/providers/target-manager';
+import { ArtifactStorageWriter } from './artifact-storage-writer';
 import type { SchemaModuleConfig } from './config';
 import { SCHEMA_MODULE_CONFIG } from './config';
 import { SchemaHelper } from './schema-helper';
-import { HiveError } from '../../../shared/errors';
-import { ArtifactStorageWriter } from './artifact-storage-writer';
+import { SchemaManager } from './schema-manager';
+import { SchemaValidator, ValidationResult } from './schema-validator';
 
 type CheckInput = Omit<Types.SchemaCheckInput, 'project' | 'organization' | 'target'> &
   TargetSelector;

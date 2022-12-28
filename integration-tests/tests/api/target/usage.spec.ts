@@ -1,4 +1,3 @@
-import { parse, print } from 'graphql';
 import {
   OrganizationAccessScope,
   ProjectAccessScope,
@@ -9,6 +8,7 @@ import {
 import { normalizeOperation } from '@graphql-hive/core';
 import formatISO from 'date-fns/formatISO';
 import subHours from 'date-fns/subHours';
+import { parse, print } from 'graphql';
 import { clickHouseQuery } from '../../../testkit/clickhouse';
 import { createTarget, updateTargetValidationSettings, waitFor } from '../../../testkit/flow';
 import { initSeed } from '../../../testkit/seed';
