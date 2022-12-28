@@ -28,6 +28,9 @@ spec:
                   number: 80
             path: /graphql
             pathType: Prefix
-  {{- with .Values.ingress.tls.root }}
-  {{- toYaml . | nindent 4 }}
-  {{- end }}
+{{- if .Values.ingress.useTls }}
+  tls:
+    - hosts:
+        - {{ $url }}
+      secretName: root-hive-k8s
+{{- end }}
