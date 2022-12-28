@@ -52,7 +52,7 @@
     "@graphql-tools/load": "~7.8.0",
     "@graphql-tools/url-loader": "~7.16.4",
     "@graphql-tools/utils": "8.13.1",
-    "@oclif/core": "^1.20.4",
+    "@oclif/core": "^1.23.0",
     "@oclif/plugin-help": "5.1.20",
     "@oclif/plugin-update": "3.0.9",
     "colors": "1.4.0",
@@ -71,7 +71,7 @@
     "@graphql-codegen/typescript-graphql-request": "4.5.8",
     "@types/env-ci": "3.1.1",
     "@types/mkdirp": "1.0.2",
-    "oclif": "^3.2.25"
+    "oclif": "3.4.3"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org",
