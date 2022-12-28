@@ -87,7 +87,7 @@ const GitHubIntegration = ({ gitRepository }: { gitRepository: string | null }):
             value={values.gitRepository ?? undefined}
             onChange={handleChange}
             onBlur={handleBlur}
-            isInvalid={!!touched.gitRepository && Boolean(errors.gitRepository)}
+            isInvalid={Boolean(touched.gitRepository && errors.gitRepository)}
           />
           <Button
             type="submit"

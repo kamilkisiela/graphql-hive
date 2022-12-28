@@ -65,7 +65,7 @@ export class AdminManager {
     }));
   }
 
-  @atomic((arg: { daysLimit: number }) => arg.daysLimit + '')
+  @atomic((arg: { daysLimit: number }) => String(arg.daysLimit))
   async countOperationsPerOrganization({ period }: { period: { from: Date; to: Date } }) {
     this.logger.info(
       'Counting collected operations per organization (admin, from=%s, to=%s)',

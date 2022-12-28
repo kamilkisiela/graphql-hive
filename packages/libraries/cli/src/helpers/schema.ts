@@ -21,7 +21,7 @@ export function renderErrors(this: baseCommand, errors: SchemaErrorConnection) {
   this.log('');
 
   errors.nodes.forEach(error => {
-    this.log(`${indent}`, colors.red('-'), this.bolderize(error.message));
+    this.log(String(indent), colors.red('-'), this.bolderize(error.message));
   });
 }
 

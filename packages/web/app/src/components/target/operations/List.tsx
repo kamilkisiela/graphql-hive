@@ -471,7 +471,7 @@ export const OperationsList: React.FC<{
 
   return (
     <OperationsFallback
-      isError={!!query.error}
+      isError={Boolean(query.error)}
       isFetching={query.fetching}
       refetch={() =>
         refetch({

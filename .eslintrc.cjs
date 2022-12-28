@@ -4,6 +4,7 @@ const guildConfig = require('@theguild/eslint-config/base');
 const rulesToExtends = Object.fromEntries(
   Object.entries(guildConfig.rules).filter(([key]) =>
     [
+      'no-implicit-coercion',
       'simple-import-sort/imports',
       'import/first',
       'no-restricted-globals',

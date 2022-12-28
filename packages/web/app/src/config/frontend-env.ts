@@ -15,10 +15,10 @@ export const env = {
   docsUrl: backendEnv.docsUrl,
   stripePublicKey: backendEnv?.stripePublicKey,
   auth: {
-    github: !!backendEnv.auth.github,
-    google: !!backendEnv.auth.google,
+    github: Boolean(backendEnv.auth.github),
+    google: Boolean(backendEnv.auth.google),
     okta: backendEnv.auth.okta ? { hidden: backendEnv.auth.okta.hidden } : null,
-    legacyAuth0: !!backendEnv.auth.legacyAuth0,
+    legacyAuth0: Boolean(backendEnv.auth.legacyAuth0),
     requireEmailVerification: backendEnv.auth.requireEmailVerification,
     organizationOIDC: backendEnv.auth.organizationOIDC,
   },
@@ -27,7 +27,7 @@ export const env = {
     crispWebsiteId: backendEnv?.analytics.crispWebsiteId,
   },
   integrations: {
-    slack: !!backendEnv.slack,
+    slack: Boolean(backendEnv.slack),
   },
   sentry: backendEnv.sentry,
   release: backendEnv.release,
