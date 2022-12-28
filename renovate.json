@@ -4,6 +4,10 @@
   "prConcurrentLimit": 20,
   "packageRules": [
     {
+      "groupName": "radix",
+      "matchPackagePrefixes": ["@radix"]
+    },
+    {
       "groupName": "graphql-tools",
       "matchPackagePrefixes": "@graphql-tools"
     },
