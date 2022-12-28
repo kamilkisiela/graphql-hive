@@ -414,13 +414,11 @@ const deleteOrganizationInvitation: TypedDocumentNodeUpdateResolver<
 
         const invitation = deleteOrganizationInvitation.ok;
 
-        if (invitation) {
-          if (data.organization?.organization?.invitations.nodes) {
-            data.organization.organization.invitations.nodes =
-              data.organization.organization.invitations.nodes.filter(
-                node => node.id !== invitation.id,
-              );
-          }
+        if (invitation && data.organization?.organization?.invitations.nodes) {
+          data.organization.organization.invitations.nodes =
+            data.organization.organization.invitations.nodes.filter(
+              node => node.id !== invitation.id,
+            );
         }
 
         return data;

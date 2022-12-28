@@ -1,5 +1,5 @@
-import { captureException } from '@sentry/nextjs';
 import { GetServerSideProps } from 'next';
+import { captureException } from '@sentry/nextjs';
 import { SessionContainerInterface } from 'supertokens-node/lib/build/recipe/session/types';
 
 export const serverSidePropsSessionHandling = async (

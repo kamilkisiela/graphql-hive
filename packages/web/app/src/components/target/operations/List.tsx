@@ -388,10 +388,12 @@ const OperationsTableContainer: React.FC<{
   const data = React.useMemo(() => {
     const records: Array<Operation> = [];
     for (const op of operations) {
-      if (operationsFilter.length > 0 && op.operationHash) {
-        if (operationsFilter.includes(op.operationHash) === false) {
-          continue;
-        }
+      if (
+        operationsFilter.length > 0 &&
+        op.operationHash &&
+        operationsFilter.includes(op.operationHash) === false
+      ) {
+        continue;
       }
       records.push({
         id: op.id,

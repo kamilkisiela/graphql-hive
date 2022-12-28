@@ -103,8 +103,8 @@ const TriggerItem: FC<DropdownMenuTriggerItemProps> = ({ children, className, ..
   <DropDownMenuTriggerItem
     className={clsx(
       `
-      radix-state-open:sepia
       radix-state-open:bg-orange-500/40
+      radix-state-open:sepia
       flex
       cursor-pointer
       items-center

@@ -1,4 +1,4 @@
-import * as crypto from 'crypto';
+import * as crypto from 'node:crypto';
 import { EmailsApi } from '@hive/emails';
 import { InternalApi } from '@hive/server';
 import { createTRPCProxyClient, httpLink, inferRouterProxyClient } from '@trpc/client';

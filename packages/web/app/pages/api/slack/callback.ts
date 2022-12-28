@@ -1,4 +1,4 @@
-import { stringify } from 'querystring';
+import { stringify } from 'node:querystring';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { env } from '@/env/backend';
 import { graphql } from '@/lib/api/utils';

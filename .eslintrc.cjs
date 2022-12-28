@@ -78,10 +78,9 @@ module.exports = {
     {
       files: ['packages/web/**'],
       extends: [
-        'plugin:react/recommended',
-        'plugin:react-hooks/recommended',
+        '@theguild',
+        '@theguild/eslint-config/react',
         'plugin:tailwindcss/recommended',
-        'plugin:jsx-a11y/recommended',
         'plugin:@next/next/recommended',
       ],
       settings: {
@@ -93,20 +92,36 @@ module.exports = {
         // conflicts with official prettier-plugin-tailwindcss and tailwind v3
         'tailwindcss/classnames-order': 'off',
         // set more strict to highlight in editor
-        'tailwindcss/no-custom-classname': 'error',
         'tailwindcss/enforces-shorthand': 'error',
-        'tailwindcss/migration-from-tailwind-2': 'error',
-        // in React@17, import React is no longer required
-        'react/react-in-jsx-scope': 'off',
         'react/display-name': 'off',
         'react/prop-types': 'off',
-        'react/no-unescaped-entities': 'off',
-        'react/jsx-curly-brace-presence': 'error',
         'react/no-unknown-property': 'off',
         'jsx-a11y/anchor-is-valid': ['off', { components: ['Link', 'NextLink'] }],
         'jsx-a11y/alt-text': ['warn', { elements: ['img'], img: ['Image', 'NextImage'] }],
-        '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'no-type-imports' }],
         'simple-import-sort/exports': 'error',
+
+        // TODO: enable below rules👇
+        '@typescript-eslint/consistent-type-imports': ['off', { prefer: 'no-type-imports' }],
+        'tailwindcss/no-custom-classname': 'off',
+        'tailwindcss/migration-from-tailwind-2': 'off',
+        'no-console': 'off',
+        '@typescript-eslint/no-non-null-assertion': 'off',
+        'react/jsx-no-useless-fragment': 'off',
+        '@typescript-eslint/no-explicit-any': 'off',
+        '@typescript-eslint/no-restricted-imports': 'off',
+        '@typescript-eslint/no-empty-function': 'off',
+        'react-hooks/rules-of-hooks': 'off',
+        'react-hooks/exhaustive-deps': 'off',
+        'unicorn/filename-case': 'off',
+        'import/no-default-export': 'off',
+        '@next/next/no-img-element': 'off',
+        '@typescript-eslint/ban-types': 'off',
+        'react/jsx-key': 'off',
+        'jsx-a11y/label-has-associated-control': 'off',
+        'jsx-a11y/click-events-have-key-events': 'off',
+        'jsx-a11y/no-static-element-interactions': 'off',
+        '@next/next/no-html-link-for-pages': 'off',
+        'tailwindcss/no-contradicting-classname': 'off',
       },
     },
     {

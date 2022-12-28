@@ -11,7 +11,7 @@ import { Pricing } from '../pricing';
 
 const classes = {
   link: clsx(
-    'inline-block bg-gray-100 hover:bg-gray-200 text-gray-600 px-6 py-3 rounded-lg font-medium shadow-sm',
+    'inline-block rounded-lg bg-gray-100 px-6 py-3 font-medium text-gray-600 shadow-sm hover:bg-gray-200',
     'dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700',
   ),
   feature: clsx(
@@ -19,7 +19,7 @@ const classes = {
     'odd:bg-gray-50 odd:dark:bg-gray-900',
     'even:bg-white even:dark:bg-black',
   ),
-  root: clsx('flex flex-row md:flex-col lg:flex-row flex-1 gap-6'),
+  root: clsx('flex flex-1 flex-row gap-6 md:flex-col lg:flex-row'),
   content: clsx('flex flex-col text-black dark:text-white'),
   title: clsx('text-xl font-semibold'),
   description: clsx('text-gray-600 dark:text-gray-400'),
