@@ -99,7 +99,7 @@ describe('create', () => {
       });
     });
 
-    test.concurrent('error: non existing organization', async () => {
+    test.concurrent('error: non existing organization', async ({ expect }) => {
       const { ownerToken } = await initSeed().createOwner();
       const errors = await execute({
         document: CreateOIDCIntegrationMutation,
@@ -119,22 +119,22 @@ describe('create', () => {
       expect(errors).toMatchInlineSnapshot(`
         [
           {
-            "locations": [
+            locations: [
               {
-                "column": 3,
-                "line": 2,
+                column: 3,
+                line: 2,
               },
             ],
-            "message": "No access (reason: "Missing organization:integrations permission")",
-            "path": [
-              "createOIDCIntegration",
+            message: No access (reason: "Missing organization:integrations permission"),
+            path: [
+              createOIDCIntegration,
             ],
           },
         ]
       `);
     });
 
-    test.concurrent('error: too short clientId', async () => {
+    test.concurrent('error: too short clientId', async ({ expect }) => {
       const { ownerToken, createOrg } = await initSeed().createOwner();
       const { organization } = await createOrg();
 
@@ -155,24 +155,24 @@ describe('create', () => {
 
       expect(result).toMatchInlineSnapshot(`
         {
-          "createOIDCIntegration": {
-            "error": {
-              "details": {
-                "authorizationEndpoint": null,
-                "clientId": "Must be at least 3 characters long.",
-                "clientSecret": null,
-                "tokenEndpoint": null,
-                "userinfoEndpoint": null,
+          createOIDCIntegration: {
+            error: {
+              details: {
+                authorizationEndpoint: null,
+                clientId: Must be at least 3 characters long.,
+                clientSecret: null,
+                tokenEndpoint: null,
+                userinfoEndpoint: null,
               },
-              "message": "Failed to create OIDC Integration.",
+              message: Failed to create OIDC Integration.,
             },
-            "ok": null,
+            ok: null,
           },
         }
       `);
     });
 
-    test.concurrent('error: too long clientId', async () => {
+    test.concurrent('error: too long clientId', async ({ expect }) => {
       const { ownerToken, createOrg } = await initSeed().createOwner();
       const { organization } = await createOrg();
 
@@ -193,24 +193,24 @@ describe('create', () => {
 
       expect(result).toMatchInlineSnapshot(`
         {
-          "createOIDCIntegration": {
-            "error": {
-              "details": {
-                "authorizationEndpoint": null,
-                "clientId": "Can not be longer than 100 characters.",
-                "clientSecret": null,
-                "tokenEndpoint": null,
-                "userinfoEndpoint": null,
+          createOIDCIntegration: {
+            error: {
+              details: {
+                authorizationEndpoint: null,
+                clientId: Can not be longer than 100 characters.,
+                clientSecret: null,
+                tokenEndpoint: null,
+                userinfoEndpoint: null,
               },
-              "message": "Failed to create OIDC Integration.",
+              message: Failed to create OIDC Integration.,
             },
-            "ok": null,
+            ok: null,
           },
         }
       `);
     });
 
-    test.concurrent('error: too short clientSecret', async () => {
+    test.concurrent('error: too short clientSecret', async ({ expect }) => {
       const { ownerToken, createOrg } = await initSeed().createOwner();
       const { organization } = await createOrg();
 
@@ -231,24 +231,24 @@ describe('create', () => {
 
       expect(result).toMatchInlineSnapshot(`
         {
-          "createOIDCIntegration": {
-            "error": {
-              "details": {
-                "authorizationEndpoint": null,
-                "clientId": null,
-                "clientSecret": "Must be at least 3 characters long.",
-                "tokenEndpoint": null,
-                "userinfoEndpoint": null,
+          createOIDCIntegration: {
+            error: {
+              details: {
+                authorizationEndpoint: null,
+                clientId: null,
+                clientSecret: Must be at least 3 characters long.,
+                tokenEndpoint: null,
+                userinfoEndpoint: null,
               },
-              "message": "Failed to create OIDC Integration.",
+              message: Failed to create OIDC Integration.,
             },
-            "ok": null,
+            ok: null,
           },
         }
       `);
     });
 
-    test.concurrent('error: too long clientSecret', async () => {
+    test.concurrent('error: too long clientSecret', async ({ expect }) => {
       const { ownerToken, createOrg } = await initSeed().createOwner();
       const { organization } = await createOrg();
 
@@ -269,24 +269,24 @@ describe('create', () => {
 
       expect(result).toMatchInlineSnapshot(`
         {
-          "createOIDCIntegration": {
-            "error": {
-              "details": {
-                "authorizationEndpoint": null,
-                "clientId": null,
-                "clientSecret": "Can not be longer than 200 characters.",
-                "tokenEndpoint": null,
-                "userinfoEndpoint": null,
+          createOIDCIntegration: {
+            error: {
+              details: {
+                authorizationEndpoint: null,
+                clientId: null,
+                clientSecret: Can not be longer than 200 characters.,
+                tokenEndpoint: null,
+                userinfoEndpoint: null,
               },
-              "message": "Failed to create OIDC Integration.",
+              message: Failed to create OIDC Integration.,
             },
-            "ok": null,
+            ok: null,
           },
         }
       `);
     });
 
-    test.concurrent('error: invalid oauth api url', async () => {
+    test.concurrent('error: invalid oauth api url', async ({ expect }) => {
       const { ownerToken, createOrg } = await initSeed().createOwner();
       const { organization } = await createOrg();
 
@@ -307,18 +307,18 @@ describe('create', () => {
 
       expect(result).toMatchInlineSnapshot(`
         {
-          "createOIDCIntegration": {
-            "error": {
-              "details": {
-                "authorizationEndpoint": "Must be a valid OAuth API url.",
-                "clientId": null,
-                "clientSecret": null,
-                "tokenEndpoint": "Must be a valid OAuth API url.",
-                "userinfoEndpoint": "Must be a valid OAuth API url.",
+          createOIDCIntegration: {
+            error: {
+              details: {
+                authorizationEndpoint: Must be a valid OAuth API url.,
+                clientId: null,
+                clientSecret: null,
+                tokenEndpoint: Must be a valid OAuth API url.,
+                userinfoEndpoint: Must be a valid OAuth API url.,
               },
-              "message": "Failed to create OIDC Integration.",
+              message: Failed to create OIDC Integration.,
             },
-            "ok": null,
+            ok: null,
           },
         }
       `);
@@ -521,15 +521,15 @@ describe('delete', () => {
       expect(errors).toMatchInlineSnapshot(`
         [
           {
-            "locations": [
+            locations: [
               {
-                "column": 3,
-                "line": 2,
+                column: 3,
+                line: 2,
               },
             ],
-            "message": "No access (reason: "Missing organization:integrations permission")",
-            "path": [
-              "deleteOIDCIntegration",
+            message: No access (reason: "Missing organization:integrations permission"),
+            path: [
+              deleteOIDCIntegration,
             ],
           },
         ]
@@ -538,7 +538,7 @@ describe('delete', () => {
 
     test.concurrent(
       'success: upon integration deletion oidc members are also deleted',
-      async () => {
+      async ({ expect }) => {
         const seed = initSeed();
         const { ownerToken, createOrg } = await seed.createOwner();
         const { organization } = await createOrg();
@@ -601,15 +601,15 @@ describe('delete', () => {
         expect(refetchedMeResult).toMatchInlineSnapshot(`
           [
             {
-              "locations": [
+              locations: [
                 {
-                  "column": 3,
-                  "line": 2,
+                  column: 3,
+                  line: 2,
                 },
               ],
-              "message": "No access (reason: "User not found")",
-              "path": [
-                "me",
+              message: No access (reason: "User not found"),
+              path: [
+                me,
               ],
             },
           ]
@@ -701,7 +701,7 @@ describe('update', () => {
       });
     });
 
-    test.concurrent('error: user does not have permissions', async () => {
+    test.concurrent('error: user does not have permissions', async ({ expect }) => {
       const { ownerToken, createOrg } = await initSeed().createOwner();
       const { organization } = await createOrg();
 
@@ -736,15 +736,15 @@ describe('update', () => {
       expect(errors).toMatchInlineSnapshot(`
         [
           {
-            "locations": [
+            locations: [
               {
-                "column": 3,
-                "line": 2,
+                column: 3,
+                line: 2,
               },
             ],
-            "message": "No access (reason: "Missing organization:integrations permission")",
-            "path": [
-              "updateOIDCIntegration",
+            message: No access (reason: "Missing organization:integrations permission"),
+            path: [
+              updateOIDCIntegration,
             ],
           },
         ]

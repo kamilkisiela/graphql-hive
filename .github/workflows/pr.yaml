@@ -58,7 +58,7 @@ jobs:
       publish: false
     secrets: inherit
 
-  # Unit tests using Jest
+  # Unit tests using Vitest
   unit-tests:
     name: test
     uses: ./.github/workflows/tests-unit.yaml

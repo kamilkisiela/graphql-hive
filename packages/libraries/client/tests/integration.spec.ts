@@ -39,8 +39,8 @@ function handleProcess() {
 
 test('GraphQL Yoga - should not interrupt the process', async () => {
   const logger = {
-    error: jest.fn(),
-    info: jest.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
   };
   const clean = handleProcess();
   const hive = createHive({
@@ -105,8 +105,8 @@ test('GraphQL Yoga - should not interrupt the process', async () => {
 
 test('Apollo Server - should not interrupt the process', async () => {
   const logger = {
-    error: jest.fn(),
-    info: jest.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
   };
   const clean = handleProcess();
   const apollo = new ApolloServer({
