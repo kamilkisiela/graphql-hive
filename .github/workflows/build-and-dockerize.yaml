@@ -91,9 +91,13 @@ jobs:
           message: |
             🐋 This PR was built and pushed to the following [Docker images](https://github.com/kamilkisiela?ecosystem=container&tab=packages&visibility=public&tab=packages&ecosystem=container&visibility=public&q=graphql-hive) (tag: `${{ inputs.imageTag }}`):
 
-            ```json
-            ${{ steps.docker-bake.outputs.metadata }}
-            ```
+            <details>
+              <summary>Docker Bake metadata</summary>
+              
+              ```json
+              ${{ steps.docker-bake.outputs.metadata }}
+              ```
+            </details>
 
       - name: upload sourcemaps to Sentry
         if: ${{ inputs.publishSourceMaps }}
