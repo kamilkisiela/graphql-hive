@@ -217,7 +217,9 @@ function runArtifactsCDNTests(
       });
       const body = await response.text();
       expect(response.status).toEqual(200);
-      expect(body).toMatchInlineSnapshot(`"[{"sdl":"type Query { ping: String }"}]"`);
+      expect(body).toMatchInlineSnapshot(
+        `"[{"name":"ping","sdl":"type Query { ping: String }","url":"ping.com"}]"`,
+      );
     });
 
     test.concurrent('access services artifact with if-none-match header', async () => {
