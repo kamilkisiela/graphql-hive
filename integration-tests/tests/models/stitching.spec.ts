@@ -1,6 +1,6 @@
 import { ProjectType } from '@app/gql/graphql';
-import { prepareProject } from '../../testkit/registry-models';
 import { createCLI } from '../../testkit/cli';
+import { prepareProject } from '../../testkit/registry-models';
 
 describe('publish', () => {
   test.concurrent('accepted: composable', async () => {
@@ -328,7 +328,6 @@ describe('check', () => {
     });
   });
 
-  // TODO: this should be rejected, add a check to `main`
   test.concurrent('rejected: missing service name', async () => {
     const { check, publish } = await prepare();
 
