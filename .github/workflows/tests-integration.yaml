@@ -62,7 +62,7 @@ jobs:
           docker compose -f docker-compose.community.yml -f ./integration-tests/docker-compose.integration.yaml --env-file ./integration-tests/.env logs
 
       - name: run integration tests
-        timeout-minutes: 10
+        timeout-minutes: 15
         run: |
           pnpm --filter integration-tests test:integration --max-workers ${{ steps.cpu-cores.outputs.count }}
 
