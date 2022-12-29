@@ -1,5 +1,6 @@
 import type { Span } from '@sentry/types';
 import { Inject, Injectable, Scope } from 'graphql-modules';
+import * as Sentry from '@sentry/node';
 import lodash from 'lodash';
 import * as Types from '../../../__generated__/types';
 import {
@@ -97,6 +98,61 @@ export class SchemaPublisher {
     const schemas = latest.schemas;
     const isInitialSchema = schemas.length === 0;
 
+    if (
+      (project.type === ProjectType.STITCHING || project.type === ProjectType.FEDERATION) &&
+      (lodash.isNil(input.service) || input.service?.trim() === '')
+    ) {
+      this.logger.debug('Detected missing service name');
+      const missingServiceNameMessage = `Can not check schema without a service name.`;
+
+      if (!project.gitRepository) {
+        return {
+          __typename: 'GitHubSchemaCheckError' as const,
+          message: 'Git repository is not configured for this project',
+        };
+      }
+
+      const [repositoryOwner, repositoryName] = project.gitRepository.split('/');
+
+      if (input.github) {
+        try {
+          await this.gitHubIntegrationManager.createCheckRun({
+            name: 'GraphQL Hive - schema:check',
+            conclusion: 'failure',
+            sha: input.github.commit,
+            organization: input.organization,
+            repositoryOwner,
+            repositoryName,
+            output: {
+              title: 'Missing service name',
+              summary: missingServiceNameMessage,
+            },
+          });
+
+          return {
+            __typename: 'GitHubSchemaCheckSuccess' as const,
+            message: 'Check-run created',
+          };
+        } catch (error) {
+          Sentry.captureException(error);
+          return {
+            __typename: 'GitHubSchemaCheckError' as const,
+            message: `Failed to create the check-run`,
+          };
+        }
+      }
+
+      return {
+        valid: false,
+        errors: [
+          {
+            message: missingServiceNameMessage,
+          },
+        ],
+        initial: isInitialSchema,
+      };
+    }
+
     await this.schemaManager.completeGetStartedCheck({
       organization: project.orgId,
       step: 'checkingSchema',
@@ -187,7 +243,7 @@ export class SchemaPublisher {
       } catch (error: any) {
         return {
           __typename: 'GitHubSchemaCheckError' as const,
-          message: `Failed to create the check-run: ${error.message}`,
+          message: `Failed to create the check-run`,
         };
       }
     }
@@ -946,9 +1002,10 @@ export class SchemaPublisher {
         message: title,
       };
     } catch (error: any) {
+      Sentry.captureException(error);
       return {
         __typename: 'GitHubSchemaPublishError' as const,
-        message: `Failed to create the check-run: ${error.message}`,
+        message: `Failed to create the check-run`,
       };
     }
   }

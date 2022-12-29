@@ -164,7 +164,7 @@ function runArtifactsCDNTests(
     test.concurrent('access services artifact with valid credentials', async () => {
       const { createOrg } = await initSeed().createOwner();
       const { createProject } = await createOrg();
-      const { createToken, target } = await createProject(ProjectType.Single);
+      const { createToken, target } = await createProject(ProjectType.Federation);
       const writeToken = await createToken({
         targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
       });
@@ -175,6 +175,8 @@ function runArtifactsCDNTests(
           author: 'Kamil',
           commit: 'abc123',
           sdl: `type Query { ping: String }`,
+          service: 'ping',
+          url: 'ping.com',
         })
         .then(r => r.expectNoGraphQLErrors());
 
@@ -186,7 +188,7 @@ function runArtifactsCDNTests(
         `artifact/${target!.id}/services`,
       );
       expect(artifactContents.body).toMatchInlineSnapshot(
-        `"[{"sdl":"type Query { ping: String }"}]"`,
+        `"[{"name":"ping","sdl":"type Query { ping: String }","url":"ping.com"}]"`,
       );
 
       const cdnAccessResult = await writeToken.createCdnAccess();
@@ -221,7 +223,7 @@ function runArtifactsCDNTests(
     test.concurrent('access services artifact with if-none-match header', async () => {
       const { createOrg } = await initSeed().createOwner();
       const { createProject } = await createOrg();
-      const { createToken, target } = await createProject(ProjectType.Single);
+      const { createToken, target } = await createProject(ProjectType.Federation);
       const writeToken = await createToken({
         targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
       });
@@ -233,6 +235,8 @@ function runArtifactsCDNTests(
           author: 'Kamil',
           commit: 'abc123',
           sdl: `type Query { ping: String }`,
+          service: 'ping',
+          url: 'ping.com',
         })
         .then(r => r.expectNoGraphQLErrors());
 
@@ -244,7 +248,7 @@ function runArtifactsCDNTests(
         `artifact/${target!.id}/services`,
       );
       expect(artifactContents.body).toMatchInlineSnapshot(
-        `"[{"sdl":"type Query { ping: String }"}]"`,
+        `"[{"name":"ping","sdl":"type Query { ping: String }","url":"ping.com"}]"`,
       );
 
       const cdnAccessResult = await writeToken.createCdnAccess();

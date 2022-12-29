@@ -35,6 +35,7 @@ interface CompositionFailure {
     errors: Array<{
       message: string;
     }>;
+    raw?: string;
   };
 }
 
@@ -222,6 +223,7 @@ const createFederation: (
           type: 'failure',
           result: {
             errors: result.errors.map(toValidationError),
+            raw: result.schema ? printSchema(result.schema) : undefined,
           },
         };
       }
@@ -255,6 +257,14 @@ const createFederation: (
     },
     async build(schemas, external) {
       const result = await compose({ schemas, external });
+
+      // If `raw` SDL is present, it means that we were able to build a schema, but it still has composition errors
+      if (result.result.raw) {
+        return {
+          raw: result.result.raw,
+          source: emptySource,
+        };
+      }
 
       if (result.type === 'failure') {
         throw new Error(

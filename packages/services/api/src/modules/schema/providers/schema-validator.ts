@@ -76,6 +76,7 @@ export class SchemaValidator {
     const areIdentical = existing && hashSchema(existing) === hashSchema(incoming);
 
     if (areIdentical) {
+      this.logger.debug('Identical schema found, skipping validation');
       return {
         valid: true,
         errors: [],
@@ -90,6 +91,7 @@ export class SchemaValidator {
     );
 
     if (isInitialSchema) {
+      this.logger.debug('Initial schema, skipping changes check');
       return {
         valid: errors.length === 0,
         errors,
@@ -150,6 +152,7 @@ export class SchemaValidator {
         }
       }
     } catch (error) {
+      this.logger.error('Failed to compare schemas');
       errors.push({
         message: `Failed to compare schemas: ${(error as Error).message}`,
       });
