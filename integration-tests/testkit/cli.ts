@@ -1,8 +1,8 @@
 import 'jest-expect-message';
-import { resolve, join } from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { tmpdir } from 'node:os';
 import { writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
 import { execaCommand } from '@esm2cjs/execa';
 import { fetchLatestSchema, fetchLatestValidSchema } from './flow';
 import { getServiceHost } from './utils';
@@ -65,9 +65,10 @@ export async function createCLI(token: string) {
 
     if (expectedStatus === 'rejected') {
       await expect(cmd).rejects.toThrow();
-      const latestSchemaResult = await fetchLatestSchema(token);
-      const latestSchemaCommit = (await latestSchemaResult.expectNoGraphQLErrors()).latestVersion
-        ?.commit;
+      const latestSchemaResult = await fetchLatestSchema(token).then(r =>
+        r.expectNoGraphQLErrors(),
+      );
+      const latestSchemaCommit = latestSchemaResult.latestVersion?.commit;
 
       expect(
         latestSchemaCommit,
@@ -84,9 +85,8 @@ export async function createCLI(token: string) {
       throw new Error(`${publishName} failed: ${String(error)}`);
     }
 
-    const latestSchemaResult = await fetchLatestSchema(token);
-    const latestSchemaCommit = (await latestSchemaResult.expectNoGraphQLErrors()).latestVersion
-      ?.commit;
+    const latestSchemaResult = await fetchLatestSchema(token).then(r => r.expectNoGraphQLErrors());
+    const latestSchemaCommit = latestSchemaResult.latestVersion?.commit;
 
     if (expectedStatus === 'ignored') {
       // Check if the schema was ignored
@@ -95,18 +95,17 @@ export async function createCLI(token: string) {
         `${publishName} was expected to be ignored but it was published`,
       ).not.toEqual(expectedCommit);
       return;
-    } else {
-      // Check if the schema was published
-      expect(latestSchemaCommit, `${publishName} was expected to be published`).toEqual(
-        expectedCommit,
-      );
     }
+    // Check if the schema was published
+    expect(latestSchemaCommit, `${publishName} was expected to be published`).toEqual(
+      expectedCommit,
+    );
 
-    const latestComposableSchemaResult = await fetchLatestValidSchema(token);
+    const latestComposableSchemaResult = await fetchLatestValidSchema(token).then(r =>
+      r.expectNoGraphQLErrors(),
+    );
 
-    const latestComposableSchemaCommit = (
-      await latestComposableSchemaResult.expectNoGraphQLErrors()
-    ).latestValidVersion?.commit;
+    const latestComposableSchemaCommit = latestComposableSchemaResult.latestValidVersion?.commit;
 
     // Check if the schema was published as composable or non-composable
     if (expectedStatus === 'latest') {
@@ -143,9 +142,8 @@ export async function createCLI(token: string) {
     if (expectedStatus === 'rejected') {
       await expect(cmd).rejects.toThrow();
       return cmd.catch(reason => Promise.resolve(reason.message));
-    } else {
-      return cmd;
     }
+    return cmd;
   }
 
   return {

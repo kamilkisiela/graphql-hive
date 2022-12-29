@@ -6,7 +6,11 @@ describe('publish', () => {
   test.concurrent('accepted: composable', async () => {
     const { publish } = await prepare();
     await publish({
-      sdl: `type Query { topProductName: String }`,
+      sdl: /* GraphQL */ `
+        type Query {
+          topProductName: String
+        }
+      `,
       serviceName: 'products',
       serviceUrl: 'http://products:3000/graphql',
       expect: 'latest-composable',

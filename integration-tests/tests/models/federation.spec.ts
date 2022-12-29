@@ -1,12 +1,16 @@
 import { ProjectType } from '@app/gql/graphql';
-import { prepareProject } from '../../testkit/registry-models';
 import { createCLI } from '../../testkit/cli';
+import { prepareProject } from '../../testkit/registry-models';
 
 describe('publish', () => {
   test.concurrent('accepted: composable', async () => {
     const { publish } = await prepare();
     await publish({
-      sdl: `type Query { topProductName: String }`,
+      sdl: /* GraphQL */ `
+        type Query {
+          topProductName: String
+        }
+      `,
       serviceName: 'products',
       serviceUrl: 'http://products:3000/graphql',
       expect: 'latest-composable',
