@@ -1,6 +1,6 @@
+import * as Sentry from '@sentry/node';
 import type { Span } from '@sentry/types';
 import { Inject, Injectable, Scope } from 'graphql-modules';
-import * as Sentry from '@sentry/node';
 import lodash from 'lodash';
 import * as Types from '../../../__generated__/types';
 import {
