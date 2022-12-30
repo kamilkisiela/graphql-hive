@@ -90,8 +90,6 @@ export default class SchemaCheck extends Command {
         usesGitHubApp,
       });
 
-      this.debugGraphQLResult(result);
-
       if (result.schemaCheck.__typename === 'SchemaCheckSuccess') {
         const changes = result.schemaCheck.changes;
         if (result.schemaCheck.initial) {

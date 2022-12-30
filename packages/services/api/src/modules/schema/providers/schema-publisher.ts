@@ -105,16 +105,16 @@ export class SchemaPublisher {
       this.logger.debug('Detected missing service name');
       const missingServiceNameMessage = `Can not check schema without a service name.`;
 
-      if (!project.gitRepository) {
-        return {
-          __typename: 'GitHubSchemaCheckError' as const,
-          message: 'Git repository is not configured for this project',
-        };
-      }
-
-      const [repositoryOwner, repositoryName] = project.gitRepository.split('/');
-
       if (input.github) {
+        if (!project.gitRepository) {
+          return {
+            __typename: 'GitHubSchemaCheckError' as const,
+            message: 'Git repository is not configured for this project',
+          };
+        }
+
+        const [repositoryOwner, repositoryName] = project.gitRepository.split('/');
+
         try {
           await this.gitHubIntegrationManager.createCheckRun({
             name: 'GraphQL Hive - schema:check',

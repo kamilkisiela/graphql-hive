@@ -180,8 +180,6 @@ export default class SchemaPublish extends Command {
         usesGitHubApp,
       });
 
-      this.debugGraphQLResult(result);
-
       if (result.schemaPublish.__typename === 'SchemaPublishSuccess') {
         const changes = result.schemaPublish.changes;
 
