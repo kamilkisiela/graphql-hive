@@ -6,7 +6,16 @@ import type { FastifyLoggerInstance } from '@hive/service-common';
 import { fetch } from '@whatwg-node/fetch';
 import retry from 'async-retry';
 import type { DocumentNode } from 'graphql';
-import { ASTNode, buildASTSchema, concatAST, parse, print, printSchema, visit } from 'graphql';
+import {
+  ASTNode,
+  buildASTSchema,
+  concatAST,
+  GraphQLError,
+  parse,
+  print,
+  printSchema,
+  visit,
+} from 'graphql';
 import { validateSDL } from 'graphql/validation/validate.js';
 import type { Redis as RedisInstance } from 'ioredis';
 import { z } from 'zod';
@@ -34,6 +43,7 @@ interface CompositionFailure {
   result: {
     errors: Array<{
       message: string;
+      code?: string | null;
     }>;
     raw?: string;
   };
@@ -56,7 +66,9 @@ const EXTERNAL_COMPOSITION_RESULT = z.union([
       type: z.literal('failure'),
       result: z
         .object({
-          errors: z.array(z.object({ message: z.string() }).required()),
+          errors: z.array(
+            z.object({ message: z.string(), code: z.string().optional().nullable() }),
+          ),
         })
         .required(),
     })
@@ -95,7 +107,15 @@ function trimDescriptions(doc: DocumentNode): DocumentNode {
 
 const emptySource = '*';
 
-function toValidationError(error: any) {
+function toValidationError(error: any, errorCode?: string | null) {
+  if (error instanceof GraphQLError) {
+    const code = error.extensions?.code ?? errorCode;
+    return {
+      message: error.message,
+      code: typeof code === 'string' ? code : undefined,
+    };
+  }
+
   if (error instanceof Error) {
     return {
       message: error.message,
@@ -222,7 +242,7 @@ const createFederation: (
         return {
           type: 'failure',
           result: {
-            errors: result.errors.map(toValidationError),
+            errors: result.errors.map(e => toValidationError(e)),
             raw: result.schema ? printSchema(result.schema) : undefined,
           },
         };
@@ -301,7 +321,7 @@ const createFederation: (
 const single: Orchestrator = {
   async validate(schemas) {
     const schema = schemas[0];
-    const errors = validateSDL(parse(schema.raw)).map(toValidationError);
+    const errors = validateSDL(parse(schema.raw)).map(e => toValidationError(e));
 
     return {
       errors,
@@ -345,7 +365,7 @@ const createStitching: (redis: RedisInstance, logger: FastifyLoggerInstance) => 
       try {
         await stitchAndPrint(schemas);
       } catch (error) {
-        errors.push(toValidationError(error));
+        errors.push(toValidationError(error, 'STITCHING_ERROR'));
       }
 
       return {
@@ -369,17 +389,17 @@ const createStitching: (redis: RedisInstance, logger: FastifyLoggerInstance) => 
 function validateStitchedSchema(doc: DocumentNode) {
   const { allStitchingDirectivesTypeDefs, stitchingDirectivesValidator } = stitchingDirectives();
   const fullDoc = concatAST([parse(allStitchingDirectivesTypeDefs), doc]);
-  const errors = validateSDL(fullDoc).map(toValidationError);
+  const errors = validateSDL(fullDoc).map(e => toValidationError(e));
 
   try {
     stitchingDirectivesValidator(
       buildASTSchema(fullDoc, {
-        assumeValid: false,
-        assumeValidSDL: false,
+        assumeValid: true,
+        assumeValidSDL: true,
       }),
     );
   } catch (error) {
-    errors.push(toValidationError(error));
+    errors.push(toValidationError(error, 'STITCHING_DIRECTIVES_ERROR'));
   }
 
   return errors;

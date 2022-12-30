@@ -65,22 +65,29 @@ export class RegistryChecks {
     project: Project;
     schemas: Schemas;
   }) {
-    const compositionErrors = await orchestrator.validate(
+    const validationErrors = await orchestrator.validate(
       schemas.map(s => this.helper.createSchemaObject(s)),
       project,
     );
 
-    if (Array.isArray(compositionErrors) && compositionErrors.length) {
-      this.logger.debug('Detected composition errors');
+    if (Array.isArray(validationErrors) && validationErrors.length) {
+      this.logger.debug('Detected validation errors');
+
+      // TODO: improve this...
+      const buildErrors = validationErrors.filter(e => typeof e.code !== 'string');
+      const compositionErrors = validationErrors.filter(e => typeof e.code === 'string');
+
       return {
         status: 'failed',
         reason: {
-          errors: compositionErrors,
+          allErrors: validationErrors,
+          buildErrors,
+          compositionErrors,
         },
       } satisfies CheckResult;
     }
 
-    this.logger.debug('No composition errors');
+    this.logger.debug('No validation errors');
 
     return {
       status: 'completed',

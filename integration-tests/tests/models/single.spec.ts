@@ -1,6 +1,6 @@
 import { ProjectType } from '@app/gql/graphql';
-import { prepareProject } from '../../testkit/registry-models';
 import { createCLI } from '../../testkit/cli';
+import { prepareProject } from '../../testkit/registry-models';
 
 describe('publish', () => {
   test.concurrent('accepted: composable', async () => {
@@ -32,30 +32,16 @@ describe('publish', () => {
     });
   });
 
-  test.concurrent('accepted: composable, previous version was not', async () => {
+  test.concurrent('rejected: not composable (build errors)', async () => {
     const { publish } = await prepare();
 
-    // non-composable
     await publish({
       sdl: /* GraphQL */ `
         type Query {
           topProduct: Product
         }
       `,
-      expect: 'latest',
-    });
-
-    // composable
-    await publish({
-      sdl: /* GraphQL */ `
-        type Query {
-          topProduct: Product
-        }
-        type Product {
-          id: ID!
-        }
-      `,
-      expect: 'latest-composable',
+      expect: 'rejected',
     });
   });
 
@@ -108,38 +94,6 @@ describe('check', () => {
     });
 
     expect(message).toMatch('topProductName');
-  });
-
-  test.concurrent('accepted: composable, previous version was not', async () => {
-    const { publish, check } = await prepare();
-
-    await publish({
-      sdl: /* GraphQL */ `
-        type Query {
-          topProduct: Product
-        }
-
-        type Product {
-          id: UUID!
-        }
-      `,
-      expect: 'latest',
-    });
-
-    const message = await check({
-      sdl: /* GraphQL */ `
-        type Query {
-          topProduct: Product
-        }
-
-        type Product {
-          id: ID!
-        }
-      `,
-      expect: 'approved',
-    });
-
-    expect(message).toMatch('topProduct');
   });
 
   test.concurrent('accepted: no changes', async () => {
@@ -244,8 +198,7 @@ describe('check', () => {
       expect: 'rejected',
     });
 
-    expect(message).toMatch('Product.name');
-    expect(message).toMatch('topProduct');
+    expect(message).toMatch('Str');
   });
 });
 

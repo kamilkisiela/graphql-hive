@@ -23,6 +23,7 @@ const composeFederation = compose(services => {
         result: {
           errors: result.errors.map(error => ({
             message: error.message,
+            code: typeof error.extensions?.code === 'string' ? error.extensions.code : null,
           })),
         },
       };

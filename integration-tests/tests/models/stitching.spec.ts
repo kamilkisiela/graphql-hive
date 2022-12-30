@@ -1,6 +1,6 @@
 import { ProjectType } from '@app/gql/graphql';
-import { prepareProject } from '../../testkit/registry-models';
 import { createCLI } from '../../testkit/cli';
+import { prepareProject } from '../../testkit/registry-models';
 
 describe('publish', () => {
   test.concurrent('accepted: composable', async () => {
@@ -38,6 +38,20 @@ describe('publish', () => {
     });
   });
 
+  test.concurrent('rejected: not composable (build errors)', async () => {
+    const { publish } = await prepare();
+    await publish({
+      sdl: /* GraphQL */ `
+        type Query {
+          topProductName: UnknownType
+        }
+      `,
+      serviceName: 'products',
+      serviceUrl: 'http://products:3000/graphql',
+      expect: 'rejected',
+    });
+  });
+
   test.concurrent('accepted: composable, previous version was not', async () => {
     const { publish } = await prepare();
 
@@ -45,7 +59,12 @@ describe('publish', () => {
     await publish({
       sdl: /* GraphQL */ `
         type Query {
-          topProduct: Product
+          product(id: ID!): Product
+        }
+
+        type Product @key(selectionSet: "{ id") {
+          id: ID!
+          name: String
         }
       `,
       serviceName: 'products',
@@ -57,10 +76,12 @@ describe('publish', () => {
     await publish({
       sdl: /* GraphQL */ `
         type Query {
-          topProduct: Product
+          product(id: ID!): Product
         }
-        type Product {
+
+        type Product @key(selectionSet: "{ id }") {
           id: ID!
+          name: String
         }
       `,
       serviceName: 'products',

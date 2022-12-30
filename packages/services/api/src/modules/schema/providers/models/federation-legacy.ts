@@ -121,7 +121,7 @@ export class FederationLegacyModel {
       if (compositionCheck.status === 'failed') {
         reasons.push({
           code: CheckFailureReasonCode.CompositionFailure,
-          compositionErrors: compositionCheck.reason.errors,
+          compositionErrors: compositionCheck.reason.allErrors,
         });
       }
 
@@ -255,7 +255,7 @@ export class FederationLegacyModel {
     ]);
 
     const compositionErrors =
-      compositionCheck.status === 'failed' ? compositionCheck.reason.errors : null;
+      compositionCheck.status === 'failed' ? compositionCheck.reason.allErrors : null;
     const breakingChanges =
       diffCheck.status === 'failed' && !acceptBreakingChanges
         ? diffCheck.reason.breakingChanges
@@ -301,7 +301,7 @@ export class FederationLegacyModel {
     if (compositionCheck.status === 'failed') {
       reasons.push({
         code: PublishFailureReasonCode.CompositionFailure,
-        compositionErrors: compositionCheck.reason.errors,
+        compositionErrors: compositionCheck.reason.allErrors,
       });
     }
 

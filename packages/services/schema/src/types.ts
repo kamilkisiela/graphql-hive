@@ -18,6 +18,8 @@ export type ValidationInput = Array<{
 export interface ValidationOutput {
   errors: Array<{
     message: string;
+    // If it has code, it's not coming from GraphQL-js validation
+    code?: string | null;
   }>;
 }
 

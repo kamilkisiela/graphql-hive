@@ -119,7 +119,7 @@ export class StitchingModel {
       if (compositionCheck.status === 'failed') {
         reasons.push({
           code: CheckFailureReasonCode.CompositionFailure,
-          compositionErrors: compositionCheck.reason.errors,
+          compositionErrors: compositionCheck.reason.allErrors,
         });
       }
 
@@ -261,6 +261,18 @@ export class StitchingModel {
 
     if (hasNewMetadata) {
       messages.push('Metadata has been updated');
+    }
+
+    if (compositionCheck.status === 'failed' && compositionCheck.reason.buildErrors.length > 0) {
+      return {
+        conclusion: SchemaPublishConclusion.Reject,
+        reasons: [
+          {
+            code: PublishFailureReasonCode.CompositionFailure,
+            compositionErrors: compositionCheck.reason.buildErrors,
+          },
+        ],
+      };
     }
 
     return {

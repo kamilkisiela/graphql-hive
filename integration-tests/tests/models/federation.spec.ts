@@ -1,6 +1,6 @@
 import { ProjectType } from '@app/gql/graphql';
-import { prepareProject } from '../../testkit/registry-models';
 import { createCLI } from '../../testkit/cli';
+import { prepareProject } from '../../testkit/registry-models';
 
 describe('publish', () => {
   test.concurrent('accepted: composable', async () => {
@@ -38,7 +38,7 @@ describe('publish', () => {
     });
   });
 
-  test.concurrent('accepted: composable, previous version was not', async () => {
+  test.concurrent('rejected: not composable (build errors)', async () => {
     const { publish } = await prepare();
 
     // non-composable
@@ -50,6 +50,26 @@ describe('publish', () => {
       `,
       serviceName: 'products',
       serviceUrl: 'http://products:3000/graphql',
+      expect: 'rejected',
+    });
+  });
+
+  test.concurrent('accepted: composable, previous version was not', async () => {
+    const { publish } = await prepare();
+
+    // non-composable
+    await publish({
+      sdl: /* GraphQL */ `
+        type Query {
+          product(id: ID!): Product
+        }
+        type Product @key(fields: "it") {
+          id: ID!
+          name: String
+        }
+      `,
+      serviceName: 'products',
+      serviceUrl: 'http://products:3000/graphql',
       expect: 'latest',
     });
 
@@ -57,10 +77,11 @@ describe('publish', () => {
     await publish({
       sdl: /* GraphQL */ `
         type Query {
-          topProduct: Product
+          product(id: ID!): Product
         }
-        type Product {
+        type Product @key(fields: "id") {
           id: ID!
+          name: String
         }
       `,
       serviceName: 'products',
@@ -191,7 +212,11 @@ describe('check', () => {
     await publish({
       sdl: /* GraphQL */ `
         type Query {
-          topProduct: Str
+          product(id: ID!): Product
+        }
+        type Product @key(fields: "it") {
+          id: ID!
+          name: String
         }
       `,
       serviceName: 'products',
@@ -202,7 +227,11 @@ describe('check', () => {
     const message = await check({
       sdl: /* GraphQL */ `
         type Query {
-          topProduct: String
+          product(id: ID!): Product
+        }
+        type Product @key(fields: "id") {
+          id: ID!
+          name: String
         }
       `,
       serviceName: 'products',
