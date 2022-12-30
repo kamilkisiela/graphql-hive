@@ -1,4 +1,4 @@
-import { ProjectType, RegistryModel,TargetAccessScope } from '@app/gql/graphql';
+import { ProjectType, RegistryModel, TargetAccessScope } from '@app/gql/graphql';
 import { createCLI } from '../../testkit/cli';
 import { prepareProject } from '../../testkit/registry-models';
 import { initSeed } from '../../testkit/seed';
