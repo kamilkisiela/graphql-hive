@@ -119,9 +119,6 @@ export default class SchemaCheck extends Command {
       } else if (result.schemaCheck.__typename === 'GitHubSchemaCheckSuccess') {
         this.success(result.schemaCheck.message);
       } else {
-        console.dir(result, {
-          depth: 10,
-        });
         this.error(result.schemaCheck.message);
       }
     } catch (error) {
