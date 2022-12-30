@@ -716,6 +716,10 @@ export function fetchLatestSchema(token: string) {
       query latestVersion {
         latestVersion {
           baseSchema
+          commit {
+            source
+            commit
+          }
           schemas {
             nodes {
               source
@@ -738,6 +742,10 @@ export function fetchLatestValidSchema(token: string) {
         latestValidVersion {
           id
           baseSchema
+          commit {
+            source
+            commit
+          }
           schemas {
             nodes {
               source

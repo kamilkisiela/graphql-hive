@@ -104,13 +104,13 @@ test.concurrent('base schema should not affect the output schema persisted in db
   expect(versionsResult).toHaveLength(2);
 
   const latestResult = await readWriteToken.latestSchema();
-  expect(latestResult.latestVersion.schemas.total).toBe(1);
-  expect(latestResult.latestVersion.schemas.nodes[0].commit).toBe('2');
-  expect(latestResult.latestVersion.schemas.nodes[0].source).toMatch(
+  expect(latestResult.latestVersion?.schemas.total).toBe(1);
+  expect(latestResult.latestVersion?.schemas.nodes[0].commit).toBe('2');
+  expect(latestResult.latestVersion?.schemas.nodes[0].source).toMatch(
     'type Query { ping: String @auth pong: String }',
   );
-  expect(latestResult.latestVersion.schemas.nodes[0].source).not.toMatch('directive');
-  expect(latestResult.latestVersion.baseSchema).toMatch(
+  expect(latestResult.latestVersion?.schemas.nodes[0].source).not.toMatch('directive');
+  expect(latestResult.latestVersion?.baseSchema).toMatch(
     'directive @auth on OBJECT | FIELD_DEFINITION',
   );
 });
@@ -141,9 +141,9 @@ test.concurrent('directives should not be removed (federation)', async () => {
   expect(versionsResult).toHaveLength(1);
 
   const latestResult = await readWriteToken.latestSchema();
-  expect(latestResult.latestVersion.schemas.total).toBe(1);
-  expect(latestResult.latestVersion.schemas.nodes[0].commit).toBe('abc123');
-  expect(latestResult.latestVersion.schemas.nodes[0].source).toMatch(
+  expect(latestResult.latestVersion?.schemas.total).toBe(1);
+  expect(latestResult.latestVersion?.schemas.nodes[0].commit).toBe('abc123');
+  expect(latestResult.latestVersion?.schemas.nodes[0].source).toMatch(
     `type Query { me: User } type User @key(fields: "id") { id: ID! name: String }`,
   );
 });
@@ -192,12 +192,12 @@ test.concurrent(
     );
 
     const latestResult = await readWriteToken.latestSchema();
-    expect(latestResult.latestVersion.schemas.total).toBe(1);
-    expect(latestResult.latestVersion.schemas.nodes[0].commit).toBe('abc1234');
-    expect(latestResult.latestVersion.schemas.nodes[0].url).toBe(
+    expect(latestResult.latestVersion?.schemas.total).toBe(1);
+    expect(latestResult.latestVersion?.schemas.nodes[0].commit).toBe('abc1234');
+    expect(latestResult.latestVersion?.schemas.nodes[0].url).toBe(
       'http://localhost:3000/test/graphql',
     );
-    expect(latestResult.latestVersion.schemas.nodes[0].source).toMatch(
+    expect(latestResult.latestVersion?.schemas.nodes[0].source).toMatch(
       `type Query { me: User } type User @key(fields: "id") { id: ID! name: String }`,
     );
   },
@@ -233,9 +233,9 @@ test.concurrent(
     expect(versionsResult).toHaveLength(1);
 
     const latestResult = await readWriteToken.latestSchema();
-    expect(latestResult.latestVersion.schemas.total).toBe(1);
-    expect(latestResult.latestVersion.schemas.nodes[0].commit).toBe('abc123');
-    expect(latestResult.latestVersion.schemas.nodes[0].source).toMatch(
+    expect(latestResult.latestVersion?.schemas.total).toBe(1);
+    expect(latestResult.latestVersion?.schemas.nodes[0].commit).toBe('abc123');
+    expect(latestResult.latestVersion?.schemas.nodes[0].source).toMatch(
       `type Query { me: User } type User @key(fields: "id") { id: ID! name: String }`,
     );
 
@@ -282,9 +282,9 @@ test.concurrent('directives should not be removed (stitching)', async () => {
   expect(versionsResult).toHaveLength(1);
 
   const latestResult = await readWriteToken.latestSchema();
-  expect(latestResult.latestVersion.schemas.total).toBe(1);
-  expect(latestResult.latestVersion.schemas.nodes[0].commit).toBe('abc123');
-  expect(latestResult.latestVersion.schemas.nodes[0].source).toMatch(
+  expect(latestResult.latestVersion?.schemas.total).toBe(1);
+  expect(latestResult.latestVersion?.schemas.nodes[0].commit).toBe('abc123');
+  expect(latestResult.latestVersion?.schemas.nodes[0].source).toMatch(
     `type Query { me: User } type User @key(selectionSet: "{ id }") { id: ID! name: String }`,
   );
 });
@@ -316,9 +316,9 @@ test.concurrent('directives should not be removed (single)', async () => {
   expect(versionsResult).toHaveLength(1);
 
   const latestResult = await readWriteToken.latestSchema();
-  expect(latestResult.latestVersion.schemas.total).toBe(1);
-  expect(latestResult.latestVersion.schemas.nodes[0].commit).toBe('abc123');
-  expect(latestResult.latestVersion.schemas.nodes[0].source).toMatch(
+  expect(latestResult.latestVersion?.schemas.total).toBe(1);
+  expect(latestResult.latestVersion?.schemas.nodes[0].commit).toBe('abc123');
+  expect(latestResult.latestVersion?.schemas.nodes[0].source).toMatch(
     `directive @auth on FIELD_DEFINITION type Query { me: User @auth } type User { id: ID! name: String }`,
   );
 });
@@ -459,8 +459,8 @@ test.concurrent('marking versions as valid', async () => {
 
   // the initial version should be the latest valid version
   let latestValidSchemaResult = await readWriteToken.fetchLatestValidSchema();
-  expect(latestValidSchemaResult.latestValidVersion.schemas.total).toEqual(1);
-  expect(latestValidSchemaResult.latestValidVersion.schemas.nodes[0].commit).toEqual('c0');
+  expect(latestValidSchemaResult.latestValidVersion?.schemas.total).toEqual(1);
+  expect(latestValidSchemaResult.latestValidVersion?.schemas.nodes[0].commit).toEqual('c0');
 
   const versionId = (commit: string) =>
     versionsResult.find(node => node.commit.commit === commit)!.id;
@@ -474,13 +474,13 @@ test.concurrent('marking versions as valid', async () => {
   expect(versionStatusUpdateResult.updateSchemaVersionStatus.id).toEqual(versionId('c2'));
 
   latestValidSchemaResult = await readWriteToken.fetchLatestValidSchema();
-  expect(latestValidSchemaResult.latestValidVersion.id).toEqual(versionId('c2'));
+  expect(latestValidSchemaResult.latestValidVersion?.id).toEqual(versionId('c2'));
 
   // marking the second (not the most recent) version as valid should NOT promote it to be the latest valid version
   versionStatusUpdateResult = await readWriteToken.updateSchemaVersionStatus(versionId('c1'), true);
 
   latestValidSchemaResult = await readWriteToken.fetchLatestValidSchema();
-  expect(latestValidSchemaResult.latestValidVersion.id).toEqual(versionId('c2'));
+  expect(latestValidSchemaResult.latestValidVersion?.id).toEqual(versionId('c2'));
 });
 
 test.concurrent(
@@ -841,7 +841,7 @@ test.concurrent(
     const latestValid = await readWriteToken.fetchLatestValidSchema();
 
     expect(composableButBreakingResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
-    expect(latestValid.latestValidVersion.schemas.nodes[0].commit).toBe('composable-but-breaking');
+    expect(latestValid.latestValidVersion?.schemas.nodes[0].commit).toBe('composable-but-breaking');
   },
 );
 
@@ -942,7 +942,7 @@ test.concurrent(
     });
 
     const latestValid = await readWriteToken.fetchLatestValidSchema();
-    expect(latestValid.latestValidVersion.schemas.nodes[0].commit).toBe('products');
+    expect(latestValid.latestValidVersion?.schemas.nodes[0].commit).toBe('products');
   },
 );
 
@@ -998,7 +998,7 @@ test.concurrent(
     });
 
     const latestValid = await readWriteToken.fetchLatestValidSchema();
-    expect(latestValid.latestValidVersion.schemas.nodes[0].commit).toBe('users');
+    expect(latestValid.latestValidVersion?.schemas.nodes[0].commit).toBe('users');
   },
 );
 

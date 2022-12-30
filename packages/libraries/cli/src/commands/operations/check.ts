@@ -61,7 +61,7 @@ export default class OperationsCheck extends Command {
 
       const result = await this.registryApi(registry, token).fetchLatestVersion();
 
-      const sdl = result.latestVersion.sdl;
+      const sdl = result.latestVersion?.sdl;
 
       if (!sdl) {
         this.error('No schema found');
