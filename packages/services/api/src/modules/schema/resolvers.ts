@@ -592,6 +592,7 @@ export const resolvers: SchemaModule.Resolvers = {
       return {
         schema: buildASTSchema(schema.document, {
           assumeValidSDL: true,
+          assumeValid: true,
         }),
         usage: {
           period: usage?.period ? parseDateRangeInput(usage.period) : createPeriod('30d'),

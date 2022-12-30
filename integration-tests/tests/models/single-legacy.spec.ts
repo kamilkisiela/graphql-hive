@@ -1,6 +1,6 @@
-import { ProjectType, TargetAccessScope, RegistryModel } from '@app/gql/graphql';
-import { prepareProject } from '../../testkit/registry-models';
+import { ProjectType, RegistryModel,TargetAccessScope } from '@app/gql/graphql';
 import { createCLI } from '../../testkit/cli';
+import { prepareProject } from '../../testkit/registry-models';
 import { initSeed } from '../../testkit/seed';
 
 describe('publish', () => {
@@ -265,7 +265,9 @@ describe('other', () => {
   test.concurrent('marking versions as valid', async () => {
     const { createOrg } = await initSeed().createOwner();
     const { createProject } = await createOrg();
-    const { createToken } = await createProject(ProjectType.Single);
+    const { createToken } = await createProject(ProjectType.Single, {
+      useLegacyRegistryModels: true,
+    });
     const { publishSchema, fetchVersions, fetchLatestValidSchema, updateSchemaVersionStatus } =
       await createToken({
         organizationScopes: [],
@@ -331,7 +333,9 @@ describe('other', () => {
     async () => {
       const { createOrg } = await initSeed().createOwner();
       const { createProject } = await createOrg();
-      const { createToken } = await createProject(ProjectType.Single);
+      const { createToken } = await createProject(ProjectType.Single, {
+        useLegacyRegistryModels: true,
+      });
       const {
         publishSchema,
         fetchVersions,

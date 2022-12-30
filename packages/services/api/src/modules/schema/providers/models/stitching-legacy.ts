@@ -261,8 +261,8 @@ export class StitchingLegacyModel {
       hasNewUrl ||
       // If there is new metadata, we should publish
       hasNewMetadata ||
-      // If there are errors, we should publish if we're forcing
-      (hasCompositionErrors && forced) ||
+      // If there are composition errors or breaking changes, we should publish if we're forcing
+      ((hasCompositionErrors || hasBreakingChanges) && forced) ||
       // If there are breaking changes, we should publish if we're accepting breaking changes
       (hasBreakingChanges && acceptBreakingChanges);
 
