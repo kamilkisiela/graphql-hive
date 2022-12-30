@@ -35,6 +35,8 @@ export default class WhoAmI extends Command {
         this.handleFetchError(error);
       });
 
+    this.debugGraphQLResult(result);
+
     if (result.tokenInfo.__typename === 'TokenInfo') {
       const { tokenInfo } = result;
       const { organization, project, target } = tokenInfo;

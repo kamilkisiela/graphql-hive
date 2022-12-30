@@ -30,6 +30,20 @@ export default abstract class extends Command {
     this.log(colors.yellow(symbols.info), ...args);
   }
 
+  debugGraphQLResult(result: unknown) {
+    if (this.config.debug >= 1) {
+      this.debug(
+        JSON.stringify(
+          {
+            graphql: result,
+          },
+          null,
+          2,
+        ),
+      );
+    }
+  }
+
   bolderize(msg: string) {
     const findSingleQuotes = /'([^']+)'/gim;
     const findDoubleQuotes = /"([^"]+)"/gim;
