@@ -2,11 +2,15 @@ import { resolve } from 'path';
 import { execaCommand } from '@esm2cjs/execa';
 import { getServiceHost } from './utils';
 
-const binPath = resolve(__dirname, '../../packages/libraries/cli/bin/dev');
+const binPath = resolve(__dirname, '../../packages/libraries/cli/bin/run');
+const cliDir = resolve(__dirname, '../../packages/libraries/cli');
 
 async function exec(cmd: string) {
   const outout = await execaCommand(`${binPath} ${cmd}`, {
     shell: true,
+    env: {
+      OCLIF_CLI_CUSTOM_PATH: cliDir,
+    },
   });
 
   if (outout.failed) {
