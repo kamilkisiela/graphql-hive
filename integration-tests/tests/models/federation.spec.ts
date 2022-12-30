@@ -228,6 +228,7 @@ describe('check', () => {
       sdl: /* GraphQL */ `
         type Query {
           product(id: ID!): Product
+          topProduct: Product
         }
         type Product @key(fields: "id") {
           id: ID!
