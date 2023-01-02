@@ -34,13 +34,23 @@ describe.each`
       'Kamil',
       '--commit',
       'abc123',
+      '--service',
+      'test',
+      '--url',
+      'http://localhost:4000',
       'fixtures/init-schema.graphql',
     ]);
 
-    await schemaCheck(['--token', secret, 'fixtures/nonbreaking-schema.graphql']);
+    await schemaCheck([
+      '--service',
+      'test',
+      '--token',
+      secret,
+      'fixtures/nonbreaking-schema.graphql',
+    ]);
 
     await expect(
-      schemaCheck(['--token', secret, 'fixtures/breaking-schema.graphql']),
+      schemaCheck(['--service', 'test', '--token', secret, 'fixtures/breaking-schema.graphql']),
     ).rejects.toThrowError(/breaking/i);
   });
 
@@ -69,6 +79,10 @@ describe.each`
           'Kamil',
           '--commit',
           'abc123',
+          '--service',
+          'test',
+          '--url',
+          'http://localhost:4000',
           'fixtures/init-invalid-schema.graphql',
         ]);
         throw allocatedError;
@@ -97,13 +111,29 @@ describe.each`
     const { secret } = await createToken({});
 
     await expect(
-      schemaPublish(['--token', secret, 'fixtures/init-schema.graphql']),
+      schemaPublish([
+        '--service',
+        'test',
+        '--url',
+        'http://localhost:4000',
+        '--token',
+        secret,
+        'fixtures/init-schema.graphql',
+      ]),
     ).resolves.toMatch(
       `Available at ${process.env.HIVE_APP_BASE_URL}/${organization.cleanId}/${project.cleanId}/${target.cleanId}`,
     );
 
     await expect(
-      schemaPublish(['--token', secret, 'fixtures/nonbreaking-schema.graphql']),
+      schemaPublish([
+        '--service',
+        'test',
+        '--url',
+        'http://localhost:4000',
+        '--token',
+        secret,
+        'fixtures/nonbreaking-schema.graphql',
+      ]),
     ).resolves.toMatch(
       `Available at ${process.env.HIVE_APP_BASE_URL}/${organization.cleanId}/${project.cleanId}/${target.cleanId}/history/`,
     );
@@ -123,9 +153,9 @@ describe.each`
     );
     const { secret } = await createToken({});
 
-    await expect(schemaCheck(['--token', secret, 'fixtures/init-schema.graphql'])).resolves.toMatch(
-      'empty',
-    );
+    await expect(
+      schemaCheck(['--token', secret, '--service', 'test', 'fixtures/init-schema.graphql']),
+    ).resolves.toMatch('empty');
   });
 
   test.concurrent('schema:check should throw on corrupted schema', async () => {
@@ -142,7 +172,13 @@ describe.each`
     );
     const { secret } = await createToken({});
 
-    const output = schemaCheck(['--token', secret, 'fixtures/missing-type.graphql']);
+    const output = schemaCheck([
+      '--service',
+      'test',
+      '--token',
+      secret,
+      'fixtures/missing-type.graphql',
+    ]);
     await expect(output).rejects.toThrowError('Unknown type');
   });
 
@@ -150,7 +186,15 @@ describe.each`
     'schema:publish should see Invalid Token error when token is invalid',
     async () => {
       const invalidToken = createHash('md5').update('nope').digest('hex').substring(0, 31);
-      const output = schemaPublish(['--token', invalidToken, 'fixtures/init-schema.graphql']);
+      const output = schemaPublish([
+        '--service',
+        'test',
+        '--url',
+        'http://localhost:4000',
+        '--token',
+        invalidToken,
+        'fixtures/init-schema.graphql',
+      ]);
 
       await expect(output).rejects.toThrowError('Invalid token provided');
     },
