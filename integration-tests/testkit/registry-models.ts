@@ -1,4 +1,4 @@
-import { ProjectType, TargetAccessScope, RegistryModel } from '@app/gql/graphql';
+import { ProjectType, RegistryModel,TargetAccessScope } from '@app/gql/graphql';
 import { initSeed } from './seed';
 
 export async function prepareProject(
@@ -12,7 +12,7 @@ export async function prepareProject(
   });
 
   // Create a token with write rights
-  const { secret } = await createToken({
+  const { secret, fetchVersions } = await createToken({
     organizationScopes: [],
     projectScopes: [],
     targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
@@ -23,6 +23,7 @@ export async function prepareProject(
     project,
     targets,
     target,
+    fetchVersions,
     tokens: {
       registry: secret,
     },

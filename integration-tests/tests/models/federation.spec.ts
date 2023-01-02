@@ -1,4 +1,4 @@
-import { ProjectType } from '@app/gql/graphql';
+import { ProjectType, TargetAccessScope } from '@app/gql/graphql';
 import { createCLI, schemaPublish } from '../../testkit/cli';
 import { prepareProject } from '../../testkit/registry-models';
 import { initSeed } from '../../testkit/seed';
@@ -402,6 +402,163 @@ describe('other', () => {
     const supergraph = await fetchSupergraph();
     expect(supergraph).toMatch('(name: "users" url: "https://api.com/users-subgraph")');
   });
+
+  test.concurrent(
+    'publishing composable schema without the definition of the Query type, but only extension, should work',
+    async () => {
+      const { createOrg } = await initSeed().createOwner();
+      const { createProject } = await createOrg();
+      const { createToken } = await createProject(ProjectType.Federation);
+      const readWriteToken = await createToken({
+        targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+        projectScopes: [],
+        organizationScopes: [],
+      });
+
+      await readWriteToken.publishSchema({
+        service: 'products',
+        author: 'Kamil',
+        commit: 'products',
+        url: 'https://api.com/products',
+        experimental_acceptBreakingChanges: true,
+        force: true,
+        sdl: /* GraphQL */ `
+          type Product @key(fields: "id") {
+            id: ID!
+            title: String
+            url: String
+          }
+
+          extend type Query {
+            product(id: ID!): Product
+          }
+        `,
+      });
+
+      await readWriteToken.publishSchema({
+        service: 'users',
+        author: 'Kamil',
+        commit: 'users',
+        url: 'https://api.com/users',
+        experimental_acceptBreakingChanges: true,
+        force: true,
+        sdl: /* GraphQL */ `
+          type User @key(fields: "id") {
+            id: ID!
+            name: String!
+          }
+
+          extend type Query {
+            user(id: ID!): User
+          }
+        `,
+      });
+
+      const latestValid = await readWriteToken.fetchLatestValidSchema();
+      expect(latestValid.latestValidVersion?.schemas.nodes[0].commit).toBe('users');
+    },
+  );
+
+  test.concurrent(
+    '(experimental_acceptBreakingChanges and force) publishing composable schema on second attempt',
+    async () => {
+      const { createOrg } = await initSeed().createOwner();
+      const { createProject } = await createOrg();
+      const { createToken } = await createProject(ProjectType.Federation);
+      const readWriteToken = await createToken({
+        targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+        projectScopes: [],
+        organizationScopes: [],
+      });
+
+      await readWriteToken.publishSchema({
+        service: 'reviews',
+        author: 'Kamil',
+        commit: 'reviews',
+        url: 'https://api.com/reviews',
+        experimental_acceptBreakingChanges: true,
+        force: true,
+        sdl: /* GraphQL */ `
+          extend type Product @key(fields: "id") {
+            id: ID! @external
+            reviews: [Review]
+            reviewSummary: ReviewSummary
+          }
+
+          type Review @key(fields: "id") {
+            id: ID!
+            rating: Float
+          }
+
+          type ReviewSummary {
+            totalReviews: Int
+          }
+        `,
+      });
+
+      await readWriteToken.publishSchema({
+        service: 'products',
+        author: 'Kamil',
+        commit: 'products',
+        url: 'https://api.com/products',
+        experimental_acceptBreakingChanges: true,
+        force: true,
+        sdl: /* GraphQL */ `
+          enum CURRENCY_CODE {
+            USD
+          }
+
+          type Department {
+            category: ProductCategory
+            url: String
+          }
+
+          type Money {
+            amount: Float
+            currencyCode: CURRENCY_CODE
+          }
+
+          type Price {
+            cost: Money
+            deal: Float
+            dealSavings: Money
+          }
+
+          type Product @key(fields: "id") {
+            id: ID!
+            title: String
+            url: String
+            description: String
+            price: Price
+            salesRank(category: ProductCategory = ALL): Int
+            salesRankOverall: Int
+            salesRankInCategory: Int
+            category: ProductCategory
+            images(size: Int = 1000): [String]
+            primaryImage(size: Int = 1000): String
+          }
+
+          enum ProductCategory {
+            ALL
+            GIFT_CARDS
+            ELECTRONICS
+            CAMERA_N_PHOTO
+            VIDEO_GAMES
+            BOOKS
+            CLOTHING
+          }
+
+          extend type Query {
+            categories: [Department]
+            product(id: ID!): Product
+          }
+        `,
+      });
+
+      const latestValid = await readWriteToken.fetchLatestValidSchema();
+      expect(latestValid.latestValidVersion?.schemas.nodes[0].commit).toBe('products');
+    },
+  );
 });
 
 async function prepare() {

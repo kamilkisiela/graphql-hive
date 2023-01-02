@@ -38,7 +38,7 @@ describe('publish', () => {
     });
   });
 
-  test.concurrent('rejected: not composable (graphql errors)', async () => {
+  test.concurrent('rejected: not composable (build errors)', async () => {
     const { publish } = await prepare();
     await publish({
       sdl: /* GraphQL */ `
@@ -375,6 +375,61 @@ describe('check', () => {
     expect(message).toMatch('topProduct');
     expect(message).toMatch('Expected Name');
   });
+});
+
+describe('other', () => {
+  test.concurrent(
+    'publish new schema when a field is moved from one service to another (stitching)',
+    async () => {
+      const {
+        tokens: { registry: token },
+        fetchVersions,
+      } = await prepareProject(ProjectType.Stitching);
+
+      const { publish } = await createCLI(token);
+
+      // cats service has only one field
+      await publish({
+        sdl: /* GraphQL */ `
+          type Query {
+            randomCat: String
+          }
+        `,
+        serviceName: 'cats',
+        serviceUrl: 'http://cats.com/graphql',
+        expect: 'latest-composable',
+      });
+
+      // dogs service has two fields
+      await publish({
+        sdl: /* GraphQL */ `
+          type Query {
+            randomDog: String
+            randomAnimal: String
+          }
+        `,
+        serviceName: 'dogs',
+        serviceUrl: 'http://dogs.com/graphql',
+        expect: 'latest-composable',
+      });
+
+      // cats service has now two fields, randomAnimal is borrowed from dogs service
+      await publish({
+        sdl: /* GraphQL */ `
+          type Query {
+            randomCat: String
+            randomAnimal: String
+          }
+        `,
+        serviceName: 'cats',
+        serviceUrl: 'http://cats.com/graphql',
+        expect: 'latest-composable', // We expect to have a new version, even tough the schema (merged) is the same
+      });
+
+      const versionsResult = await fetchVersions(3);
+      expect(versionsResult).toHaveLength(3);
+    },
+  );
 });
 
 async function prepare() {

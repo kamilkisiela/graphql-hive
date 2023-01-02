@@ -21,14 +21,9 @@ describe.each`
     const { createOrg } = await initSeed().createOwner();
     const { inviteAndJoinMember, createProject } = await createOrg();
     await inviteAndJoinMember();
-    const { createToken } = await createProject(
-      projectType,
-      model === 'legacy'
-        ? {
-            useLegacyRegistryModels: true,
-          }
-        : {},
-    );
+    const { createToken } = await createProject(projectType, {
+      useLegacyRegistryModels: model === 'legacy',
+    });
     const { secret } = await createToken({});
 
     await schemaPublish([
@@ -62,14 +57,9 @@ describe.each`
       const { createOrg } = await initSeed().createOwner();
       const { inviteAndJoinMember, createProject } = await createOrg();
       await inviteAndJoinMember();
-      const { createToken } = await createProject(
-        projectType,
-        model === 'legacy'
-          ? {
-              useLegacyRegistryModels: true,
-            }
-          : {},
-      );
+      const { createToken } = await createProject(projectType, {
+        useLegacyRegistryModels: model === 'legacy',
+      });
       const { secret } = await createToken({});
 
       const allocatedError = new Error('Should have thrown.');
@@ -100,14 +90,9 @@ describe.each`
     const { createOrg } = await initSeed().createOwner();
     const { organization, inviteAndJoinMember, createProject } = await createOrg();
     await inviteAndJoinMember();
-    const { project, target, createToken } = await createProject(
-      projectType,
-      model === 'legacy'
-        ? {
-            useLegacyRegistryModels: true,
-          }
-        : {},
-    );
+    const { project, target, createToken } = await createProject(projectType, {
+      useLegacyRegistryModels: model === 'legacy',
+    });
     const { secret } = await createToken({});
 
     await expect(
@@ -139,14 +124,9 @@ describe.each`
     const { createOrg } = await initSeed().createOwner();
     const { inviteAndJoinMember, createProject } = await createOrg();
     await inviteAndJoinMember();
-    const { createToken } = await createProject(
-      projectType,
-      model === 'legacy'
-        ? {
-            useLegacyRegistryModels: true,
-          }
-        : {},
-    );
+    const { createToken } = await createProject(projectType, {
+      useLegacyRegistryModels: model === 'legacy',
+    });
     const { secret } = await createToken({});
 
     await expect(
@@ -158,14 +138,9 @@ describe.each`
     const { createOrg } = await initSeed().createOwner();
     const { inviteAndJoinMember, createProject } = await createOrg();
     await inviteAndJoinMember();
-    const { createToken } = await createProject(
-      projectType,
-      model === 'legacy'
-        ? {
-            useLegacyRegistryModels: true,
-          }
-        : {},
-    );
+    const { createToken } = await createProject(projectType, {
+      useLegacyRegistryModels: model === 'legacy',
+    });
     const { secret } = await createToken({});
 
     const output = schemaCheck([
