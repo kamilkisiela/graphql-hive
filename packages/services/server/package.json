@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "3.238.0",
+    "@aws-sdk/client-s3": "3.241.0",
     "@envelop/core": "3.0.4",
     "@envelop/generic-auth": "5.0.4",
     "@envelop/graphql-modules": "4.0.4",
