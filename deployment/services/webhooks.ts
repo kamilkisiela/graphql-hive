@@ -40,7 +40,6 @@ export function deployWebhooks({
         REDIS_HOST: redis.config.host,
         REDIS_PORT: String(redis.config.port),
         REDIS_PASSWORD: redis.config.password,
-        BULLMQ_COMMANDS_FROM_ROOT: 'true',
         REQUEST_BROKER: '1',
         REQUEST_BROKER_ENDPOINT: broker.workerBaseUrl,
         REQUEST_BROKER_SIGNATURE: broker.secretSignature,

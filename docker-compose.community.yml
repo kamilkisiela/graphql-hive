@@ -291,7 +291,6 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: production
-      BULLMQ_COMMANDS_FROM_ROOT: 'true'
       PORT: 3005
       REDIS_HOST: redis
       REDIS_PORT: 6379
@@ -306,7 +305,6 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: production
-      BULLMQ_COMMANDS_FROM_ROOT: 'true'
       PORT: 3011
       REDIS_HOST: redis
       REDIS_PORT: 6379

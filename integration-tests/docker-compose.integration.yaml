@@ -147,7 +147,6 @@ services:
       POSTGRES_PASSWORD: '${POSTGRES_PASSWORD}'
       USAGE_ESTIMATOR_ENDPOINT: http://usage-estimator:3008
       EMAILS_ENDPOINT: http://emails:3011
-      BULLMQ_COMMANDS_FROM_ROOT: 'true'
       PORT: 3009
 
   # Overrides only to `docker-compose.community.yaml` from now on:
