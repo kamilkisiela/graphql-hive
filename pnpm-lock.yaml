@@ -357,7 +357,6 @@ importers:
       object-hash: 3.0.0
       param-case: 3.0.4
       supertokens-node: 12.1.4
-      ts-toolbelt: 9.6.0
       tslib: 2.4.1
       zod: 3.20.2
     dependencies:
@@ -387,7 +386,6 @@ importers:
       object-hash: 3.0.0
       param-case: 3.0.4
       supertokens-node: 12.1.4
-      ts-toolbelt: 9.6.0
       zod: 3.20.2
     devDependencies:
       '@graphql-hive/core': link:../../libraries/core
@@ -25541,10 +25539,6 @@ packages:
       mkdirp: 0.5.6
       source-map-support: 0.5.21
       yn: 2.0.0
-    dev: false
-
-  /ts-toolbelt/9.6.0:
-    resolution: {integrity: sha512-nsZd8ZeNUzukXPlJmTBwUAuABDe/9qtVDelJeT/qW0ow3ZS3BsQJtNkan1802aM9Uf68/Y8ljw86Hu0h5IUW3w==}
     dev: false
 
   /tsconfig-paths/3.14.1:

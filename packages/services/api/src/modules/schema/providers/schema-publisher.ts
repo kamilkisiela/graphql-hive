@@ -28,7 +28,9 @@ import {
   getReasonByCode,
   PublishFailureReasonCode,
   SchemaCheckConclusion,
+  SchemaCheckResult,
   SchemaPublishConclusion,
+  SchemaPublishResult,
 } from './models/shared';
 import { SingleModel } from './models/single';
 import { SingleLegacyModel } from './models/single-legacy';
@@ -55,6 +57,20 @@ type PublishResult = BreakPromise<ReturnType<SchemaPublisher['internalPublish']>
 })
 export class SchemaPublisher {
   private logger: Logger;
+  private models: {
+    [ProjectType.SINGLE]: {
+      modern: SingleModel;
+      legacy: SingleLegacyModel;
+    };
+    [ProjectType.FEDERATION]: {
+      modern: FederationModel;
+      legacy: FederationLegacyModel;
+    };
+    [ProjectType.STITCHING]: {
+      modern: StitchingModel;
+      legacy: StitchingLegacyModel;
+    };
+  };
 
   constructor(
     logger: Logger,
@@ -70,15 +86,29 @@ export class SchemaPublisher {
     private idempotentRunner: IdempotentRunner,
     private helper: SchemaHelper,
     private artifactStorageWriter: ArtifactStorageWriter,
-    private federationModel: FederationModel,
-    private federationLegacyModel: FederationLegacyModel,
-    private singleModel: SingleModel,
-    private singleLegacyModel: SingleLegacyModel,
-    private stitchingModel: StitchingModel,
-    private stitchingLegacyModel: StitchingLegacyModel,
     @Inject(SCHEMA_MODULE_CONFIG) private schemaModuleConfig: SchemaModuleConfig,
+    federationModel: FederationModel,
+    federationLegacyModel: FederationLegacyModel,
+    singleModel: SingleModel,
+    singleLegacyModel: SingleLegacyModel,
+    stitchingModel: StitchingModel,
+    stitchingLegacyModel: StitchingLegacyModel,
   ) {
     this.logger = logger.child({ service: 'SchemaPublisher' });
+    this.models = {
+      [ProjectType.SINGLE]: {
+        modern: singleModel,
+        legacy: singleLegacyModel,
+      },
+      [ProjectType.FEDERATION]: {
+        modern: federationModel,
+        legacy: federationLegacyModel,
+      },
+      [ProjectType.STITCHING]: {
+        modern: stitchingModel,
+        legacy: stitchingLegacyModel,
+      },
+    };
   }
 
   @sentry('SchemaPublisher.check')
@@ -121,12 +151,14 @@ export class SchemaPublisher {
       target: input.target,
     };
 
-    const mode: 'legacy' | 'modern' = project.legacyRegistryModel ? 'legacy' : 'modern';
+    const modelVersion = project.legacyRegistryModel ? 'legacy' : 'modern';
 
-    let checkResult;
-    switch (`${project.type}:${mode}` as const) {
-      case `${ProjectType.SINGLE}:modern`:
-        checkResult = await this.singleModel.check({
+    let checkResult: SchemaCheckResult;
+
+    switch (project.type) {
+      case ProjectType.SINGLE:
+        this.logger.debug('Using SINGLE registry model (version=%s)', modelVersion);
+        checkResult = await this.models[ProjectType.SINGLE][modelVersion].check({
           input,
           selector,
           latest: latestVersion
@@ -139,75 +171,10 @@ export class SchemaPublisher {
           project,
         });
         break;
-      case `${ProjectType.FEDERATION}:modern`:
-        checkResult = await this.federationModel.check({
-          input: {
-            sdl: input.sdl,
-            serviceName: input.service,
-          },
-          selector,
-          latest: latestVersion
-            ? {
-                isComposable: latestVersion.valid,
-                schemas: ensureCompositeSchemas(latestVersion.schemas),
-              }
-            : null,
-          baseSchema,
-          project,
-        });
-        break;
-      case `${ProjectType.STITCHING}:modern`:
-        checkResult = await this.stitchingModel.check({
-          input: {
-            sdl: input.sdl,
-            serviceName: input.service,
-          },
-          selector,
-          latest: latestVersion
-            ? {
-                isComposable: latestVersion.valid,
-                schemas: ensureCompositeSchemas(latestVersion.schemas),
-              }
-            : null,
-          baseSchema,
-          project,
-        });
-        break;
-      case `${ProjectType.SINGLE}:legacy`:
-        checkResult = await this.singleLegacyModel.check({
-          input: {
-            sdl: input.sdl,
-          },
-          selector,
-          latest: latestVersion
-            ? {
-                isComposable: latestVersion.valid,
-                schemas: [ensureSingleSchema(latestVersion.schemas)],
-              }
-            : null,
-          baseSchema,
-          project,
-        });
-        break;
-      case `${ProjectType.FEDERATION}:legacy`:
-        checkResult = await this.federationLegacyModel.check({
-          input: {
-            sdl: input.sdl,
-            serviceName: input.service,
-          },
-          selector,
-          latest: latestVersion
-            ? {
-                isComposable: latestVersion.valid,
-                schemas: ensureCompositeSchemas(latestVersion.schemas),
-              }
-            : null,
-          baseSchema,
-          project,
-        });
-        break;
-      case `${ProjectType.STITCHING}:legacy`:
-        checkResult = await this.stitchingLegacyModel.check({
+      case ProjectType.FEDERATION:
+      case ProjectType.STITCHING:
+        this.logger.debug('Using %s registry model (version=%s)', project.type, modelVersion);
+        checkResult = await this.models[project.type][modelVersion].check({
           input: {
             sdl: input.sdl,
             serviceName: input.service,
@@ -224,7 +191,7 @@ export class SchemaPublisher {
         });
         break;
       default:
-        throw new HiveError(`${project.type} project (${mode}) not supported`);
+        throw new HiveError(`${project.type} project (${modelVersion}) not supported`);
     }
 
     if (input.github) {
@@ -514,8 +481,6 @@ export class SchemaPublisher {
       }),
     ]);
 
-    // const schemas = latest.schemas;
-
     await this.schemaManager.completeGetStartedCheck({
       organization: project.orgId,
       step: 'publishingSchema',
@@ -523,12 +488,13 @@ export class SchemaPublisher {
 
     this.logger.debug(`Found ${latestVersion?.schemas.length ?? 0} most recent schemas`);
 
-    const mode: 'legacy' | 'modern' = project.legacyRegistryModel ? 'legacy' : 'modern';
+    const modelVersion = project.legacyRegistryModel ? 'legacy' : 'modern';
 
-    let publishResult;
-    switch (`${project.type}:${mode}` as const) {
-      case `${ProjectType.SINGLE}:modern`:
-        publishResult = await this.singleModel.publish({
+    let publishResult: SchemaPublishResult;
+    switch (project.type) {
+      case ProjectType.SINGLE:
+        this.logger.debug('Using SINGLE registry model (version=%s)', modelVersion);
+        publishResult = await this.models[ProjectType.SINGLE][modelVersion].publish({
           input,
           latest: latestVersion
             ? {
@@ -541,64 +507,10 @@ export class SchemaPublisher {
           baseSchema,
         });
         break;
-      case `${ProjectType.FEDERATION}:modern`:
-        this.logger.debug('Using Federation model');
-        publishResult = await this.federationModel.publish({
-          input,
-          latest: latestVersion
-            ? {
-                isComposable: latestVersion.valid,
-                schemas: ensureCompositeSchemas(latestVersion.schemas),
-              }
-            : null,
-          project,
-          target,
-        });
-        break;
-      case `${ProjectType.STITCHING}:modern`:
-        publishResult = await this.stitchingModel.publish({
-          input,
-          latest: latestVersion
-            ? {
-                isComposable: latestVersion.valid,
-                schemas: ensureCompositeSchemas(latestVersion.schemas),
-              }
-            : null,
-          project,
-          target,
-        });
-        break;
-      case `${ProjectType.SINGLE}:legacy`:
-        this.logger.debug('Using Single (legacy) model');
-        publishResult = await this.singleLegacyModel.publish({
-          input,
-          latest: latestVersion
-            ? {
-                isComposable: latestVersion.valid,
-                schemas: [ensureSingleSchema(latestVersion.schemas)],
-              }
-            : null,
-          project,
-          target,
-          baseSchema,
-        });
-        break;
-      case `${ProjectType.FEDERATION}:legacy`:
-        this.logger.debug('Using Federation (legacy) model');
-        return this.federationLegacyModel.publish({
-          input,
-          latest: latestVersion
-            ? {
-                isComposable: latestVersion.valid,
-                schemas: ensureCompositeSchemas(latestVersion.schemas),
-              }
-            : null,
-          project,
-          target,
-        });
-      case `${ProjectType.STITCHING}:legacy`:
-        this.logger.debug('Using Stitching (legacy) model');
-        publishResult = await this.stitchingLegacyModel.publish({
+      case ProjectType.FEDERATION:
+      case ProjectType.STITCHING:
+        this.logger.debug('Using %s registry model (version=%s)', project.type, modelVersion);
+        publishResult = await this.models[project.type][modelVersion].publish({
           input,
           latest: latestVersion
             ? {
@@ -611,7 +523,7 @@ export class SchemaPublisher {
         });
         break;
       default:
-        throw new HiveError(`${project.type} project (${mode}) not supported`);
+        throw new HiveError(`${project.type} project (${modelVersion}) not supported`);
     }
 
     if (publishResult.conclusion === SchemaPublishConclusion.Ignore) {
@@ -1106,17 +1018,9 @@ export class SchemaPublisher {
       lines.push(`Safe: ${safeChanges.length}`);
     }
 
-    if (breakingChanges.length) {
-      writeChanges('Breaking', breakingChanges, lines);
-    }
-
-    if (dangerousChanges.length) {
-      writeChanges('Dangerous', dangerousChanges, lines);
-    }
-
-    if (safeChanges.length) {
-      writeChanges('Safe', safeChanges, lines);
-    }
+    writeChanges('Breaking', breakingChanges, lines);
+    writeChanges('Dangerous', dangerousChanges, lines);
+    writeChanges('Safe', safeChanges, lines);
 
     return lines.join('\n');
   }
@@ -1127,7 +1031,11 @@ function filterChangesByLevel(level: Types.CriticalityLevel) {
 }
 
 function writeChanges(type: string, changes: readonly Types.SchemaChange[], lines: string[]): void {
-  lines.push(
-    ...['', `### ${type} changes`].concat(changes.map(change => ` - ${bolderize(change.message)}`)),
-  );
+  if (changes.length > 0) {
+    lines.push(
+      ...['', `### ${type} changes`].concat(
+        changes.map(change => ` - ${bolderize(change.message)}`),
+      ),
+    );
+  }
 }

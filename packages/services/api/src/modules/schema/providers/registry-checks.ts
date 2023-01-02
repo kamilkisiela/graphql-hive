@@ -9,9 +9,23 @@ import type {
   SingleSchema,
 } from './../../../shared/entities';
 import { Logger } from './../../shared/providers/logger';
-import type { CheckResult } from './checks';
 import { Inspector } from './inspector';
 import { SchemaHelper } from './schema-helper';
+
+// The reason why I'm using `result` and `reason` instead of just `data` for both:
+// https://bit.ly/hive-check-result-data
+export type CheckResult<C = unknown, F = unknown> =
+  | {
+      status: 'completed';
+      result: C;
+    }
+  | {
+      status: 'failed';
+      reason: F;
+    }
+  | {
+      status: 'skipped';
+    };
 
 type Schemas = [SingleSchema] | PushedCompositeSchema[];
 
