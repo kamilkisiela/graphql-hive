@@ -1,3 +1,4 @@
+import type { CompositionFailureError } from '@hive/schema';
 import { DocumentNode, GraphQLError, SourceLocation } from 'graphql';
 import { parse } from 'graphql';
 import { z } from 'zod';
@@ -7,7 +8,6 @@ import type {
   AuthProvider,
   OrganizationAccessScope,
   ProjectAccessScope,
-  SchemaError,
   TargetAccessScope,
 } from '../__generated__/types';
 
@@ -247,11 +247,9 @@ export interface TargetSettings {
   };
 }
 
-type WithCode<T> = T & { code?: string | null };
-
 export interface Orchestrator {
   ensureConfig(config: any): void | never;
-  validate(schemas: SchemaObject[], config: any): Promise<WithCode<SchemaError>[]>;
+  validate(schemas: SchemaObject[], config: any): Promise<CompositionFailureError[]>;
   build(schemas: SchemaObject[], config: any): Promise<SchemaObject>;
   supergraph(schemas: SchemaObject[], config: any): Promise<string | null>;
 }

@@ -103,7 +103,7 @@ export class SingleModel {
         this.logger.debug('Failing schema check due to composition errors');
         reasons.push({
           code: CheckFailureReasonCode.CompositionFailure,
-          compositionErrors: compositionCheck.reason.allErrors,
+          compositionErrors: compositionCheck.reason.errors,
         });
       }
 
@@ -210,13 +210,16 @@ export class SingleModel {
       messages.push('Metadata has been updated');
     }
 
-    if (compositionCheck.status === 'failed' && compositionCheck.reason.buildErrors.length > 0) {
+    if (
+      compositionCheck.status === 'failed' &&
+      compositionCheck.reason.errorsBySource.graphql.length > 0
+    ) {
       return {
         conclusion: SchemaPublishConclusion.Reject,
         reasons: [
           {
             code: PublishFailureReasonCode.CompositionFailure,
-            compositionErrors: compositionCheck.reason.buildErrors,
+            compositionErrors: compositionCheck.reason.errorsBySource.graphql,
           },
         ],
       };

@@ -38,13 +38,17 @@ interface CompositionSuccess {
   };
 }
 
+export type CompositionErrorSource = 'graphql' | 'composition';
+
+export interface CompositionFailureError {
+  message: string;
+  source?: CompositionErrorSource | null;
+}
+
 interface CompositionFailure {
   type: 'failure';
   result: {
-    errors: Array<{
-      message: string;
-      code?: string | null;
-    }>;
+    errors: CompositionFailureError[];
     raw?: string;
   };
 }
@@ -107,24 +111,37 @@ function trimDescriptions(doc: DocumentNode): DocumentNode {
 
 const emptySource = '*';
 
-function toValidationError(error: any, errorCode?: string | null) {
+function toValidationError(error: any, source: CompositionErrorSource) {
   if (error instanceof GraphQLError) {
-    const code = error.extensions?.code ?? errorCode;
     return {
       message: error.message,
-      code: typeof code === 'string' ? code : undefined,
+      source,
     };
   }
 
   if (error instanceof Error) {
     return {
       message: error.message,
+      source,
     };
   }
 
   return {
     message: error as string,
+    source,
   };
+}
+
+function errorWithSource(source: CompositionErrorSource) {
+  return (error: unknown) => toValidationError(error, source);
+}
+
+function errorWithPossibleCode(error: unknown) {
+  if (error instanceof GraphQLError && error.extensions?.code) {
+    return toValidationError(error, 'composition');
+  }
+
+  return toValidationError(error, 'graphql');
 }
 
 interface Orchestrator {
@@ -242,7 +259,7 @@ const createFederation: (
         return {
           type: 'failure',
           result: {
-            errors: result.errors.map(e => toValidationError(e)),
+            errors: result.errors.map(errorWithPossibleCode),
             raw: result.schema ? printSchema(result.schema) : undefined,
           },
         };
@@ -321,7 +338,7 @@ const createFederation: (
 const single: Orchestrator = {
   async validate(schemas) {
     const schema = schemas[0];
-    const errors = validateSDL(parse(schema.raw)).map(e => toValidationError(e));
+    const errors = validateSDL(parse(schema.raw)).map(errorWithSource('graphql'));
 
     return {
       errors,
@@ -365,7 +382,7 @@ const createStitching: (redis: RedisInstance, logger: FastifyLoggerInstance) => 
       try {
         await stitchAndPrint(schemas);
       } catch (error) {
-        errors.push(toValidationError(error, 'STITCHING_ERROR'));
+        errors.push(toValidationError(error, 'composition'));
       }
 
       return {
@@ -389,7 +406,7 @@ const createStitching: (redis: RedisInstance, logger: FastifyLoggerInstance) => 
 function validateStitchedSchema(doc: DocumentNode) {
   const { allStitchingDirectivesTypeDefs, stitchingDirectivesValidator } = stitchingDirectives();
   const fullDoc = concatAST([parse(allStitchingDirectivesTypeDefs), doc]);
-  const errors = validateSDL(fullDoc).map(e => toValidationError(e));
+  const errors = validateSDL(fullDoc).map(errorWithSource('graphql'));
 
   try {
     stitchingDirectivesValidator(
@@ -399,7 +416,7 @@ function validateStitchedSchema(doc: DocumentNode) {
       }),
     );
   } catch (error) {
-    errors.push(toValidationError(error, 'STITCHING_DIRECTIVES_ERROR'));
+    errors.push(toValidationError(error, 'composition'));
   }
 
   return errors;

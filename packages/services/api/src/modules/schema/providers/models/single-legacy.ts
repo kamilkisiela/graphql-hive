@@ -104,7 +104,7 @@ export class SingleLegacyModel {
         this.logger.debug('Failing schema check due to composition errors');
         reasons.push({
           code: CheckFailureReasonCode.CompositionFailure,
-          compositionErrors: compositionCheck.reason.allErrors,
+          compositionErrors: compositionCheck.reason.errors,
         });
       }
 
@@ -206,7 +206,7 @@ export class SingleLegacyModel {
     ]);
 
     const compositionErrors =
-      compositionCheck.status === 'failed' ? compositionCheck.reason.allErrors : null;
+      compositionCheck.status === 'failed' ? compositionCheck.reason.errors : null;
     const breakingChanges =
       diffCheck.status === 'failed' && !acceptBreakingChanges
         ? diffCheck.reason.breakingChanges
@@ -264,7 +264,7 @@ export class SingleLegacyModel {
     if (compositionCheck.status === 'failed') {
       reasons.push({
         code: PublishFailureReasonCode.CompositionFailure,
-        compositionErrors: compositionCheck.reason.allErrors,
+        compositionErrors: compositionCheck.reason.errors,
       });
     }
 

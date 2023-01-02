@@ -140,7 +140,7 @@ export class FederationModel {
       if (compositionCheck.status === 'failed') {
         reasons.push({
           code: CheckFailureReasonCode.CompositionFailure,
-          compositionErrors: compositionCheck.reason.allErrors,
+          compositionErrors: compositionCheck.reason.errors,
         });
       }
 
@@ -256,13 +256,16 @@ export class FederationModel {
       schemas,
     });
 
-    if (compositionCheck.status === 'failed' && compositionCheck.reason.buildErrors.length > 0) {
+    if (
+      compositionCheck.status === 'failed' &&
+      compositionCheck.reason.errorsBySource.graphql.length > 0
+    ) {
       return {
         conclusion: SchemaPublishConclusion.Reject,
         reasons: [
           {
             code: PublishFailureReasonCode.CompositionFailure,
-            compositionErrors: compositionCheck.reason.buildErrors,
+            compositionErrors: compositionCheck.reason.errorsBySource.graphql,
           },
         ],
       };

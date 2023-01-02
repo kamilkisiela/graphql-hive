@@ -1,3 +1,4 @@
+import type { CompositionFailureError } from '@hive/schema';
 import { Injectable, Scope } from 'graphql-modules';
 import hashObject from 'object-hash';
 import { buildSchema } from '../../../shared/schema';
@@ -18,6 +19,20 @@ type LatestVersion = {
   isComposable: boolean;
   schemas: Schemas;
 } | null;
+
+function isCompositionValidationError(error: CompositionFailureError): error is {
+  message: string;
+  source: 'composition';
+} {
+  return error.source === 'composition';
+}
+
+function isGraphQLValidationError(error: CompositionFailureError): error is {
+  message: string;
+  source: 'graphql';
+} {
+  return !isCompositionValidationError(error);
+}
 
 @Injectable({
   scope: Scope.Operation,
@@ -73,16 +88,14 @@ export class RegistryChecks {
     if (Array.isArray(validationErrors) && validationErrors.length) {
       this.logger.debug('Detected validation errors');
 
-      // TODO: improve this...
-      const buildErrors = validationErrors.filter(e => typeof e.code !== 'string');
-      const compositionErrors = validationErrors.filter(e => typeof e.code === 'string');
-
       return {
         status: 'failed',
         reason: {
-          allErrors: validationErrors,
-          buildErrors,
-          compositionErrors,
+          errors: validationErrors,
+          errorsBySource: {
+            graphql: validationErrors.filter(isGraphQLValidationError),
+            composition: validationErrors.filter(isCompositionValidationError),
+          },
         },
       } satisfies CheckResult;
     }

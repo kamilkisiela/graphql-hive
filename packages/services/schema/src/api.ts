@@ -6,6 +6,8 @@ import { z } from 'zod';
 import { buildCounter, supergraphCounter, validateCounter } from './metrics';
 import { pickOrchestrator } from './orchestrators';
 
+export type { CompositionFailureError, CompositionErrorSource } from './orchestrators';
+
 const t = initTRPC
   .context<{
     logger: FastifyLoggerInstance;
