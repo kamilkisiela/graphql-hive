@@ -36,7 +36,7 @@ export BUILD_TYPE=""
 export DOCKER_TAG=":local"
 ```
 
-6. Compile a local Docker image by running: `docker buildx bake -f docker.hcl build --load`
+6. Compile a local Docker image by running: `docker buildx bake -f docker.hcl integration-tests --load`
 7. Use Docker Compose to run the built containers (based on `community` compose file), along with
    the extra containers:
 
