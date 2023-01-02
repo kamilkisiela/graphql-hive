@@ -125,7 +125,6 @@ export enum ProjectType {
   FEDERATION = 'FEDERATION',
   STITCHING = 'STITCHING',
   SINGLE = 'SINGLE',
-  CUSTOM = 'CUSTOM',
 }
 
 export enum OrganizationType {
