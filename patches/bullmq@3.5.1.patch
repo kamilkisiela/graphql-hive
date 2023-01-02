@@ -1,18 +1,5 @@
-diff --git a/dist/esm/classes/redis-connection.js b/dist/esm/classes/redis-connection.js
-index 7843e65..3807efe 100644
---- a/dist/esm/classes/redis-connection.js
-+++ b/dist/esm/classes/redis-connection.js
-@@ -105,7 +105,7 @@ export class RedisConnection extends EventEmitter {
-     }
-     loadCommands() {
-         return (this._client['bullmq:loadingCommands'] ||
--            (this._client['bullmq:loadingCommands'] = scriptLoader.load(this._client, path.join(__dirname, '../commands'))));
-+            (this._client['bullmq:loadingCommands'] = scriptLoader.load(this._client, path.join(__dirname, process.env.BULLMQ_COMMANDS_FROM_ROOT ? './' : '../commands'))));
-     }
-     async init() {
-         if (!this._client) {
 diff --git a/dist/esm/commands/script-loader.js b/dist/esm/commands/script-loader.js
-index 3ed1c00..79e455a 100644
+index bcbe1b33d8c4adf3113e561584dbd17c48a197d2..671d1316123c29ea8bc0901e4e8236fbd6290dcd 100644
 --- a/dist/esm/commands/script-loader.js
 +++ b/dist/esm/commands/script-loader.js
 @@ -2,6 +2,7 @@ import { createHash } from 'crypto';
@@ -23,11 +10,11 @@ index 3ed1c00..79e455a 100644
  import { promisify } from 'util';
  const readFile = promisify(fs.readFile);
  const readdir = promisify(fs.readdir);
-@@ -343,15 +344,7 @@ async function getFilenamesByPattern(pattern) {
+@@ -349,15 +350,7 @@ async function getFilenamesByPattern(pattern) {
  // Determine the project root
  // https://stackoverflow.com/a/18721515
  function getPkgJsonDir() {
--    for (const modPath of (module.paths || [])) {
+-    for (const modPath of module.paths || []) {
 -        try {
 -            const prospectivePkgJsonDir = path.dirname(modPath);
 -            fs.accessSync(modPath, fs.constants.F_OK);

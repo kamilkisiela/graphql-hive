@@ -1,27 +1,27 @@
 lockfileVersion: 5.4
 
 patchedDependencies:
-  '@tgriesser/schemats@7.0.1':
-    hash: u3kbucfchakklx3sci2vh6wjau
-    path: patches/@tgriesser__schemats@7.0.1.patch
-  bullmq@1.81.4:
-    hash: d7likfulu5mfjaaerbpls6og24
-    path: patches/bullmq@1.81.4.patch
   '@theguild/buddy@0.1.0':
     hash: ryylgra5xglhidfoiaxehn22hq
     path: patches/@theguild__buddy@0.1.0.patch
-  '@oclif/core@1.23.0':
-    hash: zhte2hlj7lfobytjpalcwwo474
-    path: patches/@oclif__core@1.23.0.patch
   mjml-core@4.13.0:
     hash: zxxsxbqejjmcwuzpigutzzq6wa
     path: patches/mjml-core@4.13.0.patch
+  '@tgriesser/schemats@7.0.1':
+    hash: u3kbucfchakklx3sci2vh6wjau
+    path: patches/@tgriesser__schemats@7.0.1.patch
   slonik@30.1.2:
     hash: wg2hxbo7txnklmvja4aeqnygfi
     path: patches/slonik@30.1.2.patch
   '@graphql-inspector/core@3.4.0':
     hash: tu4s2cjheabese6hdiqk5i3mii
     path: patches/@graphql-inspector__core@3.4.0.patch
+  '@oclif/core@1.23.0':
+    hash: zhte2hlj7lfobytjpalcwwo474
+    path: patches/@oclif__core@1.23.0.patch
+  bullmq@3.5.1:
+    hash: xbmkiyyfti7h6orsfs6pdmi4s4
+    path: patches/bullmq@3.5.1.patch
 
 importers:
 
@@ -459,7 +459,7 @@ importers:
       '@types/nodemailer': 6.4.7
       '@types/sendmail': 1.4.4
       '@whatwg-node/fetch': 0.5.3
-      bullmq: 1.81.4
+      bullmq: 3.5.1
       copyfiles: 2.4.1
       dotenv: 16.0.3
       ioredis: 5.2.4
@@ -474,7 +474,7 @@ importers:
       '@sentry/node': 7.28.1
       '@trpc/server': 10.7.0
       '@whatwg-node/fetch': 0.5.3
-      bullmq: 1.81.4_d7likfulu5mfjaaerbpls6og24
+      bullmq: 3.5.1
       dotenv: 16.0.3
       ioredis: 5.2.4
       mjml: 4.13.0
@@ -910,7 +910,7 @@ importers:
       '@sentry/node': 7.28.1
       '@sentry/tracing': 7.28.1
       '@trpc/server': 10.7.0
-      bullmq: 1.81.4
+      bullmq: 3.5.1
       copyfiles: 2.4.1
       dotenv: 16.0.3
       got: 12.5.3
@@ -923,7 +923,7 @@ importers:
       '@sentry/node': 7.28.1
       '@sentry/tracing': 7.28.1
       '@trpc/server': 10.7.0
-      bullmq: 1.81.4_d7likfulu5mfjaaerbpls6og24
+      bullmq: 3.5.1
       dotenv: 16.0.3
       got: 12.5.3
       ioredis: 5.2.4
@@ -12530,22 +12530,20 @@ packages:
       semver: 7.3.8
     dev: true
 
-  /bullmq/1.81.4_d7likfulu5mfjaaerbpls6og24:
-    resolution: {integrity: sha512-sUEWOMKZnWlh1/XNqYAoSwXW6P8nZN7uJiHKZ8XlZCiIxWlEGjFtlugkkiCZ0lsTI2nNRHdxfpn78x9K3L1utQ==}
+  /bullmq/3.5.1:
+    resolution: {integrity: sha512-QxQnSIPBmEVq/bM1wxmMdh9RS4oNyUNeCvoTegr2EgtlNYToCkLgHAkM56JhaRlffo9ExNiWfVFJpXLWDfK0Fw==}
     dependencies:
       cron-parser: 4.6.0
-      get-port: 5.1.1
-      glob: 7.2.3
-      ioredis: 4.28.5
+      glob: 8.0.3
+      ioredis: 5.2.4
       lodash: 4.17.21
       msgpackr: 1.7.2
-      semver: 6.3.0
-      tslib: 1.14.1
-      uuid: 8.3.2
+      semver: 7.3.8
+      tslib: 2.4.1
+      uuid: 9.0.0
     transitivePeerDependencies:
       - supports-color
     dev: false
-    patched: true
 
   /bundle-require/3.1.2_esbuild@0.15.15:
     resolution: {integrity: sha512-Of6l6JBAxiyQ5axFxUM6dYeP/W7X2Sozeo/4EYB9sJhL+dqL7TKjg+shwxp6jlu/6ZSERfsYtIpSJ1/x3XkAEA==}
@@ -14458,11 +14456,6 @@ packages:
   /delegates/1.0.0:
     resolution: {integrity: sha512-bd2L678uiWATM6m5Z1VzNCErI3jiGzt6HGY8OVICs40JQq/HALfbyNJmp0UDakEY4pMMaN0Ly5om/B1VI/+xfQ==}
 
-  /denque/1.5.1:
-    resolution: {integrity: sha512-XwE+iZ4D6ZUB7mfYRMb5wByE8L74HCn30FBN7sWnXksWc1LO1bPDl67pBR9o/kC4z/xSNAwkMYcGgqDV3BE3Hw==}
-    engines: {node: '>=0.10'}
-    dev: false
-
   /denque/2.1.0:
     resolution: {integrity: sha512-HVQE3AAb/pxF8fQAoiqpvg9i3evqug3hoiwakOyZAwJm+6vZehbkYXZ0l4JxS+I3QxM97v5aaRNhj8v5oBhekw==}
     engines: {node: '>=0.10'}
@@ -15436,7 +15429,7 @@ packages:
     dependencies:
       fast-glob: 3.2.12
       postcss: 8.4.20
-      tailwindcss: 3.2.4_ra2vnoek4vhbzktaezawwqbin4
+      tailwindcss: 3.2.4_ts-node@10.9.1
     transitivePeerDependencies:
       - ts-node
     dev: true
@@ -16426,11 +16419,6 @@ packages:
   /get-package-type/0.1.0:
     resolution: {integrity: sha512-pjzuKtY64GYfWizNAJ0fr9VqttZkNiK2iS430LtIHzjBEr6bX8Am2zm4sW4Ro5wjWW5cAlRL1qAMTcXbjNAO2Q==}
     engines: {node: '>=8.0.0'}
-
-  /get-port/5.1.1:
-    resolution: {integrity: sha512-g/Q1aTSDOxFpchXC4i8ZWvxA1lnPqx/JHqcpIw0/LX9T8x/GBbi6YnlN5nhaKIFkT8oFsscUKgDJYxfwfS6QsQ==}
-    engines: {node: '>=8'}
-    dev: false
 
   /get-stack-trace/2.1.1:
     resolution: {integrity: sha512-dhqSDD9lHU/6FvIZ9KbXGmVK6IKr9ZskZtNOUvhlCiONlnqatu4FmAeRbxCfJJVuQ0NWfz6dAbibKQg19B7AmQ==}
@@ -17534,25 +17522,6 @@ packages:
       fengari-interop: 0.1.3_fengari@0.1.4
       ioredis: 5.2.4
     dev: true
-
-  /ioredis/4.28.5:
-    resolution: {integrity: sha512-3GYo0GJtLqgNXj4YhrisLaNNvWSNwSS2wS4OELGfGxH8I69+XfNdnmV1AyN+ZqMh0i7eX+SWjrwFKDBDgfBC1A==}
-    engines: {node: '>=6'}
-    dependencies:
-      cluster-key-slot: 1.1.1
-      debug: 4.3.4
-      denque: 1.5.1
-      lodash.defaults: 4.2.0
-      lodash.flatten: 4.4.0
-      lodash.isarguments: 3.1.0
-      p-map: 2.1.0
-      redis-commands: 1.7.0
-      redis-errors: 1.2.0
-      redis-parser: 3.0.0
-      standard-as-callback: 2.1.0
-    transitivePeerDependencies:
-      - supports-color
-    dev: false
 
   /ioredis/5.2.4:
     resolution: {integrity: sha512-qIpuAEt32lZJQ0XyrloCRdlEdUUNGG9i0UOk6zgzK6igyudNWqEBxfH6OlbnOOoBBvr1WB02mm8fR55CnikRng==}
@@ -19215,10 +19184,6 @@ packages:
 
   /lodash.flatmap/4.5.0:
     resolution: {integrity: sha512-/OcpcAGWlrZyoHGeHh3cAoa6nGdX6QYtmzNP84Jqol6UEQQ2gIaU3H+0eICcjcKGl0/XF8LWOujNn9lffsnaOg==}
-    dev: false
-
-  /lodash.flatten/4.4.0:
-    resolution: {integrity: sha512-C5N2Z3DgnnKr0LOpv/hKCgKdb7ZZwafIrsesve6lmzvZIRZRGaZ/l6Q8+2W7NaT+ZwO3fFlSCzCzrDCFdJfZ4g==}
     dev: false
 
   /lodash.get/4.4.2:
@@ -21548,6 +21513,7 @@ packages:
   /p-map/2.1.0:
     resolution: {integrity: sha512-y3b8Kpd8OAN444hxfBbFfj1FY/RjtTd8tzYwhUqNYXx0fXx2iX4maP4Qr6qhIKbQXI02wTLAda4fYUbDagTUFw==}
     engines: {node: '>=6'}
+    dev: true
 
   /p-map/4.0.0:
     resolution: {integrity: sha512-/bjOqmgETBYB5BoEeGVea8dmvHb2m9GLy1E9W43yeyfP6QQCZGFNa+XRceJEuDB6zqr+gKpIAmlLebMpykw/MQ==}
@@ -23435,10 +23401,6 @@ packages:
     dependencies:
       esprima: 4.0.1
 
-  /redis-commands/1.7.0:
-    resolution: {integrity: sha512-nJWqw3bTFy21hX/CPKHth6sfhZbdiHP6bTawSgQBlKOVRG7EZkfHbbHwQJnrE4vsQf0CMNE+3gJ4Fmm16vdVlQ==}
-    dev: false
-
   /redis-errors/1.2.0:
     resolution: {integrity: sha512-1qny3OExCf0UvUV/5wpYKf2YwPcOqXzkwKKSmKHiE6ZMQs5heeE/c8eXK+PNllPvmjgAbfnsbpkGZWy8cBpn9w==}
     engines: {node: '>=4'}
@@ -25064,12 +25026,10 @@ packages:
       - ts-node
     dev: true
 
-  /tailwindcss/3.2.4_ra2vnoek4vhbzktaezawwqbin4:
+  /tailwindcss/3.2.4_ts-node@10.9.1:
     resolution: {integrity: sha512-AhwtHCKMtR71JgeYDaswmZXhPcW9iuI9Sp2LvZPo9upDZ7231ZJ7eA9RaURbhpXGVlrjX4cFNlB4ieTetEb7hQ==}
     engines: {node: '>=12.13.0'}
     hasBin: true
-    peerDependencies:
-      postcss: ^8.0.9
     dependencies:
       arg: 5.0.2
       chokidar: 3.5.3

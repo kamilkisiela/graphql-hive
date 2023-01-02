@@ -109,7 +109,13 @@ To run integration tests locally, from the pre-build Docker image, follow:
 2. Install all deps: `pnpm i`
 3. Generate types: `pnpm graphql:generate`
 4. Build source code: `pnpm build`
-5. Decide on the commit ID / Docker image tag you would like to use.
+5. Decide on the commit ID / Docker image tag you would like to use and set it as env var:
+
+```
+export DOCKER_REGISTRY="ghcr.io/kamilkisiela/graphql-hive/"
+export DOCKER_TAG=":IMAGE_TAG_HERE"
+```
+
 6. Run the e2e environment, by running:
    `docker compose -f docker-compose.community.yml --env-file ./integration-tests/.env up -d --wait`
 7. Run Cypress: `pnpm test:e2e`
