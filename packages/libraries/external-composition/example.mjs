@@ -40,7 +40,7 @@ const composeFederation = compose(services => {
       result: {
         errors: result.errors.map(err => ({
           message: err.message,
-          code: typeof err.extensions?.code === 'string' ? err.extensions.code : null,
+          source: typeof err.extensions?.code === 'string' ? 'composition' : 'graphql',
         })),
       },
     };

@@ -42,7 +42,7 @@ export type CompositionErrorSource = 'graphql' | 'composition';
 
 export interface CompositionFailureError {
   message: string;
-  source?: CompositionErrorSource | null;
+  source: CompositionErrorSource;
 }
 
 interface CompositionFailure {
@@ -71,7 +71,13 @@ const EXTERNAL_COMPOSITION_RESULT = z.union([
       result: z
         .object({
           errors: z.array(
-            z.object({ message: z.string(), code: z.string().optional().nullable() }),
+            z.object({
+              message: z.string(),
+              source: z
+                .union([z.literal('composition'), z.literal('graphql')])
+                .optional()
+                .transform(value => value ?? 'graphql'),
+            }),
           ),
         })
         .required(),
