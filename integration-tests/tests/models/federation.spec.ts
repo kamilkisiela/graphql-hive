@@ -1,6 +1,7 @@
 import { ProjectType } from '@app/gql/graphql';
-import { createCLI } from '../../testkit/cli';
+import { createCLI, schemaPublish } from '../../testkit/cli';
 import { prepareProject } from '../../testkit/registry-models';
+import { initSeed } from '../../testkit/seed';
 
 describe('publish', () => {
   test.concurrent('accepted: composable', async () => {
@@ -373,6 +374,33 @@ describe('check', () => {
 
     expect(message).toMatch('Product.it');
     expect(message).toMatch('topProduct');
+  });
+});
+
+describe('other', () => {
+  test.concurrent('service url should be available in supergraph', async () => {
+    const { createOrg } = await initSeed().createOwner();
+    const { inviteAndJoinMember, createProject } = await createOrg();
+    await inviteAndJoinMember();
+    const { createToken } = await createProject(ProjectType.Federation);
+    const { secret, fetchSupergraph } = await createToken({});
+
+    await schemaPublish([
+      '--token',
+      secret,
+      '--author',
+      'Kamil',
+      '--commit',
+      'abc123',
+      '--service',
+      'users',
+      '--url',
+      'https://api.com/users-subgraph',
+      'fixtures/federation-init.graphql',
+    ]);
+
+    const supergraph = await fetchSupergraph();
+    expect(supergraph).toMatch('(name: "users" url: "https://api.com/users-subgraph")');
   });
 });
 
