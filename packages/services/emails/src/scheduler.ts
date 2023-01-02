@@ -1,6 +1,6 @@
 import type { FastifyLoggerInstance } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
-import { Job, Queue, QueueScheduler, Worker } from 'bullmq';
+import { Job, Queue, Worker } from 'bullmq';
 import Redis, { Redis as RedisInstance } from 'ioredis';
 import mjml2html from 'mjml';
 import pTimeout from 'p-timeout';
@@ -24,7 +24,6 @@ export function createScheduler(config: {
 }) {
   let redisConnection: RedisInstance | null;
   let queue: Queue | null;
-  let queueScheduler: QueueScheduler | null;
   let stopped = false;
   const logger = config.logger;
 
@@ -41,12 +40,12 @@ export function createScheduler(config: {
     };
   }
 
-  function onFailed(job: Job, error: Error) {
+  function onFailed(job: Job<EmailInput> | undefined, error: Error) {
     logger.debug(
       `Job %s failed after %s attempts, reason: %s`,
-      job.name,
-      job.attemptsMade,
-      job.failedReason,
+      job?.name,
+      job?.attemptsMade,
+      job?.failedReason,
     );
     logger.error(error);
     emailsFailuresTotal.inc();
@@ -59,20 +58,14 @@ export function createScheduler(config: {
 
     const prefix = 'hive-emails';
 
-    queueScheduler = new QueueScheduler(config.queueName, {
-      prefix,
-      connection: redisConnection,
-      sharedConnection: true,
-    });
-
     queue = new Queue(config.queueName, {
       prefix,
       connection: redisConnection,
       sharedConnection: true,
     });
 
-    // Wait for Queues and Scheduler to be ready
-    await Promise.all([queueScheduler.waitUntilReady(), queue.waitUntilReady()]);
+    // Wait for Queues to be ready
+    await queue.waitUntilReady();
 
     const worker = new Worker<EmailInput>(
       config.queueName,
@@ -171,17 +164,17 @@ export function createScheduler(config: {
 
     logger.info('Clearing BullMQ...');
     try {
-      queue?.removeAllListeners();
-      queueScheduler?.removeAllListeners(),
-        await pTimeout(Promise.all([queue?.close(), queueScheduler?.close()]), {
+      if (queue) {
+        queue.removeAllListeners();
+        await pTimeout(queue.close(), {
           milliseconds: 5000,
           message: 'BullMQ close timeout',
         });
+      }
     } catch (e) {
       logger.error('Failed to stop queues', e);
     } finally {
       queue = null;
-      queueScheduler = null;
       logger.info('BullMQ stopped');
     }
 
