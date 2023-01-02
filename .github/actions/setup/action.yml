@@ -23,10 +23,19 @@ runs:
       with:
         node-version-file: .node-version
 
+    - name: check pnpm version
+      shell: bash
+      id: pnpm
+      run: |
+        PNPM_VERSION=$(cat package.json | jq -r '.packageManager' | awk -F@ '{print $2}')
+        PNPM_VERSION=${PNPM_VERSION:-7}
+        echo "Using PNPM version $PNPM_VERSION"
+        echo "version=$PNPM_VERSION" >> $GITHUB_OUTPUT
+
     - name: install pnpm
       uses: pnpm/action-setup@v2.2.4
       with:
-        version: 7.18.2
+        version: ${{ steps.pnpm.outputs.version }}
 
     - name: pnpm store path
       id: pnpm-cache
