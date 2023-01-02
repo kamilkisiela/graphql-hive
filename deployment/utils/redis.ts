@@ -1,8 +1,8 @@
 import * as k8s from '@pulumi/kubernetes';
 import * as kx from '@pulumi/kubernetesx';
+import { getLocalComposeConfig } from './local-config';
 import { normalizeEnv, PodBuilder } from './pod-builder';
 
-const DEFAULT_IMAGE = 'bitnami/redis:6.2.6';
 const PORT = 6379;
 
 export class Redis {
@@ -14,8 +14,8 @@ export class Redis {
   ) {}
 
   deploy({ limits }: { limits: k8s.types.input.core.v1.ResourceRequirements['limits'] }) {
+    const redisService = getLocalComposeConfig().service('redis');
     const name = 'redis-store';
-    const image = DEFAULT_IMAGE;
 
     const env = normalizeEnv(this.options.env ?? {}).concat([
       {
@@ -58,7 +58,7 @@ fi
       containers: [
         {
           name,
-          image,
+          image: redisService.image,
           env,
           volumeMounts,
           ports: [{ containerPort: PORT, hostPort: PORT, protocol: 'TCP' }],
