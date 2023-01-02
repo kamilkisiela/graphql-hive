@@ -1,4 +1,4 @@
-import { ProjectType, RegistryModel,TargetAccessScope } from '@app/gql/graphql';
+import { ProjectType, RegistryModel, TargetAccessScope } from '@app/gql/graphql';
 import { initSeed } from './seed';
 
 export async function prepareProject(
