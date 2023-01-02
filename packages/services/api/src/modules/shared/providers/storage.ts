@@ -21,11 +21,9 @@ import type {
   TargetSettings,
   User,
 } from '../../../shared/entities';
-import type { NullableAndPartial } from '../../../shared/helpers';
 import type { OrganizationAccessScope } from '../../auth/providers/organization-access';
 import type { ProjectAccessScope } from '../../auth/providers/project-access';
 import type { TargetAccessScope } from '../../auth/providers/target-access';
-import type { CustomOrchestratorConfig } from '../../schema/providers/orchestrators/custom';
 
 type Paginated<T> = T & {
   after?: string | null;
@@ -194,9 +192,7 @@ export interface Storage {
   getProjectByCleanId(_: { cleanId: string } & OrganizationSelector): Promise<Project | null>;
   getProjects(_: OrganizationSelector): Promise<Project[] | never>;
   createProject(
-    _: Pick<Project, 'name' | 'cleanId' | 'type'> &
-      NullableAndPartial<CustomOrchestratorConfig> &
-      OrganizationSelector,
+    _: Pick<Project, 'name' | 'cleanId' | 'type'> & OrganizationSelector,
   ): Promise<Project | never>;
   deleteProject(_: ProjectSelector): Promise<Project | never>;
   updateProjectName(

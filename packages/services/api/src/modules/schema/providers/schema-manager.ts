@@ -17,7 +17,6 @@ import {
   Storage,
   TargetSelector,
 } from '../../shared/providers/storage';
-import { CustomOrchestrator } from './orchestrators/custom';
 import { FederationOrchestrator } from './orchestrators/federation';
 import { SingleOrchestrator } from './orchestrators/single';
 import { StitchingOrchestrator } from './orchestrators/stitching';
@@ -54,7 +53,6 @@ export class SchemaManager {
     private singleOrchestrator: SingleOrchestrator,
     private stitchingOrchestrator: StitchingOrchestrator,
     private federationOrchestrator: FederationOrchestrator,
-    private customOrchestrator: CustomOrchestrator,
     private crypto: CryptoProvider,
   ) {
     this.logger = logger.child({ source: 'SchemaManager' });
@@ -339,9 +337,6 @@ export class SchemaManager {
       }
       case ProjectType.FEDERATION: {
         return this.federationOrchestrator;
-      }
-      case ProjectType.CUSTOM: {
-        return this.customOrchestrator;
       }
       default: {
         throw new HiveError(`Couldn't find an orchestrator for project type "${projectType}"`);

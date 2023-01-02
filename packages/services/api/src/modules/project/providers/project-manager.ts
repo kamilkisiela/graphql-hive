@@ -1,12 +1,11 @@
 import { Injectable, Scope } from 'graphql-modules';
 import { paramCase } from 'param-case';
 import type { Project, ProjectType } from '../../../shared/entities';
-import { NullableAndPartial, share, uuid } from '../../../shared/helpers';
+import { share, uuid } from '../../../shared/helpers';
 import { ActivityManager } from '../../activity/providers/activity-manager';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { OrganizationAccessScope } from '../../auth/providers/organization-access';
 import { ProjectAccessScope } from '../../auth/providers/project-access';
-import type { CustomOrchestratorConfig } from '../../schema/providers/orchestrators/custom';
 import { SchemaManager } from '../../schema/providers/schema-manager';
 import { Logger } from '../../shared/providers/logger';
 import { OrganizationSelector, ProjectSelector, Storage } from '../../shared/providers/storage';
@@ -38,10 +37,9 @@ export class ProjectManager {
     input: {
       name: string;
       type: ProjectType;
-    } & OrganizationSelector &
-      NullableAndPartial<CustomOrchestratorConfig>,
+    } & OrganizationSelector,
   ): Promise<Project> {
-    const { name, type, organization, buildUrl, validationUrl } = input;
+    const { name, type, organization } = input;
     this.logger.info('Creating a project (input=%o)', input);
     let cleanId = paramCase(name);
 
@@ -49,18 +47,12 @@ export class ProjectManager {
       cleanId = paramCase(`${name}-${uuid(4)}`);
     }
 
-    const orchestrator = this.schemaManager.matchOrchestrator(type);
-
-    orchestrator.ensureConfig({ buildUrl, validationUrl });
-
     // create project
     const project = await this.storage.createProject({
       name,
       cleanId,
       type,
       organization,
-      buildUrl,
-      validationUrl,
     });
 
     await Promise.all([

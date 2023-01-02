@@ -664,21 +664,14 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       return result;
     },
-    async createProject({
-      name,
-      organization,
-      cleanId,
-      type,
-      buildUrl = null,
-      validationUrl = null,
-    }) {
+    async createProject({ name, organization, cleanId, type }) {
       return transformProject(
         await pool.one<Slonik<projects>>(
           sql`
             INSERT INTO public.projects
-              ("name", "clean_id", "type", "org_id", "build_url", "validation_url")
+              ("name", "clean_id", "type", "org_id")
             VALUES
-              (${name}, ${cleanId}, ${type}, ${organization}, ${buildUrl}, ${validationUrl})
+              (${name}, ${cleanId}, ${type}, ${organization})
             RETURNING *
           `,
         ),
