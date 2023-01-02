@@ -199,3 +199,7 @@ services:
       EMAIL_PROVIDER: '${EMAIL_PROVIDER}'
     ports:
       - '3011:3011'
+  # Awkwardly, we need to override the `app` service as it's not used in the integration tests
+  app:
+    image: node:18.12.1-alpine3.16
+    command: ['node', '--version']

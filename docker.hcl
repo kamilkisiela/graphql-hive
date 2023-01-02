@@ -327,3 +327,19 @@ group "build" {
     "docs"
   ]
 }
+
+group "integration-tests" {
+  targets = [
+    "emails",
+    "rate-limit",
+    "schema",
+    "storage",
+    "tokens",
+    "usage-estimator",
+    "usage-ingestor",
+    "usage",
+    "webhooks",
+    "server",
+    "composition-federation-2"
+  ]
+}
