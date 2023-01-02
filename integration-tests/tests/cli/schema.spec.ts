@@ -5,21 +5,25 @@ import { ProjectType } from '../../testkit/gql/graphql';
 import { initSeed } from '../../testkit/seed';
 
 describe.each`
-  projectType               | isLegacy
-  ${ProjectType.Single}     | ${false}
-  ${ProjectType.Stitching}  | ${false}
-  ${ProjectType.Federation} | ${false}
-  ${ProjectType.Single}     | ${true}
-  ${ProjectType.Stitching}  | ${true}
-  ${ProjectType.Federation} | ${true}
-`('$projectType (legacy: $isLegacy)', ({ projectType, isLegacy }) => {
+  projectType               | model
+  ${ProjectType.Single}     | ${'modern'}
+  ${ProjectType.Stitching}  | ${'modern'}
+  ${ProjectType.Federation} | ${'modern'}
+  ${ProjectType.Single}     | ${'legacy'}
+  ${ProjectType.Stitching}  | ${'legacy'}
+  ${ProjectType.Federation} | ${'legacy'}
+`('$projectType ($model)', ({ projectType, model }) => {
+  const serviceNameArgs = projectType === ProjectType.Single ? [] : ['--service', 'test'];
+  const serviceUrlArgs =
+    projectType === ProjectType.Single ? [] : ['--url', 'http://localhost:4000'];
+
   test.concurrent('can publish and check a schema with target:registry:read access', async () => {
     const { createOrg } = await initSeed().createOwner();
     const { inviteAndJoinMember, createProject } = await createOrg();
     await inviteAndJoinMember();
     const { createToken } = await createProject(
       projectType,
-      isLegacy
+      model === 'legacy'
         ? {
             useLegacyRegistryModels: true,
           }
@@ -34,10 +38,8 @@ describe.each`
       'Kamil',
       '--commit',
       'abc123',
-      '--service',
-      'test',
-      '--url',
-      'http://localhost:4000',
+      ...serviceNameArgs,
+      ...serviceUrlArgs,
       'fixtures/init-schema.graphql',
     ]);
 
@@ -50,7 +52,7 @@ describe.each`
     ]);
 
     await expect(
-      schemaCheck(['--service', 'test', '--token', secret, 'fixtures/breaking-schema.graphql']),
+      schemaCheck([...serviceNameArgs, '--token', secret, 'fixtures/breaking-schema.graphql']),
     ).rejects.toThrowError(/breaking/i);
   });
 
@@ -62,7 +64,7 @@ describe.each`
       await inviteAndJoinMember();
       const { createToken } = await createProject(
         projectType,
-        isLegacy
+        model === 'legacy'
           ? {
               useLegacyRegistryModels: true,
             }
@@ -79,10 +81,8 @@ describe.each`
           'Kamil',
           '--commit',
           'abc123',
-          '--service',
-          'test',
-          '--url',
-          'http://localhost:4000',
+          ...serviceNameArgs,
+          ...serviceUrlArgs,
           'fixtures/init-invalid-schema.graphql',
         ]);
         throw allocatedError;
@@ -102,7 +102,7 @@ describe.each`
     await inviteAndJoinMember();
     const { project, target, createToken } = await createProject(
       projectType,
-      isLegacy
+      model === 'legacy'
         ? {
             useLegacyRegistryModels: true,
           }
@@ -112,10 +112,8 @@ describe.each`
 
     await expect(
       schemaPublish([
-        '--service',
-        'test',
-        '--url',
-        'http://localhost:4000',
+        ...serviceNameArgs,
+        ...serviceUrlArgs,
         '--token',
         secret,
         'fixtures/init-schema.graphql',
@@ -126,10 +124,8 @@ describe.each`
 
     await expect(
       schemaPublish([
-        '--service',
-        'test',
-        '--url',
-        'http://localhost:4000',
+        ...serviceNameArgs,
+        ...serviceUrlArgs,
         '--token',
         secret,
         'fixtures/nonbreaking-schema.graphql',
@@ -145,7 +141,7 @@ describe.each`
     await inviteAndJoinMember();
     const { createToken } = await createProject(
       projectType,
-      isLegacy
+      model === 'legacy'
         ? {
             useLegacyRegistryModels: true,
           }
@@ -154,7 +150,7 @@ describe.each`
     const { secret } = await createToken({});
 
     await expect(
-      schemaCheck(['--token', secret, '--service', 'test', 'fixtures/init-schema.graphql']),
+      schemaCheck(['--token', secret, ...serviceNameArgs, 'fixtures/init-schema.graphql']),
     ).resolves.toMatch('empty');
   });
 
@@ -164,7 +160,7 @@ describe.each`
     await inviteAndJoinMember();
     const { createToken } = await createProject(
       projectType,
-      isLegacy
+      model === 'legacy'
         ? {
             useLegacyRegistryModels: true,
           }
@@ -173,8 +169,7 @@ describe.each`
     const { secret } = await createToken({});
 
     const output = schemaCheck([
-      '--service',
-      'test',
+      ...serviceNameArgs,
       '--token',
       secret,
       'fixtures/missing-type.graphql',
@@ -187,10 +182,8 @@ describe.each`
     async () => {
       const invalidToken = createHash('md5').update('nope').digest('hex').substring(0, 31);
       const output = schemaPublish([
-        '--service',
-        'test',
-        '--url',
-        'http://localhost:4000',
+        ...serviceNameArgs,
+        ...serviceUrlArgs,
         '--token',
         invalidToken,
         'fixtures/init-schema.graphql',
