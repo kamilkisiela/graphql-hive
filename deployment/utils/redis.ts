@@ -61,7 +61,7 @@ fi
           image: redisService.image,
           env,
           volumeMounts,
-          ports: [{ containerPort: PORT, hostPort: PORT, protocol: 'TCP' }],
+          ports: [{ containerPort: PORT, protocol: 'TCP' }],
           resources: {
             limits,
           },
