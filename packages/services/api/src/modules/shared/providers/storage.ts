@@ -245,17 +245,11 @@ export interface Storage {
     _: {
       version?: string;
     } & TargetSelector,
-  ): Promise<
-    | {
-        schemas: [];
-      }
-    | {
-        schemas: Schema[];
-        version: string;
-        valid: boolean;
-      }
-    | never
-  >;
+  ): Promise<{
+    schemas: Schema[];
+    version: string;
+    valid: boolean;
+  } | null>;
   getLatestValidVersion(_: TargetSelector): Promise<SchemaVersion | never>;
   getMaybeLatestValidVersion(_: TargetSelector): Promise<SchemaVersion | null | never>;
   getLatestVersion(_: TargetSelector): Promise<SchemaVersion | never>;

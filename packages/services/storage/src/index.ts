@@ -1638,9 +1638,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       `);
 
       if (!latest) {
-        return {
-          schemas: [],
-        };
+        return null;
       }
 
       const schemas = await storage.getSchemasOfVersion({

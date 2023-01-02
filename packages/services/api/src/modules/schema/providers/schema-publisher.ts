@@ -123,112 +123,109 @@ export class SchemaPublisher {
 
     const mode: 'legacy' | 'modern' = project.legacyRegistryModel ? 'legacy' : 'modern';
 
-    const runCheck = () => {
-      switch (`${project.type}:${mode}` as const) {
-        case `${ProjectType.SINGLE}:modern`:
-          return this.singleModel.check({
-            input,
-            selector,
-            latest:
-              'version' in latestVersion
-                ? {
-                    isComposable: latestVersion.valid,
-                    schemas: [ensureSingleSchema(latestVersion.schemas)],
-                  }
-                : null,
-            baseSchema,
-            project,
-          });
-        case `${ProjectType.FEDERATION}:modern`:
-          return this.federationModel.check({
-            input: {
-              sdl: input.sdl,
-              serviceName: input.service,
-            },
-            selector,
-            latest:
-              'version' in latestVersion
-                ? {
-                    isComposable: latestVersion.valid,
-                    schemas: ensureCompositeSchemas(latestVersion.schemas),
-                  }
-                : null,
-            baseSchema,
-            project,
-          });
-        case `${ProjectType.STITCHING}:modern`:
-          return this.stitchingModel.check({
-            input: {
-              sdl: input.sdl,
-              serviceName: input.service,
-            },
-            selector,
-            latest:
-              'version' in latestVersion
-                ? {
-                    isComposable: latestVersion.valid,
-                    schemas: ensureCompositeSchemas(latestVersion.schemas),
-                  }
-                : null,
-            baseSchema,
-            project,
-          });
-        case `${ProjectType.SINGLE}:legacy`:
-          return this.singleLegacyModel.check({
-            input: {
-              sdl: input.sdl,
-            },
-            selector,
-            latest:
-              'version' in latestVersion
-                ? {
-                    isComposable: latestVersion.valid,
-                    schemas: [ensureSingleSchema(latestVersion.schemas)],
-                  }
-                : null,
-            baseSchema,
-            project,
-          });
-        case `${ProjectType.FEDERATION}:legacy`:
-          return this.federationLegacyModel.check({
-            input: {
-              sdl: input.sdl,
-              serviceName: input.service,
-            },
-            selector,
-            latest:
-              'version' in latestVersion
-                ? {
-                    isComposable: latestVersion.valid,
-                    schemas: ensureCompositeSchemas(latestVersion.schemas),
-                  }
-                : null,
-            baseSchema,
-            project,
-          });
-        case `${ProjectType.STITCHING}:legacy`:
-          return this.stitchingLegacyModel.check({
-            input: {
-              sdl: input.sdl,
-              serviceName: input.service,
-            },
-            selector,
-            latest:
-              'version' in latestVersion
-                ? {
-                    isComposable: latestVersion.valid,
-                    schemas: ensureCompositeSchemas(latestVersion.schemas),
-                  }
-                : null,
-            baseSchema,
-            project,
-          });
-        default:
-          throw new HiveError(`${project.type} project (${mode}) not supported`);
-      }
-    };
-
-    const checkResult = await runCheck();
+    let checkResult;
+    switch (`${project.type}:${mode}` as const) {
+      case `${ProjectType.SINGLE}:modern`:
+        checkResult = await this.singleModel.check({
+          input,
+          selector,
+          latest: latestVersion
+            ? {
+                isComposable: latestVersion.valid,
+                schemas: [ensureSingleSchema(latestVersion.schemas)],
+              }
+            : null,
+          baseSchema,
+          project,
+        });
+        break;
+      case `${ProjectType.FEDERATION}:modern`:
+        checkResult = await this.federationModel.check({
+          input: {
+            sdl: input.sdl,
+            serviceName: input.service,
+          },
+          selector,
+          latest: latestVersion
+            ? {
+                isComposable: latestVersion.valid,
+                schemas: ensureCompositeSchemas(latestVersion.schemas),
+              }
+            : null,
+          baseSchema,
+          project,
+        });
+        break;
+      case `${ProjectType.STITCHING}:modern`:
+        checkResult = await this.stitchingModel.check({
+          input: {
+            sdl: input.sdl,
+            serviceName: input.service,
+          },
+          selector,
+          latest: latestVersion
+            ? {
+                isComposable: latestVersion.valid,
+                schemas: ensureCompositeSchemas(latestVersion.schemas),
+              }
+            : null,
+          baseSchema,
+          project,
+        });
+        break;
+      case `${ProjectType.SINGLE}:legacy`:
+        checkResult = await this.singleLegacyModel.check({
+          input: {
+            sdl: input.sdl,
+          },
+          selector,
+          latest: latestVersion
+            ? {
+                isComposable: latestVersion.valid,
+                schemas: [ensureSingleSchema(latestVersion.schemas)],
+              }
+            : null,
+          baseSchema,
+          project,
+        });
+        break;
+      case `${ProjectType.FEDERATION}:legacy`:
+        checkResult = await this.federationLegacyModel.check({
+          input: {
+            sdl: input.sdl,
+            serviceName: input.service,
+          },
+          selector,
+          latest: latestVersion
+            ? {
+                isComposable: latestVersion.valid,
+                schemas: ensureCompositeSchemas(latestVersion.schemas),
+              }
+            : null,
+          baseSchema,
+          project,
+        });
+        break;
+      case `${ProjectType.STITCHING}:legacy`:
+        checkResult = await this.stitchingLegacyModel.check({
+          input: {
+            sdl: input.sdl,
+            serviceName: input.service,
+          },
+          selector,
+          latest: latestVersion
+            ? {
+                isComposable: latestVersion.valid,
+                schemas: ensureCompositeSchemas(latestVersion.schemas),
+              }
+            : null,
+          baseSchema,
+          project,
+        });
+        break;
+      default:
+        throw new HiveError(`${project.type} project (${mode}) not supported`);
+    }
 
     if (input.github) {
       if (checkResult.conclusion === SchemaCheckConclusion.Success) {
@@ -524,102 +521,98 @@ export class SchemaPublisher {
       step: 'publishingSchema',
     });
 
-    this.logger.debug(`Found ${latestVersion.schemas.length} most recent schemas`);
+    this.logger.debug(`Found ${latestVersion?.schemas.length ?? 0} most recent schemas`);
 
     const mode: 'legacy' | 'modern' = project.legacyRegistryModel ? 'legacy' : 'modern';
 
-    const runPublish = () => {
-      switch (`${project.type}:${mode}` as const) {
-        case `${ProjectType.SINGLE}:modern`:
-          return this.singleModel.publish({
-            input,
-            latest:
-              'version' in latestVersion
-                ? {
-                    isComposable: latestVersion.valid,
-                    schemas: [ensureSingleSchema(latestVersion.schemas)],
-                  }
-                : null,
-            project,
-            target,
-            baseSchema,
-          });
-        case `${ProjectType.FEDERATION}:modern`:
-          this.logger.debug('Using Federation model');
-          return this.federationModel.publish({
-            input,
-            latest:
-              'version' in latestVersion
-                ? {
-                    isComposable: latestVersion.valid,
-                    schemas: ensureCompositeSchemas(latestVersion.schemas),
-                  }
-                : null,
-            project,
-            target,
-          });
-        case `${ProjectType.STITCHING}:modern`:
-          return this.stitchingModel.publish({
-            input,
-            latest:
-              'version' in latestVersion
-                ? {
-                    isComposable: latestVersion.valid,
-                    schemas: ensureCompositeSchemas(latestVersion.schemas),
-                  }
-                : null,
-            project,
-            target,
-          });
-        case `${ProjectType.SINGLE}:legacy`:
-          this.logger.debug('Using Single (legacy) model');
-          return this.singleLegacyModel.publish({
-            input,
-            latest:
-              'version' in latestVersion
-                ? {
-                    isComposable: latestVersion.valid,
-                    schemas: [ensureSingleSchema(latestVersion.schemas)],
-                  }
-                : null,
-            project,
-            target,
-            baseSchema,
-          });
-        case `${ProjectType.FEDERATION}:legacy`:
-          this.logger.debug('Using Federation (legacy) model');
-          return this.federationLegacyModel.publish({
-            input,
-            latest:
-              'version' in latestVersion
-                ? {
-                    isComposable: latestVersion.valid,
-                    schemas: ensureCompositeSchemas(latestVersion.schemas),
-                  }
-                : null,
-            project,
-            target,
-          });
-        case `${ProjectType.STITCHING}:legacy`:
-          this.logger.debug('Using Stitching (legacy) model');
-          return this.stitchingLegacyModel.publish({
-            input,
-            latest:
-              'version' in latestVersion
-                ? {
-                    isComposable: latestVersion.valid,
-                    schemas: ensureCompositeSchemas(latestVersion.schemas),
-                  }
-                : null,
-            project,
-            target,
-          });
-        default:
-          throw new HiveError(`${project.type} project (${mode}) not supported`);
-      }
-    };
-
-    const publishResult = await runPublish();
+    let publishResult;
+    switch (`${project.type}:${mode}` as const) {
+      case `${ProjectType.SINGLE}:modern`:
+        publishResult = await this.singleModel.publish({
+          input,
+          latest: latestVersion
+            ? {
+                isComposable: latestVersion.valid,
+                schemas: [ensureSingleSchema(latestVersion.schemas)],
+              }
+            : null,
+          project,
+          target,
+          baseSchema,
+        });
+        break;
+      case `${ProjectType.FEDERATION}:modern`:
+        this.logger.debug('Using Federation model');
+        publishResult = await this.federationModel.publish({
+          input,
+          latest: latestVersion
+            ? {
+                isComposable: latestVersion.valid,
+                schemas: ensureCompositeSchemas(latestVersion.schemas),
+              }
+            : null,
+          project,
+          target,
+        });
+        break;
+      case `${ProjectType.STITCHING}:modern`:
+        publishResult = await this.stitchingModel.publish({
+          input,
+          latest: latestVersion
+            ? {
+                isComposable: latestVersion.valid,
+                schemas: ensureCompositeSchemas(latestVersion.schemas),
+              }
+            : null,
+          project,
+          target,
+        });
+        break;
+      case `${ProjectType.SINGLE}:legacy`:
+        this.logger.debug('Using Single (legacy) model');
+        publishResult = await this.singleLegacyModel.publish({
+          input,
+          latest: latestVersion
+            ? {
+                isComposable: latestVersion.valid,
+                schemas: [ensureSingleSchema(latestVersion.schemas)],
+              }
+            : null,
+          project,
+          target,
+          baseSchema,
+        });
+        break;
+      case `${ProjectType.FEDERATION}:legacy`:
+        this.logger.debug('Using Federation (legacy) model');
+        return this.federationLegacyModel.publish({
+          input,
+          latest: latestVersion
+            ? {
+                isComposable: latestVersion.valid,
+                schemas: ensureCompositeSchemas(latestVersion.schemas),
+              }
+            : null,
+          project,
+          target,
+        });
+      case `${ProjectType.STITCHING}:legacy`:
+        this.logger.debug('Using Stitching (legacy) model');
+        publishResult = await this.stitchingLegacyModel.publish({
+          input,
+          latest: latestVersion
+            ? {
+                isComposable: latestVersion.valid,
+                schemas: ensureCompositeSchemas(latestVersion.schemas),
+              }
+            : null,
+          project,
+          target,
+        });
+        break;
+      default:
+        throw new HiveError(`${project.type} project (${mode}) not supported`);
+    }
 
     if (publishResult.conclusion === SchemaPublishConclusion.Ignore) {
       this.logger.debug('Publish ignored (reasons=%s)', publishResult.reason);
@@ -730,7 +723,7 @@ export class SchemaPublisher {
             target: {
               cleanId: target.cleanId,
             },
-            version: 'version' in latestVersion ? newVersion : undefined,
+            version: latestVersion ? newVersion : undefined,
           })
         : null;
 
