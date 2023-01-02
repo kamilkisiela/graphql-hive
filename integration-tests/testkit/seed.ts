@@ -26,12 +26,11 @@ import {
   publishSchema,
   readOperationsStats,
   readTokenInfo,
-  schemaSyncCDN,
   setTargetValidation,
   updateBaseSchema,
   updateMemberAccess,
-  updateSchemaVersionStatus,
   updateRegistryModel,
+  updateSchemaVersionStatus,
 } from './flow';
 import { collect, CollectedOperation } from './usage';
 import { generateUnique } from './utils';
@@ -311,16 +310,6 @@ export function initSeed() {
                       ).then(r => r.expectNoGraphQLErrors());
 
                       return result.updateBaseSchema;
-                    },
-                    async schemaSyncCDN() {
-                      return await schemaSyncCDN(
-                        {
-                          organization: organization.cleanId,
-                          project: project.cleanId,
-                          target: target.cleanId,
-                        },
-                        secret,
-                      ).then(r => r.expectNoGraphQLErrors());
                     },
                     async fetchVersions(count: number) {
                       const result = await fetchVersions(

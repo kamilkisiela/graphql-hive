@@ -410,62 +410,6 @@ export class SchemaPublisher {
     });
   }
 
-  @sentry('SchemaPublisher.sync')
-  public async sync(selector: TargetSelector, span?: Span) {
-    this.logger.info('Syncing CDN with DB (target=%s)', selector.target);
-    await this.authManager.ensureTargetAccess({
-      target: selector.target,
-      project: selector.project,
-      organization: selector.organization,
-      scope: TargetAccessScope.REGISTRY_WRITE,
-    });
-    try {
-      const [latestVersion, project, target] = await Promise.all([
-        this.schemaManager.getLatestValidVersion(selector),
-        this.projectManager.getProject({
-          organization: selector.organization,
-          project: selector.project,
-        }),
-        this.targetManager.getTarget({
-          organization: selector.organization,
-          project: selector.project,
-          target: selector.target,
-        }),
-      ]);
-
-      const schemas = await this.schemaManager.getSchemasOfVersion({
-        organization: selector.organization,
-        project: selector.project,
-        target: selector.target,
-        version: latestVersion.id,
-        includeMetadata: true,
-      });
-
-      const orchestrator = this.schemaManager.matchOrchestrator(project.type);
-      const schemaObjects = schemas.map(s => this.helper.createSchemaObject(s));
-      const schema = await orchestrator.build(schemaObjects, project.externalComposition);
-
-      this.logger.info('Deploying version to CDN (reason="sync", version=%s)', latestVersion.id);
-
-      await this.updateCDN(
-        {
-          target,
-          project,
-          supergraph:
-            project.type === ProjectType.FEDERATION
-              ? await orchestrator.supergraph(schemaObjects, project.externalComposition)
-              : null,
-          schemas,
-          fullSchemaSdl: schema.raw,
-        },
-        span,
-      );
-    } catch (error) {
-      this.logger.error(`Failed to sync with CDN ` + String(error), error);
-      throw error;
-    }
-  }
-
   public async updateVersionStatus(input: TargetSelector & { version: string; valid: boolean }) {
     const updateResult = await this.schemaManager.updateSchemaVersionStatus(input);
 

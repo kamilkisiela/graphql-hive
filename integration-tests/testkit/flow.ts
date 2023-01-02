@@ -18,7 +18,6 @@ import type {
   RequestOrganizationTransferInput,
   SchemaCheckInput,
   SchemaPublishInput,
-  SchemaSyncCdnInput,
   SchemaVersionsInput,
   SchemaVersionUpdateInput,
   SetTargetValidationInput,
@@ -26,9 +25,9 @@ import type {
   UpdateBaseSchemaInput,
   UpdateOrganizationNameInput,
   UpdateProjectNameInput,
+  UpdateProjectRegistryModelInput,
   UpdateTargetNameInput,
   UpdateTargetValidationSettingsInput,
-  UpdateProjectRegistryModelInput,
 } from './gql/graphql';
 import { execute } from './graphql';
 
@@ -853,28 +852,6 @@ export function updateSchemaVersionStatus(input: SchemaVersionUpdateInput, token
           commit {
             id
             commit
-          }
-        }
-      }
-    `),
-    token,
-    variables: {
-      input,
-    },
-  });
-}
-
-export function schemaSyncCDN(input: SchemaSyncCdnInput, token: string) {
-  return execute({
-    document: gql(/* GraphQL */ `
-      mutation schemaSyncCDN($input: SchemaSyncCDNInput!) {
-        schemaSyncCDN(input: $input) {
-          __typename
-          ... on SchemaSyncCDNSuccess {
-            message
-          }
-          ... on SchemaSyncCDNError {
-            message
           }
         }
       }

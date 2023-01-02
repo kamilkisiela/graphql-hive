@@ -219,12 +219,21 @@ export class SchemaManager {
       scope: TargetAccessScope.REGISTRY_WRITE,
     });
 
-    return {
-      ...(await this.storage.updateVersionStatus(input)),
+    const project = await this.storage.getProject({
       organization: input.organization,
       project: input.project,
-      target: input.target,
-    };
+    });
+
+    if (project.legacyRegistryModel) {
+      return {
+        ...(await this.storage.updateVersionStatus(input)),
+        organization: input.organization,
+        project: input.project,
+        target: input.target,
+      };
+    }
+
+    throw new HiveError(`Updating the status is supported only by legacy projects`);
   }
 
   async updateSchemaUrl(

@@ -13,7 +13,6 @@ export default gql`
     updateSchemaVersionStatus(input: SchemaVersionUpdateInput!): SchemaVersion!
     updateBaseSchema(input: UpdateBaseSchemaInput!): UpdateBaseSchemaResult!
     updateSchemaServiceName(input: UpdateSchemaServiceNameInput!): UpdateSchemaServiceNameResult!
-    schemaSyncCDN(input: SchemaSyncCDNInput!): SchemaSyncCDNPayload!
     enableExternalSchemaComposition(
       input: EnableExternalSchemaCompositionInput!
     ): EnableExternalSchemaCompositionResult!
@@ -370,22 +369,6 @@ export default gql`
     nodes: [SchemaVersion!]!
     pageInfo: PageInfo!
   }
-
-  input SchemaSyncCDNInput {
-    organization: ID!
-    project: ID!
-    target: ID!
-  }
-
-  type SchemaSyncCDNSuccess {
-    message: String!
-  }
-
-  type SchemaSyncCDNError {
-    message: String!
-  }
-
-  union SchemaSyncCDNPayload = SchemaSyncCDNSuccess | SchemaSyncCDNError
 
   input SchemaExplorerUsageInput {
     period: DateRangeInput!

@@ -7,7 +7,6 @@ import {
   Input,
   InputGroup,
   InputRightElement,
-  Tooltip,
 } from '@chakra-ui/react';
 import { VscClose } from 'react-icons/vsc';
 import { gql, useMutation, useQuery } from 'urql';
@@ -15,8 +14,7 @@ import { useDebouncedCallback } from 'use-debounce';
 import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
 import { MarkAsValid } from '@/components/target/history/MarkAsValid';
-import { Button, DataWrapper, GraphQLBlock, noSchema, Title } from '@/components/v2';
-import { RefreshIcon } from '@/components/v2/icon';
+import { DataWrapper, GraphQLBlock, noSchema, Title } from '@/components/v2';
 import { SchemaFieldsFragment } from '@/gql/graphql';
 import {
   LatestSchemaDocument,
@@ -160,82 +158,6 @@ const Schemas = ({
   );
 };
 
-const SchemaSyncButton_SchemaSyncCDN = gql(/* GraphQL */ `
-  mutation schemaSyncCdn($input: SchemaSyncCDNInput!) {
-    schemaSyncCDN(input: $input) {
-      __typename
-      ... on SchemaSyncCDNSuccess {
-        message
-      }
-      ... on SchemaSyncCDNError {
-        message
-      }
-    }
-  }
-`);
-
-const SyncSchemaButton = ({
-  target,
-  project,
-  organization,
-}: {
-  target: TargetFieldsFragment;
-  project: ProjectFieldsFragment;
-  organization: OrganizationFieldsFragment;
-}): ReactElement | null => {
-  const [status, setStatus] = useState<'idle' | 'error' | 'success'>('idle');
-  const [mutation, mutate] = useMutation(SchemaSyncButton_SchemaSyncCDN);
-
-  const sync = useCallback(async () => {
-    const result = await mutate({
-      input: {
-        organization: organization.cleanId,
-        project: project.cleanId,
-        target: target.cleanId,
-      },
-    });
-    if (result.error) {
-      setStatus('error');
-    } else {
-      setStatus(
-        result.data?.schemaSyncCDN.__typename === 'SchemaSyncCDNError' ? 'error' : 'success',
-      );
-    }
-    setTimeout(() => {
-      setStatus('idle');
-    }, 5000);
-  }, [mutate, organization.cleanId, project.cleanId, target.cleanId]);
-
-  if (!target.hasSchema) {
-    return null;
-  }
-
-  return (
-    <Tooltip
-      label="Re-upload the latest valid version to Hive CDN"
-      fontSize="xs"
-      placement="bottom-start"
-    >
-      <Button
-        variant="primary"
-        size="large"
-        onClick={sync}
-        disabled={status !== 'idle' || mutation.fetching}
-      >
-        {mutation.fetching
-          ? 'Syncing…'
-          : FetchingMessages[status as keyof typeof FetchingMessages] ?? 'CDN is up to date'}
-        <RefreshIcon className="ml-8 h-4 w-4" />
-      </Button>
-    </Tooltip>
-  );
-};
-
-const FetchingMessages = {
-  idle: 'Update CDN',
-  error: 'Failed to synchronize',
-} as const;
-
 function SchemaView({
   organization,
   project,
@@ -323,11 +245,6 @@ function SchemaView({
                 {canManage ? (
                   <>
                     <MarkAsValid version={query.data.target.latestSchemaVersion} />{' '}
-                    <SyncSchemaButton
-                      target={target}
-                      project={project}
-                      organization={organization}
-                    />
                   </>
                 ) : null}
               </div>

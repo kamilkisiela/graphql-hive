@@ -223,32 +223,6 @@ export const resolvers: SchemaModule.Resolvers = {
         },
       };
     },
-    async schemaSyncCDN(_, { input }, { injector }) {
-      const translator = injector.get(IdTranslator);
-      const [organization, project, target] = await Promise.all([
-        translator.translateOrganizationId(input),
-        translator.translateProjectId(input),
-        translator.translateTargetId(input),
-      ]);
-
-      try {
-        await injector.get(SchemaPublisher).sync({
-          organization,
-          project,
-          target,
-        });
-
-        return {
-          __typename: 'SchemaSyncCDNSuccess',
-          message: 'CDN is now up to date with the latest version',
-        };
-      } catch (error) {
-        return {
-          __typename: 'SchemaSyncCDNError',
-          message: error instanceof Error ? error.message : 'Failed to sync with CDN',
-        };
-      }
-    },
     async disableExternalSchemaComposition(_, { input }, { injector }) {
       const translator = injector.get(IdTranslator);
       const [organization, project] = await Promise.all([
