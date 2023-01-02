@@ -51,7 +51,7 @@ jobs:
         uses: SimenB/github-actions-cpu-cores@v1
 
       - name: run containers
-        timeout-minutes: 6
+        timeout-minutes: 8
         run: |
           docker compose -f docker-compose.community.yml -f ./integration-tests/docker-compose.integration.yaml --env-file ./integration-tests/.env up -d --wait
 
