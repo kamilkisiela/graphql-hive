@@ -175,11 +175,12 @@ export default gql`
     sdl: String!
     author: String!
     commit: String!
-    force: Boolean
+    force: Boolean @deprecated(reason: "Enabled by default for newly created projects")
     """
     Accept breaking changes and mark schema as valid (if composable)
     """
     experimental_acceptBreakingChanges: Boolean
+      @deprecated(reason: "Enabled by default for newly created projects")
     metadata: String
     """
     Talk to GitHub Application and create a check-run
