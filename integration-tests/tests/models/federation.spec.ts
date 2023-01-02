@@ -38,7 +38,7 @@ describe('publish', () => {
     });
   });
 
-  test.concurrent('rejected: not composable (build errors)', async () => {
+  test.concurrent('rejected: not composable (graphql errors)', async () => {
     const { publish } = await prepare();
 
     // non-composable
