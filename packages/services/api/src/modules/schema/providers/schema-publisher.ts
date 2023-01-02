@@ -21,7 +21,7 @@ import { TargetManager } from '../../target/providers/target-manager';
 import { ArtifactStorageWriter } from './artifact-storage-writer';
 import type { SchemaModuleConfig } from './config';
 import { SCHEMA_MODULE_CONFIG } from './config';
-import { FederationModel } from './models/federation';
+import { CompositeModel } from './models/composite';
 import { FederationLegacyModel } from './models/federation-legacy';
 import {
   CheckFailureReasonCode,
@@ -34,7 +34,6 @@ import {
 } from './models/shared';
 import { SingleModel } from './models/single';
 import { SingleLegacyModel } from './models/single-legacy';
-import { StitchingModel } from './models/stitching';
 import { StitchingLegacyModel } from './models/stitching-legacy';
 import { ensureCompositeSchemas, ensureSingleSchema, SchemaHelper } from './schema-helper';
 import { SchemaManager } from './schema-manager';
@@ -63,11 +62,11 @@ export class SchemaPublisher {
       legacy: SingleLegacyModel;
     };
     [ProjectType.FEDERATION]: {
-      modern: FederationModel;
+      modern: CompositeModel;
       legacy: FederationLegacyModel;
     };
     [ProjectType.STITCHING]: {
-      modern: StitchingModel;
+      modern: CompositeModel;
       legacy: StitchingLegacyModel;
     };
   };
@@ -87,11 +86,10 @@ export class SchemaPublisher {
     private helper: SchemaHelper,
     private artifactStorageWriter: ArtifactStorageWriter,
     @Inject(SCHEMA_MODULE_CONFIG) private schemaModuleConfig: SchemaModuleConfig,
-    federationModel: FederationModel,
-    federationLegacyModel: FederationLegacyModel,
     singleModel: SingleModel,
+    compositeModel: CompositeModel,
+    federationLegacyModel: FederationLegacyModel,
     singleLegacyModel: SingleLegacyModel,
-    stitchingModel: StitchingModel,
     stitchingLegacyModel: StitchingLegacyModel,
   ) {
     this.logger = logger.child({ service: 'SchemaPublisher' });
@@ -101,11 +99,11 @@ export class SchemaPublisher {
         legacy: singleLegacyModel,
       },
       [ProjectType.FEDERATION]: {
-        modern: federationModel,
+        modern: compositeModel,
         legacy: federationLegacyModel,
       },
       [ProjectType.STITCHING]: {
-        modern: stitchingModel,
+        modern: compositeModel,
         legacy: stitchingLegacyModel,
       },
     };

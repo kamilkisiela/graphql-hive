@@ -1,9 +1,11 @@
 import { Injectable, Scope } from 'graphql-modules';
+import { FederationOrchestrator } from '../orchestrators/federation';
 import { StitchingOrchestrator } from '../orchestrators/stitching';
 import { RegistryChecks } from '../registry-checks';
 import { swapServices } from '../schema-helper';
 import type { PublishInput } from '../schema-publisher';
 import type { Project, PushedCompositeSchema, Target } from './../../../../shared/entities';
+import { ProjectType } from './../../../../shared/entities';
 import {
   CheckFailureReasonCode,
   PublishFailureReasonCode,
@@ -22,8 +24,16 @@ import {
 @Injectable({
   scope: Scope.Operation,
 })
-export class StitchingModel {
-  constructor(private orchestrator: StitchingOrchestrator, private checks: RegistryChecks) {}
+export class CompositeModel {
+  constructor(
+    private federationOrchestrator: FederationOrchestrator,
+    private stitchingOrchestrator: StitchingOrchestrator,
+    private checks: RegistryChecks,
+  ) {}
+
+  private supportsMetadata(project: Project) {
+    return project.type === ProjectType.FEDERATION;
+  }
 
   async check({
     input,
@@ -98,14 +108,19 @@ export class StitchingModel {
       };
     }
 
+    const orchestrator =
+      project.type === ProjectType.FEDERATION
+        ? this.federationOrchestrator
+        : this.stitchingOrchestrator;
+
     const [compositionCheck, diffCheck] = await Promise.all([
       this.checks.composition({
-        orchestrator: this.orchestrator,
+        orchestrator,
         project,
         schemas,
       }),
       this.checks.diff({
-        orchestrator: this.orchestrator,
+        orchestrator,
         project,
         schemas,
         selector,
@@ -170,8 +185,8 @@ export class StitchingModel {
       date: Date.now() as any,
       service_name: input.service!,
       service_url: input.url!,
-      metadata: input.metadata ?? null,
       action: 'PUSH',
+      metadata: this.supportsMetadata(project) ? input.metadata ?? null : null,
     };
 
     const latestVersion = latest;
@@ -229,15 +244,22 @@ export class StitchingModel {
       };
     }
 
-    const metadataCheck = await this.checks.metadata(incoming, previousService ?? null);
+    const orchestrator =
+      project.type === ProjectType.FEDERATION
+        ? this.federationOrchestrator
+        : this.stitchingOrchestrator;
+
+    const metadataCheck = this.supportsMetadata(project)
+      ? await this.checks.metadata(incoming, previousService ?? null)
+      : null;
 
     const compositionCheck = await this.checks.composition({
-      orchestrator: this.orchestrator,
+      orchestrator,
       project,
       schemas,
     });
 
-    if (metadataCheck.status === 'failed') {
+    if (metadataCheck?.status === 'failed') {
       return {
         conclusion: SchemaPublishConclusion.Reject,
         reasons: [
@@ -251,7 +273,7 @@ export class StitchingModel {
     const hasNewUrl =
       serviceUrlCheck.status === 'completed' && serviceUrlCheck.result.status === 'modified';
     const hasNewMetadata =
-      metadataCheck.status === 'completed' && metadataCheck.result.status === 'modified';
+      metadataCheck?.status === 'completed' && metadataCheck.result.status === 'modified';
 
     const messages: string[] = [];
 
@@ -289,7 +311,7 @@ export class StitchingModel {
         compositionErrors: null,
         schema: incoming,
         schemas,
-        orchestrator: this.orchestrator,
+        orchestrator,
       },
     };
   }
