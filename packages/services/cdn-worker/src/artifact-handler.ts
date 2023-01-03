@@ -1,5 +1,5 @@
 import type { ArtifactsType } from '@hive/api/src/modules/schema/providers/artifact-storage-reader';
-import { createRouter, Response,RouterRequest } from '@whatwg-node/router';
+import { createRouter, Response, RouterRequest } from '@whatwg-node/router';
 import zod from 'zod';
 import type { Analytics } from './analytics';
 import { createAnalytics } from './analytics';
