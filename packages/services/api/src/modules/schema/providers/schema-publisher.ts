@@ -3,7 +3,14 @@ import type { Span } from '@sentry/types';
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import lodash from 'lodash';
 import * as Types from '../../../__generated__/types';
-import { Orchestrator, Project, ProjectType, Schema, Target } from '../../../shared/entities';
+import {
+  Orchestrator,
+  Project,
+  ProjectType,
+  Schema,
+  SchemaWithSDL,
+  Target,
+} from '../../../shared/entities';
 import { HiveError } from '../../../shared/errors';
 import { bolderize } from '../../../shared/markdown';
 import { sentry } from '../../../shared/sentry';
@@ -35,10 +42,18 @@ import {
 import { SingleModel } from './models/single';
 import { SingleLegacyModel } from './models/single-legacy';
 import { StitchingLegacyModel } from './models/stitching-legacy';
-import { ensureCompositeSchemas, ensureSingleSchema, SchemaHelper } from './schema-helper';
+import {
+  ensurePushedCompositeSchemas,
+  ensureSingleSchema,
+  SchemaHelper,
+  selectSchemaWithSDL,
+} from './schema-helper';
 import { SchemaManager } from './schema-manager';
 
 export type CheckInput = Omit<Types.SchemaCheckInput, 'project' | 'organization' | 'target'> &
+  TargetSelector;
+
+export type DeleteInput = Omit<Types.SchemaDeleteInput, 'project' | 'organization' | 'target'> &
   TargetSelector;
 
 export type PublishInput = Types.SchemaPublishInput &
@@ -181,7 +196,7 @@ export class SchemaPublisher {
           latest: latestVersion
             ? {
                 isComposable: latestVersion.valid,
-                schemas: ensureCompositeSchemas(latestVersion.schemas),
+                schemas: ensurePushedCompositeSchemas(latestVersion.schemas),
               }
             : null,
           baseSchema,
@@ -264,90 +279,6 @@ export class SchemaPublisher {
     } satisfies Types.ResolversTypes['SchemaCheckError'];
   }
 
-  async githubCheck({
-    project,
-    sha,
-    conclusion,
-    changes,
-    breakingChanges,
-    compositionErrors,
-    errors,
-  }: {
-    project: Project;
-    sha: string;
-    conclusion: SchemaCheckConclusion;
-    changes: Types.SchemaChange[] | null;
-    breakingChanges: Array<{
-      message: string;
-    }> | null;
-    compositionErrors: Array<{
-      message: string;
-    }> | null;
-    errors: Array<{
-      message: string;
-    }> | null;
-  }) {
-    if (!project.gitRepository) {
-      return {
-        __typename: 'GitHubSchemaCheckError' as const,
-        message: 'Git repository is not configured for this project',
-      };
-    }
-    const [repositoryOwner, repositoryName] = project.gitRepository.split('/');
-
-    try {
-      let title: string;
-      let summary: string;
-
-      if (conclusion === SchemaCheckConclusion.Success) {
-        if (!changes || changes.length === 0) {
-          title = 'No changes';
-          summary = 'No changes detected';
-        } else {
-          title = 'No breaking changes';
-          summary = this.changesToMarkdown(changes);
-        }
-      } else {
-        const total =
-          (compositionErrors?.length ?? 0) + (breakingChanges?.length ?? 0) + (errors?.length ?? 0);
-
-        title = `Detected ${total} error${total === 1 ? '' : 's'}`;
-        summary = [
-          errors ? this.errorsToMarkdown(errors) : null,
-          compositionErrors ? this.errorsToMarkdown(compositionErrors) : null,
-          breakingChanges ? this.errorsToMarkdown(breakingChanges) : null,
-          changes ? this.changesToMarkdown(changes) : null,
-        ]
-          .filter(Boolean)
-          .join('\n\n');
-      }
-
-      await this.gitHubIntegrationManager.createCheckRun({
-        name: 'GraphQL Hive - schema:check',
-        conclusion: conclusion === SchemaCheckConclusion.Success ? 'success' : 'failure',
-        sha,
-        organization: project.orgId,
-        repositoryOwner,
-        repositoryName,
-        output: {
-          title,
-          summary,
-        },
-      });
-
-      return {
-        __typename: 'GitHubSchemaCheckSuccess' as const,
-        message: 'Check-run created',
-      };
-    } catch (error: any) {
-      Sentry.captureException(error);
-      return {
-        __typename: 'GitHubSchemaCheckError' as const,
-        message: `Failed to create the check-run`,
-      };
-    }
-  }
-
   @sentry('SchemaPublisher.publish')
   async publish(
     input: PublishInput,
@@ -406,7 +337,8 @@ export class SchemaPublisher {
         ]);
 
         const orchestrator = this.schemaManager.matchOrchestrator(project.type);
-        const schemaObjects = schemas.map(s => this.helper.createSchemaObject(s));
+        const schemasWithSDL = selectSchemaWithSDL(schemas);
+        const schemaObjects = schemasWithSDL.map(s => this.helper.createSchemaObject(s));
         const schema = await orchestrator.build(schemaObjects, project.externalComposition);
 
         this.logger.info(
@@ -420,17 +352,31 @@ export class SchemaPublisher {
           supergraph:
             project.type === ProjectType.FEDERATION
               ? await orchestrator.supergraph(
-                  schemas.map(s => this.helper.createSchemaObject(s)),
+                  schemasWithSDL.map(s => this.helper.createSchemaObject(s)),
                   project.externalComposition,
                 )
               : null,
-          schemas,
+          schemas: schemasWithSDL,
           fullSchemaSdl: schema.raw,
         });
       }
     }
 
     return updateResult;
+  }
+
+  @sentry('SchemaPublisher.delete')
+  async delete(input: DeleteInput) {
+    this.logger.info('Deleting schema (input=%o)', lodash.omit(input, ['sdl']));
+
+    await this.authManager.ensureTargetAccess({
+      target: input.target,
+      project: input.project,
+      organization: input.organization,
+      scope: TargetAccessScope.REGISTRY_WRITE, // TODO: should be REGISTRY_ADMIN or REGISTRY_DELETE
+    });
+
+    throw new Error('Not implemented yet');
   }
 
   private async internalPublish(input: PublishInput) {
@@ -513,7 +459,7 @@ export class SchemaPublisher {
           latest: latestVersion
             ? {
                 isComposable: latestVersion.valid,
-                schemas: ensureCompositeSchemas(latestVersion.schemas),
+                schemas: ensurePushedCompositeSchemas(latestVersion.schemas),
               }
             : null,
           project,
@@ -660,6 +606,90 @@ export class SchemaPublisher {
     } satisfies Types.ResolversTypes['SchemaPublishSuccess'];
   }
 
+  private async githubCheck({
+    project,
+    sha,
+    conclusion,
+    changes,
+    breakingChanges,
+    compositionErrors,
+    errors,
+  }: {
+    project: Project;
+    sha: string;
+    conclusion: SchemaCheckConclusion;
+    changes: Types.SchemaChange[] | null;
+    breakingChanges: Array<{
+      message: string;
+    }> | null;
+    compositionErrors: Array<{
+      message: string;
+    }> | null;
+    errors: Array<{
+      message: string;
+    }> | null;
+  }) {
+    if (!project.gitRepository) {
+      return {
+        __typename: 'GitHubSchemaCheckError' as const,
+        message: 'Git repository is not configured for this project',
+      };
+    }
+    const [repositoryOwner, repositoryName] = project.gitRepository.split('/');
+
+    try {
+      let title: string;
+      let summary: string;
+
+      if (conclusion === SchemaCheckConclusion.Success) {
+        if (!changes || changes.length === 0) {
+          title = 'No changes';
+          summary = 'No changes detected';
+        } else {
+          title = 'No breaking changes';
+          summary = this.changesToMarkdown(changes);
+        }
+      } else {
+        const total =
+          (compositionErrors?.length ?? 0) + (breakingChanges?.length ?? 0) + (errors?.length ?? 0);
+
+        title = `Detected ${total} error${total === 1 ? '' : 's'}`;
+        summary = [
+          errors ? this.errorsToMarkdown(errors) : null,
+          compositionErrors ? this.errorsToMarkdown(compositionErrors) : null,
+          breakingChanges ? this.errorsToMarkdown(breakingChanges) : null,
+          changes ? this.changesToMarkdown(changes) : null,
+        ]
+          .filter(Boolean)
+          .join('\n\n');
+      }
+
+      await this.gitHubIntegrationManager.createCheckRun({
+        name: 'GraphQL Hive - schema:check',
+        conclusion: conclusion === SchemaCheckConclusion.Success ? 'success' : 'failure',
+        sha,
+        organization: project.orgId,
+        repositoryOwner,
+        repositoryName,
+        output: {
+          title,
+          summary,
+        },
+      });
+
+      return {
+        __typename: 'GitHubSchemaCheckSuccess' as const,
+        message: 'Check-run created',
+      };
+    } catch (error: any) {
+      Sentry.captureException(error);
+      return {
+        __typename: 'GitHubSchemaCheckError' as const,
+        message: `Failed to create the check-run`,
+      };
+    }
+  }
+
   @sentry('SchemaPublisher.publishNewVersion')
   private async publishNewVersion({
     valid,
@@ -708,6 +738,7 @@ export class SchemaPublisher {
         url: input.url,
         base_schema: baseSchema,
         metadata: input.metadata ?? null,
+        projectType: project.type,
       }),
       this.organizationManager.getOrganization({
         organization: organizationId,
@@ -743,7 +774,7 @@ export class SchemaPublisher {
     target: Target;
     project: Project;
     orchestrator: Orchestrator;
-    schemas: readonly Schema[];
+    schemas: readonly SchemaWithSDL[];
   }) {
     try {
       if (valid) {
@@ -779,7 +810,7 @@ export class SchemaPublisher {
     }: {
       target: Target;
       project: Project;
-      schemas: readonly Schema[];
+      schemas: readonly SchemaWithSDL[];
       supergraph?: string | null;
       fullSchemaSdl: string;
     },
@@ -812,7 +843,7 @@ export class SchemaPublisher {
     };
 
     const publishCompositeSchema = async () => {
-      const compositeSchema = ensureCompositeSchemas(schemas);
+      const compositeSchema = ensurePushedCompositeSchemas(schemas);
 
       await Promise.all([
         this.artifactStorageWriter.writeArtifact({

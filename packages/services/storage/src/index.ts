@@ -1,4 +1,4 @@
-import type {
+import {
   ActivityObject,
   Alert,
   AlertChannel,
@@ -229,21 +229,44 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       | 'service_url'
       | 'target_id'
       | 'metadata'
-    >,
+    > &
+      Pick<projects, 'type'>,
   ): Schema {
-    const record: Schema = {
-      kind: schema.service_name ? 'composite' : 'single', // maybe we should check it based on project's type
-      id: schema.id,
-      author: schema.author,
-      sdl: ensureDefined(schema.sdl, 'sdl'),
-      commit: schema.commit,
-      date: schema.created_at as any,
-      service_name: schema.service_name!,
-      service_url: schema.service_url,
-      target: schema.target_id,
-      action: schema.action as any,
-      metadata: schema.metadata ?? null,
-    };
+    const isSingleProject = (schema.type as ProjectType) === ProjectType.SINGLE;
+    const record: Schema = isSingleProject
+      ? {
+          kind: 'single',
+          id: schema.id,
+          author: schema.author,
+          sdl: ensureDefined(schema.sdl, 'sdl'),
+          commit: schema.commit,
+          date: schema.created_at as any,
+          target: schema.target_id,
+          action: schema.action as any,
+          metadata: schema.metadata ?? null,
+        }
+      : schema.action === 'PUSH'
+      ? {
+          kind: 'composite',
+          id: schema.id,
+          author: schema.author,
+          sdl: ensureDefined(schema.sdl, 'sdl'),
+          commit: schema.commit,
+          date: schema.created_at as any,
+          service_name: schema.service_name!,
+          service_url: schema.service_url,
+          target: schema.target_id,
+          action: 'PUSH',
+          metadata: schema.metadata ?? null,
+        }
+      : {
+          kind: 'composite',
+          id: schema.id,
+          date: schema.created_at as any,
+          service_name: schema.service_name!,
+          target: schema.target_id,
+          action: 'DELETE',
+        };
 
     return record;
   }
@@ -1649,22 +1672,21 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     },
     async getSchemasOfVersion({ version, includeMetadata = false }) {
       const results = await pool.many<
-        Slonik<
-          Pick<
-            schema_log,
-            | 'id'
-            | 'commit'
-            | 'action'
-            | 'author'
-            | 'sdl'
-            | 'created_at'
-            | 'project_id'
-            | 'service_name'
-            | 'service_url'
-            | 'target_id'
-            | 'metadata'
-          >
-        >
+        Pick<
+          schema_log,
+          | 'id'
+          | 'commit'
+          | 'action'
+          | 'author'
+          | 'sdl'
+          | 'created_at'
+          | 'project_id'
+          | 'service_name'
+          | 'service_url'
+          | 'target_id'
+          | 'metadata'
+        > &
+          Pick<projects, 'type'>
       >(
         sql`
           SELECT
@@ -1678,9 +1700,11 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             sl.service_name,
             sl.service_url,
             ${includeMetadata ? sql`sl.metadata,` : sql``}
-            sl.target_id
+            sl.target_id,
+            p.type
           FROM public.schema_version_to_log AS svl
           LEFT JOIN public.schema_log AS sl ON sl.id = svl.action_id
+          LEFT JOIN public.projects as p ON (p.id = sl.project_id)
           WHERE
             svl.version_id = ${version}
           ORDER BY
@@ -1691,10 +1715,11 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       return results.map(transformSchema);
     },
     async getSchemasOfPreviousVersion({ version, target }) {
-      const results = await pool.query<Slonik<schema_log>>(
+      const results = await pool.query<schema_log & Pick<projects, 'type'>>(
         sql`
-          SELECT sl.* FROM public.schema_version_to_log as svl
+          SELECT sl.*, p.type FROM public.schema_version_to_log as svl
           LEFT JOIN public.schema_log as sl ON (sl.id = svl.action_id)
+          LEFT JOIN public.projects as p ON (p.id = sl.project_id)
           WHERE svl.version_id = (
             SELECT sv.id FROM public.schema_versions as sv WHERE sv.created_at < (
               SELECT svi.created_at FROM public.schema_versions as svi WHERE svi.id = ${version}
@@ -1778,12 +1803,6 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           Pick<schema_log, 'author' | 'service_name'>
       >(query);
 
-      const vers = await pool.query(
-        sql`SELECT * FROM public.schema_versions WHERE target_id = ${target}`,
-      );
-
-      console.log(JSON.stringify(vers, null, 2));
-
       const hasMore = result.rows.length > limit;
 
       const versions = result.rows.slice(0, limit).map(version => ({
@@ -1804,12 +1823,13 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       commit,
       author,
       project,
+      projectType,
       target,
       service = null,
       url = null,
       metadata,
     }) {
-      const result = await pool.one<Slonik<schema_log>>(sql`
+      const result = await pool.one<schema_log>(sql`
         INSERT INTO public.schema_log
           (
             author,
@@ -1837,7 +1857,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         RETURNING *
       `);
 
-      return transformSchema(result);
+      return transformSchema({ ...result, type: projectType });
     },
     async createVersion(input) {
       const newVersion = await pool.transaction(async trx => {
@@ -1898,10 +1918,11 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     },
 
     getSchema: batch(async selectors => {
-      const rows = await pool.many<Slonik<schema_log>>(
+      const rows = await pool.many<schema_log & Pick<projects, 'type'>>(
         sql`
-            SELECT sl.*
+            SELECT sl.*, p.type
             FROM public.schema_log as sl
+            LEFT JOIN public.projects as p ON (p.id = sl.project_id)
             WHERE (sl.id, sl.target_id) IN ((${sql.join(
               selectors.map(s => sql`${s.commit}, ${s.target}`),
               sql`), (`,

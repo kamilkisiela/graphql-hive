@@ -10,6 +10,10 @@ export default gql`
     Requires API Token
     """
     schemaCheck(input: SchemaCheckInput!): SchemaCheckPayload!
+    """
+    Requires API Token
+    """
+    schemaDelete(input: SchemaDeleteInput!): SchemaDeleteResult!
     updateSchemaVersionStatus(input: SchemaVersionUpdateInput!): SchemaVersion!
     updateBaseSchema(input: UpdateBaseSchemaInput!): UpdateBaseSchemaResult!
     updateSchemaServiceName(input: UpdateSchemaServiceNameInput!): UpdateSchemaServiceNameResult!
@@ -149,7 +153,18 @@ export default gql`
     total: Int!
   }
 
-  type Schema {
+  union Schema = SingleSchema | PushedCompositeSchema | DeletedCompositeSchema
+
+  type SingleSchema {
+    id: ID!
+    author: String!
+    source: String!
+    date: DateTime!
+    commit: ID!
+    metadata: String
+  }
+
+  type PushedCompositeSchema {
     id: ID!
     author: String!
     source: String!
@@ -158,6 +173,12 @@ export default gql`
     url: String
     service: String
     metadata: String
+  }
+
+  type DeletedCompositeSchema {
+    id: ID!
+    date: DateTime!
+    service: String!
   }
 
   union SchemaPublishPayload =
@@ -192,6 +213,14 @@ export default gql`
     | SchemaCheckError
     | GitHubSchemaCheckSuccess
     | GitHubSchemaCheckError
+
+  """
+  @oneOf
+  """
+  type SchemaDeleteResult {
+    ok: DeletedCompositeSchema
+    errors: SchemaErrorConnection
+  }
 
   enum CriticalityLevel {
     Breaking
@@ -275,6 +304,11 @@ export default gql`
     service: ID
     sdl: String!
     github: GitHubSchemaCheckInput
+  }
+
+  input SchemaDeleteInput {
+    serviceName: ID!
+    force: Boolean
   }
 
   input GitHubSchemaCheckInput {

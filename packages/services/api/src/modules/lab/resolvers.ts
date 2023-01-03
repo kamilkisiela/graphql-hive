@@ -1,7 +1,7 @@
 import { AuthManager } from '../auth/providers/auth-manager';
 import { TargetAccessScope } from '../auth/providers/target-access';
 import { ProjectManager } from '../project/providers/project-manager';
-import { SchemaHelper } from '../schema/providers/schema-helper';
+import { SchemaHelper, selectSchemaWithSDL } from '../schema/providers/schema-helper';
 import { SchemaManager } from '../schema/providers/schema-manager';
 import { IdTranslator } from '../shared/providers/id-translator';
 import type { LabModule } from './__generated__/types';
@@ -36,12 +36,14 @@ export const resolvers: LabModule.Resolvers = {
       }
 
       const [schemas, { type, externalComposition }] = await Promise.all([
-        schemaManager.getSchemasOfVersion({
-          organization,
-          project,
-          target,
-          version: latestSchema.id,
-        }),
+        schemaManager
+          .getSchemasOfVersion({
+            organization,
+            project,
+            target,
+            version: latestSchema.id,
+          })
+          .then(selectSchemaWithSDL),
         injector.get(ProjectManager).getProject({
           organization,
           project,

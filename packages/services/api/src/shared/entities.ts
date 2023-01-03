@@ -60,7 +60,8 @@ export type SingleSchema = z.infer<typeof SingleSchemaModel>;
 export type DeletedCompositeSchema = z.infer<typeof DeletedCompositeSchemaModel>;
 export type PushedCompositeSchema = z.infer<typeof PushedCompositeSchemaModel>;
 export type CompositeSchema = z.infer<typeof CompositeSchemaModel>;
-export type Schema = SingleSchema | PushedCompositeSchema;
+export type Schema = SingleSchema | PushedCompositeSchema | DeletedCompositeSchema;
+export type SchemaWithSDL = SingleSchema | PushedCompositeSchema;
 
 export interface DateRange {
   from: Date;

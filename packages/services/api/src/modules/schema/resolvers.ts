@@ -33,7 +33,7 @@ import { TargetManager } from '../target/providers/target-manager';
 import type { SchemaModule } from './__generated__/types';
 import { Inspector } from './providers/inspector';
 import { SchemaBuildError } from './providers/orchestrators/errors';
-import { SchemaHelper } from './providers/schema-helper';
+import { SchemaHelper, selectSchemaWithSDL } from './providers/schema-helper';
 import { SchemaManager } from './providers/schema-manager';
 import { SchemaPublisher } from './providers/schema-publisher';
 
@@ -122,6 +122,20 @@ export const resolvers: SchemaModule.Resolvers = {
         },
         abortSignal,
       );
+    },
+    async schemaDelete(_, { input }, { injector }) {
+      const [organization, project, target] = await Promise.all([
+        injector.get(OrganizationManager).getOrganizationIdByToken(),
+        injector.get(ProjectManager).getProjectIdByToken(),
+        injector.get(TargetManager).getTargetIdByToken(),
+      ]);
+
+      return injector.get(SchemaPublisher).delete({
+        ...input,
+        organization,
+        project,
+        target,
+      }) as any;
     },
     async updateSchemaVersionStatus(_, { input }, { injector }) {
       const translator = injector.get(IdTranslator);
@@ -284,18 +298,24 @@ export const resolvers: SchemaModule.Resolvers = {
 
       // TODO: collect stats from a period between these two versions
       const [schemasBefore, schemasAfter] = await Promise.all([
-        injector.get(SchemaManager).getSchemasOfVersion({
-          organization: organizationId,
-          project: projectId,
-          target: targetId,
-          version: selector.before,
-        }),
-        injector.get(SchemaManager).getSchemasOfVersion({
-          organization: organizationId,
-          project: projectId,
-          target: targetId,
-          version: selector.after,
-        }),
+        injector
+          .get(SchemaManager)
+          .getSchemasOfVersion({
+            organization: organizationId,
+            project: projectId,
+            target: targetId,
+            version: selector.before,
+          })
+          .then(selectSchemaWithSDL),
+        injector
+          .get(SchemaManager)
+          .getSchemasOfVersion({
+            organization: organizationId,
+            project: projectId,
+            target: targetId,
+            version: selector.after,
+          })
+          .then(selectSchemaWithSDL),
       ]);
 
       return Promise.all([
@@ -337,18 +357,24 @@ export const resolvers: SchemaModule.Resolvers = {
 
       // TODO: collect stats from a period between these two versions
       const [schemasBefore, schemasAfter] = await Promise.all([
-        injector.get(SchemaManager).getSchemasOfPreviousVersion({
-          organization: organizationId,
-          project: projectId,
-          target: targetId,
-          version: selector.version,
-        }),
-        injector.get(SchemaManager).getSchemasOfVersion({
-          organization: organizationId,
-          project: projectId,
-          target: targetId,
-          version: selector.version,
-        }),
+        injector
+          .get(SchemaManager)
+          .getSchemasOfPreviousVersion({
+            organization: organizationId,
+            project: projectId,
+            target: targetId,
+            version: selector.version,
+          })
+          .then(selectSchemaWithSDL),
+        injector
+          .get(SchemaManager)
+          .getSchemasOfVersion({
+            organization: organizationId,
+            project: projectId,
+            target: targetId,
+            version: selector.version,
+          })
+          .then(selectSchemaWithSDL),
       ]);
 
       return Promise.all([
@@ -447,46 +473,20 @@ export const resolvers: SchemaModule.Resolvers = {
   },
   SchemaVersion: {
     commit(version, _, { injector }) {
-      return injector
-        .get(SchemaManager)
-        .getCommit({
-          commit: version.commit,
-          organization: version.organization,
-          project: version.project,
-          target: version.target,
-        })
-        .then(commit => ({
-          id: commit.id,
-          author: commit.author,
-          date: commit.date as any,
-          source: commit.sdl,
-          commit: commit.commit,
-          metadata: commit.metadata,
-          service: 'service_name' in commit ? commit.service_name : null,
-          url: 'service_url' in commit ? commit.service_url : null,
-        }));
+      return injector.get(SchemaManager).getCommit({
+        commit: version.commit,
+        organization: version.organization,
+        project: version.project,
+        target: version.target,
+      });
     },
     schemas(version, _, { injector }) {
-      return injector
-        .get(SchemaManager)
-        .getCommits({
-          version: version.id,
-          organization: version.organization,
-          project: version.project,
-          target: version.target,
-        })
-        .then(schemas =>
-          schemas.map(s => ({
-            id: s.id,
-            author: s.author,
-            date: s.date as any,
-            source: s.sdl,
-            commit: s.commit,
-            metadata: s.metadata,
-            service: 'service_name' in s ? s.service_name : null,
-            url: 'service_url' in s ? s.service_url : null,
-          })),
-        );
+      return injector.get(SchemaManager).getCommits({
+        version: version.id,
+        organization: version.organization,
+        project: version.project,
+        target: version.target,
+      });
     },
     async supergraph(version, _, { injector }) {
       const project = await injector.get(ProjectManager).getProject({
@@ -502,12 +502,14 @@ export const resolvers: SchemaModule.Resolvers = {
       const orchestrator = schemaManager.matchOrchestrator(project.type);
       const helper = injector.get(SchemaHelper);
 
-      const schemas = await schemaManager.getCommits({
-        version: version.id,
-        organization: version.organization,
-        project: version.project,
-        target: version.target,
-      });
+      const schemas = await schemaManager
+        .getCommits({
+          version: version.id,
+          organization: version.organization,
+          project: version.project,
+          target: version.target,
+        })
+        .then(selectSchemaWithSDL);
 
       return orchestrator.supergraph(
         schemas.map(s => helper.createSchemaObject(s)),
@@ -524,12 +526,14 @@ export const resolvers: SchemaModule.Resolvers = {
       const orchestrator = schemaManager.matchOrchestrator(project.type);
       const helper = injector.get(SchemaHelper);
 
-      const schemas = await schemaManager.getCommits({
-        version: version.id,
-        organization: version.organization,
-        project: version.project,
-        target: version.target,
-      });
+      const schemas = await schemaManager
+        .getCommits({
+          version: version.id,
+          organization: version.organization,
+          project: version.project,
+          target: version.target,
+        })
+        .then(selectSchemaWithSDL);
 
       return (
         await orchestrator.build(
@@ -551,12 +555,14 @@ export const resolvers: SchemaModule.Resolvers = {
       const orchestrator = schemaManager.matchOrchestrator(project.type);
       const helper = injector.get(SchemaHelper);
 
-      const schemas = await schemaManager.getCommits({
-        version: version.id,
-        organization: version.organization,
-        project: version.project,
-        target: version.target,
-      });
+      const schemas = await schemaManager
+        .getCommits({
+          version: version.id,
+          organization: version.organization,
+          project: version.project,
+          target: version.target,
+        })
+        .then(selectSchemaWithSDL);
 
       const schema = await orchestrator.build(
         schemas.map(s => helper.createSchemaObject(s)),
@@ -620,6 +626,36 @@ export const resolvers: SchemaModule.Resolvers = {
         before: before ? before.raw : '',
         after: after.raw,
       };
+    },
+  },
+  SingleSchema: {
+    __isTypeOf(obj) {
+      return obj.kind === 'single';
+    },
+    source(schema) {
+      return schema.sdl;
+    },
+  },
+  PushedCompositeSchema: {
+    __isTypeOf(obj) {
+      return obj.kind === 'composite' && obj.action === 'PUSH';
+    },
+    service(schema) {
+      return schema.service_name;
+    },
+    source(schema) {
+      return schema.sdl;
+    },
+    url(schema) {
+      return schema.service_url;
+    },
+  },
+  DeletedCompositeSchema: {
+    __isTypeOf(obj) {
+      return obj.kind === 'composite' && obj.action === 'DELETE';
+    },
+    service(schema) {
+      return schema.service_name;
     },
   },
   SchemaConnection: createConnection(),

@@ -3,6 +3,7 @@ import type {
   AddAlertChannelInput,
   AddAlertInput,
   RegistryModel,
+  ProjectType,
 } from '../../../__generated__/types';
 import type {
   ActivityObject,
@@ -284,6 +285,7 @@ export interface Storage {
       service?: string | null;
       url?: string | null;
       metadata: string | null;
+      projectType: ProjectType;
     } & TargetSelector,
   ): Promise<Schema | never>;
 

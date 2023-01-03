@@ -4,6 +4,7 @@ import { Injectable, Scope } from 'graphql-modules';
 import objectHash from 'object-hash';
 import type {
   CompositeSchema,
+  DeletedCompositeSchema,
   PushedCompositeSchema,
   Schema,
   SchemaObject,
@@ -13,9 +14,14 @@ import { createSchemaObject, PushedCompositeSchemaModel } from '../../../shared/
 import { cache } from '../../../shared/helpers';
 import { sortDocumentNode } from '../../../shared/schema';
 
-export function isCompositeSchema(schema: Schema): schema is PushedCompositeSchema {
-  return schema.kind === 'composite';
+export function isPushedCompositeSchema(schema: Schema): schema is PushedCompositeSchema {
+  return schema.kind === 'composite' && schema.action === 'PUSH';
 }
+
+export function isDeletedCompositeSchema(schema: Schema): schema is DeletedCompositeSchema {
+  return schema.kind === 'composite' && schema.action === 'DELETE';
+}
+
 export function isSingleSchema(schema: Schema): schema is SingleSchema {
   return schema.kind === 'single';
 }
@@ -36,22 +42,34 @@ export function ensureSingleSchema(schema: Schema | Schema[]): SingleSchema {
   throw new Error('Expected a single schema');
 }
 
-export function ensureCompositeSchemas(
+export function ensurePushedCompositeSchemas(
   schemas: readonly Schema[],
 ): PushedCompositeSchema[] | never {
   return schemas.map(schema => PushedCompositeSchemaModel.parse(schema));
 }
 
-export function isSchemaWithSDL(schema: Schema): schema is Schema {
+export function isSchemaWithSDL(schema: Schema): schema is PushedCompositeSchema | SingleSchema {
   return 'sdl' in schema && typeof schema.sdl === 'string';
 }
 
-export function ensureSchemaWithSDL(schema: Schema): Schema | never {
+export function ensureSchemaWithSDL(schema: Schema): PushedCompositeSchema | SingleSchema | never {
   if (isSchemaWithSDL(schema)) {
     return schema;
   }
 
   throw new Error('Schema does not have an SDL');
+}
+
+export function selectPushedCompositeSchemas(schemas: readonly Schema[]) {
+  return schemas.filter(isPushedCompositeSchema);
+}
+
+export function selectDeletedCompositeSchemas(schemas: readonly Schema[]) {
+  return schemas.filter(isDeletedCompositeSchema);
+}
+
+export function selectSchemaWithSDL(schemas: readonly Schema[]) {
+  return schemas.filter(isSchemaWithSDL);
 }
 
 export function serviceExists(schemas: CompositeSchema[], serviceName: string) {

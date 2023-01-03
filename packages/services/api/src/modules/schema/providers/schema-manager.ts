@@ -282,11 +282,23 @@ export class SchemaManager {
       url?: string | null;
       base_schema: string | null;
       metadata: string | null;
+      projectType: ProjectType;
     } & TargetSelector,
   ) {
     this.logger.info('Creating a new version (input=%o)', lodash.omit(input, ['schema']));
-    const { valid, project, organization, target, commit, schema, author, commits, url, metadata } =
-      input;
+    const {
+      valid,
+      project,
+      organization,
+      target,
+      commit,
+      schema,
+      author,
+      commits,
+      url,
+      metadata,
+      projectType,
+    } = input;
     let service = input.service;
 
     await this.authManager.ensureTargetAccess({
@@ -313,6 +325,7 @@ export class SchemaManager {
       author,
       url,
       metadata,
+      projectType,
     });
 
     // finally create a version
@@ -352,6 +365,7 @@ export class SchemaManager {
       service?: string | null;
       url?: string | null;
       metadata: string | null;
+      projectType: ProjectType;
     } & TargetSelector,
   ) {
     this.logger.info('Inserting schema (input=%o)', lodash.omit(input, ['schema']));

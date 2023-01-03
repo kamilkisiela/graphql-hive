@@ -29,6 +29,10 @@ import type {
   Target,
   Token,
   User,
+  Schema as SchemaEntity,
+  SingleSchema as SingleSchemaEntity,
+  PushedCompositeSchema as PushedCompositeSchemaEntity,
+  DeletedCompositeSchema as DeletedCompositeSchemaEntity,
 } from './entities';
 
 export interface SchemaVersion extends SchemaVersionEntity {
@@ -121,13 +125,12 @@ export type SchemaComparePayload =
 export type SchemaCompareResult =
   | readonly [SchemaObject, SchemaObject]
   | readonly [undefined | null, SchemaObject];
-export interface Schema {
-  id: string;
-  author: string;
-  source: string;
-  date: string;
-  service?: string | null;
-}
+
+export type Schema = SchemaEntity;
+
+export type SingleSchema = SingleSchemaEntity;
+export type PushedCompositeSchema = PushedCompositeSchemaEntity;
+export type DeletedCompositeSchema = DeletedCompositeSchemaEntity;
 
 export interface OperationsStats {
   organization: string;
