@@ -104,9 +104,7 @@ router
         status: 200,
       }),
   )
-  .get('*', handleArtifactRequest)
-  // Legacy CDN Handlers
-  .get('*', handleRequest);
+  .get('*', handleArtifactRequest, handleRequest);
 
 self.addEventListener('fetch', (event: FetchEvent) => {
   const sentry = new Toucan({

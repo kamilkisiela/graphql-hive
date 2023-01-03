@@ -1,5 +1,6 @@
 import '../src/dev-polyfill';
 import { createHmac } from 'crypto';
+import { Request } from '@whatwg-node/fetch';
 import {
   InvalidArtifactTypeResponse,
   InvalidAuthKeyResponse,
