@@ -1,3 +1,4 @@
+import { crypto, Response,TextEncoder } from '@whatwg-node/fetch';
 import { buildSchema, introspectionFromSchema } from 'graphql';
 import { Analytics, createAnalytics } from './analytics';
 import {

@@ -1,4 +1,4 @@
-import { crypto } from '@whatwg-node/fetch';
+import { crypto, TextEncoder } from '@whatwg-node/fetch';
 
 const encoder = new TextEncoder();
 

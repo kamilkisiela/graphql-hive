@@ -1,12 +1,13 @@
 import { S3Client } from '@aws-sdk/client-s3';
 import { ArtifactStorageReader } from '@hive/api/src/modules/schema/providers/artifact-storage-reader';
-import itty from 'itty-router';
+import { createRouter, Response, Router, withErrorHandling } from '@whatwg-node/router';
 import Toucan from 'toucan-js';
 import { AnalyticsEngine, createAnalytics } from './analytics';
 import { createArtifactRequestHandler } from './artifact-handler';
 import { UnexpectedError } from './errors';
 import { createRequestHandler } from './handler';
 import { createIsKeyValid } from './key-validation';
+import { ServerContext } from './types';
 
 /**
  * KV Storage for the CDN
@@ -89,8 +90,13 @@ const handleArtifactRequest = createArtifactRequestHandler({
   },
 });
 
-const router = itty
-  .Router()
+const router = withErrorHandling<ServerContext>(createRouter<ServerContext>(), (error, __, ctx) => {
+  console.error(error);
+  ctx.sentry?.captureException(error);
+  return new UnexpectedError(analytics);
+}) as Router<ServerContext>;
+
+router
   .get(
     '/_health',
     () =>
@@ -102,7 +108,7 @@ const router = itty
   // Legacy CDN Handlers
   .get('*', handleRequest);
 
-self.addEventListener('fetch', async (event: FetchEvent) => {
+self.addEventListener('fetch', (event: FetchEvent) => {
   const sentry = new Toucan({
     dsn: SENTRY_DSN,
     environment: SENTRY_ENVIRONMENT,
@@ -119,24 +125,7 @@ self.addEventListener('fetch', async (event: FetchEvent) => {
     allowedSearchParams: /(.*)/,
   });
 
-  try {
-    event.respondWith(
-      router
-        .handle(event.request, sentry.captureException)
-        .then(response => {
-          if (response) {
-            return response;
-          }
-          return new Response('Not found', { status: 404 });
-        })
-        .catch(err => {
-          console.error(err);
-          sentry.captureException(err);
-          return new UnexpectedError(analytics);
-        }),
-    );
-  } catch (error) {
-    sentry.captureException(error);
-    event.respondWith(new UnexpectedError(analytics));
-  }
+  return router(event, {
+    sentry,
+  });
 });

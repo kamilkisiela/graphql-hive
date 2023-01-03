@@ -1,14 +1,12 @@
-import './dev-polyfill';
 import { createServer } from 'http';
 import { S3Client } from '@aws-sdk/client-s3';
 import { ArtifactStorageReader } from '@hive/api/src/modules/schema/providers/artifact-storage-reader';
-import { createServerAdapter } from '@whatwg-node/server';
-import itty from 'itty-router';
-import { json, withParams } from 'itty-router-extras';
+import { createRouter, Response } from '@whatwg-node/router';
 import { createArtifactRequestHandler } from './artifact-handler';
 import { devStorage } from './dev-polyfill';
 import { createRequestHandler } from './handler';
 import { createIsKeyValid } from './key-validation';
+import { ServerContext } from './types';
 
 // eslint-disable-next-line no-process-env
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4010;
@@ -56,41 +54,49 @@ const handleArtifactRequest = createArtifactRequestHandler({
 });
 
 function main() {
-  const app = createServerAdapter(itty.Router());
+  const app = createRouter<ServerContext>();
 
-  app.put(
-    '/:accountId/storage/kv/namespaces/:namespaceId/values/:key',
-    withParams,
-    async (
-      request: Request & {
-        params: {
-          accountId: string;
-          namespaceId: string;
-          key: string;
-        };
-      },
-    ) => {
-      if (!request.params.key) {
-        throw new Error(`Missing key`);
-      }
+  app.put('/:accountId/storage/kv/namespaces/:namespaceId/values/:key', async request => {
+    if (!request.params.key) {
+      throw new Error(`Missing key`);
+    }
 
-      const textBody = await request.text();
+    const textBody = await request.text();
 
-      if (!textBody) {
-        throw new Error(`Missing body value`);
-      }
+    if (!textBody) {
+      throw new Error(`Missing body value`);
+    }
 
-      console.log(`Writing to ephermal storage: ${request.params.key}, value: ${request.body}`);
+    console.log(`Writing to ephermal storage: ${request.params.key}, value: ${request.body}`);
 
-      devStorage.set(request.params.key, textBody);
+    devStorage.set(request.params.key, textBody);
 
-      return json({
+    return new Response(
+      JSON.stringify({
         success: true,
-      });
-    },
-  );
+      }),
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+    );
+  });
 
-  app.get('/dump', () => json(Object.fromEntries(devStorage.entries())));
+  app.get(
+    '/dump',
+    () =>
+      new Response(
+        JSON.stringify({
+          devStorage: Object.fromEntries(devStorage.entries()),
+        }),
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        },
+      ),
+  );
 
   app.get(
     '/_readiness',
@@ -100,13 +106,7 @@ function main() {
       }),
   );
 
-  const router = itty
-    .Router()
-    .get('*', handleArtifactRequest)
-    // Legacy CDN Handlers
-    .get('*', handleRequest);
-
-  app.get('*', (request: Request) => router.handle(request));
+  app.get('*', handleArtifactRequest, handleRequest);
 
   const server = createServer(app);
 
