@@ -50,6 +50,14 @@ export async function schemaCheck(args: string[]) {
   );
 }
 
+export async function schemaDelete(args: string[]) {
+  const registryAddress = await getServiceHost('server', 8082);
+
+  return await exec(
+    ['schema:delete', `--registry`, `http://${registryAddress}/graphql`, ...args].join(' '),
+  );
+}
+
 export async function createCLI(token: string) {
   let publishCount = 0;
 
@@ -174,8 +182,61 @@ export async function createCLI(token: string) {
     }
   }
 
+  async function deleteCommand({
+    serviceName,
+    expect: expectedStatus,
+  }: {
+    serviceName?: string;
+    expect: 'latest' | 'latest-composable' | 'rejected';
+  }) {
+    const cmd = schemaDelete(['--token', token, '--confirm', serviceName ?? '']);
+
+    const before = {
+      latest: await fetchLatestSchema(token).then(r => r.expectNoGraphQLErrors()),
+      latestValid: await fetchLatestValidSchema(token).then(r => r.expectNoGraphQLErrors()),
+    };
+
+    if (expectedStatus === 'rejected') {
+      await expect(cmd).rejects.toThrow();
+
+      const after = {
+        latest: await fetchLatestSchema(token).then(r => r.expectNoGraphQLErrors()),
+        latestValid: await fetchLatestValidSchema(token).then(r => r.expectNoGraphQLErrors()),
+      };
+
+      expect(after.latest.latestVersion?.commit).toEqual(before.latest.latestVersion?.commit);
+      expect(after.latestValid.latestValidVersion?.id).toEqual(
+        before.latestValid.latestValidVersion?.id,
+      );
+
+      return cmd.catch(reason => Promise.resolve(reason.message));
+    } else {
+      await cmd;
+
+      const after = {
+        latest: await fetchLatestSchema(token).then(r => r.expectNoGraphQLErrors()),
+        latestValid: await fetchLatestValidSchema(token).then(r => r.expectNoGraphQLErrors()),
+      };
+
+      if (expectedStatus === 'latest-composable') {
+        expect(after.latest.latestVersion?.commit).not.toEqual(before.latest.latestVersion?.commit);
+        expect(after.latestValid.latestValidVersion?.commit).not.toEqual(
+          before.latestValid.latestValidVersion?.commit,
+        );
+      } else {
+        expect(after.latest.latestVersion?.commit).not.toEqual(before.latest.latestVersion?.commit);
+        expect(after.latestValid.latestValidVersion?.id).toEqual(
+          before.latestValid.latestValidVersion?.id,
+        );
+      }
+
+      return cmd;
+    }
+  }
+
   return {
     publish,
     check,
+    delete: deleteCommand,
   };
 }

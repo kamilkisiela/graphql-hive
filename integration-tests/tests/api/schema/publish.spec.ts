@@ -105,11 +105,21 @@ test.concurrent('base schema should not affect the output schema persisted in db
 
   const latestResult = await readWriteToken.latestSchema();
   expect(latestResult.latestVersion?.schemas.total).toBe(1);
-  expect(latestResult.latestVersion?.schemas.nodes[0].commit).toBe('2');
-  expect(latestResult.latestVersion?.schemas.nodes[0].source).toMatch(
-    'type Query { ping: String @auth pong: String }',
+
+  const firstNode = latestResult.latestVersion?.schemas.nodes[0];
+
+  expect(firstNode).toEqual(
+    expect.objectContaining({
+      commit: '2',
+      source: expect.stringContaining('type Query { ping: String @auth pong: String }'),
+    }),
   );
-  expect(latestResult.latestVersion?.schemas.nodes[0].source).not.toMatch('directive');
+  expect(firstNode).not.toEqual(
+    expect.objectContaining({
+      source: expect.stringContaining('directive'),
+    }),
+  );
+
   expect(latestResult.latestVersion?.baseSchema).toMatch(
     'directive @auth on OBJECT | FIELD_DEFINITION',
   );
@@ -146,9 +156,14 @@ test.concurrent.each(['legacy', 'modern'])(
 
     const latestResult = await readWriteToken.latestSchema();
     expect(latestResult.latestVersion?.schemas.total).toBe(1);
-    expect(latestResult.latestVersion?.schemas.nodes[0].commit).toBe('abc123');
-    expect(latestResult.latestVersion?.schemas.nodes[0].source).toMatch(
-      `type Query { me: User } type User @key(fields: "id") { id: ID! name: String }`,
+
+    expect(latestResult.latestVersion?.schemas.nodes[0]).toEqual(
+      expect.objectContaining({
+        commit: 'abc123',
+        source: expect.stringContaining(
+          `type Query { me: User } type User @key(fields: "id") { id: ID! name: String }`,
+        ),
+      }),
     );
   },
 );
@@ -186,9 +201,14 @@ test.concurrent.each(['legacy', 'modern'])(
 
     const latestResult = await readWriteToken.latestSchema();
     expect(latestResult.latestVersion?.schemas.total).toBe(1);
-    expect(latestResult.latestVersion?.schemas.nodes[0].commit).toBe('abc123');
-    expect(latestResult.latestVersion?.schemas.nodes[0].source).toMatch(
-      `type Query { me: User } type User @key(selectionSet: "{ id }") { id: ID! name: String }`,
+
+    expect(latestResult.latestVersion?.schemas.nodes[0]).toEqual(
+      expect.objectContaining({
+        commit: 'abc123',
+        source: expect.stringContaining(
+          `type Query { me: User } type User @key(selectionSet: "{ id }") { id: ID! name: String }`,
+        ),
+      }),
     );
   },
 );
@@ -225,9 +245,19 @@ test.concurrent.each(['legacy', 'modern'])(
 
     const latestResult = await readWriteToken.latestSchema();
     expect(latestResult.latestVersion?.schemas.total).toBe(1);
-    expect(latestResult.latestVersion?.schemas.nodes[0].commit).toBe('abc123');
-    expect(latestResult.latestVersion?.schemas.nodes[0].source).toMatch(
-      `directive @auth on FIELD_DEFINITION type Query { me: User @auth } type User { id: ID! name: String }`,
+
+    const firstNode = latestResult.latestVersion?.schemas.nodes[0];
+    if (firstNode?.__typename === 'DeletedCompositeSchema') {
+      throw new Error('Unexpected deleted schema');
+    }
+
+    expect(latestResult.latestVersion?.schemas.nodes[0]).toEqual(
+      expect.objectContaining({
+        commit: 'abc123',
+        source: expect.stringContaining(
+          `directive @auth on FIELD_DEFINITION type Query { me: User @auth } type User { id: ID! name: String }`,
+        ),
+      }),
     );
   },
 );

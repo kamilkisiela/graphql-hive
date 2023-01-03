@@ -261,6 +261,17 @@ describe('check', () => {
   });
 });
 
+describe('delete', () => {
+  test.concurrent('not supported', async () => {
+    const cli = await prepare();
+
+    await cli.delete({
+      serviceName: 'test',
+      expect: 'rejected',
+    });
+  });
+});
+
 describe('other', () => {
   test.concurrent('marking versions as valid', async () => {
     const { createOrg } = await initSeed().createOwner();
@@ -309,9 +320,14 @@ describe('other', () => {
     // the initial version should be the latest valid version
     let latestValidSchemaResult = await fetchLatestValidSchema();
     expect(latestValidSchemaResult.latestValidVersion?.schemas.total).toEqual(1);
-    expect(latestValidSchemaResult.latestValidVersion?.schemas.nodes[0].commit).toEqual('c0');
+    expect(latestValidSchemaResult.latestValidVersion?.schemas.nodes[0]).toEqual(
+      expect.objectContaining({
+        commit: 'c0',
+      }),
+    );
 
-    const versionId = (commit: string) => versions.find(node => node.commit.commit === commit)!.id;
+    const versionId = (commit: string) =>
+      versions.find(node => 'commit' in node.commit && node.commit.commit === commit)!.id;
 
     // marking the third version as valid should promote it to be the latest valid version
     let versionStatusUpdateResult = await updateSchemaVersionStatus(versionId('c2'), true);
@@ -387,7 +403,7 @@ describe('other', () => {
       const versions = await fetchVersions(3);
 
       const versionId = (commit: string) =>
-        versions.find(node => node.commit.commit === commit)!.id;
+        versions.find(node => 'commit' in node.commit && node.commit.commit === commit)!.id;
 
       // marking the third version as valid should promote it to be the latest valid version and publish it to CDN
       await updateSchemaVersionStatus(versionId('c2'), true);

@@ -17,6 +17,7 @@ import type {
   PersistedOperation,
   Project,
   Schema,
+  DeletedCompositeSchema,
   SchemaVersion,
   Target,
   TargetSettings,
@@ -288,6 +289,13 @@ export interface Storage {
       projectType: ProjectType;
     } & TargetSelector,
   ): Promise<Schema | never>;
+
+  deleteSchema(
+    _: {
+      serviceName: string;
+      composable: boolean;
+    } & TargetSelector,
+  ): Promise<DeletedCompositeSchema>;
 
   createVersion(
     _: {

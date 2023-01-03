@@ -377,6 +377,78 @@ describe('check', () => {
   });
 });
 
+describe('delete', () => {
+  test.concurrent('accepted: composable before and after', async () => {
+    const cli = await prepare();
+
+    await cli.publish({
+      sdl: /* GraphQL */ `
+        type Query {
+          topProduct: Product
+        }
+
+        type Product @key(fields: "id") {
+          id: ID!
+          name: String
+        }
+      `,
+      serviceName: 'products',
+      serviceUrl: 'http://products:3000/graphql',
+      expect: 'latest-composable',
+    });
+
+    await cli.publish({
+      sdl: /* GraphQL */ `
+        type Query {
+          topReview: Review
+        }
+
+        type Review @key(fields: "id") {
+          id: ID!
+          title: String
+        }
+      `,
+      serviceName: 'reviews',
+      serviceUrl: 'http://reviews:3000/graphql',
+      expect: 'latest-composable',
+    });
+
+    const message = await cli.delete({
+      serviceName: 'reviews',
+      expect: 'latest-composable',
+    });
+
+    expect(message).toMatch('reviews deleted');
+  });
+
+  test.concurrent('rejected: unknown service', async () => {
+    const cli = await prepare();
+
+    await cli.publish({
+      sdl: /* GraphQL */ `
+        type Query {
+          topProduct: Product
+        }
+
+        type Product @key(fields: "id") {
+          id: ID!
+          name: String
+        }
+      `,
+      serviceName: 'products',
+      serviceUrl: 'http://products:3000/graphql',
+      expect: 'latest-composable',
+    });
+
+    const message = await cli.delete({
+      serviceName: 'unknown_service',
+      expect: 'rejected',
+    });
+
+    expect(message).toMatch('not found');
+  });
+});
+
 describe('other', () => {
   test.concurrent('service url should be available in supergraph', async () => {
     const { createOrg } = await initSeed().createOwner();
@@ -455,7 +527,11 @@ describe('other', () => {
       });
 
       const latestValid = await readWriteToken.fetchLatestValidSchema();
-      expect(latestValid.latestValidVersion?.schemas.nodes[0].commit).toBe('users');
+      expect(latestValid.latestValidVersion?.schemas.nodes[0]).toEqual(
+        expect.objectContaining({
+          commit: 'users',
+        }),
+      );
     },
   );
 
@@ -556,7 +632,11 @@ describe('other', () => {
       });
 
       const latestValid = await readWriteToken.fetchLatestValidSchema();
-      expect(latestValid.latestValidVersion?.schemas.nodes[0].commit).toBe('products');
+      expect(latestValid.latestValidVersion?.schemas.nodes[0]).toEqual(
+        expect.objectContaining({
+          commit: 'products',
+        }),
+      );
     },
   );
 });

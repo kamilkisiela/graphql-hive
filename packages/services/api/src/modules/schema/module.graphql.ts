@@ -214,12 +214,17 @@ export default gql`
     | GitHubSchemaCheckSuccess
     | GitHubSchemaCheckError
 
-  """
-  @oneOf
-  """
-  type SchemaDeleteResult {
-    ok: DeletedCompositeSchema
-    errors: SchemaErrorConnection
+  union SchemaDeleteResult = SchemaDeleteSuccess | SchemaDeleteError
+
+  type SchemaDeleteSuccess {
+    valid: Boolean!
+    changes: SchemaChangeConnection
+    errors: SchemaErrorConnection!
+  }
+
+  type SchemaDeleteError {
+    valid: Boolean!
+    errors: SchemaErrorConnection!
   }
 
   enum CriticalityLevel {
@@ -308,7 +313,7 @@ export default gql`
 
   input SchemaDeleteInput {
     serviceName: ID!
-    force: Boolean
+    dryRun: Boolean
   }
 
   input GitHubSchemaCheckInput {

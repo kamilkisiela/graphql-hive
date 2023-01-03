@@ -1859,6 +1859,90 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       return transformSchema({ ...result, type: projectType });
     },
+    async deleteSchema({ project, target, serviceName, composable }) {
+      return pool.transaction(async trx => {
+        // fetch the latest version
+        const latestVersion = await trx.one<Pick<schema_versions, 'id' | 'base_schema'>>(
+          sql`
+          SELECT sv.id, sv.base_schema
+          FROM public.schema_versions as sv
+          WHERE sv.target_id = ${target}
+          ORDER BY sv.created_at DESC
+          LIMIT 1
+        `,
+        );
+
+        // create a new action
+        const deleteActionResult = await trx.one<schema_log>(sql`
+          INSERT INTO public.schema_log
+            (
+              author,
+              commit,
+              service_name,
+              project_id,
+              target_id,
+              action
+            )
+          VALUES
+            (
+              ${'system'}::text,
+              ${'system'}::text,
+              ${serviceName}::text,
+              ${project},
+              ${target},
+              'DELETE'
+            )
+          RETURNING *
+        `);
+
+        // creates a new version
+        const newVersion = await trx.one<Pick<schema_versions, 'id' | 'created_at'>>(sql`
+          INSERT INTO public.schema_versions
+            (
+              is_composable,
+              target_id,
+              action_id,
+              base_schema
+            )
+          VALUES
+            (
+              ${composable},
+              ${target},
+              ${deleteActionResult.id},
+              ${latestVersion.base_schema}
+            )
+          RETURNING
+            id,
+            created_at
+        `);
+
+        // Move all the schema_version_to_log entries of the previous version to the new version
+        await trx.query(sql`
+          INSERT INTO public.schema_version_to_log
+            (version_id, action_id)
+          SELECT ${newVersion.id}::uuid as version_id, svl.action_id
+          FROM public.schema_version_to_log svl
+          LEFT JOIN public.schema_log sl ON (sl.id = svl.action_id)
+          WHERE svl.version_id = ${latestVersion.id} AND sl.action = 'PUSH' AND sl.service_name != ${serviceName}
+        `);
+
+        await trx.query(sql`
+          INSERT INTO public.schema_version_to_log
+            (version_id, action_id)
+          VALUES
+            (${newVersion.id}, ${deleteActionResult.id})
+        `);
+
+        return {
+          kind: 'composite',
+          id: deleteActionResult.id,
+          date: deleteActionResult.created_at as any,
+          service_name: deleteActionResult.service_name!,
+          target: deleteActionResult.target_id,
+          action: 'DELETE',
+        };
+      });
+    },
     async createVersion(input) {
       const newVersion = await pool.transaction(async trx => {
         // creates a new version

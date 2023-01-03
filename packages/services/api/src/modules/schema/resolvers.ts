@@ -123,19 +123,29 @@ export const resolvers: SchemaModule.Resolvers = {
         abortSignal,
       );
     },
-    async schemaDelete(_, { input }, { injector }) {
+    async schemaDelete(_, { input }, { injector, abortSignal }) {
       const [organization, project, target] = await Promise.all([
         injector.get(OrganizationManager).getOrganizationIdByToken(),
         injector.get(ProjectManager).getProjectIdByToken(),
         injector.get(TargetManager).getTargetIdByToken(),
       ]);
 
-      return injector.get(SchemaPublisher).delete({
-        ...input,
-        organization,
-        project,
-        target,
-      }) as any;
+      const token = injector.get(AuthManager).ensureApiToken();
+      const checksum = createHash('md5')
+        .update(JSON.stringify(input))
+        .update(token)
+        .digest('base64');
+
+      return injector.get(SchemaPublisher).delete(
+        {
+          ...input,
+          organization,
+          project,
+          target,
+          checksum,
+        },
+        abortSignal,
+      );
     },
     async updateSchemaVersionStatus(_, { input }, { injector }) {
       const translator = injector.get(IdTranslator);

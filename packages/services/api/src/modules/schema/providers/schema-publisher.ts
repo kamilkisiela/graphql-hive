@@ -38,6 +38,8 @@ import {
   SchemaCheckResult,
   SchemaPublishConclusion,
   SchemaPublishResult,
+  SchemaDeleteConclusion,
+  DeleteFailureReasonCode,
 } from './models/shared';
 import { SingleModel } from './models/single';
 import { SingleLegacyModel } from './models/single-legacy';
@@ -47,6 +49,7 @@ import {
   ensureSingleSchema,
   SchemaHelper,
   selectSchemaWithSDL,
+  selectPushedCompositeSchemas,
 } from './schema-helper';
 import { SchemaManager } from './schema-manager';
 
@@ -54,7 +57,9 @@ export type CheckInput = Omit<Types.SchemaCheckInput, 'project' | 'organization'
   TargetSelector;
 
 export type DeleteInput = Omit<Types.SchemaDeleteInput, 'project' | 'organization' | 'target'> &
-  TargetSelector;
+  TargetSelector & {
+    checksum: string;
+  };
 
 export type PublishInput = Types.SchemaPublishInput &
   TargetSelector & {
@@ -65,6 +70,10 @@ export type PublishInput = Types.SchemaPublishInput &
 type BreakPromise<T> = T extends Promise<infer U> ? U : never;
 
 type PublishResult = BreakPromise<ReturnType<SchemaPublisher['internalPublish']>>;
+
+function registryLockId(targetId: string) {
+  return `registry:lock:${targetId}`;
+}
 
 @Injectable({
   scope: Scope.Operation,
@@ -289,7 +298,7 @@ export class SchemaPublisher {
     return this.idempotentRunner.run({
       identifier: `schema:publish:${input.checksum}`,
       executor: async () => {
-        const unlock = await this.storage.idMutex.lock(`schema:publish:${input.target}`, {
+        const unlock = await this.storage.idMutex.lock(registryLockId(input.target), {
           signal,
         });
         try {
@@ -366,17 +375,137 @@ export class SchemaPublisher {
   }
 
   @sentry('SchemaPublisher.delete')
-  async delete(input: DeleteInput) {
-    this.logger.info('Deleting schema (input=%o)', lodash.omit(input, ['sdl']));
+  async delete(input: DeleteInput, signal: AbortSignal, span?: Span | undefined) {
+    this.logger.info('Deleting schema (input=%o)', input);
+    return this.idempotentRunner.run({
+      identifier: `schema:delete:${input.checksum}`,
+      executor: async () => {
+        const unlock = await this.storage.idMutex.lock(registryLockId(input.target), {
+          signal,
+        });
+        try {
+          await this.authManager.ensureTargetAccess({
+            organization: input.organization,
+            project: input.project,
+            target: input.target,
+            scope: TargetAccessScope.REGISTRY_WRITE,
+          });
+          const [project, latestVersion, baseSchema] = await Promise.all([
+            this.projectManager.getProject({
+              organization: input.organization,
+              project: input.project,
+            }),
+            this.schemaManager.getLatestSchemas({
+              organization: input.organization,
+              project: input.project,
+              target: input.target,
+            }),
+            this.schemaManager.getBaseSchema({
+              organization: input.organization,
+              project: input.project,
+              target: input.target,
+            }),
+          ]);
 
-    await this.authManager.ensureTargetAccess({
-      target: input.target,
-      project: input.project,
-      organization: input.organization,
-      scope: TargetAccessScope.REGISTRY_WRITE, // TODO: should be REGISTRY_ADMIN or REGISTRY_DELETE
+          const modelVersion = project.legacyRegistryModel ? 'legacy' : 'modern';
+          if (project.type !== ProjectType.FEDERATION && project.type !== ProjectType.STITCHING) {
+            throw new HiveError(`${project.type} project (${modelVersion}) not supported`);
+          }
+
+          if (!latestVersion || selectPushedCompositeSchemas(latestVersion.schemas).length === 0) {
+            throw new HiveError('Registry is empty');
+          }
+
+          const schemas = selectPushedCompositeSchemas(latestVersion.schemas);
+          this.logger.debug(`Found ${latestVersion?.schemas.length ?? 0} most recent schemas`);
+          this.logger.debug('Using %s registry model (version=%s)', project.type, modelVersion);
+
+          const serviceExists = schemas.some(s => s.service_name === input.serviceName);
+
+          if (!serviceExists) {
+            return {
+              __typename: 'SchemaDeleteError',
+              valid: latestVersion.valid,
+              errors: [
+                {
+                  message: `Service "${input.serviceName}" not found`,
+                },
+              ],
+            } satisfies Types.ResolversTypes['SchemaDeleteResult'];
+          }
+
+          // TODO: support dry-run (to show what would be deleted and how it would affect the registry)
+          const deleteResult = await this.models[project.type][modelVersion].delete({
+            input: {
+              serviceName: input.serviceName,
+            },
+            latest: {
+              isComposable: latestVersion.valid,
+              schemas: ensurePushedCompositeSchemas(schemas),
+            },
+            baseSchema, // TODO: support base schema in all models
+            project,
+            selector: {
+              target: input.target,
+              project: input.project,
+              organization: input.organization,
+            },
+          });
+
+          if (deleteResult.conclusion === SchemaDeleteConclusion.Accept) {
+            this.logger.debug('Delete accepted');
+            if (input.dryRun !== true) {
+              await this.storage.deleteSchema({
+                organization: input.organization,
+                project: input.project,
+                target: input.target,
+                serviceName: input.serviceName,
+                composable: deleteResult.state.composable,
+              });
+            }
+
+            return {
+              __typename: 'SchemaDeleteSuccess',
+              valid: deleteResult.state.composable,
+              changes: deleteResult.state.changes,
+              errors: [
+                ...(deleteResult.state.compositionErrors ?? []),
+                ...(deleteResult.state.breakingChanges ?? []),
+              ],
+            } satisfies Types.ResolversTypes['SchemaDeleteResult'];
+          }
+
+          this.logger.debug('Delete rejected');
+
+          const errors = [];
+
+          const compositionErrors = getReasonByCode(
+            deleteResult,
+            DeleteFailureReasonCode.CompositionFailure,
+          )?.compositionErrors;
+
+          if (getReasonByCode(deleteResult, DeleteFailureReasonCode.MissingServiceName)) {
+            errors.push({
+              message: 'Service name is required',
+            });
+          }
+
+          if (compositionErrors?.length) {
+            errors.push(...compositionErrors);
+          }
+
+          return {
+            __typename: 'SchemaDeleteError',
+            valid: false,
+            errors,
+          } satisfies Types.ResolversTypes['SchemaDeleteResult'];
+        } finally {
+          await unlock();
+        }
+      },
+      ttl: 60,
+      span,
     });
-
-    throw new Error('Not implemented yet');
   }
 
   private async internalPublish(input: PublishInput) {

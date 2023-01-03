@@ -202,6 +202,17 @@ describe('check', () => {
   });
 });
 
+describe('delete', () => {
+  test.concurrent('not supported', async () => {
+    const cli = await prepare();
+
+    await cli.delete({
+      serviceName: 'test',
+      expect: 'rejected',
+    });
+  });
+});
+
 async function prepare() {
   const {
     tokens: { registry: token },

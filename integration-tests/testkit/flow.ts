@@ -740,14 +740,36 @@ export function fetchLatestSchema(token: string) {
         latestVersion {
           baseSchema
           commit {
-            source
-            commit
-          }
-          schemas {
-            nodes {
+            ... on SingleSchema {
+              __typename
+              source
+              commit
+            }
+            ... on PushedCompositeSchema {
+              __typename
               source
               commit
               url
+            }
+            ... on DeletedCompositeSchema {
+              __typename
+            }
+          }
+          schemas {
+            nodes {
+              ... on SingleSchema {
+                source
+                commit
+              }
+              ... on PushedCompositeSchema {
+                source
+                commit
+                url
+              }
+
+              ... on DeletedCompositeSchema {
+                __typename
+              }
             }
             total
           }
@@ -766,13 +788,37 @@ export function fetchLatestValidSchema(token: string) {
           id
           baseSchema
           commit {
-            source
-            commit
+            ... on SingleSchema {
+              __typename
+              source
+              commit
+            }
+            ... on PushedCompositeSchema {
+              __typename
+              source
+              commit
+              url
+            }
+            ... on DeletedCompositeSchema {
+              __typename
+            }
           }
           schemas {
             nodes {
-              source
-              commit
+              ... on SingleSchema {
+                __typename
+                source
+                commit
+              }
+              ... on PushedCompositeSchema {
+                __typename
+                source
+                commit
+                url
+              }
+              ... on DeletedCompositeSchema {
+                __typename
+              }
             }
             total
           }
@@ -793,14 +839,38 @@ export function fetchVersions(selector: SchemaVersionsInput, limit: number, toke
             valid
             date
             commit {
-              source
-              commit
+              ... on SingleSchema {
+                __typename
+                source
+                commit
+              }
+              ... on PushedCompositeSchema {
+                __typename
+                source
+                commit
+                url
+              }
+              ... on DeletedCompositeSchema {
+                __typename
+              }
             }
             baseSchema
             schemas {
               nodes {
-                source
-                commit
+                ... on SingleSchema {
+                  __typename
+                  source
+                  commit
+                }
+                ... on PushedCompositeSchema {
+                  __typename
+                  source
+                  commit
+                  url
+                }
+                ... on DeletedCompositeSchema {
+                  __typename
+                }
               }
             }
           }
@@ -850,8 +920,23 @@ export function updateSchemaVersionStatus(input: SchemaVersionUpdateInput, token
           date
           valid
           commit {
-            id
-            commit
+            ... on SingleSchema {
+              __typename
+              id
+              source
+              commit
+            }
+            ... on PushedCompositeSchema {
+              __typename
+              id
+              source
+              commit
+              url
+            }
+            ... on DeletedCompositeSchema {
+              __typename
+              id
+            }
           }
         }
       }
