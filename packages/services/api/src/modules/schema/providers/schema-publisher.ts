@@ -32,14 +32,14 @@ import { CompositeModel } from './models/composite';
 import { FederationLegacyModel } from './models/federation-legacy';
 import {
   CheckFailureReasonCode,
+  DeleteFailureReasonCode,
   getReasonByCode,
   PublishFailureReasonCode,
   SchemaCheckConclusion,
   SchemaCheckResult,
+  SchemaDeleteConclusion,
   SchemaPublishConclusion,
   SchemaPublishResult,
-  SchemaDeleteConclusion,
-  DeleteFailureReasonCode,
 } from './models/shared';
 import { SingleModel } from './models/single';
 import { SingleLegacyModel } from './models/single-legacy';
@@ -48,8 +48,8 @@ import {
   ensurePushedCompositeSchemas,
   ensureSingleSchema,
   SchemaHelper,
-  selectSchemaWithSDL,
   selectPushedCompositeSchemas,
+  selectSchemaWithSDL,
 } from './schema-helper';
 import { SchemaManager } from './schema-manager';
 
@@ -434,7 +434,6 @@ export class SchemaPublisher {
             } satisfies Types.ResolversTypes['SchemaDeleteResult'];
           }
 
-          // TODO: support dry-run (to show what would be deleted and how it would affect the registry)
           const deleteResult = await this.models[project.type][modelVersion].delete({
             input: {
               serviceName: input.serviceName,
