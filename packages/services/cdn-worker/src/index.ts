@@ -1,5 +1,6 @@
 import { S3Client } from '@aws-sdk/client-s3';
 import { ArtifactStorageReader } from '@hive/api/src/modules/schema/providers/artifact-storage-reader';
+import { Request } from '@whatwg-node/fetch';
 import { createRouter, Response, Router, withErrorHandling } from '@whatwg-node/router';
 import Toucan from 'toucan-js';
 import { AnalyticsEngine, createAnalytics } from './analytics';
