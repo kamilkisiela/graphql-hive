@@ -1,7 +1,6 @@
 global:
   image:
     tag: 59b64c36c866b3555c135c70de76a884e63f8619
-  appBaseUrl: localhost:8080
   backendProtocol: http
 
 image:
@@ -11,6 +10,7 @@ image:
 appName: hive-app
 serverPort: 8080
 nodeEnv: production
+appProtocol: http
 
 supertokensConnectionUri: http://supertokens:3567
 emailsEndpoint: http://emails-svc:80

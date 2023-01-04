@@ -1,5 +1,5 @@
 ---
-{{- $appBaseUrl := printf "%s://%s" .Values.global.backendProtocol .Values.global.appBaseUrl }}
+{{- $appBaseUrl := printf "%s://%s" .Values.appProtocol .Values.global.appBaseUrl }}
 
 apiVersion: v1
 kind: ConfigMap
