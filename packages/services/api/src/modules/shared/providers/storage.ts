@@ -2,13 +2,14 @@ import { Injectable } from 'graphql-modules';
 import type {
   AddAlertChannelInput,
   AddAlertInput,
-  RegistryModel,
   ProjectType,
+  RegistryModel,
 } from '../../../__generated__/types';
 import type {
   ActivityObject,
   Alert,
   AlertChannel,
+  DeletedCompositeSchema,
   Member,
   OIDCIntegration,
   Organization,
@@ -17,12 +18,11 @@ import type {
   PersistedOperation,
   Project,
   Schema,
+  SchemaLog,
   SchemaVersion,
   Target,
   TargetSettings,
   User,
-  DeletedCompositeSchema,
-  SchemaLog,
 } from '../../../shared/entities';
 import type { OrganizationAccessScope } from '../../auth/providers/organization-access';
 import type { ProjectAccessScope } from '../../auth/providers/project-access';

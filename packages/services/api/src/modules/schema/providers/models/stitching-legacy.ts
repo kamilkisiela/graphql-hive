@@ -4,27 +4,27 @@ import { RegistryChecks } from '../registry-checks';
 import { swapServices } from '../schema-helper';
 import type { PublishInput } from '../schema-publisher';
 import type {
+  DeletedCompositeSchema,
   Project,
   PushedCompositeSchema,
-  DeletedCompositeSchema,
   Target,
 } from './../../../../shared/entities';
 import {
   CheckFailureReasonCode,
+  DeleteFailureReasonCode,
   PublishFailureReasonCode,
   PublishIgnoreReasonCode,
-  DeleteFailureReasonCode,
   // Check
   SchemaCheckConclusion,
   SchemaCheckFailureReason,
   SchemaCheckResult,
+  // Delete
+  SchemaDeleteConclusion,
+  SchemaDeleteResult,
   // Publish
   SchemaPublishConclusion,
   SchemaPublishFailureReason,
   SchemaPublishResult,
-  // Delete
-  SchemaDeleteConclusion,
-  SchemaDeleteResult,
   temp,
 } from './shared';
 

@@ -15,7 +15,7 @@ import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
 import { MarkAsValid } from '@/components/target/history/MarkAsValid';
 import { DataWrapper, GraphQLBlock, noSchema, Title } from '@/components/v2';
-import { SingleSchemaFieldsFragment, CompositeSchemaFieldsFragment } from '@/gql/graphql';
+import { CompositeSchemaFieldsFragment, SingleSchemaFieldsFragment } from '@/gql/graphql';
 import {
   LatestSchemaDocument,
   OrganizationFieldsFragment,

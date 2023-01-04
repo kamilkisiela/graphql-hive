@@ -1,3 +1,15 @@
+import { batch } from '@theguild/buddy';
+import { paramCase } from 'param-case';
+import {
+  DatabasePool,
+  DatabasePoolConnection,
+  DatabaseTransactionConnection,
+  sql,
+  TaggedTemplateLiteralInvocation,
+  UniqueIntegrityConstraintViolationError,
+} from 'slonik';
+import { update } from 'slonik-utilities';
+import zod from 'zod';
 import {
   ActivityObject,
   Alert,
@@ -20,19 +32,7 @@ import {
   TargetAccessScope,
   TargetSettings,
   User,
-} from '@hive/api';
-import { batch } from '@theguild/buddy';
-import { paramCase } from 'param-case';
-import {
-  DatabasePool,
-  DatabasePoolConnection,
-  DatabaseTransactionConnection,
-  sql,
-  TaggedTemplateLiteralInvocation,
-  UniqueIntegrityConstraintViolationError,
-} from 'slonik';
-import { update } from 'slonik-utilities';
-import zod from 'zod';
+} from '../../api/src';
 import type { OIDCIntegration, SchemaLog } from '../../api/src/shared/entities';
 import {
   activities,

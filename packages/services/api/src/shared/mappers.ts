@@ -20,18 +20,18 @@ import type {
 import type {
   ActivityObject,
   DateRange,
+  DeletedCompositeSchema as DeletedCompositeSchemaEntity,
   Member,
   Organization,
   PersistedOperation,
   Project,
+  PushedCompositeSchema as PushedCompositeSchemaEntity,
   SchemaObject,
   SchemaVersion as SchemaVersionEntity,
+  SingleSchema as SingleSchemaEntity,
   Target,
   Token,
   User,
-  SingleSchema as SingleSchemaEntity,
-  PushedCompositeSchema as PushedCompositeSchemaEntity,
-  DeletedCompositeSchema as DeletedCompositeSchemaEntity,
 } from './entities';
 
 export interface SchemaVersion extends SchemaVersionEntity {

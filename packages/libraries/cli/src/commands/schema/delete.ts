@@ -1,7 +1,7 @@
-import { Flags, Errors, CliUx } from '@oclif/core';
-import { renderErrors } from '../../helpers/schema';
-import { graphqlEndpoint } from '../../helpers/config';
+import { CliUx, Errors, Flags } from '@oclif/core';
 import Command from '../../base-command';
+import { graphqlEndpoint } from '../../helpers/config';
+import { renderErrors } from '../../helpers/schema';
 
 export default class SchemaDelete extends Command {
   static description = 'deletes a schema';
