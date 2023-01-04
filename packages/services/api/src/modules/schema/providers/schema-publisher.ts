@@ -3,14 +3,7 @@ import type { Span } from '@sentry/types';
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import lodash from 'lodash';
 import * as Types from '../../../__generated__/types';
-import {
-  Orchestrator,
-  Project,
-  ProjectType,
-  Schema,
-  SchemaWithSDL,
-  Target,
-} from '../../../shared/entities';
+import { Orchestrator, Project, ProjectType, Schema, Target } from '../../../shared/entities';
 import { HiveError } from '../../../shared/errors';
 import { bolderize } from '../../../shared/markdown';
 import { sentry } from '../../../shared/sentry';
@@ -44,13 +37,7 @@ import {
 import { SingleModel } from './models/single';
 import { SingleLegacyModel } from './models/single-legacy';
 import { StitchingLegacyModel } from './models/stitching-legacy';
-import {
-  ensurePushedCompositeSchemas,
-  ensureSingleSchema,
-  SchemaHelper,
-  selectPushedCompositeSchemas,
-  selectSchemaWithSDL,
-} from './schema-helper';
+import { ensureCompositeSchemas, ensureSingleSchema, SchemaHelper } from './schema-helper';
 import { SchemaManager } from './schema-manager';
 
 export type CheckInput = Omit<Types.SchemaCheckInput, 'project' | 'organization' | 'target'> &
@@ -205,7 +192,7 @@ export class SchemaPublisher {
           latest: latestVersion
             ? {
                 isComposable: latestVersion.valid,
-                schemas: ensurePushedCompositeSchemas(latestVersion.schemas),
+                schemas: ensureCompositeSchemas(latestVersion.schemas),
               }
             : null,
           baseSchema,
@@ -346,8 +333,7 @@ export class SchemaPublisher {
         ]);
 
         const orchestrator = this.schemaManager.matchOrchestrator(project.type);
-        const schemasWithSDL = selectSchemaWithSDL(schemas);
-        const schemaObjects = schemasWithSDL.map(s => this.helper.createSchemaObject(s));
+        const schemaObjects = schemas.map(s => this.helper.createSchemaObject(s));
         const schema = await orchestrator.build(schemaObjects, project.externalComposition);
 
         this.logger.info(
@@ -361,11 +347,11 @@ export class SchemaPublisher {
           supergraph:
             project.type === ProjectType.FEDERATION
               ? await orchestrator.supergraph(
-                  schemasWithSDL.map(s => this.helper.createSchemaObject(s)),
+                  schemas.map(s => this.helper.createSchemaObject(s)),
                   project.externalComposition,
                 )
               : null,
-          schemas: schemasWithSDL,
+          schemas,
           fullSchemaSdl: schema.raw,
         });
       }
@@ -412,11 +398,11 @@ export class SchemaPublisher {
             throw new HiveError(`${project.type} project (${modelVersion}) not supported`);
           }
 
-          if (!latestVersion || selectPushedCompositeSchemas(latestVersion.schemas).length === 0) {
+          if (!latestVersion || latestVersion.schemas.length === 0) {
             throw new HiveError('Registry is empty');
           }
 
-          const schemas = selectPushedCompositeSchemas(latestVersion.schemas);
+          const schemas = ensureCompositeSchemas(latestVersion.schemas);
           this.logger.debug(`Found ${latestVersion?.schemas.length ?? 0} most recent schemas`);
           this.logger.debug('Using %s registry model (version=%s)', project.type, modelVersion);
 
@@ -440,7 +426,7 @@ export class SchemaPublisher {
             },
             latest: {
               isComposable: latestVersion.valid,
-              schemas: ensurePushedCompositeSchemas(schemas),
+              schemas,
             },
             baseSchema, // TODO: support base schema in all models
             project,
@@ -587,7 +573,7 @@ export class SchemaPublisher {
           latest: latestVersion
             ? {
                 isComposable: latestVersion.valid,
-                schemas: ensurePushedCompositeSchemas(latestVersion.schemas),
+                schemas: ensureCompositeSchemas(latestVersion.schemas),
               }
             : null,
           project,
@@ -902,7 +888,7 @@ export class SchemaPublisher {
     target: Target;
     project: Project;
     orchestrator: Orchestrator;
-    schemas: readonly SchemaWithSDL[];
+    schemas: readonly Schema[];
   }) {
     try {
       if (valid) {
@@ -938,7 +924,7 @@ export class SchemaPublisher {
     }: {
       target: Target;
       project: Project;
-      schemas: readonly SchemaWithSDL[];
+      schemas: readonly Schema[];
       supergraph?: string | null;
       fullSchemaSdl: string;
     },
@@ -971,7 +957,7 @@ export class SchemaPublisher {
     };
 
     const publishCompositeSchema = async () => {
-      const compositeSchema = ensurePushedCompositeSchemas(schemas);
+      const compositeSchema = ensureCompositeSchemas(schemas);
 
       await Promise.all([
         this.artifactStorageWriter.writeArtifact({

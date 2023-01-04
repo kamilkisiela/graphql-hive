@@ -106,7 +106,7 @@ export async function createCLI(token: string) {
       const latestSchemaResult = await fetchLatestSchema(token).then(r =>
         r.expectNoGraphQLErrors(),
       );
-      const latestSchemaCommit = latestSchemaResult.latestVersion?.commit;
+      const latestSchemaCommit = latestSchemaResult.latestVersion?.log;
 
       expect(
         latestSchemaCommit,
@@ -120,7 +120,7 @@ export async function createCLI(token: string) {
     await cmd;
 
     const latestSchemaResult = await fetchLatestSchema(token).then(r => r.expectNoGraphQLErrors());
-    const latestSchemaCommit = latestSchemaResult.latestVersion?.commit;
+    const latestSchemaCommit = latestSchemaResult.latestVersion?.log;
 
     if (expectedStatus === 'ignored') {
       // Check if the schema was ignored
@@ -140,7 +140,7 @@ export async function createCLI(token: string) {
       r.expectNoGraphQLErrors(),
     );
 
-    const latestComposableSchemaCommit = latestComposableSchemaResult.latestValidVersion?.commit;
+    const latestComposableSchemaCommit = latestComposableSchemaResult.latestValidVersion?.log;
 
     // Check if the schema was published as composable or non-composable
     if (expectedStatus === 'latest') {
@@ -204,7 +204,7 @@ export async function createCLI(token: string) {
         latestValid: await fetchLatestValidSchema(token).then(r => r.expectNoGraphQLErrors()),
       };
 
-      expect(after.latest.latestVersion?.commit).toEqual(before.latest.latestVersion?.commit);
+      expect(after.latest.latestVersion?.log).toEqual(before.latest.latestVersion?.log);
       expect(after.latestValid.latestValidVersion?.id).toEqual(
         before.latestValid.latestValidVersion?.id,
       );
@@ -219,12 +219,12 @@ export async function createCLI(token: string) {
       };
 
       if (expectedStatus === 'latest-composable') {
-        expect(after.latest.latestVersion?.commit).not.toEqual(before.latest.latestVersion?.commit);
-        expect(after.latestValid.latestValidVersion?.commit).not.toEqual(
-          before.latestValid.latestValidVersion?.commit,
+        expect(after.latest.latestVersion?.log).not.toEqual(before.latest.latestVersion?.log);
+        expect(after.latestValid.latestValidVersion?.log).not.toEqual(
+          before.latestValid.latestValidVersion?.log,
         );
       } else {
-        expect(after.latest.latestVersion?.commit).not.toEqual(before.latest.latestVersion?.commit);
+        expect(after.latest.latestVersion?.log).not.toEqual(before.latest.latestVersion?.log);
         expect(after.latestValid.latestValidVersion?.id).toEqual(
           before.latestValid.latestValidVersion?.id,
         );

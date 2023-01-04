@@ -4,26 +4,21 @@ import { Injectable, Scope } from 'graphql-modules';
 import objectHash from 'object-hash';
 import type {
   CompositeSchema,
-  DeletedCompositeSchema,
   PushedCompositeSchema,
   Schema,
   SchemaObject,
   SingleSchema,
 } from '../../../shared/entities';
-import { createSchemaObject, PushedCompositeSchemaModel } from '../../../shared/entities';
+import { createSchemaObject } from '../../../shared/entities';
 import { cache } from '../../../shared/helpers';
 import { sortDocumentNode } from '../../../shared/schema';
 
-export function isPushedCompositeSchema(schema: Schema): schema is PushedCompositeSchema {
-  return schema.kind === 'composite' && schema.action === 'PUSH';
-}
-
-export function isDeletedCompositeSchema(schema: Schema): schema is DeletedCompositeSchema {
-  return schema.kind === 'composite' && schema.action === 'DELETE';
-}
-
 export function isSingleSchema(schema: Schema): schema is SingleSchema {
   return schema.kind === 'single';
+}
+
+export function isCompositeSchema(schema: Schema): schema is CompositeSchema {
+  return schema.kind === 'composite';
 }
 
 export function ensureSingleSchema(schema: Schema | Schema[]): SingleSchema {
@@ -42,34 +37,8 @@ export function ensureSingleSchema(schema: Schema | Schema[]): SingleSchema {
   throw new Error('Expected a single schema');
 }
 
-export function ensurePushedCompositeSchemas(
-  schemas: readonly Schema[],
-): PushedCompositeSchema[] | never {
-  return schemas.map(schema => PushedCompositeSchemaModel.parse(schema));
-}
-
-export function isSchemaWithSDL(schema: Schema): schema is PushedCompositeSchema | SingleSchema {
-  return 'sdl' in schema && typeof schema.sdl === 'string';
-}
-
-export function ensureSchemaWithSDL(schema: Schema): PushedCompositeSchema | SingleSchema | never {
-  if (isSchemaWithSDL(schema)) {
-    return schema;
-  }
-
-  throw new Error('Schema does not have an SDL');
-}
-
-export function selectPushedCompositeSchemas(schemas: readonly Schema[]) {
-  return schemas.filter(isPushedCompositeSchema);
-}
-
-export function selectDeletedCompositeSchemas(schemas: readonly Schema[]) {
-  return schemas.filter(isDeletedCompositeSchema);
-}
-
-export function selectSchemaWithSDL(schemas: readonly Schema[]) {
-  return schemas.filter(isSchemaWithSDL);
+export function ensureCompositeSchemas(schemas: readonly Schema[]): CompositeSchema[] | never {
+  return schemas.filter(isCompositeSchema);
 }
 
 export function serviceExists(schemas: CompositeSchema[], serviceName: string) {
@@ -77,13 +46,13 @@ export function serviceExists(schemas: CompositeSchema[], serviceName: string) {
 }
 
 export function swapServices(
-  schemas: PushedCompositeSchema[],
-  newSchema: PushedCompositeSchema,
+  schemas: CompositeSchema[],
+  newSchema: CompositeSchema,
 ): {
-  schemas: PushedCompositeSchema[];
-  existing: PushedCompositeSchema | null;
+  schemas: CompositeSchema[];
+  existing: CompositeSchema | null;
 } {
-  let swapped: PushedCompositeSchema | null = null;
+  let swapped: CompositeSchema | null = null;
   const output = schemas.map(existing => {
     if (existing.service_name === newSchema.service_name) {
       swapped = existing;

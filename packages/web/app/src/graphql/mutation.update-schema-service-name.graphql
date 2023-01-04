@@ -8,7 +8,8 @@ mutation updateSchemaServiceName($input: UpdateSchemaServiceNameInput!) {
           valid
           schemas {
             nodes {
-              ...SchemaFields
+              ...SingleSchemaFields
+              ...CompositeSchemaFields
             }
           }
         }

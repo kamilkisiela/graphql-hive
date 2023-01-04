@@ -327,7 +327,7 @@ describe('other', () => {
     );
 
     const versionId = (commit: string) =>
-      versions.find(node => 'commit' in node.commit && node.commit.commit === commit)!.id;
+      versions.find(node => 'commit' in node.log && node.log.commit === commit)!.id;
 
     // marking the third version as valid should promote it to be the latest valid version
     let versionStatusUpdateResult = await updateSchemaVersionStatus(versionId('c2'), true);
@@ -403,7 +403,7 @@ describe('other', () => {
       const versions = await fetchVersions(3);
 
       const versionId = (commit: string) =>
-        versions.find(node => 'commit' in node.commit && node.commit.commit === commit)!.id;
+        versions.find(node => 'commit' in node.log && node.log.commit === commit)!.id;
 
       // marking the third version as valid should promote it to be the latest valid version and publish it to CDN
       await updateSchemaVersionStatus(versionId('c2'), true);

@@ -26,10 +26,6 @@ const ENABLE_EXTERNAL_COMPOSITION_SCHEMA = z.object({
   secret: z.string().nonempty(),
 });
 
-interface VersionSelector extends TargetSelector {
-  version: string;
-}
-
 type Paginated<T> = T & {
   after?: string | null;
   limit: number;
@@ -67,6 +63,7 @@ export class SchemaManager {
     return this.storage.hasSchema(selector);
   }
 
+  @atomic(stringifySelector)
   async getSchemasOfVersion(
     selector: {
       version: string;
@@ -249,26 +246,16 @@ export class SchemaManager {
     await this.storage.updateSchemaUrlOfVersion(input);
   }
 
-  async getCommit(selector: { commit: string } & TargetSelector) {
-    this.logger.debug('Fetching schema (selector=%o)', selector);
+  async getSchemaLog(selector: { commit: string } & TargetSelector) {
+    this.logger.debug('Fetching schema log (selector=%o)', selector);
     await this.authManager.ensureTargetAccess({
       ...selector,
       scope: TargetAccessScope.REGISTRY_READ,
     });
-    return this.storage.getSchema({
+    return this.storage.getSchemaLog({
       commit: selector.commit,
       target: selector.target,
     });
-  }
-
-  @atomic(stringifySelector)
-  async getCommits(selector: VersionSelector) {
-    this.logger.debug('Fetching schemas (selector=%o)', selector);
-    await this.authManager.ensureTargetAccess({
-      ...selector,
-      scope: TargetAccessScope.REGISTRY_READ,
-    });
-    return this.storage.getSchemasOfVersion(selector);
   }
 
   async createVersion(

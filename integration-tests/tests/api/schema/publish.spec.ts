@@ -246,11 +246,6 @@ test.concurrent.each(['legacy', 'modern'])(
     const latestResult = await readWriteToken.latestSchema();
     expect(latestResult.latestVersion?.schemas.total).toBe(1);
 
-    const firstNode = latestResult.latestVersion?.schemas.nodes[0];
-    if (firstNode?.__typename === 'DeletedCompositeSchema') {
-      throw new Error('Unexpected deleted schema');
-    }
-
     expect(latestResult.latestVersion?.schemas.nodes[0]).toEqual(
       expect.objectContaining({
         commit: 'abc123',

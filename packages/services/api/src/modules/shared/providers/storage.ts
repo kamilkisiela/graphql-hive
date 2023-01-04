@@ -17,11 +17,12 @@ import type {
   PersistedOperation,
   Project,
   Schema,
-  DeletedCompositeSchema,
   SchemaVersion,
   Target,
   TargetSettings,
   User,
+  DeletedCompositeSchema,
+  SchemaLog,
 } from '../../../shared/entities';
 import type { OrganizationAccessScope } from '../../auth/providers/organization-access';
 import type { ProjectAccessScope } from '../../auth/providers/project-access';
@@ -314,7 +315,7 @@ export interface Storage {
     } & TargetSelector,
   ): Promise<SchemaVersion | never>;
 
-  getSchema(_: { commit: string; target: string }): Promise<Schema | never>;
+  getSchemaLog(_: { commit: string; target: string }): Promise<SchemaLog>;
 
   createActivity(
     _: {

@@ -47,10 +47,7 @@ generates:
         SchemaVersion: ../shared/mappers#SchemaVersion as SchemaVersionMapper
         Schema: ../shared/mappers#Schema as SchemaMapper
         SingleSchema: ../shared/mappers#SingleSchema as SingleSchemaMapper
-        PushedCompositeSchema:
-          ../shared/mappers#PushedCompositeSchema as PushedCompositeSchemaMapper
-        DeletedCompositeSchema:
-          ../shared/mappers#DeletedCompositeSchema as DeletedCompositeSchemaMapper
+        CompositeSchema: ../shared/mappers#PushedCompositeSchema as PushedCompositeSchemaMapper
         PersistedOperationConnection:
           ../shared/mappers#PersistedOperationConnection as PersistedOperationMapper
         Organization: ../shared/entities#Organization as OrganizationMapper

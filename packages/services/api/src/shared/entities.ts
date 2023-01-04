@@ -51,17 +51,13 @@ export const PushedCompositeSchemaModel = z
   })
   .required();
 
-export const CompositeSchemaModel = z.union([
-  DeletedCompositeSchemaModel,
-  PushedCompositeSchemaModel,
-]);
-
 export type SingleSchema = z.infer<typeof SingleSchemaModel>;
 export type DeletedCompositeSchema = z.infer<typeof DeletedCompositeSchemaModel>;
 export type PushedCompositeSchema = z.infer<typeof PushedCompositeSchemaModel>;
-export type CompositeSchema = z.infer<typeof CompositeSchemaModel>;
-export type Schema = SingleSchema | PushedCompositeSchema | DeletedCompositeSchema;
-export type SchemaWithSDL = SingleSchema | PushedCompositeSchema;
+export type CompositeSchema = PushedCompositeSchema;
+
+export type Schema = SingleSchema | CompositeSchema;
+export type SchemaLog = SingleSchema | PushedCompositeSchema | DeletedCompositeSchema;
 
 export interface DateRange {
   from: Date;

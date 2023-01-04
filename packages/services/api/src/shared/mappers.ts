@@ -29,7 +29,6 @@ import type {
   Target,
   Token,
   User,
-  Schema as SchemaEntity,
   SingleSchema as SingleSchemaEntity,
   PushedCompositeSchema as PushedCompositeSchemaEntity,
   DeletedCompositeSchema as DeletedCompositeSchemaEntity,
@@ -126,11 +125,10 @@ export type SchemaCompareResult =
   | readonly [SchemaObject, SchemaObject]
   | readonly [undefined | null, SchemaObject];
 
-export type Schema = SchemaEntity;
-
 export type SingleSchema = SingleSchemaEntity;
 export type PushedCompositeSchema = PushedCompositeSchemaEntity;
 export type DeletedCompositeSchema = DeletedCompositeSchemaEntity;
+export type Schema = SingleSchema | PushedCompositeSchema;
 
 export interface OperationsStats {
   organization: string;

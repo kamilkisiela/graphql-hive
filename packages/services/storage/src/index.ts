@@ -33,7 +33,7 @@ import {
 } from 'slonik';
 import { update } from 'slonik-utilities';
 import zod from 'zod';
-import type { OIDCIntegration } from '../../api/src/shared/entities';
+import type { OIDCIntegration, SchemaLog } from '../../api/src/shared/entities';
 import {
   activities,
   alert_channels,
@@ -59,6 +59,8 @@ export { createTokenStorage } from './tokens';
 export type { tokens } from './db/types';
 
 type Connection = DatabasePool | DatabaseTransactionConnection;
+
+type OverrideProp<T extends {}, K extends keyof T, V extends T[K]> = Omit<T, K> & { [P in K]: V };
 
 const organizationGetStartedMapping: Record<
   Exclude<keyof Organization['getStarted'], 'id'>,
@@ -217,7 +219,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
   function transformSchema(
     schema: Pick<
-      schema_log,
+      OverrideProp<schema_log, 'action', 'PUSH'>,
       | 'id'
       | 'action'
       | 'commit'
@@ -242,7 +244,52 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           commit: schema.commit,
           date: schema.created_at as any,
           target: schema.target_id,
-          action: schema.action as any,
+          metadata: schema.metadata ?? null,
+        }
+      : {
+          kind: 'composite',
+          id: schema.id,
+          author: schema.author,
+          sdl: ensureDefined(schema.sdl, 'sdl'),
+          commit: schema.commit,
+          date: schema.created_at as any,
+          service_name: schema.service_name!,
+          service_url: schema.service_url,
+          target: schema.target_id,
+          action: 'PUSH',
+          metadata: schema.metadata ?? null,
+        };
+
+    return record;
+  }
+
+  function transformSchemaLog(
+    schema: Pick<
+      schema_log,
+      | 'id'
+      | 'action'
+      | 'commit'
+      | 'author'
+      | 'sdl'
+      | 'created_at'
+      | 'project_id'
+      | 'service_name'
+      | 'service_url'
+      | 'target_id'
+      | 'metadata'
+    > &
+      Pick<projects, 'type'>,
+  ): SchemaLog {
+    const isSingleProject = (schema.type as ProjectType) === ProjectType.SINGLE;
+    const record: SchemaLog = isSingleProject
+      ? {
+          kind: 'single',
+          id: schema.id,
+          author: schema.author,
+          sdl: ensureDefined(schema.sdl, 'sdl'),
+          commit: schema.commit,
+          date: schema.created_at as any,
+          target: schema.target_id,
           metadata: schema.metadata ?? null,
         }
       : schema.action === 'PUSH'
@@ -1648,7 +1695,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         SELECT sv.id, sv.is_composable
         FROM public.schema_versions as sv
         LEFT JOIN public.targets as t ON (t.id = sv.target_id)
-        WHERE t.id = ${target} AND t.project_id = ${project}
+        LEFT JOIN public.schema_log as sl ON (sl.id = sv.action_id)
+        WHERE t.id = ${target} AND t.project_id = ${project} AND sl.action = 'PUSH'
         ORDER BY sv.created_at DESC
         LIMIT 1
       `);
@@ -1673,7 +1721,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async getSchemasOfVersion({ version, includeMetadata = false }) {
       const results = await pool.many<
         Pick<
-          schema_log,
+          OverrideProp<schema_log, 'action', 'PUSH'>,
           | 'id'
           | 'commit'
           | 'action'
@@ -1703,10 +1751,11 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             sl.target_id,
             p.type
           FROM public.schema_version_to_log AS svl
-          LEFT JOIN public.schema_log AS sl ON sl.id = svl.action_id
+          LEFT JOIN public.schema_log AS sl ON (sl.id = svl.action_id)
           LEFT JOIN public.projects as p ON (p.id = sl.project_id)
           WHERE
             svl.version_id = ${version}
+            AND sl.action = 'PUSH'
           ORDER BY
             sl.created_at DESC
         `,
@@ -1715,7 +1764,9 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       return results.map(transformSchema);
     },
     async getSchemasOfPreviousVersion({ version, target }) {
-      const results = await pool.query<schema_log & Pick<projects, 'type'>>(
+      const results = await pool.query<
+        OverrideProp<schema_log, 'action', 'PUSH'> & Pick<projects, 'type'>
+      >(
         sql`
           SELECT sl.*, p.type FROM public.schema_version_to_log as svl
           LEFT JOIN public.schema_log as sl ON (sl.id = svl.action_id)
@@ -1724,7 +1775,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             SELECT sv.id FROM public.schema_versions as sv WHERE sv.created_at < (
               SELECT svi.created_at FROM public.schema_versions as svi WHERE svi.id = ${version}
             ) AND sv.target_id = ${target} ORDER BY sv.created_at DESC LIMIT 1
-          )
+          ) AND sl.action = 'PUSH'
           ORDER BY c.created_at DESC
         `,
       );
@@ -1829,7 +1880,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       url = null,
       metadata,
     }) {
-      const result = await pool.one<schema_log>(sql`
+      const result = await pool.one<OverrideProp<schema_log, 'action', 'PUSH'>>(sql`
         INSERT INTO public.schema_log
           (
             author,
@@ -2001,7 +2052,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       );
     },
 
-    getSchema: batch(async selectors => {
+    getSchemaLog: batch(async selectors => {
       const rows = await pool.many<schema_log & Pick<projects, 'type'>>(
         sql`
             SELECT sl.*, p.type
@@ -2013,7 +2064,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             )}))
         `,
       );
-      const schemas = rows.map(transformSchema);
+      const schemas = rows.map(transformSchemaLog);
 
       return selectors.map(selector => {
         const schema = schemas.find(
@@ -2025,7 +2076,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         }
 
         return Promise.reject(
-          new Error(`Schema not found (commit=${selector.commit}, target=${selector.target})`),
+          new Error(`Schema log not found (commit=${selector.commit}, target=${selector.target})`),
         );
       });
     }),

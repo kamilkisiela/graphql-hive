@@ -739,20 +739,15 @@ export function fetchLatestSchema(token: string) {
       query latestVersion {
         latestVersion {
           baseSchema
-          commit {
-            ... on SingleSchema {
+          log {
+            ... on PushedSchemaLog {
               __typename
-              source
               commit
+              service
             }
-            ... on PushedCompositeSchema {
+            ... on DeletedSchemaLog {
               __typename
-              source
-              commit
-              url
-            }
-            ... on DeletedCompositeSchema {
-              __typename
+              deleteService: service
             }
           }
           schemas {
@@ -761,14 +756,10 @@ export function fetchLatestSchema(token: string) {
                 source
                 commit
               }
-              ... on PushedCompositeSchema {
+              ... on CompositeSchema {
                 source
                 commit
                 url
-              }
-
-              ... on DeletedCompositeSchema {
-                __typename
               }
             }
             total
@@ -787,20 +778,15 @@ export function fetchLatestValidSchema(token: string) {
         latestValidVersion {
           id
           baseSchema
-          commit {
-            ... on SingleSchema {
+          log {
+            ... on PushedSchemaLog {
               __typename
-              source
               commit
+              service
             }
-            ... on PushedCompositeSchema {
+            ... on DeletedSchemaLog {
               __typename
-              source
-              commit
-              url
-            }
-            ... on DeletedCompositeSchema {
-              __typename
+              deleteService: service
             }
           }
           schemas {
@@ -810,14 +796,11 @@ export function fetchLatestValidSchema(token: string) {
                 source
                 commit
               }
-              ... on PushedCompositeSchema {
+              ... on CompositeSchema {
                 __typename
                 source
                 commit
                 url
-              }
-              ... on DeletedCompositeSchema {
-                __typename
               }
             }
             total
@@ -838,20 +821,15 @@ export function fetchVersions(selector: SchemaVersionsInput, limit: number, toke
             id
             valid
             date
-            commit {
-              ... on SingleSchema {
+            log {
+              ... on PushedSchemaLog {
                 __typename
-                source
                 commit
+                service
               }
-              ... on PushedCompositeSchema {
+              ... on DeletedSchemaLog {
                 __typename
-                source
-                commit
-                url
-              }
-              ... on DeletedCompositeSchema {
-                __typename
+                deleteService: service
               }
             }
             baseSchema
@@ -862,14 +840,11 @@ export function fetchVersions(selector: SchemaVersionsInput, limit: number, toke
                   source
                   commit
                 }
-                ... on PushedCompositeSchema {
+                ... on CompositeSchema {
                   __typename
                   source
                   commit
                   url
-                }
-                ... on DeletedCompositeSchema {
-                  __typename
                 }
               }
             }
@@ -919,23 +894,15 @@ export function updateSchemaVersionStatus(input: SchemaVersionUpdateInput, token
           id
           date
           valid
-          commit {
-            ... on SingleSchema {
+          log {
+            ... on PushedSchemaLog {
               __typename
-              id
-              source
               commit
+              service
             }
-            ... on PushedCompositeSchema {
+            ... on DeletedSchemaLog {
               __typename
-              id
-              source
-              commit
-              url
-            }
-            ... on DeletedCompositeSchema {
-              __typename
-              id
+              deleteService: service
             }
           }
         }

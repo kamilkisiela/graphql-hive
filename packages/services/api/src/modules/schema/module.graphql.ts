@@ -153,7 +153,23 @@ export default gql`
     total: Int!
   }
 
-  union Schema = SingleSchema | PushedCompositeSchema | DeletedCompositeSchema
+  union RegistryLog = PushedSchemaLog | DeletedSchemaLog
+
+  type PushedSchemaLog {
+    id: ID!
+    author: String!
+    date: DateTime!
+    commit: ID!
+    service: String
+  }
+
+  type DeletedSchemaLog {
+    id: ID!
+    date: DateTime!
+    service: String!
+  }
+
+  union Schema = SingleSchema | CompositeSchema
 
   type SingleSchema {
     id: ID!
@@ -164,7 +180,7 @@ export default gql`
     metadata: String
   }
 
-  type PushedCompositeSchema {
+  type CompositeSchema {
     id: ID!
     author: String!
     source: String!
@@ -173,12 +189,6 @@ export default gql`
     url: String
     service: String
     metadata: String
-  }
-
-  type DeletedCompositeSchema {
-    id: ID!
-    date: DateTime!
-    service: String!
   }
 
   union SchemaPublishPayload =
@@ -393,7 +403,7 @@ export default gql`
     id: ID!
     valid: Boolean!
     date: DateTime!
-    commit: Schema!
+    log: RegistryLog!
     baseSchema: String
     schemas: SchemaConnection!
     supergraph: String

@@ -15,7 +15,7 @@ import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
 import { MarkAsValid } from '@/components/target/history/MarkAsValid';
 import { DataWrapper, GraphQLBlock, noSchema, Title } from '@/components/v2';
-import { SchemaFieldsFragment } from '@/gql/graphql';
+import { SingleSchemaFieldsFragment, CompositeSchemaFieldsFragment } from '@/gql/graphql';
 import {
   LatestSchemaDocument,
   OrganizationFieldsFragment,
@@ -25,6 +25,12 @@ import {
 } from '@/graphql';
 import { TargetAccessScope, useTargetAccess } from '@/lib/access/target';
 import { withSessionProtection } from '@/lib/supertokens/guard';
+
+function isCompositeSchema(
+  schema: SingleSchemaFieldsFragment | CompositeSchemaFieldsFragment,
+): schema is CompositeSchemaFieldsFragment {
+  return schema.__typename === 'CompositeSchema';
+}
 
 const SchemaServiceName_UpdateSchemaServiceName = gql(/* GraphQL */ `
   mutation SchemaServiceName_UpdateSchemaServiceName($input: UpdateSchemaServiceNameInput!) {
@@ -37,7 +43,8 @@ const SchemaServiceName_UpdateSchemaServiceName = gql(/* GraphQL */ `
             valid
             schemas {
               nodes {
-                ...SchemaFields
+                ...SingleSchemaFields
+                ...CompositeSchemaFields
               }
             }
           }
@@ -58,7 +65,7 @@ const SchemaServiceName = ({
   version,
 }: {
   version: string;
-  schema: SchemaFieldsFragment;
+  schema: CompositeSchemaFieldsFragment;
   target: TargetFieldsFragment;
   project: ProjectFieldsFragment;
   organization: OrganizationFieldsFragment;
@@ -120,19 +127,27 @@ const Schemas = ({
   organization: OrganizationFieldsFragment;
   project: ProjectFieldsFragment;
   target: TargetFieldsFragment;
-  schemas: SchemaFieldsFragment[];
+  schemas: Array<SingleSchemaFieldsFragment | CompositeSchemaFieldsFragment>;
   version: string;
   filterService?: string;
 }): ReactElement => {
   if (project.type === ProjectType.Single) {
-    return <GraphQLBlock className="mb-6" sdl={schemas[0].source} url={schemas[0]?.url ?? ''} />;
+    const schema = schemas[0];
+    return (
+      <GraphQLBlock
+        className="mb-6"
+        sdl={schema.source}
+        url={'url' in schema && typeof schema.url === 'string' ? schema.url : ''}
+      />
+    );
   }
 
   return (
     <div className="flex flex-col gap-8">
       {schemas
+        .filter(isCompositeSchema)
         .filter(schema => {
-          if (filterService && schema.service) {
+          if (filterService && 'service' in schema && schema.service) {
             return schema.service.toLowerCase().includes(filterService.toLowerCase());
           }
 
