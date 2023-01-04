@@ -28,6 +28,7 @@
     "zod": "3.20.2"
   },
   "devDependencies": {
+    "@hive/rate-limit": "workspace:*",
     "@hive/server": "workspace:*",
     "@types/dockerode": "3.3.14",
     "@types/ioredis": "4.28.10",
