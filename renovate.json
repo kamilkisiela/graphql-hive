@@ -4,6 +4,10 @@
   "prConcurrentLimit": 20,
   "packageRules": [
     {
+      "groupName": "whatwg-node",
+      "matchPackagePrefixes": ["@whatwg-node"]
+    },
+    {
       "groupName": "radix",
       "matchPackagePrefixes": ["@radix"]
     },
