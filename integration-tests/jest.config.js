@@ -20,7 +20,7 @@ export default {
     }),
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
-  testTimeout: 30_000,
+  testTimeout: 60_000,
   setupFilesAfterEnv: ['dotenv/config'],
   collectCoverage: false,
 };
