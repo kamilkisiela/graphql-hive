@@ -158,10 +158,10 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
       useSentryUser(),
       useErrorHandler(({ errors, context }): void => {
         for (const error of errors) {
-          // Only log unexpected errors.
-          if (isGraphQLError(error)) {
-            continue;
-          }
+          // // Only log unexpected errors.
+          // if (isGraphQLError(error)) {
+          //   continue;
+          // }
 
           if (hasFastifyRequest(context)) {
             context.req.log.error(error);
