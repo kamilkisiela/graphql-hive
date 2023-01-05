@@ -401,7 +401,7 @@ importers:
       '@cloudflare/workers-types': 4.20221111.1
       '@types/service-worker-mock': 2.0.1
       '@whatwg-node/fetch': 0.5.3
-      '@whatwg-node/server': 0.5.0
+      '@whatwg-node/server': 0.5.5
       esbuild: 0.16.11
       itty-router: 2.6.6
       itty-router-extras: 0.4.2
@@ -415,7 +415,7 @@ importers:
       '@cloudflare/workers-types': 4.20221111.1
       '@types/service-worker-mock': 2.0.1
       '@whatwg-node/fetch': 0.5.3
-      '@whatwg-node/server': 0.5.0
+      '@whatwg-node/server': 0.5.5
       esbuild: 0.16.11
       itty-router: 2.6.6
       itty-router-extras: 0.4.2
@@ -428,7 +428,7 @@ importers:
       '@hive/api': workspace:*
       '@types/service-worker-mock': 2.0.1
       '@whatwg-node/fetch': 0.5.3
-      '@whatwg-node/server': 0.5.0
+      '@whatwg-node/server': 0.5.5
       esbuild: 0.16.11
       fastify: 3.29.4
       graphql: 16.6.0
@@ -446,7 +446,7 @@ importers:
       '@hive/api': link:../api
       '@types/service-worker-mock': 2.0.1
       '@whatwg-node/fetch': 0.5.3
-      '@whatwg-node/server': 0.5.0
+      '@whatwg-node/server': 0.5.5
       esbuild: 0.16.11
       fastify: 3.29.4
       itty-router: 2.6.6
@@ -615,7 +615,7 @@ importers:
       '@swc/core': 1.3.24
       '@trpc/server': 10.7.0
       '@whatwg-node/fetch': 0.5.3
-      '@whatwg-node/server': 0.5.0
+      '@whatwg-node/server': 0.5.5
       dotenv: 16.0.3
       fastify: 3.29.4
       got: 12.5.3
@@ -643,7 +643,7 @@ importers:
       '@sentry/tracing': 7.28.1
       '@trpc/server': 10.7.0
       '@whatwg-node/fetch': 0.5.3
-      '@whatwg-node/server': 0.5.0
+      '@whatwg-node/server': 0.5.5
       dotenv: 16.0.3
       got: 12.5.3
       graphql: 16.6.0
@@ -11402,9 +11402,20 @@ packages:
       tslib: 2.4.1
     transitivePeerDependencies:
       - encoding
+    dev: false
 
   /@whatwg-node/server/0.5.4:
     resolution: {integrity: sha512-JDMmRyyQXdXOzPY2hhJNR+n4K3F2+LuReHbnF81oi+pnNAgHiffr6s9ZGVI3bO9p/Hv/3v0ur3VaMmTPGtxdUA==}
+    peerDependencies:
+      '@types/node': ^18.0.6
+    dependencies:
+      '@whatwg-node/fetch': 0.6.1
+      tslib: 2.4.1
+    transitivePeerDependencies:
+      - encoding
+
+  /@whatwg-node/server/0.5.5:
+    resolution: {integrity: sha512-SQJ050Y+aWl/OS8KG8FfsnFsLstbKGlcy3uEk8XwuVA7rM26mmDA22tSJLSvDjbME2jH3/020kGen//854ipsA==}
     peerDependencies:
       '@types/node': ^18.0.6
     dependencies:
