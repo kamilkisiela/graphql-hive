@@ -1,13 +1,9 @@
+import { OrganizationAccessScope, ProjectAccessScope, TargetAccessScope } from '@app/gql/graphql';
 import {
   answerOrganizationTransferRequest,
   getOrganizationTransferRequest,
   requestOrganizationTransfer,
 } from '../../../testkit/flow';
-import {
-  OrganizationAccessScope,
-  ProjectAccessScope,
-  TargetAccessScope,
-} from '../../../testkit/gql/graphql';
 import { initSeed } from '../../../testkit/seed';
 
 test.concurrent(

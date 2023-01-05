@@ -157,6 +157,7 @@ importers:
       '@esm2cjs/execa': 6.1.1-cjs.1
       '@graphql-hive/core': 0.2.3
       '@graphql-typed-document-node/core': 3.1.1
+      '@hive/rate-limit': workspace:*
       '@hive/server': workspace:*
       '@trpc/client': 10.7.0
       '@trpc/server': 10.7.0
@@ -196,6 +197,7 @@ importers:
       slonik: 30.1.2_wg2hxbo7txnklmvja4aeqnygfi
       zod: 3.20.2
     devDependencies:
+      '@hive/rate-limit': link:../packages/services/rate-limit
       '@hive/server': link:../packages/services/server
       '@types/dockerode': 3.3.14
       '@types/ioredis': 4.28.10

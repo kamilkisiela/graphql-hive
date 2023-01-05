@@ -139,7 +139,7 @@ services:
     environment:
       NODE_ENV: production
       LOG_LEVEL: debug
-      LIMIT_CACHE_UPDATE_INTERVAL_MS: 2000
+      LIMIT_CACHE_UPDATE_INTERVAL_MS: '${LIMIT_CACHE_UPDATE_INTERVAL_MS}'
       POSTGRES_HOST: db
       POSTGRES_PORT: 5432
       POSTGRES_DB: '${POSTGRES_DB}'

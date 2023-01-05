@@ -1,5 +1,7 @@
+import { gql } from '@app/gql';
 import {
   OrganizationAccessScope,
+  OrganizationType,
   ProjectAccessScope,
   ProjectType,
   TargetAccessScope,
@@ -31,6 +33,7 @@ import {
   updateMemberAccess,
   updateSchemaVersionStatus,
 } from './flow';
+import { execute } from './graphql';
 import { collect, CollectedOperation } from './usage';
 import { generateUnique } from './utils';
 
@@ -45,6 +48,48 @@ export function initSeed() {
       return {
         ownerEmail,
         ownerToken,
+        async createPersonalProject(projectType: ProjectType) {
+          const orgs = await execute({
+            document: gql(/* GraphQL */ `
+              query myOrganizations {
+                organizations {
+                  total
+                  nodes {
+                    id
+                    cleanId
+                    name
+                    type
+                  }
+                }
+              }
+            `),
+            authToken: ownerToken,
+          }).then(r => r.expectNoGraphQLErrors());
+
+          const personalOrg = orgs.organizations.nodes.find(
+            o => o.type === OrganizationType.Personal,
+          );
+
+          if (!personalOrg) {
+            throw new Error('Personal organization should exist');
+          }
+
+          const projectResult = await createProject(
+            {
+              organization: personalOrg.cleanId,
+              type: projectType,
+              name: generateUnique(),
+            },
+            ownerToken,
+          ).then(r => r.expectNoGraphQLErrors());
+
+          const targets = projectResult.createProject.ok!.createdTargets;
+          const target = targets[0];
+
+          return {
+            target,
+          };
+        },
         async createOrg() {
           const orgName = generateUnique();
           const orgResult = await createOrganization({ name: orgName }, ownerToken).then(r =>

@@ -1,3 +1,4 @@
+import { ProjectType, TargetAccessScope } from '@app/gql/graphql';
 import {
   DeleteObjectsCommand,
   GetObjectCommand,
@@ -5,7 +6,6 @@ import {
   S3Client,
 } from '@aws-sdk/client-s3';
 import { fetch } from '@whatwg-node/fetch';
-import { ProjectType, TargetAccessScope } from '../../testkit/gql/graphql';
 import { initSeed } from '../../testkit/seed';
 import { getServiceHost } from '../../testkit/utils';
 
