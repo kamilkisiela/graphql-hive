@@ -30,7 +30,7 @@
     "graphql-modules": "2.1.0",
     "graphql-parse-resolve-info": "4.12.3",
     "graphql-scalars": "1.20.1",
-    "graphql-yoga": "3.1.2",
+    "graphql-yoga": "3.3.0",
     "ioredis": "5.2.4",
     "lodash": "4.17.21",
     "lru-cache": "7.14.1",
