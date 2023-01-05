@@ -14,7 +14,7 @@
     "@sentry/tracing": "7.28.1",
     "@trpc/client": "10.7.0",
     "@trpc/server": "10.7.0",
-    "@whatwg-node/fetch": "0.5.3",
+    "@whatwg-node/fetch": "0.6.1",
     "ajv": "8.11.2",
     "dotenv": "16.0.3",
     "got": "12.5.3",

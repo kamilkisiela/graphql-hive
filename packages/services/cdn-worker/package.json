@@ -22,7 +22,7 @@
     "@cloudflare/workers-types": "4.20221111.1",
     "@hive/api": "workspace:*",
     "@types/service-worker-mock": "2.0.1",
-    "@whatwg-node/fetch": "0.5.3",
+    "@whatwg-node/fetch": "0.6.1",
     "@whatwg-node/server": "0.5.0",
     "esbuild": "0.16.11",
     "fastify": "3.29.4",
