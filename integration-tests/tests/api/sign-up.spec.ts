@@ -3,6 +3,7 @@ import { ProjectType } from '@app/gql/graphql';
 import type { RateLimitApi } from '@hive/rate-limit';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import { createFetch } from '@whatwg-node/fetch';
+import { ensureEnv } from '../../testkit/env';
 import { waitFor } from '../../testkit/flow';
 import { execute } from '../../testkit/graphql';
 import { initSeed } from '../../testkit/seed';
@@ -32,7 +33,7 @@ test.concurrent('should auto-create an organization for freshly signed-up user',
   expect(result.organizations.total).toBe(1);
 });
 
-test.concurrent.only(
+test.concurrent(
   'freshly signed-up user should have a Hobby plan with 7 days of retention',
   async () => {
     const { ownerToken, createPersonalProject } = await initSeed().createOwner();
@@ -55,7 +56,7 @@ test.concurrent.only(
 
     const { target } = await createPersonalProject(ProjectType.Single);
 
-    await waitFor(3_000); // wait for rate-limit to update (longer then LIMIT_CACHE_UPDATE_INTERVAL_MS)
+    await waitFor(ensureEnv('LIMIT_CACHE_UPDATE_INTERVAL_MS', 'number') + 1_000); // wait for rate-limit to update
 
     const rateLimit = createTRPCProxyClient<RateLimitApi>({
       links: [
