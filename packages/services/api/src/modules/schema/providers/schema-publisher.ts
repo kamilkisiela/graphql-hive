@@ -83,7 +83,12 @@ export class SchemaPublisher {
       scope: TargetAccessScope.REGISTRY_READ,
     });
 
-    const [project, latest] = await Promise.all([
+    const [target, project, latest] = await Promise.all([
+      this.targetManager.getTarget({
+        organization: input.organization,
+        project: input.project,
+        target: input.target,
+      }),
       this.projectManager.getProject({
         organization: input.organization,
         project: input.project,
@@ -117,7 +122,7 @@ export class SchemaPublisher {
 
         try {
           await this.gitHubIntegrationManager.createCheckRun({
-            name: 'GraphQL Hive - schema:check',
+            name: buildGitHubActionCheckName(target.name, null),
             conclusion: 'failure',
             sha: input.github.commit,
             organization: input.organization,
@@ -225,7 +230,7 @@ export class SchemaPublisher {
         }
 
         await this.gitHubIntegrationManager.createCheckRun({
-          name: buildGitHubActionCheckName(input.target, input.service ?? null),
+          name: buildGitHubActionCheckName(target.name, input.service ?? null),
           conclusion: validationResult.valid ? 'success' : 'failure',
           sha: input.github.commit,
           organization: input.organization,
