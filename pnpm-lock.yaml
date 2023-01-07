@@ -745,7 +745,7 @@ importers:
       got: 12.5.3
       pino-pretty: 9.1.1
       reflect-metadata: 0.1.13
-      stripe: 11.5.0
+      stripe: 11.6.0
       zod: 3.20.2
     dependencies:
       '@sentry/node': 7.28.1
@@ -757,7 +757,7 @@ importers:
       dotenv: 16.0.3
       got: 12.5.3
       reflect-metadata: 0.1.13
-      stripe: 11.5.0
+      stripe: 11.6.0
       zod: 3.20.2
     devDependencies:
       '@hive/service-common': link:../service-common
@@ -972,7 +972,7 @@ importers:
       '@sentry/react': 7.28.1
       '@sentry/tracing': 7.28.1
       '@sentry/types': 7.28.1
-      '@stripe/react-stripe-js': 1.16.1
+      '@stripe/react-stripe-js': 1.16.2
       '@stripe/stripe-js': 1.46.0
       '@tailwindcss/line-clamp': 0.4.2
       '@tanstack/react-table': 8.0.0-beta.8
@@ -1065,7 +1065,7 @@ importers:
       '@sentry/react': 7.28.1_react@18.2.0
       '@sentry/tracing': 7.28.1
       '@sentry/types': 7.28.1
-      '@stripe/react-stripe-js': 1.16.1_keartrz7uyerl3wkpjpue4xbhy
+      '@stripe/react-stripe-js': 1.16.2_keartrz7uyerl3wkpjpue4xbhy
       '@stripe/stripe-js': 1.46.0
       '@tanstack/react-table': 8.0.0-beta.8_biqbaboplfbrettd7655fr4n2y
       '@theguild/editor': 0.4.1_m3acdzultzo2owbx5gwkccg4tm
@@ -10292,8 +10292,8 @@ packages:
       umzug: 3.0.0-beta.15
     dev: false
 
-  /@stripe/react-stripe-js/1.16.1_keartrz7uyerl3wkpjpue4xbhy:
-    resolution: {integrity: sha512-einalv46WrAZhCN8jDHz3e6ePYmwwkbwDfv//XPKw/higzdiZmSZgMJWeqEOPvalf8qryx9vOXOYaH7G6yUGug==}
+  /@stripe/react-stripe-js/1.16.2_keartrz7uyerl3wkpjpue4xbhy:
+    resolution: {integrity: sha512-RTL3rE6eNosRb2AhxHBWN0HQgigSo/cfZu8vPAqB9/dZEAjYcEoiDYtjI9Zj1MAh58c5RyQNn3HU3M4hIqUdAg==}
     peerDependencies:
       '@stripe/stripe-js': ^1.44.1
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
@@ -24631,8 +24631,8 @@ packages:
     resolution: {integrity: sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig==}
     engines: {node: '>=8'}
 
-  /stripe/11.5.0:
-    resolution: {integrity: sha512-yjTqnzeUk2wg1yIeYWOAH6CL5qu9fINzOhqkibXfbyeWSBEBauQrfCoB8shMmREoK2qdkScz1HjahF9qUg+X3g==}
+  /stripe/11.6.0:
+    resolution: {integrity: sha512-ht8S1l8CJJE3jtv2NM1mEQzZBkITYvb9uDpSeXYeNz9iJkFFgDU169htwOW00OdIESvFaIsGgWQatAE5dfOERQ==}
     engines: {node: '>=12.*'}
     dependencies:
       '@types/node': 18.11.18
