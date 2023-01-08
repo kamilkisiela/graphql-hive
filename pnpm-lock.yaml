@@ -45,7 +45,7 @@ importers:
       '@graphql-inspector/cli': 3.4.0
       '@sentry/cli': 2.11.0
       '@swc/core': 1.3.24
-      '@theguild/eslint-config': 0.4.1
+      '@theguild/eslint-config': 0.5.0
       '@theguild/prettier-config': 1.0.0
       '@types/jest': 29.2.4
       '@types/node': 18.11.18
@@ -93,7 +93,7 @@ importers:
       '@graphql-inspector/cli': 3.4.0_jwu2wi6x3ji7ggupbvyruied7a
       '@sentry/cli': 2.11.0
       '@swc/core': 1.3.24
-      '@theguild/eslint-config': 0.4.1_lzzuuodtsqwxnvqeq4g4likcqa
+      '@theguild/eslint-config': 0.5.0_lzzuuodtsqwxnvqeq4g4likcqa
       '@theguild/prettier-config': 1.0.0_prettier@2.8.1
       '@types/jest': 29.2.4
       '@types/node': 18.11.18
@@ -10546,10 +10546,10 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@theguild/eslint-config/0.4.1_lzzuuodtsqwxnvqeq4g4likcqa:
-    resolution: {integrity: sha512-cwnPO10vzAUTd/ixaktChW64hbzIhyjub0f5Hgmz00paC2Zr2OHUcE/txnDFpXa8WtOel6H91mSfoxMjEXBn/g==}
+  /@theguild/eslint-config/0.5.0_lzzuuodtsqwxnvqeq4g4likcqa:
+    resolution: {integrity: sha512-aSiN3Eg6lH5Uq0LjHRt764trs3uYHMsvr2UDRA6/RK/ThPHMvBwnfi1xI7vdwXabE9vSZosnlJ/e/skj43FnKQ==}
     peerDependencies:
-      eslint: ^8
+      eslint: ^8.24.0
     dependencies:
       '@rushstack/eslint-patch': 1.2.0
       '@typescript-eslint/eslint-plugin': 5.47.1_txmweb6yn7coi7nfrp22gpyqmy
