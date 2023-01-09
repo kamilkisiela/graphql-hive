@@ -37,7 +37,7 @@ function useGitHubAction(): CIRunner {
   return {
     detect() {
       // eslint-disable-next-line no-process-env
-      return Boolean(process.env.GITHUB_ACTIONS);
+      return !!process.env.GITHUB_ACTIONS;
     },
     env() {
       const isPr =

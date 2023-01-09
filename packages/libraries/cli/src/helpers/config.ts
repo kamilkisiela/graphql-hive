@@ -47,8 +47,8 @@ export class Config<TValue = any> {
   clear(): void {
     try {
       mkdirp.sync(path.dirname(this.filepath));
-    } catch (e) {}
-    fs.writeFileSync(this.filepath, JSON.stringify({}));
+    } catch {}
+    fs.writeFileSync(this.filepath, JSON.stringify({}), 'utf8');
   }
 
   private readSpace(content: Record<string, any>) {

@@ -43,7 +43,7 @@ export class GitHubIntegrationManager {
   }
 
   isEnabled(): boolean {
-    return Boolean(this.app);
+    return !!this.app;
   }
 
   async register(
