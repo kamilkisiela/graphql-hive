@@ -74,7 +74,7 @@ const ExternalCompositionForm = ({
           onChange={handleChange}
           onBlur={handleBlur}
           disabled={isSubmitting}
-          isInvalid={touched.endpoint && Boolean(errors.endpoint)}
+          isInvalid={touched.endpoint && !!errors.endpoint}
           className="w-96"
         />
         {touched.endpoint && (errors.endpoint || mutationError?.inputErrors?.endpoint) && (
@@ -97,7 +97,7 @@ const ExternalCompositionForm = ({
           onChange={handleChange}
           onBlur={handleBlur}
           disabled={isSubmitting}
-          isInvalid={touched.secret && Boolean(errors.secret)}
+          isInvalid={touched.secret && !!errors.secret}
           className="w-96"
         />
         {touched.secret && (errors.secret || mutationError?.inputErrors?.secret) && (
@@ -187,7 +187,7 @@ export const ExternalCompositionSettings = ({
   );
 
   const externalCompositionConfig = projectQuery.data?.project?.externalSchemaComposition;
-  const initialEnabled = Boolean(externalCompositionConfig);
+  const initialEnabled = !!externalCompositionConfig;
   const isEnabled = typeof enabled === 'boolean' ? enabled : initialEnabled;
   const isLoading = projectQuery.fetching || mutation.fetching;
   const isFormVisible = isEnabled && !isLoading;

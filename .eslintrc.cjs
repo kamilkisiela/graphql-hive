@@ -17,6 +17,7 @@ const rulesToExtends = Object.fromEntries(
       'react/self-closing-comp',
       'prefer-const',
       'no-extra-boolean-cast',
+      'no-restricted-syntax',
     ].includes(key),
   ),
 );

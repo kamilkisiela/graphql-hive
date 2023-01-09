@@ -425,7 +425,7 @@ const ConditionalBreakingChanges = (): ReactElement => {
               onChange={handleChange}
               onBlur={handleBlur}
               value={values.percentage}
-              isInvalid={touched.percentage && Boolean(errors.percentage)}
+              isInvalid={touched.percentage && !!errors.percentage}
               disabled={isSubmitting}
               size="small"
               type="number"
@@ -439,7 +439,7 @@ const ConditionalBreakingChanges = (): ReactElement => {
               onChange={handleChange}
               onBlur={handleBlur}
               value={values.period}
-              isInvalid={touched.period && Boolean(errors.period)}
+              isInvalid={touched.period && !!errors.period}
               disabled={isSubmitting}
               size="small"
               type="number"
@@ -635,7 +635,7 @@ const Page = ({
             onChange={handleChange}
             onBlur={handleBlur}
             disabled={isSubmitting}
-            isInvalid={touched.name && Boolean(errors.name)}
+            isInvalid={touched.name && !!errors.name}
             className="w-96"
           />
           <Button

@@ -73,7 +73,7 @@ const NoIntrospection: ValidationRule = (context: ValidationContext) => ({
 function hasFastifyRequest(ctx: unknown): ctx is {
   req: FastifyRequest;
 } {
-  return Boolean(ctx) && typeof ctx === 'object' && 'req' in ctx!;
+  return !!ctx && typeof ctx === 'object' && 'req' in ctx!;
 }
 
 function useNoIntrospection(params: {
@@ -129,7 +129,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
 
           if (transaction) {
             transaction.setTag('graphql_client_name', clientName ?? 'unknown');
-            transaction.sampled = Boolean(clientName) && clientName !== 'Hive Client';
+            transaction.sampled = !!clientName && clientName !== 'Hive Client';
           }
 
           scope.setContext('Extra Info', {
@@ -196,7 +196,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
       }),
       useHive({
         debug: true,
-        enabled: Boolean(options.hiveConfig),
+        enabled: !!options.hiveConfig,
         token: options.hiveConfig?.token ?? '',
         usage: {
           endpoint: options.hiveConfig?.usage?.endpoint ?? undefined,

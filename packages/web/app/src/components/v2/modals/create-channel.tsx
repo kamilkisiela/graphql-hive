@@ -93,7 +93,7 @@ export const CreateChannelModal = ({
             onBlur={handleBlur}
             placeholder="Example: Slack #hives"
             disabled={isSubmitting}
-            isInvalid={touched.name && Boolean(errors.name)}
+            isInvalid={touched.name && !!errors.name}
             className="grow"
           />
           {touched.name && errors.name && <div className="text-sm text-red-500">{errors.name}</div>}
@@ -116,7 +116,7 @@ export const CreateChannelModal = ({
             value={values.type}
             onChange={handleChange}
             onBlur={handleBlur}
-            isInvalid={Boolean(touched.type && errors.type)}
+            isInvalid={!!(touched.type && errors.type)}
             placeholder="Select channel type"
             options={[
               { value: AlertChannelType.Slack, name: 'Slack' },
@@ -138,7 +138,7 @@ export const CreateChannelModal = ({
               onBlur={handleBlur}
               placeholder="Your endpoint"
               disabled={isSubmitting}
-              isInvalid={touched.endpoint && Boolean(errors.endpoint)}
+              isInvalid={touched.endpoint && !!errors.endpoint}
               className="grow"
             />
             {touched.endpoint && errors.endpoint && (
@@ -165,7 +165,7 @@ export const CreateChannelModal = ({
               onBlur={handleBlur}
               placeholder="Where should Hive post messages?"
               disabled={isSubmitting}
-              isInvalid={touched.slackChannel && Boolean(errors.slackChannel)}
+              isInvalid={touched.slackChannel && !!errors.slackChannel}
               className="grow"
             />
             {touched.slackChannel && errors.slackChannel && (

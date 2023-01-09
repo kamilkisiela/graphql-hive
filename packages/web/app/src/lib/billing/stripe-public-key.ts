@@ -8,4 +8,4 @@ export const getStripePublicKey = () => {
   return stripePublicKey;
 };
 
-export const getIsStripeEnabled = () => Boolean(getStripePublicKey());
+export const getIsStripeEnabled = () => !!getStripePublicKey();

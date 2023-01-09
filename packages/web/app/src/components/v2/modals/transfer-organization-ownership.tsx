@@ -163,7 +163,7 @@ export const TransferOrganizationOwnershipModal = ({
             <div
               className={clsx(
                 `rounded-sm bg-gray-800 p-4 text-sm font-medium text-white ring-1 ring-gray-700 focus-within:ring`,
-                touched.newOwner && Boolean(errors.newOwner)
+                touched.newOwner && !!errors.newOwner
                   ? 'text-red-500 caret-white ring-red-500'
                   : null,
               )}
@@ -235,7 +235,7 @@ export const TransferOrganizationOwnershipModal = ({
           onChange={handleChange}
           onBlur={handleBlur}
           disabled={isSubmitting}
-          isInvalid={touched.confirmation && Boolean(errors.confirmation)}
+          isInvalid={touched.confirmation && !!errors.confirmation}
           className="w-full"
         />
       </div>

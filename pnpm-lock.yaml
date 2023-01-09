@@ -46,7 +46,7 @@ importers:
       '@next/eslint-plugin-next': 13.1.1
       '@sentry/cli': 2.11.0
       '@swc/core': 1.3.24
-      '@theguild/eslint-config': 0.5.0
+      '@theguild/eslint-config': 0.6.0-alpha-20230109161359-c8f5cf3
       '@theguild/prettier-config': 1.0.0
       '@types/jest': 29.2.4
       '@types/node': 18.11.18
@@ -95,7 +95,7 @@ importers:
       '@next/eslint-plugin-next': 13.1.1
       '@sentry/cli': 2.11.0
       '@swc/core': 1.3.24
-      '@theguild/eslint-config': 0.5.0_lzzuuodtsqwxnvqeq4g4likcqa
+      '@theguild/eslint-config': 0.6.0-alpha-20230109161359-c8f5cf3_lzzuuodtsqwxnvqeq4g4likcqa
       '@theguild/prettier-config': 1.0.0_prettier@2.8.1
       '@types/jest': 29.2.4
       '@types/node': 18.11.18
@@ -10546,8 +10546,8 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@theguild/eslint-config/0.5.0_lzzuuodtsqwxnvqeq4g4likcqa:
-    resolution: {integrity: sha512-aSiN3Eg6lH5Uq0LjHRt764trs3uYHMsvr2UDRA6/RK/ThPHMvBwnfi1xI7vdwXabE9vSZosnlJ/e/skj43FnKQ==}
+  /@theguild/eslint-config/0.6.0-alpha-20230109161359-c8f5cf3_lzzuuodtsqwxnvqeq4g4likcqa:
+    resolution: {integrity: sha512-a64MEVEM7h1fuJly6L2Y8joohvME0JWTS+ZTBHtdYNW0ktZThJEJdptYc/it9SKkQLKHM+jrOH96wsjxIB8F2w==}
     peerDependencies:
       eslint: ^8.24.0
     dependencies:
