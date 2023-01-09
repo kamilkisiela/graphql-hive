@@ -64,6 +64,7 @@ module.exports = {
       },
     ],
     '@typescript-eslint/no-floating-promises': 'error',
+    '@typescript-eslint/no-unnecessary-type-assertion': 'error',
     ...rulesToExtends,
 
     // 🚨 The following rules needs to be fixed and was temporarily disabled to avoid printing warning
