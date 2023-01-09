@@ -69,7 +69,7 @@ export class TokenStorage {
       target: input.target,
       project: input.project,
       organization: input.organization,
-      scopes: input.scopes as CreateTokenInput['scopes'],
+      scopes: input.scopes,
     });
 
     return response;

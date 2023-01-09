@@ -660,7 +660,7 @@ export class SchemaPublisher {
     if (valid && hasNewUrl) {
       messages.push(
         `Updated: New service url: ${incomingSchema.url ?? 'empty'} (previously: ${
-          previousSchema!.url ?? 'empty'
+          previousSchema.url ?? 'empty'
         })`,
       );
     }

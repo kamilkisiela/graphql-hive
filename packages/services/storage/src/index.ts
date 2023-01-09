@@ -688,7 +688,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         sql`SELECT id FROM public.organizations WHERE clean_id = ${organization} LIMIT 1`,
       );
 
-      return result.id as string;
+      return result.id;
     },
     getOrganizationOwnerId: batch(async selectors => {
       const organizations = selectors.map(s => s.organization);
@@ -1068,7 +1068,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         WHERE p.clean_id = ${project} AND org.clean_id = ${organization} LIMIT 1`,
       );
 
-      return result.id as string;
+      return result.id;
     },
     async getTargetId({ project, target, organization, useIds }) {
       if (useIds) {
@@ -1081,7 +1081,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           LIMIT 1`,
         );
 
-        return result.id as string;
+        return result.id;
       }
 
       // Based on clean_id, resolve id
@@ -1094,7 +1094,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           LIMIT 1`,
       );
 
-      return result.id as string;
+      return result.id;
     },
     async getPersistedOperationId({ project, operation }) {
       const result = await pool.one<Pick<persisted_operations, 'id'>>(
