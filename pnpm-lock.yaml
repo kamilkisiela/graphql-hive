@@ -46,7 +46,7 @@ importers:
       '@next/eslint-plugin-next': 13.1.1
       '@sentry/cli': 2.11.0
       '@swc/core': 1.3.24
-      '@theguild/eslint-config': 0.6.0-alpha-20230109161359-c8f5cf3
+      '@theguild/eslint-config': 0.6.0
       '@theguild/prettier-config': 1.0.0
       '@types/jest': 29.2.4
       '@types/node': 18.11.18
@@ -95,7 +95,7 @@ importers:
       '@next/eslint-plugin-next': 13.1.1
       '@sentry/cli': 2.11.0
       '@swc/core': 1.3.24
-      '@theguild/eslint-config': 0.6.0-alpha-20230109161359-c8f5cf3_lzzuuodtsqwxnvqeq4g4likcqa
+      '@theguild/eslint-config': 0.6.0_lzzuuodtsqwxnvqeq4g4likcqa
       '@theguild/prettier-config': 1.0.0_prettier@2.8.1
       '@types/jest': 29.2.4
       '@types/node': 18.11.18
@@ -7247,7 +7247,7 @@ packages:
       '@types/node': 18.11.18
       ansi-escapes: 4.3.2
       chalk: 4.1.2
-      ci-info: 3.5.0
+      ci-info: 3.7.0
       exit: 0.1.2
       graceful-fs: 4.2.10
       jest-changed-files: 29.2.0
@@ -7288,7 +7288,7 @@ packages:
       '@types/node': 18.11.18
       ansi-escapes: 4.3.2
       chalk: 4.1.2
-      ci-info: 3.5.0
+      ci-info: 3.7.0
       exit: 0.1.2
       graceful-fs: 4.2.10
       jest-changed-files: 29.2.0
@@ -7521,7 +7521,7 @@ packages:
   /@manypkg/find-root/1.1.0:
     resolution: {integrity: sha512-mki5uBvhHzO8kYYix/WRy2WX8S3B5wdVSc9D6KcU5lQNglP2yt58/VfLuAK49glRXChosY8ap2oJ1qgma3GUVA==}
     dependencies:
-      '@babel/runtime': 7.19.4
+      '@babel/runtime': 7.20.7
       '@types/node': 12.20.55
       find-up: 4.1.0
       fs-extra: 8.1.0
@@ -10546,8 +10546,8 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@theguild/eslint-config/0.6.0-alpha-20230109161359-c8f5cf3_lzzuuodtsqwxnvqeq4g4likcqa:
-    resolution: {integrity: sha512-a64MEVEM7h1fuJly6L2Y8joohvME0JWTS+ZTBHtdYNW0ktZThJEJdptYc/it9SKkQLKHM+jrOH96wsjxIB8F2w==}
+  /@theguild/eslint-config/0.6.0_lzzuuodtsqwxnvqeq4g4likcqa:
+    resolution: {integrity: sha512-KvhPwf1X7Ra775dwdl4ZP2jlqUWpvQPxAm8MSX5QCT5sJu3I/FkW/i1eNgtKiWlu7bqCaqhCMuBmrzDgIFxy7Q==}
     peerDependencies:
       eslint: ^8.24.0
     dependencies:
@@ -12909,9 +12909,6 @@ packages:
     dependencies:
       cross-env: 6.0.3
     dev: false
-
-  /ci-info/3.5.0:
-    resolution: {integrity: sha512-yH4RezKOGlOhxkmhbeNuC4eYZKAUsEaGtBuBzDDP1eFUKiccDWzBABxBfOx31IDwDIXMTxWuwAxUGModvkbuVw==}
 
   /ci-info/3.7.0:
     resolution: {integrity: sha512-2CpRNYmImPx+RXKLq6jko/L07phmS9I02TyqkcNU20GCF/GgaWvc58hPtjxDX8lPpkdwc9sNh72V9k00S7ezog==}
