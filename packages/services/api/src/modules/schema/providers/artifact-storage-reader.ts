@@ -1,9 +1,8 @@
 /**
  * IMPORTANT NOTE: This file needs to be kept platform-agnostic, don't use any Node.js specific APIs.
  */
-import { type S3Client, GetObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { fetch } from '@whatwg-node/fetch';
+import { Request } from '@whatwg-node/fetch';
+import { AwsClient } from '../../../shared/aws';
 
 const presignedUrlExpirationSeconds = 60;
 
@@ -19,31 +18,45 @@ export type ArtifactsType = SDLArtifactTypes | 'metadata' | 'services' | 'superg
  */
 export class ArtifactStorageReader {
   private publicUrl: URL | null;
+  private awsClient: AwsClient;
+  private s3Endpoint: string;
 
   constructor(
-    private s3Client: S3Client,
+    s3Config: {
+      accessKeyId: string;
+      secretAccessKey: string;
+      endpoint: string;
+    },
     private bucketName: string,
     /** The public URL in case the public S3 endpoint differs from the internal S3 endpoint. E.g. within a docker network. */
     publicUrl: string | null,
   ) {
     this.publicUrl = publicUrl ? new URL(publicUrl) : null;
+    this.awsClient = new AwsClient({
+      accessKeyId: s3Config.accessKeyId,
+      secretAccessKey: s3Config.secretAccessKey,
+      region: 'auto',
+      service: 's3',
+    });
+    this.s3Endpoint = s3Config.endpoint;
   }
 
   private async generatePresignedGetUrl(key: string): Promise<string> {
-    const command = new GetObjectCommand({
-      Bucket: this.bucketName,
-      Key: key,
-    });
-
-    const presignedUrl = await getSignedUrl(this.s3Client, command, {
-      expiresIn: presignedUrlExpirationSeconds,
-    });
+    const signedUrl = await this.awsClient.sign(
+      new Request(this.s3Endpoint + `/` + this.bucketName + '/' + key, { method: 'GET' }),
+      {
+        aws: { signQuery: true },
+        headers: {
+          'x-amz-expires': String(presignedUrlExpirationSeconds),
+        },
+      },
+    );
 
     if (!this.publicUrl) {
-      return presignedUrl;
+      return signedUrl.url;
     }
 
-    const publicUrl = new URL(presignedUrl);
+    const publicUrl = new URL(signedUrl.url);
     publicUrl.protocol = this.publicUrl.protocol;
     publicUrl.host = this.publicUrl.host;
     publicUrl.port = this.publicUrl.port;
@@ -63,25 +76,12 @@ export class ArtifactStorageReader {
 
     const key = buildArtifactStorageKey(targetId, artifactType);
 
-    // In case you are wondering why we generate a pre-signed URL for doing the HEAD
-    // request instead of just run the command with the AWS SDK:
-    // The S3 client is not platform agnostic and will fail when
-    // executed from within a Cloudflare Worker.
-    // Signing, on the other hand, is platform agnostic.
-    // AWS does not seem to fix this any time soon.
-    // See https://github.com/aws/aws-sdk-js-v3/issues/3104
-
-    const headCommand = await getSignedUrl(
-      this.s3Client,
-      new HeadObjectCommand({
-        Bucket: this.bucketName,
-        Key: key,
-      }),
+    const response = await this.awsClient.fetch(
+      this.s3Endpoint + '/' + this.bucketName + '/' + key,
+      {
+        method: 'HEAD',
+      },
     );
-
-    const response = await fetch(headCommand, {
-      method: 'HEAD',
-    });
 
     if (response.status === 200) {
       if (etagValue && response.headers.get('etag') === etagValue) {

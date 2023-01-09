@@ -423,7 +423,6 @@ importers:
 
   packages/services/cdn-worker:
     specifiers:
-      '@aws-sdk/client-s3': 3.241.0
       '@cloudflare/workers-types': 4.20221111.1
       '@hive/api': workspace:*
       '@types/service-worker-mock': 2.0.1
@@ -437,7 +436,6 @@ importers:
       toucan-js: 2.7.0
       zod: 3.20.2
     dependencies:
-      '@aws-sdk/client-s3': 3.241.0
       graphql: 16.6.0
       toucan-js: 2.7.0
       zod: 3.20.2
