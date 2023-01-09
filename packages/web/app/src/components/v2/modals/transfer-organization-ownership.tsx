@@ -240,7 +240,7 @@ export const TransferOrganizationOwnershipModal = ({
         />
       </div>
 
-      <div className="h-0 w-full border-t-2 border-gray-900"></div>
+      <div className="h-0 w-full border-t-2 border-gray-900" />
 
       <div className="font-bold">About the ownership transfer</div>
       <ul className="list-inside list-disc px-5 text-sm text-white">

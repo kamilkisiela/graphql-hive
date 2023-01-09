@@ -1,6 +1,5 @@
 import React from 'react';
-import { StylesConfig } from 'react-select';
-import Select from 'react-select';
+import Select, { StylesConfig } from 'react-select';
 import { FixedSizeList } from 'react-window';
 
 const height = 40;

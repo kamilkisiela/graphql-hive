@@ -1,4 +1,4 @@
-import type { Exchange, Operation } from 'urql';
+import { Exchange, Operation } from 'urql';
 import { proxy, useSnapshot } from 'valtio';
 import { map, pipe, tap } from 'wonka';
 

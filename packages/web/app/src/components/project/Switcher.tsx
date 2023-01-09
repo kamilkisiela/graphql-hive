@@ -1,7 +1,6 @@
 import 'twin.macro';
 import React from 'react';
-import { useColorModeValue } from '@chakra-ui/react';
-import { Button, Menu, MenuButton, MenuItem, MenuList } from '@chakra-ui/react';
+import { Button, Menu, MenuButton, MenuItem, MenuList, useColorModeValue } from '@chakra-ui/react';
 import { VscChevronDown } from 'react-icons/vsc';
 import { useQuery } from 'urql';
 import { ProjectsDocument } from '@/graphql';

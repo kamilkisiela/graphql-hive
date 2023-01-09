@@ -1,7 +1,6 @@
 import { ReactElement, ReactNode, useEffect } from 'react';
 import NextLink from 'next/link';
-import { useQuery } from 'urql';
-import { gql } from 'urql';
+import { gql, useQuery } from 'urql';
 import { Button, DropdownMenu, Heading, Link, Spinner, SubHeader, Tabs } from '@/components/v2';
 import { ArrowDownIcon, Link2Icon } from '@/components/v2/icon';
 import { ConnectSchemaModal } from '@/components/v2/modals';

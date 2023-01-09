@@ -73,8 +73,7 @@ const Plan = (plan: {
             plan.price
           ) : (
             <>
-              {'$'}
-              {plan.price}
+              ${plan.price}
               <span className="text-sm text-gray-500">/mo</span>
             </>
           )}
