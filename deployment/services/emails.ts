@@ -43,7 +43,6 @@ export function deployEmails({
         REDIS_HOST: redis.config.host,
         REDIS_PORT: String(redis.config.port),
         REDIS_PASSWORD: redis.config.password,
-        BULLMQ_COMMANDS_FROM_ROOT: 'true',
         EMAIL_FROM: email.from,
         EMAIL_PROVIDER: 'postmark',
         EMAIL_PROVIDER_POSTMARK_TOKEN: email.token,

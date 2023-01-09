@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/node';
 import type { Span } from '@sentry/types';
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import lodash from 'lodash';
@@ -82,7 +83,12 @@ export class SchemaPublisher {
       scope: TargetAccessScope.REGISTRY_READ,
     });
 
-    const [project, latest] = await Promise.all([
+    const [target, project, latest] = await Promise.all([
+      this.targetManager.getTarget({
+        organization: input.organization,
+        project: input.project,
+        target: input.target,
+      }),
       this.projectManager.getProject({
         organization: input.organization,
         project: input.project,
@@ -96,6 +102,61 @@ export class SchemaPublisher {
 
     const schemas = latest.schemas;
     const isInitialSchema = schemas.length === 0;
+
+    if (
+      (project.type === ProjectType.STITCHING || project.type === ProjectType.FEDERATION) &&
+      (lodash.isNil(input.service) || input.service?.trim() === '')
+    ) {
+      this.logger.debug('Detected missing service name');
+      const missingServiceNameMessage = `Can not check schema without a service name.`;
+
+      if (input.github) {
+        if (!project.gitRepository) {
+          return {
+            __typename: 'GitHubSchemaCheckError' as const,
+            message: 'Git repository is not configured for this project',
+          };
+        }
+
+        const [repositoryOwner, repositoryName] = project.gitRepository.split('/');
+
+        try {
+          await this.gitHubIntegrationManager.createCheckRun({
+            name: buildGitHubActionCheckName(target.name, null),
+            conclusion: 'failure',
+            sha: input.github.commit,
+            organization: input.organization,
+            repositoryOwner,
+            repositoryName,
+            output: {
+              title: 'Missing service name',
+              summary: missingServiceNameMessage,
+            },
+          });
+
+          return {
+            __typename: 'GitHubSchemaCheckSuccess' as const,
+            message: 'Check-run created',
+          };
+        } catch (error) {
+          Sentry.captureException(error);
+          return {
+            __typename: 'GitHubSchemaCheckError' as const,
+            message: `Failed to create the check-run`,
+          };
+        }
+      }
+
+      return {
+        valid: false,
+        errors: [
+          {
+            message: missingServiceNameMessage,
+          },
+        ],
+        initial: isInitialSchema,
+      };
+    }
 
     await this.schemaManager.completeGetStartedCheck({
       organization: project.orgId,
@@ -169,7 +230,7 @@ export class SchemaPublisher {
         }
 
         await this.gitHubIntegrationManager.createCheckRun({
-          name: 'GraphQL Hive - schema:check',
+          name: buildGitHubActionCheckName(target.name, input.service ?? null),
           conclusion: validationResult.valid ? 'success' : 'failure',
           sha: input.github.commit,
           organization: input.organization,
@@ -187,7 +248,7 @@ export class SchemaPublisher {
       } catch (error: any) {
         return {
           __typename: 'GitHubSchemaCheckError' as const,
-          message: `Failed to create the check-run: ${error.message}`,
+          message: `Failed to create the check-run`,
         };
       }
     }
@@ -946,9 +1007,10 @@ export class SchemaPublisher {
         message: title,
       };
     } catch (error: any) {
+      Sentry.captureException(error);
       return {
         __typename: 'GitHubSchemaPublishError' as const,
-        message: `Failed to create the check-run: ${error.message}`,
+        message: `Failed to create the check-run`,
       };
     }
   }
@@ -1003,4 +1065,8 @@ function writeChanges(type: string, changes: readonly Types.SchemaChange[], line
   lines.push(
     ...['', `### ${type} changes`].concat(changes.map(change => ` - ${bolderize(change.message)}`)),
   );
+}
+
+function buildGitHubActionCheckName(target: string, service: string | null) {
+  return `GraphQL Hive > schema:check > ${target}` + (service ? ` > ${service}` : '');
 }

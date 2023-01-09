@@ -2,7 +2,7 @@ import { DeploymentEnvironment } from '../types';
 
 export function isProduction(deploymentEnv: DeploymentEnvironment | string): boolean {
   return isDeploymentEnvironment(deploymentEnv)
-    ? deploymentEnv.ENVIRONMENT === 'production'
+    ? deploymentEnv.ENVIRONMENT === 'production' || deploymentEnv.ENVIRONMENT === 'prod'
     : deploymentEnv === 'production' || deploymentEnv === 'prod';
 }
 

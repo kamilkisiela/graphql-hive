@@ -9,7 +9,7 @@ export type RateLimitInput = z.infer<typeof VALIDATION>;
 
 const VALIDATION = z
   .object({
-    id: z.string().nonempty(),
+    id: z.string().min(1),
     entityType: z.enum(['organization', 'target']),
     type: z.enum(['operations-reporting']),
     /**

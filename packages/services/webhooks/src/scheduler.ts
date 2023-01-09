@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/node';
-import { Job, Queue, QueueScheduler, Worker } from 'bullmq';
+import { Job, Queue, Worker } from 'bullmq';
 import Redis, { Redis as RedisInstance } from 'ioredis';
 import pTimeout from 'p-timeout';
 import { createWebhookJob, scheduleWebhook } from './jobs';
@@ -38,7 +38,6 @@ export interface WebhookInput {
 export function createScheduler(config: Config) {
   let redisConnection: RedisInstance | null;
   let webhookQueue: Queue | null;
-  let webhookQueueScheduler: QueueScheduler | null;
   let stopped = false;
   const logger = config.logger;
 
@@ -46,17 +45,17 @@ export function createScheduler(config: Config) {
     logger.info('Clearing BullMQ...');
 
     try {
-      webhookQueue?.removeAllListeners();
-      webhookQueueScheduler?.removeAllListeners(),
-        await pTimeout(Promise.all([webhookQueue?.close(), webhookQueueScheduler?.close()]), {
+      if (webhookQueue) {
+        webhookQueue.removeAllListeners();
+        await pTimeout(webhookQueue.close(), {
           milliseconds: 5000,
           message: 'BullMQ close timeout',
         });
+      }
     } catch (e) {
       logger.error('Failed to stop queues', e);
     } finally {
       webhookQueue = null;
-      webhookQueueScheduler = null;
       logger.info('BullMQ stopped');
     }
   }
@@ -68,20 +67,14 @@ export function createScheduler(config: Config) {
 
     const prefix = 'hive-webhooks';
 
-    webhookQueueScheduler = new QueueScheduler(config.webhookQueueName, {
-      prefix,
-      connection: redisConnection,
-      sharedConnection: true,
-    });
-
     webhookQueue = new Queue(config.webhookQueueName, {
       prefix,
       connection: redisConnection,
       sharedConnection: true,
     });
 
-    // Wait for Queues and Scheduler to be ready
-    await Promise.all([webhookQueueScheduler.waitUntilReady(), webhookQueue.waitUntilReady()]);
+    // Wait for Queue to be ready
+    await webhookQueue.waitUntilReady();
 
     const webhookJob = createWebhookJob({ config });
 
@@ -158,16 +151,16 @@ export function createScheduler(config: Config) {
     };
   }
 
-  function onFailed(job: Job, error: Error) {
+  function onFailed(job: Job | undefined, error: Error) {
     logger.debug(
       `Job %s failed after %s attempts, reason: %s (orgId=%s, projectId=%s, targetId=%s, schemaId=%s)`,
-      job.name,
-      job.attemptsMade,
-      job.failedReason,
-      job.data?.event?.organization?.id,
-      job.data?.event?.project?.id,
-      job.data?.event?.target?.id,
-      job.data?.event?.schema?.id,
+      job?.name,
+      job?.attemptsMade,
+      job?.failedReason,
+      job?.data?.event?.organization?.id,
+      job?.data?.event?.project?.id,
+      job?.data?.event?.target?.id,
+      job?.data?.event?.schema?.id,
     );
     logger.error(error);
   }

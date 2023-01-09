@@ -139,7 +139,7 @@ services:
     environment:
       NODE_ENV: production
       LOG_LEVEL: debug
-      LIMIT_CACHE_UPDATE_INTERVAL_MS: 2000
+      LIMIT_CACHE_UPDATE_INTERVAL_MS: '${LIMIT_CACHE_UPDATE_INTERVAL_MS}'
       POSTGRES_HOST: db
       POSTGRES_PORT: 5432
       POSTGRES_DB: '${POSTGRES_DB}'
@@ -147,7 +147,6 @@ services:
       POSTGRES_PASSWORD: '${POSTGRES_PASSWORD}'
       USAGE_ESTIMATOR_ENDPOINT: http://usage-estimator:3008
       EMAILS_ENDPOINT: http://emails:3011
-      BULLMQ_COMMANDS_FROM_ROOT: 'true'
       PORT: 3009
 
   # Overrides only to `docker-compose.community.yaml` from now on:
@@ -199,3 +198,8 @@ services:
       EMAIL_PROVIDER: '${EMAIL_PROVIDER}'
     ports:
       - '3011:3011'
+
+  # Awkwardly, we need to override the `app` service as it's not used in the integration tests
+  app:
+    image: node:18.12.1-alpine3.16
+    command: ['npx', 'http-server']

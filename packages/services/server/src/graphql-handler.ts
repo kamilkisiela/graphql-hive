@@ -1,4 +1,3 @@
-import { isGraphQLError } from '@envelop/core';
 import { useGenericAuth } from '@envelop/generic-auth';
 import { useGraphQLModules } from '@envelop/graphql-modules';
 import { useSentry } from '@envelop/sentry';
@@ -153,15 +152,14 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
           // It's the readiness check
           return args.operationName === 'readiness';
         },
-        skipError: isGraphQLError,
       }),
       useSentryUser(),
       useErrorHandler(({ errors, context }): void => {
         for (const error of errors) {
-          // Only log unexpected errors.
-          if (isGraphQLError(error)) {
-            continue;
-          }
+          // // Only log unexpected errors.
+          // if (isGraphQLError(error)) {
+          //   continue;
+          // }
 
           if (hasFastifyRequest(context)) {
             context.req.log.error(error);

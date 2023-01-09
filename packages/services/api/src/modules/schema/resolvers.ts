@@ -419,7 +419,7 @@ export const resolvers: SchemaModule.Resolvers = {
     async latestVersion(_, __, { injector }) {
       const target = await injector.get(TargetManager).getTargetFromToken();
 
-      return injector.get(SchemaManager).getLatestValidVersion({
+      return injector.get(SchemaManager).getMaybeLatestVersion({
         organization: target.orgId,
         project: target.projectId,
         target: target.id,
@@ -428,7 +428,7 @@ export const resolvers: SchemaModule.Resolvers = {
     async latestValidVersion(_, __, { injector }) {
       const target = await injector.get(TargetManager).getTargetFromToken();
 
-      return injector.get(SchemaManager).getLatestValidVersion({
+      return injector.get(SchemaManager).getMaybeLatestValidVersion({
         organization: target.orgId,
         project: target.projectId,
         target: target.id,

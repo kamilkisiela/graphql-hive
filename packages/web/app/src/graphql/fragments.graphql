@@ -419,20 +419,11 @@ fragment OrgBillingInfoFields on Organization {
   plan
   ...OrgRateLimitFields
   billingConfiguration {
-    hasActiveSubscription
     paymentMethod {
       brand
       last4
       expMonth
       expYear
-    }
-    billingAddress {
-      city
-      country
-      line1
-      line2
-      postalCode
-      state
     }
     invoices {
       ...BillingInvoiceFields

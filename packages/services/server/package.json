@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "3.238.0",
+    "@aws-sdk/client-s3": "3.241.0",
     "@envelop/core": "3.0.4",
     "@envelop/generic-auth": "5.0.4",
     "@envelop/graphql-modules": "4.0.4",
@@ -24,14 +24,14 @@
     "@sentry/node": "7.28.1",
     "@sentry/tracing": "7.28.1",
     "@trpc/server": "10.7.0",
-    "@whatwg-node/fetch": "0.5.3",
-    "@whatwg-node/server": "0.5.0",
+    "@whatwg-node/fetch": "0.6.1",
+    "@whatwg-node/server": "0.5.5",
     "dotenv": "16.0.3",
     "got": "12.5.3",
     "graphql": "16.6.0",
-    "graphql-yoga": "3.1.2",
+    "graphql-yoga": "3.3.0",
     "hyperid": "3.0.1",
-    "prom-client": "14.1.0",
+    "prom-client": "14.1.1",
     "reflect-metadata": "0.1.13",
     "zod": "3.20.2"
   },

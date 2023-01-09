@@ -170,10 +170,6 @@ export function createRateLimiter(config: {
 
     cachedResult = newCachedResult;
     targetIdToOrgLookup = newTargetIdToOrgLookup;
-    logger.info(
-      `Built a new rate-limit map: %s`,
-      JSON.stringify(Array.from(newCachedResult.entries())),
-    );
 
     const scheduledEmails = emails.drain();
     if (scheduledEmails.length > 0) {
