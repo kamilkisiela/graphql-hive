@@ -190,7 +190,6 @@ export class AwsV4Signer {
     if (url == null) throw new TypeError('url is a required option');
     if (accessKeyId == null) throw new TypeError('accessKeyId is a required option');
     if (secretAccessKey == null) throw new TypeError('secretAccessKey is a required option');
-
     this.method = method || (body ? 'POST' : 'GET');
     this.url = new URL(url);
     this.headers = new Headers(headers || {});
@@ -227,7 +226,6 @@ export class AwsV4Signer {
     }
 
     const theHeaders: Array<string> = ['host'];
-    this.headers.forEach((_, key) => theHeaders.push(key));
 
     // headers are always lowercase in keys()
     this.signableHeaders = theHeaders
@@ -258,7 +256,7 @@ export class AwsV4Signer {
 
     if (this.signQuery) {
       if (this.service === 's3' && !params.has('X-Amz-Expires')) {
-        params.set('X-Amz-Expires', '86400'); // 24 hours
+        params.set('X-Amz-Expires', this.headers.get('X-Amz-Expires') ?? '86400'); // 24 hours
       }
       params.set('X-Amz-Algorithm', 'AWS4-HMAC-SHA256');
       params.set('X-Amz-Credential', this.accessKeyId + '/' + this.credentialString);
@@ -300,15 +298,12 @@ export class AwsV4Signer {
       .join('&');
   }
 
-  /**
-   * @returns {Promise<{
-   *   method: string
-   *   url: URL
-   *   headers: Headers
-   *   body?: BodyInit | null
-   * }>}
-   */
-  async sign() {
+  async sign(): Promise<{
+    method: string;
+    url: URL;
+    headers: Headers;
+    body?: BodyInit | null;
+  }> {
     if (this.signQuery) {
       this.url.searchParams.set('X-Amz-Signature', await this.signature());
       if (this.sessionToken && this.appendSessionToken) {

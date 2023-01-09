@@ -45,9 +45,10 @@ export class ArtifactStorageReader {
     const signedUrl = await this.awsClient.sign(
       new Request(this.s3Endpoint + `/` + this.bucketName + '/' + key, { method: 'GET' }),
       {
+        method: 'GET',
         aws: { signQuery: true },
         headers: {
-          'x-amz-expires': String(presignedUrlExpirationSeconds),
+          'X-Amz-Expires': String(presignedUrlExpirationSeconds),
         },
       },
     );
