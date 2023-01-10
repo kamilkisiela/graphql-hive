@@ -211,7 +211,7 @@ export class AuthManager {
   }
 
   isUser() {
-    return Boolean(this.session);
+    return !!this.session;
   }
 
   getMemberOrganizationScopes(selector: OrganizationUserScopesSelector) {

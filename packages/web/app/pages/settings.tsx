@@ -84,7 +84,7 @@ const SettingsPage = (): React.ReactElement => {
                 onChange={handleChange}
                 onBlur={handleBlur}
                 disabled={isSubmitting}
-                isInvalid={touched.fullName && Boolean(errors.fullName)}
+                isInvalid={touched.fullName && !!errors.fullName}
               />
               {touched.fullName && errors.fullName && (
                 <span className="text-red-500">{errors.fullName}</span>
@@ -107,7 +107,7 @@ const SettingsPage = (): React.ReactElement => {
                 onChange={handleChange}
                 onBlur={handleBlur}
                 disabled={isSubmitting}
-                isInvalid={touched.displayName && Boolean(errors.displayName)}
+                isInvalid={touched.displayName && !!errors.displayName}
               />
               {touched.displayName && errors.displayName && (
                 <span className="text-red-500">{errors.displayName}</span>

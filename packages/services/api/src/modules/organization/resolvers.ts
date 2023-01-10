@@ -266,7 +266,7 @@ export const resolvers: OrganizationModule.Resolvers = {
   },
   Organization: {
     __isTypeOf(organization) {
-      return Boolean(organization.id);
+      return !!organization.id;
     },
     owner(organization, _, { injector }) {
       return injector
@@ -312,12 +312,12 @@ export const resolvers: OrganizationModule.Resolvers = {
   },
   OrganizationInvitationError: {
     __isTypeOf(obj) {
-      return Boolean(obj.message);
+      return !!obj.message;
     },
   },
   OrganizationInvitationPayload: {
     __isTypeOf(organization) {
-      return Boolean(organization.name);
+      return !!organization.name;
     },
     name(organization) {
       return organization.name;

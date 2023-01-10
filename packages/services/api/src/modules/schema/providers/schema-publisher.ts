@@ -420,7 +420,7 @@ export class SchemaPublisher {
       sdl: input.sdl.length,
       checksum: input.checksum,
       experimental_accept_breaking_changes: input.experimental_acceptBreakingChanges === true,
-      metadata: Boolean(input.metadata),
+      metadata: !!input.metadata,
     });
 
     await this.authManager.ensureTargetAccess({
@@ -570,7 +570,7 @@ export class SchemaPublisher {
 
     const { changes, errors, valid, messages } = result;
 
-    const hasPreviousVersion = 'version' in latest && Boolean(latest.version);
+    const hasPreviousVersion = 'version' in latest && !!latest.version;
     const hasNewUrl =
       hasPreviousVersion &&
       previousSchema != null &&
@@ -660,7 +660,7 @@ export class SchemaPublisher {
     if (valid && hasNewUrl) {
       messages.push(
         `Updated: New service url: ${incomingSchema.url ?? 'empty'} (previously: ${
-          previousSchema!.url ?? 'empty'
+          previousSchema.url ?? 'empty'
         })`,
       );
     }

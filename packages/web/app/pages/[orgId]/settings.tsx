@@ -196,7 +196,7 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
               onChange={handleChange}
               onBlur={handleBlur}
               disabled={isSubmitting}
-              isInvalid={touched.name && Boolean(errors.name)}
+              isInvalid={touched.name && !!errors.name}
               className="w-96"
             />
             <Button

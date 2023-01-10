@@ -30,7 +30,7 @@ const plugin: FastifyPluginAsync = async server => {
     const requestId = cleanRequestId(request.headers['x-request-id']);
     if (requestId) {
       Sentry.configureScope(scope => {
-        scope.setTag('request_id', requestId as string);
+        scope.setTag('request_id', requestId);
         if (request.headers.referer) {
           scope.setTag('referer', request.headers.referer);
         }

@@ -785,7 +785,7 @@ export const OperationsStats: React.FC<{
   }, [refetchQuery]);
 
   const isFetching = query.fetching;
-  const isError = Boolean(query.error);
+  const isError = !!query.error;
 
   const operationsStats = query.data?.operationsStats;
 

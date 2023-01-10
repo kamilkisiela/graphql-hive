@@ -126,7 +126,7 @@ const MemberInvitationForm = ({
           onChange={handleChange}
           onBlur={handleBlur}
           disabled={isSubmitting}
-          isInvalid={touched.email && Boolean(errors.email)}
+          isInvalid={touched.email && !!errors.email}
         />
       </Tooltip>
       <Button

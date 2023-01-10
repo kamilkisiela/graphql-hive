@@ -42,7 +42,7 @@ const Inner = ({
   });
 
   const [paymentDetailsValid, setPaymentDetailsValid] = useState(
-    Boolean(organization.billingConfiguration?.paymentMethod),
+    !!organization.billingConfiguration?.paymentMethod,
   );
   const upgradeToProMutation = useMutation(UpgradeToProDocument);
   const downgradeToHobbyMutation = useMutation(DowngradeToHobbyDocument);

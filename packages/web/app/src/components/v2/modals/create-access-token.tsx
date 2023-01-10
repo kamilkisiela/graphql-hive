@@ -134,7 +134,7 @@ const ModalContent = (props: {
             onChange={handleChange}
             onBlur={handleBlur}
             disabled={isSubmitting}
-            isInvalid={touched.name && Boolean(errors.name)}
+            isInvalid={touched.name && !!errors.name}
             className="w-full"
           />
 

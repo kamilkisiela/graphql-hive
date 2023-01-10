@@ -21,11 +21,7 @@ export async function loadOperations(
   const shouldNormalize = options?.normalize ?? true;
 
   if (file.toLowerCase().endsWith('.json')) {
-    const output: Record<string, string> = JSON.parse(
-      await fs.readFile(file, {
-        encoding: 'utf-8',
-      }),
-    );
+    const output: Record<string, string> = JSON.parse(await fs.readFile(file, 'utf8'));
 
     const operations: Array<{
       operationHash: string;

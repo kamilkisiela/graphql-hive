@@ -77,7 +77,7 @@ export const CreateTargetModal = ({
           onChange={handleChange}
           onBlur={handleBlur}
           disabled={isSubmitting}
-          isInvalid={touched.name && Boolean(errors.name)}
+          isInvalid={touched.name && !!errors.name}
           className="grow"
         />
         {touched.name && (errors.name || mutation.error) && (
