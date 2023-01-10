@@ -4,6 +4,10 @@
   "prConcurrentLimit": 20,
   "packageRules": [
     {
+      "groupName": "graphql-armor",
+      "matchPackagePrefixes": ["@escape.tech/graphql-armor"]
+    },
+    {
       "groupName": "whatwg-node",
       "matchPackagePrefixes": ["@whatwg-node"]
     },
