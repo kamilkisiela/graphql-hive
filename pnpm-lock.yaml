@@ -604,7 +604,7 @@ importers:
       '@envelop/types': 3.0.1
       '@escape.tech/graphql-armor-max-aliases': 1.6.0
       '@escape.tech/graphql-armor-max-depth': 1.8.0
-      '@escape.tech/graphql-armor-max-directives': 1.6.0
+      '@escape.tech/graphql-armor-max-directives': 1.6.1
       '@escape.tech/graphql-armor-max-tokens': 1.3.0
       '@graphql-hive/client': 0.21.4
       '@hive/api': workspace:*
@@ -638,7 +638,7 @@ importers:
       '@envelop/types': 3.0.1
       '@escape.tech/graphql-armor-max-aliases': 1.6.0
       '@escape.tech/graphql-armor-max-depth': 1.8.0
-      '@escape.tech/graphql-armor-max-directives': 1.6.0
+      '@escape.tech/graphql-armor-max-directives': 1.6.1
       '@escape.tech/graphql-armor-max-tokens': 1.3.0
       '@sentry/integrations': 7.28.1
       '@sentry/node': 7.28.1
@@ -5550,13 +5550,13 @@ packages:
       '@escape.tech/graphql-armor-types': 0.3.0
     dev: false
 
-  /@escape.tech/graphql-armor-max-directives/1.6.0:
-    resolution: {integrity: sha512-so0mHWlJig+lzhFuiQVI0+bePBoPqFxWUKrPq1KyIQNOKudFxDkPqZFWCgcekJGp+ezTJ1Z8/9AImito0Fn9pw==}
+  /@escape.tech/graphql-armor-max-directives/1.6.1:
+    resolution: {integrity: sha512-LfPC1oJ2LtsGGH/nZmQRXXXBRquQX01nL2jvSSO/ZKcNivWUqjQ6TvOA+7133us3W8HZjTKI18rQV/prwMtLOw==}
     dependencies:
       graphql: 16.6.0
     optionalDependencies:
       '@envelop/core': 3.0.4
-      '@escape.tech/graphql-armor-types': 0.3.0
+      '@escape.tech/graphql-armor-types': 0.4.0
     dev: false
 
   /@escape.tech/graphql-armor-max-tokens/1.3.0:
@@ -5570,6 +5570,14 @@ packages:
 
   /@escape.tech/graphql-armor-types/0.3.0:
     resolution: {integrity: sha512-As+57ZkwCuKe2zuEcNESL22g+3lkd/jh37qJAUD7z5WKYlbtp3JpZXFNMyDOjTTcof2EDlbeE9uTOXbg9rfjpQ==}
+    requiresBuild: true
+    dependencies:
+      graphql: 16.6.0
+    dev: false
+    optional: true
+
+  /@escape.tech/graphql-armor-types/0.4.0:
+    resolution: {integrity: sha512-E78TUacOz70tFK4mKOTrJE/ar2Z9hiDM0dcxau3GBffozWVGNqLmCt4JJeahlJieldJuXfhaJestRJuVVCWm5g==}
     requiresBuild: true
     dependencies:
       graphql: 16.6.0
