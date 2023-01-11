@@ -7,6 +7,9 @@ on:
       publishLatest:
         default: false
         type: boolean
+      build:
+        default: true
+        type: boolean
       targets:
         required: true
         type: string
@@ -21,6 +24,9 @@ on:
         type: string
       publishSourceMaps:
         default: false
+        type: boolean
+      publishPrComment:
+        default: true
         type: boolean
 
 jobs:
@@ -38,9 +44,11 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: build packages and applications
+        if: ${{ inputs.build }}
         run: pnpm build
 
       - name: test ESM & CJS exports integrity
+        if: ${{ inputs.build }}
         run: pnpm turbo check:build
 
       - name: configure eqemu
@@ -72,7 +80,7 @@ jobs:
           replace-with: '_'
 
       - name: build docker images
-        timeout-minutes: 25
+        timeout-minutes: 45
         id: docker-bake
         if: ${{ inputs.dockerize }}
         uses: docker/bake-action@v2
@@ -94,7 +102,8 @@ jobs:
 
       - name: docker details pr comment
         uses: marocchino/sticky-pull-request-comment@v2
-        if: ${{ inputs.dockerize && github.event_name == 'pull_request' }}
+        if:
+          ${{ inputs.dockerize && github.event_name == 'pull_request' && inputs.publishPrComment }}
         with:
           message: |
             🐋 This PR was built and pushed to the following [Docker images](https://github.com/kamilkisiela?ecosystem=container&tab=packages&visibility=public&tab=packages&ecosystem=container&visibility=public&q=graphql-hive) (tag: `${{ inputs.imageTag }}`):

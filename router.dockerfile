@@ -5,6 +5,7 @@ WORKDIR /usr/src/router
 # build
 RUN apt-get update
 RUN apt-get -y install npm protobuf-compiler curl
+RUN rm -rf /var/lib/apt/lists/*
 RUN update-ca-certificates
 RUN rustup component add rustfmt
 
@@ -20,10 +21,18 @@ RUN mkdir -p /dist/config \
 COPY router.yaml /dist/config.yaml
 
 # final binary
-FROM debian:bullseye-slim
+FROM debian:bullseye-slim as runtime
 
 RUN apt-get update
 RUN apt-get -y install ca-certificates
+RUN rm -rf /var/lib/apt/lists/*
+
+LABEL org.opencontainers.image.title=$IMAGE_TITLE
+LABEL org.opencontainers.image.version=$RELEASE
+LABEL org.opencontainers.image.description=$IMAGE_DESCRIPTION
+LABEL org.opencontainers.image.authors="The Guild"
+LABEL org.opencontainers.image.vendor="Kamil Kisiela"
+LABEL org.opencontainers.image.url="https://github.com/kamilkisiela/graphql-hive"
 
 # Copy in the required files from our build image
 COPY --from=build --chown=root:root /dist /dist

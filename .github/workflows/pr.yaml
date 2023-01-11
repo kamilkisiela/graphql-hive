@@ -43,6 +43,8 @@ jobs:
       imageTag: ${{ github.event.pull_request.head.sha }}
       publishLatest: false
       targets: 'rust'
+      build: false
+      publishPrComment: false
     secrets: inherit
 
   # Unit tests using Jest

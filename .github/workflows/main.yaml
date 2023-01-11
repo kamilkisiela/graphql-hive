@@ -17,7 +17,7 @@ jobs:
         rust
     secrets: inherit
 
-  # Build and publish Rust packages.
+  # Build and publish Rust crates and binaries
   rust:
     uses: ./.github/workflows/publish-rust.yaml
     secrets: inherit
