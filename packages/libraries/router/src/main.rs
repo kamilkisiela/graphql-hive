@@ -6,7 +6,7 @@ mod registry;
 mod usage;
 
 fn main() {
-    match HiveRegistry::new() {
+    match HiveRegistry::new(None) {
         Ok(_) => {}
         Err(e) => {
             eprintln!("{}", e);
