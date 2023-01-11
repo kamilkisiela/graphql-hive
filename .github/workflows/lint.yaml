@@ -21,13 +21,23 @@ jobs:
             ${{ runner.os }}-eslint
 
       - name: eslint
+        id: eslint
         run: pnpm lint
         env:
           TIMING: 'true'
           DEBUG: 'eslint:cli-engine'
 
+      - name: eslint tip
+        if: ${{ steps.eslint.outcome }} == 'failure'
+        run: echo "Run pnpm lint --fix"
+
       - name: prettier
+        id: prettier
         run: pnpm lint:prettier
+
+      - name: eslint tip
+        if: ${{ steps.prettier.outcome }} == 'failure'
+        run: echo "Run pnpm format"
 
       - name: Generate Types
         run: yarn graphql:generate
