@@ -33,7 +33,7 @@ export function createSupergraphSDLFetcher({ endpoint, key }: SupergraphSDLFetch
     let retryCount = 0;
 
     const retry = (status: number) => {
-      if (retryCount >= 10 || status <= 499) {
+      if (retryCount >= 10 || status < 499) {
         return Promise.reject(new Error(`Failed to fetch [${status}]`));
       }
 
