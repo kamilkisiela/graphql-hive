@@ -1,3 +1,4 @@
+import { normalizeOperation } from '@graphql-hive/core';
 import {
   ArgumentNode,
   DocumentNode,
@@ -24,24 +25,23 @@ import {
   visitWithTypeInfo,
 } from 'graphql';
 import LRU from 'tiny-lru';
-import { normalizeOperation } from '@graphql-hive/core';
+import { version } from '../version.js';
 import { createAgent } from './agent.js';
 import { randomSampling } from './sampling.js';
-import { version } from '../version.js';
+import type {
+  ClientInfo,
+  CollectUsageCallback,
+  HivePluginOptions,
+  HiveUsagePluginOptions,
+} from './types.js';
 import {
   cache,
   cacheDocumentKey,
-  measureDuration,
-  memo,
   isAsyncIterableIterator,
   logIf,
+  measureDuration,
+  memo,
 } from './utils.js';
-import type {
-  HivePluginOptions,
-  HiveUsagePluginOptions,
-  CollectUsageCallback,
-  ClientInfo,
-} from './types.js';
 
 interface UsageCollector {
   collect(args: ExecutionArgs): CollectUsageCallback;
@@ -293,11 +293,10 @@ export function createCollector({
       if (collected_entire_named_types.has(namedType.name)) {
         // No need to mark this type as used again
         return;
-      } else {
-        // Add this type to the set of types that have been marked as used
-        // to avoid infinite loops
-        collected_entire_named_types.add(namedType.name);
       }
+      // Add this type to the set of types that have been marked as used
+      // to avoid infinite loops
+      collected_entire_named_types.add(namedType.name);
 
       if (isScalarType(namedType)) {
         markAsUsed(makeId(namedType.name));

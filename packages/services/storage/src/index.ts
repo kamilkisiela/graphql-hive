@@ -1,26 +1,28 @@
 import type {
-  User,
+  ActivityObject,
+  Alert,
+  AlertChannel,
+  AuthProvider,
+  Member,
   Organization,
+  OrganizationAccessScope,
+  OrganizationBilling,
+  OrganizationInvitation,
+  OrganizationType,
+  PersistedOperation,
   Project,
-  Target,
+  ProjectAccessScope,
+  ProjectType,
   Schema,
   SchemaVersion,
-  Member,
-  ActivityObject,
-  TargetSettings,
-  PersistedOperation,
-  AlertChannel,
-  Alert,
-  AuthProvider,
-  OrganizationBilling,
   Storage,
-  ProjectType,
-  OrganizationType,
-  OrganizationInvitation,
-  OrganizationAccessScope,
-  ProjectAccessScope,
+  Target,
   TargetAccessScope,
+  TargetSettings,
+  User,
 } from '@hive/api';
+import { batch } from '@theguild/buddy';
+import { paramCase } from 'param-case';
 import {
   DatabasePool,
   DatabasePoolConnection,
@@ -30,30 +32,28 @@ import {
   UniqueIntegrityConstraintViolationError,
 } from 'slonik';
 import { update } from 'slonik-utilities';
-import { paramCase } from 'param-case';
-import {
-  commits,
-  getPool,
-  organizations,
-  organization_member,
-  projects,
-  targets,
-  target_validation,
-  users,
-  versions,
-  version_commit,
-  objectToParams,
-  activities,
-  persisted_operations,
-  alert_channels,
-  alerts,
-  organizations_billing,
-  organization_invitations,
-} from './db';
-import { batch } from '@theguild/buddy';
-import type { Slonik } from './shared';
 import zod from 'zod';
 import type { OIDCIntegration } from '../../api/src/shared/entities';
+import {
+  activities,
+  alert_channels,
+  alerts,
+  commits,
+  getPool,
+  objectToParams,
+  organization_invitations,
+  organization_member,
+  organizations,
+  organizations_billing,
+  persisted_operations,
+  projects,
+  target_validation,
+  targets,
+  users,
+  version_commit,
+  versions,
+} from './db';
+import type { Slonik } from './shared';
 
 export { createConnectionString } from './db/utils';
 export { createTokenStorage } from './tokens';
@@ -688,7 +688,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         sql`SELECT id FROM public.organizations WHERE clean_id = ${organization} LIMIT 1`,
       );
 
-      return result.id as string;
+      return result.id;
     },
     getOrganizationOwnerId: batch(async selectors => {
       const organizations = selectors.map(s => s.organization);
@@ -1068,7 +1068,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         WHERE p.clean_id = ${project} AND org.clean_id = ${organization} LIMIT 1`,
       );
 
-      return result.id as string;
+      return result.id;
     },
     async getTargetId({ project, target, organization, useIds }) {
       if (useIds) {
@@ -1081,7 +1081,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           LIMIT 1`,
         );
 
-        return result.id as string;
+        return result.id;
       }
 
       // Based on clean_id, resolve id
@@ -1094,7 +1094,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           LIMIT 1`,
       );
 
-      return result.id as string;
+      return result.id;
     },
     async getPersistedOperationId({ project, operation }) {
       const result = await pool.one<Pick<persisted_operations, 'id'>>(
@@ -2444,6 +2444,9 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           , "client_id"
           , "client_secret"
           , "oauth_api_url"
+          , "token_endpoint"
+          , "userinfo_endpoint"
+          , "authorization_endpoint"
         FROM
           "public"."oidc_integrations"
         WHERE
@@ -2466,6 +2469,9 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           , "client_id"
           , "client_secret"
           , "oauth_api_url"
+          , "token_endpoint"
+          , "userinfo_endpoint"
+          , "authorization_endpoint"
         FROM
           "public"."oidc_integrations"
         WHERE
@@ -2487,13 +2493,17 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             "linked_organization_id",
             "client_id",
             "client_secret",
-            "oauth_api_url"
+            "token_endpoint",
+            "userinfo_endpoint",
+            "authorization_endpoint"
           )
           VALUES (
             ${args.organizationId},
             ${args.clientId},
             ${args.encryptedClientSecret},
-            ${args.oauthApiUrl}
+            ${args.tokenEndpoint},
+            ${args.userinfoEndpoint},
+            ${args.authorizationEndpoint}
           )
           RETURNING
             "id"
@@ -2501,6 +2511,9 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             , "client_id"
             , "client_secret"
             , "oauth_api_url"
+            , "token_endpoint"
+            , "userinfo_endpoint"
+            , "authorization_endpoint"
         `);
 
         return {
@@ -2525,9 +2538,24 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       const result = await pool.maybeOne<unknown>(sql`
         UPDATE "public"."oidc_integrations"
         SET
-          "oauth_api_url" = ${args.oauthApiUrl ?? sql`"oauth_api_url"`}
-          , "client_id" = ${args.clientId ?? sql`"client_id"`}
+          "client_id" = ${args.clientId ?? sql`"client_id"`}
           , "client_secret" = ${args.encryptedClientSecret ?? sql`"client_secret"`}
+          , "token_endpoint" = ${
+            args.tokenEndpoint ??
+            /** update existing columns to the old legacy values if not yet stored */
+            sql`COALESCE("token_endpoint", CONCAT("oauth_api_url", "/token"))`
+          }
+          , "userinfo_endpoint" = ${
+            args.userinfoEndpoint ??
+            /** update existing columns to the old legacy values if not yet stored */
+            sql`COALESCE("userinfo_endpoint", CONCAT("oauth_api_url", "/userinfo"))`
+          }
+          , "authorization_endpoint" = ${
+            args.authorizationEndpoint ??
+            /** update existing columns to the old legacy values if not yet stored */
+            sql`COALESCE("authorization_endpoint", CONCAT("oauth_api_url", "/authorize"))`
+          }
+          , "oauth_api_url" = NULL
         WHERE
           "id" = ${args.oidcIntegrationId}
         RETURNING
@@ -2536,6 +2564,9 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           , "client_id"
           , "client_secret"
           , "oauth_api_url"
+          , "token_endpoint"
+          , "userinfo_endpoint"
+          , "authorization_endpoint"
       `);
 
       return decodeOktaIntegrationRecord(result);
@@ -2660,22 +2691,55 @@ function isDefined<T>(val: T | undefined | null): val is T {
   return val !== undefined && val !== null;
 }
 
-const OktaIntegrationModel = zod.object({
+const OktaIntegrationBaseModel = zod.object({
   id: zod.string(),
   linked_organization_id: zod.string(),
   client_id: zod.string(),
   client_secret: zod.string(),
-  oauth_api_url: zod.string().url(),
 });
 
+const OktaIntegrationLegacyModel = zod.intersection(
+  OktaIntegrationBaseModel,
+  zod.object({
+    oauth_api_url: zod.string().url(),
+  }),
+);
+
+const OktaIntegrationModel = zod.intersection(
+  OktaIntegrationBaseModel,
+  zod.object({
+    token_endpoint: zod.string().url(),
+    userinfo_endpoint: zod.string().url(),
+    authorization_endpoint: zod.string().url(),
+  }),
+);
+
+const OktaIntegrationModelUnion = zod.union([OktaIntegrationLegacyModel, OktaIntegrationModel]);
+
 const decodeOktaIntegrationRecord = (result: unknown): OIDCIntegration => {
-  const rawRecord = OktaIntegrationModel.parse(result);
+  const rawRecord = OktaIntegrationModelUnion.parse(result);
+
+  // handle legacy case
+  if ('oauth_api_url' in rawRecord) {
+    return {
+      id: rawRecord.id,
+      clientId: rawRecord.client_id,
+      encryptedClientSecret: rawRecord.client_secret,
+      linkedOrganizationId: rawRecord.linked_organization_id,
+      tokenEndpoint: `${rawRecord.oauth_api_url}/token`,
+      userinfoEndpoint: `${rawRecord.oauth_api_url}/userinfo`,
+      authorizationEndpoint: `${rawRecord.oauth_api_url}/authorize`,
+    };
+  }
+
   return {
     id: rawRecord.id,
     clientId: rawRecord.client_id,
     encryptedClientSecret: rawRecord.client_secret,
     linkedOrganizationId: rawRecord.linked_organization_id,
-    oauthApiUrl: rawRecord.oauth_api_url,
+    tokenEndpoint: rawRecord.token_endpoint,
+    userinfoEndpoint: rawRecord.userinfo_endpoint,
+    authorizationEndpoint: rawRecord.authorization_endpoint,
   };
 };
 

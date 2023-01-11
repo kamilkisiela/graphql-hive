@@ -1,6 +1,6 @@
-import { Interceptor } from 'slonik';
-import { getCurrentHub, captureException } from '@sentry/node';
+import { captureException, getCurrentHub } from '@sentry/node';
 import type { Span } from '@sentry/types';
+import { Interceptor } from 'slonik';
 
 export const createSentryInterceptor = (): Interceptor => {
   const connections: Record<string, Record<string, Span>> = {};

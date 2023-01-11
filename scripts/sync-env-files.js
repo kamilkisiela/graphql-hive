@@ -3,12 +3,12 @@
  * <sync> is a special value that will be replaced with the value from the root .env file.
  */
 import { constants } from 'fs';
-import { readFile, writeFile, access } from 'fs/promises';
-import { join, dirname, relative } from 'path';
+import { access, readFile, writeFile } from 'fs/promises';
+import { dirname, join, relative } from 'path';
 import { parse } from 'dotenv';
 import glob from 'glob';
 
-if (!!process.env.CI) {
+if (process.env.CI) {
   console.log('[sync-env-files] CI Detected, skipping');
   process.exit(0);
 }

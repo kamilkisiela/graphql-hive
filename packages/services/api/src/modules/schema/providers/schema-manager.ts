@@ -1,25 +1,25 @@
 import { Injectable, Scope } from 'graphql-modules';
 import lodash from 'lodash';
-import { SchemaVersion } from '../../../shared/mappers';
+import { z } from 'zod';
 import { Orchestrator, ProjectType } from '../../../shared/entities';
-import { atomic, stringifySelector } from '../../../shared/helpers';
 import { HiveError } from '../../../shared/errors';
+import { atomic, stringifySelector } from '../../../shared/helpers';
+import { SchemaVersion } from '../../../shared/mappers';
 import { AuthManager } from '../../auth/providers/auth-manager';
+import { ProjectAccessScope } from '../../auth/providers/project-access';
+import { TargetAccessScope } from '../../auth/providers/target-access';
+import { CryptoProvider } from '../../shared/providers/crypto';
 import { Logger } from '../../shared/providers/logger';
 import {
+  OrganizationSelector,
+  ProjectSelector,
   Storage,
   TargetSelector,
-  ProjectSelector,
-  OrganizationSelector,
 } from '../../shared/providers/storage';
 import { CustomOrchestrator } from './orchestrators/custom';
 import { FederationOrchestrator } from './orchestrators/federation';
 import { SingleOrchestrator } from './orchestrators/single';
 import { StitchingOrchestrator } from './orchestrators/stitching';
-import { TargetAccessScope } from '../../auth/providers/target-access';
-import { ProjectAccessScope } from '../../auth/providers/project-access';
-import { CryptoProvider } from '../../shared/providers/crypto';
-import { z } from 'zod';
 
 const ENABLE_EXTERNAL_COMPOSITION_SCHEMA = z.object({
   endpoint: z.string().url().nonempty(),

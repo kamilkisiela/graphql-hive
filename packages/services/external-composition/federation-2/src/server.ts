@@ -1,8 +1,8 @@
-import { verifyRequest, compose, signatureHeaderName } from '@graphql-hive/external-composition';
 import { composeServices } from '@apollo/composition';
-import { parse, printSchema } from 'graphql';
-import { createServerAdapter } from '@whatwg-node/server';
+import { compose, signatureHeaderName, verifyRequest } from '@graphql-hive/external-composition';
 import { Response } from '@whatwg-node/fetch';
+import { createServerAdapter } from '@whatwg-node/server';
+import { parse, printSchema } from 'graphql';
 import { ResolvedEnv } from './environment';
 
 const composeFederation = compose(services => {
@@ -26,24 +26,23 @@ const composeFederation = compose(services => {
           })),
         },
       };
-    } else {
-      if (!result.supergraphSdl) {
-        return {
-          type: 'failure',
-          result: {
-            errors: [{ message: 'supergraphSdl not defined' }],
-          },
-        };
-      }
-
+    }
+    if (!result.supergraphSdl) {
       return {
-        type: 'success',
+        type: 'failure',
         result: {
-          supergraph: result.supergraphSdl,
-          sdl: printSchema(result.schema.toGraphQLJSSchema()),
+          errors: [{ message: 'supergraphSdl not defined' }],
         },
       };
     }
+
+    return {
+      type: 'success',
+      result: {
+        supergraph: result.supergraphSdl,
+        sdl: printSchema(result.schema.toGraphQLJSSchema()),
+      },
+    };
   } catch (e) {
     return {
       type: 'failure',
@@ -87,15 +86,14 @@ export const createRequestListener = (env: ResolvedEnv): ReturnType<typeof creat
 
       if (error) {
         return new Response(error, { status: 500 });
-      } else {
-        const result = composeFederation(JSON.parse(body));
-        return new Response(JSON.stringify(result), {
-          status: 200,
-          headers: {
-            'content-type': 'application/json',
-          },
-        });
       }
+      const result = composeFederation(JSON.parse(body));
+      return new Response(JSON.stringify(result), {
+        status: 200,
+        headers: {
+          'content-type': 'application/json',
+        },
+      });
     }
 
     return new Response('', {

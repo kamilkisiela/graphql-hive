@@ -1,6 +1,6 @@
-import type { Exchange, Operation } from 'urql';
-import { map, pipe, tap } from 'wonka';
+import { Exchange, Operation } from 'urql';
 import { proxy, useSnapshot } from 'valtio';
+import { map, pipe, tap } from 'wonka';
 
 const inflightRequests = new Set<number>();
 

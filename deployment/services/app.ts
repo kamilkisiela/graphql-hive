@@ -1,12 +1,11 @@
+import * as k8s from '@pulumi/kubernetes';
 import * as pulumi from '@pulumi/pulumi';
-import * as azure from '@pulumi/azure';
-import { GraphQL } from './graphql';
-import { DbMigrations } from './db-migrations';
-import { RemoteArtifactAsServiceDeployment } from '../utils/remote-artifact-as-service';
-import { serviceLocalEndpoint } from '../utils/local-endpoint';
 import { DeploymentEnvironment } from '../types';
-import { PackageHelper } from '../utils/pack';
+import { serviceLocalEndpoint } from '../utils/local-endpoint';
+import { ServiceDeployment } from '../utils/service-deployment';
+import { DbMigrations } from './db-migrations';
 import { Docs } from './docs';
+import { GraphQL } from './graphql';
 
 const appConfig = new pulumi.Config('app');
 const commonConfig = new pulumi.Config('common');
@@ -22,19 +21,21 @@ export function deployApp({
   docs,
   graphql,
   dbMigrations,
-  storageContainer,
-  packageHelper,
+  release,
+  image,
   supertokensConfig,
   auth0Config,
   googleConfig,
   githubConfig,
+  imagePullSecret,
   emailsEndpoint,
 }: {
-  storageContainer: azure.storage.Container;
-  packageHelper: PackageHelper;
+  image: string;
+  release: string;
   deploymentEnv: DeploymentEnvironment;
   graphql: GraphQL;
   dbMigrations: DbMigrations;
+  imagePullSecret: k8s.core.v1.Secret;
   supertokensConfig: {
     endpoint: pulumi.Output<string>;
     apiKey: pulumi.Output<string>;
@@ -53,13 +54,11 @@ export function deployApp({
   emailsEndpoint: pulumi.Output<string>;
   docs: Docs;
 }) {
-  const appRelease = packageHelper.currentReleaseId();
-
-  return new RemoteArtifactAsServiceDeployment(
+  return new ServiceDeployment(
     'app',
     {
-      storageContainer,
-      packageInfo: packageHelper.npmPack('@hive/app'),
+      image,
+      imagePullSecret,
       readinessProbe: '/api/health',
       livenessProbe: '/api/health',
       env: [
@@ -71,7 +70,7 @@ export function deployApp({
         },
         {
           name: 'RELEASE',
-          value: appRelease,
+          value: release,
         },
         { name: 'SENTRY_DSN', value: commonEnv.SENTRY_DSN },
         { name: 'SENTRY', value: commonEnv.SENTRY_ENABLED },

@@ -1,11 +1,11 @@
-/* eslint-disable-next-line import/no-extraneous-dependencies */
-import { createSchema, createYoga } from 'graphql-yoga';
+import { createServer } from 'node:http';
+import { AddressInfo } from 'node:net';
 /* eslint-disable-next-line import/no-extraneous-dependencies */
 import { ApolloServerBase } from 'apollo-server-core';
 import axios from 'axios';
-import { createServer } from 'node:http';
-import { AddressInfo } from 'node:net';
-import { createHive, useHive, hiveApollo } from '../src';
+/* eslint-disable-next-line import/no-extraneous-dependencies */
+import { createSchema, createYoga } from 'graphql-yoga';
+import { createHive, hiveApollo, useHive } from '../src';
 import { waitFor } from './test-utils';
 
 const typeDefs = /* GraphQL */ `

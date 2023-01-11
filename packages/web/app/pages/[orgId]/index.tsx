@@ -2,7 +2,6 @@ import { ReactElement } from 'react';
 import NextLink from 'next/link';
 import { onlyText } from 'react-children-utilities';
 import { useQuery } from 'urql';
-
 import { authenticated } from '@/components/authenticated-container';
 import { OrganizationLayout } from '@/components/layouts';
 import {

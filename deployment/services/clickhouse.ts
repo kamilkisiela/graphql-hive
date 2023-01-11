@@ -1,6 +1,6 @@
 import * as pulumi from '@pulumi/pulumi';
-import { serviceLocalHost } from '../utils/local-endpoint';
 import { Clickhouse as ClickhouseDeployment } from '../utils/clickhouse';
+import { serviceLocalHost } from '../utils/local-endpoint';
 
 const clickhouseConfig = new pulumi.Config('clickhouse');
 const commonConfig = new pulumi.Config('common');
@@ -57,7 +57,7 @@ export function deployClickhouse() {
     protocol: 'http',
     host: serviceLocalHost(chApi.service),
     port: String(chApi.port),
-    password: password,
+    password,
     username,
     cloud: null,
   };

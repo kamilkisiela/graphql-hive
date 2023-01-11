@@ -1,9 +1,8 @@
-import { ReactElement, useCallback, useEffect, useRef, useState } from 'react';
 import 'twin.macro';
+import { ReactElement, useCallback, useEffect, useRef, useState } from 'react';
 import { Stat, StatHelpText, StatLabel, StatNumber } from '@chakra-ui/react';
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { useMutation, useQuery } from 'urql';
-
 import { authenticated } from '@/components/authenticated-container';
 import { Section } from '@/components/common';
 import { DataWrapper, QueryError } from '@/components/common/DataWrapper';
@@ -12,8 +11,7 @@ import { BillingPaymentMethod } from '@/components/organization/billing/BillingP
 import { BillingPlanPicker } from '@/components/organization/billing/BillingPlanPicker';
 import { LimitSlider } from '@/components/organization/billing/LimitSlider';
 import { PlanSummary } from '@/components/organization/billing/PlanSummary';
-import { Card, Heading, Title } from '@/components/v2';
-import { Button, Input } from '@/components/v2';
+import { Button, Card, Heading, Input, Title } from '@/components/v2';
 import { BillingPlanType } from '@/gql/graphql';
 import {
   BillingPlansDocument,
@@ -136,7 +134,7 @@ const Inner = ({
       monthlyLimits: {
         operations: operationsRateLimit * 1_000_000,
       },
-      paymentMethodId: paymentMethodId,
+      paymentMethodId,
       couponCode: couponCode.trim() === '' ? null : couponCode.trim(),
     });
   };

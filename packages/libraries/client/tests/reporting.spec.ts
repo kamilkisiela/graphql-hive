@@ -1,8 +1,8 @@
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { buildSubgraphSchema } from '@apollo/federation';
 import { buildSchema, parse } from 'graphql';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import nock from 'nock';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { buildSubgraphSchema } from '@apollo/federation';
 import { createHive } from '../src/client';
 import { version } from '../src/version';
 import { waitFor } from './test-utils';
@@ -481,7 +481,7 @@ test('should display SchemaPublishMissingServiceError', async () => {
       maxRetries: 1,
       logger,
     },
-    token: token,
+    token,
     reporting: {
       author: 'Test',
       commit: 'Commit',
@@ -543,7 +543,7 @@ test('should display SchemaPublishMissingUrlError', async () => {
       maxRetries: 1,
       logger,
     },
-    token: token,
+    token,
     reporting: {
       author: 'Test',
       commit: 'Commit',

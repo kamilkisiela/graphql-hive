@@ -1,22 +1,22 @@
 #!/usr/bin/env node
 import 'reflect-metadata';
 import {
-  createServer,
   createErrorHandler,
-  startMetrics,
+  createServer,
   registerShutdown,
   reportReadiness,
   startHeartbeats,
+  startMetrics,
 } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
-import LRU from 'tiny-lru';
-import ms from 'ms';
-import { createStorage } from './storage';
-import { useCache } from './cache';
-import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
 import type { CreateFastifyContextOptions } from '@trpc/server/adapters/fastify';
+import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
+import ms from 'ms';
+import LRU from 'tiny-lru';
 import { Context, tokensApiRouter } from './api';
+import { useCache } from './cache';
 import { env } from './environment';
+import { createStorage } from './storage';
 
 export async function main() {
   if (env.sentry) {

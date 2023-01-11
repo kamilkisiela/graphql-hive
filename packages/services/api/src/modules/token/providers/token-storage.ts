@@ -1,21 +1,21 @@
-import { Inject, Injectable, Scope, CONTEXT } from 'graphql-modules';
-import { atomic } from '../../../shared/helpers';
-import { HiveError } from '../../../shared/errors';
-import type { Token } from '../../../shared/entities';
-import { Logger } from '../../shared/providers/logger';
-import {
-  TargetSelector,
-  ProjectSelector,
-  OrganizationSelector,
-} from '../../shared/providers/storage';
-import type { TargetAccessScope } from '../../auth/providers/target-access';
-import type { ProjectAccessScope } from '../../auth/providers/project-access';
-import type { OrganizationAccessScope } from '../../auth/providers/organization-access';
-import type { TokensConfig } from './tokens';
-import { TOKENS_CONFIG } from './tokens';
 import type { TokensApi } from '@hive/tokens';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import { fetch } from '@whatwg-node/fetch';
+import { CONTEXT, Inject, Injectable, Scope } from 'graphql-modules';
+import type { Token } from '../../../shared/entities';
+import { HiveError } from '../../../shared/errors';
+import { atomic } from '../../../shared/helpers';
+import type { OrganizationAccessScope } from '../../auth/providers/organization-access';
+import type { ProjectAccessScope } from '../../auth/providers/project-access';
+import type { TargetAccessScope } from '../../auth/providers/target-access';
+import { Logger } from '../../shared/providers/logger';
+import {
+  OrganizationSelector,
+  ProjectSelector,
+  TargetSelector,
+} from '../../shared/providers/storage';
+import type { TokensConfig } from './tokens';
+import { TOKENS_CONFIG } from './tokens';
 
 function maskToken(token: string) {
   return token.substring(0, 3) + '*'.repeat(token.length - 6) + token.substring(token.length - 3);
@@ -69,7 +69,7 @@ export class TokenStorage {
       target: input.target,
       project: input.project,
       organization: input.organization,
-      scopes: input.scopes as CreateTokenInput['scopes'],
+      scopes: input.scopes,
     });
 
     return response;

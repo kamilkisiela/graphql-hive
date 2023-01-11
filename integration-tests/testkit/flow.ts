@@ -1,34 +1,33 @@
 import { gql } from '@app/gql';
 import { fetch } from '@whatwg-node/fetch';
-
 import type {
+  AnswerOrganizationTransferRequestInput,
   CreateOrganizationInput,
-  UpdateOrganizationNameInput,
-  SchemaPublishInput,
   CreateProjectInput,
-  UpdateProjectNameInput,
+  CreateTargetInput,
   CreateTokenInput,
   DeleteTokensInput,
-  OrganizationMemberAccessInput,
-  SchemaCheckInput,
-  PublishPersistedOperationInput,
-  SetTargetValidationInput,
-  UpdateTargetValidationSettingsInput,
-  OperationsStatsSelectorInput,
-  UpdateBaseSchemaInput,
-  SchemaVersionsInput,
-  CreateTargetInput,
-  UpdateTargetNameInput,
-  SchemaVersionUpdateInput,
-  TargetSelectorInput,
-  OrganizationSelectorInput,
-  SchemaSyncCdnInput,
-  RateLimitInput,
-  InviteToOrganizationByEmailInput,
   EnableExternalSchemaCompositionInput,
+  InviteToOrganizationByEmailInput,
+  OperationsStatsSelectorInput,
+  OrganizationMemberAccessInput,
+  OrganizationSelectorInput,
   OrganizationTransferRequestSelector,
+  PublishPersistedOperationInput,
+  RateLimitInput,
   RequestOrganizationTransferInput,
-  AnswerOrganizationTransferRequestInput,
+  SchemaCheckInput,
+  SchemaPublishInput,
+  SchemaSyncCdnInput,
+  SchemaVersionsInput,
+  SchemaVersionUpdateInput,
+  SetTargetValidationInput,
+  TargetSelectorInput,
+  UpdateBaseSchemaInput,
+  UpdateOrganizationNameInput,
+  UpdateProjectNameInput,
+  UpdateTargetNameInput,
+  UpdateTargetValidationSettingsInput,
 } from './gql/graphql';
 import { execute } from './graphql';
 
@@ -351,6 +350,9 @@ export function createTarget(input: CreateTargetInput, authToken: string) {
               id
               cleanId
             }
+          }
+          error {
+            message
           }
         }
       }
@@ -714,6 +716,10 @@ export function fetchLatestSchema(token: string) {
       query latestVersion {
         latestVersion {
           baseSchema
+          commit {
+            source
+            commit
+          }
           schemas {
             nodes {
               source
@@ -736,6 +742,10 @@ export function fetchLatestValidSchema(token: string) {
         latestValidVersion {
           id
           baseSchema
+          commit {
+            source
+            commit
+          }
           schemas {
             nodes {
               source
@@ -870,13 +880,11 @@ export function createCdnAccess(selector: TargetSelectorInput, token: string) {
 }
 
 export async function fetchSchemaFromCDN(selector: TargetSelectorInput, token: string) {
-  const cdnAccessResult = await createCdnAccess(selector, token);
+  const cdnAccessResult = await createCdnAccess(selector, token).then(r =>
+    r.expectNoGraphQLErrors(),
+  );
 
-  if (cdnAccessResult.body.errors) {
-    throw new Error(cdnAccessResult.body.errors[0].message);
-  }
-
-  const cdn = cdnAccessResult.body.data!.createCdnToken;
+  const cdn = cdnAccessResult.createCdnToken;
 
   const res = await fetch(cdn.url + '/sdl', {
     headers: {
@@ -891,13 +899,11 @@ export async function fetchSchemaFromCDN(selector: TargetSelectorInput, token: s
 }
 
 export async function fetchSupergraphFromCDN(selector: TargetSelectorInput, token: string) {
-  const cdnAccessResult = await createCdnAccess(selector, token);
+  const cdnAccessResult = await createCdnAccess(selector, token).then(r =>
+    r.expectNoGraphQLErrors(),
+  );
 
-  if (cdnAccessResult.body.errors) {
-    throw new Error(cdnAccessResult.body.errors[0].message);
-  }
-
-  const cdn = cdnAccessResult.body.data!.createCdnToken;
+  const cdn = cdnAccessResult.createCdnToken;
 
   const res = await fetch(cdn.url + '/supergraph', {
     headers: {
@@ -914,13 +920,11 @@ export async function fetchSupergraphFromCDN(selector: TargetSelectorInput, toke
 }
 
 export async function fetchMetadataFromCDN(selector: TargetSelectorInput, token: string) {
-  const cdnAccessResult = await createCdnAccess(selector, token);
+  const cdnAccessResult = await createCdnAccess(selector, token).then(r =>
+    r.expectNoGraphQLErrors(),
+  );
 
-  if (cdnAccessResult.body.errors) {
-    throw new Error(cdnAccessResult.body.errors[0].message);
-  }
-
-  const cdn = cdnAccessResult.body.data!.createCdnToken;
+  const cdn = cdnAccessResult.createCdnToken;
 
   const res = await fetch(cdn.url + '/metadata', {
     headers: {

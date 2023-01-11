@@ -1,10 +1,10 @@
 import type { inferRouterInputs } from '@trpc/server';
 import { initTRPC } from '@trpc/server';
 import type { FastifyLoggerInstance } from 'fastify';
+import { Redis } from 'ioredis';
 import { z } from 'zod';
 import { buildCounter, supergraphCounter, validateCounter } from './metrics';
 import { pickOrchestrator } from './orchestrators';
-import { Redis } from 'ioredis';
 
 const t = initTRPC
   .context<{
@@ -41,7 +41,7 @@ export const schemaBuilderApiRouter = t.router({
             z
               .object({
                 ...SCHEMA_OBJECT_VALIDATION,
-                url: z.string().nullish(),
+                url: z.string().nullish().optional(),
               })
               .required(),
           ),

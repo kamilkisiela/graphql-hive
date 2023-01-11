@@ -1,5 +1,5 @@
-import React from 'react';
 import 'twin.macro';
+import React, { PropsWithChildren } from 'react';
 import {
   Button,
   Drawer,
@@ -23,31 +23,30 @@ import {
   useDisclosure,
 } from '@chakra-ui/react';
 import {
+  createTable,
+  getCoreRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  OnChangeFn,
+  PaginationState,
+  SortingState,
+  useTableInstance,
+} from '@tanstack/react-table';
+import {
   VscChevronDown,
   VscChevronLeft,
   VscChevronRight,
   VscChevronUp,
   VscWarning,
 } from 'react-icons/vsc';
-import {
-  createTable,
-  useTableInstance,
-  getCoreRowModel,
-  getSortedRowModel,
-  getPaginationRowModel,
-  SortingState,
-  PaginationState,
-  OnChangeFn,
-} from '@tanstack/react-table';
 import { useQuery } from 'urql';
 import { useDebouncedCallback } from 'use-debounce';
-
 import { Scale, Section } from '@/components/common';
 import { GraphQLHighlight } from '@/components/common/GraphQLSDLBlock';
+import { env } from '@/env/frontend';
 import { DateRangeInput, OperationsStatsDocument, OperationStatsFieldsFragment } from '@/graphql';
 import { useDecimal, useFormattedDuration, useFormattedNumber } from '@/lib/hooks';
 import { OperationsFallback } from './Fallback';
-import { env } from '@/env/frontend';
 
 interface Operation {
   id: string;
@@ -62,11 +61,16 @@ interface Operation {
   document: string;
 }
 
-const Sortable: React.FC<{
+const Sortable = ({
+  children,
+  isSorted,
+  isSortedDesc,
+  align = 'left',
+}: PropsWithChildren<{
   align?: 'center' | 'right' | 'left';
   isSortedDesc?: boolean;
   isSorted?: boolean;
-}> = ({ children, isSorted, isSortedDesc, align = 'left' }) => {
+}>) => {
   return (
     <Flex
       direction="row"
@@ -384,10 +388,12 @@ const OperationsTableContainer: React.FC<{
   const data = React.useMemo(() => {
     const records: Array<Operation> = [];
     for (const op of operations) {
-      if (operationsFilter.length > 0 && op.operationHash) {
-        if (operationsFilter.includes(op.operationHash) === false) {
-          continue;
-        }
+      if (
+        operationsFilter.length > 0 &&
+        op.operationHash &&
+        operationsFilter.includes(op.operationHash) === false
+      ) {
+        continue;
       }
       records.push({
         id: op.id,
@@ -419,7 +425,8 @@ const OperationsTableContainer: React.FC<{
         const maxPageIndex = Math.ceil(data.length / state.pageSize) - 1;
         if (state.pageIndex < 0) {
           return { ...state, pageIndex: 0 };
-        } else if (state.pageIndex > maxPageIndex) {
+        }
+        if (state.pageIndex > maxPageIndex) {
           return { ...state, pageIndex: maxPageIndex };
         }
         return state;

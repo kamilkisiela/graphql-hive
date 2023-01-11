@@ -1,7 +1,7 @@
-import { gitToJs } from 'git-parse';
-import ci from 'env-ci';
-import { readFileSync, existsSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
+import ci from 'env-ci';
+import { gitToJs } from 'git-parse';
 
 function splitPath(path: string) {
   const parts = path.split(/(\/|\\)/);
@@ -37,7 +37,7 @@ function useGitHubAction(): CIRunner {
   return {
     detect() {
       // eslint-disable-next-line no-process-env
-      return Boolean(process.env.GITHUB_ACTIONS);
+      return !!process.env.GITHUB_ACTIONS;
     },
     env() {
       const isPr =

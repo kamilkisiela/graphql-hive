@@ -1,8 +1,8 @@
 import { hash, nsToMs, parseDateRangeInput } from '../../shared/helpers';
 import { createConnection } from '../../shared/schema';
 import { IdTranslator } from '../shared/providers/id-translator';
-import { OperationsManager } from './providers/operations-manager';
 import { OperationsModule } from './__generated__/types';
+import { OperationsManager } from './providers/operations-manager';
 
 export const resolvers: OperationsModule.Resolvers = {
   Query: {

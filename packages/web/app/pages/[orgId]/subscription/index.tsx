@@ -2,7 +2,6 @@ import { ReactElement } from 'react';
 import dynamic from 'next/dynamic';
 import { Stat, StatHelpText, StatLabel, StatNumber } from '@chakra-ui/react';
 import { endOfMonth, startOfMonth } from 'date-fns';
-
 import { authenticated } from '@/components/authenticated-container';
 import { OrganizationLayout } from '@/components/layouts';
 import { BillingView } from '@/components/organization/billing/Billing';
@@ -128,11 +127,11 @@ export const getServerSideProps = withSessionProtection(async context => {
    */
   const isStripeEnabled = getIsStripeEnabled();
   if (isStripeEnabled === false) {
-    const parts = `${context.resolvedUrl}`.split('/');
+    const parts = String(context.resolvedUrl).split('/');
     parts.pop();
     return {
       redirect: {
-        destination: `${parts.join('/')}`,
+        destination: parts.join('/'),
         permanent: false,
       },
     };

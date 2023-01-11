@@ -1,9 +1,9 @@
-import { Flags, Errors } from '@oclif/core';
-import { loadSchema, renderChanges, renderErrors, minifySchema } from '../../helpers/schema';
-import { invariant } from '../../helpers/validation';
-import { gitInfo } from '../../helpers/git';
-import { graphqlEndpoint } from '../../helpers/config';
+import { Errors, Flags } from '@oclif/core';
 import Command from '../../base-command';
+import { graphqlEndpoint } from '../../helpers/config';
+import { gitInfo } from '../../helpers/git';
+import { loadSchema, minifySchema, renderChanges, renderErrors } from '../../helpers/schema';
+import { invariant } from '../../helpers/validation';
 
 export default class SchemaCheck extends Command {
   static description = 'checks schema';

@@ -1,6 +1,5 @@
 import React, { ReactElement, ReactNode } from 'react';
 import { useQuery } from 'urql';
-
 import { ActivityNode } from '@/components/common/activities/common';
 import { Heading, Link, Skeleton, TimeAgo } from '@/components/v2';
 import {
@@ -226,15 +225,15 @@ export const Activities = (props: React.ComponentProps<'div'>): ReactElement => 
       <Heading>Recent Activity</Heading>
       <ul className="mt-4 w-full break-all rounded-md border border-gray-800 p-5">
         {isLoading || !activities?.nodes
-          ? new Array(3).fill(null).map((_, index) => {
+          ? new Array(3).fill(null).map((_, index) => (
               <ActivityContainer key={index}>
                 <Skeleton circle visible className="h-7 w-7 shrink-0" />
                 <div className="grow">
                   <Skeleton visible className="mb-2 h-3 w-2/5" />
                   <Skeleton visible className="h-3 w-full" />
                 </div>
-              </ActivityContainer>;
-            })
+              </ActivityContainer>
+            ))
           : activities.nodes.map(activity => {
               const { content, icon } = getActivity(activity);
 

@@ -1,36 +1,37 @@
-import { Injectable, Inject, Scope } from 'graphql-modules';
-import lodash from 'lodash';
+import * as Sentry from '@sentry/node';
 import type { Span } from '@sentry/types';
+import { Inject, Injectable, Scope } from 'graphql-modules';
+import lodash from 'lodash';
+import * as Types from '../../../__generated__/types';
 import {
-  Schema,
-  Target,
+  GraphQLDocumentStringInvalidError,
+  Orchestrator,
   Project,
   ProjectType,
-  Orchestrator,
-  GraphQLDocumentStringInvalidError,
+  Schema,
+  Target,
 } from '../../../shared/entities';
-import * as Types from '../../../__generated__/types';
-import { ProjectManager } from '../../project/providers/project-manager';
-import { Logger } from '../../shared/providers/logger';
-import { updateSchemas } from '../../../shared/schema';
-import { SchemaManager } from './schema-manager';
-import { SchemaValidator, ValidationResult } from './schema-validator';
-import { sentry } from '../../../shared/sentry';
-import { Storage, type TargetSelector } from '../../shared/providers/storage';
-import { IdempotentRunner } from '../../shared/providers/idempotent-runner';
+import { HiveError } from '../../../shared/errors';
 import { bolderize } from '../../../shared/markdown';
+import { updateSchemas } from '../../../shared/schema';
+import { sentry } from '../../../shared/sentry';
 import { AlertsManager } from '../../alerts/providers/alerts-manager';
-import { TargetManager } from '../../target/providers/target-manager';
-import { CdnProvider } from '../../cdn/providers/cdn.provider';
-import { OrganizationManager } from '../../organization/providers/organization-manager';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { TargetAccessScope } from '../../auth/providers/target-access';
+import { CdnProvider } from '../../cdn/providers/cdn.provider';
 import { GitHubIntegrationManager } from '../../integrations/providers/github-integration-manager';
+import { OrganizationManager } from '../../organization/providers/organization-manager';
+import { ProjectManager } from '../../project/providers/project-manager';
+import { IdempotentRunner } from '../../shared/providers/idempotent-runner';
+import { Logger } from '../../shared/providers/logger';
+import { type TargetSelector, Storage } from '../../shared/providers/storage';
+import { TargetManager } from '../../target/providers/target-manager';
+import { ArtifactStorageWriter } from './artifact-storage-writer';
 import type { SchemaModuleConfig } from './config';
 import { SCHEMA_MODULE_CONFIG } from './config';
 import { SchemaHelper } from './schema-helper';
-import { HiveError } from '../../../shared/errors';
-import { ArtifactStorageWriter } from './artifact-storage-writer';
+import { SchemaManager } from './schema-manager';
+import { SchemaValidator, ValidationResult } from './schema-validator';
 
 type CheckInput = Omit<Types.SchemaCheckInput, 'project' | 'organization' | 'target'> &
   TargetSelector;
@@ -82,7 +83,12 @@ export class SchemaPublisher {
       scope: TargetAccessScope.REGISTRY_READ,
     });
 
-    const [project, latest] = await Promise.all([
+    const [target, project, latest] = await Promise.all([
+      this.targetManager.getTarget({
+        organization: input.organization,
+        project: input.project,
+        target: input.target,
+      }),
       this.projectManager.getProject({
         organization: input.organization,
         project: input.project,
@@ -96,6 +102,61 @@ export class SchemaPublisher {
 
     const schemas = latest.schemas;
     const isInitialSchema = schemas.length === 0;
+
+    if (
+      (project.type === ProjectType.STITCHING || project.type === ProjectType.FEDERATION) &&
+      (lodash.isNil(input.service) || input.service?.trim() === '')
+    ) {
+      this.logger.debug('Detected missing service name');
+      const missingServiceNameMessage = `Can not check schema without a service name.`;
+
+      if (input.github) {
+        if (!project.gitRepository) {
+          return {
+            __typename: 'GitHubSchemaCheckError' as const,
+            message: 'Git repository is not configured for this project',
+          };
+        }
+
+        const [repositoryOwner, repositoryName] = project.gitRepository.split('/');
+
+        try {
+          await this.gitHubIntegrationManager.createCheckRun({
+            name: buildGitHubActionCheckName(target.name, null),
+            conclusion: 'failure',
+            sha: input.github.commit,
+            organization: input.organization,
+            repositoryOwner,
+            repositoryName,
+            output: {
+              title: 'Missing service name',
+              summary: missingServiceNameMessage,
+            },
+          });
+
+          return {
+            __typename: 'GitHubSchemaCheckSuccess' as const,
+            message: 'Check-run created',
+          };
+        } catch (error) {
+          Sentry.captureException(error);
+          return {
+            __typename: 'GitHubSchemaCheckError' as const,
+            message: `Failed to create the check-run`,
+          };
+        }
+      }
+
+      return {
+        valid: false,
+        errors: [
+          {
+            message: missingServiceNameMessage,
+          },
+        ],
+        initial: isInitialSchema,
+      };
+    }
 
     await this.schemaManager.completeGetStartedCheck({
       organization: project.orgId,
@@ -130,7 +191,7 @@ export class SchemaPublisher {
         project: input.project,
         target: input.target,
       },
-      baseSchema: baseSchema,
+      baseSchema,
       experimental_acceptBreakingChanges: false,
       project,
     });
@@ -169,7 +230,7 @@ export class SchemaPublisher {
         }
 
         await this.gitHubIntegrationManager.createCheckRun({
-          name: 'GraphQL Hive - schema:check',
+          name: buildGitHubActionCheckName(target.name, input.service ?? null),
           conclusion: validationResult.valid ? 'success' : 'failure',
           sha: input.github.commit,
           organization: input.organization,
@@ -187,7 +248,7 @@ export class SchemaPublisher {
       } catch (error: any) {
         return {
           __typename: 'GitHubSchemaCheckError' as const,
-          message: `Failed to create the check-run: ${error.message}`,
+          message: `Failed to create the check-run`,
         };
       }
     }
@@ -496,7 +557,7 @@ export class SchemaPublisher {
           project: projectId,
           target: targetId,
         },
-        baseSchema: baseSchema,
+        baseSchema,
         experimental_acceptBreakingChanges: input.experimental_acceptBreakingChanges === true,
         project,
       });
@@ -512,7 +573,7 @@ export class SchemaPublisher {
     const hasPreviousVersion = 'version' in latest && !!latest.version;
     const hasNewUrl =
       hasPreviousVersion &&
-      !!previousSchema &&
+      previousSchema != null &&
       (previousSchema.url ?? null) !== (incomingSchema.url ?? null);
     const hasSchemaChanges = changes.length > 0;
     const hasErrors = errors.length > 0;
@@ -599,7 +660,7 @@ export class SchemaPublisher {
     if (valid && hasNewUrl) {
       messages.push(
         `Updated: New service url: ${incomingSchema.url ?? 'empty'} (previously: ${
-          previousSchema!.url ?? 'empty'
+          previousSchema.url ?? 'empty'
         })`,
       );
     }
@@ -946,9 +1007,10 @@ export class SchemaPublisher {
         message: title,
       };
     } catch (error: any) {
+      Sentry.captureException(error);
       return {
         __typename: 'GitHubSchemaPublishError' as const,
-        message: `Failed to create the check-run: ${error.message}`,
+        message: `Failed to create the check-run`,
       };
     }
   }
@@ -1003,4 +1065,8 @@ function writeChanges(type: string, changes: readonly Types.SchemaChange[], line
   lines.push(
     ...['', `### ${type} changes`].concat(changes.map(change => ` - ${bolderize(change.message)}`)),
   );
+}
+
+function buildGitHubActionCheckName(target: string, service: string | null) {
+  return `GraphQL Hive > schema:check > ${target}` + (service ? ` > ${service}` : '');
 }

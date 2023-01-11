@@ -1,10 +1,10 @@
 import {
-  stringifyOperation,
-  stringifyRegistryRecord,
+  formatDate,
+  joinIntoSingleMessage,
   stringifyLegacyOperation,
   stringifyLegacyRegistryRecord,
-  joinIntoSingleMessage,
-  formatDate,
+  stringifyOperation,
+  stringifyRegistryRecord,
 } from '../src/serializer';
 
 const timestamp = {

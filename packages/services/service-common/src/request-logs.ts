@@ -1,7 +1,7 @@
 import type { FastifyInstance, FastifyPluginAsync, FastifyRequest } from 'fastify';
 import fp from 'fastify-plugin';
-import { cleanRequestId } from './helpers';
 import { z } from 'zod';
+import { cleanRequestId } from './helpers';
 
 const GraphQLPayloadSchema = z.object({
   operationName: z.string(),

@@ -1,41 +1,41 @@
 import { createHash } from 'crypto';
 import {
   buildASTSchema,
-  isObjectType,
-  isInterfaceType,
-  isUnionType,
+  GraphQLError,
+  GraphQLNamedType,
   isEnumType,
   isInputObjectType,
+  isInterfaceType,
+  isObjectType,
   isScalarType,
-  GraphQLNamedType,
-  GraphQLError,
+  isUnionType,
 } from 'graphql';
-import type { SchemaModule } from './__generated__/types';
-import { SchemaManager } from './providers/schema-manager';
-import { SchemaPublisher } from './providers/schema-publisher';
-import { Inspector } from './providers/inspector';
-import { buildSchema, createConnection } from '../../shared/schema';
-import { ProjectType } from '../../shared/entities';
-import type {
-  GraphQLObjectTypeMapper,
-  GraphQLInterfaceTypeMapper,
-  GraphQLUnionTypeMapper,
-  GraphQLEnumTypeMapper,
-  GraphQLInputObjectTypeMapper,
-  GraphQLScalarTypeMapper,
-} from '../../shared/mappers';
-import { ProjectManager } from '../project/providers/project-manager';
-import { IdTranslator } from '../shared/providers/id-translator';
-import { OrganizationManager } from '../organization/providers/organization-manager';
-import { SchemaBuildError } from './providers/orchestrators/errors';
-import { TargetManager } from '../target/providers/target-manager';
-import { AuthManager } from '../auth/providers/auth-manager';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import { z } from 'zod';
-import { SchemaHelper } from './providers/schema-helper';
-import type { WithSchemaCoordinatesUsage, WithGraphQLParentInfo } from '../../shared/mappers';
+import { ProjectType } from '../../shared/entities';
 import { createPeriod, parseDateRangeInput } from '../../shared/helpers';
+import type {
+  GraphQLEnumTypeMapper,
+  GraphQLInputObjectTypeMapper,
+  GraphQLInterfaceTypeMapper,
+  GraphQLObjectTypeMapper,
+  GraphQLScalarTypeMapper,
+  GraphQLUnionTypeMapper,
+} from '../../shared/mappers';
+import type { WithGraphQLParentInfo, WithSchemaCoordinatesUsage } from '../../shared/mappers';
+import { buildSchema, createConnection } from '../../shared/schema';
+import { AuthManager } from '../auth/providers/auth-manager';
 import { OperationsManager } from '../operations/providers/operations-manager';
+import { OrganizationManager } from '../organization/providers/organization-manager';
+import { ProjectManager } from '../project/providers/project-manager';
+import { IdTranslator } from '../shared/providers/id-translator';
+import { TargetManager } from '../target/providers/target-manager';
+import type { SchemaModule } from './__generated__/types';
+import { Inspector } from './providers/inspector';
+import { SchemaBuildError } from './providers/orchestrators/errors';
+import { SchemaHelper } from './providers/schema-helper';
+import { SchemaManager } from './providers/schema-manager';
+import { SchemaPublisher } from './providers/schema-publisher';
 
 const MaybeModel = <T extends z.ZodType>(value: T) => z.union([z.null(), z.undefined(), value]);
 const GraphQLSchemaStringModel = z.string().max(5_000_000).min(0);
@@ -418,7 +418,7 @@ export const resolvers: SchemaModule.Resolvers = {
     async latestVersion(_, __, { injector }) {
       const target = await injector.get(TargetManager).getTargetFromToken();
 
-      return injector.get(SchemaManager).getLatestValidVersion({
+      return injector.get(SchemaManager).getMaybeLatestVersion({
         organization: target.orgId,
         project: target.projectId,
         target: target.id,
@@ -427,7 +427,7 @@ export const resolvers: SchemaModule.Resolvers = {
     async latestValidVersion(_, __, { injector }) {
       const target = await injector.get(TargetManager).getTargetFromToken();
 
-      return injector.get(SchemaManager).getLatestValidVersion({
+      return injector.get(SchemaManager).getMaybeLatestValidVersion({
         organization: target.orgId,
         project: target.projectId,
         target: target.id,

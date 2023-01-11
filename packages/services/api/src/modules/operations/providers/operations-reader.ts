@@ -1,11 +1,11 @@
-import { Injectable } from 'graphql-modules';
-import { format, addMinutes, isAfter, differenceInDays } from 'date-fns';
 import type { Span } from '@sentry/types';
 import { batch } from '@theguild/buddy';
-import { ClickHouse, RowOf } from './clickhouse-client';
-import { calculateTimeWindow } from './helpers';
+import { addMinutes, differenceInDays, format, isAfter } from 'date-fns';
+import { Injectable } from 'graphql-modules';
 import type { DateRange } from '../../../shared/entities';
 import { sentry } from '../../../shared/sentry';
+import { ClickHouse, RowOf } from './clickhouse-client';
+import { calculateTimeWindow } from './helpers';
 
 function formatDate(date: Date): string {
   return format(addMinutes(date, date.getTimezoneOffset()), 'yyyy-MM-dd HH:mm:ss');
@@ -250,7 +250,7 @@ export class OperationsReader {
             })}
             GROUP BY coordinate
           `,
-      queryId: queryId,
+      queryId,
       timeout: 30_000,
       span,
     });
@@ -1638,8 +1638,10 @@ export class OperationsReader {
     }
 
     if (period) {
-      where.push(`timestamp >= toDateTime('${formatDate(period.from)}', 'UTC')`);
-      where.push(`timestamp <= toDateTime('${formatDate(period.to)}', 'UTC')`);
+      where.push(
+        `timestamp >= toDateTime('${formatDate(period.from)}', 'UTC')`,
+        `timestamp <= toDateTime('${formatDate(period.to)}', 'UTC')`,
+      );
     }
 
     if (operations?.length) {

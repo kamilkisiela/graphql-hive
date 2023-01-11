@@ -1,5 +1,5 @@
-import { useColorMode, Button } from '@chakra-ui/react';
-import { FiSun, FiMoon } from 'react-icons/fi';
+import { Button, useColorMode } from '@chakra-ui/react';
+import { FiMoon, FiSun } from 'react-icons/fi';
 
 const ThemeButton = () => {
   const { colorMode, toggleColorMode } = useColorMode();

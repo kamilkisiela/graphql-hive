@@ -1,9 +1,8 @@
-import React from 'react';
-import { useQuery } from 'urql';
-import { useColorModeValue } from '@chakra-ui/react';
 import 'twin.macro';
+import React from 'react';
+import { Button, Menu, MenuButton, MenuItem, MenuList, useColorModeValue } from '@chakra-ui/react';
 import { VscChevronDown } from 'react-icons/vsc';
-import { Button, Menu, MenuButton, MenuList, MenuItem } from '@chakra-ui/react';
+import { useQuery } from 'urql';
 import { TargetsDocument } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks';
 

@@ -1,8 +1,8 @@
-import { InjectionToken } from 'graphql-modules';
-import Redis from 'ioredis';
 import type { FactoryProvider } from 'graphql-modules';
+import { InjectionToken } from 'graphql-modules';
 import type { Redis as RedisInstance } from 'ioredis';
 import type { RedisOptions } from 'ioredis';
+import Redis from 'ioredis';
 import { Logger } from './logger';
 
 export type { RedisInstance as Redis };

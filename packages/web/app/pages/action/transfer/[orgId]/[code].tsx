@@ -1,12 +1,12 @@
 import * as React from 'react';
-import tw from 'twin.macro';
 import { Button } from '@chakra-ui/react';
-import { gql, useQuery, useMutation } from 'urql';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import tw from 'twin.macro';
+import { gql, useMutation, useQuery } from 'urql';
+import { authenticated } from '@/components/authenticated-container';
 import { Title } from '@/components/common';
 import { DataWrapper } from '@/components/common/DataWrapper';
 import { useNotifications } from '@/lib/hooks/use-notifications';
-import { authenticated } from '@/components/authenticated-container';
+import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const Center = tw.div`w-full h-full flex flex-row items-center justify-center`;

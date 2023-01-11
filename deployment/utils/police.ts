@@ -1,7 +1,7 @@
-import * as cf from '@pulumi/cloudflare';
-import * as pulumi from '@pulumi/pulumi';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
+import * as cf from '@pulumi/cloudflare';
+import * as pulumi from '@pulumi/pulumi';
 
 export class HivePolice {
   constructor(

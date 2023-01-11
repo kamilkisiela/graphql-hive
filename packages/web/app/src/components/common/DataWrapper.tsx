@@ -1,15 +1,15 @@
 import React from 'react';
-import { CombinedError, UseQueryState } from 'urql';
 import {
-  Box,
-  AlertDescription,
-  Center,
   Alert,
-  Code,
+  AlertDescription,
   AlertIcon,
-  Link,
   AlertTitle,
+  Box,
+  Center,
+  Code,
+  Link,
 } from '@chakra-ui/react';
+import { CombinedError, UseQueryState } from 'urql';
 import { Spinner } from './Spinner';
 
 export const QueryError: React.FC<{
@@ -19,9 +19,7 @@ export const QueryError: React.FC<{
   let requestId =
     error instanceof CombinedError ? error.response?.headers?.get('x-request-id') : null;
 
-  if (requestId) {
-    requestId = requestId.split(',')[0].trim();
-  }
+  requestId &&= requestId.split(',')[0].trim();
 
   const openChatSupport = () => {
     if (typeof window !== 'undefined' && (window as any).$crisp) {

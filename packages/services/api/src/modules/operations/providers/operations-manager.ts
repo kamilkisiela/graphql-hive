@@ -1,12 +1,12 @@
 import { Injectable, Scope } from 'graphql-modules';
 import LRU from 'lru-cache';
 import type { DateRange } from '../../../shared/entities';
-import type { Optional, Listify } from '../../../shared/helpers';
+import type { Listify, Optional } from '../../../shared/helpers';
 import { cache } from '../../../shared/helpers';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { TargetAccessScope } from '../../auth/providers/target-access';
 import { Logger } from '../../shared/providers/logger';
-import type { TargetSelector, OrganizationSelector } from '../../shared/providers/storage';
+import type { OrganizationSelector, TargetSelector } from '../../shared/providers/storage';
 import { Storage } from '../../shared/providers/storage';
 import { OperationsReader } from './operations-reader';
 

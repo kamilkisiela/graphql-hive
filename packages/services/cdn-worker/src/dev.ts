@@ -1,14 +1,13 @@
 import './dev-polyfill';
 import { createServer } from 'http';
-import { createRequestHandler } from './handler';
+import { ArtifactStorageReader } from '@hive/api/src/modules/schema/providers/artifact-storage-reader';
+import { createServerAdapter } from '@whatwg-node/server';
+import itty from 'itty-router';
+import { json, withParams } from 'itty-router-extras';
 import { createArtifactRequestHandler } from './artifact-handler';
 import { devStorage } from './dev-polyfill';
-import { createServerAdapter } from '@whatwg-node/server';
-import { withParams, json } from 'itty-router-extras';
+import { createRequestHandler } from './handler';
 import { createIsKeyValid } from './key-validation';
-import itty from 'itty-router';
-import { S3Client } from '@aws-sdk/client-s3';
-import { ArtifactStorageReader } from '@hive/api/src/modules/schema/providers/artifact-storage-reader';
 
 // eslint-disable-next-line no-process-env
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4010;
@@ -36,17 +35,15 @@ declare let S3_SECRET_ACCESS_KEY: string;
 declare let S3_BUCKET_NAME: string;
 declare let S3_PUBLIC_URL: string;
 
-const s3Client = new S3Client({
-  endpoint: S3_ENDPOINT,
-  credentials: {
+const artifactStorageReader = new ArtifactStorageReader(
+  {
     accessKeyId: S3_ACCESS_KEY_ID,
     secretAccessKey: S3_SECRET_ACCESS_KEY,
+    endpoint: S3_ENDPOINT,
   },
-  forcePathStyle: true,
-  region: 'auto',
-});
-
-const artifactStorageReader = new ArtifactStorageReader(s3Client, S3_BUCKET_NAME, S3_PUBLIC_URL);
+  S3_BUCKET_NAME,
+  S3_PUBLIC_URL,
+);
 
 const handleArtifactRequest = createArtifactRequestHandler({
   isKeyValid: createIsKeyValid({ keyData: KEY_DATA }),

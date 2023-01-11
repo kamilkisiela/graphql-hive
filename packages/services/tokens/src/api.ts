@@ -1,11 +1,11 @@
+import { createHash } from 'crypto';
 import { createErrorHandler, metrics } from '@hive/service-common';
 import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
 import { initTRPC } from '@trpc/server';
 import type { FastifyLoggerInstance } from 'fastify';
+import { Lru as LruType } from 'tiny-lru';
 import { z } from 'zod';
 import { useCache } from './cache';
-import { createHash } from 'crypto';
-import { Lru as LruType } from 'tiny-lru';
 
 const httpRequests = new metrics.Counter({
   name: 'tokens_http_requests',
@@ -50,8 +50,8 @@ function maskToken(token: string) {
 
 function generateToken() {
   const token = createHash('md5')
-    .update(Math.random() + '')
-    .update(Date.now() + '')
+    .update(String(Math.random()))
+    .update(String(Date.now()))
     .digest('hex');
 
   const hash = hashToken(token);

@@ -30,11 +30,11 @@ export default gql`
     """
     Requires API Token
     """
-    latestVersion: SchemaVersion!
+    latestVersion: SchemaVersion
     """
     Requires API Token
     """
-    latestValidVersion: SchemaVersion!
+    latestValidVersion: SchemaVersion
   }
 
   input DisableExternalSchemaCompositionInput {

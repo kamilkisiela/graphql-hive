@@ -1,18 +1,31 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["github>the-guild-org/shared-config:renovate", ":preserveSemverRanges"],
+  "prConcurrentLimit": 20,
   "packageRules": [
+    {
+      "groupName": "graphql-armor",
+      "matchPackagePrefixes": ["@escape.tech/graphql-armor"]
+    },
+    {
+      "groupName": "whatwg-node",
+      "matchPackagePrefixes": ["@whatwg-node"]
+    },
+    {
+      "groupName": "radix",
+      "matchPackagePrefixes": ["@radix"]
+    },
     {
       "groupName": "graphql-tools",
       "matchPackagePrefixes": "@graphql-tools"
     },
     {
       "groupName": "stripe",
-      "matchPackagePrefixes": "@stripe"
+      "matchPackagePrefixes": ["@stripe", "stripe"]
     },
     {
       "groupName": "urql",
-      "matchPackagePrefixes": "@urql"
+      "matchPackagePrefixes": ["@urql", "urql"]
     },
     {
       "groupName": "envelop",
@@ -24,11 +37,11 @@
     },
     {
       "groupName": "oclif",
-      "matchPackagePrefixes": "@oclif"
+      "matchPackagePrefixes": ["@oclif", "oclif"]
     },
     {
       "groupName": "sentry",
-      "matchPackagePrefixes": "@sentry"
+      "matchPackagePrefixes": ["@sentry", "sentry"]
     },
     {
       "groupName": "trpc",
@@ -36,17 +49,11 @@
     },
     {
       "groupName": "slonik",
-      "matchPackagePrefixes": "@slonik"
+      "matchPackagePrefixes": ["@slonik", "slonik"]
     },
     {
       "groupName": "supertokens",
-      "matchPackageNames": [
-        "supertokens-node",
-        "supertokens-auth-react",
-        "supertokens-js-override",
-        "supertokens-website"
-      ]
+      "matchPackagePrefixes": ["supertokens"]
     }
-  ],
-  "ignorePaths": ["deployment"]
+  ]
 }

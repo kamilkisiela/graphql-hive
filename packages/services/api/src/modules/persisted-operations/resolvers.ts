@@ -2,8 +2,8 @@ import { createConnection } from '../../shared/schema';
 import { OrganizationManager } from '../organization/providers/organization-manager';
 import { ProjectManager } from '../project/providers/project-manager';
 import { IdTranslator } from '../shared/providers/id-translator';
-import { PersistedOperationManager } from './providers/persisted-operation-manager';
 import type { PersistedOperationsModule } from './__generated__/types';
+import { PersistedOperationManager } from './providers/persisted-operation-manager';
 
 export const resolvers: PersistedOperationsModule.Resolvers = {
   Query: {

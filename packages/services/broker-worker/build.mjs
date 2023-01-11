@@ -1,10 +1,10 @@
-import { build } from 'esbuild';
-import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+import { build } from 'esbuild';
 
 (async function main() {
   const __dirname = dirname(fileURLToPath(import.meta.url));
-  const localBuild = !!process.env.BUILD_FOR_LOCAL;
+  const localBuild = Boolean(process.env.BUILD_FOR_LOCAL);
   const outfile = localBuild ? '/dist/dev.js' : '/dist/worker.js';
 
   await build({

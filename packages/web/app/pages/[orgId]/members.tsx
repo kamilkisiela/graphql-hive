@@ -3,7 +3,6 @@ import { Tooltip } from '@chakra-ui/react';
 import { useFormik } from 'formik';
 import { DocumentType, gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
-
 import { authenticated } from '@/components/authenticated-container';
 import { OrganizationLayout } from '@/components/layouts';
 import { Avatar, Button, Card, Checkbox, DropdownMenu, Input, Title } from '@/components/v2';
@@ -127,7 +126,7 @@ const MemberInvitationForm = ({
           onChange={handleChange}
           onBlur={handleBlur}
           disabled={isSubmitting}
-          isInvalid={touched.email && Boolean(errors.email)}
+          isInvalid={touched.email && !!errors.email}
         />
       </Tooltip>
       <Button
@@ -364,7 +363,7 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
       })}
       {invitations?.length ? (
         <div className="pt-3">
-          <div className="border-t-4 border-solid pb-6"></div>
+          <div className="border-t-4 border-solid pb-6" />
           {invitations.map(node => (
             <Invitation key={node.id} invitation={node} organizationCleanId={org.cleanId} />
           ))}

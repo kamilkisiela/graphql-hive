@@ -7,7 +7,7 @@ export const Spinner = ({ className }: { className?: string }): ReactElement => 
       viewBox="0 0 24 24"
       height="32"
       width="32"
-      className={clsx('text-orange-500 w-full animate-spin', className)}
+      className={clsx('w-full animate-spin text-orange-500', className)}
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
     >

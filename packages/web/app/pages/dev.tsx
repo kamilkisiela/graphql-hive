@@ -1,6 +1,6 @@
 import { ReactElement } from 'react';
-import { GraphiQL } from 'graphiql';
 import { createGraphiQLFetcher } from '@graphiql/toolkit';
+import { GraphiQL } from 'graphiql';
 import { HiveLogo } from '@/components/v2/icon';
 import 'graphiql/graphiql.css';
 

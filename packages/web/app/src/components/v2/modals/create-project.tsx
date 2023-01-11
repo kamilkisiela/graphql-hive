@@ -3,7 +3,6 @@ import { useRouter } from 'next/router';
 import { useFormik } from 'formik';
 import { gql, useMutation } from 'urql';
 import * as Yup from 'yup';
-
 import { Button, Heading, Input, Modal, ProjectTypes } from '@/components/v2';
 import { ProjectType } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks';
@@ -119,7 +118,7 @@ export const CreateProjectModal = ({
             onChange={handleChange}
             onBlur={handleBlur}
             disabled={isSubmitting}
-            isInvalid={touched.name && Boolean(errors.name)}
+            isInvalid={touched.name && !!errors.name}
             className="grow"
           />
           {touched.name && errors.name && <div className="text-sm text-red-500">{errors.name}</div>}
@@ -151,7 +150,7 @@ export const CreateProjectModal = ({
                 onChange={handleChange}
                 onBlur={handleBlur}
                 disabled={isSubmitting}
-                isInvalid={touched.validationUrl && Boolean(errors.validationUrl)}
+                isInvalid={touched.validationUrl && !!errors.validationUrl}
                 className="grow"
               />
               {touched.validationUrl && errors.validationUrl && (
@@ -178,7 +177,7 @@ export const CreateProjectModal = ({
                 onChange={handleChange}
                 onBlur={handleBlur}
                 disabled={isSubmitting}
-                isInvalid={touched.buildUrl && Boolean(errors.buildUrl)}
+                isInvalid={touched.buildUrl && !!errors.buildUrl}
                 className="grow"
               />
               {touched.buildUrl && errors.buildUrl && (

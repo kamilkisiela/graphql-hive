@@ -1,27 +1,27 @@
 import { Injectable } from 'graphql-modules';
-import type { NullableAndPartial } from '../../../shared/helpers';
+import type { AddAlertChannelInput, AddAlertInput } from '../../../__generated__/types';
 import type {
+  ActivityObject,
+  Alert,
+  AlertChannel,
   Member,
+  OIDCIntegration,
   Organization,
+  OrganizationBilling,
+  OrganizationInvitation,
   PersistedOperation,
   Project,
   Schema,
   SchemaVersion,
   Target,
-  User,
-  ActivityObject,
   TargetSettings,
-  AlertChannel,
-  Alert,
-  OrganizationBilling,
-  OrganizationInvitation,
-  OIDCIntegration,
+  User,
 } from '../../../shared/entities';
-import type { CustomOrchestratorConfig } from '../../schema/providers/orchestrators/custom';
-import type { AddAlertChannelInput, AddAlertInput } from '../../../__generated__/types';
+import type { NullableAndPartial } from '../../../shared/helpers';
 import type { OrganizationAccessScope } from '../../auth/providers/organization-access';
 import type { ProjectAccessScope } from '../../auth/providers/project-access';
 import type { TargetAccessScope } from '../../auth/providers/target-access';
+import type { CustomOrchestratorConfig } from '../../schema/providers/orchestrators/custom';
 
 type Paginated<T> = T & {
   after?: string | null;
@@ -426,13 +426,17 @@ export interface Storage {
     organizationId: string;
     clientId: string;
     encryptedClientSecret: string;
-    oauthApiUrl: string;
+    tokenEndpoint: string;
+    userinfoEndpoint: string;
+    authorizationEndpoint: string;
   }): Promise<{ type: 'ok'; oidcIntegration: OIDCIntegration } | { type: 'error'; reason: string }>;
   updateOIDCIntegration(_: {
     oidcIntegrationId: string;
     clientId: string | null;
     encryptedClientSecret: string | null;
-    oauthApiUrl: string | null;
+    tokenEndpoint: string | null;
+    userinfoEndpoint: string | null;
+    authorizationEndpoint: string | null;
   }): Promise<OIDCIntegration>;
   deleteOIDCIntegration(_: { oidcIntegrationId: string }): Promise<void>;
   idMutex: IdMutex;

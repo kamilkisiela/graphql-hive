@@ -1,11 +1,11 @@
-import Toucan from 'toucan-js';
-import itty from 'itty-router';
 import { ArtifactStorageReader } from '@hive/api/src/modules/schema/providers/artifact-storage-reader';
-import { S3Client } from '@aws-sdk/client-s3';
-import { createIsKeyValid } from './key-validation';
+import itty from 'itty-router';
+import Toucan from 'toucan-js';
+import { AnalyticsEngine, createAnalytics } from './analytics';
+import { createArtifactRequestHandler } from './artifact-handler';
 import { UnexpectedError } from './errors';
 import { createRequestHandler } from './handler';
-import { createArtifactRequestHandler } from './artifact-handler';
+import { createIsKeyValid } from './key-validation';
 
 /**
  * KV Storage for the CDN
@@ -27,6 +27,9 @@ declare let SENTRY_ENVIRONMENT: string;
  */
 declare let SENTRY_RELEASE: string;
 
+declare let USAGE_ANALYTICS: AnalyticsEngine;
+declare let ERROR_ANALYTICS: AnalyticsEngine;
+
 const isKeyValid = createIsKeyValid({ keyData: KEY_DATA });
 
 declare let S3_ENDPOINT: string;
@@ -34,25 +37,30 @@ declare let S3_ACCESS_KEY_ID: string;
 declare let S3_SECRET_ACCESS_KEY: string;
 declare let S3_BUCKET_NAME: string;
 
-const s3Client = new S3Client({
-  endpoint: S3_ENDPOINT,
-  credentials: {
-    accessKeyId: S3_ACCESS_KEY_ID,
-    secretAccessKey: S3_SECRET_ACCESS_KEY,
-  },
-  forcePathStyle: true,
-  region: 'auto',
+const analytics = createAnalytics({
+  usage: USAGE_ANALYTICS,
+  error: ERROR_ANALYTICS,
 });
 
 const handleRequest = createRequestHandler({
   getRawStoreValue: value => HIVE_DATA.get(value),
   isKeyValid,
+  analytics,
 });
 
-const artifactStorageReader = new ArtifactStorageReader(s3Client, S3_BUCKET_NAME, null);
+const artifactStorageReader = new ArtifactStorageReader(
+  {
+    accessKeyId: S3_ACCESS_KEY_ID,
+    secretAccessKey: S3_SECRET_ACCESS_KEY,
+    endpoint: S3_ENDPOINT,
+  },
+  S3_BUCKET_NAME,
+  null,
+);
 
 const handleArtifactRequest = createArtifactRequestHandler({
   isKeyValid,
+  analytics,
   async getArtifactAction(targetId, artifactType, eTag) {
     return artifactStorageReader.generateArtifactReadUrl(targetId, artifactType, eTag);
   },
@@ -121,11 +129,11 @@ self.addEventListener('fetch', async (event: FetchEvent) => {
         .catch(err => {
           console.error(err);
           sentry.captureException(err);
-          return new UnexpectedError();
+          return new UnexpectedError(analytics);
         }),
     );
   } catch (error) {
     sentry.captureException(error);
-    event.respondWith(new UnexpectedError());
+    event.respondWith(new UnexpectedError(analytics));
   }
 });

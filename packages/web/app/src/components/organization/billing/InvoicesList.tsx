@@ -1,7 +1,7 @@
-import { OrganizationFieldsFragment, OrgBillingInfoFieldsFragment } from '@/graphql';
-import { Table, TableContainer, Tbody, Td, Th, Thead, Tr, Link } from '@chakra-ui/react';
 import React from 'react';
+import { Link, Table, TableContainer, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
 import { VscCloudDownload } from 'react-icons/vsc';
+import { OrganizationFieldsFragment, OrgBillingInfoFieldsFragment } from '@/graphql';
 import { CurrencyFormatter, DateFormatter } from './helpers';
 
 export const InvoicesList: React.FC<{

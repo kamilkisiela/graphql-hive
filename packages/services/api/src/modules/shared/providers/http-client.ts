@@ -1,8 +1,8 @@
-import { Injectable } from 'graphql-modules';
-import { got, TimeoutError, HTTPError } from 'got';
-import type { OptionsOfJSONResponseBody } from 'got';
 import * as Sentry from '@sentry/node';
 import type { Span } from '@sentry/types';
+import type { OptionsOfJSONResponseBody } from 'got';
+import { got, HTTPError, TimeoutError } from 'got';
+import { Injectable } from 'graphql-modules';
 
 interface HttpClientOptions extends OptionsOfJSONResponseBody {
   method: 'GET' | 'POST' | 'DELETE' | 'PUT';

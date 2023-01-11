@@ -1,14 +1,14 @@
-import { Injectable, Inject, Scope, CONTEXT } from 'graphql-modules';
-import { parse } from 'graphql';
-import { Logger } from '../../../shared/providers/logger';
-import { sentry } from '../../../../shared/sentry';
-import { Orchestrator, ProjectType, SchemaObject } from '../../../../shared/entities';
-import { SchemaBuildError } from './errors';
-import { SCHEMA_SERVICE_CONFIG } from './tokens';
-import type { SchemaServiceConfig } from './tokens';
+import type { SchemaBuilderApi } from '@hive/schema';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import { fetch } from '@whatwg-node/fetch';
-import type { SchemaBuilderApi } from '@hive/schema';
+import { parse } from 'graphql';
+import { CONTEXT, Inject, Injectable, Scope } from 'graphql-modules';
+import { Orchestrator, ProjectType, SchemaObject } from '../../../../shared/entities';
+import { sentry } from '../../../../shared/sentry';
+import { Logger } from '../../../shared/providers/logger';
+import { SchemaBuildError } from './errors';
+import type { SchemaServiceConfig } from './tokens';
+import { SCHEMA_SERVICE_CONFIG } from './tokens';
 
 type ExternalComposition = {
   enabled: boolean;
@@ -104,7 +104,7 @@ export class FederationOrchestrator implements Orchestrator {
       schemas: schemas.map(s => ({
         raw: s.raw,
         source: s.source,
-        url: s.url,
+        url: s.url || null,
       })),
       external: external?.enabled ? external : null,
     });

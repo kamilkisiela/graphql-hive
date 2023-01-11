@@ -4,7 +4,6 @@ import clsx from 'clsx';
 import { useFormik } from 'formik';
 import { gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
-
 import { Button, Heading, Input, Modal } from '@/components/v2';
 import { ArrowDownIcon, CheckIcon } from '@/components/v2/icon';
 import { MemberFieldsFragment, OrganizationFieldsFragment } from '@/graphql';
@@ -164,7 +163,7 @@ export const TransferOrganizationOwnershipModal = ({
             <div
               className={clsx(
                 `rounded-sm bg-gray-800 p-4 text-sm font-medium text-white ring-1 ring-gray-700 focus-within:ring`,
-                touched.newOwner && Boolean(errors.newOwner)
+                touched.newOwner && !!errors.newOwner
                   ? 'text-red-500 caret-white ring-red-500'
                   : null,
               )}
@@ -187,7 +186,7 @@ export const TransferOrganizationOwnershipModal = ({
               leaveTo="opacity-0"
               afterLeave={() => setSearchPhrase('')}
             >
-              <Combobox.Options className="focus:outline-none absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-gray-800 text-base shadow-lg ring-1 ring-black/5">
+              <Combobox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-gray-800 text-base shadow-lg ring-1 ring-black/5 focus:outline-none">
                 {filteredMembers.length === 0 && searchPhrase !== '' ? (
                   <div className="relative cursor-default select-none py-2 px-4 text-base text-gray-700">
                     Nothing found.
@@ -236,12 +235,12 @@ export const TransferOrganizationOwnershipModal = ({
           onChange={handleChange}
           onBlur={handleBlur}
           disabled={isSubmitting}
-          isInvalid={touched.confirmation && Boolean(errors.confirmation)}
+          isInvalid={touched.confirmation && !!errors.confirmation}
           className="w-full"
         />
       </div>
 
-      <div className="h-0 w-full border-t-2 border-gray-900"></div>
+      <div className="h-0 w-full border-t-2 border-gray-900" />
 
       <div className="font-bold">About the ownership transfer</div>
       <ul className="list-inside list-disc px-5 text-sm text-white">

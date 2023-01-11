@@ -1,10 +1,8 @@
-import * as utils from '@n1ru4l/dockest/test-helper';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { ExecutionResult, print } from 'graphql';
 import { TypedDocumentNode } from '@graphql-typed-document-node/core';
 import { createFetch } from '@whatwg-node/fetch';
-
-const registryAddress = utils.getServiceAddress('server', 3001);
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { ExecutionResult, print } from 'graphql';
+import { getServiceHost } from './utils';
 
 const { fetch } = createFetch({
   useNodeFetch: true,
@@ -21,10 +19,13 @@ export async function execute<TResult, TVariables>(
     ? { variables?: never }
     : { variables: TVariables }),
 ) {
-  const response = await fetch(`http://${registryAddress}/graphql`, {
+  const registryAddress = await getServiceHost('server', 8082);
+  const endpoint = `http://${registryAddress}/graphql`;
+  const queryString = print(params.document);
+  const response = await fetch(endpoint, {
     method: 'POST',
     body: JSON.stringify({
-      query: print(params.document),
+      query: queryString,
       operationName: params.operationName,
       variables: params.variables,
     }),
@@ -50,8 +51,34 @@ export async function execute<TResult, TVariables>(
 
   const body = (await response.json()) as ExecutionResult<TResult>;
 
-  return {
+  const detailsDump = `\n\tendpoint: ${endpoint}\n\tquery:\n${queryString}\n\tbody:\n${JSON.stringify(
     body,
+    null,
+    2,
+  )}`;
+
+  return {
+    rawBody: body,
     status: response.status,
+    expectGraphQLErrors() {
+      if (!body.errors?.length) {
+        throw new Error(
+          `Expected GraphQL response to have errors, but no errors were found!${detailsDump}`,
+        );
+      }
+
+      return body.errors!;
+    },
+    expectNoGraphQLErrors: async () => {
+      if (body.errors?.length) {
+        throw new Error(
+          `Expected GraphQL response to have no errors, but got ${
+            body.errors.length
+          } errors:\n\t${body.errors.map(e => e.message).join('\n')}${detailsDump}`,
+        );
+      }
+
+      return body.data!;
+    },
   };
 }

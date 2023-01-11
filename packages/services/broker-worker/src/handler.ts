@@ -9,13 +9,14 @@ async function gatherResponse(response: Response) {
 
   if (contentType.includes('json')) {
     return JSON.stringify(await response.json());
-  } else if (contentType.includes('application/text')) {
-    return response.text();
-  } else if (contentType.startsWith('text/')) {
-    return response.text();
-  } else {
+  }
+  if (contentType.includes('application/text')) {
     return response.text();
   }
+  if (contentType.startsWith('text/')) {
+    return response.text();
+  }
+  return response.text();
 }
 
 export async function handleRequest(request: Request, keyValidator: typeof isSignatureValid) {

@@ -1,17 +1,17 @@
-import { ReactElement, useState, useCallback, ReactNode } from 'react';
-import { useMounted } from '@theguild/components';
-import * as Tooltip from '@radix-ui/react-tooltip';
-import clsx from 'clsx';
-import { FiServer, FiGlobe, FiRadio, FiGithub } from 'react-icons/fi';
-import { Pricing } from '../pricing';
-import schemaHistoryImage from '../../public/features/schema-history.png';
-import monitoringImage from '../../public/features/monitoring-preview.png';
-import cicdImage from '../../public/any-ci-cd.svg';
+import { ReactElement, ReactNode, useCallback, useState } from 'react';
 import Image, { StaticImageData } from 'next/image';
+import * as Tooltip from '@radix-ui/react-tooltip';
+import { useMounted } from '@theguild/components';
+import clsx from 'clsx';
+import { FiGithub, FiGlobe, FiRadio, FiServer } from 'react-icons/fi';
+import { Pricing } from '../pricing';
+import cicdImage from '../../public/any-ci-cd.svg';
+import monitoringImage from '../../public/features/monitoring-preview.png';
+import schemaHistoryImage from '../../public/features/schema-history.png';
 
 const classes = {
   link: clsx(
-    'inline-block bg-gray-100 hover:bg-gray-200 text-gray-600 px-6 py-3 rounded-lg font-medium shadow-sm',
+    'inline-block rounded-lg bg-gray-100 px-6 py-3 font-medium text-gray-600 shadow-sm hover:bg-gray-200',
     'dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700',
   ),
   feature: clsx(
@@ -19,7 +19,7 @@ const classes = {
     'odd:bg-gray-50 odd:dark:bg-gray-900',
     'even:bg-white even:dark:bg-black',
   ),
-  root: clsx('flex flex-row md:flex-col lg:flex-row flex-1 gap-6'),
+  root: clsx('flex flex-1 flex-row gap-6 md:flex-col lg:flex-row'),
   content: clsx('flex flex-col text-black dark:text-white'),
   title: clsx('text-xl font-semibold'),
   description: clsx('text-gray-600 dark:text-gray-400'),
@@ -44,11 +44,14 @@ const CookiesConsent = (): ReactElement => {
         <p>If you continue to use our services, you are agreeing to the use of such cookies.</p>
       </div>
       <div className="flex flex-shrink-0 items-center gap-4 lg:pr-24">
-        <a href="/privacy-policy.pdf" className="whitespace-nowrap text-yellow-600 hover:underline">
+        <a
+          href="https://the-guild.dev/graphql/hive/privacy-policy.pdf"
+          className="whitespace-nowrap text-yellow-600 hover:underline"
+        >
           Privacy Policy
         </a>
         <button
-          className="focus:outline-none rounded-md bg-yellow-500 px-5 py-2 text-white hover:bg-yellow-700"
+          className="rounded-md bg-yellow-500 px-5 py-2 text-white hover:bg-yellow-700 focus:outline-none"
           onClick={accept}
         >
           Allow Cookies
@@ -89,7 +92,7 @@ function Hero() {
   return (
     <div className="w-full">
       <div className="my-6 py-20 px-2 sm:py-24 lg:py-32">
-        <h1 className="to-orange-600 dark:to-orange-500 mx-auto max-w-screen-md bg-gradient-to-r from-yellow-500 bg-clip-text text-center text-5xl font-extrabold text-transparent dark:from-yellow-400 sm:text-5xl lg:text-6xl">
+        <h1 className="mx-auto max-w-screen-md bg-gradient-to-r from-yellow-500 to-orange-600 bg-clip-text text-center text-5xl font-extrabold text-transparent dark:from-yellow-400 dark:to-orange-500 sm:text-5xl lg:text-6xl">
           Take full control of your GraphQL API
         </h1>
         <p className="mx-auto mt-6 max-w-screen-sm text-center text-2xl text-gray-600 dark:text-gray-400">

@@ -1,4 +1,4 @@
-import { ReactElement, useCallback, useState } from 'react';
+import { ChangeEventHandler, ReactElement, useCallback, useState } from 'react';
 import {
   Editable,
   EditableInput,
@@ -12,7 +12,6 @@ import {
 import { VscClose } from 'react-icons/vsc';
 import { gql, useMutation, useQuery } from 'urql';
 import { useDebouncedCallback } from 'use-debounce';
-
 import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
 import { MarkAsValid } from '@/components/target/history/MarkAsValid';
@@ -251,7 +250,7 @@ function SchemaView({
   const debouncedFilter = useDebouncedCallback((value: string) => {
     setFilterService(value);
   }, 500);
-  const handleChange = useCallback(
+  const handleChange = useCallback<ChangeEventHandler<HTMLInputElement>>(
     event => {
       debouncedFilter(event.target.value);
       setTerm(event.target.value);

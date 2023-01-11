@@ -2,7 +2,6 @@ import { useCallback, useState } from 'react';
 import { useFormik } from 'formik';
 import { gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
-
 import { Button, Card, Heading, Input, Spinner, Switch } from '@/components/v2';
 import { OrganizationFieldsFragment, ProjectFieldsFragment } from '@/graphql';
 import { useNotifications } from '@/lib/hooks';
@@ -75,7 +74,7 @@ const ExternalCompositionForm = ({
           onChange={handleChange}
           onBlur={handleBlur}
           disabled={isSubmitting}
-          isInvalid={touched.endpoint && Boolean(errors.endpoint)}
+          isInvalid={touched.endpoint && !!errors.endpoint}
           className="w-96"
         />
         {touched.endpoint && (errors.endpoint || mutationError?.inputErrors?.endpoint) && (
@@ -98,7 +97,7 @@ const ExternalCompositionForm = ({
           onChange={handleChange}
           onBlur={handleBlur}
           disabled={isSubmitting}
-          isInvalid={touched.secret && Boolean(errors.secret)}
+          isInvalid={touched.secret && !!errors.secret}
           className="w-96"
         />
         {touched.secret && (errors.secret || mutationError?.inputErrors?.secret) && (
@@ -107,7 +106,7 @@ const ExternalCompositionForm = ({
           </div>
         )}
       </div>
-      {mutation.error && <div className="mt-2 text-xs text-red-500">{mutation.error}</div>}
+      {mutation.error && <div className="mt-2 text-xs text-red-500">{mutation.error.message}</div>}
       <div>
         <Button
           type="submit"

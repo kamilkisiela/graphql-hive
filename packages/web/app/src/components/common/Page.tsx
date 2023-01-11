@@ -1,10 +1,10 @@
-import React, { ReactElement } from 'react';
-import tw, { styled } from 'twin.macro';
+import React, { PropsWithChildren, ReactElement } from 'react';
 import Link from 'next/link';
 import { FiTarget } from 'react-icons/fi';
-import { VscOrganization, VscFolder } from 'react-icons/vsc';
-import { useNavigation, Navigation, NavigationItem } from './Navigation';
+import { VscFolder, VscOrganization } from 'react-icons/vsc';
+import tw, { styled } from 'twin.macro';
 import { useRouteSelector } from '@/lib/hooks';
+import { Navigation, NavigationItem, useNavigation } from './Navigation';
 
 const PageContainer = tw.div`flex flex-col flex-1 overflow-y-auto relative`;
 
@@ -67,7 +67,7 @@ const Menu = {
   },
 };
 
-const WithNavigation: React.FC<{}> = ({ children }) => {
+const WithNavigation = ({ children }: PropsWithChildren) => {
   const navigation = useNavigation();
   const router = useRouteSelector();
 
@@ -116,6 +116,6 @@ const WithNavigation: React.FC<{}> = ({ children }) => {
   );
 };
 
-export const Page: React.FC = ({ children }) => {
+export const Page = ({ children }: PropsWithChildren) => {
   return <WithNavigation>{children}</WithNavigation>;
 };

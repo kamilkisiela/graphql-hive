@@ -1,12 +1,12 @@
 import { Injectable, Scope } from 'graphql-modules';
-import { Orchestrator, Schema, SchemaObject, Project } from '../../../shared/entities';
-import { buildSchema, findSchema, hashSchema } from '../../../shared/schema';
 import * as Types from '../../../__generated__/types';
-import { Logger } from '../../shared/providers/logger';
+import { Orchestrator, Project, Schema, SchemaObject } from '../../../shared/entities';
+import { buildSchema, findSchema, hashSchema } from '../../../shared/schema';
 import { sentry } from '../../../shared/sentry';
-import { SchemaHelper } from './schema-helper';
+import { Logger } from '../../shared/providers/logger';
 import { Inspector } from './inspector';
 import { SchemaBuildError } from './orchestrators/errors';
+import { SchemaHelper } from './schema-helper';
 
 export type ValidationResult = {
   valid: boolean;
@@ -59,7 +59,7 @@ export class SchemaValidator {
       return {
         id: schema.id,
         author: schema.author,
-        source: source,
+        source,
         date: schema.date,
         commit: schema.commit,
         url: schema.url,
@@ -76,6 +76,7 @@ export class SchemaValidator {
     const areIdentical = existing && hashSchema(existing) === hashSchema(incoming);
 
     if (areIdentical) {
+      this.logger.debug('Identical schema found, skipping validation');
       return {
         valid: true,
         errors: [],
@@ -90,9 +91,10 @@ export class SchemaValidator {
     );
 
     if (isInitialSchema) {
+      this.logger.debug('Initial schema, skipping changes check');
       return {
         valid: errors.length === 0,
-        errors: errors,
+        errors,
         changes: [],
         messages: [],
       };
@@ -150,6 +152,7 @@ export class SchemaValidator {
         }
       }
     } catch (error) {
+      this.logger.error('Failed to compare schemas');
       errors.push({
         message: `Failed to compare schemas: ${(error as Error).message}`,
       });

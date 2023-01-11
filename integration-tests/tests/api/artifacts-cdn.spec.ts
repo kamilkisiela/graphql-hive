@@ -1,19 +1,13 @@
+import { ProjectType, TargetAccessScope } from '@app/gql/graphql';
 import {
-  S3Client,
-  ListObjectsCommand,
   DeleteObjectsCommand,
   GetObjectCommand,
+  ListObjectsCommand,
+  S3Client,
 } from '@aws-sdk/client-s3';
 import { fetch } from '@whatwg-node/fetch';
-import { authenticate } from '../../testkit/auth';
-import {
-  createOrganization,
-  createProject,
-  createToken,
-  publishSchema,
-  createCdnAccess,
-} from '../../testkit/flow';
-import { ProjectType, TargetAccessScope } from '../../testkit/gql/graphql';
+import { initSeed } from '../../testkit/seed';
+import { getServiceHost } from '../../testkit/utils';
 
 const s3Client = new S3Client({
   endpoint: 'http://127.0.0.1:9000',
@@ -80,9 +74,15 @@ function buildEndpointUrl(
 /**
  * We have both a CDN that runs as part of the server and one that runs as a standalone service (cloudflare worker).
  */
-function runArtifactsCDNTests(name: string, endpointBaseUrl: string) {
+function runArtifactsCDNTests(
+  name: string,
+  runtime: { service: string; port: number; path: string },
+) {
+  const getBaseEndpoint = () =>
+    getServiceHost(runtime.service, runtime.port).then(v => `http://${v}${runtime.path}`);
   describe(`Artifacts CDN ${name}`, () => {
-    test('access without credentials', async () => {
+    test.concurrent('access without credentials', async () => {
+      const endpointBaseUrl = await getBaseEndpoint();
       const url = buildEndpointUrl(endpointBaseUrl, 'i-do-not-exist', 'sdl');
       const response = await fetch(url, { method: 'GET' });
       expect(response.status).toEqual(400);
@@ -96,7 +96,8 @@ function runArtifactsCDNTests(name: string, endpointBaseUrl: string) {
       expect(response.headers.get('location')).toEqual(null);
     });
 
-    test('access invalid credentials', async () => {
+    test.concurrent('access invalid credentials', async () => {
+      const endpointBaseUrl = await getBaseEndpoint();
       const url = buildEndpointUrl(endpointBaseUrl, 'i-do-not-exist', 'sdl');
       const response = await fetch(url, {
         method: 'GET',
@@ -116,87 +117,31 @@ function runArtifactsCDNTests(name: string, endpointBaseUrl: string) {
       expect(response.headers.get('location')).toEqual(null);
     });
 
-    test('access SDL artifact with valid credentials', async () => {
-      const { access_token } = await authenticate('main');
-
-      // Create Organization
-
-      const orgResult = await createOrganization(
-        {
-          name: 'foo',
-        },
-        access_token,
-      );
-
-      const org =
-        orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
-
-      // Create Project
-
-      const projectResult = await createProject(
-        {
-          organization: org.cleanId,
-          type: ProjectType.Single,
-          name: 'foo',
-        },
-        access_token,
-      );
-
-      const project = projectResult.body.data!.createProject.ok!.createdProject;
-      const target = projectResult.body.data?.createProject.ok?.createdTargets.find(
-        t => t.name === 'production',
-      );
-
-      // Create Schema Publish Token
-
-      const tokenResult = await createToken(
-        {
-          name: 'test',
-          organization: org.cleanId,
-          project: project.cleanId,
-          target: target!.cleanId,
-          organizationScopes: [],
-          projectScopes: [],
-          targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-        },
-        access_token,
-      );
-
-      expect(tokenResult.body.errors).not.toBeDefined();
-
-      const token = tokenResult.body.data!.createToken.ok!.secret;
+    test.concurrent('access SDL artifact with valid credentials', async () => {
+      const { createOrg } = await initSeed().createOwner();
+      const { createProject } = await createOrg();
+      const { createToken, target } = await createProject(ProjectType.Single);
+      const writeToken = await createToken({
+        targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      });
 
       // Publish Schema
-
-      const publishSchemaResult = await publishSchema(
-        {
+      const publishSchemaResult = await writeToken
+        .publishSchema({
           author: 'Kamil',
           commit: 'abc123',
           sdl: `type Query { ping: String }`,
-        },
-        token,
-      );
+        })
+        .then(r => r.expectNoGraphQLErrors());
 
-      expect(publishSchemaResult.body.data?.schemaPublish.__typename).toEqual(
-        'SchemaPublishSuccess',
-      );
-
-      const cdnAccessResult = await createCdnAccess(
-        {
-          organization: org.cleanId,
-          project: project.cleanId,
-          target: target!.cleanId,
-        },
-        access_token,
-      );
-
-      expect(cdnAccessResult.body.errors).toBeUndefined();
-
+      expect(publishSchemaResult.schemaPublish.__typename).toEqual('SchemaPublishSuccess');
+      const cdnAccessResult = await writeToken.createCdnAccess();
+      const endpointBaseUrl = await getBaseEndpoint();
       const url = buildEndpointUrl(endpointBaseUrl, target!.id, 'sdl');
       const response = await fetch(url, {
         method: 'GET',
         headers: {
-          'x-hive-cdn-key': cdnAccessResult.body.data!.createCdnToken.token,
+          'x-hive-cdn-key': cdnAccessResult.token,
         },
         redirect: 'manual',
       });
@@ -216,70 +161,26 @@ function runArtifactsCDNTests(name: string, endpointBaseUrl: string) {
       `);
     });
 
-    test('access services artifact with valid credentials', async () => {
-      const { access_token } = await authenticate('main');
-
-      // Create Organization
-
-      const orgResult = await createOrganization(
-        {
-          name: 'foo',
-        },
-        access_token,
-      );
-
-      const org =
-        orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
-
-      // Create Project
-
-      const projectResult = await createProject(
-        {
-          organization: org.cleanId,
-          type: ProjectType.Single,
-          name: 'foo',
-        },
-        access_token,
-      );
-
-      const project = projectResult.body.data!.createProject.ok!.createdProject;
-      const target = projectResult.body.data?.createProject.ok?.createdTargets.find(
-        t => t.name === 'production',
-      );
-
-      // Create Schema Publish Token
-
-      const tokenResult = await createToken(
-        {
-          name: 'test',
-          organization: org.cleanId,
-          project: project.cleanId,
-          target: target!.cleanId,
-          organizationScopes: [],
-          projectScopes: [],
-          targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-        },
-        access_token,
-      );
-
-      expect(tokenResult.body.errors).not.toBeDefined();
-
-      const token = tokenResult.body.data!.createToken.ok!.secret;
+    test.concurrent('access services artifact with valid credentials', async () => {
+      const { createOrg } = await initSeed().createOwner();
+      const { createProject } = await createOrg();
+      const { createToken, target } = await createProject(ProjectType.Federation);
+      const writeToken = await createToken({
+        targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      });
 
       // Publish Schema
-
-      const publishSchemaResult = await publishSchema(
-        {
+      const publishSchemaResult = await writeToken
+        .publishSchema({
           author: 'Kamil',
           commit: 'abc123',
           sdl: `type Query { ping: String }`,
-        },
-        token,
-      );
+          service: 'ping',
+          url: 'ping.com',
+        })
+        .then(r => r.expectNoGraphQLErrors());
 
-      expect(publishSchemaResult.body.data?.schemaPublish.__typename).toEqual(
-        'SchemaPublishSuccess',
-      );
+      expect(publishSchemaResult.schemaPublish.__typename).toEqual('SchemaPublishSuccess');
 
       // check if artifact exists in bucket
       const artifactContents = await fetchS3ObjectArtifact(
@@ -287,25 +188,16 @@ function runArtifactsCDNTests(name: string, endpointBaseUrl: string) {
         `artifact/${target!.id}/services`,
       );
       expect(artifactContents.body).toMatchInlineSnapshot(
-        `"[{"sdl":"type Query { ping: String }"}]"`,
+        `"[{"name":"ping","sdl":"type Query { ping: String }","url":"ping.com"}]"`,
       );
 
-      const cdnAccessResult = await createCdnAccess(
-        {
-          organization: org.cleanId,
-          project: project.cleanId,
-          target: target!.cleanId,
-        },
-        access_token,
-      );
-
-      expect(cdnAccessResult.body.errors).toBeUndefined();
-
+      const cdnAccessResult = await writeToken.createCdnAccess();
+      const endpointBaseUrl = await getBaseEndpoint();
       const url = buildEndpointUrl(endpointBaseUrl, target!.id, 'services');
       let response = await fetch(url, {
         method: 'GET',
         headers: {
-          'x-hive-cdn-key': cdnAccessResult.body.data!.createCdnToken.token,
+          'x-hive-cdn-key': cdnAccessResult.token,
         },
         redirect: 'manual',
       });
@@ -317,7 +209,7 @@ function runArtifactsCDNTests(name: string, endpointBaseUrl: string) {
       const locationUrl = new URL(locationHeader!);
       expect(locationUrl.protocol).toEqual('http:');
       expect(locationUrl.hostname).toEqual('localhost');
-      expect(locationUrl.port).toEqual('9002');
+      expect(locationUrl.port).toEqual('8083');
 
       response = await fetch(locationHeader!, {
         method: 'GET',
@@ -325,73 +217,32 @@ function runArtifactsCDNTests(name: string, endpointBaseUrl: string) {
       });
       const body = await response.text();
       expect(response.status).toEqual(200);
-      expect(body).toMatchInlineSnapshot(`"[{"sdl":"type Query { ping: String }"}]"`);
+      expect(body).toMatchInlineSnapshot(
+        `"[{"name":"ping","sdl":"type Query { ping: String }","url":"ping.com"}]"`,
+      );
     });
 
-    test('access services artifact with if-none-match header', async () => {
-      const { access_token } = await authenticate('main');
-
-      // Create Organization
-
-      const orgResult = await createOrganization(
-        {
-          name: 'foo',
-        },
-        access_token,
-      );
-
-      const org =
-        orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
-
-      // Create Project
-
-      const projectResult = await createProject(
-        {
-          organization: org.cleanId,
-          type: ProjectType.Single,
-          name: 'foo',
-        },
-        access_token,
-      );
-
-      const project = projectResult.body.data!.createProject.ok!.createdProject;
-      const target = projectResult.body.data?.createProject.ok?.createdTargets.find(
-        t => t.name === 'production',
-      );
-
-      // Create Schema Publish Token
-
-      const tokenResult = await createToken(
-        {
-          name: 'test',
-          organization: org.cleanId,
-          project: project.cleanId,
-          target: target!.cleanId,
-          organizationScopes: [],
-          projectScopes: [],
-          targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-        },
-        access_token,
-      );
-
-      expect(tokenResult.body.errors).not.toBeDefined();
-
-      const token = tokenResult.body.data!.createToken.ok!.secret;
+    test.concurrent('access services artifact with if-none-match header', async () => {
+      const { createOrg } = await initSeed().createOwner();
+      const { createProject } = await createOrg();
+      const { createToken, target } = await createProject(ProjectType.Federation);
+      const writeToken = await createToken({
+        targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      });
 
       // Publish Schema
 
-      const publishSchemaResult = await publishSchema(
-        {
+      const publishSchemaResult = await writeToken
+        .publishSchema({
           author: 'Kamil',
           commit: 'abc123',
           sdl: `type Query { ping: String }`,
-        },
-        token,
-      );
+          service: 'ping',
+          url: 'ping.com',
+        })
+        .then(r => r.expectNoGraphQLErrors());
 
-      expect(publishSchemaResult.body.data?.schemaPublish.__typename).toEqual(
-        'SchemaPublishSuccess',
-      );
+      expect(publishSchemaResult.schemaPublish.__typename).toEqual('SchemaPublishSuccess');
 
       // check if artifact exists in bucket
       const artifactContents = await fetchS3ObjectArtifact(
@@ -399,25 +250,16 @@ function runArtifactsCDNTests(name: string, endpointBaseUrl: string) {
         `artifact/${target!.id}/services`,
       );
       expect(artifactContents.body).toMatchInlineSnapshot(
-        `"[{"sdl":"type Query { ping: String }"}]"`,
+        `"[{"name":"ping","sdl":"type Query { ping: String }","url":"ping.com"}]"`,
       );
 
-      const cdnAccessResult = await createCdnAccess(
-        {
-          organization: org.cleanId,
-          project: project.cleanId,
-          target: target!.cleanId,
-        },
-        access_token,
-      );
-
-      expect(cdnAccessResult.body.errors).toBeUndefined();
-
+      const cdnAccessResult = await writeToken.createCdnAccess();
+      const endpointBaseUrl = await getBaseEndpoint();
       const url = buildEndpointUrl(endpointBaseUrl, target!.id, 'services');
       const response = await fetch(url, {
         method: 'GET',
         headers: {
-          'x-hive-cdn-key': cdnAccessResult.body.data!.createCdnToken.token,
+          'x-hive-cdn-key': cdnAccessResult.token,
           'if-none-match': artifactContents.eTag,
         },
         redirect: 'manual',
@@ -428,5 +270,5 @@ function runArtifactsCDNTests(name: string, endpointBaseUrl: string) {
   });
 }
 
-runArtifactsCDNTests('API Mirror', 'http://127.0.0.1:3001/artifacts/v1/');
+runArtifactsCDNTests('API Mirror', { service: 'server', port: 8082, path: '/artifacts/v1/' });
 // runArtifactsCDNTests('Local CDN Mock', 'http://127.0.0.1:3004/artifacts/v1/');

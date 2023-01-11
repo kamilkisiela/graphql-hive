@@ -1,0 +1,74 @@
+on:
+  workflow_call:
+    secrets:
+      stripeTestPublicKey:
+        required: true
+      stripeTestSecretKey:
+        required: true
+    inputs:
+      registry:
+        default: ghcr.io
+        type: string
+      imageName:
+        default: ${{ github.repository }}
+        type: string
+      imageTag:
+        required: true
+        type: string
+      configureEnv:
+        default: ''
+        type: string
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+
+    env:
+      DOCKER_REGISTRY: ${{ inputs.registry }}/${{ inputs.imageName }}/
+      DOCKER_TAG: :${{ inputs.imageTag }}
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: configure env vars
+        if: ${{ inputs.configureEnv != '' }}
+        run: ${{ inputs.configureEnv }}
+
+      - name: setup environment
+        uses: ./.github/actions/setup
+
+      - name: prepare packages
+        run: pnpm --filter integration-tests prepare:env
+
+      - name: patch compose file volumes
+        uses: mikefarah/yq@v4.30.6
+        with:
+          cmd: yq -i 'del(.services.*.volumes)' docker-compose.community.yml
+
+      - name: get cpu count for jest
+        id: cpu-cores
+        uses: SimenB/github-actions-cpu-cores@v1
+
+      - name: run containers
+        timeout-minutes: 8
+        run: |
+          docker compose -f docker-compose.community.yml -f ./integration-tests/docker-compose.integration.yaml --env-file ./integration-tests/.env up -d --wait
+
+      - name: troubleshoot containers
+        if: ${{ failure() }}
+        run: |
+          docker compose -f docker-compose.community.yml -f ./integration-tests/docker-compose.integration.yaml --env-file ./integration-tests/.env ps
+          docker compose -f docker-compose.community.yml -f ./integration-tests/docker-compose.integration.yaml --env-file ./integration-tests/.env logs
+
+      - name: run integration tests
+        timeout-minutes: 10
+        env:
+          HIVE_DEBUG: 1
+        run: |
+          pnpm --filter integration-tests test:integration --max-workers ${{ steps.cpu-cores.outputs.count }}
+
+      - name: log dump
+        if: ${{ failure() }}
+        run: |
+          docker compose -f docker-compose.community.yml -f ./integration-tests/docker-compose.integration.yaml --env-file ./integration-tests/.env logs

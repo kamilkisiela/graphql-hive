@@ -1,5 +1,5 @@
-import { splitReport } from '../src/usage';
 import type { RawReport } from '@hive/usage-common';
+import { splitReport } from '../src/usage';
 
 test('should split report based on operation map length', () => {
   const now = Date.now();
