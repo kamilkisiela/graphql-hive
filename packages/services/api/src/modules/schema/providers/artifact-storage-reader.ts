@@ -1,7 +1,6 @@
 /**
  * IMPORTANT NOTE: This file needs to be kept platform-agnostic, don't use any Node.js specific APIs.
  */
-import { Request } from '@whatwg-node/fetch';
 import { AwsClient } from '../../../shared/aws';
 
 const presignedUrlExpirationSeconds = 60;
@@ -43,7 +42,7 @@ export class ArtifactStorageReader {
 
   private async generatePresignedGetUrl(key: string): Promise<string> {
     const signedUrl = await this.awsClient.sign(
-      new Request(this.s3Endpoint + `/` + this.bucketName + '/' + key, { method: 'GET' }),
+      this.s3Endpoint + `/` + this.bucketName + '/' + key,
       {
         method: 'GET',
         aws: { signQuery: true },
