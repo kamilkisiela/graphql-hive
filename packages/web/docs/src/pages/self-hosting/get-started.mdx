@@ -119,6 +119,8 @@ representing the volumes for the different storages used by Hive services like `
 `minio`, etc... So yes data are currently local but we'll discuss that further more in the
 `Next Steps` section.
 
+> Note: deleting this directory will end up with a loss of data, as this directory is acting as a volume for storing the data from Hive dependencies: database and storage
+
 ## Testing GraphQL Hive
 
 Visit `http://localhost:8080` in your browser and start using GraphQL Hive! The usage reporting
