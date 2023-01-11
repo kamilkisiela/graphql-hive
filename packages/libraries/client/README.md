@@ -202,7 +202,8 @@ You can connect your Apollo Gateway with Hive client.
 ```ts
 import { createSupergraphManager } from '@graphql-hive/client'
 import { ApolloGateway } from '@apollo/gateway'
-import { ApolloServer } from 'apollo-server'
+import { ApolloServer } from '@apollo/server'
+import { startStandaloneServer } from '@apollo/server/standalone'
 
 const gateway = new ApolloGateway({
   // Apollo Gateway will fetch Supergraph from GraphQL Hive CDN
@@ -217,9 +218,8 @@ const server = new ApolloServer({
   gateway
 })
 
-server.listen().then(({ url }) => {
-  console.log(`🚀 Server ready at ${url}`)
-})
+const { url } = await startStandaloneServer({ server })
+console.log(`🚀 Server ready at ${url}`)
 ```
 
 ## Usage Reporting configuration

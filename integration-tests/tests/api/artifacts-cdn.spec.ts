@@ -1,3 +1,7 @@
+import { ApolloGateway } from '@apollo/gateway';
+import { ApolloServer } from '@apollo/server';
+import { startStandaloneServer } from '@apollo/server/standalone';
+import { createSupergraphManager } from '@graphql-hive/client';
 import { ProjectType, TargetAccessScope } from '@app/gql/graphql';
 import {
   DeleteObjectsCommand,
@@ -80,6 +84,7 @@ function runArtifactsCDNTests(
 ) {
   const getBaseEndpoint = () =>
     getServiceHost(runtime.service, runtime.port).then(v => `http://${v}${runtime.path}`);
+
   describe(`Artifacts CDN ${name}`, () => {
     test.concurrent('access without credentials', async () => {
       const endpointBaseUrl = await getBaseEndpoint();
@@ -266,6 +271,76 @@ function runArtifactsCDNTests(
       });
 
       expect(response.status).toMatchInlineSnapshot(`304`);
+    });
+
+    test.concurrent('access services artifact with ApolloGateway and ApolloServer', async () => {
+      const endpointBaseUrl = await getBaseEndpoint();
+      const { createOrg } = await initSeed().createOwner();
+      const { createProject } = await createOrg();
+      const { createToken, target } = await createProject(ProjectType.Federation);
+      const writeToken = await createToken({
+        targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      });
+
+      // Publish Schema
+      const publishSchemaResult = await writeToken
+        .publishSchema({
+          author: 'Kamil',
+          commit: 'abc123',
+          sdl: `type Query { ping: String }`,
+          service: 'ping',
+          url: 'ping.com',
+        })
+        .then(r => r.expectNoGraphQLErrors());
+
+      expect(publishSchemaResult.schemaPublish.__typename).toEqual('SchemaPublishSuccess');
+      const cdnAccessResult = await writeToken.createCdnAccess();
+
+      const gateway = new ApolloGateway({
+        supergraphSdl: createSupergraphManager({
+          endpoint: endpointBaseUrl + target.id,
+          key: cdnAccessResult.token,
+        }),
+      });
+
+      const server = new ApolloServer({
+        gateway,
+      });
+
+      try {
+        const { url } = await startStandaloneServer(server);
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            accept: 'application/json',
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({
+            query: /* GraphQL */ `
+              {
+                __schema {
+                  types {
+                    name
+                    fields {
+                      name
+                    }
+                  }
+                }
+              }
+            `,
+          }),
+        });
+
+        expect(response.status).toEqual(200);
+        const result = await response.json();
+        console.log(result);
+        expect(result.data.__schema.types).toContainEqual({
+          name: 'Query',
+          fields: [{ name: 'ping' }],
+        });
+      } finally {
+        await server.stop();
+      }
     });
   });
 }
