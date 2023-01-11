@@ -1,4 +1,3 @@
-import { S3Client } from '@aws-sdk/client-s3';
 import { ArtifactStorageReader } from '@hive/api/src/modules/schema/providers/artifact-storage-reader';
 import itty from 'itty-router';
 import Toucan from 'toucan-js';
@@ -38,16 +37,6 @@ declare let S3_ACCESS_KEY_ID: string;
 declare let S3_SECRET_ACCESS_KEY: string;
 declare let S3_BUCKET_NAME: string;
 
-const s3Client = new S3Client({
-  endpoint: S3_ENDPOINT,
-  credentials: {
-    accessKeyId: S3_ACCESS_KEY_ID,
-    secretAccessKey: S3_SECRET_ACCESS_KEY,
-  },
-  forcePathStyle: true,
-  region: 'auto',
-});
-
 const analytics = createAnalytics({
   usage: USAGE_ANALYTICS,
   error: ERROR_ANALYTICS,
@@ -59,7 +48,15 @@ const handleRequest = createRequestHandler({
   analytics,
 });
 
-const artifactStorageReader = new ArtifactStorageReader(s3Client, S3_BUCKET_NAME, null);
+const artifactStorageReader = new ArtifactStorageReader(
+  {
+    accessKeyId: S3_ACCESS_KEY_ID,
+    secretAccessKey: S3_SECRET_ACCESS_KEY,
+    endpoint: S3_ENDPOINT,
+  },
+  S3_BUCKET_NAME,
+  null,
+);
 
 const handleArtifactRequest = createArtifactRequestHandler({
   isKeyValid,

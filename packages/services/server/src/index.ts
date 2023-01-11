@@ -325,7 +325,11 @@ export async function main() {
 
     if (env.cdn.providers.api !== null) {
       const artifactStorageReader = new ArtifactStorageReader(
-        s3Client,
+        {
+          endpoint: env.s3.endpoint,
+          accessKeyId: env.s3.credentials.accessKeyId,
+          secretAccessKey: env.s3.credentials.secretAccessKey,
+        },
         env.s3.bucketName,
         env.s3.publicUrl,
       );

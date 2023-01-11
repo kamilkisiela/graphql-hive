@@ -13,7 +13,6 @@
     "graphql": "^16.0.0"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "3.241.0",
     "graphql": "16.6.0",
     "toucan-js": "2.7.0",
     "zod": "3.20.2"
