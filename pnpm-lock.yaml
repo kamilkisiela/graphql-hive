@@ -600,10 +600,10 @@ importers:
       '@envelop/graphql-modules': 4.0.4
       '@envelop/sentry': 5.0.0
       '@envelop/types': 3.0.1
-      '@escape.tech/graphql-armor-max-aliases': 1.6.0
-      '@escape.tech/graphql-armor-max-depth': 1.8.0
-      '@escape.tech/graphql-armor-max-directives': 1.6.0
-      '@escape.tech/graphql-armor-max-tokens': 1.3.0
+      '@escape.tech/graphql-armor-max-aliases': 1.6.1
+      '@escape.tech/graphql-armor-max-depth': 1.8.1
+      '@escape.tech/graphql-armor-max-directives': 1.6.1
+      '@escape.tech/graphql-armor-max-tokens': 1.3.1
       '@graphql-hive/client': 0.21.4
       '@hive/api': workspace:*
       '@hive/cdn-script': workspace:*
@@ -634,10 +634,10 @@ importers:
       '@envelop/graphql-modules': 4.0.4_a6sekiasy2tqr6d5gj7n2wtjli
       '@envelop/sentry': 5.0.0_ychana5idhickjc4tnbdcwqcsq
       '@envelop/types': 3.0.1
-      '@escape.tech/graphql-armor-max-aliases': 1.6.0
-      '@escape.tech/graphql-armor-max-depth': 1.8.0
-      '@escape.tech/graphql-armor-max-directives': 1.6.0
-      '@escape.tech/graphql-armor-max-tokens': 1.3.0
+      '@escape.tech/graphql-armor-max-aliases': 1.6.1
+      '@escape.tech/graphql-armor-max-depth': 1.8.1
+      '@escape.tech/graphql-armor-max-directives': 1.6.1
+      '@escape.tech/graphql-armor-max-tokens': 1.3.1
       '@sentry/integrations': 7.28.1
       '@sentry/node': 7.28.1
       '@sentry/tracing': 7.28.1
@@ -5530,44 +5530,44 @@ packages:
     dev: true
     optional: true
 
-  /@escape.tech/graphql-armor-max-aliases/1.6.0:
-    resolution: {integrity: sha512-NjIVxch/qd5dNc5DPo8Q8y+yqB0ZKLS8pK87ZjCUYGf8lanPKS0lxVSr/dLZRbxCc7sKhLGkbzfg081hhU3kQQ==}
+  /@escape.tech/graphql-armor-max-aliases/1.6.1:
+    resolution: {integrity: sha512-vqYb2EG4NpCo4cRBhreGHiztFopLlz+Pr65swqJUjnsjKaQwQwZMea5YZ9j0FV5nWkrbe4Gv5PoYIpJ7ZyBrwg==}
     dependencies:
       graphql: 16.6.0
     optionalDependencies:
       '@envelop/core': 3.0.4
-      '@escape.tech/graphql-armor-types': 0.3.0
+      '@escape.tech/graphql-armor-types': 0.4.0
     dev: false
 
-  /@escape.tech/graphql-armor-max-depth/1.8.0:
-    resolution: {integrity: sha512-7fjhDI+U29AINCMC7b4GealX6TQDIXUSotgZLv8NXuMM56XbnIfYji9j2ssGwZK1FJOf9tzk/vy3ldOsG/Xa5A==}
+  /@escape.tech/graphql-armor-max-depth/1.8.1:
+    resolution: {integrity: sha512-WXJI1mQz9iRPk5H6e+cvMHqAm6p3xO6g8aR8u1IgmlmlkzJq9Ejx8qISuvlMmYmkEHBlPnIFs59L0Cf9ikzWDQ==}
     dependencies:
       graphql: 16.6.0
     optionalDependencies:
       '@envelop/core': 3.0.4
-      '@escape.tech/graphql-armor-types': 0.3.0
+      '@escape.tech/graphql-armor-types': 0.4.0
     dev: false
 
-  /@escape.tech/graphql-armor-max-directives/1.6.0:
-    resolution: {integrity: sha512-so0mHWlJig+lzhFuiQVI0+bePBoPqFxWUKrPq1KyIQNOKudFxDkPqZFWCgcekJGp+ezTJ1Z8/9AImito0Fn9pw==}
+  /@escape.tech/graphql-armor-max-directives/1.6.1:
+    resolution: {integrity: sha512-LfPC1oJ2LtsGGH/nZmQRXXXBRquQX01nL2jvSSO/ZKcNivWUqjQ6TvOA+7133us3W8HZjTKI18rQV/prwMtLOw==}
     dependencies:
       graphql: 16.6.0
     optionalDependencies:
       '@envelop/core': 3.0.4
-      '@escape.tech/graphql-armor-types': 0.3.0
+      '@escape.tech/graphql-armor-types': 0.4.0
     dev: false
 
-  /@escape.tech/graphql-armor-max-tokens/1.3.0:
-    resolution: {integrity: sha512-OiQpVTUZpD33zvqJ1hsS8eNGGl8SWQE33w2H7s/lB4GGO1WLZNQRXofXCJIMKuwjkD8HsJG2hxDHknE4AMgMpw==}
+  /@escape.tech/graphql-armor-max-tokens/1.3.1:
+    resolution: {integrity: sha512-RvK9xnG4+1M6XH0TxwKb4cLvKN1EN2Auuh5Qq5IaoPGQzSvMjCfLa7d2v/j3mO3+68Pdsj6Y4MVzow/VBYBfDw==}
     dependencies:
       graphql: 16.6.0
     optionalDependencies:
       '@envelop/core': 3.0.4
-      '@escape.tech/graphql-armor-types': 0.3.0
+      '@escape.tech/graphql-armor-types': 0.4.0
     dev: false
 
-  /@escape.tech/graphql-armor-types/0.3.0:
-    resolution: {integrity: sha512-As+57ZkwCuKe2zuEcNESL22g+3lkd/jh37qJAUD7z5WKYlbtp3JpZXFNMyDOjTTcof2EDlbeE9uTOXbg9rfjpQ==}
+  /@escape.tech/graphql-armor-types/0.4.0:
+    resolution: {integrity: sha512-E78TUacOz70tFK4mKOTrJE/ar2Z9hiDM0dcxau3GBffozWVGNqLmCt4JJeahlJieldJuXfhaJestRJuVVCWm5g==}
     requiresBuild: true
     dependencies:
       graphql: 16.6.0
