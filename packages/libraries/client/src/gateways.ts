@@ -31,6 +31,16 @@ function createFetcher({ endpoint, key }: SchemaFetcherOptions & ServicesFetcher
 
     let retryCount = 0;
 
+    const retry = (status: number) => {
+      if (retryCount >= 10 || status <= 499) {
+        return Promise.reject(new Error(`Failed to fetch [${status}]`));
+      }
+
+      retryCount = retryCount + 1;
+
+      return fetchWithRetry();
+    };
+
     const fetchWithRetry = (): Promise<readonly Schema[] | Schema> => {
       return axios
         .get(endpoint + '/services', {
@@ -50,17 +60,17 @@ function createFetcher({ endpoint, key }: SchemaFetcherOptions & ServicesFetcher
             return result;
           }
 
-          if (retryCount > 10 || response.status < 500) {
-            return Promise.reject(new Error(`Failed to fetch [${response.status}]`));
-          }
-
-          retryCount = retryCount + 1;
-
-          return fetchWithRetry();
+          return retry(response.status);
         })
         .catch(async error => {
-          if (axios.isAxiosError(error) && error.response?.status === 304 && cached !== null) {
-            return cached;
+          if (axios.isAxiosError(error)) {
+            if (error.response?.status === 304 && cached !== null) {
+              return cached;
+            }
+
+            if (error.response?.status) {
+              return retry(error.response.status);
+            }
           }
 
           throw error;
