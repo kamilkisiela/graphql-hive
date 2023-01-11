@@ -53,15 +53,32 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata (tags, labels)
-        id: router-extract
-        uses: docker/metadata-action@v4
+      - uses: frabert/replace-string-action@v2.4
+        id: branch_name_fix
+        name: sanitize branch name
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=ref,event=branch
-            type=sha,prefix=,format=long
-            type=raw,value=latest,enable={{is_default_branch}}
+          pattern: '(\/|-)'
+          string: ${{ github.head_ref || github.ref_name }}
+          replace-with: '_'
+
+      - name: build docker images
+        timeout-minutes: 25
+        id: docker-bake
+        uses: docker/bake-action@v2
+        env:
+          DOCKER_REGISTRY: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          COMMIT_SHA: ${{ github.sha }}
+          RELEASE: ${{ github.sha }}
+          BRANCH_NAME: ${{ steps.branch_name_fix.outputs.replaced }}
+          BUILD_TYPE: 'publish'
+          PWD: ${{ github.workspace }}
+        with:
+          push: true
+          files: docker.hcl
+          targets: rust
+          set: |
+            *.cache-from=type=gha
+            *.cache-to=type=gha,mode=max
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v3

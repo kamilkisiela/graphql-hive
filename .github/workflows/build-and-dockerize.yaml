@@ -7,6 +7,9 @@ on:
       publishLatest:
         default: false
         type: boolean
+      targets:
+        required: true
+        type: string
       registry:
         default: ghcr.io
         type: string
@@ -84,7 +87,7 @@ jobs:
         with:
           push: true
           files: docker.hcl
-          targets: build
+          targets: ${{ inputs.targets }}
           set: |
             *.cache-from=type=gha
             *.cache-to=type=gha,mode=max
