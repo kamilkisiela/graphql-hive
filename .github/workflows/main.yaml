@@ -11,6 +11,7 @@ jobs:
     with:
       imageTag: ${{ github.sha }}
       publishSourceMaps: true
+      publishLatest: true
     secrets: inherit
 
   # Build and publish Rust packages.
