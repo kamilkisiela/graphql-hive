@@ -13,6 +13,7 @@ jobs:
         run: |
           curl https://sh.rustup.rs -sSf | sh -s -- -y
           rustup target add x86_64-unknown-linux-gnu
+          apt-get install protobuf-compiler
 
       - name: cache rust
         uses: Swatinem/rust-cache@v2
