@@ -4,13 +4,14 @@ WORKDIR /usr/src/router
 
 # build
 RUN apt-get update
-RUN apt-get -y install npm protobuf-compiler
+RUN apt-get -y install npm protobuf-compiler curl
 RUN update-ca-certificates
 RUN rustup component add rustfmt
 
 ENV RUST_BACKTRACE=1
 
 COPY ./ .
+
 RUN cargo build --release
 
 RUN mkdir -p /dist/config \
