@@ -69,7 +69,7 @@ to set some environment variables.
 
 ```bash
 export DOCKER_REGISTRY="ghcr.io/kamilkisiela/graphql-hive/"
-export DOCKER_TAG=":latest" # Pin this to an exact commit hash from our `main` branch
+export DOCKER_TAG=":latest" # Pin this to an exact commit hash from our `main` branch, we publish a Docker image per each commit on main, and for PRs.
 export HIVE_ENCRYPTION_SECRET=$(openssl rand -hex 16)
 export HIVE_APP_BASE_URL="http://localhost:8080"
 export HIVE_EMAIL_FROM="no-reply@graphql-hive.com"
