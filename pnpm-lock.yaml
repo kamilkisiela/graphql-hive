@@ -219,8 +219,8 @@ importers:
       '@graphql-tools/url-loader': ~7.16.4
       '@graphql-tools/utils': 8.13.1
       '@oclif/core': ^1.23.0
-      '@oclif/plugin-help': 5.1.20
-      '@oclif/plugin-update': 3.0.9
+      '@oclif/plugin-help': 5.1.22
+      '@oclif/plugin-update': 3.0.12
       '@types/env-ci': 3.1.1
       '@types/mkdirp': 1.0.2
       colors: 1.4.0
@@ -245,8 +245,8 @@ importers:
       '@graphql-tools/url-loader': 7.16.4_graphql@16.6.0
       '@graphql-tools/utils': 8.13.1_graphql@16.6.0
       '@oclif/core': 1.23.0_zhte2hlj7lfobytjpalcwwo474
-      '@oclif/plugin-help': 5.1.20
-      '@oclif/plugin-update': 3.0.9
+      '@oclif/plugin-help': 5.1.22
+      '@oclif/plugin-update': 3.0.12
       colors: 1.4.0
       env-ci: 7.3.0
       git-parse: 3.0.1
@@ -8073,8 +8073,8 @@ packages:
       - supports-color
     dev: true
 
-  /@oclif/color/1.0.2:
-    resolution: {integrity: sha512-HqTFeMjfLOZajxqffSkyDWFUB3YqsSLRcsvnvITGRzhO0Ip4Qwp0VHVwh+qe0TjJYEltmOgzoxsR1LZPQIHNBQ==}
+  /@oclif/color/1.0.3:
+    resolution: {integrity: sha512-E+KKAE5CKhXRBZEoZLe5yNR0VHmba1m1fxz8HlpcWjHF5Pdhhf6W/0XMmed6vwQCmyzL/YLwdspCRfu0A1cgGA==}
     engines: {node: '>=12.0.0'}
     dependencies:
       ansi-styles: 4.3.0
@@ -8117,31 +8117,64 @@ packages:
       wrap-ansi: 7.0.0
     patched: true
 
+  /@oclif/core/1.23.2:
+    resolution: {integrity: sha512-NdaOaUDTRc6g1yTkOAKiEVOiQhc5CNcWNXa0QF4IS4yTjNqp4DOzgtF9Dwe585nPEKzSbTBiz1wyLOa4qIHSRQ==}
+    engines: {node: '>=14.0.0'}
+    dependencies:
+      '@oclif/linewrap': 1.0.0
+      '@oclif/screen': 3.0.4
+      ansi-escapes: 4.3.2
+      ansi-styles: 4.3.0
+      cardinal: 2.1.1
+      chalk: 4.1.2
+      clean-stack: 3.0.1
+      cli-progress: 3.11.2
+      debug: 4.3.4_supports-color@8.1.1
+      ejs: 3.1.8
+      fs-extra: 9.1.0
+      get-package-type: 0.1.0
+      globby: 11.1.0
+      hyperlinker: 1.0.0
+      indent-string: 4.0.0
+      is-wsl: 2.2.0
+      js-yaml: 3.14.1
+      natural-orderby: 2.0.3
+      object-treeify: 1.1.33
+      password-prompt: 1.1.2
+      semver: 7.3.8
+      string-width: 4.2.3
+      strip-ansi: 6.0.1
+      supports-color: 8.1.1
+      supports-hyperlinks: 2.3.0
+      tslib: 2.4.1
+      widest-line: 3.1.0
+      wrap-ansi: 7.0.0
+
   /@oclif/linewrap/1.0.0:
     resolution: {integrity: sha512-Ups2dShK52xXa8w6iBWLgcjPJWjais6KPJQq3gQ/88AY6BXoTX+MIGFPrWQO1KLMiQfoTpcLnUwloN4brrVUHw==}
 
-  /@oclif/plugin-help/5.1.20:
-    resolution: {integrity: sha512-N8xRxE/isFcdBDI8cobixEZA5toxIK5jbxpwALNTr4s8KNAtBA3ORQrSiY0fWGkcv0sCGMwZw7rJ0Izh18JPsw==}
+  /@oclif/plugin-help/5.1.22:
+    resolution: {integrity: sha512-gflrCqV3c7nd1UgknuZZTX6Th9CTkvVyTjL76UNHrea3kCZEpPzsMGhwP989R+j3KSGJGeZVrq2i9g2QXI9tZA==}
     engines: {node: '>=12.0.0'}
     dependencies:
-      '@oclif/core': 1.23.0_zhte2hlj7lfobytjpalcwwo474
+      '@oclif/core': 1.23.2
 
   /@oclif/plugin-not-found/2.3.8:
     resolution: {integrity: sha512-PfUVr67dHORFSeQthUwrPMJB/mRRNT4ENNdbafCOlL0HqC+WTuFy5nih+qnHBEli15RaOuMNoW3kR5MyBH82hA==}
     engines: {node: '>=12.0.0'}
     dependencies:
-      '@oclif/color': 1.0.2
-      '@oclif/core': 1.23.0_zhte2hlj7lfobytjpalcwwo474
+      '@oclif/color': 1.0.3
+      '@oclif/core': 1.23.2
       fast-levenshtein: 3.0.0
       lodash: 4.17.21
     dev: true
 
-  /@oclif/plugin-update/3.0.9:
-    resolution: {integrity: sha512-CLlMyQI87kQi0sfB7R0ysJSXO6E8pEs5/bx0cSOUd5WL54QXC2HhHOuTl66uEJxH2pGCdLacoDtD7JX8rufSZg==}
+  /@oclif/plugin-update/3.0.12:
+    resolution: {integrity: sha512-r5/AY+I9YBNqe6sxMOq8AmGj0MIVIXSUIFpiSGbz3pDOUex9ExvcKuUgqRH4p6mTOGHYcz+hR2t55AN2Wrltyg==}
     engines: {node: '>=12.0.0'}
     dependencies:
-      '@oclif/color': 1.0.2
-      '@oclif/core': 1.23.0_zhte2hlj7lfobytjpalcwwo474
+      '@oclif/color': 1.0.3
+      '@oclif/core': 1.23.2
       cross-spawn: 7.0.3
       debug: 4.3.4
       filesize: 6.4.0
@@ -8160,7 +8193,7 @@ packages:
     resolution: {integrity: sha512-wen8nqrKUB5KB9PSqkBfAWB8LarmE9kOljMEXEWjDz5T0Yp77+/3IUiswu1ffYKUELBqaVsgsqb2uV4VP4oF9w==}
     engines: {node: '>=12.0.0'}
     dependencies:
-      '@oclif/core': 1.23.0_zhte2hlj7lfobytjpalcwwo474
+      '@oclif/core': 1.23.2
       chalk: 4.1.2
       debug: 4.3.4
       fs-extra: 9.1.0
@@ -8173,6 +8206,10 @@ packages:
 
   /@oclif/screen/3.0.3:
     resolution: {integrity: sha512-KX8gMYA9ujBPOd1HFsV9e0iEx7Uoj8AG/3YsW4TtWQTg4lJvr82qNm7o/cFQfYRIt+jw7Ew/4oL4A22zOT+IRA==}
+    engines: {node: '>=12.0.0'}
+
+  /@oclif/screen/3.0.4:
+    resolution: {integrity: sha512-IMsTN1dXEXaOSre27j/ywGbBjrzx0FNd1XmuhCWCB9NTPrhWI1Ifbz+YLSEcstfQfocYsrbrIessxXb2oon4lA==}
     engines: {node: '>=12.0.0'}
 
   /@octokit/app/13.1.1:
@@ -21320,7 +21357,7 @@ packages:
     hasBin: true
     dependencies:
       '@oclif/core': 1.23.0_zhte2hlj7lfobytjpalcwwo474
-      '@oclif/plugin-help': 5.1.20
+      '@oclif/plugin-help': 5.1.22
       '@oclif/plugin-not-found': 2.3.8
       '@oclif/plugin-warn-if-update-available': 2.0.17
       aws-sdk: 2.1231.0
