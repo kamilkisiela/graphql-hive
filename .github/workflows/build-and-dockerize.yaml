@@ -79,7 +79,7 @@ jobs:
           BRANCH_NAME: ${{ steps.branch_name_fix.outputs.replaced }}
           BUILD_TYPE: 'publish'
           PWD: ${{ github.workspace }}
-          BUILD_STABLE: ${{ inputs.publishLatest ?? '1' || '' }}
+          BUILD_STABLE: ${{ inputs.publishLatest && '1' || '' }}
         with:
           push: true
           files: docker.hcl
