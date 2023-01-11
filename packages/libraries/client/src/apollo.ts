@@ -30,36 +30,48 @@ export function createSupergraphSDLFetcher({ endpoint, key }: SupergraphSDLFetch
       headers['If-None-Match'] = cacheETag;
     }
 
-    return axios
-      .get(endpoint + '/supergraph', {
-        headers,
-      })
-      .then(response => {
-        if (response.status >= 200 && response.status < 300) {
-          const supergraphSdl = response.data;
-          const result = {
-            id: createHash('sha256').update(supergraphSdl).digest('base64'),
-            supergraphSdl,
-          };
+    let retryCount = 0;
 
-          const etag = response.headers['etag'];
-          if (etag) {
-            cached = result;
-            cacheETag = etag;
+    const fetchWithRetry = (): Promise<{ id: string; supergraphSdl: string }> => {
+      return axios
+        .get(endpoint + '/supergraph', {
+          headers,
+        })
+        .then(response => {
+          if (response.status >= 200 && response.status < 300) {
+            const supergraphSdl = response.data;
+            const result = {
+              id: createHash('sha256').update(supergraphSdl).digest('base64'),
+              supergraphSdl,
+            };
+
+            const etag = response.headers['etag'];
+            if (etag) {
+              cached = result;
+              cacheETag = etag;
+            }
+
+            return result;
           }
 
-          return result;
-        }
+          if (retryCount > 10 || response.status < 500) {
+            return Promise.reject(new Error(`Failed to fetch supergraph [${response.status}]`));
+          }
 
-        return Promise.reject(new Error(`Failed to fetch supergraph [${response.status}]`));
-      })
-      .catch(async error => {
-        if (axios.isAxiosError(error) && error.response?.status === 304 && cached !== null) {
-          return cached;
-        }
+          retryCount = retryCount + 1;
 
-        throw error;
-      });
+          return fetchWithRetry();
+        })
+        .catch(async error => {
+          if (axios.isAxiosError(error) && error.response?.status === 304 && cached !== null) {
+            return cached;
+          }
+
+          throw error;
+        });
+    };
+
+    return fetchWithRetry();
   };
 }
 
