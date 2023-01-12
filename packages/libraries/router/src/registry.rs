@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use sha2::Digest;
 use sha2::Sha256;
 use std::env;
@@ -16,13 +16,13 @@ pub struct HiveRegistry {
 pub struct HiveRegistryConfig {
     endpoint: Option<String>,
     key: Option<String>,
-    poll_interval: Option<u64>
+    poll_interval: Option<u64>,
 }
 
 static COMMIT: Option<&'static str> = option_env!("GITHUB_SHA");
 
 impl HiveRegistry {
-    pub fn new(user_config: Option<HiveRegistryConfig>) -> Result<(), String> {
+    pub fn new(user_config: Option<HiveRegistryConfig>) -> Result<()> {
         let mut config = HiveRegistryConfig {
             endpoint: None,
             key: None,
@@ -37,22 +37,26 @@ impl HiveRegistry {
         }
 
         // Pass values from environment variables if they are not set in the user's config
-        
+
         if config.endpoint.is_none() {
-            if  let Ok(endpoint) = env::var("HIVE_CDN_ENDPOINT") {
+            if let Ok(endpoint) = env::var("HIVE_CDN_ENDPOINT") {
                 config.endpoint = Some(endpoint);
             }
         }
 
         if config.key.is_none() {
-            if  let Ok(key) = env::var("HIVE_CDN_KEY") {
+            if let Ok(key) = env::var("HIVE_CDN_KEY") {
                 config.key = Some(key);
             }
         }
 
         if config.poll_interval.is_none() {
-            if  let Ok(poll_interval) = env::var("HIVE_CDN_POLL_INTERVAL") {
-                config.poll_interval = Some(poll_interval.parse().expect("failed to parse HIVE_CDN_POLL_INTERVAL"));
+            if let Ok(poll_interval) = env::var("HIVE_CDN_POLL_INTERVAL") {
+                config.poll_interval = Some(
+                    poll_interval
+                        .parse()
+                        .expect("failed to parse HIVE_CDN_POLL_INTERVAL"),
+                );
             }
         }
 
@@ -61,7 +65,7 @@ impl HiveRegistry {
         let key = config.key.unwrap_or_else(|| "".to_string());
         let poll_interval: u64 = match config.poll_interval {
             Some(value) => value,
-            None => 10
+            None => 10,
         };
 
         // In case of an endpoint and an key being empty, we don't start the polling and skip the registry
@@ -75,12 +79,12 @@ impl HiveRegistry {
 
         // Throw if endpoint is empty
         if endpoint.is_empty() {
-            return Err("environment variable HIVE_CDN_ENDPOINT not found".to_string());
+            return Err(anyhow!("environment variable HIVE_CDN_ENDPOINT not found",));
         }
 
         // Throw if key is empty
         if key.is_empty() {
-            return Err("environment variable HIVE_CDN_KEY not found".to_string());
+            return Err(anyhow!("environment variable HIVE_CDN_KEY not found"));
         }
 
         // A hacky way to force the router to use GraphQL Hive CDN as the source of schema.
