@@ -1,11 +1,14 @@
-use registry::HiveRegistry;
-
 mod agent;
 mod graphql;
 mod registry;
 mod usage;
 
+use registry::HiveRegistry;
+use usage::register;
+
 fn main() {
+    register();
+
     match HiveRegistry::new(None) {
         Ok(_) => {}
         Err(e) => {
