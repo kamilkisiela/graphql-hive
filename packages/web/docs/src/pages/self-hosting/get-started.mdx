@@ -46,9 +46,8 @@ using `wget`. This's gonna download the latest version available.
 <Callout type="info">
   Note: make sure you've Docker installed to be able to continue with the setup process.
 </Callout>
-> You can also download the file directly from GitHub, if you don't have wget installed using the link below
-```bash
-wget https://raw.githubusercontent.com/kamilkisiela/graphql-hive/main/docker-compose.community.yml
+> You can also download the file directly from GitHub, if you don't have wget installed using the link
+below ```bash wget https://raw.githubusercontent.com/kamilkisiela/graphql-hive/main/docker-compose.community.yml
 ```
 
 After downloading the `docker-compose.community.yml` file, this includes all the services required
@@ -119,7 +118,8 @@ representing the volumes for the different storages used by Hive services like `
 `minio`, etc... So yes data are currently local but we'll discuss that further more in the
 `Next Steps` section.
 
-> Note: deleting this directory will end up with a loss of data, as this directory is acting as a volume for storing the data from Hive dependencies: database and storage
+> Note: deleting this directory will end up with a loss of data, as this directory is acting as a
+> volume for storing the data from Hive dependencies: database and storage
 
 ## Testing GraphQL Hive
 
@@ -241,6 +241,15 @@ pnpm hive schema:publish ./schema.graphql
 ```
 
 Go to the `Schema` tab in your project target and you're gonna see your latest published schema.
+
+## Bounded Ports Reference
+
+| Port | Purpose                      |
+| ---- | ---------------------------- |
+| 8080 | Hive's Main App UI           |
+| 8081 | The Usage Reporting Endpoint |
+| 8082 | The GraphQL API              |
+| 8083 | The Artifacts Bucket         |
 
 ## Next Steps
 
