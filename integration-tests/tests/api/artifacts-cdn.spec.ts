@@ -12,6 +12,7 @@ import {
 import { fetch } from '@whatwg-node/fetch';
 import { initSeed } from '../../testkit/seed';
 import { getServiceHost } from '../../testkit/utils';
+import bcrypt from 'bcryptjs';
 
 const s3Client = new S3Client({
   endpoint: 'http://127.0.0.1:9000',
@@ -131,7 +132,8 @@ function runArtifactsCDNTests(
       });
       const cdnAccess = await writeToken.createCdnAccess();
       const result = await fetchS3ObjectArtifact('artifacts', `cdn-legacy-keys/${target.id}`);
-      expect(result.body).toEqual(cdnAccess.token);
+      const isMatch = await bcrypt.compare(cdnAccess.token, result.body);
+      expect(isMatch).toEqual(true);
     });
 
     test.concurrent('creating (legacy) cdn access token can be done multiple times', async () => {
@@ -141,12 +143,16 @@ function runArtifactsCDNTests(
       const writeToken = await createToken({
         targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
       });
+
       let cdnAccess = await writeToken.createCdnAccess();
       const firstResult = await fetchS3ObjectArtifact('artifacts', `cdn-legacy-keys/${target.id}`);
-      expect(firstResult.body).toEqual(cdnAccess.token);
+      let isMatch = await bcrypt.compare(cdnAccess.token, firstResult.body);
+      expect(isMatch).toEqual(true);
+
       cdnAccess = await writeToken.createCdnAccess();
       const secondResult = await fetchS3ObjectArtifact('artifacts', `cdn-legacy-keys/${target.id}`);
-      expect(secondResult.body).toEqual(firstResult.body);
+      isMatch = await bcrypt.compare(cdnAccess.token, secondResult.body);
+      expect(isMatch).toEqual(true);
     });
 
     test.concurrent('access SDL artifact with valid credentials', async () => {
