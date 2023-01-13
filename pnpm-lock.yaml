@@ -1037,7 +1037,7 @@ importers:
       tslib: 2.4.1
       twin.macro: 2.8.2
       urql: 2.0.5
-      use-debounce: 9.0.2
+      use-debounce: 9.0.3
       valtio: 1.8.2
       wonka: 4.0.15
       yup: 0.32.11
@@ -1114,7 +1114,7 @@ importers:
       supertokens-website: 14.0.3
       twin.macro: 2.8.2
       urql: 2.0.5_onqnqwb3ubg5opvemcqf7c2qhy
-      use-debounce: 9.0.2_react@18.2.0
+      use-debounce: 9.0.3_react@18.2.0
       valtio: 1.8.2_react@18.2.0
       wonka: 4.0.15
       yup: 0.32.11
@@ -26713,6 +26713,15 @@ packages:
 
   /use-debounce/9.0.2_react@18.2.0:
     resolution: {integrity: sha512-QLyB0sxt9F5AisGDrUybCRJSLE60bTQR0yXc+IebNGUu1GCXwii1zsZl82mPGdWqDVQy7+1FKMLHQUixxf5Nbw==}
+    engines: {node: '>= 10.0.0'}
+    peerDependencies:
+      react: '>=16.8.0'
+    dependencies:
+      react: 18.2.0
+    dev: false
+
+  /use-debounce/9.0.3_react@18.2.0:
+    resolution: {integrity: sha512-FhtlbDtDXILJV7Lix5OZj5yX/fW1tzq+VrvK1fnT2bUrPOGruU9Rw8NCEn+UI9wopfERBEZAOQ8lfeCJPllgnw==}
     engines: {node: '>= 10.0.0'}
     peerDependencies:
       react: '>=16.8.0'
