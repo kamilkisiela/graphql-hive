@@ -600,7 +600,6 @@ importers:
 
   packages/services/server:
     specifiers:
-      '@aws-sdk/client-s3': 3.241.0
       '@envelop/core': 3.0.4
       '@envelop/generic-auth': 5.0.4
       '@envelop/graphql-modules': 4.0.4
@@ -634,7 +633,6 @@ importers:
       tslib: 2.4.1
       zod: 3.20.2
     dependencies:
-      '@aws-sdk/client-s3': 3.241.0
       '@envelop/core': 3.0.4
       '@envelop/generic-auth': 5.0.4_a6sekiasy2tqr6d5gj7n2wtjli
       '@envelop/graphql-modules': 4.0.4_a6sekiasy2tqr6d5gj7n2wtjli

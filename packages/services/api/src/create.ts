@@ -1,4 +1,3 @@
-import type { S3Client } from '@aws-sdk/client-s3';
 import { createApplication, Scope } from 'graphql-modules';
 import { activityModule } from './modules/activity';
 import { adminModule } from './modules/admin';
@@ -44,6 +43,7 @@ import { IdTranslator } from './modules/shared/providers/id-translator';
 import { IdempotentRunner } from './modules/shared/providers/idempotent-runner';
 import { Logger } from './modules/shared/providers/logger';
 import { REDIS_CONFIG, RedisConfig, RedisProvider } from './modules/shared/providers/redis';
+import { type S3Config, S3_CONFIG } from './modules/shared/providers/s3-config';
 import { Storage } from './modules/shared/providers/storage';
 import { WEB_APP_URL } from './modules/shared/providers/tokens';
 import { targetModule } from './modules/target';
@@ -54,6 +54,7 @@ import {
   USAGE_ESTIMATION_SERVICE_CONFIG,
   UsageEstimationServiceConfig,
 } from './modules/usage-estimation/providers/tokens';
+import { AwsClient } from './shared/aws';
 
 const modules = [
   sharedModule,
@@ -111,8 +112,10 @@ export function createRegistry({
   githubApp: GitHubApplicationConfig | null;
   cdn: CDNConfig | null;
   s3: {
-    client: S3Client;
     bucketName: string;
+    endpoint: string;
+    accessKeyId: string;
+    secretAccessKeyId: string;
   };
   encryptionSecret: string;
   feedback: {
@@ -127,7 +130,18 @@ export function createRegistry({
   emailsEndpoint?: string;
   organizationOIDC: boolean;
 }) {
-  const artifactStorageWriter = new ArtifactStorageWriter(s3.client, s3.bucketName);
+  const s3Config: S3Config = {
+    client: new AwsClient({
+      accessKeyId: s3.accessKeyId,
+      secretAccessKey: s3.secretAccessKeyId,
+      service: 's3',
+      region: 'auto',
+    }),
+    bucket: s3.bucketName,
+    endpoint: s3.endpoint,
+  };
+
+  const artifactStorageWriter = new ArtifactStorageWriter(s3Config);
 
   const providers = [
     HttpClient,
@@ -198,6 +212,11 @@ export function createRegistry({
     {
       provide: CDN_CONFIG,
       useValue: cdn,
+      scope: Scope.Singleton,
+    },
+    {
+      provide: S3_CONFIG,
+      useValue: s3Config,
       scope: Scope.Singleton,
     },
     {

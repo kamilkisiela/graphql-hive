@@ -1,4 +1,5 @@
-import { type S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { Inject } from 'graphql-modules';
+import { type S3Config, S3_CONFIG } from '../../shared/providers/s3-config';
 import { buildArtifactStorageKey } from './artifact-storage-reader';
 
 const artifactMeta = {
@@ -24,7 +25,7 @@ const artifactMeta = {
  * Write an Artifact to an S3 bucket.
  */
 export class ArtifactStorageWriter {
-  constructor(private s3Client: S3Client, private bucketName: string) {}
+  constructor(@Inject(S3_CONFIG) private s3: S3Config) {}
 
   async writeArtifact(args: {
     targetId: string;
@@ -34,13 +35,16 @@ export class ArtifactStorageWriter {
     const key = buildArtifactStorageKey(args.targetId, args.artifactType);
     const meta = artifactMeta[args.artifactType];
 
-    const putCommand = new PutObjectCommand({
-      Bucket: this.bucketName,
-      Key: key,
-      ContentType: meta.contentType,
-      Body: meta.preprocessor(args.artifact),
+    const result = await this.s3.client.fetch([this.s3.endpoint, this.s3.bucket, key].join('/'), {
+      method: 'PUT',
+      headers: {
+        'content-type': meta.contentType,
+      },
+      body: meta.preprocessor(args.artifact),
     });
 
-    await this.s3Client.send(putCommand);
+    if (result.status !== 200) {
+      throw new Error(`Unexpected status code ${result.status} when writing artifact.`);
+    }
   }
 }

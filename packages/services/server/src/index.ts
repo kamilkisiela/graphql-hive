@@ -2,7 +2,6 @@
 
 import 'reflect-metadata';
 import { Readable } from 'node:stream';
-import { S3Client } from '@aws-sdk/client-s3';
 import { createRegistry, LogFn, Logger } from '@hive/api';
 import { CryptoProvider } from '@hive/api';
 import { ArtifactStorageReader } from '@hive/api/src/modules/schema/providers/artifact-storage-reader';
@@ -144,16 +143,6 @@ export async function main() {
       };
     }
 
-    const s3Client = new S3Client({
-      endpoint: env.s3.endpoint,
-      credentials: {
-        accessKeyId: env.s3.credentials.accessKeyId,
-        secretAccessKey: env.s3.credentials.secretAccessKey,
-      },
-      forcePathStyle: true,
-      region: 'auto',
-    });
-
     const graphqlLogger = createGraphQLLogger();
     const registry = createRegistry({
       app: env.hiveServices.webApp
@@ -201,8 +190,10 @@ export async function main() {
       },
       cdn: env.cdn,
       s3: {
-        client: s3Client,
+        accessKeyId: env.s3.credentials.accessKeyId,
+        secretAccessKeyId: env.s3.credentials.secretAccessKey,
         bucketName: env.s3.bucketName,
+        endpoint: env.s3.endpoint,
       },
       encryptionSecret: env.encryptionSecret,
       feedback: {

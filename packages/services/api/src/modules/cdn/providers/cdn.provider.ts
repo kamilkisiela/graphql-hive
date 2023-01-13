@@ -3,15 +3,19 @@ import type { Span } from '@sentry/types';
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import { HiveError } from '../../../shared/errors';
 import { sentry } from '../../../shared/sentry';
+import { AuthManager } from '../../auth/providers/auth-manager';
+import { TargetAccessScope } from '../../auth/providers/scopes';
 import { HttpClient } from '../../shared/providers/http-client';
 import { Logger } from '../../shared/providers/logger';
+import { type S3Config, S3_CONFIG } from '../../shared/providers/s3-config';
+import { Storage } from '../../shared/providers/storage';
 import type { CDNConfig } from './tokens';
 import { CDN_CONFIG } from './tokens';
 
 type CdnResourceType = 'schema' | 'supergraph' | 'metadata';
 
 @Injectable({
-  scope: Scope.Singleton,
+  scope: Scope.Operation,
   global: true,
 })
 export class CdnProvider {
@@ -22,7 +26,10 @@ export class CdnProvider {
   constructor(
     logger: Logger,
     private httpClient: HttpClient,
+    @Inject(AuthManager) private authManager: AuthManager,
     @Inject(CDN_CONFIG) private config: CDNConfig,
+    @Inject(S3_CONFIG) private s3Config: S3Config,
+    @Inject(Storage) private storage: Storage,
   ) {
     this.logger = logger.child({ source: 'CdnProvider' });
     this.encoder = new TextEncoder();
@@ -44,7 +51,43 @@ export class CdnProvider {
     throw new HiveError(`CDN is not configured, cannot resolve CDN target url.`);
   }
 
-  generateToken(targetId: string): string {
+  async generateCdnAccess(args: { organizationId: string; projectId: string; targetId: string }) {
+    await this.authManager.ensureTargetAccess({
+      organization: args.organizationId,
+      project: args.projectId,
+      target: args.targetId,
+      scope: TargetAccessScope.REGISTRY_READ,
+    });
+
+    const token = this.generateToken(args.targetId);
+    const url = this.getCdnUrlForTarget(args.targetId);
+
+    const s3Key = `cdn-legacy-keys/${args.targetId}`;
+
+    const s3Url = [this.s3Config.endpoint, this.s3Config.bucket, s3Key].join('/');
+    const response = await this.s3Config.client.fetch(s3Url, {
+      method: 'PUT',
+      body: token,
+    });
+
+    if (response.status !== 200) {
+      throw new Error(`Unexpected Status for storing key. (status=${response.status})`);
+    }
+
+    await this.storage.createCDNAccessToken({
+      targetId: args.targetId,
+      s3Key,
+      firstCharacters: token.substring(0, 3),
+      lastCharacters: token.substring(token.length - 3),
+    });
+
+    return {
+      token,
+      url,
+    };
+  }
+
+  private generateToken(targetId: string): string {
     return createHmac('sha256', this.secretKeyData)
       .update(this.encoder.encode(targetId))
       .digest('base64');

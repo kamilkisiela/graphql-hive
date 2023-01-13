@@ -43,6 +43,16 @@ export interface alerts {
   type: alert_type;
 }
 
+export interface cdn_access_tokens {
+  created_at: Date;
+  first_characters: string;
+  id: string;
+  is_revoked: boolean;
+  last_characters: string;
+  s3_key: string;
+  target_id: string;
+}
+
 export interface commits {
   author: string;
   commit: string;
