@@ -1,4 +1,5 @@
-import { crypto } from '@whatwg-node/fetch';
+import bcrypt from 'bcryptjs';
+import { AwsClient } from 'packages/services/api/src/shared/aws';
 
 const encoder = new TextEncoder();
 
@@ -16,32 +17,26 @@ export type KeyValidator = (targetId: string, headerKey: string) => Promise<bool
 
 type CreateKeyValidatorDeps = {
   keyData: string;
-};
-
-const atobMaybe = (str: string): string | null => {
-  try {
-    return atob(str);
-  } catch {
-    return null;
-  }
+  s3: {
+    endpoint: string;
+    bucketName: string;
+    client: AwsClient;
+  };
 };
 
 export const createIsKeyValid =
   (deps: CreateKeyValidatorDeps): KeyValidator =>
   async (targetId: string, accessHeaderValue: string): Promise<boolean> => {
-    const headerBinary = atobMaybe(accessHeaderValue);
-    if (headerBinary === null) {
-      return false;
-    }
-    const headerData = byteStringToUint8Array(headerBinary);
-    const secretKeyData = encoder.encode(deps.keyData);
-    const secretKey = await crypto.subtle.importKey(
-      'raw',
-      secretKeyData,
-      { name: 'HMAC', hash: 'SHA-256' },
-      false,
-      ['verify'],
+    const key = await deps.s3.client.fetch(
+      [deps.s3.endpoint, deps.s3.bucketName, 'cdn-legacy-keys', targetId].join('/'),
+      {
+        method: 'GET',
+      },
     );
 
-    return await crypto.subtle.verify('HMAC', secretKey, headerData, encoder.encode(targetId));
+    if (key.status !== 200) {
+      return false;
+    }
+
+    return await bcrypt.compare(accessHeaderValue, await key.text());
   };

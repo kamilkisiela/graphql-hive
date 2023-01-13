@@ -1,4 +1,5 @@
 import itty from 'itty-router';
+import { AwsClient } from '@hive/api/src/shared/aws';
 import Toucan from 'toucan-js';
 import { ArtifactStorageReader } from '@hive/api/src/modules/schema/providers/artifact-storage-reader';
 import { AnalyticsEngine, createAnalytics } from './analytics';
@@ -6,6 +7,21 @@ import { createArtifactRequestHandler } from './artifact-handler';
 import { UnexpectedError } from './errors';
 import { createRequestHandler } from './handler';
 import { createIsKeyValid } from './key-validation';
+
+declare let S3_ENDPOINT: string;
+declare let S3_ACCESS_KEY_ID: string;
+declare let S3_SECRET_ACCESS_KEY: string;
+declare let S3_BUCKET_NAME: string;
+
+const s3 = {
+  client: new AwsClient({
+    accessKeyId: S3_ACCESS_KEY_ID,
+    secretAccessKey: S3_SECRET_ACCESS_KEY,
+    service: 's3',
+  }),
+  bucketName: S3_BUCKET_NAME,
+  endpoint: S3_ENDPOINT,
+};
 
 /**
  * KV Storage for the CDN
@@ -30,12 +46,7 @@ declare let SENTRY_RELEASE: string;
 declare let USAGE_ANALYTICS: AnalyticsEngine;
 declare let ERROR_ANALYTICS: AnalyticsEngine;
 
-const isKeyValid = createIsKeyValid({ keyData: KEY_DATA });
-
-declare let S3_ENDPOINT: string;
-declare let S3_ACCESS_KEY_ID: string;
-declare let S3_SECRET_ACCESS_KEY: string;
-declare let S3_BUCKET_NAME: string;
+const isKeyValid = createIsKeyValid({ keyData: KEY_DATA, s3 });
 
 const analytics = createAnalytics({
   usage: USAGE_ANALYTICS,
@@ -48,15 +59,7 @@ const handleRequest = createRequestHandler({
   analytics,
 });
 
-const artifactStorageReader = new ArtifactStorageReader(
-  {
-    accessKeyId: S3_ACCESS_KEY_ID,
-    secretAccessKey: S3_SECRET_ACCESS_KEY,
-    endpoint: S3_ENDPOINT,
-  },
-  S3_BUCKET_NAME,
-  null,
-);
+const artifactStorageReader = new ArtifactStorageReader(s3, S3_BUCKET_NAME);
 
 const handleArtifactRequest = createArtifactRequestHandler({
   isKeyValid,

@@ -25,6 +25,7 @@ import { asyncStorage } from './async-storage';
 import { env } from './environment';
 import { graphqlHandler } from './graphql-handler';
 import { clickHouseElapsedDuration, clickHouseReadDuration } from './metrics';
+import { AwsClient } from 'packages/services/api/src/shared/aws';
 
 const LegacySetUserIdMappingPayloadModel = zod.object({
   auth0UserId: zod.string(),
@@ -314,18 +315,19 @@ export async function main() {
     });
 
     if (env.cdn.providers.api !== null) {
-      const artifactStorageReader = new ArtifactStorageReader(
-        {
-          endpoint: env.s3.endpoint,
+      const s3 = {
+        client: new AwsClient({
           accessKeyId: env.s3.credentials.accessKeyId,
           secretAccessKey: env.s3.credentials.secretAccessKey,
-        },
-        env.s3.bucketName,
-        env.s3.publicUrl,
-      );
+          service: 's3',
+        }),
+        endpoint: env.s3.endpoint,
+        bucketName: env.s3.bucketName,
+      };
+      const artifactStorageReader = new ArtifactStorageReader(s3, env.s3.publicUrl);
 
       const artifactHandler = createArtifactRequestHandler({
-        isKeyValid: createIsKeyValid({ keyData: env.cdn.authPrivateKey }),
+        isKeyValid: createIsKeyValid({ keyData: env.cdn.authPrivateKey, s3 }),
         async getArtifactAction(targetId, artifactType, eTag) {
           return artifactStorageReader.generateArtifactReadUrl(targetId, artifactType, eTag);
         },

@@ -8,9 +8,26 @@ import './dev-polyfill';
 import { devStorage } from './dev-polyfill';
 import { createRequestHandler } from './handler';
 import { createIsKeyValid } from './key-validation';
+import { AwsClient } from '@hive/api/src/shared/aws';
 
 // eslint-disable-next-line no-process-env
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4010;
+
+declare let S3_ENDPOINT: string;
+declare let S3_ACCESS_KEY_ID: string;
+declare let S3_SECRET_ACCESS_KEY: string;
+declare let S3_BUCKET_NAME: string;
+declare let S3_PUBLIC_URL: string;
+
+const s3 = {
+  client: new AwsClient({
+    accessKeyId: S3_ACCESS_KEY_ID,
+    secretAccessKey: S3_SECRET_ACCESS_KEY,
+    service: 's3',
+  }),
+  bucketName: S3_BUCKET_NAME,
+  endpoint: S3_ENDPOINT,
+};
 
 /**
  * KV Storage for the CDN
@@ -26,27 +43,13 @@ declare let KEY_DATA: string;
 
 const handleRequest = createRequestHandler({
   getRawStoreValue: value => HIVE_DATA.get(value),
-  isKeyValid: createIsKeyValid({ keyData: KEY_DATA }),
+  isKeyValid: createIsKeyValid({ keyData: KEY_DATA, s3 }),
 });
 
-declare let S3_ENDPOINT: string;
-declare let S3_ACCESS_KEY_ID: string;
-declare let S3_SECRET_ACCESS_KEY: string;
-declare let S3_BUCKET_NAME: string;
-declare let S3_PUBLIC_URL: string;
-
-const artifactStorageReader = new ArtifactStorageReader(
-  {
-    accessKeyId: S3_ACCESS_KEY_ID,
-    secretAccessKey: S3_SECRET_ACCESS_KEY,
-    endpoint: S3_ENDPOINT,
-  },
-  S3_BUCKET_NAME,
-  S3_PUBLIC_URL,
-);
+const artifactStorageReader = new ArtifactStorageReader(s3, S3_PUBLIC_URL);
 
 const handleArtifactRequest = createArtifactRequestHandler({
-  isKeyValid: createIsKeyValid({ keyData: KEY_DATA }),
+  isKeyValid: createIsKeyValid({ keyData: KEY_DATA, s3 }),
   async getArtifactAction(targetId, artifactType, eTag) {
     return artifactStorageReader.generateArtifactReadUrl(targetId, artifactType, eTag);
   },
