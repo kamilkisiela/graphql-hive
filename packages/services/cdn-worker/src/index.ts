@@ -67,7 +67,7 @@ const handleRequest = createRequestHandler({
   analytics,
 });
 
-const artifactStorageReader = new ArtifactStorageReader(s3, S3_BUCKET_NAME);
+const artifactStorageReader = new ArtifactStorageReader(s3, null);
 
 const handleArtifactRequest = createArtifactRequestHandler({
   isKeyValid,
