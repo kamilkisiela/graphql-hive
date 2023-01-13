@@ -611,7 +611,10 @@ export const resolvers: SchemaModule.Resolvers = {
   SchemaVersionConnection: {
     pageInfo(info) {
       return {
-        hasMore: info.hasMore,
+        hasNextPage: info.hasMore,
+        hasPreviousPage: false,
+        endCursor: '',
+        startCursor: '',
       };
     },
   },
