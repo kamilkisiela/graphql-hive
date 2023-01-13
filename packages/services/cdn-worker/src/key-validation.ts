@@ -1,4 +1,4 @@
-import { Response } from '@whatwg-node/fetch';
+import { Response, Request } from '@whatwg-node/fetch';
 import bcrypt from 'bcryptjs';
 import { AwsClient } from 'packages/services/api/src/shared/aws';
 
@@ -17,7 +17,9 @@ type CreateKeyValidatorDeps = {
 export const createIsKeyValid =
   (deps: CreateKeyValidatorDeps): KeyValidator =>
   async (targetId: string, accessHeaderValue: string): Promise<boolean> => {
-    const cacheKey = 'http://key-cache.graphql-hive.com/' + targetId;
+    const cacheKey = new Request('http://key-cache.graphql-hive.com/' + targetId, {
+      method: 'GET',
+    });
 
     console.log('use cache', !!deps.cache);
 
