@@ -4,7 +4,7 @@ query versions($selector: SchemaVersionsInput!, $limit: Int!, $after: ID) {
       ...SchemaVersionFields
     }
     pageInfo {
-      hasMore
+      hasNextPage
     }
   }
 }

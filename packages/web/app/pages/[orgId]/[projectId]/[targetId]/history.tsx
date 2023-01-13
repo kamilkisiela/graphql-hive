@@ -178,7 +178,7 @@ const ListPage = ({
   });
 
   const versions = versionsQuery.data?.schemaVersions;
-  const hasMore = versions?.pageInfo.hasMore;
+  const hasMore = versions?.pageInfo.hasNextPage;
 
   return (
     <>
