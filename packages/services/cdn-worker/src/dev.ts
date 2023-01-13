@@ -43,13 +43,13 @@ declare let KEY_DATA: string;
 
 const handleRequest = createRequestHandler({
   getRawStoreValue: value => HIVE_DATA.get(value),
-  isKeyValid: createIsKeyValid({ keyData: KEY_DATA, s3 }),
+  isKeyValid: createIsKeyValid({ keyData: KEY_DATA, s3, cache: null }),
 });
 
 const artifactStorageReader = new ArtifactStorageReader(s3, S3_PUBLIC_URL);
 
 const handleArtifactRequest = createArtifactRequestHandler({
-  isKeyValid: createIsKeyValid({ keyData: KEY_DATA, s3 }),
+  isKeyValid: createIsKeyValid({ keyData: KEY_DATA, s3, cache: null }),
   async getArtifactAction(targetId, artifactType, eTag) {
     return artifactStorageReader.generateArtifactReadUrl(targetId, artifactType, eTag);
   },

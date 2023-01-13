@@ -46,7 +46,15 @@ declare let SENTRY_RELEASE: string;
 declare let USAGE_ANALYTICS: AnalyticsEngine;
 declare let ERROR_ANALYTICS: AnalyticsEngine;
 
-const isKeyValid = createIsKeyValid({ keyData: KEY_DATA, s3 });
+/**
+ * Default cache on Cloudflare
+ * See https://developers.cloudflare.com/workers/runtime-apis/cache/
+ */
+declare let caches: {
+  default: Cache;
+};
+
+const isKeyValid = createIsKeyValid({ keyData: KEY_DATA, s3, cache: caches.default });
 
 const analytics = createAnalytics({
   usage: USAGE_ANALYTICS,
