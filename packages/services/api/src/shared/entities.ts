@@ -140,6 +140,15 @@ export interface OIDCIntegration {
   authorizationEndpoint: string;
 }
 
+export interface CDNAccessToken {
+  readonly id: string;
+  readonly targetId: string;
+  readonly s3Key: string;
+  readonly firstCharacters: string;
+  readonly lastCharacters: string;
+  readonly createdAt: string;
+}
+
 export interface Project {
   id: string;
   cleanId: string;

@@ -1,5 +1,6 @@
 import { ApolloGateway } from '@apollo/gateway';
 import { ApolloServer } from '@apollo/server';
+import { createSupergraphManager } from '@graphql-hive/client';
 import { startStandaloneServer } from '@apollo/server/standalone';
 import { ProjectType, TargetAccessScope } from '@app/gql/graphql';
 import {
@@ -8,7 +9,6 @@ import {
   ListObjectsCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
-import { createSupergraphManager } from '@graphql-hive/client';
 import { fetch } from '@whatwg-node/fetch';
 import { initSeed } from '../../testkit/seed';
 import { getServiceHost } from '../../testkit/utils';
@@ -120,6 +120,33 @@ function runArtifactsCDNTests(
           'Please refer to the documentation for more details: https://docs.graphql-hive.com/features/registry-usage',
       });
       expect(response.headers.get('location')).toEqual(null);
+    });
+
+    test.concurrent('created (legacy) cdn access key is stored on S3', async () => {
+      const { createOrg } = await initSeed().createOwner();
+      const { createProject } = await createOrg();
+      const { createToken, target } = await createProject(ProjectType.Single);
+      const writeToken = await createToken({
+        targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      });
+      const cdnAccess = await writeToken.createCdnAccess();
+      const result = await fetchS3ObjectArtifact('artifacts', `cdn-legacy-keys/${target.id}`);
+      expect(result.body).toEqual(cdnAccess.token);
+    });
+
+    test.concurrent('creating (legacy) cdn access token can be done multiple times', async () => {
+      const { createOrg } = await initSeed().createOwner();
+      const { createProject } = await createOrg();
+      const { createToken, target } = await createProject(ProjectType.Single);
+      const writeToken = await createToken({
+        targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      });
+      let cdnAccess = await writeToken.createCdnAccess();
+      const firstResult = await fetchS3ObjectArtifact('artifacts', `cdn-legacy-keys/${target.id}`);
+      expect(firstResult.body).toEqual(cdnAccess.token);
+      cdnAccess = await writeToken.createCdnAccess();
+      const secondResult = await fetchS3ObjectArtifact('artifacts', `cdn-legacy-keys/${target.id}`);
+      expect(secondResult.body).toEqual(firstResult.body);
     });
 
     test.concurrent('access SDL artifact with valid credentials', async () => {

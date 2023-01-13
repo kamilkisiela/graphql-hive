@@ -1,6 +1,4 @@
 import { HiveError } from '../../shared/errors';
-import { AuthManager } from '../auth/providers/auth-manager';
-import { TargetAccessScope } from '../auth/providers/target-access';
 import { IdTranslator } from '../shared/providers/id-translator';
 import { CdnModule } from './__generated__/types';
 import { CdnProvider } from './providers/cdn.provider';
@@ -15,23 +13,17 @@ export const resolvers: CdnModule.Resolvers = {
         throw new HiveError(`CDN is not configured, cannot generate a token.`);
       }
 
-      const [organization, project, target] = await Promise.all([
+      const [organizationId, projectId, targetId] = await Promise.all([
         translator.translateOrganizationId(selector),
         translator.translateProjectId(selector),
         translator.translateTargetId(selector),
       ]);
 
-      await injector.get(AuthManager).ensureTargetAccess({
-        organization,
-        project,
-        target,
-        scope: TargetAccessScope.REGISTRY_READ,
+      return await cdn.generateCdnAccess({
+        organizationId,
+        projectId,
+        targetId,
       });
-
-      return {
-        token: cdn.generateToken(target),
-        url: cdn.getCdnUrlForTarget(target),
-      };
     },
   },
   Query: {
