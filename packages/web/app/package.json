@@ -81,7 +81,7 @@
     "supertokens-js-override": "0.0.4",
     "supertokens-node": "12.1.4",
     "supertokens-website": "14.0.3",
-    "twin.macro": "2.8.2",
+    "twin.macro": "3.1.0",
     "urql": "2.0.5",
     "use-debounce": "9.0.2",
     "valtio": "1.8.2",
