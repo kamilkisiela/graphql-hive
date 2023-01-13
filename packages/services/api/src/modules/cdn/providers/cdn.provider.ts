@@ -1,4 +1,5 @@
 import { createHmac } from 'crypto';
+import bcryptjs from 'bcryptjs';
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import type { Span } from '@sentry/types';
 import { HiveError } from '../../../shared/errors';
@@ -59,7 +60,8 @@ export class CdnProvider {
       scope: TargetAccessScope.REGISTRY_READ,
     });
 
-    const token = this.generateToken(args.targetId);
+    const token = this.legacy_generateToken(args.targetId);
+    const tokenHash = await bcryptjs.hash(token, await bcryptjs.genSalt());
     const url = this.getCdnUrlForTarget(args.targetId);
 
     const s3Key = `cdn-legacy-keys/${args.targetId}`;
@@ -67,7 +69,7 @@ export class CdnProvider {
     const s3Url = [this.s3Config.endpoint, this.s3Config.bucket, s3Key].join('/');
     const response = await this.s3Config.client.fetch(s3Url, {
       method: 'PUT',
-      body: token,
+      body: tokenHash,
     });
 
     if (response.status !== 200) {
@@ -87,7 +89,7 @@ export class CdnProvider {
     };
   }
 
-  private generateToken(targetId: string): string {
+  private legacy_generateToken(targetId: string): string {
     return createHmac('sha256', this.secretKeyData)
       .update(this.encoder.encode(targetId))
       .digest('base64');

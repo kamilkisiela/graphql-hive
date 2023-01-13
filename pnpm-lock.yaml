@@ -381,11 +381,13 @@ importers:
       '@theguild/buddy': 0.1.0
       '@trpc/client': 10.9.0
       '@trpc/server': 10.9.0
+      '@types/bcryptjs': 2.4.2
       '@types/ioredis-mock': 8.2.1
       '@types/lodash': 4.14.191
       '@types/ms': 0.7.31
       '@whatwg-node/fetch': 0.6.2
       agentkeepalive: 4.2.1
+      bcryptjs: 2.4.3
       dataloader: 2.1.0
       date-fns: 2.29.3
       got: 12.5.3
@@ -415,6 +417,7 @@ importers:
       '@trpc/server': 10.9.0
       '@whatwg-node/fetch': 0.6.2
       agentkeepalive: 4.2.1
+      bcryptjs: 2.4.3
       dataloader: 2.1.0
       date-fns: 2.29.3
       got: 12.5.3
@@ -436,6 +439,7 @@ importers:
       '@hive/storage': link:../storage
       '@hive/tokens': link:../tokens
       '@hive/webhooks': link:../webhooks
+      '@types/bcryptjs': 2.4.2
       '@types/ioredis-mock': 8.2.1
       '@types/lodash': 4.14.191
       '@types/ms': 0.7.31
@@ -11345,6 +11349,10 @@ packages:
     dependencies:
       '@babel/types': 7.20.7
 
+  /@types/bcryptjs/2.4.2:
+    resolution: {integrity: sha512-LiMQ6EOPob/4yUL66SZzu6Yh77cbzJFYll+ZfaPiPPFswtIlA/Fs1MzdKYA7JApHU49zQTbJGX3PDmCpIdDBRQ==}
+    dev: true
+
   /@types/body-parser/1.19.2:
     resolution: {integrity: sha512-ALYone6pm6QmwZoAgeyNksccT9Q4AWZQ6PvfwR37GT6r6FWUPguq6sUmNGSMV2Wr761oQoBxwGGa6DR5o1DC9g==}
     dependencies:
@@ -12946,6 +12954,10 @@ packages:
     resolution: {integrity: sha512-qeFIXtP4MSoi6NLqO12WfqARWWuCKi2Rn/9hJLEmtB5yTNr9DqFWkJRCf2qShWzPeAMRnOgCrq0sg/KLv5ES9w==}
     dependencies:
       tweetnacl: 0.14.5
+
+  /bcryptjs/2.4.3:
+    resolution: {integrity: sha512-V/Hy/X9Vt7f3BbPJEi8BdVFMByHi+jNXrYkW3huaybV/kQ0KJg0Y6PkEMbn+zeT+i+SiKZ/HMqJGIIt4LZDqNQ==}
+    dev: false
 
   /before-after-hook/2.2.3:
     resolution: {integrity: sha512-NzUnlZexiaH/46WDhANlyR2bXRopNg4F/zuSA3OpZnllCUgRaOF2znDioDWrmbNVsuZk6l9pMquQB38cfBZwkQ==}
