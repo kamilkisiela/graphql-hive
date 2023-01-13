@@ -153,7 +153,7 @@ services:
       - ./volumes/broker/db:/var/lib/kafka/data
 
   supertokens:
-    image: registry.supertokens.io/supertokens/supertokens-postgresql:4.2
+    image: registry.supertokens.io/supertokens/supertokens-postgresql:4.3
     depends_on:
       db:
         condition: service_healthy
