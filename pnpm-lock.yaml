@@ -678,14 +678,14 @@ importers:
       '@whatwg-node/fetch': 0.6.1
       fastify: 3.29.4
       fastify-cors: 6.0.2
-      fastify-plugin: 3.0.1
+      fastify-plugin: 4.5.0
       prom-client: 14.1.1
       zod: 3.20.2
     dependencies:
       '@whatwg-node/fetch': 0.6.1
       fastify: 3.29.4
       fastify-cors: 6.0.2
-      fastify-plugin: 3.0.1
+      fastify-plugin: 4.5.0
       prom-client: 14.1.1
       zod: 3.20.2
     devDependencies:
@@ -16431,6 +16431,10 @@ packages:
 
   /fastify-plugin/3.0.1:
     resolution: {integrity: sha512-qKcDXmuZadJqdTm6vlCqioEbyewF60b/0LOFCcYN1B6BIZGlYJumWWOYs70SFYLDAH4YqdE1cxH/RKMG7rFxgA==}
+    dev: false
+
+  /fastify-plugin/4.5.0:
+    resolution: {integrity: sha512-79ak0JxddO0utAXAQ5ccKhvs6vX2MGyHHMMsmZkBANrq3hXc1CHzvNPHOcvTsVMEPl5I+NT+RO4YKMGehOfSIg==}
     dev: false
 
   /fastify/3.29.4:
