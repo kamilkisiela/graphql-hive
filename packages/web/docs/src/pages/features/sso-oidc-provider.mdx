@@ -55,3 +55,73 @@ Provider. Share this link with your users or add it to your SSO provider dashboa
 people will be redirected to it.
 
 E.g. `https://app.graphql-hive.com/auth/oidc?id=xxxxxxxx-1234-1234-1234-xxxxxxxxxxxx`
+
+## Configuring with Okta
+
+First we need to have an Okta account, so you can register for an account from
+https://login.okta.com/signin/register or sign up for a 30 days trial from
+https://www.okta.com/free-trial to ease the process of going through this guide.
+
+> Note: that unfortunately for sigining up for an Okta account, you're required to have a busieness
+> email.
+
+Once you're logged in to your account, click the "Admin" button in the header to navigate to the
+admin view.
+
+![](/docs/pages/features/sso-oidc-provider/okta-admin-button.png)
+
+After you're redirected click on the "Applications" tab in the sidebar then click on the "Create App
+Integration" button
+
+![](/docs/pages/features/sso-oidc-provider/okta-create-app-integration.png)
+
+Choose "OIDC - OpenID Connect" as for the Sign-in method and "Web Application" for the "Application
+type", then click "Next".
+
+![](/docs/pages/features/sso-oidc-provider/create-new-app-integration-options.png)
+
+Next you're gonna be able to customize your app's name and logo if you want to, then choose the
+option that suits you for the "Controlled access", I'm gonna go with "Allow everyone" as this's just
+a guide, after you're done click "Save".
+
+![](/docs/pages/features/sso-oidc-provider/controlled-access-of-okta-app.png)
+
+And now you're almost good to go with Okta's configuration, now head to your Hive organization
+settings tab and hit the "Connect Open ID Connect Provider" button
+
+![](/docs/pages/features/sso-oidc-provider/hive-connect-openid-provider.png)
+
+And now you'd have to fill in a couple of inputs to connect your OpenID Okta's provider as the
+following:
+
+![](/docs/pages/features/sso-oidc-provider/hive-connect-openid-provider-modal.png)
+
+- Token Endpoint = https://${yourOktaDomain}/oauth2/v1/token (ex:
+  https://trial-5517233.okta.com/oauth2/v1/token)
+- User Info Endpoint = https://${yourOktaDomain}/oauth2/v1/userinfo (ex:
+  https://trial-5517233.okta.com/oauth2/v1/userinfo)
+- Authorization Endpoint = https://${yourOktaDomain}/oauth2/v1/authorize (ex:
+  https://trial-5517233.okta.com/oauth2/v1/authorize)
+- Client ID = ![](/docs/pages/features/sso-oidc-provider/okta-app-config-client-id.png)
+- Client Secret = ![](/docs/pages/features/sso-oidc-provider/okta-app-config-client-secret.png)
+
+After you're done, click the "Connect OIDC Provider" button.
+
+The last step to do is, grabbing both the OIDC provider sign-in and sign-out redirect URIs by
+clicking the copy button next to them, then go back to your Okta's app SSO configuration and scroll
+down to the "General Settings" section and click "Edit" on the right, then scroll down to the
+"LOGIN" section and paste both the Sign-in redirect URI and the Sign-out redirect URI from Hive into
+their responding inputs and click "Save" when you're done.
+
+![](/docs/pages/features/sso-oidc-provider/hive-manage-openid-connect-modal.png)
+
+![](/docs/pages/features/sso-oidc-provider/okta-app-general-settings-section.png)
+
+And congrats, you know have Okta connected! 🥳🎉
+
+You can use the link provided in the modal right section to let your users login via Okta.
+
+![](/docs/pages/features/sso-oidc-provider/hive-manage-openid-okta-login-url.png)
+
+Hope that helped, and let us know if something changed on either Okta's or Hive's side in the
+screenshots and/or steps and we'll make that change happen.
