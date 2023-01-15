@@ -815,7 +815,7 @@ importers:
       '@trpc/client': 10.7.0
       '@trpc/server': 10.7.0
       '@whatwg-node/fetch': 0.6.1
-      ajv: 8.11.2
+      ajv: 8.12.0
       dotenv: 16.0.3
       got: 12.5.3
       graphql: 16.6.0
@@ -829,7 +829,7 @@ importers:
       '@trpc/client': 10.7.0_@trpc+server@10.7.0
       '@trpc/server': 10.7.0
       '@whatwg-node/fetch': 0.6.1
-      ajv: 8.11.2
+      ajv: 8.12.0
       dotenv: 16.0.3
       got: 12.5.3
       graphql: 16.6.0
@@ -11998,8 +11998,8 @@ packages:
       json-schema-traverse: 0.4.1
       uri-js: 4.4.1
 
-  /ajv/8.11.2:
-    resolution: {integrity: sha512-E4bfmKAhGiSTvMfL1Myyycaub+cUEU2/IvpylXkUu7CHBkBj1f/ikdzbD7YQ6FKUbixDxeYvB/xY4fvyroDlQg==}
+  /ajv/8.12.0:
+    resolution: {integrity: sha512-sRu1kpcO9yLtYxBKvqfTeh9KzZEwO3STyX1HT+4CaDzC6HpTGYhIhPIzj9XuKU7KYDwnaeh5hcOwjy1QuJzBPA==}
     dependencies:
       fast-deep-equal: 3.1.3
       json-schema-traverse: 1.0.0
@@ -19551,7 +19551,7 @@ packages:
   /light-my-request/4.12.0:
     resolution: {integrity: sha512-0y+9VIfJEsPVzK5ArSIJ8Dkxp8QMP7/aCuxCUtG/tr9a2NoOf/snATE/OUc05XUplJCEnRh6gTkH7xh9POt1DQ==}
     dependencies:
-      ajv: 8.11.2
+      ajv: 8.12.0
       cookie: 0.5.0
       process-warning: 1.0.0
       set-cookie-parser: 2.5.1
