@@ -31,7 +31,7 @@
     "graphql-parse-resolve-info": "4.12.3",
     "graphql-scalars": "1.20.1",
     "graphql-yoga": "3.3.0",
-    "ioredis": "5.2.4",
+    "ioredis": "5.2.5",
     "lodash": "4.17.21",
     "lru-cache": "7.14.1",
     "ms": "2.1.3",
