@@ -55,3 +55,171 @@ Provider. Share this link with your users or add it to your SSO provider dashboa
 people will be redirected to it.
 
 E.g. `https://app.graphql-hive.com/auth/oidc?id=xxxxxxxx-1234-1234-1234-xxxxxxxxxxxx`
+
+## Configuring with Okta
+
+Once you're logged in to your account, click the "Admin" button in the header to navigate to the
+admin view.
+
+![](/docs/pages/features/sso-oidc-provider/okta-admin-button.png)
+
+After you're redirected click on the "Applications" tab in the sidebar then click on the "Create App
+Integration" button
+
+![](/docs/pages/features/sso-oidc-provider/okta-create-app-integration.png)
+
+Choose "OIDC - OpenID Connect" as for the Sign-in method and "Web Application" for the "Application
+type", then click "Next".
+
+![](/docs/pages/features/sso-oidc-provider/create-new-app-integration-options.png)
+
+Next you're gonna be able to customize your app's name and logo if you want to, then choose the
+option that suits you for the "Controlled access", I'm gonna go with "Allow everyone" as this's just
+a guide, after you're done click "Save".
+
+![](/docs/pages/features/sso-oidc-provider/controlled-access-of-okta-app.png)
+
+And now you're almost good to go with Okta's configuration, now head to your Hive organization
+settings tab and hit the "Connect Open ID Connect Provider" button
+
+![](/docs/pages/features/sso-oidc-provider/hive-connect-openid-provider.png)
+
+And now you'd have to fill in a couple of inputs to connect your OpenID Okta's provider as the
+following:
+
+![](/docs/pages/features/sso-oidc-provider/hive-connect-openid-provider-modal.png)
+
+- Token Endpoint = https://YOUR_OKTA_DOMAIN_HERE/oauth2/v1/token (ex:
+  https://trial-5517233.okta.com/oauth2/v1/token)
+- User Info Endpoint = https://YOUR_OKTA_DOMAIN_HERE//oauth2/v1/userinfo (ex:
+  https://trial-5517233.okta.com/oauth2/v1/userinfo)
+- Authorization Endpoint = https://YOUR_OKTA_DOMAIN_HERE//oauth2/v1/authorize (ex:
+  https://trial-5517233.okta.com/oauth2/v1/authorize)
+- Client ID = ![](/docs/pages/features/sso-oidc-provider/okta-app-config-client-id.png)
+- Client Secret = ![](/docs/pages/features/sso-oidc-provider/okta-app-config-client-secret.png)
+
+After you're done, click the "Connect OIDC Provider" button.
+
+The last step to do is, grabbing both the OIDC provider sign-in and sign-out redirect URIs by
+clicking the copy button next to them, then go back to your Okta's app SSO configuration and scroll
+down to the "General Settings" section and click "Edit" on the right, then scroll down to the
+"LOGIN" section and paste both the Sign-in redirect URI and the Sign-out redirect URI from Hive into
+their responding inputs and click "Save" when you're done.
+
+![](/docs/pages/features/sso-oidc-provider/hive-manage-openid-connect-modal.png)
+
+![](/docs/pages/features/sso-oidc-provider/okta-app-general-settings-section.png)
+
+And congrats, you now have Okta connected! 🥳🎉
+
+You can use the link provided in the modal right section to let your users login via Okta.
+
+![](/docs/pages/features/sso-oidc-provider/hive-manage-openid-okta-login-url.png)
+
+Hope that helped, and let us know if something changed on either Okta's or Hive's side in the
+screenshots and/or steps and we'll make that change happen.
+
+## Configuring with Azure AD
+
+
+After you're logged in, search from the search bar at the top "azure active directory" then click on
+it from the search results. On the left sidebar, click on the "Enterprise applications" under the
+"Manage" section
+
+![](/docs/pages/features/sso-oidc-provider/azure-ad-enterprise-applications.png)
+
+Then click on the "New Application" button and then click on the "Create your own application"
+button afterwards, you're gonna see the panel on the right where you should provide a name and
+select "Register an application to integrate with Azure AD (App you're developing)" as for the
+application purpose, then hit the "Create" button.
+
+![](/docs/pages/features/sso-oidc-provider/azure-ad-new-application-button.png)
+![](/docs/pages/features/sso-oidc-provider/azure-ad-create-application-panel.png)
+
+And now the last step to register your app is to define "Who can use this application or access this
+API?" according to your needs, then choose "Web" as for the selecting the platform and input
+"https://app.graphql-hive.com/auth/callback/oidc" in the input next to it, and finally click
+"Register".
+
+![](/docs/pages/features/sso-oidc-provider/azure-ad-register-application.png)
+
+Once you see the successfully created application popup, go back to your enterprise applications by
+navigating through the history structure from the top, then navigate to the "App registrations" tab
+from the right sidebar, and now you're gonna see your app in the applications list, so click on your
+app.
+
+![](/docs/pages/features/sso-oidc-provider/azure-ad-go-back-after-app-registeration.png)
+![](/docs/pages/features/sso-oidc-provider/azure-ad-after-going-back-choose-tab-in-sidebar.png)
+
+And from here, we now have most of the configuration details needed by Hive for SSO connection, so
+now head to your Hive's organization settings tab and hit the "Connect Open ID Connect Provider"
+button
+
+![](/docs/pages/features/sso-oidc-provider/hive-connect-openid-provider.png)
+
+And now you'd have to fill in a couple of inputs to connect your OpenID Azure AD's provider.
+
+![](/docs/pages/features/sso-oidc-provider/hive-connect-openid-provider-modal.png)
+
+Use the pointers in the screenshot to help you find your credentials to be able to fill Hive's
+connection inputs:
+
+![](/docs/pages/features/sso-oidc-provider/azure-ad-app-creds.png)
+
+- Token Endpoint = From the screenshot above
+- User Info Endpoint = https://graph.microsoft.com/oidc/userinfo
+- Authorization Endpoint = From the screenshot above
+- Client ID = From the screenshot above
+- Client Secret = Create a new client secret for your app by navigating as the screenshot
+  illustrates then on the right panel add a description for your secret and configure your
+  expiration configuration or leave it as the default recommended value which is "6 months", then
+  click "Add". ![](/docs/pages/features/sso-oidc-provider/azure-ad-app-new-client-secret.png) Copy
+  your clien secret value and paste it in Hive
+  ![](/docs/pages/features/sso-oidc-provider/azure-ad-client-secret-value.png)
+  > Make sure to copy the value immediately, as you're not gonna be able to see it again after
+  > navigating.
+
+After you're done, click the "Connect OIDC Provider" button.
+
+And we're almost done, go to the "Authentication" tab and scroll done to the "Front-channel logout
+URL" section, and fill in the input with the following URL "https://app.graphql-hive.com/logout",
+then click "Save"
+
+![](/docs/pages/features/sso-oidc-provider/azure-ad-configure-logout-url.png)
+
+And for the last step, we need to add the permissions for Azure AD to be able to access the user
+info after authentication, so you're gonna go to "API permissions" then click the "Add a permission"
+button, you're gonna see a right panel, choose "Microsoft Graph" then "Delegated permissions". And
+make sure to add all of the listed permissions by using the search bar and checking the checkboxes:
+
+- `email`
+- `openid`
+- `profile`
+- `User.read`
+
+After you're done, click the "Add permissions" button.
+
+![](/docs/pages/features/sso-oidc-provider/azure-ad-configure-api-permissions.png)
+![](/docs/pages/features/sso-oidc-provider/azure-ad-configure-api-permissions-graph.png)
+![](/docs/pages/features/sso-oidc-provider/azure-ad-delegated-permissions.png)
+
+An Important Note:
+
+<Callout type="info">
+  Granting the permission for `email` unfortunately doesn't guarantee a successful login, because
+  how Azure AD works is that emails are optional which is problematic for Hive as an email is what
+  makes a login successful, so make sure when adding user records to add their email field as well
+  so that they're able to login. Azure made it extra annoying because the only way to add an email
+  is by editing an existing user not when creating a user record, but it is what it is. You can
+  follow the steps in the screenshots below to be able to add an email for a user record.
+  ![](/docs/pages/features/sso-oidc-provider/azure-ad-users-tab.png)
+  ![](/docs/pages/features/sso-oidc-provider/azure-ad-users-table.png)
+  ![](/docs/pages/features/sso-oidc-provider/azure-ad-edit-user-properties.png)
+  ![](/docs/pages/features/sso-oidc-provider/azure-ad-edit-user-email-field.png)
+</Callout>
+
+And congrats, you now have Azure AD connected! 🥳🎉
+
+You can use the link provided in the modal right section to let your users login via Okta.
+
+![](/docs/pages/features/sso-oidc-provider/hive-manage-openid-connect-modal.png)
