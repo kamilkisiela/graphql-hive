@@ -113,7 +113,6 @@ const createTableStatements = [
       timestamp,
       expires_at
   `,
-  // replaces schema_coordinates_daily (adds ttl)
   `
     CREATE MATERIALIZED VIEW IF NOT EXISTS default.coordinates_daily
     (
@@ -146,7 +145,6 @@ const createTableStatements = [
       timestamp,
       expires_at
   `,
-  // replaces client_names_daily (adds client_version and TTL)
   `
     CREATE MATERIALIZED VIEW IF NOT EXISTS default.clients_daily
     (

@@ -224,10 +224,10 @@ async function processMessage({
         })
         .catch(error => {
           ingestedOperationsFailures.inc(operations.length);
-          // We want to retry the kafka message only if the write to operations_new table fails.
+          // We want to retry the kafka message only if the write to operations table fails.
           // Why? Because if we retry the message for operation_registry, we will have duplicate.
           // One write could succeed, the other one could fail.
-          // Let's stick to the operations_new table for now.
+          // Let's stick to the operations table for now.
           error[retryOnFailureSymbol] = true;
           return Promise.reject(error);
         }),
