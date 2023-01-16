@@ -337,8 +337,8 @@ importers:
       '@hive/tokens': workspace:*
       '@hive/webhooks': workspace:*
       '@octokit/app': 13.1.1
-      '@sentry/node': 7.28.1
-      '@sentry/types': 7.28.1
+      '@sentry/node': 7.30.0
+      '@sentry/types': 7.30.0
       '@slack/web-api': 6.8.0
       '@theguild/buddy': 0.1.0
       '@trpc/client': 10.7.0
@@ -369,8 +369,8 @@ importers:
       '@aws-sdk/s3-request-presigner': 3.245.0
       '@graphql-inspector/core': 3.4.0_tu4s2cjheabese6hdiqk5i3mii
       '@octokit/app': 13.1.1
-      '@sentry/node': 7.28.1
-      '@sentry/types': 7.28.1
+      '@sentry/node': 7.30.0
+      '@sentry/types': 7.30.0
       '@slack/web-api': 6.8.0
       '@theguild/buddy': 0.1.0_ryylgra5xglhidfoiaxehn22hq
       '@trpc/client': 10.7.0_@trpc+server@10.7.0
@@ -461,7 +461,7 @@ importers:
   packages/services/emails:
     specifiers:
       '@hive/service-common': workspace:*
-      '@sentry/node': 7.28.1
+      '@sentry/node': 7.30.0
       '@trpc/server': 10.7.0
       '@types/mjml': 4.7.0
       '@types/nodemailer': 6.4.7
@@ -479,7 +479,7 @@ importers:
       tslib: 2.4.1
       zod: 3.20.2
     dependencies:
-      '@sentry/node': 7.28.1
+      '@sentry/node': 7.30.0
       '@trpc/server': 10.7.0
       '@whatwg-node/fetch': 0.6.1
       bullmq: 3.5.6_xbmkiyyfti7h6orsfs6pdmi4s4
@@ -531,8 +531,8 @@ importers:
       '@hive/emails': workspace:*
       '@hive/service-common': workspace:*
       '@hive/storage': workspace:*
-      '@sentry/node': 7.28.1
-      '@sentry/tracing': 7.28.1
+      '@sentry/node': 7.30.0
+      '@sentry/tracing': 7.30.0
       '@trpc/client': 10.7.0
       '@trpc/server': 10.7.0
       '@whatwg-node/fetch': 0.6.1
@@ -544,8 +544,8 @@ importers:
       tslib: 2.4.1
       zod: 3.20.2
     dependencies:
-      '@sentry/node': 7.28.1
-      '@sentry/tracing': 7.28.1
+      '@sentry/node': 7.30.0
+      '@sentry/tracing': 7.30.0
       '@trpc/client': 10.7.0_@trpc+server@10.7.0
       '@trpc/server': 10.7.0
       '@whatwg-node/fetch': 0.6.1
@@ -567,8 +567,8 @@ importers:
       '@graphql-tools/stitch': 8.7.35
       '@graphql-tools/stitching-directives': 2.3.25
       '@hive/service-common': workspace:*
-      '@sentry/node': 7.28.1
-      '@sentry/tracing': 7.28.1
+      '@sentry/node': 7.30.0
+      '@sentry/tracing': 7.30.0
       '@trpc/server': 10.7.0
       '@types/async-retry': 1.4.5
       '@whatwg-node/fetch': 0.6.1
@@ -583,8 +583,8 @@ importers:
       '@apollo/federation': 0.38.1_graphql@16.6.0
       '@graphql-tools/stitch': 8.7.35_graphql@16.6.0
       '@graphql-tools/stitching-directives': 2.3.25_graphql@16.6.0
-      '@sentry/node': 7.28.1
-      '@sentry/tracing': 7.28.1
+      '@sentry/node': 7.30.0
+      '@sentry/tracing': 7.30.0
       '@trpc/server': 10.7.0
       '@whatwg-node/fetch': 0.6.1
       async-retry: 1.3.3
@@ -615,9 +615,9 @@ importers:
       '@hive/cdn-script': workspace:*
       '@hive/service-common': workspace:*
       '@hive/storage': workspace:*
-      '@sentry/integrations': 7.28.1
-      '@sentry/node': 7.28.1
-      '@sentry/tracing': 7.28.1
+      '@sentry/integrations': 7.30.0
+      '@sentry/node': 7.30.0
+      '@sentry/tracing': 7.30.0
       '@swc/core': 1.3.24
       '@trpc/server': 10.7.0
       '@whatwg-node/fetch': 0.6.1
@@ -638,15 +638,15 @@ importers:
       '@envelop/core': 3.0.4
       '@envelop/generic-auth': 5.0.4_a6sekiasy2tqr6d5gj7n2wtjli
       '@envelop/graphql-modules': 4.0.4_a6sekiasy2tqr6d5gj7n2wtjli
-      '@envelop/sentry': 5.0.0_ychana5idhickjc4tnbdcwqcsq
+      '@envelop/sentry': 5.0.0_dfa4ibznoqdklbzkyf3mitwrdu
       '@envelop/types': 3.0.1
       '@escape.tech/graphql-armor-max-aliases': 1.6.1
       '@escape.tech/graphql-armor-max-depth': 1.8.1
       '@escape.tech/graphql-armor-max-directives': 1.6.1
       '@escape.tech/graphql-armor-max-tokens': 1.3.1
-      '@sentry/integrations': 7.28.1
-      '@sentry/node': 7.28.1
-      '@sentry/tracing': 7.28.1
+      '@sentry/integrations': 7.30.0
+      '@sentry/node': 7.30.0
+      '@sentry/tracing': 7.30.0
       '@trpc/server': 10.7.0
       '@whatwg-node/fetch': 0.6.1
       '@whatwg-node/server': 0.5.5
@@ -671,10 +671,10 @@ importers:
 
   packages/services/service-common:
     specifiers:
-      '@sentry/node': 7.28.1
-      '@sentry/tracing': 7.28.1
-      '@sentry/types': 7.28.1
-      '@sentry/utils': 7.28.1
+      '@sentry/node': 7.30.0
+      '@sentry/tracing': 7.30.0
+      '@sentry/types': 7.30.0
+      '@sentry/utils': 7.30.0
       '@whatwg-node/fetch': 0.6.1
       fastify: 3.29.4
       fastify-cors: 6.0.2
@@ -689,15 +689,15 @@ importers:
       prom-client: 14.1.1
       zod: 3.20.2
     devDependencies:
-      '@sentry/node': 7.28.1
-      '@sentry/tracing': 7.28.1
-      '@sentry/types': 7.28.1
-      '@sentry/utils': 7.28.1
+      '@sentry/node': 7.30.0
+      '@sentry/tracing': 7.30.0
+      '@sentry/types': 7.30.0
+      '@sentry/utils': 7.30.0
 
   packages/services/storage:
     specifiers:
-      '@sentry/node': 7.28.1
-      '@sentry/types': 7.28.1
+      '@sentry/node': 7.30.0
+      '@sentry/types': 7.30.0
       '@slonik/migrator': 0.8.5
       '@tgriesser/schemats': 7.0.1
       '@theguild/buddy': 0.1.0
@@ -716,7 +716,7 @@ importers:
       typescript: 4.9.4
       zod: 3.20.2
     dependencies:
-      '@sentry/node': 7.28.1
+      '@sentry/node': 7.30.0
       '@slonik/migrator': 0.8.5_slonik@30.1.2
       '@theguild/buddy': 0.1.0_ryylgra5xglhidfoiaxehn22hq
       dotenv: 16.0.3
@@ -727,7 +727,7 @@ importers:
       slonik-utilities: 1.9.4_slonik@30.1.2
       zod: 3.20.2
     devDependencies:
-      '@sentry/types': 7.28.1
+      '@sentry/types': 7.30.0
       '@tgriesser/schemats': 7.0.1_u3kbucfchakklx3sci2vh6wjau
       '@types/node': 18.11.18
       '@types/pg': 8.6.6
@@ -741,8 +741,8 @@ importers:
     specifiers:
       '@hive/service-common': workspace:*
       '@hive/storage': workspace:*
-      '@sentry/node': 7.28.1
-      '@sentry/tracing': 7.28.1
+      '@sentry/node': 7.30.0
+      '@sentry/tracing': 7.30.0
       '@trpc/client': 10.7.0
       '@trpc/server': 10.7.0
       '@whatwg-node/fetch': 0.6.1
@@ -754,8 +754,8 @@ importers:
       stripe: 11.6.0
       zod: 3.20.2
     dependencies:
-      '@sentry/node': 7.28.1
-      '@sentry/tracing': 7.28.1
+      '@sentry/node': 7.30.0
+      '@sentry/tracing': 7.30.0
       '@trpc/client': 10.7.0_@trpc+server@10.7.0
       '@trpc/server': 10.7.0
       '@whatwg-node/fetch': 0.6.1
@@ -774,8 +774,8 @@ importers:
     specifiers:
       '@hive/service-common': workspace:*
       '@hive/storage': workspace:*
-      '@sentry/node': 7.28.1
-      '@sentry/tracing': 7.28.1
+      '@sentry/node': 7.30.0
+      '@sentry/tracing': 7.30.0
       '@trpc/server': 10.7.0
       '@types/ms': 0.7.31
       dotenv: 16.0.3
@@ -788,8 +788,8 @@ importers:
       tslib: 2.4.1
       zod: 3.20.2
     dependencies:
-      '@sentry/node': 7.28.1
-      '@sentry/tracing': 7.28.1
+      '@sentry/node': 7.30.0
+      '@sentry/tracing': 7.30.0
       '@trpc/server': 10.7.0
       dotenv: 16.0.3
       ms: 2.1.3
@@ -810,8 +810,8 @@ importers:
       '@hive/service-common': workspace:*
       '@hive/tokens': workspace:*
       '@hive/usage-common': workspace:*
-      '@sentry/node': 7.28.1
-      '@sentry/tracing': 7.28.1
+      '@sentry/node': 7.30.0
+      '@sentry/tracing': 7.30.0
       '@trpc/client': 10.7.0
       '@trpc/server': 10.7.0
       '@whatwg-node/fetch': 0.6.1
@@ -824,8 +824,8 @@ importers:
       tiny-lru: 8.0.2
       zod: 3.20.2
     dependencies:
-      '@sentry/node': 7.28.1
-      '@sentry/tracing': 7.28.1
+      '@sentry/node': 7.30.0
+      '@sentry/tracing': 7.30.0
       '@trpc/client': 10.7.0_@trpc+server@10.7.0
       '@trpc/server': 10.7.0
       '@whatwg-node/fetch': 0.6.1
@@ -852,8 +852,8 @@ importers:
     specifiers:
       '@hive/api': workspace:*
       '@hive/service-common': workspace:*
-      '@sentry/node': 7.28.1
-      '@sentry/tracing': 7.28.1
+      '@sentry/node': 7.30.0
+      '@sentry/tracing': 7.30.0
       '@trpc/server': 10.7.0
       '@whatwg-node/fetch': 0.6.1
       dotenv: 16.0.3
@@ -863,8 +863,8 @@ importers:
       tslib: 2.4.1
       zod: 3.20.2
     dependencies:
-      '@sentry/node': 7.28.1
-      '@sentry/tracing': 7.28.1
+      '@sentry/node': 7.30.0
+      '@sentry/tracing': 7.30.0
       '@trpc/server': 10.7.0
       '@whatwg-node/fetch': 0.6.1
       dotenv: 16.0.3
@@ -882,8 +882,8 @@ importers:
       '@graphql-hive/core': 0.2.3
       '@hive/service-common': workspace:*
       '@hive/usage-common': workspace:*
-      '@sentry/node': 7.28.1
-      '@sentry/tracing': 7.28.1
+      '@sentry/node': 7.30.0
+      '@sentry/tracing': 7.30.0
       agentkeepalive: 4.2.1
       date-fns: 2.29.3
       dotenv: 16.0.3
@@ -895,8 +895,8 @@ importers:
       tslib: 2.4.1
       zod: 3.20.2
     dependencies:
-      '@sentry/node': 7.28.1
-      '@sentry/tracing': 7.28.1
+      '@sentry/node': 7.30.0
+      '@sentry/tracing': 7.30.0
       agentkeepalive: 4.2.1
       date-fns: 2.29.3
       dotenv: 16.0.3
@@ -915,8 +915,8 @@ importers:
   packages/services/webhooks:
     specifiers:
       '@hive/service-common': workspace:*
-      '@sentry/node': 7.28.1
-      '@sentry/tracing': 7.28.1
+      '@sentry/node': 7.30.0
+      '@sentry/tracing': 7.30.0
       '@trpc/server': 10.7.0
       bullmq: 3.5.6
       copyfiles: 2.4.1
@@ -928,8 +928,8 @@ importers:
       tslib: 2.4.1
       zod: 3.20.2
     dependencies:
-      '@sentry/node': 7.28.1
-      '@sentry/tracing': 7.28.1
+      '@sentry/node': 7.30.0
+      '@sentry/tracing': 7.30.0
       '@trpc/server': 10.7.0
       bullmq: 3.5.6_xbmkiyyfti7h6orsfs6pdmi4s4
       dotenv: 16.0.3
@@ -972,11 +972,11 @@ importers:
       '@radix-ui/react-tabs': 0.1.5
       '@radix-ui/react-toggle-group': 0.1.5
       '@radix-ui/react-toolbar': 0.1.5
-      '@sentry/nextjs': 7.28.1
-      '@sentry/node': 7.28.1
-      '@sentry/react': 7.28.1
-      '@sentry/tracing': 7.28.1
-      '@sentry/types': 7.28.1
+      '@sentry/nextjs': 7.30.0
+      '@sentry/node': 7.30.0
+      '@sentry/react': 7.30.0
+      '@sentry/tracing': 7.30.0
+      '@sentry/types': 7.30.0
       '@stripe/react-stripe-js': 1.16.3
       '@stripe/stripe-js': 1.46.0
       '@tailwindcss/line-clamp': 0.4.2
@@ -1065,11 +1065,11 @@ importers:
       '@radix-ui/react-tabs': 0.1.5_react@18.2.0
       '@radix-ui/react-toggle-group': 0.1.5_react@18.2.0
       '@radix-ui/react-toolbar': 0.1.5_react@18.2.0
-      '@sentry/nextjs': 7.28.1_next@13.1.1+react@18.2.0
-      '@sentry/node': 7.28.1
-      '@sentry/react': 7.28.1_react@18.2.0
-      '@sentry/tracing': 7.28.1
-      '@sentry/types': 7.28.1
+      '@sentry/nextjs': 7.30.0_next@13.1.1+react@18.2.0
+      '@sentry/node': 7.30.0
+      '@sentry/react': 7.30.0_react@18.2.0
+      '@sentry/tracing': 7.30.0
+      '@sentry/types': 7.30.0
       '@stripe/react-stripe-js': 1.16.3_keartrz7uyerl3wkpjpue4xbhy
       '@stripe/stripe-js': 1.46.0
       '@tanstack/react-table': 8.0.0-beta.8_biqbaboplfbrettd7655fr4n2y
@@ -1138,7 +1138,7 @@ importers:
       autoprefixer: 10.4.13_postcss@8.4.20
       postcss: 8.4.20
       rimraf: 3.0.2
-      tailwindcss: 3.2.4
+      tailwindcss: 3.2.4_postcss@8.4.20
       tailwindcss-radix: 2.6.1
       tslib: 2.4.1
 
@@ -1194,7 +1194,7 @@ importers:
       '@types/react': 18.0.26
       next-sitemap: 3.1.43_syentjjt63dukspj2zj7hzem6y
       postcss: 8.4.20
-      tailwindcss: 3.2.4
+      tailwindcss: 3.2.4_postcss@8.4.20
 
 packages:
 
@@ -5529,7 +5529,7 @@ packages:
       tslib: 2.4.1
     dev: false
 
-  /@envelop/sentry/5.0.0_ychana5idhickjc4tnbdcwqcsq:
+  /@envelop/sentry/5.0.0_dfa4ibznoqdklbzkyf3mitwrdu:
     resolution: {integrity: sha512-LSgfyH9A5A7nJWlZQFVQscKN5GCMJf+FN51gNKUzxVb4CT4/46gpg53v0L23FFq6NpQ+llG0KyFqh1EofNz1Uw==}
     peerDependencies:
       '@envelop/core': ^3.0.4
@@ -5537,7 +5537,7 @@ packages:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
       '@envelop/core': 3.0.4
-      '@sentry/node': 7.28.1
+      '@sentry/node': 7.30.0
       graphql: 16.6.0
       tslib: 2.4.1
     dev: false
@@ -10485,14 +10485,14 @@ packages:
       string-argv: 0.3.1
     dev: false
 
-  /@sentry/browser/7.28.1:
-    resolution: {integrity: sha512-N8j93IcrWKWorfJ5D+RSKVAvcR4S5tIcZ/HvFPMrQWnfVa/jtJcrKThdjZYteA0wjmPiy8/D3KA8nB91yulBPA==}
+  /@sentry/browser/7.30.0:
+    resolution: {integrity: sha512-9hpaNAqIBDLdnrZ51iWkqenRotqqweE1f2AlHO56nyT/UE+u+GdmAiBrgRNqdFQQM13JtTG/gu4HGOyLWb9HEA==}
     engines: {node: '>=8'}
     dependencies:
-      '@sentry/core': 7.28.1
-      '@sentry/replay': 7.28.1_@sentry+browser@7.28.1
-      '@sentry/types': 7.28.1
-      '@sentry/utils': 7.28.1
+      '@sentry/core': 7.30.0
+      '@sentry/replay': 7.30.0_@sentry+browser@7.30.0
+      '@sentry/types': 7.30.0
+      '@sentry/utils': 7.30.0
       tslib: 1.14.1
     dev: false
 
@@ -10541,12 +10541,12 @@ packages:
       tslib: 1.14.1
     dev: false
 
-  /@sentry/core/7.28.1:
-    resolution: {integrity: sha512-7wvnuvn/mrAfcugWoCG/3pqDIrUgH5t+HisMJMGw0h9Tc33KqrmqMDCQVvjlrr2pWrw/vuUCFdm8CbUHJ832oQ==}
+  /@sentry/core/7.30.0:
+    resolution: {integrity: sha512-NeLigkBlpcK63ymM63GoIHurml6V3BUe1Vi+trwm4/qqOTzT7PQhvdJCX+o3+atzRBH+zdb6kd4VWx44Oye3KA==}
     engines: {node: '>=8'}
     dependencies:
-      '@sentry/types': 7.28.1
-      '@sentry/utils': 7.28.1
+      '@sentry/types': 7.30.0
+      '@sentry/utils': 7.30.0
       tslib: 1.14.1
 
   /@sentry/hub/6.19.6:
@@ -10558,12 +10558,12 @@ packages:
       tslib: 1.14.1
     dev: false
 
-  /@sentry/integrations/7.28.1:
-    resolution: {integrity: sha512-opeXVR1L9mZmZcpAs9kX+4JPY7pXhVupy17Sbz+43zd5CshYTveIcttGNPp+EPT3j7mMU+1TMAYZspKqJXtEBQ==}
+  /@sentry/integrations/7.30.0:
+    resolution: {integrity: sha512-KU8TnJm1Yldxnhdu/EZcIGXU9ptGQPk6ot4smcNx/mKsy575VrDdyVDx8uIYURWyfsg7eOayt6VdC7ISSODp8A==}
     engines: {node: '>=8'}
     dependencies:
-      '@sentry/types': 7.28.1
-      '@sentry/utils': 7.28.1
+      '@sentry/types': 7.30.0
+      '@sentry/utils': 7.30.0
       localforage: 1.10.0
       tslib: 1.14.1
     dev: false
@@ -10577,8 +10577,8 @@ packages:
       tslib: 1.14.1
     dev: false
 
-  /@sentry/nextjs/7.28.1_next@13.1.1+react@18.2.0:
-    resolution: {integrity: sha512-y2ldKQmLTEMaBk2Z7jBKpNdQVu19b/B0iN2zIXtdmDLDKiJ1v7923YTgDuMFq3aRv9Yg38/90NsDGNW1f9U7Ww==}
+  /@sentry/nextjs/7.30.0_next@13.1.1+react@18.2.0:
+    resolution: {integrity: sha512-4gW29QRb9S7AHf8/uJ77xc18JwmFFqdGyZ8YHRSoRhuof9IM0i8sK/NYUaPolaMRHYc3gf8gJsHjH/0AaUXhQA==}
     engines: {node: '>=8'}
     peerDependencies:
       next: ^10.0.8 || ^11.0 || ^12.0 || ^13.0
@@ -10590,13 +10590,13 @@ packages:
     dependencies:
       '@rollup/plugin-sucrase': 4.0.4_rollup@2.78.0
       '@rollup/plugin-virtual': 3.0.0_rollup@2.78.0
-      '@sentry/core': 7.28.1
-      '@sentry/integrations': 7.28.1
-      '@sentry/node': 7.28.1
-      '@sentry/react': 7.28.1_react@18.2.0
-      '@sentry/tracing': 7.28.1
-      '@sentry/types': 7.28.1
-      '@sentry/utils': 7.28.1
+      '@sentry/core': 7.30.0
+      '@sentry/integrations': 7.30.0
+      '@sentry/node': 7.30.0
+      '@sentry/react': 7.30.0_react@18.2.0
+      '@sentry/tracing': 7.30.0
+      '@sentry/types': 7.30.0
+      '@sentry/utils': 7.30.0
       '@sentry/webpack-plugin': 1.20.0
       chalk: 3.0.0
       next: 13.1.1_biqbaboplfbrettd7655fr4n2y
@@ -10608,13 +10608,13 @@ packages:
       - supports-color
     dev: false
 
-  /@sentry/node/7.28.1:
-    resolution: {integrity: sha512-n7AbpJqZJjWPpKNGc55mP7AdQ+XSomS9MZJuZ+Xt2AU52aVwGPI4z9aHUJFSDGaMHHiu/toyPnoUES+XZf6/hw==}
+  /@sentry/node/7.30.0:
+    resolution: {integrity: sha512-YYasu6C3I0HBP4N1oc/ed2nunxhGJgtAWaKwq3lo8uk3uF6cB1A8+2e0CpjzU5ejhbaFPUBxHyj4th39Bvku/w==}
     engines: {node: '>=8'}
     dependencies:
-      '@sentry/core': 7.28.1
-      '@sentry/types': 7.28.1
-      '@sentry/utils': 7.28.1
+      '@sentry/core': 7.30.0
+      '@sentry/types': 7.30.0
+      '@sentry/utils': 7.30.0
       cookie: 0.4.2
       https-proxy-agent: 5.0.1
       lru_map: 0.3.3
@@ -10622,39 +10622,39 @@ packages:
     transitivePeerDependencies:
       - supports-color
 
-  /@sentry/react/7.28.1_react@18.2.0:
-    resolution: {integrity: sha512-sFKK7uDREh84GyJcXDNuiQQ5VhLx7XJTOAdELxLv4HEI6BxbBRz0zNRQiKamTRkz9NmL7bZtld5TfbpOo9kijg==}
+  /@sentry/react/7.30.0_react@18.2.0:
+    resolution: {integrity: sha512-yn0GiRewi/Gcig2Fkps95l96zOwiKxQacv3T83bBzlFIuO0vBWqV6imOcJKt4gxU9JoX6RGf9UqeACxzJlDqNg==}
     engines: {node: '>=8'}
     peerDependencies:
       react: 15.x || 16.x || 17.x || 18.x
     dependencies:
-      '@sentry/browser': 7.28.1
-      '@sentry/types': 7.28.1
-      '@sentry/utils': 7.28.1
+      '@sentry/browser': 7.30.0
+      '@sentry/types': 7.30.0
+      '@sentry/utils': 7.30.0
       hoist-non-react-statics: 3.3.2
       react: 18.2.0
       tslib: 1.14.1
     dev: false
 
-  /@sentry/replay/7.28.1_@sentry+browser@7.28.1:
-    resolution: {integrity: sha512-Os0PzMjKlwtHwzTU0kfVzGzsi4Vaj3g2arCl4Qnr3b6kYTb9WOFZo/n/v56ss7Z+nZG3K8W5PisoD4MRsRJRig==}
+  /@sentry/replay/7.30.0_@sentry+browser@7.30.0:
+    resolution: {integrity: sha512-qJgz1tG0uStqMF5V7gN7KqxZuZY0MMQQY7siwPcSQVYj7X3AQswHjmvD4npEKbIa+jP6aQ6fFjoBjl3c0t3Mmg==}
     engines: {node: '>=12'}
     peerDependencies:
       '@sentry/browser': '>=7.24.0'
     dependencies:
-      '@sentry/browser': 7.28.1
-      '@sentry/core': 7.28.1
-      '@sentry/types': 7.28.1
-      '@sentry/utils': 7.28.1
+      '@sentry/browser': 7.30.0
+      '@sentry/core': 7.30.0
+      '@sentry/types': 7.30.0
+      '@sentry/utils': 7.30.0
     dev: false
 
-  /@sentry/tracing/7.28.1:
-    resolution: {integrity: sha512-uWspnuz+7FyW8ES5lRaVA7O/YJSzMlSkvBFtgzaoKmdaueokU/sRLwlCsrdgwavG1wpm79df7R1iiSeqhaXDlw==}
+  /@sentry/tracing/7.30.0:
+    resolution: {integrity: sha512-bjGeDeKhpGAmLcWcrXFT/xOfHVwp/j0L1aRHzYHnqgTjVzD0NXcooPu/Nz8vF0paxz+hPD5bJwb8kz/ggJzGWQ==}
     engines: {node: '>=8'}
     dependencies:
-      '@sentry/core': 7.28.1
-      '@sentry/types': 7.28.1
-      '@sentry/utils': 7.28.1
+      '@sentry/core': 7.30.0
+      '@sentry/types': 7.30.0
+      '@sentry/utils': 7.30.0
       tslib: 1.14.1
 
   /@sentry/types/6.19.6:
@@ -10662,8 +10662,8 @@ packages:
     engines: {node: '>=6'}
     dev: false
 
-  /@sentry/types/7.28.1:
-    resolution: {integrity: sha512-DvSplMVrVEmOzR2M161V5+B8Up3vR71xMqJOpWTzE9TqtFJRGPtqT/5OBsNJJw1+/j2ssMcnKwbEo9Q2EGeS6g==}
+  /@sentry/types/7.30.0:
+    resolution: {integrity: sha512-l4A86typvt/SfWh5JffpdxNGkg5EEA8m35BzpIcKmCAQZUDmnb4b478r8jdD2uuOjLmPNmZr1tifdRW4NCLuxQ==}
     engines: {node: '>=8'}
 
   /@sentry/utils/6.19.6:
@@ -10674,11 +10674,11 @@ packages:
       tslib: 1.14.1
     dev: false
 
-  /@sentry/utils/7.28.1:
-    resolution: {integrity: sha512-75/jzLUO9HH09iC9TslNimGbxOP3jgn89P+q7uR+rp2fJfRExHVeKJZQdK0Ij4/SmE7TJ3Uh2r154N0INZEx1g==}
+  /@sentry/utils/7.30.0:
+    resolution: {integrity: sha512-tSlBhr5u/LdE2emxIDTDmjmyRr99GnZGIAh5GwRxUgeDQ3VEfNUFlyFodBCbZ6yeYTYd6PWNih5xoHn1+Rf3Sw==}
     engines: {node: '>=8'}
     dependencies:
-      '@sentry/types': 7.28.1
+      '@sentry/types': 7.30.0
       tslib: 1.14.1
 
   /@sentry/webpack-plugin/1.20.0:
@@ -10904,7 +10904,7 @@ packages:
     peerDependencies:
       tailwindcss: '>=2.0.0 || >=3.0.0 || >=3.0.0-alpha.1'
     dependencies:
-      tailwindcss: 3.2.4
+      tailwindcss: 3.2.4_postcss@8.4.20
     dev: true
 
   /@tanstack/react-table/8.0.0-beta.8_biqbaboplfbrettd7655fr4n2y:
@@ -11055,7 +11055,7 @@ packages:
       cssnano: 5.1.14_postcss@8.4.19
       postcss: 8.4.19
       postcss-import: 15.0.0_postcss@8.4.19
-      tailwindcss: 3.2.4
+      tailwindcss: 3.2.4_postcss@8.4.19
     transitivePeerDependencies:
       - ts-node
     dev: true
@@ -12515,7 +12515,7 @@ packages:
   /axios/0.21.4_debug@4.3.4:
     resolution: {integrity: sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg==}
     dependencies:
-      follow-redirects: 1.15.2
+      follow-redirects: 1.15.2_debug@4.3.4
     transitivePeerDependencies:
       - debug
     dev: false
@@ -12523,7 +12523,7 @@ packages:
   /axios/0.26.1_debug@4.3.4:
     resolution: {integrity: sha512-fPwcX4EvnSHuInCMItEhAGnaSEXRBjtzh9fOtsE6E1G6p7vl7edEeZe11QHf18+6+9gR5PbKV/sGKNaD8YaMeA==}
     dependencies:
-      follow-redirects: 1.15.2
+      follow-redirects: 1.15.2_debug@4.3.4
     transitivePeerDependencies:
       - debug
     dev: false
@@ -12531,7 +12531,7 @@ packages:
   /axios/0.27.2:
     resolution: {integrity: sha512-t+yRIyySRTp/wua5xEr+z1q60QmLq8ABsS5O9Me1AsE5dfKqgnCFzwiCZZ/cGNd1lq4/7akDWMxdhVlucjmnOQ==}
     dependencies:
-      follow-redirects: 1.15.2
+      follow-redirects: 1.15.2_debug@4.3.4
       form-data: 4.0.0
     transitivePeerDependencies:
       - debug
@@ -12540,7 +12540,7 @@ packages:
   /axios/1.2.1:
     resolution: {integrity: sha512-I88cFiGu9ryt/tfVEi4kX2SITsvDddTajXTOFmt2uK1ZVA8LytjtdeyefdQWEf5PU8w+4SSJDoYnggflB5tW4A==}
     dependencies:
-      follow-redirects: 1.15.2
+      follow-redirects: 1.15.2_debug@4.3.4
       form-data: 4.0.0
       proxy-from-env: 1.1.0
     transitivePeerDependencies:
@@ -15924,7 +15924,7 @@ packages:
     dependencies:
       fast-glob: 3.2.12
       postcss: 8.4.20
-      tailwindcss: 3.2.4_ts-node@10.9.1
+      tailwindcss: 3.2.4_ra2vnoek4vhbzktaezawwqbin4
     transitivePeerDependencies:
       - ts-node
     dev: true
@@ -16706,7 +16706,7 @@ packages:
     resolution: {integrity: sha512-Rwix9pBtC1Nuy5wysTmKy+UjbDJpIfg8eHjw0rjZ1mX4GNLz1Bmd16uDpI3Gk1i70Fgcs8Csg2lPm8HULFg9DQ==}
     dev: false
 
-  /follow-redirects/1.15.2:
+  /follow-redirects/1.15.2_debug@4.3.4:
     resolution: {integrity: sha512-VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==}
     engines: {node: '>=4.0'}
     peerDependencies:
@@ -16714,6 +16714,8 @@ packages:
     peerDependenciesMeta:
       debug:
         optional: true
+    dependencies:
+      debug: 4.3.4
     dev: false
 
   /for-each/0.3.3:
@@ -22660,6 +22662,29 @@ packages:
       postcss: 8.4.19
     dev: true
 
+  /postcss-import/14.1.0:
+    resolution: {integrity: sha512-flwI+Vgm4SElObFVPpTIT7SU7R3qk2L7PyduMcokiaVKuWv9d/U+Gm/QAd8NDLuykTWTkcrjOeD2Pp1rMeBTGw==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      postcss: ^8.0.0
+    dependencies:
+      postcss-value-parser: 4.2.0
+      read-cache: 1.0.0
+      resolve: 1.22.1
+    dev: true
+
+  /postcss-import/14.1.0_postcss@8.4.19:
+    resolution: {integrity: sha512-flwI+Vgm4SElObFVPpTIT7SU7R3qk2L7PyduMcokiaVKuWv9d/U+Gm/QAd8NDLuykTWTkcrjOeD2Pp1rMeBTGw==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      postcss: ^8.0.0
+    dependencies:
+      postcss: 8.4.19
+      postcss-value-parser: 4.2.0
+      read-cache: 1.0.0
+      resolve: 1.22.1
+    dev: true
+
   /postcss-import/14.1.0_postcss@8.4.20:
     resolution: {integrity: sha512-flwI+Vgm4SElObFVPpTIT7SU7R3qk2L7PyduMcokiaVKuWv9d/U+Gm/QAd8NDLuykTWTkcrjOeD2Pp1rMeBTGw==}
     engines: {node: '>=10.0.0'}
@@ -22692,6 +22717,25 @@ packages:
       postcss: 8.4.20
     dev: false
 
+  /postcss-js/4.0.0:
+    resolution: {integrity: sha512-77QESFBwgX4irogGVPgQ5s07vLvFqWr228qZY+w6lW599cRlK/HmnlivnnVUxkjHnCu4J16PDMHcH+e+2HbvTQ==}
+    engines: {node: ^12 || ^14 || >= 16}
+    peerDependencies:
+      postcss: ^8.3.3
+    dependencies:
+      camelcase-css: 2.0.1
+    dev: true
+
+  /postcss-js/4.0.0_postcss@8.4.19:
+    resolution: {integrity: sha512-77QESFBwgX4irogGVPgQ5s07vLvFqWr228qZY+w6lW599cRlK/HmnlivnnVUxkjHnCu4J16PDMHcH+e+2HbvTQ==}
+    engines: {node: ^12 || ^14 || >= 16}
+    peerDependencies:
+      postcss: ^8.3.3
+    dependencies:
+      camelcase-css: 2.0.1
+      postcss: 8.4.19
+    dev: true
+
   /postcss-js/4.0.0_postcss@8.4.20:
     resolution: {integrity: sha512-77QESFBwgX4irogGVPgQ5s07vLvFqWr228qZY+w6lW599cRlK/HmnlivnnVUxkjHnCu4J16PDMHcH+e+2HbvTQ==}
     engines: {node: ^12 || ^14 || >= 16}
@@ -22700,6 +22744,39 @@ packages:
     dependencies:
       camelcase-css: 2.0.1
       postcss: 8.4.20
+    dev: true
+
+  /postcss-load-config/3.1.4:
+    resolution: {integrity: sha512-6DiM4E7v4coTE4uzA8U//WhtPwyhiim3eyjEMFCnUpzbrkK9wJHgKDT2mR+HbtSrd/NubVaYTOpSpjUl8NQeRg==}
+    engines: {node: '>= 10'}
+    peerDependencies:
+      postcss: '>=8.0.9'
+      ts-node: '>=9.0.0'
+    peerDependenciesMeta:
+      postcss:
+        optional: true
+      ts-node:
+        optional: true
+    dependencies:
+      lilconfig: 2.0.6
+      yaml: 1.10.2
+    dev: true
+
+  /postcss-load-config/3.1.4_postcss@8.4.19:
+    resolution: {integrity: sha512-6DiM4E7v4coTE4uzA8U//WhtPwyhiim3eyjEMFCnUpzbrkK9wJHgKDT2mR+HbtSrd/NubVaYTOpSpjUl8NQeRg==}
+    engines: {node: '>= 10'}
+    peerDependencies:
+      postcss: '>=8.0.9'
+      ts-node: '>=9.0.0'
+    peerDependenciesMeta:
+      postcss:
+        optional: true
+      ts-node:
+        optional: true
+    dependencies:
+      lilconfig: 2.0.6
+      postcss: 8.4.19
+      yaml: 1.10.2
     dev: true
 
   /postcss-load-config/3.1.4_postcss@8.4.20:
@@ -22830,6 +22907,25 @@ packages:
       postcss: 8.4.20
       postcss-selector-parser: 6.0.10
     dev: false
+
+  /postcss-nested/6.0.0:
+    resolution: {integrity: sha512-0DkamqrPcmkBDsLn+vQDIrtkSbNkv5AD/M322ySo9kqFkCIYklym2xEmWkwo+Y3/qZo34tzEPNUw4y7yMCdv5w==}
+    engines: {node: '>=12.0'}
+    peerDependencies:
+      postcss: ^8.2.14
+    dependencies:
+      postcss-selector-parser: 6.0.10
+    dev: true
+
+  /postcss-nested/6.0.0_postcss@8.4.19:
+    resolution: {integrity: sha512-0DkamqrPcmkBDsLn+vQDIrtkSbNkv5AD/M322ySo9kqFkCIYklym2xEmWkwo+Y3/qZo34tzEPNUw4y7yMCdv5w==}
+    engines: {node: '>=12.0'}
+    peerDependencies:
+      postcss: ^8.2.14
+    dependencies:
+      postcss: 8.4.19
+      postcss-selector-parser: 6.0.10
+    dev: true
 
   /postcss-nested/6.0.0_postcss@8.4.20:
     resolution: {integrity: sha512-0DkamqrPcmkBDsLn+vQDIrtkSbNkv5AD/M322ySo9kqFkCIYklym2xEmWkwo+Y3/qZo34tzEPNUw4y7yMCdv5w==}
@@ -25482,6 +25578,76 @@ packages:
     resolution: {integrity: sha512-AhwtHCKMtR71JgeYDaswmZXhPcW9iuI9Sp2LvZPo9upDZ7231ZJ7eA9RaURbhpXGVlrjX4cFNlB4ieTetEb7hQ==}
     engines: {node: '>=12.13.0'}
     hasBin: true
+    peerDependencies:
+      postcss: ^8.0.9
+    dependencies:
+      arg: 5.0.2
+      chokidar: 3.5.3
+      color-name: 1.1.4
+      detective: 5.2.1
+      didyoumean: 1.2.2
+      dlv: 1.1.3
+      fast-glob: 3.2.12
+      glob-parent: 6.0.2
+      is-glob: 4.0.3
+      lilconfig: 2.0.6
+      micromatch: 4.0.5
+      normalize-path: 3.0.0
+      object-hash: 3.0.0
+      picocolors: 1.0.0
+      postcss: 8.4.20
+      postcss-import: 14.1.0
+      postcss-js: 4.0.0
+      postcss-load-config: 3.1.4
+      postcss-nested: 6.0.0
+      postcss-selector-parser: 6.0.10
+      postcss-value-parser: 4.2.0
+      quick-lru: 5.1.1
+      resolve: 1.22.1
+    transitivePeerDependencies:
+      - ts-node
+    dev: true
+
+  /tailwindcss/3.2.4_postcss@8.4.19:
+    resolution: {integrity: sha512-AhwtHCKMtR71JgeYDaswmZXhPcW9iuI9Sp2LvZPo9upDZ7231ZJ7eA9RaURbhpXGVlrjX4cFNlB4ieTetEb7hQ==}
+    engines: {node: '>=12.13.0'}
+    hasBin: true
+    peerDependencies:
+      postcss: ^8.0.9
+    dependencies:
+      arg: 5.0.2
+      chokidar: 3.5.3
+      color-name: 1.1.4
+      detective: 5.2.1
+      didyoumean: 1.2.2
+      dlv: 1.1.3
+      fast-glob: 3.2.12
+      glob-parent: 6.0.2
+      is-glob: 4.0.3
+      lilconfig: 2.0.6
+      micromatch: 4.0.5
+      normalize-path: 3.0.0
+      object-hash: 3.0.0
+      picocolors: 1.0.0
+      postcss: 8.4.19
+      postcss-import: 14.1.0_postcss@8.4.19
+      postcss-js: 4.0.0_postcss@8.4.19
+      postcss-load-config: 3.1.4_postcss@8.4.19
+      postcss-nested: 6.0.0_postcss@8.4.19
+      postcss-selector-parser: 6.0.10
+      postcss-value-parser: 4.2.0
+      quick-lru: 5.1.1
+      resolve: 1.22.1
+    transitivePeerDependencies:
+      - ts-node
+    dev: true
+
+  /tailwindcss/3.2.4_postcss@8.4.20:
+    resolution: {integrity: sha512-AhwtHCKMtR71JgeYDaswmZXhPcW9iuI9Sp2LvZPo9upDZ7231ZJ7eA9RaURbhpXGVlrjX4cFNlB4ieTetEb7hQ==}
+    engines: {node: '>=12.13.0'}
+    hasBin: true
+    peerDependencies:
+      postcss: ^8.0.9
     dependencies:
       arg: 5.0.2
       chokidar: 3.5.3
@@ -25510,10 +25676,12 @@ packages:
       - ts-node
     dev: true
 
-  /tailwindcss/3.2.4_ts-node@10.9.1:
+  /tailwindcss/3.2.4_ra2vnoek4vhbzktaezawwqbin4:
     resolution: {integrity: sha512-AhwtHCKMtR71JgeYDaswmZXhPcW9iuI9Sp2LvZPo9upDZ7231ZJ7eA9RaURbhpXGVlrjX4cFNlB4ieTetEb7hQ==}
     engines: {node: '>=12.13.0'}
     hasBin: true
+    peerDependencies:
+      postcss: ^8.0.9
     dependencies:
       arg: 5.0.2
       chokidar: 3.5.3
