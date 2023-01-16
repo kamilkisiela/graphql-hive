@@ -16,8 +16,8 @@
   "devDependencies": {
     "@cloudflare/workers-types": "4.20221111.1",
     "@types/service-worker-mock": "2.0.1",
-    "@whatwg-node/fetch": "0.6.1",
-    "@whatwg-node/server": "0.5.5",
+    "@whatwg-node/fetch": "0.6.2",
+    "@whatwg-node/server": "0.5.6",
     "esbuild": "0.16.11",
     "itty-router": "2.6.6",
     "itty-router-extras": "0.4.2",
