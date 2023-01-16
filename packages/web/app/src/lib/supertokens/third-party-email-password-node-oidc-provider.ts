@@ -36,6 +36,12 @@ const createOIDCSuperTokensProvider = (oidcConfig: {
         },
       }).then(res => res.json());
 
+      console.info(
+        `getProfileInfo: fetched OIDC (${
+          oidcConfig.userinfoEndpoint
+        }) profile info: ${JSON.stringify(rawData)}`,
+      );
+
       const data = OIDCProfileInfoSchema.parse(rawData);
 
       return {
