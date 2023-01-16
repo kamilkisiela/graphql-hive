@@ -59,7 +59,7 @@
     "framer-motion": "4.1.17",
     "graphiql": "2.2.0",
     "graphql": "16.6.0",
-    "hyperid": "3.0.1",
+    "hyperid": "3.1.0",
     "immer": "9.0.17",
     "js-cookie": "3.0.1",
     "monaco-editor": "0.27.0",
