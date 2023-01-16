@@ -472,7 +472,7 @@ importers:
       dotenv: 16.0.3
       ioredis: 5.2.5
       mjml: 4.13.0
-      nodemailer: 6.8.0
+      nodemailer: 6.9.0
       p-timeout: 6.0.0
       pino-pretty: 9.1.1
       sendmail: 1.6.1
@@ -486,7 +486,7 @@ importers:
       dotenv: 16.0.3
       ioredis: 5.2.5
       mjml: 4.13.0
-      nodemailer: 6.8.0
+      nodemailer: 6.9.0
       p-timeout: 6.0.0
       sendmail: 1.6.1
       zod: 3.20.2
@@ -21651,6 +21651,11 @@ packages:
 
   /nodemailer/6.8.0:
     resolution: {integrity: sha512-EjYvSmHzekz6VNkNd12aUqAco+bOkRe3Of5jVhltqKhEsjw/y0PYPJfp83+s9Wzh1dspYAkUW/YNQ350NATbSQ==}
+    engines: {node: '>=6.0.0'}
+    dev: false
+
+  /nodemailer/6.9.0:
+    resolution: {integrity: sha512-jFaCEGTeT3E/m/5R2MHWiyQH3pSARECRUDM+1hokOYc3lQAAG7ASuy+2jIsYVf+RVa9zePopSQwKNVFH8DKUpA==}
     engines: {node: '>=6.0.0'}
     dev: false
 
