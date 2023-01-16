@@ -11,17 +11,15 @@ type CreateKeyValidatorDeps = {
     bucketName: string;
     client: AwsClient;
   };
-  cache: Promise<Cache | null> | Cache | null;
+  getCache: () => Promise<Cache | null> | Cache | null;
 };
 
 export const createIsKeyValid =
-  (deps: CreateKeyValidatorDeps): KeyValidator =>
+  (deps: CreateKeyValidatorDeps) =>
   async (targetId: string, accessHeaderValue: string): Promise<boolean> => {
-    const requestCache = await deps.cache;
+    const requestCache = await deps.getCache();
 
     let cacheKey: null | Request = null;
-
-    console.log('use cache', !!deps.cache);
 
     if (requestCache) {
       cacheKey = new Request('http://key-cache.graphql-hive.com/' + targetId, {
@@ -29,13 +27,9 @@ export const createIsKeyValid =
       });
       const response = await requestCache.match(cacheKey);
       if (response) {
-        console.log('use cache response');
-
         return (await response.text()) === '1';
       }
     }
-
-    console.log('compute');
 
     const key = await deps.s3.client.fetch(
       [deps.s3.endpoint, deps.s3.bucketName, 'cdn-legacy-keys', targetId].join('/'),
@@ -51,7 +45,7 @@ export const createIsKeyValid =
     const isValid = await bcrypt.compare(accessHeaderValue, await key.text());
 
     if (cacheKey && requestCache) {
-      console.log('try caching');
+      // TODO: use event.waitUntil to not block the response
       await requestCache.put(
         cacheKey,
         new Response(isValid ? '1' : '0', {
@@ -61,11 +55,7 @@ export const createIsKeyValid =
           },
         }),
       );
-
-      console.log('caching done caching');
     }
-
-    console.log('all done');
 
     return isValid;
   };

@@ -23,6 +23,8 @@ const s3 = {
   endpoint: S3_ENDPOINT,
 };
 
+const artifactStorageReader = new ArtifactStorageReader(s3, null);
+
 /**
  * KV Storage for the CDN
  */
@@ -55,7 +57,19 @@ declare let caches: {
   open: (namespace: string) => Promise<Cache>;
 };
 
-const isKeyValid = createIsKeyValid({ keyData: KEY_DATA, s3, cache: caches.open('turtles') });
+let cachePromise: Promise<Cache> | null = null;
+const getCache = () => {
+  if (!cachePromise) {
+    cachePromise = caches.open('artifacts-auth');
+  }
+  return cachePromise;
+};
+
+const isKeyValid = createIsKeyValid({
+  keyData: KEY_DATA,
+  s3,
+  getCache,
+});
 
 const analytics = createAnalytics({
   usage: USAGE_ANALYTICS,
@@ -67,8 +81,6 @@ const handleRequest = createRequestHandler({
   isKeyValid,
   analytics,
 });
-
-const artifactStorageReader = new ArtifactStorageReader(s3, null);
 
 const handleArtifactRequest = createArtifactRequestHandler({
   isKeyValid,
