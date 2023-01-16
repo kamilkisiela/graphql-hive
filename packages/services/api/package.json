@@ -28,7 +28,7 @@
     "date-fns": "2.29.3",
     "got": "12.5.3",
     "graphql-modules": "2.1.0",
-    "graphql-parse-resolve-info": "4.12.3",
+    "graphql-parse-resolve-info": "4.13.0",
     "graphql-scalars": "1.20.1",
     "graphql-yoga": "3.3.0",
     "ioredis": "5.2.5",
