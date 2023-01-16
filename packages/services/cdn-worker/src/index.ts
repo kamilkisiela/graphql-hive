@@ -52,9 +52,10 @@ declare let ERROR_ANALYTICS: AnalyticsEngine;
  */
 declare let caches: {
   default: Cache;
+  open: (namespace: string) => Promise<Cache>;
 };
 
-const isKeyValid = createIsKeyValid({ keyData: KEY_DATA, s3, cache: caches.default });
+const isKeyValid = createIsKeyValid({ keyData: KEY_DATA, s3, cache: caches.open('turtles') });
 
 const analytics = createAnalytics({
   usage: USAGE_ANALYTICS,
