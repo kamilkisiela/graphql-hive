@@ -21,7 +21,7 @@ function getRemoteClickhouseConfig(): ClickhouseConfig {
     password: clickhouseConfig.requireSecret('password'),
     protocol: clickhouseConfig.require('protocol'),
     mirror: {
-      host: clickhouseConfig.require('mirrorHost'), // todo: align with the deployment repo
+      host: clickhouseConfig.require('mirrorHost'),
       port: clickhouseConfig.require('mirrorPort'),
       username: clickhouseConfig.require('mirrorUsername'),
       password: clickhouseConfig.requireSecret('mirrorPassword'),
