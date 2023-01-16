@@ -55,7 +55,13 @@ declare let caches: {
   open: (namespace: string) => Promise<Cache>;
 };
 
-const isKeyValid = createIsKeyValid({ keyData: KEY_DATA, s3, cache: caches.open('turtles') });
+const isKeyValid = createIsKeyValid({
+  keyData: KEY_DATA,
+  s3,
+  get cache() {
+    return caches.open('turtles');
+  },
+});
 
 const analytics = createAnalytics({
   usage: USAGE_ANALYTICS,
