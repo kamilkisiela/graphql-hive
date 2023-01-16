@@ -1009,7 +1009,7 @@ importers:
       graphiql: 2.2.0
       graphql: 16.6.0
       hyperid: 3.1.0
-      immer: 9.0.17
+      immer: 9.0.18
       js-cookie: 3.0.1
       monaco-editor: 0.27.0
       monaco-themes: 0.4.3
@@ -1091,7 +1091,7 @@ importers:
       graphiql: 2.2.0_f47u4fyrpsztifti3kd5wz3pee
       graphql: 16.6.0
       hyperid: 3.1.0
-      immer: 9.0.17
+      immer: 9.0.18
       js-cookie: 3.0.1
       monaco-editor: 0.27.0
       monaco-themes: 0.4.3
@@ -17958,8 +17958,8 @@ packages:
     resolution: {integrity: sha512-XXOFtyqDjNDAQxVfYxuF7g9Il/IbWmmlQg2MYKOH8ExIT1qg6xc4zyS3HaEEATgs1btfzxq15ciUiY7gjSXRGQ==}
     dev: false
 
-  /immer/9.0.17:
-    resolution: {integrity: sha512-+hBruaLSQvkPfxRiTLK/mi4vLH+/VQS6z2KJahdoxlleFOI8ARqzOF17uy12eFDlqWmPoygwc5evgwcp+dlHhg==}
+  /immer/9.0.18:
+    resolution: {integrity: sha512-eAPNpsj7Ax1q6Y/3lm2PmlwRcFzpON7HSNQ3ru5WQH1/PSpnyed/HpNOELl2CxLKoj4r+bAHgdyKqW5gc2Se1A==}
     dev: false
 
   /immutable/3.7.6:
