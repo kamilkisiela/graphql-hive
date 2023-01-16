@@ -18,29 +18,21 @@ export interface Percentiles {
   p99: number;
 }
 
-export interface ESPercentiles {
-  '75.0': number;
-  '90.0': number;
-  '95.0': number;
-  '99.0': number;
-}
-
-// Remove after ES is no longer used
-function toESPercentiles(item: Percentiles | number[]): ESPercentiles {
+function toPercentiles(item: Percentiles | number[]) {
   if (Array.isArray(item)) {
     return {
-      '75.0': item[0],
-      '90.0': item[1],
-      '95.0': item[2],
-      '99.0': item[3],
+      p75: item[0],
+      p90: item[1],
+      p95: item[2],
+      p99: item[3],
     };
   }
 
   return {
-    '75.0': item.p75,
-    '90.0': item.p90,
-    '95.0': item.p95,
-    '99.0': item.p99,
+    p75: item.p75,
+    p90: item.p90,
+    p95: item.p95,
+    p99: item.p99,
   };
 }
 
@@ -683,7 +675,7 @@ export class OperationsReader {
   }): Promise<
     Array<{
       date: any;
-      duration: ESPercentiles;
+      duration: Percentiles;
     }>
   > {
     return this.getDurationAndCountOverTime({
@@ -754,7 +746,7 @@ export class OperationsReader {
       operations?: readonly string[];
     },
     span?: Span,
-  ): Promise<ESPercentiles> {
+  ): Promise<Percentiles> {
     const result = await this.clickHouse.query<{
       percentiles: [number, number, number, number];
     }>(
@@ -798,7 +790,7 @@ export class OperationsReader {
       ),
     );
 
-    return toESPercentiles(result.data[0].percentiles);
+    return toPercentiles(result.data[0].percentiles);
   }
 
   @sentry('OperationsReader.durationPercentiles')
@@ -864,10 +856,10 @@ export class OperationsReader {
       ),
     );
 
-    const collection = new Map<string, ESPercentiles>();
+    const collection = new Map<string, Percentiles>();
 
     result.data.forEach(row => {
-      collection.set(row.hash, toESPercentiles(row.percentiles));
+      collection.set(row.hash, toPercentiles(row.percentiles));
     });
 
     return collection;
@@ -995,7 +987,7 @@ export class OperationsReader {
         date: ensureNumber(row.date) as any,
         total: ensureNumber(row.total),
         totalOk: ensureNumber(row.totalOk),
-        duration: toESPercentiles(row.percentiles),
+        duration: toPercentiles(row.percentiles),
       };
     });
   }

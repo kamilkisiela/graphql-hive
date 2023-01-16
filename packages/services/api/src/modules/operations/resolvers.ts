@@ -290,16 +290,16 @@ export const resolvers: OperationsModule.Resolvers = {
   },
   DurationStats: {
     p75(value) {
-      return transformPercentile(value['75.0']);
+      return transformPercentile(value.p75);
     },
     p90(value) {
-      return transformPercentile(value['90.0']);
+      return transformPercentile(value.p90);
     },
     p95(value) {
-      return transformPercentile(value['95.0']);
+      return transformPercentile(value.p95);
     },
     p99(value) {
-      return transformPercentile(value['99.0']);
+      return transformPercentile(value.p99);
     },
   },
   OperationStatsConnection: createConnection(),
