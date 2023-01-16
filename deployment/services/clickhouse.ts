@@ -1,10 +1,6 @@
 import * as pulumi from '@pulumi/pulumi';
-import { Clickhouse as ClickhouseDeployment } from '../utils/clickhouse';
-import { serviceLocalHost } from '../utils/local-endpoint';
 
 const clickhouseConfig = new pulumi.Config('clickhouse');
-const commonConfig = new pulumi.Config('common');
-const commonEnv = commonConfig.getObject<Record<string, string>>('env')!;
 
 export type Clickhouse = ReturnType<typeof deployClickhouse>;
 
@@ -14,7 +10,7 @@ type ClickhouseConfig = {
   port: pulumi.Output<string> | string;
   username: pulumi.Output<string> | string;
   password: pulumi.Output<string>;
-  cloud: Omit<ClickhouseConfig, 'cloud'> | null;
+  mirror: Omit<ClickhouseConfig, 'mirror'> | null;
 };
 
 function getRemoteClickhouseConfig(): ClickhouseConfig {
@@ -24,47 +20,20 @@ function getRemoteClickhouseConfig(): ClickhouseConfig {
     username: clickhouseConfig.require('username'),
     password: clickhouseConfig.requireSecret('password'),
     protocol: clickhouseConfig.require('protocol'),
-    cloud: {
-      host: clickhouseConfig.require('cloudHost'),
-      port: clickhouseConfig.require('cloudPort'),
-      username: clickhouseConfig.require('cloudUsername'),
-      password: clickhouseConfig.requireSecret('cloudPassword'),
-      protocol: clickhouseConfig.require('cloudProtocol'),
+    mirror: {
+      host: clickhouseConfig.require('mirrorHost'), // todo: align with the deployment repo
+      port: clickhouseConfig.require('mirrorPort'),
+      username: clickhouseConfig.require('mirrorUsername'),
+      password: clickhouseConfig.requireSecret('mirrorPassword'),
+      protocol: clickhouseConfig.require('mirrorProtocol'),
     },
   };
 }
 
 export function deployClickhouse() {
-  if (!clickhouseConfig.getBoolean('inCluster')) {
-    return {
-      config: getRemoteClickhouseConfig(),
-      deployment: null,
-      service: null,
-    };
-  }
-
-  const password = clickhouseConfig.requireSecret('password');
-  const username = clickhouseConfig.requireSecret('username');
-  const chApi = new ClickhouseDeployment('clickhouse', {
-    env: {
-      CLICKHOUSE_USER: username,
-      CLICKHOUSE_PASSWORD: password,
-    },
-    sentryDsn: commonEnv.SENTRY_DSN,
-  }).deploy();
-
-  const config: ClickhouseConfig = {
-    protocol: 'http',
-    host: serviceLocalHost(chApi.service),
-    port: String(chApi.port),
-    password,
-    username,
-    cloud: null,
-  };
-
   return {
-    deployment: chApi.deployment,
-    service: chApi.service,
-    config,
+    config: getRemoteClickhouseConfig(),
+    deployment: null,
+    service: null,
   };
 }

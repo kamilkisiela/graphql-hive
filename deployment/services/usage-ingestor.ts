@@ -44,13 +44,13 @@ export function deployUsageIngestor({
     CLICKHOUSE_PASSWORD: clickhouse.config.password,
     CLICKHOUSE_ASYNC_INSERT_BUSY_TIMEOUT_MS: '30000', // flush data after max 30 seconds
     CLICKHOUSE_ASYNC_INSERT_MAX_DATA_SIZE: '200000000', // flush data when the buffer reaches 200MB
-    ...(clickhouse.config.cloud
+    ...(clickhouse.config.mirror
       ? {
-          CLICKHOUSE_MIRROR_PROTOCOL: clickhouse.config.cloud.protocol,
-          CLICKHOUSE_MIRROR_HOST: clickhouse.config.cloud.host,
-          CLICKHOUSE_MIRROR_PORT: clickhouse.config.cloud.port,
-          CLICKHOUSE_MIRROR_USERNAME: clickhouse.config.cloud.username,
-          CLICKHOUSE_MIRROR_PASSWORD: clickhouse.config.cloud.password,
+          CLICKHOUSE_MIRROR_PROTOCOL: clickhouse.config.mirror.protocol,
+          CLICKHOUSE_MIRROR_HOST: clickhouse.config.mirror.host,
+          CLICKHOUSE_MIRROR_PORT: clickhouse.config.mirror.port,
+          CLICKHOUSE_MIRROR_USERNAME: clickhouse.config.mirror.username,
+          CLICKHOUSE_MIRROR_PASSWORD: clickhouse.config.mirror.password,
         }
       : {}),
   };
