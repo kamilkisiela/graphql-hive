@@ -11,23 +11,28 @@ type CreateKeyValidatorDeps = {
     bucketName: string;
     client: AwsClient;
   };
-  cache: Cache | null;
+  cache: Promise<Cache | null> | Cache | null;
 };
 
 export const createIsKeyValid =
   (deps: CreateKeyValidatorDeps): KeyValidator =>
   async (targetId: string, accessHeaderValue: string): Promise<boolean> => {
-    const cacheKey = new Request('http://key-cache.graphql-hive.com/' + targetId, {
-      method: 'GET',
-    });
+    const requestCache = await deps.cache;
+
+    let cacheKey: null | Request = null;
 
     console.log('use cache', !!deps.cache);
 
-    let response = await deps.cache?.match(cacheKey);
+    if (requestCache) {
+      cacheKey = new Request('http://key-cache.graphql-hive.com/' + targetId, {
+        method: 'GET',
+      });
+      const response = await requestCache.match(cacheKey);
+      if (response) {
+        console.log('use cache response');
 
-    if (response) {
-      console.log('use cache response');
-      return (await response.text()) === '1';
+        return (await response.text()) === '1';
+      }
     }
 
     console.log('compute');
@@ -45,10 +50,9 @@ export const createIsKeyValid =
 
     const isValid = await bcrypt.compare(accessHeaderValue, await key.text());
 
-    if (deps.cache) {
+    if (cacheKey && requestCache) {
       console.log('try caching');
-
-      await deps.cache.put(
+      await requestCache.put(
         cacheKey,
         new Response(isValid ? '1' : '0', {
           status: 200,
