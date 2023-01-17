@@ -189,6 +189,6 @@ checksum. If you send the same checksum in the `If-None-Match` header, the CDN s
 `304 Not Modified`, but only if the data hasn't changed. If the data has changed, the CDN service
 will return `200 OK` with the new data and new `ETag` header.
 
-Using `ETag` and `If-None-Mathc` helps to prevent unnecessary data transfer.
+Using `ETag` and `If-None-Match` helps to prevent unnecessary data transfer.
 
 The `@graphql-hive/client` package uses this feature to save bandwidth and improve performance.
