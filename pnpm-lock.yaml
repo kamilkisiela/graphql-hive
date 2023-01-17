@@ -271,7 +271,7 @@ importers:
       '@graphql-codegen/typescript-graphql-request': 4.5.8_upqs5jjd3ykece5dxcsvdam2ju
       '@types/env-ci': 3.1.1
       '@types/mkdirp': 1.0.2
-      oclif: 3.4.3
+      oclif: 3.4.3_rxmtqiusuyruv7tkwux5gvotbm
 
   packages/libraries/client:
     specifiers:
@@ -364,7 +364,7 @@ importers:
       lru-cache: 7.14.1
       ms: 2.1.3
       param-case: 3.0.4
-      supertokens-node: 12.1.4
+      supertokens-node: 12.1.5
       tslib: 2.4.1
       zod: 3.20.2
     dependencies:
@@ -392,7 +392,7 @@ importers:
       lru-cache: 7.14.1
       ms: 2.1.3
       param-case: 3.0.4
-      supertokens-node: 12.1.4
+      supertokens-node: 12.1.5
       zod: 3.20.2
     devDependencies:
       '@graphql-hive/core': link:../../libraries/core
@@ -1031,9 +1031,9 @@ importers:
       regenerator-runtime: 0.13.11
       rimraf: 3.0.2
       snarkdown: 2.0.0
-      supertokens-auth-react: 0.28.1
+      supertokens-auth-react: 0.29.0
       supertokens-js-override: 0.0.4
-      supertokens-node: 12.1.4
+      supertokens-node: 12.1.5
       supertokens-website: 14.0.3
       tailwindcss: 3.2.4
       tailwindcss-radix: 2.6.1
@@ -1111,9 +1111,9 @@ importers:
       react-window: 1.8.8_biqbaboplfbrettd7655fr4n2y
       regenerator-runtime: 0.13.11
       snarkdown: 2.0.0
-      supertokens-auth-react: 0.28.1_ib3m5ricvtkl2cll7qpr2f6lvq
+      supertokens-auth-react: 0.29.0_ib3m5ricvtkl2cll7qpr2f6lvq
       supertokens-js-override: 0.0.4
-      supertokens-node: 12.1.4
+      supertokens-node: 12.1.5
       supertokens-website: 14.0.3
       twin.macro: 2.8.2
       urql: 2.0.5_onqnqwb3ubg5opvemcqf7c2qhy
@@ -15739,7 +15739,7 @@ packages:
     dependencies:
       fast-glob: 3.2.12
       postcss: 8.4.20
-      tailwindcss: 3.2.4_ts-node@10.9.1
+      tailwindcss: 3.2.4_ra2vnoek4vhbzktaezawwqbin4
     transitivePeerDependencies:
       - ts-node
     dev: true
@@ -21562,11 +21562,6 @@ packages:
       nodemailer-fetch: 1.6.0
     dev: false
 
-  /nodemailer/6.8.0:
-    resolution: {integrity: sha512-EjYvSmHzekz6VNkNd12aUqAco+bOkRe3Of5jVhltqKhEsjw/y0PYPJfp83+s9Wzh1dspYAkUW/YNQ350NATbSQ==}
-    engines: {node: '>=6.0.0'}
-    dev: false
-
   /nodemailer/6.9.0:
     resolution: {integrity: sha512-jFaCEGTeT3E/m/5R2MHWiyQH3pSARECRUDM+1hokOYc3lQAAG7ASuy+2jIsYVf+RVa9zePopSQwKNVFH8DKUpA==}
     engines: {node: '>=6.0.0'}
@@ -21863,7 +21858,7 @@ packages:
     resolution: {integrity: sha512-PX1wu0AmAdPqOL1mWhqmlOd8kOIZQwGZw6rh7uby9fTc5lhaOWFLX3I6R1hrF9k3zUY40e6igsLGkDXK92LJNg==}
     dev: false
 
-  /oclif/3.4.3:
+  /oclif/3.4.3_rxmtqiusuyruv7tkwux5gvotbm:
     resolution: {integrity: sha512-Kg8ezSJvDluazG6eyN+TeoryaFn3i9utKVty2hy6I0FUy6QcPnbl8+MCha4Jwc+x5+pA46Tu0n2cnjUcWqp56w==}
     engines: {node: '>=12.0.0'}
     hasBin: true
@@ -21891,6 +21886,7 @@ packages:
       - encoding
       - supports-color
     dev: true
+    patched: true
 
   /on-exit-leak-free/2.1.0:
     resolution: {integrity: sha512-VuCaZZAjReZ3vUwgOB8LxAosIurDiAW0s13rI1YwmaP++jvcxP77AWoQvenZebpCA2m8WC1/EosPYPMjnRAp/w==}
@@ -25347,8 +25343,8 @@ packages:
       pirates: 4.0.5
       ts-interface-checker: 0.1.13
 
-  /supertokens-auth-react/0.28.1_ib3m5ricvtkl2cll7qpr2f6lvq:
-    resolution: {integrity: sha512-3ewCezwD+x3ZHxBcCTUSZH/5ME6W6lcNsqa19/a0O7CHqv2t8PF9HS5e6Jv+Bqy0GhvH/PM55fl1N/+I2sRGjg==}
+  /supertokens-auth-react/0.29.0_ib3m5ricvtkl2cll7qpr2f6lvq:
+    resolution: {integrity: sha512-VY1oETjoSeTx/wAoIZ+satm1JAm3jJg7eqX73sRuBcVsyCxYRchOur3QxkjdJPNxzUtVJl/C/coRGoVrsE/t5A==}
     engines: {node: '>=16.0.0', npm: ^8}
     peerDependencies:
       react: '>=16.8.0'
@@ -25373,8 +25369,8 @@ packages:
     resolution: {integrity: sha512-r0JFBjkMIdep3Lbk3JA+MpnpuOtw4RSyrlRAbrzMcxwiYco3GFWl/daimQZ5b1forOiUODpOlXbSOljP/oyurg==}
     dev: false
 
-  /supertokens-node/12.1.4:
-    resolution: {integrity: sha512-C7pbK/gjpUt5edyC03iP7Xgbdwc3RwlNNWXvNi9f77DnRtF3UEVpT7v3LmQXbV0T7xiXbt++nEu25mVniD+hSw==}
+  /supertokens-node/12.1.5:
+    resolution: {integrity: sha512-X+098F/VsZzUrC06C8D8YQ8zq8lg8MqmGBxdxsmulYbLHtAAitMc9LMaWusMM3yclrYWo7H87TORbjH3M9/+jw==}
     dependencies:
       axios: 0.21.4_debug@4.3.4
       body-parser: 1.20.1
@@ -25384,7 +25380,7 @@ packages:
       jsonwebtoken: 8.5.1
       jwks-rsa: 2.1.5
       libphonenumber-js: 1.10.14
-      nodemailer: 6.8.0
+      nodemailer: 6.9.0
       psl: 1.8.0
       supertokens-js-override: 0.0.4
       twilio: 3.82.2_debug@4.3.4
@@ -25636,10 +25632,12 @@ packages:
       - ts-node
     dev: true
 
-  /tailwindcss/3.2.4_ts-node@10.9.1:
+  /tailwindcss/3.2.4_ra2vnoek4vhbzktaezawwqbin4:
     resolution: {integrity: sha512-AhwtHCKMtR71JgeYDaswmZXhPcW9iuI9Sp2LvZPo9upDZ7231ZJ7eA9RaURbhpXGVlrjX4cFNlB4ieTetEb7hQ==}
     engines: {node: '>=12.13.0'}
     hasBin: true
+    peerDependencies:
+      postcss: ^8.0.9
     dependencies:
       arg: 5.0.2
       chokidar: 3.5.3
