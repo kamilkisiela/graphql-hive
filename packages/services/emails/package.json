@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@sentry/node": "7.30.0",
-    "@trpc/server": "10.7.0",
+    "@trpc/server": "10.9.0",
     "@whatwg-node/fetch": "0.6.2",
     "bullmq": "3.5.6",
     "dotenv": "16.0.3",
