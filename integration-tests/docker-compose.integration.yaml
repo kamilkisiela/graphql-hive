@@ -175,6 +175,27 @@ services:
       EMAIL_PROVIDER: '${EMAIL_PROVIDER}'
 
   broker:
+    image: vectorized/redpanda:latest
+    container_name: broker
+    hostname: broker
+    networks:
+      - 'stack'
+    command:
+      - redpanda
+      - start
+      - --smp
+      - '1'
+      - --set redpanda.empty_seed_starts_cluster=false
+      - --seeds "redpanda-1:33145"
+      - --kafka-addr
+      - PLAINTEXT://0.0.0.0:29092,OUTSIDE://0.0.0.0:9092
+      - --advertise-kafka-addr
+      - PLAINTEXT://broker:29092,OUTSIDE://localhost:9092
+      - --pandaproxy-addr
+      - PLAINTEXT://0.0.0.0:28082,OUTSIDE://0.0.0.0:8082
+      - --advertise-pandaproxy-addr
+      - PLAINTEXT://broker:28082,OUTSIDE://localhost:8082
+      - --advertise-rpc-addr redpanda-1:33145
     mem_limit: 300m
     mem_reservation: 100m
 
@@ -191,11 +212,21 @@ services:
   usage:
     environment:
       RATE_LIMIT_ENDPOINT: '${RATE_LIMIT_ENDPOINT}'
+    depends_on:
+      broker:
+        condition: service_started # Redpand is ready when it starts
+      tokens:
+        condition: service_healthy
 
   usage-ingestor:
     environment:
       CLICKHOUSE_ASYNC_INSERT_BUSY_TIMEOUT_MS: '${CLICKHOUSE_ASYNC_INSERT_BUSY_TIMEOUT_MS}'
       CLICKHOUSE_ASYNC_INSERT_MAX_DATA_SIZE: '${CLICKHOUSE_ASYNC_INSERT_MAX_DATA_SIZE}'
+    depends_on:
+      broker:
+        condition: service_started # Redpand is ready when it starts
+      tokens:
+        condition: service_healthy
 
   emails:
     environment:
@@ -203,7 +234,16 @@ services:
     ports:
       - '3011:3011'
 
-  # Awkwardly, we need to override the `app` service as it's not used in the integration tests
+  #
+  # Awkwardly, we need to override some services for different reasons
+  #
+
+  # It's not part of integration tests
   app:
+    image: node:18.13.0-alpine3.16
+    command: ['npx', 'http-server']
+
+  # Redpand is used for integration tests, instead of Kafka. Zookeeper is no longer needed
+  zookeeper:
     image: node:18.13.0-alpine3.16
     command: ['npx', 'http-server']
