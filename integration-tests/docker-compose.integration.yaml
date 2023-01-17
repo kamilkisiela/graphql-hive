@@ -198,6 +198,12 @@ services:
       - --advertise-rpc-addr redpanda-1:33145
     mem_limit: 300m
     mem_reservation: 100m
+    depends_on: {}
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'http://localhost:9644/public_metrics']
+      interval: 10s
+      timeout: 10s
+      retries: 3
 
   db:
     ports:
