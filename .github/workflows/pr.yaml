@@ -54,20 +54,6 @@ jobs:
     with:
       imageTag: ${{ github.event.pull_request.head.sha }}
 
-  # Integration tests that are based on Docker images created during build step.
-  # This runs the same intergration tests, but with feature flags enabled.
-  integration-tests-ff:
-    name: integration-feature-flags
-    needs: build
-    uses: ./.github/workflows/tests-integration.yaml
-    secrets:
-      stripeTestPublicKey: ${{ secrets.TEST_STRIPE_PUBLIC_KEY }}
-      stripeTestSecretKey: ${{ secrets.TEST_STRIPE_SECRET_KEY }}
-    with:
-      imageTag: ${{ github.event.pull_request.head.sha }}
-      configureEnv: |
-        echo "FF_CLICKHOUSE_V2_TABLES=1" >> $GITHUB_ENV
-
   # e2e tests using Cypress, runs Hive from pre-built Docker images.
   e2e:
     name: test
