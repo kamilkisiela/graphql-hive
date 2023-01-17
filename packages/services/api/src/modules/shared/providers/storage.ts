@@ -443,6 +443,7 @@ export interface Storage {
   idMutex: IdMutex;
 
   createCDNAccessToken(_: {
+    id: string;
     targetId: string;
     s3Key: string;
     firstCharacters: string;

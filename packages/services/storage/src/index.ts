@@ -2686,13 +2686,15 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async createCDNAccessToken(args) {
       const result = await pool.maybeOne(sql`
         INSERT INTO "public"."cdn_access_tokens" (
-          "target_id"
+          "id"
+          , "target_id"
           , "s3_key"
           , "first_characters"
           , "last_characters"
         )
         VALUES (
-          ${args.targetId}
+          ${args.id}
+          , ${args.targetId}
           , ${args.s3Key}
           , ${args.firstCharacters}
           , ${args.lastCharacters}

@@ -1,4 +1,5 @@
 import { createHmac } from 'crypto';
+import { crypto } from '@whatwg-node/fetch';
 import bcryptjs from 'bcryptjs';
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import type { Span } from '@sentry/types';
@@ -10,8 +11,7 @@ import { HttpClient } from '../../shared/providers/http-client';
 import { Logger } from '../../shared/providers/logger';
 import { type S3Config, S3_CONFIG } from '../../shared/providers/s3-config';
 import { Storage } from '../../shared/providers/storage';
-import type { CDNConfig } from './tokens';
-import { CDN_CONFIG } from './tokens';
+import { type CDNConfig, CDN_CONFIG } from './tokens';
 
 type CdnResourceType = 'schema' | 'supergraph' | 'metadata';
 
@@ -77,6 +77,7 @@ export class CdnProvider {
     }
 
     await this.storage.createCDNAccessToken({
+      id: crypto.randomUUID(),
       targetId: args.targetId,
       s3Key,
       firstCharacters: token.substring(0, 3),
