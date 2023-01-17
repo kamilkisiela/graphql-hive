@@ -64,6 +64,7 @@ jobs:
         if: ${{ inputs.dockerize }}
         with:
           pattern: '[\/@|-]'
+          flags: 'g'
           string: ${{ github.head_ref || github.ref_name }}
           replace-with: '_'
 
