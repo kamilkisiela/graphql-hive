@@ -20,13 +20,15 @@ function getRemoteClickhouseConfig(): ClickhouseConfig {
     username: clickhouseConfig.require('username'),
     password: clickhouseConfig.requireSecret('password'),
     protocol: clickhouseConfig.require('protocol'),
-    mirror: {
-      host: clickhouseConfig.require('mirrorHost'),
-      port: clickhouseConfig.require('mirrorPort'),
-      username: clickhouseConfig.require('mirrorUsername'),
-      password: clickhouseConfig.requireSecret('mirrorPassword'),
-      protocol: clickhouseConfig.require('mirrorProtocol'),
-    },
+    mirror: clickhouseConfig.get('mirrorHost')
+      ? {
+          host: clickhouseConfig.require('mirrorHost'),
+          port: clickhouseConfig.require('mirrorPort'),
+          username: clickhouseConfig.require('mirrorUsername'),
+          password: clickhouseConfig.requireSecret('mirrorPassword'),
+          protocol: clickhouseConfig.require('mirrorProtocol'),
+        }
+      : null,
   };
 }
 
