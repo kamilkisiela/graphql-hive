@@ -32,6 +32,7 @@
     "lint": "eslint --cache --ignore-path .gitignore \"{packages,cypress}/**/*.{ts,tsx}\"",
     "lint:fix": "pnpm lint --fix",
     "lint:prettier": "prettier --cache --check .",
+    "local:setup": "docker-compose -f docker-compose.dev.yml up -d --remove-orphans && pnpm --filter @hive/migrations db:init",
     "postinstall": "node ./scripts/patch-manifests.js && pnpm env:sync && node ./scripts/turborepo-cleanup.js && node ./scripts/turborepo-setup.js",
     "pre-commit": "exit 0 && lint-staged",
     "prepare": "husky install",
@@ -39,7 +40,6 @@
     "prettier": "prettier --cache --write --list-different .",
     "release": "pnpm build:libraries && changeset publish",
     "seed": "node scripts/seed-local-env.js",
-    "setup": "pnpm --filter @hive/storage setup",
     "test": "jest",
     "test:e2e": "CYPRESS_BASE_URL=$HIVE_APP_BASE_URL cypress run",
     "turbo": "env-cmd --silent turbo run",
@@ -119,7 +119,8 @@
       "@graphql-inspector/core@3.4.0": "patches/@graphql-inspector__core@3.4.0.patch",
       "@oclif/core@1.23.0": "patches/@oclif__core@1.23.0.patch",
       "bullmq@3.5.6": "patches/bullmq@3.5.6.patch",
-      "oclif@3.4.3": "patches/oclif@3.4.3.patch"
+      "oclif@3.4.3": "patches/oclif@3.4.3.patch",
+      "@slonik/migrator@0.8.5": "patches/@slonik__migrator@0.8.5.patch"
     }
   }
 }

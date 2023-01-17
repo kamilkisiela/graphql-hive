@@ -24,7 +24,7 @@ CDN_AUTH_PRIVATE_KEY=$(openssl rand -hex 16)
 ```
 
 - Run `pnpm i` at the root to install all the dependencies and run the hooks
-- Run `pnpm run --filter @hive/storage setup` to create local databases
+- Run `pnpm local:setup` to run Docker compose dependencies, create databases and migrate database
 - Run `pnpm generate` to generate the typings from the graphql files (use `pnpm graphql:generate` if
   you only need to run GraphQL Codegen)
 - Run `pnpm build` to build all services
