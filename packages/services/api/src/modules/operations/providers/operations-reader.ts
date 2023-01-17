@@ -231,7 +231,7 @@ export class OperationsReader {
             },
           )}`,
           queryId: 'count_operations_daily',
-          timeout: 10_000,
+          timeout: 15_000,
           span,
         },
         hourly: {
@@ -760,7 +760,7 @@ export class OperationsReader {
               ${this.createFilter({ target, period, operations })}
             `,
             queryId: 'general_duration_percentiles_daily',
-            timeout: 15_000,
+            timeout: 30_000,
             span,
           },
           hourly: {
@@ -771,7 +771,7 @@ export class OperationsReader {
               ${this.createFilter({ target, period, operations })}
             `,
             queryId: 'general_duration_percentiles_hourly',
-            timeout: 15_000,
+            timeout: 30_000,
             span,
           },
           regular: {
@@ -782,7 +782,7 @@ export class OperationsReader {
               ${this.createFilter({ target, period, operations })}
             `,
             queryId: 'general_duration_percentiles_regular',
-            timeout: 15_000,
+            timeout: 30_000,
             span,
           },
         },
@@ -822,7 +822,7 @@ export class OperationsReader {
               GROUP BY hash
             `,
             queryId: 'duration_percentiles_daily',
-            timeout: 15_000,
+            timeout: 30_000,
             span,
           },
           hourly: {
@@ -835,7 +835,7 @@ export class OperationsReader {
               GROUP BY hash
             `,
             queryId: 'duration_percentiles_hourly',
-            timeout: 15_000,
+            timeout: 30_000,
             span,
           },
           regular: {
@@ -848,7 +848,7 @@ export class OperationsReader {
               GROUP BY hash
             `,
             queryId: 'duration_percentiles_regular',
-            timeout: 15_000,
+            timeout: 30_000,
             span,
           },
         },
@@ -880,7 +880,7 @@ export class OperationsReader {
         target,
         period,
       })} GROUP BY client_name`,
-      timeout: 10_000,
+      timeout: 15_000,
     });
 
     return result.data.map(row => row.client_name);
@@ -929,7 +929,7 @@ export class OperationsReader {
               ORDER BY date
             `,
             queryId: 'duration_and_count_over_time_daily',
-            timeout: 15_000,
+            timeout: 30_000,
             span,
           },
           hourly: {
@@ -951,7 +951,7 @@ export class OperationsReader {
               ORDER BY date
             `,
             queryId: 'duration_and_count_over_time_hourly',
-            timeout: 15_000,
+            timeout: 30_000,
             span,
           },
           regular: {
@@ -973,7 +973,7 @@ export class OperationsReader {
               ORDER BY date
             `,
             queryId: 'duration_and_count_over_time_regular',
-            timeout: 15_000,
+            timeout: 30_000,
             span,
           },
         },
@@ -1001,7 +1001,7 @@ export class OperationsReader {
         `', '`,
       )}')`,
       queryId: 'count_operations_for_targets',
-      timeout: 15_000,
+      timeout: 30_000,
     });
 
     if (result.data.length === 0) {
