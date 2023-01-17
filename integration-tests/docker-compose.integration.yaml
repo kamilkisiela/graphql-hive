@@ -174,9 +174,11 @@ services:
       RATE_LIMIT_ENDPOINT: '${RATE_LIMIT_ENDPOINT}'
       EMAIL_PROVIDER: '${EMAIL_PROVIDER}'
 
+  redis:
+    image: redis:7.0.7-alpine
+
   broker:
     image: vectorized/redpanda:latest
-    container_name: broker
     hostname: broker
     networks:
       - 'stack'
@@ -198,12 +200,13 @@ services:
       - --advertise-rpc-addr redpanda-1:33145
     mem_limit: 300m
     mem_reservation: 100m
-    depends_on: {}
+    depends_on: []
     healthcheck:
-      test: ['CMD', 'wget', '--spider', '-q', 'http://localhost:9644/public_metrics']
-      interval: 10s
-      timeout: 10s
-      retries: 3
+      test: 'curl -f http://localhost:9644/public_metrics'
+      interval: 3s
+      timeout: 3s
+      retries: 6
+      start_period: 5s
 
   db:
     ports:

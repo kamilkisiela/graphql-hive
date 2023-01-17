@@ -106,8 +106,8 @@ services:
       retries: 6
       start_period: 5s
     environment:
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
-      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+      REDIS_PASSWORD: '${REDIS_PASSWORD}'
+      REDIS_DISABLE_COMMANDS: 'FLUSHDB,FLUSHALL'
     volumes:
       - './.hive/redis/db:/bitnami/redis/data'
 
