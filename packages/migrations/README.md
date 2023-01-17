@@ -13,7 +13,7 @@ need to implement.
 Please follow these guidelines:
 
 1. Do not delete previous migration files!
-2. Do not change any existing migration code once it's merged to `main` branch.
+2. Do not change any existing migration code or file name, once it's merged to `main` branch!
 3. If you need a change in database or structure, make sure that the `down` migration does the exact
    opposite (usually, in the reversed order).
 4. Migrations should not take too long to run - if your migration is doing too many things, please

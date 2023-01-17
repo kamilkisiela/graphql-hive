@@ -1,9 +1,12 @@
 import { config as dotenv } from 'dotenv';
 import zod from 'zod';
 
-dotenv({
-  debug: true,
-});
+// eslint-disable-next-line no-process-env
+if (!process.env.RELEASE) {
+  dotenv({
+    debug: true,
+  });
+}
 
 const isNumberString = (input: unknown) => zod.string().regex(/^\d+$/).safeParse(input).success;
 
