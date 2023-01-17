@@ -4,13 +4,7 @@ import * as Sentry from '@sentry/node';
 import Agent from 'agentkeepalive';
 import { got, Response as GotResponse } from 'got';
 import { writeDuration } from './metrics';
-import {
-  joinIntoSingleMessage,
-  legacyOperationsOrder,
-  legacyRegistryOrder,
-  operationsOrder,
-  registryOrder,
-} from './serializer';
+import { joinIntoSingleMessage, operationsOrder, registryOrder } from './serializer';
 
 function hasResponse(error: unknown): error is {
   response: GotResponse;
@@ -30,8 +24,6 @@ export interface ClickHouseConfig {
 
 const operationsFields = operationsOrder.join(', ');
 const registryFields = registryOrder.join(', ');
-const legacyOperationsFields = legacyOperationsOrder.join(', ');
-const legacyRegistryFields = legacyRegistryOrder.join(', ');
 
 const agentConfig: Agent.HttpOptions = {
   // Keep sockets around in a pool to be used by other requests in the future
@@ -104,39 +96,6 @@ export function createWriter({
             })
           : Promise.resolve(),
       ]);
-    },
-    legacy: {
-      async writeOperations(operations: string[]) {
-        if (operations.length === 0) {
-          return;
-        }
-
-        const csv = joinIntoSingleMessage(operations);
-
-        await writeCsv(
-          clickhouse,
-          agents,
-          `INSERT INTO operations_new (${legacyOperationsFields}) FORMAT CSV`,
-          await compress(csv),
-          logger,
-          3,
-        );
-      },
-      async writeRegistry(records: string[]) {
-        if (records.length === 0) {
-          return;
-        }
-
-        const csv = joinIntoSingleMessage(records);
-        await writeCsv(
-          clickhouse,
-          agents,
-          `INSERT INTO operations_registry (${legacyRegistryFields}) FORMAT CSV`,
-          await compress(csv),
-          logger,
-          3,
-        );
-      },
     },
     destroy() {
       httpAgent.destroy();

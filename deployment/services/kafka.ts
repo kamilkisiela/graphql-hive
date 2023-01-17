@@ -10,13 +10,13 @@ export function deployKafka() {
 
   if (!eventhubConfig.getBoolean('inCluster')) {
     return {
-      connectionEnv: <Record<string, pulumi.Output<string> | string>>{
+      connectionEnv: {
         KAFKA_SSL: '1',
         KAFKA_SASL_MECHANISM: 'plain',
         KAFKA_CONCURRENCY: '1',
         KAFKA_SASL_USERNAME: '$ConnectionString',
         KAFKA_SASL_PASSWORD: eventhubConfig.requireSecret('key'),
-      },
+      } as Record<string, pulumi.Output<string> | string>,
       config: {
         endpoint: eventhubConfig.require('endpoint'),
         bufferSize: eventhubConfig.require('bufferSize'),
@@ -50,10 +50,10 @@ export function deployKafka() {
   }).deploy();
 
   return {
-    connectionEnv: <Record<string, pulumi.Output<string> | string>>{
+    connectionEnv: {
       KAFKA_CONNECTION_MODE: 'docker',
       KAFKA_CONCURRENCY: '1',
-    },
+    } as Record<string, pulumi.Output<string> | string>,
     service: localKafka.service,
     deployment: localKafka.deployment,
     config: {
