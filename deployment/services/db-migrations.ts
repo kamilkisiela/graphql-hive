@@ -18,6 +18,8 @@ export function deployDbMigrations({
   imagePullSecret,
   dependencies,
   force,
+  s3,
+  encryptionSecret,
 }: {
   deploymentEnv: DeploymentEnvironment;
   clickhouse: Clickhouse;
@@ -26,6 +28,13 @@ export function deployDbMigrations({
   imagePullSecret: k8s.core.v1.Secret;
   dependencies?: pulumi.Resource[];
   force?: boolean;
+  s3: {
+    accessKeyId: string | pulumi.Output<string>;
+    secretAccessKey: string | pulumi.Output<string>;
+    endpoint: string | pulumi.Output<string>;
+    bucketName: string | pulumi.Output<string>;
+  };
+  encryptionSecret: string | pulumi.Output<string>;
 }) {
   const rawConnectionString = apiConfig.requireSecret('postgresConnectionString');
   const connectionString = rawConnectionString.apply(rawConnectionString =>
@@ -53,6 +62,12 @@ export function deployDbMigrations({
         CLICKHOUSE_PROTOCOL: clickhouse.config.protocol,
         KAFKA_BROKER: kafka.config.endpoint,
         TS_NODE_TRANSPILE_ONLY: 'true',
+        RUN_S3_LEGACY_CDN_KEY_IMPORT: '1',
+        S3_ACCESS_KEY_ID: s3.accessKeyId,
+        S3_SECRET_ACCESS_KEY: s3.secretAccessKey,
+        S3_ENDPOINT: s3.endpoint,
+        S3_BUCKET_NAME: s3.bucketName,
+        ENCRYPTION_SECRET: encryptionSecret,
         ...deploymentEnv,
         // Change to this env var will lead to force rerun of the migration job
         // Since K8s job are immutable, we can't edit or ask K8s to re-run a Job, so we are doing a
