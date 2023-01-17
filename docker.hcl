@@ -150,7 +150,7 @@ target "server" {
   ]
 }
 
-target "migrations" {
+target "storage" {
   inherits = ["migrations-base", get_target()]
   context = "${PWD}/packages/migrations/migrations-artifact"
   args = {
@@ -321,7 +321,7 @@ group "build" {
     "emails",
     "rate-limit",
     "schema",
-    "migrations",
+    "storage",
     "tokens",
     "usage-estimator",
     "usage-ingestor",
@@ -340,7 +340,7 @@ group "integration-tests" {
     "emails",
     "rate-limit",
     "schema",
-    "migrations",
+    "storage",
     "tokens",
     "usage-estimator",
     "usage-ingestor",

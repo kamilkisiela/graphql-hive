@@ -170,7 +170,7 @@ services:
       - '8083:8083'
     command: caddy reverse-proxy --from :8083 --to s3:9000 --change-host-header
 
-  storage:
+  migrations:
     image: '${DOCKER_REGISTRY}storage${DOCKER_TAG}'
     networks:
       - 'stack'
@@ -202,7 +202,7 @@ services:
         condition: service_healthy
       clickhouse:
         condition: service_healthy
-      storage:
+      migrations:
         condition: service_completed_successfully
       s3_provision_buckets:
         condition: service_completed_successfully
@@ -270,7 +270,7 @@ services:
     networks:
       - 'stack'
     depends_on:
-      storage:
+      migrations:
         condition: service_completed_successfully
     environment:
       NODE_ENV: production

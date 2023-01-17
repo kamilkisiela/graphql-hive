@@ -108,7 +108,7 @@ services:
     depends_on:
       clickhouse:
         condition: service_healthy
-      storage:
+      migrations:
         condition: service_completed_successfully
     environment:
       NODE_ENV: production
@@ -130,7 +130,7 @@ services:
     depends_on:
       clickhouse:
         condition: service_healthy
-      storage:
+      migrations:
         condition: service_completed_successfully
       usage-estimator:
         condition: service_healthy
