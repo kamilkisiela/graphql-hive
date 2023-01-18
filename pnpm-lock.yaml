@@ -351,6 +351,7 @@ importers:
       got: 12.5.3
       slonik: 30.1.2_wg2hxbo7txnklmvja4aeqnygfi
       ts-node: 10.9.1_awa2wsr5thmg3i7jqycphctjfq
+      typescript: 4.9.4
       zod: 3.20.2
     devDependencies:
       '@types/node': 18.11.18
@@ -358,7 +359,6 @@ importers:
       copyfiles: 2.4.1
       pg-promise: 10.15.4
       tslib: 2.4.1
-      typescript: 4.9.4
 
   packages/services/api:
     specifiers:
