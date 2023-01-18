@@ -1,4 +1,5 @@
 import { createServer } from 'http';
+import { AwsClient } from '@hive/api/src/shared/aws';
 import itty from 'itty-router';
 import { json, withParams } from 'itty-router-extras';
 import { ArtifactStorageReader } from '@hive/api/src/modules/schema/providers/artifact-storage-reader';
@@ -8,7 +9,6 @@ import './dev-polyfill';
 import { devStorage } from './dev-polyfill';
 import { createRequestHandler } from './handler';
 import { createIsKeyValid } from './key-validation';
-import { AwsClient } from '@hive/api/src/shared/aws';
 
 // eslint-disable-next-line no-process-env
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4010;

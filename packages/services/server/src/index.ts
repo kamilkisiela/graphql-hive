@@ -1,9 +1,6 @@
 #!/usr/bin/env node
 import { Readable } from 'node:stream';
-import got from 'got';
-import { GraphQLError, stripIgnoredCharacters } from 'graphql';
 import 'reflect-metadata';
-import zod from 'zod';
 import { createRegistry, LogFn, Logger } from '@hive/api';
 import { CryptoProvider } from '@hive/api';
 import { ArtifactStorageReader } from '@hive/api/src/modules/schema/providers/artifact-storage-reader';
@@ -20,12 +17,15 @@ import { Dedupe, ExtraErrorData } from '@sentry/integrations';
 import * as Sentry from '@sentry/node';
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
 import { createServerAdapter } from '@whatwg-node/server';
+import got from 'got';
+import { GraphQLError, stripIgnoredCharacters } from 'graphql';
+import { AwsClient } from 'packages/services/api/src/shared/aws';
+import zod from 'zod';
 import { createContext, internalApiRouter } from './api';
 import { asyncStorage } from './async-storage';
 import { env } from './environment';
 import { graphqlHandler } from './graphql-handler';
 import { clickHouseElapsedDuration, clickHouseReadDuration } from './metrics';
-import { AwsClient } from 'packages/services/api/src/shared/aws';
 
 const LegacySetUserIdMappingPayloadModel = zod.object({
   auth0UserId: zod.string(),
