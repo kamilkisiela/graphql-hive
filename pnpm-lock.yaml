@@ -337,6 +337,7 @@ importers:
   packages/migrations:
     specifiers:
       '@slonik/migrator': 0.8.5
+      '@types/bcryptjs': 2.4.2
       '@types/node': 18.11.18
       '@types/pg': 8.6.6
       '@whatwg-node/fetch': 0.6.2
@@ -361,6 +362,7 @@ importers:
       typescript: 4.9.4
       zod: 3.20.2
     devDependencies:
+      '@types/bcryptjs': 2.4.2
       '@types/node': 18.11.18
       '@types/pg': 8.6.6
       copyfiles: 2.4.1
