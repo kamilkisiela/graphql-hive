@@ -242,7 +242,7 @@ importers:
       graphql-request: 4.3.0
       graphql-tag: 2.12.6
       log-symbols: 4.1.0
-      mkdirp: 1.0.4
+      mkdirp: 2.1.3
       oclif: 3.4.3
       rimraf: 3.0.2
       ts-node: 10.9.1
@@ -266,7 +266,7 @@ importers:
       graphql-request: 4.3.0_graphql@16.6.0
       graphql-tag: 2.12.6_graphql@16.6.0
       log-symbols: 4.1.0
-      mkdirp: 1.0.4
+      mkdirp: 2.1.3
       rimraf: 3.0.2
       ts-node: 10.9.1
       tslib: 2.4.1
@@ -21194,6 +21194,12 @@ packages:
     resolution: {integrity: sha512-vVqVZQyf3WLx2Shd0qJ9xuvqgAyKPLAiqITEtqW0oIUjzo3PePDd6fW9iFz30ef7Ysp/oiWqbhszeGWW2T6Gzw==}
     engines: {node: '>=10'}
     hasBin: true
+
+  /mkdirp/2.1.3:
+    resolution: {integrity: sha512-sjAkg21peAG9HS+Dkx7hlG9Ztx7HLeKnvB3NQRcu/mltCVmvkF0pisbiTSfDVYTT86XEfZrTUosLdZLStquZUw==}
+    engines: {node: '>=10'}
+    hasBin: true
+    dev: false
 
   /modern-normalize/1.1.0:
     resolution: {integrity: sha512-2lMlY1Yc1+CUy0gw4H95uNN7vjbpoED7NNRSBHE25nWfLBdmMzFCsPshlzbxHz+gYMcBEUN8V4pU16prcdPSgA==}
