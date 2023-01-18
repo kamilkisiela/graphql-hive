@@ -271,7 +271,7 @@ importers:
       '@graphql-codegen/typescript-graphql-request': 4.5.8_upqs5jjd3ykece5dxcsvdam2ju
       '@types/env-ci': 3.1.1
       '@types/mkdirp': 1.0.2
-      oclif: 3.4.3
+      oclif: 3.4.3_rxmtqiusuyruv7tkwux5gvotbm
 
   packages/libraries/client:
     specifiers:
@@ -567,7 +567,7 @@ importers:
   packages/services/schema:
     specifiers:
       '@apollo/federation': 0.38.1
-      '@graphql-tools/stitch': 8.7.35
+      '@graphql-tools/stitch': 8.7.36
       '@graphql-tools/stitching-directives': 2.3.25
       '@hive/service-common': workspace:*
       '@sentry/node': 7.30.0
@@ -584,7 +584,7 @@ importers:
       zod: 3.20.2
     dependencies:
       '@apollo/federation': 0.38.1_graphql@16.6.0
-      '@graphql-tools/stitch': 8.7.35_graphql@16.6.0
+      '@graphql-tools/stitch': 8.7.36_graphql@16.6.0
       '@graphql-tools/stitching-directives': 2.3.25_graphql@16.6.0
       '@sentry/node': 7.30.0
       '@sentry/tracing': 7.30.0
@@ -7252,8 +7252,8 @@ packages:
       tslib: 2.4.1
       value-or-promise: 1.0.11
 
-  /@graphql-tools/stitch/8.7.35_graphql@16.6.0:
-    resolution: {integrity: sha512-djuBs0CukCok/h9OYUP5P4voziusCd6RaZ72rxSJjeRbX72JT48CkPxRkAI7VjrxnfOwZSylA3V2xd4G8SgAew==}
+  /@graphql-tools/stitch/8.7.36_graphql@16.6.0:
+    resolution: {integrity: sha512-XRukKVOyf7z9hT1034SR2XN7XsyHVvDjl6OBxt4fo7L+3EtKQl2iUCbKPTSzPCIK+CCERDQ2/J8Kp+RYIJYT/g==}
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
     dependencies:
@@ -7262,10 +7262,10 @@ packages:
       '@graphql-tools/merge': 8.3.15_graphql@16.6.0
       '@graphql-tools/schema': 9.0.13_graphql@16.6.0
       '@graphql-tools/utils': 9.1.4_graphql@16.6.0
-      '@graphql-tools/wrap': 9.3.0_graphql@16.6.0
+      '@graphql-tools/wrap': 9.3.1_graphql@16.6.0
       graphql: 16.6.0
       tslib: 2.4.1
-      value-or-promise: 1.0.11
+      value-or-promise: 1.0.12
     dev: false
 
   /@graphql-tools/stitching-directives/2.3.25_graphql@16.6.0:
@@ -7464,6 +7464,19 @@ packages:
       graphql: 16.6.0
       tslib: 2.4.1
       value-or-promise: 1.0.12
+
+  /@graphql-tools/wrap/9.3.1_graphql@16.6.0:
+    resolution: {integrity: sha512-uzY1HKc7qMErWL3ybv8bFG3hI1rTJPVYQ8WeJkCF/r/+aHEkUj0Bo2PYZrZTX1UIr3Tb4P5GyhqYBgZOXraZjw==}
+    peerDependencies:
+      graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
+    dependencies:
+      '@graphql-tools/delegate': 9.0.22_graphql@16.6.0
+      '@graphql-tools/schema': 9.0.13_graphql@16.6.0
+      '@graphql-tools/utils': 9.1.4_graphql@16.6.0
+      graphql: 16.6.0
+      tslib: 2.4.1
+      value-or-promise: 1.0.12
+    dev: false
 
   /@graphql-typed-document-node/core/3.1.1:
     resolution: {integrity: sha512-NQ17ii0rK1b34VZonlmT2QMJFI70m0TRwbknO/ihlbatXyaktDhN/98vBiUU6kNBPljqGqyIrl2T4nY2RpFANg==}
@@ -15739,7 +15752,7 @@ packages:
     dependencies:
       fast-glob: 3.2.12
       postcss: 8.4.20
-      tailwindcss: 3.2.4_ts-node@10.9.1
+      tailwindcss: 3.2.4_ra2vnoek4vhbzktaezawwqbin4
     transitivePeerDependencies:
       - ts-node
     dev: true
@@ -21863,7 +21876,7 @@ packages:
     resolution: {integrity: sha512-PX1wu0AmAdPqOL1mWhqmlOd8kOIZQwGZw6rh7uby9fTc5lhaOWFLX3I6R1hrF9k3zUY40e6igsLGkDXK92LJNg==}
     dev: false
 
-  /oclif/3.4.3:
+  /oclif/3.4.3_rxmtqiusuyruv7tkwux5gvotbm:
     resolution: {integrity: sha512-Kg8ezSJvDluazG6eyN+TeoryaFn3i9utKVty2hy6I0FUy6QcPnbl8+MCha4Jwc+x5+pA46Tu0n2cnjUcWqp56w==}
     engines: {node: '>=12.0.0'}
     hasBin: true
@@ -21891,6 +21904,7 @@ packages:
       - encoding
       - supports-color
     dev: true
+    patched: true
 
   /on-exit-leak-free/2.1.0:
     resolution: {integrity: sha512-VuCaZZAjReZ3vUwgOB8LxAosIurDiAW0s13rI1YwmaP++jvcxP77AWoQvenZebpCA2m8WC1/EosPYPMjnRAp/w==}
@@ -25636,10 +25650,12 @@ packages:
       - ts-node
     dev: true
 
-  /tailwindcss/3.2.4_ts-node@10.9.1:
+  /tailwindcss/3.2.4_ra2vnoek4vhbzktaezawwqbin4:
     resolution: {integrity: sha512-AhwtHCKMtR71JgeYDaswmZXhPcW9iuI9Sp2LvZPo9upDZ7231ZJ7eA9RaURbhpXGVlrjX4cFNlB4ieTetEb7hQ==}
     engines: {node: '>=12.13.0'}
     hasBin: true
+    peerDependencies:
+      postcss: ^8.0.9
     dependencies:
       arg: 5.0.2
       chokidar: 3.5.3
