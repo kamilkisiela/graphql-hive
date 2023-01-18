@@ -1,6 +1,6 @@
-import { Response, Request } from '@whatwg-node/fetch';
+import { Request, Response } from '@whatwg-node/fetch';
 import bcrypt from 'bcryptjs';
-import { AwsClient } from 'packages/services/api/src/shared/aws';
+import { type AwsClient } from 'packages/services/api/src/shared/aws';
 
 export type KeyValidator = (targetId: string, headerKey: string) => Promise<boolean>;
 
@@ -12,22 +12,48 @@ type CreateKeyValidatorDeps = {
     client: AwsClient;
   };
   getCache: () => Promise<Cache | null> | Cache | null;
+  waitUntil: null | FetchEvent['waitUntil'];
 };
 
 export const createIsKeyValid =
   (deps: CreateKeyValidatorDeps) =>
   async (targetId: string, accessHeaderValue: string): Promise<boolean> => {
-    const requestCache = await deps.getCache();
+    let withCache = (isValid: boolean) => Promise.resolve(isValid);
 
-    let cacheKey: null | Request = null;
+    {
+      const requestCache = await deps.getCache();
+      if (requestCache) {
+        const cacheKey = new Request(
+          ['http://key-cache.graphql-hive.com/', 'legacy', targetId].join('/'),
+          {
+            method: 'GET',
+          },
+        );
 
-    if (requestCache) {
-      cacheKey = new Request('http://key-cache.graphql-hive.com/' + targetId, {
-        method: 'GET',
-      });
-      const response = await requestCache.match(cacheKey);
-      if (response) {
-        return (await response.text()) === '1';
+        const response = await requestCache.match(cacheKey);
+        if (response) {
+          return (await response.text()) === '1';
+        }
+
+        withCache = async (isValid: boolean) => {
+          const promise = requestCache.put(
+            cacheKey,
+            new Response(isValid ? '1' : '0', {
+              status: 200,
+              headers: {
+                'Cache-Control': `s-maxage=${60 * 5}`,
+              },
+            }),
+          );
+
+          if (deps.waitUntil) {
+            deps.waitUntil(promise);
+          } else {
+            await promise;
+          }
+
+          return isValid;
+        };
       }
     }
 
@@ -39,23 +65,9 @@ export const createIsKeyValid =
     );
 
     if (key.status !== 200) {
-      return false;
+      return withCache(false);
     }
 
     const isValid = await bcrypt.compare(accessHeaderValue, await key.text());
-
-    if (cacheKey && requestCache) {
-      // TODO: use event.waitUntil to not block the response
-      await requestCache.put(
-        cacheKey,
-        new Response(isValid ? '1' : '0', {
-          status: 200,
-          headers: {
-            'Cache-Control': `s-maxage=${60 * 5}`,
-          },
-        }),
-      );
-    }
-
-    return isValid;
+    return withCache(isValid);
   };

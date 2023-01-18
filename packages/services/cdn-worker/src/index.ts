@@ -1,5 +1,5 @@
-import itty from 'itty-router';
 import { AwsClient } from '@hive/api/src/shared/aws';
+import itty from 'itty-router';
 import Toucan from 'toucan-js';
 import { ArtifactStorageReader } from '@hive/api/src/modules/schema/providers/artifact-storage-reader';
 import { AnalyticsEngine, createAnalytics } from './analytics';
@@ -65,63 +65,10 @@ const getCache = () => {
   return cachePromise;
 };
 
-const isKeyValid = createIsKeyValid({
-  keyData: KEY_DATA,
-  s3,
-  getCache,
-});
-
 const analytics = createAnalytics({
   usage: USAGE_ANALYTICS,
   error: ERROR_ANALYTICS,
 });
-
-const handleRequest = createRequestHandler({
-  getRawStoreValue: value => HIVE_DATA.get(value),
-  isKeyValid,
-  analytics,
-});
-
-const handleArtifactRequest = createArtifactRequestHandler({
-  isKeyValid,
-  analytics,
-  async getArtifactAction(targetId, artifactType, eTag) {
-    return artifactStorageReader.generateArtifactReadUrl(targetId, artifactType, eTag);
-  },
-  async fallback(request: Request, params: { targetId: string; artifactType: string }) {
-    const artifactTypeMap: Record<string, string> = {
-      metadata: 'metadata',
-      sdl: 'sdl',
-      services: 'schema',
-      supergraph: 'supergraph',
-    };
-    const artifactType = artifactTypeMap[params.artifactType];
-
-    if (artifactType) {
-      const url = request.url.replace(
-        `/artifacts/v1/${params.targetId}/${params.artifactType}`,
-        `/${params.targetId}/${artifactType}`,
-      );
-
-      return handleRequest(new Request(url, request));
-    }
-
-    return;
-  },
-});
-
-const router = itty
-  .Router()
-  .get(
-    '/_health',
-    () =>
-      new Response('OK', {
-        status: 200,
-      }),
-  )
-  .get('*', handleArtifactRequest)
-  // Legacy CDN Handlers
-  .get('*', handleRequest);
 
 self.addEventListener('fetch', async (event: FetchEvent) => {
   const sentry = new Toucan({
@@ -141,6 +88,60 @@ self.addEventListener('fetch', async (event: FetchEvent) => {
   });
 
   try {
+    const isKeyValid = createIsKeyValid({
+      keyData: KEY_DATA,
+      s3,
+      getCache,
+      waitUntil: promise => event.waitUntil(promise),
+    });
+
+    const handleRequest = createRequestHandler({
+      getRawStoreValue: value => HIVE_DATA.get(value),
+      isKeyValid,
+      analytics,
+    });
+
+    const handleArtifactRequest = createArtifactRequestHandler({
+      isKeyValid,
+      analytics,
+      async getArtifactAction(targetId, artifactType, eTag) {
+        return artifactStorageReader.generateArtifactReadUrl(targetId, artifactType, eTag);
+      },
+      async fallback(request: Request, params: { targetId: string; artifactType: string }) {
+        const artifactTypeMap: Record<string, string> = {
+          metadata: 'metadata',
+          sdl: 'sdl',
+          services: 'schema',
+          supergraph: 'supergraph',
+        };
+        const artifactType = artifactTypeMap[params.artifactType];
+
+        if (artifactType) {
+          const url = request.url.replace(
+            `/artifacts/v1/${params.targetId}/${params.artifactType}`,
+            `/${params.targetId}/${artifactType}`,
+          );
+
+          return handleRequest(new Request(url, request));
+        }
+
+        return;
+      },
+    });
+
+    const router = itty
+      .Router()
+      .get(
+        '/_health',
+        () =>
+          new Response('OK', {
+            status: 200,
+          }),
+      )
+      .get('*', handleArtifactRequest)
+      // Legacy CDN Handlers
+      .get('*', handleRequest);
+
     event.respondWith(
       router
         .handle(event.request, sentry.captureException)

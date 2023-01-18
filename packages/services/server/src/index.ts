@@ -327,15 +327,17 @@ export async function main() {
       const artifactStorageReader = new ArtifactStorageReader(s3, env.s3.publicUrl);
 
       const artifactHandler = createArtifactRequestHandler({
-        isKeyValid: createIsKeyValid({ keyData: env.cdn.authPrivateKey, s3, getCache: () => null }),
+        isKeyValid: createIsKeyValid({
+          keyData: env.cdn.authPrivateKey,
+          s3,
+          getCache: () => null,
+          waitUntil: false,
+        }),
         async getArtifactAction(targetId, artifactType, eTag) {
           return artifactStorageReader.generateArtifactReadUrl(targetId, artifactType, eTag);
         },
       });
-      const artifactRouteHandler = createServerAdapter(
-        // TODO: remove `as any` once the fallback logic in packages/services/cdn-worker/src/artifact-handler.ts is removed
-        artifactHandler as any,
-      );
+      const artifactRouteHandler = createServerAdapter(artifactHandler as any);
 
       /** Artifacts API */
       server.route({
