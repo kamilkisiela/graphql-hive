@@ -175,7 +175,7 @@ services:
       EMAIL_PROVIDER: '${EMAIL_PROVIDER}'
 
   redis:
-    image: redis:7.0.7-alpine
+    image: redis:7.0.8-alpine
 
   broker:
     image: vectorized/redpanda:latest
