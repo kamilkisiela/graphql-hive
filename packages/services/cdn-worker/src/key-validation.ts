@@ -12,7 +12,7 @@ type CreateKeyValidatorDeps = {
     client: AwsClient;
   };
   getCache: () => Promise<Cache | null> | Cache | null;
-  waitUntil: null | FetchEvent['waitUntil'];
+  waitUntil: null | ((promise: void | Promise<void>) => void);
 };
 
 export const createIsKeyValid =

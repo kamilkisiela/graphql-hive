@@ -331,7 +331,7 @@ export async function main() {
           keyData: env.cdn.authPrivateKey,
           s3,
           getCache: () => null,
-          waitUntil: false,
+          waitUntil: null,
         }),
         async getArtifactAction(targetId, artifactType, eTag) {
           return artifactStorageReader.generateArtifactReadUrl(targetId, artifactType, eTag);
