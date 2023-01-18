@@ -48,6 +48,13 @@ function "image_tag" {
   result = notequal("", tag) ? "${DOCKER_REGISTRY}${name}:${tag}" : ""
 }
 
+target "migrations-base" {
+  dockerfile = "${PWD}/migrations.dockerfile"
+  args = {
+    RELEASE = "${RELEASE}"
+  }
+}
+
 target "service-base" {
   dockerfile = "${PWD}/services.dockerfile"
   args = {
@@ -144,11 +151,11 @@ target "server" {
 }
 
 target "storage" {
-  inherits = ["service-base", get_target()]
-  context = "${PWD}/packages/services/storage/dist"
+  inherits = ["migrations-base", get_target()]
+  context = "${PWD}/packages/migrations/migrations-artifact"
   args = {
     IMAGE_TITLE = "graphql-hive/storage"
-    IMAGE_DESCRIPTION = "The storage service of the GraphQL Hive project."
+    IMAGE_DESCRIPTION = "The migrations service of the GraphQL Hive project."
   }
   tags = [
     local_image_tag("storage"),

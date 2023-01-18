@@ -3,9 +3,20 @@ import path from 'node:path';
 import url from 'node:url';
 import { SlonikMigrator } from '@slonik/migrator';
 import { createPool } from 'slonik';
-import { createConnectionString } from '../src/db';
-import { env } from '../src/environment';
 import { migrateClickHouse } from './clickhouse';
+import { env } from './environment';
+
+export function createConnectionString(config: {
+  host: string;
+  port: number;
+  password: string;
+  user: string;
+  db: string;
+  ssl: boolean;
+}) {
+  // prettier-ignore
+  return `postgres://${config.user}:${config.password}@${config.host}:${config.port}/${config.db}${config.ssl ? '?sslmode=require' : '?sslmode=disable'}`;
+}
 
 const [, , cmd] = process.argv;
 const slonik = await createPool(createConnectionString(env.postgres));

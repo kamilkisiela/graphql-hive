@@ -15,7 +15,7 @@ services:
       POSTGRES_DB: registry
       PGDATA: /var/lib/postgresql/data
     volumes:
-      - ./volumes/postgresql/db:/var/lib/postgresql/data
+      - ./.hive-dev/postgresql/db:/var/lib/postgresql/data
     ports:
       - '5432:5432'
 
@@ -35,7 +35,7 @@ services:
     ports:
       - '6379:6379'
     volumes:
-      - './volumes/redis/db:/bitnami/redis/data'
+      - './.hive-dev/redis/db:/bitnami/redis/data'
 
   s3:
     image: quay.io/minio/minio:RELEASE.2022-11-29T23-40-49Z
@@ -77,8 +77,8 @@ services:
       timeout: 5s
       retries: 3
     volumes:
-      - ./volumes/clickhouse/logs:/var/log/clickhouse-server
-      - ./volumes/clickhouse/db:/var/lib/clickhouse
+      - ./.hive-dev/clickhouse/logs:/var/log/clickhouse-server
+      - ./.hive-dev/clickhouse/db:/var/lib/clickhouse
       - ./configs/clickhouse:/etc/clickhouse-server/conf.d
     ports:
       - '8123:8123'
@@ -110,7 +110,7 @@ services:
     mem_limit: 300m
     mem_reservation: 100m
     volumes:
-      - ./volumes/broker/db:/var/lib/redpanda/data
+      - ./.hive-dev/broker/db:/var/lib/kafka/data
 
   supertokens:
     image: registry.supertokens.io/supertokens/supertokens-postgresql:4.3

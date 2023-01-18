@@ -1,21 +1,12 @@
 lockfileVersion: 5.4
 
 patchedDependencies:
-  '@theguild/buddy@0.1.0':
-    hash: ryylgra5xglhidfoiaxehn22hq
-    path: patches/@theguild__buddy@0.1.0.patch
-  mjml-core@4.13.0:
-    hash: zxxsxbqejjmcwuzpigutzzq6wa
-    path: patches/mjml-core@4.13.0.patch
-  oclif@3.4.3:
-    hash: rxmtqiusuyruv7tkwux5gvotbm
-    path: patches/oclif@3.4.3.patch
   '@tgriesser/schemats@7.0.1':
     hash: u3kbucfchakklx3sci2vh6wjau
     path: patches/@tgriesser__schemats@7.0.1.patch
-  slonik@30.1.2:
-    hash: wg2hxbo7txnklmvja4aeqnygfi
-    path: patches/slonik@30.1.2.patch
+  '@theguild/buddy@0.1.0':
+    hash: ryylgra5xglhidfoiaxehn22hq
+    path: patches/@theguild__buddy@0.1.0.patch
   '@graphql-inspector/core@3.4.0':
     hash: tu4s2cjheabese6hdiqk5i3mii
     path: patches/@graphql-inspector__core@3.4.0.patch
@@ -25,6 +16,18 @@ patchedDependencies:
   bullmq@3.5.6:
     hash: xbmkiyyfti7h6orsfs6pdmi4s4
     path: patches/bullmq@3.5.6.patch
+  oclif@3.4.3:
+    hash: rxmtqiusuyruv7tkwux5gvotbm
+    path: patches/oclif@3.4.3.patch
+  mjml-core@4.13.0:
+    hash: zxxsxbqejjmcwuzpigutzzq6wa
+    path: patches/mjml-core@4.13.0.patch
+  '@slonik/migrator@0.8.5':
+    hash: yfpv2xzdmnkrtu2wvaktxf5mmq
+    path: patches/@slonik__migrator@0.8.5.patch
+  slonik@30.1.2:
+    hash: wg2hxbo7txnklmvja4aeqnygfi
+    path: patches/slonik@30.1.2.patch
 
 importers:
 
@@ -271,7 +274,7 @@ importers:
       '@graphql-codegen/typescript-graphql-request': 4.5.8_upqs5jjd3ykece5dxcsvdam2ju
       '@types/env-ci': 3.1.1
       '@types/mkdirp': 1.0.2
-      oclif: 3.4.3
+      oclif: 3.4.3_rxmtqiusuyruv7tkwux5gvotbm
 
   packages/libraries/client:
     specifiers:
@@ -327,6 +330,35 @@ importers:
       fastify: 3.29.4
       graphql: 16.6.0
     publishDirectory: dist
+
+  packages/migrations:
+    specifiers:
+      '@slonik/migrator': 0.8.5
+      '@types/node': 18.11.18
+      '@types/pg': 8.6.6
+      copyfiles: 2.4.1
+      dotenv: 16.0.3
+      got: 12.5.3
+      pg-promise: 10.15.4
+      slonik: 30.1.2
+      ts-node: 10.9.1
+      tslib: 2.4.1
+      typescript: 4.9.4
+      zod: 3.20.2
+    dependencies:
+      '@slonik/migrator': 0.8.5_yfpv2xzdmnkrtu2wvaktxf5mmq_slonik@30.1.2
+      dotenv: 16.0.3
+      got: 12.5.3
+      slonik: 30.1.2_wg2hxbo7txnklmvja4aeqnygfi
+      ts-node: 10.9.1_awa2wsr5thmg3i7jqycphctjfq
+      zod: 3.20.2
+    devDependencies:
+      '@types/node': 18.11.18
+      '@types/pg': 8.6.6
+      copyfiles: 2.4.1
+      pg-promise: 10.15.4
+      tslib: 2.4.1
+      typescript: 4.9.4
 
   packages/services/api:
     specifiers:
@@ -701,12 +733,10 @@ importers:
     specifiers:
       '@sentry/node': 7.30.0
       '@sentry/types': 7.30.0
-      '@slonik/migrator': 0.8.5
       '@tgriesser/schemats': 7.0.1
       '@theguild/buddy': 0.1.0
       '@types/node': 18.11.18
       '@types/pg': 8.6.6
-      copyfiles: 2.4.1
       dotenv: 16.0.3
       got: 12.5.3
       param-case: 3.0.4
@@ -714,13 +744,11 @@ importers:
       slonik: 30.1.2
       slonik-interceptor-query-logging: 1.4.7
       slonik-utilities: 1.9.4
-      ts-node: 10.9.1
       tslib: 2.4.1
       typescript: 4.9.4
       zod: 3.20.2
     dependencies:
       '@sentry/node': 7.30.0
-      '@slonik/migrator': 0.8.5_slonik@30.1.2
       '@theguild/buddy': 0.1.0_ryylgra5xglhidfoiaxehn22hq
       dotenv: 16.0.3
       got: 12.5.3
@@ -734,9 +762,7 @@ importers:
       '@tgriesser/schemats': 7.0.1_u3kbucfchakklx3sci2vh6wjau
       '@types/node': 18.11.18
       '@types/pg': 8.6.6
-      copyfiles: 2.4.1
       pg-promise: 10.15.4
-      ts-node: 10.9.1_awa2wsr5thmg3i7jqycphctjfq
       tslib: 2.4.1
       typescript: 4.9.4
 
@@ -10733,7 +10759,7 @@ packages:
       - debug
     dev: false
 
-  /@slonik/migrator/0.8.5_slonik@30.1.2:
+  /@slonik/migrator/0.8.5_yfpv2xzdmnkrtu2wvaktxf5mmq_slonik@30.1.2:
     resolution: {integrity: sha512-EqX2/n75oLPuf8E6595oxz4nsmEQ0AWpBPmbBjTmDS2AI0nXo5ED22objFGFHQ7Qy8k0Xja+BgDrIxgnHZNv7w==}
     peerDependencies:
       slonik: '>= 23.0.0 < 24'
@@ -10741,6 +10767,7 @@ packages:
       slonik: 30.1.2_wg2hxbo7txnklmvja4aeqnygfi
       umzug: 3.0.0-beta.15
     dev: false
+    patched: true
 
   /@stripe/react-stripe-js/1.16.3_keartrz7uyerl3wkpjpue4xbhy:
     resolution: {integrity: sha512-gS6UDGEuM92K50pFB3o//EqqPxmaqpC8IrsBda4P4LxeULoO0pBFSHXJ5Ab6uA7G2lyO2bluvSLereh0OH9GrQ==}
@@ -15739,7 +15766,7 @@ packages:
     dependencies:
       fast-glob: 3.2.12
       postcss: 8.4.20
-      tailwindcss: 3.2.4_ts-node@10.9.1
+      tailwindcss: 3.2.4_ra2vnoek4vhbzktaezawwqbin4
     transitivePeerDependencies:
       - ts-node
     dev: true
@@ -21863,7 +21890,7 @@ packages:
     resolution: {integrity: sha512-PX1wu0AmAdPqOL1mWhqmlOd8kOIZQwGZw6rh7uby9fTc5lhaOWFLX3I6R1hrF9k3zUY40e6igsLGkDXK92LJNg==}
     dev: false
 
-  /oclif/3.4.3:
+  /oclif/3.4.3_rxmtqiusuyruv7tkwux5gvotbm:
     resolution: {integrity: sha512-Kg8ezSJvDluazG6eyN+TeoryaFn3i9utKVty2hy6I0FUy6QcPnbl8+MCha4Jwc+x5+pA46Tu0n2cnjUcWqp56w==}
     engines: {node: '>=12.0.0'}
     hasBin: true
@@ -21891,6 +21918,7 @@ packages:
       - encoding
       - supports-color
     dev: true
+    patched: true
 
   /on-exit-leak-free/2.1.0:
     resolution: {integrity: sha512-VuCaZZAjReZ3vUwgOB8LxAosIurDiAW0s13rI1YwmaP++jvcxP77AWoQvenZebpCA2m8WC1/EosPYPMjnRAp/w==}
@@ -25636,10 +25664,12 @@ packages:
       - ts-node
     dev: true
 
-  /tailwindcss/3.2.4_ts-node@10.9.1:
+  /tailwindcss/3.2.4_ra2vnoek4vhbzktaezawwqbin4:
     resolution: {integrity: sha512-AhwtHCKMtR71JgeYDaswmZXhPcW9iuI9Sp2LvZPo9upDZ7231ZJ7eA9RaURbhpXGVlrjX4cFNlB4ieTetEb7hQ==}
     engines: {node: '>=12.13.0'}
     hasBin: true
+    peerDependencies:
+      postcss: ^8.0.9
     dependencies:
       arg: 5.0.2
       chokidar: 3.5.3
@@ -26068,7 +26098,7 @@ packages:
       typescript: 4.9.4
       v8-compile-cache-lib: 3.0.1
       yn: 3.1.1
-    dev: true
+    dev: false
 
   /ts-node/10.9.1_wiov2xnxutssp33bmsvup4kx3q:
     resolution: {integrity: sha512-NtVysVPkxxrwFGUUxGYhfux8k78pQB3JqYBXlLRZgdGUqTO5wU/UyHop5p70iEbGhB7q5KmiZiU0Y3KlJrScEw==}
@@ -26202,7 +26232,7 @@ packages:
       smartwrap: 2.0.2
       strip-ansi: 6.0.1
       wcwidth: 1.0.1
-      yargs: 17.6.0
+      yargs: 17.6.2
     dev: true
 
   /tunnel-agent/0.6.0:
@@ -26382,7 +26412,6 @@ packages:
     resolution: {integrity: sha512-Uz+dTXYzxXXbsFpM86Wh3dKCxrQqUcVMxwU54orwlJjOpO3ao8L7j5lH+dWfTwgCwIuM9GQ2kvVotzYJMXTBZg==}
     engines: {node: '>=4.2.0'}
     hasBin: true
-    dev: true
 
   /ua-parser-js/0.7.31:
     resolution: {integrity: sha512-qLK/Xe9E2uzmYI3qLeOmI0tEOt+TBBQyUIAh4aAgU05FVYzeZrKUdkAZfBNVGRaHVgV0TDkdEngJSw/SyQchkQ==}
