@@ -82,7 +82,6 @@ fragment UserFields on User {
 
 fragment OperationStatsFields on OperationStats {
   id
-  document
   operationHash
   name
   kind

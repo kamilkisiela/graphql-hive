@@ -67,6 +67,25 @@ export class OperationsManager {
     this.logger = logger.child({ source: 'OperationsManager' });
   }
 
+  async getOperationBody({
+    organization,
+    project,
+    target,
+    hash,
+  }: { hash: string } & TargetSelector) {
+    await this.authManager.ensureTargetAccess({
+      organization,
+      project,
+      target,
+      scope: TargetAccessScope.REGISTRY_READ,
+    });
+
+    return await this.reader.readOperationBody({
+      target,
+      hash,
+    });
+  }
+
   async countUniqueOperations({
     organization,
     project,
@@ -82,13 +101,11 @@ export class OperationsManager {
       scope: TargetAccessScope.REGISTRY_READ,
     });
 
-    return (
-      await this.reader.countUniqueDocuments({
-        target,
-        period,
-        operations,
-      })
-    ).length;
+    return await this.reader.countUniqueDocuments({
+      target,
+      period,
+      operations,
+    });
   }
 
   async hasCollectedOperations({ organization, project, target }: TargetSelector) {
@@ -272,7 +289,8 @@ export class OperationsManager {
       scope: TargetAccessScope.REGISTRY_READ,
     });
 
-    return this.reader.countUniqueDocuments({
+    // Maybe it needs less data
+    return this.reader.readUniqueDocuments({
       target,
       period,
       operations,
