@@ -3,8 +3,7 @@ import { AppProps } from 'next/app';
 import Router from 'next/router';
 import Script from 'next/script';
 import { ChakraProvider, extendTheme } from '@chakra-ui/react';
-import { configureScope } from '@sentry/nextjs';
-import * as Sentry from '@sentry/react';
+import * as Sentry from '@sentry/nextjs';
 import cookies from 'js-cookie';
 import SuperTokens, { SuperTokensWrapper } from 'supertokens-auth-react';
 import Session from 'supertokens-auth-react/recipe/session';
@@ -41,7 +40,7 @@ function pushIfNotEmpty(crisp: any, key: string, value: string | undefined | nul
 }
 
 function identifyOnSentry(userId: string, email: string): void {
-  configureScope(scope => {
+  Sentry.configureScope(scope => {
     scope.setUser({ id: userId, email });
   });
 }

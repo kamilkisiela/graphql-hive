@@ -47,6 +47,7 @@ export function deployDbMigrations({
         CLICKHOUSE_PASSWORD: clickhouse.config.password,
         CLICKHOUSE_PROTOCOL: clickhouse.config.protocol,
         KAFKA_BROKER: kafka.config.endpoint,
+        TS_NODE_TRANSPILE_ONLY: 'true',
         ...deploymentEnv,
       },
     },

@@ -6,7 +6,7 @@
   "scripts": {
     "build": "bob runify --single",
     "dev": "next",
-    "postbuild": "pnpm --filter @hive/docs deploy dist/deploy && rimraf dist/node_modules && mv dist/deploy/node_modules dist && rimraf dist/deploy",
+    "postbuild": "pnpm --filter @hive/docs deploy --prod --no-optional dist/docs && rimraf dist/node_modules && mv dist/docs/node_modules dist && rimraf dist/docs",
     "start": "next start"
   },
   "dependencies": {
@@ -14,12 +14,12 @@
     "next": "13.1.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "tailwindcss": "3.2.4",
     "zod": "3.20.2"
   },
   "devDependencies": {
     "@theguild/tailwind-config": "0.2.1",
-    "@types/react": "18.0.26",
-    "tailwindcss": "3.2.4"
+    "@types/react": "18.0.26"
   },
   "buildOptions": {
     "runify": true,
