@@ -1,4 +1,5 @@
 import { Callout, PackageCmd } from '@theguild/components'
+import { Tab, Tabs } from 'nextra-theme-docs'
 
 # Monitoring Operations
 
@@ -74,15 +75,45 @@ GraphQL Hive ships a custom version of [Apollo Router](https://www.apollographql
 The reason is that in order to extend Apollo Router, we need to write
 [a native Rust plugin](https://www.apollographql.com/docs/router/customizations/native).
 
-Download Apollo Router for Linux (x86_64), MacOS (x86_64) or Windows (x86_64):
+<Tabs items={['Binary', 'Docker']}>
+  <Tab>
+    Download Apollo Router for Linux (x86_64), MacOS (x86_64) or Windows (x86_64):
 
-```bash
-curl -fsSL https://graphql-hive.com/apollo-router-download.sh | bash
-```
+    ```bash
+    curl -fsSL https://graphql-hive.com/apollo-router-download.sh | bash
+    ```
 
-Write `router.yaml` file and enable `hive.usage` plugin:
+    To start the router:
+
+    ```bash
+    HIVE_TOKEN="your-token" ./router --config router.yaml
+    ```
+
+  </Tab>
+
+  <Tab>
+    To start the router:
+    
+    ```bash
+    docker run -p 4000:4000 \
+    --env HIVE_CDN_ENDPOINT="..." \
+    --env HIVE_CDN_KEY="..." \
+    --env HIVE_TOKEN="..." \
+    --mount "type=bind,source=/home/usr/src/hive/router.yaml,target=/dist/config/router.yaml" \
+    --rm \
+    ghcr.io/kamilkisiela/graphql-hive/apollo-router:latest
+    ```
+
+    To follow the same convention as Apollo Router's official Docker image, the config file is also located at `/dist/config/router.yaml`.
+
+  </Tab>
+</Tabs>
+
+In order to enable Usage Reporting, write a `router.yaml` file and enable `hive.usage` plugin:
 
 ```yaml
+supergraph:
+  listen: 0.0.0.0:4000
 plugins:
   hive.usage:
     {}
@@ -106,12 +137,6 @@ plugins:
 ```
 
 You can also enable other feautes like sampling.
-
-Now, start the router:
-
-```bash
-HIVE_TOKEN="your-token" ./router --config router.yaml
-```
 
 If everything worked correctly, you should see the first operations in GraphQL Hive in 1-2 minutes.
 

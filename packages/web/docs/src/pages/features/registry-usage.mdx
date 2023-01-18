@@ -1,3 +1,5 @@
+import { Tab, Tabs } from 'nextra-theme-docs'
+
 # Using Registry
 
 ## CDN Access
@@ -56,17 +58,44 @@ GraphQL Hive ships a custom version of [Apollo Router](https://www.apollographql
 The reason is that in order to extend Apollo Router, we need to write
 [a native Rust plugin](https://www.apollographql.com/docs/router/customizations/native).
 
-Download Apollo Router for Linux (x86_64), MacOS (x86_64) or Windows (x86_64):
+<Tabs items={['Binary', 'Docker']}>
+  <Tab>
+    Download Apollo Router for Linux (x86_64), MacOS (x86_64) or Windows (x86_64):
 
-```bash
-curl -fsSL https://graphql-hive.com/apollo-router-download.sh | bash
-```
+    ```bash
+    curl -fsSL https://graphql-hive.com/apollo-router-download.sh | bash
+    ```
 
-Start the router:
+    Start the router:
 
-```bash
-HIVE_CDN_ENDPOINT="..." HIVE_CDN_KEY="..." ./router
-```
+    ```bash
+    HIVE_CDN_ENDPOINT="..." HIVE_CDN_KEY="..." ./router
+    ```
+
+  </Tab>
+  <Tab>
+      Running Apollo Router with GraphQL Hive's Schema Registry:
+
+      ```bash
+      docker run -p 4000:4000 \
+        --env HIVE_CDN_ENDPOINT="..." \
+        --env HIVE_CDN_KEY="..." \
+        --rm \
+        ghcr.io/kamilkisiela/graphql-hive/apollo-router:latest
+      ```
+
+      Passing command-line arguments:
+
+      ```bash
+      docker run -p 4000:4000 \
+        --env HIVE_CDN_ENDPOINT="..." \
+        --env HIVE_CDN_KEY="..." \
+        --rm \
+        ghcr.io/kamilkisiela/graphql-hive/apollo-router:latest --log debug
+      ```
+
+  </Tab>
+</Tabs>
 
 - `HIVE_CDN_ENDPOINT` - the endpoint Hive generated for you in the previous step
 - `HIVE_CDN_KEY` - the access key
