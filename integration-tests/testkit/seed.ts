@@ -25,6 +25,7 @@ import {
   inviteToOrganization,
   joinOrganization,
   publishSchema,
+  readOperationBody,
   readOperationsStats,
   readTokenInfo,
   schemaSyncCDN,
@@ -32,7 +33,6 @@ import {
   updateBaseSchema,
   updateMemberAccess,
   updateSchemaVersionStatus,
-  readOperationBody,
 } from './flow';
 import { execute } from './graphql';
 import { collect, CollectedOperation } from './usage';
