@@ -300,9 +300,76 @@ export class OperationsReader {
       operations?: readonly string[];
     },
     span?: Span,
+  ): Promise<number> {
+    const query = pickQueryByPeriod(
+      {
+        daily: {
+          query: `
+            SELECT count(distinct hash) as total
+            FROM operations_daily
+            ${this.createFilter({
+              target,
+              period,
+              operations,
+            })}
+          `,
+          queryId: 'count_unique_documents_daily',
+          timeout: 10_000,
+          span,
+        },
+        hourly: {
+          query: `
+            SELECT count(distinct hash) as total
+            FROM operations_hourly
+            ${this.createFilter({
+              target,
+              period,
+              operations,
+            })}
+          `,
+          queryId: 'count_unique_documents_hourly',
+          timeout: 15_000,
+          span,
+        },
+        regular: {
+          query: `
+            SELECT count(distinct hash) as total
+            FROM operations
+            ${this.createFilter({
+              target,
+              period,
+              operations,
+            })}
+          `,
+          queryId: 'count_unique_documents',
+          timeout: 15_000,
+          span,
+        },
+      },
+      period,
+    );
+
+    const result = await this.clickHouse.query<{
+      total: string;
+    }>(query);
+
+    return result.data.length ? parseInt(result.data[0].total, 10) : 0;
+  }
+
+  @sentry('OperationsReader.readUniqueDocuments')
+  async readUniqueDocuments(
+    {
+      target,
+      period,
+      operations,
+    }: {
+      target: string;
+      period: DateRange;
+      operations?: readonly string[];
+    },
+    span?: Span,
   ): Promise<
     Array<{
-      document: string;
       operationHash?: string;
       operationName: string;
       kind: string;
@@ -324,7 +391,7 @@ export class OperationsReader {
             })}
             GROUP BY hash
           `,
-          queryId: 'count_unique_documents_daily',
+          queryId: 'read_unique_documents_daily',
           timeout: 10_000,
           span,
         },
@@ -342,7 +409,7 @@ export class OperationsReader {
             })}
             GROUP BY hash
           `,
-          queryId: 'count_unique_documents_hourly',
+          queryId: 'read_unique_documents_hourly',
           timeout: 15_000,
           span,
         },
@@ -357,7 +424,7 @@ export class OperationsReader {
             })}
             GROUP BY hash
           `,
-          queryId: 'count_unique_documents',
+          queryId: 'read_unique_documents',
           timeout: 15_000,
           span,
         },
@@ -365,36 +432,36 @@ export class OperationsReader {
       period,
     );
 
-    const result = await this.clickHouse.query<{
-      total: string;
-      totalOk: string;
-      hash: string;
-    }>(query);
-    const total = result.data.reduce((sum, row) => sum + parseInt(row.total, 10), 0);
+    const [operationsResult, registryResult] = await Promise.all([
+      this.clickHouse.query<{
+        total: string;
+        totalOk: string;
+        hash: string;
+      }>(query),
+      this.clickHouse.query<{
+        name?: string;
+        hash: string;
+        operation_kind: string;
+      }>({
+        query: `
+          SELECT 
+            name,
+            hash,
+            operation_kind
+          FROM operation_collection
+            ${this.createFilter({
+              target,
+              operations,
+              period,
+            })}
+          GROUP BY name, hash, operation_kind`,
+        queryId: 'operations_registry',
+        timeout: 15_000,
+        span,
+      }),
+    ]);
 
-    const registryResult = await this.clickHouse.query<{
-      name?: string;
-      body: string;
-      hash: string;
-      operation_kind: string;
-    }>({
-      query: `
-        SELECT 
-          name,
-          body,
-          hash,
-          operation_kind
-        FROM operation_collection
-          ${this.createFilter({
-            target,
-            operations,
-            period,
-          })}
-        GROUP BY name, body, hash, operation_kind`,
-      queryId: 'operations_registry',
-      timeout: 15_000,
-      span,
-    });
+    const total = operationsResult.data.reduce((sum, row) => sum + parseInt(row.total, 10), 0);
 
     const operationsMap = new Map<string, RowOf<typeof registryResult>>();
 
@@ -402,18 +469,16 @@ export class OperationsReader {
       operationsMap.set(row.hash, row);
     }
 
-    return result.data.map(row => {
+    return operationsResult.data.map(row => {
       const rowTotal = parseInt(row.total, 10);
       const rowTotalOk = parseInt(row.totalOk, 10);
       const op = operationsMap.get(row.hash);
-      const { name, body, operation_kind } = op ?? {
+      const { name, operation_kind } = op ?? {
         name: 'missing',
-        body: 'missing',
         operation_kind: 'missing',
       };
 
       return {
-        document: body,
         operationName: `${row.hash.substr(0, 4)}_${name ?? 'anonymous'}`,
         operationHash: row.hash,
         kind: operation_kind,
@@ -422,6 +487,38 @@ export class OperationsReader {
         percentage: (rowTotal / total) * 100,
       };
     });
+  }
+
+  @sentry('OperationsReader.readOperationBody')
+  async readOperationBody(
+    {
+      target,
+      hash,
+    }: {
+      target: string;
+      hash: string;
+    },
+    span?: Span,
+  ) {
+    const result = await this.clickHouse.query<{
+      body: string;
+    }>({
+      query: `
+        SELECT 
+          body
+        FROM operation_collection
+          ${this.createFilter({
+            target,
+            extra: [`hash = '${hash}'`],
+          })}
+        LIMIT 1
+      `,
+      queryId: 'read_body',
+      timeout: 10_000,
+      span,
+    });
+
+    return result.data.length ? result.data[0].body : null;
   }
 
   @sentry('OperationsReader.countUniqueClients')

@@ -7,6 +7,7 @@ export default gql`
     operationsStats(selector: OperationsStatsSelectorInput!): OperationsStats!
     hasCollectedOperations(selector: TargetSelectorInput!): Boolean!
     clientStatsByTargets(selector: ClientStatsByTargetsInput!): ClientStatsConnection!
+    operationBodyByHash(selector: OperationBodyByHashInput!): String
   }
 
   input OperationsStatsSelectorInput {
@@ -15,6 +16,13 @@ export default gql`
     target: ID!
     period: DateRangeInput!
     operations: [ID!]
+  }
+
+  input OperationBodyByHashInput {
+    organization: ID!
+    project: ID!
+    target: ID!
+    hash: String!
   }
 
   input ClientStatsByTargetsInput {
@@ -100,7 +108,6 @@ export default gql`
 
   type OperationStats {
     id: ID!
-    document: String!
     operationHash: String
     kind: String!
     name: String!

@@ -1,3 +1,4 @@
+import { OperationBodyByHashInput } from './../../packages/web/app/src/graphql/index';
 import { gql } from '@app/gql';
 import { fetch } from '@whatwg-node/fetch';
 import type {
@@ -686,7 +687,6 @@ export function readOperationsStats(input: OperationsStatsSelectorInput, token: 
           operations {
             nodes {
               id
-              document
               operationHash
               kind
               name
@@ -706,6 +706,20 @@ export function readOperationsStats(input: OperationsStatsSelectorInput, token: 
     token,
     variables: {
       input,
+    },
+  });
+}
+
+export function readOperationBody(selector: OperationBodyByHashInput, token: string) {
+  return execute({
+    document: gql(/* GraphQL */ `
+      query readOperationBody($selector: OperationBodyByHashInput!) {
+        operationBodyByHash(selector: $selector)
+      }
+    `),
+    token,
+    variables: {
+      selector,
     },
   });
 }

@@ -32,6 +32,7 @@ import {
   updateBaseSchema,
   updateMemberAccess,
   updateSchemaVersionStatus,
+  readOperationBody,
 } from './flow';
 import { execute } from './graphql';
 import { collect, CollectedOperation } from './usage';
@@ -199,6 +200,19 @@ export function initSeed() {
                   return {
                     token,
                     secret,
+                    async readOperationBody(hash: string) {
+                      const operationBodyResult = await readOperationBody(
+                        {
+                          organization: organization.cleanId,
+                          project: project.cleanId,
+                          target: target.cleanId,
+                          hash,
+                        },
+                        secret,
+                      ).then(r => r.expectNoGraphQLErrors());
+
+                      return operationBodyResult.operationBodyByHash;
+                    },
                     async readOperationsStats(from: string, to: string) {
                       const statsResult = await readOperationsStats(
                         {

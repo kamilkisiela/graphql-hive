@@ -101,7 +101,7 @@ test.concurrent('collect operation', async () => {
   const op = operationsStats.operations.nodes[0];
 
   expect(op.count).toEqual(1);
-  expect(op.document).toMatch('ping');
+  await expect(writeToken.readOperationBody(op.operationHash!)).resolves.toEqual('ping');
   expect(op.operationHash).toBeDefined();
   expect(op.duration.p75).toEqual(200);
   expect(op.duration.p90).toEqual(200);
@@ -213,10 +213,17 @@ test.concurrent('normalize and collect operation without breaking its syntax', a
 
   const op = operationsStats.operations.nodes[0];
   expect(op.count).toEqual(1);
+
+  const doc = await writeToken.readOperationBody(op.operationHash!);
+
+  if (!doc) {
+    throw new Error('Operation body is empty');
+  }
+
   expect(() => {
-    parse(op.document);
+    parse(doc);
   }).not.toThrow();
-  expect(print(parse(op.document))).toEqual(print(parse(normalized_document)));
+  expect(print(parse(doc))).toEqual(print(parse(normalized_document)));
   expect(op.operationHash).toBeDefined();
   expect(op.duration.p75).toEqual(200);
   expect(op.duration.p90).toEqual(200);
@@ -273,7 +280,7 @@ test.concurrent(
 
     const op = operationsStats.operations.nodes[0];
     expect(op.count).toEqual(totalAmount);
-    expect(op.document).toMatch('ping');
+    await expect(writeToken.readOperationBody(op.operationHash!)).resolves.toEqual('ping');
     expect(op.operationHash).toBeDefined();
     expect(op.duration.p75).toEqual(200);
     expect(op.duration.p90).toEqual(200);

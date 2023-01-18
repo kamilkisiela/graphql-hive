@@ -106,6 +106,21 @@ export const resolvers: OperationsModule.Resolvers = {
         };
       });
     },
+    async operationBodyByHash(_, { selector }, { injector }) {
+      const translator = injector.get(IdTranslator);
+      const [organization, project, target] = await Promise.all([
+        translator.translateOrganizationId(selector),
+        translator.translateProjectId(selector),
+        translator.translateTargetId(selector),
+      ]);
+
+      return injector.get(OperationsManager).getOperationBody({
+        organization,
+        project,
+        target,
+        hash: selector.hash,
+      });
+    },
   },
   OperationsStats: {
     async operations(
@@ -134,9 +149,8 @@ export const resolvers: OperationsModule.Resolvers = {
       return operations
         .map(op => {
           return {
-            id: hash(`${op.operationName}__${op.document}`),
+            id: hash(`${op.operationName}__${op.operationHash!}`),
             kind: op.kind,
-            document: op.document,
             name: op.operationName,
             count: op.count,
             countOk: op.countOk,
