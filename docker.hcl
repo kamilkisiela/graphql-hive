@@ -69,6 +69,13 @@ target "app-base" {
   }
 }
 
+target "router-base" {
+  dockerfile = "${PWD}/router.dockerfile"
+  args = {
+    RELEASE = "${RELEASE}"
+  }
+}
+
 target "target-dev" {}
 
 target "target-ci" {
@@ -316,6 +323,22 @@ target "docs" {
   ]
 }
 
+target "apollo-router" {
+  inherits = ["router-base", get_target()]
+  context = "${PWD}/packages/libraries/router"
+  args = {
+    IMAGE_TITLE = "graphql-hive/apollo-router"
+    PORT = "4000"
+    IMAGE_DESCRIPTION = "Apollo Router for GraphQL Hive."
+  }
+  tags = [
+    local_image_tag("apollo-router"),
+    stable_image_tag("apollo-router"),
+    image_tag("apollo-router", COMMIT_SHA),
+    image_tag("apollo-router", BRANCH_NAME)
+  ]
+}
+
 group "build" {
   targets = [
     "emails",
@@ -348,5 +371,11 @@ group "integration-tests" {
     "webhooks",
     "server",
     "composition-federation-2"
+  ]
+}
+
+group "rust" {
+  targets = [
+    "apollo-router"
   ]
 }

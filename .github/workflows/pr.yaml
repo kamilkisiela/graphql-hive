@@ -23,11 +23,6 @@ jobs:
     secrets:
       hiveToken: ${{ secrets.HIVE_TOKEN }}
 
-  # Unit tests using Jest
-  build-rust:
-    name: build
-    uses: ./.github/workflows/build-rust.yaml
-
   # Build all packages and applications, and creates Docker images
   build:
     name: build
@@ -36,6 +31,20 @@ jobs:
       dockerize: ${{ !github.event.pull_request.head.repo.fork }}
       imageTag: ${{ github.event.pull_request.head.sha }}
       publishLatest: false
+      targets: 'build'
+    secrets: inherit
+
+  # Builds Rust crates, and creates Docker images
+  build-rust:
+    name: build_rust
+    uses: ./.github/workflows/build-and-dockerize.yaml
+    with:
+      dockerize: ${{ !github.event.pull_request.head.repo.fork }}
+      imageTag: ${{ github.event.pull_request.head.sha }}
+      publishLatest: false
+      targets: 'rust'
+      build: false
+      publishPrComment: false
     secrets: inherit
 
   # Unit tests using Jest

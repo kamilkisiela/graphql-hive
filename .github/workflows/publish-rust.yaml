@@ -20,61 +20,6 @@ jobs:
               echo 'rust_changed=true' >> $GITHUB_OUTPUT
           fi
 
-  publish_rust_docker:
-    needs: publish_rust
-    if: needs.publish_rust.outputs.rust_changed == 'true'
-    name: docker
-    runs-on: ubuntu-22.04
-
-    env:
-      REGISTRY: ghcr.io
-      IMAGE_NAME: ${{ github.repository }}/apollo-router
-
-    permissions:
-      contents: read
-      packages: write
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-        with:
-          platforms: 'linux/arm64,linux/amd64'
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Login to registry
-        uses: docker/login-action@v2
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract metadata (tags, labels)
-        id: router-extract
-        uses: docker/metadata-action@v4
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=ref,event=branch
-            type=sha,prefix=,format=long
-            type=raw,value=latest,enable={{is_default_branch}}
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v3
-        with:
-          platforms: linux/amd64,linux/arm64
-          file: packages/libraries/router/Dockerfile
-          context: .
-          push: true
-          tags: ${{ steps.router-extract.outputs.tags }}
-          labels: ${{ steps.router-extract.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
   publish_rust_windows:
     needs: publish_rust
     if: needs.publish_rust.outputs.rust_changed == 'true'

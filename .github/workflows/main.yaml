@@ -12,9 +12,12 @@ jobs:
       imageTag: ${{ github.sha }}
       publishSourceMaps: true
       publishLatest: true
+      targets: |
+        build
+        rust
     secrets: inherit
 
-  # Build and publish Rust packages.
+  # Build and publish Rust crates and binaries
   rust:
     uses: ./.github/workflows/publish-rust.yaml
     secrets: inherit
