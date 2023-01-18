@@ -6,7 +6,7 @@
   "scripts": {
     "build": "bob runify --single",
     "dev": "next",
-    "postbuild": "pnpm --filter @hive/docs deploy dist/deploy && rimraf dist/node_modules && mv dist/deploy/node_modules dist && rimraf dist/deploy",
+    "postbuild": "pnpm --filter @hive/docs deploy --prod --no-optional dist/docs && rimraf dist/node_modules && mv dist/docs/node_modules dist && rimraf dist/docs",
     "start": "next start"
   },
   "dependencies": {

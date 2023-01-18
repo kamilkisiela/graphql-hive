@@ -10,8 +10,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@sentry/node": "7.30.0",
-    "@sentry/tracing": "7.30.0",
+    "@sentry/node": "7.31.1",
+    "@sentry/tracing": "7.31.1",
     "@trpc/client": "10.9.0",
     "@trpc/server": "10.9.0",
     "@whatwg-node/fetch": "0.6.2",
