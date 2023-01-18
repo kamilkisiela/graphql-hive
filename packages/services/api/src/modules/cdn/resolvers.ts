@@ -33,4 +33,20 @@ export const resolvers: CdnModule.Resolvers = {
       return cdn.isEnabled();
     },
   },
+  Target: {
+    async cdnTokens(target, args, context) {
+      const result = await context.injector.get(CdnProvider).getPaginatedCDNTokens({
+        targetId: target.id,
+        projectId: target.projectId,
+        organizationId: target.orgId,
+        first: args.first ?? null,
+        cursor: args.after ?? null,
+      });
+
+      return {
+        edges: result.items,
+        pageInfo: result.pageInfo,
+      };
+    },
+  },
 };

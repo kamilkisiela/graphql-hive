@@ -1,6 +1,7 @@
-import { createHmac } from 'crypto';
 import bcryptjs from 'bcryptjs';
+import { GraphQLError } from 'graphql';
 import { Inject, Injectable, Scope } from 'graphql-modules';
+import { encodeCdnToken, generatePrivateKey } from '@hive/cdn-script/cdn-token';
 import type { Span } from '@sentry/types';
 import { crypto } from '@whatwg-node/fetch';
 import { HiveError } from '../../../shared/errors';
@@ -14,6 +15,8 @@ import { Storage } from '../../shared/providers/storage';
 import { CDN_CONFIG, type CDNConfig } from './tokens';
 
 type CdnResourceType = 'schema' | 'supergraph' | 'metadata';
+
+const s3KeyPrefix = 'cdn-keys';
 
 @Injectable({
   scope: Scope.Operation,
@@ -53,48 +56,22 @@ export class CdnProvider {
   }
 
   async generateCdnAccess(args: { organizationId: string; projectId: string; targetId: string }) {
-    await this.authManager.ensureTargetAccess({
-      organization: args.organizationId,
-      project: args.projectId,
-      target: args.targetId,
-      scope: TargetAccessScope.REGISTRY_READ,
+    const result = await this.createCDNToken({
+      organizationId: args.organizationId,
+      projectId: args.projectId,
+      targetId: args.targetId,
     });
 
-    const token = this.legacy_generateToken(args.targetId);
-    const tokenHash = await bcryptjs.hash(token, await bcryptjs.genSalt());
-    const url = this.getCdnUrlForTarget(args.targetId);
-
-    const s3Key = `cdn-legacy-keys/${args.targetId}`;
-
-    const s3Url = [this.s3Config.endpoint, this.s3Config.bucket, s3Key].join('/');
-    const response = await this.s3Config.client.fetch(s3Url, {
-      method: 'PUT',
-      body: tokenHash,
-    });
-
-    if (response.status !== 200) {
-      throw new Error(`Unexpected Status for storing key. (status=${response.status})`);
+    if (result.type === 'failure') {
+      throw new GraphQLError(result.reason);
     }
 
-    await this.storage.createCDNAccessToken({
-      id: crypto.randomUUID(),
-      targetId: args.targetId,
-      s3Key,
-      firstCharacters: token.substring(0, 3),
-      lastCharacters: token.substring(token.length - 3),
-      alias: 'CDN Access Token',
-    });
+    const url = this.getCdnUrlForTarget(args.targetId);
 
     return {
-      token,
+      token: result.cdnAccessTokenKey,
       url,
     };
-  }
-
-  private legacy_generateToken(targetId: string): string {
-    return createHmac('sha256', this.secretKeyData)
-      .update(this.encoder.encode(targetId))
-      .digest('base64');
   }
 
   async pushToCloudflareCDN(url: string, body: string, span?: Span): Promise<{ success: boolean }> {
@@ -160,5 +137,132 @@ export class CdnProvider {
       `Published to CDN based on target: "${target}", resourceType is: ${resourceType} is done, response: %o`,
       result,
     );
+  }
+
+  async createCDNToken(args: { organizationId: string; projectId: string; targetId: string }) {
+    await this.authManager.ensureTargetAccess({
+      organization: args.organizationId,
+      project: args.projectId,
+      target: args.targetId,
+      scope: TargetAccessScope.READ,
+    });
+
+    // generate all things upfront so we do net get surprised by encoding issues after writing to the destination.
+    const keyId = crypto.randomUUID();
+    const s3Key = `${s3KeyPrefix}/${args.targetId}/${keyId}`;
+    const privateKey = generatePrivateKey();
+    const privateKeyHash = await bcryptjs.hash(privateKey, await bcryptjs.genSalt());
+    const cdnAccessToken = encodeCdnToken({ targetId: args.targetId, keyId, privateKey });
+
+    // Check if key already exists
+    const headResponse = await this.s3Config.client.fetch(
+      [this.s3Config.endpoint, this.s3Config.bucket, s3Key].join('/'),
+      {
+        method: 'HEAD',
+      },
+    );
+
+    if (headResponse.status !== 404) {
+      return {
+        type: 'failure',
+        reason: 'Failed to generate key. Please try again later. 1',
+      } as const;
+    }
+
+    // put key onto s3 bucket
+    const putResponse = await this.s3Config.client.fetch(
+      [this.s3Config.endpoint, this.s3Config.bucket, s3Key].join('/'),
+      {
+        method: 'PUT',
+        body: privateKeyHash,
+      },
+    );
+
+    if (putResponse.status !== 200) {
+      return {
+        type: 'failure',
+        reason: 'Failed to generate key. Please try again later. 2',
+      } as const;
+    }
+
+    const cdnAccessTokenRecord = await this.storage.createCDNAccessToken({
+      id: keyId,
+      targetId: args.targetId,
+      firstCharacters: cdnAccessToken.substring(0, 3),
+      lastCharacters: cdnAccessToken.substring(cdnAccessToken.length - 3, cdnAccessToken.length),
+      s3Key,
+      alias: 'CDN Access Token',
+    });
+
+    return {
+      type: 'success',
+      cdnAccessToken: cdnAccessTokenRecord,
+      cdnAccessTokenKey: cdnAccessToken,
+    } as const;
+  }
+
+  public async deleteCDNToken(args: {
+    organizationId: string;
+    projectId: string;
+    targetId: string;
+    cdnAccessTokenId: string;
+  }) {
+    await this.authManager.ensureTargetAccess({
+      organization: args.organizationId,
+      project: args.projectId,
+      target: args.targetId,
+      scope: TargetAccessScope.SETTINGS,
+    });
+
+    // TODO: this should probably happen within a db transaction to ensure integrity
+    const record = await this.storage.getCDNAccessTokenById({
+      cdnAccessTokenId: args.cdnAccessTokenId,
+    });
+
+    if (record === null) {
+      return {
+        type: 'success',
+      };
+    }
+
+    const headResponse = await this.s3Config.client.fetch(
+      [this.s3Config.endpoint, record.s3Key].join('/'),
+      {
+        method: 'DELETE',
+      },
+    );
+
+    if (headResponse.status !== 204) {
+      return;
+    }
+
+    await this.storage.deleteCDNAccessToken({ cdnAccessTokenId: args.cdnAccessTokenId });
+
+    return {
+      type: 'success',
+    } as const;
+  }
+
+  public async getPaginatedCDNTokens(args: {
+    organizationId: string;
+    projectId: string;
+    targetId: string;
+    first: number | null;
+    cursor: string | null;
+  }) {
+    await this.authManager.ensureTargetAccess({
+      organization: args.organizationId,
+      project: args.projectId,
+      target: args.targetId,
+      scope: TargetAccessScope.SETTINGS,
+    });
+
+    const paginatedResult = await this.storage.getPaginatedCDNAccessTokensForTarget({
+      targetId: args.targetId,
+      first: args.first,
+      cursor: args.cursor,
+    });
+
+    return paginatedResult;
   }
 }

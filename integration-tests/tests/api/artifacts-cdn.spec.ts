@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import { ApolloGateway } from '@apollo/gateway';
 import { ApolloServer } from '@apollo/server';
@@ -7,10 +8,13 @@ import {
   DeleteObjectsCommand,
   GetObjectCommand,
   ListObjectsCommand,
+  PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
 import { createSupergraphManager } from '@graphql-hive/client';
 import { fetch } from '@whatwg-node/fetch';
+import { gql } from '../../testkit/gql';
+import { execute } from '../../testkit/graphql';
 import { initSeed } from '../../testkit/seed';
 import { getServiceHost } from '../../testkit/utils';
 
@@ -53,6 +57,15 @@ async function deleteAllS3BucketObjects(s3Client: S3Client, bucketName: string) 
   await deleteS3Object(s3Client, bucketName, keysToDelete);
 }
 
+async function putS3Object(s3Client: S3Client, bucketName: string, key: string, body: string) {
+  const putObjectCommand = new PutObjectCommand({
+    Bucket: bucketName,
+    Key: key,
+    Body: body,
+  });
+  await s3Client.send(putObjectCommand);
+}
+
 async function fetchS3ObjectArtifact(
   bucketName: string,
   key: string,
@@ -80,6 +93,14 @@ function buildEndpointUrl(
   return `${baseUrl}${targetId}/${resourceType}`;
 }
 
+function generateLegacyToken(targetId: string) {
+  const encoder = new TextEncoder();
+  return crypto
+    .createHmac('sha256', 'wowverysecuremuchsecret')
+    .update(encoder.encode(targetId))
+    .digest('base64');
+}
+
 /**
  * We have both a CDN that runs as part of the server and one that runs as a standalone service (cloudflare worker).
  */
@@ -91,6 +112,97 @@ function runArtifactsCDNTests(
     getServiceHost(runtime.service, runtime.port).then(v => `http://${v}${runtime.path}`);
 
   describe(`Artifacts CDN ${name}`, () => {
+    test.concurrent('legacy cdn access key can be used for accessing artifacts', async () => {
+      const endpointBaseUrl = await getBaseEndpoint();
+      const { createOrg } = await initSeed().createOwner();
+      const { createProject } = await createOrg();
+      const { target, createToken } = await createProject(ProjectType.Single);
+      const token = await createToken({
+        targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      });
+
+      await token
+        .publishSchema({
+          author: 'Kamil',
+          commit: 'abc123',
+          sdl: `type Query { ping: String }`,
+        })
+        .then(r => r.expectNoGraphQLErrors());
+
+      // manually generate CDN access token for legacy support
+      const legacyToken = generateLegacyToken(target.id);
+      const legacyTokenHash = await bcrypt.hash(legacyToken, await bcrypt.genSalt(10));
+      await putS3Object(s3Client, 'artifacts', `cdn-legacy-keys/${target.id}`, legacyTokenHash);
+
+      const url = buildEndpointUrl(endpointBaseUrl, target.id, 'sdl');
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'x-hive-cdn-key': legacyToken,
+        },
+      });
+
+      expect(response.status).toEqual(200);
+      expect(await response.text()).toMatchInlineSnapshot(`
+        "type Query {
+          ping: String
+        }"
+      `);
+    });
+
+    test.concurrent(
+      'legacy deleting cdn access token from s3 revokes artifact cdn access',
+      async () => {
+        const { createOrg } = await initSeed().createOwner();
+        const { createProject } = await createOrg();
+        const { createToken, target } = await createProject(ProjectType.Single);
+        const writeToken = await createToken({
+          targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+        });
+
+        await writeToken
+          .publishSchema({
+            author: 'Kamil',
+            commit: 'abc123',
+            sdl: `type Query { ping: String }`,
+          })
+          .then(r => r.expectNoGraphQLErrors());
+
+        // manually generate CDN access token for legacy support
+        const legacyToken = generateLegacyToken(target.id);
+        const legacyTokenHash = await bcrypt.hash(legacyToken, await bcrypt.genSalt(10));
+        await putS3Object(s3Client, 'artifacts', `cdn-legacy-keys/${target.id}`, legacyTokenHash);
+
+        const endpointBaseUrl = await getBaseEndpoint();
+
+        // First roundtrip
+        const url = buildEndpointUrl(endpointBaseUrl, target.id, 'sdl');
+        let response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'x-hive-cdn-key': legacyToken,
+          },
+        });
+        expect(response.status).toEqual(200);
+        expect(await response.text()).toMatchInlineSnapshot(`
+                  "type Query {
+                    ping: String
+                  }"
+                `);
+
+        await deleteS3Object(s3Client, 'artifacts', [`cdn-legacy-keys/${target.id}`]);
+
+        // Second roundtrip
+        response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'x-hive-cdn-key': legacyToken,
+          },
+        });
+        expect(response.status).toEqual(403);
+      },
+    );
+
     test.concurrent('access without credentials', async () => {
       const endpointBaseUrl = await getBaseEndpoint();
       const url = buildEndpointUrl(endpointBaseUrl, 'i-do-not-exist', 'sdl');
@@ -127,87 +239,6 @@ function runArtifactsCDNTests(
       expect(response.headers.get('location')).toEqual(null);
     });
 
-    test.concurrent('created (legacy) cdn access key is stored on S3', async () => {
-      const { createOrg } = await initSeed().createOwner();
-      const { createProject } = await createOrg();
-      const { createToken, target } = await createProject(ProjectType.Single);
-      const writeToken = await createToken({
-        targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-      });
-      const cdnAccess = await writeToken.createCdnAccess();
-      const result = await fetchS3ObjectArtifact('artifacts', `cdn-legacy-keys/${target.id}`);
-      const isMatch = await bcrypt.compare(cdnAccess.token, result.body);
-      expect(isMatch).toEqual(true);
-    });
-
-    test.concurrent('creating (legacy) cdn access token can be done multiple times', async () => {
-      const { createOrg } = await initSeed().createOwner();
-      const { createProject } = await createOrg();
-      const { createToken, target } = await createProject(ProjectType.Single);
-      const writeToken = await createToken({
-        targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-      });
-
-      let cdnAccess = await writeToken.createCdnAccess();
-      const firstResult = await fetchS3ObjectArtifact('artifacts', `cdn-legacy-keys/${target.id}`);
-      let isMatch = await bcrypt.compare(cdnAccess.token, firstResult.body);
-      expect(isMatch).toEqual(true);
-
-      cdnAccess = await writeToken.createCdnAccess();
-      const secondResult = await fetchS3ObjectArtifact('artifacts', `cdn-legacy-keys/${target.id}`);
-      isMatch = await bcrypt.compare(cdnAccess.token, secondResult.body);
-      expect(isMatch).toEqual(true);
-    });
-
-    test.concurrent(
-      'deleting (legacy) cdn access token from s3 revokes artifact cdn access',
-      async () => {
-        const { createOrg } = await initSeed().createOwner();
-        const { createProject } = await createOrg();
-        const { createToken, target } = await createProject(ProjectType.Single);
-        const writeToken = await createToken({
-          targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-        });
-
-        await writeToken
-          .publishSchema({
-            author: 'Kamil',
-            commit: 'abc123',
-            sdl: `type Query { ping: String }`,
-          })
-          .then(r => r.expectNoGraphQLErrors());
-
-        const cdnAccess = await writeToken.createCdnAccess();
-        const endpointBaseUrl = await getBaseEndpoint();
-
-        // First roundtrip
-        const url = buildEndpointUrl(endpointBaseUrl, target!.id, 'sdl');
-        let response = await fetch(url, {
-          method: 'GET',
-          headers: {
-            'x-hive-cdn-key': cdnAccess.token,
-          },
-        });
-        expect(response.status).toEqual(200);
-        expect(await response.text()).toMatchInlineSnapshot(`
-        "type Query {
-          ping: String
-        }"
-        `);
-
-        await deleteS3Object(s3Client, 'artifacts', [`cdn-legacy-keys/${target.id}`]);
-
-        // Second roundtrip
-        response = await fetch(url, {
-          method: 'GET',
-          headers: {
-            'x-hive-cdn-key': cdnAccess.token,
-          },
-        });
-        expect(response.status).toEqual(403);
-      },
-    );
-
     test.concurrent('access SDL artifact with valid credentials', async () => {
       const { createOrg } = await initSeed().createOwner();
       const { createProject } = await createOrg();
@@ -228,7 +259,7 @@ function runArtifactsCDNTests(
       expect(publishSchemaResult.schemaPublish.__typename).toEqual('SchemaPublishSuccess');
       const cdnAccessResult = await writeToken.createCdnAccess();
       const endpointBaseUrl = await getBaseEndpoint();
-      const url = buildEndpointUrl(endpointBaseUrl, target!.id, 'sdl');
+      const url = buildEndpointUrl(endpointBaseUrl, target.id, 'sdl');
       const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -243,7 +274,7 @@ function runArtifactsCDNTests(
 
       const artifactContents = await fetchS3ObjectArtifact(
         'artifacts',
-        `artifact/${target!.id}/sdl`,
+        `artifact/${target.id}/sdl`,
       );
       expect(artifactContents.body).toMatchInlineSnapshot(`
         "type Query {
@@ -276,7 +307,7 @@ function runArtifactsCDNTests(
       // check if artifact exists in bucket
       const artifactContents = await fetchS3ObjectArtifact(
         'artifacts',
-        `artifact/${target!.id}/services`,
+        `artifact/${target.id}/services`,
       );
       expect(artifactContents.body).toMatchInlineSnapshot(
         `"[{"name":"ping","sdl":"type Query { ping: String }","url":"ping.com"}]"`,
@@ -284,7 +315,7 @@ function runArtifactsCDNTests(
 
       const cdnAccessResult = await writeToken.createCdnAccess();
       const endpointBaseUrl = await getBaseEndpoint();
-      const url = buildEndpointUrl(endpointBaseUrl, target!.id, 'services');
+      const url = buildEndpointUrl(endpointBaseUrl, target.id, 'services');
       let response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -338,7 +369,7 @@ function runArtifactsCDNTests(
       // check if artifact exists in bucket
       const artifactContents = await fetchS3ObjectArtifact(
         'artifacts',
-        `artifact/${target!.id}/services`,
+        `artifact/${target.id}/services`,
       );
       expect(artifactContents.body).toMatchInlineSnapshot(
         `"[{"name":"ping","sdl":"type Query { ping: String }","url":"ping.com"}]"`,
@@ -346,7 +377,7 @@ function runArtifactsCDNTests(
 
       const cdnAccessResult = await writeToken.createCdnAccess();
       const endpointBaseUrl = await getBaseEndpoint();
-      const url = buildEndpointUrl(endpointBaseUrl, target!.id, 'services');
+      const url = buildEndpointUrl(endpointBaseUrl, target.id, 'services');
       const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -432,3 +463,133 @@ function runArtifactsCDNTests(
 
 runArtifactsCDNTests('API Mirror', { service: 'server', port: 8082, path: '/artifacts/v1/' });
 // runArtifactsCDNTests('Local CDN Mock', 'http://127.0.0.1:3004/artifacts/v1/');
+
+describe('CDN token', () => {
+  const TargetCDNTokensQuery = gql(/* GraphQL */ `
+    query TargetCDNTokens($selector: TargetSelectorInput!, $after: String, $first: Int = 2) {
+      target(selector: $selector) {
+        cdnTokens(first: $first, after: $after) {
+          pageInfo {
+            hasNextPage
+            endCursor
+          }
+          edges {
+            cursor
+            node {
+              id
+              firstCharacters
+              lastCharacters
+              createdAt
+            }
+          }
+        }
+      }
+    }
+  `);
+
+  it('connection pagination', async () => {
+    const { createOrg } = await initSeed().createOwner();
+    const { organization, createProject } = await createOrg();
+    const { project, target, createToken } = await createProject(ProjectType.Federation);
+
+    const token = await createToken({
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.Settings],
+    });
+
+    await Promise.all(new Array(5).fill(0).map(() => token.createCdnAccess()));
+
+    let result = await execute({
+      document: TargetCDNTokensQuery,
+      variables: {
+        selector: {
+          organization: organization.cleanId,
+          project: project.cleanId,
+          target: target.cleanId,
+        },
+      },
+      authToken: token.secret,
+    }).then(r => r.expectNoGraphQLErrors());
+
+    expect(result.target!.cdnTokens.edges).toHaveLength(2);
+    expect(result.target!.cdnTokens.pageInfo.hasNextPage).toEqual(true);
+    let endCursor = result.target!.cdnTokens.pageInfo.endCursor;
+
+    result = await execute({
+      document: TargetCDNTokensQuery,
+      variables: {
+        selector: {
+          organization: organization.cleanId,
+          project: project.cleanId,
+          target: target.cleanId,
+        },
+        after: endCursor,
+      },
+      authToken: token.secret,
+    }).then(r => r.expectNoGraphQLErrors());
+
+    expect(result.target!.cdnTokens.edges).toHaveLength(2);
+    expect(result.target!.cdnTokens.pageInfo.hasNextPage).toEqual(true);
+    endCursor = result.target!.cdnTokens.pageInfo.endCursor;
+
+    result = await execute({
+      document: TargetCDNTokensQuery,
+      variables: {
+        selector: {
+          organization: organization.cleanId,
+          project: project.cleanId,
+          target: target.cleanId,
+        },
+        after: endCursor,
+      },
+      authToken: token.secret,
+    }).then(r => r.expectNoGraphQLErrors());
+
+    expect(result.target!.cdnTokens.edges).toHaveLength(1);
+    expect(result.target!.cdnTokens.pageInfo.hasNextPage).toEqual(false);
+  });
+
+  it('new created access tokens are added at the beginning of the connection', async () => {
+    const { createOrg } = await initSeed().createOwner();
+    const { organization, createProject } = await createOrg();
+    const { project, target, createToken } = await createProject(ProjectType.Federation);
+
+    const token = await createToken({
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.Settings],
+    });
+
+    await token.createCdnAccess();
+
+    const firstResult = await execute({
+      document: TargetCDNTokensQuery,
+      variables: {
+        selector: {
+          organization: organization.cleanId,
+          project: project.cleanId,
+          target: target.cleanId,
+        },
+        first: 2,
+      },
+      authToken: token.secret,
+    }).then(r => r.expectNoGraphQLErrors());
+
+    const firstId = firstResult.target!.cdnTokens.edges[0].node.id;
+    expect(firstResult.target!.cdnTokens.edges).toHaveLength(1);
+
+    await token.createCdnAccess();
+
+    const secondResult = await execute({
+      document: TargetCDNTokensQuery,
+      variables: {
+        selector: {
+          organization: organization.cleanId,
+          project: project.cleanId,
+          target: target.cleanId,
+        },
+        first: 2,
+      },
+      authToken: token.secret,
+    }).then(r => r.expectNoGraphQLErrors());
+    expect(secondResult.target!.cdnTokens.edges).toHaveLength(2);
+    expect(secondResult.target!.cdnTokens.edges[1].node.id).toEqual(firstId);
+  });
+});

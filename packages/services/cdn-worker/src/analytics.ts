@@ -19,25 +19,30 @@ type Event =
         | 'sdl.graphqls';
     }
   | {
-      type: 'new-key-validation';
+      type: 'key-validation';
       value:
         | {
             type: 'cache-hit';
+            version: 'v1' | 'legacy';
             isValid: boolean;
           }
         | {
             type: 'cache-write';
+            version: 'v1' | 'legacy';
             isValid: boolean;
           }
         | {
             type: 's3-key-read-failure';
+            version: 'v1' | 'legacy';
             status: number | null;
           }
         | {
             type: 's3-key-compare-failure';
+            version: 'v1' | 'legacy';
           }
         | {
-            type: 's3-key-validation-success';
+            type: 's3-key-validation';
+            version: 'v1' | 'legacy';
             status: 'success' | 'failure';
           };
     }
@@ -69,21 +74,29 @@ export function createAnalytics(
           return engines.error.writeDataPoint({
             blobs: event.value,
           });
-        case 'new-key-validation':
+        case 'key-validation':
           switch (event.value.type) {
             case 'cache-hit':
               return engines.keyValidation.writeDataPoint({
-                blobs: ['cache-hit', event.value.isValid ? 'valid' : 'invalid'],
+                blobs: [
+                  'cache-hit',
+                  event.value.version,
+                  event.value.isValid ? 'valid' : 'invalid',
+                ],
                 indexes: [targetId.substr(0, 32)],
               });
             case 'cache-write':
               return engines.keyValidation.writeDataPoint({
-                blobs: ['cache-write', event.value.isValid ? 'valid' : 'invalid'],
+                blobs: [
+                  'cache-write',
+                  event.value.version,
+                  event.value.isValid ? 'valid' : 'invalid',
+                ],
                 indexes: [targetId.substr(0, 32)],
               });
-            case 's3-key-validation-success':
+            case 's3-key-validation':
               return engines.keyValidation.writeDataPoint({
-                blobs: ['s3-key-validation-success', event.value.status],
+                blobs: ['s3-key-validation', event.value.version, event.value.status],
                 indexes: [targetId.substr(0, 32)],
               });
           }

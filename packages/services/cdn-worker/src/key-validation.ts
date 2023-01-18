@@ -1,16 +1,8 @@
 import bcrypt from 'bcryptjs';
+import { Request, Response } from '@whatwg-node/fetch';
 import { Analytics } from './analytics';
-import { AwsClient } from './aws';
-
-export function byteStringToUint8Array(byteString: string) {
-  const ui = new Uint8Array(byteString.length);
-
-  for (let i = 0; i < byteString.length; ++i) {
-    ui[i] = byteString.charCodeAt(i);
-  }
-
-  return ui;
-}
+import { type AwsClient } from './aws';
+import { decodeCdnAccessTokenSafe, isCDNAccessToken } from './cdn-token';
 
 export type KeyValidator = (targetId: string, headerKey: string) => Promise<boolean>;
 
@@ -34,14 +26,18 @@ type CreateKeyValidatorDeps = {
 export const createIsKeyValid =
   (deps: CreateKeyValidatorDeps): KeyValidator =>
   async (targetId: string, accessHeaderValue: string): Promise<boolean> => {
-    return validateKey({
+    if (isCDNAccessToken(accessHeaderValue)) {
+      return handleCDNAccessToken(deps, targetId, accessHeaderValue);
+    }
+
+    return handleLegacyCDNAccessToken({
       ...deps,
       targetId,
       accessToken: accessHeaderValue,
     });
   };
 
-const validateKey = async (args: {
+const handleLegacyCDNAccessToken = async (args: {
   targetId: string;
   accessToken: string;
   s3: S3Config;
@@ -76,9 +72,10 @@ const validateKey = async (args: {
 
         args.analytics?.track(
           {
-            type: 'new-key-validation',
+            type: 'key-validation',
             value: {
               type: 'cache-hit',
+              version: 'legacy',
               isValid,
             },
           },
@@ -91,9 +88,10 @@ const validateKey = async (args: {
       withCache = async (isValid: boolean) => {
         args.analytics?.track(
           {
-            type: 'new-key-validation',
+            type: 'key-validation',
             value: {
               type: 'cache-write',
+              version: 'legacy',
               isValid,
             },
           },
@@ -136,9 +134,10 @@ const validateKey = async (args: {
 
   args.analytics?.track(
     {
-      type: 'new-key-validation',
+      type: 'key-validation',
       value: {
-        type: 's3-key-validation-success',
+        type: 's3-key-validation',
+        version: 'legacy',
         status: isValid ? 'success' : 'failure',
       },
     },
@@ -147,3 +146,115 @@ const validateKey = async (args: {
 
   return withCache(isValid);
 };
+
+async function handleCDNAccessToken(
+  deps: CreateKeyValidatorDeps,
+  targetId: string,
+  accessToken: string,
+) {
+  let withCache = (isValid: boolean) => Promise.resolve(isValid);
+
+  {
+    const requestCache = await deps.getCache?.();
+
+    if (requestCache) {
+      const cacheKey = new Request(
+        ['http://key-cache.graphql-hive.com', 'v1', targetId, encodeURIComponent(accessToken)].join(
+          '/',
+        ),
+        {
+          method: 'GET',
+        },
+      );
+
+      const response = await requestCache.match(cacheKey);
+
+      if (response) {
+        const responseValue = await response.text();
+
+        const isValid = responseValue === '1';
+
+        deps.analytics?.track(
+          {
+            type: 'key-validation',
+            value: {
+              type: 'cache-hit',
+              version: 'v1',
+              isValid,
+            },
+          },
+          targetId,
+        );
+
+        return isValid;
+      }
+
+      withCache = async (isValid: boolean) => {
+        deps.analytics?.track(
+          {
+            type: 'key-validation',
+            value: {
+              type: 'cache-write',
+              version: 'v1',
+              isValid,
+            },
+          },
+          targetId,
+        );
+
+        const promise = requestCache.put(
+          cacheKey,
+          new Response(isValid ? '1' : '0', {
+            status: 200,
+            headers: {
+              'Cache-Control': `s-maxage=${60 * 5}`,
+            },
+          }),
+        );
+
+        if (deps.waitUntil) {
+          deps.waitUntil(promise);
+        } else {
+          await promise;
+        }
+
+        return isValid;
+      };
+    }
+  }
+
+  const decodeResult = decodeCdnAccessTokenSafe(accessToken);
+
+  if (decodeResult.type === 'failure') {
+    return withCache(false);
+  }
+
+  const s3KeyParts = ['cdn-keys', targetId, decodeResult.token.keyId];
+
+  const key = await deps.s3.client.fetch(
+    [deps.s3.endpoint, deps.s3.bucketName, ...s3KeyParts].join('/'),
+    {
+      method: 'GET',
+    },
+  );
+
+  if (key.status !== 200) {
+    return withCache(false);
+  }
+
+  const isValid = await bcrypt.compare(decodeResult.token.privateKey, await key.text());
+
+  deps.analytics?.track(
+    {
+      type: 'key-validation',
+      value: {
+        type: 's3-key-validation',
+        version: 'v1',
+        status: isValid ? 'success' : 'failure',
+      },
+    },
+    targetId,
+  );
+
+  return withCache(isValid);
+}

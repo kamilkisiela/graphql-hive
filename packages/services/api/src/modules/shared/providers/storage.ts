@@ -465,6 +465,29 @@ export interface Storage {
     lastCharacters: string;
     alias: string;
   }): Promise<CDNAccessToken | null>;
+
+  getCDNAccessTokenById(_: { cdnAccessTokenId: string }): Promise<CDNAccessToken | null>;
+
+  deleteCDNAccessToken(_: { cdnAccessTokenId: string }): Promise<boolean>;
+
+  getPaginatedCDNAccessTokensForTarget(_: {
+    targetId: string;
+    first: number | null;
+    cursor: null | string;
+  }): Promise<
+    Readonly<{
+      items: ReadonlyArray<{
+        node: CDNAccessToken;
+        cursor: string;
+      }>;
+      pageInfo: Readonly<{
+        hasNextPage: boolean;
+        hasPreviousPage: boolean;
+        startCursor: string;
+        endCursor: string;
+      }>;
+    }>
+  >;
 }
 
 @Injectable()
