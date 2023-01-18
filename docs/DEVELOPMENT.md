@@ -7,7 +7,6 @@ Developing Hive locally requires you to have the following software installed lo
 - Node.js 18 LTS (or `nvm` or `fnm`)
 - pnpm v7
 - Docker
-- docker-compose
 
 ## Setup Instructions
 
