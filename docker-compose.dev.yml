@@ -20,7 +20,7 @@ services:
       - '5432:5432'
 
   redis:
-    image: docker.io/bitnami/redis:7.0.7
+    image: redis:7.0.7-alpine
     networks:
       - 'stack'
     healthcheck:
