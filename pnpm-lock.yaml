@@ -1059,7 +1059,7 @@ importers:
       supertokens-node: 12.1.5
       supertokens-website: 14.0.3
       tailwindcss: 3.2.4
-      tailwindcss-radix: 2.6.1
+      tailwindcss-radix: 2.7.0
       tslib: 2.4.1
       twin.macro: 2.8.2
       urql: 2.0.5
@@ -1136,7 +1136,7 @@ importers:
       supertokens-node: 12.1.5
       supertokens-website: 14.0.3
       tailwindcss: 3.2.4_postcss@8.4.20
-      tailwindcss-radix: 2.6.1
+      tailwindcss-radix: 2.7.0
       twin.macro: 2.8.2
       urql: 2.0.5_onqnqwb3ubg5opvemcqf7c2qhy
       use-debounce: 9.0.3_react@18.2.0
@@ -25540,8 +25540,8 @@ packages:
     resolution: {integrity: sha512-SYJSIgeyXW7EuX1ytdneO5e8jip42oHWg9xl/o3oTYhmXusZVgiA+VlPvjIN+kHii9v90AmzTZEBcsEvuAY+TA==}
     dev: false
 
-  /tailwindcss-radix/2.6.1:
-    resolution: {integrity: sha512-ejh4BHkn/3g349l+JiEW6I4//uclU4nllEqnOK3/8zpORscIk9WbjLyYR2UzqwVRjjzgd72I/hMDJZm3+XO48w==}
+  /tailwindcss-radix/2.7.0:
+    resolution: {integrity: sha512-fIVkT5zQYdsjT9+/Mvp+DTlJDdTFpRDuyS5+PLuJDAIIVr9+rWYKhK6rsB9QtjwUwwb0YF+BkAJN6CjZivOfLA==}
     dev: false
 
   /tailwindcss/2.2.19_r4gnkvssmvyxmi2wmat5xbx36a:
