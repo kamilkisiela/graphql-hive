@@ -47,7 +47,7 @@ test.concurrent(
 
     const op = operationsStats.operations.nodes[0];
     expect(op.count).toEqual(1);
-    await expect(readOperationBody(op.operationHash!)).resolves.toEqual('ping');
+    await expect(readOperationBody(op.operationHash!)).resolves.toEqual('query ping{ping}');
     expect(op.operationHash).toBeDefined();
     expect(op.duration.p75).toEqual(200);
     expect(op.duration.p90).toEqual(200);

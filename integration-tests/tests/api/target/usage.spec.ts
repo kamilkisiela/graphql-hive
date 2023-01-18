@@ -101,7 +101,9 @@ test.concurrent('collect operation', async () => {
   const op = operationsStats.operations.nodes[0];
 
   expect(op.count).toEqual(1);
-  await expect(writeToken.readOperationBody(op.operationHash!)).resolves.toEqual('ping');
+  await expect(writeToken.readOperationBody(op.operationHash!)).resolves.toEqual(
+    'query ping{ping}',
+  );
   expect(op.operationHash).toBeDefined();
   expect(op.duration.p75).toEqual(200);
   expect(op.duration.p90).toEqual(200);
@@ -280,7 +282,9 @@ test.concurrent(
 
     const op = operationsStats.operations.nodes[0];
     expect(op.count).toEqual(totalAmount);
-    await expect(writeToken.readOperationBody(op.operationHash!)).resolves.toEqual('ping');
+    await expect(writeToken.readOperationBody(op.operationHash!)).resolves.toEqual(
+      'query ping{ping}',
+    );
     expect(op.operationHash).toBeDefined();
     expect(op.duration.p75).toEqual(200);
     expect(op.duration.p90).toEqual(200);
