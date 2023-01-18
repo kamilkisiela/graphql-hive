@@ -15,7 +15,7 @@ const emptyString = <T extends zod.ZodType>(input: T) => {
 const TargetsModel = zod.array(
   zod.object({
     id: zod.string(),
-    created_at: zod.string(),
+    created_at_cursor: zod.string(),
   }),
 );
 
@@ -73,7 +73,7 @@ export const up: slonik.Migration = async ({ context: { connection, sql } }) => 
     const query = sql`
       SELECT
         "id"
-        , "created_at"::text
+        , to_json("created_at") as "created_at_cursor"
       FROM
         "targets"
       ${
@@ -149,7 +149,7 @@ export const up: slonik.Migration = async ({ context: { connection, sql } }) => 
     if (items.length > 0) {
       lastCursor = {
         lastId: items[items.length - 1].id,
-        lastCreatedAt: items[items.length - 1].created_at,
+        lastCreatedAt: items[items.length - 1].created_at_cursor,
       };
     }
   } while (lastCursor !== null);
