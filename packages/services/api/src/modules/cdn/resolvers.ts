@@ -5,7 +5,7 @@ import { CdnProvider } from './providers/cdn.provider';
 
 export const resolvers: CdnModule.Resolvers = {
   Mutation: {
-    createCdnToken: async (_, { selector }, { injector }) => {
+    createCdnAccessToken: async (_, { input }, { injector }) => {
       const translator = injector.get(IdTranslator);
       const cdn = injector.get(CdnProvider);
 
@@ -14,16 +14,31 @@ export const resolvers: CdnModule.Resolvers = {
       }
 
       const [organizationId, projectId, targetId] = await Promise.all([
-        translator.translateOrganizationId(selector),
-        translator.translateProjectId(selector),
-        translator.translateTargetId(selector),
+        translator.translateOrganizationId(input.selector),
+        translator.translateProjectId(input.selector),
+        translator.translateTargetId(input.selector),
       ]);
 
-      return await cdn.generateCDNAccess({
+      const result = await cdn.generateCDNAccess({
         organizationId,
         projectId,
         targetId,
       });
+
+      if (result.type === 'failure') {
+        return {
+          error: {
+            message: result.reason,
+          },
+        };
+      }
+
+      return {
+        ok: {
+          secretAccessToken: result.secretAccessToken,
+          createdCdnAccessToken: result.cdnAccessToken,
+        },
+      };
     },
     deleteCdnAccessToken: async (_, { input }, { injector }) => {
       const translator = injector.get(IdTranslator);
@@ -77,6 +92,9 @@ export const resolvers: CdnModule.Resolvers = {
         edges: result.items,
         pageInfo: result.pageInfo,
       };
+    },
+    cdnUrl(target, _args, context) {
+      return context.injector.get(CdnProvider).getCdnUrlForTarget(target.id);
     },
   },
 };

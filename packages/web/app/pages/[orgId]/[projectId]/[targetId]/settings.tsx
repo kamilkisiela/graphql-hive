@@ -2,7 +2,7 @@ import React, { ReactElement, useCallback, useState } from 'react';
 import clsx from 'clsx';
 import { formatISO, subDays } from 'date-fns';
 import { useFormik } from 'formik';
-import { gql, useMutation, useQuery } from 'urql';
+import { DocumentType, gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
@@ -13,6 +13,7 @@ import {
   Checkbox,
   Heading,
   Input,
+  Modal,
   Switch,
   Table,
   Tag,
@@ -43,7 +44,7 @@ const columns = [
   { key: 'createdAt', align: 'right' },
 ] as const;
 
-const Tokens = ({ me }: { me: MemberFieldsFragment }): ReactElement => {
+const RegistryAccessTokens = ({ me }: { me: MemberFieldsFragment }): ReactElement => {
   const router = useRouteSelector();
   const [{ fetching: deleting }, mutate] = useMutation(DeleteTokensDocument);
   const [checked, setChecked] = useState<string[]>([]);
@@ -78,7 +79,7 @@ const Tokens = ({ me }: { me: MemberFieldsFragment }): ReactElement => {
 
   return (
     <Card>
-      <Heading className="mb-2">Tokens</Heading>
+      <Heading className="mb-2">Registry Access Tokens</Heading>
       <p className="mb-3 font-light text-gray-300">
         Be careful! These tokens allow to read and write your target data.
       </p>
@@ -130,6 +131,369 @@ const Tokens = ({ me }: { me: MemberFieldsFragment }): ReactElement => {
       {isModalOpen && (
         <CreateAccessTokenModal isOpen={isModalOpen} toggleModalOpen={toggleModalOpen} />
       )}
+    </Card>
+  );
+};
+
+const CDNAccessTokeRowFragment = gql(/* GraphQL */ `
+  fragment Settings_CdnAccessTokenRowFragment on CdnAccessToken {
+    id
+    firstCharacters
+    lastCharacters
+    createdAt
+  }
+`);
+
+const CDNAccessTokenCreateMutation = gql(/* GraphQL */ `
+  mutation Settings_CDNAccessTokenCreateMutation($input: CreateCdnAccessTokenInput!) {
+    createCdnAccessToken(input: $input) {
+      error {
+        message
+      }
+      ok {
+        createdCdnAccessToken {
+          ...Settings_CdnAccessTokenRowFragment
+        }
+        secretAccessToken
+      }
+    }
+  }
+`);
+
+const CreateCDNAccessTokenModal = (props: { onClose: () => void }) => {
+  const router = useRouteSelector();
+  const [createCdnAccessToken, mutate] = useMutation(CDNAccessTokenCreateMutation);
+
+  let body = (
+    <>
+      <div className="flex flex-col gap-5">
+        <Heading className="text-center">Create CDN Access Token</Heading>
+      </div>
+
+      <p>Do you want to create a new CDN Access Token?</p>
+
+      <Button variant="primary" size="large" className="ml-auto" onClick={props.onClose}>
+        Abort
+      </Button>
+
+      <Button
+        variant="primary"
+        disabled={createCdnAccessToken.fetching}
+        onClick={() => {
+          void mutate({
+            input: {
+              selector: {
+                organization: router.organizationId,
+                project: router.projectId,
+                target: router.targetId,
+              },
+            },
+          });
+        }}
+      >
+        Create
+      </Button>
+    </>
+  );
+
+  if (createCdnAccessToken.data?.createCdnAccessToken.ok) {
+    body = (
+      <>
+        <div className="flex flex-col gap-5">
+          <Heading className="text-center">Create CDN Access Token</Heading>
+        </div>
+
+        <p>The CDN Access Token was successfully created.</p>
+
+        <Tag color="yellow" className="py-2.5 px-4">
+          <AlertTriangleIcon className="h-5 w-5" />
+          Please store this access token securely. You will not be able to see it again.
+        </Tag>
+
+        <Input
+          readOnly
+          value={createCdnAccessToken.data.createCdnAccessToken.ok.secretAccessToken}
+        />
+
+        <Button variant="primary" size="large" className="ml-auto" onClick={props.onClose}>
+          Close
+        </Button>
+      </>
+    );
+  } else if (createCdnAccessToken.data?.createCdnAccessToken.error) {
+    body = (
+      <>
+        <div className="flex flex-col gap-5">
+          <Heading className="text-center">Delete CDN Access Token</Heading>
+        </div>
+
+        <p>Something went wrong.</p>
+
+        <Tag color="yellow" className="py-2.5 px-4">
+          <AlertTriangleIcon className="h-5 w-5" />
+          {createCdnAccessToken.data?.createCdnAccessToken.error.message}
+        </Tag>
+
+        <Button variant="primary" size="large" className="ml-auto" onClick={props.onClose}>
+          Close
+        </Button>
+      </>
+    );
+  }
+
+  return (
+    <Modal open={true} className="w-[650px]" onOpenChange={props.onClose}>
+      {body}
+    </Modal>
+  );
+};
+
+const CDNAccessTokenDeleteMutation = gql(/* GraphQL */ `
+  mutation Settings_DeleteCDNAccessToken($input: DeleteCdnAccessTokenInput!) {
+    deleteCdnAccessToken(input: $input) {
+      error {
+        message
+      }
+      ok {
+        deletedCdnAccessTokenId
+      }
+    }
+  }
+`);
+
+const DeleteCDNAccessTokenModal = (props: {
+  cdnAccessToken: DocumentType<typeof CDNAccessTokeRowFragment>;
+  onClose: (deletedCdnAccessTokenId: string | null) => void;
+}) => {
+  const router = useRouteSelector();
+  const [deleteCdnAccessToken, mutate] = useMutation(CDNAccessTokenDeleteMutation);
+
+  const onClose = () =>
+    props.onClose(
+      deleteCdnAccessToken.data?.deleteCdnAccessToken.ok?.deletedCdnAccessTokenId ?? null,
+    );
+
+  let body = (
+    <>
+      <div className="flex flex-col gap-5">
+        <Heading className="text-center">Delete CDN Access Tokens</Heading>
+      </div>
+
+      <Button variant="primary" size="large" className="ml-auto" onClick={onClose}>
+        Abort
+      </Button>
+      <Button
+        disabled={deleteCdnAccessToken.fetching}
+        danger
+        variant="primary"
+        size="large"
+        className="ml-auto"
+        onClick={() =>
+          mutate({
+            input: {
+              selector: {
+                organization: router.organizationId,
+                project: router.projectId,
+                target: router.targetId,
+              },
+              cdnAccessTokenId: props.cdnAccessToken.id,
+            },
+          })
+        }
+      >
+        Delete
+      </Button>
+    </>
+  );
+
+  if (deleteCdnAccessToken.data?.deleteCdnAccessToken.ok) {
+    body = (
+      <>
+        <div className="flex flex-col gap-5">
+          <Heading className="text-center">Delete CDN Access Token</Heading>
+        </div>
+
+        <p>The CDN Access Token was successfully deleted.</p>
+
+        <Tag color="yellow" className="py-2.5 px-4">
+          <AlertTriangleIcon className="h-5 w-5" />
+          It can take up to 5 minutes before the changes are propagated across the CDN.
+        </Tag>
+
+        <Button variant="primary" size="large" className="ml-auto" onClick={onClose}>
+          Close
+        </Button>
+      </>
+    );
+  } else if (deleteCdnAccessToken.data?.deleteCdnAccessToken.error) {
+    body = (
+      <>
+        <div className="flex flex-col gap-5">
+          <Heading className="text-center">Delete CDN Access Token</Heading>
+        </div>
+
+        <p>Something went wrong.</p>
+
+        <Tag color="yellow" className="py-2.5 px-4">
+          <AlertTriangleIcon className="h-5 w-5" />
+          {deleteCdnAccessToken.data?.deleteCdnAccessToken.error.message}
+        </Tag>
+
+        <Button variant="primary" size="large" className="ml-auto" onClick={onClose}>
+          Close
+        </Button>
+      </>
+    );
+  }
+
+  return (
+    <Modal open={true} className="w-[650px]" onOpenChange={onClose}>
+      {body}
+    </Modal>
+  );
+};
+
+const CDNAccessTokensQuery = gql(/* GraphQL */ `
+  query CDNAccessTokensQuery($selector: TargetSelectorInput!, $first: Int!, $after: String) {
+    target(selector: $selector) {
+      id
+      cdnAccessTokens(first: $first, after: $after) {
+        edges {
+          node {
+            id
+            ...Settings_CdnAccessTokenRowFragment
+          }
+        }
+        pageInfo {
+          hasNextPage
+          hasPreviousPage
+          endCursor
+        }
+      }
+    }
+  }
+`);
+
+const CDNAccessTokens = (props: { me: MemberFieldsFragment }): React.ReactElement => {
+  const router = useRouteSelector();
+
+  const [endCursors, setEndCursors] = useState<Array<string>>([]);
+  const [modal, setModal] = useState<React.ReactElement | null>(null);
+
+  const [target, reexecuteQuery] = useQuery({
+    query: CDNAccessTokensQuery,
+    variables: {
+      selector: {
+        organization: router.organizationId,
+        project: router.projectId,
+        target: router.targetId,
+      },
+      first: 20,
+      after: endCursors[endCursors.length - 1] ?? null,
+    },
+  });
+
+  const canManage = canAccessTarget(TargetAccessScope.Settings, props.me);
+
+  return (
+    <Card>
+      <Heading id="cdn-access-tokens" className="mb-2">
+        CDN Access Token
+      </Heading>
+      <p className="mb-3 font-light text-gray-300">
+        Be careful! These tokens allow accessing the schema artifacts of your target.
+      </p>
+      {canManage && (
+        <div className="my-3.5 flex justify-between">
+          <Button
+            variant="secondary"
+            onClick={() => {
+              alert('kekek');
+              setModal(<CreateCDNAccessTokenModal onClose={() => setModal(null)} />);
+            }}
+            size="large"
+            className="px-5"
+          >
+            Create new CDN Token
+          </Button>
+        </div>
+      )}
+      <Table
+        dataSource={target?.data?.target?.cdnAccessTokens.edges?.map(edge => ({
+          id: edge.node.id,
+          name:
+            edge.node.firstCharacters + new Array(10).fill('•').join('') + edge.node.lastCharacters,
+          alias: 'brrrrrrrt',
+          createdAt: (
+            <>
+              created <TimeAgo date={edge.node.createdAt} />
+            </>
+          ),
+          delete: (
+            <Button
+              size="small"
+              danger
+              className="px-9"
+              onClick={() => {
+                setModal(
+                  <DeleteCDNAccessTokenModal
+                    cdnAccessToken={edge.node}
+                    onClose={deletedCdnAccessTokenId => {
+                      if (deletedCdnAccessTokenId) {
+                        reexecuteQuery({ requestPolicy: 'network-only' });
+                      }
+                      setModal(null);
+                    }}
+                  />,
+                );
+              }}
+            >
+              Delete
+            </Button>
+          ),
+        }))}
+        columns={[
+          { key: 'name' },
+          { key: 'alias' },
+          { key: 'createdAt', align: 'right' },
+          { key: 'delete', align: 'right' },
+        ]}
+      />
+      <div className="my-3.5 flex justify-end">
+        <Button
+          variant="secondary"
+          size="large"
+          className="mr-2 px-5"
+          disabled={!target.data?.target?.cdnAccessTokens.pageInfo.hasPreviousPage}
+          onClick={() => {
+            setEndCursors(cursors => {
+              if (cursors.length === 0) {
+                return cursors;
+              }
+              return cursors.slice(0, cursors.length - 1);
+            });
+          }}
+        >
+          Previous Page
+        </Button>
+        <Button
+          variant="secondary"
+          size="large"
+          className="px-5"
+          disabled={!target.data?.target?.cdnAccessTokens.pageInfo.hasNextPage}
+          onClick={() => {
+            setEndCursors(cursors => {
+              if (!target.data?.target?.cdnAccessTokens.pageInfo.endCursor) {
+                return cursors;
+              }
+              return [...cursors, target.data?.target?.cdnAccessTokens.pageInfo.endCursor];
+            });
+          }}
+        >
+          Next Page
+        </Button>
+      </div>
+      {modal}
     </Card>
   );
 };
@@ -660,7 +1024,9 @@ const Page = ({
         )}
       </Card>
 
-      {canAccessTokens && <Tokens me={me} />}
+      {canAccessTokens && <RegistryAccessTokens me={me} />}
+
+      {canAccessTokens && <CDNAccessTokens me={me} />}
 
       <ConditionalBreakingChanges />
 

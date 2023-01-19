@@ -587,7 +587,7 @@ test.concurrent('CDN data can not be fetched with an invalid access token', asyn
   expect(result.schemaPublish.__typename).toBe('SchemaPublishSuccess');
 
   const cdn = await readWriteToken.createCdnAccess();
-  const res = await fetch(cdn.url + '/sdl', {
+  const res = await fetch(cdn.cdnUrl + '/sdl', {
     method: 'GET',
     headers: {
       'X-Hive-CDN-Key': 'i-like-turtles',
@@ -620,12 +620,12 @@ test.concurrent('CDN data can be fetched with an valid access token', async () =
   expect(result.schemaPublish.__typename).toBe('SchemaPublishSuccess');
 
   const cdn = await readWriteToken.createCdnAccess();
-  const artifactUrl = cdn.url + '/sdl';
+  const artifactUrl = cdn.cdnUrl + '/sdl';
 
   const cdnResult = await fetch(artifactUrl, {
     method: 'GET',
     headers: {
-      'X-Hive-CDN-Key': cdn.token,
+      'X-Hive-CDN-Key': cdn.cdnUrl,
     },
   });
 

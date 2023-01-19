@@ -263,7 +263,7 @@ function runArtifactsCDNTests(
       const response = await fetch(url, {
         method: 'GET',
         headers: {
-          'x-hive-cdn-key': cdnAccessResult.token,
+          'x-hive-cdn-key': cdnAccessResult.secretAccessToken,
         },
         redirect: 'manual',
       });
@@ -319,7 +319,7 @@ function runArtifactsCDNTests(
       let response = await fetch(url, {
         method: 'GET',
         headers: {
-          'x-hive-cdn-key': cdnAccessResult.token,
+          'x-hive-cdn-key': cdnAccessResult.secretAccessToken,
         },
         redirect: 'manual',
       });
@@ -381,7 +381,7 @@ function runArtifactsCDNTests(
       const response = await fetch(url, {
         method: 'GET',
         headers: {
-          'x-hive-cdn-key': cdnAccessResult.token,
+          'x-hive-cdn-key': cdnAccessResult.secretAccessToken,
           'if-none-match': artifactContents.eTag,
         },
         redirect: 'manual',
@@ -416,7 +416,7 @@ function runArtifactsCDNTests(
       const gateway = new ApolloGateway({
         supergraphSdl: createSupergraphManager({
           endpoint: endpointBaseUrl + target.id,
-          key: cdnAccessResult.token,
+          key: cdnAccessResult.secretAccessToken,
         }),
       });
 

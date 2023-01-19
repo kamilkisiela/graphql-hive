@@ -2,7 +2,7 @@ import { gql } from 'graphql-modules';
 
 export default gql`
   extend type Mutation {
-    createCdnToken(selector: TargetSelectorInput!): CdnTokenResult!
+    createCdnAccessToken(input: CreateCdnAccessTokenInput!): CdnAccessTokenCreateResult!
     deleteCdnAccessToken(input: DeleteCdnAccessTokenInput!): DeleteCdnAccessTokenResult!
   }
 
@@ -19,6 +19,10 @@ export default gql`
   }
 
   extend type Target {
+    """
+    The URL for accessing this target's artifacts via the CDN.
+    """
+    cdnUrl: String!
     """
     A paginated connection of CDN tokens for accessing this target's artifacts.
     """
@@ -60,6 +64,27 @@ export default gql`
   }
 
   type DeleteCdnAccessTokenError implements Error {
+    message: String!
+  }
+
+  input CreateCdnAccessTokenInput {
+    selector: TargetSelectorInput!
+  }
+
+  """
+  @oneOf
+  """
+  type CdnAccessTokenCreateResult {
+    ok: CdnAccessTokenCreateOk
+    error: CdnAccessTokenCreateError
+  }
+
+  type CdnAccessTokenCreateOk {
+    createdCdnAccessToken: CdnAccessToken!
+    secretAccessToken: String!
+  }
+
+  type CdnAccessTokenCreateError implements Error {
     message: String!
   }
 `;

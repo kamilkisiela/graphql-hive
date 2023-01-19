@@ -1,5 +1,4 @@
 import bcryptjs from 'bcryptjs';
-import { GraphQLError } from 'graphql';
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import { encodeCdnToken, generatePrivateKey } from '@hive/cdn-script/cdn-token';
 import type { Span } from '@sentry/types';
@@ -59,15 +58,17 @@ export class CdnProvider {
     });
 
     if (result.type === 'failure') {
-      throw new GraphQLError(result.reason);
+      return {
+        type: 'failure',
+        reason: result.reason,
+      } as const;
     }
 
-    const url = this.getCdnUrlForTarget(args.targetId);
-
     return {
-      token: result.cdnAccessTokenKey,
-      url,
-    };
+      type: 'success',
+      secretAccessToken: result.cdnAccessTokenKey,
+      cdnAccessToken: result.cdnAccessToken,
+    } as const;
   }
 
   async pushToCloudflareCDN(url: string, body: string, span?: Span): Promise<{ success: boolean }> {
@@ -193,6 +194,13 @@ export class CdnProvider {
       s3Key,
       alias: 'CDN Access Token',
     });
+
+    if (cdnAccessTokenRecord === null) {
+      return {
+        type: 'failure',
+        reason: 'Failed to generate key. Please try again later. 2',
+      } as const;
+    }
 
     return {
       type: 'success',
