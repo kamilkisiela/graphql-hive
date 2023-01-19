@@ -465,10 +465,10 @@ runArtifactsCDNTests('API Mirror', { service: 'server', port: 8082, path: '/arti
 // runArtifactsCDNTests('Local CDN Mock', 'http://127.0.0.1:3004/artifacts/v1/');
 
 describe('CDN token', () => {
-  const TargetCDNTokensQuery = gql(/* GraphQL */ `
-    query TargetCDNTokens($selector: TargetSelectorInput!, $after: String, $first: Int = 2) {
+  const TargetCDNAccessTokensQuery = gql(/* GraphQL */ `
+    query TargetCDNAccessTokens($selector: TargetSelectorInput!, $after: String, $first: Int = 2) {
       target(selector: $selector) {
-        cdnTokens(first: $first, after: $after) {
+        cdnAccessTokens(first: $first, after: $after) {
           pageInfo {
             hasNextPage
             endCursor
@@ -487,6 +487,19 @@ describe('CDN token', () => {
     }
   `);
 
+  const DeleteCDNAccessTokenMutation = gql(/* GraphQL */ `
+    mutation DeleteCDNAccessToken($input: DeleteCdnAccessTokenInput!) {
+      deleteCdnAccessToken(input: $input) {
+        error {
+          message
+        }
+        ok {
+          deletedCdnAccessTokenId
+        }
+      }
+    }
+  `);
+
   it('connection pagination', async () => {
     const { createOrg } = await initSeed().createOwner();
     const { organization, createProject } = await createOrg();
@@ -499,7 +512,7 @@ describe('CDN token', () => {
     await Promise.all(new Array(5).fill(0).map(() => token.createCdnAccess()));
 
     let result = await execute({
-      document: TargetCDNTokensQuery,
+      document: TargetCDNAccessTokensQuery,
       variables: {
         selector: {
           organization: organization.cleanId,
@@ -510,12 +523,12 @@ describe('CDN token', () => {
       authToken: token.secret,
     }).then(r => r.expectNoGraphQLErrors());
 
-    expect(result.target!.cdnTokens.edges).toHaveLength(2);
-    expect(result.target!.cdnTokens.pageInfo.hasNextPage).toEqual(true);
-    let endCursor = result.target!.cdnTokens.pageInfo.endCursor;
+    expect(result.target!.cdnAccessTokens.edges).toHaveLength(2);
+    expect(result.target!.cdnAccessTokens.pageInfo.hasNextPage).toEqual(true);
+    let endCursor = result.target!.cdnAccessTokens.pageInfo.endCursor;
 
     result = await execute({
-      document: TargetCDNTokensQuery,
+      document: TargetCDNAccessTokensQuery,
       variables: {
         selector: {
           organization: organization.cleanId,
@@ -527,12 +540,12 @@ describe('CDN token', () => {
       authToken: token.secret,
     }).then(r => r.expectNoGraphQLErrors());
 
-    expect(result.target!.cdnTokens.edges).toHaveLength(2);
-    expect(result.target!.cdnTokens.pageInfo.hasNextPage).toEqual(true);
-    endCursor = result.target!.cdnTokens.pageInfo.endCursor;
+    expect(result.target!.cdnAccessTokens.edges).toHaveLength(2);
+    expect(result.target!.cdnAccessTokens.pageInfo.hasNextPage).toEqual(true);
+    endCursor = result.target!.cdnAccessTokens.pageInfo.endCursor;
 
     result = await execute({
-      document: TargetCDNTokensQuery,
+      document: TargetCDNAccessTokensQuery,
       variables: {
         selector: {
           organization: organization.cleanId,
@@ -544,12 +557,12 @@ describe('CDN token', () => {
       authToken: token.secret,
     }).then(r => r.expectNoGraphQLErrors());
 
-    expect(result.target!.cdnTokens.edges).toHaveLength(1);
-    expect(result.target!.cdnTokens.pageInfo.hasNextPage).toEqual(false);
+    expect(result.target!.cdnAccessTokens.edges).toHaveLength(1);
+    expect(result.target!.cdnAccessTokens.pageInfo.hasNextPage).toEqual(false);
   });
 
   it('new created access tokens are added at the beginning of the connection', async () => {
-    const { createOrg } = await initSeed().createOwner();
+    const { createOrg, ownerToken } = await initSeed().createOwner();
     const { organization, createProject } = await createOrg();
     const { project, target, createToken } = await createProject(ProjectType.Federation);
 
@@ -560,7 +573,7 @@ describe('CDN token', () => {
     await token.createCdnAccess();
 
     const firstResult = await execute({
-      document: TargetCDNTokensQuery,
+      document: TargetCDNAccessTokensQuery,
       variables: {
         selector: {
           organization: organization.cleanId,
@@ -569,16 +582,16 @@ describe('CDN token', () => {
         },
         first: 2,
       },
-      authToken: token.secret,
+      authToken: ownerToken,
     }).then(r => r.expectNoGraphQLErrors());
 
-    const firstId = firstResult.target!.cdnTokens.edges[0].node.id;
-    expect(firstResult.target!.cdnTokens.edges).toHaveLength(1);
+    const firstId = firstResult.target!.cdnAccessTokens.edges[0].node.id;
+    expect(firstResult.target!.cdnAccessTokens.edges).toHaveLength(1);
 
     await token.createCdnAccess();
 
     const secondResult = await execute({
-      document: TargetCDNTokensQuery,
+      document: TargetCDNAccessTokensQuery,
       variables: {
         selector: {
           organization: organization.cleanId,
@@ -587,9 +600,128 @@ describe('CDN token', () => {
         },
         first: 2,
       },
+      authToken: ownerToken,
+    }).then(r => r.expectNoGraphQLErrors());
+    expect(secondResult.target!.cdnAccessTokens.edges).toHaveLength(2);
+    expect(secondResult.target!.cdnAccessTokens.edges[1].node.id).toEqual(firstId);
+  });
+
+  it('delete cdn access token', async () => {
+    const { createOrg, ownerToken } = await initSeed().createOwner();
+    const { organization, createProject } = await createOrg();
+    const { project, target, createToken } = await createProject(ProjectType.Federation);
+
+    const token = await createToken({
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.Settings],
+    });
+
+    await token.createCdnAccess();
+
+    let paginatedResult = await execute({
+      document: TargetCDNAccessTokensQuery,
+      variables: {
+        selector: {
+          organization: organization.cleanId,
+          project: project.cleanId,
+          target: target.cleanId,
+        },
+        first: 1,
+      },
+      authToken: ownerToken,
+    }).then(r => r.expectNoGraphQLErrors());
+    expect(paginatedResult.target!.cdnAccessTokens.edges).toHaveLength(1);
+
+    const deleteResult = await execute({
+      document: DeleteCDNAccessTokenMutation,
+      variables: {
+        input: {
+          selector: {
+            organization: organization.cleanId,
+            project: project.cleanId,
+            target: target.cleanId,
+          },
+          cdnAccessTokenId: paginatedResult.target!.cdnAccessTokens.edges[0].node.id,
+        },
+      },
+      authToken: ownerToken,
+    }).then(r => r.expectNoGraphQLErrors());
+
+    expect(deleteResult.deleteCdnAccessToken.ok).toBeDefined();
+    expect(deleteResult.deleteCdnAccessToken.error).toBeNull();
+    expect(deleteResult.deleteCdnAccessToken.ok!.deletedCdnAccessTokenId).toEqual(
+      paginatedResult.target!.cdnAccessTokens.edges[0].node.id,
+    );
+
+    paginatedResult = await execute({
+      document: TargetCDNAccessTokensQuery,
+      variables: {
+        selector: {
+          organization: organization.cleanId,
+          project: project.cleanId,
+          target: target.cleanId,
+        },
+        first: 1,
+      },
+      authToken: ownerToken,
+    }).then(r => r.expectNoGraphQLErrors());
+    expect(paginatedResult.target!.cdnAccessTokens.edges).toHaveLength(0);
+  });
+
+  it('delete cdn access token without access', async () => {
+    const { createOrg } = await initSeed().createOwner();
+    const { createProject, organization } = await createOrg();
+    const { target, project, createToken } = await createProject(ProjectType.Federation);
+    const token = await createToken({
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.Settings],
+    });
+
+    await token.createCdnAccess();
+
+    const paginatedResult = await execute({
+      document: TargetCDNAccessTokensQuery,
+      variables: {
+        selector: {
+          organization: organization.cleanId,
+          project: project.cleanId,
+          target: target.cleanId,
+        },
+        first: 1,
+      },
       authToken: token.secret,
     }).then(r => r.expectNoGraphQLErrors());
-    expect(secondResult.target!.cdnTokens.edges).toHaveLength(2);
-    expect(secondResult.target!.cdnTokens.edges[1].node.id).toEqual(firstId);
+    expect(paginatedResult.target!.cdnAccessTokens.edges).toHaveLength(1);
+
+    const { ownerToken } = await initSeed().createOwner();
+    const deleteResult = await execute({
+      document: DeleteCDNAccessTokenMutation,
+      variables: {
+        input: {
+          selector: {
+            organization: organization.cleanId,
+            project: project.cleanId,
+            target: target.cleanId,
+          },
+          cdnAccessTokenId: paginatedResult.target!.cdnAccessTokens.edges[0].node.id,
+        },
+      },
+      authToken: ownerToken,
+    }).then(r => r.expectGraphQLErrors());
+
+    expect(deleteResult).toMatchInlineSnapshot(`
+      [
+        {
+          "locations": [
+            {
+              "column": 3,
+              "line": 2,
+            },
+          ],
+          "message": "No access (reason: "Missing target:settings permission")",
+          "path": [
+            "deleteCdnAccessToken",
+          ],
+        },
+      ]
+    `);
   });
 });

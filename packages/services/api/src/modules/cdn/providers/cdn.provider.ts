@@ -24,8 +24,6 @@ const s3KeyPrefix = 'cdn-keys';
 })
 export class CdnProvider {
   private logger: Logger;
-  private encoder: TextEncoder;
-  private secretKeyData: Uint8Array;
 
   constructor(
     logger: Logger,
@@ -36,8 +34,6 @@ export class CdnProvider {
     @Inject(Storage) private storage: Storage,
   ) {
     this.logger = logger.child({ source: 'CdnProvider' });
-    this.encoder = new TextEncoder();
-    this.secretKeyData = this.encoder.encode(this.config.authPrivateKey);
   }
 
   isEnabled(): boolean {
@@ -55,8 +51,8 @@ export class CdnProvider {
     throw new HiveError(`CDN is not configured, cannot resolve CDN target url.`);
   }
 
-  async generateCdnAccess(args: { organizationId: string; projectId: string; targetId: string }) {
-    const result = await this.createCDNToken({
+  async generateCDNAccess(args: { organizationId: string; projectId: string; targetId: string }) {
+    const result = await this.createCDNAccessToken({
       organizationId: args.organizationId,
       projectId: args.projectId,
       targetId: args.targetId,
@@ -139,7 +135,11 @@ export class CdnProvider {
     );
   }
 
-  async createCDNToken(args: { organizationId: string; projectId: string; targetId: string }) {
+  async createCDNAccessToken(args: {
+    organizationId: string;
+    projectId: string;
+    targetId: string;
+  }) {
     await this.authManager.ensureTargetAccess({
       organization: args.organizationId,
       project: args.projectId,
@@ -201,7 +201,7 @@ export class CdnProvider {
     } as const;
   }
 
-  public async deleteCDNToken(args: {
+  public async deleteCDNAccessToken(args: {
     organizationId: string;
     projectId: string;
     targetId: string;
@@ -219,31 +219,44 @@ export class CdnProvider {
       cdnAccessTokenId: args.cdnAccessTokenId,
     });
 
-    if (record === null) {
+    if (record === null || record.targetId !== args.targetId) {
       return {
-        type: 'success',
-      };
+        type: 'failure',
+        reason: 'The CDN Access Token does not exist.',
+      } as const;
     }
 
     const headResponse = await this.s3Config.client.fetch(
-      [this.s3Config.endpoint, record.s3Key].join('/'),
+      [this.s3Config.endpoint, this.s3Config.bucket, record.s3Key].join('/'),
       {
         method: 'DELETE',
       },
     );
 
     if (headResponse.status !== 204) {
-      return;
+      return {
+        type: 'failure',
+        reason: 'Failed deleting CDN Access Token. Please try again later.',
+      } as const;
     }
 
-    await this.storage.deleteCDNAccessToken({ cdnAccessTokenId: args.cdnAccessTokenId });
+    await this.storage.deleteCDNAccessToken({
+      cdnAccessTokenId: args.cdnAccessTokenId,
+    });
+
+    if (record === null) {
+      return {
+        type: 'failure',
+        reason: 'The CDN Access Token. Does not exist.',
+      } as const;
+    }
 
     return {
       type: 'success',
     } as const;
   }
 
-  public async getPaginatedCDNTokens(args: {
+  public async getPaginatedCDNAccessTokensForTarget(args: {
     organizationId: string;
     projectId: string;
     targetId: string;

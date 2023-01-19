@@ -19,11 +19,41 @@ export const resolvers: CdnModule.Resolvers = {
         translator.translateTargetId(selector),
       ]);
 
-      return await cdn.generateCdnAccess({
+      return await cdn.generateCDNAccess({
         organizationId,
         projectId,
         targetId,
       });
+    },
+    deleteCdnAccessToken: async (_, { input }, { injector }) => {
+      const translator = injector.get(IdTranslator);
+
+      const [organizationId, projectId, targetId] = await Promise.all([
+        translator.translateOrganizationId(input.selector),
+        translator.translateProjectId(input.selector),
+        translator.translateTargetId(input.selector),
+      ]);
+
+      const deleteResult = await injector.get(CdnProvider).deleteCDNAccessToken({
+        organizationId,
+        projectId,
+        targetId,
+        cdnAccessTokenId: input.cdnAccessTokenId,
+      });
+
+      if (deleteResult.type === 'failure') {
+        return {
+          error: {
+            message: deleteResult.reason,
+          },
+        };
+      }
+
+      return {
+        ok: {
+          deletedCdnAccessTokenId: input.cdnAccessTokenId,
+        },
+      };
     },
   },
   Query: {
@@ -34,8 +64,8 @@ export const resolvers: CdnModule.Resolvers = {
     },
   },
   Target: {
-    async cdnTokens(target, args, context) {
-      const result = await context.injector.get(CdnProvider).getPaginatedCDNTokens({
+    async cdnAccessTokens(target, args, context) {
+      const result = await context.injector.get(CdnProvider).getPaginatedCDNAccessTokensForTarget({
         targetId: target.id,
         projectId: target.projectId,
         organizationId: target.orgId,

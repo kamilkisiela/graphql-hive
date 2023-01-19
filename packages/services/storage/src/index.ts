@@ -2773,15 +2773,17 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     },
 
     async deleteCDNAccessToken(args) {
-      await pool.query(sql`
+      const result = await pool.maybeOne(sql`
         DELETE
         FROM
           "public"."cdn_access_tokens"
         WHERE
           "id" = ${args.cdnAccessTokenId}
+        RETURNING
+          "id"
       `);
 
-      return true;
+      return result != null;
     },
 
     async getPaginatedCDNAccessTokensForTarget(args) {
