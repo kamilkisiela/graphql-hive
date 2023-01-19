@@ -12,9 +12,19 @@ jobs:
       imageTag: ${{ github.sha }}
       publishSourceMaps: true
       publishLatest: true
-      targets: |
-        build
-        rust
+      targets: build
+    secrets: inherit
+
+  # Builds Rust crates, and creates Docker images
+  build-rust:
+    name: build_rust
+    uses: ./.github/workflows/build-and-dockerize.yaml
+    with:
+      imageTag: ${{ github.sha }}
+      publishLatest: true
+      targets: rust
+      build: false
+      publishPrComment: false
     secrets: inherit
 
   # Build and publish Rust crates and binaries
