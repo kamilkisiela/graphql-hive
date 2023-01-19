@@ -1003,7 +1003,7 @@ importers:
       '@radix-ui/react-toolbar': 0.1.5
       '@sentry/nextjs': 7.31.1
       '@sentry/types': 7.31.1
-      '@stripe/react-stripe-js': 1.16.3
+      '@stripe/react-stripe-js': 1.16.4
       '@stripe/stripe-js': 1.46.0
       '@tailwindcss/line-clamp': 0.4.2
       '@tanstack/react-table': 8.0.0-beta.8
@@ -1093,7 +1093,7 @@ importers:
       '@radix-ui/react-toolbar': 0.1.5_react@18.2.0
       '@sentry/nextjs': 7.31.1_next@13.1.1+react@18.2.0
       '@sentry/types': 7.31.1
-      '@stripe/react-stripe-js': 1.16.3_keartrz7uyerl3wkpjpue4xbhy
+      '@stripe/react-stripe-js': 1.16.4_keartrz7uyerl3wkpjpue4xbhy
       '@stripe/stripe-js': 1.46.0
       '@tanstack/react-table': 8.0.0-beta.8_biqbaboplfbrettd7655fr4n2y
       '@theguild/editor': 0.4.1_m3acdzultzo2owbx5gwkccg4tm
@@ -10835,8 +10835,8 @@ packages:
     dev: false
     patched: true
 
-  /@stripe/react-stripe-js/1.16.3_keartrz7uyerl3wkpjpue4xbhy:
-    resolution: {integrity: sha512-gS6UDGEuM92K50pFB3o//EqqPxmaqpC8IrsBda4P4LxeULoO0pBFSHXJ5Ab6uA7G2lyO2bluvSLereh0OH9GrQ==}
+  /@stripe/react-stripe-js/1.16.4_keartrz7uyerl3wkpjpue4xbhy:
+    resolution: {integrity: sha512-x+Zstd3mHctNbSATOdbA2rOVXqGhbLU1ziNgcWqYCaFXj2dPKzjkBiUJfDhoARJVXVGOts0oZ8teTkOFY/ZRzQ==}
     peerDependencies:
       '@stripe/stripe-js': ^1.44.1
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
