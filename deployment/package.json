@@ -9,7 +9,7 @@
     "@pulumi/cloudflare": "4.15.0",
     "@pulumi/kubernetes": "3.23.1",
     "@pulumi/kubernetesx": "0.1.6",
-    "@pulumi/pulumi": "3.51.1",
+    "@pulumi/pulumi": "3.52.0",
     "@pulumi/random": "4.8.2",
     "js-yaml": "4.1.0",
     "pg-connection-string": "2.5.0"
