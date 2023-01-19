@@ -4,7 +4,7 @@ CREATE TABLE "public"."cdn_access_tokens" (
   , "s3_key" text UNIQUE NOT NULL
   , "first_characters" text NOT NULL
   , "last_characters" text NOT NULL
-  , "is_revoked" boolean NOT NULL DEFAULT false
+  , "alias" text NOT NULL
   , "created_at" timestamp with time zone NOT NULL DEFAULT NOW()
 );
 

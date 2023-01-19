@@ -82,6 +82,7 @@ export class CdnProvider {
       s3Key,
       firstCharacters: token.substring(0, 3),
       lastCharacters: token.substring(token.length - 3),
+      alias: 'CDN Access Token',
     });
 
     return {

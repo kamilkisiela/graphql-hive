@@ -2691,6 +2691,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           , "s3_key"
           , "first_characters"
           , "last_characters"
+          , "alias"
         )
         VALUES (
           ${args.id}
@@ -2698,6 +2699,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           , ${args.s3Key}
           , ${args.firstCharacters}
           , ${args.lastCharacters}
+          , ${args.alias}
         )
         ON CONFLICT ("s3_key") DO NOTHING
         RETURNING
@@ -2706,6 +2708,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           , "s3_key"
           , "first_characters"
           , "last_characters"
+          , "alias"
           , "created_at"
       `);
 
@@ -2782,6 +2785,7 @@ const CDNAccessTokenModel = zod.object({
   s3_key: zod.string(),
   first_characters: zod.string(),
   last_characters: zod.string(),
+  alias: zod.string(),
   created_at: zod.number(),
 });
 
@@ -2795,6 +2799,7 @@ const decodeCDNAccessTokenRecord = (result: unknown): CDNAccessToken => {
     firstCharacters: rawRecord.first_characters,
     lastCharacters: rawRecord.last_characters,
     createdAt: new Date(rawRecord.created_at).toString(),
+    alias: rawRecord.alias,
   };
 };
 

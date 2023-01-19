@@ -448,6 +448,7 @@ export interface Storage {
     s3Key: string;
     firstCharacters: string;
     lastCharacters: string;
+    alias: string;
   }): Promise<CDNAccessToken | null>;
 }
 

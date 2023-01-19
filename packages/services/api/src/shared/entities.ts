@@ -146,6 +146,7 @@ export interface CDNAccessToken {
   readonly s3Key: string;
   readonly firstCharacters: string;
   readonly lastCharacters: string;
+  readonly alias: string;
   readonly createdAt: string;
 }
 
