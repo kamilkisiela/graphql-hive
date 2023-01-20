@@ -22,7 +22,7 @@
     "@hive/api": "workspace:*",
     "@types/service-worker-mock": "2.0.1",
     "@whatwg-node/fetch": "0.6.2",
-    "@whatwg-node/server": "0.5.6",
+    "@whatwg-node/server": "0.5.7",
     "esbuild": "0.16.11",
     "fastify": "3.29.4",
     "itty-router": "2.6.6",
