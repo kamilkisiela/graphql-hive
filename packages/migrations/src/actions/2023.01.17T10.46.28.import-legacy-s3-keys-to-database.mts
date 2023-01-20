@@ -2,6 +2,7 @@ import { createHmac } from 'crypto';
 import * as slonik from '@slonik/migrator';
 import { crypto, fetch, Headers, Request, TextEncoder } from '@whatwg-node/fetch';
 import bcryptjs from 'bcryptjs';
+import pLimit from 'p-limit';
 import * as zod from 'zod';
 
 // treat an empty string (`''`) as undefined
@@ -98,29 +99,24 @@ export const up: slonik.Migration = async ({ context: { connection, sql } }) => 
 
   let lastCursor: null | Cursor = null;
 
-  do {
-    const items: zod.TypeOf<typeof TargetsModel> = await getPaginationTargets(lastCursor);
-    for (const item of items) {
-      const s3Key = `s3-legacy-keys/${item.id}`;
-      const privateAccessKey = generateLegacyCDNAccessToken(item.id);
-      const firstCharacters = privateAccessKey.substring(0, 3);
-      const lastCharacters = privateAccessKey.substring(privateAccessKey.length - 3);
-      const accessKeyHash = await bcryptjs.hash(privateAccessKey, await bcryptjs.genSalt());
+  async function seedLegacyCDNKey(item: zod.TypeOf<typeof TargetsModel>[number]): Promise<void> {
+    const s3Key = `s3-legacy-keys/${item.id}`;
+    const privateAccessKey = generateLegacyCDNAccessToken(item.id);
+    const firstCharacters = privateAccessKey.substring(0, 3);
+    const lastCharacters = privateAccessKey.substring(privateAccessKey.length - 3);
+    const accessKeyHash = await bcryptjs.hash(privateAccessKey, await bcryptjs.genSalt());
 
-      // After creation on database
-      const response = await s3Client.fetch(
-        [env.S3_ENDPOINT, env.S3_BUCKET_NAME, s3Key].join('/'),
-        {
-          method: 'PUT',
-          body: accessKeyHash,
-        },
-      );
+    // After creation on database
+    const response = await s3Client.fetch([env.S3_ENDPOINT, env.S3_BUCKET_NAME, s3Key].join('/'), {
+      method: 'PUT',
+      body: accessKeyHash,
+    });
 
-      if (response.status !== 200) {
-        throw new Error(`Unexpected Status for storing key. (status=${response.status})`);
-      }
+    if (response.status !== 200) {
+      throw new Error(`Unexpected Status for storing key. (status=${response.status})`);
+    }
 
-      const query = sql`
+    const query = sql`
       INSERT INTO
         "cdn_access_tokens"
         (
@@ -141,8 +137,14 @@ export const up: slonik.Migration = async ({ context: { connection, sql } }) => 
       ON CONFLICT DO NOTHING
     `;
 
-      await connection.query(query);
-    }
+    await connection.query(query);
+  }
+
+  const limit = pLimit(20);
+
+  do {
+    const items: zod.TypeOf<typeof TargetsModel> = await getPaginationTargets(lastCursor);
+    await Promise.all(items.map(item => limit(() => seedLegacyCDNKey(item))));
 
     lastCursor = null;
     if (items.length > 0) {
