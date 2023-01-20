@@ -89,7 +89,7 @@ export const up: slonik.Migration = async ({ context: { connection, sql } }) => 
         "created_at" ASC
         , "id" ASC
       LIMIT
-        20
+        200
     `;
 
     const items = await connection.query(query);
@@ -116,7 +116,6 @@ export const up: slonik.Migration = async ({ context: { connection, sql } }) => 
         },
       );
 
-      // Should probably do a retry here
       if (response.status !== 200) {
         throw new Error(`Unexpected Status for storing key. (status=${response.status})`);
       }
