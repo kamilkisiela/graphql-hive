@@ -1,6 +1,6 @@
 CREATE TABLE "public"."cdn_access_tokens" (
   "id" uuid PRIMARY KEY DEFAULT uuid_generate_v4()
-  , "target_id" uuid REFERENCES "targets"("id") NOT NULL ON DELETE CASCADE
+  , "target_id" uuid NOT NULL REFERENCES "targets"("id") ON DELETE CASCADE
   , "s3_key" text UNIQUE NOT NULL
   , "first_characters" text NOT NULL
   , "last_characters" text NOT NULL
