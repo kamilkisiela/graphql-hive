@@ -129,7 +129,7 @@ export const up: slonik.Migration = async ({ context: { connection, sql } }) => 
           , "s3_key"
           , "first_characters"
           , "last_characters"
-          , "is_revoked"
+          , "alias"
         )
       VALUES
         (
@@ -137,7 +137,7 @@ export const up: slonik.Migration = async ({ context: { connection, sql } }) => 
           , ${s3Key}
           , ${firstCharacters}
           , ${lastCharacters}
-          , false
+          , 'CDN Access Token'
         )
       ON CONFLICT DO NOTHING
     `;
