@@ -154,8 +154,8 @@ export const up: slonik.Migration = async ({ context: { connection, sql } }) => 
   } while (lastCursor !== null);
 };
 
-export const down: slonik.Migration = async ({ context: { connection, sql } }) => {
-  await connection.query(sql`raise 'down migration not implemented'`);
+export const down: slonik.Migration = async () => {
+  throw new Error('down migration not implemented.');
 };
 
 const encoder = new TextEncoder();
