@@ -161,7 +161,7 @@ importers:
   integration-tests:
     specifiers:
       '@apollo/gateway': 2.2.3
-      '@apollo/server': 4.3.0
+      '@apollo/server': 4.3.1
       '@app/gql': link:./testkit/gql
       '@aws-sdk/client-s3': 3.252.0
       '@esm2cjs/execa': 6.1.1-cjs.1
@@ -190,7 +190,7 @@ importers:
       zod: 3.20.2
     dependencies:
       '@apollo/gateway': 2.2.3_graphql@16.6.0
-      '@apollo/server': 4.3.0_graphql@16.6.0
+      '@apollo/server': 4.3.1_graphql@16.6.0
       '@app/gql': link:testkit/gql
       '@aws-sdk/client-s3': 3.252.0
       '@esm2cjs/execa': 6.1.1-cjs.1
@@ -1592,8 +1592,8 @@ packages:
       graphql: 16.6.0
     dev: false
 
-  /@apollo/server/4.3.0_graphql@16.6.0:
-    resolution: {integrity: sha512-M30z/hExJtvqGE4UFJTa0W7FoRPPXmEjrrHK16+v63hE+deH1gYiXq0MdXKvMdoQhQQqnv09jo9mDDEpMBJvjg==}
+  /@apollo/server/4.3.1_graphql@16.6.0:
+    resolution: {integrity: sha512-FSeZVxysH63BotZwqE6jI0yoUwHRBpgF2auXdRH3T9rXeUd3acposh5cHHyJHJvmQAbboeR/KyMEEuRaVFaM3Q==}
     engines: {node: '>=14.16.0'}
     peerDependencies:
       graphql: ^16.6.0
@@ -1608,7 +1608,7 @@ packages:
       '@apollo/utils.logger': 2.0.0
       '@apollo/utils.usagereporting': 2.0.0_graphql@16.6.0
       '@apollo/utils.withrequired': 2.0.0
-      '@graphql-tools/schema': 9.0.12_graphql@16.6.0
+      '@graphql-tools/schema': 9.0.13_graphql@16.6.0
       '@josephg/resolvable': 1.0.1
       '@types/express': 4.17.14
       '@types/express-serve-static-core': 4.17.31
