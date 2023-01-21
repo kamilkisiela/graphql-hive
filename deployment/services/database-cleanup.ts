@@ -19,12 +19,7 @@ export function deployDatabaseCleanupJob(options: { deploymentEnv: DeploymentEnv
       env: {
         PG_CONNECTION_STRING: rawConnectionString,
       },
-      args: [
-        'psql',
-        '$(PG_CONNECTION_STRING)',
-        '-c',
-        'DROP SCHEMA public CASCADE; CREATE SCHEMA public;',
-      ],
+      args: ['$(PG_CONNECTION_STRING)', '-c', 'DROP SCHEMA public CASCADE; CREATE SCHEMA public;'],
     },
     [],
   ).deployAsJob();
