@@ -28,6 +28,7 @@ import { deployWebhooks } from './services/webhooks';
 import { DeploymentEnvironment } from './types';
 import { optimizeAzureCluster } from './utils/azure-helpers';
 import { createDockerImageFactory } from './utils/docker-images';
+import { isDefined } from './utils/helpers';
 
 optimizeAzureCluster();
 
@@ -108,7 +109,7 @@ const dbMigrations = deployDbMigrations({
   image: dockerImages.getImageId('storage', imagesTag),
   imagePullSecret,
   force: forceRunDbMigrations,
-  dependencies: databaseCleanupJob ? [databaseCleanupJob] : [],
+  dependencies: [databaseCleanupJob].filter(isDefined),
 });
 
 const tokensApi = deployTokens({
