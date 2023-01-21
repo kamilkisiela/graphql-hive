@@ -444,7 +444,7 @@ importers:
       '@cloudflare/workers-types': 4.20221111.1
       '@types/service-worker-mock': 2.0.1
       '@whatwg-node/fetch': 0.6.2
-      '@whatwg-node/server': 0.5.6
+      '@whatwg-node/server': 0.5.7
       esbuild: 0.16.11
       itty-router: 2.6.6
       itty-router-extras: 0.4.2
@@ -458,7 +458,7 @@ importers:
       '@cloudflare/workers-types': 4.20221111.1
       '@types/service-worker-mock': 2.0.1
       '@whatwg-node/fetch': 0.6.2
-      '@whatwg-node/server': 0.5.6
+      '@whatwg-node/server': 0.5.7
       esbuild: 0.16.11
       itty-router: 2.6.6
       itty-router-extras: 0.4.2
@@ -470,7 +470,7 @@ importers:
       '@hive/api': workspace:*
       '@types/service-worker-mock': 2.0.1
       '@whatwg-node/fetch': 0.6.2
-      '@whatwg-node/server': 0.5.6
+      '@whatwg-node/server': 0.5.7
       esbuild: 0.16.11
       fastify: 3.29.4
       graphql: 16.6.0
@@ -487,7 +487,7 @@ importers:
       '@hive/api': link:../api
       '@types/service-worker-mock': 2.0.1
       '@whatwg-node/fetch': 0.6.2
-      '@whatwg-node/server': 0.5.6
+      '@whatwg-node/server': 0.5.7
       esbuild: 0.16.11
       fastify: 3.29.4
       itty-router: 2.6.6
@@ -656,7 +656,7 @@ importers:
       '@swc/core': 1.3.24
       '@trpc/server': 10.9.0
       '@whatwg-node/fetch': 0.6.2
-      '@whatwg-node/server': 0.5.6
+      '@whatwg-node/server': 0.5.7
       dotenv: 16.0.3
       fastify: 3.29.4
       got: 12.5.3
@@ -684,7 +684,7 @@ importers:
       '@sentry/tracing': 7.31.1
       '@trpc/server': 10.9.0
       '@whatwg-node/fetch': 0.6.2
-      '@whatwg-node/server': 0.5.6
+      '@whatwg-node/server': 0.5.7
       dotenv: 16.0.3
       got: 12.5.3
       graphql: 16.6.0
@@ -12046,8 +12046,8 @@ packages:
     transitivePeerDependencies:
       - encoding
 
-  /@whatwg-node/server/0.5.6:
-    resolution: {integrity: sha512-C4sUhRaHjRljqsZ37xWzqPcrIcfi7Kp+T++8zhl6KVube6D8quqJPFYMHxFzGBaEMx10ghEkzsA1qkcskxmUYA==}
+  /@whatwg-node/server/0.5.7:
+    resolution: {integrity: sha512-OX1Oj+NA8D9zpB+IPKZ2s6zVQPUVKTcD+UVcCFQ3b9Wek/fM0RZFSm9sdnUoejt9MC9Y2vIjhbXa46VmSoWz2Q==}
     peerDependencies:
       '@types/node': ^18.0.6
     dependencies:
