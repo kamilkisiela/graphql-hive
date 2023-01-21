@@ -54,6 +54,8 @@ export function deployDbMigrations({
         TS_NODE_TRANSPILE_ONLY: 'true',
         ...deploymentEnv,
         // Change to this env var will lead to force rerun of the migration job
+        // Since K8s job are immutable, we can't edit or ask K8s to re-run a Job, so we are doing a
+        // pseudo change to an env var, which causes Pulumi to re-create the Job.
         IGNORE_RERUN_NONCE: force ? Date.now().toString() : '0',
       },
     },

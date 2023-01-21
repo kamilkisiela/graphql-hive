@@ -18,6 +18,8 @@ export function deployDatabaseCleanupJob(options: { deploymentEnv: DeploymentEnv
       image: 'jbergknoff/postgresql-client',
       env: {
         PG_CONNECTION_STRING: rawConnectionString,
+        // to make sure we can run this over and over
+        IGNORE_RERUN_NONCE: Date.now().toString(),
       },
       args: ['$(PG_CONNECTION_STRING)', '-c', 'DROP SCHEMA public CASCADE; CREATE SCHEMA public;'],
     },
