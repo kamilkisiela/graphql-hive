@@ -15,12 +15,16 @@ export function deployDbMigrations({
   kafka,
   image,
   imagePullSecret,
+  dependencies,
+  force,
 }: {
   deploymentEnv: DeploymentEnvironment;
   clickhouse: Clickhouse;
   kafka: Kafka;
   image: string;
   imagePullSecret: k8s.core.v1.Secret;
+  dependencies?: pulumi.Resource[];
+  force?: boolean;
 }) {
   const rawConnectionString = apiConfig.requireSecret('postgresConnectionString');
   const connectionString = rawConnectionString.apply(rawConnectionString =>
@@ -49,9 +53,11 @@ export function deployDbMigrations({
         KAFKA_BROKER: kafka.config.endpoint,
         TS_NODE_TRANSPILE_ONLY: 'true',
         ...deploymentEnv,
+        // Change to this env var will lead to force rerun of the migration job
+        IGNORE_RERUN_NONCE: force ? Date.now().toString() : '0',
       },
     },
-    [clickhouse.deployment, clickhouse.service],
+    [clickhouse.deployment, clickhouse.service, ...(dependencies || [])],
     clickhouse.service,
   ).deployAsJob();
 
