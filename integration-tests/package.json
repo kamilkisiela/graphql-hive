@@ -35,7 +35,7 @@
     "@hive/server": "workspace:*",
     "@types/dockerode": "3.3.14",
     "@types/ioredis": "4.28.10",
-    "@types/jest": "29.2.4",
+    "@types/jest": "29.2.6",
     "ts-jest": "29.0.3",
     "tslib": "2.4.1"
   }
