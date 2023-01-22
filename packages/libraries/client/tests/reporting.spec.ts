@@ -1,7 +1,7 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { buildSchema, parse } from 'graphql';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import nock from 'nock';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { buildSubgraphSchema } from '@apollo/federation';
 import { createHive } from '../src/client';
 import { version } from '../src/version';
