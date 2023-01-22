@@ -55,8 +55,8 @@ importers:
       '@next/eslint-plugin-next': 13.1.1
       '@sentry/cli': 2.11.0
       '@swc/core': 1.3.24
-      '@theguild/eslint-config': 0.7.0-alpha-20230122192931-4f9df03
-      '@theguild/prettier-config': 1.1.0-alpha-20230122192931-4f9df03
+      '@theguild/eslint-config': ^0.7.0
+      '@theguild/prettier-config': ^1.1.0
       '@types/jest': 29.2.6
       '@types/node': 18.11.18
       babel-jest: 29.3.1
@@ -104,8 +104,8 @@ importers:
       '@next/eslint-plugin-next': 13.1.1
       '@sentry/cli': 2.11.0
       '@swc/core': 1.3.24
-      '@theguild/eslint-config': 0.7.0-alpha-20230122192931-4f9df03_lzzuuodtsqwxnvqeq4g4likcqa
-      '@theguild/prettier-config': 1.1.0-alpha-20230122192931-4f9df03_prettier@2.8.1
+      '@theguild/eslint-config': 0.7.0_lzzuuodtsqwxnvqeq4g4likcqa
+      '@theguild/prettier-config': 1.1.0_prettier@2.8.1
       '@types/jest': 29.2.6
       '@types/node': 18.11.18
       babel-jest: 29.3.1_@babel+core@7.20.12
@@ -11193,8 +11193,8 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@theguild/eslint-config/0.7.0-alpha-20230122192931-4f9df03_lzzuuodtsqwxnvqeq4g4likcqa:
-    resolution: {integrity: sha512-zgzRhSQYIAI68+SZ3cSWx4LChMfZiznez6HgfQzzSsdD6B4Cj3DZwmKh7B/7irCs6EaHY2urUMLYH8cB855+ag==}
+  /@theguild/eslint-config/0.7.0_lzzuuodtsqwxnvqeq4g4likcqa:
+    resolution: {integrity: sha512-XQfJrpMSjIsubN4oAFGQbA+GEwqN2M/LQUfR5R7eBTe+9p+VupvNUrP/WDl29GfUDjmGLDrHxUrzKD3Izi32DQ==}
     peerDependencies:
       eslint: ^8.24.0
     dependencies:
@@ -11221,8 +11221,8 @@ packages:
       - typescript
     dev: true
 
-  /@theguild/prettier-config/1.1.0-alpha-20230122192931-4f9df03_prettier@2.8.1:
-    resolution: {integrity: sha512-/68eWYSqqrYDaExrvV+ARplNuWcwNEnsYDpwSBIl32wJiLw7GbkweKXNJ1Xg77eGUKwcBbYX7778hljSw2yynA==}
+  /@theguild/prettier-config/1.1.0_prettier@2.8.1:
+    resolution: {integrity: sha512-+8Cmd85O3Ourz4YBurN9TKuokCrlW/1ogNwA6EqAAFKHN7FSCJPErofhhNiwF6wMxC0BLkbIac0FowCAiVxdQA==}
     peerDependencies:
       prettier: ^2
     dependencies:
