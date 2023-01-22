@@ -4,10 +4,10 @@ import clsx from 'clsx';
 import { FiGithub, FiGlobe, FiRadio, FiServer } from 'react-icons/fi';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { useMounted } from '@theguild/components';
+import { Pricing } from '../pricing';
 import cicdImage from '../../public/any-ci-cd.svg';
 import monitoringImage from '../../public/features/monitoring-preview.png';
 import schemaHistoryImage from '../../public/features/schema-history.png';
-import { Pricing } from '../pricing';
 
 const classes = {
   link: clsx(
