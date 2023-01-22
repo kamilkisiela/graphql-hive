@@ -1,5 +1,5 @@
-import type { Span } from '@sentry/types';
 import { Inject, Injectable, Scope } from 'graphql-modules';
+import type { Span } from '@sentry/types';
 import { uuid } from '../../../shared/helpers';
 import { Logger } from '../../shared/providers/logger';
 import type { Redis } from '../../shared/providers/redis';

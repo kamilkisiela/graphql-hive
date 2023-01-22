@@ -1,9 +1,9 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { captureException, startTransaction } from '@sentry/nextjs';
-import type { Transaction } from '@sentry/types';
 import hyperid from 'hyperid';
 import { env } from '@/env/backend';
 import { extractAccessTokenFromRequest } from '@/lib/api/extract-access-token-from-request';
+import { captureException, startTransaction } from '@sentry/nextjs';
+import type { Transaction } from '@sentry/types';
 
 const reqIdGenerate = hyperid({ fixedLength: true });
 

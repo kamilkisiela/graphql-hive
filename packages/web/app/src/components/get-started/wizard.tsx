@@ -1,4 +1,9 @@
 import React from 'react';
+import clsx from 'clsx';
+import { VscError, VscIssues } from 'react-icons/vsc';
+import { DocumentType, gql } from 'urql';
+import { OrganizationType } from '@/graphql';
+import { getDocsUrl } from '@/lib/docs-url';
 import {
   Drawer,
   DrawerBody,
@@ -8,11 +13,6 @@ import {
   DrawerOverlay,
   useDisclosure,
 } from '@chakra-ui/react';
-import clsx from 'clsx';
-import { VscError, VscIssues } from 'react-icons/vsc';
-import { DocumentType, gql } from 'urql';
-import { OrganizationType } from '@/graphql';
-import { getDocsUrl } from '@/lib/docs-url';
 
 const GetStartedWizard_GetStartedProgress = gql(/* GraphQL */ `
   fragment GetStartedWizard_GetStartedProgress on OrganizationGetStarted {

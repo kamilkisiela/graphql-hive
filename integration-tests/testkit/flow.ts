@@ -1,6 +1,6 @@
-import { OperationBodyByHashInput } from './../../packages/web/app/src/graphql/index';
 import { gql } from '@app/gql';
 import { fetch } from '@whatwg-node/fetch';
+import { OperationBodyByHashInput } from './../../packages/web/app/src/graphql/index';
 import type {
   AnswerOrganizationTransferRequestInput,
   CreateOrganizationInput,

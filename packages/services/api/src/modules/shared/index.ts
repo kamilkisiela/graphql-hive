@@ -1,6 +1,6 @@
 import { createModule } from 'graphql-modules';
-import { resolvers } from './resolvers';
 import typeDefs from './module.graphql';
+import { resolvers } from './resolvers';
 
 export const sharedModule = createModule({
   id: 'shared',

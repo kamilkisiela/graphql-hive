@@ -1,10 +1,10 @@
-import './dev-polyfill';
 import { createServer } from 'http';
-import { ArtifactStorageReader } from '@hive/api/src/modules/schema/providers/artifact-storage-reader';
-import { createServerAdapter } from '@whatwg-node/server';
 import itty from 'itty-router';
 import { json, withParams } from 'itty-router-extras';
+import { ArtifactStorageReader } from '@hive/api/src/modules/schema/providers/artifact-storage-reader';
+import { createServerAdapter } from '@whatwg-node/server';
 import { createArtifactRequestHandler } from './artifact-handler';
+import './dev-polyfill';
 import { devStorage } from './dev-polyfill';
 import { createRequestHandler } from './handler';
 import { createIsKeyValid } from './key-validation';

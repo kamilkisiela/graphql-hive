@@ -1,6 +1,6 @@
+import { GraphQLError } from 'graphql';
 import * as Sentry from '@sentry/node';
 import type { Span } from '@sentry/types';
-import { GraphQLError } from 'graphql';
 
 export type SentryContext = Parameters<Span['startChild']>[0] & {
   captureException?: boolean;

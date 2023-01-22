@@ -1,4 +1,12 @@
 import { createHash } from 'crypto';
+import type {
+  DefinitionNode,
+  DocumentNode,
+  OperationDefinitionNode,
+  OperationTypeNode,
+} from 'graphql';
+import { Kind, parse } from 'graphql';
+import LRU from 'tiny-lru';
 import { normalizeOperation as coreNormalizeOperation } from '@graphql-hive/core';
 import type { FastifyLoggerInstance } from '@hive/service-common';
 import type {
@@ -8,14 +16,6 @@ import type {
   RawOperationMapRecord,
   RawReport,
 } from '@hive/usage-common';
-import type {
-  DefinitionNode,
-  DocumentNode,
-  OperationDefinitionNode,
-  OperationTypeNode,
-} from 'graphql';
-import { Kind, parse } from 'graphql';
-import LRU from 'tiny-lru';
 import { cache } from './helpers';
 import {
   normalizeCacheMisses,

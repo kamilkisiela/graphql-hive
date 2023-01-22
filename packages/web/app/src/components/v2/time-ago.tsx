@@ -1,7 +1,7 @@
 import { ReactElement, useMemo } from 'react';
-import { TimeAgo as ReactTimeAgo } from '@n1ru4l/react-time-ago';
 import clsx from 'clsx';
 import { format } from 'date-fns';
+import { TimeAgo as ReactTimeAgo } from '@n1ru4l/react-time-ago';
 
 export const TimeAgo = ({
   date,

@@ -25,8 +25,8 @@ Hive Client comes with generic client and plugins for [Envelop](https://envelop.
 built on top of the envelop engine.
 
 ```ts
-import { createYoga } from '@graphql-yoga/node'
 import { useHive } from '@graphql-hive/client'
+import { createYoga } from '@graphql-yoga/node'
 
 const server = createYoga({
   plugins: [
@@ -200,10 +200,10 @@ You can connect your Apollo Gateway with Hive client.
 - `HIVE_CDN_KEY` - the access
 
 ```ts
-import { createSupergraphManager } from '@graphql-hive/client'
 import { ApolloGateway } from '@apollo/gateway'
 import { ApolloServer } from '@apollo/server'
 import { startStandaloneServer } from '@apollo/server/standalone'
+import { createSupergraphManager } from '@graphql-hive/client'
 
 const gateway = new ApolloGateway({
   // Apollo Gateway will fetch Supergraph from GraphQL Hive CDN
@@ -233,8 +233,8 @@ operation.
 ### GraphQL Yoga Example
 
 ```ts
-import { createYoga } from '@graphql-yoga/node'
 import { useHive } from '@graphql-hive/client'
+import { createYoga } from '@graphql-yoga/node'
 
 const server = createYoga({
   plugins: [
@@ -291,9 +291,9 @@ const envelopProxy = envelop({
 #### Apollo Server Example
 
 ```ts
+import type { IncomingMessage } from 'http'
 import { ApolloServer } from 'apollo-server'
 import { hiveApollo } from '@graphql-hive/client'
-import type { IncomingMessage } from 'http'
 
 const server = new ApolloServer({
   typeDefs,
@@ -328,8 +328,8 @@ The example is based on GraphQL Yoga, but the same configuration applies to Apol
 others.
 
 ```ts
-import { createYoga } from '@graphql-yoga/node'
 import { useHive } from '@graphql-hive/client'
+import { createYoga } from '@graphql-yoga/node'
 
 const server = createYoga({
   plugins: [

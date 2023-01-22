@@ -1,8 +1,8 @@
-import type { inferRouterInputs } from '@trpc/server';
-import { initTRPC } from '@trpc/server';
 import type { FastifyLoggerInstance } from 'fastify';
 import { Redis } from 'ioredis';
 import { z } from 'zod';
+import type { inferRouterInputs } from '@trpc/server';
+import { initTRPC } from '@trpc/server';
 import { buildCounter, supergraphCounter, validateCounter } from './metrics';
 import { pickOrchestrator } from './orchestrators';
 

@@ -1,7 +1,7 @@
 import { createModule } from 'graphql-modules';
+import typeDefs from './module.graphql';
 import { OIDCIntegrationsProvider } from './providers/oidc-integrations.provider';
 import { resolvers } from './resolvers';
-import typeDefs from './module.graphql';
 
 export const oidcIntegrationsModule = createModule({
   id: 'oidc-integrations',

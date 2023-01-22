@@ -1,7 +1,7 @@
 import { createModule } from 'graphql-modules';
+import typeDefs from './module.graphql';
 import { ActivityManager } from './providers/activity-manager';
 import { resolvers } from './resolvers';
-import typeDefs from './module.graphql';
 
 export const activityModule = createModule({
   id: 'activity',

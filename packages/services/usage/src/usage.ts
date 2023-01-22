@@ -1,8 +1,8 @@
 import { createHash, randomUUID } from 'crypto';
+import { CompressionTypes, Kafka, logLevel, Partitioners } from 'kafkajs';
 import type { FastifyLoggerInstance } from '@hive/service-common';
 import type { RawOperationMap, RawReport } from '@hive/usage-common';
 import { compress } from '@hive/usage-common';
-import { CompressionTypes, Kafka, logLevel, Partitioners } from 'kafkajs';
 import { calculateChunkSize, createKVBuffer, isBufferTooBigError } from './buffer';
 import type { KafkaEnvironment } from './environment';
 import {

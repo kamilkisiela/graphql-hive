@@ -1,6 +1,6 @@
 import { ReactElement } from 'react';
-import { Item, RadioGroupItemProps, RadioGroupProps, Root } from '@radix-ui/react-radio-group';
 import clsx from 'clsx';
+import { Item, RadioGroupItemProps, RadioGroupProps, Root } from '@radix-ui/react-radio-group';
 
 export const RadioGroup = ({ children, className, ...props }: RadioGroupProps): ReactElement => {
   return (

@@ -1,7 +1,7 @@
+import { Kafka, KafkaMessage, logLevel } from 'kafkajs';
 import type { FastifyLoggerInstance } from '@hive/service-common';
 import type { RawReport } from '@hive/usage-common';
 import { decompress } from '@hive/usage-common';
-import { Kafka, KafkaMessage, logLevel } from 'kafkajs';
 import type { KafkaEnvironment } from './environment';
 import {
   errors,

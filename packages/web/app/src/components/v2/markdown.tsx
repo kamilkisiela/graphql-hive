@@ -1,6 +1,6 @@
-import { css } from '@emotion/react';
 import { sanitize } from 'dompurify';
 import snarkdown from 'snarkdown';
+import { css } from '@emotion/react';
 
 const styles = css`
   a {

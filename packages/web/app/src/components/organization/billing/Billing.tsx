@@ -1,5 +1,5 @@
-import 'twin.macro';
 import React, { PropsWithChildren } from 'react';
+import 'twin.macro';
 import { useQuery } from 'urql';
 import { DataWrapper } from '@/components/common/DataWrapper';
 import {

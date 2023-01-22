@@ -1,6 +1,5 @@
-import 'twin.macro';
 import React, { FormEventHandler } from 'react';
-import { AccordionButton, AccordionItem, AccordionPanel, Select } from '@chakra-ui/react';
+import 'twin.macro';
 import { useMutation } from 'urql';
 import {
   MemberFieldsFragment,
@@ -15,6 +14,7 @@ import { canAccessOrganization } from '@/lib/access/organization';
 import { canAccessProject } from '@/lib/access/project';
 import { canAccessTarget } from '@/lib/access/target';
 import { useNotifications } from '@/lib/hooks';
+import { AccordionButton, AccordionItem, AccordionPanel, Select } from '@chakra-ui/react';
 
 interface Props<T> {
   title: string;

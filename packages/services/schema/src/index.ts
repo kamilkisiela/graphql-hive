@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import crypto from 'crypto';
+import Redis from 'ioredis';
 import {
   createErrorHandler,
   createServer,
@@ -10,7 +11,6 @@ import {
 import * as Sentry from '@sentry/node';
 import type { CreateFastifyContextOptions } from '@trpc/server/adapters/fastify';
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
-import Redis from 'ioredis';
 import { schemaBuilderApiRouter } from './api';
 import { env } from './environment';
 

@@ -30,10 +30,10 @@ There are gateways maintained by Apollo team, [Apollo Gateway](#apollo-gateway) 
 - `HIVE_CDN_KEY` - the access key
 
 ```typescript
-import { createSupergraphManager } from '@graphql-hive/client'
 import { ApolloGateway } from '@apollo/gateway'
 import { ApolloServer } from '@apollo/server'
 import { startStandaloneServer } from '@apollo/server/standalone'
+import { createSupergraphManager } from '@graphql-hive/client'
 
 const gateway = new ApolloGateway({
   // Apollo Gateway will fetch Supergraph from GraphQL Hive CDN
@@ -111,10 +111,10 @@ not something dedicated for stitching. Unfortunately the implementation of gatew
 Here's an example of how it could work
 
 ```typescript
+import { buildSchema } from 'graphql'
 import { createServicesFetcher } from '@graphql-hive/client'
 import { stitchSchemas } from '@graphql-tools/stitch'
 import { UrlLoader } from '@graphql-tools/url-loader'
-import { buildSchema } from 'graphql'
 import { createServer } from '@graphql-yoga/node'
 
 const urlLoader = new UrlLoader()

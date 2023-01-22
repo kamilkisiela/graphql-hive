@@ -1,6 +1,6 @@
 import { createHmac } from 'crypto';
-import type { Span } from '@sentry/types';
 import { Inject, Injectable, Scope } from 'graphql-modules';
+import type { Span } from '@sentry/types';
 import { HiveError } from '../../../shared/errors';
 import { sentry } from '../../../shared/sentry';
 import { HttpClient } from '../../shared/providers/http-client';

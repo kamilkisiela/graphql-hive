@@ -1,4 +1,6 @@
 import { ReactElement, useState } from 'react';
+import clsx from 'clsx';
+import { Section } from '@/components/common';
 import {
   Slider,
   SliderFilledTrack,
@@ -7,8 +9,6 @@ import {
   SliderTrack,
   Tooltip,
 } from '@chakra-ui/react';
-import clsx from 'clsx';
-import { Section } from '@/components/common';
 
 export const LimitSlider = (props: {
   value: number;

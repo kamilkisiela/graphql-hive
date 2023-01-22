@@ -1,8 +1,10 @@
 import { createServer } from 'node:http';
 import { AddressInfo } from 'node:net';
+
 /* eslint-disable-next-line import/no-extraneous-dependencies */
 import { ApolloServerBase } from 'apollo-server-core';
 import axios from 'axios';
+
 /* eslint-disable-next-line import/no-extraneous-dependencies */
 import { createSchema, createYoga } from 'graphql-yoga';
 import { createHive, hiveApollo, useHive } from '../src';

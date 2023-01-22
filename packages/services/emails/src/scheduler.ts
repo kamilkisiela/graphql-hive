@@ -1,9 +1,9 @@
-import type { FastifyLoggerInstance } from '@hive/service-common';
-import * as Sentry from '@sentry/node';
 import { Job, Queue, Worker } from 'bullmq';
 import Redis, { Redis as RedisInstance } from 'ioredis';
 import mjml2html from 'mjml';
 import pTimeout from 'p-timeout';
+import type { FastifyLoggerInstance } from '@hive/service-common';
+import * as Sentry from '@sentry/node';
 import { emailsFailuresTotal, emailsTotal } from './metrics';
 import type { EmailProvider } from './providers';
 import type { EmailInput } from './shapes';

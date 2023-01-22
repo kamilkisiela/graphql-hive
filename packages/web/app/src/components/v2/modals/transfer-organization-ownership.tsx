@@ -1,5 +1,4 @@
 import { Fragment, ReactElement, useCallback, useState } from 'react';
-import { Combobox as HeadlessCombobox, Transition as HeadlessTransition } from '@headlessui/react';
 import clsx from 'clsx';
 import { useFormik } from 'formik';
 import { gql, useMutation, useQuery } from 'urql';
@@ -8,6 +7,7 @@ import { Button, Heading, Input, Modal } from '@/components/v2';
 import { ArrowDownIcon, CheckIcon } from '@/components/v2/icon';
 import { MemberFieldsFragment, OrganizationFieldsFragment } from '@/graphql';
 import { useNotifications } from '@/lib/hooks';
+import { Combobox as HeadlessCombobox, Transition as HeadlessTransition } from '@headlessui/react';
 
 const Combobox = HeadlessCombobox as any;
 const Transition = HeadlessTransition as any;

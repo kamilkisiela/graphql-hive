@@ -1,14 +1,4 @@
 import { ChangeEventHandler, ReactElement, useCallback, useState } from 'react';
-import {
-  Editable,
-  EditableInput,
-  EditablePreview,
-  IconButton,
-  Input,
-  InputGroup,
-  InputRightElement,
-  Tooltip,
-} from '@chakra-ui/react';
 import { VscClose } from 'react-icons/vsc';
 import { gql, useMutation, useQuery } from 'urql';
 import { useDebouncedCallback } from 'use-debounce';
@@ -27,6 +17,16 @@ import {
 } from '@/graphql';
 import { TargetAccessScope, useTargetAccess } from '@/lib/access/target';
 import { withSessionProtection } from '@/lib/supertokens/guard';
+import {
+  Editable,
+  EditableInput,
+  EditablePreview,
+  IconButton,
+  Input,
+  InputGroup,
+  InputRightElement,
+  Tooltip,
+} from '@chakra-ui/react';
 
 const SchemaServiceName_UpdateSchemaServiceName = gql(/* GraphQL */ `
   mutation SchemaServiceName_UpdateSchemaServiceName($input: UpdateSchemaServiceNameInput!) {

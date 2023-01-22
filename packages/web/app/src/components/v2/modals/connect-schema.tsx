@@ -1,10 +1,10 @@
 import { ReactElement, useEffect, useState } from 'react';
-import { Spinner } from '@chakra-ui/react';
 import { useMutation, useQuery } from 'urql';
 import { Button, CopyValue, Heading, Link, Modal, Tag } from '@/components/v2';
 import { CreateCdnTokenDocument, ProjectDocument, ProjectType } from '@/graphql';
 import { getDocsUrl } from '@/lib/docs-url';
 import { useRouteSelector } from '@/lib/hooks';
+import { Spinner } from '@chakra-ui/react';
 
 const taxonomy = {
   [ProjectType.Federation]: 'supergraph schema',

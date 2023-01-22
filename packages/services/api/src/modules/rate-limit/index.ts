@@ -1,7 +1,7 @@
 import { createModule } from 'graphql-modules';
+import typeDefs from './module.graphql';
 import { RateLimitProvider } from './providers/rate-limit.provider';
 import { resolvers } from './resolvers';
-import typeDefs from './module.graphql';
 
 export const rateLimitModule = createModule({
   id: 'rate-limit',

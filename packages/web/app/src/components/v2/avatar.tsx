@@ -1,6 +1,6 @@
 import { ReactElement, ReactNode } from 'react';
-import { Fallback, Image, Root } from '@radix-ui/react-avatar';
 import clsx from 'clsx';
+import { Fallback, Image, Root } from '@radix-ui/react-avatar';
 
 type Size = 'lg' | 'md' | 'sm' | 'xs';
 //           50     40     34     20

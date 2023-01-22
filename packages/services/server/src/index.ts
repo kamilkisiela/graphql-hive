@@ -1,7 +1,9 @@
 #!/usr/bin/env node
-
-import 'reflect-metadata';
 import { Readable } from 'node:stream';
+import got from 'got';
+import { GraphQLError, stripIgnoredCharacters } from 'graphql';
+import 'reflect-metadata';
+import zod from 'zod';
 import { S3Client } from '@aws-sdk/client-s3';
 import { createRegistry, LogFn, Logger } from '@hive/api';
 import { CryptoProvider } from '@hive/api';
@@ -19,9 +21,6 @@ import { Dedupe, ExtraErrorData } from '@sentry/integrations';
 import * as Sentry from '@sentry/node';
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
 import { createServerAdapter } from '@whatwg-node/server';
-import got from 'got';
-import { GraphQLError, stripIgnoredCharacters } from 'graphql';
-import zod from 'zod';
 import { createContext, internalApiRouter } from './api';
 import { asyncStorage } from './async-storage';
 import { env } from './environment';

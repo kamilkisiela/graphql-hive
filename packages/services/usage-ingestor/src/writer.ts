@@ -1,8 +1,8 @@
+import Agent from 'agentkeepalive';
+import { got, Response as GotResponse } from 'got';
 import type { FastifyLoggerInstance } from '@hive/service-common';
 import { compress } from '@hive/usage-common';
 import * as Sentry from '@sentry/node';
-import Agent from 'agentkeepalive';
-import { got, Response as GotResponse } from 'got';
 import { writeDuration } from './metrics';
 import { joinIntoSingleMessage, operationsOrder, registryOrder } from './serializer';
 

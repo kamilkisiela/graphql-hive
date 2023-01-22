@@ -1,5 +1,4 @@
 import { ReactElement } from 'react';
-import { createGraphiQLFetcher } from '@graphiql/toolkit';
 import { GraphiQL } from 'graphiql';
 import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
@@ -8,6 +7,7 @@ import { HiveLogo, Link2Icon } from '@/components/v2/icon';
 import { ConnectLabModal } from '@/components/v2/modals/connect-lab';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
 import { withSessionProtection } from '@/lib/supertokens/guard';
+import { createGraphiQLFetcher } from '@graphiql/toolkit';
 import 'graphiql/graphiql.css';
 
 const Page = ({ endpoint }: { endpoint: string }): ReactElement => {

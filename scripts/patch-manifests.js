@@ -3,7 +3,6 @@
 
   That's why we patch package.json of @octokit/webhooks-methods and replace the value of `main` with the value from `source`.
 */
-
 import fs from 'fs';
 import { createRequire } from 'module';
 import path from 'path';
