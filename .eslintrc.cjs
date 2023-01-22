@@ -5,7 +5,6 @@ const rulesToExtends = Object.fromEntries(
   Object.entries(guildConfig.rules).filter(([key]) =>
     [
       'no-implicit-coercion',
-      'simple-import-sort/imports',
       'import/first',
       'no-restricted-globals',
       '@typescript-eslint/no-unused-vars',
@@ -100,7 +99,6 @@ module.exports = {
         'react/no-unknown-property': 'off',
         'jsx-a11y/anchor-is-valid': ['off', { components: ['Link', 'NextLink'] }],
         'jsx-a11y/alt-text': ['warn', { elements: ['img'], img: ['Image', 'NextImage'] }],
-        'simple-import-sort/exports': 'error',
 
         // TODO: enable below rules👇
         '@typescript-eslint/consistent-type-imports': ['off', { prefer: 'no-type-imports' }],
