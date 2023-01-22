@@ -111,6 +111,9 @@
     ]
   },
   "pnpm": {
+    "overrides": {
+      "@trivago/prettier-plugin-sort-imports>@babel/parser": "^7.20.7"
+    },
     "patchedDependencies": {
       "@tgriesser/schemats@7.0.1": "patches/@tgriesser__schemats@7.0.1.patch",
       "@theguild/buddy@0.1.0": "patches/@theguild__buddy@0.1.0.patch",
