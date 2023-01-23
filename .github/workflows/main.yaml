@@ -13,6 +13,7 @@ jobs:
       publishSourceMaps: true
       publishLatest: true
       targets: build
+      uploadJavaScriptArtifacts: true
     secrets: inherit
 
   # Builds Rust crates, and creates Docker images
@@ -25,6 +26,7 @@ jobs:
       targets: rust
       build: false
       publishPrComment: false
+      uploadJavaScriptArtifacts: false
     secrets: inherit
 
   # Build and publish Rust crates and binaries

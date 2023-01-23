@@ -32,6 +32,7 @@ jobs:
       imageTag: ${{ github.event.pull_request.head.sha }}
       publishLatest: false
       targets: 'build'
+      uploadJavaScriptArtifacts: true
     secrets: inherit
 
   # Builds Rust crates, and creates Docker images
@@ -45,6 +46,7 @@ jobs:
       targets: 'rust'
       build: false
       publishPrComment: false
+      uploadJavaScriptArtifacts: false
     secrets: inherit
 
   # Unit tests using Jest

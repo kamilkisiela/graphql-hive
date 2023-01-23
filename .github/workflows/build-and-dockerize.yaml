@@ -4,6 +4,9 @@ on:
       dockerize:
         default: true
         type: boolean
+      uploadJavaScriptArtifacts:
+        required: true
+        type: boolean
       publishLatest:
         default: false
         type: boolean
@@ -51,6 +54,27 @@ jobs:
       - name: test ESM & CJS exports integrity
         if: ${{ inputs.build }}
         run: pnpm turbo check:build
+
+      - uses: vimtor/action-zip@v1
+        name: archive javascript artifacts
+        if: ${{ inputs.uploadJavaScriptArtifacts }}
+        with:
+          recursive: false
+          files:
+            packages/services/broker-worker/dist/index.worker.js
+            packages/services/cdn-worker/dist/index.worker.js
+            packages/services/police-worker/dist/index.worker.js
+          dest: ${{ inputs.imageTag }}.zip
+
+      - name: upload artifact
+        uses: randomairborne/r2-release@v1.0.2
+        with:
+          endpoint: https://6d5bc18cd8d13babe7ed321adba3d8ae.r2.cloudflarestorage.com
+          accesskeyid: ${{ secrets.R2_ACCESS_KEY_ID }}
+          secretaccesskey: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          bucket: hive-js-build-artifacts
+          file: ${{ github.workspace }}/${{ inputs.imageTag }}.zip
+          destination: ${{ inputs.imageTag }}.zip
 
       - name: configure eqemu
         if: ${{ inputs.dockerize }}
@@ -129,5 +153,5 @@ jobs:
           SENTRY_ORG: the-guild-z4
           SENTRY_PROJECT: graphql-hive
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_RELEASE: ${{ github.sha }}
+          SENTRY_RELEASE: ${{ inputs.imageTag }}
         run: pnpm upload-sourcemaps
