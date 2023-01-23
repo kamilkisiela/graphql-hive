@@ -1,5 +1,5 @@
 import { Inject } from 'graphql-modules';
-import { type S3Config, S3_CONFIG } from '../../shared/providers/s3-config';
+import { S3_CONFIG, type S3Config } from '../../shared/providers/s3-config';
 import { buildArtifactStorageKey } from './artifact-storage-reader';
 
 const artifactMeta = {

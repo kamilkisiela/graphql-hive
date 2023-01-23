@@ -1,6 +1,6 @@
+import bcrypt from 'bcryptjs';
 import { ApolloGateway } from '@apollo/gateway';
 import { ApolloServer } from '@apollo/server';
-import { createSupergraphManager } from '@graphql-hive/client';
 import { startStandaloneServer } from '@apollo/server/standalone';
 import { ProjectType, TargetAccessScope } from '@app/gql/graphql';
 import {
@@ -9,10 +9,10 @@ import {
   ListObjectsCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
+import { createSupergraphManager } from '@graphql-hive/client';
 import { fetch } from '@whatwg-node/fetch';
 import { initSeed } from '../../testkit/seed';
 import { getServiceHost } from '../../testkit/utils';
-import bcrypt from 'bcryptjs';
 
 const s3Client = new S3Client({
   endpoint: 'http://127.0.0.1:9000',

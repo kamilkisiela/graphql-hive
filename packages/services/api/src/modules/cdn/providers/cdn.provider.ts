@@ -1,17 +1,17 @@
 import { createHmac } from 'crypto';
-import { crypto } from '@whatwg-node/fetch';
 import bcryptjs from 'bcryptjs';
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import type { Span } from '@sentry/types';
+import { crypto } from '@whatwg-node/fetch';
 import { HiveError } from '../../../shared/errors';
 import { sentry } from '../../../shared/sentry';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { TargetAccessScope } from '../../auth/providers/scopes';
 import { HttpClient } from '../../shared/providers/http-client';
 import { Logger } from '../../shared/providers/logger';
-import { type S3Config, S3_CONFIG } from '../../shared/providers/s3-config';
+import { S3_CONFIG, type S3Config } from '../../shared/providers/s3-config';
 import { Storage } from '../../shared/providers/storage';
-import { type CDNConfig, CDN_CONFIG } from './tokens';
+import { CDN_CONFIG, type CDNConfig } from './tokens';
 
 type CdnResourceType = 'schema' | 'supergraph' | 'metadata';
 

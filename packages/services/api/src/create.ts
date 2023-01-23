@@ -43,7 +43,7 @@ import { IdTranslator } from './modules/shared/providers/id-translator';
 import { IdempotentRunner } from './modules/shared/providers/idempotent-runner';
 import { Logger } from './modules/shared/providers/logger';
 import { REDIS_CONFIG, RedisConfig, RedisProvider } from './modules/shared/providers/redis';
-import { type S3Config, S3_CONFIG } from './modules/shared/providers/s3-config';
+import { S3_CONFIG, type S3Config } from './modules/shared/providers/s3-config';
 import { Storage } from './modules/shared/providers/storage';
 import { WEB_APP_URL } from './modules/shared/providers/tokens';
 import { targetModule } from './modules/target';
