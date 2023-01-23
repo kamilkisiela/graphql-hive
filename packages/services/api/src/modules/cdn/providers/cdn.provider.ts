@@ -143,7 +143,7 @@ export class CdnProvider {
     const s3Key = `${s3KeyPrefix}/${args.targetId}/${keyId}`;
     const privateKey = generatePrivateKey();
     const privateKeyHash = await bcryptjs.hash(privateKey, await bcryptjs.genSalt());
-    const cdnAccessToken = encodeCdnToken({ targetId: args.targetId, keyId, privateKey });
+    const cdnAccessToken = encodeCdnToken({ keyId, privateKey });
 
     // Check if key already exists
     const headResponse = await this.s3Config.client.fetch(
@@ -179,8 +179,8 @@ export class CdnProvider {
     const cdnAccessTokenRecord = await this.storage.createCDNAccessToken({
       id: keyId,
       targetId: args.targetId,
-      firstCharacters: cdnAccessToken.substring(0, 3),
-      lastCharacters: cdnAccessToken.substring(cdnAccessToken.length - 3, cdnAccessToken.length),
+      firstCharacters: cdnAccessToken.substring(0, 5),
+      lastCharacters: cdnAccessToken.substring(cdnAccessToken.length - 5, cdnAccessToken.length),
       s3Key,
       alias: args.alias ?? 'CDN Access Token',
     });

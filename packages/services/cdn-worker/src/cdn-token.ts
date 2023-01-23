@@ -5,7 +5,6 @@ import * as bc from 'bcryptjs';
 import { crypto } from '@whatwg-node/fetch';
 
 export interface CDNToken {
-  targetId: string;
   keyId: string;
   privateKey: string;
 }
@@ -19,7 +18,7 @@ const keyPrefix = 'hv2';
  * Encode a CDN token into a hex string with prefix.
  */
 export function encodeCdnToken(args: CDNToken): string {
-  const arr = encoder.encode(['v1', args.targetId, args.keyId, args.privateKey].join(':'));
+  const arr = encoder.encode([args.keyId, args.privateKey].join(':'));
   return keyPrefix + buf2hex(arr);
 }
 
@@ -40,9 +39,9 @@ export function decodeCdnAccessTokenSafe(token: string) {
   token = token.slice(keyPrefix.length);
 
   const str = decoder.decode(hex2buf(token));
-  const [version, targetId, keyId, privateKey] = str.split(':');
-  if (version === 'v1' && targetId && keyId && privateKey) {
-    return { type: 'success', token: { targetId, keyId, privateKey } } as const;
+  const [keyId, privateKey] = str.split(':');
+  if (keyId && privateKey) {
+    return { type: 'success', token: { keyId, privateKey } } as const;
   }
   return decodeError;
 }
