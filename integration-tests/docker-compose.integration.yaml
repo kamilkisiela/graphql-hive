@@ -25,7 +25,7 @@ services:
     ports:
       - 3004:3004
     volumes:
-      - '${PWD}/packages/services/cdn-worker/dist/dev.js:/app/index.js'
+      - '${PWD}/packages/services/cdn-worker/dist/index.nodejs.js:/app/index.js'
     environment:
       NODE_ENV: production
       PORT: 3004
@@ -52,7 +52,7 @@ services:
     ports:
       - 3013:3013
     volumes:
-      - '${PWD}/packages/services/broker-worker/dist/dev.js:/app/broker.js'
+      - '${PWD}/packages/services/broker-worker/dist/index.nodejs.js:/app/broker.js'
     environment:
       NODE_ENV: production
       PORT: 3013

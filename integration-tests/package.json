@@ -4,7 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "prepare:env": "cd ../ && pnpm build:libraries && pnpm build:local",
+    "prepare:env": "cd ../ && pnpm build:libraries && pnpm build:services",
     "test:integration": "jest"
   },
   "dependencies": {
