@@ -4,30 +4,30 @@ overrides:
   '@trivago/prettier-plugin-sort-imports>@babel/parser': ^7.20.7
 
 patchedDependencies:
-  '@graphql-inspector/core@3.4.0':
-    hash: tu4s2cjheabese6hdiqk5i3mii
-    path: patches/@graphql-inspector__core@3.4.0.patch
-  slonik@30.1.2:
-    hash: wg2hxbo7txnklmvja4aeqnygfi
-    path: patches/slonik@30.1.2.patch
+  '@tgriesser/schemats@7.0.1':
+    hash: u3kbucfchakklx3sci2vh6wjau
+    path: patches/@tgriesser__schemats@7.0.1.patch
   '@theguild/buddy@0.1.0':
     hash: ryylgra5xglhidfoiaxehn22hq
     path: patches/@theguild__buddy@0.1.0.patch
+  mjml-core@4.13.0:
+    hash: zxxsxbqejjmcwuzpigutzzq6wa
+    path: patches/mjml-core@4.13.0.patch
+  slonik@30.1.2:
+    hash: wg2hxbo7txnklmvja4aeqnygfi
+    path: patches/slonik@30.1.2.patch
+  '@graphql-inspector/core@3.4.0':
+    hash: tu4s2cjheabese6hdiqk5i3mii
+    path: patches/@graphql-inspector__core@3.4.0.patch
+  '@oclif/core@1.23.0':
+    hash: zhte2hlj7lfobytjpalcwwo474
+    path: patches/@oclif__core@1.23.0.patch
   bullmq@3.5.9:
     hash: xbmkiyyfti7h6orsfs6pdmi4s4
     path: patches/bullmq@3.5.9.patch
   oclif@3.5.0:
     hash: rxmtqiusuyruv7tkwux5gvotbm
     path: patches/oclif@3.5.0.patch
-  mjml-core@4.13.0:
-    hash: zxxsxbqejjmcwuzpigutzzq6wa
-    path: patches/mjml-core@4.13.0.patch
-  '@tgriesser/schemats@7.0.1':
-    hash: u3kbucfchakklx3sci2vh6wjau
-    path: patches/@tgriesser__schemats@7.0.1.patch
-  '@oclif/core@1.23.0':
-    hash: zhte2hlj7lfobytjpalcwwo474
-    path: patches/@oclif__core@1.23.0.patch
   '@slonik/migrator@0.8.5':
     hash: yfpv2xzdmnkrtu2wvaktxf5mmq
     path: patches/@slonik__migrator@0.8.5.patch
@@ -383,11 +383,13 @@ importers:
       '@theguild/buddy': 0.1.0
       '@trpc/client': 10.9.0
       '@trpc/server': 10.9.0
+      '@types/bcryptjs': 2.4.2
       '@types/ioredis-mock': 8.2.1
       '@types/lodash': 4.14.191
       '@types/ms': 0.7.31
       '@whatwg-node/fetch': 0.6.2
       agentkeepalive: 4.2.1
+      bcryptjs: 2.4.3
       dataloader: 2.1.0
       date-fns: 2.29.3
       got: 12.5.3
@@ -417,6 +419,7 @@ importers:
       '@trpc/server': 10.9.0
       '@whatwg-node/fetch': 0.6.2
       agentkeepalive: 4.2.1
+      bcryptjs: 2.4.3
       dataloader: 2.1.0
       date-fns: 2.29.3
       got: 12.5.3
@@ -438,6 +441,7 @@ importers:
       '@hive/storage': link:../storage
       '@hive/tokens': link:../tokens
       '@hive/webhooks': link:../webhooks
+      '@types/bcryptjs': 2.4.2
       '@types/ioredis-mock': 8.2.1
       '@types/lodash': 4.14.191
       '@types/ms': 0.7.31
@@ -640,7 +644,6 @@ importers:
 
   packages/services/server:
     specifiers:
-      '@aws-sdk/client-s3': 3.254.0
       '@envelop/core': 3.0.4
       '@envelop/generic-auth': 5.0.4
       '@envelop/graphql-modules': 4.0.4
@@ -674,7 +677,6 @@ importers:
       tslib: 2.4.1
       zod: 3.20.2
     dependencies:
-      '@aws-sdk/client-s3': 3.254.0
       '@envelop/core': 3.0.4
       '@envelop/generic-auth': 5.0.4_a6sekiasy2tqr6d5gj7n2wtjli
       '@envelop/graphql-modules': 4.0.4_a6sekiasy2tqr6d5gj7n2wtjli
@@ -8723,8 +8725,8 @@ packages:
       wrap-ansi: 7.0.0
     dev: true
 
-  /@oclif/core/2.0.2-beta.6:
-    resolution: {integrity: sha512-g3M/I2VrZaN6Ba8qyn2KggGoxDc2ys88LV/7+cGhxpaK98ZVWlgPCTLNHyY1DiA0KSDTTBhUsPV+Uis5mbHB4g==}
+  /@oclif/core/2.0.2-beta.10:
+    resolution: {integrity: sha512-FgJ5XHE6MjE7DOyQAcOZPD5Xs5cNOzP91zAQBkut8xhOkZA1NRQjv+7BczJqOTerXccohhTlu09pd7OAyDuitw==}
     engines: {node: '>=14.0.0'}
     dependencies:
       '@types/cli-progress': 3.11.0
@@ -8763,7 +8765,7 @@ packages:
     resolution: {integrity: sha512-Sp6Eywj3V2Moif/CJeJsyInPJhzifs2JjsaVbsrLS77WOL2/XAmca1sE5QxfakOGYH21g8xz/Ht9ZgiNy8u1zQ==}
     engines: {node: '>=12.0.0'}
     dependencies:
-      '@oclif/core': 2.0.2-beta.6
+      '@oclif/core': 2.0.2-beta.10
 
   /@oclif/plugin-not-found/2.3.8:
     resolution: {integrity: sha512-PfUVr67dHORFSeQthUwrPMJB/mRRNT4ENNdbafCOlL0HqC+WTuFy5nih+qnHBEli15RaOuMNoW3kR5MyBH82hA==}
@@ -11349,6 +11351,10 @@ packages:
     dependencies:
       '@babel/types': 7.20.7
 
+  /@types/bcryptjs/2.4.2:
+    resolution: {integrity: sha512-LiMQ6EOPob/4yUL66SZzu6Yh77cbzJFYll+ZfaPiPPFswtIlA/Fs1MzdKYA7JApHU49zQTbJGX3PDmCpIdDBRQ==}
+    dev: true
+
   /@types/body-parser/1.19.2:
     resolution: {integrity: sha512-ALYone6pm6QmwZoAgeyNksccT9Q4AWZQ6PvfwR37GT6r6FWUPguq6sUmNGSMV2Wr761oQoBxwGGa6DR5o1DC9g==}
     dependencies:
@@ -12950,6 +12956,10 @@ packages:
     resolution: {integrity: sha512-qeFIXtP4MSoi6NLqO12WfqARWWuCKi2Rn/9hJLEmtB5yTNr9DqFWkJRCf2qShWzPeAMRnOgCrq0sg/KLv5ES9w==}
     dependencies:
       tweetnacl: 0.14.5
+
+  /bcryptjs/2.4.3:
+    resolution: {integrity: sha512-V/Hy/X9Vt7f3BbPJEi8BdVFMByHi+jNXrYkW3huaybV/kQ0KJg0Y6PkEMbn+zeT+i+SiKZ/HMqJGIIt4LZDqNQ==}
+    dev: false
 
   /before-after-hook/2.2.3:
     resolution: {integrity: sha512-NzUnlZexiaH/46WDhANlyR2bXRopNg4F/zuSA3OpZnllCUgRaOF2znDioDWrmbNVsuZk6l9pMquQB38cfBZwkQ==}
@@ -21997,7 +22007,7 @@ packages:
     engines: {node: '>=12.0.0'}
     hasBin: true
     dependencies:
-      '@oclif/core': 2.0.2-beta.6
+      '@oclif/core': 2.0.2-beta.10
       '@oclif/plugin-help': 5.2.0
       '@oclif/plugin-not-found': 2.3.8
       '@oclif/plugin-warn-if-update-available': 2.0.17
