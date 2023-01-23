@@ -74,21 +74,11 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
+          # Seems like this target is set as default,
+          # there's no need to use `--target TARGET` in `cargo build` command
           target: ${{ env.RUST_TARGET }}
           default: true
           override: true
-
-      - name: Default target
-        run: |
-          rustup default
-          echo "1"
-          echo $RUST_TARGET
-          echo "2"
-          echo "$RUST_TARGET"
-          echo "3"
-          echo ${{ env.RUST_TARGET }}
-          echo "4"
-          rustup default stable-${{ env.RUST_TARGET }}
 
       - name: Cache Rust
         uses: Swatinem/rust-cache@v2
