@@ -47,6 +47,14 @@ jobs:
       publishPrComment: false
     secrets: inherit
 
+  # Builds Rust crates, and creates Docker images
+  build-rust-binaries:
+    name: build-rust-binaries
+    uses: ./.github/workflows/publish-rust.yaml
+    with:
+      publish: false
+    secrets: inherit
+
   # Unit tests using Jest
   unit-tests:
     name: test

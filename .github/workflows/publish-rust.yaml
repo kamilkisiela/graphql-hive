@@ -1,5 +1,10 @@
 on:
   workflow_call:
+    inputs:
+      publish:
+        default: false
+        type: boolean
+        required: true
 
 jobs:
   publish_rust:
@@ -15,10 +20,12 @@ jobs:
       - name: Look for changes
         id: rust_changed
         run: |
-          lines=$( git diff HEAD~ HEAD --name-only -- 'packages/libraries/router' | wc -l )
-          if [ $lines -gt 0 ]; then
-              echo 'rust_changed=true' >> $GITHUB_OUTPUT
-          fi
+          echo 'rust_changed=true' >> $GITHUB_OUTPUT
+        # run: |
+        #   lines=$( git diff HEAD~ HEAD --name-only -- 'packages/libraries/router' | wc -l )
+        #   if [ $lines -gt 0 ]; then
+        #       echo 'rust_changed=true' >> $GITHUB_OUTPUT
+        #   fi
 
   publish_rust_windows:
     needs: publish_rust
@@ -56,6 +63,7 @@ jobs:
           path: router.tar.gz
 
       - name: Upload to R2
+        if: ${{ inputs.publish }}
         uses: randomairborne/r2-release@v1.0.2
         with:
           endpoint: https://6d5bc18cd8d13babe7ed321adba3d8ae.r2.cloudflarestorage.com
@@ -66,6 +74,7 @@ jobs:
           destination: ${{ github.sha }}/win/router.tar.gz
 
       - name: Upload to R2 as latest
+        if: ${{ inputs.publish }}
         uses: randomairborne/r2-release@v1.0.2
         with:
           endpoint: https://6d5bc18cd8d13babe7ed321adba3d8ae.r2.cloudflarestorage.com
@@ -125,6 +134,7 @@ jobs:
           path: router.tar.gz
 
       - name: Upload to R2
+        if: ${{ inputs.publish }}
         uses: randomairborne/r2-release@v1.0.2
         with:
           endpoint: https://6d5bc18cd8d13babe7ed321adba3d8ae.r2.cloudflarestorage.com
@@ -135,6 +145,7 @@ jobs:
           destination: ${{ github.sha }}/macos/router.tar.gz
 
       - name: Upload to R2 as latest
+        if: ${{ inputs.publish }}
         uses: randomairborne/r2-release@v1.0.2
         with:
           endpoint: https://6d5bc18cd8d13babe7ed321adba3d8ae.r2.cloudflarestorage.com
@@ -183,6 +194,7 @@ jobs:
           path: router.tar.gz
 
       - name: Upload to R2
+        if: ${{ inputs.publish }}
         uses: randomairborne/r2-release@v1.0.2
         with:
           endpoint: https://6d5bc18cd8d13babe7ed321adba3d8ae.r2.cloudflarestorage.com
@@ -193,6 +205,7 @@ jobs:
           destination: ${{ github.sha }}/linux/router.tar.gz
 
       - name: Upload to R2 as latest
+        if: ${{ inputs.publish }}
         uses: randomairborne/r2-release@v1.0.2
         with:
           endpoint: https://6d5bc18cd8d13babe7ed321adba3d8ae.r2.cloudflarestorage.com
