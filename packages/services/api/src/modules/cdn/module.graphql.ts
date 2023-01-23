@@ -69,6 +69,7 @@ export default gql`
 
   input CreateCdnAccessTokenInput {
     selector: TargetSelectorInput!
+    alias: String!
   }
 
   """
@@ -82,6 +83,7 @@ export default gql`
   type CdnAccessTokenCreateOk {
     createdCdnAccessToken: CdnAccessToken!
     secretAccessToken: String!
+    cdnUrl: String!
   }
 
   type CdnAccessTokenCreateError implements Error {

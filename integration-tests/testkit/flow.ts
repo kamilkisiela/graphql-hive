@@ -893,7 +893,7 @@ export function createCdnAccess(selector: TargetSelectorInput, token: string) {
     `),
     token,
     variables: {
-      input: { selector },
+      input: { selector, alias: 'CDN Access Token' },
     },
   });
 }

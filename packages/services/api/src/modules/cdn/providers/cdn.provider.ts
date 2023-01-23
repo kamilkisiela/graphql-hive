@@ -1,5 +1,6 @@
 import bcryptjs from 'bcryptjs';
 import { Inject, Injectable, Scope } from 'graphql-modules';
+import { z } from 'zod';
 import { encodeCdnToken, generatePrivateKey } from '@hive/cdn-script/cdn-token';
 import type { Span } from '@sentry/types';
 import { crypto } from '@whatwg-node/fetch';
@@ -48,27 +49,6 @@ export class CdnProvider {
     }
 
     throw new HiveError(`CDN is not configured, cannot resolve CDN target url.`);
-  }
-
-  async generateCDNAccess(args: { organizationId: string; projectId: string; targetId: string }) {
-    const result = await this.createCDNAccessToken({
-      organizationId: args.organizationId,
-      projectId: args.projectId,
-      targetId: args.targetId,
-    });
-
-    if (result.type === 'failure') {
-      return {
-        type: 'failure',
-        reason: result.reason,
-      } as const;
-    }
-
-    return {
-      type: 'success',
-      secretAccessToken: result.cdnAccessTokenKey,
-      cdnAccessToken: result.cdnAccessToken,
-    } as const;
   }
 
   async pushToCloudflareCDN(url: string, body: string, span?: Span): Promise<{ success: boolean }> {
@@ -140,7 +120,17 @@ export class CdnProvider {
     organizationId: string;
     projectId: string;
     targetId: string;
+    alias: string;
   }) {
+    const alias = AliasStringModel.safeParse(args.alias);
+
+    if (alias.success === false) {
+      return {
+        type: 'failure',
+        reason: alias.error.issues[0].message,
+      } as const;
+    }
+
     await this.authManager.ensureTargetAccess({
       organization: args.organizationId,
       project: args.projectId,
@@ -192,7 +182,7 @@ export class CdnProvider {
       firstCharacters: cdnAccessToken.substring(0, 3),
       lastCharacters: cdnAccessToken.substring(cdnAccessToken.length - 3, cdnAccessToken.length),
       s3Key,
-      alias: 'CDN Access Token',
+      alias: args.alias ?? 'CDN Access Token',
     });
 
     if (cdnAccessTokenRecord === null) {
@@ -205,7 +195,7 @@ export class CdnProvider {
     return {
       type: 'success',
       cdnAccessToken: cdnAccessTokenRecord,
-      cdnAccessTokenKey: cdnAccessToken,
+      secretAccessToken: cdnAccessToken,
     } as const;
   }
 
@@ -287,3 +277,8 @@ export class CdnProvider {
     return paginatedResult;
   }
 }
+
+const AliasStringModel = z
+  .string()
+  .min(3, 'Must be at least 3 characters long.')
+  .max(100, 'Can not be longer than 100 characters.');

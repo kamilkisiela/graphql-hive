@@ -19,10 +19,11 @@ export const resolvers: CdnModule.Resolvers = {
         translator.translateTargetId(input.selector),
       ]);
 
-      const result = await cdn.generateCDNAccess({
+      const result = await cdn.createCDNAccessToken({
         organizationId,
         projectId,
         targetId,
+        alias: input.alias,
       });
 
       if (result.type === 'failure') {
@@ -37,6 +38,7 @@ export const resolvers: CdnModule.Resolvers = {
         ok: {
           secretAccessToken: result.secretAccessToken,
           createdCdnAccessToken: result.cdnAccessToken,
+          cdnUrl: cdn.getCdnUrlForTarget(targetId),
         },
       };
     },

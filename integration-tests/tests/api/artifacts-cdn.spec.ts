@@ -95,10 +95,13 @@ function buildEndpointUrl(
 
 function generateLegacyToken(targetId: string) {
   const encoder = new TextEncoder();
-  return crypto
-    .createHmac('sha256', 'wowverysecuremuchsecret')
-    .update(encoder.encode(targetId))
-    .digest('base64');
+  return (
+    crypto
+      // eslint-disable-next-line no-process-env
+      .createHmac('sha256', process.env.HIVE_ENCRYPTION_SECRET!)
+      .update(encoder.encode(targetId))
+      .digest('base64')
+  );
 }
 
 /**
