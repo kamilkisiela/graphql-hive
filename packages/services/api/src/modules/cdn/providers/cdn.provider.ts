@@ -5,6 +5,7 @@ import { encodeCdnToken, generatePrivateKey } from '@hive/cdn-script/cdn-token';
 import type { Span } from '@sentry/types';
 import { crypto } from '@whatwg-node/fetch';
 import { HiveError } from '../../../shared/errors';
+import { isUUID } from '../../../shared/is-uuid';
 import { sentry } from '../../../shared/sentry';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { TargetAccessScope } from '../../auth/providers/scopes';
@@ -211,6 +212,13 @@ export class CdnProvider {
       target: args.targetId,
       scope: TargetAccessScope.SETTINGS,
     });
+
+    if (isUUID(args.cdnAccessTokenId) === false) {
+      return {
+        type: 'failure',
+        reason: 'The CDN Access Token does not exist.',
+      } as const;
+    }
 
     // TODO: this should probably happen within a db transaction to ensure integrity
     const record = await this.storage.getCDNAccessTokenById({

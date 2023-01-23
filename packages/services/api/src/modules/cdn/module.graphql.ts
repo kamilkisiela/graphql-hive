@@ -31,6 +31,7 @@ export default gql`
 
   type CdnAccessToken {
     id: ID!
+    alias: String!
     firstCharacters: String!
     lastCharacters: String!
     createdAt: DateTime!

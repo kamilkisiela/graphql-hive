@@ -2759,6 +2759,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           , "s3_key"
           , "first_characters"
           , "last_characters"
+          , "alias"
           , to_json("created_at") as "created_at"
         FROM
           "public"."cdn_access_tokens"
@@ -2805,6 +2806,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           , "s3_key"
           , "first_characters"
           , "last_characters"
+          , "alias"
           , to_json("created_at") as "created_at"
         FROM
           "public"."cdn_access_tokens"
