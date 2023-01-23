@@ -79,7 +79,7 @@ jobs:
           override: true
 
       - name: Default target
-        run: rustup default ${{ env.RUST_TARGET }}
+        run: rustup default stable-${{ env.RUST_TARGET }}
 
       - name: Cache Rust
         uses: Swatinem/rust-cache@v2
