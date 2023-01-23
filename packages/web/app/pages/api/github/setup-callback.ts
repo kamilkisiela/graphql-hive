@@ -42,7 +42,7 @@ export default async function githubSetupCallback(req: NextApiRequest, res: Next
   }
 
   if (orgId) {
-    res.redirect(`/${orgId}/settings`);
+    res.redirect(`/${orgId}/view/settings`);
   } else {
     res.redirect('/');
   }

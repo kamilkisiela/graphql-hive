@@ -12,7 +12,7 @@ import {
   InvitationDeleteButton_DeleteInvitation,
   MemberInvitationForm_InviteByEmail,
   Members_OrganizationMembers,
-} from '../../pages/[orgId]/members';
+} from '../../pages/[orgId]/view/members';
 import {
   AddAlertChannelDocument,
   AddAlertDocument,

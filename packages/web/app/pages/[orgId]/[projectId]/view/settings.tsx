@@ -181,7 +181,7 @@ const Page = ({
         }).then(result => {
           if (result?.data?.updateProjectName?.ok) {
             const newProjectId = result.data.updateProjectName.ok.updatedProject.cleanId;
-            void router.replace(`/${router.organizationId}/${newProjectId}/settings`);
+            void router.replace(`/${router.organizationId}/${newProjectId}/view/settings`);
           }
         }),
     });
