@@ -38,6 +38,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - uses: pnpm/action-setup@v2.2.4
+        with:
+          version: 7
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+          node-version-file: .node-version
+
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v1
+
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
@@ -106,6 +120,9 @@ jobs:
           cache: 'pnpm'
           node-version-file: .node-version
 
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v1
+
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
@@ -165,6 +182,20 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
+      - uses: pnpm/action-setup@v2.2.4
+        with:
+          version: 7
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+          node-version-file: .node-version
+
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v1
 
       - name: Install Rust
         run: |
