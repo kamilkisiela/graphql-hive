@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import path from 'node:path';
 import url from 'node:url';
-import { SlonikMigrator } from '@slonik/migrator';
 import { createPool } from 'slonik';
+import { SlonikMigrator } from '@slonik/migrator';
 import { migrateClickHouse } from './clickhouse';
 import { env } from './environment';
 

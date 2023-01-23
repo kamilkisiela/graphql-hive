@@ -1,5 +1,5 @@
-import { MessageAttachment, WebClient } from '@slack/web-api';
 import { Inject, Injectable } from 'graphql-modules';
+import { MessageAttachment, WebClient } from '@slack/web-api';
 import type * as Types from '../../../../__generated__/types';
 import { Logger } from '../../../shared/providers/logger';
 import { WEB_APP_URL } from '../../../shared/providers/tokens';

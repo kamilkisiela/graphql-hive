@@ -1,5 +1,19 @@
-import 'twin.macro';
 import React, { PropsWithChildren } from 'react';
+import {
+  VscChevronDown,
+  VscChevronLeft,
+  VscChevronRight,
+  VscChevronUp,
+  VscWarning,
+} from 'react-icons/vsc';
+import 'twin.macro';
+import { gql, useQuery } from 'urql';
+import { useDebouncedCallback } from 'use-debounce';
+import { Scale, Section } from '@/components/common';
+import { GraphQLHighlight } from '@/components/common/GraphQLSDLBlock';
+import { env } from '@/env/frontend';
+import { DateRangeInput, OperationsStatsDocument, OperationStatsFieldsFragment } from '@/graphql';
+import { useDecimal, useFormattedDuration, useFormattedNumber } from '@/lib/hooks';
 import {
   Button,
   Drawer,
@@ -32,20 +46,6 @@ import {
   SortingState,
   useTableInstance,
 } from '@tanstack/react-table';
-import {
-  VscChevronDown,
-  VscChevronLeft,
-  VscChevronRight,
-  VscChevronUp,
-  VscWarning,
-} from 'react-icons/vsc';
-import { gql, useQuery } from 'urql';
-import { useDebouncedCallback } from 'use-debounce';
-import { Scale, Section } from '@/components/common';
-import { GraphQLHighlight } from '@/components/common/GraphQLSDLBlock';
-import { env } from '@/env/frontend';
-import { DateRangeInput, OperationsStatsDocument, OperationStatsFieldsFragment } from '@/graphql';
-import { useDecimal, useFormattedDuration, useFormattedNumber } from '@/lib/hooks';
 import { OperationsFallback } from './Fallback';
 
 interface Operation {

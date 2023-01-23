@@ -1,7 +1,5 @@
-import 'twin.macro';
 import { ReactElement, useCallback, useEffect, useRef, useState } from 'react';
-import { Stat, StatHelpText, StatLabel, StatNumber } from '@chakra-ui/react';
-import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
+import 'twin.macro';
 import { useMutation, useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { Section } from '@/components/common';
@@ -23,6 +21,8 @@ import {
 } from '@/graphql';
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
 import { withSessionProtection } from '@/lib/supertokens/guard';
+import { Stat, StatHelpText, StatLabel, StatNumber } from '@chakra-ui/react';
+import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 
 const Inner = ({
   organization,

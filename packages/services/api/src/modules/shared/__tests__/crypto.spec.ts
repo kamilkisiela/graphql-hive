@@ -1,5 +1,5 @@
-import 'reflect-metadata';
 import { testkit } from 'graphql-modules';
+import 'reflect-metadata';
 import { CryptoProvider, encryptionSecretProvider } from '../providers/crypto';
 
 test('should decrypt encrypted value', () => {

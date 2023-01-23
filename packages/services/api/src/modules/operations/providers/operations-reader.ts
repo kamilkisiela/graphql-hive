@@ -1,7 +1,7 @@
-import type { Span } from '@sentry/types';
-import { batch } from '@theguild/buddy';
 import { addMinutes, differenceInDays, format } from 'date-fns';
 import { Injectable } from 'graphql-modules';
+import type { Span } from '@sentry/types';
+import { batch } from '@theguild/buddy';
 import type { DateRange } from '../../../shared/entities';
 import { sentry } from '../../../shared/sentry';
 import { ClickHouse, RowOf } from './clickhouse-client';

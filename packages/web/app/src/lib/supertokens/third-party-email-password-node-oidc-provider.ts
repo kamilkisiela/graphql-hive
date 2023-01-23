@@ -1,10 +1,10 @@
-import { InternalApi } from '@hive/server';
-import { inferRouterProxyClient } from '@trpc/client';
 import { ExpressRequest } from 'supertokens-node/lib/build/framework/express/framework';
 import ThirdPartyEmailPasswordNode from 'supertokens-node/recipe/thirdpartyemailpassword';
 import { TypeInput as ThirdPartEmailPasswordTypeInput } from 'supertokens-node/recipe/thirdpartyemailpassword/types';
 import zod from 'zod';
 import { env } from '@/env/backend';
+import { InternalApi } from '@hive/server';
+import { inferRouterProxyClient } from '@trpc/client';
 
 const OIDCProfileInfoSchema = zod.object({
   sub: zod.string(),

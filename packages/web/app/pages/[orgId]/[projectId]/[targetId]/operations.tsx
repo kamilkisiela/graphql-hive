@@ -1,9 +1,8 @@
-import 'twin.macro';
 import { ComponentProps, ReactElement, useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
-import { Select, Stack } from '@chakra-ui/react';
 import { formatISO, subDays, subHours, subMinutes } from 'date-fns';
 import { VscChevronDown } from 'react-icons/vsc';
+import 'twin.macro';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
@@ -19,6 +18,7 @@ import {
 } from '@/graphql';
 import { getDocsUrl } from '@/lib/docs-url';
 import { withSessionProtection } from '@/lib/supertokens/guard';
+import { Select, Stack } from '@chakra-ui/react';
 
 function floorDate(date: Date): Date {
   const time = 1000 * 60;

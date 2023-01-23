@@ -1,7 +1,7 @@
+import { z } from 'zod';
 import type { InternalApi } from '@hive/server';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import { createFetch } from '@whatwg-node/fetch';
-import { z } from 'zod';
 import { ensureEnv } from './env';
 import { getServiceHost } from './utils';
 

@@ -5,7 +5,6 @@
  *
  * The goal here is to delete it once a week.
  */
-
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';

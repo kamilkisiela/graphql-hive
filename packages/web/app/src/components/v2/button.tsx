@@ -1,7 +1,7 @@
 import { ComponentProps, forwardRef } from 'react';
-import * as Toolbar from '@radix-ui/react-toolbar';
 import clsx from 'clsx';
 import tw, { css } from 'twin.macro';
+import * as Toolbar from '@radix-ui/react-toolbar';
 
 type ButtonProps = Omit<ComponentProps<'button'>, 'size'> & {
   danger?: boolean;

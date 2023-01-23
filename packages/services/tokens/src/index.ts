@@ -1,5 +1,7 @@
 #!/usr/bin/env node
+import ms from 'ms';
 import 'reflect-metadata';
+import LRU from 'tiny-lru';
 import {
   createErrorHandler,
   createServer,
@@ -11,8 +13,6 @@ import {
 import * as Sentry from '@sentry/node';
 import type { CreateFastifyContextOptions } from '@trpc/server/adapters/fastify';
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
-import ms from 'ms';
-import LRU from 'tiny-lru';
 import { Context, tokensApiRouter } from './api';
 import { useCache } from './cache';
 import { env } from './environment';

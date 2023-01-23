@@ -1,11 +1,3 @@
-import { useGenericAuth } from '@envelop/generic-auth';
-import { useGraphQLModules } from '@envelop/graphql-modules';
-import { useSentry } from '@envelop/sentry';
-import { useHive } from '@graphql-hive/client';
-import { Registry, RegistryContext } from '@hive/api';
-import { HiveError } from '@hive/api';
-import { cleanRequestId } from '@hive/service-common';
-import { fetch } from '@whatwg-node/fetch';
 import type {
   FastifyLoggerInstance,
   FastifyReply,
@@ -23,6 +15,14 @@ import {
 import { createYoga, Plugin, useErrorHandler } from 'graphql-yoga';
 import hyperid from 'hyperid';
 import zod from 'zod';
+import { useGenericAuth } from '@envelop/generic-auth';
+import { useGraphQLModules } from '@envelop/graphql-modules';
+import { useSentry } from '@envelop/sentry';
+import { useHive } from '@graphql-hive/client';
+import { Registry, RegistryContext } from '@hive/api';
+import { HiveError } from '@hive/api';
+import { cleanRequestId } from '@hive/service-common';
+import { fetch } from '@whatwg-node/fetch';
 import { asyncStorage } from './async-storage';
 import type { HiveConfig } from './environment';
 import { useArmor } from './use-armor';

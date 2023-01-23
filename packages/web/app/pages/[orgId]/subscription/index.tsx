@@ -1,6 +1,5 @@
 import { ReactElement } from 'react';
 import dynamic from 'next/dynamic';
-import { Stat, StatHelpText, StatLabel, StatNumber } from '@chakra-ui/react';
 import { endOfMonth, startOfMonth } from 'date-fns';
 import { authenticated } from '@/components/authenticated-container';
 import { OrganizationLayout } from '@/components/layouts';
@@ -18,6 +17,7 @@ import {
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
 import { getIsStripeEnabled } from '@/lib/billing/stripe-public-key';
 import { withSessionProtection } from '@/lib/supertokens/guard';
+import { Stat, StatHelpText, StatLabel, StatNumber } from '@chakra-ui/react';
 
 const DateFormatter = Intl.DateTimeFormat('en-US', {
   month: 'short',

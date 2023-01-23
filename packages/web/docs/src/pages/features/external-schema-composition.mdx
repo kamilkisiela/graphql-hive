@@ -171,10 +171,10 @@ npm install @graphql-hive/external-composition
 </Callout>
 
 ```javascript
-import { verifyRequest, compose, signatureHeaderName } from '@graphql-hive/external-composition'
-import { composeAndValidate, compositionHasErrors } from '@apollo/federation'
-import { parse, printSchema } from 'graphql'
 import fastify from 'fastify'
+import { parse, printSchema } from 'graphql'
+import { composeAndValidate, compositionHasErrors } from '@apollo/federation'
+import { compose, signatureHeaderName, verifyRequest } from '@graphql-hive/external-composition'
 
 const composeFederation = compose(services => {
   const result = composeAndValidate(
@@ -287,10 +287,10 @@ npm install @graphql-hive/external-composition
 </Callout>
 
 ```javascript
-import { verifyRequest, compose, signatureHeaderName } from '@graphql-hive/external-composition'
-import { composeServices } from '@apollo/composition'
-import { parse, printSchema } from 'graphql'
 import fastify from 'fastify'
+import { parse, printSchema } from 'graphql'
+import { composeServices } from '@apollo/composition'
+import { compose, signatureHeaderName, verifyRequest } from '@graphql-hive/external-composition'
 
 const composeFederation = compose(services => {
   const result = composeServices(

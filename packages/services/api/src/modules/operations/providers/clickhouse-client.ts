@@ -1,6 +1,6 @@
-import type { Span } from '@sentry/types';
 import Agent from 'agentkeepalive';
 import { Inject, Injectable } from 'graphql-modules';
+import type { Span } from '@sentry/types';
 import { atomic } from '../../../shared/helpers';
 import { HttpClient } from '../../shared/providers/http-client';
 import { Logger } from '../../shared/providers/logger';

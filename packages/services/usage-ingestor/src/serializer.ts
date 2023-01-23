@@ -1,5 +1,5 @@
-import type { ProcessedOperation, ProcessedRegistryRecord } from '@hive/usage-common';
 import LRU from 'tiny-lru';
+import type { ProcessedOperation, ProcessedRegistryRecord } from '@hive/usage-common';
 import { cache } from './helpers';
 
 const delimiter = '\n';

@@ -1,5 +1,4 @@
 import { ReactElement, useCallback, useEffect, useState } from 'react';
-import { Tooltip } from '@chakra-ui/react';
 import { useFormik } from 'formik';
 import { DocumentType, gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
@@ -15,6 +14,7 @@ import { useNotifications } from '@/lib/hooks/use-notifications';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { useToggle } from '@/lib/hooks/use-toggle';
 import { withSessionProtection } from '@/lib/supertokens/guard';
+import { Tooltip } from '@chakra-ui/react';
 
 export const DateFormatter = Intl.DateTimeFormat('en', {
   year: 'numeric',

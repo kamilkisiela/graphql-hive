@@ -1,7 +1,7 @@
 import { ReactElement, useMemo } from 'react';
-import { DiffEditor as MonacoDiffEditor } from '@monaco-editor/react';
 import { parse, print } from 'graphql';
 import { Spinner } from '@/components/common/Spinner';
+import { DiffEditor as MonacoDiffEditor } from '@monaco-editor/react';
 
 const prettify = (sdl: string): string => {
   if (!sdl) {

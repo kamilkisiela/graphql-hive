@@ -1,7 +1,7 @@
+import { parse } from 'pg-connection-string';
 import * as k8s from '@pulumi/kubernetes';
 import * as pulumi from '@pulumi/pulumi';
 import { Output } from '@pulumi/pulumi';
-import { parse } from 'pg-connection-string';
 import { DeploymentEnvironment } from '../types';
 import { isProduction } from '../utils/helpers';
 import { serviceLocalEndpoint } from '../utils/local-endpoint';

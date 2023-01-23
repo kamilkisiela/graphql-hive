@@ -1,6 +1,6 @@
-import { ArtifactStorageReader } from '@hive/api/src/modules/schema/providers/artifact-storage-reader';
 import itty from 'itty-router';
 import Toucan from 'toucan-js';
+import { ArtifactStorageReader } from '@hive/api/src/modules/schema/providers/artifact-storage-reader';
 import { AnalyticsEngine, createAnalytics } from './analytics';
 import { createArtifactRequestHandler } from './artifact-handler';
 import { UnexpectedError } from './errors';

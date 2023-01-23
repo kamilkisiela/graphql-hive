@@ -1,7 +1,7 @@
+import { Inject, Injectable, Scope } from 'graphql-modules';
 import type { UsageEstimatorApi, UsageEstimatorApiInput } from '@hive/usage-estimator';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import { fetch } from '@whatwg-node/fetch';
-import { Inject, Injectable, Scope } from 'graphql-modules';
 import { sentry } from '../../../shared/sentry';
 import { Logger } from '../../shared/providers/logger';
 import type { UsageEstimationServiceConfig } from './tokens';

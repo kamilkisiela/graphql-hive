@@ -2,8 +2,6 @@ import { ReactElement, useEffect } from 'react';
 import { AppProps } from 'next/app';
 import Router from 'next/router';
 import Script from 'next/script';
-import { ChakraProvider, extendTheme } from '@chakra-ui/react';
-import * as Sentry from '@sentry/nextjs';
 import cookies from 'js-cookie';
 import SuperTokens, { SuperTokensWrapper } from 'supertokens-auth-react';
 import Session from 'supertokens-auth-react/recipe/session';
@@ -16,6 +14,8 @@ import { env } from '@/env/frontend';
 import * as gtag from '@/lib/gtag';
 import { colors } from '@/lib/theme';
 import { urqlClient } from '@/lib/urql';
+import { ChakraProvider, extendTheme } from '@chakra-ui/react';
+import * as Sentry from '@sentry/nextjs';
 import '../public/styles.css';
 
 const theme = extendTheme({ colors });

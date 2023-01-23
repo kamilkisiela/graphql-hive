@@ -1,5 +1,5 @@
-import 'twin.macro';
 import React from 'react';
+import 'twin.macro';
 import { Spinner as CSpinner } from '@chakra-ui/react';
 
 export const Spinner = () => (

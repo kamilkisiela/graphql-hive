@@ -1,5 +1,5 @@
-import type { S3Client } from '@aws-sdk/client-s3';
 import { createApplication, Scope } from 'graphql-modules';
+import type { S3Client } from '@aws-sdk/client-s3';
 import { activityModule } from './modules/activity';
 import { adminModule } from './modules/admin';
 import { alertsModule } from './modules/alerts';

@@ -1,7 +1,6 @@
 import { ApolloGateway } from '@apollo/gateway';
 import { ApolloServer } from '@apollo/server';
 import { startStandaloneServer } from '@apollo/server/standalone';
-import { createSupergraphManager } from '@graphql-hive/client';
 import { ProjectType, TargetAccessScope } from '@app/gql/graphql';
 import {
   DeleteObjectsCommand,
@@ -9,6 +8,7 @@ import {
   ListObjectsCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
+import { createSupergraphManager } from '@graphql-hive/client';
 import { fetch } from '@whatwg-node/fetch';
 import { initSeed } from '../../testkit/seed';
 import { getServiceHost } from '../../testkit/utils';

@@ -1,7 +1,7 @@
-import * as Sentry from '@sentry/node';
 import { Job, Queue, Worker } from 'bullmq';
 import Redis, { Redis as RedisInstance } from 'ioredis';
 import pTimeout from 'p-timeout';
+import * as Sentry from '@sentry/node';
 import { createWebhookJob, scheduleWebhook } from './jobs';
 import type { Config } from './types';
 
