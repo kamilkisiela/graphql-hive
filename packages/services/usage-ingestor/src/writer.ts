@@ -41,11 +41,9 @@ const agentConfig: Agent.HttpOptions = {
 
 export function createWriter({
   clickhouse,
-  clickhouseMirror,
   logger,
 }: {
   clickhouse: ClickHouseConfig;
-  clickhouseMirror: ClickHouseConfig | null;
   logger: FastifyLoggerInstance;
 }) {
   const httpAgent = new Agent(agentConfig);
@@ -66,16 +64,7 @@ export function createWriter({
       const compressed = await compress(csv);
       const sql = `INSERT INTO operations (${operationsFields}) FORMAT CSV`;
 
-      await Promise.all([
-        writeCsv(clickhouse, agents, sql, compressed, logger, 3),
-        clickhouseMirror
-          ? writeCsv(clickhouseMirror, agents, sql, compressed, logger, 3).catch(error => {
-              logger.error('Failed to write operations to ClickHouse Cloud %s', error);
-              // Ignore errors from clickhouse cloud
-              return Promise.resolve();
-            })
-          : Promise.resolve(),
-      ]);
+      await writeCsv(clickhouse, agents, sql, compressed, logger, 3);
     },
     async writeRegistry(records: string[]) {
       if (records.length === 0) {
@@ -86,16 +75,7 @@ export function createWriter({
       const compressed = await compress(csv);
       const sql = `INSERT INTO operation_collection (${registryFields}) FORMAT CSV`;
 
-      await Promise.all([
-        writeCsv(clickhouse, agents, sql, compressed, logger, 3),
-        clickhouseMirror
-          ? writeCsv(clickhouseMirror, agents, sql, compressed, logger, 3).catch(error => {
-              logger.error('Failed to write operation_collection to ClickHouse Cloud %s', error);
-              // Ignore errors from clickhouse cloud
-              return Promise.resolve();
-            })
-          : Promise.resolve(),
-      ]);
+      await writeCsv(clickhouse, agents, sql, compressed, logger, 3);
     },
     destroy() {
       httpAgent.destroy();

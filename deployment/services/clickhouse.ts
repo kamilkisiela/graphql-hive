@@ -10,7 +10,6 @@ type ClickhouseConfig = {
   port: pulumi.Output<string> | string;
   username: pulumi.Output<string> | string;
   password: pulumi.Output<string>;
-  mirror: Omit<ClickhouseConfig, 'mirror'> | null;
 };
 
 function getRemoteClickhouseConfig(): ClickhouseConfig {
@@ -20,15 +19,6 @@ function getRemoteClickhouseConfig(): ClickhouseConfig {
     username: clickhouseConfig.require('username'),
     password: clickhouseConfig.requireSecret('password'),
     protocol: clickhouseConfig.require('protocol'),
-    mirror: clickhouseConfig.get('mirrorHost')
-      ? {
-          host: clickhouseConfig.require('mirrorHost'),
-          port: clickhouseConfig.require('mirrorPort'),
-          username: clickhouseConfig.require('mirrorUsername'),
-          password: clickhouseConfig.requireSecret('mirrorPassword'),
-          protocol: clickhouseConfig.require('mirrorProtocol'),
-        }
-      : null,
   };
 }
 
