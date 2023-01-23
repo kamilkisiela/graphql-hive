@@ -49,6 +49,14 @@ jobs:
       uploadJavaScriptArtifacts: false
     secrets: inherit
 
+  # Builds binaries from Rust crates
+  build-rust-binaries:
+    name: build-rust-binaries
+    uses: ./.github/workflows/publish-rust.yaml
+    with:
+      publish: false
+    secrets: inherit
+
   # Unit tests using Jest
   unit-tests:
     name: test

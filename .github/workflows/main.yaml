@@ -33,6 +33,8 @@ jobs:
   rust:
     uses: ./.github/workflows/publish-rust.yaml
     secrets: inherit
+    with:
+      publish: true
 
   # Trigger deployment
   deploy:
