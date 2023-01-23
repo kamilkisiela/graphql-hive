@@ -75,7 +75,11 @@ jobs:
         with:
           toolchain: stable
           target: ${{ env.RUST_TARGET }}
+          default: true
           override: true
+
+      - name: Default target
+        run: rustup default ${{ env.RUST_TARGET }}
 
       - name: Cache Rust
         uses: Swatinem/rust-cache@v2
@@ -84,15 +88,15 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --release --target ${{ env.RUST_TARGET }}
+          args: --release
 
       - name: Strip binary from debug symbols
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: strip target/${{ env.RUST_TARGET }}/release/${{ env.RUST_TARGET_FILE }}
+        run: strip target/release/${{ env.RUST_TARGET_FILE }}
 
       - name: Compress
         run: |
-          ./target/${{ env.RUST_TARGET }}/release/compress ./target/${{ env.RUST_TARGET }}/release/${{ env.RUST_TARGET_FILE }} ./router.tar.gz
+          ./target/release/compress ./target/release/${{ env.RUST_TARGET_FILE }} ./router.tar.gz
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
