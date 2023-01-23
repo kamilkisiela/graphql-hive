@@ -54,9 +54,9 @@ jobs:
       - name: Prepare Windows
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
-          echo "RUST_TARGET=x86_64-pc-windows-msvc" >> $GITHUB_ENV
-          echo "RUST_TARGET_FILE=router.exe" >> $GITHUB_ENV
-          echo "RUST_TARGET_OS=win" >> $GITHUB_ENV
+          echo "RUST_TARGET=x86_64-pc-windows-msvc" | Out-File -FilePath $env:GITHUB_ENV -Append
+          echo "RUST_TARGET_FILE=router.exe" | Out-File -FilePath $env:GITHUB_ENV -Append
+          echo "RUST_TARGET_OS=win" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: Checkout
         uses: actions/checkout@v3
@@ -75,11 +75,13 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-          # Seems like this target is set as default,
-          # there's no need to use `--target TARGET` in `cargo build` command
           target: ${{ env.RUST_TARGET }}
           default: true
           override: true
+
+      - name: Set default target
+        run: |
+          rustup default stable-${{ env.RUST_TARGET }}
 
       - name: Cache Rust
         uses: Swatinem/rust-cache@v2
