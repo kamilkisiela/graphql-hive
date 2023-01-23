@@ -52,7 +52,7 @@ jobs:
     name: build-rust-binaries
     uses: ./.github/workflows/publish-rust.yaml
     with:
-      publish: true
+      publish: false
     secrets: inherit
 
   # Unit tests using Jest
