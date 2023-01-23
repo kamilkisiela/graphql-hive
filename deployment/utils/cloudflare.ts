@@ -28,7 +28,9 @@ export class CloudflareCDN {
 
     const script = new cf.WorkerScript('hive-ha-worker', {
       content: readFileSync(
-        resolve(__dirname, '../../packages/services/cdn-worker/dist/index.worker.js'),
+        // eslint-disable-next-line no-process-env
+        process.env.CDN_WORKER_ARTIFACT_PATH ||
+          resolve(__dirname, '../../packages/services/cdn-worker/dist/index.worker.js'),
         'utf-8',
       ),
       name: `hive-storage-cdn-${this.config.envName}`,
@@ -119,7 +121,9 @@ export class CloudflareBroker {
   deploy() {
     const script = new cf.WorkerScript('hive-broker-worker', {
       content: readFileSync(
-        resolve(__dirname, '../../packages/services/broker-worker/dist/index.worker.js'),
+        // eslint-disable-next-line no-process-env
+        process.env.BROKER_WORKER_ARTIFACT_PATH ||
+          resolve(__dirname, '../../packages/services/broker-worker/dist/index.worker.js'),
         'utf-8',
       ),
       name: `hive-broker-${this.config.envName}`,
