@@ -39,7 +39,6 @@ function shouldRetryOnFailure(error: any) {
 export function createIngestor(config: {
   logger: FastifyLoggerInstance;
   clickhouse: ClickHouseConfig;
-  clickhouseMirror: ClickHouseConfig | null;
   kafka: {
     topic: string;
     consumerGroup: string;
@@ -171,7 +170,6 @@ export function createIngestor(config: {
   const processor = createProcessor({ logger });
   const writer = createWriter({
     clickhouse: config.clickhouse,
-    clickhouseMirror: config.clickhouseMirror,
     logger,
   });
 

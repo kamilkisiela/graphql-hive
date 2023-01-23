@@ -24,15 +24,3 @@ This service takes care of feeding usage data into the ClickHouse instance.
 | `SENTRY_DSN`                        | No (Yes if `SENTRY` is defined)                | The DSN for reporting errors to Sentry.                                               | `https://dooobars@o557896.ingest.sentry.io/12121212` |
 | `PROMETHEUS_METRICS`                | No                                             | Whether Prometheus metrics should be enabled                                          | `1` (enabled) or `0` (disabled)                      |
 | `PROMETHEUS_METRICS_LABEL_INSTANCE` | No                                             | The instance label added for the prometheus metrics.                                  | `usage-ingestor`                                     |
-
-## Hive Hosted configuration
-
-If you are self-hosting Hive, you can ignore these.
-
-| Name                         | Required                                                                    | Description                            | Example Value     |
-| ---------------------------- | --------------------------------------------------------------------------- | -------------------------------------- | ----------------- |
-| `CLICKHOUSE_MIRROR_PROTOCOL` | No (Yes if any other `CLICKHOUSE_MIRROR_*` environment variable is defined) | The ClickHouse protocol.               | `http` or `https` |
-| `CLICKHOUSE_MIRROR_HOST`     | No (Yes if any other `CLICKHOUSE_MIRROR_*` environment variable is defined) | The ClickHouse host.                   | `127.0.0.1`       |
-| `CLICKHOUSE_MIRROR_PORT`     | No (Yes if any other `CLICKHOUSE_MIRROR_*` environment variable is defined) | The ClickHouse port.                   | `8443`            |
-| `CLICKHOUSE_MIRROR_USERNAME` | No (Yes if any other `CLICKHOUSE_MIRROR_*` environment variable is defined) | The username for accessing ClickHouse. | `letmein`         |
-| `CLICKHOUSE_MIRROR_PASSWORD` | No (Yes if any other `CLICKHOUSE_MIRROR_*` environment variable is defined) | The password for accessing ClickHouse. | `letmein`         |
