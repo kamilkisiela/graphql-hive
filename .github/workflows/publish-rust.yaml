@@ -51,6 +51,8 @@ jobs:
 
       - name: Install Protoc
         uses: arduino/setup-protoc@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Rust
         uses: actions-rs/toolchain@v1
@@ -122,6 +124,8 @@ jobs:
 
       - name: Install Protoc
         uses: arduino/setup-protoc@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Rust
         uses: actions-rs/toolchain@v1
@@ -196,6 +200,8 @@ jobs:
 
       - name: Install Protoc
         uses: arduino/setup-protoc@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Rust
         run: |
