@@ -106,7 +106,7 @@
     "@types/react-window": "1.8.5",
     "@welldone-software/why-did-you-render": "7.0.1",
     "autoprefixer": "10.4.13",
-    "postcss": "8.4.20",
+    "postcss": "8.4.21",
     "rimraf": "3.0.2"
   },
   "babelMacros": {
