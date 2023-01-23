@@ -79,7 +79,16 @@ jobs:
           override: true
 
       - name: Default target
-        run: rustup default stable-${{ env.RUST_TARGET }}
+        run: |
+          rustup default
+          echo "1"
+          echo $RUST_TARGET
+          echo "2"
+          echo "$RUST_TARGET"
+          echo "3"
+          echo ${{ env.RUST_TARGET }}
+          echo "4"
+          rustup default stable-${{ env.RUST_TARGET }}
 
       - name: Cache Rust
         uses: Swatinem/rust-cache@v2
