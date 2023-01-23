@@ -33,7 +33,7 @@ import type {
   User,
 } from '@hive/api';
 import { batch } from '@theguild/buddy';
-import type { OIDCIntegration } from '../../api/src/shared/entities';
+import type { CDNAccessToken, OIDCIntegration } from '../../api/src/shared/entities';
 import {
   activities,
   alert_channels,
@@ -2682,6 +2682,42 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         ]);
       },
     },
+
+    async createCDNAccessToken(args) {
+      const result = await pool.maybeOne(sql`
+        INSERT INTO "public"."cdn_access_tokens" (
+          "id"
+          , "target_id"
+          , "s3_key"
+          , "first_characters"
+          , "last_characters"
+          , "alias"
+        )
+        VALUES (
+          ${args.id}
+          , ${args.targetId}
+          , ${args.s3Key}
+          , ${args.firstCharacters}
+          , ${args.lastCharacters}
+          , ${args.alias}
+        )
+        ON CONFLICT ("s3_key") DO NOTHING
+        RETURNING
+          "id"
+          , "target_id"
+          , "s3_key"
+          , "first_characters"
+          , "last_characters"
+          , "alias"
+          , "created_at"
+      `);
+
+      if (result === null) {
+        return null;
+      }
+
+      return decodeCDNAccessTokenRecord(result);
+    },
   };
 
   return storage;
@@ -2740,6 +2776,30 @@ const decodeOktaIntegrationRecord = (result: unknown): OIDCIntegration => {
     tokenEndpoint: rawRecord.token_endpoint,
     userinfoEndpoint: rawRecord.userinfo_endpoint,
     authorizationEndpoint: rawRecord.authorization_endpoint,
+  };
+};
+
+const CDNAccessTokenModel = zod.object({
+  id: zod.string(),
+  target_id: zod.string(),
+  s3_key: zod.string(),
+  first_characters: zod.string(),
+  last_characters: zod.string(),
+  alias: zod.string(),
+  created_at: zod.number(),
+});
+
+const decodeCDNAccessTokenRecord = (result: unknown): CDNAccessToken => {
+  const rawRecord = CDNAccessTokenModel.parse(result);
+
+  return {
+    id: rawRecord.id,
+    targetId: rawRecord.target_id,
+    s3Key: rawRecord.s3_key,
+    firstCharacters: rawRecord.first_characters,
+    lastCharacters: rawRecord.last_characters,
+    createdAt: new Date(rawRecord.created_at).toString(),
+    alias: rawRecord.alias,
   };
 };
 

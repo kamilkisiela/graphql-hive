@@ -1,3 +1,4 @@
+import bcrypt from 'bcryptjs';
 import { ApolloGateway } from '@apollo/gateway';
 import { ApolloServer } from '@apollo/server';
 import { startStandaloneServer } from '@apollo/server/standalone';
@@ -120,6 +121,38 @@ function runArtifactsCDNTests(
           'Please refer to the documentation for more details: https://docs.graphql-hive.com/features/registry-usage',
       });
       expect(response.headers.get('location')).toEqual(null);
+    });
+
+    test.concurrent('created (legacy) cdn access key is stored on S3', async () => {
+      const { createOrg } = await initSeed().createOwner();
+      const { createProject } = await createOrg();
+      const { createToken, target } = await createProject(ProjectType.Single);
+      const writeToken = await createToken({
+        targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      });
+      const cdnAccess = await writeToken.createCdnAccess();
+      const result = await fetchS3ObjectArtifact('artifacts', `cdn-legacy-keys/${target.id}`);
+      const isMatch = await bcrypt.compare(cdnAccess.token, result.body);
+      expect(isMatch).toEqual(true);
+    });
+
+    test.concurrent('creating (legacy) cdn access token can be done multiple times', async () => {
+      const { createOrg } = await initSeed().createOwner();
+      const { createProject } = await createOrg();
+      const { createToken, target } = await createProject(ProjectType.Single);
+      const writeToken = await createToken({
+        targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      });
+
+      let cdnAccess = await writeToken.createCdnAccess();
+      const firstResult = await fetchS3ObjectArtifact('artifacts', `cdn-legacy-keys/${target.id}`);
+      let isMatch = await bcrypt.compare(cdnAccess.token, firstResult.body);
+      expect(isMatch).toEqual(true);
+
+      cdnAccess = await writeToken.createCdnAccess();
+      const secondResult = await fetchS3ObjectArtifact('artifacts', `cdn-legacy-keys/${target.id}`);
+      isMatch = await bcrypt.compare(cdnAccess.token, secondResult.body);
+      expect(isMatch).toEqual(true);
     });
 
     test.concurrent('access SDL artifact with valid credentials', async () => {

@@ -205,6 +205,36 @@ export async function migrateClickHouse(
   console.log('Username:', clickhouse.username);
   console.log('Password:', clickhouse.password.length);
 
+  // Warm up ClickHouse instance.
+  // This is needed because ClickHouse takes a while to start up
+  // when pausing after a period of inactivity is enabled (which is true for dev and staging)
+  await got.get(endpoint, {
+    searchParams: {
+      query: 'SELECT 1',
+      default_format: 'JSON',
+      wait_end_of_query: '1',
+    },
+    timeout: {
+      request: 10_000,
+    },
+    headers: {
+      Accept: 'text/plain',
+    },
+    username: clickhouse.username,
+    password: clickhouse.password,
+    retry: {
+      calculateDelay({ attemptCount }) {
+        if (attemptCount > 10) {
+          // Stop retrying after 10 attempts
+          return 0;
+        }
+
+        // Retry after 5 seconds
+        return 5_000;
+      },
+    },
+  });
+
   for await (const query of createTableStatements) {
     await got
       .post(endpoint, {
