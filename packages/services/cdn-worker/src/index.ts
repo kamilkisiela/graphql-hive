@@ -1,9 +1,9 @@
-import { AwsClient } from '@hive/api/src/shared/aws';
 import itty from 'itty-router';
 import Toucan from 'toucan-js';
-import { ArtifactStorageReader } from '@hive/api/src/modules/schema/providers/artifact-storage-reader';
 import { AnalyticsEngine, createAnalytics } from './analytics';
 import { createArtifactRequestHandler } from './artifact-handler';
+import { ArtifactStorageReader } from './artifact-storage-reader';
+import { AwsClient } from './aws';
 import { UnexpectedError } from './errors';
 import { createRequestHandler } from './handler';
 import { createIsKeyValid } from './key-validation';

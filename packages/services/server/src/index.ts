@@ -1,10 +1,14 @@
 #!/usr/bin/env node
 import { Readable } from 'node:stream';
+import got from 'got';
+import { GraphQLError, stripIgnoredCharacters } from 'graphql';
 import 'reflect-metadata';
+import zod from 'zod';
 import { createRegistry, LogFn, Logger } from '@hive/api';
 import { CryptoProvider } from '@hive/api';
-import { ArtifactStorageReader } from '@hive/api/src/modules/schema/providers/artifact-storage-reader';
 import { createArtifactRequestHandler } from '@hive/cdn-script/artifact-handler';
+import { ArtifactStorageReader } from '@hive/cdn-script/artifact-storage-reader';
+import { AwsClient } from '@hive/cdn-script/aws';
 import { createIsKeyValid } from '@hive/cdn-script/key-validation';
 import {
   createServer,
@@ -17,10 +21,6 @@ import { Dedupe, ExtraErrorData } from '@sentry/integrations';
 import * as Sentry from '@sentry/node';
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
 import { createServerAdapter } from '@whatwg-node/server';
-import got from 'got';
-import { GraphQLError, stripIgnoredCharacters } from 'graphql';
-import { AwsClient } from 'packages/services/api/src/shared/aws';
-import zod from 'zod';
 import { createContext, internalApiRouter } from './api';
 import { asyncStorage } from './async-storage';
 import { env } from './environment';

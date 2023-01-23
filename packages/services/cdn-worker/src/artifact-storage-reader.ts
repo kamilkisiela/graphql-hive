@@ -1,7 +1,7 @@
 /**
  * IMPORTANT NOTE: This file needs to be kept platform-agnostic, don't use any Node.js specific APIs.
  */
-import { AwsClient } from '../../../shared/aws';
+import { AwsClient } from './aws';
 
 const presignedUrlExpirationSeconds = 60;
 

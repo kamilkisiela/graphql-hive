@@ -19,7 +19,6 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "4.20221111.1",
-    "@hive/api": "workspace:*",
     "@types/service-worker-mock": "2.0.1",
     "@whatwg-node/fetch": "0.6.2",
     "@whatwg-node/server": "0.5.7",

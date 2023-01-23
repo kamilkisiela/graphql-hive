@@ -1,10 +1,10 @@
 import { createServer } from 'http';
-import { AwsClient } from '@hive/api/src/shared/aws';
 import itty from 'itty-router';
 import { json, withParams } from 'itty-router-extras';
-import { ArtifactStorageReader } from '@hive/api/src/modules/schema/providers/artifact-storage-reader';
 import { createServerAdapter } from '@whatwg-node/server';
 import { createArtifactRequestHandler } from './artifact-handler';
+import { ArtifactStorageReader } from './artifact-storage-reader';
+import { AwsClient } from './aws';
 import './dev-polyfill';
 import { devStorage } from './dev-polyfill';
 import { createRequestHandler } from './handler';
@@ -43,13 +43,13 @@ declare let KEY_DATA: string;
 
 const handleRequest = createRequestHandler({
   getRawStoreValue: value => HIVE_DATA.get(value),
-  isKeyValid: createIsKeyValid({ keyData: KEY_DATA, s3, cache: null }),
+  isKeyValid: createIsKeyValid({ keyData: KEY_DATA, s3, waitUntil: null, getCache: () => null }),
 });
 
 const artifactStorageReader = new ArtifactStorageReader(s3, S3_PUBLIC_URL);
 
 const handleArtifactRequest = createArtifactRequestHandler({
-  isKeyValid: createIsKeyValid({ keyData: KEY_DATA, s3, cache: null }),
+  isKeyValid: createIsKeyValid({ keyData: KEY_DATA, s3, waitUntil: null, getCache: () => null }),
   async getArtifactAction(targetId, artifactType, eTag) {
     return artifactStorageReader.generateArtifactReadUrl(targetId, artifactType, eTag);
   },

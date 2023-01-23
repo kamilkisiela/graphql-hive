@@ -1,6 +1,6 @@
-import { Request, Response } from '@whatwg-node/fetch';
 import bcrypt from 'bcryptjs';
-import { type AwsClient } from 'packages/services/api/src/shared/aws';
+import { Request, Response } from '@whatwg-node/fetch';
+import { type AwsClient } from './aws';
 
 export type KeyValidator = (targetId: string, headerKey: string) => Promise<boolean>;
 
