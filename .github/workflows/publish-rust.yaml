@@ -84,7 +84,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --release --target $RUST_TARGET
+          args: --release --target ${{ env.RUST_TARGET }}
 
       - name: Strip binary from debug symbols
         if: ${{ matrix.os == 'ubuntu-latest' }}
