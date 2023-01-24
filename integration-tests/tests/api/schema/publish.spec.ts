@@ -625,7 +625,7 @@ test.concurrent('CDN data can be fetched with an valid access token', async () =
   const cdnResult = await fetch(artifactUrl, {
     method: 'GET',
     headers: {
-      'X-Hive-CDN-Key': cdn.cdnUrl,
+      'X-Hive-CDN-Key': cdn.secretAccessToken,
     },
   });
 
