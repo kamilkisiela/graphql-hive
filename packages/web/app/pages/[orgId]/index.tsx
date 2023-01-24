@@ -77,7 +77,7 @@ const ProjectCard = ({
               <LinkIcon />
               Share Link
             </DropdownMenu.Item>
-            <NextLink href={`/${router.organizationId}/${project.cleanId}#settings`}>
+            <NextLink href={`/${router.organizationId}/${project.cleanId}/view/settings`}>
               <DropdownMenu.Item>
                 <SettingsIcon />
                 Settings
