@@ -1072,7 +1072,7 @@ importers:
       supertokens-auth-react: 0.29.0
       supertokens-js-override: 0.0.4
       supertokens-node: 12.1.5
-      supertokens-website: 14.0.3
+      supertokens-website: 15.0.0
       tailwindcss: 3.2.4
       tailwindcss-radix: 2.7.0
       tslib: 2.4.1
@@ -1149,7 +1149,7 @@ importers:
       supertokens-auth-react: 0.29.0_5ndqzdd6t4rivxsukjv3i3ak2q
       supertokens-js-override: 0.0.4
       supertokens-node: 12.1.5
-      supertokens-website: 14.0.3
+      supertokens-website: 15.0.0
       tailwindcss: 3.2.4_postcss@8.4.21
       tailwindcss-radix: 2.7.0
       tslib: 2.4.1
@@ -25483,6 +25483,13 @@ packages:
 
   /supertokens-website/14.0.3:
     resolution: {integrity: sha512-W/IvK1RjLbthunsMfq0gd9yeYZMGY00yncZ2Csh5kns435PbAr0hp+eKzQehOP/pO/Kmd3qM8GzA0Fod3k4D4A==}
+    dependencies:
+      browser-tabs-lock: 1.2.15
+      supertokens-js-override: 0.0.4
+    dev: false
+
+  /supertokens-website/15.0.0:
+    resolution: {integrity: sha512-Lsrp+Xc6I9kz4VDm1PBZamUGjIKXRKaueqm/N4TAubeq+gJY12qdraIeBcDzUw8UsIZVvGINB6ae5iHzNsenIA==}
     dependencies:
       browser-tabs-lock: 1.2.15
       supertokens-js-override: 0.0.4

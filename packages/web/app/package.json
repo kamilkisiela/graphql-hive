@@ -77,7 +77,7 @@
     "supertokens-auth-react": "0.29.0",
     "supertokens-js-override": "0.0.4",
     "supertokens-node": "12.1.5",
-    "supertokens-website": "14.0.3",
+    "supertokens-website": "15.0.0",
     "tailwindcss": "3.2.4",
     "tailwindcss-radix": "2.7.0",
     "tslib": "2.4.1",
