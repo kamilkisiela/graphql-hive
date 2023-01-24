@@ -71,6 +71,7 @@ describe('CDN Worker', () => {
   });
 
   test('etag + if-none-match for schema', async () => {
+    const SECRET = '123456';
     const targetId = 'fake-target-id';
     const map = new Map();
     map.set(`target:${targetId}:schema`, JSON.stringify({ sdl: `type Query { dummy: String }` }));
