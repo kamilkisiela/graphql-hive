@@ -328,7 +328,6 @@ export async function main() {
 
       const artifactHandler = createArtifactRequestHandler({
         isKeyValid: createIsKeyValid({
-          keyData: env.cdn.authPrivateKey,
           s3,
           getCache: () => null,
           waitUntil: null,

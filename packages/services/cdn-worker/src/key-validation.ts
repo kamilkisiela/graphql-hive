@@ -5,7 +5,6 @@ import { type AwsClient } from './aws';
 export type KeyValidator = (targetId: string, headerKey: string) => Promise<boolean>;
 
 type CreateKeyValidatorDeps = {
-  keyData: string;
   s3: {
     endpoint: string;
     bucketName: string;

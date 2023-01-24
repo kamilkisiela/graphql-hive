@@ -32,7 +32,6 @@ describe('CDN Worker', () => {
 
     const handleRequest = createRequestHandler({
       isKeyValid: createIsKeyValid({
-        keyData: SECRET,
         getCache: () => null,
         waitUntil: null,
         s3: {
@@ -72,14 +71,12 @@ describe('CDN Worker', () => {
   });
 
   test('etag + if-none-match for schema', async () => {
-    const SECRET = '123456';
     const targetId = 'fake-target-id';
     const map = new Map();
     map.set(`target:${targetId}:schema`, JSON.stringify({ sdl: `type Query { dummy: String }` }));
 
     const handleRequest = createRequestHandler({
       isKeyValid: createIsKeyValid({
-        keyData: SECRET,
         getCache: () => null,
         waitUntil: null,
         s3: {
@@ -144,9 +141,10 @@ describe('CDN Worker', () => {
       JSON.stringify({ sdl: `type Query { dummy: String }` }),
     );
 
+    const token = createToken(SECRET, targetId);
+
     const handleRequest = createRequestHandler({
       isKeyValid: createIsKeyValid({
-        keyData: SECRET,
         getCache: () => null,
         waitUntil: null,
         s3: {
@@ -163,8 +161,6 @@ describe('CDN Worker', () => {
       }),
       getRawStoreValue: (key: string) => map.get(key),
     });
-
-    const token = createToken(SECRET, targetId);
 
     const firstRequest = new Request(`https://fake-worker.com/${targetId}/supergraph`, {
       headers: {
@@ -210,7 +206,6 @@ describe('CDN Worker', () => {
 
     const handleRequest = createRequestHandler({
       isKeyValid: createIsKeyValid({
-        keyData: SECRET,
         getCache: () => null,
         waitUntil: null,
         s3: {
@@ -274,7 +269,6 @@ describe('CDN Worker', () => {
 
     const handleRequest = createRequestHandler({
       isKeyValid: createIsKeyValid({
-        keyData: SECRET,
         getCache: () => null,
         waitUntil: null,
         s3: {
@@ -343,7 +337,6 @@ describe('CDN Worker', () => {
 
     const handleRequest = createRequestHandler({
       isKeyValid: createIsKeyValid({
-        keyData: SECRET,
         getCache: () => null,
         waitUntil: null,
         s3: {
@@ -466,7 +459,6 @@ describe('CDN Worker', () => {
 
       const handleRequest = createRequestHandler({
         isKeyValid: createIsKeyValid({
-          keyData: SECRET,
           getCache: () => null,
           waitUntil: null,
           s3: {
@@ -502,7 +494,6 @@ describe('CDN Worker', () => {
 
       const handleRequest = createRequestHandler({
         isKeyValid: createIsKeyValid({
-          keyData: SECRET,
           getCache: () => null,
           waitUntil: null,
           s3: {
@@ -536,7 +527,6 @@ describe('CDN Worker', () => {
     it('Should throw on invalid token hash', async () => {
       const handleRequest = createRequestHandler({
         isKeyValid: createIsKeyValid({
-          keyData: '123456',
           getCache: () => null,
           waitUntil: null,
           s3: {
