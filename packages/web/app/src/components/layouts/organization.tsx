@@ -133,17 +133,17 @@ export function OrganizationLayout({
           </Tabs.Trigger>
           {isRegularOrg && canAccessOrganization(OrganizationAccessScope.Members, me) && (
             <Tabs.Trigger value={TabValue.Members} asChild>
-              <NextLink href={`/${orgId}/${TabValue.Members}`}>Members</NextLink>
+              <NextLink href={`/${orgId}/view/${TabValue.Members}`}>Members</NextLink>
             </Tabs.Trigger>
           )}
           {canAccessOrganization(OrganizationAccessScope.Settings, me) && (
             <Tabs.Trigger value={TabValue.Settings} asChild>
-              <NextLink href={`/${orgId}/${TabValue.Settings}`}>Settings</NextLink>
+              <NextLink href={`/${orgId}/view/${TabValue.Settings}`}>Settings</NextLink>
             </Tabs.Trigger>
           )}
           {getIsStripeEnabled() && canAccessOrganization(OrganizationAccessScope.Settings, me) && (
             <Tabs.Trigger value={TabValue.Subscription} asChild>
-              <NextLink href={`/${orgId}/${TabValue.Subscription}`}>Subscription</NextLink>
+              <NextLink href={`/${orgId}/view/${TabValue.Subscription}`}>Subscription</NextLink>
             </Tabs.Trigger>
           )}
         </Tabs.List>
