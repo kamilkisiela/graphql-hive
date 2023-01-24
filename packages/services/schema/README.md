@@ -20,3 +20,4 @@ of subschemas.
 | `REQUEST_BROKER`                    | No       | Whether Request Broker should be enabled.                                             | `1` (enabled) or `0` (disabled)                      |
 | `REQUEST_BROKER_ENDPOINT`           | No       | The address                                                                           | `https://broker.worker.dev`                          |
 | `REQUEST_BROKER_SIGNATURE`          | No       | A secret signature needed to verify the request origin                                | `hbsahdbzxch123`                                     |
+| `REQUEST_LOGGING`                   | No       | Log http requests                                                                     | `1` (enabled) or `0` (disabled)                      |
