@@ -379,6 +379,7 @@ importers:
       '@aws-sdk/s3-request-presigner': 3.256.0
       '@graphql-hive/core': 0.2.3
       '@graphql-inspector/core': 3.4.0
+      '@hive/cdn-script': workspace:*
       '@hive/emails': workspace:*
       '@hive/schema': workspace:*
       '@hive/storage': workspace:*
@@ -444,6 +445,7 @@ importers:
       zod: 3.20.2
     devDependencies:
       '@graphql-hive/core': link:../../libraries/core
+      '@hive/cdn-script': link:../cdn-worker
       '@hive/emails': link:../emails
       '@hive/schema': link:../schema
       '@hive/storage': link:../storage
@@ -484,10 +486,10 @@ importers:
   packages/services/cdn-worker:
     specifiers:
       '@cloudflare/workers-types': 4.20221111.1
-      '@hive/api': workspace:*
       '@types/service-worker-mock': 2.0.1
       '@whatwg-node/fetch': 0.6.2
       '@whatwg-node/server': 0.5.7
+      bcryptjs: 2.4.3
       esbuild: 0.16.11
       fastify: 3.29.5
       graphql: 16.6.0
@@ -496,12 +498,12 @@ importers:
       toucan-js: 2.7.0
       zod: 3.20.2
     dependencies:
+      bcryptjs: 2.4.3
       graphql: 16.6.0
       toucan-js: 2.7.0
       zod: 3.20.2
     devDependencies:
       '@cloudflare/workers-types': 4.20221111.1
-      '@hive/api': link:../api
       '@types/service-worker-mock': 2.0.1
       '@whatwg-node/fetch': 0.6.2
       '@whatwg-node/server': 0.5.7

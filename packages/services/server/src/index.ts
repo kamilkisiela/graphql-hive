@@ -6,8 +6,9 @@ import 'reflect-metadata';
 import zod from 'zod';
 import { createRegistry, LogFn, Logger } from '@hive/api';
 import { CryptoProvider } from '@hive/api';
-import { ArtifactStorageReader } from '@hive/api/src/modules/schema/providers/artifact-storage-reader';
 import { createArtifactRequestHandler } from '@hive/cdn-script/artifact-handler';
+import { ArtifactStorageReader } from '@hive/cdn-script/artifact-storage-reader';
+import { AwsClient } from '@hive/cdn-script/aws';
 import { createIsKeyValid } from '@hive/cdn-script/key-validation';
 import {
   createServer,
@@ -314,26 +315,28 @@ export async function main() {
     });
 
     if (env.cdn.providers.api !== null) {
-      const artifactStorageReader = new ArtifactStorageReader(
-        {
-          endpoint: env.s3.endpoint,
+      const s3 = {
+        client: new AwsClient({
           accessKeyId: env.s3.credentials.accessKeyId,
           secretAccessKey: env.s3.credentials.secretAccessKey,
-        },
-        env.s3.bucketName,
-        env.s3.publicUrl,
-      );
+          service: 's3',
+        }),
+        endpoint: env.s3.endpoint,
+        bucketName: env.s3.bucketName,
+      };
+      const artifactStorageReader = new ArtifactStorageReader(s3, env.s3.publicUrl);
 
       const artifactHandler = createArtifactRequestHandler({
-        isKeyValid: createIsKeyValid({ keyData: env.cdn.authPrivateKey }),
+        isKeyValid: createIsKeyValid({
+          s3,
+          getCache: () => null,
+          waitUntil: null,
+        }),
         async getArtifactAction(targetId, artifactType, eTag) {
           return artifactStorageReader.generateArtifactReadUrl(targetId, artifactType, eTag);
         },
       });
-      const artifactRouteHandler = createServerAdapter(
-        // TODO: remove `as any` once the fallback logic in packages/services/cdn-worker/src/artifact-handler.ts is removed
-        artifactHandler as any,
-      );
+      const artifactRouteHandler = createServerAdapter(artifactHandler as any);
 
       /** Artifacts API */
       server.route({
