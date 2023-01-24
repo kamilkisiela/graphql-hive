@@ -175,7 +175,7 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
             const newOrgId =
               result.data?.updateOrganizationName?.ok.updatedOrganizationPayload.selector
                 .organization;
-            void router.replace(`/${newOrgId}/settings`);
+            void router.replace(`/${newOrgId}/view/settings`);
           }
         }),
     });

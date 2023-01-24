@@ -53,7 +53,11 @@ export class TargetManager {
 
     let cleanId = paramCase(name);
 
-    if (await this.storage.getTargetByCleanId({ cleanId, project, organization })) {
+    if (
+      // packages/web/app uses the "view" prefix, let's avoid the collision
+      name.toLowerCase() === 'view' ||
+      (await this.storage.getTargetByCleanId({ cleanId, project, organization }))
+    ) {
       cleanId = paramCase(`${name}-${uuid(4)}`);
     }
 

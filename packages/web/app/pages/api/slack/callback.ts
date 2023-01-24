@@ -64,5 +64,5 @@ export default async function slackCallback(req: NextApiRequest, res: NextApiRes
       },
     },
   });
-  res.redirect(`/${orgId}/settings`);
+  res.redirect(`/${orgId}/view/settings`);
 }
