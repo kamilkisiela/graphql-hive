@@ -110,6 +110,8 @@ const dbMigrations = deployDbMigrations({
   imagePullSecret,
   force: forceRunDbMigrations,
   dependencies: [databaseCleanupJob].filter(isDefined),
+  s3: s3Config,
+  encryptionSecret: commonConfig.requireSecret('encryptionSecret'),
 });
 
 const tokensApi = deployTokens({

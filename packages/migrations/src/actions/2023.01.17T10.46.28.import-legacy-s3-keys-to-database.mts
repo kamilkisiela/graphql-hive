@@ -1,8 +1,164 @@
-/**
- * This is a copy of https://github.com/mhart/aws4fetch which is licensed MIT
- * See https://github.com/mhart/aws4fetch/issues/22
- */
+import { createHmac } from 'crypto';
+import bcryptjs from 'bcryptjs';
+import pLimit from 'p-limit';
+import * as zod from 'zod';
+import * as slonik from '@slonik/migrator';
 import { crypto, fetch, Headers, Request, TextEncoder } from '@whatwg-node/fetch';
+
+// treat an empty string (`''`) as undefined
+const emptyString = <T extends zod.ZodType>(input: T) => {
+  return zod.preprocess((value: unknown) => {
+    if (value === '') return undefined;
+    return value;
+  }, input);
+};
+
+const TargetsModel = zod.array(
+  zod.object({
+    id: zod.string(),
+    created_at_cursor: zod.string(),
+  }),
+);
+
+const shouldRunModel = zod.object({
+  RUN_S3_LEGACY_CDN_KEY_IMPORT: emptyString(
+    zod.union([zod.literal('1'), zod.literal('0')]).optional(),
+  ),
+});
+
+const envModel = zod.object({
+  S3_ACCESS_KEY_ID: zod.string().min(1),
+  S3_SECRET_ACCESS_KEY: zod.string().min(1),
+  S3_ENDPOINT: zod.string().url(),
+  S3_BUCKET_NAME: zod.string().min(1),
+  ENCRYPTION_SECRET: zod.string().min(1),
+});
+
+type Cursor = {
+  lastId: string;
+  lastCreatedAt: string;
+};
+
+export const up: slonik.Migration = async ({ context: { connection, sql } }) => {
+  // eslint-disable-next-line no-process-env
+  const eenv = shouldRunModel.parse(process.env);
+  const shouldRun = eenv.RUN_S3_LEGACY_CDN_KEY_IMPORT === '1';
+
+  if (!shouldRun) {
+    return;
+  }
+
+  // eslint-disable-next-line no-process-env
+  const env = envModel.parse(process.env);
+
+  const s3Client = new AwsClient({
+    accessKeyId: env.S3_ACCESS_KEY_ID,
+    secretAccessKey: env.S3_SECRET_ACCESS_KEY,
+    service: 's3',
+  });
+
+  function generateLegacyCDNAccessToken(targetId: string): string {
+    const encoder = new TextEncoder();
+    return createHmac('sha256', env.ENCRYPTION_SECRET)
+      .update(encoder.encode(targetId))
+      .digest('base64');
+  }
+
+  async function getPaginationTargets(
+    cursor: null | Cursor,
+  ): Promise<zod.TypeOf<typeof TargetsModel>> {
+    // Note: there is no index for this query, so it might be slow
+    // Also all this code runs inside a database transaction.
+    // This will block any other writes to the table.
+    // As the table should not be heavily in use when this is being run, it does not really matter.
+    const query = sql`
+      SELECT
+        "id"
+        , to_json("created_at") as "created_at_cursor"
+      FROM
+        "targets"
+      ${
+        cursor
+          ? sql`
+              WHERE
+                ("created_at" = ${cursor.lastCreatedAt} AND "id" > ${cursor.lastId})
+                OR "created_at" > ${cursor.lastCreatedAt}
+            `
+          : sql``
+      }
+      ORDER BY
+        "created_at" ASC
+        , "id" ASC
+      LIMIT
+        200
+    `;
+
+    const items = await connection.query(query);
+    return TargetsModel.parse(items.rows);
+  }
+
+  let lastCursor: null | Cursor = null;
+
+  async function seedLegacyCDNKey(item: zod.TypeOf<typeof TargetsModel>[number]): Promise<void> {
+    const s3Key = `s3-legacy-keys/${item.id}`;
+    const privateAccessKey = generateLegacyCDNAccessToken(item.id);
+    const firstCharacters = privateAccessKey.substring(0, 3);
+    const lastCharacters = privateAccessKey.substring(privateAccessKey.length - 3);
+    const accessKeyHash = await bcryptjs.hash(privateAccessKey, await bcryptjs.genSalt());
+
+    // After creation on database
+    const response = await s3Client.fetch([env.S3_ENDPOINT, env.S3_BUCKET_NAME, s3Key].join('/'), {
+      method: 'PUT',
+      body: accessKeyHash,
+    });
+
+    if (response.status !== 200) {
+      throw new Error(`Unexpected Status for storing key. (status=${response.status})`);
+    }
+
+    const query = sql`
+      INSERT INTO
+        "cdn_access_tokens"
+        (
+          "target_id"
+          , "s3_key"
+          , "first_characters"
+          , "last_characters"
+          , "alias"
+        )
+      VALUES
+        (
+          ${item.id}
+          , ${s3Key}
+          , ${firstCharacters}
+          , ${lastCharacters}
+          , 'CDN Access Token'
+        )
+      ON CONFLICT DO NOTHING
+    `;
+
+    await connection.query(query);
+  }
+
+  const limit = pLimit(20);
+
+  do {
+    const items: zod.TypeOf<typeof TargetsModel> = await getPaginationTargets(lastCursor);
+    await Promise.all(items.map(item => limit(() => seedLegacyCDNKey(item))));
+
+    lastCursor = null;
+    if (items.length > 0) {
+      lastCursor = {
+        lastId: items[items.length - 1].id,
+        lastCreatedAt: items[items.length - 1].created_at_cursor,
+      };
+    }
+  } while (lastCursor !== null);
+};
+
+export const down: slonik.Migration = async () => {
+  throw new Error('down migration not implemented.');
+};
 
 const encoder = new TextEncoder();
 
@@ -48,7 +204,7 @@ type AwsRequestInit = RequestInit & {
   };
 };
 
-export class AwsClient {
+class AwsClient {
   private secretAccessKey: string;
   private accessKeyId: string;
   private sessionToken?: string;
@@ -133,7 +289,7 @@ export class AwsClient {
   }
 }
 
-export class AwsV4Signer {
+class AwsV4Signer {
   private method: string;
   private url: URL;
   private headers: Headers;
