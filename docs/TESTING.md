@@ -37,7 +37,7 @@ export DOCKER_TAG=":local"
 ```
 
 6. Compile a local Docker image by running:
-   `docker buildx bake -f docker.hcl integration-tests --load`
+   `docker buildx bake -f docker/docker.hcl integration-tests --load`
 7. Use Docker Compose to run the built containers (based on `community` compose file), along with
    the extra containers:
 
@@ -45,7 +45,7 @@ export DOCKER_TAG=":local"
 export DOCKER_TAG=":local"
 export DOCKER_REGISTRY=""
 
-docker compose -f docker-compose.community.yml -f ./integration-tests/docker-compose.integration.yaml --env-file ./integration-tests/.env up -d --wait
+docker compose -f ./docker/docker-compose.community.yml -f ./integration-tests/docker-compose.integration.yaml --env-file ./integration-tests/.env up -d --wait
 ```
 
 8. Run the tests: `pnpm --filter integration-tests test:integration`
@@ -66,7 +66,7 @@ To run integration tests locally, from the pre-build Docker image, follow:
 export DOCKER_REGISTRY="ghcr.io/kamilkisiela/graphql-hive/"
 export DOCKER_TAG=":IMAGE_TAG_HERE"
 
-docker compose -f docker-compose.community.yml -f ./integration-tests/docker-compose.integration.yaml --env-file ./integration-tests/.env up -d --wait
+docker compose -f ./docker/docker-compose.community.yml -f ./integration-tests/docker-compose.integration.yaml --env-file ./integration-tests/.env up -d --wait
 ```
 
 6. Run the tests: `pnpm --filter integration-tests test:integration`
@@ -95,9 +95,9 @@ export BUILD_TYPE=""
 export DOCKER_TAG=":local"
 ```
 
-6. Compile a local Docker image by running: `docker buildx bake -f docker.hcl build --load`
+6. Compile a local Docker image by running: `docker buildx bake -f docker/docker.hcl build --load`
 7. Run the e2e environment, by running:
-   `docker compose -f docker-compose.community.yml --env-file ./integration-tests/.env up -d --wait`
+   `docker compose -f ./docker/docker-compose.community.yml --env-file ./integration-tests/.env up -d --wait`
 8. Run Cypress: `pnpm test:e2e`
 
 #### Running from pre-built Docker image
@@ -117,7 +117,7 @@ export DOCKER_TAG=":IMAGE_TAG_HERE"
 ```
 
 6. Run the e2e environment, by running:
-   `docker compose -f docker-compose.community.yml --env-file ./integration-tests/.env up -d --wait`
+   `docker compose -f ./docker/docker-compose.community.yml --env-file ./integration-tests/.env up -d --wait`
 7. Run Cypress: `pnpm test:e2e`
 
 #### Docker Compose configuration

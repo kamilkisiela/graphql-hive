@@ -5,7 +5,7 @@ let loadedConfig: any = null;
 
 export function getLocalComposeConfig() {
   if (!loadedConfig) {
-    loadedConfig = yaml.load(readFileSync('../docker-compose.community.yml', 'utf8'));
+    loadedConfig = yaml.load(readFileSync('../docker/docker-compose.community.yml', 'utf8'));
   }
 
   return {
