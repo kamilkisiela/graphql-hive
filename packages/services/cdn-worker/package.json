@@ -12,13 +12,13 @@
     "graphql": "^16.0.0"
   },
   "dependencies": {
-    "bcryptjs": "2.4.3",
     "graphql": "16.6.0",
     "toucan-js": "2.7.0",
     "zod": "3.20.2"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "4.20221111.1",
+    "@hive/api": "workspace:*",
     "@types/service-worker-mock": "2.0.1",
     "@whatwg-node/fetch": "0.6.2",
     "@whatwg-node/server": "0.5.7",

@@ -1,6 +1,6 @@
 import { Inject } from 'graphql-modules';
-import { buildArtifactStorageKey } from '@hive/cdn-script/artifact-storage-reader';
 import { S3_CONFIG, type S3Config } from '../../shared/providers/s3-config';
+import { buildArtifactStorageKey } from './artifact-storage-reader';
 
 const artifactMeta = {
   sdl: {

@@ -42,7 +42,6 @@
   },
   "devDependencies": {
     "@graphql-hive/core": "0.2.3",
-    "@hive/cdn-script": "workspace:*",
     "@hive/emails": "workspace:*",
     "@hive/schema": "workspace:*",
     "@hive/storage": "workspace:*",

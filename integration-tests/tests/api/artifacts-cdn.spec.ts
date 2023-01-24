@@ -24,33 +24,29 @@ const s3Client = new S3Client({
   forcePathStyle: true,
 });
 
-async function deleteS3Object(s3Client: S3Client, bucketName: string, keysToDelete: Array<string>) {
-  if (keysToDelete.length) {
-    const deleteObjectsCommand = new DeleteObjectsCommand({
-      Bucket: bucketName,
-      Delete: { Objects: keysToDelete.map(key => ({ Key: key })) },
-    });
-
-    await s3Client.send(deleteObjectsCommand);
-  }
-}
-
 async function deleteAllS3BucketObjects(s3Client: S3Client, bucketName: string) {
   const listObjectsCommand = new ListObjectsCommand({
     Bucket: bucketName,
   });
   const result = await s3Client.send(listObjectsCommand);
-  const keysToDelete: Array<string> = [];
+  const keysToDelete: Array<{ Key: string }> = [];
 
   if (result.Contents) {
     for (const item of result.Contents) {
       if (item.Key) {
-        keysToDelete.push(item.Key);
+        keysToDelete.push({ Key: item.Key });
       }
     }
   }
 
-  await deleteS3Object(s3Client, bucketName, keysToDelete);
+  if (keysToDelete.length) {
+    const deleteObjectsCommand = new DeleteObjectsCommand({
+      Bucket: bucketName,
+      Delete: { Objects: keysToDelete },
+    });
+
+    await s3Client.send(deleteObjectsCommand);
+  }
 }
 
 async function fetchS3ObjectArtifact(
@@ -158,55 +154,6 @@ function runArtifactsCDNTests(
       isMatch = await bcrypt.compare(cdnAccess.token, secondResult.body);
       expect(isMatch).toEqual(true);
     });
-
-    test.concurrent(
-      'deleting (legacy) cdn access token from s3 revokes artifact cdn access',
-      async () => {
-        const { createOrg } = await initSeed().createOwner();
-        const { createProject } = await createOrg();
-        const { createToken, target } = await createProject(ProjectType.Single);
-        const writeToken = await createToken({
-          targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-        });
-
-        const publishSchemaResult = await writeToken
-          .publishSchema({
-            author: 'Kamil',
-            commit: 'abc123',
-            sdl: `type Query { ping: String }`,
-          })
-          .then(r => r.expectNoGraphQLErrors());
-
-        const cdnAccess = await writeToken.createCdnAccess();
-        const endpointBaseUrl = await getBaseEndpoint();
-
-        // First roundtrip
-        const url = buildEndpointUrl(endpointBaseUrl, target!.id, 'sdl');
-        let response = await fetch(url, {
-          method: 'GET',
-          headers: {
-            'x-hive-cdn-key': cdnAccess.token,
-          },
-        });
-        expect(response.status).toEqual(200);
-        expect(await response.text()).toMatchInlineSnapshot(`
-        "type Query {
-          ping: String
-        }"
-        `);
-
-        await deleteS3Object(s3Client, 'artifacts', [`cdn-legacy-keys/${target.id}`]);
-
-        // Second roundtrip
-        response = await fetch(url, {
-          method: 'GET',
-          headers: {
-            'x-hive-cdn-key': cdnAccess.token,
-          },
-        });
-        expect(response.status).toEqual(403);
-      },
-    );
 
     test.concurrent('access SDL artifact with valid credentials', async () => {
       const { createOrg } = await initSeed().createOwner();
@@ -419,6 +366,7 @@ function runArtifactsCDNTests(
 
         expect(response.status).toEqual(200);
         const result = await response.json();
+        console.log(result);
         expect(result.data.__schema.types).toContainEqual({
           name: 'Query',
           fields: [{ name: 'ping' }],
