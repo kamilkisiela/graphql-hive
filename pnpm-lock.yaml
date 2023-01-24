@@ -294,13 +294,13 @@ importers:
       axios: ^1.2.1
       graphql-yoga: 3.3.0
       nock: 13.2.9
-      tiny-lru: 8.0.2
+      tiny-lru: 10.0.1
     dependencies:
       '@graphql-hive/core': link:../core
       '@graphql-tools/utils': 9.1.4
       async-retry: 1.3.3
       axios: 1.2.1
-      tiny-lru: 8.0.2
+      tiny-lru: 10.0.1
     devDependencies:
       '@apollo/federation': 0.38.1
       '@envelop/types': 3.0.1
@@ -828,7 +828,7 @@ importers:
       p-timeout: 6.1.0
       pino-pretty: 9.1.1
       reflect-metadata: 0.1.13
-      tiny-lru: 8.0.2
+      tiny-lru: 10.0.1
       tslib: 2.4.1
       zod: 3.20.2
     dependencies:
@@ -839,7 +839,7 @@ importers:
       ms: 2.1.3
       p-timeout: 6.1.0
       reflect-metadata: 0.1.13
-      tiny-lru: 8.0.2
+      tiny-lru: 10.0.1
       zod: 3.20.2
     devDependencies:
       '@hive/service-common': link:../service-common
@@ -865,7 +865,7 @@ importers:
       graphql: 16.6.0
       kafkajs: 2.2.3
       pino-pretty: 9.1.1
-      tiny-lru: 8.0.2
+      tiny-lru: 10.0.1
       zod: 3.20.2
     dependencies:
       '@sentry/node': 7.32.1
@@ -878,7 +878,7 @@ importers:
       got: 12.5.3
       graphql: 16.6.0
       kafkajs: 2.2.3
-      tiny-lru: 8.0.2
+      tiny-lru: 10.0.1
       zod: 3.20.2
     devDependencies:
       '@hive/service-common': link:../service-common
@@ -935,7 +935,7 @@ importers:
       graphql: 16.6.0
       kafkajs: 2.2.3
       pino-pretty: 9.1.1
-      tiny-lru: 8.0.2
+      tiny-lru: 10.0.1
       tslib: 2.4.1
       zod: 3.20.2
     dependencies:
@@ -947,7 +947,7 @@ importers:
       got: 12.5.3
       graphql: 16.6.0
       kafkajs: 2.2.3
-      tiny-lru: 8.0.2
+      tiny-lru: 10.0.1
       zod: 3.20.2
     devDependencies:
       '@graphql-hive/core': link:../../libraries/core
@@ -25856,6 +25856,11 @@ packages:
 
   /tiny-invariant/1.3.1:
     resolution: {integrity: sha512-AD5ih2NlSssTCwsMznbvwMZpJ1cbhkGd2uueNxzv2jDlEeZdU04JQfRnggJQ8DrcVBGjAsCKwFBbDlVNtEMlzw==}
+    dev: false
+
+  /tiny-lru/10.0.1:
+    resolution: {integrity: sha512-Vst+6kEsWvb17Zpz14sRJV/f8bUWKhqm6Dc+v08iShmIJ/WxqWytHzCTd6m88pS33rE2zpX34TRmOpAJPloNCA==}
+    engines: {node: '>=6'}
     dev: false
 
   /tiny-lru/8.0.2:
