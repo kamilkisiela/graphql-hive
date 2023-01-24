@@ -26,6 +26,7 @@ async function main() {
     tracing: false,
     log: {
       level: env.log.level,
+      requests: env.log.requests,
     },
   });
 
