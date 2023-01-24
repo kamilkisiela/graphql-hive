@@ -49,28 +49,28 @@ function "image_tag" {
 }
 
 target "migrations-base" {
-  dockerfile = "${PWD}/migrations.dockerfile"
+  dockerfile = "${PWD}/docker/migrations.dockerfile"
   args = {
     RELEASE = "${RELEASE}"
   }
 }
 
 target "service-base" {
-  dockerfile = "${PWD}/services.dockerfile"
+  dockerfile = "${PWD}/docker/services.dockerfile"
   args = {
     RELEASE = "${RELEASE}"
   }
 }
 
 target "app-base" {
-  dockerfile = "${PWD}/app.dockerfile"
+  dockerfile = "${PWD}/docker/app.dockerfile"
   args = {
     RELEASE = "${RELEASE}"
   }
 }
 
 target "router-base" {
-  dockerfile = "${PWD}/router.dockerfile"
+  dockerfile = "${PWD}/docker/router.dockerfile"
   args = {
     RELEASE = "${RELEASE}"
   }
