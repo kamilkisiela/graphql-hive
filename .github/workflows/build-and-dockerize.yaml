@@ -124,7 +124,7 @@ jobs:
           BUILD_STABLE: ${{ inputs.publishLatest && '1' || '' }}
         with:
           push: true
-          files: docker.hcl
+          files: docker/docker.hcl
           targets: ${{ inputs.targets }}
           set: |
             *.cache-from=type=gha
