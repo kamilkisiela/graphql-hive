@@ -11,7 +11,7 @@
     "@apollo/gateway": "2.2.3",
     "@apollo/server": "4.3.1",
     "@app/gql": "link:./testkit/gql",
-    "@aws-sdk/client-s3": "3.256.0",
+    "@aws-sdk/client-s3": "3.257.0",
     "@esm2cjs/execa": "6.1.1-cjs.1",
     "@graphql-hive/core": "0.2.3",
     "@graphql-typed-document-node/core": "3.1.1",
