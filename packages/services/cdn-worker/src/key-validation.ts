@@ -24,7 +24,7 @@ export const createIsKeyValid =
       const requestCache = await deps.getCache();
       if (requestCache) {
         const cacheKey = new Request(
-          ['http://key-cache.graphql-hive.com/', 'legacy', targetId].join('/'),
+          ['https://key-cache.graphql-hive.com', 'legacy', targetId].join('/'),
           {
             method: 'GET',
           },
