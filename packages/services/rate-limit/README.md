@@ -22,3 +22,4 @@ you don't need this service.
 | `PROMETHEUS_METRICS`                | No                                                 | Whether Prometheus metrics should be enabled                                          | `1` (enabled) or `0` (disabled)                      |
 | `PROMETHEUS_METRICS_LABEL_INSTANCE` | No                                                 | The instance label added for the prometheus metrics.                                  | `rate-limit`                                         |
 | `WEB_APP_URL`                       | No                                                 | The base url of the web app                                                           | `https://your-instance.com`                          |
+| `REQUEST_LOGGING`                   | No                                                 | Log http requests                                                                     | `1` (enabled) or `0` (disabled)                      |

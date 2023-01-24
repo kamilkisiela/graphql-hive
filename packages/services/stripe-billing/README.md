@@ -19,3 +19,4 @@ Optional service for billing customers with Stripe.
 | `ENVIRONMENT`              | No       | The environment of your Hive app. (**Note:** This will be used for Sentry reporting.) | `staging`                                             |
 | `SENTRY`                   | No       | Whether Sentry error reporting should be enabled.                                     | `1` (enabled) or `0` (disabled)                       |
 | `SENTRY_DSN`               | No       | The DSN for reporting errors to Sentry.                                               | `https://dooobars@o557896.ingest.sentry.io/12121212`  |
+| `REQUEST_LOGGING`          | No       | Log http requests                                                                     | `1` (enabled) or `0` (disabled)                       |

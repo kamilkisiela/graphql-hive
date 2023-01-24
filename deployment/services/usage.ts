@@ -50,8 +50,9 @@ export function deployUsage({
       env: {
         ...deploymentEnv,
         ...commonEnv,
-        SENTRY: commonEnv.SENTRY_ENABLED,
         ...kafka.connectionEnv,
+        SENTRY: commonEnv.SENTRY_ENABLED,
+        REQUEST_LOGGING: '0', // disabled
         KAFKA_BROKER: kafka.config.endpoint,
         KAFKA_BUFFER_SIZE: kafka.config.bufferSize,
         KAFKA_BUFFER_INTERVAL: kafka.config.bufferInterval,

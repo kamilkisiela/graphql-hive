@@ -65,6 +65,7 @@ export async function main() {
     tracing: true,
     log: {
       level: env.log.level,
+      requests: env.log.requests,
     },
   });
 

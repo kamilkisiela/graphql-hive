@@ -10,6 +10,7 @@ export async function createServer(options: {
   tracing: boolean;
   name: string;
   log: {
+    requests: boolean;
     level: string;
   };
 }) {
@@ -42,7 +43,10 @@ export async function createServer(options: {
     await useSentryTracing(server);
   }
 
-  await useRequestLogging(server);
+  if (options.log.requests) {
+    await useRequestLogging(server);
+  }
+
   await server.register(cors);
 
   return server;
