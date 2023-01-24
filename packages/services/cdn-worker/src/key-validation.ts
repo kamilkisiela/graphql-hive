@@ -22,19 +22,35 @@ export const createIsKeyValid =
     {
       const requestCache = await deps.getCache();
       if (requestCache) {
+        console.log(`attempt reading from cache. (targetId=${targetId})`);
+
         const cacheKey = new Request(
-          ['https://key-cache.graphql-hive.com', 'legacy', targetId].join('/'),
+          [
+            'https://key-cache.graphql-hive.com',
+            'legacy',
+            targetId,
+            encodeURIComponent(accessHeaderValue),
+          ].join('/'),
           {
             method: 'GET',
           },
         );
 
         const response = await requestCache.match(cacheKey);
+
         if (response) {
-          return (await response.text()) === '1';
+          console.log(`cache entry found. (targetId=${targetId})`);
+
+          const isValid = (await response.text()) === '1';
+
+          return isValid;
         }
 
+        console.log(`cache entry not found. (targetId=${targetId})`);
+
         withCache = async (isValid: boolean) => {
+          console.log(`write to cache. (targetId=${targetId}, isValid=${isValid})`);
+
           const promise = requestCache.put(
             cacheKey,
             new Response(isValid ? '1' : '0', {
@@ -56,6 +72,8 @@ export const createIsKeyValid =
       }
     }
 
+    console.log(`fetch key (targetId=${targetId})`);
+
     const key = await deps.s3.client.fetch(
       [deps.s3.endpoint, deps.s3.bucketName, 'cdn-legacy-keys', targetId].join('/'),
       {
@@ -64,9 +82,15 @@ export const createIsKeyValid =
     );
 
     if (key.status !== 200) {
+      console.log(`key not found (targetId=${targetId})`);
       return withCache(false);
     }
 
+    console.log(`key found (targetId=${targetId})`);
+
     const isValid = await bcrypt.compare(accessHeaderValue, await key.text());
+
+    console.log(`validating key against access key (targetId=${targetId}, isValid=${isValid})`);
+
     return withCache(isValid);
   };
