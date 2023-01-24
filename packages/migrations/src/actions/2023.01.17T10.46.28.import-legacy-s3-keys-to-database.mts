@@ -100,7 +100,7 @@ export const up: slonik.Migration = async ({ context: { connection, sql } }) => 
   let lastCursor: null | Cursor = null;
 
   async function seedLegacyCDNKey(item: zod.TypeOf<typeof TargetsModel>[number]): Promise<void> {
-    const s3Key = `s3-legacy-keys/${item.id}`;
+    const s3Key = `cdn-legacy-keys/${item.id}`;
     const privateAccessKey = generateLegacyCDNAccessToken(item.id);
     const firstCharacters = privateAccessKey.substring(0, 3);
     const lastCharacters = privateAccessKey.substring(privateAccessKey.length - 3);
