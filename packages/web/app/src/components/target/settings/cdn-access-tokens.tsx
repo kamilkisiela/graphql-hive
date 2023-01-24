@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useFormik } from 'formik';
 import { gql, useMutation, useQuery } from 'urql';
@@ -39,7 +39,10 @@ const CDNAccessTokenCreateMutation = gql(/* GraphQL */ `
   }
 `);
 
-const CreateCDNAccessTokenModal = (props: { onClose: () => void }) => {
+const CreateCDNAccessTokenModal = (props: {
+  onCreateCDNAccessToken: () => void;
+  onClose: () => void;
+}) => {
   const router = useRouteSelector();
   const [createCdnAccessToken, mutate] = useMutation(CDNAccessTokenCreateMutation);
 
@@ -64,6 +67,12 @@ const CreateCDNAccessTokenModal = (props: { onClose: () => void }) => {
       });
     },
   });
+
+  useEffect(() => {
+    if (createCdnAccessToken.data?.createCdnAccessToken.ok?.createdCdnAccessToken.id) {
+      props.onCreateCDNAccessToken();
+    }
+  }, [createCdnAccessToken.data?.createCdnAccessToken.ok?.createdCdnAccessToken.id]);
 
   let body = (
     <form className="flex flex-1 flex-col items-stretch gap-12" onSubmit={form.handleSubmit}>
@@ -172,15 +181,22 @@ const CDNAccessTokenDeleteMutation = gql(/* GraphQL */ `
 
 const DeleteCDNAccessTokenModal = (props: {
   cdnAccessTokenId: string;
-  onClose: (deletedCdnAccessTokenId: string | null) => void;
+  onDeletedAccessTokenId: (deletedAccessTokenId: string) => void;
+  onClose: () => void;
 }) => {
   const router = useRouteSelector();
   const [deleteCdnAccessToken, mutate] = useMutation(CDNAccessTokenDeleteMutation);
 
-  const onClose = () =>
-    props.onClose(
-      deleteCdnAccessToken.data?.deleteCdnAccessToken.ok?.deletedCdnAccessTokenId ?? null,
-    );
+  useEffect(() => {
+    if (deleteCdnAccessToken.data?.deleteCdnAccessToken.ok?.deletedCdnAccessTokenId) {
+      props.onDeletedAccessTokenId(
+        deleteCdnAccessToken.data.deleteCdnAccessToken.ok.deletedCdnAccessTokenId,
+      );
+      props.onClose();
+    }
+  }, [deleteCdnAccessToken.data?.deleteCdnAccessToken.ok?.deletedCdnAccessTokenId ?? null]);
+
+  const onClose = () => props.onClose();
 
   let body = (
     <div className="flex flex-1 flex-col items-stretch gap-12">
@@ -426,16 +442,21 @@ export const CDNAccessTokens = (props: { me: MemberFieldsFragment }): React.Reac
           Next Page
         </Button>
       </div>
-      {isCreateCDNAccessTokensModalOpen ? <CreateCDNAccessTokenModal onClose={closeModal} /> : null}
+      {isCreateCDNAccessTokensModalOpen ? (
+        <CreateCDNAccessTokenModal
+          onCreateCDNAccessToken={() => {
+            reexecuteQuery({ requestPolicy: 'network-only' });
+          }}
+          onClose={closeModal}
+        />
+      ) : null}
       {deleteCDNAccessTokenId ? (
         <DeleteCDNAccessTokenModal
           cdnAccessTokenId={deleteCDNAccessTokenId}
-          onClose={id => {
-            if (id) {
-              reexecuteQuery({ requestPolicy: 'network-only' });
-            }
-            closeModal();
+          onDeletedAccessTokenId={() => {
+            reexecuteQuery({ requestPolicy: 'network-only' });
           }}
+          onClose={closeModal}
         />
       ) : null}
       {/* {modal} */}
