@@ -1,7 +1,7 @@
 /**
  * IMPORTANT NOTE: This file needs to be kept platform-agnostic, don't use any Node.js specific APIs.
  */
-import { AwsClient } from './aws';
+import { AwsClient } from '../../../shared/aws';
 
 const presignedUrlExpirationSeconds = 60;
 
@@ -17,22 +17,32 @@ export type ArtifactsType = SDLArtifactTypes | 'metadata' | 'services' | 'superg
  */
 export class ArtifactStorageReader {
   private publicUrl: URL | null;
+  private awsClient: AwsClient;
+  private s3Endpoint: string;
 
   constructor(
-    private s3: {
-      client: AwsClient;
+    s3Config: {
+      accessKeyId: string;
+      secretAccessKey: string;
       endpoint: string;
-      bucketName: string;
     },
+    private bucketName: string,
     /** The public URL in case the public S3 endpoint differs from the internal S3 endpoint. E.g. within a docker network. */
     publicUrl: string | null,
   ) {
     this.publicUrl = publicUrl ? new URL(publicUrl) : null;
+    this.awsClient = new AwsClient({
+      accessKeyId: s3Config.accessKeyId,
+      secretAccessKey: s3Config.secretAccessKey,
+      region: 'auto',
+      service: 's3',
+    });
+    this.s3Endpoint = s3Config.endpoint;
   }
 
   private async generatePresignedGetUrl(key: string): Promise<string> {
-    const signedUrl = await this.s3.client.sign(
-      [this.s3.endpoint, this.s3.bucketName, key].join('/'),
+    const signedUrl = await this.awsClient.sign(
+      this.s3Endpoint + `/` + this.bucketName + '/' + key,
       {
         method: 'GET',
         aws: { signQuery: true },
@@ -66,8 +76,8 @@ export class ArtifactStorageReader {
 
     const key = buildArtifactStorageKey(targetId, artifactType);
 
-    const response = await this.s3.client.fetch(
-      [this.s3.endpoint, this.s3.bucketName, key].join('/'),
+    const response = await this.awsClient.fetch(
+      this.s3Endpoint + '/' + this.bucketName + '/' + key,
       {
         method: 'HEAD',
       },
