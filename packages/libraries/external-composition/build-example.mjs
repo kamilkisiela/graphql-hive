@@ -14,7 +14,6 @@ await tsup({
   format: ['esm'],
   splitting: false,
   sourcemap: true,
-  clean: true,
   shims: false,
   skipNodeModulesBundle: false,
   noExternal: Object.keys(pkg.peerDependencies).concat(Object.keys(pkg.devDependencies)),
