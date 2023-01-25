@@ -24,6 +24,7 @@
     "zod": "3.20.2"
   },
   "devDependencies": {
+    "@graphql-hive/external-composition": "workspace:*",
     "@hive/service-common": "workspace:*",
     "@types/async-retry": "1.4.5",
     "fastify": "3.29.5",

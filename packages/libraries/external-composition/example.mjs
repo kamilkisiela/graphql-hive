@@ -100,6 +100,42 @@ async function main() {
     },
   });
 
+  /**
+   * used for testing
+   */
+
+  server.route({
+    method: ['POST'],
+    url: '/fail_on_signature',
+    handler(req, res) {
+      /**
+       * @type any
+       */
+      const signature = req.headers[signatureHeaderName];
+      const error = verifyRequest({
+        body: JSON.stringify(req.body),
+        signature: signature,
+        secret: SECRET + 'wrong = fail',
+      });
+
+      if (error) {
+        // Failed to verify the request
+        res.status(500).send(error);
+      } else {
+        /**
+         * @type any
+         */
+        const input = req.body;
+        const result = composeFederation(input);
+        res.send(JSON.stringify(result));
+      }
+    },
+  });
+
+  /**
+   * ok, we're back from testing
+   */
+
   await server.listen({
     port: parseInt(PORT, 10),
   });

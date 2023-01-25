@@ -6,6 +6,7 @@ import { validateSDL } from 'graphql/validation/validate.js';
 import type { Redis as RedisInstance } from 'ioredis';
 import { z } from 'zod';
 import { composeAndValidate, compositionHasErrors } from '@apollo/federation';
+import type { ErrorCode } from '@graphql-hive/external-composition';
 import { stitchSchemas } from '@graphql-tools/stitch';
 import { stitchingDirectives } from '@graphql-tools/stitching-directives';
 import type { FastifyLoggerInstance } from '@hive/service-common';
@@ -63,6 +64,12 @@ const EXTERNAL_COMPOSITION_RESULT = z.union([
     .required(),
 ]);
 
+class NetworkError extends Error {
+  constructor(message: string, public readonly statusCode: number) {
+    super(message);
+  }
+}
+
 function trimDescriptions(doc: DocumentNode): DocumentNode {
   function trim<T extends ASTNode>(node: T): T {
     if (node && 'description' in node && node.description) {
@@ -117,6 +124,19 @@ function hash(secret: string, alg: string, value: string) {
   return createHmac(alg, secret).update(value, 'utf-8').digest('hex');
 }
 
+const codeToExplanationMap: Record<ErrorCode, string> = {
+  ERR_EMPTY_BODY: 'The body of the request is empty',
+  ERR_INVALID_SIGNATURE: 'The signature is invalid. Please check your secret',
+};
+
+function translateMessage(errorCode: string) {
+  const explanation = codeToExplanationMap[errorCode as ErrorCode];
+
+  if (explanation) {
+    return `(${errorCode}) ${explanation}`;
+  }
+}
+
 const createFederation: (
   redis: RedisInstance,
   logger: FastifyLoggerInstance,
@@ -153,9 +173,9 @@ const createFederation: (
           body,
         };
 
-        const response = await retry(
+        const response: unknown = await retry(
           async () => {
-            const response = await (external.broker
+            const res = await (external.broker
               ? fetch(external.broker.endpoint, {
                   method: 'POST',
                   headers: {
@@ -169,25 +189,62 @@ const createFederation: (
                   }),
                 })
               : fetch(external.endpoint, init)
-            ).catch(error => {
+            ).catch(async error => {
               logger.error(error);
-
-              return Promise.reject(error);
+              throw error;
             });
 
-            if (!response.ok) {
-              const message = await response
-                .text()
-                .catch(_ => Promise.resolve(response.statusText));
-              throw new Error(`External composition failure: ${response.status} ${message}`);
+            if (!res.ok) {
+              const message = await res.text().catch(_ => Promise.resolve(res.statusText));
+
+              // If the response is a string starting with ERR_ it's a special error returned by the composition service.
+              // We don't want to throw an error in this case, but instead return a failure result.
+              // This is useful for cases where the composition service is not able to compose the schemas for technical reasons,
+              // and we do want to pass the error to the user and not do a retry.
+              if (typeof message === 'string') {
+                const translatedMessage = translateMessage(message);
+
+                if (translatedMessage) {
+                  return {
+                    type: 'failure',
+                    result: {
+                      errors: [
+                        {
+                          message: `External composition failure: ${translatedMessage}`,
+                        },
+                      ],
+                    },
+                  };
+                }
+              }
+
+              // If it does not start with ERR_ we throw an error, which will be caught by the retry logic.
+              throw new NetworkError(message, res.status);
             }
 
-            return response.json();
+            return res.json();
           },
           {
             retries: 3,
           },
-        );
+        ).catch(async error => {
+          // The expected error
+          if (error instanceof NetworkError) {
+            logger.info('Network error so return failure');
+            return {
+              type: 'failure',
+              result: {
+                errors: [
+                  {
+                    message: `External composition network failure: [${error.statusCode}] ${error.message}`,
+                  },
+                ],
+              },
+            };
+          }
+
+          throw error;
+        });
 
         const parseResult = EXTERNAL_COMPOSITION_RESULT.safeParse(await response);
 
