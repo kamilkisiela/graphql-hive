@@ -45,16 +45,33 @@ declare let SENTRY_ENVIRONMENT: string;
  */
 declare let SENTRY_RELEASE: string;
 
+/**
+ * Default cache on Cloudflare
+ * See https://developers.cloudflare.com/workers/runtime-apis/cache/
+ */
+declare let caches: {
+  default: Cache;
+  open: (namespace: string) => Promise<Cache>;
+};
+
 declare let USAGE_ANALYTICS: AnalyticsEngine;
 declare let ERROR_ANALYTICS: AnalyticsEngine;
+declare let KEY_VALIDATION_ANALYTICS: AnalyticsEngine;
 
 const analytics = createAnalytics({
   usage: USAGE_ANALYTICS,
   error: ERROR_ANALYTICS,
+  keyValidation: KEY_VALIDATION_ANALYTICS,
 });
 
 self.addEventListener('fetch', async (event: FetchEvent) => {
-  const isKeyValid = createIsKeyValid({ keyData: KEY_DATA });
+  const isKeyValid = createIsKeyValid({
+    keyData: KEY_DATA,
+    waitUntil: p => event.waitUntil(p),
+    getCache: () => caches.open('artifacts-auth'),
+    s3,
+    analytics,
+  });
 
   const handleRequest = createRequestHandler({
     getRawStoreValue: value => HIVE_DATA.get(value),

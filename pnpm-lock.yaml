@@ -489,6 +489,7 @@ importers:
       '@types/service-worker-mock': 2.0.1
       '@whatwg-node/fetch': 0.6.2
       '@whatwg-node/server': 0.5.8
+      bcryptjs: 2.4.3
       esbuild: 0.16.11
       fastify: 3.29.5
       graphql: 16.6.0
@@ -497,6 +498,7 @@ importers:
       toucan-js: 2.7.0
       zod: 3.20.2
     dependencies:
+      bcryptjs: 2.4.3
       graphql: 16.6.0
       toucan-js: 2.7.0
       zod: 3.20.2

@@ -50,6 +50,10 @@ export class CloudflareCDN {
           name: 'ERROR_ANALYTICS',
           dataset: `hive_ha_cdn_error_${this.config.envName}`,
         },
+        {
+          name: 'KEY_VALIDATION_ANALYTICS',
+          dataset: `hive_ha_cdn_key_validation_${this.config.envName}`,
+        },
       ],
       secretTextBindings: [
         {
