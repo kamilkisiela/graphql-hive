@@ -1,6 +1,4 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import { ResultOf, VariablesOf } from '@graphql-typed-document-node/core';
-import { Cache, QueryInput, UpdateResolver } from '@urql/exchange-graphcache';
 import produce from 'immer';
 import { getOperationName, TypedDocumentNode } from 'urql';
 import {
@@ -8,11 +6,13 @@ import {
   ExternalComposition_ProjectConfigurationQuery,
   ExternalCompositionForm_EnableMutation,
 } from '@/components/project/settings/external-composition';
+import { ResultOf, VariablesOf } from '@graphql-typed-document-node/core';
+import { Cache, QueryInput, UpdateResolver } from '@urql/exchange-graphcache';
 import {
   InvitationDeleteButton_DeleteInvitation,
   MemberInvitationForm_InviteByEmail,
   Members_OrganizationMembers,
-} from '../../pages/[orgId]/members';
+} from '../../pages/[orgId]/view/members';
 import {
   AddAlertChannelDocument,
   AddAlertDocument,

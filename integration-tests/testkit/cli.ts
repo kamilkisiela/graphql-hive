@@ -1,8 +1,8 @@
-import 'jest-expect-message';
 import { randomUUID } from 'node:crypto';
 import { writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
+import 'jest-expect-message';
 import { execaCommand } from '@esm2cjs/execa';
 import { fetchLatestSchema, fetchLatestValidSchema } from './flow';
 import { getServiceHost } from './utils';

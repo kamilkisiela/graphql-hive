@@ -25,6 +25,7 @@ import {
   inviteToOrganization,
   joinOrganization,
   publishSchema,
+  readOperationBody,
   readOperationsStats,
   readTokenInfo,
   schemaSyncCDN,
@@ -199,6 +200,19 @@ export function initSeed() {
                   return {
                     token,
                     secret,
+                    async readOperationBody(hash: string) {
+                      const operationBodyResult = await readOperationBody(
+                        {
+                          organization: organization.cleanId,
+                          project: project.cleanId,
+                          target: target.cleanId,
+                          hash,
+                        },
+                        secret,
+                      ).then(r => r.expectNoGraphQLErrors());
+
+                      return operationBodyResult.operationBodyByHash;
+                    },
                     async readOperationsStats(from: string, to: string) {
                       const statsResult = await readOperationsStats(
                         {

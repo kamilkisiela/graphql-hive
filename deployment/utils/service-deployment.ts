@@ -8,15 +8,15 @@ export class ServiceDeployment {
   constructor(
     protected name: string,
     protected options: {
-      imagePullSecret: k8s.core.v1.Secret;
+      imagePullSecret?: k8s.core.v1.Secret;
       env?: kx.types.Container['env'];
+      args?: kx.types.Container['args'];
       image: string;
       port?: number;
       livenessProbe?: string;
       readinessProbe?: string;
       memoryLimit?: string;
       cpuLimit?: string;
-      bin?: string;
       /**
        * Enables /metrics endpoint on port 10254
        */
@@ -120,6 +120,7 @@ export class ServiceDeployment {
                 },
               }
             : undefined,
+          args: this.options.args,
           ports: {
             http: port,
             ...(this.options.exposesMetrics

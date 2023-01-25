@@ -1,5 +1,14 @@
-import 'twin.macro';
 import React, { PropsWithChildren, ReactNode } from 'react';
+import { formatISO } from 'date-fns';
+import ReactECharts from 'echarts-for-react';
+import { VscChevronDown, VscChevronLeft, VscChevronRight, VscChevronUp } from 'react-icons/vsc';
+import AutoSizer from 'react-virtualized-auto-sizer';
+import 'twin.macro';
+import { DocumentType, gql, useQuery } from 'urql';
+import { DataWrapper } from '@/components/common/DataWrapper';
+import { env } from '@/env/frontend';
+import { OrganizationType } from '@/graphql';
+import { theme } from '@/lib/charts';
 import {
   Button,
   Flex,
@@ -20,21 +29,12 @@ import {
   getCoreRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  PaginationState,
-  SortingState,
   Table as OriginalTable,
   TableInstance as OriginalTableInstance,
+  PaginationState,
+  SortingState,
   useTableInstance,
 } from '@tanstack/react-table';
-import { formatISO } from 'date-fns';
-import ReactECharts from 'echarts-for-react';
-import { VscChevronDown, VscChevronLeft, VscChevronRight, VscChevronUp } from 'react-icons/vsc';
-import AutoSizer from 'react-virtualized-auto-sizer';
-import { DocumentType, gql, useQuery } from 'urql';
-import { DataWrapper } from '@/components/common/DataWrapper';
-import { env } from '@/env/frontend';
-import { OrganizationType } from '@/graphql';
-import { theme } from '@/lib/charts';
 
 interface Organization {
   name: React.ReactElement;

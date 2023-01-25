@@ -1,5 +1,9 @@
-import 'twin.macro';
 import * as React from 'react';
+import { useFormik } from 'formik';
+import 'twin.macro';
+import { useMutation } from 'urql';
+import * as Yup from 'yup';
+import { SendFeedbackDocument } from '@/graphql';
 import {
   Alert,
   AlertDescription,
@@ -17,10 +21,6 @@ import {
   ModalOverlay,
   Textarea,
 } from '@chakra-ui/react';
-import { useFormik } from 'formik';
-import { useMutation } from 'urql';
-import * as Yup from 'yup';
-import { SendFeedbackDocument } from '@/graphql';
 
 export const Feedback: React.FC<{
   isOpen: boolean;

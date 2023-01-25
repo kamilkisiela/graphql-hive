@@ -1,10 +1,14 @@
-import 'twin.macro';
 import * as React from 'react';
 import Link from 'next/link';
+import 'twin.macro';
+import { useQuery } from 'urql';
+import { env } from '@/env/frontend';
+import { MeDocument } from '@/graphql';
+import { getDocsUrl } from '@/lib/docs-url';
 import {
   Button,
-  Divider,
   Link as ChakraLink,
+  Divider,
   Menu,
   MenuButton,
   MenuItem,
@@ -12,10 +16,6 @@ import {
   useColorModeValue,
   useDisclosure,
 } from '@chakra-ui/react';
-import { useQuery } from 'urql';
-import { env } from '@/env/frontend';
-import { MeDocument } from '@/graphql';
-import { getDocsUrl } from '@/lib/docs-url';
 import { OrganizationSwitcher } from '../organization/Switcher';
 import { ProjectSwitcher } from '../project/Switcher';
 import { TargetSwitcher } from '../target/Switcher';

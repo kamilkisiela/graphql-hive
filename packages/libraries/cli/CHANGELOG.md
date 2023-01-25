@@ -1,5 +1,29 @@
 # @graphql-hive/cli
 
+## 0.19.12
+
+### Patch Changes
+
+- [#1047](https://github.com/kamilkisiela/graphql-hive/pull/1047)
+  [`8c2cc65b`](https://github.com/kamilkisiela/graphql-hive/commit/8c2cc65b9489278196905a6e42056641de002230)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Bump
+
+## 0.19.11
+
+### Patch Changes
+
+- [#904](https://github.com/kamilkisiela/graphql-hive/pull/904)
+  [`20edc8c5`](https://github.com/kamilkisiela/graphql-hive/commit/20edc8c5e54cd71a726f02f33f9710460fc6d5a0)
+  Thanks [@dotansimha](https://github.com/dotansimha)! - Upgrade dependency git-parse to v3
+
+- [#909](https://github.com/kamilkisiela/graphql-hive/pull/909)
+  [`9a4a69bb`](https://github.com/kamilkisiela/graphql-hive/commit/9a4a69bb83760bf8e83961cc0a878899f7715da7)
+  Thanks [@dotansimha](https://github.com/dotansimha)! - Upgrade oclif to latest version
+
+- [#930](https://github.com/kamilkisiela/graphql-hive/pull/930)
+  [`a972fe26`](https://github.com/kamilkisiela/graphql-hive/commit/a972fe26f2c3624dd4e66b36edf91ce3dbae78c7)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Support nullable Query.latestVersion
+
 ## 0.19.10
 
 ### Patch Changes

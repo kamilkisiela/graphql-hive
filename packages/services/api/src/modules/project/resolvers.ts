@@ -7,7 +7,7 @@ import type { ProjectModule } from './__generated__/types';
 import { ProjectManager } from './providers/project-manager';
 
 const ProjectNameModel = z.string().min(2).max(40);
-const URLModel = z.string().url().max(200);
+const URLModel = z.string().url().max(500);
 const RepoOwnerWithNameModel = z
   .string()
   .regex(/^[^/]+\/[^/]+$/, 'Expected owner/name format')

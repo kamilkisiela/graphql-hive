@@ -1,7 +1,7 @@
-import * as Sentry from '@sentry/node';
-import type { Span } from '@sentry/types';
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import lodash from 'lodash';
+import * as Sentry from '@sentry/node';
+import type { Span } from '@sentry/types';
 import * as Types from '../../../__generated__/types';
 import {
   GraphQLDocumentStringInvalidError,
@@ -24,7 +24,7 @@ import { OrganizationManager } from '../../organization/providers/organization-m
 import { ProjectManager } from '../../project/providers/project-manager';
 import { IdempotentRunner } from '../../shared/providers/idempotent-runner';
 import { Logger } from '../../shared/providers/logger';
-import { type TargetSelector, Storage } from '../../shared/providers/storage';
+import { Storage, type TargetSelector } from '../../shared/providers/storage';
 import { TargetManager } from '../../target/providers/target-manager';
 import { ArtifactStorageWriter } from './artifact-storage-writer';
 import type { SchemaModuleConfig } from './config';

@@ -1,6 +1,6 @@
-import 'twin.macro';
 import { FC, ReactElement } from 'react';
 import clsx from 'clsx';
+import 'twin.macro';
 
 const DEFAULT_PATH_PROPS = {
   strokeWidth: '2',

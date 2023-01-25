@@ -1,3 +1,7 @@
+import bcrypt from 'bcryptjs';
+import { ApolloGateway } from '@apollo/gateway';
+import { ApolloServer } from '@apollo/server';
+import { startStandaloneServer } from '@apollo/server/standalone';
 import { ProjectType, TargetAccessScope } from '@app/gql/graphql';
 import {
   DeleteObjectsCommand,
@@ -5,6 +9,7 @@ import {
   ListObjectsCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
+import { createSupergraphManager } from '@graphql-hive/client';
 import { fetch } from '@whatwg-node/fetch';
 import { initSeed } from '../../testkit/seed';
 import { getServiceHost } from '../../testkit/utils';
@@ -80,6 +85,7 @@ function runArtifactsCDNTests(
 ) {
   const getBaseEndpoint = () =>
     getServiceHost(runtime.service, runtime.port).then(v => `http://${v}${runtime.path}`);
+
   describe(`Artifacts CDN ${name}`, () => {
     test.concurrent('access without credentials', async () => {
       const endpointBaseUrl = await getBaseEndpoint();
@@ -115,6 +121,38 @@ function runArtifactsCDNTests(
           'Please refer to the documentation for more details: https://docs.graphql-hive.com/features/registry-usage',
       });
       expect(response.headers.get('location')).toEqual(null);
+    });
+
+    test.concurrent('created (legacy) cdn access key is stored on S3', async () => {
+      const { createOrg } = await initSeed().createOwner();
+      const { createProject } = await createOrg();
+      const { createToken, target } = await createProject(ProjectType.Single);
+      const writeToken = await createToken({
+        targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      });
+      const cdnAccess = await writeToken.createCdnAccess();
+      const result = await fetchS3ObjectArtifact('artifacts', `cdn-legacy-keys/${target.id}`);
+      const isMatch = await bcrypt.compare(cdnAccess.token, result.body);
+      expect(isMatch).toEqual(true);
+    });
+
+    test.concurrent('creating (legacy) cdn access token can be done multiple times', async () => {
+      const { createOrg } = await initSeed().createOwner();
+      const { createProject } = await createOrg();
+      const { createToken, target } = await createProject(ProjectType.Single);
+      const writeToken = await createToken({
+        targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      });
+
+      let cdnAccess = await writeToken.createCdnAccess();
+      const firstResult = await fetchS3ObjectArtifact('artifacts', `cdn-legacy-keys/${target.id}`);
+      let isMatch = await bcrypt.compare(cdnAccess.token, firstResult.body);
+      expect(isMatch).toEqual(true);
+
+      cdnAccess = await writeToken.createCdnAccess();
+      const secondResult = await fetchS3ObjectArtifact('artifacts', `cdn-legacy-keys/${target.id}`);
+      isMatch = await bcrypt.compare(cdnAccess.token, secondResult.body);
+      expect(isMatch).toEqual(true);
     });
 
     test.concurrent('access SDL artifact with valid credentials', async () => {
@@ -266,6 +304,75 @@ function runArtifactsCDNTests(
       });
 
       expect(response.status).toMatchInlineSnapshot(`304`);
+    });
+
+    test.concurrent('access services artifact with ApolloGateway and ApolloServer', async () => {
+      const endpointBaseUrl = await getBaseEndpoint();
+      const { createOrg } = await initSeed().createOwner();
+      const { createProject } = await createOrg();
+      const { createToken, target } = await createProject(ProjectType.Federation);
+      const writeToken = await createToken({
+        targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      });
+
+      // Publish Schema
+      const publishSchemaResult = await writeToken
+        .publishSchema({
+          author: 'Kamil',
+          commit: 'abc123',
+          sdl: `type Query { ping: String }`,
+          service: 'ping',
+          url: 'ping.com',
+        })
+        .then(r => r.expectNoGraphQLErrors());
+
+      expect(publishSchemaResult.schemaPublish.__typename).toEqual('SchemaPublishSuccess');
+      const cdnAccessResult = await writeToken.createCdnAccess();
+
+      const gateway = new ApolloGateway({
+        supergraphSdl: createSupergraphManager({
+          endpoint: endpointBaseUrl + target.id,
+          key: cdnAccessResult.token,
+        }),
+      });
+
+      const server = new ApolloServer({
+        gateway,
+      });
+
+      try {
+        const { url } = await startStandaloneServer(server);
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            accept: 'application/json',
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({
+            query: /* GraphQL */ `
+              {
+                __schema {
+                  types {
+                    name
+                    fields {
+                      name
+                    }
+                  }
+                }
+              }
+            `,
+          }),
+        });
+
+        expect(response.status).toEqual(200);
+        const result = await response.json();
+        expect(result.data.__schema.types).toContainEqual({
+          name: 'Query',
+          fields: [{ name: 'ping' }],
+        });
+      } finally {
+        await server.stop();
+      }
     });
   });
 }

@@ -27,3 +27,4 @@ The data is written to a Kafka broker, form Kafka the data is feed into clickhou
 | `SENTRY`                            | No       | Whether Sentry error reporting should be enabled.                                     | `1` (enabled) or `0` (disabled)                      |
 | `PROMETHEUS_METRICS`                | No       | Whether Prometheus metrics should be enabled                                          | `1` (enabled) or `0` (disabled)                      |
 | `PROMETHEUS_METRICS_LABEL_INSTANCE` | No       | The instance label added for the prometheus metrics.                                  | `usage-service`                                      |
+| `REQUEST_LOGGING`                   | No       | Log http requests                                                                     | `1` (enabled) or `0` (disabled)                      |

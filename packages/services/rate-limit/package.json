@@ -11,11 +11,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@sentry/node": "7.28.1",
-    "@sentry/tracing": "7.28.1",
-    "@trpc/client": "10.7.0",
-    "@trpc/server": "10.7.0",
-    "@whatwg-node/fetch": "0.6.1",
+    "@sentry/node": "7.32.1",
+    "@sentry/tracing": "7.32.1",
+    "@trpc/client": "10.9.0",
+    "@trpc/server": "10.9.0",
+    "@whatwg-node/fetch": "0.6.2",
     "date-fns": "2.29.3",
     "dotenv": "16.0.3",
     "got": "12.5.3",

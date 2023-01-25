@@ -1,11 +1,9 @@
 /* eslint-disable */
 /// @ts-check
-
-import { verifyRequest, compose, signatureHeaderName } from './src/index';
-import { composeAndValidate, compositionHasErrors } from '@apollo/federation';
-import { parse, printSchema } from 'graphql';
-
 import fastify from 'fastify';
+import { parse, printSchema } from 'graphql';
+import { composeAndValidate, compositionHasErrors } from '@apollo/federation';
+import { compose, signatureHeaderName, verifyRequest } from './src/index';
 
 if (typeof process.env.PORT === 'undefined') {
   throw new Error('PORT environment variable must be set');

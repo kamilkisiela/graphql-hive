@@ -1,6 +1,6 @@
-import { ProjectType } from '@app/gql/graphql';
 import formatISO from 'date-fns/formatISO';
 import subHours from 'date-fns/subHours';
+import { ProjectType } from '@app/gql/graphql';
 import { waitFor } from '../../testkit/flow';
 import { initSeed } from '../../testkit/seed';
 
@@ -11,7 +11,8 @@ test.concurrent(
     const { inviteAndJoinMember, createProject } = await createOrg();
     await inviteAndJoinMember();
     const { createToken } = await createProject(ProjectType.Single);
-    const { publishSchema, collectOperations, readOperationsStats } = await createToken({});
+    const { publishSchema, collectOperations, readOperationsStats, readOperationBody } =
+      await createToken({});
 
     const result = await publishSchema({
       sdl: `type Query { ping: String }`,
@@ -46,7 +47,7 @@ test.concurrent(
 
     const op = operationsStats.operations.nodes[0];
     expect(op.count).toEqual(1);
-    expect(op.document).toMatch('ping');
+    await expect(readOperationBody(op.operationHash!)).resolves.toEqual('query ping{ping}');
     expect(op.operationHash).toBeDefined();
     expect(op.duration.p75).toEqual(200);
     expect(op.duration.p90).toEqual(200);

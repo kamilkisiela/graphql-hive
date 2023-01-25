@@ -1,6 +1,6 @@
+import { z } from 'zod';
 import type { inferRouterInputs } from '@trpc/server';
 import { initTRPC } from '@trpc/server';
-import { z } from 'zod';
 import type { Context } from './types';
 
 const webhookInput = z

@@ -1,7 +1,7 @@
-import { metrics } from '@hive/service-common';
 import type { FastifyLoggerInstance } from 'fastify';
 import ms from 'ms';
 import LRU from 'tiny-lru';
+import { metrics } from '@hive/service-common';
 import { atomic, until, useActionTracker } from './helpers';
 import type { Storage, StorageItem } from './storage';
 

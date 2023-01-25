@@ -4,6 +4,7 @@ import type {
   ActivityObject,
   Alert,
   AlertChannel,
+  CDNAccessToken,
   Member,
   OIDCIntegration,
   Organization,
@@ -440,6 +441,15 @@ export interface Storage {
   }): Promise<OIDCIntegration>;
   deleteOIDCIntegration(_: { oidcIntegrationId: string }): Promise<void>;
   idMutex: IdMutex;
+
+  createCDNAccessToken(_: {
+    id: string;
+    targetId: string;
+    s3Key: string;
+    firstCharacters: string;
+    lastCharacters: string;
+    alias: string;
+  }): Promise<CDNAccessToken | null>;
 }
 
 @Injectable()

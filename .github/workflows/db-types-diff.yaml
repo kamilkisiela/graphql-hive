@@ -34,11 +34,11 @@ jobs:
           codegen: false # no need to run codegen in this case, we can skip
 
       - name: create database
-        working-directory: packages/services/storage
+        working-directory: packages/migrations
         run: pnpm db:create
 
       - name: migrate database
-        working-directory: packages/services/storage
+        working-directory: packages/migrations
         run: pnpm db:migrator up
 
       - name: generate database types

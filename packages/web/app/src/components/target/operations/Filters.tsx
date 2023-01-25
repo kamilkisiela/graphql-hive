@@ -1,5 +1,13 @@
-import 'twin.macro';
 import React, { ComponentType } from 'react';
+import { VscChevronDown, VscChromeClose } from 'react-icons/vsc';
+import AutoSizer from 'react-virtualized-auto-sizer';
+import { FixedSizeList, ListChildComponentProps } from 'react-window';
+import 'twin.macro';
+import { useQuery } from 'urql';
+import { useDebouncedCallback } from 'use-debounce';
+import { Spinner } from '@/components/common/Spinner';
+import { DateRangeInput, OperationsStatsDocument, OperationStatsFieldsFragment } from '@/graphql';
+import { useFormattedNumber, useRouteSelector } from '@/lib/hooks';
 import {
   Button,
   Checkbox,
@@ -15,14 +23,6 @@ import {
   InputRightElement,
   useDisclosure,
 } from '@chakra-ui/react';
-import { VscChevronDown, VscChromeClose } from 'react-icons/vsc';
-import AutoSizer from 'react-virtualized-auto-sizer';
-import { FixedSizeList, ListChildComponentProps } from 'react-window';
-import { useQuery } from 'urql';
-import { useDebouncedCallback } from 'use-debounce';
-import { Spinner } from '@/components/common/Spinner';
-import { DateRangeInput, OperationsStatsDocument, OperationStatsFieldsFragment } from '@/graphql';
-import { useFormattedNumber, useRouteSelector } from '@/lib/hooks';
 
 const OperationsFilter: React.FC<{
   onClose(): void;

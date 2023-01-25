@@ -33,9 +33,9 @@ export function deployUsage({
   rateLimit: RateLimitService;
   imagePullSecret: k8s.core.v1.Secret;
 }) {
-  const replicas = 1; /*isProduction(deploymentEnv) ? 2 : 1*/
+  const replicas = isProduction(deploymentEnv) ? 2 : 1;
   const cpuLimit = isProduction(deploymentEnv) ? '600m' : '300m';
-  const maxReplicas = isProduction(deploymentEnv) ? 4 : 2;
+  const maxReplicas = isProduction(deploymentEnv) ? 6 : 2;
   const kafkaBufferDynamic =
     kafka.config.bufferDynamic === 'true' || kafka.config.bufferDynamic === '1' ? '1' : '0';
 
@@ -50,8 +50,9 @@ export function deployUsage({
       env: {
         ...deploymentEnv,
         ...commonEnv,
-        SENTRY: commonEnv.SENTRY_ENABLED,
         ...kafka.connectionEnv,
+        SENTRY: commonEnv.SENTRY_ENABLED,
+        REQUEST_LOGGING: '0', // disabled
         KAFKA_BROKER: kafka.config.endpoint,
         KAFKA_BUFFER_SIZE: kafka.config.bufferSize,
         KAFKA_BUFFER_INTERVAL: kafka.config.bufferInterval,

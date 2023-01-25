@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import NextCors from 'nextjs-cors';
 import supertokens from 'supertokens-node';
 import { middleware } from 'supertokens-node/framework/express';

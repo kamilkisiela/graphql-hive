@@ -31,7 +31,7 @@ export function deployUsageIngestor({
   heartbeat?: string;
   imagePullSecret: k8s.core.v1.Secret;
 }) {
-  const numberOfPartitions = 6;
+  const numberOfPartitions = 16;
   const replicas = isProduction(deploymentEnv) ? 6 : 1;
   const cpuLimit = isProduction(deploymentEnv) ? '600m' : '300m';
   const maxReplicas = isProduction(deploymentEnv) ? numberOfPartitions : 2;
@@ -44,15 +44,6 @@ export function deployUsageIngestor({
     CLICKHOUSE_PASSWORD: clickhouse.config.password,
     CLICKHOUSE_ASYNC_INSERT_BUSY_TIMEOUT_MS: '30000', // flush data after max 30 seconds
     CLICKHOUSE_ASYNC_INSERT_MAX_DATA_SIZE: '200000000', // flush data when the buffer reaches 200MB
-    ...(clickhouse.config.cloud
-      ? {
-          CLICKHOUSE_MIRROR_PROTOCOL: clickhouse.config.cloud.protocol,
-          CLICKHOUSE_MIRROR_HOST: clickhouse.config.cloud.host,
-          CLICKHOUSE_MIRROR_PORT: clickhouse.config.cloud.port,
-          CLICKHOUSE_MIRROR_USERNAME: clickhouse.config.cloud.username,
-          CLICKHOUSE_MIRROR_PASSWORD: clickhouse.config.cloud.password,
-        }
-      : {}),
   };
 
   return new ServiceDeployment(

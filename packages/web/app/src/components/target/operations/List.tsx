@@ -1,5 +1,19 @@
-import 'twin.macro';
 import React, { PropsWithChildren } from 'react';
+import {
+  VscChevronDown,
+  VscChevronLeft,
+  VscChevronRight,
+  VscChevronUp,
+  VscWarning,
+} from 'react-icons/vsc';
+import 'twin.macro';
+import { gql, useQuery } from 'urql';
+import { useDebouncedCallback } from 'use-debounce';
+import { Scale, Section } from '@/components/common';
+import { GraphQLHighlight } from '@/components/common/GraphQLSDLBlock';
+import { env } from '@/env/frontend';
+import { DateRangeInput, OperationsStatsDocument, OperationStatsFieldsFragment } from '@/graphql';
+import { useDecimal, useFormattedDuration, useFormattedNumber } from '@/lib/hooks';
 import {
   Button,
   Drawer,
@@ -32,20 +46,6 @@ import {
   SortingState,
   useTableInstance,
 } from '@tanstack/react-table';
-import {
-  VscChevronDown,
-  VscChevronLeft,
-  VscChevronRight,
-  VscChevronUp,
-  VscWarning,
-} from 'react-icons/vsc';
-import { useQuery } from 'urql';
-import { useDebouncedCallback } from 'use-debounce';
-import { Scale, Section } from '@/components/common';
-import { GraphQLHighlight } from '@/components/common/GraphQLSDLBlock';
-import { env } from '@/env/frontend';
-import { DateRangeInput, OperationsStatsDocument, OperationStatsFieldsFragment } from '@/graphql';
-import { useDecimal, useFormattedDuration, useFormattedNumber } from '@/lib/hooks';
 import { OperationsFallback } from './Fallback';
 
 interface Operation {
@@ -58,7 +58,7 @@ interface Operation {
   failureRate: number;
   requests: number;
   percentage: number;
-  document: string;
+  hash: string;
 }
 
 const Sortable = ({
@@ -84,9 +84,51 @@ const Sortable = ({
   );
 };
 
+const GraphQLOperationBody_GetOperationBodyQuery = gql(/* GraphQL */ `
+  query GraphQLOperationBody_GetOperationBodyQuery($selector: OperationBodyByHashInput!) {
+    operationBodyByHash(selector: $selector)
+  }
+`);
+
+function GraphQLOperationBody({
+  hash,
+  organization,
+  project,
+  target,
+}: {
+  hash: string;
+  organization: string;
+  project: string;
+  target: string;
+}) {
+  const [result] = useQuery({
+    query: GraphQLOperationBody_GetOperationBodyQuery,
+    variables: { selector: { hash, organization, project, target } },
+  });
+
+  const { data, fetching, error } = result;
+
+  if (fetching) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Oh no... {error.message}</div>;
+  }
+
+  if (data?.operationBodyByHash) {
+    return <GraphQLHighlight tw="pt-6" light code={data.operationBodyByHash} />;
+  }
+
+  return null;
+}
+
 const OperationRow: React.FC<{
   operation: Operation;
-}> = ({ operation }) => {
+  organization: string;
+  project: string;
+  target: string;
+}> = ({ operation, organization, project, target }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const linkRef = React.useRef<HTMLButtonElement | null>(null);
   const count = useFormattedNumber(operation.requests);
@@ -153,7 +195,12 @@ const OperationRow: React.FC<{
           </DrawerHeader>
 
           <DrawerBody>
-            <GraphQLHighlight tw="pt-6" light code={operation.document} />
+            <GraphQLOperationBody
+              hash={operation.hash}
+              organization={organization}
+              project={project}
+              target={target}
+            />
           </DrawerBody>
         </DrawerContent>
       </Drawer>
@@ -205,7 +252,20 @@ const OperationsTable: React.FC<{
   sorting: SortingState;
   setSorting: OnChangeFn<SortingState>;
   className?: string;
-}> = ({ operations, sorting, setSorting, pagination, setPagination, className }) => {
+  organization: string;
+  project: string;
+  target: string;
+}> = ({
+  operations,
+  sorting,
+  setSorting,
+  pagination,
+  setPagination,
+  className,
+  organization,
+  project,
+  target,
+}) => {
   const tableInstance = useTableInstance(table, {
     columns,
     data: operations,
@@ -318,7 +378,15 @@ const OperationsTable: React.FC<{
             if (!row.original) {
               return null;
             }
-            return <OperationRow operation={row.original} key={row.original.id} />;
+            return (
+              <OperationRow
+                operation={row.original}
+                key={row.original.id}
+                organization={organization}
+                project={project}
+                target={target}
+              />
+            );
           })}
         </Tbody>
       </Table>
@@ -383,8 +451,11 @@ const OperationsTable: React.FC<{
 const OperationsTableContainer: React.FC<{
   operations: readonly OperationStatsFieldsFragment[];
   operationsFilter: readonly string[];
+  organization: string;
+  project: string;
+  target: string;
   className?: string;
-}> = ({ operations, operationsFilter, className }) => {
+}> = ({ operations, operationsFilter, organization, project, target, className }) => {
   const data = React.useMemo(() => {
     const records: Array<Operation> = [];
     for (const op of operations) {
@@ -405,7 +476,7 @@ const OperationsTableContainer: React.FC<{
         failureRate: 1 - op.countOk / op.count,
         requests: op.count,
         percentage: op.percentage,
-        document: op.document,
+        hash: op.operationHash!,
       });
     }
 
@@ -446,6 +517,9 @@ const OperationsTableContainer: React.FC<{
       setPagination={safeSetPagination}
       sorting={sorting}
       setSorting={setSorting}
+      organization={organization}
+      project={project}
+      target={target}
     />
   );
 };
@@ -486,6 +560,9 @@ export const OperationsList: React.FC<{
         operations={operations}
         operationsFilter={operationsFilter}
         className={className}
+        organization={organization}
+        project={project}
+        target={target}
       />
     </OperationsFallback>
   );

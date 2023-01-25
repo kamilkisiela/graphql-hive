@@ -1,15 +1,15 @@
-import 'twin.macro';
 import React from 'react';
-import { Checkbox, CheckboxGroup, Select, Tooltip } from '@chakra-ui/react';
 import startOfMonth from 'date-fns/startOfMonth';
 import subDays from 'date-fns/subDays';
 import subHours from 'date-fns/subHours';
 import { VscChevronDown } from 'react-icons/vsc';
+import 'twin.macro';
 import { AdminStats, Filters } from '@/components/admin/AdminStats';
 import { authenticated } from '@/components/authenticated-container';
 import { Page } from '@/components/common';
 import { DATE_RANGE_OPTIONS, floorToMinute } from '@/components/common/TimeFilter';
 import { withSessionProtection } from '@/lib/supertokens/guard';
+import { Checkbox, CheckboxGroup, Select, Tooltip } from '@chakra-ui/react';
 
 type DateRangeOptions = Exclude<
   typeof DATE_RANGE_OPTIONS[number],

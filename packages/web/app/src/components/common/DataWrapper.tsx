@@ -1,4 +1,5 @@
 import React from 'react';
+import { CombinedError, UseQueryState } from 'urql';
 import {
   Alert,
   AlertDescription,
@@ -9,7 +10,6 @@ import {
   Code,
   Link,
 } from '@chakra-ui/react';
-import { CombinedError, UseQueryState } from 'urql';
 import { Spinner } from './Spinner';
 
 export const QueryError: React.FC<{

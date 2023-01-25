@@ -1,5 +1,5 @@
-import type { FastifyLoggerInstance } from '@hive/service-common';
 import type { Job } from 'bullmq';
+import type { FastifyLoggerInstance } from '@hive/service-common';
 import type { WebhookInput } from './scheduler';
 
 export interface Config {

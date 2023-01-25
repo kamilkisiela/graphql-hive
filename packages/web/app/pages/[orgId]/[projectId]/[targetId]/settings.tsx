@@ -1,5 +1,4 @@
 import React, { ReactElement, useCallback, useState } from 'react';
-import { Spinner } from '@chakra-ui/react';
 import clsx from 'clsx';
 import { formatISO, subDays } from 'date-fns';
 import { useFormik } from 'formik';
@@ -34,6 +33,7 @@ import {
 import { canAccessTarget, TargetAccessScope } from '@/lib/access/target';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
 import { withSessionProtection } from '@/lib/supertokens/guard';
+import { Spinner } from '@chakra-ui/react';
 
 const columns = [
   { key: 'checkbox' },

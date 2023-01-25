@@ -26,6 +26,7 @@ async function main() {
     tracing: false,
     log: {
       level: env.log.level,
+      requests: env.log.requests,
     },
   });
 
@@ -33,7 +34,6 @@ async function main() {
     const { readiness, start, stop } = createIngestor({
       logger: server.log,
       clickhouse: env.clickhouse,
-      clickhouseMirror: env.clickhouseMirror,
       kafka: {
         topic: env.kafka.topic,
         consumerGroup: env.kafka.consumerGroup,
@@ -47,7 +47,7 @@ async function main() {
           enabled: true,
           endpoint: env.heartbeat.endpoint,
           intervalInMS: 20_000,
-          onError: server.log.error,
+          onError: e => server.log.error(e, `Heartbeat failed with error`),
           isReady: readiness,
         })
       : startHeartbeats({ enabled: false });

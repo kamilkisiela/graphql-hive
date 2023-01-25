@@ -42,9 +42,9 @@ jobs:
         run: pnpm --filter integration-tests prepare:env
 
       - name: patch compose file volumes
-        uses: mikefarah/yq@v4.30.6
+        uses: mikefarah/yq@v4.30.8
         with:
-          cmd: yq -i 'del(.services.*.volumes)' docker-compose.community.yml
+          cmd: yq -i 'del(.services.*.volumes)' docker/docker-compose.community.yml
 
       - name: get cpu count for jest
         id: cpu-cores
@@ -53,13 +53,13 @@ jobs:
       - name: run containers
         timeout-minutes: 8
         run: |
-          docker compose -f docker-compose.community.yml -f ./integration-tests/docker-compose.integration.yaml --env-file ./integration-tests/.env up -d --wait
+          docker compose -f docker/docker-compose.community.yml -f ./integration-tests/docker-compose.integration.yaml --env-file ./integration-tests/.env up -d --wait
 
       - name: troubleshoot containers
         if: ${{ failure() }}
         run: |
-          docker compose -f docker-compose.community.yml -f ./integration-tests/docker-compose.integration.yaml --env-file ./integration-tests/.env ps
-          docker compose -f docker-compose.community.yml -f ./integration-tests/docker-compose.integration.yaml --env-file ./integration-tests/.env logs
+          docker compose -f docker/docker-compose.community.yml -f ./integration-tests/docker-compose.integration.yaml --env-file ./integration-tests/.env ps
+          docker compose -f docker/docker-compose.community.yml -f ./integration-tests/docker-compose.integration.yaml --env-file ./integration-tests/.env logs
 
       - name: run integration tests
         timeout-minutes: 10
@@ -71,4 +71,4 @@ jobs:
       - name: log dump
         if: ${{ failure() }}
         run: |
-          docker compose -f docker-compose.community.yml -f ./integration-tests/docker-compose.integration.yaml --env-file ./integration-tests/.env logs
+          docker compose -f docker/docker-compose.community.yml -f ./integration-tests/docker-compose.integration.yaml --env-file ./integration-tests/.env logs

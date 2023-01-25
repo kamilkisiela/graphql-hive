@@ -138,10 +138,10 @@ export interface OperationsStats {
 }
 
 export interface DurationStats {
-  '75.0': number | null;
-  '90.0': number | null;
-  '95.0': number | null;
-  '99.0': number | null;
+  p75: number | null;
+  p90: number | null;
+  p95: number | null;
+  p99: number | null;
 }
 
 export type TargetsEstimationDateFilter = {

@@ -9,8 +9,8 @@
   },
   "dependencies": {
     "@next/env": "13.1.1",
-    "@radix-ui/react-tooltip": "1.0.2",
-    "@theguild/components": "4.4.4",
+    "@radix-ui/react-tooltip": "1.0.3",
+    "@theguild/components": "4.5.2",
     "clsx": "1.2.1",
     "next": "13.1.1",
     "next-themes": "*",
@@ -20,9 +20,9 @@
   },
   "devDependencies": {
     "@theguild/tailwind-config": "0.2.1",
-    "@types/react": "18.0.26",
-    "next-sitemap": "3.1.43",
-    "postcss": "8.4.20",
+    "@types/react": "18.0.27",
+    "next-sitemap": "3.1.47",
+    "postcss": "8.4.21",
     "tailwindcss": "3.2.4"
   }
 }

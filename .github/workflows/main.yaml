@@ -12,12 +12,29 @@ jobs:
       imageTag: ${{ github.sha }}
       publishSourceMaps: true
       publishLatest: true
+      targets: build
+      uploadJavaScriptArtifacts: true
     secrets: inherit
 
-  # Build and publish Rust packages.
+  # Builds Rust crates, and creates Docker images
+  build-rust:
+    name: build_rust
+    uses: ./.github/workflows/build-and-dockerize.yaml
+    with:
+      imageTag: ${{ github.sha }}
+      publishLatest: true
+      targets: rust
+      build: false
+      publishPrComment: false
+      uploadJavaScriptArtifacts: false
+    secrets: inherit
+
+  # Build and publish Rust crates and binaries
   rust:
     uses: ./.github/workflows/publish-rust.yaml
     secrets: inherit
+    with:
+      publish: true
 
   # Trigger deployment
   deploy:

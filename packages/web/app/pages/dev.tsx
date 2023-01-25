@@ -1,7 +1,7 @@
 import { ReactElement } from 'react';
-import { createGraphiQLFetcher } from '@graphiql/toolkit';
 import { GraphiQL } from 'graphiql';
 import { HiveLogo } from '@/components/v2/icon';
+import { createGraphiQLFetcher } from '@graphiql/toolkit';
 import 'graphiql/graphiql.css';
 
 export default function DevPage(): ReactElement {

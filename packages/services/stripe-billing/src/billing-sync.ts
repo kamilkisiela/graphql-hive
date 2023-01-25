@@ -1,6 +1,6 @@
+import { Stripe } from 'stripe';
 import { FastifyLoggerInstance } from '@hive/service-common';
 import { createStorage as createPostgreSQLStorage } from '@hive/storage';
-import { Stripe } from 'stripe';
 
 export function createStripeBilling(config: {
   logger: FastifyLoggerInstance;

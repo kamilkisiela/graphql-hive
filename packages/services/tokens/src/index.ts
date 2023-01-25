@@ -1,5 +1,7 @@
 #!/usr/bin/env node
+import ms from 'ms';
 import 'reflect-metadata';
+import LRU from 'tiny-lru';
 import {
   createErrorHandler,
   createServer,
@@ -11,8 +13,6 @@ import {
 import * as Sentry from '@sentry/node';
 import type { CreateFastifyContextOptions } from '@trpc/server/adapters/fastify';
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
-import ms from 'ms';
-import LRU from 'tiny-lru';
 import { Context, tokensApiRouter } from './api';
 import { useCache } from './cache';
 import { env } from './environment';
@@ -34,6 +34,7 @@ export async function main() {
     tracing: false,
     log: {
       level: env.log.level,
+      requests: env.log.requests,
     },
   });
 
@@ -63,7 +64,7 @@ export async function main() {
           enabled: true,
           endpoint: env.heartbeat.endpoint,
           intervalInMS: 20_000,
-          onError: server.log.error,
+          onError: e => server.log.error(e, `Heartbeat failed with error`),
           isReady: readiness,
         })
       : startHeartbeats({ enabled: false });

@@ -14,24 +14,13 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
-    "build-local": {
-      "outputs": ["dist/**"]
-    },
     "@hive/cdn-script#build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/worker.js"]
-    },
-    "@hive/cdn-script#build-local": {
-      "dependsOn": ["^build"],
-      "outputs": ["dist/dev.js"]
+      "outputs": ["dist/**"]
     },
     "@hive/broker-script#build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/worker.js"]
-    },
-    "@hive/broker-script#build-local": {
-      "dependsOn": ["^build"],
-      "outputs": ["dist/dev.js"]
+      "outputs": ["dist/**"]
     },
     "@hive/app#build": {
       "dependsOn": ["^build"],

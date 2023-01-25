@@ -42,19 +42,19 @@ jobs:
           codegen: false
 
       - name: patch compose file volumes
-        uses: mikefarah/yq@v4.30.6
+        uses: mikefarah/yq@v4.30.8
         with:
-          cmd: yq -i 'del(.services.*.volumes)' docker-compose.community.yml
+          cmd: yq -i 'del(.services.*.volumes)' docker/docker-compose.community.yml
 
       - name: run containers
         timeout-minutes: 10
-        run: docker compose -f docker-compose.community.yml up -d --wait
+        run: docker compose -f docker/docker-compose.community.yml up -d --wait
 
       - name: troubleshoot containers
         if: ${{ failure() }}
         run: |
-          docker compose -f docker-compose.community.yml ps
-          docker compose -f docker-compose.community.yml logs
+          docker compose -f docker/docker-compose.community.yml ps
+          docker compose -f docker/docker-compose.community.yml logs
 
       - name: cypress
         timeout-minutes: 6

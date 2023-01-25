@@ -4,9 +4,18 @@ on:
       dockerize:
         default: true
         type: boolean
+      uploadJavaScriptArtifacts:
+        required: true
+        type: boolean
       publishLatest:
         default: false
         type: boolean
+      build:
+        default: true
+        type: boolean
+      targets:
+        required: true
+        type: string
       registry:
         default: ghcr.io
         type: string
@@ -18,6 +27,9 @@ on:
         type: string
       publishSourceMaps:
         default: false
+        type: boolean
+      publishPrComment:
+        default: true
         type: boolean
 
 jobs:
@@ -32,13 +44,37 @@ jobs:
         uses: actions/checkout@v3
 
       - name: setup environment
+        if: ${{ inputs.build }}
         uses: ./.github/actions/setup
 
       - name: build packages and applications
+        if: ${{ inputs.build }}
         run: pnpm build
 
       - name: test ESM & CJS exports integrity
+        if: ${{ inputs.build }}
         run: pnpm turbo check:build
+
+      - uses: vimtor/action-zip@v1
+        name: archive javascript artifacts
+        if: ${{ inputs.uploadJavaScriptArtifacts }}
+        with:
+          recursive: false
+          files:
+            packages/services/broker-worker/dist/index.worker.js
+            packages/services/cdn-worker/dist/index.worker.js
+            packages/services/police-worker/dist/index.worker.js
+          dest: ${{ inputs.imageTag }}.zip
+
+      - name: upload artifact
+        uses: randomairborne/r2-release@v1.0.2
+        with:
+          endpoint: https://6d5bc18cd8d13babe7ed321adba3d8ae.r2.cloudflarestorage.com
+          accesskeyid: ${{ secrets.R2_ACCESS_KEY_ID }}
+          secretaccesskey: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          bucket: hive-js-build-artifacts
+          file: ${{ github.workspace }}/${{ inputs.imageTag }}.zip
+          destination: ${{ inputs.imageTag }}.zip
 
       - name: configure eqemu
         if: ${{ inputs.dockerize }}
@@ -49,6 +85,11 @@ jobs:
       - name: configure docker buildx
         if: ${{ inputs.dockerize }}
         uses: docker/setup-buildx-action@v2
+        with:
+          # needed because of https://github.com/docker/build-push-action/issues/761
+          # it's better to pin to a version that works for us
+          driver-opts: |
+            image=moby/buildkit:v0.10.6
 
       - name: login to docker registry
         if: ${{ inputs.dockerize }}
@@ -63,12 +104,13 @@ jobs:
         name: sanitize branch name
         if: ${{ inputs.dockerize }}
         with:
-          pattern: '(\/|-)'
+          pattern: '[\/@|-]'
+          flags: 'g'
           string: ${{ github.head_ref || github.ref_name }}
           replace-with: '_'
 
       - name: build docker images
-        timeout-minutes: 25
+        timeout-minutes: 360
         id: docker-bake
         if: ${{ inputs.dockerize }}
         uses: docker/bake-action@v2
@@ -82,15 +124,16 @@ jobs:
           BUILD_STABLE: ${{ inputs.publishLatest && '1' || '' }}
         with:
           push: true
-          files: docker.hcl
-          targets: build
+          files: docker/docker.hcl
+          targets: ${{ inputs.targets }}
           set: |
             *.cache-from=type=gha
             *.cache-to=type=gha,mode=max
 
       - name: docker details pr comment
         uses: marocchino/sticky-pull-request-comment@v2
-        if: ${{ inputs.dockerize && github.event_name == 'pull_request' }}
+        if:
+          ${{ inputs.dockerize && github.event_name == 'pull_request' && inputs.publishPrComment }}
         with:
           message: |
             🐋 This PR was built and pushed to the following [Docker images](https://github.com/kamilkisiela?ecosystem=container&tab=packages&visibility=public&tab=packages&ecosystem=container&visibility=public&q=graphql-hive) (tag: `${{ inputs.imageTag }}`):
@@ -110,5 +153,5 @@ jobs:
           SENTRY_ORG: the-guild-z4
           SENTRY_PROJECT: graphql-hive
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_RELEASE: ${{ github.sha }}
+          SENTRY_RELEASE: ${{ inputs.imageTag }}
         run: pnpm upload-sourcemaps

@@ -1,9 +1,8 @@
-import type { ArtifactsType } from '@hive/api/src/modules/schema/providers/artifact-storage-reader';
-import { type Request, createFetch } from '@whatwg-node/fetch';
 import itty from 'itty-router';
 import zod from 'zod';
-import type { Analytics } from './analytics';
-import { createAnalytics } from './analytics';
+import { createFetch, type Request } from '@whatwg-node/fetch';
+import { type Analytics, createAnalytics } from './analytics';
+import { type ArtifactsType } from './artifact-storage-reader';
 import { InvalidAuthKeyResponse, MissingAuthKeyResponse } from './errors';
 import type { KeyValidator } from './key-validation';
 
