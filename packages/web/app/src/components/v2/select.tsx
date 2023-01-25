@@ -1,8 +1,8 @@
 import { ComponentProps, ReactElement } from 'react';
-import * as SelectPrimitive from '@radix-ui/react-select';
 import clsx from 'clsx';
 import { VscCheck, VscChevronDown, VscChevronUp } from 'react-icons/vsc';
 import { ArrowDownIcon } from '@/components/v2/icon';
+import * as SelectPrimitive from '@radix-ui/react-select';
 
 export function RadixSelect<T extends string>(props: {
   placeholder: string;

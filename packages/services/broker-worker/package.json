@@ -5,7 +5,6 @@
   "private": true,
   "scripts": {
     "build": "node build.mjs",
-    "build-local": "BUILD_FOR_LOCAL=1 node build.mjs",
     "dev": "tsup-node src/dev.ts --target node18 --sourcemap --watch --onSuccess \"node --enable-source-maps dist/dev.js\"",
     "typecheck": "tsc --noEmit"
   },
@@ -16,8 +15,8 @@
   "devDependencies": {
     "@cloudflare/workers-types": "4.20221111.1",
     "@types/service-worker-mock": "2.0.1",
-    "@whatwg-node/fetch": "0.6.1",
-    "@whatwg-node/server": "0.5.5",
+    "@whatwg-node/fetch": "0.6.2",
+    "@whatwg-node/server": "0.5.8",
     "esbuild": "0.16.11",
     "itty-router": "2.6.6",
     "itty-router-extras": "0.4.2",

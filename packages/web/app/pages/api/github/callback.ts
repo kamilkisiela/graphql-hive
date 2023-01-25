@@ -40,5 +40,5 @@ export default async function githubCallback(req: NextApiRequest, res: NextApiRe
     installationId,
     orgId,
   });
-  res.redirect(`/${orgId}/settings`);
+  res.redirect(`/${orgId}/view/settings`);
 }

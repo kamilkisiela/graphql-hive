@@ -1,5 +1,5 @@
-import { App } from '@octokit/app';
 import { Inject, Injectable, InjectionToken, Scope } from 'graphql-modules';
+import { App } from '@octokit/app';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { OrganizationAccessScope } from '../../auth/providers/organization-access';
 import { Logger } from '../../shared/providers/logger';

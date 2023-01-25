@@ -1,6 +1,6 @@
-import { Change, CriticalityLevel, diff, DiffRule } from '@graphql-inspector/core';
 import type { GraphQLSchema } from 'graphql';
 import { Injectable, Scope } from 'graphql-modules';
+import { Change, CriticalityLevel, diff, DiffRule } from '@graphql-inspector/core';
 import type * as Types from '../../../__generated__/types';
 import type { TargetSettings } from '../../../shared/entities';
 import { createPeriod } from '../../../shared/helpers';

@@ -1,5 +1,8 @@
-import 'twin.macro';
 import * as React from 'react';
+import { useFormik } from 'formik';
+import 'twin.macro';
+import { DocumentType, gql, useMutation } from 'urql';
+import * as Yup from 'yup';
 import {
   Button,
   FormControl,
@@ -13,9 +16,6 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react';
-import { useFormik } from 'formik';
-import { DocumentType, gql, useMutation } from 'urql';
-import * as Yup from 'yup';
 
 const UpdateMeFragment = gql(/* GraphQL */ `
   fragment UpdateMeFragment on User {

@@ -1,5 +1,5 @@
-import { Flags } from '@oclif/core';
 import colors from 'colors';
+import { Flags } from '@oclif/core';
 import Command from '../base-command';
 import { graphqlEndpoint } from '../helpers/config';
 

@@ -13,7 +13,7 @@ export const resolvers: AlertsModule.Resolvers = {
     async addAlertChannel(_, { input }, { injector }) {
       const AddAlertChannelModel = z.object({
         slack: MaybeModel(z.object({ channel: SlackChannelNameModel })),
-        webhook: MaybeModel(z.object({ endpoint: z.string().url().max(200) })),
+        webhook: MaybeModel(z.object({ endpoint: z.string().url().max(500) })),
         name: AlertChannelNameModel,
       });
 

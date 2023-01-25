@@ -1,12 +1,14 @@
 #!/usr/bin/env node
-
-import 'reflect-metadata';
 import { Readable } from 'node:stream';
-import { S3Client } from '@aws-sdk/client-s3';
+import got from 'got';
+import { GraphQLError, stripIgnoredCharacters } from 'graphql';
+import 'reflect-metadata';
+import zod from 'zod';
 import { createRegistry, LogFn, Logger } from '@hive/api';
 import { CryptoProvider } from '@hive/api';
-import { ArtifactStorageReader } from '@hive/api/src/modules/schema/providers/artifact-storage-reader';
 import { createArtifactRequestHandler } from '@hive/cdn-script/artifact-handler';
+import { ArtifactStorageReader } from '@hive/cdn-script/artifact-storage-reader';
+import { AwsClient } from '@hive/cdn-script/aws';
 import { createIsKeyValid } from '@hive/cdn-script/key-validation';
 import {
   createServer,
@@ -19,9 +21,6 @@ import { Dedupe, ExtraErrorData } from '@sentry/integrations';
 import * as Sentry from '@sentry/node';
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
 import { createServerAdapter } from '@whatwg-node/server';
-import got from 'got';
-import { GraphQLError, stripIgnoredCharacters } from 'graphql';
-import zod from 'zod';
 import { createContext, internalApiRouter } from './api';
 import { asyncStorage } from './async-storage';
 import { env } from './environment';
@@ -66,6 +65,7 @@ export async function main() {
     tracing: true,
     log: {
       level: env.log.level,
+      requests: env.log.requests,
     },
   });
 
@@ -144,16 +144,6 @@ export async function main() {
       };
     }
 
-    const s3Client = new S3Client({
-      endpoint: env.s3.endpoint,
-      credentials: {
-        accessKeyId: env.s3.credentials.accessKeyId,
-        secretAccessKey: env.s3.credentials.secretAccessKey,
-      },
-      forcePathStyle: true,
-      region: 'auto',
-    });
-
     const graphqlLogger = createGraphQLLogger();
     const registry = createRegistry({
       app: env.hiveServices.webApp
@@ -201,8 +191,10 @@ export async function main() {
       },
       cdn: env.cdn,
       s3: {
-        client: s3Client,
+        accessKeyId: env.s3.credentials.accessKeyId,
+        secretAccessKeyId: env.s3.credentials.secretAccessKey,
         bucketName: env.s3.bucketName,
+        endpoint: env.s3.endpoint,
       },
       encryptionSecret: env.encryptionSecret,
       feedback: {
@@ -324,15 +316,17 @@ export async function main() {
     });
 
     if (env.cdn.providers.api !== null) {
-      const artifactStorageReader = new ArtifactStorageReader(
-        {
-          endpoint: env.s3.endpoint,
+      const s3 = {
+        client: new AwsClient({
           accessKeyId: env.s3.credentials.accessKeyId,
           secretAccessKey: env.s3.credentials.secretAccessKey,
-        },
-        env.s3.bucketName,
-        env.s3.publicUrl,
-      );
+          service: 's3',
+        }),
+        endpoint: env.s3.endpoint,
+        bucketName: env.s3.bucketName,
+      };
+
+      const artifactStorageReader = new ArtifactStorageReader(s3, env.s3.publicUrl);
 
       const artifactHandler = createArtifactRequestHandler({
         isKeyValid: createIsKeyValid({ keyData: env.cdn.authPrivateKey }),

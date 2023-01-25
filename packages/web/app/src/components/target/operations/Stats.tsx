@@ -1,5 +1,4 @@
 import React, { useCallback } from 'react';
-import { Grid, GridItem, useColorModeValue } from '@chakra-ui/react';
 import ReactECharts from 'echarts-for-react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import tw from 'twin.macro';
@@ -18,6 +17,7 @@ import {
   useFormattedNumber,
   useFormattedThroughput,
 } from '@/lib/hooks';
+import { Grid, GridItem, useColorModeValue } from '@chakra-ui/react';
 import { OperationsFallback } from './Fallback';
 
 function resolutionToMilliseconds(

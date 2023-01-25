@@ -1,9 +1,9 @@
 import { ReactElement, ReactNode } from 'react';
-import { List, ListIcon, ListItem } from '@chakra-ui/react';
 import { VscCheck } from 'react-icons/vsc';
 import { Label, Section } from '@/components/common';
 import { Link, Radio, RadioGroup } from '@/components/v2';
 import { BillingPlansQuery, BillingPlanType } from '@/graphql';
+import { List, ListIcon, ListItem } from '@chakra-ui/react';
 
 const planCollection: {
   [key in BillingPlanType]: {

@@ -1,10 +1,10 @@
 import { createHash } from 'crypto';
-import { createErrorHandler, metrics } from '@hive/service-common';
-import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
-import { initTRPC } from '@trpc/server';
 import type { FastifyLoggerInstance } from 'fastify';
 import { Lru as LruType } from 'tiny-lru';
 import { z } from 'zod';
+import { createErrorHandler, metrics } from '@hive/service-common';
+import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
+import { initTRPC } from '@trpc/server';
 import { useCache } from './cache';
 
 const httpRequests = new metrics.Counter({

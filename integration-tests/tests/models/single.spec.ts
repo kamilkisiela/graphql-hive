@@ -1,6 +1,6 @@
 import { ProjectType, TargetAccessScope } from '@app/gql/graphql';
-import { prepareProject } from '../../testkit/registry-models';
 import { createCLI } from '../../testkit/cli';
+import { prepareProject } from '../../testkit/registry-models';
 import { initSeed } from '../../testkit/seed';
 
 describe('publish', () => {

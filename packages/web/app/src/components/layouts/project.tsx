@@ -1,6 +1,6 @@
-import 'twin.macro';
 import { ReactElement, ReactNode, useEffect } from 'react';
 import NextLink from 'next/link';
+import 'twin.macro';
 import { useQuery } from 'urql';
 import { Button, DropdownMenu, Heading, Link, SubHeader, Tabs } from '@/components/v2';
 import { ArrowDownIcon, TargetIcon } from '@/components/v2/icon';
@@ -142,12 +142,12 @@ export const ProjectLayout = ({
           </Tabs.Trigger>
           {canAccessProject(ProjectAccessScope.Alerts, org.me) && (
             <Tabs.Trigger value={TabValue.Alerts} asChild>
-              <NextLink href={`/${orgId}/${projectId}/alerts`}>Alerts</NextLink>
+              <NextLink href={`/${orgId}/${projectId}/view/alerts`}>Alerts</NextLink>
             </Tabs.Trigger>
           )}
           {canAccessProject(ProjectAccessScope.Settings, org.me) && (
             <Tabs.Trigger value={TabValue.Settings} asChild>
-              <NextLink href={`/${orgId}/${projectId}/settings`}>Settings</NextLink>
+              <NextLink href={`/${orgId}/${projectId}/view/settings`}>Settings</NextLink>
             </Tabs.Trigger>
           )}
         </Tabs.List>

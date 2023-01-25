@@ -1,8 +1,8 @@
+import { parse } from 'graphql';
+import { CONTEXT, Inject, Injectable, Scope } from 'graphql-modules';
 import type { SchemaBuilderApi } from '@hive/schema';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import { fetch } from '@whatwg-node/fetch';
-import { parse } from 'graphql';
-import { CONTEXT, Inject, Injectable, Scope } from 'graphql-modules';
 import { Orchestrator, ProjectType, SchemaObject } from '../../../../shared/entities';
 import { HiveError } from '../../../../shared/errors';
 import { sentry } from '../../../../shared/sentry';

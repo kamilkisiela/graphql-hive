@@ -1,10 +1,10 @@
-import '@sentry/tracing';
+import type { FastifyInstance, FastifyPluginAsync, FastifyRequest } from 'fastify';
+import fp from 'fastify-plugin';
 import * as Sentry from '@sentry/node';
+import '@sentry/tracing';
 import { Transaction } from '@sentry/tracing';
 import type { ExtractedNodeRequestData, TraceparentData } from '@sentry/types';
 import { extractTraceparentData, normalize } from '@sentry/utils';
-import type { FastifyInstance, FastifyPluginAsync, FastifyRequest } from 'fastify';
-import fp from 'fastify-plugin';
 import { cleanRequestId } from './helpers';
 
 const plugin: FastifyPluginAsync = async server => {

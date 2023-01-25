@@ -47,6 +47,7 @@ The GraphQL API for GraphQL Hive.
 | `SENTRY_DSN`                                | No                                             | The DSN for reporting errors to Sentry.                                                       | `https://dooobars@o557896.ingest.sentry.io/12121212` |
 | `PROMETHEUS_METRICS`                        | No                                             | Whether Prometheus metrics should be enabled                                                  | `1` (enabled) or `0` (disabled)                      |
 | `PROMETHEUS_METRICS_LABEL_INSTANCE`         | No                                             | The instance label added for the prometheus metrics.                                          | `server`                                             |
+| `REQUEST_LOGGING`                           | No                                             | Log http requests                                                                             | `1` (enabled) or `0` (disabled)                      |
 
 ## Hive Hosted Configuration
 

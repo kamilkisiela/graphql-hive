@@ -116,6 +116,9 @@ npm-shrinkwrap.json
 # bob
 .bob/
 
+# Docker temp volumes
 .hive
+.hive-dev
+.volumes
 
 cypress

@@ -1,7 +1,7 @@
 import React from 'react';
-import { useColorModeValue } from '@chakra-ui/react';
 import { parse, print } from 'graphql';
 import { SchemaEditor, SchemaEditorProps } from '@/components/schema-editor';
+import { useColorModeValue } from '@chakra-ui/react';
 
 function prettify(sdl: string) {
   try {

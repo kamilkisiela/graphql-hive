@@ -1,5 +1,9 @@
-import 'twin.macro';
 import React, { ChangeEventHandler, FormEventHandler } from 'react';
+import 'twin.macro';
+import { useMutation } from 'urql';
+import { Description, Label } from '@/components/common';
+import { CreateOrganizationDocument } from '@/graphql';
+import { useRouteSelector } from '@/lib/hooks';
 import {
   Button,
   FormControl,
@@ -13,10 +17,6 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react';
-import { useMutation } from 'urql';
-import { Description, Label } from '@/components/common';
-import { CreateOrganizationDocument } from '@/graphql';
-import { useRouteSelector } from '@/lib/hooks';
 
 export const OrganizationCreator: React.FC<{
   isOpen: boolean;

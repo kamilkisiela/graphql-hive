@@ -1,10 +1,10 @@
-import 'twin.macro';
 import React from 'react';
-import { Button, Menu, MenuButton, MenuItem, MenuList, useColorModeValue } from '@chakra-ui/react';
 import { VscChevronDown } from 'react-icons/vsc';
+import 'twin.macro';
 import { useQuery } from 'urql';
 import { TargetsDocument } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks';
+import { Button, Menu, MenuButton, MenuItem, MenuList, useColorModeValue } from '@chakra-ui/react';
 
 export const TargetSwitcher: React.FC<{
   organizationId: string;

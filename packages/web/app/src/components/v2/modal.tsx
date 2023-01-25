@@ -1,4 +1,8 @@
 import { PropsWithChildren, ReactElement } from 'react';
+import clsx from 'clsx';
+import { css } from 'twin.macro';
+import { Button } from '@/components/v2';
+import { XIcon } from '@/components/v2/icon';
 import { keyframes } from '@emotion/react';
 import {
   Close,
@@ -12,10 +16,6 @@ import {
   Title,
   Trigger,
 } from '@radix-ui/react-dialog';
-import clsx from 'clsx';
-import { css } from 'twin.macro';
-import { Button } from '@/components/v2';
-import { XIcon } from '@/components/v2/icon';
 
 const overlayShow = keyframes({
   '0%': { opacity: 0 },

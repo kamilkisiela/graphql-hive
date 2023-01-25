@@ -1,5 +1,5 @@
-import { createConnectionString, createTokenStorage, tokens } from '@hive/storage';
 import type { FastifyReply } from 'fastify';
+import { createConnectionString, createTokenStorage, tokens } from '@hive/storage';
 
 export interface StorageItem {
   token: string;

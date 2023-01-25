@@ -1,5 +1,5 @@
-import { createHive } from '../packages/libraries/client/dist/cjs/index.js';
 import { buildSchema, parse } from 'graphql';
+import { createHive } from '../packages/libraries/client/dist/cjs/index.js';
 
 async function main() {
   const hiveInstance = createHive({

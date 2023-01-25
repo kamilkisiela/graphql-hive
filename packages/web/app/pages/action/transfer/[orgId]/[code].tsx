@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { Button } from '@chakra-ui/react';
 import tw from 'twin.macro';
 import { gql, useMutation, useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
@@ -8,6 +7,7 @@ import { DataWrapper } from '@/components/common/DataWrapper';
 import { useNotifications } from '@/lib/hooks/use-notifications';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { withSessionProtection } from '@/lib/supertokens/guard';
+import { Button } from '@chakra-ui/react';
 
 const Center = tw.div`w-full h-full flex flex-row items-center justify-center`;
 

@@ -1,12 +1,12 @@
-import 'twin.macro';
 import React from 'react';
-import { Table, TableContainer, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
+import 'twin.macro';
 import { useQuery } from 'urql';
 import {
   OrganizationFieldsFragment,
   OrgBillingInfoFieldsFragment,
   UsageEstimationDocument,
 } from '@/graphql';
+import { Table, TableContainer, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
 import { Scale } from '../common';
 import { DataWrapper } from '../common/DataWrapper';
 import { calculatePeriod } from '../common/TimeFilter';

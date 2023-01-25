@@ -45,7 +45,11 @@ export class ProjectManager {
     this.logger.info('Creating a project (input=%o)', input);
     let cleanId = paramCase(name);
 
-    if (await this.storage.getProjectByCleanId({ cleanId, organization })) {
+    if (
+      // packages/web/app uses the "view" prefix, let's avoid the collision
+      name.toLowerCase() === 'view' ||
+      (await this.storage.getProjectByCleanId({ cleanId, organization }))
+    ) {
       cleanId = paramCase(`${name}-${uuid(4)}`);
     }
 

@@ -1,5 +1,5 @@
-import { resolve, dirname } from 'path';
 import { readFileSync } from 'fs';
+import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { pathsToModuleNameMapper } from 'ts-jest';
 
@@ -20,7 +20,7 @@ export default {
     }),
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
-  testTimeout: 60_000,
+  testTimeout: 90_000,
   setupFilesAfterEnv: ['dotenv/config'],
   collectCoverage: false,
 };

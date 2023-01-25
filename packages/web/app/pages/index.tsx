@@ -1,7 +1,5 @@
 import { ReactElement, useEffect } from 'react';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { InternalApi } from '@hive/server';
-import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import Cookies from 'cookies';
 import Session from 'supertokens-node/recipe/session';
 import { useQuery } from 'urql';
@@ -14,6 +12,8 @@ import { OrganizationsDocument, OrganizationType } from '@/graphql';
 import { writeLastVisitedOrganization } from '@/lib/cookies';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { withSessionProtection } from '@/lib/supertokens/guard';
+import { InternalApi } from '@hive/server';
+import { createTRPCProxyClient, httpLink } from '@trpc/client';
 
 async function getSuperTokensUserIdFromRequest(
   req: NextApiRequest,

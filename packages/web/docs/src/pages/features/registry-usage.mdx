@@ -1,3 +1,5 @@
+import { Tab, Tabs } from 'nextra-theme-docs'
+
 # Using Registry
 
 ## CDN Access
@@ -28,15 +30,16 @@ There are gateways maintained by Apollo team, [Apollo Gateway](#apollo-gateway) 
 - `HIVE_CDN_KEY` - the access key
 
 ```typescript
-import { createSupergraphManager } from '@graphql-hive/client'
 import { ApolloGateway } from '@apollo/gateway'
-import { ApolloServer } from 'apollo-server'
+import { ApolloServer } from '@apollo/server'
+import { startStandaloneServer } from '@apollo/server/standalone'
+import { createSupergraphManager } from '@graphql-hive/client'
 
 const gateway = new ApolloGateway({
   // Apollo Gateway will fetch Supergraph from GraphQL Hive CDN
   supergraphSdl: createSupergraphManager({
-    endpoint: process.env.HIVE_CDN_ENDPOINT,
-    key: process.env.HIVE_CDN_KEY,
+    endpoint: HIVE_CDN_ENDPOINT,
+    key: HIVE_CDN_KEY,
     pollIntervalInMs: 15_000
   })
 })
@@ -45,9 +48,8 @@ const server = new ApolloServer({
   gateway
 })
 
-server.listen().then(({ url }) => {
-  console.log(`🚀 Server ready at ${url}`)
-})
+const { url } = await startStandaloneServer({ server })
+console.log(`🚀 Server ready at ${url}`)
 ```
 
 ### Apollo Router
@@ -56,17 +58,44 @@ GraphQL Hive ships a custom version of [Apollo Router](https://www.apollographql
 The reason is that in order to extend Apollo Router, we need to write
 [a native Rust plugin](https://www.apollographql.com/docs/router/customizations/native).
 
-Download Apollo Router for Linux (x86_64), MacOS (x86_64) or Windows (x86_64):
+<Tabs items={['Binary', 'Docker']}>
+  <Tab>
+    Download Apollo Router for Linux (x86_64), MacOS (x86_64) or Windows (x86_64):
 
-```bash
-curl -fsSL https://graphql-hive.com/apollo-router-download.sh | bash
-```
+    ```bash
+    curl -fsSL https://graphql-hive.com/apollo-router-download.sh | bash
+    ```
 
-Start the router:
+    Start the router:
 
-```bash
-HIVE_CDN_ENDPOINT="..." HIVE_CDN_KEY="..." ./router
-```
+    ```bash
+    HIVE_CDN_ENDPOINT="..." HIVE_CDN_KEY="..." ./router
+    ```
+
+  </Tab>
+  <Tab>
+      Running Apollo Router with GraphQL Hive's Schema Registry:
+
+      ```bash
+      docker run -p 4000:4000 \
+        --env HIVE_CDN_ENDPOINT="..." \
+        --env HIVE_CDN_KEY="..." \
+        --rm \
+        ghcr.io/kamilkisiela/graphql-hive/apollo-router:latest
+      ```
+
+      Passing command-line arguments:
+
+      ```bash
+      docker run -p 4000:4000 \
+        --env HIVE_CDN_ENDPOINT="..." \
+        --env HIVE_CDN_KEY="..." \
+        --rm \
+        ghcr.io/kamilkisiela/graphql-hive/apollo-router:latest --log debug
+      ```
+
+  </Tab>
+</Tabs>
 
 - `HIVE_CDN_ENDPOINT` - the endpoint Hive generated for you in the previous step
 - `HIVE_CDN_KEY` - the access key
@@ -82,10 +111,10 @@ not something dedicated for stitching. Unfortunately the implementation of gatew
 Here's an example of how it could work
 
 ```typescript
+import { buildSchema } from 'graphql'
 import { createServicesFetcher } from '@graphql-hive/client'
 import { stitchSchemas } from '@graphql-tools/stitch'
 import { UrlLoader } from '@graphql-tools/url-loader'
-import { buildSchema } from 'graphql'
 import { createServer } from '@graphql-yoga/node'
 
 const urlLoader = new UrlLoader()
@@ -189,6 +218,6 @@ checksum. If you send the same checksum in the `If-None-Match` header, the CDN s
 `304 Not Modified`, but only if the data hasn't changed. If the data has changed, the CDN service
 will return `200 OK` with the new data and new `ETag` header.
 
-Using `ETag` and `If-None-Mathc` helps to prevent unnecessary data transfer.
+Using `ETag` and `If-None-Match` helps to prevent unnecessary data transfer.
 
 The `@graphql-hive/client` package uses this feature to save bandwidth and improve performance.

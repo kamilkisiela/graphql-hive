@@ -1,8 +1,8 @@
 import { ReactElement } from 'react';
 import { AppProps } from 'next/app';
 import Head from 'next/head';
-import { FooterExtended, Header } from '@theguild/components';
 import { ThemeProvider } from 'next-themes';
+import { FooterExtended, Header } from '@theguild/components';
 import '@theguild/components/style.css';
 
 const TITLE = 'GraphQL Hive - Schema Registry and Monitoring';

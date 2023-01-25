@@ -1,8 +1,8 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { addMocksToSchema } from '@graphql-tools/mock';
 import { buildSchema, execute, GraphQLError, parse } from 'graphql';
 import { env } from '@/env/backend';
 import { extractAccessTokenFromRequest } from '@/lib/api/extract-access-token-from-request';
+import { addMocksToSchema } from '@graphql-tools/mock';
 
 async function lab(req: NextApiRequest, res: NextApiResponse) {
   const url = env.graphqlEndpoint;
