@@ -1,4 +1,4 @@
-import { gql, DocumentType } from 'urql';
+import { DocumentType, gql } from 'urql';
 import { Markdown } from '@/components/v2/markdown';
 import { GraphQLTypeCard, SchemaExplorerUsageStats } from './common';
 

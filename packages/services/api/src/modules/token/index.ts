@@ -1,8 +1,8 @@
 import { createModule } from 'graphql-modules';
-import { resolvers } from './resolvers';
-import typeDefs from './module.graphql';
 import { TokenManager } from './providers/token-manager';
 import { TokenStorage } from './providers/token-storage';
+import { resolvers } from './resolvers';
+import typeDefs from './module.graphql';
 
 export const tokenModule = createModule({
   id: 'token',

@@ -45,19 +45,19 @@
   },
   "dependencies": {
     "@graphql-hive/core": "0.2.3",
-    "@graphql-inspector/core": "~3.2.0",
+    "@graphql-inspector/core": "~3.4.0",
     "@graphql-tools/code-file-loader": "~7.3.6",
     "@graphql-tools/graphql-file-loader": "~7.5.5",
     "@graphql-tools/json-file-loader": "~7.4.6",
-    "@graphql-tools/load": "~7.7.7",
+    "@graphql-tools/load": "~7.8.0",
     "@graphql-tools/url-loader": "~7.16.4",
-    "@graphql-tools/utils": "8.12.0",
-    "@oclif/core": "^1.20.4",
-    "@oclif/plugin-help": "5.1.20",
-    "@oclif/plugin-update": "3.0.8",
+    "@graphql-tools/utils": "8.13.1",
+    "@oclif/core": "^1.23.0",
+    "@oclif/plugin-help": "5.1.22",
+    "@oclif/plugin-update": "3.0.12",
     "colors": "1.4.0",
     "env-ci": "7.3.0",
-    "git-parse": "2.1.2",
+    "git-parse": "3.0.1",
     "graphql": "^16.0.0",
     "graphql-request": "4.3.0",
     "graphql-tag": "2.12.6",
@@ -68,10 +68,10 @@
     "tslib": "2.4.1"
   },
   "devDependencies": {
+    "@graphql-codegen/typescript-graphql-request": "4.5.8",
     "@types/env-ci": "3.1.1",
-    "@types/git-parse": "2.1.2",
     "@types/mkdirp": "1.0.2",
-    "oclif": "^3.2.25"
+    "oclif": "3.4.3"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org",

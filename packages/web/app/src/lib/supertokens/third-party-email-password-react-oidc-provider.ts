@@ -1,13 +1,13 @@
-import { env } from '@/env/frontend';
 import { UserInput } from 'supertokens-auth-react/lib/build/recipe/thirdpartyemailpassword/types';
 import { getAuthorisationURLWithQueryParamsAndSetState } from 'supertokens-auth-react/recipe/thirdpartyemailpassword';
+import { env } from '@/env/frontend';
 
 export const createThirdPartyEmailPasswordReactOIDCProvider = () => ({
   id: 'oidc',
   name: 'OIDC',
 });
 
-const delimiter = '||';
+const delimiter = '--';
 
 export const getOIDCOverrides = (): UserInput['override'] => ({
   functions: originalImplementation => ({

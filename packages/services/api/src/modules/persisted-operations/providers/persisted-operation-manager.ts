@@ -1,16 +1,16 @@
-import { Injectable, Scope } from 'graphql-modules';
 import { hashOperation, normalizeOperation } from '@graphql-hive/core';
-import { parse, Kind, OperationDefinitionNode, DefinitionNode } from 'graphql';
-import { PersistedOperationsModule } from '../__generated__/types';
+import { DefinitionNode, Kind, OperationDefinitionNode, parse } from 'graphql';
+import { Injectable, Scope } from 'graphql-modules';
 import type { PersistedOperation } from '../../../shared/entities';
 import { AuthManager } from '../../auth/providers/auth-manager';
+import { ProjectAccessScope } from '../../auth/providers/project-access';
 import { Logger } from '../../shared/providers/logger';
 import {
   PersistedOperationSelector,
   ProjectSelector,
   Storage,
 } from '../../shared/providers/storage';
-import { ProjectAccessScope } from '../../auth/providers/project-access';
+import { PersistedOperationsModule } from '../__generated__/types';
 
 /**
  * Responsible for auth checks.

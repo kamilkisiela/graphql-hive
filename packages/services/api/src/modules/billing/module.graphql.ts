@@ -35,7 +35,7 @@ export default gql`
     country: String
     line1: String
     line2: String
-    postalCode: Int
+    postalCode: String
     state: String
   }
 

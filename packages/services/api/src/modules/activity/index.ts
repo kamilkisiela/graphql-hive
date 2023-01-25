@@ -1,6 +1,6 @@
 import { createModule } from 'graphql-modules';
-import { resolvers } from './resolvers';
 import { ActivityManager } from './providers/activity-manager';
+import { resolvers } from './resolvers';
 import typeDefs from './module.graphql';
 
 export const activityModule = createModule({

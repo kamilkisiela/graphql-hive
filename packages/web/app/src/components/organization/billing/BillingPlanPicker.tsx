@@ -1,9 +1,9 @@
-import { ReactNode, ReactElement } from 'react';
+import { ReactElement, ReactNode } from 'react';
 import { List, ListIcon, ListItem } from '@chakra-ui/react';
 import { VscCheck } from 'react-icons/vsc';
-import { BillingPlanType, BillingPlansQuery } from '@/graphql';
 import { Label, Section } from '@/components/common';
-import { Link, RadioGroup, Radio } from '@/components/v2';
+import { Link, Radio, RadioGroup } from '@/components/v2';
+import { BillingPlansQuery, BillingPlanType } from '@/graphql';
 
 const planCollection: {
   [key in BillingPlanType]: {
@@ -73,8 +73,7 @@ const Plan = (plan: {
             plan.price
           ) : (
             <>
-              {'$'}
-              {plan.price}
+              ${plan.price}
               <span className="text-sm text-gray-500">/mo</span>
             </>
           )}

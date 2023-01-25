@@ -1,5 +1,5 @@
-import { Injectable, Scope, InjectionToken, Inject } from 'graphql-modules';
 import crypto from 'crypto';
+import { Inject, Injectable, InjectionToken, Scope } from 'graphql-modules';
 
 const ALG = 'aes256';
 const IN_ENC = 'utf8';

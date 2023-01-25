@@ -1,14 +1,13 @@
+import * as k8s from '@pulumi/kubernetes';
 import * as pulumi from '@pulumi/pulumi';
-import * as azure from '@pulumi/azure';
-import { Tokens } from './tokens';
-import { DbMigrations } from './db-migrations';
-import { RemoteArtifactAsServiceDeployment } from '../utils/remote-artifact-as-service';
-import { PackageHelper } from '../utils/pack';
-import { serviceLocalEndpoint } from '../utils/local-endpoint';
 import { DeploymentEnvironment } from '../types';
+import { isProduction } from '../utils/helpers';
+import { serviceLocalEndpoint } from '../utils/local-endpoint';
+import { ServiceDeployment } from '../utils/service-deployment';
+import { DbMigrations } from './db-migrations';
 import { Kafka } from './kafka';
 import { RateLimitService } from './rate-limit';
-import { isProduction } from '../utils/helpers';
+import { Tokens } from './tokens';
 
 const commonConfig = new pulumi.Config('common');
 const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
@@ -16,31 +15,35 @@ const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
 export type Usage = ReturnType<typeof deployUsage>;
 
 export function deployUsage({
-  storageContainer,
-  packageHelper,
   deploymentEnv,
   tokens,
   kafka,
   dbMigrations,
   rateLimit,
+  image,
+  release,
+  imagePullSecret,
 }: {
-  storageContainer: azure.storage.Container;
-  packageHelper: PackageHelper;
+  image: string;
+  release: string;
   deploymentEnv: DeploymentEnvironment;
   tokens: Tokens;
   kafka: Kafka;
   dbMigrations: DbMigrations;
   rateLimit: RateLimitService;
+  imagePullSecret: k8s.core.v1.Secret;
 }) {
   const replicas = 1; /*isProduction(deploymentEnv) ? 2 : 1*/
   const cpuLimit = isProduction(deploymentEnv) ? '600m' : '300m';
   const maxReplicas = isProduction(deploymentEnv) ? 4 : 2;
-  const kafkaBufferDynamic = kafka.config.bufferDynamic === 'true' ? '1' : '0';
+  const kafkaBufferDynamic =
+    kafka.config.bufferDynamic === 'true' || kafka.config.bufferDynamic === '1' ? '1' : '0';
 
-  return new RemoteArtifactAsServiceDeployment(
+  return new ServiceDeployment(
     'usage-service',
     {
-      storageContainer,
+      image,
+      imagePullSecret,
       replicas,
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
@@ -48,21 +51,17 @@ export function deployUsage({
         ...deploymentEnv,
         ...commonEnv,
         SENTRY: commonEnv.SENTRY_ENABLED,
-        KAFKA_SSL: '1',
+        ...kafka.connectionEnv,
         KAFKA_BROKER: kafka.config.endpoint,
-        KAFKA_SASL_MECHANISM: 'plain',
-        KAFKA_SASL_USERNAME: kafka.config.user,
-        KAFKA_SASL_PASSWORD: kafka.config.key,
         KAFKA_BUFFER_SIZE: kafka.config.bufferSize,
         KAFKA_BUFFER_INTERVAL: kafka.config.bufferInterval,
         KAFKA_BUFFER_DYNAMIC: kafkaBufferDynamic,
         KAFKA_TOPIC: kafka.config.topic,
-        RELEASE: packageHelper.currentReleaseId(),
+        RELEASE: release,
         TOKENS_ENDPOINT: serviceLocalEndpoint(tokens.service),
         RATE_LIMIT_ENDPOINT: serviceLocalEndpoint(rateLimit.service),
       },
       exposesMetrics: true,
-      packageInfo: packageHelper.npmPack('@hive/usage'),
       port: 4000,
       pdb: true,
       autoScaling: {
@@ -70,9 +69,17 @@ export function deployUsage({
           cpuAverageToScale: 60,
           limit: cpuLimit,
         },
-        maxReplicas: maxReplicas,
+        maxReplicas,
       },
     },
-    [dbMigrations, tokens.deployment, tokens.service, rateLimit.deployment, rateLimit.service],
+    [
+      dbMigrations,
+      tokens.deployment,
+      tokens.service,
+      rateLimit.deployment,
+      rateLimit.service,
+      kafka.deployment,
+      kafka.service,
+    ].filter(Boolean),
   ).deploy();
 }

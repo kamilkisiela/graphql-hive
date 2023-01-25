@@ -1,26 +1,26 @@
 #!/usr/bin/env node
-import * as Sentry from '@sentry/node';
 import {
   createServer,
-  startMetrics,
   registerShutdown,
   reportReadiness,
+  startMetrics,
 } from '@hive/service-common';
-import { createTokens } from './tokens';
-import { createUsage } from './usage';
+import * as Sentry from '@sentry/node';
+import { env } from './environment';
+import { maskToken } from './helpers';
 import {
-  httpRequests,
-  httpRequestsWithoutToken,
-  httpRequestsWithNonExistingToken,
-  httpRequestsWithNoAccess,
   collectDuration,
   droppedReports,
+  httpRequests,
+  httpRequestsWithNoAccess,
+  httpRequestsWithNonExistingToken,
+  httpRequestsWithoutToken,
   tokensDuration,
 } from './metrics';
-import type { IncomingLegacyReport, IncomingReport } from './types';
 import { createUsageRateLimit } from './rate-limit';
-import { maskToken } from './helpers';
-import { env } from './environment';
+import { createTokens } from './tokens';
+import type { IncomingLegacyReport, IncomingReport } from './types';
+import { createUsage } from './usage';
 
 async function main() {
   if (env.sentry) {

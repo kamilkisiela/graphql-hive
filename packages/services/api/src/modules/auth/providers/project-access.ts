@@ -1,9 +1,10 @@
-import { Injectable, Scope } from 'graphql-modules';
 import Dataloader from 'dataloader';
-import { Logger } from '../../shared/providers/logger';
+import { Injectable, Scope } from 'graphql-modules';
 import { AccessError } from '../../../shared/errors';
-import { ProjectAccessScope } from './scopes';
+import { Logger } from '../../shared/providers/logger';
 import { OrganizationAccess } from './organization-access';
+import { ProjectAccessScope } from './scopes';
+
 export { ProjectAccessScope } from './scopes';
 
 export interface ProjectUserAccessSelector {

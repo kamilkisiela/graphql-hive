@@ -1,7 +1,7 @@
-import { Flags, Errors } from '@oclif/core';
+import { Errors, Flags } from '@oclif/core';
 import Command from '../../base-command';
-import { loadOperations } from '../../helpers/operations';
 import { graphqlEndpoint } from '../../helpers/config';
+import { loadOperations } from '../../helpers/operations';
 
 export default class OperationsPublish extends Command {
   static description = 'saves operations to the store';
@@ -52,7 +52,7 @@ export default class OperationsPublish extends Command {
         normalize: true,
       });
       const collectedOperationsTotal = operations.length;
-      const noMissingHashes = operations.some(op => !!op.operationHash);
+      const noMissingHashes = operations.some(op => op.operationHash);
 
       if (noMissingHashes) {
         const comparisonResult = await this.registryApi(registry, token).comparePersistedOperations(

@@ -1,9 +1,9 @@
+import { NextApiRequest, NextApiResponse } from 'next';
 import supertokens from 'supertokens-node';
+import { SessionContainerInterface } from 'supertokens-node/lib/build/recipe/session/types';
 import { superTokensNextWrapper } from 'supertokens-node/nextjs';
 import { verifySession } from 'supertokens-node/recipe/session/framework/express';
-import type { NextApiRequest, NextApiResponse } from 'next';
 import { backendConfig } from '@/config/supertokens/backend';
-import type { SessionContainerInterface } from 'supertokens-node/lib/build/recipe/session/types';
 
 supertokens.init(backendConfig());
 

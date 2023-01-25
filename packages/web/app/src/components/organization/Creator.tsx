@@ -1,21 +1,21 @@
-import React from 'react';
 import 'twin.macro';
-import { useMutation } from 'urql';
+import React, { ChangeEventHandler, FormEventHandler } from 'react';
 import {
   Button,
   FormControl,
   FormLabel,
   Input,
   Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
   ModalBody,
   ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
 } from '@chakra-ui/react';
+import { useMutation } from 'urql';
+import { Description, Label } from '@/components/common';
 import { CreateOrganizationDocument } from '@/graphql';
-import { Label, Description } from '@/components/common';
 import { useRouteSelector } from '@/lib/hooks';
 
 export const OrganizationCreator: React.FC<{
@@ -25,7 +25,7 @@ export const OrganizationCreator: React.FC<{
   const router = useRouteSelector();
   const [{ fetching }, mutate] = useMutation(CreateOrganizationDocument);
   const [name, setName] = React.useState('');
-  const submit = React.useCallback(
+  const submit = React.useCallback<FormEventHandler<HTMLElement>>(
     async evt => {
       evt.preventDefault();
       if (name) {
@@ -48,7 +48,7 @@ export const OrganizationCreator: React.FC<{
     [mutate, router, name],
   );
 
-  const onNameChange = React.useCallback(
+  const onNameChange = React.useCallback<ChangeEventHandler<HTMLInputElement>>(
     evt => {
       setName(evt.target.value);
     },

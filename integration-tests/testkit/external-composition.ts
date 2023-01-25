@@ -1,13 +1,12 @@
-import * as utils from '@n1ru4l/dockest/test-helper';
 import { fetch } from '@whatwg-node/fetch';
+import { getServiceHost } from './utils';
 
-const port = 3012;
-export const container = 'external_composition';
-export const address = utils.getServiceAddress(container, port);
-export const dockerAddress = `${container}:${port}`;
+export const serviceName = 'external_composition';
+export const servicePort = 3012;
 
 export async function history(): Promise<string[]> {
-  const res = await fetch(`http://${address}/_history`, {
+  const dockerAddress = await getServiceHost(serviceName, servicePort);
+  const res = await fetch(`http://${dockerAddress}/_history`, {
     method: 'GET',
     headers: {
       accept: 'application/json',

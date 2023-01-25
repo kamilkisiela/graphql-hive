@@ -1,4 +1,4 @@
-import { createKVBuffer, calculateChunkSize } from '../src/buffer';
+import { calculateChunkSize, createKVBuffer } from '../src/buffer';
 
 function waitFor(time: number) {
   return new Promise(resolve => setTimeout(resolve, time));

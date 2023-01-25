@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { isSignatureValid } from './auth';
-import { MissingSignature, InvalidSignature, InvalidRequestFormat } from './errors';
+import { InvalidRequestFormat, InvalidSignature, MissingSignature } from './errors';
 
 const SIGNATURE_HEADER_NAME = 'x-hive-signature';
 

@@ -1,10 +1,10 @@
-FROM node:16-slim
+FROM node:18.13.0-slim
 
 ENV NODE_ENV production
 
 WORKDIR /usr/src/app
 
-# context packages/web/app/dist
+# context packages/web/app/.next/standalone
 COPY . /usr/src/app/
 
 LABEL org.opencontainers.image.title=$IMAGE_TITLE

@@ -1,14 +1,14 @@
-import { Injectable, Inject, Scope, CONTEXT } from 'graphql-modules';
-import { parse } from 'graphql';
-import { Logger } from '../../../shared/providers/logger';
-import { Orchestrator, ProjectType, SchemaObject } from '../../../../shared/entities';
-import { SchemaBuildError } from './errors';
-import { SCHEMA_SERVICE_CONFIG } from './tokens';
-import type { SchemaServiceConfig } from './tokens';
-import { sentry } from '../../../../shared/sentry';
+import type { SchemaBuilderApi } from '@hive/schema';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import { fetch } from '@whatwg-node/fetch';
-import type { SchemaBuilderApi } from '@hive/schema';
+import { parse } from 'graphql';
+import { CONTEXT, Inject, Injectable, Scope } from 'graphql-modules';
+import { Orchestrator, ProjectType, SchemaObject } from '../../../../shared/entities';
+import { sentry } from '../../../../shared/sentry';
+import { Logger } from '../../../shared/providers/logger';
+import { SchemaBuildError } from './errors';
+import type { SchemaServiceConfig } from './tokens';
+import { SCHEMA_SERVICE_CONFIG } from './tokens';
 
 @Injectable({
   scope: Scope.Operation,

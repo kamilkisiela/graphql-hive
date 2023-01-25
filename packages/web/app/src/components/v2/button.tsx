@@ -55,11 +55,11 @@ export const Button = forwardRef<any, ButtonProps>(
             danger
               ? 'bg-red-500 text-white hover:brightness-110 active:bg-red-600'
               : {
-                  primary: 'bg-orange-600 active:bg-orange-700 text-white hover:brightness-110',
+                  primary: 'bg-orange-600 text-white hover:brightness-110 active:bg-orange-700',
                   secondary:
-                    'hover:text-orange-600 bg-gray-800 text-gray-500 hover:brightness-110 active:bg-gray-900',
+                    'bg-gray-800 text-gray-500 hover:text-orange-600 hover:brightness-110 active:bg-gray-900',
                   default:
-                    'hover:text-orange-600 bg-transparent text-gray-500 hover:border-gray-800',
+                    'bg-transparent text-gray-500 hover:border-gray-800 hover:text-orange-600',
                   link: 'text-orange-600 hover:underline',
                 }[variant],
             variant !== 'link' &&

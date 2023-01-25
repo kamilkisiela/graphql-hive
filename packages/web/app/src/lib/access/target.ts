@@ -1,5 +1,5 @@
-import { useRedirect } from './common';
 import { MemberFieldsFragment, TargetAccessScope } from '../../graphql';
+import { useRedirect } from './common';
 
 export { TargetAccessScope } from '../../graphql';
 

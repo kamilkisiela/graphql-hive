@@ -1,23 +1,23 @@
-import ThirdPartyEmailPasswordNode from 'supertokens-node/recipe/thirdpartyemailpassword';
-import SessionNode from 'supertokens-node/recipe/session';
-import type { TypeInput } from 'supertokens-node/types';
-import EmailVerification from 'supertokens-node/recipe/emailverification';
-import { OverrideableBuilder } from 'supertokens-js-override/lib/build';
-import type { TypeProvider } from 'supertokens-node/recipe/thirdparty/types';
-import type { TypeInput as ThirdPartEmailPasswordTypeInput } from 'supertokens-node/recipe/thirdpartyemailpassword/types';
-import { fetch } from '@whatwg-node/fetch';
-import { appInfo } from '../../lib/supertokens/app-info';
-import zod from 'zod';
-import * as crypto from 'crypto';
+import * as crypto from 'node:crypto';
+import { EmailsApi } from '@hive/emails';
+import { InternalApi } from '@hive/server';
 import { createTRPCProxyClient, httpLink, inferRouterProxyClient } from '@trpc/client';
-import type { EmailsApi } from '@hive/emails';
-import type { InternalApi } from '@hive/server';
+import { fetch } from '@whatwg-node/fetch';
+import { OverrideableBuilder } from 'supertokens-js-override/lib/build';
+import EmailVerification from 'supertokens-node/recipe/emailverification';
+import SessionNode from 'supertokens-node/recipe/session';
+import { TypeProvider } from 'supertokens-node/recipe/thirdparty/types';
+import ThirdPartyEmailPasswordNode from 'supertokens-node/recipe/thirdpartyemailpassword';
+import { TypeInput as ThirdPartEmailPasswordTypeInput } from 'supertokens-node/recipe/thirdpartyemailpassword/types';
+import { TypeInput } from 'supertokens-node/types';
+import zod from 'zod';
 import { env } from '@/env/backend';
-import { createThirdPartyEmailPasswordNodeOktaProvider } from '../../lib/supertokens/third-party-email-password-node-okta-provider';
 import {
   createOIDCSuperTokensNoopProvider,
   getOIDCThirdPartyEmailPasswordNodeOverrides,
 } from '@/lib/supertokens/third-party-email-password-node-oidc-provider';
+import { appInfo } from '../../lib/supertokens/app-info';
+import { createThirdPartyEmailPasswordNodeOktaProvider } from '../../lib/supertokens/third-party-email-password-node-okta-provider';
 
 export const backendConfig = (): TypeInput => {
   const emailsService = createTRPCProxyClient<EmailsApi>({
@@ -126,7 +126,7 @@ export const backendConfig = (): TypeInput => {
           functions: originalImplementation => {
             return {
               ...originalImplementation,
-              createNewSession: async function (input) {
+              async createNewSession(input) {
                 const user = await ThirdPartyEmailPasswordNode.getUserById(input.userId);
 
                 if (!user) {
@@ -468,7 +468,7 @@ async function trySignIntoAuth0WithUserCredentialsAndRetrieveUserInfo(
       client_secret: config.clientSecret,
       grant_type: 'password',
       username: email,
-      password: password,
+      password,
     }),
   });
 

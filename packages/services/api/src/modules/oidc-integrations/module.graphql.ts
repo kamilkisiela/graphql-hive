@@ -14,7 +14,9 @@ export default gql`
     id: ID!
     clientId: ID!
     clientSecretPreview: String!
-    oauthApiUrl: String!
+    tokenEndpoint: String!
+    userinfoEndpoint: String!
+    authorizationEndpoint: String!
     organization: Organization!
   }
 
@@ -28,7 +30,9 @@ export default gql`
     organizationId: ID!
     clientId: ID!
     clientSecret: String!
-    oauthApiUrl: String!
+    tokenEndpoint: String!
+    userinfoEndpoint: String!
+    authorizationEndpoint: String!
   }
 
   type CreateOIDCIntegrationResult {
@@ -44,7 +48,9 @@ export default gql`
   type CreateOIDCIntegrationErrorDetails {
     clientId: String
     clientSecret: String
-    oauthApiUrl: String
+    tokenEndpoint: String
+    userinfoEndpoint: String
+    authorizationEndpoint: String
   }
 
   type CreateOIDCIntegrationError implements Error {
@@ -56,7 +62,9 @@ export default gql`
     oidcIntegrationId: ID!
     clientId: ID
     clientSecret: String
-    oauthApiUrl: String
+    tokenEndpoint: String
+    userinfoEndpoint: String
+    authorizationEndpoint: String
   }
 
   type UpdateOIDCIntegrationResult {
@@ -71,7 +79,9 @@ export default gql`
   type UpdateOIDCIntegrationErrorDetails {
     clientId: String
     clientSecret: String
-    oauthApiUrl: String
+    tokenEndpoint: String
+    userinfoEndpoint: String
+    authorizationEndpoint: String
   }
 
   type UpdateOIDCIntegrationError implements Error {

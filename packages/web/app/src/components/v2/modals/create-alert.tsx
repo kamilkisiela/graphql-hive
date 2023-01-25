@@ -2,7 +2,6 @@ import { ReactElement } from 'react';
 import { useFormik } from 'formik';
 import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
-
 import { Button, Heading, Modal, Select } from '@/components/v2';
 import { AddAlertDocument, AlertChannelsDocument, AlertType, TargetsDocument } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks';
@@ -97,7 +96,7 @@ export const CreateAlertModal = ({
             ]}
             value={values.type}
             onChange={handleChange}
-            isInvalid={!!touched.type && Boolean(errors.type)}
+            isInvalid={!!(touched.type && errors.type)}
           />
           {touched.type && errors.type && <div className="text-sm text-red-500">{errors.type}</div>}
         </div>
@@ -115,7 +114,7 @@ export const CreateAlertModal = ({
             }))}
             value={values.channel}
             onChange={handleChange}
-            isInvalid={!!touched.channel && Boolean(errors.channel)}
+            isInvalid={!!(touched.channel && errors.channel)}
           />
           {touched.channel && errors.channel && (
             <div className="text-sm text-red-500">{errors.channel}</div>
@@ -135,7 +134,7 @@ export const CreateAlertModal = ({
             }))}
             value={values.target}
             onChange={handleChange}
-            isInvalid={!!touched.target && Boolean(errors.target)}
+            isInvalid={!!(touched.target && errors.target)}
           />
           {touched.target && errors.target && (
             <div className="text-sm text-red-500">{errors.target}</div>

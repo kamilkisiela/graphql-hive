@@ -36,7 +36,11 @@ export default function App({ Component, pageProps }: AppProps): ReactElement {
 
       <FooterExtended
         resources={[
-          { title: 'Privacy Policy', href: '/privacy-policy.pdf', children: 'Privacy Policy' },
+          {
+            title: 'Privacy Policy',
+            href: 'https://the-guild.dev/graphql/hive/privacy-policy.pdf',
+            children: 'Privacy Policy',
+          },
           { title: 'Terms of Use', href: '/terms-of-use.pdf', children: 'Terms of Use' },
         ]}
       />

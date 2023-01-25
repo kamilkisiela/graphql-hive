@@ -1,9 +1,9 @@
-import { Injectable, Scope, Inject } from 'graphql-modules';
 import type { Span } from '@sentry/types';
-import { REDIS_INSTANCE } from '../../shared/providers/redis';
-import type { Redis } from '../../shared/providers/redis';
-import { Logger } from '../../shared/providers/logger';
+import { Inject, Injectable, Scope } from 'graphql-modules';
 import { uuid } from '../../../shared/helpers';
+import { Logger } from '../../shared/providers/logger';
+import type { Redis } from '../../shared/providers/redis';
+import { REDIS_INSTANCE } from '../../shared/providers/redis';
 
 /**
  *
@@ -182,14 +182,13 @@ export class IdempotentRunner {
           },
           ttl,
         });
-      } else {
-        this.logger.debug(
-          'Job created (id=%s, traceId=%s, attempt=%s)',
-          identifier,
-          traceId,
-          context.attempt,
-        );
       }
+      this.logger.debug(
+        'Job created (id=%s, traceId=%s, attempt=%s)',
+        identifier,
+        traceId,
+        context.attempt,
+      );
 
       this.logger.debug(
         'Executing job (id=%s, traceId=%s, attempt=%s)',

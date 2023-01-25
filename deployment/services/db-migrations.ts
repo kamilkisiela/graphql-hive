@@ -1,36 +1,37 @@
+import * as k8s from '@pulumi/kubernetes';
 import * as pulumi from '@pulumi/pulumi';
-import * as azure from '@pulumi/azure';
 import { parse } from 'pg-connection-string';
-import { RemoteArtifactAsServiceDeployment } from '../utils/remote-artifact-as-service';
+import { DeploymentEnvironment } from '../types';
+import { ServiceDeployment } from '../utils/service-deployment';
 import { Clickhouse } from './clickhouse';
 import { Kafka } from './kafka';
-import { PackageHelper } from '../utils/pack';
-import { DeploymentEnvironment } from '../types';
 const apiConfig = new pulumi.Config('api');
 
 export type DbMigrations = ReturnType<typeof deployDbMigrations>;
 
 export function deployDbMigrations({
-  storageContainer,
-  packageHelper,
   deploymentEnv,
   clickhouse,
   kafka,
+  image,
+  imagePullSecret,
 }: {
-  storageContainer: azure.storage.Container;
-  packageHelper: PackageHelper;
   deploymentEnv: DeploymentEnvironment;
   clickhouse: Clickhouse;
   kafka: Kafka;
+  image: string;
+  imagePullSecret: k8s.core.v1.Secret;
 }) {
   const rawConnectionString = apiConfig.requireSecret('postgresConnectionString');
   const connectionString = rawConnectionString.apply(rawConnectionString =>
     parse(rawConnectionString),
   );
 
-  const { job } = new RemoteArtifactAsServiceDeployment(
+  const { job } = new ServiceDeployment(
     'db-migrations',
     {
+      imagePullSecret,
+      image,
       env: {
         POSTGRES_HOST: connectionString.apply(connection => connection.host ?? ''),
         POSTGRES_PORT: connectionString.apply(connection => connection.port ?? '5432'),
@@ -48,8 +49,6 @@ export function deployDbMigrations({
         KAFKA_BROKER: kafka.config.endpoint,
         ...deploymentEnv,
       },
-      storageContainer,
-      packageInfo: packageHelper.npmPack('@hive/storage'),
     },
     [clickhouse.deployment, clickhouse.service],
     clickhouse.service,

@@ -1,12 +1,12 @@
-import * as Sentry from '@sentry/node';
 import type { FastifyLoggerInstance } from '@hive/service-common';
-import { Queue, QueueScheduler, Worker, Job } from 'bullmq';
+import * as Sentry from '@sentry/node';
+import { Job, Queue, Worker } from 'bullmq';
 import Redis, { Redis as RedisInstance } from 'ioredis';
-import pTimeout from 'p-timeout';
 import mjml2html from 'mjml';
-import { emailsTotal, emailsFailuresTotal } from './metrics';
-import type { EmailInput } from './shapes';
+import pTimeout from 'p-timeout';
+import { emailsFailuresTotal, emailsTotal } from './metrics';
 import type { EmailProvider } from './providers';
+import type { EmailInput } from './shapes';
 
 const DAY_IN_SECONDS = 86_400;
 
@@ -24,7 +24,6 @@ export function createScheduler(config: {
 }) {
   let redisConnection: RedisInstance | null;
   let queue: Queue | null;
-  let queueScheduler: QueueScheduler | null;
   let stopped = false;
   const logger = config.logger;
 
@@ -41,12 +40,12 @@ export function createScheduler(config: {
     };
   }
 
-  function onFailed(job: Job, error: Error) {
+  function onFailed(job: Job<EmailInput> | undefined, error: Error) {
     logger.debug(
       `Job %s failed after %s attempts, reason: %s`,
-      job.name,
-      job.attemptsMade,
-      job.failedReason,
+      job?.name,
+      job?.attemptsMade,
+      job?.failedReason,
     );
     logger.error(error);
     emailsFailuresTotal.inc();
@@ -59,20 +58,14 @@ export function createScheduler(config: {
 
     const prefix = 'hive-emails';
 
-    queueScheduler = new QueueScheduler(config.queueName, {
-      prefix,
-      connection: redisConnection,
-      sharedConnection: true,
-    });
-
     queue = new Queue(config.queueName, {
       prefix,
       connection: redisConnection,
       sharedConnection: true,
     });
 
-    // Wait for Queues and Scheduler to be ready
-    await Promise.all([queueScheduler.waitUntilReady(), queue.waitUntilReady()]);
+    // Wait for Queues to be ready
+    await queue.waitUntilReady();
 
     const worker = new Worker<EmailInput>(
       config.queueName,
@@ -129,7 +122,8 @@ export function createScheduler(config: {
         onError('redis:reconnectOnError')(error);
         if (clientCommandMessageReg.test(error.message)) {
           return false;
-        } else return 1;
+        }
+        return 1;
       },
       db: 0,
       maxRetriesPerRequest: null,
@@ -170,18 +164,17 @@ export function createScheduler(config: {
 
     logger.info('Clearing BullMQ...');
     try {
-      queue?.removeAllListeners();
-      queueScheduler?.removeAllListeners(),
-        await pTimeout(
-          Promise.all([queue?.close(), queueScheduler?.close()]),
-          5000,
-          'BullMQ close timeout',
-        );
+      if (queue) {
+        queue.removeAllListeners();
+        await pTimeout(queue.close(), {
+          milliseconds: 5000,
+          message: 'BullMQ close timeout',
+        });
+      }
     } catch (e) {
       logger.error('Failed to stop queues', e);
     } finally {
       queue = null;
-      queueScheduler = null;
       logger.info('BullMQ stopped');
     }
 

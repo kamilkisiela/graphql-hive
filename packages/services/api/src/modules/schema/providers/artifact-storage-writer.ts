@@ -1,4 +1,4 @@
-import { PutObjectCommand, type S3Client } from '@aws-sdk/client-s3';
+import { type S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { buildArtifactStorageKey } from './artifact-storage-reader';
 
 const artifactMeta = {

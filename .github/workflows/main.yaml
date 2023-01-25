@@ -1,0 +1,70 @@
+name: ci
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  # Build all packages and applications, and creates Docker images.
+  build:
+    uses: ./.github/workflows/build-and-dockerize.yaml
+    with:
+      imageTag: ${{ github.sha }}
+      publishSourceMaps: true
+      publishLatest: true
+    secrets: inherit
+
+  # Build and publish Rust packages.
+  rust:
+    uses: ./.github/workflows/publish-rust.yaml
+    secrets: inherit
+
+  # Trigger deployment
+  deploy:
+    name: trigger staging deployment
+    needs:
+      - build
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Dispatch Deployment
+        run: |
+          curl --request POST \
+            --url 'https://api.github.com/repos/${{ secrets.PRIVATE_REPO_OWNER }}/${{ secrets.PRIVATE_REPO_NAME }}/dispatches' \
+            --header 'Accept: application/vnd.github.everest-preview+json' \
+            --header 'Authorization: token ${{ secrets.GH_PAT }}' \
+            --header 'Content-Type: application/json' \
+            --data '{
+            "event_type": "deploy-staging",
+            "client_payload": {
+              "actor": "${{ github.actor }}",
+              "ref": "${{ github.sha }}"
+            }
+          }'
+
+  # ESLint and Prettier
+  code-style:
+    uses: ./.github/workflows/lint.yaml
+
+  # CodeQL
+  static-analysis:
+    uses: ./.github/workflows/codeql-analysis.yml
+
+  # TypeScript Typecheck and compiler checks
+  typescript:
+    uses: ./.github/workflows/typescript-typecheck.yaml
+
+  # Deploy Website to CloudFlare Pages
+  website:
+    uses: ./.github/workflows/website.yaml
+    secrets: inherit
+
+  # Release NPM packages and tarballs
+  package:
+    uses: ./.github/workflows/release-stable.yaml
+    secrets: inherit
+
+  # GraphQL Schema Publish
+  graphql-schema:
+    uses: ./.github/workflows/graphql-schema-publish.yaml
+    secrets:
+      hiveToken: ${{ secrets.HIVE_TOKEN }}

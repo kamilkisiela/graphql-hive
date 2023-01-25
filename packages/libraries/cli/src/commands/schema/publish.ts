@@ -1,12 +1,12 @@
+import { existsSync, readFileSync } from 'fs';
 import { transformCommentsToDescriptions } from '@graphql-tools/utils';
-import { Flags, Errors } from '@oclif/core';
+import { Errors, Flags } from '@oclif/core';
 import { GraphQLError, print } from 'graphql';
 import Command from '../../base-command';
 import { graphqlEndpoint } from '../../helpers/config';
 import { gitInfo } from '../../helpers/git';
-import { invariant } from '../../helpers/validation';
 import { loadSchema, minifySchema, renderChanges, renderErrors } from '../../helpers/schema';
-import { existsSync, readFileSync } from 'fs';
+import { invariant } from '../../helpers/validation';
 
 export default class SchemaPublish extends Command {
   static description = 'publishes schema';

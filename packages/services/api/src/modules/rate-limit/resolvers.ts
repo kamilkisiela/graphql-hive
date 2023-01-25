@@ -1,6 +1,6 @@
-import { RateLimitProvider } from './providers/rate-limit.provider';
 import { Logger } from './../shared/providers/logger';
 import { RateLimitModule } from './__generated__/types';
+import { RateLimitProvider } from './providers/rate-limit.provider';
 
 export const resolvers: RateLimitModule.Resolvers = {
   Organization: {
@@ -13,6 +13,7 @@ export const resolvers: RateLimitModule.Resolvers = {
           entityType: 'organization',
           id: org.id,
           type: 'operations-reporting',
+          token: null,
         });
 
         logger.debug('Fetched rate-limit info:', { orgId: org.id, operationsRateLimit });

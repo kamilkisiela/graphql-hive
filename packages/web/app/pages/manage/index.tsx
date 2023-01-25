@@ -1,14 +1,14 @@
-import React from 'react';
 import 'twin.macro';
-import { Select, CheckboxGroup, Checkbox, Tooltip } from '@chakra-ui/react';
-import { VscChevronDown } from 'react-icons/vsc';
+import React from 'react';
+import { Checkbox, CheckboxGroup, Select, Tooltip } from '@chakra-ui/react';
 import startOfMonth from 'date-fns/startOfMonth';
 import subDays from 'date-fns/subDays';
 import subHours from 'date-fns/subHours';
+import { VscChevronDown } from 'react-icons/vsc';
 import { AdminStats, Filters } from '@/components/admin/AdminStats';
+import { authenticated } from '@/components/authenticated-container';
 import { Page } from '@/components/common';
 import { DATE_RANGE_OPTIONS, floorToMinute } from '@/components/common/TimeFilter';
-import { authenticated } from '@/components/authenticated-container';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
 type DateRangeOptions = Exclude<
@@ -78,7 +78,7 @@ function Manage() {
                 colorScheme="teal"
                 size="sm"
                 defaultValue={Object.keys(filters).filter(
-                  key => !!filters[key as keyof typeof filters],
+                  key => filters[key as keyof typeof filters],
                 )}
                 onChange={onFiltersChange}
               >

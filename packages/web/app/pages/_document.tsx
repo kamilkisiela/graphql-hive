@@ -1,8 +1,8 @@
 import 'regenerator-runtime/runtime';
-import Document, { Html, Head, Main, NextScript, DocumentContext } from 'next/document';
-import { extractCritical } from '@emotion/server';
 // don't remove this import ; it will break the built app ; but not the dev app :)
 import '@/config/frontend-env';
+import Document, { DocumentContext, Head, Html, Main, NextScript } from 'next/document';
+import { extractCritical } from '@emotion/server';
 
 export default class MyDocument extends Document<{
   ids: Array<string>;

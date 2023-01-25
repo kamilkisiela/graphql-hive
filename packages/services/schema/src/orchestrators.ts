@@ -1,24 +1,24 @@
-import type { Redis as RedisInstance } from 'ioredis';
-import type { FastifyLoggerInstance } from '@hive/service-common';
 import { createHash, createHmac } from 'crypto';
-import { printSchema, parse, concatAST, visit, print, ASTNode } from 'graphql';
-import type { DocumentNode } from 'graphql';
-import { validateSDL } from 'graphql/validation/validate.js';
 import { composeAndValidate, compositionHasErrors } from '@apollo/federation';
 import { stitchSchemas } from '@graphql-tools/stitch';
 import { stitchingDirectives } from '@graphql-tools/stitching-directives';
+import type { FastifyLoggerInstance } from '@hive/service-common';
 import { fetch } from '@whatwg-node/fetch';
 import retry from 'async-retry';
+import type { DocumentNode } from 'graphql';
+import { ASTNode, concatAST, parse, print, printSchema, visit } from 'graphql';
+import { validateSDL } from 'graphql/validation/validate.js';
+import type { Redis as RedisInstance } from 'ioredis';
 import { z } from 'zod';
 import type {
-  SchemaType,
   BuildInput,
   BuildOutput,
-  ValidationInput,
-  ValidationOutput,
+  ExternalComposition,
+  SchemaType,
   SupergraphInput,
   SupergraphOutput,
-  ExternalComposition,
+  ValidationInput,
+  ValidationOutput,
 } from './types';
 
 interface CompositionSuccess {
@@ -35,6 +35,7 @@ interface CompositionFailure {
     errors: Array<{
       message: string;
     }>;
+    raw?: string;
   };
 }
 
@@ -222,6 +223,7 @@ const createFederation: (
           type: 'failure',
           result: {
             errors: result.errors.map(toValidationError),
+            raw: result.schema ? printSchema(result.schema) : undefined,
           },
         };
       }
@@ -255,6 +257,14 @@ const createFederation: (
     },
     async build(schemas, external) {
       const result = await compose({ schemas, external });
+
+      // If `raw` SDL is present, it means that we were able to build a schema, but it still has composition errors
+      if (result.result.raw) {
+        return {
+          raw: result.result.raw,
+          source: emptySource,
+        };
+      }
 
       if (result.type === 'failure') {
         throw new Error(

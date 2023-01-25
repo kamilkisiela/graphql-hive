@@ -1,40 +1,40 @@
 import 'twin.macro';
-import React from 'react';
+import React, { PropsWithChildren, ReactNode } from 'react';
 import {
-  Table,
-  Thead,
-  Tbody,
-  Th,
-  Tr,
-  Td,
+  Button,
   Flex,
-  StatGroup,
+  IconButton,
   Stat,
+  StatGroup,
   StatLabel,
   StatNumber,
-  Button,
-  IconButton,
+  Table,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr,
 } from '@chakra-ui/react';
-import ReactECharts from 'echarts-for-react';
-import AutoSizer from 'react-virtualized-auto-sizer';
 import {
   createTable,
-  useTableInstance,
   getCoreRowModel,
-  getSortedRowModel,
   getPaginationRowModel,
-  SortingState,
+  getSortedRowModel,
   PaginationState,
-  TableInstance as OriginalTableInstance,
+  SortingState,
   Table as OriginalTable,
+  TableInstance as OriginalTableInstance,
+  useTableInstance,
 } from '@tanstack/react-table';
-import { DocumentType, gql, useQuery } from 'urql';
 import { formatISO } from 'date-fns';
-import { VscChevronUp, VscChevronDown, VscChevronLeft, VscChevronRight } from 'react-icons/vsc';
+import ReactECharts from 'echarts-for-react';
+import { VscChevronDown, VscChevronLeft, VscChevronRight, VscChevronUp } from 'react-icons/vsc';
+import AutoSizer from 'react-virtualized-auto-sizer';
+import { DocumentType, gql, useQuery } from 'urql';
 import { DataWrapper } from '@/components/common/DataWrapper';
-import { theme } from '@/lib/charts';
-import { OrganizationType } from '@/graphql';
 import { env } from '@/env/frontend';
+import { OrganizationType } from '@/graphql';
+import { theme } from '@/lib/charts';
 
 interface Organization {
   name: React.ReactElement;
@@ -157,11 +157,16 @@ const OverallStat: React.FC<{
   );
 };
 
-const Sortable: React.FC<{
+const Sortable = ({
+  children,
+  isSorted,
+  isSortedDesc,
+  align = 'left',
+}: PropsWithChildren<{
   align?: 'center' | 'right' | 'left';
   isSortedDesc?: boolean;
   isSorted?: boolean;
-}> = ({ children, isSorted, isSortedDesc, align = 'left' }) => {
+}>) => {
   return (
     <Flex
       direction="row"
@@ -263,7 +268,7 @@ function OrganizationTableRow({ row }: { row: ReturnType<TableInstance['getRow']
             {isNumeric
               ? formatNumber(cell.getValue() as number)
               : isReact
-              ? cell.getValue()
+              ? (cell.getValue() as ReactNode)
               : cell.renderCell()}
           </Td>
         );

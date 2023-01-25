@@ -1,13 +1,9 @@
 import { DeploymentEnvironment } from '../types';
 
 export function isProduction(deploymentEnv: DeploymentEnvironment | string): boolean {
-  return !isStaging(deploymentEnv);
-}
-
-export function isStaging(deploymentEnv: DeploymentEnvironment | string): boolean {
   return isDeploymentEnvironment(deploymentEnv)
-    ? deploymentEnv.ENVIRONMENT === 'staging'
-    : deploymentEnv === 'staging';
+    ? deploymentEnv.ENVIRONMENT === 'production' || deploymentEnv.ENVIRONMENT === 'prod'
+    : deploymentEnv === 'production' || deploymentEnv === 'prod';
 }
 
 export function isDeploymentEnvironment(value: any): value is DeploymentEnvironment {

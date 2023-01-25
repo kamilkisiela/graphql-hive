@@ -1,7 +1,7 @@
-import * as cf from '@pulumi/cloudflare';
-import * as pulumi from '@pulumi/pulumi';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
+import * as cf from '@pulumi/cloudflare';
+import * as pulumi from '@pulumi/pulumi';
 
 export class CloudflareCDN {
   constructor(
@@ -37,6 +37,16 @@ export class CloudflareCDN {
           // HIVE_DATA is in use in cdn-script.js as well, its the name of the global variable
           name: 'HIVE_DATA',
           namespaceId: kvStorage.id,
+        },
+      ],
+      analyticsEngineBindings: [
+        {
+          name: 'USAGE_ANALYTICS',
+          dataset: `hive_ha_cdn_usage_${this.config.envName}`,
+        },
+        {
+          name: 'ERROR_ANALYTICS',
+          dataset: `hive_ha_cdn_error_${this.config.envName}`,
         },
       ],
       secretTextBindings: [

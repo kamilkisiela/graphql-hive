@@ -1,14 +1,14 @@
+import 'twin.macro';
 import React from 'react';
+import { Table, TableContainer, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
+import { useQuery } from 'urql';
 import {
   OrganizationFieldsFragment,
   OrgBillingInfoFieldsFragment,
   UsageEstimationDocument,
 } from '@/graphql';
-import { useQuery } from 'urql';
 import { Scale } from '../common';
 import { DataWrapper } from '../common/DataWrapper';
-import 'twin.macro';
-import { Table, TableContainer, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
 import { calculatePeriod } from '../common/TimeFilter';
 
 const NumericFormatter = Intl.NumberFormat('en', {
@@ -40,7 +40,7 @@ export const OrganizationUsageEstimationView: React.FC<{
                     <Th>Feature</Th>
                     <Th isNumeric>Used</Th>
                     <Th isNumeric>Limit</Th>
-                    <Th></Th>
+                    <Th />
                   </Tr>
                 </Thead>
                 <Tbody>
