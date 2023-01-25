@@ -47,7 +47,7 @@ async function main() {
           enabled: true,
           endpoint: env.heartbeat.endpoint,
           intervalInMS: 20_000,
-          onError: server.log.error,
+          onError: e => server.log.error(e, `Heartbeat failed with error`),
           isReady: readiness,
         })
       : startHeartbeats({ enabled: false });
