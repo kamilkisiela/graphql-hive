@@ -1,5 +1,5 @@
 import { InjectionToken } from 'graphql-modules';
-import type { AwsClient } from '../../../shared/aws';
+import type { AwsClient } from '@hive/cdn-script/aws';
 
 export interface S3Config {
   client: AwsClient;

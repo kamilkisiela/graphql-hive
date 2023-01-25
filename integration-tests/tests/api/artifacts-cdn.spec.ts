@@ -366,7 +366,6 @@ function runArtifactsCDNTests(
 
         expect(response.status).toEqual(200);
         const result = await response.json();
-        console.log(result);
         expect(result.data.__schema.types).toContainEqual({
           name: 'Query',
           fields: [{ name: 'ping' }],
