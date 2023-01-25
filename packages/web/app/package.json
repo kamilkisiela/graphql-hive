@@ -54,7 +54,7 @@
     "echarts-for-react": "3.0.2",
     "formik": "2.2.9",
     "framer-motion": "4.1.17",
-    "graphiql": "2.2.0",
+    "graphiql": "2.3.0",
     "graphql": "16.6.0",
     "hyperid": "3.1.0",
     "immer": "9.0.18",
