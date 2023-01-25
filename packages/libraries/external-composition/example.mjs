@@ -106,7 +106,7 @@ async function main() {
 
   server.route({
     method: ['POST'],
-    url: '/compose_and_fail_on_signature',
+    url: '/fail_on_signature',
     handler(req, res) {
       /**
        * @type any

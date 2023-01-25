@@ -40,7 +40,6 @@
     "seed": "node scripts/seed-local-env.js",
     "test": "jest",
     "test:e2e": "CYPRESS_BASE_URL=$HIVE_APP_BASE_URL cypress run",
-    "turbo": "env-cmd --silent turbo run",
     "typecheck": "pnpm turbo typecheck --color",
     "upload-sourcemaps": "./scripts/upload-sourcemaps.sh",
     "workspace": "pnpm run --filter $1 $2"
@@ -75,7 +74,6 @@
     "bob-the-bundler": "4.1.1",
     "cypress": "12.2.0",
     "dotenv": "16.0.3",
-    "env-cmd": "10.1.0",
     "eslint": "8.30.0",
     "eslint-plugin-cypress": "2.12.1",
     "eslint-plugin-hive": "file:./rules",

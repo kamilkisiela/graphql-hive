@@ -1,5 +1,7 @@
 import crypto from 'crypto';
 
+export type ErrorCode = 'ERR_EMPTY_BODY' | 'ERR_INVALID_SIGNATURE';
+
 export const signatureHeaderName = 'x-hive-signature-256';
 const sigHashAlg = 'sha256';
 
@@ -7,7 +9,11 @@ function hash(secret: string, algo: string, data: string) {
   return crypto.createHmac(algo, secret).update(data, 'utf-8').digest('hex');
 }
 
-export function verifyRequest(input: { body: string; signature: string; secret: string }) {
+export function verifyRequest(input: {
+  body: string;
+  signature: string;
+  secret: string;
+}): ErrorCode | undefined {
   const { body, signature, secret } = input;
 
   if (!body) {
