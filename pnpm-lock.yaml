@@ -616,6 +616,7 @@ importers:
   packages/services/schema:
     specifiers:
       '@apollo/federation': 0.38.1
+      '@graphql-hive/external-composition': workspace:*
       '@graphql-tools/stitch': 8.7.36
       '@graphql-tools/stitching-directives': 2.3.25
       '@hive/service-common': workspace:*
@@ -645,6 +646,7 @@ importers:
       ioredis: 5.2.5
       zod: 3.20.2
     devDependencies:
+      '@graphql-hive/external-composition': link:../../libraries/external-composition
       '@hive/service-common': link:../service-common
       '@types/async-retry': 1.4.5
       fastify: 3.29.5
