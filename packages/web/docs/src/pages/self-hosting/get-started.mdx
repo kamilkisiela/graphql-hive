@@ -136,19 +136,19 @@ see your personal organization that has been automatically created for you by de
 Now that we have GraphQL Hive setup locally, signed up and logged into our dashboard. We can start
 creating our first project which we're going to push graphql schemas to.
 
-So you're going to click on the `Create a Project` button on the top right, give it a name and choose
-your project type. You're going to see all sorts of types `Single` which is the most common and
-there're also `Federation` and `Stitching` but what's also nice is that you can define your own
-custom endpoints for schema validation and schema building. I'm going to go with `Single` but you can
-choose what best suits your needs. Then click `Create Project`, you're going to be redirected to your
-project page where you're going to see 3 listed targets created for you by default:
+So you're going to click on the `Create a Project` button on the top right, give it a name and
+choose your project type. You're going to see all sorts of types `Single` which is the most common
+and there're also `Federation` and `Stitching` but what's also nice is that you can define your own
+custom endpoints for schema validation and schema building. I'm going to go with `Single` but you
+can choose what best suits your needs. Then click `Create Project`, you're going to be redirected to
+your project page where you're going to see 3 listed targets created for you by default:
 
 - `development`
 - `production`
 - `staging`
 
-We're going to use the `development` target in this guide and as soon as you click it you'll see this
-message:
+We're going to use the `development` target in this guide and as soon as you click it you'll see
+this message:
 
 > Hive is waiting for your first schema.
 >
@@ -174,7 +174,7 @@ type Query {
 
 You also need to have a git repository initilaized for your project, because Hive automatically uses
 the last commit hash to determine who the author is and ties the schema with the commit hash. So
-we're gonna do that.
+we're going to do that.
 
 ```bash
 git init
@@ -198,7 +198,7 @@ git commit -m"init"
 ```
 
 Now that you've your Nodejs project setup, start by installing the GraphQL Hive CLI which we're
-gonna use to interact with Hive's server.
+going to use to interact with Hive's server.
 
 ```bash
 # you can do the same with npm or yarn
@@ -221,14 +221,14 @@ Make sure you get an output specifiying the installed version for your CLI.
 
 And since we're using the Self Hosted version, we need to configure the Hive CLI to use our local
 endpoint, by creating a `hive.json` file at the root of your directory. Then specify the `registry`
-key to point it our local registry instead of the cloud version one and the value is gonna be
+key to point it our local registry instead of the cloud version one and the value is going to be
 `http://localhost:8082/graphql` where its running.
 
 Additionally the schemas registry only allows trusted sources to be able to push to them, so we have
 to create an access token by heading back to our project page, specifically on the target(in this
-guide it's `development`) then go to the settings tab, if you scroll donw a bit you're gonna see the
-`Tokens` section, click the `Generate New Token` button, give it a name then we'll have to set some
-permissions for that token, so expand the `All targets` section then give the `Registry` a
+guide it's `development`) then go to the settings tab, if you scroll donw a bit you're going to see
+the `Tokens` section, click the `Generate New Token` button, give it a name then we'll have to set
+some permissions for that token, so expand the `All targets` section then give the `Registry` a
 `Read & Write` access. Click the `Generate Token` button, then copy the token value. Head back to
 the `hive.json` config file then add a new key `token` and paste the value from your clipboard.
 
@@ -240,7 +240,7 @@ We can publish our first schema by using:
 pnpm hive schema:publish ./schema.graphql
 ```
 
-Go to the `Schema` tab in your project target and you're gonna see your latest published schema.
+Go to the `Schema` tab in your project target and you're going to see your latest published schema.
 
 ## Bounded Ports Reference
 
@@ -252,6 +252,7 @@ Go to the `Schema` tab in your project target and you're gonna see your latest p
 | 8083 | The Artifacts Bucket         |
 
 ## Next Steps
+
 ## Bounded Ports Reference
 
 | Port | Purpose                      |
