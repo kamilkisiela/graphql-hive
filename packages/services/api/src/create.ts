@@ -1,4 +1,5 @@
 import { createApplication, Scope } from 'graphql-modules';
+import { AwsClient } from '@hive/cdn-script/aws';
 import { activityModule } from './modules/activity';
 import { adminModule } from './modules/admin';
 import { alertsModule } from './modules/alerts';
@@ -54,7 +55,6 @@ import {
   USAGE_ESTIMATION_SERVICE_CONFIG,
   UsageEstimationServiceConfig,
 } from './modules/usage-estimation/providers/tokens';
-import { AwsClient } from './shared/aws';
 
 const modules = [
   sharedModule,
