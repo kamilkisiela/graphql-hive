@@ -38,3 +38,6 @@ export const devStorage = new Map<string, string>();
 (globalThis as any).ERROR_ANALYTICS = {
   writeDataPoint(_input: any) {},
 };
+(globalThis as any).KEY_VALIDATION_ANALYTICS = {
+  writeDataPoint(_input: any) {},
+};
