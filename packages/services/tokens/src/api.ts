@@ -26,17 +26,20 @@ const TARGET_VALIDATION = z
   .required();
 const PROJECT_VALIDATION = z
   .object({
-    projectId: z.string().nonempty(),
+    projectId: z.string().min(1),
+    targetIds: z.array(z.string().min(1)),
   })
   .required();
 const ORG_VALIDATION = z
   .object({
-    organizationId: z.string().nonempty(),
+    organizationId: z.string().min(1),
+    projectIds: z.array(z.string().min(1)),
+    targetIds: z.array(z.string().min(1)),
   })
   .required();
 const TOKEN_VALIDATION = z
   .object({
-    token: z.string().nonempty(),
+    token: z.string().min(1),
   })
   .required();
 
@@ -111,7 +114,7 @@ export const tokensApiRouter = t.router({
   invalidateTokenByTarget: procedure.input(TARGET_VALIDATION).mutation(async ({ ctx, input }) => {
     try {
       const storage = await ctx.getStorage();
-      storage.invalidateTarget(input.targetId);
+      await storage.invalidateTarget(input.targetId);
 
       return true;
     } catch (error) {
@@ -123,7 +126,7 @@ export const tokensApiRouter = t.router({
   invalidateTokenByProject: procedure.input(PROJECT_VALIDATION).mutation(async ({ ctx, input }) => {
     try {
       const storage = await ctx.getStorage();
-      storage.invalidateProject(input.projectId);
+      await storage.invalidateProject(input.projectId, input.targetIds);
 
       return true;
     } catch (error) {
@@ -137,7 +140,11 @@ export const tokensApiRouter = t.router({
     .mutation(async ({ ctx, input }) => {
       try {
         const storage = await ctx.getStorage();
-        storage.invalidateProject(input.organizationId);
+        await storage.invalidateOrganization(
+          input.organizationId,
+          input.projectIds,
+          input.targetIds,
+        );
 
         return true;
       } catch (error) {

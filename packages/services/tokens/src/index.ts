@@ -43,6 +43,7 @@ export async function main() {
   try {
     const { start, stop, readiness, getStorage } = useCache(
       createStorage(env.postgres),
+      env.redis,
       server.log,
     );
     const tokenReadFailuresCache = LRU<

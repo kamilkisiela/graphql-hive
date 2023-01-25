@@ -105,6 +105,7 @@ export class TokenStorage {
     await this.tokensService.invalidateTokenByProject
       .mutate({
         projectId: input.project,
+        // TODO: add a list of target ids
       })
       .catch(error => {
         this.logger.error(error);
@@ -117,6 +118,8 @@ export class TokenStorage {
     await this.tokensService.invalidateTokenByOrganization
       .mutate({
         organizationId: input.organization,
+        // TODO: add a list of project ids
+        // TODO: and their target ids
       })
       .catch(error => {
         this.logger.error(error);
