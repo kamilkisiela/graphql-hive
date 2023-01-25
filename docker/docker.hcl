@@ -325,7 +325,10 @@ target "docs" {
 
 target "apollo-router" {
   inherits = ["router-base", get_target()]
-  context = "${PWD}/packages/libraries/router"
+  contexts = {
+    pkg = "${PWD}/packages/libraries/router"
+    config = "${PWD}/configs/cargo"
+  }
   args = {
     IMAGE_TITLE = "graphql-hive/apollo-router"
     PORT = "4000"
