@@ -1,3 +1,7 @@
+# syntax=docker/dockerfile:1
+FROM scratch AS pkg
+FROM scratch AS config
+
 FROM rust:1-slim as build
 
 WORKDIR /usr/src
@@ -5,13 +9,14 @@ WORKDIR /usr/src
 # Create blank project
 RUN USER=root cargo new router
 
-COPY Cargo.toml /usr/src/router/
+COPY --from=pkg Cargo.toml /usr/src/router/
+COPY --from=config Cargo.lock /usr/src/router/
 
 WORKDIR /usr/src/router
 
 # Required by Apollo Router
 RUN apt-get update
-RUN apt-get -y install npm protobuf-compiler curl
+RUN apt-get -y install npm protobuf-compiler curl pkg-config
 RUN rm -rf /var/lib/apt/lists/*
 RUN update-ca-certificates
 RUN rustup component add rustfmt
@@ -19,7 +24,7 @@ RUN rustup component add rustfmt
 # Get the dependencies cached
 RUN cargo build --release
 
-COPY src ./src
+COPY --from=pkg src ./src
 
 RUN touch ./src/main.rs
 
@@ -45,7 +50,7 @@ RUN mkdir /dist/schema
 
 # Copy in the required files from our build image
 COPY --from=build --chown=root:root /usr/src/router/target/release/router /dist
-COPY router.yaml /dist/config/router.yaml
+COPY --from=pkg router.yaml /dist/config/router.yaml
 
 WORKDIR /dist
 
