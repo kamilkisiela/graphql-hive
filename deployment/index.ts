@@ -296,6 +296,7 @@ const proxy = deployProxy({
   docs,
   graphql: graphqlApi,
   usage: usageApi,
+  tokens: tokensApi,
   deploymentEnv,
 });
 
