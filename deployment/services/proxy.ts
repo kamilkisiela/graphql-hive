@@ -6,6 +6,7 @@ import { Proxy } from '../utils/reverse-proxy';
 import { App } from './app';
 import { Docs } from './docs';
 import { GraphQL } from './graphql';
+import { Tokens } from './tokens';
 import { Usage } from './usage';
 
 const commonConfig = new pulumi.Config('common');
@@ -17,6 +18,7 @@ export function deployProxy({
   app,
   docs,
   usage,
+  tokens,
   deploymentEnv,
 }: {
   deploymentEnv: DeploymentEnvironment;
@@ -25,6 +27,7 @@ export function deployProxy({
   graphql: GraphQL;
   app: App;
   usage: Usage;
+  tokens: Tokens;
   docs: Docs;
 }) {
   const { tlsIssueName } = new CertManager().deployCertManagerAndIssuer();
@@ -83,6 +86,12 @@ export function deployProxy({
         name: 'usage',
         path: '/usage',
         service: usage.service,
+        retryOnReset: true,
+      },
+      {
+        name: 'tokens',
+        path: '/tokens',
+        service: tokens.service,
         retryOnReset: true,
       },
     ])
