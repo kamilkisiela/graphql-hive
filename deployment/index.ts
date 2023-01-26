@@ -84,7 +84,6 @@ const cdn = deployCFCDN({
   rootDns,
   s3Config,
   release: imagesTag,
-  cdnAuthPrivateKey,
 });
 
 const cfBroker = deployCFBroker({
@@ -247,6 +246,7 @@ const graphqlApi = deployGraphQL({
   dbMigrations,
   redis: redisApi,
   usage: usageApi,
+  cdnAuthPrivateKey,
   cdn,
   usageEstimator: usageEstimationApi,
   rateLimit: rateLimitApi,

@@ -9,7 +9,6 @@ export class CloudflareCDN {
       envName: string;
       zoneId: string;
       cdnDnsRecord: string;
-      authPrivateKey: pulumi.Output<string>;
       sentryDsn: string;
       release: string;
       s3Config: {
@@ -57,12 +56,6 @@ export class CloudflareCDN {
       ],
       secretTextBindings: [
         {
-          // KEY_DATA is in use in cdn-script.js as well, its the name of the global variable,
-          // basically it's the private key for the hmac key.
-          name: 'KEY_DATA',
-          text: this.config.authPrivateKey,
-        },
-        {
           name: 'SENTRY_DSN',
           text: this.config.sentryDsn,
         },
@@ -103,7 +96,6 @@ export class CloudflareCDN {
     });
 
     return {
-      authPrivateKey: this.config.authPrivateKey,
       workerBaseUrl: workerUrl,
       cfStorageNamespaceId: kvStorage.id,
     };

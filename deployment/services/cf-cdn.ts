@@ -14,7 +14,6 @@ export function deployCFCDN({
   release,
   envName,
   s3Config,
-  cdnAuthPrivateKey,
 }: {
   rootDns: string;
   envName: string;
@@ -25,7 +24,6 @@ export function deployCFCDN({
     accessKeyId: pulumi.Output<string>;
     secretAccessKey: pulumi.Output<string>;
   };
-  cdnAuthPrivateKey: pulumi.Output<string>;
 }) {
   const cdn = new CloudflareCDN({
     envName,
@@ -34,7 +32,6 @@ export function deployCFCDN({
     // one level of subdomains. See: https://community.cloudflare.com/t/ssl-handshake-error-cloudflare-proxy/175088
     // So for staging env, we are going to use `cdn-staging` instead of `cdn.staging`.
     cdnDnsRecord: isProduction(envName) ? `cdn.${rootDns}` : `cdn-${rootDns}`,
-    authPrivateKey: cdnAuthPrivateKey,
     sentryDsn: commonEnv.SENTRY_DSN,
     release,
     s3Config,

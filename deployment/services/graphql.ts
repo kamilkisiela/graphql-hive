@@ -49,6 +49,7 @@ export function deployGraphQL({
   auth0Config,
   s3Config,
   imagePullSecret,
+  cdnAuthPrivateKey,
 }: {
   release: string;
   image: string;
@@ -59,6 +60,7 @@ export function deployGraphQL({
   schema: Schema;
   redis: Redis;
   cdn: CDN;
+  cdnAuthPrivateKey: Output<string>;
   usage: Usage;
   usageEstimator: UsageEstimator;
   dbMigrations: DbMigrations;
@@ -137,7 +139,7 @@ export function deployGraphQL({
         CDN_CF_AUTH_TOKEN: cloudflareConfig.requireSecret('apiToken'),
         CDN_CF_NAMESPACE_ID: cdn.cfStorageNamespaceId,
         CDN_CF_BASE_URL: cdn.workerBaseUrl,
-        CDN_AUTH_PRIVATE_KEY: cdn.authPrivateKey,
+        CDN_AUTH_PRIVATE_KEY: cdnAuthPrivateKey,
         // Hive
         HIVE: '1',
         HIVE_REPORTING: '1',
