@@ -22,15 +22,6 @@ type Event =
       type: 'new-key-validation';
       value:
         | {
-            type: 'cache-not-found';
-          }
-        | {
-            type: 'cache-key-build-failure';
-          }
-        | {
-            type: 'cache-key-match-failure';
-          }
-        | {
             type: 'cache-hit';
             isValid: boolean;
           }
@@ -46,7 +37,8 @@ type Event =
             type: 's3-key-compare-failure';
           }
         | {
-            type: 'success';
+            type: 's3-key-validation-success';
+            status: 'success' | 'failure';
           };
     }
   | {
@@ -79,21 +71,6 @@ export function createAnalytics(
           });
         case 'new-key-validation':
           switch (event.value.type) {
-            case 'cache-not-found':
-              return engines.keyValidation.writeDataPoint({
-                blobs: ['cache-not-found'],
-                indexes: [targetId.substr(0, 32)],
-              });
-            case 'cache-key-build-failure':
-              return engines.keyValidation.writeDataPoint({
-                blobs: ['cache-key-build-failure'],
-                indexes: [targetId.substr(0, 32)],
-              });
-            case 'cache-key-match-failure':
-              return engines.keyValidation.writeDataPoint({
-                blobs: ['cache-key-match-failure'],
-                indexes: [targetId.substr(0, 32)],
-              });
             case 'cache-hit':
               return engines.keyValidation.writeDataPoint({
                 blobs: ['cache-hit', event.value.isValid ? 'valid' : 'invalid'],
@@ -104,19 +81,9 @@ export function createAnalytics(
                 blobs: ['cache-write', event.value.isValid ? 'valid' : 'invalid'],
                 indexes: [targetId.substr(0, 32)],
               });
-            case 's3-key-read-failure':
+            case 's3-key-validation-success':
               return engines.keyValidation.writeDataPoint({
-                blobs: ['s3-key-read-failure', String(event.value.status ?? 'err')],
-                indexes: [targetId.substr(0, 32)],
-              });
-            case 's3-key-compare-failure':
-              return engines.keyValidation.writeDataPoint({
-                blobs: ['s3-key-compare-failure'],
-                indexes: [targetId.substr(0, 32)],
-              });
-            case 'success':
-              return engines.keyValidation.writeDataPoint({
-                blobs: ['success'],
+                blobs: ['s3-key-validation-success', event.value.status],
                 indexes: [targetId.substr(0, 32)],
               });
           }

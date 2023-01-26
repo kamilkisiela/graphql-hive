@@ -77,11 +77,14 @@ const deploymentEnv: DeploymentEnvironment = {
 deployBotKube({ envName });
 deployMetrics({ envName });
 
+const cdnAuthPrivateKey = commonConfig.requireSecret('cdnAuthPrivateKey');
+
 const cdn = deployCFCDN({
   envName,
   rootDns,
   s3Config,
   release: imagesTag,
+  cdnAuthPrivateKey,
 });
 
 const cfBroker = deployCFBroker({
@@ -111,7 +114,7 @@ const dbMigrations = deployDbMigrations({
   force: forceRunDbMigrations,
   dependencies: [databaseCleanupJob].filter(isDefined),
   s3: s3Config,
-  encryptionSecret: commonConfig.requireSecret('encryptionSecret'),
+  cdnAuthPrivateKey,
 });
 
 const tokensApi = deployTokens({

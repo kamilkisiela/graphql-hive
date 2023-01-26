@@ -31,7 +31,7 @@ const envModel = zod.object({
   S3_SECRET_ACCESS_KEY: zod.string().min(1),
   S3_ENDPOINT: zod.string().url(),
   S3_BUCKET_NAME: zod.string().min(1),
-  ENCRYPTION_SECRET: zod.string().min(1),
+  CDN_AUTH_PRIVATE_KEY: zod.string().min(1),
 });
 
 type Cursor = {
@@ -59,7 +59,7 @@ export const up: slonik.Migration = async ({ context: { connection, sql } }) => 
 
   function generateLegacyCDNAccessToken(targetId: string): string {
     const encoder = new TextEncoder();
-    return createHmac('sha256', env.ENCRYPTION_SECRET)
+    return createHmac('sha256', env.CDN_AUTH_PRIVATE_KEY)
       .update(encoder.encode(targetId))
       .digest('base64');
   }

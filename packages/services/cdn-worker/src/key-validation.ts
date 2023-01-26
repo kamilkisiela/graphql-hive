@@ -100,65 +100,27 @@ const newIsKeyValidCheck = async (args: {
   let withCache = (isValid: boolean) => Promise.resolve(isValid);
 
   {
-    const requestCache = await args.getCache().catch(err => {
-      args.analytics.track(
-        {
-          type: 'new-key-validation',
-          value: {
-            type: 'cache-not-found',
-          },
-        },
-        args.targetId,
-      );
-
-      throw err;
-    });
+    const requestCache = await args.getCache();
 
     if (requestCache) {
-      let cacheKey: Request;
-
-      try {
-        cacheKey = new Request(
-          [
-            'https://key-cache.graphql-hive.com',
-            'legacy',
-            args.targetId,
-            encodeURIComponent(args.accessToken),
-          ].join('/'),
-          {
-            method: 'GET',
-          },
-        );
-      } catch (err) {
-        args.analytics.track(
-          {
-            type: 'new-key-validation',
-            value: {
-              type: 'cache-key-build-failure',
-            },
-          },
+      const cacheKey = new Request(
+        [
+          'https://key-cache.graphql-hive.com',
+          'legacy',
           args.targetId,
-        );
+          encodeURIComponent(args.accessToken),
+        ].join('/'),
+        {
+          method: 'GET',
+        },
+      );
 
-        throw err;
-      }
-
-      const response = await requestCache.match(cacheKey).catch(err => {
-        args.analytics.track(
-          {
-            type: 'new-key-validation',
-            value: {
-              type: 'cache-key-match-failure',
-            },
-          },
-          args.targetId,
-        );
-
-        throw err;
-      });
+      const response = await requestCache.match(cacheKey);
 
       if (response) {
-        const isValid = (await response.text()) === '1';
+        const responseValue = await response.text();
+
+        const isValid = responseValue === '1';
 
         args.analytics.track(
           {
@@ -207,58 +169,25 @@ const newIsKeyValidCheck = async (args: {
     }
   }
 
-  const key = await args.s3.client
-    .fetch([args.s3.endpoint, args.s3.bucketName, 'cdn-legacy-keys', args.targetId].join('/'), {
+  const key = await args.s3.client.fetch(
+    [args.s3.endpoint, args.s3.bucketName, 'cdn-legacy-keys', args.targetId].join('/'),
+    {
       method: 'GET',
-    })
-    .catch(err => {
-      args.analytics.track(
-        {
-          type: 'new-key-validation',
-          value: {
-            type: 's3-key-read-failure',
-            status: null,
-          },
-        },
-        args.targetId,
-      );
-
-      throw err;
-    });
+    },
+  );
 
   if (key.status !== 200) {
-    args.analytics.track(
-      {
-        type: 'new-key-validation',
-        value: {
-          type: 's3-key-read-failure',
-          status: key.status,
-        },
-      },
-      args.targetId,
-    );
-
     return withCache(false);
   }
 
-  const isValid = await bcrypt.compare(args.accessToken, await key.text()).catch(err => {
-    args.analytics.track(
-      {
-        type: 'new-key-validation',
-        value: {
-          type: 's3-key-compare-failure',
-        },
-      },
-      args.targetId,
-    );
-    throw err;
-  });
+  const isValid = await bcrypt.compare(args.accessToken, await key.text());
 
   args.analytics.track(
     {
       type: 'new-key-validation',
       value: {
-        type: 'success',
+        type: 's3-key-validation-success',
+        status: isValid ? 'success' : 'failure',
       },
     },
     args.targetId,

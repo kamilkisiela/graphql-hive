@@ -19,7 +19,7 @@ export function deployDbMigrations({
   dependencies,
   force,
   s3,
-  encryptionSecret,
+  cdnAuthPrivateKey,
 }: {
   deploymentEnv: DeploymentEnvironment;
   clickhouse: Clickhouse;
@@ -34,7 +34,7 @@ export function deployDbMigrations({
     endpoint: string | pulumi.Output<string>;
     bucketName: string | pulumi.Output<string>;
   };
-  encryptionSecret: string | pulumi.Output<string>;
+  cdnAuthPrivateKey: pulumi.Output<string>;
 }) {
   const rawConnectionString = apiConfig.requireSecret('postgresConnectionString');
   const connectionString = rawConnectionString.apply(rawConnectionString =>
@@ -67,7 +67,7 @@ export function deployDbMigrations({
         S3_SECRET_ACCESS_KEY: s3.secretAccessKey,
         S3_ENDPOINT: s3.endpoint,
         S3_BUCKET_NAME: s3.bucketName,
-        ENCRYPTION_SECRET: encryptionSecret,
+        CDN_AUTH_PRIVATE_KEY: cdnAuthPrivateKey,
         ...deploymentEnv,
         // Change to this env var will lead to force rerun of the migration job
         // Since K8s job are immutable, we can't edit or ask K8s to re-run a Job, so we are doing a
