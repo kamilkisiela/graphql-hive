@@ -45,9 +45,7 @@ export async function main() {
     host: env.redis.host,
     port: env.redis.port,
     password: env.redis.password,
-    retryStrategy(times) {
-      return Math.min(times * 500, 2000);
-    },
+    maxRetriesPerRequest: 20,
     db: 0,
     enableReadyCheck: false,
   });
@@ -147,8 +145,7 @@ export async function main() {
       method: ['GET', 'HEAD'],
       url: '/_readiness',
       handler(_, res) {
-        // TODO: let's what happens when status of redis is other than ready
-        const isReady = readiness() && redis?.status === 'ready';
+        const isReady = readiness();
         reportReadiness(isReady);
         void res.status(isReady ? 200 : 400).send();
       },

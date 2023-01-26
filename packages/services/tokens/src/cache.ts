@@ -1,6 +1,7 @@
 import type { FastifyLoggerInstance } from 'fastify';
-import type { Redis as RedisInstance } from 'ioredis';
+import type { Redis } from 'ioredis';
 import ms from 'ms';
+import LRU from 'tiny-lru';
 import { metrics } from '@hive/service-common';
 import { atomic, until, useActionTracker } from './helpers';
 import type { Storage, StorageItem } from './storage';
@@ -28,13 +29,58 @@ interface CacheStorage extends Omit<Storage, 'touchTokens'> {
   invalidateTokens(tokens: string[]): Promise<void>;
 }
 
+const TTL = {
+  notFound: 60, // seconds
+  found: 60 * 5, // 5 minutes
+};
+
+function useSafeRedis(redis: Redis, logger: FastifyLoggerInstance) {
+  const cache = LRU<string>(1000, TTL.notFound);
+
+  // Purge the cache when redis is ready (when it reconnects or when it starts)
+  redis.on('ready', () => {
+    cache.clear();
+  });
+
+  return {
+    async get(key: string) {
+      if (redis.status === 'ready') {
+        return redis.get(key);
+      }
+
+      logger.warn('Redis is not ready, skipping GET');
+      return cache.get(key);
+    },
+    async del(keys: string[]) {
+      for (const key of keys) {
+        cache.delete(key);
+      }
+
+      if (redis.status === 'ready') {
+        await redis.del(...keys);
+      } else {
+        logger.warn('Redis is not ready, skipping DEL');
+      }
+    },
+    async setex(key: string, ttl: number, value: string) {
+      cache.set(key, value);
+
+      if (redis.status === 'ready') {
+        await redis.setex(key, ttl, value);
+      } else {
+        logger.warn('Redis is not ready, skipping SETEX');
+      }
+    },
+  };
+}
+
 // Cache is a wrapper around the storage that adds a cache layer.
 // It also handles invalidation of the cache.
 // It also handles the "touch" logic to mark tokens as used and update the "lastUsedAt" column in PG.
 // Without the cache we would hit the DB for every request, with the cache we hit it only once (until a token is invalidated).
 export function useCache(
   storagePromise: Promise<Storage>,
-  redisConnection: RedisInstance | null,
+  redisInstance: Redis,
   logger: FastifyLoggerInstance,
 ): {
   start(): Promise<void>;
@@ -54,6 +100,7 @@ export function useCache(
   }
 
   const tracker = useActionTracker();
+  const redis = useSafeRedis(redisInstance, logger);
 
   async function create() {
     const storage = await storagePromise;
@@ -63,9 +110,7 @@ export function useCache(
     async function invalidateTokens(tokens: string[]) {
       cacheInvalidations.inc(1);
 
-      if (redisConnection) {
-        await redisConnection.del(...tokens.map(generateKey));
-      }
+      await redis.del(tokens.map(generateKey));
     }
 
     // Thanks to the `atomic` function, every call to this function will only be executed once and Promise will be shared.
@@ -73,13 +118,11 @@ export function useCache(
     const readTokenFromStorage = atomic(async function _readToken(token: string) {
       const item = await storage.readToken(token);
 
-      if (redisConnection) {
-        if (!item) {
-          // If the token doesn't exist in the DB we still want to cache it for a short period of time to avoid hitting the DB again and again.
-          await redisConnection.setex(generateKey(token), 60 /* seconds */, JSON.stringify(null));
-        } else {
-          await redisConnection.set(generateKey(token), JSON.stringify(item));
-        }
+      if (!item) {
+        // If the token doesn't exist in the DB we still want to cache it for a short period of time to avoid hitting the DB again and again.
+        await redis.setex(generateKey(token), TTL.notFound, JSON.stringify(null));
+      } else {
+        await redis.setex(generateKey(token), TTL.found, JSON.stringify(item));
       }
 
       return item;
@@ -90,7 +133,7 @@ export function useCache(
     const readTokenFromRedis = atomic(async function _readToken(
       hashed_token: string,
     ): Promise<StorageItem | null> {
-      const item = await redisConnection?.get(generateKey(hashed_token));
+      const item = await redis.get(generateKey(hashed_token));
 
       if (item === 'string') {
         return JSON.parse(item);
@@ -98,8 +141,6 @@ export function useCache(
 
       return null;
     });
-
-    // TODO: add a in-memory fallback cache (in case Redis is down)
 
     const cachedStorage: CacheStorage = {
       destroy() {
@@ -112,7 +153,6 @@ export function useCache(
         return storage.readTarget(target);
       },
       async readToken(hashed_token, res) {
-        // TODO: make sure we handle the case when redisConnection is null
         const cached = await readTokenFromRedis(hashed_token);
 
         if (cached) {
@@ -139,16 +179,11 @@ export function useCache(
       writeToken: tracker.wrap(async item => {
         logger.debug('Writing token (target=%s)', item.target);
         const result = await storage.writeToken(item);
-        if (redisConnection) {
-          await redisConnection.set(generateKey(result.token), JSON.stringify(result));
-        }
 
         return result;
       }),
       deleteToken: tracker.wrap(async hashed_token => {
-        if (redisConnection) {
-          await redisConnection.del(generateKey(hashed_token));
-        }
+        await redis.del([generateKey(hashed_token)]);
 
         return storage.deleteToken(hashed_token);
       }),
@@ -176,11 +211,14 @@ export function useCache(
       await (await cachedStoragePromise).destroy();
     }
 
+    // Wait for Redis to finish all the pending operations
+    await redisInstance.quit();
+
     process.exit(0);
   }
 
   function readiness() {
-    return started && !!redisConnection;
+    return started && (redisInstance.status === 'ready' || redisInstance.status === 'reconnecting');
   }
 
   return {
