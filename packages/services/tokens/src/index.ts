@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import Redis from 'ioredis';
 import ms from 'ms';
 import 'reflect-metadata';
 import LRU from 'tiny-lru';
@@ -40,12 +41,65 @@ export async function main() {
 
   const errorHandler = createErrorHandler(server);
 
+  const redis = new Redis({
+    host: env.redis.host,
+    port: env.redis.port,
+    password: env.redis.password,
+    retryStrategy(times) {
+      return Math.min(times * 500, 2000);
+    },
+    db: 0,
+    enableReadyCheck: false,
+  });
+
+  const { start, stop, readiness, getStorage } = useCache(
+    createStorage(env.postgres),
+    redis,
+    server.log,
+  );
+
+  const stopHeartbeats = env.heartbeat
+    ? startHeartbeats({
+        enabled: true,
+        endpoint: env.heartbeat.endpoint,
+        intervalInMS: 20_000,
+        onError: e => server.log.error(e, `Heartbeat failed with error`),
+        isReady: readiness,
+      })
+    : startHeartbeats({ enabled: false });
+
+  async function shutdown() {
+    stopHeartbeats();
+    await server.close();
+    await stop();
+  }
+
   try {
-    const { start, stop, readiness, getStorage } = useCache(
-      createStorage(env.postgres),
-      env.redis,
-      server.log,
-    );
+    redis.on('error', err => {
+      server.log.error(err, 'Redis connection error');
+    });
+
+    redis.on('connect', () => {
+      server.log.info('Redis connection established');
+    });
+
+    redis.on('ready', () => {
+      server.log.info('Redis connection ready... ');
+    });
+
+    redis.on('close', () => {
+      server.log.info('Redis connection closed');
+    });
+
+    redis.on('reconnecting', timeToReconnect => {
+      server.log.info('Redis reconnecting in %s', timeToReconnect);
+    });
+
+    redis.on('end', async () => {
+      server.log.info('Redis ended - no more reconnections will be made');
+      await shutdown();
+    });
+
     const tokenReadFailuresCache = LRU<
       | {
           type: 'error';
@@ -60,23 +114,9 @@ export async function main() {
     // Cache failures for 1 minute
     const errorCachingInterval = ms('1m');
 
-    const stopHeartbeats = env.heartbeat
-      ? startHeartbeats({
-          enabled: true,
-          endpoint: env.heartbeat.endpoint,
-          intervalInMS: 20_000,
-          onError: e => server.log.error(e, `Heartbeat failed with error`),
-          isReady: readiness,
-        })
-      : startHeartbeats({ enabled: false });
-
     registerShutdown({
       logger: server.log,
-      async onShutdown() {
-        stopHeartbeats();
-        await server.close();
-        await stop();
-      },
+      onShutdown: shutdown,
     });
 
     await server.register(fastifyTRPCPlugin, {
@@ -98,7 +138,7 @@ export async function main() {
     server.route({
       method: ['GET', 'HEAD'],
       url: '/_health',
-      handler(req, res) {
+      handler(_req, res) {
         void res.status(200).send();
       },
     });
@@ -107,7 +147,8 @@ export async function main() {
       method: ['GET', 'HEAD'],
       url: '/_readiness',
       handler(_, res) {
-        const isReady = readiness();
+        // TODO: let's what happens when status of redis is other than ready
+        const isReady = readiness() && redis?.status === 'ready';
         reportReadiness(isReady);
         void res.status(isReady ? 200 : 400).send();
       },

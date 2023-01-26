@@ -1,5 +1,5 @@
 import type { FastifyLoggerInstance } from 'fastify';
-import Redis, { Redis as RedisInstance } from 'ioredis';
+import type { Redis as RedisInstance } from 'ioredis';
 import ms from 'ms';
 import { metrics } from '@hive/service-common';
 import { atomic, until, useActionTracker } from './helpers';
@@ -34,11 +34,7 @@ interface CacheStorage extends Omit<Storage, 'touchTokens'> {
 // Without the cache we would hit the DB for every request, with the cache we hit it only once (until a token is invalidated).
 export function useCache(
   storagePromise: Promise<Storage>,
-  redisConfig: {
-    host: string;
-    port: number;
-    password?: string;
-  },
+  redisConnection: RedisInstance | null,
   logger: FastifyLoggerInstance,
 ): {
   start(): Promise<void>;
@@ -48,7 +44,6 @@ export function useCache(
 } {
   let started = false;
   let cachedStoragePromise: Promise<CacheStorage> | null = null;
-  let redisConnection: RedisInstance | null;
 
   function getStorage() {
     if (!cachedStoragePromise) {
@@ -63,42 +58,6 @@ export function useCache(
   async function create() {
     const storage = await storagePromise;
     const touch = useTokenTouchScheduler(storage, logger);
-
-    redisConnection = new Redis({
-      host: redisConfig.host,
-      port: redisConfig.port,
-      password: redisConfig.password,
-      retryStrategy(times) {
-        return Math.min(times * 500, 2000);
-      },
-      db: 0,
-      enableReadyCheck: false,
-    });
-
-    redisConnection.on('error', err => {
-      logger.error(err, 'Redis connection error');
-    });
-
-    redisConnection.on('connect', () => {
-      logger.info('Redis connection established');
-    });
-
-    redisConnection.on('ready', async () => {
-      logger.info('Redis connection ready... ');
-    });
-
-    redisConnection.on('close', () => {
-      logger.info('Redis connection closed');
-    });
-
-    redisConnection.on('reconnecting', timeToReconnect => {
-      logger.info('Redis reconnecting in %s', timeToReconnect);
-    });
-
-    redisConnection.on('end', async () => {
-      logger.info('Redis ended - no more reconnections will be made');
-      await stop();
-    });
 
     // When there's a new token or a token was removed we need to invalidate the cache
     async function invalidateTokens(tokens: string[]) {
