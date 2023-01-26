@@ -3,7 +3,6 @@ import * as k8s from '@pulumi/kubernetes';
 import * as pulumi from '@pulumi/pulumi';
 import { Output } from '@pulumi/pulumi';
 import { DeploymentEnvironment } from '../types';
-import { isProduction } from '../utils/helpers';
 import { serviceLocalEndpoint } from '../utils/local-endpoint';
 import { ServiceDeployment } from '../utils/service-deployment';
 import { StripeBillingService } from './billing';
@@ -90,7 +89,7 @@ export function deployGraphQL({
     {
       imagePullSecret,
       image,
-      replicas: isProduction(deploymentEnv) ? 2 : 1,
+      replicas: 2,
       pdb: true,
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',

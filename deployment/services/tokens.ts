@@ -4,6 +4,7 @@ import * as pulumi from '@pulumi/pulumi';
 import { DeploymentEnvironment } from '../types';
 import { ServiceDeployment } from '../utils/service-deployment';
 import { DbMigrations } from './db-migrations';
+import { Redis } from './redis';
 
 const commonConfig = new pulumi.Config('common');
 const apiConfig = new pulumi.Config('api');
@@ -14,6 +15,7 @@ export type Tokens = ReturnType<typeof deployTokens>;
 export function deployTokens({
   deploymentEnv,
   dbMigrations,
+  redis,
   heartbeat,
   image,
   release,
@@ -23,6 +25,7 @@ export function deployTokens({
   release: string;
   deploymentEnv: DeploymentEnvironment;
   dbMigrations: DbMigrations;
+  redis: Redis;
   heartbeat?: string;
   imagePullSecret: k8s.core.v1.Secret;
 }) {
@@ -38,6 +41,7 @@ export function deployTokens({
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
       exposesMetrics: true,
+      replicas: 2,
       image,
       env: {
         ...deploymentEnv,
@@ -49,6 +53,9 @@ export function deployTokens({
         POSTGRES_USER: connectionString.apply(connection => connection.user ?? ''),
         POSTGRES_DB: connectionString.apply(connection => connection.database ?? ''),
         POSTGRES_SSL: connectionString.apply(connection => (connection.ssl ? '1' : '0')),
+        REDIS_HOST: redis.config.host,
+        REDIS_PORT: String(redis.config.port),
+        REDIS_PASSWORD: redis.config.password,
         RELEASE: release,
         HEARTBEAT_ENDPOINT: heartbeat ?? '',
       },

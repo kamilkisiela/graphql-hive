@@ -122,6 +122,7 @@ const tokensApi = deployTokens({
   release: imagesTag,
   deploymentEnv,
   dbMigrations,
+  redis: redisApi,
   heartbeat: heartbeatsConfig.get('tokens'),
   imagePullSecret,
 });
