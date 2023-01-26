@@ -329,7 +329,7 @@ export async function main() {
       const artifactStorageReader = new ArtifactStorageReader(s3, env.s3.publicUrl);
 
       const artifactHandler = createArtifactRequestHandler({
-        isKeyValid: createIsKeyValid({ keyData: env.cdn.authPrivateKey }),
+        isKeyValid: createIsKeyValid({ s3, analytics: null, getCache: null, waitUntil: null }),
         async getArtifactAction(targetId, artifactType, eTag) {
           return artifactStorageReader.generateArtifactReadUrl(targetId, artifactType, eTag);
         },

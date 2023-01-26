@@ -30,11 +30,6 @@ const artifactStorageReader = new ArtifactStorageReader(s3, null);
  */
 declare let HIVE_DATA: KVNamespace;
 
-/**
- * Secret used to sign the CDN keys
- */
-declare let KEY_DATA: string;
-
 declare let SENTRY_DSN: string;
 /**
  * Name of the environment, e.g. staging, production
@@ -66,7 +61,6 @@ const analytics = createAnalytics({
 
 self.addEventListener('fetch', async (event: FetchEvent) => {
   const isKeyValid = createIsKeyValid({
-    keyData: KEY_DATA,
     waitUntil: p => event.waitUntil(p),
     getCache: () => caches.open('artifacts-auth'),
     s3,

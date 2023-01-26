@@ -36,20 +36,15 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4010;
 // @ts-ignore
 declare let HIVE_DATA: KVNamespace;
 
-/**
- * Secret used to sign the CDN keys
- */
-declare let KEY_DATA: string;
-
 const handleRequest = createRequestHandler({
   getRawStoreValue: value => HIVE_DATA.get(value),
-  isKeyValid: createIsKeyValid({ keyData: KEY_DATA }),
+  isKeyValid: createIsKeyValid({ s3, getCache: null, waitUntil: null, analytics: null }),
 });
 
 const artifactStorageReader = new ArtifactStorageReader(s3, S3_PUBLIC_URL);
 
 const handleArtifactRequest = createArtifactRequestHandler({
-  isKeyValid: createIsKeyValid({ keyData: KEY_DATA }),
+  isKeyValid: createIsKeyValid({ s3, getCache: null, waitUntil: null, analytics: null }),
   async getArtifactAction(targetId, artifactType, eTag) {
     return artifactStorageReader.generateArtifactReadUrl(targetId, artifactType, eTag);
   },
