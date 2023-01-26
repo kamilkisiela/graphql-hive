@@ -109,7 +109,10 @@
   },
   "pnpm": {
     "overrides": {
-      "@trivago/prettier-plugin-sort-imports>@babel/parser": "^7.20.7"
+      "@trivago/prettier-plugin-sort-imports>@babel/parser": "^7.20.7",
+      "@whatwg-node/fetch": "0.6.3-alpha-20230126122900-db01245",
+      "@whatwg-node/router": "0.1.8-alpha-20230126122900-db01245",
+      "@whatwg-node/server": "0.5.9-alpha-20230126122900-db01245"
     },
     "patchedDependencies": {
       "@tgriesser/schemats@7.0.1": "patches/@tgriesser__schemats@7.0.1.patch",
