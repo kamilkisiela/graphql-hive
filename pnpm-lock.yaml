@@ -384,8 +384,8 @@ importers:
       '@hive/tokens': workspace:*
       '@hive/webhooks': workspace:*
       '@octokit/app': 13.1.2
-      '@sentry/node': 7.32.1
-      '@sentry/types': 7.32.1
+      '@sentry/node': 7.34.0
+      '@sentry/types': 7.34.0
       '@slack/web-api': 6.8.0
       '@theguild/buddy': 0.1.0
       '@trpc/client': 10.9.0
@@ -418,8 +418,8 @@ importers:
       '@aws-sdk/s3-request-presigner': 3.258.0
       '@graphql-inspector/core': 3.4.0_tu4s2cjheabese6hdiqk5i3mii
       '@octokit/app': 13.1.2
-      '@sentry/node': 7.32.1
-      '@sentry/types': 7.32.1
+      '@sentry/node': 7.34.0
+      '@sentry/types': 7.34.0
       '@slack/web-api': 6.8.0
       '@theguild/buddy': 0.1.0_ryylgra5xglhidfoiaxehn22hq
       '@trpc/client': 10.9.0_@trpc+server@10.9.0
@@ -513,7 +513,7 @@ importers:
   packages/services/emails:
     specifiers:
       '@hive/service-common': workspace:*
-      '@sentry/node': 7.32.1
+      '@sentry/node': 7.34.0
       '@trpc/server': 10.9.0
       '@types/mjml': 4.7.0
       '@types/nodemailer': 6.4.7
@@ -531,7 +531,7 @@ importers:
       tslib: 2.4.1
       zod: 3.20.2
     dependencies:
-      '@sentry/node': 7.32.1
+      '@sentry/node': 7.34.0
       '@trpc/server': 10.9.0
       '@whatwg-node/fetch': 0.6.2
       bullmq: 3.5.10_xbmkiyyfti7h6orsfs6pdmi4s4
@@ -583,8 +583,8 @@ importers:
       '@hive/emails': workspace:*
       '@hive/service-common': workspace:*
       '@hive/storage': workspace:*
-      '@sentry/node': 7.32.1
-      '@sentry/tracing': 7.32.1
+      '@sentry/node': 7.34.0
+      '@sentry/tracing': 7.34.0
       '@trpc/client': 10.9.0
       '@trpc/server': 10.9.0
       '@whatwg-node/fetch': 0.6.2
@@ -596,8 +596,8 @@ importers:
       tslib: 2.4.1
       zod: 3.20.2
     dependencies:
-      '@sentry/node': 7.32.1
-      '@sentry/tracing': 7.32.1
+      '@sentry/node': 7.34.0
+      '@sentry/tracing': 7.34.0
       '@trpc/client': 10.9.0_@trpc+server@10.9.0
       '@trpc/server': 10.9.0
       '@whatwg-node/fetch': 0.6.2
@@ -620,8 +620,8 @@ importers:
       '@graphql-tools/stitch': 8.7.36
       '@graphql-tools/stitching-directives': 2.3.25
       '@hive/service-common': workspace:*
-      '@sentry/node': 7.32.1
-      '@sentry/tracing': 7.32.1
+      '@sentry/node': 7.34.0
+      '@sentry/tracing': 7.34.0
       '@trpc/server': 10.9.0
       '@types/async-retry': 1.4.5
       '@whatwg-node/fetch': 0.6.2
@@ -636,8 +636,8 @@ importers:
       '@apollo/federation': 0.38.1_graphql@16.6.0
       '@graphql-tools/stitch': 8.7.36_graphql@16.6.0
       '@graphql-tools/stitching-directives': 2.3.25_graphql@16.6.0
-      '@sentry/node': 7.32.1
-      '@sentry/tracing': 7.32.1
+      '@sentry/node': 7.34.0
+      '@sentry/tracing': 7.34.0
       '@trpc/server': 10.9.0
       '@whatwg-node/fetch': 0.6.2
       async-retry: 1.3.3
@@ -668,9 +668,9 @@ importers:
       '@hive/cdn-script': workspace:*
       '@hive/service-common': workspace:*
       '@hive/storage': workspace:*
-      '@sentry/integrations': 7.32.1
-      '@sentry/node': 7.32.1
-      '@sentry/tracing': 7.32.1
+      '@sentry/integrations': 7.34.0
+      '@sentry/node': 7.34.0
+      '@sentry/tracing': 7.34.0
       '@swc/core': 1.3.28
       '@trpc/server': 10.9.0
       '@whatwg-node/fetch': 0.6.2
@@ -690,15 +690,15 @@ importers:
       '@envelop/core': 3.0.4
       '@envelop/generic-auth': 5.0.4_a6sekiasy2tqr6d5gj7n2wtjli
       '@envelop/graphql-modules': 4.0.4_a6sekiasy2tqr6d5gj7n2wtjli
-      '@envelop/sentry': 5.0.0_t3ooi56ggxz5sch4lrxliw4n7a
+      '@envelop/sentry': 5.0.0_x3se4sgwcoxccgxhkd7vlku5ty
       '@envelop/types': 3.0.1
       '@escape.tech/graphql-armor-max-aliases': 1.6.1
       '@escape.tech/graphql-armor-max-depth': 1.8.1
       '@escape.tech/graphql-armor-max-directives': 1.6.1
       '@escape.tech/graphql-armor-max-tokens': 1.3.1
-      '@sentry/integrations': 7.32.1
-      '@sentry/node': 7.32.1
-      '@sentry/tracing': 7.32.1
+      '@sentry/integrations': 7.34.0
+      '@sentry/node': 7.34.0
+      '@sentry/tracing': 7.34.0
       '@trpc/server': 10.9.0
       '@whatwg-node/fetch': 0.6.2
       '@whatwg-node/server': 0.5.8
@@ -723,10 +723,10 @@ importers:
 
   packages/services/service-common:
     specifiers:
-      '@sentry/node': 7.32.1
-      '@sentry/tracing': 7.32.1
-      '@sentry/types': 7.32.1
-      '@sentry/utils': 7.32.1
+      '@sentry/node': 7.34.0
+      '@sentry/tracing': 7.34.0
+      '@sentry/types': 7.34.0
+      '@sentry/utils': 7.34.0
       '@whatwg-node/fetch': 0.6.2
       fastify: 3.29.5
       fastify-cors: 6.0.2
@@ -741,15 +741,15 @@ importers:
       prom-client: 14.1.1
       zod: 3.20.2
     devDependencies:
-      '@sentry/node': 7.32.1
-      '@sentry/tracing': 7.32.1
-      '@sentry/types': 7.32.1
-      '@sentry/utils': 7.32.1
+      '@sentry/node': 7.34.0
+      '@sentry/tracing': 7.34.0
+      '@sentry/types': 7.34.0
+      '@sentry/utils': 7.34.0
 
   packages/services/storage:
     specifiers:
-      '@sentry/node': 7.32.1
-      '@sentry/types': 7.32.1
+      '@sentry/node': 7.34.0
+      '@sentry/types': 7.34.0
       '@tgriesser/schemats': 7.0.1
       '@theguild/buddy': 0.1.0
       '@types/node': 18.11.18
@@ -765,7 +765,7 @@ importers:
       typescript: 4.9.4
       zod: 3.20.2
     dependencies:
-      '@sentry/node': 7.32.1
+      '@sentry/node': 7.34.0
       '@theguild/buddy': 0.1.0_ryylgra5xglhidfoiaxehn22hq
       dotenv: 16.0.3
       got: 12.5.3
@@ -775,7 +775,7 @@ importers:
       slonik-utilities: 1.9.4_slonik@30.1.2
       zod: 3.20.2
     devDependencies:
-      '@sentry/types': 7.32.1
+      '@sentry/types': 7.34.0
       '@tgriesser/schemats': 7.0.1_u3kbucfchakklx3sci2vh6wjau
       '@types/node': 18.11.18
       '@types/pg': 8.6.6
@@ -787,8 +787,8 @@ importers:
     specifiers:
       '@hive/service-common': workspace:*
       '@hive/storage': workspace:*
-      '@sentry/node': 7.32.1
-      '@sentry/tracing': 7.32.1
+      '@sentry/node': 7.34.0
+      '@sentry/tracing': 7.34.0
       '@trpc/client': 10.9.0
       '@trpc/server': 10.9.0
       '@whatwg-node/fetch': 0.6.2
@@ -800,8 +800,8 @@ importers:
       stripe: 11.7.0
       zod: 3.20.2
     dependencies:
-      '@sentry/node': 7.32.1
-      '@sentry/tracing': 7.32.1
+      '@sentry/node': 7.34.0
+      '@sentry/tracing': 7.34.0
       '@trpc/client': 10.9.0_@trpc+server@10.9.0
       '@trpc/server': 10.9.0
       '@whatwg-node/fetch': 0.6.2
@@ -820,8 +820,8 @@ importers:
     specifiers:
       '@hive/service-common': workspace:*
       '@hive/storage': workspace:*
-      '@sentry/node': 7.32.1
-      '@sentry/tracing': 7.32.1
+      '@sentry/node': 7.34.0
+      '@sentry/tracing': 7.34.0
       '@trpc/server': 10.9.0
       '@types/ms': 0.7.31
       dotenv: 16.0.3
@@ -835,8 +835,8 @@ importers:
       tslib: 2.4.1
       zod: 3.20.2
     dependencies:
-      '@sentry/node': 7.32.1
-      '@sentry/tracing': 7.32.1
+      '@sentry/node': 7.34.0
+      '@sentry/tracing': 7.34.0
       '@trpc/server': 10.9.0
       dotenv: 16.0.3
       ioredis: 5.2.5
@@ -858,8 +858,8 @@ importers:
       '@hive/service-common': workspace:*
       '@hive/tokens': workspace:*
       '@hive/usage-common': workspace:*
-      '@sentry/node': 7.32.1
-      '@sentry/tracing': 7.32.1
+      '@sentry/node': 7.34.0
+      '@sentry/tracing': 7.34.0
       '@trpc/client': 10.9.0
       '@trpc/server': 10.9.0
       '@whatwg-node/fetch': 0.6.2
@@ -872,8 +872,8 @@ importers:
       tiny-lru: 8.0.2
       zod: 3.20.2
     dependencies:
-      '@sentry/node': 7.32.1
-      '@sentry/tracing': 7.32.1
+      '@sentry/node': 7.34.0
+      '@sentry/tracing': 7.34.0
       '@trpc/client': 10.9.0_@trpc+server@10.9.0
       '@trpc/server': 10.9.0
       '@whatwg-node/fetch': 0.6.2
@@ -900,8 +900,8 @@ importers:
     specifiers:
       '@hive/api': workspace:*
       '@hive/service-common': workspace:*
-      '@sentry/node': 7.32.1
-      '@sentry/tracing': 7.32.1
+      '@sentry/node': 7.34.0
+      '@sentry/tracing': 7.34.0
       '@trpc/server': 10.9.0
       '@whatwg-node/fetch': 0.6.2
       dotenv: 16.0.3
@@ -911,8 +911,8 @@ importers:
       tslib: 2.4.1
       zod: 3.20.2
     dependencies:
-      '@sentry/node': 7.32.1
-      '@sentry/tracing': 7.32.1
+      '@sentry/node': 7.34.0
+      '@sentry/tracing': 7.34.0
       '@trpc/server': 10.9.0
       '@whatwg-node/fetch': 0.6.2
       dotenv: 16.0.3
@@ -930,8 +930,8 @@ importers:
       '@graphql-hive/core': 0.2.3
       '@hive/service-common': workspace:*
       '@hive/usage-common': workspace:*
-      '@sentry/node': 7.32.1
-      '@sentry/tracing': 7.32.1
+      '@sentry/node': 7.34.0
+      '@sentry/tracing': 7.34.0
       agentkeepalive: 4.2.1
       date-fns: 2.29.3
       dotenv: 16.0.3
@@ -943,8 +943,8 @@ importers:
       tslib: 2.4.1
       zod: 3.20.2
     dependencies:
-      '@sentry/node': 7.32.1
-      '@sentry/tracing': 7.32.1
+      '@sentry/node': 7.34.0
+      '@sentry/tracing': 7.34.0
       agentkeepalive: 4.2.1
       date-fns: 2.29.3
       dotenv: 16.0.3
@@ -963,8 +963,8 @@ importers:
   packages/services/webhooks:
     specifiers:
       '@hive/service-common': workspace:*
-      '@sentry/node': 7.32.1
-      '@sentry/tracing': 7.32.1
+      '@sentry/node': 7.34.0
+      '@sentry/tracing': 7.34.0
       '@trpc/server': 10.9.0
       bullmq: 3.5.10
       copyfiles: 2.4.1
@@ -976,8 +976,8 @@ importers:
       tslib: 2.4.1
       zod: 3.20.2
     dependencies:
-      '@sentry/node': 7.32.1
-      '@sentry/tracing': 7.32.1
+      '@sentry/node': 7.34.0
+      '@sentry/tracing': 7.34.0
       '@trpc/server': 10.9.0
       bullmq: 3.5.10_xbmkiyyfti7h6orsfs6pdmi4s4
       dotenv: 16.0.3
@@ -1020,8 +1020,8 @@ importers:
       '@radix-ui/react-tabs': 0.1.5
       '@radix-ui/react-toggle-group': 0.1.5
       '@radix-ui/react-toolbar': 0.1.5
-      '@sentry/nextjs': 7.32.1
-      '@sentry/types': 7.32.1
+      '@sentry/nextjs': 7.34.0
+      '@sentry/types': 7.34.0
       '@stripe/react-stripe-js': 1.16.4
       '@stripe/stripe-js': 1.46.0
       '@tailwindcss/line-clamp': 0.4.2
@@ -1110,8 +1110,8 @@ importers:
       '@radix-ui/react-tabs': 0.1.5_react@18.2.0
       '@radix-ui/react-toggle-group': 0.1.5_react@18.2.0
       '@radix-ui/react-toolbar': 0.1.5_react@18.2.0
-      '@sentry/nextjs': 7.32.1_next@13.1.1+react@18.2.0
-      '@sentry/types': 7.32.1
+      '@sentry/nextjs': 7.34.0_next@13.1.1+react@18.2.0
+      '@sentry/types': 7.34.0
       '@stripe/react-stripe-js': 1.16.4_keartrz7uyerl3wkpjpue4xbhy
       '@stripe/stripe-js': 1.46.0
       '@tanstack/react-table': 8.0.0-beta.8_biqbaboplfbrettd7655fr4n2y
@@ -5631,7 +5631,7 @@ packages:
       tslib: 2.4.1
     dev: false
 
-  /@envelop/sentry/5.0.0_t3ooi56ggxz5sch4lrxliw4n7a:
+  /@envelop/sentry/5.0.0_x3se4sgwcoxccgxhkd7vlku5ty:
     resolution: {integrity: sha512-LSgfyH9A5A7nJWlZQFVQscKN5GCMJf+FN51gNKUzxVb4CT4/46gpg53v0L23FFq6NpQ+llG0KyFqh1EofNz1Uw==}
     peerDependencies:
       '@envelop/core': ^3.0.4
@@ -5639,7 +5639,7 @@ packages:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
       '@envelop/core': 3.0.4
-      '@sentry/node': 7.32.1
+      '@sentry/node': 7.34.0
       graphql: 16.6.0
       tslib: 2.4.1
     dev: false
@@ -10621,14 +10621,14 @@ packages:
       string-argv: 0.3.1
     dev: false
 
-  /@sentry/browser/7.32.1:
-    resolution: {integrity: sha512-w2Ay8Y28maboyA/pgNRhNxCth0pCYsJ7co5oLVAGptjOFudeihD4Bx2wthz6sfk9DpxzqtUIGa54edcniyk14g==}
+  /@sentry/browser/7.34.0:
+    resolution: {integrity: sha512-5Jmjj0DLxx+31o12T+VH4U+gO7wz3L+ftjuTxcQaC8GeFVe5qCyXZoDmWKNV9NEyREiZ3azV62bJc5wojZrIIg==}
     engines: {node: '>=8'}
     dependencies:
-      '@sentry/core': 7.32.1
-      '@sentry/replay': 7.32.1
-      '@sentry/types': 7.32.1
-      '@sentry/utils': 7.32.1
+      '@sentry/core': 7.34.0
+      '@sentry/replay': 7.34.0
+      '@sentry/types': 7.34.0
+      '@sentry/utils': 7.34.0
       tslib: 1.14.1
     dev: false
 
@@ -10677,12 +10677,12 @@ packages:
       tslib: 1.14.1
     dev: false
 
-  /@sentry/core/7.32.1:
-    resolution: {integrity: sha512-WHCFdlvK+YiGPjjmwLLvueH7zMYxLgNl0esCQUrqoTHhZ4asIV8k3/5OXgUi4kV2DW+NjzhmtK3qKeWZxgitfw==}
+  /@sentry/core/7.34.0:
+    resolution: {integrity: sha512-J1oxsYZX1N0tkEcaHt/uuDqk6zOnaivyampp+EvBsUMCdemjg7rwKvawlRB0ZtBEQu3HAhi8zecm03mlpWfCDw==}
     engines: {node: '>=8'}
     dependencies:
-      '@sentry/types': 7.32.1
-      '@sentry/utils': 7.32.1
+      '@sentry/types': 7.34.0
+      '@sentry/utils': 7.34.0
       tslib: 1.14.1
 
   /@sentry/hub/6.19.6:
@@ -10694,12 +10694,12 @@ packages:
       tslib: 1.14.1
     dev: false
 
-  /@sentry/integrations/7.32.1:
-    resolution: {integrity: sha512-FYu+wQc6sjKQelqgfGA1NFB+lnOmvY64I2MiygYVQZSMQ35wzg2MlJnzJcbGNmJEIvveyv0N2CFMS5m4K8YPYw==}
+  /@sentry/integrations/7.34.0:
+    resolution: {integrity: sha512-xbWnTvG4gkKeCVpmhhdPtMbQkPO0RAfEJ8VPO5TWmUMT23ZWy2kE0gTZHtnBopy7AXxg231XxTi4fxnwgQGxEQ==}
     engines: {node: '>=8'}
     dependencies:
-      '@sentry/types': 7.32.1
-      '@sentry/utils': 7.32.1
+      '@sentry/types': 7.34.0
+      '@sentry/utils': 7.34.0
       localforage: 1.10.0
       tslib: 1.14.1
     dev: false
@@ -10713,8 +10713,8 @@ packages:
       tslib: 1.14.1
     dev: false
 
-  /@sentry/nextjs/7.32.1_next@13.1.1+react@18.2.0:
-    resolution: {integrity: sha512-rB2F6/sJ1RSlK5U/Wc2TN6Hkcxf5D59YzeYQEFCjUhhigLT6vr6I7xcOADtwMlaArZHQuIDsaRb2qMVmW9uQwg==}
+  /@sentry/nextjs/7.34.0_next@13.1.1+react@18.2.0:
+    resolution: {integrity: sha512-vXtlpONIDU2kT2eA5STLBuGvw5njM7K/7IqjvvkwTwYUpKWs7xZvp7NeHAHpH6LkDSBljokS45fnvfMijEqN7A==}
     engines: {node: '>=8'}
     peerDependencies:
       next: ^10.0.8 || ^11.0 || ^12.0 || ^13.0
@@ -10725,13 +10725,13 @@ packages:
         optional: true
     dependencies:
       '@rollup/plugin-commonjs': 24.0.0_rollup@2.78.0
-      '@sentry/core': 7.32.1
-      '@sentry/integrations': 7.32.1
-      '@sentry/node': 7.32.1
-      '@sentry/react': 7.32.1_react@18.2.0
-      '@sentry/tracing': 7.32.1
-      '@sentry/types': 7.32.1
-      '@sentry/utils': 7.32.1
+      '@sentry/core': 7.34.0
+      '@sentry/integrations': 7.34.0
+      '@sentry/node': 7.34.0
+      '@sentry/react': 7.34.0_react@18.2.0
+      '@sentry/tracing': 7.34.0
+      '@sentry/types': 7.34.0
+      '@sentry/utils': 7.34.0
       '@sentry/webpack-plugin': 1.20.0
       chalk: 3.0.0
       next: 13.1.1_biqbaboplfbrettd7655fr4n2y
@@ -10743,13 +10743,13 @@ packages:
       - supports-color
     dev: false
 
-  /@sentry/node/7.32.1:
-    resolution: {integrity: sha512-wHC3hZzirYLeT2CB6co4PE9og3aVEqUyKi4YUsFKxigWyftIzkWyuQag4DNStlUpaBI1uFusBmhp87J0ZC6PQA==}
+  /@sentry/node/7.34.0:
+    resolution: {integrity: sha512-VM4XeydRdgeaNTRe8kwqYg2oNPddVyY74PlCFEFnPEN1NccycNuwiFno68kNrApeqxxLlTTmzkJy0BWo16x2Yg==}
     engines: {node: '>=8'}
     dependencies:
-      '@sentry/core': 7.32.1
-      '@sentry/types': 7.32.1
-      '@sentry/utils': 7.32.1
+      '@sentry/core': 7.34.0
+      '@sentry/types': 7.34.0
+      '@sentry/utils': 7.34.0
       cookie: 0.4.2
       https-proxy-agent: 5.0.1
       lru_map: 0.3.3
@@ -10757,36 +10757,36 @@ packages:
     transitivePeerDependencies:
       - supports-color
 
-  /@sentry/react/7.32.1_react@18.2.0:
-    resolution: {integrity: sha512-DeI5N0nTn4tc1/4+ZeiSyGoMBYsYTqoRBn8F/UBMNIMseBh4/6d85QX6HyyrZi0o/N9jzMq0mnxJNJlNaicHfQ==}
+  /@sentry/react/7.34.0_react@18.2.0:
+    resolution: {integrity: sha512-vdonnZK9R8xyEBDaXNofHyoqy9biNRvlKrQXZp4x8WlYcBCwbU46qxZlSVsxa89pm7yUYS+KHq8cYL801+weqg==}
     engines: {node: '>=8'}
     peerDependencies:
       react: 15.x || 16.x || 17.x || 18.x
     dependencies:
-      '@sentry/browser': 7.32.1
-      '@sentry/types': 7.32.1
-      '@sentry/utils': 7.32.1
+      '@sentry/browser': 7.34.0
+      '@sentry/types': 7.34.0
+      '@sentry/utils': 7.34.0
       hoist-non-react-statics: 3.3.2
       react: 18.2.0
       tslib: 1.14.1
     dev: false
 
-  /@sentry/replay/7.32.1:
-    resolution: {integrity: sha512-nRy2upcZecRveMCatyeukNQQH39/9lSF/j6PhWTRyHcam5bvOb2d2mM0TiIfvYxNM1ePb+9SvX1W0qqpmvqyGA==}
+  /@sentry/replay/7.34.0:
+    resolution: {integrity: sha512-4L4YZfWt8mcVNcI99RxHORPb308URI1R9xsFj97fagk0ATjexLKr5QCA2ApnKaSn8Q0q1Zdzd4XmFtW9anU45Q==}
     engines: {node: '>=12'}
     dependencies:
-      '@sentry/core': 7.32.1
-      '@sentry/types': 7.32.1
-      '@sentry/utils': 7.32.1
+      '@sentry/core': 7.34.0
+      '@sentry/types': 7.34.0
+      '@sentry/utils': 7.34.0
     dev: false
 
-  /@sentry/tracing/7.32.1:
-    resolution: {integrity: sha512-MG67+DzsbEM0p7+g/H5DQqsjFCXkvF50gK2+8EpfO6N2uqYpELPMIeTkERtMiqjhkDZ11bokWKE33CvA/TEF5Q==}
+  /@sentry/tracing/7.34.0:
+    resolution: {integrity: sha512-JtfSWBfcWslfIujcpGEPF5oOiAOCd5shMoWYrdTvCfruHhYjp4w5kv/ndkvq2EpFkcQYhdmtQEytXEO8IJIqRw==}
     engines: {node: '>=8'}
     dependencies:
-      '@sentry/core': 7.32.1
-      '@sentry/types': 7.32.1
-      '@sentry/utils': 7.32.1
+      '@sentry/core': 7.34.0
+      '@sentry/types': 7.34.0
+      '@sentry/utils': 7.34.0
       tslib: 1.14.1
 
   /@sentry/types/6.19.6:
@@ -10794,8 +10794,8 @@ packages:
     engines: {node: '>=6'}
     dev: false
 
-  /@sentry/types/7.32.1:
-    resolution: {integrity: sha512-yWS5no9Xxftgb6IGjj7iK6TvOk6rfy2H5gKcj4DrPqSWKmh0jfszUoX4B+olkt7H75sTSQqv3yiuMsySsMh+6Q==}
+  /@sentry/types/7.34.0:
+    resolution: {integrity: sha512-K+OeHIrl35PSYn6Zwqe4b8WWyAJQoI5NeWxHVkM7oQTGJ1YLG4BvLsR+UiUXnKdR5krE4EDtEA5jLsDlBEyPvw==}
     engines: {node: '>=8'}
 
   /@sentry/utils/6.19.6:
@@ -10806,11 +10806,11 @@ packages:
       tslib: 1.14.1
     dev: false
 
-  /@sentry/utils/7.32.1:
-    resolution: {integrity: sha512-kZVpqRTC+UiI/PlSxEuv0G5G0lZeTZTL/pyRb8sptLhFo7QxEaGO/XCDNzWC4vQdm5PrpCVZ6w/XCYCHEhx4Tw==}
+  /@sentry/utils/7.34.0:
+    resolution: {integrity: sha512-VIHHXEBw0htzqxnU8A7WkXKvmsG2pZVqHlAn0H9W/yyFQtXMuP1j1i0NsjADB/3JXUKK83kTNWGzScXvp0o+Jg==}
     engines: {node: '>=8'}
     dependencies:
-      '@sentry/types': 7.32.1
+      '@sentry/types': 7.34.0
       tslib: 1.14.1
 
   /@sentry/webpack-plugin/1.20.0:
