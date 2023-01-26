@@ -30,20 +30,38 @@ interface CacheStorage extends Omit<Storage, 'touchTokens'> {
 }
 
 const TTL = {
+  /**
+   * TTL for tokens that don't exist in the DB.
+   */
   notFound: 60, // seconds
+  /**
+   * TTL for tokens that exist in the DB.
+   */
   found: 60 * 5, // 5 minutes
+  /**
+   * TTL for tokens in the in-memory cache.
+   * Helps to reduce the traffic that goes to Redis (as we read the token from in-memory cache first) and in case Redis is down.
+   */
+  inMemory: 60, // seconds
 };
 
 function useSafeRedis(redis: Redis, logger: FastifyLoggerInstance) {
-  const cache = LRU<string>(1000, TTL.notFound);
+  const cache = LRU<string>(1000, TTL.inMemory);
 
   // Purge the cache when redis is ready (when it reconnects or when it starts)
   redis.on('ready', () => {
+    logger.info('Redis is ready, purging the in-memory cache');
     cache.clear();
   });
 
   return {
     async get(key: string) {
+      const cached = cache.get(key);
+
+      if (cached) {
+        return cached;
+      }
+
       if (redis.status === 'ready') {
         return redis.get(key);
       }
