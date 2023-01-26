@@ -49,6 +49,7 @@ import {
   projects,
   target_validation,
   targets,
+  tokens,
   users,
   version_commit,
   versions,
@@ -650,17 +651,27 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       return pool.transaction(t => shared.createOrganization(input, t));
     },
     async deleteOrganization({ organization }) {
-      const result = transformOrganization(
-        await pool.one<Slonik<organizations>>(
-          sql`
-            DELETE FROM public.organizations
-            WHERE id = ${organization}
-            RETURNING *
-          `,
-        ),
-      );
+      const result = await pool.transaction(async t => {
+        const tokensResult = await t.query<Pick<tokens, 'token'>>(sql`
+          SELECT token FROM public.tokens WHERE organization_id = ${organization} AND deleted_at IS NULL
+        `);
 
-      return result;
+        return {
+          organization: await t.one<organizations>(
+            sql`
+              DELETE FROM public.organizations
+              WHERE id = ${organization}
+              RETURNING *
+            `,
+          ),
+          tokens: tokensResult.rows.map(row => row.token),
+        };
+      });
+
+      return {
+        ...transformOrganization(result.organization),
+        tokens: result.tokens,
+      };
     },
     async createProject({
       name,
@@ -1249,17 +1260,27 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     },
 
     async deleteProject({ organization, project }) {
-      const result = transformProject(
-        await pool.one<Slonik<projects>>(
-          sql`
-            DELETE FROM public.projects
-            WHERE id = ${project} AND org_id = ${organization}
-            RETURNING *
-          `,
-        ),
-      );
+      const result = await pool.transaction(async t => {
+        const tokensResult = await t.query<Pick<tokens, 'token'>>(sql`
+          SELECT token FROM public.tokens WHERE project_id = ${project} AND deleted_at IS NULL
+        `);
 
-      return result;
+        return {
+          project: await t.one<projects>(
+            sql`
+              DELETE FROM public.projects
+              WHERE id = ${project} AND org_id = ${organization}
+              RETURNING *
+            `,
+          ),
+          tokens: tokensResult.rows.map(row => row.token),
+        };
+      });
+
+      return {
+        ...transformProject(result.project),
+        tokens: result.tokens,
+      };
     },
     async createTarget({ organization, project, name, cleanId }) {
       return transformTarget(
@@ -1286,21 +1307,32 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         organization,
       );
     },
-    async deleteTarget({ organization, project, target }) {
-      const result = transformTarget(
-        await pool.one<Slonik<targets>>(
+    async deleteTarget({ organization, target }) {
+      const result = await pool.transaction(async t => {
+        const tokensResult = await t.query<Pick<tokens, 'token'>>(sql`
+          SELECT token FROM public.tokens WHERE target_id = ${target} AND deleted_at IS NULL
+        `);
+
+        const targetResult = await t.one<targets>(
           sql`
             DELETE FROM public.targets
-            WHERE id = ${target} AND project_id = ${project}
+            WHERE id = ${target}
             RETURNING *
           `,
-        ),
-        organization,
-      );
+        );
 
-      await pool.query(sql`DELETE FROM public.versions WHERE target_id = ${target}`);
+        await t.query(sql`DELETE FROM public.versions WHERE target_id = ${target}`);
 
-      return result;
+        return {
+          target: targetResult,
+          tokens: tokensResult.rows.map(row => row.token),
+        };
+      });
+
+      return {
+        ...transformTarget(result.target, organization),
+        tokens: result.tokens,
+      };
     },
     getTarget: batch(
       async (

@@ -9,11 +9,7 @@ import type { OrganizationAccessScope } from '../../auth/providers/organization-
 import type { ProjectAccessScope } from '../../auth/providers/project-access';
 import type { TargetAccessScope } from '../../auth/providers/target-access';
 import { Logger } from '../../shared/providers/logger';
-import {
-  OrganizationSelector,
-  ProjectSelector,
-  TargetSelector,
-} from '../../shared/providers/storage';
+import type { TargetSelector } from '../../shared/providers/storage';
 import type { TokensConfig } from './tokens';
 import { TOKENS_CONFIG } from './tokens';
 
@@ -87,36 +83,12 @@ export class TokenStorage {
     return input.tokens;
   }
 
-  async invalidateTarget(input: TargetSelector) {
-    this.logger.debug('Invalidating target tokens (input=%o)', input);
+  async invalidateTokens(tokens: string[]) {
+    this.logger.debug('Invalidating tokens (size=%s)', tokens.length);
 
-    await this.tokensService.invalidateTokenByTarget
+    await this.tokensService.invalidateTokens
       .mutate({
-        targetId: input.target,
-      })
-      .catch(error => {
-        this.logger.error(error);
-      });
-  }
-
-  async invalidateProject(input: ProjectSelector) {
-    this.logger.debug('Invalidating project tokens (input=%o)', input);
-
-    await this.tokensService.invalidateTokenByProject
-      .mutate({
-        projectId: input.project,
-      })
-      .catch(error => {
-        this.logger.error(error);
-      });
-  }
-
-  async invalidateOrganization(input: OrganizationSelector) {
-    this.logger.debug('Invalidating organization tokens (input=%o)', input);
-
-    await this.tokensService.invalidateTokenByOrganization
-      .mutate({
-        organizationId: input.organization,
+        tokens,
       })
       .catch(error => {
         this.logger.error(error);

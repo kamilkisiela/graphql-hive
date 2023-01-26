@@ -279,6 +279,9 @@ services:
       POSTGRES_PASSWORD: '${POSTGRES_PASSWORD}'
       POSTGRES_PORT: 5432
       POSTGRES_DB: '${POSTGRES_DB}'
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: '${REDIS_PASSWORD}'
       PORT: 3003
 
   webhooks:

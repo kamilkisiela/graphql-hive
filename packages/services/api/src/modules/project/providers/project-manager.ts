@@ -95,16 +95,12 @@ export class ProjectManager {
       scope: ProjectAccessScope.DELETE,
     });
 
-    const [result] = await Promise.all([
-      this.storage.deleteProject({
-        project,
-        organization,
-      }),
-      this.tokenStorage.invalidateProject({
-        project,
-        organization,
-      }),
-    ]);
+    const deletedProject = await this.storage.deleteProject({
+      project,
+      organization,
+    });
+
+    await this.tokenStorage.invalidateTokens(deletedProject.tokens);
 
     await this.activityManager.create({
       type: 'PROJECT_DELETED',
@@ -112,12 +108,12 @@ export class ProjectManager {
         organization,
       },
       meta: {
-        name: result.name,
-        cleanId: result.cleanId,
+        name: deletedProject.name,
+        cleanId: deletedProject.cleanId,
       },
     });
 
-    return result;
+    return deletedProject;
   }
 
   getProjectIdByToken: () => Promise<string | never> = share(async () => {

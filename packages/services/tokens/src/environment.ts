@@ -43,6 +43,12 @@ const PostgresModel = zod.object({
   POSTGRES_SSL: emptyString(zod.union([zod.literal('1'), zod.literal('0')]).optional()),
 });
 
+const RedisModel = zod.object({
+  REDIS_HOST: zod.string(),
+  REDIS_PORT: NumberFromString,
+  REDIS_PASSWORD: emptyString(zod.string().optional()),
+});
+
 const PrometheusModel = zod.object({
   PROMETHEUS_METRICS: emptyString(zod.union([zod.literal('0'), zod.literal('1')]).optional()),
   PROMETHEUS_METRICS_LABEL_INSTANCE: emptyString(zod.string().optional()),
@@ -75,6 +81,8 @@ const configs = {
   // eslint-disable-next-line no-process-env
   postgres: PostgresModel.safeParse(process.env),
   // eslint-disable-next-line no-process-env
+  redis: RedisModel.safeParse(process.env),
+  // eslint-disable-next-line no-process-env
   prometheus: PrometheusModel.safeParse(process.env),
   // eslint-disable-next-line no-process-env
   log: LogModel.safeParse(process.env),
@@ -103,6 +111,7 @@ function extractConfig<Input, Output>(config: zod.SafeParseReturnType<Input, Out
 
 const base = extractConfig(configs.base);
 const postgres = extractConfig(configs.postgres);
+const redis = extractConfig(configs.redis);
 const sentry = extractConfig(configs.sentry);
 const prometheus = extractConfig(configs.prometheus);
 const log = extractConfig(configs.log);
@@ -120,6 +129,11 @@ export const env = {
     user: postgres.POSTGRES_USER,
     password: postgres.POSTGRES_PASSWORD,
     ssl: postgres.POSTGRES_SSL === '1',
+  },
+  redis: {
+    host: redis.REDIS_HOST,
+    port: redis.REDIS_PORT,
+    password: redis.REDIS_PASSWORD,
   },
   heartbeat: base.HEARTBEAT_ENDPOINT ? { endpoint: base.HEARTBEAT_ENDPOINT } : null,
   sentry: sentry.SENTRY === '1' ? { dsn: sentry.SENTRY_DSN } : null,

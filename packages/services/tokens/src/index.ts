@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import Redis from 'ioredis';
 import ms from 'ms';
 import 'reflect-metadata';
 import LRU from 'tiny-lru';
@@ -40,11 +41,63 @@ export async function main() {
 
   const errorHandler = createErrorHandler(server);
 
+  const redis = new Redis({
+    host: env.redis.host,
+    port: env.redis.port,
+    password: env.redis.password,
+    maxRetriesPerRequest: 20,
+    db: 0,
+    enableReadyCheck: false,
+  });
+
+  const { start, stop, readiness, getStorage } = useCache(
+    createStorage(env.postgres),
+    redis,
+    server.log,
+  );
+
+  const stopHeartbeats = env.heartbeat
+    ? startHeartbeats({
+        enabled: true,
+        endpoint: env.heartbeat.endpoint,
+        intervalInMS: 20_000,
+        onError: e => server.log.error(e, `Heartbeat failed with error`),
+        isReady: readiness,
+      })
+    : startHeartbeats({ enabled: false });
+
+  async function shutdown() {
+    stopHeartbeats();
+    await server.close();
+    await stop();
+  }
+
   try {
-    const { start, stop, readiness, getStorage } = useCache(
-      createStorage(env.postgres),
-      server.log,
-    );
+    redis.on('error', err => {
+      server.log.error(err, 'Redis connection error');
+    });
+
+    redis.on('connect', () => {
+      server.log.info('Redis connection established');
+    });
+
+    redis.on('ready', () => {
+      server.log.info('Redis connection ready... ');
+    });
+
+    redis.on('close', () => {
+      server.log.info('Redis connection closed');
+    });
+
+    redis.on('reconnecting', timeToReconnect => {
+      server.log.info('Redis reconnecting in %s', timeToReconnect);
+    });
+
+    redis.on('end', async () => {
+      server.log.info('Redis ended - no more reconnections will be made');
+      await shutdown();
+    });
+
     const tokenReadFailuresCache = LRU<
       | {
           type: 'error';
@@ -56,26 +109,12 @@ export async function main() {
           checkAt: number;
         }
     >(200);
-    // Cache failures for 10 minutes
-    const errorCachingInterval = ms('10m');
-
-    const stopHeartbeats = env.heartbeat
-      ? startHeartbeats({
-          enabled: true,
-          endpoint: env.heartbeat.endpoint,
-          intervalInMS: 20_000,
-          onError: e => server.log.error(e, `Heartbeat failed with error`),
-          isReady: readiness,
-        })
-      : startHeartbeats({ enabled: false });
+    // Cache failures for 1 minute
+    const errorCachingInterval = ms('1m');
 
     registerShutdown({
       logger: server.log,
-      async onShutdown() {
-        stopHeartbeats();
-        await server.close();
-        await stop();
-      },
+      onShutdown: shutdown,
     });
 
     await server.register(fastifyTRPCPlugin, {
@@ -97,7 +136,7 @@ export async function main() {
     server.route({
       method: ['GET', 'HEAD'],
       url: '/_health',
-      handler(req, res) {
+      handler(_req, res) {
         void res.status(200).send();
       },
     });
