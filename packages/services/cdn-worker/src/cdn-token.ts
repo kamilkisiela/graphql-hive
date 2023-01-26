@@ -23,7 +23,7 @@ export function encodeCdnToken(args: CDNToken): string {
 }
 
 export function isCDNAccessToken(token: string) {
-  return token.startsWith(keyPrefix) === false;
+  return token.startsWith(keyPrefix) === true;
 }
 
 const decodeError = { type: 'failure', reason: 'Invalid access token.' } as const;
