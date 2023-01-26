@@ -111,7 +111,12 @@ export interface Storage {
       reservedNames: string[];
     },
   ): Promise<Organization | never>;
-  deleteOrganization(_: OrganizationSelector): Promise<Organization | never>;
+  deleteOrganization(_: OrganizationSelector): Promise<
+    | (Organization & {
+        tokens: string[];
+      })
+    | never
+  >;
   updateOrganizationName(
     _: OrganizationSelector & Pick<Organization, 'name' | 'cleanId'> & { user: string },
   ): Promise<Organization | never>;
@@ -195,7 +200,12 @@ export interface Storage {
       NullableAndPartial<CustomOrchestratorConfig> &
       OrganizationSelector,
   ): Promise<Project | never>;
-  deleteProject(_: ProjectSelector): Promise<Project | never>;
+  deleteProject(_: ProjectSelector): Promise<
+    | (Project & {
+        tokens: string[];
+      })
+    | never
+  >;
   updateProjectName(
     _: ProjectSelector & Pick<Project, 'name' | 'cleanId'> & { user: string },
   ): Promise<Project | never>;
@@ -220,7 +230,12 @@ export interface Storage {
   updateTargetName(
     _: TargetSelector & Pick<Project, 'name' | 'cleanId'> & { user: string },
   ): Promise<Target | never>;
-  deleteTarget(_: TargetSelector): Promise<Target | never>;
+  deleteTarget(_: TargetSelector): Promise<
+    | (Target & {
+        tokens: string[];
+      })
+    | never
+  >;
   getTarget(_: TargetSelector): Promise<Target | never>;
   getTargets(_: ProjectSelector): Promise<readonly Target[]>;
   getTargetIdsOfOrganization(_: OrganizationSelector): Promise<readonly string[]>;

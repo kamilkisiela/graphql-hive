@@ -3,7 +3,11 @@ import Redis, { Redis as RedisInstance } from 'ioredis';
 import ms from 'ms';
 import { metrics } from '@hive/service-common';
 import { atomic, until, useActionTracker } from './helpers';
-import type { Storage } from './storage';
+import type { Storage, StorageItem } from './storage';
+
+function generateKey(token: string) {
+  return `tokens:cache:${token}`;
+}
 
 const cacheHits = new metrics.Counter({
   name: 'tokens_cache_hits',
@@ -20,12 +24,8 @@ const cacheInvalidations = new metrics.Counter({
   help: 'Number of cache invalidations',
 });
 
-// share "promises" to allow reduce the number of requests even more
-
 interface CacheStorage extends Omit<Storage, 'touchTokens'> {
-  invalidateTarget(target: string): Promise<void>;
-  invalidateProject(project: string, targets: string[]): Promise<void>;
-  invalidateOrganization(organization: string, projects: string[], target: string[]): Promise<void>;
+  invalidateTokens(tokens: string[]): Promise<void>;
 }
 
 // Cache is a wrapper around the storage that adds a cache layer.
@@ -37,7 +37,7 @@ export function useCache(
   redisConfig: {
     host: string;
     port: number;
-    password: string;
+    password?: string;
   },
   logger: FastifyLoggerInstance,
 ): {
@@ -101,36 +101,43 @@ export function useCache(
     });
 
     // When there's a new token or a token was removed we need to invalidate the cache
-    async function invalidateByTags(tags: string[]) {
+    async function invalidateTokens(tokens: string[]) {
       cacheInvalidations.inc(1);
-      console.log('invalidate:', tags.join(', '));
 
       if (redisConnection) {
-        const keys = (await Promise.all(tags.map(tag => redisConnection!.smembers(tag)))).flat(1);
-        const pipeline = redisConnection.pipeline();
-
-        for (const key of keys) {
-          pipeline.del(key);
-        }
-
-        for (const tag of tags) {
-          pipeline.del(tag);
-        }
-
-        await pipeline.exec();
+        await redisConnection.del(...tokens.map(generateKey));
       }
     }
 
     // Thanks to the `atomic` function, every call to this function will only be executed once and Promise will be shared.
     // This is important because we don't want to make multiple requests to the DB for the same token, at the same time.
     const readTokenFromStorage = atomic(async function _readToken(token: string) {
-      return storage.readToken(token);
+      const item = await storage.readToken(token);
+
+      if (redisConnection) {
+        if (!item) {
+          // If the token doesn't exist in the DB we still want to cache it for a short period of time to avoid hitting the DB again and again.
+          await redisConnection.setex(generateKey(token), 60 /* seconds */, JSON.stringify(null));
+        } else {
+          await redisConnection.set(generateKey(token), JSON.stringify(item));
+        }
+      }
+
+      return item;
     });
 
     // Thanks to the `atomic` function, every call to this function will only be executed once and Promise will be shared.
     // This is important because we don't want to make multiple requests to Redis for the same token, at the same time.
-    const readTokenFromRedis = atomic(async function _readToken(hashed_token: string) {
-      return redisConnection?.get(`token:${hashed_token}`);
+    const readTokenFromRedis = atomic(async function _readToken(
+      hashed_token: string,
+    ): Promise<StorageItem | null> {
+      const item = await redisConnection?.get(generateKey(hashed_token));
+
+      if (item === 'string') {
+        return JSON.parse(item);
+      }
+
+      return null;
     });
 
     // TODO: add a in-memory fallback cache (in case Redis is down)
@@ -139,24 +146,11 @@ export function useCache(
       destroy() {
         return storage.destroy();
       },
-      async readTarget(target) {
+      invalidateTokens(tokens) {
+        return invalidateTokens(tokens);
+      },
+      readTarget(target) {
         return storage.readTarget(target);
-      },
-      async invalidateTarget(target) {
-        logger.debug('Invalidating (target=%s)', target);
-        await invalidateByTags([`target:${target}`]);
-      },
-      async invalidateProject(project, targets) {
-        logger.debug('Invalidating (project=%s)', project);
-        await invalidateByTags([`project:${project}`, ...targets.map(t => `target:${t}`)]);
-      },
-      async invalidateOrganization(organization, projects, targets) {
-        logger.debug('Invalidating (organization=%s)', organization);
-        await invalidateByTags([
-          `organization:${organization}`,
-          ...projects.map(p => `project:${p}`),
-          ...targets.map(t => `target:${t}`),
-        ]);
       },
       async readToken(hashed_token, res) {
         // TODO: make sure we handle the case when redisConnection is null
@@ -164,10 +158,10 @@ export function useCache(
 
         if (cached) {
           cacheHits.inc(1);
-          res?.header('x-cache', 'HIT'); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+          void res?.header('x-cache', 'HIT');
           // mark as used
           touch.schedule(hashed_token);
-          return JSON.parse(cached);
+          return cached;
         }
 
         const item = await readTokenFromStorage(hashed_token);
@@ -177,7 +171,7 @@ export function useCache(
         }
 
         cacheMisses.inc(1);
-        res?.header('x-cache', 'MISS'); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+        void res?.header('x-cache', 'MISS');
 
         touch.schedule(hashed_token); // mark as used
 
@@ -186,40 +180,15 @@ export function useCache(
       writeToken: tracker.wrap(async item => {
         logger.debug('Writing token (target=%s)', item.target);
         const result = await storage.writeToken(item);
-        // no need to invalidate the cache, just add the token to Redis
         if (redisConnection) {
-          const key = `token:${result.token}`;
-          await redisConnection
-            .multi()
-            // tags
-            .sadd(`organization:${item.organization}`, key)
-            .sadd(`project:${item.project}`, key)
-            .sadd(`target:${item.target}`, key)
-            // token record
-            .set(key, JSON.stringify(result))
-            .exec();
+          await redisConnection.set(generateKey(result.token), JSON.stringify(result));
         }
 
         return result;
       }),
       deleteToken: tracker.wrap(async hashed_token => {
-        const item = await cachedStorage.readToken(hashed_token);
-
-        if (!item) {
-          return;
-        }
-
         if (redisConnection) {
-          const key = `token:${item.token}`;
-          await redisConnection
-            .multi()
-            // tags
-            .srem(`organization:${item.organization}`, key)
-            .srem(`project:${item.project}`, key)
-            .srem(`target:${item.target}`, key)
-            // token record
-            .del(key)
-            .exec();
+          await redisConnection.del(generateKey(hashed_token));
         }
 
         return storage.deleteToken(hashed_token);

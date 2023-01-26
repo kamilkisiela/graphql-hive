@@ -193,14 +193,11 @@ export class OrganizationManager {
       throw new HiveError(`Cannot remove a personal organization`);
     }
 
-    const [deletedOrganization] = await Promise.all([
-      this.storage.deleteOrganization({
-        organization: organization.id,
-      }),
-      this.tokenStorage.invalidateOrganization({
-        organization: selector.organization,
-      }),
-    ]);
+    const deletedOrganization = await this.storage.deleteOrganization({
+      organization: organization.id,
+    });
+
+    await this.tokenStorage.invalidateTokens(deletedOrganization.tokens);
 
     // Because we checked the access before, it's stale by now
     this.authManager.resetAccessCache();

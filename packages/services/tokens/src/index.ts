@@ -57,8 +57,8 @@ export async function main() {
           checkAt: number;
         }
     >(200);
-    // Cache failures for 10 minutes
-    const errorCachingInterval = ms('10m');
+    // Cache failures for 1 minute
+    const errorCachingInterval = ms('1m');
 
     const stopHeartbeats = env.heartbeat
       ? startHeartbeats({

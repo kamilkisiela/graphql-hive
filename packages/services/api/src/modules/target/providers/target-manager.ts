@@ -95,19 +95,12 @@ export class TargetManager {
       scope: TargetAccessScope.DELETE,
     });
 
-    // create target
-    const [result] = await Promise.all([
-      this.storage.deleteTarget({
-        target,
-        project,
-        organization,
-      }),
-      this.tokenStorage.invalidateTarget({
-        target,
-        project,
-        organization,
-      }),
-    ]);
+    const deletedTarget = await this.storage.deleteTarget({
+      target,
+      project,
+      organization,
+    });
+    await this.tokenStorage.invalidateTokens(deletedTarget.tokens);
 
     await this.activityManager.create({
       type: 'TARGET_DELETED',
@@ -116,12 +109,12 @@ export class TargetManager {
         project,
       },
       meta: {
-        name: result.name,
-        cleanId: result.cleanId,
+        name: deletedTarget.name,
+        cleanId: deletedTarget.cleanId,
       },
     });
 
-    return result;
+    return deletedTarget;
   }
 
   async getTargets(selector: ProjectSelector): Promise<readonly Target[]> {
