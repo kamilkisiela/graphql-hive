@@ -1,9 +1,6 @@
 import bcrypt from 'bcryptjs';
-import { crypto } from '@whatwg-node/fetch';
 import { Analytics } from './analytics';
 import { AwsClient } from './aws';
-
-const encoder = new TextEncoder();
 
 export function byteStringToUint8Array(byteString: string) {
   const ui = new Uint8Array(byteString.length);
@@ -25,82 +22,37 @@ type S3Config = {
   endpoint: string;
 };
 
-type CreateKeyValidatorDeps = {
-  keyData: string;
-  waitUntil?: WaitUntil;
-  s3?: S3Config;
-  getCache?: () => Promise<Cache | null>;
-  analytics?: Analytics;
-};
+type GetCache = () => Promise<Cache | null>;
 
-const atobMaybe = (str: string): string | null => {
-  try {
-    return atob(str);
-  } catch {
-    return null;
-  }
+type CreateKeyValidatorDeps = {
+  waitUntil: null | WaitUntil;
+  s3: S3Config;
+  getCache: null | GetCache;
+  analytics: null | Analytics;
 };
 
 export const createIsKeyValid =
   (deps: CreateKeyValidatorDeps): KeyValidator =>
   async (targetId: string, accessHeaderValue: string): Promise<boolean> => {
-    const headerBinary = atobMaybe(accessHeaderValue);
-    if (headerBinary === null) {
-      return false;
-    }
-    const headerData = byteStringToUint8Array(headerBinary);
-    const secretKeyData = encoder.encode(deps.keyData);
-    const secretKey = await crypto.subtle.importKey(
-      'raw',
-      secretKeyData,
-      { name: 'HMAC', hash: 'SHA-256' },
-      false,
-      ['verify'],
-    );
-
-    const verifyPromise = crypto.subtle.verify(
-      'HMAC',
-      secretKey,
-      headerData,
-      encoder.encode(targetId),
-    );
-
-    // check the new method and report whether it fails or not
-    if (deps.waitUntil && deps.s3 && deps.getCache && deps.analytics) {
-      const { s3, waitUntil, getCache, analytics } = deps;
-      deps.waitUntil(
-        verifyPromise.then(oldMethodSucceeded =>
-          oldMethodSucceeded
-            ? newIsKeyValidCheck({
-                targetId,
-                accessToken: accessHeaderValue,
-                s3,
-                oldMethodSucceeded,
-                waitUntil,
-                getCache,
-                analytics,
-              }).then(() => undefined)
-            : Promise.resolve(),
-        ),
-      );
-    }
-
-    return await verifyPromise;
+    return validateKey({
+      ...deps,
+      targetId,
+      accessToken: accessHeaderValue,
+    });
   };
 
-const newIsKeyValidCheck = async (args: {
+const validateKey = async (args: {
   targetId: string;
   accessToken: string;
   s3: S3Config;
-  oldMethodSucceeded: boolean;
-  getCache: () => Promise<Cache | null>;
-  waitUntil: WaitUntil;
-  analytics: Analytics;
+  getCache: null | GetCache;
+  waitUntil: null | WaitUntil;
+  analytics: null | Analytics;
 }): Promise<boolean> => {
   let withCache = (isValid: boolean) => Promise.resolve(isValid);
 
   {
-    const requestCache = await args.getCache();
+    const requestCache = await args.getCache?.();
 
     if (requestCache) {
       const cacheKey = new Request(
@@ -122,7 +74,7 @@ const newIsKeyValidCheck = async (args: {
 
         const isValid = responseValue === '1';
 
-        args.analytics.track(
+        args.analytics?.track(
           {
             type: 'new-key-validation',
             value: {
@@ -137,7 +89,7 @@ const newIsKeyValidCheck = async (args: {
       }
 
       withCache = async (isValid: boolean) => {
-        args.analytics.track(
+        args.analytics?.track(
           {
             type: 'new-key-validation',
             value: {
@@ -182,7 +134,7 @@ const newIsKeyValidCheck = async (args: {
 
   const isValid = await bcrypt.compare(args.accessToken, await key.text());
 
-  args.analytics.track(
+  args.analytics?.track(
     {
       type: 'new-key-validation',
       value: {
