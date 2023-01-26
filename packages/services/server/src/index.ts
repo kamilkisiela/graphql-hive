@@ -355,9 +355,10 @@ export async function main() {
           });
 
           void reply.status(response.status);
-          if (response.body) {
-            void reply.send(response.body);
-          }
+
+          // Fastify doesn't accept `null` so we need to send `undefined` instead
+          void reply.send(response.body || undefined);
+
           return reply;
         },
       });
