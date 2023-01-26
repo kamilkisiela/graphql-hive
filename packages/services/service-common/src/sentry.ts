@@ -111,7 +111,7 @@ const plugin: FastifyPluginAsync = async server => {
       void reply.send(
         JSON.stringify({
           error: 500,
-          message: 'Internal Server Error'
+          message: 'Internal Server Error',
         }),
       );
     });
