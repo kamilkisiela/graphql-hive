@@ -26,6 +26,6 @@ tower = { version = "0.4", features = ["full"] }
 http = "0.2"
 graphql-parser = { git = "https://github.com/kamilkisiela/graphql-parser.git", branch = "kamil-minifier" }
 graphql-tools = { git = "https://github.com/dotansimha/graphql-tools-rs.git", branch = "kamil-minifier" }
-lru = "0.7.8"
+lru = "0.9.0"
 md5 = "0.7.0"
 rand = "0.8.5"
