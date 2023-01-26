@@ -1,5 +1,9 @@
 name: pr
-on: [pull_request]
+on:
+  pull_request: {}
+  push:
+    paths:
+      - '.changeset/**.md'
 
 env:
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
