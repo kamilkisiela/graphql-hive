@@ -390,6 +390,8 @@ function runArtifactsCDNTests(
         redirect: 'manual',
       });
 
+      const bodyText = await response.text();
+      expect(bodyText).toMatchInlineSnapshot(`""`);
       expect(response.status).toMatchInlineSnapshot(`304`);
     });
 
