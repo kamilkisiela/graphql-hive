@@ -115,7 +115,7 @@ const plugin: FastifyPluginAsync = async server => {
           err: {
             message: err.message,
             stack: err.stack,
-          }
+          },
         }),
       );
     });
