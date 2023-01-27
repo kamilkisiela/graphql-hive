@@ -32,7 +32,7 @@ const decodeError = { type: 'failure', reason: 'Invalid access token.' } as cons
  * Safely decode a CDN token that got serialized as a string.
  */
 export function decodeCdnAccessTokenSafe(token: string) {
-  if (isCDNAccessToken(token)) {
+  if (isCDNAccessToken(token) === false) {
     return decodeError;
   }
 
