@@ -15,9 +15,9 @@ export interface StorageItem {
 export interface Storage {
   destroy(): Promise<void>;
   readTarget(targetId: string): Promise<StorageItem[]>;
-  readToken(token: string): Promise<StorageItem | null>;
+  readToken(hashedToken: string): Promise<StorageItem | null>;
   writeToken(item: Omit<StorageItem, 'date' | 'lastUsedAt'>): Promise<StorageItem>;
-  deleteToken(token: string): Promise<void>;
+  deleteToken(hashedToken: string): Promise<void>;
   touchTokens(tokens: Array<{ token: string; date: Date }>): Promise<void>;
 }
 

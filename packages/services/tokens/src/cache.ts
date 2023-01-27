@@ -6,12 +6,12 @@ import { atomic, until, useActionTracker } from './helpers';
 import { cacheHits, cacheInvalidations, cacheMisses } from './metrics';
 import type { Storage, StorageItem } from './storage';
 
-function generateKey(token: string) {
-  return `tokens:cache:${token}`;
+function generateKey(hashedToken: string) {
+  return `tokens:cache:${hashedToken}`;
 }
 
 interface CacheStorage extends Omit<Storage, 'touchTokens'> {
-  invalidateTokens(tokens: string[]): Promise<void>;
+  invalidateTokens(hashedTokens: string[]): Promise<void>;
 }
 
 const TTLSeconds = {
@@ -110,22 +110,22 @@ export function useCache(
     const touch = useTokenTouchScheduler(storage, logger);
 
     // When there's a new token or a token was removed we need to invalidate the cache
-    async function invalidateTokens(tokens: string[]) {
+    async function invalidateTokens(hashedTokens: string[]) {
       cacheInvalidations.inc(1);
 
-      await redis.del(tokens.map(generateKey));
+      await redis.del(hashedTokens.map(generateKey));
     }
 
     // Thanks to the `atomic` function, every call to this function will only be executed once and Promise will be shared.
     // This is important because we don't want to make multiple requests to the DB for the same token, at the same time.
-    const readTokenFromStorage = atomic(async function _readToken(token: string) {
-      const item = await storage.readToken(token);
+    const readTokenFromStorage = atomic(async function _readToken(hashedToken: string) {
+      const item = await storage.readToken(hashedToken);
 
       if (!item) {
         // If the token doesn't exist in the DB we still want to cache it for a short period of time to avoid hitting the DB again and again.
-        await redis.setex(generateKey(token), TTLSeconds.notFound, JSON.stringify(null));
+        await redis.setex(generateKey(hashedToken), TTLSeconds.notFound, JSON.stringify(null));
       } else {
-        await redis.setex(generateKey(token), TTLSeconds.found, JSON.stringify(item));
+        await redis.setex(generateKey(hashedToken), TTLSeconds.found, JSON.stringify(item));
       }
 
       return item;
@@ -134,9 +134,9 @@ export function useCache(
     // Thanks to the `atomic` function, every call to this function will only be executed once and Promise will be shared.
     // This is important because we don't want to make multiple requests to Redis for the same token, at the same time.
     const readTokenFromRedis = atomic(async function _readToken(
-      hashed_token: string,
+      hashedToken: string,
     ): Promise<StorageItem | null | undefined> {
-      const item = await redis.get(generateKey(hashed_token));
+      const item = await redis.get(generateKey(hashedToken));
 
       if (typeof item === 'string') {
         return JSON.parse(item);
@@ -149,31 +149,31 @@ export function useCache(
       destroy() {
         return storage.destroy();
       },
-      invalidateTokens(tokens) {
-        return invalidateTokens(tokens);
+      invalidateTokens(hashedTokens) {
+        return invalidateTokens(hashedTokens);
       },
       readTarget(target) {
         return storage.readTarget(target);
       },
-      async readToken(hashed_token) {
-        const cached = await readTokenFromRedis(hashed_token);
+      async readToken(hashedToken) {
+        const cached = await readTokenFromRedis(hashedToken);
 
         if (typeof cached !== 'undefined') {
           cacheHits.inc(1);
           // mark as used
-          touch.schedule(hashed_token);
+          touch.schedule(hashedToken);
           return cached;
         }
 
         cacheMisses.inc(1);
 
-        const item = await readTokenFromStorage(hashed_token);
+        const item = await readTokenFromStorage(hashedToken);
 
         if (!item) {
           return null;
         }
 
-        touch.schedule(hashed_token); // mark as used
+        touch.schedule(hashedToken); // mark as used
 
         return item;
       },
@@ -183,10 +183,10 @@ export function useCache(
 
         return result;
       }),
-      deleteToken: tracker.wrap(async hashed_token => {
-        await redis.del([generateKey(hashed_token)]);
+      deleteToken: tracker.wrap(async hashedToken => {
+        await redis.del([generateKey(hashedToken)]);
 
-        return storage.deleteToken(hashed_token);
+        return storage.deleteToken(hashedToken);
       }),
     };
 
@@ -236,9 +236,9 @@ function useTokenTouchScheduler(storage: Storage, logger: FastifyLoggerInstance)
   /**
    * Mark token as used
    */
-  function schedule(hashed_token: string): void {
+  function schedule(hashedToken: string): void {
     const now = new Date();
-    scheduledTokens.set(hashed_token, now);
+    scheduledTokens.set(hashedToken, now);
   }
 
   // updated every 10m
