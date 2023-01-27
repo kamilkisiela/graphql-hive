@@ -2,34 +2,19 @@ import type { FastifyLoggerInstance } from 'fastify';
 import type { Redis } from 'ioredis';
 import ms from 'ms';
 import LRU from 'tiny-lru';
-import { metrics } from '@hive/service-common';
 import { atomic, until, useActionTracker } from './helpers';
+import { cacheHits, cacheInvalidations, cacheMisses } from './metrics';
 import type { Storage, StorageItem } from './storage';
 
 function generateKey(token: string) {
   return `tokens:cache:${token}`;
 }
 
-const cacheHits = new metrics.Counter({
-  name: 'tokens_cache_hits',
-  help: 'Number of cache hits',
-});
-
-const cacheMisses = new metrics.Counter({
-  name: 'tokens_cache_misses',
-  help: 'Number of cache misses',
-});
-
-const cacheInvalidations = new metrics.Counter({
-  name: 'tokens_cache_invalidations',
-  help: 'Number of cache invalidations',
-});
-
 interface CacheStorage extends Omit<Storage, 'touchTokens'> {
   invalidateTokens(tokens: string[]): Promise<void>;
 }
 
-const TTL = {
+const TTLSeconds = {
   /**
    * TTL for tokens that don't exist in the DB.
    */
@@ -46,7 +31,7 @@ const TTL = {
 };
 
 function useSafeRedis(redis: Redis, logger: FastifyLoggerInstance) {
-  const cache = LRU<string>(1000, TTL.inMemory);
+  const cache = LRU<string>(1000, TTLSeconds.inMemory * 1000 /* s -> ms */);
 
   // Purge the cache when redis is ready (when it reconnects or when it starts)
   redis.on('ready', () => {
@@ -138,9 +123,9 @@ export function useCache(
 
       if (!item) {
         // If the token doesn't exist in the DB we still want to cache it for a short period of time to avoid hitting the DB again and again.
-        await redis.setex(generateKey(token), TTL.notFound, JSON.stringify(null));
+        await redis.setex(generateKey(token), TTLSeconds.notFound, JSON.stringify(null));
       } else {
-        await redis.setex(generateKey(token), TTL.found, JSON.stringify(item));
+        await redis.setex(generateKey(token), TTLSeconds.found, JSON.stringify(item));
       }
 
       return item;
@@ -150,14 +135,14 @@ export function useCache(
     // This is important because we don't want to make multiple requests to Redis for the same token, at the same time.
     const readTokenFromRedis = atomic(async function _readToken(
       hashed_token: string,
-    ): Promise<StorageItem | null> {
+    ): Promise<StorageItem | null | undefined> {
       const item = await redis.get(generateKey(hashed_token));
 
-      if (item === 'string') {
+      if (typeof item === 'string') {
         return JSON.parse(item);
       }
 
-      return null;
+      return;
     });
 
     const cachedStorage: CacheStorage = {
@@ -170,25 +155,23 @@ export function useCache(
       readTarget(target) {
         return storage.readTarget(target);
       },
-      async readToken(hashed_token, res) {
+      async readToken(hashed_token) {
         const cached = await readTokenFromRedis(hashed_token);
 
-        if (cached) {
+        if (typeof cached !== 'undefined') {
           cacheHits.inc(1);
-          void res?.header('x-cache', 'HIT');
           // mark as used
           touch.schedule(hashed_token);
           return cached;
         }
+
+        cacheMisses.inc(1);
 
         const item = await readTokenFromStorage(hashed_token);
 
         if (!item) {
           return null;
         }
-
-        cacheMisses.inc(1);
-        void res?.header('x-cache', 'MISS');
 
         touch.schedule(hashed_token); // mark as used
 
