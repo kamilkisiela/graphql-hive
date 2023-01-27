@@ -118,7 +118,7 @@
       "@graphql-inspector/core@3.4.0": "patches/@graphql-inspector__core@3.4.0.patch",
       "@oclif/core@1.23.0": "patches/@oclif__core@1.23.0.patch",
       "oclif@3.6.1": "patches/oclif@3.6.1.patch",
-      "bullmq@3.5.10": "patches/bullmq@3.5.10.patch",
+      "bullmq@3.5.11": "patches/bullmq@3.5.11.patch",
       "@slonik/migrator@0.8.5": "patches/@slonik__migrator@0.8.5.patch"
     }
   }
