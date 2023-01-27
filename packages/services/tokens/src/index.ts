@@ -98,19 +98,9 @@ export async function main() {
       await shutdown();
     });
 
-    const tokenReadFailuresCache = LRU<
-      | {
-          type: 'error';
-          error: string;
-          checkAt: number;
-        }
-      | {
-          type: 'not-found';
-          checkAt: number;
-        }
-    >(200);
     // Cache failures for 1 minute
     const errorCachingInterval = ms('1m');
+    const tokenReadFailuresCache = LRU<string>(1000, errorCachingInterval);
 
     registerShutdown({
       logger: server.log,
@@ -123,7 +113,6 @@ export async function main() {
         router: tokensApiRouter,
         createContext({ req }: CreateFastifyContextOptions): Context {
           return {
-            errorCachingInterval,
             logger: req.log,
             errorHandler,
             getStorage,

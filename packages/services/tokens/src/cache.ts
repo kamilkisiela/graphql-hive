@@ -2,34 +2,19 @@ import type { FastifyLoggerInstance } from 'fastify';
 import type { Redis } from 'ioredis';
 import ms from 'ms';
 import LRU from 'tiny-lru';
-import { metrics } from '@hive/service-common';
 import { atomic, until, useActionTracker } from './helpers';
+import { cacheHits, cacheInvalidations, cacheMisses } from './metrics';
 import type { Storage, StorageItem } from './storage';
 
-function generateKey(token: string) {
-  return `tokens:cache:${token}`;
+function generateKey(hashedToken: string) {
+  return `tokens:cache:${hashedToken}`;
 }
-
-const cacheHits = new metrics.Counter({
-  name: 'tokens_cache_hits',
-  help: 'Number of cache hits',
-});
-
-const cacheMisses = new metrics.Counter({
-  name: 'tokens_cache_misses',
-  help: 'Number of cache misses',
-});
-
-const cacheInvalidations = new metrics.Counter({
-  name: 'tokens_cache_invalidations',
-  help: 'Number of cache invalidations',
-});
 
 interface CacheStorage extends Omit<Storage, 'touchTokens'> {
-  invalidateTokens(tokens: string[]): Promise<void>;
+  invalidateTokens(hashedTokens: string[]): Promise<void>;
 }
 
-const TTL = {
+const TTLSeconds = {
   /**
    * TTL for tokens that don't exist in the DB.
    */
@@ -46,7 +31,7 @@ const TTL = {
 };
 
 function useSafeRedis(redis: Redis, logger: FastifyLoggerInstance) {
-  const cache = LRU<string>(1000, TTL.inMemory);
+  const cache = LRU<string>(1000, TTLSeconds.inMemory * 1000 /* s -> ms */);
 
   // Purge the cache when redis is ready (when it reconnects or when it starts)
   redis.on('ready', () => {
@@ -125,22 +110,22 @@ export function useCache(
     const touch = useTokenTouchScheduler(storage, logger);
 
     // When there's a new token or a token was removed we need to invalidate the cache
-    async function invalidateTokens(tokens: string[]) {
+    async function invalidateTokens(hashedTokens: string[]) {
       cacheInvalidations.inc(1);
 
-      await redis.del(tokens.map(generateKey));
+      await redis.del(hashedTokens.map(generateKey));
     }
 
     // Thanks to the `atomic` function, every call to this function will only be executed once and Promise will be shared.
     // This is important because we don't want to make multiple requests to the DB for the same token, at the same time.
-    const readTokenFromStorage = atomic(async function _readToken(token: string) {
-      const item = await storage.readToken(token);
+    const readTokenFromStorage = atomic(async function _readToken(hashedToken: string) {
+      const item = await storage.readToken(hashedToken);
 
       if (!item) {
         // If the token doesn't exist in the DB we still want to cache it for a short period of time to avoid hitting the DB again and again.
-        await redis.setex(generateKey(token), TTL.notFound, JSON.stringify(null));
+        await redis.setex(generateKey(hashedToken), TTLSeconds.notFound, JSON.stringify(null));
       } else {
-        await redis.setex(generateKey(token), TTL.found, JSON.stringify(item));
+        await redis.setex(generateKey(hashedToken), TTLSeconds.found, JSON.stringify(item));
       }
 
       return item;
@@ -149,48 +134,46 @@ export function useCache(
     // Thanks to the `atomic` function, every call to this function will only be executed once and Promise will be shared.
     // This is important because we don't want to make multiple requests to Redis for the same token, at the same time.
     const readTokenFromRedis = atomic(async function _readToken(
-      hashed_token: string,
-    ): Promise<StorageItem | null> {
-      const item = await redis.get(generateKey(hashed_token));
+      hashedToken: string,
+    ): Promise<StorageItem | null | undefined> {
+      const item = await redis.get(generateKey(hashedToken));
 
-      if (item === 'string') {
+      if (typeof item === 'string') {
         return JSON.parse(item);
       }
 
-      return null;
+      return;
     });
 
     const cachedStorage: CacheStorage = {
       destroy() {
         return storage.destroy();
       },
-      invalidateTokens(tokens) {
-        return invalidateTokens(tokens);
+      invalidateTokens(hashedTokens) {
+        return invalidateTokens(hashedTokens);
       },
       readTarget(target) {
         return storage.readTarget(target);
       },
-      async readToken(hashed_token, res) {
-        const cached = await readTokenFromRedis(hashed_token);
+      async readToken(hashedToken) {
+        const cached = await readTokenFromRedis(hashedToken);
 
-        if (cached) {
+        if (typeof cached !== 'undefined') {
           cacheHits.inc(1);
-          void res?.header('x-cache', 'HIT');
           // mark as used
-          touch.schedule(hashed_token);
+          touch.schedule(hashedToken);
           return cached;
         }
 
-        const item = await readTokenFromStorage(hashed_token);
+        cacheMisses.inc(1);
+
+        const item = await readTokenFromStorage(hashedToken);
 
         if (!item) {
           return null;
         }
 
-        cacheMisses.inc(1);
-        void res?.header('x-cache', 'MISS');
-
-        touch.schedule(hashed_token); // mark as used
+        touch.schedule(hashedToken); // mark as used
 
         return item;
       },
@@ -200,10 +183,10 @@ export function useCache(
 
         return result;
       }),
-      deleteToken: tracker.wrap(async hashed_token => {
-        await redis.del([generateKey(hashed_token)]);
+      deleteToken: tracker.wrap(async hashedToken => {
+        await redis.del([generateKey(hashedToken)]);
 
-        return storage.deleteToken(hashed_token);
+        return storage.deleteToken(hashedToken);
       }),
     };
 
@@ -253,9 +236,9 @@ function useTokenTouchScheduler(storage: Storage, logger: FastifyLoggerInstance)
   /**
    * Mark token as used
    */
-  function schedule(hashed_token: string): void {
+  function schedule(hashedToken: string): void {
     const now = new Date();
-    scheduledTokens.set(hashed_token, now);
+    scheduledTokens.set(hashedToken, now);
   }
 
   // updated every 10m

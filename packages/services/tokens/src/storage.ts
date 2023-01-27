@@ -1,4 +1,3 @@
-import type { FastifyReply } from 'fastify';
 import { createConnectionString, createTokenStorage, tokens } from '@hive/storage';
 
 export interface StorageItem {
@@ -15,10 +14,10 @@ export interface StorageItem {
 
 export interface Storage {
   destroy(): Promise<void>;
-  readTarget(targetId: string, res?: FastifyReply): Promise<StorageItem[]>;
-  readToken(token: string, res?: FastifyReply): Promise<StorageItem | null>;
+  readTarget(targetId: string): Promise<StorageItem[]>;
+  readToken(hashedToken: string): Promise<StorageItem | null>;
   writeToken(item: Omit<StorageItem, 'date' | 'lastUsedAt'>): Promise<StorageItem>;
-  deleteToken(token: string): Promise<void>;
+  deleteToken(hashedToken: string): Promise<void>;
   touchTokens(tokens: Array<{ token: string; date: Date }>): Promise<void>;
 }
 

@@ -6,6 +6,7 @@ import { createErrorHandler, metrics } from '@hive/service-common';
 import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
 import { initTRPC } from '@trpc/server';
 import { useCache } from './cache';
+import { cacheHits, cacheMisses } from './metrics';
 
 const httpRequests = new metrics.Counter({
   name: 'tokens_http_requests',
@@ -63,18 +64,7 @@ export type Context = {
   logger: FastifyLoggerInstance;
   errorHandler: ReturnType<typeof createErrorHandler>;
   getStorage: ReturnType<typeof useCache>['getStorage'];
-  tokenReadFailuresCache: LruType<
-    | {
-        type: 'error';
-        error: string;
-        checkAt: number;
-      }
-    | {
-        type: 'not-found';
-        checkAt: number;
-      }
-  >;
-  errorCachingInterval: number;
+  tokenReadFailuresCache: LruType<string>;
 };
 
 const t = initTRPC.context<Context>().create();
@@ -172,18 +162,11 @@ export const tokensApiRouter = t.router({
     const alias = maskToken(input.token);
 
     // In case the token was not found (or we failed to fetch it)
-    const failedRead = ctx.tokenReadFailuresCache.get(hash);
+    const cachedFailure = ctx.tokenReadFailuresCache.get(hash);
 
-    if (failedRead) {
-      // let's re-throw the same error (or return null)
-      if (failedRead.checkAt >= Date.now()) {
-        if (failedRead.type === 'error') {
-          throw new Error(failedRead.error);
-        } else {
-          return null;
-        }
-      }
-      // or look for it again if last time we checked was 10 minutes ago
+    if (cachedFailure) {
+      cacheHits.inc(1);
+      throw new Error(cachedFailure);
     }
 
     try {
@@ -193,26 +176,14 @@ export const tokensApiRouter = t.router({
       // removes the token from the failures cache (in case the value expired)
       ctx.tokenReadFailuresCache.delete(hash);
 
-      if (!result) {
-        // set token read as not found
-        // so we don't try to read it again for next X minutes
-        ctx.tokenReadFailuresCache.set(hash, {
-          type: 'not-found',
-          checkAt: Date.now() + ctx.errorCachingInterval,
-        });
-      }
-
       return result;
     } catch (error) {
       ctx.errorHandler(`Failed to get a token "${alias}"`, error as Error, ctx.logger);
 
       // set token read as failure
       // so we don't try to read it again for next X minutes
-      ctx.tokenReadFailuresCache.set(hash, {
-        type: 'error',
-        error: (error as Error).message,
-        checkAt: Date.now() + ctx.errorCachingInterval,
-      });
+      ctx.tokenReadFailuresCache.set(hash, (error as Error).message);
+      cacheMisses.inc(1);
 
       throw error;
     }
