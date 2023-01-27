@@ -192,7 +192,6 @@ const DeleteCDNAccessTokenModal = (props: {
       props.onDeletedAccessTokenId(
         deleteCdnAccessToken.data.deleteCdnAccessToken.ok.deletedCdnAccessTokenId,
       );
-      props.onClose();
     }
   }, [deleteCdnAccessToken.data?.deleteCdnAccessToken.ok?.deletedCdnAccessTokenId ?? null]);
 
@@ -460,7 +459,6 @@ export const CDNAccessTokens = (props: { me: MemberFieldsFragment }): React.Reac
           onClose={closeModal}
         />
       ) : null}
-      {/* {modal} */}
     </Card>
   );
 };
