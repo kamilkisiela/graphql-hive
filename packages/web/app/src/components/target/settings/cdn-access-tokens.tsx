@@ -349,6 +349,7 @@ export const CDNAccessTokens = (props: { me: MemberFieldsFragment }): React.Reac
       first: 10,
       after: endCursors[endCursors.length - 1] ?? null,
     },
+    requestPolicy: 'cache-and-network',
   });
 
   const canManage = canAccessTarget(TargetAccessScope.Settings, props.me);
