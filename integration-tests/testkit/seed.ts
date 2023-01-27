@@ -304,7 +304,9 @@ export function initSeed() {
                         secret,
                       ).then(r => r.expectNoGraphQLErrors());
 
-                      return result.createCdnToken;
+                      expect(result.createCdnAccessToken.ok).not.toBeNull();
+
+                      return result.createCdnAccessToken.ok!;
                     },
                     async publishSchema(options: {
                       sdl: string;
@@ -376,7 +378,7 @@ export function initSeed() {
                       return result.schemaVersions.nodes;
                     },
                     async fetchTokenInfo() {
-                      const tokenInfoResult = await readTokenInfo(secret!).then(r =>
+                      const tokenInfoResult = await readTokenInfo(secret).then(r =>
                         r.expectNoGraphQLErrors(),
                       );
 

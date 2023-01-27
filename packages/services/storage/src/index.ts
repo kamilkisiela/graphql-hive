@@ -2741,7 +2741,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           , "first_characters"
           , "last_characters"
           , "alias"
-          , "created_at"
+          , to_json("created_at") as "created_at"
       `);
 
       if (result === null) {
@@ -2750,9 +2750,140 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       return decodeCDNAccessTokenRecord(result);
     },
+
+    async getCDNAccessTokenById(args) {
+      const result = await pool.maybeOne(sql`
+        SELECT 
+          "id"
+          , "target_id"
+          , "s3_key"
+          , "first_characters"
+          , "last_characters"
+          , "alias"
+          , to_json("created_at") as "created_at"
+        FROM
+          "public"."cdn_access_tokens"
+        WHERE
+          "id" = ${args.cdnAccessTokenId}
+      `);
+
+      if (result == null) {
+        return null;
+      }
+      return decodeCDNAccessTokenRecord(result);
+    },
+
+    async deleteCDNAccessToken(args) {
+      const result = await pool.maybeOne(sql`
+        DELETE
+        FROM
+          "public"."cdn_access_tokens"
+        WHERE
+          "id" = ${args.cdnAccessTokenId}
+        RETURNING
+          "id"
+      `);
+
+      return result != null;
+    },
+
+    async getPaginatedCDNAccessTokensForTarget(args) {
+      let cursor: null | {
+        createdAt: string;
+        id: string;
+      } = null;
+
+      const limit = args.first ? (args.first > 0 ? Math.min(args.first, 20) : 20) : 20;
+
+      if (args.cursor) {
+        cursor = decodeCDNAccessTokenCursor(args.cursor);
+      }
+
+      const result = await pool.any(sql`
+        SELECT
+          "id"
+          , "target_id"
+          , "s3_key"
+          , "first_characters"
+          , "last_characters"
+          , "alias"
+          , to_json("created_at") as "created_at"
+        FROM
+          "public"."cdn_access_tokens"
+        WHERE
+          "target_id" = ${args.targetId}
+          ${
+            cursor
+              ? sql`
+                AND (
+                  (
+                    "cdn_access_tokens"."created_at" = ${cursor.createdAt}
+                    AND "id" < ${cursor.id}
+                  )
+                  OR "cdn_access_tokens"."created_at" < ${cursor.createdAt}
+                )
+              `
+              : sql``
+          }
+        ORDER BY
+          "target_id" ASC
+          , "cdn_access_tokens"."created_at" DESC
+          , "id" DESC
+        LIMIT ${limit + 1}
+      `);
+
+      let items = result.map(row => {
+        const node = decodeCDNAccessTokenRecord(row);
+
+        return {
+          node,
+          get cursor() {
+            return encodeCDNAccessTokenCursor(node);
+          },
+        };
+      });
+
+      const hasNextPage = items.length > limit;
+
+      items = items.slice(0, limit);
+
+      return {
+        items,
+        pageInfo: {
+          hasNextPage,
+          hasPreviousPage: cursor !== null,
+          get endCursor() {
+            return items[items.length - 1]?.cursor ?? '';
+          },
+          get startCursor() {
+            return items[0]?.cursor ?? '';
+          },
+        },
+      };
+    },
   };
 
   return storage;
+}
+
+function encodeCDNAccessTokenCursor(cursor: { createdAt: string; id: string }) {
+  return Buffer.from(`${cursor.createdAt}|${cursor.id}`).toString('base64');
+}
+
+function decodeCDNAccessTokenCursor(cursor: string) {
+  const [createdAt, id] = Buffer.from(cursor, 'base64').toString('utf8').split('|');
+  if (
+    Number.isNaN(Date.parse(createdAt)) ||
+    id === undefined ||
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id) === false
+  ) {
+    throw new Error('Invalid cursor');
+  }
+
+  return {
+    createdAt,
+    id,
+  };
 }
 
 function isDefined<T>(val: T | undefined | null): val is T {
@@ -2818,7 +2949,7 @@ const CDNAccessTokenModel = zod.object({
   first_characters: zod.string(),
   last_characters: zod.string(),
   alias: zod.string(),
-  created_at: zod.number(),
+  created_at: zod.string(),
 });
 
 const decodeCDNAccessTokenRecord = (result: unknown): CDNAccessToken => {
@@ -2830,8 +2961,8 @@ const decodeCDNAccessTokenRecord = (result: unknown): CDNAccessToken => {
     s3Key: rawRecord.s3_key,
     firstCharacters: rawRecord.first_characters,
     lastCharacters: rawRecord.last_characters,
-    createdAt: new Date(rawRecord.created_at).toString(),
     alias: rawRecord.alias,
+    createdAt: rawRecord.created_at,
   };
 };
 

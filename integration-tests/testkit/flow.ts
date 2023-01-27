@@ -879,16 +879,21 @@ export function schemaSyncCDN(input: SchemaSyncCdnInput, token: string) {
 export function createCdnAccess(selector: TargetSelectorInput, token: string) {
   return execute({
     document: gql(/* GraphQL */ `
-      mutation createCdnToken($selector: TargetSelectorInput!) {
-        createCdnToken(selector: $selector) {
-          url
-          token
+      mutation createCdnAccessToken($input: CreateCdnAccessTokenInput!) {
+        createCdnAccessToken(input: $input) {
+          ok {
+            secretAccessToken
+            cdnUrl
+          }
+          error {
+            message
+          }
         }
       }
     `),
     token,
     variables: {
-      selector,
+      input: { selector, alias: 'CDN Access Token' },
     },
   });
 }
@@ -898,11 +903,11 @@ export async function fetchSchemaFromCDN(selector: TargetSelectorInput, token: s
     r.expectNoGraphQLErrors(),
   );
 
-  const cdn = cdnAccessResult.createCdnToken;
+  const cdn = cdnAccessResult.createCdnAccessToken.ok!;
 
-  const res = await fetch(cdn.url + '/sdl', {
+  const res = await fetch(cdn.cdnUrl + '/sdl', {
     headers: {
-      'X-Hive-CDN-Key': cdn.token,
+      'X-Hive-CDN-Key': cdn.secretAccessToken,
     },
   });
 
@@ -917,11 +922,11 @@ export async function fetchSupergraphFromCDN(selector: TargetSelectorInput, toke
     r.expectNoGraphQLErrors(),
   );
 
-  const cdn = cdnAccessResult.createCdnToken;
+  const cdn = cdnAccessResult.createCdnAccessToken.ok!;
 
-  const res = await fetch(cdn.url + '/supergraph', {
+  const res = await fetch(cdn.cdnUrl + '/supergraph', {
     headers: {
-      'X-Hive-CDN-Key': cdn.token,
+      'X-Hive-CDN-Key': cdn.secretAccessToken,
     },
   });
 
@@ -938,11 +943,11 @@ export async function fetchMetadataFromCDN(selector: TargetSelectorInput, token:
     r.expectNoGraphQLErrors(),
   );
 
-  const cdn = cdnAccessResult.createCdnToken;
+  const cdn = cdnAccessResult.createCdnAccessToken.ok!;
 
-  const res = await fetch(cdn.url + '/metadata', {
+  const res = await fetch(cdn.cdnUrl + '/metadata', {
     headers: {
-      'X-Hive-CDN-Key': cdn.token,
+      'X-Hive-CDN-Key': cdn.secretAccessToken,
     },
   });
 

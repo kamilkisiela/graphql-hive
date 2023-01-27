@@ -7,6 +7,7 @@ import * as Yup from 'yup';
 import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
 import { SchemaEditor } from '@/components/schema-editor';
+import { CDNAccessTokens } from '@/components/target/settings/cdn-access-tokens';
 import {
   Button,
   Card,
@@ -43,7 +44,7 @@ const columns = [
   { key: 'createdAt', align: 'right' },
 ] as const;
 
-const Tokens = ({ me }: { me: MemberFieldsFragment }): ReactElement => {
+const RegistryAccessTokens = ({ me }: { me: MemberFieldsFragment }): ReactElement => {
   const router = useRouteSelector();
   const [{ fetching: deleting }, mutate] = useMutation(DeleteTokensDocument);
   const [checked, setChecked] = useState<string[]>([]);
@@ -78,7 +79,7 @@ const Tokens = ({ me }: { me: MemberFieldsFragment }): ReactElement => {
 
   return (
     <Card>
-      <Heading className="mb-2">Tokens</Heading>
+      <Heading className="mb-2">Registry Access Tokens</Heading>
       <p className="mb-3 font-light text-gray-300">
         Be careful! These tokens allow to read and write your target data.
       </p>
@@ -660,7 +661,9 @@ const Page = ({
         )}
       </Card>
 
-      {canAccessTokens && <Tokens me={me} />}
+      {canAccessTokens && <RegistryAccessTokens me={me} />}
+
+      {canAccessTokens && <CDNAccessTokens me={me} />}
 
       <ConditionalBreakingChanges />
 
