@@ -157,7 +157,7 @@ export class CdnProvider {
     if (headResponse.status !== 404) {
       return {
         type: 'failure',
-        reason: 'Failed to generate key. Please try again later. 1',
+        reason: 'Failed to generate key. Please try again later.',
       } as const;
     }
 
@@ -183,13 +183,13 @@ export class CdnProvider {
       firstCharacters: cdnAccessToken.substring(0, 5),
       lastCharacters: cdnAccessToken.substring(cdnAccessToken.length - 5, cdnAccessToken.length),
       s3Key,
-      alias: args.alias ?? 'CDN Access Token',
+      alias: args.alias,
     });
 
     if (cdnAccessTokenRecord === null) {
       return {
         type: 'failure',
-        reason: 'Failed to generate key. Please try again later. 2',
+        reason: 'Failed to generate key. Please try again later.',
       } as const;
     }
 
