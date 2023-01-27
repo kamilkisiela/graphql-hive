@@ -18,7 +18,6 @@ if (!globalThis.crypto) {
 
 export const devStorage = new Map<string, string>();
 
-// eslint-disable-next-line no-process-env
 (globalThis as any).HIVE_DATA = devStorage;
 // eslint-disable-next-line no-process-env
 (globalThis as any).S3_ENDPOINT = process.env.S3_ENDPOINT || '';
