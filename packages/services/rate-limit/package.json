@@ -27,7 +27,7 @@
     "@hive/service-common": "workspace:*",
     "@hive/storage": "workspace:*",
     "pino-pretty": "9.1.1",
-    "tslib": "2.4.1"
+    "tslib": "2.5.0"
   },
   "buildOptions": {
     "runify": true,
