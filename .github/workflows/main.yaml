@@ -18,7 +18,6 @@ jobs:
 
   # Builds Rust crates, and creates Docker images
   build-rust:
-    name: build_rust
     uses: ./.github/workflows/build-and-dockerize.yaml
     with:
       imageTag: ${{ github.sha }}
