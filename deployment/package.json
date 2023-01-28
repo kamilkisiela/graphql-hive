@@ -10,7 +10,7 @@
     "@pulumi/kubernetes": "3.23.1",
     "@pulumi/kubernetesx": "0.1.6",
     "@pulumi/pulumi": "3.53.1",
-    "@pulumi/random": "4.9.0",
+    "@pulumi/random": "4.10.0",
     "js-yaml": "4.1.0",
     "pg-connection-string": "2.5.0"
   },
