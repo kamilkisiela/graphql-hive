@@ -60,7 +60,9 @@ function useSafeRedis(redis: Redis, logger: FastifyLoggerInstance) {
       }
 
       if (redis.status === 'ready') {
-        await redis.del(...keys);
+        if (keys.length > 0) {
+          await redis.del(...keys);
+        }
       } else {
         logger.warn('Redis is not ready, skipping DEL');
       }
@@ -113,7 +115,9 @@ export function useCache(
     async function invalidateTokens(hashedTokens: string[]) {
       cacheInvalidations.inc(1);
 
-      await redis.del(hashedTokens.map(generateKey));
+      if (hashedTokens.length > 0) {
+        await redis.del(hashedTokens.map(generateKey));
+      }
     }
 
     // Thanks to the `atomic` function, every call to this function will only be executed once and Promise will be shared.
