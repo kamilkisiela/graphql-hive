@@ -5,7 +5,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@manypkg/get-packages": "1.1.3",
+    "@manypkg/get-packages": "2.0.0",
     "@pulumi/cloudflare": "4.15.0",
     "@pulumi/kubernetes": "3.23.1",
     "@pulumi/kubernetesx": "0.1.6",
