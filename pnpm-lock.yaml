@@ -1041,7 +1041,7 @@ importers:
       '@types/react-window': 1.8.5
       '@urql/core': 2.6.1
       '@urql/devtools': 2.0.3
-      '@urql/exchange-graphcache': 4.3.6
+      '@urql/exchange-graphcache': 4.4.3
       '@welldone-software/why-did-you-render': 7.0.1
       '@whatwg-node/fetch': 0.6.2
       autoprefixer: 10.4.13
@@ -1083,7 +1083,7 @@ importers:
       tailwindcss-radix: 2.7.0
       tslib: 2.5.0
       twin.macro: 2.8.2
-      urql: 2.0.5
+      urql: 2.2.3
       use-debounce: 9.0.3
       valtio: 1.9.0
       wonka: 4.0.15
@@ -1122,7 +1122,7 @@ importers:
       '@trpc/server': 10.9.0
       '@urql/core': 2.6.1_graphql@16.6.0
       '@urql/devtools': 2.0.3_xjrygy3ln734yc6gtgbaa34b4a
-      '@urql/exchange-graphcache': 4.3.6_graphql@16.6.0
+      '@urql/exchange-graphcache': 4.4.3_graphql@16.6.0
       '@whatwg-node/fetch': 0.6.2
       clsx: 1.2.1
       cookies: 0.8.0
@@ -1160,7 +1160,7 @@ importers:
       tailwindcss-radix: 2.7.0
       tslib: 2.5.0
       twin.macro: 2.8.2
-      urql: 2.0.5_onqnqwb3ubg5opvemcqf7c2qhy
+      urql: 2.2.3_onqnqwb3ubg5opvemcqf7c2qhy
       use-debounce: 9.0.3_react@18.2.0
       valtio: 1.9.0_react@18.2.0
       wonka: 4.0.15
@@ -12054,8 +12054,8 @@ packages:
       wonka: 4.0.15
     dev: false
 
-  /@urql/exchange-graphcache/4.3.6_graphql@16.6.0:
-    resolution: {integrity: sha512-RDEi1954lcnwBK2dwQGaxOInuebZrRliz2v7aAuQasj49N9bWYrlSkBfELG14EzOL7NI23IUaeLeaDN7MouDJg==}
+  /@urql/exchange-graphcache/4.4.3_graphql@16.6.0:
+    resolution: {integrity: sha512-EPXRCzq929RjVDym4NP4mO6bsyGE6J1JzUxE9vpm04VjZtK90Ag4bgftFdkHsMHh4ydvokLKQjCRVqGxKEBnEg==}
     peerDependencies:
       graphql: ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
@@ -26766,10 +26766,10 @@ packages:
     dependencies:
       braces: 3.0.2
 
-  /urql/2.0.5_onqnqwb3ubg5opvemcqf7c2qhy:
-    resolution: {integrity: sha512-UOl37CkNO1sfhw8jPihq+9NKUpTLnsRjpK7vmOVqPceqSO0rYXHOAEJp2TWDhyLjn2lYDlDlAfDaxNyK5m1FOA==}
+  /urql/2.2.3_onqnqwb3ubg5opvemcqf7c2qhy:
+    resolution: {integrity: sha512-XMkSYJKW9s4ZlbSuxcUz3fTBIykOn0sGileRXQeyZpaRBXJPVz5saSY05k7jdefNxShZtTI+/nr7PYUWQertfg==}
     peerDependencies:
-      graphql: ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0
+      graphql: ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
       react: '>= 16.8.0'
     dependencies:
       '@urql/core': 2.6.1_graphql@16.6.0
