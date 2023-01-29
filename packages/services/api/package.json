@@ -37,7 +37,7 @@
     "lru-cache": "7.14.1",
     "ms": "2.1.3",
     "param-case": "3.0.4",
-    "supertokens-node": "12.1.5",
+    "supertokens-node": "12.1.6",
     "zod": "3.20.2"
   },
   "devDependencies": {
