@@ -718,7 +718,7 @@ test.concurrent('cannot do API request with invalid access token', async () => {
 
   expect(errors).toEqual([
     {
-      message: 'Invalid token provided!',
+      message: 'Invalid token provided',
       locations: [
         {
           column: 3,
