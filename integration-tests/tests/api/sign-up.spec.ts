@@ -1,4 +1,3 @@
-import { gql } from '@app/gql';
 import { ProjectType } from '@app/gql/graphql';
 import type { RateLimitApi } from '@hive/rate-limit';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
@@ -8,6 +7,7 @@ import { waitFor } from '../../testkit/flow';
 import { execute } from '../../testkit/graphql';
 import { initSeed } from '../../testkit/seed';
 import { getServiceHost } from '../../testkit/utils';
+import { graphql } from './../../testkit/gql';
 
 const { fetch } = createFetch({
   useNodeFetch: true,
@@ -16,7 +16,7 @@ const { fetch } = createFetch({
 test.concurrent('should auto-create an organization for freshly signed-up user', async () => {
   const { ownerToken } = await initSeed().createOwner();
   const result = await execute({
-    document: gql(/* GraphQL */ `
+    document: graphql(/* GraphQL */ `
       query organizations {
         organizations {
           total
@@ -38,7 +38,7 @@ test.concurrent(
   async () => {
     const { ownerToken, createPersonalProject } = await initSeed().createOwner();
     const result = await execute({
-      document: gql(/* GraphQL */ `
+      document: graphql(/* GraphQL */ `
         query organizations {
           organizations {
             total
@@ -81,7 +81,7 @@ test.concurrent(
   async () => {
     const { ownerToken } = await initSeed().createOwner();
     const query1 = execute({
-      document: gql(/* GraphQL */ `
+      document: graphql(/* GraphQL */ `
         query organizations {
           organizations {
             total
@@ -95,7 +95,7 @@ test.concurrent(
       authToken: ownerToken,
     }).then(r => r.expectNoGraphQLErrors());
     const query2 = execute({
-      document: gql(/* GraphQL */ `
+      document: graphql(/* GraphQL */ `
         query organizations {
           organizations {
             total
