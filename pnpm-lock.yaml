@@ -1190,7 +1190,7 @@ importers:
 
   packages/web/docs:
     specifiers:
-      '@theguild/components': 4.5.2
+      '@theguild/components': 4.5.4
       '@theguild/tailwind-config': 0.2.1
       '@types/react': 18.0.27
       next: 13.1.1
@@ -1199,7 +1199,7 @@ importers:
       tailwindcss: 3.2.4
       zod: 3.20.2
     dependencies:
-      '@theguild/components': 4.5.2_q76c2b4vyoegvsbrcwkfvimnai
+      '@theguild/components': 4.5.4_q76c2b4vyoegvsbrcwkfvimnai
       next: 13.1.1_biqbaboplfbrettd7655fr4n2y
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
@@ -1213,7 +1213,7 @@ importers:
     specifiers:
       '@next/env': 13.1.1
       '@radix-ui/react-tooltip': 1.0.3
-      '@theguild/components': 4.5.2
+      '@theguild/components': 4.5.4
       '@theguild/tailwind-config': 0.2.1
       '@types/react': 18.0.27
       clsx: 1.2.1
@@ -1228,7 +1228,7 @@ importers:
     dependencies:
       '@next/env': 13.1.1
       '@radix-ui/react-tooltip': 1.0.3_5ndqzdd6t4rivxsukjv3i3ak2q
-      '@theguild/components': 4.5.2_q76c2b4vyoegvsbrcwkfvimnai
+      '@theguild/components': 4.5.4_q76c2b4vyoegvsbrcwkfvimnai
       clsx: 1.2.1
       next: 13.1.1_biqbaboplfbrettd7655fr4n2y
       next-themes: 0.2.1_q76c2b4vyoegvsbrcwkfvimnai
@@ -4240,6 +4240,7 @@ packages:
     engines: {node: '>=6.9.0'}
     dependencies:
       regenerator-runtime: 0.13.11
+    dev: false
 
   /@babel/runtime/7.20.7:
     resolution: {integrity: sha512-UF0tvkUtxwAgZ5W/KrkHf0Rn0fdnLDU9ScxBrEVNUprE/MzirjK4MJUX1/BVDv00Sv8cljtukVK1aky++X1SjQ==}
@@ -8193,7 +8194,7 @@ packages:
   /@manypkg/get-packages/1.1.3:
     resolution: {integrity: sha512-fo+QhuU3qE/2TQMQmbVMqaQ6EWbMhi4ABWP+O4AM1NqPBuy0OrApV5LO6BrrgnhtAHS2NH6RrVk9OL181tTi8A==}
     dependencies:
-      '@babel/runtime': 7.19.4
+      '@babel/runtime': 7.20.7
       '@changesets/types': 4.1.0
       '@manypkg/find-root': 1.1.0
       fs-extra: 8.1.0
@@ -8237,7 +8238,7 @@ packages:
       unified: 10.1.2
       unist-util-position-from-estree: 1.1.1
       unist-util-stringify-position: 3.0.2
-      unist-util-visit: 4.1.1
+      unist-util-visit: 4.1.2
       vfile: 5.3.5
     transitivePeerDependencies:
       - supports-color
@@ -8464,8 +8465,8 @@ packages:
       - utf-8-validate
     dev: true
 
-  /@next/bundle-analyzer/13.1.5:
-    resolution: {integrity: sha512-Z+1gyS0Hy+Lpt2k/067YIxmYoKQt0RtHy3EMyR3SMZyZGmx3muZPUBS0Aj+tdfdReVNOK2nQdT8ghSZG9Lwmbw==}
+  /@next/bundle-analyzer/13.1.6:
+    resolution: {integrity: sha512-rJS9CtLoGT58mL+v2ISKANosFFWP/0YKYByHQ3vTaZrbQP8b1rYRxd2QVMJmnSXaFkiP9URt1XJ6OdGyVq5b6g==}
     dependencies:
       webpack-bundle-analyzer: 4.7.0
     transitivePeerDependencies:
@@ -11284,8 +11285,8 @@ packages:
     dev: false
     patched: true
 
-  /@theguild/components/4.5.2_q76c2b4vyoegvsbrcwkfvimnai:
-    resolution: {integrity: sha512-pK7f6w91aSl8APHGG0a2Ru88yBZwkTwhW8+xlD6lQcLlbaaScnI3WIJvBRNZsm5ai+WCYesmQAqzHapgMcqXlA==}
+  /@theguild/components/4.5.4_q76c2b4vyoegvsbrcwkfvimnai:
+    resolution: {integrity: sha512-p9IQC6lkEduz2qG9nMFClOEUB4TA3jcbsf2F08dQqa4oESMbpx3DwlBhd8sLTvGl0K07qh1DP0vjWggmEh3iig==}
     peerDependencies:
       next: ^12.3.1 || ^13.0.0
       react: ^18.2.0
@@ -11296,7 +11297,7 @@ packages:
       '@algolia/autocomplete-plugin-query-suggestions': 1.7.4_algoliasearch@4.14.3
       '@algolia/autocomplete-theme-classic': 1.7.4
       '@giscus/react': 2.2.6_biqbaboplfbrettd7655fr4n2y
-      '@next/bundle-analyzer': 13.1.5
+      '@next/bundle-analyzer': 13.1.6
       '@radix-ui/react-navigation-menu': 1.1.1_biqbaboplfbrettd7655fr4n2y
       algoliasearch: 4.14.3
       clsx: 1.2.1
@@ -11305,17 +11306,17 @@ packages:
       mermaid: 9.3.0
       next: 13.1.1_biqbaboplfbrettd7655fr4n2y
       next-videos: 1.5.0
-      nextra: 2.2.13_q76c2b4vyoegvsbrcwkfvimnai
-      nextra-theme-docs: 2.2.13_45p7ptalf3sm4r75hzq3pywol4
+      nextra: 2.2.14_q76c2b4vyoegvsbrcwkfvimnai
+      nextra-theme-docs: 2.2.14_7q4ckdafu7ealwynzv2eidet24
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
-      react-instantsearch-dom: 6.38.3_lcvw2wliyvolumce2ki4t5bwom
+      react-instantsearch-dom: 6.39.0_lcvw2wliyvolumce2ki4t5bwom
       react-paginate: 8.1.4_react@18.2.0
       react-player: 2.11.0_react@18.2.0
       remark-mdx-disable-explicit-jsx: 0.1.0
       search-insights: 2.2.3
       semver: 7.3.8
-      unist-util-visit: 4.1.1
+      unist-util-visit: 4.1.2
       use-debounce: 9.0.3_react@18.2.0
     transitivePeerDependencies:
       - '@algolia/client-search'
@@ -12385,8 +12386,8 @@ packages:
       require-from-string: 2.0.2
       uri-js: 4.4.1
 
-  /algoliasearch-helper/3.11.2_algoliasearch@4.14.3:
-    resolution: {integrity: sha512-eKvSM5hz5w9RcUowu8LnQ5v0KRrFLCvF4K3KF/Ab3VwCT726rWgZUWUIQUPjr9qDENUMukQ/IHZ7bGUVYRGP0g==}
+  /algoliasearch-helper/3.11.3_algoliasearch@4.14.3:
+    resolution: {integrity: sha512-TbaEvLwiuGygHQIB8y+OsJKQQ40+JKUua5B91X66tMUHyyhbNHvqyr0lqd3wCoyKx7WybyQrC0WJvzoIeh24Aw==}
     peerDependencies:
       algoliasearch: '>= 3.1 < 6'
     dependencies:
@@ -15799,7 +15800,7 @@ packages:
       synckit: 0.8.4
       tslib: 2.5.0
       unified: 10.1.2
-      unist-util-visit: 4.1.1
+      unist-util-visit: 4.1.2
       uvu: 0.5.6
       vfile: 5.3.5
     transitivePeerDependencies:
@@ -20205,7 +20206,7 @@ packages:
     dependencies:
       '@types/mdast': 3.0.10
       '@types/unist': 2.0.6
-      unist-util-visit: 4.1.1
+      unist-util-visit: 4.1.2
     dev: false
 
   /mdast-util-find-and-replace/2.2.1:
@@ -20366,7 +20367,7 @@ packages:
       unist-builder: 3.0.0
       unist-util-generated: 2.0.0
       unist-util-position: 4.0.3
-      unist-util-visit: 4.1.1
+      unist-util-visit: 4.1.2
     dev: false
 
   /mdast-util-to-markdown/1.3.0:
@@ -20377,7 +20378,7 @@ packages:
       longest-streak: 3.0.1
       mdast-util-to-string: 3.1.0
       micromark-util-decode-string: 1.0.2
-      unist-util-visit: 4.1.1
+      unist-util-visit: 4.1.2
       zwitch: 2.0.2
 
   /mdast-util-to-string/2.0.0:
@@ -21685,11 +21686,11 @@ packages:
       next: 13.1.1_biqbaboplfbrettd7655fr4n2y
     dev: false
 
-  /nextra-theme-docs/2.2.13_45p7ptalf3sm4r75hzq3pywol4:
-    resolution: {integrity: sha512-cMjxK/ooLaobm/3xxioKnyUrdTXcejMh1hB0bJirKZ7Vm5GdI3hHsvlE4hCj3mV3/JvusEaUx8VvApb2LsJ/FQ==}
+  /nextra-theme-docs/2.2.14_7q4ckdafu7ealwynzv2eidet24:
+    resolution: {integrity: sha512-QQcHOcAXSfrpbSX3FqXgcQ2favKLnBAczqKWbSDVEtgHiUG6s7pVpxclpKm5F1c/fP47v19USRq3BL/SZ4JEIQ==}
     peerDependencies:
       next: '>=9.5.3'
-      nextra: 2.2.13
+      nextra: 2.2.14
       react: '>=16.13.1'
       react-dom: '>=16.13.1'
     dependencies:
@@ -21704,15 +21705,15 @@ packages:
       next: 13.1.1_biqbaboplfbrettd7655fr4n2y
       next-seo: 5.14.0_q76c2b4vyoegvsbrcwkfvimnai
       next-themes: 0.2.1_q76c2b4vyoegvsbrcwkfvimnai
-      nextra: 2.2.13_q76c2b4vyoegvsbrcwkfvimnai
+      nextra: 2.2.14_q76c2b4vyoegvsbrcwkfvimnai
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
       scroll-into-view-if-needed: 3.0.4
       zod: 3.20.2
     dev: false
 
-  /nextra/2.2.13_q76c2b4vyoegvsbrcwkfvimnai:
-    resolution: {integrity: sha512-COTh3Dw00qkiOMKynJlJlWNbhjHwawoL3oc206+C9x8V0zRmWg0bbwpRYpVeJXw7E627G/zL2jw8iZG01pk8ZQ==}
+  /nextra/2.2.14_q76c2b4vyoegvsbrcwkfvimnai:
+    resolution: {integrity: sha512-kToTiTiE4qrQsQ9snFRqCGLLSjKSFgFV/BJm3yp/SRmkmCr1WaWrlmUTAuXlxM7PREbNaZouNSOJ0hGS92rM8A==}
     peerDependencies:
       next: '>=9.5.3'
       react: '>=16.13.1'
@@ -21740,7 +21741,7 @@ packages:
       slash: 3.0.0
       title: 3.5.3
       unist-util-remove: 3.1.1
-      unist-util-visit: 4.1.1
+      unist-util-visit: 4.1.2
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -23716,22 +23717,22 @@ packages:
       react: 18.2.0
     dev: false
 
-  /react-instantsearch-core/6.38.3_67xkusp2uelphus2k7ikyhm6rq:
-    resolution: {integrity: sha512-m7sL8NR5SlqctZJqoRYyBUFSUplK221EHESC+g6+fZ9Vd1fUX07MNvnbZ9+8Uyn0v+Hi8nL/3qGesJZ/xbJ/dg==}
+  /react-instantsearch-core/6.39.0_67xkusp2uelphus2k7ikyhm6rq:
+    resolution: {integrity: sha512-UROe0jjXI56pu1uHuP5lDhyXMIrodkDBISBv5pLU9/1LIYMNF3o4C9FllTdfia3Jz3lDDsSEcPpc/77so2x3Ww==}
     peerDependencies:
       algoliasearch: '>= 3.1 < 5'
       react: '>= 16.3.0 < 19'
     dependencies:
       '@babel/runtime': 7.20.7
       algoliasearch: 4.14.3
-      algoliasearch-helper: 3.11.2_algoliasearch@4.14.3
+      algoliasearch-helper: 3.11.3_algoliasearch@4.14.3
       prop-types: 15.8.1
       react: 18.2.0
       react-fast-compare: 3.2.0
     dev: false
 
-  /react-instantsearch-dom/6.38.3_lcvw2wliyvolumce2ki4t5bwom:
-    resolution: {integrity: sha512-1VQxMq23pAaeJjyBdTuC+U2DHa35ygnKd4fCTWHv0YK/GwneoSOubxKf24QtNLsHfswJ/qjpW21xXv6IVRA90g==}
+  /react-instantsearch-dom/6.39.0_lcvw2wliyvolumce2ki4t5bwom:
+    resolution: {integrity: sha512-wdFGDFugoCpO9buxjybyLTs7cblQ6g+NIiYIsZ9ua0FLUIdoeawXQYDV83dDzcNgbml5RTiKJsAFxlne8gguMg==}
     peerDependencies:
       algoliasearch: '>= 3.1 < 5'
       react: '>= 16.3.0 < 19'
@@ -23739,13 +23740,13 @@ packages:
     dependencies:
       '@babel/runtime': 7.20.7
       algoliasearch: 4.14.3
-      algoliasearch-helper: 3.11.2_algoliasearch@4.14.3
+      algoliasearch-helper: 3.11.3_algoliasearch@4.14.3
       classnames: 2.3.2
       prop-types: 15.8.1
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
       react-fast-compare: 3.2.0
-      react-instantsearch-core: 6.38.3_67xkusp2uelphus2k7ikyhm6rq
+      react-instantsearch-core: 6.39.0_67xkusp2uelphus2k7ikyhm6rq
     dev: false
 
   /react-is/16.13.1:
@@ -24247,7 +24248,7 @@ packages:
       rehype-parse: 8.0.4
       unified: 10.1.2
       unist-util-remove-position: 4.0.1
-      unist-util-visit: 4.1.1
+      unist-util-visit: 4.1.2
     dev: false
 
   /rehype-parse/8.0.4:
@@ -24311,7 +24312,7 @@ packages:
     dependencies:
       '@types/hast': 2.3.4
       unified: 10.1.2
-      unist-util-visit: 4.1.1
+      unist-util-visit: 4.1.2
     dev: false
 
   /remark-mdx/2.1.5:
@@ -26728,7 +26729,7 @@ packages:
     resolution: {integrity: sha512-0yDkppiIhDlPrfHELgB+NLQD5mfjup3a8UYclHruTJWmY74je8g+CIFr79x5f6AkmzSwlvKLbs63hC0meOMowQ==}
     dependencies:
       '@types/unist': 2.0.6
-      unist-util-visit: 4.1.1
+      unist-util-visit: 4.1.2
 
   /unist-util-remove/3.1.1:
     resolution: {integrity: sha512-kfCqZK5YVY5yEa89tvpl7KnBBHu2c6CzMkqHUrlOqaRgGOMp0sMvwWOVrbAtj03KhovQB7i96Gda72v/EFE0vw==}
@@ -26770,8 +26771,8 @@ packages:
       unist-util-visit-parents: 4.1.1
     dev: false
 
-  /unist-util-visit/4.1.1:
-    resolution: {integrity: sha512-n9KN3WV9k4h1DxYR1LoajgN93wpEi/7ZplVe02IoB4gH5ctI1AaF2670BLHQYbwj+pY83gFtyeySFiyMHJklrg==}
+  /unist-util-visit/4.1.2:
+    resolution: {integrity: sha512-MSd8OUGISqHdVvfY9TPhyK2VdUrPgxkUtWSuMHF6XAAFuL4LokseigBnZtPnJMu+FbynTkFNnFlyjxpVKujMRg==}
     dependencies:
       '@types/unist': 2.0.6
       unist-util-is: 5.1.1
