@@ -46,7 +46,7 @@ describe('CDN Worker', () => {
           },
         },
       }),
-      getRawStoreValue: (key: string) => map.get(key),
+      getRawStoreValue: async (key: string) => map.get(key),
     });
 
     const schemaRequest = new Request(`https://fake-worker.com/${targetId}/schema`, {
@@ -92,7 +92,7 @@ describe('CDN Worker', () => {
           },
         },
       }),
-      getRawStoreValue: (key: string) => map.get(key),
+      getRawStoreValue: async (key: string) => map.get(key),
     });
 
     const token = createToken(SECRET, targetId);
@@ -160,7 +160,7 @@ describe('CDN Worker', () => {
           },
         },
       }),
-      getRawStoreValue: (key: string) => map.get(key),
+      getRawStoreValue: async (key: string) => map.get(key),
     });
 
     const firstRequest = new Request(`https://fake-worker.com/${targetId}/supergraph`, {
@@ -221,7 +221,7 @@ describe('CDN Worker', () => {
           },
         },
       }),
-      getRawStoreValue: (key: string) => map.get(key),
+      getRawStoreValue: async (key: string) => map.get(key),
     });
 
     const token = createToken(SECRET, targetId);
@@ -284,7 +284,7 @@ describe('CDN Worker', () => {
           },
         },
       }),
-      getRawStoreValue: (key: string) => map.get(key),
+      getRawStoreValue: async (key: string) => map.get(key),
     });
 
     const token = createToken(SECRET, targetId);
@@ -352,7 +352,7 @@ describe('CDN Worker', () => {
           },
         },
       }),
-      getRawStoreValue: (key: string) => map.get(key),
+      getRawStoreValue: async (key: string) => map.get(key),
     });
 
     const token = createToken(SECRET, targetId);
@@ -397,7 +397,7 @@ describe('CDN Worker', () => {
     it('Should throw when target id is missing', async () => {
       const handleRequest = createRequestHandler({
         isKeyValid: KeyValidators.AlwaysTrue,
-        getRawStoreValue: (_key: string) => Promise.resolve(null),
+        getRawStoreValue: async (_key: string) => Promise.resolve(null),
       });
 
       const request = new Request('https://fake-worker.com/', {});
@@ -410,7 +410,7 @@ describe('CDN Worker', () => {
     it('Should throw when requested resource is not valid', async () => {
       const handleRequest = createRequestHandler({
         isKeyValid: KeyValidators.AlwaysTrue,
-        getRawStoreValue: (_key: string) => Promise.resolve(null),
+        getRawStoreValue: async (_key: string) => Promise.resolve(null),
       });
 
       const request = new Request('https://fake-worker.com/fake-target-id/error', {});
@@ -423,7 +423,7 @@ describe('CDN Worker', () => {
     it('Should throw when auth key is missing', async () => {
       const handleRequest = createRequestHandler({
         isKeyValid: KeyValidators.AlwaysTrue,
-        getRawStoreValue: (_key: string) => Promise.resolve(null),
+        getRawStoreValue: async (_key: string) => Promise.resolve(null),
       });
 
       const request = new Request('https://fake-worker.com/fake-target-id/sdl', {});
@@ -436,7 +436,7 @@ describe('CDN Worker', () => {
     it('Should throw when key validation function fails', async () => {
       const handleRequest = createRequestHandler({
         isKeyValid: KeyValidators.AlwaysFalse,
-        getRawStoreValue: (_key: string) => Promise.resolve(null),
+        getRawStoreValue: async (_key: string) => Promise.resolve(null),
       });
 
       const request = new Request('https://fake-worker.com/fake-target-id/sdl', {
@@ -474,7 +474,7 @@ describe('CDN Worker', () => {
             },
           },
         }),
-        getRawStoreValue: (key: string) => map.get(key),
+        getRawStoreValue: async (key: string) => map.get(key),
       });
 
       const token = createToken(SECRET, targetId);
@@ -509,7 +509,7 @@ describe('CDN Worker', () => {
             },
           },
         }),
-        getRawStoreValue: (key: string) => map.get(key),
+        getRawStoreValue: async (key: string) => map.get(key),
       });
 
       const token = createToken(SECRET, 'fake-target-id');
@@ -542,7 +542,7 @@ describe('CDN Worker', () => {
             },
           },
         }),
-        getRawStoreValue: (key: string) => new Map().get(key),
+        getRawStoreValue: async (key: string) => new Map().get(key),
       });
 
       const request = new Request(`https://fake-worker.com/some-target/sdl`, {
