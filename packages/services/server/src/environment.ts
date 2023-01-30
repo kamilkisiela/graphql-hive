@@ -139,7 +139,6 @@ const S3Model = zod.object({
   S3_SECRET_ACCESS_KEY: zod.string(),
   S3_BUCKET_NAME: zod.string(),
   S3_PUBLIC_URL: emptyString(zod.string().url().optional()),
-  CDN_AUTH_PRIVATE_KEY: zod.string(),
 });
 
 const LogModel = zod.object({
@@ -301,7 +300,6 @@ export const env = {
         }
       : null,
   cdn: {
-    authPrivateKey: s3.CDN_AUTH_PRIVATE_KEY,
     providers: {
       cloudflare:
         cdnCf.CDN_CF === '1'
