@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { handleTRPCError } from '@hive/service-common';
 import type { inferRouterInputs } from '@trpc/server';
 import { initTRPC } from '@trpc/server';
 import type { Context } from './context';
@@ -7,19 +8,20 @@ import { renderEmailVerificationEmail } from './templates/email-verification';
 import { renderPasswordResetEmail } from './templates/password-reset';
 
 const t = initTRPC.context<Context>().create();
+const procedure = t.procedure.use(t.middleware(handleTRPCError));
 
 export const emailsApiRouter = t.router({
-  schedule: t.procedure.input(EmailInputShape).mutation(async ({ ctx, input }) => {
+  schedule: procedure.input(EmailInputShape).mutation(async ({ ctx, input }) => {
     try {
       const job = await ctx.schedule(input);
 
       return { job: job.id ?? 'unknown' };
     } catch (error) {
-      ctx.errorHandler('Failed to schedule an email', error as Error, ctx.logger);
+      ctx.errorHandler('Failed to schedule an email', error as Error);
       throw error;
     }
   }),
-  sendEmailVerificationEmail: t.procedure
+  sendEmailVerificationEmail: procedure
     .input(
       z.object({
         user: z.object({
@@ -45,11 +47,11 @@ export const emailsApiRouter = t.router({
 
         return { job: job.id ?? 'unknown' };
       } catch (error) {
-        ctx.errorHandler('Failed to schedule an email', error as Error, ctx.logger);
+        ctx.errorHandler('Failed to schedule an email', error as Error);
         throw error;
       }
     }),
-  sendPasswordResetEmail: t.procedure
+  sendPasswordResetEmail: procedure
     .input(
       z.object({
         user: z.object({
@@ -74,7 +76,7 @@ export const emailsApiRouter = t.router({
         });
         return { job: job.id ?? 'unknown' };
       } catch (error) {
-        ctx.errorHandler('Failed to schedule an email', error as Error, ctx.logger);
+        ctx.errorHandler('Failed to schedule an email', error as Error);
         throw error;
       }
     }),

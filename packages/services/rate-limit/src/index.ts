@@ -3,13 +3,13 @@ import 'reflect-metadata';
 import {
   createServer,
   registerShutdown,
+  registerTRPC,
   reportReadiness,
   startMetrics,
 } from '@hive/service-common';
 import { createConnectionString } from '@hive/storage';
 import * as Sentry from '@sentry/node';
-import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
-import { rateLimitApiRouter } from './api';
+import { Context, rateLimitApiRouter } from './api';
 import { env } from './environment';
 import { createRateLimiter } from './limiter';
 
@@ -34,7 +34,7 @@ async function main() {
   });
 
   try {
-    const ctx = createRateLimiter({
+    const limiter = createRateLimiter({
       logger: server.log,
       rateLimitConfig: {
         interval: env.limitCacheUpdateIntervalMs,
@@ -46,18 +46,20 @@ async function main() {
       },
     });
 
-    await server.register(fastifyTRPCPlugin, {
-      prefix: '/trpc',
-      trpcOptions: {
-        router: rateLimitApiRouter,
-        createContext: () => ctx,
+    await registerTRPC(server, {
+      router: rateLimitApiRouter,
+      createContext({ req }): Context {
+        return {
+          req,
+          limiter,
+        };
       },
     });
 
     registerShutdown({
       logger: server.log,
       async onShutdown() {
-        await Promise.all([ctx.stop(), server.close()]);
+        await Promise.all([limiter.stop(), server.close()]);
       },
     });
 
@@ -73,7 +75,7 @@ async function main() {
       method: ['GET', 'HEAD'],
       url: '/_readiness',
       handler(_, res) {
-        const isReady = ctx.readiness();
+        const isReady = limiter.readiness();
         reportReadiness(isReady);
         void res.status(isReady ? 200 : 400).send();
       },
@@ -83,7 +85,7 @@ async function main() {
       await startMetrics(env.prometheus.labels.instance);
     }
     await server.listen(env.http.port, '0.0.0.0');
-    await ctx.start();
+    await limiter.start();
   } catch (error) {
     server.log.fatal(error);
     Sentry.captureException(error, {

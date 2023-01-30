@@ -1,22 +1,26 @@
-import type { FastifyLoggerInstance } from 'fastify';
+import type { FastifyRequest } from 'fastify';
 import { Redis } from 'ioredis';
 import { z } from 'zod';
+import { handleTRPCError } from '@hive/service-common';
 import type { inferRouterInputs } from '@trpc/server';
 import { initTRPC } from '@trpc/server';
 import { buildCounter, supergraphCounter, validateCounter } from './metrics';
 import { pickOrchestrator } from './orchestrators';
 
-const t = initTRPC
-  .context<{
-    logger: FastifyLoggerInstance;
-    redis: Redis;
-    decrypt(value: string): string;
-    broker: {
-      endpoint: string;
-      signature: string;
-    } | null;
-  }>()
-  .create();
+export interface Context {
+  req: FastifyRequest;
+  redis: Redis;
+  decrypt(value: string): string;
+  broker: {
+    endpoint: string;
+    signature: string;
+  } | null;
+}
+
+const t = initTRPC.context<Context>().create();
+
+const errorMiddleware = t.middleware(handleTRPCError);
+const procedure = t.procedure.use(errorMiddleware);
 
 const TYPE_VALIDATION = z.enum(['single', 'federation', 'stitching']);
 const SCHEMA_OBJECT_VALIDATION = {
@@ -32,7 +36,7 @@ const EXTERNAL_VALIDATION = z
   .nullable();
 
 export const schemaBuilderApiRouter = t.router({
-  supergraph: t.procedure
+  supergraph: procedure
     .input(
       z
         .object({
@@ -55,7 +59,7 @@ export const schemaBuilderApiRouter = t.router({
           type: input.type,
         })
         .inc();
-      return await pickOrchestrator(input.type, ctx.redis, ctx.logger, ctx.decrypt).supergraph(
+      return await pickOrchestrator(input.type, ctx.redis, ctx.req.log, ctx.decrypt).supergraph(
         input.schemas,
         input.external
           ? {
@@ -65,7 +69,7 @@ export const schemaBuilderApiRouter = t.router({
           : null,
       );
     }),
-  validate: t.procedure
+  validate: procedure
     .input(
       z
         .object({
@@ -81,7 +85,7 @@ export const schemaBuilderApiRouter = t.router({
           type: input.type,
         })
         .inc();
-      return await pickOrchestrator(input.type, ctx.redis, ctx.logger, ctx.decrypt).validate(
+      return await pickOrchestrator(input.type, ctx.redis, ctx.req.log, ctx.decrypt).validate(
         input.schemas,
         input.external
           ? {
@@ -91,7 +95,7 @@ export const schemaBuilderApiRouter = t.router({
           : null,
       );
     }),
-  build: t.procedure
+  build: procedure
     .input(
       z
         .object({
@@ -107,7 +111,7 @@ export const schemaBuilderApiRouter = t.router({
           type: input.type,
         })
         .inc();
-      return await pickOrchestrator(input.type, ctx.redis, ctx.logger, ctx.decrypt).build(
+      return await pickOrchestrator(input.type, ctx.redis, ctx.req.log, ctx.decrypt).build(
         input.schemas,
         input.external
           ? {
