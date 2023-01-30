@@ -249,6 +249,7 @@ services:
       CDN_AUTH_PRIVATE_KEY: ${CDN_AUTH_PRIVATE_KEY}
       CDN_API: '1'
       CDN_API_BASE_URL: 'http://localhost:8082'
+      AUTH_ORGANIZATION_OIDC: '1'
 
   schema:
     image: '${DOCKER_REGISTRY}schema${DOCKER_TAG}'
@@ -375,3 +376,4 @@ services:
       GRAPHQL_ENDPOINT: http://server:3001/graphql
       SERVER_ENDPOINT: http://server:3001
       AUTH_REQUIRE_EMAIL_VERIFICATION: '0'
+      AUTH_ORGANIZATION_OIDC: '1'
