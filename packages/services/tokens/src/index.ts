@@ -7,13 +7,12 @@ import {
   createErrorHandler,
   createServer,
   registerShutdown,
+  registerTRPC,
   reportReadiness,
   startHeartbeats,
   startMetrics,
 } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
-import type { CreateFastifyContextOptions } from '@trpc/server/adapters/fastify';
-import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
 import { Context, tokensApiRouter } from './api';
 import { useCache } from './cache';
 import { env } from './environment';
@@ -107,18 +106,15 @@ export async function main() {
       onShutdown: shutdown,
     });
 
-    await server.register(fastifyTRPCPlugin, {
-      prefix: '/trpc',
-      trpcOptions: {
-        router: tokensApiRouter,
-        createContext({ req }: CreateFastifyContextOptions): Context {
-          return {
-            logger: req.log,
-            errorHandler,
-            getStorage,
-            tokenReadFailuresCache,
-          };
-        },
+    await registerTRPC(server, {
+      router: tokensApiRouter,
+      createContext({ req }): Context {
+        return {
+          req,
+          errorHandler,
+          getStorage,
+          tokenReadFailuresCache,
+        };
       },
     });
 

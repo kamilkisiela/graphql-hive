@@ -13,13 +13,13 @@ import { createIsKeyValid } from '@hive/cdn-script/key-validation';
 import {
   createServer,
   registerShutdown,
+  registerTRPC,
   reportReadiness,
   startMetrics,
 } from '@hive/service-common';
 import { createConnectionString, createStorage as createPostgreSQLStorage } from '@hive/storage';
 import { Dedupe, ExtraErrorData } from '@sentry/integrations';
 import * as Sentry from '@sentry/node';
-import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
 import { createServerAdapter } from '@whatwg-node/server';
 import { createContext, internalApiRouter } from './api';
 import { asyncStorage } from './async-storage';
@@ -257,13 +257,10 @@ export async function main() {
 
     const crypto = new CryptoProvider(env.encryptionSecret);
 
-    await server.register(fastifyTRPCPlugin, {
-      prefix: '/trpc',
-      trpcOptions: {
-        router: internalApiRouter,
-        createContext() {
-          return createContext({ storage, crypto });
-        },
+    await registerTRPC(server, {
+      router: internalApiRouter,
+      createContext({ req }) {
+        return createContext({ storage, crypto, req });
       },
     });
 

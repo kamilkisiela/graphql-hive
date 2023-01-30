@@ -3,12 +3,12 @@ import 'reflect-metadata';
 import {
   createServer,
   registerShutdown,
+  registerTRPC,
   reportReadiness,
   startMetrics,
 } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
-import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
-import { usageEstimatorApiRouter } from './api';
+import { createContext, usageEstimatorApiRouter } from './api';
 import { env } from './environment';
 import { createEstimator } from './estimator';
 import { clickHouseElapsedDuration, clickHouseReadDuration } from './metrics';
@@ -34,7 +34,7 @@ async function main() {
   });
 
   try {
-    const context = createEstimator({
+    const estimator = createEstimator({
       logger: server.log,
       clickhouse: {
         protocol: env.clickhouse.protocol,
@@ -52,15 +52,14 @@ async function main() {
     registerShutdown({
       logger: server.log,
       async onShutdown() {
-        await Promise.all([context.stop(), server.close()]);
+        await Promise.all([estimator.stop(), server.close()]);
       },
     });
 
-    await server.register(fastifyTRPCPlugin, {
-      prefix: '/trpc',
-      trpcOptions: {
-        router: usageEstimatorApiRouter,
-        createContext: () => context,
+    await registerTRPC(server, {
+      router: usageEstimatorApiRouter,
+      createContext({ req }) {
+        return createContext(estimator, req);
       },
     });
 
@@ -76,7 +75,7 @@ async function main() {
       method: ['GET', 'HEAD'],
       url: '/_readiness',
       handler(_, res) {
-        const isReady = context.readiness();
+        const isReady = estimator.readiness();
         reportReadiness(isReady);
         void res.status(isReady ? 200 : 400).send();
       },
@@ -86,7 +85,7 @@ async function main() {
       await startMetrics(env.prometheus.labels.instance);
     }
     await server.listen(env.http.port, '0.0.0.0');
-    await context.start();
+    await estimator.start();
   } catch (error) {
     server.log.fatal(error);
     Sentry.captureException(error, {

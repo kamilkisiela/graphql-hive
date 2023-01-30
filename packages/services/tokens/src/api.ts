@@ -1,8 +1,8 @@
 import { createHash } from 'crypto';
-import type { FastifyLoggerInstance } from 'fastify';
+import type { FastifyRequest } from 'fastify';
 import { Lru as LruType } from 'tiny-lru';
 import { z } from 'zod';
-import { createErrorHandler, metrics } from '@hive/service-common';
+import { createErrorHandler, handleTRPCError, metrics } from '@hive/service-common';
 import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
 import { initTRPC } from '@trpc/server';
 import { useCache } from './cache';
@@ -61,13 +61,14 @@ function generateToken() {
 }
 
 export type Context = {
-  logger: FastifyLoggerInstance;
+  req: FastifyRequest;
   errorHandler: ReturnType<typeof createErrorHandler>;
   getStorage: ReturnType<typeof useCache>['getStorage'];
   tokenReadFailuresCache: LruType<string>;
 };
 
 const t = initTRPC.context<Context>().create();
+const errorMiddleware = t.middleware(handleTRPCError);
 
 const prometheusMiddleware = t.middleware(async ({ next, path }) => {
   const stopTimer = httpRequestDuration.startTimer({ path });
@@ -79,7 +80,7 @@ const prometheusMiddleware = t.middleware(async ({ next, path }) => {
   }
 });
 
-const procedure = t.procedure.use(prometheusMiddleware);
+const procedure = t.procedure.use(prometheusMiddleware).use(errorMiddleware);
 
 export const tokensApiRouter = t.router({
   targetTokens: procedure.input(TARGET_INPUT_SCHEMA).query(async ({ ctx, input }) => {
@@ -178,7 +179,7 @@ export const tokensApiRouter = t.router({
 
       return result;
     } catch (error) {
-      ctx.errorHandler(`Failed to get a token "${alias}"`, error as Error, ctx.logger);
+      ctx.errorHandler(`Failed to get a token "${alias}"`, error as Error, ctx.req.log);
 
       // set token read as failure
       // so we don't try to read it again for next X minutes

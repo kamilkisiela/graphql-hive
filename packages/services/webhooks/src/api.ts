@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { handleTRPCError } from '@hive/service-common';
 import type { inferRouterInputs } from '@trpc/server';
 import { initTRPC } from '@trpc/server';
 import type { Context } from './types';
@@ -44,15 +45,17 @@ const webhookInput = z
   .required();
 
 const t = initTRPC.context<Context>().create();
+const errorMiddleware = t.middleware(handleTRPCError);
+const procedure = t.procedure.use(errorMiddleware);
 
 export const webhooksApiRouter = t.router({
-  schedule: t.procedure.input(webhookInput).mutation(async ({ ctx, input }) => {
+  schedule: procedure.input(webhookInput).mutation(async ({ ctx, input }) => {
     try {
       const job = await ctx.schedule(input);
 
       return { job: job.id ?? 'unknown' };
     } catch (error) {
-      ctx.errorHandler('Failed to schedule a webhook', error as Error, ctx.logger);
+      ctx.errorHandler('Failed to schedule a webhook', error as Error, ctx.req.log);
       throw error;
     }
   }),

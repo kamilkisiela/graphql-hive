@@ -3,13 +3,12 @@ import {
   createErrorHandler,
   createServer,
   registerShutdown,
+  registerTRPC,
   reportReadiness,
   startHeartbeats,
   startMetrics,
 } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
-import type { CreateFastifyContextOptions } from '@trpc/server/adapters/fastify';
-import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
 import { emailsApiRouter } from './api';
 import type { Context } from './context';
 import { env } from './environment';
@@ -69,13 +68,16 @@ async function main() {
       },
     });
 
-    await server.register(fastifyTRPCPlugin, {
-      prefix: '/trpc',
-      trpcOptions: {
-        router: emailsApiRouter,
-        createContext({ req }: CreateFastifyContextOptions): Context {
-          return { logger: req.log, errorHandler, schedule };
-        },
+    await registerTRPC(server, {
+      router: emailsApiRouter,
+      createContext({ req }): Context {
+        return {
+          req,
+          errorHandler(message: string, error: Error) {
+            return errorHandler(message, error, req.log);
+          },
+          schedule,
+        };
       },
     });
 
