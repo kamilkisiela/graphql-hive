@@ -1030,7 +1030,7 @@ importers:
       '@stripe/stripe-js': 1.46.0
       '@tailwindcss/line-clamp': 0.4.2
       '@tanstack/react-table': 8.0.0-beta.8
-      '@theguild/editor': 0.4.1
+      '@theguild/editor': 1.2.4
       '@trpc/client': 10.9.0
       '@trpc/server': 10.9.0
       '@types/cookies': 0.7.7
@@ -1119,7 +1119,7 @@ importers:
       '@stripe/react-stripe-js': 1.16.4_keartrz7uyerl3wkpjpue4xbhy
       '@stripe/stripe-js': 1.46.0
       '@tanstack/react-table': 8.0.0-beta.8_biqbaboplfbrettd7655fr4n2y
-      '@theguild/editor': 0.4.1_m3acdzultzo2owbx5gwkccg4tm
+      '@theguild/editor': 1.2.4_m3acdzultzo2owbx5gwkccg4tm
       '@trpc/client': 10.9.0_@trpc+server@10.9.0
       '@trpc/server': 10.9.0
       '@urql/core': 2.6.1_graphql@16.6.0
@@ -11326,16 +11326,16 @@ packages:
       - webpack
     dev: false
 
-  /@theguild/editor/0.4.1_m3acdzultzo2owbx5gwkccg4tm:
-    resolution: {integrity: sha512-AQ1FS7y+bY5QUYpbpF3QBIKJWXkxUfQ/rvW+Rm3VoN2mjetluGEopXSRip5KthXitLengTSr1c88pQXtmNGqzw==}
+  /@theguild/editor/1.2.4_m3acdzultzo2owbx5gwkccg4tm:
+    resolution: {integrity: sha512-1HP4snDkjAvTPb6IVXaUSW4F8La2Do4mJdhZ2dGMxwCLpChwjtjPzSZv/NqKT62M0UbZeOEs8nMbqVT+0UoemA==}
     peerDependencies:
       '@monaco-editor/react': ^4
-      monaco-editor: ^0.24.0 || ^0.25.0 || ^0.26.0 || ^0.27.0 || ^0.28.0 || ^0.29.0
-      react: ^17.0.1
-      react-dom: ^17.0.2
+      monaco-editor: ^0.24.0 || ^0.25.0 || ^0.26.0 || ^0.27.0 || ^0.28.0 || ^0.29.0 || ^0.30.0 || ^0.32.0 || ^0.34.0
+      react: ^18.2.0
+      react-dom: ^18.2.0
     dependencies:
       '@monaco-editor/react': 4.4.6_jvipfxa73ntvmo6bim7qoogjo4
-      graphql-language-service: 3.1.4_graphql@16.6.0
+      graphql-language-service: 3.2.5_graphql@16.6.0
       monaco-editor: 0.27.0
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
@@ -14277,8 +14277,8 @@ packages:
     dependencies:
       '@iarna/toml': 2.2.5
 
-  /cosmiconfig-typescript-loader/4.1.1_hguxidgmm6hcsx2ec4lzz7uqxu:
-    resolution: {integrity: sha512-9DHpa379Gp0o0Zefii35fcmuuin6q92FnLDffzdZ0l9tVd3nEobG3O+MZ06+kuBvFTSVScvNb/oHA13Nd4iipg==}
+  /cosmiconfig-typescript-loader/4.3.0_hguxidgmm6hcsx2ec4lzz7uqxu:
+    resolution: {integrity: sha512-NTxV1MFfZDLPiBMjxbHRwSh5LaLcPMwNdCutmnHJCKoVnlvldPWlllonKwrsRJ5pYZBIBGRWWU2tfvzxgeSW5Q==}
     engines: {node: '>=12', npm: '>=6'}
     peerDependencies:
       '@types/node': '*'
@@ -14289,21 +14289,6 @@ packages:
       cosmiconfig: 7.0.1
       ts-node: 10.9.1
     dev: false
-
-  /cosmiconfig-typescript-loader/4.1.1_thgmyp3ypwxicrrxhqijzwgoje:
-    resolution: {integrity: sha512-9DHpa379Gp0o0Zefii35fcmuuin6q92FnLDffzdZ0l9tVd3nEobG3O+MZ06+kuBvFTSVScvNb/oHA13Nd4iipg==}
-    engines: {node: '>=12', npm: '>=6'}
-    peerDependencies:
-      '@types/node': '*'
-      cosmiconfig: '>=7'
-      ts-node: '>=10'
-      typescript: '>=3'
-    dependencies:
-      '@types/node': 18.11.18
-      cosmiconfig: 7.0.1
-      ts-node: 10.9.1_77eewksgbftpmjzrrlme5yowfm
-      typescript: 4.9.4
-    dev: true
 
   /cosmiconfig-typescript-loader/4.3.0_thgmyp3ypwxicrrxhqijzwgoje:
     resolution: {integrity: sha512-NTxV1MFfZDLPiBMjxbHRwSh5LaLcPMwNdCutmnHJCKoVnlvldPWlllonKwrsRJ5pYZBIBGRWWU2tfvzxgeSW5Q==}
@@ -17361,7 +17346,7 @@ packages:
       '@graphql-tools/utils': 8.13.1_graphql@16.6.0
       cosmiconfig: 7.0.1
       cosmiconfig-toml-loader: 1.0.0
-      cosmiconfig-typescript-loader: 4.1.1_hguxidgmm6hcsx2ec4lzz7uqxu
+      cosmiconfig-typescript-loader: 4.3.0_hguxidgmm6hcsx2ec4lzz7uqxu
       graphql: 16.6.0
       minimatch: 4.2.1
       string-env-interpolation: 1.0.1
@@ -17391,7 +17376,7 @@ packages:
       '@graphql-tools/utils': 8.13.1_graphql@16.6.0
       cosmiconfig: 7.0.1
       cosmiconfig-toml-loader: 1.0.0
-      cosmiconfig-typescript-loader: 4.1.1_thgmyp3ypwxicrrxhqijzwgoje
+      cosmiconfig-typescript-loader: 4.3.0_thgmyp3ypwxicrrxhqijzwgoje
       graphql: 16.6.0
       minimatch: 4.2.1
       string-env-interpolation: 1.0.1
@@ -17482,15 +17467,17 @@ packages:
       - utf-8-validate
     dev: false
 
-  /graphql-language-service/3.1.4_graphql@16.6.0:
-    resolution: {integrity: sha512-AF98AT4wLxkE9q1gRf20Yn0EPgd5SctRiw1IkGFivPr98pEX0sKqUcIcIHePn2mxqf73jlWUJV5v6l/CB1gdqQ==}
+  /graphql-language-service/3.2.5_graphql@16.6.0:
+    resolution: {integrity: sha512-utkQ8GfYrR310E7AWk2dGE9QRidIEtAJPJ5j0THHlA+h12s4loZmmGosaHpjzbKy6WCNKNw8aKkqt3eEBxJJRg==}
     hasBin: true
     peerDependencies:
-      graphql: '>= v14.5.0 <= 15.5.0'
+      graphql: ^15.5.0 || ^16.0.0
     dependencies:
       graphql: 16.6.0
       graphql-language-service-interface: 2.10.2_graphql@16.6.0
+      graphql-language-service-parser: 1.10.4_graphql@16.6.0
       graphql-language-service-types: 1.8.7_graphql@16.6.0
+      graphql-language-service-utils: 2.7.1_graphql@16.6.0
     transitivePeerDependencies:
       - '@swc/core'
       - '@swc/wasm'
