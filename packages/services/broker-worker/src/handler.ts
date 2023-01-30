@@ -40,8 +40,11 @@ export async function handleRequest(request: Request, keyValidator: typeof isSig
   const response = await fetch(parsedRequest.url, init);
   const text = await gatherResponse(response);
   return new Response(text, {
-    ...init,
     status: response.status,
     statusText: response.statusText,
+    headers: {
+      'content-type': 'text/plain',
+      'user-agent': 'Hive Broker',
+    },
   });
 }
