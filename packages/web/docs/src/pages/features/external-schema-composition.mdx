@@ -260,7 +260,7 @@ will be used as private key to hash the requests to your composition service.
 To run the container, you can use the following command:
 
 ```
-docker run -p 3069 -e SECRET="MY_SECRET_HERE" ghcr.io/kamilkisiela/graphql-hive/composition-federation-2
+docker run -p 3069:3069 -e SECRET="MY_SECRET_HERE" ghcr.io/kamilkisiela/graphql-hive/composition-federation-2
 ```
 
 You should make this service publicly available, and then configure it in Hive platform (see
