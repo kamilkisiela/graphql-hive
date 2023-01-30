@@ -107,24 +107,22 @@ export class TokenStorage {
 
   @atomic<TokenSelector>(({ token }) => token)
   async getToken({ token }: TokenSelector) {
-    // Tokens are MD5 hashes, so they are always 32 characters long
-    if (token.length !== 32) {
-      throw new HiveError('Invalid token provided!');
-    }
-
-    this.logger.debug('Fetching token (token=%s)', maskToken(token));
-
     try {
+      // Tokens are MD5 hashes, so they are always 32 characters long
+      if (token.length !== 32) {
+        throw new HiveError(`Incorrect length: received ${token.length}, expected 32`);
+      }
+
+      this.logger.debug('Fetching token (token=%s)', maskToken(token));
       const tokenInfo = await this.tokensService.getToken.query({ token });
 
       if (!tokenInfo) {
-        throw new Error('Token not found');
+        throw new HiveError('Not found');
       }
 
       return tokenInfo;
     } catch (error: any) {
       this.logger.error(error);
-
       throw new HiveError('Invalid token provided', {
         originalError: error,
       });
