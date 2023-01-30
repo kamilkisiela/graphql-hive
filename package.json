@@ -54,6 +54,7 @@
     "@changesets/cli": "2.26.0",
     "@graphql-codegen/add": "3.2.3",
     "@graphql-codegen/cli": "2.16.2",
+    "@graphql-codegen/client-preset": "1.2.6",
     "@graphql-codegen/gql-tag-operations-preset": "1.7.3",
     "@graphql-codegen/graphql-modules-preset": "2.5.10",
     "@graphql-codegen/typed-document-node": "2.3.11",

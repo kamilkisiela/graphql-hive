@@ -143,6 +143,6 @@ generates:
       - typescript-operations
 
   # Integration tests
-  ./integration-tests/testkit/gql:
+  ./integration-tests/testkit/gql/:
     documents: ./integration-tests/(testkit|tests)/**/*.ts
-    preset: gql-tag-operations-preset
+    preset: client-preset

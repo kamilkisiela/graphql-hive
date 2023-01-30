@@ -13,7 +13,7 @@ import {
 } from '@aws-sdk/client-s3';
 import { createSupergraphManager } from '@graphql-hive/client';
 import { fetch } from '@whatwg-node/fetch';
-import { gql } from '../../testkit/gql';
+import { graphql } from '../../testkit/gql';
 import { execute } from '../../testkit/graphql';
 import { initSeed } from '../../testkit/seed';
 import { getServiceHost } from '../../testkit/utils';
@@ -468,7 +468,7 @@ runArtifactsCDNTests('API Mirror', { service: 'server', port: 8082, path: '/arti
 // runArtifactsCDNTests('Local CDN Mock', 'http://127.0.0.1:3004/artifacts/v1/');
 
 describe('CDN token', () => {
-  const TargetCDNAccessTokensQuery = gql(/* GraphQL */ `
+  const TargetCDNAccessTokensQuery = graphql(/* GraphQL */ `
     query TargetCDNAccessTokens($selector: TargetSelectorInput!, $after: String, $first: Int = 2) {
       target(selector: $selector) {
         cdnAccessTokens(first: $first, after: $after) {
@@ -490,7 +490,7 @@ describe('CDN token', () => {
     }
   `);
 
-  const DeleteCDNAccessTokenMutation = gql(/* GraphQL */ `
+  const DeleteCDNAccessTokenMutation = graphql(/* GraphQL */ `
     mutation DeleteCDNAccessToken($input: DeleteCdnAccessTokenInput!) {
       deleteCdnAccessToken(input: $input) {
         error {

@@ -1,4 +1,3 @@
-import { gql } from '@app/gql';
 import {
   OrganizationAccessScope,
   OrganizationType,
@@ -34,6 +33,7 @@ import {
   updateMemberAccess,
   updateSchemaVersionStatus,
 } from './flow';
+import { graphql } from './gql';
 import { execute } from './graphql';
 import { collect, CollectedOperation } from './usage';
 import { generateUnique } from './utils';
@@ -51,7 +51,7 @@ export function initSeed() {
         ownerToken,
         async createPersonalProject(projectType: ProjectType) {
           const orgs = await execute({
-            document: gql(/* GraphQL */ `
+            document: graphql(/* GraphQL */ `
               query myOrganizations {
                 organizations {
                   total
