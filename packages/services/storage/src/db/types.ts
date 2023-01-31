@@ -11,7 +11,6 @@ export type alert_channel_type = "SLACK" | "WEBHOOK";
 export type alert_type = "SCHEMA_CHANGE_NOTIFICATIONS";
 export type operation_kind = "mutation" | "query" | "subscription";
 export type organization_type = "PERSONAL" | "REGULAR";
-export type schema_registry_action = "DELETE" | "PUSH";
 export type user_role = "ADMIN" | "MEMBER";
 
 export interface activities {
@@ -156,7 +155,7 @@ export interface projects {
 }
 
 export interface schema_log {
-  action: schema_registry_action;
+  action: string;
   author: string;
   commit: string;
   created_at: Date;
