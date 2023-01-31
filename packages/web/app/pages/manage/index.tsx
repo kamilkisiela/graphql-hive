@@ -12,13 +12,13 @@ import { withSessionProtection } from '@/lib/supertokens/guard';
 import { Checkbox, CheckboxGroup, Select, Tooltip } from '@chakra-ui/react';
 
 type DateRangeOptions = Exclude<
-  typeof DATE_RANGE_OPTIONS[number],
+  (typeof DATE_RANGE_OPTIONS)[number],
   {
     key: 'all';
   }
 >;
 
-function isNotAllOption(option: typeof DATE_RANGE_OPTIONS[number]): option is DateRangeOptions {
+function isNotAllOption(option: (typeof DATE_RANGE_OPTIONS)[number]): option is DateRangeOptions {
   return option.key !== 'all';
 }
 
