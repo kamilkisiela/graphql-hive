@@ -173,7 +173,7 @@ export const resolvers: SchemaModule.Resolvers = {
         organization,
         project,
         target,
-      }) as any;
+      });
     },
     async updateBaseSchema(_, { input }, { injector }) {
       const UpdateBaseSchemaModel = z.object({

@@ -46,7 +46,7 @@ import {
   organizations_billing,
   persisted_operations,
   projects,
-  schema_log,
+  schema_log as schema_log_in_db,
   schema_versions,
   target_validation,
   targets,
@@ -62,6 +62,10 @@ export type { tokens } from './db/types';
 type Connection = DatabasePool | DatabaseTransactionConnection;
 
 type OverrideProp<T extends {}, K extends keyof T, V extends T[K]> = Omit<T, K> & { [P in K]: V };
+
+type schema_log = Omit<schema_log_in_db, 'action'> & {
+  action: 'PUSH' | 'DELETE';
+};
 
 const organizationGetStartedMapping: Record<
   Exclude<keyof Organization['getStarted'], 'id'>,

@@ -1,10 +1,5 @@
 -- 
 
--- Describes an action that was performed on a registry.
--- PUSH - a new schema was pushed to the registry, an existing schema was updated
--- DELETE - a schema was deleted from the registry
-CREATE TYPE schema_registry_action AS ENUM ('PUSH', 'DELETE');
-
 -- Holds the actions that were performed on the registry.
 -- Every time a schema is pushed or deleted, a new entry is created.
 CREATE TABLE public.schema_log (
@@ -16,7 +11,7 @@ CREATE TABLE public.schema_log (
   sdl text,
   metadata text,
   commit text NOT NULL,
-  action schema_registry_action NOT NULL,
+  action text NOT NULL,
   target_id uuid NOT NULL REFERENCES public.targets(id) ON DELETE CASCADE,
   project_id uuid NOT NULL REFERENCES public.projects(id) ON DELETE CASCADE
 );
@@ -76,7 +71,7 @@ INSERT INTO public.schema_log (
   metadata,
   commit,
 --- Use `PUSH` for `schema_log.action`
-  'PUSH'::schema_registry_action as action,
+  'PUSH'::text as action,
   target_id,
   project_id
 FROM public.commits;
