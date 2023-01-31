@@ -16,14 +16,14 @@ import {
   DeleteFailureReasonCode,
   PublishFailureReasonCode,
   PublishIgnoreReasonCode,
-  // Check
+  /* Check */
   SchemaCheckConclusion,
   SchemaCheckFailureReason,
   SchemaCheckResult,
-  // Delete
+  /* Delete */
   SchemaDeleteConclusion,
   SchemaDeleteResult,
-  // Publish
+  /* Publish */
   SchemaPublishConclusion,
   SchemaPublishFailureReason,
   SchemaPublishResult,

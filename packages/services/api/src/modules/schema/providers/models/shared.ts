@@ -1,6 +1,7 @@
 import { PushedCompositeSchema, SingleSchema } from 'packages/services/api/src/shared/entities';
 import { Orchestrator } from './../../../../shared/entities';
 import type { SchemaModule } from './../../__generated__/types';
+
 export const SchemaPublishConclusion = {
   /**
    * Schema hasn't been published to the registry, because it contains no changes

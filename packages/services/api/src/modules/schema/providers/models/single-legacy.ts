@@ -8,11 +8,11 @@ import {
   CheckFailureReasonCode,
   PublishFailureReasonCode,
   PublishIgnoreReasonCode,
-  // Check
+  /* Check */
   SchemaCheckConclusion,
   SchemaCheckFailureReason,
   SchemaCheckResult,
-  // Publish
+  /* Publish */
   SchemaPublishConclusion,
   SchemaPublishFailureReason,
   SchemaPublishResult,
