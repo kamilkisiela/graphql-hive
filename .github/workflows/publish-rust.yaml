@@ -35,6 +35,14 @@ jobs:
     timeout-minutes: 40
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Use Node
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: .node-version
+
       - name: Prepare MacOS
         if: ${{ matrix.os == 'macos-latest' }}
         run: |
@@ -55,14 +63,7 @@ jobs:
           echo "RUST_TARGET=x86_64-pc-windows-msvc" | Out-File -FilePath $env:GITHUB_ENV -Append
           echo "RUST_TARGET_FILE=router.exe" | Out-File -FilePath $env:GITHUB_ENV -Append
           echo "RUST_TARGET_OS=win" | Out-File -FilePath $env:GITHUB_ENV -Append
-
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Use Node
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: .node-version
+          npm run cargo:fix
 
       - name: Install Protoc
         uses: arduino/setup-protoc@v1

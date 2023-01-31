@@ -1172,7 +1172,7 @@ dependencies = [
  "apollo-router",
  "async-trait",
  "futures",
- "graphql-parser 0.4.0 (git+https://github.com/kamilkisiela/graphql-parser.git?branch=kamil-minifier)",
+ "graphql-parser 0.4.0 (git+https://github.com/graphql-rust/graphql-parser.git?rev=8d76425d83c40670570cc325f57c730262f07456)",
  "graphql-tools",
  "http",
  "lru 0.7.8",
@@ -1210,7 +1210,7 @@ dependencies = [
 [[package]]
 name = "graphql-parser"
 version = "0.4.0"
-source = "git+https://github.com/kamilkisiela/graphql-parser.git?branch=kamil-minifier#3773ba8e1b471531823be0b90d7ffd5ca4752c20"
+source = "git+https://github.com/graphql-rust/graphql-parser.git?rev=8d76425d83c40670570cc325f57c730262f07456#8d76425d83c40670570cc325f57c730262f07456"
 dependencies = [
  "combine",
  "thiserror",
@@ -1218,10 +1218,11 @@ dependencies = [
 
 [[package]]
 name = "graphql-tools"
-version = "0.1.0"
-source = "git+https://github.com/dotansimha/graphql-tools-rs.git?branch=kamil-minifier#e1ab0436aef74aa2b53f1dfdbd2471b72ea6898a"
+version = "0.2.1"
+source = "git+https://github.com/dotansimha/graphql-tools-rs.git?branch=kamil-minifier-without-fork#e70f3bfa00520116d32d18c19397260f9eb48079"
 dependencies = [
- "graphql-parser 0.4.0 (git+https://github.com/kamilkisiela/graphql-parser.git?branch=kamil-minifier)",
+ "graphql-parser 0.4.0 (git+https://github.com/graphql-rust/graphql-parser.git?rev=8d76425d83c40670570cc325f57c730262f07456)",
+ "lazy_static",
  "serde",
  "serde_json",
 ]
