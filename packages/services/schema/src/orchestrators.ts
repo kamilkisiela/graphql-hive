@@ -215,6 +215,11 @@ const createFederation: (
   >(
     async ({ schemas, external }) => {
       if (external) {
+        logger.debug(
+          'Using external composition service (url=%s, schemas=%s)',
+          external.endpoint,
+          schemas.length,
+        );
         const body = JSON.stringify(
           schemas.map(schema => {
             return {
@@ -275,10 +280,11 @@ const createFederation: (
                       errors: [
                         {
                           message: `External composition failure: ${translatedMessage}`,
+                          source: 'graphql',
                         },
                       ],
                     },
-                  };
+                  } satisfies CompositionFailure;
                 }
               }
 
@@ -301,10 +307,11 @@ const createFederation: (
                 errors: [
                   {
                     message: `External composition network failure: [${error.statusCode}] ${error.message}`,
+                    source: 'graphql',
                   },
                 ],
               },
-            };
+            } satisfies CompositionFailure;
           }
 
           throw error;
@@ -328,6 +335,8 @@ const createFederation: (
 
         return parseResult.data;
       }
+
+      logger.debug('Using built-in composition service (schemas=%s)', schemas.length);
 
       const result = composeAndValidate(
         schemas.map(schema => {

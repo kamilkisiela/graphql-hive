@@ -38,8 +38,6 @@ export class SingleOrchestrator implements Orchestrator {
     });
   }
 
-  ensureConfig() {}
-
   @sentry('SingleOrchestrator.validate')
   async validate(schemas: SchemaObject[]) {
     this.logger.debug('Validating Single Schema');

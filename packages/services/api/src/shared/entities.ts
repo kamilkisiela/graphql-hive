@@ -1,7 +1,7 @@
-import type { CompositionFailureError } from '@hive/schema';
 import { DocumentNode, GraphQLError, SourceLocation } from 'graphql';
 import { parse } from 'graphql';
 import { z } from 'zod';
+import type { CompositionFailureError } from '@hive/schema';
 import type {
   AlertChannelType,
   AlertType,
@@ -254,10 +254,15 @@ export interface TargetSettings {
 }
 
 export interface Orchestrator {
-  ensureConfig(config: any): void | never;
-  validate(schemas: SchemaObject[], config: any): Promise<CompositionFailureError[]>;
-  build(schemas: SchemaObject[], config: any): Promise<SchemaObject>;
-  supergraph(schemas: SchemaObject[], config: any): Promise<string | null>;
+  validate(
+    schemas: SchemaObject[],
+    config: Project['externalComposition'],
+  ): Promise<CompositionFailureError[]>;
+  build(schemas: SchemaObject[], config: Project['externalComposition']): Promise<SchemaObject>;
+  supergraph(
+    schemas: SchemaObject[],
+    config: Project['externalComposition'],
+  ): Promise<string | null>;
 }
 
 export interface ActivityObject {

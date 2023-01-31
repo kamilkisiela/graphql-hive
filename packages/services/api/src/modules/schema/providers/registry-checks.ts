@@ -1,6 +1,6 @@
-import type { CompositionFailureError } from '@hive/schema';
 import { Injectable, Scope } from 'graphql-modules';
 import hashObject from 'object-hash';
+import type { CompositionFailureError } from '@hive/schema';
 import { buildSchema } from '../../../shared/schema';
 import type {
   Orchestrator,
@@ -98,7 +98,7 @@ export class RegistryChecks {
   }) {
     const validationErrors = await orchestrator.validate(
       extendWithBase(schemas, baseSchema).map(s => this.helper.createSchemaObject(s)),
-      project,
+      project.externalComposition,
     );
 
     if (Array.isArray(validationErrors) && validationErrors.length) {
@@ -153,13 +153,13 @@ export class RegistryChecks {
         orchestrator
           .build(
             latestVersion.schemas.map(s => this.helper.createSchemaObject(s)),
-            project,
+            project.externalComposition,
           )
           .then(buildSchema),
         orchestrator
           .build(
             schemas.map(s => this.helper.createSchemaObject(s)),
-            project,
+            project.externalComposition,
           )
           .then(buildSchema),
       ]);
