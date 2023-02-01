@@ -4,7 +4,7 @@ import { TypeInput as ThirdPartEmailPasswordTypeInput } from 'supertokens-node/r
 import zod from 'zod';
 import { env } from '@/env/backend';
 import { InternalApi } from '@hive/server';
-import { inferRouterProxyClient } from '@trpc/client';
+import { CreateTRPCProxyClient } from '@trpc/client';
 
 const OIDCProfileInfoSchema = zod.object({
   sub: zod.string(),
@@ -90,7 +90,7 @@ const getOIDCIdFromInput = (input: { userContext: any }): string => {
 };
 
 export const getOIDCThirdPartyEmailPasswordNodeOverrides = (args: {
-  internalApi: inferRouterProxyClient<InternalApi>;
+  internalApi: CreateTRPCProxyClient<InternalApi>;
 }): ThirdPartEmailPasswordTypeInput['override'] => ({
   apis: originalImplementation => ({
     ...originalImplementation,
@@ -137,7 +137,7 @@ export const createOIDCSuperTokensNoopProvider = () => ({
 });
 
 const fetchOIDCConfig = async (
-  internalApi: inferRouterProxyClient<InternalApi>,
+  internalApi: CreateTRPCProxyClient<InternalApi>,
   oidcIntegrationId: string,
 ): Promise<{
   id: string;
