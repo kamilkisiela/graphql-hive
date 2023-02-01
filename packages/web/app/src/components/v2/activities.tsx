@@ -243,10 +243,10 @@ export const Activities = (props: React.ComponentProps<'div'>): ReactElement => 
                   <>
                     <div className="self-center p-1">{icon}</div>
                     <div className="grow">
-                      {'project' in activity && (
+                      {'project' in activity && !!activity.project && (
                         <h3 className="mb-1 flex items-center font-medium">
                           <span className="line-clamp-1">{activity.project.name}</span>
-                          {'target' in activity && (
+                          {'target' in activity && !!activity.target && (
                             <>
                               <ArrowDownIcon className="h-4 w-4 shrink-0 -rotate-90 select-none" />
                               <span className="line-clamp-1">{activity.target.name}</span>
