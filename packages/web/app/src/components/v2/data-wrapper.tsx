@@ -1,9 +1,9 @@
 import { Component, ReactNode } from 'react';
-import { UseQueryState } from 'urql';
+import { AnyVariables, UseQueryState } from 'urql';
 import { QueryError } from '@/components/common/DataWrapper';
 import { Spinner } from '@/components/v2';
 
-export class DataWrapper<TData, TVariables> extends Component<{
+export class DataWrapper<TData, TVariables extends AnyVariables> extends Component<{
   query: UseQueryState<TData, TVariables>;
   showStale?: boolean;
   children(props: { data: TData }): ReactNode;
