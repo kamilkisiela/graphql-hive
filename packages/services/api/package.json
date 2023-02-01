@@ -18,7 +18,7 @@
     "@octokit/app": "13.1.2",
     "@sentry/node": "7.34.0",
     "@sentry/types": "7.34.0",
-    "@slack/web-api": "6.8.0",
+    "@slack/web-api": "6.8.1",
     "@theguild/buddy": "0.1.0",
     "@trpc/client": "10.9.1",
     "@trpc/server": "10.9.1",
