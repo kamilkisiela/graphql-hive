@@ -14,7 +14,7 @@ import {
 } from '@/lib/supertokens/third-party-email-password-node-oidc-provider';
 import { EmailsApi } from '@hive/emails';
 import { InternalApi } from '@hive/server';
-import { createTRPCProxyClient, httpLink, inferRouterProxyClient } from '@trpc/client';
+import { createTRPCProxyClient, CreateTRPCProxyClient, httpLink } from '@trpc/client';
 import { fetch } from '@whatwg-node/fetch';
 import { appInfo } from '../../lib/supertokens/app-info';
 import { createThirdPartyEmailPasswordNodeOktaProvider } from '../../lib/supertokens/third-party-email-password-node-okta-provider';
@@ -165,7 +165,7 @@ export const backendConfig = (): TypeInput => {
 };
 
 const getEnsureUserOverrides = (
-  internalApi: inferRouterProxyClient<InternalApi>,
+  internalApi: CreateTRPCProxyClient<InternalApi>,
 ): ThirdPartEmailPasswordTypeInput['override'] => ({
   apis: originalImplementation => ({
     ...originalImplementation,
