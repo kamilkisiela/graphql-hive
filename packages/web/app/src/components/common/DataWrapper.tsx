@@ -1,5 +1,5 @@
 import React from 'react';
-import { CombinedError, UseQueryState } from 'urql';
+import { AnyVariables, CombinedError, UseQueryState } from 'urql';
 import {
   Alert,
   AlertDescription,
@@ -57,7 +57,7 @@ export const QueryError: React.FC<{
   );
 };
 
-export class DataWrapper<TData, TVariables> extends React.Component<{
+export class DataWrapper<TData, TVariables extends AnyVariables> extends React.Component<{
   query: UseQueryState<TData, TVariables>;
   showStale?: boolean;
   loading?: boolean;
