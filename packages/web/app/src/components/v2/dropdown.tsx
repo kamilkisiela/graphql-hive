@@ -9,8 +9,8 @@ import {
   DropdownMenuItemProps,
   Separator as DropDownMenuSeparator,
   DropdownMenuSeparatorProps,
-  TriggerItem as DropDownMenuTriggerItem,
-  DropdownMenuTriggerItemProps,
+  Trigger as DropDownMenuTriggerItem,
+  DropdownMenuTriggerProps,
   Label,
   Root,
   Trigger,
@@ -99,7 +99,7 @@ const Item: FC<DropdownMenuItemProps> = ({ children, className, ...props }) => (
   </DropDownMenuItem>
 );
 
-const TriggerItem: FC<DropdownMenuTriggerItemProps> = ({ children, className, ...props }) => (
+const TriggerItem: FC<DropdownMenuTriggerProps> = ({ children, className, ...props }) => (
   <DropDownMenuTriggerItem
     className={clsx(
       `
