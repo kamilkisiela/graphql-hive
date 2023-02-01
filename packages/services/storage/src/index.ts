@@ -1342,7 +1342,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           target: string;
         }>,
       ) => {
-        const uniqueSelectorsMap = new Map<string, typeof selectors[0]>();
+        const uniqueSelectorsMap = new Map<string, (typeof selectors)[0]>();
 
         for (const selector of selectors) {
           const key = JSON.stringify({
