@@ -107,7 +107,7 @@ const DiffView = ({
           Previous or current schema is most likely incomplete and was force published
         </p>
         <pre className="mt-5 whitespace-pre-wrap rounded-lg bg-red-900 p-3 text-xs text-white">
-          {error.graphQLErrors[0].message}
+          {error.graphQLErrors?.[0].message ?? error.networkError?.message}
         </pre>
       </div>
     );
