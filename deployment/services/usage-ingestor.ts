@@ -32,7 +32,7 @@ export function deployUsageIngestor({
   imagePullSecret: k8s.core.v1.Secret;
 }) {
   const numberOfPartitions = 16;
-  const replicas = isProduction(deploymentEnv) ? 6 : 2;
+  const replicas = isProduction(deploymentEnv) ? 6 : 1;
   const cpuLimit = isProduction(deploymentEnv) ? '600m' : '300m';
   const maxReplicas = isProduction(deploymentEnv) ? numberOfPartitions : 2;
 
