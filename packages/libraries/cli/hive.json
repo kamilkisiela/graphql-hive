@@ -1,4 +1,6 @@
 {
   "registry": "http://localhost:8082/graphql",
-  "token": "f3b6afd4c6959809421f3099ef9b98aa"
+  "token": "f3b6afd4c6959809421f3099ef9b98aa",
+  "cdn.token": "your_token",
+  "cdn.endpoint": "your_cdn_endpoint"
 }

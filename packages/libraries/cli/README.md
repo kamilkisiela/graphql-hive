@@ -322,12 +322,16 @@ You can use the `HIVE_CONFIG` environment variable to define the path to the JSO
 
 Note that the CLI args will override the values in config if both are specified.
 
+The configuration input priority is: CLI args > environment variables > hive.json configuration.
+
 This is how the structure of the config file should look like:
 
 ```json
 {
   "registry": "<yourRegistryURL>",
-  "token": "<yourtoken>"
+  "token": "<yourToken>",
+  "cdn.token": "<yourCdnURL>",
+  "cdn.endpoint": "<yourCdnToken>"
 }
 ```
 

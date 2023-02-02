@@ -57,17 +57,23 @@ export default abstract class extends Command {
     TKey extends keyof TArgs,
   >({
     key,
+    path: inputPath,
     args,
     defaultValue,
     message,
     env,
   }: {
+    /** The cli configuration identifier, e.g `--token` */
     key: TKey;
+    /** The path to key in hive.json (optional, defaults to key) */
+    path?: TKey;
     args: TArgs;
     defaultValue?: TArgs[TKey] | null;
     message?: string;
     env?: string;
   }): NonNullable<TArgs[TKey]> | never {
+    const path: string = (inputPath ?? key) as string;
+
     if (args[key]) {
       return args[key];
     }
@@ -78,8 +84,8 @@ export default abstract class extends Command {
       return process.env[env] as TArgs[TKey];
     }
 
-    if (this._userConfig.has(key as string)) {
-      return this._userConfig.get(key as string);
+    if (this._userConfig.has(path)) {
+      return this._userConfig.get(path);
     }
 
     if (defaultValue) {
