@@ -59,7 +59,12 @@ const ProjectCard = ({
   const lastActivity = projectActivitiesQuery.data?.projectActivities.nodes[0];
 
   return (
-    <Card as={NextLink} key={project.id} href={href} className="self-start hover:bg-gray-800/40">
+    <Card
+      as={NextLink}
+      key={project.id}
+      href={href}
+      className="h-full self-start hover:bg-gray-800/40"
+    >
       <div className="flex items-start gap-x-2">
         <div className="grow">
           <h3 className="text-xs font-medium text-[#34EAB9]">{project.type}</h3>
@@ -131,7 +136,7 @@ function ProjectsPage(): ReactElement {
                   docsUrl={getDocsUrl(`/get-started/projects`)}
                 />
               ) : (
-                <div className="grid grid-cols-2 gap-5">
+                <div className="grid grid-cols-2 gap-5 items-stretch">
                   {projectsWithTargetsQuery.fetching
                     ? [1, 2].map(key => (
                         <Card key={key}>

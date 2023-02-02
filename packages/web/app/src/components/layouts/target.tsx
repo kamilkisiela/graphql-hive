@@ -187,7 +187,9 @@ export const TargetLayout = ({
         </div>
       </SubHeader>
 
-      <ProjectMigrationToast orgId={orgId} projectId={projectId} />
+      {project.registryModel === 'LEGACY' ? (
+        <ProjectMigrationToast orgId={orgId} projectId={projectId} />
+      ) : null}
 
       <Tabs className="container flex h-full grow flex-col" value={value}>
         <Tabs.List>

@@ -173,7 +173,7 @@ export const ModelMigrationSettings = ({
     try {
       const result = await upgradeMutation({
         input: {
-          project: project.id,
+          project: project.cleanId,
           organization: organizationId,
           model: RegistryModel.Modern,
         },
@@ -213,7 +213,13 @@ export const ModelMigrationSettings = ({
           <Button variant="primary" size="large" disabled={fetching} onClick={upgrade}>
             Upgrade my project
           </Button>
-          <Button variant="secondary" size="large">
+          <Button
+            variant="secondary"
+            size="large"
+            onClick={() => {
+              window.$crisp.push(['do', 'chat:open']);
+            }}
+          >
             Live Chat
           </Button>
         </div>

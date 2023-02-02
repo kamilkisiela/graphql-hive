@@ -39,7 +39,14 @@ CREATE TABLE public.schema_version_to_log (
 
 -- This is used to determine if the project is using the new registry model or the old one.
 ALTER TABLE public.projects
-  ADD COLUMN legacy_registry_model boolean NOT NULL DEFAULT FALSE;
+  ADD COLUMN legacy_registry_model boolean;
+
+UPDATE public.projects
+  SET legacy_registry_model = true;
+
+ALTER TABLE public.projects
+  ALTER COLUMN legacy_registry_model SET NOT NULL,
+  ALTER COLUMN legacy_registry_model SET DEFAULT FALSE;
 
 --
 -- migrate the state

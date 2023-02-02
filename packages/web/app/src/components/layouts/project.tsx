@@ -142,7 +142,9 @@ export const ProjectLayout = ({
         </div>
       </SubHeader>
 
-      {value === 'settings' ? null : <ProjectMigrationToast orgId={orgId} projectId={projectId} />}
+      {value === 'settings' || project.registryModel !== 'LEGACY' ? null : (
+        <ProjectMigrationToast orgId={orgId} projectId={projectId} />
+      )}
 
       <Tabs className="container" value={value}>
         <Tabs.List>

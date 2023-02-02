@@ -2,7 +2,7 @@ import { Button } from '@/components/v2';
 
 export function ProjectMigrationToast({ projectId, orgId }: { projectId: string; orgId: string }) {
   return (
-    <div className="fixed right-6 bottom-6 p-4 rounded-md bg-gray-900 flex flex-row justify-center gap-6">
+    <div className="fixed right-24 bottom-6 p-4 rounded-md bg-gray-900 flex flex-row justify-center gap-6 z-10">
       <div>
         <div className="font-medium text-sm text-white mb-2">
           This project utilizes the outdated model of the registry
