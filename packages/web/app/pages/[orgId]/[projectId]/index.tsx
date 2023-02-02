@@ -9,13 +9,18 @@ import {
   Badge,
   Button,
   Card,
-  DropdownMenu,
   EmptyList,
   Heading,
   TimeAgo,
   Title,
 } from '@/components/v2';
 import { LinkIcon, MoreIcon, SettingsIcon } from '@/components/v2/icon';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/v2/multi-dropdown';
 import { TargetQuery, TargetsDocument, VersionsDocument } from '@/graphql';
 import { getDocsUrl } from '@/lib/docs-url';
 import { useClipboard } from '@/lib/hooks/use-clipboard';
@@ -54,13 +59,13 @@ const TargetCard = ({
           <h2 className="line-clamp-2 text-lg font-bold">{target.name}</h2>
         </div>
         <DropdownMenu>
-          <DropdownMenu.Trigger asChild>
+          <DropdownMenuTrigger asChild>
             <Button rotate={90}>
               <MoreIcon />
             </Button>
-          </DropdownMenu.Trigger>
-          <DropdownMenu.Content sideOffset={5} align="start">
-            <DropdownMenu.Item
+          </DropdownMenuTrigger>
+          <DropdownMenuContent sideOffset={5} align="start">
+            <DropdownMenuItem
               onClick={async e => {
                 e.stopPropagation();
                 await copyToClipboard(`${location.origin}${href}`);
@@ -68,16 +73,16 @@ const TargetCard = ({
             >
               <LinkIcon />
               Share Link
-            </DropdownMenu.Item>
+            </DropdownMenuItem>
             <NextLink
               href={`/${router.organizationId}/${router.projectId}/${target.cleanId}#settings`}
             >
-              <DropdownMenu.Item>
+              <DropdownMenuItem>
                 <SettingsIcon />
                 Settings
-              </DropdownMenu.Item>
+              </DropdownMenuItem>
             </NextLink>
-          </DropdownMenu.Content>
+          </DropdownMenuContent>
         </DropdownMenu>
       </div>
       {author && (

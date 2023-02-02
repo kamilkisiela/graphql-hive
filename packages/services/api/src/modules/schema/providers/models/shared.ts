@@ -48,11 +48,11 @@ export const SchemaDeleteConclusion = {
 } as const;
 
 export type SchemaCheckConclusion =
-  typeof SchemaCheckConclusion[keyof typeof SchemaCheckConclusion];
+  (typeof SchemaCheckConclusion)[keyof typeof SchemaCheckConclusion];
 export type SchemaPublishConclusion =
-  typeof SchemaPublishConclusion[keyof typeof SchemaPublishConclusion];
+  (typeof SchemaPublishConclusion)[keyof typeof SchemaPublishConclusion];
 export type SchemaDeleteConclusion =
-  typeof SchemaDeleteConclusion[keyof typeof SchemaDeleteConclusion];
+  (typeof SchemaDeleteConclusion)[keyof typeof SchemaDeleteConclusion];
 
 export const CheckFailureReasonCode = {
   MissingServiceUrl: 'MISSING_SERVICE_URL',
@@ -62,20 +62,20 @@ export const CheckFailureReasonCode = {
 } as const;
 
 export type CheckFailureReasonCode =
-  typeof CheckFailureReasonCode[keyof typeof CheckFailureReasonCode];
+  (typeof CheckFailureReasonCode)[keyof typeof CheckFailureReasonCode];
 
 export type SchemaCheckFailureReason =
   | {
-      code: typeof CheckFailureReasonCode['MissingServiceName'];
+      code: (typeof CheckFailureReasonCode)['MissingServiceName'];
     }
   | {
-      code: typeof CheckFailureReasonCode['CompositionFailure'];
+      code: (typeof CheckFailureReasonCode)['CompositionFailure'];
       compositionErrors: Array<{
         message: string;
       }>;
     }
   | {
-      code: typeof CheckFailureReasonCode['BreakingChanges'];
+      code: (typeof CheckFailureReasonCode)['BreakingChanges'];
       breakingChanges: Array<{
         message: string;
       }>;
@@ -83,7 +83,7 @@ export type SchemaCheckFailureReason =
     };
 
 export type SchemaCheckSuccess = {
-  conclusion: typeof SchemaCheckConclusion['Success'];
+  conclusion: (typeof SchemaCheckConclusion)['Success'];
   state: {
     changes: SchemaModule.SchemaChange[] | null;
     initial: boolean;
@@ -91,7 +91,7 @@ export type SchemaCheckSuccess = {
 };
 
 export type SchemaCheckFailure = {
-  conclusion: typeof SchemaCheckConclusion['Failure'];
+  conclusion: (typeof SchemaCheckConclusion)['Failure'];
   reasons: SchemaCheckFailureReason[];
 };
 
@@ -110,28 +110,28 @@ export const PublishFailureReasonCode = {
 } as const;
 
 export type PublishIgnoreReasonCode =
-  typeof PublishIgnoreReasonCode[keyof typeof PublishIgnoreReasonCode];
+  (typeof PublishIgnoreReasonCode)[keyof typeof PublishIgnoreReasonCode];
 export type PublishFailureReasonCode =
-  typeof PublishFailureReasonCode[keyof typeof PublishFailureReasonCode];
+  (typeof PublishFailureReasonCode)[keyof typeof PublishFailureReasonCode];
 
 export type SchemaPublishFailureReason =
   | {
-      code: typeof PublishFailureReasonCode['MissingServiceName'];
+      code: (typeof PublishFailureReasonCode)['MissingServiceName'];
     }
   | {
-      code: typeof PublishFailureReasonCode['MissingServiceUrl'];
+      code: (typeof PublishFailureReasonCode)['MissingServiceUrl'];
     }
   | {
-      code: typeof PublishFailureReasonCode['MetadataParsingFailure'];
+      code: (typeof PublishFailureReasonCode)['MetadataParsingFailure'];
     }
   | {
-      code: typeof PublishFailureReasonCode['CompositionFailure'];
+      code: (typeof PublishFailureReasonCode)['CompositionFailure'];
       compositionErrors: Array<{
         message: string;
       }>;
     }
   | {
-      code: typeof PublishFailureReasonCode['BreakingChanges'];
+      code: (typeof PublishFailureReasonCode)['BreakingChanges'];
       breakingChanges: Array<{
         message: string;
       }>;
@@ -139,7 +139,7 @@ export type SchemaPublishFailureReason =
     };
 
 type SchemaPublishSuccess = {
-  conclusion: typeof SchemaPublishConclusion['Publish'];
+  conclusion: (typeof SchemaPublishConclusion)['Publish'];
   state: {
     composable: boolean;
     initial: boolean;
@@ -158,12 +158,12 @@ type SchemaPublishSuccess = {
 };
 
 type SchemaPublishIgnored = {
-  conclusion: typeof SchemaPublishConclusion['Ignore'];
-  reason: typeof PublishIgnoreReasonCode['NoChanges'];
+  conclusion: (typeof SchemaPublishConclusion)['Ignore'];
+  reason: (typeof PublishIgnoreReasonCode)['NoChanges'];
 };
 
 type SchemaPublishFailure = {
-  conclusion: typeof SchemaPublishConclusion['Reject'];
+  conclusion: (typeof SchemaPublishConclusion)['Reject'];
   reasons: SchemaPublishFailureReason[];
 };
 
@@ -178,21 +178,21 @@ export const DeleteFailureReasonCode = {
 } as const;
 
 export type DeleteFailureReasonCode =
-  typeof DeleteFailureReasonCode[keyof typeof DeleteFailureReasonCode];
+  (typeof DeleteFailureReasonCode)[keyof typeof DeleteFailureReasonCode];
 
 export type SchemaDeleteFailureReason =
   | {
-      code: typeof DeleteFailureReasonCode['MissingServiceName'];
+      code: (typeof DeleteFailureReasonCode)['MissingServiceName'];
     }
   | {
-      code: typeof DeleteFailureReasonCode['CompositionFailure'];
+      code: (typeof DeleteFailureReasonCode)['CompositionFailure'];
       compositionErrors: Array<{
         message: string;
       }>;
     };
 
 export type SchemaDeleteSuccess = {
-  conclusion: typeof SchemaDeleteConclusion['Accept'];
+  conclusion: (typeof SchemaDeleteConclusion)['Accept'];
   state: {
     composable: boolean;
     changes: SchemaModule.SchemaChange[] | null;
@@ -206,7 +206,7 @@ export type SchemaDeleteSuccess = {
 };
 
 export type SchemaDeleteFailure = {
-  conclusion: typeof SchemaDeleteConclusion['Reject'];
+  conclusion: (typeof SchemaDeleteConclusion)['Reject'];
   reasons: SchemaDeleteFailureReason[];
 };
 

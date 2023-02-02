@@ -1,7 +1,13 @@
 import { ReactElement, ReactNode, useEffect } from 'react';
 import NextLink from 'next/link';
 import { gql, useQuery } from 'urql';
-import { Button, DropdownMenu, Heading, Link, Spinner, SubHeader, Tabs } from '@/components/v2';
+import { Button, Heading, Link, Spinner, SubHeader, Tabs } from '@/components/v2';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/v2/dropdown';
 import { ArrowDownIcon, Link2Icon } from '@/components/v2/icon';
 import { ConnectSchemaModal } from '@/components/v2/modals';
 import {
@@ -139,12 +145,12 @@ export const TargetLayout = ({
               </Heading>
               {targets && targets.total > 1 && (
                 <DropdownMenu>
-                  <DropdownMenu.Trigger asChild>
+                  <DropdownMenuTrigger asChild>
                     <Button size="small" rotate={180}>
                       <ArrowDownIcon className="h-5 w-5 text-gray-500" />
                     </Button>
-                  </DropdownMenu.Trigger>
-                  <DropdownMenu.Content sideOffset={5} align="end">
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent sideOffset={5} align="end">
                     {targets.nodes.map(
                       node =>
                         node.cleanId !== targetId && (
@@ -153,11 +159,11 @@ export const TargetLayout = ({
                             href={`/${orgId}/${projectId}/${node.cleanId}`}
                             className="line-clamp-1 max-w-2xl"
                           >
-                            <DropdownMenu.Item>{node.name}</DropdownMenu.Item>
+                            <DropdownMenuItem>{node.name}</DropdownMenuItem>
                           </NextLink>
                         ),
                     )}
-                  </DropdownMenu.Content>
+                  </DropdownMenuContent>
                 </DropdownMenu>
               )}
             </div>

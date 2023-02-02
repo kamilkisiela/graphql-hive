@@ -8,7 +8,6 @@ import {
   Activities,
   Button,
   Card,
-  DropdownMenu,
   EmptyList,
   Heading,
   Skeleton,
@@ -17,6 +16,12 @@ import {
 } from '@/components/v2';
 import { getActivity } from '@/components/v2/activities';
 import { LinkIcon, MoreIcon, SettingsIcon } from '@/components/v2/icon';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/v2/multi-dropdown';
 import {
   ProjectActivitiesDocument,
   ProjectsWithTargetsDocument,
@@ -62,13 +67,13 @@ const ProjectCard = ({
         </div>
 
         <DropdownMenu>
-          <DropdownMenu.Trigger asChild>
+          <DropdownMenuTrigger asChild>
             <Button rotate={90}>
               <MoreIcon />
             </Button>
-          </DropdownMenu.Trigger>
-          <DropdownMenu.Content sideOffset={5} align="start">
-            <DropdownMenu.Item
+          </DropdownMenuTrigger>
+          <DropdownMenuContent sideOffset={5} align="start">
+            <DropdownMenuItem
               onClick={async e => {
                 e.stopPropagation();
                 await copyToClipboard(`${location.origin}${href}`);
@@ -76,14 +81,14 @@ const ProjectCard = ({
             >
               <LinkIcon />
               Share Link
-            </DropdownMenu.Item>
+            </DropdownMenuItem>
             <NextLink href={`/${router.organizationId}/${project.cleanId}/view/settings`}>
-              <DropdownMenu.Item>
+              <DropdownMenuItem>
                 <SettingsIcon />
                 Settings
-              </DropdownMenu.Item>
+              </DropdownMenuItem>
             </NextLink>
-          </DropdownMenu.Content>
+          </DropdownMenuContent>
         </DropdownMenu>
       </div>
       {lastActivity && (
