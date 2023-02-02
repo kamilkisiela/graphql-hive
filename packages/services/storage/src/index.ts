@@ -1145,7 +1145,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         sql`SELECT p.id as id
         FROM public.projects as p
         LEFT JOIN public.organizations as org ON (p.org_id = org.id)
-        WHERE p.clean_id = ${project} AND org.clean_id = ${organization} LIMIT 1`,
+        WHERE p.clean_id = ${project} AND org.clean_id = ${organization} AND p.type != 'CUSTOM' LIMIT 1`,
       );
 
       return result.id;
@@ -1157,7 +1157,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           SELECT t.id FROM public.targets as t
           LEFT JOIN public.projects AS p ON (p.id = t.project_id)
           LEFT JOIN public.organizations AS o ON (o.id = p.org_id)
-          WHERE t.clean_id = ${target} AND p.id = ${project} AND o.id = ${organization}
+          WHERE t.clean_id = ${target} AND p.id = ${project} AND o.id = ${organization} AND p.type != 'CUSTOM'
           LIMIT 1`,
         );
 
@@ -1170,7 +1170,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           SELECT t.id FROM public.targets as t
           LEFT JOIN public.projects AS p ON (p.id = t.project_id)
           LEFT JOIN public.organizations AS o ON (o.id = p.org_id)
-          WHERE t.clean_id = ${target} AND p.clean_id = ${project} AND o.clean_id = ${organization}
+          WHERE t.clean_id = ${target} AND p.clean_id = ${project} AND o.clean_id = ${organization} AND p.type != 'CUSTOM'
           LIMIT 1`,
       );
 
@@ -1181,7 +1181,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         sql`
           SELECT po.id FROM public.persisted_operations as po
           LEFT JOIN public.projects AS p ON (p.id = po.project_id)
-          WHERE po.operation_hash = ${operation} AND p.clean_id = ${project}
+          WHERE po.operation_hash = ${operation} AND p.clean_id = ${project} AND p.type != 'CUSTOM'
           LIMIT 1`,
       );
 
@@ -1259,13 +1259,13 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async getProject({ project }) {
       return transformProject(
         await pool.one<Slonik<projects>>(
-          sql`SELECT * FROM public.projects WHERE id = ${project} LIMIT 1`,
+          sql`SELECT * FROM public.projects WHERE id = ${project} AND type != 'CUSTOM' LIMIT 1`,
         ),
       );
     },
     async getProjectByCleanId({ cleanId, organization }) {
       const result = await pool.maybeOne<Slonik<projects>>(
-        sql`SELECT * FROM public.projects WHERE clean_id = ${cleanId} AND org_id = ${organization} LIMIT 1`,
+        sql`SELECT * FROM public.projects WHERE clean_id = ${cleanId} AND org_id = ${organization} AND type != 'CUSTOM' LIMIT 1`,
       );
 
       if (!result) {
@@ -1276,7 +1276,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     },
     async getProjects({ organization }) {
       const result = await pool.query<Slonik<projects>>(
-        sql`SELECT * FROM public.projects WHERE org_id = ${organization} ORDER BY created_at DESC`,
+        sql`SELECT * FROM public.projects WHERE org_id = ${organization} AND type != 'CUSTOM' ORDER BY created_at DESC`,
       );
 
       return result.rows.map(transformProject);
@@ -1792,6 +1792,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           WHERE
             svl.version_id = ${version}
             AND sl.action = 'PUSH'
+            AND p.type != 'CUSTOM'
           ORDER BY
             sl.created_at DESC
         `,
@@ -2129,6 +2130,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             a.target_id = ${selector.target}
             AND a.project_id = ${selector.project}
             AND a.organization_id = ${selector.organization}
+            AND p.type != 'CUSTOM'
           GROUP BY a.created_at
           ORDER BY a.created_at DESC LIMIT ${selector.limit}
         `;
@@ -2148,6 +2150,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           WHERE
             a.project_id = ${selector.project}
             AND a.organization_id = ${selector.organization}
+            AND p.type != 'CUSTOM'
           GROUP BY a.created_at
           ORDER BY a.created_at DESC LIMIT ${selector.limit}
         `;
@@ -2164,7 +2167,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           LEFT JOIN public.projects as p ON (p.id = a.project_id)
           LEFT JOIN public.organizations as o ON (o.id = a.organization_id)
           LEFT JOIN public.users as u ON (u.id = a.user_id)
-          WHERE a.organization_id = ${selector.organization}
+          WHERE a.organization_id = ${selector.organization} AND p.type != 'CUSTOM'
           GROUP BY a.created_at
           ORDER BY a.created_at DESC LIMIT ${selector.limit}
         `;
