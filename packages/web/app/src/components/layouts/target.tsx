@@ -14,6 +14,7 @@ import {
 import { canAccessTarget, TargetAccessScope, useTargetAccess } from '@/lib/access/target';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
 import { QueryError } from '../common/DataWrapper';
+import { ProjectMigrationToast } from '../project/migration-toast';
 
 enum TabValue {
   Schema = 'schema',
@@ -179,6 +180,8 @@ export const TargetLayout = ({
             ) : null)}
         </div>
       </SubHeader>
+
+      <ProjectMigrationToast orgId={orgId} projectId={projectId} />
 
       <Tabs className="container flex h-full grow flex-col" value={value}>
         <Tabs.List>

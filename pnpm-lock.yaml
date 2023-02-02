@@ -1029,6 +1029,7 @@ importers:
       '@radix-ui/react-tabs': 1.0.2
       '@radix-ui/react-toggle-group': 1.0.2
       '@radix-ui/react-toolbar': 1.0.2
+      '@radix-ui/react-tooltip': 1.0.3
       '@sentry/nextjs': 7.34.0
       '@sentry/types': 7.34.0
       '@stripe/react-stripe-js': 1.16.4
@@ -1119,6 +1120,7 @@ importers:
       '@radix-ui/react-tabs': 1.0.2_biqbaboplfbrettd7655fr4n2y
       '@radix-ui/react-toggle-group': 1.0.2_biqbaboplfbrettd7655fr4n2y
       '@radix-ui/react-toolbar': 1.0.2_biqbaboplfbrettd7655fr4n2y
+      '@radix-ui/react-tooltip': 1.0.3_5ndqzdd6t4rivxsukjv3i3ak2q
       '@sentry/nextjs': 7.34.0_next@13.1.1+react@18.2.0
       '@sentry/types': 7.34.0
       '@stripe/react-stripe-js': 1.16.4_keartrz7uyerl3wkpjpue4xbhy

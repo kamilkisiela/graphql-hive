@@ -13,6 +13,7 @@ import {
 } from '@/graphql';
 import { canAccessProject, ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
+import { ProjectMigrationToast } from '../project/migration-toast';
 
 enum TabValue {
   Targets = 'targets',
@@ -134,6 +135,8 @@ export const ProjectLayout = ({
           <CreateTargetModal isOpen={isModalOpen} toggleModalOpen={toggleModalOpen} />
         </div>
       </SubHeader>
+
+      {value === 'settings' ? null : <ProjectMigrationToast orgId={orgId} projectId={projectId} />}
 
       <Tabs className="container" value={value}>
         <Tabs.List>
