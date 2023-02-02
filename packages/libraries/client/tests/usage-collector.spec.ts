@@ -195,7 +195,7 @@ test('collect arguments', async () => {
   expect(info.fields).toContain(`Query.projects.filter`);
 });
 
-test('skip argument directives', async () => {
+test('skips argument directives', async () => {
   const collect = createCollector({
     schema,
     max: 1,
