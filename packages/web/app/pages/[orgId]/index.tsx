@@ -15,13 +15,13 @@ import {
   Title,
 } from '@/components/v2';
 import { getActivity } from '@/components/v2/activities';
-import { LinkIcon, MoreIcon, SettingsIcon } from '@/components/v2/icon';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/v2/multi-dropdown';
+} from '@/components/v2/dropdown';
+import { LinkIcon, MoreIcon, SettingsIcon } from '@/components/v2/icon';
 import {
   ProjectActivitiesDocument,
   ProjectsWithTargetsDocument,
