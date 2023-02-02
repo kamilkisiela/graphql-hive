@@ -1037,7 +1037,7 @@ importers:
       '@stripe/react-stripe-js': 1.16.4
       '@stripe/stripe-js': 1.46.0
       '@tailwindcss/line-clamp': 0.4.2
-      '@tanstack/react-table': 8.0.0-beta.8
+      '@tanstack/react-table': 8.7.9
       '@theguild/editor': 1.2.4
       '@trpc/client': 10.9.1
       '@trpc/server': 10.9.1
@@ -1127,7 +1127,7 @@ importers:
       '@sentry/types': 7.34.0
       '@stripe/react-stripe-js': 1.16.4_keartrz7uyerl3wkpjpue4xbhy
       '@stripe/stripe-js': 1.46.0
-      '@tanstack/react-table': 8.0.0-beta.8_biqbaboplfbrettd7655fr4n2y
+      '@tanstack/react-table': 8.7.9_biqbaboplfbrettd7655fr4n2y
       '@theguild/editor': 1.2.4_m3acdzultzo2owbx5gwkccg4tm
       '@trpc/client': 10.9.1_@trpc+server@10.9.1
       '@trpc/server': 10.9.1
@@ -11038,20 +11038,20 @@ packages:
       tailwindcss: 3.2.4_postcss@8.4.21
     dev: true
 
-  /@tanstack/react-table/8.0.0-beta.8_biqbaboplfbrettd7655fr4n2y:
-    resolution: {integrity: sha512-hffDi9NnSI2tl/l3cW0CH8ErI1aJOWzIo6of0t1KMGdfES6mDcnfYMMRjm89ffaWogqVrdkKFJfbNAwV0g/0iA==}
+  /@tanstack/react-table/8.7.9_biqbaboplfbrettd7655fr4n2y:
+    resolution: {integrity: sha512-6MbbQn5AupSOkek1+6IYu+1yZNthAKTRZw9tW92Vi6++iRrD1GbI3lKTjJalf8lEEKOqapPzQPE20nywu0PjCA==}
     engines: {node: '>=12'}
     peerDependencies:
       react: '>=16'
       react-dom: '>=16'
     dependencies:
-      '@tanstack/table-core': 8.0.0-beta.8
+      '@tanstack/table-core': 8.7.9
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
     dev: false
 
-  /@tanstack/table-core/8.0.0-beta.8:
-    resolution: {integrity: sha512-uIl9kHsuyP09Mc5DBhCzBavRg/e2KNUnZmb7/SW6ec+l2cyC4n64c1B64rDVzIn0CaV/0ajuXB4gI3xfcGsPfg==}
+  /@tanstack/table-core/8.7.9:
+    resolution: {integrity: sha512-4RkayPMV1oS2SKDXfQbFoct1w5k+pvGpmX18tCXMofK/VDRdA2hhxfsQlMvsJ4oTX8b0CI4Y3GDKn5T425jBCw==}
     engines: {node: '>=12'}
     dev: false
 
