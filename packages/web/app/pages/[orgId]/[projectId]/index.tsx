@@ -14,13 +14,13 @@ import {
   TimeAgo,
   Title,
 } from '@/components/v2';
-import { LinkIcon, MoreIcon, SettingsIcon } from '@/components/v2/icon';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/v2/multi-dropdown';
+} from '@/components/v2/dropdown';
+import { LinkIcon, MoreIcon, SettingsIcon } from '@/components/v2/icon';
 import { TargetQuery, TargetsDocument, VersionsDocument } from '@/graphql';
 import { getDocsUrl } from '@/lib/docs-url';
 import { useClipboard } from '@/lib/hooks/use-clipboard';
