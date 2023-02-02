@@ -45,7 +45,7 @@ export const GraphQLBlock: React.FC<{
     <Card className={clsx(className)}>
       <Heading className="mb-4">
         {title ?? 'SDL'}
-        {url && <span tw="text-sm italic">{url}</span>}
+        {url && <span className="text-sm italic ml-3">{url}</span>}
       </Heading>
       <div className="pb-2">
         <GraphQLHighlight {...editorProps} code={sdl} />

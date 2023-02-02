@@ -7,6 +7,8 @@ import { initTRPC } from '@trpc/server';
 import { buildCounter, supergraphCounter, validateCounter } from './metrics';
 import { pickOrchestrator } from './orchestrators';
 
+export type { CompositionFailureError, CompositionErrorSource } from './orchestrators';
+
 export interface Context {
   req: FastifyRequest;
   redis: Redis;
@@ -22,12 +24,17 @@ const t = initTRPC.context<Context>().create();
 const errorMiddleware = t.middleware(handleTRPCError);
 const procedure = t.procedure.use(errorMiddleware);
 
-const TYPE_VALIDATION = z.enum(['single', 'federation', 'stitching']);
-const SCHEMA_OBJECT_VALIDATION = {
+const COMPOSITE_SCHEMA_OBJECT_VALIDATION = {
   raw: z.string().nonempty(),
   source: z.string().nonempty(),
 };
-const SCHEMAS_VALIDATION = z.array(z.object(SCHEMA_OBJECT_VALIDATION));
+const COMPOSITE_SCHEMAS_VALIDATION = z.array(z.object(COMPOSITE_SCHEMA_OBJECT_VALIDATION));
+
+const SINGLE_SCHEMA_OBJECT_VALIDATION = {
+  raw: z.string().nonempty(),
+};
+const SINGLE_SCHEMA_VALIDATION = z.array(z.object(SINGLE_SCHEMA_OBJECT_VALIDATION));
+
 const EXTERNAL_VALIDATION = z
   .object({
     endpoint: z.string().url().nonempty(),
@@ -40,12 +47,13 @@ export const schemaBuilderApiRouter = t.router({
     .input(
       z
         .object({
-          type: TYPE_VALIDATION,
+          type: z.literal('federation'),
           schemas: z.array(
             z
               .object({
-                ...SCHEMA_OBJECT_VALIDATION,
-                url: z.string().nullish().optional(),
+                raw: z.string().nonempty(),
+                source: z.string().nonempty(),
+                url: z.string().nullish(),
               })
               .required(),
           ),
@@ -71,13 +79,22 @@ export const schemaBuilderApiRouter = t.router({
     }),
   validate: procedure
     .input(
-      z
-        .object({
-          type: TYPE_VALIDATION,
-          schemas: SCHEMAS_VALIDATION,
-          external: EXTERNAL_VALIDATION,
-        })
-        .required(),
+      z.union([
+        z
+          .object({
+            type: z.literal('single'),
+            schemas: SINGLE_SCHEMA_VALIDATION,
+            external: EXTERNAL_VALIDATION,
+          })
+          .required(),
+        z
+          .object({
+            type: z.union([z.literal('federation'), z.literal('stitching')]),
+            schemas: COMPOSITE_SCHEMAS_VALIDATION,
+            external: EXTERNAL_VALIDATION,
+          })
+          .required(),
+      ]),
     )
     .mutation(async ({ ctx, input }) => {
       validateCounter
@@ -86,7 +103,12 @@ export const schemaBuilderApiRouter = t.router({
         })
         .inc();
       return await pickOrchestrator(input.type, ctx.redis, ctx.req.log, ctx.decrypt).validate(
-        input.schemas,
+        input.type === 'single'
+          ? input.schemas.map(s => ({
+              ...s,
+              source: 'single',
+            }))
+          : input.schemas,
         input.external
           ? {
               ...input.external,
@@ -97,13 +119,22 @@ export const schemaBuilderApiRouter = t.router({
     }),
   build: procedure
     .input(
-      z
-        .object({
-          type: TYPE_VALIDATION,
-          schemas: SCHEMAS_VALIDATION,
-          external: EXTERNAL_VALIDATION,
-        })
-        .required(),
+      z.union([
+        z
+          .object({
+            type: z.literal('single'),
+            schemas: SINGLE_SCHEMA_VALIDATION,
+            external: EXTERNAL_VALIDATION,
+          })
+          .required(),
+        z
+          .object({
+            type: z.union([z.literal('federation'), z.literal('stitching')]),
+            schemas: COMPOSITE_SCHEMAS_VALIDATION,
+            external: EXTERNAL_VALIDATION,
+          })
+          .required(),
+      ]),
     )
     .mutation(async ({ ctx, input }) => {
       buildCounter
@@ -112,7 +143,12 @@ export const schemaBuilderApiRouter = t.router({
         })
         .inc();
       return await pickOrchestrator(input.type, ctx.redis, ctx.req.log, ctx.decrypt).build(
-        input.schemas,
+        input.type === 'single'
+          ? input.schemas.map(s => ({
+              ...s,
+              source: 'single',
+            }))
+          : input.schemas,
         input.external
           ? {
               ...input.external,

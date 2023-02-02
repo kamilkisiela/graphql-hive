@@ -36,7 +36,9 @@
     "lodash": "4.17.21",
     "lru-cache": "7.14.1",
     "ms": "2.1.3",
+    "object-hash": "3.0.0",
     "param-case": "3.0.4",
+    "prom-client": "14.1.1",
     "supertokens-node": "12.1.5",
     "zod": "3.20.2"
   },
@@ -52,6 +54,7 @@
     "@types/ioredis-mock": "8.2.1",
     "@types/lodash": "4.14.191",
     "@types/ms": "0.7.31",
+    "@types/object-hash": "3.0.2",
     "ioredis-mock": "8.2.5",
     "tslib": "2.5.0"
   }

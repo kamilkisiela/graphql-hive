@@ -20,138 +20,6 @@ async function generateTmpFile(content: string, extension: string) {
   return filepath;
 }
 
-export async function createCLI(token: string) {
-  let publishCount = 0;
-
-  async function publish({
-    sdl,
-    serviceName,
-    serviceUrl,
-    metadata,
-    expect: expectedStatus,
-    force,
-    acceptBreakingChanges,
-  }: {
-    sdl: string;
-    commit?: string;
-    serviceName?: string;
-    serviceUrl?: string;
-    metadata?: string;
-    force?: boolean;
-    acceptBreakingChanges?: boolean;
-    expect: 'latest' | 'latest-composable' | 'ignored' | 'rejected';
-  }) {
-    const publishName = ` #${++publishCount}`;
-    const commit = randomUUID();
-
-    const cmd = schemaPublish([
-      '--token',
-      token,
-      '--author',
-      'Kamil',
-      '--commit',
-      commit,
-      ...(serviceName ? ['--service', serviceName] : []),
-      ...(serviceUrl ? ['--url', serviceUrl] : []),
-      ...(metadata ? ['--metadata', metadata] : []),
-      ...(force ? ['--force'] : []),
-      ...(acceptBreakingChanges ? ['--experimental_acceptBreakingChanges'] : []),
-      await generateTmpFile(sdl, 'graphql'),
-    ]);
-
-    const expectedCommit = expect.objectContaining({
-      commit,
-    });
-
-    if (expectedStatus === 'rejected') {
-      await expect(cmd).rejects.toThrow();
-      const latestSchemaResult = await fetchLatestSchema(token).then(r =>
-        r.expectNoGraphQLErrors(),
-      );
-      const latestSchemaCommit = latestSchemaResult.latestVersion?.commit;
-
-      expect(
-        latestSchemaCommit,
-        `${publishName} was expected to be rejected but was published`,
-      ).not.toEqual(expectedCommit);
-
-      return;
-    }
-
-    // throw if the command fails
-    try {
-      await cmd;
-    } catch (error) {
-      throw new Error(`${publishName} failed: ${String(error)}`);
-    }
-
-    const latestSchemaResult = await fetchLatestSchema(token).then(r => r.expectNoGraphQLErrors());
-    const latestSchemaCommit = latestSchemaResult.latestVersion?.commit;
-
-    if (expectedStatus === 'ignored') {
-      // Check if the schema was ignored
-      expect(
-        latestSchemaCommit,
-        `${publishName} was expected to be ignored but it was published`,
-      ).not.toEqual(expectedCommit);
-      return;
-    }
-    // Check if the schema was published
-    expect(latestSchemaCommit, `${publishName} was expected to be published`).toEqual(
-      expectedCommit,
-    );
-
-    const latestComposableSchemaResult = await fetchLatestValidSchema(token).then(r =>
-      r.expectNoGraphQLErrors(),
-    );
-
-    const latestComposableSchemaCommit = latestComposableSchemaResult.latestValidVersion?.commit;
-
-    // Check if the schema was published as composable or non-composable
-    if (expectedStatus === 'latest') {
-      // schema is not available to the gateway
-      expect(
-        latestComposableSchemaCommit,
-        `${publishName} was expected to be published but not as composable`,
-      ).not.toEqual(expectedCommit);
-    } else {
-      // schema is available to the gateway
-      expect(
-        latestComposableSchemaCommit,
-        `${publishName} was expected to be published as composable`,
-      ).toEqual(expectedCommit);
-    }
-  }
-
-  async function check({
-    sdl,
-    serviceName,
-    expect: expectedStatus,
-  }: {
-    sdl: string;
-    serviceName?: string;
-    expect: 'approved' | 'rejected';
-  }) {
-    const cmd = schemaCheck([
-      '--token',
-      token,
-      ...(serviceName ? ['--service', serviceName] : []),
-      await generateTmpFile(sdl, 'graphql'),
-    ]);
-
-    if (expectedStatus === 'rejected') {
-      await expect(cmd).rejects.toThrow();
-      return cmd.catch(reason => Promise.resolve(reason.message));
-    }
-    return cmd;
-  }
-
-  return {
-    publish,
-    check,
-  };
-}
-
 async function exec(cmd: string) {
   const outout = await execaCommand(`${binPath} ${cmd}`, {
     shell: true,
@@ -180,4 +48,200 @@ export async function schemaCheck(args: string[]) {
   return await exec(
     ['schema:check', `--registry`, `http://${registryAddress}/graphql`, ...args].join(' '),
   );
+}
+
+export async function schemaDelete(args: string[]) {
+  const registryAddress = await getServiceHost('server', 8082);
+
+  return await exec(
+    ['schema:delete', `--registry`, `http://${registryAddress}/graphql`, ...args].join(' '),
+  );
+}
+
+export async function createCLI(tokens: { readwrite: string; readonly: string }) {
+  let publishCount = 0;
+
+  async function publish({
+    sdl,
+    serviceName,
+    serviceUrl,
+    metadata,
+    expect: expectedStatus,
+    legacy_force,
+    legacy_acceptBreakingChanges,
+  }: {
+    sdl: string;
+    commit?: string;
+    serviceName?: string;
+    serviceUrl?: string;
+    metadata?: string;
+    legacy_force?: boolean;
+    legacy_acceptBreakingChanges?: boolean;
+    expect: 'latest' | 'latest-composable' | 'ignored' | 'rejected';
+  }) {
+    const publishName = ` #${++publishCount}`;
+    const commit = randomUUID();
+
+    const cmd = schemaPublish([
+      '--token',
+      tokens.readwrite,
+      '--author',
+      'Kamil',
+      '--commit',
+      commit,
+      ...(serviceName ? ['--service', serviceName] : []),
+      ...(serviceUrl ? ['--url', serviceUrl] : []),
+      ...(metadata ? ['--metadata', metadata] : []),
+      ...(legacy_force ? ['--force'] : []),
+      ...(legacy_acceptBreakingChanges ? ['--experimental_acceptBreakingChanges'] : []),
+      await generateTmpFile(sdl, 'graphql'),
+    ]);
+
+    const expectedCommit = expect.objectContaining({
+      commit,
+    });
+
+    if (expectedStatus === 'rejected') {
+      await expect(cmd).rejects.toThrow();
+      const latestSchemaResult = await fetchLatestSchema(tokens.readonly).then(r =>
+        r.expectNoGraphQLErrors(),
+      );
+      const latestSchemaCommit = latestSchemaResult.latestVersion?.log;
+
+      expect(
+        latestSchemaCommit,
+        `${publishName} was expected to be rejected but was published`,
+      ).not.toEqual(expectedCommit);
+
+      return;
+    }
+
+    // throw if the command fails
+    await cmd;
+
+    const latestSchemaResult = await fetchLatestSchema(tokens.readonly).then(r =>
+      r.expectNoGraphQLErrors(),
+    );
+    const latestSchemaCommit = latestSchemaResult.latestVersion?.log;
+
+    if (expectedStatus === 'ignored') {
+      // Check if the schema was ignored
+      expect(
+        latestSchemaCommit,
+        `${publishName} was expected to be ignored but it was published`,
+      ).not.toEqual(expectedCommit);
+      return;
+    }
+    // Check if the schema was published
+    expect(latestSchemaCommit, `${publishName} was expected to be published`).toEqual(
+      expectedCommit,
+    );
+
+    const latestComposableSchemaResult = await fetchLatestValidSchema(tokens.readonly).then(r =>
+      r.expectNoGraphQLErrors(),
+    );
+
+    const latestComposableSchemaCommit = latestComposableSchemaResult.latestValidVersion?.log;
+
+    // Check if the schema was published as composable or non-composable
+    if (expectedStatus === 'latest') {
+      // schema is not available to the gateway
+      expect(
+        latestComposableSchemaCommit,
+        `${publishName} was expected to be published but not as composable`,
+      ).not.toEqual(expectedCommit);
+    } else {
+      // schema is available to the gateway
+      expect(
+        latestComposableSchemaCommit,
+        `${publishName} was expected to be published as composable`,
+      ).toEqual(expectedCommit);
+    }
+  }
+
+  async function check({
+    sdl,
+    serviceName,
+    expect: expectedStatus,
+  }: {
+    sdl: string;
+    serviceName?: string;
+    expect: 'approved' | 'rejected';
+  }) {
+    const cmd = schemaCheck([
+      '--token',
+      tokens.readonly,
+      ...(serviceName ? ['--service', serviceName] : []),
+      await generateTmpFile(sdl, 'graphql'),
+    ]);
+
+    if (expectedStatus === 'rejected') {
+      await expect(cmd).rejects.toThrow();
+      return cmd.catch(reason => Promise.resolve(reason.message));
+    }
+    return cmd;
+  }
+
+  async function deleteCommand({
+    serviceName,
+    expect: expectedStatus,
+  }: {
+    serviceName?: string;
+    expect: 'latest' | 'latest-composable' | 'rejected';
+  }) {
+    const cmd = schemaDelete(['--token', tokens.readwrite, '--confirm', serviceName ?? '']);
+
+    const before = {
+      latest: await fetchLatestSchema(tokens.readonly).then(r => r.expectNoGraphQLErrors()),
+      latestValid: await fetchLatestValidSchema(tokens.readonly).then(r =>
+        r.expectNoGraphQLErrors(),
+      ),
+    };
+
+    if (expectedStatus === 'rejected') {
+      await expect(cmd).rejects.toThrow();
+
+      const after = {
+        latest: await fetchLatestSchema(tokens.readonly).then(r => r.expectNoGraphQLErrors()),
+        latestValid: await fetchLatestValidSchema(tokens.readonly).then(r =>
+          r.expectNoGraphQLErrors(),
+        ),
+      };
+
+      expect(after.latest.latestVersion?.log).toEqual(before.latest.latestVersion?.log);
+      expect(after.latestValid.latestValidVersion?.id).toEqual(
+        before.latestValid.latestValidVersion?.id,
+      );
+
+      return cmd.catch(reason => Promise.resolve(reason.message));
+    }
+    await cmd;
+
+    const after = {
+      latest: await fetchLatestSchema(tokens.readonly).then(r => r.expectNoGraphQLErrors()),
+      latestValid: await fetchLatestValidSchema(tokens.readonly).then(r =>
+        r.expectNoGraphQLErrors(),
+      ),
+    };
+
+    if (expectedStatus === 'latest-composable') {
+      expect(after.latest.latestVersion?.log).not.toEqual(before.latest.latestVersion?.log);
+      expect(after.latestValid.latestValidVersion?.log).not.toEqual(
+        before.latestValid.latestValidVersion?.log,
+      );
+    } else {
+      expect(after.latest.latestVersion?.log).not.toEqual(before.latest.latestVersion?.log);
+      expect(after.latestValid.latestValidVersion?.id).toEqual(
+        before.latestValid.latestValidVersion?.id,
+      );
+    }
+
+    return cmd;
+  }
+
+  return {
+    publish,
+    check,
+    delete: deleteCommand,
+  };
 }

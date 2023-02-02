@@ -4,7 +4,13 @@ import { DocumentType, gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 import { authenticated } from '@/components/authenticated-container';
 import { OrganizationLayout } from '@/components/layouts';
-import { Avatar, Button, Card, Checkbox, DropdownMenu, Input, Title } from '@/components/v2';
+import { Avatar, Button, Card, Checkbox, Input, Title } from '@/components/v2';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/v2/dropdown';
 import { CopyIcon, KeyIcon, MoreIcon, SettingsIcon, TrashIcon } from '@/components/v2/icon';
 import { ChangePermissionsModal, DeleteMembersModal } from '@/components/v2/modals';
 import { MeDocument, OrganizationFieldsFragment, OrganizationType } from '@/graphql';
@@ -152,7 +158,7 @@ const InvitationDeleteButton = ({
   const [mutation, mutate] = useMutation(InvitationDeleteButton_DeleteInvitation);
 
   return (
-    <DropdownMenu.Item
+    <DropdownMenuItem
       disabled={mutation.fetching}
       onClick={async () => {
         await mutate({
@@ -164,7 +170,7 @@ const InvitationDeleteButton = ({
       }}
     >
       <TrashIcon /> Remove
-    </DropdownMenu.Item>
+    </DropdownMenuItem>
   );
 };
 
@@ -213,21 +219,21 @@ const Invitation = ({
         </h4>
       </div>
       <DropdownMenu>
-        <DropdownMenu.Trigger asChild>
+        <DropdownMenuTrigger asChild>
           <Button rotate={90}>
             <MoreIcon />
           </Button>
-        </DropdownMenu.Trigger>
-        <DropdownMenu.Content sideOffset={5} align="start">
-          <DropdownMenu.Item onClick={copyLink}>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent sideOffset={5} align="start">
+          <DropdownMenuItem onClick={copyLink}>
             <CopyIcon />
             Copy invite link
-          </DropdownMenu.Item>
+          </DropdownMenuItem>
           <InvitationDeleteButton
             organizationCleanId={organizationCleanId}
             email={invitation.email}
           />
-        </DropdownMenu.Content>
+        </DropdownMenuContent>
       </DropdownMenu>
     </Card>
   );
@@ -333,13 +339,13 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
               <IconToUse className="h-5 w-5" />
             </div>
             <DropdownMenu>
-              <DropdownMenu.Trigger asChild>
+              <DropdownMenuTrigger asChild>
                 <Button rotate={90} className={isDisabled ? 'invisible' : ''}>
                   <MoreIcon />
                 </Button>
-              </DropdownMenu.Trigger>
-              <DropdownMenu.Content sideOffset={5} align="start">
-                <DropdownMenu.Item
+              </DropdownMenuTrigger>
+              <DropdownMenuContent sideOffset={5} align="start">
+                <DropdownMenuItem
                   onClick={() => {
                     setSelectedMemberId(node.id);
                     togglePermissionsModalOpen();
@@ -347,16 +353,16 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
                 >
                   <SettingsIcon />
                   Change permissions
-                </DropdownMenu.Item>
-                <DropdownMenu.Item
+                </DropdownMenuItem>
+                <DropdownMenuItem
                   onClick={() => {
                     setChecked([node.id]);
                     toggleDeleteMembersModalOpen();
                   }}
                 >
                   <TrashIcon /> Remove
-                </DropdownMenu.Item>
-              </DropdownMenu.Content>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
             </DropdownMenu>
           </Card>
         );

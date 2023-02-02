@@ -26,93 +26,102 @@ function prepareBatch(amount: number, operation: CollectedOperation) {
   return new Array(amount).fill(operation);
 }
 
-test.concurrent('collect operation', async () => {
-  const { createOrg } = await initSeed().createOwner();
-  const { createProject } = await createOrg();
-  const { createToken } = await createProject(ProjectType.Single);
-  const settingsToken = await createToken({
-    targetScopes: [TargetAccessScope.Read, TargetAccessScope.Settings],
-    projectScopes: [ProjectAccessScope.Read],
-    organizationScopes: [OrganizationAccessScope.Read],
-  });
+test.concurrent(
+  'collect operation and publish schema using WRITE access but read operations and check schema using READ access',
+  async () => {
+    const { createOrg } = await initSeed().createOwner();
+    const { createProject } = await createOrg();
+    const { createToken } = await createProject(ProjectType.Single);
+    const settingsToken = await createToken({
+      targetScopes: [TargetAccessScope.Read, TargetAccessScope.Settings],
+      projectScopes: [ProjectAccessScope.Read],
+      organizationScopes: [OrganizationAccessScope.Read],
+    });
 
-  const writeToken = await createToken({
-    targetScopes: [
-      TargetAccessScope.Read,
-      TargetAccessScope.RegistryRead,
-      TargetAccessScope.RegistryWrite,
-    ],
-    projectScopes: [ProjectAccessScope.Read],
-    organizationScopes: [OrganizationAccessScope.Read],
-  });
+    const writeToken = await createToken({
+      targetScopes: [
+        TargetAccessScope.Read,
+        TargetAccessScope.RegistryRead,
+        TargetAccessScope.RegistryWrite,
+      ],
+      projectScopes: [ProjectAccessScope.Read],
+      organizationScopes: [OrganizationAccessScope.Read],
+    });
 
-  const schemaPublishResult = await writeToken
-    .publishSchema({
-      author: 'Kamil',
-      commit: 'abc123',
-      sdl: `type Query { ping: String me: String }`,
-    })
-    .then(r => r.expectNoGraphQLErrors());
+    const readToken = await createToken({
+      targetScopes: [TargetAccessScope.Read, TargetAccessScope.RegistryRead],
+      projectScopes: [ProjectAccessScope.Read],
+      organizationScopes: [OrganizationAccessScope.Read],
+    });
 
-  expect((schemaPublishResult.schemaPublish as any).valid).toEqual(true);
+    const schemaPublishResult = await writeToken
+      .publishSchema({
+        author: 'Kamil',
+        commit: 'abc123',
+        sdl: `type Query { ping: String me: String }`,
+      })
+      .then(r => r.expectNoGraphQLErrors());
 
-  const targetValidationResult = await settingsToken.toggleTargetValidation(true);
-  expect(targetValidationResult.setTargetValidation.enabled).toEqual(true);
-  expect(targetValidationResult.setTargetValidation.percentage).toEqual(0);
-  expect(targetValidationResult.setTargetValidation.period).toEqual(30);
+    expect((schemaPublishResult.schemaPublish as any).valid).toEqual(true);
 
-  // should not be breaking because the field is unused
-  const unusedCheckResult = await writeToken
-    .checkSchema(`type Query { me: String }`)
-    .then(r => r.expectNoGraphQLErrors());
-  expect(unusedCheckResult.schemaCheck.__typename).toEqual('SchemaCheckSuccess');
+    const targetValidationResult = await settingsToken.toggleTargetValidation(true);
+    expect(targetValidationResult.setTargetValidation.enabled).toEqual(true);
+    expect(targetValidationResult.setTargetValidation.percentage).toEqual(0);
+    expect(targetValidationResult.setTargetValidation.period).toEqual(30);
 
-  const collectResult = await writeToken.collectOperations([
-    {
-      operation: 'query ping { ping }',
-      operationName: 'ping',
-      fields: ['Query', 'Query.ping'],
-      execution: {
-        ok: true,
-        duration: 200_000_000,
-        errorsTotal: 0,
+    // should not be breaking because the field is unused
+    const unusedCheckResult = await readToken
+      .checkSchema(`type Query { me: String }`)
+      .then(r => r.expectNoGraphQLErrors());
+    expect(unusedCheckResult.schemaCheck.__typename).toEqual('SchemaCheckSuccess');
+
+    const collectResult = await writeToken.collectOperations([
+      {
+        operation: 'query ping { ping }',
+        operationName: 'ping',
+        fields: ['Query', 'Query.ping'],
+        execution: {
+          ok: true,
+          duration: 200_000_000,
+          errorsTotal: 0,
+        },
       },
-    },
-  ]);
-  expect(collectResult.status).toEqual(200);
-  await waitFor(5000);
+    ]);
+    expect(collectResult.status).toEqual(200);
+    await waitFor(5000);
 
-  // should be breaking because the field is used now
-  const usedCheckResult = await writeToken
-    .checkSchema(`type Query { me: String }`)
-    .then(r => r.expectNoGraphQLErrors());
+    // should be breaking because the field is used now
+    const usedCheckResult = await readToken
+      .checkSchema(`type Query { me: String }`)
+      .then(r => r.expectNoGraphQLErrors());
 
-  if (usedCheckResult.schemaCheck.__typename !== 'SchemaCheckError') {
-    throw new Error(`Expected SchemaCheckError, got ${usedCheckResult.schemaCheck.__typename}`);
-  }
+    if (usedCheckResult.schemaCheck.__typename !== 'SchemaCheckError') {
+      throw new Error(`Expected SchemaCheckError, got ${usedCheckResult.schemaCheck.__typename}`);
+    }
 
-  expect(usedCheckResult.schemaCheck.valid).toEqual(false);
+    expect(usedCheckResult.schemaCheck.valid).toEqual(false);
 
-  const from = formatISO(subHours(Date.now(), 6));
-  const to = formatISO(Date.now());
-  const operationsStats = await writeToken.readOperationsStats(from, to);
-  expect(operationsStats.operations.nodes).toHaveLength(1);
+    const from = formatISO(subHours(Date.now(), 6));
+    const to = formatISO(Date.now());
+    const operationsStats = await readToken.readOperationsStats(from, to);
+    expect(operationsStats.operations.nodes).toHaveLength(1);
 
-  const op = operationsStats.operations.nodes[0];
+    const op = operationsStats.operations.nodes[0];
 
-  expect(op.count).toEqual(1);
-  await expect(writeToken.readOperationBody(op.operationHash!)).resolves.toEqual(
-    'query ping{ping}',
-  );
-  expect(op.operationHash).toBeDefined();
-  expect(op.duration.p75).toEqual(200);
-  expect(op.duration.p90).toEqual(200);
-  expect(op.duration.p95).toEqual(200);
-  expect(op.duration.p99).toEqual(200);
-  expect(op.kind).toEqual('query');
-  expect(op.name).toMatch('ping');
-  expect(op.percentage).toBeGreaterThan(99);
-});
+    expect(op.count).toEqual(1);
+    await expect(writeToken.readOperationBody(op.operationHash!)).resolves.toEqual(
+      'query ping{ping}',
+    );
+    expect(op.operationHash).toBeDefined();
+    expect(op.duration.p75).toEqual(200);
+    expect(op.duration.p90).toEqual(200);
+    expect(op.duration.p95).toEqual(200);
+    expect(op.duration.p99).toEqual(200);
+    expect(op.kind).toEqual('query');
+    expect(op.name).toMatch('ping');
+    expect(op.percentage).toBeGreaterThan(99);
+  },
+);
 
 test.concurrent('normalize and collect operation without breaking its syntax', async () => {
   const { createOrg } = await initSeed().createOwner();

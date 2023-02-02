@@ -1,12 +1,13 @@
 query LatestSchema($selector: TargetSelectorInput!) {
   target(selector: $selector) {
-    ...TargetFields
+    id
     latestSchemaVersion {
       id
       valid
       schemas {
         nodes {
-          ...SchemaFields
+          ...SingleSchemaFields
+          ...CompositeSchemaFields
         }
       }
     }

@@ -37,8 +37,6 @@ export class StitchingOrchestrator implements Orchestrator {
     });
   }
 
-  ensureConfig() {}
-
   @sentry('StitchingOrchestrator.validate')
   async validate(schemas: SchemaObject[]) {
     this.logger.debug('Validating Stitched Schemas');

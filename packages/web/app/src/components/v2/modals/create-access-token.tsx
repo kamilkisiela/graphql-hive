@@ -158,14 +158,14 @@ const ModalContent = (props: {
               checkAccess={manager.canAccessOrganization}
             />
             <PermissionsSpace
-              title="All Projects"
+              title="Project"
               scopes={scopes.project}
               initialScopes={manager.projectScopes}
               onChange={manager.setProjectScopes}
               checkAccess={manager.canAccessProject}
             />
             <PermissionsSpace
-              title="All targets"
+              title="Target"
               scopes={scopes.target}
               initialScopes={manager.targetScopes}
               onChange={manager.setTargetScopes}

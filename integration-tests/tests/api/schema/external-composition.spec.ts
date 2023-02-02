@@ -164,13 +164,10 @@ test.concurrent(
           nodes: [],
         },
         errors: {
-          total: 2,
+          total: 1,
           nodes: [
             {
               message: expect.stringContaining('(ERR_INVALID_SIGNATURE)'), // composition
-            },
-            {
-              message: expect.stringContaining('(ERR_INVALID_SIGNATURE)'), // diff
             },
           ],
         },
@@ -261,13 +258,10 @@ test.concurrent(
           nodes: [],
         },
         errors: {
-          total: 2,
+          total: 1,
           nodes: [
             {
               message: expect.stringContaining('404'), // composition
-            },
-            {
-              message: expect.stringContaining('404'), // diff
             },
           ],
         },

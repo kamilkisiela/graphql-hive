@@ -18,8 +18,8 @@ import type {
   RateLimitInput,
   RequestOrganizationTransferInput,
   SchemaCheckInput,
+  SchemaDeleteInput,
   SchemaPublishInput,
-  SchemaSyncCdnInput,
   SchemaVersionsInput,
   SchemaVersionUpdateInput,
   SetTargetValidationInput,
@@ -27,6 +27,7 @@ import type {
   UpdateBaseSchemaInput,
   UpdateOrganizationNameInput,
   UpdateProjectNameInput,
+  UpdateProjectRegistryModelInput,
   UpdateTargetNameInput,
   UpdateTargetValidationSettingsInput,
 } from './gql/graphql';
@@ -341,6 +342,29 @@ export function renameProject(input: UpdateProjectNameInput, authToken: string) 
   });
 }
 
+export function updateRegistryModel(input: UpdateProjectRegistryModelInput, authToken: string) {
+  return execute({
+    document: graphql(/* GraphQL */ `
+      mutation updateRegistryModel($input: UpdateProjectRegistryModelInput!) {
+        updateProjectRegistryModel(input: $input) {
+          ok {
+            id
+            cleanId
+            name
+          }
+          error {
+            message
+          }
+        }
+      }
+    `),
+    authToken,
+    variables: {
+      input,
+    },
+  });
+}
+
 export function createTarget(input: CreateTargetInput, authToken: string) {
   return execute({
     document: graphql(/* GraphQL */ `
@@ -591,6 +615,27 @@ export function checkSchema(input: SchemaCheckInput, token: string) {
   });
 }
 
+export function deleteSchema(
+  input: SchemaDeleteInput,
+  token: string,
+  authHeader?: 'x-api-token' | 'authorization',
+) {
+  return execute({
+    document: graphql(/* GraphQL */ `
+      mutation schemaDelete($input: SchemaDeleteInput!) {
+        schemaDelete(input: $input) {
+          __typename
+        }
+      }
+    `),
+    token,
+    variables: {
+      input,
+    },
+    legacyAuthorizationMode: authHeader === 'x-api-token',
+  });
+}
+
 export function setTargetValidation(
   input: SetTargetValidationInput,
   access:
@@ -730,15 +775,28 @@ export function fetchLatestSchema(token: string) {
       query latestVersion {
         latestVersion {
           baseSchema
-          commit {
-            source
-            commit
+          log {
+            ... on PushedSchemaLog {
+              __typename
+              commit
+              service
+            }
+            ... on DeletedSchemaLog {
+              __typename
+              deletedService: service
+            }
           }
           schemas {
             nodes {
-              source
-              commit
-              url
+              ... on SingleSchema {
+                source
+                commit
+              }
+              ... on CompositeSchema {
+                source
+                commit
+                url
+              }
             }
             total
           }
@@ -756,14 +814,30 @@ export function fetchLatestValidSchema(token: string) {
         latestValidVersion {
           id
           baseSchema
-          commit {
-            source
-            commit
+          log {
+            ... on PushedSchemaLog {
+              __typename
+              commit
+              service
+            }
+            ... on DeletedSchemaLog {
+              __typename
+              deletedService: service
+            }
           }
           schemas {
             nodes {
-              source
-              commit
+              ... on SingleSchema {
+                __typename
+                source
+                commit
+              }
+              ... on CompositeSchema {
+                __typename
+                source
+                commit
+                url
+              }
             }
             total
           }
@@ -783,15 +857,31 @@ export function fetchVersions(selector: SchemaVersionsInput, limit: number, toke
             id
             valid
             date
-            commit {
-              source
-              commit
+            log {
+              ... on PushedSchemaLog {
+                __typename
+                commit
+                service
+              }
+              ... on DeletedSchemaLog {
+                __typename
+                deletedService: service
+              }
             }
             baseSchema
             schemas {
               nodes {
-                source
-                commit
+                ... on SingleSchema {
+                  __typename
+                  source
+                  commit
+                }
+                ... on CompositeSchema {
+                  __typename
+                  source
+                  commit
+                  url
+                }
               }
             }
           }
@@ -840,31 +930,16 @@ export function updateSchemaVersionStatus(input: SchemaVersionUpdateInput, token
           id
           date
           valid
-          commit {
-            id
-            commit
-          }
-        }
-      }
-    `),
-    token,
-    variables: {
-      input,
-    },
-  });
-}
-
-export function schemaSyncCDN(input: SchemaSyncCdnInput, token: string) {
-  return execute({
-    document: graphql(/* GraphQL */ `
-      mutation schemaSyncCDN($input: SchemaSyncCDNInput!) {
-        schemaSyncCDN(input: $input) {
-          __typename
-          ... on SchemaSyncCDNSuccess {
-            message
-          }
-          ... on SchemaSyncCDNError {
-            message
+          log {
+            ... on PushedSchemaLog {
+              __typename
+              commit
+              service
+            }
+            ... on DeletedSchemaLog {
+              __typename
+              deletedService: service
+            }
           }
         }
       }
@@ -947,6 +1022,7 @@ export async function fetchMetadataFromCDN(selector: TargetSelectorInput, token:
 
   const res = await fetch(cdn.cdnUrl + '/metadata', {
     headers: {
+      Accept: 'application/json',
       'X-Hive-CDN-Key': cdn.secretAccessToken,
     },
   });

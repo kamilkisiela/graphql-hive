@@ -28,6 +28,7 @@ fragment ProjectFields on Project {
   name
   type
   gitRepository
+  registryModel
 }
 
 fragment ProjectEssentials on Project {
@@ -51,7 +52,16 @@ fragment TargetEssentials on Target {
   hasSchema
 }
 
-fragment SchemaFields on Schema {
+fragment SingleSchemaFields on SingleSchema {
+  __typename
+  id
+  author
+  source
+  commit
+}
+
+fragment CompositeSchemaFields on CompositeSchema {
+  __typename
   id
   author
   source
@@ -100,11 +110,17 @@ fragment SchemaVersionFields on SchemaVersion {
   id
   date
   valid
-  commit {
-    id
-    author
-    service
-    commit
+  log {
+    ... on PushedSchemaLog {
+      id
+      author
+      service
+      commit
+    }
+    ... on DeletedSchemaLog {
+      id
+      deletedService: service
+    }
   }
   baseSchema
 }

@@ -134,6 +134,7 @@ type CompositionFailure = {
   result: {
     errors: Array<{
       message: string
+      source: 'graphql' : 'composition'
     }>
   }
 }
@@ -147,7 +148,8 @@ Example response:
   "result": {
     "errors": [
       {
-        "message": "Type \"Query\" was defined more than once."
+        "message": "Type \"Query\" was defined more than once.",
+        "source": "graphql"
       }
     ]
   }
@@ -191,8 +193,9 @@ const composeFederation = compose(services => {
     return {
       type: 'failure',
       result: {
-        errors: result.errors.map(err => ({
-          message: err.message
+        errors: result.errors.map(error => ({
+          message: error.message,
+          source: typeof error.extensions?.code === 'string' ? 'composition' : 'graphql'
         }))
       }
     }
@@ -304,7 +307,8 @@ const composeFederation = compose(services => {
       type: 'failure',
       result: {
         errors: result.errors.map(error => ({
-          message: error.message
+          message: error.message,
+          source: typeof error.extensions?.code === 'string' ? 'composition' : 'graphql'
         }))
       }
     }

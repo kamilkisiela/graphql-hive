@@ -8,7 +8,6 @@ import {
   Activities,
   Button,
   Card,
-  DropdownMenu,
   EmptyList,
   Heading,
   Skeleton,
@@ -16,6 +15,12 @@ import {
   Title,
 } from '@/components/v2';
 import { getActivity } from '@/components/v2/activities';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/v2/dropdown';
 import { LinkIcon, MoreIcon, SettingsIcon } from '@/components/v2/icon';
 import {
   ProjectActivitiesDocument,
@@ -54,7 +59,12 @@ const ProjectCard = ({
   const lastActivity = projectActivitiesQuery.data?.projectActivities.nodes[0];
 
   return (
-    <Card as={NextLink} key={project.id} href={href} className="self-start hover:bg-gray-800/40">
+    <Card
+      as={NextLink}
+      key={project.id}
+      href={href}
+      className="h-full self-start hover:bg-gray-800/40"
+    >
       <div className="flex items-start gap-x-2">
         <div className="grow">
           <h3 className="text-xs font-medium text-[#34EAB9]">{project.type}</h3>
@@ -62,13 +72,13 @@ const ProjectCard = ({
         </div>
 
         <DropdownMenu>
-          <DropdownMenu.Trigger asChild>
+          <DropdownMenuTrigger asChild>
             <Button rotate={90}>
               <MoreIcon />
             </Button>
-          </DropdownMenu.Trigger>
-          <DropdownMenu.Content sideOffset={5} align="start">
-            <DropdownMenu.Item
+          </DropdownMenuTrigger>
+          <DropdownMenuContent sideOffset={5} align="start">
+            <DropdownMenuItem
               onClick={async e => {
                 e.stopPropagation();
                 await copyToClipboard(`${location.origin}${href}`);
@@ -76,14 +86,14 @@ const ProjectCard = ({
             >
               <LinkIcon />
               Share Link
-            </DropdownMenu.Item>
+            </DropdownMenuItem>
             <NextLink href={`/${router.organizationId}/${project.cleanId}/view/settings`}>
-              <DropdownMenu.Item>
+              <DropdownMenuItem>
                 <SettingsIcon />
                 Settings
-              </DropdownMenu.Item>
+              </DropdownMenuItem>
             </NextLink>
-          </DropdownMenu.Content>
+          </DropdownMenuContent>
         </DropdownMenu>
       </div>
       {lastActivity && (
@@ -126,7 +136,7 @@ function ProjectsPage(): ReactElement {
                   docsUrl={getDocsUrl(`/get-started/projects`)}
                 />
               ) : (
-                <div className="grid grid-cols-2 gap-5">
+                <div className="grid grid-cols-2 gap-5 items-stretch">
                   {projectsWithTargetsQuery.fetching
                     ? [1, 2].map(key => (
                         <Card key={key}>

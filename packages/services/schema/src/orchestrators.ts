@@ -1,7 +1,17 @@
 import { createHash, createHmac } from 'crypto';
 import retry from 'async-retry';
 import type { DocumentNode } from 'graphql';
-import { ASTNode, concatAST, parse, print, printSchema, visit } from 'graphql';
+import {
+  ASTNode,
+  buildASTSchema,
+  concatAST,
+  GraphQLError,
+  Kind,
+  parse,
+  print,
+  printSchema,
+  visit,
+} from 'graphql';
 import { validateSDL } from 'graphql/validation/validate.js';
 import type { Redis as RedisInstance } from 'ioredis';
 import { z } from 'zod';
@@ -30,14 +40,39 @@ interface CompositionSuccess {
   };
 }
 
+export type CompositionErrorSource = 'graphql' | 'composition';
+
+export interface CompositionFailureError {
+  message: string;
+  source: CompositionErrorSource;
+}
+
 interface CompositionFailure {
   type: 'failure';
   result: {
-    errors: Array<{
-      message: string;
-    }>;
+    errors: CompositionFailureError[];
     raw?: string;
   };
+}
+
+const { allStitchingDirectivesTypeDefs, stitchingDirectivesValidator } = stitchingDirectives();
+const parsedStitchingDirectives = parse(allStitchingDirectivesTypeDefs);
+const stitchingDirectivesNames = extractDirectiveNames(parsedStitchingDirectives);
+
+function extractDirectiveNames(doc: DocumentNode) {
+  const directives: string[] = [];
+
+  for (const definition of doc.definitions) {
+    if (definition.kind === Kind.DIRECTIVE_DEFINITION) {
+      directives.push(definition.name.value);
+    }
+  }
+
+  return directives;
+}
+
+function definesStitchingDirective(doc: DocumentNode) {
+  return extractDirectiveNames(doc).some(name => stitchingDirectivesNames.includes(name));
 }
 
 const EXTERNAL_COMPOSITION_RESULT = z.union([
@@ -57,7 +92,15 @@ const EXTERNAL_COMPOSITION_RESULT = z.union([
       type: z.literal('failure'),
       result: z
         .object({
-          errors: z.array(z.object({ message: z.string() }).required()),
+          errors: z.array(
+            z.object({
+              message: z.string(),
+              source: z
+                .union([z.literal('composition'), z.literal('graphql')])
+                .optional()
+                .transform(value => value ?? 'graphql'),
+            }),
+          ),
         })
         .required(),
     })
@@ -102,16 +145,37 @@ function trimDescriptions(doc: DocumentNode): DocumentNode {
 
 const emptySource = '*';
 
-function toValidationError(error: any) {
+function toValidationError(error: any, source: CompositionErrorSource) {
+  if (error instanceof GraphQLError) {
+    return {
+      message: error.message,
+      source,
+    };
+  }
+
   if (error instanceof Error) {
     return {
       message: error.message,
+      source,
     };
   }
 
   return {
     message: error as string,
+    source,
   };
+}
+
+function errorWithSource(source: CompositionErrorSource) {
+  return (error: unknown) => toValidationError(error, source);
+}
+
+function errorWithPossibleCode(error: unknown) {
+  if (error instanceof GraphQLError && error.extensions?.code) {
+    return toValidationError(error, 'composition');
+  }
+
+  return toValidationError(error, 'graphql');
 }
 
 interface Orchestrator {
@@ -151,6 +215,11 @@ const createFederation: (
   >(
     async ({ schemas, external }) => {
       if (external) {
+        logger.debug(
+          'Using external composition service (url=%s, schemas=%s)',
+          external.endpoint,
+          schemas.length,
+        );
         const body = JSON.stringify(
           schemas.map(schema => {
             return {
@@ -211,10 +280,11 @@ const createFederation: (
                       errors: [
                         {
                           message: `External composition failure: ${translatedMessage}`,
+                          source: 'graphql',
                         },
                       ],
                     },
-                  };
+                  } satisfies CompositionFailure;
                 }
               }
 
@@ -237,10 +307,11 @@ const createFederation: (
                 errors: [
                   {
                     message: `External composition network failure: [${error.statusCode}] ${error.message}`,
+                    source: 'graphql',
                   },
                 ],
               },
-            };
+            } satisfies CompositionFailure;
           }
 
           throw error;
@@ -265,6 +336,8 @@ const createFederation: (
         return parseResult.data;
       }
 
+      logger.debug('Using built-in composition service (schemas=%s)', schemas.length);
+
       const result = composeAndValidate(
         schemas.map(schema => {
           return {
@@ -279,7 +352,7 @@ const createFederation: (
         return {
           type: 'failure',
           result: {
-            errors: result.errors.map(toValidationError),
+            errors: result.errors.map(errorWithPossibleCode),
             raw: result.schema ? printSchema(result.schema) : undefined,
           },
         };
@@ -324,6 +397,14 @@ const createFederation: (
       }
 
       if (result.type === 'failure') {
+        // If `raw` SDL is present, it means that we were able to build a schema, but it still has composition errors
+        if (result.result.raw) {
+          return {
+            raw: result.result.raw,
+            source: emptySource,
+          };
+        }
+
         throw new Error(
           [
             `Schemas couldn't be merged:`,
@@ -350,7 +431,7 @@ const createFederation: (
 const single: Orchestrator = {
   async validate(schemas) {
     const schema = schemas[0];
-    const errors = validateSDL(parse(schema.raw)).map(toValidationError);
+    const errors = validateSDL(parse(schema.raw)).map(errorWithSource('graphql'));
 
     return {
       errors,
@@ -394,7 +475,7 @@ const createStitching: (redis: RedisInstance, logger: FastifyLoggerInstance) => 
       try {
         await stitchAndPrint(schemas);
       } catch (error) {
-        errors.push(toValidationError(error));
+        errors.push(toValidationError(error, 'composition'));
       }
 
       return {
@@ -416,11 +497,30 @@ const createStitching: (redis: RedisInstance, logger: FastifyLoggerInstance) => 
 };
 
 function validateStitchedSchema(doc: DocumentNode) {
-  const { allStitchingDirectivesTypeDefs } = stitchingDirectives();
+  const definesItsOwnStitchingDirectives = definesStitchingDirective(doc);
+  const fullDoc = definesItsOwnStitchingDirectives
+    ? doc
+    : concatAST([parsedStitchingDirectives, doc]);
+  const errors = validateSDL(fullDoc).map(errorWithSource('graphql'));
 
-  return validateSDL(concatAST([parse(allStitchingDirectivesTypeDefs), doc])).map(
-    toValidationError,
-  );
+  // If the schema defines its own stitching directives,
+  // it means we can't be sure that it follows the official spec.
+  if (definesItsOwnStitchingDirectives) {
+    return errors;
+  }
+
+  try {
+    stitchingDirectivesValidator(
+      buildASTSchema(fullDoc, {
+        assumeValid: true,
+        assumeValidSDL: true,
+      }),
+    );
+  } catch (error) {
+    errors.push(toValidationError(error, 'composition'));
+  }
+
+  return errors;
 }
 
 export function pickOrchestrator(
@@ -457,11 +557,15 @@ function createChecksum<TInput>(input: TInput, uniqueKey: string): string {
     .digest('hex');
 }
 
+function createActionKey(checksum: string): string {
+  return `schema-service:${checksum}`;
+}
+
 async function readAction<O>(
   checksum: string,
   redis: RedisInstance,
 ): Promise<ActionStarted | ActionCompleted<O> | null> {
-  const action = await redis.get(`schema-service:${checksum}`);
+  const action = await redis.get(createActionKey(checksum));
 
   if (action) {
     return JSON.parse(action);
@@ -475,7 +579,7 @@ async function startAction(
   redis: RedisInstance,
   logger: FastifyLoggerInstance,
 ): Promise<boolean> {
-  const key = `schema-service:${checksum}`;
+  const key = createActionKey(checksum);
   logger.debug('Starting action (checksum=%s)', checksum);
   // Set and lock + expire
   const inserted = await redis.setnx(key, JSON.stringify({ status: 'started' }));
@@ -497,7 +601,7 @@ async function completeAction<O>(
   redis: RedisInstance,
   logger: FastifyLoggerInstance,
 ): Promise<void> {
-  const key = `schema-service:${checksum}`;
+  const key = createActionKey(checksum);
   logger.debug('Completing action (checksum=%s)', checksum);
   await redis.setex(
     key,
@@ -515,7 +619,7 @@ async function removeAction(
   logger: FastifyLoggerInstance,
 ): Promise<void> {
   logger.debug('Removing action (checksum=%s)', checksum);
-  const key = `schema-service:${checksum}`;
+  const key = createActionKey(checksum);
   await redis.del(key);
 }
 

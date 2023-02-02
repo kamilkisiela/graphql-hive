@@ -194,7 +194,6 @@ export const resolvers: ProjectModule.Resolvers & { ProjectType: any } = {
     FEDERATION: ProjectType.FEDERATION,
     STITCHING: ProjectType.STITCHING,
     SINGLE: ProjectType.SINGLE,
-    CUSTOM: ProjectType.CUSTOM,
   },
   Organization: {
     projects(organization, _, { injector }) {

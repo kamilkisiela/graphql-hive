@@ -1,16 +1,28 @@
-import { ProjectType, TargetAccessScope } from '@app/gql/graphql';
+import { ProjectType, RegistryModel, TargetAccessScope } from '@app/gql/graphql';
 import { initSeed } from './seed';
 
-export async function prepareProject(projectType: ProjectType) {
+export async function prepareProject(
+  projectType: ProjectType,
+  model: RegistryModel = RegistryModel.Modern,
+) {
   const { createOrg } = await initSeed().createOwner();
   const { organization, createProject } = await createOrg();
-  const { project, createToken, target, targets } = await createProject(projectType);
+  const { project, createToken, target, targets } = await createProject(projectType, {
+    useLegacyRegistryModels: model === RegistryModel.Legacy,
+  });
 
   // Create a token with write rights
-  const { secret } = await createToken({
+  const { secret: readwriteToken } = await createToken({
     organizationScopes: [],
     projectScopes: [],
     targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+  });
+
+  // Create a token with read-only rights
+  const { secret: readonlyToken, fetchVersions } = await createToken({
+    organizationScopes: [],
+    projectScopes: [],
+    targetScopes: [TargetAccessScope.RegistryRead],
   });
 
   return {
@@ -18,8 +30,12 @@ export async function prepareProject(projectType: ProjectType) {
     project,
     targets,
     target,
+    fetchVersions,
     tokens: {
-      registry: secret,
+      registry: {
+        readwrite: readwriteToken,
+        readonly: readonlyToken,
+      },
     },
   };
 }

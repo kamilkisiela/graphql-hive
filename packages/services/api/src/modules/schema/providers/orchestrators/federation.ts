@@ -3,15 +3,14 @@ import { CONTEXT, Inject, Injectable, Scope } from 'graphql-modules';
 import type { SchemaBuilderApi } from '@hive/schema';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import { fetch } from '@whatwg-node/fetch';
-import { Orchestrator, ProjectType, SchemaObject } from '../../../../shared/entities';
+import { Orchestrator, Project, ProjectType, SchemaObject } from '../../../../shared/entities';
 import { sentry } from '../../../../shared/sentry';
 import { Logger } from '../../../shared/providers/logger';
 import { SchemaBuildError } from './errors';
 import type { SchemaServiceConfig } from './tokens';
 import { SCHEMA_SERVICE_CONFIG } from './tokens';
 
-type ExternalComposition = {
-  enabled: boolean;
+type ExternalCompositionConfig = {
   endpoint: string;
   encryptedSecret: string;
 } | null;
@@ -43,7 +42,7 @@ export class FederationOrchestrator implements Orchestrator {
     });
   }
 
-  ensureConfig(config?: ExternalComposition) {
+  private createConfig(config: Project['externalComposition']): ExternalCompositionConfig {
     if (config && config.enabled) {
       if (!config.endpoint) {
         throw new Error('External composition error: endpoint is missing');
@@ -52,11 +51,18 @@ export class FederationOrchestrator implements Orchestrator {
       if (!config.encryptedSecret) {
         throw new Error('External composition error: encryptedSecret is missing');
       }
+
+      return {
+        endpoint: config.endpoint,
+        encryptedSecret: config.encryptedSecret,
+      };
     }
+
+    return null;
   }
 
   @sentry('FederationOrchestrator.validate')
-  async validate(schemas: SchemaObject[], external: ExternalComposition) {
+  async validate(schemas: SchemaObject[], external: Project['externalComposition']) {
     this.logger.debug('Validating Federated Schemas');
 
     const result = await this.schemaService.validate.mutate({
@@ -65,14 +71,17 @@ export class FederationOrchestrator implements Orchestrator {
         raw: s.raw,
         source: s.source,
       })),
-      external: external?.enabled ? external : null,
+      external: this.createConfig(external),
     });
 
     return result.errors;
   }
 
   @sentry('FederationOrchestrator.build')
-  async build(schemas: SchemaObject[], external: ExternalComposition): Promise<SchemaObject> {
+  async build(
+    schemas: SchemaObject[],
+    external: Project['externalComposition'],
+  ): Promise<SchemaObject> {
     this.logger.debug('Building Federated Schemas');
 
     try {
@@ -82,7 +91,7 @@ export class FederationOrchestrator implements Orchestrator {
           raw: s.raw,
           source: s.source,
         })),
-        external: external?.enabled ? external : null,
+        external: this.createConfig(external),
       });
 
       return {
@@ -96,7 +105,10 @@ export class FederationOrchestrator implements Orchestrator {
   }
 
   @sentry('FederationOrchestrator.supergraph')
-  async supergraph(schemas: SchemaObject[], external: ExternalComposition): Promise<string | null> {
+  async supergraph(
+    schemas: SchemaObject[],
+    external: Project['externalComposition'],
+  ): Promise<string | null> {
     this.logger.debug('Generating Federated Supergraph');
 
     const result = await this.schemaService.supergraph.mutate({
@@ -106,7 +118,7 @@ export class FederationOrchestrator implements Orchestrator {
         source: s.source,
         url: s.url || null,
       })),
-      external: external?.enabled ? external : null,
+      external: this.createConfig(external),
     });
 
     return result.supergraph;

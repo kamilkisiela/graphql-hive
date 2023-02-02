@@ -3,7 +3,18 @@ import NextLink from 'next/link';
 import clsx from 'clsx';
 import { useQuery } from 'urql';
 import { GetStartedProgress } from '@/components/get-started/wizard';
-import { Avatar, Button, DropdownMenu, HiveLink } from '@/components/v2';
+import { Avatar, Button, HiveLink } from '@/components/v2';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from '@/components/v2/dropdown';
 import {
   AlertTriangleIcon,
   ArrowDownIcon,
@@ -87,50 +98,52 @@ export const Header = (): ReactElement => {
             <GetStartedProgress organizationType={currentOrg.type} tasks={currentOrg.getStarted} />
           ) : null}
           <DropdownMenu>
-            <DropdownMenu.Trigger asChild>
+            <DropdownMenuTrigger asChild>
               <Button>
                 <ArrowDownIcon className="h-5 w-5 text-gray-500" />
                 <Avatar shape="circle" className="ml-2.5 border-2 border-gray-900" />
               </Button>
-            </DropdownMenu.Trigger>
+            </DropdownMenuTrigger>
 
-            <DropdownMenu.Content sideOffset={5} align="end">
-              <DropdownMenu.Label className="line-clamp-1 mb-2 max-w-[250px] px-2">
+            <DropdownMenuContent sideOffset={5} align="end">
+              <DropdownMenuLabel className="line-clamp-1 mb-2 max-w-[250px] px-2">
                 {me?.displayName}
-              </DropdownMenu.Label>
-              <DropdownMenu>
+              </DropdownMenuLabel>
+              <DropdownMenuSub>
                 {me?.canSwitchOrganization ? (
-                  <DropdownMenu.TriggerItem>
+                  <DropdownMenuSubTrigger>
                     <GridIcon className="h-5 w-5" />
                     Switch organization
                     <ArrowDownIcon className="ml-10 -rotate-90 text-white" />
-                  </DropdownMenu.TriggerItem>
+                  </DropdownMenuSubTrigger>
                 ) : null}
-                <DropdownMenu.Content sideOffset={25} className="max-w-[300px]">
-                  <DropdownMenu.Label className="px-2 text-xs font-bold text-gray-500">
+                <DropdownMenuSubContent sideOffset={25} className="max-w-[300px]">
+                  <DropdownMenuLabel className="px-2 mb-2 text-xs font-bold text-gray-500">
                     PERSONAL
-                  </DropdownMenu.Label>
+                  </DropdownMenuLabel>
                   {personal.map(org => (
                     <NextLink href={`/${org.cleanId}`} key={org.cleanId}>
-                      <DropdownMenu.Item>{org.name}</DropdownMenu.Item>
+                      <DropdownMenuItem>{org.name}</DropdownMenuItem>
                     </NextLink>
                   ))}
-                  <DropdownMenu.Label className="px-2 text-xs font-bold text-gray-500">
-                    OUTERS ORGANIZATIONS
-                  </DropdownMenu.Label>
+                  {organizations.length ? (
+                    <DropdownMenuLabel className="px-2 mb-2 text-xs font-bold text-gray-500">
+                      OUTERS ORGANIZATIONS
+                    </DropdownMenuLabel>
+                  ) : null}
                   {organizations.map(org => (
                     <NextLink href={`/${org.cleanId}`} key={org.cleanId}>
-                      <DropdownMenu.Item>{org.name}</DropdownMenu.Item>
+                      <DropdownMenuItem>{org.name}</DropdownMenuItem>
                     </NextLink>
                   ))}
-                  <DropdownMenu.Separator />
-                  <DropdownMenu.Item onSelect={toggleModalOpen}>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={toggleModalOpen}>
                     <PlusIcon className="h-5 w-5" />
                     Create an organization
-                  </DropdownMenu.Item>
-                </DropdownMenu.Content>
-              </DropdownMenu>
-              <DropdownMenu.Item asChild>
+                  </DropdownMenuItem>
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+              <DropdownMenuItem asChild>
                 <a
                   href="https://cal.com/team/the-guild/graphql-hive-15m"
                   target="_blank"
@@ -139,51 +152,51 @@ export const Header = (): ReactElement => {
                   <CalendarIcon className="h-5 w-5" />
                   Schedule a meeting
                 </a>
-              </DropdownMenu.Item>
+              </DropdownMenuItem>
 
               <NextLink href="/settings">
-                <DropdownMenu.Item>
+                <DropdownMenuItem>
                   <SettingsIcon className="h-5 w-5" />
                   Profile settings
-                </DropdownMenu.Item>
+                </DropdownMenuItem>
               </NextLink>
               {docsUrl ? (
-                <DropdownMenu.Item asChild>
+                <DropdownMenuItem asChild>
                   <a href={docsUrl} target="_blank" rel="noreferrer">
                     <FileTextIcon className="h-5 w-5" />
                     Documentation
                   </a>
-                </DropdownMenu.Item>
+                </DropdownMenuItem>
               ) : null}
-              <DropdownMenu.Item asChild>
+              <DropdownMenuItem asChild>
                 <a href="https://status.graphql-hive.com" target="_blank" rel="noreferrer">
                   <AlertTriangleIcon className="h-5 w-5" />
                   Status page
                 </a>
-              </DropdownMenu.Item>
+              </DropdownMenuItem>
               {meQuery.data?.me?.isAdmin && (
                 <NextLink href="/manage">
-                  <DropdownMenu.Item>
+                  <DropdownMenuItem>
                     <TrendingUpIcon className="h-5 w-5" />
                     Manage Instance
-                  </DropdownMenu.Item>
+                  </DropdownMenuItem>
                 </NextLink>
               )}
               {env.nodeEnv === 'development' && (
                 <NextLink href="/dev">
-                  <DropdownMenu.Item>
+                  <DropdownMenuItem>
                     <GraphQLIcon className="h-5 w-5" />
                     Dev GraphiQL
-                  </DropdownMenu.Item>
+                  </DropdownMenuItem>
                 </NextLink>
               )}
-              <DropdownMenu.Item asChild>
+              <DropdownMenuItem asChild>
                 <a href="/logout">
                   <LogOutIcon className="h-5 w-5" />
                   Log out
                 </a>
-              </DropdownMenu.Item>
-            </DropdownMenu.Content>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </div>
