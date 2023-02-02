@@ -1,5 +1,6 @@
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import lodash from 'lodash';
+import promClient from 'prom-client';
 import * as Sentry from '@sentry/node';
 import type { Span } from '@sentry/types';
 import * as Types from '../../../__generated__/types';
@@ -38,6 +39,24 @@ import { SingleModel } from './models/single';
 import { SingleLegacyModel } from './models/single-legacy';
 import { ensureCompositeSchemas, ensureSingleSchema, SchemaHelper } from './schema-helper';
 import { SchemaManager } from './schema-manager';
+
+const schemaCheckCount = new promClient.Counter({
+  name: 'registry_check_count',
+  help: 'Number of schema checks',
+  labelNames: ['model', 'projectType'],
+});
+
+const schemaPublishCount = new promClient.Counter({
+  name: 'registry_publish_count',
+  help: 'Number of schema publishes',
+  labelNames: ['model', 'projectType', 'conclusion'],
+});
+
+const schemaDeleteCount = new promClient.Counter({
+  name: 'registry_delete_count',
+  help: 'Number of schema deletes',
+  labelNames: ['model', 'projectType'],
+});
 
 export type CheckInput = Omit<Types.SchemaCheckInput, 'project' | 'organization' | 'target'> &
   TargetSelector;
@@ -145,6 +164,11 @@ export class SchemaPublisher {
         target: input.target,
       }),
     ]);
+
+    schemaCheckCount.inc({
+      model: project.legacyRegistryModel ? 'legacy' : 'modern',
+      projectType: project.type,
+    });
 
     await this.schemaManager.completeGetStartedCheck({
       organization: project.orgId,
@@ -402,6 +426,9 @@ export class SchemaPublisher {
           ]);
 
           const modelVersion = project.legacyRegistryModel ? 'legacy' : 'modern';
+
+          schemaDeleteCount.inc({ model: modelVersion, projectType: project.type });
+
           if (project.type !== ProjectType.FEDERATION && project.type !== ProjectType.STITCHING) {
             throw new HiveError(`${project.type} project (${modelVersion}) not supported`);
           }
@@ -547,6 +574,11 @@ export class SchemaPublisher {
       }),
     ]);
 
+    schemaPublishCount.inc({
+      model: project.legacyRegistryModel ? 'legacy' : 'modern',
+      projectType: project.type,
+    });
+
     await this.schemaManager.completeGetStartedCheck({
       organization: project.orgId,
       step: 'publishingSchema',
@@ -595,6 +627,13 @@ export class SchemaPublisher {
 
     if (publishResult.conclusion === SchemaPublishConclusion.Ignore) {
       this.logger.debug('Publish ignored (reasons=%s)', publishResult.reason);
+
+      schemaPublishCount.inc({
+        model: modelVersion,
+        projectType: project.type,
+        conclusion: 'ignored',
+      });
+
       if (input.github) {
         return this.createPublishCheckRun({
           force: false,
@@ -620,6 +659,13 @@ export class SchemaPublisher {
         'Publish rejected (reasons=%s)',
         publishResult.reasons.map(r => r.code).join(', '),
       );
+
+      schemaPublishCount.inc({
+        model: modelVersion,
+        projectType: project.type,
+        conclusion: 'rejected',
+      });
+
       if (getReasonByCode(publishResult, PublishFailureReasonCode.MissingServiceName)) {
         return {
           __typename: 'SchemaPublishMissingServiceError' as const,
@@ -668,6 +714,12 @@ export class SchemaPublisher {
     );
 
     this.logger.debug('Publishing new version');
+
+    schemaPublishCount.inc({
+      model: modelVersion,
+      projectType: project.type,
+      conclusion: 'accepted',
+    });
 
     const newVersion = await this.publishNewVersion({
       input,
