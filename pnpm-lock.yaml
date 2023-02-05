@@ -5,33 +5,33 @@ overrides:
   tsup: 6.5.0
 
 patchedDependencies:
-  mjml-core@4.13.0:
-    hash: zxxsxbqejjmcwuzpigutzzq6wa
-    path: patches/mjml-core@4.13.0.patch
-  '@theguild/buddy@0.1.0':
-    hash: ryylgra5xglhidfoiaxehn22hq
-    path: patches/@theguild__buddy@0.1.0.patch
   '@tgriesser/schemats@7.0.1':
     hash: u3kbucfchakklx3sci2vh6wjau
     path: patches/@tgriesser__schemats@7.0.1.patch
-  '@graphql-inspector/core@3.4.0':
-    hash: tu4s2cjheabese6hdiqk5i3mii
-    path: patches/@graphql-inspector__core@3.4.0.patch
+  '@theguild/buddy@0.1.0':
+    hash: ryylgra5xglhidfoiaxehn22hq
+    path: patches/@theguild__buddy@0.1.0.patch
+  mjml-core@4.13.0:
+    hash: zxxsxbqejjmcwuzpigutzzq6wa
+    path: patches/mjml-core@4.13.0.patch
   '@oclif/core@1.23.0':
     hash: zhte2hlj7lfobytjpalcwwo474
     path: patches/@oclif__core@1.23.0.patch
-  oclif@3.6.1:
-    hash: rxmtqiusuyruv7tkwux5gvotbm
-    path: patches/oclif@3.6.1.patch
   slonik@30.1.2:
     hash: wg2hxbo7txnklmvja4aeqnygfi
     path: patches/slonik@30.1.2.patch
-  '@slonik/migrator@0.8.5':
-    hash: yfpv2xzdmnkrtu2wvaktxf5mmq
-    path: patches/@slonik__migrator@0.8.5.patch
+  '@graphql-inspector/core@3.4.0':
+    hash: tu4s2cjheabese6hdiqk5i3mii
+    path: patches/@graphql-inspector__core@3.4.0.patch
+  oclif@3.6.2:
+    hash: rxmtqiusuyruv7tkwux5gvotbm
+    path: patches/oclif@3.6.2.patch
   bullmq@3.6.2:
     hash: xbmkiyyfti7h6orsfs6pdmi4s4
     path: patches/bullmq@3.6.2.patch
+  '@slonik/migrator@0.8.5':
+    hash: yfpv2xzdmnkrtu2wvaktxf5mmq
+    path: patches/@slonik__migrator@0.8.5.patch
 
 importers:
 
@@ -239,8 +239,8 @@ importers:
       '@graphql-tools/url-loader': ~7.17.0
       '@graphql-tools/utils': 9.1.4
       '@oclif/core': ^1.23.0
-      '@oclif/plugin-help': 5.2.2
-      '@oclif/plugin-update': 3.1.1
+      '@oclif/plugin-help': 5.2.4
+      '@oclif/plugin-update': 3.1.2
       '@types/env-ci': 3.1.1
       '@types/mkdirp': 1.0.2
       colors: 1.4.0
@@ -251,7 +251,7 @@ importers:
       graphql-tag: 2.12.6
       log-symbols: 4.1.0
       mkdirp: 2.1.3
-      oclif: 3.6.1
+      oclif: 3.6.2
       rimraf: 3.0.2
       ts-node: 10.9.1
       tslib: 2.5.0
@@ -265,8 +265,8 @@ importers:
       '@graphql-tools/url-loader': 7.17.1_graphql@16.6.0
       '@graphql-tools/utils': 9.1.4_graphql@16.6.0
       '@oclif/core': 1.23.0_zhte2hlj7lfobytjpalcwwo474
-      '@oclif/plugin-help': 5.2.2
-      '@oclif/plugin-update': 3.1.1
+      '@oclif/plugin-help': 5.2.4
+      '@oclif/plugin-update': 3.1.2
       colors: 1.4.0
       env-ci: 7.3.0
       git-parse: 3.0.1
@@ -282,7 +282,7 @@ importers:
       '@graphql-codegen/typescript-graphql-request': 4.5.8_f45c35xnr66et7kv43kezet7ie
       '@types/env-ci': 3.1.1
       '@types/mkdirp': 1.0.2
-      oclif: 3.6.1_rxmtqiusuyruv7tkwux5gvotbm
+      oclif: 3.6.2_rxmtqiusuyruv7tkwux5gvotbm
 
   packages/libraries/client:
     specifiers:
@@ -8820,8 +8820,8 @@ packages:
       wrap-ansi: 7.0.0
     dev: true
 
-  /@oclif/core/2.0.3:
-    resolution: {integrity: sha512-Dr6tghg32KKEivcWYqrx9bgC8FDE4i47FLR1wjnLg3jNJWf+blTYorj6aHize2WF0wiwkvB28Cr5TUNBooB4AQ==}
+  /@oclif/core/2.0.7:
+    resolution: {integrity: sha512-pj7hIH8SBeH3qha47fmyqdaBdNVEqesRgnKFh8Ytdb4S41/4BYOiQuyQGuvnKgvicH6DMxp4FbM9EQEW46V9xw==}
     engines: {node: '>=14.0.0'}
     dependencies:
       '@types/cli-progress': 3.11.0
@@ -8852,10 +8852,9 @@ packages:
       widest-line: 3.1.0
       wordwrap: 1.0.0
       wrap-ansi: 7.0.0
-    dev: true
 
-  /@oclif/core/2.0.7:
-    resolution: {integrity: sha512-pj7hIH8SBeH3qha47fmyqdaBdNVEqesRgnKFh8Ytdb4S41/4BYOiQuyQGuvnKgvicH6DMxp4FbM9EQEW46V9xw==}
+  /@oclif/core/2.0.8:
+    resolution: {integrity: sha512-jt06vEZfpazkR0C8vYuVMKmsxjky52y1B1oFGPnCa6/17qH+PByd5knQP6/QbRoE5OT9RAf4zzpxx2wcihVslw==}
     engines: {node: '>=14.0.0'}
     dependencies:
       '@types/cli-progress': 3.11.0
@@ -8890,11 +8889,11 @@ packages:
   /@oclif/linewrap/1.0.0:
     resolution: {integrity: sha512-Ups2dShK52xXa8w6iBWLgcjPJWjais6KPJQq3gQ/88AY6BXoTX+MIGFPrWQO1KLMiQfoTpcLnUwloN4brrVUHw==}
 
-  /@oclif/plugin-help/5.2.2:
-    resolution: {integrity: sha512-ok8gS2phqA4MiGkjCrZPFvhNIHIp35WsvNNVUn4GL8WZYQ5mk1cZuu+IIqTZxBFZ4QDUZLVkumrhsqx3oNId9A==}
+  /@oclif/plugin-help/5.2.4:
+    resolution: {integrity: sha512-7fVB/M1cslwHJTmyNGGDYBizi54NHcKCxHAbDSD16EbjosKxFwncRylVC/nsMgKZEufMDKZaVYI2lYRY3GHlSQ==}
     engines: {node: '>=12.0.0'}
     dependencies:
-      '@oclif/core': 2.0.7
+      '@oclif/core': 2.0.8
 
   /@oclif/plugin-not-found/2.3.8:
     resolution: {integrity: sha512-PfUVr67dHORFSeQthUwrPMJB/mRRNT4ENNdbafCOlL0HqC+WTuFy5nih+qnHBEli15RaOuMNoW3kR5MyBH82hA==}
@@ -8906,8 +8905,8 @@ packages:
       lodash: 4.17.21
     dev: true
 
-  /@oclif/plugin-update/3.1.1:
-    resolution: {integrity: sha512-WPXAbrbeDjGmDftKK7EsPUmhjuVeBOoWd0tedwKr5VQBgVlVH9jkCOx6JHTVK2r8/jCHwfOx8ngfbD3L9tFkDg==}
+  /@oclif/plugin-update/3.1.2:
+    resolution: {integrity: sha512-gLHVa1Dn1hYp4ETCbDN2aN2mpbO9FeTrIOE+lkq56lOr16cVNRT89jciGtGiHZTbrJs9k8rXI6OTSOtWfpcfJA==}
     engines: {node: '>=12.0.0'}
     dependencies:
       '@oclif/color': 1.0.3
@@ -21956,13 +21955,13 @@ packages:
     resolution: {integrity: sha512-PX1wu0AmAdPqOL1mWhqmlOd8kOIZQwGZw6rh7uby9fTc5lhaOWFLX3I6R1hrF9k3zUY40e6igsLGkDXK92LJNg==}
     dev: false
 
-  /oclif/3.6.1_rxmtqiusuyruv7tkwux5gvotbm:
-    resolution: {integrity: sha512-zedbQqxAzC8WlH/T2D/CbGCTWIXHMV7wGs2av+M3KPG4SfB9/lwn1zXGjft/3NNy3X6KCEoGCYWqYYMZOf2Fgg==}
+  /oclif/3.6.2_rxmtqiusuyruv7tkwux5gvotbm:
+    resolution: {integrity: sha512-SslNzNzryOMJ8eqID4ehIipqS+cF032ZEGIyhqN2J5mD6gsHAf1t+rMNpHBFy2kcCjgy/9/wUZQGanaFSCB41Q==}
     engines: {node: '>=12.0.0'}
     hasBin: true
     dependencies:
-      '@oclif/core': 2.0.3
-      '@oclif/plugin-help': 5.2.2
+      '@oclif/core': 2.0.7
+      '@oclif/plugin-help': 5.2.4
       '@oclif/plugin-not-found': 2.3.8
       '@oclif/plugin-warn-if-update-available': 2.0.17
       aws-sdk: 2.1231.0
