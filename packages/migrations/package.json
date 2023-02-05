@@ -4,6 +4,10 @@
   "type": "module",
   "license": "MIT",
   "private": true,
+  "files": [
+    "src",
+    "tsconfig.json"
+  ],
   "scripts": {
     "build": "pnpm --filter=@hive/migrations deploy --prod ./dist/migrations/",
     "db:create": "node tools/create-db.mjs",
