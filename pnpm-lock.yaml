@@ -691,7 +691,7 @@ importers:
       got: 12.5.3
       graphql: 16.6.0
       graphql-yoga: 3.5.1
-      hyperid: 3.1.0
+      hyperid: 3.1.1
       pino-pretty: 9.1.1
       prom-client: 14.1.1
       reflect-metadata: 0.1.13
@@ -717,7 +717,7 @@ importers:
       got: 12.5.3
       graphql: 16.6.0
       graphql-yoga: 3.5.1_graphql@16.6.0
-      hyperid: 3.1.0
+      hyperid: 3.1.1
       prom-client: 14.1.1
       reflect-metadata: 0.1.13
       zod: 3.20.2
@@ -1065,7 +1065,7 @@ importers:
       framer-motion: 4.1.17
       graphiql: 2.2.0
       graphql: 16.6.0
-      hyperid: 3.1.0
+      hyperid: 3.1.1
       immer: 9.0.19
       js-cookie: 3.0.1
       monaco-editor: 0.27.0
@@ -1145,7 +1145,7 @@ importers:
       framer-motion: 4.1.17_biqbaboplfbrettd7655fr4n2y
       graphiql: 2.2.0_gfvjcgkzjgpidpvrmfsbitoime
       graphql: 16.6.0
-      hyperid: 3.1.0
+      hyperid: 3.1.1
       immer: 9.0.19
       js-cookie: 3.0.1
       monaco-editor: 0.27.0
@@ -17835,8 +17835,8 @@ packages:
       uuid-parse: 1.1.0
     dev: false
 
-  /hyperid/3.1.0:
-    resolution: {integrity: sha512-ejqC0aqua7caNiOAVIFnRCwFPKaSq9ev+a3aOG7A8dATW8aaUWpSpdV6S3jZywpg/7ysVsdzO6H+xS4aFBRL/w==}
+  /hyperid/3.1.1:
+    resolution: {integrity: sha512-RveV33kIksycSf7HLkq1sHB5wW0OwuX8ot8MYnY++gaaPXGFfKpBncHrAWxdpuEeRlazUMGWefwP1w6o6GaumA==}
     dependencies:
       uuid: 8.3.2
       uuid-parse: 1.1.0
