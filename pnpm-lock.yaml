@@ -403,7 +403,7 @@ importers:
       '@whatwg-node/fetch': 0.6.2
       agentkeepalive: 4.2.1
       bcryptjs: 2.4.3
-      dataloader: 2.1.0
+      dataloader: 2.2.1
       date-fns: 2.29.3
       got: 12.5.3
       graphql-modules: 2.1.0
@@ -435,7 +435,7 @@ importers:
       '@whatwg-node/fetch': 0.6.2
       agentkeepalive: 4.2.1
       bcryptjs: 2.4.3
-      dataloader: 2.1.0
+      dataloader: 2.2.1
       date-fns: 2.29.3
       got: 12.5.3
       graphql-modules: 2.1.0
@@ -14709,6 +14709,10 @@ packages:
 
   /dataloader/2.1.0:
     resolution: {integrity: sha512-qTcEYLen3r7ojZNgVUaRggOI+KM7jrKxXeSHhogh/TWxYMeONEMqY+hmkobiYQozsGIyg9OYVzO4ZIfoB4I0pQ==}
+
+  /dataloader/2.2.1:
+    resolution: {integrity: sha512-Zn+tVZo1RKu120rgoe0JsRk56UiKdefPSH47QROJsMHrX8/S9UJvi5A/A6+Sbuk6rE88z5JoM/wIJ09Z7BTfYA==}
+    dev: false
 
   /date-fns/2.29.3:
     resolution: {integrity: sha512-dDCnyH2WnnKusqvZZ6+jA1O51Ibt8ZMRNkDZdyAyK4YfbDwa/cEmuztzG5pk6hqlp9aSBPYcjOlktquahGwGeA==}
