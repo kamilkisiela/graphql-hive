@@ -53,7 +53,12 @@
     },
     {
       "groupName": "supertokens",
-      "matchPackagePrefixes": ["supertokens"]
+      "matchPackageNames": [
+        "supertokens-node",
+        "supertokens-website",
+        "supertokens-auth-react",
+        "supertokens-js-override"
+      ]
     }
   ]
 }
