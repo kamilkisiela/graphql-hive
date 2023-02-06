@@ -1,20 +1,43 @@
--- 
+--
+
+CREATE INDEX IF NOT EXISTS version_commit_cid_vid_idx ON version_commit (commit_id, version_id);
 
 -- Holds the actions that were performed on the registry.
 -- Every time a schema is pushed or deleted, a new entry is created.
-CREATE TABLE public.schema_log (
-  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-  author text NOT NULL,
-  created_at timestamp with time zone NOT NULL DEFAULT NOW(),
-  service_name text,
-  service_url text,
-  sdl text,
-  metadata text,
-  commit text NOT NULL,
-  action text NOT NULL,
-  target_id uuid NOT NULL REFERENCES public.targets(id) ON DELETE CASCADE,
-  project_id uuid NOT NULL REFERENCES public.projects(id) ON DELETE CASCADE
-);
+CREATE TABLE public.schema_log AS
+SELECT
+  id,
+  author,
+  created_at,
+--- Copy `commits.service` to `schema_log.service_name`
+  service as service_name,
+--- Use NULL for `schema_log.service_url` as it's not available in `commits`. It's being migrated later on.
+  NULL as service_url,
+--- Copy `commits.content` to `schema_log.sdl`
+  content as sdl,
+  metadata,
+  commit,
+--- Use `PUSH` for `schema_log.action`
+  'PUSH'::text as action,
+  target_id,
+  project_id
+FROM public.commits;
+
+ALTER TABLE public.schema_log
+    ALTER COLUMN id SET DEFAULT uuid_generate_v4(),
+    ALTER COLUMN created_at SET DEFAULT NOW(),
+    ALTER COLUMN created_at SET NOT NULL,
+    ALTER COLUMN commit SET NOT NULL,
+    ALTER COLUMN action SET NOT NULL,
+    ALTER COLUMN target_id SET NOT NULL,
+    ALTER COLUMN project_id SET NOT NULL,
+    ADD CONSTRAINT fk_schema_log_targets
+      FOREIGN KEY(target_id)
+      REFERENCES public.targets(id) ON DELETE CASCADE,
+    ADD CONSTRAINT fk_schema_log_projects
+      FOREIGN KEY(project_id)
+      REFERENCES public.projects(id) ON DELETE CASCADE,
+    ADD CONSTRAINT schema_log_pk PRIMARY KEY (id);
 
 -- Describes the state of a schema in the registry.
 -- Groups together all the actions that were performed on a schema.
@@ -51,37 +74,6 @@ ALTER TABLE public.projects
 --
 -- migrate the state
 --
-
--- 1. Copy `commits` to `schema_log`
-INSERT INTO public.schema_log (
-  id,
-  author,
-  created_at,
-  service_name,
-  service_url,
-  sdl,
-  metadata,
-  commit,
-  action,
-  target_id,
-  project_id
-) SELECT 
-  id,
-  author,
-  created_at,
---- Copy `commits.service` to `schema_log.service_name`
-  service as service_name,
---- Use NULL for `schema_log.service_url` as it's not available in `commits`. It's being migrated later on.
-  NULL as service_url,
---- Copy `commits.content` to `schema_log.sdl`
-  content as sdl,
-  metadata,
-  commit,
---- Use `PUSH` for `schema_log.action`
-  'PUSH'::text as action,
-  target_id,
-  project_id
-FROM public.commits;
 
 --- Update `schema_log.service_url` to use a real value (take it from `version_commit.url`)
 UPDATE public.schema_log
