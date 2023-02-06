@@ -1088,7 +1088,7 @@ importers:
       supertokens-auth-react: 0.30.2
       supertokens-js-override: 0.0.4
       supertokens-node: 12.1.6
-      supertokens-website: 16.0.1
+      supertokens-web-js: 0.4.1
       tailwindcss: 3.2.4
       tailwindcss-radix: 2.7.0
       tslib: 2.5.0
@@ -1163,10 +1163,10 @@ importers:
       react-window: 1.8.8_biqbaboplfbrettd7655fr4n2y
       regenerator-runtime: 0.13.11
       snarkdown: 2.0.0
-      supertokens-auth-react: 0.30.2_biqbaboplfbrettd7655fr4n2y
+      supertokens-auth-react: 0.30.2_mynjfwouou6ga7fcnpi77jicle
       supertokens-js-override: 0.0.4
       supertokens-node: 12.1.6
-      supertokens-website: 16.0.1
+      supertokens-web-js: 0.4.1
       tailwindcss: 3.2.4_postcss@8.4.21
       tailwindcss-radix: 2.7.0
       tslib: 2.5.0
@@ -25291,7 +25291,7 @@ packages:
       ts-interface-checker: 0.1.13
     dev: true
 
-  /supertokens-auth-react/0.30.2_biqbaboplfbrettd7655fr4n2y:
+  /supertokens-auth-react/0.30.2_mynjfwouou6ga7fcnpi77jicle:
     resolution: {integrity: sha512-pgGqM77cS9noBToLtOtuUUUzroYW9diIc/RdR2q/RkBivZLS5Nov3GiMMJ4hZLy4RmJJUI4HESJ1L2QiDfja6Q==}
     engines: {node: '>=16.0.0', npm: ^8}
     peerDependencies:
@@ -25304,6 +25304,7 @@ packages:
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
       supertokens-js-override: 0.0.4
+      supertokens-web-js: 0.4.1
     dev: false
 
   /supertokens-js-override/0.0.4:
@@ -25330,8 +25331,15 @@ packages:
       - supports-color
     dev: false
 
-  /supertokens-website/16.0.1:
-    resolution: {integrity: sha512-IOiMVABP9d95lGoCKuZPQxx6hJCaETFIpLsspULbqwDpgSj7K2UkBWTTZeAxdKkEpaOJW9i2GcF2AgNTuYOjWw==}
+  /supertokens-web-js/0.4.1:
+    resolution: {integrity: sha512-8OwqScBYmgODiMHvXZFW68FoyYCrsltyUInMAup36bYT4Eh5DQUiNDTjS7Fv8qZCgIucqNvhvCmVqmG9ttpT6g==}
+    dependencies:
+      supertokens-js-override: 0.0.4
+      supertokens-website: 15.0.0
+    dev: false
+
+  /supertokens-website/15.0.0:
+    resolution: {integrity: sha512-Lsrp+Xc6I9kz4VDm1PBZamUGjIKXRKaueqm/N4TAubeq+gJY12qdraIeBcDzUw8UsIZVvGINB6ae5iHzNsenIA==}
     dependencies:
       browser-tabs-lock: 1.2.15
       supertokens-js-override: 0.0.4
