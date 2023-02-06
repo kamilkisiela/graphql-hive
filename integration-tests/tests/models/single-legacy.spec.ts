@@ -28,7 +28,7 @@ describe('publish', () => {
     });
   });
 
-  test.concurrent('accepted (invalid): not composable (force)', async () => {
+  test.concurrent('partially accepted: not composable (force)', async () => {
     const { publish } = await prepare();
     await publish({
       sdl: /* GraphQL */ `
@@ -84,7 +84,7 @@ describe('publish', () => {
     });
   });
 
-  test.concurrent('accepted (invalid): composable, breaking changes (force)', async () => {
+  test.concurrent('partially accepted: composable, breaking changes (force)', async () => {
     const { publish } = await prepare();
     await publish({
       sdl: /* GraphQL */ `
