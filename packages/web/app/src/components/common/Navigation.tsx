@@ -1,6 +1,5 @@
 import * as React from 'react';
 import Link from 'next/link';
-import 'twin.macro';
 import { useQuery } from 'urql';
 import { env } from '@/env/frontend';
 import { MeDocument } from '@/graphql';
@@ -115,25 +114,25 @@ export function Navigation() {
   const docsUrl = getDocsUrl();
 
   return (
-    <nav tw="bg-white shadow-md dark:bg-gray-900 z-10">
-      <div tw="mx-auto px-2 sm:px-6 lg:px-8">
-        <div tw="relative flex flex-row items-center justify-between h-12">
-          <div tw="flex-1 flex items-center justify-center sm:items-stretch sm:justify-start">
-            <Link href="/" tw="flex-shrink-0 flex text-yellow-500 items-center hover:opacity-50">
-              <Logo tw="w-6 h-6" />
+    <nav className="bg-white shadow-md dark:bg-gray-900 z-10">
+      <div className="mx-auto px-2 sm:px-6 lg:px-8">
+        <div className="relative flex flex-row items-center justify-between h-12">
+          <div className="flex-1 flex items-center justify-center sm:items-stretch sm:justify-start">
+            <Link href="/" className="shrink-0 flex text-yellow-500 items-center hover:opacity-50">
+              <Logo className="w-6 h-6" />
             </Link>
-            <div tw="hidden sm:block sm:ml-6">
-              <div tw="flex space-x-4 items-center ">
+            <div className="hidden sm:block sm:ml-6">
+              <div className="flex space-x-4 items-center ">
                 {organization && <OrganizationSwitcher organizationId={organization} />}
                 {project && organization && (
                   <>
-                    <div tw="text-xl text-gray-200 font-normal select-none">/</div>
+                    <div className="text-xl text-gray-200 font-normal select-none">/</div>
                     <ProjectSwitcher organizationId={organization} projectId={project} />
                   </>
                 )}
                 {project && target && organization && (
                   <>
-                    <div tw="text-xl text-gray-200 font-normal select-none">/</div>
+                    <div className="text-xl text-gray-200 font-normal select-none">/</div>
                     <TargetSwitcher
                       organizationId={organization}
                       projectId={project}
@@ -145,24 +144,24 @@ export function Navigation() {
             </div>
           </div>
           {docsUrl ? (
-            <div tw="flex flex-row items-center space-x-4">
-              <ChakraLink tw="text-sm dark:text-gray-200" href={docsUrl}>
+            <div className="flex flex-row items-center space-x-4">
+              <ChakraLink className="text-sm dark:text-gray-200" href={docsUrl}>
                 Documentation
               </ChakraLink>
             </div>
           ) : null}
-          <Divider orientation="vertical" tw="height[20px] ml-8 mr-3" />
-          <div tw="inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:pr-0">
-            <div tw="ml-3 relative">
+          <Divider orientation="vertical" className="h-5 ml-8 mr-3" />
+          <div className="inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:pr-0">
+            <div className="ml-3 relative">
               <Menu autoSelect={false}>
                 <MenuButton
                   size="sm"
                   as={Button}
-                  tw="font-normal"
+                  className="font-normal"
                   variant="ghost"
                   rightIcon={
                     <img
-                      tw="h-6 w-6 rounded-full"
+                      className="h-6 w-6 rounded-full"
                       src={undefined}
                       alt={me?.displayName ?? undefined}
                     />
@@ -212,7 +211,6 @@ export function Navigation() {
             </div>
           </div>
           <ThemeButton />
-          <div className="hive-release-notes" />
         </div>
       </div>
     </nav>

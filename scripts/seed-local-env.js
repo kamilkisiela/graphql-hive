@@ -67,7 +67,7 @@ async function main() {
     () => {
       for (let i = 0; i < operationsPerBatch; i++) {
         const randNumber = Math.random() * 100;
-        console.log(`Reporting usage query...`);
+        console.log('Reporting usage query...');
 
         const done = hiveInstance.collectUsage({
           document: randNumber > 50 ? query1 : query2,

@@ -1,5 +1,4 @@
 import React, { ChangeEventHandler, FormEventHandler } from 'react';
-import 'twin.macro';
 import { useMutation } from 'urql';
 import { Description, Label } from '@/components/common';
 import { CreateOrganizationDocument } from '@/graphql';
@@ -68,7 +67,7 @@ export const OrganizationCreator: React.FC<{
           <Description>
             You will become an <Label>admin</Label> and don't worry, you can add members later.
           </Description>
-          <div tw="pt-6 space-y-6">
+          <div className="pt-6 space-y-6">
             <FormControl>
               <FormLabel>Organization Name</FormLabel>
               <Input
@@ -82,7 +81,7 @@ export const OrganizationCreator: React.FC<{
             </FormControl>
           </div>
         </ModalBody>
-        <ModalFooter tw="space-x-6">
+        <ModalFooter className="space-x-6">
           <Button variant="ghost" type="button" disabled={fetching} onClick={onClose}>
             Cancel
           </Button>

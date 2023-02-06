@@ -195,7 +195,7 @@ export const ExternalCompositionSettings = ({
   return (
     <Card>
       <Heading className="mb-2 flex items-center justify-between gap-5">
-        <span className="flex-shrink-0">External Composition</span>
+        <span className="shrink-0">External Composition</span>
         <div>
           {isLoading ? (
             <Spinner />

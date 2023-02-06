@@ -3,7 +3,6 @@ import { formatISO } from 'date-fns';
 import ReactECharts from 'echarts-for-react';
 import { VscChevronDown, VscChevronLeft, VscChevronRight, VscChevronUp } from 'react-icons/vsc';
 import AutoSizer from 'react-virtualized-auto-sizer';
-import 'twin.macro';
 import { DocumentType, gql, useQuery } from 'urql';
 import { DataWrapper } from '@/components/common/DataWrapper';
 import { env } from '@/env/frontend';
@@ -172,7 +171,7 @@ const Sortable = ({
       direction="row"
       align="center"
       justifyContent={align === 'center' ? 'center' : align === 'left' ? 'flex-start' : 'flex-end'}
-      tw="cursor-pointer"
+      className="cursor-pointer"
     >
       <span>{children}</span>
       {isSorted ? isSortedDesc ? <VscChevronDown /> : <VscChevronUp /> : null}
@@ -404,7 +403,7 @@ function OrganizationTable({ data }: { data: Organization[] }) {
           ))}
         </Tbody>
       </Table>
-      <div tw="py-3 flex flex-row items-center justify-center space-x-2">
+      <div className="py-3 flex flex-row items-center justify-center space-x-2">
         <Button
           size="sm"
           variant="ghost"
@@ -423,7 +422,7 @@ function OrganizationTable({ data }: { data: Organization[] }) {
           disabled={!tableInstance.getCanPreviousPage()}
           icon={<VscChevronLeft />}
         />
-        <span tw="font-bold whitespace-nowrap text-sm">
+        <span className="font-bold whitespace-nowrap text-sm">
           {tableInstance.getState().pagination.pageIndex + 1} / {tableInstance.getPageCount()}
         </span>
         <IconButton
@@ -504,8 +503,8 @@ export const AdminStats: React.FC<{
   return (
     <DataWrapper query={query}>
       {({ data }) => (
-        <div tw="flex flex-col space-y-6">
-          <StatGroup tw="bg-gray-100 dark:bg-gray-800 px-3 py-2">
+        <div className="flex flex-col space-y-6">
+          <StatGroup className="bg-gray-100 dark:bg-gray-800 px-3 py-2">
             <OverallStat label="Users" value={overall.users} />
             <OverallStat label="Organizations" value={overall.organizations} />
             <OverallStat label="Projects" value={overall.projects} />

@@ -2,7 +2,6 @@ import { ComponentProps, ReactElement, useCallback, useMemo, useState } from 're
 import { useRouter } from 'next/router';
 import { formatISO, subDays, subHours, subMinutes } from 'date-fns';
 import { VscChevronDown } from 'react-icons/vsc';
-import 'twin.macro';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';

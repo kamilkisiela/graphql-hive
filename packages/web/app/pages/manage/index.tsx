@@ -3,7 +3,6 @@ import startOfMonth from 'date-fns/startOfMonth';
 import subDays from 'date-fns/subDays';
 import subHours from 'date-fns/subHours';
 import { VscChevronDown } from 'react-icons/vsc';
-import 'twin.macro';
 import { AdminStats, Filters } from '@/components/admin/AdminStats';
 import { authenticated } from '@/components/authenticated-container';
 import { Page } from '@/components/common';
@@ -11,12 +10,7 @@ import { DATE_RANGE_OPTIONS, floorToMinute } from '@/components/common/TimeFilte
 import { withSessionProtection } from '@/lib/supertokens/guard';
 import { Checkbox, CheckboxGroup, Select, Tooltip } from '@chakra-ui/react';
 
-type DateRangeOptions = Exclude<
-  (typeof DATE_RANGE_OPTIONS)[number],
-  {
-    key: 'all';
-  }
->;
+type DateRangeOptions = Exclude<(typeof DATE_RANGE_OPTIONS)[number], { key: 'all' }>;
 
 function isNotAllOption(option: (typeof DATE_RANGE_OPTIONS)[number]): option is DateRangeOptions {
   return option.key !== 'all';
@@ -70,10 +64,10 @@ function Manage() {
 
   return (
     <Page title="Hive Stats">
-      <div tw="flex flex-row h-full">
-        <div tw="flex-grow overflow-x-auto divide-y divide-gray-200">
-          <div tw="w-6/12 mt-10 mb-6">
-            <div tw="inline-block">
+      <div className="flex flex-row h-full">
+        <div className="grow overflow-x-auto divide-y divide-gray-200">
+          <div className="w-6/12 mt-10 mb-6">
+            <div className="inline-block">
               <CheckboxGroup
                 colorScheme="teal"
                 size="sm"
@@ -82,24 +76,24 @@ function Manage() {
                 )}
                 onChange={onFiltersChange}
               >
-                <Checkbox tw="whitespace-nowrap align-middle" value="only-regular">
+                <Checkbox className="whitespace-nowrap align-middle" value="only-regular">
                   <Tooltip label="Do not count personal organizations, created automatically for every user">
                     Only Regular
                   </Tooltip>
                 </Checkbox>
-                <Checkbox tw="whitespace-nowrap align-middle" value="with-projects">
+                <Checkbox className="whitespace-nowrap align-middle" value="with-projects">
                   With Projects
                 </Checkbox>
-                <Checkbox tw="whitespace-nowrap align-middle" value="with-targets">
+                <Checkbox className="whitespace-nowrap align-middle" value="with-targets">
                   With Targets
                 </Checkbox>
-                <Checkbox tw="whitespace-nowrap align-middle" value="with-schema-pushes">
+                <Checkbox className="whitespace-nowrap align-middle" value="with-schema-pushes">
                   With Schema Pushes
                 </Checkbox>
-                <Checkbox tw="whitespace-nowrap align-middle" value="with-persisted">
+                <Checkbox className="whitespace-nowrap align-middle" value="with-persisted">
                   With Persisted
                 </Checkbox>
-                <Checkbox tw="whitespace-nowrap align-middle" value="with-collected">
+                <Checkbox className="whitespace-nowrap align-middle" value="with-collected">
                   With Collected
                 </Checkbox>
               </CheckboxGroup>
@@ -113,15 +107,13 @@ function Manage() {
                   iconSize="16"
                   icon={<VscChevronDown />}
                   size="sm"
-                  tw="inline-block align-middle"
+                  className="inline-block align-middle"
                 >
-                  {dateRangeOptions.map(item => {
-                    return (
-                      <option key={item.key} value={item.key}>
-                        {item.label}
-                      </option>
-                    );
-                  })}
+                  {dateRangeOptions.map(item => (
+                    <option key={item.key} value={item.key}>
+                      {item.label}
+                    </option>
+                  ))}
                 </Select>
               </Tooltip>
             </div>

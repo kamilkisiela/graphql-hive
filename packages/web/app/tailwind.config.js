@@ -1,15 +1,9 @@
 const colors = require('tailwindcss/colors');
-const plugin = require('tailwindcss/plugin');
 
 module.exports = {
   darkMode: 'class',
-  mode: 'jit', // remove in v3
-  purge: ['./{pages,src}/**/*.ts{,x}'], // rename to content in v3
+  content: ['./{pages,src}/**/*.ts{,x}'],
   theme: {
-    fontFamily: {
-      // to use `font-sans` class
-      sans: ['Inter', 'ui-sans-serif', 'system-ui'],
-    },
     container: {
       center: true,
     },
@@ -18,11 +12,7 @@ module.exports = {
       current: 'currentColor',
       white: '#fcfcfc',
       black: '#0b0d11',
-      // gray: colors.gray,
-      // red: colors.red,
-      // yellow: colors.yellow,
       emerald: colors.emerald,
-
       red: {
         50: '#fef5f5',
         100: '#fdeaeb',
@@ -88,8 +78,8 @@ module.exports = {
       },
     },
     extend: {
-      zIndex: {
-        '-1': -1,
+      fontFamily: {
+        sans: ['Inter', 'ui-sans-serif', 'system-ui'],
       },
       ringColor: theme => ({
         DEFAULT: theme('colors.orange.500'),
@@ -98,31 +88,6 @@ module.exports = {
     },
   },
   plugins: [
-    plugin(({ addUtilities }) => {
-      addUtilities({
-        '.drag-none': {
-          '-webkit-user-drag': 'none',
-        },
-        '.fill-none': {
-          fill: 'none',
-        },
-        '.will-change-transform': {
-          willChange: 'transform', // exist in tailwind v3, remove after upgrade
-        },
-        '.grow': {
-          flexGrow: 1, // exist in v3
-        },
-        '.grow-0': {
-          flexGrow: 0, // exist in v3
-        },
-        '.shrink-0': {
-          flexShrink: 0, // exist in v3
-        },
-        '.text-ellipsis': {
-          textOverflow: 'ellipsis', // exist in v3
-        },
-      });
-    }),
     // Utilities for visually truncating text after a fixed number of lines
     require('@tailwindcss/line-clamp'),
     // Utilities and variants for styling Radix state

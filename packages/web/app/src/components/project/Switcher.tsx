@@ -1,6 +1,5 @@
 import React from 'react';
 import { VscChevronDown } from 'react-icons/vsc';
-import 'twin.macro';
 import { useQuery } from 'urql';
 import { ProjectsDocument } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks';
@@ -47,7 +46,7 @@ export const ProjectSwitcher: React.FC<{
         as={Button}
         rightIcon={<VscChevronDown />}
         variant="ghost"
-        tw="font-normal"
+        className="font-normal"
       >
         {refinedData.currentProject.name}
       </MenuButton>

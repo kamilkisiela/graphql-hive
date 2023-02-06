@@ -51,7 +51,7 @@ export default class MyDocument extends Document<{
           <script
             type="module"
             dangerouslySetInnerHTML={{
-              __html: `globalThis["__frontend_env"] = ${JSON.stringify(
+              __html: `globalThis.__frontend_env = ${JSON.stringify(
                 (this.props as any).frontendEnv,
               )}`,
             }}

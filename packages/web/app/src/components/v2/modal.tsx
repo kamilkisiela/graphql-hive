@@ -1,9 +1,8 @@
 import { PropsWithChildren, ReactElement } from 'react';
 import clsx from 'clsx';
-import { css } from 'twin.macro';
 import { Button } from '@/components/v2';
 import { XIcon } from '@/components/v2/icon';
-import { keyframes } from '@emotion/react';
+import { css, keyframes } from '@emotion/react';
 import {
   Close,
   Content,
@@ -74,9 +73,9 @@ const Modal = ({
             widthBySize[size],
           )}
           css={css`
+            transform: translate(-50%, -50%);
             box-shadow: hsl(206 22% 7% / 35%) 0 10px 38px -10px,
               hsl(206 22% 7% / 20%) 0 10px 20px -15px;
-            transform: translate(-50%, -50%);
             @media (prefers-reduced-motion: no-preference) {
               animation: ${contentShow} 300ms cubic-bezier(0.16, 1, 0.3, 1);
             }
