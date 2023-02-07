@@ -150,7 +150,7 @@ export interface schema_log {
   id: string;
   metadata: string | null;
   project_id: string;
-  sdl: string;
+  sdl: string | null;
   service_name: string | null;
   service_url: string | null;
   target_id: string;
