@@ -5,27 +5,27 @@ overrides:
   tsup: 6.5.0
 
 patchedDependencies:
-  '@tgriesser/schemats@7.0.1':
-    hash: u3kbucfchakklx3sci2vh6wjau
-    path: patches/@tgriesser__schemats@7.0.1.patch
-  '@theguild/buddy@0.1.0':
-    hash: ryylgra5xglhidfoiaxehn22hq
-    path: patches/@theguild__buddy@0.1.0.patch
-  mjml-core@4.13.0:
-    hash: zxxsxbqejjmcwuzpigutzzq6wa
-    path: patches/mjml-core@4.13.0.patch
   slonik@30.1.2:
     hash: wg2hxbo7txnklmvja4aeqnygfi
     path: patches/slonik@30.1.2.patch
+  mjml-core@4.13.0:
+    hash: zxxsxbqejjmcwuzpigutzzq6wa
+    path: patches/mjml-core@4.13.0.patch
+  '@theguild/buddy@0.1.0':
+    hash: ryylgra5xglhidfoiaxehn22hq
+    path: patches/@theguild__buddy@0.1.0.patch
   '@oclif/core@1.23.0':
     hash: zhte2hlj7lfobytjpalcwwo474
     path: patches/@oclif__core@1.23.0.patch
-  oclif@3.6.2:
+  oclif@3.6.3:
     hash: rxmtqiusuyruv7tkwux5gvotbm
-    path: patches/oclif@3.6.2.patch
+    path: patches/oclif@3.6.3.patch
   bullmq@3.6.2:
     hash: xbmkiyyfti7h6orsfs6pdmi4s4
     path: patches/bullmq@3.6.2.patch
+  '@tgriesser/schemats@7.0.1':
+    hash: u3kbucfchakklx3sci2vh6wjau
+    path: patches/@tgriesser__schemats@7.0.1.patch
   '@slonik/migrator@0.8.5':
     hash: yfpv2xzdmnkrtu2wvaktxf5mmq
     path: patches/@slonik__migrator@0.8.5.patch
@@ -251,7 +251,7 @@ importers:
       graphql-tag: 2.12.6
       log-symbols: 4.1.0
       mkdirp: 2.1.3
-      oclif: 3.6.2
+      oclif: 3.6.3
       rimraf: 3.0.2
       ts-node: 10.9.1
       tslib: 2.5.0
@@ -282,7 +282,7 @@ importers:
       '@graphql-codegen/typescript-graphql-request': 4.5.8_f45c35xnr66et7kv43kezet7ie
       '@types/env-ci': 3.1.1
       '@types/mkdirp': 1.0.2
-      oclif: 3.6.2_rxmtqiusuyruv7tkwux5gvotbm
+      oclif: 3.6.3_rxmtqiusuyruv7tkwux5gvotbm
 
   packages/libraries/client:
     specifiers:
@@ -8914,40 +8914,6 @@ packages:
       wrap-ansi: 7.0.0
     dev: true
 
-  /@oclif/core/2.0.7:
-    resolution: {integrity: sha512-pj7hIH8SBeH3qha47fmyqdaBdNVEqesRgnKFh8Ytdb4S41/4BYOiQuyQGuvnKgvicH6DMxp4FbM9EQEW46V9xw==}
-    engines: {node: '>=14.0.0'}
-    dependencies:
-      '@types/cli-progress': 3.11.0
-      ansi-escapes: 4.3.2
-      ansi-styles: 4.3.0
-      cardinal: 2.1.1
-      chalk: 4.1.2
-      clean-stack: 3.0.1
-      cli-progress: 3.11.2
-      debug: 4.3.4_supports-color@8.1.1
-      ejs: 3.1.8
-      fs-extra: 9.1.0
-      get-package-type: 0.1.0
-      globby: 11.1.0
-      hyperlinker: 1.0.0
-      indent-string: 4.0.0
-      is-wsl: 2.2.0
-      js-yaml: 3.14.1
-      natural-orderby: 2.0.3
-      object-treeify: 1.1.33
-      password-prompt: 1.1.2
-      semver: 7.3.8
-      string-width: 4.2.3
-      strip-ansi: 6.0.1
-      supports-color: 8.1.1
-      supports-hyperlinks: 2.3.0
-      tslib: 2.5.0
-      widest-line: 3.1.0
-      wordwrap: 1.0.0
-      wrap-ansi: 7.0.0
-    dev: true
-
   /@oclif/core/2.0.8:
     resolution: {integrity: sha512-jt06vEZfpazkR0C8vYuVMKmsxjky52y1B1oFGPnCa6/17qH+PByd5knQP6/QbRoE5OT9RAf4zzpxx2wcihVslw==}
     engines: {node: '>=14.0.0'}
@@ -9043,6 +9009,7 @@ packages:
   /@oclif/screen/3.0.4:
     resolution: {integrity: sha512-IMsTN1dXEXaOSre27j/ywGbBjrzx0FNd1XmuhCWCB9NTPrhWI1Ifbz+YLSEcstfQfocYsrbrIessxXb2oon4lA==}
     engines: {node: '>=12.0.0'}
+    deprecated: Deprecated in favor of @oclif/core
     dev: true
 
   /@octokit/app/13.1.2:
@@ -21871,12 +21838,12 @@ packages:
     resolution: {integrity: sha512-PX1wu0AmAdPqOL1mWhqmlOd8kOIZQwGZw6rh7uby9fTc5lhaOWFLX3I6R1hrF9k3zUY40e6igsLGkDXK92LJNg==}
     dev: false
 
-  /oclif/3.6.2_rxmtqiusuyruv7tkwux5gvotbm:
-    resolution: {integrity: sha512-SslNzNzryOMJ8eqID4ehIipqS+cF032ZEGIyhqN2J5mD6gsHAf1t+rMNpHBFy2kcCjgy/9/wUZQGanaFSCB41Q==}
+  /oclif/3.6.3_rxmtqiusuyruv7tkwux5gvotbm:
+    resolution: {integrity: sha512-S4pSWrPB9fm6IIiXBWtmNkeSWvGfw8Vb51hS6TTyv0fa2xU4sdcDU0YYKM3oFqpfapyf3aH0YjQTofJKU5joSw==}
     engines: {node: '>=12.0.0'}
     hasBin: true
     dependencies:
-      '@oclif/core': 2.0.7
+      '@oclif/core': 2.0.8
       '@oclif/plugin-help': 5.2.4
       '@oclif/plugin-not-found': 2.3.8
       '@oclif/plugin-warn-if-update-available': 2.0.17
