@@ -351,7 +351,7 @@ importers:
       dotenv: 16.0.3
       got: 12.5.3
       p-limit: 4.0.0
-      pg-promise: 10.15.4
+      pg-promise: 11.2.0
       slonik: 30.1.2
       ts-node: 10.9.1
       tslib: 2.5.0
@@ -373,7 +373,7 @@ importers:
       '@types/node': 18.13.0
       '@types/pg': 8.6.6
       copyfiles: 2.4.1
-      pg-promise: 10.15.4
+      pg-promise: 11.2.0
       tslib: 2.5.0
 
   packages/services/api:
@@ -768,7 +768,7 @@ importers:
       dotenv: 16.0.3
       got: 12.5.3
       param-case: 3.0.4
-      pg-promise: 10.15.4
+      pg-promise: 11.2.0
       slonik: 30.1.2
       slonik-interceptor-query-logging: 1.4.7
       slonik-utilities: 1.9.4
@@ -790,7 +790,7 @@ importers:
       '@tgriesser/schemats': 7.0.1_u3kbucfchakklx3sci2vh6wjau
       '@types/node': 18.13.0
       '@types/pg': 8.6.6
-      pg-promise: 10.15.4
+      pg-promise: 11.2.0
       tslib: 2.5.0
       typescript: 4.9.5
 
@@ -22427,13 +22427,22 @@ packages:
       pg: '>=8.0'
     dependencies:
       pg: 8.8.0
+    dev: false
 
-  /pg-promise/10.15.4:
-    resolution: {integrity: sha512-BKlHCMCdNUmF6gagVbehRWSEiVcZzPVltEx14OJExR9Iz9/1R6KETDWLLGv2l6yRqYFnEZZy1VDjRhArzeIGrw==}
-    engines: {node: '>=12.0'}
+  /pg-pool/3.5.2_pg@8.9.0:
+    resolution: {integrity: sha512-His3Fh17Z4eg7oANLob6ZvH8xIVen3phEZh2QuyrIl4dQSDVEabNducv6ysROKpDNPSD+12tONZVWfSgMvDD9w==}
+    peerDependencies:
+      pg: '>=8.0'
+    dependencies:
+      pg: 8.9.0
+    dev: true
+
+  /pg-promise/11.2.0:
+    resolution: {integrity: sha512-aAYW0yWvwS02VdIrzZApRaIrZL71ckCl0/biZPXFvueWGMXzvRbDf4G2l1yU+pA2fiYxu+hYZIFztCuloK1MDQ==}
+    engines: {node: '>=14.0'}
     dependencies:
       assert-options: 0.8.0
-      pg: 8.8.0
+      pg: 8.9.0
       pg-minify: 1.6.2
       spex: 3.2.0
     transitivePeerDependencies:
@@ -22442,6 +22451,9 @@ packages:
 
   /pg-protocol/1.5.0:
     resolution: {integrity: sha512-muRttij7H8TqRNu/DxrAJQITO4Ac7RmX3Klyr/9mJEOBeIpgnF8f9jAfRz5d3XwQZl5qBjF9gLsUtMPJE0vezQ==}
+
+  /pg-protocol/1.6.0:
+    resolution: {integrity: sha512-M+PDm637OY5WM307051+bsDia5Xej6d9IR4GwJse1qA1DIhiKlksvrneZOYQq42OM+spubpcNYEo2FcKQrDk+Q==}
 
   /pg-types/2.2.0:
     resolution: {integrity: sha512-qTAAlrEsl8s4OiEQY69wDvcMIdQN6wdz5ojQiOy6YRMuynxenON0O5oCpJI6lshc6scgAY8qvJ2On/p+CXY0GA==}
@@ -22479,9 +22491,28 @@ packages:
       packet-reader: 1.0.0
       pg-connection-string: 2.5.0
       pg-pool: 3.5.2_pg@8.8.0
-      pg-protocol: 1.5.0
+      pg-protocol: 1.6.0
       pg-types: 2.2.0
       pgpass: 1.0.5
+    dev: false
+
+  /pg/8.9.0:
+    resolution: {integrity: sha512-ZJM+qkEbtOHRuXjmvBtOgNOXOtLSbxiMiUVMgE4rV6Zwocy03RicCVvDXgx8l4Biwo8/qORUnEqn2fdQzV7KCg==}
+    engines: {node: '>= 8.0.0'}
+    peerDependencies:
+      pg-native: '>=3.0.1'
+    peerDependenciesMeta:
+      pg-native:
+        optional: true
+    dependencies:
+      buffer-writer: 2.0.0
+      packet-reader: 1.0.0
+      pg-connection-string: 2.5.0
+      pg-pool: 3.5.2_pg@8.9.0
+      pg-protocol: 1.6.0
+      pg-types: 2.2.0
+      pgpass: 1.0.5
+    dev: true
 
   /pgpass/1.0.5:
     resolution: {integrity: sha512-FdW9r/jQZhSeohs1Z3sI1yxFQNFvMcnmfuj4WBMUTxOrAyLMaTcE1aAMBiTlbMNaXvBCQuVi0R7hd8udDSP7ug==}
