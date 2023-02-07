@@ -53,18 +53,6 @@ export interface cdn_access_tokens {
   target_id: string;
 }
 
-export interface commits {
-  author: string;
-  commit: string;
-  content: string;
-  created_at: Date;
-  id: string;
-  metadata: string | null;
-  project_id: string;
-  service: string | null;
-  target_id: string;
-}
-
 export interface migration {
   date: Date;
   hash: string;
@@ -162,7 +150,7 @@ export interface schema_log {
   id: string;
   metadata: string | null;
   project_id: string;
-  sdl: string | null;
+  sdl: string;
   service_name: string | null;
   service_url: string | null;
   target_id: string;
