@@ -6,6 +6,7 @@ query LatestSchema($selector: TargetSelectorInput!) {
       valid
       schemas {
         nodes {
+          __typename
           ...SingleSchemaFields
           ...CompositeSchemaFields
         }

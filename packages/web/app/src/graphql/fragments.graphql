@@ -119,7 +119,7 @@ fragment SchemaVersionFields on SchemaVersion {
     }
     ... on DeletedSchemaLog {
       id
-      deletedService: service
+      deletedService
     }
   }
   baseSchema

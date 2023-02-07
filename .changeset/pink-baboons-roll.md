@@ -1,5 +1,5 @@
 ---
-"@graphql-hive/cli": minor
+'@graphql-hive/cli': minor
 ---
 
 Adds `schema:delete` command

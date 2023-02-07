@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "build": "node build.mjs",
-    "dev": "tsup-node src/dev.ts --target node18 --sourcemap --watch --onSuccess \"node --enable-source-maps dist/dev.js\"",
+    "dev": "tsup-node src/dev.ts --target node18 --sourcemap --format esm --watch --onSuccess  \"node --enable-source-maps dist/dev.js\"",
     "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
