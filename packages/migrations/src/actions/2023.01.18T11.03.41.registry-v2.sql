@@ -8,7 +8,8 @@ ALTER TABLE public.commits RENAME COLUMN service TO service_name;
 ALTER TABLE public.commits RENAME COLUMN content TO sdl;
 ALTER TABLE public.commits 
   ADD COLUMN service_url text,
-  ADD COLUMN action text NOT NULL DEFAULT 'PUSH';
+  ADD COLUMN action text NOT NULL DEFAULT 'PUSH',
+  ALTER COLUMN sdl DROP NOT NULL;
 ALTER TABLE public.commits RENAME TO schema_log;
 
 -- Describes the state of a schema in the registry.
