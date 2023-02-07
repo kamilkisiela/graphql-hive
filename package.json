@@ -80,7 +80,7 @@
     "eslint-plugin-cypress": "2.12.1",
     "eslint-plugin-hive": "file:./rules",
     "eslint-plugin-tailwindcss": "3.7.1",
-    "glob": "8.0.3",
+    "glob": "8.1.0",
     "graphql": "16.6.0",
     "husky": "8.0.3",
     "jest": "29.3.1",
