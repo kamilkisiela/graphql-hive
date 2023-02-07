@@ -1813,7 +1813,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
               SELECT svi.created_at FROM public.schema_versions as svi WHERE svi.id = ${version}
             ) AND sv.target_id = ${target} ORDER BY sv.created_at DESC LIMIT 1
           ) AND sl.action = 'PUSH'
-          ORDER BY c.created_at DESC
+          ORDER BY sl.created_at DESC
         `,
       );
 
