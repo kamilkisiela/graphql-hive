@@ -10,6 +10,6 @@
   "devDependencies": {
     "@cloudflare/workers-types": "4.20221111.1",
     "@types/service-worker-mock": "2.0.1",
-    "esbuild": "0.16.11"
+    "esbuild": "0.17.6"
   }
 }
