@@ -474,7 +474,7 @@ importers:
       '@whatwg-node/fetch': 0.6.2
       '@whatwg-node/server': 0.5.8
       esbuild: 0.17.6
-      itty-router: 2.6.6
+      itty-router: 3.0.11
       itty-router-extras: 0.4.2
       nock: 13.3.0
       toucan-js: 2.7.0
@@ -488,7 +488,7 @@ importers:
       '@whatwg-node/fetch': 0.6.2
       '@whatwg-node/server': 0.5.8
       esbuild: 0.17.6
-      itty-router: 2.6.6
+      itty-router: 3.0.11
       itty-router-extras: 0.4.2
       nock: 13.3.0
 
@@ -502,7 +502,7 @@ importers:
       esbuild: 0.17.6
       fastify: 3.29.5
       graphql: 16.6.0
-      itty-router: 2.6.6
+      itty-router: 3.0.11
       itty-router-extras: 0.4.2
       toucan-js: 2.7.0
       zod: 3.20.2
@@ -518,7 +518,7 @@ importers:
       '@whatwg-node/server': 0.5.8
       esbuild: 0.17.6
       fastify: 3.29.5
-      itty-router: 2.6.6
+      itty-router: 3.0.11
       itty-router-extras: 0.4.2
 
   packages/services/emails:
@@ -18527,8 +18527,8 @@ packages:
     resolution: {integrity: sha512-ppHaBzcTXs7idFSDISehG+8kif2/4aqLCfyY/Y/uIZv79sfEfNmTq9G+rDeqblun/VZRBiXZD8ztYmMS8EOsKw==}
     dev: true
 
-  /itty-router/2.6.6:
-    resolution: {integrity: sha512-hIPHtXGymCX7Lzb2I4G6JgZFE4QEEQwst9GORK7sMYUpJvLfy4yZJr95r04e8DzoAnj6HcxM2m4TbK+juu+18g==}
+  /itty-router/3.0.11:
+    resolution: {integrity: sha512-vWsoHBi2CmU15YzyUeHjRfjdySL2jqZQKA9jP1LXkBcLJAo0KQNVlQMvhtzG0mzABhVYifeBF97UkrrpuTCWYQ==}
     dev: true
 
   /jake/10.8.5:
