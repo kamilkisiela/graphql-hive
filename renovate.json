@@ -1,59 +1,45 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["github>the-guild-org/shared-config:renovate", ":preserveSemverRanges"],
-  "prConcurrentLimit": 20,
   "packageRules": [
     {
       "groupName": "graphql-armor",
-      "matchPackagePrefixes": ["@escape.tech/graphql-armor"]
-    },
-    {
-      "groupName": "whatwg-node",
-      "matchPackagePrefixes": ["@whatwg-node"]
+      "matchPackagePrefixes": ["@escape.tech/graphql-armor/"]
     },
     {
       "groupName": "radix",
-      "matchPackagePrefixes": ["@radix"]
-    },
-    {
-      "groupName": "graphql-tools",
-      "matchPackagePrefixes": "@graphql-tools"
+      "matchPackagePrefixes": ["@radix/"],
+      "recreateClosed": false
     },
     {
       "groupName": "stripe",
-      "matchPackagePrefixes": ["@stripe", "stripe"]
+      "matchPackagePrefixes": ["@stripe/", "stripe"]
     },
     {
       "groupName": "urql",
-      "matchPackagePrefixes": ["@urql", "urql"]
-    },
-    {
-      "groupName": "envelop",
-      "matchPackagePrefixes": "@envelop"
-    },
-    {
-      "groupName": "graphql-inspector",
-      "matchPackagePrefixes": "@graphql-inspector"
+      "matchPackagePrefixes": ["@urql/", "urql"],
+      "recreateClosed": false
     },
     {
       "groupName": "oclif",
-      "matchPackagePrefixes": ["@oclif", "oclif"]
+      "matchPackagePrefixes": ["@oclif/", "oclif"]
     },
     {
       "groupName": "sentry",
-      "matchPackagePrefixes": ["@sentry", "sentry"]
+      "matchPackagePrefixes": ["@sentry/", "sentry"]
     },
     {
       "groupName": "trpc",
-      "matchPackagePrefixes": "@trpc"
-    },
-    {
-      "groupName": "slonik",
-      "matchPackagePrefixes": ["@slonik", "slonik"]
+      "matchPackagePrefixes": ["@trpc/", "trpc"]
     },
     {
       "groupName": "supertokens",
       "matchPackagePrefixes": ["supertokens"]
+    },
+    {
+      "groupName": "slonik",
+      "matchPackagePrefixes": ["@slonik", "slonik"],
+      "recreateClosed": false
     }
   ]
 }
