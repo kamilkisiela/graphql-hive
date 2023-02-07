@@ -27,7 +27,7 @@
     "@graphql-hive/external-composition": "workspace:*",
     "@hive/service-common": "workspace:*",
     "@types/async-retry": "1.4.5",
-    "fastify": "3.29.5",
+    "fastify": "4.12.0",
     "pino-pretty": "9.1.1"
   },
   "buildOptions": {
