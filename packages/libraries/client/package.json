@@ -56,7 +56,7 @@
     "apollo-server-core": "3.11.1",
     "apollo-server-plugin-base": "3.7.1",
     "graphql-yoga": "3.5.1",
-    "nock": "13.2.9"
+    "nock": "13.3.0"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org",
