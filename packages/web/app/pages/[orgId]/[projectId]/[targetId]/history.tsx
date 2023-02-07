@@ -174,7 +174,7 @@ const ListPage = ({
       },
       ...variables,
     },
-    requestPolicy: 'network-only',
+    requestPolicy: 'cache-and-network',
   });
 
   const versions = versionsQuery.data?.schemaVersions;
@@ -301,7 +301,7 @@ function HistoryPage(): ReactElement {
         target: router.targetId,
       },
     },
-    requestPolicy: 'network-only',
+    requestPolicy: 'cache-and-network',
   });
   const versionId = router.versionId ?? latestSchemaQuery.data?.target?.latestSchemaVersion?.id;
 

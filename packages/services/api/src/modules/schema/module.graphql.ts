@@ -152,7 +152,7 @@ export default gql`
   type DeletedSchemaLog {
     id: ID!
     date: DateTime!
-    service: String!
+    deletedService: String!
   }
 
   union Schema = SingleSchema | CompositeSchema

@@ -783,7 +783,7 @@ export function fetchLatestSchema(token: string) {
             }
             ... on DeletedSchemaLog {
               __typename
-              deletedService: service
+              deletedService
             }
           }
           schemas {
@@ -822,7 +822,7 @@ export function fetchLatestValidSchema(token: string) {
             }
             ... on DeletedSchemaLog {
               __typename
-              deletedService: service
+              deletedService
             }
           }
           schemas {
@@ -865,7 +865,7 @@ export function fetchVersions(selector: SchemaVersionsInput, limit: number, toke
               }
               ... on DeletedSchemaLog {
                 __typename
-                deletedService: service
+                deletedService
               }
             }
             baseSchema
@@ -938,7 +938,7 @@ export function updateSchemaVersionStatus(input: SchemaVersionUpdateInput, token
             }
             ... on DeletedSchemaLog {
               __typename
-              deletedService: service
+              deletedService
             }
           }
         }

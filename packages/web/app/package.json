@@ -12,7 +12,7 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@chakra-ui/react": "1.8.9",
+    "@chakra-ui/react": "2.4.9",
     "@emotion/cache": "11.10.5",
     "@emotion/css": "11.10.5",
     "@emotion/react": "11.10.5",
@@ -54,7 +54,7 @@
     "echarts": "5.4.1",
     "echarts-for-react": "3.0.2",
     "formik": "2.2.9",
-    "framer-motion": "4.1.17",
+    "framer-motion": "9.0.2",
     "graphiql": "2.2.0",
     "graphql": "16.6.0",
     "hyperid": "3.1.1",
