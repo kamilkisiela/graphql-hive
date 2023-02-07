@@ -53,6 +53,8 @@ services:
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - './.hive-dev/minio/db:/data'
 
   s3_provision_buckets:
     image: quay.io/minio/mc:RELEASE.2022-11-17T21-20-39Z

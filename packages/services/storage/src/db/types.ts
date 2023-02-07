@@ -53,18 +53,6 @@ export interface cdn_access_tokens {
   target_id: string;
 }
 
-export interface commits {
-  author: string;
-  commit: string;
-  content: string;
-  created_at: Date;
-  id: string;
-  metadata: string | null;
-  project_id: string;
-  service: string | null;
-  target_id: string;
-}
-
 export interface migration {
   date: Date;
   hash: string;
