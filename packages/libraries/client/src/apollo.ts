@@ -1,7 +1,7 @@
 import { createHash } from 'crypto';
-import type { ApolloServerPlugin } from 'apollo-server-plugin-base';
 import axios from 'axios';
 import type { DocumentNode } from 'graphql';
+import type { ApolloServerPlugin } from '@apollo/server';
 import { createHive } from './client.js';
 import type {
   HiveClient,
@@ -149,6 +149,8 @@ export function hiveApollo(clientOrOptions: HiveClient | HivePluginOptions): Apo
     requestDidStart(context) {
       // `overallCachePolicy` does not exist in v0
       const isLegacyV0 = !('overallCachePolicy' in context);
+      // `context` does not exist in v4, it is `contextValue` instead
+      const isLegacyV3 = 'context' in context;
 
       let doc: DocumentNode;
       const complete = hive.collectUsage({
@@ -157,7 +159,7 @@ export function hiveApollo(clientOrOptions: HiveClient | HivePluginOptions): Apo
           return doc;
         },
         operationName: context.operationName,
-        contextValue: context.context,
+        contextValue: isLegacyV3 ? context.context : context.contextValue,
         variableValues: context.request.variables,
       });
 
@@ -170,10 +172,27 @@ export function hiveApollo(clientOrOptions: HiveClient | HivePluginOptions): Apo
         } as any;
       }
 
+      if (isLegacyV3) {
+        return Promise.resolve({
+          async willSendResponse(ctx) {
+            doc = ctx.document!;
+            complete(ctx.response as any);
+          },
+        });
+      }
+
+      // v4
       return Promise.resolve({
         async willSendResponse(ctx) {
           doc = ctx.document!;
-          complete(ctx.response);
+          if (ctx.response.body.kind === 'incremental') {
+            complete({
+              action: 'abort',
+              reason: '@defer and @stream is not supported by Hive',
+            });
+          } else {
+            complete(ctx.response.body.singleResult);
+          }
         },
       });
     },
@@ -190,6 +209,8 @@ export function hiveApollo(clientOrOptions: HiveClient | HivePluginOptions): Apo
           },
         } as any;
       }
+
+      // Works on v3 and v4
 
       return Promise.resolve({
         async serverWillStop() {

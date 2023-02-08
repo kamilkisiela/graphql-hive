@@ -29,6 +29,7 @@ import { version } from '../version.js';
 import { createAgent } from './agent.js';
 import { randomSampling } from './sampling.js';
 import type {
+  AbortAction,
   ClientInfo,
   CollectUsageCallback,
   HivePluginOptions,
@@ -37,6 +38,7 @@ import type {
 import {
   cache,
   cacheDocumentKey,
+  isAsyncIterable,
   isAsyncIterableIterator,
   logIf,
   measureDuration,
@@ -46,6 +48,10 @@ import {
 interface UsageCollector {
   collect(args: ExecutionArgs): CollectUsageCallback;
   dispose(): Promise<void>;
+}
+
+function isAbortAction(result: Parameters<CollectUsageCallback>[0]): result is AbortAction {
+  return 'action' in result && result.action === 'abort';
 }
 
 export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
@@ -150,7 +156,13 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
 
       return function complete(result) {
         try {
-          if (isAsyncIterableIterator(result)) {
+          if (isAbortAction(result)) {
+            logger.info(result.reason);
+            finish();
+            return;
+          }
+
+          if (isAsyncIterableIterator(result) || isAsyncIterable(result)) {
             logger.info('@stream @defer is not supported');
             finish();
             return;
