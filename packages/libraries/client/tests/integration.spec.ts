@@ -1,12 +1,11 @@
 import { createServer } from 'node:http';
 import { AddressInfo } from 'node:net';
-
-/* eslint-disable-next-line import/no-extraneous-dependencies */
-import { ApolloServerBase } from 'apollo-server-core';
 import axios from 'axios';
 
 /* eslint-disable-next-line import/no-extraneous-dependencies */
 import { createSchema, createYoga } from 'graphql-yoga';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { ApolloServer } from '@apollo/server';
 import { createHive, hiveApollo, useHive } from '../src';
 import { waitFor } from './test-utils';
 
@@ -110,7 +109,7 @@ test('Apollo Server - should not interrupt the process', async () => {
     info: jest.fn(),
   };
   const clean = handleProcess();
-  const apollo = new ApolloServerBase({
+  const apollo = new ApolloServer({
     typeDefs,
     resolvers,
     plugins: [
@@ -136,7 +135,6 @@ test('Apollo Server - should not interrupt the process', async () => {
     ],
   });
 
-  await apollo.start();
   await apollo.executeOperation({
     query: /* GraphQL */ `
       {

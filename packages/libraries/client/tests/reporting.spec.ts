@@ -2,7 +2,9 @@ import { buildSchema, parse } from 'graphql';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import nock from 'nock';
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { buildSubgraphSchema } from '@apollo/federation';
+import { buildSubgraphSchema as buildSubgraphSchemaV1 } from '@apollo/federation';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { buildSubgraphSchema as buildSubgraphSchemaV2 } from '@apollo/subgraph';
 import { createHive } from '../src/client';
 import { version } from '../src/version';
 import { waitFor } from './test-utils';
@@ -381,7 +383,7 @@ test('should send data to Hive immediately', async () => {
   http.done();
 });
 
-test('should send original schema of a federated service', async () => {
+test('should send original schema of a federated (v1) service', async () => {
   const logger = {
     error: jest.fn(),
     info: jest.fn(),
@@ -425,7 +427,71 @@ test('should send original schema of a federated service', async () => {
     });
 
   hive.reportSchema({
-    schema: buildSubgraphSchema(
+    schema: buildSubgraphSchemaV1(
+      parse(/* GraphQL */ `
+        type Query {
+          bar: String
+        }
+      `),
+    ),
+  });
+
+  await hive.dispose();
+  http.done();
+
+  expect(body.variables.input.sdl).toBe(`type Query{bar:String}`);
+  expect(body.variables.input.author).toBe(author);
+  expect(body.variables.input.commit).toBe(commit);
+  expect(body.variables.input.service).toBe(serviceName);
+  expect(body.variables.input.url).toBe(serviceUrl);
+  expect(body.variables.input.force).toBe(true);
+});
+
+test('should send original schema of a federated (v2) service', async () => {
+  const logger = {
+    error: jest.fn(),
+    info: jest.fn(),
+  };
+
+  const author = 'Test';
+  const commit = 'Commit';
+  const token = 'Token';
+  const serviceUrl = 'https://api.com';
+  const serviceName = 'my-api';
+
+  const hive = createHive({
+    enabled: true,
+    debug: true,
+    agent: {
+      timeout: 500,
+      maxRetries: 1,
+      logger,
+    },
+    token,
+    reporting: {
+      author,
+      commit,
+      endpoint: 'http://localhost/200',
+      serviceUrl,
+      serviceName,
+    },
+  });
+
+  let body: any = {};
+  const http = nock('http://localhost')
+    .post('/200')
+    .matchHeader('Authorization', `Bearer ${token}`)
+    .matchHeader('Content-Type', headers['Content-Type'])
+    .matchHeader('graphql-client-name', headers['graphql-client-name'])
+    .matchHeader('graphql-client-version', headers['graphql-client-version'])
+    .once()
+    .reply((_, _body) => {
+      body = _body;
+      return [200];
+    });
+
+  hive.reportSchema({
+    schema: buildSubgraphSchemaV2(
       parse(/* GraphQL */ `
         type Query {
           bar: String
