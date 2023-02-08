@@ -38,7 +38,14 @@ export function decodeCdnAccessTokenSafe(token: string) {
 
   token = token.slice(keyPrefix.length);
 
-  const str = globalThis.atob(token);
+  let str: string;
+
+  try {
+    str = globalThis.atob(token);
+  } catch (error) {
+    return decodeError;
+  }
+
   const [keyId, privateKey] = str.split(':');
   if (keyId && privateKey) {
     return { type: 'success', token: { keyId, privateKey } } as const;
