@@ -19,7 +19,7 @@
     "p-timeout": "6.1.0",
     "reflect-metadata": "0.1.13",
     "tiny-lru": "8.0.2",
-    "zod": "3.20.2"
+    "zod": "3.20.3"
   },
   "devDependencies": {
     "@hive/service-common": "workspace:*",
