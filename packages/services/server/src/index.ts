@@ -147,8 +147,8 @@ export async function main() {
     const registry = createRegistry({
       app: env.hiveServices.webApp
         ? {
-          baseUrl: env.hiveServices.webApp.url,
-        }
+            baseUrl: env.hiveServices.webApp.url,
+          }
         : null,
       tokens: {
         endpoint: env.hiveServices.tokens.endpoint,
@@ -202,17 +202,18 @@ export async function main() {
       },
       schemaConfig: env.hiveServices.webApp
         ? {
-          schemaPublishLink(input) {
-            let url = `${env.hiveServices.webApp!.url}/${input.organization.cleanId}/${input.project.cleanId
+            schemaPublishLink(input) {
+              let url = `${env.hiveServices.webApp!.url}/${input.organization.cleanId}/${
+                input.project.cleanId
               }/${input.target.cleanId}`;
 
-            if (input.version) {
-              url += `/history/${input.version.id}`;
-            }
+              if (input.version) {
+                url += `/history/${input.version.id}`;
+              }
 
-            return url;
-          },
-        }
+              return url;
+            },
+          }
         : {},
       organizationOIDC: env.organizationOIDC,
     });
@@ -403,10 +404,10 @@ export async function main() {
           await reply.status(200).send({
             user: user
               ? {
-                id: user.id,
-                email: user?.email,
-                auth0UserId: user.externalAuthUserId,
-              }
+                  id: user.id,
+                  email: user?.email,
+                  auth0UserId: user.externalAuthUserId,
+                }
               : null,
           });
         },
