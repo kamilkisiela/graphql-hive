@@ -18,7 +18,7 @@
     "dotenv": "16.0.3",
     "got": "12.5.3",
     "reflect-metadata": "0.1.13",
-    "zod": "3.20.2"
+    "zod": "3.20.3"
   },
   "devDependencies": {
     "@hive/api": "workspace:*",
