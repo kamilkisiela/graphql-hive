@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import { Readable } from 'node:stream';
 import got from 'got';
 import { GraphQLError, stripIgnoredCharacters } from 'graphql';
 import 'reflect-metadata';
@@ -353,8 +352,9 @@ export async function main() {
           });
 
           void reply.status(response.status);
-          void reply.send(Readable.from(response.body!));
-          return reply;
+
+          const textResponse = await response.text();
+          void reply.send(textResponse);
         },
       });
     }
