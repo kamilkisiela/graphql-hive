@@ -325,7 +325,7 @@ export class SchemaPublisher {
           await unlock();
         }
       },
-      ttl: 60,
+      ttl: 15,
       span,
     });
   }
