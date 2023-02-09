@@ -159,7 +159,7 @@ describe.each`
         author: 'Kamil',
         commit: 'push1',
         sdl: serviceA,
-        service: 'serviceA',
+        service: 'service-a',
         url: 'http://localhost:4001',
       }).then(r => r.expectNoGraphQLErrors());
 
@@ -169,14 +169,14 @@ describe.each`
         author: 'Kamil',
         commit: 'push2',
         sdl: serviceB,
-        service: 'serviceB',
+        service: 'service-b',
         url: 'http://localhost:4002',
       }).then(r => r.expectNoGraphQLErrors());
 
       // We should have 2 versions (push, push)
       await expect(fetchVersions(3)).resolves.toHaveLength(2);
 
-      await expect(deleteSchema('serviceB').then(r => r.expectNoGraphQLErrors())).resolves.toEqual(
+      await expect(deleteSchema('service-b').then(r => r.expectNoGraphQLErrors())).resolves.toEqual(
         expect.objectContaining({
           schemaDelete: {
             __typename: 'SchemaDeleteSuccess',
@@ -191,14 +191,14 @@ describe.each`
       // Most recent version should be a delete action
       expect(versions[0].log).toEqual({
         __typename: 'DeletedSchemaLog',
-        deletedService: 'serviceB',
+        deletedService: 'service-b',
       });
 
       await publishSchema({
         author: 'Kamil',
         commit: 'push3',
         sdl: serviceB,
-        service: 'serviceB',
+        service: 'service-b',
         url: 'http://localhost:4002',
       }).then(r => r.expectNoGraphQLErrors());
 
