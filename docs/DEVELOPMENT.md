@@ -65,7 +65,7 @@ We recommend the following flow if you are having issues with running Hive local
 4. Delete local `.hive` dir used by Docker volumes.
 5. Reinstall dependencies using `pnpm install`
 6. Force-generate new `.env` files: `pnpm env:sync --force`
-7. Make sure you are using `127.0.0.1` to interact between separate services (see
+7. Make sure you are using `0.0.0.0` to interact between separate services (see
    https://stackoverflow.com/questions/72648487/node-js-16-17-changed-resolution-of-localhost and
    the notes on IPv6 vs IPv4)
 

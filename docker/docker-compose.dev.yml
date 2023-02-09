@@ -88,11 +88,16 @@ services:
       - 'stack'
 
   broker:
-    image: vectorized/redpanda:latest
+    image: vectorized/redpanda:v22.3.12
     container_name: broker
     hostname: broker
     networks:
       - 'stack'
+    ports:
+      - '0.0.0.0:9092:9092'
+      - '0.0.0.0:8081:8081'
+      - '0.0.0.0:8082:8082'
+      - '0.0.0.0:9644:9644'
     command:
       - redpanda
       - start
