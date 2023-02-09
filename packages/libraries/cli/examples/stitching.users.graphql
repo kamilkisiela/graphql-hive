@@ -1,0 +1,9 @@
+type User {
+  id: ID!
+  username: String!
+  email: String!
+}
+
+type Query {
+  users(ids: [ID!]!): [User]! @merge(keyField: "id") @canonical
+}

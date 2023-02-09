@@ -55,6 +55,11 @@ export class RegistryChecks {
   constructor(private helper: SchemaHelper, private inspector: Inspector, private logger: Logger) {}
 
   async checksum({ schemas, latestVersion }: { schemas: Schemas; latestVersion: LatestVersion }) {
+    this.logger.debug(
+      'Checksum check (before=%s, after=%s)',
+      latestVersion?.schemas.length ?? 0,
+      schemas.length,
+    );
     const isInitial = latestVersion === null;
 
     if (isInitial) {
