@@ -1,5 +1,6 @@
 /* eslint-env node */
 const guildConfig = require('@theguild/eslint-config/base');
+const { REACT_RESTRICTED_SYNTAX, RESTRICTED_SYNTAX } = require('@theguild/eslint-config/constants');
 
 const rulesToExtends = Object.fromEntries(
   Object.entries(guildConfig.rules).filter(([key]) =>
@@ -16,10 +17,17 @@ const rulesToExtends = Object.fromEntries(
       'react/self-closing-comp',
       'prefer-const',
       'no-extra-boolean-cast',
-      'no-restricted-syntax',
     ].includes(key),
   ),
 );
+
+const HIVE_RESTRICTED_SYNTAX = [
+  {
+    // ❌ '0.0.0.0' or `0.0.0.0`
+    selector: ':matches(Literal[value="0.0.0.0"], TemplateElement[value.raw="0.0.0.0"])',
+    message: 'Use "::" to make it compatible with both IPv4 and IPv6',
+  },
+];
 
 module.exports = {
   reportUnusedDisableDirectives: true,
@@ -65,6 +73,7 @@ module.exports = {
     '@typescript-eslint/no-floating-promises': 'error',
     '@typescript-eslint/no-unnecessary-type-assertion': 'error',
     ...rulesToExtends,
+    'no-restricted-syntax': ['error', ...HIVE_RESTRICTED_SYNTAX, ...RESTRICTED_SYNTAX],
 
     // 🚨 The following rules needs to be fixed and was temporarily disabled to avoid printing warning
     '@typescript-eslint/no-explicit-any': 'off',
@@ -99,6 +108,7 @@ module.exports = {
         'react/no-unknown-property': 'off',
         'jsx-a11y/anchor-is-valid': ['off', { components: ['Link', 'NextLink'] }],
         'jsx-a11y/alt-text': ['warn', { elements: ['img'], img: ['Image', 'NextImage'] }],
+        'no-restricted-syntax': ['error', ...HIVE_RESTRICTED_SYNTAX, ...REACT_RESTRICTED_SYNTAX],
 
         // TODO: enable below rules👇
         '@typescript-eslint/consistent-type-imports': ['off', { prefer: 'no-type-imports' }],
