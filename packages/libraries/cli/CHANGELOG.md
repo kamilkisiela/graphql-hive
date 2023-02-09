@@ -1,5 +1,14 @@
 # @graphql-hive/cli
 
+## 0.20.2
+
+### Patch Changes
+
+- [#1326](https://github.com/kamilkisiela/graphql-hive/pull/1326)
+  [`99f7c66a`](https://github.com/kamilkisiela/graphql-hive/commit/99f7c66a44dc0ff5d209fdfcd5d9620dcd51171a)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Do not show "Skipping" when publishing
+  schema to the modern model
+
 ## 0.20.1
 
 ### Patch Changes
