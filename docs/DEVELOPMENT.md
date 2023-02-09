@@ -19,7 +19,6 @@ Developing Hive locally requires you to have the following software installed lo
 ```
 SERVER_ENDPOINT=http://localhost:3001
 ENVIRONMENT=local
-CDN_AUTH_PRIVATE_KEY=$(openssl rand -hex 16)
 ```
 
 - Run `pnpm i` at the root to install all the dependencies and run the hooks
@@ -55,6 +54,17 @@ We have a script to feed your local instance of Hive.
 > (amount of operations in each interval round, default is `1`) and `INTERVAL` (frequency of sending
 > operations, default: `1000`ms). For example, using `INTERVAL=1000 OPERATIONS=1000` will send 1000
 > requests per second.
+
+### Troubleshooting
+
+We recommend the following flow if you are having issues with running Hive locally:
+
+1. Stop all Docker containers: `docker kill $(docker ps -q)`
+2. Clear all local Docker environment: `docker system prune --all --force --volumes`
+3. Delete all generated local `.env` files: `find . -name '.env' | xargs rm`
+4. Delete local `.hive` dir used by Docker volumes.
+5. Reinstall dependencies using `pnpm install`
+6. Force-generate new `.env` files: `pnpm env:sync --force`
 
 ## Publish your first schema (manually)
 

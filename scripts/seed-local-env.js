@@ -13,7 +13,7 @@ async function main() {
         ? 'https://app.staging.graphql-hive.com/registry'
         : process.env.DEV
         ? 'https://app.dev.graphql-hive.com/registry'
-        : 'http://localhost:4000/graphql',
+        : 'http://localhost:3001/graphql',
       author: 'Hive Seed Script',
       commit: '1',
     },

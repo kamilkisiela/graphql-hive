@@ -42,7 +42,7 @@ const IntegrationSlackSchema = zod.union([
 
 const AuthGitHubConfigSchema = zod.union([
   zod.object({
-    AUTH_GITHUB: zod.union([zod.void(), zod.literal('0')]),
+    AUTH_GITHUB: zod.union([zod.void(), zod.literal('0'), zod.literal('')]),
   }),
   zod.object({
     AUTH_GITHUB: zod.literal('1'),
@@ -53,7 +53,7 @@ const AuthGitHubConfigSchema = zod.union([
 
 const AuthGoogleConfigSchema = zod.union([
   zod.object({
-    AUTH_GOOGLE: zod.union([zod.void(), zod.literal('0')]),
+    AUTH_GOOGLE: zod.union([zod.void(), zod.literal('0'), zod.literal('')]),
   }),
   zod.object({
     AUTH_GOOGLE: zod.literal('1'),
