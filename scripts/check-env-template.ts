@@ -1,8 +1,8 @@
 import { readFile } from 'node:fs/promises';
 import fg from 'fast-glob';
 
-const FORBIDDEN_IP = '0.0.0.0'
-const ALLOWED_IP = 'localhost'
+const FORBIDDEN_IP = '0.0.0.0';
+const ALLOWED_IP = 'localhost';
 
 const envTemplatePaths = await fg('**/.env.template', {
   cwd: process.cwd(),
