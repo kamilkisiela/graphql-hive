@@ -13,6 +13,7 @@ if (process.env.CI) {
   process.exit(0);
 }
 
+const force = ['--force', '-f'].includes(process.argv[2] || '');
 const cwd = process.cwd();
 
 async function main() {
@@ -24,7 +25,7 @@ async function main() {
     const dir = dirname(envLocalFile);
     const envFile = join(dir, '.env');
 
-    if (!(await exists(envFile))) {
+    if (force || !(await exists(envFile))) {
       console.log('[sync-env-files] Write .env file in', relative(process.cwd(), dir));
       await writeFile(envFile, await readFile(envLocalFile));
     }
@@ -52,7 +53,7 @@ async function main() {
       }
     }
 
-    if (modified) {
+    if (modified || force) {
       console.log('[sync-env-files] Sync', relative(process.cwd(), envFile));
       await writeFile(envFile, stringifyDotEnv(env), 'utf8');
     }
