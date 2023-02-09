@@ -194,10 +194,12 @@ export default class SchemaPublish extends Command {
           this.success('Published initial schema.');
         } else if (result.schemaPublish.successMessage) {
           this.success(result.schemaPublish.successMessage);
-        } else if (!changes?.total) {
+        } else if (changes && changes.total === 0) {
           this.success('No changes. Skipping.');
         } else {
-          renderChanges.call(this, changes);
+          if (changes) {
+            renderChanges.call(this, changes);
+          }
           this.success('Schema published');
         }
 
