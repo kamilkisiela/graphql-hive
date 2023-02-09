@@ -18,7 +18,7 @@
     "@graphql-typed-document-node/core": "3.1.1",
     "@trpc/client": "10.9.1",
     "@trpc/server": "10.9.1",
-    "@whatwg-node/fetch": "0.6.2",
+    "@whatwg-node/fetch": "0.7.0",
     "bcryptjs": "2.4.3",
     "date-fns": "2.29.3",
     "dockerode": "3.3.4",
