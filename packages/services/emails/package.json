@@ -21,7 +21,7 @@
     "nodemailer": "6.9.1",
     "p-timeout": "6.1.0",
     "sendmail": "1.6.1",
-    "zod": "3.20.3"
+    "zod": "3.20.5"
   },
   "devDependencies": {
     "@hive/service-common": "workspace:*",
