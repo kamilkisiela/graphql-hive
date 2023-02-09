@@ -3,6 +3,13 @@
   "extends": ["github>the-guild-org/shared-config:renovate", ":preserveSemverRanges"],
   "packageRules": [
     {
+      "groupName": "@theguild/prettier-config",
+      "matchPackageNames": ["@theguild/prettier-config"],
+      "prPriority": 10000,
+      "ignoreUnstable": false,
+      "allowedVersions": "/^(d+).(d+)(?:.(d+))?(-rc-.+)?$/"
+    },
+    {
       "groupName": "graphql-armor",
       "matchPackagePrefixes": ["@escape.tech/graphql-armor/"]
     },
