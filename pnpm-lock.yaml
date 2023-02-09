@@ -1227,7 +1227,7 @@ importers:
       '@types/react': 18.0.27
       clsx: 1.2.1
       next: 13.1.1
-      next-sitemap: 3.1.50
+      next-sitemap: 3.1.52
       next-themes: '*'
       postcss: 8.4.21
       react: 18.2.0
@@ -1247,7 +1247,7 @@ importers:
     devDependencies:
       '@theguild/tailwind-config': 0.2.1
       '@types/react': 18.0.27
-      next-sitemap: 3.1.50_syentjjt63dukspj2zj7hzem6y
+      next-sitemap: 3.1.52_syentjjt63dukspj2zj7hzem6y
       postcss: 8.4.21
       tailwindcss: 3.2.6_postcss@8.4.21
 
@@ -21644,8 +21644,8 @@ packages:
       react-dom: 18.2.0_react@18.2.0
     dev: false
 
-  /next-sitemap/3.1.50_syentjjt63dukspj2zj7hzem6y:
-    resolution: {integrity: sha512-BnxAbjOK1zVcYvpZ4sYfhPXcL3ajLh/AIJLR39YKrhFxrD92KkiAGuVaKhfpoQLUf+ldsGBkGpdml2N5Qdd1KA==}
+  /next-sitemap/3.1.52_syentjjt63dukspj2zj7hzem6y:
+    resolution: {integrity: sha512-tY469i4QRV1PwM9BoL+HdKYBCJ83IQl3PmUNapG/Hxp0MIYIw1hINU8E+Edf5Kr8vHXfVzPqDoul/Abu2P0vkw==}
     engines: {node: '>=14.18'}
     hasBin: true
     peerDependencies:
