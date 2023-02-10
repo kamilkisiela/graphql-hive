@@ -7,7 +7,6 @@ import { ProjectType, TargetAccessScope } from '@app/gql/graphql';
 import {
   DeleteObjectsCommand,
   GetObjectCommand,
-  ListObjectsCommand,
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
@@ -39,24 +38,6 @@ async function deleteS3Object(s3Client: S3Client, bucketName: string, keysToDele
   }
 }
 
-async function deleteAllS3BucketObjects(s3Client: S3Client, bucketName: string) {
-  const listObjectsCommand = new ListObjectsCommand({
-    Bucket: bucketName,
-  });
-  const result = await s3Client.send(listObjectsCommand);
-  const keysToDelete: Array<string> = [];
-
-  if (result.Contents) {
-    for (const item of result.Contents) {
-      if (item.Key) {
-        keysToDelete.push(item.Key);
-      }
-    }
-  }
-
-  await deleteS3Object(s3Client, bucketName, keysToDelete);
-}
-
 async function putS3Object(s3Client: S3Client, bucketName: string, key: string, body: string) {
   const putObjectCommand = new PutObjectCommand({
     Bucket: bucketName,
@@ -80,10 +61,6 @@ async function fetchS3ObjectArtifact(
     eTag: result.ETag!,
   };
 }
-
-beforeEach(async () => {
-  await deleteAllS3BucketObjects(s3Client, 'artifacts');
-});
 
 function buildEndpointUrl(
   baseUrl: string,
