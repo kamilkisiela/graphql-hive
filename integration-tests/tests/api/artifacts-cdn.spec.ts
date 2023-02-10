@@ -115,47 +115,50 @@ function runArtifactsCDNTests(
     getServiceHost(runtime.service, runtime.port).then(v => `http://${v}${runtime.path}`);
 
   describe(`Artifacts CDN ${name}`, () => {
-    test.concurrent('legacy cdn access key can be used for accessing artifacts', async () => {
-      const endpointBaseUrl = await getBaseEndpoint();
-      const { createOrg } = await initSeed().createOwner();
-      const { createProject } = await createOrg();
-      const { target, createToken } = await createProject(ProjectType.Single);
-      const token = await createToken({
-        targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-      });
+    test.concurrent(
+      'legacy cdn access key can be used for accessing artifacts',
+      async ({ expect }) => {
+        const endpointBaseUrl = await getBaseEndpoint();
+        const { createOrg } = await initSeed().createOwner();
+        const { createProject } = await createOrg();
+        const { target, createToken } = await createProject(ProjectType.Single);
+        const token = await createToken({
+          targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+        });
 
-      await token
-        .publishSchema({
-          author: 'Kamil',
-          commit: 'abc123',
-          sdl: `type Query { ping: String }`,
-        })
-        .then(r => r.expectNoGraphQLErrors());
+        await token
+          .publishSchema({
+            author: 'Kamil',
+            commit: 'abc123',
+            sdl: `type Query { ping: String }`,
+          })
+          .then(r => r.expectNoGraphQLErrors());
 
-      // manually generate CDN access token for legacy support
-      const legacyToken = generateLegacyToken(target.id);
-      const legacyTokenHash = await bcrypt.hash(legacyToken, await bcrypt.genSalt(10));
-      await putS3Object(s3Client, 'artifacts', `cdn-legacy-keys/${target.id}`, legacyTokenHash);
+        // manually generate CDN access token for legacy support
+        const legacyToken = generateLegacyToken(target.id);
+        const legacyTokenHash = await bcrypt.hash(legacyToken, await bcrypt.genSalt(10));
+        await putS3Object(s3Client, 'artifacts', `cdn-legacy-keys/${target.id}`, legacyTokenHash);
 
-      const url = buildEndpointUrl(endpointBaseUrl, target.id, 'sdl');
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'x-hive-cdn-key': legacyToken,
-        },
-      });
+        const url = buildEndpointUrl(endpointBaseUrl, target.id, 'sdl');
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'x-hive-cdn-key': legacyToken,
+          },
+        });
 
-      expect(response.status).toEqual(200);
-      expect(await response.text()).toMatchInlineSnapshot(`
-        "type Query {
-          ping: String
-        }"
+        expect(response.status).toBe(200);
+        expect(await response.text()).toMatchInlineSnapshot(`
+          type Query {
+            ping: String
+          }
       `);
-    });
+      },
+    );
 
     test.concurrent(
       'legacy deleting cdn access token from s3 revokes artifact cdn access',
-      async () => {
+      async ({ expect }) => {
         const { createOrg } = await initSeed().createOwner();
         const { createProject } = await createOrg();
         const { createToken, target } = await createProject(ProjectType.Single);
@@ -186,12 +189,12 @@ function runArtifactsCDNTests(
             'x-hive-cdn-key': legacyToken,
           },
         });
-        expect(response.status).toEqual(200);
+        expect(response.status).toBe(200);
         expect(await response.text()).toMatchInlineSnapshot(`
-                  "type Query {
-                    ping: String
-                  }"
-                `);
+          type Query {
+            ping: String
+          }
+        `);
 
         await deleteS3Object(s3Client, 'artifacts', [`cdn-legacy-keys/${target.id}`]);
 
@@ -202,7 +205,7 @@ function runArtifactsCDNTests(
             'x-hive-cdn-key': legacyToken,
           },
         });
-        expect(response.status).toEqual(403);
+        expect(response.status).toBe(403);
       },
     );
 
@@ -210,7 +213,7 @@ function runArtifactsCDNTests(
       const endpointBaseUrl = await getBaseEndpoint();
       const url = buildEndpointUrl(endpointBaseUrl, 'i-do-not-exist', 'sdl');
       const response = await fetch(url, { method: 'GET' });
-      expect(response.status).toEqual(400);
+      expect(response.status).toBe(400);
       expect(response.headers.get('content-type')).toContain('application/json');
       expect(await response.json()).toEqual({
         code: 'MISSING_AUTH_KEY',
@@ -218,7 +221,7 @@ function runArtifactsCDNTests(
         description:
           'Please refer to the documentation for more details: https://docs.graphql-hive.com/features/registry-usage',
       });
-      expect(response.headers.get('location')).toEqual(null);
+      expect(response.headers.get('location')).toBe(null);
     });
 
     test.concurrent('access invalid credentials', async () => {
@@ -230,7 +233,7 @@ function runArtifactsCDNTests(
           'x-hive-cdn-key': 'skrrtbrrrt',
         },
       });
-      expect(response.status).toEqual(403);
+      expect(response.status).toBe(403);
       expect(response.headers.get('content-type')).toContain('application/json');
       expect(await response.json()).toEqual({
         code: 'INVALID_AUTH_KEY',
@@ -239,10 +242,10 @@ function runArtifactsCDNTests(
         description:
           'Please refer to the documentation for more details: https://docs.graphql-hive.com/features/registry-usage',
       });
-      expect(response.headers.get('location')).toEqual(null);
+      expect(response.headers.get('location')).toBe(null);
     });
 
-    test.concurrent('access SDL artifact with valid credentials', async () => {
+    test.concurrent('access SDL artifact with valid credentials', async ({ expect }) => {
       const { createOrg } = await initSeed().createOwner();
       const { createProject } = await createOrg();
       const { createToken, target } = await createProject(ProjectType.Single);
@@ -259,7 +262,7 @@ function runArtifactsCDNTests(
         })
         .then(r => r.expectNoGraphQLErrors());
 
-      expect(publishSchemaResult.schemaPublish.__typename).toEqual('SchemaPublishSuccess');
+      expect(publishSchemaResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
       const cdnAccessResult = await writeToken.createCdnAccess();
       const endpointBaseUrl = await getBaseEndpoint();
       const url = buildEndpointUrl(endpointBaseUrl, target.id, 'sdl');
@@ -271,8 +274,8 @@ function runArtifactsCDNTests(
         redirect: 'manual',
       });
 
-      expect(response.status).toMatchInlineSnapshot(`302`);
-      expect(await response.text()).toMatchInlineSnapshot(`"Found."`);
+      expect(response.status).toBe(302);
+      expect(await response.text()).toBe('Found.');
       expect(response.headers.get('location')).toBeDefined();
 
       const artifactContents = await fetchS3ObjectArtifact(
@@ -280,13 +283,13 @@ function runArtifactsCDNTests(
         `artifact/${target.id}/sdl`,
       );
       expect(artifactContents.body).toMatchInlineSnapshot(`
-        "type Query {
+        type Query {
           ping: String
-        }"
+        }
       `);
     });
 
-    test.concurrent('access services artifact with valid credentials', async () => {
+    test.concurrent('access services artifact with valid credentials', async ({ expect }) => {
       const { createOrg } = await initSeed().createOwner();
       const { createProject } = await createOrg();
       const { createToken, target } = await createProject(ProjectType.Federation);
@@ -305,7 +308,7 @@ function runArtifactsCDNTests(
         })
         .then(r => r.expectNoGraphQLErrors());
 
-      expect(publishSchemaResult.schemaPublish.__typename).toEqual('SchemaPublishSuccess');
+      expect(publishSchemaResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
 
       // check if artifact exists in bucket
       const artifactContents = await fetchS3ObjectArtifact(
@@ -313,7 +316,7 @@ function runArtifactsCDNTests(
         `artifact/${target.id}/services`,
       );
       expect(artifactContents.body).toMatchInlineSnapshot(
-        `"[{"name":"ping","sdl":"type Query { ping: String }","url":"ping.com"}]"`,
+        '[{"name":"ping","sdl":"type Query { ping: String }","url":"ping.com"}]',
       );
 
       const cdnAccessResult = await writeToken.createCdnAccess();
@@ -327,27 +330,27 @@ function runArtifactsCDNTests(
         redirect: 'manual',
       });
 
-      expect(response.status).toMatchInlineSnapshot(`302`);
-      expect(await response.text()).toMatchInlineSnapshot(`"Found."`);
+      expect(response.status).toBe(302);
+      expect(await response.text()).toBe('Found.');
       const locationHeader = response.headers.get('location');
       expect(locationHeader).toBeDefined();
       const locationUrl = new URL(locationHeader!);
-      expect(locationUrl.protocol).toEqual('http:');
-      expect(locationUrl.hostname).toEqual('localhost');
-      expect(locationUrl.port).toEqual('8083');
+      expect(locationUrl.protocol).toBe('http:');
+      expect(locationUrl.hostname).toBe('localhost');
+      expect(locationUrl.port).toBe('8083');
 
       response = await fetch(locationHeader!, {
         method: 'GET',
         redirect: 'manual',
       });
       const body = await response.text();
-      expect(response.status).toEqual(200);
+      expect(response.status).toBe(200);
       expect(body).toMatchInlineSnapshot(
-        `"[{"name":"ping","sdl":"type Query { ping: String }","url":"ping.com"}]"`,
+        '[{"name":"ping","sdl":"type Query { ping: String }","url":"ping.com"}]',
       );
     });
 
-    test.concurrent('access services artifact with if-none-match header', async () => {
+    test.concurrent('access services artifact with if-none-match header', async ({ expect }) => {
       const { createOrg } = await initSeed().createOwner();
       const { createProject } = await createOrg();
       const { createToken, target } = await createProject(ProjectType.Federation);
@@ -367,7 +370,7 @@ function runArtifactsCDNTests(
         })
         .then(r => r.expectNoGraphQLErrors());
 
-      expect(publishSchemaResult.schemaPublish.__typename).toEqual('SchemaPublishSuccess');
+      expect(publishSchemaResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
 
       // check if artifact exists in bucket
       const artifactContents = await fetchS3ObjectArtifact(
@@ -375,7 +378,7 @@ function runArtifactsCDNTests(
         `artifact/${target.id}/services`,
       );
       expect(artifactContents.body).toMatchInlineSnapshot(
-        `"[{"name":"ping","sdl":"type Query { ping: String }","url":"ping.com"}]"`,
+        '[{"name":"ping","sdl":"type Query { ping: String }","url":"ping.com"}]',
       );
 
       const cdnAccessResult = await writeToken.createCdnAccess();
@@ -390,7 +393,7 @@ function runArtifactsCDNTests(
         redirect: 'manual',
       });
 
-      expect(response.status).toMatchInlineSnapshot(`304`);
+      expect(response.status).toBe(304);
     });
 
     test.concurrent('access services artifact with ApolloGateway and ApolloServer', async () => {
@@ -407,13 +410,13 @@ function runArtifactsCDNTests(
         .publishSchema({
           author: 'Kamil',
           commit: 'abc123',
-          sdl: `type Query { ping: String }`,
+          sdl: 'type Query { ping: String }',
           service: 'ping',
           url: 'ping.com',
         })
         .then(r => r.expectNoGraphQLErrors());
 
-      expect(publishSchemaResult.schemaPublish.__typename).toEqual('SchemaPublishSuccess');
+      expect(publishSchemaResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
       const cdnAccessResult = await writeToken.createCdnAccess();
 
       const gateway = new ApolloGateway({
@@ -423,9 +426,7 @@ function runArtifactsCDNTests(
         }),
       });
 
-      const server = new ApolloServer({
-        gateway,
-      });
+      const server = new ApolloServer({ gateway });
 
       try {
         const { url } = await startStandaloneServer(server);
@@ -451,7 +452,7 @@ function runArtifactsCDNTests(
           }),
         });
 
-        expect(response.status).toEqual(200);
+        expect(response.status).toBe(200);
         const result = await response.json();
         expect(result.data.__schema.types).toContainEqual({
           name: 'Query',
@@ -527,7 +528,7 @@ describe('CDN token', () => {
     }).then(r => r.expectNoGraphQLErrors());
 
     expect(result.target!.cdnAccessTokens.edges).toHaveLength(2);
-    expect(result.target!.cdnAccessTokens.pageInfo.hasNextPage).toEqual(true);
+    expect(result.target!.cdnAccessTokens.pageInfo.hasNextPage).toBe(true);
     let endCursor = result.target!.cdnAccessTokens.pageInfo.endCursor;
 
     result = await execute({
@@ -544,7 +545,7 @@ describe('CDN token', () => {
     }).then(r => r.expectNoGraphQLErrors());
 
     expect(result.target!.cdnAccessTokens.edges).toHaveLength(2);
-    expect(result.target!.cdnAccessTokens.pageInfo.hasNextPage).toEqual(true);
+    expect(result.target!.cdnAccessTokens.pageInfo.hasNextPage).toBe(true);
     endCursor = result.target!.cdnAccessTokens.pageInfo.endCursor;
 
     result = await execute({
@@ -561,7 +562,7 @@ describe('CDN token', () => {
     }).then(r => r.expectNoGraphQLErrors());
 
     expect(result.target!.cdnAccessTokens.edges).toHaveLength(1);
-    expect(result.target!.cdnAccessTokens.pageInfo.hasNextPage).toEqual(false);
+    expect(result.target!.cdnAccessTokens.pageInfo.hasNextPage).toBe(false);
   });
 
   it('new created access tokens are added at the beginning of the connection', async () => {
@@ -606,7 +607,7 @@ describe('CDN token', () => {
       authToken: ownerToken,
     }).then(r => r.expectNoGraphQLErrors());
     expect(secondResult.target!.cdnAccessTokens.edges).toHaveLength(2);
-    expect(secondResult.target!.cdnAccessTokens.edges[1].node.id).toEqual(firstId);
+    expect(secondResult.target!.cdnAccessTokens.edges[1].node.id).toBe(firstId);
   });
 
   it('delete cdn access token', async () => {
@@ -651,7 +652,7 @@ describe('CDN token', () => {
 
     expect(deleteResult.deleteCdnAccessToken.ok).toBeDefined();
     expect(deleteResult.deleteCdnAccessToken.error).toBeNull();
-    expect(deleteResult.deleteCdnAccessToken.ok!.deletedCdnAccessTokenId).toEqual(
+    expect(deleteResult.deleteCdnAccessToken.ok!.deletedCdnAccessTokenId).toBe(
       paginatedResult.target!.cdnAccessTokens.edges[0].node.id,
     );
 
@@ -713,15 +714,15 @@ describe('CDN token', () => {
     expect(deleteResult).toMatchInlineSnapshot(`
       [
         {
-          "locations": [
+          locations: [
             {
-              "column": 3,
-              "line": 2,
+              column: 3,
+              line: 2,
             },
           ],
-          "message": "No access (reason: "Missing target:settings permission")",
-          "path": [
-            "deleteCdnAccessToken",
+          message: No access (reason: "Missing target:settings permission"),
+          path: [
+            deleteCdnAccessToken,
           ],
         },
       ]

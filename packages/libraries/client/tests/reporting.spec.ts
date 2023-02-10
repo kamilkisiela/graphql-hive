@@ -21,8 +21,8 @@ const headers = {
 
 test('should not leak the exception', async () => {
   const logger = {
-    error: jest.fn(),
-    info: jest.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
   };
 
   const hive = createHive({
@@ -67,8 +67,8 @@ test('should not leak the exception', async () => {
 
 test('should send data to Hive', async () => {
   const logger = {
-    error: jest.fn(),
-    info: jest.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
   };
 
   const author = 'Test';
@@ -148,8 +148,8 @@ test('should send data to Hive', async () => {
 
 test('should send data to Hive (deprecated endpoint)', async () => {
   const logger = {
-    error: jest.fn(),
-    info: jest.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
   };
 
   const author = 'Test';
@@ -226,8 +226,8 @@ test('should send data to Hive (deprecated endpoint)', async () => {
 
 test('should send data to app.graphql-hive.com/graphql by default', async () => {
   const logger = {
-    error: jest.fn(),
-    info: jest.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
   };
 
   const author = 'Test';
@@ -297,8 +297,8 @@ test('should send data to app.graphql-hive.com/graphql by default', async () => 
 
 test('should send data to Hive immediately', async () => {
   const logger = {
-    error: jest.fn(),
-    info: jest.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
   };
 
   const author = 'Test';
@@ -385,8 +385,8 @@ test('should send data to Hive immediately', async () => {
 
 test('should send original schema of a federated (v1) service', async () => {
   const logger = {
-    error: jest.fn(),
-    info: jest.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
   };
 
   const author = 'Test';
@@ -449,8 +449,8 @@ test('should send original schema of a federated (v1) service', async () => {
 
 test('should send original schema of a federated (v2) service', async () => {
   const logger = {
-    error: jest.fn(),
-    info: jest.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
   };
 
   const author = 'Test';
@@ -513,8 +513,8 @@ test('should send original schema of a federated (v2) service', async () => {
 
 test('should display SchemaPublishMissingServiceError', async () => {
   const logger = {
-    error: jest.fn(),
-    info: jest.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
   };
 
   const token = 'Token';
@@ -575,8 +575,8 @@ test('should display SchemaPublishMissingServiceError', async () => {
 
 test('should display SchemaPublishMissingUrlError', async () => {
   const logger = {
-    error: jest.fn(),
-    info: jest.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
   };
 
   const token = 'Token';

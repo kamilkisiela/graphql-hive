@@ -25,4 +25,5 @@ pnpm-lock.yaml
 .changeset/
 
 # temp volumes
-.hive
+.hive/
+.hive-dev/

@@ -1,14 +1,14 @@
 # Testing
 
-## Unit tests
+## Unit Tests
 
-We are using Jest.
+We are using Vitest.
 
 Simply run `pnpm test` to run all the tests locally.
 
 ## Integration Tests
 
-We are using Jest to test the following concerns:
+We are using Vitest to test the following concerns:
 
 1. Main application flows and integration of different services
 2. Containerize execution of all services
@@ -16,7 +16,7 @@ We are using Jest to test the following concerns:
 
 Integration tests are based pre-built Docker images, so you can run it in 2 modes:
 
-#### Running from source code
+#### Running from Source Code
 
 To run integration tests locally, from the local source code, you need to build a valid Docker
 image.
@@ -28,7 +28,7 @@ To do so, follow these instructions:
 4. Build source code: `pnpm build`
 5. Set env vars:
 
-```
+```bash
 export COMMIT_SHA="local"
 export RELEASE="local"
 export BRANCH_NAME="local"
@@ -41,7 +41,7 @@ export DOCKER_TAG=":local"
 7. Use Docker Compose to run the built containers (based on `community` compose file), along with
    the extra containers:
 
-```
+```bash
 export DOCKER_TAG=":local"
 export DOCKER_REGISTRY=""
 
@@ -50,7 +50,7 @@ docker compose -f ./docker/docker-compose.community.yml -f ./integration-tests/d
 
 8. Run the tests: `pnpm --filter integration-tests test:integration`
 
-#### Running from pre-built Docker image
+#### Running from Pre-Built Docker Image
 
 To run integration tests locally, from the pre-build Docker image, follow:
 
@@ -62,7 +62,7 @@ To run integration tests locally, from the pre-build Docker image, follow:
    is done successfully)
 5. Set the needed env vars, and use Docker Compose to run all local services:
 
-```
+```bash
 export DOCKER_REGISTRY="ghcr.io/kamilkisiela/graphql-hive/"
 export DOCKER_TAG=":IMAGE_TAG_HERE"
 
@@ -71,12 +71,12 @@ docker compose -f ./docker/docker-compose.community.yml -f ./integration-tests/d
 
 6. Run the tests: `pnpm --filter integration-tests test:integration`
 
-## e2e Tests
+## E2E Tests
 
 e2e Tests are based on Cypress, and matches files that ends with `.cy.ts`. The tests flow runs from
 a pre-build Docker image.
 
-#### Running from source code
+#### Running from Source Code
 
 To run e2e tests locally, from the local source code, follow:
 
@@ -87,7 +87,7 @@ To run e2e tests locally, from the local source code, follow:
 4. Build source code: `pnpm build`
 5. Set env vars:
 
-```
+```bash
 export COMMIT_SHA="local"
 export RELEASE="local"
 export BRANCH_NAME="local"
@@ -100,7 +100,7 @@ export DOCKER_TAG=":local"
    `docker compose -f ./docker/docker-compose.community.yml --env-file ./integration-tests/.env up -d --wait`
 8. Run Cypress: `pnpm test:e2e`
 
-#### Running from pre-built Docker image
+#### Running from Pre-Built Docker Image
 
 To run integration tests locally, from the pre-build Docker image, follow:
 
@@ -111,7 +111,7 @@ To run integration tests locally, from the pre-build Docker image, follow:
 4. Build source code: `pnpm build`
 5. Decide on the commit ID / Docker image tag you would like to use and set it as env var:
 
-```
+```bash
 export DOCKER_REGISTRY="ghcr.io/kamilkisiela/graphql-hive/"
 export DOCKER_TAG=":IMAGE_TAG_HERE"
 ```
@@ -120,7 +120,7 @@ export DOCKER_TAG=":IMAGE_TAG_HERE"
    `docker compose -f ./docker/docker-compose.community.yml --env-file ./integration-tests/.env up -d --wait`
 7. Run Cypress: `pnpm test:e2e`
 
-#### Docker Compose configuration
+#### Docker Compose Configuration
 
 Keep in mind that integration tests are running a combination of 2 Docker Compose files:
 
@@ -137,7 +137,7 @@ Keep in mind that integration tests are running a combination of 2 Docker Compos
 
 If you are having issues with running Docker images, follow these instructions:
 
-1. Make sure you have latest Docker installed.
+1. Make sure you have the latest Docker installed.
 1. Make sure no containers are running (`docker ps` and then `docker stop CONTAINER_ID`).
 1. Delete the local volume used for testing, it's located under `.hive` directory.
 1. Try to run `docker system prune` to clean all the Docker images, containers, networks and caches.

@@ -4,16 +4,14 @@ import { createHive } from '../src/client';
 
 test('should not leak the exception', async () => {
   const logger = {
-    error: jest.fn(),
-    info: jest.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
   };
 
   const hive = createHive({
     enabled: true,
     debug: true,
-    agent: {
-      logger,
-    },
+    agent: { logger },
     token: 'Token',
     reporting: {
       endpoint: 'http://empty.localhost',
@@ -33,8 +31,8 @@ test('should not leak the exception', async () => {
 
 test('should use selfHosting.graphqlEndpoint if provided', async () => {
   const logger = {
-    error: jest.fn(),
-    info: jest.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
   };
 
   nock('http://localhost')
