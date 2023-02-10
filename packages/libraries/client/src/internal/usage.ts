@@ -379,6 +379,12 @@ export function createCollector({
             collectInputType(resolveTypeName(inputType));
           }
         },
+        Directive(node) {
+          return {
+            ...node,
+            arguments: [],
+          };
+        },
         Argument(node) {
           const parent = typeInfo.getParentType()!;
           const field = typeInfo.getFieldDef()!;
