@@ -385,8 +385,8 @@ test('should send data to Hive immediately', async () => {
 
 test('should send original schema of a federated (v1) service', async () => {
   const logger = {
-    error: jest.fn(),
-    info: jest.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
   };
 
   const author = 'Test';
