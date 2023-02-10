@@ -21,8 +21,10 @@ const RequestModelSchema = z.union([
 export async function parseIncomingRequest(
   request: Request,
   keyValidator: typeof isSignatureValid,
+  captureException: (exception: Error) => void,
 ): Promise<{ error: Response } | z.infer<typeof RequestModelSchema>> {
   if (request.method !== 'POST') {
+    captureException(new Error(`Only POST requests are allowed, got ${request.method}`));
     return {
       error: new Response('Only POST requests are allowed', {
         status: 405,
@@ -35,20 +37,20 @@ export async function parseIncomingRequest(
 
   if (!signature) {
     return {
-      error: new MissingSignature(),
+      error: new MissingSignature(captureException),
     };
   }
 
   if (!keyValidator(signature)) {
     return {
-      error: new InvalidSignature(),
+      error: new InvalidSignature(captureException),
     };
   }
 
   const parseResult = RequestModelSchema.safeParse(await request.json<unknown>());
 
   if (!parseResult.success) {
-    return { error: new InvalidRequestFormat(parseResult.error.message) };
+    return { error: new InvalidRequestFormat(captureException, parseResult.error.message) };
   }
 
   return parseResult.data;
