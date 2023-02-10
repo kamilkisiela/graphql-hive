@@ -15,9 +15,17 @@ export interface HiveClient {
 }
 
 export type AsyncIterableIteratorOrValue<T> = AsyncIterableIterator<T> | T;
+export type AsyncIterableOrValue<T> = AsyncIterable<T> | T;
+export type AbortAction = {
+  action: 'abort';
+  reason: string;
+};
 
 export type CollectUsageCallback = (
-  result: AsyncIterableIteratorOrValue<GraphQLErrorsResult>,
+  result:
+    | AsyncIterableIteratorOrValue<GraphQLErrorsResult>
+    | AsyncIterableOrValue<GraphQLErrorsResult>
+    | AbortAction,
 ) => void;
 export interface ClientInfo {
   name: string;
