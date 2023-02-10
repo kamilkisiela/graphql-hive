@@ -243,7 +243,13 @@ const createFederation: (
         };
 
         const response: unknown = await retry(
-          async () => {
+          async (_, attempt) => {
+            logger.debug(
+              'Calling external composition service (broker=%s, attempt=%s, url=%s)',
+              external.broker ? 'yes' : 'no',
+              attempt,
+              external.endpoint,
+            );
             const res = await (external.broker
               ? fetch(external.broker.endpoint, {
                   method: 'POST',
@@ -300,7 +306,11 @@ const createFederation: (
         ).catch(async error => {
           // The expected error
           if (error instanceof NetworkError) {
-            logger.info('Network error so return failure');
+            logger.info(
+              'Network error so return failure (status=%s, message=%s)',
+              error.statusCode,
+              error.message,
+            );
             return {
               type: 'failure',
               result: {
