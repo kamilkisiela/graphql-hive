@@ -29,6 +29,7 @@
     "generate": "pnpm --filter @hive/storage db:generate && pnpm graphql:generate",
     "graphql:generate": "graphql-codegen",
     "lint": "eslint --cache --ignore-path .gitignore \"{packages,cypress}/**/*.{ts,tsx}\"",
+    "lint:env-template": "tsx scripts/check-env-template.ts",
     "lint:fix": "pnpm lint --fix",
     "lint:prettier": "prettier --cache --check .",
     "local:setup": "docker-compose -f ./docker/docker-compose.dev.yml up -d --remove-orphans && pnpm --filter @hive/migrations db:init",
@@ -92,6 +93,7 @@
     "ts-jest": "29.0.5",
     "ts-node": "10.9.1",
     "tsup": "6.6.0",
+    "tsx": "3.12.3",
     "turbo": "1.7.4",
     "typescript": "4.9.5"
   },
