@@ -68,6 +68,24 @@ export async function main() {
     },
   });
 
+  server.addContentTypeParser(
+    'application/graphql+json',
+    { parseAs: 'string' },
+    function parseApplicationGraphQLJsonPayload(_req, payload, done) {
+      done(null, JSON.parse(payload as unknown as string));
+    },
+  );
+
+  server.addContentTypeParser(
+    'application/graphql',
+    { parseAs: 'string' },
+    function parseApplicationGraphQLPayload(_req, payload, done) {
+      done(null, {
+        query: payload,
+      });
+    },
+  );
+
   const storage = await createPostgreSQLStorage(createConnectionString(env.postgres), 10);
 
   registerShutdown({
