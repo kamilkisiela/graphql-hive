@@ -458,7 +458,12 @@ const createStitching: (redis: RedisInstance, logger: FastifyLoggerInstance) => 
     async (schemas: ValidationInput) => {
       return printSchema(
         stitchSchemas({
-          typeDefs: schemas.map(schema => trimDescriptions(parse(schema.raw))),
+          subschemas: schemas.map(schema =>
+            buildASTSchema(trimDescriptions(parse(schema.raw)), {
+              assumeValid: true,
+              assumeValidSDL: true,
+            }),
+          ),
         }),
       );
     },
