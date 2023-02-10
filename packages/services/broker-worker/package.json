@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "toucan-js": "2.7.0",
-    "zod": "3.20.5"
+    "zod": "3.20.6"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "4.20230115.0",

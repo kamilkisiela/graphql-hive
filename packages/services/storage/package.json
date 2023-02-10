@@ -20,7 +20,7 @@
     "slonik": "30.1.2",
     "slonik-interceptor-query-logging": "1.4.7",
     "slonik-utilities": "1.9.4",
-    "zod": "3.20.5"
+    "zod": "3.20.6"
   },
   "devDependencies": {
     "@sentry/types": "7.36.0",
