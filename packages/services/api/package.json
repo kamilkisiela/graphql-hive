@@ -40,7 +40,7 @@
     "param-case": "3.0.4",
     "prom-client": "14.1.1",
     "supertokens-node": "12.1.6",
-    "zod": "3.20.5"
+    "zod": "3.20.6"
   },
   "devDependencies": {
     "@graphql-hive/core": "0.2.3",
