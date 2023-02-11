@@ -163,7 +163,7 @@ importers:
       '@trpc/server': 10.9.1
       '@types/dockerode': 3.3.14
       '@types/ioredis': 4.28.10
-      '@whatwg-node/fetch': 0.7.1
+      '@whatwg-node/fetch': 0.8.1
       bcryptjs: 2.4.3
       date-fns: 2.29.3
       dockerode: 3.3.4
@@ -185,7 +185,7 @@ importers:
       '@graphql-typed-document-node/core': 3.1.1_graphql@16.6.0
       '@trpc/client': 10.9.1_@trpc+server@10.9.1
       '@trpc/server': 10.9.1
-      '@whatwg-node/fetch': 0.7.1
+      '@whatwg-node/fetch': 0.8.1
       bcryptjs: 2.4.3
       date-fns: 2.29.3
       dockerode: 3.3.4
@@ -322,7 +322,7 @@ importers:
       '@types/bcryptjs': 2.4.2
       '@types/node': 18.13.0
       '@types/pg': 8.6.6
-      '@whatwg-node/fetch': 0.7.1
+      '@whatwg-node/fetch': 0.8.1
       bcryptjs: 2.4.3
       copyfiles: 2.4.1
       dotenv: 16.0.3
@@ -336,7 +336,7 @@ importers:
       zod: 3.20.5
     dependencies:
       '@slonik/migrator': 0.8.5_yfpv2xzdmnkrtu2wvaktxf5mmq_slonik@30.1.2
-      '@whatwg-node/fetch': 0.7.1_@types+node@18.13.0
+      '@whatwg-node/fetch': 0.8.1_@types+node@18.13.0
       bcryptjs: 2.4.3
       dotenv: 16.0.3
       got: 12.5.3
@@ -377,7 +377,7 @@ importers:
       '@types/lodash': 4.14.191
       '@types/ms': 0.7.31
       '@types/object-hash': 3.0.2
-      '@whatwg-node/fetch': 0.7.1
+      '@whatwg-node/fetch': 0.8.1
       agentkeepalive: 4.2.1
       bcryptjs: 2.4.3
       dataloader: 2.2.1
@@ -409,7 +409,7 @@ importers:
       '@theguild/buddy': 0.1.0_ryylgra5xglhidfoiaxehn22hq
       '@trpc/client': 10.9.1_@trpc+server@10.9.1
       '@trpc/server': 10.9.1
-      '@whatwg-node/fetch': 0.7.1
+      '@whatwg-node/fetch': 0.8.1
       agentkeepalive: 4.2.1
       bcryptjs: 2.4.3
       dataloader: 2.2.1
@@ -448,8 +448,8 @@ importers:
     specifiers:
       '@cloudflare/workers-types': 4.20230115.0
       '@types/service-worker-mock': 2.0.1
-      '@whatwg-node/fetch': 0.7.1
-      '@whatwg-node/server': 0.6.5
+      '@whatwg-node/fetch': 0.8.1
+      '@whatwg-node/server': 0.6.7
       esbuild: 0.17.7
       itty-router: 2.6.6
       itty-router-extras: 0.4.2
@@ -462,8 +462,8 @@ importers:
     devDependencies:
       '@cloudflare/workers-types': 4.20230115.0
       '@types/service-worker-mock': 2.0.1
-      '@whatwg-node/fetch': 0.7.1
-      '@whatwg-node/server': 0.6.5
+      '@whatwg-node/fetch': 0.8.1
+      '@whatwg-node/server': 0.6.7
       esbuild: 0.17.7
       itty-router: 2.6.6
       itty-router-extras: 0.4.2
@@ -473,8 +473,8 @@ importers:
     specifiers:
       '@cloudflare/workers-types': 4.20230115.0
       '@types/service-worker-mock': 2.0.1
-      '@whatwg-node/fetch': 0.7.1
-      '@whatwg-node/server': 0.6.5
+      '@whatwg-node/fetch': 0.8.1
+      '@whatwg-node/server': 0.6.7
       bcryptjs: 2.4.3
       esbuild: 0.17.7
       fastify: 3.29.5
@@ -491,8 +491,8 @@ importers:
     devDependencies:
       '@cloudflare/workers-types': 4.20230115.0
       '@types/service-worker-mock': 2.0.1
-      '@whatwg-node/fetch': 0.7.1
-      '@whatwg-node/server': 0.6.5
+      '@whatwg-node/fetch': 0.8.1
+      '@whatwg-node/server': 0.6.7
       esbuild: 0.17.7
       fastify: 3.29.5
       itty-router: 2.6.6
@@ -506,7 +506,7 @@ importers:
       '@types/mjml': 4.7.0
       '@types/nodemailer': 6.4.7
       '@types/sendmail': 1.4.4
-      '@whatwg-node/fetch': 0.7.1
+      '@whatwg-node/fetch': 0.8.1
       bullmq: 3.6.3
       copyfiles: 2.4.1
       dotenv: 16.0.3
@@ -521,7 +521,7 @@ importers:
     dependencies:
       '@sentry/node': 7.37.0
       '@trpc/server': 10.9.1
-      '@whatwg-node/fetch': 0.7.1
+      '@whatwg-node/fetch': 0.8.1
       bullmq: 3.6.3_xbmkiyyfti7h6orsfs6pdmi4s4
       dotenv: 16.0.3
       ioredis: 5.3.0
@@ -543,13 +543,13 @@ importers:
     specifiers:
       '@apollo/composition': ^2.2.2
       '@graphql-hive/external-composition': workspace:*
-      '@whatwg-node/fetch': ^0.7.0
+      '@whatwg-node/fetch': ^0.8.0
       '@whatwg-node/server': ^0.6.0
       graphql: ^16.6.0
       zod: 3.20.5
     dependencies:
       '@apollo/composition': 2.2.2_graphql@16.6.0
-      '@whatwg-node/fetch': 0.7.0
+      '@whatwg-node/fetch': 0.8.1
       '@whatwg-node/server': 0.6.5
       graphql: 16.6.0
       zod: 3.20.5
@@ -575,7 +575,7 @@ importers:
       '@sentry/tracing': 7.37.0
       '@trpc/client': 10.9.1
       '@trpc/server': 10.9.1
-      '@whatwg-node/fetch': 0.7.1
+      '@whatwg-node/fetch': 0.8.1
       date-fns: 2.29.3
       dotenv: 16.0.3
       got: 12.5.3
@@ -588,7 +588,7 @@ importers:
       '@sentry/tracing': 7.37.0
       '@trpc/client': 10.9.1_@trpc+server@10.9.1
       '@trpc/server': 10.9.1
-      '@whatwg-node/fetch': 0.7.1
+      '@whatwg-node/fetch': 0.8.1
       date-fns: 2.29.3
       dotenv: 16.0.3
       got: 12.5.3
@@ -612,7 +612,7 @@ importers:
       '@sentry/tracing': 7.37.0
       '@trpc/server': 10.9.1
       '@types/async-retry': 1.4.5
-      '@whatwg-node/fetch': 0.7.1
+      '@whatwg-node/fetch': 0.8.1
       dotenv: 16.0.3
       fastify: 3.29.5
       got: 12.5.3
@@ -627,7 +627,7 @@ importers:
       '@sentry/node': 7.37.0
       '@sentry/tracing': 7.37.0
       '@trpc/server': 10.9.1
-      '@whatwg-node/fetch': 0.7.1
+      '@whatwg-node/fetch': 0.8.1
       dotenv: 16.0.3
       got: 12.5.3
       graphql: 16.6.0
@@ -661,8 +661,8 @@ importers:
       '@sentry/tracing': 7.37.0
       '@swc/core': 1.3.34
       '@trpc/server': 10.9.1
-      '@whatwg-node/fetch': 0.7.1
-      '@whatwg-node/server': 0.6.5
+      '@whatwg-node/fetch': 0.8.1
+      '@whatwg-node/server': 0.6.7
       dotenv: 16.0.3
       fastify: 3.29.5
       got: 12.5.3
@@ -688,8 +688,8 @@ importers:
       '@sentry/node': 7.37.0
       '@sentry/tracing': 7.37.0
       '@trpc/server': 10.9.1
-      '@whatwg-node/fetch': 0.7.1
-      '@whatwg-node/server': 0.6.5
+      '@whatwg-node/fetch': 0.8.1
+      '@whatwg-node/server': 0.6.7
       dotenv: 16.0.3
       got: 12.5.3
       graphql: 16.6.0
@@ -715,14 +715,14 @@ importers:
       '@sentry/tracing': 7.37.0
       '@sentry/types': 7.37.0
       '@sentry/utils': 7.37.0
-      '@whatwg-node/fetch': 0.7.1
+      '@whatwg-node/fetch': 0.8.1
       fastify: 3.29.5
       fastify-cors: 6.0.2
       fastify-plugin: 3.0.1
       prom-client: 14.1.1
       zod: 3.20.5
     dependencies:
-      '@whatwg-node/fetch': 0.7.1
+      '@whatwg-node/fetch': 0.8.1
       fastify: 3.29.5
       fastify-cors: 6.0.2
       fastify-plugin: 3.0.1
@@ -779,7 +779,7 @@ importers:
       '@sentry/tracing': 7.37.0
       '@trpc/client': 10.9.1
       '@trpc/server': 10.9.1
-      '@whatwg-node/fetch': 0.7.1
+      '@whatwg-node/fetch': 0.8.1
       date-fns: 2.29.3
       dotenv: 16.0.3
       got: 12.5.3
@@ -792,7 +792,7 @@ importers:
       '@sentry/tracing': 7.37.0
       '@trpc/client': 10.9.1_@trpc+server@10.9.1
       '@trpc/server': 10.9.1
-      '@whatwg-node/fetch': 0.7.1
+      '@whatwg-node/fetch': 0.8.1
       date-fns: 2.29.3
       dotenv: 16.0.3
       got: 12.5.3
@@ -850,7 +850,7 @@ importers:
       '@sentry/tracing': 7.37.0
       '@trpc/client': 10.9.1
       '@trpc/server': 10.9.1
-      '@whatwg-node/fetch': 0.7.1
+      '@whatwg-node/fetch': 0.8.1
       ajv: 8.12.0
       dotenv: 16.0.3
       got: 12.5.3
@@ -864,7 +864,7 @@ importers:
       '@sentry/tracing': 7.37.0
       '@trpc/client': 10.9.1_@trpc+server@10.9.1
       '@trpc/server': 10.9.1
-      '@whatwg-node/fetch': 0.7.1
+      '@whatwg-node/fetch': 0.8.1
       ajv: 8.12.0
       dotenv: 16.0.3
       got: 12.5.3
@@ -891,7 +891,7 @@ importers:
       '@sentry/node': 7.37.0
       '@sentry/tracing': 7.37.0
       '@trpc/server': 10.9.1
-      '@whatwg-node/fetch': 0.7.1
+      '@whatwg-node/fetch': 0.8.1
       dotenv: 16.0.3
       got: 12.5.3
       pino-pretty: 9.1.1
@@ -902,7 +902,7 @@ importers:
       '@sentry/node': 7.37.0
       '@sentry/tracing': 7.37.0
       '@trpc/server': 10.9.1
-      '@whatwg-node/fetch': 0.7.1
+      '@whatwg-node/fetch': 0.8.1
       dotenv: 16.0.3
       got: 12.5.3
       reflect-metadata: 0.1.13
@@ -1030,7 +1030,7 @@ importers:
       '@urql/devtools': 2.0.3
       '@urql/exchange-graphcache': 5.0.8
       '@welldone-software/why-did-you-render': 7.0.1
-      '@whatwg-node/fetch': 0.7.1
+      '@whatwg-node/fetch': 0.8.1
       autoprefixer: 10.4.13
       clsx: 1.2.1
       cookies: 0.8.0
@@ -1111,7 +1111,7 @@ importers:
       '@urql/core': 3.1.1_graphql@16.6.0
       '@urql/devtools': 2.0.3_ioimjbecbkqzfeizgamzrgwc3y
       '@urql/exchange-graphcache': 5.0.8_graphql@16.6.0
-      '@whatwg-node/fetch': 0.7.1
+      '@whatwg-node/fetch': 0.8.1
       clsx: 1.2.1
       cookies: 0.8.0
       date-fns: 2.29.3
@@ -11515,18 +11515,6 @@ packages:
       - '@types/node'
     dev: true
 
-  /@whatwg-node/fetch/0.7.0:
-    resolution: {integrity: sha512-0nmiUgHA9lSBcPQS0Eq9DACsdGa2W9gJUnN+Ul1vVhQsL3dnOAIGTs4uTiVC/W7bcfxTMP+TRFxngxS40aO5Nw==}
-    dependencies:
-      '@peculiar/webcrypto': 1.4.0
-      '@whatwg-node/node-fetch': 0.0.6
-      busboy: 1.6.0
-      urlpattern-polyfill: 6.0.2
-      web-streams-polyfill: 3.2.1
-    transitivePeerDependencies:
-      - '@types/node'
-    dev: false
-
   /@whatwg-node/fetch/0.7.1:
     resolution: {integrity: sha512-rU/oS5pQLP0GOtTegi3sgzCkid5kbogXX16IaO0DYudhHJxbylKO7+xr7mbjM68XXYr7wkJ2BCmO1DHeg/XBuw==}
     dependencies:
@@ -11537,12 +11525,24 @@ packages:
       web-streams-polyfill: 3.2.1
     transitivePeerDependencies:
       - '@types/node'
+    dev: false
 
-  /@whatwg-node/fetch/0.7.1_@types+node@18.13.0:
-    resolution: {integrity: sha512-rU/oS5pQLP0GOtTegi3sgzCkid5kbogXX16IaO0DYudhHJxbylKO7+xr7mbjM68XXYr7wkJ2BCmO1DHeg/XBuw==}
+  /@whatwg-node/fetch/0.8.1:
+    resolution: {integrity: sha512-Fkd1qQHK2tAWxKlC85h9L86Lgbq3BzxMnHSnTsnzNZMMzn6Xi+HlN8/LJ90LxorhSqD54td+Q864LgwUaYDj1Q==}
     dependencies:
       '@peculiar/webcrypto': 1.4.0
-      '@whatwg-node/node-fetch': 0.1.0_@types+node@18.13.0
+      '@whatwg-node/node-fetch': 0.3.0
+      busboy: 1.6.0
+      urlpattern-polyfill: 6.0.2
+      web-streams-polyfill: 3.2.1
+    transitivePeerDependencies:
+      - '@types/node'
+
+  /@whatwg-node/fetch/0.8.1_@types+node@18.13.0:
+    resolution: {integrity: sha512-Fkd1qQHK2tAWxKlC85h9L86Lgbq3BzxMnHSnTsnzNZMMzn6Xi+HlN8/LJ90LxorhSqD54td+Q864LgwUaYDj1Q==}
+    dependencies:
+      '@peculiar/webcrypto': 1.4.0
+      '@whatwg-node/node-fetch': 0.3.0_@types+node@18.13.0
       busboy: 1.6.0
       urlpattern-polyfill: 6.0.2
       web-streams-polyfill: 3.2.1
@@ -11570,16 +11570,6 @@ packages:
       tslib: 2.5.0
     dev: true
 
-  /@whatwg-node/node-fetch/0.0.6:
-    resolution: {integrity: sha512-pFEN2DNk1ZJZjdX9O7FG9qBZ7oIaB8JzOpAUCUditZ25kOSJb0qylq5uR2XUnzngBQCBwT/MHnKq2sXQZp1BUQ==}
-    peerDependencies:
-      '@types/node': ^18.0.6
-    dependencies:
-      '@whatwg-node/events': 0.0.2
-      busboy: 1.6.0
-      tslib: 2.5.0
-    dev: false
-
   /@whatwg-node/node-fetch/0.1.0:
     resolution: {integrity: sha512-SSEGg+uVCeGSROAFSuBHhh7KufoOVcs+ftcCQaCHawXdkWVX7+fHramK23H3tXXlKdxuYIHO0oDiIVbq9BE34Q==}
     peerDependencies:
@@ -11588,15 +11578,29 @@ packages:
       '@whatwg-node/events': 0.0.2
       busboy: 1.6.0
       tslib: 2.5.0
+    dev: false
 
-  /@whatwg-node/node-fetch/0.1.0_@types+node@18.13.0:
-    resolution: {integrity: sha512-SSEGg+uVCeGSROAFSuBHhh7KufoOVcs+ftcCQaCHawXdkWVX7+fHramK23H3tXXlKdxuYIHO0oDiIVbq9BE34Q==}
+  /@whatwg-node/node-fetch/0.3.0:
+    resolution: {integrity: sha512-mPM8WnuHiI/3kFxDeE0SQQXAElbz4onqmm64fEGCwYEcBes2UsvIDI8HwQIqaXCH42A9ajJUPv4WsYoN/9oG6w==}
+    peerDependencies:
+      '@types/node': ^18.0.6
+    dependencies:
+      '@whatwg-node/events': 0.0.2
+      busboy: 1.6.0
+      fast-querystring: 1.1.1
+      fast-url-parser: 1.1.3
+      tslib: 2.5.0
+
+  /@whatwg-node/node-fetch/0.3.0_@types+node@18.13.0:
+    resolution: {integrity: sha512-mPM8WnuHiI/3kFxDeE0SQQXAElbz4onqmm64fEGCwYEcBes2UsvIDI8HwQIqaXCH42A9ajJUPv4WsYoN/9oG6w==}
     peerDependencies:
       '@types/node': ^18.0.6
     dependencies:
       '@types/node': 18.13.0
       '@whatwg-node/events': 0.0.2
       busboy: 1.6.0
+      fast-querystring: 1.1.1
+      fast-url-parser: 1.1.3
       tslib: 2.5.0
     dev: false
 
@@ -11612,6 +11616,15 @@ packages:
     resolution: {integrity: sha512-hZWvMkIK8KRSK1EP//L+Yp1N5grPwao1XYHCs9kFrV68YKEP9gCQ7ZTTvKR42lPsXzCjqJH+iEpPHSYrmZVeMQ==}
     dependencies:
       '@whatwg-node/fetch': 0.7.1
+      tslib: 2.5.0
+    transitivePeerDependencies:
+      - '@types/node'
+    dev: false
+
+  /@whatwg-node/server/0.6.7:
+    resolution: {integrity: sha512-M4zHWdJ6M1IdcxnZBdDmiUh1bHQ4gPYRxzkH0gh8Qf6MpWJmX6I/MNftqem3GNn+qn1y47qqlGSed7T7nzsRFw==}
+    dependencies:
+      '@whatwg-node/fetch': 0.8.1
       tslib: 2.5.0
     transitivePeerDependencies:
       - '@types/node'
@@ -15664,12 +15677,22 @@ packages:
       boolean: 3.2.0
     dev: false
 
+  /fast-querystring/1.1.1:
+    resolution: {integrity: sha512-qR2r+e3HvhEFmpdHMv//U8FnFlnYjaC6QKDuaXALDkw2kvHO8WDjxH+f/rHGR4Me4pnk8p9JAkRNTjYHAKRn2Q==}
+    dependencies:
+      fast-decode-uri-component: 1.0.1
+
   /fast-redact/3.1.2:
     resolution: {integrity: sha512-+0em+Iya9fKGfEQGcd62Yv6onjBmmhV1uh86XVfOU8VwAe6kaFdQCWI9s0/Nnugx5Vd9tdbZ7e6gE2tR9dzXdw==}
     engines: {node: '>=6'}
 
   /fast-safe-stringify/2.1.1:
     resolution: {integrity: sha512-W+KJc2dmILlPplD/H4K9l9LcAHAfPtP6BY84uVLXQ6Evcz9Lcg33Y2z1IVblT6xdY54PXYVHEv+0Wpq8Io6zkA==}
+
+  /fast-url-parser/1.1.3:
+    resolution: {integrity: sha512-5jOCVXADYNuRkKFzNJ0dCCewsZiYo0dz8QNYljkOpFC6r2U4OBmKtvm/Tsuh4w1YYdDqDb31a8TVhBJ2OJKdqQ==}
+    dependencies:
+      punycode: 1.3.2
 
   /fast-xml-parser/4.0.11:
     resolution: {integrity: sha512-4aUg3aNRR/WjQAcpceODG1C3x3lFANXRo8+1biqfieHmg9pyMt7qB4lQV/Ta6sJCTbA5vfD8fnA8S54JATiFUA==}
@@ -22113,7 +22136,6 @@ packages:
 
   /punycode/1.3.2:
     resolution: {integrity: sha512-RofWgt/7fL5wP1Y7fxE7/EmTLzQVnB0ycyibJ0OOHIlJqTNzglYFxVwETOcIoJqJmpDXJ9xImDv+Fq34F/d4Dw==}
-    dev: true
 
   /punycode/2.1.1:
     resolution: {integrity: sha512-XRsRjdf+j5ml+y/6GKHPZbrF/8p2Yga0JPtdqTIY2Xe5ohJPD9saDJJLPvp9+NSBprVvevdXZybnj2cv8OEd0A==}
