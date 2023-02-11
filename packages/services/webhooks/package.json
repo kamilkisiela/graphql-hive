@@ -24,7 +24,7 @@
   "devDependencies": {
     "@hive/service-common": "workspace:*",
     "copyfiles": "2.4.1",
-    "pino-pretty": "9.1.1",
+    "pino-pretty": "9.2.0",
     "tslib": "2.5.0"
   },
   "buildOptions": {
