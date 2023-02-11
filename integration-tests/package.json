@@ -8,7 +8,7 @@
     "test:integration": "vitest ."
   },
   "dependencies": {
-    "@apollo/gateway": "2.3.1",
+    "@apollo/gateway": "2.3.2",
     "@apollo/server": "4.3.3",
     "@aws-sdk/client-s3": "3.267.0",
     "@esm2cjs/execa": "6.1.1-cjs.1",
