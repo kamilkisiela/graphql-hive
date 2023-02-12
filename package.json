@@ -113,7 +113,7 @@
       "slonik@30.1.2": "patches/slonik@30.1.2.patch",
       "@oclif/core@1.23.0": "patches/@oclif__core@1.23.0.patch",
       "oclif@3.6.3": "patches/oclif@3.6.3.patch",
-      "bullmq@3.6.3": "patches/bullmq@3.6.3.patch",
+      "bullmq@3.6.5": "patches/bullmq@3.6.5.patch",
       "@slonik/migrator@0.8.5": "patches/@slonik__migrator@0.8.5.patch",
       "@graphql-inspector/core@3.5.0": "patches/@graphql-inspector__core@3.5.0.patch"
     }
