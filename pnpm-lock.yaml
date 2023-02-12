@@ -1062,7 +1062,7 @@ importers:
       regenerator-runtime: 0.13.11
       rimraf: 4.1.2
       snarkdown: 2.0.0
-      supertokens-auth-react: 0.31.0
+      supertokens-auth-react: 0.31.1
       supertokens-js-override: 0.0.4
       supertokens-node: 12.1.6
       supertokens-web-js: 0.5.0
@@ -1140,7 +1140,7 @@ importers:
       react-window: 1.8.8_biqbaboplfbrettd7655fr4n2y
       regenerator-runtime: 0.13.11
       snarkdown: 2.0.0
-      supertokens-auth-react: 0.31.0_zh4rdguscatxykxktv3lwuw3je
+      supertokens-auth-react: 0.31.1_zh4rdguscatxykxktv3lwuw3je
       supertokens-js-override: 0.0.4
       supertokens-node: 12.1.6
       supertokens-web-js: 0.5.0
@@ -23941,8 +23941,8 @@ packages:
       ts-interface-checker: 0.1.13
     dev: true
 
-  /supertokens-auth-react/0.31.0_zh4rdguscatxykxktv3lwuw3je:
-    resolution: {integrity: sha512-mcl2+xkDGf+xWEEVAMee3CssKA7bCPx7hgNV8QNphl49ezG0CSZD30MfdmtyyOrdmtewvFPsNltQmXeuJLgw/w==}
+  /supertokens-auth-react/0.31.1_zh4rdguscatxykxktv3lwuw3je:
+    resolution: {integrity: sha512-SPY9IxpkebviHPBdkSBER6Bw7JyQMCy4Pqz4cK1eqKUYQdr5VltCafXCOSGEDp01MRGwkXAwuJ5QcaW2XA0LFw==}
     engines: {node: '>=16.0.0', npm: ^8}
     peerDependencies:
       react: '>=16.8.0'
