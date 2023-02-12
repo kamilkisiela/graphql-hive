@@ -514,7 +514,7 @@ importers:
       mjml: 4.13.0
       nodemailer: 6.9.1
       p-timeout: 6.1.0
-      pino-pretty: 9.1.1
+      pino-pretty: 9.2.0
       sendmail: 1.6.1
       tslib: 2.5.0
       zod: 3.20.6
@@ -536,7 +536,7 @@ importers:
       '@types/nodemailer': 6.4.7
       '@types/sendmail': 1.4.4
       copyfiles: 2.4.1
-      pino-pretty: 9.1.1
+      pino-pretty: 9.2.0
       tslib: 2.5.0
 
   packages/services/external-composition/federation-2:
@@ -579,7 +579,7 @@ importers:
       date-fns: 2.29.3
       dotenv: 16.0.3
       got: 12.5.3
-      pino-pretty: 9.1.1
+      pino-pretty: 9.2.0
       reflect-metadata: 0.1.13
       tslib: 2.5.0
       zod: 3.20.6
@@ -598,7 +598,7 @@ importers:
       '@hive/emails': link:../emails
       '@hive/service-common': link:../service-common
       '@hive/storage': link:../storage
-      pino-pretty: 9.1.1
+      pino-pretty: 9.2.0
       tslib: 2.5.0
 
   packages/services/schema:
@@ -618,7 +618,7 @@ importers:
       got: 12.5.3
       graphql: 16.6.0
       ioredis: 5.3.0
-      pino-pretty: 9.1.1
+      pino-pretty: 9.2.0
       zod: 3.20.6
     dependencies:
       '@apollo/federation': 0.38.1_graphql@16.6.0
@@ -638,7 +638,7 @@ importers:
       '@hive/service-common': link:../service-common
       '@types/async-retry': 1.4.5
       fastify: 3.29.5
-      pino-pretty: 9.1.1
+      pino-pretty: 9.2.0
 
   packages/services/server:
     specifiers:
@@ -669,7 +669,7 @@ importers:
       graphql: 16.6.0
       graphql-yoga: 3.5.1
       hyperid: 3.1.1
-      pino-pretty: 9.1.1
+      pino-pretty: 9.2.0
       prom-client: 14.1.1
       reflect-metadata: 0.1.13
       tslib: 2.5.0
@@ -706,7 +706,7 @@ importers:
       '@hive/storage': link:../storage
       '@swc/core': 1.3.34
       fastify: 3.29.5
-      pino-pretty: 9.1.1
+      pino-pretty: 9.2.0
       tslib: 2.5.0
 
   packages/services/service-common:
@@ -783,7 +783,7 @@ importers:
       date-fns: 2.29.3
       dotenv: 16.0.3
       got: 12.5.3
-      pino-pretty: 9.1.1
+      pino-pretty: 9.2.0
       reflect-metadata: 0.1.13
       stripe: 11.10.0
       zod: 3.20.6
@@ -802,7 +802,7 @@ importers:
     devDependencies:
       '@hive/service-common': link:../service-common
       '@hive/storage': link:../storage
-      pino-pretty: 9.1.1
+      pino-pretty: 9.2.0
 
   packages/services/tokens:
     specifiers:
@@ -817,7 +817,7 @@ importers:
       ioredis: 5.3.0
       ms: 2.1.3
       p-timeout: 6.1.0
-      pino-pretty: 9.1.1
+      pino-pretty: 9.2.0
       reflect-metadata: 0.1.13
       tiny-lru: 8.0.2
       tslib: 2.5.0
@@ -838,7 +838,7 @@ importers:
       '@hive/storage': link:../storage
       '@types/ms': 0.7.31
       fastify: 3.29.5
-      pino-pretty: 9.1.1
+      pino-pretty: 9.2.0
       tslib: 2.5.0
 
   packages/services/usage:
@@ -856,7 +856,7 @@ importers:
       got: 12.5.3
       graphql: 16.6.0
       kafkajs: 2.2.3
-      pino-pretty: 9.1.1
+      pino-pretty: 9.2.0
       tiny-lru: 8.0.2
       zod: 3.20.6
     dependencies:
@@ -876,7 +876,7 @@ importers:
       '@hive/service-common': link:../service-common
       '@hive/tokens': link:../tokens
       '@hive/usage-common': link:../usage-common
-      pino-pretty: 9.1.1
+      pino-pretty: 9.2.0
 
   packages/services/usage-common:
     specifiers:
@@ -894,7 +894,7 @@ importers:
       '@whatwg-node/fetch': 0.8.1
       dotenv: 16.0.3
       got: 12.5.3
-      pino-pretty: 9.1.1
+      pino-pretty: 9.2.0
       reflect-metadata: 0.1.13
       tslib: 2.5.0
       zod: 3.20.6
@@ -910,7 +910,7 @@ importers:
     devDependencies:
       '@hive/api': link:../api
       '@hive/service-common': link:../service-common
-      pino-pretty: 9.1.1
+      pino-pretty: 9.2.0
       tslib: 2.5.0
 
   packages/services/usage-ingestor:
@@ -926,7 +926,7 @@ importers:
       got: 12.5.3
       graphql: 16.6.0
       kafkajs: 2.2.3
-      pino-pretty: 9.1.1
+      pino-pretty: 9.2.0
       tiny-lru: 8.0.2
       tslib: 2.5.0
       zod: 3.20.6
@@ -945,7 +945,7 @@ importers:
       '@graphql-hive/core': link:../../libraries/core
       '@hive/service-common': link:../service-common
       '@hive/usage-common': link:../usage-common
-      pino-pretty: 9.1.1
+      pino-pretty: 9.2.0
       tslib: 2.5.0
 
   packages/services/webhooks:
@@ -960,7 +960,7 @@ importers:
       got: 12.5.3
       ioredis: 5.3.0
       p-timeout: 6.1.0
-      pino-pretty: 9.1.1
+      pino-pretty: 9.2.0
       tslib: 2.5.0
       zod: 3.20.6
     dependencies:
@@ -976,7 +976,7 @@ importers:
     devDependencies:
       '@hive/service-common': link:../service-common
       copyfiles: 2.4.1
-      pino-pretty: 9.1.1
+      pino-pretty: 9.2.0
       tslib: 2.5.0
 
   packages/web/app:
@@ -21306,8 +21306,8 @@ packages:
       split2: 4.1.0
     dev: true
 
-  /pino-pretty/9.1.1:
-    resolution: {integrity: sha512-iJrnjgR4FWQIXZkUF48oNgoRI9BpyMhaEmihonHeCnZ6F50ZHAS4YGfGBT/ZVNsPmd+hzkIPGzjKdY08+/yAXw==}
+  /pino-pretty/9.2.0:
+    resolution: {integrity: sha512-7CeszmFqrUD08+JvtYcFXowNE7duFlE1XScmR41qTMbwQOhn7gijYYrRb5udH+z8xq4+A8vN8rQNYVPCTfzmGw==}
     hasBin: true
     dependencies:
       colorette: 2.0.19
