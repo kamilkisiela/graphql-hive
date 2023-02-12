@@ -513,7 +513,7 @@ importers:
       ioredis: 5.3.1
       mjml: 4.13.0
       nodemailer: 6.9.1
-      p-timeout: 6.1.0
+      p-timeout: 6.1.1
       pino-pretty: 9.2.0
       sendmail: 1.6.1
       tslib: 2.5.0
@@ -527,7 +527,7 @@ importers:
       ioredis: 5.3.1
       mjml: 4.13.0
       nodemailer: 6.9.1
-      p-timeout: 6.1.0
+      p-timeout: 6.1.1
       sendmail: 1.6.1
       zod: 3.20.6
     devDependencies:
@@ -816,7 +816,7 @@ importers:
       fastify: 3.29.5
       ioredis: 5.3.1
       ms: 2.1.3
-      p-timeout: 6.1.0
+      p-timeout: 6.1.1
       pino-pretty: 9.2.0
       reflect-metadata: 0.1.13
       tiny-lru: 8.0.2
@@ -829,7 +829,7 @@ importers:
       dotenv: 16.0.3
       ioredis: 5.3.1
       ms: 2.1.3
-      p-timeout: 6.1.0
+      p-timeout: 6.1.1
       reflect-metadata: 0.1.13
       tiny-lru: 8.0.2
       zod: 3.20.6
@@ -959,7 +959,7 @@ importers:
       dotenv: 16.0.3
       got: 12.5.3
       ioredis: 5.3.1
-      p-timeout: 6.1.0
+      p-timeout: 6.1.1
       pino-pretty: 9.2.0
       tslib: 2.5.0
       zod: 3.20.6
@@ -971,7 +971,7 @@ importers:
       dotenv: 16.0.3
       got: 12.5.3
       ioredis: 5.3.1
-      p-timeout: 6.1.0
+      p-timeout: 6.1.1
       zod: 3.20.6
     devDependencies:
       '@hive/service-common': link:../service-common
@@ -20885,8 +20885,8 @@ packages:
     dependencies:
       p-finally: 1.0.0
 
-  /p-timeout/6.1.0:
-    resolution: {integrity: sha512-s0y6Le9QYGELLzNpFIt6h8B2DHTVUDLStvxtvRMSKNKeuNVVWby2dZ+pIJpW4/pWr5a3s8W85wBNtc0ZA+lzCg==}
+  /p-timeout/6.1.1:
+    resolution: {integrity: sha512-yqz2Wi4fiFRpMmK0L2pGAU49naSUaP23fFIQL2Y6YT+qDGPoFwpvgQM/wzc6F8JoenUkIlAFa4Ql7NguXBxI7w==}
     engines: {node: '>=14.16'}
     dev: false
 
