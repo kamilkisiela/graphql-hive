@@ -212,6 +212,7 @@ async function callExternalServiceViaBroker(
   },
   payload: BrokerPayload,
   logger: FastifyLoggerInstance,
+  timeoutMs: number,
 ) {
   return callExternalService(
     {
@@ -224,12 +225,14 @@ async function callExternalServiceViaBroker(
       body: JSON.stringify(payload),
     },
     logger,
+    timeoutMs,
   );
 }
 
 async function callExternalService(
   input: { url: string; headers: Record<string, string>; body: string },
   logger: FastifyLoggerInstance,
+  timeoutMs: number,
 ) {
   try {
     const response = await got(input.url, {
@@ -243,7 +246,7 @@ async function callExternalService(
         backoffLimit: 500,
       },
       timeout: {
-        request: 10_000,
+        request: timeoutMs,
       },
     });
 
@@ -251,7 +254,7 @@ async function callExternalService(
   } catch (error) {
     if (error instanceof RequestError) {
       if (error.response) {
-        const message = error.response.body ? error.response.body : error.response.statusMessage; // await res.text().catch(_ => Promise.resolve(res.statusText));
+        const message = error.response.body ? error.response.body : error.response.statusMessage;
 
         // If the response is a string starting with ERR_ it's a special error returned by the composition service.
         // We don't want to throw an error in this case, but instead return a failure result.
@@ -301,6 +304,7 @@ const createFederation: (
   logger: FastifyLoggerInstance,
   decrypt: (value: string) => string,
 ) => Orchestrator = (cache, logger, decrypt) => {
+  const timeoutMs = Math.min(cache.timeoutMs, 25_000);
   const compose = cache.reuse<
     {
       schemas: ValidationInput | SupergraphInput;
@@ -349,8 +353,9 @@ const createFederation: (
                 ...request,
               },
               logger,
+              timeoutMs,
             )
-          : callExternalService(request, logger)),
+          : callExternalService(request, logger, timeoutMs)),
       );
 
       if (!parseResult.success) {
