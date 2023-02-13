@@ -209,7 +209,7 @@ const federationV2 = {
     'tag',
   ]),
   types: new Set(['_Service']),
-  queryFields: new Set(['_service']),
+  queryFields: new Set(['_service', '_entities']),
 };
 
 /**
