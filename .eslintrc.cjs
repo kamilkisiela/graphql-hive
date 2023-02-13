@@ -92,8 +92,10 @@ module.exports = {
         'plugin:@next/next/recommended',
       ],
       settings: {
-        react: {
-          version: 'detect',
+        'import/resolver': {
+          typescript: {
+            project: ['packages/web/app/tsconfig.json'],
+          },
         },
       },
       rules: {
@@ -110,7 +112,6 @@ module.exports = {
         'jsx-a11y/anchor-is-valid': ['off', { components: ['Link', 'NextLink'] }],
         'jsx-a11y/alt-text': ['warn', { elements: ['img'], img: ['Image', 'NextImage'] }],
         'no-restricted-syntax': ['error', ...HIVE_RESTRICTED_SYNTAX, ...REACT_RESTRICTED_SYNTAX],
-
         // TODO: enable below rules👇
         '@typescript-eslint/consistent-type-imports': ['off', { prefer: 'no-type-imports' }],
         'no-console': 'off',
@@ -140,16 +141,7 @@ module.exports = {
         },
         tailwindcss: {
           config: 'packages/web/app/tailwind.config.js',
-          whitelist: [
-            'drag-none',
-            'placeholder-gray-500',
-            'fill-none',
-            'wrapper',
-            'line-clamp-1',
-            'line-clamp-2',
-            'line-clamp-3',
-            '-z-1',
-          ],
+          whitelist: ['drag-none'],
         },
       },
     },
