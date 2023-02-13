@@ -1,5 +1,4 @@
 import { ReactElement, useCallback, useEffect, useRef, useState } from 'react';
-import 'twin.macro';
 import { useMutation, useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { Section } from '@/components/common';

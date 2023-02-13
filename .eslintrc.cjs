@@ -101,6 +101,9 @@ module.exports = {
         'tailwindcss/classnames-order': 'off',
         // set more strict to highlight in editor
         'tailwindcss/enforces-shorthand': 'error',
+        'tailwindcss/no-custom-classname': 'error',
+        'tailwindcss/migration-from-tailwind-2': 'error',
+        'tailwindcss/no-contradicting-classname': 'error',
         'react/display-name': 'off',
         'react/prop-types': 'off',
         'react/no-unknown-property': 'off',
@@ -110,8 +113,6 @@ module.exports = {
 
         // TODO: enable below rules👇
         '@typescript-eslint/consistent-type-imports': ['off', { prefer: 'no-type-imports' }],
-        'tailwindcss/no-custom-classname': 'off',
-        'tailwindcss/migration-from-tailwind-2': 'off',
         'no-console': 'off',
         '@typescript-eslint/no-non-null-assertion': 'off',
         'react/jsx-no-useless-fragment': 'off',
@@ -129,7 +130,6 @@ module.exports = {
         'jsx-a11y/click-events-have-key-events': 'off',
         'jsx-a11y/no-static-element-interactions': 'off',
         '@next/next/no-html-link-for-pages': 'off',
-        'tailwindcss/no-contradicting-classname': 'off',
       },
     },
     {

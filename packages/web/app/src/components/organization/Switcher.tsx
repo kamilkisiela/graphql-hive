@@ -1,6 +1,5 @@
 import React from 'react';
 import { VscAdd, VscChevronDown } from 'react-icons/vsc';
-import 'twin.macro';
 import { useQuery } from 'urql';
 import { OrganizationsDocument, OrganizationsQuery, OrganizationType } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks';
@@ -79,7 +78,7 @@ export const OrganizationSwitcher: React.FC<{
           as={Button}
           rightIcon={<VscChevronDown />}
           variant="ghost"
-          tw="font-normal"
+          className="font-normal"
         >
           {menu.currentOrganization.name}
         </MenuButton>

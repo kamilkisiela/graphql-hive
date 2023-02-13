@@ -43,7 +43,7 @@ const CookiesConsent = (): ReactElement => {
         <p>This website uses cookies to analyze site usage and improve your experience.</p>
         <p>If you continue to use our services, you are agreeing to the use of such cookies.</p>
       </div>
-      <div className="flex flex-shrink-0 items-center gap-4 lg:pr-24">
+      <div className="flex shrink-0 items-center gap-4 lg:pr-24">
         <a
           href="https://the-guild.dev/graphql/hive/privacy-policy.pdf"
           className="whitespace-nowrap text-yellow-600 hover:underline"
@@ -103,8 +103,9 @@ function Hero() {
           <a
             href="https://app.graphql-hive.com"
             className={clsx(
-              'inline-block rounded-lg bg-yellow-500 px-6 py-3 font-medium text-white shadow-sm hover:bg-opacity-75',
-              'dark:bg-yellow-600 dark:hover:bg-yellow-500 dark:hover:bg-opacity-100',
+              'inline-block rounded-lg px-6 py-3 font-medium text-white shadow-sm',
+              'bg-yellow-500 hover:bg-yellow-500/75',
+              'dark:bg-yellow-600 dark:hover:bg-yellow-500/100',
             )}
           >
             Sign up for free
@@ -148,7 +149,7 @@ function Feature(props: {
             flipped ? 'md:flex-row-reverse' : 'md:flex-row',
           )}
         >
-          <div className="flex w-full flex-shrink-0 flex-col gap-4 md:w-2/5 lg:w-1/3">
+          <div className="flex w-full shrink-0 flex-col gap-4 md:w-2/5 lg:w-1/3">
             <h2
               className="bg-clip-text text-5xl font-semibold leading-normal text-transparent dark:text-transparent"
               style={{ backgroundImage: `linear-gradient(-70deg, ${end}, ${start})` }}
@@ -158,7 +159,7 @@ function Feature(props: {
             <div className="text-lg leading-7 text-gray-600 dark:text-gray-400">{description}</div>
           </div>
           <div
-            className="relative flex flex-grow flex-col items-center justify-center overflow-hidden rounded-3xl p-8"
+            className="relative flex grow flex-col items-center justify-center overflow-hidden rounded-3xl p-8"
             style={{ backgroundImage: `linear-gradient(70deg, ${start}, ${end})` }}
           >
             <Image {...image} className="rounded-2xl" alt={title} />
@@ -168,7 +169,7 @@ function Feature(props: {
           <div className="flex flex-col justify-between gap-12 md:flex-row">
             {highlights.map(({ title, description, icon }) => (
               <div className={classes.root} key={title}>
-                <div className="h-16 w-16 flex-shrink-0 text-yellow-500">{icon}</div>
+                <div className="h-16 w-16 shrink-0 text-yellow-500">{icon}</div>
                 <div className={classes.content}>
                   <h3 className={classes.title}>{title}</h3>
                   <p className={classes.description}>{description}</p>

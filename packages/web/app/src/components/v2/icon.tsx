@@ -1,6 +1,5 @@
 import { FC, ReactElement } from 'react';
 import clsx from 'clsx';
-import 'twin.macro';
 
 const DEFAULT_PATH_PROPS = {
   strokeWidth: '2',
@@ -119,11 +118,11 @@ export const UserPlusMinusIcon: FC<IconProps & { isPlus: boolean }> = ({ classNa
   </svg>
 );
 
-export const MoreIcon: FC<IconProps> = props => (
+export const MoreIcon: FC<IconProps> = ({ className, ...props }) => (
   <svg
     viewBox="0 0 24 24"
     xmlns="http://www.w3.org/2000/svg"
-    tw="w-6 h-6 stroke-current"
+    className={clsx('w-6 h-6 stroke-current', className)}
     {...props}
   >
     <path
@@ -330,11 +329,11 @@ export const LogOutIcon = ({ className }: IconProps): ReactElement => (
   </svg>
 );
 
-export const LinkIcon: FC<IconProps> = props => (
+export const LinkIcon: FC<IconProps> = ({ className, ...props }) => (
   <svg
     viewBox="0 0 24 24"
     xmlns="http://www.w3.org/2000/svg"
-    tw="w-6 h-6 stroke-current fill-none"
+    className={clsx('w-6 h-6 stroke-current fill-none', className)}
     {...props}
   >
     <path
@@ -375,8 +374,13 @@ export const XIcon: FC<IconProps> = ({ className }) => (
   </svg>
 );
 
-export const LinkedInIcon: FC<IconProps> = props => (
-  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" tw="w-6 h-6 fill-current" {...props}>
+export const LinkedInIcon: FC<IconProps> = ({ className, ...props }) => (
+  <svg
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+    className={clsx('w-6 h-6 fill-current', className)}
+    {...props}
+  >
     <path d="M16 8C19.3137 8 22 10.6863 22 14V21H18V14C18 12.8954 17.1046 12 16 12C14.8954 12 14 12.8954 14 14V21H10V14C10 10.6863 12.6863 8 16 8Z" />
     <rect x={2} y={9} width={4} height={12} />
     <path d="M4 6C5.10457 6 6 5.10457 6 4C6 2.89543 5.10457 2 4 2C2.89543 2 2 2.89543 2 4C2 5.10457 2.89543 6 4 6Z" />

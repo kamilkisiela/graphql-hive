@@ -1,6 +1,6 @@
 import { ComponentProps, forwardRef } from 'react';
 import clsx from 'clsx';
-import tw, { css } from 'twin.macro';
+import { css } from '@emotion/react';
 import * as Toolbar from '@radix-ui/react-toolbar';
 
 type ButtonProps = Omit<ComponentProps<'button'>, 'size'> & {
@@ -65,19 +65,19 @@ export const Button = forwardRef<any, ButtonProps>(
             variant !== 'link' &&
               'inline-flex items-center border border-transparent text-sm font-bold',
             className,
+            rotate > 0 && 'radix-state-open:border-gray-800 radix-state-open:text-orange-600',
           )}
-          css={
-            rotate > 0 &&
-            css`
-              &[data-state='open'] {
-                ${tw`border-gray-800 text-orange-600`}
-                svg {
-                  transform: rotate(${rotate}deg);
-                  ${tw`will-change-transform transition-transform`}
-                }
-              }
-            `
-          }
+          css={css`
+            &[data-state='open'] svg {
+              transform: rotate(${rotate}deg);
+              will-change: transform; /* will-change-transform */
+
+              /* transition-transform */
+              transition-property: transform;
+              transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+              transition-duration: 150ms;
+            }
+          `}
           {...props}
         >
           {children}

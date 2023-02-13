@@ -1,4 +1,5 @@
 import React, { PropsWithChildren } from 'react';
+import clsx from 'clsx';
 import {
   VscChevronDown,
   VscChevronLeft,
@@ -6,7 +7,6 @@ import {
   VscChevronUp,
   VscWarning,
 } from 'react-icons/vsc';
-import 'twin.macro';
 import { gql, useQuery } from 'urql';
 import { useDebouncedCallback } from 'use-debounce';
 import { Scale, Section } from '@/components/common';
@@ -76,7 +76,7 @@ const Sortable = ({
       direction="row"
       align="center"
       justify={align === 'center' ? 'center' : align === 'left' ? 'start' : 'end'}
-      tw="cursor-pointer"
+      className="cursor-pointer"
     >
       <span>{children}</span>
       {isSorted ? isSortedDesc ? <VscChevronDown /> : <VscChevronUp /> : null}
@@ -117,7 +117,7 @@ function GraphQLOperationBody({
   }
 
   if (data?.operationBodyByHash) {
-    return <GraphQLHighlight tw="pt-6" light code={data.operationBodyByHash} />;
+    return <GraphQLHighlight className="pt-6" light code={data.operationBodyByHash} />;
   }
 
   return null;
@@ -141,8 +141,8 @@ const OperationRow: React.FC<{
   return (
     <>
       <Tr>
-        <Td tw="font-medium truncate">
-          <div tw="flex flex-row">
+        <Td className="font-medium truncate">
+          <div className="flex flex-row">
             <Button
               as="a"
               href="#"
@@ -164,7 +164,7 @@ const OperationRow: React.FC<{
                 placement="right"
                 label="Anonymous operation detected. Naming your operations is a recommended practice"
               >
-                <span tw="ml-1 text-yellow-500">
+                <span className="ml-1 text-yellow-500">
                   <VscWarning />
                 </span>
               </Tooltip>
@@ -172,7 +172,7 @@ const OperationRow: React.FC<{
           </div>
         </Td>
         <Td textAlign="center">
-          <span tw="text-xs">{operation.kind}</span>
+          <span className="text-xs">{operation.kind}</span>
         </Td>
         <Td textAlign="center">{p90}</Td>
         <Td textAlign="center">{p95}</Td>
@@ -180,9 +180,9 @@ const OperationRow: React.FC<{
         <Td textAlign="center">{failureRate}%</Td>
         <Td textAlign="center">{count}</Td>
         <Td textAlign="right">
-          <div tw="flex flex-row justify-end">
-            <div tw="mr-3">{percentage}%</div>
-            <Scale value={operation.percentage} size={10} max={100} tw="justify-end" />
+          <div className="flex flex-row justify-end">
+            <div className="mr-3">{percentage}%</div>
+            <Scale value={operation.percentage} size={10} max={100} className="justify-end" />
           </div>
         </Td>
       </Tr>
@@ -307,15 +307,17 @@ const OperationsTable: React.FC<{
 
   return (
     <div
-      className={className}
-      tw="transition-opacity ease-in-out duration-700 rounded-md p-5 ring-1 ring-gray-800 bg-gray-900/50"
+      className={clsx(
+        'transition-opacity ease-in-out duration-700 rounded-md p-5 ring-1 ring-gray-800 bg-gray-900/50',
+        className,
+      )}
     >
       <Section.Title>Operations</Section.Title>
       <Section.Subtitle>List of all operations with their statistics</Section.Subtitle>
-      <Table tw="mt-6" variant="striped" colorScheme="gray" size="sm">
+      <Table className="mt-6" variant="striped" colorScheme="gray" size="sm">
         <Thead>
           <Tr>
-            <Th tw="truncate">Operation</Th>
+            <Th className="truncate">Operation</Th>
             <Th textAlign="center">Kind</Th>
             <Th onClick={p90Column.column.getToggleSortingHandler()}>
               <Sortable
@@ -390,7 +392,7 @@ const OperationsTable: React.FC<{
           })}
         </Tbody>
       </Table>
-      <div tw="py-3 flex flex-row items-center justify-center space-x-2">
+      <div className="py-3 flex flex-row items-center justify-center space-x-2">
         <Button
           size="sm"
           variant="ghost"
@@ -409,7 +411,7 @@ const OperationsTable: React.FC<{
           disabled={!tableInstance.getCanPreviousPage()}
           icon={<VscChevronLeft />}
         />
-        <span tw="font-bold whitespace-nowrap text-sm">
+        <span className="font-bold whitespace-nowrap text-sm">
           {tableInstance.getState().pagination.pageIndex + 1} / {tableInstance.getPageCount()}
         </span>
         <IconButton
@@ -430,7 +432,7 @@ const OperationsTable: React.FC<{
         >
           Last
         </Button>
-        <InputGroup variant="filled" tw="w-auto" size="sm">
+        <InputGroup variant="filled" className="w-auto" size="sm">
           <InputLeftAddon>Go to</InputLeftAddon>
           <Input
             width="70px"

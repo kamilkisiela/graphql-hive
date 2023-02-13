@@ -197,7 +197,7 @@ export const ModelMigrationSettings = ({
       <div className="flex gap-12 items-center">
         <div>
           <Heading className="mb-2 flex items-center justify-between gap-5">
-            <span className="flex-shrink-0">Upgrade Project</span>
+            <span className="shrink-0">Upgrade Project</span>
           </Heading>
           <p className="mb-3 font-light text-gray-300">
             In a few months, access to the old schema registry model will be discontinued as we have

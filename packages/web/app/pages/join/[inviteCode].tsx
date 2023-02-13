@@ -1,5 +1,5 @@
 import * as React from 'react';
-import tw from 'twin.macro';
+import clsx from 'clsx';
 import { useMutation, useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { Title } from '@/components/common';
@@ -10,13 +10,10 @@ import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 import { Button } from '@chakra-ui/react';
 
-const Center = tw.div`w-full h-full flex flex-row items-center justify-center`;
-
-const Invitation = {
-  Root: tw.div`flex flex-col text-center md:w-2/3 w-full`,
-  Title: tw.h1`sm:text-4xl text-3xl mb-4 font-medium text-white`,
-  Description: tw.p`mb-8 leading-relaxed`,
-  Actions: tw.div`flex flex-row gap-2 items-center justify-center`,
+const classes = {
+  title: clsx('sm:text-4xl text-3xl mb-4 font-medium text-white'),
+  description: clsx('mb-8 leading-relaxed'),
+  actions: clsx('flex flex-row gap-2 items-center justify-center'),
 };
 
 function OrganizationPage() {
@@ -59,39 +56,37 @@ function OrganizationPage() {
           }
           const invitation = data.organizationByInviteCode;
 
-          if (invitation.__typename === 'OrganizationInvitationError') {
-            return (
-              <Center>
-                <Invitation.Root>
-                  <Invitation.Title>Invitation Error</Invitation.Title>
-                  <Invitation.Description>{invitation.message}</Invitation.Description>
-
-                  <Invitation.Actions>
-                    <Button onClick={goBack}>Back to Hive</Button>
-                  </Invitation.Actions>
-                </Invitation.Root>
-              </Center>
-            );
-          }
-
           return (
-            <Center>
-              <Invitation.Root>
-                <Invitation.Title>Join "{invitation.name}" organization?</Invitation.Title>
-                <Invitation.Description>
-                  You've been invited to join "{invitation.name}" organization on GraphQL Hive.
-                </Invitation.Description>
+            <div className="w-full h-full flex flex-row items-center justify-center">
+              <div className="flex flex-col text-center md:w-2/3 w-full">
+                {invitation.__typename === 'OrganizationInvitationError' ? (
+                  <>
+                    <h1 className={classes.title}>Invitation Error</h1>
+                    <p className={classes.description}>{invitation.message}</p>
 
-                <Invitation.Actions>
-                  <Button colorScheme="primary" onClick={accept} disabled={mutation.fetching}>
-                    Accept
-                  </Button>
-                  <Button disabled={mutation.fetching} onClick={goBack}>
-                    Ignore
-                  </Button>
-                </Invitation.Actions>
-              </Invitation.Root>
-            </Center>
+                    <div className={classes.actions}>
+                      <Button onClick={goBack}>Back to Hive</Button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <h1 className={classes.title}>Join "{invitation.name}" organization?</h1>
+                    <p className={classes.description}>
+                      You've been invited to join "{invitation.name}" organization on GraphQL Hive.
+                    </p>
+
+                    <div className={classes.actions}>
+                      <Button colorScheme="primary" onClick={accept} disabled={mutation.fetching}>
+                        Accept
+                      </Button>
+                      <Button disabled={mutation.fetching} onClick={goBack}>
+                        Ignore
+                      </Button>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
           );
         }}
       </DataWrapper>

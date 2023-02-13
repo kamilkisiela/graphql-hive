@@ -14,9 +14,8 @@ Developing Hive locally requires you to have the following software installed lo
 - Make sure to install the recommended VSCode extensions (defined in `.vscode/extensions.json`)
 - In the root of the repo, run `nvm use` to use the same version of node as mentioned
 - Create `.env` file in the root, and use the following:
--
 
-```
+```dotenv
 SERVER_ENDPOINT=http://localhost:3001
 ENVIRONMENT=local
 ```

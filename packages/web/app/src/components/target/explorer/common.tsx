@@ -65,13 +65,13 @@ export function SchemaExplorerUsageStats(props: {
       <div className="text-xl">
         <VscPulse />
       </div>
-      <div className="flex-grow">
+      <div className="grow">
         <div className="text-center" title={`${props.usage.total} requests`}>
           {formatNumber(props.usage.total)}
         </div>
         <div
           title={`${percentage.toFixed(2)}% of all requests`}
-          className="relative mt-1 w-full overflow-hidden rounded bg-orange-500 bg-opacity-20"
+          className="relative mt-1 w-full overflow-hidden rounded bg-orange-500/20"
           style={{
             width: 50,
             height: 5,
@@ -243,7 +243,7 @@ export function GraphQLTypeCardListItem(
       onClick={props.onClick}
       className={clsx(
         'flex flex-row items-center justify-between p-4 text-sm',
-        props.index % 2 ? '' : 'bg-gray-900 bg-opacity-50',
+        props.index % 2 ? '' : 'bg-gray-900/50',
         props.className,
       )}
     >

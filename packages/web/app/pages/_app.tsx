@@ -6,7 +6,6 @@ import cookies from 'js-cookie';
 import SuperTokens, { SuperTokensWrapper } from 'supertokens-auth-react';
 import Session from 'supertokens-auth-react/recipe/session';
 import { Provider as UrqlProvider } from 'urql';
-import GlobalStylesComponent from '@/components/common/GlobalStyles';
 import { LoadingAPIIndicator } from '@/components/common/LoadingAPI';
 import { frontendConfig } from '@/config/supertokens/frontend';
 import { LAST_VISITED_ORG_KEY } from '@/constants';
@@ -33,7 +32,7 @@ function identifyOnCrisp(email: string): void {
   }
 }
 
-function pushIfNotEmpty(crisp: any, key: string, value: string | undefined | null): void {
+function pushIfNotEmpty(crisp: any, key: string, value?: string | null): void {
   if (value) {
     crisp.push(['set', key, value]);
   }
@@ -45,7 +44,7 @@ function identifyOnSentry(userId: string, email: string): void {
   });
 }
 
-function App({ Component, pageProps }: AppProps): ReactElement {
+export default function App({ Component, pageProps }: AppProps): ReactElement {
   useEffect(() => {
     const handleRouteChange = (url: string) => {
       gtag.pageview(url);
@@ -85,7 +84,6 @@ function App({ Component, pageProps }: AppProps): ReactElement {
 
   return (
     <>
-      <GlobalStylesComponent />
       {env.analytics.googleAnalyticsTrackingId && (
         <>
           <Script
@@ -152,5 +150,3 @@ if (globalThis.window) {
     });
   }
 }
-
-export default App;

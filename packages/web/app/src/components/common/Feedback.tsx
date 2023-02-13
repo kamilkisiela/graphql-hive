@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { useFormik } from 'formik';
-import 'twin.macro';
 import { useMutation } from 'urql';
 import * as Yup from 'yup';
 import { SendFeedbackDocument } from '@/graphql';
@@ -76,7 +75,7 @@ export const Feedback: React.FC<{
         <ModalHeader>{state === 'FORM' ? 'Send feedback' : 'We got your feedback'}</ModalHeader>
         <ModalBody>
           {state === 'FORM' ? (
-            <div tw="space-y-6">
+            <div className="space-y-6">
               <FormControl isInvalid={isValid('feedback')}>
                 <FormLabel>How can we improve GraphQL Hive?</FormLabel>
                 <Textarea
@@ -109,7 +108,7 @@ export const Feedback: React.FC<{
             </Alert>
           )}
         </ModalBody>
-        <ModalFooter tw="space-x-6">
+        <ModalFooter className="space-x-6">
           {state === 'FORM' ? (
             <>
               <Button variant="ghost" type="button" onClick={onClose}>

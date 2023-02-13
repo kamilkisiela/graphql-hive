@@ -25,7 +25,7 @@ export const BillingPaymentMethod = ({
       <div className={clsx('flex flex-col gap-6', className)}>
         <Heading>Payment Method</Heading>
         <CardElement
-          className="flex-grow"
+          className="grow"
           onChange={e => {
             if (e.error || !e.complete) {
               onValidationChange?.(false);
