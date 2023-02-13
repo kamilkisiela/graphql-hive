@@ -274,9 +274,7 @@ export const OperationsFilterTrigger: React.FC<{
         bgColor="whiteAlpha.50"
         _hover={{ bgColor: 'whiteAlpha.100' }}
       >
-        <span className="font-normal">
-          Operations ({selected?.length ? selected.length : 'all'})
-        </span>
+        <span className="font-normal">Operations ({selected?.length || 'all'})</span>
       </Button>
       <OperationsFilterContainer
         isOpen={isOpen}
