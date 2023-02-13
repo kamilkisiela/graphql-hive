@@ -1,7 +1,5 @@
 import React from 'react';
-import startOfMonth from 'date-fns/startOfMonth';
-import subDays from 'date-fns/subDays';
-import subHours from 'date-fns/subHours';
+import { startOfMonth, subDays, subHours } from 'date-fns';
 import { VscChevronDown } from 'react-icons/vsc';
 import { AdminStats, Filters } from '@/components/admin/AdminStats';
 import { authenticated } from '@/components/authenticated-container';

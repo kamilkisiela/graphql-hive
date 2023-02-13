@@ -1,4 +1,4 @@
-import React, { PropsWithChildren, ReactElement } from 'react';
+import { PropsWithChildren, ReactElement } from 'react';
 import Link from 'next/link';
 import clsx from 'clsx';
 import { FiTarget } from 'react-icons/fi';
