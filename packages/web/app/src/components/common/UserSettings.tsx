@@ -48,8 +48,8 @@ export const UserSettings: React.FC<{
       displayName: me.displayName,
     },
     validationSchema: Yup.object().shape({
-      fullName: Yup.string().min(1).required(`Full name is required`),
-      displayName: Yup.string().min(1).required(`Display name is required`),
+      fullName: Yup.string().min(1).required('Full name is required'),
+      displayName: Yup.string().min(1).required('Display name is required'),
     }),
     async onSubmit(values) {
       if (formik.isValid && !mutation.fetching) {

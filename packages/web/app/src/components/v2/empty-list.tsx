@@ -37,6 +37,6 @@ export const noSchema = (
   <EmptyList
     title="Hive is waiting for your first schema"
     description="You can publish a schema with Hive CLI and Hive Client"
-    docsUrl={getDocsUrl(`/features/publish-schema`)}
+    docsUrl={getDocsUrl('/features/publish-schema')}
   />
 );

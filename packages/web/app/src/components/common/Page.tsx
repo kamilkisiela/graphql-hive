@@ -66,7 +66,7 @@ const WithNavigation = ({ children }: PropsWithChildren) => {
     return <>{children}</>;
   }
 
-  const menuTitle = router.targetId ? `Target` : router.projectId ? `Project` : 'Organization';
+  const menuTitle = router.targetId ? 'Target' : router.projectId ? 'Project' : 'Organization';
 
   const menuIcon = router.targetId ? (
     <FiTarget />
