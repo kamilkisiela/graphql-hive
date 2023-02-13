@@ -73,7 +73,7 @@ export function createCache(options: {
   }
 
   return {
-    reuse<I, O>(factory: (input: I) => Promise<O>, groupKey: string): (input: I) => Promise<O> {
+    reuse<I, O>(groupKey: string, factory: (input: I) => Promise<O>): (input: I) => Promise<O> {
       async function reuseFactory(input: I, attempt = 0): Promise<O> {
         const id = `${prefix}:${groupKey}:${createChecksum(input)}`;
 

@@ -307,7 +307,7 @@ const createFederation: (
       external: ExternalComposition;
     },
     CompositionSuccess | CompositionFailure
-  >(async ({ schemas, external }) => {
+  >('federation', async ({ schemas, external }) => {
     if (external) {
       logger.debug(
         'Using external composition service (url=%s, schemas=%s)',
@@ -399,7 +399,7 @@ const createFederation: (
         raw: printSchema(result.schema),
       },
     };
-  }, 'federation');
+  });
 
   return {
     async validate(schemas, external) {
@@ -481,7 +481,7 @@ const single: Orchestrator = {
 };
 
 const createStitching: (cache: Cache) => Orchestrator = cache => {
-  const stitchAndPrint = cache.reuse(async (schemas: ValidationInput) => {
+  const stitchAndPrint = cache.reuse('stitching', async (schemas: ValidationInput) => {
     return printSchema(
       stitchSchemas({
         subschemas: schemas.map(schema =>
@@ -492,7 +492,7 @@ const createStitching: (cache: Cache) => Orchestrator = cache => {
         ),
       }),
     );
-  }, 'stitching');
+  });
 
   return {
     async validate(schemas) {

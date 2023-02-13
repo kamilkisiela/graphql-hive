@@ -20,9 +20,9 @@ test('catch sync exception', async ({ expect }) => {
     timeoutMs: 2000,
   });
 
-  const run = cache.reuse(() => {
+  const run = cache.reuse(randomString(), () => {
     throw new Error('test');
-  }, randomString());
+  });
 
   await expect(run({})).rejects.toThrow('test');
 });
@@ -38,9 +38,9 @@ test('catch async exception', async ({ expect }) => {
     timeoutMs: 2000,
   });
 
-  const run = cache.reuse(async () => {
+  const run = cache.reuse(randomString(), async () => {
     throw new Error('test');
-  }, randomString());
+  });
 
   await expect(run({})).rejects.toThrow('test');
 });
@@ -58,11 +58,11 @@ test('share execution', async ({ expect }) => {
 
   const spy = vi.fn();
 
-  const run = cache.reuse(async () => {
+  const run = cache.reuse(randomString(), async () => {
     spy();
     await waitFor(150);
     return 'foo';
-  }, randomString());
+  });
 
   const run1 = run({});
   const run2 = run({});
@@ -86,11 +86,11 @@ test('cache the result of an action for no longer than the timeout', async ({ ex
 
   const spy = vi.fn();
 
-  const run = cache.reuse(async () => {
+  const run = cache.reuse(randomString(), async () => {
     spy();
     await waitFor(100);
     return 'foo';
-  }, randomString());
+  });
 
   await expect(run({})).resolves.toBe('foo');
   await expect(run({})).resolves.toBe('foo');
@@ -121,7 +121,7 @@ test('purge the cache when an action fails', async ({ expect }) => {
   const spy = vi.fn();
   let calls = 0;
 
-  const run = cache.reuse(async () => {
+  const run = cache.reuse(randomString(), async () => {
     spy();
     calls++;
     await waitFor(100);
@@ -132,7 +132,7 @@ test('purge the cache when an action fails', async ({ expect }) => {
     }
 
     return 'foo';
-  }, randomString());
+  });
 
   await expect(run({})).resolves.toBe('foo');
   await expect(run({})).resolves.toBe('foo');
@@ -160,11 +160,11 @@ test('timeout', async ({ expect }) => {
   });
 
   const spy = vi.fn();
-  const run = cache.reuse(async () => {
+  const run = cache.reuse(randomString(), async () => {
     spy();
     await waitFor(timeoutMs * 2);
     return 'foo';
-  }, randomString());
+  });
 
   const run1 = run({});
   const run2 = run({});
