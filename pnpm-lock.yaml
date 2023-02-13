@@ -1073,7 +1073,7 @@ importers:
       urql: 3.0.3
       use-debounce: 9.0.3
       valtio: 1.10.1
-      wonka: 6.1.2
+      wonka: 6.2.3
       yup: 0.32.11
       zod: 3.20.6
     dependencies:
@@ -1151,7 +1151,7 @@ importers:
       urql: 3.0.3_onqnqwb3ubg5opvemcqf7c2qhy
       use-debounce: 9.0.3_react@18.2.0
       valtio: 1.10.1_react@18.2.0
-      wonka: 6.1.2
+      wonka: 6.2.3
       yup: 0.32.11
       zod: 3.20.6
     devDependencies:
@@ -11408,7 +11408,7 @@ packages:
       graphql: ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
       graphql: 16.6.0
-      wonka: 6.1.2
+      wonka: 6.2.3
     dev: false
 
   /@urql/devtools/2.0.3_ioimjbecbkqzfeizgamzrgwc3y:
@@ -11419,7 +11419,7 @@ packages:
     dependencies:
       '@urql/core': 3.1.1_graphql@16.6.0
       graphql: 16.6.0
-      wonka: 6.1.2
+      wonka: 6.2.3
     dev: false
 
   /@urql/exchange-graphcache/5.0.8_graphql@16.6.0:
@@ -11429,7 +11429,7 @@ packages:
     dependencies:
       '@urql/core': 3.1.1_graphql@16.6.0
       graphql: 16.6.0
-      wonka: 6.1.2
+      wonka: 6.2.3
     dev: false
 
   /@vercel/ncc/0.36.1:
@@ -25160,7 +25160,7 @@ packages:
       '@urql/core': 3.1.1_graphql@16.6.0
       graphql: 16.6.0
       react: 18.2.0
-      wonka: 6.1.2
+      wonka: 6.2.3
     dev: false
 
   /use-callback-ref/1.3.0_pmekkgnqduwlme35zpnqhenc34:
@@ -25709,8 +25709,8 @@ packages:
     dependencies:
       string-width: 4.2.3
 
-  /wonka/6.1.2:
-    resolution: {integrity: sha512-zNrXPMccg/7OEp9tSfFkMgTvhhowqasiSHdJ3eCZolXxVTV/aT6HUTofoZk9gwRbGoFey/Nss3JaZKUMKMbofg==}
+  /wonka/6.2.3:
+    resolution: {integrity: sha512-EFOYiqDeYLXSzGYt2X3aVe9Hq1XJG+Hz/HjTRRT4dZE9q95khHl5+7pzUSXI19dbMO1/2UMrTf7JT7/7JrSQSQ==}
     dev: false
 
   /word-wrap/1.2.3:
