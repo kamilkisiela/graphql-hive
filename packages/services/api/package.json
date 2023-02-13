@@ -25,7 +25,7 @@
     "@whatwg-node/fetch": "0.8.1",
     "agentkeepalive": "4.2.1",
     "bcryptjs": "2.4.3",
-    "dataloader": "2.2.1",
+    "dataloader": "2.2.2",
     "date-fns": "2.29.3",
     "got": "12.5.3",
     "graphql-modules": "2.1.0",
