@@ -12,7 +12,7 @@ import { OrganizationsDocument, OrganizationType } from '@/graphql';
 import { writeLastVisitedOrganization } from '@/lib/cookies';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { withSessionProtection } from '@/lib/supertokens/guard';
-import { InternalApi } from '@hive/server';
+import { InternalApi } from '@hive/server'; // eslint-disable-line import/no-extraneous-dependencies -- TODO: should we move to "dependencies"?
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
 
 async function getSuperTokensUserIdFromRequest(

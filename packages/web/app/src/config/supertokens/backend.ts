@@ -12,8 +12,8 @@ import {
   createOIDCSuperTokensNoopProvider,
   getOIDCThirdPartyEmailPasswordNodeOverrides,
 } from '@/lib/supertokens/third-party-email-password-node-oidc-provider';
-import { EmailsApi } from '@hive/emails';
-import { InternalApi } from '@hive/server';
+import { EmailsApi } from '@hive/emails'; // eslint-disable-line import/no-extraneous-dependencies -- TODO: should we move to "dependencies"?
+import { InternalApi } from '@hive/server'; // eslint-disable-line import/no-extraneous-dependencies -- TODO: should we move to "dependencies"?
 import { createTRPCProxyClient, CreateTRPCProxyClient, httpLink } from '@trpc/client';
 import { fetch } from '@whatwg-node/fetch';
 import { appInfo } from '../../lib/supertokens/app-info';
