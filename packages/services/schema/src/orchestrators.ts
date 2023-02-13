@@ -32,6 +32,16 @@ import type {
   ValidationOutput,
 } from './types';
 
+interface BrokerPayload {
+  method: 'POST';
+  url: string;
+  headers: {
+    [key: string]: string;
+    'x-hive-signature-256': string;
+  };
+  body: string;
+}
+
 interface CompositionSuccess {
   type: 'success';
   result: {
@@ -195,6 +205,28 @@ function translateMessage(errorCode: string) {
   }
 }
 
+async function callExternalServiceViaBroker(
+  broker: {
+    endpoint: string;
+    signature: string;
+  },
+  payload: BrokerPayload,
+  logger: FastifyLoggerInstance,
+) {
+  return callExternalService(
+    {
+      url: broker.endpoint,
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'x-hive-signature': broker.signature,
+      },
+      body: JSON.stringify(payload),
+    },
+    logger,
+  );
+}
+
 async function callExternalService(
   input: { url: string; headers: Record<string, string>; body: string },
   logger: FastifyLoggerInstance,
@@ -299,33 +331,27 @@ const createFederation: (
           external.broker ? 'yes' : 'no',
         );
 
-        const headers = {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-          'x-hive-signature-256': signature,
-        };
-
-        const init = {
+        const request = {
           url: external.endpoint,
-          headers,
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            'x-hive-signature-256': signature,
+          } as const,
           body,
         };
 
         const parseResult = EXTERNAL_COMPOSITION_RESULT.safeParse(
-          await callExternalService(
-            external.broker
-              ? {
-                  url: external.broker.endpoint,
-                  headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                    'x-hive-signature': external.broker.signature,
-                  },
-                  body: JSON.stringify(init),
-                }
-              : init,
-            logger,
-          ),
+          await (external.broker
+            ? callExternalServiceViaBroker(
+                external.broker,
+                {
+                  method: 'POST',
+                  ...request,
+                },
+                logger,
+              )
+            : callExternalService(request, logger)),
         );
 
         if (!parseResult.success) {

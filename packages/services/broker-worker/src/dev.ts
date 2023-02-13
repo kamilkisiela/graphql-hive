@@ -19,7 +19,9 @@ function main() {
       }),
   );
 
-  app.all('*', (request: Request) => handleRequest(request, isSignatureValid));
+  app.all('*', (request: Request) =>
+    handleRequest(request, isSignatureValid, e => console.error(e)),
+  );
 
   const server = createServer(app);
 

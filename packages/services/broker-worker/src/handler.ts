@@ -19,8 +19,12 @@ async function gatherResponse(response: Response) {
   return response.text();
 }
 
-export async function handleRequest(request: Request, keyValidator: typeof isSignatureValid) {
-  const parsedRequest = await parseIncomingRequest(request, keyValidator);
+export async function handleRequest(
+  request: Request,
+  keyValidator: typeof isSignatureValid,
+  captureException: (exception: Error) => void,
+) {
+  const parsedRequest = await parseIncomingRequest(request, keyValidator, captureException);
 
   if ('error' in parsedRequest) {
     return parsedRequest.error;
