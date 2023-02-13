@@ -95,7 +95,7 @@ const deleteOrganization: TypedDocumentNodeUpdateResolver<typeof DeleteOrganizat
   _args,
   cache,
 ) => {
-  const organization = deleteOrganization.organization;
+  const { organization } = deleteOrganization;
 
   cache.invalidate({
     __typename: organization.__typename,
@@ -111,7 +111,7 @@ const createProject: TypedDocumentNodeUpdateResolver<typeof CreateProjectDocumen
   if (!createProject.ok) {
     return;
   }
-  const selector = createProject.ok.selector;
+  const { selector } = createProject.ok;
   const project = createProject.ok.createdProject;
 
   updateQuery(
@@ -154,7 +154,7 @@ const createTarget: TypedDocumentNodeUpdateResolver<typeof CreateTargetDocument>
   }
 
   const target = createTarget.ok.createdTarget;
-  const selector = createTarget.ok.selector;
+  const { selector } = createTarget.ok;
 
   updateQuery(
     cache,
@@ -221,7 +221,7 @@ const deleteTokens: TypedDocumentNodeUpdateResolver<typeof DeleteTokensDocument>
   _args,
   cache,
 ) => {
-  const selector = deleteTokens.selector;
+  const { selector } = deleteTokens;
 
   updateQuery(
     cache,
@@ -446,7 +446,7 @@ const enableExternalSchemaComposition: TypedDocumentNodeUpdateResolver<
           return null;
         }
 
-        const ok = enableExternalSchemaComposition.ok;
+        const { ok } = enableExternalSchemaComposition;
 
         if (ok && data.project?.externalSchemaComposition) {
           data.project.externalSchemaComposition = {
@@ -480,7 +480,7 @@ const disableExternalSchemaComposition: TypedDocumentNodeUpdateResolver<
           return null;
         }
 
-        const ok = disableExternalSchemaComposition.ok;
+        const { ok } = disableExternalSchemaComposition;
 
         if (ok && data.project?.externalSchemaComposition) {
           data.project.externalSchemaComposition = null;

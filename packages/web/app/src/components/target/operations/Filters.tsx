@@ -40,6 +40,7 @@ const OperationsFilter: React.FC<{
     }
     return items;
   }
+
   const [selectedItems, setSelectedItems] = React.useState<string[]>(() => {
     if (selected?.length) {
       return selected;
@@ -69,7 +70,7 @@ const OperationsFilter: React.FC<{
 
   const onChange = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      const value = event.currentTarget.value;
+      const { value } = event.currentTarget;
 
       setSearchTerm(value);
       debouncedFilter(value);

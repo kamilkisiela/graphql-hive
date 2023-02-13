@@ -7,7 +7,7 @@ export default async function githubConnectOrg(req: NextApiRequest, res: NextApi
     throw new Error('GitHub is not set up.');
   }
 
-  const orgId = req.query.orgId;
+  const { orgId } = req.query;
   console.log('Organization', orgId);
 
   const url = `https://github.com/apps/${env.github.appName}/installations/new`;

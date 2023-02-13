@@ -19,7 +19,7 @@ export async function extractAccessTokenFromRequest(
     req,
     res,
   );
-  const session: SessionContainerInterface | undefined = (req as any).session;
+  const { session } = req as { session?: SessionContainerInterface };
   // Session can be undefined in case no access token was sent.
   const accessToken = session?.getAccessToken() ?? null;
 
