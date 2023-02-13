@@ -113,7 +113,6 @@ module.exports = {
         'jsx-a11y/alt-text': ['warn', { elements: ['img'], img: ['Image', 'NextImage'] }],
         'no-restricted-syntax': ['error', ...HIVE_RESTRICTED_SYNTAX, ...REACT_RESTRICTED_SYNTAX],
         // TODO: enable below rules👇
-        '@typescript-eslint/consistent-type-imports': ['off', { prefer: 'no-type-imports' }],
         'no-console': 'off',
         '@typescript-eslint/no-non-null-assertion': 'off',
         'react/jsx-no-useless-fragment': 'off',
