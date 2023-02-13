@@ -1,0 +1,65 @@
+# Note: This is a composite GitHub Action.
+# Docs: https://docs.github.com/en/actions/creating-actions/creating-a-composite-action
+
+name: setup
+description: Hive CI environment setup
+
+inputs:
+  codegen:
+    description: Should run GraphQL Codegen?
+    default: 'true'
+  installDependencies:
+    description: Should run pnpm install?
+    default: 'true'
+  workingDirectory:
+    description: Working dir
+    default: ${{ github.workspace }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: install nodejs
+      uses: actions/setup-node@v3.6.0
+      with:
+        node-version-file: .node-version
+
+    - name: check pnpm version
+      shell: bash
+      id: pnpm
+      run: |
+        PNPM_VERSION=$(cat package.json | jq -r '.packageManager' | awk -F@ '{print $2}')
+        PNPM_VERSION=${PNPM_VERSION:-7}
+        echo "Using PNPM version $PNPM_VERSION"
+        echo "version=$PNPM_VERSION" >> $GITHUB_OUTPUT
+
+    - name: install pnpm
+      uses: pnpm/action-setup@v2.2.4
+      with:
+        version: ${{ steps.pnpm.outputs.version }}
+
+    - name: pnpm store path
+      id: pnpm-cache
+      shell: bash
+      run: echo "pnpm_cache_dir=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+    - uses: actions/cache@v3
+      name: restore pnpm cache
+      with:
+        path: |
+          ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
+          ~/.cache/Cypress
+        key: ${{ runner.os }}-pnpm-store-n18-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-n18-
+
+    - name: pnpm install
+      if: ${{ inputs.installDependencies == 'true' }}
+      shell: bash
+      working-directory: ${{ inputs.workingDirectory }}
+      run: pnpm install --frozen-lockfile
+
+    - name: generate graphql types
+      if: ${{ inputs.codegen == 'true' }}
+      shell: bash
+      working-directory: ${{ inputs.workingDirectory }}
+      run: pnpm graphql:generate

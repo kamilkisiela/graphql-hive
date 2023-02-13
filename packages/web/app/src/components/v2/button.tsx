@@ -1,7 +1,7 @@
 import { ComponentProps, forwardRef } from 'react';
-import * as Toolbar from '@radix-ui/react-toolbar';
 import clsx from 'clsx';
-import tw, { css } from 'twin.macro';
+import { css } from '@emotion/react';
+import * as Toolbar from '@radix-ui/react-toolbar';
 
 type ButtonProps = Omit<ComponentProps<'button'>, 'size'> & {
   danger?: boolean;
@@ -55,29 +55,29 @@ export const Button = forwardRef<any, ButtonProps>(
             danger
               ? 'bg-red-500 text-white hover:brightness-110 active:bg-red-600'
               : {
-                  primary: 'bg-orange-600 active:bg-orange-700 text-white hover:brightness-110',
+                  primary: 'bg-orange-600 text-white hover:brightness-110 active:bg-orange-700',
                   secondary:
-                    'hover:text-orange-600 bg-gray-800 text-gray-500 hover:brightness-110 active:bg-gray-900',
+                    'bg-gray-800 text-gray-500 hover:text-orange-600 hover:brightness-110 active:bg-gray-900',
                   default:
-                    'hover:text-orange-600 bg-transparent text-gray-500 hover:border-gray-800',
+                    'bg-transparent text-gray-500 hover:border-gray-800 hover:text-orange-600',
                   link: 'text-orange-600 hover:underline',
                 }[variant],
             variant !== 'link' &&
               'inline-flex items-center border border-transparent text-sm font-bold',
             className,
+            rotate > 0 && 'radix-state-open:border-gray-800 radix-state-open:text-orange-600',
           )}
-          css={
-            rotate > 0 &&
-            css`
-              &[data-state='open'] {
-                ${tw`border-gray-800 text-orange-600`}
-                svg {
-                  transform: rotate(${rotate}deg);
-                  ${tw`will-change-transform transition-transform`}
-                }
-              }
-            `
-          }
+          css={css`
+            &[data-state='open'] svg {
+              transform: rotate(${rotate}deg);
+              will-change: transform; /* will-change-transform */
+
+              /* transition-transform */
+              transition-property: transform;
+              transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+              transition-duration: 150ms;
+            }
+          `}
           {...props}
         >
           {children}

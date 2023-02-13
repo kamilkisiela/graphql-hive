@@ -1,12 +1,12 @@
-import { Injectable, Inject, Scope, CONTEXT } from 'graphql-modules';
+import { CONTEXT, Inject, Injectable, Scope } from 'graphql-modules';
 import type { WebhooksApi } from '@hive/webhooks';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import { fetch } from '@whatwg-node/fetch';
-import type { CommunicationAdapter, SchemaChangeNotificationInput } from './common';
-import { Logger } from '../../../shared/providers/logger';
 import { HttpClient } from '../../../shared/providers/http-client';
-import { WEBHOOKS_CONFIG } from '../tokens';
+import { Logger } from '../../../shared/providers/logger';
 import type { WebhooksConfig } from '../tokens';
+import { WEBHOOKS_CONFIG } from '../tokens';
+import type { CommunicationAdapter, SchemaChangeNotificationInput } from './common';
 
 @Injectable({
   scope: Scope.Operation,

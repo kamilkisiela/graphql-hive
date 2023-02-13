@@ -1,11 +1,11 @@
-import { Injectable, Inject } from 'graphql-modules';
 import Agent from 'agentkeepalive';
+import { Inject, Injectable } from 'graphql-modules';
 import type { Span } from '@sentry/types';
-import { CLICKHOUSE_CONFIG } from './tokens';
-import type { ClickHouseConfig } from './tokens';
-import { HttpClient } from '../../shared/providers/http-client';
 import { atomic } from '../../../shared/helpers';
+import { HttpClient } from '../../shared/providers/http-client';
 import { Logger } from '../../shared/providers/logger';
+import type { ClickHouseConfig } from './tokens';
+import { CLICKHOUSE_CONFIG } from './tokens';
 
 export interface QueryResponse<T> {
   data: readonly T[];

@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-extraneous-dependencies -- Tailwind should be installed as devDep
 import tailwindColors from 'tailwindcss/colors';
 
 export const colors = {

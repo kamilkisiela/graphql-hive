@@ -1,14 +1,14 @@
 #!/usr/bin/env node
-import * as Sentry from '@sentry/node';
 import {
   createServer,
-  startMetrics,
   registerShutdown,
   reportReadiness,
   startHeartbeats,
+  startMetrics,
 } from '@hive/service-common';
-import { createIngestor } from './ingestor';
+import * as Sentry from '@sentry/node';
 import { env } from './environment';
+import { createIngestor } from './ingestor';
 
 async function main() {
   if (env.sentry) {
@@ -26,6 +26,7 @@ async function main() {
     tracing: false,
     log: {
       level: env.log.level,
+      requests: env.log.requests,
     },
   });
 
@@ -33,7 +34,6 @@ async function main() {
     const { readiness, start, stop } = createIngestor({
       logger: server.log,
       clickhouse: env.clickhouse,
-      clickhouseMirror: env.clickhouseMirror,
       kafka: {
         topic: env.kafka.topic,
         consumerGroup: env.kafka.consumerGroup,
@@ -47,7 +47,7 @@ async function main() {
           enabled: true,
           endpoint: env.heartbeat.endpoint,
           intervalInMS: 20_000,
-          onError: server.log.error,
+          onError: e => server.log.error(e, `Heartbeat failed with error`),
           isReady: readiness,
         })
       : startHeartbeats({ enabled: false });
@@ -81,7 +81,7 @@ async function main() {
     if (env.prometheus) {
       await startMetrics(env.prometheus.labels.instance);
     }
-    await server.listen(env.http.port, '0.0.0.0');
+    await server.listen(env.http.port, '::');
     await start();
   } catch (error) {
     server.log.fatal(error);

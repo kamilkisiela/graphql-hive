@@ -1,12 +1,12 @@
-import { Injectable, Scope, InjectionToken, Inject } from 'graphql-modules';
 import crypto from 'crypto';
+import { Inject, Injectable, InjectionToken, Scope } from 'graphql-modules';
 
 const ALG = 'aes256';
 const IN_ENC = 'utf8';
 const OUT_ENC = 'hex';
 const IV = 16;
 
-const ENCRYPTION_SECRET = new InjectionToken<string>('ENCRYPTION_SECRET');
+export const ENCRYPTION_SECRET = new InjectionToken<string>('ENCRYPTION_SECRET');
 
 export function encryptionSecretProvider(value: string) {
   return {

@@ -4,7 +4,7 @@ export const SubHeader = ({ children }: { children: ReactNode }): ReactElement =
   return (
     <header
       className={`
-        after:-z-1
+        after:z-[-1]
         relative
         pt-20
         after:absolute

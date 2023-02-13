@@ -14,6 +14,9 @@ export default gql`
   }
 
   type PageInfo {
-    hasMore: Boolean!
+    hasNextPage: Boolean!
+    hasPreviousPage: Boolean!
+    startCursor: String!
+    endCursor: String!
   }
 `;

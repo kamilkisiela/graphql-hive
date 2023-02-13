@@ -10,6 +10,7 @@ export const Heading = ({
   children: ReactNode;
   size?: 'lg' | 'xl' | '2xl';
   className?: string;
+  id?: string;
 }): ReactElement => {
   const HeadingLevel = size === '2xl' ? 'h1' : 'h3';
 

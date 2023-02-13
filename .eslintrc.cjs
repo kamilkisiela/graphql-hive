@@ -1,6 +1,33 @@
 /* eslint-env node */
-/* eslint-disable-next-line @typescript-eslint/no-var-requires */
-const { builtinModules } = require('module');
+const guildConfig = require('@theguild/eslint-config/base');
+const { REACT_RESTRICTED_SYNTAX, RESTRICTED_SYNTAX } = require('@theguild/eslint-config/constants');
+
+const rulesToExtends = Object.fromEntries(
+  Object.entries(guildConfig.rules).filter(([key]) =>
+    [
+      'no-implicit-coercion',
+      'import/first',
+      'no-restricted-globals',
+      '@typescript-eslint/no-unused-vars',
+      'unicorn/no-useless-fallback-in-spread',
+      'unicorn/no-array-push-push',
+      'no-else-return',
+      'no-lonely-if',
+      'unicorn/prefer-includes',
+      'react/self-closing-comp',
+      'prefer-const',
+      'no-extra-boolean-cast',
+    ].includes(key),
+  ),
+);
+
+const HIVE_RESTRICTED_SYNTAX = [
+  {
+    // ❌ '0.0.0.0' or `0.0.0.0`
+    selector: ':matches(Literal[value="0.0.0.0"], TemplateElement[value.raw="0.0.0.0"])',
+    message: 'Use "::" to make it compatible with both IPv4 and IPv6',
+  },
+];
 
 module.exports = {
   reportUnusedDisableDirectives: true,
@@ -8,12 +35,11 @@ module.exports = {
     'scripts',
     'rules',
     'out',
+    '.hive',
     'public',
     'packages/web/app/src/graphql/index.ts',
     'packages/libraries/cli/src/sdk.ts',
     'packages/services/storage/src/db/types.ts',
-    'babel.config.cjs',
-    'jest.config.js',
   ],
   parserOptions: {
     ecmaVersion: 2020,
@@ -21,17 +47,11 @@ module.exports = {
     project: ['./tsconfig.eslint.json'],
   },
   parser: '@typescript-eslint/parser',
-  plugins: ['@typescript-eslint', 'import', 'hive'],
-  extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended'],
+  plugins: [...guildConfig.plugins, 'hive'],
+  extends: guildConfig.extends,
   rules: {
     'no-process-env': 'error',
-    'no-restricted-globals': ['error', 'stop'],
-    '@typescript-eslint/no-unused-vars': [
-      'error',
-      { argsIgnorePattern: '^_', ignoreRestSiblings: true },
-    ],
     'no-empty': ['error', { allowEmptyCatch: true }],
-
     'import/no-absolute-path': 'error',
     'import/no-self-import': 'error',
     'import/no-extraneous-dependencies': [
@@ -41,7 +61,6 @@ module.exports = {
         optionalDependencies: false,
       },
     ],
-    'import/first': 'error',
     'hive/enforce-deps-in-dev': [
       'error',
       {
@@ -50,6 +69,9 @@ module.exports = {
       },
     ],
     '@typescript-eslint/no-floating-promises': 'error',
+    '@typescript-eslint/no-unnecessary-type-assertion': 'error',
+    ...rulesToExtends,
+    'no-restricted-syntax': ['error', ...HIVE_RESTRICTED_SYNTAX, ...RESTRICTED_SYNTAX],
 
     // 🚨 The following rules needs to be fixed and was temporarily disabled to avoid printing warning
     '@typescript-eslint/no-explicit-any': 'off',
@@ -62,19 +84,62 @@ module.exports = {
   },
   overrides: [
     {
-      // TODO: replace with packages/web/**
-      files: ['packages/web/app/src/components/v2/**', 'packages/web/app/pages/\\[orgId\\]/**'],
+      files: ['packages/web/**'],
       extends: [
-        'plugin:react/recommended',
-        'plugin:react-hooks/recommended',
+        '@theguild',
+        '@theguild/eslint-config/react',
         'plugin:tailwindcss/recommended',
-        'plugin:jsx-a11y/recommended',
         'plugin:@next/next/recommended',
       ],
-      plugins: ['simple-import-sort'],
       settings: {
+        react: {
+          version: 'detect',
+        },
+      },
+      rules: {
+        // conflicts with official prettier-plugin-tailwindcss and tailwind v3
+        'tailwindcss/classnames-order': 'off',
+        // set more strict to highlight in editor
+        'tailwindcss/enforces-shorthand': 'error',
+        'tailwindcss/no-custom-classname': 'error',
+        'tailwindcss/migration-from-tailwind-2': 'error',
+        'tailwindcss/no-contradicting-classname': 'error',
+        'react/display-name': 'off',
+        'react/prop-types': 'off',
+        'react/no-unknown-property': 'off',
+        'jsx-a11y/anchor-is-valid': ['off', { components: ['Link', 'NextLink'] }],
+        'jsx-a11y/alt-text': ['warn', { elements: ['img'], img: ['Image', 'NextImage'] }],
+        'no-restricted-syntax': ['error', ...HIVE_RESTRICTED_SYNTAX, ...REACT_RESTRICTED_SYNTAX],
+
+        // TODO: enable below rules👇
+        '@typescript-eslint/consistent-type-imports': ['off', { prefer: 'no-type-imports' }],
+        'no-console': 'off',
+        '@typescript-eslint/no-non-null-assertion': 'off',
+        'react/jsx-no-useless-fragment': 'off',
+        '@typescript-eslint/no-explicit-any': 'off',
+        '@typescript-eslint/no-restricted-imports': 'off',
+        '@typescript-eslint/no-empty-function': 'off',
+        'react-hooks/rules-of-hooks': 'off',
+        'react-hooks/exhaustive-deps': 'off',
+        'unicorn/filename-case': 'off',
+        'import/no-default-export': 'off',
+        '@next/next/no-img-element': 'off',
+        '@typescript-eslint/ban-types': 'off',
+        'react/jsx-key': 'off',
+        'jsx-a11y/label-has-associated-control': 'off',
+        'jsx-a11y/click-events-have-key-events': 'off',
+        'jsx-a11y/no-static-element-interactions': 'off',
+        '@next/next/no-html-link-for-pages': 'off',
+      },
+    },
+    {
+      files: ['packages/web/app/**'],
+      settings: {
+        next: {
+          rootDir: 'packages/web/app',
+        },
         tailwindcss: {
-          config: 'packages/app/tailwind.config.js',
+          config: 'packages/web/app/tailwind.config.js',
           whitelist: [
             'drag-none',
             'placeholder-gray-500',
@@ -86,59 +151,28 @@ module.exports = {
             '-z-1',
           ],
         },
-        react: {
-          version: 'detect',
+      },
+    },
+    {
+      files: ['packages/web/docs/**'],
+      settings: {
+        next: {
+          rootDir: 'packages/web/docs',
+        },
+        tailwindcss: {
+          config: 'packages/web/docs/tailwind.config.cjs',
         },
       },
-      rules: {
-        // conflicts with official prettier-plugin-tailwindcss and tailwind v3
-        'tailwindcss/classnames-order': 'off',
-        // set more strict to highlight in editor
-        'tailwindcss/no-custom-classname': 'error',
-        'tailwindcss/enforces-shorthand': 'error',
-        'tailwindcss/migration-from-tailwind-2': 'error',
-        // in React@17, import React is no longer required
-        'react/react-in-jsx-scope': 'off',
-        'react/display-name': 'off',
-        'react/prop-types': 'off',
-        'react/no-unescaped-entities': 'off',
-        'react/jsx-curly-brace-presence': 'error',
-        'react/no-unknown-property': 'off',
-        'jsx-a11y/anchor-is-valid': ['off', { components: ['Link', 'NextLink'] }],
-        'jsx-a11y/alt-text': ['warn', { elements: ['img'], img: ['Image', 'NextImage'] }],
-        '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'no-type-imports' }],
-        'simple-import-sort/exports': 'error',
-        'simple-import-sort/imports': [
-          'error',
-          {
-            groups: [
-              [
-                // Node.js builtins
-                `^(node:)?(${builtinModules
-                  .filter(mod => !mod.startsWith('_') && !mod.includes('/'))
-                  .join('|')})(/.*|$)`,
-                '^react(-dom)?$',
-                '^next(/.*|$)',
-                '^graphql(/.*|$)',
-                // Side effect imports.
-                '^\\u0000',
-                // Packages.
-                // Things that start with a letter (or digit or underscore), or `@` followed by a letter.
-                '^@?\\w',
-              ],
-              [
-                // Absolute imports and other imports such as Vue-style `@/foo`.
-                // Anything not matched in another group.
-                '^',
-                // Relative imports.
-                // Anything that starts with a dot.
-                '^\\.',
-                // Style imports.
-                '^.+\\.css$',
-              ],
-            ],
-          },
-        ],
+    },
+    {
+      files: ['packages/web/landing-page/**'],
+      settings: {
+        next: {
+          rootDir: 'packages/web/landing-page',
+        },
+        tailwindcss: {
+          config: 'packages/web/landing-page/tailwind.config.cjs',
+        },
       },
     },
     {

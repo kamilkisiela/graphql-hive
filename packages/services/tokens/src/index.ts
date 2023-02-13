@@ -1,22 +1,22 @@
 #!/usr/bin/env node
+import Redis from 'ioredis';
+import ms from 'ms';
 import 'reflect-metadata';
+import LRU from 'tiny-lru';
 import {
-  createServer,
   createErrorHandler,
-  startMetrics,
+  createServer,
   registerShutdown,
+  registerTRPC,
   reportReadiness,
   startHeartbeats,
+  startMetrics,
 } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
-import LRU from 'tiny-lru';
-import ms from 'ms';
-import { createStorage } from './storage';
-import { useCache } from './cache';
-import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
-import type { CreateFastifyContextOptions } from '@trpc/server/adapters/fastify';
 import { Context, tokensApiRouter } from './api';
+import { useCache } from './cache';
 import { env } from './environment';
+import { createStorage } from './storage';
 
 export async function main() {
   if (env.sentry) {
@@ -34,69 +34,94 @@ export async function main() {
     tracing: false,
     log: {
       level: env.log.level,
+      requests: env.log.requests,
     },
   });
 
   const errorHandler = createErrorHandler(server);
 
-  try {
-    const { start, stop, readiness, getStorage } = useCache(
-      createStorage(env.postgres),
-      server.log,
-    );
-    const tokenReadFailuresCache = LRU<
-      | {
-          type: 'error';
-          error: string;
-          checkAt: number;
-        }
-      | {
-          type: 'not-found';
-          checkAt: number;
-        }
-    >(200);
-    // Cache failures for 10 minutes
-    const errorCachingInterval = ms('10m');
+  const redis = new Redis({
+    host: env.redis.host,
+    port: env.redis.port,
+    password: env.redis.password,
+    maxRetriesPerRequest: 20,
+    db: 0,
+    enableReadyCheck: false,
+  });
 
-    const stopHeartbeats = env.heartbeat
-      ? startHeartbeats({
-          enabled: true,
-          endpoint: env.heartbeat.endpoint,
-          intervalInMS: 20_000,
-          onError: server.log.error,
-          isReady: readiness,
-        })
-      : startHeartbeats({ enabled: false });
+  const { start, stop, readiness, getStorage } = useCache(
+    createStorage(env.postgres),
+    redis,
+    server.log,
+  );
+
+  const stopHeartbeats = env.heartbeat
+    ? startHeartbeats({
+        enabled: true,
+        endpoint: env.heartbeat.endpoint,
+        intervalInMS: 20_000,
+        onError: e => server.log.error(e, `Heartbeat failed with error`),
+        isReady: readiness,
+      })
+    : startHeartbeats({ enabled: false });
+
+  async function shutdown() {
+    stopHeartbeats();
+    await server.close();
+    await stop();
+  }
+
+  try {
+    redis.on('error', err => {
+      server.log.error(err, 'Redis connection error');
+    });
+
+    redis.on('connect', () => {
+      server.log.info('Redis connection established');
+    });
+
+    redis.on('ready', () => {
+      server.log.info('Redis connection ready... ');
+    });
+
+    redis.on('close', () => {
+      server.log.info('Redis connection closed');
+    });
+
+    redis.on('reconnecting', timeToReconnect => {
+      server.log.info('Redis reconnecting in %s', timeToReconnect);
+    });
+
+    redis.on('end', async () => {
+      server.log.info('Redis ended - no more reconnections will be made');
+      await shutdown();
+    });
+
+    // Cache failures for 1 minute
+    const errorCachingInterval = ms('1m');
+    const tokenReadFailuresCache = LRU<string>(1000, errorCachingInterval);
 
     registerShutdown({
       logger: server.log,
-      async onShutdown() {
-        stopHeartbeats();
-        await server.close();
-        await stop();
-      },
+      onShutdown: shutdown,
     });
 
-    await server.register(fastifyTRPCPlugin, {
-      prefix: '/trpc',
-      trpcOptions: {
-        router: tokensApiRouter,
-        createContext({ req }: CreateFastifyContextOptions): Context {
-          return {
-            errorCachingInterval,
-            logger: req.log,
-            errorHandler,
-            getStorage,
-            tokenReadFailuresCache,
-          };
-        },
+    await registerTRPC(server, {
+      router: tokensApiRouter,
+      createContext({ req }): Context {
+        return {
+          req,
+          errorHandler,
+          getStorage,
+          tokenReadFailuresCache,
+        };
       },
     });
 
     server.route({
       method: ['GET', 'HEAD'],
       url: '/_health',
-      handler(req, res) {
+      handler(_req, res) {
         void res.status(200).send();
       },
     });
@@ -114,7 +139,7 @@ export async function main() {
     if (env.prometheus) {
       await startMetrics(env.prometheus.labels.instance);
     }
-    await server.listen(env.http.port, '0.0.0.0');
+    await server.listen(env.http.port, '::');
     await start();
   } catch (error) {
     server.log.fatal(error);

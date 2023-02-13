@@ -1,20 +1,19 @@
 #!/usr/bin/env node
 import {
-  createServer,
   createErrorHandler,
-  startMetrics,
+  createServer,
   registerShutdown,
+  registerTRPC,
   reportReadiness,
   startHeartbeats,
+  startMetrics,
 } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
-import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
-import type { CreateFastifyContextOptions } from '@trpc/server/adapters/fastify';
 import { emailsApiRouter } from './api';
-import { createScheduler } from './scheduler';
-import { createEmailProvider } from './providers';
 import type { Context } from './context';
 import { env } from './environment';
+import { createEmailProvider } from './providers';
+import { createScheduler } from './scheduler';
 
 async function main() {
   if (env.sentry) {
@@ -32,6 +31,7 @@ async function main() {
     tracing: false,
     log: {
       level: env.log.level,
+      requests: env.log.requests,
     },
   });
 
@@ -55,7 +55,7 @@ async function main() {
           enabled: true,
           endpoint: env.heartbeat.endpoint,
           intervalInMS: 20_000,
-          onError: server.log.error,
+          onError: e => server.log.error(e, `Heartbeat failed with error`),
           isReady: readiness,
         })
       : startHeartbeats({ enabled: false });
@@ -68,13 +68,16 @@ async function main() {
       },
     });
 
-    await server.register(fastifyTRPCPlugin, {
-      prefix: '/trpc',
-      trpcOptions: {
-        router: emailsApiRouter,
-        createContext({ req }: CreateFastifyContextOptions): Context {
-          return { logger: req.log, errorHandler, schedule };
-        },
+    await registerTRPC(server, {
+      router: emailsApiRouter,
+      createContext({ req }): Context {
+        return {
+          req,
+          errorHandler(message: string, error: Error) {
+            return errorHandler(message, error, req.log);
+          },
+          schedule,
+        };
       },
     });
 
@@ -106,7 +109,7 @@ async function main() {
       });
     }
 
-    await server.listen(env.http.port, '0.0.0.0');
+    await server.listen(env.http.port, '::');
 
     if (env.prometheus) {
       await startMetrics(env.prometheus.labels.instance);

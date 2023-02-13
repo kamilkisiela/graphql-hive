@@ -42,8 +42,7 @@ export const Input = forwardRef<
         {prefix}
 
         <input
-          // eslint-disable-next-line tailwindcss/migration-from-tailwind-2 -- refactor in tailwindcss v3
-          className="w-full bg-transparent placeholder-gray-500 disabled:cursor-not-allowed"
+          className="w-full bg-transparent placeholder:text-gray-500 disabled:cursor-not-allowed"
           placeholder={placeholder}
           type={type}
           style={{ fontWeight: 'inherit' }}

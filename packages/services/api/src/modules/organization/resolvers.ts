@@ -1,11 +1,11 @@
-import type { OrganizationModule } from './__generated__/types';
-import { createConnection } from '../../shared/schema';
-import { OrganizationType } from '../../shared/entities';
-import { IdTranslator } from '../shared/providers/id-translator';
-import { OrganizationManager } from './providers/organization-manager';
-import { AuthManager } from '../auth/providers/auth-manager';
 import { z } from 'zod';
+import { OrganizationType } from '../../shared/entities';
+import { createConnection } from '../../shared/schema';
+import { AuthManager } from '../auth/providers/auth-manager';
+import { IdTranslator } from '../shared/providers/id-translator';
 import { Logger } from '../shared/providers/logger';
+import type { OrganizationModule } from './__generated__/types';
+import { OrganizationManager } from './providers/organization-manager';
 
 const OrganizationNameModel = z.string().min(2).max(50);
 

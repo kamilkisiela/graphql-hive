@@ -1,11 +1,12 @@
-import { createErrorHandler, metrics } from '@hive/service-common';
+import { createHash } from 'crypto';
+import type { FastifyRequest } from 'fastify';
+import { Lru as LruType } from 'tiny-lru';
+import { z } from 'zod';
+import { createErrorHandler, handleTRPCError, metrics } from '@hive/service-common';
 import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
 import { initTRPC } from '@trpc/server';
-import type { FastifyLoggerInstance } from 'fastify';
-import { z } from 'zod';
 import { useCache } from './cache';
-import { createHash } from 'crypto';
-import { Lru as LruType } from 'tiny-lru';
+import { cacheHits, cacheMisses } from './metrics';
 
 const httpRequests = new metrics.Counter({
   name: 'tokens_http_requests',
@@ -19,24 +20,19 @@ const httpRequestDuration = new metrics.Histogram({
   labelNames: ['path'],
 });
 
-const TARGET_VALIDATION = z
+const TARGET_INPUT_SCHEMA = z
   .object({
     targetId: z.string().nonempty(),
   })
   .required();
-const PROJECT_VALIDATION = z
+const TOKEN_INPUT_SCHEMA = z
   .object({
-    projectId: z.string().nonempty(),
+    token: z.string().min(1),
   })
   .required();
-const ORG_VALIDATION = z
+const INVALIDATE_TOKENS_INPUT_SCHEMA = z
   .object({
-    organizationId: z.string().nonempty(),
-  })
-  .required();
-const TOKEN_VALIDATION = z
-  .object({
-    token: z.string().nonempty(),
+    tokens: z.array(z.string().min(1)),
   })
   .required();
 
@@ -50,8 +46,8 @@ function maskToken(token: string) {
 
 function generateToken() {
   const token = createHash('md5')
-    .update(Math.random() + '')
-    .update(Date.now() + '')
+    .update(String(Math.random()))
+    .update(String(Date.now()))
     .digest('hex');
 
   const hash = hashToken(token);
@@ -65,24 +61,14 @@ function generateToken() {
 }
 
 export type Context = {
-  logger: FastifyLoggerInstance;
+  req: FastifyRequest;
   errorHandler: ReturnType<typeof createErrorHandler>;
   getStorage: ReturnType<typeof useCache>['getStorage'];
-  tokenReadFailuresCache: LruType<
-    | {
-        type: 'error';
-        error: string;
-        checkAt: number;
-      }
-    | {
-        type: 'not-found';
-        checkAt: number;
-      }
-  >;
-  errorCachingInterval: number;
+  tokenReadFailuresCache: LruType<string>;
 };
 
 const t = initTRPC.context<Context>().create();
+const errorMiddleware = t.middleware(handleTRPCError);
 
 const prometheusMiddleware = t.middleware(async ({ next, path }) => {
   const stopTimer = httpRequestDuration.startTimer({ path });
@@ -94,10 +80,10 @@ const prometheusMiddleware = t.middleware(async ({ next, path }) => {
   }
 });
 
-const procedure = t.procedure.use(prometheusMiddleware);
+const procedure = t.procedure.use(prometheusMiddleware).use(errorMiddleware);
 
 export const tokensApiRouter = t.router({
-  targetTokens: procedure.input(TARGET_VALIDATION).query(async ({ ctx, input }) => {
+  targetTokens: procedure.input(TARGET_INPUT_SCHEMA).query(async ({ ctx, input }) => {
     try {
       const storage = await ctx.getStorage();
 
@@ -108,40 +94,16 @@ export const tokensApiRouter = t.router({
       throw error;
     }
   }),
-  invalidateTokenByTarget: procedure.input(TARGET_VALIDATION).mutation(async ({ ctx, input }) => {
-    try {
-      const storage = await ctx.getStorage();
-      storage.invalidateTarget(input.targetId);
-
-      return true;
-    } catch (error) {
-      ctx.errorHandler('Failed to invalidate tokens of a target', error as Error);
-
-      throw error;
-    }
-  }),
-  invalidateTokenByProject: procedure.input(PROJECT_VALIDATION).mutation(async ({ ctx, input }) => {
-    try {
-      const storage = await ctx.getStorage();
-      storage.invalidateProject(input.projectId);
-
-      return true;
-    } catch (error) {
-      ctx.errorHandler('Failed to invalidate tokens of a project', error as Error);
-
-      throw error;
-    }
-  }),
-  invalidateTokenByOrganization: procedure
-    .input(ORG_VALIDATION)
+  invalidateTokens: procedure
+    .input(INVALIDATE_TOKENS_INPUT_SCHEMA)
     .mutation(async ({ ctx, input }) => {
       try {
         const storage = await ctx.getStorage();
-        storage.invalidateProject(input.organizationId);
+        await storage.invalidateTokens(input.tokens);
 
         return true;
       } catch (error) {
-        ctx.errorHandler('Failed to invalidate tokens of a org', error as Error);
+        ctx.errorHandler('Failed to invalidate tokens', error as Error);
 
         throw error;
       }
@@ -183,7 +145,7 @@ export const tokensApiRouter = t.router({
         throw error;
       }
     }),
-  deleteToken: procedure.input(TOKEN_VALIDATION).mutation(async ({ ctx, input }) => {
+  deleteToken: procedure.input(TOKEN_INPUT_SCHEMA).mutation(async ({ ctx, input }) => {
     try {
       const hashed_token = input.token;
       const storage = await ctx.getStorage();
@@ -196,23 +158,16 @@ export const tokensApiRouter = t.router({
       throw error;
     }
   }),
-  getToken: procedure.input(TOKEN_VALIDATION).query(async ({ ctx, input }) => {
+  getToken: procedure.input(TOKEN_INPUT_SCHEMA).query(async ({ ctx, input }) => {
     const hash = hashToken(input.token);
     const alias = maskToken(input.token);
 
     // In case the token was not found (or we failed to fetch it)
-    const failedRead = ctx.tokenReadFailuresCache.get(hash);
+    const cachedFailure = ctx.tokenReadFailuresCache.get(hash);
 
-    if (failedRead) {
-      // let's re-throw the same error (or return null)
-      if (failedRead.checkAt >= Date.now()) {
-        if (failedRead.type === 'error') {
-          throw new Error(failedRead.error);
-        } else {
-          return null;
-        }
-      }
-      // or look for it again if last time we checked was 10 minutes ago
+    if (cachedFailure) {
+      cacheHits.inc(1);
+      throw new Error(cachedFailure);
     }
 
     try {
@@ -222,26 +177,14 @@ export const tokensApiRouter = t.router({
       // removes the token from the failures cache (in case the value expired)
       ctx.tokenReadFailuresCache.delete(hash);
 
-      if (!result) {
-        // set token read as not found
-        // so we don't try to read it again for next X minutes
-        ctx.tokenReadFailuresCache.set(hash, {
-          type: 'not-found',
-          checkAt: Date.now() + ctx.errorCachingInterval,
-        });
-      }
-
       return result;
     } catch (error) {
-      ctx.errorHandler(`Failed to get a token "${alias}"`, error as Error, ctx.logger);
+      ctx.errorHandler(`Failed to get a token "${alias}"`, error as Error, ctx.req.log);
 
       // set token read as failure
       // so we don't try to read it again for next X minutes
-      ctx.tokenReadFailuresCache.set(hash, {
-        type: 'error',
-        error: (error as Error).message,
-        checkAt: Date.now() + ctx.errorCachingInterval,
-      });
+      ctx.tokenReadFailuresCache.set(hash, (error as Error).message);
+      cacheMisses.inc(1);
 
       throw error;
     }

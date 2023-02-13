@@ -5,22 +5,21 @@
   "private": true,
   "scripts": {
     "build": "node build.mjs",
-    "build-local": "BUILD_FOR_LOCAL=1 node build.mjs",
-    "dev": "tsup-node src/dev.ts --target node16 --sourcemap --watch --onSuccess \"node --enable-source-maps dist/dev.js\"",
+    "dev": "tsup-node src/dev.ts --target node18 --sourcemap --watch --onSuccess \"node --enable-source-maps dist/dev.js\"",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "toucan-js": "2.7.0",
-    "zod": "3.19.1"
+    "zod": "3.20.6"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "3.4.0",
+    "@cloudflare/workers-types": "4.20230115.0",
     "@types/service-worker-mock": "2.0.1",
-    "@whatwg-node/fetch": "0.5.3",
-    "@whatwg-node/server": "0.4.17",
-    "esbuild": "0.14.39",
+    "@whatwg-node/fetch": "0.8.1",
+    "@whatwg-node/server": "0.6.7",
+    "esbuild": "0.17.8",
     "itty-router": "2.6.6",
     "itty-router-extras": "0.4.2",
-    "nock": "13.2.4"
+    "nock": "13.3.0"
   }
 }

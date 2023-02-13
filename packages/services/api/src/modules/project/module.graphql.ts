@@ -78,7 +78,6 @@ export default gql`
     FEDERATION
     STITCHING
     SINGLE
-    CUSTOM
   }
 
   extend type Organization {

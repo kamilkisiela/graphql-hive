@@ -1,13 +1,13 @@
 import { Injectable, Scope } from 'graphql-modules';
-import type {
-  OrganizationSelector,
-  ProjectSelector,
-  TargetSelector,
-  PersistedOperationSelector,
-} from './storage';
-import { Storage } from './storage';
 import { cache, filterSelector } from '../../../shared/helpers';
 import { Logger } from './logger';
+import type {
+  OrganizationSelector,
+  PersistedOperationSelector,
+  ProjectSelector,
+  TargetSelector,
+} from './storage';
+import { Storage } from './storage';
 
 @Injectable({
   scope: Scope.Operation,

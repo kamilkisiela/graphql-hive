@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-import { createServerAdapter } from '@whatwg-node/server';
-import 'reflect-metadata';
-import * as Sentry from '@sentry/node';
-import { startMetrics, registerShutdown, createLogger } from '@hive/service-common';
-import { env } from './environment';
 import { createServer } from 'http';
+import 'reflect-metadata';
+import { createLogger, registerShutdown, startMetrics } from '@hive/service-common';
+import * as Sentry from '@sentry/node';
+import { createServerAdapter } from '@whatwg-node/server';
+import { env } from './environment';
 import { rateLimitCtX, rateLimitRouter } from './router';
 
 async function main() {
@@ -36,7 +36,7 @@ async function main() {
     }
     await rateLimitCtX.start();
     return new Promise<void>(resolve => {
-      server.listen(env.http.port, '0.0.0.0', resolve);
+      server.listen(env.http.port, 'localhost', resolve);
     });
   } catch (error: any) {
     logger.fatal(error);

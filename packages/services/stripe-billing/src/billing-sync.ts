@@ -1,6 +1,6 @@
+import { Stripe } from 'stripe';
 import { FastifyLoggerInstance } from '@hive/service-common';
 import { createStorage as createPostgreSQLStorage } from '@hive/storage';
-import { Stripe } from 'stripe';
 
 export function createStripeBilling(config: {
   logger: FastifyLoggerInstance;
@@ -24,7 +24,7 @@ export function createStripeBilling(config: {
   //   fetch,
   // });
   const stripeApi = new Stripe(config.stripe.token, {
-    apiVersion: '2020-08-27',
+    apiVersion: '2022-11-15',
     typescript: true,
   });
   const loadStripeData$ = ensureStripeProducts();

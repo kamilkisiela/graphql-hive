@@ -1,470 +1,425 @@
+import { OrganizationAccessScope, ProjectAccessScope, TargetAccessScope } from '@app/gql/graphql';
 import {
-  createOrganization,
-  getOrganizationTransferRequest,
-  getOrganizationMembers,
-  inviteToOrganization,
-  joinOrganization,
-  requestOrganizationTransfer,
   answerOrganizationTransferRequest,
+  getOrganizationTransferRequest,
+  requestOrganizationTransfer,
 } from '../../../testkit/flow';
-import { authenticate, userEmail } from '../../../testkit/auth';
-import {
-  OrganizationAccessScope,
-  ProjectAccessScope,
-  TargetAccessScope,
-} from '../../../testkit/gql/graphql';
+import { initSeed } from '../../../testkit/seed';
 
-async function prepareOrganization() {
-  const accessTokens = {
-    owner: (await authenticate('main')).access_token,
-    member: (await authenticate('extra')).access_token,
-    lonelyMember: (await authenticate('lonely')).access_token,
-    nonMember: (await authenticate('foo')).access_token,
-  };
+test.concurrent(
+  'accessing non-existing ownership transfer request should result in null',
+  async () => {
+    const { createOrg, ownerToken } = await initSeed().createOwner();
+    const { organization } = await createOrg();
 
-  const orgResult = await createOrganization(
-    {
-      name: 'foo',
-    },
-    accessTokens.owner,
-  );
-
-  const organization =
-    orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
-
-  async function join(email: string, accessToken: string) {
-    const invitationResult = await inviteToOrganization(
+    const transferRequestResult = await getOrganizationTransferRequest(
       {
         organization: organization.cleanId,
-        email,
+        code: 'non-existing-code',
       },
-      accessTokens.owner,
-    );
+      ownerToken,
+    ).then(r => r.expectNoGraphQLErrors());
 
-    const code = invitationResult.body.data?.inviteToOrganizationByEmail.ok?.code;
+    expect(transferRequestResult.organizationTransferRequest).toBeNull();
+  },
+);
+
+test.concurrent('owner should be able to request the ownership transfer to a member', async () => {
+  const { createOrg, ownerToken } = await initSeed().createOwner();
+  const { organization, inviteAndJoinMember } = await createOrg();
+  const { member, memberEmail } = await inviteAndJoinMember();
+
+  const transferRequestResult = await requestOrganizationTransfer(
+    {
+      organization: organization.cleanId,
+      user: member.id,
+    },
+    ownerToken,
+  ).then(r => r.expectNoGraphQLErrors());
+
+  expect(transferRequestResult.requestOrganizationTransfer.ok?.email).toBe(memberEmail);
+});
+
+test.concurrent('non-owner should not be able to request the ownership transfer', async () => {
+  const { createOrg, ownerEmail } = await initSeed().createOwner();
+  const { organization, inviteAndJoinMember, members } = await createOrg();
+  const { memberToken } = await inviteAndJoinMember();
+  const orgMembers = await members();
+
+  const errors = await requestOrganizationTransfer(
+    {
+      organization: organization.cleanId,
+      user: orgMembers.find(u => u.user.email === ownerEmail)!.id,
+    },
+    memberToken,
+  ).then(r => r.expectGraphQLErrors());
+
+  expect(errors).toBeDefined();
+  expect(errors.length).toBe(1);
+});
+
+test.concurrent(
+  'owner should not be able to request the ownership transfer to non-member',
+  async () => {
+    const { createOrg } = await initSeed().createOwner();
+    const { organization, inviteAndJoinMember } = await createOrg();
+    const { memberToken, member } = await inviteAndJoinMember();
+
+    const transferRequestResult = await requestOrganizationTransfer(
+      {
+        organization: organization.cleanId,
+        user: member.id,
+      },
+      memberToken,
+    ).then(r => r.expectNoGraphQLErrors());
+
+    expect(transferRequestResult.requestOrganizationTransfer?.error?.message).toBeDefined();
+  },
+);
+
+test.concurrent('non-member should not be able to access the transfer request', async () => {
+  const { createOrg, ownerToken } = await initSeed().createOwner();
+  const { organization, inviteAndJoinMember } = await createOrg();
+  const { member } = await inviteAndJoinMember();
+
+  const requestTransferResult = await requestOrganizationTransfer(
+    {
+      organization: organization.cleanId,
+      user: member.id,
+    },
+    ownerToken,
+  ).then(r => r.expectNoGraphQLErrors());
+
+  const code = requestTransferResult.requestOrganizationTransfer.ok?.code;
+
+  if (!code) {
+    throw new Error('Could not create transfer request');
+  }
+
+  const { ownerToken: nonMemberToken } = await initSeed().createOwner();
+
+  const errors = await getOrganizationTransferRequest(
+    {
+      organization: organization.cleanId,
+      code,
+    },
+    nonMemberToken,
+  ).then(r => r.expectGraphQLErrors());
+
+  expect(errors).toBeDefined();
+  expect(errors.length).toBe(1);
+});
+
+test.concurrent('non-recipient should not be able to access the transfer request', async () => {
+  const { createOrg, ownerToken } = await initSeed().createOwner();
+  const { organization, inviteAndJoinMember } = await createOrg();
+  const { member } = await inviteAndJoinMember();
+  const { memberToken: lonelyMemberToken } = await inviteAndJoinMember();
+
+  const requestTransferResult = await requestOrganizationTransfer(
+    {
+      organization: organization.cleanId,
+      user: member.id,
+    },
+    ownerToken,
+  ).then(r => r.expectNoGraphQLErrors());
+
+  const code = requestTransferResult.requestOrganizationTransfer.ok?.code;
+
+  if (!code) {
+    throw new Error('Could not create transfer request');
+  }
+
+  const requestResult = await getOrganizationTransferRequest(
+    {
+      organization: organization.cleanId,
+      code,
+    },
+    lonelyMemberToken,
+  ).then(r => r.expectNoGraphQLErrors());
+
+  expect(requestResult.organizationTransferRequest).toBeNull();
+});
+
+test.concurrent('recipient should be able to access the transfer request', async () => {
+  const { createOrg, ownerToken } = await initSeed().createOwner();
+  const { organization, inviteAndJoinMember } = await createOrg();
+  const { member, memberToken } = await inviteAndJoinMember();
+  const requestTransferResult = await requestOrganizationTransfer(
+    {
+      organization: organization.cleanId,
+      user: member.id,
+    },
+    ownerToken,
+  ).then(r => r.expectNoGraphQLErrors());
+
+  const code = requestTransferResult.requestOrganizationTransfer.ok?.code;
+
+  if (!code) {
+    throw new Error('Could not create transfer request');
+  }
+
+  const requestResult = await getOrganizationTransferRequest(
+    {
+      organization: organization.cleanId,
+      code,
+    },
+    memberToken,
+  ).then(r => r.expectNoGraphQLErrors());
+
+  expect(requestResult.organizationTransferRequest).not.toBeNull();
+});
+
+test.concurrent('recipient should be able to answer the ownership transfer', async () => {
+  const { createOrg, ownerToken } = await initSeed().createOwner();
+  const { organization, inviteAndJoinMember } = await createOrg();
+  const { member, memberToken } = await inviteAndJoinMember();
+
+  const requestTransferResult = await requestOrganizationTransfer(
+    {
+      organization: organization.cleanId,
+      user: member.id,
+    },
+    ownerToken,
+  ).then(r => r.expectNoGraphQLErrors());
+
+  const code = requestTransferResult.requestOrganizationTransfer.ok?.code;
+
+  if (!code) {
+    throw new Error('Could not create transfer request');
+  }
+
+  const answerResult = await answerOrganizationTransferRequest(
+    {
+      organization: organization.cleanId,
+      code,
+      accept: true,
+    },
+    memberToken,
+  ).then(r => r.expectNoGraphQLErrors());
+
+  expect(answerResult.answerOrganizationTransferRequest.ok?.accepted).toBe(true);
+});
+
+test.concurrent('non-member should not be able to answer the ownership transfer', async () => {
+  const { createOrg, ownerToken } = await initSeed().createOwner();
+  const { organization, inviteAndJoinMember } = await createOrg();
+  const { member } = await inviteAndJoinMember();
+  const { memberToken: lonelyMemberToken } = await inviteAndJoinMember();
+
+  const requestTransferResult = await requestOrganizationTransfer(
+    {
+      organization: organization.cleanId,
+      user: member.id,
+    },
+    ownerToken,
+  ).then(r => r.expectNoGraphQLErrors());
+
+  const code = requestTransferResult.requestOrganizationTransfer.ok?.code;
+
+  if (!code) {
+    throw new Error('Could not create transfer request');
+  }
+
+  const answerResult = await answerOrganizationTransferRequest(
+    {
+      organization: organization.cleanId,
+      code,
+      accept: true,
+    },
+    lonelyMemberToken,
+  ).then(r => r.expectNoGraphQLErrors());
+
+  expect(answerResult.answerOrganizationTransferRequest.error?.message).toBeDefined();
+});
+
+test.concurrent('owner should not be able to answer the ownership transfer', async () => {
+  const { createOrg, ownerToken } = await initSeed().createOwner();
+  const { organization, inviteAndJoinMember } = await createOrg();
+  const { member } = await inviteAndJoinMember();
+
+  const requestTransferResult = await requestOrganizationTransfer(
+    {
+      organization: organization.cleanId,
+      user: member.id,
+    },
+    ownerToken,
+  ).then(r => r.expectNoGraphQLErrors());
+
+  const code = requestTransferResult.requestOrganizationTransfer.ok?.code;
+
+  if (!code) {
+    throw new Error('Could not create transfer request');
+  }
+
+  const answerResult = await answerOrganizationTransferRequest(
+    {
+      organization: organization.cleanId,
+      code,
+      accept: true,
+    },
+    ownerToken,
+  ).then(r => r.expectNoGraphQLErrors());
+
+  expect(answerResult.answerOrganizationTransferRequest.error?.message).toBeDefined();
+});
+
+test.concurrent('non-member should not be able to answer the ownership transfer', async () => {
+  const { createOrg, ownerToken } = await initSeed().createOwner();
+  const { organization, inviteAndJoinMember } = await createOrg();
+  const { member } = await inviteAndJoinMember();
+
+  const requestTransferResult = await requestOrganizationTransfer(
+    {
+      organization: organization.cleanId,
+      user: member.id,
+    },
+    ownerToken,
+  ).then(r => r.expectNoGraphQLErrors());
+
+  const code = requestTransferResult.requestOrganizationTransfer.ok?.code;
+
+  if (!code) {
+    throw new Error('Could not create transfer request');
+  }
+
+  const { ownerToken: nonMemberToken } = await initSeed().createOwner();
+  const answerResult = await answerOrganizationTransferRequest(
+    {
+      organization: organization.cleanId,
+      code,
+      accept: true,
+    },
+    nonMemberToken,
+  ).then(r => r.expectNoGraphQLErrors());
+
+  expect(answerResult.answerOrganizationTransferRequest.error?.message).toBeDefined();
+});
+
+test.concurrent(
+  'previous owner should keep the ownership until the new owner accepts the transfer',
+  async () => {
+    const { createOrg, ownerToken, ownerEmail } = await initSeed().createOwner();
+    const { organization, inviteAndJoinMember, members } = await createOrg();
+    const { member } = await inviteAndJoinMember();
+
+    const requestTransferResult = await requestOrganizationTransfer(
+      {
+        organization: organization.cleanId,
+        user: member.id,
+      },
+      ownerToken,
+    ).then(r => r.expectNoGraphQLErrors());
+
+    const code = requestTransferResult.requestOrganizationTransfer.ok?.code;
 
     if (!code) {
-      throw new Error('Could not create invitation');
+      throw new Error('Could not create transfer request');
     }
 
-    const joinResult = await joinOrganization(code, accessToken);
+    const orgMembers = await members();
 
-    if (joinResult.body.data?.joinOrganization.__typename !== 'OrganizationPayload') {
-      throw new Error('Could not join organization');
+    if (!orgMembers) {
+      throw new Error('Could not get members');
     }
-  }
 
-  await join(userEmail('extra'), accessTokens.member);
-  await join(userEmail('lonely'), accessTokens.lonelyMember);
-
-  const membersResult = await getOrganizationMembers(
-    { organization: organization.cleanId },
-    accessTokens.owner,
-  );
-
-  const members = membersResult.body.data?.organization?.organization.members.nodes;
-
-  if (!members) {
-    throw new Error('Could not get organization members');
-  }
-
-  return {
-    organization,
-    accessTokens,
-    owner: members.find(m => m.user.email === userEmail('main'))!,
-    member: members.find(m => m.user.email === userEmail('extra'))!,
-    lonelyMember: members.find(m => m.user.email === userEmail('lonely'))!,
-  };
-}
-
-test('accessing non-existing ownership transfer request should result in null', async () => {
-  const { organization, accessTokens } = await prepareOrganization();
-
-  const transferRequestResult = await getOrganizationTransferRequest(
-    {
-      organization: organization.cleanId,
-      code: 'non-existing-code',
-    },
-    accessTokens.owner,
-  );
-
-  expect(transferRequestResult.body.errors).not.toBeDefined();
-  expect(transferRequestResult.body.data?.organizationTransferRequest).toBeNull();
-});
-
-test('owner should be able to request the ownership transfer to a member', async () => {
-  const { organization, accessTokens, member } = await prepareOrganization();
-
-  const transferRequestResult = await requestOrganizationTransfer(
-    {
-      organization: organization.cleanId,
-      user: member.id,
-    },
-    accessTokens.owner,
-  );
-
-  expect(transferRequestResult.body.errors).not.toBeDefined();
-  expect(transferRequestResult.body.data?.requestOrganizationTransfer.ok?.email).toBe(
-    member.user.email,
-  );
-});
-
-test('non-owner should not be able to request the ownership transfer', async () => {
-  const { organization, accessTokens, owner } = await prepareOrganization();
-
-  const transferRequestResult = await requestOrganizationTransfer(
-    {
-      organization: organization.cleanId,
-      user: owner.id,
-    },
-    accessTokens.member,
-  );
-
-  expect(transferRequestResult.body.data).toBeNull();
-  expect(transferRequestResult.body.errors).toBeDefined();
-});
-
-test('owner should not be able to request the ownership transfer to non-member', async () => {
-  const { organization, accessTokens, member } = await prepareOrganization();
-
-  const transferRequestResult = await requestOrganizationTransfer(
-    {
-      organization: organization.cleanId,
-      user: member.id,
-    },
-    accessTokens.member,
-  );
-
-  expect(transferRequestResult.body.errors).not.toBeDefined();
-  expect(
-    transferRequestResult.body.data?.requestOrganizationTransfer?.error?.message,
-  ).toBeDefined();
-});
-
-test('non-member should not be able to access the transfer request', async () => {
-  const { organization, accessTokens, member } = await prepareOrganization();
-
-  const requestTransferResult = await requestOrganizationTransfer(
-    {
-      organization: organization.cleanId,
-      user: member.id,
-    },
-    accessTokens.owner,
-  );
-
-  const code = requestTransferResult.body.data?.requestOrganizationTransfer.ok?.code;
-
-  if (!code) {
-    throw new Error('Could not create transfer request');
-  }
-
-  const requestResult = await getOrganizationTransferRequest(
-    {
-      organization: organization.cleanId,
-      code,
-    },
-    accessTokens.nonMember,
-  );
-
-  expect(requestResult.body.errors).toBeDefined();
-  expect(requestResult.body.data?.organizationTransferRequest).toBeNull();
-});
-
-test('non-recipient should not be able to access the transfer request', async () => {
-  const { organization, accessTokens, member } = await prepareOrganization();
-
-  const requestTransferResult = await requestOrganizationTransfer(
-    {
-      organization: organization.cleanId,
-      user: member.id,
-    },
-    accessTokens.owner,
-  );
-
-  const code = requestTransferResult.body.data?.requestOrganizationTransfer.ok?.code;
-
-  if (!code) {
-    throw new Error('Could not create transfer request');
-  }
-
-  const requestResult = await getOrganizationTransferRequest(
-    {
-      organization: organization.cleanId,
-      code,
-    },
-    accessTokens.lonelyMember,
-  );
-
-  expect(requestResult.body.errors).not.toBeDefined();
-  expect(requestResult.body.data?.organizationTransferRequest).toBeNull();
-});
-
-test('recipient should be able to access the transfer request', async () => {
-  const { organization, accessTokens, member } = await prepareOrganization();
-
-  const requestTransferResult = await requestOrganizationTransfer(
-    {
-      organization: organization.cleanId,
-      user: member.id,
-    },
-    accessTokens.owner,
-  );
-
-  const code = requestTransferResult.body.data?.requestOrganizationTransfer.ok?.code;
-
-  if (!code) {
-    throw new Error('Could not create transfer request');
-  }
-
-  const requestResult = await getOrganizationTransferRequest(
-    {
-      organization: organization.cleanId,
-      code,
-    },
-    accessTokens.member,
-  );
-
-  expect(requestResult.body.errors).not.toBeDefined();
-  expect(requestResult.body.data?.organizationTransferRequest).not.toBeNull();
-});
-
-test('recipient should be able to answer the ownership transfer', async () => {
-  const { organization, accessTokens, member } = await prepareOrganization();
-
-  const requestTransferResult = await requestOrganizationTransfer(
-    {
-      organization: organization.cleanId,
-      user: member.id,
-    },
-    accessTokens.owner,
-  );
-
-  const code = requestTransferResult.body.data?.requestOrganizationTransfer.ok?.code;
-
-  if (!code) {
-    throw new Error('Could not create transfer request');
-  }
-
-  const answerResult = await answerOrganizationTransferRequest(
-    {
-      organization: organization.cleanId,
-      code,
-      accept: true,
-    },
-    accessTokens.member,
-  );
-
-  expect(answerResult.body.errors).not.toBeDefined();
-  expect(answerResult.body.data?.answerOrganizationTransferRequest.ok?.accepted).toBe(true);
-});
-
-test('non-member should not be able to answer the ownership transfer', async () => {
-  const { organization, accessTokens, member } = await prepareOrganization();
-
-  const requestTransferResult = await requestOrganizationTransfer(
-    {
-      organization: organization.cleanId,
-      user: member.id,
-    },
-    accessTokens.owner,
-  );
-
-  const code = requestTransferResult.body.data?.requestOrganizationTransfer.ok?.code;
-
-  if (!code) {
-    throw new Error('Could not create transfer request');
-  }
-
-  const answerResult = await answerOrganizationTransferRequest(
-    {
-      organization: organization.cleanId,
-      code,
-      accept: true,
-    },
-    accessTokens.lonelyMember,
-  );
-
-  expect(answerResult.body.errors).not.toBeDefined();
-  expect(answerResult.body.data?.answerOrganizationTransferRequest.error?.message).toBeDefined();
-});
-
-test('owner should not be able to answer the ownership transfer', async () => {
-  const { organization, accessTokens, member } = await prepareOrganization();
-
-  const requestTransferResult = await requestOrganizationTransfer(
-    {
-      organization: organization.cleanId,
-      user: member.id,
-    },
-    accessTokens.owner,
-  );
-
-  const code = requestTransferResult.body.data?.requestOrganizationTransfer.ok?.code;
-
-  if (!code) {
-    throw new Error('Could not create transfer request');
-  }
-
-  const answerResult = await answerOrganizationTransferRequest(
-    {
-      organization: organization.cleanId,
-      code,
-      accept: true,
-    },
-    accessTokens.owner,
-  );
-
-  expect(answerResult.body.errors).not.toBeDefined();
-  expect(answerResult.body.data?.answerOrganizationTransferRequest.error?.message).toBeDefined();
-});
-
-test('non-member should not be able to answer the ownership transfer', async () => {
-  const { organization, accessTokens, member } = await prepareOrganization();
-
-  const requestTransferResult = await requestOrganizationTransfer(
-    {
-      organization: organization.cleanId,
-      user: member.id,
-    },
-    accessTokens.owner,
-  );
-
-  const code = requestTransferResult.body.data?.requestOrganizationTransfer.ok?.code;
-
-  if (!code) {
-    throw new Error('Could not create transfer request');
-  }
-
-  const answerResult = await answerOrganizationTransferRequest(
-    {
-      organization: organization.cleanId,
-      code,
-      accept: true,
-    },
-    accessTokens.nonMember,
-  );
-
-  expect(answerResult.body.errors).not.toBeDefined();
-  expect(answerResult.body.data?.answerOrganizationTransferRequest.error?.message).toBeDefined();
-});
-
-test('previous owner should keep the ownership until the new owner accepts the transfer', async () => {
-  const { organization, accessTokens, member, owner } = await prepareOrganization();
-
-  const requestTransferResult = await requestOrganizationTransfer(
-    {
-      organization: organization.cleanId,
-      user: member.id,
-    },
-    accessTokens.owner,
-  );
-
-  const code = requestTransferResult.body.data?.requestOrganizationTransfer.ok?.code;
-
-  if (!code) {
-    throw new Error('Could not create transfer request');
-  }
-
-  const membersResult = await getOrganizationMembers(
-    {
-      organization: organization.cleanId,
-    },
-    accessTokens.owner,
-  );
-
-  const members = membersResult.body.data?.organization?.organization.members.nodes;
-
-  if (!members) {
-    throw new Error('Could not get members');
-  }
-
-  // current owner
-  expect(members.find(m => m.id === owner.id)).toEqual(
-    expect.objectContaining({
-      organizationAccessScopes: owner.organizationAccessScopes,
-      projectAccessScopes: owner.projectAccessScopes,
-      targetAccessScopes: owner.targetAccessScopes,
-    }),
-  );
-
-  // potential new owner
-  expect(members.find(m => m.id === member.id)).toEqual(
-    expect.objectContaining({
-      organizationAccessScopes: member.organizationAccessScopes,
-      projectAccessScopes: member.projectAccessScopes,
-      targetAccessScopes: member.targetAccessScopes,
-    }),
-  );
-});
-
-test('previous owner should lose only "delete" rights, new owner should get all access', async () => {
-  const { organization, accessTokens, member, owner, lonelyMember } = await prepareOrganization();
-
-  const requestTransferResult = await requestOrganizationTransfer(
-    {
-      organization: organization.cleanId,
-      user: member.id,
-    },
-    accessTokens.owner,
-  );
-
-  const code = requestTransferResult.body.data?.requestOrganizationTransfer.ok?.code;
-
-  if (!code) {
-    throw new Error('Could not create transfer request');
-  }
-
-  const answerResult = await answerOrganizationTransferRequest(
-    {
-      organization: organization.cleanId,
-      code,
-      accept: true,
-    },
-    accessTokens.member,
-  );
-
-  expect(answerResult.body.errors).not.toBeDefined();
-  expect(answerResult.body.data?.answerOrganizationTransferRequest.ok?.accepted).toBe(true);
-
-  const membersResult = await getOrganizationMembers(
-    {
-      organization: organization.cleanId,
-    },
-    accessTokens.owner,
-  );
-
-  const members = membersResult.body.data?.organization?.organization.members.nodes;
-
-  if (!members) {
-    throw new Error('Could not get members');
-  }
-
-  // previous owner should lose only "delete" rights
-  expect(members.find(m => m.id === owner.id)).toEqual(
-    expect.objectContaining({
-      organizationAccessScopes: owner.organizationAccessScopes.filter(
-        s => s !== OrganizationAccessScope.Delete,
-      ),
-      projectAccessScopes: owner.projectAccessScopes.filter(s => s !== ProjectAccessScope.Delete),
-      targetAccessScopes: owner.targetAccessScopes.filter(s => s !== TargetAccessScope.Delete),
-    }),
-  );
-
-  // new owner should get all access
-  expect(members.find(m => m.id === member.id)).toEqual(
-    expect.objectContaining({
-      organizationAccessScopes: owner.organizationAccessScopes,
-      projectAccessScopes: owner.projectAccessScopes,
-      targetAccessScopes: owner.targetAccessScopes,
-    }),
-  );
-
-  // other members should not be affected
-  expect(members.find(m => m.id === lonelyMember.id)).toEqual(
-    expect.objectContaining({
-      organizationAccessScopes: lonelyMember.organizationAccessScopes,
-      projectAccessScopes: lonelyMember.projectAccessScopes,
-      targetAccessScopes: lonelyMember.targetAccessScopes,
-    }),
-  );
-});
+    // current owner
+    const owner = orgMembers.find(m => m.user.email === ownerEmail)!;
+    expect(orgMembers.find(m => m.id === owner.id)).toEqual(
+      expect.objectContaining({
+        organizationAccessScopes: owner.organizationAccessScopes,
+        projectAccessScopes: owner.projectAccessScopes,
+        targetAccessScopes: owner.targetAccessScopes,
+      }),
+    );
+
+    // potential new owner
+    expect(orgMembers.find(m => m.id === member.id)).toEqual(
+      expect.objectContaining({
+        organizationAccessScopes: member.organizationAccessScopes,
+        projectAccessScopes: member.projectAccessScopes,
+        targetAccessScopes: member.targetAccessScopes,
+      }),
+    );
+  },
+);
+
+test.concurrent(
+  'previous owner should lose only "delete" rights, new owner should get all access',
+  async () => {
+    const { createOrg, ownerToken, ownerEmail } = await initSeed().createOwner();
+    const { organization, inviteAndJoinMember, members } = await createOrg();
+    const { member, memberToken } = await inviteAndJoinMember();
+    const { member: lonelyMember } = await inviteAndJoinMember();
+
+    const requestTransferResult = await requestOrganizationTransfer(
+      {
+        organization: organization.cleanId,
+        user: member.id,
+      },
+      ownerToken,
+    ).then(r => r.expectNoGraphQLErrors());
+
+    const code = requestTransferResult.requestOrganizationTransfer.ok?.code;
+
+    if (!code) {
+      throw new Error('Could not create transfer request');
+    }
+
+    const answerResult = await answerOrganizationTransferRequest(
+      {
+        organization: organization.cleanId,
+        code,
+        accept: true,
+      },
+      memberToken,
+    ).then(r => r.expectNoGraphQLErrors());
+
+    expect(answerResult.answerOrganizationTransferRequest.ok?.accepted).toBe(true);
+
+    const orgMembers = await members();
+
+    if (!orgMembers) {
+      throw new Error('Could not get members');
+    }
+
+    // previous owner should lose only "delete" rights
+    const owner = orgMembers.find(m => m.user.email === ownerEmail)!;
+    expect(orgMembers.find(m => m.id === owner.id)).toEqual(
+      expect.objectContaining({
+        organizationAccessScopes: owner.organizationAccessScopes.filter(
+          s => s !== OrganizationAccessScope.Delete,
+        ),
+        projectAccessScopes: owner.projectAccessScopes.filter(s => s !== ProjectAccessScope.Delete),
+        targetAccessScopes: owner.targetAccessScopes.filter(s => s !== TargetAccessScope.Delete),
+      }),
+    );
+
+    // new owner should get all access
+    expect(orgMembers.find(m => m.id === member.id)).toEqual(
+      expect.objectContaining({
+        organizationAccessScopes: expect.arrayContaining([
+          ...owner.organizationAccessScopes,
+          OrganizationAccessScope.Delete,
+        ]),
+        projectAccessScopes: expect.arrayContaining([
+          ...owner.projectAccessScopes,
+          ProjectAccessScope.Delete,
+        ]),
+        targetAccessScopes: expect.arrayContaining([
+          ...owner.targetAccessScopes,
+          TargetAccessScope.Delete,
+        ]),
+      }),
+    );
+
+    // other members should not be affected
+    expect(orgMembers.find(m => m.id === lonelyMember.id)).toEqual(
+      expect.objectContaining({
+        organizationAccessScopes: lonelyMember.organizationAccessScopes,
+        projectAccessScopes: lonelyMember.projectAccessScopes,
+        targetAccessScopes: lonelyMember.targetAccessScopes,
+      }),
+    );
+  },
+);

@@ -1,17 +1,17 @@
 import { Injectable, Scope } from 'graphql-modules';
+import { AccessError } from '../../../shared/errors';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { OrganizationAccessScope } from '../../auth/providers/organization-access';
 import { ProjectAccessScope } from '../../auth/providers/project-access';
 import { TargetAccessScope } from '../../auth/providers/target-access';
-import { Logger } from '../../shared/providers/logger';
 import { CryptoProvider } from '../../shared/providers/crypto';
+import { Logger } from '../../shared/providers/logger';
 import {
-  Storage,
   OrganizationSelector,
   ProjectSelector,
+  Storage,
   TargetSelector,
 } from '../../shared/providers/storage';
-import { AccessError } from '../../../shared/errors';
 import { IntegrationsAccessContext } from './integrations-access-context';
 
 @Injectable({

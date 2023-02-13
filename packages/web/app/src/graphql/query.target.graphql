@@ -14,7 +14,8 @@ query target($organizationId: ID!, $targetId: ID!, $projectId: ID!) {
       valid
       schemas {
         nodes {
-          ...SchemaFields
+          ...SingleSchemaFields
+          ...CompositeSchemaFields
         }
       }
     }

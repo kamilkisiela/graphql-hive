@@ -4,7 +4,6 @@ import clsx from 'clsx';
 import { VscBug, VscDiff, VscListFlat } from 'react-icons/vsc';
 import reactStringReplace from 'react-string-replace';
 import { useQuery } from 'urql';
-
 import { authenticated } from '@/components/authenticated-container';
 import { Label } from '@/components/common';
 import { TargetLayout } from '@/components/layouts';
@@ -108,7 +107,7 @@ const DiffView = ({
           Previous or current schema is most likely incomplete and was force published
         </p>
         <pre className="mt-5 whitespace-pre-wrap rounded-lg bg-red-900 p-3 text-xs text-white">
-          {error.graphQLErrors[0].message}
+          {error.graphQLErrors?.[0].message ?? error.networkError?.message}
         </pre>
       </div>
     );
@@ -179,7 +178,7 @@ const ListPage = ({
   });
 
   const versions = versionsQuery.data?.schemaVersions;
-  const hasMore = versions?.pageInfo.hasMore;
+  const hasMore = versions?.pageInfo.hasNextPage;
 
   return (
     <>
@@ -193,21 +192,25 @@ const ListPage = ({
             versionId === version.id && 'bg-gray-800/40',
           )}
         >
-          <h3 className="truncate font-bold">{version.commit.commit}</h3>
-          <div className="truncate text-xs font-medium text-gray-500">
-            <span className="overflow-hidden truncate">{version.commit.author}</span>
-          </div>
+          <h3 className="truncate font-bold">
+            {'commit' in version.log ? version.log.commit : `Deleted ${version.log.deletedService}`}
+          </h3>
+          {'author' in version.log ? (
+            <div className="truncate text-xs font-medium text-gray-500">
+              <span className="overflow-hidden truncate">{version.log.author}</span>
+            </div>
+          ) : null}
           <div className="mt-2.5 mb-1.5 flex align-middle text-xs font-medium text-[#c4c4c4]">
             <div className={clsx('w-1/2 ', !version.valid && 'text-red-500')}>
               <Badge color={version.valid ? 'green' : 'red'} /> Published{' '}
               <TimeAgo date={version.date} />
             </div>
 
-            {version.commit.service && (
+            {'service' in version.log && version.log.service ? (
               <div className="ml-auto mr-0 w-1/2 overflow-hidden text-ellipsis whitespace-nowrap text-right font-bold">
-                {version.commit.service}
+                {version.log.service}
               </div>
-            )}
+            ) : null}
           </div>
         </NextLink>
       ))}

@@ -1,36 +1,51 @@
-import * as pulumi from '@pulumi/pulumi';
-import * as azure from '@pulumi/azure';
 import { parse } from 'pg-connection-string';
-import { RemoteArtifactAsServiceDeployment } from '../utils/remote-artifact-as-service';
+import * as k8s from '@pulumi/kubernetes';
+import * as pulumi from '@pulumi/pulumi';
+import { DeploymentEnvironment } from '../types';
+import { ServiceDeployment } from '../utils/service-deployment';
 import { Clickhouse } from './clickhouse';
 import { Kafka } from './kafka';
-import { PackageHelper } from '../utils/pack';
-import { DeploymentEnvironment } from '../types';
+
 const apiConfig = new pulumi.Config('api');
 
 export type DbMigrations = ReturnType<typeof deployDbMigrations>;
 
 export function deployDbMigrations({
-  storageContainer,
-  packageHelper,
   deploymentEnv,
   clickhouse,
   kafka,
+  image,
+  imagePullSecret,
+  dependencies,
+  force,
+  s3,
+  cdnAuthPrivateKey,
 }: {
-  storageContainer: azure.storage.Container;
-  packageHelper: PackageHelper;
   deploymentEnv: DeploymentEnvironment;
   clickhouse: Clickhouse;
   kafka: Kafka;
+  image: string;
+  imagePullSecret: k8s.core.v1.Secret;
+  dependencies?: pulumi.Resource[];
+  force?: boolean;
+  s3: {
+    accessKeyId: string | pulumi.Output<string>;
+    secretAccessKey: string | pulumi.Output<string>;
+    endpoint: string | pulumi.Output<string>;
+    bucketName: string | pulumi.Output<string>;
+  };
+  cdnAuthPrivateKey: pulumi.Output<string>;
 }) {
   const rawConnectionString = apiConfig.requireSecret('postgresConnectionString');
   const connectionString = rawConnectionString.apply(rawConnectionString =>
     parse(rawConnectionString),
   );
 
-  const { job } = new RemoteArtifactAsServiceDeployment(
+  const { job } = new ServiceDeployment(
     'db-migrations',
     {
+      imagePullSecret,
+      image,
       env: {
         POSTGRES_HOST: connectionString.apply(connection => connection.host ?? ''),
         POSTGRES_PORT: connectionString.apply(connection => connection.port ?? '5432'),
@@ -46,12 +61,21 @@ export function deployDbMigrations({
         CLICKHOUSE_PASSWORD: clickhouse.config.password,
         CLICKHOUSE_PROTOCOL: clickhouse.config.protocol,
         KAFKA_BROKER: kafka.config.endpoint,
+        TS_NODE_TRANSPILE_ONLY: 'true',
+        RUN_S3_LEGACY_CDN_KEY_IMPORT: '1',
+        S3_ACCESS_KEY_ID: s3.accessKeyId,
+        S3_SECRET_ACCESS_KEY: s3.secretAccessKey,
+        S3_ENDPOINT: s3.endpoint,
+        S3_BUCKET_NAME: s3.bucketName,
+        CDN_AUTH_PRIVATE_KEY: cdnAuthPrivateKey,
         ...deploymentEnv,
+        // Change to this env var will lead to force rerun of the migration job
+        // Since K8s job are immutable, we can't edit or ask K8s to re-run a Job, so we are doing a
+        // pseudo change to an env var, which causes Pulumi to re-create the Job.
+        IGNORE_RERUN_NONCE: force ? Date.now().toString() : '0',
       },
-      storageContainer,
-      packageInfo: packageHelper.npmPack('@hive/storage'),
     },
-    [clickhouse.deployment, clickhouse.service],
+    [clickhouse.deployment, clickhouse.service, ...(dependencies || [])],
     clickhouse.service,
   ).deployAsJob();
 

@@ -1,5 +1,5 @@
-import { ReactNode, ReactElement } from 'react';
-import { Root, Trigger, Content, Arrow } from '@radix-ui/react-tooltip';
+import { ReactElement, ReactNode } from 'react';
+import { Arrow, Content, Root, Trigger } from '@radix-ui/react-tooltip';
 
 function Tooltip({ content, children }: { content: string; children: ReactNode }) {
   return (
@@ -59,10 +59,10 @@ const OPERATIONS_EXPLAINER = 'GraphQL requests reported to GraphQL Hive';
 
 export function Pricing({ gradient }: { gradient: [string, string] }): ReactElement {
   return (
-    <div className="bg-neutral-900 w-full">
+    <div className="w-full bg-neutral-900">
       <div className="mx-auto my-12 box-border w-full max-w-[1024px] px-6">
         <h2
-          className="bg-clip-text text-2xl font-bold leading-normal text-white text-transparent dark:text-transparent md:text-3xl"
+          className="bg-clip-text text-2xl font-bold leading-normal text-transparent md:text-3xl"
           style={{
             backgroundImage: `linear-gradient(-70deg, ${gradient[1]}, ${gradient[0]})`,
           }}
@@ -109,9 +109,7 @@ export function Pricing({ gradient }: { gradient: [string, string] }): ReactElem
               <span
                 className="cursor-pointer"
                 onClick={() => {
-                  if (typeof window !== 'undefined') {
-                    (window as any).$crisp?.push(['do', 'chat:open']);
-                  }
+                  (window as any).$crisp?.push(['do', 'chat:open']);
                 }}
               >
                 Contact us
@@ -130,7 +128,7 @@ export function Pricing({ gradient }: { gradient: [string, string] }): ReactElem
                   href="https://the-guild.dev"
                   target="_blank"
                   rel="noreferrer"
-                  className="text-orange-500 font-medium transition-colors hover:underline"
+                  className="font-medium text-orange-500 transition-colors hover:underline"
                 >
                   The Guild
                 </a>

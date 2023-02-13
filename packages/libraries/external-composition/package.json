@@ -1,6 +1,6 @@
 {
   "name": "@graphql-hive/external-composition",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
   "description": "Compose schemas outside GraphQL Hive",
   "repository": {
@@ -49,8 +49,7 @@
   },
   "typings": "dist/typings/index.d.ts",
   "scripts": {
-    "build": "bob build",
-    "build-local": "pnpm build && node build-example.mjs",
+    "build": "bob build && node build-example.mjs",
     "check:build": "bob check"
   },
   "peerDependencies": {
@@ -58,8 +57,8 @@
   },
   "devDependencies": {
     "@apollo/federation": "0.38.1",
-    "esbuild": "0.14.39",
-    "fastify": "3.29.4",
+    "esbuild": "0.17.8",
+    "fastify": "3.29.5",
     "graphql": "16.6.0"
   },
   "publishConfig": {

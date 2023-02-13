@@ -1,10 +1,10 @@
-import { normalizeOperation } from '@graphql-hive/core';
 import { promises as fs } from 'fs';
 import { relative } from 'path';
 import { parse } from 'graphql';
-import { loadDocuments } from '@graphql-tools/load';
+import { normalizeOperation } from '@graphql-hive/core';
 import { CodeFileLoader } from '@graphql-tools/code-file-loader';
 import { GraphQLFileLoader } from '@graphql-tools/graphql-file-loader';
+import { loadDocuments } from '@graphql-tools/load';
 
 export async function loadOperations(
   file: string,
@@ -21,11 +21,7 @@ export async function loadOperations(
   const shouldNormalize = options?.normalize ?? true;
 
   if (file.toLowerCase().endsWith('.json')) {
-    const output: Record<string, string> = JSON.parse(
-      await fs.readFile(file, {
-        encoding: 'utf-8',
-      }),
-    );
+    const output: Record<string, string> = JSON.parse(await fs.readFile(file, 'utf8'));
 
     const operations: Array<{
       operationHash: string;

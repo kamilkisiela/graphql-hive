@@ -1,23 +1,12 @@
 import {
-  TargetAccessScope,
-  ProjectType,
-  ProjectAccessScope,
   OrganizationAccessScope,
+  ProjectAccessScope,
+  ProjectType,
+  TargetAccessScope,
 } from '@app/gql/graphql';
-import {
-  createOrganization,
-  createProject,
-  createToken,
-  updateOrgRateLimit,
-  waitFor,
-} from '../../../testkit/flow';
 import * as emails from '../../../testkit/emails';
-import { authenticate, userEmail } from '../../../testkit/auth';
-import { collect } from '../../../testkit/usage';
-
-function generateUnique() {
-  return Math.random().toString(36).substring(7);
-}
+import { updateOrgRateLimit, waitFor } from '../../../testkit/flow';
+import { initSeed } from '../../../testkit/seed';
 
 function filterEmailsByOrg(orgName: string, emails: emails.Email[]) {
   return emails
@@ -29,60 +18,29 @@ function filterEmailsByOrg(orgName: string, emails: emails.Email[]) {
 }
 
 test('rate limit approaching and reached for organization', async () => {
-  const adminEmail = userEmail('admin');
-  const { access_token } = await authenticate('admin');
-  const orgResult = await createOrganization(
-    {
-      name: generateUnique(),
-    },
-    access_token,
-  );
-
-  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
-  const projectResult = await createProject(
-    {
-      organization: org.cleanId,
-      type: ProjectType.Single,
-      name: 'bar',
-    },
-    access_token,
-  );
-
-  const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTargets.find(
-    t => t.name === 'production',
-  )!;
+  const { createOrg, ownerToken, ownerEmail } = await initSeed().createOwner();
+  const { createProject, organization } = await createOrg();
+  const { createToken } = await createProject(ProjectType.Single);
 
   await updateOrgRateLimit(
     {
-      organization: org.cleanId,
+      organization: organization.cleanId,
     },
     {
       operations: 11,
     },
-    access_token,
+    ownerToken,
   );
 
-  const tokenResult = await createToken(
-    {
-      name: 'test',
-      organization: org.cleanId,
-      project: project.cleanId,
-      target: target.cleanId,
-      organizationScopes: [OrganizationAccessScope.Read],
-      projectScopes: [ProjectAccessScope.Read],
-      targetScopes: [
-        TargetAccessScope.Read,
-        TargetAccessScope.RegistryRead,
-        TargetAccessScope.RegistryWrite,
-      ],
-    },
-    access_token,
-  );
-
-  expect(tokenResult.body.errors).not.toBeDefined();
-
-  const token = tokenResult.body.data!.createToken.ok!.secret;
+  const { collectOperations } = await createToken({
+    targetScopes: [
+      TargetAccessScope.Read,
+      TargetAccessScope.RegistryRead,
+      TargetAccessScope.RegistryWrite,
+    ],
+    projectScopes: [ProjectAccessScope.Read],
+    organizationScopes: [OrganizationAccessScope.Read],
+  });
 
   const op = {
     operation: 'query ping { ping }',
@@ -95,48 +53,42 @@ test('rate limit approaching and reached for organization', async () => {
     },
   };
 
-  const collectResult = await collect({
-    operations: new Array(10).fill(op),
-    token,
-  });
-
+  // Collect operations and check for warning
+  const collectResult = await collectOperations(new Array(10).fill(op));
   expect(collectResult.status).toEqual(200);
 
   await waitFor(5000);
 
   let sent = await emails.history();
   expect(sent).toContainEqual({
-    to: adminEmail,
-    subject: `${org.name} is approaching its rate limit`,
+    to: ownerEmail,
+    subject: `${organization.name} is approaching its rate limit`,
     body: expect.any(String),
   });
-  expect(filterEmailsByOrg(org.name, sent)).toHaveLength(1);
+  expect(filterEmailsByOrg(organization.name, sent)).toHaveLength(1);
 
-  await collect({
-    operations: [op, op],
-    token,
-  });
+  // Collect operations and check for rate-limit reached
+  const collectMoreResult = await collectOperations([op, op]);
+  expect(collectMoreResult.status).toEqual(200);
 
-  await waitFor(5000);
+  await waitFor(7000);
 
   sent = await emails.history();
 
   expect(sent).toContainEqual({
-    to: adminEmail,
-    subject: `GraphQL-Hive operations quota for ${org.name} exceeded`,
+    to: ownerEmail,
+    subject: `GraphQL-Hive operations quota for ${organization.name} exceeded`,
     body: expect.any(String),
   });
-  expect(filterEmailsByOrg(org.name, sent)).toHaveLength(2);
+  expect(filterEmailsByOrg(organization.name, sent)).toHaveLength(2);
 
   // Make sure we don't send the same email again
-  await collect({
-    operations: [op, op],
-    token,
-  });
+  const collectEvenMoreResult = await collectOperations([op, op]);
+  expect(collectEvenMoreResult.status).toEqual(200);
 
   await waitFor(5000);
 
   // Nothing new
   sent = await emails.history();
-  expect(filterEmailsByOrg(org.name, sent)).toHaveLength(2);
+  expect(filterEmailsByOrg(organization.name, sent)).toHaveLength(2);
 });

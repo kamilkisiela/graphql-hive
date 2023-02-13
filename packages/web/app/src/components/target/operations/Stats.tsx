@@ -1,10 +1,8 @@
 import React, { useCallback } from 'react';
-import { Grid, GridItem, useColorModeValue } from '@chakra-ui/react';
+import clsx from 'clsx';
 import ReactECharts from 'echarts-for-react';
 import AutoSizer from 'react-virtualized-auto-sizer';
-import tw from 'twin.macro';
 import { useQuery } from 'urql';
-
 import { Section } from '@/components/common';
 import {
   DateRangeInput,
@@ -13,12 +11,13 @@ import {
 } from '@/graphql';
 import { theme } from '@/lib/charts';
 import {
+  formatThroughput,
   toDecimal,
   useFormattedDuration,
   useFormattedNumber,
-  formatThroughput,
   useFormattedThroughput,
 } from '@/lib/hooks';
+import { Grid, GridItem, useColorModeValue } from '@chakra-ui/react';
 import { OperationsFallback } from './Fallback';
 
 function resolutionToMilliseconds(
@@ -156,20 +155,20 @@ function useChartStyles() {
   );
 }
 
-const Stats = {
-  Root: tw.div`text-center`,
-  Value: tw.h2`font-normal text-3xl text-gray-900 dark:text-white`,
-  Title: tw.p`text-sm leading-relaxed`,
+const classes = {
+  root: clsx('text-center'),
+  value: clsx('font-normal text-3xl text-gray-900 dark:text-white'),
+  title: clsx('text-sm leading-relaxed'),
 };
 
 const RequestsStats: React.FC<{ requests?: number }> = ({ requests = 0 }) => {
   const value = useFormattedNumber(requests);
 
   return (
-    <Stats.Root>
-      <Stats.Value>{value}</Stats.Value>
-      <Stats.Title>Requests</Stats.Title>
-    </Stats.Root>
+    <div className={classes.root}>
+      <h2 className={classes.value}>{value}</h2>
+      <p className={classes.title}>Requests</p>
+    </div>
   );
 };
 
@@ -177,10 +176,10 @@ const UniqueOperationsStats: React.FC<{ operations?: number }> = ({ operations =
   const value = useFormattedNumber(operations);
 
   return (
-    <Stats.Root>
-      <Stats.Value>{value}</Stats.Value>
-      <Stats.Title>Unique Operations</Stats.Title>
-    </Stats.Root>
+    <div className={classes.root}>
+      <h2 className={classes.value}>{value}</h2>
+      <p className={classes.title}>Unique Operations</p>
+    </div>
   );
 };
 
@@ -188,10 +187,10 @@ const PercentileStats: React.FC<{ value?: number; title: string }> = ({ value, t
   const formatted = useFormattedDuration(value);
 
   return (
-    <Stats.Root>
-      <Stats.Value>{formatted}</Stats.Value>
-      <Stats.Title>{title}</Stats.Title>
-    </Stats.Root>
+    <div className={classes.root}>
+      <h2 className={classes.value}>{formatted}</h2>
+      <p className={classes.title}>{title}</p>
+    </div>
   );
 };
 
@@ -207,10 +206,10 @@ const RPM: React.FC<{
     window: new Date(period.to).getTime() - new Date(period.from).getTime(),
   });
   return (
-    <Stats.Root>
-      <Stats.Value>{throughput}</Stats.Value>
-      <Stats.Title>RPM</Stats.Title>
-    </Stats.Root>
+    <div className={classes.root}>
+      <h2 className={classes.value}>{throughput}</h2>
+      <p className={classes.title}>RPM</p>
+    </div>
   );
 };
 
@@ -224,10 +223,10 @@ const SuccessRateStats: React.FC<{
       : '-';
 
   return (
-    <Stats.Root>
-      <Stats.Value tw="text-emerald-500 dark:text-emerald-500">{rate}</Stats.Value>
-      <Stats.Title>Success rate</Stats.Title>
-    </Stats.Root>
+    <div className={classes.root}>
+      <h2 className={clsx(classes.value, 'text-emerald-500 dark:text-emerald-500')}>{rate}</h2>
+      <p className={classes.title}>Success rate</p>
+    </div>
   );
 };
 
@@ -238,10 +237,10 @@ const FailureRateStats: React.FC<{
   const rate = requests || totalFailures ? `${toDecimal((totalFailures * 100) / requests)}%` : '-';
 
   return (
-    <Stats.Root tw="pt-4">
-      <Stats.Value tw="text-red-500 dark:text-red-500">{rate}</Stats.Value>
-      <Stats.Title>Failure rate</Stats.Title>
-    </Stats.Root>
+    <div className={clsx(classes.root, 'pt-4')}>
+      <h2 className={clsx(classes.value, 'text-red-500 dark:text-red-500')}>{rate}</h2>
+      <p className={classes.title}>Failure rate</p>
+    </div>
   );
 };
 
@@ -379,17 +378,15 @@ const ClientsStats: React.FC<{
         if (i < 4) {
           counts.push(client.count);
           labels.push(client.name);
+        } else if (!labels[4]) {
+          counts.push(client.count);
+          labels.push(
+            sortedClients.length === 5
+              ? client.name
+              : `Other clients (${sortedClients.length - 4})`,
+          );
         } else {
-          if (!labels[4]) {
-            counts.push(client.count);
-            labels.push(
-              sortedClients.length === 5
-                ? client.name
-                : `Other clients (${sortedClients.length - 4})`,
-            );
-          } else {
-            counts[4] += client.percentage;
-          }
+          counts[4] += client.percentage;
         }
       }
 
@@ -430,15 +427,13 @@ const ClientsStats: React.FC<{
         if (i < 4) {
           counts.push(version.count);
           labels.push(version.name);
+        } else if (!labels[4]) {
+          counts.push(version.count);
+          labels.push(
+            versions.length === 5 ? version.name : `Other versions (${versions.length - 4})`,
+          );
         } else {
-          if (!labels[4]) {
-            counts.push(version.count);
-            labels.push(
-              versions.length === 5 ? version.name : `Other versions (${versions.length - 4})`,
-            );
-          } else {
-            counts[4] += version.count;
-          }
+          counts[4] += version.count;
         }
       }
 
@@ -795,13 +790,13 @@ export const OperationsStats: React.FC<{
   const operationsStats = query.data?.operationsStats;
 
   return (
-    <section tw="text-gray-600 dark:text-gray-400 space-y-12 transition-opacity ease-in-out duration-700">
+    <section className="text-gray-600 dark:text-gray-400 space-y-12 transition-opacity ease-in-out duration-700">
       <OperationsFallback isError={isError} refetch={refetch} isFetching={isFetching}>
         <Grid
           templateRows="repeat(2, 1fr)"
           templateColumns="repeat(4, 1fr)"
           gap={4}
-          tw="rounded-md p-5 ring-1 ring-gray-800 transition bg-gray-900/50"
+          className="rounded-md p-5 ring-1 ring-gray-800 transition bg-gray-900/50"
         >
           <GridItem>
             <RequestsStats requests={operationsStats?.totalRequests} />

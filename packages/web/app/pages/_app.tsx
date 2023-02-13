@@ -1,23 +1,21 @@
 import { ReactElement, useEffect } from 'react';
 import { AppProps } from 'next/app';
-import Script from 'next/script';
 import Router from 'next/router';
-import { ChakraProvider, extendTheme } from '@chakra-ui/react';
-import GlobalStylesComponent from '@/components/common/GlobalStyles';
+import Script from 'next/script';
+import cookies from 'js-cookie';
+import SuperTokens, { SuperTokensWrapper } from 'supertokens-auth-react';
+import Session from 'supertokens-auth-react/recipe/session';
+import { Provider as UrqlProvider } from 'urql';
+import { LoadingAPIIndicator } from '@/components/common/LoadingAPI';
+import { frontendConfig } from '@/config/supertokens/frontend';
+import { LAST_VISITED_ORG_KEY } from '@/constants';
+import { env } from '@/env/frontend';
 import * as gtag from '@/lib/gtag';
 import { colors } from '@/lib/theme';
-import { LoadingAPIIndicator } from '@/components/common/LoadingAPI';
-import '../public/styles.css';
-import cookies from 'js-cookie';
-import Session from 'supertokens-auth-react/recipe/session';
-import SuperTokens, { SuperTokensWrapper } from 'supertokens-auth-react';
-import { frontendConfig } from '@/config/supertokens/frontend';
-import { configureScope } from '@sentry/nextjs';
-import { LAST_VISITED_ORG_KEY } from '@/constants';
-import { Provider as UrqlProvider } from 'urql';
 import { urqlClient } from '@/lib/urql';
-import { env } from '@/env/frontend';
-import * as Sentry from '@sentry/react';
+import { ChakraProvider, extendTheme } from '@chakra-ui/react';
+import * as Sentry from '@sentry/nextjs';
+import '../public/styles.css';
 
 const theme = extendTheme({ colors });
 
@@ -34,19 +32,19 @@ function identifyOnCrisp(email: string): void {
   }
 }
 
-function pushIfNotEmpty(crisp: any, key: string, value: string | undefined | null): void {
+function pushIfNotEmpty(crisp: any, key: string, value?: string | null): void {
   if (value) {
     crisp.push(['set', key, value]);
   }
 }
 
 function identifyOnSentry(userId: string, email: string): void {
-  configureScope(scope => {
+  Sentry.configureScope(scope => {
     scope.setUser({ id: userId, email });
   });
 }
 
-function App({ Component, pageProps }: AppProps): ReactElement {
+export default function App({ Component, pageProps }: AppProps): ReactElement {
   useEffect(() => {
     const handleRouteChange = (url: string) => {
       gtag.pageview(url);
@@ -86,7 +84,6 @@ function App({ Component, pageProps }: AppProps): ReactElement {
 
   return (
     <>
-      <GlobalStylesComponent />
       {env.analytics.googleAnalyticsTrackingId && (
         <>
           <Script
@@ -153,5 +150,3 @@ if (globalThis.window) {
     });
   }
 }
-
-export default App;

@@ -1,5 +1,5 @@
-import { createHive } from '@graphql-hive/client';
 import { buildSchema, parse } from 'graphql';
+import { createHive } from '../packages/libraries/client/dist/cjs/index.js';
 
 async function main() {
   const hiveInstance = createHive({
@@ -11,7 +11,9 @@ async function main() {
       enabled: true,
       endpoint: process.env.STAGING
         ? 'https://app.staging.graphql-hive.com/registry'
-        : 'http://localhost:4000/graphql',
+        : process.env.DEV
+        ? 'https://app.dev.graphql-hive.com/registry'
+        : 'http://localhost:3001/graphql',
       author: 'Hive Seed Script',
       commit: '1',
     },
@@ -20,6 +22,8 @@ async function main() {
       clientInfo: 'Fake Hive Client',
       endpoint: process.env.STAGING
         ? 'https://app.staging.graphql-hive.com/usage'
+        : process.env.DEV
+        ? 'https://app.dev.graphql-hive.com/usage'
         : 'http://localhost:4001',
       max: 10,
       sampleRate: 1,
@@ -62,8 +66,8 @@ async function main() {
   setInterval(
     () => {
       for (let i = 0; i < operationsPerBatch; i++) {
-        let randNumber = Math.random() * 100;
-        console.log(`Reporting usage query...`);
+        const randNumber = Math.random() * 100;
+        console.log('Reporting usage query...');
 
         const done = hiveInstance.collectUsage({
           document: randNumber > 50 ? query1 : query2,

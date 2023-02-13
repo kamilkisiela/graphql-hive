@@ -1,13 +1,13 @@
-import type { ApolloServerPlugin } from 'apollo-server-plugin-base';
+import { createHash } from 'crypto';
+import axios from 'axios';
 import type { DocumentNode } from 'graphql';
+import type { ApolloServerPlugin } from '@apollo/server';
+import { createHive } from './client.js';
 import type {
   HiveClient,
   HivePluginOptions,
   SupergraphSDLFetcherOptions,
 } from './internal/types.js';
-import { createHash } from 'crypto';
-import axios from 'axios';
-import { createHive } from './client.js';
 import { isHiveClient } from './internal/utils.js';
 import { version } from './version.js';
 
@@ -30,36 +30,58 @@ export function createSupergraphSDLFetcher({ endpoint, key }: SupergraphSDLFetch
       headers['If-None-Match'] = cacheETag;
     }
 
-    return axios
-      .get(endpoint + '/supergraph', {
-        headers,
-      })
-      .then(response => {
-        if (response.status >= 200 && response.status < 300) {
-          const supergraphSdl = response.data;
-          const result = {
-            id: createHash('sha256').update(supergraphSdl).digest('base64'),
-            supergraphSdl,
-          };
+    let retryCount = 0;
 
-          const etag = response.headers['etag'];
-          if (etag) {
-            cached = result;
-            cacheETag = etag;
+    const retry = (status: number) => {
+      if (retryCount >= 10 || status < 499) {
+        return Promise.reject(new Error(`Failed to fetch [${status}]`));
+      }
+
+      retryCount = retryCount + 1;
+
+      return fetchWithRetry();
+    };
+
+    const fetchWithRetry = (): Promise<{ id: string; supergraphSdl: string }> => {
+      return axios
+        .get(endpoint + '/supergraph', {
+          headers,
+        })
+        .then(response => {
+          if (response.status >= 200 && response.status < 300) {
+            const supergraphSdl = response.data;
+            const result = {
+              id: createHash('sha256').update(supergraphSdl).digest('base64'),
+              supergraphSdl,
+            };
+
+            const etag = response.headers['etag'];
+            if (etag) {
+              cached = result;
+              cacheETag = etag;
+            }
+
+            return result;
           }
 
-          return result;
-        }
+          return retry(response.status);
+        })
+        .catch(async error => {
+          if (axios.isAxiosError(error)) {
+            if (error.response?.status === 304 && cached !== null) {
+              return cached;
+            }
 
-        return Promise.reject(new Error(`Failed to fetch supergraph [${response.status}]`));
-      })
-      .catch(async error => {
-        if (axios.isAxiosError(error) && error.response?.status === 304 && cached !== null) {
-          return cached;
-        }
+            if (error.response?.status) {
+              return retry(error.response.status);
+            }
+          }
 
-        throw error;
-      });
+          throw error;
+        });
+    };
+
+    return fetchWithRetry();
   };
 }
 
@@ -117,7 +139,7 @@ export function hiveApollo(clientOrOptions: HiveClient | HivePluginOptions): Apo
         ...clientOrOptions,
         agent: {
           name: 'hive-client-apollo',
-          ...(clientOrOptions.agent ?? {}),
+          ...clientOrOptions.agent,
         },
       });
 
@@ -127,6 +149,8 @@ export function hiveApollo(clientOrOptions: HiveClient | HivePluginOptions): Apo
     requestDidStart(context) {
       // `overallCachePolicy` does not exist in v0
       const isLegacyV0 = !('overallCachePolicy' in context);
+      // `context` does not exist in v4, it is `contextValue` instead
+      const isLegacyV3 = 'context' in context;
 
       let doc: DocumentNode;
       const complete = hive.collectUsage({
@@ -135,7 +159,7 @@ export function hiveApollo(clientOrOptions: HiveClient | HivePluginOptions): Apo
           return doc;
         },
         operationName: context.operationName,
-        contextValue: context.context,
+        contextValue: isLegacyV3 ? context.context : context.contextValue,
         variableValues: context.request.variables,
       });
 
@@ -148,10 +172,27 @@ export function hiveApollo(clientOrOptions: HiveClient | HivePluginOptions): Apo
         } as any;
       }
 
+      if (isLegacyV3) {
+        return Promise.resolve({
+          async willSendResponse(ctx) {
+            doc = ctx.document!;
+            complete(ctx.response as any);
+          },
+        });
+      }
+
+      // v4
       return Promise.resolve({
         async willSendResponse(ctx) {
           doc = ctx.document!;
-          complete(ctx.response);
+          if (ctx.response.body.kind === 'incremental') {
+            complete({
+              action: 'abort',
+              reason: '@defer and @stream is not supported by Hive',
+            });
+          } else {
+            complete(ctx.response.body.singleResult);
+          }
         },
       });
     },
@@ -168,6 +209,8 @@ export function hiveApollo(clientOrOptions: HiveClient | HivePluginOptions): Apo
           },
         } as any;
       }
+
+      // Works on v3 and v4
 
       return Promise.resolve({
         async serverWillStop() {

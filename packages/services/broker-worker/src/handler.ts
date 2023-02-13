@@ -9,17 +9,22 @@ async function gatherResponse(response: Response) {
 
   if (contentType.includes('json')) {
     return JSON.stringify(await response.json());
-  } else if (contentType.includes('application/text')) {
-    return response.text();
-  } else if (contentType.startsWith('text/')) {
-    return response.text();
-  } else {
+  }
+  if (contentType.includes('application/text')) {
     return response.text();
   }
+  if (contentType.startsWith('text/')) {
+    return response.text();
+  }
+  return response.text();
 }
 
-export async function handleRequest(request: Request, keyValidator: typeof isSignatureValid) {
-  const parsedRequest = await parseIncomingRequest(request, keyValidator);
+export async function handleRequest(
+  request: Request,
+  keyValidator: typeof isSignatureValid,
+  captureException: (exception: Error) => void,
+) {
+  const parsedRequest = await parseIncomingRequest(request, keyValidator, captureException);
 
   if ('error' in parsedRequest) {
     return parsedRequest.error;
@@ -39,8 +44,11 @@ export async function handleRequest(request: Request, keyValidator: typeof isSig
   const response = await fetch(parsedRequest.url, init);
   const text = await gatherResponse(response);
   return new Response(text, {
-    ...init,
     status: response.status,
     statusText: response.statusText,
+    headers: {
+      'content-type': 'text/plain',
+      'user-agent': 'Hive Broker',
+    },
   });
 }

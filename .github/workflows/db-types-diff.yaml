@@ -1,0 +1,49 @@
+on:
+  workflow_call:
+
+jobs:
+  diff:
+    runs-on: ubuntu-22.04
+
+    services:
+      postgres:
+        image: postgres:13.10-alpine
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: registry
+        options: >-
+          --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    env:
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: registry
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: setup environment
+        uses: ./.github/actions/setup
+        with:
+          codegen: false # no need to run codegen in this case, we can skip
+
+      - name: create database
+        working-directory: packages/migrations
+        run: pnpm db:create
+
+      - name: migrate database
+        working-directory: packages/migrations
+        run: pnpm db:migrator up
+
+      - name: generate database types
+        working-directory: packages/services/storage
+        run: pnpm db:generate
+
+      - name: check database types
+        run: git diff --exit-code ./packages/services/storage/src/db/types.ts

@@ -46,6 +46,8 @@ generates:
           ../shared/mappers#SchemaVersionConnection as SchemaVersionConnectionMapper
         SchemaVersion: ../shared/mappers#SchemaVersion as SchemaVersionMapper
         Schema: ../shared/mappers#Schema as SchemaMapper
+        SingleSchema: ../shared/mappers#SingleSchema as SingleSchemaMapper
+        CompositeSchema: ../shared/mappers#PushedCompositeSchema as PushedCompositeSchemaMapper
         PersistedOperationConnection:
           ../shared/mappers#PersistedOperationConnection as PersistedOperationMapper
         Organization: ../shared/entities#Organization as OrganizationMapper
@@ -68,7 +70,7 @@ generates:
         UsageEstimationScope: '../shared/mappers#TargetsEstimationDateFilter'
         BillingPaymentMethod: 'StripeTypes.PaymentMethod.Card'
         BillingDetails: 'StripeTypes.PaymentMethod.BillingDetails'
-        BillingInvoice: 'StripeTypes.Invoice'
+        BillingInvoice: 'StripeTypes.Invoice | StripeTypes.UpcomingInvoice'
         OrganizationGetStarted:
           ../shared/entities#OrganizationGetStarted as OrganizationGetStartedMapper
         SchemaExplorer: ../shared/mappers#SchemaExplorerMapper
@@ -143,6 +145,6 @@ generates:
       - typescript-operations
 
   # Integration tests
-  ./integration-tests/testkit/gql:
+  ./integration-tests/testkit/gql/:
     documents: ./integration-tests/(testkit|tests)/**/*.ts
-    preset: gql-tag-operations-preset
+    preset: client-preset

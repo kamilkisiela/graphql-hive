@@ -1,7 +1,9 @@
+import { z } from 'zod';
+import { handleTRPCError } from '@hive/service-common';
+import type { FastifyRequest } from '@hive/service-common';
 import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
 import { initTRPC } from '@trpc/server';
 import type { Estimator } from './estimator';
-import { z } from 'zod';
 
 const DATE_RANGE_VALIDATION = {
   startTime: z.string().nonempty(),
@@ -12,10 +14,19 @@ const TARGET_BASED_FILTER = {
   targetIds: z.array(z.string().nonempty()),
 };
 
-const t = initTRPC.context<Estimator>().create();
+export function createContext(estimator: Estimator, req: FastifyRequest) {
+  return {
+    estimator,
+    req,
+  };
+}
+
+const t = initTRPC.context<ReturnType<typeof createContext>>().create();
+const errorMiddleware = t.middleware(handleTRPCError);
+const procedure = t.procedure.use(errorMiddleware);
 
 export const usageEstimatorApiRouter = t.router({
-  estimateOperationsForTarget: t.procedure
+  estimateOperationsForTarget: procedure
     .input(
       z
         .object({
@@ -25,7 +36,7 @@ export const usageEstimatorApiRouter = t.router({
         .required(),
     )
     .query(async ({ ctx, input }) => {
-      const estimationResponse = await ctx.estimateCollectedOperationsForTargets({
+      const estimationResponse = await ctx.estimator.estimateCollectedOperationsForTargets({
         targets: input.targetIds,
         startTime: new Date(input.startTime),
         endTime: new Date(input.endTime),
@@ -35,10 +46,10 @@ export const usageEstimatorApiRouter = t.router({
         totalOperations: parseInt(estimationResponse.data[0].total),
       };
     }),
-  estimateOperationsForAllTargets: t.procedure
+  estimateOperationsForAllTargets: procedure
     .input(z.object(DATE_RANGE_VALIDATION).required())
     .query(async ({ ctx, input }) => {
-      const estimationResponse = await ctx.estimateOperationsForAllTargets({
+      const estimationResponse = await ctx.estimator.estimateOperationsForAllTargets({
         startTime: new Date(input.startTime),
         endTime: new Date(input.endTime),
       });

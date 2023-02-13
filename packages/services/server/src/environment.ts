@@ -139,7 +139,6 @@ const S3Model = zod.object({
   S3_SECRET_ACCESS_KEY: zod.string(),
   S3_BUCKET_NAME: zod.string(),
   S3_PUBLIC_URL: emptyString(zod.string().url().optional()),
-  CDN_AUTH_PRIVATE_KEY: zod.string(),
 });
 
 const LogModel = zod.object({
@@ -155,6 +154,9 @@ const LogModel = zod.object({
         zod.literal('silent'),
       ])
       .optional(),
+  ),
+  REQUEST_LOGGING: emptyString(zod.union([zod.literal('0'), zod.literal('1')]).optional()).default(
+    '1',
   ),
 });
 
@@ -298,7 +300,6 @@ export const env = {
         }
       : null,
   cdn: {
-    authPrivateKey: s3.CDN_AUTH_PRIVATE_KEY,
     providers: {
       cloudflare:
         cdnCf.CDN_CF === '1'
@@ -332,6 +333,7 @@ export const env = {
   sentry: sentry.SENTRY === '1' ? { dsn: sentry.SENTRY_DSN } : null,
   log: {
     level: log.LOG_LEVEL ?? 'info',
+    requests: log.REQUEST_LOGGING === '1',
   },
   prometheus:
     prometheus.PROMETHEUS_METRICS === '1'

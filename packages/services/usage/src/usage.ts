@@ -1,26 +1,26 @@
-import { Kafka, CompressionTypes, logLevel, Partitioners } from 'kafkajs';
 import { createHash, randomUUID } from 'crypto';
+import { CompressionTypes, Kafka, logLevel, Partitioners } from 'kafkajs';
+import type { FastifyLoggerInstance } from '@hive/service-common';
+import type { RawOperationMap, RawReport } from '@hive/usage-common';
 import { compress } from '@hive/usage-common';
+import { calculateChunkSize, createKVBuffer, isBufferTooBigError } from './buffer';
+import type { KafkaEnvironment } from './environment';
 import {
-  rawOperationWrites,
+  bufferFlushes,
+  compressDuration,
+  estimationError,
+  invalidRawOperations,
+  kafkaDuration,
   rawOperationFailures,
   rawOperationsSize,
-  invalidRawOperations,
+  rawOperationWrites,
+  totalLegacyReports,
   totalOperations,
   totalReports,
-  totalLegacyReports,
-  kafkaDuration,
-  compressDuration,
-  bufferFlushes,
-  estimationError,
 } from './metrics';
-import { createKVBuffer, calculateChunkSize, isBufferTooBigError } from './buffer';
-import { validateOperation, validateOperationMapRecord } from './validation';
-import type { FastifyLoggerInstance } from '@hive/service-common';
-import type { RawReport, RawOperationMap } from '@hive/usage-common';
-import type { IncomingReport, IncomingLegacyReport } from './types';
 import type { TokensResponse } from './tokens';
-import type { KafkaEnvironment } from './environment';
+import type { IncomingLegacyReport, IncomingReport } from './types';
+import { validateOperation, validateOperationMapRecord } from './validation';
 
 const DAY_IN_MS = 86_400_000;
 

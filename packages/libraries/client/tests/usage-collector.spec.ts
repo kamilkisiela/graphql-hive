@@ -1,4 +1,4 @@
-import { parse, buildSchema } from 'graphql';
+import { buildSchema, parse } from 'graphql';
 import { createCollector } from '../src/internal/usage';
 
 const schema = buildSchema(/* GraphQL */ `
@@ -187,6 +187,34 @@ test('collect arguments', async () => {
         projects(filter: { pagination: { limit: $limit }, type: $type }) {
           id
         }
+      }
+    `),
+    {},
+  ).value;
+
+  expect(info.fields).toContain(`Query.projects.filter`);
+});
+
+test('skips argument directives', async () => {
+  const collect = createCollector({
+    schema,
+    max: 1,
+  });
+  const info = collect(
+    parse(/* GraphQL */ `
+      query getProjects($limit: Int!, $type: ProjectType!, $includeName: Boolean!) {
+        projects(filter: { pagination: { limit: $limit }, type: $type }) {
+          id
+          ...NestedFragment
+        }
+      }
+
+      fragment NestedFragment on Project {
+        ...IncludeNameFragment @include(if: $includeName)
+      }
+
+      fragment IncludeNameFragment on Project {
+        name
       }
     `),
     {},

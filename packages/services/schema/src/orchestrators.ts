@@ -1,25 +1,46 @@
-import type { Redis as RedisInstance } from 'ioredis';
-import type { FastifyLoggerInstance } from '@hive/service-common';
 import { createHash, createHmac } from 'crypto';
-import { printSchema, parse, concatAST, visit, print, ASTNode } from 'graphql';
+import got from 'got';
+import { RequestError } from 'got';
 import type { DocumentNode } from 'graphql';
+import {
+  ASTNode,
+  buildASTSchema,
+  concatAST,
+  GraphQLError,
+  Kind,
+  parse,
+  print,
+  printSchema,
+  visit,
+} from 'graphql';
 import { validateSDL } from 'graphql/validation/validate.js';
+import type { Redis as RedisInstance } from 'ioredis';
+import { z } from 'zod';
 import { composeAndValidate, compositionHasErrors } from '@apollo/federation';
+import type { ErrorCode } from '@graphql-hive/external-composition';
 import { stitchSchemas } from '@graphql-tools/stitch';
 import { stitchingDirectives } from '@graphql-tools/stitching-directives';
-import { fetch } from '@whatwg-node/fetch';
-import retry from 'async-retry';
-import { z } from 'zod';
+import type { FastifyLoggerInstance } from '@hive/service-common';
 import type {
-  SchemaType,
   BuildInput,
   BuildOutput,
-  ValidationInput,
-  ValidationOutput,
+  ExternalComposition,
+  SchemaType,
   SupergraphInput,
   SupergraphOutput,
-  ExternalComposition,
+  ValidationInput,
+  ValidationOutput,
 } from './types';
+
+interface BrokerPayload {
+  method: 'POST';
+  url: string;
+  headers: {
+    [key: string]: string;
+    'x-hive-signature-256': string;
+  };
+  body: string;
+}
 
 interface CompositionSuccess {
   type: 'success';
@@ -29,13 +50,39 @@ interface CompositionSuccess {
   };
 }
 
+export type CompositionErrorSource = 'graphql' | 'composition';
+
+export interface CompositionFailureError {
+  message: string;
+  source: CompositionErrorSource;
+}
+
 interface CompositionFailure {
   type: 'failure';
   result: {
-    errors: Array<{
-      message: string;
-    }>;
+    errors: CompositionFailureError[];
+    raw?: string;
   };
+}
+
+const { allStitchingDirectivesTypeDefs, stitchingDirectivesValidator } = stitchingDirectives();
+const parsedStitchingDirectives = parse(allStitchingDirectivesTypeDefs);
+const stitchingDirectivesNames = extractDirectiveNames(parsedStitchingDirectives);
+
+function extractDirectiveNames(doc: DocumentNode) {
+  const directives: string[] = [];
+
+  for (const definition of doc.definitions) {
+    if (definition.kind === Kind.DIRECTIVE_DEFINITION) {
+      directives.push(definition.name.value);
+    }
+  }
+
+  return directives;
+}
+
+function definesStitchingDirective(doc: DocumentNode) {
+  return extractDirectiveNames(doc).some(name => stitchingDirectivesNames.includes(name));
 }
 
 const EXTERNAL_COMPOSITION_RESULT = z.union([
@@ -55,7 +102,15 @@ const EXTERNAL_COMPOSITION_RESULT = z.union([
       type: z.literal('failure'),
       result: z
         .object({
-          errors: z.array(z.object({ message: z.string() }).required()),
+          errors: z.array(
+            z.object({
+              message: z.string(),
+              source: z
+                .union([z.literal('composition'), z.literal('graphql')])
+                .optional()
+                .transform(value => value ?? 'graphql'),
+            }),
+          ),
         })
         .required(),
     })
@@ -94,16 +149,37 @@ function trimDescriptions(doc: DocumentNode): DocumentNode {
 
 const emptySource = '*';
 
-function toValidationError(error: any) {
+function toValidationError(error: any, source: CompositionErrorSource) {
+  if (error instanceof GraphQLError) {
+    return {
+      message: error.message,
+      source,
+    };
+  }
+
   if (error instanceof Error) {
     return {
       message: error.message,
+      source,
     };
   }
 
   return {
     message: error as string,
+    source,
   };
+}
+
+function errorWithSource(source: CompositionErrorSource) {
+  return (error: unknown) => toValidationError(error, source);
+}
+
+function errorWithPossibleCode(error: unknown) {
+  if (error instanceof GraphQLError && error.extensions?.code) {
+    return toValidationError(error, 'composition');
+  }
+
+  return toValidationError(error, 'graphql');
 }
 
 interface Orchestrator {
@@ -114,6 +190,110 @@ interface Orchestrator {
 
 function hash(secret: string, alg: string, value: string) {
   return createHmac(alg, secret).update(value, 'utf-8').digest('hex');
+}
+
+const codeToExplanationMap: Record<ErrorCode, string> = {
+  ERR_EMPTY_BODY: 'The body of the request is empty',
+  ERR_INVALID_SIGNATURE: 'The signature is invalid. Please check your secret',
+};
+
+function translateMessage(errorCode: string) {
+  const explanation = codeToExplanationMap[errorCode as ErrorCode];
+
+  if (explanation) {
+    return `(${errorCode}) ${explanation}`;
+  }
+}
+
+async function callExternalServiceViaBroker(
+  broker: {
+    endpoint: string;
+    signature: string;
+  },
+  payload: BrokerPayload,
+  logger: FastifyLoggerInstance,
+) {
+  return callExternalService(
+    {
+      url: broker.endpoint,
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'x-hive-signature': broker.signature,
+      },
+      body: JSON.stringify(payload),
+    },
+    logger,
+  );
+}
+
+async function callExternalService(
+  input: { url: string; headers: Record<string, string>; body: string },
+  logger: FastifyLoggerInstance,
+) {
+  try {
+    const response = await got(input.url, {
+      method: 'POST',
+      headers: input.headers,
+      body: input.body,
+      responseType: 'text',
+      retry: {
+        limit: 2,
+        methods: ['POST'],
+        backoffLimit: 500,
+      },
+      timeout: {
+        request: 10_000,
+      },
+    });
+
+    return JSON.parse(response.body) as unknown;
+  } catch (error) {
+    if (error instanceof RequestError) {
+      if (error.response) {
+        const message = error.response.body ? error.response.body : error.response.statusMessage; // await res.text().catch(_ => Promise.resolve(res.statusText));
+
+        // If the response is a string starting with ERR_ it's a special error returned by the composition service.
+        // We don't want to throw an error in this case, but instead return a failure result.
+        if (typeof message === 'string') {
+          const translatedMessage = translateMessage(message);
+
+          if (translatedMessage) {
+            return {
+              type: 'failure',
+              result: {
+                errors: [
+                  {
+                    message: `External composition failure: ${translatedMessage}`,
+                    source: 'graphql',
+                  },
+                ],
+              },
+            } satisfies CompositionFailure;
+          }
+        }
+
+        logger.info(
+          'Network error so return failure (status=%s, message=%s)',
+          error.response.statusCode,
+          error.message,
+        );
+        return {
+          type: 'failure',
+          result: {
+            errors: [
+              {
+                message: `External composition network failure: ${error.message}`,
+                source: 'graphql',
+              },
+            ],
+          },
+        } satisfies CompositionFailure;
+      }
+    }
+
+    throw error;
+  }
 }
 
 const createFederation: (
@@ -130,6 +310,11 @@ const createFederation: (
   >(
     async ({ schemas, external }) => {
       if (external) {
+        logger.debug(
+          'Using external composition service (url=%s, schemas=%s)',
+          external.endpoint,
+          schemas.length,
+        );
         const body = JSON.stringify(
           schemas.map(schema => {
             return {
@@ -140,55 +325,34 @@ const createFederation: (
           }),
         );
         const signature = hash(decrypt(external.encryptedSecret), 'sha256', body);
-        logger.debug('Calling external composition service (url=%s)', external.endpoint);
+        logger.debug(
+          'Calling external composition service (url=%s, broker=%s)',
+          external.endpoint,
+          external.broker ? 'yes' : 'no',
+        );
 
-        const init = {
-          method: 'POST',
+        const request = {
+          url: external.endpoint,
           headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json',
             'x-hive-signature-256': signature,
-          },
+          } as const,
           body,
         };
 
-        const response = await retry(
-          async () => {
-            const response = await (external.broker
-              ? fetch(external.broker.endpoint, {
+        const parseResult = EXTERNAL_COMPOSITION_RESULT.safeParse(
+          await (external.broker
+            ? callExternalServiceViaBroker(
+                external.broker,
+                {
                   method: 'POST',
-                  headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                    'x-hive-signature': external.broker.signature,
-                  },
-                  body: JSON.stringify({
-                    url: external.endpoint,
-                    ...init,
-                  }),
-                })
-              : fetch(external.endpoint, init)
-            ).catch(error => {
-              logger.error(error);
-
-              return Promise.reject(error);
-            });
-
-            if (!response.ok) {
-              const message = await response
-                .text()
-                .catch(_ => Promise.resolve(response.statusText));
-              throw new Error(`External composition failure: ${response.status} ${message}`);
-            }
-
-            return response.json();
-          },
-          {
-            retries: 3,
-          },
+                  ...request,
+                },
+                logger,
+              )
+            : callExternalService(request, logger)),
         );
-
-        const parseResult = EXTERNAL_COMPOSITION_RESULT.safeParse(await response);
 
         if (!parseResult.success) {
           throw new Error(`External composition failure: invalid shape of data`);
@@ -207,6 +371,8 @@ const createFederation: (
         return parseResult.data;
       }
 
+      logger.debug('Using built-in composition service (schemas=%s)', schemas.length);
+
       const result = composeAndValidate(
         schemas.map(schema => {
           return {
@@ -221,7 +387,8 @@ const createFederation: (
         return {
           type: 'failure',
           result: {
-            errors: result.errors.map(toValidationError),
+            errors: result.errors.map(errorWithPossibleCode),
+            raw: result.schema ? printSchema(result.schema) : undefined,
           },
         };
       }
@@ -256,7 +423,23 @@ const createFederation: (
     async build(schemas, external) {
       const result = await compose({ schemas, external });
 
+      // If `raw` SDL is present, it means that we were able to build a schema, but it still has composition errors
+      if (result.result.raw) {
+        return {
+          raw: result.result.raw,
+          source: emptySource,
+        };
+      }
+
       if (result.type === 'failure') {
+        // If `raw` SDL is present, it means that we were able to build a schema, but it still has composition errors
+        if (result.result.raw) {
+          return {
+            raw: result.result.raw,
+            source: emptySource,
+          };
+        }
+
         throw new Error(
           [
             `Schemas couldn't be merged:`,
@@ -283,7 +466,7 @@ const createFederation: (
 const single: Orchestrator = {
   async validate(schemas) {
     const schema = schemas[0];
-    const errors = validateSDL(parse(schema.raw)).map(toValidationError);
+    const errors = validateSDL(parse(schema.raw)).map(errorWithSource('graphql'));
 
     return {
       errors,
@@ -310,7 +493,12 @@ const createStitching: (redis: RedisInstance, logger: FastifyLoggerInstance) => 
     async (schemas: ValidationInput) => {
       return printSchema(
         stitchSchemas({
-          typeDefs: schemas.map(schema => trimDescriptions(parse(schema.raw))),
+          subschemas: schemas.map(schema =>
+            buildASTSchema(trimDescriptions(parse(schema.raw)), {
+              assumeValid: true,
+              assumeValidSDL: true,
+            }),
+          ),
         }),
       );
     },
@@ -327,7 +515,7 @@ const createStitching: (redis: RedisInstance, logger: FastifyLoggerInstance) => 
       try {
         await stitchAndPrint(schemas);
       } catch (error) {
-        errors.push(toValidationError(error));
+        errors.push(toValidationError(error, 'composition'));
       }
 
       return {
@@ -349,11 +537,30 @@ const createStitching: (redis: RedisInstance, logger: FastifyLoggerInstance) => 
 };
 
 function validateStitchedSchema(doc: DocumentNode) {
-  const { allStitchingDirectivesTypeDefs } = stitchingDirectives();
+  const definesItsOwnStitchingDirectives = definesStitchingDirective(doc);
+  const fullDoc = definesItsOwnStitchingDirectives
+    ? doc
+    : concatAST([parsedStitchingDirectives, doc]);
+  const errors = validateSDL(fullDoc).map(errorWithSource('graphql'));
 
-  return validateSDL(concatAST([parse(allStitchingDirectivesTypeDefs), doc])).map(
-    toValidationError,
-  );
+  // If the schema defines its own stitching directives,
+  // it means we can't be sure that it follows the official spec.
+  if (definesItsOwnStitchingDirectives) {
+    return errors;
+  }
+
+  try {
+    stitchingDirectivesValidator(
+      buildASTSchema(fullDoc, {
+        assumeValid: true,
+        assumeValidSDL: true,
+      }),
+    );
+  } catch (error) {
+    errors.push(toValidationError(error, 'composition'));
+  }
+
+  return errors;
 }
 
 export function pickOrchestrator(
@@ -390,11 +597,15 @@ function createChecksum<TInput>(input: TInput, uniqueKey: string): string {
     .digest('hex');
 }
 
+function createActionKey(checksum: string): string {
+  return `schema-service:${checksum}`;
+}
+
 async function readAction<O>(
   checksum: string,
   redis: RedisInstance,
 ): Promise<ActionStarted | ActionCompleted<O> | null> {
-  const action = await redis.get(`schema-service:${checksum}`);
+  const action = await redis.get(createActionKey(checksum));
 
   if (action) {
     return JSON.parse(action);
@@ -408,7 +619,7 @@ async function startAction(
   redis: RedisInstance,
   logger: FastifyLoggerInstance,
 ): Promise<boolean> {
-  const key = `schema-service:${checksum}`;
+  const key = createActionKey(checksum);
   logger.debug('Starting action (checksum=%s)', checksum);
   // Set and lock + expire
   const inserted = await redis.setnx(key, JSON.stringify({ status: 'started' }));
@@ -430,7 +641,7 @@ async function completeAction<O>(
   redis: RedisInstance,
   logger: FastifyLoggerInstance,
 ): Promise<void> {
-  const key = `schema-service:${checksum}`;
+  const key = createActionKey(checksum);
   logger.debug('Completing action (checksum=%s)', checksum);
   await redis.setex(
     key,
@@ -448,7 +659,7 @@ async function removeAction(
   logger: FastifyLoggerInstance,
 ): Promise<void> {
   logger.debug('Removing action (checksum=%s)', checksum);
-  const key = `schema-service:${checksum}`;
+  const key = createActionKey(checksum);
   await redis.del(key);
 }
 
@@ -494,9 +705,9 @@ function reuse<I, O>(
       await new Promise(resolve => setTimeout(resolve, 500));
       cached = await readAction<O>(checksum, redis);
 
-      if (Date.now() - startedAt > 30_000) {
+      if (Date.now() - startedAt > 25_000) {
         await removeAction(checksum, redis, logger);
-        throw new Error('Timeout after 30s');
+        throw new Error('Timeout after 25s');
       }
     }
 

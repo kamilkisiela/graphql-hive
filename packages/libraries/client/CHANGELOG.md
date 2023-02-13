@@ -1,5 +1,65 @@
 # @graphql-hive/client
 
+## 0.23.1
+
+### Patch Changes
+
+- [#1357](https://github.com/kamilkisiela/graphql-hive/pull/1357)
+  [`9fc97488`](https://github.com/kamilkisiela/graphql-hive/commit/9fc97488cf6da479a63c4d68c6cfae1f3526f8f9)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Remove `Query._entities` when
+  extracting original SDL from Fed v2
+
+## 0.23.0
+
+### Minor Changes
+
+- [#1305](https://github.com/kamilkisiela/graphql-hive/pull/1305)
+  [`cdf2e8a7`](https://github.com/kamilkisiela/graphql-hive/commit/cdf2e8a77eb1e98f7b90c7ac82ad663bda5784ef)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Support Federation v2 in schema
+  reporting
+
+- [#1224](https://github.com/kamilkisiela/graphql-hive/pull/1224)
+  [`cf14c18d`](https://github.com/kamilkisiela/graphql-hive/commit/cf14c18d6ebf7751f6bec37f82fa643306b538f6)
+  Thanks [@rperryng](https://github.com/rperryng)! - skip directive arguments during usage
+  collection
+
+- [#1305](https://github.com/kamilkisiela/graphql-hive/pull/1305)
+  [`cdf2e8a7`](https://github.com/kamilkisiela/graphql-hive/commit/cdf2e8a77eb1e98f7b90c7ac82ad663bda5784ef)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Add @apollo/server and @envelop/types
+  as optional dependencies
+
+- [#1305](https://github.com/kamilkisiela/graphql-hive/pull/1305)
+  [`cdf2e8a7`](https://github.com/kamilkisiela/graphql-hive/commit/cdf2e8a77eb1e98f7b90c7ac82ad663bda5784ef)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Support @apollo/server
+
+## 0.22.0
+
+### Minor Changes
+
+- [#862](https://github.com/kamilkisiela/graphql-hive/pull/862)
+  [`d2aa98a5`](https://github.com/kamilkisiela/graphql-hive/commit/d2aa98a574f191e115bd8fab1f95a7aa5bb17659)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Use new CDN endpoint for retrieving the service
+  list
+
+- [#971](https://github.com/kamilkisiela/graphql-hive/pull/971)
+  [`0abc58b9`](https://github.com/kamilkisiela/graphql-hive/commit/0abc58b9e2ed8b4c7d950ce3f7cba43dfdeff344)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Retry failed requests upon CDN issues.
+
+### Patch Changes
+
+- [#776](https://github.com/kamilkisiela/graphql-hive/pull/776)
+  [`e46b5dda`](https://github.com/kamilkisiela/graphql-hive/commit/e46b5ddab84406ea810a9e0f0c08e6149e77468a)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Use correct default value for 'enabled'.
+
+- [#904](https://github.com/kamilkisiela/graphql-hive/pull/904)
+  [`20edc8c5`](https://github.com/kamilkisiela/graphql-hive/commit/20edc8c5e54cd71a726f02f33f9710460fc6d5a0)
+  Thanks [@dotansimha](https://github.com/dotansimha)! - Upgrade dependency `axios` to v1
+
+- [#904](https://github.com/kamilkisiela/graphql-hive/pull/904)
+  [`20edc8c5`](https://github.com/kamilkisiela/graphql-hive/commit/20edc8c5e54cd71a726f02f33f9710460fc6d5a0)
+  Thanks [@dotansimha](https://github.com/dotansimha)! - Upgrade dependency
+  `apollo-server-plugin-base`
+
 ## 0.21.4
 
 ### Patch Changes

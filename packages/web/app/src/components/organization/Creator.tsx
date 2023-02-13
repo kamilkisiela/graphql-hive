@@ -1,22 +1,21 @@
-import React from 'react';
-import 'twin.macro';
+import React, { ChangeEventHandler, FormEventHandler } from 'react';
 import { useMutation } from 'urql';
+import { Description, Label } from '@/components/common';
+import { CreateOrganizationDocument } from '@/graphql';
+import { useRouteSelector } from '@/lib/hooks';
 import {
   Button,
   FormControl,
   FormLabel,
   Input,
   Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
   ModalBody,
   ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
 } from '@chakra-ui/react';
-import { CreateOrganizationDocument } from '@/graphql';
-import { Label, Description } from '@/components/common';
-import { useRouteSelector } from '@/lib/hooks';
 
 export const OrganizationCreator: React.FC<{
   isOpen: boolean;
@@ -25,7 +24,7 @@ export const OrganizationCreator: React.FC<{
   const router = useRouteSelector();
   const [{ fetching }, mutate] = useMutation(CreateOrganizationDocument);
   const [name, setName] = React.useState('');
-  const submit = React.useCallback(
+  const submit = React.useCallback<FormEventHandler<HTMLElement>>(
     async evt => {
       evt.preventDefault();
       if (name) {
@@ -48,7 +47,7 @@ export const OrganizationCreator: React.FC<{
     [mutate, router, name],
   );
 
-  const onNameChange = React.useCallback(
+  const onNameChange = React.useCallback<ChangeEventHandler<HTMLInputElement>>(
     evt => {
       setName(evt.target.value);
     },
@@ -68,7 +67,7 @@ export const OrganizationCreator: React.FC<{
           <Description>
             You will become an <Label>admin</Label> and don't worry, you can add members later.
           </Description>
-          <div tw="pt-6 space-y-6">
+          <div className="pt-6 space-y-6">
             <FormControl>
               <FormLabel>Organization Name</FormLabel>
               <Input
@@ -82,7 +81,7 @@ export const OrganizationCreator: React.FC<{
             </FormControl>
           </div>
         </ModalBody>
-        <ModalFooter tw="space-x-6">
+        <ModalFooter className="space-x-6">
           <Button variant="ghost" type="button" disabled={fetching} onClick={onClose}>
             Cancel
           </Button>

@@ -1,14 +1,14 @@
 import { FC, forwardRef } from 'react';
-import {
-  Content as TabsContent,
-  List as TabsList,
-  Root,
-  TabsContentProps,
-  TabsListProps,
-  TabsTriggerProps,
-  Trigger as TabsTrigger,
-} from '@radix-ui/react-tabs';
 import clsx from 'clsx';
+import {
+  Root,
+  Content as TabsContent,
+  TabsContentProps,
+  List as TabsList,
+  TabsListProps,
+  Trigger as TabsTrigger,
+  TabsTriggerProps,
+} from '@radix-ui/react-tabs';
 
 const List: FC<TabsListProps> = ({ children, className, ...props }) => (
   <TabsList
@@ -29,11 +29,8 @@ const List: FC<TabsListProps> = ({ children, className, ...props }) => (
   </TabsList>
 );
 
-const Trigger: FC<TabsTriggerProps & { hasBorder?: boolean }> = forwardRef(
-  (
-    { children, className, hasBorder = true, ...props },
-    forwardedRef /* when has asChild prop */,
-  ) => (
+const Trigger: FC<Omit<TabsTriggerProps, 'className'> & { hasBorder?: boolean }> = forwardRef(
+  ({ children, hasBorder = true, ...props }, forwardedRef /* when has asChild prop */) => (
     <TabsTrigger
       ref={forwardedRef as any}
       className={clsx(

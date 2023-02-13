@@ -1,7 +1,7 @@
-import type { FeedbackModule } from './__generated__/types';
 import * as Sentry from '@sentry/node';
 import { WebClient } from '@slack/web-api';
 import { AuthManager } from '../auth/providers/auth-manager';
+import type { FeedbackModule } from './__generated__/types';
 import { FEEDBACK_SLACK_CHANNEL, FEEDBACK_SLACK_TOKEN } from './providers/tokens';
 
 export const resolvers: FeedbackModule.Resolvers = {
