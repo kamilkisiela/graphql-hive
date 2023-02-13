@@ -1,9 +1,9 @@
 import type { FastifyRequest } from 'fastify';
-import { Redis } from 'ioredis';
 import { z } from 'zod';
 import { handleTRPCError } from '@hive/service-common';
 import type { inferRouterInputs } from '@trpc/server';
 import { initTRPC } from '@trpc/server';
+import type { Cache } from './cache';
 import { buildCounter, supergraphCounter, validateCounter } from './metrics';
 import { pickOrchestrator } from './orchestrators';
 
@@ -11,7 +11,7 @@ export type { CompositionFailureError, CompositionErrorSource } from './orchestr
 
 export interface Context {
   req: FastifyRequest;
-  redis: Redis;
+  cache: Cache;
   decrypt(value: string): string;
   broker: {
     endpoint: string;
@@ -67,7 +67,7 @@ export const schemaBuilderApiRouter = t.router({
           type: input.type,
         })
         .inc();
-      return await pickOrchestrator(input.type, ctx.redis, ctx.req.log, ctx.decrypt).supergraph(
+      return await pickOrchestrator(input.type, ctx.cache, ctx.req.log, ctx.decrypt).supergraph(
         input.schemas,
         input.external
           ? {
@@ -102,7 +102,7 @@ export const schemaBuilderApiRouter = t.router({
           type: input.type,
         })
         .inc();
-      return await pickOrchestrator(input.type, ctx.redis, ctx.req.log, ctx.decrypt).validate(
+      return await pickOrchestrator(input.type, ctx.cache, ctx.req.log, ctx.decrypt).validate(
         input.type === 'single'
           ? input.schemas.map(s => ({
               ...s,
@@ -142,7 +142,7 @@ export const schemaBuilderApiRouter = t.router({
           type: input.type,
         })
         .inc();
-      return await pickOrchestrator(input.type, ctx.redis, ctx.req.log, ctx.decrypt).build(
+      return await pickOrchestrator(input.type, ctx.cache, ctx.req.log, ctx.decrypt).build(
         input.type === 'single'
           ? input.schemas.map(s => ({
               ...s,

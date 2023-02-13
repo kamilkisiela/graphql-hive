@@ -612,12 +612,15 @@ importers:
       '@sentry/tracing': 7.37.1
       '@trpc/server': 10.9.1
       '@types/async-retry': 1.4.5
+      '@types/ioredis-mock': 8.2.1
       '@whatwg-node/fetch': 0.8.1
       dotenv: 16.0.3
       fastify: 3.29.5
       got: 12.5.3
       graphql: 16.6.0
       ioredis: 5.3.1
+      ioredis-mock: 8.2.6
+      p-timeout: 6.1.1
       pino-pretty: 9.2.0
       zod: 3.20.6
     dependencies:
@@ -632,12 +635,15 @@ importers:
       got: 12.5.3
       graphql: 16.6.0
       ioredis: 5.3.1
+      p-timeout: 6.1.1
       zod: 3.20.6
     devDependencies:
       '@graphql-hive/external-composition': link:../../libraries/external-composition
       '@hive/service-common': link:../service-common
       '@types/async-retry': 1.4.5
+      '@types/ioredis-mock': 8.2.1
       fastify: 3.29.5
+      ioredis-mock: 8.2.6_6jydlboc7eyi5xrsjrlqeddf74
       pino-pretty: 9.2.0
 
   packages/services/server:
