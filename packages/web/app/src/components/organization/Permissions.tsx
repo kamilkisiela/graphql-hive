@@ -94,7 +94,7 @@ function PermissionsSpaceInner<
                   <div className="font-semibold text-gray-600">{scope.name}</div>
                   <div className="text-xs text-gray-600">{scope.description}</div>
                 </div>
-                <div>
+                <div className="shrink-0">
                   <Select
                     size="sm"
                     value={selectedScope}
