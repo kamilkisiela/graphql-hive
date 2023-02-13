@@ -1,5 +1,6 @@
 import { createHash, createHmac } from 'crypto';
-import retry from 'async-retry';
+import got from 'got';
+import { RequestError } from 'got';
 import type { DocumentNode } from 'graphql';
 import {
   ASTNode,
@@ -20,7 +21,6 @@ import type { ErrorCode } from '@graphql-hive/external-composition';
 import { stitchSchemas } from '@graphql-tools/stitch';
 import { stitchingDirectives } from '@graphql-tools/stitching-directives';
 import type { FastifyLoggerInstance } from '@hive/service-common';
-import { fetch } from '@whatwg-node/fetch';
 import type {
   BuildInput,
   BuildOutput,
@@ -31,6 +31,16 @@ import type {
   ValidationInput,
   ValidationOutput,
 } from './types';
+
+interface BrokerPayload {
+  method: 'POST';
+  url: string;
+  headers: {
+    [key: string]: string;
+    'x-hive-signature-256': string;
+  };
+  body: string;
+}
 
 interface CompositionSuccess {
   type: 'success';
@@ -106,12 +116,6 @@ const EXTERNAL_COMPOSITION_RESULT = z.union([
     })
     .required(),
 ]);
-
-class NetworkError extends Error {
-  constructor(message: string, public readonly statusCode: number) {
-    super(message);
-  }
-}
 
 function trimDescriptions(doc: DocumentNode): DocumentNode {
   function trim<T extends ASTNode>(node: T): T {
@@ -201,6 +205,97 @@ function translateMessage(errorCode: string) {
   }
 }
 
+async function callExternalServiceViaBroker(
+  broker: {
+    endpoint: string;
+    signature: string;
+  },
+  payload: BrokerPayload,
+  logger: FastifyLoggerInstance,
+) {
+  return callExternalService(
+    {
+      url: broker.endpoint,
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'x-hive-signature': broker.signature,
+      },
+      body: JSON.stringify(payload),
+    },
+    logger,
+  );
+}
+
+async function callExternalService(
+  input: { url: string; headers: Record<string, string>; body: string },
+  logger: FastifyLoggerInstance,
+) {
+  try {
+    const response = await got(input.url, {
+      method: 'POST',
+      headers: input.headers,
+      body: input.body,
+      responseType: 'text',
+      retry: {
+        limit: 2,
+        methods: ['POST'],
+        backoffLimit: 500,
+      },
+      timeout: {
+        request: 10_000,
+      },
+    });
+
+    return JSON.parse(response.body) as unknown;
+  } catch (error) {
+    if (error instanceof RequestError) {
+      if (error.response) {
+        const message = error.response.body ? error.response.body : error.response.statusMessage; // await res.text().catch(_ => Promise.resolve(res.statusText));
+
+        // If the response is a string starting with ERR_ it's a special error returned by the composition service.
+        // We don't want to throw an error in this case, but instead return a failure result.
+        if (typeof message === 'string') {
+          const translatedMessage = translateMessage(message);
+
+          if (translatedMessage) {
+            return {
+              type: 'failure',
+              result: {
+                errors: [
+                  {
+                    message: `External composition failure: ${translatedMessage}`,
+                    source: 'graphql',
+                  },
+                ],
+              },
+            } satisfies CompositionFailure;
+          }
+        }
+
+        logger.info(
+          'Network error so return failure (status=%s, message=%s)',
+          error.response.statusCode,
+          error.message,
+        );
+        return {
+          type: 'failure',
+          result: {
+            errors: [
+              {
+                message: `External composition network failure: ${error.message}`,
+                source: 'graphql',
+              },
+            ],
+          },
+        } satisfies CompositionFailure;
+      }
+    }
+
+    throw error;
+  }
+}
+
 const createFederation: (
   redis: RedisInstance,
   logger: FastifyLoggerInstance,
@@ -230,94 +325,34 @@ const createFederation: (
           }),
         );
         const signature = hash(decrypt(external.encryptedSecret), 'sha256', body);
-        logger.debug('Calling external composition service (url=%s)', external.endpoint);
+        logger.debug(
+          'Calling external composition service (url=%s, broker=%s)',
+          external.endpoint,
+          external.broker ? 'yes' : 'no',
+        );
 
-        const init = {
-          method: 'POST',
+        const request = {
+          url: external.endpoint,
           headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json',
             'x-hive-signature-256': signature,
-          },
+          } as const,
           body,
         };
 
-        const response: unknown = await retry(
-          async () => {
-            const res = await (external.broker
-              ? fetch(external.broker.endpoint, {
+        const parseResult = EXTERNAL_COMPOSITION_RESULT.safeParse(
+          await (external.broker
+            ? callExternalServiceViaBroker(
+                external.broker,
+                {
                   method: 'POST',
-                  headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                    'x-hive-signature': external.broker.signature,
-                  },
-                  body: JSON.stringify({
-                    url: external.endpoint,
-                    ...init,
-                  }),
-                })
-              : fetch(external.endpoint, init)
-            ).catch(async error => {
-              logger.error(error);
-              throw error;
-            });
-
-            if (!res.ok) {
-              const message = await res.text().catch(_ => Promise.resolve(res.statusText));
-
-              // If the response is a string starting with ERR_ it's a special error returned by the composition service.
-              // We don't want to throw an error in this case, but instead return a failure result.
-              // This is useful for cases where the composition service is not able to compose the schemas for technical reasons,
-              // and we do want to pass the error to the user and not do a retry.
-              if (typeof message === 'string') {
-                const translatedMessage = translateMessage(message);
-
-                if (translatedMessage) {
-                  return {
-                    type: 'failure',
-                    result: {
-                      errors: [
-                        {
-                          message: `External composition failure: ${translatedMessage}`,
-                          source: 'graphql',
-                        },
-                      ],
-                    },
-                  } satisfies CompositionFailure;
-                }
-              }
-
-              // If it does not start with ERR_ we throw an error, which will be caught by the retry logic.
-              throw new NetworkError(message, res.status);
-            }
-
-            return res.json();
-          },
-          {
-            retries: 3,
-          },
-        ).catch(async error => {
-          // The expected error
-          if (error instanceof NetworkError) {
-            logger.info('Network error so return failure');
-            return {
-              type: 'failure',
-              result: {
-                errors: [
-                  {
-                    message: `External composition network failure: [${error.statusCode}] ${error.message}`,
-                    source: 'graphql',
-                  },
-                ],
-              },
-            } satisfies CompositionFailure;
-          }
-
-          throw error;
-        });
-
-        const parseResult = EXTERNAL_COMPOSITION_RESULT.safeParse(await response);
+                  ...request,
+                },
+                logger,
+              )
+            : callExternalService(request, logger)),
+        );
 
         if (!parseResult.success) {
           throw new Error(`External composition failure: invalid shape of data`);
@@ -458,7 +493,12 @@ const createStitching: (redis: RedisInstance, logger: FastifyLoggerInstance) => 
     async (schemas: ValidationInput) => {
       return printSchema(
         stitchSchemas({
-          typeDefs: schemas.map(schema => trimDescriptions(parse(schema.raw))),
+          subschemas: schemas.map(schema =>
+            buildASTSchema(trimDescriptions(parse(schema.raw)), {
+              assumeValid: true,
+              assumeValidSDL: true,
+            }),
+          ),
         }),
       );
     },
@@ -665,9 +705,9 @@ function reuse<I, O>(
       await new Promise(resolve => setTimeout(resolve, 500));
       cached = await readAction<O>(checksum, redis);
 
-      if (Date.now() - startedAt > 30_000) {
+      if (Date.now() - startedAt > 25_000) {
         await removeAction(checksum, redis, logger);
-        throw new Error('Timeout after 30s');
+        throw new Error('Timeout after 25s');
       }
     }
 

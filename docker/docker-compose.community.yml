@@ -6,7 +6,7 @@ networks:
 
 services:
   db:
-    image: postgres:13.4-alpine
+    image: postgres:13.10-alpine
     environment:
       POSTGRES_DB: '${POSTGRES_DB}'
       POSTGRES_USER: '${POSTGRES_USER}'
@@ -160,7 +160,7 @@ services:
       myminio/artifacts; exit 0"
 
   s3_reverse_proxy:
-    image: caddy:2.6.2-alpine
+    image: caddy:2.6.3-alpine
     depends_on:
       s3:
         condition: service_healthy

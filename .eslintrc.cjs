@@ -1,5 +1,6 @@
 /* eslint-env node */
 const guildConfig = require('@theguild/eslint-config/base');
+const { REACT_RESTRICTED_SYNTAX, RESTRICTED_SYNTAX } = require('@theguild/eslint-config/constants');
 
 const rulesToExtends = Object.fromEntries(
   Object.entries(guildConfig.rules).filter(([key]) =>
@@ -16,10 +17,17 @@ const rulesToExtends = Object.fromEntries(
       'react/self-closing-comp',
       'prefer-const',
       'no-extra-boolean-cast',
-      'no-restricted-syntax',
     ].includes(key),
   ),
 );
+
+const HIVE_RESTRICTED_SYNTAX = [
+  {
+    // ❌ '0.0.0.0' or `0.0.0.0`
+    selector: ':matches(Literal[value="0.0.0.0"], TemplateElement[value.raw="0.0.0.0"])',
+    message: 'Use "::" to make it compatible with both IPv4 and IPv6',
+  },
+];
 
 module.exports = {
   reportUnusedDisableDirectives: true,
@@ -32,8 +40,6 @@ module.exports = {
     'packages/web/app/src/graphql/index.ts',
     'packages/libraries/cli/src/sdk.ts',
     'packages/services/storage/src/db/types.ts',
-    'babel.config.cjs',
-    'jest.config.js',
   ],
   parserOptions: {
     ecmaVersion: 2020,
@@ -65,6 +71,7 @@ module.exports = {
     '@typescript-eslint/no-floating-promises': 'error',
     '@typescript-eslint/no-unnecessary-type-assertion': 'error',
     ...rulesToExtends,
+    'no-restricted-syntax': ['error', ...HIVE_RESTRICTED_SYNTAX, ...RESTRICTED_SYNTAX],
 
     // 🚨 The following rules needs to be fixed and was temporarily disabled to avoid printing warning
     '@typescript-eslint/no-explicit-any': 'off',
@@ -94,16 +101,18 @@ module.exports = {
         'tailwindcss/classnames-order': 'off',
         // set more strict to highlight in editor
         'tailwindcss/enforces-shorthand': 'error',
+        'tailwindcss/no-custom-classname': 'error',
+        'tailwindcss/migration-from-tailwind-2': 'error',
+        'tailwindcss/no-contradicting-classname': 'error',
         'react/display-name': 'off',
         'react/prop-types': 'off',
         'react/no-unknown-property': 'off',
         'jsx-a11y/anchor-is-valid': ['off', { components: ['Link', 'NextLink'] }],
         'jsx-a11y/alt-text': ['warn', { elements: ['img'], img: ['Image', 'NextImage'] }],
+        'no-restricted-syntax': ['error', ...HIVE_RESTRICTED_SYNTAX, ...REACT_RESTRICTED_SYNTAX],
 
         // TODO: enable below rules👇
         '@typescript-eslint/consistent-type-imports': ['off', { prefer: 'no-type-imports' }],
-        'tailwindcss/no-custom-classname': 'off',
-        'tailwindcss/migration-from-tailwind-2': 'off',
         'no-console': 'off',
         '@typescript-eslint/no-non-null-assertion': 'off',
         'react/jsx-no-useless-fragment': 'off',
@@ -121,7 +130,6 @@ module.exports = {
         'jsx-a11y/click-events-have-key-events': 'off',
         'jsx-a11y/no-static-element-interactions': 'off',
         '@next/next/no-html-link-for-pages': 'off',
-        'tailwindcss/no-contradicting-classname': 'off',
       },
     },
     {

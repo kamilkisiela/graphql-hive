@@ -1,4 +1,12 @@
-import { ExecutionResult, GraphQLSchema, Kind, print, stripIgnoredCharacters } from 'graphql';
+import {
+  ExecutionResult,
+  GraphQLSchema,
+  Kind,
+  parse,
+  print,
+  stripIgnoredCharacters,
+  visit,
+} from 'graphql';
 import { getDocumentNodeFromSchema } from '@graphql-tools/utils';
 import type { SchemaPublishMutation } from '../__generated__/types.js';
 import { version } from '../version.js';
@@ -187,6 +195,23 @@ function isFederatedSchema(schema: GraphQLSchema): boolean {
   return false;
 }
 
+const federationV2 = {
+  scalars: new Set(['_Any', '_FieldSet']),
+  directives: new Set([
+    'key',
+    'requires',
+    'provides',
+    'external',
+    'shareable',
+    'extends',
+    'override',
+    'inaccessible',
+    'tag',
+  ]),
+  types: new Set(['_Service']),
+  queryFields: new Set(['_service', '_entities']),
+};
+
 /**
  * Extracts the SDL of a federated service from a GraphQLSchema object
  * We do it to not send federated schema to the registry but only the original schema provided by user
@@ -195,6 +220,45 @@ async function extractFederationServiceSDL(schema: GraphQLSchema): Promise<strin
   const queryType = schema.getQueryType()!;
   const serviceField = queryType.getFields()._service;
   const resolved = await (serviceField.resolve as () => Promise<{ sdl: string }>)();
+
+  if (resolved.sdl.includes('_service')) {
+    // It seems that the schema is a federated (v2) schema.
+    // The _service field returns the SDL of the whole subgraph, not only the sdl provided by the user.
+    // We want to remove the federation specific types and directives from the SDL.
+    return print(
+      visit(parse(resolved.sdl), {
+        ScalarTypeDefinition(node) {
+          if (federationV2.scalars.has(node.name.value)) {
+            return null;
+          }
+
+          return node;
+        },
+        DirectiveDefinition(node) {
+          if (federationV2.directives.has(node.name.value)) {
+            return null;
+          }
+
+          return node;
+        },
+        ObjectTypeDefinition(node) {
+          if (federationV2.types.has(node.name.value)) {
+            return null;
+          }
+
+          if (node.name.value === 'Query' && node.fields) {
+            return {
+              ...node,
+              fields: node.fields.filter(field => !federationV2.queryFields.has(field.name.value)),
+            };
+          }
+
+          return node;
+        },
+      }),
+    );
+  }
+
   return resolved.sdl;
 }
 

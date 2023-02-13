@@ -87,7 +87,7 @@ const op = parse(/* GraphQL */ `
 `);
 
 beforeEach(() => {
-  jest.restoreAllMocks();
+  vi.restoreAllMocks();
 });
 
 afterEach(() => {
@@ -96,8 +96,8 @@ afterEach(() => {
 
 test('should send data to Hive', async () => {
   const logger = {
-    error: jest.fn(),
-    info: jest.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
   };
 
   const token = 'Token';
@@ -195,8 +195,8 @@ test('should send data to Hive', async () => {
 
 test('should send data to Hive (deprecated endpoint)', async () => {
   const logger = {
-    error: jest.fn(),
-    info: jest.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
   };
 
   const token = 'Token';
@@ -291,8 +291,8 @@ test('should send data to Hive (deprecated endpoint)', async () => {
 
 test('should not leak the exception', async () => {
   const logger = {
-    error: jest.fn(),
-    info: jest.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
   };
 
   const hive = createHive({
@@ -331,8 +331,8 @@ test('should not leak the exception', async () => {
 
 test('sendImmediately should not stop the schedule', async () => {
   const logger = {
-    error: jest.fn(),
-    info: jest.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
   };
 
   const token = 'Token';

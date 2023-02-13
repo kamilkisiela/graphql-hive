@@ -1,5 +1,5 @@
 import Docker from 'dockerode';
-import humanId from 'human-id';
+import { humanId } from 'human-id';
 
 let docker: Docker | null = null;
 

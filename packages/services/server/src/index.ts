@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import { Readable } from 'node:stream';
 import got from 'got';
 import { GraphQLError, stripIgnoredCharacters } from 'graphql';
 import 'reflect-metadata';
@@ -68,6 +67,24 @@ export async function main() {
       requests: env.log.requests,
     },
   });
+
+  server.addContentTypeParser(
+    'application/graphql+json',
+    { parseAs: 'string' },
+    function parseApplicationGraphQLJsonPayload(_req, payload, done) {
+      done(null, JSON.parse(payload as unknown as string));
+    },
+  );
+
+  server.addContentTypeParser(
+    'application/graphql',
+    { parseAs: 'string' },
+    function parseApplicationGraphQLPayload(_req, payload, done) {
+      done(null, {
+        query: payload,
+      });
+    },
+  );
 
   const storage = await createPostgreSQLStorage(createConnectionString(env.postgres), 10);
 
@@ -353,8 +370,9 @@ export async function main() {
           });
 
           void reply.status(response.status);
-          void reply.send(Readable.from(response.body!));
-          return reply;
+
+          const textResponse = await response.text();
+          void reply.send(textResponse);
         },
       });
     }
@@ -418,7 +436,7 @@ export async function main() {
       await startMetrics(env.prometheus.labels.instance);
     }
 
-    await server.listen(port, '0.0.0.0');
+    await server.listen(port, '::');
   } catch (error) {
     server.log.fatal(error);
     Sentry.captureException(error, {

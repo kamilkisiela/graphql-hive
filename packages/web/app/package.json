@@ -12,7 +12,7 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@chakra-ui/react": "1.8.9",
+    "@chakra-ui/react": "2.4.9",
     "@emotion/cache": "11.10.5",
     "@emotion/css": "11.10.5",
     "@emotion/react": "11.10.5",
@@ -35,8 +35,8 @@
     "@radix-ui/react-toggle-group": "1.0.2",
     "@radix-ui/react-toolbar": "1.0.2",
     "@radix-ui/react-tooltip": "1.0.3",
-    "@sentry/nextjs": "7.36.0",
-    "@sentry/types": "7.36.0",
+    "@sentry/nextjs": "7.37.1",
+    "@sentry/types": "7.37.1",
     "@stripe/react-stripe-js": "1.16.4",
     "@stripe/stripe-js": "1.46.0",
     "@tanstack/react-table": "8.0.0-beta.8",
@@ -46,7 +46,7 @@
     "@urql/core": "3.1.1",
     "@urql/devtools": "2.0.3",
     "@urql/exchange-graphcache": "5.0.8",
-    "@whatwg-node/fetch": "0.6.2",
+    "@whatwg-node/fetch": "0.8.1",
     "clsx": "1.2.1",
     "cookies": "0.8.0",
     "date-fns": "2.29.3",
@@ -54,7 +54,7 @@
     "echarts": "5.4.1",
     "echarts-for-react": "3.0.2",
     "formik": "2.2.9",
-    "framer-motion": "4.1.17",
+    "framer-motion": "9.0.2",
     "graphiql": "2.2.0",
     "graphql": "16.6.0",
     "hyperid": "3.1.1",
@@ -75,23 +75,22 @@
     "react-window": "1.8.8",
     "regenerator-runtime": "0.13.11",
     "snarkdown": "2.0.0",
-    "supertokens-auth-react": "0.30.2",
+    "supertokens-auth-react": "0.31.1",
     "supertokens-js-override": "0.0.4",
     "supertokens-node": "12.1.6",
-    "supertokens-web-js": "0.4.1",
-    "tailwindcss": "3.2.4",
+    "supertokens-web-js": "0.5.0",
+    "tailwindcss": "3.2.6",
     "tailwindcss-radix": "2.7.0",
     "tslib": "2.5.0",
-    "twin.macro": "2.8.2",
     "urql": "3.0.3",
     "use-debounce": "9.0.3",
-    "valtio": "1.10.0",
-    "wonka": "6.1.2",
+    "valtio": "1.10.1",
+    "wonka": "6.2.3",
     "yup": "0.32.11",
-    "zod": "3.20.2"
+    "zod": "3.20.6"
   },
   "devDependencies": {
-    "@graphql-codegen/gql-tag-operations-preset": "1.7.4",
+    "@graphql-codegen/gql-tag-operations-preset": "2.0.0",
     "@graphql-typed-document-node/core": "3.1.1",
     "@hive/emails": "workspace:*",
     "@hive/server": "workspace:*",
@@ -100,7 +99,7 @@
     "@types/cookies": "0.7.7",
     "@types/dompurify": "2.4.0",
     "@types/js-cookie": "3.0.2",
-    "@types/react": "18.0.27",
+    "@types/react": "18.0.28",
     "@types/react-date-range": "1.4.4",
     "@types/react-dom": "18.0.10",
     "@types/react-virtualized-auto-sizer": "1.0.1",
@@ -108,12 +107,7 @@
     "@welldone-software/why-did-you-render": "7.0.1",
     "autoprefixer": "10.4.13",
     "postcss": "8.4.21",
-    "rimraf": "3.0.2"
-  },
-  "babelMacros": {
-    "twin": {
-      "preset": "emotion"
-    }
+    "rimraf": "4.1.2"
   },
   "buildOptions": {
     "runify": {

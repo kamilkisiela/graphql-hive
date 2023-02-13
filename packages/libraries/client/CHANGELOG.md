@@ -1,5 +1,37 @@
 # @graphql-hive/client
 
+## 0.23.1
+
+### Patch Changes
+
+- [#1357](https://github.com/kamilkisiela/graphql-hive/pull/1357)
+  [`9fc97488`](https://github.com/kamilkisiela/graphql-hive/commit/9fc97488cf6da479a63c4d68c6cfae1f3526f8f9)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Remove `Query._entities` when
+  extracting original SDL from Fed v2
+
+## 0.23.0
+
+### Minor Changes
+
+- [#1305](https://github.com/kamilkisiela/graphql-hive/pull/1305)
+  [`cdf2e8a7`](https://github.com/kamilkisiela/graphql-hive/commit/cdf2e8a77eb1e98f7b90c7ac82ad663bda5784ef)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Support Federation v2 in schema
+  reporting
+
+- [#1224](https://github.com/kamilkisiela/graphql-hive/pull/1224)
+  [`cf14c18d`](https://github.com/kamilkisiela/graphql-hive/commit/cf14c18d6ebf7751f6bec37f82fa643306b538f6)
+  Thanks [@rperryng](https://github.com/rperryng)! - skip directive arguments during usage
+  collection
+
+- [#1305](https://github.com/kamilkisiela/graphql-hive/pull/1305)
+  [`cdf2e8a7`](https://github.com/kamilkisiela/graphql-hive/commit/cdf2e8a77eb1e98f7b90c7ac82ad663bda5784ef)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Add @apollo/server and @envelop/types
+  as optional dependencies
+
+- [#1305](https://github.com/kamilkisiela/graphql-hive/pull/1305)
+  [`cdf2e8a7`](https://github.com/kamilkisiela/graphql-hive/commit/cdf2e8a77eb1e98f7b90c7ac82ad663bda5784ef)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Support @apollo/server
+
 ## 0.22.0
 
 ### Minor Changes

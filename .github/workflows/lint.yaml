@@ -12,6 +12,9 @@ jobs:
       - name: setup environment
         uses: ./.github/actions/setup
 
+      - name: lint .env.template files
+        run: pnpm lint:env-template
+
       - name: eslint cache
         uses: actions/cache@v3
         with:

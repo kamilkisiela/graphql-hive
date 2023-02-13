@@ -195,6 +195,34 @@ test('collect arguments', async () => {
   expect(info.fields).toContain(`Query.projects.filter`);
 });
 
+test('skips argument directives', async () => {
+  const collect = createCollector({
+    schema,
+    max: 1,
+  });
+  const info = collect(
+    parse(/* GraphQL */ `
+      query getProjects($limit: Int!, $type: ProjectType!, $includeName: Boolean!) {
+        projects(filter: { pagination: { limit: $limit }, type: $type }) {
+          id
+          ...NestedFragment
+        }
+      }
+
+      fragment NestedFragment on Project {
+        ...IncludeNameFragment @include(if: $includeName)
+      }
+
+      fragment IncludeNameFragment on Project {
+        name
+      }
+    `),
+    {},
+  ).value;
+
+  expect(info.fields).toContain(`Query.projects.filter`);
+});
+
 test('collect used-only input fields', async () => {
   const collect = createCollector({
     schema,

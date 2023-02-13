@@ -62,7 +62,7 @@ export function Pricing({ gradient }: { gradient: [string, string] }): ReactElem
     <div className="w-full bg-neutral-900">
       <div className="mx-auto my-12 box-border w-full max-w-[1024px] px-6">
         <h2
-          className="bg-clip-text text-2xl font-bold leading-normal text-white text-transparent dark:text-transparent md:text-3xl"
+          className="bg-clip-text text-2xl font-bold leading-normal text-transparent md:text-3xl"
           style={{
             backgroundImage: `linear-gradient(-70deg, ${gradient[1]}, ${gradient[0]})`,
           }}
@@ -109,9 +109,7 @@ export function Pricing({ gradient }: { gradient: [string, string] }): ReactElem
               <span
                 className="cursor-pointer"
                 onClick={() => {
-                  if (typeof window !== 'undefined') {
-                    (window as any).$crisp?.push(['do', 'chat:open']);
-                  }
+                  (window as any).$crisp?.push(['do', 'chat:open']);
                 }}
               >
                 Contact us

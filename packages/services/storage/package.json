@@ -12,7 +12,7 @@
     "db:generate": "schemats generate --config schemats.cjs -o src/db/types.ts"
   },
   "dependencies": {
-    "@sentry/node": "7.36.0",
+    "@sentry/node": "7.37.1",
     "@theguild/buddy": "0.1.0",
     "dotenv": "16.0.3",
     "got": "12.5.3",
@@ -20,14 +20,14 @@
     "slonik": "30.1.2",
     "slonik-interceptor-query-logging": "1.4.7",
     "slonik-utilities": "1.9.4",
-    "zod": "3.20.2"
+    "zod": "3.20.6"
   },
   "devDependencies": {
-    "@sentry/types": "7.36.0",
+    "@sentry/types": "7.37.1",
     "@tgriesser/schemats": "7.0.1",
     "@types/node": "18.13.0",
     "@types/pg": "8.6.6",
-    "pg-promise": "10.15.4",
+    "pg-promise": "11.2.0",
     "tslib": "2.5.0",
     "typescript": "4.9.5"
   }

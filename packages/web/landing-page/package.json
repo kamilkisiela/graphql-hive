@@ -20,9 +20,9 @@
   },
   "devDependencies": {
     "@theguild/tailwind-config": "0.2.1",
-    "@types/react": "18.0.27",
-    "next-sitemap": "3.1.50",
+    "@types/react": "18.0.28",
+    "next-sitemap": "3.1.52",
     "postcss": "8.4.21",
-    "tailwindcss": "3.2.4"
+    "tailwindcss": "3.2.6"
   }
 }

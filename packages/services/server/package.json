@@ -19,12 +19,12 @@
     "@escape.tech/graphql-armor-max-depth": "1.8.1",
     "@escape.tech/graphql-armor-max-directives": "1.6.1",
     "@escape.tech/graphql-armor-max-tokens": "1.3.1",
-    "@sentry/integrations": "7.36.0",
-    "@sentry/node": "7.36.0",
-    "@sentry/tracing": "7.36.0",
+    "@sentry/integrations": "7.37.1",
+    "@sentry/node": "7.37.1",
+    "@sentry/tracing": "7.37.1",
     "@trpc/server": "10.9.1",
-    "@whatwg-node/fetch": "0.6.2",
-    "@whatwg-node/server": "0.5.8",
+    "@whatwg-node/fetch": "0.8.1",
+    "@whatwg-node/server": "0.6.7",
     "dotenv": "16.0.3",
     "got": "12.5.3",
     "graphql": "16.6.0",
@@ -32,7 +32,7 @@
     "hyperid": "3.1.1",
     "prom-client": "14.1.1",
     "reflect-metadata": "0.1.13",
-    "zod": "3.20.2"
+    "zod": "3.20.6"
   },
   "devDependencies": {
     "@graphql-hive/client": "workspace:*",
@@ -40,9 +40,9 @@
     "@hive/cdn-script": "workspace:*",
     "@hive/service-common": "workspace:*",
     "@hive/storage": "workspace:*",
-    "@swc/core": "1.3.32",
+    "@swc/core": "1.3.35",
     "fastify": "3.29.5",
-    "pino-pretty": "9.1.1",
+    "pino-pretty": "9.2.0",
     "tslib": "2.5.0"
   },
   "buildOptions": {

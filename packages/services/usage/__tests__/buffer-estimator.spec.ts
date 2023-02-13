@@ -44,7 +44,7 @@ test('increasing the defaultBytesPerUnit', () => {
     defaultBytesPerUnit,
     resetAfter: 5000,
     logger: {
-      info: jest.fn(),
+      info: vi.fn(),
     } as any,
     increaseBy() {
       return 0.25;
@@ -63,7 +63,7 @@ test('increasing the defaultBytesPerUnit should not go over 50% of original esti
     defaultBytesPerUnit,
     resetAfter: 5000,
     logger: {
-      info: jest.fn(),
+      info: vi.fn(),
     } as any,
     increaseBy() {
       return 0.6;
@@ -82,7 +82,7 @@ test('teach estimator multiple times', () => {
     defaultBytesPerUnit,
     resetAfter: 5000,
     logger: {
-      info: jest.fn(),
+      info: vi.fn(),
     } as any,
     increaseBy() {
       return 0;
@@ -112,7 +112,7 @@ test('reset after N milliseconds', async () => {
     defaultBytesPerUnit,
     resetAfter: 100,
     logger: {
-      info: jest.fn(),
+      info: vi.fn(),
     } as any,
     increaseBy() {
       return 0;

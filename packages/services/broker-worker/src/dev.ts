@@ -19,12 +19,14 @@ function main() {
       }),
   );
 
-  app.all('*', (request: Request) => handleRequest(request, isSignatureValid));
+  app.all('*', (request: Request) =>
+    handleRequest(request, isSignatureValid, e => console.error(e)),
+  );
 
   const server = createServer(app);
 
   return new Promise<void>(resolve => {
-    server.listen(PORT, '0.0.0.0', resolve);
+    server.listen(PORT, '::', resolve);
   });
 }
 

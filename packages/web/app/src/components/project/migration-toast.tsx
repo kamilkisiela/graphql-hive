@@ -19,7 +19,7 @@ export function ProjectMigrationToast({ projectId, orgId }: { projectId: string;
         href={`/${orgId}/${projectId}/view/settings`}
         variant="link"
         size="small"
-        className="shrink-1 mr-2 self-center text-sm font-medium text-gray-300"
+        className="mr-2 self-center text-sm font-medium text-gray-300"
       >
         Migrate
       </Button>

@@ -1,6 +1,5 @@
 import { ReactElement, ReactNode, useEffect } from 'react';
 import NextLink from 'next/link';
-import 'twin.macro';
 import { useQuery } from 'urql';
 import { Button, Heading, Link, SubHeader, Tabs } from '@/components/v2';
 import {

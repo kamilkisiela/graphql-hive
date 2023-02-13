@@ -461,7 +461,7 @@ export const resolvers: SchemaModule.Resolvers = {
           commit: 'system',
           date: log.date as any,
           id: log.id,
-          service: log.service_name,
+          deletedService: log.service_name,
         };
       }
 

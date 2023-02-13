@@ -46,7 +46,7 @@ jobs:
         with:
           cmd: yq -i 'del(.services.*.volumes)' docker/docker-compose.community.yml
 
-      - name: get cpu count for jest
+      - name: get cpu count for vitest
         id: cpu-cores
         uses: SimenB/github-actions-cpu-cores@v1
 
@@ -66,7 +66,7 @@ jobs:
         env:
           HIVE_DEBUG: 1
         run: |
-          pnpm --filter integration-tests test:integration --max-workers ${{ steps.cpu-cores.outputs.count }}
+          VITEST_MAX_THREADS=${{ steps.cpu-cores.outputs.count }} pnpm --filter integration-tests test:integration
 
       - name: log dump
         if: ${{ failure() }}

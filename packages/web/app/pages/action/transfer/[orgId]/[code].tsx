@@ -1,5 +1,5 @@
 import * as React from 'react';
-import tw from 'twin.macro';
+import clsx from 'clsx';
 import { gql, useMutation, useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { Title } from '@/components/common';
@@ -9,13 +9,10 @@ import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 import { Button } from '@chakra-ui/react';
 
-const Center = tw.div`w-full h-full flex flex-row items-center justify-center`;
-
-const Invitation = {
-  Root: tw.div`flex flex-col text-center md:w-2/3 w-full`,
-  Title: tw.h1`sm:text-4xl text-3xl mb-4 font-medium text-white`,
-  Description: tw.p`mb-8 leading-relaxed`,
-  Actions: tw.div`flex flex-row gap-2 items-center justify-center`,
+const classes = {
+  title: clsx('sm:text-4xl text-3xl mb-4 font-medium text-white'),
+  description: clsx('mb-8 leading-relaxed'),
+  actions: clsx('flex flex-row gap-2 items-center justify-center'),
 };
 
 const OrganizationTransferPage_GetRequest = gql(`
@@ -105,44 +102,40 @@ function OrganizationTransferPage() {
     <>
       <Title title="Organization Transfer" />
       <DataWrapper query={query}>
-        {({ data }) => {
-          if (data.organizationTransferRequest == null) {
-            return (
-              <Center>
-                <Invitation.Root>
-                  <Invitation.Title>Organization Transfer Error</Invitation.Title>
-                  <Invitation.Description>Not found</Invitation.Description>
+        {({ data }) => (
+          <div className="w-full h-full flex flex-row items-center justify-center">
+            <div className="flex flex-col text-center md:w-2/3 w-full">
+              {data.organizationTransferRequest == null ? (
+                <>
+                  <h1 className={classes.title}>Organization Transfer Error</h1>
+                  <p className={classes.description}>Not found</p>
 
-                  <Invitation.Actions>
+                  <div className={classes.actions}>
                     <Button onClick={goBack}>Back to Hive</Button>
-                  </Invitation.Actions>
-                </Invitation.Root>
-              </Center>
-            );
-          }
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h1 className={classes.title}>Accept the transfer?</h1>
+                  <p className={classes.description}>
+                    {data.organizationTransferRequest.organization.owner.user.displayName} wants to
+                    transfer the "{data.organizationTransferRequest.organization.name}" organization
+                    to you.
+                  </p>
 
-          return (
-            <Center>
-              <Invitation.Root>
-                <Invitation.Title>Accept the transfer?</Invitation.Title>
-                <Invitation.Description>
-                  {data.organizationTransferRequest.organization.owner.user.displayName} wants to
-                  transfer the "{data.organizationTransferRequest.organization.name}" organization
-                  to you.
-                </Invitation.Description>
-
-                <Invitation.Actions>
-                  <Button colorScheme="primary" onClick={accept} disabled={mutation.fetching}>
-                    Accept
-                  </Button>
-                  <Button colorScheme="red" onClick={reject} disabled={mutation.fetching}>
-                    Reject
-                  </Button>
-                </Invitation.Actions>
-              </Invitation.Root>
-            </Center>
-          );
-        }}
+                  <div className={classes.actions}>
+                    <Button colorScheme="primary" onClick={accept} disabled={mutation.fetching}>
+                      Accept
+                    </Button>
+                    <Button colorScheme="red" onClick={reject} disabled={mutation.fetching}>
+                      Reject
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
       </DataWrapper>
     </>
   );

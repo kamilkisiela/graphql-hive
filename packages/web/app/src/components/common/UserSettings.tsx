@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { useFormik } from 'formik';
-import 'twin.macro';
 import { DocumentType, gql, useMutation } from 'urql';
 import * as Yup from 'yup';
 import {
@@ -97,7 +96,7 @@ export const UserSettings: React.FC<{
       >
         <ModalHeader>User Settings</ModalHeader>
         <ModalBody>
-          <div tw="space-y-6">
+          <div className="space-y-6">
             <FormControl isInvalid={isValid('fullName')}>
               <FormLabel>Full name</FormLabel>
               <Input
@@ -122,7 +121,7 @@ export const UserSettings: React.FC<{
             </FormControl>
           </div>
         </ModalBody>
-        <ModalFooter tw="space-x-6">
+        <ModalFooter className="space-x-6">
           <Button variant="ghost" type="button" disabled={formik.isSubmitting} onClick={onClose}>
             Cancel
           </Button>

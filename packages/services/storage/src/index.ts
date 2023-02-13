@@ -1732,7 +1732,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         FROM public.schema_versions as sv
         LEFT JOIN public.targets as t ON (t.id = sv.target_id)
         LEFT JOIN public.schema_log as sl ON (sl.id = sv.action_id)
-        WHERE t.id = ${target} AND t.project_id = ${project} AND sl.action = 'PUSH'
+        WHERE t.id = ${target} AND t.project_id = ${project}
         ORDER BY sv.created_at DESC
         LIMIT 1
       `);

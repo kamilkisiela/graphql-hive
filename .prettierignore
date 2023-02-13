@@ -22,5 +22,8 @@ tmp
 pnpm-lock.yaml
 .bob/
 
+.changeset/
+
 # temp volumes
-.hive
+.hive/
+.hive-dev/

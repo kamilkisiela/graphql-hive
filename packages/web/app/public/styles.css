@@ -1,3 +1,42 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+  *:active,
+  *:focus {
+    outline: none !important;
+  }
+
+  html,
+  body,
+  #__next {
+    @apply h-screen w-screen;
+  }
+
+  #__next {
+    font-family: inherit !important;
+    color: inherit !important;
+    @apply flex h-full flex-col text-sm text-gray-700 antialiased lg:text-base;
+  }
+
+  /* Remove autocomplete color in Chrome */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-transition: color 9999s ease-out, background-color 9999s ease-out;
+    -webkit-transition-delay: 9999s;
+  }
+
+  select {
+    /* remove default arrow down icon in right side */
+    appearance: none;
+  }
+
+  .monaco-editor,
+  .monaco-editor-background,
+  [role='presentation'] {
+    background: transparent !important;
+  }
+}
