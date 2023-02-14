@@ -159,8 +159,8 @@ importers:
       '@graphql-typed-document-node/core': 3.1.1
       '@hive/rate-limit': workspace:*
       '@hive/server': workspace:*
-      '@trpc/client': 10.9.1
-      '@trpc/server': 10.9.1
+      '@trpc/client': 10.11.1
+      '@trpc/server': 10.11.1
       '@types/dockerode': 3.3.14
       '@types/ioredis': 4.28.10
       '@whatwg-node/fetch': 0.8.1
@@ -183,8 +183,8 @@ importers:
       '@graphql-hive/client': link:../packages/libraries/client
       '@graphql-hive/core': link:../packages/libraries/core
       '@graphql-typed-document-node/core': 3.1.1_graphql@16.6.0
-      '@trpc/client': 10.9.1_@trpc+server@10.9.1
-      '@trpc/server': 10.9.1
+      '@trpc/client': 10.11.1_@trpc+server@10.11.1
+      '@trpc/server': 10.11.1
       '@whatwg-node/fetch': 0.8.1
       bcryptjs: 2.4.3
       date-fns: 2.29.3
@@ -370,8 +370,8 @@ importers:
       '@sentry/types': 7.37.2
       '@slack/web-api': 6.8.1
       '@theguild/buddy': 0.1.0
-      '@trpc/client': 10.9.1
-      '@trpc/server': 10.9.1
+      '@trpc/client': 10.11.1
+      '@trpc/server': 10.11.1
       '@types/bcryptjs': 2.4.2
       '@types/ioredis-mock': 8.2.1
       '@types/lodash': 4.14.191
@@ -407,8 +407,8 @@ importers:
       '@sentry/types': 7.37.2
       '@slack/web-api': 6.8.1
       '@theguild/buddy': 0.1.0_ryylgra5xglhidfoiaxehn22hq
-      '@trpc/client': 10.9.1_@trpc+server@10.9.1
-      '@trpc/server': 10.9.1
+      '@trpc/client': 10.11.1_@trpc+server@10.11.1
+      '@trpc/server': 10.11.1
       '@whatwg-node/fetch': 0.8.1
       agentkeepalive: 4.2.1
       bcryptjs: 2.4.3
@@ -502,7 +502,7 @@ importers:
     specifiers:
       '@hive/service-common': workspace:*
       '@sentry/node': 7.37.2
-      '@trpc/server': 10.9.1
+      '@trpc/server': 10.11.1
       '@types/mjml': 4.7.0
       '@types/nodemailer': 6.4.7
       '@types/sendmail': 1.4.4
@@ -520,7 +520,7 @@ importers:
       zod: 3.20.6
     dependencies:
       '@sentry/node': 7.37.2
-      '@trpc/server': 10.9.1
+      '@trpc/server': 10.11.1
       '@whatwg-node/fetch': 0.8.1
       bullmq: 3.6.5_xbmkiyyfti7h6orsfs6pdmi4s4
       dotenv: 16.0.3
@@ -573,8 +573,8 @@ importers:
       '@hive/storage': workspace:*
       '@sentry/node': 7.37.2
       '@sentry/tracing': 7.37.2
-      '@trpc/client': 10.9.1
-      '@trpc/server': 10.9.1
+      '@trpc/client': 10.11.1
+      '@trpc/server': 10.11.1
       '@whatwg-node/fetch': 0.8.1
       date-fns: 2.29.3
       dotenv: 16.0.3
@@ -586,8 +586,8 @@ importers:
     dependencies:
       '@sentry/node': 7.37.2
       '@sentry/tracing': 7.37.2
-      '@trpc/client': 10.9.1_@trpc+server@10.9.1
-      '@trpc/server': 10.9.1
+      '@trpc/client': 10.11.1_@trpc+server@10.11.1
+      '@trpc/server': 10.11.1
       '@whatwg-node/fetch': 0.8.1
       date-fns: 2.29.3
       dotenv: 16.0.3
@@ -610,7 +610,7 @@ importers:
       '@hive/service-common': workspace:*
       '@sentry/node': 7.37.2
       '@sentry/tracing': 7.37.2
-      '@trpc/server': 10.9.1
+      '@trpc/server': 10.11.1
       '@types/async-retry': 1.4.5
       '@types/ioredis-mock': 8.2.1
       '@whatwg-node/fetch': 0.8.1
@@ -629,7 +629,7 @@ importers:
       '@graphql-tools/stitching-directives': 2.3.30_graphql@16.6.0
       '@sentry/node': 7.37.2
       '@sentry/tracing': 7.37.2
-      '@trpc/server': 10.9.1
+      '@trpc/server': 10.11.1
       '@whatwg-node/fetch': 0.8.1
       dotenv: 16.0.3
       got: 12.5.3
@@ -666,7 +666,7 @@ importers:
       '@sentry/node': 7.37.2
       '@sentry/tracing': 7.37.2
       '@swc/core': 1.3.35
-      '@trpc/server': 10.9.1
+      '@trpc/server': 10.11.1
       '@whatwg-node/fetch': 0.8.1
       '@whatwg-node/server': 0.6.7
       dotenv: 16.0.3
@@ -693,7 +693,7 @@ importers:
       '@sentry/integrations': 7.37.2
       '@sentry/node': 7.37.2
       '@sentry/tracing': 7.37.2
-      '@trpc/server': 10.9.1
+      '@trpc/server': 10.11.1
       '@whatwg-node/fetch': 0.8.1
       '@whatwg-node/server': 0.6.7
       dotenv: 16.0.3
@@ -783,8 +783,8 @@ importers:
       '@hive/storage': workspace:*
       '@sentry/node': 7.37.2
       '@sentry/tracing': 7.37.2
-      '@trpc/client': 10.9.1
-      '@trpc/server': 10.9.1
+      '@trpc/client': 10.11.1
+      '@trpc/server': 10.11.1
       '@whatwg-node/fetch': 0.8.1
       date-fns: 2.29.3
       dotenv: 16.0.3
@@ -796,8 +796,8 @@ importers:
     dependencies:
       '@sentry/node': 7.37.2
       '@sentry/tracing': 7.37.2
-      '@trpc/client': 10.9.1_@trpc+server@10.9.1
-      '@trpc/server': 10.9.1
+      '@trpc/client': 10.11.1_@trpc+server@10.11.1
+      '@trpc/server': 10.11.1
       '@whatwg-node/fetch': 0.8.1
       date-fns: 2.29.3
       dotenv: 16.0.3
@@ -816,7 +816,7 @@ importers:
       '@hive/storage': workspace:*
       '@sentry/node': 7.37.2
       '@sentry/tracing': 7.37.2
-      '@trpc/server': 10.9.1
+      '@trpc/server': 10.11.1
       '@types/ms': 0.7.31
       dotenv: 16.0.3
       fastify: 3.29.5
@@ -831,7 +831,7 @@ importers:
     dependencies:
       '@sentry/node': 7.37.2
       '@sentry/tracing': 7.37.2
-      '@trpc/server': 10.9.1
+      '@trpc/server': 10.11.1
       dotenv: 16.0.3
       ioredis: 5.3.1
       ms: 2.1.3
@@ -854,8 +854,8 @@ importers:
       '@hive/usage-common': workspace:*
       '@sentry/node': 7.37.2
       '@sentry/tracing': 7.37.2
-      '@trpc/client': 10.9.1
-      '@trpc/server': 10.9.1
+      '@trpc/client': 10.11.1
+      '@trpc/server': 10.11.1
       '@whatwg-node/fetch': 0.8.1
       ajv: 8.12.0
       dotenv: 16.0.3
@@ -868,8 +868,8 @@ importers:
     dependencies:
       '@sentry/node': 7.37.2
       '@sentry/tracing': 7.37.2
-      '@trpc/client': 10.9.1_@trpc+server@10.9.1
-      '@trpc/server': 10.9.1
+      '@trpc/client': 10.11.1_@trpc+server@10.11.1
+      '@trpc/server': 10.11.1
       '@whatwg-node/fetch': 0.8.1
       ajv: 8.12.0
       dotenv: 16.0.3
@@ -896,7 +896,7 @@ importers:
       '@hive/service-common': workspace:*
       '@sentry/node': 7.37.2
       '@sentry/tracing': 7.37.2
-      '@trpc/server': 10.9.1
+      '@trpc/server': 10.11.1
       '@whatwg-node/fetch': 0.8.1
       dotenv: 16.0.3
       got: 12.5.3
@@ -907,7 +907,7 @@ importers:
     dependencies:
       '@sentry/node': 7.37.2
       '@sentry/tracing': 7.37.2
-      '@trpc/server': 10.9.1
+      '@trpc/server': 10.11.1
       '@whatwg-node/fetch': 0.8.1
       dotenv: 16.0.3
       got: 12.5.3
@@ -959,7 +959,7 @@ importers:
       '@hive/service-common': workspace:*
       '@sentry/node': 7.37.2
       '@sentry/tracing': 7.37.2
-      '@trpc/server': 10.9.1
+      '@trpc/server': 10.11.1
       bullmq: 3.6.5
       copyfiles: 2.4.1
       dotenv: 16.0.3
@@ -972,7 +972,7 @@ importers:
     dependencies:
       '@sentry/node': 7.37.2
       '@sentry/tracing': 7.37.2
-      '@trpc/server': 10.9.1
+      '@trpc/server': 10.11.1
       bullmq: 3.6.5_xbmkiyyfti7h6orsfs6pdmi4s4
       dotenv: 16.0.3
       got: 12.5.3
@@ -1022,8 +1022,8 @@ importers:
       '@tailwindcss/line-clamp': 0.4.2
       '@tanstack/react-table': 8.0.0-beta.8
       '@theguild/editor': 1.2.4
-      '@trpc/client': 10.9.1
-      '@trpc/server': 10.9.1
+      '@trpc/client': 10.11.1
+      '@trpc/server': 10.11.1
       '@types/cookies': 0.7.7
       '@types/dompurify': 2.4.0
       '@types/js-cookie': 3.0.2
@@ -1111,8 +1111,8 @@ importers:
       '@stripe/stripe-js': 1.46.0
       '@tanstack/react-table': 8.0.0-beta.8_biqbaboplfbrettd7655fr4n2y
       '@theguild/editor': 1.2.4_m3acdzultzo2owbx5gwkccg4tm
-      '@trpc/client': 10.9.1_@trpc+server@10.9.1
-      '@trpc/server': 10.9.1
+      '@trpc/client': 10.11.1_@trpc+server@10.11.1
+      '@trpc/server': 10.11.1
       '@urql/core': 3.1.1_graphql@16.6.0
       '@urql/devtools': 2.0.3_ioimjbecbkqzfeizgamzrgwc3y
       '@urql/exchange-graphcache': 5.0.8_graphql@16.6.0
@@ -10753,16 +10753,16 @@ packages:
       - supports-color
     dev: true
 
-  /@trpc/client/10.9.1_@trpc+server@10.9.1:
-    resolution: {integrity: sha512-9ma44dFU40KHIEaMdyjRJd9LloFyZZXeAbZJTi2+XK/5sj64FRqqef3fWTj2dBc7A09pk8gls4Tqa3tNC98jSg==}
+  /@trpc/client/10.11.1_@trpc+server@10.11.1:
+    resolution: {integrity: sha512-6aHY27YomzyUAlKhJE4jJulzDjc6vAKAKoWqAmoYbEEhApvyDrMo52bdYqqsukjxvA/L/uPhjOcPU5OsO+x+pA==}
     peerDependencies:
-      '@trpc/server': 10.9.1
+      '@trpc/server': 10.11.1
     dependencies:
-      '@trpc/server': 10.9.1
+      '@trpc/server': 10.11.1
     dev: false
 
-  /@trpc/server/10.9.1:
-    resolution: {integrity: sha512-cUbj8KphlH0IHuoVUhkZrN1E+FdfRpagglqhblyj8VPJKkjzTjb6D8MYHlXhiX7Tdmtwy2w0ev39HBkzlM0thg==}
+  /@trpc/server/10.11.1:
+    resolution: {integrity: sha512-7FnvuaNsSl6HLloh0a297McS4yjhbqg/bw1h/XOAKduNPUQwXNmJf48X1PAsD8ODtO1Rrjz9TeynJD7uCEn0xQ==}
     dev: false
 
   /@trysound/sax/0.2.0:

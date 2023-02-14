@@ -15,7 +15,7 @@
     "@graphql-tools/stitching-directives": "2.3.30",
     "@sentry/node": "7.37.2",
     "@sentry/tracing": "7.37.2",
-    "@trpc/server": "10.9.1",
+    "@trpc/server": "10.11.1",
     "@whatwg-node/fetch": "0.8.1",
     "dotenv": "16.0.3",
     "got": "12.5.3",
