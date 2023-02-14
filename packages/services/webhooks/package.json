@@ -11,8 +11,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@sentry/node": "7.37.1",
-    "@sentry/tracing": "7.37.1",
+    "@sentry/node": "7.37.2",
+    "@sentry/tracing": "7.37.2",
     "@trpc/server": "10.9.1",
     "bullmq": "3.6.5",
     "dotenv": "16.0.3",
