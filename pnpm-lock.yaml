@@ -1041,7 +1041,7 @@ importers:
       clsx: 1.2.1
       cookies: 0.8.0
       date-fns: 2.29.3
-      dompurify: 2.4.4
+      dompurify: 3.0.0
       echarts: 5.4.1
       echarts-for-react: 3.0.2
       formik: 2.2.9
@@ -1120,7 +1120,7 @@ importers:
       clsx: 1.2.1
       cookies: 0.8.0
       date-fns: 2.29.3
-      dompurify: 2.4.4
+      dompurify: 3.0.0
       echarts: 5.4.1
       echarts-for-react: 3.0.2_echarts@5.4.1+react@18.2.0
       formik: 2.2.9_react@18.2.0
@@ -14372,8 +14372,8 @@ packages:
     resolution: {integrity: sha512-ewwFzHzrrneRjxzmK6oVz/rZn9VWspGFRDb4/rRtIsM1n36t9AKma/ye8syCpcw+XJ25kOK/hOG7t1j2I2yBqA==}
     dev: false
 
-  /dompurify/2.4.4:
-    resolution: {integrity: sha512-1e2SpqHiRx4DPvmRuXU5J0di3iQACwJM+mFGE2HAkkK7Tbnfk9WcghcAmyWc9CRrjyRRUpmuhPUH6LphQQR3EQ==}
+  /dompurify/3.0.0:
+    resolution: {integrity: sha512-0g/yr2IJn4nTbxwL785YxS7/AvvgGFJw6LLWP+BzWzB1+BYOqPUT9Hy0rXrZh5HLdHnxH72aDdzvC9SdTjsuaA==}
     dev: false
 
   /domutils/2.8.0:
