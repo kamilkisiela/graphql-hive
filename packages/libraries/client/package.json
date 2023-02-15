@@ -55,7 +55,7 @@
   },
   "devDependencies": {
     "@apollo/federation": "0.38.1",
-    "@apollo/server": "4.3.3",
+    "@apollo/server": "4.4.0",
     "@apollo/subgraph": "2.3.2",
     "@envelop/types": "3.0.1",
     "@types/async-retry": "1.4.5",
