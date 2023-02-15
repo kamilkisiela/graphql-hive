@@ -1029,7 +1029,7 @@ importers:
       '@types/js-cookie': 3.0.2
       '@types/react': 18.0.28
       '@types/react-date-range': 1.4.4
-      '@types/react-dom': 18.0.10
+      '@types/react-dom': 18.0.11
       '@types/react-virtualized-auto-sizer': 1.0.1
       '@types/react-window': 1.8.5
       '@urql/core': 3.1.1
@@ -1170,7 +1170,7 @@ importers:
       '@types/js-cookie': 3.0.2
       '@types/react': 18.0.28
       '@types/react-date-range': 1.4.4
-      '@types/react-dom': 18.0.10
+      '@types/react-dom': 18.0.11
       '@types/react-virtualized-auto-sizer': 1.0.1
       '@types/react-window': 1.8.5
       '@welldone-software/why-did-you-render': 7.0.1_react@18.2.0
@@ -11096,8 +11096,8 @@ packages:
       date-fns: 2.29.3
     dev: true
 
-  /@types/react-dom/18.0.10:
-    resolution: {integrity: sha512-E42GW/JA4Qv15wQdqJq8DL4JhNpB3prJgjgapN3qJT9K2zO5IIAQh4VXvCEDupoqAwnz0cY4RlXeC/ajX5SFHg==}
+  /@types/react-dom/18.0.11:
+    resolution: {integrity: sha512-O38bPbI2CWtgw/OoQoY+BRelw7uysmXbWvw3nLWO21H1HSh+GOlqPuXshJfjmpNlKiiSDG9cc1JZAaMmVdcTlw==}
     dependencies:
       '@types/react': 18.0.28
     dev: true
