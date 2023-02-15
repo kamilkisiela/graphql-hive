@@ -1034,7 +1034,7 @@ importers:
       '@types/react-window': 1.8.5
       '@urql/core': 3.1.1
       '@urql/devtools': 2.0.3
-      '@urql/exchange-graphcache': 5.0.8
+      '@urql/exchange-graphcache': 5.0.9
       '@welldone-software/why-did-you-render': 7.0.1
       '@whatwg-node/fetch': 0.8.1
       autoprefixer: 10.4.13
@@ -1115,7 +1115,7 @@ importers:
       '@trpc/server': 10.11.1
       '@urql/core': 3.1.1_graphql@16.6.0
       '@urql/devtools': 2.0.3_ioimjbecbkqzfeizgamzrgwc3y
-      '@urql/exchange-graphcache': 5.0.8_graphql@16.6.0
+      '@urql/exchange-graphcache': 5.0.9_graphql@16.6.0
       '@whatwg-node/fetch': 0.8.1
       clsx: 1.2.1
       cookies: 0.8.0
@@ -11367,8 +11367,8 @@ packages:
       wonka: 6.2.3
     dev: false
 
-  /@urql/exchange-graphcache/5.0.8_graphql@16.6.0:
-    resolution: {integrity: sha512-uUomVgpcvcOgFEkNWoz9eEPsZ4KNZpZ5YfopZHQ+SN6eZKtT91XqjHNP0mUdcKqIE3fmbKMiPMKbBvxBwzbOow==}
+  /@urql/exchange-graphcache/5.0.9_graphql@16.6.0:
+    resolution: {integrity: sha512-GYhN4YDL+/alF6ci1OFOaL0Ze0GinmuYWrjQjpjl8kP/9ZbXY2LLN/3ZlRG9cCks1nxyea/9h4IS0mk5LS57lA==}
     peerDependencies:
       graphql: ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
