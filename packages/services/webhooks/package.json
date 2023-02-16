@@ -14,7 +14,7 @@
     "@sentry/node": "7.37.2",
     "@sentry/tracing": "7.37.2",
     "@trpc/server": "10.11.1",
-    "bullmq": "3.6.5",
+    "bullmq": "3.6.6",
     "dotenv": "16.0.3",
     "got": "12.5.3",
     "ioredis": "5.3.1",
