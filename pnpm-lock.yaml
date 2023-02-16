@@ -151,7 +151,7 @@ importers:
   integration-tests:
     specifiers:
       '@apollo/gateway': 2.3.2
-      '@apollo/server': 4.3.3
+      '@apollo/server': 4.4.0
       '@aws-sdk/client-s3': 3.267.0
       '@esm2cjs/execa': 6.1.1-cjs.1
       '@graphql-hive/client': workspace:*
@@ -177,7 +177,7 @@ importers:
       zod: 3.20.6
     dependencies:
       '@apollo/gateway': 2.3.2_graphql@16.6.0
-      '@apollo/server': 4.3.3_graphql@16.6.0
+      '@apollo/server': 4.4.0_graphql@16.6.0
       '@aws-sdk/client-s3': 3.267.0
       '@esm2cjs/execa': 6.1.1-cjs.1
       '@graphql-hive/client': link:../packages/libraries/client
@@ -281,7 +281,7 @@ importers:
       axios: 1.2.1
       tiny-lru: 8.0.2
     optionalDependencies:
-      '@apollo/server': 4.3.3
+      '@apollo/server': 4.4.0
       '@envelop/types': 3.0.1
     devDependencies:
       '@apollo/federation': 0.38.1
@@ -1627,8 +1627,8 @@ packages:
       graphql: 16.6.0
     dev: false
 
-  /@apollo/server/4.3.3:
-    resolution: {integrity: sha512-2nigGTgXCAUk2PHHGybtofyuuVAA/QUZwRJzwuCbRFgY1fKkMT7J4fUPwNcA809lDlZyyYphcQnM/vQNbeiu6w==}
+  /@apollo/server/4.4.0:
+    resolution: {integrity: sha512-hjFq8fB3tO6jnvNj2030IUDlxjpKAHvcjXq0PhpdSzjRggZlAMVr9REqvn6Ni++lF/80T/Na+YYZW4L+gedHaQ==}
     engines: {node: '>=14.16.0'}
     peerDependencies:
       graphql: ^16.6.0
@@ -1665,8 +1665,8 @@ packages:
     dev: false
     optional: true
 
-  /@apollo/server/4.3.3_graphql@16.6.0:
-    resolution: {integrity: sha512-2nigGTgXCAUk2PHHGybtofyuuVAA/QUZwRJzwuCbRFgY1fKkMT7J4fUPwNcA809lDlZyyYphcQnM/vQNbeiu6w==}
+  /@apollo/server/4.4.0_graphql@16.6.0:
+    resolution: {integrity: sha512-hjFq8fB3tO6jnvNj2030IUDlxjpKAHvcjXq0PhpdSzjRggZlAMVr9REqvn6Ni++lF/80T/Na+YYZW4L+gedHaQ==}
     engines: {node: '>=14.16.0'}
     peerDependencies:
       graphql: ^16.6.0
