@@ -31,7 +31,7 @@
     "@types/ioredis-mock": "8.2.1",
     "fastify": "3.29.5",
     "ioredis-mock": "8.2.6",
-    "pino-pretty": "9.2.0"
+    "pino-pretty": "9.3.0"
   },
   "buildOptions": {
     "runify": true,
