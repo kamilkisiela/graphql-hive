@@ -1072,7 +1072,7 @@ importers:
       supertokens-js-override: 0.0.4
       supertokens-node: 12.1.6
       supertokens-web-js: 0.5.0
-      tailwindcss: 3.2.6
+      tailwindcss: 3.2.7
       tailwindcss-radix: 2.7.0
       tslib: 2.5.0
       urql: 3.0.3
@@ -1149,7 +1149,7 @@ importers:
       supertokens-js-override: 0.0.4
       supertokens-node: 12.1.6
       supertokens-web-js: 0.5.0
-      tailwindcss: 3.2.6_postcss@8.4.21
+      tailwindcss: 3.2.7_postcss@8.4.21
       tailwindcss-radix: 2.7.0
       tslib: 2.5.0
       urql: 3.0.3_onqnqwb3ubg5opvemcqf7c2qhy
@@ -1164,7 +1164,7 @@ importers:
       '@hive/emails': link:../../services/emails
       '@hive/server': link:../../services/server
       '@next/bundle-analyzer': 13.1.1
-      '@tailwindcss/line-clamp': 0.4.2_tailwindcss@3.2.6
+      '@tailwindcss/line-clamp': 0.4.2_tailwindcss@3.2.7
       '@types/cookies': 0.7.7
       '@types/dompurify': 2.4.0
       '@types/js-cookie': 3.0.2
@@ -1186,14 +1186,14 @@ importers:
       next: 13.1.1
       react: 18.2.0
       react-dom: 18.2.0
-      tailwindcss: 3.2.6
+      tailwindcss: 3.2.7
       zod: 3.20.6
     dependencies:
       '@theguild/components': 4.5.4_q76c2b4vyoegvsbrcwkfvimnai
       next: 13.1.1_biqbaboplfbrettd7655fr4n2y
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
-      tailwindcss: 3.2.6
+      tailwindcss: 3.2.7
       zod: 3.20.6
     devDependencies:
       '@theguild/tailwind-config': 0.2.1
@@ -1214,7 +1214,7 @@ importers:
       react: 18.2.0
       react-dom: 18.2.0
       react-icons: 4.7.1
-      tailwindcss: 3.2.6
+      tailwindcss: 3.2.7
     dependencies:
       '@next/env': 13.1.1
       '@radix-ui/react-tooltip': 1.0.3_zula6vjvt3wdocc4mwcxqa6nzi
@@ -1230,7 +1230,7 @@ importers:
       '@types/react': 18.0.28
       next-sitemap: 3.1.52_syentjjt63dukspj2zj7hzem6y
       postcss: 8.4.21
-      tailwindcss: 3.2.6_postcss@8.4.21
+      tailwindcss: 3.2.7_postcss@8.4.21
 
 packages:
 
@@ -10517,12 +10517,12 @@ packages:
       defer-to-connect: 2.0.1
     dev: false
 
-  /@tailwindcss/line-clamp/0.4.2_tailwindcss@3.2.6:
+  /@tailwindcss/line-clamp/0.4.2_tailwindcss@3.2.7:
     resolution: {integrity: sha512-HFzAQuqYCjyy/SX9sLGB1lroPzmcnWv1FHkIpmypte10hptf4oPUfucryMKovZh2u0uiS9U5Ty3GghWfEJGwVw==}
     peerDependencies:
       tailwindcss: '>=2.0.0 || >=3.0.0 || >=3.0.0-alpha.1'
     dependencies:
-      tailwindcss: 3.2.6_postcss@8.4.21
+      tailwindcss: 3.2.7_postcss@8.4.21
     dev: true
 
   /@tanstack/react-table/8.0.0-beta.8_biqbaboplfbrettd7655fr4n2y:
@@ -10675,7 +10675,7 @@ packages:
       cssnano: 5.1.14_postcss@8.4.21
       postcss: 8.4.21
       postcss-import: 15.0.0_postcss@8.4.21
-      tailwindcss: 3.2.6_postcss@8.4.21
+      tailwindcss: 3.2.7_postcss@8.4.21
     transitivePeerDependencies:
       - ts-node
     dev: true
@@ -23863,8 +23863,8 @@ packages:
     resolution: {integrity: sha512-fIVkT5zQYdsjT9+/Mvp+DTlJDdTFpRDuyS5+PLuJDAIIVr9+rWYKhK6rsB9QtjwUwwb0YF+BkAJN6CjZivOfLA==}
     dev: false
 
-  /tailwindcss/3.2.6:
-    resolution: {integrity: sha512-BfgQWZrtqowOQMC2bwaSNe7xcIjdDEgixWGYOd6AL0CbKHJlvhfdbINeAW76l1sO+1ov/MJ93ODJ9yluRituIw==}
+  /tailwindcss/3.2.7:
+    resolution: {integrity: sha512-B6DLqJzc21x7wntlH/GsZwEXTBttVSl1FtCzC8WP4oBc/NKef7kaax5jeihkkCEWc831/5NDJ9gRNDK6NEioQQ==}
     engines: {node: '>=12.13.0'}
     hasBin: true
     peerDependencies:
@@ -23884,7 +23884,6 @@ packages:
       normalize-path: 3.0.0
       object-hash: 3.0.0
       picocolors: 1.0.0
-      postcss: 8.4.21
       postcss-import: 14.1.0
       postcss-js: 4.0.0
       postcss-load-config: 3.1.4
@@ -23897,8 +23896,8 @@ packages:
       - ts-node
     dev: false
 
-  /tailwindcss/3.2.6_postcss@8.4.21:
-    resolution: {integrity: sha512-BfgQWZrtqowOQMC2bwaSNe7xcIjdDEgixWGYOd6AL0CbKHJlvhfdbINeAW76l1sO+1ov/MJ93ODJ9yluRituIw==}
+  /tailwindcss/3.2.7_postcss@8.4.21:
+    resolution: {integrity: sha512-B6DLqJzc21x7wntlH/GsZwEXTBttVSl1FtCzC8WP4oBc/NKef7kaax5jeihkkCEWc831/5NDJ9gRNDK6NEioQQ==}
     engines: {node: '>=12.13.0'}
     hasBin: true
     peerDependencies:
