@@ -23,6 +23,6 @@
     "@types/react": "18.0.28",
     "next-sitemap": "3.1.52",
     "postcss": "8.4.21",
-    "tailwindcss": "3.2.6"
+    "tailwindcss": "3.2.7"
   }
 }
