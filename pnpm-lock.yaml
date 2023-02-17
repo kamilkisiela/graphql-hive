@@ -648,10 +648,10 @@ importers:
 
   packages/services/server:
     specifiers:
-      '@envelop/core': 3.0.4
-      '@envelop/generic-auth': 5.0.4
-      '@envelop/graphql-modules': 4.0.4
-      '@envelop/sentry': 5.0.0
+      '@envelop/core': 3.0.5
+      '@envelop/generic-auth': 5.0.5
+      '@envelop/graphql-modules': 4.0.5
+      '@envelop/sentry': 5.1.0
       '@envelop/types': 3.0.1
       '@escape.tech/graphql-armor-max-aliases': 1.6.1
       '@escape.tech/graphql-armor-max-depth': 1.8.1
@@ -681,10 +681,10 @@ importers:
       tslib: 2.5.0
       zod: 3.20.6
     dependencies:
-      '@envelop/core': 3.0.4
-      '@envelop/generic-auth': 5.0.4_a6sekiasy2tqr6d5gj7n2wtjli
-      '@envelop/graphql-modules': 4.0.4_a6sekiasy2tqr6d5gj7n2wtjli
-      '@envelop/sentry': 5.0.0_cpgmj45tg2qipinq3vyszoyolm
+      '@envelop/core': 3.0.5
+      '@envelop/generic-auth': 5.0.5_uqioltj7hgx2ihhktcvuwrguru
+      '@envelop/graphql-modules': 4.0.5_uqioltj7hgx2ihhktcvuwrguru
+      '@envelop/sentry': 5.1.0_47ebhlswh5dxc3ap234ih7qs7y
       '@envelop/types': 3.0.1
       '@escape.tech/graphql-armor-max-aliases': 1.6.1
       '@escape.tech/graphql-armor-max-depth': 1.8.1
@@ -5129,6 +5129,13 @@ packages:
       '@envelop/types': 3.0.1
       tslib: 2.4.0
 
+  /@envelop/core/3.0.5:
+    resolution: {integrity: sha512-qMnjdZwlvGxlhXZS8SIEJ6F4eCYbGp/gwVyF2DoMCmKriy4NS+gSDbpl/9t13c/fql5x3/zhnzaL39OAhX532A==}
+    dependencies:
+      '@envelop/types': 3.0.1
+      tslib: 2.5.0
+    dev: false
+
   /@envelop/disable-introspection/3.6.0_4hr55tbjlvoppd2sokdhrbpreq:
     resolution: {integrity: sha512-Zf505LqWo2efM0EtTBvXyYPynSTSL2+Ps0X+dCH33vQ3wF6gxMui9g1pGa4MDcGjaXWG67qZcT4eojpGlmmavA==}
     peerDependencies:
@@ -5140,38 +5147,38 @@ packages:
       tslib: 2.5.0
     dev: true
 
-  /@envelop/extended-validation/2.0.4_a6sekiasy2tqr6d5gj7n2wtjli:
-    resolution: {integrity: sha512-23B6VgizjItYehAGB4ZDT9VVmYCHxYVnbJ4XPvlT5R0KSEmTAzoCHTJ5Y+hnQ/lP3wk5OgZZI5HTDSi8CcSNug==}
+  /@envelop/extended-validation/2.0.5_uqioltj7hgx2ihhktcvuwrguru:
+    resolution: {integrity: sha512-3exQGS9mofw9lr7xzTd8lHhnLZq0o7TVgzIthWRCLK7Ays+wHOQies3vP/wSq5v/OkhiWaSayndABE8C2kH/eQ==}
     peerDependencies:
-      '@envelop/core': ^3.0.4
+      '@envelop/core': ^3.0.5
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
-      '@envelop/core': 3.0.4
+      '@envelop/core': 3.0.5
       '@graphql-tools/utils': 8.13.1_graphql@16.6.0
       graphql: 16.6.0
       tslib: 2.5.0
     dev: false
 
-  /@envelop/generic-auth/5.0.4_a6sekiasy2tqr6d5gj7n2wtjli:
-    resolution: {integrity: sha512-D6cSPjNlVV6lJUoTJZVkzjN/F9/nFLvYuotjcZQHue7tCBxegFDUrXf30AfJj3g/RMLZC7U2O6kWvZx5qzTK+w==}
+  /@envelop/generic-auth/5.0.5_uqioltj7hgx2ihhktcvuwrguru:
+    resolution: {integrity: sha512-I4v5VATh9XfAv6H9BUWFz1yggtCbuo+sSjp8amQtmvAMOL6dP+hyEfZOJB3SzRLgXZQ04xASztUgATezruluUQ==}
     peerDependencies:
-      '@envelop/core': ^3.0.4
+      '@envelop/core': ^3.0.5
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
-      '@envelop/core': 3.0.4
-      '@envelop/extended-validation': 2.0.4_a6sekiasy2tqr6d5gj7n2wtjli
+      '@envelop/core': 3.0.5
+      '@envelop/extended-validation': 2.0.5_uqioltj7hgx2ihhktcvuwrguru
       graphql: 16.6.0
       tslib: 2.5.0
     dev: false
 
-  /@envelop/graphql-modules/4.0.4_a6sekiasy2tqr6d5gj7n2wtjli:
-    resolution: {integrity: sha512-jrhGQCjJqFuCOxtgDYjINPC01mLIzdbw3bWEQA8tThT+TpIMsT/oAsUwSZCh3qVA3gydSIv0/8Tuq+4u893t0Q==}
+  /@envelop/graphql-modules/4.0.5_uqioltj7hgx2ihhktcvuwrguru:
+    resolution: {integrity: sha512-CGY7m1OtPIXe6/kKl3VC5k7s8nIWjawHdVMtlZ8SwWaSxExpdwW5JNfGAnZ5MfvkXqUR4mVUavTVy92qs0IbbQ==}
     peerDependencies:
-      '@envelop/core': ^3.0.4
+      '@envelop/core': ^3.0.5
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
       graphql-modules: ^1 || ^2.0.0
     dependencies:
-      '@envelop/core': 3.0.4
+      '@envelop/core': 3.0.5
       graphql: 16.6.0
       tslib: 2.5.0
     dev: false
@@ -5188,14 +5195,14 @@ packages:
       tslib: 2.5.0
     dev: true
 
-  /@envelop/sentry/5.0.0_cpgmj45tg2qipinq3vyszoyolm:
-    resolution: {integrity: sha512-LSgfyH9A5A7nJWlZQFVQscKN5GCMJf+FN51gNKUzxVb4CT4/46gpg53v0L23FFq6NpQ+llG0KyFqh1EofNz1Uw==}
+  /@envelop/sentry/5.1.0_47ebhlswh5dxc3ap234ih7qs7y:
+    resolution: {integrity: sha512-h05KvPAikPfxq58gtPmzElxg+k4dtwEG2FuHgXOfi2Ljuv7RIfiYxTM1F5fXU3BzyPWm7gkzjOi+7Mh2FRNLTw==}
     peerDependencies:
-      '@envelop/core': ^3.0.4
+      '@envelop/core': ^3.0.5
       '@sentry/node': ^6 || ^7
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
-      '@envelop/core': 3.0.4
+      '@envelop/core': 3.0.5
       '@sentry/node': 7.37.2
       graphql: 16.6.0
       tslib: 2.5.0
@@ -5689,7 +5696,7 @@ packages:
     dependencies:
       graphql: 16.6.0
     optionalDependencies:
-      '@envelop/core': 3.0.4
+      '@envelop/core': 3.0.5
       '@escape.tech/graphql-armor-types': 0.4.0
     dev: false
 
@@ -5698,7 +5705,7 @@ packages:
     dependencies:
       graphql: 16.6.0
     optionalDependencies:
-      '@envelop/core': 3.0.4
+      '@envelop/core': 3.0.5
       '@escape.tech/graphql-armor-types': 0.4.0
     dev: false
 
@@ -5707,7 +5714,7 @@ packages:
     dependencies:
       graphql: 16.6.0
     optionalDependencies:
-      '@envelop/core': 3.0.4
+      '@envelop/core': 3.0.5
       '@escape.tech/graphql-armor-types': 0.4.0
     dev: false
 
@@ -5716,7 +5723,7 @@ packages:
     dependencies:
       graphql: 16.6.0
     optionalDependencies:
-      '@envelop/core': 3.0.4
+      '@envelop/core': 3.0.5
       '@escape.tech/graphql-armor-types': 0.4.0
     dev: false
 

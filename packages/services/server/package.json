@@ -10,10 +10,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@envelop/core": "3.0.4",
-    "@envelop/generic-auth": "5.0.4",
-    "@envelop/graphql-modules": "4.0.4",
-    "@envelop/sentry": "5.0.0",
+    "@envelop/core": "3.0.5",
+    "@envelop/generic-auth": "5.0.5",
+    "@envelop/graphql-modules": "4.0.5",
+    "@envelop/sentry": "5.1.0",
     "@envelop/types": "3.0.1",
     "@escape.tech/graphql-armor-max-aliases": "1.6.1",
     "@escape.tech/graphql-armor-max-depth": "1.8.1",
