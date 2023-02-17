@@ -123,7 +123,7 @@ importers:
     specifiers:
       '@manypkg/get-packages': 2.1.0
       '@pulumi/cloudflare': 4.15.0
-      '@pulumi/kubernetes': 3.24.0
+      '@pulumi/kubernetes': 3.24.1
       '@pulumi/kubernetesx': 0.1.6
       '@pulumi/pulumi': 3.55.0
       '@pulumi/random': 4.11.2
@@ -136,8 +136,8 @@ importers:
     dependencies:
       '@manypkg/get-packages': 2.1.0
       '@pulumi/cloudflare': 4.15.0
-      '@pulumi/kubernetes': 3.24.0
-      '@pulumi/kubernetesx': 0.1.6_zb7tcqxnn47tgsmoehdmtrsjmy
+      '@pulumi/kubernetes': 3.24.1
+      '@pulumi/kubernetesx': 0.1.6_gniffiygljxkoqeezz4ktxg5wy
       '@pulumi/pulumi': 3.55.0
       '@pulumi/random': 4.11.2
       js-yaml: 4.1.0
@@ -9152,8 +9152,8 @@ packages:
       - supports-color
     dev: false
 
-  /@pulumi/kubernetes/3.24.0:
-    resolution: {integrity: sha512-/8d7wjJd8DyGfhJbC2DVNf/x+qDG+Wf8haZX6+XmDFZb9fcuupDfj/I+n6HL3dskcZpuwRo9FmPE0nxkl7bKAQ==}
+  /@pulumi/kubernetes/3.24.1:
+    resolution: {integrity: sha512-BH/LxfsgZPEqesvuB9VBo8gHkyC/t605+6xYMNNtTSfFTqN+pMX+i17gMYtRQlV7pic/uQ6xAUHGlXOT0JaV9Q==}
     requiresBuild: true
     dependencies:
       '@pulumi/pulumi': 3.55.0
@@ -9169,13 +9169,13 @@ packages:
       - supports-color
     dev: false
 
-  /@pulumi/kubernetesx/0.1.6_zb7tcqxnn47tgsmoehdmtrsjmy:
+  /@pulumi/kubernetesx/0.1.6_gniffiygljxkoqeezz4ktxg5wy:
     resolution: {integrity: sha512-9VL4Yi4b4aLC/obBarJuNkm86kABByUZICYPSTdV396MGZtOc066o2brsB+kWVQcVfkYVXTPrpjIkAwBXXnzGw==}
     peerDependencies:
       '@pulumi/kubernetes': ^3.0.0
       '@pulumi/pulumi': ^3.0.0
     dependencies:
-      '@pulumi/kubernetes': 3.24.0
+      '@pulumi/kubernetes': 3.24.1
       '@pulumi/pulumi': 3.55.0
     dev: false
 
