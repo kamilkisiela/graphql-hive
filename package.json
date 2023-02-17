@@ -33,7 +33,7 @@
     "lint:fix": "pnpm lint --fix",
     "lint:prettier": "prettier --cache --check .",
     "local:setup": "docker-compose -f ./docker/docker-compose.dev.yml up -d --remove-orphans && pnpm --filter @hive/migrations db:init",
-    "postinstall": "node ./scripts/patch-manifests.js && pnpm env:sync && node ./scripts/turborepo-cleanup.js && node ./scripts/turborepo-setup.js && pnpm cargo:fix",
+    "postinstall": "pnpm env:sync && node ./scripts/turborepo-cleanup.js && node ./scripts/turborepo-setup.js && pnpm cargo:fix",
     "pre-commit": "exit 0 && lint-staged",
     "prepare": "husky install",
     "prerelease": "pnpm build:libraries",
@@ -115,7 +115,9 @@
       "oclif@3.6.5": "patches/oclif@3.6.5.patch",
       "bullmq@3.7.0": "patches/bullmq@3.7.0.patch",
       "@slonik/migrator@0.8.5": "patches/@slonik__migrator@0.8.5.patch",
-      "@graphql-inspector/core@3.5.0": "patches/@graphql-inspector__core@3.5.0.patch"
+      "@graphql-inspector/core@3.5.0": "patches/@graphql-inspector__core@3.5.0.patch",
+      "@apollo/federation@0.38.1": "patches/@apollo__federation@0.38.1.patch",
+      "@octokit/webhooks-methods@3.0.1": "patches/@octokit__webhooks-methods@3.0.1.patch"
     }
   }
 }

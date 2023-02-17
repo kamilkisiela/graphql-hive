@@ -1,0 +1,398 @@
+diff --git a/error/GraphQLError.mjs b/error/GraphQLError.mjs
+deleted file mode 100644
+index d2fe38ae1d6bad8a8b6d81a66338918c5dd88ffc..0000000000000000000000000000000000000000
+diff --git a/error/index.mjs b/error/index.mjs
+deleted file mode 100644
+index d3507ffbd50f4db4fe880bbdf4e729ce3269729a..0000000000000000000000000000000000000000
+diff --git a/error/locatedError.mjs b/error/locatedError.mjs
+deleted file mode 100644
+index 572e398ea033522f517434388ed9cab3c8ee0313..0000000000000000000000000000000000000000
+diff --git a/error/syntaxError.mjs b/error/syntaxError.mjs
+deleted file mode 100644
+index e5b2d74c4e6f3dae587ac8407edc9f740ed0ae05..0000000000000000000000000000000000000000
+diff --git a/execution/collectFields.mjs b/execution/collectFields.mjs
+deleted file mode 100644
+index cb88797c3d0c4a66b80f938c0dbbc787c7d5c832..0000000000000000000000000000000000000000
+diff --git a/execution/execute.mjs b/execution/execute.mjs
+deleted file mode 100644
+index 27d20199b0da4ddcdd7b5eee202d44f5c17be0ff..0000000000000000000000000000000000000000
+diff --git a/execution/index.mjs b/execution/index.mjs
+deleted file mode 100644
+index f1b97564907d349e81f634151beb210618e15ad3..0000000000000000000000000000000000000000
+diff --git a/execution/mapAsyncIterator.mjs b/execution/mapAsyncIterator.mjs
+deleted file mode 100644
+index b3d3a27fcd0965ede0693e5c6634463c147d1d06..0000000000000000000000000000000000000000
+diff --git a/execution/subscribe.mjs b/execution/subscribe.mjs
+deleted file mode 100644
+index e0cf7328495d87c77d7550dedceeccfdfc6bb99c..0000000000000000000000000000000000000000
+diff --git a/execution/values.mjs b/execution/values.mjs
+deleted file mode 100644
+index 2b79fade2090a4334f58af6d818280a0e99cf17e..0000000000000000000000000000000000000000
+diff --git a/graphql.mjs b/graphql.mjs
+deleted file mode 100644
+index c8cfdbcd0472f7171330543161e5c466e9bb15eb..0000000000000000000000000000000000000000
+diff --git a/index.mjs b/index.mjs
+deleted file mode 100644
+index ba8672e675b69675b8d37d3aa521ee2298eacdcc..0000000000000000000000000000000000000000
+diff --git a/jsutils/Maybe.mjs b/jsutils/Maybe.mjs
+deleted file mode 100644
+index cb0ff5c3b541f646105198ee23ac0fc3d805023e..0000000000000000000000000000000000000000
+diff --git a/jsutils/ObjMap.mjs b/jsutils/ObjMap.mjs
+deleted file mode 100644
+index cb0ff5c3b541f646105198ee23ac0fc3d805023e..0000000000000000000000000000000000000000
+diff --git a/jsutils/Path.mjs b/jsutils/Path.mjs
+deleted file mode 100644
+index 945f182e9efc259e50a0ace56652410af6ab2ad3..0000000000000000000000000000000000000000
+diff --git a/jsutils/PromiseOrValue.mjs b/jsutils/PromiseOrValue.mjs
+deleted file mode 100644
+index cb0ff5c3b541f646105198ee23ac0fc3d805023e..0000000000000000000000000000000000000000
+diff --git a/jsutils/devAssert.mjs b/jsutils/devAssert.mjs
+deleted file mode 100644
+index 5192b324c146046f845a82b98645a69d9a8c0c57..0000000000000000000000000000000000000000
+diff --git a/jsutils/didYouMean.mjs b/jsutils/didYouMean.mjs
+deleted file mode 100644
+index bce3c291188bed7696d8ecdfb50bea65ee0b11b6..0000000000000000000000000000000000000000
+diff --git a/jsutils/groupBy.mjs b/jsutils/groupBy.mjs
+deleted file mode 100644
+index 032287b5825b44415801359dc181eb26f75d23eb..0000000000000000000000000000000000000000
+diff --git a/jsutils/identityFunc.mjs b/jsutils/identityFunc.mjs
+deleted file mode 100644
+index 88e3fdcb7bf9c128c95904900663e51da7afb8cf..0000000000000000000000000000000000000000
+diff --git a/jsutils/inspect.mjs b/jsutils/inspect.mjs
+deleted file mode 100644
+index 00000b82a40d7d0a92ed5a7dd17063380a68d0fc..0000000000000000000000000000000000000000
+diff --git a/jsutils/instanceOf.mjs b/jsutils/instanceOf.mjs
+deleted file mode 100644
+index dbe4eef4b751c849ffdc74f21a7e8f8a00c652c6..0000000000000000000000000000000000000000
+diff --git a/jsutils/invariant.mjs b/jsutils/invariant.mjs
+deleted file mode 100644
+index 986cc478bda4b2b09ac0dab561588b1a62267a05..0000000000000000000000000000000000000000
+diff --git a/jsutils/isAsyncIterable.mjs b/jsutils/isAsyncIterable.mjs
+deleted file mode 100644
+index b55e3f015cc4f3a4469809ae1910874a3cf1515b..0000000000000000000000000000000000000000
+diff --git a/jsutils/isIterableObject.mjs b/jsutils/isIterableObject.mjs
+deleted file mode 100644
+index 92ca65742642ecced248cfae30ced465e96433f6..0000000000000000000000000000000000000000
+diff --git a/jsutils/isObjectLike.mjs b/jsutils/isObjectLike.mjs
+deleted file mode 100644
+index 96e76785853f28684c1c6f855ded6b60c2122076..0000000000000000000000000000000000000000
+diff --git a/jsutils/isPromise.mjs b/jsutils/isPromise.mjs
+deleted file mode 100644
+index 02755c209bf55aa1c5ff66a9e1b1d5816e308600..0000000000000000000000000000000000000000
+diff --git a/jsutils/keyMap.mjs b/jsutils/keyMap.mjs
+deleted file mode 100644
+index 56712f3aa8ea9f94adbf5c94f70bc0baf127c114..0000000000000000000000000000000000000000
+diff --git a/jsutils/keyValMap.mjs b/jsutils/keyValMap.mjs
+deleted file mode 100644
+index 9efe2ae7627961ddec3179770196b82d7b88bae3..0000000000000000000000000000000000000000
+diff --git a/jsutils/mapValue.mjs b/jsutils/mapValue.mjs
+deleted file mode 100644
+index c7e2a23087b1314fab297550ebb2740fc42482d2..0000000000000000000000000000000000000000
+diff --git a/jsutils/memoize3.mjs b/jsutils/memoize3.mjs
+deleted file mode 100644
+index 89687f837caab32c7444f4be3a08cfdb1bef7560..0000000000000000000000000000000000000000
+diff --git a/jsutils/naturalCompare.mjs b/jsutils/naturalCompare.mjs
+deleted file mode 100644
+index e47a4843bc33e8486a1068dbc49fd3a53424f04c..0000000000000000000000000000000000000000
+diff --git a/jsutils/printPathArray.mjs b/jsutils/printPathArray.mjs
+deleted file mode 100644
+index 410921272659dff62cf5c52d850d0277ef4026e3..0000000000000000000000000000000000000000
+diff --git a/jsutils/promiseForObject.mjs b/jsutils/promiseForObject.mjs
+deleted file mode 100644
+index 9d24cbd0ec28fd8288b98792ab79a73112136ebe..0000000000000000000000000000000000000000
+diff --git a/jsutils/promiseReduce.mjs b/jsutils/promiseReduce.mjs
+deleted file mode 100644
+index c9eeddfb4670b57e909f32b966908ba9b02c715a..0000000000000000000000000000000000000000
+diff --git a/jsutils/suggestionList.mjs b/jsutils/suggestionList.mjs
+deleted file mode 100644
+index c3dba2e7811eb2ea5ed9f4c6ee5b0a779e310df2..0000000000000000000000000000000000000000
+diff --git a/jsutils/toError.mjs b/jsutils/toError.mjs
+deleted file mode 100644
+index 55173ba1e31d0116d1ab5d749d91767a9e354eb9..0000000000000000000000000000000000000000
+diff --git a/jsutils/toObjMap.mjs b/jsutils/toObjMap.mjs
+deleted file mode 100644
+index 61a8284bd6c1f17f0db4335e7e29f2cf09d9f52b..0000000000000000000000000000000000000000
+diff --git a/language/ast.mjs b/language/ast.mjs
+deleted file mode 100644
+index d6d9ef2b37f393824b52363ffc6d761599d25bf3..0000000000000000000000000000000000000000
+diff --git a/language/blockString.mjs b/language/blockString.mjs
+deleted file mode 100644
+index e050d7f64db97ba1272b33f980956065802b7f68..0000000000000000000000000000000000000000
+diff --git a/language/characterClasses.mjs b/language/characterClasses.mjs
+deleted file mode 100644
+index c75777a7e29ab3efb69dde06677f08d258d09449..0000000000000000000000000000000000000000
+diff --git a/language/directiveLocation.mjs b/language/directiveLocation.mjs
+deleted file mode 100644
+index 31bfbb1d47b3fa19a799723b5b7455d349d94548..0000000000000000000000000000000000000000
+diff --git a/language/index.mjs b/language/index.mjs
+deleted file mode 100644
+index 3f23c6cacd153e23a0acaad47a62444a03136fc1..0000000000000000000000000000000000000000
+diff --git a/language/kinds.mjs b/language/kinds.mjs
+deleted file mode 100644
+index 3205eaea53ea084caee6f76d1a99b6b6eadf64cc..0000000000000000000000000000000000000000
+diff --git a/language/lexer.mjs b/language/lexer.mjs
+deleted file mode 100644
+index 75299ca429133a6deb9e53c7c9b141f525cc7a89..0000000000000000000000000000000000000000
+diff --git a/language/location.mjs b/language/location.mjs
+deleted file mode 100644
+index 6cca4bb69cf12dee7cdbcaa3b8c110af8deaccd5..0000000000000000000000000000000000000000
+diff --git a/language/parser.mjs b/language/parser.mjs
+deleted file mode 100644
+index 2ba066c17cac7b9d4414994ce257832b655fe46e..0000000000000000000000000000000000000000
+diff --git a/language/predicates.mjs b/language/predicates.mjs
+deleted file mode 100644
+index 858ff4e1cc6bd23a10cdb5a4121987639d5cc223..0000000000000000000000000000000000000000
+diff --git a/language/printLocation.mjs b/language/printLocation.mjs
+deleted file mode 100644
+index 4b9a66f50fe147827328148e453ec89bd2c8e82a..0000000000000000000000000000000000000000
+diff --git a/language/printString.mjs b/language/printString.mjs
+deleted file mode 100644
+index bb034b418d19156db23a687135b2c9c7d7b02851..0000000000000000000000000000000000000000
+diff --git a/language/printer.mjs b/language/printer.mjs
+deleted file mode 100644
+index cffc2bf05b7440abe0f6cb92163092666127f182..0000000000000000000000000000000000000000
+diff --git a/language/source.mjs b/language/source.mjs
+deleted file mode 100644
+index c15f85e5dae602a9e85f10b9c704a26cc0eb7795..0000000000000000000000000000000000000000
+diff --git a/language/tokenKind.mjs b/language/tokenKind.mjs
+deleted file mode 100644
+index a9024ec1acb97cfb7b62506e933c236f67b200e7..0000000000000000000000000000000000000000
+diff --git a/language/visitor.mjs b/language/visitor.mjs
+deleted file mode 100644
+index e3173a3a95182b635d2df61671984f7f032a351d..0000000000000000000000000000000000000000
+diff --git a/package.json b/package.json
+index b30f230c70afe19bad45045e98a42c08a1c8b8cc..0c1543a2bf595838f390b90438f69c44464b2da3 100644
+--- a/package.json
++++ b/package.json
+@@ -3,8 +3,7 @@
+   "version": "16.6.0",
+   "description": "A Query Language and Runtime which can target any service.",
+   "license": "MIT",
+-  "main": "index",
+-  "module": "index.mjs",
++  "main": "index.js",
+   "typesVersions": {
+     ">=4.1.0": {
+       "*": [
+diff --git a/subscription/index.mjs b/subscription/index.mjs
+deleted file mode 100644
+index 222cbcbccd2be2044f90b46a6858f03054a591ca..0000000000000000000000000000000000000000
+diff --git a/type/assertName.mjs b/type/assertName.mjs
+deleted file mode 100644
+index 960e302fdd155e57b6b075d1fc3f8062f5c21c7b..0000000000000000000000000000000000000000
+diff --git a/type/definition.mjs b/type/definition.mjs
+deleted file mode 100644
+index 636afd66c84a936fb7c36cb53ec312f8fae4b041..0000000000000000000000000000000000000000
+diff --git a/type/directives.mjs b/type/directives.mjs
+deleted file mode 100644
+index c31196edb39ee924e4fc13110ae2770f7629120d..0000000000000000000000000000000000000000
+diff --git a/type/index.mjs b/type/index.mjs
+deleted file mode 100644
+index 027799dcbd0e95719199cc3efc6d81b1f197b523..0000000000000000000000000000000000000000
+diff --git a/type/introspection.mjs b/type/introspection.mjs
+deleted file mode 100644
+index 31ee74137e9ba6e3d7f45de30336f557318ba278..0000000000000000000000000000000000000000
+diff --git a/type/scalars.mjs b/type/scalars.mjs
+deleted file mode 100644
+index 3aa154aa2f47cea8799aadf769b21078991904b2..0000000000000000000000000000000000000000
+diff --git a/type/schema.mjs b/type/schema.mjs
+deleted file mode 100644
+index 39216df1e804fa713eb71f4e85da8215bff1e3f3..0000000000000000000000000000000000000000
+diff --git a/type/validate.mjs b/type/validate.mjs
+deleted file mode 100644
+index 5792c26dfa25be51e9d78dc28905e7c536c9b599..0000000000000000000000000000000000000000
+diff --git a/utilities/TypeInfo.mjs b/utilities/TypeInfo.mjs
+deleted file mode 100644
+index 4956e0f9d20ee643bcc5e74e6b46cf2295b4d7d8..0000000000000000000000000000000000000000
+diff --git a/utilities/assertValidName.mjs b/utilities/assertValidName.mjs
+deleted file mode 100644
+index a313a72f27c830fc7e7016dd92d25fa8c7abb40f..0000000000000000000000000000000000000000
+diff --git a/utilities/astFromValue.mjs b/utilities/astFromValue.mjs
+deleted file mode 100644
+index 9bdc1f846237208f1de61b077cd8b7b8e8307963..0000000000000000000000000000000000000000
+diff --git a/utilities/buildASTSchema.mjs b/utilities/buildASTSchema.mjs
+deleted file mode 100644
+index f1fe080feb16f8dda46eac65758c78676c6a6b1b..0000000000000000000000000000000000000000
+diff --git a/utilities/buildClientSchema.mjs b/utilities/buildClientSchema.mjs
+deleted file mode 100644
+index bed5876f0aedcd9c6b044647fd379905946ff200..0000000000000000000000000000000000000000
+diff --git a/utilities/coerceInputValue.mjs b/utilities/coerceInputValue.mjs
+deleted file mode 100644
+index 706c5f620fafa42ccaf0e7fc91b201832d7fe6b3..0000000000000000000000000000000000000000
+diff --git a/utilities/concatAST.mjs b/utilities/concatAST.mjs
+deleted file mode 100644
+index ca7b4c38b6175f81dec1e463888e187bbb0a3752..0000000000000000000000000000000000000000
+diff --git a/utilities/extendSchema.mjs b/utilities/extendSchema.mjs
+deleted file mode 100644
+index 78e18ea6d3c2227c04561145beb53bea6e76831e..0000000000000000000000000000000000000000
+diff --git a/utilities/findBreakingChanges.mjs b/utilities/findBreakingChanges.mjs
+deleted file mode 100644
+index 50756e399684f10b6559aa70b5179f0f00e98084..0000000000000000000000000000000000000000
+diff --git a/utilities/getIntrospectionQuery.mjs b/utilities/getIntrospectionQuery.mjs
+deleted file mode 100644
+index 7de18e3b07c78ca5cbd308197f4aafdea881dfe0..0000000000000000000000000000000000000000
+diff --git a/utilities/getOperationAST.mjs b/utilities/getOperationAST.mjs
+deleted file mode 100644
+index 8d1f5b9f836e7711b92d3584984473147b8cf34e..0000000000000000000000000000000000000000
+diff --git a/utilities/getOperationRootType.mjs b/utilities/getOperationRootType.mjs
+deleted file mode 100644
+index 27855c5b46d6c411ea4566809308571571deb8d2..0000000000000000000000000000000000000000
+diff --git a/utilities/index.mjs b/utilities/index.mjs
+deleted file mode 100644
+index cb8f6b4046249fddfa18f0077d1fddb1baafa12a..0000000000000000000000000000000000000000
+diff --git a/utilities/introspectionFromSchema.mjs b/utilities/introspectionFromSchema.mjs
+deleted file mode 100644
+index 6ad7b1fc037c6e9fc71231b6cd73028b985249c6..0000000000000000000000000000000000000000
+diff --git a/utilities/lexicographicSortSchema.mjs b/utilities/lexicographicSortSchema.mjs
+deleted file mode 100644
+index b734adbf30dec9179a90f6adcb1bb41caec7c7f3..0000000000000000000000000000000000000000
+diff --git a/utilities/printSchema.mjs b/utilities/printSchema.mjs
+deleted file mode 100644
+index 9d0643b30b23ea4538d73ffe4a743a2622444d68..0000000000000000000000000000000000000000
+diff --git a/utilities/separateOperations.mjs b/utilities/separateOperations.mjs
+deleted file mode 100644
+index 1d8ab8b5e7db30c1fd84a3a1f32717296133aa0a..0000000000000000000000000000000000000000
+diff --git a/utilities/sortValueNode.mjs b/utilities/sortValueNode.mjs
+deleted file mode 100644
+index 79bece3ea006f757539644dfee68c0186d4dc8fa..0000000000000000000000000000000000000000
+diff --git a/utilities/stripIgnoredCharacters.mjs b/utilities/stripIgnoredCharacters.mjs
+deleted file mode 100644
+index f85bdb9964f36a7e25ebdf2bb98e6348b747c1ee..0000000000000000000000000000000000000000
+diff --git a/utilities/typeComparators.mjs b/utilities/typeComparators.mjs
+deleted file mode 100644
+index a57093ae25c4d63448ae0901e8d3390f2c586e86..0000000000000000000000000000000000000000
+diff --git a/utilities/typeFromAST.mjs b/utilities/typeFromAST.mjs
+deleted file mode 100644
+index edae41becd2eb485e0abeeb34ee13ae09e78db39..0000000000000000000000000000000000000000
+diff --git a/utilities/typedQueryDocumentNode.mjs b/utilities/typedQueryDocumentNode.mjs
+deleted file mode 100644
+index cb0ff5c3b541f646105198ee23ac0fc3d805023e..0000000000000000000000000000000000000000
+diff --git a/utilities/valueFromAST.mjs b/utilities/valueFromAST.mjs
+deleted file mode 100644
+index da2ab5cccc83b09c33c09497f49887259e05983c..0000000000000000000000000000000000000000
+diff --git a/utilities/valueFromASTUntyped.mjs b/utilities/valueFromASTUntyped.mjs
+deleted file mode 100644
+index 800d295a61054a2c9a65ed10016a98ace55055c9..0000000000000000000000000000000000000000
+diff --git a/validation/ValidationContext.mjs b/validation/ValidationContext.mjs
+deleted file mode 100644
+index 4f07f381fbb2cef750d38de6d2fc1d9826b29294..0000000000000000000000000000000000000000
+diff --git a/validation/index.mjs b/validation/index.mjs
+deleted file mode 100644
+index ebb103bfd5c8cde9c736d8a525fb5d43ffb5fae9..0000000000000000000000000000000000000000
+diff --git a/validation/rules/ExecutableDefinitionsRule.mjs b/validation/rules/ExecutableDefinitionsRule.mjs
+deleted file mode 100644
+index b83cee4fea11e09642ba6ce2b7cb2dccec45fc06..0000000000000000000000000000000000000000
+diff --git a/validation/rules/FieldsOnCorrectTypeRule.mjs b/validation/rules/FieldsOnCorrectTypeRule.mjs
+deleted file mode 100644
+index c9552651034891b8e38c134d471ad4c363565e77..0000000000000000000000000000000000000000
+diff --git a/validation/rules/FragmentsOnCompositeTypesRule.mjs b/validation/rules/FragmentsOnCompositeTypesRule.mjs
+deleted file mode 100644
+index 24437742d5b61c82fe70d07fe0563b4498341adf..0000000000000000000000000000000000000000
+diff --git a/validation/rules/KnownArgumentNamesRule.mjs b/validation/rules/KnownArgumentNamesRule.mjs
+deleted file mode 100644
+index 2213728c7ca2654b52f3c7e0eb6af85453353d81..0000000000000000000000000000000000000000
+diff --git a/validation/rules/KnownDirectivesRule.mjs b/validation/rules/KnownDirectivesRule.mjs
+deleted file mode 100644
+index 6755ff14940f5c879a1a8a758d2ee3da4fbc8dd4..0000000000000000000000000000000000000000
+diff --git a/validation/rules/KnownFragmentNamesRule.mjs b/validation/rules/KnownFragmentNamesRule.mjs
+deleted file mode 100644
+index f4b530783584ae4dcfb2496988ee4e973fbfd95e..0000000000000000000000000000000000000000
+diff --git a/validation/rules/KnownTypeNamesRule.mjs b/validation/rules/KnownTypeNamesRule.mjs
+deleted file mode 100644
+index 424b162bba4c7c9fb0a3573275bb18142143be9b..0000000000000000000000000000000000000000
+diff --git a/validation/rules/LoneAnonymousOperationRule.mjs b/validation/rules/LoneAnonymousOperationRule.mjs
+deleted file mode 100644
+index 1a21a3902b80415d824db80828af3f7f6c8f7fae..0000000000000000000000000000000000000000
+diff --git a/validation/rules/LoneSchemaDefinitionRule.mjs b/validation/rules/LoneSchemaDefinitionRule.mjs
+deleted file mode 100644
+index 4287eaac66056c40b5c49fc73c6acf4af63871ea..0000000000000000000000000000000000000000
+diff --git a/validation/rules/NoFragmentCyclesRule.mjs b/validation/rules/NoFragmentCyclesRule.mjs
+deleted file mode 100644
+index 014f1d294069380a4c83fb43df8b77eebc4c58e0..0000000000000000000000000000000000000000
+diff --git a/validation/rules/NoUndefinedVariablesRule.mjs b/validation/rules/NoUndefinedVariablesRule.mjs
+deleted file mode 100644
+index 29b8f371c41015f0f090e491b39136f16ebdd48d..0000000000000000000000000000000000000000
+diff --git a/validation/rules/NoUnusedFragmentsRule.mjs b/validation/rules/NoUnusedFragmentsRule.mjs
+deleted file mode 100644
+index 8ce0735fa983c24cf2a50ea4ee658631730b198e..0000000000000000000000000000000000000000
+diff --git a/validation/rules/NoUnusedVariablesRule.mjs b/validation/rules/NoUnusedVariablesRule.mjs
+deleted file mode 100644
+index 07ef8d6da81115f6a5857b88872bacac406ebee8..0000000000000000000000000000000000000000
+diff --git a/validation/rules/OverlappingFieldsCanBeMergedRule.mjs b/validation/rules/OverlappingFieldsCanBeMergedRule.mjs
+deleted file mode 100644
+index ed81a3d1ffd11cb084a942295d9fd82dcd908ca6..0000000000000000000000000000000000000000
+diff --git a/validation/rules/PossibleFragmentSpreadsRule.mjs b/validation/rules/PossibleFragmentSpreadsRule.mjs
+deleted file mode 100644
+index f1f8711fc3c3863d1ad914543d9bf864aa9c7c82..0000000000000000000000000000000000000000
+diff --git a/validation/rules/PossibleTypeExtensionsRule.mjs b/validation/rules/PossibleTypeExtensionsRule.mjs
+deleted file mode 100644
+index a0a05fa325cce6531048d198409988b17c61f883..0000000000000000000000000000000000000000
+diff --git a/validation/rules/ProvidedRequiredArgumentsRule.mjs b/validation/rules/ProvidedRequiredArgumentsRule.mjs
+deleted file mode 100644
+index c96da13505c1fb4b42dc75153e1e8fde243c0ccf..0000000000000000000000000000000000000000
+diff --git a/validation/rules/ScalarLeafsRule.mjs b/validation/rules/ScalarLeafsRule.mjs
+deleted file mode 100644
+index 4a2f06dd1f633153917899b6aa464f4a55219ad9..0000000000000000000000000000000000000000
+diff --git a/validation/rules/SingleFieldSubscriptionsRule.mjs b/validation/rules/SingleFieldSubscriptionsRule.mjs
+deleted file mode 100644
+index 869f54df767bb6e1edecf1eda0b3d038e9c85aa9..0000000000000000000000000000000000000000
+diff --git a/validation/rules/UniqueArgumentDefinitionNamesRule.mjs b/validation/rules/UniqueArgumentDefinitionNamesRule.mjs
+deleted file mode 100644
+index 416a954119c71e6ccee7de027ffe1f15d194f30d..0000000000000000000000000000000000000000
+diff --git a/validation/rules/UniqueArgumentNamesRule.mjs b/validation/rules/UniqueArgumentNamesRule.mjs
+deleted file mode 100644
+index 9f78a666398753d9a6d8827900690130712bb87f..0000000000000000000000000000000000000000
+diff --git a/validation/rules/UniqueDirectiveNamesRule.mjs b/validation/rules/UniqueDirectiveNamesRule.mjs
+deleted file mode 100644
+index fe70dc9003281944fa645125c459d190ec5673b7..0000000000000000000000000000000000000000
+diff --git a/validation/rules/UniqueDirectivesPerLocationRule.mjs b/validation/rules/UniqueDirectivesPerLocationRule.mjs
+deleted file mode 100644
+index efd6abef4ebaebea41acd01bf086ca60341e229b..0000000000000000000000000000000000000000
+diff --git a/validation/rules/UniqueEnumValueNamesRule.mjs b/validation/rules/UniqueEnumValueNamesRule.mjs
+deleted file mode 100644
+index 8e66111c69312720d8fffcfc8b221f8c54804431..0000000000000000000000000000000000000000
+diff --git a/validation/rules/UniqueFieldDefinitionNamesRule.mjs b/validation/rules/UniqueFieldDefinitionNamesRule.mjs
+deleted file mode 100644
+index 34a7a4af15060e62e8a70e26ee4af56ee969e706..0000000000000000000000000000000000000000
+diff --git a/validation/rules/UniqueFragmentNamesRule.mjs b/validation/rules/UniqueFragmentNamesRule.mjs
+deleted file mode 100644
+index 354fff59a93994475518ff6d0c3962ebc126a49e..0000000000000000000000000000000000000000
+diff --git a/validation/rules/UniqueInputFieldNamesRule.mjs b/validation/rules/UniqueInputFieldNamesRule.mjs
+deleted file mode 100644
+index 3b21c3cbdc42cf53313b6a84da4133c8edfd73e3..0000000000000000000000000000000000000000
+diff --git a/validation/rules/UniqueOperationNamesRule.mjs b/validation/rules/UniqueOperationNamesRule.mjs
+deleted file mode 100644
+index c79a88fe686f44d6ae0c839cfed895207deed066..0000000000000000000000000000000000000000
+diff --git a/validation/rules/UniqueOperationTypesRule.mjs b/validation/rules/UniqueOperationTypesRule.mjs
+deleted file mode 100644
+index 9b56d35d249f6bd87c1e7ec469048a1f60031142..0000000000000000000000000000000000000000
+diff --git a/validation/rules/UniqueTypeNamesRule.mjs b/validation/rules/UniqueTypeNamesRule.mjs
+deleted file mode 100644
+index becbf21aae5b81311dbede1a3484eda6bcbc0512..0000000000000000000000000000000000000000
+diff --git a/validation/rules/UniqueVariableNamesRule.mjs b/validation/rules/UniqueVariableNamesRule.mjs
+deleted file mode 100644
+index e8b9e62480aaa8980f743e740baf5064e480256d..0000000000000000000000000000000000000000
+diff --git a/validation/rules/ValuesOfCorrectTypeRule.mjs b/validation/rules/ValuesOfCorrectTypeRule.mjs
+deleted file mode 100644
+index ca5ca2f2efb71a387a7587ce349ce2adfffc35f5..0000000000000000000000000000000000000000
+diff --git a/validation/rules/VariablesAreInputTypesRule.mjs b/validation/rules/VariablesAreInputTypesRule.mjs
+deleted file mode 100644
+index 7ad0659170a7c3356813d918d5d03f48d8c8d3e9..0000000000000000000000000000000000000000
+diff --git a/validation/rules/VariablesInAllowedPositionRule.mjs b/validation/rules/VariablesInAllowedPositionRule.mjs
+deleted file mode 100644
+index cd97ffc84a1ea0b46c67d88e392dde55448919a1..0000000000000000000000000000000000000000
+diff --git a/validation/rules/custom/NoDeprecatedCustomRule.mjs b/validation/rules/custom/NoDeprecatedCustomRule.mjs
+deleted file mode 100644
+index 0e04b4f6856028f5ab3d9d548097d692649b7a22..0000000000000000000000000000000000000000
+diff --git a/validation/rules/custom/NoSchemaIntrospectionCustomRule.mjs b/validation/rules/custom/NoSchemaIntrospectionCustomRule.mjs
+deleted file mode 100644
+index 9f7984e809bcb4680e099a27de70aa7369a64dd5..0000000000000000000000000000000000000000
+diff --git a/validation/specifiedRules.mjs b/validation/specifiedRules.mjs
+deleted file mode 100644
+index c45f0f0cfd6d12543f81c1bb6be1aaea5bcbc776..0000000000000000000000000000000000000000
+diff --git a/validation/validate.mjs b/validation/validate.mjs
+deleted file mode 100644
+index be5a3c26d41b19a5b482168573428b9e72461757..0000000000000000000000000000000000000000
+diff --git a/version.mjs b/version.mjs
+deleted file mode 100644
+index 5cbd5078f394e78ab47f399317a3d8dcccb8c143..0000000000000000000000000000000000000000
