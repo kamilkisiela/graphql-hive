@@ -46,6 +46,9 @@ jobs:
           # change this if you prefer a more strict cache
           key: ${{ runner.os }}-build-${{ env.cache-name }}
 
+      - name: Codegen
+        run: cd ../../.. && pnpm pnpm graphql:generate
+
       - name: Build Next.js App
         # change this if your site requires a custom build command
         run: pnpm build
@@ -84,9 +87,7 @@ jobs:
       # entry in your package.json file.
       - name: Compare with Base Branch Bundle
         if: success() && github.event.number
-        run:
-          ls -laR .next/analyze/base && npx -p
-          nextjs-bundle-analysis compare
+        run: ls -laR .next/analyze/base && npx -p nextjs-bundle-analysis compare
 
       - name: Get Comment Body
         id: get-comment-body
