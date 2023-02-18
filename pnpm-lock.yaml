@@ -1026,7 +1026,7 @@ importers:
       '@trpc/server': 10.11.1
       '@types/cookies': 0.7.7
       '@types/dompurify': 2.4.0
-      '@types/js-cookie': 3.0.2
+      '@types/js-cookie': 3.0.3
       '@types/react': 18.0.28
       '@types/react-date-range': 1.4.4
       '@types/react-dom': 18.0.11
@@ -1167,7 +1167,7 @@ importers:
       '@tailwindcss/line-clamp': 0.4.2_tailwindcss@3.2.7
       '@types/cookies': 0.7.7
       '@types/dompurify': 2.4.0
-      '@types/js-cookie': 3.0.2
+      '@types/js-cookie': 3.0.3
       '@types/react': 18.0.28
       '@types/react-date-range': 1.4.4
       '@types/react-dom': 18.0.11
@@ -10908,8 +10908,8 @@ packages:
       '@types/node': 18.13.0
     dev: false
 
-  /@types/js-cookie/3.0.2:
-    resolution: {integrity: sha512-6+0ekgfusHftJNYpihfkMu8BWdeHs9EOJuGcSofErjstGPfPGEu9yTu4t460lTzzAMl2cM5zngQJqPMHbbnvYA==}
+  /@types/js-cookie/3.0.3:
+    resolution: {integrity: sha512-Xe7IImK09HP1sv2M/aI+48a20VX+TdRJucfq4vfRVy6nWN8PYPOEnlMRSgxJAgYQIXJVL8dZ4/ilAM7dWNaOww==}
     dev: true
 
   /@types/js-yaml/4.0.5:
