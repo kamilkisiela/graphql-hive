@@ -12,9 +12,11 @@ on:
 
 jobs:
   analyze:
+    env:
+      working-directory: packages/web/app
     defaults:
       run:
-        working-directory: packages/web/app
+        working-directory: ${{ env.working-directory }}
 
     runs-on: ubuntu-latest
 
@@ -42,7 +44,7 @@ jobs:
         with:
           # if you use a custom build directory, replace all instances of `.next` in this file with your build directory
           # ex: if your app builds to `dist`, replace `.next` with `dist`
-          path: .next/cache
+          path: ${{ env.working-directory }}/.next/cache
           # change this if you prefer a more strict cache
           key: ${{ runner.os }}-build-${{ env.cache-name }}
 
@@ -62,7 +64,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: bundle
-          path: .next/analyze/__bundle_analysis.json
+          path: ${{ env.working-directory }}/.next/analyze/__bundle_analysis.json
 
       - name: Download Base Branch Bundle Stats
         uses: dawidd6/action-download-artifact@v2
@@ -70,7 +72,7 @@ jobs:
         with:
           workflow: nextjs-bundle-analysis.yml
           branch: ${{ github.event.pull_request.base.ref }}
-          path: .next/analyze/base
+          path: ${{ env.working-directory }}/.next/analyze/base
 
       # And here's the second place - this runs after we have both the current and
       # base branch bundle stats, and will compare them to determine what changed.
