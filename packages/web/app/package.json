@@ -98,7 +98,7 @@
     "@tailwindcss/line-clamp": "0.4.2",
     "@types/cookies": "0.7.7",
     "@types/dompurify": "2.4.0",
-    "@types/js-cookie": "3.0.2",
+    "@types/js-cookie": "3.0.3",
     "@types/react": "18.0.28",
     "@types/react-date-range": "1.4.4",
     "@types/react-dom": "18.0.11",
