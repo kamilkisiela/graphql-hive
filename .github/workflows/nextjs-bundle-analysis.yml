@@ -31,10 +31,13 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
-          cache: 'pnpm'
 
-      - name: Install Dependencies
-        run: pnpm i
+      - name: Install PNPM
+        uses: pnpm/action-setup@v2
+        id: pnpm-install
+        with:
+          version: 7
+          run_install: true
 
       - name: Restore Next.js Build
         uses: actions/cache@v3
@@ -49,7 +52,7 @@ jobs:
           key: ${{ runner.os }}-build-${{ env.cache-name }}
 
       - name: Codegen
-        run: cd ../../.. && pnpm pnpm graphql:generate
+        run: cd ../../.. && pnpm graphql:generate
 
       - name: Build Next.js App
         # change this if your site requires a custom build command
