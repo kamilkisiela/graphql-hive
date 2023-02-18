@@ -30,7 +30,6 @@ const HIVE_RESTRICTED_SYNTAX = [
 ];
 
 module.exports = {
-  root: true,
   reportUnusedDisableDirectives: true,
   ignorePatterns: [
     'scripts',
@@ -45,7 +44,7 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 2020,
     sourceType: 'module',
-    project: `${__dirname}/tsconfig.eslint.json`,
+    project: ['./tsconfig.eslint.json'],
   },
   parser: '@typescript-eslint/parser',
   plugins: [...guildConfig.plugins, 'hive'],

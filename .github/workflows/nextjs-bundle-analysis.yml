@@ -10,13 +10,14 @@ on:
       - packages/web/app/**
   workflow_dispatch:
 
-defaults:
-  run:
-    working-directory: ./
-
 jobs:
   analyze:
+    defaults:
+      run:
+        working-directory: packages/web/app
+
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v3
 
@@ -41,24 +42,24 @@ jobs:
         with:
           # if you use a custom build directory, replace all instances of `.next` in this file with your build directory
           # ex: if your app builds to `dist`, replace `.next` with `dist`
-          path: packages/web/app/.next/cache
+          path: .next/cache
           # change this if you prefer a more strict cache
           key: ${{ runner.os }}-build-${{ env.cache-name }}
 
       - name: Build Next.js App
         # change this if your site requires a custom build command
-        run: cd packages/web/app && ./node_modules/.bin/next build
+        run: node_modules/.bin/next build
 
       # Here's the first place where next-bundle-analysis' own script is used
       # This step pulls the raw bundle stats for the current bundle
       - name: Analyze Bundle
-        run: cd packages/web/app && npx -p nextjs-bundle-analysis report
+        run: npx -p nextjs-bundle-analysis report
 
       - name: Upload bundle
         uses: actions/upload-artifact@v3
         with:
           name: bundle
-          path: packages/web/app/.next/analyze/__bundle_analysis.json
+          path: .next/analyze/__bundle_analysis.json
 
       - name: Download Base Branch Bundle Stats
         uses: dawidd6/action-download-artifact@v2
@@ -66,7 +67,7 @@ jobs:
         with:
           workflow: nextjs-bundle-analysis.yml
           branch: ${{ github.event.pull_request.base.ref }}
-          path: packages/web/app/.next/analyze/base
+          path: .next/analyze/base
 
       # And here's the second place - this runs after we have both the current and
       # base branch bundle stats, and will compare them to determine what changed.
@@ -84,14 +85,14 @@ jobs:
       - name: Compare with Base Branch Bundle
         if: success() && github.event.number
         run:
-          ls -laR packages/web/app/.next/analyze/base && cd packages/web/app && npx -p
+          ls -laR .next/analyze/base && npx -p
           nextjs-bundle-analysis compare
 
       - name: Get Comment Body
         id: get-comment-body
         if: success() && github.event.number
         run: |
-          body=$(cat packages/web/app/.next/analyze/__bundle_analysis_comment.txt)
+          body=$(cat .next/analyze/__bundle_analysis_comment.txt)
           body="${body//'%'/'%25'}"
           body="${body//$'\n'/'%0A'}"
           body="${body//$'\r'/'%0D'}"
