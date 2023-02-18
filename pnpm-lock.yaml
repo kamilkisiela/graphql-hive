@@ -48,7 +48,7 @@ importers:
       '@graphql-codegen/typescript': 3.0.0
       '@graphql-codegen/typescript-operations': 3.0.0
       '@graphql-codegen/typescript-resolvers': 3.0.0
-      '@graphql-inspector/cli': 3.4.5
+      '@graphql-inspector/cli': 3.4.6
       '@next/eslint-plugin-next': 13.1.1
       '@sentry/cli': 2.13.0
       '@swc/core': 1.3.35
@@ -89,7 +89,7 @@ importers:
       '@graphql-codegen/typescript': 3.0.0_graphql@16.6.0
       '@graphql-codegen/typescript-operations': 3.0.0_graphql@16.6.0
       '@graphql-codegen/typescript-resolvers': 3.0.0_graphql@16.6.0
-      '@graphql-inspector/cli': 3.4.5_dsrot7vgr22owbcoisakchg2na
+      '@graphql-inspector/cli': 3.4.6_dsrot7vgr22owbcoisakchg2na
       '@next/eslint-plugin-next': 13.1.1
       '@sentry/cli': 2.13.0
       '@swc/core': 1.3.35
@@ -6235,13 +6235,13 @@ packages:
       - supports-color
     dev: true
 
-  /@graphql-inspector/audit-command/3.4.3_w6t5gchx37towmvxgjre3s4nhq:
-    resolution: {integrity: sha512-1xZbR3Lz5jhVTRT8qhjiEviwTOfHEdXjzH/DN8T1kIVHpmh3biIo2sKJK9rLv/N47XmCnfq+RMLkMAQcIyQPVQ==}
+  /@graphql-inspector/audit-command/3.4.4_w6t5gchx37towmvxgjre3s4nhq:
+    resolution: {integrity: sha512-Vd+2TvVOsbuPqVln931wb1wFmC0oaZkZ/ecp/s6xiQm5cx1Cj9PAtqNNr220ts9o16YzjM+/ybHxQR3nqFBjXQ==}
     peerDependencies:
       graphql: ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
       '@graphql-inspector/commands': 3.4.1_w6t5gchx37towmvxgjre3s4nhq
-      '@graphql-inspector/core': 3.5.1_graphql@16.6.0
+      '@graphql-inspector/core': 4.0.0_graphql@16.6.0
       '@graphql-inspector/logger': 3.4.2
       cli-table3: 0.6.3
       graphql: 16.6.0
@@ -6252,29 +6252,29 @@ packages:
       - yargs
     dev: true
 
-  /@graphql-inspector/cli/3.4.5_dsrot7vgr22owbcoisakchg2na:
-    resolution: {integrity: sha512-tgRlXXHWpSmyebjQ0VGcBszLhxgEBdHgp3yWRhIuvBweWh18FcpUpipiAQ7UT+E2INTLE3xC2MFgzgGA+ENCqw==}
+  /@graphql-inspector/cli/3.4.6_dsrot7vgr22owbcoisakchg2na:
+    resolution: {integrity: sha512-QC+11txEJGH6NPDXWTB0aZZY5w+Rb1HnuKo8cUHr8vSXCXkB25FV8P+CRzs875gNnJpDaa/UJA7TnZP77D0o0g==}
     hasBin: true
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
-      '@graphql-inspector/audit-command': 3.4.3_w6t5gchx37towmvxgjre3s4nhq
+      '@graphql-inspector/audit-command': 3.4.4_w6t5gchx37towmvxgjre3s4nhq
       '@graphql-inspector/code-loader': 3.4.0_graphql@16.6.0
       '@graphql-inspector/commands': 3.4.1_w6t5gchx37towmvxgjre3s4nhq
       '@graphql-inspector/config': 3.4.0_graphql@16.6.0
-      '@graphql-inspector/coverage-command': 3.4.4_w6t5gchx37towmvxgjre3s4nhq
-      '@graphql-inspector/diff-command': 3.4.3_w6t5gchx37towmvxgjre3s4nhq
+      '@graphql-inspector/coverage-command': 4.0.0_w6t5gchx37towmvxgjre3s4nhq
+      '@graphql-inspector/diff-command': 3.4.4_w6t5gchx37towmvxgjre3s4nhq
       '@graphql-inspector/docs-command': 3.4.2_w6t5gchx37towmvxgjre3s4nhq
       '@graphql-inspector/git-loader': 3.4.0_graphql@16.6.0
       '@graphql-inspector/github-loader': 3.4.0_graphql@16.6.0
       '@graphql-inspector/graphql-loader': 3.4.0_graphql@16.6.0
-      '@graphql-inspector/introspect-command': 3.4.3_w6t5gchx37towmvxgjre3s4nhq
+      '@graphql-inspector/introspect-command': 3.4.4_w6t5gchx37towmvxgjre3s4nhq
       '@graphql-inspector/json-loader': 3.4.0_graphql@16.6.0
       '@graphql-inspector/loaders': 3.4.1_wpz2aayrflbxznm3yrosfo3aeq
       '@graphql-inspector/serve-command': 3.4.2_w6t5gchx37towmvxgjre3s4nhq
-      '@graphql-inspector/similar-command': 3.4.3_w6t5gchx37towmvxgjre3s4nhq
+      '@graphql-inspector/similar-command': 3.4.4_w6t5gchx37towmvxgjre3s4nhq
       '@graphql-inspector/url-loader': 3.4.0_dsrot7vgr22owbcoisakchg2na
-      '@graphql-inspector/validate-command': 3.4.3_w6t5gchx37towmvxgjre3s4nhq
+      '@graphql-inspector/validate-command': 3.4.4_w6t5gchx37towmvxgjre3s4nhq
       graphql: 16.6.0
       tslib: 2.5.0
       yargs: 17.2.1
@@ -6346,8 +6346,8 @@ packages:
       tslib: 2.5.0
     dev: false
 
-  /@graphql-inspector/core/3.5.1_graphql@16.6.0:
-    resolution: {integrity: sha512-aZ6kWU2gyf56d0asExNSL4LXSegbd1IvZdw/DM2dUNSlND53w2UczYsM9/7OXeRJHn5NK6UP+8cjHkAMDToKUA==}
+  /@graphql-inspector/core/4.0.0_graphql@16.6.0:
+    resolution: {integrity: sha512-lgyc6ozmU5WbdlFx7Uftb96cS9ahYmu6hL41ZswK3KQcS6s7AM7zGu8gNDSdXtAGw8eARm8+Ql4+8J1+/72/+A==}
     peerDependencies:
       graphql: ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
@@ -6357,13 +6357,13 @@ packages:
       tslib: 2.5.0
     dev: true
 
-  /@graphql-inspector/coverage-command/3.4.4_w6t5gchx37towmvxgjre3s4nhq:
-    resolution: {integrity: sha512-77VLnBTt9ZYisEFrcPPjPaG6EgrKUT1xIvkZZzH1XKRehPf+FdVMWDlGzL4bhGS7DcHocXA34lJ4TqCL61ST6w==}
+  /@graphql-inspector/coverage-command/4.0.0_w6t5gchx37towmvxgjre3s4nhq:
+    resolution: {integrity: sha512-JdkoKKyZM9cWQMugc3MN7oy+veecxPyqgxcAwvR/8zwkudywtI8oiAQPcXIXtUAulOS9CWVHMQp7WAL9o8X7KA==}
     peerDependencies:
       graphql: ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
       '@graphql-inspector/commands': 3.4.1_w6t5gchx37towmvxgjre3s4nhq
-      '@graphql-inspector/core': 3.5.1_graphql@16.6.0
+      '@graphql-inspector/core': 4.0.0_graphql@16.6.0
       '@graphql-inspector/logger': 3.4.2
       graphql: 16.6.0
       tslib: 2.5.0
@@ -6373,13 +6373,13 @@ packages:
       - yargs
     dev: true
 
-  /@graphql-inspector/diff-command/3.4.3_w6t5gchx37towmvxgjre3s4nhq:
-    resolution: {integrity: sha512-6oSKPVWW9m3DT2Ls8xhYj2x2ktq4dVbIaZ68h+NpyElP1BDIzqOd+jB0KfIzDhZgjfX0LN3t+gEQY+vQtqvipQ==}
+  /@graphql-inspector/diff-command/3.4.4_w6t5gchx37towmvxgjre3s4nhq:
+    resolution: {integrity: sha512-WLpjyh5icCadEnm4Z15fO+5UdVoZ9s2yh3biTiJjKwzNseswLjzzw6D/Vf27um0fiIesh1dERzr0m+GkElDIkA==}
     peerDependencies:
       graphql: ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
       '@graphql-inspector/commands': 3.4.1_w6t5gchx37towmvxgjre3s4nhq
-      '@graphql-inspector/core': 3.5.1_graphql@16.6.0
+      '@graphql-inspector/core': 4.0.0_graphql@16.6.0
       '@graphql-inspector/logger': 3.4.2
       graphql: 16.6.0
       tslib: 2.5.0
@@ -6441,13 +6441,13 @@ packages:
       tslib: 2.5.0
     dev: true
 
-  /@graphql-inspector/introspect-command/3.4.3_w6t5gchx37towmvxgjre3s4nhq:
-    resolution: {integrity: sha512-WRsdgaWffEJ9gI2fVKx/LghnSFr5wO8VMrxyht7SW8ICmWDuh8YSxEW6zcejtbkgf1+fRY37GL4gFhVn1KUfuw==}
+  /@graphql-inspector/introspect-command/3.4.4_w6t5gchx37towmvxgjre3s4nhq:
+    resolution: {integrity: sha512-MnhhYo++NEyYwbxq/PR0J/UBWTIyfPby/R5tb4jCocY7i8zBNYyfgz6LiCFS63v5r7jYwDPajGuXGDmGStUxOw==}
     peerDependencies:
       graphql: ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
       '@graphql-inspector/commands': 3.4.1_w6t5gchx37towmvxgjre3s4nhq
-      '@graphql-inspector/core': 3.5.1_graphql@16.6.0
+      '@graphql-inspector/core': 4.0.0_graphql@16.6.0
       '@graphql-inspector/logger': 3.4.2
       graphql: 16.6.0
       tslib: 2.5.0
@@ -6508,13 +6508,13 @@ packages:
       - yargs
     dev: true
 
-  /@graphql-inspector/similar-command/3.4.3_w6t5gchx37towmvxgjre3s4nhq:
-    resolution: {integrity: sha512-kTepzJIHwL+XgiwxoSkVjvqMHoBibs3WzB7o6hX/FuzyigQQcPIQyPYp8NvO+kyoYyFA2QSUrHDlXy9JQgqKJQ==}
+  /@graphql-inspector/similar-command/3.4.4_w6t5gchx37towmvxgjre3s4nhq:
+    resolution: {integrity: sha512-Li60VVRZVGGlSvg2IS+eG6p3p26UwOhee2wTqNHOPg+Tb+rTx/HyX1TFiPl866SUA+n/3ctCrvo20OOYjjlU1Q==}
     peerDependencies:
       graphql: ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
       '@graphql-inspector/commands': 3.4.1_w6t5gchx37towmvxgjre3s4nhq
-      '@graphql-inspector/core': 3.5.1_graphql@16.6.0
+      '@graphql-inspector/core': 4.0.0_graphql@16.6.0
       '@graphql-inspector/logger': 3.4.2
       graphql: 16.6.0
       tslib: 2.5.0
@@ -6539,13 +6539,13 @@ packages:
       - utf-8-validate
     dev: true
 
-  /@graphql-inspector/validate-command/3.4.3_w6t5gchx37towmvxgjre3s4nhq:
-    resolution: {integrity: sha512-a4FjhDSOOLpHhQ2oPHwuwSzfGeMg9Kg2WdjdPrz3VZVLyGfdCevoBbXjVckfObd+Vpxg/PtPnsOKcLuv5EqY7g==}
+  /@graphql-inspector/validate-command/3.4.4_w6t5gchx37towmvxgjre3s4nhq:
+    resolution: {integrity: sha512-Ac/UWvFKf78RmXpMKvHOhKzMKjFMUJTndcVt2WaksHCQCF7CrZmQqIwmDuJ0qXG3FCJUA3+XcrAWEVE8AP/Y0g==}
     peerDependencies:
       graphql: ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
       '@graphql-inspector/commands': 3.4.1_w6t5gchx37towmvxgjre3s4nhq
-      '@graphql-inspector/core': 3.5.1_graphql@16.6.0
+      '@graphql-inspector/core': 4.0.0_graphql@16.6.0
       '@graphql-inspector/logger': 3.4.2
       graphql: 16.6.0
       tslib: 2.5.0
@@ -23081,7 +23081,7 @@ packages:
     dependencies:
       call-bind: 1.0.2
       get-intrinsic: 1.1.3
-      object-inspect: 1.12.2
+      object-inspect: 1.12.3
 
   /siginfo/2.0.0:
     resolution: {integrity: sha512-ybx0WO1/8bSBLEWXZvEd7gMW3Sn3JFlW3TvX1nREbDLRNQNaeNN8WK0meBwPdAaOI7TtRRRJn/Es1zhrrCHu7g==}
