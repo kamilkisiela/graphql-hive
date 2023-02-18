@@ -30,6 +30,7 @@ const HIVE_RESTRICTED_SYNTAX = [
 ];
 
 module.exports = {
+  root: true,
   reportUnusedDisableDirectives: true,
   ignorePatterns: [
     'scripts',
