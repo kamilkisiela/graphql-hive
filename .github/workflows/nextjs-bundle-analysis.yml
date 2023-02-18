@@ -5,6 +5,9 @@ on:
   push:
     branches:
       - main
+    # run action only when Hive app files were changed
+    paths:
+      - packages/web/app/**
   workflow_dispatch:
 
 defaults:
