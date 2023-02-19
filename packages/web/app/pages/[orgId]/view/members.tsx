@@ -108,9 +108,7 @@ const MemberInvitationForm = ({
   const errorMessage =
     touched.email && (errors.email || invitation.error)
       ? errors.email || invitation.error?.message
-      : invitation.data?.inviteToOrganizationByEmail.error?.inputErrors.email
-      ? invitation.data.inviteToOrganizationByEmail.error.inputErrors.email
-      : null;
+      : invitation.data?.inviteToOrganizationByEmail.error?.inputErrors.email || null;
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-row gap-2">

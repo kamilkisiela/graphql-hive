@@ -3,6 +3,7 @@ import ThirdPartyEmailPasswordNode from 'supertokens-node/recipe/thirdpartyemail
 import { TypeInput as ThirdPartEmailPasswordTypeInput } from 'supertokens-node/recipe/thirdpartyemailpassword/types';
 import zod from 'zod';
 import { env } from '@/env/backend';
+// eslint-disable-next-line import/no-extraneous-dependencies -- TODO: should we move to "dependencies"?
 import { InternalApi } from '@hive/server';
 import { CreateTRPCProxyClient } from '@trpc/client';
 

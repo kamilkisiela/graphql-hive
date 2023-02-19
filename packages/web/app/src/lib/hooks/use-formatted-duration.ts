@@ -3,7 +3,7 @@ import { toDecimal } from './use-decimal';
 
 export function formatDuration(duration: number, showZero = false) {
   if (duration === 0 && !showZero) {
-    return `-`;
+    return '-';
   }
 
   if (duration < 1000) {

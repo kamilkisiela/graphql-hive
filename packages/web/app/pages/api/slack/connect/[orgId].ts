@@ -6,7 +6,7 @@ export default async function slackConnectOrg(req: NextApiRequest, res: NextApiR
   if (env.slack === null) {
     throw new Error('The Slack integration is not enabled.');
   }
-  const orgId = req.query.orgId;
+  const { orgId } = req.query;
   console.log('Organization', orgId);
 
   const slackUrl = `https://slack.com/oauth/v2/authorize?scope=incoming-webhook,chat:write,chat:write.public,commands&client_id=${env.slack.clientId}`;

@@ -160,7 +160,7 @@ const CreateCDNAccessTokenModal = (props: {
   }
 
   return (
-    <Modal open={true} className="w-[650px]" onOpenChange={props.onClose}>
+    <Modal open className="w-[650px]" onOpenChange={props.onClose}>
       {body}
     </Modal>
   );
@@ -280,7 +280,7 @@ const DeleteCDNAccessTokenModal = (props: {
   }
 
   return (
-    <Modal open={true} className="w-[650px]" onOpenChange={onClose}>
+    <Modal open className="w-[650px]" onOpenChange={onClose}>
       {body}
     </Modal>
   );

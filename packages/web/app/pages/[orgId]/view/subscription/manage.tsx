@@ -80,14 +80,14 @@ const Inner = ({
 
   useEffect(() => {
     if (query.data?.billingPlans?.length) {
-      if (organization.plan !== plan) {
+      if (organization.plan === plan) {
+        setOperationsRateLimit(Math.floor((organization.rateLimit.operations || 0) / 1_000_000));
+      } else {
         const actualPlan = query.data.billingPlans.find(v => v.planType === plan);
 
         setOperationsRateLimit(
           Math.floor((actualPlan?.includedOperationsLimit || 1_000_000) / 1_000_000),
         );
-      } else {
-        setOperationsRateLimit(Math.floor((organization.rateLimit.operations || 0) / 1_000_000));
       }
     }
   }, [organization.plan, organization.rateLimit.operations, plan, query.data?.billingPlans]);

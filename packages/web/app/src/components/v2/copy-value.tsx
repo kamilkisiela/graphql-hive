@@ -10,13 +10,13 @@ export const CopyValue = ({
   value: string;
   className?: string;
 }): ReactElement => {
-  const [isCopied, setCopied] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
   const copyToClipboard = useClipboard();
 
   useEffect(() => {
     if (!isCopied) return;
     const timerId = setTimeout(() => {
-      setCopied(false);
+      setIsCopied(false);
     }, 2000);
 
     return () => {
@@ -26,7 +26,7 @@ export const CopyValue = ({
 
   const handleClick = useCallback(async () => {
     await copyToClipboard(value);
-    setCopied(true);
+    setIsCopied(true);
   }, [value, copyToClipboard]);
 
   return (

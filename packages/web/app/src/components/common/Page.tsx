@@ -1,4 +1,4 @@
-import React, { PropsWithChildren, ReactElement } from 'react';
+import { PropsWithChildren, ReactElement } from 'react';
 import Link from 'next/link';
 import clsx from 'clsx';
 import { FiTarget } from 'react-icons/fi';
@@ -66,7 +66,7 @@ const WithNavigation = ({ children }: PropsWithChildren) => {
     return <>{children}</>;
   }
 
-  const menuTitle = router.targetId ? `Target` : router.projectId ? `Project` : 'Organization';
+  const menuTitle = router.targetId ? 'Target' : router.projectId ? 'Project' : 'Organization';
 
   const menuIcon = router.targetId ? (
     <FiTarget />

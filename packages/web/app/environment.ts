@@ -132,7 +132,7 @@ for (const config of Object.values(configs)) {
 }
 
 if (environmentErrors.length) {
-  const fullError = environmentErrors.join(`\n`);
+  const fullError = environmentErrors.join('\n');
   console.error('❌ Invalid environment variables:', fullError);
   process.exit(1);
 }
