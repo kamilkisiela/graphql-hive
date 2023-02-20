@@ -1,15 +1,14 @@
 #!/usr/bin/env node
+import { createServer } from 'http';
 import {
-  startMetrics,
+  createLogger,
   registerShutdown,
   startHeartbeats,
-  createLogger,
+  startMetrics,
 } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
 import { env } from './environment';
-import { createServerAdapter } from '@whatwg-node/server';
-import { createServer } from 'http';
-import { webhooksRouter, startSchedular, stopSchedular, schedularReadiness } from './router';
+import { schedularReadiness, startSchedular, stopSchedular, webhooksRouter } from './router';
 
 async function main() {
   if (env.sentry) {
@@ -23,7 +22,6 @@ async function main() {
   }
 
   const logger = createLogger(env.log.level);
-  const app = createServerAdapter(webhooksRouter);
 
   try {
     const stopHeartbeats = env.heartbeat
@@ -44,7 +42,7 @@ async function main() {
       },
     });
 
-    const server = createServer(app);
+    const server = createServer(webhooksRouter);
 
     if (env.prometheus) {
       await startMetrics(env.prometheus.labels.instance);
@@ -52,7 +50,7 @@ async function main() {
 
     await startSchedular();
     return new Promise<void>(resolve => {
-      server.listen(env.http.port, '0.0.0.0', resolve);
+      server.listen(env.http.port, 'localhost', resolve);
     });
   } catch (error) {
     logger.error(error);

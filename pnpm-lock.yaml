@@ -971,7 +971,7 @@ importers:
       '@sentry/tracing': 7.38.0
       '@trpc/server': 10.12.0
       '@valu/trpc-fetch-api-adapter': ^0.0.3
-      '@whatwg-node/server': ^0.4.17
+      '@whatwg-node/router': ^0.2.7
       bullmq: 3.7.0
       copyfiles: 2.4.1
       dotenv: 16.0.3
@@ -986,7 +986,7 @@ importers:
       '@sentry/tracing': 7.38.0
       '@trpc/server': 10.12.0
       '@valu/trpc-fetch-api-adapter': 0.0.3
-      '@whatwg-node/server': 0.4.17_@types+node@18.14.0
+      '@whatwg-node/router': 0.2.7_@types+node@18.14.0
       bullmq: 3.7.0_xbmkiyyfti7h6orsfs6pdmi4s4
       dotenv: 16.0.3
       got: 12.5.3
@@ -11365,6 +11365,7 @@ packages:
       web-streams-polyfill: 3.2.1
     transitivePeerDependencies:
       - encoding
+    dev: true
 
   /@whatwg-node/fetch/0.6.1:
     resolution: {integrity: sha512-sG39WLvcJxGZ+gDstnLSXR2IcnuvIOB51KxCFo0mEhFW0q2u8fZgolr0HPkL+zXwOJsnmT+9V3IRcqLnTXdqVQ==}
@@ -11425,16 +11426,14 @@ packages:
       fast-url-parser: 1.1.3
       tslib: 2.5.0
 
-  /@whatwg-node/server/0.4.17_@types+node@18.14.0:
-    resolution: {integrity: sha512-kq1AHyi87VWfiDqiSTAOY+py83HMJg42+fI8JAe1wjmMkJ8v/E5mKq5NpLNRM9Cnf7NHsQR0AwQgvX/RFuptaA==}
-    peerDependencies:
-      '@types/node': ^18.0.6
+  /@whatwg-node/router/0.2.7_@types+node@18.14.0:
+    resolution: {integrity: sha512-kZynz9z5kgBJ/mWowSNzoacRsP4iGPkM6MAVHUzaUxYcQR+crtUvsp7/P6H4X20ScRbs8sDRXi7XOU9mFT8Zhg==}
     dependencies:
-      '@types/node': 18.14.0
-      '@whatwg-node/fetch': 0.5.3
+      '@whatwg-node/fetch': 0.8.1_@types+node@18.14.0
+      '@whatwg-node/server': 0.6.7_@types+node@18.14.0
       tslib: 2.5.0
     transitivePeerDependencies:
-      - encoding
+      - '@types/node'
     dev: false
 
   /@whatwg-node/server/0.6.7_@types+node@18.14.0:

@@ -1,13 +1,13 @@
 import { createErrorHandler, reportReadiness } from '@hive/service-common';
-import { createFetchAPIHandler } from '@valu/trpc-fetch-api-adapter';
-import { Router } from 'itty-router';
 import { createLogger } from '@hive/service-common';
+import { createFetchAPIHandler } from '@valu/trpc-fetch-api-adapter';
+import { createRouter } from '@whatwg-node/router';
 import { webhooksApiRouter } from './api';
-import { Context } from './types';
 import { env } from './environment';
 import { createScheduler } from './scheduler';
+import { Context } from './types';
 
-const webhooksRouter: Router = Router();
+const webhooksRouter = createRouter();
 
 const logger = createLogger(env.log.level);
 
