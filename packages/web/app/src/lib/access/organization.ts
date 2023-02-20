@@ -28,7 +28,7 @@ export function useOrganizationAccess({
     canAccess,
     redirectTo: redirect
       ? router => ({
-          route: `/[orgId]`,
+          route: '/[orgId]',
           as: `/${router.query.orgId}`,
         })
       : undefined,

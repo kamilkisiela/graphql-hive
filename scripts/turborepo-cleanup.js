@@ -5,12 +5,10 @@
  *
  * The goal here is to delete it once a week.
  */
-
-import path from 'path';
 import fs from 'fs';
-import fsExtra from 'fs-extra';
-import rimraf from 'rimraf';
+import path from 'path';
 import { fileURLToPath } from 'url';
+import rimraf from 'rimraf';
 
 const cwd = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -37,7 +35,7 @@ function main() {
   console.log('[turborepo-cleanup] Cleaning up the cache.');
 
   rimraf.sync(path.resolve(cwd, cacheDir, '*'));
-  fsExtra.mkdirSync(path.resolve(cwd, cacheDir), { recursive: true });
+  fs.mkdirSync(path.resolve(cwd, cacheDir), { recursive: true });
   fs.writeFileSync(cleanupDateFile, Date.now().toString(), 'utf-8');
 }
 

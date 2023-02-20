@@ -10,7 +10,7 @@ and fail the check once breaking change is detected.
 
 ## Requirements
 
-- An active [token](./tokens)
+- An active [token](./tokens) with "Read" permissions to the Registry.
 - [Published schema](./publish-schema)
 
 ## Using Hive CLI
@@ -19,15 +19,16 @@ To check a schema, use `hive schema:check` command:
 
 ```bash
 # Single GraphQL API
+# one file
 hive schema:check schema.graphql
-# or
+# glob pattern
 hive schema:check "src/*.graphql"
 
-# Federation or Stitching
+# Federation and Stitching
 hive schema:check --service reviews schema.graphql
 ```
 
-<Callout>In case of Federation or Stitching it's mandatory to use `--service` flag.</Callout>
+<Callout>In case of Federation or Stitching it's mandatory to use `--service` an flag.</Callout>
 
 ## With `Usage` enabled
 

@@ -1,18 +1,18 @@
 import React from 'react';
-import { VscIssues, VscError } from 'react-icons/vsc';
+import clsx from 'clsx';
+import { VscIssues, VscPass } from 'react-icons/vsc';
+import { DocumentType, gql } from 'urql';
+import { OrganizationType } from '@/graphql';
+import { getDocsUrl } from '@/lib/docs-url';
 import {
-  useDisclosure,
   Drawer,
   DrawerBody,
+  DrawerCloseButton,
+  DrawerContent,
   DrawerHeader,
   DrawerOverlay,
-  DrawerContent,
-  DrawerCloseButton,
+  useDisclosure,
 } from '@chakra-ui/react';
-import clsx from 'clsx';
-import { OrganizationType } from '@/graphql';
-import { gql, DocumentType } from 'urql';
-import { getDocsUrl } from '@/lib/docs-url';
 
 const GetStartedWizard_GetStartedProgress = gql(/* GraphQL */ `
   fragment GetStartedWizard_GetStartedProgress on OrganizationGetStarted {
@@ -74,7 +74,7 @@ export function GetStartedProgress({
             }}
           >
             <div
-              className="bg-orange-500 h-full"
+              className="h-full bg-orange-500"
               style={{
                 width: `${(completed / total) * 100}%`,
               }}
@@ -114,34 +114,34 @@ function GetStartedWizard({
       size="md"
     >
       <DrawerOverlay />
-      <DrawerContent bgColor={'gray.800'}>
+      <DrawerContent bgColor="gray.800">
         <DrawerCloseButton />
         <DrawerHeader>Get Started</DrawerHeader>
         <DrawerBody>
           <p>Complete these steps to experience the full power of GraphQL Hive</p>
           <div className="mt-4 flex flex-col divide-y-2 divide-gray-900">
-            <Task link={getDocsUrl(`/get-started/projects`)} completed={tasks.creatingProject}>
+            <Task link={getDocsUrl('/get-started/projects')} completed={tasks.creatingProject}>
               Create a project
             </Task>
-            <Task link={getDocsUrl(`/features/publish-schema`)} completed={tasks.publishingSchema}>
+            <Task link={getDocsUrl('/features/publish-schema')} completed={tasks.publishingSchema}>
               Publish a schema
             </Task>
-            <Task link={getDocsUrl(`/features/checking-schema`)} completed={tasks.checkingSchema}>
+            <Task link={getDocsUrl('/features/checking-schema')} completed={tasks.checkingSchema}>
               Check a schema
             </Task>
             {'invitingMembers' in tasks && typeof tasks.invitingMembers === 'boolean' ? (
               <Task
-                link={getDocsUrl(`/get-started/organizations#members`)}
+                link={getDocsUrl('/get-started/organizations#members')}
                 completed={tasks.invitingMembers}
               >
                 Invite members
               </Task>
             ) : null}
-            <Task link={getDocsUrl(`/features/monitoring`)} completed={tasks.reportingOperations}>
+            <Task link={getDocsUrl('/features/monitoring')} completed={tasks.reportingOperations}>
               Report operations
             </Task>
             <Task
-              link={getDocsUrl(`/features/checking-schema#with-usage-enabled`)}
+              link={getDocsUrl('/features/checking-schema#with-usage-enabled')}
               completed={tasks.enablingUsageBasedBreakingChanges}
             >
               Enable usage-based breaking changes
@@ -168,13 +168,13 @@ function Task({
       rel="noreferrer"
       className={clsx(
         'flex flex-row items-center gap-4 p-3 text-left',
-        completed ? 'opacity-50' : 'hover:opacity-80',
+        completed ? 'opacity-50 line-through' : 'hover:opacity-80',
       )}
     >
       {completed ? (
-        <VscIssues className="h-[20px] w-[20px] text-green-400" />
+        <VscPass className="h-[20px] w-[20px] text-green-400" />
       ) : (
-        <VscError className="h-[20px] w-[20px] text-red-400" />
+        <VscIssues className="h-[20px] w-[20px] text-green-400" />
       )}
       {children}
     </a>

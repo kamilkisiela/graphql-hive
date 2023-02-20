@@ -47,6 +47,7 @@ export const reservedOrganizationNames = [
   'from',
   'call',
   'join',
+  'view',
 ];
 
 export const organizationAdminScopes = [

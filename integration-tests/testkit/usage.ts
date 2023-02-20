@@ -1,7 +1,5 @@
-import * as utils from '@n1ru4l/dockest/test-helper';
 import { fetch } from '@whatwg-node/fetch';
-
-const usageAddress = utils.getServiceAddress('usage', 3006);
+import { getServiceHost } from './utils';
 
 export interface CollectedOperation {
   timestamp?: number;
@@ -26,6 +24,7 @@ export async function collect(params: {
   token: string;
   authorizationHeader?: 'x-api-token' | 'authorization';
 }) {
+  const usageAddress = await getServiceHost('usage', 8081);
   const res = await fetch(`http://${usageAddress}`, {
     method: 'POST',
     body: JSON.stringify(params.operations),

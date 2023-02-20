@@ -1,0 +1,53 @@
+import { Callout, PackageCmd } from '@theguild/components'
+
+# Deleting a schema
+
+In case you want to delete a schema (or a subgraph in case of Federation), you can do so by using
+the `hive schema:delete` command.
+
+## Requirements
+
+- An active [token](./tokens) with "Read & Write" permissions to the Registry.
+- Available only for Stitching and Federation projects
+
+### NPM
+
+Install [`@graphql-hive/cli`](https://www.npmjs.com/package/@graphql-hive/cli) package from NPM:
+
+<PackageCmd packages={['-D @graphql-hive/cli']} />
+
+### Linux / MacOS
+
+Install latest version:
+
+```bash
+curl -sSL https://graphql-hive.com/install.sh | sh
+```
+
+Now, create a config file as `hive.json` and paste there your token:
+
+```json
+{
+  "token": "YOUR-TOKEN"
+}
+```
+
+<Callout>
+  Having a config file is not mandatory, you can use `--token YOUR-TOKEN` or an environment variable
+  called `HIVE_TOKEN` instead.
+</Callout>
+
+To delete a schema, use `hive schema:delete` command:
+
+```bash
+hive schema:delete <service-name>
+```
+
+<Callout>
+
+You can also use `--dryRun` flag first to see what effect the command will have on the registry.
+
+In case you want to confirm deletion of the service without typing anything in the terminal, use
+`--confirm` flag.
+
+</Callout>

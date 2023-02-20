@@ -5,8 +5,8 @@ import { OrganizationAccessScope } from '../auth/providers/organization-access';
 import { ProjectManager } from '../project/providers/project-manager';
 import { IdTranslator } from '../shared/providers/id-translator';
 import { TargetManager } from '../target/providers/target-manager';
-import { UsageEstimationProvider } from './providers/usage-estimation.provider';
 import { UsageEstimationModule } from './__generated__/types';
+import { UsageEstimationProvider } from './providers/usage-estimation.provider';
 
 export const resolvers: UsageEstimationModule.Resolvers = {
   Query: {

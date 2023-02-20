@@ -1,5 +1,19 @@
-import React from 'react';
-import 'twin.macro';
+import React, { PropsWithChildren } from 'react';
+import clsx from 'clsx';
+import {
+  VscChevronDown,
+  VscChevronLeft,
+  VscChevronRight,
+  VscChevronUp,
+  VscWarning,
+} from 'react-icons/vsc';
+import { gql, useQuery } from 'urql';
+import { useDebouncedCallback } from 'use-debounce';
+import { Scale, Section } from '@/components/common';
+import { GraphQLHighlight } from '@/components/common/GraphQLSDLBlock';
+import { env } from '@/env/frontend';
+import { DateRangeInput, OperationsStatsDocument, OperationStatsFieldsFragment } from '@/graphql';
+import { useDecimal, useFormattedDuration, useFormattedNumber } from '@/lib/hooks';
 import {
   Button,
   Drawer,
@@ -23,31 +37,16 @@ import {
   useDisclosure,
 } from '@chakra-ui/react';
 import {
-  VscChevronDown,
-  VscChevronLeft,
-  VscChevronRight,
-  VscChevronUp,
-  VscWarning,
-} from 'react-icons/vsc';
-import {
   createTable,
-  useTableInstance,
   getCoreRowModel,
-  getSortedRowModel,
   getPaginationRowModel,
-  SortingState,
-  PaginationState,
+  getSortedRowModel,
   OnChangeFn,
+  PaginationState,
+  SortingState,
+  useTableInstance,
 } from '@tanstack/react-table';
-import { useQuery } from 'urql';
-import { useDebouncedCallback } from 'use-debounce';
-
-import { Scale, Section } from '@/components/common';
-import { GraphQLHighlight } from '@/components/common/GraphQLSDLBlock';
-import { DateRangeInput, OperationsStatsDocument, OperationStatsFieldsFragment } from '@/graphql';
-import { useDecimal, useFormattedDuration, useFormattedNumber } from '@/lib/hooks';
 import { OperationsFallback } from './Fallback';
-import { env } from '@/env/frontend';
 
 interface Operation {
   id: string;
@@ -59,20 +58,25 @@ interface Operation {
   failureRate: number;
   requests: number;
   percentage: number;
-  document: string;
+  hash: string;
 }
 
-const Sortable: React.FC<{
+const Sortable = ({
+  children,
+  isSorted,
+  isSortedDesc,
+  align = 'left',
+}: PropsWithChildren<{
   align?: 'center' | 'right' | 'left';
   isSortedDesc?: boolean;
   isSorted?: boolean;
-}> = ({ children, isSorted, isSortedDesc, align = 'left' }) => {
+}>) => {
   return (
     <Flex
       direction="row"
       align="center"
       justify={align === 'center' ? 'center' : align === 'left' ? 'start' : 'end'}
-      tw="cursor-pointer"
+      className="cursor-pointer"
     >
       <span>{children}</span>
       {isSorted ? isSortedDesc ? <VscChevronDown /> : <VscChevronUp /> : null}
@@ -80,9 +84,51 @@ const Sortable: React.FC<{
   );
 };
 
+const GraphQLOperationBody_GetOperationBodyQuery = gql(/* GraphQL */ `
+  query GraphQLOperationBody_GetOperationBodyQuery($selector: OperationBodyByHashInput!) {
+    operationBodyByHash(selector: $selector)
+  }
+`);
+
+function GraphQLOperationBody({
+  hash,
+  organization,
+  project,
+  target,
+}: {
+  hash: string;
+  organization: string;
+  project: string;
+  target: string;
+}) {
+  const [result] = useQuery({
+    query: GraphQLOperationBody_GetOperationBodyQuery,
+    variables: { selector: { hash, organization, project, target } },
+  });
+
+  const { data, fetching, error } = result;
+
+  if (fetching) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Oh no... {error.message}</div>;
+  }
+
+  if (data?.operationBodyByHash) {
+    return <GraphQLHighlight className="pt-6" light code={data.operationBodyByHash} />;
+  }
+
+  return null;
+}
+
 const OperationRow: React.FC<{
   operation: Operation;
-}> = ({ operation }) => {
+  organization: string;
+  project: string;
+  target: string;
+}> = ({ operation, organization, project, target }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const linkRef = React.useRef<HTMLButtonElement | null>(null);
   const count = useFormattedNumber(operation.requests);
@@ -95,8 +141,8 @@ const OperationRow: React.FC<{
   return (
     <>
       <Tr>
-        <Td tw="font-medium truncate">
-          <div tw="flex flex-row">
+        <Td className="font-medium truncate">
+          <div className="flex flex-row">
             <Button
               as="a"
               href="#"
@@ -118,7 +164,7 @@ const OperationRow: React.FC<{
                 placement="right"
                 label="Anonymous operation detected. Naming your operations is a recommended practice"
               >
-                <span tw="ml-1 text-yellow-500">
+                <span className="ml-1 text-yellow-500">
                   <VscWarning />
                 </span>
               </Tooltip>
@@ -126,7 +172,7 @@ const OperationRow: React.FC<{
           </div>
         </Td>
         <Td textAlign="center">
-          <span tw="text-xs">{operation.kind}</span>
+          <span className="text-xs">{operation.kind}</span>
         </Td>
         <Td textAlign="center">{p90}</Td>
         <Td textAlign="center">{p95}</Td>
@@ -134,9 +180,9 @@ const OperationRow: React.FC<{
         <Td textAlign="center">{failureRate}%</Td>
         <Td textAlign="center">{count}</Td>
         <Td textAlign="right">
-          <div tw="flex flex-row justify-end">
-            <div tw="mr-3">{percentage}%</div>
-            <Scale value={operation.percentage} size={10} max={100} tw="justify-end" />
+          <div className="flex flex-row justify-end">
+            <div className="mr-3">{percentage}%</div>
+            <Scale value={operation.percentage} size={10} max={100} className="justify-end" />
           </div>
         </Td>
       </Tr>
@@ -149,7 +195,12 @@ const OperationRow: React.FC<{
           </DrawerHeader>
 
           <DrawerBody>
-            <GraphQLHighlight tw="pt-6" light code={operation.document} />
+            <GraphQLOperationBody
+              hash={operation.hash}
+              organization={organization}
+              project={project}
+              target={target}
+            />
           </DrawerBody>
         </DrawerContent>
       </Drawer>
@@ -201,7 +252,20 @@ const OperationsTable: React.FC<{
   sorting: SortingState;
   setSorting: OnChangeFn<SortingState>;
   className?: string;
-}> = ({ operations, sorting, setSorting, pagination, setPagination, className }) => {
+  organization: string;
+  project: string;
+  target: string;
+}> = ({
+  operations,
+  sorting,
+  setSorting,
+  pagination,
+  setPagination,
+  className,
+  organization,
+  project,
+  target,
+}) => {
   const tableInstance = useTableInstance(table, {
     columns,
     data: operations,
@@ -243,15 +307,17 @@ const OperationsTable: React.FC<{
 
   return (
     <div
-      className={className}
-      tw="transition-opacity ease-in-out duration-700 rounded-md p-5 ring-1 ring-gray-800 bg-gray-900/50"
+      className={clsx(
+        'transition-opacity ease-in-out duration-700 rounded-md p-5 ring-1 ring-gray-800 bg-gray-900/50',
+        className,
+      )}
     >
       <Section.Title>Operations</Section.Title>
       <Section.Subtitle>List of all operations with their statistics</Section.Subtitle>
-      <Table tw="mt-6" variant="striped" colorScheme="gray" size="sm">
+      <Table className="mt-6" variant="striped" colorScheme="gray" size="sm">
         <Thead>
           <Tr>
-            <Th tw="truncate">Operation</Th>
+            <Th className="truncate">Operation</Th>
             <Th textAlign="center">Kind</Th>
             <Th onClick={p90Column.column.getToggleSortingHandler()}>
               <Sortable
@@ -314,11 +380,19 @@ const OperationsTable: React.FC<{
             if (!row.original) {
               return null;
             }
-            return <OperationRow operation={row.original} key={row.original.id} />;
+            return (
+              <OperationRow
+                operation={row.original}
+                key={row.original.id}
+                organization={organization}
+                project={project}
+                target={target}
+              />
+            );
           })}
         </Tbody>
       </Table>
-      <div tw="py-3 flex flex-row items-center justify-center space-x-2">
+      <div className="py-3 flex flex-row items-center justify-center space-x-2">
         <Button
           size="sm"
           variant="ghost"
@@ -337,7 +411,7 @@ const OperationsTable: React.FC<{
           disabled={!tableInstance.getCanPreviousPage()}
           icon={<VscChevronLeft />}
         />
-        <span tw="font-bold whitespace-nowrap text-sm">
+        <span className="font-bold whitespace-nowrap text-sm">
           {tableInstance.getState().pagination.pageIndex + 1} / {tableInstance.getPageCount()}
         </span>
         <IconButton
@@ -358,7 +432,7 @@ const OperationsTable: React.FC<{
         >
           Last
         </Button>
-        <InputGroup variant="filled" tw="w-auto" size="sm">
+        <InputGroup variant="filled" className="w-auto" size="sm">
           <InputLeftAddon>Go to</InputLeftAddon>
           <Input
             width="70px"
@@ -379,15 +453,20 @@ const OperationsTable: React.FC<{
 const OperationsTableContainer: React.FC<{
   operations: readonly OperationStatsFieldsFragment[];
   operationsFilter: readonly string[];
+  organization: string;
+  project: string;
+  target: string;
   className?: string;
-}> = ({ operations, operationsFilter, className }) => {
+}> = ({ operations, operationsFilter, organization, project, target, className }) => {
   const data = React.useMemo(() => {
     const records: Array<Operation> = [];
     for (const op of operations) {
-      if (operationsFilter.length > 0 && op.operationHash) {
-        if (operationsFilter.includes(op.operationHash) === false) {
-          continue;
-        }
+      if (
+        operationsFilter.length > 0 &&
+        op.operationHash &&
+        operationsFilter.includes(op.operationHash) === false
+      ) {
+        continue;
       }
       records.push({
         id: op.id,
@@ -399,7 +478,7 @@ const OperationsTableContainer: React.FC<{
         failureRate: 1 - op.countOk / op.count,
         requests: op.count,
         percentage: op.percentage,
-        document: op.document,
+        hash: op.operationHash!,
       });
     }
 
@@ -419,7 +498,8 @@ const OperationsTableContainer: React.FC<{
         const maxPageIndex = Math.ceil(data.length / state.pageSize) - 1;
         if (state.pageIndex < 0) {
           return { ...state, pageIndex: 0 };
-        } else if (state.pageIndex > maxPageIndex) {
+        }
+        if (state.pageIndex > maxPageIndex) {
           return { ...state, pageIndex: maxPageIndex };
         }
         return state;
@@ -439,6 +519,9 @@ const OperationsTableContainer: React.FC<{
       setPagination={safeSetPagination}
       sorting={sorting}
       setSorting={setSorting}
+      organization={organization}
+      project={project}
+      target={target}
     />
   );
 };
@@ -479,6 +562,9 @@ export const OperationsList: React.FC<{
         operations={operations}
         operationsFilter={operationsFilter}
         className={className}
+        organization={organization}
+        project={project}
+        target={target}
       />
     </OperationsFallback>
   );

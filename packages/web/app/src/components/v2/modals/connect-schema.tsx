@@ -1,16 +1,17 @@
-import { ReactElement, useEffect, useState } from 'react';
-import { Spinner } from '@chakra-ui/react';
-import { useMutation, useQuery } from 'urql';
-
+import { ReactElement } from 'react';
+import { gql, useQuery } from 'urql';
 import { Button, CopyValue, Heading, Link, Modal, Tag } from '@/components/v2';
-import { CreateCdnTokenDocument, ProjectDocument, ProjectType } from '@/graphql';
 import { getDocsUrl } from '@/lib/docs-url';
 import { useRouteSelector } from '@/lib/hooks';
 
-const taxonomy = {
-  [ProjectType.Federation]: 'supergraph schema',
-  [ProjectType.Stitching]: 'services',
-} as Record<ProjectType, string | undefined>;
+const ConnectSchemaModalQuery = gql(/* GraphQL */ `
+  query ConnectSchemaModal($targetSelector: TargetSelectorInput!) {
+    target(selector: $targetSelector) {
+      id
+      cdnUrl
+    }
+  }
+`);
 
 export const ConnectSchemaModal = ({
   isOpen,
@@ -19,75 +20,64 @@ export const ConnectSchemaModal = ({
   isOpen: boolean;
   toggleModalOpen: () => void;
 }): ReactElement => {
-  const [generating, setGenerating] = useState(true);
   const router = useRouteSelector();
-  const [projectQuery] = useQuery({
-    query: ProjectDocument,
+  const [query] = useQuery({
+    query: ConnectSchemaModalQuery,
     variables: {
-      organizationId: router.organizationId,
-      projectId: router.projectId,
-    },
-    requestPolicy: 'cache-and-network',
-  });
-  const [mutation, mutate] = useMutation(CreateCdnTokenDocument);
-
-  useEffect(() => {
-    if (!isOpen) {
-      setGenerating(true);
-      return;
-    }
-
-    void mutate({
-      selector: {
+      targetSelector: {
         organization: router.organizationId,
         project: router.projectId,
         target: router.targetId,
       },
-    }).then(() => {
-      setTimeout(() => {
-        setGenerating(false);
-      }, 2000);
-    });
-  }, [isOpen, mutate, router.organizationId, router.projectId, router.targetId]);
-
-  const project = projectQuery.data?.project;
+    },
+    requestPolicy: 'cache-and-network',
+  });
 
   return (
     <Modal open={isOpen} onOpenChange={toggleModalOpen} className="flex w-[650px] flex-col gap-5">
       <Heading className="text-center">Connect to Hive</Heading>
 
-      {project && generating && (
-        <div className="mt-5 flex flex-col items-center gap-2 px-20">
-          <Spinner />
-          <Heading>Generating access...</Heading>
-          <p className="text-center">
-            Hive is now generating an authentication token and an URL you can use to fetch your{' '}
-            {taxonomy[project.type] ?? 'schema'}.
-          </p>
-        </div>
-      )}
-
-      {project && !generating && mutation.data && (
+      {query.data?.target && (
         <>
           <p className="text-sm text-gray-500">
             With high-availability and multi-zone CDN service based on Cloudflare, Hive allows you
-            to access the
-            {taxonomy[project.type] ?? 'schema'} of your API, through a secured external service,
-            that's always up regardless of Hive.
+            to access the schema of your API, through a secured external service, that's always up
+            regardless of Hive.
           </p>
           <span className="text-sm text-gray-500">You can use the following endpoint:</span>
-          <CopyValue value={mutation.data.createCdnToken.url} />
+          <CopyValue value={query.data.target.cdnUrl} />
           <span className="text-sm text-gray-500">
-            To authenticate, use the following HTTP headers:
+            To authenticate, use the access HTTP headers. <br />
           </span>
-          <Tag>X-Hive-CDN-Key: {mutation.data.createCdnToken.token}</Tag>
+          <p className="text-sm text-gray-500">
+            <Tag>
+              X-Hive-CDN-Key: {'<'}Your Access Token{'>'}
+            </Tag>
+          </p>
+          <p className="text-sm text-gray-500">
+            You can manage and generate CDN access tokens in the{' '}
+            <Link
+              variant="primary"
+              href={
+                '/' +
+                [
+                  router.organizationId,
+                  router.projectId,
+                  router.targetId,
+                  'settings#cdn-access-tokens',
+                ].join('/')
+              }
+            >
+              target settings
+            </Link>
+          </p>
           <p className="text-sm text-gray-500">
             Read the{' '}
             <Link
               variant="primary"
               target="_blank"
               rel="noreferrer"
-              href={getDocsUrl(`/features/registry-usage#apollo-federation`) ?? ''}
+              href={getDocsUrl('/features/registry-usage#apollo-federation') ?? ''}
             >
               Using the Registry with a Apollo Gateway
             </Link>{' '}

@@ -23,7 +23,7 @@ $ npm install -g @graphql-hive/cli
 $ hive COMMAND
 running command...
 $ hive (--version)
-@graphql-hive/cli/0.19.5 darwin-arm64 node-v16.18.0
+@graphql-hive/cli/0.20.0 darwin-arm64 node-v18.14.0
 $ hive --help [COMMAND]
 USAGE
   $ hive COMMAND
@@ -40,10 +40,11 @@ USAGE
 - [`hive config:get KEY`](#hive-configget-key)
 - [`hive config:reset`](#hive-configreset)
 - [`hive config:set KEY VALUE`](#hive-configset-key-value)
-- [`hive help [COMMAND]`](#hive-help-command)
+- [`hive help [COMMANDS]`](#hive-help-commands)
 - [`hive operations:check FILE`](#hive-operationscheck-file)
 - [`hive operations:publish FILE`](#hive-operationspublish-file)
 - [`hive schema:check FILE`](#hive-schemacheck-file)
+- [`hive schema:delete SERVICE`](#hive-schemadelete-service)
 - [`hive schema:publish FILE`](#hive-schemapublish-file)
 - [`hive update [CHANNEL]`](#hive-update-channel)
 - [`hive whoami`](#hive-whoami)
@@ -64,7 +65,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/config/delete.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.5/dist/commands/config/delete.js)_
+[dist/commands/config/delete.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.0/dist/commands/config/delete.js)_
 
 ## `hive config:get KEY`
 
@@ -82,7 +83,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/config/get.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.5/dist/commands/config/get.js)_
+[dist/commands/config/get.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.0/dist/commands/config/get.js)_
 
 ## `hive config:reset`
 
@@ -97,7 +98,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/config/reset.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.5/dist/commands/config/reset.js)_
+[dist/commands/config/reset.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.0/dist/commands/config/reset.js)_
 
 ## `hive config:set KEY VALUE`
 
@@ -116,18 +117,18 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/config/set.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.5/dist/commands/config/set.js)_
+[dist/commands/config/set.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.0/dist/commands/config/set.js)_
 
-## `hive help [COMMAND]`
+## `hive help [COMMANDS]`
 
 Display help for hive.
 
 ```
 USAGE
-  $ hive help [COMMAND] [-n]
+  $ hive help [COMMANDS] [-n]
 
 ARGUMENTS
-  COMMAND  Command to show help for.
+  COMMANDS  Command to show help for.
 
 FLAGS
   -n, --nested-commands  Include all nested commands in the output.
@@ -137,7 +138,7 @@ DESCRIPTION
 ```
 
 _See code:
-[@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.1.18/src/commands/help.ts)_
+[@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.2.4/src/commands/help.ts)_
 
 ## `hive operations:check FILE`
 
@@ -160,7 +161,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/operations/check.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.5/dist/commands/operations/check.js)_
+[dist/commands/operations/check.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.0/dist/commands/operations/check.js)_
 
 ## `hive operations:publish FILE`
 
@@ -184,7 +185,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/operations/publish.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.5/dist/commands/operations/publish.js)_
+[dist/commands/operations/publish.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.0/dist/commands/operations/publish.js)_
 
 ## `hive schema:check FILE`
 
@@ -212,7 +213,31 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/schema/check.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.5/dist/commands/schema/check.js)_
+[dist/commands/schema/check.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.0/dist/commands/schema/check.js)_
+
+## `hive schema:delete SERVICE`
+
+deletes a schema
+
+```
+USAGE
+  $ hive schema:delete [SERVICE] [--registry <value>] [--token <value>] [--dryRun] [--confirm]
+
+ARGUMENTS
+  SERVICE  name of the service
+
+FLAGS
+  --confirm           Confirm deletion of the service
+  --dryRun            Does not delete the service, only reports what it would have done.
+  --registry=<value>  Address of the registry
+  --token=<value>     API token
+
+DESCRIPTION
+  deletes a schema
+```
+
+_See code:
+[dist/commands/schema/delete.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.0/dist/commands/schema/delete.js)_
 
 ## `hive schema:publish FILE`
 
@@ -248,7 +273,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/schema/publish.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.5/dist/commands/schema/publish.js)_
+[dist/commands/schema/publish.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.0/dist/commands/schema/publish.js)_
 
 ## `hive update [CHANNEL]`
 
@@ -286,11 +311,11 @@ EXAMPLES
 ```
 
 _See code:
-[@oclif/plugin-update](https://github.com/oclif/plugin-update/blob/v3.0.6/src/commands/update.ts)_
+[@oclif/plugin-update](https://github.com/oclif/plugin-update/blob/v3.1.3/src/commands/update.ts)_
 
 ## `hive whoami`
 
-checks schema
+shows information about the current token
 
 ```
 USAGE
@@ -301,11 +326,11 @@ FLAGS
   --token=<value>     api token
 
 DESCRIPTION
-  checks schema
+  shows information about the current token
 ```
 
 _See code:
-[dist/commands/whoami.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.19.5/dist/commands/whoami.js)_
+[dist/commands/whoami.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.0/dist/commands/whoami.js)_
 
 <!-- commandsstop -->
 

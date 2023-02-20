@@ -1,0 +1,72 @@
+on:
+  workflow_call:
+    inputs:
+      registry:
+        default: ghcr.io
+        type: string
+      imageName:
+        default: ${{ github.repository }}
+        type: string
+      imageTag:
+        required: true
+        type: string
+
+jobs:
+  e2e:
+    runs-on: ubuntu-22.04
+
+    env:
+      HIVE_ENCRYPTION_SECRET: wowverysecuremuchsecret
+      HIVE_EMAIL_FROM: no-reply@graphql-hive.com
+      HIVE_APP_BASE_URL: http://localhost:8080
+      SUPERTOKENS_API_KEY: wowverysecuremuchsecret
+      CLICKHOUSE_USER: clickhouse
+      CLICKHOUSE_PASSWORD: wowverysecuremuchsecret
+      REDIS_PASSWORD: wowverysecuremuchsecret
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: registry
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+      CDN_AUTH_PRIVATE_KEY: 6b4721a99bd2ef6c00ce4328f34d95d7
+      DOCKER_REGISTRY: ${{ inputs.registry }}/${{ inputs.imageName }}/
+      DOCKER_TAG: :${{ inputs.imageTag }}
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: setup environment
+        uses: ./.github/actions/setup
+        with:
+          codegen: false
+
+      - name: patch compose file volumes
+        uses: mikefarah/yq@v4.30.8
+        with:
+          cmd: yq -i 'del(.services.*.volumes)' docker/docker-compose.community.yml
+
+      - name: run containers
+        timeout-minutes: 10
+        run: docker compose -f docker/docker-compose.community.yml up -d --wait
+
+      - name: troubleshoot containers
+        if: ${{ failure() }}
+        run: |
+          docker compose -f docker/docker-compose.community.yml ps
+          docker compose -f docker/docker-compose.community.yml logs
+
+      - name: cypress
+        timeout-minutes: 6
+        uses: cypress-io/github-action@v5
+        with:
+          command: pnpm test:e2e
+          install: false
+
+      - uses: actions/upload-artifact@v3.1.2
+        if: ${{ failure() }}
+        with:
+          name: cypress
+          path: |
+            ./cypress/videos/**/*
+            ./cypress/screenshots/**/*

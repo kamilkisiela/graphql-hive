@@ -1,0 +1,43 @@
+on:
+  workflow_call:
+    secrets:
+      hiveToken:
+
+jobs:
+  search-token:
+    runs-on: ubuntu-22.04
+    outputs:
+      hive_token_present: ${{ steps.secrets_present.outputs.hive_token }}
+    steps:
+      - name: check for Hive token presence
+        env:
+          HIVE_TOKEN: ${{ secrets.hiveToken }}
+        id: secrets_present
+        run: echo "hive_token=${{ env.HIVE_TOKEN != '' }}" >> $GITHUB_OUTPUT
+
+  check:
+    runs-on: ubuntu-22.04
+    needs: search-token
+    if: needs.search-token.outputs.hive_token_present == 'true'
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: setup environment
+        uses: ./.github/actions/setup
+
+      - name: check pull request label
+        if: contains(github.event.pull_request.labels.*.name, 'non-breaking')
+        run: echo "safeFlag=--forceSafe" >> $GITHUB_OUTPUT
+        id: pr-label-check
+
+      - name: build core package
+        run: pnpm build --filter @graphql-hive/core
+
+      - name: schema check
+        env:
+          HIVE_TOKEN: ${{ secrets.hiveToken }}
+        run:
+          ./packages/libraries/cli/bin/dev schema:check
+          "packages/services/api/src/modules/*/module.graphql.ts" ${{
+          steps.pr-label-check.outputs.safeFlag }} --github

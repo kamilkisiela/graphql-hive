@@ -1,6 +1,6 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import nock from 'nock';
-import { createServicesFetcher, createSchemaFetcher } from '../src/gateways';
+import { createSchemaFetcher, createServicesFetcher } from '../src/gateways';
 
 afterEach(() => {
   nock.cleanAll();
@@ -19,12 +19,12 @@ test('createServicesFetcher without ETag', async () => {
   };
   const key = 'secret-key';
   nock('http://localhost')
-    .get('/schema')
+    .get('/services')
     .once()
     .matchHeader('X-Hive-CDN-Key', key)
     .matchHeader('accept', 'application/json')
     .reply(() => [200, [schema]])
-    .get('/schema')
+    .get('/services')
     .once()
     .matchHeader('X-Hive-CDN-Key', key)
     .matchHeader('accept', 'application/json')
@@ -65,20 +65,20 @@ test('createServicesFetcher with ETag', async () => {
   };
   const key = 'secret-key';
   nock('http://localhost')
-    .get('/schema')
+    .get('/services')
     .once()
     .matchHeader('X-Hive-CDN-Key', key)
     .matchHeader('accept', 'application/json')
     .reply(200, [schema], {
       ETag: 'first',
     })
-    .get('/schema')
+    .get('/services')
     .once()
     .matchHeader('X-Hive-CDN-Key', key)
     .matchHeader('accept', 'application/json')
     .matchHeader('If-None-Match', 'first')
     .reply(304)
-    .get('/schema')
+    .get('/services')
     .once()
     .matchHeader('X-Hive-CDN-Key', key)
     .matchHeader('accept', 'application/json')
@@ -130,12 +130,12 @@ test('createSchemaFetcher without ETag (older versions)', async () => {
   };
   const key = 'secret-key';
   nock('http://localhost')
-    .get('/schema')
+    .get('/services')
     .once()
     .matchHeader('X-Hive-CDN-Key', key)
     .matchHeader('accept', 'application/json')
     .reply(() => [200, schema])
-    .get('/schema')
+    .get('/services')
     .once()
     .matchHeader('X-Hive-CDN-Key', key)
     .matchHeader('accept', 'application/json')
@@ -174,20 +174,20 @@ test('createSchemaFetcher with ETag', async () => {
   };
   const key = 'secret-key';
   nock('http://localhost')
-    .get('/schema')
+    .get('/services')
     .once()
     .matchHeader('X-Hive-CDN-Key', key)
     .matchHeader('accept', 'application/json')
     .reply(200, schema, {
       ETag: 'first',
     })
-    .get('/schema')
+    .get('/services')
     .once()
     .matchHeader('X-Hive-CDN-Key', key)
     .matchHeader('accept', 'application/json')
     .matchHeader('If-None-Match', 'first')
     .reply(304)
-    .get('/schema')
+    .get('/services')
     .once()
     .matchHeader('X-Hive-CDN-Key', key)
     .matchHeader('accept', 'application/json')
@@ -221,4 +221,75 @@ test('createSchemaFetcher with ETag', async () => {
   expect(staleResult.name).toEqual(newSchema.name);
   expect(staleResult.sdl).toEqual(newSchema.sdl);
   expect(staleResult.url).toEqual(newSchema.url);
+});
+
+test('retry in case of unexpected CDN status code (nRetryCount=10)', async () => {
+  const schema = {
+    sdl: 'type Query { noop: String }',
+    url: 'service-url',
+    name: 'service-name',
+  };
+
+  const key = 'secret-key';
+
+  nock('http://localhost')
+    .get('/services')
+    .times(10)
+    .matchHeader('X-Hive-CDN-Key', key)
+    .matchHeader('accept', 'application/json')
+    .reply(500)
+    .get('/services')
+    .once()
+    .matchHeader('X-Hive-CDN-Key', key)
+    .matchHeader('accept', 'application/json')
+    .reply(200, schema, {
+      ETag: 'first',
+    });
+
+  const fetcher = createSchemaFetcher({
+    endpoint: 'http://localhost',
+    key,
+  });
+
+  const result = await fetcher();
+  expect(result.id).toBeDefined();
+  expect(result.name).toEqual(result.name);
+  expect(result.sdl).toEqual(result.sdl);
+  expect(result.url).toEqual(result.url);
+});
+
+test('fail in case of unexpected CDN status code (nRetryCount=11)', async () => {
+  expect.assertions(1);
+  const schema = {
+    sdl: 'type Query { noop: String }',
+    url: 'service-url',
+    name: 'service-name',
+  };
+
+  const key = 'secret-key';
+
+  nock('http://localhost')
+    .get('/services')
+    .times(11)
+    .matchHeader('X-Hive-CDN-Key', key)
+    .matchHeader('accept', 'application/json')
+    .reply(500)
+    .get('/services')
+    .once()
+    .matchHeader('X-Hive-CDN-Key', key)
+    .matchHeader('accept', 'application/json')
+    .reply(200, schema, {
+      ETag: 'first',
+    });
+
+  const fetcher = createSchemaFetcher({
+    endpoint: 'http://localhost',
+    key,
+  });
+
+  try {
+    await fetcher();
+  } catch (e) {
+    expect(e).toMatchInlineSnapshot(`[Error: Failed to fetch [500]]`);
+  }
 });

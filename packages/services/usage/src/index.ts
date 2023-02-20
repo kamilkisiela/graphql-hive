@@ -1,26 +1,26 @@
 #!/usr/bin/env node
-import * as Sentry from '@sentry/node';
 import {
   createServer,
-  startMetrics,
   registerShutdown,
   reportReadiness,
+  startMetrics,
 } from '@hive/service-common';
-import { createTokens } from './tokens';
-import { createUsage } from './usage';
+import * as Sentry from '@sentry/node';
+import { env } from './environment';
+import { maskToken } from './helpers';
 import {
-  httpRequests,
-  httpRequestsWithoutToken,
-  httpRequestsWithNonExistingToken,
-  httpRequestsWithNoAccess,
   collectDuration,
   droppedReports,
+  httpRequests,
+  httpRequestsWithNoAccess,
+  httpRequestsWithNonExistingToken,
+  httpRequestsWithoutToken,
   tokensDuration,
 } from './metrics';
-import type { IncomingLegacyReport, IncomingReport } from './types';
 import { createUsageRateLimit } from './rate-limit';
-import { maskToken } from './helpers';
-import { env } from './environment';
+import { createTokens } from './tokens';
+import type { IncomingLegacyReport, IncomingReport } from './types';
+import { createUsage } from './usage';
 
 async function main() {
   if (env.sentry) {
@@ -38,6 +38,7 @@ async function main() {
     tracing: false,
     log: {
       level: env.log.level,
+      requests: env.log.requests,
     },
   });
 
@@ -184,7 +185,7 @@ async function main() {
     if (env.prometheus) {
       await startMetrics(env.prometheus.labels.instance ?? undefined);
     }
-    await server.listen(env.http.port, '0.0.0.0');
+    await server.listen(env.http.port, '::');
     await start();
   } catch (error) {
     server.log.fatal(error);

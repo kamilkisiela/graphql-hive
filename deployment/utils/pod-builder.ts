@@ -1,5 +1,5 @@
-import * as kx from '@pulumi/kubernetesx';
 import * as k8s from '@pulumi/kubernetes';
+import * as kx from '@pulumi/kubernetesx';
 import * as pulumi from '@pulumi/pulumi';
 
 export function normalizeEnv(env: kx.types.Container['env']): any[] {
@@ -27,7 +27,7 @@ export class PodBuilder extends kx.PodBuilder {
       selector: { matchLabels: appLabels },
       replicas: _args.replicas ?? 1,
       template: {
-        metadata: { labels: appLabels, ...(metadata || {}) },
+        metadata: { labels: appLabels, ...metadata },
         spec: this.podSpec,
       },
     };

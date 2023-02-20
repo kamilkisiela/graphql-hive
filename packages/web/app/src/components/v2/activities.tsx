@@ -1,6 +1,5 @@
 import React, { ReactElement, ReactNode } from 'react';
 import { useQuery } from 'urql';
-
 import { ActivityNode } from '@/components/common/activities/common';
 import { Heading, Link, Skeleton, TimeAgo } from '@/components/v2';
 import {
@@ -31,9 +30,8 @@ export const getActivity = (
   content: ReactElement | string;
 } => {
   const { __typename: type } = activity;
-  const organization = (activity as any).organization;
-  const user = (activity as any).user;
-  const projectLink = 'project' in activity && (
+  const { organization, user } = activity as any;
+  const projectLink = 'project' in activity && !!activity.project && (
     <Link
       variant="primary"
       href={{
@@ -48,16 +46,17 @@ export const getActivity = (
     </Link>
   );
 
-  const targetHref = 'target' in activity && {
-    pathname: '/[orgId]/[projectId]/[targetId]',
-    query: {
-      orgId: organization.cleanId,
-      projectId: activity.project.cleanId,
-      targetId: activity.target.cleanId,
-    },
-  };
+  const targetHref = 'target' in activity &&
+    !!activity.target && {
+      pathname: '/[orgId]/[projectId]/[targetId]',
+      query: {
+        orgId: organization.cleanId,
+        projectId: activity.project.cleanId,
+        targetId: activity.target.cleanId,
+      },
+    };
 
-  const targetLink = 'target' in activity && (
+  const targetLink = 'target' in activity && !!activity.target && (
     /* TODO: figure out what is going on with targetHref... */
     <Link variant="primary" href={targetHref as any}>
       {activity.target.name}
@@ -226,15 +225,15 @@ export const Activities = (props: React.ComponentProps<'div'>): ReactElement => 
       <Heading>Recent Activity</Heading>
       <ul className="mt-4 w-full break-all rounded-md border border-gray-800 p-5">
         {isLoading || !activities?.nodes
-          ? new Array(3).fill(null).map((_, index) => {
+          ? new Array(3).fill(null).map((_, index) => (
               <ActivityContainer key={index}>
                 <Skeleton circle visible className="h-7 w-7 shrink-0" />
                 <div className="grow">
                   <Skeleton visible className="mb-2 h-3 w-2/5" />
                   <Skeleton visible className="h-3 w-full" />
                 </div>
-              </ActivityContainer>;
-            })
+              </ActivityContainer>
+            ))
           : activities.nodes.map(activity => {
               const { content, icon } = getActivity(activity);
 
@@ -243,10 +242,10 @@ export const Activities = (props: React.ComponentProps<'div'>): ReactElement => 
                   <>
                     <div className="self-center p-1">{icon}</div>
                     <div className="grow">
-                      {'project' in activity && (
+                      {'project' in activity && !!activity.project && (
                         <h3 className="mb-1 flex items-center font-medium">
                           <span className="line-clamp-1">{activity.project.name}</span>
-                          {'target' in activity && (
+                          {'target' in activity && !!activity.target && (
                             <>
                               <ArrowDownIcon className="h-4 w-4 shrink-0 -rotate-90 select-none" />
                               <span className="line-clamp-1">{activity.target.name}</span>

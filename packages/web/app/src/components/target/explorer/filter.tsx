@@ -98,7 +98,7 @@ export function SchemaExplorerFilter({
 
   return (
     <div className="flex flex-row items-center gap-12">
-      <div className="flex-grow">
+      <div className="grow">
         <Autocomplete
           placeholder="Search for a type"
           defaultValue={typename ? { value: typename, label: typename } : null}
@@ -111,7 +111,7 @@ export function SchemaExplorerFilter({
           loading={query.fetching}
         />
       </div>
-      <div className="flex-shrink-0">
+      <div className="shrink-0">
         <RadixSelect
           className="cursor-pointer rounded-md"
           value={periodSelector.value}
@@ -120,7 +120,7 @@ export function SchemaExplorerFilter({
           options={periodSelector.options}
         />
       </div>
-      <div className="flex-shrink-0">
+      <div className="shrink-0">
         <div className="flex flex-row items-center gap-4">
           <Switch checked={!collapsed} onCheckedChange={toggleCollapsed} />
           <div>

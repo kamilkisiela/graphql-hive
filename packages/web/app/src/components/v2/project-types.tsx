@@ -1,17 +1,15 @@
 import { ReactElement } from 'react';
 import Image, { ImageProps } from 'next/image';
-import { RadioGroupProps } from '@radix-ui/react-radio-group';
 import clsx from 'clsx';
-
 import { Radio, RadioGroup } from '@/components/v2';
 import { ProjectType } from '@/graphql';
-import custom from '../../../public/images/figures/custom.svg';
+import { RadioGroupProps } from '@radix-ui/react-radio-group';
 import federation from '../../../public/images/figures/federation.svg';
 import single from '../../../public/images/figures/single.svg';
 import stitching from '../../../public/images/figures/stitching.svg';
 
 const PROJECTS: {
-  title: 'REGULAR' | 'DISTRIBUTED' | 'CUSTOM';
+  title: 'REGULAR' | 'DISTRIBUTED';
   type: ProjectType;
   image: ImageProps['src'];
   description: string;
@@ -34,15 +32,11 @@ const PROJECTS: {
     image: stitching,
     description: 'Built using Schema Stitching',
   },
-  {
-    title: 'CUSTOM',
-    type: ProjectType.Custom,
-    image: custom,
-    description: 'Own validation and schema building',
-  },
 ];
 
-export const ProjectTypes = ({ children, className, ...props }: RadioGroupProps): ReactElement => {
+export const ProjectTypes = (
+  props: Omit<RadioGroupProps, 'children' | 'className'>,
+): ReactElement => {
   return (
     <RadioGroup {...props}>
       {PROJECTS.map(({ type, image, title, description }) => {

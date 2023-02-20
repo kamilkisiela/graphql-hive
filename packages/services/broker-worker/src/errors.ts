@@ -1,19 +1,26 @@
+type CaptureException = (exception: Error) => void;
+
 export class InvalidRequestFormat extends Response {
-  constructor(message: string) {
+  constructor(captureException: CaptureException, message: string) {
     super(
       JSON.stringify({
         code: 'INVALID_REQUEST_FORMAT',
-        error: `Invalid artifact type: "${message}"`,
+        error: `Invalid payload provided: "${message}"`,
       }),
       {
         status: 400,
       },
     );
+    captureException(
+      new Error(`INVALID_REQUEST_FORMAT`, {
+        cause: message,
+      }),
+    );
   }
 }
 
 export class MissingSignature extends Response {
-  constructor() {
+  constructor(captureException: CaptureException) {
     super(
       JSON.stringify({
         code: 'MISSING_SIGNATURE',
@@ -23,11 +30,12 @@ export class MissingSignature extends Response {
         status: 401,
       },
     );
+    captureException(new Error(`MISSING_SIGNATURE`));
   }
 }
 
 export class InvalidSignature extends Response {
-  constructor() {
+  constructor(captureException: CaptureException) {
     super(
       JSON.stringify({
         code: 'INVALID_SIGNATURE',
@@ -37,6 +45,7 @@ export class InvalidSignature extends Response {
         status: 403,
       },
     );
+    captureException(new Error(`INVALID_SIGNATURE`));
   }
 }
 
@@ -51,5 +60,6 @@ export class UnexpectedError extends Response {
         status: 500,
       },
     );
+    console.error(`UNEXPECTED_ERROR: ${errorId}`);
   }
 }

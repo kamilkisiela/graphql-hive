@@ -1,13 +1,11 @@
+import { HiveError } from '../../shared/errors';
+import { IdTranslator } from '../shared/providers/id-translator';
 import { CdnModule } from './__generated__/types';
 import { CdnProvider } from './providers/cdn.provider';
-import { IdTranslator } from '../shared/providers/id-translator';
-import { AuthManager } from '../auth/providers/auth-manager';
-import { TargetAccessScope } from '../auth/providers/target-access';
-import { HiveError } from '../../shared/errors';
 
 export const resolvers: CdnModule.Resolvers = {
   Mutation: {
-    createCdnToken: async (_, { selector }, { injector }) => {
+    createCdnAccessToken: async (_, { input }, { injector }) => {
       const translator = injector.get(IdTranslator);
       const cdn = injector.get(CdnProvider);
 
@@ -15,22 +13,63 @@ export const resolvers: CdnModule.Resolvers = {
         throw new HiveError(`CDN is not configured, cannot generate a token.`);
       }
 
-      const [organization, project, target] = await Promise.all([
-        translator.translateOrganizationId(selector),
-        translator.translateProjectId(selector),
-        translator.translateTargetId(selector),
+      const [organizationId, projectId, targetId] = await Promise.all([
+        translator.translateOrganizationId(input.selector),
+        translator.translateProjectId(input.selector),
+        translator.translateTargetId(input.selector),
       ]);
 
-      await injector.get(AuthManager).ensureTargetAccess({
-        organization,
-        project,
-        target,
-        scope: TargetAccessScope.REGISTRY_READ,
+      const result = await cdn.createCDNAccessToken({
+        organizationId,
+        projectId,
+        targetId,
+        alias: input.alias,
       });
 
+      if (result.type === 'failure') {
+        return {
+          error: {
+            message: result.reason,
+          },
+        };
+      }
+
       return {
-        token: cdn.generateToken(target),
-        url: cdn.getCdnUrlForTarget(target),
+        ok: {
+          secretAccessToken: result.secretAccessToken,
+          createdCdnAccessToken: result.cdnAccessToken,
+          cdnUrl: cdn.getCdnUrlForTarget(targetId),
+        },
+      };
+    },
+    deleteCdnAccessToken: async (_, { input }, { injector }) => {
+      const translator = injector.get(IdTranslator);
+
+      const [organizationId, projectId, targetId] = await Promise.all([
+        translator.translateOrganizationId(input.selector),
+        translator.translateProjectId(input.selector),
+        translator.translateTargetId(input.selector),
+      ]);
+
+      const deleteResult = await injector.get(CdnProvider).deleteCDNAccessToken({
+        organizationId,
+        projectId,
+        targetId,
+        cdnAccessTokenId: input.cdnAccessTokenId,
+      });
+
+      if (deleteResult.type === 'failure') {
+        return {
+          error: {
+            message: deleteResult.reason,
+          },
+        };
+      }
+
+      return {
+        ok: {
+          deletedCdnAccessTokenId: input.cdnAccessTokenId,
+        },
       };
     },
   },
@@ -39,6 +78,25 @@ export const resolvers: CdnModule.Resolvers = {
       const cdn = injector.get(CdnProvider);
 
       return cdn.isEnabled();
+    },
+  },
+  Target: {
+    async cdnAccessTokens(target, args, context) {
+      const result = await context.injector.get(CdnProvider).getPaginatedCDNAccessTokensForTarget({
+        targetId: target.id,
+        projectId: target.projectId,
+        organizationId: target.orgId,
+        first: args.first ?? null,
+        cursor: args.after ?? null,
+      });
+
+      return {
+        edges: result.items,
+        pageInfo: result.pageInfo,
+      };
+    },
+    cdnUrl(target, _args, context) {
+      return context.injector.get(CdnProvider).getCdnUrlForTarget(target.id);
     },
   },
 };

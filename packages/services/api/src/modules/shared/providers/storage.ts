@@ -1,24 +1,30 @@
 import { Injectable } from 'graphql-modules';
-import type { NullableAndPartial } from '../../../shared/helpers';
 import type {
+  AddAlertChannelInput,
+  AddAlertInput,
+  ProjectType,
+  RegistryModel,
+} from '../../../__generated__/types';
+import type {
+  ActivityObject,
+  Alert,
+  AlertChannel,
+  CDNAccessToken,
+  DeletedCompositeSchema,
   Member,
+  OIDCIntegration,
   Organization,
+  OrganizationBilling,
+  OrganizationInvitation,
   PersistedOperation,
   Project,
   Schema,
+  SchemaLog,
   SchemaVersion,
   Target,
-  User,
-  ActivityObject,
   TargetSettings,
-  AlertChannel,
-  Alert,
-  OrganizationBilling,
-  OrganizationInvitation,
-  OIDCIntegration,
+  User,
 } from '../../../shared/entities';
-import type { CustomOrchestratorConfig } from '../../schema/providers/orchestrators/custom';
-import type { AddAlertChannelInput, AddAlertInput } from '../../../__generated__/types';
 import type { OrganizationAccessScope } from '../../auth/providers/organization-access';
 import type { ProjectAccessScope } from '../../auth/providers/project-access';
 import type { TargetAccessScope } from '../../auth/providers/target-access';
@@ -110,7 +116,12 @@ export interface Storage {
       reservedNames: string[];
     },
   ): Promise<Organization | never>;
-  deleteOrganization(_: OrganizationSelector): Promise<Organization | never>;
+  deleteOrganization(_: OrganizationSelector): Promise<
+    | (Organization & {
+        tokens: string[];
+      })
+    | never
+  >;
   updateOrganizationName(
     _: OrganizationSelector & Pick<Organization, 'name' | 'cleanId'> & { user: string },
   ): Promise<Organization | never>;
@@ -190,11 +201,14 @@ export interface Storage {
   getProjectByCleanId(_: { cleanId: string } & OrganizationSelector): Promise<Project | null>;
   getProjects(_: OrganizationSelector): Promise<Project[] | never>;
   createProject(
-    _: Pick<Project, 'name' | 'cleanId' | 'type'> &
-      NullableAndPartial<CustomOrchestratorConfig> &
-      OrganizationSelector,
+    _: Pick<Project, 'name' | 'cleanId' | 'type'> & OrganizationSelector,
   ): Promise<Project | never>;
-  deleteProject(_: ProjectSelector): Promise<Project | never>;
+  deleteProject(_: ProjectSelector): Promise<
+    | (Project & {
+        tokens: string[];
+      })
+    | never
+  >;
   updateProjectName(
     _: ProjectSelector & Pick<Project, 'name' | 'cleanId'> & { user: string },
   ): Promise<Project | never>;
@@ -208,6 +222,11 @@ export interface Storage {
     },
   ): Promise<Project>;
   disableExternalSchemaComposition(_: ProjectSelector): Promise<Project>;
+  updateProjectRegistryModel(
+    _: ProjectSelector & {
+      model: RegistryModel;
+    },
+  ): Promise<Project>;
 
   getTargetId(_: TargetSelector & { useIds?: boolean }): Promise<string | never>;
   getTargetByCleanId(
@@ -219,7 +238,12 @@ export interface Storage {
   updateTargetName(
     _: TargetSelector & Pick<Project, 'name' | 'cleanId'> & { user: string },
   ): Promise<Target | never>;
-  deleteTarget(_: TargetSelector): Promise<Target | never>;
+  deleteTarget(_: TargetSelector): Promise<
+    | (Target & {
+        tokens: string[];
+      })
+    | never
+  >;
   getTarget(_: TargetSelector): Promise<Target | never>;
   getTargets(_: ProjectSelector): Promise<readonly Target[]>;
   getTargetIdsOfOrganization(_: OrganizationSelector): Promise<readonly string[]>;
@@ -236,17 +260,11 @@ export interface Storage {
     _: {
       version?: string;
     } & TargetSelector,
-  ): Promise<
-    | {
-        schemas: [];
-      }
-    | {
-        schemas: Schema[];
-        version: string;
-        valid: boolean;
-      }
-    | never
-  >;
+  ): Promise<{
+    schemas: Schema[];
+    version: string;
+    valid: boolean;
+  } | null>;
   getLatestValidVersion(_: TargetSelector): Promise<SchemaVersion | never>;
   getMaybeLatestValidVersion(_: TargetSelector): Promise<SchemaVersion | null | never>;
   getLatestVersion(_: TargetSelector): Promise<SchemaVersion | never>;
@@ -272,11 +290,6 @@ export interface Storage {
   >;
   getVersion(_: TargetSelector & { version: string }): Promise<SchemaVersion | never>;
 
-  updateSchemaUrlOfVersion(
-    _: TargetSelector & { version: string; url?: string | null; commit: string },
-  ): Promise<void>;
-  updateServiceName(_: TargetSelector & { commit: string; name: string }): Promise<void>;
-
   insertSchema(
     _: {
       schema: string;
@@ -285,8 +298,16 @@ export interface Storage {
       service?: string | null;
       url?: string | null;
       metadata: string | null;
+      projectType: ProjectType;
     } & TargetSelector,
   ): Promise<Schema | never>;
+
+  deleteSchema(
+    _: {
+      serviceName: string;
+      composable: boolean;
+    } & TargetSelector,
+  ): Promise<DeletedCompositeSchema>;
 
   createVersion(
     _: {
@@ -305,7 +326,7 @@ export interface Storage {
     } & TargetSelector,
   ): Promise<SchemaVersion | never>;
 
-  getSchema(_: { commit: string; target: string }): Promise<Schema | never>;
+  getSchemaLog(_: { commit: string; target: string }): Promise<SchemaLog>;
 
   createActivity(
     _: {
@@ -426,16 +447,52 @@ export interface Storage {
     organizationId: string;
     clientId: string;
     encryptedClientSecret: string;
-    oauthApiUrl: string;
+    tokenEndpoint: string;
+    userinfoEndpoint: string;
+    authorizationEndpoint: string;
   }): Promise<{ type: 'ok'; oidcIntegration: OIDCIntegration } | { type: 'error'; reason: string }>;
   updateOIDCIntegration(_: {
     oidcIntegrationId: string;
     clientId: string | null;
     encryptedClientSecret: string | null;
-    oauthApiUrl: string | null;
+    tokenEndpoint: string | null;
+    userinfoEndpoint: string | null;
+    authorizationEndpoint: string | null;
   }): Promise<OIDCIntegration>;
   deleteOIDCIntegration(_: { oidcIntegrationId: string }): Promise<void>;
   idMutex: IdMutex;
+
+  createCDNAccessToken(_: {
+    id: string;
+    targetId: string;
+    s3Key: string;
+    firstCharacters: string;
+    lastCharacters: string;
+    alias: string;
+  }): Promise<CDNAccessToken | null>;
+
+  getCDNAccessTokenById(_: { cdnAccessTokenId: string }): Promise<CDNAccessToken | null>;
+
+  deleteCDNAccessToken(_: { cdnAccessTokenId: string }): Promise<boolean>;
+
+  getPaginatedCDNAccessTokensForTarget(_: {
+    targetId: string;
+    first: number | null;
+    cursor: null | string;
+  }): Promise<
+    Readonly<{
+      items: ReadonlyArray<{
+        node: CDNAccessToken;
+        cursor: string;
+      }>;
+      pageInfo: Readonly<{
+        hasNextPage: boolean;
+        hasPreviousPage: boolean;
+        startCursor: string;
+        endCursor: string;
+      }>;
+    }>
+  >;
 }
 
 @Injectable()

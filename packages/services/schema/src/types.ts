@@ -1,3 +1,5 @@
+import type { CompositionErrorSource } from './orchestrators';
+
 export type SchemaType = 'single' | 'federation' | 'stitching';
 
 export type BuildInput = Array<{
@@ -18,6 +20,7 @@ export type ValidationInput = Array<{
 export interface ValidationOutput {
   errors: Array<{
     message: string;
+    source: CompositionErrorSource;
   }>;
 }
 

@@ -1,5 +1,58 @@
 # @graphql-hive/cli
 
+## 0.20.2
+
+### Patch Changes
+
+- [#1326](https://github.com/kamilkisiela/graphql-hive/pull/1326)
+  [`99f7c66a`](https://github.com/kamilkisiela/graphql-hive/commit/99f7c66a44dc0ff5d209fdfcd5d9620dcd51171a)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Do not show "Skipping" when publishing
+  schema to the modern model
+
+## 0.20.1
+
+### Patch Changes
+
+- [`3688d09a`](https://github.com/kamilkisiela/graphql-hive/commit/3688d09ab4421b4dc3d16e866ec1e1f6dc91bffc)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Update README
+
+## 0.20.0
+
+### Minor Changes
+
+- [`854e22fb`](https://github.com/kamilkisiela/graphql-hive/commit/854e22fbe4e3fe2f3d3f5442c15d987a357845e7)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Adds `schema:delete` command
+
+### Patch Changes
+
+- [#1261](https://github.com/kamilkisiela/graphql-hive/pull/1261)
+  [`ce829b50`](https://github.com/kamilkisiela/graphql-hive/commit/ce829b50721175181d5f945c392cd1a8b51a85df)
+  Thanks [@renovate](https://github.com/apps/renovate)! - update oclif
+
+## 0.19.12
+
+### Patch Changes
+
+- [#1047](https://github.com/kamilkisiela/graphql-hive/pull/1047)
+  [`8c2cc65b`](https://github.com/kamilkisiela/graphql-hive/commit/8c2cc65b9489278196905a6e42056641de002230)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Bump
+
+## 0.19.11
+
+### Patch Changes
+
+- [#904](https://github.com/kamilkisiela/graphql-hive/pull/904)
+  [`20edc8c5`](https://github.com/kamilkisiela/graphql-hive/commit/20edc8c5e54cd71a726f02f33f9710460fc6d5a0)
+  Thanks [@dotansimha](https://github.com/dotansimha)! - Upgrade dependency git-parse to v3
+
+- [#909](https://github.com/kamilkisiela/graphql-hive/pull/909)
+  [`9a4a69bb`](https://github.com/kamilkisiela/graphql-hive/commit/9a4a69bb83760bf8e83961cc0a878899f7715da7)
+  Thanks [@dotansimha](https://github.com/dotansimha)! - Upgrade oclif to latest version
+
+- [#930](https://github.com/kamilkisiela/graphql-hive/pull/930)
+  [`a972fe26`](https://github.com/kamilkisiela/graphql-hive/commit/a972fe26f2c3624dd4e66b36edf91ce3dbae78c7)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Support nullable Query.latestVersion
+
 ## 0.19.10
 
 ### Patch Changes

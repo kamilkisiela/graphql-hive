@@ -35,3 +35,5 @@ lib/graphql-operations.ts
 
 next.config.mjs
 environment-*.mjs
+
+./packages

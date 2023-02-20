@@ -1,10 +1,10 @@
-import { superTokensNextWrapper } from 'supertokens-node/nextjs';
-import { middleware } from 'supertokens-node/framework/express';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { Request, Response } from 'express';
-import supertokens from 'supertokens-node';
-import { backendConfig } from '@/config/supertokens/backend';
+import type { Request, Response } from 'express';
 import NextCors from 'nextjs-cors';
+import supertokens from 'supertokens-node';
+import { middleware } from 'supertokens-node/framework/express';
+import { superTokensNextWrapper } from 'supertokens-node/nextjs';
+import { backendConfig } from '@/config/supertokens/backend';
 import { env } from '@/env/backend';
 
 supertokens.init(backendConfig());

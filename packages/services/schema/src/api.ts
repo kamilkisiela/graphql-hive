@@ -1,29 +1,40 @@
+import type { FastifyRequest } from 'fastify';
+import { z } from 'zod';
+import { handleTRPCError } from '@hive/service-common';
 import type { inferRouterInputs } from '@trpc/server';
 import { initTRPC } from '@trpc/server';
-import type { FastifyLoggerInstance } from 'fastify';
-import { z } from 'zod';
+import type { Cache } from './cache';
 import { buildCounter, supergraphCounter, validateCounter } from './metrics';
 import { pickOrchestrator } from './orchestrators';
-import { Redis } from 'ioredis';
 
-const t = initTRPC
-  .context<{
-    logger: FastifyLoggerInstance;
-    redis: Redis;
-    decrypt(value: string): string;
-    broker: {
-      endpoint: string;
-      signature: string;
-    } | null;
-  }>()
-  .create();
+export type { CompositionFailureError, CompositionErrorSource } from './orchestrators';
 
-const TYPE_VALIDATION = z.enum(['single', 'federation', 'stitching']);
-const SCHEMA_OBJECT_VALIDATION = {
+export interface Context {
+  req: FastifyRequest;
+  cache: Cache;
+  decrypt(value: string): string;
+  broker: {
+    endpoint: string;
+    signature: string;
+  } | null;
+}
+
+const t = initTRPC.context<Context>().create();
+
+const errorMiddleware = t.middleware(handleTRPCError);
+const procedure = t.procedure.use(errorMiddleware);
+
+const COMPOSITE_SCHEMA_OBJECT_VALIDATION = {
   raw: z.string().nonempty(),
   source: z.string().nonempty(),
 };
-const SCHEMAS_VALIDATION = z.array(z.object(SCHEMA_OBJECT_VALIDATION));
+const COMPOSITE_SCHEMAS_VALIDATION = z.array(z.object(COMPOSITE_SCHEMA_OBJECT_VALIDATION));
+
+const SINGLE_SCHEMA_OBJECT_VALIDATION = {
+  raw: z.string().nonempty(),
+};
+const SINGLE_SCHEMA_VALIDATION = z.array(z.object(SINGLE_SCHEMA_OBJECT_VALIDATION));
+
 const EXTERNAL_VALIDATION = z
   .object({
     endpoint: z.string().url().nonempty(),
@@ -32,15 +43,16 @@ const EXTERNAL_VALIDATION = z
   .nullable();
 
 export const schemaBuilderApiRouter = t.router({
-  supergraph: t.procedure
+  supergraph: procedure
     .input(
       z
         .object({
-          type: TYPE_VALIDATION,
+          type: z.literal('federation'),
           schemas: z.array(
             z
               .object({
-                ...SCHEMA_OBJECT_VALIDATION,
+                raw: z.string().nonempty(),
+                source: z.string().nonempty(),
                 url: z.string().nullish(),
               })
               .required(),
@@ -55,7 +67,7 @@ export const schemaBuilderApiRouter = t.router({
           type: input.type,
         })
         .inc();
-      return await pickOrchestrator(input.type, ctx.redis, ctx.logger, ctx.decrypt).supergraph(
+      return await pickOrchestrator(input.type, ctx.cache, ctx.req.log, ctx.decrypt).supergraph(
         input.schemas,
         input.external
           ? {
@@ -65,15 +77,24 @@ export const schemaBuilderApiRouter = t.router({
           : null,
       );
     }),
-  validate: t.procedure
+  validate: procedure
     .input(
-      z
-        .object({
-          type: TYPE_VALIDATION,
-          schemas: SCHEMAS_VALIDATION,
-          external: EXTERNAL_VALIDATION,
-        })
-        .required(),
+      z.union([
+        z
+          .object({
+            type: z.literal('single'),
+            schemas: SINGLE_SCHEMA_VALIDATION,
+            external: EXTERNAL_VALIDATION,
+          })
+          .required(),
+        z
+          .object({
+            type: z.union([z.literal('federation'), z.literal('stitching')]),
+            schemas: COMPOSITE_SCHEMAS_VALIDATION,
+            external: EXTERNAL_VALIDATION,
+          })
+          .required(),
+      ]),
     )
     .mutation(async ({ ctx, input }) => {
       validateCounter
@@ -81,8 +102,13 @@ export const schemaBuilderApiRouter = t.router({
           type: input.type,
         })
         .inc();
-      return await pickOrchestrator(input.type, ctx.redis, ctx.logger, ctx.decrypt).validate(
-        input.schemas,
+      return await pickOrchestrator(input.type, ctx.cache, ctx.req.log, ctx.decrypt).validate(
+        input.type === 'single'
+          ? input.schemas.map(s => ({
+              ...s,
+              source: 'single',
+            }))
+          : input.schemas,
         input.external
           ? {
               ...input.external,
@@ -91,15 +117,24 @@ export const schemaBuilderApiRouter = t.router({
           : null,
       );
     }),
-  build: t.procedure
+  build: procedure
     .input(
-      z
-        .object({
-          type: TYPE_VALIDATION,
-          schemas: SCHEMAS_VALIDATION,
-          external: EXTERNAL_VALIDATION,
-        })
-        .required(),
+      z.union([
+        z
+          .object({
+            type: z.literal('single'),
+            schemas: SINGLE_SCHEMA_VALIDATION,
+            external: EXTERNAL_VALIDATION,
+          })
+          .required(),
+        z
+          .object({
+            type: z.union([z.literal('federation'), z.literal('stitching')]),
+            schemas: COMPOSITE_SCHEMAS_VALIDATION,
+            external: EXTERNAL_VALIDATION,
+          })
+          .required(),
+      ]),
     )
     .mutation(async ({ ctx, input }) => {
       buildCounter
@@ -107,8 +142,13 @@ export const schemaBuilderApiRouter = t.router({
           type: input.type,
         })
         .inc();
-      return await pickOrchestrator(input.type, ctx.redis, ctx.logger, ctx.decrypt).build(
-        input.schemas,
+      return await pickOrchestrator(input.type, ctx.cache, ctx.req.log, ctx.decrypt).build(
+        input.type === 'single'
+          ? input.schemas.map(s => ({
+              ...s,
+              source: 'single',
+            }))
+          : input.schemas,
         input.external
           ? {
               ...input.external,

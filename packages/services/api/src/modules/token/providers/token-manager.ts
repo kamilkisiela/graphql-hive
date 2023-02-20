@@ -3,13 +3,13 @@ import type { Token } from '../../../shared/entities';
 import { HiveError } from '../../../shared/errors';
 import { diffArrays, pushIfMissing } from '../../../shared/helpers';
 import { AuthManager } from '../../auth/providers/auth-manager';
-import { Storage, TargetSelector } from '../../shared/providers/storage';
-import { Logger } from '../../shared/providers/logger';
-import { TokenStorage } from './token-storage';
-import type { CreateTokenResult } from './token-storage';
-import { TargetAccessScope } from '../../auth/providers/target-access';
-import { ProjectAccessScope } from '../../auth/providers/project-access';
 import { OrganizationAccessScope } from '../../auth/providers/organization-access';
+import { ProjectAccessScope } from '../../auth/providers/project-access';
+import { TargetAccessScope } from '../../auth/providers/target-access';
+import { Logger } from '../../shared/providers/logger';
+import { Storage, TargetSelector } from '../../shared/providers/storage';
+import type { CreateTokenResult } from './token-storage';
+import { TokenStorage } from './token-storage';
 
 interface CreateTokenInput extends TargetSelector {
   name: string;

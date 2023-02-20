@@ -1,16 +1,15 @@
 #!/usr/bin/env node
-import { createServerAdapter } from '@whatwg-node/server';
 import 'reflect-metadata';
 import {
-  startMetrics,
+  createLogger,
   registerShutdown,
   startHeartbeats,
-  createLogger,
+  startMetrics,
 } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
 import { env } from './environment';
-import { createServer } from 'http';
-import { cacheReadiness, startCache, stopCache, tokensRouter } from './router';
+import { cacheReadiness, redisInstance, startCache, stopCache, tokensRouter } from './router'
+import { createServer } from 'http'
 
 export async function main() {
   if (env.sentry) {
@@ -25,27 +24,53 @@ export async function main() {
 
   const logger = createLogger();
 
-  const app = createServerAdapter(tokensRouter);
-  const server = createServer(app);
+  const server =  createServer(tokensRouter);
+
+  const stopHeartbeats = env.heartbeat
+    ? startHeartbeats({
+        enabled: true,
+        endpoint: env.heartbeat.endpoint,
+        intervalInMS: 20_000,
+        onError: e => logger.error(e, `Heartbeat failed with error`),
+        isReady: cacheReadiness,
+      })
+    : startHeartbeats({ enabled: false });
+
+  async function shutdown() {
+    stopHeartbeats();
+    server.close();
+    await stopCache();
+  }
 
   try {
-    const stopHeartbeats = env.heartbeat
-      ? startHeartbeats({
-          enabled: true,
-          endpoint: env.heartbeat.endpoint,
-          intervalInMS: 20_000,
-          onError: logger.error,
-          isReady: cacheReadiness,
-        })
-      : startHeartbeats({ enabled: false });
+    redisInstance.on('error', err => {
+      logger.error(err, 'Redis connection error');
+    });
+
+    redisInstance.on('connect', () => {
+      logger.info('Redis connection established');
+    });
+
+    redisInstance.on('ready', () => {
+      logger.info('Redis connection ready... ');
+    });
+
+    redisInstance.on('close', () => {
+      logger.info('Redis connection closed');
+    });
+
+    redisInstance.on('reconnecting', timeToReconnect => {
+      logger.info('Redis reconnecting in %s', timeToReconnect);
+    });
+
+    redisInstance.on('end', async () => {
+      logger.info('Redis ended - no more reconnections will be made');
+      await shutdown();
+    });
 
     registerShutdown({
       logger,
-      async onShutdown() {
-        stopHeartbeats();
-        server.close();
-        await stopCache();
-      },
+      onShutdown: shutdown,
     });
 
     if (env.prometheus) {
@@ -53,10 +78,10 @@ export async function main() {
     }
     await startCache();
     return new Promise<void>(resolve => {
-      server.listen(env.http.port, '0.0.0.0', resolve);
+      server.listen(env.http.port, 'localhost', resolve);
     });
-  } catch (error: any) {
-    logger.fatal(error);
+  } catch (error) {
+    logger.fatal(error as string);
     Sentry.captureException(error, {
       level: 'fatal',
     });

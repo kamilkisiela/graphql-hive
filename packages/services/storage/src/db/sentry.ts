@@ -1,5 +1,5 @@
 import { Interceptor } from 'slonik';
-import { getCurrentHub, captureException } from '@sentry/node';
+import { captureException, getCurrentHub } from '@sentry/node';
 import type { Span } from '@sentry/types';
 
 export const createSentryInterceptor = (): Interceptor => {

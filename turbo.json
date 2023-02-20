@@ -1,6 +1,5 @@
 {
   "$schema": "https://turborepo.org/schema.json",
-  "baseBranch": "origin/main",
   "globalDependencies": [
     "package.json",
     "codegen.yml",
@@ -15,24 +14,13 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
-    "build-local": {
-      "outputs": ["dist/**"]
-    },
     "@hive/cdn-script#build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/worker.js"]
-    },
-    "@hive/cdn-script#build-local": {
-      "dependsOn": ["^build"],
-      "outputs": ["dist/dev.js"]
+      "outputs": ["dist/**"]
     },
     "@hive/broker-script#build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/worker.js"]
-    },
-    "@hive/broker-script#build-local": {
-      "dependsOn": ["^build"],
-      "outputs": ["dist/dev.js"]
+      "outputs": ["dist/**"]
     },
     "@hive/app#build": {
       "dependsOn": ["^build"],
@@ -45,7 +33,15 @@
     },
     "@hive/landing-page#build": {
       "dependsOn": ["^build"],
-      "env": ["NEXT_PUBLIC_CRISP_WEBSITE_ID", "NEXT_PUBLIC_GA_TRACKING_ID"],
+      "env": [
+        "NEXT_PUBLIC_CRISP_WEBSITE_ID",
+        "NEXT_PUBLIC_GA_TRACKING_ID",
+        "NEXT_BASE_PATH",
+        "NEXT_PUBLIC_ALGOLIA_INDEX_NAME",
+        "NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY",
+        "NEXT_PUBLIC_ALGOLIA_APP_ID",
+        "SITE_URL"
+      ],
       "outputs": ["dist/**"]
     },
     "typecheck": {

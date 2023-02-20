@@ -1,36 +1,83 @@
 import type { FastifyLoggerInstance } from 'fastify';
-import LRU from 'tiny-lru';
+import type { Redis } from 'ioredis';
 import ms from 'ms';
-import { createLogger, metrics } from '@hive/service-common';
+import { createLogger } from '@hive/service-common';
+import LRU from 'tiny-lru';
+import { atomic, until, useActionTracker } from './helpers';
+import { cacheHits, cacheInvalidations, cacheMisses } from './metrics';
 import type { Storage, StorageItem } from './storage';
-import { atomic, useActionTracker, until } from './helpers';
 
-const cacheHits = new metrics.Counter({
-  name: 'tokens_cache_hits',
-  help: 'Number of cache hits',
-});
-
-const cacheMisses = new metrics.Counter({
-  name: 'tokens_cache_misses',
-  help: 'Number of cache misses',
-});
-
-const cacheFillups = new metrics.Counter({
-  name: 'tokens_cache_fillups',
-  help: 'Number of cache fill ups',
-});
-
-const cacheInvalidations = new metrics.Counter({
-  name: 'tokens_cache_invalidations',
-  help: 'Number of cache invalidations',
-});
-
-// share "promises" to allow reduce the number of requests even more
+function generateKey(hashedToken: string) {
+  return `tokens:cache:${hashedToken}`;
+}
 
 interface CacheStorage extends Omit<Storage, 'touchTokens'> {
-  invalidateTarget(target: string): void;
-  invalidateProject(project: string): void;
-  invalidateOrganization(organization: string): void;
+  invalidateTokens(hashedTokens: string[]): Promise<void>;
+}
+
+const TTLSeconds = {
+  /**
+   * TTL for tokens that don't exist in the DB.
+   */
+  notFound: 60, // seconds
+  /**
+   * TTL for tokens that exist in the DB.
+   */
+  found: 60 * 5, // 5 minutes
+  /**
+   * TTL for tokens in the in-memory cache.
+   * Helps to reduce the traffic that goes to Redis (as we read the token from in-memory cache first) and in case Redis is down.
+   */
+  inMemory: 60, // seconds
+};
+
+function useSafeRedis(redis: Redis, logger: FastifyLoggerInstance | ReturnType<typeof createLogger>) {
+  const cache = LRU<string>(1000, TTLSeconds.inMemory * 1000 /* s -> ms */);
+
+  // Purge the cache when redis is ready (when it reconnects or when it starts)
+  redis.on('ready', () => {
+    logger.info('Redis is ready, purging the in-memory cache');
+    cache.clear();
+  });
+
+  return {
+    async get(key: string) {
+      const cached = cache.get(key);
+
+      if (cached) {
+        return cached;
+      }
+
+      if (redis.status === 'ready') {
+        return redis.get(key);
+      }
+
+      logger.warn('Redis is not ready, skipping GET');
+      return cache.get(key);
+    },
+    async del(keys: string[]) {
+      for (const key of keys) {
+        cache.delete(key);
+      }
+
+      if (redis.status === 'ready') {
+        if (keys.length > 0) {
+          await redis.del(...keys);
+        }
+      } else {
+        logger.warn('Redis is not ready, skipping DEL');
+      }
+    },
+    async setex(key: string, ttl: number, value: string) {
+      cache.set(key, value);
+
+      if (redis.status === 'ready') {
+        await redis.setex(key, ttl, value);
+      } else {
+        logger.warn('Redis is not ready, skipping SETEX');
+      }
+    },
+  };
 }
 
 // Cache is a wrapper around the storage that adds a cache layer.
@@ -39,6 +86,7 @@ interface CacheStorage extends Omit<Storage, 'touchTokens'> {
 // Without the cache we would hit the DB for every request, with the cache we hit it only once (until a token is invalidated).
 export function useCache(
   storagePromise: Promise<Storage>,
+  redisInstance: Redis,
   logger: FastifyLoggerInstance | ReturnType<typeof createLogger>,
 ): {
   start(): Promise<void>;
@@ -58,149 +106,92 @@ export function useCache(
   }
 
   const tracker = useActionTracker();
+  const redis = useSafeRedis(redisInstance, logger);
 
   async function create() {
     const storage = await storagePromise;
-    // We might want to make this configurable in the future
-    const cache = LRU<StorageItem[]>(500);
-    const relations = useRelations();
-    const touch = useTokenTouchScheduler(storage, logger, updateLastUsedAt);
+    const touch = useTokenTouchScheduler(storage, logger);
 
-    function updateLastUsedAt(token: string, date: Date) {
-      const targetIds = cache.keys();
-
-      for (const target of targetIds) {
-        const items = cache.get(target);
-
-        if (items) {
-          const item = items.find(p => p.token === token);
-
-          if (item) {
-            item.lastUsedAt = date.getTime() as any;
-            break;
-          }
-        }
-      }
-    }
-
-    // When there's a new token or a token was removed we need to invalidate the cache for the related targets
-    function invalidate(target: string): void {
-      logger.debug('Invalidating (target=%s)', target);
+    // When there's a new token or a token was removed we need to invalidate the cache
+    async function invalidateTokens(hashedTokens: string[]) {
       cacheInvalidations.inc(1);
-      cache.delete(target);
-    }
 
-    // Reads the tokens (of a target) from the postgres db and cache them
-    // Thanks to the `atomic` function, every call to this function will only be executed once
-    // and the Promise will be shared (similar thing to the DataLoader).
-    const readAndFill = atomic(async function _readAndFill(target: string) {
-      const result = await storage.readTarget(target);
-
-      logger.debug('Cache Fill (target=%s)', target);
-      cacheFillups.inc(1);
-
-      if (result.length) {
-        const organization = result[0].organization;
-        const project = result[0].project;
-
-        // Connects a project to an organization
-        relations.ensureOrganizationProject(organization, project);
-        // Connects a target to a project
-        relations.ensureProjectTarget(project, target);
+      if (hashedTokens.length > 0) {
+        await redis.del(hashedTokens.map(generateKey));
       }
-
-      cache.set(target, result);
-
-      return result;
-    });
+    }
 
     // Thanks to the `atomic` function, every call to this function will only be executed once and Promise will be shared.
     // This is important because we don't want to make multiple requests to the DB for the same token, at the same time.
-    const readToken = atomic(async function _readToken(token: string) {
-      return storage.readToken(token);
+    const readTokenFromStorage = atomic(async function _readToken(hashedToken: string) {
+      const item = await storage.readToken(hashedToken);
+
+      if (!item) {
+        // If the token doesn't exist in the DB we still want to cache it for a short period of time to avoid hitting the DB again and again.
+        await redis.setex(generateKey(hashedToken), TTLSeconds.notFound, JSON.stringify(null));
+      } else {
+        await redis.setex(generateKey(hashedToken), TTLSeconds.found, JSON.stringify(item));
+      }
+
+      return item;
+    });
+
+    // Thanks to the `atomic` function, every call to this function will only be executed once and Promise will be shared.
+    // This is important because we don't want to make multiple requests to Redis for the same token, at the same time.
+    const readTokenFromRedis = atomic(async function _readToken(
+      hashedToken: string,
+    ): Promise<StorageItem | null | undefined> {
+      const item = await redis.get(generateKey(hashedToken));
+
+      if (typeof item === 'string') {
+        return JSON.parse(item);
+      }
+
+      return;
     });
 
     const cachedStorage: CacheStorage = {
       destroy() {
         return storage.destroy();
       },
-      async readTarget(target, res) {
-        const cachedValue = cache.get(target);
-        if (cachedValue) {
-          res?.header('x-cache', 'HIT'); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+      invalidateTokens(hashedTokens) {
+        return invalidateTokens(hashedTokens);
+      },
+      readTarget(target) {
+        return storage.readTarget(target);
+      },
+      async readToken(hashedToken) {
+        const cached = await readTokenFromRedis(hashedToken);
+
+        if (typeof cached !== 'undefined') {
           cacheHits.inc(1);
-          return cachedValue;
+          // mark as used
+          touch.schedule(hashedToken);
+          return cached;
         }
 
         cacheMisses.inc(1);
-        res?.header('x-cache', 'MISS'); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
 
-        return readAndFill(target);
-      },
-      invalidateTarget(target) {
-        invalidate(target);
-      },
-      invalidateProject(project) {
-        relations
-          .getTargetsOfProject(project)
-          .forEach(target => cachedStorage.invalidateTarget(target));
-      },
-      invalidateOrganization(organization) {
-        relations
-          .getTargetsOfOrganization(organization)
-          .forEach(target => cachedStorage.invalidateTarget(target));
-      },
-      async readToken(hashed_token, res) {
-        const targetIds = cache.keys();
-
-        for (const target of targetIds) {
-          const items = cache.get(target);
-
-          if (items) {
-            const item = items.find(p => p.token === hashed_token);
-
-            if (item) {
-              cacheHits.inc(1);
-              res?.header('x-cache', 'HIT'); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
-              // mark as used
-              touch.schedule(hashed_token);
-              return item;
-            }
-          }
-        }
-
-        const item = await readToken(hashed_token);
+        const item = await readTokenFromStorage(hashedToken);
 
         if (!item) {
           return null;
         }
 
-        // Read the tokens of the target and cache them
-        await readAndFill(item.target).catch(() => {});
-        cacheMisses.inc(1);
-        res?.header('x-cache', 'MISS'); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
-
-        touch.schedule(hashed_token); // mark as used
+        touch.schedule(hashedToken); // mark as used
 
         return item;
       },
       writeToken: tracker.wrap(async item => {
         logger.debug('Writing token (target=%s)', item.target);
         const result = await storage.writeToken(item);
-        invalidate(item.target);
 
         return result;
       }),
-      deleteToken: tracker.wrap(async hashed_token => {
-        const item = await cachedStorage.readToken(hashed_token);
+      deleteToken: tracker.wrap(async hashedToken => {
+        await redis.del([generateKey(hashedToken)]);
 
-        if (!item) {
-          return;
-        }
-
-        invalidate(item.target);
-
-        return storage.deleteToken(hashed_token);
+        return storage.deleteToken(hashedToken);
       }),
     };
 
@@ -226,11 +217,14 @@ export function useCache(
       await (await cachedStoragePromise).destroy();
     }
 
+    // Wait for Redis to finish all the pending operations
+    await redisInstance.quit();
+
     process.exit(0);
   }
 
   function readiness() {
-    return started;
+    return started && (redisInstance.status === 'ready' || redisInstance.status === 'reconnecting');
   }
 
   return {
@@ -241,68 +235,15 @@ export function useCache(
   };
 }
 
-function useRelations() {
-  const organizationToProjects = new Map<string, Set<string>>();
-  const projectToTokens = new Map<string, Set<string>>();
-
-  function getTargetsOfProject(project: string): Set<string> {
-    return projectToTokens.get(project) ?? new Set();
-  }
-
-  function getProjectsOfOrganization(organization: string): Set<string> {
-    return organizationToProjects.get(organization) ?? new Set();
-  }
-
-  function getTargetsOfOrganization(organization: string): Set<string> {
-    const targets = new Set<string>();
-
-    getProjectsOfOrganization(organization).forEach(project => {
-      getTargetsOfProject(project).forEach(target => {
-        targets.add(target);
-      });
-    });
-
-    return targets;
-  }
-
-  function ensureRelation(from: string, to: string, mapSet: Map<string, Set<string>>) {
-    if (!mapSet.has(from)) {
-      mapSet.set(from, new Set());
-    }
-
-    mapSet.get(from)!.add(to);
-  }
-
-  function ensureOrganizationProject(organization: string, project: string) {
-    ensureRelation(organization, project, organizationToProjects);
-  }
-
-  function ensureProjectTarget(project: string, target: string) {
-    ensureRelation(project, target, projectToTokens);
-  }
-
-  return {
-    ensureOrganizationProject,
-    ensureProjectTarget,
-    getTargetsOfProject,
-    getTargetsOfOrganization,
-  };
-}
-
-function useTokenTouchScheduler(
-  storage: Storage,
-  logger: FastifyLoggerInstance | ReturnType<typeof createLogger>,
-  onTouch: (token: string, date: Date) => void,
-) {
+function useTokenTouchScheduler(storage: Storage, logger: FastifyLoggerInstance | ReturnType<typeof createLogger>) {
   const scheduledTokens = new Map<string, Date>();
 
   /**
    * Mark token as used
    */
-  function schedule(hashed_token: string): void {
+  function schedule(hashedToken: string): void {
     const now = new Date();
-    scheduledTokens.set(hashed_token, now);
-    onTouch(hashed_token, now);
+    scheduledTokens.set(hashedToken, now);
   }
 
   // updated every 10m
@@ -318,11 +259,10 @@ function useTokenTouchScheduler(
     scheduledTokens.clear();
 
     logger.debug(`Touch ${tokens.length} tokens`);
-    tokens.forEach(({ token, date }) => onTouch(token, date));
     storage.touchTokens(tokens).catch(error => {
       logger.error(error);
     });
-  }, ms('10m'));
+  }, ms('60s'));
 
   function dispose() {
     clearInterval(interval);

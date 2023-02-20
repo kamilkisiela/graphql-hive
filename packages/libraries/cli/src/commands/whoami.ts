@@ -1,10 +1,10 @@
-import { Flags } from '@oclif/core';
 import colors from 'colors';
+import { Flags } from '@oclif/core';
 import Command from '../base-command';
 import { graphqlEndpoint } from '../helpers/config';
 
 export default class WhoAmI extends Command {
-  static description = 'checks schema';
+  static description = 'shows information about the current token';
   static flags = {
     registry: Flags.string({
       description: 'registry address',

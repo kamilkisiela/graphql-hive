@@ -1,16 +1,10 @@
-import * as Sentry from '@sentry/node';
-import { got, Response as GotResponse } from 'got';
 import Agent from 'agentkeepalive';
+import { got, Response as GotResponse } from 'got';
 import type { FastifyLoggerInstance } from '@hive/service-common';
 import { compress } from '@hive/usage-common';
-import {
-  operationsOrder,
-  registryOrder,
-  legacyOperationsOrder,
-  legacyRegistryOrder,
-  joinIntoSingleMessage,
-} from './serializer';
+import * as Sentry from '@sentry/node';
 import { writeDuration } from './metrics';
+import { joinIntoSingleMessage, operationsOrder, registryOrder } from './serializer';
 
 function hasResponse(error: unknown): error is {
   response: GotResponse;
@@ -30,8 +24,6 @@ export interface ClickHouseConfig {
 
 const operationsFields = operationsOrder.join(', ');
 const registryFields = registryOrder.join(', ');
-const legacyOperationsFields = legacyOperationsOrder.join(', ');
-const legacyRegistryFields = legacyRegistryOrder.join(', ');
 
 const agentConfig: Agent.HttpOptions = {
   // Keep sockets around in a pool to be used by other requests in the future
@@ -49,11 +41,9 @@ const agentConfig: Agent.HttpOptions = {
 
 export function createWriter({
   clickhouse,
-  clickhouseMirror,
   logger,
 }: {
   clickhouse: ClickHouseConfig;
-  clickhouseMirror: ClickHouseConfig | null;
   logger: FastifyLoggerInstance;
 }) {
   const httpAgent = new Agent(agentConfig);
@@ -74,16 +64,7 @@ export function createWriter({
       const compressed = await compress(csv);
       const sql = `INSERT INTO operations (${operationsFields}) FORMAT CSV`;
 
-      await Promise.all([
-        writeCsv(clickhouse, agents, sql, compressed, logger, 3),
-        clickhouseMirror
-          ? writeCsv(clickhouseMirror, agents, sql, compressed, logger, 3).catch(error => {
-              logger.error('Failed to write operations to ClickHouse Cloud %s', error);
-              // Ignore errors from clickhouse cloud
-              return Promise.resolve();
-            })
-          : Promise.resolve(),
-      ]);
+      await writeCsv(clickhouse, agents, sql, compressed, logger, 3);
     },
     async writeRegistry(records: string[]) {
       if (records.length === 0) {
@@ -94,49 +75,7 @@ export function createWriter({
       const compressed = await compress(csv);
       const sql = `INSERT INTO operation_collection (${registryFields}) FORMAT CSV`;
 
-      await Promise.all([
-        writeCsv(clickhouse, agents, sql, compressed, logger, 3),
-        clickhouseMirror
-          ? writeCsv(clickhouseMirror, agents, sql, compressed, logger, 3).catch(error => {
-              logger.error('Failed to write operation_collection to ClickHouse Cloud %s', error);
-              // Ignore errors from clickhouse cloud
-              return Promise.resolve();
-            })
-          : Promise.resolve(),
-      ]);
-    },
-    legacy: {
-      async writeOperations(operations: string[]) {
-        if (operations.length === 0) {
-          return;
-        }
-
-        const csv = joinIntoSingleMessage(operations);
-
-        await writeCsv(
-          clickhouse,
-          agents,
-          `INSERT INTO operations_new (${legacyOperationsFields}) FORMAT CSV`,
-          await compress(csv),
-          logger,
-          3,
-        );
-      },
-      async writeRegistry(records: string[]) {
-        if (records.length === 0) {
-          return;
-        }
-
-        const csv = joinIntoSingleMessage(records);
-        await writeCsv(
-          clickhouse,
-          agents,
-          `INSERT INTO operations_registry (${legacyRegistryFields}) FORMAT CSV`,
-          await compress(csv),
-          logger,
-          3,
-        );
-      },
+      await writeCsv(clickhouse, agents, sql, compressed, logger, 3);
     },
     destroy() {
       httpAgent.destroy();

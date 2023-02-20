@@ -1,9 +1,9 @@
+import { NextApiRequest, NextApiResponse } from 'next';
 import supertokens from 'supertokens-node';
+import { SessionContainerInterface } from 'supertokens-node/lib/build/recipe/session/types';
 import { superTokensNextWrapper } from 'supertokens-node/nextjs';
 import { verifySession } from 'supertokens-node/recipe/session/framework/express';
-import type { NextApiRequest, NextApiResponse } from 'next';
 import { backendConfig } from '@/config/supertokens/backend';
-import type { SessionContainerInterface } from 'supertokens-node/lib/build/recipe/session/types';
 
 supertokens.init(backendConfig());
 
@@ -19,7 +19,7 @@ export async function extractAccessTokenFromRequest(
     req,
     res,
   );
-  const session: SessionContainerInterface | undefined = (req as any).session;
+  const { session } = req as { session?: SessionContainerInterface };
   // Session can be undefined in case no access token was sent.
   const accessToken = session?.getAccessToken() ?? null;
 

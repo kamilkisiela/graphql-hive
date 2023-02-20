@@ -1,8 +1,16 @@
+import { Callout } from '@theguild/components'
+
 # OIDC Login
 
 By default GraphQL Hive allows you to login using a email and password. However, you can also enable
 OIDC (often refered to as social login). This allows you to login using a third party provider such
 as GitHub and Google.
+
+<Callout>
+  Don't confused OIDC Login with [organization scoped OIDC login](/features/sso-oidc-provider). If
+  you want to automatically add users and restrict their access to your organization based on their
+  OIDC login, you need to follow the organization scoped OIDC login guide instead.
+</Callout>
 
 ## GitHub
 

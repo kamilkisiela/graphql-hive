@@ -1,5 +1,5 @@
-import * as pulumi from '@pulumi/pulumi';
 import * as cf from '@pulumi/cloudflare';
+import * as pulumi from '@pulumi/pulumi';
 
 const cfConfig = new pulumi.Config('cloudflareCustom');
 

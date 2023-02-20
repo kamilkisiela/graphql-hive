@@ -1,12 +1,12 @@
-import { transformCommentsToDescriptions } from '@graphql-tools/utils';
-import { Flags, Errors } from '@oclif/core';
+import { existsSync, readFileSync } from 'fs';
 import { GraphQLError, print } from 'graphql';
+import { transformCommentsToDescriptions } from '@graphql-tools/utils';
+import { Errors, Flags } from '@oclif/core';
 import Command from '../../base-command';
 import { graphqlEndpoint } from '../../helpers/config';
 import { gitInfo } from '../../helpers/git';
-import { invariant } from '../../helpers/validation';
 import { loadSchema, minifySchema, renderChanges, renderErrors } from '../../helpers/schema';
-import { existsSync, readFileSync } from 'fs';
+import { invariant } from '../../helpers/validation';
 
 export default class SchemaPublish extends Command {
   static description = 'publishes schema';
@@ -40,10 +40,17 @@ export default class SchemaPublish extends Command {
     force: Flags.boolean({
       description: 'force publish even on breaking changes',
       default: false,
+      deprecated: {
+        message: '--force is enabled by default for newly created projects',
+      },
     }),
     experimental_acceptBreakingChanges: Flags.boolean({
       description:
         '(experimental) accept breaking changes and mark schema as valid (only if composable)',
+      deprecated: {
+        message:
+          '--experimental_acceptBreakingChanges is enabled by default for newly created projects',
+      },
     }),
     require: Flags.string({
       description:
@@ -187,10 +194,12 @@ export default class SchemaPublish extends Command {
           this.success('Published initial schema.');
         } else if (result.schemaPublish.successMessage) {
           this.success(result.schemaPublish.successMessage);
-        } else if (!changes?.total) {
+        } else if (changes && changes.total === 0) {
           this.success('No changes. Skipping.');
         } else {
-          renderChanges.call(this, changes);
+          if (changes) {
+            renderChanges.call(this, changes);
+          }
           this.success('Schema published');
         }
 

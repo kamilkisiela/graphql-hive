@@ -1,10 +1,10 @@
 import {
-  createPool,
-  TaggedTemplateLiteralInvocation,
-  QueryResultRowColumn,
   CommonQueryMethods,
+  createPool,
   Interceptor,
   QueryResultRow,
+  QueryResultRowColumn,
+  TaggedTemplateLiteralInvocation,
 } from 'slonik';
 import { createQueryLoggingInterceptor } from 'slonik-interceptor-query-logging';
 import { createSentryInterceptor } from './sentry';

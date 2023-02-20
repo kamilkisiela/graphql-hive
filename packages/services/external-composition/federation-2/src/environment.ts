@@ -11,7 +11,7 @@ const BaseSchema = zod.object({
   NODE_ENV: zod.string().default('production'),
   ENVIRONMENT: zod.string().default('production'),
   RELEASE: zod.string().default(''),
-  PORT: zod.coerce.number(),
+  PORT: zod.coerce.number().default(3069),
   SECRET: zod.string(),
 });
 
@@ -40,7 +40,7 @@ export function resolveEnv(env: Record<string, string | undefined>) {
     environment: base.ENVIRONMENT,
     release: base.RELEASE ?? 'local',
     http: {
-      port: base.PORT ?? 3069,
+      port: base.PORT,
     },
     secret: base.SECRET,
   };
