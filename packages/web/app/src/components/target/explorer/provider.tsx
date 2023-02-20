@@ -1,9 +1,19 @@
-import React from 'react';
+import {
+  createContext,
+  ReactElement,
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { formatISO, subDays } from 'date-fns';
 import { useLocalStorage } from '@/lib/hooks';
 
-export type PeriodOption = '365d' | '180d' | '90d' | '30d' | '14d' | '7d';
-export type Period = {
+type PeriodOption = '365d' | '180d' | '90d' | '30d' | '14d' | '7d';
+
+type Period = {
   from: string;
   to: string;
 };
@@ -32,7 +42,7 @@ type SchemaExplorerContextType = {
   period: Period;
 };
 
-const SchemaExplorerContext = React.createContext<SchemaExplorerContextType>({
+const SchemaExplorerContext = createContext<SchemaExplorerContextType>({
   isArgumentListCollapsed: true,
   setArgumentListCollapsed: () => {},
   periodOption: '7d',
@@ -41,12 +51,13 @@ const SchemaExplorerContext = React.createContext<SchemaExplorerContextType>({
   setPeriodOption: () => {},
 });
 
-export function SchemaExplorerProvider(
-  props: React.PropsWithChildren<{
-    dataRetentionInDays: number;
-  }>,
-) {
-  const { dataRetentionInDays } = props;
+export function SchemaExplorerProvider({
+  dataRetentionInDays,
+  children,
+}: {
+  dataRetentionInDays: number;
+  children: ReactNode;
+}): ReactElement {
   const [isArgumentListCollapsed, setArgumentListCollapsed] = useLocalStorage(
     'hive:schema-explorer:collapsed',
     true,
@@ -55,16 +66,16 @@ export function SchemaExplorerProvider(
     'hive:schema-explorer:period',
     '30d',
   );
-  const [period, setPeriod] = React.useState(createPeriod(periodOption));
+  const [period, setPeriod] = useState(createPeriod(periodOption));
 
-  React.useEffect(() => {
+  useEffect(() => {
     const inDays = parseInt(periodOption.replace('d', ''), 10);
     if (dataRetentionInDays < inDays) {
       updatePeriod(dataRetentionInDays > 7 ? '30d' : '7d');
     }
   }, [periodOption, setPeriodOption]);
 
-  const updatePeriod = React.useCallback<SchemaExplorerContextType['setPeriodOption']>(
+  const updatePeriod = useCallback<SchemaExplorerContextType['setPeriodOption']>(
     option => {
       setPeriodOption(option);
       setPeriod(createPeriod(option));
@@ -72,8 +83,8 @@ export function SchemaExplorerProvider(
     [setPeriodOption, setPeriod],
   );
 
-  const availablePeriodOptions = React.useMemo(() => {
-    const options: PeriodOption[] = ['365d', '180d', '90d', '30d', '14d', '7d'];
+  const availablePeriodOptions = useMemo(() => {
+    const options = Object.keys(periodLabelMap) as PeriodOption[];
 
     return options.filter(option => parseInt(option.replace('d', ''), 10) <= dataRetentionInDays);
   }, [periodOption]);
@@ -89,18 +100,18 @@ export function SchemaExplorerProvider(
         availablePeriodOptions,
       }}
     >
-      {props.children}
+      {children}
     </SchemaExplorerContext.Provider>
   );
 }
 
 export function useSchemaExplorerContext() {
-  return React.useContext(SchemaExplorerContext);
+  return useContext(SchemaExplorerContext);
 }
 
 export function useArgumentListToggle() {
   const { isArgumentListCollapsed, setArgumentListCollapsed } = useSchemaExplorerContext();
-  const toggle = React.useCallback(() => {
+  const toggle = useCallback(() => {
     setArgumentListCollapsed(!isArgumentListCollapsed);
   }, [setArgumentListCollapsed, isArgumentListCollapsed]);
 

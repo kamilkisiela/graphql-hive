@@ -1,14 +1,13 @@
-import * as React from 'react';
-import clsx from 'clsx';
+import { useCallback } from 'react';
+import { clsx } from 'clsx';
 import { useMutation, useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { Title } from '@/components/common';
-import { DataWrapper } from '@/components/common/DataWrapper';
+import { Button, DataWrapper } from '@/components/v2';
 import { JoinOrganizationDocument, OrganizationInvitationDocument } from '@/graphql';
 import { useNotifications } from '@/lib/hooks/use-notifications';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { withSessionProtection } from '@/lib/supertokens/guard';
-import { Button } from '@chakra-ui/react';
 
 const classes = {
   title: clsx('sm:text-4xl text-3xl mb-4 font-medium text-white'),
@@ -22,12 +21,10 @@ function OrganizationPage() {
   const code = router.query.inviteCode as string;
   const [query] = useQuery({
     query: OrganizationInvitationDocument,
-    variables: {
-      code,
-    },
+    variables: { code },
   });
   const [mutation, mutate] = useMutation(JoinOrganizationDocument);
-  const accept = React.useCallback(async () => {
+  const accept = useCallback(async () => {
     const result = await mutate({ code });
     if (result.data) {
       if (result.data.joinOrganization.__typename === 'OrganizationInvitationError') {
@@ -35,14 +32,12 @@ function OrganizationPage() {
       } else {
         const org = result.data.joinOrganization.organization;
         notify(`You joined "${org.name}" organization`, 'success');
-        router.visitOrganization({
-          organizationId: org.cleanId,
-        });
+        router.visitOrganization({ organizationId: org.cleanId });
       }
     }
   }, [mutate, code, router, notify]);
 
-  const goBack = React.useCallback(() => {
+  const goBack = useCallback(() => {
     router.visitHome();
   }, [router]);
 
@@ -65,7 +60,9 @@ function OrganizationPage() {
                     <p className={classes.description}>{invitation.message}</p>
 
                     <div className={classes.actions}>
-                      <Button onClick={goBack}>Back to Hive</Button>
+                      <Button variant="secondary" size="large" onClick={goBack}>
+                        Back to Hive
+                      </Button>
                     </div>
                   </>
                 ) : (
@@ -76,10 +73,15 @@ function OrganizationPage() {
                     </p>
 
                     <div className={classes.actions}>
-                      <Button colorScheme="primary" onClick={accept} disabled={mutation.fetching}>
+                      <Button
+                        size="large"
+                        variant="primary"
+                        onClick={accept}
+                        disabled={mutation.fetching}
+                      >
                         Accept
                       </Button>
-                      <Button disabled={mutation.fetching} onClick={goBack}>
+                      <Button size="large" danger disabled={mutation.fetching} onClick={goBack}>
                         Ignore
                       </Button>
                     </div>

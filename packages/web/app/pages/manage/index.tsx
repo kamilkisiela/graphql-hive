@@ -1,12 +1,11 @@
-import React from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { startOfMonth, subDays, subHours } from 'date-fns';
-import { VscChevronDown } from 'react-icons/vsc';
 import { AdminStats, Filters } from '@/components/admin/AdminStats';
 import { authenticated } from '@/components/authenticated-container';
 import { Page } from '@/components/common';
 import { DATE_RANGE_OPTIONS, floorToMinute } from '@/components/common/TimeFilter';
+import { Checkbox as RadixCheckbox, RadixSelect, Tooltip } from '@/components/v2';
 import { withSessionProtection } from '@/lib/supertokens/guard';
-import { Checkbox, CheckboxGroup, Select, Tooltip } from '@chakra-ui/react';
 
 type DateRangeOptions = Exclude<(typeof DATE_RANGE_OPTIONS)[number], { key: 'all' }>;
 
@@ -16,13 +15,28 @@ function isNotAllOption(option: (typeof DATE_RANGE_OPTIONS)[number]): option is 
 
 const dateRangeOptions = DATE_RANGE_OPTIONS.filter(isNotAllOption);
 
+type FilterKey = keyof Filters;
+
+const CHECKBOXES: { value: FilterKey; label: string; tooltip?: string }[] = [
+  {
+    value: 'only-regular',
+    label: 'Only Regular',
+    tooltip: 'Do not count personal organizations, created automatically for every user',
+  },
+  { value: 'with-projects', label: 'With Projects' },
+  { value: 'with-targets', label: 'With Targets' },
+  { value: 'with-schema-pushes', label: 'With Schema Pushes' },
+  { value: 'with-persisted', label: 'With Persisted' },
+  { value: 'with-collected', label: 'With Collected' },
+];
+
 function Manage() {
-  const [dateRangeKey, setDateRangeKey] = React.useState<DateRangeOptions['key']>('30d');
-  const [filters, setFilters] = React.useState<Filters>({});
-  const onFiltersChange = React.useCallback(
-    (keys: Array<keyof Filters>) => {
+  const [dateRangeKey, setDateRangeKey] = useState<DateRangeOptions['key']>('30d');
+  const [filters, setFilters] = useState<Filters>({});
+  const onFiltersChange = useCallback(
+    (keys: FilterKey[]) => {
       const newFilters: {
-        [key in keyof Filters]: boolean;
+        [key in FilterKey]: boolean;
       } = {
         'only-regular': false,
         'with-collected': false,
@@ -41,7 +55,7 @@ function Manage() {
     [setFilters, filters],
   );
 
-  const dateRange = React.useMemo(() => {
+  const dateRange = useMemo(() => {
     const to = floorToMinute(new Date());
 
     if (dateRangeKey === 'month') {
@@ -61,63 +75,51 @@ function Manage() {
   }, [dateRangeKey]);
 
   return (
-    <Page title="Hive Stats">
-      <div className="flex flex-row h-full">
-        <div className="grow overflow-x-auto divide-y divide-gray-200">
-          <div className="w-6/12 mt-10 mb-6">
-            <div className="inline-block">
-              <CheckboxGroup
-                colorScheme="teal"
-                size="sm"
-                defaultValue={Object.keys(filters).filter(
-                  key => filters[key as keyof typeof filters],
-                )}
-                onChange={onFiltersChange}
-              >
-                <Checkbox className="whitespace-nowrap align-middle" value="only-regular">
-                  <Tooltip label="Do not count personal organizations, created automatically for every user">
-                    Only Regular
+    <Page title="Hive Stats" className="mt-[84px]">
+      <div className="grow overflow-x-auto">
+        <div className="flex gap-4 pb-2">
+          <Tooltip.Provider delayDuration={200}>
+            <Tooltip content="Date filter applies only to collected operations data">
+              <RadixSelect
+                defaultValue={dateRangeKey}
+                onChange={setDateRangeKey}
+                options={dateRangeOptions.map(({ key, label }) => ({ value: key, label }))}
+              />
+            </Tooltip>
+            {CHECKBOXES.map(({ value, label, tooltip }) => (
+              <span className="flex items-center gap-2" key={value}>
+                <RadixCheckbox
+                  onCheckedChange={isChecked => {
+                    const newFilters = {
+                      ...filters,
+                      [value]: isChecked,
+                    };
+
+                    return onFiltersChange(
+                      Object.entries(newFilters)
+                        .filter(([, v]) => v)
+                        .map(([k]) => k) as any,
+                    );
+                  }}
+                  checked={filters[value]}
+                  id={value}
+                />
+                {tooltip ? (
+                  <Tooltip content={tooltip}>
+                    <label htmlFor={value} className="cursor-pointer">
+                      {label}
+                    </label>
                   </Tooltip>
-                </Checkbox>
-                <Checkbox className="whitespace-nowrap align-middle" value="with-projects">
-                  With Projects
-                </Checkbox>
-                <Checkbox className="whitespace-nowrap align-middle" value="with-targets">
-                  With Targets
-                </Checkbox>
-                <Checkbox className="whitespace-nowrap align-middle" value="with-schema-pushes">
-                  With Schema Pushes
-                </Checkbox>
-                <Checkbox className="whitespace-nowrap align-middle" value="with-persisted">
-                  With Persisted
-                </Checkbox>
-                <Checkbox className="whitespace-nowrap align-middle" value="with-collected">
-                  With Collected
-                </Checkbox>
-              </CheckboxGroup>
-              <Tooltip
-                label="Date filter applies only to collected operations data"
-                placement="left"
-              >
-                <Select
-                  defaultValue={dateRangeKey}
-                  onChange={ev => setDateRangeKey(ev.target.value as DateRangeOptions['key'])}
-                  iconSize="16"
-                  icon={<VscChevronDown />}
-                  size="sm"
-                  className="inline-block align-middle"
-                >
-                  {dateRangeOptions.map(item => (
-                    <option key={item.key} value={item.key}>
-                      {item.label}
-                    </option>
-                  ))}
-                </Select>
-              </Tooltip>
-            </div>
-          </div>
-          <AdminStats dateRange={dateRange} filters={filters} />
+                ) : (
+                  <label htmlFor={value} className="cursor-pointer">
+                    {label}
+                  </label>
+                )}
+              </span>
+            ))}
+          </Tooltip.Provider>
         </div>
+        <AdminStats dateRange={dateRange} filters={filters} />
       </div>
     </Page>
   );

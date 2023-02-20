@@ -8,7 +8,7 @@ import { CurrencyFormatter } from '@/components/organization/billing/helpers';
 import { InvoicesList } from '@/components/organization/billing/InvoicesList';
 import { RateLimitWarn } from '@/components/organization/billing/RateLimitWarn';
 import { OrganizationUsageEstimationView } from '@/components/organization/Usage';
-import { Card, Heading, Tabs, Title } from '@/components/v2';
+import { Card, Heading, Stat, Tabs, Title } from '@/components/v2';
 import {
   OrganizationFieldsFragment,
   OrgBillingInfoFieldsFragment,
@@ -17,7 +17,6 @@ import {
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
 import { getIsStripeEnabled } from '@/lib/billing/stripe-public-key';
 import { withSessionProtection } from '@/lib/supertokens/guard';
-import { Stat, StatHelpText, StatLabel, StatNumber } from '@chakra-ui/react';
 
 const DateFormatter = Intl.DateTimeFormat('en-US', {
   month: 'short',
@@ -27,13 +26,13 @@ const DateFormatter = Intl.DateTimeFormat('en-US', {
 
 const ManagePage = dynamic(() => import('./manage'));
 
-const Page = ({
+function Page({
   organization,
 }: {
   organization: OrganizationFieldsFragment &
     OrgBillingInfoFieldsFragment &
     OrgRateLimitFieldsFragment;
-}): ReactElement | null => {
+}): ReactElement | null {
   const canAccess = useOrganizationAccess({
     scope: OrganizationAccessScope.Settings,
     member: organization?.me,
@@ -68,18 +67,18 @@ const Page = ({
           <div>
             <BillingView organization={organization}>
               {organization.billingConfiguration?.upcomingInvoice && (
-                <Stat className="mb-4">
-                  <StatLabel>Next Invoice</StatLabel>
-                  <StatNumber>
+                <Stat>
+                  <Stat.Label>Next Invoice</Stat.Label>
+                  <Stat.Number>
                     {CurrencyFormatter.format(
                       organization.billingConfiguration.upcomingInvoice.amount,
                     )}
-                  </StatNumber>
-                  <StatHelpText>
+                  </Stat.Number>
+                  <Stat.HelpText>
                     {DateFormatter.format(
                       new Date(organization.billingConfiguration.upcomingInvoice.date),
                     )}
-                  </StatHelpText>
+                  </Stat.HelpText>
                 </Stat>
               )}
             </BillingView>
@@ -108,7 +107,7 @@ const Page = ({
       </Tabs.Content>
     </Tabs>
   );
-};
+}
 
 function SubscriptionPage(): ReactElement {
   return (
@@ -126,7 +125,7 @@ export const getServerSideProps = withSessionProtection(async context => {
    * If Strive is not enabled we redirect the user to the organization.
    */
   const isStripeEnabled = getIsStripeEnabled();
-  if (isStripeEnabled === false) {
+  if (!isStripeEnabled) {
     const parts = String(context.resolvedUrl).split('/');
     parts.pop();
     return {

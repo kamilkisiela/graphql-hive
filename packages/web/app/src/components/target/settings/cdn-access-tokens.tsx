@@ -1,9 +1,21 @@
-import { useEffect, useMemo, useState } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useFormik } from 'formik';
 import { gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
-import { Button, Card, Heading, Input, Modal, Table, Tag, TimeAgo } from '@/components/v2';
+import {
+  Button,
+  Card,
+  Heading,
+  Input,
+  Modal,
+  Table,
+  Tag,
+  TBody,
+  Td,
+  TimeAgo,
+  Tr,
+} from '@/components/v2';
 import { AlertTriangleIcon, TrashIcon } from '@/components/v2/icon';
 import { InlineCode } from '@/components/v2/inline-code';
 import { TargetAccessScope } from '@/gql/graphql';
@@ -39,10 +51,10 @@ const CDNAccessTokenCreateMutation = gql(/* GraphQL */ `
   }
 `);
 
-const CreateCDNAccessTokenModal = (props: {
+function CreateCDNAccessTokenModal(props: {
   onCreateCDNAccessToken: () => void;
   onClose: () => void;
-}) => {
+}): ReactElement {
   const router = useRouteSelector();
   const [createCdnAccessToken, mutate] = useMutation(CDNAccessTokenCreateMutation);
 
@@ -164,7 +176,7 @@ const CreateCDNAccessTokenModal = (props: {
       {body}
     </Modal>
   );
-};
+}
 
 const CDNAccessTokenDeleteMutation = gql(/* GraphQL */ `
   mutation CDNAccessTokens_DeleteCDNAccessToken($input: DeleteCdnAccessTokenInput!) {
@@ -179,11 +191,11 @@ const CDNAccessTokenDeleteMutation = gql(/* GraphQL */ `
   }
 `);
 
-const DeleteCDNAccessTokenModal = (props: {
+function DeleteCDNAccessTokenModal(props: {
   cdnAccessTokenId: string;
   onDeletedAccessTokenId: (deletedAccessTokenId: string) => void;
   onClose: () => void;
-}) => {
+}): ReactElement {
   const router = useRouteSelector();
   const [deleteCdnAccessToken, mutate] = useMutation(CDNAccessTokenDeleteMutation);
 
@@ -284,7 +296,7 @@ const DeleteCDNAccessTokenModal = (props: {
       {body}
     </Modal>
   );
-};
+}
 
 const CDNAccessTokensQuery = gql(/* GraphQL */ `
   query CDNAccessTokensQuery($selector: TargetSelectorInput!, $first: Int!, $after: String) {
@@ -318,7 +330,7 @@ const isDeleteCDNAccessTokenModalPath = (path: string): null | string => {
   return result[1];
 };
 
-export const CDNAccessTokens = (props: { me: MemberFieldsFragment }): React.ReactElement => {
+export function CDNAccessTokens(props: { me: MemberFieldsFragment }): React.ReactElement {
   const routerSelector = useRouteSelector();
   const router = useRouter();
 
@@ -378,35 +390,33 @@ export const CDNAccessTokens = (props: { me: MemberFieldsFragment }): React.Reac
           </Button>
         </div>
       )}
-      <Table
-        dataSource={target?.data?.target?.cdnAccessTokens.edges?.map(edge => ({
-          id: edge.node.id,
-          name:
-            edge.node.firstCharacters + new Array(10).fill('•').join('') + edge.node.lastCharacters,
-          alias: edge.node.alias,
-          createdAt: (
-            <>
-              created <TimeAgo date={edge.node.createdAt} />
-            </>
-          ),
-          delete: (
-            <Button
-              className="hover:text-red-500"
-              onClick={() => {
-                void router.push(`${router.asPath}#delete-cdn-access-token?id=${edge.node.id}`);
-              }}
-            >
-              <TrashIcon />
-            </Button>
-          ),
-        }))}
-        columns={[
-          { key: 'name' },
-          { key: 'alias' },
-          { key: 'createdAt', align: 'right' },
-          { key: 'delete', align: 'right' },
-        ]}
-      />
+      <Table>
+        <TBody>
+          {target?.data?.target?.cdnAccessTokens.edges?.map(edge => (
+            <Tr key={edge.node.id}>
+              <Td>
+                {edge.node.firstCharacters +
+                  new Array(10).fill('•').join('') +
+                  edge.node.lastCharacters}
+              </Td>
+              <Td>{edge.node.alias}</Td>
+              <Td align="right">
+                created <TimeAgo date={edge.node.createdAt} />
+              </Td>
+              <Td align="right">
+                <Button
+                  className="hover:text-red-500"
+                  onClick={() => {
+                    void router.push(`${router.asPath}#delete-cdn-access-token?id=${edge.node.id}`);
+                  }}
+                >
+                  <TrashIcon />
+                </Button>
+              </Td>
+            </Tr>
+          ))}
+        </TBody>
+      </Table>
       <div className="my-3.5 flex justify-end">
         {target.data?.target?.cdnAccessTokens.pageInfo.hasPreviousPage ? (
           <Button
@@ -461,4 +471,4 @@ export const CDNAccessTokens = (props: { me: MemberFieldsFragment }): React.Reac
       ) : null}
     </Card>
   );
-};
+}

@@ -1,7 +1,7 @@
 import { ReactElement, ReactNode, useEffect } from 'react';
 import NextLink from 'next/link';
 import { gql, useQuery } from 'urql';
-import { Button, Heading, Link, Spinner, SubHeader, Tabs } from '@/components/v2';
+import { Button, Heading, Link, SubHeader, Tabs } from '@/components/v2';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -110,7 +110,7 @@ export const TargetLayout = ({
   const canAccessSettings = canAccessTarget(TargetAccessScope.Settings, me);
 
   if (projectQuery.fetching || targetsQuery.fetching) {
-    return <Spinner className="mt-10" />;
+    return null;
   }
 
   if (projectQuery.error || targetsQuery.error) {

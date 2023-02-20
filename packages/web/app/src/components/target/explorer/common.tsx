@@ -1,21 +1,21 @@
-import React from 'react';
-import clsx from 'clsx';
-import { VscCommentDiscussion, VscPulse } from 'react-icons/vsc';
+import React, { ReactElement, ReactNode } from 'react';
+import { clsx } from 'clsx';
 import { DocumentType, gql } from 'urql';
+import { PulseIcon } from '@/components/v2/icon';
 import { Link } from '@/components/v2/link';
 import { Markdown } from '@/components/v2/markdown';
 import { formatNumber, useRouteSelector } from '@/lib/hooks';
-import * as Popover from '@radix-ui/react-popover';
+import { ChatBubbleIcon } from '@radix-ui/react-icons';
+import * as P from '@radix-ui/react-popover';
 import { useArgumentListToggle } from './provider';
 
+const noop = () => {};
+
 function useCollapsibleList<T>(list: T[], max: number, defaultValue: boolean) {
-  const [collapsed, setCollapsed] = React.useState(
-    defaultValue === true && list.length > max ? true : false,
-  );
+  const [collapsed, setCollapsed] = React.useState(defaultValue === true && list.length > max);
   const expand = React.useCallback(() => {
     setCollapsed(false);
   }, [setCollapsed]);
-  const noop = React.useCallback(() => {}, []);
 
   if (collapsed) {
     return [list.slice(0, max), collapsed, expand] as const;
@@ -26,24 +26,21 @@ function useCollapsibleList<T>(list: T[], max: number, defaultValue: boolean) {
 
 function Description(props: { description: string }) {
   return (
-    <Popover.Root>
-      <Popover.Trigger asChild>
-        <button
-          title="Description is available"
-          className="m-0 h-6 p-0 text-gray-500 hover:text-white"
-        >
-          <VscCommentDiscussion className="w-full" />
+    <P.Root>
+      <P.Trigger asChild>
+        <button title="Description is available" className="text-gray-500 hover:text-white">
+          <ChatBubbleIcon className="h-5 w-auto" />
         </button>
-      </Popover.Trigger>
-      <Popover.Content
+      </P.Trigger>
+      <P.Content
         className="max-w-screen-sm rounded-md bg-gray-800 p-4 text-sm shadow-md"
         side="right"
         sideOffset={5}
       >
-        <Popover.Arrow className="fill-current text-gray-800" />
+        <P.Arrow className="fill-current text-gray-800" />
         <Markdown content={props.description} />
-      </Popover.Content>
-    </Popover.Root>
+      </P.Content>
+    </P.Root>
   );
 }
 
@@ -63,7 +60,7 @@ export function SchemaExplorerUsageStats(props: {
   return (
     <div className="flex flex-row items-center gap-2 text-xs">
       <div className="text-xl">
-        <VscPulse />
+        <PulseIcon className="h-6 w-auto" />
       </div>
       <div className="grow">
         <div className="text-center" title={`${props.usage.total} requests`}>
@@ -72,17 +69,9 @@ export function SchemaExplorerUsageStats(props: {
         <div
           title={`${percentage.toFixed(2)}% of all requests`}
           className="relative mt-1 w-full overflow-hidden rounded bg-orange-500/20"
-          style={{
-            width: 50,
-            height: 5,
-          }}
+          style={{ width: 50, height: 5 }}
         >
-          <div
-            className="h-full bg-orange-500"
-            style={{
-              width: `${percentage}%`,
-            }}
-          />
+          <div className="h-full bg-orange-500" style={{ width: `${percentage}%` }} />
         </div>
       </div>
     </div>
@@ -140,7 +129,7 @@ export function GraphQLTypeCard(
     totalRequests?: number;
     usage?: DocumentType<typeof SchemaExplorerUsageStats_UsageFragment>;
   }>,
-) {
+): ReactElement {
   return (
     <div className="rounded-md border-2">
       <div className="flex flex-row justify-between p-4">
@@ -170,7 +159,7 @@ export function GraphQLTypeCard(
   );
 }
 
-export function GraphQLArguments(props: {
+function GraphQLArguments(props: {
   args: DocumentType<typeof GraphQLArguments_ArgumentFragment>[];
 }) {
   const { args } = props;
@@ -208,15 +197,13 @@ export function GraphQLArguments(props: {
     <span className="ml-1">
       <span className="text-gray-400">(</span>
       <span className="space-x-2">
-        {props.args.slice(0, 2).map(arg => {
-          return (
-            <span key={arg.name}>
-              {arg.name}
-              {': '}
-              <GraphQLTypeAsLink type={arg.type} />
-            </span>
-          );
-        })}
+        {props.args.slice(0, 2).map(arg => (
+          <span key={arg.name}>
+            {arg.name}
+            {': '}
+            <GraphQLTypeAsLink type={arg.type} />
+          </span>
+        ))}
         {hasMoreThanTwo ? (
           <span
             className="cursor-pointer rounded bg-gray-900 p-1 text-xs text-gray-300 hover:bg-gray-700 hover:text-white"
@@ -231,13 +218,12 @@ export function GraphQLArguments(props: {
   );
 }
 
-export function GraphQLTypeCardListItem(
-  props: React.PropsWithChildren<{
-    index: number;
-    className?: string;
-    onClick?: () => void;
-  }>,
-) {
+export function GraphQLTypeCardListItem(props: {
+  children: ReactNode;
+  index: number;
+  className?: string;
+  onClick?: () => void;
+}): ReactElement {
   return (
     <div
       onClick={props.onClick}
@@ -294,7 +280,7 @@ export function GraphQLInputFields({
 }: {
   fields: DocumentType<typeof GraphQLInputFields_InputFieldFragment>[];
   totalRequests: number;
-}) {
+}): ReactElement {
   return (
     <div className="flex flex-col">
       {fields.map((field, i) => {
@@ -313,7 +299,7 @@ export function GraphQLInputFields({
   );
 }
 
-export function GraphQLTypeAsLink(props: { type: string }) {
+function GraphQLTypeAsLink(props: { type: string }): ReactElement {
   const router = useRouteSelector();
   const typename = props.type.replace(/[[\]!]+/g, '');
 

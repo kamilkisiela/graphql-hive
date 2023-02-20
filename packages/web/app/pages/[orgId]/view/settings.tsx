@@ -5,7 +5,7 @@ import * as Yup from 'yup';
 import { authenticated } from '@/components/authenticated-container';
 import { OrganizationLayout } from '@/components/layouts';
 import { OIDCIntegrationSection } from '@/components/organization/settings/oidc-integration-section';
-import { Button, Card, Heading, Input, Spinner, Tag, Title } from '@/components/v2';
+import { Button, Card, Heading, Input, Tag, Title } from '@/components/v2';
 import { AlertTriangleIcon, GitHubIcon, SlackIcon } from '@/components/v2/icon';
 import {
   DeleteOrganizationModal,
@@ -27,7 +27,7 @@ import {
 import { useRouteSelector, useToggle } from '@/lib/hooks';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
-const Integrations = (): ReactElement => {
+function Integrations(): ReactElement | null {
   const router = useRouteSelector();
   const orgId = router.organizationId;
 
@@ -44,7 +44,7 @@ const Integrations = (): ReactElement => {
   const [deleteGitHubMutation, deleteGitHub] = useMutation(DeleteGitHubIntegrationDocument);
 
   if (checkIntegrations.fetching) {
-    return <Spinner />;
+    return null;
   }
 
   const isGitHubIntegrationFeatureEnabled =
@@ -120,7 +120,7 @@ const Integrations = (): ReactElement => {
       ) : null}
     </>
   );
-};
+}
 
 const UpdateOrganizationNameMutation = gql(/* GraphQL */ `
   mutation Settings_UpdateOrganizationName($input: UpdateOrganizationNameInput!) {

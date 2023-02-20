@@ -1,14 +1,13 @@
-import { ComponentProps, ReactElement, useCallback, useMemo, useState } from 'react';
+import { ReactElement, useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import { formatISO, subDays, subHours, subMinutes } from 'date-fns';
-import { VscChevronDown } from 'react-icons/vsc';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
 import { OperationsFilterTrigger } from '@/components/target/operations/Filters';
 import { OperationsList } from '@/components/target/operations/List';
 import { OperationsStats } from '@/components/target/operations/Stats';
-import { DataWrapper, EmptyList, Title } from '@/components/v2';
+import { DataWrapper, EmptyList, RadixSelect, Title } from '@/components/v2';
 import {
   HasCollectedOperationsDocument,
   OrganizationFieldsFragment,
@@ -17,7 +16,6 @@ import {
 } from '@/graphql';
 import { getDocsUrl } from '@/lib/docs-url';
 import { withSessionProtection } from '@/lib/supertokens/guard';
-import { Select, Stack } from '@chakra-ui/react';
 
 function floorDate(date: Date): Date {
   const time = 1000 * 60;
@@ -34,7 +32,7 @@ const DateRange = {
 
 type PeriodKey = keyof typeof DateRange;
 
-const OperationsView = ({
+function OperationsView({
   organization,
   project,
   target,
@@ -42,7 +40,7 @@ const OperationsView = ({
   organization: OrganizationFieldsFragment;
   project: ProjectFieldsFragment;
   target: TargetFieldsFragment;
-}): ReactElement => {
+}): ReactElement {
   const router = useRouter();
   const [href, periodParam] = router.asPath.split('?');
   const selectedPeriod: PeriodKey =
@@ -66,65 +64,47 @@ const OperationsView = ({
     return { from, to };
   }, [selectedPeriod]);
 
-  const updatePeriod = useCallback<Exclude<ComponentProps<'select'>['onChange'], undefined | null>>(
-    ev => {
-      void router.push(`${href}?period=${ev.target.value}`);
+  const updatePeriod = useCallback(
+    (value: string) => {
+      void router.push(`${href}?period=${value}`);
     },
     [href, router],
   );
 
   return (
     <>
-      <div className="absolute top-0 right-0">
-        <Stack direction="row" spacing={4}>
-          <div>
-            <OperationsFilterTrigger
-              period={period}
-              selected={selectedOperations}
-              onFilter={setSelectedOperations}
-            />
-          </div>
-          <div>
-            <Select
-              variant="filled"
-              className="cursor-pointer rounded-md"
-              defaultValue={selectedPeriod}
-              onChange={updatePeriod}
-              iconSize="16"
-              icon={<VscChevronDown />}
-              size="sm"
-            >
-              {Object.entries(DateRange).map(([key, label]) => (
-                <option key={key} value={key}>
-                  {label}
-                </option>
-              ))}
-            </Select>
-          </div>
-        </Stack>
-      </div>
-      <div className="space-y-12">
-        <OperationsStats
-          organization={organization.cleanId}
-          project={project.cleanId}
-          target={target.cleanId}
+      <div className="absolute top-0 right-0 flex gap-2">
+        <OperationsFilterTrigger
           period={period}
-          operationsFilter={selectedOperations}
+          selected={selectedOperations}
+          onFilter={setSelectedOperations}
         />
-        <OperationsList
-          className="pt-12"
-          period={period}
-          organization={organization.cleanId}
-          project={project.cleanId}
-          target={target.cleanId}
-          operationsFilter={selectedOperations}
+        <RadixSelect
+          onChange={updatePeriod}
+          defaultValue={selectedPeriod}
+          options={Object.entries(DateRange).map(([value, label]) => ({ value, label }))}
         />
       </div>
+      <OperationsStats
+        organization={organization.cleanId}
+        project={project.cleanId}
+        target={target.cleanId}
+        period={period}
+        operationsFilter={selectedOperations}
+      />
+      <OperationsList
+        className="mt-12"
+        period={period}
+        organization={organization.cleanId}
+        project={project.cleanId}
+        target={target.cleanId}
+        operationsFilter={selectedOperations}
+      />
     </>
   );
-};
+}
 
-const OperationsViewGate = ({
+function OperationsViewGate({
   organization,
   project,
   target,
@@ -132,7 +112,7 @@ const OperationsViewGate = ({
   organization: OrganizationFieldsFragment;
   project: ProjectFieldsFragment;
   target: TargetFieldsFragment;
-}): ReactElement => {
+}): ReactElement {
   const [query] = useQuery({
     query: HasCollectedOperationsDocument,
     variables: {
@@ -159,7 +139,7 @@ const OperationsViewGate = ({
       }
     </DataWrapper>
   );
-};
+}
 
 function OperationsPage(): ReactElement {
   return (

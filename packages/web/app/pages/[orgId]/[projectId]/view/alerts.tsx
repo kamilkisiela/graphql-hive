@@ -2,7 +2,7 @@ import { ReactElement, useState } from 'react';
 import { useMutation, useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { ProjectLayout } from '@/components/layouts';
-import { Button, Card, Checkbox, Heading, Table, Tag, Title } from '@/components/v2';
+import { Button, Card, Checkbox, Heading, Table, Tag, TBody, Td, Title, Tr } from '@/components/v2';
 import { CreateAlertModal, CreateChannelModal } from '@/components/v2/modals';
 import {
   AlertChannelsDocument,
@@ -17,20 +17,7 @@ import { ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
-const channelAlertsColumns = [
-  { key: 'checkbox', width: 'auto' },
-  { key: 'name' },
-  { key: 'type' },
-] as const;
-
-const alertsColumns = [
-  { key: 'checkbox', width: 'auto' },
-  { key: 'type' },
-  { key: 'channelName' },
-  { key: 'targetName' },
-] as const;
-
-const Channels = (): ReactElement => {
+function Channels(): ReactElement {
   const router = useRouteSelector();
   const [checked, setChecked] = useState<string[]>([]);
   const [channelAlertsQuery] = useQuery({
@@ -52,30 +39,32 @@ const Channels = (): ReactElement => {
     <Card>
       <Heading className="mb-2">Available Channels</Heading>
       <p className="mb-3 font-light text-gray-300">Channel represents a form of communication</p>
-      <Table
-        dataSource={channelAlerts.map(channelAlert => ({
-          id: channelAlert.id,
-          name: channelAlert.name,
-          checkbox: (
-            <Checkbox
-              onCheckedChange={isChecked =>
-                setChecked(
-                  isChecked
-                    ? [...checked, channelAlert.id]
-                    : checked.filter(k => k !== channelAlert.id),
-                )
-              }
-              checked={checked.includes(channelAlert.id)}
-            />
-          ),
-          type: (
-            <Tag color={channelAlert.type === AlertChannelType.Webhook ? 'green' : 'yellow'}>
-              {channelAlert.type}
-            </Tag>
-          ),
-        }))}
-        columns={channelAlertsColumns}
-      />
+      <Table>
+        <TBody>
+          {channelAlerts.map(channelAlert => (
+            <Tr key={channelAlert.id}>
+              <Td width="1">
+                <Checkbox
+                  onCheckedChange={isChecked =>
+                    setChecked(
+                      isChecked
+                        ? [...checked, channelAlert.id]
+                        : checked.filter(k => k !== channelAlert.id),
+                    )
+                  }
+                  checked={checked.includes(channelAlert.id)}
+                />
+              </Td>
+              <Td>{channelAlert.name}</Td>
+              <Td>
+                <Tag color={channelAlert.type === AlertChannelType.Webhook ? 'green' : 'yellow'}>
+                  {channelAlert.type}
+                </Tag>
+              </Td>
+            </Tr>
+          ))}
+        </TBody>
+      </Table>
       <div className="mt-4 flex gap-x-2">
         <Button size="large" variant="primary" onClick={toggleModalOpen}>
           Add channel
@@ -103,7 +92,7 @@ const Channels = (): ReactElement => {
       {isModalOpen && <CreateChannelModal isOpen={isModalOpen} toggleModalOpen={toggleModalOpen} />}
     </Card>
   );
-};
+}
 
 const Page = (props: {
   organization: OrganizationFieldsFragment;
@@ -136,27 +125,31 @@ const Page = (props: {
       <Card>
         <Heading className="mb-2">Active Alerts</Heading>
         <p className="mb-3 font-light text-gray-300">Alerts are sent over the Channels</p>
-        <Table
-          dataSource={alerts.map(alert => ({
-            id: alert.id,
-            type: (
-              <span className="capitalize">{alert.type.replaceAll('_', ' ').toLowerCase()}</span>
-            ),
-            checkbox: (
-              <Checkbox
-                onCheckedChange={isChecked =>
-                  setChecked(
-                    isChecked ? [...checked, alert.id] : checked.filter(k => k !== alert.id),
-                  )
-                }
-                checked={checked.includes(alert.id)}
-              />
-            ),
-            channelName: `Channel: ${alert.channel.name}`,
-            targetName: `Target: ${alert.target.name}`,
-          }))}
-          columns={alertsColumns}
-        />
+        <Table>
+          <TBody>
+            {alerts.map(alert => (
+              <Tr key={alert.id}>
+                <Td width="1">
+                  <Checkbox
+                    onCheckedChange={isChecked =>
+                      setChecked(
+                        isChecked ? [...checked, alert.id] : checked.filter(k => k !== alert.id),
+                      )
+                    }
+                    checked={checked.includes(alert.id)}
+                  />
+                </Td>
+                <Td>
+                  <span className="capitalize">
+                    {alert.type.replaceAll('_', ' ').toLowerCase()}
+                  </span>
+                </Td>
+                <Td>Channel: {alert.channel.name}</Td>
+                <Td>Target: {alert.target.name}</Td>
+              </Tr>
+            ))}
+          </TBody>
+        </Table>
         <div className="mt-4 flex gap-x-2">
           <Button size="large" variant="primary" onClick={toggleModalOpen}>
             Create alert

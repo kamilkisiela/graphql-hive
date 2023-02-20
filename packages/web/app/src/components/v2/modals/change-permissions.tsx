@@ -1,11 +1,10 @@
 import { ReactElement } from 'react';
 import { PermissionsSpace, usePermissionsManager } from '@/components/organization/Permissions';
-import { Button, Heading, Modal } from '@/components/v2';
+import { Accordion, Button, Heading, Modal } from '@/components/v2';
 import { MemberFieldsFragment, OrganizationFieldsFragment } from '@/graphql';
 import { scopes } from '@/lib/access/common';
-import { Accordion } from '@chakra-ui/react';
 
-export const ChangePermissionsModal = ({
+export function ChangePermissionsModal({
   isOpen,
   toggleModalOpen,
   organization,
@@ -15,7 +14,7 @@ export const ChangePermissionsModal = ({
   toggleModalOpen: () => void;
   organization: OrganizationFieldsFragment;
   member: MemberFieldsFragment;
-}): ReactElement => {
+}): ReactElement {
   const manager = usePermissionsManager({
     onSuccess: toggleModalOpen,
     organization,
@@ -27,7 +26,7 @@ export const ChangePermissionsModal = ({
     <Modal open={isOpen} onOpenChange={toggleModalOpen} className="w-[600px]">
       <form className="flex flex-col items-center gap-5" onSubmit={manager.submit}>
         <Heading>Permissions</Heading>
-        <Accordion defaultIndex={0} width="100%">
+        <Accordion defaultValue="Organization">
           <PermissionsSpace
             title="Organization"
             scopes={scopes.organization}
@@ -61,4 +60,4 @@ export const ChangePermissionsModal = ({
       </form>
     </Modal>
   );
-};
+}

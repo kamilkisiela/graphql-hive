@@ -21,7 +21,7 @@ async function main() {
 
   const [localFiles, rootEnv] = await Promise.all([findLocalEnvFiles(), loadRootEnv()]);
 
-  async function syncEnvFile(envLocalFile) {
+  async function syncEnvFile(envLocalFile: string) {
     const dir = dirname(envLocalFile);
     const envFile = join(dir, '.env');
 
@@ -49,7 +49,7 @@ async function main() {
 
       if (env[key] === '<sync>' || env[key] === '') {
         modified = true;
-        env[key] = typeof rootEnv[key] !== 'undefined' ? rootEnv[key] : process.env[key];
+        env[key] = rootEnv[key] !== undefined ? rootEnv[key] : process.env[key];
       }
     }
 
@@ -69,7 +69,7 @@ main().catch(error => {
   process.exit(1);
 });
 
-async function exists(file) {
+async function exists(file: string) {
   try {
     await access(file, constants.F_OK);
     return true;
@@ -78,10 +78,7 @@ async function exists(file) {
   }
 }
 
-/**
- * @returns {Promise<string[]>}
- */
-function findLocalEnvFiles() {
+function findLocalEnvFiles(): Promise<string[]> {
   return new Promise((resolve, reject) => {
     glob(
       '{packages/**/*/.env.template,integration-tests/.env.template}',

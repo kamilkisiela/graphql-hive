@@ -3,11 +3,10 @@ import { useFormik } from 'formik';
 import { gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 import { PermissionsSpace, usePermissionsManager } from '@/components/organization/Permissions';
-import { Button, CopyValue, Heading, Input, Modal, Tag } from '@/components/v2';
+import { Accordion, Button, CopyValue, Heading, Input, Modal, Tag } from '@/components/v2';
 import { OrganizationDocument, OrganizationQuery } from '@/graphql';
 import { scopes } from '@/lib/access/common';
 import { useRouteSelector } from '@/lib/hooks';
-import { Accordion } from '@chakra-ui/react';
 
 const CreateAccessToken_CreateTokenMutation = gql(/* GraphQL */ `
   mutation CreateAccessToken_CreateToken($input: CreateTokenInput!) {
@@ -30,13 +29,13 @@ const CreateAccessToken_CreateTokenMutation = gql(/* GraphQL */ `
   }
 `);
 
-export const CreateAccessTokenModal = ({
+export function CreateAccessTokenModal({
   isOpen,
   toggleModalOpen,
 }: {
   isOpen: boolean;
   toggleModalOpen: () => void;
-}): ReactElement => {
+}): ReactElement {
   const router = useRouteSelector();
   const [organizationQuery] = useQuery({
     query: OrganizationDocument,
@@ -62,15 +61,15 @@ export const CreateAccessTokenModal = ({
       ) : null}
     </Modal>
   );
-};
+}
 
-const ModalContent = (props: {
+function ModalContent(props: {
   organization: Exclude<OrganizationQuery['organization'], null | undefined>['organization'];
   organizationId: string;
   projectId: string;
   targetId: string;
   toggleModalOpen: () => void;
-}) => {
+}): ReactElement {
   const [mutation, mutate] = useMutation(CreateAccessToken_CreateTokenMutation);
 
   const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } =
@@ -149,7 +148,7 @@ const ModalContent = (props: {
 
           <Heading>Permissions</Heading>
 
-          <Accordion defaultIndex={0} width="100%">
+          <Accordion defaultValue="Organization">
             <PermissionsSpace
               title="Organization"
               scopes={scopes.organization}
@@ -187,4 +186,4 @@ const ModalContent = (props: {
       )}
     </>
   );
-};
+}

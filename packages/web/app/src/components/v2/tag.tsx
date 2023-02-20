@@ -1,5 +1,5 @@
 import { ReactElement, ReactNode } from 'react';
-import clsx from 'clsx';
+import { clsx } from 'clsx';
 
 const colors = {
   green: 'bg-green-500/10 text-green-500',
@@ -7,7 +7,7 @@ const colors = {
   gray: 'bg-gray-500/10 text-gray-500',
 } as const;
 
-export const Tag = ({
+export function Tag({
   children,
   color = 'gray',
   className,
@@ -15,7 +15,7 @@ export const Tag = ({
   color?: 'green' | 'yellow' | 'gray';
   className?: string;
   children: ReactNode;
-}): ReactElement => {
+}): ReactElement {
   return (
     <span
       className={clsx('inline-flex items-center gap-x-1 rounded-sm p-2', colors[color], className)}
@@ -23,4 +23,4 @@ export const Tag = ({
       {children}
     </span>
   );
-};
+}

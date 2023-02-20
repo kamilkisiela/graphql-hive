@@ -117,7 +117,6 @@ module.exports = {
         '@typescript-eslint/no-non-null-assertion': 'off',
         'react/jsx-no-useless-fragment': 'off',
         '@typescript-eslint/no-explicit-any': 'off',
-        '@typescript-eslint/no-restricted-imports': 'off',
         '@typescript-eslint/no-empty-function': 'off',
         'react-hooks/rules-of-hooks': 'off',
         'react-hooks/exhaustive-deps': 'off',
@@ -139,11 +138,18 @@ module.exports = {
           rootDir: 'packages/web/app',
         },
         tailwindcss: {
-          config: 'packages/web/app/tailwind.config.js',
+          config: 'packages/web/app/tailwind.config.cjs',
           whitelist: ['drag-none'],
         },
       },
     },
+    // {
+    //   files: ['packages/web/app/**'],
+    //   excludedFiles: ['packages/web/app/pages/**'],
+    //   rules: {
+    //     'import/no-unused-modules': ['error', { unusedExports: true }],
+    //   },
+    // },
     {
       files: ['packages/web/docs/**'],
       settings: {

@@ -1,7 +1,6 @@
 import { Component, ReactNode } from 'react';
 import { AnyVariables, UseQueryState } from 'urql';
 import { QueryError } from '@/components/common/DataWrapper';
-import { Spinner } from '@/components/v2';
 
 export class DataWrapper<TData, TVariables extends AnyVariables> extends Component<{
   query: UseQueryState<TData, TVariables>;
@@ -11,19 +10,19 @@ export class DataWrapper<TData, TVariables extends AnyVariables> extends Compone
 }> {
   render() {
     const { query, children, spinnerComponent } = this.props;
-
-    if (query.fetching) {
-      return spinnerComponent ?? <Spinner />;
+    const { fetching, error, data } = query;
+    if (fetching) {
+      return spinnerComponent;
     }
 
-    if (query.error) {
-      return <QueryError error={query.error} />;
+    if (error) {
+      return <QueryError error={error} />;
     }
 
-    if (!query.data) {
-      return spinnerComponent ?? <Spinner />;
+    if (!data) {
+      return spinnerComponent;
     }
 
-    return children({ data: query.data });
+    return children({ data });
   }
 }

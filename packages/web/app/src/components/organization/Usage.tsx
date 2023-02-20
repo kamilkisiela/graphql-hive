@@ -1,22 +1,21 @@
-import React from 'react';
+import { ReactElement } from 'react';
 import { useQuery } from 'urql';
+import { DataWrapper, Table, TBody, Td, Th, THead, Tr } from '@/components/v2';
 import {
   OrganizationFieldsFragment,
   OrgBillingInfoFieldsFragment,
   UsageEstimationDocument,
 } from '@/graphql';
-import { Table, TableContainer, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
 import { Scale } from '../common';
-import { DataWrapper } from '../common/DataWrapper';
 import { calculatePeriod } from '../common/TimeFilter';
 
-const NumericFormatter = Intl.NumberFormat('en', {
-  notation: 'standard',
-});
+const NumericFormatter = Intl.NumberFormat('en', { notation: 'standard' });
 
-export const OrganizationUsageEstimationView: React.FC<{
+export function OrganizationUsageEstimationView({
+  organization,
+}: {
   organization: OrganizationFieldsFragment & OrgBillingInfoFieldsFragment;
-}> = ({ organization }) => {
+}): ReactElement {
   const period = calculatePeriod('month');
 
   const [query] = useQuery({
@@ -28,42 +27,35 @@ export const OrganizationUsageEstimationView: React.FC<{
   });
 
   return (
-    <>
-      <div className="top-7 right-4">
-        <DataWrapper query={query}>
-          {result => (
-            <TableContainer>
-              <Table size="sm">
-                <Thead>
-                  <Tr>
-                    <Th>Feature</Th>
-                    <Th isNumeric>Used</Th>
-                    <Th isNumeric>Limit</Th>
-                    <Th />
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  <Tr>
-                    <Td>Operations</Td>
-                    <Td isNumeric>
-                      {NumericFormatter.format(result.data.usageEstimation.org.operations)}
-                    </Td>
-                    <Td isNumeric>{NumericFormatter.format(organization.rateLimit.operations)}</Td>
-                    <Td isNumeric>
-                      <Scale
-                        value={result.data.usageEstimation.org.operations}
-                        size={10}
-                        max={organization.rateLimit.operations}
-                        className="justify-end"
-                      />
-                    </Td>
-                  </Tr>
-                </Tbody>
-              </Table>
-            </TableContainer>
-          )}
-        </DataWrapper>
-      </div>
-    </>
+    <div className="top-7 right-4">
+      <DataWrapper query={query}>
+        {result => (
+          <Table>
+            <THead>
+              <Th>Feature</Th>
+              <Th align="right">Used</Th>
+              <Th align="right">Limit</Th>
+            </THead>
+            <TBody>
+              <Tr>
+                <Td>Operations</Td>
+                <Td align="right">
+                  {NumericFormatter.format(result.data.usageEstimation.org.operations)}
+                </Td>
+                <Td align="right">{NumericFormatter.format(organization.rateLimit.operations)}</Td>
+                <Td>
+                  <Scale
+                    value={result.data.usageEstimation.org.operations}
+                    size={10}
+                    max={organization.rateLimit.operations}
+                    className="justify-end"
+                  />
+                </Td>
+              </Tr>
+            </TBody>
+          </Table>
+        )}
+      </DataWrapper>
+    </div>
   );
-};
+}

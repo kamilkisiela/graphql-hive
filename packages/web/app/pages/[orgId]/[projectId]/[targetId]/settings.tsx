@@ -14,11 +14,15 @@ import {
   Checkbox,
   Heading,
   Input,
+  Spinner,
   Switch,
   Table,
   Tag,
+  TBody,
+  Td,
   TimeAgo,
   Title,
+  Tr,
 } from '@/components/v2';
 import { Combobox } from '@/components/v2/combobox';
 import { AlertTriangleIcon } from '@/components/v2/icon';
@@ -34,17 +38,8 @@ import {
 import { canAccessTarget, TargetAccessScope } from '@/lib/access/target';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
 import { withSessionProtection } from '@/lib/supertokens/guard';
-import { Spinner } from '@chakra-ui/react';
 
-const columns = [
-  { key: 'checkbox' },
-  { key: 'alias' },
-  { key: 'name' },
-  { key: 'lastUsedAt', align: 'right' },
-  { key: 'createdAt', align: 'right' },
-] as const;
-
-const RegistryAccessTokens = ({ me }: { me: MemberFieldsFragment }): ReactElement => {
+function RegistryAccessTokens({ me }: { me: MemberFieldsFragment }): ReactElement {
   const router = useRouteSelector();
   const [{ fetching: deleting }, mutate] = useMutation(DeleteTokensDocument);
   const [checked, setChecked] = useState<string[]>([]);
@@ -99,41 +94,45 @@ const RegistryAccessTokens = ({ me }: { me: MemberFieldsFragment }): ReactElemen
           </Button>
         </div>
       )}
-      <Table
-        dataSource={tokens?.map(token => ({
-          id: token.id,
-          alias: token.alias,
-          name: token.name,
-          checkbox: (
-            <Checkbox
-              onCheckedChange={isChecked =>
-                setChecked(isChecked ? [...checked, token.id] : checked.filter(k => k !== token.id))
-              }
-              checked={checked.includes(token.id)}
-              disabled={!canManage}
-            />
-          ),
-          lastUsedAt: token.lastUsedAt ? (
-            <>
-              last used <TimeAgo date={token.lastUsedAt} />
-            </>
-          ) : (
-            'not used yet'
-          ),
-          createdAt: (
-            <>
-              created <TimeAgo date={token.date} />
-            </>
-          ),
-        }))}
-        columns={columns}
-      />
+      <Table>
+        <TBody>
+          {tokens?.map(token => (
+            <Tr key={token.id}>
+              <Td width="1">
+                <Checkbox
+                  onCheckedChange={isChecked =>
+                    setChecked(
+                      isChecked ? [...checked, token.id] : checked.filter(k => k !== token.id),
+                    )
+                  }
+                  checked={checked.includes(token.id)}
+                  disabled={!canManage}
+                />
+              </Td>
+              <Td>{token.alias}</Td>
+              <Td>{token.name}</Td>
+              <Td align="right">
+                {token.lastUsedAt ? (
+                  <>
+                    last used <TimeAgo date={token.lastUsedAt} />
+                  </>
+                ) : (
+                  'not used yet'
+                )}
+              </Td>
+              <Td align="right">
+                created <TimeAgo date={token.date} />
+              </Td>
+            </Tr>
+          ))}
+        </TBody>
+      </Table>
       {isModalOpen && (
         <CreateAccessTokenModal isOpen={isModalOpen} toggleModalOpen={toggleModalOpen} />
       )}
     </Card>
   );
-};
+}
 
 const Settings_UpdateBaseSchemaMutation = gql(/* GraphQL */ `
   mutation Settings_UpdateBaseSchema($input: UpdateBaseSchemaInput!) {

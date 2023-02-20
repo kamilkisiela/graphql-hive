@@ -1,11 +1,10 @@
 import { ChangeEventHandler, ReactElement, useCallback, useState } from 'react';
-import { VscClose } from 'react-icons/vsc';
 import { useQuery } from 'urql';
 import { useDebouncedCallback } from 'use-debounce';
 import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
 import { MarkAsValid } from '@/components/target/history/MarkAsValid';
-import { DataWrapper, GraphQLBlock, noSchema, Title } from '@/components/v2';
+import { DataWrapper, GraphQLBlock, Input, noSchema, Title } from '@/components/v2';
 import { CompositeSchemaFieldsFragment, SingleSchemaFieldsFragment } from '@/gql/graphql';
 import {
   LatestSchemaDocument,
@@ -17,7 +16,6 @@ import {
 } from '@/graphql';
 import { TargetAccessScope, useTargetAccess } from '@/lib/access/target';
 import { withSessionProtection } from '@/lib/supertokens/guard';
-import { IconButton, Input, InputGroup, InputRightElement } from '@chakra-ui/react';
 
 function isCompositeSchema(
   schema: SingleSchemaFieldsFragment | CompositeSchemaFieldsFragment,
@@ -25,7 +23,7 @@ function isCompositeSchema(
   return schema.__typename === 'CompositeSchema';
 }
 
-const Schemas = ({
+function Schemas({
   project,
   filterService,
   schemas = [],
@@ -33,9 +31,9 @@ const Schemas = ({
   project: ProjectFieldsFragment;
   schemas: Array<SingleSchemaFieldsFragment | CompositeSchemaFieldsFragment>;
   filterService?: string;
-}): ReactElement => {
+}): ReactElement {
   if (project.type === ProjectType.Single) {
-    const schema = schemas[0];
+    const [schema] = schemas;
     return (
       <GraphQLBlock
         className="mb-6"
@@ -66,7 +64,7 @@ const Schemas = ({
         ))}
     </div>
   );
-};
+}
 
 function SchemaView({
   organization,
@@ -77,8 +75,8 @@ function SchemaView({
   project: ProjectFieldsFragment;
   target: TargetFieldsFragment;
 }): ReactElement | null {
-  const [filterService, setFilterService] = useState<string>('');
-  const [term, setTerm] = useState<string>('');
+  const [filterService, setFilterService] = useState('');
+  const [term, setTerm] = useState('');
   const debouncedFilter = useDebouncedCallback((value: string) => {
     setFilterService(value);
   }, 500);
@@ -128,29 +126,13 @@ function SchemaView({
               <div className="font-light text-gray-500">The latest published schema.</div>
               <div className="flex flex-row items-center gap-4">
                 {isDistributed && (
-                  <form
-                    onSubmit={event => {
-                      event.preventDefault();
-                    }}
-                  >
-                    <InputGroup size="sm" variant="filled">
-                      <Input
-                        type="text"
-                        placeholder="Find service"
-                        value={term}
-                        onChange={handleChange}
-                      />
-                      <InputRightElement>
-                        <IconButton
-                          aria-label="Reset"
-                          size="xs"
-                          variant="ghost"
-                          onClick={reset}
-                          icon={<VscClose />}
-                        />
-                      </InputRightElement>
-                    </InputGroup>
-                  </form>
+                  <Input
+                    placeholder="Find service"
+                    value={term}
+                    onChange={handleChange}
+                    onClear={reset}
+                    size="small"
+                  />
                 )}
                 {canManage && project.registryModel === RegistryModel.Legacy ? (
                   <>

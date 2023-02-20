@@ -1,14 +1,13 @@
 import { ReactElement, ReactNode } from 'react';
-import { VscCheck } from 'react-icons/vsc';
 import { Label, Section } from '@/components/common';
 import { Link, Radio, RadioGroup } from '@/components/v2';
 import { BillingPlansQuery, BillingPlanType } from '@/graphql';
-import { List, ListIcon, ListItem } from '@chakra-ui/react';
+import { CheckIcon } from '@radix-ui/react-icons';
 
 const planCollection: {
   [key in BillingPlanType]: {
     description: string;
-    features: Array<ReactNode | string>;
+    features: (ReactNode | string)[];
     footer?: ReactNode;
   };
 } = {
@@ -53,14 +52,14 @@ const planCollection: {
   },
 };
 
-const Plan = (plan: {
+function Plan(plan: {
   isActive: boolean;
   name: string;
   price: string | number;
   description: string;
   features: ReactNode[];
   footer?: ReactNode;
-}): ReactElement => {
+}): ReactElement {
   return (
     <div className="flex h-full flex-col justify-between">
       <div>
@@ -79,17 +78,15 @@ const Plan = (plan: {
           )}
         </div>
         <div className="text-sm text-gray-500">{plan.description}</div>
-        <div>
-          <List spacing={2} className="mt-6">
-            {plan.features.map((feature, i) => (
-              <ListItem key={i}>
-                <Section.Subtitle className="flex items-center">
-                  <ListIcon color="gray.500" as={VscCheck} />
-                  {feature}
-                </Section.Subtitle>
-              </ListItem>
-            ))}
-          </List>
+        <div className="mt-6 flex flex-col gap-2">
+          {plan.features.map((feature, i) => (
+            <div key={i}>
+              <Section.Subtitle className="flex items-center gap-1">
+                <CheckIcon className="text-gray-500 h-5 w-auto" />
+                {feature}
+              </Section.Subtitle>
+            </div>
+          ))}
         </div>
       </div>
       {plan.footer && (
@@ -100,13 +97,13 @@ const Plan = (plan: {
       )}
     </div>
   );
-};
+}
 
 const billingPlanLookUpMap = {
   [BillingPlanType.Hobby]: 'Free',
 } as Record<BillingPlanType, string | undefined>;
 
-export const BillingPlanPicker = ({
+export function BillingPlanPicker({
   value,
   activePlan,
   plans,
@@ -116,7 +113,7 @@ export const BillingPlanPicker = ({
   activePlan: BillingPlanType;
   plans: BillingPlansQuery['billingPlans'];
   onPlanChange: (plan: BillingPlanType) => void;
-}): ReactElement => {
+}): ReactElement {
   return (
     <RadioGroup value={value} onValueChange={onPlanChange} className="flex gap-4 md:!flex-row">
       {plans.map(plan => (
@@ -134,4 +131,4 @@ export const BillingPlanPicker = ({
       ))}
     </RadioGroup>
   );
-};
+}

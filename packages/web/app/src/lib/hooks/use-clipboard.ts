@@ -12,7 +12,7 @@ export function useClipboard() {
       }
       try {
         await navigator.clipboard.writeText(text);
-        notify('Copied to clipboard!', 'info');
+        notify('Copied to clipboard!', 'success');
       } catch {
         notify('Failed to copy!', 'error');
       }

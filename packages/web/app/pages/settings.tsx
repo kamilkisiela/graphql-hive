@@ -1,3 +1,4 @@
+import { ReactElement } from 'react';
 import { useFormik } from 'formik';
 import { gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
@@ -5,6 +6,14 @@ import { authenticated } from '@/components/authenticated-container';
 import { Avatar, Button, Heading, Input, SubHeader, Tabs, Title } from '@/components/v2';
 import { MeDocument } from '@/graphql';
 import { withSessionProtection } from '@/lib/supertokens/guard';
+
+gql(/* GraphQL */ `
+  fragment UpdateMeFragment on User {
+    id
+    fullName
+    displayName
+  }
+`);
 
 const UpdateMeMutation = gql(/* GraphQL */ `
   mutation updateMe($input: UpdateMeInput!) {
@@ -25,7 +34,7 @@ const UpdateMeMutation = gql(/* GraphQL */ `
   }
 `);
 
-const SettingsPage = (): React.ReactElement => {
+function SettingsPage(): ReactElement {
   const [meQuery] = useQuery({ query: MeDocument });
   const [mutation, mutate] = useMutation(UpdateMeMutation);
 
@@ -132,7 +141,7 @@ const SettingsPage = (): React.ReactElement => {
       </Tabs>
     </>
   );
-};
+}
 
 export const getServerSideProps = withSessionProtection();
 

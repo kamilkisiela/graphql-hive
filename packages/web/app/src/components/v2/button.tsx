@@ -1,6 +1,5 @@
 import { ComponentProps, forwardRef } from 'react';
 import clsx from 'clsx';
-import { css } from '@emotion/react';
 import * as Toolbar from '@radix-ui/react-toolbar';
 
 type ButtonProps = Omit<ComponentProps<'button'>, 'size'> & {
@@ -38,8 +37,9 @@ export const Button = forwardRef<any, ButtonProps>(
           ref={forwardedRef} // required by DropdownMenu.Trigger with asChild prop
           className={clsx(
             `
+              hive-button
               transition
-              focus:ring
+              focus-within:ring
               disabled:cursor-not-allowed
               disabled:bg-gray-800
               disabled:text-[#c4c4c4]
@@ -67,17 +67,9 @@ export const Button = forwardRef<any, ButtonProps>(
             className,
             rotate > 0 && 'radix-state-open:border-gray-800 radix-state-open:text-orange-600',
           )}
-          css={css`
-            &[data-state='open'] svg {
-              transform: rotate(${rotate}deg);
-              will-change: transform; /* will-change-transform */
-
-              /* transition-transform */
-              transition-property: transform;
-              transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-              transition-duration: 150ms;
-            }
-          `}
+          style={{
+            ['--hive-rotate' as string]: `${rotate}deg`,
+          }}
           {...props}
         >
           {children}

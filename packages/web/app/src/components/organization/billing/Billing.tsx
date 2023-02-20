@@ -1,6 +1,6 @@
-import { PropsWithChildren } from 'react';
+import { ReactNode } from 'react';
 import { useQuery } from 'urql';
-import { DataWrapper } from '@/components/common/DataWrapper';
+import { DataWrapper } from '@/components/v2';
 import {
   BillingPlansDocument,
   OrganizationFieldsFragment,
@@ -8,15 +8,14 @@ import {
 } from '@/graphql';
 import { PlanSummary } from './PlanSummary';
 
-export const BillingView = ({
+export function BillingView({
   organization,
   children,
-}: PropsWithChildren<{
+}: {
+  children: ReactNode;
   organization: OrganizationFieldsFragment & OrgBillingInfoFieldsFragment;
-}>) => {
-  const [query] = useQuery({
-    query: BillingPlansDocument,
-  });
+}) {
+  const [query] = useQuery({ query: BillingPlansDocument });
 
   return (
     <DataWrapper query={query}>
@@ -39,4 +38,4 @@ export const BillingView = ({
       }}
     </DataWrapper>
   );
-};
+}

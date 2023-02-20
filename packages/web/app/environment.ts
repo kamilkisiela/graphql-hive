@@ -1,7 +1,7 @@
 import zod from 'zod';
 import * as Sentry from '@sentry/nextjs';
 
-// treat an empty string (`''`) as undefined
+// treat an empty string `''` as `undefined`
 const emptyString = <T extends zod.ZodType>(input: T) => {
   return zod.preprocess((value: unknown) => {
     if (value === '') return undefined;
@@ -172,11 +172,7 @@ const config = {
           clientSecret: integrationSlack.INTEGRATION_SLACK_CLIENT_SECRET,
         }
       : null,
-  github: base.INTEGRATION_GITHUB_APP_NAME
-    ? {
-        appName: base.INTEGRATION_GITHUB_APP_NAME,
-      }
-    : null,
+  github: base.INTEGRATION_GITHUB_APP_NAME ? { appName: base.INTEGRATION_GITHUB_APP_NAME } : null,
   analytics: {
     googleAnalyticsTrackingId: base.GA_TRACKING_ID,
     crispWebsiteId: base.CRISP_WEBSITE_ID,

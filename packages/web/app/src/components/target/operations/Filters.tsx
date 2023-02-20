@@ -1,36 +1,26 @@
-import React, { ComponentType } from 'react';
-import { VscChevronDown, VscChromeClose } from 'react-icons/vsc';
+import { ChangeEvent, ComponentType, ReactElement, useCallback, useState } from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import { useQuery } from 'urql';
 import { useDebouncedCallback } from 'use-debounce';
-import { Spinner } from '@/components/common/Spinner';
+import { Button, Checkbox, Drawer, Input, Spinner } from '@/components/v2';
 import { DateRangeInput, OperationsStatsDocument, OperationStatsFieldsFragment } from '@/graphql';
-import { useFormattedNumber, useRouteSelector } from '@/lib/hooks';
-import {
-  Button,
-  Checkbox,
-  Drawer,
-  DrawerBody,
-  DrawerCloseButton,
-  DrawerContent,
-  DrawerHeader,
-  DrawerOverlay,
-  IconButton,
-  Input,
-  InputGroup,
-  InputRightElement,
-  useDisclosure,
-} from '@chakra-ui/react';
+import { useFormattedNumber, useRouteSelector, useToggle } from '@/lib/hooks';
+import { ChevronUpIcon } from '@radix-ui/react-icons';
 
-const OperationsFilter: React.FC<{
+function OperationsFilter({
+  onClose,
+  isOpen,
+  onFilter,
+  operations,
+  selected,
+}: {
   onClose(): void;
   onFilter(keys: string[]): void;
   isOpen: boolean;
-  focusRef: React.RefObject<any>;
   operations: readonly OperationStatsFieldsFragment[];
   selected?: string[];
-}> = ({ onClose, isOpen, onFilter, focusRef, operations, selected }) => {
+}): ReactElement {
   function getOperationHashes() {
     const items: Array<string> = [];
     for (const op of operations) {
@@ -41,14 +31,14 @@ const OperationsFilter: React.FC<{
     return items;
   }
 
-  const [selectedItems, setSelectedItems] = React.useState<string[]>(() => {
+  const [selectedItems, setSelectedItems] = useState<string[]>(() => {
     if (selected?.length) {
       return selected;
     }
     return getOperationHashes();
   });
 
-  const onSelect = React.useCallback(
+  const onSelect = useCallback(
     (operationHash: string, selected: boolean) => {
       const itemAt = selectedItems.findIndex(hash => hash === operationHash);
       const exists = itemAt > -1;
@@ -61,15 +51,15 @@ const OperationsFilter: React.FC<{
     },
     [selectedItems, setSelectedItems],
   );
-  const [searchTerm, setSearchTerm] = React.useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   const debouncedFilter = useDebouncedCallback((value: string) => {
     setVisibleOperations(
       operations.filter(op => op.name.toLocaleLowerCase().includes(value.toLocaleLowerCase())),
     );
   }, 500);
 
-  const onChange = React.useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
+  const onChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
       const { value } = event.currentTarget;
 
       setSearchTerm(value);
@@ -78,16 +68,16 @@ const OperationsFilter: React.FC<{
     [setSearchTerm, debouncedFilter],
   );
 
-  const [visibleOperations, setVisibleOperations] = React.useState(operations);
+  const [visibleOperations, setVisibleOperations] = useState(operations);
 
-  const selectAll = React.useCallback(() => {
+  const selectAll = useCallback(() => {
     setSelectedItems(getOperationHashes());
   }, [operations]);
-  const selectNone = React.useCallback(() => {
+  const selectNone = useCallback(() => {
     setSelectedItems([]);
   }, [setSelectedItems]);
 
-  const renderRow = React.useCallback<ComponentType<ListChildComponentProps>>(
+  const renderRow = useCallback<ComponentType<ListChildComponentProps>>(
     ({ index, style }) => {
       const operation = visibleOperations[index];
 
@@ -105,90 +95,76 @@ const OperationsFilter: React.FC<{
   );
 
   return (
-    <Drawer onClose={onClose} finalFocusRef={focusRef} isOpen={isOpen} placement="right" size="md">
-      <DrawerOverlay />
-      <DrawerContent>
-        <DrawerHeader bgColor="gray.900">Filter by operation</DrawerHeader>
-        <DrawerCloseButton />
-        <DrawerBody bgColor="gray.900">
-          <div className="flex flex-col h-full space-y-3">
-            <InputGroup>
-              <Input
-                pr="3rem"
-                placeholder="Search for operation..."
-                onChange={onChange}
-                value={searchTerm}
-              />
-              <InputRightElement width="3rem">
-                <IconButton
-                  variant="ghost"
-                  h="1.75rem"
-                  size="sm"
-                  icon={<VscChromeClose />}
-                  aria-label="Clear"
-                  onClick={() => {
-                    setSearchTerm('');
-                    setVisibleOperations(operations);
-                  }}
-                />
-              </InputRightElement>
-            </InputGroup>
-            <div className="flex flex-row justify-between items-center">
-              <div>
-                <Button variant="link" size="xs" onClick={selectAll}>
-                  All
-                </Button>{' '}
-                <Button variant="link" size="xs" onClick={selectNone}>
-                  None
-                </Button>
-              </div>
-              <div className="flex flex-row">
-                <Button variant="ghost" size="sm" onClick={selectAll}>
-                  Reset
-                </Button>
-                <Button
-                  colorScheme="primary"
-                  size="sm"
-                  disabled={selectedItems.length === 0}
-                  onClick={() => {
-                    onFilter(selectedItems);
-                    onClose();
-                  }}
-                >
-                  Save
-                </Button>
-              </div>
-            </div>
-            <div className="pl-1 grow">
-              <AutoSizer>
-                {({ height, width }) => (
-                  <FixedSizeList
-                    height={height}
-                    width={width}
-                    itemCount={visibleOperations.length}
-                    itemSize={24}
-                    overscanCount={5}
-                  >
-                    {renderRow}
-                  </FixedSizeList>
-                )}
-              </AutoSizer>
-            </div>
+    <Drawer open={isOpen} onOpenChange={onClose} width={500}>
+      <Drawer.Title>Filter by operation</Drawer.Title>
+
+      <div className="flex flex-col h-full space-y-3">
+        <Input
+          size="medium"
+          placeholder="Search for operation..."
+          onChange={onChange}
+          value={searchTerm}
+          onClear={() => {
+            setSearchTerm('');
+            setVisibleOperations(operations);
+          }}
+        />
+        <div className="flex flex-row justify-between items-center">
+          <div>
+            <Button variant="link" onClick={selectAll}>
+              All
+            </Button>{' '}
+            <Button variant="link" onClick={selectNone}>
+              None
+            </Button>
           </div>
-        </DrawerBody>
-      </DrawerContent>
+          <div>
+            <Button onClick={selectAll}>Reset</Button>
+            <Button
+              variant="primary"
+              disabled={selectedItems.length === 0}
+              onClick={() => {
+                onFilter(selectedItems);
+                onClose();
+              }}
+            >
+              Save
+            </Button>
+          </div>
+        </div>
+        <div className="pl-1 grow">
+          <AutoSizer>
+            {({ height, width }) => (
+              <FixedSizeList
+                height={height}
+                width={width}
+                itemCount={visibleOperations.length}
+                itemSize={24}
+                overscanCount={5}
+              >
+                {renderRow}
+              </FixedSizeList>
+            )}
+          </AutoSizer>
+        </div>
+      </div>
     </Drawer>
   );
-};
+}
 
-const OperationsFilterContainer: React.FC<{
+function OperationsFilterContainer({
+  period,
+  isOpen,
+  onClose,
+  onFilter,
+  selected,
+}: {
   onFilter(keys: string[]): void;
   onClose(): void;
   isOpen: boolean;
-  focusRef: React.RefObject<any>;
   period: DateRangeInput;
   selected?: string[];
-}> = ({ period, isOpen, onClose, onFilter, focusRef, selected }) => {
+}): ReactElement | null {
   const router = useRouteSelector();
   const [query] = useQuery({
     query: OperationsStatsDocument,
@@ -219,22 +195,26 @@ const OperationsFilterContainer: React.FC<{
       selected={selected}
       isOpen={isOpen}
       onClose={onClose}
-      focusRef={focusRef}
       onFilter={hashes => {
         onFilter(hashes.length === allOperations.length ? [] : hashes);
       }}
     />
   );
-};
+}
 
-const OperationRow: React.FC<{
+function OperationRow({
+  operation,
+  selected,
+  onSelect,
+  style,
+}: {
   operation: OperationStatsFieldsFragment;
   selected: boolean;
   onSelect(id: string, selected: boolean): void;
   style: any;
-}> = ({ operation, selected, onSelect, style }) => {
+}): ReactElement {
   const requests = useFormattedNumber(operation.count);
-  const change = React.useCallback(() => {
+  const change = useCallback(() => {
     if (operation.operationHash) {
       onSelect(operation.operationHash, !selected);
     }
@@ -242,7 +222,7 @@ const OperationRow: React.FC<{
 
   return (
     <div style={style} className="flex flex-row space-x-4 items-center">
-      <Checkbox colorScheme="primary" isChecked={selected} onChange={change} />
+      <Checkbox checked={selected} onChange={change} />
       <div className="flex grow flex-row items-center cursor-pointer">
         <button className="grow text-ellipsis overflow-hidden whitespace-nowrap" onClick={change}>
           {operation.name}
@@ -253,37 +233,31 @@ const OperationRow: React.FC<{
       </div>
     </div>
   );
-};
+}
 
-export const OperationsFilterTrigger: React.FC<{
+export function OperationsFilterTrigger({
+  period,
+  onFilter,
+  selected,
+}: {
   period: DateRangeInput;
   onFilter(keys: string[]): void;
   selected?: string[];
-}> = ({ period, onFilter, selected }) => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const ref = React.useRef<HTMLButtonElement | null>(null);
+}): ReactElement {
+  const [isOpen, toggle] = useToggle();
 
   return (
     <>
-      <Button
-        ref={ref}
-        rightIcon={<VscChevronDown />}
-        size="sm"
-        onClick={onOpen}
-        borderRadius="sm"
-        bgColor="whiteAlpha.50"
-        _hover={{ bgColor: 'whiteAlpha.100' }}
-      >
-        <span className="font-normal">Operations ({selected?.length || 'all'})</span>
+      <Button variant="secondary" className="gap-2" onClick={toggle}>
+        Operations ({selected?.length || 'all'})<ChevronUpIcon className="rotate-180" />
       </Button>
       <OperationsFilterContainer
         isOpen={isOpen}
-        onClose={onClose}
-        focusRef={ref}
+        onClose={toggle}
         period={period}
         selected={selected}
         onFilter={onFilter}
       />
     </>
   );
-};
+}
