@@ -1,13 +1,13 @@
 import { reportReadiness } from '@hive/service-common';
 import { createFetchAPIHandler } from '@valu/trpc-fetch-api-adapter';
-import { Router } from 'itty-router';
 import { createLogger } from '@hive/service-common';
 import { Context, stripeBillingApiRouter } from './api';
 import { env } from './environment';
 import { createConnectionString } from '@hive/storage';
 import { createStripeBilling } from './billing-sync';
+import { createRouter } from '@whatwg-node/router'
 
-const stripeBillingRouter: Router = Router();
+const stripeBillingRouter = createRouter();
 
 const logger = createLogger(env.log.level);
 
@@ -32,7 +32,9 @@ const {
   },
 });
 
-const context: Context = {
+type APIContext = Omit<Context, 'req'>;
+
+const context: APIContext = {
   storage$: postgres$,
   stripe: stripeApi,
   stripeData$: loadStripeData$,
@@ -42,7 +44,7 @@ stripeBillingRouter.all(
   '/trpc/:path+',
   createFetchAPIHandler({
     router: stripeBillingApiRouter,
-    createContext: async (): Promise<Context> => context,
+    createContext: async (): Promise<APIContext> => context,
   }),
 );
 

@@ -21,7 +21,6 @@
     "date-fns": "2.29.3",
     "dotenv": "16.0.3",
     "got": "12.5.3",
-    "itty-router": "2.6.6",
     "reflect-metadata": "0.1.13",
     "stripe": "11.11.0",
     "zod": "3.20.6"
