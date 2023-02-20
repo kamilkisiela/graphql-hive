@@ -28,7 +28,7 @@ export function useTargetAccess({
     canAccess,
     redirectTo: redirect
       ? router => ({
-          route: `/[orgId]/[projectId]/[targetId]`,
+          route: '/[orgId]/[projectId]/[targetId]',
           as: `/${router.query.orgId}/${router.query.projectId}/${router.query.targetId}`,
         })
       : undefined,

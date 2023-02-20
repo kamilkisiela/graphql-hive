@@ -1,4 +1,3 @@
-import React from 'react';
 import { Spinner as CSpinner } from '@chakra-ui/react';
 
 export const Spinner = () => (

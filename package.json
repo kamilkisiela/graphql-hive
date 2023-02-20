@@ -13,7 +13,7 @@
   },
   "license": "MIT",
   "private": true,
-  "packageManager": "pnpm@7.27.0",
+  "packageManager": "pnpm@7.27.1",
   "engines": {
     "node": ">=18",
     "pnpm": ">=7"
@@ -58,20 +58,20 @@
     "@graphql-codegen/typescript": "3.0.0",
     "@graphql-codegen/typescript-operations": "3.0.0",
     "@graphql-codegen/typescript-resolvers": "3.0.0",
-    "@graphql-inspector/cli": "3.4.5",
-    "@next/eslint-plugin-next": "13.1.1",
+    "@graphql-inspector/cli": "3.4.6",
+    "@next/eslint-plugin-next": "13.1.6",
     "@sentry/cli": "2.13.0",
     "@swc/core": "1.3.35",
-    "@theguild/eslint-config": "^0.7.0",
-    "@theguild/prettier-config": "^1.1.0",
-    "@types/node": "18.13.0",
+    "@theguild/eslint-config": "0.8.0",
+    "@theguild/prettier-config": "1.1.2",
+    "@types/node": "18.14.0",
     "bob-the-bundler": "5.0.1",
     "cypress": "12.6.0",
     "dotenv": "16.0.3",
     "eslint": "8.34.0",
     "eslint-plugin-cypress": "2.12.1",
     "eslint-plugin-hive": "file:./rules",
-    "eslint-plugin-tailwindcss": "3.8.3",
+    "eslint-plugin-tailwindcss": "3.9.0",
     "glob": "8.1.0",
     "graphql": "16.6.0",
     "husky": "8.0.3",
@@ -84,7 +84,7 @@
     "ts-node": "10.9.1",
     "tsup": "6.6.3",
     "tsx": "3.12.3",
-    "turbo": "1.7.4",
+    "turbo": "1.8.1",
     "typescript": "4.9.5",
     "vitest": "0.28.5"
   },
@@ -113,9 +113,11 @@
       "slonik@30.1.2": "patches/slonik@30.1.2.patch",
       "@oclif/core@1.23.0": "patches/@oclif__core@1.23.0.patch",
       "oclif@3.6.5": "patches/oclif@3.6.5.patch",
-      "bullmq@3.6.6": "patches/bullmq@3.6.6.patch",
+      "bullmq@3.7.0": "patches/bullmq@3.7.0.patch",
       "@slonik/migrator@0.8.5": "patches/@slonik__migrator@0.8.5.patch",
-      "@graphql-inspector/core@3.5.0": "patches/@graphql-inspector__core@3.5.0.patch"
+      "@graphql-inspector/core@3.5.0": "patches/@graphql-inspector__core@3.5.0.patch",
+      "@apollo/federation@0.38.1": "patches/@apollo__federation@0.38.1.patch",
+      "@octokit/webhooks-methods@3.0.1": "patches/@octokit__webhooks-methods@3.0.1.patch"
     }
   }
 }

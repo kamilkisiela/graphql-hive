@@ -77,7 +77,7 @@ export const ConnectSchemaModal = ({
               variant="primary"
               target="_blank"
               rel="noreferrer"
-              href={getDocsUrl(`/features/registry-usage#apollo-federation`) ?? ''}
+              href={getDocsUrl('/features/registry-usage#apollo-federation') ?? ''}
             >
               Using the Registry with a Apollo Gateway
             </Link>{' '}

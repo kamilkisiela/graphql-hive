@@ -94,7 +94,7 @@ const DiffView = ({
     },
   });
   const comparison = compareQuery.data?.schemaCompareToPrevious;
-  const error = compareQuery.error;
+  const { error } = compareQuery;
 
   if (error) {
     return (
