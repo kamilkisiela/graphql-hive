@@ -83,7 +83,7 @@ jobs:
         if: success() && github.event.number
         # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#multiline-strings
         run: |
-          echo body<<EOF >> $GITHUB_OUTPUT
+          echo "body<<EOF" >> $GITHUB_OUTPUT
           echo $(cat .next/analyze/__bundle_analysis_comment.txt) >> $GITHUB_OUTPUT
           echo EOF >> $GITHUB_OUTPUT
 
