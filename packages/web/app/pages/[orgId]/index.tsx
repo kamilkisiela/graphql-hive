@@ -133,7 +133,7 @@ function ProjectsPage(): ReactElement {
                 <EmptyList
                   title="Hive is waiting for your first project"
                   description='You can create a project by clicking the "Create Project" button'
-                  docsUrl={getDocsUrl(`/get-started/projects`)}
+                  docsUrl={getDocsUrl('/get-started/projects')}
                 />
               ) : (
                 <div className="grid grid-cols-2 gap-5 items-stretch">

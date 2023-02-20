@@ -162,7 +162,7 @@ export const TransferOrganizationOwnershipModal = ({
           <div className="relative">
             <div
               className={clsx(
-                `rounded-sm bg-gray-800 p-4 text-sm font-medium text-white ring-1 ring-gray-700 focus-within:ring`,
+                'rounded-sm bg-gray-800 p-4 text-sm font-medium text-white ring-1 ring-gray-700 focus-within:ring',
                 touched.newOwner && !!errors.newOwner
                   ? 'text-red-500 caret-white ring-red-500'
                   : null,
@@ -197,7 +197,7 @@ export const TransferOrganizationOwnershipModal = ({
                       key={member.id}
                       className={({ active, selected }: { active?: boolean; selected?: boolean }) =>
                         clsx(
-                          `relative cursor-pointer select-none p-2 font-medium text-gray-300`,
+                          'relative cursor-pointer select-none p-2 font-medium text-gray-300',
                           active || selected ? 'bg-gray-900' : null,
                         )
                       }

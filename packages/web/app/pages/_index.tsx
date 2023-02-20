@@ -4,7 +4,7 @@ import { Button, Heading, HiveLink, Input, Link, ShineBackground } from '@/compo
 import { GitHubIcon, GoogleIcon, LinkedInIcon } from '@/components/v2/icon';
 
 const IndexPage: FC = () => {
-  const [isLoginPage, setLoginPage] = useState(true);
+  const [isLoginPage, setIsLoginPage] = useState(true);
 
   return (
     <div className="flex">
@@ -36,7 +36,7 @@ const IndexPage: FC = () => {
             {isLoginPage ? "Don't Have An Account" : 'Already A Member'}?{' '}
             <Button
               variant="link"
-              onClick={() => setLoginPage(prev => !prev)}
+              onClick={() => setIsLoginPage(prev => !prev)}
               className="font-light"
             >
               {isLoginPage ? 'Create Account' : 'Log In'}

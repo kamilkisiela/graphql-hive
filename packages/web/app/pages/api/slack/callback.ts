@@ -28,7 +28,7 @@ export default async function slackCallback(req: NextApiRequest, res: NextApiRes
     throw new Error('The Slack integration is not enabled.');
   }
 
-  const code = req.query.code;
+  const { code } = req.query;
   const orgId = req.query.state;
 
   const slackResponse = await fetchData({

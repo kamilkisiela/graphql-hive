@@ -35,7 +35,7 @@ export default class MyDocument extends Document<{
               __html:
                 css +
                 // we setup background via style tag to prevent white flash on initial page loading
-                `html {background: #0b0d11}`,
+                'html {background: #0b0d11}',
             }}
           />
           <link rel="preconnect" href="https://fonts.gstatic.com" />

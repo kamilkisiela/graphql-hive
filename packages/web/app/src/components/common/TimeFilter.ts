@@ -1,8 +1,4 @@
-import { startOfMonth } from 'date-fns';
-import formatISO from 'date-fns/formatISO';
-import subDays from 'date-fns/subDays';
-import subHours from 'date-fns/subHours';
-import subMinutes from 'date-fns/subMinutes';
+import { formatISO, startOfMonth, subDays, subHours, subMinutes } from 'date-fns';
 
 export function floorToMinute(date: Date) {
   const time = 1000 * 60 * 1;

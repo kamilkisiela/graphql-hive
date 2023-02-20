@@ -20,22 +20,6 @@ const httpRequestDuration = new metrics.Histogram({
   labelNames: ['path'],
 });
 
-const TARGET_INPUT_SCHEMA = z
-  .object({
-    targetId: z.string().nonempty(),
-  })
-  .required();
-const TOKEN_INPUT_SCHEMA = z
-  .object({
-    token: z.string().min(1),
-  })
-  .required();
-const INVALIDATE_TOKENS_INPUT_SCHEMA = z
-  .object({
-    tokens: z.array(z.string().min(1)),
-  })
-  .required();
-
 function hashToken(token: string) {
   return createHash('sha256').update(token).digest('hex');
 }
@@ -83,19 +67,33 @@ const prometheusMiddleware = t.middleware(async ({ next, path }) => {
 const procedure = t.procedure.use(prometheusMiddleware).use(errorMiddleware);
 
 export const tokensApiRouter = t.router({
-  targetTokens: procedure.input(TARGET_INPUT_SCHEMA).query(async ({ ctx, input }) => {
-    try {
-      const storage = await ctx.getStorage();
+  targetTokens: procedure
+    .input(
+      z
+        .object({
+          targetId: z.string().min(1),
+        })
+        .required(),
+    )
+    .query(async ({ ctx, input }) => {
+      try {
+        const storage = await ctx.getStorage();
 
-      return await storage.readTarget(input.targetId);
-    } catch (error) {
-      ctx.errorHandler('Failed to get tokens of a target', error as Error);
+        return await storage.readTarget(input.targetId);
+      } catch (error) {
+        ctx.errorHandler('Failed to get tokens of a target', error as Error);
 
-      throw error;
-    }
-  }),
+        throw error;
+      }
+    }),
   invalidateTokens: procedure
-    .input(INVALIDATE_TOKENS_INPUT_SCHEMA)
+    .input(
+      z
+        .object({
+          tokens: z.array(z.string().min(1)),
+        })
+        .required(),
+    )
     .mutation(async ({ ctx, input }) => {
       try {
         const storage = await ctx.getStorage();
@@ -145,50 +143,66 @@ export const tokensApiRouter = t.router({
         throw error;
       }
     }),
-  deleteToken: procedure.input(TOKEN_INPUT_SCHEMA).mutation(async ({ ctx, input }) => {
-    try {
-      const hashed_token = input.token;
-      const storage = await ctx.getStorage();
-      await storage.deleteToken(hashed_token);
+  deleteToken: procedure
+    .input(
+      z
+        .object({
+          token: z.string().min(1),
+        })
+        .required(),
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const hashed_token = input.token;
+        const storage = await ctx.getStorage();
+        await storage.deleteToken(hashed_token);
 
-      return true;
-    } catch (error) {
-      ctx.errorHandler('Failed to delete a token', error as Error);
+        return true;
+      } catch (error) {
+        ctx.errorHandler('Failed to delete a token', error as Error);
 
-      throw error;
-    }
-  }),
-  getToken: procedure.input(TOKEN_INPUT_SCHEMA).query(async ({ ctx, input }) => {
-    const hash = hashToken(input.token);
-    const alias = maskToken(input.token);
+        throw error;
+      }
+    }),
+  getToken: procedure
+    .input(
+      z
+        .object({
+          token: z.string().length(32, 'token should be 32 characters long'),
+        })
+        .required(),
+    )
+    .query(async ({ ctx, input }) => {
+      const hash = hashToken(input.token);
+      const alias = maskToken(input.token);
 
-    // In case the token was not found (or we failed to fetch it)
-    const cachedFailure = ctx.tokenReadFailuresCache.get(hash);
+      // In case the token was not found (or we failed to fetch it)
+      const cachedFailure = ctx.tokenReadFailuresCache.get(hash);
 
-    if (cachedFailure) {
-      cacheHits.inc(1);
-      throw new Error(cachedFailure);
-    }
+      if (cachedFailure) {
+        cacheHits.inc(1);
+        throw new Error(cachedFailure);
+      }
 
-    try {
-      const storage = await ctx.getStorage();
-      const result = await storage.readToken(hash);
+      try {
+        const storage = await ctx.getStorage();
+        const result = await storage.readToken(hash);
 
-      // removes the token from the failures cache (in case the value expired)
-      ctx.tokenReadFailuresCache.delete(hash);
+        // removes the token from the failures cache (in case the value expired)
+        ctx.tokenReadFailuresCache.delete(hash);
 
-      return result;
-    } catch (error) {
-      ctx.errorHandler(`Failed to get a token "${alias}"`, error as Error, ctx.req.log);
+        return result;
+      } catch (error) {
+        ctx.errorHandler(`Failed to get a token "${alias}"`, error as Error, ctx.req.log);
 
-      // set token read as failure
-      // so we don't try to read it again for next X minutes
-      ctx.tokenReadFailuresCache.set(hash, (error as Error).message);
-      cacheMisses.inc(1);
+        // set token read as failure
+        // so we don't try to read it again for next X minutes
+        ctx.tokenReadFailuresCache.set(hash, (error as Error).message);
+        cacheMisses.inc(1);
 
-      throw error;
-    }
-  }),
+        throw error;
+      }
+    }),
 });
 
 export type TokensApi = typeof tokensApiRouter;

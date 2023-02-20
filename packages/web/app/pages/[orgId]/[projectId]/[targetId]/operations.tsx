@@ -153,7 +153,7 @@ const OperationsViewGate = ({
           <EmptyList
             title="Hive is waiting for your first collected operation"
             description="You can collect usage of your GraphQL API with Hive Client"
-            docsUrl={getDocsUrl(`/features/monitoring`)}
+            docsUrl={getDocsUrl('/features/monitoring')}
           />
         )
       }
