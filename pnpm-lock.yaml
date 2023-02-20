@@ -67,7 +67,7 @@ importers:
       eslint: 8.34.0
       eslint-plugin-cypress: 2.12.1
       eslint-plugin-hive: file:./rules
-      eslint-plugin-tailwindcss: 3.8.3
+      eslint-plugin-tailwindcss: 3.9.0
       glob: 8.1.0
       graphql: 16.6.0
       husky: 8.0.3
@@ -108,7 +108,7 @@ importers:
       eslint: 8.34.0
       eslint-plugin-cypress: 2.12.1_eslint@8.34.0
       eslint-plugin-hive: file:rules
-      eslint-plugin-tailwindcss: 3.8.3
+      eslint-plugin-tailwindcss: 3.9.0
       glob: 8.1.0
       graphql: 16.6.0
       husky: 8.0.3
@@ -15134,8 +15134,8 @@ packages:
       eslint: 8.34.0
     dev: true
 
-  /eslint-plugin-tailwindcss/3.8.3:
-    resolution: {integrity: sha512-wfzfCmc9yONNW+TqfR+QWZ+syFPQ8zMOrIGx500lS4XITEm0HJYGyKh1sC1tQ9+Wmt58bnHzW3Yc31vy5RlJww==}
+  /eslint-plugin-tailwindcss/3.9.0:
+    resolution: {integrity: sha512-uA2/Q0g22i1uGFI/FTBkLCvpc5VpzMZjAJn3/hPqhongG0V7aaRHrFx4LyfOje/b9Q/t9iarx40InrXKf2jC6w==}
     engines: {node: '>=12.13.0'}
     peerDependencies:
       tailwindcss: ^3.2.2
