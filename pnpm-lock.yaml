@@ -5,33 +5,39 @@ overrides:
   tsup: 6.5.0
 
 patchedDependencies:
+  '@tgriesser/schemats@7.0.1':
+    hash: u3kbucfchakklx3sci2vh6wjau
+    path: patches/@tgriesser__schemats@7.0.1.patch
+  mjml-core@4.13.0:
+    hash: zxxsxbqejjmcwuzpigutzzq6wa
+    path: patches/mjml-core@4.13.0.patch
   slonik@30.1.2:
     hash: wg2hxbo7txnklmvja4aeqnygfi
     path: patches/slonik@30.1.2.patch
   '@theguild/buddy@0.1.0':
     hash: ryylgra5xglhidfoiaxehn22hq
     path: patches/@theguild__buddy@0.1.0.patch
-  oclif@3.6.5:
-    hash: rxmtqiusuyruv7tkwux5gvotbm
-    path: patches/oclif@3.6.5.patch
   '@oclif/core@1.23.0':
     hash: zhte2hlj7lfobytjpalcwwo474
     path: patches/@oclif__core@1.23.0.patch
   bullmq@3.7.0:
     hash: xbmkiyyfti7h6orsfs6pdmi4s4
     path: patches/bullmq@3.7.0.patch
+  oclif@3.6.5:
+    hash: rxmtqiusuyruv7tkwux5gvotbm
+    path: patches/oclif@3.6.5.patch
   '@graphql-inspector/core@3.5.0':
     hash: wf35oaq7brzyeva5aoncxac66a
     path: patches/@graphql-inspector__core@3.5.0.patch
-  '@tgriesser/schemats@7.0.1':
-    hash: u3kbucfchakklx3sci2vh6wjau
-    path: patches/@tgriesser__schemats@7.0.1.patch
   '@slonik/migrator@0.8.5':
     hash: yfpv2xzdmnkrtu2wvaktxf5mmq
     path: patches/@slonik__migrator@0.8.5.patch
-  mjml-core@4.13.0:
-    hash: zxxsxbqejjmcwuzpigutzzq6wa
-    path: patches/mjml-core@4.13.0.patch
+  '@apollo/federation@0.38.1':
+    hash: rjgakkkphrejw6qrtph4ar24zq
+    path: patches/@apollo__federation@0.38.1.patch
+  '@octokit/webhooks-methods@3.0.1':
+    hash: ckboo4crezw7uvstxm24ozngtq
+    path: patches/@octokit__webhooks-methods@3.0.1.patch
 
 importers:
 
@@ -284,7 +290,7 @@ importers:
       '@apollo/server': 4.4.0
       '@envelop/types': 3.0.1
     devDependencies:
-      '@apollo/federation': 0.38.1
+      '@apollo/federation': 0.38.1_rjgakkkphrejw6qrtph4ar24zq
       '@apollo/subgraph': 2.3.2
       '@types/async-retry': 1.4.5
       graphql-yoga: 3.6.0
@@ -310,7 +316,7 @@ importers:
       fastify: 3.29.5
       graphql: 16.6.0
     devDependencies:
-      '@apollo/federation': 0.38.1_graphql@16.6.0
+      '@apollo/federation': 0.38.1_rjgakkkphrejw6qrtph4ar24zq_graphql@16.6.0
       esbuild: 0.17.9
       fastify: 3.29.5
       graphql: 16.6.0
@@ -624,7 +630,7 @@ importers:
       pino-pretty: 9.3.0
       zod: 3.20.6
     dependencies:
-      '@apollo/federation': 0.38.1_graphql@16.6.0
+      '@apollo/federation': 0.38.1_rjgakkkphrejw6qrtph4ar24zq_graphql@16.6.0
       '@graphql-tools/stitch': 8.7.41_graphql@16.6.0
       '@graphql-tools/stitching-directives': 2.3.30_graphql@16.6.0
       '@sentry/node': 7.38.0
@@ -1466,7 +1472,7 @@ packages:
       js-levenshtein: 1.1.6
     dev: false
 
-  /@apollo/federation/0.38.1:
+  /@apollo/federation/0.38.1_rjgakkkphrejw6qrtph4ar24zq:
     resolution: {integrity: sha512-miifyAEsFgiYKeM3lUHFH6+vKa2vm9dXKSyWVpX6oeJiPblFLe2/iByN3psZQO2sRdVqO1OKYrGXdgKc74XDKw==}
     engines: {node: '>=12.13.0'}
     peerDependencies:
@@ -1478,8 +1484,9 @@ packages:
     transitivePeerDependencies:
       - encoding
     dev: true
+    patched: true
 
-  /@apollo/federation/0.38.1_graphql@16.6.0:
+  /@apollo/federation/0.38.1_rjgakkkphrejw6qrtph4ar24zq_graphql@16.6.0:
     resolution: {integrity: sha512-miifyAEsFgiYKeM3lUHFH6+vKa2vm9dXKSyWVpX6oeJiPblFLe2/iByN3psZQO2sRdVqO1OKYrGXdgKc74XDKw==}
     engines: {node: '>=12.13.0'}
     peerDependencies:
@@ -1491,6 +1498,7 @@ packages:
       lodash.xorby: 4.7.0
     transitivePeerDependencies:
       - encoding
+    patched: true
 
   /@apollo/gateway/2.3.2_graphql@16.6.0:
     resolution: {integrity: sha512-D7p1I6wfHA9XY0HJXyBDouaGCcd/+oUU7bhSyVg1MmREL52sZnSk/140nds5L93jHca3Gl3IB4kiQ5JUJXfA6w==}
@@ -8902,10 +8910,11 @@ packages:
       '@octokit/openapi-types': 16.0.0
     dev: false
 
-  /@octokit/webhooks-methods/3.0.1:
+  /@octokit/webhooks-methods/3.0.1_ckboo4crezw7uvstxm24ozngtq:
     resolution: {integrity: sha512-XftYVcBxtzC2G05kdBNn9IYLtQ+Cz6ufKkjZd0DU/qGaZEFTPzM2OabXAWG5tvL0q/I+Exio1JnRiPfetiMSEw==}
     engines: {node: '>= 14'}
     dev: false
+    patched: true
 
   /@octokit/webhooks-types/6.7.0:
     resolution: {integrity: sha512-bykm7UkSnxmb2uhSfcLM1Pity/LQ6ZBSdzy9HU0vXjR+2g+tzlmRhXb7Go8oj0TlgO+vDrTivGXju6zkzOGKjA==}
@@ -8916,7 +8925,7 @@ packages:
     engines: {node: '>= 14'}
     dependencies:
       '@octokit/request-error': 3.0.2
-      '@octokit/webhooks-methods': 3.0.1
+      '@octokit/webhooks-methods': 3.0.1_ckboo4crezw7uvstxm24ozngtq
       '@octokit/webhooks-types': 6.7.0
       aggregate-error: 3.1.0
     dev: false
