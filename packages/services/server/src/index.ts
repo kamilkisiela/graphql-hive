@@ -1,32 +1,30 @@
 #!/usr/bin/env node
-
-import 'reflect-metadata';
-import {
-  createServer,
-  startMetrics,
-  registerShutdown,
-  reportReadiness,
-} from '@hive/service-common';
-import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
-import { createRegistry, LogFn, Logger } from '@hive/api';
-import { createStorage as createPostgreSQLStorage, createConnectionString } from '@hive/storage';
 import got from 'got';
 import { GraphQLError, stripIgnoredCharacters } from 'graphql';
-import * as Sentry from '@sentry/node';
-import { S3Client } from '@aws-sdk/client-s3';
-import { Dedupe, ExtraErrorData } from '@sentry/integrations';
-import { internalApiRouter, createContext } from './api';
-import { asyncStorage } from './async-storage';
-import { graphqlHandler } from './graphql-handler';
-import { clickHouseReadDuration, clickHouseElapsedDuration } from './metrics';
+import 'reflect-metadata';
 import zod from 'zod';
-import { env } from './environment';
+import { createRegistry, LogFn, Logger } from '@hive/api';
 import { CryptoProvider } from '@hive/api';
-import { ArtifactStorageReader } from '@hive/api/src/modules/schema/providers/artifact-storage-reader';
 import { createArtifactRequestHandler } from '@hive/cdn-script/artifact-handler';
+import { ArtifactStorageReader } from '@hive/cdn-script/artifact-storage-reader';
+import { AwsClient } from '@hive/cdn-script/aws';
 import { createIsKeyValid } from '@hive/cdn-script/key-validation';
+import {
+  createServer,
+  registerShutdown,
+  registerTRPC,
+  reportReadiness,
+  startMetrics,
+} from '@hive/service-common';
+import { createConnectionString, createStorage as createPostgreSQLStorage } from '@hive/storage';
+import { Dedupe, ExtraErrorData } from '@sentry/integrations';
+import * as Sentry from '@sentry/node';
 import { createServerAdapter } from '@whatwg-node/server';
-import { Readable } from 'node:stream';
+import { createContext, internalApiRouter } from './api';
+import { asyncStorage } from './async-storage';
+import { env } from './environment';
+import { graphqlHandler } from './graphql-handler';
+import { clickHouseElapsedDuration, clickHouseReadDuration } from './metrics';
 
 const LegacySetUserIdMappingPayloadModel = zod.object({
   auth0UserId: zod.string(),
@@ -66,8 +64,27 @@ export async function main() {
     tracing: true,
     log: {
       level: env.log.level,
+      requests: env.log.requests,
     },
   });
+
+  server.addContentTypeParser(
+    'application/graphql+json',
+    { parseAs: 'string' },
+    function parseApplicationGraphQLJsonPayload(_req, payload, done) {
+      done(null, JSON.parse(payload as unknown as string));
+    },
+  );
+
+  server.addContentTypeParser(
+    'application/graphql',
+    { parseAs: 'string' },
+    function parseApplicationGraphQLPayload(_req, payload, done) {
+      done(null, {
+        query: payload,
+      });
+    },
+  );
 
   const storage = await createPostgreSQLStorage(createConnectionString(env.postgres), 10);
 
@@ -144,16 +161,6 @@ export async function main() {
       };
     }
 
-    const s3Client = new S3Client({
-      endpoint: env.s3.endpoint,
-      credentials: {
-        accessKeyId: env.s3.credentials.accessKeyId,
-        secretAccessKey: env.s3.credentials.secretAccessKey,
-      },
-      forcePathStyle: true,
-      region: 'auto',
-    });
-
     const graphqlLogger = createGraphQLLogger();
     const registry = createRegistry({
       app: env.hiveServices.webApp
@@ -201,8 +208,10 @@ export async function main() {
       },
       cdn: env.cdn,
       s3: {
-        client: s3Client,
+        accessKeyId: env.s3.credentials.accessKeyId,
+        secretAccessKeyId: env.s3.credentials.secretAccessKey,
         bucketName: env.s3.bucketName,
+        endpoint: env.s3.endpoint,
       },
       encryptionSecret: env.encryptionSecret,
       feedback: {
@@ -265,13 +274,10 @@ export async function main() {
 
     const crypto = new CryptoProvider(env.encryptionSecret);
 
-    await server.register(fastifyTRPCPlugin, {
-      prefix: '/trpc',
-      trpcOptions: {
-        router: internalApiRouter,
-        createContext() {
-          return createContext({ storage, crypto });
-        },
+    await registerTRPC(server, {
+      router: internalApiRouter,
+      createContext({ req }) {
+        return createContext({ storage, crypto, req });
       },
     });
 
@@ -324,14 +330,20 @@ export async function main() {
     });
 
     if (env.cdn.providers.api !== null) {
-      const artifactStorageReader = new ArtifactStorageReader(
-        s3Client,
-        env.s3.bucketName,
-        env.s3.publicUrl,
-      );
+      const s3 = {
+        client: new AwsClient({
+          accessKeyId: env.s3.credentials.accessKeyId,
+          secretAccessKey: env.s3.credentials.secretAccessKey,
+          service: 's3',
+        }),
+        endpoint: env.s3.endpoint,
+        bucketName: env.s3.bucketName,
+      };
+
+      const artifactStorageReader = new ArtifactStorageReader(s3, env.s3.publicUrl);
 
       const artifactHandler = createArtifactRequestHandler({
-        isKeyValid: createIsKeyValid({ keyData: env.cdn.authPrivateKey }),
+        isKeyValid: createIsKeyValid({ s3, analytics: null, getCache: null, waitUntil: null }),
         async getArtifactAction(targetId, artifactType, eTag) {
           return artifactStorageReader.generateArtifactReadUrl(targetId, artifactType, eTag);
         },
@@ -358,8 +370,9 @@ export async function main() {
           });
 
           void reply.status(response.status);
-          void reply.send(Readable.from(response.body!));
-          return reply;
+
+          const textResponse = await response.text();
+          void reply.send(textResponse);
         },
       });
     }
@@ -423,7 +436,7 @@ export async function main() {
       await startMetrics(env.prometheus.labels.instance);
     }
 
-    await server.listen(port, '0.0.0.0');
+    await server.listen(port, '::');
   } catch (error) {
     server.log.fatal(error);
     Sentry.captureException(error, {

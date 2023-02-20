@@ -1,36 +1,30 @@
-import { normalizeOperation as coreNormalizeOperation } from '@graphql-hive/core';
-import { Kind, parse } from 'graphql';
-import LRU from 'tiny-lru';
 import { createHash } from 'crypto';
-import { cache } from './helpers';
-import {
-  reportSize,
-  totalOperations,
-  reportMessageSize,
-  normalizeCacheMisses,
-  schemaCoordinatesSize,
-} from './metrics';
-import {
-  stringifyOperation,
-  stringifyRegistryRecord,
-  stringifyLegacyOperation,
-  stringifyLegacyRegistryRecord,
-} from './serializer';
-
-import type { FastifyLoggerInstance } from '@hive/service-common';
-import type {
-  RawReport,
-  RawOperation,
-  RawOperationMap,
-  RawOperationMapRecord,
-  ProcessedOperation,
-} from '@hive/usage-common';
 import type {
   DefinitionNode,
   DocumentNode,
   OperationDefinitionNode,
   OperationTypeNode,
 } from 'graphql';
+import { Kind, parse } from 'graphql';
+import LRU from 'tiny-lru';
+import { normalizeOperation as coreNormalizeOperation } from '@graphql-hive/core';
+import type { FastifyLoggerInstance } from '@hive/service-common';
+import type {
+  ProcessedOperation,
+  RawOperation,
+  RawOperationMap,
+  RawOperationMapRecord,
+  RawReport,
+} from '@hive/usage-common';
+import { cache } from './helpers';
+import {
+  normalizeCacheMisses,
+  reportMessageSize,
+  reportSize,
+  schemaCoordinatesSize,
+  totalOperations,
+} from './metrics';
+import { stringifyOperation, stringifyRegistryRecord } from './serializer';
 
 interface NormalizationResult {
   type: OperationTypeNode;
@@ -65,10 +59,6 @@ export function createProcessor(config: { logger: FastifyLoggerInstance }) {
       const serializedOperations: string[] = [];
       const serializedRegistryRecords: string[] = [];
 
-      // legacy
-      const serializedLegacyOperations: string[] = [];
-      const serializedLegacyRegistryRecords: string[] = [];
-
       for (const rawReport of rawReports) {
         reportSize.observe(rawReport.size);
 
@@ -95,11 +85,6 @@ export function createProcessor(config: { logger: FastifyLoggerInstance }) {
 
           serializedOperations.push(stringifyOperation(processedOperation));
 
-          // legacy
-          serializedLegacyOperations.push(
-            stringifyLegacyOperation(processedOperation, processedOperation.legacy.coordinates),
-          );
-
           const sample = operationSample.get(rawOperation.operationMapKey);
 
           // count operations per operationMapKey
@@ -108,17 +93,6 @@ export function createProcessor(config: { logger: FastifyLoggerInstance }) {
               operation: rawOperation,
               size: 1,
             });
-            // legacy
-            serializedLegacyRegistryRecords.push(
-              stringifyLegacyRegistryRecord({
-                target: processedOperation.target,
-                hash: processedOperation.operationHash,
-                name: processedOperation.legacy.name,
-                body: processedOperation.legacy.body,
-                operation_kind: processedOperation.legacy.kind,
-                timestamp: processedOperation.timestamp,
-              }),
-            );
           } else {
             sample.size += 1;
           }
@@ -155,7 +129,7 @@ export function createProcessor(config: { logger: FastifyLoggerInstance }) {
               operation_kind: normalized.type,
               coordinates: normalized.coordinates,
               expires_at: group.operation.expiresAt || timestamp + 30 * DAY_IN_MS,
-              timestamp: timestamp,
+              timestamp,
             }),
           );
         }
@@ -164,10 +138,6 @@ export function createProcessor(config: { logger: FastifyLoggerInstance }) {
       return {
         operations: serializedOperations,
         registryRecords: serializedRegistryRecords,
-        legacy: {
-          operations: serializedLegacyOperations,
-          registryRecords: serializedLegacyRegistryRecords,
-        },
       };
     },
   };
@@ -208,7 +178,7 @@ function processSingleOperation(
       : operation.timestamp;
 
   return {
-    timestamp: timestamp,
+    timestamp,
     expiresAt: operation.expiresAt || timestamp + 30 * DAY_IN_MS,
     target,
     execution,

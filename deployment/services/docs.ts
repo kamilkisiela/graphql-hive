@@ -1,28 +1,29 @@
-import * as azure from '@pulumi/azure';
-import { RemoteArtifactAsServiceDeployment } from '../utils/remote-artifact-as-service';
-import { PackageHelper } from '../utils/pack';
+import * as k8s from '@pulumi/kubernetes';
+import { ServiceDeployment } from '../utils/service-deployment';
 
 export type Docs = ReturnType<typeof deployDocs>;
 
 export function deployDocs({
+  release,
+  image,
   rootDns,
-  storageContainer,
-  packageHelper,
+  imagePullSecret,
 }: {
-  storageContainer: azure.storage.Container;
-  packageHelper: PackageHelper;
+  release: string;
+  image: string;
   rootDns: string;
+  imagePullSecret: k8s.core.v1.Secret;
 }) {
-  const deployment = new RemoteArtifactAsServiceDeployment('docs', {
-    storageContainer,
+  const deployment = new ServiceDeployment('docs', {
+    image,
+    imagePullSecret,
     readinessProbe: '/api/health',
     livenessProbe: '/api/health',
     env: [
-      { name: 'RELEASE', value: packageHelper.currentReleaseId() },
+      { name: 'RELEASE', value: release },
       { name: 'DEPLOYED_DNS', value: rootDns },
       { name: 'NODE_ENV', value: 'production' },
     ],
-    packageInfo: packageHelper.npmPack('@hive/docs'),
     port: 3000,
   }).deploy();
 

@@ -1,22 +1,22 @@
-import { Injectable, Inject, Scope } from 'graphql-modules';
-import { paramCase } from 'param-case';
 import { createHash } from 'crypto';
-import { Organization, OrganizationType, OrganizationInvitation } from '../../../shared/entities';
+import { Inject, Injectable, Scope } from 'graphql-modules';
+import { paramCase } from 'param-case';
+import { Organization, OrganizationInvitation, OrganizationType } from '../../../shared/entities';
 import { HiveError } from '../../../shared/errors';
-import { AuthManager } from '../../auth/providers/auth-manager';
-import { Logger } from '../../shared/providers/logger';
-import { Storage } from '../../shared/providers/storage';
-import { WEB_APP_URL } from '../../shared/providers/tokens';
-import type { OrganizationSelector } from '../../shared/providers/storage';
-import { share, cache, uuid, diffArrays, pushIfMissing } from '../../../shared/helpers';
+import { cache, diffArrays, pushIfMissing, share, uuid } from '../../../shared/helpers';
 import { ActivityManager } from '../../activity/providers/activity-manager';
-import { BillingProvider } from '../../billing/providers/billing.provider';
-import { TokenStorage } from '../../token/providers/token-storage';
-import { Emails } from '../../shared/providers/emails';
+import { AuthManager } from '../../auth/providers/auth-manager';
 import { OrganizationAccessScope } from '../../auth/providers/organization-access';
 import { ProjectAccessScope } from '../../auth/providers/project-access';
 import { TargetAccessScope } from '../../auth/providers/target-access';
-import { reservedOrganizationNames, organizationAdminScopes } from './organization-config';
+import { BillingProvider } from '../../billing/providers/billing.provider';
+import { Emails } from '../../shared/providers/emails';
+import { Logger } from '../../shared/providers/logger';
+import type { OrganizationSelector } from '../../shared/providers/storage';
+import { Storage } from '../../shared/providers/storage';
+import { WEB_APP_URL } from '../../shared/providers/tokens';
+import { TokenStorage } from '../../token/providers/token-storage';
+import { organizationAdminScopes, reservedOrganizationNames } from './organization-config';
 
 /**
  * Responsible for auth checks.
@@ -193,14 +193,11 @@ export class OrganizationManager {
       throw new HiveError(`Cannot remove a personal organization`);
     }
 
-    const [deletedOrganization] = await Promise.all([
-      this.storage.deleteOrganization({
-        organization: organization.id,
-      }),
-      this.tokenStorage.invalidateOrganization({
-        organization: selector.organization,
-      }),
-    ]);
+    const deletedOrganization = await this.storage.deleteOrganization({
+      organization: organization.id,
+    });
+
+    await this.tokenStorage.invalidateTokens(deletedOrganization.tokens);
 
     // Because we checked the access before, it's stale by now
     this.authManager.resetAccessCache();
@@ -604,7 +601,7 @@ export class OrganizationManager {
     const owner = await this.getOrganizationOwner(selector);
     const { users, organization } = selector;
 
-    if (users.some(user => user === owner.id)) {
+    if (users.includes(owner.id)) {
       throw new HiveError(`Cannot remove the owner from the organization`);
     }
 

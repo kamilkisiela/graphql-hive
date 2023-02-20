@@ -1,9 +1,9 @@
-import type { TargetModule } from './__generated__/types';
-import { createConnection } from '../../shared/schema';
-import { IdTranslator } from '../shared/providers/id-translator';
-import { TargetManager } from './providers/target-manager';
 import { z } from 'zod';
+import { createConnection } from '../../shared/schema';
 import { OrganizationManager } from '../organization/providers/organization-manager';
+import { IdTranslator } from '../shared/providers/id-translator';
+import type { TargetModule } from './__generated__/types';
+import { TargetManager } from './providers/target-manager';
 
 const TargetNameModel = z.string().min(2).max(30);
 const PercentageModel = z.number().min(0).max(100);

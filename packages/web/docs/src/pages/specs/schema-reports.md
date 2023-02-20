@@ -34,7 +34,8 @@ input SchemaPublishInput {
   """
   GraphQL Hive prevents from publishing breaking changes or broken schemas by default, use this flag to override this behavior.
   """
-  force: Boolean
+  force: Boolean @deprecated(reason: "No longer needed for new projects")
+  """
 }
 
 mutation schemaPublish($input: SchemaPublishInput!) {

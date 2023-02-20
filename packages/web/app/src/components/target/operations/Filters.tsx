@@ -1,5 +1,12 @@
-import React from 'react';
-import 'twin.macro';
+import React, { ComponentType } from 'react';
+import { VscChevronDown, VscChromeClose } from 'react-icons/vsc';
+import AutoSizer from 'react-virtualized-auto-sizer';
+import { FixedSizeList, ListChildComponentProps } from 'react-window';
+import { useQuery } from 'urql';
+import { useDebouncedCallback } from 'use-debounce';
+import { Spinner } from '@/components/common/Spinner';
+import { DateRangeInput, OperationsStatsDocument, OperationStatsFieldsFragment } from '@/graphql';
+import { useFormattedNumber, useRouteSelector } from '@/lib/hooks';
 import {
   Button,
   Checkbox,
@@ -15,15 +22,6 @@ import {
   InputRightElement,
   useDisclosure,
 } from '@chakra-ui/react';
-import { VscChevronDown, VscChromeClose } from 'react-icons/vsc';
-import AutoSizer from 'react-virtualized-auto-sizer';
-import { FixedSizeList } from 'react-window';
-import { useQuery } from 'urql';
-import { useDebouncedCallback } from 'use-debounce';
-
-import { Spinner } from '@/components/common/Spinner';
-import { DateRangeInput, OperationsStatsDocument, OperationStatsFieldsFragment } from '@/graphql';
-import { useRouteSelector, useFormattedNumber } from '@/lib/hooks';
 
 const OperationsFilter: React.FC<{
   onClose(): void;
@@ -42,6 +40,7 @@ const OperationsFilter: React.FC<{
     }
     return items;
   }
+
   const [selectedItems, setSelectedItems] = React.useState<string[]>(() => {
     if (selected?.length) {
       return selected;
@@ -71,7 +70,7 @@ const OperationsFilter: React.FC<{
 
   const onChange = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      const value = event.currentTarget.value;
+      const { value } = event.currentTarget;
 
       setSearchTerm(value);
       debouncedFilter(value);
@@ -88,7 +87,7 @@ const OperationsFilter: React.FC<{
     setSelectedItems([]);
   }, [setSelectedItems]);
 
-  const renderRow = React.useCallback(
+  const renderRow = React.useCallback<ComponentType<ListChildComponentProps>>(
     ({ index, style }) => {
       const operation = visibleOperations[index];
 
@@ -97,7 +96,7 @@ const OperationsFilter: React.FC<{
           style={style}
           key={operation.id}
           operation={operation}
-          selected={selectedItems.some(operationHash => operationHash === operation.operationHash)}
+          selected={selectedItems.includes(operation.operationHash || '')}
           onSelect={onSelect}
         />
       );
@@ -112,7 +111,7 @@ const OperationsFilter: React.FC<{
         <DrawerHeader bgColor="gray.900">Filter by operation</DrawerHeader>
         <DrawerCloseButton />
         <DrawerBody bgColor="gray.900">
-          <div tw="flex flex-col h-full space-y-3">
+          <div className="flex flex-col h-full space-y-3">
             <InputGroup>
               <Input
                 pr="3rem"
@@ -134,7 +133,7 @@ const OperationsFilter: React.FC<{
                 />
               </InputRightElement>
             </InputGroup>
-            <div tw="flex flex-row justify-between items-center">
+            <div className="flex flex-row justify-between items-center">
               <div>
                 <Button variant="link" size="xs" onClick={selectAll}>
                   All
@@ -143,7 +142,7 @@ const OperationsFilter: React.FC<{
                   None
                 </Button>
               </div>
-              <div tw="flex flex-row">
+              <div className="flex flex-row">
                 <Button variant="ghost" size="sm" onClick={selectAll}>
                   Reset
                 </Button>
@@ -160,7 +159,7 @@ const OperationsFilter: React.FC<{
                 </Button>
               </div>
             </div>
-            <div tw="pl-1 flex-grow">
+            <div className="pl-1 grow">
               <AutoSizer>
                 {({ height, width }) => (
                   <FixedSizeList
@@ -242,13 +241,13 @@ const OperationRow: React.FC<{
   }, [onSelect, operation.operationHash, selected]);
 
   return (
-    <div style={style} tw="flex flex-row space-x-4 items-center">
+    <div style={style} className="flex flex-row space-x-4 items-center">
       <Checkbox colorScheme="primary" isChecked={selected} onChange={change} />
-      <div tw="flex flex-grow flex-row items-center cursor-pointer">
-        <button tw="flex-grow overflow-ellipsis overflow-hidden whitespace-nowrap" onClick={change}>
+      <div className="flex grow flex-row items-center cursor-pointer">
+        <button className="grow text-ellipsis overflow-hidden whitespace-nowrap" onClick={change}>
           {operation.name}
         </button>
-        <button tw="width[75px] flex-shrink-0 text-right text-gray-500" onClick={change}>
+        <button className="w-[75px] shrink-0 text-right text-gray-500" onClick={change}>
           {requests}
         </button>
       </div>
@@ -275,7 +274,7 @@ export const OperationsFilterTrigger: React.FC<{
         bgColor="whiteAlpha.50"
         _hover={{ bgColor: 'whiteAlpha.100' }}
       >
-        <span tw="font-normal">Operations ({selected?.length ? selected.length : 'all'})</span>
+        <span className="font-normal">Operations ({selected?.length || 'all'})</span>
       </Button>
       <OperationsFilterContainer
         isOpen={isOpen}

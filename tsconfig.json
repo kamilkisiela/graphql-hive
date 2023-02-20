@@ -3,7 +3,7 @@
     "module": "esnext",
     "target": "esnext",
     "lib": ["esnext", "dom"],
-
+    "types": ["vitest/globals"],
     "baseUrl": ".",
     "outDir": "dist",
     "rootDir": "packages",
@@ -33,7 +33,12 @@
       "@hive/cdn-script/artifact-handler": [
         "./packages/services/cdn-worker/src/artifact-handler.ts"
       ],
+      "@hive/cdn-script/artifact-storage-reader": [
+        "./packages/services/cdn-worker/src/artifact-storage-reader.ts"
+      ],
+      "@hive/cdn-script/cdn-token": ["./packages/services/cdn-worker/src/cdn-token.ts"],
       "@hive/cdn-script/key-validation": ["./packages/services/cdn-worker/src/key-validation.ts"],
+      "@hive/cdn-script/aws": ["./packages/services/cdn-worker/src/aws.ts"],
       "@hive/server": ["./packages/services/server/src/api.ts"],
       "@hive/stripe-billing": ["./packages/services/stripe-billing/src/api.ts"],
       "@hive/schema": ["./packages/services/schema/src/api.ts"],

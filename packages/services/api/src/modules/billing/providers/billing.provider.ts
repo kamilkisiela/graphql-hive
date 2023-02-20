@@ -1,13 +1,13 @@
 import { Inject, Injectable, Scope } from 'graphql-modules';
-import { Logger } from '../../shared/providers/logger';
-import { BILLING_CONFIG } from './tokens';
-import type { BillingConfig } from './tokens';
 import type { StripeBillingApi, StripeBillingApiInput } from '@hive/stripe-billing';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import { fetch } from '@whatwg-node/fetch';
 import { OrganizationSelector } from '../../../__generated__/types';
 import { OrganizationBilling } from '../../../shared/entities';
+import { Logger } from '../../shared/providers/logger';
 import { Storage } from '../../shared/providers/storage';
+import type { BillingConfig } from './tokens';
+import { BILLING_CONFIG } from './tokens';
 
 @Injectable({
   global: true,

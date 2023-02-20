@@ -1,26 +1,25 @@
 import * as React from 'react';
-import 'twin.macro';
-import { useMutation } from 'urql';
 import { useFormik } from 'formik';
+import { useMutation } from 'urql';
 import * as Yup from 'yup';
+import { SendFeedbackDocument } from '@/graphql';
 import {
+  Alert,
+  AlertDescription,
+  AlertIcon,
+  AlertTitle,
   Button,
   FormControl,
   FormErrorMessage,
-  Textarea,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
   FormLabel,
-  Alert,
-  AlertIcon,
-  AlertTitle,
-  AlertDescription,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  Textarea,
 } from '@chakra-ui/react';
-import { SendFeedbackDocument } from '@/graphql';
 
 export const Feedback: React.FC<{
   isOpen: boolean;
@@ -35,7 +34,7 @@ export const Feedback: React.FC<{
     validationSchema: Yup.object().shape({
       feedback: Yup.string()
         .min(1)
-        .required(`Hey hey hey, you opened the feedback modal and won't even say Hi?`),
+        .required("Hey hey hey, you opened the feedback modal and won't even say Hi?"),
     }),
     async onSubmit(values) {
       if (formik.isValid && !mutation.fetching) {
@@ -76,7 +75,7 @@ export const Feedback: React.FC<{
         <ModalHeader>{state === 'FORM' ? 'Send feedback' : 'We got your feedback'}</ModalHeader>
         <ModalBody>
           {state === 'FORM' ? (
-            <div tw="space-y-6">
+            <div className="space-y-6">
               <FormControl isInvalid={isValid('feedback')}>
                 <FormLabel>How can we improve GraphQL Hive?</FormLabel>
                 <Textarea
@@ -109,7 +108,7 @@ export const Feedback: React.FC<{
             </Alert>
           )}
         </ModalBody>
-        <ModalFooter tw="space-x-6">
+        <ModalFooter className="space-x-6">
           {state === 'FORM' ? (
             <>
               <Button variant="ghost" type="button" onClick={onClose}>

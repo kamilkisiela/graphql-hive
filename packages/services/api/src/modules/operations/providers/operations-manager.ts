@@ -1,12 +1,12 @@
 import { Injectable, Scope } from 'graphql-modules';
 import LRU from 'lru-cache';
 import type { DateRange } from '../../../shared/entities';
-import type { Optional, Listify } from '../../../shared/helpers';
+import type { Listify, Optional } from '../../../shared/helpers';
 import { cache } from '../../../shared/helpers';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { TargetAccessScope } from '../../auth/providers/target-access';
 import { Logger } from '../../shared/providers/logger';
-import type { TargetSelector, OrganizationSelector } from '../../shared/providers/storage';
+import type { OrganizationSelector, TargetSelector } from '../../shared/providers/storage';
 import { Storage } from '../../shared/providers/storage';
 import { OperationsReader } from './operations-reader';
 
@@ -67,6 +67,25 @@ export class OperationsManager {
     this.logger = logger.child({ source: 'OperationsManager' });
   }
 
+  async getOperationBody({
+    organization,
+    project,
+    target,
+    hash,
+  }: { hash: string } & TargetSelector) {
+    await this.authManager.ensureTargetAccess({
+      organization,
+      project,
+      target,
+      scope: TargetAccessScope.REGISTRY_READ,
+    });
+
+    return await this.reader.readOperationBody({
+      target,
+      hash,
+    });
+  }
+
   async countUniqueOperations({
     organization,
     project,
@@ -82,13 +101,11 @@ export class OperationsManager {
       scope: TargetAccessScope.REGISTRY_READ,
     });
 
-    return (
-      await this.reader.countUniqueDocuments({
-        target,
-        period,
-        operations,
-      })
-    ).length;
+    return await this.reader.countUniqueDocuments({
+      target,
+      period,
+      operations,
+    });
   }
 
   async hasCollectedOperations({ organization, project, target }: TargetSelector) {
@@ -272,7 +289,8 @@ export class OperationsManager {
       scope: TargetAccessScope.REGISTRY_READ,
     });
 
-    return this.reader.countUniqueDocuments({
+    // Maybe it needs less data
+    return this.reader.readUniqueDocuments({
       target,
       period,
       operations,

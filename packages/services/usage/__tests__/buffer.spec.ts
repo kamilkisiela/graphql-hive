@@ -1,4 +1,4 @@
-import { createKVBuffer, calculateChunkSize } from '../src/buffer';
+import { calculateChunkSize, createKVBuffer } from '../src/buffer';
 
 function waitFor(time: number) {
   return new Promise(resolve => setTimeout(resolve, time));
@@ -10,13 +10,13 @@ const defaultBytesPerUnit = eventHubLimitInBytes / bufferSize;
 
 test('increase the defaultBytesPerOperation estimation by 5% when over 100 calls were made and 10% of them failed', async () => {
   const logger = {
-    // info: jest.fn(console.info),
-    // error: jest.fn(console.error),
-    info: jest.fn(),
-    error: jest.fn(),
+    // info: vi.fn(console.info),
+    // error: vi.fn(console.error),
+    info: vi.fn(),
+    error: vi.fn(),
   };
-  const flush = jest.fn();
-  const onRetry = jest.fn();
+  const flush = vi.fn();
+  const onRetry = vi.fn();
   const interval = 200;
   const size = {
     successful: bufferSize / 2,
@@ -135,10 +135,10 @@ test('increase the defaultBytesPerOperation estimation by 5% when over 100 calls
 
 test('buffer should split the report into multiple reports when the estimated size is greater than the limit', async () => {
   const logger = {
-    info: jest.fn(),
-    error: jest.fn(),
+    info: vi.fn(),
+    error: vi.fn(),
   };
-  const flush = jest.fn();
+  const flush = vi.fn();
   const interval = 200;
   const buffer = createKVBuffer<{
     id: string;
@@ -220,13 +220,13 @@ test('buffer should split the report into multiple reports when the estimated si
 
 test('buffer create two chunks out of one buffer when actual buffer size is too big', async () => {
   const logger = {
-    info: jest.fn(),
-    error: jest.fn(),
-    // info: jest.fn(console.info),
-    // error: jest.fn(console.error),
+    info: vi.fn(),
+    error: vi.fn(),
+    // info: vi.fn(console.info),
+    // error: vi.fn(console.error),
   };
-  const flush = jest.fn();
-  const split = jest.fn((report, numOfChunks) => {
+  const flush = vi.fn();
+  const split = vi.fn((report, numOfChunks) => {
     const reports: Array<{
       id: string;
       size: number;
@@ -249,7 +249,7 @@ test('buffer create two chunks out of one buffer when actual buffer size is too 
 
     return reports;
   });
-  const onRetry = jest.fn();
+  const onRetry = vi.fn();
   const interval = 200;
 
   const buffer = createKVBuffer<{

@@ -1,16 +1,15 @@
 import { Injectable, Scope } from 'graphql-modules';
 import { paramCase } from 'param-case';
 import type { Project, ProjectType } from '../../../shared/entities';
-import { AuthManager } from '../../auth/providers/auth-manager';
-import { Logger } from '../../shared/providers/logger';
-import { Storage, OrganizationSelector, ProjectSelector } from '../../shared/providers/storage';
-import { NullableAndPartial, share, uuid } from '../../../shared/helpers';
-import { SchemaManager } from '../../schema/providers/schema-manager';
-import type { CustomOrchestratorConfig } from '../../schema/providers/orchestrators/custom';
+import { share, uuid } from '../../../shared/helpers';
 import { ActivityManager } from '../../activity/providers/activity-manager';
-import { TokenStorage } from '../../token/providers/token-storage';
+import { AuthManager } from '../../auth/providers/auth-manager';
 import { OrganizationAccessScope } from '../../auth/providers/organization-access';
 import { ProjectAccessScope } from '../../auth/providers/project-access';
+import { SchemaManager } from '../../schema/providers/schema-manager';
+import { Logger } from '../../shared/providers/logger';
+import { OrganizationSelector, ProjectSelector, Storage } from '../../shared/providers/storage';
+import { TokenStorage } from '../../token/providers/token-storage';
 
 /**
  * Responsible for auth checks.
@@ -38,20 +37,19 @@ export class ProjectManager {
     input: {
       name: string;
       type: ProjectType;
-    } & OrganizationSelector &
-      NullableAndPartial<CustomOrchestratorConfig>,
+    } & OrganizationSelector,
   ): Promise<Project> {
-    const { name, type, organization, buildUrl, validationUrl } = input;
+    const { name, type, organization } = input;
     this.logger.info('Creating a project (input=%o)', input);
     let cleanId = paramCase(name);
 
-    if (await this.storage.getProjectByCleanId({ cleanId, organization })) {
+    if (
+      // packages/web/app uses the "view" prefix, let's avoid the collision
+      name.toLowerCase() === 'view' ||
+      (await this.storage.getProjectByCleanId({ cleanId, organization }))
+    ) {
       cleanId = paramCase(`${name}-${uuid(4)}`);
     }
-
-    const orchestrator = this.schemaManager.matchOrchestrator(type);
-
-    orchestrator.ensureConfig({ buildUrl, validationUrl });
 
     // create project
     const project = await this.storage.createProject({
@@ -59,8 +57,6 @@ export class ProjectManager {
       cleanId,
       type,
       organization,
-      buildUrl,
-      validationUrl,
     });
 
     await Promise.all([
@@ -91,16 +87,12 @@ export class ProjectManager {
       scope: ProjectAccessScope.DELETE,
     });
 
-    const [result] = await Promise.all([
-      this.storage.deleteProject({
-        project,
-        organization,
-      }),
-      this.tokenStorage.invalidateProject({
-        project,
-        organization,
-      }),
-    ]);
+    const deletedProject = await this.storage.deleteProject({
+      project,
+      organization,
+    });
+
+    await this.tokenStorage.invalidateTokens(deletedProject.tokens);
 
     await this.activityManager.create({
       type: 'PROJECT_DELETED',
@@ -108,12 +100,12 @@ export class ProjectManager {
         organization,
       },
       meta: {
-        name: result.name,
-        cleanId: result.cleanId,
+        name: deletedProject.name,
+        cleanId: deletedProject.cleanId,
       },
     });
 
-    return result;
+    return deletedProject;
   }
 
   getProjectIdByToken: () => Promise<string | never> = share(async () => {

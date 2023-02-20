@@ -1,4 +1,4 @@
-/* eslint-disable no-undef, no-process-env */
+/* eslint-disable no-process-env */
 export default {
   basePath: process.env.NEXT_BASE_PATH,
   poweredByHeader: false,

@@ -1,13 +1,13 @@
-import * as pulumi from '@pulumi/pulumi';
-import * as azure from '@pulumi/azure';
 import { parse } from 'pg-connection-string';
-import { DbMigrations } from './db-migrations';
-import { RemoteArtifactAsServiceDeployment } from '../utils/remote-artifact-as-service';
+import * as k8s from '@pulumi/kubernetes';
+import * as pulumi from '@pulumi/pulumi';
 import { DeploymentEnvironment } from '../types';
-import { PackageHelper } from '../utils/pack';
+import { ServiceDeployment } from '../utils/service-deployment';
+import { DbMigrations } from './db-migrations';
+import { Redis } from './redis';
+
 const commonConfig = new pulumi.Config('common');
 const apiConfig = new pulumi.Config('api');
-
 const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
 
 export type Tokens = ReturnType<typeof deployTokens>;
@@ -15,29 +15,34 @@ export type Tokens = ReturnType<typeof deployTokens>;
 export function deployTokens({
   deploymentEnv,
   dbMigrations,
-  storageContainer,
-  packageHelper,
+  redis,
   heartbeat,
+  image,
+  release,
+  imagePullSecret,
 }: {
-  storageContainer: azure.storage.Container;
-  packageHelper: PackageHelper;
+  image: string;
+  release: string;
   deploymentEnv: DeploymentEnvironment;
   dbMigrations: DbMigrations;
+  redis: Redis;
   heartbeat?: string;
+  imagePullSecret: k8s.core.v1.Secret;
 }) {
   const rawConnectionString = apiConfig.requireSecret('postgresConnectionString');
   const connectionString = rawConnectionString.apply(rawConnectionString =>
     parse(rawConnectionString),
   );
 
-  return new RemoteArtifactAsServiceDeployment(
+  return new ServiceDeployment(
     'tokens-service',
     {
-      storageContainer,
+      imagePullSecret,
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
       exposesMetrics: true,
-      packageInfo: packageHelper.npmPack('@hive/tokens'),
+      replicas: 2,
+      image,
       env: {
         ...deploymentEnv,
         ...commonEnv,
@@ -48,7 +53,10 @@ export function deployTokens({
         POSTGRES_USER: connectionString.apply(connection => connection.user ?? ''),
         POSTGRES_DB: connectionString.apply(connection => connection.database ?? ''),
         POSTGRES_SSL: connectionString.apply(connection => (connection.ssl ? '1' : '0')),
-        RELEASE: packageHelper.currentReleaseId(),
+        REDIS_HOST: redis.config.host,
+        REDIS_PORT: String(redis.config.port),
+        REDIS_PASSWORD: redis.config.password,
+        RELEASE: release,
         HEARTBEAT_ENDPOINT: heartbeat ?? '',
       },
     },

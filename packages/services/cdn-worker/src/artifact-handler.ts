@@ -1,11 +1,10 @@
-import type { KeyValidator } from './key-validation';
-import { type Request, createFetch } from '@whatwg-node/fetch';
 import itty from 'itty-router';
 import zod from 'zod';
+import { createFetch, type Request } from '@whatwg-node/fetch';
+import { type Analytics, createAnalytics } from './analytics';
+import { type ArtifactsType } from './artifact-storage-reader';
 import { InvalidAuthKeyResponse, MissingAuthKeyResponse } from './errors';
-import type { Analytics } from './analytics';
-import { createAnalytics } from './analytics';
-import type { ArtifactsType } from '@hive/api/src/modules/schema/providers/artifact-storage-reader';
+import type { KeyValidator } from './key-validation';
 
 const { Response } = createFetch({ useNodeFetch: true });
 
@@ -33,6 +32,7 @@ const ParamsModel = zod.object({
     zod.literal('sdl.graphql'),
     zod.literal('sdl.graphqls'),
     zod.literal('services'),
+    zod.literal('schema'),
     zod.literal('supergraph'),
   ]),
 });
@@ -71,6 +71,16 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
       }
 
       const params = parseResult.data;
+
+      /** Legacy handling for old client SDK versions. */
+      if (params.artifactType === 'schema') {
+        return new Response('Found.', {
+          status: 301,
+          headers: {
+            Location: request.url.replace('/schema', '/services'),
+          },
+        });
+      }
 
       const maybeResponse = await authenticate(request, params.targetId);
 
@@ -111,9 +121,11 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
         return new Response('', {
           status: 304,
         });
-      } else if (result.type === 'notFound') {
+      }
+      if (result.type === 'notFound') {
         return new Response('Not found.', { status: 404 });
-      } else if (result.type === 'redirect') {
+      }
+      if (result.type === 'redirect') {
         return new Response('Found.', { status: 302, headers: { Location: result.location } });
       }
     },

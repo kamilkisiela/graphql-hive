@@ -1,8 +1,8 @@
-import type { AlertsModule } from './__generated__/types';
-import { IdTranslator } from '../shared/providers/id-translator';
-import { AlertsManager } from './providers/alerts-manager';
-import { TargetManager } from '../target/providers/target-manager';
 import { z } from 'zod';
+import { IdTranslator } from '../shared/providers/id-translator';
+import { TargetManager } from '../target/providers/target-manager';
+import type { AlertsModule } from './__generated__/types';
+import { AlertsManager } from './providers/alerts-manager';
 
 const AlertChannelNameModel = z.string().min(1).max(100);
 const SlackChannelNameModel = z.string().min(1).max(80);
@@ -13,7 +13,7 @@ export const resolvers: AlertsModule.Resolvers = {
     async addAlertChannel(_, { input }, { injector }) {
       const AddAlertChannelModel = z.object({
         slack: MaybeModel(z.object({ channel: SlackChannelNameModel })),
-        webhook: MaybeModel(z.object({ endpoint: z.string().url().max(200) })),
+        webhook: MaybeModel(z.object({ endpoint: z.string().url().max(500) })),
         name: AlertChannelNameModel,
       });
 

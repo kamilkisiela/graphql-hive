@@ -1,10 +1,10 @@
-import { Injectable, Scope } from 'graphql-modules';
 import { GraphQLError } from 'graphql';
+import { Injectable, Scope } from 'graphql-modules';
+import { atomic } from '../../../shared/helpers';
 import { AuthManager } from '../../auth/providers/auth-manager';
+import { OperationsReader } from '../../operations/providers/operations-reader';
 import { Logger } from '../../shared/providers/logger';
 import { Storage } from '../../shared/providers/storage';
-import { atomic } from '../../../shared/helpers';
-import { OperationsReader } from '../../operations/providers/operations-reader';
 
 /**
  * Responsible for auth checks.
@@ -65,7 +65,7 @@ export class AdminManager {
     }));
   }
 
-  @atomic((arg: { daysLimit: number }) => arg.daysLimit + '')
+  @atomic((arg: { daysLimit: number }) => String(arg.daysLimit))
   async countOperationsPerOrganization({ period }: { period: { from: Date; to: Date } }) {
     this.logger.info(
       'Counting collected operations per organization (admin, from=%s, to=%s)',

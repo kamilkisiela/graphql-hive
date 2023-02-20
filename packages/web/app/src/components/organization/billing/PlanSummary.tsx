@@ -1,3 +1,4 @@
+import { ReactElement, ReactNode } from 'react';
 import { BillingPlansQuery, BillingPlanType } from '@/graphql';
 import {
   Stat,
@@ -13,7 +14,6 @@ import {
   Thead,
   Tr,
 } from '@chakra-ui/react';
-import { ReactElement, ReactNode } from 'react';
 import { CurrencyFormatter } from './helpers';
 
 const PriceEstimationTable = ({

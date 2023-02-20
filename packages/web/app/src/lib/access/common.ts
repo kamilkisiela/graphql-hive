@@ -28,14 +28,14 @@ export const scopes: {
     },
     {
       name: 'Settings',
-      description: `Manage organization's settings (change its name, etc.)`,
+      description: "Manage organization's settings (change its name, etc.)",
       mapping: {
         'read-write': OrganizationAccessScope.Settings,
       },
     },
     {
       name: 'Integrations',
-      description: `Manage 3rd party integrations (Slack, GitHub, etc.)`,
+      description: 'Manage 3rd party integrations (Slack, GitHub, etc.)',
       mapping: {
         'read-write': OrganizationAccessScope.Integrations,
       },
@@ -58,7 +58,7 @@ export const scopes: {
     },
     {
       name: 'Settings',
-      description: `Manage organization's settings (change its name, etc.)`,
+      description: "Manage organization's settings (change its name, etc.)",
       mapping: {
         'read-write': ProjectAccessScope.Settings,
       },
@@ -98,14 +98,14 @@ export const scopes: {
     },
     {
       name: 'Settings',
-      description: `Manage organization's settings (change its name, etc.)`,
+      description: "Manage organization's settings (change its name, etc.)",
       mapping: {
         'read-write': TargetAccessScope.Settings,
       },
     },
     {
       name: 'Tokens',
-      description: `Manage access tokens`,
+      description: 'Manage access tokens',
       mapping: {
         'read-only': TargetAccessScope.TokensRead,
         'read-write': TargetAccessScope.TokensWrite,

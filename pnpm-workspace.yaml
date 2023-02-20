@@ -1,5 +1,6 @@
 packages:
   - packages/services/*
+  - packages/migrations
   - packages/services/external-composition/*
   - packages/web/*
   - packages/libraries/*

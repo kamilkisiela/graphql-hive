@@ -1,8 +1,7 @@
+import * as k8s from '@pulumi/kubernetes';
 import * as pulumi from '@pulumi/pulumi';
-import * as azure from '@pulumi/azure';
-import { RemoteArtifactAsServiceDeployment } from '../utils/remote-artifact-as-service';
-import { PackageHelper } from '../utils/pack';
 import { DeploymentEnvironment } from '../types';
+import { ServiceDeployment } from '../utils/service-deployment';
 import { Clickhouse } from './clickhouse';
 import { DbMigrations } from './db-migrations';
 
@@ -12,22 +11,25 @@ const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
 export type UsageEstimator = ReturnType<typeof deployUsageEstimation>;
 
 export function deployUsageEstimation({
-  storageContainer,
-  packageHelper,
+  image,
+  imagePullSecret,
+  release,
   deploymentEnv,
   clickhouse,
   dbMigrations,
 }: {
-  storageContainer: azure.storage.Container;
-  packageHelper: PackageHelper;
+  image: string;
+  imagePullSecret: k8s.core.v1.Secret;
+  release: string;
   deploymentEnv: DeploymentEnvironment;
   clickhouse: Clickhouse;
   dbMigrations: DbMigrations;
 }) {
-  return new RemoteArtifactAsServiceDeployment(
+  return new ServiceDeployment(
     'usage-estimator',
     {
-      storageContainer,
+      image,
+      imagePullSecret,
       replicas: 1,
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
@@ -40,10 +42,9 @@ export function deployUsageEstimation({
         CLICKHOUSE_PORT: clickhouse.config.port,
         CLICKHOUSE_USERNAME: clickhouse.config.username,
         CLICKHOUSE_PASSWORD: clickhouse.config.password,
-        RELEASE: packageHelper.currentReleaseId(),
+        RELEASE: release,
       },
       exposesMetrics: true,
-      packageInfo: packageHelper.npmPack('@hive/usage-estimator'),
       port: 4000,
     },
     [dbMigrations],

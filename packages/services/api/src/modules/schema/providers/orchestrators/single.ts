@@ -1,15 +1,15 @@
-import { Injectable, Inject, Scope, CONTEXT } from 'graphql-modules';
 import { parse } from 'graphql';
-import { Logger } from '../../../shared/providers/logger';
-import { HiveError } from '../../../../shared/errors';
-import { Orchestrator, ProjectType, SchemaObject } from '../../../../shared/entities';
-import { SchemaBuildError } from './errors';
-import { SCHEMA_SERVICE_CONFIG } from './tokens';
-import type { SchemaServiceConfig } from './tokens';
-import { sentry } from '../../../../shared/sentry';
+import { CONTEXT, Inject, Injectable, Scope } from 'graphql-modules';
+import type { SchemaBuilderApi } from '@hive/schema';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import { fetch } from '@whatwg-node/fetch';
-import type { SchemaBuilderApi } from '@hive/schema';
+import { Orchestrator, ProjectType, SchemaObject } from '../../../../shared/entities';
+import { HiveError } from '../../../../shared/errors';
+import { sentry } from '../../../../shared/sentry';
+import { Logger } from '../../../shared/providers/logger';
+import { SchemaBuildError } from './errors';
+import type { SchemaServiceConfig } from './tokens';
+import { SCHEMA_SERVICE_CONFIG } from './tokens';
 
 @Injectable({
   scope: Scope.Operation,
@@ -37,8 +37,6 @@ export class SingleOrchestrator implements Orchestrator {
       ],
     });
   }
-
-  ensureConfig() {}
 
   @sentry('SingleOrchestrator.validate')
   async validate(schemas: SchemaObject[]) {

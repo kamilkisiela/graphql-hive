@@ -38,7 +38,7 @@ async function main() {
 
     await estimatorContext.start();
     return new Promise<void>(resolve => {
-      server.listen(env.http.port, '0.0.0.0', resolve);
+      server.listen(env.http.port, 'localhost', resolve);
     });
   } catch (error: any) {
     logger.fatal(error);

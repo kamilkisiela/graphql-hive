@@ -4,8 +4,8 @@ import { AuthManager } from '../auth/providers/auth-manager';
 import { OrganizationAccessScope } from '../auth/providers/organization-access';
 import { OrganizationManager } from '../organization/providers/organization-manager';
 import { IdTranslator } from '../shared/providers/id-translator';
-import { BillingProvider } from './providers/billing.provider';
 import { BillingModule } from './__generated__/types';
+import { BillingProvider } from './providers/billing.provider';
 
 const USAGE_DEFAULT_LIMITATIONS: Record<
   'HOBBY' | 'PRO' | 'ENTERPRISE',
@@ -27,7 +27,7 @@ const USAGE_DEFAULT_LIMITATIONS: Record<
 
 export const resolvers: BillingModule.Resolvers = {
   BillingInvoice: {
-    id: i => i.id || 'upcoming',
+    id: i => (i && 'id' in i ? i.id : 'upcoming'),
     amount: i => parseFloat((i.total / 100).toFixed(2)),
     pdfLink: i => i.invoice_pdf || null,
     date: i => new Date(i.created * 1000).toISOString(),
@@ -94,7 +94,7 @@ export const resolvers: BillingModule.Resolvers = {
     country: bd => bd.address?.country || null,
     line1: bd => bd.address?.line1 || null,
     line2: bd => bd.address?.line2 || null,
-    postalCode: bd => (bd.address?.postal_code ? parseInt(bd.address?.postal_code) : null),
+    postalCode: bd => bd.address?.postal_code ?? null,
     state: bd => bd.address?.state || null,
   },
   Query: {

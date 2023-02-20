@@ -1,6 +1,8 @@
 import { DocumentNode, GraphQLError, SourceLocation } from 'graphql';
+import { parse } from 'graphql';
+import { z } from 'zod';
+import type { CompositionFailureError } from '@hive/schema';
 import type {
-  SchemaError,
   AlertChannelType,
   AlertType,
   AuthProvider,
@@ -8,19 +10,54 @@ import type {
   ProjectAccessScope,
   TargetAccessScope,
 } from '../__generated__/types';
-import { parse } from 'graphql';
 
-export interface Schema {
-  id: string;
-  author: string;
-  source: string;
-  date: string;
-  commit: string;
-  target: string;
-  url?: string | null;
-  service?: string | null;
-  metadata?: Record<string, any> | null;
-}
+export const SingleSchemaModel = z
+  .object({
+    kind: z.literal('single'),
+    id: z.string(),
+    author: z.string(),
+    date: z.number(),
+    commit: z.string(),
+    target: z.string(),
+    sdl: z.string(),
+    metadata: z.string().nullish(),
+  })
+  .required();
+
+export const DeletedCompositeSchemaModel = z
+  .object({
+    kind: z.literal('composite'),
+    id: z.string(),
+    date: z.number(),
+    target: z.string(),
+    service_name: z.string(),
+    action: z.literal('DELETE'),
+  })
+  .required();
+
+export const PushedCompositeSchemaModel = z
+  .object({
+    kind: z.literal('composite'),
+    id: z.string(),
+    author: z.string(),
+    date: z.number(),
+    commit: z.string(),
+    target: z.string(),
+    sdl: z.string(),
+    service_name: z.string(),
+    service_url: z.string().nullable(),
+    action: z.literal('PUSH'),
+    metadata: z.string().nullish(),
+  })
+  .required();
+
+export type SingleSchema = z.infer<typeof SingleSchemaModel>;
+export type DeletedCompositeSchema = z.infer<typeof DeletedCompositeSchemaModel>;
+export type PushedCompositeSchema = z.infer<typeof PushedCompositeSchemaModel>;
+export type CompositeSchema = PushedCompositeSchema;
+
+export type Schema = SingleSchema | CompositeSchema;
+export type SchemaLog = SingleSchema | PushedCompositeSchema | DeletedCompositeSchema;
 
 export interface DateRange {
   from: Date;
@@ -61,11 +98,11 @@ export class GraphQLDocumentStringInvalidError extends Error {
   }
 }
 
-export function createSchemaObject(schema: Schema): SchemaObject {
+export function createSchemaObject(schema: SingleSchema | PushedCompositeSchema): SchemaObject {
   let document: DocumentNode;
 
   try {
-    document = parse(schema.source);
+    document = parse(schema.sdl);
   } catch (err) {
     if (err instanceof GraphQLError) {
       throw new GraphQLDocumentStringInvalidError(err.message, err.locations?.[0]);
@@ -75,9 +112,9 @@ export function createSchemaObject(schema: Schema): SchemaObject {
 
   return {
     document,
-    raw: schema.source,
-    source: schema.service ?? emptySource,
-    url: schema.url ?? null,
+    raw: schema.sdl,
+    source: 'service_name' in schema ? schema.service_name : emptySource,
+    url: 'service_url' in schema ? schema.service_url : null,
   };
 }
 
@@ -85,7 +122,6 @@ export enum ProjectType {
   FEDERATION = 'FEDERATION',
   STITCHING = 'STITCHING',
   SINGLE = 'SINGLE',
-  CUSTOM = 'CUSTOM',
 }
 
 export enum OrganizationType {
@@ -135,7 +171,19 @@ export interface OIDCIntegration {
   linkedOrganizationId: string;
   clientId: string;
   encryptedClientSecret: string;
-  oauthApiUrl: string;
+  tokenEndpoint: string;
+  userinfoEndpoint: string;
+  authorizationEndpoint: string;
+}
+
+export interface CDNAccessToken {
+  readonly id: string;
+  readonly targetId: string;
+  readonly s3Key: string;
+  readonly firstCharacters: string;
+  readonly lastCharacters: string;
+  readonly alias: string;
+  readonly createdAt: string;
 }
 
 export interface Project {
@@ -147,6 +195,7 @@ export interface Project {
   buildUrl?: string | null;
   validationUrl?: string | null;
   gitRepository?: string | null;
+  legacyRegistryModel: boolean;
   externalComposition: {
     enabled: boolean;
     endpoint?: string | null;
@@ -205,10 +254,15 @@ export interface TargetSettings {
 }
 
 export interface Orchestrator {
-  ensureConfig(config: any): void | never;
-  validate(schemas: SchemaObject[], config: any): Promise<SchemaError[]>;
-  build(schemas: SchemaObject[], config: any): Promise<SchemaObject>;
-  supergraph(schemas: SchemaObject[], config: any): Promise<string | null>;
+  validate(
+    schemas: SchemaObject[],
+    config: Project['externalComposition'],
+  ): Promise<CompositionFailureError[]>;
+  build(schemas: SchemaObject[], config: Project['externalComposition']): Promise<SchemaObject>;
+  supergraph(
+    schemas: SchemaObject[],
+    config: Project['externalComposition'],
+  ): Promise<string | null>;
 }
 
 export interface ActivityObject {

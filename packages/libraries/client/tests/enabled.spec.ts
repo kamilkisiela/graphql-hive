@@ -2,8 +2,8 @@ import { createHive } from '../src/client';
 
 test("should log that it's not enabled", async () => {
   const logger = {
-    error: jest.fn(),
-    info: jest.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
   };
 
   const hive = createHive({
@@ -26,16 +26,14 @@ test("should log that it's not enabled", async () => {
 
 test("should not log that it's not enabled", async () => {
   const logger = {
-    error: jest.fn(),
-    info: jest.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
   };
 
   const hive = createHive({
     enabled: false,
     debug: false,
-    agent: {
-      logger,
-    },
+    agent: { logger },
   });
 
   const result = await hive
@@ -49,16 +47,14 @@ test("should not log that it's not enabled", async () => {
 
 test('should not throw exception about missing token when disabled', async () => {
   const logger = {
-    error: jest.fn(),
-    info: jest.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
   };
 
   const hive = createHive({
     enabled: false,
     debug: false,
-    agent: {
-      logger,
-    },
+    agent: { logger },
   });
 
   const result = await hive

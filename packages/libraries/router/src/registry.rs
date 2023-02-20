@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use sha2::Digest;
 use sha2::Sha256;
 use std::env;
@@ -13,15 +13,62 @@ pub struct HiveRegistry {
     etag: Option<String>,
 }
 
+pub struct HiveRegistryConfig {
+    endpoint: Option<String>,
+    key: Option<String>,
+    poll_interval: Option<u64>,
+}
+
 static COMMIT: Option<&'static str> = option_env!("GITHUB_SHA");
 
 impl HiveRegistry {
-    pub fn new() -> Result<(), String> {
-        let endpoint = env::var("HIVE_CDN_ENDPOINT").unwrap_or_default();
-        let key = env::var("HIVE_CDN_KEY").unwrap_or_default();
+    pub fn new(user_config: Option<HiveRegistryConfig>) -> Result<()> {
+        let mut config = HiveRegistryConfig {
+            endpoint: None,
+            key: None,
+            poll_interval: None,
+        };
 
-        //.map_err(|_| "environment variable HIVE_CDN_KEY not found")?;
-        // .map_err(|_| "environment variable HIVE_CDN_ENDPOINT not found")?;
+        // Pass values from user's config
+        if let Some(user_config) = user_config {
+            config.endpoint = user_config.endpoint;
+            config.key = user_config.key;
+            config.poll_interval = user_config.poll_interval;
+        }
+
+        // Pass values from environment variables if they are not set in the user's config
+
+        if config.endpoint.is_none() {
+            if let Ok(endpoint) = env::var("HIVE_CDN_ENDPOINT") {
+                config.endpoint = Some(endpoint);
+            }
+        }
+
+        if config.key.is_none() {
+            if let Ok(key) = env::var("HIVE_CDN_KEY") {
+                config.key = Some(key);
+            }
+        }
+
+        if config.poll_interval.is_none() {
+            if let Ok(poll_interval) = env::var("HIVE_CDN_POLL_INTERVAL") {
+                config.poll_interval = Some(
+                    poll_interval
+                        .parse()
+                        .expect("failed to parse HIVE_CDN_POLL_INTERVAL"),
+                );
+            }
+        }
+
+        // Resolve values
+        let endpoint = config.endpoint.unwrap_or_else(|| "".to_string());
+        let key = config.key.unwrap_or_else(|| "".to_string());
+        let poll_interval: u64 = match config.poll_interval {
+            Some(value) => value,
+            None => 10,
+        };
+
+        // In case of an endpoint and an key being empty, we don't start the polling and skip the registry
         if endpoint.is_empty() && key.is_empty() {
             tracing::info!("You're not using GraphQL Hive as the source of schema.");
             tracing::info!(
@@ -30,20 +77,20 @@ impl HiveRegistry {
             return Ok(());
         }
 
+        // Throw if endpoint is empty
         if endpoint.is_empty() {
-            return Err("environment variable HIVE_CDN_ENDPOINT not found".to_string());
+            return Err(anyhow!("environment variable HIVE_CDN_ENDPOINT not found",));
         }
 
+        // Throw if key is empty
         if key.is_empty() {
-            return Err("environment variable HIVE_CDN_KEY not found".to_string());
+            return Err(anyhow!("environment variable HIVE_CDN_KEY not found"));
         }
 
+        // A hacky way to force the router to use GraphQL Hive CDN as the source of schema.
+        // Our plugin does the polling and saves the supergraph to a file.
+        // It also enables hot-reloading to makes sure Apollo Router watches the file.
         let file_name = "supergraph-schema.graphql".to_string();
-        let poll_interval: u64 = env::var("HIVE_CDN_POLL_INTERVAL")
-            .unwrap_or_else(|_| "10".to_string())
-            .parse()
-            .expect("failed to parse HIVE_CDN_POLL_INTERVAL");
-
         env::set_var("APOLLO_ROUTER_SUPERGRAPH_PATH", file_name.clone());
         env::set_var("APOLLO_ROUTER_HOT_RELOAD", "true");
 

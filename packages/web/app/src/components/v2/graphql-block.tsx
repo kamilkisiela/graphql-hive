@@ -1,7 +1,6 @@
 import React from 'react';
-import { parse, print } from 'graphql';
 import clsx from 'clsx';
-
+import { parse, print } from 'graphql';
 import { SchemaEditor, SchemaEditorProps } from '@/components/schema-editor';
 import { Card } from '@/components/v2/card';
 import { Heading } from '@/components/v2/heading';
@@ -17,9 +16,8 @@ function prettify(sdl: string) {
 const GraphQLHighlight: React.FC<
   Omit<SchemaEditorProps, 'schema'> & {
     code: string;
-    light?: boolean;
   }
-> = ({ code, light, ...props }) => {
+> = ({ code, ...props }) => {
   const pretty = React.useMemo(() => prettify(code), [code]);
 
   return (
@@ -47,7 +45,7 @@ export const GraphQLBlock: React.FC<{
     <Card className={clsx(className)}>
       <Heading className="mb-4">
         {title ?? 'SDL'}
-        {url && <span tw="text-sm italic">{url}</span>}
+        {url && <span className="text-sm italic ml-3">{url}</span>}
       </Heading>
       <div className="pb-2">
         <GraphQLHighlight {...editorProps} code={sdl} />

@@ -1,6 +1,6 @@
 import * as pulumi from '@pulumi/pulumi';
 import { CloudflareCDN } from '../utils/cloudflare';
-import { PackageHelper } from '../utils/pack';
+import { isProduction } from '../utils/helpers';
 
 const commonConfig = new pulumi.Config('common');
 const cfConfig = new pulumi.Config('cloudflareCustom');
@@ -11,13 +11,13 @@ export type CDN = ReturnType<typeof deployCFCDN>;
 
 export function deployCFCDN({
   rootDns,
+  release,
   envName,
-  packageHelper,
   s3Config,
 }: {
   rootDns: string;
   envName: string;
-  packageHelper: PackageHelper;
+  release: string;
   s3Config: {
     endpoint: string;
     bucketName: string;
@@ -25,17 +25,15 @@ export function deployCFCDN({
     secretAccessKey: pulumi.Output<string>;
   };
 }) {
-  const cdnAuthPrivateKey = commonConfig.requireSecret('cdnAuthPrivateKey');
   const cdn = new CloudflareCDN({
     envName,
     zoneId: cfConfig.require('zoneId'),
     // We can't cdn for staging env, since CF certificate only covers
     // one level of subdomains. See: https://community.cloudflare.com/t/ssl-handshake-error-cloudflare-proxy/175088
     // So for staging env, we are going to use `cdn-staging` instead of `cdn.staging`.
-    cdnDnsRecord: envName === 'staging' ? `cdn-${rootDns}` : `cdn.${rootDns}`,
-    authPrivateKey: cdnAuthPrivateKey,
+    cdnDnsRecord: isProduction(envName) ? `cdn.${rootDns}` : `cdn-${rootDns}`,
     sentryDsn: commonEnv.SENTRY_DSN,
-    release: packageHelper.currentReleaseId(),
+    release,
     s3Config,
   });
 

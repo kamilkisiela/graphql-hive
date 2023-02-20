@@ -1,11 +1,9 @@
 import React from 'react';
-import { useQuery } from 'urql';
-import { useColorModeValue } from '@chakra-ui/react';
-import 'twin.macro';
 import { VscChevronDown } from 'react-icons/vsc';
-import { Button, Menu, MenuButton, MenuList, MenuItem } from '@chakra-ui/react';
+import { useQuery } from 'urql';
 import { TargetsDocument } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks';
+import { Button, Menu, MenuButton, MenuItem, MenuList, useColorModeValue } from '@chakra-ui/react';
 
 export const TargetSwitcher: React.FC<{
   organizationId: string;
@@ -41,7 +39,7 @@ export const TargetSwitcher: React.FC<{
         as={Button}
         rightIcon={<VscChevronDown />}
         variant="ghost"
-        tw="font-normal"
+        className="font-normal"
       >
         {currentTarget.name}
       </MenuButton>

@@ -1,13 +1,14 @@
+import { createHmac } from 'crypto';
+import * as bcrypt from 'bcryptjs';
 import '../src/dev-polyfill';
-import { createRequestHandler } from '../src/handler';
 import {
   InvalidArtifactTypeResponse,
   InvalidAuthKeyResponse,
   MissingAuthKeyResponse,
   MissingTargetIDErrorResponse,
 } from '../src/errors';
+import { createRequestHandler } from '../src/handler';
 import { createIsKeyValid, KeyValidator } from '../src/key-validation';
-import { createHmac } from 'crypto';
 
 describe('CDN Worker', () => {
   const KeyValidators: Record<string, KeyValidator> = {
@@ -27,13 +28,26 @@ describe('CDN Worker', () => {
     const targetId = 'fake-target-id';
     const map = new Map();
     map.set(`target:${targetId}:schema`, JSON.stringify({ sdl: `type Query { dummy: String }` }));
+    const token = createToken(SECRET, targetId);
 
     const handleRequest = createRequestHandler({
-      isKeyValid: createIsKeyValid({ keyData: SECRET }),
-      getRawStoreValue: (key: string) => map.get(key),
+      isKeyValid: createIsKeyValid({
+        getCache: null,
+        waitUntil: null,
+        s3: {
+          endpoint: 'http://localhost:1337',
+          bucketName: 'artifacts',
+          client: {
+            async fetch() {
+              return new Response(await bcrypt.hash(token, await bcrypt.genSalt()), {
+                status: 200,
+              });
+            },
+          },
+        },
+      }),
+      getRawStoreValue: async (key: string) => map.get(key),
     });
-
-    const token = createToken(SECRET, targetId);
 
     const schemaRequest = new Request(`https://fake-worker.com/${targetId}/schema`, {
       headers: {
@@ -63,8 +77,22 @@ describe('CDN Worker', () => {
     map.set(`target:${targetId}:schema`, JSON.stringify({ sdl: `type Query { dummy: String }` }));
 
     const handleRequest = createRequestHandler({
-      isKeyValid: createIsKeyValid({ keyData: SECRET }),
-      getRawStoreValue: (key: string) => map.get(key),
+      isKeyValid: createIsKeyValid({
+        getCache: null,
+        waitUntil: null,
+        s3: {
+          endpoint: 'http://localhost:1337',
+          bucketName: 'artifacts',
+          client: {
+            async fetch() {
+              return new Response(await bcrypt.hash(token, await bcrypt.genSalt()), {
+                status: 200,
+              });
+            },
+          },
+        },
+      }),
+      getRawStoreValue: async (key: string) => map.get(key),
     });
 
     const token = createToken(SECRET, targetId);
@@ -114,12 +142,26 @@ describe('CDN Worker', () => {
       JSON.stringify({ sdl: `type Query { dummy: String }` }),
     );
 
-    const handleRequest = createRequestHandler({
-      isKeyValid: createIsKeyValid({ keyData: SECRET }),
-      getRawStoreValue: (key: string) => map.get(key),
-    });
-
     const token = createToken(SECRET, targetId);
+
+    const handleRequest = createRequestHandler({
+      isKeyValid: createIsKeyValid({
+        getCache: null,
+        waitUntil: null,
+        s3: {
+          endpoint: 'http://localhost:1337',
+          bucketName: 'artifacts',
+          client: {
+            async fetch() {
+              return new Response(await bcrypt.hash(token, await bcrypt.genSalt()), {
+                status: 200,
+              });
+            },
+          },
+        },
+      }),
+      getRawStoreValue: async (key: string) => map.get(key),
+    });
 
     const firstRequest = new Request(`https://fake-worker.com/${targetId}/supergraph`, {
       headers: {
@@ -164,8 +206,22 @@ describe('CDN Worker', () => {
     map.set(`target:${targetId}:metadata`, JSON.stringify({ sdl: `type Query { dummy: String }` }));
 
     const handleRequest = createRequestHandler({
-      isKeyValid: createIsKeyValid({ keyData: SECRET }),
-      getRawStoreValue: (key: string) => map.get(key),
+      isKeyValid: createIsKeyValid({
+        getCache: null,
+        waitUntil: null,
+        s3: {
+          endpoint: 'http://localhost:1337',
+          bucketName: 'artifacts',
+          client: {
+            async fetch() {
+              return new Response(await bcrypt.hash(token, await bcrypt.genSalt()), {
+                status: 200,
+              });
+            },
+          },
+        },
+      }),
+      getRawStoreValue: async (key: string) => map.get(key),
     });
 
     const token = createToken(SECRET, targetId);
@@ -213,8 +269,22 @@ describe('CDN Worker', () => {
     map.set(`target:${targetId}:schema`, JSON.stringify({ sdl: `type Query { dummy: String }` }));
 
     const handleRequest = createRequestHandler({
-      isKeyValid: createIsKeyValid({ keyData: SECRET }),
-      getRawStoreValue: (key: string) => map.get(key),
+      isKeyValid: createIsKeyValid({
+        getCache: null,
+        waitUntil: null,
+        s3: {
+          endpoint: 'http://localhost:1337',
+          bucketName: 'artifacts',
+          client: {
+            async fetch() {
+              return new Response(await bcrypt.hash(token, await bcrypt.genSalt()), {
+                status: 200,
+              });
+            },
+          },
+        },
+      }),
+      getRawStoreValue: async (key: string) => map.get(key),
     });
 
     const token = createToken(SECRET, targetId);
@@ -267,8 +337,22 @@ describe('CDN Worker', () => {
     );
 
     const handleRequest = createRequestHandler({
-      isKeyValid: createIsKeyValid({ keyData: SECRET }),
-      getRawStoreValue: (key: string) => map.get(key),
+      isKeyValid: createIsKeyValid({
+        getCache: null,
+        waitUntil: null,
+        s3: {
+          endpoint: 'http://localhost:1337',
+          bucketName: 'artifacts',
+          client: {
+            async fetch() {
+              return new Response(await bcrypt.hash(token, await bcrypt.genSalt()), {
+                status: 200,
+              });
+            },
+          },
+        },
+      }),
+      getRawStoreValue: async (key: string) => map.get(key),
     });
 
     const token = createToken(SECRET, targetId);
@@ -313,7 +397,7 @@ describe('CDN Worker', () => {
     it('Should throw when target id is missing', async () => {
       const handleRequest = createRequestHandler({
         isKeyValid: KeyValidators.AlwaysTrue,
-        getRawStoreValue: (_key: string) => Promise.resolve(null),
+        getRawStoreValue: async (_key: string) => Promise.resolve(null),
       });
 
       const request = new Request('https://fake-worker.com/', {});
@@ -326,7 +410,7 @@ describe('CDN Worker', () => {
     it('Should throw when requested resource is not valid', async () => {
       const handleRequest = createRequestHandler({
         isKeyValid: KeyValidators.AlwaysTrue,
-        getRawStoreValue: (_key: string) => Promise.resolve(null),
+        getRawStoreValue: async (_key: string) => Promise.resolve(null),
       });
 
       const request = new Request('https://fake-worker.com/fake-target-id/error', {});
@@ -339,7 +423,7 @@ describe('CDN Worker', () => {
     it('Should throw when auth key is missing', async () => {
       const handleRequest = createRequestHandler({
         isKeyValid: KeyValidators.AlwaysTrue,
-        getRawStoreValue: (_key: string) => Promise.resolve(null),
+        getRawStoreValue: async (_key: string) => Promise.resolve(null),
       });
 
       const request = new Request('https://fake-worker.com/fake-target-id/sdl', {});
@@ -352,7 +436,7 @@ describe('CDN Worker', () => {
     it('Should throw when key validation function fails', async () => {
       const handleRequest = createRequestHandler({
         isKeyValid: KeyValidators.AlwaysFalse,
-        getRawStoreValue: (_key: string) => Promise.resolve(null),
+        getRawStoreValue: async (_key: string) => Promise.resolve(null),
       });
 
       const request = new Request('https://fake-worker.com/fake-target-id/sdl', {
@@ -375,8 +459,22 @@ describe('CDN Worker', () => {
       map.set(`target:${targetId}:schema`, JSON.stringify({ sdl: `type Query { dummy: String }` }));
 
       const handleRequest = createRequestHandler({
-        isKeyValid: createIsKeyValid({ keyData: SECRET }),
-        getRawStoreValue: (key: string) => map.get(key),
+        isKeyValid: createIsKeyValid({
+          getCache: null,
+          waitUntil: null,
+          s3: {
+            endpoint: 'http://localhost:1337',
+            bucketName: 'artifacts',
+            client: {
+              async fetch() {
+                return new Response(await bcrypt.hash(token, await bcrypt.genSalt()), {
+                  status: 200,
+                });
+              },
+            },
+          },
+        }),
+        getRawStoreValue: async (key: string) => map.get(key),
       });
 
       const token = createToken(SECRET, targetId);
@@ -396,8 +494,22 @@ describe('CDN Worker', () => {
       const map = new Map();
 
       const handleRequest = createRequestHandler({
-        isKeyValid: createIsKeyValid({ keyData: SECRET }),
-        getRawStoreValue: (key: string) => map.get(key),
+        isKeyValid: createIsKeyValid({
+          getCache: null,
+          waitUntil: null,
+          s3: {
+            endpoint: 'http://localhost:1337',
+            bucketName: 'artifacts',
+            client: {
+              async fetch() {
+                return new Response(null, {
+                  status: 404,
+                });
+              },
+            },
+          },
+        }),
+        getRawStoreValue: async (key: string) => map.get(key),
       });
 
       const token = createToken(SECRET, 'fake-target-id');
@@ -415,8 +527,22 @@ describe('CDN Worker', () => {
 
     it('Should throw on invalid token hash', async () => {
       const handleRequest = createRequestHandler({
-        isKeyValid: createIsKeyValid({ keyData: '123456' }),
-        getRawStoreValue: (key: string) => new Map().get(key),
+        isKeyValid: createIsKeyValid({
+          getCache: null,
+          waitUntil: null,
+          s3: {
+            endpoint: 'http://localhost:1337',
+            bucketName: 'artifacts',
+            client: {
+              async fetch() {
+                return new Response(await bcrypt.hash('foobars', await bcrypt.genSalt()), {
+                  status: 200,
+                });
+              },
+            },
+          },
+        }),
+        getRawStoreValue: async (key: string) => new Map().get(key),
       });
 
       const request = new Request(`https://fake-worker.com/some-target/sdl`, {

@@ -1,13 +1,13 @@
 import nodemailer from 'nodemailer';
 import sm from 'sendmail';
+import { fetch } from '@whatwg-node/fetch';
 import type {
   EmailProviderConfig,
-  PostmarkEmailProviderConfig,
   MockEmailProviderConfig,
-  SMTPEmailProviderConfig,
+  PostmarkEmailProviderConfig,
   SendmailEmailProviderConfig,
+  SMTPEmailProviderConfig,
 } from './environment';
-import { fetch } from '@whatwg-node/fetch';
 
 interface Email {
   to: string;

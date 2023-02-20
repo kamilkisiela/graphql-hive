@@ -25,27 +25,33 @@ import {
 } from 'graphql';
 import LRU from 'tiny-lru';
 import { normalizeOperation } from '@graphql-hive/core';
+import { version } from '../version.js';
 import { createAgent } from './agent.js';
 import { randomSampling } from './sampling.js';
-import { version } from '../version.js';
+import type {
+  AbortAction,
+  ClientInfo,
+  CollectUsageCallback,
+  HivePluginOptions,
+  HiveUsagePluginOptions,
+} from './types.js';
 import {
   cache,
   cacheDocumentKey,
-  measureDuration,
-  memo,
+  isAsyncIterable,
   isAsyncIterableIterator,
   logIf,
+  measureDuration,
+  memo,
 } from './utils.js';
-import type {
-  HivePluginOptions,
-  HiveUsagePluginOptions,
-  CollectUsageCallback,
-  ClientInfo,
-} from './types.js';
 
 interface UsageCollector {
   collect(args: ExecutionArgs): CollectUsageCallback;
   dispose(): Promise<void>;
+}
+
+function isAbortAction(result: Parameters<CollectUsageCallback>[0]): result is AbortAction {
+  return 'action' in result && result.action === 'abort';
 }
 
 export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
@@ -150,7 +156,13 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
 
       return function complete(result) {
         try {
-          if (isAsyncIterableIterator(result)) {
+          if (isAbortAction(result)) {
+            logger.info(result.reason);
+            finish();
+            return;
+          }
+
+          if (isAsyncIterableIterator(result) || isAsyncIterable(result)) {
             logger.info('@stream @defer is not supported');
             finish();
             return;
@@ -293,11 +305,10 @@ export function createCollector({
       if (collected_entire_named_types.has(namedType.name)) {
         // No need to mark this type as used again
         return;
-      } else {
-        // Add this type to the set of types that have been marked as used
-        // to avoid infinite loops
-        collected_entire_named_types.add(namedType.name);
       }
+      // Add this type to the set of types that have been marked as used
+      // to avoid infinite loops
+      collected_entire_named_types.add(namedType.name);
 
       if (isScalarType(namedType)) {
         markAsUsed(makeId(namedType.name));
@@ -367,6 +378,12 @@ export function createCollector({
             // Collect the entire type without processing the variables
             collectInputType(resolveTypeName(inputType));
           }
+        },
+        Directive(node) {
+          return {
+            ...node,
+            arguments: [],
+          };
         },
         Argument(node) {
           const parent = typeInfo.getParentType()!;
