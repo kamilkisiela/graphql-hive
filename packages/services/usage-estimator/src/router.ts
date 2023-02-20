@@ -1,13 +1,13 @@
 import { reportReadiness } from '@hive/service-common';
 import { createFetchAPIHandler } from '@valu/trpc-fetch-api-adapter';
-import { Router } from 'itty-router';
 import { createLogger } from '@hive/service-common';
 import { usageEstimatorApiRouter } from './api';
 import { env } from './environment';
 import { createEstimator } from './estimator';
 import { clickHouseElapsedDuration, clickHouseReadDuration } from './metrics';
+import { createRouter } from '@whatwg-node/router'
 
-const usageEstimatorRouter: Router = Router();
+const usageEstimatorRouter = createRouter();
 
 const logger = createLogger(env.log.level);
 

@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import { createServerAdapter } from '@whatwg-node/server';
 import 'reflect-metadata';
 import * as Sentry from '@sentry/node';
 import { startMetrics, registerShutdown } from '@hive/service-common';
@@ -21,8 +20,7 @@ async function main() {
 
   const logger = createLogger();
 
-  const app = createServerAdapter(usageEstimatorRouter);
-  const server = createServer(app);
+  const server = createServer(usageEstimatorRouter);
 
   try {
     registerShutdown({
