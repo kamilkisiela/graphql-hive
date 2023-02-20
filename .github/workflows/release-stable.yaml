@@ -1,0 +1,66 @@
+on:
+  workflow_call:
+
+jobs:
+  publish:
+    runs-on: ubuntu-22.04
+
+    env:
+      HIVE_TOKEN: ${{ secrets.HIVE_TOKEN }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: setup environment
+        uses: ./.github/actions/setup
+        with:
+          codegen: false # no need to run because release script will run it anyway
+
+      - name: prepare npm credentials
+        run: |
+          echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> $HOME/.npmrc
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: publish stable
+        id: changesets
+        uses: changesets/action@v1.4.1
+        with:
+          publish: pnpm release
+          commit: 'chore(release): update monorepo packages versions'
+          title: 'Upcoming Release Changes'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: extract published version
+        if:
+          steps.changesets.outputs.published && contains(steps.changesets.outputs.publishedPackages,
+          '"@graphql-hive/cli"')
+        id: cli
+        run: |
+          echo '${{steps.changesets.outputs.publishedPackages}}' > cli-ver.json
+          VERSION=`echo $(jq -r '.[] | select(.name | endswith("@graphql-hive/cli")).version' cli-ver.json)`
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "publish=true" >> $GITHUB_OUTPUT
+
+      - name: pack tarballs
+        if: steps.cli.outputs.publish == 'true'
+        working-directory: packages/libraries/cli
+        run: pnpm oclif:pack
+
+      - name: upload tarballs
+        if: steps.cli.outputs.publish == 'true'
+        working-directory: packages/libraries/cli
+        run: pnpm oclif:upload
+
+      - name: promote tarballs
+        if: steps.cli.outputs.publish == 'true'
+        working-directory: packages/libraries/cli
+        env:
+          VERSION: ${{ steps.cli.outputs.version }}
+        run:
+          pnpm oclif promote --no-xz --sha ${GITHUB_SHA:0:7} --version $VERSION || pnpm oclif
+          promote --no-xz --sha ${GITHUB_SHA:0:8} --version $VERSION

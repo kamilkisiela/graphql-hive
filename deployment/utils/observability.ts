@@ -1,5 +1,5 @@
 import * as k8s from '@pulumi/kubernetes';
-import { Output, interpolate } from '@pulumi/pulumi';
+import { interpolate, Output } from '@pulumi/pulumi';
 
 export type ObservabilityConfig = {
   loki: {

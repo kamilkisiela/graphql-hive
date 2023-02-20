@@ -1,8 +1,8 @@
-import { env } from '@/env/backend';
-import type { TypeProvider } from 'supertokens-node/recipe/thirdpartyemailpassword';
+import { TypeProvider } from 'supertokens-node/recipe/thirdpartyemailpassword';
 import zod from 'zod';
+import { env } from '@/env/backend';
 
-type OktaConfig = Exclude<typeof env['auth']['okta'], null>;
+type OktaConfig = Exclude<(typeof env)['auth']['okta'], null>;
 
 /**
  * Custom (server) provider for SuperTokens in order to allow Okta users to sign in.

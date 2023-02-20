@@ -1,6 +1,5 @@
 import React from 'react';
-import { StylesConfig } from 'react-select';
-import Select from 'react-select';
+import Select, { StylesConfig } from 'react-select';
 
 interface Option {
   value: string;

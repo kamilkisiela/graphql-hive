@@ -1,0 +1,142 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:13.10-alpine
+    networks:
+      - 'stack'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: registry
+      PGDATA: /var/lib/postgresql/data
+    volumes:
+      - ./.hive-dev/postgresql/db:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+
+  redis:
+    image: docker.io/bitnami/redis:7.0.7
+    networks:
+      - 'stack'
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+    ports:
+      - '6379:6379'
+    volumes:
+      - './.hive-dev/redis/db:/bitnami/redis/data'
+
+  s3:
+    image: quay.io/minio/minio:RELEASE.2022-11-29T23-40-49Z
+    command: server /data --console-address ":9001"
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    networks:
+      - 'stack'
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - './.hive-dev/minio/db:/data'
+
+  s3_provision_buckets:
+    image: quay.io/minio/mc:RELEASE.2022-11-17T21-20-39Z
+    depends_on:
+      s3:
+        condition: service_healthy
+    restart: 'no'
+    networks:
+      - 'stack'
+    entrypoint: >
+      /bin/sh -c " /usr/bin/mc alias set myminio http://s3:9000 minioadmin minioadmin; /usr/bin/mc
+      ls myminio/artifacts >/dev/null 2>&1 || /usr/bin/mc mb myminio/artifacts; exit 0"
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:23.1-alpine
+    environment:
+      CLICKHOUSE_USER: test
+      CLICKHOUSE_PASSWORD: test
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'localhost:8123/ping']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    volumes:
+      - ./.hive-dev/clickhouse/logs:/var/log/clickhouse-server
+      - ./.hive-dev/clickhouse/db:/var/lib/clickhouse
+      - ./configs/clickhouse:/etc/clickhouse-server/conf.d
+    ports:
+      - '8123:8123'
+    networks:
+      - 'stack'
+
+  broker:
+    image: vectorized/redpanda:v22.3.13
+    container_name: broker
+    hostname: broker
+    networks:
+      - 'stack'
+    ports:
+      - '0.0.0.0:9092:9092'
+      - '0.0.0.0:8081:8081'
+      - '0.0.0.0:8082:8082'
+      - '0.0.0.0:9644:9644'
+    command:
+      - redpanda
+      - start
+      - --smp
+      - '1'
+      - --set redpanda.empty_seed_starts_cluster=false
+      - --seeds "redpanda-1:33145"
+      - --kafka-addr
+      - PLAINTEXT://0.0.0.0:29092,OUTSIDE://0.0.0.0:9092
+      - --advertise-kafka-addr
+      - PLAINTEXT://broker:29092,OUTSIDE://localhost:9092
+      - --pandaproxy-addr
+      - PLAINTEXT://0.0.0.0:28082,OUTSIDE://0.0.0.0:8082
+      - --advertise-pandaproxy-addr
+      - PLAINTEXT://broker:28082,OUTSIDE://localhost:8082
+      - --advertise-rpc-addr redpanda-1:33145
+    mem_limit: 300m
+    mem_reservation: 100m
+    volumes:
+      - ./.hive-dev/broker/db:/var/lib/kafka/data
+
+  supertokens:
+    image: registry.supertokens.io/supertokens/supertokens-postgresql:4.3
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - 'stack'
+    ports:
+      - '3567:3567'
+    environment:
+      POSTGRESQL_USER: postgres
+      POSTGRESQL_PASSWORD: postgres
+      POSTGRESQL_DATABASE_NAME: registry
+      POSTGRESQL_TABLE_NAMES_PREFIX: 'supertokens'
+      POSTGRESQL_HOST: db
+      POSTGRESQL_PORT: 5432
+      API_KEYS: bubatzbieber6942096420
+      ACCESS_TOKEN_BLACKLISTING: 'true'
+
+networks:
+  stack: {}

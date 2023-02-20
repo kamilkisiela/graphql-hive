@@ -285,4 +285,7 @@ impl Drop for UsagePlugin {
     }
 }
 
-register_plugin!("hive", "usage", UsagePlugin);
+// Register the hive.usage plugin
+pub fn register() {
+    register_plugin!("hive", "usage", UsagePlugin);
+}

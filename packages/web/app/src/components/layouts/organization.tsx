@@ -1,27 +1,26 @@
 import { ReactElement, ReactNode, useEffect } from 'react';
-import { useRouter } from 'next/router';
-import { useQuery } from 'urql';
 import NextLink from 'next/link';
-
-import { Button, Heading, Tabs, SubHeader } from '@/components/v2';
+import { useRouter } from 'next/router';
+import cookies from 'js-cookie';
+import { useQuery } from 'urql';
+import { Button, Heading, SubHeader, Tabs } from '@/components/v2';
 import { PlusIcon } from '@/components/v2/icon';
 import { CreateProjectModal } from '@/components/v2/modals';
+import { LAST_VISITED_ORG_KEY } from '@/constants';
 import {
   OrganizationDocument,
-  OrganizationType,
   OrganizationFieldsFragment,
+  OrganizationType,
   OrgBillingInfoFieldsFragment,
   OrgRateLimitFieldsFragment,
 } from '@/graphql';
-import { useRouteSelector, useToggle } from '@/lib/hooks';
 import {
   canAccessOrganization,
   OrganizationAccessScope,
   useOrganizationAccess,
 } from '@/lib/access/organization';
-import cookies from 'js-cookie';
-import { LAST_VISITED_ORG_KEY } from '@/constants';
 import { getIsStripeEnabled } from '@/lib/billing/stripe-public-key';
+import { useRouteSelector, useToggle } from '@/lib/hooks';
 
 enum TabValue {
   Overview = 'overview',
@@ -134,17 +133,17 @@ export function OrganizationLayout({
           </Tabs.Trigger>
           {isRegularOrg && canAccessOrganization(OrganizationAccessScope.Members, me) && (
             <Tabs.Trigger value={TabValue.Members} asChild>
-              <NextLink href={`/${orgId}/${TabValue.Members}`}>Members</NextLink>
+              <NextLink href={`/${orgId}/view/${TabValue.Members}`}>Members</NextLink>
             </Tabs.Trigger>
           )}
           {canAccessOrganization(OrganizationAccessScope.Settings, me) && (
             <Tabs.Trigger value={TabValue.Settings} asChild>
-              <NextLink href={`/${orgId}/${TabValue.Settings}`}>Settings</NextLink>
+              <NextLink href={`/${orgId}/view/${TabValue.Settings}`}>Settings</NextLink>
             </Tabs.Trigger>
           )}
           {getIsStripeEnabled() && canAccessOrganization(OrganizationAccessScope.Settings, me) && (
             <Tabs.Trigger value={TabValue.Subscription} asChild>
-              <NextLink href={`/${orgId}/${TabValue.Subscription}`}>Subscription</NextLink>
+              <NextLink href={`/${orgId}/view/${TabValue.Subscription}`}>Subscription</NextLink>
             </Tabs.Trigger>
           )}
         </Tabs.List>

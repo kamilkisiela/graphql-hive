@@ -1,11 +1,9 @@
 import React from 'react';
-import { useColorModeValue } from '@chakra-ui/react';
-import { useQuery } from 'urql';
-import 'twin.macro';
 import { VscChevronDown } from 'react-icons/vsc';
-import { Button, Menu, MenuButton, MenuList, MenuItem } from '@chakra-ui/react';
+import { useQuery } from 'urql';
 import { ProjectsDocument } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks';
+import { Button, Menu, MenuButton, MenuItem, MenuList, useColorModeValue } from '@chakra-ui/react';
 
 export const ProjectSwitcher: React.FC<{
   organizationId: string;
@@ -48,7 +46,7 @@ export const ProjectSwitcher: React.FC<{
         as={Button}
         rightIcon={<VscChevronDown />}
         variant="ghost"
-        tw="font-normal"
+        className="font-normal"
       >
         {refinedData.currentProject.name}
       </MenuButton>
@@ -58,7 +56,7 @@ export const ProjectSwitcher: React.FC<{
             <MenuItem
               onClick={() => {
                 router.visitProject({
-                  organizationId: organizationId,
+                  organizationId,
                   projectId: item.cleanId,
                 });
               }}

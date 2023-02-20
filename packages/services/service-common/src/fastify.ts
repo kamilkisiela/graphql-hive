@@ -1,15 +1,16 @@
 import { fastify } from 'fastify';
 import cors from 'fastify-cors';
 import * as Sentry from '@sentry/node';
-import { useSentryTracing } from './sentry';
 import { useRequestLogging } from './request-logs';
+import { useSentryTracing } from './sentry';
 
-export type { FastifyLoggerInstance } from 'fastify';
+export type { FastifyLoggerInstance, FastifyRequest } from 'fastify';
 
 export async function createServer(options: {
   tracing: boolean;
   name: string;
   log: {
+    requests: boolean;
     level: string;
   };
 }) {
@@ -42,7 +43,10 @@ export async function createServer(options: {
     await useSentryTracing(server);
   }
 
-  await useRequestLogging(server);
+  if (options.log.requests) {
+    await useRequestLogging(server);
+  }
+
   await server.register(cors);
 
   return server;

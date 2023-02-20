@@ -1,14 +1,13 @@
-import { fetch } from '@whatwg-node/fetch';
+import { endOfMonth, startOfMonth } from 'date-fns';
 import type { FastifyLoggerInstance } from '@hive/service-common';
 import { createStorage as createPostgreSQLStorage } from '@hive/storage';
-
-import { startOfMonth, endOfMonth } from 'date-fns';
+import type { UsageEstimatorApi } from '@hive/usage-estimator';
 import * as Sentry from '@sentry/node';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
-import type { UsageEstimatorApi } from '@hive/usage-estimator';
+import { fetch } from '@whatwg-node/fetch';
 import type { RateLimitInput } from './api';
-import { rateLimitOperationsEventOrg } from './metrics';
 import { createEmailScheduler } from './emails';
+import { rateLimitOperationsEventOrg } from './metrics';
 
 export type RateLimitCheckResponse = {
   limited: boolean;
@@ -171,10 +170,6 @@ export function createRateLimiter(config: {
 
     cachedResult = newCachedResult;
     targetIdToOrgLookup = newTargetIdToOrgLookup;
-    logger.info(
-      `Built a new rate-limit map: %s`,
-      JSON.stringify(Array.from(newCachedResult.entries())),
-    );
 
     const scheduledEmails = emails.drain();
     if (scheduledEmails.length > 0) {
@@ -223,9 +218,8 @@ export function createRateLimiter(config: {
 
       if (input.type === 'operations-reporting') {
         return orgData.operations;
-      } else {
-        return UNKNOWN_RATE_LIMIT_OBJ;
       }
+      return UNKNOWN_RATE_LIMIT_OBJ;
     },
     async start() {
       logger.info(

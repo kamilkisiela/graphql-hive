@@ -2,7 +2,6 @@ import { ReactElement } from 'react';
 import NextLink from 'next/link';
 import clsx from 'clsx';
 import { useQuery } from 'urql';
-
 import { authenticated } from '@/components/authenticated-container';
 import { ProjectLayout } from '@/components/layouts';
 import {
@@ -10,12 +9,17 @@ import {
   Badge,
   Button,
   Card,
-  DropdownMenu,
   EmptyList,
   Heading,
   TimeAgo,
   Title,
 } from '@/components/v2';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/v2/dropdown';
 import { LinkIcon, MoreIcon, SettingsIcon } from '@/components/v2/icon';
 import { TargetQuery, TargetsDocument, VersionsDocument } from '@/graphql';
 import { getDocsUrl } from '@/lib/docs-url';
@@ -44,7 +48,7 @@ const TargetCard = ({
   });
   const versions = versionsQuery.data?.schemaVersions;
   const lastVersion = versions?.nodes[0];
-  const author = lastVersion?.commit.author;
+  const author = lastVersion?.log && 'author' in lastVersion.log ? lastVersion.log.author : null;
   const isValid = lastVersion?.valid;
   const href = `/${router.organizationId}/${router.projectId}/${target.cleanId}`;
 
@@ -55,13 +59,13 @@ const TargetCard = ({
           <h2 className="line-clamp-2 text-lg font-bold">{target.name}</h2>
         </div>
         <DropdownMenu>
-          <DropdownMenu.Trigger asChild>
+          <DropdownMenuTrigger asChild>
             <Button rotate={90}>
               <MoreIcon />
             </Button>
-          </DropdownMenu.Trigger>
-          <DropdownMenu.Content sideOffset={5} align="start">
-            <DropdownMenu.Item
+          </DropdownMenuTrigger>
+          <DropdownMenuContent sideOffset={5} align="start">
+            <DropdownMenuItem
               onClick={async e => {
                 e.stopPropagation();
                 await copyToClipboard(`${location.origin}${href}`);
@@ -69,16 +73,16 @@ const TargetCard = ({
             >
               <LinkIcon />
               Share Link
-            </DropdownMenu.Item>
+            </DropdownMenuItem>
             <NextLink
               href={`/${router.organizationId}/${router.projectId}/${target.cleanId}#settings`}
             >
-              <DropdownMenu.Item>
+              <DropdownMenuItem>
                 <SettingsIcon />
                 Settings
-              </DropdownMenu.Item>
+              </DropdownMenuItem>
             </NextLink>
-          </DropdownMenu.Content>
+          </DropdownMenuContent>
         </DropdownMenu>
       </div>
       {author && (
@@ -87,7 +91,9 @@ const TargetCard = ({
             {lastVersion ? (
               <>
                 <Badge color={isValid ? 'green' : 'red'} />
-                <span>{lastVersion.commit.commit.substring(0, 7)}</span>
+                <span>
+                  {'commit' in lastVersion.log ? lastVersion.log.commit.substring(0, 7) : ''}
+                </span>
                 <span>
                   - Published <TimeAgo date={lastVersion.date} />
                 </span>
@@ -123,7 +129,7 @@ const Page = () => {
           <EmptyList
             title="Hive is waiting for your first target"
             description='You can create a target by clicking the "New Target" button'
-            docsUrl={getDocsUrl(`/get-started/targets`)}
+            docsUrl={getDocsUrl('/get-started/targets')}
           />
         ) : (
           targets?.nodes.map(target => <TargetCard key={target.id} target={target} />)

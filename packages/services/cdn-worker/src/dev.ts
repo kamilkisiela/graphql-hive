@@ -1,14 +1,30 @@
-import './dev-polyfill';
 import { createServer } from 'http';
-import { createRequestHandler } from './handler';
-import { createArtifactRequestHandler } from './artifact-handler';
-import { devStorage } from './dev-polyfill';
-import { createServerAdapter } from '@whatwg-node/server';
-import { withParams, json } from 'itty-router-extras';
-import { createIsKeyValid } from './key-validation';
 import itty from 'itty-router';
-import { S3Client } from '@aws-sdk/client-s3';
-import { ArtifactStorageReader } from '@hive/api/src/modules/schema/providers/artifact-storage-reader';
+import { json, withParams } from 'itty-router-extras';
+import { createServerAdapter } from '@whatwg-node/server';
+import { createArtifactRequestHandler } from './artifact-handler';
+import { ArtifactStorageReader } from './artifact-storage-reader';
+import { AwsClient } from './aws';
+import './dev-polyfill';
+import { devStorage } from './dev-polyfill';
+import { createRequestHandler } from './handler';
+import { createIsKeyValid } from './key-validation';
+
+declare let S3_ENDPOINT: string;
+declare let S3_ACCESS_KEY_ID: string;
+declare let S3_SECRET_ACCESS_KEY: string;
+declare let S3_BUCKET_NAME: string;
+declare let S3_PUBLIC_URL: string;
+
+const s3 = {
+  client: new AwsClient({
+    accessKeyId: S3_ACCESS_KEY_ID,
+    secretAccessKey: S3_SECRET_ACCESS_KEY,
+    service: 's3',
+  }),
+  bucketName: S3_BUCKET_NAME,
+  endpoint: S3_ENDPOINT,
+};
 
 // eslint-disable-next-line no-process-env
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4010;
@@ -20,36 +36,15 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4010;
 // @ts-ignore
 declare let HIVE_DATA: KVNamespace;
 
-/**
- * Secret used to sign the CDN keys
- */
-declare let KEY_DATA: string;
-
 const handleRequest = createRequestHandler({
   getRawStoreValue: value => HIVE_DATA.get(value),
-  isKeyValid: createIsKeyValid({ keyData: KEY_DATA }),
+  isKeyValid: createIsKeyValid({ s3, getCache: null, waitUntil: null, analytics: null }),
 });
 
-declare let S3_ENDPOINT: string;
-declare let S3_ACCESS_KEY_ID: string;
-declare let S3_SECRET_ACCESS_KEY: string;
-declare let S3_BUCKET_NAME: string;
-declare let S3_PUBLIC_URL: string;
-
-const s3Client = new S3Client({
-  endpoint: S3_ENDPOINT,
-  credentials: {
-    accessKeyId: S3_ACCESS_KEY_ID,
-    secretAccessKey: S3_SECRET_ACCESS_KEY,
-  },
-  forcePathStyle: true,
-  region: 'auto',
-});
-
-const artifactStorageReader = new ArtifactStorageReader(s3Client, S3_BUCKET_NAME, S3_PUBLIC_URL);
+const artifactStorageReader = new ArtifactStorageReader(s3, S3_PUBLIC_URL);
 
 const handleArtifactRequest = createArtifactRequestHandler({
-  isKeyValid: createIsKeyValid({ keyData: KEY_DATA }),
+  isKeyValid: createIsKeyValid({ s3, getCache: null, waitUntil: null, analytics: null }),
   async getArtifactAction(targetId, artifactType, eTag) {
     return artifactStorageReader.generateArtifactReadUrl(targetId, artifactType, eTag);
   },
@@ -111,7 +106,7 @@ function main() {
   const server = createServer(app);
 
   return new Promise<void>(resolve => {
-    server.listen(PORT, '0.0.0.0', resolve);
+    server.listen(PORT, '::', resolve);
   });
 }
 

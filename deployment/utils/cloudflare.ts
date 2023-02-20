@@ -1,7 +1,7 @@
-import * as cf from '@pulumi/cloudflare';
-import * as pulumi from '@pulumi/pulumi';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
+import * as cf from '@pulumi/cloudflare';
+import * as pulumi from '@pulumi/pulumi';
 
 export class CloudflareCDN {
   constructor(
@@ -9,7 +9,6 @@ export class CloudflareCDN {
       envName: string;
       zoneId: string;
       cdnDnsRecord: string;
-      authPrivateKey: pulumi.Output<string>;
       sentryDsn: string;
       release: string;
       s3Config: {
@@ -28,7 +27,9 @@ export class CloudflareCDN {
 
     const script = new cf.WorkerScript('hive-ha-worker', {
       content: readFileSync(
-        resolve(__dirname, '../../packages/services/cdn-worker/dist/worker.js'),
+        // eslint-disable-next-line no-process-env
+        process.env.CDN_WORKER_ARTIFACT_PATH ||
+          resolve(__dirname, '../../packages/services/cdn-worker/dist/index.worker.js'),
         'utf-8',
       ),
       name: `hive-storage-cdn-${this.config.envName}`,
@@ -39,13 +40,21 @@ export class CloudflareCDN {
           namespaceId: kvStorage.id,
         },
       ],
-      secretTextBindings: [
+      analyticsEngineBindings: [
         {
-          // KEY_DATA is in use in cdn-script.js as well, its the name of the global variable,
-          // basically it's the private key for the hmac key.
-          name: 'KEY_DATA',
-          text: this.config.authPrivateKey,
+          name: 'USAGE_ANALYTICS',
+          dataset: `hive_ha_cdn_usage_${this.config.envName}`,
         },
+        {
+          name: 'ERROR_ANALYTICS',
+          dataset: `hive_ha_cdn_error_${this.config.envName}`,
+        },
+        {
+          name: 'KEY_VALIDATION_ANALYTICS',
+          dataset: `hive_ha_cdn_key_validation_${this.config.envName}`,
+        },
+      ],
+      secretTextBindings: [
         {
           name: 'SENTRY_DSN',
           text: this.config.sentryDsn,
@@ -87,7 +96,6 @@ export class CloudflareCDN {
     });
 
     return {
-      authPrivateKey: this.config.authPrivateKey,
       workerBaseUrl: workerUrl,
       cfStorageNamespaceId: kvStorage.id,
     };
@@ -109,7 +117,9 @@ export class CloudflareBroker {
   deploy() {
     const script = new cf.WorkerScript('hive-broker-worker', {
       content: readFileSync(
-        resolve(__dirname, '../../packages/services/broker-worker/dist/worker.js'),
+        // eslint-disable-next-line no-process-env
+        process.env.BROKER_WORKER_ARTIFACT_PATH ||
+          resolve(__dirname, '../../packages/services/broker-worker/dist/index.worker.js'),
         'utf-8',
       ),
       name: `hive-broker-${this.config.envName}`,

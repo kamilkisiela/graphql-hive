@@ -33,7 +33,6 @@ The GraphQL API for GraphQL Hive.
 | `S3_SECRET_ACCESS_KEY`                      | **Yes**                                        | The S3 secret access key.                                                                     | `minioadmin`                                         |
 | `S3_BUCKET_NAME`                            | **Yes**                                        | The S3 bucket name.                                                                           | `artifacts`                                          |
 | `S3_PUBLIC_URL`                             | No                                             | The public URL of the S3, in case it differs from the `S#_ENDPOINT`.                          | `http://localhost:8083`                              |
-| `CDN_AUTH_PRIVATE_KEY`                      | **Yes**                                        | The artifacts private key                                                                     | `103df4521212121269213971ce28b5b0`                   |
 | `CDN_API`                                   | No                                             | Whether the CDN exposed via API is enabled.                                                   | `1` (enabled) or `0` (disabled)                      |
 | `CDN_API_BASE_URL`                          | No (Yes if `CDN_API` is set to `1`)            | The public base url of the API service.                                                       | `http://localhost:8082`                              |
 | `SUPERTOKENS_CONNECTION_URI`                | **Yes**                                        | The URI of the SuperTokens instance.                                                          | `http://127.0.0.1:3567`                              |
@@ -47,6 +46,7 @@ The GraphQL API for GraphQL Hive.
 | `SENTRY_DSN`                                | No                                             | The DSN for reporting errors to Sentry.                                                       | `https://dooobars@o557896.ingest.sentry.io/12121212` |
 | `PROMETHEUS_METRICS`                        | No                                             | Whether Prometheus metrics should be enabled                                                  | `1` (enabled) or `0` (disabled)                      |
 | `PROMETHEUS_METRICS_LABEL_INSTANCE`         | No                                             | The instance label added for the prometheus metrics.                                          | `server`                                             |
+| `REQUEST_LOGGING`                           | No                                             | Log http requests                                                                             | `1` (enabled) or `0` (disabled)                      |
 
 ## Hive Hosted Configuration
 

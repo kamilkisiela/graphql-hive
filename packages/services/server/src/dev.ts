@@ -1,6 +1,6 @@
-import { config } from 'dotenv';
-import { readFileSync, existsSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
+import { config } from 'dotenv';
 
 config({
   debug: true,

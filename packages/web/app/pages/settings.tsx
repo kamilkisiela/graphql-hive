@@ -1,10 +1,9 @@
 import { useFormik } from 'formik';
 import { gql, useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
-
-import { Avatar, Button, SubHeader, Heading, Input, Tabs, Title } from '@/components/v2';
-import { MeDocument } from '@/graphql';
 import { authenticated } from '@/components/authenticated-container';
+import { Avatar, Button, Heading, Input, SubHeader, Tabs, Title } from '@/components/v2';
+import { MeDocument } from '@/graphql';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const UpdateMeMutation = gql(/* GraphQL */ `
@@ -85,7 +84,7 @@ const SettingsPage = (): React.ReactElement => {
                 onChange={handleChange}
                 onBlur={handleBlur}
                 disabled={isSubmitting}
-                isInvalid={touched.fullName && Boolean(errors.fullName)}
+                isInvalid={touched.fullName && !!errors.fullName}
               />
               {touched.fullName && errors.fullName && (
                 <span className="text-red-500">{errors.fullName}</span>
@@ -108,7 +107,7 @@ const SettingsPage = (): React.ReactElement => {
                 onChange={handleChange}
                 onBlur={handleBlur}
                 disabled={isSubmitting}
-                isInvalid={touched.displayName && Boolean(errors.displayName)}
+                isInvalid={touched.displayName && !!errors.displayName}
               />
               {touched.displayName && errors.displayName && (
                 <span className="text-red-500">{errors.displayName}</span>

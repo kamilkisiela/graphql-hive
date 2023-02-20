@@ -1,10 +1,10 @@
+import type { FastifyInstance, FastifyPluginAsync, FastifyRequest } from 'fastify';
+import fp from 'fastify-plugin';
 import * as Sentry from '@sentry/node';
 import '@sentry/tracing';
 import { Transaction } from '@sentry/tracing';
-import { extractTraceparentData, normalize } from '@sentry/utils';
 import type { ExtractedNodeRequestData, TraceparentData } from '@sentry/types';
-import type { FastifyInstance, FastifyPluginAsync, FastifyRequest } from 'fastify';
-import fp from 'fastify-plugin';
+import { extractTraceparentData, normalize } from '@sentry/utils';
 import { cleanRequestId } from './helpers';
 
 const plugin: FastifyPluginAsync = async server => {
@@ -30,7 +30,7 @@ const plugin: FastifyPluginAsync = async server => {
     const requestId = cleanRequestId(request.headers['x-request-id']);
     if (requestId) {
       Sentry.configureScope(scope => {
-        scope.setTag('request_id', requestId as string);
+        scope.setTag('request_id', requestId);
         if (request.headers.referer) {
           scope.setTag('referer', request.headers.referer);
         }

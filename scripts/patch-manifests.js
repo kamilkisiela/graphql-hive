@@ -3,10 +3,9 @@
 
   That's why we patch package.json of @octokit/webhooks-methods and replace the value of `main` with the value from `source`.
 */
-
 import fs from 'fs';
-import path from 'path';
 import { createRequire } from 'module';
+import path from 'path';
 
 function patchPackage(name, patchFn) {
   const require = createRequire(import.meta.url);

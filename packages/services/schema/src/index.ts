@@ -1,17 +1,17 @@
 #!/usr/bin/env node
+import crypto from 'crypto';
+import Redis from 'ioredis';
 import {
-  createServer,
   createErrorHandler,
-  startMetrics,
+  createServer,
   registerShutdown,
+  registerTRPC,
   reportReadiness,
+  startMetrics,
 } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
-import Redis from 'ioredis';
-import crypto from 'crypto';
-import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
-import type { CreateFastifyContextOptions } from '@trpc/server/adapters/fastify';
-import { schemaBuilderApiRouter } from './api';
+import { Context, schemaBuilderApiRouter } from './api';
+import { createCache } from './cache';
 import { env } from './environment';
 
 const ENCRYPTION_SECRET = crypto.createHash('md5').update(env.encryptionSecret).digest('hex');
@@ -48,6 +48,7 @@ async function main() {
     tracing: false,
     log: {
       level: env.log.level,
+      requests: env.log.requests,
     },
   });
 
@@ -100,13 +101,17 @@ async function main() {
 
     const decrypt = decryptFactory();
 
-    await server.register(fastifyTRPCPlugin, {
-      prefix: '/trpc',
-      trpcOptions: {
-        router: schemaBuilderApiRouter,
-        createContext({ req }: CreateFastifyContextOptions) {
-          return { redis, logger: req.log, decrypt, broker: env.requestBroker };
-        },
+    await registerTRPC(server, {
+      router: schemaBuilderApiRouter,
+      createContext({ req }): Context {
+        const cache = createCache({
+          prefix: 'schema-service',
+          redis,
+          logger: req.log,
+          pollIntervalMs: 150,
+          timeoutMs: 25_000,
+        });
+        return { cache, req, decrypt, broker: env.requestBroker };
       },
     });
 
@@ -127,7 +132,7 @@ async function main() {
       },
     });
 
-    await server.listen(env.http.port, '0.0.0.0');
+    await server.listen(env.http.port, '::');
     if (env.prometheus) {
       await startMetrics(env.prometheus.labels.instance);
     }

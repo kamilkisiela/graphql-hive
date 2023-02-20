@@ -1,12 +1,12 @@
-import type { TokenModule } from './__generated__/types';
+import { z } from 'zod';
 import { createConnection } from '../../shared/schema';
-import { TokenManager } from './providers/token-manager';
-import { IdTranslator } from '../shared/providers/id-translator';
 import { AuthManager } from '../auth/providers/auth-manager';
 import { OrganizationManager } from '../organization/providers/organization-manager';
 import { ProjectManager } from '../project/providers/project-manager';
+import { IdTranslator } from '../shared/providers/id-translator';
 import { TargetManager } from '../target/providers/target-manager';
-import { z } from 'zod';
+import type { TokenModule } from './__generated__/types';
+import { TokenManager } from './providers/token-manager';
 
 const TokenNameModel = z.string().min(2).max(50);
 

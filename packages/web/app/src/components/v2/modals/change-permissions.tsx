@@ -1,10 +1,9 @@
 import { ReactElement } from 'react';
-import { Accordion } from '@chakra-ui/react';
-
 import { PermissionsSpace, usePermissionsManager } from '@/components/organization/Permissions';
 import { Button, Heading, Modal } from '@/components/v2';
 import { MemberFieldsFragment, OrganizationFieldsFragment } from '@/graphql';
 import { scopes } from '@/lib/access/common';
+import { Accordion } from '@chakra-ui/react';
 
 export const ChangePermissionsModal = ({
   isOpen,

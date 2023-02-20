@@ -1,9 +1,9 @@
-import { Flags, Errors } from '@oclif/core';
-import { buildSchema, Source, GraphQLError } from 'graphql';
-import { validate, InvalidDocument } from '@graphql-inspector/core';
+import { buildSchema, GraphQLError, Source } from 'graphql';
+import { InvalidDocument, validate } from '@graphql-inspector/core';
+import { Errors, Flags } from '@oclif/core';
 import Command from '../../base-command';
-import { loadOperations } from '../../helpers/operations';
 import { graphqlEndpoint } from '../../helpers/config';
+import { loadOperations } from '../../helpers/operations';
 
 export default class OperationsCheck extends Command {
   static description = 'checks operations against a published schema';
@@ -61,7 +61,7 @@ export default class OperationsCheck extends Command {
 
       const result = await this.registryApi(registry, token).fetchLatestVersion();
 
-      const sdl = result.latestVersion.sdl;
+      const sdl = result.latestVersion?.sdl;
 
       if (!sdl) {
         this.error('No schema found');

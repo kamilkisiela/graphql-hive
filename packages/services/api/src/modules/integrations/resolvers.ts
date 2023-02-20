@@ -1,9 +1,9 @@
-import type { IntegrationsModule } from './__generated__/types';
-import { SlackIntegrationManager } from './providers/slack-integration-manager';
-import { GitHubIntegrationManager } from './providers/github-integration-manager';
-import { IdTranslator } from '../shared/providers/id-translator';
 import { z } from 'zod';
 import { HiveError } from '../../shared/errors';
+import { IdTranslator } from '../shared/providers/id-translator';
+import type { IntegrationsModule } from './__generated__/types';
+import { GitHubIntegrationManager } from './providers/github-integration-manager';
+import { SlackIntegrationManager } from './providers/slack-integration-manager';
 
 /**
  * Current token size is 255 characters.

@@ -1,45 +1,44 @@
 import { createHash } from 'crypto';
 import {
   buildASTSchema,
-  isObjectType,
-  isInterfaceType,
-  isUnionType,
+  GraphQLError,
+  GraphQLNamedType,
   isEnumType,
   isInputObjectType,
+  isInterfaceType,
+  isObjectType,
   isScalarType,
-  GraphQLNamedType,
-  GraphQLError,
+  isUnionType,
 } from 'graphql';
-import type { SchemaModule } from './__generated__/types';
-import { SchemaManager } from './providers/schema-manager';
-import { SchemaPublisher } from './providers/schema-publisher';
-import { Inspector } from './providers/inspector';
-import { buildSchema, createConnection } from '../../shared/schema';
-import { ProjectType } from '../../shared/entities';
-import type {
-  GraphQLObjectTypeMapper,
-  GraphQLInterfaceTypeMapper,
-  GraphQLUnionTypeMapper,
-  GraphQLEnumTypeMapper,
-  GraphQLInputObjectTypeMapper,
-  GraphQLScalarTypeMapper,
-} from '../../shared/mappers';
-import { ProjectManager } from '../project/providers/project-manager';
-import { IdTranslator } from '../shared/providers/id-translator';
-import { OrganizationManager } from '../organization/providers/organization-manager';
-import { SchemaBuildError } from './providers/orchestrators/errors';
-import { TargetManager } from '../target/providers/target-manager';
-import { AuthManager } from '../auth/providers/auth-manager';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import { z } from 'zod';
-import { SchemaHelper } from './providers/schema-helper';
-import type { WithSchemaCoordinatesUsage, WithGraphQLParentInfo } from '../../shared/mappers';
+import { ProjectType } from '../../shared/entities';
 import { createPeriod, parseDateRangeInput } from '../../shared/helpers';
+import type {
+  GraphQLEnumTypeMapper,
+  GraphQLInputObjectTypeMapper,
+  GraphQLInterfaceTypeMapper,
+  GraphQLObjectTypeMapper,
+  GraphQLScalarTypeMapper,
+  GraphQLUnionTypeMapper,
+} from '../../shared/mappers';
+import type { WithGraphQLParentInfo, WithSchemaCoordinatesUsage } from '../../shared/mappers';
+import { buildSchema, createConnection } from '../../shared/schema';
+import { AuthManager } from '../auth/providers/auth-manager';
 import { OperationsManager } from '../operations/providers/operations-manager';
+import { OrganizationManager } from '../organization/providers/organization-manager';
+import { ProjectManager } from '../project/providers/project-manager';
+import { IdTranslator } from '../shared/providers/id-translator';
+import { TargetManager } from '../target/providers/target-manager';
+import type { SchemaModule } from './__generated__/types';
+import { Inspector } from './providers/inspector';
+import { SchemaBuildError } from './providers/orchestrators/errors';
+import { SchemaHelper } from './providers/schema-helper';
+import { SchemaManager } from './providers/schema-manager';
+import { SchemaPublisher } from './providers/schema-publisher';
 
 const MaybeModel = <T extends z.ZodType>(value: T) => z.union([z.null(), z.undefined(), value]);
 const GraphQLSchemaStringModel = z.string().max(5_000_000).min(0);
-const ServiceNameModel = z.string().min(1).max(100);
 
 async function usage(
   source:
@@ -86,6 +85,7 @@ export const resolvers: SchemaModule.Resolvers = {
 
       return injector.get(SchemaPublisher).check({
         ...input,
+        service: input.service?.toLowerCase(),
         organization,
         project,
         target,
@@ -100,7 +100,12 @@ export const resolvers: SchemaModule.Resolvers = {
       const token = injector.get(AuthManager).ensureApiToken();
 
       const checksum = createHash('md5')
-        .update(JSON.stringify(input))
+        .update(
+          JSON.stringify({
+            ...input,
+            service: input.service?.toLowerCase(),
+          }),
+        )
         .update(token)
         .digest('base64');
 
@@ -113,11 +118,43 @@ export const resolvers: SchemaModule.Resolvers = {
       return injector.get(SchemaPublisher).publish(
         {
           ...input,
+          service: input.service?.toLowerCase(),
           checksum,
           organization,
           project,
           target,
           isSchemaPublishMissingUrlErrorSelected,
+        },
+        abortSignal,
+      );
+    },
+    async schemaDelete(_, { input }, { injector, abortSignal }) {
+      const [organization, project, target] = await Promise.all([
+        injector.get(OrganizationManager).getOrganizationIdByToken(),
+        injector.get(ProjectManager).getProjectIdByToken(),
+        injector.get(TargetManager).getTargetIdByToken(),
+      ]);
+
+      const token = injector.get(AuthManager).ensureApiToken();
+
+      const checksum = createHash('md5')
+        .update(
+          JSON.stringify({
+            ...input,
+            serviceName: input.serviceName.toLowerCase(),
+          }),
+        )
+        .update(token)
+        .digest('base64');
+
+      return injector.get(SchemaPublisher).delete(
+        {
+          dryRun: input.dryRun,
+          serviceName: input.serviceName.toLowerCase(),
+          organization,
+          project,
+          target,
+          checksum,
         },
         abortSignal,
       );
@@ -175,79 +212,6 @@ export const resolvers: SchemaModule.Resolvers = {
         },
       };
     },
-    async updateSchemaServiceName(_, { input }, { injector }) {
-      const UpdateSchemaServiceNameModel = z.object({
-        newName: ServiceNameModel,
-      });
-
-      const result = UpdateSchemaServiceNameModel.safeParse(input);
-
-      if (!result.success) {
-        return {
-          error: {
-            message: result.error.formErrors.fieldErrors.newName?.[0] ?? 'Please check your input.',
-          },
-        };
-      }
-
-      const translator = injector.get(IdTranslator);
-      const [organization, project, target] = await Promise.all([
-        translator.translateOrganizationId(input),
-        translator.translateProjectId(input),
-        translator.translateTargetId(input),
-      ]);
-
-      const { type: projectType } = await injector.get(ProjectManager).getProject({
-        organization,
-        project,
-      });
-
-      await injector.get(SchemaManager).updateServiceName({
-        organization,
-        project,
-        target,
-        version: input.version,
-        name: input.name,
-        newName: input.newName,
-        projectType,
-      });
-
-      return {
-        ok: {
-          updatedTarget: await injector.get(TargetManager).getTarget({
-            organization,
-            project,
-            target,
-          }),
-        },
-      };
-    },
-    async schemaSyncCDN(_, { input }, { injector }) {
-      const translator = injector.get(IdTranslator);
-      const [organization, project, target] = await Promise.all([
-        translator.translateOrganizationId(input),
-        translator.translateProjectId(input),
-        translator.translateTargetId(input),
-      ]);
-
-      try {
-        await injector.get(SchemaPublisher).sync({
-          organization,
-          project,
-          target,
-        });
-
-        return {
-          __typename: 'SchemaSyncCDNSuccess',
-          message: 'CDN is now up to date with the latest version',
-        };
-      } catch (error) {
-        return {
-          __typename: 'SchemaSyncCDNError',
-          message: error instanceof Error ? error.message : 'Failed to sync with CDN',
-        };
-      }
-    },
     async disableExternalSchemaComposition(_, { input }, { injector }) {
       const translator = injector.get(IdTranslator);
       const [organization, project] = await Promise.all([
@@ -272,6 +236,19 @@ export const resolvers: SchemaModule.Resolvers = {
         organization,
         endpoint: input.endpoint,
         secret: input.secret,
+      });
+    },
+    async updateProjectRegistryModel(_, { input }, { injector }) {
+      const translator = injector.get(IdTranslator);
+      const [organization, project] = await Promise.all([
+        translator.translateOrganizationId(input),
+        translator.translateProjectId(input),
+      ]);
+
+      return injector.get(SchemaManager).updateRegistryModel({
+        project,
+        organization,
+        model: input.model,
       });
     },
   },
@@ -418,7 +395,7 @@ export const resolvers: SchemaModule.Resolvers = {
     async latestVersion(_, __, { injector }) {
       const target = await injector.get(TargetManager).getTargetFromToken();
 
-      return injector.get(SchemaManager).getLatestValidVersion({
+      return injector.get(SchemaManager).getMaybeLatestVersion({
         organization: target.orgId,
         project: target.projectId,
         target: target.id,
@@ -427,7 +404,7 @@ export const resolvers: SchemaModule.Resolvers = {
     async latestValidVersion(_, __, { injector }) {
       const target = await injector.get(TargetManager).getTargetFromToken();
 
-      return injector.get(SchemaManager).getLatestValidVersion({
+      return injector.get(SchemaManager).getMaybeLatestValidVersion({
         organization: target.orgId,
         project: target.projectId,
         target: target.id,
@@ -458,16 +435,47 @@ export const resolvers: SchemaModule.Resolvers = {
     },
   },
   SchemaVersion: {
-    commit(version, _, { injector }) {
-      return injector.get(SchemaManager).getCommit({
+    async log(version, _, { injector }) {
+      const log = await injector.get(SchemaManager).getSchemaLog({
         commit: version.commit,
         organization: version.organization,
         project: version.project,
         target: version.target,
       });
+
+      if (log.kind === 'single') {
+        return {
+          __typename: 'PushedSchemaLog',
+          author: log.author,
+          commit: log.commit,
+          date: log.date as any,
+          id: log.id,
+          service: null,
+        };
+      }
+
+      if (log.action === 'DELETE') {
+        return {
+          __typename: 'DeletedSchemaLog',
+          author: 'system',
+          commit: 'system',
+          date: log.date as any,
+          id: log.id,
+          deletedService: log.service_name,
+        };
+      }
+
+      return {
+        __typename: 'PushedSchemaLog',
+        author: log.author,
+        commit: log.commit,
+        date: log.date as any,
+        id: log.id,
+        service: log.service_name,
+      };
     },
     schemas(version, _, { injector }) {
-      return injector.get(SchemaManager).getCommits({
+      return injector.get(SchemaManager).getSchemasOfVersion({
         version: version.id,
         organization: version.organization,
         project: version.project,
@@ -488,11 +496,12 @@ export const resolvers: SchemaModule.Resolvers = {
       const orchestrator = schemaManager.matchOrchestrator(project.type);
       const helper = injector.get(SchemaHelper);
 
-      const schemas = await schemaManager.getCommits({
+      const schemas = await schemaManager.getSchemasOfVersion({
         version: version.id,
         organization: version.organization,
         project: version.project,
         target: version.target,
+        includeMetadata: false,
       });
 
       return orchestrator.supergraph(
@@ -510,11 +519,12 @@ export const resolvers: SchemaModule.Resolvers = {
       const orchestrator = schemaManager.matchOrchestrator(project.type);
       const helper = injector.get(SchemaHelper);
 
-      const schemas = await schemaManager.getCommits({
+      const schemas = await schemaManager.getSchemasOfVersion({
         version: version.id,
         organization: version.organization,
         project: version.project,
         target: version.target,
+        includeMetadata: false,
       });
 
       return (
@@ -537,7 +547,7 @@ export const resolvers: SchemaModule.Resolvers = {
       const orchestrator = schemaManager.matchOrchestrator(project.type);
       const helper = injector.get(SchemaHelper);
 
-      const schemas = await schemaManager.getCommits({
+      const schemas = await schemaManager.getSchemasOfVersion({
         version: version.id,
         organization: version.organization,
         project: version.project,
@@ -552,6 +562,7 @@ export const resolvers: SchemaModule.Resolvers = {
       return {
         schema: buildASTSchema(schema.document, {
           assumeValidSDL: true,
+          assumeValid: true,
         }),
         usage: {
           period: usage?.period ? parseDateRangeInput(usage.period) : createPeriod('30d'),
@@ -607,11 +618,44 @@ export const resolvers: SchemaModule.Resolvers = {
       };
     },
   },
+  SingleSchema: {
+    __isTypeOf(obj) {
+      return obj.kind === 'single';
+    },
+    source(schema) {
+      return schema.sdl;
+    },
+  },
+  CompositeSchema: {
+    __isTypeOf(obj) {
+      return obj.kind === 'composite' && obj.action === 'PUSH';
+    },
+    service(schema) {
+      return schema.service_name;
+    },
+    source(schema) {
+      return schema.sdl;
+    },
+    url(schema) {
+      return schema.service_url;
+    },
+  },
+  // DeletedCompositeSchema: {
+  //   __isTypeOf(obj) {
+  //     return obj.kind === 'composite' && obj.action === 'DELETE';
+  //   },
+  //   service(schema) {
+  //     return schema.service_name;
+  //   },
+  // },
   SchemaConnection: createConnection(),
   SchemaVersionConnection: {
     pageInfo(info) {
       return {
-        hasMore: info.hasMore,
+        hasNextPage: info.hasMore,
+        hasPreviousPage: false,
+        endCursor: '',
+        startCursor: '',
       };
     },
   },
@@ -636,6 +680,9 @@ export const resolvers: SchemaModule.Resolvers = {
       }
 
       return null;
+    },
+    registryModel(project) {
+      return project.legacyRegistryModel ? 'LEGACY' : 'MODERN';
     },
   },
   SchemaExplorer: {

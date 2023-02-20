@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import { createServerAdapter } from '@whatwg-node/server';
 import 'reflect-metadata';
 import * as Sentry from '@sentry/node';
 import { startMetrics, registerShutdown, createLogger } from '@hive/service-common';
@@ -20,8 +19,7 @@ async function main() {
 
   const logger = createLogger();
 
-  const app = createServerAdapter(stripeBillingRouter);
-  const server = createServer(app);
+  const server = createServer(stripeBillingRouter);
 
   try {
     registerShutdown({
@@ -36,7 +34,7 @@ async function main() {
     }
     await startStripeBilling();
     return new Promise<void>(resolve => {
-      server.listen(env.http.port, '0.0.0.0', resolve);
+      server.listen(env.http.port, 'localhost', resolve);
     });
   } catch (error: any) {
     logger.fatal(error);

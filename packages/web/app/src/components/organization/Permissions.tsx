@@ -1,20 +1,19 @@
-import React from 'react';
-import 'twin.macro';
+import React, { FormEventHandler } from 'react';
 import { useMutation } from 'urql';
-import { Select, AccordionItem, AccordionButton, AccordionPanel } from '@chakra-ui/react';
 import {
   MemberFieldsFragment,
-  OrganizationFieldsFragment,
-  UpdateOrganizationMemberAccessDocument,
   OrganizationAccessScope,
+  OrganizationFieldsFragment,
   ProjectAccessScope,
   TargetAccessScope,
+  UpdateOrganizationMemberAccessDocument,
 } from '@/graphql';
-import { Scope, NoAccess } from '@/lib/access/common';
+import { NoAccess, Scope } from '@/lib/access/common';
 import { canAccessOrganization } from '@/lib/access/organization';
 import { canAccessProject } from '@/lib/access/project';
 import { canAccessTarget } from '@/lib/access/target';
 import { useNotifications } from '@/lib/hooks';
+import { AccordionButton, AccordionItem, AccordionPanel, Select } from '@chakra-ui/react';
 
 interface Props<T> {
   title: string;
@@ -66,9 +65,9 @@ function PermissionsSpaceInner<
 
   return (
     <AccordionItem>
-      <AccordionButton tw="font-bold">{title}</AccordionButton>
+      <AccordionButton className="font-bold">{title}</AccordionButton>
       <AccordionPanel pb={4}>
-        <div tw="divide-y-2 divide-gray-100">
+        <div className="divide-y-2 divide-gray-100">
           {scopes.map(scope => {
             const possibleScope = [scope.mapping['read-only'], scope.mapping['read-write']].filter(
               isDefined,
@@ -90,12 +89,12 @@ function PermissionsSpaceInner<
             );
 
             return (
-              <div tw="py-2 flex flex-row justify-between items-center" key={scope.name}>
+              <div className="py-2 flex flex-row justify-between items-center" key={scope.name}>
                 <div>
-                  <div tw="font-semibold text-gray-600">{scope.name}</div>
-                  <div tw="text-xs text-gray-600">{scope.description}</div>
+                  <div className="font-semibold text-gray-600">{scope.name}</div>
+                  <div className="text-xs text-gray-600">{scope.description}</div>
                 </div>
-                <div>
+                <div className="shrink-0">
                   <Select
                     size="sm"
                     value={selectedScope}
@@ -176,7 +175,7 @@ export function usePermissionsManager({
     passMemberScopes ? member.organizationAccessScopes : [],
   );
 
-  const submit = React.useCallback(
+  const submit = React.useCallback<FormEventHandler<HTMLElement>>(
     async evt => {
       evt.preventDefault();
       setState('LOADING');

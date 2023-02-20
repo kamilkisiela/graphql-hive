@@ -4,18 +4,24 @@
 
 Developing Hive locally requires you to have the following software installed locally:
 
-- Node.js 16 LTS (or `nvm` or `fnm`)
+- Node.js 18 LTS (or `nvm` or `fnm`)
 - pnpm v7
 - Docker
-- docker-compose
 
 ## Setup Instructions
 
 - Clone the repository locally
 - Make sure to install the recommended VSCode extensions (defined in `.vscode/extensions.json`)
 - In the root of the repo, run `nvm use` to use the same version of node as mentioned
+- Create `.env` file in the root, and use the following:
+
+```dotenv
+SERVER_ENDPOINT=http://localhost:3001
+ENVIRONMENT=local
+```
+
 - Run `pnpm i` at the root to install all the dependencies and run the hooks
-- Run `pnpm run --filter @hive/storage setup` to create local databases
+- Run `pnpm local:setup` to run Docker compose dependencies, create databases and migrate database
 - Run `pnpm generate` to generate the typings from the graphql files (use `pnpm graphql:generate` if
   you only need to run GraphQL Codegen)
 - Run `pnpm build` to build all services
@@ -40,12 +46,24 @@ We have a script to feed your local instance of Hive.
 5. This should report a dummy schema and some dummy usage data to your local instance of Hive,
    allowing you to test features e2e
 
-> Note: You can set `STAGING=1` in order to target staging env and seed a target there.
+> Note: You can set `STAGING=1` in order to target staging env and seed a target there. Same for
+> development env, you can use `DEV=1`
 
 > To send more operations and test heavy load on Hive instance, you can also set `OPERATIONS`
 > (amount of operations in each interval round, default is `1`) and `INTERVAL` (frequency of sending
 > operations, default: `1000`ms). For example, using `INTERVAL=1000 OPERATIONS=1000` will send 1000
 > requests per second.
+
+### Troubleshooting
+
+We recommend the following flow if you are having issues with running Hive locally:
+
+1. Stop all Docker containers: `docker kill $(docker ps -q)`
+2. Clear all local Docker environment: `docker system prune --all --force --volumes`
+3. Delete all generated local `.env` files: `find . -name '.env' | xargs rm`
+4. Delete local `.hive` dir used by Docker volumes.
+5. Reinstall dependencies using `pnpm install`
+6. Force-generate new `.env` files: `pnpm env:sync --force`
 
 ## Publish your first schema (manually)
 

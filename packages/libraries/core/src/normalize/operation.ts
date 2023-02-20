@@ -1,16 +1,16 @@
 import {
-  visit,
-  print,
-  stripIgnoredCharacters,
-  separateOperations,
-  Kind,
-  DocumentNode,
-  DefinitionNode,
-  OperationDefinitionNode,
   ArgumentNode,
-  VariableDefinitionNode,
-  SelectionNode,
+  DefinitionNode,
   DirectiveNode,
+  DocumentNode,
+  Kind,
+  OperationDefinitionNode,
+  print,
+  SelectionNode,
+  separateOperations,
+  stripIgnoredCharacters,
+  VariableDefinitionNode,
+  visit,
 } from 'graphql';
 import sortBy from 'lodash.sortby';
 

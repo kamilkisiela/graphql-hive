@@ -1,4 +1,4 @@
-import { createFetch, Response, Request, Headers, ReadableStream } from '@whatwg-node/fetch';
+import { createFetch, Headers, ReadableStream, Request, Response } from '@whatwg-node/fetch';
 
 const nodeFetch = createFetch({
   useNodeFetch: true,
@@ -16,9 +16,8 @@ if (!globalThis.Headers) {
 if (!globalThis.ReadableStream) {
   globalThis.ReadableStream = ReadableStream;
 }
-if (!globalThis.fetch) {
-  globalThis.fetch = nodeFetch.fetch;
-}
+
+globalThis.fetch = nodeFetch.fetch;
 
 // eslint-disable-next-line no-process-env
 (globalThis as any).SIGNATURE = process.env.CF_BROKER_SIGNATURE || '';

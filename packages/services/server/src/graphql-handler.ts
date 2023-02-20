@@ -1,32 +1,32 @@
 import type {
-  RouteHandlerMethod,
-  FastifyRequest,
-  FastifyReply,
   FastifyLoggerInstance,
+  FastifyReply,
+  FastifyRequest,
+  RouteHandlerMethod,
 } from 'fastify';
-import { Registry, RegistryContext } from '@hive/api';
-import { cleanRequestId } from '@hive/service-common';
-import { createYoga, useErrorHandler, Plugin } from 'graphql-yoga';
-import { isGraphQLError } from '@envelop/core';
 import {
   GraphQLError,
-  ValidationContext,
-  ValidationRule,
   Kind,
   OperationDefinitionNode,
   print,
+  ValidationContext,
+  ValidationRule,
 } from 'graphql';
-import { useGraphQLModules } from '@envelop/graphql-modules';
-import { useGenericAuth } from '@envelop/generic-auth';
-import { fetch } from '@whatwg-node/fetch';
-import { useSentry } from '@envelop/sentry';
-import { asyncStorage } from './async-storage';
-import { useSentryUser, extractUserId } from './use-sentry-user';
-import { useHive } from '@graphql-hive/client';
+import { createYoga, Plugin, useErrorHandler } from 'graphql-yoga';
 import hyperid from 'hyperid';
 import zod from 'zod';
+import { useGenericAuth } from '@envelop/generic-auth';
+import { useGraphQLModules } from '@envelop/graphql-modules';
+import { useSentry } from '@envelop/sentry';
+import { useHive } from '@graphql-hive/client';
+import { Registry, RegistryContext } from '@hive/api';
 import { HiveError } from '@hive/api';
+import { cleanRequestId } from '@hive/service-common';
+import { fetch } from '@whatwg-node/fetch';
+import { asyncStorage } from './async-storage';
 import type { HiveConfig } from './environment';
+import { useArmor } from './use-armor';
+import { extractUserId, useSentryUser } from './use-sentry-user';
 
 const reqIdGenerate = hyperid({ fixedLength: true });
 
@@ -95,6 +95,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
   const server = createYoga<Context>({
     logging: options.logger,
     plugins: [
+      useArmor(),
       useSentry({
         startTransaction: false,
         renameTransaction: true,
@@ -151,15 +152,14 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
           // It's the readiness check
           return args.operationName === 'readiness';
         },
-        skipError: isGraphQLError,
       }),
       useSentryUser(),
       useErrorHandler(({ errors, context }): void => {
         for (const error of errors) {
-          // Only log unexpected errors.
-          if (isGraphQLError(error)) {
-            continue;
-          }
+          // // Only log unexpected errors.
+          // if (isGraphQLError(error)) {
+          //   continue;
+          // }
 
           if (hasFastifyRequest(context)) {
             context.req.log.error(error);
@@ -272,9 +272,9 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
         }
 
         void reply.status(response.status);
-        void reply.send(response.body);
 
-        return reply;
+        const textResponse = await response.text();
+        void reply.send(textResponse);
       },
     );
   };

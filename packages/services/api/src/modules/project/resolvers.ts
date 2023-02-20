@@ -1,13 +1,13 @@
-import type { ProjectModule } from './__generated__/types';
+import { z } from 'zod';
 import { ProjectType } from '../../shared/entities';
 import { createConnection } from '../../shared/schema';
-import { ProjectManager } from './providers/project-manager';
 import { IdTranslator } from '../shared/providers/id-translator';
 import { TargetManager } from '../target/providers/target-manager';
-import { z } from 'zod';
+import type { ProjectModule } from './__generated__/types';
+import { ProjectManager } from './providers/project-manager';
 
 const ProjectNameModel = z.string().min(2).max(40);
-const URLModel = z.string().url().max(200);
+const URLModel = z.string().url().max(500);
 const RepoOwnerWithNameModel = z
   .string()
   .regex(/^[^/]+\/[^/]+$/, 'Expected owner/name format')
@@ -194,7 +194,6 @@ export const resolvers: ProjectModule.Resolvers & { ProjectType: any } = {
     FEDERATION: ProjectType.FEDERATION,
     STITCHING: ProjectType.STITCHING,
     SINGLE: ProjectType.SINGLE,
-    CUSTOM: ProjectType.CUSTOM,
   },
   Organization: {
     projects(organization, _, { injector }) {

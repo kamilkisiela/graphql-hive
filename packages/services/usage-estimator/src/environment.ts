@@ -52,6 +52,9 @@ const LogModel = zod.object({
       ])
       .optional(),
   ),
+  REQUEST_LOGGING: emptyString(zod.union([zod.literal('0'), zod.literal('1')]).optional()).default(
+    '1',
+  ),
 });
 
 const ClickHouseModel = zod.object({
@@ -119,6 +122,7 @@ export const env = {
   sentry: sentry.SENTRY === '1' ? { dsn: sentry.SENTRY_DSN } : null,
   log: {
     level: log.LOG_LEVEL ?? 'info',
+    requests: log.REQUEST_LOGGING === '1',
   },
   prometheus:
     prometheus.PROMETHEUS_METRICS === '1'

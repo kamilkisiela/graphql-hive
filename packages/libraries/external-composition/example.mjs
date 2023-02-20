@@ -1,11 +1,9 @@
 /* eslint-disable */
 /// @ts-check
-
-import { verifyRequest, compose, signatureHeaderName } from './src/index';
-import { composeAndValidate, compositionHasErrors } from '@apollo/federation';
-import { parse, printSchema } from 'graphql';
-
 import fastify from 'fastify';
+import { parse, printSchema } from 'graphql';
+import { composeAndValidate, compositionHasErrors } from '@apollo/federation';
+import { compose, signatureHeaderName, verifyRequest } from './src/index';
 
 if (typeof process.env.PORT === 'undefined') {
   throw new Error('PORT environment variable must be set');
@@ -41,6 +39,7 @@ const composeFederation = compose(services => {
       result: {
         errors: result.errors.map(err => ({
           message: err.message,
+          source: typeof err.extensions?.code === 'string' ? 'composition' : 'graphql',
         })),
       },
     };
@@ -101,6 +100,42 @@ async function main() {
       }
     },
   });
+
+  /**
+   * used for testing
+   */
+
+  server.route({
+    method: ['POST'],
+    url: '/fail_on_signature',
+    handler(req, res) {
+      /**
+       * @type any
+       */
+      const signature = req.headers[signatureHeaderName];
+      const error = verifyRequest({
+        body: JSON.stringify(req.body),
+        signature: signature,
+        secret: SECRET + 'wrong = fail',
+      });
+
+      if (error) {
+        // Failed to verify the request
+        res.status(500).send(error);
+      } else {
+        /**
+         * @type any
+         */
+        const input = req.body;
+        const result = composeFederation(input);
+        res.send(JSON.stringify(result));
+      }
+    },
+  });
+
+  /**
+   * ok, we're back from testing
+   */
 
   await server.listen({
     port: parseInt(PORT, 10),

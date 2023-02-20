@@ -1,26 +1,35 @@
+import { z } from 'zod';
+import { handleTRPCError } from '@hive/service-common';
+import type { FastifyRequest } from '@hive/service-common';
+import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
 import { initTRPC } from '@trpc/server';
 import type { Limiter } from './limiter';
-import { z } from 'zod';
-import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
 
-const t = initTRPC.context<Limiter>().create();
+export interface Context {
+  req: FastifyRequest;
+  limiter: Limiter;
+}
+
+const t = initTRPC.context<Context>().create();
+const errorMiddleware = t.middleware(handleTRPCError);
+const procedure = t.procedure.use(errorMiddleware);
 
 export type RateLimitInput = z.infer<typeof VALIDATION>;
 
 const VALIDATION = z
   .object({
-    id: z.string().nonempty(),
+    id: z.string().min(1),
     entityType: z.enum(['organization', 'target']),
     type: z.enum(['operations-reporting']),
     /**
      * Token is optional, and used only when an additional blocking (WAF) process is needed.
      */
-    token: z.string().nullish(),
+    token: z.string().nullish().optional(),
   })
   .required();
 
 export const rateLimitApiRouter = t.router({
-  getRetention: t.procedure
+  getRetention: procedure
     .input(
       z
         .object({
@@ -29,10 +38,10 @@ export const rateLimitApiRouter = t.router({
         .required(),
     )
     .query(({ ctx, input }) => {
-      return ctx.getRetention(input.targetId);
+      return ctx.limiter.getRetention(input.targetId);
     }),
-  checkRateLimit: t.procedure.input(VALIDATION).query(({ ctx, input }) => {
-    return ctx.checkLimit(input);
+  checkRateLimit: procedure.input(VALIDATION).query(({ ctx, input }) => {
+    return ctx.limiter.checkLimit(input);
   }),
 });
 

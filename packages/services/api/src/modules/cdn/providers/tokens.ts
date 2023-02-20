@@ -1,8 +1,6 @@
 import { InjectionToken } from 'graphql-modules';
 
 export interface CDNConfig {
-  /** Private key for issuing access tokens. */
-  authPrivateKey: string;
   /** Available providers for serving the CDN. */
   providers: {
     cloudflare: {

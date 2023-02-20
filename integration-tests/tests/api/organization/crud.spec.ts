@@ -1,37 +1,32 @@
-import { createOrganization, renameOrganization } from '../../../testkit/flow';
-import { authenticate } from '../../../testkit/auth';
+import { randomUUID } from 'node:crypto';
+import { renameOrganization } from '../../../testkit/flow';
+import { initSeed } from '../../../testkit/seed';
 
-test('renaming an organization should result changing its cleanId', async () => {
-  const { access_token } = await authenticate('main');
-  const orgResult = await createOrganization(
-    {
-      name: 'foo',
-    },
-    access_token,
-  );
-  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+test.concurrent('renaming an organization should result changing its cleanId', async () => {
+  const { ownerToken, createOrg } = await initSeed().createOwner();
+  const { organization } = await createOrg();
 
+  const name = randomUUID();
+  const partialCleanId = name.split('-')[0];
   const renamedOrganizationResult = await renameOrganization(
     {
-      organization: org.cleanId,
-      name: 'bar',
+      organization: organization.cleanId,
+      name: name,
     },
-    access_token,
-  );
+    ownerToken,
+  ).then(r => r.expectNoGraphQLErrors());
 
-  expect(renamedOrganizationResult.body.errors).not.toBeDefined();
-
-  expect(renamedOrganizationResult.body.data?.updateOrganizationName.error).toBeNull();
+  expect(renamedOrganizationResult.updateOrganizationName.error).toBeNull();
   expect(
-    renamedOrganizationResult.body.data?.updateOrganizationName.ok?.updatedOrganizationPayload
-      .organization.name,
-  ).toBe('bar');
+    renamedOrganizationResult.updateOrganizationName.ok?.updatedOrganizationPayload.organization
+      .name,
+  ).toBe(name);
   expect(
-    renamedOrganizationResult.body.data?.updateOrganizationName.ok?.updatedOrganizationPayload
-      .organization.cleanId,
-  ).toBe('bar');
+    renamedOrganizationResult.updateOrganizationName.ok?.updatedOrganizationPayload.organization
+      .cleanId,
+  ).toEqual(expect.stringContaining(partialCleanId));
   expect(
-    renamedOrganizationResult.body.data?.updateOrganizationName.ok?.updatedOrganizationPayload
-      .selector.organization,
-  ).toBe('bar');
+    renamedOrganizationResult.updateOrganizationName.ok?.updatedOrganizationPayload.selector
+      .organization,
+  ).toEqual(expect.stringContaining(partialCleanId));
 });

@@ -1,8 +1,8 @@
 import { hash, nsToMs, parseDateRangeInput } from '../../shared/helpers';
 import { createConnection } from '../../shared/schema';
 import { IdTranslator } from '../shared/providers/id-translator';
-import { OperationsManager } from './providers/operations-manager';
 import { OperationsModule } from './__generated__/types';
+import { OperationsManager } from './providers/operations-manager';
 
 export const resolvers: OperationsModule.Resolvers = {
   Query: {
@@ -106,6 +106,21 @@ export const resolvers: OperationsModule.Resolvers = {
         };
       });
     },
+    async operationBodyByHash(_, { selector }, { injector }) {
+      const translator = injector.get(IdTranslator);
+      const [organization, project, target] = await Promise.all([
+        translator.translateOrganizationId(selector),
+        translator.translateProjectId(selector),
+        translator.translateTargetId(selector),
+      ]);
+
+      return injector.get(OperationsManager).getOperationBody({
+        organization,
+        project,
+        target,
+        hash: selector.hash,
+      });
+    },
   },
   OperationsStats: {
     async operations(
@@ -134,9 +149,8 @@ export const resolvers: OperationsModule.Resolvers = {
       return operations
         .map(op => {
           return {
-            id: hash(`${op.operationName}__${op.document}`),
+            id: hash(`${op.operationName}__${op.operationHash!}`),
             kind: op.kind,
-            document: op.document,
             name: op.operationName,
             count: op.count,
             countOk: op.countOk,
@@ -290,16 +304,16 @@ export const resolvers: OperationsModule.Resolvers = {
   },
   DurationStats: {
     p75(value) {
-      return transformPercentile(value['75.0']);
+      return transformPercentile(value.p75);
     },
     p90(value) {
-      return transformPercentile(value['90.0']);
+      return transformPercentile(value.p90);
     },
     p95(value) {
-      return transformPercentile(value['95.0']);
+      return transformPercentile(value.p95);
     },
     p99(value) {
-      return transformPercentile(value['99.0']);
+      return transformPercentile(value.p99);
     },
   },
   OperationStatsConnection: createConnection(),

@@ -1,5 +1,5 @@
-import { AdminManager } from './providers/admin-manager';
 import { AdminModule } from './__generated__/types';
+import { AdminManager } from './providers/admin-manager';
 
 export const resolvers: AdminModule.Resolvers = {
   Query: {
