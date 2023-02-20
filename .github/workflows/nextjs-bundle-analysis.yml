@@ -23,21 +23,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: pnpm/action-setup@v2.2.4
-        with:
-          version: 7
-
-      - name: Install Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - name: Install PNPM
-        uses: pnpm/action-setup@v2
-        id: pnpm-install
-        with:
-          version: 7
-          run_install: true
+      - name: Setup Environment
+        uses: ./.github/actions/setup
 
       - name: Restore Next.js Build
         uses: actions/cache@v3
@@ -50,9 +37,6 @@ jobs:
           path: ${{ env.working-directory }}/.next/cache
           # change this if you prefer a more strict cache
           key: ${{ runner.os }}-build-${{ env.cache-name }}
-
-      - name: Codegen
-        run: cd ../../.. && pnpm graphql:generate
 
       - name: Build Next.js App
         # change this if your site requires a custom build command
@@ -102,7 +86,7 @@ jobs:
           body="${body//'%'/'%25'}"
           body="${body//$'\n'/'%0A'}"
           body="${body//$'\r'/'%0D'}"
-          echo ::set-output name=body::$body
+          echo "body=$body" >> $GITHUB_OUTPUT
 
       - name: Find Comment
         uses: peter-evans/find-comment@v2
@@ -112,16 +96,9 @@ jobs:
           issue-number: ${{ github.event.number }}
           body-includes: '<!-- __NEXTJS_BUNDLE -->'
 
-      - name: Create Comment
+      - name: Create or Update Comment
         uses: peter-evans/create-or-update-comment@v2.1.1
-        if: success() && github.event.number && steps.fc.outputs.comment-id == 0
-        with:
-          issue-number: ${{ github.event.number }}
-          body: ${{ steps.get-comment-body.outputs.body }}
-
-      - name: Update Comment
-        uses: peter-evans/create-or-update-comment@v2.1.1
-        if: success() && github.event.number && steps.fc.outputs.comment-id != 0
+        if: success() && github.event.number
         with:
           issue-number: ${{ github.event.number }}
           body: ${{ steps.get-comment-body.outputs.body }}
