@@ -110,6 +110,7 @@ async function main() {
           logger: req.log,
           pollIntervalMs: 150,
           timeoutMs: 25_000,
+          ttlMs: 30_000,
         });
         return { cache, req, decrypt, broker: env.requestBroker };
       },
