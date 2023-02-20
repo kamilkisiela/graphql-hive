@@ -585,11 +585,10 @@ importers:
       '@trpc/server': 10.9.1
       '@valu/trpc-fetch-api-adapter': ^0.0.3
       '@whatwg-node/fetch': 0.8.1
-      '@whatwg-node/server': ^0.4.17
+      '@whatwg-node/router': ^0.2.7
       date-fns: 2.29.3
       dotenv: 16.0.3
       got: 12.5.3
-      itty-router: 2.6.6
       pino-pretty: 9.2.0
       reflect-metadata: 0.1.13
       tslib: 2.5.0
@@ -601,11 +600,10 @@ importers:
       '@trpc/server': 10.9.1
       '@valu/trpc-fetch-api-adapter': 0.0.3
       '@whatwg-node/fetch': 0.8.1_@types+node@18.13.0
-      '@whatwg-node/server': 0.4.17_@types+node@18.13.0
+      '@whatwg-node/router': 0.2.7_@types+node@18.13.0
       date-fns: 2.29.3
       dotenv: 16.0.3
       got: 12.5.3
-      itty-router: 2.6.6
       reflect-metadata: 0.1.13
       zod: 3.20.6
     devDependencies:
@@ -11391,6 +11389,7 @@ packages:
       web-streams-polyfill: 3.2.1
     transitivePeerDependencies:
       - encoding
+    dev: true
 
   /@whatwg-node/fetch/0.6.1:
     resolution: {integrity: sha512-sG39WLvcJxGZ+gDstnLSXR2IcnuvIOB51KxCFo0mEhFW0q2u8fZgolr0HPkL+zXwOJsnmT+9V3IRcqLnTXdqVQ==}
@@ -11451,16 +11450,14 @@ packages:
       fast-url-parser: 1.1.3
       tslib: 2.5.0
 
-  /@whatwg-node/server/0.4.17_@types+node@18.13.0:
-    resolution: {integrity: sha512-kq1AHyi87VWfiDqiSTAOY+py83HMJg42+fI8JAe1wjmMkJ8v/E5mKq5NpLNRM9Cnf7NHsQR0AwQgvX/RFuptaA==}
-    peerDependencies:
-      '@types/node': ^18.0.6
+  /@whatwg-node/router/0.2.7_@types+node@18.13.0:
+    resolution: {integrity: sha512-kZynz9z5kgBJ/mWowSNzoacRsP4iGPkM6MAVHUzaUxYcQR+crtUvsp7/P6H4X20ScRbs8sDRXi7XOU9mFT8Zhg==}
     dependencies:
-      '@types/node': 18.13.0
-      '@whatwg-node/fetch': 0.5.3
+      '@whatwg-node/fetch': 0.8.1_@types+node@18.13.0
+      '@whatwg-node/server': 0.6.7_@types+node@18.13.0
       tslib: 2.5.0
     transitivePeerDependencies:
-      - encoding
+      - '@types/node'
     dev: false
 
   /@whatwg-node/server/0.5.11_@types+node@18.13.0:
@@ -18313,6 +18310,7 @@ packages:
 
   /itty-router/2.6.6:
     resolution: {integrity: sha512-hIPHtXGymCX7Lzb2I4G6JgZFE4QEEQwst9GORK7sMYUpJvLfy4yZJr95r04e8DzoAnj6HcxM2m4TbK+juu+18g==}
+    dev: true
 
   /jake/10.8.5:
     resolution: {integrity: sha512-sVpxYeuAhWt0OTWITwT98oyV0GsXyMlXCF+3L1SuafBVUIr/uILGRB+NqwkzhgXKvoJpDIpQvqkUALgdmQsQxw==}

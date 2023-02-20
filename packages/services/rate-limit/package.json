@@ -11,17 +11,16 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@valu/trpc-fetch-api-adapter": "^0.0.3",
-    "@whatwg-node/server": "^0.4.17",
     "@sentry/node": "7.37.1",
     "@sentry/tracing": "7.37.1",
     "@trpc/client": "10.9.1",
     "@trpc/server": "10.9.1",
+    "@valu/trpc-fetch-api-adapter": "^0.0.3",
     "@whatwg-node/fetch": "0.8.1",
+    "@whatwg-node/router": "^0.2.7",
     "date-fns": "2.29.3",
     "dotenv": "16.0.3",
     "got": "12.5.3",
-    "itty-router": "2.6.6",
     "reflect-metadata": "0.1.13",
     "zod": "3.20.6"
   },

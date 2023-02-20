@@ -1,12 +1,12 @@
-import { Router } from 'itty-router';
 import { createLogger, reportReadiness } from '@hive/service-common';
 import { createConnectionString } from '@hive/storage';
-import { createRateLimiter } from './limiter';
-import { env } from './environment';
 import { createFetchAPIHandler } from '@valu/trpc-fetch-api-adapter';
+import { createRouter } from '@whatwg-node/router';
 import { rateLimitApiRouter } from './api';
+import { env } from './environment';
+import { createRateLimiter } from './limiter';
 
-const rateLimitRouter: Router = Router();
+const rateLimitRouter = createRouter();
 
 const logger = createLogger(env.log.level);
 

@@ -3,7 +3,6 @@ import { createServer } from 'http';
 import 'reflect-metadata';
 import { createLogger, registerShutdown, startMetrics } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
-import { createServerAdapter } from '@whatwg-node/server';
 import { env } from './environment';
 import { rateLimitCtX, rateLimitRouter } from './router';
 
@@ -20,8 +19,7 @@ async function main() {
 
   const logger = createLogger();
 
-  const app = createServerAdapter(rateLimitRouter);
-  const server = createServer(app);
+  const server = createServer(rateLimitRouter);
 
   try {
     registerShutdown({
