@@ -5,6 +5,7 @@ import { usageEstimatorApiRouter } from './api';
 import { env } from './environment';
 import { createEstimator } from './estimator';
 import { clickHouseElapsedDuration, clickHouseReadDuration } from './metrics';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { createRouter } from '@whatwg-node/router'
 
 const usageEstimatorRouter = createRouter();

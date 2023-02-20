@@ -974,7 +974,6 @@ importers:
       '@sentry/node': 7.38.0
       '@sentry/tracing': 7.38.0
       '@trpc/server': 10.12.0
-      '@whatwg-node/router': ^0.2.7
       bullmq: 3.7.0
       copyfiles: 2.4.1
       dotenv: 16.0.3
@@ -988,7 +987,6 @@ importers:
       '@sentry/node': 7.38.0
       '@sentry/tracing': 7.38.0
       '@trpc/server': 10.12.0
-      '@whatwg-node/router': 0.2.7_@types+node@18.14.0
       bullmq: 3.7.0_xbmkiyyfti7h6orsfs6pdmi4s4
       dotenv: 16.0.3
       got: 12.5.3
