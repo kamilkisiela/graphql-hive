@@ -1,7 +1,7 @@
 import type { FastifyInstance, FastifyPluginAsync, FastifyRequest } from 'fastify';
 import fp from 'fastify-plugin';
-import { cleanRequestId } from './helpers';
 import { z } from 'zod';
+import { cleanRequestId } from './helpers';
 
 const GraphQLPayloadSchema = z.object({
   operationName: z.string(),
@@ -28,6 +28,11 @@ const plugin: FastifyPluginAsync = async server => {
   }
 
   server.addHook('onResponse', async (request, reply) => {
+    if (request.url === '/_readiness' || request.url === '/_health') {
+      // Don't log health checks
+      return;
+    }
+
     const requestId = cleanRequestId(request.headers['x-request-id']);
     const operationName = graphqlOperationName(request);
     const message = [

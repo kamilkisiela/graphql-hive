@@ -67,19 +67,6 @@ const ClickHouseModel = zod.object({
   CLICKHOUSE_ASYNC_INSERT_MAX_DATA_SIZE: emptyString(NumberFromString.optional()),
 });
 
-const ClickHouseMirrorModel = zod.union([
-  zod.object({
-    CLICKHOUSE_MIRROR_PROTOCOL: zod.union([zod.literal('http'), zod.literal('https')]),
-    CLICKHOUSE_MIRROR_HOST: zod.string(),
-    CLICKHOUSE_MIRROR_PORT: NumberFromString,
-    CLICKHOUSE_MIRROR_USERNAME: zod.string(),
-    CLICKHOUSE_MIRROR_PASSWORD: zod.string(),
-    CLICKHOUSE_ASYNC_INSERT_BUSY_TIMEOUT_MS: emptyString(NumberFromString.optional()),
-    CLICKHOUSE_ASYNC_INSERT_MAX_DATA_SIZE: emptyString(NumberFromString.optional()),
-  }),
-  zod.object({}),
-]);
-
 const PrometheusModel = zod.object({
   PROMETHEUS_METRICS: emptyString(zod.union([zod.literal('0'), zod.literal('1')]).optional()),
   PROMETHEUS_METRICS_LABEL_INSTANCE: emptyString(zod.string().optional()),
@@ -99,6 +86,9 @@ const LogModel = zod.object({
       ])
       .optional(),
   ),
+  REQUEST_LOGGING: emptyString(zod.union([zod.literal('0'), zod.literal('1')]).optional()).default(
+    '1',
+  ),
 });
 
 const configs = {
@@ -114,8 +104,6 @@ const configs = {
   log: LogModel.safeParse(process.env),
   // eslint-disable-next-line no-process-env
   clickhouse: ClickHouseModel.safeParse(process.env),
-  // eslint-disable-next-line no-process-env
-  clickhouseMirror: ClickHouseMirrorModel.safeParse(process.env),
 };
 
 const environmentErrors: Array<string> = [];
@@ -145,7 +133,6 @@ const kafka = extractConfig(configs.kafka);
 const prometheus = extractConfig(configs.prometheus);
 const log = extractConfig(configs.log);
 const clickhouse = extractConfig(configs.clickhouse);
-const clickhouseMirror = extractConfig(configs.clickhouseMirror);
 
 export const env = {
   environment: base.ENVIRONMENT,
@@ -179,24 +166,11 @@ export const env = {
     async_insert_busy_timeout_ms: clickhouse.CLICKHOUSE_ASYNC_INSERT_BUSY_TIMEOUT_MS ?? 30_000,
     async_insert_max_data_size: clickhouse.CLICKHOUSE_ASYNC_INSERT_MAX_DATA_SIZE ?? 200_000_000,
   },
-  clickhouseMirror:
-    'CLICKHOUSE_MIRROR_PROTOCOL' in clickhouseMirror
-      ? {
-          protocol: clickhouseMirror.CLICKHOUSE_MIRROR_PROTOCOL,
-          host: clickhouseMirror.CLICKHOUSE_MIRROR_HOST,
-          port: clickhouseMirror.CLICKHOUSE_MIRROR_PORT,
-          username: clickhouseMirror.CLICKHOUSE_MIRROR_USERNAME,
-          password: clickhouseMirror.CLICKHOUSE_MIRROR_PASSWORD,
-          async_insert_busy_timeout_ms:
-            clickhouse.CLICKHOUSE_ASYNC_INSERT_BUSY_TIMEOUT_MS ?? 30_000,
-          async_insert_max_data_size:
-            clickhouse.CLICKHOUSE_ASYNC_INSERT_MAX_DATA_SIZE ?? 200_000_000,
-        }
-      : null,
   heartbeat: base.HEARTBEAT_ENDPOINT ? { endpoint: base.HEARTBEAT_ENDPOINT } : null,
   sentry: sentry.SENTRY === '1' ? { dsn: sentry.SENTRY_DSN } : null,
   log: {
     level: log.LOG_LEVEL ?? 'info',
+    requests: log.REQUEST_LOGGING === '1',
   },
   prometheus:
     prometheus.PROMETHEUS_METRICS === '1'

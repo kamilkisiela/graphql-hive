@@ -1,12 +1,12 @@
-import { Injectable, Scope } from 'graphql-modules';
 import type { GraphQLSchema } from 'graphql';
-import { diff, Change, CriticalityLevel, DiffRule } from '@graphql-inspector/core';
+import { Injectable, Scope } from 'graphql-modules';
+import { Change, CriticalityLevel, diff, DiffRule } from '@graphql-inspector/core';
 import type * as Types from '../../../__generated__/types';
 import type { TargetSettings } from '../../../shared/entities';
-import { Logger } from '../../shared/providers/logger';
-import { sentry } from '../../../shared/sentry';
 import { createPeriod } from '../../../shared/helpers';
+import { sentry } from '../../../shared/sentry';
 import { OperationsManager } from '../../operations/providers/operations-manager';
+import { Logger } from '../../shared/providers/logger';
 import { TargetManager } from '../../target/providers/target-manager';
 
 const criticalityMap: Record<CriticalityLevel, Types.CriticalityLevel> = {

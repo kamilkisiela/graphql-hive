@@ -1,6 +1,6 @@
 import { ReactElement } from 'react';
-import { Item, RadioGroupItemProps, RadioGroupProps, Root } from '@radix-ui/react-radio-group';
 import clsx from 'clsx';
+import { Item, RadioGroupItemProps, RadioGroupProps, Root } from '@radix-ui/react-radio-group';
 
 export const RadioGroup = ({ children, className, ...props }: RadioGroupProps): ReactElement => {
   return (
@@ -16,12 +16,12 @@ export const Radio = ({ children, className, ...props }: RadioGroupItemProps): R
       className={clsx(
         `
         radix-state-checked:border-orange-500
-        hover:border-orange-500/50
         relative
         overflow-hidden
         rounded-sm
         border
         text-left
+        hover:border-orange-500/50
         focus:ring
         `,
         className,

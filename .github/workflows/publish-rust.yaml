@@ -1,0 +1,128 @@
+on:
+  workflow_call:
+    inputs:
+      publish:
+        default: false
+        type: boolean
+        required: true
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-22.04
+    outputs:
+      rust_changed: ${{ steps.rust_changed.outputs.rust_changed }}
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+      - name: Look for changes
+        id: rust_changed
+        run: |
+          lines=$( git diff HEAD~ HEAD --name-only -- 'packages/libraries/router' | wc -l )
+          if [ $lines -gt 0 ]; then
+              echo 'rust_changed=true' >> $GITHUB_OUTPUT
+          fi
+
+  publish-rust:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.rust_changed == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 40
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Use Node
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: .node-version
+
+      - name: Prepare MacOS
+        if: ${{ matrix.os == 'macos-latest' }}
+        run: |
+          echo "RUST_TARGET=x86_64-apple-darwin" >> $GITHUB_ENV
+          echo "RUST_TARGET_FILE=router" >> $GITHUB_ENV
+          echo "RUST_TARGET_OS=macos" >> $GITHUB_ENV
+
+      - name: Prepare Linux
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        run: |
+          echo "RUST_TARGET=x86_64-unknown-linux-gnu" >> $GITHUB_ENV
+          echo "RUST_TARGET_FILE=router" >> $GITHUB_ENV
+          echo "RUST_TARGET_OS=linux" >> $GITHUB_ENV
+
+      - name: Prepare Windows
+        if: ${{ matrix.os == 'windows-latest' }}
+        run: |
+          echo "RUST_TARGET=x86_64-pc-windows-msvc" | Out-File -FilePath $env:GITHUB_ENV -Append
+          echo "RUST_TARGET_FILE=router.exe" | Out-File -FilePath $env:GITHUB_ENV -Append
+          echo "RUST_TARGET_OS=win" | Out-File -FilePath $env:GITHUB_ENV -Append
+          npm run cargo:fix
+
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: ${{ env.RUST_TARGET }}
+          default: true
+          override: true
+
+      - name: Set default target
+        run: |
+          rustup default stable-${{ env.RUST_TARGET }}
+
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
+
+      - name: Build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release
+
+      - name: Strip binary from debug symbols
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        run: strip target/release/${{ env.RUST_TARGET_FILE }}
+
+      - name: Compress
+        run: |
+          ./target/release/compress ./target/release/${{ env.RUST_TARGET_FILE }} ./router.tar.gz
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: router-${{ env.RUST_TARGET_OS }}
+          path: router.tar.gz
+
+      - name: Upload to R2
+        if: ${{ inputs.publish }}
+        uses: randomairborne/r2-release@v1.0.2
+        with:
+          endpoint: https://6d5bc18cd8d13babe7ed321adba3d8ae.r2.cloudflarestorage.com
+          accesskeyid: ${{ secrets.R2_ACCESS_KEY_ID }}
+          secretaccesskey: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          bucket: apollo-router
+          file: router.tar.gz
+          destination: ${{ github.sha }}/${{ env.RUST_TARGET_OS }}/router.tar.gz
+
+      - name: Upload to R2 as latest
+        if: ${{ inputs.publish }}
+        uses: randomairborne/r2-release@v1.0.2
+        with:
+          endpoint: https://6d5bc18cd8d13babe7ed321adba3d8ae.r2.cloudflarestorage.com
+          accesskeyid: ${{ secrets.R2_ACCESS_KEY_ID }}
+          secretaccesskey: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          bucket: apollo-router
+          file: router.tar.gz
+          destination: latest/${{ env.RUST_TARGET_OS }}/router.tar.gz

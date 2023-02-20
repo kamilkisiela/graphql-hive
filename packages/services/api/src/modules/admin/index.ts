@@ -1,6 +1,6 @@
 import { createModule } from 'graphql-modules';
-import { resolvers } from './resolvers';
 import { AdminManager } from './providers/admin-manager';
+import { resolvers } from './resolvers';
 import typeDefs from './module.graphql';
 
 export const adminModule = createModule({

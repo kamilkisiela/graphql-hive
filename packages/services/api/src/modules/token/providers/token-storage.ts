@@ -1,21 +1,17 @@
-import { Inject, Injectable, Scope, CONTEXT } from 'graphql-modules';
-import { atomic } from '../../../shared/helpers';
-import { HiveError } from '../../../shared/errors';
-import type { Token } from '../../../shared/entities';
-import { Logger } from '../../shared/providers/logger';
-import {
-  TargetSelector,
-  ProjectSelector,
-  OrganizationSelector,
-} from '../../shared/providers/storage';
-import type { TargetAccessScope } from '../../auth/providers/target-access';
-import type { ProjectAccessScope } from '../../auth/providers/project-access';
-import type { OrganizationAccessScope } from '../../auth/providers/organization-access';
-import type { TokensConfig } from './tokens';
-import { TOKENS_CONFIG } from './tokens';
+import { CONTEXT, Inject, Injectable, Scope } from 'graphql-modules';
 import type { TokensApi } from '@hive/tokens';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import { fetch } from '@whatwg-node/fetch';
+import type { Token } from '../../../shared/entities';
+import { HiveError } from '../../../shared/errors';
+import { atomic } from '../../../shared/helpers';
+import type { OrganizationAccessScope } from '../../auth/providers/organization-access';
+import type { ProjectAccessScope } from '../../auth/providers/project-access';
+import type { TargetAccessScope } from '../../auth/providers/target-access';
+import { Logger } from '../../shared/providers/logger';
+import type { TargetSelector } from '../../shared/providers/storage';
+import type { TokensConfig } from './tokens';
+import { TOKENS_CONFIG } from './tokens';
 
 function maskToken(token: string) {
   return token.substring(0, 3) + '*'.repeat(token.length - 6) + token.substring(token.length - 3);
@@ -69,7 +65,7 @@ export class TokenStorage {
       target: input.target,
       project: input.project,
       organization: input.organization,
-      scopes: input.scopes as CreateTokenInput['scopes'],
+      scopes: input.scopes,
     });
 
     return response;
@@ -87,36 +83,12 @@ export class TokenStorage {
     return input.tokens;
   }
 
-  async invalidateTarget(input: TargetSelector) {
-    this.logger.debug('Invalidating target tokens (input=%o)', input);
+  async invalidateTokens(tokens: string[]) {
+    this.logger.debug('Invalidating tokens (size=%s)', tokens.length);
 
-    await this.tokensService.invalidateTokenByTarget
+    await this.tokensService.invalidateTokens
       .mutate({
-        targetId: input.target,
-      })
-      .catch(error => {
-        this.logger.error(error);
-      });
-  }
-
-  async invalidateProject(input: ProjectSelector) {
-    this.logger.debug('Invalidating project tokens (input=%o)', input);
-
-    await this.tokensService.invalidateTokenByProject
-      .mutate({
-        projectId: input.project,
-      })
-      .catch(error => {
-        this.logger.error(error);
-      });
-  }
-
-  async invalidateOrganization(input: OrganizationSelector) {
-    this.logger.debug('Invalidating organization tokens (input=%o)', input);
-
-    await this.tokensService.invalidateTokenByOrganization
-      .mutate({
-        organizationId: input.organization,
+        tokens,
       })
       .catch(error => {
         this.logger.error(error);
@@ -135,24 +107,22 @@ export class TokenStorage {
 
   @atomic<TokenSelector>(({ token }) => token)
   async getToken({ token }: TokenSelector) {
-    // Tokens are MD5 hashes, so they are always 32 characters long
-    if (token.length !== 32) {
-      throw new HiveError('Invalid token provided!');
-    }
-
-    this.logger.debug('Fetching token (token=%s)', maskToken(token));
-
     try {
+      // Tokens are MD5 hashes, so they are always 32 characters long
+      if (token.length !== 32) {
+        throw new HiveError(`Incorrect length: received ${token.length}, expected 32`);
+      }
+
+      this.logger.debug('Fetching token (token=%s)', maskToken(token));
       const tokenInfo = await this.tokensService.getToken.query({ token });
 
       if (!tokenInfo) {
-        throw new Error('Token not found');
+        throw new HiveError('Not found');
       }
 
       return tokenInfo;
     } catch (error: any) {
       this.logger.error(error);
-
       throw new HiveError('Invalid token provided', {
         originalError: error,
       });

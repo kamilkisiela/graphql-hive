@@ -1,6 +1,6 @@
-import { env } from '@/env/frontend';
 import { UserInput } from 'supertokens-auth-react/lib/build/recipe/thirdpartyemailpassword/types';
 import { getAuthorisationURLWithQueryParamsAndSetState } from 'supertokens-auth-react/recipe/thirdpartyemailpassword';
+import { env } from '@/env/frontend';
 
 export const createThirdPartyEmailPasswordReactOIDCProvider = () => ({
   id: 'oidc',
@@ -14,7 +14,7 @@ export const getOIDCOverrides = (): UserInput['override'] => ({
     ...originalImplementation,
     generateStateToSendToOAuthProvider(input) {
       const hash = originalImplementation.generateStateToSendToOAuthProvider(input);
-      const oidcId: unknown = input.userContext['oidcId'];
+      const { oidcId } = input.userContext;
 
       if (typeof oidcId === 'string') {
         return `${hash}${delimiter}${oidcId}`;

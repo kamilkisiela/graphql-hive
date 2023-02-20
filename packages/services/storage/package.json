@@ -9,51 +9,26 @@
   },
   "scripts": {
     "build": "bob runify --single",
-    "db": "pnpm db:create && pnpm migration:run",
-    "db:create": "node tools/create-db.mjs",
-    "db:dev": "docker compose up --remove-orphans",
-    "db:generate": "schemats generate --config schemats.cjs -o src/db/types.ts",
-    "db:migrator": "node --experimental-specifier-resolution=node --loader ts-node/esm migrations/index.ts",
-    "db:start": "docker-compose up -d --remove-orphans",
-    "dev": "pnpm db:dev",
-    "migration:create": "pnpm db:migrator create",
-    "migration:rollback": "pnpm db:migrator down",
-    "migration:run": "pnpm db:migrator up",
-    "postbuild": "copyfiles -f \"migrations/actions/*.sql\" dist/actions && copyfiles -f \"migrations/actions/down/*.sql\" dist/actions/down",
-    "prune": "docker compose down && rm -rf volumes",
-    "setup": "pnpm db:start && pnpm db"
+    "db:generate": "schemats generate --config schemats.cjs -o src/db/types.ts"
   },
   "dependencies": {
-    "@sentry/node": "7.21.1",
-    "@slonik/migrator": "0.8.5",
+    "@sentry/node": "7.38.0",
     "@theguild/buddy": "0.1.0",
-    "dotenv": "10.0.0",
+    "dotenv": "16.0.3",
     "got": "12.5.3",
     "param-case": "3.0.4",
     "slonik": "30.1.2",
     "slonik-interceptor-query-logging": "1.4.7",
     "slonik-utilities": "1.9.4",
-    "zod": "3.15.1"
+    "zod": "3.20.6"
   },
   "devDependencies": {
-    "@sentry/types": "7.21.1",
-    "@tgriesser/schemats": "7.0.0",
-    "@types/pg": "8.6.5",
-    "copyfiles": "2.4.1",
-    "pg-promise": "10.11.1",
-    "ts-node": "10.9.1",
-    "tslib": "2.4.1"
-  },
-  "buildOptions": {
-    "runify": true,
-    "tsup": true,
-    "bin": "migrations/index.ts",
-    "external": [
-      "pg-native"
-    ],
-    "tags": [
-      "backend"
-    ],
-    "banner": "../../../scripts/banner.js"
+    "@sentry/types": "7.38.0",
+    "@tgriesser/schemats": "7.0.1",
+    "@types/node": "18.14.0",
+    "@types/pg": "8.6.6",
+    "pg-promise": "11.2.0",
+    "tslib": "2.5.0",
+    "typescript": "4.9.5"
   }
 }

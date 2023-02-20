@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
+import { env } from '@/env/backend';
 import { graphql } from '@/lib/api/utils';
 import { ensureGithubIntegration } from './callback';
-import { env } from '@/env/backend';
 
 export default async function githubSetupCallback(req: NextApiRequest, res: NextApiResponse) {
   console.log('GitHub Integration Setup Callback');
@@ -42,7 +42,7 @@ export default async function githubSetupCallback(req: NextApiRequest, res: Next
   }
 
   if (orgId) {
-    res.redirect(`/${orgId}/settings`);
+    res.redirect(`/${orgId}/view/settings`);
   } else {
     res.redirect('/');
   }

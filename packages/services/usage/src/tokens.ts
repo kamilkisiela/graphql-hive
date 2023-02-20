@@ -1,6 +1,5 @@
-import { FastifyLoggerInstance } from '@hive/service-common';
 import LRU from 'tiny-lru';
-
+import { FastifyLoggerInstance } from '@hive/service-common';
 import type { TokensApi } from '@hive/tokens';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import { fetch } from '@whatwg-node/fetch';

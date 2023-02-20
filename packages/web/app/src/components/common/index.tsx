@@ -1,6 +1,6 @@
-import React from 'react';
-import tw, { styled } from 'twin.macro';
+import React, { ComponentProps, PropsWithChildren, ReactElement } from 'react';
 import Head from 'next/head';
+import clsx from 'clsx';
 
 export const Title: React.FC<{ title: string }> = ({ title }) => (
   <Head>
@@ -9,50 +9,82 @@ export const Title: React.FC<{ title: string }> = ({ title }) => (
   </Head>
 );
 
-export const Label = tw.span`
+export function Label({ className, children, ...props }: ComponentProps<'span'>): ReactElement {
+  return (
+    <span
+      className={clsx(
+        `
   inline-block
   py-1 px-2
   rounded
-  bg-yellow-50 dark:bg-white dark:bg-opacity-10
+  bg-yellow-50 dark:bg-white/10
   text-yellow-600 dark:text-yellow-300
-  text-xs font-medium tracking-widest`;
+  text-xs font-medium tracking-widest`,
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </span>
+  );
+}
 
-const PageContent = styled.div(({ scrollable }: { scrollable: boolean }) => [
-  tw`px-4 pb-4 dark:text-white`,
-  scrollable ? tw`flex-grow overflow-y-auto` : tw`h-full`,
-]);
-
-export const Page: React.FC<{
+export const Page = ({
+  title,
+  subtitle = '',
+  scrollable = false,
+  actions,
+  children,
+  noPadding,
+}: PropsWithChildren<{
   title: string;
   subtitle?: string;
   actions?: React.ReactElement;
   scrollable?: boolean;
   noPadding?: boolean;
-}> = ({ title, subtitle = '', scrollable = false, actions, children, noPadding }) => {
+}>) => {
   return (
-    <div tw="flex flex-col relative h-full dark:bg-gray-900">
-      <div tw="p-4 flex-shrink-0 flex flex-row justify-between items-center">
+    <div className="flex flex-col relative h-full dark:bg-gray-900">
+      <div className="p-4 shrink-0 flex flex-row justify-between items-center">
         <div>
-          <h2 tw="text-xl text-black dark:text-white font-bold">{title}</h2>
-          <span tw="text-sm text-gray-600 dark:text-gray-300 mt-2">{subtitle}</span>
+          <h2 className="text-xl text-black dark:text-white font-bold">{title}</h2>
+          <span className="text-sm text-gray-600 dark:text-gray-300 mt-2">{subtitle}</span>
         </div>
-        <div tw="flex flex-row items-center space-x-2">{actions}</div>
+        <div className="flex flex-row items-center space-x-2">{actions}</div>
       </div>
-      {noPadding ? children : <PageContent scrollable={scrollable}>{children}</PageContent>}
+      {noPadding ? (
+        children
+      ) : (
+        <div
+          className={clsx(
+            'px-4 pb-4 dark:text-white',
+            scrollable ? 'grow overflow-y-auto' : 'h-full',
+          )}
+        >
+          {children}
+        </div>
+      )}
     </div>
   );
 };
 
 export const Section = {
-  Title: tw.h3`text-base text-black dark:text-white font-bold`,
-  BigTitle: tw.h2`text-base text-black dark:text-white font-bold`,
-  Subtitle: tw.div`text-sm text-gray-600 dark:text-gray-300`,
+  Title: ({ className, children, ...props }: ComponentProps<'h3'>): ReactElement => (
+    <h3 className={clsx('text-base text-black dark:text-white font-bold', className)} {...props}>
+      {children}
+    </h3>
+  ),
+  BigTitle: ({ className, children, ...props }: ComponentProps<'h2'>): ReactElement => (
+    <h2 className={clsx('text-base text-black dark:text-white font-bold', className)} {...props}>
+      {children}
+    </h2>
+  ),
+  Subtitle: ({ className, children, ...props }: ComponentProps<'div'>): ReactElement => (
+    <div className={clsx('text-sm text-gray-600 dark:text-gray-300', className)} {...props}>
+      {children}
+    </div>
+  ),
 };
-
-const ScalePiece = styled.div(({ filled }: { filled: boolean }) => [
-  tw`w-1 h-4`,
-  filled ? tw`bg-emerald-400` : tw`bg-gray-200`,
-]);
 
 export const Scale: React.FC<{
   value: number;
@@ -61,12 +93,24 @@ export const Scale: React.FC<{
   className?: string;
 }> = ({ value, max, size, className }) => {
   return (
-    <div tw="flex flex-row space-x-1 flex-grow-0" className={className}>
+    <div className={clsx('flex flex-row space-x-1 grow-0', className)}>
       {new Array(size).fill(null).map((_, i) => (
-        <ScalePiece key={i} filled={value >= i * (max / size)} />
+        <div
+          key={i}
+          className={clsx('w-1 h-4', value >= i * (max / size) ? 'bg-emerald-400' : 'bg-gray-200')}
+        />
       ))}
     </div>
   );
 };
 
-export const Description = tw.p`pr-5 text-sm leading-5 text-gray-500 dark:text-gray-300`;
+export function Description({ className, children, ...props }: ComponentProps<'p'>): ReactElement {
+  return (
+    <p
+      className={clsx('pr-5 text-sm leading-5 text-gray-500 dark:text-gray-300', className)}
+      {...props}
+    >
+      {children}
+    </p>
+  );
+}

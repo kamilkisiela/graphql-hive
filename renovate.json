@@ -3,50 +3,50 @@
   "extends": ["github>the-guild-org/shared-config:renovate", ":preserveSemverRanges"],
   "packageRules": [
     {
-      "groupName": "graphql-tools",
-      "matchPackagePrefixes": "@graphql-tools"
+      "groupName": "@theguild/prettier-config",
+      "matchPackageNames": ["@theguild/prettier-config"],
+      "prPriority": 10000,
+      "ignoreUnstable": false,
+      "allowedVersions": "/^(d+).(d+)(?:.(d+))?(-rc-.+)?$/"
+    },
+    {
+      "groupName": "graphql-armor",
+      "matchPackagePrefixes": ["@escape.tech/graphql-armor/"]
+    },
+    {
+      "groupName": "radix",
+      "matchPackagePrefixes": ["@radix/"],
+      "recreateClosed": false
     },
     {
       "groupName": "stripe",
-      "matchPackagePrefixes": "@stripe"
+      "matchPackagePrefixes": ["@stripe/", "stripe"]
     },
     {
       "groupName": "urql",
-      "matchPackagePrefixes": "@urql"
-    },
-    {
-      "groupName": "envelop",
-      "matchPackagePrefixes": "@envelop"
-    },
-    {
-      "groupName": "graphql-inspector",
-      "matchPackagePrefixes": "@graphql-inspector"
+      "matchPackagePrefixes": ["@urql/", "urql"],
+      "recreateClosed": false
     },
     {
       "groupName": "oclif",
-      "matchPackagePrefixes": "@oclif"
+      "matchPackagePrefixes": ["@oclif/", "oclif"]
     },
     {
       "groupName": "sentry",
-      "matchPackagePrefixes": "@sentry"
+      "matchPackagePrefixes": ["@sentry/", "sentry"]
     },
     {
       "groupName": "trpc",
-      "matchPackagePrefixes": "@trpc"
-    },
-    {
-      "groupName": "slonik",
-      "matchPackagePrefixes": "@slonik"
+      "matchPackagePrefixes": ["@trpc/", "trpc"]
     },
     {
       "groupName": "supertokens",
-      "matchPackageNames": [
-        "supertokens-node",
-        "supertokens-auth-react",
-        "supertokens-js-override",
-        "supertokens-website"
-      ]
+      "matchPackagePrefixes": ["supertokens"]
+    },
+    {
+      "groupName": "slonik",
+      "matchPackagePrefixes": ["@slonik", "slonik"],
+      "recreateClosed": false
     }
-  ],
-  "ignorePaths": ["deployment"]
+  ]
 }

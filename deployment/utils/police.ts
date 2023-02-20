@@ -1,7 +1,7 @@
-import * as cf from '@pulumi/cloudflare';
-import * as pulumi from '@pulumi/pulumi';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
+import * as cf from '@pulumi/cloudflare';
+import * as pulumi from '@pulumi/pulumi';
 
 export class HivePolice {
   constructor(
@@ -19,7 +19,9 @@ export class HivePolice {
 
     const script = new cf.WorkerScript('hive-police-worker', {
       content: readFileSync(
-        resolve(__dirname, '../../packages/services/police-worker/dist/worker.js'),
+        // eslint-disable-next-line no-process-env
+        process.env.POLICE_WORKER_ARTIFACT_PATH ||
+          resolve(__dirname, '../../packages/services/police-worker/dist/index.worker.js'),
         'utf-8',
       ),
       name: `hive-police-${this.envName}`,

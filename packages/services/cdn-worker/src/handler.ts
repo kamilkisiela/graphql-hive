@@ -1,3 +1,5 @@
+import { buildSchema, introspectionFromSchema } from 'graphql';
+import { Analytics, createAnalytics } from './analytics';
 import {
   CDNArtifactNotFound,
   InvalidArtifactMatch,
@@ -6,8 +8,6 @@ import {
   MissingAuthKeyResponse,
   MissingTargetIDErrorResponse,
 } from './errors';
-import { Analytics, createAnalytics } from './analytics';
-import { buildSchema, introspectionFromSchema } from 'graphql';
 import type { KeyValidator } from './key-validation';
 
 async function createETag(value: string) {
@@ -193,7 +193,12 @@ export const createRequestHandler = (deps: RequestHandlerDependencies) => {
     analytics.track({ type: 'artifact', value: artifactType, version: 'v0' }, targetId);
 
     const kvStorageKey = `target:${targetId}:${storageKeyType}`;
-    const rawValue = await deps.getRawStoreValue(kvStorageKey);
+    const rawValue = await deps.getRawStoreValue(kvStorageKey).catch(() => {
+      // Do an extra attempt to read the value from the store.
+      // If we see that a single retry does not help, we should do a proper retry logic here.
+      // Why not now? Because we do have a new implementation that is based on R2 storage and this change is simple enough.
+      return deps.getRawStoreValue(kvStorageKey);
+    });
 
     if (rawValue) {
       const etag = await createETag(`${kvStorageKey}|${rawValue}`);

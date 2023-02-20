@@ -1,11 +1,10 @@
 import { ReactElement } from 'react';
 import { useRouter } from 'next/router';
-import { gql } from '@urql/core';
 import { useFormik } from 'formik';
 import { useMutation } from 'urql';
 import * as Yup from 'yup';
-
 import { Button, Heading, Input, Modal } from '@/components/v2';
+import { gql } from '@urql/core';
 
 const CreateOrganizationMutation = gql(/* GraphQL */ `
   mutation CreateOrganizationMutation($input: CreateOrganizationInput!) {
@@ -76,7 +75,7 @@ export const CreateOrganizationModal = ({
           onChange={handleChange}
           onBlur={handleBlur}
           disabled={isSubmitting}
-          isInvalid={touched.name && Boolean(errors.name)}
+          isInvalid={touched.name && !!errors.name}
           className="grow"
         />
         {touched.name && (errors.name || mutation.error) && (

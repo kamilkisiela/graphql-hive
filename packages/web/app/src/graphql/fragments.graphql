@@ -28,6 +28,7 @@ fragment ProjectFields on Project {
   name
   type
   gitRepository
+  registryModel
 }
 
 fragment ProjectEssentials on Project {
@@ -51,7 +52,16 @@ fragment TargetEssentials on Target {
   hasSchema
 }
 
-fragment SchemaFields on Schema {
+fragment SingleSchemaFields on SingleSchema {
+  __typename
+  id
+  author
+  source
+  commit
+}
+
+fragment CompositeSchemaFields on CompositeSchema {
+  __typename
   id
   author
   source
@@ -82,7 +92,6 @@ fragment UserFields on User {
 
 fragment OperationStatsFields on OperationStats {
   id
-  document
   operationHash
   name
   kind
@@ -101,11 +110,17 @@ fragment SchemaVersionFields on SchemaVersion {
   id
   date
   valid
-  commit {
-    id
-    author
-    service
-    commit
+  log {
+    ... on PushedSchemaLog {
+      id
+      author
+      service
+      commit
+    }
+    ... on DeletedSchemaLog {
+      id
+      deletedService
+    }
   }
   baseSchema
 }
@@ -419,20 +434,11 @@ fragment OrgBillingInfoFields on Organization {
   plan
   ...OrgRateLimitFields
   billingConfiguration {
-    hasActiveSubscription
     paymentMethod {
       brand
       last4
       expMonth
       expYear
-    }
-    billingAddress {
-      city
-      country
-      line1
-      line2
-      postalCode
-      state
     }
     invoices {
       ...BillingInvoiceFields

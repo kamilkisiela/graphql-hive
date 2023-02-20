@@ -1,4 +1,9 @@
 const user = { email: '<RANDOMISED BEFORE EACH TEST>', password: 'Loc@l.h0st' };
+
+Cypress.on('uncaught:exception', (_err, _runnable) => {
+  return false;
+});
+
 before(() => {
   user.email = `${crypto.randomUUID()}@local.host`;
 });

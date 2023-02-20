@@ -1,17 +1,17 @@
 #!/usr/bin/env node
 import 'reflect-metadata';
-import * as Sentry from '@sentry/node';
 import {
   createServer,
-  startMetrics,
   registerShutdown,
+  registerTRPC,
   reportReadiness,
+  startMetrics,
 } from '@hive/service-common';
-import { createRateLimiter } from './limiter';
 import { createConnectionString } from '@hive/storage';
-import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
-import { rateLimitApiRouter } from './api';
+import * as Sentry from '@sentry/node';
+import { Context, rateLimitApiRouter } from './api';
 import { env } from './environment';
+import { createRateLimiter } from './limiter';
 
 async function main() {
   if (env.sentry) {
@@ -29,11 +29,12 @@ async function main() {
     tracing: false,
     log: {
       level: env.log.level,
+      requests: env.log.requests,
     },
   });
 
   try {
-    const ctx = createRateLimiter({
+    const limiter = createRateLimiter({
       logger: server.log,
       rateLimitConfig: {
         interval: env.limitCacheUpdateIntervalMs,
@@ -45,18 +46,20 @@ async function main() {
       },
     });
 
-    await server.register(fastifyTRPCPlugin, {
-      prefix: '/trpc',
-      trpcOptions: {
-        router: rateLimitApiRouter,
-        createContext: () => ctx,
+    await registerTRPC(server, {
+      router: rateLimitApiRouter,
+      createContext({ req }): Context {
+        return {
+          req,
+          limiter,
+        };
       },
     });
 
     registerShutdown({
       logger: server.log,
       async onShutdown() {
-        await Promise.all([ctx.stop(), server.close()]);
+        await Promise.all([limiter.stop(), server.close()]);
       },
     });
 
@@ -72,7 +75,7 @@ async function main() {
       method: ['GET', 'HEAD'],
       url: '/_readiness',
       handler(_, res) {
-        const isReady = ctx.readiness();
+        const isReady = limiter.readiness();
         reportReadiness(isReady);
         void res.status(isReady ? 200 : 400).send();
       },
@@ -81,8 +84,8 @@ async function main() {
     if (env.prometheus) {
       await startMetrics(env.prometheus.labels.instance);
     }
-    await server.listen(env.http.port, '0.0.0.0');
-    await ctx.start();
+    await server.listen(env.http.port, '::');
+    await limiter.start();
   } catch (error) {
     server.log.fatal(error);
     Sentry.captureException(error, {

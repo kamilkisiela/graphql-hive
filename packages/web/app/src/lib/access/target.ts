@@ -1,5 +1,5 @@
-import { useRedirect } from './common';
 import { MemberFieldsFragment, TargetAccessScope } from '../../graphql';
+import { useRedirect } from './common';
 
 export { TargetAccessScope } from '../../graphql';
 
@@ -28,7 +28,7 @@ export function useTargetAccess({
     canAccess,
     redirectTo: redirect
       ? router => ({
-          route: `/[orgId]/[projectId]/[targetId]`,
+          route: '/[orgId]/[projectId]/[targetId]',
           as: `/${router.query.orgId}/${router.query.projectId}/${router.query.targetId}`,
         })
       : undefined,

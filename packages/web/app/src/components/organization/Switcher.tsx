@@ -1,21 +1,20 @@
 import React from 'react';
+import { VscAdd, VscChevronDown } from 'react-icons/vsc';
 import { useQuery } from 'urql';
-import { VscChevronDown, VscAdd } from 'react-icons/vsc';
+import { OrganizationsDocument, OrganizationsQuery, OrganizationType } from '@/graphql';
+import { useRouteSelector } from '@/lib/hooks';
 import {
   Button,
   Menu,
   MenuButton,
-  MenuList,
-  MenuItem,
-  MenuGroup,
   MenuDivider,
-  useDisclosure,
+  MenuGroup,
+  MenuItem,
+  MenuList,
   useColorModeValue,
+  useDisclosure,
 } from '@chakra-ui/react';
-import 'twin.macro';
-import { OrganizationsDocument, OrganizationsQuery, OrganizationType } from '@/graphql';
 import { OrganizationCreator } from './Creator';
-import { useRouteSelector } from '@/lib/hooks';
 
 export const OrganizationSwitcher: React.FC<{
   organizationId: string;
@@ -79,7 +78,7 @@ export const OrganizationSwitcher: React.FC<{
           as={Button}
           rightIcon={<VscChevronDown />}
           variant="ghost"
-          tw="font-normal"
+          className="font-normal"
         >
           {menu.currentOrganization.name}
         </MenuButton>

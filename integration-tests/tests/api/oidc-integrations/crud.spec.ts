@@ -1,9 +1,8 @@
-import { gql } from '@app/gql';
-import { authenticate } from '../../../testkit/auth';
-import { createOrganization } from '../../../testkit/flow';
+import { graphql } from '../../../testkit/gql';
 import { execute } from '../../../testkit/graphql';
+import { initSeed } from '../../../testkit/seed';
 
-const OrganizationWithOIDCIntegration = gql(/* GraphQL */ `
+const OrganizationWithOIDCIntegration = graphql(/* GraphQL */ `
   query OrganizationWithOIDCIntegration($organizationId: ID!) {
     organization(selector: { organization: $organizationId }) {
       organization {
@@ -16,7 +15,7 @@ const OrganizationWithOIDCIntegration = gql(/* GraphQL */ `
   }
 `);
 
-const CreateOIDCIntegrationMutation = gql(/* GraphQL */ `
+const CreateOIDCIntegrationMutation = graphql(/* GraphQL */ `
   mutation CreateOIDCIntegrationMutation($input: CreateOIDCIntegrationInput!) {
     createOIDCIntegration(input: $input) {
       ok {
@@ -24,7 +23,9 @@ const CreateOIDCIntegrationMutation = gql(/* GraphQL */ `
           id
           clientId
           clientSecretPreview
-          oauthApiUrl
+          tokenEndpoint
+          userinfoEndpoint
+          authorizationEndpoint
         }
       }
       error {
@@ -32,7 +33,9 @@ const CreateOIDCIntegrationMutation = gql(/* GraphQL */ `
         details {
           clientId
           clientSecret
-          oauthApiUrl
+          tokenEndpoint
+          userinfoEndpoint
+          authorizationEndpoint
         }
       }
     }
@@ -41,33 +44,26 @@ const CreateOIDCIntegrationMutation = gql(/* GraphQL */ `
 
 describe('create', () => {
   describe('permissions="organization:integrations"', () => {
-    test('success', async () => {
-      const { access_token } = await authenticate('main');
-      const orgResult = await createOrganization(
-        {
-          name: 'foo',
-        },
-        access_token,
-      );
-
-      const org =
-        orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+    test.concurrent('success', async () => {
+      const { ownerToken, createOrg } = await initSeed().createOwner();
+      const { organization } = await createOrg();
 
       const result = await execute({
         document: CreateOIDCIntegrationMutation,
         variables: {
           input: {
-            organizationId: org.id,
+            organizationId: organization.id,
             clientId: 'foo',
             clientSecret: 'foofoofoofoo',
-            oauthApiUrl: 'http://localhost:8888/oauth',
+            tokenEndpoint: 'http://localhost:8888/oauth/token',
+            userinfoEndpoint: 'http://localhost:8888/oauth/userinfo',
+            authorizationEndpoint: 'http://localhost:8888/oauth/authorize',
           },
         },
-        authToken: access_token,
-      });
+        authToken: ownerToken,
+      }).then(r => r.expectNoGraphQLErrors());
 
-      expect(result.body.errors).toBeUndefined();
-      expect(result.body.data).toEqual({
+      expect(result).toEqual({
         createOIDCIntegration: {
           error: null,
           ok: {
@@ -75,7 +71,9 @@ describe('create', () => {
               id: expect.any(String),
               clientId: 'foo',
               clientSecretPreview: 'ofoo',
-              oauthApiUrl: 'http://localhost:8888/oauth',
+              tokenEndpoint: 'http://localhost:8888/oauth/token',
+              userinfoEndpoint: 'http://localhost:8888/oauth/userinfo',
+              authorizationEndpoint: 'http://localhost:8888/oauth/authorize',
             },
           },
         },
@@ -84,293 +82,268 @@ describe('create', () => {
       const refetchedOrg = await execute({
         document: OrganizationWithOIDCIntegration,
         variables: {
-          organizationId: org.cleanId,
+          organizationId: organization.cleanId,
         },
-        authToken: access_token,
-      });
+        authToken: ownerToken,
+      }).then(r => r.expectNoGraphQLErrors());
 
-      expect(refetchedOrg.body.errors).toBeUndefined();
-      expect(refetchedOrg.body.data).toEqual({
+      expect(refetchedOrg).toEqual({
         organization: {
           organization: {
-            id: org.id,
+            id: organization.id,
             oidcIntegration: {
-              id: result.body.data!.createOIDCIntegration.ok!.createdOIDCIntegration.id,
+              id: result.createOIDCIntegration.ok!.createdOIDCIntegration.id,
             },
           },
         },
       });
     });
 
-    test('error: non existing organization', async () => {
-      const { access_token } = await authenticate('main');
-      const result = await execute({
+    test.concurrent('error: non existing organization', async ({ expect }) => {
+      const { ownerToken } = await initSeed().createOwner();
+      const errors = await execute({
         document: CreateOIDCIntegrationMutation,
         variables: {
           input: {
             organizationId: 'i-do-not-exist',
             clientId: 'fo',
             clientSecret: 'foofoofoofoo',
-            oauthApiUrl: 'http://localhost:8888/oauth',
+            tokenEndpoint: 'http://localhost:8888/oauth/token',
+            userinfoEndpoint: 'http://localhost:8888/oauth/userinfo',
+            authorizationEndpoint: 'http://localhost:8888/oauth/authorize',
           },
         },
-        authToken: access_token,
-      });
+        authToken: ownerToken,
+      }).then(r => r.expectGraphQLErrors());
 
-      expect(result.body.errors).toMatchInlineSnapshot(`
+      expect(errors).toMatchInlineSnapshot(`
         [
           {
-            "locations": [
+            locations: [
               {
-                "column": 3,
-                "line": 2,
+                column: 3,
+                line: 2,
               },
             ],
-            "message": "No access (reason: "Missing organization:integrations permission")",
-            "path": [
-              "createOIDCIntegration",
+            message: No access (reason: "Missing organization:integrations permission"),
+            path: [
+              createOIDCIntegration,
             ],
           },
         ]
       `);
     });
-    test('error: too short clientId', async () => {
-      const { access_token } = await authenticate('main');
-      const orgResult = await createOrganization(
-        {
-          name: 'foo',
-        },
-        access_token,
-      );
 
-      const org =
-        orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+    test.concurrent('error: too short clientId', async ({ expect }) => {
+      const { ownerToken, createOrg } = await initSeed().createOwner();
+      const { organization } = await createOrg();
 
       const result = await execute({
         document: CreateOIDCIntegrationMutation,
         variables: {
           input: {
-            organizationId: org.id,
+            organizationId: organization.id,
             clientId: 'fo',
             clientSecret: 'foofoofoofoo',
-            oauthApiUrl: 'http://localhost:8888/oauth',
+            tokenEndpoint: 'http://localhost:8888/oauth/token',
+            userinfoEndpoint: 'http://localhost:8888/oauth/userinfo',
+            authorizationEndpoint: 'http://localhost:8888/oauth/authorize',
           },
         },
-        authToken: access_token,
-      });
+        authToken: ownerToken,
+      }).then(r => r.expectNoGraphQLErrors());
 
-      expect(result.body.errors).toBeUndefined();
-      expect(result.body.data).toMatchInlineSnapshot(`
+      expect(result).toMatchInlineSnapshot(`
         {
-          "createOIDCIntegration": {
-            "error": {
-              "details": {
-                "clientId": "Must be at least 3 characters long.",
-                "clientSecret": null,
-                "oauthApiUrl": null,
+          createOIDCIntegration: {
+            error: {
+              details: {
+                authorizationEndpoint: null,
+                clientId: Must be at least 3 characters long.,
+                clientSecret: null,
+                tokenEndpoint: null,
+                userinfoEndpoint: null,
               },
-              "message": "Failed to create OIDC Integration.",
+              message: Failed to create OIDC Integration.,
             },
-            "ok": null,
+            ok: null,
           },
         }
       `);
     });
-    test('error: too long clientId', async () => {
-      const { access_token } = await authenticate('main');
-      const orgResult = await createOrganization(
-        {
-          name: 'foo',
-        },
-        access_token,
-      );
 
-      const org =
-        orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+    test.concurrent('error: too long clientId', async ({ expect }) => {
+      const { ownerToken, createOrg } = await initSeed().createOwner();
+      const { organization } = await createOrg();
 
       const result = await execute({
         document: CreateOIDCIntegrationMutation,
         variables: {
           input: {
-            organizationId: org.id,
+            organizationId: organization.id,
             clientId: new Array(101).fill('a').join(''),
             clientSecret: 'foofoofoofoo',
-            oauthApiUrl: 'http://localhost:8888/oauth',
+            tokenEndpoint: 'http://localhost:8888/oauth/token',
+            userinfoEndpoint: 'http://localhost:8888/oauth/userinfo',
+            authorizationEndpoint: 'http://localhost:8888/oauth/authorize',
           },
         },
-        authToken: access_token,
-      });
+        authToken: ownerToken,
+      }).then(r => r.expectNoGraphQLErrors());
 
-      expect(result.body.errors).toBeUndefined();
-      expect(result.body.data).toMatchInlineSnapshot(`
+      expect(result).toMatchInlineSnapshot(`
         {
-          "createOIDCIntegration": {
-            "error": {
-              "details": {
-                "clientId": "Can not be longer than 100 characters.",
-                "clientSecret": null,
-                "oauthApiUrl": null,
+          createOIDCIntegration: {
+            error: {
+              details: {
+                authorizationEndpoint: null,
+                clientId: Can not be longer than 100 characters.,
+                clientSecret: null,
+                tokenEndpoint: null,
+                userinfoEndpoint: null,
               },
-              "message": "Failed to create OIDC Integration.",
+              message: Failed to create OIDC Integration.,
             },
-            "ok": null,
+            ok: null,
           },
         }
       `);
     });
-    test('error: too short clientSecret', async () => {
-      const { access_token } = await authenticate('main');
-      const orgResult = await createOrganization(
-        {
-          name: 'foo',
-        },
-        access_token,
-      );
 
-      const org =
-        orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+    test.concurrent('error: too short clientSecret', async ({ expect }) => {
+      const { ownerToken, createOrg } = await initSeed().createOwner();
+      const { organization } = await createOrg();
 
       const result = await execute({
         document: CreateOIDCIntegrationMutation,
         variables: {
           input: {
-            organizationId: org.id,
+            organizationId: organization.id,
             clientId: 'foo',
             clientSecret: 'fo',
-            oauthApiUrl: 'http://localhost:8888/oauth',
+            tokenEndpoint: 'http://localhost:8888/oauth/token',
+            userinfoEndpoint: 'http://localhost:8888/oauth/userinfo',
+            authorizationEndpoint: 'http://localhost:8888/oauth/authorize',
           },
         },
-        authToken: access_token,
-      });
+        authToken: ownerToken,
+      }).then(r => r.expectNoGraphQLErrors());
 
-      expect(result.body.errors).toBeUndefined();
-      expect(result.body.data).toMatchInlineSnapshot(`
+      expect(result).toMatchInlineSnapshot(`
         {
-          "createOIDCIntegration": {
-            "error": {
-              "details": {
-                "clientId": null,
-                "clientSecret": "Must be at least 3 characters long.",
-                "oauthApiUrl": null,
+          createOIDCIntegration: {
+            error: {
+              details: {
+                authorizationEndpoint: null,
+                clientId: null,
+                clientSecret: Must be at least 3 characters long.,
+                tokenEndpoint: null,
+                userinfoEndpoint: null,
               },
-              "message": "Failed to create OIDC Integration.",
+              message: Failed to create OIDC Integration.,
             },
-            "ok": null,
+            ok: null,
           },
         }
       `);
     });
-    test('error: too long clientSecret', async () => {
-      const { access_token } = await authenticate('main');
-      const orgResult = await createOrganization(
-        {
-          name: 'foo',
-        },
-        access_token,
-      );
 
-      const org =
-        orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+    test.concurrent('error: too long clientSecret', async ({ expect }) => {
+      const { ownerToken, createOrg } = await initSeed().createOwner();
+      const { organization } = await createOrg();
 
       const result = await execute({
         document: CreateOIDCIntegrationMutation,
         variables: {
           input: {
-            organizationId: org.id,
+            organizationId: organization.id,
             clientId: 'foo',
             clientSecret: new Array(500).fill('a').join(''),
-            oauthApiUrl: 'http://localhost:8888/oauth',
+            tokenEndpoint: 'http://localhost:8888/oauth/token',
+            userinfoEndpoint: 'http://localhost:8888/oauth/userinfo',
+            authorizationEndpoint: 'http://localhost:8888/oauth/authorize',
           },
         },
-        authToken: access_token,
-      });
+        authToken: ownerToken,
+      }).then(r => r.expectNoGraphQLErrors());
 
-      expect(result.body.errors).toBeUndefined();
-      expect(result.body.data).toMatchInlineSnapshot(`
+      expect(result).toMatchInlineSnapshot(`
         {
-          "createOIDCIntegration": {
-            "error": {
-              "details": {
-                "clientId": null,
-                "clientSecret": "Can not be longer than 200 characters.",
-                "oauthApiUrl": null,
+          createOIDCIntegration: {
+            error: {
+              details: {
+                authorizationEndpoint: null,
+                clientId: null,
+                clientSecret: Can not be longer than 200 characters.,
+                tokenEndpoint: null,
+                userinfoEndpoint: null,
               },
-              "message": "Failed to create OIDC Integration.",
+              message: Failed to create OIDC Integration.,
             },
-            "ok": null,
+            ok: null,
           },
         }
       `);
     });
-    test('error: invalid oauth api url', async () => {
-      const { access_token } = await authenticate('main');
-      const orgResult = await createOrganization(
-        {
-          name: 'foo',
-        },
-        access_token,
-      );
 
-      const org =
-        orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+    test.concurrent('error: invalid oauth api url', async ({ expect }) => {
+      const { ownerToken, createOrg } = await initSeed().createOwner();
+      const { organization } = await createOrg();
 
       const result = await execute({
         document: CreateOIDCIntegrationMutation,
         variables: {
           input: {
-            organizationId: org.id,
+            organizationId: organization.id,
             clientId: 'foo',
             clientSecret: 'foo',
-            oauthApiUrl: 'foo',
+            tokenEndpoint: 'foo',
+            userinfoEndpoint: 'foo',
+            authorizationEndpoint: 'foo',
           },
         },
-        authToken: access_token,
-      });
+        authToken: ownerToken,
+      }).then(r => r.expectNoGraphQLErrors());
 
-      expect(result.body.errors).toBeUndefined();
-      expect(result.body.data).toMatchInlineSnapshot(`
+      expect(result).toMatchInlineSnapshot(`
         {
-          "createOIDCIntegration": {
-            "error": {
-              "details": {
-                "clientId": null,
-                "clientSecret": null,
-                "oauthApiUrl": "Must be a valid OAuth API url.",
+          createOIDCIntegration: {
+            error: {
+              details: {
+                authorizationEndpoint: Must be a valid OAuth API url.,
+                clientId: null,
+                clientSecret: null,
+                tokenEndpoint: Must be a valid OAuth API url.,
+                userinfoEndpoint: Must be a valid OAuth API url.,
               },
-              "message": "Failed to create OIDC Integration.",
+              message: Failed to create OIDC Integration.,
             },
-            "ok": null,
+            ok: null,
           },
         }
       `);
     });
-    test('error: multiple integrations per organization', async () => {
-      const { access_token } = await authenticate('main');
-      const orgResult = await createOrganization(
-        {
-          name: 'foo',
-        },
-        access_token,
-      );
 
-      const org =
-        orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+    test.concurrent('error: multiple integrations per organization', async () => {
+      const { ownerToken, createOrg } = await initSeed().createOwner();
+      const { organization } = await createOrg();
 
-      let result = await execute({
+      const result = await execute({
         document: CreateOIDCIntegrationMutation,
         variables: {
           input: {
-            organizationId: org.id,
+            organizationId: organization.id,
             clientId: 'foo',
             clientSecret: 'foofoofoofoo',
-            oauthApiUrl: 'http://localhost:8888/oauth',
+            tokenEndpoint: 'http://localhost:8888/oauth/token',
+            userinfoEndpoint: 'http://localhost:8888/oauth/userinfo',
+            authorizationEndpoint: 'http://localhost:8888/oauth/authorize',
           },
         },
-        authToken: access_token,
-      });
+        authToken: ownerToken,
+      }).then(r => r.expectNoGraphQLErrors());
 
-      expect(result.body.errors).toBeUndefined();
-      expect(result.body.data).toEqual({
+      expect(result).toEqual({
         createOIDCIntegration: {
           error: null,
           ok: {
@@ -378,34 +351,39 @@ describe('create', () => {
               id: expect.any(String),
               clientId: 'foo',
               clientSecretPreview: 'ofoo',
-              oauthApiUrl: 'http://localhost:8888/oauth',
+              tokenEndpoint: 'http://localhost:8888/oauth/token',
+              userinfoEndpoint: 'http://localhost:8888/oauth/userinfo',
+              authorizationEndpoint: 'http://localhost:8888/oauth/authorize',
             },
           },
         },
       });
 
-      result = await execute({
+      const result2 = await execute({
         document: CreateOIDCIntegrationMutation,
         variables: {
           input: {
-            organizationId: org.id,
+            organizationId: organization.id,
             clientId: 'foo',
             clientSecret: 'foofoofoofoo',
-            oauthApiUrl: 'http://localhost:8888/oauth',
+            tokenEndpoint: 'http://localhost:8888/oauth/token',
+            userinfoEndpoint: 'http://localhost:8888/oauth/userinfo',
+            authorizationEndpoint: 'http://localhost:8888/oauth/authorize',
           },
         },
-        authToken: access_token,
-      });
+        authToken: ownerToken,
+      }).then(r => r.expectNoGraphQLErrors());
 
-      expect(result.body.errors).toBeUndefined();
-      expect(result.body.data).toEqual({
+      expect(result2).toEqual({
         createOIDCIntegration: {
           error: {
             message: 'An OIDC integration already exists for this organization.',
             details: {
               clientId: null,
               clientSecret: null,
-              oauthApiUrl: null,
+              tokenEndpoint: null,
+              userinfoEndpoint: null,
+              authorizationEndpoint: null,
             },
           },
           ok: null,
@@ -415,7 +393,7 @@ describe('create', () => {
   });
 });
 
-const DeleteOIDCIntegrationMutation = gql(/* GraphQL */ `
+const DeleteOIDCIntegrationMutation = graphql(/* GraphQL */ `
   mutation DeleteOIDCIntegrationMutation($input: DeleteOIDCIntegrationInput!) {
     deleteOIDCIntegration(input: $input) {
       ok {
@@ -430,48 +408,39 @@ const DeleteOIDCIntegrationMutation = gql(/* GraphQL */ `
 
 describe('delete', () => {
   describe('permissions="organization:integrations"', () => {
-    test('success', async () => {
-      const { access_token } = await authenticate('main');
-      const orgResult = await createOrganization(
-        {
-          name: 'foo',
-        },
-        access_token,
-      );
-
-      const org =
-        orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+    test.concurrent('success', async () => {
+      const { ownerToken, createOrg } = await initSeed().createOwner();
+      const { organization } = await createOrg();
 
       const createResult = await execute({
         document: CreateOIDCIntegrationMutation,
         variables: {
           input: {
-            organizationId: org.id,
+            organizationId: organization.id,
             clientId: 'foo',
             clientSecret: 'foofoofoofoo',
-            oauthApiUrl: 'http://localhost:8888/oauth',
+            tokenEndpoint: 'http://localhost:8888/oauth/token',
+            userinfoEndpoint: 'http://localhost:8888/oauth/userinfo',
+            authorizationEndpoint: 'http://localhost:8888/oauth/authorize',
           },
         },
-        authToken: access_token,
-      });
+        authToken: ownerToken,
+      }).then(r => r.expectNoGraphQLErrors());
 
-      expect(createResult.body.errors).toBeUndefined();
-      const oidcIntegrationId =
-        createResult.body.data!.createOIDCIntegration.ok!.createdOIDCIntegration.id;
+      const oidcIntegrationId = createResult.createOIDCIntegration.ok!.createdOIDCIntegration.id;
 
       let refetchedOrg = await execute({
         document: OrganizationWithOIDCIntegration,
         variables: {
-          organizationId: org.cleanId,
+          organizationId: organization.cleanId,
         },
-        authToken: access_token,
-      });
+        authToken: ownerToken,
+      }).then(r => r.expectNoGraphQLErrors());
 
-      expect(refetchedOrg.body.errors).toBeUndefined();
-      expect(refetchedOrg.body.data).toEqual({
+      expect(refetchedOrg).toEqual({
         organization: {
           organization: {
-            id: org.id,
+            id: organization.id,
             oidcIntegration: {
               id: oidcIntegrationId,
             },
@@ -486,39 +455,30 @@ describe('delete', () => {
             oidcIntegrationId,
           },
         },
-        authToken: access_token,
-      });
+        authToken: ownerToken,
+      }).then(r => r.expectNoGraphQLErrors());
 
-      expect(deleteResult.body.errors).toBeUndefined();
-      expect(deleteResult).toMatchInlineSnapshot(`
-        {
-          "body": {
-            "data": {
-              "deleteOIDCIntegration": {
-                "error": null,
-                "ok": {
-                  "__typename": "DeleteOIDCIntegrationOk",
-                },
-              },
-            },
+      expect(deleteResult).toEqual({
+        deleteOIDCIntegration: {
+          error: null,
+          ok: {
+            __typename: 'DeleteOIDCIntegrationOk',
           },
-          "status": 200,
-        }
-      `);
+        },
+      });
 
       refetchedOrg = await execute({
         document: OrganizationWithOIDCIntegration,
         variables: {
-          organizationId: org.cleanId,
+          organizationId: organization.cleanId,
         },
-        authToken: access_token,
-      });
+        authToken: ownerToken,
+      }).then(r => r.expectNoGraphQLErrors());
 
-      expect(refetchedOrg.body.errors).toBeUndefined();
-      expect(refetchedOrg.body.data).toEqual({
+      expect(refetchedOrg).toEqual({
         organization: {
           organization: {
-            id: org.id,
+            id: organization.id,
             oidcIntegration: null,
           },
         },
@@ -526,37 +486,29 @@ describe('delete', () => {
     });
 
     test("error: user doesn't have permissions", async () => {
-      const { access_token } = await authenticate('main');
-      const orgResult = await createOrganization(
-        {
-          name: 'foo',
-        },
-        access_token,
-      );
-
-      const org =
-        orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+      const { ownerToken, createOrg } = await initSeed().createOwner();
+      const { organization } = await createOrg();
 
       const createResult = await execute({
         document: CreateOIDCIntegrationMutation,
         variables: {
           input: {
-            organizationId: org.id,
+            organizationId: organization.id,
             clientId: 'foo',
             clientSecret: 'foofoofoofoo',
-            oauthApiUrl: 'http://localhost:8888/oauth',
+            tokenEndpoint: 'http://localhost:8888/oauth/token',
+            userinfoEndpoint: 'http://localhost:8888/oauth/userinfo',
+            authorizationEndpoint: 'http://localhost:8888/oauth/authorize',
           },
         },
-        authToken: access_token,
-      });
+        authToken: ownerToken,
+      }).then(r => r.expectNoGraphQLErrors());
 
-      expect(createResult.body.errors).toBeUndefined();
-      const oidcIntegrationId =
-        createResult.body.data!.createOIDCIntegration.ok!.createdOIDCIntegration.id;
+      const oidcIntegrationId = createResult.createOIDCIntegration.ok!.createdOIDCIntegration.id;
 
-      const { access_token: accessTokenExtra } = await authenticate('extra');
+      const { ownerToken: accessTokenExtra } = await initSeed().createOwner();
 
-      const deleteResult = await execute({
+      const errors = await execute({
         document: DeleteOIDCIntegrationMutation,
         variables: {
           input: {
@@ -564,128 +516,118 @@ describe('delete', () => {
           },
         },
         authToken: accessTokenExtra,
-      });
+      }).then(r => r.expectGraphQLErrors());
 
-      expect(deleteResult.body.errors).toBeDefined();
-      expect(deleteResult.body.errors).toMatchInlineSnapshot(`
+      expect(errors).toMatchInlineSnapshot(`
         [
           {
-            "locations": [
+            locations: [
               {
-                "column": 3,
-                "line": 2,
+                column: 3,
+                line: 2,
               },
             ],
-            "message": "No access (reason: "Missing organization:integrations permission")",
-            "path": [
-              "deleteOIDCIntegration",
+            message: No access (reason: "Missing organization:integrations permission"),
+            path: [
+              deleteOIDCIntegration,
             ],
           },
         ]
       `);
     });
 
-    test('success: upon integration deletion oidc members are also deleted', async () => {
-      const { access_token } = await authenticate('main');
-      const orgResult = await createOrganization(
-        {
-          name: 'foo',
-        },
-        access_token,
-      );
+    test.concurrent(
+      'success: upon integration deletion oidc members are also deleted',
+      async ({ expect }) => {
+        const seed = initSeed();
+        const { ownerToken, createOrg } = await seed.createOwner();
+        const { organization } = await createOrg();
 
-      const org =
-        orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
-
-      const createResult = await execute({
-        document: CreateOIDCIntegrationMutation,
-        variables: {
-          input: {
-            organizationId: org.id,
-            clientId: 'foo',
-            clientSecret: 'foofoofoofoo',
-            oauthApiUrl: 'http://localhost:8888/oauth',
+        const createResult = await execute({
+          document: CreateOIDCIntegrationMutation,
+          variables: {
+            input: {
+              organizationId: organization.id,
+              clientId: 'foo',
+              clientSecret: 'foofoofoofoo',
+              tokenEndpoint: 'http://localhost:8888/oauth/token',
+              userinfoEndpoint: 'http://localhost:8888/oauth/userinfo',
+              authorizationEndpoint: 'http://localhost:8888/oauth/authorize',
+            },
           },
-        },
-        authToken: access_token,
-      });
+          authToken: ownerToken,
+        }).then(r => r.expectNoGraphQLErrors());
 
-      expect(createResult.body.errors).toBeUndefined();
-      const oidcIntegrationId =
-        createResult.body.data!.createOIDCIntegration.ok!.createdOIDCIntegration.id;
+        const oidcIntegrationId = createResult.createOIDCIntegration.ok!.createdOIDCIntegration.id;
 
-      const MeQuery = gql(/* GraphQL */ `
-        query Me {
-          me {
-            id
+        const MeQuery = graphql(/* GraphQL */ `
+          query Me {
+            me {
+              id
+            }
           }
-        }
-      `);
+        `);
 
-      // create new member that belongs to oidc integration
-      const { access_token: memberAccessToken } = await authenticate(
-        'oidc_member',
-        oidcIntegrationId,
-      );
-      let meResult = await execute({
-        document: MeQuery,
-        authToken: memberAccessToken,
-      });
+        const { access_token: memberAccessToken } = await seed.authenticate(
+          seed.generateEmail(),
+          oidcIntegrationId,
+        );
+        const meResult = await execute({
+          document: MeQuery,
+          authToken: memberAccessToken,
+        }).then(r => r.expectNoGraphQLErrors());
 
-      expect(meResult.body.errors).toBeUndefined();
-      expect(meResult.body.data).toEqual({
-        me: {
-          id: expect.any(String),
-        },
-      });
-
-      const deleteResult = await execute({
-        document: DeleteOIDCIntegrationMutation,
-        variables: {
-          input: {
-            oidcIntegrationId,
+        expect(meResult).toEqual({
+          me: {
+            id: expect.any(String),
           },
-        },
-        authToken: access_token,
-      });
+        });
 
-      expect(deleteResult.body.errors).toBeUndefined();
+        await execute({
+          document: DeleteOIDCIntegrationMutation,
+          variables: {
+            input: {
+              oidcIntegrationId,
+            },
+          },
+          authToken: ownerToken,
+        }).then(r => r.expectNoGraphQLErrors());
 
-      meResult = await execute({
-        document: MeQuery,
-        authToken: memberAccessToken,
-      });
+        const refetchedMeResult = await execute({
+          document: MeQuery,
+          authToken: memberAccessToken,
+        }).then(r => r.expectGraphQLErrors());
 
-      expect(meResult.body).toMatchInlineSnapshot(`
-        {
-          "data": null,
-          "errors": [
+        expect(refetchedMeResult).toMatchInlineSnapshot(`
+          [
             {
-              "locations": [
+              locations: [
                 {
-                  "column": 3,
-                  "line": 2,
+                  column: 3,
+                  line: 2,
                 },
               ],
-              "message": "No access (reason: "User not found")",
-              "path": [
-                "me",
+              message: No access (reason: "User not found"),
+              path: [
+                me,
               ],
             },
-          ],
-        }
-      `);
-    });
+          ]
+        `);
+      },
+    );
   });
 });
 
-const UpdateOIDCIntegrationMutation = gql(/* GraphQL */ `
+const UpdateOIDCIntegrationMutation = graphql(/* GraphQL */ `
   mutation UpdateOIDCIntegrationMutation($input: UpdateOIDCIntegrationInput!) {
     updateOIDCIntegration(input: $input) {
       ok {
         updatedOIDCIntegration {
           id
-          oauthApiUrl
+          tokenEndpoint
+          userinfoEndpoint
+          authorizationEndpoint
           clientId
           clientSecretPreview
         }
@@ -695,7 +637,9 @@ const UpdateOIDCIntegrationMutation = gql(/* GraphQL */ `
         details {
           clientId
           clientSecret
-          oauthApiUrl
+          tokenEndpoint
+          userinfoEndpoint
+          authorizationEndpoint
         }
       }
     }
@@ -704,50 +648,43 @@ const UpdateOIDCIntegrationMutation = gql(/* GraphQL */ `
 
 describe('update', () => {
   describe('permissions="organization:integrations"', () => {
-    test('success', async () => {
-      const { access_token } = await authenticate('main');
-      const orgResult = await createOrganization(
-        {
-          name: 'foo',
-        },
-        access_token,
-      );
-
-      const org =
-        orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+    test.concurrent('success', async () => {
+      const { ownerToken, createOrg } = await initSeed().createOwner();
+      const { organization } = await createOrg();
 
       const createResult = await execute({
         document: CreateOIDCIntegrationMutation,
         variables: {
           input: {
-            organizationId: org.id,
+            organizationId: organization.id,
             clientId: 'aaaa',
             clientSecret: 'aaaaaaaaaaaa',
-            oauthApiUrl: 'http://localhost:8888/aaaa',
+            tokenEndpoint: 'http://localhost:8888/aaaa/token',
+            userinfoEndpoint: 'http://localhost:8888/aaaa/userinfo',
+            authorizationEndpoint: 'http://localhost:8888/aaaa/authorize',
           },
         },
-        authToken: access_token,
-      });
-      expect(createResult.body.errors).toBeUndefined();
+        authToken: ownerToken,
+      }).then(r => r.expectNoGraphQLErrors());
 
-      const oidcIntegrationId =
-        createResult.body.data!.createOIDCIntegration.ok!.createdOIDCIntegration.id;
+      const oidcIntegrationId = createResult.createOIDCIntegration.ok!.createdOIDCIntegration.id;
 
       const updateResult = await execute({
         document: UpdateOIDCIntegrationMutation,
         variables: {
           input: {
-            oidcIntegrationId: oidcIntegrationId,
+            oidcIntegrationId,
             clientId: 'bbbb',
             clientSecret: 'bbbbbbbbbbbb',
-            oauthApiUrl: 'http://localhost:8888/bbbb',
+            tokenEndpoint: 'http://localhost:8888/bbbb/token',
+            userinfoEndpoint: 'http://localhost:8888/bbbb/userinfo',
+            authorizationEndpoint: 'http://localhost:8888/bbbb/authorize',
           },
         },
-        authToken: access_token,
-      });
+        authToken: ownerToken,
+      }).then(r => r.expectNoGraphQLErrors());
 
-      expect(updateResult.body.errors).toBeUndefined();
-      expect(updateResult.body.data).toEqual({
+      expect(updateResult).toEqual({
         updateOIDCIntegration: {
           error: null,
           ok: {
@@ -755,44 +692,38 @@ describe('update', () => {
               id: oidcIntegrationId,
               clientId: 'bbbb',
               clientSecretPreview: 'bbbb',
-              oauthApiUrl: 'http://localhost:8888/bbbb',
+              tokenEndpoint: 'http://localhost:8888/bbbb/token',
+              userinfoEndpoint: 'http://localhost:8888/bbbb/userinfo',
+              authorizationEndpoint: 'http://localhost:8888/bbbb/authorize',
             },
           },
         },
       });
     });
-    test('error: user does not have permissions', async () => {
-      const { access_token } = await authenticate('main');
-      const orgResult = await createOrganization(
-        {
-          name: 'foo',
-        },
-        access_token,
-      );
 
-      const org =
-        orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
+    test.concurrent('error: user does not have permissions', async ({ expect }) => {
+      const { ownerToken, createOrg } = await initSeed().createOwner();
+      const { organization } = await createOrg();
 
       const createResult = await execute({
         document: CreateOIDCIntegrationMutation,
         variables: {
           input: {
-            organizationId: org.id,
+            organizationId: organization.id,
             clientId: 'foo',
             clientSecret: 'foofoofoofoo',
-            oauthApiUrl: 'http://localhost:8888/oauth',
+            tokenEndpoint: 'http://localhost:8888/oauth/token',
+            userinfoEndpoint: 'http://localhost:8888/oauth/userinfo',
+            authorizationEndpoint: 'http://localhost:8888/oauth/authorize',
           },
         },
-        authToken: access_token,
-      });
+        authToken: ownerToken,
+      }).then(r => r.expectNoGraphQLErrors());
 
-      expect(createResult.body.errors).toBeUndefined();
-      const oidcIntegrationId =
-        createResult.body.data!.createOIDCIntegration.ok!.createdOIDCIntegration.id;
+      const oidcIntegrationId = createResult.createOIDCIntegration.ok!.createdOIDCIntegration.id;
+      const { ownerToken: accessTokenExtra } = await initSeed().createOwner();
 
-      const { access_token: accessTokenExtra } = await authenticate('extra');
-
-      const deleteResult = await execute({
+      const errors = await execute({
         document: UpdateOIDCIntegrationMutation,
         variables: {
           input: {
@@ -800,21 +731,20 @@ describe('update', () => {
           },
         },
         authToken: accessTokenExtra,
-      });
+      }).then(r => r.expectGraphQLErrors());
 
-      expect(deleteResult.body.errors).toBeDefined();
-      expect(deleteResult.body.errors).toMatchInlineSnapshot(`
+      expect(errors).toMatchInlineSnapshot(`
         [
           {
-            "locations": [
+            locations: [
               {
-                "column": 3,
-                "line": 2,
+                column: 3,
+                line: 2,
               },
             ],
-            "message": "No access (reason: "Missing organization:integrations permission")",
-            "path": [
-              "updateOIDCIntegration",
+            message: No access (reason: "Missing organization:integrations permission"),
+            path: [
+              updateOIDCIntegration,
             ],
           },
         ]

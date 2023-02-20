@@ -1,20 +1,19 @@
 import { Kafka, KafkaMessage, logLevel } from 'kafkajs';
-import { decompress } from '@hive/usage-common';
-import {
-  errors,
-  processDuration,
-  reportMessageBytes,
-  ingestedOperationsWrites,
-  ingestedOperationsFailures,
-  ingestedOperationRegistryWrites,
-  ingestedOperationRegistryFailures,
-} from './metrics';
-import { ClickHouseConfig, createWriter } from './writer';
-import { createProcessor } from './processor';
-import type { KafkaEnvironment } from './environment';
-
 import type { FastifyLoggerInstance } from '@hive/service-common';
 import type { RawReport } from '@hive/usage-common';
+import { decompress } from '@hive/usage-common';
+import type { KafkaEnvironment } from './environment';
+import {
+  errors,
+  ingestedOperationRegistryFailures,
+  ingestedOperationRegistryWrites,
+  ingestedOperationsFailures,
+  ingestedOperationsWrites,
+  processDuration,
+  reportMessageBytes,
+} from './metrics';
+import { createProcessor } from './processor';
+import { ClickHouseConfig, createWriter } from './writer';
 
 enum Status {
   Waiting,
@@ -40,7 +39,6 @@ function shouldRetryOnFailure(error: any) {
 export function createIngestor(config: {
   logger: FastifyLoggerInstance;
   clickhouse: ClickHouseConfig;
-  clickhouseMirror: ClickHouseConfig | null;
   kafka: {
     topic: string;
     consumerGroup: string;
@@ -172,7 +170,6 @@ export function createIngestor(config: {
   const processor = createProcessor({ logger });
   const writer = createWriter({
     clickhouse: config.clickhouse,
-    clickhouseMirror: config.clickhouseMirror,
     logger,
   });
 
@@ -202,7 +199,7 @@ async function processMessage({
   // Decompress and parse the message to get a list of reports
   const rawReports: RawReport[] = JSON.parse((await decompress(message.value!)).toString());
 
-  const { operations, registryRecords, legacy } = await processor.processReports(rawReports);
+  const { operations, registryRecords } = await processor.processReports(rawReports);
 
   try {
     // .then and .catch looks weird but async/await with try/catch and Promise.all is even weirder
@@ -225,16 +222,13 @@ async function processMessage({
         })
         .catch(error => {
           ingestedOperationsFailures.inc(operations.length);
-          // We want to retry the kafka message only if the write to operations_new table fails.
+          // We want to retry the kafka message only if the write to operations table fails.
           // Why? Because if we retry the message for operation_registry, we will have duplicate.
           // One write could succeed, the other one could fail.
-          // Let's stick to the operations_new table for now.
+          // Let's stick to the operations table for now.
           error[retryOnFailureSymbol] = true;
           return Promise.reject(error);
         }),
-      // legacy
-      writer.legacy.writeRegistry(legacy.registryRecords),
-      writer.legacy.writeOperations(legacy.operations),
     ]);
   } catch (error) {
     logger.error(error);

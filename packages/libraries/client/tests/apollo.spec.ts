@@ -82,3 +82,55 @@ test('createSupergraphSDLFetcher', async () => {
   expect(staleResult.id).toBeDefined();
   expect(staleResult.supergraphSdl).toEqual(newSupergraphSdl);
 });
+
+test('createSupergraphSDLFetcher retry with unexpected status code (nRetryCount=10)', async () => {
+  const supergraphSdl = 'type SuperQuery { sdl: String }';
+  const key = 'secret-key';
+  nock('http://localhost')
+    .get('/supergraph')
+    .times(10)
+    .reply(500)
+    .get('/supergraph')
+    .once()
+    .matchHeader('X-Hive-CDN-Key', key)
+    .reply(200, supergraphSdl, {
+      ETag: 'first',
+    });
+
+  const fetcher = createSupergraphSDLFetcher({
+    endpoint: 'http://localhost',
+    key,
+  });
+
+  const result = await fetcher();
+
+  expect(result.id).toBeDefined();
+  expect(result.supergraphSdl).toEqual(supergraphSdl);
+});
+
+test('createSupergraphSDLFetcher retry with unexpected status code (nRetryCount=11)', async () => {
+  expect.assertions(1);
+  const supergraphSdl = 'type SuperQuery { sdl: String }';
+  const key = 'secret-key';
+  nock('http://localhost')
+    .get('/supergraph')
+    .times(11)
+    .reply(500)
+    .get('/supergraph')
+    .once()
+    .matchHeader('X-Hive-CDN-Key', key)
+    .reply(200, supergraphSdl, {
+      ETag: 'first',
+    });
+
+  const fetcher = createSupergraphSDLFetcher({
+    endpoint: 'http://localhost',
+    key,
+  });
+
+  try {
+    await fetcher();
+  } catch (err) {
+    expect(err).toMatchInlineSnapshot(`[Error: Failed to fetch [500]]`);
+  }
+});

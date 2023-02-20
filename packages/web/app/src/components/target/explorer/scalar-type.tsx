@@ -1,4 +1,4 @@
-import { gql, DocumentType } from 'urql';
+import { DocumentType, gql } from 'urql';
 import { Markdown } from '@/components/v2/markdown';
 import { GraphQLTypeCard, SchemaExplorerUsageStats } from './common';
 
@@ -19,7 +19,7 @@ export function GraphQLScalarTypeComponent(props: {
   return (
     <GraphQLTypeCard name={props.type.name} kind="scalar">
       <div className="flex flex-row gap-4 p-4">
-        <div className="flex-grow text-sm">
+        <div className="grow text-sm">
           {typeof props.type.description === 'string' ? (
             <Markdown content={props.type.description} />
           ) : null}

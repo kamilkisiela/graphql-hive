@@ -31,7 +31,7 @@ async function main() {
           enabled: true,
           endpoint: env.heartbeat.endpoint,
           intervalInMS: 20_000,
-          onError: logger.error,
+          onError: e => logger.error(e, `Heartbeat failed with error`),
           isReady: schedularReadiness,
         })
       : startHeartbeats({ enabled: false });

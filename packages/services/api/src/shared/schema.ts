@@ -1,24 +1,28 @@
-import lodash from 'lodash';
 import { createHash } from 'crypto';
 import {
   buildASTSchema,
-  GraphQLSchema,
-  lexicographicSortSchema,
-  visit,
-  DocumentNode,
-  Kind,
-  DefinitionNode,
   ConstDirectiveNode,
-  OperationTypeDefinitionNode,
-  FieldDefinitionNode,
-  NamedTypeNode,
+  DefinitionNode,
+  DocumentNode,
   EnumValueDefinitionNode,
+  FieldDefinitionNode,
+  GraphQLSchema,
   InputValueDefinitionNode,
+  Kind,
+  lexicographicSortSchema,
+  NamedTypeNode,
+  OperationTypeDefinitionNode,
+  visit,
 } from 'graphql';
-import { Schema, SchemaObject, emptySource } from './entities';
+import lodash from 'lodash';
+import type { SchemaObject } from './entities';
 
-export function hashSchema(schema: Schema): string {
-  return createHash('md5').update(schema.source, 'utf-8').digest('hex');
+export function hashSchema(schema: SchemaObject): string {
+  return createHash('md5')
+    .update(schema.source, 'utf-8')
+    .update(`service_name: ${schema.source}`)
+    .update(`service_url: ${schema.url || ''}`)
+    .digest('hex');
 }
 
 /**
@@ -38,39 +42,6 @@ export function buildSchema(
   } catch (error) {
     throw transformError(error);
   }
-}
-
-export function findSchema(schemas: readonly Schema[], expected: Schema): Schema | undefined {
-  return schemas.find(schema => schema.service === expected.service);
-}
-
-export function updateSchemas(
-  schemas: Schema[],
-  incoming: Schema,
-): {
-  schemas: Schema[];
-  swappedSchema: Schema | null;
-} {
-  let swappedSchema: Schema | null = null;
-  const newSchemas = schemas.map(schema => {
-    const matching = (schema.service ?? emptySource) === (incoming.service ?? emptySource);
-
-    if (matching) {
-      swappedSchema = schema;
-      return incoming;
-    }
-
-    return schema;
-  });
-
-  if (!swappedSchema) {
-    newSchemas.push(incoming);
-  }
-
-  return {
-    schemas: newSchemas,
-    swappedSchema,
-  };
 }
 
 export function minifySchema(schema: string): string {

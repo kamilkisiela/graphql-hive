@@ -1,20 +1,20 @@
 import { Injectable, Scope } from 'graphql-modules';
-import type { AlertsModule } from '../__generated__/types';
-import type { AlertChannel, Alert } from '../../../shared/entities';
+import type { Alert, AlertChannel } from '../../../shared/entities';
 import { cache } from '../../../shared/helpers';
 import { AuthManager } from '../../auth/providers/auth-manager';
+import { ProjectAccessScope } from '../../auth/providers/project-access';
+import { TargetAccessScope } from '../../auth/providers/target-access';
+import { IntegrationsAccessContext } from '../../integrations/providers/integrations-access-context';
+import { SlackIntegrationManager } from '../../integrations/providers/slack-integration-manager';
 import { OrganizationManager } from '../../organization/providers/organization-manager';
 import { ProjectManager } from '../../project/providers/project-manager';
 import { Logger } from '../../shared/providers/logger';
-import { Storage } from '../../shared/providers/storage';
 import type { ProjectSelector } from '../../shared/providers/storage';
-import { SlackIntegrationManager } from '../../integrations/providers/slack-integration-manager';
-import { IntegrationsAccessContext } from '../../integrations/providers/integrations-access-context';
+import { Storage } from '../../shared/providers/storage';
+import type { AlertsModule } from '../__generated__/types';
 import { SchemaChangeNotificationInput } from './adapters/common';
 import { SlackCommunicationAdapter } from './adapters/slack';
 import { WebhookCommunicationAdapter } from './adapters/webhook';
-import { ProjectAccessScope } from '../../auth/providers/project-access';
-import { TargetAccessScope } from '../../auth/providers/target-access';
 
 @Injectable({
   scope: Scope.Operation,

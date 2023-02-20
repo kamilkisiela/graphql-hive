@@ -1,40 +1,39 @@
-import 'twin.macro';
-import React from 'react';
+import React, { PropsWithChildren, ReactNode } from 'react';
+import { formatISO } from 'date-fns';
+import ReactECharts from 'echarts-for-react';
+import { VscChevronDown, VscChevronLeft, VscChevronRight, VscChevronUp } from 'react-icons/vsc';
+import AutoSizer from 'react-virtualized-auto-sizer';
+import { DocumentType, gql, useQuery } from 'urql';
+import { DataWrapper } from '@/components/common/DataWrapper';
+import { env } from '@/env/frontend';
+import { OrganizationType } from '@/graphql';
+import { theme } from '@/lib/charts';
 import {
-  Table,
-  Thead,
-  Tbody,
-  Th,
-  Tr,
-  Td,
+  Button,
   Flex,
-  StatGroup,
+  IconButton,
   Stat,
+  StatGroup,
   StatLabel,
   StatNumber,
-  Button,
-  IconButton,
+  Table,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr,
 } from '@chakra-ui/react';
-import ReactECharts from 'echarts-for-react';
-import AutoSizer from 'react-virtualized-auto-sizer';
 import {
   createTable,
-  useTableInstance,
   getCoreRowModel,
-  getSortedRowModel,
   getPaginationRowModel,
-  SortingState,
-  PaginationState,
-  TableInstance as OriginalTableInstance,
+  getSortedRowModel,
   Table as OriginalTable,
+  TableInstance as OriginalTableInstance,
+  PaginationState,
+  SortingState,
+  useTableInstance,
 } from '@tanstack/react-table';
-import { DocumentType, gql, useQuery } from 'urql';
-import { formatISO } from 'date-fns';
-import { VscChevronUp, VscChevronDown, VscChevronLeft, VscChevronRight } from 'react-icons/vsc';
-import { DataWrapper } from '@/components/common/DataWrapper';
-import { theme } from '@/lib/charts';
-import { OrganizationType } from '@/graphql';
-import { env } from '@/env/frontend';
 
 interface Organization {
   name: React.ReactElement;
@@ -157,17 +156,22 @@ const OverallStat: React.FC<{
   );
 };
 
-const Sortable: React.FC<{
+const Sortable = ({
+  children,
+  isSorted,
+  isSortedDesc,
+  align = 'left',
+}: PropsWithChildren<{
   align?: 'center' | 'right' | 'left';
   isSortedDesc?: boolean;
   isSorted?: boolean;
-}> = ({ children, isSorted, isSortedDesc, align = 'left' }) => {
+}>) => {
   return (
     <Flex
       direction="row"
       align="center"
       justifyContent={align === 'center' ? 'center' : align === 'left' ? 'flex-start' : 'flex-end'}
-      tw="cursor-pointer"
+      className="cursor-pointer"
     >
       <span>{children}</span>
       {isSorted ? isSortedDesc ? <VscChevronDown /> : <VscChevronUp /> : null}
@@ -263,7 +267,7 @@ function OrganizationTableRow({ row }: { row: ReturnType<TableInstance['getRow']
             {isNumeric
               ? formatNumber(cell.getValue() as number)
               : isReact
-              ? cell.getValue()
+              ? (cell.getValue() as ReactNode)
               : cell.renderCell()}
           </Td>
         );
@@ -399,7 +403,7 @@ function OrganizationTable({ data }: { data: Organization[] }) {
           ))}
         </Tbody>
       </Table>
-      <div tw="py-3 flex flex-row items-center justify-center space-x-2">
+      <div className="py-3 flex flex-row items-center justify-center space-x-2">
         <Button
           size="sm"
           variant="ghost"
@@ -418,7 +422,7 @@ function OrganizationTable({ data }: { data: Organization[] }) {
           disabled={!tableInstance.getCanPreviousPage()}
           icon={<VscChevronLeft />}
         />
-        <span tw="font-bold whitespace-nowrap text-sm">
+        <span className="font-bold whitespace-nowrap text-sm">
           {tableInstance.getState().pagination.pageIndex + 1} / {tableInstance.getPageCount()}
         </span>
         <IconButton
@@ -499,8 +503,8 @@ export const AdminStats: React.FC<{
   return (
     <DataWrapper query={query}>
       {({ data }) => (
-        <div tw="flex flex-col space-y-6">
-          <StatGroup tw="bg-gray-100 dark:bg-gray-800 px-3 py-2">
+        <div className="flex flex-col space-y-6">
+          <StatGroup className="bg-gray-100 dark:bg-gray-800 px-3 py-2">
             <OverallStat label="Users" value={overall.users} />
             <OverallStat label="Organizations" value={overall.organizations} />
             <OverallStat label="Projects" value={overall.projects} />

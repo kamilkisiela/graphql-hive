@@ -1,7 +1,5 @@
-import * as utils from '@n1ru4l/dockest/test-helper';
 import { fetch } from '@whatwg-node/fetch';
-
-const emailsAddress = utils.getServiceAddress('emails', 3011);
+import { getServiceHost } from './utils';
 
 export interface Email {
   to: string;
@@ -10,6 +8,8 @@ export interface Email {
 }
 
 export async function history(): Promise<Email[]> {
+  const emailsAddress = await getServiceHost('emails', 3011);
+
   const response = await fetch(`http://${emailsAddress}/_history`, {
     method: 'GET',
     headers: {

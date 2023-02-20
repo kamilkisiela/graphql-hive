@@ -3,16 +3,17 @@
  * <sync> is a special value that will be replaced with the value from the root .env file.
  */
 import { constants } from 'fs';
-import { readFile, writeFile, access } from 'fs/promises';
-import { join, dirname, relative } from 'path';
+import { access, readFile, writeFile } from 'fs/promises';
+import { dirname, join, relative } from 'path';
 import { parse } from 'dotenv';
 import glob from 'glob';
 
-if (!!process.env.CI) {
+if (process.env.CI) {
   console.log('[sync-env-files] CI Detected, skipping');
   process.exit(0);
 }
 
+const force = ['--force', '-f'].includes(process.argv[2] || '');
 const cwd = process.cwd();
 
 async function main() {
@@ -24,7 +25,7 @@ async function main() {
     const dir = dirname(envLocalFile);
     const envFile = join(dir, '.env');
 
-    if (!(await exists(envFile))) {
+    if (force || !(await exists(envFile))) {
       console.log('[sync-env-files] Write .env file in', relative(process.cwd(), dir));
       await writeFile(envFile, await readFile(envLocalFile));
     }
@@ -52,7 +53,7 @@ async function main() {
       }
     }
 
-    if (modified) {
+    if (modified || force) {
       console.log('[sync-env-files] Sync', relative(process.cwd(), envFile));
       await writeFile(envFile, stringifyDotEnv(env), 'utf8');
     }

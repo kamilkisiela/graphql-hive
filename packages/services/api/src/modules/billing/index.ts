@@ -1,7 +1,7 @@
 import { createModule } from 'graphql-modules';
+import { BillingProvider } from './providers/billing.provider';
 import { resolvers } from './resolvers';
 import typeDefs from './module.graphql';
-import { BillingProvider } from './providers/billing.provider';
 
 export const billingModule = createModule({
   id: 'billing',

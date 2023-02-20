@@ -36,7 +36,7 @@ const errorHandler = createErrorHandler({
 const respondWithTRPC = createFetchAPIHandler({
   router: webhooksApiRouter,
   async createContext({ req }: any): Promise<Context> {
-    return { logger: req.log, errorHandler, schedule };
+    return { req, errorHandler, schedule };
   },
 });
 

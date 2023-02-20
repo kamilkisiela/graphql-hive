@@ -1,7 +1,7 @@
 import type { ExecutionArgs } from 'graphql';
 import type { AgentOptions } from './agent.js';
-import type { SchemaReporter } from './reporting.js';
 import type { OperationsStore } from './operations-store.js';
+import type { SchemaReporter } from './reporting.js';
 
 export interface HiveClient {
   info(): Promise<void>;
@@ -15,9 +15,17 @@ export interface HiveClient {
 }
 
 export type AsyncIterableIteratorOrValue<T> = AsyncIterableIterator<T> | T;
+export type AsyncIterableOrValue<T> = AsyncIterable<T> | T;
+export type AbortAction = {
+  action: 'abort';
+  reason: string;
+};
 
 export type CollectUsageCallback = (
-  result: AsyncIterableIteratorOrValue<GraphQLErrorsResult>,
+  result:
+    | AsyncIterableIteratorOrValue<GraphQLErrorsResult>
+    | AsyncIterableOrValue<GraphQLErrorsResult>
+    | AbortAction,
 ) => void;
 export interface ClientInfo {
   name: string;

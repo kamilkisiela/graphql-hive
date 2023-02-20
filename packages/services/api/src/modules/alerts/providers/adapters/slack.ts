@@ -1,15 +1,15 @@
 import { Inject, Injectable } from 'graphql-modules';
-import { WebClient, MessageAttachment } from '@slack/web-api';
-import {
-  CommunicationAdapter,
-  SchemaChangeNotificationInput,
-  filterChangesByLevel,
-  slackCoderize,
-  ChannelConfirmationInput,
-} from './common';
+import { MessageAttachment, WebClient } from '@slack/web-api';
 import type * as Types from '../../../../__generated__/types';
 import { Logger } from '../../../shared/providers/logger';
 import { WEB_APP_URL } from '../../../shared/providers/tokens';
+import {
+  ChannelConfirmationInput,
+  CommunicationAdapter,
+  filterChangesByLevel,
+  SchemaChangeNotificationInput,
+  slackCoderize,
+} from './common';
 
 @Injectable()
 export class SlackCommunicationAdapter implements CommunicationAdapter {

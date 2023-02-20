@@ -1,13 +1,13 @@
-import { OrganizationFieldsFragment, OrgBillingInfoFieldsFragment } from '@/graphql';
-import { Table, TableContainer, Tbody, Td, Th, Thead, Tr, Link } from '@chakra-ui/react';
 import React from 'react';
 import { VscCloudDownload } from 'react-icons/vsc';
+import { OrganizationFieldsFragment, OrgBillingInfoFieldsFragment } from '@/graphql';
+import { Link, Table, TableContainer, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
 import { CurrencyFormatter, DateFormatter } from './helpers';
 
 export const InvoicesList: React.FC<{
   organization: OrganizationFieldsFragment & OrgBillingInfoFieldsFragment;
 }> = ({ organization }) => {
-  if (null == organization.billingConfiguration?.invoices?.length) {
+  if (organization.billingConfiguration?.invoices?.length == null) {
     return null;
   }
 

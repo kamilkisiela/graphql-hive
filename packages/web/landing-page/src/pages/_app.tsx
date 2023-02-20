@@ -1,8 +1,8 @@
 import { ReactElement } from 'react';
 import { AppProps } from 'next/app';
 import Head from 'next/head';
-import { FooterExtended, Header } from '@theguild/components';
 import { ThemeProvider } from 'next-themes';
+import { FooterExtended, Header } from '@theguild/components';
 import '@theguild/components/style.css';
 
 const TITLE = 'GraphQL Hive - Schema Registry and Monitoring';
@@ -36,7 +36,11 @@ export default function App({ Component, pageProps }: AppProps): ReactElement {
 
       <FooterExtended
         resources={[
-          { title: 'Privacy Policy', href: '/privacy-policy.pdf', children: 'Privacy Policy' },
+          {
+            title: 'Privacy Policy',
+            href: 'https://the-guild.dev/graphql/hive/privacy-policy.pdf',
+            children: 'Privacy Policy',
+          },
           { title: 'Terms of Use', href: '/terms-of-use.pdf', children: 'Terms of Use' },
         ]}
       />

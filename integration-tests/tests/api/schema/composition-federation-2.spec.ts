@@ -1,68 +1,42 @@
-import {
-  createOrganization,
-  publishSchema,
-  createProject,
-  createToken,
-  enableExternalSchemaComposition,
-} from '../../../testkit/flow';
-import { authenticate } from '../../../testkit/auth';
-import { TargetAccessScope, ProjectType, ProjectAccessScope } from '@app/gql/graphql';
+import { ProjectAccessScope, ProjectType, TargetAccessScope } from '@app/gql/graphql';
+import { enableExternalSchemaComposition } from '../../../testkit/flow';
+import { initSeed } from '../../../testkit/seed';
+import { generateUnique } from '../../../testkit/utils';
 
-const dockerAddress = 'composition_federation_2:3069';
+// We do not resolve this to a host address, because we are calling this through a different flow:
+// GraphQL API -> Schema service -> Composition service
+const dockerAddress = `composition_federation_2:3069`;
 
-test('call an external service to compose and validate services', async () => {
-  const { access_token: owner_access_token } = await authenticate('main');
-  const orgResult = await createOrganization(
-    {
-      name: 'foo',
-    },
-    owner_access_token,
-  );
-  const org = orgResult.body.data!.createOrganization.ok!.createdOrganizationPayload.organization;
-
-  const projectResult = await createProject(
-    {
-      organization: org.cleanId,
-      type: ProjectType.Federation,
-      name: 'bar',
-    },
-    owner_access_token,
-  );
-
-  const project = projectResult.body.data!.createProject.ok!.createdProject;
-  const target = projectResult.body.data!.createProject.ok!.createdTargets[0];
+test.concurrent('call an external service to compose and validate services', async () => {
+  const { createOrg } = await initSeed().createOwner();
+  const { createProject, organization } = await createOrg();
+  const { createToken, project } = await createProject(ProjectType.Federation);
 
   // Create a token with write rights
-  const writeTokenResult = await createToken(
-    {
-      name: 'test',
-      organization: org.cleanId,
-      project: project.cleanId,
-      target: target.cleanId,
-      organizationScopes: [],
-      projectScopes: [ProjectAccessScope.Settings, ProjectAccessScope.Read],
-      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-    },
-    owner_access_token,
-  );
-  expect(writeTokenResult.body.errors).not.toBeDefined();
-  const writeToken = writeTokenResult.body.data!.createToken.ok!.secret;
-
-  const usersServiceName = Math.random().toString(16).substring(2);
-  const publishUsersResult = await publishSchema(
-    {
-      author: 'Kamil',
-      commit: 'init',
-      url: 'https://api.com/users',
-      sdl: `type Query { me: User } type User @key(fields: "id") { id: ID! name: String }`,
+  const writeToken = await createToken({
+    targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+    projectScopes: [ProjectAccessScope.Settings, ProjectAccessScope.Read],
+    organizationScopes: [],
+  });
+  const usersServiceName = generateUnique();
+  const publishUsersResult = await writeToken
+    .publishSchema({
+      sdl: /* GraphQL */ `
+        type Query {
+          me: User
+        }
+        type User @key(fields: "id") {
+          id: ID!
+          name: String
+        }
+      `,
       service: usersServiceName,
-    },
-    writeToken,
-  );
+      url: 'https://api.com/users',
+    })
+    .then(r => r.expectNoGraphQLErrors());
 
   // Schema publish should be successful
-  expect(publishUsersResult.body.errors).not.toBeDefined();
-  expect(publishUsersResult.body.data!.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+  expect(publishUsersResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
 
   // enable external composition
   const externalCompositionResult = await enableExternalSchemaComposition(
@@ -71,28 +45,31 @@ test('call an external service to compose and validate services', async () => {
       // eslint-disable-next-line no-process-env
       secret: process.env.EXTERNAL_COMPOSITION_SECRET!,
       project: project.cleanId,
-      organization: org.cleanId,
+      organization: organization.cleanId,
     },
-    writeToken,
-  );
-  expect(externalCompositionResult.body.errors).not.toBeDefined();
-  expect(externalCompositionResult.body.data!.enableExternalSchemaComposition.ok?.endpoint).toBe(
+    writeToken.secret,
+  ).then(r => r.expectNoGraphQLErrors());
+  expect(externalCompositionResult.enableExternalSchemaComposition.ok?.endpoint).toBe(
     `http://${dockerAddress}/compose`,
   );
 
-  const productsServiceName = Math.random().toString(16).substring(2);
-  const publishProductsResult = await publishSchema(
-    {
-      author: 'Kamil',
-      commit: 'init',
-      url: 'https://api.com/products',
-      sdl: `type Query { products: [Product] } type Product @key(fields: "id") { id: ID! name: String }`,
+  const productsServiceName = generateUnique();
+  const publishProductsResult = await writeToken
+    .publishSchema({
+      sdl: /* GraphQL */ `
+        type Query {
+          products: [Product]
+        }
+        type Product @key(fields: "id") {
+          id: ID!
+          name: String
+        }
+      `,
       service: productsServiceName,
-    },
-    writeToken,
-  );
+      url: 'https://api.com/products',
+    })
+    .then(r => r.expectNoGraphQLErrors());
 
   // Schema publish should be successful
-  expect(publishProductsResult.body.errors).not.toBeDefined();
-  expect(publishProductsResult.body.data!.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+  expect(publishProductsResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
 });

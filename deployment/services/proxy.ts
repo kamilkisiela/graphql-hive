@@ -1,10 +1,12 @@
 import * as pulumi from '@pulumi/pulumi';
-import { Proxy } from '../utils/reverse-proxy';
+import { DeploymentEnvironment } from '../types';
 import { CertManager } from '../utils/cert-manager';
-import { GraphQL } from './graphql';
+import { isProduction } from '../utils/helpers';
+import { Proxy } from '../utils/reverse-proxy';
 import { App } from './app';
-import { Usage } from './usage';
 import { Docs } from './docs';
+import { GraphQL } from './graphql';
+import { Usage } from './usage';
 
 const commonConfig = new pulumi.Config('common');
 
@@ -15,7 +17,9 @@ export function deployProxy({
   app,
   docs,
   usage,
+  deploymentEnv,
 }: {
+  deploymentEnv: DeploymentEnvironment;
   appHostname: string;
   docsHostname: string;
   graphql: GraphQL;
@@ -26,8 +30,9 @@ export function deployProxy({
   const { tlsIssueName } = new CertManager().deployCertManagerAndIssuer();
   return new Proxy(tlsIssueName, {
     address: commonConfig.get('staticIp'),
+    aksReservedIpResourceGroup: commonConfig.get('aksReservedIpResourceGroup'),
   })
-    .deployProxy({ replicas: 2 })
+    .deployProxy({ replicas: isProduction(deploymentEnv) ? 2 : 1 })
     .registerService(
       {
         record: docsHostname,

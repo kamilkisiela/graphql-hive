@@ -7,7 +7,7 @@ export const InlineCode = (props: { content: string }) => {
     <span className="rounded-md bg-gray-800 p-1 pl-2 font-mono">
       <code>{props.content}</code>
       <button
-        className="hover:text-orange-600 cursor-pointer p-2 pr-1 pl-2"
+        className="cursor-pointer p-2 hover:text-orange-600"
         onClick={async ev => {
           ev.preventDefault();
           await navigator.clipboard.writeText(props.content);

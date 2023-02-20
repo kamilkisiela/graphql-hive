@@ -1,14 +1,14 @@
 import React from 'react';
-import { CombinedError, UseQueryState } from 'urql';
+import { AnyVariables, CombinedError, UseQueryState } from 'urql';
 import {
-  Box,
-  AlertDescription,
-  Center,
   Alert,
-  Code,
+  AlertDescription,
   AlertIcon,
-  Link,
   AlertTitle,
+  Box,
+  Center,
+  Code,
+  Link,
 } from '@chakra-ui/react';
 import { Spinner } from './Spinner';
 
@@ -19,9 +19,7 @@ export const QueryError: React.FC<{
   let requestId =
     error instanceof CombinedError ? error.response?.headers?.get('x-request-id') : null;
 
-  if (requestId) {
-    requestId = requestId.split(',')[0].trim();
-  }
+  requestId &&= requestId.split(',')[0].trim();
 
   const openChatSupport = () => {
     if (typeof window !== 'undefined' && (window as any).$crisp) {
@@ -59,7 +57,7 @@ export const QueryError: React.FC<{
   );
 };
 
-export class DataWrapper<TData, TVariables> extends React.Component<{
+export class DataWrapper<TData, TVariables extends AnyVariables> extends React.Component<{
   query: UseQueryState<TData, TVariables>;
   showStale?: boolean;
   loading?: boolean;

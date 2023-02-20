@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 import 'reflect-metadata';
-import * as Sentry from '@sentry/node';
 import {
   createServer,
-  startMetrics,
   registerShutdown,
+  registerTRPC,
   reportReadiness,
+  startMetrics,
 } from '@hive/service-common';
 import { createConnectionString } from '@hive/storage';
+import * as Sentry from '@sentry/node';
+import { Context, stripeBillingApiRouter } from './api';
 import { createStripeBilling } from './billing-sync';
-import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
-import { stripeBillingApiRouter, Context } from './api';
 import { env } from './environment';
 
 async function main() {
@@ -29,6 +29,7 @@ async function main() {
     tracing: false,
     log: {
       level: env.log.level,
+      requests: env.log.requests,
     },
   });
 
@@ -54,17 +55,15 @@ async function main() {
       },
     });
 
-    const context: Context = {
-      storage$: postgres$,
-      stripe: stripeApi,
-      stripeData$: loadStripeData$,
-    };
-
-    await server.register(fastifyTRPCPlugin, {
-      prefix: '/trpc',
-      trpcOptions: {
-        router: stripeBillingApiRouter,
-        createContext: () => context,
+    await registerTRPC(server, {
+      router: stripeBillingApiRouter,
+      createContext({ req }): Context {
+        return {
+          storage$: postgres$,
+          stripe: stripeApi,
+          stripeData$: loadStripeData$,
+          req,
+        };
       },
     });
 
@@ -89,7 +88,7 @@ async function main() {
     if (env.prometheus) {
       await startMetrics(env.prometheus.labels.instance);
     }
-    await server.listen(env.http.port, '0.0.0.0');
+    await server.listen(env.http.port, '::');
     await start();
   } catch (error) {
     server.log.fatal(error);

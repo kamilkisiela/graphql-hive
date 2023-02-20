@@ -1,9 +1,10 @@
+import { addDays, startOfMonth } from 'date-fns';
+import { Stripe } from 'stripe';
+import { z } from 'zod';
+import { FastifyRequest, handleTRPCError } from '@hive/service-common';
+import { createStorage } from '@hive/storage';
 import type { inferRouterInputs } from '@trpc/server';
 import { initTRPC } from '@trpc/server';
-import { z } from 'zod';
-import { createStorage } from '@hive/storage';
-import { Stripe } from 'stripe';
-import { addDays, startOfMonth } from 'date-fns';
 
 export type Context = {
   storage$: ReturnType<typeof createStorage>;
@@ -12,17 +13,20 @@ export type Context = {
     operationsPrice: Stripe.Price;
     basePrice: Stripe.Price;
   }>;
+  req: FastifyRequest;
 };
 
 export { Stripe as StripeTypes };
 
 const t = initTRPC.context<Context>().create();
+const errorMiddleware = t.middleware(handleTRPCError);
+const procedure = t.procedure.use(errorMiddleware);
 
 export const stripeBillingApiRouter = t.router({
-  availablePrices: t.procedure.query(async ({ ctx }) => {
+  availablePrices: procedure.query(async ({ ctx }) => {
     return await ctx.stripeData$;
   }),
-  invoices: t.procedure
+  invoices: procedure
     .input(
       z.object({
         organizationId: z.string().nonempty(),
@@ -44,7 +48,7 @@ export const stripeBillingApiRouter = t.router({
 
       return invoices.data;
     }),
-  upcomingInvoice: t.procedure
+  upcomingInvoice: procedure
     .input(
       z.object({
         organizationId: z.string().nonempty(),
@@ -70,7 +74,7 @@ export const stripeBillingApiRouter = t.router({
         return null;
       }
     }),
-  activeSubscription: t.procedure
+  activeSubscription: procedure
     .input(
       z.object({
         organizationId: z.string().nonempty(),
@@ -116,7 +120,7 @@ export const stripeBillingApiRouter = t.router({
         subscription: actualSubscription,
       };
     }),
-  syncOrganizationToStripe: t.procedure
+  syncOrganizationToStripe: procedure
     .input(
       z.object({
         organizationId: z.string().nonempty(),
@@ -175,7 +179,7 @@ export const stripeBillingApiRouter = t.router({
         );
       }
     }),
-  cancelSubscriptionForOrganization: t.procedure
+  cancelSubscriptionForOrganization: procedure
     .input(
       z.object({
         organizationId: z.string().nonempty(),
@@ -212,7 +216,7 @@ export const stripeBillingApiRouter = t.router({
 
       return response;
     }),
-  createSubscriptionForOrganization: t.procedure
+  createSubscriptionForOrganization: procedure
     .input(
       z.object({
         paymentMethodId: z.string().nullish(),

@@ -43,7 +43,7 @@ pub fn collect_schema_coordinates(
         match named_type {
             Some(named_type) => match named_type {
                 TypeDefinition::InputObject(input_type) => {
-                    for field in input_type.fields {
+                    for field in &input_type.fields {
                         ctx.schema_coordinates
                             .insert(format!("{}.{}", input_type_name, field.name));
                     }
@@ -129,7 +129,8 @@ impl<'a> OperationVisitor<'a, SchemaCoordinatesContext> for SchemaCoordinatesVis
                             // handled by enter_object_field
                         }
                         _ => {
-                            ctx.input_types_to_collect.insert(input_type_name);
+                            ctx.input_types_to_collect
+                                .insert(input_type_name.to_string());
                         }
                     }
                 }
@@ -151,7 +152,8 @@ impl<'a> OperationVisitor<'a, SchemaCoordinatesContext> for SchemaCoordinatesVis
                         // object fields are handled by enter_object_field
                     }
                     _ => {
-                        ctx.input_types_to_collect.insert(input_type.name());
+                        ctx.input_types_to_collect
+                            .insert(input_type.name().to_string());
                     }
                 }
             }
@@ -185,7 +187,8 @@ impl<'a> OperationVisitor<'a, SchemaCoordinatesContext> for SchemaCoordinatesVis
                     // handled by enter_object_field
                 }
                 _ => {
-                    ctx.input_types_to_collect.insert(input_type_name);
+                    ctx.input_types_to_collect
+                        .insert(input_type_name.to_string());
                 }
             }
         }

@@ -1,8 +1,8 @@
 import { ReactElement } from 'react';
 import clsx from 'clsx';
 import { Section } from '@/components/common';
+import { Heading, Link } from '@/components/v2';
 import { BillingPlanType, OrgBillingInfoFieldsFragment } from '@/graphql';
-import { Link, Heading } from '@/components/v2';
 import { CardElement } from '@stripe/react-stripe-js';
 
 export const BillingPaymentMethod = ({
@@ -25,7 +25,7 @@ export const BillingPaymentMethod = ({
       <div className={clsx('flex flex-col gap-6', className)}>
         <Heading>Payment Method</Heading>
         <CardElement
-          className="flex-grow"
+          className="grow"
           onChange={e => {
             if (e.error || !e.complete) {
               onValidationChange?.(false);

@@ -1,11 +1,11 @@
 import React from 'react';
 import clsx from 'clsx';
-import { gql, DocumentType } from 'urql';
-import * as Popover from '@radix-ui/react-popover';
 import { VscCommentDiscussion, VscPulse } from 'react-icons/vsc';
-import { useRouteSelector, formatNumber } from '@/lib/hooks';
+import { DocumentType, gql } from 'urql';
 import { Link } from '@/components/v2/link';
 import { Markdown } from '@/components/v2/markdown';
+import { formatNumber, useRouteSelector } from '@/lib/hooks';
+import * as Popover from '@radix-ui/react-popover';
 import { useArgumentListToggle } from './provider';
 
 function useCollapsibleList<T>(list: T[], max: number, defaultValue: boolean) {
@@ -65,20 +65,20 @@ export function SchemaExplorerUsageStats(props: {
       <div className="text-xl">
         <VscPulse />
       </div>
-      <div className="flex-grow">
+      <div className="grow">
         <div className="text-center" title={`${props.usage.total} requests`}>
           {formatNumber(props.usage.total)}
         </div>
         <div
           title={`${percentage.toFixed(2)}% of all requests`}
-          className="bg-orange-500 relative mt-1 w-full overflow-hidden rounded bg-opacity-20"
+          className="relative mt-1 w-full overflow-hidden rounded bg-orange-500/20"
           style={{
             width: 50,
             height: 5,
           }}
         >
           <div
-            className="bg-orange-500 h-full"
+            className="h-full bg-orange-500"
             style={{
               width: `${percentage}%`,
             }}
@@ -186,7 +186,7 @@ export function GraphQLArguments(props: {
   if (showAll) {
     return (
       <span className="ml-1">
-        <span className="text-gray-400">{'('}</span>
+        <span className="text-gray-400">(</span>
         <div className="pl-4">
           {props.args.map(arg => {
             return (
@@ -199,14 +199,14 @@ export function GraphQLArguments(props: {
             );
           })}
         </div>
-        <span className="text-gray-400">{')'}</span>
+        <span className="text-gray-400">)</span>
       </span>
     );
   }
 
   return (
     <span className="ml-1">
-      <span className="text-gray-400">{'('}</span>
+      <span className="text-gray-400">(</span>
       <span className="space-x-2">
         {props.args.slice(0, 2).map(arg => {
           return (
@@ -226,7 +226,7 @@ export function GraphQLArguments(props: {
           </span>
         ) : null}
       </span>
-      <span className="text-gray-400">{')'}</span>
+      <span className="text-gray-400">)</span>
     </span>
   );
 }
@@ -243,7 +243,7 @@ export function GraphQLTypeCardListItem(
       onClick={props.onClick}
       className={clsx(
         'flex flex-row items-center justify-between p-4 text-sm',
-        props.index % 2 ? '' : 'bg-gray-900 bg-opacity-50',
+        props.index % 2 ? '' : 'bg-gray-900/50',
         props.className,
       )}
     >
@@ -268,7 +268,7 @@ export function GraphQLFields(props: {
             <div>
               {field.name}
               {field.args.length > 0 ? <GraphQLArguments args={field.args} /> : null}
-              <span className="mr-1">{':'}</span>
+              <span className="mr-1">:</span>
               <GraphQLTypeAsLink type={field.type} />
             </div>
             <SchemaExplorerUsageStats totalRequests={totalRequests} usage={field.usage} />
@@ -302,7 +302,7 @@ export function GraphQLInputFields({
           <GraphQLTypeCardListItem key={field.name} index={i}>
             <div>
               {field.name}
-              <span className="mr-1">{':'}</span>
+              <span className="mr-1">:</span>
               <GraphQLTypeAsLink type={field.type} />
             </div>
             <SchemaExplorerUsageStats totalRequests={totalRequests} usage={field.usage} />

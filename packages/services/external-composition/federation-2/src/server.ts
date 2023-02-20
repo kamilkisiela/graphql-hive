@@ -1,8 +1,8 @@
-import { verifyRequest, compose, signatureHeaderName } from '@graphql-hive/external-composition';
-import { composeServices } from '@apollo/composition';
 import { parse, printSchema } from 'graphql';
-import { createServerAdapter } from '@whatwg-node/server';
+import { composeServices } from '@apollo/composition';
+import { compose, signatureHeaderName, verifyRequest } from '@graphql-hive/external-composition';
 import { Response } from '@whatwg-node/fetch';
+import { createServerAdapter } from '@whatwg-node/server';
 import { ResolvedEnv } from './environment';
 
 const composeFederation = compose(services => {
@@ -23,27 +23,32 @@ const composeFederation = compose(services => {
         result: {
           errors: result.errors.map(error => ({
             message: error.message,
+            source: typeof error.extensions?.code === 'string' ? 'composition' : 'graphql',
           })),
         },
       };
-    } else {
-      if (!result.supergraphSdl) {
-        return {
-          type: 'failure',
-          result: {
-            errors: [{ message: 'supergraphSdl not defined' }],
-          },
-        };
-      }
-
+    }
+    if (!result.supergraphSdl) {
       return {
-        type: 'success',
+        type: 'failure',
         result: {
-          supergraph: result.supergraphSdl,
-          sdl: printSchema(result.schema.toGraphQLJSSchema()),
+          errors: [
+            {
+              message: 'supergraphSdl not defined',
+              source: 'graphql',
+            },
+          ],
         },
       };
     }
+
+    return {
+      type: 'success',
+      result: {
+        supergraph: result.supergraphSdl,
+        sdl: printSchema(result.schema.toGraphQLJSSchema()),
+      },
+    };
   } catch (e) {
     return {
       type: 'failure',
@@ -51,6 +56,7 @@ const composeFederation = compose(services => {
         errors: [
           {
             message: (e as Error).message,
+            source: 'graphql',
           },
         ],
       },
@@ -87,15 +93,14 @@ export const createRequestListener = (env: ResolvedEnv): ReturnType<typeof creat
 
       if (error) {
         return new Response(error, { status: 500 });
-      } else {
-        const result = composeFederation(JSON.parse(body));
-        return new Response(JSON.stringify(result), {
-          status: 200,
-          headers: {
-            'content-type': 'application/json',
-          },
-        });
       }
+      const result = composeFederation(JSON.parse(body));
+      return new Response(JSON.stringify(result), {
+        status: 200,
+        headers: {
+          'content-type': 'application/json',
+        },
+      });
     }
 
     return new Response('', {

@@ -1,7 +1,7 @@
+import { stringify } from 'node:querystring';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { stringify } from 'querystring';
-import { graphql } from '@/lib/api/utils';
 import { env } from '@/env/backend';
+import { graphql } from '@/lib/api/utils';
 
 async function fetchData({
   url,
@@ -28,7 +28,7 @@ export default async function slackCallback(req: NextApiRequest, res: NextApiRes
     throw new Error('The Slack integration is not enabled.');
   }
 
-  const code = req.query.code;
+  const { code } = req.query;
   const orgId = req.query.state;
 
   const slackResponse = await fetchData({
@@ -64,5 +64,5 @@ export default async function slackCallback(req: NextApiRequest, res: NextApiRes
       },
     },
   });
-  res.redirect(`/${orgId}/settings`);
+  res.redirect(`/${orgId}/view/settings`);
 }

@@ -1,14 +1,13 @@
 import React from 'react';
+import { useQuery } from 'urql';
 import {
   OrganizationFieldsFragment,
   OrgBillingInfoFieldsFragment,
   UsageEstimationDocument,
 } from '@/graphql';
-import { useQuery } from 'urql';
+import { Table, TableContainer, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
 import { Scale } from '../common';
 import { DataWrapper } from '../common/DataWrapper';
-import 'twin.macro';
-import { Table, TableContainer, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
 import { calculatePeriod } from '../common/TimeFilter';
 
 const NumericFormatter = Intl.NumberFormat('en', {
@@ -30,7 +29,7 @@ export const OrganizationUsageEstimationView: React.FC<{
 
   return (
     <>
-      <div tw="top-7 right-4">
+      <div className="top-7 right-4">
         <DataWrapper query={query}>
           {result => (
             <TableContainer>
@@ -40,7 +39,7 @@ export const OrganizationUsageEstimationView: React.FC<{
                     <Th>Feature</Th>
                     <Th isNumeric>Used</Th>
                     <Th isNumeric>Limit</Th>
-                    <Th></Th>
+                    <Th />
                   </Tr>
                 </Thead>
                 <Tbody>
@@ -55,7 +54,7 @@ export const OrganizationUsageEstimationView: React.FC<{
                         value={result.data.usageEstimation.org.operations}
                         size={10}
                         max={organization.rateLimit.operations}
-                        tw="justify-end"
+                        className="justify-end"
                       />
                     </Td>
                   </Tr>

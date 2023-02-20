@@ -1,10 +1,10 @@
-import type { LabModule } from './__generated__/types';
-import { IdTranslator } from '../shared/providers/id-translator';
-import { SchemaManager } from '../schema/providers/schema-manager';
-import { ProjectManager } from '../project/providers/project-manager';
 import { AuthManager } from '../auth/providers/auth-manager';
 import { TargetAccessScope } from '../auth/providers/target-access';
+import { ProjectManager } from '../project/providers/project-manager';
 import { SchemaHelper } from '../schema/providers/schema-helper';
+import { SchemaManager } from '../schema/providers/schema-manager';
+import { IdTranslator } from '../shared/providers/id-translator';
+import type { LabModule } from './__generated__/types';
 
 export const resolvers: LabModule.Resolvers = {
   Query: {
@@ -17,8 +17,8 @@ export const resolvers: LabModule.Resolvers = {
       ]);
 
       await injector.get(AuthManager).ensureTargetAccess({
-        organization: organization,
-        project: project,
+        organization,
+        project,
         target,
         scope: TargetAccessScope.REGISTRY_READ,
       });

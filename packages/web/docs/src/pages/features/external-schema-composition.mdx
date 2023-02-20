@@ -134,6 +134,7 @@ type CompositionFailure = {
   result: {
     errors: Array<{
       message: string
+      source: 'graphql' : 'composition'
     }>
   }
 }
@@ -147,7 +148,8 @@ Example response:
   "result": {
     "errors": [
       {
-        "message": "Type \"Query\" was defined more than once."
+        "message": "Type \"Query\" was defined more than once.",
+        "source": "graphql"
       }
     ]
   }
@@ -171,10 +173,10 @@ npm install @graphql-hive/external-composition
 </Callout>
 
 ```javascript
-import { verifyRequest, compose, signatureHeaderName } from '@graphql-hive/external-composition'
-import { composeAndValidate, compositionHasErrors } from '@apollo/federation'
-import { parse, printSchema } from 'graphql'
 import fastify from 'fastify'
+import { parse, printSchema } from 'graphql'
+import { composeAndValidate, compositionHasErrors } from '@apollo/federation'
+import { compose, signatureHeaderName, verifyRequest } from '@graphql-hive/external-composition'
 
 const composeFederation = compose(services => {
   const result = composeAndValidate(
@@ -191,8 +193,9 @@ const composeFederation = compose(services => {
     return {
       type: 'failure',
       result: {
-        errors: result.errors.map(err => ({
-          message: err.message
+        errors: result.errors.map(error => ({
+          message: error.message,
+          source: typeof error.extensions?.code === 'string' ? 'composition' : 'graphql'
         }))
       }
     }
@@ -240,10 +243,6 @@ await server.listen({
 
 ### Apollo Federation v2 example
 
-#### CloudFlare Worker
-
-We provide a ready-to-use CloudFlare Worker project
-
 #### Pre-built Docker image
 
 We provide a
@@ -260,7 +259,7 @@ will be used as private key to hash the requests to your composition service.
 To run the container, you can use the following command:
 
 ```
-docker run -p 3069 -e SECRET="MY_SECRET_HERE" ghcr.io/kamilkisiela/graphql-hive/composition-federation-2
+docker run -p 3069:3069 -e SECRET="MY_SECRET_HERE" ghcr.io/kamilkisiela/graphql-hive/composition-federation-2
 ```
 
 You should make this service publicly available, and then configure it in Hive platform (see
@@ -287,10 +286,10 @@ npm install @graphql-hive/external-composition
 </Callout>
 
 ```javascript
-import { verifyRequest, compose, signatureHeaderName } from '@graphql-hive/external-composition'
-import { composeServices } from '@apollo/composition'
-import { parse, printSchema } from 'graphql'
 import fastify from 'fastify'
+import { parse, printSchema } from 'graphql'
+import { composeServices } from '@apollo/composition'
+import { compose, signatureHeaderName, verifyRequest } from '@graphql-hive/external-composition'
 
 const composeFederation = compose(services => {
   const result = composeServices(
@@ -308,7 +307,8 @@ const composeFederation = compose(services => {
       type: 'failure',
       result: {
         errors: result.errors.map(error => ({
-          message: error.message
+          message: error.message,
+          source: typeof error.extensions?.code === 'string' ? 'composition' : 'graphql'
         }))
       }
     }

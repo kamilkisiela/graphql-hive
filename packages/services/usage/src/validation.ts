@@ -1,8 +1,8 @@
-import type { IncomingOperation, OperationMap, OperationMapRecord } from './types';
-import Ajv from 'ajv';
 import type { JSONSchemaType } from 'ajv';
+import Ajv from 'ajv';
 import { parse } from 'graphql';
 import LRU from 'tiny-lru';
+import type { IncomingOperation, OperationMap, OperationMapRecord } from './types';
 
 const unixTimestampRegex = /^\d{13,}$/;
 

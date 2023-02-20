@@ -1,27 +1,31 @@
-import { initTRPC } from '@trpc/server';
-import type { inferAsyncReturnType } from '@trpc/server';
-import {
-  reservedOrganizationNames,
-  organizationAdminScopes,
-  OrganizationAccessScope,
-  ProjectAccessScope,
-  TargetAccessScope,
-  OrganizationType,
-} from '@hive/api';
-import type { Storage } from '@hive/api';
-import { z } from 'zod';
 import { CryptoProvider } from 'packages/services/api/src/modules/shared/providers/crypto';
+import { z } from 'zod';
+import type { Storage } from '@hive/api';
+import {
+  OrganizationAccessScope,
+  organizationAdminScopes,
+  OrganizationType,
+  ProjectAccessScope,
+  reservedOrganizationNames,
+  TargetAccessScope,
+} from '@hive/api';
+import { FastifyRequest, handleTRPCError } from '@hive/service-common';
+import type { inferAsyncReturnType } from '@trpc/server';
+import { initTRPC } from '@trpc/server';
 
 export async function createContext({
   storage,
   crypto,
+  req,
 }: {
   storage: Storage;
   crypto: CryptoProvider;
+  req: FastifyRequest;
 }) {
   return {
     storage,
     crypto,
+    req,
   };
 }
 
@@ -35,9 +39,11 @@ const oidcDefaultScopes = [
 ];
 
 const t = initTRPC.context<Context>().create();
+const errorMiddleware = t.middleware(handleTRPCError);
+const procedure = t.procedure.use(errorMiddleware);
 
 export const internalApiRouter = t.router({
-  ensureUser: t.procedure
+  ensureUser: procedure
     .input(
       z
         .object({
@@ -62,7 +68,7 @@ export const internalApiRouter = t.router({
 
       return result;
     }),
-  getDefaultOrgForUser: t.procedure
+  getDefaultOrgForUser: procedure
     .input(
       z.object({
         superTokensUserId: z.string(),
@@ -118,7 +124,7 @@ export const internalApiRouter = t.router({
 
       return null;
     }),
-  getOIDCIntegrationById: t.procedure
+  getOIDCIntegrationById: procedure
     .input(
       z.object({
         oidcIntegrationId: z.string().min(1),
@@ -136,7 +142,9 @@ export const internalApiRouter = t.router({
         id: result.id,
         clientId: result.clientId,
         clientSecret: ctx.crypto.decrypt(result.encryptedClientSecret),
-        oauthApiUrl: result.oauthApiUrl,
+        tokenEndpoint: result.tokenEndpoint,
+        userinfoEndpoint: result.userinfoEndpoint,
+        authorizationEndpoint: result.authorizationEndpoint,
       };
     }),
 });
