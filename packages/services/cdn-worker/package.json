@@ -23,7 +23,7 @@
     "@types/service-worker-mock": "2.0.1",
     "@whatwg-node/fetch": "0.8.1",
     "@whatwg-node/server": "0.6.7",
-    "esbuild": "0.17.9",
+    "esbuild": "0.17.10",
     "fastify": "3.29.5",
     "itty-router": "2.6.6",
     "itty-router-extras": "0.4.2"
