@@ -30,8 +30,7 @@ export const getActivity = (
   content: ReactElement | string;
 } => {
   const { __typename: type } = activity;
-  const organization = (activity as any).organization;
-  const user = (activity as any).user;
+  const { organization, user } = activity as any;
   const projectLink = 'project' in activity && !!activity.project && (
     <Link
       variant="primary"

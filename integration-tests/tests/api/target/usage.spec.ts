@@ -264,7 +264,6 @@ test.concurrent(
     const batchSize = 1000;
     const totalAmount = 10_000;
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     for await (const _ of new Array(totalAmount / batchSize)) {
       await writeToken.collectOperations(
         prepareBatch(batchSize, {

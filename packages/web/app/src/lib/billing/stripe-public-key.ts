@@ -1,7 +1,7 @@
 import { env } from '@/env/frontend';
 
 export const getStripePublicKey = () => {
-  const stripePublicKey = env.stripePublicKey;
+  const { stripePublicKey } = env;
   if (!stripePublicKey) {
     return null;
   }

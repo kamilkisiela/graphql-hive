@@ -11,6 +11,7 @@ import {
 } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
 import { Context, schemaBuilderApiRouter } from './api';
+import { createCache } from './cache';
 import { env } from './environment';
 
 const ENCRYPTION_SECRET = crypto.createHash('md5').update(env.encryptionSecret).digest('hex');
@@ -103,7 +104,14 @@ async function main() {
     await registerTRPC(server, {
       router: schemaBuilderApiRouter,
       createContext({ req }): Context {
-        return { redis, req, decrypt, broker: env.requestBroker };
+        const cache = createCache({
+          prefix: 'schema-service',
+          redis,
+          logger: req.log,
+          pollIntervalMs: 150,
+          timeoutMs: 25_000,
+        });
+        return { cache, req, decrypt, broker: env.requestBroker };
       },
     });
 

@@ -1,4 +1,4 @@
-import React, { PropsWithChildren } from 'react';
+import { PropsWithChildren } from 'react';
 import { useQuery } from 'urql';
 import { DataWrapper } from '@/components/common/DataWrapper';
 import {

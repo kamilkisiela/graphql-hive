@@ -1,21 +1,27 @@
-import React, { PropsWithChildren } from 'react';
+import { ReactElement, ReactNode, Suspense, useRef } from 'react';
 import { Elements as ElementsProvider } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { getStripePublicKey } from './stripe-public-key';
 
-export const HiveStripeWrapper = ({ children }: PropsWithChildren) => {
-  const [stripe] = React.useState(() => {
+export const HiveStripeWrapper = ({ children }: { children: ReactNode }): ReactElement => {
+  const stripeRef = useRef<ReturnType<typeof loadStripe> | null>(null);
+
+  if (!stripeRef.current) {
     const stripePublicKey = getStripePublicKey();
-    return stripePublicKey ? loadStripe(stripePublicKey) : null;
-  });
+    if (stripePublicKey) {
+      stripeRef.current = loadStripe(stripePublicKey);
+    }
+  }
+
+  const stripe = stripeRef.current;
 
   if (stripe === null) {
     return children as any;
   }
 
   return (
-    <React.Suspense fallback={children}>
+    <Suspense fallback={children}>
       <ElementsProvider stripe={stripe}>{children}</ElementsProvider>
-    </React.Suspense>
+    </Suspense>
   );
 };

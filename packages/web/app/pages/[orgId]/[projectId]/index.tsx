@@ -129,7 +129,7 @@ const Page = () => {
           <EmptyList
             title="Hive is waiting for your first target"
             description='You can create a target by clicking the "New Target" button'
-            docsUrl={getDocsUrl(`/get-started/targets`)}
+            docsUrl={getDocsUrl('/get-started/targets')}
           />
         ) : (
           targets?.nodes.map(target => <TargetCard key={target.id} target={target} />)

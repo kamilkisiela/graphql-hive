@@ -34,7 +34,7 @@ export const Feedback: React.FC<{
     validationSchema: Yup.object().shape({
       feedback: Yup.string()
         .min(1)
-        .required(`Hey hey hey, you opened the feedback modal and won't even say Hi?`),
+        .required("Hey hey hey, you opened the feedback modal and won't even say Hi?"),
     }),
     async onSubmit(values) {
       if (formik.isValid && !mutation.fetching) {
