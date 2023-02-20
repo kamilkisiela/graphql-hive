@@ -5,6 +5,9 @@ overrides:
   tsup: 6.5.0
 
 patchedDependencies:
+  '@tgriesser/schemats@7.0.1':
+    hash: u3kbucfchakklx3sci2vh6wjau
+    path: patches/@tgriesser__schemats@7.0.1.patch
   mjml-core@4.13.0:
     hash: zxxsxbqejjmcwuzpigutzzq6wa
     path: patches/mjml-core@4.13.0.patch
@@ -14,24 +17,21 @@ patchedDependencies:
   '@theguild/buddy@0.1.0':
     hash: ryylgra5xglhidfoiaxehn22hq
     path: patches/@theguild__buddy@0.1.0.patch
-  '@tgriesser/schemats@7.0.1':
-    hash: u3kbucfchakklx3sci2vh6wjau
-    path: patches/@tgriesser__schemats@7.0.1.patch
-  oclif@3.6.5:
-    hash: rxmtqiusuyruv7tkwux5gvotbm
-    path: patches/oclif@3.6.5.patch
-  '@slonik/migrator@0.8.5':
-    hash: yfpv2xzdmnkrtu2wvaktxf5mmq
-    path: patches/@slonik__migrator@0.8.5.patch
   '@oclif/core@1.23.0':
     hash: zhte2hlj7lfobytjpalcwwo474
     path: patches/@oclif__core@1.23.0.patch
-  '@graphql-inspector/core@3.5.0':
-    hash: wf35oaq7brzyeva5aoncxac66a
-    path: patches/@graphql-inspector__core@3.5.0.patch
   bullmq@3.7.0:
     hash: xbmkiyyfti7h6orsfs6pdmi4s4
     path: patches/bullmq@3.7.0.patch
+  oclif@3.6.5:
+    hash: rxmtqiusuyruv7tkwux5gvotbm
+    path: patches/oclif@3.6.5.patch
+  '@graphql-inspector/core@3.5.0':
+    hash: wf35oaq7brzyeva5aoncxac66a
+    path: patches/@graphql-inspector__core@3.5.0.patch
+  '@slonik/migrator@0.8.5':
+    hash: yfpv2xzdmnkrtu2wvaktxf5mmq
+    path: patches/@slonik__migrator@0.8.5.patch
   '@apollo/federation@0.38.1':
     hash: rjgakkkphrejw6qrtph4ar24zq
     path: patches/@apollo__federation@0.38.1.patch

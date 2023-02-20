@@ -33,7 +33,7 @@
     "lint:fix": "pnpm lint --fix",
     "lint:prettier": "prettier --cache --check .",
     "local:setup": "docker-compose -f ./docker/docker-compose.dev.yml up -d --remove-orphans && pnpm --filter @hive/migrations db:init",
-    "postinstall": "pnpm env:sync && node ./scripts/turborepo-cleanup.js && node ./scripts/turborepo-setup.js && pnpm cargo:fix",
+    "postinstall": "node ./scripts/patch-manifests.js && pnpm env:sync && node ./scripts/turborepo-cleanup.js && node ./scripts/turborepo-setup.js && pnpm cargo:fix",
     "pre-commit": "exit 0 && lint-staged",
     "prepare": "husky install",
     "prerelease": "pnpm build:libraries",
