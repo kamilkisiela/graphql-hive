@@ -59,9 +59,11 @@ export function withSessionProtection(handlerFn: GetServerSideProps = defaultHan
     const result = await serverSidePropsSessionHandling(context);
 
     if (result) {
+      console.log('withSessionProtection result', result);
       return result;
     }
 
+    console.log('Run handlerFn');
     return handlerFn(context);
   };
 

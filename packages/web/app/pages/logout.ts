@@ -12,6 +12,7 @@ export default function LogOutPage() {
   const router = useRouter();
   React.useEffect(() => {
     void signOut().then(() => {
+      console.log('Signed out successfully. Redirecting to home page...');
       void router.replace('/');
     });
   });
