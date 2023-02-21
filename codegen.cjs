@@ -157,7 +157,7 @@ const config = {
         flattenGeneratedTypes: true,
         onlyOperationTypes: true,
       },
-      plugins: ['typescript', 'typescript', 'typescript-operations'],
+      plugins: ['typescript', 'typescript-operations'],
     },
     // Integration tests
     './integration-tests/testkit/gql/': {
