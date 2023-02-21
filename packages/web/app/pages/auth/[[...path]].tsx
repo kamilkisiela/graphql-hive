@@ -13,7 +13,6 @@ export const getServerSideProps: GetServerSideProps = async context => {
   if (env.auth.organizationOIDC === true) {
     const url = new URL(env.appBaseUrl + (context.req.url ?? ''));
     const oidcProviderId = url.searchParams.get('id');
-
     if (url.pathname === '/auth/oidc' && oidcProviderId) {
       return {
         props: {
@@ -23,6 +22,7 @@ export const getServerSideProps: GetServerSideProps = async context => {
     }
   }
 
+  // Locally I get this:
   return {
     props: {
       oidcProviderId: null,

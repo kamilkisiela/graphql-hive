@@ -34,7 +34,12 @@ export const serverSidePropsSessionHandling = async (
     throw err;
   }
 
+  console.log('url', context.req.url);
+  console.log('resolved', context.resolvedUrl);
+  console.log('ref', context.req.headers.referer);
+
   if (session === undefined) {
+    // On dev, I get this
     return {
       redirect: {
         destination: `/auth?redirectToPath=${encodeURIComponent(context.resolvedUrl)}`,
