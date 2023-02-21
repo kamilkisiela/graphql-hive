@@ -57,7 +57,7 @@
   },
   "devDependencies": {
     "@apollo/federation": "0.38.1",
-    "esbuild": "0.17.9",
+    "esbuild": "0.17.10",
     "fastify": "3.29.5",
     "graphql": "16.6.0"
   },
