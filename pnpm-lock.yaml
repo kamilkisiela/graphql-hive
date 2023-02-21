@@ -158,7 +158,7 @@ importers:
     specifiers:
       '@apollo/gateway': 2.3.2
       '@apollo/server': 4.4.0
-      '@aws-sdk/client-s3': 3.272.0
+      '@aws-sdk/client-s3': 3.276.0
       '@esm2cjs/execa': 6.1.1-cjs.1
       '@graphql-hive/client': workspace:*
       '@graphql-hive/core': 0.2.3
@@ -184,7 +184,7 @@ importers:
     dependencies:
       '@apollo/gateway': 2.3.2_graphql@16.6.0
       '@apollo/server': 4.4.0_graphql@16.6.0
-      '@aws-sdk/client-s3': 3.272.0
+      '@aws-sdk/client-s3': 3.276.0
       '@esm2cjs/execa': 6.1.1-cjs.1
       '@graphql-hive/client': link:../packages/libraries/client
       '@graphql-hive/core': link:../packages/libraries/core
@@ -361,8 +361,8 @@ importers:
 
   packages/services/api:
     specifiers:
-      '@aws-sdk/client-s3': 3.272.0
-      '@aws-sdk/s3-request-presigner': 3.272.0
+      '@aws-sdk/client-s3': 3.276.0
+      '@aws-sdk/s3-request-presigner': 3.276.0
       '@graphql-hive/core': 0.2.3
       '@graphql-inspector/core': 3.5.1
       '@hive/cdn-script': workspace:*
@@ -405,8 +405,8 @@ importers:
       tslib: 2.5.0
       zod: 3.20.6
     dependencies:
-      '@aws-sdk/client-s3': 3.272.0
-      '@aws-sdk/s3-request-presigner': 3.272.0
+      '@aws-sdk/client-s3': 3.276.0
+      '@aws-sdk/s3-request-presigner': 3.276.0
       '@graphql-inspector/core': 3.5.1
       '@octokit/app': 13.1.2
       '@sentry/node': 7.38.0
@@ -2052,14 +2052,14 @@ packages:
       tslib: 2.5.0
     dev: false
 
-  /@aws-sdk/client-s3/3.272.0:
-    resolution: {integrity: sha512-KxlVhTHfmcm3HlAP5+vY1cuQt60AaYOISp1ccYOPsww7Ly7fbDnbov0AV9bcwlLLVcfZFWQYJqH+Gvk2SpyXFQ==}
+  /@aws-sdk/client-s3/3.276.0:
+    resolution: {integrity: sha512-9cwrYeMTx9a9MUWSxBr2i87NACEw3Vc8ALnDYZSvhps8UivdgZ1v3zN8c0v/g/3RrJJNco2HCs9je+lOPRvq3w==}
     engines: {node: '>=14.0.0'}
     dependencies:
       '@aws-crypto/sha1-browser': 3.0.0
       '@aws-crypto/sha256-browser': 3.0.0
       '@aws-crypto/sha256-js': 3.0.0
-      '@aws-sdk/client-sts': 3.272.0
+      '@aws-sdk/client-sts': 3.276.0
       '@aws-sdk/config-resolver': 3.272.0
       '@aws-sdk/credential-provider-node': 3.272.0
       '@aws-sdk/eventstream-serde-browser': 3.272.0
@@ -2108,7 +2108,7 @@ packages:
       '@aws-sdk/util-utf8': 3.254.0
       '@aws-sdk/util-waiter': 3.272.0
       '@aws-sdk/xml-builder': 3.201.0
-      fast-xml-parser: 4.0.11
+      fast-xml-parser: 4.1.2
       tslib: 2.5.0
     transitivePeerDependencies:
       - '@aws-sdk/signature-v4-crt'
@@ -2195,8 +2195,8 @@ packages:
       - aws-crt
     dev: false
 
-  /@aws-sdk/client-sts/3.272.0:
-    resolution: {integrity: sha512-kigxCxURp3WupufGaL/LABMb7UQfzAQkKcj9royizL3ItJ0vw5kW/JFrPje5IW1mfLgdPF7PI9ShOjE0fCLTqA==}
+  /@aws-sdk/client-sts/3.276.0:
+    resolution: {integrity: sha512-J6FR4tYa/WdDdwWAKhw/mXQXKWUaZZQpMiyFEbFPQyURSWu3u17nv97NUdvVOgCth48H6Wb6a4ksssYy4K9tFQ==}
     engines: {node: '>=14.0.0'}
     dependencies:
       '@aws-crypto/sha256-browser': 3.0.0
@@ -2233,7 +2233,7 @@ packages:
       '@aws-sdk/util-user-agent-browser': 3.272.0
       '@aws-sdk/util-user-agent-node': 3.272.0
       '@aws-sdk/util-utf8': 3.254.0
-      fast-xml-parser: 4.0.11
+      fast-xml-parser: 4.1.2
       tslib: 2.5.0
     transitivePeerDependencies:
       - aws-crt
@@ -2665,8 +2665,8 @@ packages:
       tslib: 2.5.0
     dev: false
 
-  /@aws-sdk/s3-request-presigner/3.272.0:
-    resolution: {integrity: sha512-WniD9K8JyLpl6qs6Z0xLVqDR0EVHjacWDZc8s4X6N2mLnkV/4WexsCz9Tlg8WQtiuiWY4L/pR+JTALt7w30HCw==}
+  /@aws-sdk/s3-request-presigner/3.276.0:
+    resolution: {integrity: sha512-xRp+1eiErM8ys3IIjasxeS8kWAPnwO0byNB26i5htppJ2AgzH11mIuipjhhbzcHB+7EO3JiVxHJB+NSFmHdLaw==}
     engines: {node: '>=14.0.0'}
     dependencies:
       '@aws-sdk/middleware-endpoint': 3.272.0
@@ -15641,8 +15641,8 @@ packages:
     dependencies:
       punycode: 1.3.2
 
-  /fast-xml-parser/4.0.11:
-    resolution: {integrity: sha512-4aUg3aNRR/WjQAcpceODG1C3x3lFANXRo8+1biqfieHmg9pyMt7qB4lQV/Ta6sJCTbA5vfD8fnA8S54JATiFUA==}
+  /fast-xml-parser/4.1.2:
+    resolution: {integrity: sha512-CDYeykkle1LiA/uqQyNwYpFbyF6Axec6YapmpUP+/RHWIoR1zKjocdvNaTsxCxZzQ6v9MLXaSYm9Qq0thv0DHg==}
     hasBin: true
     dependencies:
       strnum: 1.0.5
