@@ -25,7 +25,6 @@ async function getSuperTokensUserIdFromRequest(
 }
 
 export const getServerSideProps = withSessionProtection(async ({ req, res }) => {
-  console.log('Running getServerSideProps');
   const internalApi = createTRPCProxyClient<InternalApi>({
     links: [
       httpLink({
@@ -40,7 +39,6 @@ export const getServerSideProps = withSessionProtection(async ({ req, res }) => 
     const lastOrgIdInCookies = cookies.get(LAST_VISITED_ORG_KEY) ?? null;
 
     if (superTokensId) {
-      console.log('Got superTokensId', superTokensId);
       const defaultOrganization = await internalApi.getDefaultOrgForUser.query({
         superTokensUserId: superTokensId,
         lastOrgId: lastOrgIdInCookies,
@@ -49,7 +47,6 @@ export const getServerSideProps = withSessionProtection(async ({ req, res }) => 
       if (defaultOrganization) {
         writeLastVisitedOrganization(req, res, defaultOrganization.cleanId);
 
-        console.log('Default organization, redirect', defaultOrganization.cleanId);
         return {
           redirect: {
             destination: `/${defaultOrganization.cleanId}`,
@@ -59,11 +56,8 @@ export const getServerSideProps = withSessionProtection(async ({ req, res }) => 
       }
     }
   } catch (error) {
-    console.log('Got error in getServerSideProps ', error);
     console.error(error);
   }
-
-  console.log('Resolving empty props');
 
   return {
     props: {},

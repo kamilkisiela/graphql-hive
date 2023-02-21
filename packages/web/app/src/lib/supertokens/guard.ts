@@ -34,12 +34,7 @@ export const serverSidePropsSessionHandling = async (
     throw err;
   }
 
-  console.log('url', context.req.url);
-  console.log('resolved', context.resolvedUrl);
-  console.log('ref', context.req.headers.referer);
-
   if (session === undefined) {
-    // On dev, I get this
     return {
       redirect: {
         destination: `/auth?redirectToPath=${encodeURIComponent(context.resolvedUrl)}`,
@@ -64,11 +59,9 @@ export function withSessionProtection(handlerFn: GetServerSideProps = defaultHan
     const result = await serverSidePropsSessionHandling(context);
 
     if (result) {
-      console.log('withSessionProtection result', result);
       return result;
     }
 
-    console.log('Run handlerFn');
     return handlerFn(context);
   };
 
