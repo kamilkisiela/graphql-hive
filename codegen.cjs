@@ -133,14 +133,8 @@ const config = {
         './packages/web/app/src/graphql',
         '!./packages/web/app/pages/api/github/setup-callback.ts',
       ],
-      preset: 'gql-tag-operations-preset',
+      preset: 'client',
       plugins: [],
-      config: {
-        dedupeFragments: true,
-      },
-      presetConfig: {
-        augmentedModuleName: '@urql/core',
-      },
     },
     // CLI
     'packages/libraries/cli/src/sdk.ts': {
@@ -162,7 +156,7 @@ const config = {
     // Integration tests
     './integration-tests/testkit/gql/': {
       documents: './integration-tests/(testkit|tests)/**/*.ts',
-      preset: 'client-preset',
+      preset: 'client',
       plugins: [],
     },
   },

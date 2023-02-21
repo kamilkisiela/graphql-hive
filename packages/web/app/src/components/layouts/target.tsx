@@ -1,6 +1,6 @@
 import { ReactElement, ReactNode, useEffect } from 'react';
 import NextLink from 'next/link';
-import { gql, useQuery } from 'urql';
+import { useQuery } from 'urql';
 import { Button, Heading, Link, SubHeader, Tabs } from '@/components/v2';
 import {
   DropdownMenu,
@@ -10,6 +10,7 @@ import {
 } from '@/components/v2/dropdown';
 import { ArrowDownIcon, Link2Icon } from '@/components/v2/icon';
 import { ConnectSchemaModal } from '@/components/v2/modals';
+import { graphql } from '@/gql';
 import {
   OrganizationFieldsFragment,
   ProjectDocument,
@@ -31,7 +32,7 @@ enum TabValue {
   Settings = 'settings',
 }
 
-const IsCDNEnabledQuery = gql(/* GraphQL */ `
+const IsCDNEnabledQuery = graphql(/* GraphQL */ `
   query IsCDNEnabledQuery {
     isCDNEnabled
   }

@@ -1,7 +1,7 @@
-import { DocumentType, gql } from 'urql';
+import { FragmentType, graphql, useFragment } from '@/gql';
 import { GraphQLFields, GraphQLTypeCard } from './common';
 
-export const GraphQLInterfaceTypeComponent_TypeFragment = gql(/* GraphQL */ `
+export const GraphQLInterfaceTypeComponent_TypeFragment = graphql(/* GraphQL */ `
   fragment GraphQLInterfaceTypeComponent_TypeFragment on GraphQLInterfaceType {
     name
     description
@@ -16,17 +16,18 @@ export const GraphQLInterfaceTypeComponent_TypeFragment = gql(/* GraphQL */ `
 `);
 
 export function GraphQLInterfaceTypeComponent(props: {
-  type: DocumentType<typeof GraphQLInterfaceTypeComponent_TypeFragment>;
+  type: FragmentType<typeof GraphQLInterfaceTypeComponent_TypeFragment>;
   totalRequests: number;
 }) {
+  const ttype = useFragment(GraphQLInterfaceTypeComponent_TypeFragment, props.type);
   return (
     <GraphQLTypeCard
       kind="interface"
-      name={props.type.name}
-      description={props.type.description}
-      implements={props.type.interfaces}
+      name={ttype.name}
+      description={ttype.description}
+      implements={ttype.interfaces}
     >
-      <GraphQLFields fields={props.type.fields} totalRequests={props.totalRequests} />
+      <GraphQLFields fields={ttype.fields} totalRequests={props.totalRequests} />
     </GraphQLTypeCard>
   );
 }

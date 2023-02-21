@@ -11,10 +11,11 @@ import { clsx } from 'clsx';
 import { formatISO } from 'date-fns';
 import ReactECharts from 'echarts-for-react';
 import AutoSizer from 'react-virtualized-auto-sizer';
-import { DocumentType, gql, useQuery } from 'urql';
+import { useQuery } from 'urql';
 import { Button, DataWrapper, Stat, Table, TBody, Td, Th, THead, Tr } from '@/components/v2';
 import { CHART_PRIMARY_COLOR } from '@/constants';
 import { env } from '@/env/frontend';
+import { DocumentType, FragmentType, graphql, useFragment } from '@/gql';
 import { OrganizationType } from '@/graphql';
 import { theme } from '@/lib/charts';
 import { useChartStyles } from '@/utils';
@@ -65,26 +66,25 @@ export type Filters = Partial<{
   'with-collected': boolean;
 }>;
 
-const CollectedOperationsOverTime_OperationFragment = gql(/* GraphQL */ `
+const CollectedOperationsOverTime_OperationFragment = graphql(/* GraphQL */ `
   fragment CollectedOperationsOverTime_OperationFragment on AdminOperationPoint {
     count
     date
   }
 `);
 
-function CollectedOperationsOverTime({
-  dateRange,
-  operations,
-}: {
+function CollectedOperationsOverTime(props: {
   dateRange: {
     from: Date;
     to: Date;
   };
-  operations: DocumentType<typeof CollectedOperationsOverTime_OperationFragment>[];
+  operations: Array<FragmentType<typeof CollectedOperationsOverTime_OperationFragment>>;
 }): ReactElement {
+  const operations = useFragment(CollectedOperationsOverTime_OperationFragment, props.operations);
   const dataRef = useRef<[string, number][]>();
   dataRef.current ||= operations.map(node => [node.date, node.count]);
   const data = dataRef.current;
+
   return (
     <AutoSizer disableHeight>
       {size => (
@@ -107,8 +107,8 @@ function CollectedOperationsOverTime({
               {
                 type: 'time',
                 boundaryGap: false,
-                min: dateRange.from,
-                max: dateRange.to,
+                min: props.dateRange.from,
+                max: props.dateRange.to,
               },
             ],
             yAxis: [{ type: 'value', min: 0 }],
@@ -143,7 +143,7 @@ function OverallStat({ label, value }: { label: string; value: number }): ReactE
   );
 }
 
-const AdminStatsQuery = gql(/* GraphQL */ `
+const AdminStatsQuery = graphql(/* GraphQL */ `
   query adminStats($period: DateRangeInput!) {
     admin {
       stats(period: $period) {

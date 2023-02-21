@@ -1,13 +1,13 @@
 import { ReactElement, ReactNode } from 'react';
 import clsx from 'clsx';
-import { DocumentType, gql } from 'urql';
 import { Drawer } from '@/components/v2';
+import { DocumentType, graphql } from '@/gql';
 import { OrganizationType } from '@/graphql';
 import { getDocsUrl } from '@/lib/docs-url';
 import { useToggle } from '@/lib/hooks';
 import { CheckCircledIcon } from '@radix-ui/react-icons';
 
-const GetStartedWizard_GetStartedProgress = gql(/* GraphQL */ `
+const GetStartedWizard_GetStartedProgress = graphql(/* GraphQL */ `
   fragment GetStartedWizard_GetStartedProgress on OrganizationGetStarted {
     creatingProject
     publishingSchema

@@ -1,10 +1,11 @@
 import { Fragment, ReactElement, useCallback, useState } from 'react';
 import clsx from 'clsx';
 import { useFormik } from 'formik';
-import { gql, useMutation, useQuery } from 'urql';
+import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 import { Button, Heading, Input, Modal } from '@/components/v2';
 import { ArrowDownIcon, CheckIcon } from '@/components/v2/icon';
+import { graphql } from '@/gql';
 import { MemberFieldsFragment, OrganizationFieldsFragment } from '@/graphql';
 import { useNotifications } from '@/lib/hooks';
 import { Combobox as HeadlessCombobox, Transition as HeadlessTransition } from '@headlessui/react';
@@ -12,7 +13,7 @@ import { Combobox as HeadlessCombobox, Transition as HeadlessTransition } from '
 const Combobox = HeadlessCombobox as any;
 const Transition = HeadlessTransition as any;
 
-const TransferOrganizationOwnership_Request = gql(/* GraphQL */ `
+const TransferOrganizationOwnership_Request = graphql(/* GraphQL */ `
   mutation TransferOrganizationOwnership_Request($input: RequestOrganizationTransferInput!) {
     requestOrganizationTransfer(input: $input) {
       ok {
@@ -25,7 +26,7 @@ const TransferOrganizationOwnership_Request = gql(/* GraphQL */ `
   }
 `);
 
-const TransferOrganizationOwnership_Members = gql(/* GraphQL */ `
+const TransferOrganizationOwnership_Members = graphql(/* GraphQL */ `
   query TransferOrganizationOwnership_Members($selector: OrganizationSelectorInput!) {
     organization(selector: $selector) {
       organization {
@@ -35,7 +36,14 @@ const TransferOrganizationOwnership_Members = gql(/* GraphQL */ `
         type
         members {
           nodes {
+            isOwner
             ...MemberFields
+            user {
+              id
+              fullName
+              displayName
+              email
+            }
           }
           total
         }

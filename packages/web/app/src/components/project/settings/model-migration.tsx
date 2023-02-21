@@ -1,6 +1,7 @@
 import { ReactElement, ReactNode, useCallback } from 'react';
-import { gql, useMutation } from 'urql';
+import { useMutation } from 'urql';
 import { Button, Card, Heading, Tooltip } from '@/components/v2';
+import { graphql } from '@/gql';
 import { ProjectFieldsFragment, RegistryModel } from '@/graphql';
 import { useNotifications } from '@/lib/hooks';
 import { openChatSupport } from '@/utils';
@@ -106,7 +107,7 @@ const available = (
 
 const notAvailable = <Tooltip content="Not available">{crossIcon}</Tooltip>;
 
-const ModelMigrationSettings_upgradeProjectRegistryModelMutation = gql(/* GraphQL */ `
+const ModelMigrationSettings_upgradeProjectRegistryModelMutation = graphql(/* GraphQL */ `
   mutation ModelMigrationSettings_upgradeProjectRegistryModelMutation(
     $input: UpdateProjectRegistryModelInput!
   ) {

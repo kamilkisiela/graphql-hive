@@ -1,10 +1,11 @@
 import { ReactElement } from 'react';
-import { gql, useQuery } from 'urql';
+import { useQuery } from 'urql';
 import { Button, CopyValue, Heading, Link, Modal, Tag } from '@/components/v2';
+import { graphql } from '@/gql';
 import { getDocsUrl } from '@/lib/docs-url';
 import { useRouteSelector } from '@/lib/hooks';
 
-const ConnectSchemaModalQuery = gql(/* GraphQL */ `
+const ConnectSchemaModalQuery = graphql(/* GraphQL */ `
   query ConnectSchemaModal($targetSelector: TargetSelectorInput!) {
     target(selector: $targetSelector) {
       id

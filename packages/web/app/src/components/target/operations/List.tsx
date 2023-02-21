@@ -1,11 +1,12 @@
 import { ReactElement, SetStateAction, useCallback, useMemo, useState } from 'react';
-import { clsx } from 'clsx';
-import { gql, useQuery } from 'urql';
+import clsx from 'clsx';
+import { useQuery } from 'urql';
 import { useDebouncedCallback } from 'use-debounce';
 import { Scale, Section } from '@/components/common';
 import { GraphQLHighlight } from '@/components/common/GraphQLSDLBlock';
 import { Button, Drawer, Input, Table, TBody, Td, Th, THead, Tooltip, Tr } from '@/components/v2';
 import { env } from '@/env/frontend';
+import { graphql } from '@/gql';
 import { DateRangeInput, OperationsStatsDocument, OperationStatsFieldsFragment } from '@/graphql';
 import { useDecimal, useFormattedDuration, useFormattedNumber, useToggle } from '@/lib/hooks';
 import { ChevronUpIcon, ExclamationTriangleIcon } from '@radix-ui/react-icons';
@@ -34,7 +35,7 @@ interface Operation {
   hash: string;
 }
 
-const GraphQLOperationBody_GetOperationBodyQuery = gql(/* GraphQL */ `
+const GraphQLOperationBody_GetOperationBodyQuery = graphql(/* GraphQL */ `
   query GraphQLOperationBody_GetOperationBodyQuery($selector: OperationBodyByHashInput!) {
     operationBodyByHash(selector: $selector)
   }

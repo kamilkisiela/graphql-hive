@@ -1,12 +1,13 @@
 import { ReactElement } from 'react';
 import { useFormik } from 'formik';
-import { gql, useMutation } from 'urql';
+import { useMutation } from 'urql';
 import * as Yup from 'yup';
 import { Button, Heading, Input, Modal, Select, Tag } from '@/components/v2';
+import { graphql } from '@/gql';
 import { AlertChannelType } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks';
 
-const CreateChannel_AddAlertChannelMutation = gql(/* GraphQL */ `
+const CreateChannel_AddAlertChannelMutation = graphql(/* GraphQL */ `
   mutation CreateChannel_AddAlertChannel($input: AddAlertChannelInput!) {
     addAlertChannel(input: $input) {
       ok {

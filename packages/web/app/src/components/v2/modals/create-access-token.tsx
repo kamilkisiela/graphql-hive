@@ -1,14 +1,15 @@
 import { ReactElement } from 'react';
 import { useFormik } from 'formik';
-import { gql, useMutation, useQuery } from 'urql';
+import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 import { PermissionsSpace, usePermissionsManager } from '@/components/organization/Permissions';
 import { Accordion, Button, CopyValue, Heading, Input, Modal, Tag } from '@/components/v2';
+import { graphql } from '@/gql';
 import { OrganizationDocument, OrganizationQuery } from '@/graphql';
 import { scopes } from '@/lib/access/common';
 import { useRouteSelector } from '@/lib/hooks';
 
-const CreateAccessToken_CreateTokenMutation = gql(/* GraphQL */ `
+const CreateAccessToken_CreateTokenMutation = graphql(/* GraphQL */ `
   mutation CreateAccessToken_CreateToken($input: CreateTokenInput!) {
     createToken(input: $input) {
       ok {

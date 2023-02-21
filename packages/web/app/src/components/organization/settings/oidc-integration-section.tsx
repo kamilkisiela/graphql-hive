@@ -2,23 +2,25 @@ import { ReactElement } from 'react';
 import { useRouter } from 'next/router';
 import { clsx } from 'clsx';
 import { useFormik } from 'formik';
-import { DocumentType, gql, useMutation } from 'urql';
+import { useMutation } from 'urql';
 import { Button, Heading, Input, Modal, Tag } from '@/components/v2';
 import { AlertTriangleIcon, KeyIcon } from '@/components/v2/icon';
 import { InlineCode } from '@/components/v2/inline-code';
 import { env } from '@/env/frontend';
+import { DocumentType, FragmentType, graphql, useFragment } from '@/gql';
 
 const classes = {
   container: clsx('flex flex-col items-stretch gap-5'),
   modal: clsx('w-[550px]'),
 };
 
-const OIDCIntegrationSection_OrganizationFragment = gql(/* GraphQL */ `
+const OIDCIntegrationSection_OrganizationFragment = graphql(/* GraphQL */ `
   fragment OIDCIntegrationSection_OrganizationFragment on Organization {
     id
     oidcIntegration {
       id
       ...UpdateOIDCIntegration_OIDCIntegrationFragment
+      authorizationEndpoint
     }
   }
 `);
@@ -120,7 +122,7 @@ export function OIDCIntegrationSection(props: {
   );
 }
 
-const CreateOIDCIntegrationModal_CreateOIDCIntegrationMutation = gql(/* GraphQL */ `
+const CreateOIDCIntegrationModal_CreateOIDCIntegrationMutation = graphql(/* GraphQL */ `
   mutation CreateOIDCIntegrationModal_CreateOIDCIntegrationMutation(
     $input: CreateOIDCIntegrationInput!
   ) {
@@ -319,10 +321,15 @@ function CreateOIDCIntegrationForm(props: {
 function ManageOIDCIntegrationModal(props: {
   isOpen: boolean;
   close: () => void;
-  oidcIntegration: DocumentType<typeof UpdateOIDCIntegration_OIDCIntegrationFragment> | null;
+  oidcIntegration: FragmentType<typeof UpdateOIDCIntegration_OIDCIntegrationFragment> | null;
   openCreateModalLink: string;
 }): ReactElement {
-  return props.oidcIntegration === null ? (
+  const oidcIntegration = useFragment(
+    UpdateOIDCIntegration_OIDCIntegrationFragment,
+    props.oidcIntegration,
+  );
+
+  return oidcIntegration == null ? (
     <Modal open={props.isOpen} onOpenChange={props.close} className={classes.modal}>
       <div className={classes.container}>
         <Heading>Manage OpenID Connect Integration</Heading>
@@ -350,13 +357,13 @@ function ManageOIDCIntegrationModal(props: {
     <UpdateOIDCIntegrationForm
       close={props.close}
       isOpen={props.isOpen}
-      key={props.oidcIntegration.id}
-      oidcIntegration={props.oidcIntegration}
+      key={oidcIntegration.id}
+      oidcIntegration={oidcIntegration}
     />
   );
 }
 
-const UpdateOIDCIntegration_OIDCIntegrationFragment = gql(/* GraphQL */ `
+const UpdateOIDCIntegration_OIDCIntegrationFragment = graphql(/* GraphQL */ `
   fragment UpdateOIDCIntegration_OIDCIntegrationFragment on OIDCIntegration {
     id
     tokenEndpoint
@@ -367,7 +374,7 @@ const UpdateOIDCIntegration_OIDCIntegrationFragment = gql(/* GraphQL */ `
   }
 `);
 
-const UpdateOIDCIntegrationForm_UpdateOIDCIntegrationMutation = gql(/* GraphQL */ `
+const UpdateOIDCIntegrationForm_UpdateOIDCIntegrationMutation = graphql(/* GraphQL */ `
   mutation UpdateOIDCIntegrationForm_UpdateOIDCIntegrationMutation(
     $input: UpdateOIDCIntegrationInput!
   ) {
@@ -549,7 +556,7 @@ function UpdateOIDCIntegrationForm(props: {
   );
 }
 
-const RemoveOIDCIntegrationForm_DeleteOIDCIntegrationMutation = gql(/* GraphQL */ `
+const RemoveOIDCIntegrationForm_DeleteOIDCIntegrationMutation = graphql(/* GraphQL */ `
   mutation RemoveOIDCIntegrationForm_DeleteOIDCIntegrationMutation(
     $input: DeleteOIDCIntegrationInput!
   ) {
