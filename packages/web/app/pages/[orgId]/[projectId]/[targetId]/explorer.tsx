@@ -1,5 +1,5 @@
 import { ReactElement } from 'react';
-import { gql, useQuery } from 'urql';
+import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
 import { SchemaExplorerFilter } from '@/components/target/explorer/filter';
@@ -9,10 +9,11 @@ import {
   useSchemaExplorerContext,
 } from '@/components/target/explorer/provider';
 import { DataWrapper, noSchema, Title } from '@/components/v2';
+import { graphql } from '@/gql';
 import { OrganizationFieldsFragment, ProjectFieldsFragment, TargetFieldsFragment } from '@/graphql';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
-const SchemaView_SchemaExplorer = gql(/* GraphQL */ `
+const SchemaView_SchemaExplorer = graphql(/* GraphQL */ `
   query SchemaView_SchemaExplorer(
     $organization: ID!
     $project: ID!

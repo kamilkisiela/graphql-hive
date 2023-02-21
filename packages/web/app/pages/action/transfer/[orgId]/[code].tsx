@@ -1,9 +1,10 @@
 import { useCallback } from 'react';
 import { clsx } from 'clsx';
-import { gql, useMutation, useQuery } from 'urql';
+import { useMutation, useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { Title } from '@/components/common';
 import { Button, DataWrapper } from '@/components/v2';
+import { graphql } from '@/gql';
 import { useNotifications } from '@/lib/hooks/use-notifications';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { withSessionProtection } from '@/lib/supertokens/guard';
@@ -14,7 +15,7 @@ const classes = {
   actions: clsx('flex flex-row gap-2 items-center justify-center'),
 };
 
-const OrganizationTransferPage_GetRequest = gql(`
+const OrganizationTransferPage_GetRequest = graphql(`
   query OrganizationTransferPage_GetRequest($selector: OrganizationTransferRequestSelector!) {
     organizationTransferRequest(selector: $selector) {
       organization {
@@ -33,7 +34,7 @@ const OrganizationTransferPage_GetRequest = gql(`
   }
 `);
 
-const OrganizationTransferPage_AnswerRequest = gql(`
+const OrganizationTransferPage_AnswerRequest = graphql(`
   mutation OrganizationTransferPage_AnswerRequest($input: AnswerOrganizationTransferRequestInput!) {
     answerOrganizationTransferRequest(input: $input) {
       ok {

@@ -1,6 +1,6 @@
 import { ReactElement } from 'react';
 import { useFormik } from 'formik';
-import { gql, useMutation, useQuery } from 'urql';
+import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 import { authenticated } from '@/components/authenticated-container';
 import { ProjectLayout } from '@/components/layouts';
@@ -9,6 +9,7 @@ import { ModelMigrationSettings } from '@/components/project/settings/model-migr
 import { Button, Card, Heading, Input, Link, Select, Tag, Title } from '@/components/v2';
 import { AlertTriangleIcon } from '@/components/v2/icon';
 import { DeleteProjectModal } from '@/components/v2/modals';
+import { graphql } from '@/gql';
 import {
   GetGitHubIntegrationDetailsDocument,
   OrganizationFieldsFragment,
@@ -19,7 +20,7 @@ import { canAccessProject, ProjectAccessScope, useProjectAccess } from '@/lib/ac
 import { useRouteSelector, useToggle } from '@/lib/hooks';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
-const Settings_UpdateProjectGitRepositoryMutation = gql(/* GraphQL */ `
+const Settings_UpdateProjectGitRepositoryMutation = graphql(/* GraphQL */ `
   mutation Settings_UpdateProjectGitRepository($input: UpdateProjectGitRepositoryInput!) {
     updateProjectGitRepository(input: $input) {
       ok {
@@ -131,7 +132,7 @@ function GitHubIntegration({
   );
 }
 
-const Settings_UpdateProjectNameMutation = gql(/* GraphQL */ `
+const Settings_UpdateProjectNameMutation = graphql(/* GraphQL */ `
   mutation Settings_UpdateProjectName($input: UpdateProjectNameInput!) {
     updateProjectName(input: $input) {
       ok {
@@ -141,6 +142,7 @@ const Settings_UpdateProjectNameMutation = gql(/* GraphQL */ `
         }
         updatedProject {
           ...ProjectFields
+          cleanId
         }
       }
       error {
