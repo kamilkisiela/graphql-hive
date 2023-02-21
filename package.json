@@ -27,7 +27,7 @@
     "docker:build": "docker buildx bake -f docker/docker.hcl --load build",
     "env:sync": "node ./scripts/sync-env-files.js",
     "generate": "pnpm --filter @hive/storage db:generate && pnpm graphql:generate",
-    "graphql:generate": "graphql-codegen",
+    "graphql:generate": "graphql-codegen --config codegen.cjs",
     "lint": "eslint --cache --ignore-path .gitignore \"{packages,cypress}/**/*.{ts,tsx}\"",
     "lint:env-template": "tsx scripts/check-env-template.ts",
     "lint:fix": "pnpm lint --fix",
