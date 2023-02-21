@@ -4,7 +4,7 @@ import 'reflect-metadata';
 import { createLogger, registerShutdown, startMetrics } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
 import { env } from './environment';
-import { rateLimitCtX, rateLimitRouter } from './router';
+import { rateLimitContext, rateLimitRouter } from './router';
 
 async function main() {
   if (env.sentry) {
@@ -25,14 +25,14 @@ async function main() {
     registerShutdown({
       logger,
       async onShutdown() {
-        await Promise.all([rateLimitCtX.stop(), server.close()]);
+        await Promise.all([rateLimitContext.stop(), server.close()]);
       },
     });
 
     if (env.prometheus) {
       await startMetrics(env.prometheus.labels.instance);
     }
-    await rateLimitCtX.start();
+    await rateLimitContext.start();
     return new Promise<void>(resolve => {
       server.listen(env.http.port, 'localhost', resolve);
     });

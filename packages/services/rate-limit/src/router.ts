@@ -6,11 +6,11 @@ import { rateLimitApiRouter } from './api';
 import { env } from './environment';
 import { createRateLimiter } from './limiter';
 
-const rateLimitRouter = createRouter();
+export const rateLimitRouter = createRouter();
 
 const logger = createLogger(env.log.level);
 
-const ctx = createRateLimiter({
+export const rateLimitContext = createRateLimiter({
   logger,
   rateLimitConfig: {
     interval: env.limitCacheUpdateIntervalMs,
@@ -24,7 +24,7 @@ const ctx = createRateLimiter({
 
 const respondWithTRPC = createFetchAPIHandler({
   router: rateLimitApiRouter,
-  createContext: async (): Promise<any> => ctx,
+  createContext: async (): Promise<any> => rateLimitContext,
 });
 
 rateLimitRouter.all('/trpc/:path+', respondWithTRPC);
@@ -42,7 +42,7 @@ rateLimitRouter.all('/_health', req => {
 rateLimitRouter.all('/_readiness', req => {
   const method = req.method.toUpperCase();
   if (method === 'GET' || method === 'HEAD') {
-    const isReady = ctx.readiness();
+    const isReady = rateLimitContext.readiness();
     reportReadiness(isReady);
 
     return new Response(null, {
@@ -51,5 +51,3 @@ rateLimitRouter.all('/_readiness', req => {
   }
   // return nothing so router can continue with other middlewares if exist
 });
-
-export { ctx as rateLimitCtX, rateLimitRouter };
