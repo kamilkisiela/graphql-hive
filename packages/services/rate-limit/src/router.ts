@@ -27,9 +27,7 @@ const respondWithTRPC = createFetchAPIHandler({
   createContext: async (): Promise<any> => ctx,
 });
 
-rateLimitRouter.all('/trpc/:path+', async (req: any) => {
-  return await respondWithTRPC(req);
-});
+rateLimitRouter.all('/trpc/:path+', respondWithTRPC);
 
 rateLimitRouter.all('/_health', req => {
   const method = req.method.toUpperCase();
