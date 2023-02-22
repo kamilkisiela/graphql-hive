@@ -101,6 +101,19 @@ export const internalApiRouter = t.router({
         }
       }
 
+      if (user?.id) {
+        const allAllOraganizations = await ctx.storage.getOrganizations({ user: user.id });
+
+        if (allAllOraganizations.length > 0) {
+          const someOrg = allAllOraganizations[0];
+
+          return {
+            id: someOrg.id,
+            cleanId: someOrg.cleanId,
+          };
+        }
+      }
+
       return null;
     }),
   getOIDCIntegrationById: procedure
