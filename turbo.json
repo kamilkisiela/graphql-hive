@@ -33,6 +33,7 @@
     },
     "@hive/landing-page#build": {
       "dependsOn": ["^build"],
+      "inputs": ["src/**/*.tsx", "package.json", "next.config.js", "next-sitemap.config.cjs"],
       "env": [
         "NEXT_PUBLIC_CRISP_WEBSITE_ID",
         "NEXT_PUBLIC_GA_TRACKING_ID",
@@ -42,6 +43,11 @@
         "NEXT_PUBLIC_ALGOLIA_APP_ID",
         "SITE_URL"
       ],
+      "outputs": [".next/**", "dist/**"]
+    },
+    "@hive/migrations#build": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**/*"],
       "outputs": ["dist/**"]
     },
     "typecheck": {
