@@ -82,7 +82,6 @@ export function getOrganization(organizationId: string, authToken: string) {
             id
             cleanId
             name
-            type
             getStarted {
               creatingProject
               publishingSchema

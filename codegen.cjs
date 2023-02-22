@@ -11,7 +11,7 @@ const config = {
       plugins: [
         {
           add: {
-            content: "import { StripeTypes } from '@hive/stripe-billing';",
+            content: "import type { StripeTypes } from '@hive/stripe-billing';",
           },
         },
         'typescript',
@@ -26,7 +26,6 @@ const config = {
         immutableTypes: true,
         contextType: 'GraphQLModules.ModuleContext',
         enumValues: {
-          OrganizationType: '../shared/entities#OrganizationType',
           ProjectType: '../shared/entities#ProjectType',
           TargetAccessScope: '../modules/auth/providers/target-access#TargetAccessScope',
           ProjectAccessScope: '../modules/auth/providers/project-access#ProjectAccessScope',

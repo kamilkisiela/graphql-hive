@@ -16,7 +16,6 @@ import { Button, DataWrapper, Stat, Table, TBody, Td, Th, THead, Tr } from '@/co
 import { CHART_PRIMARY_COLOR } from '@/constants';
 import { env } from '@/env/frontend';
 import { DocumentType, FragmentType, graphql, useFragment } from '@/gql';
-import { OrganizationType } from '@/graphql';
 import { theme } from '@/lib/charts';
 import { useChartStyles } from '@/utils';
 import { ChevronUpIcon } from '@radix-ui/react-icons';
@@ -33,7 +32,6 @@ import {
 interface Organization {
   name: ReactElement;
   members: string;
-  type: OrganizationType;
   users: number;
   projects: number;
   targets: number;
@@ -58,7 +56,6 @@ function sumByKey<
 }
 
 export type Filters = Partial<{
-  'only-regular': boolean;
   'with-projects': boolean;
   'with-targets': boolean;
   'with-schema-pushes': boolean;
@@ -152,7 +149,6 @@ const AdminStatsQuery = graphql(`
             id
             cleanId
             name
-            type
             owner {
               user {
                 email
@@ -188,10 +184,6 @@ function filterStats(
   row: DocumentType<typeof AdminStatsQuery>['admin']['stats']['organizations'][0],
   filters: Filters,
 ) {
-  if (filters['only-regular'] && row.organization.type !== 'REGULAR') {
-    return false;
-  }
-
   if (filters['with-projects'] && row.projects === 0) {
     return false;
   }
@@ -220,10 +212,6 @@ const columns = [
     header: 'Organization',
     footer: props => props.column.id,
     enableSorting: false,
-  }),
-  table.createDataColumn('type', {
-    header: 'Type',
-    footer: props => props.column.id,
   }),
   table.createDataColumn('members', {
     header: 'Members',
@@ -412,7 +400,6 @@ export function AdminStats({
             </div>
           ),
           members: (node.organization.members.nodes || []).map(v => v.user.email).join(', '),
-          type: node.organization.type,
           users: node.users,
           projects: node.projects,
           targets: node.targets,
@@ -425,7 +412,7 @@ export function AdminStats({
 
   const overall = useMemo(
     () => ({
-      users: tableData.reduce((total, node) => (node.type === 'PERSONAL' ? total + 1 : total), 0),
+      users: sumByKey(tableData, 'users'),
       organizations: tableData.length,
       projects: sumByKey(tableData, 'projects'),
       targets: sumByKey(tableData, 'targets'),

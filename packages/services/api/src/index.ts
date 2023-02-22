@@ -23,7 +23,7 @@ export type {
 } from './shared/entities';
 export { minifySchema } from './shared/schema';
 export { HiveError } from './shared/errors';
-export { OrganizationType, ProjectType } from './__generated__/types';
+export { ProjectType } from './__generated__/types';
 export type { AuthProvider } from './__generated__/types';
 export { HttpClient } from './modules/shared/providers/http-client';
 export { OperationsManager } from './modules/operations/providers/operations-manager';

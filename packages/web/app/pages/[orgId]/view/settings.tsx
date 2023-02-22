@@ -17,7 +17,6 @@ import {
   CheckIntegrationsDocument,
   DeleteGitHubIntegrationDocument,
   DeleteSlackIntegrationDocument,
-  OrganizationType,
 } from '@/graphql';
 import {
   canAccessOrganization,
@@ -144,7 +143,6 @@ const UpdateOrganizationNameMutation = graphql(`
 
 const SettingsPageRenderer_OrganizationFragment = graphql(`
   fragment SettingsPageRenderer_OrganizationFragment on Organization {
-    type
     name
     me {
       ...CanAccessOrganization_MemberFragment
@@ -165,7 +163,6 @@ const SettingsPageRenderer = (props: {
     redirect: true,
   });
   const router = useRouteSelector();
-  const isRegularOrg = organization?.type === OrganizationType.Regular;
   const [isDeleteModalOpen, toggleDeleteModalOpen] = useToggle();
   const [isTransferModalOpen, toggleTransferModalOpen] = useToggle();
 
@@ -198,46 +195,44 @@ const SettingsPageRenderer = (props: {
 
   return (
     <>
-      {isRegularOrg && (
-        <Card>
-          <Heading className="mb-2">Organization Name</Heading>
-          <p className="mb-3 font-light text-gray-300">
-            Name of your organization visible within Hive
-          </p>
-          <form onSubmit={handleSubmit} className="flex gap-x-2">
-            <Input
-              placeholder="Organization name"
-              name="name"
-              value={values.name}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              disabled={isSubmitting}
-              isInvalid={touched.name && !!errors.name}
-              className="w-96"
-            />
-            <Button
-              type="submit"
-              variant="primary"
-              size="large"
-              disabled={isSubmitting}
-              className="px-10"
-            >
-              Save
-            </Button>
-          </form>
-          {touched.name && (errors.name || mutation.error) && (
-            <div className="mt-2 text-red-500">{errors.name || mutation.error?.message}</div>
-          )}
-          {mutation.data?.updateOrganizationName?.error && (
-            <div className="mt-2 text-red-500">
-              {mutation.data?.updateOrganizationName.error.message}
-            </div>
-          )}
-          {mutation.error && (
-            <div>{mutation.error.graphQLErrors[0]?.message ?? mutation.error.message}</div>
-          )}
-        </Card>
-      )}
+      <Card>
+        <Heading className="mb-2">Organization Name</Heading>
+        <p className="mb-3 font-light text-gray-300">
+          Name of your organization visible within Hive
+        </p>
+        <form onSubmit={handleSubmit} className="flex gap-x-2">
+          <Input
+            placeholder="Organization name"
+            name="name"
+            value={values.name}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            disabled={isSubmitting}
+            isInvalid={touched.name && !!errors.name}
+            className="w-96"
+          />
+          <Button
+            type="submit"
+            variant="primary"
+            size="large"
+            disabled={isSubmitting}
+            className="px-10"
+          >
+            Save
+          </Button>
+        </form>
+        {touched.name && (errors.name || mutation.error) && (
+          <div className="mt-2 text-red-500">{errors.name || mutation.error?.message}</div>
+        )}
+        {mutation.data?.updateOrganizationName?.error && (
+          <div className="mt-2 text-red-500">
+            {mutation.data?.updateOrganizationName.error.message}
+          </div>
+        )}
+        {mutation.error && (
+          <div>{mutation.error.graphQLErrors[0]?.message ?? mutation.error.message}</div>
+        )}
+      </Card>
 
       {canAccessOrganization(OrganizationAccessScope.Integrations, organization.me) && (
         <Card>
@@ -249,7 +244,7 @@ const SettingsPageRenderer = (props: {
         </Card>
       )}
 
-      {isRegularOrg && organization.me.isOwner && (
+      {organization.me.isOwner && (
         <Card>
           <div className="flex items-center justify-between">
             <div>
@@ -276,7 +271,7 @@ const SettingsPageRenderer = (props: {
         </Card>
       )}
 
-      {isRegularOrg && canAccessOrganization(OrganizationAccessScope.Delete, organization.me) && (
+      {canAccessOrganization(OrganizationAccessScope.Delete, organization.me) && (
         <Card>
           <div className="flex items-center justify-between">
             <div>

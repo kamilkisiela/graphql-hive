@@ -2,7 +2,6 @@ import { ReactElement, ReactNode } from 'react';
 import clsx from 'clsx';
 import { Drawer } from '@/components/v2';
 import { DocumentType, graphql } from '@/gql';
-import { OrganizationType } from '@/graphql';
 import { getDocsUrl } from '@/lib/docs-url';
 import { useToggle } from '@/lib/hooks';
 import { CheckCircledIcon } from '@radix-ui/react-icons';
@@ -20,10 +19,8 @@ const GetStartedWizard_GetStartedProgress = graphql(`
 
 export function GetStartedProgress({
   tasks,
-  organizationType,
 }: {
   tasks: DocumentType<typeof GetStartedWizard_GetStartedProgress>;
-  organizationType: OrganizationType;
 }): ReactElement | null {
   const [isOpen, toggle] = useToggle();
 
@@ -31,14 +28,7 @@ export function GetStartedProgress({
     return null;
   }
 
-  const processedTasks =
-    organizationType === OrganizationType.Personal
-      ? {
-          ...tasks,
-          invitingMembers: undefined,
-        }
-      : tasks;
-  const values = Object.values(processedTasks).filter(v => typeof v === 'boolean');
+  const values = Object.values(tasks).filter(v => typeof v === 'boolean');
   const total = values.length;
   const completed = values.filter(t => t === true).length;
   const remaining = total - completed;
@@ -66,7 +56,7 @@ export function GetStartedProgress({
           </div>
         </div>
       </button>
-      <GetStartedWizard isOpen={isOpen} onClose={toggle} tasks={processedTasks} />
+      <GetStartedWizard isOpen={isOpen} onClose={toggle} tasks={tasks} />
     </>
   );
 }

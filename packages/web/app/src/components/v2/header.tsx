@@ -28,11 +28,9 @@ import {
   TrendingUpIcon,
 } from '@/components/v2/icon';
 import { env } from '@/env/frontend';
-import { MeDocument, OrganizationsDocument, OrganizationsQuery, OrganizationType } from '@/graphql';
+import { MeDocument, OrganizationsDocument } from '@/graphql';
 import { getDocsUrl } from '@/lib/docs-url';
 import { useRouteSelector } from '@/lib/hooks';
-
-type DropdownOrganization = OrganizationsQuery['organizations']['nodes'];
 
 export function Header(): ReactElement {
   const router = useRouteSelector();
@@ -41,25 +39,11 @@ export function Header(): ReactElement {
   const [isOpaque, setIsOpaque] = useState(false);
 
   const me = meQuery.data?.me;
-  const allOrgs = organizationsQuery.data?.organizations.nodes || [];
-  const { personal, organizations } = allOrgs.reduce<{
-    personal: DropdownOrganization;
-    organizations: DropdownOrganization;
-  }>(
-    (acc, node) => {
-      if (node.type === OrganizationType.Personal) {
-        acc.personal.push(node);
-      } else {
-        acc.organizations.push(node);
-      }
-      return acc;
-    },
-    { personal: [], organizations: [] },
-  );
+  const organizations = organizationsQuery.data?.organizations.nodes || [];
 
   const currentOrg =
     typeof router.organizationId === 'string'
-      ? allOrgs.find(org => org.cleanId === router.organizationId)
+      ? organizations.find(org => org.cleanId === router.organizationId)
       : null;
 
   // Copied from tailwindcss website
@@ -92,9 +76,7 @@ export function Header(): ReactElement {
       <div className="container flex h-[84px] items-center justify-between">
         <HiveLink />
         <div className="flex flex-row gap-8">
-          {currentOrg ? (
-            <GetStartedProgress organizationType={currentOrg.type} tasks={currentOrg.getStarted} />
-          ) : null}
+          {currentOrg ? <GetStartedProgress tasks={currentOrg.getStarted} /> : null}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button>
@@ -116,17 +98,9 @@ export function Header(): ReactElement {
                   </DropdownMenuSubTrigger>
                 ) : null}
                 <DropdownMenuSubContent sideOffset={25} className="max-w-[300px]">
-                  <DropdownMenuLabel className="px-2 mb-2 text-xs font-bold text-gray-500">
-                    PERSONAL
-                  </DropdownMenuLabel>
-                  {personal.map(org => (
-                    <NextLink href={`/${org.cleanId}`} key={org.cleanId}>
-                      <DropdownMenuItem className="truncate !block">{org.name}</DropdownMenuItem>
-                    </NextLink>
-                  ))}
                   {organizations.length ? (
-                    <DropdownMenuLabel className="px-2 mb-2 text-xs font-bold text-gray-500">
-                      OUTERS ORGANIZATIONS
+                    <DropdownMenuLabel className="px-2 mb-2 text-xs font-bold text-gray-500 truncate !block">
+                      ORGANIZATIONS
                     </DropdownMenuLabel>
                   ) : null}
                   {organizations.map(org => (
