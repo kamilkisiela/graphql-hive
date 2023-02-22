@@ -259,7 +259,7 @@ describe('publish', () => {
     });
   });
 
-  test.concurrent('CLI output', async () => {
+  test.concurrent('CLI output', async ({ expect }) => {
     const { publish } = await prepare();
 
     const service = {
