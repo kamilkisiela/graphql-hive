@@ -107,7 +107,7 @@ const available = (
 
 const notAvailable = <Tooltip content="Not available">{crossIcon}</Tooltip>;
 
-const ModelMigrationSettings_upgradeProjectRegistryModelMutation = graphql(/* GraphQL */ `
+const ModelMigrationSettings_upgradeProjectRegistryModelMutation = graphql(`
   mutation ModelMigrationSettings_upgradeProjectRegistryModelMutation(
     $input: UpdateProjectRegistryModelInput!
   ) {

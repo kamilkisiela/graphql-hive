@@ -24,7 +24,7 @@ import { MemberFieldsFragment } from '@/graphql';
 import { canAccessTarget } from '@/lib/access/target';
 import { useRouteSelector } from '@/lib/hooks';
 
-const CDNAccessTokeRowFragment = graphql(/* GraphQL */ `
+const CDNAccessTokeRowFragment = graphql(`
   fragment CDNAccessTokens_CdnAccessTokenRowFragment on CdnAccessToken {
     id
     firstCharacters
@@ -34,7 +34,7 @@ const CDNAccessTokeRowFragment = graphql(/* GraphQL */ `
   }
 `);
 
-const CDNAccessTokenCreateMutation = graphql(/* GraphQL */ `
+const CDNAccessTokenCreateMutation = graphql(`
   mutation CDNAccessTokens_CDNAccessTokenCreateMutation($input: CreateCdnAccessTokenInput!) {
     createCdnAccessToken(input: $input) {
       error {
@@ -180,7 +180,7 @@ function CreateCDNAccessTokenModal(props: {
   );
 }
 
-const CDNAccessTokenDeleteMutation = graphql(/* GraphQL */ `
+const CDNAccessTokenDeleteMutation = graphql(`
   mutation CDNAccessTokens_DeleteCDNAccessToken($input: DeleteCdnAccessTokenInput!) {
     deleteCdnAccessToken(input: $input) {
       error {
@@ -300,7 +300,7 @@ function DeleteCDNAccessTokenModal(props: {
   );
 }
 
-const CDNAccessTokensQuery = graphql(/* GraphQL */ `
+const CDNAccessTokensQuery = graphql(`
   query CDNAccessTokensQuery($selector: TargetSelectorInput!, $first: Int!, $after: String) {
     target(selector: $selector) {
       id

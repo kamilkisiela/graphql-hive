@@ -5,7 +5,7 @@ import * as Yup from 'yup';
 import { Button, Heading, Input } from '@/components/v2';
 import { graphql } from '@/gql';
 
-const CreateOrganizationMutation = graphql(/* GraphQL */ `
+const CreateOrganizationMutation = graphql(`
   mutation CreateOrganizationMutation($input: CreateOrganizationInput!) {
     createOrganization(input: $input) {
       ok {

@@ -123,7 +123,7 @@ function Integrations(): ReactElement | null {
   );
 }
 
-const UpdateOrganizationNameMutation = graphql(/* GraphQL */ `
+const UpdateOrganizationNameMutation = graphql(`
   mutation Settings_UpdateOrganizationName($input: UpdateOrganizationNameInput!) {
     updateOrganizationName(input: $input) {
       ok {

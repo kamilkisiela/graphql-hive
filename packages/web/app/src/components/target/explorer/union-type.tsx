@@ -1,7 +1,7 @@
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { GraphQLTypeCard, GraphQLTypeCardListItem, SchemaExplorerUsageStats } from './common';
 
-export const GraphQLUnionTypeComponent_TypeFragment = graphql(/* GraphQL */ `
+export const GraphQLUnionTypeComponent_TypeFragment = graphql(`
   fragment GraphQLUnionTypeComponent_TypeFragment on GraphQLUnionType {
     name
     description

@@ -2,7 +2,7 @@ import { Markdown } from '@/components/v2/markdown';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { GraphQLTypeCard, SchemaExplorerUsageStats } from './common';
 
-export const GraphQLScalarTypeComponent_TypeFragment = graphql(/* GraphQL */ `
+export const GraphQLScalarTypeComponent_TypeFragment = graphql(`
   fragment GraphQLScalarTypeComponent_TypeFragment on GraphQLScalarType {
     name
     description

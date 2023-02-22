@@ -5,7 +5,7 @@ import { graphql } from '@/gql';
 import { getDocsUrl } from '@/lib/docs-url';
 import { useRouteSelector } from '@/lib/hooks';
 
-const ConnectSchemaModalQuery = graphql(/* GraphQL */ `
+const ConnectSchemaModalQuery = graphql(`
   query ConnectSchemaModal($targetSelector: TargetSelectorInput!) {
     target(selector: $targetSelector) {
       id

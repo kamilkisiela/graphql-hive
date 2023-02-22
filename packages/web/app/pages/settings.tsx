@@ -8,7 +8,7 @@ import { graphql } from '@/gql';
 import { MeDocument } from '@/graphql';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
-const UpdateMeMutation = graphql(/* GraphQL */ `
+const UpdateMeMutation = graphql(`
   mutation updateMe($input: UpdateMeInput!) {
     updateMe(input: $input) {
       ok {

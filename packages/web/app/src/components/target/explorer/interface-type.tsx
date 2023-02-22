@@ -1,7 +1,7 @@
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { GraphQLFields, GraphQLTypeCard } from './common';
 
-export const GraphQLInterfaceTypeComponent_TypeFragment = graphql(/* GraphQL */ `
+export const GraphQLInterfaceTypeComponent_TypeFragment = graphql(`
   fragment GraphQLInterfaceTypeComponent_TypeFragment on GraphQLInterfaceType {
     name
     description

@@ -13,7 +13,7 @@ import { Combobox as HeadlessCombobox, Transition as HeadlessTransition } from '
 const Combobox = HeadlessCombobox as any;
 const Transition = HeadlessTransition as any;
 
-const TransferOrganizationOwnership_Request = graphql(/* GraphQL */ `
+const TransferOrganizationOwnership_Request = graphql(`
   mutation TransferOrganizationOwnership_Request($input: RequestOrganizationTransferInput!) {
     requestOrganizationTransfer(input: $input) {
       ok {
@@ -26,7 +26,7 @@ const TransferOrganizationOwnership_Request = graphql(/* GraphQL */ `
   }
 `);
 
-const TransferOrganizationOwnership_Members = graphql(/* GraphQL */ `
+const TransferOrganizationOwnership_Members = graphql(`
   query TransferOrganizationOwnership_Members($selector: OrganizationSelectorInput!) {
     organization(selector: $selector) {
       organization {

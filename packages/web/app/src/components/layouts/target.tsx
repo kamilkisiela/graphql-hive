@@ -32,7 +32,7 @@ enum TabValue {
   Settings = 'settings',
 }
 
-const IsCDNEnabledQuery = graphql(/* GraphQL */ `
+const IsCDNEnabledQuery = graphql(`
   query IsCDNEnabledQuery {
     isCDNEnabled
   }

@@ -20,7 +20,7 @@ import { canAccessProject, ProjectAccessScope, useProjectAccess } from '@/lib/ac
 import { useRouteSelector, useToggle } from '@/lib/hooks';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
-const Settings_UpdateProjectGitRepositoryMutation = graphql(/* GraphQL */ `
+const Settings_UpdateProjectGitRepositoryMutation = graphql(`
   mutation Settings_UpdateProjectGitRepository($input: UpdateProjectGitRepositoryInput!) {
     updateProjectGitRepository(input: $input) {
       ok {
@@ -132,7 +132,7 @@ function GitHubIntegration({
   );
 }
 
-const Settings_UpdateProjectNameMutation = graphql(/* GraphQL */ `
+const Settings_UpdateProjectNameMutation = graphql(`
   mutation Settings_UpdateProjectName($input: UpdateProjectNameInput!) {
     updateProjectName(input: $input) {
       ok {

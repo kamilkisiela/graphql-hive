@@ -27,7 +27,7 @@ export const DateFormatter = Intl.DateTimeFormat('en', {
   day: 'numeric',
 });
 
-const Members_Invitation = gql(/* GraphQL */ `
+const Members_Invitation = gql(`
   fragment Members_Invitation on OrganizationInvitation {
     id
     createdAt
@@ -37,7 +37,7 @@ const Members_Invitation = gql(/* GraphQL */ `
   }
 `);
 
-export const MemberInvitationForm_InviteByEmail = gql(/* GraphQL */ `
+export const MemberInvitationForm_InviteByEmail = gql(`
   mutation MemberInvitationForm_InviteByEmail($input: InviteToOrganizationByEmailInput!) {
     inviteToOrganizationByEmail(input: $input) {
       ok {
@@ -53,7 +53,7 @@ export const MemberInvitationForm_InviteByEmail = gql(/* GraphQL */ `
   }
 `);
 
-export const InvitationDeleteButton_DeleteInvitation = gql(/* GraphQL */ `
+export const InvitationDeleteButton_DeleteInvitation = gql(`
   mutation InvitationDeleteButton_DeleteInvitation($input: DeleteOrganizationInvitationInput!) {
     deleteOrganizationInvitation(input: $input) {
       ok {
@@ -167,7 +167,7 @@ function InvitationDeleteButton({
   );
 }
 
-export const Members_OrganizationMembers = gql(/* GraphQL */ `
+export const Members_OrganizationMembers = gql(`
   query Members_OrganizationMembers($selector: OrganizationSelectorInput!) {
     organization(selector: $selector) {
       organization {

@@ -8,7 +8,7 @@ import { graphql } from '@/gql';
 import { ProjectType } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks';
 
-const CreateProjectMutation = graphql(/* GraphQL */ `
+const CreateProjectMutation = graphql(`
   mutation CreateProject_CreateProject($input: CreateProjectInput!) {
     createProject(input: $input) {
       ok {

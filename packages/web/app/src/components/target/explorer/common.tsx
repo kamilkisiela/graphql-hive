@@ -44,7 +44,7 @@ function Description(props: { description: string }) {
   );
 }
 
-const SchemaExplorerUsageStats_UsageFragment = graphql(/* GraphQL */ `
+const SchemaExplorerUsageStats_UsageFragment = graphql(`
   fragment SchemaExplorerUsageStats_UsageFragment on SchemaCoordinateUsage {
     total
     isUsed
@@ -79,7 +79,7 @@ export function SchemaExplorerUsageStats(props: {
   );
 }
 
-const GraphQLFields_FieldFragment = graphql(/* GraphQL */ `
+const GraphQLFields_FieldFragment = graphql(`
   fragment GraphQLFields_FieldFragment on GraphQLField {
     name
     description
@@ -95,7 +95,7 @@ const GraphQLFields_FieldFragment = graphql(/* GraphQL */ `
   }
 `);
 
-const GraphQLArguments_ArgumentFragment = graphql(/* GraphQL */ `
+const GraphQLArguments_ArgumentFragment = graphql(`
   fragment GraphQLArguments_ArgumentFragment on GraphQLArgument {
     name
     description
@@ -108,7 +108,7 @@ const GraphQLArguments_ArgumentFragment = graphql(/* GraphQL */ `
   }
 `);
 
-const GraphQLInputFields_InputFieldFragment = graphql(/* GraphQL */ `
+const GraphQLInputFields_InputFieldFragment = graphql(`
   fragment GraphQLInputFields_InputFieldFragment on GraphQLInputField {
     name
     description

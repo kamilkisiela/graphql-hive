@@ -13,7 +13,7 @@ import { graphql } from '@/gql';
 import { OrganizationFieldsFragment, ProjectFieldsFragment, TargetFieldsFragment } from '@/graphql';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
-const SchemaView_SchemaExplorer = graphql(/* GraphQL */ `
+const SchemaView_SchemaExplorer = graphql(`
   query SchemaView_SchemaExplorer(
     $organization: ID!
     $project: ID!

@@ -19,7 +19,7 @@ import { OrganizationFieldsFragment, ProjectFieldsFragment, TargetFieldsFragment
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
-const SchemaTypeExplorer_Type = graphql(/* GraphQL */ `
+const SchemaTypeExplorer_Type = graphql(`
   query SchemaTypeExplorer_Type(
     $organization: ID!
     $project: ID!
@@ -49,7 +49,7 @@ const SchemaTypeExplorer_Type = graphql(/* GraphQL */ `
   }
 `);
 
-const TypeRenderFragment = graphql(/* GraphQL */ `
+const TypeRenderFragment = graphql(`
   fragment TypeRenderFragment on GraphQLNamedType {
     __typename
     ...GraphQLObjectTypeComponent_TypeFragment

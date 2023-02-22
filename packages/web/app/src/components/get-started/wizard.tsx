@@ -7,7 +7,7 @@ import { getDocsUrl } from '@/lib/docs-url';
 import { useToggle } from '@/lib/hooks';
 import { CheckCircledIcon } from '@radix-ui/react-icons';
 
-const GetStartedWizard_GetStartedProgress = graphql(/* GraphQL */ `
+const GetStartedWizard_GetStartedProgress = graphql(`
   fragment GetStartedWizard_GetStartedProgress on OrganizationGetStarted {
     creatingProject
     publishingSchema

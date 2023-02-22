@@ -134,7 +134,7 @@ function RegistryAccessTokens({ me }: { me: MemberFieldsFragment }): ReactElemen
   );
 }
 
-const Settings_UpdateBaseSchemaMutation = gql(/* GraphQL */ `
+const Settings_UpdateBaseSchemaMutation = gql(`
   mutation Settings_UpdateBaseSchema($input: UpdateBaseSchemaInput!) {
     updateBaseSchema(input: $input) {
       ok {
@@ -212,7 +212,7 @@ const ExtendBaseSchema = (props: { baseSchema: string }): ReactElement => {
   );
 };
 
-const ClientExclusion_AvailableClientNamesQuery = gql(/* GraphQL */ `
+const ClientExclusion_AvailableClientNamesQuery = gql(`
   query ClientExclusion_AvailableClientNamesQuery($selector: ClientStatsByTargetsInput!) {
     clientStatsByTargets(selector: $selector) {
       nodes {
@@ -274,7 +274,7 @@ function ClientExclusion(
   );
 }
 
-const Settings_TargetSettingsQuery = gql(/* GraphQL */ `
+const Settings_TargetSettingsQuery = gql(`
   query Settings_TargetSettingsQuery(
     $selector: TargetSelectorInput!
     $targetsSelector: ProjectSelectorInput!
@@ -299,7 +299,7 @@ const Settings_TargetSettingsQuery = gql(/* GraphQL */ `
   }
 `);
 
-const Settings_UpdateTargetValidationSettingsMutation = gql(/* GraphQL */ `
+const Settings_UpdateTargetValidationSettingsMutation = gql(`
   mutation Settings_UpdateTargetValidationSettings($input: UpdateTargetValidationSettingsInput!) {
     updateTargetValidationSettings(input: $input) {
       ok {
@@ -554,7 +554,7 @@ const ConditionalBreakingChanges = (): ReactElement => {
   );
 };
 
-const Settings_UpdateTargetNameMutation = gql(/* GraphQL */ `
+const Settings_UpdateTargetNameMutation = gql(`
   mutation Settings_UpdateTargetName($input: UpdateTargetNameInput!) {
     updateTargetName(input: $input) {
       ok {

@@ -7,7 +7,7 @@ import { graphql } from '@/gql';
 import { AlertChannelType } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks';
 
-const CreateChannel_AddAlertChannelMutation = graphql(/* GraphQL */ `
+const CreateChannel_AddAlertChannelMutation = graphql(`
   mutation CreateChannel_AddAlertChannel($input: AddAlertChannelInput!) {
     addAlertChannel(input: $input) {
       ok {

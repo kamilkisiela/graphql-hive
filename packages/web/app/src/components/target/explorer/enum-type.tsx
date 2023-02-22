@@ -1,7 +1,7 @@
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { GraphQLTypeCard, GraphQLTypeCardListItem, SchemaExplorerUsageStats } from './common';
 
-export const GraphQLEnumTypeComponent_TypeFragment = graphql(/* GraphQL */ `
+export const GraphQLEnumTypeComponent_TypeFragment = graphql(`
   fragment GraphQLEnumTypeComponent_TypeFragment on GraphQLEnumType {
     name
     description

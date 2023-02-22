@@ -35,7 +35,7 @@ interface Operation {
   hash: string;
 }
 
-const GraphQLOperationBody_GetOperationBodyQuery = graphql(/* GraphQL */ `
+const GraphQLOperationBody_GetOperationBodyQuery = graphql(`
   query GraphQLOperationBody_GetOperationBodyQuery($selector: OperationBodyByHashInput!) {
     operationBodyByHash(selector: $selector)
   }

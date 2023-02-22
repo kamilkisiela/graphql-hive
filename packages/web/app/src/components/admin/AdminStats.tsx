@@ -66,7 +66,7 @@ export type Filters = Partial<{
   'with-collected': boolean;
 }>;
 
-const CollectedOperationsOverTime_OperationFragment = graphql(/* GraphQL */ `
+const CollectedOperationsOverTime_OperationFragment = graphql(`
   fragment CollectedOperationsOverTime_OperationFragment on AdminOperationPoint {
     count
     date
@@ -143,7 +143,7 @@ function OverallStat({ label, value }: { label: string; value: number }): ReactE
   );
 }
 
-const AdminStatsQuery = graphql(/* GraphQL */ `
+const AdminStatsQuery = graphql(`
   query adminStats($period: DateRangeInput!) {
     admin {
       stats(period: $period) {

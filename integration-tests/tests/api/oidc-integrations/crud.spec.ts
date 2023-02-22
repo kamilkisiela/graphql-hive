@@ -2,7 +2,7 @@ import { graphql } from '../../../testkit/gql';
 import { execute } from '../../../testkit/graphql';
 import { initSeed } from '../../../testkit/seed';
 
-const OrganizationWithOIDCIntegration = graphql(/* GraphQL */ `
+const OrganizationWithOIDCIntegration = graphql(`
   query OrganizationWithOIDCIntegration($organizationId: ID!) {
     organization(selector: { organization: $organizationId }) {
       organization {
@@ -15,7 +15,7 @@ const OrganizationWithOIDCIntegration = graphql(/* GraphQL */ `
   }
 `);
 
-const CreateOIDCIntegrationMutation = graphql(/* GraphQL */ `
+const CreateOIDCIntegrationMutation = graphql(`
   mutation CreateOIDCIntegrationMutation($input: CreateOIDCIntegrationInput!) {
     createOIDCIntegration(input: $input) {
       ok {
@@ -393,7 +393,7 @@ describe('create', () => {
   });
 });
 
-const DeleteOIDCIntegrationMutation = graphql(/* GraphQL */ `
+const DeleteOIDCIntegrationMutation = graphql(`
   mutation DeleteOIDCIntegrationMutation($input: DeleteOIDCIntegrationInput!) {
     deleteOIDCIntegration(input: $input) {
       ok {
@@ -560,7 +560,7 @@ describe('delete', () => {
 
         const oidcIntegrationId = createResult.createOIDCIntegration.ok!.createdOIDCIntegration.id;
 
-        const MeQuery = graphql(/* GraphQL */ `
+        const MeQuery = graphql(`
           query Me {
             me {
               id
@@ -619,7 +619,7 @@ describe('delete', () => {
   });
 });
 
-const UpdateOIDCIntegrationMutation = graphql(/* GraphQL */ `
+const UpdateOIDCIntegrationMutation = graphql(`
   mutation UpdateOIDCIntegrationMutation($input: UpdateOIDCIntegrationInput!) {
     updateOIDCIntegration(input: $input) {
       ok {

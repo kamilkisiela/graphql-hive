@@ -14,7 +14,7 @@ const classes = {
   modal: clsx('w-[550px]'),
 };
 
-const OIDCIntegrationSection_OrganizationFragment = graphql(/* GraphQL */ `
+const OIDCIntegrationSection_OrganizationFragment = graphql(`
   fragment OIDCIntegrationSection_OrganizationFragment on Organization {
     id
     oidcIntegration {
@@ -122,7 +122,7 @@ export function OIDCIntegrationSection(props: {
   );
 }
 
-const CreateOIDCIntegrationModal_CreateOIDCIntegrationMutation = graphql(/* GraphQL */ `
+const CreateOIDCIntegrationModal_CreateOIDCIntegrationMutation = graphql(`
   mutation CreateOIDCIntegrationModal_CreateOIDCIntegrationMutation(
     $input: CreateOIDCIntegrationInput!
   ) {
@@ -363,7 +363,7 @@ function ManageOIDCIntegrationModal(props: {
   );
 }
 
-const UpdateOIDCIntegration_OIDCIntegrationFragment = graphql(/* GraphQL */ `
+const UpdateOIDCIntegration_OIDCIntegrationFragment = graphql(`
   fragment UpdateOIDCIntegration_OIDCIntegrationFragment on OIDCIntegration {
     id
     tokenEndpoint
@@ -374,7 +374,7 @@ const UpdateOIDCIntegration_OIDCIntegrationFragment = graphql(/* GraphQL */ `
   }
 `);
 
-const UpdateOIDCIntegrationForm_UpdateOIDCIntegrationMutation = graphql(/* GraphQL */ `
+const UpdateOIDCIntegrationForm_UpdateOIDCIntegrationMutation = graphql(`
   mutation UpdateOIDCIntegrationForm_UpdateOIDCIntegrationMutation(
     $input: UpdateOIDCIntegrationInput!
   ) {
@@ -556,7 +556,7 @@ function UpdateOIDCIntegrationForm(props: {
   );
 }
 
-const RemoveOIDCIntegrationForm_DeleteOIDCIntegrationMutation = graphql(/* GraphQL */ `
+const RemoveOIDCIntegrationForm_DeleteOIDCIntegrationMutation = graphql(`
   mutation RemoveOIDCIntegrationForm_DeleteOIDCIntegrationMutation(
     $input: DeleteOIDCIntegrationInput!
   ) {
