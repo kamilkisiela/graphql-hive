@@ -27,11 +27,10 @@ import {
   SettingsIcon,
   TrendingUpIcon,
 } from '@/components/v2/icon';
-import { CreateOrganizationModal } from '@/components/v2/modals';
 import { env } from '@/env/frontend';
 import { MeDocument, OrganizationsDocument, OrganizationsQuery, OrganizationType } from '@/graphql';
 import { getDocsUrl } from '@/lib/docs-url';
-import { useRouteSelector, useToggle } from '@/lib/hooks';
+import { useRouteSelector } from '@/lib/hooks';
 
 type DropdownOrganization = OrganizationsQuery['organizations']['nodes'];
 
@@ -39,7 +38,6 @@ export function Header(): ReactElement {
   const router = useRouteSelector();
   const [meQuery] = useQuery({ query: MeDocument });
   const [organizationsQuery] = useQuery({ query: OrganizationsDocument });
-  const [isModalOpen, toggleModalOpen] = useToggle();
   const [isOpaque, setIsOpaque] = useState(false);
 
   const me = meQuery.data?.me;
@@ -137,10 +135,12 @@ export function Header(): ReactElement {
                     </NextLink>
                   ))}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onSelect={toggleModalOpen}>
-                    <PlusIcon className="h-5 w-5" />
-                    Create an organization
-                  </DropdownMenuItem>
+                  <NextLink href="/org/new">
+                    <DropdownMenuItem>
+                      <PlusIcon className="h-5 w-5" />
+                      Create an organization
+                    </DropdownMenuItem>
+                  </NextLink>
                 </DropdownMenuSubContent>
               </DropdownMenuSub>
               <DropdownMenuItem asChild>
@@ -200,8 +200,6 @@ export function Header(): ReactElement {
           </DropdownMenu>
         </div>
       </div>
-
-      <CreateOrganizationModal isOpen={isModalOpen} toggleModalOpen={toggleModalOpen} />
     </header>
   );
 }

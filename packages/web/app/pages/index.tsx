@@ -50,6 +50,13 @@ export const getServerSideProps = withSessionProtection(async ({ req, res }) => 
           },
         };
       }
+
+      return {
+        redirect: {
+          destination: '/org/new',
+          permanent: true,
+        },
+      };
     }
   } catch (error) {
     console.error(error);
