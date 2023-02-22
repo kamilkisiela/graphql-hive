@@ -1,6 +1,5 @@
 import { createHmac } from 'crypto';
-import got from 'got';
-import { RequestError } from 'got';
+import got, { RequestError } from 'got';
 import type { DocumentNode } from 'graphql';
 import {
   ASTNode,

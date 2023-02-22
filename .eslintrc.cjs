@@ -60,6 +60,11 @@ module.exports = {
     '@typescript-eslint/no-empty-function': 'off',
     '@typescript-eslint/ban-types': 'off',
     '@typescript-eslint/triple-slash-reference': 'off',
+
+    'import/extensions': 'off',
+    'unicorn/prefer-node-protocol': 'off',
+    'no-console': 'off',
+    'import/no-default-export': 'off',
   },
   overrides: [
     {
@@ -91,7 +96,6 @@ module.exports = {
         'jsx-a11y/alt-text': ['warn', { elements: ['img'], img: ['Image', 'NextImage'] }],
         'no-restricted-syntax': ['error', ...HIVE_RESTRICTED_SYNTAX, ...REACT_RESTRICTED_SYNTAX],
         // TODO: enable below rules👇
-        'no-console': 'off',
         '@typescript-eslint/no-non-null-assertion': 'off',
         'react/jsx-no-useless-fragment': 'off',
         '@typescript-eslint/no-explicit-any': 'off',
@@ -99,7 +103,6 @@ module.exports = {
         'react-hooks/rules-of-hooks': 'off',
         'react-hooks/exhaustive-deps': 'off',
         'unicorn/filename-case': 'off',
-        'import/no-default-export': 'off',
         '@next/next/no-img-element': 'off',
         '@typescript-eslint/ban-types': 'off',
         'react/jsx-key': 'off',

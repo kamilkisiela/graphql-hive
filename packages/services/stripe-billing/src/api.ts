@@ -256,10 +256,10 @@ export const stripeBillingApiRouter = t.router({
             .then(r => r.id);
 
       organizationBillingRecord ||= await storage.createOrganizationBilling({
-          externalBillingReference: customerId,
-          organizationId: input.organizationId,
-          billingEmailAddress: orgOwner.user.email,
-        });
+        externalBillingReference: customerId,
+        organizationId: input.organizationId,
+        billingEmailAddress: orgOwner.user.email,
+      });
 
       const existingPaymentMethods = (
         await ctx.stripe.paymentMethods.list({

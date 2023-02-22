@@ -97,8 +97,8 @@ export async function gitInfo(noGit: () => void) {
         commit ||= lastCommit.hash;
 
         author ||= `${lastCommit.authorName || ''} ${
-            lastCommit.authorEmail ? `<${lastCommit.authorEmail}>` : ''
-          }`.trim();
+          lastCommit.authorEmail ? `<${lastCommit.authorEmail}>` : ''
+        }`.trim();
       }
     } else {
       noGit();

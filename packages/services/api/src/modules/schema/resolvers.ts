@@ -21,8 +21,9 @@ import type {
   GraphQLObjectTypeMapper,
   GraphQLScalarTypeMapper,
   GraphQLUnionTypeMapper,
+  WithGraphQLParentInfo,
+  WithSchemaCoordinatesUsage,
 } from '../../shared/mappers';
-import type { WithGraphQLParentInfo, WithSchemaCoordinatesUsage } from '../../shared/mappers';
 import { buildSchema, createConnection } from '../../shared/schema';
 import { AuthManager } from '../auth/providers/auth-manager';
 import { OperationsManager } from '../operations/providers/operations-manager';

@@ -265,9 +265,9 @@ export function createCollector({
 
     function collectInputType(inputType: string, fieldName?: string) {
       collectedInputTypes[inputType] ||= {
-          all: false,
-          fields: new Set<string>(),
-        };
+        all: false,
+        fields: new Set<string>(),
+      };
 
       if (fieldName) {
         collectedInputTypes[inputType].fields.add(fieldName);
