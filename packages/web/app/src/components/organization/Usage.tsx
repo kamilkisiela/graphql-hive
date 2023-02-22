@@ -1,21 +1,29 @@
 import { ReactElement } from 'react';
 import { useQuery } from 'urql';
 import { DataWrapper, Table, TBody, Td, Th, THead, Tr } from '@/components/v2';
-import {
-  OrganizationFieldsFragment,
-  OrgBillingInfoFieldsFragment,
-  UsageEstimationDocument,
-} from '@/graphql';
+import { FragmentType, graphql, useFragment } from '@/gql';
+import { UsageEstimationDocument } from '@/graphql';
 import { Scale } from '../common';
 import { calculatePeriod } from '../common/TimeFilter';
 
 const NumericFormatter = Intl.NumberFormat('en', { notation: 'standard' });
 
-export function OrganizationUsageEstimationView({
-  organization,
-}: {
-  organization: OrganizationFieldsFragment & OrgBillingInfoFieldsFragment;
+const OrganizationUsageEstimationView_OrganizationFragment = graphql(`
+  fragment OrganizationUsageEstimationView_OrganizationFragment on Organization {
+    cleanId
+    rateLimit {
+      operations
+    }
+  }
+`);
+
+export function OrganizationUsageEstimationView(props: {
+  organization: FragmentType<typeof OrganizationUsageEstimationView_OrganizationFragment>;
 }): ReactElement {
+  const organization = useFragment(
+    OrganizationUsageEstimationView_OrganizationFragment,
+    props.organization,
+  );
   const period = calculatePeriod('month');
 
   const [query] = useQuery({

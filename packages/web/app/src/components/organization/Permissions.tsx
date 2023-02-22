@@ -1,10 +1,9 @@
 import { FormEventHandler, memo, ReactElement, useCallback, useState } from 'react';
 import { useMutation } from 'urql';
 import { Accordion, RadixSelect } from '@/components/v2';
+import { FragmentType, graphql, useFragment } from '@/gql';
 import {
-  MemberFieldsFragment,
   OrganizationAccessScope,
-  OrganizationFieldsFragment,
   ProjectAccessScope,
   TargetAccessScope,
   UpdateOrganizationMemberAccessDocument,
@@ -149,17 +148,38 @@ export const PermissionsSpace = memo(
   PermissionsSpaceInner,
 ) as unknown as typeof PermissionsSpaceInner;
 
+const UsePermissionManager_OrganizationFragment = graphql(`
+  fragment UsePermissionManager_OrganizationFragment on Organization {
+    cleanId
+    me {
+      ...CanAccessOrganization_MemberFragment
+      ...CanAccessProject_MemberFragment
+      ...CanAccessTarget_MemberFragment
+    }
+  }
+`);
+
+const UsePermissionManager_MemberFragment = graphql(`
+  fragment UsePermissionManager_MemberFragment on Member {
+    id
+    targetAccessScopes
+    projectAccessScopes
+    organizationAccessScopes
+  }
+`);
+
 export function usePermissionsManager({
-  organization,
-  member,
   onSuccess,
   passMemberScopes,
+  ...props
 }: {
-  organization: OrganizationFieldsFragment;
-  member: MemberFieldsFragment;
+  organization: FragmentType<typeof UsePermissionManager_OrganizationFragment>;
+  member: FragmentType<typeof UsePermissionManager_MemberFragment>;
   passMemberScopes: boolean;
   onSuccess(): void;
 }) {
+  const member = useFragment(UsePermissionManager_MemberFragment, props.member);
+  const organization = useFragment(UsePermissionManager_OrganizationFragment, props.organization);
   const [state, setState] = useState<'LOADING' | 'IDLE'>('IDLE');
   const notify = useNotifications();
   const [, mutate] = useMutation(UpdateOrganizationMemberAccessDocument);

@@ -1,20 +1,25 @@
 import { ReactNode } from 'react';
 import { useQuery } from 'urql';
 import { DataWrapper } from '@/components/v2';
-import {
-  BillingPlansDocument,
-  OrganizationFieldsFragment,
-  OrgBillingInfoFieldsFragment,
-} from '@/graphql';
+import { FragmentType, graphql, useFragment } from '@/gql';
+import { BillingPlansDocument } from '@/graphql';
 import { PlanSummary } from './PlanSummary';
 
-export function BillingView({
-  organization,
-  children,
-}: {
+const BillingView_OrganizationFragment = graphql(`
+  fragment BillingView_OrganizationFragment on Organization {
+    plan
+    rateLimit {
+      retentionInDays
+      operations
+    }
+  }
+`);
+
+export function BillingView(props: {
   children: ReactNode;
-  organization: OrganizationFieldsFragment & OrgBillingInfoFieldsFragment;
+  organization: FragmentType<typeof BillingView_OrganizationFragment>;
 }) {
+  const organization = useFragment(BillingView_OrganizationFragment, props.organization);
   const [query] = useQuery({ query: BillingPlansDocument });
 
   return (
@@ -32,7 +37,7 @@ export function BillingView({
             operationsRateLimit={Math.floor(organization.rateLimit.operations / 1_000_000)}
             plan={plan}
           >
-            {children}
+            {props.children}
           </PlanSummary>
         );
       }}

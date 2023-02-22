@@ -1,6 +1,6 @@
 import { ReactElement, ReactNode, useEffect } from 'react';
 import NextLink from 'next/link';
-import { useQuery } from 'urql';
+import { TypedDocumentNode, useQuery } from 'urql';
 import { Button, Heading, Link, SubHeader, Tabs } from '@/components/v2';
 import {
   DropdownMenu,
@@ -10,12 +10,8 @@ import {
 } from '@/components/v2/dropdown';
 import { ArrowDownIcon, TargetIcon } from '@/components/v2/icon';
 import { CreateTargetModal } from '@/components/v2/modals';
-import {
-  OrganizationFieldsFragment,
-  ProjectDocument,
-  ProjectFieldsFragment,
-  ProjectsDocument,
-} from '@/graphql';
+import { FragmentType, graphql, useFragment } from '@/gql';
+import { Exact, ProjectsDocument } from '@/graphql';
 import { canAccessProject, ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
 import { ProjectMigrationToast } from '../project/migration-toast';
@@ -26,25 +22,65 @@ enum TabValue {
   Settings = 'settings',
 }
 
-export const ProjectLayout = ({
+const ProjectLayout_OrganizationFragment = graphql(`
+  fragment ProjectLayout_OrganizationFragment on Organization {
+    name
+    me {
+      ...CanAccessProject_MemberFragment
+    }
+  }
+`);
+
+const ProjectLayout_ProjectFragment = graphql(`
+  fragment ProjectLayout_ProjectFragment on Project {
+    name
+    type
+    registryModel
+  }
+`);
+
+export function ProjectLayout<
+  /**
+   *  LOL fire me for this.
+   *  Because of this kind of abstraction in place I invented this complicated generic satisfaction thing.
+   *  I'm not sure if it's worth it, but it's the only way I could think of to make it work without removing this component.
+   */
+  TSatisfiesType extends {
+    organization?:
+      | {
+          organization?: FragmentType<typeof ProjectLayout_OrganizationFragment> | null;
+        }
+      | null
+      | undefined;
+    project?: FragmentType<typeof ProjectLayout_ProjectFragment> | null;
+  },
+>({
   children,
   value,
   className,
+  query,
 }: {
   children(props: {
-    project: ProjectFieldsFragment;
-    organization: OrganizationFieldsFragment;
+    project: Exclude<TSatisfiesType['project'], null | undefined>;
+    organization: Exclude<TSatisfiesType['organization'], null | undefined>['organization'];
   }): ReactNode;
   value: 'targets' | 'alerts' | 'settings';
   className?: string;
-}): ReactElement | null => {
+  query: TypedDocumentNode<
+    TSatisfiesType,
+    Exact<{
+      organizationId: string;
+      projectId: string;
+    }>
+  >;
+}): ReactElement | null {
   const router = useRouteSelector();
   const [isModalOpen, toggleModalOpen] = useToggle();
 
   const { organizationId: orgId, projectId } = router;
 
   const [projectQuery] = useQuery({
-    query: ProjectDocument,
+    query,
     variables: {
       organizationId: orgId,
       projectId,
@@ -67,9 +103,14 @@ export const ProjectLayout = ({
     },
   });
 
+  const organization = useFragment(
+    ProjectLayout_OrganizationFragment,
+    projectQuery.data?.organization?.organization,
+  );
+
   useProjectAccess({
     scope: ProjectAccessScope.Read,
-    member: projectQuery.data?.organization?.organization.me,
+    member: organization?.me ?? null,
     redirect: true,
   });
 
@@ -77,11 +118,10 @@ export const ProjectLayout = ({
     return null;
   }
 
-  const project = projectQuery.data?.project;
-  const org = projectQuery.data?.organization?.organization;
+  const project = useFragment(ProjectLayout_ProjectFragment, projectQuery.data?.project);
   const projects = projectsQuery.data?.projects;
 
-  if (!org || !project) {
+  if (!organization || !project) {
     return null;
   }
 
@@ -90,12 +130,12 @@ export const ProjectLayout = ({
       <SubHeader>
         <div className="container flex items-center pb-4">
           <div>
-            {org && (
+            {organization && (
               <Link
                 href={`/${orgId}`}
                 className="line-clamp-1 flex max-w-[250px] items-center text-xs font-medium text-gray-500"
               >
-                {org.name}
+                {organization.name}
               </Link>
             )}
             <div className="flex items-center gap-2.5">
@@ -150,21 +190,32 @@ export const ProjectLayout = ({
           <Tabs.Trigger value={TabValue.Targets} asChild>
             <NextLink href={`/${orgId}/${projectId}`}>Targets</NextLink>
           </Tabs.Trigger>
-          {canAccessProject(ProjectAccessScope.Alerts, org.me) && (
+          {canAccessProject(ProjectAccessScope.Alerts, organization.me) && (
             <Tabs.Trigger value={TabValue.Alerts} asChild>
               <NextLink href={`/${orgId}/${projectId}/view/alerts`}>Alerts</NextLink>
             </Tabs.Trigger>
           )}
-          {canAccessProject(ProjectAccessScope.Settings, org.me) && (
+          {canAccessProject(ProjectAccessScope.Settings, organization.me) && (
             <Tabs.Trigger value={TabValue.Settings} asChild>
               <NextLink href={`/${orgId}/${projectId}/view/settings`}>Settings</NextLink>
             </Tabs.Trigger>
           )}
         </Tabs.List>
         <Tabs.Content value={value} className={className}>
-          {children({ project, organization: org })}
+          {children({
+            // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+            project: projectQuery.data?.project as Exclude<
+              TSatisfiesType['project'],
+              null | undefined
+            >,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+            organization: projectQuery.data?.organization! as Exclude<
+              TSatisfiesType['organization'],
+              null | undefined
+            >['organization'],
+          })}
         </Tabs.Content>
       </Tabs>
     </>
   );
-};
+}

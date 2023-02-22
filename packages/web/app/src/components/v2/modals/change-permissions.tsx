@@ -1,20 +1,33 @@
 import { ReactElement } from 'react';
 import { PermissionsSpace, usePermissionsManager } from '@/components/organization/Permissions';
 import { Accordion, Button, Heading, Modal } from '@/components/v2';
-import { MemberFieldsFragment, OrganizationFieldsFragment } from '@/graphql';
+import { FragmentType, graphql, useFragment } from '@/gql';
 import { scopes } from '@/lib/access/common';
+
+const ChangePermissionsModal_OrganizationFragment = graphql(`
+  fragment ChangePermissionsModal_OrganizationFragment on Organization {
+    ...UsePermissionManager_OrganizationFragment
+  }
+`);
+
+const ChangePermissionsModal_MemberFragment = graphql(`
+  fragment ChangePermissionsModal_MemberFragment on Member {
+    ...UsePermissionManager_MemberFragment
+  }
+`);
 
 export function ChangePermissionsModal({
   isOpen,
   toggleModalOpen,
-  organization,
-  member,
+  ...props
 }: {
   isOpen: boolean;
   toggleModalOpen: () => void;
-  organization: OrganizationFieldsFragment;
-  member: MemberFieldsFragment;
+  organization: FragmentType<typeof ChangePermissionsModal_OrganizationFragment>;
+  member: FragmentType<typeof ChangePermissionsModal_MemberFragment>;
 }): ReactElement {
+  const organization = useFragment(ChangePermissionsModal_OrganizationFragment, props.organization);
+  const member = useFragment(ChangePermissionsModal_MemberFragment, props.member);
   const manager = usePermissionsManager({
     onSuccess: toggleModalOpen,
     organization,

@@ -1,12 +1,20 @@
-import { MemberFieldsFragment, ProjectAccessScope } from '../../graphql';
+import { FragmentType, graphql, useFragment } from '@/gql';
+import { ProjectAccessScope } from '../../graphql';
 import { useRedirect } from './common';
 
 export { ProjectAccessScope } from '../../graphql';
 
+const CanAccessProject_MemberFragment = graphql(`
+  fragment CanAccessProject_MemberFragment on Member {
+    projectAccessScopes
+  }
+`);
+
 export function canAccessProject(
   scope: ProjectAccessScope,
-  member: Pick<MemberFieldsFragment, 'projectAccessScopes'> | null | undefined,
+  mmember: null | FragmentType<typeof CanAccessProject_MemberFragment>,
 ) {
+  const member = useFragment(CanAccessProject_MemberFragment, mmember);
   if (!member) {
     return false;
   }
@@ -16,14 +24,16 @@ export function canAccessProject(
 
 export function useProjectAccess({
   scope,
-  member,
+  member: mmember,
   redirect = false,
 }: {
   scope: ProjectAccessScope;
-  member: Pick<MemberFieldsFragment, 'projectAccessScopes'> | null | undefined;
+  member: null | FragmentType<typeof CanAccessProject_MemberFragment>;
   redirect?: boolean;
 }) {
-  const canAccess = canAccessProject(scope, member);
+  const member = useFragment(CanAccessProject_MemberFragment, mmember);
+
+  const canAccess = canAccessProject(scope, mmember);
   useRedirect({
     canAccess,
     redirectTo: redirect

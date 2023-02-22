@@ -9,11 +9,7 @@ import { InvoicesList } from '@/components/organization/billing/InvoicesList';
 import { RateLimitWarn } from '@/components/organization/billing/RateLimitWarn';
 import { OrganizationUsageEstimationView } from '@/components/organization/Usage';
 import { Card, Heading, Stat, Tabs, Title } from '@/components/v2';
-import {
-  OrganizationFieldsFragment,
-  OrgBillingInfoFieldsFragment,
-  OrgRateLimitFieldsFragment,
-} from '@/graphql';
+import { FragmentType, graphql, useFragment } from '@/gql';
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
 import { getIsStripeEnabled } from '@/lib/billing/stripe-public-key';
 import { withSessionProtection } from '@/lib/supertokens/guard';
@@ -26,13 +22,31 @@ const DateFormatter = Intl.DateTimeFormat('en-US', {
 
 const ManagePage = dynamic(() => import('./manage'));
 
-function Page({
-  organization,
-}: {
-  organization: OrganizationFieldsFragment &
-    OrgBillingInfoFieldsFragment &
-    OrgRateLimitFieldsFragment;
+const SubscriptionPage_OrganizationFragment = graphql(`
+  fragment SubscriptionPage_OrganizationFragment on Organization {
+    me {
+      ...CanAccessOrganization_MemberFragment
+    }
+    billingConfiguration {
+      invoices {
+        id
+      }
+      upcomingInvoice {
+        amount
+        date
+      }
+    }
+    ...RateLimitWarn_OrganizationFragment
+    ...OrganizationInvoicesList_OrganizationFragment
+    ...BillingView_OrganizationFragment
+    ...OrganizationUsageEstimationView_OrganizationFragment
+  }
+`);
+
+function Page(props: {
+  organization: FragmentType<typeof SubscriptionPage_OrganizationFragment>;
 }): ReactElement | null {
+  const organization = useFragment(SubscriptionPage_OrganizationFragment, props.organization);
   const canAccess = useOrganizationAccess({
     scope: OrganizationAccessScope.Settings,
     member: organization?.me,

@@ -1,13 +1,30 @@
 import { ReactElement } from 'react';
 import { Link, Table, TBody, Td, Th, THead, Tr } from '@/components/v2';
-import { OrganizationFieldsFragment, OrgBillingInfoFieldsFragment } from '@/graphql';
+import { FragmentType, graphql, useFragment } from '@/gql';
 import { CurrencyFormatter, DateFormatter } from './helpers';
 
-export function InvoicesList({
-  organization,
-}: {
-  organization: OrganizationFieldsFragment & OrgBillingInfoFieldsFragment;
+const OrganizationInvoicesList_OrganizationFragment = graphql(`
+  fragment OrganizationInvoicesList_OrganizationFragment on Organization {
+    billingConfiguration {
+      invoices {
+        id
+        date
+        amount
+        periodStart
+        periodEnd
+        pdfLink
+      }
+    }
+  }
+`);
+
+export function InvoicesList(props: {
+  organization: FragmentType<typeof OrganizationInvoicesList_OrganizationFragment>;
 }): ReactElement | null {
+  const organization = useFragment(
+    OrganizationInvoicesList_OrganizationFragment,
+    props.organization,
+  );
   if (!organization.billingConfiguration?.invoices?.length) {
     return null;
   }

@@ -5,8 +5,8 @@ import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 import { Button, Heading, Input, Modal } from '@/components/v2';
 import { ArrowDownIcon, CheckIcon } from '@/components/v2/icon';
-import { graphql } from '@/gql';
-import { MemberFieldsFragment, OrganizationFieldsFragment } from '@/graphql';
+import { FragmentType, graphql, useFragment } from '@/gql';
+import { MemberFieldsFragment } from '@/graphql';
 import { useNotifications } from '@/lib/hooks';
 import { Combobox as HeadlessCombobox, Transition as HeadlessTransition } from '@headlessui/react';
 
@@ -54,15 +54,25 @@ const TransferOrganizationOwnership_Members = graphql(`
 
 type Member = MemberFieldsFragment;
 
+const TransferOrganizationOwnershipModal_OrganizationFragment = graphql(`
+  fragment TransferOrganizationOwnershipModal_OrganizationFragment on Organization {
+    cleanId
+  }
+`);
+
 export const TransferOrganizationOwnershipModal = ({
   isOpen,
   toggleModalOpen,
-  organization,
+  ...props
 }: {
   isOpen: boolean;
   toggleModalOpen: () => void;
-  organization: OrganizationFieldsFragment;
+  organization: FragmentType<typeof TransferOrganizationOwnershipModal_OrganizationFragment>;
 }): ReactElement => {
+  const organization = useFragment(
+    TransferOrganizationOwnershipModal_OrganizationFragment,
+    props.organization,
+  );
   const notify = useNotifications();
   const [, mutate] = useMutation(TransferOrganizationOwnership_Request);
   const [query] = useQuery({
