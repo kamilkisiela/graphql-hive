@@ -124,7 +124,7 @@ export default function App({ Component, pageProps }: AppProps): ReactElement {
     </>
   );
 }
-if (typeof window !== 'undefined') {
+if (globalThis.window) {
   SuperTokens.init(frontendConfig());
   if (env.sentry) {
     Sentry.init({
