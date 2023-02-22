@@ -42,7 +42,7 @@ import { generateUnique } from './utils';
 
 export function initSeed() {
   return {
-    authenticate: authenticate,
+    authenticate,
     generateEmail: () => userEmail(generateUnique()),
     async createOwner() {
       const ownerEmail = userEmail(generateUnique());
@@ -206,9 +206,9 @@ export function initSeed() {
                       organization: organization.cleanId,
                       project: project.cleanId,
                       target: targetId,
-                      organizationScopes: organizationScopes,
-                      projectScopes: projectScopes,
-                      targetScopes: targetScopes,
+                      organizationScopes,
+                      projectScopes,
+                      targetScopes,
                     },
                     actorToken,
                   ).then(r => r.expectNoGraphQLErrors());
@@ -472,9 +472,9 @@ export function initSeed() {
                   const updateResult = await updateMemberAccess(
                     {
                       organization: organization.cleanId,
-                      organizationScopes: organizationScopes,
-                      projectScopes: projectScopes,
-                      targetScopes: targetScopes,
+                      organizationScopes,
+                      projectScopes,
+                      targetScopes,
                       user: member.id,
                     },
                     options.useMemberToken ? memberToken : ownerToken,

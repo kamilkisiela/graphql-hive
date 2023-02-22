@@ -11,7 +11,7 @@ test.concurrent('renaming an organization should result changing its cleanId', a
   const renamedOrganizationResult = await renameOrganization(
     {
       organization: organization.cleanId,
-      name: name,
+      name,
     },
     ownerToken,
   ).then(r => r.expectNoGraphQLErrors());

@@ -1,25 +1,5 @@
 /* eslint-env node */
-const guildConfig = require('@theguild/eslint-config/base');
 const { REACT_RESTRICTED_SYNTAX, RESTRICTED_SYNTAX } = require('@theguild/eslint-config/constants');
-
-const rulesToExtends = Object.fromEntries(
-  Object.entries(guildConfig.rules).filter(([key]) =>
-    [
-      'no-implicit-coercion',
-      'import/first',
-      'no-restricted-globals',
-      '@typescript-eslint/no-unused-vars',
-      'unicorn/no-useless-fallback-in-spread',
-      'unicorn/no-array-push-push',
-      'no-else-return',
-      'no-lonely-if',
-      'unicorn/prefer-includes',
-      'react/self-closing-comp',
-      'prefer-const',
-      'no-extra-boolean-cast',
-    ].includes(key),
-  ),
-);
 
 const HIVE_RESTRICTED_SYNTAX = [
   {
@@ -47,8 +27,8 @@ module.exports = {
     project: ['./tsconfig.eslint.json'],
   },
   parser: '@typescript-eslint/parser',
-  plugins: [...guildConfig.plugins, 'hive'],
-  extends: guildConfig.extends,
+  plugins: ['hive'],
+  extends: '@theguild',
   rules: {
     'no-process-env': 'error',
     'no-empty': ['error', { allowEmptyCatch: true }],
@@ -70,7 +50,6 @@ module.exports = {
     ],
     '@typescript-eslint/no-floating-promises': 'error',
     '@typescript-eslint/no-unnecessary-type-assertion': 'error',
-    ...rulesToExtends,
     'no-restricted-syntax': ['error', ...HIVE_RESTRICTED_SYNTAX, ...RESTRICTED_SYNTAX],
 
     // 🚨 The following rules needs to be fixed and was temporarily disabled to avoid printing warning
@@ -86,7 +65,6 @@ module.exports = {
     {
       files: ['packages/web/**'],
       extends: [
-        '@theguild',
         '@theguild/eslint-config/react',
         'plugin:tailwindcss/recommended',
         'plugin:@next/next/recommended',
