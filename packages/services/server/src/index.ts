@@ -312,12 +312,14 @@ export async function main() {
             },
           });
 
-          if (response.statusCode >= 200 && response.statusCode < 300) {
-            if (response.body.includes('"__schema"')) {
-              reportReadiness(true);
-              res.status(200).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
-              return;
-            }
+          if (
+            response.statusCode >= 200 &&
+            response.statusCode < 300 &&
+            response.body.includes('"__schema"')
+          ) {
+            reportReadiness(true);
+            res.status(200).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+            return;
           }
           console.error(response.statusCode, response.body);
         } catch (error) {

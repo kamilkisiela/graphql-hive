@@ -252,47 +252,45 @@ async function callExternalService(
 
     return JSON.parse(response.body) as unknown;
   } catch (error) {
-    if (error instanceof RequestError) {
-      if (error.response) {
-        const message = error.response.body ? error.response.body : error.response.statusMessage;
+    if (error instanceof RequestError && error.response) {
+      const message = error.response.body ? error.response.body : error.response.statusMessage;
 
-        // If the response is a string starting with ERR_ it's a special error returned by the composition service.
-        // We don't want to throw an error in this case, but instead return a failure result.
-        if (typeof message === 'string') {
-          const translatedMessage = translateMessage(message);
+      // If the response is a string starting with ERR_ it's a special error returned by the composition service.
+      // We don't want to throw an error in this case, but instead return a failure result.
+      if (typeof message === 'string') {
+        const translatedMessage = translateMessage(message);
 
-          if (translatedMessage) {
-            return {
-              type: 'failure',
-              result: {
-                errors: [
-                  {
-                    message: `External composition failure: ${translatedMessage}`,
-                    source: 'graphql',
-                  },
-                ],
-              },
-            } satisfies CompositionFailure;
-          }
+        if (translatedMessage) {
+          return {
+            type: 'failure',
+            result: {
+              errors: [
+                {
+                  message: `External composition failure: ${translatedMessage}`,
+                  source: 'graphql',
+                },
+              ],
+            },
+          } satisfies CompositionFailure;
         }
-
-        logger.info(
-          'Network error so return failure (status=%s, message=%s)',
-          error.response.statusCode,
-          error.message,
-        );
-        return {
-          type: 'failure',
-          result: {
-            errors: [
-              {
-                message: `External composition network failure: ${error.message}`,
-                source: 'graphql',
-              },
-            ],
-          },
-        } satisfies CompositionFailure;
       }
+
+      logger.info(
+        'Network error so return failure (status=%s, message=%s)',
+        error.response.statusCode,
+        error.message,
+      );
+      return {
+        type: 'failure',
+        result: {
+          errors: [
+            {
+              message: `External composition network failure: ${error.message}`,
+              source: 'graphql',
+            },
+          ],
+        },
+      } satisfies CompositionFailure;
     }
 
     throw error;

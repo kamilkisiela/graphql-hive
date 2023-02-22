@@ -1090,26 +1090,24 @@ export class SchemaPublisher {
       publishMetadata(),
     ];
 
-    if (project.type === ProjectType.FEDERATION) {
-      if (supergraph) {
-        this.logger.debug('Publishing supergraph to CDN');
+    if (project.type === ProjectType.FEDERATION && supergraph) {
+      this.logger.debug('Publishing supergraph to CDN');
 
-        actions.push(
-          this.cdn.publish(
-            {
-              targetId: target.id,
-              resourceType: 'supergraph',
-              value: supergraph,
-            },
-            span,
-          ),
-          this.artifactStorageWriter.writeArtifact({
+      actions.push(
+        this.cdn.publish(
+          {
             targetId: target.id,
-            artifactType: 'supergraph',
-            artifact: supergraph,
-          }),
-        );
-      }
+            resourceType: 'supergraph',
+            value: supergraph,
+          },
+          span,
+        ),
+        this.artifactStorageWriter.writeArtifact({
+          targetId: target.id,
+          artifactType: 'supergraph',
+          artifact: supergraph,
+        }),
+      );
     }
 
     await Promise.all(actions);
