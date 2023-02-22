@@ -91,7 +91,7 @@ export async function gitInfo(noGit: () => void) {
     if (git) {
       const commits = await gitToJs(git);
 
-      if (commits && commits.length) {
+      if (commits?.length) {
         const lastCommit = commits[0];
 
         commit ||= lastCommit.hash;

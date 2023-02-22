@@ -105,7 +105,7 @@ export default class SchemaCheck extends Command {
         const errors = result.schemaCheck.errors;
         renderErrors.call(this, errors);
 
-        if (changes && changes.total) {
+        if (changes?.total) {
           this.log('');
           renderChanges.call(this, changes);
         }

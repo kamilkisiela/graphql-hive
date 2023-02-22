@@ -217,7 +217,7 @@ export default class SchemaPublish extends Command {
         const errors = result.schemaPublish.errors;
         renderErrors.call(this, errors);
 
-        if (changes && changes.total) {
+        if (changes?.total) {
           this.log('');
           renderChanges.call(this, changes);
         }
