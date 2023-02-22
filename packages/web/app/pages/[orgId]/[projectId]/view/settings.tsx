@@ -286,8 +286,8 @@ const Page = (props: {
   );
 };
 
-const SettingsPageQuery = graphql(`
-  query SettingsPageQuery($organizationId: ID!, $projectId: ID!) {
+const ProjectSettingsPageQuery = graphql(`
+  query ProjectSettingsPageQuery($organizationId: ID!, $projectId: ID!) {
     organization(selector: { organization: $organizationId }) {
       organization {
         ...SettingsPage_OrganizationFragment
@@ -305,7 +305,11 @@ function SettingsPage(): ReactElement {
   return (
     <>
       <Title title="Project settings" />
-      <ProjectLayout value="settings" className="flex flex-col gap-y-10" query={SettingsPageQuery}>
+      <ProjectLayout
+        value="settings"
+        className="flex flex-col gap-y-10"
+        query={ProjectSettingsPageQuery}
+      >
         {props => <Page {...props} />}
       </ProjectLayout>
     </>

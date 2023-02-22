@@ -196,8 +196,8 @@ const Page = (props: {
   );
 };
 
-const AlertsPageQuery = graphql(`
-  query AlertsPageQuery($organizationId: ID!, $projectId: ID!) {
+const ProjectAlertsPageQuery = graphql(`
+  query ProjectAlertsPageQuery($organizationId: ID!, $projectId: ID!) {
     organization(selector: { organization: $organizationId }) {
       organization {
         ...ProjectLayout_OrganizationFragment
@@ -215,7 +215,11 @@ function AlertsPage(): ReactElement {
   return (
     <>
       <Title title="Alerts" />
-      <ProjectLayout value="alerts" className="flex flex-col gap-y-10" query={AlertsPageQuery}>
+      <ProjectLayout
+        value="alerts"
+        className="flex flex-col gap-y-10"
+        query={ProjectAlertsPageQuery}
+      >
         {props => <Page organization={props.organization} project={props.project} />}
       </ProjectLayout>
     </>

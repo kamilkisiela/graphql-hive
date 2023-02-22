@@ -203,13 +203,11 @@ export function ProjectLayout<
         </Tabs.List>
         <Tabs.Content value={value} className={className}>
           {children({
-            // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
             project: projectQuery.data?.project as Exclude<
               TSatisfiesType['project'],
               null | undefined
             >,
-            // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-            organization: projectQuery.data?.organization! as Exclude<
+            organization: projectQuery.data?.organization as Exclude<
               TSatisfiesType['organization'],
               null | undefined
             >['organization'],
