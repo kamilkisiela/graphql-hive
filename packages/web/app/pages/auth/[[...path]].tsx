@@ -46,7 +46,7 @@ export default function Auth(props: { oidcProviderId: string | null }): ReactEle
     // In case we are directed here from the Okta dashboard we automatically start the login flow.
     const isOkta =
       env.auth.okta !== null &&
-      new URLSearchParams(globalThis.window?.location.search ?? '').get('provider') === 'okta';
+      new URLSearchParams(window.location.search ?? '').get('provider') === 'okta';
 
     if (isOkta) {
       void startAuthFlowForProvider('okta');
