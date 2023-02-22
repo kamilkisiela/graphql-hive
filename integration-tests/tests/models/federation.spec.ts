@@ -176,6 +176,56 @@ describe('publish', () => {
       expect: 'rejected',
     });
   });
+
+  test.concurrent('CLI output', async ({ expect }) => {
+    const { publish } = await prepare();
+
+    const service = {
+      serviceName: 'products',
+      serviceUrl: 'http://products:3000/graphql',
+    };
+
+    await expect(
+      publish({
+        sdl: /* GraphQL */ `
+          type Query {
+            topProduct: Product
+          }
+
+          type Product {
+            id: ID!
+            name: String!
+          }
+        `,
+        ...service,
+        expect: 'latest-composable',
+      }),
+    ).resolves.toMatchInlineSnapshot(`
+      v Published initial schema.
+      i Available at http://localhost:8080/$organization/$project/production
+    `);
+
+    await expect(
+      publish({
+        sdl: /* GraphQL */ `
+          type Query {
+            topProduct: Product
+          }
+
+          type Product {
+            id: ID!
+            name: String!
+            price: Int!
+          }
+        `,
+        ...service,
+        expect: 'latest-composable',
+      }),
+    ).resolves.toMatchInlineSnapshot(`
+      v Schema published
+      i Available at http://localhost:8080/$organization/$project/production/history/$version
+    `);
+  });
 });
 
 describe('check', () => {

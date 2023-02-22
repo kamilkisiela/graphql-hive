@@ -156,6 +156,8 @@ export async function createCLI(tokens: { readwrite: string; readonly: string })
         `${publishName} was expected to be published as composable`,
       ).toEqual(expectedCommit);
     }
+
+    return await cmd;
   }
 
   async function check({

@@ -730,6 +730,7 @@ export class SchemaPublisher {
       target,
       project,
       changes: publishResult.state.changes ?? [],
+      messages: publishResult.state.messages ?? [],
       errors,
       initial: publishResult.state.initial,
     });
@@ -775,7 +776,7 @@ export class SchemaPublisher {
       __typename: 'SchemaPublishSuccess' as const,
       initial: publishResult.state.initial,
       valid: publishResult.state.composable,
-      changes: publishResult.state.changes ?? [],
+      changes: modelVersion === 'legacy' ? publishResult.state.changes ?? [] : null,
       message: (publishResult.state.messages ?? []).join('\n'),
       linkToWebsite,
     } satisfies Types.ResolversTypes['SchemaPublishSuccess'];
@@ -879,6 +880,7 @@ export class SchemaPublisher {
     newSchema,
     schemas,
     changes,
+    messages,
     errors,
     initial,
   }: {
@@ -890,6 +892,7 @@ export class SchemaPublisher {
     newSchema: Schema;
     schemas: readonly Schema[];
     changes: Types.SchemaChange[];
+    messages: string[];
     errors: Types.SchemaError[];
     initial: boolean;
   }) {
@@ -924,19 +927,22 @@ export class SchemaPublisher {
       }),
     ]);
 
-    void this.alertsManager
-      .triggerSchemaChangeNotifications({
-        organization,
-        project,
-        target,
-        schema: schemaVersion,
-        changes,
-        errors,
-        initial,
-      })
-      .catch(err => {
-        this.logger.error('Failed to trigger schema change notifications', err);
-      });
+    if (changes.length > 0 || errors.length > 0) {
+      void this.alertsManager
+        .triggerSchemaChangeNotifications({
+          organization,
+          project,
+          target,
+          schema: schemaVersion,
+          changes,
+          messages,
+          errors,
+          initial,
+        })
+        .catch(err => {
+          this.logger.error('Failed to trigger schema change notifications', err);
+        });
+    }
 
     return schemaVersion;
   }

@@ -15,6 +15,7 @@ export interface SchemaChangeNotificationInput {
     target: Pick<Target, 'id' | 'cleanId' | 'name'>;
     schema: Pick<SchemaVersion, 'id' | 'commit' | 'valid'>;
     changes: Types.SchemaChange[];
+    messages: string[];
     errors: Types.SchemaError[];
     initial: boolean;
   };

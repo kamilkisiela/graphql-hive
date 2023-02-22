@@ -230,6 +230,7 @@ export class AlertsManager {
         valid: event.schema.valid,
       },
       changes: event.changes,
+      messages: event.messages,
       errors: event.errors,
       initial: event.initial,
     };
