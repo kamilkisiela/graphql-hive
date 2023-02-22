@@ -136,10 +136,12 @@ function CreateCDNAccessTokenModal(props: {
 
         <p>The CDN Access Token was successfully created.</p>
 
-        <Tag color="yellow" className="py-2.5 px-4">
+        <div className="flex items-center gap-2 rounded-sm p-4 bg-yellow-500/10 text-yellow-500">
           <AlertTriangleIcon className="h-5 w-5" />
-          Please store this access token securely. You will not be able to see it again.
-        </Tag>
+          <span>
+            Please store this access token securely. You will not be able to see it again.
+          </span>
+        </div>
 
         <InlineCode content={createCdnAccessToken.data.createCdnAccessToken.ok.secretAccessToken} />
 
