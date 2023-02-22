@@ -129,6 +129,51 @@ describe('publish', () => {
       expect: 'ignored',
     });
   });
+
+  test.concurrent('CLI output', async () => {
+    const { publish } = await prepare();
+
+    await expect(
+      publish({
+        sdl: /* GraphQL */ `
+          type Query {
+            topProduct: Product
+          }
+
+          type Product {
+            id: ID!
+            name: String!
+          }
+        `,
+        expect: 'latest-composable',
+      }),
+    ).resolves.toMatchInlineSnapshot(`
+      v Published initial schema.
+      i Available at http://localhost:8080/$organization/$project/production
+    `);
+
+    await expect(
+      publish({
+        sdl: /* GraphQL */ `
+          type Query {
+            topProduct: Product
+          }
+
+          type Product {
+            id: ID!
+            name: String!
+            price: Int!
+          }
+        `,
+        expect: 'latest-composable',
+      }),
+    ).resolves.toMatchInlineSnapshot(`
+      i Detected 1 change
+      - Field price was added to object type Product
+      v Schema published
+      i Available at http://localhost:8080/$organization/$project/production/history/$version
+    `);
+  });
 });
 
 describe('check', () => {

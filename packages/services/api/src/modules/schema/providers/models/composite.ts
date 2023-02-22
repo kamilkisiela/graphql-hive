@@ -266,12 +266,25 @@ export class CompositeModel {
       ? await this.checks.metadata(incoming, previousService ?? null)
       : null;
 
-    const compositionCheck = await this.checks.composition({
-      orchestrator,
-      project,
-      schemas,
-      baseSchema,
-    });
+    const [compositionCheck, diffCheck] = await Promise.all([
+      this.checks.composition({
+        orchestrator,
+        project,
+        schemas,
+        baseSchema,
+      }),
+      this.checks.diff({
+        orchestrator,
+        project,
+        schemas,
+        selector: {
+          target: target.id,
+          project: project.id,
+          organization: project.orgId,
+        },
+        latestVersion,
+      }),
+    ]);
 
     if (metadataCheck?.status === 'failed') {
       return {
@@ -319,7 +332,7 @@ export class CompositeModel {
       state: {
         composable: compositionCheck.status === 'completed',
         initial: latestVersion === null,
-        changes: null,
+        changes: diffCheck.result?.changes ?? diffCheck.reason?.changes ?? null,
         messages,
         breakingChanges: null,
         compositionErrors: null,
