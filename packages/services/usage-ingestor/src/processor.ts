@@ -88,13 +88,13 @@ export function createProcessor(config: { logger: FastifyLoggerInstance }) {
           const sample = operationSample.get(rawOperation.operationMapKey);
 
           // count operations per operationMapKey
-          if (!sample) {
+          if (sample) {
+            sample.size += 1;
+          } else {
             operationSample.set(rawOperation.operationMapKey, {
               operation: rawOperation,
               size: 1,
             });
-          } else {
-            sample.size += 1;
           }
         }
 

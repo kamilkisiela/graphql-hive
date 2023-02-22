@@ -10,7 +10,7 @@ function splitPath(path: string) {
   }
 
   // when path starts with a slash, the first part is empty string
-  return !parts[0].length ? parts.slice(1) : parts;
+  return parts[0].length ? parts : parts.slice(1);
 }
 
 function findParentDir(currentFullPath: string, clue: string) {

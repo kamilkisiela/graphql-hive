@@ -232,7 +232,7 @@ export class SingleLegacyModel {
       // If there are breaking changes, we should publish if we're accepting breaking changes
       (hasBreakingChanges && acceptBreakingChanges);
 
-    this.logger.debug('!hasErrors: %s', !hasErrors ? 'true' : 'false');
+    this.logger.debug('!hasErrors: %s', hasErrors ? 'false' : 'true');
     this.logger.debug('hasErrors && forced: %s', hasErrors && forced ? 'true' : 'false');
     this.logger.debug(
       'hasBreakingChanges && acceptBreakingChanges: %s',

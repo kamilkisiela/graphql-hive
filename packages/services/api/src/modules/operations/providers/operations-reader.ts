@@ -626,8 +626,8 @@ export class OperationsReader {
     >();
 
     for (const row of result.data) {
-      const client_name = !row.client_name ? 'unknown' : row.client_name;
-      const client_version = !row.client_version ? 'unknown' : row.client_version;
+      const client_name = row.client_name ? row.client_name : 'unknown';
+      const client_version = row.client_version ? row.client_version : 'unknown';
 
       if (!clientMap.has(client_name)) {
         clientMap.set(client_name, {
@@ -1143,14 +1143,14 @@ export class OperationsReader {
         const key = makeKey(selector);
         const value = aggregationMap.get(key);
 
-        if (!value) {
+        if (value) {
+          value.typenames.push(selector.typename);
+        } else {
           aggregationMap.set(key, {
             target: selector.target,
             period: selector.period,
             typenames: [selector.typename],
           });
-        } else {
-          value.typenames.push(selector.typename);
         }
       }
 

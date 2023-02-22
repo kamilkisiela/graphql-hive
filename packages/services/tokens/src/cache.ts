@@ -123,11 +123,11 @@ export function useCache(
     const readTokenFromStorage = atomic(async function _readToken(hashedToken: string) {
       const item = await storage.readToken(hashedToken);
 
-      if (!item) {
+      if (item) {
+        await redis.setex(generateKey(hashedToken), TTLSeconds.found, JSON.stringify(item));
+      } else {
         // If the token doesn't exist in the DB we still want to cache it for a short period of time to avoid hitting the DB again and again.
         await redis.setex(generateKey(hashedToken), TTLSeconds.notFound, JSON.stringify(null));
-      } else {
-        await redis.setex(generateKey(hashedToken), TTLSeconds.found, JSON.stringify(item));
       }
 
       return item;

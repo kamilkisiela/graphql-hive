@@ -94,11 +94,11 @@ export default class SchemaCheck extends Command {
         const changes = result.schemaCheck.changes;
         if (result.schemaCheck.initial) {
           this.success('Schema registry is empty, nothing to compare your schema with.');
-        } else if (!changes?.total) {
-          this.success('No changes');
-        } else {
+        } else if (changes?.total) {
           renderChanges.call(this, changes);
           this.log('');
+        } else {
+          this.success('No changes');
         }
       } else if (result.schemaCheck.__typename === 'SchemaCheckError') {
         const changes = result.schemaCheck.changes;

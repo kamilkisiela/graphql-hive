@@ -223,11 +223,11 @@ export default class SchemaPublish extends Command {
         }
         this.log('');
 
-        if (!force) {
+        if (force) {
+          this.success('Schema published (forced)');
+        } else {
           this.fail('Failed to publish schema');
           this.exit(1);
-        } else {
-          this.success('Schema published (forced)');
         }
 
         if (result.schemaPublish.linkToWebsite) {

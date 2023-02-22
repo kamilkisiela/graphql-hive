@@ -85,7 +85,7 @@ export class AwsClient {
     this.service = service;
     this.region = region;
     this.cache = cache || new Map();
-    this.retries = retries != null ? retries : 10; // Up to 25.6 secs
+    this.retries = retries == null ? 10 : retries; // Up to 25.6 secs
     this.initRetryMs = initRetryMs || 50;
   }
 
@@ -418,7 +418,7 @@ function guessServiceRegion(url: URL, headers: Headers) {
   }
   if (hostname.endsWith('.backblazeb2.com')) {
     const match = hostname.match(/^(?:[^.]+\.)?s3\.([^.]+)\.backblazeb2\.com$/);
-    return match != null ? ['s3', match[1]] : ['', ''];
+    return match == null ? ['', ''] : ['s3', match[1]];
   }
   const match = hostname
     .replace('dualstack.', '')

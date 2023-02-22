@@ -148,13 +148,13 @@ export const env = {
       broker: kafka.KAFKA_BROKER,
       isSSL: kafka.KAFKA_SSL === '1',
       sasl:
-        kafka.KAFKA_SASL_MECHANISM != null
-          ? {
+        kafka.KAFKA_SASL_MECHANISM == null
+          ? null
+          : {
               mechanism: kafka.KAFKA_SASL_MECHANISM,
               username: kafka.KAFKA_SASL_USERNAME,
               password: kafka.KAFKA_SASL_PASSWORD,
-            }
-          : null,
+            },
     },
   },
   clickhouse: {

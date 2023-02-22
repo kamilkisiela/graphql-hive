@@ -59,7 +59,7 @@ export function deployCloudFlareSecurityTransform(options: {
   const splitted = mergedCsp
     .split('{DYNAMIC_HOST_PLACEHOLDER}')
     .map(v => `"${v}"`)
-    .flatMap((v, index, array) => (array.length - 1 !== index ? [v, 'http.host'] : [v]));
+    .flatMap((v, index, array) => (array.length - 1 === index ? [v] : [v, 'http.host']));
   const cspExpression = `concat(${splitted.join(', ')})`;
 
   return new cf.Ruleset('cloudflare-security-transform', {
