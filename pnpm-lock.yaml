@@ -46,7 +46,7 @@ importers:
       '@changesets/changelog-github': 0.4.8
       '@changesets/cli': 2.26.0
       '@graphql-codegen/add': 4.0.1
-      '@graphql-codegen/cli': 3.1.0
+      '@graphql-codegen/cli': 3.2.0
       '@graphql-codegen/client-preset': 2.1.0
       '@graphql-codegen/gql-tag-operations-preset': 2.1.0
       '@graphql-codegen/graphql-modules-preset': 3.1.0
@@ -87,7 +87,7 @@ importers:
       '@changesets/changelog-github': 0.4.8
       '@changesets/cli': 2.26.0
       '@graphql-codegen/add': 4.0.1_graphql@16.6.0
-      '@graphql-codegen/cli': 3.1.0_sy5542nrbzltjj4kmjs45tzpae
+      '@graphql-codegen/cli': 3.2.0_sy5542nrbzltjj4kmjs45tzpae
       '@graphql-codegen/client-preset': 2.1.0_graphql@16.6.0
       '@graphql-codegen/gql-tag-operations-preset': 2.1.0_graphql@16.6.0
       '@graphql-codegen/graphql-modules-preset': 3.1.0_graphql@16.6.0
@@ -4798,8 +4798,8 @@ packages:
       tslib: 2.5.0
     dev: true
 
-  /@graphql-codegen/cli/3.1.0_sy5542nrbzltjj4kmjs45tzpae:
-    resolution: {integrity: sha512-MUYyHkh/n8XVuONk7AYvJV/ObZDlPGwyevl8ch21jNFNj2M5PM39WViHKmIYwVw2n4fDmoh3BNdaeHQs1wb4HA==}
+  /@graphql-codegen/cli/3.2.0_sy5542nrbzltjj4kmjs45tzpae:
+    resolution: {integrity: sha512-o+oTOIMlBF4PE+JDo3m37W/xQNYUIASFOc5K9DHkWh4zW/qVHVkGyyu2fEgI8PbscODALyNYWG/ArGXoIAy2/A==}
     hasBin: true
     peerDependencies:
       graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
@@ -4819,9 +4819,9 @@ packages:
       '@graphql-tools/prisma-loader': 7.2.49_dsrot7vgr22owbcoisakchg2na
       '@graphql-tools/url-loader': 7.17.1_dsrot7vgr22owbcoisakchg2na
       '@graphql-tools/utils': 9.2.1_graphql@16.6.0
+      '@parcel/watcher': 2.1.0
       '@whatwg-node/fetch': 0.8.1_@types+node@18.14.0
       chalk: 4.1.2
-      chokidar: 3.5.3
       cosmiconfig: 7.0.1
       cosmiconfig-typescript-loader: 4.3.0_565dc7e5eqzfkmaj34usdr2gz4
       debounce: 1.2.1
@@ -7897,6 +7897,17 @@ packages:
     resolution: {integrity: sha512-UdkG3mLEqXgnlKsWanWcgb6dOjUzJ+XC5f+aWw30qrtjxeNUSfKX1cd5FBzOaXQumoe9nIqeZUvrRJS03HCCtw==}
     engines: {node: '>=10.13.0'}
     dev: false
+
+  /@parcel/watcher/2.1.0:
+    resolution: {integrity: sha512-8s8yYjd19pDSsBpbkOHnT6Z2+UJSuLQx61pCFM0s5wSRvKCEMDjd/cHY3/GI1szHIWbpXpsJdg3V6ISGGx9xDw==}
+    engines: {node: '>= 10.0.0'}
+    requiresBuild: true
+    dependencies:
+      is-glob: 4.0.3
+      micromatch: 4.0.5
+      node-addon-api: 3.2.1
+      node-gyp-build: 4.6.0
+    dev: true
 
   /@peculiar/asn1-schema/2.3.0:
     resolution: {integrity: sha512-DtNLAG4vmDrdSJFPe7rypkcj597chNQL7u+2dBtYo5mh7VW2+im6ke+O0NVr8W1f4re4C3F71LhoMb0Yxqa48Q==}
@@ -18967,6 +18978,10 @@ packages:
     resolution: {integrity: sha512-AGK2yQKIjRuqnc6VkX2Xj5d+QW8xZ87pa1UK6yA6ouUyuxfHuMP6umE5QK7UmTeOAymo+Zx1Fxiuw9rVx8taHQ==}
     dev: false
 
+  /node-addon-api/3.2.1:
+    resolution: {integrity: sha512-mmcei9JghVNDYydghQmeDX8KoAm0FAiYyIcUt/N4nhyAipB17pllZQDOJD2fotxABnt4Mdz+dKTO7eftLg4d0A==}
+    dev: true
+
   /node-domexception/1.0.0:
     resolution: {integrity: sha512-/jKZoMpw0F8GRwl4/eLROPA3cfcXtLApP0QzLmUT/HuPCZWyB7IY9ZrMeKw2O/nFIqPQB3PVM9aYm0F312AXDQ==}
     engines: {node: '>=10.5.0'}
@@ -18987,6 +19002,11 @@ packages:
     hasBin: true
     dev: false
     optional: true
+
+  /node-gyp-build/4.6.0:
+    resolution: {integrity: sha512-NTZVKn9IylLwUzaKjkas1e4u2DLNcV4rdYagA4PWdPwW87Bi7z+BznyKSRwS/761tV/lzCGXplWsiaMjLqP2zQ==}
+    hasBin: true
+    dev: true
 
   /node-gyp/8.4.1:
     resolution: {integrity: sha512-olTJRgUtAb/hOXG0E93wZDs5YiJlgbXxTwQAFHyNlRsXQnYzUaF2aGgujZbw+hR8aF4ZG/rST57bWMWD16jr9w==}
