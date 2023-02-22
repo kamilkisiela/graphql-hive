@@ -2,18 +2,13 @@ import { ReactElement, ReactNode, useEffect } from 'react';
 import NextLink from 'next/link';
 import { useRouter } from 'next/router';
 import cookies from 'js-cookie';
-import { useQuery } from 'urql';
+import { TypedDocumentNode, useQuery } from 'urql';
 import { Button, Heading, SubHeader, Tabs } from '@/components/v2';
 import { PlusIcon } from '@/components/v2/icon';
 import { CreateProjectModal } from '@/components/v2/modals';
 import { LAST_VISITED_ORG_KEY } from '@/constants';
-import {
-  OrganizationDocument,
-  OrganizationFieldsFragment,
-  OrganizationType,
-  OrgBillingInfoFieldsFragment,
-  OrgRateLimitFieldsFragment,
-} from '@/graphql';
+import { FragmentType, graphql, useFragment } from '@/gql';
+import { Exact, OrganizationType } from '@/graphql';
 import {
   canAccessOrganization,
   OrganizationAccessScope,
@@ -29,38 +24,43 @@ enum TabValue {
   Subscription = 'subscription',
 }
 
-type OrganizationLayout<T, P> = {
-  children(props: { organization: OrganizationFieldsFragment & T }): ReactNode;
-  value?: 'overview' | 'members' | 'settings' | 'subscription';
-  className?: string;
-} & P;
+const OrganizationLayout_OrganizationFragment = graphql(`
+  fragment OrganizationLayout_OrganizationFragment on Organization {
+    type
+    name
+    me {
+      ...CanAccessOrganization_MemberFragment
+    }
+  }
+`);
 
-export function OrganizationLayout(
-  props: OrganizationLayout<OrgBillingInfoFieldsFragment, { includeBilling: true }>,
-): ReactElement;
-export function OrganizationLayout(
-  props: OrganizationLayout<OrgRateLimitFieldsFragment, { includeRateLimit: true }>,
-): ReactElement;
-export function OrganizationLayout(
-  props: OrganizationLayout<
-    OrgBillingInfoFieldsFragment & OrgRateLimitFieldsFragment,
-    { includeBilling: true; includeRateLimit: true }
-  >,
-): ReactElement;
-export function OrganizationLayout(props: OrganizationLayout<{}, {}>): ReactElement;
-export function OrganizationLayout({
+export function OrganizationLayout<
+  TSatisfiesType extends {
+    organization?:
+      | {
+          organization?: FragmentType<typeof OrganizationLayout_OrganizationFragment> | null;
+        }
+      | null
+      | undefined;
+  },
+>({
   children,
   value,
+  query,
   className,
-  includeBilling,
-  includeRateLimit,
-}: OrganizationLayout<
-  {},
-  {
-    includeBilling?: boolean;
-    includeRateLimit?: boolean;
-  }
->): ReactElement | null {
+}: {
+  children(props: TSatisfiesType): ReactNode;
+  value?: 'overview' | 'members' | 'settings' | 'subscription';
+  className?: string;
+  query: TypedDocumentNode<
+    TSatisfiesType,
+    Exact<{
+      selector: {
+        organization: string;
+      };
+    }>
+  >;
+}): ReactElement | null {
   const router = useRouteSelector();
   const { push } = useRouter();
   const [isModalOpen, toggleModalOpen] = useToggle();
@@ -68,15 +68,18 @@ export function OrganizationLayout({
   const orgId = router.organizationId;
 
   const [organizationQuery] = useQuery({
-    query: OrganizationDocument,
+    query,
     variables: {
       selector: {
         organization: orgId,
       },
-      includeBilling: includeBilling ?? false,
-      includeRateLimit: includeRateLimit ?? false,
     },
   });
+
+  const organization = useFragment(
+    OrganizationLayout_OrganizationFragment,
+    organizationQuery.data?.organization?.organization,
+  );
 
   useEffect(() => {
     if (organizationQuery.error) {
@@ -87,7 +90,7 @@ export function OrganizationLayout({
   }, [organizationQuery.error, router]);
 
   useOrganizationAccess({
-    member: organizationQuery.data?.organization?.organization?.me,
+    member: organization?.me ?? null,
     scope: OrganizationAccessScope.Read,
     redirect: true,
   });
@@ -96,7 +99,6 @@ export function OrganizationLayout({
     return null;
   }
 
-  const organization = organizationQuery.data?.organization?.organization;
   const me = organization?.me;
   const isRegularOrg = !organization || organization.type === OrganizationType.Regular;
 
@@ -105,7 +107,7 @@ export function OrganizationLayout({
   }
 
   if (!value) {
-    return <>{children({ organization })}</>;
+    return <>{children(organizationQuery.data!)}</>;
   }
 
   return (
@@ -148,7 +150,7 @@ export function OrganizationLayout({
           )}
         </Tabs.List>
         <Tabs.Content value={value} className={className}>
-          {children({ organization })}
+          {children(organizationQuery.data!)}
         </Tabs.Content>
       </Tabs>
     </>

@@ -1,7 +1,8 @@
 import { ReactElement, ReactNode } from 'react';
 import { Label, Section } from '@/components/common';
 import { Link, Radio, RadioGroup } from '@/components/v2';
-import { BillingPlansQuery, BillingPlanType } from '@/graphql';
+import { FragmentType, graphql, useFragment } from '@/gql';
+import { BillingPlanType } from '@/graphql';
 import { CheckIcon } from '@radix-ui/react-icons';
 
 const planCollection: {
@@ -103,17 +104,27 @@ const billingPlanLookUpMap = {
   [BillingPlanType.Hobby]: 'Free',
 } as Record<BillingPlanType, string | undefined>;
 
+const BillingPlanPicker_PlanFragment = graphql(`
+  fragment BillingPlanPicker_PlanFragment on BillingPlan {
+    planType
+    id
+    name
+    basePrice
+  }
+`);
+
 export function BillingPlanPicker({
   value,
-  activePlan,
-  plans,
   onPlanChange,
+  activePlan,
+  ...props
 }: {
   value: BillingPlanType;
   activePlan: BillingPlanType;
-  plans: BillingPlansQuery['billingPlans'];
+  plans: ReadonlyArray<FragmentType<typeof BillingPlanPicker_PlanFragment>>;
   onPlanChange: (plan: BillingPlanType) => void;
 }): ReactElement {
+  const plans = useFragment(BillingPlanPicker_PlanFragment, props.plans);
   return (
     <RadioGroup value={value} onValueChange={onPlanChange} className="flex gap-4 md:!flex-row">
       {plans.map(plan => (

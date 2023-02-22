@@ -12,12 +12,11 @@ import {
   TransferOrganizationOwnershipModal,
 } from '@/components/v2/modals';
 import { env } from '@/env/frontend';
-import { graphql } from '@/gql';
+import { FragmentType, graphql, useFragment } from '@/gql';
 import {
   CheckIntegrationsDocument,
   DeleteGitHubIntegrationDocument,
   DeleteSlackIntegrationDocument,
-  OrganizationFieldsFragment,
   OrganizationType,
 } from '@/graphql';
 import {
@@ -143,7 +142,23 @@ const UpdateOrganizationNameMutation = graphql(`
   }
 `);
 
-const Page = ({ organization }: { organization: OrganizationFieldsFragment }) => {
+const SettingsPageRenderer_OrganizationFragment = graphql(`
+  fragment SettingsPageRenderer_OrganizationFragment on Organization {
+    type
+    name
+    me {
+      ...CanAccessOrganization_MemberFragment
+      isOwner
+    }
+    ...DeleteOrganizationModal_OrganizationFragment
+    ...TransferOrganizationOwnershipModal_OrganizationFragment
+  }
+`);
+
+const SettingsPageRenderer = (props: {
+  organization: FragmentType<typeof SettingsPageRenderer_OrganizationFragment>;
+}) => {
+  const organization = useFragment(SettingsPageRenderer_OrganizationFragment, props.organization);
   useOrganizationAccess({
     scope: OrganizationAccessScope.Settings,
     member: organization.me,
@@ -295,12 +310,28 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
   );
 };
 
-function SettingsPage(): ReactElement {
+const OrganizationSettingsPageQuery = graphql(`
+  query OrganizationSettingsPageQuery($selector: OrganizationSelectorInput!) {
+    organization(selector: $selector) {
+      organization {
+        ...OrganizationLayout_OrganizationFragment
+        ...SettingsPageRenderer_OrganizationFragment
+      }
+    }
+  }
+`);
+
+function OrganizationSettingsPage(): ReactElement {
   return (
     <>
       <Title title="Organization settings" />
-      <OrganizationLayout value="settings" className="flex flex-col gap-y-10">
-        {props => <Page {...props} />}
+      <OrganizationLayout
+        value="settings"
+        className="flex flex-col gap-y-10"
+        query={OrganizationSettingsPageQuery}
+      >
+        {/* eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain */}
+        {props => <SettingsPageRenderer organization={props.organization?.organization!} />}
       </OrganizationLayout>
     </>
   );
@@ -308,4 +339,4 @@ function SettingsPage(): ReactElement {
 
 export const getServerSideProps = withSessionProtection();
 
-export default authenticated(SettingsPage);
+export default authenticated(OrganizationSettingsPage);

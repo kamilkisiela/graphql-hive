@@ -22,11 +22,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/v2/dropdown';
 import { LinkIcon, MoreIcon, SettingsIcon } from '@/components/v2/icon';
-import {
-  ProjectActivitiesDocument,
-  ProjectsWithTargetsDocument,
-  ProjectsWithTargetsQuery,
-} from '@/graphql';
+import { FragmentType, graphql, useFragment } from '@/gql';
+import { ProjectActivitiesDocument } from '@/graphql';
 import { writeLastVisitedOrganization } from '@/lib/cookies';
 import { getDocsUrl } from '@/lib/docs-url';
 import { fixDuplicatedFragments } from '@/lib/graphql';
@@ -36,11 +33,19 @@ import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const projectActivitiesDocument = fixDuplicatedFragments(ProjectActivitiesDocument);
 
-const ProjectCard = ({
-  project,
-}: {
-  project: ProjectsWithTargetsQuery['projects']['nodes'][number];
+const ProjectCard_ProjectFragment = graphql(`
+  fragment ProjectCard_ProjectFragment on Project {
+    cleanId
+    id
+    type
+    name
+  }
+`);
+
+const ProjectCard = (props: {
+  project: FragmentType<typeof ProjectCard_ProjectFragment>;
 }): ReactElement => {
+  const project = useFragment(ProjectCard_ProjectFragment, props.project);
   const copyToClipboard = useClipboard();
   const router = useRouteSelector();
   const [projectActivitiesQuery] = useQuery({
@@ -109,27 +114,37 @@ const ProjectCard = ({
   );
 };
 
+const OrganizationProjectsPageQuery = graphql(`
+  query OrganizationProjectsPageQuery($selector: OrganizationSelectorInput!) {
+    organization(selector: $selector) {
+      organization {
+        ...OrganizationLayout_OrganizationFragment
+      }
+    }
+    projects(selector: $selector) {
+      total
+      nodes {
+        id
+        ...ProjectCard_ProjectFragment
+      }
+    }
+  }
+`);
+
 function ProjectsPage(): ReactElement {
-  const router = useRouteSelector();
-
-  const [projectsWithTargetsQuery] = useQuery({
-    query: ProjectsWithTargetsDocument,
-    variables: {
-      selector: {
-        organization: router.organizationId,
-      },
-    },
-  });
-
   return (
     <>
       <Title title="Projects" />
-      <OrganizationLayout value="overview" className="flex justify-between gap-5">
-        {() => (
+      <OrganizationLayout
+        value="overview"
+        className="flex justify-between gap-5"
+        query={OrganizationProjectsPageQuery}
+      >
+        {({ projects }) => (
           <>
             <div className="grow">
               <Heading className="mb-4">Active Projects</Heading>
-              {projectsWithTargetsQuery.data?.projects.total === 0 ? (
+              {projects.total === 0 ? (
                 <EmptyList
                   title="Hive is waiting for your first project"
                   description='You can create a project by clicking the "Create Project" button'
@@ -137,7 +152,8 @@ function ProjectsPage(): ReactElement {
                 />
               ) : (
                 <div className="grid grid-cols-2 gap-5 items-stretch">
-                  {projectsWithTargetsQuery.fetching
+                  {/** TODO: use defer here :) */}
+                  {projects === null
                     ? [1, 2].map(key => (
                         <Card key={key}>
                           <div className="flex gap-x-2">
@@ -151,7 +167,7 @@ function ProjectsPage(): ReactElement {
                           <Skeleton visible className="h-7" />
                         </Card>
                       ))
-                    : projectsWithTargetsQuery.data?.projects.nodes.map(project => (
+                    : projects.nodes.map(project => (
                         <ProjectCard key={project.id} project={project} />
                       ))}
                 </div>

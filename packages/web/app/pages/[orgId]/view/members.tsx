@@ -1,6 +1,6 @@
 import { ReactElement, useCallback, useEffect, useState } from 'react';
 import { useFormik } from 'formik';
-import { DocumentType, gql, useMutation, useQuery } from 'urql';
+import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 import { authenticated } from '@/components/authenticated-container';
 import { OrganizationLayout } from '@/components/layouts';
@@ -13,6 +13,7 @@ import {
 } from '@/components/v2/dropdown';
 import { CopyIcon, KeyIcon, MoreIcon, SettingsIcon, TrashIcon } from '@/components/v2/icon';
 import { ChangePermissionsModal, DeleteMembersModal } from '@/components/v2/modals';
+import { FragmentType, graphql, useFragment } from '@/gql';
 import { MeDocument, OrganizationFieldsFragment, OrganizationType } from '@/graphql';
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
 import { useClipboard } from '@/lib/hooks/use-clipboard';
@@ -27,7 +28,7 @@ export const DateFormatter = Intl.DateTimeFormat('en', {
   day: 'numeric',
 });
 
-const Members_Invitation = gql(`
+const Members_Invitation = graphql(`
   fragment Members_Invitation on OrganizationInvitation {
     id
     createdAt
@@ -37,11 +38,12 @@ const Members_Invitation = gql(`
   }
 `);
 
-export const MemberInvitationForm_InviteByEmail = gql(`
+export const MemberInvitationForm_InviteByEmail = graphql(`
   mutation MemberInvitationForm_InviteByEmail($input: InviteToOrganizationByEmailInput!) {
     inviteToOrganizationByEmail(input: $input) {
       ok {
         ...Members_Invitation
+        email
       }
       error {
         message
@@ -53,7 +55,7 @@ export const MemberInvitationForm_InviteByEmail = gql(`
   }
 `);
 
-export const InvitationDeleteButton_DeleteInvitation = gql(`
+export const InvitationDeleteButton_DeleteInvitation = graphql(`
   mutation InvitationDeleteButton_DeleteInvitation($input: DeleteOrganizationInvitationInput!) {
     deleteOrganizationInvitation(input: $input) {
       ok {
@@ -167,37 +169,11 @@ function InvitationDeleteButton({
   );
 }
 
-export const Members_OrganizationMembers = gql(`
-  query Members_OrganizationMembers($selector: OrganizationSelectorInput!) {
-    organization(selector: $selector) {
-      organization {
-        ...OrganizationFields
-        owner {
-          ...MemberFields
-        }
-        members {
-          nodes {
-            ...MemberFields
-          }
-          total
-        }
-        invitations {
-          nodes {
-            ...Members_Invitation
-          }
-        }
-      }
-    }
-  }
-`);
-
-const Invitation = ({
-  invitation,
-  organizationCleanId,
-}: {
-  invitation: DocumentType<typeof Members_Invitation>;
+const Invitation = (props: {
+  invitation: FragmentType<typeof Members_Invitation>;
   organizationCleanId: string;
-}) => {
+}): ReactElement => {
+  const invitation = useFragment(Members_Invitation, props.invitation);
   const copyToClipboard = useClipboard();
   const copyLink = useCallback(async () => {
     await copyToClipboard(`${window.location.origin}/join/${invitation.code}`);
@@ -223,7 +199,7 @@ const Invitation = ({
             Copy invite link
           </DropdownMenuItem>
           <InvitationDeleteButton
-            organizationCleanId={organizationCleanId}
+            organizationCleanId={props.organizationCleanId}
             email={invitation.email}
           />
         </DropdownMenuContent>
@@ -232,7 +208,42 @@ const Invitation = ({
   );
 };
 
-function Page({ organization }: { organization: OrganizationFieldsFragment }) {
+const Page_OrganizationFragment = graphql(`
+  fragment Page_OrganizationFragment on Organization {
+    me {
+      ...CanAccessOrganization_MemberFragment
+      ...ChangePermissionsModal_MemberFragment
+    }
+    cleanId
+    type
+    owner {
+      id
+    }
+    members {
+      nodes {
+        id
+        ...ChangePermissionsModal_MemberFragment
+        user {
+          provider
+          displayName
+          email
+        }
+      }
+      total
+    }
+    invitations {
+      nodes {
+        id
+        ...Members_Invitation
+      }
+    }
+    ...ChangePermissionsModal_OrganizationFragment
+  }
+`);
+
+function Page(props: { organization: FragmentType<typeof Page_OrganizationFragment> }) {
+  const organization = useFragment(Page_OrganizationFragment, props.organization);
+
   useOrganizationAccess({
     scope: OrganizationAccessScope.Members,
     redirect: true,
@@ -246,16 +257,8 @@ function Page({ organization }: { organization: OrganizationFieldsFragment }) {
 
   const [meQuery] = useQuery({ query: MeDocument });
   const router = useRouteSelector();
-  const [organizationMembersQuery] = useQuery({
-    query: Members_OrganizationMembers,
-    variables: {
-      selector: {
-        organization: router.organizationId,
-      },
-    },
-  });
 
-  const org = organizationMembersQuery.data?.organization?.organization;
+  const org = organization;
   const isPersonal = org?.type === OrganizationType.Personal;
   const members = org?.members.nodes;
   const invitations = org?.invitations.nodes;
@@ -372,12 +375,28 @@ function Page({ organization }: { organization: OrganizationFieldsFragment }) {
   );
 }
 
-function MembersPage(): ReactElement {
+const OrganizationMembersPageQuery = graphql(`
+  query OrganizationMembersPageQuery($selector: OrganizationSelectorInput!) {
+    organization(selector: $selector) {
+      organization {
+        ...OrganizationLayout_OrganizationFragment
+        ...Page_OrganizationFragment
+      }
+    }
+  }
+`);
+
+function OrganizationMembersPage(): ReactElement {
   return (
     <>
       <Title title="Members" />
-      <OrganizationLayout value="members" className="flex w-4/5 flex-col gap-4">
-        {({ organization }) => <Page organization={organization} />}
+      <OrganizationLayout
+        value="members"
+        className="flex w-4/5 flex-col gap-4"
+        query={OrganizationMembersPageQuery}
+      >
+        {/* eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain*/}
+        {({ organization }) => <Page organization={organization?.organization!} />}
       </OrganizationLayout>
     </>
   );
@@ -385,4 +404,4 @@ function MembersPage(): ReactElement {
 
 export const getServerSideProps = withSessionProtection();
 
-export default authenticated(MembersPage);
+export default authenticated(OrganizationMembersPage);

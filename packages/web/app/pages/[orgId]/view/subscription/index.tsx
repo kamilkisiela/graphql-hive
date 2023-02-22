@@ -123,12 +123,24 @@ function Page(props: {
   );
 }
 
+const SubscriptionPageQuery = graphql(`
+  query SubscriptionPageQuery($selector: OrganizationSelectorInput!) {
+    organization(selector: $selector) {
+      organization {
+        ...OrganizationLayout_OrganizationFragment
+        ...SubscriptionPage_OrganizationFragment
+      }
+    }
+  }
+`);
+
 function SubscriptionPage(): ReactElement {
   return (
     <>
       <Title title="Subscription & Usage" />
-      <OrganizationLayout value="subscription" includeBilling includeRateLimit>
-        {({ organization }) => <Page organization={organization} />}
+      <OrganizationLayout value="subscription" query={SubscriptionPageQuery}>
+        {/* eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain*/}
+        {({ organization }) => <Page organization={organization?.organization!} />}
       </OrganizationLayout>
     </>
   );
