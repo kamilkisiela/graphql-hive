@@ -1,4 +1,3 @@
-import { paramCase } from 'param-case';
 import {
   DatabasePool,
   DatabasePoolConnection,
@@ -606,15 +605,11 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       superTokensUserId,
       externalAuthUserId,
       email,
-      scopes,
-      reservedOrgNames,
       oidcIntegration,
     }: {
       superTokensUserId: string;
       externalAuthUserId?: string | null;
       email: string;
-      reservedOrgNames: string[];
-      scopes: Parameters<Storage['createOrganization']>[0]['scopes'];
       oidcIntegration: null | {
         id: string;
         defaultScopes: Array<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
@@ -637,24 +632,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           action = 'created';
         }
 
-        if (oidcIntegration === null) {
-          const personalOrg = await shared.getOrganization(internalUser.id, t);
-
-          if (!personalOrg) {
-            await shared.createOrganization(
-              {
-                name: internalUser.displayName,
-                user: internalUser.id,
-                cleanId: paramCase(internalUser.displayName),
-                type: 'PERSONAL' as OrganizationType,
-                scopes,
-                reservedNames: reservedOrgNames,
-              },
-              t,
-            );
-            action = 'created';
-          }
-        } else {
+        if (oidcIntegration !== null) {
           // Add user to OIDC linked integration
           await shared.addOrganizationMemberViaOIDCIntegrationId(
             {
@@ -1202,7 +1180,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       return org ? transformOrganization(org) : null;
     },
     async getOrganizations({ user }) {
-      const results = await pool.many<Slonik<organizations>>(
+      const results = await pool.query<Slonik<organizations>>(
         sql`
           SELECT o.*
           FROM public.organizations as o
@@ -1211,7 +1189,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           ORDER BY o.created_at DESC
         `,
       );
-      return results.map(transformOrganization);
+
+      return results.rows.map(transformOrganization);
     },
     async getOrganizationByInviteCode({ inviteCode }) {
       const result = await pool.maybeOne<Slonik<organizations>>(

@@ -81,8 +81,6 @@ export interface Storage {
     superTokensUserId: string;
     externalAuthUserId?: string | null;
     email: string;
-    reservedOrgNames: string[];
-    scopes: ReadonlyArray<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
     oidcIntegration: null | {
       id: string;
       defaultScopes: Array<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
