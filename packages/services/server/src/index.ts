@@ -284,7 +284,7 @@ export async function main() {
       method: ['GET', 'HEAD'],
       url: '/_health',
       async handler(req, res) {
-        res.status(200).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+        void res.status(200).send();
       },
     });
 
@@ -292,7 +292,7 @@ export async function main() {
       method: 'GET',
       url: '/lab/:org/:project/:target',
       async handler(req, res) {
-        res.status(200).send({ ok: true }); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+        void res.status(200).send({ ok: true });
       },
     });
 
@@ -317,7 +317,7 @@ export async function main() {
             response.body.includes('"__schema"')
           ) {
             reportReadiness(true);
-            res.status(200).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+            void res.status(200).send();
             return;
           }
           console.error(response.statusCode, response.body);
@@ -326,7 +326,7 @@ export async function main() {
         }
 
         reportReadiness(false);
-        res.status(500).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+        void res.status(500).send();
       },
     });
 
@@ -400,7 +400,7 @@ export async function main() {
             superTokensUserId,
             externalUserId: auth0UserId,
           });
-          reply.status(200).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+          void reply.status(200).send();
         },
       });
       server.route({
