@@ -56,7 +56,7 @@ test.concurrent(
 
     const { target } = await createPersonalProject(ProjectType.Single);
 
-    await waitFor(ensureEnv('LIMIT_CACHE_UPDATE_INTERVAL_MS', 'number') + 1_000); // wait for rate-limit to update
+    await waitFor(ensureEnv('LIMIT_CACHE_UPDATE_INTERVAL_MS', 'number') + 1000); // wait for rate-limit to update
 
     const rateLimit = createTRPCProxyClient<RateLimitApi>({
       links: [

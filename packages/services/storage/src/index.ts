@@ -2816,7 +2816,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
                 );
                 if (!advisoryLock) {
                   // only sleep if not locked so that the loop can resolve fast if locked
-                  await new Promise(resolve => setTimeout(resolve, 1_000));
+                  await new Promise(resolve => setTimeout(resolve, 1000));
                 }
                 if (signal.aborted) {
                   throw new Error('Locking aborted');
@@ -3128,7 +3128,7 @@ const decodeCDNAccessTokenRecord = (result: unknown): CDNAccessToken => {
 function hashFnv32a(str: string): number {
   let i,
     l,
-    hval = 0x811c9dc5;
+    hval = 0x81_1c_9d_c5;
   for (i = 0, l = str.length; i < l; i++) {
     hval ^= str.charCodeAt(i);
     hval += (hval << 1) + (hval << 4) + (hval << 7) + (hval << 8) + (hval << 24);

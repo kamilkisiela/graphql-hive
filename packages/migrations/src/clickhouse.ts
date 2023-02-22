@@ -230,7 +230,7 @@ export async function migrateClickHouse(
         }
 
         // Retry after 5 seconds
-        return 5_000;
+        return 5000;
       },
     },
   });

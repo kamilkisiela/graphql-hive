@@ -57,7 +57,7 @@ export class Kafka {
           name,
           value: (this.options.env as kx.types.EnvMap)[name],
         }));
-    const ports = [29092, 9092];
+    const ports = [29_092, 9092];
     const pb = new PodBuilder({
       restartPolicy: 'Always',
       containers: [
