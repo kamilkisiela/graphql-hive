@@ -42,6 +42,10 @@
         "NEXT_PUBLIC_ALGOLIA_APP_ID",
         "SITE_URL"
       ],
+      "outputs": [".next/**", "dist/**"]
+    },
+    "@hive/migrations#build": {
+      "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
     "typecheck": {
