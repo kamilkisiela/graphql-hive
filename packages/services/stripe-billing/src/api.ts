@@ -243,17 +243,17 @@ export const stripeBillingApiRouter = t.router({
         organization: input.organizationId,
       });
 
-      const customerId = organizationBillingRecord?.externalBillingReference
-        ? organizationBillingRecord.externalBillingReference
-        : await ctx.stripe.customers
-            .create({
-              metadata: {
-                external_reference_id: input.organizationId,
-              },
-              email: orgOwner.user.email,
-              name: organization.name,
-            })
-            .then(r => r.id);
+      const customerId: string =
+        organizationBillingRecord?.externalBillingReference ||
+        (await ctx.stripe.customers
+          .create({
+            metadata: {
+              external_reference_id: input.organizationId,
+            },
+            email: orgOwner.user.email,
+            name: organization.name,
+          })
+          .then(r => r.id));
 
       organizationBillingRecord ||= await storage.createOrganizationBilling({
         externalBillingReference: customerId,

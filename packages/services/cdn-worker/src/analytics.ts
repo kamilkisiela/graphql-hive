@@ -75,6 +75,7 @@ export function createAnalytics(
             blobs: event.value,
           });
         case 'key-validation':
+          // eslint-disable-next-line sonarjs/no-nested-switch -- TODO: refactor
           switch (event.value.type) {
             case 'cache-hit':
               return engines.keyValidation.writeDataPoint({
