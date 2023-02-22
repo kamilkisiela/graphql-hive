@@ -1,4 +1,4 @@
-import { FC, forwardRef } from 'react';
+import { forwardRef, ReactElement } from 'react';
 import clsx from 'clsx';
 import {
   Root,
@@ -10,7 +10,7 @@ import {
   TabsTriggerProps,
 } from '@radix-ui/react-tabs';
 
-const List: FC<TabsListProps> = ({ children, className, ...props }) => (
+const List = ({ children, className, ...props }: TabsListProps): ReactElement => (
   <TabsList
     className={clsx(
       `
@@ -29,10 +29,10 @@ const List: FC<TabsListProps> = ({ children, className, ...props }) => (
   </TabsList>
 );
 
-const Trigger: FC<Omit<TabsTriggerProps, 'className'> & { hasBorder?: boolean }> = forwardRef(
+const Trigger = forwardRef<any, Omit<TabsTriggerProps, 'className'> & { hasBorder?: boolean }>(
   ({ children, hasBorder = true, ...props }, forwardedRef /* when has asChild prop */) => (
     <TabsTrigger
-      ref={forwardedRef as any}
+      ref={forwardedRef}
       className={clsx(
         '!appearance-none', // unset button styles in Safari
         `
@@ -54,7 +54,7 @@ const Trigger: FC<Omit<TabsTriggerProps, 'className'> & { hasBorder?: boolean }>
   ),
 );
 
-const Content: FC<TabsContentProps> = ({ children, className, ...props }) => (
+const Content = ({ children, className, ...props }: TabsContentProps): ReactElement => (
   <TabsContent className={clsx('py-7', className)} {...props}>
     {children}
   </TabsContent>

@@ -20,7 +20,6 @@ import { useNotifications } from '@/lib/hooks/use-notifications';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { useToggle } from '@/lib/hooks/use-toggle';
 import { withSessionProtection } from '@/lib/supertokens/guard';
-import { Tooltip } from '@chakra-ui/react';
 
 export const DateFormatter = Intl.DateTimeFormat('en', {
   year: 'numeric',
@@ -88,7 +87,7 @@ const MemberInvitationForm = ({
   } = useFormik({
     initialValues: { email: '' },
     validationSchema: Yup.object().shape({
-      email: Yup.string().email().required('Email is required'),
+      email: Yup.string().email().required('email is required'),
     }),
     async onSubmit(values) {
       const result = await invite({
@@ -111,14 +110,8 @@ const MemberInvitationForm = ({
       : invitation.data?.inviteToOrganizationByEmail.error?.inputErrors.email || null;
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-row gap-2">
-      <Tooltip
-        hasArrow
-        placement="top"
-        label={errorMessage}
-        isOpen={typeof errorMessage === 'string'}
-        bg="red.600"
-      >
+    <div>
+      <form onSubmit={handleSubmit} className="flex flex-row gap-2">
         <Input
           style={{
             minWidth: '200px',
@@ -131,28 +124,30 @@ const MemberInvitationForm = ({
           onBlur={handleBlur}
           disabled={isSubmitting}
           isInvalid={touched.email && !!errors.email}
+          onClear={resetForm}
         />
-      </Tooltip>
-      <Button
-        type="submit"
-        size="large"
-        block
-        variant="primary"
-        disabled={isSubmitting || !isValid || !dirty}
-      >
-        Send an invite
-      </Button>
-    </form>
+        <Button
+          type="submit"
+          size="large"
+          block
+          variant="primary"
+          disabled={isSubmitting || !isValid || !dirty}
+        >
+          Send an invite
+        </Button>
+      </form>
+      {errorMessage && <div className="mt-2 text-sm text-red-500">{errorMessage}</div>}
+    </div>
   );
 };
 
-const InvitationDeleteButton = ({
+function InvitationDeleteButton({
   email,
   organizationCleanId,
 }: {
   email: string;
   organizationCleanId: string;
-}) => {
+}) {
   const [mutation, mutate] = useMutation(InvitationDeleteButton_DeleteInvitation);
 
   return (
@@ -170,7 +165,7 @@ const InvitationDeleteButton = ({
       <TrashIcon /> Remove
     </DropdownMenuItem>
   );
-};
+}
 
 export const Members_OrganizationMembers = gql(/* GraphQL */ `
   query Members_OrganizationMembers($selector: OrganizationSelectorInput!) {
@@ -237,7 +232,7 @@ const Invitation = ({
   );
 };
 
-const Page = ({ organization }: { organization: OrganizationFieldsFragment }) => {
+function Page({ organization }: { organization: OrganizationFieldsFragment }) {
   useOrganizationAccess({
     scope: OrganizationAccessScope.Members,
     redirect: true,
@@ -375,7 +370,7 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
       ) : null}
     </>
   );
-};
+}
 
 function MembersPage(): ReactElement {
   return (

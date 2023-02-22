@@ -18,7 +18,7 @@ export default withBundleAnalyzer({
   },
   typescript: {
     // next doesn't need to check because typecheck command will
-    // also next reports false positives (try it...)
+    // also Next.js report false positives (try it...)
     ignoreBuildErrors: true,
   },
   redirects: async () => [

@@ -1,9 +1,9 @@
-import { FC, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import clsx from 'clsx';
 import { Button, Heading, HiveLink, Input, Link, ShineBackground } from '@/components/v2';
 import { GitHubIcon, GoogleIcon, LinkedInIcon } from '@/components/v2/icon';
 
-const IndexPage: FC = () => {
+const IndexPage = (): ReactElement => {
   const [isLoginPage, setIsLoginPage] = useState(true);
 
   return (
@@ -93,10 +93,13 @@ const IndexPage: FC = () => {
   );
 };
 
-const GuildLink: FC<{ className?: string; textClassName?: string }> = ({
+const GuildLink = ({
   className,
   textClassName,
-}) => (
+}: {
+  className?: string;
+  textClassName?: string;
+}): ReactElement => (
   <a
     href="https://the-guild.dev"
     target="_blank"

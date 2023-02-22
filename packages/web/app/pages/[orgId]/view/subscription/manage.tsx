@@ -1,14 +1,12 @@
 import { ReactElement, useCallback, useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery } from 'urql';
-import { authenticated } from '@/components/authenticated-container';
 import { Section } from '@/components/common';
-import { DataWrapper, QueryError } from '@/components/common/DataWrapper';
+import { QueryError } from '@/components/common/DataWrapper';
 import { OrganizationLayout } from '@/components/layouts';
 import { BillingPaymentMethod } from '@/components/organization/billing/BillingPaymentMethod';
 import { BillingPlanPicker } from '@/components/organization/billing/BillingPlanPicker';
-import { LimitSlider } from '@/components/organization/billing/LimitSlider';
 import { PlanSummary } from '@/components/organization/billing/PlanSummary';
-import { Button, Card, Heading, Input, Title } from '@/components/v2';
+import { Button, Card, DataWrapper, Heading, Input, Slider, Stat, Title } from '@/components/v2';
 import { BillingPlanType } from '@/gql/graphql';
 import {
   BillingPlansDocument,
@@ -19,15 +17,14 @@ import {
   UpgradeToProDocument,
 } from '@/graphql';
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
-import { withSessionProtection } from '@/lib/supertokens/guard';
-import { Stat, StatHelpText, StatLabel, StatNumber } from '@chakra-ui/react';
+import { openChatSupport } from '@/utils';
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 
-const Inner = ({
+function Inner({
   organization,
 }: {
   organization: OrganizationFieldsFragment & OrgBillingInfoFieldsFragment;
-}): ReactElement | null => {
+}): ReactElement | null {
   const stripe = useStripe();
   const elements = useElements();
   const canAccess = useOrganizationAccess({
@@ -36,9 +33,7 @@ const Inner = ({
     redirect: true,
   });
 
-  const [query] = useQuery({
-    query: BillingPlansDocument,
-  });
+  const [query] = useQuery({ query: BillingPlansDocument });
 
   const [paymentDetailsValid, setPaymentDetailsValid] = useState(
     !!organization.billingConfiguration?.paymentMethod,
@@ -54,8 +49,8 @@ const Inner = ({
   const onPlan = useCallback(
     (plan: BillingPlanType) => {
       setPlan(plan);
-      if (planSummaryRef.current) {
-        const planSummaryElement = planSummaryRef.current;
+      const planSummaryElement = planSummaryRef.current;
+      if (planSummaryElement) {
         setTimeout(() => {
           planSummaryElement.scrollIntoView({
             block: 'start',
@@ -66,14 +61,14 @@ const Inner = ({
     },
     [setPlan, planSummaryRef],
   );
-  const [couponCode, setCouponCode] = useState<string>('');
-  const [operationsRateLimit, setOperationsRateLimit] = useState<number>(
+  const [couponCode, setCouponCode] = useState('');
+  const [operationsRateLimit, setOperationsRateLimit] = useState(
     Math.floor((organization.rateLimit.operations || 1_000_000) / 1_000_000),
   );
 
   const onOperationsRateLimitChange = useCallback(
-    (limit: number) => {
-      setOperationsRateLimit(limit);
+    (limit: number[]) => {
+      setOperationsRateLimit(limit[0]);
     },
     [setOperationsRateLimit],
   );
@@ -95,12 +90,6 @@ const Inner = ({
   if (!canAccess) {
     return null;
   }
-
-  const openChatSupport = () => {
-    if (typeof window !== 'undefined' && (window as any).$crisp) {
-      (window as any).$crisp.push(['do', 'chat:open']);
-    }
-  };
 
   const upgrade = async () => {
     let paymentMethodId: string | null = null;
@@ -178,6 +167,7 @@ const Inner = ({
         </Button>
       );
     }
+
     if (plan === 'PRO') {
       return (
         <Button variant="primary" type="button" onClick={upgrade} disabled={!paymentDetailsValid}>
@@ -185,6 +175,7 @@ const Inner = ({
         </Button>
       );
     }
+
     if (plan === 'HOBBY') {
       return (
         <Button variant="primary" type="button" onClick={downgrade}>
@@ -202,14 +193,7 @@ const Inner = ({
     updateOrgRateLimitMutation[0].error;
 
   return (
-    <DataWrapper
-      query={query}
-      loading={
-        upgradeToProMutation[0].fetching ||
-        downgradeToHobbyMutation[0].fetching ||
-        updateOrgRateLimitMutation[0].fetching
-      }
-    >
+    <DataWrapper query={query}>
       {result => {
         // TODO: this is also not safe as billingPlans might be an empty list.
         const selectedPlan =
@@ -239,10 +223,10 @@ const Inner = ({
                       operationsRateLimit={operationsRateLimit}
                     >
                       {selectedPlan.planType === BillingPlanType.Pro && (
-                        <Stat className="mb-4">
-                          <StatLabel>Free Trial</StatLabel>
-                          <StatNumber>30</StatNumber>
-                          <StatHelpText>days</StatHelpText>
+                        <Stat>
+                          <Stat.Label>Free Trial</Stat.Label>
+                          <Stat.Number>30</Stat.Number>
+                          <Stat.HelpText>days</Stat.HelpText>
                         </Stat>
                       )}
                     </PlanSummary>
@@ -262,20 +246,18 @@ const Inner = ({
                         Don't worry, you can always adjust it later.
                       </p>
                       <div className="mt-5 pl-2.5">
-                        <LimitSlider
-                          title="Monthly operations limit"
+                        <Slider
                           min={1}
                           max={300}
-                          step={1}
-                          marks={[
-                            { value: 1, label: '1M' },
-                            { value: 100, label: '100M' },
-                            { value: 200, label: '200M' },
-                            { value: 300, label: '300M' },
-                          ]}
-                          value={operationsRateLimit}
-                          onChange={onOperationsRateLimitChange}
+                          value={[operationsRateLimit]}
+                          onValueChange={onOperationsRateLimitChange}
                         />
+                        <div className="flex justify-between">
+                          <span>1M</span>
+                          <span>100M</span>
+                          <span>200M</span>
+                          <span>300M</span>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -312,9 +294,9 @@ const Inner = ({
       }}
     </DataWrapper>
   );
-};
+}
 
-function ManageSubscriptionPage(): ReactElement {
+export default function ManageSubscriptionPage(): ReactElement {
   return (
     <>
       <Title title="Manage Subscription" />
@@ -324,7 +306,3 @@ function ManageSubscriptionPage(): ReactElement {
     </>
   );
 }
-
-export const getServerSideProps = withSessionProtection();
-
-export default authenticated(ManageSubscriptionPage);

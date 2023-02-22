@@ -1,35 +1,67 @@
-import { ReactElement } from 'react';
+import { ComponentProps, ReactElement } from 'react';
 import clsx from 'clsx';
 
-type Column<TKey extends string> = { key: TKey; align?: 'right'; width?: 'auto' };
-
-export function Table<TColumns extends string>({
-  dataSource,
-  columns,
-}: {
-  dataSource?: Array<{ id: string } & Record<TColumns, ReactElement | string>>;
-  columns: Array<Column<TColumns>> | ReadonlyArray<Column<TColumns>>;
-}): ReactElement {
+function Table({ children, className, ...props }: ComponentProps<'table'>): ReactElement {
   return (
-    <table className="w-full">
-      <tbody>
-        {dataSource?.map(row => (
-          <tr key={row.id} className="border border-gray-600/10 text-xs odd:bg-gray-600/10">
-            {columns.map(column => (
-              <td
-                key={column.key}
-                className={clsx(
-                  'break-all px-5 py-4',
-                  column.align === 'right' && 'text-right',
-                  column.width === 'auto' && 'w-1',
-                )}
-              >
-                {row[column.key]}
-              </td>
-            ))}
-          </tr>
-        ))}
-      </tbody>
+    <table className={clsx('w-full', className)} {...props}>
+      {children}
     </table>
   );
 }
+
+function TBody({ children, ...props }: ComponentProps<'tbody'>): ReactElement {
+  return <tbody {...props}>{children}</tbody>;
+}
+
+function THead({ children, ...props }: ComponentProps<'thead'>): ReactElement {
+  return (
+    <thead {...props}>
+      <tr>{children}</tr>
+    </thead>
+  );
+}
+
+function TFoot({ children, ...props }: ComponentProps<'tfoot'>): ReactElement {
+  return (
+    <tfoot {...props}>
+      <tr className="text-gray-500">{children}</tr>
+    </tfoot>
+  );
+}
+
+function Th({ children, className, align = 'left', ...props }: ComponentProps<'th'>): ReactElement {
+  return (
+    <th className={clsx('px-5 py-4', className)} align={align} {...props}>
+      {children}
+    </th>
+  );
+}
+
+function Tr({ children, className, ...props }: ComponentProps<'tr'>): ReactElement {
+  return (
+    <tr
+      className={clsx('border border-gray-600/10 text-xs odd:bg-gray-600/10', className)}
+      {...props}
+    >
+      {children}
+    </tr>
+  );
+}
+
+function Td({ children, className, ...props }: ComponentProps<'td'>): ReactElement {
+  return (
+    <td
+      className={clsx(
+        'break-all px-5 py-4 text-sm',
+        className,
+        // column.align === 'right' && 'text-right',
+        // column.width === 'auto' && 'w-1',
+      )}
+      {...props}
+    >
+      {children}
+    </td>
+  );
+}
+
+export { Table, TBody, THead, TFoot, Th, Td, Tr };

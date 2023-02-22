@@ -6,7 +6,7 @@ import { authenticated } from '@/components/authenticated-container';
 import { ProjectLayout } from '@/components/layouts';
 import { ExternalCompositionSettings } from '@/components/project/settings/external-composition';
 import { ModelMigrationSettings } from '@/components/project/settings/model-migration';
-import { Button, Card, Heading, Input, Link, Select, Spinner, Tag, Title } from '@/components/v2';
+import { Button, Card, Heading, Input, Link, Select, Tag, Title } from '@/components/v2';
 import { AlertTriangleIcon } from '@/components/v2/icon';
 import { DeleteProjectModal } from '@/components/v2/modals';
 import {
@@ -38,7 +38,11 @@ const Settings_UpdateProjectGitRepositoryMutation = gql(/* GraphQL */ `
   }
 `);
 
-const GitHubIntegration = ({ gitRepository }: { gitRepository: string | null }): ReactElement => {
+function GitHubIntegration({
+  gitRepository,
+}: {
+  gitRepository: string | null;
+}): ReactElement | null {
   const router = useRouteSelector();
   const [integrationQuery] = useQuery({
     query: GetGitHubIntegrationDetailsDocument,
@@ -70,7 +74,7 @@ const GitHubIntegration = ({ gitRepository }: { gitRepository: string | null }):
     });
 
   if (integrationQuery.fetching) {
-    return <Spinner />;
+    return null;
   }
 
   if (integrationQuery.data?.gitHubIntegration) {
@@ -125,7 +129,7 @@ const GitHubIntegration = ({ gitRepository }: { gitRepository: string | null }):
       to configure it.
     </Tag>
   );
-};
+}
 
 const Settings_UpdateProjectNameMutation = gql(/* GraphQL */ `
   mutation Settings_UpdateProjectName($input: UpdateProjectNameInput!) {

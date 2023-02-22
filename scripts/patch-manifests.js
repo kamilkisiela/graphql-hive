@@ -56,7 +56,7 @@ patchPackage('universal-github-app-jwt', pkg => {
 
 /*
   TSUP (but really esbuild) bundles all node_modules, this is expected, we want that.
-  Unfortunately, `apollo-graphql` and `@apollo/*` libraries are CJS only and we end up with CJS and ESM versions of graphql.
+  Unfortunately, `apollo-graphql` and `@apollo/*` libraries are CJS only, and we end up with CJS and ESM versions of graphql.
   The very quick fix means we need to patch the graphql module to be CJS-only.
 */
 patchPackage('graphql', pkg => {

@@ -1,10 +1,11 @@
-import React from 'react';
+import { ReactElement } from 'react';
 import Select, { StylesConfig } from 'react-select';
 import { FixedSizeList } from 'react-window';
+import { SelectOption } from './radix-select';
 
 const height = 40;
 
-function MenuList(props: any) {
+function MenuList(props: any): ReactElement {
   const { options, children, maxHeight, getValue } = props;
   const [value] = getValue();
   const initialOffset = options.indexOf(value) * height;
@@ -22,11 +23,6 @@ function MenuList(props: any) {
   );
 }
 
-interface Option {
-  value: string;
-  label: string;
-}
-
 const styles: StylesConfig = {
   input: styles => ({
     ...styles,
@@ -34,7 +30,7 @@ const styles: StylesConfig = {
   }),
   control: styles => ({
     ...styles,
-    backgroundColor: '#24272E',
+    backgroundColor: '#24272e',
     borderWidth: 1,
     borderColor: '#5f6169',
   }),
@@ -46,27 +42,26 @@ const styles: StylesConfig = {
     ...styles,
     color: '#fff',
     fontSize: '14px',
-    backgroundColor: '#24272E',
+    backgroundColor: '#24272e',
     ':hover': {
       backgroundColor: '#5f6169',
     },
   }),
   menu: styles => ({
     ...styles,
-    backgroundColor: '#24272E',
+    backgroundColor: '#24272e',
   }),
 };
 
-export function Autocomplete(
-  props: React.PropsWithoutRef<{
-    placeholder: string;
-    options: readonly Option[];
-    onChange: (value: Option) => void;
-    defaultValue?: Option | null;
-    disabled?: boolean;
-    loading?: boolean;
-  }>,
-) {
+export function Autocomplete(props: {
+  placeholder: string;
+  options: readonly SelectOption[];
+  onChange: (value: SelectOption) => void;
+  defaultValue?: SelectOption | null;
+  disabled?: boolean;
+  loading?: boolean;
+  className?: string;
+}): ReactElement {
   return (
     <Select
       options={props.options}
@@ -74,13 +69,12 @@ export function Autocomplete(
       styles={styles}
       isSearchable
       closeMenuOnSelect
-      onChange={option => props.onChange(option as Option)}
+      onChange={option => props.onChange(option as SelectOption)}
       isDisabled={props.disabled}
       isLoading={props.loading}
       placeholder={props.placeholder}
-      components={{
-        MenuList,
-      }}
+      components={{ MenuList }}
+      className={props.className}
     />
   );
 }

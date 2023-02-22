@@ -1,9 +1,10 @@
-import React, { useCallback } from 'react';
+import { ReactElement, useCallback, useMemo } from 'react';
 import clsx from 'clsx';
 import ReactECharts from 'echarts-for-react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { useQuery } from 'urql';
 import { Section } from '@/components/common';
+import { CHART_PRIMARY_COLOR } from '@/constants';
 import {
   DateRangeInput,
   GeneralOperationsStatsDocument,
@@ -17,7 +18,7 @@ import {
   useFormattedNumber,
   useFormattedThroughput,
 } from '@/lib/hooks';
-import { Grid, GridItem, useColorModeValue } from '@chakra-ui/react';
+import { useChartStyles } from '@/utils';
 import { OperationsFallback } from './Fallback';
 
 function resolutionToMilliseconds(
@@ -37,13 +38,13 @@ function resolutionToMilliseconds(
  * Adds missing samples to left and right sides of the series. We end up with a smooooooth chart
  */
 function fullSeries(
-  data: Array<[string, number]>,
+  data: [string, number][],
   interval: number,
   period: {
     from: string;
     to: string;
   },
-): Array<[string, number]> {
+): [string, number][] {
   if (!data.length) {
     return createEmptySeries({ interval, period });
   }
@@ -52,9 +53,9 @@ function fullSeries(
   const firstSample = new Date(data[0][0]).getTime();
   // Find the last sample
   const lastSample = new Date(data[data.length - 1][0]).getTime();
-  // Turn period.from to a number
+  // Turn `period.from` to a number
   const startAt = new Date(period.from).getTime();
-  // Turn period.to to a number
+  // Turn `period.to` to a number
   const endAt = new Date(period.to).getTime();
 
   // Calculate the number missing steps by
@@ -75,7 +76,7 @@ function fullSeries(
   }
 
   // Instead of creating a new array, we could move things around but this is easier
-  const newData: Array<[string, number]> = [];
+  const newData: [string, number][] = [];
 
   for (let i = 0; i < data.length; i++) {
     const current = data[i];
@@ -120,39 +121,12 @@ function createEmptySeries({
     from: string;
     to: string;
   };
-}): Array<[string, number]> {
+}): [string, number][] {
   const startAt = new Date(period.from).getTime();
   const endAt = new Date(period.to).getTime();
 
   const steps = Math.floor((endAt - startAt) / interval);
   return times(steps, i => [new Date(startAt + i * interval).toISOString(), 0]);
-}
-
-function useChartStyles() {
-  return useColorModeValue(
-    {
-      backgroundColor: '#fff',
-      textStyle: {
-        color: '#52525b',
-      },
-      legend: {
-        textStyle: {
-          color: '#52525b',
-        },
-      },
-    },
-    {
-      backgroundColor: 'transparent',
-      textStyle: {
-        color: '#fff',
-      },
-      legend: {
-        textStyle: {
-          color: '#fff',
-        },
-      },
-    },
-  );
 }
 
 const classes = {
@@ -161,7 +135,7 @@ const classes = {
   title: clsx('text-sm leading-relaxed'),
 };
 
-const RequestsStats: React.FC<{ requests?: number }> = ({ requests = 0 }) => {
+function RequestsStats({ requests = 0 }: { requests?: number }): ReactElement {
   const value = useFormattedNumber(requests);
 
   return (
@@ -170,9 +144,9 @@ const RequestsStats: React.FC<{ requests?: number }> = ({ requests = 0 }) => {
       <p className={classes.title}>Requests</p>
     </div>
   );
-};
+}
 
-const UniqueOperationsStats: React.FC<{ operations?: number }> = ({ operations = 0 }) => {
+function UniqueOperationsStats({ operations = 0 }: { operations?: number }): ReactElement {
   const value = useFormattedNumber(operations);
 
   return (
@@ -181,9 +155,9 @@ const UniqueOperationsStats: React.FC<{ operations?: number }> = ({ operations =
       <p className={classes.title}>Unique Operations</p>
     </div>
   );
-};
+}
 
-const PercentileStats: React.FC<{ value?: number; title: string }> = ({ value, title }) => {
+function PercentileStats({ value, title }: { value?: number; title: string }): ReactElement {
   const formatted = useFormattedDuration(value);
 
   return (
@@ -192,15 +166,18 @@ const PercentileStats: React.FC<{ value?: number; title: string }> = ({ value, t
       <p className={classes.title}>{title}</p>
     </div>
   );
-};
+}
 
-const RPM: React.FC<{
+function RPM({
+  period,
+  requests = 0,
+}: {
   requests?: number;
   period: {
     from: string;
     to: string;
   };
-}> = ({ period, requests = 0 }) => {
+}): ReactElement {
   const throughput = useFormattedThroughput({
     requests,
     window: new Date(period.to).getTime() - new Date(period.from).getTime(),
@@ -211,12 +188,15 @@ const RPM: React.FC<{
       <p className={classes.title}>RPM</p>
     </div>
   );
-};
+}
 
-const SuccessRateStats: React.FC<{
+function SuccessRateStats({
+  requests = 0,
+  totalFailures = 0,
+}: {
   requests?: number;
   totalFailures?: number;
-}> = ({ requests = 0, totalFailures = 0 }) => {
+}): ReactElement {
   const rate =
     requests || totalFailures
       ? `${toDecimal(((requests - totalFailures) * 100) / requests)}%`
@@ -228,12 +208,15 @@ const SuccessRateStats: React.FC<{
       <p className={classes.title}>Success rate</p>
     </div>
   );
-};
+}
 
-const FailureRateStats: React.FC<{
+function FailureRateStats({
+  requests = 0,
+  totalFailures = 0,
+}: {
   requests?: number;
   totalFailures?: number;
-}> = ({ requests = 0, totalFailures = 0 }) => {
+}): ReactElement {
   const rate = requests || totalFailures ? `${toDecimal((totalFailures * 100) / requests)}%` : '-';
 
   return (
@@ -242,17 +225,22 @@ const FailureRateStats: React.FC<{
       <p className={classes.title}>Failure rate</p>
     </div>
   );
-};
+}
 
-const OverTimeStats: React.FC<{
+function OverTimeStats({
+  period,
+  resolution,
+  requestsOverTime = [],
+  failuresOverTime = [],
+}: {
   period: DateRangeInput;
   resolution: number;
   requestsOverTime?: GeneralOperationsStatsQuery['operationsStats']['requestsOverTime'];
   failuresOverTime?: GeneralOperationsStatsQuery['operationsStats']['failuresOverTime'];
-}> = ({ period, resolution, requestsOverTime = [], failuresOverTime = [] }) => {
+}): ReactElement {
   const styles = useChartStyles();
   const interval = resolutionToMilliseconds(resolution, period);
-  const requests = React.useMemo(() => {
+  const requests = useMemo(() => {
     if (requestsOverTime?.length) {
       return fullSeries(
         requestsOverTime.map<[string, number]>(node => [node.date, node.value]),
@@ -264,7 +252,7 @@ const OverTimeStats: React.FC<{
     return createEmptySeries({ interval, period });
   }, [requestsOverTime, interval, period]);
 
-  const failures = React.useMemo(() => {
+  const failures = useMemo(() => {
     if (failuresOverTime?.length) {
       return fullSeries(
         failuresOverTime.map<[string, number]>(node => [node.date, node.value]),
@@ -277,7 +265,7 @@ const OverTimeStats: React.FC<{
   }, [failuresOverTime, interval, period]);
 
   return (
-    <div className="rounded-md bg-gray-900/50 p-5 ring-1 ring-gray-800">
+    <div className="rounded-md bg-gray-900/50 p-5 border border-gray-800">
       <Section.Title>Operations over time</Section.Title>
       <Section.Subtitle>Timeline of GraphQL requests and failures</Section.Subtitle>
       <AutoSizer disableHeight>
@@ -312,14 +300,8 @@ const OverTimeStats: React.FC<{
                 },
               ],
               yAxis: [
-                {
-                  type: 'value',
-                  min: 0,
-                },
-                {
-                  type: 'value',
-                  min: 0,
-                },
+                { type: 'value', min: 0 },
+                { type: 'value', min: 0 },
               ],
               series: [
                 {
@@ -327,7 +309,7 @@ const OverTimeStats: React.FC<{
                   name: 'Requests',
                   showSymbol: false,
                   smooth: true,
-                  color: 'rgb(234, 179, 8)',
+                  color: CHART_PRIMARY_COLOR,
                   areaStyle: {},
                   emphasis: {
                     focus: 'series',
@@ -355,16 +337,18 @@ const OverTimeStats: React.FC<{
       </AutoSizer>
     </div>
   );
-};
+}
 
-const ClientsStats: React.FC<{
+function ClientsStats({
+  clients = [],
+}: {
   clients?: GeneralOperationsStatsQuery['operationsStats']['clients']['nodes'];
-}> = ({ clients = [] }) => {
+}): ReactElement {
   const styles = useChartStyles();
-  const sortedClients = React.useMemo(() => {
+  const sortedClients = useMemo(() => {
     return clients?.length ? clients.slice().sort((a, b) => b.count - a.count) : [];
   }, [clients]);
-  const byClient = React.useMemo(() => {
+  const byClient = useMemo(() => {
     let values: string[] = [];
     const labels: string[] = [];
 
@@ -393,13 +377,10 @@ const ClientsStats: React.FC<{
       values = counts.map(value => toDecimal((value * 100) / total));
     }
 
-    return {
-      labels,
-      values,
-    };
+    return { labels, values };
   }, [sortedClients]);
 
-  const byVersion = React.useMemo(() => {
+  const byVersion = useMemo(() => {
     let values: string[] = [];
     const labels: string[] = [];
     if (sortedClients?.length) {
@@ -440,14 +421,11 @@ const ClientsStats: React.FC<{
       values = counts.map(value => toDecimal((value * 100) / total));
     }
 
-    return {
-      labels,
-      values,
-    };
+    return { labels, values };
   }, [sortedClients]);
 
   return (
-    <div className="w-full rounded-md bg-gray-900/50 p-5 ring-1 ring-gray-800">
+    <div className="w-full rounded-md bg-gray-900/50 p-5 border border-gray-800">
       <Section.Title>Clients</Section.Title>
       <Section.Subtitle>Top 5 - GraphQL API consumers</Section.Subtitle>
       <AutoSizer disableHeight className="mt-5 w-full">
@@ -485,7 +463,7 @@ const ClientsStats: React.FC<{
                     {
                       type: 'bar',
                       data: byClient.values,
-                      color: 'rgb(234, 179, 8)',
+                      color: CHART_PRIMARY_COLOR,
                     },
                   ],
                 }}
@@ -517,7 +495,7 @@ const ClientsStats: React.FC<{
                     {
                       type: 'bar',
                       data: byVersion.values,
-                      color: 'rgb(234, 179, 8)',
+                      color: CHART_PRIMARY_COLOR,
                     },
                   ],
                 }}
@@ -528,19 +506,23 @@ const ClientsStats: React.FC<{
       </AutoSizer>
     </div>
   );
-};
+}
 
-const LatencyOverTimeStats: React.FC<{
+function LatencyOverTimeStats({
+  period,
+  resolution,
+  duration = [],
+}: {
   period: {
     from: string;
     to: string;
   };
   resolution: number;
   duration?: GeneralOperationsStatsQuery['operationsStats']['durationOverTime'];
-}> = ({ period, resolution, duration = [] }) => {
+}): ReactElement {
   const styles = useChartStyles();
   const interval = resolutionToMilliseconds(resolution, period);
-  const p75 = React.useMemo(() => {
+  const p75 = useMemo(() => {
     if (duration?.length) {
       return fullSeries(
         duration.map<[string, number]>(node => [node.date, node.duration.p75]),
@@ -551,7 +533,7 @@ const LatencyOverTimeStats: React.FC<{
 
     return createEmptySeries({ interval, period });
   }, [duration, interval, period]);
-  const p90 = React.useMemo(() => {
+  const p90 = useMemo(() => {
     if (duration?.length) {
       return fullSeries(
         duration.map<[string, number]>(node => [node.date, node.duration.p90]),
@@ -562,7 +544,7 @@ const LatencyOverTimeStats: React.FC<{
 
     return createEmptySeries({ interval, period });
   }, [duration, interval, period]);
-  const p95 = React.useMemo(() => {
+  const p95 = useMemo(() => {
     if (duration?.length) {
       return fullSeries(
         duration.map<[string, number]>(node => [node.date, node.duration.p95]),
@@ -573,7 +555,7 @@ const LatencyOverTimeStats: React.FC<{
 
     return createEmptySeries({ interval, period });
   }, [duration, interval, period]);
-  const p99 = React.useMemo(() => {
+  const p99 = useMemo(() => {
     if (duration?.length) {
       return fullSeries(
         duration.map<[string, number]>(node => [node.date, node.duration.p99]),
@@ -585,20 +567,6 @@ const LatencyOverTimeStats: React.FC<{
     return createEmptySeries({ interval, period });
   }, [duration, interval, period]);
 
-  const xAxis = [
-    {
-      type: 'time',
-      boundaryGap: false,
-    },
-  ];
-
-  const yAxis = [
-    {
-      type: 'value',
-      min: 0,
-    },
-  ];
-
   function createSeries(name: string, color: string, data: [string, number][]) {
     return {
       name,
@@ -606,9 +574,7 @@ const LatencyOverTimeStats: React.FC<{
       smooth: true,
       showSymbol: false,
       color,
-      emphasis: {
-        focus: 'series',
-      },
+      emphasis: { focus: 'series' },
       large: true,
       data,
     };
@@ -621,11 +587,8 @@ const LatencyOverTimeStats: React.FC<{
     createSeries('p99', '#ec4899', p99),
   ];
 
-  const legends = series.map(s => s.name);
-  const colors = series.map(s => s.color);
-
   return (
-    <div className="rounded-md bg-gray-900/50 p-5 ring-1 ring-gray-800">
+    <div className="rounded-md bg-gray-900/50 p-5 border border-gray-800">
       <Section.Title>Latency over time</Section.Title>
       <Section.Subtitle>Timeline of latency of GraphQL Operations</Section.Subtitle>
       <AutoSizer disableHeight>
@@ -642,16 +605,14 @@ const LatencyOverTimeStats: React.FC<{
                 bottom: 20,
                 containLabel: true,
               },
-              tooltip: {
-                trigger: 'axis',
-              },
-              color: colors,
+              tooltip: { trigger: 'axis' },
+              color: series.map(s => s.color),
               legend: {
                 ...styles.legend,
-                data: legends,
+                data: series.map(s => s.name),
               },
-              xAxis,
-              yAxis,
+              xAxis: [{ type: 'time', boundaryGap: false }],
+              yAxis: [{ type: 'value', min: 0 }],
               series,
             }}
           />
@@ -659,22 +620,26 @@ const LatencyOverTimeStats: React.FC<{
       </AutoSizer>
     </div>
   );
-};
+}
 
-const RpmOverTimeStats: React.FC<{
+function RpmOverTimeStats({
+  period,
+  resolution,
+  requestsOverTime = [],
+}: {
   period: {
     from: string;
     to: string;
   };
   resolution: number;
   requestsOverTime?: GeneralOperationsStatsQuery['operationsStats']['requestsOverTime'];
-}> = ({ period, resolution, requestsOverTime = [] }) => {
+}): ReactElement {
   const styles = useChartStyles();
   const requests = requestsOverTime ?? [];
 
   const interval = resolutionToMilliseconds(resolution, period);
   const windowInM = interval / (60 * 1000);
-  const rpmOverTime = React.useMemo(() => {
+  const rpmOverTime = useMemo(() => {
     if (requests.length) {
       return fullSeries(
         requests.map<[string, number]>(node => [
@@ -690,7 +655,7 @@ const RpmOverTimeStats: React.FC<{
   }, [requests, interval, period, windowInM]);
 
   return (
-    <div className="rounded-md bg-gray-900/50 p-5 ring-1 ring-gray-800">
+    <div className="rounded-md bg-gray-900/50 p-5 border border-gray-800">
       <Section.Title>RPM over time</Section.Title>
       <Section.Subtitle>Timeline of GraphQL requests and failures</Section.Subtitle>
       <AutoSizer disableHeight>
@@ -735,12 +700,12 @@ const RpmOverTimeStats: React.FC<{
                   symbol: 'none',
                   smooth: true,
                   areaStyle: {
-                    color: 'rgb(234, 179, 8)',
+                    color: CHART_PRIMARY_COLOR,
                   },
                   lineStyle: {
-                    color: 'rgb(234, 179, 8)',
+                    color: CHART_PRIMARY_COLOR,
                   },
-                  color: 'rgb(234, 179, 8)',
+                  color: CHART_PRIMARY_COLOR,
                   large: true,
                   data: rpmOverTime,
                 },
@@ -751,9 +716,15 @@ const RpmOverTimeStats: React.FC<{
       </AutoSizer>
     </div>
   );
-};
+}
 
-export const OperationsStats: React.FC<{
+export function OperationsStats({
+  organization,
+  project,
+  target,
+  period,
+  operationsFilter,
+}: {
   organization: string;
   project: string;
   target: string;
@@ -762,7 +733,7 @@ export const OperationsStats: React.FC<{
     to: string;
   };
   operationsFilter: string[];
-}> = ({ organization, project, target, period, operationsFilter }) => {
+}): ReactElement {
   const resolution = 90;
   const [query, refetchQuery] = useQuery({
     query: GeneralOperationsStatsDocument,
@@ -792,43 +763,22 @@ export const OperationsStats: React.FC<{
   return (
     <section className="text-gray-600 dark:text-gray-400 space-y-12 transition-opacity ease-in-out duration-700">
       <OperationsFallback isError={isError} refetch={refetch} isFetching={isFetching}>
-        <Grid
-          templateRows="repeat(2, 1fr)"
-          templateColumns="repeat(4, 1fr)"
-          gap={4}
-          className="rounded-md p-5 ring-1 ring-gray-800 transition bg-gray-900/50"
-        >
-          <GridItem>
-            <RequestsStats requests={operationsStats?.totalRequests} />
-          </GridItem>
-          <GridItem>
-            <RPM requests={operationsStats?.totalRequests} period={period} />
-          </GridItem>
-          <GridItem>
-            <UniqueOperationsStats operations={operationsStats?.totalOperations} />
-          </GridItem>
-
-          <GridItem rowSpan={2}>
-            <SuccessRateStats
-              requests={operationsStats?.totalRequests}
-              totalFailures={operationsStats?.totalFailures}
-            />
-            <FailureRateStats
-              requests={operationsStats?.totalRequests}
-              totalFailures={operationsStats?.totalFailures}
-            />
-          </GridItem>
-
-          <GridItem>
-            <PercentileStats value={operationsStats?.duration?.p90} title="Latency p90" />
-          </GridItem>
-          <GridItem>
-            <PercentileStats value={operationsStats?.duration?.p95} title="Latency p95" />
-          </GridItem>
-          <GridItem>
-            <PercentileStats value={operationsStats?.duration?.p99} title="Latency p99" />
-          </GridItem>
-        </Grid>
+        <div className="grid gap-y-4 grid-cols-4 rounded-md p-5 border border-gray-800 bg-gray-900/50">
+          <RequestsStats requests={operationsStats?.totalRequests} />
+          <RPM requests={operationsStats?.totalRequests} period={period} />
+          <UniqueOperationsStats operations={operationsStats?.totalOperations} />
+          <SuccessRateStats
+            requests={operationsStats?.totalRequests}
+            totalFailures={operationsStats?.totalFailures}
+          />
+          <PercentileStats value={operationsStats?.duration?.p99} title="Latency p99" />
+          <PercentileStats value={operationsStats?.duration?.p95} title="Latency p95" />
+          <PercentileStats value={operationsStats?.duration?.p90} title="Latency p90" />
+          <FailureRateStats
+            requests={operationsStats?.totalRequests}
+            totalFailures={operationsStats?.totalFailures}
+          />
+        </div>
       </OperationsFallback>
       <div>
         <ClientsStats clients={operationsStats?.clients?.nodes} />
@@ -863,4 +813,4 @@ export const OperationsStats: React.FC<{
       </div>
     </section>
   );
-};
+}

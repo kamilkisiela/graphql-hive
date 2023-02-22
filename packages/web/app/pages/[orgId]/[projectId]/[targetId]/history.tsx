@@ -1,7 +1,6 @@
 import { ReactElement, useCallback, useState } from 'react';
 import NextLink from 'next/link';
-import clsx from 'clsx';
-import { VscBug, VscDiff, VscListFlat } from 'react-icons/vsc';
+import { clsx } from 'clsx';
 import reactStringReplace from 'react-string-replace';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
@@ -18,6 +17,7 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from '@/components/v2';
+import { DiffIcon } from '@/components/v2/icon';
 import {
   CompareDocument,
   CriticalityLevel,
@@ -27,6 +27,7 @@ import {
 } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { withSessionProtection } from '@/lib/supertokens/guard';
+import { CrossCircledIcon, RowsIcon } from '@radix-ui/react-icons';
 
 function labelize(message: string) {
   const findSingleQuotes = /'([^']+)'/gim;
@@ -45,7 +46,7 @@ const titleMap: Record<CriticalityLevel, string> = {
 const criticalityLevelMapping = {
   [CriticalityLevel.Safe]: 'text-emerald-400',
   [CriticalityLevel.Dangerous]: 'text-yellow-400',
-} as Record<CriticalityLevel, string | undefined>;
+} as Record<CriticalityLevel, string>;
 
 const ChangesBlock = ({
   changes,
@@ -76,13 +77,13 @@ const ChangesBlock = ({
   );
 };
 
-const DiffView = ({
+function DiffView({
   view,
   versionId,
 }: {
-  view: 'sdl' | 'list';
+  view: 'SDL' | 'list';
   versionId: string;
-}): ReactElement | null => {
+}): ReactElement | null {
   const router = useRouteSelector();
   const [compareQuery] = useQuery({
     query: CompareDocument,
@@ -100,7 +101,7 @@ const DiffView = ({
     return (
       <div className="m-3 rounded-lg bg-red-500/20 p-8">
         <div className="mb-3 flex items-center gap-3">
-          <VscBug className="h-8 w-8 text-red-500" />
+          <CrossCircledIcon className="h-6 w-auto text-red-500" />
           <h2 className="text-lg font-medium text-white">Failed to compare schemas</h2>
         </div>
         <p className="text-base text-gray-500">
@@ -121,7 +122,7 @@ const DiffView = ({
     return (
       <div className="m-3 rounded-lg bg-red-500/20 p-8">
         <div className="mb-3 flex items-center gap-3">
-          <VscBug className="h-8 w-8 text-red-500" />
+          <CrossCircledIcon className="h-6 w-auto text-red-500" />
           <h2 className="text-lg font-medium text-white">Failed to build GraphQL Schema</h2>
         </div>
         <p className="text-base text-gray-500">
@@ -136,7 +137,7 @@ const DiffView = ({
 
   const { before, after } = comparison.diff;
 
-  if (view === 'sdl') {
+  if (view === 'SDL') {
     return <DiffEditor before={before} after={after} />;
   }
 
@@ -147,11 +148,11 @@ const DiffView = ({
       <ChangesBlock changes={comparison.changes.nodes} criticality={CriticalityLevel.Safe} />
     </div>
   );
-};
+}
 
 // URQL's Infinite scrolling pattern
 // https://formidable.com/open-source/urql/docs/basics/ui-patterns/#infinite-scrolling
-const ListPage = ({
+function ListPage({
   variables,
   isLastPage,
   onLoadMore,
@@ -161,7 +162,7 @@ const ListPage = ({
   isLastPage: boolean;
   onLoadMore: (after: string) => void;
   versionId: string;
-}): ReactElement => {
+}): ReactElement {
   const router = useRouteSelector();
 
   const [versionsQuery] = useQuery({
@@ -229,11 +230,11 @@ const ListPage = ({
       )}
     </>
   );
-};
+}
 
-type View = 'sdl' | 'list';
+type View = 'SDL' | 'list';
 
-const Page = ({ versionId }: { versionId: string }) => {
+function Page({ versionId }: { versionId: string }) {
   const [pageVariables, setPageVariables] = useState([{ limit: 10, after: '' }]);
 
   const [view, setView] = useState<View>('list');
@@ -269,12 +270,13 @@ const Page = ({ versionId }: { versionId: string }) => {
             className="bg-gray-900/50 text-gray-500"
           >
             {[
-              { value: 'sdl', icon: <VscDiff /> },
-              { value: 'list', icon: <VscListFlat /> },
+              { value: 'SDL', icon: <DiffIcon className="h-5 w-auto" /> },
+              { value: 'list', icon: <RowsIcon /> },
             ].map(({ value, icon }) => (
               <ToggleGroupItem
                 key={value}
                 value={value}
+                title={`Show ${value}`}
                 className={clsx('hover:text-white', view === value && 'bg-gray-800 text-white')}
               >
                 {icon}
@@ -288,7 +290,7 @@ const Page = ({ versionId }: { versionId: string }) => {
       </div>
     </>
   );
-};
+}
 
 function HistoryPage(): ReactElement {
   const router = useRouteSelector();

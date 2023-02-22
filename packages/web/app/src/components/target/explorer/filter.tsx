@@ -1,9 +1,7 @@
 import { useMemo } from 'react';
 import { useRouter } from 'next/router';
 import { gql, useQuery } from 'urql';
-import { Autocomplete } from '@/components/v2/autocomplete';
-import { RadixSelect } from '@/components/v2/select';
-import { Switch } from '@/components/v2/switch';
+import { Autocomplete, RadixSelect, SelectOption, Switch } from '@/components/v2';
 import { useArgumentListToggle, usePeriodSelector } from './provider';
 
 const SchemaExplorerFilter_AllTypes = gql(/* GraphQL */ `
@@ -56,15 +54,9 @@ export function SchemaExplorerFilter({
   typename,
 }: {
   typename?: string;
-  organization: {
-    cleanId: string;
-  };
-  project: {
-    cleanId: string;
-  };
-  target: {
-    cleanId: string;
-  };
+  organization: { cleanId: string };
+  project: { cleanId: string };
+  target: { cleanId: string };
   period: {
     to: string;
     from: string;
@@ -84,49 +76,36 @@ export function SchemaExplorerFilter({
   });
   const periodSelector = usePeriodSelector();
 
-  const allNamedTypes = query.data?.target?.latestSchemaVersion?.explorer.types ?? [];
-  const types = useMemo(() => {
-    if (allNamedTypes.length > 0) {
-      return allNamedTypes.map(t => ({
+  const allNamedTypes = query.data?.target?.latestSchemaVersion?.explorer.types;
+  const types = useMemo<SelectOption[]>(
+    () =>
+      allNamedTypes?.map(t => ({
         value: t.name,
         label: t.name,
-      }));
-    }
-
-    return [];
-  }, [allNamedTypes]);
+      })) || [],
+    [allNamedTypes],
+  );
 
   return (
-    <div className="flex flex-row items-center gap-12">
-      <div className="grow">
-        <Autocomplete
-          placeholder="Search for a type"
-          defaultValue={typename ? { value: typename, label: typename } : null}
-          options={types}
-          onChange={option => {
-            void router.push(
-              `/${organization.cleanId}/${project.cleanId}/${target.cleanId}/explorer/${option.value}`,
-            );
-          }}
-          loading={query.fetching}
-        />
-      </div>
-      <div className="shrink-0">
-        <RadixSelect
-          className="cursor-pointer rounded-md"
-          value={periodSelector.value}
-          onChange={periodSelector.onChange}
-          placeholder="Select a date range"
-          options={periodSelector.options}
-        />
-      </div>
-      <div className="shrink-0">
-        <div className="flex flex-row items-center gap-4">
-          <Switch checked={!collapsed} onCheckedChange={toggleCollapsed} />
-          <div>
-            <div>Show all arguments</div>
-            <p className="text-xs text-gray-500">List of arguments is collapsed by default</p>
-          </div>
+    <div className="flex flex-row items-center lg:gap-12 gap-4">
+      <Autocomplete
+        className="grow"
+        placeholder="Search for a type"
+        defaultValue={typename ? { value: typename, label: typename } : null}
+        options={types}
+        onChange={option => {
+          void router.push(
+            `/${organization.cleanId}/${project.cleanId}/${target.cleanId}/explorer/${option.value}`,
+          );
+        }}
+        loading={query.fetching}
+      />
+      <RadixSelect placeholder="Select a date range" {...periodSelector} />
+      <div className="flex flex-row items-center gap-4">
+        <Switch checked={!collapsed} onCheckedChange={toggleCollapsed} />
+        <div>
+          <div>Show all arguments</div>
+          <p className="text-xs text-gray-500">List of arguments is collapsed by default</p>
         </div>
       </div>
     </div>

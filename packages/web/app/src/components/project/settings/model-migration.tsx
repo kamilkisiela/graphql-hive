@@ -1,49 +1,25 @@
-import { useCallback } from 'react';
-import { FaCheck, FaQuestionCircle, FaTimes } from 'react-icons/fa';
+import { ReactElement, ReactNode, useCallback } from 'react';
 import { gql, useMutation } from 'urql';
-import { Button, Card, Heading } from '@/components/v2';
+import { Button, Card, Heading, Tooltip } from '@/components/v2';
 import { ProjectFieldsFragment, RegistryModel } from '@/graphql';
 import { useNotifications } from '@/lib/hooks';
-import {
-  Arrow,
-  Content,
-  Root,
-  Provider as TooltipProvider,
-  Trigger,
-} from '@radix-ui/react-tooltip';
+import { openChatSupport } from '@/utils';
+import { CheckIcon, Cross2Icon, QuestionMarkCircledIcon } from '@radix-ui/react-icons';
 
-function Tooltip({ content, children }: { content: React.ReactNode; children: React.ReactNode }) {
-  return (
-    <Root>
-      <Trigger>{children}</Trigger>
-      <Content
-        sideOffset={5}
-        className="rounded-sm bg-white p-2 text-xs font-normal text-black shadow"
-      >
-        {content}
-        <Arrow className="fill-current text-white" />
-      </Content>
-    </Root>
-  );
-}
+const divider = <div className="border-b border-gray-900 mt-4" />;
 
-function Divider() {
-  return <div className="border-b border-gray-900 mt-4" />;
-}
-
-function Flag(props: { children: React.ReactNode }) {
+function Flag(props: { children: ReactNode }): ReactElement {
   return <span className="rounded px-1 py-0.5 bg-gray-900/50 text-gray-300">{props.children}</span>;
 }
 
-function NoFlag() {
-  return <span className="text-gray-300">(defaults)</span>;
-}
+const noFlag = <span className="text-gray-300">(defaults)</span>;
+const crossIcon = <Cross2Icon className="h-6 w-auto text-red-500" />;
 
 function Row(props: {
-  action?: React.ReactNode;
-  flag?: React.ReactNode;
-  legacy?: React.ReactNode;
-  modern?: React.ReactNode;
+  action?: ReactNode;
+  flag?: ReactNode;
+  legacy?: ReactNode;
+  modern?: ReactNode;
 }) {
   return (
     <div className="flex">
@@ -59,7 +35,7 @@ function Row(props: {
   );
 }
 
-function Action(props: { title: React.ReactNode; description: React.ReactNode }) {
+function Action(props: { title: ReactNode; description: ReactNode }) {
   return (
     <>
       <p className="font-semibold">{props.title}</p>
@@ -68,39 +44,37 @@ function Action(props: { title: React.ReactNode; description: React.ReactNode })
   );
 }
 
-function Rejected() {
-  return (
-    <Tooltip content="GraphQL Hive will reject the request and CLI command will fail">
-      <FaTimes className="text-red-500 text-base" />
-    </Tooltip>
-  );
-}
+const rejected = (
+  <Tooltip content="GraphQL Hive will reject the request and CLI command will fail">
+    {crossIcon}
+  </Tooltip>
+);
 
-function Accepted(props: { gateway: boolean }) {
+function Accepted({ gateway }: { gateway: boolean }) {
   return (
     <Tooltip
       content={
-        <div>
+        <>
           <p>
             <span className="font-semibold">CDN:</span> Will be updated immediately
           </p>
           <p>
             <span className="font-semibold">Registry:</span> Will be updated immediately
           </p>
-          {props.gateway ? (
+          {gateway ? (
             <p>
               <span className="font-semibold">Your Gateway:</span> Will receive the new schema
             </p>
           ) : null}
-        </div>
+        </>
       }
     >
-      <FaCheck className="text-green-500 text-base" />
+      <CheckIcon className="h-6 w-auto text-green-500" />
     </Tooltip>
   );
 }
 
-function PartiallyAccepted(props: { gateway: boolean }) {
+function PartiallyAccepted(props: { gateway: boolean }): ReactElement {
   return (
     <Tooltip
       content={
@@ -119,26 +93,18 @@ function PartiallyAccepted(props: { gateway: boolean }) {
         </div>
       }
     >
-      <FaCheck className="text-yellow-500 text-base" />
+      <CheckIcon className="h-6 w-auto text-yellow-500" />
     </Tooltip>
   );
 }
 
-function Available() {
-  return (
-    <Tooltip content="Available">
-      <FaCheck className="text-green-500 text-base" />
-    </Tooltip>
-  );
-}
+const available = (
+  <Tooltip content="Available">
+    <CheckIcon className="h-6 w-auto text-green-500" />
+  </Tooltip>
+);
 
-function NotAvailable() {
-  return (
-    <Tooltip content="Not available">
-      <FaTimes className="text-red-500 text-base" />
-    </Tooltip>
-  );
-}
+const notAvailable = <Tooltip content="Not available">{crossIcon}</Tooltip>;
 
 const ModelMigrationSettings_upgradeProjectRegistryModelMutation = gql(/* GraphQL */ `
   mutation ModelMigrationSettings_upgradeProjectRegistryModelMutation(
@@ -155,13 +121,13 @@ const ModelMigrationSettings_upgradeProjectRegistryModelMutation = gql(/* GraphQ
   }
 `);
 
-export const ModelMigrationSettings = ({
+export function ModelMigrationSettings({
   project,
   organizationId,
 }: {
   project: ProjectFieldsFragment;
   organizationId: string;
-}) => {
+}): ReactElement | null {
   const isStitching = project.type === 'STITCHING';
   const isComposite = isStitching || project.type === 'FEDERATION';
   const notify = useNotifications();
@@ -213,18 +179,12 @@ export const ModelMigrationSettings = ({
           <Button variant="primary" size="large" disabled={fetching} onClick={upgrade}>
             Upgrade my project
           </Button>
-          <Button
-            variant="secondary"
-            size="large"
-            onClick={() => {
-              window.$crisp.push(['do', 'chat:open']);
-            }}
-          >
+          <Button variant="secondary" size="large" onClick={openChatSupport}>
             Live Chat
           </Button>
         </div>
       </div>
-      <TooltipProvider delayDuration={200}>
+      <Tooltip.Provider delayDuration={200}>
         <div className="text-sm pt-4">
           <div className="flex border-b-2 border-gray-900 text-gray-500">
             <div className="p-2 grow shrink basis-0">Action</div>
@@ -243,10 +203,10 @@ export const ModelMigrationSettings = ({
                     } from the registry`}
                   />
                 }
-                legacy={<NotAvailable />}
-                modern={<Available />}
+                legacy={notAvailable}
+                modern={available}
               />
-              <Divider />
+              {divider}
             </>
           ) : null}
           <Row
@@ -257,11 +217,7 @@ export const ModelMigrationSettings = ({
               />
             }
           />
-          <Row
-            legacy={<Rejected />}
-            modern={<Accepted gateway={isComposite} />}
-            flag={<NoFlag />}
-          />
+          <Row legacy={rejected} modern={<Accepted gateway={isComposite} />} flag={noFlag} />
           <Row
             legacy={<PartiallyAccepted gateway={isComposite} />}
             modern={<Accepted gateway={isComposite} />}
@@ -272,7 +228,7 @@ export const ModelMigrationSettings = ({
             modern={<Accepted gateway={isComposite} />}
             flag={<Flag>--experimental_acceptBreakingChanges</Flag>}
           />
-          <Divider />
+          {divider}
           <Row
             action={
               <Action
@@ -281,15 +237,15 @@ export const ModelMigrationSettings = ({
               />
             }
           />
-          <Row legacy={<Rejected />} modern={<Rejected />} flag={<NoFlag />} />
+          <Row legacy={rejected} modern={rejected} flag={noFlag} />
           <Row
             legacy={<PartiallyAccepted gateway={isComposite} />}
-            modern={<Rejected />}
+            modern={rejected}
             flag={<Flag>--force</Flag>}
           />
           {isComposite ? (
             <>
-              <Divider />
+              {divider}
               <Row
                 action={
                   <Action
@@ -299,9 +255,9 @@ export const ModelMigrationSettings = ({
                 }
               />
               <Row
-                legacy={<Rejected />}
+                legacy={rejected}
                 modern={<PartiallyAccepted gateway={isComposite} />}
-                flag={<NoFlag />}
+                flag={noFlag}
               />
               <Row
                 legacy={<PartiallyAccepted gateway={isComposite} />}
@@ -312,7 +268,7 @@ export const ModelMigrationSettings = ({
           ) : null}
           {isStitching ? (
             <>
-              <Divider />
+              {divider}
               <Row
                 action={
                   <Action
@@ -325,19 +281,15 @@ export const ModelMigrationSettings = ({
                   />
                 }
               />
+              <Row legacy={<Accepted gateway={isComposite} />} modern={rejected} flag={noFlag} />
               <Row
                 legacy={<Accepted gateway={isComposite} />}
-                modern={<Rejected />}
-                flag={<NoFlag />}
-              />
-              <Row
-                legacy={<Accepted gateway={isComposite} />}
-                modern={<Rejected />}
+                modern={rejected}
                 flag={<Flag>--force</Flag>}
               />
             </>
           ) : null}
-          <Divider />
+          {divider}
           <div className="p-2">
             <div className="font-semibold">Other changes</div>
             <div className="mt-4 flex flex-col gap-4">
@@ -354,24 +306,17 @@ export const ModelMigrationSettings = ({
         </div>
         <div className="mt-6">
           <div className="flex items-center gap-4 bg-gray-900/50 p-4 rounded border-2 border-gray-900">
-            <div>
-              <FaQuestionCircle />
-            </div>
+            <QuestionMarkCircledIcon className="h-5 w-auto" />
             <div className="font-light text-gray-300 text-sm">
               If you're having difficulty comprehending the changes,{' '}
-              <span
-                onClick={() => {
-                  window.$crisp.push(['do', 'chat:open']);
-                }}
-                className="text-yellow-500 cursor-pointer hover:underline"
-              >
+              <Button variant="link" onClick={openChatSupport}>
                 talk to us
-              </span>{' '}
+              </Button>{' '}
               through the live chat.
             </div>
           </div>
         </div>
-      </TooltipProvider>
+      </Tooltip.Provider>
     </Card>
   );
-};
+}

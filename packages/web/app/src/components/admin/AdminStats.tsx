@@ -1,42 +1,36 @@
-import React, { PropsWithChildren, ReactNode } from 'react';
+import {
+  isValidElement,
+  ReactElement,
+  ReactNode,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import { clsx } from 'clsx';
 import { formatISO } from 'date-fns';
 import ReactECharts from 'echarts-for-react';
-import { VscChevronDown, VscChevronLeft, VscChevronRight, VscChevronUp } from 'react-icons/vsc';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { DocumentType, gql, useQuery } from 'urql';
-import { DataWrapper } from '@/components/common/DataWrapper';
+import { Button, DataWrapper, Stat, Table, TBody, Td, Th, THead, Tr } from '@/components/v2';
+import { CHART_PRIMARY_COLOR } from '@/constants';
 import { env } from '@/env/frontend';
 import { OrganizationType } from '@/graphql';
 import { theme } from '@/lib/charts';
-import {
-  Button,
-  Flex,
-  IconButton,
-  Stat,
-  StatGroup,
-  StatLabel,
-  StatNumber,
-  Table,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
-} from '@chakra-ui/react';
+import { useChartStyles } from '@/utils';
+import { ChevronUpIcon } from '@radix-ui/react-icons';
 import {
   createTable,
   getCoreRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  Table as OriginalTable,
-  TableInstance as OriginalTableInstance,
   PaginationState,
   SortingState,
   useTableInstance,
 } from '@tanstack/react-table';
 
 interface Organization {
-  name: React.ReactElement;
+  name: ReactElement;
   members: string;
   type: OrganizationType;
   users: number;
@@ -48,8 +42,6 @@ interface Organization {
 }
 
 const table = createTable().setRowType<Organization>();
-
-type TableInstance = typeof table extends OriginalTable<infer T> ? OriginalTableInstance<T> : never;
 
 function formatNumber(value: number) {
   return Intl.NumberFormat().format(value);
@@ -80,17 +72,19 @@ const CollectedOperationsOverTime_OperationFragment = gql(/* GraphQL */ `
   }
 `);
 
-const CollectedOperationsOverTime: React.FC<{
+function CollectedOperationsOverTime({
+  dateRange,
+  operations,
+}: {
   dateRange: {
     from: Date;
     to: Date;
   };
-  operations: Array<DocumentType<typeof CollectedOperationsOverTime_OperationFragment>>;
-}> = ({ dateRange, operations }) => {
-  const data = React.useMemo(() => {
-    return operations.map<[string, number]>(node => [node.date, node.count]);
-  }, []);
-
+  operations: DocumentType<typeof CollectedOperationsOverTime_OperationFragment>[];
+}): ReactElement {
+  const dataRef = useRef<[string, number][]>();
+  dataRef.current ||= operations.map(node => [node.date, node.count]);
+  const data = dataRef.current;
   return (
     <AutoSizer disableHeight>
       {size => (
@@ -98,6 +92,7 @@ const CollectedOperationsOverTime: React.FC<{
           style={{ width: size.width, height: 200 }}
           theme={theme.theme}
           option={{
+            ...useChartStyles(),
             grid: {
               left: 50,
               top: 50,
@@ -116,19 +111,14 @@ const CollectedOperationsOverTime: React.FC<{
                 max: dateRange.to,
               },
             ],
-            yAxis: [
-              {
-                type: 'value',
-                min: 0,
-              },
-            ],
+            yAxis: [{ type: 'value', min: 0 }],
             series: [
               {
                 type: 'line',
                 name: 'Collected operations',
                 showSymbol: false,
                 smooth: true,
-                color: 'rgb(234, 179, 8)',
+                color: CHART_PRIMARY_COLOR,
                 areaStyle: {},
                 emphasis: {
                   focus: 'series',
@@ -142,42 +132,16 @@ const CollectedOperationsOverTime: React.FC<{
       )}
     </AutoSizer>
   );
-};
+}
 
-const OverallStat: React.FC<{
-  label: string;
-  value: number;
-}> = ({ label, value }) => {
+function OverallStat({ label, value }: { label: string; value: number }): ReactElement {
   return (
     <Stat>
-      <StatLabel>{label}</StatLabel>
-      <StatNumber>{formatNumber(value)}</StatNumber>
+      <Stat.Label>{label}</Stat.Label>
+      <Stat.Number>{formatNumber(value)}</Stat.Number>
     </Stat>
   );
-};
-
-const Sortable = ({
-  children,
-  isSorted,
-  isSortedDesc,
-  align = 'left',
-}: PropsWithChildren<{
-  align?: 'center' | 'right' | 'left';
-  isSortedDesc?: boolean;
-  isSorted?: boolean;
-}>) => {
-  return (
-    <Flex
-      direction="row"
-      align="center"
-      justifyContent={align === 'center' ? 'center' : align === 'left' ? 'flex-start' : 'flex-end'}
-      className="cursor-pointer"
-    >
-      <span>{children}</span>
-      {isSorted ? isSortedDesc ? <VscChevronDown /> : <VscChevronUp /> : null}
-    </Flex>
-  );
-};
+}
 
 const AdminStatsQuery = gql(/* GraphQL */ `
   query adminStats($period: DateRangeInput!) {
@@ -251,95 +215,55 @@ function filterStats(
   return true;
 }
 
-function OrganizationTableRow({ row }: { row: ReturnType<TableInstance['getRow']> }) {
-  return (
-    <Tr key={row.id}>
-      {row.getVisibleCells().map(cell => {
-        const isNumeric = typeof cell.getValue() === 'number';
-        const isReact =
-          typeof cell.getValue() === 'object' && React.isValidElement(cell.getValue());
-        return (
-          <Td
-            key={cell.id}
-            isNumeric={isNumeric}
-            align={(cell.column.columnDef.meta as { align: 'right' } | undefined)?.align ?? 'left'}
-          >
-            {isNumeric
-              ? formatNumber(cell.getValue() as number)
-              : isReact
-              ? (cell.getValue() as ReactNode)
-              : cell.renderCell()}
-          </Td>
-        );
-      })}
-    </Tr>
-  );
-}
+const columns = [
+  table.createDataColumn('name', {
+    header: 'Organization',
+    footer: props => props.column.id,
+    enableSorting: false,
+  }),
+  table.createDataColumn('type', {
+    header: 'Type',
+    footer: props => props.column.id,
+  }),
+  table.createDataColumn('members', {
+    header: 'Members',
+    footer: props => props.column.id,
+  }),
+  table.createDataColumn('users', {
+    header: 'Users',
+    footer: props => props.column.id,
+    meta: { align: 'right' },
+  }),
+  table.createDataColumn('projects', {
+    header: 'Projects',
+    footer: props => props.column.id,
+    meta: { align: 'right' },
+  }),
+  table.createDataColumn('targets', {
+    header: 'Targets',
+    footer: props => props.column.id,
+    meta: { align: 'right' },
+  }),
+  table.createDataColumn('versions', {
+    header: 'Schema pushes',
+    footer: props => props.column.id,
+    meta: { align: 'right' },
+  }),
+  table.createDataColumn('persistedOperations', {
+    header: 'Persisted Ops',
+    footer: props => props.column.id,
+    meta: { align: 'right' },
+  }),
+  table.createDataColumn('operations', {
+    header: 'Collected Ops',
+    footer: props => props.column.id,
+    meta: { align: 'right' },
+  }),
+];
 
 function OrganizationTable({ data }: { data: Organization[] }) {
-  const columns = React.useMemo(
-    () => [
-      table.createDataColumn('name', {
-        header: 'Organization',
-        footer: props => props.column.id,
-        enableSorting: false,
-      }),
-      table.createDataColumn('type', {
-        header: 'Type',
-        footer: props => props.column.id,
-      }),
-      table.createDataColumn('members', {
-        header: 'Members',
-        footer: props => props.column.id,
-        meta: {
-          align: 'right',
-        },
-      }),
-      table.createDataColumn('users', {
-        header: 'Users',
-        footer: props => props.column.id,
-      }),
-      table.createDataColumn('projects', {
-        header: 'Projects',
-        footer: props => props.column.id,
-        meta: {
-          align: 'right',
-        },
-      }),
-      table.createDataColumn('targets', {
-        header: 'Targets',
-        footer: props => props.column.id,
-        meta: {
-          align: 'right',
-        },
-      }),
-      table.createDataColumn('versions', {
-        header: 'Schema pushes',
-        footer: props => props.column.id,
-        meta: {
-          align: 'right',
-        },
-      }),
-      table.createDataColumn('persistedOperations', {
-        header: 'Persisted Ops',
-        footer: props => props.column.id,
-        meta: {
-          align: 'right',
-        },
-      }),
-      table.createDataColumn('operations', {
-        header: 'Collected Ops',
-        footer: props => props.column.id,
-        meta: {
-          align: 'right',
-        },
-      }),
-    ],
-    [],
-  );
-
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [pagination, setPagination] = React.useState<PaginationState>({
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 20,
   });
@@ -347,10 +271,7 @@ function OrganizationTable({ data }: { data: Organization[] }) {
   const tableInstance = useTableInstance(table, {
     data,
     columns,
-    state: {
-      sorting,
-      pagination,
-    },
+    state: { sorting, pagination },
     onSortingChange: setSorting,
     onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
@@ -359,102 +280,114 @@ function OrganizationTable({ data }: { data: Organization[] }) {
     debugTable: env.nodeEnv !== 'production',
   });
 
-  const firstPage = React.useCallback(() => {
+  const firstPage = useCallback(() => {
     tableInstance.setPageIndex(0);
   }, [tableInstance]);
-  const lastPage = React.useCallback(() => {
+  const lastPage = useCallback(() => {
     tableInstance.setPageIndex(tableInstance.getPageCount() - 1);
   }, [tableInstance]);
 
   const headerGroup = tableInstance.getHeaderGroups()[0];
 
   return (
-    <div>
-      <Table size="sm">
-        <Thead>
-          <Tr>
-            {headerGroup.headers.map(header => {
-              const align =
-                (
-                  header.column.columnDef.meta as
-                    | {
-                        align: 'right';
-                      }
-                    | undefined
-                )?.align ?? 'left';
-
-              return (
-                <Th key={header.id} align={align} onClick={header.column.getToggleSortingHandler()}>
-                  <Sortable
-                    align={align}
-                    isSorted={header.column.getIsSorted() !== false}
-                    isSortedDesc={header.column.getIsSorted() === 'desc'}
-                  >
-                    {header.renderHeader()}
-                  </Sortable>
-                </Th>
-              );
-            })}
-          </Tr>
-        </Thead>
-        <Tbody>
+    <>
+      <Table>
+        <THead>
+          {headerGroup.headers.map(header => {
+            const align =
+              (header.column.columnDef.meta as { align: 'right' } | undefined)?.align ?? 'left';
+            const isSorted = header.column.getIsSorted() !== false;
+            return (
+              <Th
+                key={header.id}
+                align={align}
+                onClick={isSorted ? header.column.getToggleSortingHandler() : undefined}
+                className={isSorted ? 'cursor-pointer' : ''}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span>{header.renderHeader()}</span>
+                  {isSorted && (
+                    <ChevronUpIcon
+                      className={clsx(
+                        header.column.getIsSorted() === 'desc' && 'rotate-180',
+                        'w-auto h-5',
+                      )}
+                    />
+                  )}
+                </div>
+              </Th>
+            );
+          })}
+        </THead>
+        <TBody>
           {tableInstance.getRowModel().rows.map(row => (
-            <OrganizationTableRow row={row} key={row.id} />
+            <Tr key={row.id}>
+              {row.getVisibleCells().map(cell => {
+                const isNumeric = typeof cell.getValue() === 'number';
+                const isReact =
+                  typeof cell.getValue() === 'object' && isValidElement(cell.getValue());
+                const align =
+                  (cell.column.columnDef.meta as { align: 'right' } | undefined)?.align ?? 'left';
+                return (
+                  <Td key={cell.id} align={align}>
+                    {isNumeric
+                      ? formatNumber(cell.getValue() as number)
+                      : isReact
+                      ? (cell.getValue() as ReactNode)
+                      : cell.renderCell()}
+                  </Td>
+                );
+              })}
+            </Tr>
           ))}
-        </Tbody>
+        </TBody>
       </Table>
-      <div className="py-3 flex flex-row items-center justify-center space-x-2">
+
+      <div className="py-3 flex flex-row items-center justify-center gap-4">
         <Button
-          size="sm"
-          variant="ghost"
-          colorScheme="gray"
+          variant="secondary"
           onClick={firstPage}
           disabled={!tableInstance.getCanPreviousPage()}
         >
           First
         </Button>
-        <IconButton
-          size="sm"
-          variant="ghost"
-          colorScheme="gray"
+        <Button
+          variant="secondary"
           aria-label="Go to previous page"
           onClick={tableInstance.previousPage}
           disabled={!tableInstance.getCanPreviousPage()}
-          icon={<VscChevronLeft />}
-        />
+        >
+          <ChevronUpIcon className="-rotate-90 h-5 w-auto" />
+        </Button>
         <span className="font-bold whitespace-nowrap text-sm">
           {tableInstance.getState().pagination.pageIndex + 1} / {tableInstance.getPageCount()}
         </span>
-        <IconButton
-          size="sm"
-          variant="ghost"
-          colorScheme="gray"
+        <Button
+          variant="secondary"
           aria-label="Go to next page"
           onClick={tableInstance.nextPage}
           disabled={!tableInstance.getCanNextPage()}
-          icon={<VscChevronRight />}
-        />
-        <Button
-          size="sm"
-          variant="ghost"
-          colorScheme="gray"
-          onClick={lastPage}
-          disabled={!tableInstance.getCanNextPage()}
         >
+          <ChevronUpIcon className="rotate-90 h-5 w-auto" />
+        </Button>
+        <Button variant="secondary" onClick={lastPage} disabled={!tableInstance.getCanNextPage()}>
           Last
         </Button>
       </div>
-    </div>
+    </>
   );
 }
 
-export const AdminStats: React.FC<{
+export function AdminStats({
+  dateRange,
+  filters,
+}: {
   dateRange: {
     from: Date;
     to: Date;
   };
   filters: Filters;
-}> = ({ dateRange, filters }) => {
+}): ReactElement {
   const [query] = useQuery({
     query: AdminStatsQuery,
     variables: {
@@ -465,31 +398,33 @@ export const AdminStats: React.FC<{
     },
   });
 
-  const tableData = React.useMemo(() => {
-    return (query.data?.admin?.stats.organizations ?? [])
-      .filter(node => filterStats(node, filters))
-      .map(node => ({
-        name: (
-          <div>
-            <div style={{ paddingBottom: 5, fontWeight: 'bold' }}>{node.organization.name}</div>
-            <pre title="id">{node.organization.id}</pre>
-            <pre title="clean id">{node.organization.cleanId}</pre>
-            <pre title="owner">{node.organization.owner.user.email}</pre>
-          </div>
-        ),
-        members: (node.organization.members.nodes || []).map(v => v.user.email).join(', '),
-        type: node.organization.type,
-        users: node.users,
-        projects: node.projects,
-        targets: node.targets,
-        versions: node.versions,
-        persistedOperations: node.persistedOperations,
-        operations: node.operations,
-      }));
-  }, [query.data, filters]);
+  const tableData = useMemo(
+    () =>
+      (query.data?.admin?.stats.organizations ?? [])
+        .filter(node => filterStats(node, filters))
+        .map(node => ({
+          name: (
+            <div>
+              <div style={{ paddingBottom: 5, fontWeight: 'bold' }}>{node.organization.name}</div>
+              <pre title="id">{node.organization.id}</pre>
+              <pre title="clean id">{node.organization.cleanId}</pre>
+              <pre title="owner">{node.organization.owner.user.email}</pre>
+            </div>
+          ),
+          members: (node.organization.members.nodes || []).map(v => v.user.email).join(', '),
+          type: node.organization.type,
+          users: node.users,
+          projects: node.projects,
+          targets: node.targets,
+          versions: node.versions,
+          persistedOperations: node.persistedOperations,
+          operations: node.operations,
+        })),
+    [query.data, filters],
+  );
 
-  const overall = React.useMemo(() => {
-    return {
+  const overall = useMemo(
+    () => ({
       users: tableData.reduce((total, node) => (node.type === 'PERSONAL' ? total + 1 : total), 0),
       organizations: tableData.length,
       projects: sumByKey(tableData, 'projects'),
@@ -497,14 +432,15 @@ export const AdminStats: React.FC<{
       versions: sumByKey(tableData, 'versions'),
       persistedOperations: sumByKey(tableData, 'persistedOperations'),
       operations: sumByKey(tableData, 'operations'),
-    };
-  }, [tableData]);
+    }),
+    [tableData],
+  );
 
   return (
     <DataWrapper query={query}>
       {({ data }) => (
-        <div className="flex flex-col space-y-6">
-          <StatGroup className="bg-gray-100 dark:bg-gray-800 px-3 py-2">
+        <div className="flex flex-col gap-6">
+          <div className="flex rounded-md p-5 border border-gray-800 bg-gray-900/50 justify-between">
             <OverallStat label="Users" value={overall.users} />
             <OverallStat label="Organizations" value={overall.organizations} />
             <OverallStat label="Projects" value={overall.projects} />
@@ -512,7 +448,7 @@ export const AdminStats: React.FC<{
             <OverallStat label="Schema Pushes" value={overall.versions} />
             <OverallStat label="Persisted Ops" value={overall.persistedOperations} />
             <OverallStat label="Collected Ops" value={overall.operations} />
-          </StatGroup>
+          </div>
           <CollectedOperationsOverTime
             dateRange={dateRange}
             operations={data.admin.stats.general.operationsOverTime}
@@ -522,4 +458,4 @@ export const AdminStats: React.FC<{
       )}
     </DataWrapper>
   );
-};
+}

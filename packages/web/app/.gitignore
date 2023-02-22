@@ -32,8 +32,3 @@ npm-debug.log*
 
 # Graphql
 lib/graphql-operations.ts
-
-next.config.mjs
-environment-*.mjs
-
-./packages

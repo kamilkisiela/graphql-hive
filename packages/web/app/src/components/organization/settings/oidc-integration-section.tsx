@@ -1,15 +1,17 @@
 import { ReactElement } from 'react';
 import { useRouter } from 'next/router';
+import { clsx } from 'clsx';
 import { useFormik } from 'formik';
 import { DocumentType, gql, useMutation } from 'urql';
-import { Button, Input, Modal, Tag } from '@/components/v2';
+import { Button, Heading, Input, Modal, Tag } from '@/components/v2';
 import { AlertTriangleIcon, KeyIcon } from '@/components/v2/icon';
 import { InlineCode } from '@/components/v2/inline-code';
 import { env } from '@/env/frontend';
-import { Heading } from '@chakra-ui/react';
 
-const containerClassName = 'flex flex-col items-stretch gap-5';
-const modalWidthClassName = 'w-[550px]';
+const classes = {
+  container: clsx('flex flex-col items-stretch gap-5'),
+  modal: clsx('w-[550px]'),
+};
 
 const OIDCIntegrationSection_OrganizationFragment = gql(/* GraphQL */ `
   fragment OIDCIntegrationSection_OrganizationFragment on Organization {
@@ -21,14 +23,14 @@ const OIDCIntegrationSection_OrganizationFragment = gql(/* GraphQL */ `
   }
 `);
 
-const extractDomain = (rawUrl: string) => {
+function extractDomain(rawUrl: string) {
   const url = new URL(rawUrl);
   return url.host;
-};
+}
 
-export const OIDCIntegrationSection = (props: {
+export function OIDCIntegrationSection(props: {
   organization: DocumentType<typeof OIDCIntegrationSection_OrganizationFragment>;
-}): ReactElement => {
+}): ReactElement {
   const router = useRouter();
 
   const isCreateOIDCIntegrationModalOpen = router.asPath.endsWith('#create-oidc-integration');
@@ -116,7 +118,7 @@ export const OIDCIntegrationSection = (props: {
       />
     </>
   );
-};
+}
 
 const CreateOIDCIntegrationModal_CreateOIDCIntegrationMutation = gql(/* GraphQL */ `
   mutation CreateOIDCIntegrationModal_CreateOIDCIntegrationMutation(
@@ -142,18 +144,18 @@ const CreateOIDCIntegrationModal_CreateOIDCIntegrationMutation = gql(/* GraphQL 
   }
 `);
 
-const CreateOIDCIntegrationModal = (props: {
+function CreateOIDCIntegrationModal(props: {
   isOpen: boolean;
   close: () => void;
   hasOIDCIntegration: boolean;
   organizationId: string;
   openEditModalLink: string;
   transitionToManageScreen: () => void;
-}): ReactElement => {
+}): ReactElement {
   return (
-    <Modal open={props.isOpen} onOpenChange={props.close} className={modalWidthClassName}>
-      {props.hasOIDCIntegration === true ? (
-        <div className={containerClassName}>
+    <Modal open={props.isOpen} onOpenChange={props.close} className={classes.modal}>
+      {props.hasOIDCIntegration ? (
+        <div className={classes.container}>
           <Heading>Connect OpenID Connect Provider</Heading>
           <p>
             You are trying to create an OpenID Connect integration for an organization that already
@@ -184,13 +186,13 @@ const CreateOIDCIntegrationModal = (props: {
       )}
     </Modal>
   );
-};
+}
 
-const CreateOIDCIntegrationForm = (props: {
+function CreateOIDCIntegrationForm(props: {
   organizationId: string;
   close: () => void;
   transitionToManageScreen: () => void;
-}): ReactElement => {
+}): ReactElement {
   const [mutation, mutate] = useMutation(CreateOIDCIntegrationModal_CreateOIDCIntegrationMutation);
 
   const formik = useFormik({
@@ -201,7 +203,7 @@ const CreateOIDCIntegrationForm = (props: {
       clientId: '',
       clientSecret: '',
     },
-    onSubmit: async values => {
+    async onSubmit(values) {
       const result = await mutate({
         input: {
           organizationId: props.organizationId,
@@ -226,7 +228,7 @@ const CreateOIDCIntegrationForm = (props: {
   });
 
   return (
-    <form className={containerClassName} onSubmit={formik.handleSubmit}>
+    <form className={classes.container} onSubmit={formik.handleSubmit}>
       <Heading>Connect OpenID Connect Provider</Heading>
       <p>
         Connecting an OIDC provider to this organization allows users to automatically log in and be
@@ -236,55 +238,66 @@ const CreateOIDCIntegrationForm = (props: {
         Use Okta, Auth0, Google Workspaces or any other OAuth2 Open ID Connect compatible provider.
       </p>
 
+      <label className="text-sm font-semibold" htmlFor="tokenEndpoint">
+        Token Endpoint
+      </label>
+
       <Input
         placeholder="OAuth Token Endpoint API"
         id="tokenEndpoint"
         name="tokenEndpoint"
-        prefix={<label className="text-sm font-semibold">Token Endpoint</label>}
         onChange={formik.handleChange}
         value={formik.values.tokenEndpoint}
         isInvalid={!!mutation.data?.createOIDCIntegration.error?.details.tokenEndpoint}
       />
       <div>{mutation.data?.createOIDCIntegration.error?.details.tokenEndpoint}</div>
 
+      <label className="text-sm font-semibold" htmlFor="userinfoEndpoint">
+        User Info Endpoint
+      </label>
       <Input
         placeholder="OAuth User Info Endpoint API"
         id="userinfoEndpoint"
         name="userinfoEndpoint"
-        prefix={<label className="text-sm font-semibold">User Info Endpoint</label>}
         onChange={formik.handleChange}
         value={formik.values.userinfoEndpoint}
         isInvalid={!!mutation.data?.createOIDCIntegration.error?.details.userinfoEndpoint}
       />
       <div>{mutation.data?.createOIDCIntegration.error?.details.userinfoEndpoint}</div>
 
+      <label className="text-sm font-semibold" htmlFor="authorizationEndpoint">
+        Authorization Endpoint
+      </label>
       <Input
         placeholder="OAuth Authorization Endpoint API"
         id="authorizationEndpoint"
         name="authorizationEndpoint"
-        prefix={<label className="text-sm font-semibold">Authorization Endpoint</label>}
         onChange={formik.handleChange}
         value={formik.values.authorizationEndpoint}
         isInvalid={!!mutation.data?.createOIDCIntegration.error?.details.authorizationEndpoint}
       />
       <div>{mutation.data?.createOIDCIntegration.error?.details.authorizationEndpoint}</div>
 
+      <label className="text-sm font-semibold" htmlFor="clientId">
+        Client ID
+      </label>
       <Input
         placeholder="Client ID"
         id="clientId"
         name="clientId"
-        prefix={<label className="text-sm font-semibold">Client ID</label>}
         onChange={formik.handleChange}
         value={formik.values.clientId}
         isInvalid={!!mutation.data?.createOIDCIntegration.error?.details.clientId}
       />
       <div>{mutation.data?.createOIDCIntegration.error?.details.clientId}</div>
 
+      <label className="text-sm font-semibold" htmlFor="clientSecret">
+        Client Secret
+      </label>
       <Input
         placeholder="Client Secret"
         id="clientSecret"
         name="clientSecret"
-        prefix={<label className="text-sm font-semibold">Client Secret</label>}
         onChange={formik.handleChange}
         value={formik.values.clientSecret}
         isInvalid={!!mutation.data?.createOIDCIntegration.error?.details.clientSecret}
@@ -301,17 +314,17 @@ const CreateOIDCIntegrationForm = (props: {
       </div>
     </form>
   );
-};
+}
 
-const ManageOIDCIntegrationModal = (props: {
+function ManageOIDCIntegrationModal(props: {
   isOpen: boolean;
   close: () => void;
   oidcIntegration: DocumentType<typeof UpdateOIDCIntegration_OIDCIntegrationFragment> | null;
   openCreateModalLink: string;
-}): ReactElement => {
+}): ReactElement {
   return props.oidcIntegration === null ? (
-    <Modal open={props.isOpen} onOpenChange={props.close} className={modalWidthClassName}>
-      <div className={containerClassName}>
+    <Modal open={props.isOpen} onOpenChange={props.close} className={classes.modal}>
+      <div className={classes.container}>
         <Heading>Manage OpenID Connect Integration</Heading>
         <p>
           You are trying to update an OpenID Connect integration for an organization that has no
@@ -341,7 +354,7 @@ const ManageOIDCIntegrationModal = (props: {
       oidcIntegration={props.oidcIntegration}
     />
   );
-};
+}
 
 const UpdateOIDCIntegration_OIDCIntegrationFragment = gql(/* GraphQL */ `
   fragment UpdateOIDCIntegration_OIDCIntegrationFragment on OIDCIntegration {
@@ -383,11 +396,11 @@ const UpdateOIDCIntegrationForm_UpdateOIDCIntegrationMutation = gql(/* GraphQL *
   }
 `);
 
-const UpdateOIDCIntegrationForm = (props: {
+function UpdateOIDCIntegrationForm(props: {
   close: () => void;
   isOpen: boolean;
   oidcIntegration: DocumentType<typeof UpdateOIDCIntegration_OIDCIntegrationFragment>;
-}): ReactElement => {
+}): ReactElement {
   const [mutation, mutate] = useMutation(UpdateOIDCIntegrationForm_UpdateOIDCIntegrationMutation);
 
   const formik = useFormik({
@@ -398,7 +411,7 @@ const UpdateOIDCIntegrationForm = (props: {
       clientId: props.oidcIntegration.clientId,
       clientSecret: '',
     },
-    onSubmit: async values => {
+    async onSubmit(values) {
       const result = await mutate({
         input: {
           oidcIntegrationId: props.oidcIntegration.id,
@@ -424,11 +437,11 @@ const UpdateOIDCIntegrationForm = (props: {
 
   return (
     <Modal open={props.isOpen} onOpenChange={props.close} className="flex min-h-[600px] w-[960px]">
-      <form className={`${containerClassName} flex-1 gap-12`} onSubmit={formik.handleSubmit}>
+      <form className={clsx(classes.container, 'flex-1 gap-12')} onSubmit={formik.handleSubmit}>
         <Heading>Manage OpenID Connect Integration</Heading>
         <div className="flex">
-          <div className={`${containerClassName} flex flex-1 flex-col pr-5`}>
-            <Heading size="sm">OIDC Provider Instructions</Heading>
+          <div className={clsx(classes.container, 'flex flex-1 flex-col pr-5')}>
+            <Heading size="lg">OIDC Provider Instructions</Heading>
             <ul className="flex flex-col gap-5">
               <li>
                 Set your OIDC Provider Sign-in redirect URI to{' '}
@@ -446,36 +459,42 @@ const UpdateOIDCIntegrationForm = (props: {
               </li>
             </ul>
           </div>
-          <div className={`${containerClassName} flex-1 pl-5`}>
-            <Heading size="sm">Properties</Heading>
+          <div className={clsx(classes.container, 'flex-1 pl-5')}>
+            <Heading size="lg">Properties</Heading>
 
+            <label className="text-sm font-semibold" htmlFor="tokenEndpoint">
+              Token Endpoint
+            </label>
             <Input
               placeholder="OAuth Token Endpoint API"
               id="tokenEndpoint"
               name="tokenEndpoint"
-              prefix={<label className="text-sm font-semibold">Token Endpoint</label>}
               onChange={formik.handleChange}
               value={formik.values.tokenEndpoint}
               isInvalid={!!mutation.data?.updateOIDCIntegration.error?.details.tokenEndpoint}
             />
             <div>{mutation.data?.updateOIDCIntegration.error?.details.tokenEndpoint}</div>
 
+            <label className="text-sm font-semibold" htmlFor="userinfoEndpoint">
+              User Info Endpoint
+            </label>
             <Input
               placeholder="OAuth User Info Endpoint API"
               id="userinfoEndpoint"
               name="userinfoEndpoint"
-              prefix={<label className="text-sm font-semibold">User Info Endpoint</label>}
               onChange={formik.handleChange}
               value={formik.values.userinfoEndpoint}
               isInvalid={!!mutation.data?.updateOIDCIntegration.error?.details.userinfoEndpoint}
             />
             <div>{mutation.data?.updateOIDCIntegration.error?.details.userinfoEndpoint}</div>
 
+            <label className="text-sm font-semibold" htmlFor="authorizationEndpoint">
+              Authorization Endpoint
+            </label>
             <Input
               placeholder="OAuth Authorization Endpoint API"
               id="authorizationEndpoint"
               name="authorizationEndpoint"
-              prefix={<label className="text-sm font-semibold">Authorization Endpoint</label>}
               onChange={formik.handleChange}
               value={formik.values.authorizationEndpoint}
               isInvalid={
@@ -484,17 +503,22 @@ const UpdateOIDCIntegrationForm = (props: {
             />
             <div>{mutation.data?.updateOIDCIntegration.error?.details.authorizationEndpoint}</div>
 
+            <label className="text-sm font-semibold" htmlFor="clientId">
+              Client ID
+            </label>
             <Input
               placeholder="Client ID"
               id="clientId"
               name="clientId"
-              prefix={<label className="text-sm font-semibold">Client ID</label>}
               onChange={formik.handleChange}
               value={formik.values.clientId}
               isInvalid={!!mutation.data?.updateOIDCIntegration.error?.details.clientId}
             />
             <div>{mutation.data?.updateOIDCIntegration.error?.details.clientId}</div>
 
+            <label className="text-sm font-semibold" htmlFor="clientSecret">
+              Client Secret
+            </label>
             <Input
               placeholder={
                 'Keep old value. (Ending with ' +
@@ -505,7 +529,6 @@ const UpdateOIDCIntegrationForm = (props: {
               }
               id="clientSecret"
               name="clientSecret"
-              prefix={<label className="text-sm font-semibold">Client Secret</label>}
               onChange={formik.handleChange}
               value={formik.values.clientSecret}
               isInvalid={!!mutation.data?.updateOIDCIntegration.error?.details.clientSecret}
@@ -524,7 +547,7 @@ const UpdateOIDCIntegrationForm = (props: {
       </form>
     </Modal>
   );
-};
+}
 
 const RemoveOIDCIntegrationForm_DeleteOIDCIntegrationMutation = gql(/* GraphQL */ `
   mutation RemoveOIDCIntegrationForm_DeleteOIDCIntegrationMutation(
@@ -543,17 +566,17 @@ const RemoveOIDCIntegrationForm_DeleteOIDCIntegrationMutation = gql(/* GraphQL *
   }
 `);
 
-const RemoveOIDCIntegrationModal = (props: {
+function RemoveOIDCIntegrationModal(props: {
   isOpen: boolean;
   close: () => void;
   oidcIntegrationId: null | string;
-}) => {
+}): ReactElement {
   const [mutation, mutate] = useMutation(RemoveOIDCIntegrationForm_DeleteOIDCIntegrationMutation);
   const { oidcIntegrationId } = props;
 
   return (
-    <Modal open={props.isOpen} onOpenChange={props.close} className={modalWidthClassName}>
-      <div className={containerClassName}>
+    <Modal open={props.isOpen} onOpenChange={props.close} className={classes.modal}>
+      <div className={classes.container}>
         <Heading>Remove OpenID Connect Integration</Heading>
         {mutation.data?.deleteOIDCIntegration.ok ? (
           <>
@@ -594,9 +617,7 @@ const RemoveOIDCIntegrationModal = (props: {
                 danger
                 disabled={mutation.fetching}
                 onClick={async () => {
-                  await mutate({
-                    input: { oidcIntegrationId },
-                  });
+                  await mutate({ input: { oidcIntegrationId } });
                 }}
               >
                 Delete
@@ -607,4 +628,4 @@ const RemoveOIDCIntegrationModal = (props: {
       </div>
     </Modal>
   );
-};
+}

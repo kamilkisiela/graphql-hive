@@ -23,7 +23,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
       <TagToUse
         // @ts-expect-error TODO: figure out what's wrong with ref here
         ref={forwardedRef}
-        className={clsx('rounded-md p-5 ring-1 ring-gray-800 transition', className)}
+        className={clsx('rounded-md p-5 border border-gray-800', className)}
         {...props}
       >
         {children}

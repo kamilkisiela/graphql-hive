@@ -35,7 +35,7 @@ import { useRouteSelector, useToggle } from '@/lib/hooks';
 
 type DropdownOrganization = OrganizationsQuery['organizations']['nodes'];
 
-export const Header = (): ReactElement => {
+export function Header(): ReactElement {
   const router = useRouteSelector();
   const [meQuery] = useQuery({ query: MeDocument });
   const [organizationsQuery] = useQuery({ query: OrganizationsDocument });
@@ -204,4 +204,4 @@ export const Header = (): ReactElement => {
       <CreateOrganizationModal isOpen={isModalOpen} toggleModalOpen={toggleModalOpen} />
     </header>
   );
-};
+}

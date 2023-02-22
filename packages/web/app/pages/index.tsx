@@ -5,7 +5,7 @@ import Session from 'supertokens-node/recipe/session';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { Title } from '@/components/common';
-import { DataWrapper } from '@/components/common/DataWrapper';
+import { DataWrapper } from '@/components/v2';
 import { LAST_VISITED_ORG_KEY } from '@/constants';
 import { env } from '@/env/backend';
 import { OrganizationsDocument, OrganizationType } from '@/graphql';
@@ -26,11 +26,7 @@ async function getSuperTokensUserIdFromRequest(
 
 export const getServerSideProps = withSessionProtection(async ({ req, res }) => {
   const internalApi = createTRPCProxyClient<InternalApi>({
-    links: [
-      httpLink({
-        url: `${env.serverEndpoint}/trpc`,
-      }),
-    ],
+    links: [httpLink({ url: `${env.serverEndpoint}/trpc` })],
   });
 
   const superTokensId = await getSuperTokensUserIdFromRequest(req as any, res as any);

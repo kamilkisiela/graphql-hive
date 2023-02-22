@@ -1,4 +1,4 @@
-import React from 'react';
+import { ReactElement, useEffect } from 'react';
 import { GetServerSideProps } from 'next';
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
@@ -24,24 +24,20 @@ export const getServerSideProps: GetServerSideProps = async context => {
   }
 
   return {
-    props: {
-      oidcProviderId: null,
-    },
+    props: { oidcProviderId: null },
   };
 };
 
 const SuperTokensComponentNoSSR = dynamic(
   new Promise(res => res(SuperTokensReact.getRoutingComponent)) as any,
-  {
-    ssr: false,
-  },
+  { ssr: false },
 );
 
 /**
  * Route for showing the SuperTokens login page.
  */
-export default function Auth(props: { oidcProviderId: string | null }): React.ReactElement {
-  React.useEffect(() => {
+export default function Auth(props: { oidcProviderId: string | null }): ReactElement {
+  useEffect(() => {
     if (props.oidcProviderId) {
       void startAuthFlowForOIDCProvider(props.oidcProviderId);
       return;
@@ -58,33 +54,29 @@ export default function Auth(props: { oidcProviderId: string | null }): React.Re
   }, []);
 
   return (
-    <>
-      <>
-        <Head>
-          <title>Welcome to GraphQL Hive</title>
-          <meta property="og:title" content="Welcome to GraphQL Hive" key="title" />
-          <meta
-            name="description"
-            content="An open-source registry of schemas with many additional features to enhance your day-to-day work with GraphQL"
-            key="description"
-          />
-          <meta property="og:url" key="og:url" content="https://app.graphql-hive.com" />
-          <meta property="og:type" key="og:type" content="website" />
-          <meta
-            property="og:image"
-            key="og:image"
-            content="https://the-guild-og-image.vercel.app/**Manage%20your%20GraphQL%20APIs**.png?theme=light&md=1&fontSize=100px&images=https://graphql-hive.com/logo.svg&widths=800&heights=400"
-          />
-        </Head>
-        <div>
-          <FullLogo
-            className="mx-auto my-5 text-yellow-500"
-            width={150}
-            color={{ main: '#fff', sub: '#fff' }}
-          />
-          {props.oidcProviderId ? null : <SuperTokensComponentNoSSR />}
-        </div>
-      </>
-    </>
+    <div>
+      <Head>
+        <title>Welcome to GraphQL Hive</title>
+        <meta property="og:title" content="Welcome to GraphQL Hive" key="title" />
+        <meta
+          name="description"
+          content="An open-source registry of schemas with many additional features to enhance your day-to-day work with GraphQL"
+          key="description"
+        />
+        <meta property="og:url" key="og:url" content="https://app.graphql-hive.com" />
+        <meta property="og:type" key="og:type" content="website" />
+        <meta
+          property="og:image"
+          key="og:image"
+          content="https://the-guild-og-image.vercel.app/**Manage%20your%20GraphQL%20APIs**.png?theme=light&md=1&fontSize=100px&images=https://graphql-hive.com/logo.svg&widths=800&heights=400"
+        />
+      </Head>
+      <FullLogo
+        className="mx-auto my-5 text-yellow-500"
+        width={150}
+        color={{ main: '#fff', sub: '#fff' }}
+      />
+      {props.oidcProviderId ? null : <SuperTokensComponentNoSSR />}
+    </div>
   );
 }

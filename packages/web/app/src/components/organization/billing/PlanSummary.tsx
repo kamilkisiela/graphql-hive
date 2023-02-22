@@ -1,84 +1,65 @@
 import { ReactElement, ReactNode } from 'react';
+import { Stat, Table, TBody, Td, TFoot, Th, THead, Tr } from '@/components/v2';
 import { BillingPlansQuery, BillingPlanType } from '@/graphql';
-import {
-  Stat,
-  StatGroup,
-  StatHelpText,
-  StatLabel,
-  StatNumber,
-  Table,
-  Tbody,
-  Td,
-  Tfoot,
-  Th,
-  Thead,
-  Tr,
-} from '@chakra-ui/react';
 import { CurrencyFormatter } from './helpers';
 
-const PriceEstimationTable = ({
+function PriceEstimationTable({
   plan,
   operationsRateLimit,
 }: {
   plan: BillingPlansQuery['billingPlans'][number];
   operationsRateLimit: number;
-}): ReactElement => {
+}): ReactElement {
   const includedOperationsInMillions = (plan.includedOperationsLimit ?? 0) / 1_000_000;
   const additionalOperations = Math.max(0, operationsRateLimit - includedOperationsInMillions);
   const operationsTotal = (plan.pricePerOperationsUnit ?? 0) * additionalOperations;
   const total = (plan.basePrice ?? 0) + operationsTotal;
 
   return (
-    <Table size="sm">
-      <Thead>
-        <Tr>
-          <Th>Feature</Th>
-          <Th isNumeric>Units</Th>
-          <Th isNumeric>Unit Price</Th>
-          <Th isNumeric>Total</Th>
-        </Tr>
-      </Thead>
-      <Tbody>
+    <Table>
+      <THead>
+        <Th>Feature</Th>
+        <Th align="right">Units</Th>
+        <Th align="right">Unit Price</Th>
+        <Th align="right">Total</Th>
+      </THead>
+      <TBody>
         <Tr>
           <Td>
             Base price <span className="text-gray-500">(unlimited seats)</span>
           </Td>
-          <Td isNumeric />
-          <Td isNumeric>{CurrencyFormatter.format(plan.basePrice ?? 0)}</Td>
-          <Td isNumeric>{CurrencyFormatter.format(plan.basePrice ?? 0)}</Td>
+          <Td align="right" />
+          <Td align="right">{CurrencyFormatter.format(plan.basePrice ?? 0)}</Td>
+          <Td align="right">{CurrencyFormatter.format(plan.basePrice ?? 0)}</Td>
         </Tr>
-        {includedOperationsInMillions > 0 ? (
+        {includedOperationsInMillions > 0 && (
           <Tr>
             <Td>
               Included Operations <span className="text-gray-500">(free)</span>
             </Td>
-            <Td isNumeric>{includedOperationsInMillions}M</Td>
-            <Td isNumeric>{CurrencyFormatter.format(0)}</Td>
-            <Td isNumeric>{CurrencyFormatter.format(0)}</Td>
+            <Td align="right">{includedOperationsInMillions}M</Td>
+            <Td align="right">{CurrencyFormatter.format(0)}</Td>
+            <Td align="right">{CurrencyFormatter.format(0)}</Td>
           </Tr>
-        ) : null}
+        )}
         {plan.planType === BillingPlanType.Pro && (
           <Tr>
             <Td>Operations</Td>
-            <Td isNumeric>{additionalOperations}M</Td>
-            <Td isNumeric>{CurrencyFormatter.format(plan.pricePerOperationsUnit ?? 0)}</Td>
-            <Td isNumeric>{CurrencyFormatter.format(operationsTotal)}</Td>
+            <Td align="right">{additionalOperations}M</Td>
+            <Td align="right">{CurrencyFormatter.format(plan.pricePerOperationsUnit ?? 0)}</Td>
+            <Td align="right">{CurrencyFormatter.format(operationsTotal)}</Td>
           </Tr>
         )}
-      </Tbody>
-      <Tfoot>
-        <Tr>
-          <Th>TOTAL MONTHLY (AFTER TRIAL ENDS)</Th>
-          <Th />
-          <Th />
-          <Th isNumeric>{total === 0 ? 'FREE' : CurrencyFormatter.format(total)}</Th>
-        </Tr>
-      </Tfoot>
+      </TBody>
+      <TFoot>
+        <Th>Total monthly (after trial ends)</Th>
+        <Th align="right">{total === 0 ? 'FREE' : CurrencyFormatter.format(total)}</Th>
+      </TFoot>
     </Table>
   );
-};
+}
 
-export const PlanSummary = ({
+export function PlanSummary({
   plan,
   operationsRateLimit,
   retentionInDays,
@@ -88,45 +69,45 @@ export const PlanSummary = ({
   operationsRateLimit: number;
   retentionInDays: number;
   children: ReactNode;
-}): ReactElement => {
+}): ReactElement {
   if (plan.planType === BillingPlanType.Enterprise) {
     return (
-      <>
-        <Stat className="mb-4">
-          <StatLabel>Plan Type</StatLabel>
-          <StatNumber>{plan.planType}</StatNumber>
-        </Stat>
-        <div className="mb-6">
+      <Stat>
+        <Stat.Label>Plan Type</Stat.Label>
+        <Stat.Number>{plan.planType}</Stat.Number>
+        <Stat.HelpText>
           Enterprise plan is for organizations that needs to ship and ingest large amount of data.
           <br />
           If you wish to upgrade to Enterprise, or you can't find the plan for you, please contact
           us and we'll find the right plan for your organization.
-        </div>
-      </>
+        </Stat.HelpText>
+      </Stat>
     );
   }
 
   return (
     <>
-      <StatGroup>
+      <div className="flex gap-32">
         <Stat className="mb-8">
-          <StatLabel>Plan Type</StatLabel>
-          <StatNumber>{plan.planType}</StatNumber>
+          <Stat.Label>Plan Type</Stat.Label>
+          <Stat.Number>{plan.planType}</Stat.Number>
         </Stat>
+
         {children}
+
         <Stat>
-          <StatLabel>Operations Limit</StatLabel>
-          <StatHelpText>up to</StatHelpText>
-          <StatNumber>{operationsRateLimit}M</StatNumber>
-          <StatHelpText>per month</StatHelpText>
+          <Stat.Label>Operations Limit</Stat.Label>
+          <Stat.HelpText>up to</Stat.HelpText>
+          <Stat.Number>{operationsRateLimit}M</Stat.Number>
+          <Stat.HelpText>per month</Stat.HelpText>
         </Stat>
         <Stat className="mb-8">
-          <StatLabel>Retention</StatLabel>
-          <StatHelpText>usage reports</StatHelpText>
-          <StatNumber>{retentionInDays} days</StatNumber>
+          <Stat.Label>Retention</Stat.Label>
+          <Stat.HelpText>usage reports</Stat.HelpText>
+          <Stat.Number>{retentionInDays} days</Stat.Number>
         </Stat>
-      </StatGroup>
+      </div>
       <PriceEstimationTable plan={plan} operationsRateLimit={operationsRateLimit} />
     </>
   );
-};
+}
