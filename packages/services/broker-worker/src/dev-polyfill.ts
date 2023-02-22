@@ -4,18 +4,10 @@ const nodeFetch = createFetch({
   useNodeFetch: true,
 });
 
-if (!globalThis.Response) {
-  globalThis.Response = Response;
-}
-if (!globalThis.Request) {
-  globalThis.Request = Request;
-}
-if (!globalThis.Headers) {
-  globalThis.Headers = Headers;
-}
-if (!globalThis.ReadableStream) {
-  globalThis.ReadableStream = ReadableStream;
-}
+globalThis.Response ||= Response;
+globalThis.Request ||= Request;
+globalThis.Headers ||= Headers;
+globalThis.ReadableStream ||= ReadableStream;
 
 globalThis.fetch = nodeFetch.fetch;
 

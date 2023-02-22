@@ -97,9 +97,7 @@ export function useCache(
   let cachedStoragePromise: Promise<CacheStorage> | null = null;
 
   function getStorage() {
-    if (!cachedStoragePromise) {
-      cachedStoragePromise = create();
-    }
+    cachedStoragePromise ||= create();
 
     return cachedStoragePromise;
   }

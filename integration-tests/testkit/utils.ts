@@ -4,9 +4,7 @@ import { humanId } from 'human-id';
 let docker: Docker | null = null;
 
 function getDockerConnection() {
-  if (!docker) {
-    docker = new Docker();
-  }
+  docker ||= new Docker();
 
   return docker;
 }

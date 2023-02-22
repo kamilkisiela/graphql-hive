@@ -142,9 +142,7 @@ export function authenticate(
   email: string | string,
   oidcIntegrationId?: string,
 ): Promise<{ access_token: string }> {
-  if (!tokenResponsePromise[email]) {
-    tokenResponsePromise[email] = signUpUserViaEmail(email, password);
-  }
+  tokenResponsePromise[email] ||= signUpUserViaEmail(email, password);
 
   return tokenResponsePromise[email]!.then(data =>
     createSession(data.user.id, data.user.email, oidcIntegrationId ?? null),

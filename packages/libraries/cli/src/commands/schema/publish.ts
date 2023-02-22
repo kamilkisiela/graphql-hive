@@ -138,13 +138,9 @@ export default class SchemaPublish extends Command {
           this.warn(`No git information found. Couldn't resolve author and commit.`);
         });
 
-        if (!commit) {
-          commit = git.commit;
-        }
+        commit ||= git.commit;
 
-        if (!author) {
-          author = git.author;
-        }
+        author ||= git.author;
       }
 
       if (!author) {

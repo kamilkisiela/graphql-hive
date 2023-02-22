@@ -1,20 +1,10 @@
 import { crypto, Headers, ReadableStream, Request, Response } from '@whatwg-node/fetch';
 
-if (!globalThis.Response) {
-  globalThis.Response = Response;
-}
-if (!globalThis.Request) {
-  globalThis.Request = Request;
-}
-if (!globalThis.Headers) {
-  globalThis.Headers = Headers;
-}
-if (!globalThis.ReadableStream) {
-  globalThis.ReadableStream = ReadableStream;
-}
-if (!globalThis.crypto) {
-  globalThis.crypto = crypto;
-}
+globalThis.Response ||= Response;
+globalThis.Request ||= Request;
+globalThis.Headers ||= Headers;
+globalThis.ReadableStream ||= ReadableStream;
+globalThis.crypto ||= crypto;
 
 export const devStorage = new Map<string, string>();
 

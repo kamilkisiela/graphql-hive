@@ -68,9 +68,7 @@ export class Config<TValue = any> {
 
   private read() {
     try {
-      if (!this.cache) {
-        this.cache = this.readSpace(JSON.parse(fs.readFileSync(this.filepath, 'utf-8')));
-      }
+      this.cache ||= this.readSpace(JSON.parse(fs.readFileSync(this.filepath, 'utf-8')));
     } catch (error) {
       this.cache = {};
     }

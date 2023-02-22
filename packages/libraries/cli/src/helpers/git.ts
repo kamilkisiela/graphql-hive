@@ -81,9 +81,7 @@ export async function gitInfo(noGit: () => void) {
     commit = githubAction.env().commit ?? null;
   }
 
-  if (!commit) {
-    commit = env.commit ?? null;
-  }
+  commit ||= env.commit ?? null;
 
   if (!commit || !author) {
     const rootFromEnv = 'root' in env ? env.root : null;
@@ -96,15 +94,11 @@ export async function gitInfo(noGit: () => void) {
       if (commits && commits.length) {
         const lastCommit = commits[0];
 
-        if (!commit) {
-          commit = lastCommit.hash;
-        }
+        commit ||= lastCommit.hash;
 
-        if (!author) {
-          author = `${lastCommit.authorName || ''} ${
+        author ||= `${lastCommit.authorName || ''} ${
             lastCommit.authorEmail ? `<${lastCommit.authorEmail}>` : ''
           }`.trim();
-        }
       }
     } else {
       noGit();
