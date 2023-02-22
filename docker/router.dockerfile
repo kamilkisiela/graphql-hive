@@ -21,15 +21,18 @@ RUN rm -rf /var/lib/apt/lists/*
 RUN update-ca-certificates
 RUN rustup component add rustfmt
 
+# Install nightly toolchain so we can use sparse-registry
+RUN rustup toolchain install nightly
+
 # Get the dependencies cached
-RUN cargo build --release
+RUN cargo +nightly build --release -Z sparse-registry
 
 COPY --from=pkg src ./src
 
 RUN touch ./src/main.rs
 
 # Real build this time
-RUN cargo build --release
+RUN cargo +nightly build --release -Z sparse-registry
 
 # Runtime
 FROM debian:bullseye-slim as runtime
