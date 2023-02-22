@@ -65,6 +65,7 @@ module.exports = {
     'unicorn/prefer-node-protocol': 'off',
     'no-console': 'off',
     'import/no-default-export': 'off',
+    'n/no-restricted-import': 'off',
   },
   overrides: [
     {
