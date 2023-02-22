@@ -145,12 +145,10 @@ export class SlackIntegrationManager {
       organization: selector.organization,
     });
 
-    if (token) {
-      /**
-       * Token is possibly not encrypted, that's why we pass `true` as second argument.
-       */
-      token = this.crypto.decrypt(token, true);
-    }
+    /**
+     * Token is possibly not encrypted, that's why we pass `true` as second argument.
+     */
+    token &&= this.crypto.decrypt(token, true);
 
     return token;
   }

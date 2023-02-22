@@ -89,7 +89,7 @@ export function createSchemaFetcher({ endpoint, key }: SchemaFetcherOptions) {
       let service: Schema;
       // Before the new artifacts endpoint the body returned an array or a single object depending on the project type.
       // This handles both in a backwards-compatible way.
-      if (schema instanceof Array) {
+      if (Array.isArray(schema)) {
         if (schema.length !== 1) {
           throw new Error(
             'Encountered multiple services instead of a single service. Please use createServicesFetcher instead.',
@@ -113,7 +113,7 @@ export function createServicesFetcher({ endpoint, key }: ServicesFetcherOptions)
 
   return function schemaFetcher() {
     return fetcher().then(services => {
-      if (services instanceof Array) {
+      if (Array.isArray(services)) {
         return services.map(service => ({
           id: createSchemaId(service),
           ...service,

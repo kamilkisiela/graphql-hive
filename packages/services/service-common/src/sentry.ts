@@ -162,7 +162,7 @@ function extractRequestData(
         }
         break;
       default:
-        if ({}.hasOwnProperty.call(req, key)) {
+        if (Object.hasOwn(req, key)) {
           requestData[key] = (req as { [key: string]: any })[key];
         }
     }

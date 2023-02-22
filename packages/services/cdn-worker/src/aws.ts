@@ -101,7 +101,7 @@ export class AwsClient {
       }
       input = url;
     }
-    const signer = new AwsV4Signer(Object.assign({ url: input }, init, this, init && init.aws));
+    const signer = new AwsV4Signer(Object.assign({ url: input }, init, this, init?.aws));
     const signed = Object.assign({}, init, await signer.sign());
     delete signed.aws;
     try {

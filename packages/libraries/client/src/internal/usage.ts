@@ -109,13 +109,11 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
 
           report.size += 1;
 
-          if (!report.map[operation.key]) {
-            report.map[operation.key] = {
-              operation: operation.operation,
-              operationName: operation.operationName,
-              fields: operation.fields,
-            };
-          }
+          report.map[operation.key] ||= {
+            operation: operation.operation,
+            operationName: operation.operationName,
+            fields: operation.fields,
+          };
         },
         size() {
           return report.size;

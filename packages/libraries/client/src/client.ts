@@ -47,6 +47,7 @@ export function createHive(options: HivePluginOptions): HiveClient {
       let endpoint = 'https://app.graphql-hive.com/graphql';
 
       // Look for the reporting.endpoint for the legacy reason.
+      // eslint-disable-next-line @typescript-eslint/prefer-optional-chain -- can't use here since reporting can be `false`
       if (options.reporting && options.reporting.endpoint) {
         endpoint = options.reporting.endpoint;
       }

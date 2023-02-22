@@ -252,7 +252,7 @@ async function callExternalService(
     return JSON.parse(response.body) as unknown;
   } catch (error) {
     if (error instanceof RequestError && error.response) {
-      const message = error.response.body ? error.response.body : error.response.statusMessage;
+      const message = error.response.body || error.response.statusMessage;
 
       // If the response is a string starting with ERR_ it's a special error returned by the composition service.
       // We don't want to throw an error in this case, but instead return a failure result.

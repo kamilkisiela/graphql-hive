@@ -43,7 +43,7 @@ export class FederationOrchestrator implements Orchestrator {
   }
 
   private createConfig(config: Project['externalComposition']): ExternalCompositionConfig {
-    if (config && config.enabled) {
+    if (config?.enabled) {
       if (!config.endpoint) {
         throw new Error('External composition error: endpoint is missing');
       }

@@ -626,8 +626,8 @@ export class OperationsReader {
     >();
 
     for (const row of result.data) {
-      const client_name = row.client_name ? row.client_name : 'unknown';
-      const client_version = row.client_version ? row.client_version : 'unknown';
+      const client_name = row.client_name || 'unknown';
+      const client_version = row.client_version || 'unknown';
 
       if (!clientMap.has(client_name)) {
         clientMap.set(client_name, {

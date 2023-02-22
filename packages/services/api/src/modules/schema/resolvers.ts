@@ -201,7 +201,7 @@ export const resolvers: SchemaModule.Resolvers = {
       ]);
 
       const selector = { organization, project, target };
-      await schemaManager.updateBaseSchema(selector, input.newBase ? input.newBase : null);
+      await schemaManager.updateBaseSchema(selector, input.newBase || null);
 
       return {
         ok: {

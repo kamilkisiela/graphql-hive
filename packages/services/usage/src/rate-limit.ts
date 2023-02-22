@@ -66,7 +66,7 @@ export function createUsageRateLimit(config: {
         if (result) {
           cache.set(input.id, result);
 
-          return result.then(r => r !== null && r.limited);
+          return result.then(r => r?.limited);
         }
 
         return false;
