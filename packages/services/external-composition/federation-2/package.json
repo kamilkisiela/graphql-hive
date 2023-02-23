@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "build": "bob runify --single",
-    "dev": "tsup-node src/index.ts --format esm --shims --target node18 --watch --sourcemap --onSuccess 'node --enable-source-maps dist/index.js' | pino-pretty --translateTime HH:MM:ss TT --ignore pid,hostname"
+    "dev": "tsup-node --config ../../../tsup/dev.config.node.ts src/index.ts"
   },
   "dependencies": {
     "@apollo/composition": "^2.2.2",

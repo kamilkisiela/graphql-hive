@@ -42,8 +42,9 @@ module.exports = {
     'packages/web/app/src/graphql/index.ts',
     'packages/libraries/cli/src/sdk.ts',
     'packages/services/storage/src/db/types.ts',
-    'codegen.cjs',
     'packages/web/app/src/gql/**/*',
+    'codegen.cjs',
+    'tsup',
   ],
   parserOptions: {
     ecmaVersion: 2020,
