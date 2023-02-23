@@ -135,7 +135,7 @@ function OperationsPage(): ReactElement {
               </p>
               {hasCollectedOperations ? (
                 <OperationsView
-                  organizationCleanId={organization.organization.cleanId!}
+                  organizationCleanId={organization.organization.cleanId}
                   projectCleanId={project.cleanId}
                   targetCleanId={target.cleanId}
                 />

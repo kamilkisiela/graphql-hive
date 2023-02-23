@@ -755,7 +755,7 @@ function SettingsPage(): ReactElement {
       >
         {props =>
           props.organization ? (
-            <Page target={props.target!} organization={props.organization.organization!} />
+            <Page target={props.target!} organization={props.organization.organization} />
           ) : null
         }
       </TargetLayout>
