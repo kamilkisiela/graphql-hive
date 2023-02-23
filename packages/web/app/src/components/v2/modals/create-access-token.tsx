@@ -4,8 +4,7 @@ import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 import { PermissionsSpace, usePermissionsManager } from '@/components/organization/Permissions';
 import { Accordion, Button, CopyValue, Heading, Input, Modal, Tag } from '@/components/v2';
-import { graphql } from '@/gql';
-import { OrganizationDocument, OrganizationQuery } from '@/graphql';
+import { FragmentType, graphql, useFragment } from '@/gql';
 import { scopes } from '@/lib/access/common';
 import { useRouteSelector } from '@/lib/hooks';
 
@@ -30,6 +29,16 @@ const CreateAccessToken_CreateTokenMutation = graphql(`
   }
 `);
 
+const CreateAccessTokenModalQuery = graphql(`
+  query CreateAccessTokenModalQuery($organizationId: ID!) {
+    organization(selector: { organization: $organizationId }) {
+      organization {
+        ...CreateAccessTokenModalContent_OrganizationFragment
+      }
+    }
+  }
+`);
+
 export function CreateAccessTokenModal({
   isOpen,
   toggleModalOpen,
@@ -39,11 +48,9 @@ export function CreateAccessTokenModal({
 }): ReactElement {
   const router = useRouteSelector();
   const [organizationQuery] = useQuery({
-    query: OrganizationDocument,
+    query: CreateAccessTokenModalQuery,
     variables: {
-      selector: {
-        organization: router.organizationId,
-      },
+      organizationId: router.organizationId,
     },
   });
 
@@ -64,13 +71,27 @@ export function CreateAccessTokenModal({
   );
 }
 
+const CreateAccessTokenModalContent_OrganizationFragment = graphql(`
+  fragment CreateAccessTokenModalContent_OrganizationFragment on Organization {
+    id
+    ...UsePermissionManager_OrganizationFragment
+    me {
+      ...UsePermissionManager_MemberFragment
+    }
+  }
+`);
+
 function ModalContent(props: {
-  organization: Exclude<OrganizationQuery['organization'], null | undefined>['organization'];
+  organization: FragmentType<typeof CreateAccessTokenModalContent_OrganizationFragment>;
   organizationId: string;
   projectId: string;
   targetId: string;
   toggleModalOpen: () => void;
 }): ReactElement {
+  const organization = useFragment(
+    CreateAccessTokenModalContent_OrganizationFragment,
+    props.organization,
+  );
   const [mutation, mutate] = useMutation(CreateAccessToken_CreateTokenMutation);
 
   const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } =
@@ -96,8 +117,8 @@ function ModalContent(props: {
 
   const manager = usePermissionsManager({
     onSuccess() {},
-    organization: props.organization,
-    member: props.organization.me,
+    organization,
+    member: organization.me,
     passMemberScopes: false,
   });
 

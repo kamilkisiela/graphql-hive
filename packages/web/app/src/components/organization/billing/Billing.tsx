@@ -1,8 +1,5 @@
 import { ReactNode } from 'react';
-import { useQuery } from 'urql';
-import { DataWrapper } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { BillingPlansDocument } from '@/graphql';
 import { PlanSummary } from './PlanSummary';
 
 const BillingView_OrganizationFragment = graphql(`
@@ -15,32 +12,34 @@ const BillingView_OrganizationFragment = graphql(`
   }
 `);
 
+const BillingView_QueryFragment = graphql(`
+  fragment BillingView_QueryFragment on Query {
+    billingPlans {
+      planType
+      ...PlanSummary_PlanFragment
+    }
+  }
+`);
+
 export function BillingView(props: {
   children: ReactNode;
   organization: FragmentType<typeof BillingView_OrganizationFragment>;
+  query: FragmentType<typeof BillingView_QueryFragment>;
 }) {
   const organization = useFragment(BillingView_OrganizationFragment, props.organization);
-  const [query] = useQuery({ query: BillingPlansDocument });
+  const query = useFragment(BillingView_QueryFragment, props.query);
+  const plan = query.billingPlans.find(v => v.planType === organization.plan);
+
+  if (plan == null) {
+    return null;
+  }
 
   return (
-    <DataWrapper query={query}>
-      {result => {
-        const plan = result.data.billingPlans.find(v => v.planType === organization.plan);
-
-        if (plan == null) {
-          return null;
-        }
-
-        return (
-          <PlanSummary
-            retentionInDays={organization.rateLimit.retentionInDays}
-            operationsRateLimit={Math.floor(organization.rateLimit.operations / 1_000_000)}
-            plan={plan}
-          >
-            {props.children}
-          </PlanSummary>
-        );
-      }}
-    </DataWrapper>
+    <PlanSummary
+      operationsRateLimit={Math.floor(organization.rateLimit.operations / 1_000_000)}
+      plan={plan}
+    >
+      {props.children}
+    </PlanSummary>
   );
 }

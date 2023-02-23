@@ -43,10 +43,18 @@ const SubscriptionPage_OrganizationFragment = graphql(`
   }
 `);
 
+const SubscriptionPage_QueryFragment = graphql(`
+  fragment SubscriptionPage_QueryFragment on Query {
+    ...BillingView_QueryFragment
+  }
+`);
+
 function Page(props: {
   organization: FragmentType<typeof SubscriptionPage_OrganizationFragment>;
+  query: FragmentType<typeof SubscriptionPage_QueryFragment>;
 }): ReactElement | null {
   const organization = useFragment(SubscriptionPage_OrganizationFragment, props.organization);
+  const query = useFragment(SubscriptionPage_QueryFragment, props.query);
   const canAccess = useOrganizationAccess({
     scope: OrganizationAccessScope.Settings,
     member: organization?.me,
@@ -79,7 +87,7 @@ function Page(props: {
         <Card className="mt-8">
           <Heading className="mb-2">Plan and Reserved Volume</Heading>
           <div>
-            <BillingView organization={organization}>
+            <BillingView organization={organization} query={query}>
               {organization.billingConfiguration?.upcomingInvoice && (
                 <Stat>
                   <Stat.Label>Next Invoice</Stat.Label>
@@ -131,6 +139,7 @@ const SubscriptionPageQuery = graphql(`
         ...SubscriptionPage_OrganizationFragment
       }
     }
+    ...SubscriptionPage_QueryFragment
   }
 `);
 
@@ -139,8 +148,10 @@ function SubscriptionPage(): ReactElement {
     <>
       <Title title="Subscription & Usage" />
       <OrganizationLayout value="subscription" query={SubscriptionPageQuery}>
-        {({ organization }) =>
-          organization ? <Page organization={organization.organization} /> : null
+        {props =>
+          props.organization ? (
+            <Page organization={props.organization.organization} query={props} />
+          ) : null
         }
       </OrganizationLayout>
     </>
