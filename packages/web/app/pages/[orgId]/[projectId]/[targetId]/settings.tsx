@@ -2,7 +2,7 @@ import React, { ReactElement, useCallback, useState } from 'react';
 import clsx from 'clsx';
 import { formatISO, subDays } from 'date-fns';
 import { useFormik } from 'formik';
-import { gql, useMutation, useQuery } from 'urql';
+import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
@@ -27,19 +27,22 @@ import {
 import { Combobox } from '@/components/v2/combobox';
 import { AlertTriangleIcon } from '@/components/v2/icon';
 import { CreateAccessTokenModal, DeleteTargetModal } from '@/components/v2/modals';
-import {
-  DeleteTokensDocument,
-  MemberFieldsFragment,
-  OrganizationFieldsFragment,
-  SetTargetValidationDocument,
-  TargetFieldsFragment,
-  TokensDocument,
-} from '@/graphql';
+import { FragmentType, graphql, useFragment } from '@/gql';
+import { DeleteTokensDocument, SetTargetValidationDocument, TokensDocument } from '@/graphql';
 import { canAccessTarget, TargetAccessScope } from '@/lib/access/target';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
-function RegistryAccessTokens({ me }: { me: MemberFieldsFragment }): ReactElement {
+const RegistryAccessTokens_MeFragment = graphql(`
+  fragment RegistryAccessTokens_MeFragment on Member {
+    ...CanAccessTarget_MemberFragment
+  }
+`);
+
+function RegistryAccessTokens(props: {
+  me: FragmentType<typeof RegistryAccessTokens_MeFragment>;
+}): ReactElement {
+  const me = useFragment(RegistryAccessTokens_MeFragment, props.me);
   const router = useRouteSelector();
   const [{ fetching: deleting }, mutate] = useMutation(DeleteTokensDocument);
   const [checked, setChecked] = useState<string[]>([]);
@@ -134,7 +137,7 @@ function RegistryAccessTokens({ me }: { me: MemberFieldsFragment }): ReactElemen
   );
 }
 
-const Settings_UpdateBaseSchemaMutation = gql(`
+const Settings_UpdateBaseSchemaMutation = graphql(`
   mutation Settings_UpdateBaseSchema($input: UpdateBaseSchemaInput!) {
     updateBaseSchema(input: $input) {
       ok {
@@ -212,7 +215,7 @@ const ExtendBaseSchema = (props: { baseSchema: string }): ReactElement => {
   );
 };
 
-const ClientExclusion_AvailableClientNamesQuery = gql(`
+const ClientExclusion_AvailableClientNamesQuery = graphql(`
   query ClientExclusion_AvailableClientNamesQuery($selector: ClientStatsByTargetsInput!) {
     clientStatsByTargets(selector: $selector) {
       nodes {
@@ -274,18 +277,27 @@ function ClientExclusion(
   );
 }
 
-const Settings_TargetSettingsQuery = gql(`
+const Settings_TargetSettingsQuery = graphql(`
   query Settings_TargetSettingsQuery(
     $selector: TargetSelectorInput!
     $targetsSelector: ProjectSelectorInput!
     $organizationSelector: OrganizationSelectorInput!
   ) {
     targetSettings(selector: $selector) {
-      ...TargetSettingsFields
+      validation {
+        enabled
+        percentage
+        period
+        targets {
+          id
+        }
+        excludedClients
+      }
     }
     targets(selector: $targetsSelector) {
       nodes {
-        ...TargetEssentials
+        id
+        name
       }
     }
     organization(selector: $organizationSelector) {
@@ -299,7 +311,7 @@ const Settings_TargetSettingsQuery = gql(`
   }
 `);
 
-const Settings_UpdateTargetValidationSettingsMutation = gql(`
+const Settings_UpdateTargetValidationSettingsMutation = graphql(`
   mutation Settings_UpdateTargetValidationSettings($input: UpdateTargetValidationSettingsInput!) {
     updateTargetValidationSettings(input: $input) {
       ok {
@@ -554,7 +566,7 @@ const ConditionalBreakingChanges = (): ReactElement => {
   );
 };
 
-const Settings_UpdateTargetNameMutation = gql(`
+const Settings_UpdateTargetNameMutation = graphql(`
   mutation Settings_UpdateTargetName($input: UpdateTargetNameInput!) {
     updateTargetName(input: $input) {
       ok {
@@ -565,6 +577,7 @@ const Settings_UpdateTargetNameMutation = gql(`
         }
         updatedTarget {
           ...TargetFields
+          cleanId
         }
       }
       error {
@@ -577,13 +590,29 @@ const Settings_UpdateTargetNameMutation = gql(`
   }
 `);
 
-const Page = ({
-  target,
-  organization,
-}: {
-  target: TargetFieldsFragment;
-  organization: OrganizationFieldsFragment;
+const TargetSettingsPage_TargetFragment = graphql(`
+  fragment TargetSettingsPage_TargetFragment on Target {
+    name
+    baseSchema
+  }
+`);
+
+const TargetSettingsPage_OrganizationFragment = graphql(`
+  fragment TargetSettingsPage_OrganizationFragment on Organization {
+    me {
+      ...CanAccessTarget_MemberFragment
+      ...RegistryAccessTokens_MeFragment
+      ...CDNAccessTokens_MeFragment
+    }
+  }
+`);
+
+const Page = (props: {
+  target: FragmentType<typeof TargetSettingsPage_TargetFragment>;
+  organization: FragmentType<typeof TargetSettingsPage_OrganizationFragment>;
 }) => {
+  const target = useFragment(TargetSettingsPage_TargetFragment, props.target);
+  const organization = useFragment(TargetSettingsPage_OrganizationFragment, props.organization);
   const router = useRouteSelector();
   const [isModalOpen, toggleModalOpen] = useToggle();
 
@@ -694,12 +723,41 @@ const Page = ({
   );
 };
 
+const TargetSettingsPageQuery = graphql(`
+  query TargetSettingsPageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
+    organization(selector: { organization: $organizationId }) {
+      organization {
+        ...TargetLayout_OrganizationFragment
+        ...TargetSettingsPage_OrganizationFragment
+      }
+    }
+    project(selector: { organization: $organizationId, project: $projectId }) {
+      ...TargetLayout_ProjectFragment
+    }
+    targets(selector: { organization: $organizationId, project: $projectId }) {
+      ...TargetLayout_TargetConnectionFragment
+    }
+    target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
+      id
+      ...TargetSettingsPage_TargetFragment
+    }
+  }
+`);
+
 function SettingsPage(): ReactElement {
   return (
     <>
       <Title title="Settings" />
-      <TargetLayout value="settings" className="flex flex-col gap-16">
-        {props => <Page target={props.target} organization={props.organization} />}
+      <TargetLayout
+        value="settings"
+        className="flex flex-col gap-16"
+        query={TargetSettingsPageQuery}
+      >
+        {props =>
+          props.organization ? (
+            <Page target={props.target!} organization={props.organization.organization!} />
+          ) : null
+        }
       </TargetLayout>
     </>
   );

@@ -139,8 +139,9 @@ function SubscriptionPage(): ReactElement {
     <>
       <Title title="Subscription & Usage" />
       <OrganizationLayout value="subscription" query={SubscriptionPageQuery}>
-        {/* eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain*/}
-        {({ organization }) => <Page organization={organization?.organization!} />}
+        {({ organization }) =>
+          organization ? <Page organization={organization.organization} /> : null
+        }
       </OrganizationLayout>
     </>
   );

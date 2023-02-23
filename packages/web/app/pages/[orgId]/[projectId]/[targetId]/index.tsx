@@ -5,15 +5,9 @@ import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
 import { MarkAsValid } from '@/components/target/history/MarkAsValid';
 import { DataWrapper, GraphQLBlock, Input, noSchema, Title } from '@/components/v2';
+import { FragmentType, graphql, useFragment } from '@/gql';
 import { CompositeSchemaFieldsFragment, SingleSchemaFieldsFragment } from '@/gql/graphql';
-import {
-  LatestSchemaDocument,
-  OrganizationFieldsFragment,
-  ProjectFieldsFragment,
-  ProjectType,
-  RegistryModel,
-  TargetFieldsFragment,
-} from '@/graphql';
+import { LatestSchemaDocument, ProjectType, RegistryModel } from '@/graphql';
 import { TargetAccessScope, useTargetAccess } from '@/lib/access/target';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
@@ -23,15 +17,22 @@ function isCompositeSchema(
   return schema.__typename === 'CompositeSchema';
 }
 
+const Schemas_ProjectFragment = graphql(`
+  fragment Schemas_ProjectFragment on Project {
+    type
+  }
+`);
+
 function Schemas({
-  project,
   filterService,
   schemas = [],
+  ...props
 }: {
-  project: ProjectFieldsFragment;
+  project: FragmentType<typeof Schemas_ProjectFragment>;
   schemas: Array<SingleSchemaFieldsFragment | CompositeSchemaFieldsFragment>;
   filterService?: string;
 }): ReactElement {
+  const project = useFragment(Schemas_ProjectFragment, props.project);
   if (project.type === ProjectType.Single) {
     const [schema] = schemas;
     return (
@@ -66,15 +67,45 @@ function Schemas({
   );
 }
 
-function SchemaView({
-  organization,
-  project,
-  target,
-}: {
-  organization: OrganizationFieldsFragment;
-  project: ProjectFieldsFragment;
-  target: TargetFieldsFragment;
+const SchemaView_OrganizationFragment = graphql(`
+  fragment SchemaView_OrganizationFragment on Organization {
+    cleanId
+    me {
+      ...CanAccessTarget_MemberFragment
+    }
+  }
+`);
+
+const SchemaView_ProjectFragment = graphql(`
+  fragment SchemaView_ProjectFragment on Project {
+    cleanId
+    type
+    registryModel
+    ...Schemas_ProjectFragment
+  }
+`);
+
+const SchemaView_TargetFragment = graphql(`
+  fragment SchemaView_TargetFragment on Target {
+    cleanId
+    latestSchemaVersion {
+      schemas {
+        nodes {
+          __typename
+        }
+      }
+    }
+  }
+`);
+
+function SchemaView(props: {
+  organization: FragmentType<typeof SchemaView_OrganizationFragment>;
+  project: FragmentType<typeof SchemaView_ProjectFragment>;
+  target: FragmentType<typeof SchemaView_TargetFragment>;
 }): ReactElement | null {
+  const organization = useFragment(SchemaView_OrganizationFragment, props.organization);
+  const project = useFragment(SchemaView_ProjectFragment, props.project);
+  const target = useFragment(SchemaView_TargetFragment, props.target);
   const [filterService, setFilterService] = useState('');
   const [term, setTerm] = useState('');
   const debouncedFilter = useDebouncedCallback((value: string) => {
@@ -153,11 +184,40 @@ function SchemaView({
   );
 }
 
+const TargetSchemaPageQuery = graphql(`
+  query TargetSchemaPageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
+    organization(selector: { organization: $organizationId }) {
+      organization {
+        ...TargetLayout_OrganizationFragment
+        ...SchemaView_OrganizationFragment
+      }
+    }
+    project(selector: { organization: $organizationId, project: $projectId }) {
+      ...TargetLayout_ProjectFragment
+      ...SchemaView_ProjectFragment
+    }
+    targets(selector: { organization: $organizationId, project: $projectId }) {
+      ...TargetLayout_TargetConnectionFragment
+    }
+    target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
+      ...SchemaView_TargetFragment
+    }
+  }
+`);
+
 function SchemaPage(): ReactElement {
   return (
     <>
       <Title title="Schema" />
-      <TargetLayout value="schema">{props => <SchemaView {...props} />}</TargetLayout>
+      <TargetLayout value="schema" query={TargetSchemaPageQuery}>
+        {props => (
+          <SchemaView
+            target={props.target!}
+            organization={props.organization!.organization}
+            project={props.project!}
+          />
+        )}
+      </TargetLayout>
     </>
   );
 }

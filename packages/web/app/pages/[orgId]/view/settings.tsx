@@ -330,8 +330,11 @@ function OrganizationSettingsPage(): ReactElement {
         className="flex flex-col gap-y-10"
         query={OrganizationSettingsPageQuery}
       >
-        {/* eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain */}
-        {props => <SettingsPageRenderer organization={props.organization?.organization!} />}
+        {props =>
+          props.organization ? (
+            <SettingsPageRenderer organization={props.organization.organization} />
+          ) : null
+        }
       </OrganizationLayout>
     </>
   );

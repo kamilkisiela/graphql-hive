@@ -73,9 +73,7 @@ function Inner(props: {
   const updateOrgRateLimitMutation = useMutation(UpdateOrgRateLimitDocument);
   const planSummaryRef = useRef<HTMLDivElement>(null);
 
-  const [plan, setPlan] = useState<BillingPlanType>(
-    (organization?.plan || 'HOBBY') as BillingPlanType,
-  );
+  const [plan, setPlan] = useState<BillingPlanType>(organization?.plan || 'HOBBY');
   const onPlan = useCallback(
     (plan: BillingPlanType) => {
       setPlan(plan);
@@ -339,13 +337,14 @@ export default function ManageSubscriptionPage(): ReactElement {
     <>
       <Title title="Manage Subscription" />
       <OrganizationLayout query={ManageSubscriptionPageQuery}>
-        {props => (
-          <Inner
-            // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-            organization={props.organization?.organization!}
-            billingPlans={props.billingPlans}
-          />
-        )}
+        {props =>
+          props.organization ? (
+            <Inner
+              organization={props.organization.organization}
+              billingPlans={props.billingPlans}
+            />
+          ) : null
+        }
       </OrganizationLayout>
     </>
   );

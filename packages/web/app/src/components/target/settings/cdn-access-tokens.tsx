@@ -18,9 +18,8 @@ import {
 } from '@/components/v2';
 import { AlertTriangleIcon, TrashIcon } from '@/components/v2/icon';
 import { InlineCode } from '@/components/v2/inline-code';
-import { graphql, useFragment } from '@/gql';
+import { FragmentType, graphql, useFragment } from '@/gql';
 import { TargetAccessScope } from '@/gql/graphql';
-import { MemberFieldsFragment } from '@/graphql';
 import { canAccessTarget } from '@/lib/access/target';
 import { useRouteSelector } from '@/lib/hooks';
 
@@ -332,7 +331,16 @@ const isDeleteCDNAccessTokenModalPath = (path: string): null | string => {
   return result[1];
 };
 
-export function CDNAccessTokens(props: { me: MemberFieldsFragment }): React.ReactElement {
+const CDNAccessTokens_MeFragment = graphql(`
+  fragment CDNAccessTokens_MeFragment on Member {
+    ...CanAccessTarget_MemberFragment
+  }
+`);
+
+export function CDNAccessTokens(props: {
+  me: FragmentType<typeof CDNAccessTokens_MeFragment>;
+}): React.ReactElement {
+  const me = useFragment(CDNAccessTokens_MeFragment, props.me);
   const routerSelector = useRouteSelector();
   const router = useRouter();
 
@@ -365,7 +373,7 @@ export function CDNAccessTokens(props: { me: MemberFieldsFragment }): React.Reac
     requestPolicy: 'cache-and-network',
   });
 
-  const canManage = canAccessTarget(TargetAccessScope.Settings, props.me);
+  const canManage = canAccessTarget(TargetAccessScope.Settings, me);
 
   return (
     <Card>

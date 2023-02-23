@@ -15,7 +15,6 @@ import { GraphQLScalarTypeComponent } from '@/components/target/explorer/scalar-
 import { GraphQLUnionTypeComponent } from '@/components/target/explorer/union-type';
 import { DataWrapper, noSchema, Title } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { OrganizationFieldsFragment, ProjectFieldsFragment, TargetFieldsFragment } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
@@ -85,23 +84,23 @@ function TypeRenderer(props: {
 }
 
 function SchemaTypeExplorer({
-  organization,
-  project,
-  target,
+  organizationCleanId,
+  projectCleanId,
+  targetCleanId,
   typename,
 }: {
-  organization: OrganizationFieldsFragment;
-  project: ProjectFieldsFragment;
-  target: TargetFieldsFragment;
+  organizationCleanId: string;
+  projectCleanId: string;
+  targetCleanId: string;
   typename: string;
 }): ReactElement | null {
   const { period } = useSchemaExplorerContext();
   const [query] = useQuery({
     query: SchemaTypeExplorer_Type,
     variables: {
-      organization: organization.cleanId,
-      project: project.cleanId,
-      target: target.cleanId,
+      organization: organizationCleanId,
+      project: projectCleanId,
+      target: targetCleanId,
       period,
       typename,
     },
@@ -125,9 +124,9 @@ function SchemaTypeExplorer({
         return (
           <div className="space-y-4">
             <SchemaExplorerFilter
-              organization={organization}
-              project={project}
-              target={target}
+              organization={{ cleanId: organizationCleanId }}
+              project={{ cleanId: projectCleanId }}
+              target={{ cleanId: targetCleanId }}
               period={period}
               typename={typename}
             />
@@ -138,6 +137,30 @@ function SchemaTypeExplorer({
     </DataWrapper>
   );
 }
+
+const TargetExplorerTypenamePageQuery = graphql(`
+  query TargetExplorerTypenamePageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
+    organization(selector: { organization: $organizationId }) {
+      organization {
+        ...TargetLayout_OrganizationFragment
+        cleanId
+        rateLimit {
+          retentionInDays
+        }
+      }
+    }
+    project(selector: { organization: $organizationId, project: $projectId }) {
+      ...TargetLayout_ProjectFragment
+      cleanId
+    }
+    targets(selector: { organization: $organizationId, project: $projectId }) {
+      ...TargetLayout_TargetConnectionFragment
+    }
+    target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
+      cleanId
+    }
+  }
+`);
 
 function ExplorerPage(): ReactElement | null {
   const router = useRouteSelector();
@@ -150,12 +173,17 @@ function ExplorerPage(): ReactElement | null {
   return (
     <>
       <Title title={`Type ${typename}`} />
-      <TargetLayout value="explorer">
+      <TargetLayout value="explorer" query={TargetExplorerTypenamePageQuery}>
         {props => (
           <SchemaExplorerProvider
-            dataRetentionInDays={props.organization.rateLimit.retentionInDays}
+            dataRetentionInDays={props.organization?.organization.rateLimit.retentionInDays ?? 0}
           >
-            <SchemaTypeExplorer {...props} typename={typename} />
+            <SchemaTypeExplorer
+              organizationCleanId={props.organization?.organization.cleanId ?? ''}
+              projectCleanId={props.project?.cleanId ?? ''}
+              targetCleanId={props.target?.cleanId ?? ''}
+              typename={typename}
+            />
           </SchemaExplorerProvider>
         )}
       </TargetLayout>

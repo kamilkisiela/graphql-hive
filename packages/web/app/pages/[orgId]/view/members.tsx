@@ -395,8 +395,9 @@ function OrganizationMembersPage(): ReactElement {
         className="flex w-4/5 flex-col gap-4"
         query={OrganizationMembersPageQuery}
       >
-        {/* eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain*/}
-        {({ organization }) => <Page organization={organization?.organization!} />}
+        {({ organization }) =>
+          organization ? <Page organization={organization.organization} /> : null
+        }
       </OrganizationLayout>
     </>
   );
