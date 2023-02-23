@@ -38,12 +38,13 @@ const Members_Invitation = graphql(`
   }
 `);
 
-export const MemberInvitationForm_InviteByEmail = graphql(`
+const MemberInvitationForm_InviteByEmail = graphql(`
   mutation MemberInvitationForm_InviteByEmail($input: InviteToOrganizationByEmailInput!) {
     inviteToOrganizationByEmail(input: $input) {
       ok {
         ...Members_Invitation
         email
+        id
       }
       error {
         message
@@ -55,7 +56,7 @@ export const MemberInvitationForm_InviteByEmail = graphql(`
   }
 `);
 
-export const InvitationDeleteButton_DeleteInvitation = graphql(`
+const InvitationDeleteButton_DeleteInvitation = graphql(`
   mutation InvitationDeleteButton_DeleteInvitation($input: DeleteOrganizationInvitationInput!) {
     deleteOrganizationInvitation(input: $input) {
       ok {
@@ -101,7 +102,7 @@ const MemberInvitationForm = ({
 
       if (result.data?.inviteToOrganizationByEmail?.ok?.email) {
         notify(`Invited ${result.data.inviteToOrganizationByEmail.ok.email}`, 'success');
-        resetForm();
+        globalThis.window?.location.reload();
       }
     },
   });
@@ -162,6 +163,7 @@ function InvitationDeleteButton({
             email,
           },
         });
+        globalThis.window?.location.reload();
       }}
     >
       <TrashIcon /> Remove
@@ -231,15 +233,37 @@ const Page_OrganizationFragment = graphql(`
       }
       total
     }
+    ...OrganizationInvitations_OrganizationFragment
+    ...ChangePermissionsModal_OrganizationFragment
+  }
+`);
+
+const OrganizationInvitations_OrganizationFragment = graphql(`
+  fragment OrganizationInvitations_OrganizationFragment on Organization {
+    cleanId
     invitations {
       nodes {
         id
         ...Members_Invitation
       }
     }
-    ...ChangePermissionsModal_OrganizationFragment
   }
 `);
+
+const OrganizationInvitations = (props: {
+  organization: FragmentType<typeof OrganizationInvitations_OrganizationFragment>;
+}): ReactElement | null => {
+  const org = useFragment(OrganizationInvitations_OrganizationFragment, props.organization);
+
+  return org.invitations.nodes.length ? (
+    <div className="pt-3">
+      <div className="border-t-4 border-solid pb-6" />
+      {org.invitations.nodes.map(node => (
+        <Invitation key={node.id} invitation={node} organizationCleanId={org.cleanId} />
+      ))}
+    </div>
+  ) : null;
+};
 
 function Page(props: { organization: FragmentType<typeof Page_OrganizationFragment> }) {
   const organization = useFragment(Page_OrganizationFragment, props.organization);
@@ -261,7 +285,6 @@ function Page(props: { organization: FragmentType<typeof Page_OrganizationFragme
   const org = organization;
   const isPersonal = org?.type === OrganizationType.Personal;
   const members = org?.members.nodes;
-  const invitations = org?.invitations.nodes;
 
   useEffect(() => {
     if (isPersonal) {
@@ -363,14 +386,7 @@ function Page(props: { organization: FragmentType<typeof Page_OrganizationFragme
           </Card>
         );
       })}
-      {invitations?.length ? (
-        <div className="pt-3">
-          <div className="border-t-4 border-solid pb-6" />
-          {invitations.map(node => (
-            <Invitation key={node.id} invitation={node} organizationCleanId={org.cleanId} />
-          ))}
-        </div>
-      ) : null}
+      <OrganizationInvitations organization={org} />
     </>
   );
 }
