@@ -101,10 +101,25 @@ jobs:
     secrets: inherit
 
   # Release alpha version on NPM for Hive libraries
-  release:
+  alpha:
     uses: the-guild-org/shared-config/.github/workflows/release-snapshot.yml@main
+    if: ${{ github.event.pull_request.title != 'Upcoming Release Changes' }}
     with:
       npmTag: alpha
+      buildScript: build:libraries
+      nodeVersion: 18
+      packageManager: pnpm
+    secrets:
+      githubToken: ${{ secrets.GITHUB_TOKEN }}
+      npmToken: ${{ secrets.NPM_TOKEN }}
+
+  # Release RC version on NPM for Hive libraries
+  release-candidate:
+    uses: the-guild-org/shared-config/.github/workflows/release-snapshot.yml@main
+    if: ${{ github.event.pull_request.title == 'Upcoming Release Changes' }}
+    with:
+      npmTag: rc
+      restoreDeletedChangesets: true
       buildScript: build:libraries
       nodeVersion: 18
       packageManager: pnpm
