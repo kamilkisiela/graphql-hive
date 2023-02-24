@@ -34,7 +34,7 @@ self.addEventListener('fetch', async event => {
 
   const loki = new Logger({
     lokiSecret: btoa(`${LOKI_USERNAME}:${LOKI_PASSWORD}`),
-    lokiUrl: LOKI_ENDPOINT,
+    lokiUrl: `https://${LOKI_ENDPOINT}`,
     stream: {
       container_name: 'broker-worker',
       env: SENTRY_ENVIRONMENT,
