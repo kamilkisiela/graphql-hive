@@ -4,7 +4,7 @@ import { isSignatureValid } from './auth';
 import { UnexpectedError } from './errors';
 import { handleRequest } from './handler';
 
-self.addEventListener('fetch', event => {
+self.addEventListener('fetch', async event => {
   const requestId =
     event.request.headers.get('x-request-id') ?? Math.random().toString(16).substring(2);
 
@@ -37,12 +37,13 @@ self.addEventListener('fetch', event => {
     lokiUrl: LOKI_ENDPOINT,
     stream: {
       container_name: 'broker-worker',
-      environment: SENTRY_ENVIRONMENT,
+      env: SENTRY_ENVIRONMENT,
     },
     mdc: {
       requestId,
     },
   });
+
   const logger = {
     info(message: string) {
       loki.info(message);
@@ -55,30 +56,20 @@ self.addEventListener('fetch', event => {
       sentry.captureException(error);
     },
   };
+
+  function flush() {
+    event.waitUntil(loki.flush());
+  }
+
   try {
-    event.respondWith(handleRequest(event.request, isSignatureValid, logger));
+    event.respondWith(
+      handleRequest(event.request, isSignatureValid, logger).finally(() => {
+        flush();
+      }),
+    );
   } catch (error) {
     logger.error('Unexpected error', error as any);
     event.respondWith(new UnexpectedError(requestId));
-  } finally {
-    event.waitUntil(
-      loki.flush().then(
-        (result: any) => {
-          console.log({
-            status: result.status,
-            statusText: result.statusText,
-          });
-
-          result.text().then((text: string) => {
-            console.log({
-              text,
-            });
-          });
-        },
-        error => {
-          console.error('waitUntil X', error);
-        },
-      ),
-    );
+    flush();
   }
 });

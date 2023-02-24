@@ -67,7 +67,7 @@ export const schemaBuilderApiRouter = t.router({
           type: input.type,
         })
         .inc();
-      return await pickOrchestrator(input.type, ctx.cache, ctx.req.log, ctx.decrypt).supergraph(
+      return await pickOrchestrator(input.type, ctx.cache, ctx.req, ctx.decrypt).supergraph(
         input.schemas,
         input.external
           ? {
@@ -102,7 +102,7 @@ export const schemaBuilderApiRouter = t.router({
           type: input.type,
         })
         .inc();
-      return await pickOrchestrator(input.type, ctx.cache, ctx.req.log, ctx.decrypt).validate(
+      return await pickOrchestrator(input.type, ctx.cache, ctx.req, ctx.decrypt).validate(
         input.type === 'single'
           ? input.schemas.map(s => ({
               ...s,
@@ -142,7 +142,7 @@ export const schemaBuilderApiRouter = t.router({
           type: input.type,
         })
         .inc();
-      return await pickOrchestrator(input.type, ctx.cache, ctx.req.log, ctx.decrypt).build(
+      return await pickOrchestrator(input.type, ctx.cache, ctx.req, ctx.decrypt).build(
         input.type === 'single'
           ? input.schemas.map(s => ({
               ...s,
