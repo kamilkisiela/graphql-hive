@@ -111,6 +111,11 @@ export class CloudflareBroker {
       secretSignature: pulumi.Output<string>;
       sentryDsn: string;
       release: string;
+      loki: {
+        endpoint: string;
+        username: string;
+        password: pulumi.Output<string>;
+      };
     },
   ) {}
 
@@ -139,6 +144,18 @@ export class CloudflareBroker {
         {
           name: 'SENTRY_RELEASE',
           text: this.config.release,
+        },
+        {
+          name: 'LOKI_PASSWORD',
+          text: this.config.loki.password,
+        },
+        {
+          name: 'LOKI_USERNAME',
+          text: this.config.loki.username,
+        },
+        {
+          name: 'LOKI_ENDPOINT',
+          text: this.config.loki.endpoint,
         },
       ],
     });

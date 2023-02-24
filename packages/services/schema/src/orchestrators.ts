@@ -1,4 +1,5 @@
 import { createHmac } from 'crypto';
+import type { FastifyRequest } from 'fastify';
 import got from 'got';
 import { RequestError } from 'got';
 import type { DocumentNode } from 'graphql';
@@ -213,6 +214,7 @@ async function callExternalServiceViaBroker(
   payload: BrokerPayload,
   logger: FastifyLoggerInstance,
   timeoutMs: number,
+  requestId: string,
 ) {
   return callExternalService(
     {
@@ -221,6 +223,7 @@ async function callExternalServiceViaBroker(
         Accept: 'application/json',
         'Content-Type': 'application/json',
         'x-hive-signature': broker.signature,
+        'x-request-id': requestId,
       },
       body: JSON.stringify(payload),
     },
@@ -302,8 +305,9 @@ async function callExternalService(
 const createFederation: (
   cache: Cache,
   logger: FastifyLoggerInstance,
+  requestId: string,
   decrypt: (value: string) => string,
-) => Orchestrator = (cache, logger, decrypt) => {
+) => Orchestrator = (cache, logger, requestId, decrypt) => {
   const timeoutMs = Math.min(cache.timeoutMs, 25_000);
   const compose = cache.reuse<
     {
@@ -354,6 +358,7 @@ const createFederation: (
               },
               logger,
               timeoutMs,
+              requestId,
             )
           : callExternalService(request, logger, timeoutMs)),
       );
@@ -558,12 +563,17 @@ function validateStitchedSchema(doc: DocumentNode) {
 export function pickOrchestrator(
   type: SchemaType,
   cache: Cache,
-  logger: FastifyLoggerInstance,
+  req: FastifyRequest,
   decrypt: (value: string) => string,
 ) {
   switch (type) {
     case 'federation':
-      return createFederation(cache, logger, decrypt);
+      return createFederation(
+        cache,
+        req.log,
+        req.id ?? Math.random().toString(16).substring(2),
+        decrypt,
+      );
     case 'single':
       return single;
     case 'stitching':

@@ -1,5 +1,6 @@
 import { isSignatureValid } from './auth';
 import { parseIncomingRequest } from './models';
+import { Logger } from './types';
 
 /**
  * gatherResponse awaits and returns a response body as a string.
@@ -22,27 +23,41 @@ async function gatherResponse(response: Response) {
 export async function handleRequest(
   request: Request,
   keyValidator: typeof isSignatureValid,
-  captureException: (exception: Error) => void,
+  logger: Logger,
 ) {
-  const parsedRequest = await parseIncomingRequest(request, keyValidator, captureException);
+  const parsedRequest = await parseIncomingRequest(request, keyValidator, logger);
 
   if ('error' in parsedRequest) {
     return parsedRequest.error;
   }
 
-  const init =
+  logger.info(`Forwarding request to ${parsedRequest.method} ${parsedRequest.url}`);
+
+  const init: Parameters<typeof fetch>[1] =
     parsedRequest.method === 'GET'
       ? {
           method: 'GET',
           headers: parsedRequest.headers,
+          signal: request.signal,
+          redirect: 'follow',
         }
       : {
           method: 'POST',
           body: parsedRequest.body,
           headers: parsedRequest.headers,
+          signal: request.signal,
+          redirect: 'follow',
         };
-  const response = await fetch(parsedRequest.url, init);
+  const response = await fetch(parsedRequest.url, init).catch(error => {
+    logger.error(`Failed to forward request to ${parsedRequest.url}`, error);
+    return Promise.reject(error);
+  });
+
+  logger.info(
+    `Received response from ${parsedRequest.url} with status ${response.status} (${response.statusText}}`,
+  );
   const text = await gatherResponse(response);
+  logger.info(`Collected response body (length=${text.length})`);
   return new Response(text, {
     status: response.status,
     statusText: response.statusText,
