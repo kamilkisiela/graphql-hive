@@ -46,7 +46,7 @@ importers:
       '@changesets/changelog-github': 0.4.8
       '@changesets/cli': 2.26.0
       '@graphql-codegen/add': 4.0.1
-      '@graphql-codegen/cli': 3.2.0
+      '@graphql-codegen/cli': 3.2.1
       '@graphql-codegen/client-preset': 2.1.0
       '@graphql-codegen/gql-tag-operations-preset': 2.1.0
       '@graphql-codegen/graphql-modules-preset': 3.1.0
@@ -87,7 +87,7 @@ importers:
       '@changesets/changelog-github': 0.4.8
       '@changesets/cli': 2.26.0
       '@graphql-codegen/add': 4.0.1_graphql@16.6.0
-      '@graphql-codegen/cli': 3.2.0_3duxb27ep3oxt5ktrrpxolj5jm
+      '@graphql-codegen/cli': 3.2.1_3duxb27ep3oxt5ktrrpxolj5jm
       '@graphql-codegen/client-preset': 2.1.0_graphql@16.6.0
       '@graphql-codegen/gql-tag-operations-preset': 2.1.0_graphql@16.6.0
       '@graphql-codegen/graphql-modules-preset': 3.1.0_graphql@16.6.0
@@ -4798,8 +4798,8 @@ packages:
       tslib: 2.5.0
     dev: true
 
-  /@graphql-codegen/cli/3.2.0_3duxb27ep3oxt5ktrrpxolj5jm:
-    resolution: {integrity: sha512-o+oTOIMlBF4PE+JDo3m37W/xQNYUIASFOc5K9DHkWh4zW/qVHVkGyyu2fEgI8PbscODALyNYWG/ArGXoIAy2/A==}
+  /@graphql-codegen/cli/3.2.1_3duxb27ep3oxt5ktrrpxolj5jm:
+    resolution: {integrity: sha512-AeXzOvhSgAyMC0TzIoc6/HIc2Fy2rCZJcs5pt1LDypn1k4gpGRzqZ5JOjYx+XIna2hLfB9NbAkcO5dcdHwFdJA==}
     hasBin: true
     peerDependencies:
       graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
@@ -4833,6 +4833,7 @@ packages:
       json-to-pretty-yaml: 1.2.2
       listr2: 4.0.5
       log-symbols: 4.1.0
+      micromatch: 4.0.5
       shell-quote: 1.7.3
       string-env-interpolation: 1.0.1
       ts-log: 2.2.5
