@@ -446,7 +446,7 @@ runArtifactsCDNTests('API Mirror', { service: 'server', port: 8082, path: '/arti
 // runArtifactsCDNTests('Local CDN Mock', 'http://127.0.0.1:3004/artifacts/v1/');
 
 describe('CDN token', () => {
-  const TargetCDNAccessTokensQuery = graphql(/* GraphQL */ `
+  const TargetCDNAccessTokensQuery = graphql(`
     query TargetCDNAccessTokens($selector: TargetSelectorInput!, $after: String, $first: Int = 2) {
       target(selector: $selector) {
         cdnAccessTokens(first: $first, after: $after) {
@@ -468,7 +468,7 @@ describe('CDN token', () => {
     }
   `);
 
-  const DeleteCDNAccessTokenMutation = graphql(/* GraphQL */ `
+  const DeleteCDNAccessTokenMutation = graphql(`
     mutation DeleteCDNAccessToken($input: DeleteCdnAccessTokenInput!) {
       deleteCdnAccessToken(input: $input) {
         error {

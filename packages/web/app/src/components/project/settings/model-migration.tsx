@@ -1,7 +1,8 @@
 import { ReactElement, ReactNode, useCallback } from 'react';
-import { gql, useMutation } from 'urql';
+import { useMutation } from 'urql';
 import { Button, Card, Heading, Tooltip } from '@/components/v2';
-import { ProjectFieldsFragment, RegistryModel } from '@/graphql';
+import { FragmentType, graphql, useFragment } from '@/gql';
+import { RegistryModel } from '@/graphql';
 import { useNotifications } from '@/lib/hooks';
 import { openChatSupport } from '@/utils';
 import { CheckIcon, Cross2Icon, QuestionMarkCircledIcon } from '@radix-ui/react-icons';
@@ -106,7 +107,7 @@ const available = (
 
 const notAvailable = <Tooltip content="Not available">{crossIcon}</Tooltip>;
 
-const ModelMigrationSettings_upgradeProjectRegistryModelMutation = gql(/* GraphQL */ `
+const ModelMigrationSettings_upgradeProjectRegistryModelMutation = graphql(`
   mutation ModelMigrationSettings_upgradeProjectRegistryModelMutation(
     $input: UpdateProjectRegistryModelInput!
   ) {
@@ -121,13 +122,19 @@ const ModelMigrationSettings_upgradeProjectRegistryModelMutation = gql(/* GraphQ
   }
 `);
 
-export function ModelMigrationSettings({
-  project,
-  organizationId,
-}: {
-  project: ProjectFieldsFragment;
+const ModelMigrationSettings_ProjectFragment = graphql(`
+  fragment ModelMigrationSettings_ProjectFragment on Project {
+    type
+    cleanId
+    registryModel
+  }
+`);
+
+export function ModelMigrationSettings(props: {
+  project: FragmentType<typeof ModelMigrationSettings_ProjectFragment>;
   organizationId: string;
 }): ReactElement | null {
+  const project = useFragment(ModelMigrationSettings_ProjectFragment, props.project);
   const isStitching = project.type === 'STITCHING';
   const isComposite = isStitching || project.type === 'FEDERATION';
   const notify = useNotifications();
@@ -140,7 +147,7 @@ export function ModelMigrationSettings({
       const result = await upgradeMutation({
         input: {
           project: project.cleanId,
-          organization: organizationId,
+          organization: props.organizationId,
           model: RegistryModel.Modern,
         },
       });

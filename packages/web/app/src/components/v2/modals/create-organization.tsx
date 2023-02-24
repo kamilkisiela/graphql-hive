@@ -3,9 +3,9 @@ import { useFormik } from 'formik';
 import { useMutation } from 'urql';
 import * as Yup from 'yup';
 import { Button, Heading, Input } from '@/components/v2';
-import { gql } from '@urql/core';
+import { graphql } from '@/gql';
 
-const CreateOrganizationMutation = gql(/* GraphQL */ `
+const CreateOrganizationMutation = graphql(`
   mutation CreateOrganizationMutation($input: CreateOrganizationInput!) {
     createOrganization(input: $input) {
       ok {
@@ -14,6 +14,7 @@ const CreateOrganizationMutation = gql(/* GraphQL */ `
             organization
           }
           organization {
+            cleanId
             ...OrganizationFields
           }
         }

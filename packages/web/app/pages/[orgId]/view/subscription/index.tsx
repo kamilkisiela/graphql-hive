@@ -9,11 +9,7 @@ import { InvoicesList } from '@/components/organization/billing/InvoicesList';
 import { RateLimitWarn } from '@/components/organization/billing/RateLimitWarn';
 import { OrganizationUsageEstimationView } from '@/components/organization/Usage';
 import { Card, Heading, Stat, Tabs, Title } from '@/components/v2';
-import {
-  OrganizationFieldsFragment,
-  OrgBillingInfoFieldsFragment,
-  OrgRateLimitFieldsFragment,
-} from '@/graphql';
+import { FragmentType, graphql, useFragment } from '@/gql';
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
 import { getIsStripeEnabled } from '@/lib/billing/stripe-public-key';
 import { withSessionProtection } from '@/lib/supertokens/guard';
@@ -26,13 +22,39 @@ const DateFormatter = Intl.DateTimeFormat('en-US', {
 
 const ManagePage = dynamic(() => import('./manage'));
 
-function Page({
-  organization,
-}: {
-  organization: OrganizationFieldsFragment &
-    OrgBillingInfoFieldsFragment &
-    OrgRateLimitFieldsFragment;
+const SubscriptionPage_OrganizationFragment = graphql(`
+  fragment SubscriptionPage_OrganizationFragment on Organization {
+    me {
+      ...CanAccessOrganization_MemberFragment
+    }
+    billingConfiguration {
+      invoices {
+        id
+      }
+      upcomingInvoice {
+        amount
+        date
+      }
+    }
+    ...RateLimitWarn_OrganizationFragment
+    ...OrganizationInvoicesList_OrganizationFragment
+    ...BillingView_OrganizationFragment
+    ...OrganizationUsageEstimationView_OrganizationFragment
+  }
+`);
+
+const SubscriptionPage_QueryFragment = graphql(`
+  fragment SubscriptionPage_QueryFragment on Query {
+    ...BillingView_QueryFragment
+  }
+`);
+
+function Page(props: {
+  organization: FragmentType<typeof SubscriptionPage_OrganizationFragment>;
+  query: FragmentType<typeof SubscriptionPage_QueryFragment>;
 }): ReactElement | null {
+  const organization = useFragment(SubscriptionPage_OrganizationFragment, props.organization);
+  const query = useFragment(SubscriptionPage_QueryFragment, props.query);
   const canAccess = useOrganizationAccess({
     scope: OrganizationAccessScope.Settings,
     member: organization?.me,
@@ -65,7 +87,7 @@ function Page({
         <Card className="mt-8">
           <Heading className="mb-2">Plan and Reserved Volume</Heading>
           <div>
-            <BillingView organization={organization}>
+            <BillingView organization={organization} query={query}>
               {organization.billingConfiguration?.upcomingInvoice && (
                 <Stat>
                   <Stat.Label>Next Invoice</Stat.Label>
@@ -109,12 +131,28 @@ function Page({
   );
 }
 
+const SubscriptionPageQuery = graphql(`
+  query SubscriptionPageQuery($selector: OrganizationSelectorInput!) {
+    organization(selector: $selector) {
+      organization {
+        ...OrganizationLayout_OrganizationFragment
+        ...SubscriptionPage_OrganizationFragment
+      }
+    }
+    ...SubscriptionPage_QueryFragment
+  }
+`);
+
 function SubscriptionPage(): ReactElement {
   return (
     <>
       <Title title="Subscription & Usage" />
-      <OrganizationLayout value="subscription" includeBilling includeRateLimit>
-        {({ organization }) => <Page organization={organization} />}
+      <OrganizationLayout value="subscription" query={SubscriptionPageQuery}>
+        {props =>
+          props.organization ? (
+            <Page organization={props.organization.organization} query={props} />
+          ) : null
+        }
       </OrganizationLayout>
     </>
   );

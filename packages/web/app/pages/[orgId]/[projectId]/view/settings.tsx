@@ -1,6 +1,6 @@
 import { ReactElement } from 'react';
 import { useFormik } from 'formik';
-import { gql, useMutation, useQuery } from 'urql';
+import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 import { authenticated } from '@/components/authenticated-container';
 import { ProjectLayout } from '@/components/layouts';
@@ -9,17 +9,13 @@ import { ModelMigrationSettings } from '@/components/project/settings/model-migr
 import { Button, Card, Heading, Input, Link, Select, Tag, Title } from '@/components/v2';
 import { AlertTriangleIcon } from '@/components/v2/icon';
 import { DeleteProjectModal } from '@/components/v2/modals';
-import {
-  GetGitHubIntegrationDetailsDocument,
-  OrganizationFieldsFragment,
-  ProjectFieldsFragment,
-  ProjectType,
-} from '@/graphql';
+import { FragmentType, graphql, useFragment } from '@/gql';
+import { GetGitHubIntegrationDetailsDocument, ProjectType } from '@/graphql';
 import { canAccessProject, ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
-const Settings_UpdateProjectGitRepositoryMutation = gql(/* GraphQL */ `
+const Settings_UpdateProjectGitRepositoryMutation = graphql(`
   mutation Settings_UpdateProjectGitRepository($input: UpdateProjectGitRepositoryInput!) {
     updateProjectGitRepository(input: $input) {
       ok {
@@ -131,7 +127,7 @@ function GitHubIntegration({
   );
 }
 
-const Settings_UpdateProjectNameMutation = gql(/* GraphQL */ `
+const Settings_UpdateProjectNameMutation = graphql(`
   mutation Settings_UpdateProjectName($input: UpdateProjectNameInput!) {
     updateProjectName(input: $input) {
       ok {
@@ -141,6 +137,7 @@ const Settings_UpdateProjectNameMutation = gql(/* GraphQL */ `
         }
         updatedProject {
           ...ProjectFields
+          cleanId
         }
       }
       error {
@@ -150,13 +147,32 @@ const Settings_UpdateProjectNameMutation = gql(/* GraphQL */ `
   }
 `);
 
-const Page = ({
-  organization,
-  project,
-}: {
-  organization: OrganizationFieldsFragment;
-  project: ProjectFieldsFragment;
+const SettingsPage_OrganizationFragment = graphql(`
+  fragment SettingsPage_OrganizationFragment on Organization {
+    cleanId
+    me {
+      ...CanAccessProject_MemberFragment
+    }
+    ...ExternalCompositionSettings_OrganizationFragment
+  }
+`);
+
+const SettingsPage_ProjectFragment = graphql(`
+  fragment SettingsPage_ProjectFragment on Project {
+    name
+    gitRepository
+    type
+    ...ModelMigrationSettings_ProjectFragment
+    ...ExternalCompositionSettings_ProjectFragment
+  }
+`);
+
+const Page = (props: {
+  organization: FragmentType<typeof SettingsPage_OrganizationFragment>;
+  project: FragmentType<typeof SettingsPage_ProjectFragment>;
 }) => {
+  const organization = useFragment(SettingsPage_OrganizationFragment, props.organization);
+  const project = useFragment(SettingsPage_ProjectFragment, props.project);
   useProjectAccess({
     scope: ProjectAccessScope.Settings,
     member: organization.me,
@@ -193,9 +209,7 @@ const Page = ({
 
   return (
     <>
-      {/* {project.registryModel === 'LEGACY' ? ( */}
       <ModelMigrationSettings project={project} organizationId={organization.cleanId} />
-      {/* ) : null} */}
       <Card>
         <Heading className="mb-2">Project Name</Heading>
         <p className="mb-3 font-light text-gray-300">
@@ -272,11 +286,30 @@ const Page = ({
   );
 };
 
+const ProjectSettingsPageQuery = graphql(`
+  query ProjectSettingsPageQuery($organizationId: ID!, $projectId: ID!) {
+    organization(selector: { organization: $organizationId }) {
+      organization {
+        ...SettingsPage_OrganizationFragment
+        ...ProjectLayout_OrganizationFragment
+      }
+    }
+    project(selector: { organization: $organizationId, project: $projectId }) {
+      ...ProjectLayout_ProjectFragment
+      ...SettingsPage_ProjectFragment
+    }
+  }
+`);
+
 function SettingsPage(): ReactElement {
   return (
     <>
       <Title title="Project settings" />
-      <ProjectLayout value="settings" className="flex flex-col gap-y-10">
+      <ProjectLayout
+        value="settings"
+        className="flex flex-col gap-y-10"
+        query={ProjectSettingsPageQuery}
+      >
         {props => <Page {...props} />}
       </ProjectLayout>
     </>

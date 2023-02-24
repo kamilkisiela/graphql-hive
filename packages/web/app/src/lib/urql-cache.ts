@@ -9,11 +9,6 @@ import {
 import { ResultOf, VariablesOf } from '@graphql-typed-document-node/core';
 import { Cache, QueryInput, UpdateResolver } from '@urql/exchange-graphcache';
 import {
-  InvitationDeleteButton_DeleteInvitation,
-  MemberInvitationForm_InviteByEmail,
-  Members_OrganizationMembers,
-} from '../../pages/[orgId]/view/members';
-import {
   AddAlertChannelDocument,
   AddAlertDocument,
   AlertChannelsDocument,
@@ -361,72 +356,6 @@ const deleteGitHubIntegration: TypedDocumentNodeUpdateResolver<
   );
 };
 
-const inviteToOrganizationByEmail: TypedDocumentNodeUpdateResolver<
-  typeof MemberInvitationForm_InviteByEmail
-> = ({ inviteToOrganizationByEmail }, args, cache) => {
-  if (inviteToOrganizationByEmail.ok) {
-    cache.updateQuery(
-      {
-        query: Members_OrganizationMembers,
-        variables: {
-          selector: {
-            organization: args.input.organization,
-          },
-        },
-      },
-      data => {
-        if (data === null) {
-          return null;
-        }
-
-        const invitation = inviteToOrganizationByEmail.ok;
-
-        if (invitation) {
-          data.organization?.organization?.invitations.nodes.push({
-            ...invitation,
-            __typename: 'OrganizationInvitation',
-          });
-        }
-
-        return data;
-      },
-    );
-  }
-};
-
-const deleteOrganizationInvitation: TypedDocumentNodeUpdateResolver<
-  typeof InvitationDeleteButton_DeleteInvitation
-> = ({ deleteOrganizationInvitation }, args, cache) => {
-  if (deleteOrganizationInvitation.ok) {
-    cache.updateQuery(
-      {
-        query: Members_OrganizationMembers,
-        variables: {
-          selector: {
-            organization: args.input.organization,
-          },
-        },
-      },
-      data => {
-        if (data === null) {
-          return null;
-        }
-
-        const invitation = deleteOrganizationInvitation.ok;
-
-        if (invitation && data.organization?.organization?.invitations.nodes) {
-          data.organization.organization.invitations.nodes =
-            data.organization.organization.invitations.nodes.filter(
-              node => node.id !== invitation.id,
-            );
-        }
-
-        return data;
-      },
-    );
-  }
-};
-
 const enableExternalSchemaComposition: TypedDocumentNodeUpdateResolver<
   typeof ExternalCompositionForm_EnableMutation
 > = ({ enableExternalSchemaComposition }, args, cache) => {
@@ -509,8 +438,6 @@ export const Mutation = {
   deleteAlertChannels,
   addAlert,
   deletePersistedOperation,
-  inviteToOrganizationByEmail,
-  deleteOrganizationInvitation,
   enableExternalSchemaComposition,
   disableExternalSchemaComposition,
 };

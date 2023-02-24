@@ -1,17 +1,28 @@
 import { ReactElement, ReactNode } from 'react';
 import { Stat, Table, TBody, Td, TFoot, Th, THead, Tr } from '@/components/v2';
-import { BillingPlansQuery, BillingPlanType } from '@/graphql';
+import { FragmentType, graphql, useFragment } from '@/gql';
+import { BillingPlanType } from '@/graphql';
 import { CurrencyFormatter } from './helpers';
 
-function PriceEstimationTable({
-  plan,
-  operationsRateLimit,
-}: {
-  plan: BillingPlansQuery['billingPlans'][number];
+const PriceEstimationTable_PlanFragment = graphql(`
+  fragment PriceEstimationTable_PlanFragment on BillingPlan {
+    includedOperationsLimit
+    pricePerOperationsUnit
+    basePrice
+    planType
+  }
+`);
+
+function PriceEstimationTable(props: {
+  plan: FragmentType<typeof PriceEstimationTable_PlanFragment>;
   operationsRateLimit: number;
 }): ReactElement {
+  const plan = useFragment(PriceEstimationTable_PlanFragment, props.plan);
   const includedOperationsInMillions = (plan.includedOperationsLimit ?? 0) / 1_000_000;
-  const additionalOperations = Math.max(0, operationsRateLimit - includedOperationsInMillions);
+  const additionalOperations = Math.max(
+    0,
+    props.operationsRateLimit - includedOperationsInMillions,
+  );
   const operationsTotal = (plan.pricePerOperationsUnit ?? 0) * additionalOperations;
   const total = (plan.basePrice ?? 0) + operationsTotal;
 
@@ -59,17 +70,24 @@ function PriceEstimationTable({
   );
 }
 
+const PlanSummary_PlanFragment = graphql(`
+  fragment PlanSummary_PlanFragment on BillingPlan {
+    planType
+    retentionInDays
+    ...PriceEstimationTable_PlanFragment
+  }
+`);
+
 export function PlanSummary({
-  plan,
   operationsRateLimit,
-  retentionInDays,
   children,
+  ...props
 }: {
-  plan: BillingPlansQuery['billingPlans'][number];
+  plan: FragmentType<typeof PlanSummary_PlanFragment>;
   operationsRateLimit: number;
-  retentionInDays: number;
   children: ReactNode;
 }): ReactElement {
+  const plan = useFragment(PlanSummary_PlanFragment, props.plan);
   if (plan.planType === BillingPlanType.Enterprise) {
     return (
       <Stat>
@@ -104,7 +122,7 @@ export function PlanSummary({
         <Stat className="mb-8">
           <Stat.Label>Retention</Stat.Label>
           <Stat.HelpText>usage reports</Stat.HelpText>
-          <Stat.Number>{retentionInDays} days</Stat.Number>
+          <Stat.Number>{plan.retentionInDays} days</Stat.Number>
         </Stat>
       </div>
       <PriceEstimationTable plan={plan} operationsRateLimit={operationsRateLimit} />

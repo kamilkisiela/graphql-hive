@@ -18,10 +18,10 @@ import {
   ToggleGroupItem,
 } from '@/components/v2';
 import { DiffIcon } from '@/components/v2/icon';
+import { graphql } from '@/gql';
 import {
   CompareDocument,
   CriticalityLevel,
-  LatestSchemaDocument,
   SchemaChangeFieldsFragment,
   VersionsDocument,
 } from '@/graphql';
@@ -292,29 +292,43 @@ function Page({ versionId }: { versionId: string }) {
   );
 }
 
+const TargetHistoryPageQuery = graphql(`
+  query TargetHistoryPageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
+    organization(selector: { organization: $organizationId }) {
+      organization {
+        ...TargetLayout_OrganizationFragment
+      }
+    }
+    project(selector: { organization: $organizationId, project: $projectId }) {
+      ...TargetLayout_ProjectFragment
+    }
+    targets(selector: { organization: $organizationId, project: $projectId }) {
+      ...TargetLayout_TargetConnectionFragment
+    }
+    target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
+      id
+      latestSchemaVersion {
+        id
+      }
+    }
+  }
+`);
+
 function HistoryPage(): ReactElement {
   const router = useRouteSelector();
-  const [latestSchemaQuery] = useQuery({
-    query: LatestSchemaDocument,
-    variables: {
-      selector: {
-        organization: router.organizationId,
-        project: router.projectId,
-        target: router.targetId,
-      },
-    },
-    requestPolicy: 'cache-and-network',
-  });
-  const versionId = router.versionId ?? latestSchemaQuery.data?.target?.latestSchemaVersion?.id;
 
   return (
     <>
       <Title title="History" />
       <TargetLayout
         value="history"
-        className={versionId ? 'flex h-full items-stretch gap-x-5' : ''}
+        className={router.versionId ? 'flex h-full items-stretch gap-x-5' : ''}
+        query={TargetHistoryPageQuery}
       >
-        {() => (versionId ? <Page versionId={versionId} /> : noSchema)}
+        {({ target }) => {
+          const versionId = router.versionId ?? target?.latestSchemaVersion?.id;
+          return versionId ? <Page versionId={versionId} /> : noSchema;
+        }}
       </TargetLayout>
     </>
   );

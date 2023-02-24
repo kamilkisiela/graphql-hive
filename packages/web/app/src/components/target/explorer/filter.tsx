@@ -1,10 +1,11 @@
 import { useMemo } from 'react';
 import { useRouter } from 'next/router';
-import { gql, useQuery } from 'urql';
+import { useQuery } from 'urql';
 import { Autocomplete, RadixSelect, SelectOption, Switch } from '@/components/v2';
+import { graphql } from '@/gql';
 import { useArgumentListToggle, usePeriodSelector } from './provider';
 
-const SchemaExplorerFilter_AllTypes = gql(/* GraphQL */ `
+const SchemaExplorerFilter_AllTypes = graphql(`
   query SchemaExplorerFilter_AllTypes(
     $organization: ID!
     $project: ID!

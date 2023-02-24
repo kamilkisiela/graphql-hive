@@ -39,7 +39,7 @@ export function waitFor(ms: number) {
 
 export function createOrganization(input: CreateOrganizationInput, authToken: string) {
   return execute({
-    document: graphql(/* GraphQL */ `
+    document: graphql(`
       mutation createOrganization($input: CreateOrganizationInput!) {
         createOrganization(input: $input) {
           ok {
@@ -75,7 +75,7 @@ export function createOrganization(input: CreateOrganizationInput, authToken: st
 
 export function getOrganization(organizationId: string, authToken: string) {
   return execute({
-    document: graphql(/* GraphQL */ `
+    document: graphql(`
       query getOrganization($organizationId: ID!) {
         organization(selector: { organization: $organizationId }) {
           organization {
@@ -104,7 +104,7 @@ export function getOrganization(organizationId: string, authToken: string) {
 
 export function inviteToOrganization(input: InviteToOrganizationByEmailInput, authToken: string) {
   return execute({
-    document: graphql(/* GraphQL */ `
+    document: graphql(`
       mutation inviteToOrganization($input: InviteToOrganizationByEmailInput!) {
         inviteToOrganizationByEmail(input: $input) {
           ok {
@@ -129,7 +129,7 @@ export function inviteToOrganization(input: InviteToOrganizationByEmailInput, au
 
 export function renameOrganization(input: UpdateOrganizationNameInput, authToken: string) {
   return execute({
-    document: graphql(/* GraphQL */ `
+    document: graphql(`
       mutation updateOrganizationName($input: UpdateOrganizationNameInput!) {
         updateOrganizationName(input: $input) {
           ok {
@@ -159,7 +159,7 @@ export function renameOrganization(input: UpdateOrganizationNameInput, authToken
 
 export function joinOrganization(code: string, authToken: string) {
   return execute({
-    document: graphql(/* GraphQL */ `
+    document: graphql(`
       mutation joinOrganization($code: String!) {
         joinOrganization(code: $code) {
           __typename
@@ -191,7 +191,7 @@ export function joinOrganization(code: string, authToken: string) {
 
 export function getOrganizationMembers(selector: OrganizationSelectorInput, authToken: string) {
   return execute({
-    document: graphql(/* GraphQL */ `
+    document: graphql(`
       query getOrganizationMembers($selector: OrganizationSelectorInput!) {
         organization(selector: $selector) {
           organization {
@@ -222,7 +222,7 @@ export function getOrganizationTransferRequest(
   authToken: string,
 ) {
   return execute({
-    document: graphql(/* GraphQL */ `
+    document: graphql(`
       query getOrganizationTransferRequest($selector: OrganizationTransferRequestSelector!) {
         organizationTransferRequest(selector: $selector) {
           organization {
@@ -243,7 +243,7 @@ export function requestOrganizationTransfer(
   authToken: string,
 ) {
   return execute({
-    document: graphql(/* GraphQL */ `
+    document: graphql(`
       mutation requestOrganizationTransfer($input: RequestOrganizationTransferInput!) {
         requestOrganizationTransfer(input: $input) {
           ok {
@@ -268,7 +268,7 @@ export function answerOrganizationTransferRequest(
   authToken: string,
 ) {
   return execute({
-    document: graphql(/* GraphQL */ `
+    document: graphql(`
       mutation answerOrganizationTransferRequest($input: AnswerOrganizationTransferRequestInput!) {
         answerOrganizationTransferRequest(input: $input) {
           ok {
@@ -289,7 +289,7 @@ export function answerOrganizationTransferRequest(
 
 export function createProject(input: CreateProjectInput, authToken: string) {
   return execute({
-    document: graphql(/* GraphQL */ `
+    document: graphql(`
       mutation createProject($input: CreateProjectInput!) {
         createProject(input: $input) {
           ok {
@@ -315,7 +315,7 @@ export function createProject(input: CreateProjectInput, authToken: string) {
 
 export function renameProject(input: UpdateProjectNameInput, authToken: string) {
   return execute({
-    document: graphql(/* GraphQL */ `
+    document: graphql(`
       mutation updateProjectName($input: UpdateProjectNameInput!) {
         updateProjectName(input: $input) {
           ok {
@@ -344,7 +344,7 @@ export function renameProject(input: UpdateProjectNameInput, authToken: string) 
 
 export function updateRegistryModel(input: UpdateProjectRegistryModelInput, authToken: string) {
   return execute({
-    document: graphql(/* GraphQL */ `
+    document: graphql(`
       mutation updateRegistryModel($input: UpdateProjectRegistryModelInput!) {
         updateProjectRegistryModel(input: $input) {
           ok {
@@ -367,7 +367,7 @@ export function updateRegistryModel(input: UpdateProjectRegistryModelInput, auth
 
 export function createTarget(input: CreateTargetInput, authToken: string) {
   return execute({
-    document: graphql(/* GraphQL */ `
+    document: graphql(`
       mutation createTarget($input: CreateTargetInput!) {
         createTarget(input: $input) {
           ok {
@@ -391,7 +391,7 @@ export function createTarget(input: CreateTargetInput, authToken: string) {
 
 export function renameTarget(input: UpdateTargetNameInput, authToken: string) {
   return execute({
-    document: graphql(/* GraphQL */ `
+    document: graphql(`
       mutation updateTargetName($input: UpdateTargetNameInput!) {
         updateTargetName(input: $input) {
           ok {
@@ -421,7 +421,7 @@ export function renameTarget(input: UpdateTargetNameInput, authToken: string) {
 
 export function createToken(input: CreateTokenInput, authToken: string) {
   return execute({
-    document: graphql(/* GraphQL */ `
+    document: graphql(`
       mutation createToken($input: CreateTokenInput!) {
         createToken(input: $input) {
           ok {
@@ -442,7 +442,7 @@ export function createToken(input: CreateTokenInput, authToken: string) {
 
 export function deleteTokens(input: DeleteTokensInput, authToken: string) {
   return execute({
-    document: graphql(/* GraphQL */ `
+    document: graphql(`
       mutation deleteTokens($input: DeleteTokensInput!) {
         deleteTokens(input: $input) {
           deletedTokens
@@ -458,7 +458,7 @@ export function deleteTokens(input: DeleteTokensInput, authToken: string) {
 
 export function readTokenInfo(token: string) {
   return execute({
-    document: graphql(/* GraphQL */ `
+    document: graphql(`
       query readTokenInfo {
         tokenInfo {
           __typename
@@ -494,7 +494,7 @@ export function readTokenInfo(token: string) {
 
 export function updateMemberAccess(input: OrganizationMemberAccessInput, authToken: string) {
   return execute({
-    document: graphql(/* GraphQL */ `
+    document: graphql(`
       mutation updateOrganizationMemberAccess($input: OrganizationMemberAccessInput!) {
         updateOrganizationMemberAccess(input: $input) {
           organization {
@@ -527,7 +527,7 @@ export function publishSchema(
   authHeader?: 'x-api-token' | 'authorization',
 ) {
   return execute({
-    document: graphql(/* GraphQL */ `
+    document: graphql(`
       mutation schemaPublish($input: SchemaPublishInput!) {
         schemaPublish(input: $input) {
           __typename
@@ -574,7 +574,7 @@ export function publishSchema(
 
 export function checkSchema(input: SchemaCheckInput, token: string) {
   return execute({
-    document: graphql(/* GraphQL */ `
+    document: graphql(`
       mutation schemaCheck($input: SchemaCheckInput!) {
         schemaCheck(input: $input) {
           ... on SchemaCheckSuccess {
@@ -621,7 +621,7 @@ export function deleteSchema(
   authHeader?: 'x-api-token' | 'authorization',
 ) {
   return execute({
-    document: graphql(/* GraphQL */ `
+    document: graphql(`
       mutation schemaDelete($input: SchemaDeleteInput!) {
         schemaDelete(input: $input) {
           __typename
@@ -647,7 +647,7 @@ export function setTargetValidation(
       },
 ) {
   return execute({
-    document: graphql(/* GraphQL */ `
+    document: graphql(`
       mutation setTargetValidation($input: SetTargetValidationInput!) {
         setTargetValidation(input: $input) {
           enabled
@@ -675,7 +675,7 @@ export function updateTargetValidationSettings(
       },
 ) {
   return execute({
-    document: graphql(/* GraphQL */ `
+    document: graphql(`
       mutation updateTargetValidationSettings($input: UpdateTargetValidationSettingsInput!) {
         updateTargetValidationSettings(input: $input) {
           ok {
@@ -709,7 +709,7 @@ export function updateTargetValidationSettings(
 
 export function updateBaseSchema(input: UpdateBaseSchemaInput, token: string) {
   return execute({
-    document: graphql(/* GraphQL */ `
+    document: graphql(`
       mutation updateBaseSchema($input: UpdateBaseSchemaInput!) {
         updateBaseSchema(input: $input) {
           __typename
@@ -725,7 +725,7 @@ export function updateBaseSchema(input: UpdateBaseSchemaInput, token: string) {
 
 export function readOperationsStats(input: OperationsStatsSelectorInput, token: string) {
   return execute({
-    document: graphql(/* GraphQL */ `
+    document: graphql(`
       query readOperationsStats($input: OperationsStatsSelectorInput!) {
         operationsStats(selector: $input) {
           totalOperations
@@ -757,7 +757,7 @@ export function readOperationsStats(input: OperationsStatsSelectorInput, token: 
 
 export function readOperationBody(selector: OperationBodyByHashInput, token: string) {
   return execute({
-    document: graphql(/* GraphQL */ `
+    document: graphql(`
       query readOperationBody($selector: OperationBodyByHashInput!) {
         operationBodyByHash(selector: $selector)
       }
@@ -771,7 +771,7 @@ export function readOperationBody(selector: OperationBodyByHashInput, token: str
 
 export function fetchLatestSchema(token: string) {
   return execute({
-    document: graphql(/* GraphQL */ `
+    document: graphql(`
       query latestVersion {
         latestVersion {
           baseSchema
@@ -809,7 +809,7 @@ export function fetchLatestSchema(token: string) {
 
 export function fetchLatestValidSchema(token: string) {
   return execute({
-    document: graphql(/* GraphQL */ `
+    document: graphql(`
       query latestValidVersion {
         latestValidVersion {
           id
@@ -850,7 +850,7 @@ export function fetchLatestValidSchema(token: string) {
 
 export function fetchVersions(selector: SchemaVersionsInput, limit: number, token: string) {
   return execute({
-    document: graphql(/* GraphQL */ `
+    document: graphql(`
       query schemaVersions($limit: Int!, $selector: SchemaVersionsInput!) {
         schemaVersions(selector: $selector, limit: $limit) {
           nodes {
@@ -898,7 +898,7 @@ export function fetchVersions(selector: SchemaVersionsInput, limit: number, toke
 
 export function publishPersistedOperations(input: PublishPersistedOperationInput[], token: string) {
   return execute({
-    document: graphql(/* GraphQL */ `
+    document: graphql(`
       mutation publishPersistedOperations($input: [PublishPersistedOperationInput!]!) {
         publishPersistedOperations(input: $input) {
           summary {
@@ -924,7 +924,7 @@ export function publishPersistedOperations(input: PublishPersistedOperationInput
 
 export function updateSchemaVersionStatus(input: SchemaVersionUpdateInput, token: string) {
   return execute({
-    document: graphql(/* GraphQL */ `
+    document: graphql(`
       mutation updateSchemaVersionStatus($input: SchemaVersionUpdateInput!) {
         updateSchemaVersionStatus(input: $input) {
           id
@@ -953,7 +953,7 @@ export function updateSchemaVersionStatus(input: SchemaVersionUpdateInput, token
 
 export function createCdnAccess(selector: TargetSelectorInput, token: string) {
   return execute({
-    document: graphql(/* GraphQL */ `
+    document: graphql(`
       mutation createCdnAccessToken($input: CreateCdnAccessTokenInput!) {
         createCdnAccessToken(input: $input) {
           ok {
@@ -1041,7 +1041,7 @@ export async function updateOrgRateLimit(
   authToken: string,
 ) {
   return execute({
-    document: graphql(/* GraphQL */ `
+    document: graphql(`
       mutation updateOrgRateLimit(
         $selector: OrganizationSelectorInput!
         $monthlyLimits: RateLimitInput!
@@ -1064,7 +1064,7 @@ export async function enableExternalSchemaComposition(
   token: string,
 ) {
   return execute({
-    document: graphql(/* GraphQL */ `
+    document: graphql(`
       mutation enableExternalSchemaComposition($input: EnableExternalSchemaCompositionInput!) {
         enableExternalSchemaComposition(input: $input) {
           ok {

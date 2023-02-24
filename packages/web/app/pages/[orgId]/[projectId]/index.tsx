@@ -21,6 +21,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/v2/dropdown';
 import { LinkIcon, MoreIcon, SettingsIcon } from '@/components/v2/icon';
+import { graphql } from '@/gql';
 import { TargetQuery, TargetsDocument, VersionsDocument } from '@/graphql';
 import { getDocsUrl } from '@/lib/docs-url';
 import { useClipboard } from '@/lib/hooks/use-clipboard';
@@ -140,11 +141,24 @@ const Page = () => {
   );
 };
 
+const ProjectOverviewPageQuery = graphql(`
+  query ProjectOverviewPageQuery($organizationId: ID!, $projectId: ID!) {
+    organization(selector: { organization: $organizationId }) {
+      organization {
+        ...ProjectLayout_OrganizationFragment
+      }
+    }
+    project(selector: { organization: $organizationId, project: $projectId }) {
+      ...ProjectLayout_ProjectFragment
+    }
+  }
+`);
+
 function ProjectsPage(): ReactElement {
   return (
     <>
       <Title title="Targets" />
-      <ProjectLayout value="targets" className="flex gap-x-5">
+      <ProjectLayout value="targets" className="flex gap-x-5" query={ProjectOverviewPageQuery}>
         {() => <Page />}
       </ProjectLayout>
     </>

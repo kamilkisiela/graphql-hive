@@ -5,6 +5,7 @@ import { TargetLayout } from '@/components/layouts';
 import { Button, Title } from '@/components/v2';
 import { HiveLogo, Link2Icon } from '@/components/v2/icon';
 import { ConnectLabModal } from '@/components/v2/modals/connect-lab';
+import { graphql } from '@/gql';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 import { createGraphiQLFetcher } from '@graphiql/toolkit';
@@ -31,6 +32,25 @@ const Page = ({ endpoint }: { endpoint: string }): ReactElement => {
   );
 };
 
+const TargetLaboratoryPageQuery = graphql(`
+  query TargetLaboratoryPageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
+    organization(selector: { organization: $organizationId }) {
+      organization {
+        ...TargetLayout_OrganizationFragment
+      }
+    }
+    project(selector: { organization: $organizationId, project: $projectId }) {
+      ...TargetLayout_ProjectFragment
+    }
+    targets(selector: { organization: $organizationId, project: $projectId }) {
+      ...TargetLayout_TargetConnectionFragment
+    }
+    target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
+      id
+    }
+  }
+`);
+
 function LaboratoryPage(): ReactElement {
   const [isModalOpen, toggleModalOpen] = useToggle();
   const router = useRouteSelector();
@@ -40,6 +60,7 @@ function LaboratoryPage(): ReactElement {
     <>
       <Title title="Schema laboratory" />
       <TargetLayout
+        query={TargetLaboratoryPageQuery}
         value="laboratory"
         className="flex h-full flex-col"
         connect={

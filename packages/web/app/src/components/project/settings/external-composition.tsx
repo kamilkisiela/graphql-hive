@@ -1,12 +1,12 @@
 import { useCallback, useState } from 'react';
 import { useFormik } from 'formik';
-import { gql, useMutation, useQuery } from 'urql';
+import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 import { Button, Card, Heading, Input, Spinner, Switch } from '@/components/v2';
-import { OrganizationFieldsFragment, ProjectFieldsFragment } from '@/graphql';
+import { FragmentType, graphql, useFragment } from '@/gql';
 import { useNotifications } from '@/lib/hooks';
 
-export const ExternalCompositionForm_EnableMutation = gql(`
+export const ExternalCompositionForm_EnableMutation = graphql(`
   mutation ExternalCompositionForm_EnableMutation($input: EnableExternalSchemaCompositionInput!) {
     enableExternalSchemaComposition(input: $input) {
       ok {
@@ -23,15 +23,31 @@ export const ExternalCompositionForm_EnableMutation = gql(`
   }
 `);
 
+const ExternalCompositionForm_OrganizationFragment = graphql(`
+  fragment ExternalCompositionForm_OrganizationFragment on Organization {
+    cleanId
+  }
+`);
+
+const ExternalCompositionForm_ProjectFragment = graphql(`
+  fragment ExternalCompositionForm_ProjectFragment on Project {
+    cleanId
+  }
+`);
+
 const ExternalCompositionForm = ({
-  project,
-  organization,
   endpoint,
+  ...props
 }: {
-  project: ProjectFieldsFragment;
-  organization: OrganizationFieldsFragment;
+  project: FragmentType<typeof ExternalCompositionForm_ProjectFragment>;
+  organization: FragmentType<typeof ExternalCompositionForm_OrganizationFragment>;
   endpoint?: string;
 }) => {
+  const project = useFragment(ExternalCompositionForm_ProjectFragment, props.project);
+  const organization = useFragment(
+    ExternalCompositionForm_OrganizationFragment,
+    props.organization,
+  );
   const notify = useNotifications();
   const [mutation, enable] = useMutation(ExternalCompositionForm_EnableMutation);
   const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } =
@@ -122,7 +138,7 @@ const ExternalCompositionForm = ({
   );
 };
 
-export const ExternalComposition_DisableMutation = gql(`
+export const ExternalComposition_DisableMutation = graphql(`
   mutation ExternalComposition_DisableMutation($input: DisableExternalSchemaCompositionInput!) {
     disableExternalSchemaComposition(input: $input) {
       ok
@@ -131,7 +147,7 @@ export const ExternalComposition_DisableMutation = gql(`
   }
 `);
 
-export const ExternalComposition_ProjectConfigurationQuery = gql(`
+export const ExternalComposition_ProjectConfigurationQuery = graphql(`
   query ExternalComposition_ProjectConfigurationQuery($selector: ProjectSelectorInput!) {
     project(selector: $selector) {
       id
@@ -143,13 +159,29 @@ export const ExternalComposition_ProjectConfigurationQuery = gql(`
   }
 `);
 
-export const ExternalCompositionSettings = ({
-  project,
-  organization,
-}: {
-  project: ProjectFieldsFragment;
-  organization: OrganizationFieldsFragment;
+const ExternalCompositionSettings_OrganizationFragment = graphql(`
+  fragment ExternalCompositionSettings_OrganizationFragment on Organization {
+    cleanId
+    ...ExternalCompositionForm_OrganizationFragment
+  }
+`);
+
+const ExternalCompositionSettings_ProjectFragment = graphql(`
+  fragment ExternalCompositionSettings_ProjectFragment on Project {
+    cleanId
+    ...ExternalCompositionForm_ProjectFragment
+  }
+`);
+
+export const ExternalCompositionSettings = (props: {
+  project: FragmentType<typeof ExternalCompositionSettings_ProjectFragment>;
+  organization: FragmentType<typeof ExternalCompositionSettings_OrganizationFragment>;
 }) => {
+  const project = useFragment(ExternalCompositionSettings_ProjectFragment, props.project);
+  const organization = useFragment(
+    ExternalCompositionSettings_OrganizationFragment,
+    props.organization,
+  );
   const [enabled, setEnabled] = useState<boolean>();
   const [mutation, disableComposition] = useMutation(ExternalComposition_DisableMutation);
   const notify = useNotifications();

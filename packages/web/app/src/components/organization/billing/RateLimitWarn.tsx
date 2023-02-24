@@ -1,12 +1,20 @@
 import { ReactElement } from 'react';
 import { Callout } from '@/components/v2';
-import { OrgRateLimitFieldsFragment } from '@/graphql';
+import { FragmentType, graphql, useFragment } from '@/gql';
 
-export function RateLimitWarn({
-  organization,
-}: {
-  organization: OrgRateLimitFieldsFragment;
+const RateLimitWarn_OrganizationFragment = graphql(`
+  fragment RateLimitWarn_OrganizationFragment on Organization {
+    name
+    rateLimit {
+      limitedForOperations
+    }
+  }
+`);
+
+export function RateLimitWarn(props: {
+  organization: FragmentType<typeof RateLimitWarn_OrganizationFragment>;
 }): ReactElement | null {
+  const organization = useFragment(RateLimitWarn_OrganizationFragment, props.organization);
   if (!organization.rateLimit.limitedForOperations) {
     return null;
   }

@@ -1,19 +1,13 @@
 import { ReactElement, useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import { formatISO, subDays, subHours, subMinutes } from 'date-fns';
-import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
 import { OperationsFilterTrigger } from '@/components/target/operations/Filters';
 import { OperationsList } from '@/components/target/operations/List';
 import { OperationsStats } from '@/components/target/operations/Stats';
-import { DataWrapper, EmptyList, RadixSelect, Title } from '@/components/v2';
-import {
-  HasCollectedOperationsDocument,
-  OrganizationFieldsFragment,
-  ProjectFieldsFragment,
-  TargetFieldsFragment,
-} from '@/graphql';
+import { EmptyList, RadixSelect, Title } from '@/components/v2';
+import { graphql } from '@/gql';
 import { getDocsUrl } from '@/lib/docs-url';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
@@ -33,13 +27,13 @@ const DateRange = {
 type PeriodKey = keyof typeof DateRange;
 
 function OperationsView({
-  organization,
-  project,
-  target,
+  organizationCleanId,
+  projectCleanId,
+  targetCleanId,
 }: {
-  organization: OrganizationFieldsFragment;
-  project: ProjectFieldsFragment;
-  target: TargetFieldsFragment;
+  organizationCleanId: string;
+  projectCleanId: string;
+  targetCleanId: string;
 }): ReactElement {
   const router = useRouter();
   const [href, periodParam] = router.asPath.split('?');
@@ -86,74 +80,75 @@ function OperationsView({
         />
       </div>
       <OperationsStats
-        organization={organization.cleanId}
-        project={project.cleanId}
-        target={target.cleanId}
+        organization={organizationCleanId}
+        project={projectCleanId}
+        target={targetCleanId}
         period={period}
         operationsFilter={selectedOperations}
       />
       <OperationsList
         className="mt-12"
         period={period}
-        organization={organization.cleanId}
-        project={project.cleanId}
-        target={target.cleanId}
+        organization={organizationCleanId}
+        project={projectCleanId}
+        target={targetCleanId}
         operationsFilter={selectedOperations}
       />
     </>
   );
 }
 
-function OperationsViewGate({
-  organization,
-  project,
-  target,
-}: {
-  organization: OrganizationFieldsFragment;
-  project: ProjectFieldsFragment;
-  target: TargetFieldsFragment;
-}): ReactElement {
-  const [query] = useQuery({
-    query: HasCollectedOperationsDocument,
-    variables: {
-      selector: {
-        organization: organization.cleanId,
-        project: project.cleanId,
-        target: target.cleanId,
-      },
-    },
-  });
-
-  return (
-    <DataWrapper query={query}>
-      {result =>
-        result.data.hasCollectedOperations ? (
-          <OperationsView organization={organization} project={project} target={target} />
-        ) : (
-          <EmptyList
-            title="Hive is waiting for your first collected operation"
-            description="You can collect usage of your GraphQL API with Hive Client"
-            docsUrl={getDocsUrl('/features/monitoring')}
-          />
-        )
+const TargetOperationsPageQuery = graphql(`
+  query TargetOperationsPageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
+    organization(selector: { organization: $organizationId }) {
+      organization {
+        ...TargetLayout_OrganizationFragment
+        cleanId
       }
-    </DataWrapper>
-  );
-}
+    }
+    project(selector: { organization: $organizationId, project: $projectId }) {
+      ...TargetLayout_ProjectFragment
+      cleanId
+    }
+    targets(selector: { organization: $organizationId, project: $projectId }) {
+      ...TargetLayout_TargetConnectionFragment
+    }
+    target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
+      cleanId
+    }
+    hasCollectedOperations(
+      selector: { organization: $organizationId, project: $projectId, target: $targetId }
+    )
+  }
+`);
 
 function OperationsPage(): ReactElement {
   return (
     <>
       <Title title="Operations" />
-      <TargetLayout value="operations">
-        {({ organization, project, target }) => (
-          <div className="relative">
-            <p className="mb-5 font-light text-gray-500">
-              Data collected based on operation executed against your GraphQL schema.
-            </p>
-            <OperationsViewGate organization={organization} project={project} target={target} />
-          </div>
-        )}
+      <TargetLayout value="operations" query={TargetOperationsPageQuery}>
+        {({ organization, project, target, hasCollectedOperations }) =>
+          organization && project && target ? (
+            <div className="relative">
+              <p className="mb-5 font-light text-gray-500">
+                Data collected based on operation executed against your GraphQL schema.
+              </p>
+              {hasCollectedOperations ? (
+                <OperationsView
+                  organizationCleanId={organization.organization.cleanId}
+                  projectCleanId={project.cleanId}
+                  targetCleanId={target.cleanId}
+                />
+              ) : (
+                <EmptyList
+                  title="Hive is waiting for your first collected operation"
+                  description="You can collect usage of your GraphQL API with Hive Client"
+                  docsUrl={getDocsUrl('/features/monitoring')}
+                />
+              )}
+            </div>
+          ) : null
+        }
       </TargetLayout>
     </>
   );

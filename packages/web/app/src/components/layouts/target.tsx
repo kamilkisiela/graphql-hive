@@ -1,6 +1,6 @@
 import { ReactElement, ReactNode, useEffect } from 'react';
 import NextLink from 'next/link';
-import { gql, useQuery } from 'urql';
+import { TypedDocumentNode, useQuery } from 'urql';
 import { Button, Heading, Link, SubHeader, Tabs } from '@/components/v2';
 import {
   DropdownMenu,
@@ -10,13 +10,7 @@ import {
 } from '@/components/v2/dropdown';
 import { ArrowDownIcon, Link2Icon } from '@/components/v2/icon';
 import { ConnectSchemaModal } from '@/components/v2/modals';
-import {
-  OrganizationFieldsFragment,
-  ProjectDocument,
-  ProjectFieldsFragment,
-  TargetFieldsFragment,
-  TargetsDocument,
-} from '@/graphql';
+import { FragmentType, graphql, useFragment } from '@/gql';
 import { canAccessTarget, TargetAccessScope, useTargetAccess } from '@/lib/access/target';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
 import { QueryError } from '../common/DataWrapper';
@@ -31,97 +25,124 @@ enum TabValue {
   Settings = 'settings',
 }
 
-const IsCDNEnabledQuery = gql(/* GraphQL */ `
-  query IsCDNEnabledQuery {
+const TargetLayout_OrganizationFragment = graphql(`
+  fragment TargetLayout_OrganizationFragment on Organization {
+    me {
+      ...CanAccessTarget_MemberFragment
+    }
+    name
+  }
+`);
+
+const TargetLayout_ProjectFragment = graphql(`
+  fragment TargetLayout_ProjectFragment on Project {
+    type
+    name
+    registryModel
+  }
+`);
+
+const TargetLayout_TargetConnectionFragment = graphql(`
+  fragment TargetLayout_TargetConnectionFragment on TargetConnection {
+    total
+    nodes {
+      cleanId
+      name
+    }
+  }
+`);
+
+const TargetLayout_IsCDNEnabledFragment = graphql(`
+  fragment TargetLayout_IsCDNEnabledFragment on Query {
     isCDNEnabled
   }
 `);
 
-export const TargetLayout = ({
+export const TargetLayout = <
+  TSatisfies extends {
+    organization?:
+      | {
+          organization?: FragmentType<typeof TargetLayout_OrganizationFragment> | null;
+        }
+      | null
+      | undefined;
+    project?: FragmentType<typeof TargetLayout_ProjectFragment> | null;
+    targets: FragmentType<typeof TargetLayout_TargetConnectionFragment>;
+  } & FragmentType<typeof TargetLayout_IsCDNEnabledFragment>,
+>({
   children,
   connect,
   value,
   className,
+  query,
 }: {
-  children(props: {
-    target: TargetFieldsFragment;
-    project: ProjectFieldsFragment;
-    organization: OrganizationFieldsFragment;
-  }): ReactNode;
+  children(props: TSatisfies): ReactNode;
   value: 'schema' | 'explorer' | 'history' | 'operations' | 'laboratory' | 'settings';
   className?: string;
   connect?: ReactNode;
+  query: TypedDocumentNode<
+    TSatisfies,
+    {
+      organizationId: string;
+      projectId: string;
+      targetId: string;
+    }
+  >;
 }): ReactElement | null => {
   const [isModalOpen, toggleModalOpen] = useToggle();
 
   const router = useRouteSelector();
-
   const { organizationId: orgId, projectId, targetId } = router;
 
-  const [targetsQuery] = useQuery({
-    query: TargetsDocument,
-    variables: {
-      selector: {
-        organization: orgId,
-        project: projectId,
-      },
-    },
-    requestPolicy: 'cache-and-network',
-  });
-
-  const [projectQuery] = useQuery({
-    query: ProjectDocument,
+  const [data] = useQuery({
+    query,
     variables: {
       organizationId: orgId,
       projectId,
+      targetId,
     },
     requestPolicy: 'cache-and-network',
   });
 
-  const [isCdnEnabledQuery] = useQuery({ query: IsCDNEnabledQuery });
-
-  const targets = targetsQuery.data?.targets;
+  const isCDNEnabled = useFragment(TargetLayout_IsCDNEnabledFragment, data.data);
+  const targets = useFragment(TargetLayout_TargetConnectionFragment, data.data?.targets);
   const target = targets?.nodes.find(node => node.cleanId === targetId);
-  const org = projectQuery.data?.organization?.organization;
-  const project = projectQuery.data?.project;
+  const org = useFragment(TargetLayout_OrganizationFragment, data.data?.organization?.organization);
+  const project = useFragment(TargetLayout_ProjectFragment, data.data?.project);
   const me = org?.me;
 
   useEffect(() => {
-    if (!targetsQuery.fetching && !target) {
+    if (!data.fetching && !target) {
       // url with # provoke error Maximum update depth exceeded
       router.push('/404', router.asPath.replace(/#.*/, ''));
     }
-  }, [router, target, targetsQuery.fetching]);
+  }, [router, target, data.fetching]);
 
   useEffect(() => {
-    if (!projectQuery.fetching && !project) {
+    if (!data.fetching && !project) {
       // url with # provoke error Maximum update depth exceeded
       router.push('/404', router.asPath.replace(/#.*/, ''));
     }
-  }, [router, project, projectQuery.fetching]);
+  }, [router, project, data.fetching]);
 
   useTargetAccess({
     scope: TargetAccessScope.Read,
-    member: me,
+    member: me ?? null,
     redirect: true,
   });
 
-  const canAccessSchema = canAccessTarget(TargetAccessScope.RegistryRead, me);
-  const canAccessSettings = canAccessTarget(TargetAccessScope.Settings, me);
+  const canAccessSchema = canAccessTarget(TargetAccessScope.RegistryRead, me ?? null);
+  const canAccessSettings = canAccessTarget(TargetAccessScope.Settings, me ?? null);
 
-  if (projectQuery.fetching || targetsQuery.fetching) {
+  if (data.fetching) {
     return null;
   }
 
-  if (projectQuery.error || targetsQuery.error) {
-    return <QueryError error={projectQuery.error || targetsQuery.error} />;
+  if (data.error) {
+    return <QueryError error={data.error} />;
   }
 
   if (!org || !project || !target) {
-    return null;
-  }
-
-  if (!isCdnEnabledQuery.data) {
     return null;
   }
 
@@ -170,7 +191,7 @@ export const TargetLayout = ({
             <div className="mb-10 text-xs font-bold text-[#34eab9]">{project?.type}</div>
           </div>
           {connect ??
-            (isCdnEnabledQuery.data.isCDNEnabled ? (
+            (isCDNEnabled?.isCDNEnabled ? (
               <>
                 <Button
                   size="large"
@@ -224,11 +245,7 @@ export const TargetLayout = ({
         </Tabs.List>
 
         <Tabs.Content value={value} className={className}>
-          {children({
-            target,
-            project,
-            organization: org,
-          })}
+          {children(data.data as TSatisfies)}
         </Tabs.Content>
       </Tabs>
     </>

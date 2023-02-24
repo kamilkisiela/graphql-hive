@@ -2,25 +2,41 @@ import { ReactElement } from 'react';
 import clsx from 'clsx';
 import { Section } from '@/components/common';
 import { Heading, Link } from '@/components/v2';
-import { BillingPlanType, OrgBillingInfoFieldsFragment } from '@/graphql';
+import { FragmentType, graphql, useFragment } from '@/gql';
+import { BillingPlanType } from '@/graphql';
 import { CardElement } from '@stripe/react-stripe-js';
+
+const BillingPaymentMethod_OrganizationFragment = graphql(`
+  fragment BillingPaymentMethod_OrganizationFragment on Organization {
+    billingConfiguration {
+      paymentMethod {
+        brand
+        last4
+        expMonth
+        expYear
+      }
+    }
+  }
+`);
 
 export const BillingPaymentMethod = ({
   plan,
-  organizationBilling,
   onValidationChange,
   className,
+  ...props
 }: {
   plan: BillingPlanType;
   className?: string;
-  organizationBilling: OrgBillingInfoFieldsFragment;
+  organization: FragmentType<typeof BillingPaymentMethod_OrganizationFragment>;
   onValidationChange?: (isValid: boolean) => void;
 }): ReactElement | null => {
   if (plan !== 'PRO') {
     return null;
   }
 
-  if (!organizationBilling.billingConfiguration?.paymentMethod) {
+  const organization = useFragment(BillingPaymentMethod_OrganizationFragment, props.organization);
+
+  if (!organization.billingConfiguration?.paymentMethod) {
     return (
       <div className={clsx('flex flex-col gap-6', className)}>
         <Heading>Payment Method</Heading>
@@ -50,7 +66,7 @@ export const BillingPaymentMethod = ({
       </div>
     );
   }
-  const info = organizationBilling.billingConfiguration.paymentMethod;
+  const info = organization.billingConfiguration.paymentMethod;
 
   return (
     <>

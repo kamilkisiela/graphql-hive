@@ -1,5 +1,7 @@
 /* eslint-env node */
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const guildConfig = require('@theguild/eslint-config/base');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const { REACT_RESTRICTED_SYNTAX, RESTRICTED_SYNTAX } = require('@theguild/eslint-config/constants');
 
 const rulesToExtends = Object.fromEntries(
@@ -40,6 +42,8 @@ module.exports = {
     'packages/web/app/src/graphql/index.ts',
     'packages/libraries/cli/src/sdk.ts',
     'packages/services/storage/src/db/types.ts',
+    'codegen.cjs',
+    'packages/web/app/src/gql/**/*',
   ],
   parserOptions: {
     ecmaVersion: 2020,

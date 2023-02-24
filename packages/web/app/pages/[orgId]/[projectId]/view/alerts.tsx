@@ -4,14 +4,13 @@ import { authenticated } from '@/components/authenticated-container';
 import { ProjectLayout } from '@/components/layouts';
 import { Button, Card, Checkbox, Heading, Table, Tag, TBody, Td, Title, Tr } from '@/components/v2';
 import { CreateAlertModal, CreateChannelModal } from '@/components/v2/modals';
+import { FragmentType, graphql, useFragment } from '@/gql';
 import {
   AlertChannelsDocument,
   AlertChannelType,
   AlertsDocument,
   DeleteAlertChannelsDocument,
   DeleteAlertsDocument,
-  OrganizationFieldsFragment,
-  ProjectFieldsFragment,
 } from '@/graphql';
 import { ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
@@ -94,13 +93,30 @@ function Channels(): ReactElement {
   );
 }
 
+const AlertsPage_OrganizationFragment = graphql(`
+  fragment AlertsPage_OrganizationFragment on Organization {
+    cleanId
+    me {
+      ...CanAccessProject_MemberFragment
+    }
+  }
+`);
+
+const AlertsPage_ProjectFragment = graphql(`
+  fragment AlertsPage_ProjectFragment on Project {
+    cleanId
+  }
+`);
+
 const Page = (props: {
-  organization: OrganizationFieldsFragment;
-  project: ProjectFieldsFragment;
+  organization: FragmentType<typeof AlertsPage_OrganizationFragment>;
+  project: FragmentType<typeof AlertsPage_ProjectFragment>;
 }) => {
+  const organization = useFragment(AlertsPage_OrganizationFragment, props.organization);
+  const project = useFragment(AlertsPage_ProjectFragment, props.project);
   useProjectAccess({
     scope: ProjectAccessScope.Alerts,
-    member: props.organization.me,
+    member: organization.me,
     redirect: true,
   });
   const [checked, setChecked] = useState<string[]>([]);
@@ -111,8 +127,8 @@ const Page = (props: {
     query: AlertsDocument,
     variables: {
       selector: {
-        organization: props.organization.cleanId,
-        project: props.project.cleanId,
+        organization: organization.cleanId,
+        project: project.cleanId,
       },
     },
     requestPolicy: 'cache-and-network',
@@ -180,11 +196,30 @@ const Page = (props: {
   );
 };
 
+const ProjectAlertsPageQuery = graphql(`
+  query ProjectAlertsPageQuery($organizationId: ID!, $projectId: ID!) {
+    organization(selector: { organization: $organizationId }) {
+      organization {
+        ...ProjectLayout_OrganizationFragment
+        ...AlertsPage_OrganizationFragment
+      }
+    }
+    project(selector: { organization: $organizationId, project: $projectId }) {
+      ...ProjectLayout_ProjectFragment
+      ...AlertsPage_ProjectFragment
+    }
+  }
+`);
+
 function AlertsPage(): ReactElement {
   return (
     <>
       <Title title="Alerts" />
-      <ProjectLayout value="alerts" className="flex flex-col gap-y-10">
+      <ProjectLayout
+        value="alerts"
+        className="flex flex-col gap-y-10"
+        query={ProjectAlertsPageQuery}
+      >
         {props => <Page organization={props.organization} project={props.project} />}
       </ProjectLayout>
     </>

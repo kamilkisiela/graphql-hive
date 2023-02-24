@@ -53,7 +53,7 @@ export function initSeed() {
         ownerToken,
         async createPersonalProject(projectType: ProjectType) {
           const orgs = await execute({
-            document: graphql(/* GraphQL */ `
+            document: graphql(`
               query myOrganizations {
                 organizations {
                   total

@@ -1,41 +1,45 @@
 import { ReactNode } from 'react';
-import { useQuery } from 'urql';
-import { DataWrapper } from '@/components/v2';
-import {
-  BillingPlansDocument,
-  OrganizationFieldsFragment,
-  OrgBillingInfoFieldsFragment,
-} from '@/graphql';
+import { FragmentType, graphql, useFragment } from '@/gql';
 import { PlanSummary } from './PlanSummary';
 
-export function BillingView({
-  organization,
-  children,
-}: {
+const BillingView_OrganizationFragment = graphql(`
+  fragment BillingView_OrganizationFragment on Organization {
+    plan
+    rateLimit {
+      retentionInDays
+      operations
+    }
+  }
+`);
+
+const BillingView_QueryFragment = graphql(`
+  fragment BillingView_QueryFragment on Query {
+    billingPlans {
+      planType
+      ...PlanSummary_PlanFragment
+    }
+  }
+`);
+
+export function BillingView(props: {
   children: ReactNode;
-  organization: OrganizationFieldsFragment & OrgBillingInfoFieldsFragment;
+  organization: FragmentType<typeof BillingView_OrganizationFragment>;
+  query: FragmentType<typeof BillingView_QueryFragment>;
 }) {
-  const [query] = useQuery({ query: BillingPlansDocument });
+  const organization = useFragment(BillingView_OrganizationFragment, props.organization);
+  const query = useFragment(BillingView_QueryFragment, props.query);
+  const plan = query.billingPlans.find(v => v.planType === organization.plan);
+
+  if (plan == null) {
+    return null;
+  }
 
   return (
-    <DataWrapper query={query}>
-      {result => {
-        const plan = result.data.billingPlans.find(v => v.planType === organization.plan);
-
-        if (plan == null) {
-          return null;
-        }
-
-        return (
-          <PlanSummary
-            retentionInDays={organization.rateLimit.retentionInDays}
-            operationsRateLimit={Math.floor(organization.rateLimit.operations / 1_000_000)}
-            plan={plan}
-          >
-            {children}
-          </PlanSummary>
-        );
-      }}
-    </DataWrapper>
+    <PlanSummary
+      operationsRateLimit={Math.floor(organization.rateLimit.operations / 1_000_000)}
+      plan={plan}
+    >
+      {props.children}
+    </PlanSummary>
   );
 }
