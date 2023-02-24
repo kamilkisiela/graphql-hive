@@ -1,4 +1,5 @@
 import nock from 'nock';
+import { afterEach, expect, test } from 'vitest';
 import { isSignatureValid } from '../src/auth';
 import '../src/dev-polyfill';
 import { InvalidRequestFormat, InvalidSignature, MissingSignature } from '../src/errors';
@@ -26,9 +27,10 @@ function clearWorkerEnv() {
   });
 }
 
-function captureException() {
-  //
-}
+const logger = {
+  info: () => {},
+  error: () => {},
+};
 
 afterEach(clearWorkerEnv);
 afterEach(nock.cleanAll);
@@ -44,7 +46,7 @@ test('401 on missing signature', async () => {
     method: 'POST',
   });
 
-  const response = await handleRequest(request, SignatureValidators.Real, captureException);
+  const response = await handleRequest(request, SignatureValidators.Real, logger);
   expect(response instanceof MissingSignature).toBeTruthy();
   expect(response.status).toBe(401);
 });
@@ -63,7 +65,7 @@ test('403 on non-matching signature', async () => {
     },
   });
 
-  const response = await handleRequest(request, SignatureValidators.Real, captureException);
+  const response = await handleRequest(request, SignatureValidators.Real, logger);
   expect(response instanceof InvalidSignature).toBeTruthy();
   expect(response.status).toBe(403);
 });
@@ -82,7 +84,7 @@ test('405 allow only POST method', async () => {
     },
   });
 
-  let response = await handleRequest(request, SignatureValidators.Real, captureException);
+  let response = await handleRequest(request, SignatureValidators.Real, logger);
   expect(response.status).toBe(405);
 
   request = new Request('https://fake-worker.com/', {
@@ -93,7 +95,7 @@ test('405 allow only POST method', async () => {
     body: JSON.stringify({}),
   });
 
-  response = await handleRequest(request, SignatureValidators.Real, captureException);
+  response = await handleRequest(request, SignatureValidators.Real, logger);
   expect(response.status).toBe(405);
 });
 
@@ -112,7 +114,7 @@ test('400 on invalid request format', async () => {
     body: JSON.stringify({}),
   });
 
-  const response = await handleRequest(request, SignatureValidators.Real, captureException);
+  const response = await handleRequest(request, SignatureValidators.Real, logger);
   expect(response instanceof InvalidRequestFormat).toBeTruthy();
   expect(response.status).toBe(400);
 });
@@ -146,7 +148,7 @@ test('GET text/plain', async () => {
     }),
   });
 
-  const response = await handleRequest(request, SignatureValidators.Real, captureException);
+  const response = await handleRequest(request, SignatureValidators.Real, logger);
   expect(response.status).toBe(200);
   expect(await response.text()).toBe('OK');
 });
@@ -182,7 +184,7 @@ test('GET application/json', async () => {
     }),
   });
 
-  const response = await handleRequest(request, SignatureValidators.Real, captureException);
+  const response = await handleRequest(request, SignatureValidators.Real, logger);
   expect(response.status).toBe(200);
   expect(await response.text()).toBe(
     JSON.stringify({
@@ -220,7 +222,7 @@ test('POST text/plain', async () => {
     }),
   });
 
-  const response = await handleRequest(request, SignatureValidators.Real, captureException);
+  const response = await handleRequest(request, SignatureValidators.Real, logger);
   expect(response.status).toBe(200);
   expect(await response.text()).toBe('OK');
 });
@@ -256,7 +258,7 @@ test('POST application/json', async () => {
     }),
   });
 
-  const response = await handleRequest(request, SignatureValidators.Real, captureException);
+  const response = await handleRequest(request, SignatureValidators.Real, logger);
   expect(response.status).toBe(200);
   expect(await response.text()).toBe(
     JSON.stringify({
@@ -302,7 +304,7 @@ test('POST application/json + body', async () => {
     }),
   });
 
-  const response = await handleRequest(request, SignatureValidators.Real, captureException);
+  const response = await handleRequest(request, SignatureValidators.Real, logger);
   expect(response.status).toBe(200);
   expect(await response.text()).toBe(
     JSON.stringify({
@@ -337,7 +339,7 @@ test('passthrough errors', async () => {
     }),
   });
 
-  const response = await handleRequest(request, SignatureValidators.Real, captureException);
+  const response = await handleRequest(request, SignatureValidators.Real, logger);
   expect(response.status).toBe(500);
   expect(await response.text()).toBe('Internal Server Error');
 });
