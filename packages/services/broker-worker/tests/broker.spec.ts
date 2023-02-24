@@ -1,5 +1,4 @@
 import nock from 'nock';
-import { afterEach, expect, test } from 'vitest';
 import { isSignatureValid } from '../src/auth';
 import '../src/dev-polyfill';
 import { InvalidRequestFormat, InvalidSignature, MissingSignature } from '../src/errors';
