@@ -5,10 +5,12 @@
   "scripts": {
     "analyze": "pnpm build:config && ANALYZE=1 next build",
     "build": "pnpm build:config && BUILD=1 bob runify --single",
+    "build-storybook": "storybook build",
     "build:config": "tsup-node --no-splitting --out-dir . --loader \".mts=ts\" --format esm --target node18 next.config.mts",
     "dev": "pnpm build:config && next dev",
     "postbuild": "pnpm --filter @hive/app deploy --prod --no-optional dist/web && rimraf dist/node_modules && mv dist/web/node_modules dist && rimraf dist/web",
     "start": "node dist/index.js",
+    "storybook": "storybook dev -p 6006",
     "typecheck": "tsc"
   },
   "dependencies": {
@@ -89,6 +91,14 @@
     "@hive/emails": "workspace:*",
     "@hive/server": "workspace:*",
     "@next/bundle-analyzer": "13.2.1",
+    "@storybook/addon-essentials": "^7.0.0-beta.54",
+    "@storybook/addon-interactions": "^7.0.0-beta.54",
+    "@storybook/addon-links": "^7.0.0-beta.54",
+    "@storybook/addon-postcss": "2.0.0",
+    "@storybook/blocks": "^7.0.0-alpha.8",
+    "@storybook/nextjs": "^7.0.0-beta.54",
+    "@storybook/react": "^7.0.0-beta.54",
+    "@storybook/testing-library": "^0.0.14-next.1",
     "@tailwindcss/line-clamp": "0.4.2",
     "@types/cookies": "0.7.7",
     "@types/dompurify": "2.4.0",
@@ -101,7 +111,9 @@
     "@welldone-software/why-did-you-render": "7.0.1",
     "autoprefixer": "10.4.13",
     "postcss": "8.4.21",
+    "postcss-loader": "7.0.2",
     "rimraf": "4.1.2",
+    "storybook": "^7.0.0-beta.54",
     "tailwindcss": "3.2.7",
     "tailwindcss-radix": "2.7.0"
   },
