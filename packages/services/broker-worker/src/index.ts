@@ -33,29 +33,6 @@ self.addEventListener('fetch', event => {
   });
 
   const loki = new Logger({
-    cloudflareContext: {
-      waitUntil(promise: Promise<unknown>) {
-        return event.waitUntil(
-          promise.then(
-            (result: any) => {
-              console.log({
-                status: result.status,
-                statusText: result.statusText,
-              });
-
-              result.text().then((text: string) => {
-                console.log({
-                  text,
-                });
-              });
-            },
-            error => {
-              console.error('waitUntil X', error);
-            },
-          ),
-        );
-      },
-    },
     lokiSecret: btoa(`${LOKI_USERNAME}:${LOKI_PASSWORD}`),
     lokiUrl: LOKI_ENDPOINT,
     stream: {
@@ -83,5 +60,26 @@ self.addEventListener('fetch', event => {
   } catch (error) {
     logger.error('Unexpected error', error as any);
     event.respondWith(new UnexpectedError(requestId));
+  } finally {
+    event.waitUntil(
+      loki.flush().then(
+        (result: any) => {
+          console.log({
+            status: result.status,
+            statusText: result.statusText,
+          });
+
+          result.text().then((text: string) => {
+            console.log({
+              text,
+            });
+          });
+        },
+        error => {
+          console.error('waitUntil X', error);
+        },
+      ),
+    );
+  }
   }
 });
