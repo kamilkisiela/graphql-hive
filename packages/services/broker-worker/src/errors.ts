@@ -1,7 +1,7 @@
-type CaptureException = (exception: Error) => void;
+import type { Logger } from './types';
 
 export class InvalidRequestFormat extends Response {
-  constructor(captureException: CaptureException, message: string) {
+  constructor(logger: Logger, message: string) {
     super(
       JSON.stringify({
         code: 'INVALID_REQUEST_FORMAT',
@@ -11,7 +11,8 @@ export class InvalidRequestFormat extends Response {
         status: 400,
       },
     );
-    captureException(
+    logger.error(
+      message,
       new Error(`INVALID_REQUEST_FORMAT`, {
         cause: message,
       }),
@@ -20,7 +21,7 @@ export class InvalidRequestFormat extends Response {
 }
 
 export class MissingSignature extends Response {
-  constructor(captureException: CaptureException) {
+  constructor(logger: Logger) {
     super(
       JSON.stringify({
         code: 'MISSING_SIGNATURE',
@@ -30,12 +31,15 @@ export class MissingSignature extends Response {
         status: 401,
       },
     );
-    captureException(new Error(`MISSING_SIGNATURE`));
+    logger.error(
+      'Broker needs a signature to verify the origin of the request',
+      new Error(`MISSING_SIGNATURE`),
+    );
   }
 }
 
 export class InvalidSignature extends Response {
-  constructor(captureException: CaptureException) {
+  constructor(logger: Logger) {
     super(
       JSON.stringify({
         code: 'INVALID_SIGNATURE',
@@ -45,7 +49,7 @@ export class InvalidSignature extends Response {
         status: 403,
       },
     );
-    captureException(new Error(`INVALID_SIGNATURE`));
+    logger.error('Failed to verify the origin of the request', new Error(`INVALID_SIGNATURE`));
   }
 }
 
@@ -60,6 +64,5 @@ export class UnexpectedError extends Response {
         status: 500,
       },
     );
-    console.error(`UNEXPECTED_ERROR: ${errorId}`);
   }
 }

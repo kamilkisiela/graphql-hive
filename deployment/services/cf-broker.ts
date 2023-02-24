@@ -4,6 +4,7 @@ import { isProduction } from '../utils/helpers';
 
 const commonConfig = new pulumi.Config('common');
 const cfConfig = new pulumi.Config('cloudflareCustom');
+const observabilityConfig = new pulumi.Config('observability');
 
 const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
 
@@ -29,6 +30,11 @@ export function deployCFBroker({
     secretSignature: cfBrokerSignature,
     sentryDsn: commonEnv.SENTRY_DSN,
     release,
+    loki: {
+      endpoint: observabilityConfig.require('lokiEndpoint'),
+      username: observabilityConfig.require('lokiUsername'),
+      password: observabilityConfig.requireSecret('lokiPassword'),
+    },
   });
   return broker.deploy();
 }
