@@ -104,7 +104,7 @@ export function Header(): ReactElement {
             </DropdownMenuTrigger>
 
             <DropdownMenuContent sideOffset={5} align="end">
-              <DropdownMenuLabel className="line-clamp-1 mb-2 max-w-[250px] px-2">
+              <DropdownMenuLabel className="mb-2 w-64 px-2 truncate">
                 {me?.displayName}
               </DropdownMenuLabel>
               <DropdownMenuSub>
@@ -121,7 +121,7 @@ export function Header(): ReactElement {
                   </DropdownMenuLabel>
                   {personal.map(org => (
                     <NextLink href={`/${org.cleanId}`} key={org.cleanId}>
-                      <DropdownMenuItem>{org.name}</DropdownMenuItem>
+                      <DropdownMenuItem className="truncate !block">{org.name}</DropdownMenuItem>
                     </NextLink>
                   ))}
                   {organizations.length ? (
@@ -131,7 +131,7 @@ export function Header(): ReactElement {
                   ) : null}
                   {organizations.map(org => (
                     <NextLink href={`/${org.cleanId}`} key={org.cleanId}>
-                      <DropdownMenuItem>{org.name}</DropdownMenuItem>
+                      <DropdownMenuItem className="truncate !block">{org.name}</DropdownMenuItem>
                     </NextLink>
                   ))}
                   <DropdownMenuSeparator />

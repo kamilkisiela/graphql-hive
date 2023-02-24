@@ -61,7 +61,7 @@ const TargetCard = ({
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button rotate={90}>
+            <Button>
               <MoreIcon />
             </Button>
           </DropdownMenuTrigger>

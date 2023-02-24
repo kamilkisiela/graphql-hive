@@ -114,8 +114,8 @@ export function OrganizationLayout<
     <>
       <SubHeader>
         <div className="container flex h-[84px] items-center justify-between">
-          <div>
-            <Heading size="2xl" className="line-clamp-1">
+          <div className="truncate">
+            <Heading size="2xl" className="inline">
               {organization?.name}
             </Heading>
             <div className="text-xs font-medium text-gray-500">Organization</div>

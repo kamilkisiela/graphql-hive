@@ -7,7 +7,6 @@ type ButtonProps = Omit<ComponentProps<'button'>, 'size'> & {
   variant?: 'primary' | 'secondary' | 'default' | 'link';
   size?: 'large' | 'medium' | 'small';
   block?: boolean;
-  rotate?: number;
   as?: 'a';
   href?: string;
 };
@@ -20,7 +19,6 @@ export const Button = forwardRef<any, ButtonProps>(
       variant = 'default',
       size = 'medium',
       block = false,
-      rotate = 0,
       className,
       as,
       ...props
@@ -37,7 +35,6 @@ export const Button = forwardRef<any, ButtonProps>(
           ref={forwardedRef} // required by DropdownMenu.Trigger with asChild prop
           className={clsx(
             `
-              hive-button
               transition
               focus-within:ring
               disabled:cursor-not-allowed
@@ -65,11 +62,7 @@ export const Button = forwardRef<any, ButtonProps>(
             variant !== 'link' &&
               'inline-flex items-center border border-transparent text-sm font-bold',
             className,
-            rotate > 0 && 'radix-state-open:border-gray-800 radix-state-open:text-orange-600',
           )}
-          style={{
-            ['--hive-rotate' as string]: `${rotate}deg`,
-          }}
           {...props}
         >
           {children}

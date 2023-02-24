@@ -23,7 +23,8 @@ import {
 } from '@/components/v2/dropdown';
 import { LinkIcon, MoreIcon, SettingsIcon } from '@/components/v2/icon';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { ProjectActivitiesDocument } from '@/graphql';
+import { ProjectActivitiesDocument, ProjectDocument } from '@/graphql';
+import { canAccessProject, ProjectAccessScope } from '@/lib/access/project';
 import { writeLastVisitedOrganization } from '@/lib/cookies';
 import { getDocsUrl } from '@/lib/docs-url';
 import { fixDuplicatedFragments } from '@/lib/graphql';
@@ -44,7 +45,7 @@ const ProjectCard_ProjectFragment = graphql(`
 
 const ProjectCard = (props: {
   project: FragmentType<typeof ProjectCard_ProjectFragment>;
-}): ReactElement => {
+}): ReactElement | null => {
   const project = useFragment(ProjectCard_ProjectFragment, props.project);
   const copyToClipboard = useClipboard();
   const router = useRouteSelector();
@@ -59,10 +60,20 @@ const ProjectCard = (props: {
     },
     requestPolicy: 'cache-and-network',
   });
+  const [projectQuery] = useQuery({
+    query: ProjectDocument,
+    variables: {
+      organizationId: router.organizationId,
+      projectId: project.cleanId,
+    },
+  });
+  const org = projectQuery.data?.organization?.organization;
+  if (!org) {
+    return null;
+  }
 
   const href = `/${router.organizationId}/${project.cleanId}`;
   const lastActivity = projectActivitiesQuery.data?.projectActivities.nodes[0];
-
   return (
     <Card
       as={NextLink}
@@ -78,7 +89,7 @@ const ProjectCard = (props: {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button rotate={90}>
+            <Button>
               <MoreIcon />
             </Button>
           </DropdownMenuTrigger>
@@ -92,12 +103,14 @@ const ProjectCard = (props: {
               <LinkIcon />
               Share Link
             </DropdownMenuItem>
-            <NextLink href={`/${router.organizationId}/${project.cleanId}/view/settings`}>
-              <DropdownMenuItem>
-                <SettingsIcon />
-                Settings
-              </DropdownMenuItem>
-            </NextLink>
+            {canAccessProject(ProjectAccessScope.Settings, org.me) && (
+              <NextLink href={`/${router.organizationId}/${project.cleanId}/view/settings`}>
+                <DropdownMenuItem>
+                  <SettingsIcon />
+                  Settings
+                </DropdownMenuItem>
+              </NextLink>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -184,9 +197,7 @@ function ProjectsPage(): ReactElement {
 
 export const getServerSideProps = withSessionProtection(async ({ req, res, resolvedUrl }) => {
   writeLastVisitedOrganization(req, res, resolvedUrl.substring(1));
-  return {
-    props: {},
-  };
+  return { props: {} };
 });
 
 export default authenticated(ProjectsPage);
