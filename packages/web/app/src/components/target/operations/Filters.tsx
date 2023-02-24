@@ -22,7 +22,7 @@ function OperationsFilter({
   selected?: string[];
 }): ReactElement {
   function getOperationHashes() {
-    const items: Array<string> = [];
+    const items: string[] = [];
     for (const op of operations) {
       if (op.operationHash) {
         items.push(op.operationHash);
@@ -31,12 +31,9 @@ function OperationsFilter({
     return items;
   }
 
-  const [selectedItems, setSelectedItems] = useState<string[]>(() => {
-    if (selected?.length) {
-      return selected;
-    }
-    return getOperationHashes();
-  });
+  const [selectedItems, setSelectedItems] = useState<string[]>(() =>
+    selected?.length ? selected : getOperationHashes(),
+  );
 
   const onSelect = useCallback(
     (operationHash: string, selected: boolean) => {
@@ -109,28 +106,26 @@ function OperationsFilter({
             setVisibleOperations(operations);
           }}
         />
-        <div className="flex flex-row justify-between items-center">
-          <div>
-            <Button variant="link" onClick={selectAll}>
-              All
-            </Button>{' '}
-            <Button variant="link" onClick={selectNone}>
-              None
-            </Button>
-          </div>
-          <div>
-            <Button onClick={selectAll}>Reset</Button>
-            <Button
-              variant="primary"
-              disabled={selectedItems.length === 0}
-              onClick={() => {
-                onFilter(selectedItems);
-                onClose();
-              }}
-            >
-              Save
-            </Button>
-          </div>
+        <div className="flex gap-2 items-center w-full">
+          <Button variant="link" onClick={selectAll}>
+            All
+          </Button>
+          <Button variant="link" onClick={selectNone}>
+            None
+          </Button>
+          <Button className="ml-auto" onClick={selectAll}>
+            Reset
+          </Button>
+          <Button
+            variant="primary"
+            disabled={selectedItems.length === 0}
+            onClick={() => {
+              onFilter(selectedItems);
+              onClose();
+            }}
+          >
+            Save
+          </Button>
         </div>
         <div className="pl-1 grow">
           <AutoSizer>
@@ -214,23 +209,23 @@ function OperationRow({
   style: any;
 }): ReactElement {
   const requests = useFormattedNumber(operation.count);
+  const hash = operation.operationHash || '';
   const change = useCallback(() => {
-    if (operation.operationHash) {
-      onSelect(operation.operationHash, !selected);
+    if (hash) {
+      onSelect(hash, !selected);
     }
-  }, [onSelect, operation.operationHash, selected]);
+  }, [onSelect, hash, selected]);
 
   return (
-    <div style={style} className="flex flex-row space-x-4 items-center">
-      <Checkbox checked={selected} onChange={change} />
-      <div className="flex grow flex-row items-center cursor-pointer">
-        <button className="grow text-ellipsis overflow-hidden whitespace-nowrap" onClick={change}>
-          {operation.name}
-        </button>
-        <button className="w-[75px] shrink-0 text-right text-gray-500" onClick={change}>
-          {requests}
-        </button>
-      </div>
+    <div style={style} className="flex items-center gap-4">
+      <Checkbox checked={selected} onCheckedChange={change} id={hash} />
+      <label
+        htmlFor={hash}
+        className="flex items-center justify-between overflow-hidden gap-4 w-full cursor-pointer"
+      >
+        <span className="grow text-ellipsis overflow-hidden">{operation.name}</span>
+        <div className="shrink-0 text-right text-gray-500">{requests}</div>
+      </label>
     </div>
   );
 }
