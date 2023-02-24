@@ -1,4 +1,4 @@
-import Toucan from 'toucan-js';
+import { Toucan } from 'toucan-js';
 import { Logger } from 'workers-loki-logger';
 import { isSignatureValid } from './auth';
 import { UnexpectedError } from './errors';
@@ -13,16 +13,18 @@ self.addEventListener('fetch', event => {
     environment: SENTRY_ENVIRONMENT,
     release: SENTRY_RELEASE,
     context: event,
-    allowedHeaders: [
-      'user-agent',
-      'cf-ipcountry',
-      'accept-encoding',
-      'accept',
-      'x-real-ip',
-      'x-request-id',
-      'cf-connecting-ip',
-    ],
-    allowedSearchParams: /(.*)/,
+    requestDataOptions: {
+      allowedHeaders: [
+        'user-agent',
+        'cf-ipcountry',
+        'accept-encoding',
+        'accept',
+        'x-real-ip',
+        'x-request-id',
+        'cf-connecting-ip',
+      ],
+      allowedSearchParams: /(.*)/,
+    },
   });
 
   event.request.signal.addEventListener('abort', () => {
