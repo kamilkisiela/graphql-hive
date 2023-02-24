@@ -13,7 +13,7 @@ export function QueryError({
   const requestId =
     error &&
     'response' in error &&
-    error.response.headers?.get('x-request-id').split(',')[0].trim();
+    error.response.headers.get('x-request-id')?.split(',')[0].trim();
 
   return (
     <Callout type="warning" className="w-1/2 mx-auto">
