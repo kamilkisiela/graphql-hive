@@ -1007,7 +1007,7 @@ importers:
       '@next/bundle-analyzer': 13.2.1
       '@radix-ui/react-accordion': 1.1.0
       '@radix-ui/react-avatar': 1.0.1
-      '@radix-ui/react-checkbox': 1.0.1
+      '@radix-ui/react-checkbox': 1.0.2
       '@radix-ui/react-dialog': 1.0.2
       '@radix-ui/react-dropdown-menu': 2.0.2
       '@radix-ui/react-icons': 1.2.0
@@ -1093,7 +1093,7 @@ importers:
       '@n1ru4l/react-time-ago': 1.1.0_react@18.2.0
       '@radix-ui/react-accordion': 1.1.0_biqbaboplfbrettd7655fr4n2y
       '@radix-ui/react-avatar': 1.0.1_biqbaboplfbrettd7655fr4n2y
-      '@radix-ui/react-checkbox': 1.0.1_biqbaboplfbrettd7655fr4n2y
+      '@radix-ui/react-checkbox': 1.0.2_biqbaboplfbrettd7655fr4n2y
       '@radix-ui/react-dialog': 1.0.2_zula6vjvt3wdocc4mwcxqa6nzi
       '@radix-ui/react-dropdown-menu': 2.0.2_zula6vjvt3wdocc4mwcxqa6nzi
       '@radix-ui/react-icons': 1.2.0_react@18.2.0
@@ -8140,8 +8140,8 @@ packages:
       react-dom: 18.2.0_react@18.2.0
     dev: false
 
-  /@radix-ui/react-checkbox/1.0.1_biqbaboplfbrettd7655fr4n2y:
-    resolution: {integrity: sha512-TisH0B8hWmYP3ONRduYCyN04rR9yLPIw/Rwyn1RoC1suSoGCa8Wn+YPdSSSarSszeIbcg3p2lBkDp2XXit4sZw==}
+  /@radix-ui/react-checkbox/1.0.2_biqbaboplfbrettd7655fr4n2y:
+    resolution: {integrity: sha512-ZaPRwTU6CM/+S3enyeyhjZ+wIVLulNiWDsF2+IWhs41QEbP/cYTb0LbAfSlF91D5IH6RZ4crP0qzbmYUAh0qig==}
     peerDependencies:
       react: ^16.8 || ^17.0 || ^18.0
       react-dom: ^16.8 || ^17.0 || ^18.0
