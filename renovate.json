@@ -48,5 +48,12 @@
       "matchPackagePrefixes": ["@slonik", "slonik"],
       "recreateClosed": false
     }
+  ],
+  "regexManagers": [
+    {
+      "fileMatch": ["deployment/services/**/*.ts"],
+      "matchStrings": ["image: '(?<datasource>.*?)/(?<depName>.*?):(?<versioning>.*?)'"],
+      "datasourceTemplate": "docker"
+    }
   ]
 }
