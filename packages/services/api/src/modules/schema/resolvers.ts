@@ -410,6 +410,32 @@ export const resolvers: SchemaModule.Resolvers = {
         target: target.id,
       });
     },
+    async testExternalSchemaComposition(_, { selector }, { injector }) {
+      const translator = injector.get(IdTranslator);
+      const [organizationId, projectId] = await Promise.all([
+        translator.translateOrganizationId(selector),
+        translator.translateProjectId(selector),
+      ]);
+
+      const schemaManager = injector.get(SchemaManager);
+
+      const result = await schemaManager.testExternalSchemaComposition({
+        organizationId,
+        projectId,
+      });
+
+      if (result.kind === 'success') {
+        return {
+          ok: result.project,
+        };
+      }
+
+      return {
+        error: {
+          message: result.error,
+        },
+      };
+    },
   },
   Target: {
     latestSchemaVersion(target, _, { injector }) {

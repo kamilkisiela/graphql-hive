@@ -54,9 +54,10 @@ test.concurrent('call an external service to compose and validate services', asy
     },
     writeToken.secret,
   ).then(r => r.expectNoGraphQLErrors());
-  expect(externalCompositionResult.enableExternalSchemaComposition.ok?.endpoint).toBe(
-    `http://${dockerAddress}/compose`,
-  );
+  expect(
+    externalCompositionResult.enableExternalSchemaComposition.ok?.externalSchemaComposition
+      ?.endpoint,
+  ).toBe(`http://${dockerAddress}/compose`);
 
   const productsServiceName = generateUnique();
   const publishProductsResult = await writeToken
@@ -134,9 +135,10 @@ test.concurrent(
       },
       writeToken.secret,
     ).then(r => r.expectNoGraphQLErrors());
-    expect(externalCompositionResult.enableExternalSchemaComposition.ok?.endpoint).toBe(
-      `http://${dockerAddress}/fail_on_signature`,
-    );
+    expect(
+      externalCompositionResult.enableExternalSchemaComposition.ok?.externalSchemaComposition
+        ?.endpoint,
+    ).toBe(`http://${dockerAddress}/fail_on_signature`);
 
     const productsServiceName = generateUnique();
     const publishProductsResult = await writeToken
@@ -228,9 +230,10 @@ test.concurrent(
       },
       writeToken.secret,
     ).then(r => r.expectNoGraphQLErrors());
-    expect(externalCompositionResult.enableExternalSchemaComposition.ok?.endpoint).toBe(
-      `http://${dockerAddress}/non-existing-endpoint`,
-    );
+    expect(
+      externalCompositionResult.enableExternalSchemaComposition.ok?.externalSchemaComposition
+        ?.endpoint,
+    ).toBe(`http://${dockerAddress}/non-existing-endpoint`);
 
     const productsServiceName = generateUnique();
     const publishProductsResult = await writeToken

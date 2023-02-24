@@ -1073,7 +1073,10 @@ export async function enableExternalSchemaComposition(
       mutation enableExternalSchemaComposition($input: EnableExternalSchemaCompositionInput!) {
         enableExternalSchemaComposition(input: $input) {
           ok {
-            endpoint
+            id
+            externalSchemaComposition {
+              endpoint
+            }
           }
           error {
             message

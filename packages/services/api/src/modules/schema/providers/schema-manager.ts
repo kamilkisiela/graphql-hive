@@ -1,3 +1,4 @@
+import { parse } from 'graphql';
 import { Injectable, Scope } from 'graphql-modules';
 import lodash from 'lodash';
 import { z } from 'zod';
@@ -9,6 +10,7 @@ import { SchemaVersion } from '../../../shared/mappers';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { ProjectAccessScope } from '../../auth/providers/project-access';
 import { TargetAccessScope } from '../../auth/providers/target-access';
+import { ProjectManager } from '../../project/providers/project-manager';
 import { CryptoProvider } from '../../shared/providers/crypto';
 import { Logger } from '../../shared/providers/logger';
 import {
@@ -31,6 +33,13 @@ type Paginated<T> = T & {
   limit: number;
 };
 
+const externalSchemaCompositionTestSdl = /* GraphQL */ `
+  type Query {
+    test: String
+  }
+`;
+const externalSchemaCompositionTestDocument = parse(externalSchemaCompositionTestSdl);
+
 /**
  * Responsible for auth checks.
  * Talks to Storage.
@@ -46,6 +55,7 @@ export class SchemaManager {
     logger: Logger,
     private authManager: AuthManager,
     private storage: Storage,
+    private projectManager: ProjectManager,
     private singleOrchestrator: SingleOrchestrator,
     private stitchingOrchestrator: StitchingOrchestrator,
     private federationOrchestrator: FederationOrchestrator,
@@ -306,6 +316,62 @@ export class SchemaManager {
     });
   }
 
+  async testExternalSchemaComposition(selector: { projectId: string; organizationId: string }) {
+    await this.authManager.ensureProjectAccess({
+      project: selector.projectId,
+      organization: selector.organizationId,
+      scope: ProjectAccessScope.SETTINGS,
+    });
+
+    const project = await this.storage.getProject({
+      organization: selector.organizationId,
+      project: selector.projectId,
+    });
+
+    if (project.type !== ProjectType.FEDERATION) {
+      throw new HiveError(
+        'Project is not of Federation type. External composition is not available.',
+      );
+    }
+
+    if (!project.externalComposition.enabled) {
+      throw new HiveError('External composition is not enabled.');
+    }
+
+    const orchestrator = this.matchOrchestrator(project.type);
+
+    try {
+      const errors = await orchestrator.validate(
+        [
+          {
+            document: externalSchemaCompositionTestDocument,
+            raw: externalSchemaCompositionTestSdl,
+            source: 'test',
+            url: null,
+          },
+        ],
+        project.externalComposition,
+      );
+
+      if (errors.length > 0) {
+        return {
+          kind: 'error',
+          error: errors[0].message,
+        } as const;
+      }
+
+      return {
+        kind: 'success',
+        project,
+      } as const;
+    } catch (error) {
+      return {
+        kind: 'error',
+        error: error instanceof HiveError ? error.message : 'Unknown error',
+      } as const;
+    }
+  }
+
   matchOrchestrator(projectType: ProjectType): Orchestrator | never {
     switch (projectType) {
       case ProjectType.SINGLE: {
@@ -377,7 +443,10 @@ export class SchemaManager {
     await this.storage.disableExternalSchemaComposition(input);
 
     return {
-      ok: true,
+      ok: await this.projectManager.getProject({
+        organization: input.organization,
+        project: input.project,
+      }),
     };
   }
 
@@ -420,9 +489,10 @@ export class SchemaManager {
     });
 
     return {
-      ok: {
-        endpoint: input.endpoint,
-      },
+      ok: await this.projectManager.getProject({
+        organization: input.organization,
+        project: input.project,
+      }),
     };
   }
 
