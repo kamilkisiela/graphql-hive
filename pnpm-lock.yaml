@@ -997,7 +997,7 @@ importers:
       '@graphql-codegen/gql-tag-operations-preset': 2.1.0
       '@graphql-tools/mock': 8.7.18
       '@graphql-typed-document-node/core': 3.1.2
-      '@headlessui/react': 1.7.11
+      '@headlessui/react': 1.7.12
       '@hive/emails': workspace:*
       '@hive/server': workspace:*
       '@monaco-editor/react': 4.4.6
@@ -1086,7 +1086,7 @@ importers:
     dependencies:
       '@graphiql/toolkit': 0.8.0_graphql@16.6.0
       '@graphql-tools/mock': 8.7.18_graphql@16.6.0
-      '@headlessui/react': 1.7.11_biqbaboplfbrettd7655fr4n2y
+      '@headlessui/react': 1.7.12_biqbaboplfbrettd7655fr4n2y
       '@monaco-editor/react': 4.4.6_jvipfxa73ntvmo6bim7qoogjo4
       '@n1ru4l/react-time-ago': 1.1.0_react@18.2.0
       '@radix-ui/react-accordion': 1.1.0_biqbaboplfbrettd7655fr4n2y
@@ -6490,8 +6490,8 @@ packages:
       '@types/node': 18.14.1
     dev: false
 
-  /@headlessui/react/1.7.11_biqbaboplfbrettd7655fr4n2y:
-    resolution: {integrity: sha512-EaDbVgcyiylhtskZZf4Qb/JiiByY7cYbd0qgZ9xm2pm2X7hKojG0P4TaQYKgPOV3vojPhd/pZyQh3nmRkkcSyw==}
+  /@headlessui/react/1.7.12_biqbaboplfbrettd7655fr4n2y:
+    resolution: {integrity: sha512-FhSx5V+Qp0GvbTpaxyS+ymGDDNntCacClWsk/d8Upbr19g3AsPbjfPk4+m2CgJGcuCB5Dz7LpUIOAbvQTyjL2g==}
     engines: {node: '>=10'}
     peerDependencies:
       react: ^16 || ^17 || ^18
@@ -18886,7 +18886,7 @@ packages:
       react: '>=16.13.1'
       react-dom: '>=16.13.1'
     dependencies:
-      '@headlessui/react': 1.7.11_biqbaboplfbrettd7655fr4n2y
+      '@headlessui/react': 1.7.12_biqbaboplfbrettd7655fr4n2y
       '@popperjs/core': 2.11.6
       clsx: 1.2.1
       flexsearch: 0.7.31
