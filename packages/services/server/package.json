@@ -42,7 +42,7 @@
     "@hive/storage": "workspace:*",
     "@swc/core": "1.3.36",
     "fastify": "3.29.5",
-    "pino-pretty": "9.3.0",
+    "pino-pretty": "9.4.0",
     "tslib": "2.5.0"
   },
   "buildOptions": {
