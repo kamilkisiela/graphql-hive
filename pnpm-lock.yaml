@@ -1017,7 +1017,7 @@ importers:
       '@radix-ui/react-tabs': 1.0.2
       '@radix-ui/react-toggle-group': 1.0.2
       '@radix-ui/react-toolbar': 1.0.2
-      '@radix-ui/react-tooltip': 1.0.3
+      '@radix-ui/react-tooltip': 1.0.4
       '@sentry/nextjs': 7.38.0
       '@sentry/types': 7.38.0
       '@stripe/react-stripe-js': 1.16.5
@@ -1103,7 +1103,7 @@ importers:
       '@radix-ui/react-tabs': 1.0.2_biqbaboplfbrettd7655fr4n2y
       '@radix-ui/react-toggle-group': 1.0.2_biqbaboplfbrettd7655fr4n2y
       '@radix-ui/react-toolbar': 1.0.2_biqbaboplfbrettd7655fr4n2y
-      '@radix-ui/react-tooltip': 1.0.3_zula6vjvt3wdocc4mwcxqa6nzi
+      '@radix-ui/react-tooltip': 1.0.4_zula6vjvt3wdocc4mwcxqa6nzi
       '@sentry/nextjs': 7.38.0_next@13.2.1+react@18.2.0
       '@sentry/types': 7.38.0
       '@stripe/react-stripe-js': 1.16.5_zw7zferaqqsd3ootrrf2mrlpoi
@@ -1200,7 +1200,7 @@ importers:
   packages/web/landing-page:
     specifiers:
       '@next/env': 13.2.1
-      '@radix-ui/react-tooltip': 1.0.3
+      '@radix-ui/react-tooltip': 1.0.4
       '@theguild/components': 4.5.4
       '@theguild/tailwind-config': 0.2.1
       '@types/react': 18.0.28
@@ -1215,7 +1215,7 @@ importers:
       tailwindcss: 3.2.7
     dependencies:
       '@next/env': 13.2.1
-      '@radix-ui/react-tooltip': 1.0.3_zula6vjvt3wdocc4mwcxqa6nzi
+      '@radix-ui/react-tooltip': 1.0.4_zula6vjvt3wdocc4mwcxqa6nzi
       '@theguild/components': 4.5.4_qgtcjgzkkjtbiyvnx7d32fl5vu
       clsx: 1.2.1
       next: 13.2.1_biqbaboplfbrettd7655fr4n2y
@@ -8648,8 +8648,8 @@ packages:
       react-dom: 18.2.0_react@18.2.0
     dev: false
 
-  /@radix-ui/react-tooltip/1.0.3_zula6vjvt3wdocc4mwcxqa6nzi:
-    resolution: {integrity: sha512-cmc9qV4KpgqdXVTn1K8KN8MnuSXvw+E719pKwyvpCGrQ+0AA2qTjcIL3uxCj4jc4k3sDR36RF7R3H7N5hPybBQ==}
+  /@radix-ui/react-tooltip/1.0.4_zula6vjvt3wdocc4mwcxqa6nzi:
+    resolution: {integrity: sha512-2h0BvJipRSv7nszzOCdAqb8fH7+Igz24GV1M4aCb/3UPfeMQ+clb1UM5/z2msW3Khir795OCQw2G74YGxjueWw==}
     peerDependencies:
       react: ^16.8 || ^17.0 || ^18.0
       react-dom: ^16.8 || ^17.0 || ^18.0
