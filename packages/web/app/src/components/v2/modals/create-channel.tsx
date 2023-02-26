@@ -50,16 +50,14 @@ export const CreateChannelModal = ({
         type: Yup.mixed().oneOf(Object.values(AlertChannelType)).required('Must select type'),
         slackChannel: Yup.string()
           .matches(/^[@#]{1}/, 'Must start with a @ or # character')
-          .when('type', {
-            is: AlertChannelType.Slack,
-            then: Yup.string().required('Must enter slack channel'),
-          }),
+          .when('type', ([type], schema) =>
+            type === AlertChannelType.Slack ? schema.required('Must enter slack channel') : schema,
+          ),
         endpoint: Yup.string()
           .url()
-          .when('type', {
-            is: AlertChannelType.Webhook,
-            then: Yup.string().required('Must enter endpoint'),
-          }),
+          .when('type', ([type], schema) =>
+            type === AlertChannelType.Webhook ? schema.required('Must enter endpoint') : schema,
+          ),
       }),
       async onSubmit(values) {
         const { data } = await mutate({

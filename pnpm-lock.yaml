@@ -1093,7 +1093,7 @@ importers:
       use-debounce: 9.0.3
       valtio: 1.10.3
       wonka: 6.2.3
-      yup: 0.32.11
+      yup: 1.0.1
       zod: 3.20.6
     dependencies:
       '@graphiql/toolkit': 0.8.0_graphql@16.6.0
@@ -1164,7 +1164,7 @@ importers:
       use-debounce: 9.0.3_react@18.2.0
       valtio: 1.10.3_react@18.2.0
       wonka: 6.2.3
-      yup: 0.32.11
+      yup: 1.0.1
       zod: 3.20.6
     devDependencies:
       '@graphql-codegen/gql-tag-operations-preset': 2.1.0_graphql@16.6.0
@@ -12345,6 +12345,7 @@ packages:
 
   /@types/lodash/4.14.191:
     resolution: {integrity: sha512-BdZ5BCCvho3EIXw6wUCXHe7rS53AIDPLE+JzwgT+OsJk53oBfbSmZZ7CX4VaRoN78N+TJpFi9QPlfIVNmJYWxQ==}
+    dev: true
 
   /@types/long/4.0.2:
     resolution: {integrity: sha512-MqTGEo5bj5t157U6fA/BiDynNkn0YknVdh48CMPkTSpFTVmvao5UQmm7uEF6xBEo7qIMAlY/JSleYaE6VOdpaA==}
@@ -22588,10 +22589,6 @@ packages:
     dev: false
     optional: true
 
-  /nanoclone/0.2.1:
-    resolution: {integrity: sha512-wynEP02LmIbLpcYw8uBKpcfF6dmg2vcpKqxeH5UcoKEYdExslsdUA4ugFauuaeYdTB76ez6gJW8XAZ6CgkXYxA==}
-    dev: false
-
   /nanoid/3.3.4:
     resolution: {integrity: sha512-MqBkQh/OHTS2egovRtLk45wEyNXwF+cokD+1YPf9u5VfJiRdAiRwB2froX5Co9Rh20xs4siNPm8naNotSD6RBw==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
@@ -27475,6 +27472,10 @@ packages:
     engines: {node: '>=0.10.0'}
     dev: true
 
+  /tiny-case/1.0.3:
+    resolution: {integrity: sha512-Eet/eeMhkO6TX8mnUteS9zgPbUMQa4I6Kkp5ORiBD5476/m+PIRiumP5tmh5ioJpH7k51Kehawy2UDfsnxxY8Q==}
+    dev: false
+
   /tiny-glob/0.2.9:
     resolution: {integrity: sha512-g/55ssRPUjShh+xkfx9UPDXqhckHEsHr4Vd9zX55oSdGZc/MD0m3sferOkwWtp98bv+kcVfEHtRJgBVJzelrzg==}
     dependencies:
@@ -28023,7 +28024,6 @@ packages:
   /type-fest/2.19.0:
     resolution: {integrity: sha512-RAH822pAdBgcNMAfWnCBU3CFZcfZ/i1eZjwFU/dsLKumyuuP3niueg2UAukXYF0E2AAoc82ZSSf9J0WQBinzHA==}
     engines: {node: '>=12.20'}
-    dev: true
 
   /type-is/1.6.18:
     resolution: {integrity: sha512-TkRKr9sUTxEH8MdfuCSP7VizJyzRNMjj2J2do2Jr3Kym598JVdEksuzPQCnlFPW4ky9Q+iA+ma9BGm06XQBy8g==}
@@ -29419,17 +29419,13 @@ packages:
       wrap-ansi: 2.1.0
     dev: true
 
-  /yup/0.32.11:
-    resolution: {integrity: sha512-Z2Fe1bn+eLstG8DRR6FTavGD+MeAwyfmouhHsIUgaADz8jvFKbO/fXc2trJKZg+5EBjh4gGm3iU/t3onKlXHIg==}
-    engines: {node: '>=10'}
+  /yup/1.0.1:
+    resolution: {integrity: sha512-nZPCUOowoJYjNUxajzFQvfZv+z68Bv9u+2Tv5Ay5oXmn9jahfbd0JPaQ7zD/421ihvYqwMJc73fgdY8gyPKBhg==}
     dependencies:
-      '@babel/runtime': 7.19.4
-      '@types/lodash': 4.14.191
-      lodash: 4.17.21
-      lodash-es: 4.17.21
-      nanoclone: 0.2.1
       property-expr: 2.0.5
+      tiny-case: 1.0.3
       toposort: 2.0.2
+      type-fest: 2.19.0
     dev: false
 
   /zen-observable/0.8.15:
