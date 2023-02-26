@@ -54,7 +54,7 @@ services:
       - ./.hive/zookeeper/db:/var/lib/zookeeper/data
 
   broker:
-    image: confluentinc/cp-kafka:7.3.1
+    image: confluentinc/cp-kafka:7.3.2
     hostname: broker
     depends_on:
       zookeeper:
