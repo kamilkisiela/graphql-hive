@@ -1206,7 +1206,7 @@ importers:
       '@types/react': 18.0.28
       clsx: 1.2.1
       next: 13.2.1
-      next-sitemap: 3.1.52
+      next-sitemap: 3.1.53
       next-themes: '*'
       postcss: 8.4.21
       react: 18.2.0
@@ -1226,7 +1226,7 @@ importers:
     devDependencies:
       '@theguild/tailwind-config': 0.2.1
       '@types/react': 18.0.28
-      next-sitemap: 3.1.52_w72blvo532ghymzwxfaavzsw7a
+      next-sitemap: 3.1.53_w72blvo532ghymzwxfaavzsw7a
       postcss: 8.4.21
       tailwindcss: 3.2.7_postcss@8.4.21
 
@@ -11057,7 +11057,7 @@ packages:
   /axios/0.27.2:
     resolution: {integrity: sha512-t+yRIyySRTp/wua5xEr+z1q60QmLq8ABsS5O9Me1AsE5dfKqgnCFzwiCZZ/cGNd1lq4/7akDWMxdhVlucjmnOQ==}
     dependencies:
-      follow-redirects: 1.15.2_debug@4.3.4
+      follow-redirects: 1.15.2
       form-data: 4.0.0
     transitivePeerDependencies:
       - debug
@@ -11066,7 +11066,7 @@ packages:
   /axios/1.2.1:
     resolution: {integrity: sha512-I88cFiGu9ryt/tfVEi4kX2SITsvDddTajXTOFmt2uK1ZVA8LytjtdeyefdQWEf5PU8w+4SSJDoYnggflB5tW4A==}
     dependencies:
-      follow-redirects: 1.15.2_debug@4.3.4
+      follow-redirects: 1.15.2
       form-data: 4.0.0
       proxy-from-env: 1.1.0
     transitivePeerDependencies:
@@ -14706,6 +14706,16 @@ packages:
 
   /focus-visible/5.2.0:
     resolution: {integrity: sha512-Rwix9pBtC1Nuy5wysTmKy+UjbDJpIfg8eHjw0rjZ1mX4GNLz1Bmd16uDpI3Gk1i70Fgcs8Csg2lPm8HULFg9DQ==}
+    dev: false
+
+  /follow-redirects/1.15.2:
+    resolution: {integrity: sha512-VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==}
+    engines: {node: '>=4.0'}
+    peerDependencies:
+      debug: '*'
+    peerDependenciesMeta:
+      debug:
+        optional: true
     dev: false
 
   /follow-redirects/1.15.2_debug@4.3.4:
@@ -18789,8 +18799,8 @@ packages:
       react-dom: 18.2.0_react@18.2.0
     dev: false
 
-  /next-sitemap/3.1.52_w72blvo532ghymzwxfaavzsw7a:
-    resolution: {integrity: sha512-tY469i4QRV1PwM9BoL+HdKYBCJ83IQl3PmUNapG/Hxp0MIYIw1hINU8E+Edf5Kr8vHXfVzPqDoul/Abu2P0vkw==}
+  /next-sitemap/3.1.53_w72blvo532ghymzwxfaavzsw7a:
+    resolution: {integrity: sha512-l57HFQrydCMApb2WpQxOh9atWQzIqpC9nGPvDVn/P2Raa777kkUlW0WlRN2IXtBSh80aftR6HFrXwKYy+ybApA==}
     engines: {node: '>=14.18'}
     hasBin: true
     peerDependencies:
