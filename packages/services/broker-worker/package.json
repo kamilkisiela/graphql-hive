@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "build": "node build.mjs",
-    "dev": "tsup-node src/dev.ts --target node18 --sourcemap --watch --onSuccess \"node --enable-source-maps dist/dev.js\"",
+    "dev": "tsup-node --config ../../../tsup/dev.config.worker.ts src/dev.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

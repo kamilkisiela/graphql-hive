@@ -5,39 +5,39 @@ overrides:
   tsup: 6.5.0
 
 patchedDependencies:
-  '@theguild/buddy@0.1.0':
-    hash: ryylgra5xglhidfoiaxehn22hq
-    path: patches/@theguild__buddy@0.1.0.patch
-  slonik@30.1.2:
-    hash: wg2hxbo7txnklmvja4aeqnygfi
-    path: patches/slonik@30.1.2.patch
-  '@tgriesser/schemats@7.0.1':
-    hash: u3kbucfchakklx3sci2vh6wjau
-    path: patches/@tgriesser__schemats@7.0.1.patch
   '@oclif/core@1.23.0':
     hash: zhte2hlj7lfobytjpalcwwo474
     path: patches/@oclif__core@1.23.0.patch
-  bullmq@3.7.2:
-    hash: xbmkiyyfti7h6orsfs6pdmi4s4
-    path: patches/bullmq@3.7.2.patch
+  '@tgriesser/schemats@7.0.1':
+    hash: u3kbucfchakklx3sci2vh6wjau
+    path: patches/@tgriesser__schemats@7.0.1.patch
   mjml-core@4.13.0:
     hash: zxxsxbqejjmcwuzpigutzzq6wa
     path: patches/mjml-core@4.13.0.patch
+  '@theguild/buddy@0.1.0':
+    hash: ryylgra5xglhidfoiaxehn22hq
+    path: patches/@theguild__buddy@0.1.0.patch
+  '@graphql-inspector/core@4.0.0':
+    hash: wf35oaq7brzyeva5aoncxac66a
+    path: patches/@graphql-inspector__core@4.0.0.patch
+  bullmq@3.7.2:
+    hash: xbmkiyyfti7h6orsfs6pdmi4s4
+    path: patches/bullmq@3.7.2.patch
   oclif@3.7.0:
     hash: rxmtqiusuyruv7tkwux5gvotbm
     path: patches/oclif@3.7.0.patch
   '@slonik/migrator@0.8.5':
     hash: yfpv2xzdmnkrtu2wvaktxf5mmq
     path: patches/@slonik__migrator@0.8.5.patch
-  '@graphql-inspector/core@4.0.0':
-    hash: wf35oaq7brzyeva5aoncxac66a
-    path: patches/@graphql-inspector__core@4.0.0.patch
-  '@octokit/webhooks-methods@3.0.1':
-    hash: ckboo4crezw7uvstxm24ozngtq
-    path: patches/@octokit__webhooks-methods@3.0.1.patch
   '@apollo/federation@0.38.1':
     hash: rjgakkkphrejw6qrtph4ar24zq
     path: patches/@apollo__federation@0.38.1.patch
+  slonik@30.1.2:
+    hash: wg2hxbo7txnklmvja4aeqnygfi
+    path: patches/slonik@30.1.2.patch
+  '@octokit/webhooks-methods@3.0.1':
+    hash: ckboo4crezw7uvstxm24ozngtq
+    path: patches/@octokit__webhooks-methods@3.0.1.patch
 
 importers:
 
@@ -54,6 +54,7 @@ importers:
       '@graphql-codegen/typescript-operations': 3.0.1
       '@graphql-codegen/typescript-resolvers': 3.1.0
       '@graphql-inspector/cli': 3.4.6
+      '@manypkg/get-packages': 2.1.0
       '@next/eslint-plugin-next': 13.2.1
       '@sentry/cli': 2.13.0
       '@swc/core': 1.3.36
@@ -94,6 +95,7 @@ importers:
       '@graphql-codegen/typescript-operations': 3.0.1_graphql@16.6.0
       '@graphql-codegen/typescript-resolvers': 3.1.0_graphql@16.6.0
       '@graphql-inspector/cli': 3.4.6_3747hjkprpk6cot33bkmfwepnm
+      '@manypkg/get-packages': 2.1.0
       '@next/eslint-plugin-next': 13.2.1
       '@sentry/cli': 2.13.0
       '@swc/core': 1.3.36
@@ -6615,7 +6617,6 @@ packages:
       '@types/node': 12.20.55
       find-up: 4.1.0
       fs-extra: 8.1.0
-    dev: false
 
   /@manypkg/get-packages/1.1.3:
     resolution: {integrity: sha512-fo+QhuU3qE/2TQMQmbVMqaQ6EWbMhi4ABWP+O4AM1NqPBuy0OrApV5LO6BrrgnhtAHS2NH6RrVk9OL181tTi8A==}
@@ -6634,7 +6635,6 @@ packages:
     dependencies:
       '@manypkg/find-root': 2.1.0
       '@manypkg/tools': 1.0.0
-    dev: false
 
   /@manypkg/tools/1.0.0:
     resolution: {integrity: sha512-W8uDMhDGtwNyXYr6A+MWggxdL3spOQ8rfMNYpNph1GDJ0v084MnBFdpF1jvcPZ0okHAeYccV7le8AUs+fzwsAQ==}
@@ -6644,7 +6644,6 @@ packages:
       globby: 11.1.0
       jju: 1.4.0
       read-yaml-file: 1.1.0
-    dev: false
 
   /@mdx-js/mdx/2.2.1:
     resolution: {integrity: sha512-hZ3ex7exYLJn6FfReq8yTvA6TE53uW9UHJQM9IlSauOuS55J9y8RtA7W+dzp6Yrzr00/U1sd7q+Wf61q6SfiTQ==}
@@ -16566,7 +16565,6 @@ packages:
 
   /jju/1.4.0:
     resolution: {integrity: sha512-8wb9Yw966OSxApiCt0K3yNJL8pnNeIv+OEq2YMidz4FKP6nonSRoOXc80iXY4JaN2FC11B9qsNmDsm+ZOfMROA==}
-    dev: false
 
   /jmespath/0.16.0:
     resolution: {integrity: sha512-9FzQjJ7MATs1tSpnco1K6ayiYE3figslrXA72G2HQ/n76RzvYlofyi5QM+iX4YRs/pu3yzxlVQSST23+dMDknw==}
