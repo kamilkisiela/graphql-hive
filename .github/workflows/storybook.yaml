@@ -1,0 +1,29 @@
+on:
+  workflow_call:
+
+jobs:
+  deployment:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: setup environment
+        uses: ./.github/actions/setup
+        with:
+          codegen: false
+
+      - uses: the-guild-org/shared-config/website-cf@main
+        name: build and deploy storybook
+        with:
+          cloudflareApiToken: ${{ secrets.WEBSITE_CLOUDFLARE_API_TOKEN }}
+          cloudflareAccountId: ${{ secrets.WEBSITE_CLOUDFLARE_ACCOUNT_ID }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          projectName: hive-storybook
+          prId: ${{ github.event.pull_request.number }}
+          mainBranch: main
+          websiteDirectory: ./
+          buildScript: cd packages/web/app && pnpm build-storybook
+          artifactDir: packages/web/app/storybook-static
+          commentId: storybook-deployment
+          commentTitle: '📚 Storybook Deployment'

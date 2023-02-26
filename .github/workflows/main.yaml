@@ -74,6 +74,11 @@ jobs:
     uses: ./.github/workflows/website.yaml
     secrets: inherit
 
+  # Deploy Storybook to CloudFlare Pages
+  storybook:
+    uses: ./.github/workflows/storybook.yaml
+    secrets: inherit
+
   # Release NPM packages and tarballs
   package:
     uses: ./.github/workflows/release-stable.yaml
