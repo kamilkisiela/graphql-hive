@@ -5,5 +5,5 @@ export const getDocsUrl = (path = '') => {
   if (!docsUrl) {
     return null;
   }
-  return `${docsUrl}${path}`;
+  return `${docsUrl.endsWith('/') ? docsUrl.slice(0, -1) : docsUrl}${path}`;
 };
