@@ -312,6 +312,8 @@ export async function main() {
             },
           });
 
+          await storage.ping();
+
           if (response.statusCode >= 200 && response.statusCode < 300) {
             if (response.body.includes('"__schema"')) {
               reportReadiness(true);
@@ -319,9 +321,9 @@ export async function main() {
               return;
             }
           }
-          console.error(response.statusCode, response.body);
+          req.log.error(`Readiness check failed [${response.statusCode}] ${response.body}`);
         } catch (error) {
-          console.error(error);
+          req.log.error(error);
         }
 
         reportReadiness(false);
