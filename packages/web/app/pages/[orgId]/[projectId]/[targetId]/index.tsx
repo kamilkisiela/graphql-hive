@@ -18,6 +18,24 @@ function isCompositeSchema(
   return schema.__typename === 'CompositeSchema';
 }
 
+function SchemaBlock({ schema }: { schema: CompositeSchemaFieldsFragment }) {
+  return (
+    <Accordion.Item value={schema.id} key={schema.id} className="border-2 border-gray-900/50">
+      <Accordion.Header>
+        <div>
+          <div className="text-base">{schema.service ?? 'SDL'}</div>
+          {schema.url ? <div className="text-xs text-gray-500">{schema.url}</div> : null}
+        </div>
+      </Accordion.Header>
+      <Accordion.Content>
+        <div className="p-2">
+          <GraphQLHighlight code={schema.source} />
+        </div>
+      </Accordion.Content>
+    </Accordion.Item>
+  );
+}
+
 const Schemas_ProjectFragment = graphql(`
   fragment Schemas_ProjectFragment on Project {
     type
@@ -55,53 +73,21 @@ function Schemas({
   });
 
   // Display format should be defined based on the length of `schemas`, and not `filteredSchemas`.
-  // Otherwise, the accordion will be displayed by default but the list when filtering.
-  const displayFormat = schemas.length > 7 ? 'accordion' : 'list';
+  // Otherwise, the accordion will be displayed by default but the list (disabled accordion) when filtering.
+  const displayFormat = schemas.length > 7 ? 'dynamic' : 'static';
 
   return (
     <div className="flex flex-col gap-8">
-      {displayFormat === 'accordion' ? (
+      {displayFormat === 'dynamic' ? (
         <Accordion type="multiple">
           {filteredSchemas.map(schema => (
-            <Accordion.Item
-              value={schema.id}
-              key={schema.id}
-              className="border-2 border-gray-900/50"
-            >
-              <Accordion.Header>
-                <div>
-                  <div className="text-base">{schema.service ?? 'SDL'}</div>
-                  {schema.url ? <div className="text-xs text-gray-500">{schema.url}</div> : null}
-                </div>
-              </Accordion.Header>
-              <Accordion.Content>
-                <div className="p-2">
-                  <GraphQLHighlight code={schema.source} />
-                </div>
-              </Accordion.Content>
-            </Accordion.Item>
+            <SchemaBlock key={schema.id} schema={schema} />
           ))}
         </Accordion>
       ) : (
         <Accordion type="multiple" value={filteredSchemas.map(s => s.id)} disabled>
           {filteredSchemas.map(schema => (
-            <Accordion.Item
-              value={schema.id}
-              key={schema.id}
-              className="border-2 border-gray-900/50"
-            >
-              <Accordion.Header>
-                <div>
-                  <div className="text-base">{schema.service ?? 'SDL'}</div>
-                  {schema.url ? <div className="text-xs text-gray-500">{schema.url}</div> : null}
-                </div>
-              </Accordion.Header>
-              <Accordion.Content>
-                <div className="p-2">
-                  <GraphQLHighlight code={schema.source} />
-                </div>
-              </Accordion.Content>
-            </Accordion.Item>
+            <SchemaBlock key={schema.id} schema={schema} />
           ))}
         </Accordion>
       )}
