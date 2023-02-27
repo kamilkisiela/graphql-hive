@@ -2,7 +2,7 @@ import { readFileSync } from 'fs';
 import { join, resolve } from 'path';
 import { getPackagesSync } from '@manypkg/get-packages';
 
-const rootDir = resolve(__dirname, '../');
+const rootDir = resolve(__dirname, '../../');
 const libDir = process.cwd();
 const packagesMetadata = getPackagesSync(rootDir);
 const currentPackage = packagesMetadata.packages.find(p => p.dir === libDir);
