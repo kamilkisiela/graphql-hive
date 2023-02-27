@@ -1,25 +1,45 @@
-import { ReactElement, ReactNode } from 'react';
+import { ComponentProps, ReactElement, ReactNode } from 'react';
 import { clsx } from 'clsx';
 import * as A from '@radix-ui/react-accordion';
 import { ChevronDownIcon } from '@radix-ui/react-icons';
 
+type AccordionProps = Partial<
+  Pick<ComponentProps<typeof A.Root>, 'type' | 'disabled' | 'value' | 'onValueChange'>
+>;
+
 function Wrapper({
   defaultValue,
   children,
+  type = 'single',
+  ...props
 }: {
   defaultValue?: string;
   children: ReactNode;
-}): ReactElement {
+} & AccordionProps): ReactElement {
   return (
-    <A.Root type="single" defaultValue={defaultValue} className="space-y-4 w-full">
+    <A.Root
+      {...(props as any[])}
+      type={type as any}
+      defaultValue={defaultValue}
+      className="space-y-4 w-full"
+    >
       {children}
     </A.Root>
   );
 }
 
-function Item({ value, children }: { value: string; children: ReactNode }): ReactElement {
+function Item({
+  value,
+  className,
+  children,
+  ...props
+}: {
+  value: string;
+  children: ReactNode;
+  className?: string;
+}): ReactElement {
   return (
-    <A.Item value={value} className="rounded-lg focus-within:ring w-full">
+    <A.Item {...props} value={value} className={clsx('rounded-md w-full', className)}>
       {children}
     </A.Item>
   );

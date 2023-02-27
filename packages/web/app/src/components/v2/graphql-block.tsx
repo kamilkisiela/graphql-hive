@@ -5,7 +5,7 @@ import { Card } from '@/components/v2/card';
 import { Heading } from '@/components/v2/heading';
 import { usePrettify } from '@/lib/hooks';
 
-function GraphQLHighlight({
+export function GraphQLHighlight({
   code,
   ...props
 }: Omit<SchemaEditorProps, 'schema'> & {
@@ -18,7 +18,7 @@ function GraphQLHighlight({
       theme="vs-dark"
       options={{
         readOnly: true,
-        lineNumbers: 'off',
+        lineNumbers: 'on',
       }}
       height="60vh"
       {...props}

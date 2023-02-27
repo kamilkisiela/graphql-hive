@@ -4,7 +4,8 @@ import { useDebouncedCallback } from 'use-debounce';
 import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
 import { MarkAsValid } from '@/components/target/history/MarkAsValid';
-import { DataWrapper, GraphQLBlock, Input, noSchema, Title } from '@/components/v2';
+import { Accordion, DataWrapper, GraphQLBlock, Input, noSchema, Title } from '@/components/v2';
+import { GraphQLHighlight } from '@/components/v2/graphql-block';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { CompositeSchemaFieldsFragment, SingleSchemaFieldsFragment } from '@/gql/graphql';
 import { LatestSchemaDocument, ProjectType, RegistryModel } from '@/graphql';
@@ -33,6 +34,7 @@ function Schemas({
   filterService?: string;
 }): ReactElement {
   const project = useFragment(Schemas_ProjectFragment, props.project);
+
   if (project.type === ProjectType.Single) {
     const [schema] = schemas;
     return (
@@ -44,25 +46,65 @@ function Schemas({
     );
   }
 
+  const filteredSchemas = schemas.filter(isCompositeSchema).filter(schema => {
+    if (filterService && 'service' in schema && schema.service) {
+      return schema.service.toLowerCase().includes(filterService.toLowerCase());
+    }
+
+    return true;
+  });
+
+  // Display format should be defined based on the length of `schemas`, and not `filteredSchemas`.
+  // Otherwise, the accordion will be displayed by default but the list when filtering.
+  const displayFormat = schemas.length > 7 ? 'accordion' : 'list';
+
   return (
     <div className="flex flex-col gap-8">
-      {schemas
-        .filter(isCompositeSchema)
-        .filter(schema => {
-          if (filterService && 'service' in schema && schema.service) {
-            return schema.service.toLowerCase().includes(filterService.toLowerCase());
-          }
-
-          return true;
-        })
-        .map(schema => (
-          <GraphQLBlock
-            key={schema.id}
-            sdl={schema.source}
-            url={schema.url ?? ''}
-            title={schema.service}
-          />
-        ))}
+      {displayFormat === 'accordion' ? (
+        <Accordion type="multiple">
+          {filteredSchemas.map(schema => (
+            <Accordion.Item
+              value={schema.id}
+              key={schema.id}
+              className="border-2 border-gray-900/50"
+            >
+              <Accordion.Header>
+                <div>
+                  <div className="text-base">{schema.service ?? 'SDL'}</div>
+                  {schema.url ? <div className="text-xs text-gray-500">{schema.url}</div> : null}
+                </div>
+              </Accordion.Header>
+              <Accordion.Content>
+                <div className="p-2">
+                  <GraphQLHighlight code={schema.source} />
+                </div>
+              </Accordion.Content>
+            </Accordion.Item>
+          ))}
+        </Accordion>
+      ) : (
+        <Accordion type="multiple" value={filteredSchemas.map(s => s.id)} disabled>
+          {filteredSchemas.map(schema => (
+            <Accordion.Item
+              value={schema.id}
+              key={schema.id}
+              className="border-2 border-gray-900/50"
+            >
+              <Accordion.Header>
+                <div>
+                  <div className="text-base">{schema.service ?? 'SDL'}</div>
+                  {schema.url ? <div className="text-xs text-gray-500">{schema.url}</div> : null}
+                </div>
+              </Accordion.Header>
+              <Accordion.Content>
+                <div className="p-2">
+                  <GraphQLHighlight code={schema.source} />
+                </div>
+              </Accordion.Content>
+            </Accordion.Item>
+          ))}
+        </Accordion>
+      )}
     </div>
   );
 }
