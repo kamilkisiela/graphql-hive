@@ -5,39 +5,36 @@ overrides:
   tsup: 6.5.0
 
 patchedDependencies:
-  '@theguild/buddy@0.1.0':
-    hash: ryylgra5xglhidfoiaxehn22hq
-    path: patches/@theguild__buddy@0.1.0.patch
-  slonik@30.1.2:
-    hash: wg2hxbo7txnklmvja4aeqnygfi
-    path: patches/slonik@30.1.2.patch
   mjml-core@4.13.0:
     hash: zxxsxbqejjmcwuzpigutzzq6wa
     path: patches/mjml-core@4.13.0.patch
-  '@tgriesser/schemats@7.0.1':
-    hash: u3kbucfchakklx3sci2vh6wjau
-    path: patches/@tgriesser__schemats@7.0.1.patch
-  '@oclif/core@1.23.0':
-    hash: zhte2hlj7lfobytjpalcwwo474
-    path: patches/@oclif__core@1.23.0.patch
   bullmq@3.9.0:
     hash: xbmkiyyfti7h6orsfs6pdmi4s4
     path: patches/bullmq@3.9.0.patch
+  '@tgriesser/schemats@7.0.1':
+    hash: u3kbucfchakklx3sci2vh6wjau
+    path: patches/@tgriesser__schemats@7.0.1.patch
+  '@theguild/buddy@0.1.0':
+    hash: ryylgra5xglhidfoiaxehn22hq
+    path: patches/@theguild__buddy@0.1.0.patch
   '@graphql-inspector/core@4.0.0':
     hash: wf35oaq7brzyeva5aoncxac66a
     path: patches/@graphql-inspector__core@4.0.0.patch
-  oclif@3.7.0:
-    hash: rxmtqiusuyruv7tkwux5gvotbm
-    path: patches/oclif@3.7.0.patch
-  '@slonik/migrator@0.8.5':
-    hash: yfpv2xzdmnkrtu2wvaktxf5mmq
-    path: patches/@slonik__migrator@0.8.5.patch
   '@apollo/federation@0.38.1':
     hash: rjgakkkphrejw6qrtph4ar24zq
     path: patches/@apollo__federation@0.38.1.patch
+  oclif@3.7.0:
+    hash: rxmtqiusuyruv7tkwux5gvotbm
+    path: patches/oclif@3.7.0.patch
+  '@oclif/core@1.23.0':
+    hash: zhte2hlj7lfobytjpalcwwo474
+    path: patches/@oclif__core@1.23.0.patch
   '@octokit/webhooks-methods@3.0.1':
     hash: ckboo4crezw7uvstxm24ozngtq
     path: patches/@octokit__webhooks-methods@3.0.1.patch
+  '@slonik/migrator@0.11.3':
+    hash: yfpv2xzdmnkrtu2wvaktxf5mmq
+    path: patches/@slonik__migrator@0.11.3.patch
 
 importers:
 
@@ -199,7 +196,7 @@ importers:
       graphql: 16.6.0
       human-id: 4.0.0
       ioredis: 5.3.1
-      slonik: 30.1.2_wg2hxbo7txnklmvja4aeqnygfi
+      slonik: 30.1.2
       zod: 3.20.6
     devDependencies:
       '@hive/rate-limit': link:../packages/services/rate-limit
@@ -324,7 +321,7 @@ importers:
 
   packages/migrations:
     specifiers:
-      '@slonik/migrator': 0.8.5
+      '@slonik/migrator': 0.11.3
       '@types/bcryptjs': 2.4.2
       '@types/node': 18.14.2
       '@types/pg': 8.6.6
@@ -335,19 +332,19 @@ importers:
       got: 12.5.3
       p-limit: 4.0.0
       pg-promise: 11.3.0
-      slonik: 30.1.2
+      slonik: 30.4.3
       ts-node: 10.9.1
       tslib: 2.5.0
       typescript: 4.9.5
       zod: 3.20.6
     dependencies:
-      '@slonik/migrator': 0.8.5_yfpv2xzdmnkrtu2wvaktxf5mmq_slonik@30.1.2
+      '@slonik/migrator': 0.11.3_yfpv2xzdmnkrtu2wvaktxf5mmq_slonik@30.4.3
       '@whatwg-node/fetch': 0.8.1_@types+node@18.14.2
       bcryptjs: 2.4.3
       dotenv: 16.0.3
       got: 12.5.3
       p-limit: 4.0.0
-      slonik: 30.1.2_wg2hxbo7txnklmvja4aeqnygfi
+      slonik: 30.4.3
       ts-node: 10.9.1_ellgaeuoqnti3hful2ny2iugba
       typescript: 4.9.5
       zod: 3.20.6
@@ -762,7 +759,7 @@ importers:
       pg-promise: 11.3.0
       slonik: 30.1.2
       slonik-interceptor-query-logging: 1.4.7
-      slonik-utilities: 1.9.4
+      slonik-utilities: 2.0.1
       tslib: 2.5.0
       typescript: 4.9.5
       zod: 3.20.6
@@ -772,9 +769,9 @@ importers:
       dotenv: 16.0.3
       got: 12.5.3
       param-case: 3.0.4
-      slonik: 30.1.2_wg2hxbo7txnklmvja4aeqnygfi
+      slonik: 30.1.2
       slonik-interceptor-query-logging: 1.4.7_slonik@30.1.2
-      slonik-utilities: 1.9.4_slonik@30.1.2
+      slonik-utilities: 2.0.1_slonik@30.1.2
       zod: 3.20.6
     devDependencies:
       '@sentry/types': 7.38.0
@@ -10276,13 +10273,14 @@ packages:
       - debug
     dev: false
 
-  /@slonik/migrator/0.8.5_yfpv2xzdmnkrtu2wvaktxf5mmq_slonik@30.1.2:
-    resolution: {integrity: sha512-EqX2/n75oLPuf8E6595oxz4nsmEQ0AWpBPmbBjTmDS2AI0nXo5ED22objFGFHQ7Qy8k0Xja+BgDrIxgnHZNv7w==}
+  /@slonik/migrator/0.11.3_yfpv2xzdmnkrtu2wvaktxf5mmq_slonik@30.4.3:
+    resolution: {integrity: sha512-lzu1WmoPRWWQPfFmU4alvEuV7ZS50W5QBvsr70+x6+sv5gXXNzzKGwGSfNkyDmlVRhNUqqv2CnGaZaetI5isZg==}
     peerDependencies:
-      slonik: '>= 23.0.0 < 24'
+      slonik: 27 - 29
     dependencies:
-      slonik: 30.1.2_wg2hxbo7txnklmvja4aeqnygfi
-      umzug: 3.0.0-beta.15
+      '@rushstack/ts-command-line': 4.12.5
+      slonik: 30.4.3
+      umzug: 3.2.1
     dev: false
     patched: true
 
@@ -12557,10 +12555,6 @@ packages:
     resolution: {integrity: sha512-c/I8ZRb51j+pYGAu5CrFMRxqZ2ke4y2grEBO5AUjgSkSk+qT2Ea+OdWElz/OiMf5MNpn2b17kuVBwZLQJXzihw==}
     dev: false
 
-  /@types/verror/1.10.6:
-    resolution: {integrity: sha512-NNm+gdePAX1VGvPcGZCDKQZKYSiAWigKhKaz5KF94hG6f2s8de9Ow5+7AbXoeKxL8gavZfk4UquSAygOF2duEQ==}
-    dev: false
-
   /@types/vinyl/2.0.6:
     resolution: {integrity: sha512-ayJ0iOCDNHnKpKTgBG6Q6JOnHTj9zFta+3j2b8Ejza0e4cvRyMn0ZoLEmbPrTHe5YYRlDYPvPWVdV4cTaRyH7g==}
     dependencies:
@@ -13606,6 +13600,7 @@ packages:
   /assert-plus/1.0.0:
     resolution: {integrity: sha512-NfJ4UzBCcQGLDlQq7nHxH+tv3kyZ0hHQqF5BO6J7tNJeP5do1llPr8dZ8zHonfhAu0PHAdMkSo+8o0wxg9lZWw==}
     engines: {node: '>=0.8'}
+    dev: true
 
   /assert/2.0.0:
     resolution: {integrity: sha512-se5Cd+js9dXJnu6Ag2JFc00t+HmHOen+8Q+L7O9zI0PqQXr20uk2J0XQqMxZEeo5U50o8Nvmmx7dZrl+Ufr35A==}
@@ -15229,6 +15224,7 @@ packages:
 
   /core-util-is/1.0.2:
     resolution: {integrity: sha512-3lqz5YjWTYnW6dlDa5TLaTCcShfar1e40rmcJVwCBJC6mWlFuj0eCHIElmG1g5kyuJ/GD+8Wn4FFCcz4gJPfaQ==}
+    dev: true
 
   /core-util-is/1.0.3:
     resolution: {integrity: sha512-ZQBvi1DcpJ4GDqanjucZ2Hj3wEO5pZDS89BWbkcrvdxksJorwUDDZamX9ldFkp9aw2lmBDLgkObEA4DWNJ9FYQ==}
@@ -16478,9 +16474,9 @@ packages:
     resolution: {integrity: sha512-L6uRgvZTH+4OF5NE/MBbzQx/WYpru1xCBE9respNj6qznEewGUIfhzmm7horWWxbNO2M0WckQypGctR8lH79xQ==}
     dev: false
 
-  /emittery/0.8.1:
-    resolution: {integrity: sha512-uDfvUjVrfGJJhymx/kz6prltenw1u7WrCg1oa94zYY8xxVpLLUu045LAT0dhDZdXG58/EpPL/5kA180fQ/qudg==}
-    engines: {node: '>=10'}
+  /emittery/0.12.1:
+    resolution: {integrity: sha512-pYyW59MIZo0HxPFf+Vb3+gacUu0gxVS3TZwB2ClwkEZywgF9f9OJDoVmNLojTn0vKX3tO9LC+pdQEcLP4Oz/bQ==}
+    engines: {node: '>=12'}
     dev: false
 
   /emoji-regex/8.0.0:
@@ -17698,6 +17694,7 @@ packages:
   /extsprintf/1.4.1:
     resolution: {integrity: sha512-Wrk35e8ydCKDj/ArClo1VrPVmN8zph5V4AtHwIuHhvMXsKf73UT3BOD+azBIW+3wOJ4FhEH7zyaJCFvChjYvMA==}
     engines: {'0': node >=0.6.0}
+    dev: true
 
   /fast-content-type-parse/1.0.0:
     resolution: {integrity: sha512-Xbc4XcysUXcsP5aHUU7Nq3OwvHq97C+WnbkeIefpeYLX+ryzFJlU6OStFJhs6Ol0LkUGpcK+wL0JwfM+FCU5IA==}
@@ -23862,6 +23859,14 @@ packages:
       pg: 8.8.0
     dev: false
 
+  /pg-cursor/2.7.4_pg@8.9.0:
+    resolution: {integrity: sha512-CNWwOzTTZ9QvphoOL+Wg/7pmVr9GnAWBjPbuK2FRclrB4A/WRO/ssCJ9BlkzIGmmofK2M/LyokNHgsLSn+fMHA==}
+    peerDependencies:
+      pg: ^8
+    dependencies:
+      pg: 8.9.0
+    dev: false
+
   /pg-int8/1.0.1:
     resolution: {integrity: sha512-WCtabS6t3c8SkpDBUlb1kjOs7l66xsGdKpIPZsg4wR+B3+u9UAum2odSsF9tnvxg80h4ZxLWMy4pRjOsFIqQpw==}
     engines: {node: '>=4.0.0'}
@@ -23890,7 +23895,6 @@ packages:
       pg: '>=8.0'
     dependencies:
       pg: 8.9.0
-    dev: true
 
   /pg-promise/11.3.0:
     resolution: {integrity: sha512-A2CYmax5gsqVAO2N0ET9oPRCPX3kpKymj9qLVK7+jszlJL6l8uJDq/DGqLpxNi5VHwK7Dmm2WNRdrwkh1xuaxQ==}
@@ -23967,7 +23971,6 @@ packages:
       pg-protocol: 1.6.0
       pg-types: 2.2.0
       pgpass: 1.0.5
-    dev: true
 
   /pgpass/1.0.5:
     resolution: {integrity: sha512-FdW9r/jQZhSeohs1Z3sI1yxFQNFvMcnmfuj4WBMUTxOrAyLMaTcE1aAMBiTlbMNaXvBCQuVi0R7hd8udDSP7ug==}
@@ -24114,6 +24117,11 @@ packages:
     dependencies:
       '@babel/runtime': 7.20.7
     dev: true
+
+  /pony-cause/2.1.8:
+    resolution: {integrity: sha512-c4E5sVlX+npoRiKb72SkMOYMZ/c+jehaKAytybykhh49tEQYkjHxKSZ3YHUyH1v3oEL+wl3aXtkyYhJp+cNXDg==}
+    engines: {node: '>=12.0.0'}
+    dev: false
 
   /postcss-calc/8.2.4_postcss@8.4.21:
     resolution: {integrity: sha512-SmWMSJmB8MRnnULldx0lQIyhSNvuDl9HfrZkaqqE/WHAhToYsAvDq+yAsA/kIyINDszOp3Rh0GFoNuH5Ypsm3Q==}
@@ -26044,6 +26052,18 @@ packages:
       semver-compare: 1.0.0
     dev: false
 
+  /roarr/7.14.3:
+    resolution: {integrity: sha512-AvUQY27C6/biXEAyYUXc8ONBtP1cA3MQM88e24Fmsl3LAqtNR309nMaWFALYk7ORTqgGrgrjBJ1vE20DZAc5qA==}
+    engines: {node: '>=12.0'}
+    dependencies:
+      boolean: 3.2.0
+      fast-json-stringify: 2.7.13
+      fast-printf: 1.6.9
+      globalthis: 1.0.3
+      safe-stable-stringify: 2.4.2
+      semver-compare: 1.0.0
+    dev: false
+
   /robust-predicates/3.0.1:
     resolution: {integrity: sha512-ndEIpszUHiG4HtDsQLeIuMvRsDnn8c8rYStabochtUeCvfuvNptb5TUbVD68LRAILPX7p9nqQGh4xJgn3EHS/g==}
     dev: false
@@ -26123,6 +26143,11 @@ packages:
     resolution: {integrity: sha512-PaUSFsUaNNuKwkBijoAPHAK6/eM6VirvyPWlZ7BAQy4D+hCvh4B6lIG+nPdhbFfIbP+gTGBcrdsOaUs0F+ZBOQ==}
     dependencies:
       ret: 0.2.2
+
+  /safe-stable-stringify/2.4.2:
+    resolution: {integrity: sha512-gMxvPJYhP0O9n2pvcfYfIuYgbledAOJFcqRThtPRmjscaipiwcwPPKLytpVzMkG2HAN87Qmo2d4PtGiri1dSLA==}
+    engines: {node: '>=10'}
+    dev: false
 
   /safer-buffer/2.1.2:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
@@ -26514,11 +26539,11 @@ packages:
       crack-json: 1.3.0
       pretty-ms: 7.0.1
       serialize-error: 8.1.0
-      slonik: 30.1.2_wg2hxbo7txnklmvja4aeqnygfi
+      slonik: 30.1.2
     dev: false
 
-  /slonik-utilities/1.9.4_slonik@30.1.2:
-    resolution: {integrity: sha512-kKu6y7cobAyoWfwaS6zZF7oqosxQ+iEBpQYD3YFv+B/jd/YM+4XxFidintA3CGnmq3R4EmXnPMsyy8IpKeE/Hg==}
+  /slonik-utilities/2.0.1_slonik@30.1.2:
+    resolution: {integrity: sha512-byf5OAzgWC0hi21jCuOdvxQxIN2oidAOmcDe2dXt0w/rQ/Ox0i0yWG14794PALZYheOwHK83WBE2fgAh6KBV1Q==}
     engines: {node: '>=8.0'}
     peerDependencies:
       slonik: ^28 | ^29
@@ -26527,12 +26552,12 @@ packages:
       delay: 4.4.1
       es6-error: 4.1.1
       lodash: 4.17.21
-      roarr: 7.13.0
+      roarr: 7.14.3
       serialize-error: 5.0.0
-      slonik: 30.1.2_wg2hxbo7txnklmvja4aeqnygfi
+      slonik: 30.1.2
     dev: false
 
-  /slonik/30.1.2_wg2hxbo7txnklmvja4aeqnygfi:
+  /slonik/30.1.2:
     resolution: {integrity: sha512-vNCZT4eEr3cKnm83LF8QOCTfm3TH/XSQdMnG4X3A+V1PVJFG3JKjRMB8jwin/3eYeM6nVCSXeZqlPGlHHXrgBQ==}
     engines: {node: '>=10.0'}
     dependencies:
@@ -26558,7 +26583,34 @@ packages:
     transitivePeerDependencies:
       - pg-native
     dev: false
-    patched: true
+
+  /slonik/30.4.3:
+    resolution: {integrity: sha512-t5PdGicTVJ7Jan1T+/0QNyvxFO+bGWvazpvdegywoN4i2wMmxhUSaUfAoqK5VxMFvKdXEFbPtUvuWdtAQI+lbw==}
+    engines: {node: '>=10.0'}
+    dependencies:
+      concat-stream: 2.0.0
+      es6-error: 4.1.1
+      fast-safe-stringify: 2.1.1
+      get-stack-trace: 2.1.1
+      hyperid: 2.3.1
+      is-plain-object: 5.0.0
+      iso8601-duration: 1.3.0
+      p-defer: 3.0.0
+      pg: 8.9.0
+      pg-copy-streams: 6.0.4
+      pg-copy-streams-binary: 2.2.0
+      pg-cursor: 2.7.4_pg@8.9.0
+      pg-protocol: 1.6.0
+      pg-types: 4.0.0
+      postgres-array: 3.0.1
+      postgres-interval: 4.0.0
+      roarr: 7.13.0
+      serialize-error: 8.1.0
+      through2: 4.0.2
+      zod: 3.20.6
+    transitivePeerDependencies:
+      - pg-native
+    dev: false
 
   /smart-buffer/4.2.0:
     resolution: {integrity: sha512-94hK0Hh8rPqQl2xXc3HsaBoOXKV20MToPkcXvwbISWLEs+64sBq5kFgn2kJDHb1Pry9yrP0dxrCI9RRci7RXKg==}
@@ -28179,17 +28231,16 @@ packages:
     hasBin: true
     requiresBuild: true
 
-  /umzug/3.0.0-beta.15:
-    resolution: {integrity: sha512-8u3SoFP8CPvzoVHptSpF38wTu0nxTjW8XYD8VI5WvFHA3hYwZsXZoquSIpY6HZo8tF2WHF+aRhb6lqfIpnRdow==}
-    engines: {node: '>=10.0.0'}
+  /umzug/3.2.1:
+    resolution: {integrity: sha512-XyWQowvP9CKZycKc/Zg9SYWrAWX/gJCE799AUTFqk8yC3tp44K1xWr3LoFF0MNEjClKOo1suCr5ASnoy+KltdA==}
+    engines: {node: '>=12'}
     dependencies:
       '@rushstack/ts-command-line': 4.12.5
-      '@types/verror': 1.10.6
-      emittery: 0.8.1
+      emittery: 0.12.1
       fs-jetpack: 4.3.1
-      glob: 7.2.3
-      type-fest: 0.20.2
-      verror: 1.10.1
+      glob: 8.1.0
+      pony-cause: 2.1.8
+      type-fest: 2.19.0
     dev: false
 
   /unbox-primitive/1.0.2:
@@ -28746,15 +28797,6 @@ packages:
       core-util-is: 1.0.2
       extsprintf: 1.4.1
     dev: true
-
-  /verror/1.10.1:
-    resolution: {integrity: sha512-veufcmxri4e3XSrT0xwfUR7kguIkaxBeosDg00yDWhk49wdwkSUrvvsm7nc75e1PUyvIeZj6nS8VQRYz2/S4Xg==}
-    engines: {node: '>=0.6.0'}
-    dependencies:
-      assert-plus: 1.0.0
-      core-util-is: 1.0.2
-      extsprintf: 1.4.1
-    dev: false
 
   /vfile-location/4.0.1:
     resolution: {integrity: sha512-JDxPlTbZrZCQXogGheBHjbRWjESSPEak770XwWPfw5mTc1v1nWGLB/apzZxsx8a0SJVfF8HK8ql8RD308vXRUw==}

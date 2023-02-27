@@ -19,7 +19,7 @@
     "param-case": "3.0.4",
     "slonik": "30.1.2",
     "slonik-interceptor-query-logging": "1.4.7",
-    "slonik-utilities": "1.9.4",
+    "slonik-utilities": "2.0.1",
     "zod": "3.20.6"
   },
   "devDependencies": {
