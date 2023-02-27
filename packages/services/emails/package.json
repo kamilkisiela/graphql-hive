@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "build": "bob runify --single",
-    "dev": "tsup-node --config ../../../tsup/dev.config.node.ts src/dev.ts",
+    "dev": "tsup-node --config ../../../configs/tsup/dev.config.node.ts src/dev.ts",
     "postbuild": "copyfiles -f \"node_modules/bullmq/dist/esm/commands/*.lua\" dist && copyfiles -f \"node_modules/bullmq/dist/esm/commands/includes/*.lua\" dist/includes",
     "typecheck": "tsc --noEmit"
   },
