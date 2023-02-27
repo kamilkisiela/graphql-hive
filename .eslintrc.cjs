@@ -144,7 +144,7 @@ module.exports = {
         },
         tailwindcss: {
           config: 'packages/web/app/tailwind.config.cjs',
-          whitelist: ['drag-none'],
+          whitelist: ['drag-none', 'graphiql-toolbar-icon', 'graphiql-toolbar-button'],
         },
       },
     },

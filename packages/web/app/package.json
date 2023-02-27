@@ -14,7 +14,8 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@graphiql/toolkit": "0.8.0",
+    "@graphiql/react": "*",
+    "@graphiql/toolkit": "*",
     "@graphql-tools/mock": "8.7.18",
     "@headlessui/react": "1.7.12",
     "@monaco-editor/react": "4.4.6",
