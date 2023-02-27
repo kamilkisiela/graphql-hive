@@ -132,7 +132,7 @@ export function GraphQLTypeCard(
   }>,
 ): ReactElement {
   return (
-    <div className="rounded-md border-2">
+    <div className="rounded-md border-2 border-gray-900">
       <div className="flex flex-row justify-between p-4">
         <div>
           <div className="flex flex-row items-center gap-2">

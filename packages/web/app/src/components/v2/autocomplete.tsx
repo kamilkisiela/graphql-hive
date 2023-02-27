@@ -1,5 +1,6 @@
-import { ReactElement } from 'react';
-import Select, { StylesConfig } from 'react-select';
+import { ComponentPropsWithRef, ReactElement } from 'react';
+import Highlighter from 'react-highlight-words';
+import Select, { components, createFilter, Props as SelectProps, StylesConfig } from 'react-select';
 import { FixedSizeList } from 'react-window';
 import { SelectOption } from './radix-select';
 
@@ -53,6 +54,19 @@ const styles: StylesConfig = {
   }),
 };
 
+// Disable mouse events to improve performance when rendering a lot of elements.
+// It's really really slow without this.
+const Option = ({ children, ...props }: ComponentPropsWithRef<typeof components.Option>) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { onMouseMove, onMouseOver, ...rest } = props.innerProps;
+  const newProps = { ...props, innerProps: rest };
+  return <components.Option {...newProps}>{children}</components.Option>;
+};
+
+const formatOptionLabel: SelectProps<any>['formatOptionLabel'] = ({ label }, { inputValue }) => {
+  return <Highlighter searchWords={[inputValue]} textToHighlight={label} />;
+};
+
 export function Autocomplete(props: {
   placeholder: string;
   options: readonly SelectOption[];
@@ -64,6 +78,13 @@ export function Autocomplete(props: {
 }): ReactElement {
   return (
     <Select
+      filterOption={createFilter({
+        ignoreAccents: false,
+        ignoreCase: true,
+        trim: true,
+        matchFrom: 'any',
+      })}
+      formatOptionLabel={formatOptionLabel}
       options={props.options}
       defaultValue={props.defaultValue}
       styles={styles}
@@ -73,7 +94,7 @@ export function Autocomplete(props: {
       isDisabled={props.disabled}
       isLoading={props.loading}
       placeholder={props.placeholder}
-      components={{ MenuList }}
+      components={{ MenuList, Option }}
       className={props.className}
     />
   );
