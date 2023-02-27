@@ -4,7 +4,7 @@ const errorTypes = ['unhandledRejection', 'uncaughtException'];
 const signalTraps = ['SIGTERM', 'SIGINT', 'SIGUSR2'];
 
 export function registerShutdown(config: {
-  logger: FastifyLoggerInstance;
+  logger: Pick<FastifyLoggerInstance, 'info' | 'error'>;
   onShutdown(): void | Promise<void>;
   noExit?: boolean;
 }) {

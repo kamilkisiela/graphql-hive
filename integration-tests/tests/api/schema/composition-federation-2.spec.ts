@@ -36,7 +36,11 @@ test.concurrent('call an external service to compose and validate services', asy
     .then(r => r.expectNoGraphQLErrors());
 
   // Schema publish should be successful
-  expect(publishUsersResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+  expect(publishUsersResult).toMatchObject({
+    schemaPublish: {
+      __typename: 'SchemaPublishSuccess',
+    },
+  });
 
   // enable external composition
   const externalCompositionResult = await enableExternalSchemaComposition(
@@ -72,5 +76,9 @@ test.concurrent('call an external service to compose and validate services', asy
     .then(r => r.expectNoGraphQLErrors());
 
   // Schema publish should be successful
-  expect(publishProductsResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+  expect(publishProductsResult).toMatchObject({
+    schemaPublish: {
+      __typename: 'SchemaPublishSuccess',
+    },
+  });
 });

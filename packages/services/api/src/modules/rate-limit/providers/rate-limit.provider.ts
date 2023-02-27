@@ -1,7 +1,6 @@
+import { createClient } from 'fets';
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import type { RateLimitApi, RateLimitApiInput } from '@hive/rate-limit';
-import { createTRPCProxyClient, httpLink } from '@trpc/client';
-import { fetch } from '@whatwg-node/fetch';
 import { HiveError } from '../../../shared/errors';
 import { sentry } from '../../../shared/sentry';
 import { Logger } from '../../shared/providers/logger';
@@ -23,13 +22,8 @@ export class RateLimitProvider {
   ) {
     this.logger = logger.child({ service: 'RateLimitProvider' });
     this.rateLimit = rateLimitServiceConfig.endpoint
-      ? createTRPCProxyClient<RateLimitApi>({
-          links: [
-            httpLink({
-              url: `${rateLimitServiceConfig.endpoint}/trpc`,
-              fetch,
-            }),
-          ],
+      ? createClient<RateLimitApi>({
+          endpoint: rateLimitServiceConfig.endpoint,
         })
       : null;
   }
@@ -59,6 +53,9 @@ export class RateLimitProvider {
 
     this.logger.debug(`Checking rate limit for target id="${input.id}", type=${input.type}`);
 
-    return await this.rateLimit.checkRateLimit.query(input);
+    const response = await this.rateLimit.checkRateLimit.post({
+      json: input,
+    });
+    return response.json();
   }
 }

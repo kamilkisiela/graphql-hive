@@ -35,7 +35,11 @@ test.concurrent('call an external service to compose and validate services', asy
     .then(r => r.expectNoGraphQLErrors());
 
   // Schema publish should be successful
-  expect(publishUsersResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+  expect(publishUsersResult).toMatchObject({
+    schemaPublish: {
+      __typename: 'SchemaPublishSuccess',
+    },
+  });
 
   // expect `users` service to be composed internally
   await expect(history()).resolves.not.toContainEqual(usersServiceName);
@@ -77,7 +81,11 @@ test.concurrent('call an external service to compose and validate services', asy
     .then(r => r.expectNoGraphQLErrors());
 
   // Schema publish should be successful
-  expect(publishProductsResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+  expect(publishProductsResult).toMatchObject({
+    schemaPublish: {
+      __typename: 'SchemaPublishSuccess',
+    },
+  });
 
   // expect `products` service to be composed externally
   await expect(history()).resolves.toContainEqual(productsServiceName);
