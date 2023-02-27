@@ -23,7 +23,7 @@ import {
 } from '@/components/v2/dropdown';
 import { LinkIcon, MoreIcon, SettingsIcon } from '@/components/v2/icon';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { ProjectActivitiesDocument, ProjectDocument } from '@/graphql';
+import { ProjectActivitiesDocument } from '@/graphql';
 import { canAccessProject, ProjectAccessScope } from '@/lib/access/project';
 import { writeLastVisitedOrganization } from '@/lib/cookies';
 import { getDocsUrl } from '@/lib/docs-url';
@@ -43,10 +43,20 @@ const ProjectCard_ProjectFragment = graphql(`
   }
 `);
 
+const ProjectCard_OrganizationFragment = graphql(`
+  fragment ProjectCard_OrganizationFragment on Organization {
+    me {
+      ...CanAccessProject_MemberFragment
+    }
+  }
+`);
+
 const ProjectCard = (props: {
   project: FragmentType<typeof ProjectCard_ProjectFragment>;
+  organization: FragmentType<typeof ProjectCard_OrganizationFragment>;
 }): ReactElement | null => {
   const project = useFragment(ProjectCard_ProjectFragment, props.project);
+  const organization = useFragment(ProjectCard_OrganizationFragment, props.organization);
   const copyToClipboard = useClipboard();
   const router = useRouteSelector();
   const [projectActivitiesQuery] = useQuery({
@@ -60,20 +70,10 @@ const ProjectCard = (props: {
     },
     requestPolicy: 'cache-and-network',
   });
-  const [projectQuery] = useQuery({
-    query: ProjectDocument,
-    variables: {
-      organizationId: router.organizationId,
-      projectId: project.cleanId,
-    },
-  });
-  const org = projectQuery.data?.organization?.organization;
-  if (!org) {
-    return null;
-  }
 
   const href = `/${router.organizationId}/${project.cleanId}`;
   const lastActivity = projectActivitiesQuery.data?.projectActivities.nodes[0];
+
   return (
     <Card
       as={NextLink}
@@ -103,7 +103,7 @@ const ProjectCard = (props: {
               <LinkIcon />
               Share Link
             </DropdownMenuItem>
-            {canAccessProject(ProjectAccessScope.Settings, org.me) && (
+            {canAccessProject(ProjectAccessScope.Settings, organization.me) && (
               <NextLink href={`/${router.organizationId}/${project.cleanId}/view/settings`}>
                 <DropdownMenuItem>
                   <SettingsIcon />
@@ -132,6 +132,7 @@ const OrganizationProjectsPageQuery = graphql(`
     organization(selector: $selector) {
       organization {
         ...OrganizationLayout_OrganizationFragment
+        ...ProjectCard_OrganizationFragment
       }
     }
     projects(selector: $selector) {
@@ -153,43 +154,50 @@ function ProjectsPage(): ReactElement {
         className="flex justify-between gap-5"
         query={OrganizationProjectsPageQuery}
       >
-        {({ projects }) => (
-          <>
-            <div className="grow">
-              <Heading className="mb-4">Active Projects</Heading>
-              {projects.total === 0 ? (
-                <EmptyList
-                  title="Hive is waiting for your first project"
-                  description='You can create a project by clicking the "Create Project" button'
-                  docsUrl={getDocsUrl('/get-started/projects')}
-                />
-              ) : (
-                <div className="grid grid-cols-2 gap-5 items-stretch">
-                  {/** TODO: use defer here :) */}
-                  {projects === null
-                    ? [1, 2].map(key => (
-                        <Card key={key}>
-                          <div className="flex gap-x-2">
-                            <Skeleton visible className="h-12 w-12" />
-                            <div>
-                              <Skeleton visible className="mb-2 h-3 w-16" />
-                              <Skeleton visible className="h-3 w-8" />
+        {({ projects, organization }) =>
+          projects &&
+          organization?.organization && (
+            <>
+              <div className="grow">
+                <Heading className="mb-4">Active Projects</Heading>
+                {projects.total === 0 ? (
+                  <EmptyList
+                    title="Hive is waiting for your first project"
+                    description='You can create a project by clicking the "Create Project" button'
+                    docsUrl={getDocsUrl('/get-started/projects')}
+                  />
+                ) : (
+                  <div className="grid grid-cols-2 gap-5 items-stretch">
+                    {/** TODO: use defer here :) */}
+                    {projects === null
+                      ? [1, 2].map(key => (
+                          <Card key={key}>
+                            <div className="flex gap-x-2">
+                              <Skeleton visible className="h-12 w-12" />
+                              <div>
+                                <Skeleton visible className="mb-2 h-3 w-16" />
+                                <Skeleton visible className="h-3 w-8" />
+                              </div>
                             </div>
-                          </div>
-                          <Skeleton visible className="mt-5 mb-3 h-7 w-1/2" />
-                          <Skeleton visible className="h-7" />
-                        </Card>
-                      ))
-                    : projects.nodes.map(project => (
-                        <ProjectCard key={project.id} project={project} />
-                      ))}
-                </div>
-              )}
-            </div>
+                            <Skeleton visible className="mt-5 mb-3 h-7 w-1/2" />
+                            <Skeleton visible className="h-7" />
+                          </Card>
+                        ))
+                      : projects.nodes.map(project => (
+                          <ProjectCard
+                            key={project.id}
+                            project={project}
+                            organization={organization.organization}
+                          />
+                        ))}
+                  </div>
+                )}
+              </div>
 
-            <Activities />
-          </>
-        )}
+              <Activities />
+            </>
+          )
+        }
       </OrganizationLayout>
     </>
   );
