@@ -601,6 +601,9 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     destroy() {
       return pool.end();
     },
+    async ping() {
+      await pool.exists(sql`SELECT 1`);
+    },
     async ensureUserExists({
       superTokensUserId,
       externalAuthUserId,

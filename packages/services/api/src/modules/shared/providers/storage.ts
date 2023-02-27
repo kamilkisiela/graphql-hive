@@ -77,6 +77,7 @@ export interface IdMutex {
 
 export interface Storage {
   destroy(): Promise<void>;
+  ping(): Promise<void>;
   ensureUserExists(_: {
     superTokensUserId: string;
     externalAuthUserId?: string | null;
