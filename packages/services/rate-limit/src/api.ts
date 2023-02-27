@@ -1,50 +1,148 @@
-import { z } from 'zod';
-import { handleTRPCError } from '@hive/service-common';
-import type { FastifyRequest } from '@hive/service-common';
-import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
-import { initTRPC } from '@trpc/server';
+import {
+  createRouter,
+  FromSchema,
+  Response,
+  RouterInput,
+  RouterOutput,
+  useErrorHandling,
+} from 'fets';
+import { createLogger } from '@graphql-yoga/logger';
+import { reportReadiness } from '@hive/service-common';
+import * as Sentry from '@sentry/node';
 import type { Limiter } from './limiter';
 
 export interface Context {
-  req: FastifyRequest;
   limiter: Limiter;
 }
 
-const t = initTRPC.context<Context>().create();
-const errorMiddleware = t.middleware(handleTRPCError);
-const procedure = t.procedure.use(errorMiddleware);
+const VALIDATION = {
+  type: 'object',
+  properties: {
+    id: {
+      type: 'string',
+      minLength: 1,
+    },
+    entityType: {
+      type: 'string',
+      enum: ['organization', 'target'],
+    },
+    type: {
+      type: 'string',
+      enum: ['operations-reporting'],
+    },
+    token: {
+      type: 'string',
+      nullable: true,
+    },
+  },
+  additionalProperties: false,
+  required: ['id', 'entityType', 'type', 'token'],
+} as const;
 
-export type RateLimitInput = z.infer<typeof VALIDATION>;
+export type RateLimitInput = FromSchema<typeof VALIDATION>;
 
-const VALIDATION = z
-  .object({
-    id: z.string().min(1),
-    entityType: z.enum(['organization', 'target']),
-    type: z.enum(['operations-reporting']),
-    /**
-     * Token is optional, and used only when an additional blocking (WAF) process is needed.
-     */
-    token: z.string().nullish().optional(),
-  })
-  .required();
-
-export const rateLimitApiRouter = t.router({
-  getRetention: procedure
-    .input(
-      z
-        .object({
-          targetId: z.string().nonempty(),
-        })
-        .required(),
-    )
-    .query(({ ctx, input }) => {
-      return ctx.limiter.getRetention(input.targetId);
-    }),
-  checkRateLimit: procedure.input(VALIDATION).query(({ ctx, input }) => {
-    return ctx.limiter.checkLimit(input);
-  }),
-});
+export const logger = createLogger();
 
 export type RateLimitApi = typeof rateLimitApiRouter;
-export type RateLimitApiInput = inferRouterInputs<RateLimitApi>;
-export type RateLimitApiOutput = inferRouterOutputs<RateLimitApi>;
+export type RateLimitApiInput = RouterInput<RateLimitApi>;
+export type RateLimitApiOutput = RouterOutput<RateLimitApi>;
+
+export const rateLimitApiRouter = createRouter<Context>({
+  title: 'Rate Limit API',
+  plugins: [
+    // Not sure about here
+    useErrorHandling((error, req, ctx) => {
+      Sentry.captureException(error, {
+        tags: {
+          path: req.url,
+          request_id: req.headers.get('x-request-id'),
+        },
+      });
+      // Logger is needed here
+      ctx.limiter.logger.error(error.message);
+      return Response.json(error.message, {
+        status: 500,
+      });
+    }),
+  ],
+})
+  .route({
+    path: '/_health',
+    handler: () => new Response(null, { status: 200 }),
+  })
+  .route({
+    path: '/_readiness',
+    handler(_req, ctx) {
+      const isReady = ctx.limiter.readiness();
+      reportReadiness(isReady);
+      return new Response(null, {
+        status: isReady ? 200 : 400,
+      });
+    },
+  })
+  .route({
+    operationId: 'getRetention',
+    method: 'POST',
+    path: '/retention',
+    schemas: {
+      request: {
+        json: {
+          type: 'object',
+          properties: {
+            targetId: {
+              type: 'string',
+            },
+          },
+          additionalProperties: false,
+          required: ['targetId'],
+        },
+      },
+      responses: {
+        200: {
+          type: 'number',
+        },
+      },
+    } as const,
+    async handler(request, ctx) {
+      const jsonBody = await request.json();
+      const retention = ctx.limiter.getRetention(jsonBody.targetId);
+      return Response.json(retention, {
+        status: 200,
+      });
+    },
+  })
+  .route({
+    operationId: 'checkRateLimit',
+    method: 'POST',
+    path: '/check-rate-limit',
+    schemas: {
+      request: {
+        json: VALIDATION,
+      },
+      responses: {
+        200: {
+          type: 'object',
+          properties: {
+            limited: {
+              type: 'boolean',
+            },
+            quota: {
+              type: 'number',
+            },
+            current: {
+              type: 'number',
+            },
+          },
+          additionalProperties: false,
+          required: ['limited', 'quota', 'current'],
+        } as const,
+      },
+    },
+    async handler(request, ctx) {
+      const input = await request.json();
+      const result = ctx.limiter.checkLimit(input);
+      return Response.json(result, {
+        status: 200,
+      });
+    },
+  });

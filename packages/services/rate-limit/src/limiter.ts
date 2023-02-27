@@ -1,5 +1,5 @@
 import { endOfMonth, startOfMonth } from 'date-fns';
-import type { FastifyLoggerInstance } from '@hive/service-common';
+import type { YogaLogger } from '@graphql-yoga/logger';
 import { createStorage as createPostgreSQLStorage } from '@hive/storage';
 import type { UsageEstimatorApi } from '@hive/usage-estimator';
 import * as Sentry from '@sentry/node';
@@ -37,7 +37,7 @@ type OrganizationId = string;
 type TargetId = string;
 
 export function createRateLimiter(config: {
-  logger: FastifyLoggerInstance;
+  logger: YogaLogger;
   rateLimitConfig: {
     interval: number;
   };

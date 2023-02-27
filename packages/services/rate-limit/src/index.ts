@@ -1,15 +1,10 @@
 #!/usr/bin/env node
+import { createServer } from 'http';
 import 'reflect-metadata';
-import {
-  createServer,
-  registerShutdown,
-  registerTRPC,
-  reportReadiness,
-  startMetrics,
-} from '@hive/service-common';
+import { registerShutdown, startMetrics } from '@hive/service-common';
 import { createConnectionString } from '@hive/storage';
 import * as Sentry from '@sentry/node';
-import { Context, rateLimitApiRouter } from './api';
+import { logger, rateLimitApiRouter } from './api';
 import { env } from './environment';
 import { createRateLimiter } from './limiter';
 
@@ -24,18 +19,9 @@ async function main() {
     });
   }
 
-  const server = await createServer({
-    name: 'rate-limit',
-    tracing: false,
-    log: {
-      level: env.log.level,
-      requests: env.log.requests,
-    },
-  });
-
   try {
     const limiter = createRateLimiter({
-      logger: server.log,
+      logger,
       rateLimitConfig: {
         interval: env.limitCacheUpdateIntervalMs,
       },
@@ -46,48 +32,22 @@ async function main() {
       },
     });
 
-    await registerTRPC(server, {
-      router: rateLimitApiRouter,
-      createContext({ req }): Context {
-        return {
-          req,
-          limiter,
-        };
-      },
-    });
+    const server = createServer((req, res) => rateLimitApiRouter(req, res, { limiter }));
 
     registerShutdown({
-      logger: server.log,
+      logger,
       async onShutdown() {
         await Promise.all([limiter.stop(), server.close()]);
-      },
-    });
-
-    server.route({
-      method: ['GET', 'HEAD'],
-      url: '/_health',
-      handler(_, res) {
-        void res.status(200).send();
-      },
-    });
-
-    server.route({
-      method: ['GET', 'HEAD'],
-      url: '/_readiness',
-      handler(_, res) {
-        const isReady = limiter.readiness();
-        reportReadiness(isReady);
-        void res.status(isReady ? 200 : 400).send();
       },
     });
 
     if (env.prometheus) {
       await startMetrics(env.prometheus.labels.instance);
     }
-    await server.listen(env.http.port, '::');
+    await new Promise<void>(resolve => server.listen(env.http.port, '::', resolve));
     await limiter.start();
   } catch (error) {
-    server.log.fatal(error);
+    logger.error(error);
     Sentry.captureException(error, {
       level: 'fatal',
     });

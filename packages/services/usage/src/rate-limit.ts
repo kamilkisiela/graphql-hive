@@ -1,8 +1,12 @@
+import { createClient } from 'fets';
 import LRU from 'tiny-lru';
 import type { RateLimitApi, RateLimitApiInput, RateLimitApiOutput } from '@hive/rate-limit';
 import { FastifyLoggerInstance } from '@hive/service-common';
-import { createTRPCProxyClient, httpLink } from '@trpc/client';
-import { fetch } from '@whatwg-node/fetch';
+
+type CheckRateLimitInput = RateLimitApiInput['/check-rate-limit']['post']['json'];
+type CheckRateLimitResponse = RateLimitApiOutput['/check-rate-limit']['post'][200];
+type GetRetentionInput = RateLimitApiInput['/retention']['post']['json'];
+type GetRetentionResponse = RateLimitApiOutput['/retention']['post'][200];
 
 export function createUsageRateLimit(config: {
   endpoint: string | null;
@@ -14,29 +18,28 @@ export function createUsageRateLimit(config: {
     logger.warn(`Usage service is not configured to use rate-limit (missing config)`);
 
     return {
-      async isRateLimited(_input: RateLimitApiInput['checkRateLimit']): Promise<boolean> {
+      async isRateLimited(_input: CheckRateLimitInput): Promise<boolean> {
         return false;
       },
     };
   }
   const endpoint = config.endpoint.replace(/\/$/, '');
-  const rateLimit = createTRPCProxyClient<RateLimitApi>({
-    links: [
-      httpLink({
-        url: `${endpoint}/trpc`,
-        fetch,
-      }),
-    ],
+  const rateLimit = createClient<RateLimitApi>({
+    endpoint,
   });
-  const cache = LRU<Promise<RateLimitApiOutput['checkRateLimit'] | null>>(1000, 30_000);
-  const retentionCache = LRU<Promise<RateLimitApiOutput['getRetention'] | null>>(1000, 30_000);
+  const cache = LRU<Promise<CheckRateLimitResponse | null>>(1000, 30_000);
+  const retentionCache = LRU<Promise<GetRetentionResponse | null>>(1000, 30_000);
 
-  async function fetchFreshRetentionInfo(input: RateLimitApiInput['getRetention']) {
-    return rateLimit.getRetention.query(input);
+  async function fetchFreshRetentionInfo(input: GetRetentionInput) {
+    return rateLimit['/retention'].post({
+      json: input,
+    });
   }
 
-  async function fetchFreshLimitInfo(input: RateLimitApiInput['checkRateLimit']) {
-    return rateLimit.checkRateLimit.query(input);
+  async function fetchFreshLimitInfo(input: CheckRateLimitInput) {
+    return rateLimit['/check-rate-limit'].post({
+      json: input,
+    });
   }
 
   return {
@@ -44,7 +47,7 @@ export function createUsageRateLimit(config: {
       const retentionResponse = await retentionCache.get(targetId);
 
       if (!retentionResponse) {
-        const result = fetchFreshRetentionInfo({ targetId });
+        const result = fetchFreshRetentionInfo({ targetId }).then(r => r.json());
 
         if (result) {
           retentionCache.set(targetId, result);
@@ -57,11 +60,11 @@ export function createUsageRateLimit(config: {
 
       return retentionResponse;
     },
-    async isRateLimited(input: RateLimitApiInput['checkRateLimit']): Promise<boolean> {
+    async isRateLimited(input: CheckRateLimitInput): Promise<boolean> {
       const limitInfo = await cache.get(input.id);
 
       if (!limitInfo) {
-        const result = fetchFreshLimitInfo(input);
+        const result = fetchFreshLimitInfo(input).then(r => r.json());
 
         if (result) {
           cache.set(input.id, result);
