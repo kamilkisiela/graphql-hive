@@ -1,5 +1,5 @@
-import { ReactElement } from 'react';
-import Select, { StylesConfig } from 'react-select';
+import { ComponentPropsWithRef, ReactElement } from 'react';
+import Select, { components, StylesConfig } from 'react-select';
 import { FixedSizeList } from 'react-window';
 import { SelectOption } from './radix-select';
 
@@ -53,6 +53,15 @@ const styles: StylesConfig = {
   }),
 };
 
+// Disable mouse events to improve performance when rendering a lot of elements.
+// It's really really slow without this.
+const Option = ({ children, ...props }: ComponentPropsWithRef<typeof components.Option>) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { onMouseMove, onMouseOver, ...rest } = props.innerProps;
+  const newProps = { ...props, innerProps: rest };
+  return <components.Option {...newProps}>{children}</components.Option>;
+};
+
 export function Autocomplete(props: {
   placeholder: string;
   options: readonly SelectOption[];
@@ -73,7 +82,7 @@ export function Autocomplete(props: {
       isDisabled={props.disabled}
       isLoading={props.loading}
       placeholder={props.placeholder}
-      components={{ MenuList }}
+      components={{ MenuList, Option }}
       className={props.className}
     />
   );
