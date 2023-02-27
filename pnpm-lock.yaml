@@ -759,7 +759,7 @@ importers:
       pg-promise: 11.3.0
       slonik: 30.1.2
       slonik-interceptor-query-logging: 1.4.7
-      slonik-utilities: 2.0.1
+      slonik-utilities: 1.9.4
       tslib: 2.5.0
       typescript: 4.9.5
       zod: 3.20.6
@@ -771,7 +771,7 @@ importers:
       param-case: 3.0.4
       slonik: 30.1.2
       slonik-interceptor-query-logging: 1.4.7_slonik@30.1.2
-      slonik-utilities: 2.0.1_slonik@30.1.2
+      slonik-utilities: 1.9.4_slonik@30.1.2
       zod: 3.20.6
     devDependencies:
       '@sentry/types': 7.38.0
@@ -26542,8 +26542,8 @@ packages:
       slonik: 30.1.2
     dev: false
 
-  /slonik-utilities/2.0.1_slonik@30.1.2:
-    resolution: {integrity: sha512-byf5OAzgWC0hi21jCuOdvxQxIN2oidAOmcDe2dXt0w/rQ/Ox0i0yWG14794PALZYheOwHK83WBE2fgAh6KBV1Q==}
+  /slonik-utilities/1.9.4_slonik@30.1.2:
+    resolution: {integrity: sha512-kKu6y7cobAyoWfwaS6zZF7oqosxQ+iEBpQYD3YFv+B/jd/YM+4XxFidintA3CGnmq3R4EmXnPMsyy8IpKeE/Hg==}
     engines: {node: '>=8.0'}
     peerDependencies:
       slonik: ^28 | ^29
