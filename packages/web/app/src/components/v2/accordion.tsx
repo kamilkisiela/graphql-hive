@@ -20,6 +20,7 @@ function Wrapper({
     <A.Root
       {...(props as any[])}
       type={type as any}
+      collapsible
       defaultValue={defaultValue}
       className="space-y-4 w-full"
     >

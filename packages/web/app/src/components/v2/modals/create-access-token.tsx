@@ -1,10 +1,21 @@
-import { ReactElement } from 'react';
+import { PropsWithoutRef, ReactElement, useState } from 'react';
 import { useFormik } from 'formik';
 import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 import { PermissionsSpace, usePermissionsManager } from '@/components/organization/Permissions';
-import { Accordion, Button, CopyValue, Heading, Input, Modal, Tag } from '@/components/v2';
+import {
+  Accordion,
+  Button,
+  CopyValue,
+  Heading,
+  Input,
+  Modal,
+  RadixSelect,
+  Tabs,
+  Tag,
+} from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
+import { OrganizationAccessScope, ProjectAccessScope, TargetAccessScope } from '@/graphql';
 import { scopes } from '@/lib/access/common';
 import { useRouteSelector } from '@/lib/hooks';
 
@@ -57,7 +68,7 @@ export function CreateAccessTokenModal({
   const organization = organizationQuery.data?.organization?.organization;
 
   return (
-    <Modal open={isOpen} onOpenChange={toggleModalOpen} className="w-[650px]">
+    <Modal open={isOpen} onOpenChange={toggleModalOpen} className="w-[650px] h-5/6 flex">
       {organization ? (
         <ModalContent
           organization={organization}
@@ -81,6 +92,109 @@ const CreateAccessTokenModalContent_OrganizationFragment = graphql(`
   }
 `);
 
+type TokenPreset = {
+  name: string;
+  description: string | ReactElement;
+  permissions: {
+    target: TargetAccessScope[];
+    project: ProjectAccessScope[];
+    organization: OrganizationAccessScope[];
+  };
+};
+
+const TOKEN_SIMPLE_PRESETS: TokenPreset[] = [
+  {
+    name: 'Schema Check & Push',
+    description:
+      'This set of permissions allows the token to check new schemas, push schemas, and report GraphQL operations usage.',
+    permissions: {
+      target: [TargetAccessScope.RegistryWrite],
+      project: [],
+      organization: [],
+    },
+  },
+  {
+    name: 'Schema Check Only',
+    description:
+      'This set of permissions allows the token to check new schemas. You can use this kind of token as part if your continuous integration pipeline.',
+    permissions: {
+      target: [TargetAccessScope.RegistryRead],
+      project: [],
+      organization: [],
+    },
+  },
+  {
+    name: 'GraphQL Operations Reporting',
+    description:
+      'This set of permissions allows the token to check new schemas, push schemas, and report GraphQL operations usage.',
+    permissions: {
+      target: [TargetAccessScope.RegistryWrite],
+      project: [],
+      organization: [],
+    },
+  },
+  {
+    name: 'Full Access',
+    description: 'A token with all permissions. Use with caution.',
+    permissions: {
+      target: [
+        TargetAccessScope.Delete,
+        TargetAccessScope.Read,
+        TargetAccessScope.RegistryRead,
+        TargetAccessScope.RegistryWrite,
+        TargetAccessScope.Settings,
+        TargetAccessScope.TokensRead,
+        TargetAccessScope.TokensWrite,
+      ],
+      project: [
+        ProjectAccessScope.OperationsStoreWrite,
+        ProjectAccessScope.OperationsStoreRead,
+        ProjectAccessScope.Settings,
+        ProjectAccessScope.Alerts,
+        ProjectAccessScope.Delete,
+        ProjectAccessScope.Read,
+      ],
+      organization: [
+        OrganizationAccessScope.Integrations,
+        OrganizationAccessScope.Settings,
+        OrganizationAccessScope.Members,
+        OrganizationAccessScope.Delete,
+        OrganizationAccessScope.Read,
+      ],
+    },
+  },
+];
+
+const TokenPresetSelect = (
+  props: PropsWithoutRef<{
+    onPresetChange: (preset: TokenPreset) => void;
+  }>,
+): ReactElement => {
+  const [selectedPreset, setSelectedPreset] = useState<string | undefined>(undefined);
+  const activePreset = selectedPreset
+    ? TOKEN_SIMPLE_PRESETS.find(v => v.name === selectedPreset)
+    : null;
+
+  return (
+    <div className="mt-3">
+      <RadixSelect
+        placeholder="Select a preset"
+        name="preset-select"
+        position="popper"
+        value={selectedPreset}
+        options={TOKEN_SIMPLE_PRESETS.map(preset => ({ value: preset.name, label: preset.name }))}
+        onChange={value => {
+          setSelectedPreset(value);
+          props.onPresetChange(TOKEN_SIMPLE_PRESETS.find(v => v.name === value)!);
+        }}
+      />
+      {activePreset ? (
+        <p className="mt-4 text-sm text-gray-500">{activePreset.description}</p>
+      ) : null}
+    </div>
+  );
+};
+
 function ModalContent(props: {
   organization: FragmentType<typeof CreateAccessTokenModalContent_OrganizationFragment>;
   organizationId: string;
@@ -98,7 +212,7 @@ function ModalContent(props: {
     useFormik({
       initialValues: { name: '' },
       validationSchema: Yup.object().shape({
-        name: Yup.string().required('Must enter name'),
+        name: Yup.string().required('Must enter description'),
       }),
       async onSubmit(values) {
         await mutate({
@@ -142,14 +256,14 @@ function ModalContent(props: {
           </Button>
         </div>
       ) : (
-        <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
+        <form className="flex flex-col gap-5 grow" onSubmit={handleSubmit}>
           <Heading className="text-center">Create an access token</Heading>
           <p className="text-sm text-gray-500">
             To access GraphQL Hive, your application or tool needs an active API key.
           </p>
 
           <Input
-            placeholder="My token"
+            placeholder="Token description"
             name="name"
             value={values.name}
             onChange={handleChange}
@@ -164,35 +278,57 @@ function ModalContent(props: {
             <div className="text-sm text-red-500">{mutation.data?.createToken.error.message}</div>
           )}
 
-          <p className="text-sm text-gray-500">
-            This will be displayed on the tokens list, we recommend to make it self-explanatory.
-          </p>
-
-          <Heading>Permissions</Heading>
-
-          <Accordion defaultValue="Organization">
-            <PermissionsSpace
-              title="Organization"
-              scopes={scopes.organization}
-              initialScopes={manager.organizationScopes}
-              onChange={manager.setOrganizationScopes}
-              checkAccess={manager.canAccessOrganization}
-            />
-            <PermissionsSpace
-              title="Project"
-              scopes={scopes.project}
-              initialScopes={manager.projectScopes}
-              onChange={manager.setProjectScopes}
-              checkAccess={manager.canAccessProject}
-            />
-            <PermissionsSpace
-              title="Target"
-              scopes={scopes.target}
-              initialScopes={manager.targetScopes}
-              onChange={manager.setTargetScopes}
-              checkAccess={manager.canAccessTarget}
-            />
-          </Accordion>
+          <Tabs
+            className="container flex h-full grow flex-col cursor-pointer"
+            defaultValue="simple"
+          >
+            <Tabs.List>
+              <Tabs.Trigger value="simple" asChild>
+                <div>Simple</div>
+              </Tabs.Trigger>
+              <Tabs.Trigger value="advanced" asChild>
+                <div>Advanced</div>
+              </Tabs.Trigger>
+            </Tabs.List>
+            <Tabs.Content value="simple">
+              <p className="text-sm text-gray-500">
+                With simple mode, you can choose the flow you want to implement and the wizard will
+                help you with the permissions required:
+              </p>
+              <TokenPresetSelect
+                onPresetChange={preset => {
+                  manager.setTargetScopes(preset.permissions.target);
+                  manager.setProjectScopes(preset.permissions.project);
+                  manager.setOrganizationScopes(preset.permissions.organization);
+                }}
+              />
+            </Tabs.Content>
+            <Tabs.Content value="advanced">
+              <Accordion>
+                <PermissionsSpace
+                  title="Organization"
+                  scopes={scopes.organization}
+                  initialScopes={manager.organizationScopes}
+                  onChange={manager.setOrganizationScopes}
+                  checkAccess={manager.canAccessOrganization}
+                />
+                <PermissionsSpace
+                  title="Project"
+                  scopes={scopes.project}
+                  initialScopes={manager.projectScopes}
+                  onChange={manager.setProjectScopes}
+                  checkAccess={manager.canAccessProject}
+                />
+                <PermissionsSpace
+                  title="Target"
+                  scopes={scopes.target}
+                  initialScopes={manager.targetScopes}
+                  onChange={manager.setTargetScopes}
+                  checkAccess={manager.canAccessTarget}
+                />
+              </Accordion>
+            </Tabs.Content>
+          </Tabs>
 
           {mutation.error && <div className="text-sm text-red-500">{mutation.error.message}</div>}
 

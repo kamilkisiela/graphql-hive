@@ -19,6 +19,7 @@ export function RadixSelect<T extends string>({
   value,
   position,
   name,
+  placeholder,
 }: {
   className?: string;
   options: SelectOption[];
@@ -33,7 +34,7 @@ export function RadixSelect<T extends string>({
     <S.Root defaultValue={defaultValue} onValueChange={onChange} value={value} name={name}>
       <S.Trigger asChild aria-label="">
         <RadixButton className={className}>
-          <S.Value />
+          <S.Value placeholder={placeholder} />
           <S.Icon className="ml-2">
             <ChevronDownIcon />
           </S.Icon>
