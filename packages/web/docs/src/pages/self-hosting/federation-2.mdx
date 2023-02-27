@@ -1,0 +1,50 @@
+import { Callout } from '@theguild/components'
+
+# Apollo Federation 2
+
+Due to the restrictive Licens of the Federation 2 libraries, support is not built-in to the Hive
+core.
+
+We provide a
+[Docker image](https://github.com/kamilkisiela/graphql-hive/pkgs/container/graphql-hive%2Fcomposition-federation-2)
+for running external composition service for Apollo Federation v2.
+
+The pre-built image implements the best-practice to secure your endpoint, and uses the latest
+version of Apollo Federation v2.
+
+For self-hosting we recommend adding the external composition federation container configuration to
+your `docker-compose.community.yml`:
+
+```yaml filename="docker-compose.community.yml"
+services:
+  # ... other services
+  composition_federation_2:
+    image: '${DOCKER_REGISTRY}composition-federation-2${DOCKER_TAG}'
+    networks:
+      - 'stack'
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'localhost:3069/_readiness']
+      interval: 5s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
+    ports:
+      - 3069:3069
+    environment:
+      PORT: 3069
+      SECRET: '${EXTERNAL_COMPOSITION_SECRET}'
+```
+
+Make sure to set the `EXTERNAL_COMPOSITION_SECRET` environment variable to a secure value.
+
+```bash filename="Secure external composition secret example"
+export EXTERNAL_COMPOSITION_SECRET=$(openssl rand -hex 16)
+```
+
+After that and restarting your stack, you can use the external composition service by adding it to
+an existing project in the Settings.
+
+Since the Hive server is using the internal docker network, you need to use the service name as the
+hostname `http://composition-federation-2:3069/compose`. Also, make sure to use the correct secret.
+
+![External Composition Federation 2](/docs/pages/self-hosting/federation-2/external-composition-config.png)
