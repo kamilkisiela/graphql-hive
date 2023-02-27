@@ -53,7 +53,8 @@
     {
       "fileMatch": ["deployment/services/**/*.ts"],
       "matchStrings": ["image: '(?<datasource>.*?)/(?<depName>.*?):(?<versioning>.*?)'"],
-      "datasourceTemplate": "docker"
+      "datasourceTemplate": "docker",
+      "currentValueTemplate": "{{{currentValue}}}"
     }
   ]
 }
