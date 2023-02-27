@@ -1,5 +1,6 @@
 import { ComponentPropsWithRef, ReactElement } from 'react';
-import Select, { components, StylesConfig } from 'react-select';
+import Highlighter from 'react-highlight-words';
+import Select, { components, createFilter, Props as SelectProps, StylesConfig } from 'react-select';
 import { FixedSizeList } from 'react-window';
 import { SelectOption } from './radix-select';
 
@@ -62,6 +63,10 @@ const Option = ({ children, ...props }: ComponentPropsWithRef<typeof components.
   return <components.Option {...newProps}>{children}</components.Option>;
 };
 
+const formatOptionLabel: SelectProps<any>['formatOptionLabel'] = ({ label }, { inputValue }) => {
+  return <Highlighter searchWords={[inputValue]} textToHighlight={label} />;
+};
+
 export function Autocomplete(props: {
   placeholder: string;
   options: readonly SelectOption[];
@@ -73,6 +78,13 @@ export function Autocomplete(props: {
 }): ReactElement {
   return (
     <Select
+      filterOption={createFilter({
+        ignoreAccents: false,
+        ignoreCase: true,
+        trim: true,
+        matchFrom: 'any',
+      })}
+      formatOptionLabel={formatOptionLabel}
       options={props.options}
       defaultValue={props.defaultValue}
       styles={styles}
