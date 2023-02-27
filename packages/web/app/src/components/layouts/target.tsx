@@ -167,7 +167,7 @@ export const TargetLayout = <
               {targets && targets.total > 1 && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button size="small" rotate={180}>
+                    <Button size="small">
                       <ArrowDownIcon className="h-5 w-5 text-gray-500" />
                     </Button>
                   </DropdownMenuTrigger>

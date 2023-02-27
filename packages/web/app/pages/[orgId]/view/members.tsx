@@ -191,7 +191,7 @@ const Invitation = (props: {
       </div>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button rotate={90}>
+          <Button>
             <MoreIcon />
           </Button>
         </DropdownMenuTrigger>
@@ -359,7 +359,7 @@ function Page(props: { organization: FragmentType<typeof Page_OrganizationFragme
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button rotate={90} className={isDisabled ? 'invisible' : ''}>
+                <Button className={isDisabled ? 'invisible' : ''}>
                   <MoreIcon />
                 </Button>
               </DropdownMenuTrigger>

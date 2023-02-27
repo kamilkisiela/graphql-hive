@@ -48,11 +48,6 @@
     @apply rounded bg-white/10 py-1 px-2 text-orange-500;
   }
 
-  .hive-button[data-state='open'] svg {
-    transform: rotate(var(--hive-rotate));
-    @apply transition-transform will-change-transform;
-  }
-
   .hive-loading-indicator {
     background: linear-gradient(to right, transparent 0%, #f4b740 50%, transparent 100%);
     animation: 1s ease 0s infinite normal none running loading-indicator;
