@@ -284,7 +284,7 @@ function Page({ versionId }: { versionId: string }) {
             ))}
           </ToggleGroup>
         </div>
-        <div className="grow rounded-md border border-gray-800/50">
+        <div className="grow rounded-md border border-gray-800/50 overflow-y-auto">
           <DiffView versionId={versionId} view={view} />
         </div>
       </div>
