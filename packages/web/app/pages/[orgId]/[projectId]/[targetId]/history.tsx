@@ -44,17 +44,17 @@ const titleMap: Record<CriticalityLevel, string> = {
 };
 
 const criticalityLevelMapping = {
-  [CriticalityLevel.Safe]: 'text-emerald-400',
-  [CriticalityLevel.Dangerous]: 'text-yellow-400',
+  [CriticalityLevel.Safe]: clsx('text-emerald-400'),
+  [CriticalityLevel.Dangerous]: clsx('text-yellow-400'),
 } as Record<CriticalityLevel, string>;
 
-const ChangesBlock = ({
+function ChangesBlock({
   changes,
   criticality,
 }: {
   changes: SchemaChangeFieldsFragment[];
   criticality: CriticalityLevel;
-}): ReactElement | null => {
+}): ReactElement | null {
   const filteredChanges = changes.filter(c => c.criticality === criticality);
 
   if (!filteredChanges.length) {
@@ -75,7 +75,7 @@ const ChangesBlock = ({
       </ul>
     </div>
   );
-};
+}
 
 function DiffView({
   view,
@@ -220,7 +220,7 @@ function ListPage({
           variant="link"
           onClick={() => {
             const id = versions.nodes.at(-1)?.id;
-            if (typeof id == 'string') {
+            if (id) {
               onLoadMore(id);
             }
           }}
@@ -322,7 +322,7 @@ function HistoryPage(): ReactElement {
       <Title title="History" />
       <TargetLayout
         value="history"
-        className={router.versionId ? 'flex h-full items-stretch gap-x-5' : ''}
+        className="flex h-full items-stretch gap-x-5"
         query={TargetHistoryPageQuery}
       >
         {({ target }) => {
