@@ -15,7 +15,7 @@ export function deployDatabaseCleanupJob(options: { deploymentEnv: DeploymentEnv
   const { job } = new ServiceDeployment(
     'db-cleanup',
     {
-      image: 'jbergknoff/postgresql-client',
+      image: 'jbergknoff/postgresql-client:latest',
       env: {
         PG_CONNECTION_STRING: rawConnectionString,
         // to make sure we can run this over and over

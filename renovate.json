@@ -51,10 +51,17 @@
   ],
   "regexManagers": [
     {
-      "fileMatch": ["deployment/services/**/*.ts"],
-      "matchStrings": ["image: '(?<datasource>.*?)/(?<depName>.*?):(?<versioning>.*?)'"],
+      "fileMatch": ["deployment/.*?\\.ts$"],
+      "matchStrings": ["image: (?:'|\")(?<depName>.*?):(?<currentValue>.*?)(?:'|\")"],
       "datasourceTemplate": "docker",
-      "currentValueTemplate": "{{{currentValue}}}"
+      "versioningTemplate": "docker"
+    },
+    {
+      "fileMatch": ["deployment/.*?\\.ts$"],
+      "matchStrings": [
+        "helmChart\\((?:'|\")(?<registryUrl>.*?)(?:'|\"), (?:'|\")(?<depName>.*?)(?:'|\"), (?:'|\")(?<currentValue>.*?)(?:'|\")\\)"
+      ],
+      "datasourceTemplate": "helm"
     }
   ]
 }
