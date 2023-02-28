@@ -1,5 +1,6 @@
 import * as k8s from '@pulumi/kubernetes';
 import { Output } from '@pulumi/pulumi';
+import { helmChart } from './helm';
 
 export class BotKube {
   deploy(config: {
@@ -17,12 +18,8 @@ export class BotKube {
     new k8s.helm.v3.Chart(
       'botkube',
       {
-        chart: 'botkube',
-        version: '0.12.4',
+        ...helmChart('https://infracloudio.github.io/charts', 'botkube', '0.12.4'),
         namespace: ns.metadata.name,
-        fetchOpts: {
-          repo: 'https://infracloudio.github.io/charts',
-        },
         values: {
           communications: {
             slack: {
