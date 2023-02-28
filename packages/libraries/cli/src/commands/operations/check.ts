@@ -35,7 +35,7 @@ export default class OperationsCheck extends Command {
       default: [],
       multiple: true,
     }),
-  } as const;
+  };
 
   static args = [
     {

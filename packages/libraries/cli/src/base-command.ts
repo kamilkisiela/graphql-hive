@@ -5,6 +5,8 @@ import { Command, Errors, Config as OclifConfig } from '@oclif/core';
 import { Config, GetConfigurationValueType, ValidConfigurationKeys } from './helpers/config';
 import { getSdk } from './sdk';
 
+type OmitNever<T> = { [K in keyof T as T[K] extends never ? never : K]: T[K] };
+
 export default abstract class extends Command {
   protected _userConfig: Config;
 
@@ -58,7 +60,7 @@ export default abstract class extends Command {
   >({
     key,
     args,
-    legacyFlagName: legacyKey,
+    legacyFlagName,
     defaultValue,
     message,
     env,
@@ -66,7 +68,15 @@ export default abstract class extends Command {
     args: TArgs;
     key: TKey;
     /** By default we try to match config names with flag names, but for legacy compatibility we need to provide the old flag name. */
-    legacyFlagName?: keyof TArgs;
+    legacyFlagName?: keyof OmitNever<{
+      // Symbol.asyncIterator to discriminate against any lol
+      [TArgKey in keyof TArgs]: typeof Symbol.asyncIterator extends TArgs[TArgKey]
+        ? never
+        : string extends TArgs[TArgKey]
+        ? TArgKey
+        : never;
+    }>;
+
     defaultValue?: TArgs[keyof TArgs] | null;
     message?: string;
     env?: string;
@@ -75,8 +85,8 @@ export default abstract class extends Command {
       return args[key] as NonNullable<GetConfigurationValueType<TKey>>;
     }
 
-    if (legacyKey && args[legacyKey] != null) {
-      return args[legacyKey] as NonNullable<GetConfigurationValueType<TKey>>;
+    if (legacyFlagName && (args as any)[legacyFlagName] != null) {
+      return args[legacyFlagName] as any as NonNullable<GetConfigurationValueType<TKey>>;
     }
 
     // eslint-disable-next-line no-process-env
