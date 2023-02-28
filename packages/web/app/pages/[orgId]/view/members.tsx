@@ -14,7 +14,7 @@ import {
 import { CopyIcon, KeyIcon, MoreIcon, SettingsIcon, TrashIcon } from '@/components/v2/icon';
 import { ChangePermissionsModal, DeleteMembersModal } from '@/components/v2/modals';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { MeDocument, OrganizationFieldsFragment, OrganizationType } from '@/graphql';
+import { MeDocument, OrganizationFieldsFragment } from '@/graphql';
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
 import { useClipboard } from '@/lib/hooks/use-clipboard';
 import { useNotifications } from '@/lib/hooks/use-notifications';
@@ -217,7 +217,6 @@ const Page_OrganizationFragment = graphql(`
       ...ChangePermissionsModal_MemberFragment
     }
     cleanId
-    type
     owner {
       id
     }
@@ -281,21 +280,18 @@ function Page(props: { organization: FragmentType<typeof Page_OrganizationFragme
 
   const [meQuery] = useQuery({ query: MeDocument });
   const router = useRouteSelector();
-
-  const org = organization;
-  const isPersonal = org?.type === OrganizationType.Personal;
-  const members = org?.members.nodes;
+  const members = organization?.members.nodes;
 
   useEffect(() => {
-    if (isPersonal) {
-      void router.replace(`/${router.organizationId}`);
-    } else if (members) {
+    if (members) {
       // uncheck checkboxes when members were deleted
       setChecked(prev => prev.filter(id => members.some(node => node.id === id)));
     }
-  }, [isPersonal, router, members]);
+  }, [router, members]);
 
-  if (!org || isPersonal) return null;
+  if (!organization) {
+    return null;
+  }
 
   const me = meQuery.data?.me;
   const selectedMember = selectedMemberId
@@ -311,7 +307,7 @@ function Page(props: { organization: FragmentType<typeof Page_OrganizationFragme
         <ChangePermissionsModal
           isOpen={isPermissionsModalOpen}
           toggleModalOpen={togglePermissionsModalOpen}
-          organization={org}
+          organization={organization}
           member={selectedMember}
         />
       )}
@@ -321,7 +317,7 @@ function Page(props: { organization: FragmentType<typeof Page_OrganizationFragme
         memberIds={checked}
       />
       <div className="flex items-center justify-between">
-        <MemberInvitationForm organizationCleanId={org.cleanId} />
+        <MemberInvitationForm organizationCleanId={organization.cleanId} />
         <Button
           size="large"
           danger
@@ -336,7 +332,7 @@ function Page(props: { organization: FragmentType<typeof Page_OrganizationFragme
       {members?.map(node => {
         const IconToUse = KeyIcon;
 
-        const isOwner = node.id === org.owner.id;
+        const isOwner = node.id === organization.owner.id;
         const isMe = node.id === me?.id;
         const isDisabled = isOwner || isMe;
 
@@ -386,7 +382,7 @@ function Page(props: { organization: FragmentType<typeof Page_OrganizationFragme
           </Card>
         );
       })}
-      <OrganizationInvitations organization={org} />
+      <OrganizationInvitations organization={organization} />
     </>
   );
 }

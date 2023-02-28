@@ -33,7 +33,6 @@ const TransferOrganizationOwnership_Members = graphql(`
         id
         cleanId
         name
-        type
         members {
           nodes {
             isOwner

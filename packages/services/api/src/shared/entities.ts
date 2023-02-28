@@ -124,11 +124,6 @@ export enum ProjectType {
   SINGLE = 'SINGLE',
 }
 
-export enum OrganizationType {
-  PERSONAL = 'PERSONAL',
-  REGULAR = 'REGULAR',
-}
-
 export interface OrganizationGetStarted {
   id: string;
   creatingProject: boolean;
@@ -143,7 +138,6 @@ export interface Organization {
   id: string;
   cleanId: string;
   name: string;
-  type: OrganizationType;
   billingPlan: string;
   monthlyRateLimit: {
     retentionInDays: number;

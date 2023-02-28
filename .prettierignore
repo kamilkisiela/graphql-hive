@@ -12,6 +12,7 @@ __generated__/
 /packages/web/app/src/gql/**
 /packages/web/app/src/graphql/index.ts
 /packages/web/app/next.config.mjs
+/packages/migrations/test/utils/testkit.ts
 
 # test fixtures
 integration-tests/fixtures/init-invalid-schema.graphql

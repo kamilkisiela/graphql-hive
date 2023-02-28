@@ -109,7 +109,7 @@ export interface Storage {
   getMyOrganization(_: { user: string }): Promise<Organization | null>;
   getOrganizations(_: { user: string }): Promise<readonly Organization[] | never>;
   createOrganization(
-    _: Pick<Organization, 'cleanId' | 'name' | 'type'> & {
+    _: Pick<Organization, 'cleanId' | 'name'> & {
       user: string;
       scopes: ReadonlyArray<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
       reservedNames: string[];

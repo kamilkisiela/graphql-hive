@@ -175,16 +175,10 @@ export default gql`
     organization: Organization!
   }
 
-  enum OrganizationType {
-    PERSONAL
-    REGULAR
-  }
-
   type Organization {
     id: ID!
     cleanId: ID!
     name: String!
-    type: OrganizationType!
     owner: Member!
     me: Member!
     members: MemberConnection!

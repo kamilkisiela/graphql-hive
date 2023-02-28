@@ -8,7 +8,7 @@ import { PlusIcon } from '@/components/v2/icon';
 import { CreateProjectModal } from '@/components/v2/modals';
 import { LAST_VISITED_ORG_KEY } from '@/constants';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { Exact, OrganizationType } from '@/graphql';
+import { Exact } from '@/graphql';
 import {
   canAccessOrganization,
   OrganizationAccessScope,
@@ -26,7 +26,6 @@ enum TabValue {
 
 const OrganizationLayout_OrganizationFragment = graphql(`
   fragment OrganizationLayout_OrganizationFragment on Organization {
-    type
     name
     me {
       ...CanAccessOrganization_MemberFragment
@@ -100,7 +99,6 @@ export function OrganizationLayout<
   }
 
   const me = organization?.me;
-  const isRegularOrg = !organization || organization.type === OrganizationType.Regular;
 
   if (!organization || !me) {
     return null;
@@ -133,7 +131,7 @@ export function OrganizationLayout<
           <Tabs.Trigger value={TabValue.Overview} asChild>
             <NextLink href={`/${orgId}`}>Overview</NextLink>
           </Tabs.Trigger>
-          {isRegularOrg && canAccessOrganization(OrganizationAccessScope.Members, me) && (
+          {canAccessOrganization(OrganizationAccessScope.Members, me) && (
             <Tabs.Trigger value={TabValue.Members} asChild>
               <NextLink href={`/${orgId}/view/${TabValue.Members}`}>Members</NextLink>
             </Tabs.Trigger>

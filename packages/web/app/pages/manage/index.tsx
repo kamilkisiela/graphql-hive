@@ -18,11 +18,6 @@ const dateRangeOptions = DATE_RANGE_OPTIONS.filter(isNotAllOption);
 type FilterKey = keyof Filters;
 
 const CHECKBOXES: { value: FilterKey; label: string; tooltip?: string }[] = [
-  {
-    value: 'only-regular',
-    label: 'Only Regular',
-    tooltip: 'Do not count personal organizations, created automatically for every user',
-  },
   { value: 'with-projects', label: 'With Projects' },
   { value: 'with-targets', label: 'With Targets' },
   { value: 'with-schema-pushes', label: 'With Schema Pushes' },
@@ -38,7 +33,6 @@ function Manage() {
       const newFilters: {
         [key in FilterKey]: boolean;
       } = {
-        'only-regular': false,
         'with-collected': false,
         'with-schema-pushes': false,
         'with-persisted': false,

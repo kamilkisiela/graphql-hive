@@ -18,7 +18,6 @@ import type {
   OrganizationAccessScope,
   OrganizationBilling,
   OrganizationInvitation,
-  OrganizationType,
   PersistedOperation,
   Project,
   ProjectAccessScope,
@@ -167,7 +166,6 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         operations: parseInt(organization.limit_operations_monthly),
       },
       billingPlan: organization.plan_name,
-      type: (organization.type === 'PERSONAL' ? 'PERSONAL' : 'REGULAR') as OrganizationType,
       getStarted: {
         id: organization.id,
         creatingProject: organization.get_started_creating_project,
@@ -488,7 +486,6 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         name,
         user,
         cleanId,
-        type,
         scopes,
         reservedNames,
       }: Parameters<Storage['createOrganization']>[0] & {
@@ -520,9 +517,9 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       const org = await connection.one<Slonik<organizations>>(
         sql`
           INSERT INTO public.organizations
-            ("name", "clean_id", "type", "user_id")
+            ("name", "clean_id", "user_id")
           VALUES
-            (${name}, ${availableCleanId}, ${type}, ${user})
+            (${name}, ${availableCleanId}, ${user})
           RETURNING *
         `,
       );

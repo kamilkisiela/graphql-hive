@@ -38,7 +38,6 @@ const ProjectCard_ProjectFragment = graphql(`
   fragment ProjectCard_ProjectFragment on Project {
     cleanId
     id
-    type
     name
   }
 `);
@@ -83,7 +82,6 @@ const ProjectCard = (props: {
     >
       <div className="flex items-start gap-x-2">
         <div className="grow">
-          <h3 className="text-xs font-medium text-[#34EAB9]">{project.type}</h3>
           <h4 className="line-clamp-2 text-lg font-bold">{project.name}</h4>
         </div>
 

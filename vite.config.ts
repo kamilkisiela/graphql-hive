@@ -8,7 +8,7 @@ export default defineConfig({
       '@hive/service-common': 'packages/services/service-common/src/index.ts',
       '@graphql-hive/core': 'packages/libraries/core/src/index.ts',
     },
-    exclude: [...defaultExclude, 'integration-tests'],
+    exclude: [...defaultExclude, 'integration-tests', 'packages/migrations/test'],
     setupFiles: ['./serializer.ts'],
   },
 });
