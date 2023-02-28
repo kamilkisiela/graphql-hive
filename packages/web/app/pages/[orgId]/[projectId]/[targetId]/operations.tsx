@@ -119,6 +119,7 @@ const TargetOperationsPageQuery = graphql(`
     hasCollectedOperations(
       selector: { organization: $organizationId, project: $projectId, target: $targetId }
     )
+    ...TargetLayout_IsCDNEnabledFragment
   }
 `);
 

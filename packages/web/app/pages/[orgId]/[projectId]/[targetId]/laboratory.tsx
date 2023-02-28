@@ -48,6 +48,7 @@ const TargetLaboratoryPageQuery = graphql(`
     target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
       id
     }
+    ...TargetLayout_IsCDNEnabledFragment
   }
 `);
 
