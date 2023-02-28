@@ -551,12 +551,14 @@ importers:
       '@whatwg-node/fetch': ^0.8.0
       '@whatwg-node/server': ^0.7.0
       graphql: ^16.6.0
+      lru-cache: ^7.17.0
       zod: 3.20.6
     dependencies:
       '@apollo/composition': 2.2.2_graphql@16.6.0
       '@whatwg-node/fetch': 0.8.1
       '@whatwg-node/server': 0.7.1
       graphql: 16.6.0
+      lru-cache: 7.17.0
       zod: 3.20.6
     devDependencies:
       '@graphql-hive/external-composition': link:../../../libraries/external-composition
