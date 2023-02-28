@@ -741,6 +741,7 @@ const TargetSettingsPageQuery = graphql(`
       id
       ...TargetSettingsPage_TargetFragment
     }
+    ...TargetLayout_IsCDNEnabledFragment
   }
 `);
 

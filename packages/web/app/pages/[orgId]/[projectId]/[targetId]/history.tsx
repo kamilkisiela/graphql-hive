@@ -311,6 +311,7 @@ const TargetHistoryPageQuery = graphql(`
         id
       }
     }
+    ...TargetLayout_IsCDNEnabledFragment
   }
 `);
 

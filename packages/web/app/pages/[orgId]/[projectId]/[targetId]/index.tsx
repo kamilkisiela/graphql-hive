@@ -230,6 +230,7 @@ const TargetSchemaPageQuery = graphql(`
     target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
       ...SchemaView_TargetFragment
     }
+    ...TargetLayout_IsCDNEnabledFragment
   }
 `);
 

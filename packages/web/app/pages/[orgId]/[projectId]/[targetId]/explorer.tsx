@@ -136,6 +136,7 @@ const TargetExplorerPageQuery = graphql(`
     target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
       cleanId
     }
+    ...TargetLayout_IsCDNEnabledFragment
   }
 `);
 
