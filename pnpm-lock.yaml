@@ -1092,7 +1092,7 @@ importers:
       use-debounce: 9.0.3
       valtio: 1.10.3
       wonka: 6.2.3
-      yup: 1.0.1
+      yup: 1.0.2
       zod: 3.20.6
     dependencies:
       '@graphiql/toolkit': 0.8.0_graphql@16.6.0
@@ -1164,7 +1164,7 @@ importers:
       use-debounce: 9.0.3_react@18.2.0
       valtio: 1.10.3_react@18.2.0
       wonka: 6.2.3
-      yup: 1.0.1
+      yup: 1.0.2
       zod: 3.20.6
     devDependencies:
       '@graphql-codegen/gql-tag-operations-preset': 2.1.0_graphql@16.6.0
@@ -29623,8 +29623,8 @@ packages:
       wrap-ansi: 2.1.0
     dev: true
 
-  /yup/1.0.1:
-    resolution: {integrity: sha512-nZPCUOowoJYjNUxajzFQvfZv+z68Bv9u+2Tv5Ay5oXmn9jahfbd0JPaQ7zD/421ihvYqwMJc73fgdY8gyPKBhg==}
+  /yup/1.0.2:
+    resolution: {integrity: sha512-Lpi8nITFKjWtCoK3yQP8MUk78LJmHWqbFd0OOMXTar+yjejlQ4OIIoZgnTW1bnEUKDw6dZBcy3/IdXnt2KDUow==}
     dependencies:
       property-expr: 2.0.5
       tiny-case: 1.0.3
