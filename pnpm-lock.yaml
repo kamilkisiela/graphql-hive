@@ -65,7 +65,7 @@ importers:
       eslint-plugin-cypress: 2.12.1
       eslint-plugin-hive: file:./rules
       eslint-plugin-tailwindcss: 3.10.0
-      glob: 8.1.0
+      glob: 9.0.1
       graphql: 16.6.0
       husky: 8.0.3
       jest-snapshot-serializer-raw: 1.2.0
@@ -106,7 +106,7 @@ importers:
       eslint-plugin-cypress: 2.12.1_eslint@8.35.0
       eslint-plugin-hive: file:rules
       eslint-plugin-tailwindcss: 3.10.0
-      glob: 8.1.0
+      glob: 9.0.1
       graphql: 16.6.0
       husky: 8.0.3
       jest-snapshot-serializer-raw: 1.2.0
@@ -14450,7 +14450,7 @@ packages:
       fs-minipass: 3.0.0
       glob: 8.1.0
       lru-cache: 7.17.0
-      minipass: 4.0.0
+      minipass: 4.2.4
       minipass-collect: 1.0.2
       minipass-flush: 1.0.5
       minipass-pipeline: 1.2.4
@@ -18351,7 +18351,7 @@ packages:
     resolution: {integrity: sha512-EUojgQaSPy6sxcqcZgQv6TVF6jiKvurji3AxhAivs/Ep4O1UpS8TusaxpybfFHZ2skRhLqzk6WR8nqNYIMMDeA==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
     dependencies:
-      minipass: 4.0.0
+      minipass: 4.2.4
     dev: false
 
   /fs-monkey/1.0.3:
@@ -18646,6 +18646,16 @@ packages:
       inherits: 2.0.4
       minimatch: 5.1.0
       once: 1.4.0
+
+  /glob/9.0.1:
+    resolution: {integrity: sha512-psRdn8MI0gRcH0xow0VOhYxXD/6ZaRGmgtfN0oWN/hCgjxpRQBMCl7wE4JRJSAUTdJsW+FmD0EtE0CgJhKqSVw==}
+    engines: {node: '>=16 || 14 >=14.17'}
+    dependencies:
+      fs.realpath: 1.0.0
+      minimatch: 7.3.0
+      minipass: 4.2.4
+      path-scurry: 1.5.0
+    dev: true
 
   /global-dirs/3.0.1:
     resolution: {integrity: sha512-NBcGGFbBA9s1VzD41QXDG+3++t9Mn5t1FpLdhESY6oKY4gYTFpX4wO3sqGUa0Srjtbfj3szX0RnemmrVRUdULA==}
@@ -21308,7 +21318,7 @@ packages:
       https-proxy-agent: 5.0.1
       is-lambda: 1.0.1
       lru-cache: 7.17.0
-      minipass: 4.0.0
+      minipass: 4.2.4
       minipass-collect: 1.0.2
       minipass-fetch: 3.0.1
       minipass-flush: 1.0.5
@@ -22162,6 +22172,13 @@ packages:
     dependencies:
       brace-expansion: 2.0.1
 
+  /minimatch/7.3.0:
+    resolution: {integrity: sha512-WaMDuhKa7a6zKiwplR1AOz+zGvJba24k5VU1Cy6NhEguavT2YRlHxuINUgTas4wiS6fwBpYq4TcA1XIECSntyw==}
+    engines: {node: '>=10'}
+    dependencies:
+      brace-expansion: 2.0.1
+    dev: true
+
   /minimist-options/4.1.0:
     resolution: {integrity: sha512-Q4r8ghd80yhO/0j1O3B2BjweX3fiHg9cdOwjJd2J76Q135c+NDxGCqdYKQ1SKBuFfgWbAUzBfvYjPUEeNgqN1A==}
     engines: {node: '>= 6'}
@@ -22206,7 +22223,7 @@ packages:
     resolution: {integrity: sha512-t9/wowtf7DYkwz8cfMSt0rMwiyNIBXf5CKZ3S5ZMqRqMYT0oLTp0x1WorMI9WTwvaPg21r1JbFxJMum8JrLGfw==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
     dependencies:
-      minipass: 4.0.0
+      minipass: 4.2.4
       minipass-sized: 1.0.3
       minizlib: 2.1.2
     optionalDependencies:
@@ -22244,11 +22261,9 @@ packages:
     dependencies:
       yallist: 4.0.0
 
-  /minipass/4.0.0:
-    resolution: {integrity: sha512-g2Uuh2jEKoht+zvO6vJqXmYpflPqzRBT+Th2h01DKh5z7wbY/AZ2gCQ78cP70YoHPyFdY30YBV5WxgLOEwOykw==}
+  /minipass/4.2.4:
+    resolution: {integrity: sha512-lwycX3cBMTvcejsHITUgYj6Gy6A7Nh4Q6h9NP4sTHY1ccJlC7yKzDmiShEHsJ16Jf1nKGDEaiHxiltsJEvk0nQ==}
     engines: {node: '>=8'}
-    dependencies:
-      yallist: 4.0.0
 
   /minizlib/2.1.2:
     resolution: {integrity: sha512-bAxsR8BVfj60DWXHE3u30oHzfl4G7khkSuPW+qvpd7jFRHm7dLxOjUk1EHACJ/hxLY8phGJ0YhYHZo7jil7Qdg==}
@@ -23873,6 +23888,14 @@ packages:
     engines: {node: '>=0.10.0'}
     dependencies:
       path-root-regex: 0.1.2
+    dev: true
+
+  /path-scurry/1.5.0:
+    resolution: {integrity: sha512-hJ8rODLI9B2qwsYAd32rrI76gwVUPeu5kq/do6URDj2bJCVH3ilyT978Mv/NLuFMaqzHrn3XtiDLMZHaTTh4vA==}
+    engines: {node: '>=14'}
+    dependencies:
+      lru-cache: 7.17.0
+      minipass: 4.2.4
     dev: true
 
   /path-to-regexp/0.1.7:
@@ -26850,7 +26873,7 @@ packages:
     resolution: {integrity: sha512-WVy6di9DlPOeBWEjMScpNipeSX2jIZBGEn5Uuo8Q7aIuFEuDX0pw8RxcOjlD1TWP4obi24ki7m/13+nFpcbXrw==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
     dependencies:
-      minipass: 4.0.0
+      minipass: 4.2.4
     dev: false
 
   /ssri/8.0.1:
@@ -27504,7 +27527,7 @@ packages:
     dependencies:
       chownr: 2.0.0
       fs-minipass: 2.1.0
-      minipass: 4.0.0
+      minipass: 4.2.4
       minizlib: 2.1.2
       mkdirp: 1.0.4
       yallist: 4.0.0
