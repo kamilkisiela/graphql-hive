@@ -62,7 +62,7 @@ export function ProjectLayout<
 }: {
   children(props: {
     project: Exclude<TSatisfiesType['project'], null | undefined>;
-    organization: Exclude<TSatisfiesType['organization'], null | undefined>['organization'];
+    organization: Exclude<TSatisfiesType['organization'], null | undefined>;
   }): ReactNode;
   value: 'targets' | 'alerts' | 'settings';
   className?: string;
@@ -210,7 +210,7 @@ export function ProjectLayout<
             organization: projectQuery.data?.organization as Exclude<
               TSatisfiesType['organization'],
               null | undefined
-            >['organization'],
+            >,
           })}
         </Tabs.Content>
       </Tabs>

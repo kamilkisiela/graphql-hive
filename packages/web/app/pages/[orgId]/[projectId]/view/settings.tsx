@@ -310,7 +310,7 @@ function SettingsPage(): ReactElement {
         className="flex flex-col gap-y-10"
         query={ProjectSettingsPageQuery}
       >
-        {props => <Page {...props} />}
+        {props => <Page organization={props.organization.organization} project={props.project} />}
       </ProjectLayout>
     </>
   );

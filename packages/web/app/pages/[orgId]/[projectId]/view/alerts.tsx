@@ -220,7 +220,7 @@ function AlertsPage(): ReactElement {
         className="flex flex-col gap-y-10"
         query={ProjectAlertsPageQuery}
       >
-        {props => <Page organization={props.organization} project={props.project} />}
+        {props => <Page organization={props.organization.organization} project={props.project} />}
       </ProjectLayout>
     </>
   );
