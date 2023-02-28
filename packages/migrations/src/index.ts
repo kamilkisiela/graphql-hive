@@ -3,7 +3,7 @@ import path from 'node:path';
 import url from 'node:url';
 import { createPool } from 'slonik';
 import { SlonikMigrator } from '@slonik/migrator';
-import { migrateClickHouse } from './clickhouse';
+// import { migrateClickHouse } from './clickhouse';
 import { env } from './environment';
 
 export function createConnectionString(config: {
@@ -44,9 +44,9 @@ if (env.isMigrator && !isCreateCommand && !isDownCommand) {
 
   try {
     await migrator.up();
-    if (env.clickhouse) {
-      await migrateClickHouse(env.isClickHouseMigrator, env.clickhouse);
-    }
+    // if (env.clickhouse) {
+    //   await migrateClickHouse(env.isClickHouseMigrator, env.clickhouse);
+    // }
     process.exit(0);
   } catch (error) {
     console.error(error);
