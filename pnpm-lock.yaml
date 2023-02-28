@@ -398,7 +398,7 @@ importers:
       object-hash: 3.0.0
       param-case: 3.0.4
       prom-client: 14.1.1
-      supertokens-node: 13.1.1
+      supertokens-node: 13.1.2
       tslib: 2.5.0
       zod: 3.20.6
     dependencies:
@@ -429,7 +429,7 @@ importers:
       object-hash: 3.0.0
       param-case: 3.0.4
       prom-client: 14.1.1
-      supertokens-node: 13.1.1
+      supertokens-node: 13.1.2
       zod: 3.20.6
     devDependencies:
       '@graphql-hive/core': link:../../libraries/core
@@ -1083,7 +1083,7 @@ importers:
       storybook: ^7.0.0-beta.54
       supertokens-auth-react: 0.31.1
       supertokens-js-override: 0.0.4
-      supertokens-node: 13.1.1
+      supertokens-node: 13.1.2
       supertokens-web-js: 0.5.0
       tailwindcss: 3.2.7
       tailwindcss-radix: 2.8.0
@@ -1157,7 +1157,7 @@ importers:
       snarkdown: 2.0.0
       supertokens-auth-react: 0.31.1_zh4rdguscatxykxktv3lwuw3je
       supertokens-js-override: 0.0.4
-      supertokens-node: 13.1.1
+      supertokens-node: 13.1.2
       supertokens-web-js: 0.5.0
       tslib: 2.5.0
       urql: 3.0.3_onqnqwb3ubg5opvemcqf7c2qhy
@@ -27237,8 +27237,8 @@ packages:
     resolution: {integrity: sha512-r0JFBjkMIdep3Lbk3JA+MpnpuOtw4RSyrlRAbrzMcxwiYco3GFWl/daimQZ5b1forOiUODpOlXbSOljP/oyurg==}
     dev: false
 
-  /supertokens-node/13.1.1:
-    resolution: {integrity: sha512-wwXY6kvyjlujoCXgcuCyJEP6fTMGm/AMAYyOJK/hHF1e5ywSe/qPZNLZ4xmrtL9mShbIxDAaZqzyWMaTRLl19w==}
+  /supertokens-node/13.1.2:
+    resolution: {integrity: sha512-GPq/So8fznl+EIugOS4qGp89ugfQL5ZqwmB+KjzC49TCooqmcQh5L8uPCw2svnqIMIh5R2so100RtuGhGrTalg==}
     dependencies:
       axios: 0.21.4_debug@4.3.4
       body-parser: 1.20.1
