@@ -11,11 +11,27 @@ export default class SchemaCheck extends Command {
     service: Flags.string({
       description: 'service name (only for distributed schemas)',
     }),
+    'registry.endpoint': Flags.string({
+      description: 'registry endpoint',
+    }),
+    /** @deprecated */
     registry: Flags.string({
       description: 'registry address',
+      deprecated: {
+        message: 'use --registry.endpoint instead',
+        version: '0.21.0',
+      },
     }),
+    'registry.accessToken': Flags.string({
+      description: 'registry access token',
+    }),
+    /** @deprecated */
     token: Flags.string({
       description: 'api token',
+      deprecated: {
+        message: 'use --registry.accessToken instead',
+        version: '0.21.0',
+      },
     }),
     forceSafe: Flags.boolean({
       description: 'mark the check as safe, breaking changes are expected',
@@ -47,18 +63,18 @@ export default class SchemaCheck extends Command {
 
       await this.require(flags);
 
-      const service = this.maybe('service', flags);
-      const forceSafe = this.maybe('forceSafe', flags);
-      const usesGitHubApp = this.maybe('github', flags) === true;
-      const registry = this.ensure({
-        key: 'registry',
+      const service = flags.service;
+      const forceSafe = flags.forceSafe;
+      const usesGitHubApp = flags.github === true;
+      const endpoint = this.ensure({
+        key: 'registry.endpoint',
         args: flags,
         defaultValue: graphqlEndpoint,
         env: 'HIVE_REGISTRY',
       });
       const file = args.file;
-      const token = this.ensure({
-        key: 'token',
+      const accessToken = this.ensure({
+        key: 'registry.accessToken',
         args: flags,
         env: 'HIVE_TOKEN',
       });
@@ -77,7 +93,7 @@ export default class SchemaCheck extends Command {
         );
       }
 
-      const result = await this.registryApi(registry, token).schemaCheck({
+      const result = await this.registryApi(endpoint, accessToken).schemaCheck({
         input: {
           service,
           sdl: minifySchema(sdl),

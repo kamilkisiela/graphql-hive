@@ -8,18 +8,34 @@ import { loadOperations } from '../../helpers/operations';
 export default class OperationsCheck extends Command {
   static description = 'checks operations against a published schema';
   static flags = {
+    'registry.endpoint': Flags.string({
+      description: 'registry endpoint',
+    }),
+    /** @deprecated */
     registry: Flags.string({
       description: 'registry address',
+      deprecated: {
+        message: 'use --registry.endpoint instead',
+        version: '0.21.0',
+      },
     }),
+    'registry.accessToken': Flags.string({
+      description: 'registry access token',
+    }),
+    /** @deprecated */
     token: Flags.string({
       description: 'api token',
+      deprecated: {
+        message: 'use --registry.accessToken instead',
+        version: '0.21.0',
+      },
     }),
     require: Flags.string({
       description: 'Loads specific require.extensions before running the command',
       default: [],
       multiple: true,
     }),
-  };
+  } as const;
 
   static args = [
     {
@@ -36,18 +52,20 @@ export default class OperationsCheck extends Command {
 
       await this.require(flags);
 
-      const registry = this.ensure({
-        key: 'registry',
+      const endpoint = this.ensure({
+        key: 'registry.endpoint',
         args: flags,
+        legacyFlagName: 'registry',
         defaultValue: graphqlEndpoint,
         env: 'HIVE_REGISTRY',
       });
-      const file: string = args.file;
-      const token = this.ensure({
-        key: 'token',
+      const accessToken = this.ensure({
+        key: 'registry.accessToken',
         args: flags,
+        legacyFlagName: 'token',
         env: 'HIVE_TOKEN',
       });
+      const file: string = args.file;
 
       const operations = await loadOperations(file, {
         normalize: false,
@@ -59,7 +77,7 @@ export default class OperationsCheck extends Command {
         return;
       }
 
-      const result = await this.registryApi(registry, token).fetchLatestVersion();
+      const result = await this.registryApi(endpoint, accessToken).fetchLatestVersion();
 
       const sdl = result.latestVersion?.sdl;
 

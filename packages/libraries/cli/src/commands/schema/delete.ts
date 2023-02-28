@@ -6,11 +6,27 @@ import { renderErrors } from '../../helpers/schema';
 export default class SchemaDelete extends Command {
   static description = 'deletes a schema';
   static flags = {
-    registry: Flags.string({
-      description: 'Address of the registry',
+    'registry.endpoint': Flags.string({
+      description: 'registry endpoint',
     }),
+    /** @deprecated */
+    registry: Flags.string({
+      description: 'registry address',
+      deprecated: {
+        message: 'use --registry.accessToken instead',
+        version: '0.21.0',
+      },
+    }),
+    'registry.accessToken': Flags.string({
+      description: 'registry access token',
+    }),
+    /** @deprecated */
     token: Flags.string({
-      description: 'API token',
+      description: 'api token',
+      deprecated: {
+        message: 'use --registry.accessToken instead',
+        version: '0.21.0',
+      },
     }),
     dryRun: Flags.boolean({
       description: 'Does not delete the service, only reports what it would have done.',
@@ -48,19 +64,21 @@ export default class SchemaDelete extends Command {
         }
       }
 
-      const registry = this.ensure({
-        key: 'registry',
+      const endpoint = this.ensure({
+        key: 'registry.endpoint',
         args: flags,
+        legacyFlagName: flags.registry,
         defaultValue: graphqlEndpoint,
         env: 'HIVE_REGISTRY',
       });
-      const token = this.ensure({
-        key: 'token',
+      const accessToken = this.ensure({
+        key: 'registry.accessToken',
         args: flags,
+        legacyFlagName: flags.token,
         env: 'HIVE_TOKEN',
       });
 
-      const result = await this.registryApi(registry, token).schemaDelete({
+      const result = await this.registryApi(endpoint, accessToken).schemaDelete({
         input: {
           serviceName: service,
           dryRun: flags.dryRun,

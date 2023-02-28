@@ -65,7 +65,8 @@
     "mkdirp": "2.1.6",
     "rimraf": "4.4.1",
     "ts-node": "10.9.1",
-    "tslib": "2.5.0"
+    "tslib": "2.5.0",
+    "zod": "3.21.4"
   },
   "devDependencies": {
     "@graphql-codegen/typescript-graphql-request": "4.5.9",

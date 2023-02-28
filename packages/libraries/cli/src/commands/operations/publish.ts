@@ -6,11 +6,27 @@ import { loadOperations } from '../../helpers/operations';
 export default class OperationsPublish extends Command {
   static description = 'saves operations to the store';
   static flags = {
+    'registry.endpoint': Flags.string({
+      description: 'registry endpoint',
+    }),
+    /** @deprecated */
     registry: Flags.string({
       description: 'registry address',
+      deprecated: {
+        message: 'use --registry.endpoint instead',
+        version: '0.21.0',
+      },
     }),
+    'registry.accessToken': Flags.string({
+      description: 'registry access token',
+    }),
+    /** @deprecated */
     token: Flags.string({
       description: 'api token',
+      deprecated: {
+        message: 'use --registry.accessToken instead',
+        version: '0.21.0',
+      },
     }),
     require: Flags.string({
       description:
@@ -35,18 +51,20 @@ export default class OperationsPublish extends Command {
 
       await this.require(flags);
 
-      const registry = this.ensure({
-        key: 'registry',
+      const endpoint = this.ensure({
+        key: 'registry.endpoint',
         args: flags,
+        legacyFlagName: flags.registry,
         defaultValue: graphqlEndpoint,
         env: 'HIVE_REGISTRY',
       });
-      const file: string = args.file;
-      const token = this.ensure({
-        key: 'token',
+      const accessToken = this.ensure({
+        key: 'registry.accessToken',
         args: flags,
+        legacyFlagName: flags.token,
         env: 'HIVE_TOKEN',
       });
+      const file: string = args.file;
 
       let operations = await loadOperations(file, {
         normalize: true,
@@ -55,11 +73,12 @@ export default class OperationsPublish extends Command {
       const noMissingHashes = operations.some(op => op.operationHash);
 
       if (noMissingHashes) {
-        const comparisonResult = await this.registryApi(registry, token).comparePersistedOperations(
-          {
-            hashes: operations.map(op => op.operationHash!),
-          },
-        );
+        const comparisonResult = await this.registryApi(
+          endpoint,
+          accessToken,
+        ).comparePersistedOperations({
+          hashes: operations.map(op => op.operationHash!),
+        });
 
         const operationsToPublish = comparisonResult.comparePersistedOperations;
 
@@ -80,7 +99,7 @@ export default class OperationsPublish extends Command {
         );
       }
 
-      const result = await this.registryApi(registry, token).publishPersistedOperations({
+      const result = await this.registryApi(endpoint, accessToken).publishPersistedOperations({
         input: operations,
       });
 
