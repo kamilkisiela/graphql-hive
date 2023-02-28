@@ -21,7 +21,7 @@ import { graphql } from '@/gql';
 import { CompareDocument, VersionsDocument } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { withSessionProtection } from '@/lib/supertokens/guard';
-import { CrossCircledIcon, RowsIcon } from '@radix-ui/react-icons';
+import { CrossCircledIcon, ExternalLinkIcon, RowsIcon } from '@radix-ui/react-icons';
 
 function DiffView({
   view,
@@ -94,11 +94,13 @@ function DiffView({
 // URQL's Infinite scrolling pattern
 // https://formidable.com/open-source/urql/docs/basics/ui-patterns/#infinite-scrolling
 function ListPage({
+  gitRepository,
   variables,
   isLastPage,
   onLoadMore,
   versionId,
 }: {
+  gitRepository?: string;
   variables: { after: string; limit: number };
   isLastPage: boolean;
   onLoadMore: (after: string) => void;
@@ -125,36 +127,51 @@ function ListPage({
   return (
     <>
       {versions?.nodes.map(version => (
-        <NextLink
-          key={version.id}
-          href={`/${router.organizationId}/${router.projectId}/${router.targetId}/history/${version.id}`}
-          scroll={false} // disable the scroll to top on page
+        <div
           className={clsx(
             'flex flex-col rounded-md p-2.5 hover:bg-gray-800/40',
             versionId === version.id && 'bg-gray-800/40',
           )}
         >
-          <h3 className="truncate font-bold">
-            {'commit' in version.log ? version.log.commit : `Deleted ${version.log.deletedService}`}
-          </h3>
-          {'author' in version.log ? (
-            <div className="truncate text-xs font-medium text-gray-500">
-              <span className="overflow-hidden truncate">{version.log.author}</span>
-            </div>
-          ) : null}
-          <div className="mt-2.5 mb-1.5 flex align-middle text-xs font-medium text-[#c4c4c4]">
-            <div className={clsx('w-1/2 ', !version.valid && 'text-red-500')}>
-              <Badge color={version.valid ? 'green' : 'red'} /> Published{' '}
-              <TimeAgo date={version.date} />
-            </div>
-
-            {'service' in version.log && version.log.service ? (
-              <div className="ml-auto mr-0 w-1/2 overflow-hidden text-ellipsis whitespace-nowrap text-right font-bold">
-                {version.log.service}
+          <NextLink
+            key={version.id}
+            href={`/${router.organizationId}/${router.projectId}/${router.targetId}/history/${version.id}`}
+            scroll={false} // disable the scroll to top on page
+          >
+            <h3 className="truncate font-bold">
+              {'commit' in version.log
+                ? version.log.commit
+                : `Deleted ${version.log.deletedService}`}
+            </h3>
+            {'author' in version.log ? (
+              <div className="truncate text-xs font-medium text-gray-500">
+                <span className="overflow-hidden truncate">{version.log.author}</span>
               </div>
             ) : null}
-          </div>
-        </NextLink>
+            <div className="mt-2.5 mb-1.5 flex align-middle text-xs font-medium text-[#c4c4c4]">
+              <div className={clsx('w-1/2 ', !version.valid && 'text-red-500')}>
+                <Badge color={version.valid ? 'green' : 'red'} /> Published{' '}
+                <TimeAgo date={version.date} />
+              </div>
+
+              {'service' in version.log && version.log.service ? (
+                <div className="ml-auto mr-0 w-1/2 overflow-hidden text-ellipsis whitespace-nowrap text-right font-bold">
+                  {version.log.service}
+                </div>
+              ) : null}
+            </div>
+          </NextLink>
+          {gitRepository && 'commit' in version.log && version.log.commit ? (
+            <a
+              className="text-xs font-medium text-gray-500 hover:text-gray-400"
+              target="_blank"
+              rel="noreferrer"
+              href={`https://github.com/${gitRepository}/commit/${version.log.commit}`}
+            >
+              <ExternalLinkIcon className="inline" /> associated with Git commit
+            </a>
+          ) : null}
+        </div>
       ))}
       {isLastPage && hasMore && (
         <Button
@@ -175,7 +192,7 @@ function ListPage({
 
 type View = 'SDL' | 'list';
 
-function Page({ versionId }: { versionId: string }) {
+function Page({ versionId, gitRepository }: { versionId: string; gitRepository?: string }) {
   const [pageVariables, setPageVariables] = useState([{ limit: 10, after: '' }]);
 
   const [view, setView] = useState<View>('list');
@@ -190,6 +207,7 @@ function Page({ versionId }: { versionId: string }) {
         <div className="flex h-0 min-w-[420px] grow flex-col gap-2.5 overflow-y-auto rounded-md border border-gray-800/50 p-2.5">
           {pageVariables.map((variables, i) => (
             <ListPage
+              gitRepository={gitRepository}
               key={variables.after}
               variables={variables}
               isLastPage={i === pageVariables.length - 1}
@@ -242,6 +260,7 @@ const TargetHistoryPageQuery = graphql(`
     }
     project(selector: { organization: $organizationId, project: $projectId }) {
       ...TargetLayout_ProjectFragment
+      gitRepository
     }
     targets(selector: { organization: $organizationId, project: $projectId }) {
       ...TargetLayout_TargetConnectionFragment
@@ -267,9 +286,13 @@ function HistoryPage(): ReactElement {
         className="flex h-full items-stretch gap-x-5"
         query={TargetHistoryPageQuery}
       >
-        {({ target }) => {
+        {({ target, project }) => {
           const versionId = router.versionId ?? target?.latestSchemaVersion?.id;
-          return versionId ? <Page versionId={versionId} /> : noSchemaVersion;
+          return versionId ? (
+            <Page gitRepository={project?.gitRepository ?? undefined} versionId={versionId} />
+          ) : (
+            noSchemaVersion
+          );
         }}
       </TargetLayout>
     </>

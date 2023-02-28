@@ -4,7 +4,17 @@ import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 import { authenticated } from '@/components/authenticated-container';
 import { OrganizationLayout } from '@/components/layouts';
-import { Avatar, Button, Card, Checkbox, Input, Title } from '@/components/v2';
+import {
+  Avatar,
+  Button,
+  Card,
+  Checkbox,
+  DocsLink,
+  DocsNote,
+  Heading,
+  Input,
+  Title,
+} from '@/components/v2';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -256,7 +266,7 @@ const OrganizationInvitations = (props: {
 
   return org.invitations.nodes.length ? (
     <div className="pt-3">
-      <div className="border-t-4 border-solid pb-6" />
+      <Heading className="mb-2">Pending Invitations</Heading>
       {org.invitations.nodes.map(node => (
         <Invitation key={node.id} invitation={node} organizationCleanId={org.cleanId} />
       ))}
@@ -300,9 +310,12 @@ function Page(props: { organization: FragmentType<typeof Page_OrganizationFragme
 
   return (
     <>
-      <p className="mb-3 font-light text-gray-300">
-        Invite others to your organization and manage access
-      </p>
+      <DocsNote>
+        You may invite other members to collaborate with you on this organization.{' '}
+        <DocsLink href="/management/organizations#members">
+          Learn more about membership and invitations
+        </DocsLink>
+      </DocsNote>
       {selectedMember && (
         <ChangePermissionsModal
           isOpen={isPermissionsModalOpen}

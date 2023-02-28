@@ -12,6 +12,8 @@ import {
   Button,
   Card,
   Checkbox,
+  DocsLink,
+  DocsNote,
   Heading,
   Input,
   Spinner,
@@ -25,7 +27,6 @@ import {
   Tr,
 } from '@/components/v2';
 import { Combobox } from '@/components/v2/combobox';
-import { AlertTriangleIcon } from '@/components/v2/icon';
 import { CreateAccessTokenModal, DeleteTargetModal } from '@/components/v2/modals';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { DeleteTokensDocument, SetTargetValidationDocument, TokensDocument } from '@/graphql';
@@ -81,6 +82,14 @@ function RegistryAccessTokens(props: {
       <p className="mb-3 font-light text-gray-300">
         Be careful! These tokens allow to read and write your target data.
       </p>
+      <DocsNote>
+        Registry Access Tokens are used to access to Hive Registry and perform actions on your
+        targets/projects. In most cases, this token is used from the Hive CLI.
+        <br />
+        <DocsLink href="/management/targets#registry-access-tokens">
+          Learn more about Registry Access Token
+        </DocsLink>
+      </DocsNote>
       {canManage && (
         <div className="my-3.5 flex justify-between">
           <Button variant="secondary" onClick={toggleModalOpen} size="large" className="px-5">
@@ -162,11 +171,14 @@ const ExtendBaseSchema = (props: { baseSchema: string }): ReactElement => {
   return (
     <Card>
       <Heading className="mb-2">Extend Your Schema</Heading>
-      <p className="mb-3 font-light text-gray-300">
-        Define a piece of SDL that will be added to every published schema.
+      <DocsNote>
+        Schema Extensions is pre-defined GraphQL schema that is automatically merged with your
+        published schemas, before being checked and validated.
         <br />
-        Useful for AWS AppSync users to not send platform-specific part of schema to Hive.
-      </p>
+        <DocsLink href="/management/targets#schema-extensions">
+          You can find more details and examples in the documentation
+        </DocsLink>
+      </DocsNote>
       <SchemaEditor
         theme="vs-dark"
         options={{ readOnly: mutation.fetching }}
@@ -424,9 +436,14 @@ const ConditionalBreakingChanges = (): ReactElement => {
             />
           )}
         </Heading>
+        <DocsNote>
+          Conditional Breaking Changes can change the behavior of schema checks, based on real
+          traffic data sent to Hive.{' '}
+          <DocsLink href="/management/targets#conditional-breaking-changes">Learn more</DocsLink>
+        </DocsNote>
         <div
           className={clsx(
-            'mb-3 flex flex-col items-start gap-3 font-light text-gray-300',
+            'mb-3 mt-4 flex flex-col items-start gap-3 font-light text-gray-300',
             !isEnabled && 'pointer-events-none opacity-25',
           )}
         >
@@ -652,10 +669,15 @@ const Page = (props: {
   return (
     <>
       <Card>
-        <Heading className="mb-2">Target Info</Heading>
-        <p className="mb-3 font-light text-gray-300">
-          Name of your target visible within organization.
-        </p>
+        <Heading className="mb-2">Target Name</Heading>
+        <DocsNote warn>
+          Changing the name of your target will also change the slug of your target URL, and will
+          invalidate any existing links to your target.
+          <br />
+          <DocsLink href="/management/targets#rename-a-target">
+            You can read more about it in the documentation
+          </DocsLink>
+        </DocsNote>
         <form onSubmit={handleSubmit} className="flex gap-x-2">
           <Input
             placeholder="Target name"
@@ -699,22 +721,29 @@ const Page = (props: {
 
       {canDelete && (
         <Card>
-          <Heading className="mb-2">Delete Target</Heading>
-          <p className="mb-3 font-light text-gray-300">Permanently remove your Target</p>
-          <div className="flex items-center gap-x-2">
-            <Button
-              variant="primary"
-              size="large"
-              danger
-              onClick={toggleModalOpen}
-              className="px-5"
-            >
-              Delete Target
-            </Button>
-            <Tag color="yellow" className="py-2.5 px-4">
-              <AlertTriangleIcon className="h-5 w-5" />
-              This action is not reversible!
-            </Tag>
+          <div className="flex items-center justify-between">
+            <div>
+              <Heading className="mb-2">Delete Target</Heading>
+              <DocsNote warn>
+                Deleting an project also delete all schemas and data associated with it.
+                <br />
+                <DocsLink href="/management/targets#delete-a-target">
+                  <strong>This action is not reversible!</strong> You can find more information
+                  about this process in the documentation
+                </DocsLink>
+              </DocsNote>
+            </div>
+            <div className="flex items-center gap-x-2">
+              <Button
+                variant="primary"
+                size="large"
+                danger
+                onClick={toggleModalOpen}
+                className="px-5"
+              >
+                Delete Target
+              </Button>
+            </div>
           </div>
         </Card>
       )}

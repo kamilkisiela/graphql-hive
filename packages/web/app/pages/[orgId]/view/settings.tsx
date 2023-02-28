@@ -5,8 +5,8 @@ import * as Yup from 'yup';
 import { authenticated } from '@/components/authenticated-container';
 import { OrganizationLayout } from '@/components/layouts';
 import { OIDCIntegrationSection } from '@/components/organization/settings/oidc-integration-section';
-import { Button, Card, Heading, Input, Tag, Title } from '@/components/v2';
-import { AlertTriangleIcon, GitHubIcon, SlackIcon } from '@/components/v2/icon';
+import { Button, Card, DocsLink, DocsNote, Heading, Input, Tag, Title } from '@/components/v2';
+import { GitHubIcon, SlackIcon } from '@/components/v2/icon';
 import {
   DeleteOrganizationModal,
   TransferOrganizationOwnershipModal,
@@ -197,9 +197,6 @@ const SettingsPageRenderer = (props: {
     <>
       <Card>
         <Heading className="mb-2">Organization Name</Heading>
-        <p className="mb-3 font-light text-gray-300">
-          Name of your organization visible within Hive
-        </p>
         <form onSubmit={handleSubmit} className="flex gap-x-2">
           <Input
             placeholder="Organization name"
@@ -232,12 +229,27 @@ const SettingsPageRenderer = (props: {
         {mutation.error && (
           <div>{mutation.error.graphQLErrors[0]?.message ?? mutation.error.message}</div>
         )}
+        <DocsNote warn>
+          Changing the name of your organization will also change the slug of your organization URL,
+          and will invalidate any existing links to your organization.
+          <br />
+          <DocsLink href="/management/organizations#rename-an-organization">
+            You can read more about it in the documentation
+          </DocsLink>
+        </DocsNote>
       </Card>
 
       {canAccessOrganization(OrganizationAccessScope.Integrations, organization.me) && (
         <Card>
           <Heading className="mb-2">Integrations</Heading>
-          <p className="mb-3 font-light text-gray-300">Connect Hive to other services</p>
+          <DocsNote>
+            Authorize external services to make them available for your the projects under this
+            organization.
+            <br />
+            <DocsLink href="/management/organizations#integrations">
+              You can find here instructions and full documentation for the available integration
+            </DocsLink>
+          </DocsNote>
           <div className="flex flex-col gap-y-4 text-gray-500">
             <Integrations />
           </div>
@@ -249,7 +261,14 @@ const SettingsPageRenderer = (props: {
           <div className="flex items-center justify-between">
             <div>
               <Heading className="mb-2">Transfer Ownership</Heading>
-              <p className="font-light text-gray-300">Transfer this organization to another user</p>
+              <DocsNote>
+                <strong>You are currently the owner of the organization.</strong> You can transfer
+                the organization to another member of the organization, or to an external user.
+                <br />
+                <DocsLink href="/management/organizations#transfer-ownership">
+                  Learn more about the process
+                </DocsLink>
+              </DocsNote>
             </div>
             <div>
               <Button
@@ -259,7 +278,7 @@ const SettingsPageRenderer = (props: {
                 onClick={toggleTransferModalOpen}
                 className="px-5"
               >
-                Transfer
+                Transfer Ownership
               </Button>
               <TransferOrganizationOwnershipModal
                 isOpen={isTransferModalOpen}
@@ -276,13 +295,17 @@ const SettingsPageRenderer = (props: {
           <div className="flex items-center justify-between">
             <div>
               <Heading className="mb-2">Delete Organization</Heading>
-              <p className="font-light text-gray-300">Permanently remove your organization</p>
+              <DocsNote warn>
+                Deleting an organization will delete all the projects, targets, schemas and data
+                associated with it.
+                <br />
+                <DocsLink href="/management/organizations#delete-an-organization">
+                  <strong>This action is not reversible!</strong> You can find more information
+                  about this process in the documentation
+                </DocsLink>
+              </DocsNote>
             </div>
             <div className="flex items-center gap-x-2">
-              <Tag color="yellow" className="py-2.5 px-4">
-                <AlertTriangleIcon className="h-5 w-5" />
-                This action is not reversible!
-              </Tag>
               <Button
                 variant="primary"
                 size="large"

@@ -1,0 +1,74 @@
+import { Callout, PackageCmd } from '@theguild/components'
+
+# Apollo-Server
+
+## Installation
+
+<PackageCmd packages={['@graphql-hive/client']} />
+
+<Callout type="info">
+  We recommend installing Hive Client package as a direct dependency of your project, because it
+  includes a runtime to send usage reports and schemas to Hive registry.
+</Callout>
+
+The `@graphql-hive/client` package exports a
+[Apollo-Server plugin](https://www.apollographql.com/docs/apollo-server/), that can be used
+directly.
+
+### Publishing Schemas
+
+Import the `hiveApollo` plugin and add it to `ApolloServer` instance:
+
+```ts
+import { ApolloServer } from 'apollo-server'
+import { hiveApollo } from '@graphql-hive/client'
+
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  plugins: [
+    hiveApollo({
+      enabled: true,
+      debug: true, // or false
+      token: 'YOUR-TOKEN',
+      reporting: {
+        // feel free to set dummy values here
+        author: 'Author of the latest change',
+        commit: 'git sha or any identifier',
+
+        // Federation and Stitching
+        serviceUrl: '...',
+        serviceName: '...'
+      }
+    })
+  ]
+})
+```
+
+### Usage Reporting
+
+You can send usage reporting to Hive registry by using the `usage` section of the configuration:
+
+```ts
+import { ApolloServer } from 'apollo-server'
+import { hiveApollo } from '@graphql-hive/client'
+
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  plugins: [
+    hiveApollo({
+      enabled: true,
+      token: 'YOUR-TOKEN',
+      reporting: { ... },
+      usage: true,  // add this one
+    })
+  ]
+})
+```
+
+## Additional Resources
+
+- [`@graphql-hive/client` source code](https://github.com/kamilkisiela/graphql-hive/tree/main/packages/libraries/client)
+- [`HivePluginOptions` configuration reference](https://github.com/kamilkisiela/graphql-hive/blob/main/packages/libraries/client/src/internal/types.ts#LL40C29-L40C29)
+- [Apollo Server](https://www.apollographql.com/docs/apollo-server/)

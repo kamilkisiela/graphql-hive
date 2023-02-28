@@ -94,10 +94,8 @@ export function PlanSummary({
         <Stat.Label>Plan Type</Stat.Label>
         <Stat.Number>{plan.planType}</Stat.Number>
         <Stat.HelpText>
-          Enterprise plan is for organizations that needs to ship and ingest large amount of data.
-          <br />
-          If you wish to upgrade to Enterprise, or you can't find the plan for you, please contact
-          us and we'll find the right plan for your organization.
+          Enterprise plan is for organizations that needs to ship and ingest large amount of data,
+          and needs ongoing support around GraphQL APIs.
         </Stat.HelpText>
       </Stat>
     );

@@ -125,11 +125,11 @@ export DOCKER_TAG=":IMAGE_TAG_HERE"
 Keep in mind that integration tests are running a combination of 2 Docker Compose files:
 
 1. `docker-compose.community.yml` - this is also used for self-hosting Hive, so this file contains
-   all services and configurations needed for running Hive core (without SaaS-specific services,
+   all services and configurations needed for running Hive core (without Cloud-specific services,
    like billing).
 2. `docker-compose.integration.yaml` - An extension and overrides file: we are using that file to
    run local services such as CloudFlare CDN mock, external composition service and so on - this is
-   done in order to mock a complete Hive SaaS environment and test all features. **This file also
+   done in order to mock a complete Hive Cloud environment and test all features. **This file also
    includes overrides such as environment variables that are specific only for integration testing -
    so make sure to choose wisely where to add environment variables!**
 

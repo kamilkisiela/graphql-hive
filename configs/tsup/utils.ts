@@ -10,6 +10,7 @@ const currentPackage = packagesMetadata.packages.find(p => p.dir === libDir);
 export const commonWatchList = () => {
   return [
     libDir + '/src/**/*',
+    libDir + '/.env',
     libDir + '/tsconfig.json',
     rootDir + '/tsconfig.json',
     rootDir + '/tsup.config.*',

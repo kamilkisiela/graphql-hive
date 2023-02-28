@@ -2,7 +2,7 @@
   "name": "@hive/rate-limit",
   "version": "0.0.0",
   "type": "module",
-  "description": "A microservice for Hive SaaS, that exposes information about rate limits per given org/target.",
+  "description": "A microservice for Hive Cloud, that exposes information about rate limits per given org/target.",
   "license": "MIT",
   "private": true,
   "scripts": {

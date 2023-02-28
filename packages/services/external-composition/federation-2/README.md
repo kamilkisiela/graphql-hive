@@ -6,7 +6,7 @@ Hive comes with support for Apollo Federation v2, based on
 [external composition](https://docs.graphql-hive.com/features/external-schema-composition).
 
 This package provides a reference for running external composition as a NodeJS service, on your
-local infrastructure, and connect GraphQL Hive (SaaS or self-service).
+local infrastructure, and connect GraphQL Hive (Cloud or self-service).
 
 # Usage
 
@@ -31,8 +31,8 @@ docker run -p 3069 -e SECRET="MY_SECRET_HERE" ghcr.io/kamilkisiela/graphql-hive/
 The container runs on port `3069` by default (you can chnage it using `PORT` env var), and listens
 to `POST /compose` requests coming from Hive platform.
 
-You should make this service publicly available and accessible to use it with Hive SaaS platform, or
-make it availble in your local/private network if you are using Hive on-prem.
+You should make this service publicly available and accessible to use it with Hive Cloud platform,
+or make it availble in your local/private network if you are using Hive on-prem.
 
 ## Running from source code
 

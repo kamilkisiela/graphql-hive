@@ -23,7 +23,6 @@ import {
 import { LinkIcon, MoreIcon, SettingsIcon } from '@/components/v2/icon';
 import { graphql } from '@/gql';
 import { TargetQuery, TargetsDocument, VersionsDocument } from '@/graphql';
-import { getDocsUrl } from '@/lib/docs-url';
 import { useClipboard } from '@/lib/hooks/use-clipboard';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { withSessionProtection } from '@/lib/supertokens/guard';
@@ -130,7 +129,7 @@ const Page = () => {
           <EmptyList
             title="Hive is waiting for your first target"
             description='You can create a target by clicking the "New Target" button'
-            docsUrl={getDocsUrl('/get-started/targets')}
+            docsUrl="/management/targets#create-a-new-target"
           />
         ) : (
           targets?.nodes.map(target => <TargetCard key={target.id} target={target} />)

@@ -116,6 +116,7 @@ export default gql`
     id: ID!
     cleanId: ID!
     name: String!
+    project: Project!
   }
 
   type TargetSettings {

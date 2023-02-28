@@ -38,3 +38,4 @@ export { TimeAgo } from '@/components/v2/time-ago';
 export { Title } from '@/components/v2/title';
 export { ToggleGroup, ToggleGroupItem } from '@/components/v2/toggle-group';
 export { Tooltip } from '@/components/v2/tooltip';
+export { DocsNote, DocsLink } from '@/components/v2/docs-note';

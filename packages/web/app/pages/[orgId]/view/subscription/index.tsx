@@ -80,12 +80,9 @@ function Page(props: {
         </Tabs.Trigger>
       </Tabs.List>
       <Tabs.Content value="overview">
-        <p className="mb-3 font-light text-gray-300">
-          Information about your Hive plan, subscription, usage and data ingestion
-        </p>
         <RateLimitWarn organization={organization} />
         <Card className="mt-8">
-          <Heading className="mb-2">Plan and Reserved Volume</Heading>
+          <Heading className="mb-2">Your current plan</Heading>
           <div>
             <BillingView organization={organization} query={query}>
               {organization.billingConfiguration?.upcomingInvoice && (

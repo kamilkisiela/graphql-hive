@@ -1,13 +1,6 @@
 {
-  "tokens": "Managing Tokens",
-  "publish-schema": "Publishing Schema",
-  "checking-schema": "Checking Schema",
-  "delete-schema": "Deleting Schema",
-  "registry-usage": "Using Registry",
-  "monitoring": "Monitoring",
-  "schema-history": "Schema and History",
-  "integrations": "Integrations",
-  "alerts-notifications": "Alerts and Notifications",
-  "external-schema-composition": "External Schema Composition",
-  "sso-oidc-provider": "SSO OIDC Provider"
+  "schema-registry": "Schema Registry",
+  "usage-reporting": "Usage Reporting and Monitoring",
+  "high-availability-cdn": "High-Availability CDN",
+  "laboratory": "Laboratory"
 }

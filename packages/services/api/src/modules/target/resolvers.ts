@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { createConnection } from '../../shared/schema';
 import { OrganizationManager } from '../organization/providers/organization-manager';
+import { ProjectManager } from '../project/providers/project-manager';
 import { IdTranslator } from '../shared/providers/id-translator';
 import type { TargetModule } from './__generated__/types';
 import { TargetManager } from './providers/target-manager';
@@ -9,6 +10,13 @@ const TargetNameModel = z.string().min(2).max(30);
 const PercentageModel = z.number().min(0).max(100);
 
 export const resolvers: TargetModule.Resolvers = {
+  Target: {
+    project: (target, args, { injector }) =>
+      injector.get(ProjectManager).getProject({
+        project: target.projectId,
+        organization: target.orgId,
+      }),
+  },
   Query: {
     async target(_, { selector }, { injector }) {
       const translator = injector.get(IdTranslator);

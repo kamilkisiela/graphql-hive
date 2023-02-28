@@ -50,7 +50,7 @@ The GraphQL API for GraphQL Hive.
 
 ## Hive Hosted Configuration
 
-If you are self-hosting GraphQL Hive, you can ignore this section. It is only required for the SaaS
+If you are self-hosting GraphQL Hive, you can ignore this section. It is only required for the Cloud
 version.
 
 | Name                                 | Required                                   | Description                                  | Example Value                      |

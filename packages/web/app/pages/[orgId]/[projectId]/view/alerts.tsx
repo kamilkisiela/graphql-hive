@@ -2,7 +2,20 @@ import { ReactElement, useState } from 'react';
 import { useMutation, useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { ProjectLayout } from '@/components/layouts';
-import { Button, Card, Checkbox, Heading, Table, Tag, TBody, Td, Title, Tr } from '@/components/v2';
+import {
+  Button,
+  Card,
+  Checkbox,
+  DocsLink,
+  DocsNote,
+  Heading,
+  Table,
+  Tag,
+  TBody,
+  Td,
+  Title,
+  Tr,
+} from '@/components/v2';
 import { CreateAlertModal, CreateChannelModal } from '@/components/v2/modals';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import {
@@ -37,7 +50,11 @@ function Channels(): ReactElement {
   return (
     <Card>
       <Heading className="mb-2">Available Channels</Heading>
-      <p className="mb-3 font-light text-gray-300">Channel represents a form of communication</p>
+      <DocsNote>
+        Alert Channels are a way to configure <strong>how</strong> you want to receive alerts and
+        notifications from Hive.{' '}
+        <DocsLink href="/management/projects#alert-channels">Learn more</DocsLink>
+      </DocsNote>
       <Table>
         <TBody>
           {channelAlerts.map(channelAlert => (
@@ -139,8 +156,12 @@ const Page = (props: {
     <>
       <Channels />
       <Card>
-        <Heading className="mb-2">Active Alerts</Heading>
-        <p className="mb-3 font-light text-gray-300">Alerts are sent over the Channels</p>
+        <Heading className="mb-2">Active Alerts and Notifications</Heading>
+        <DocsNote>
+          Alerts are a way to configure <strong>when</strong> you want to receive alerts and
+          notifications from Hive.{' '}
+          <DocsLink href="/management/projects#alerts-and-notifications-1">Learn more</DocsLink>
+        </DocsNote>
         <Table>
           <TBody>
             {alerts.map(alert => (

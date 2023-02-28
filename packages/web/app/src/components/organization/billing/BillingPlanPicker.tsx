@@ -117,8 +117,10 @@ export function BillingPlanPicker({
   value,
   onPlanChange,
   activePlan,
+  disabled,
   ...props
 }: {
+  disabled?: boolean;
   value: BillingPlanType;
   activePlan: BillingPlanType;
   plans: ReadonlyArray<FragmentType<typeof BillingPlanPicker_PlanFragment>>;
@@ -128,7 +130,12 @@ export function BillingPlanPicker({
   return (
     <RadioGroup value={value} onValueChange={onPlanChange} className="flex gap-4 md:!flex-row">
       {plans.map(plan => (
-        <Radio value={plan.planType} key={plan.id} className="!rounded-md border p-4 md:w-1/3">
+        <Radio
+          disabled={disabled}
+          value={plan.planType}
+          key={plan.id}
+          className="!rounded-md border p-4 md:w-1/3"
+        >
           <Plan
             key={plan.id}
             name={plan.name}

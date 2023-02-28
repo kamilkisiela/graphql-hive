@@ -11,18 +11,19 @@ export const ConnectLabModal = ({
   toggleModalOpen: () => void;
   endpoint: string;
 }): ReactElement => {
-  const docsUrl = getDocsUrl('/features/tokens') || '';
+  const docsUrl = getDocsUrl('/management/targets#registry-access-tokens') || '';
 
   return (
-    <Modal open={isOpen} onOpenChange={toggleModalOpen} className="flex w-[650px] flex-col gap-5">
-      <Heading className="text-center">Connect to Lab</Heading>
+    <Modal open={isOpen} onOpenChange={toggleModalOpen} className="flex w-[750px] flex-col gap-5">
+      <Heading className="text-center">Use GraphQL Schema Externally</Heading>
       <p className="text-sm text-gray-500">
-        Hive allow you to consume and use this schema with your configured mocks while developing.
+        Hive allow you to consume and use the Laboratory schema with your configured mocks while
+        developing.
       </p>
       <span className="text-sm text-gray-500">You can use the following endpoint:</span>
       <CopyValue value={endpoint} />
       <span className="text-sm text-gray-500">
-        To authenticate, use the following HTTP headers:
+        To authenticate, use the following HTTP headers, with a token that has `target:read` scope:
       </span>
       <Tag>
         X-Hive-Key:{' '}
@@ -35,7 +36,7 @@ export const ConnectLabModal = ({
         <Link variant="primary" target="_blank" rel="noreferrer" href={docsUrl}>
           Managing Tokens
         </Link>{' '}
-        chapter in our documentation.
+        chapter in our documentation to create a Registry Access Token.
       </p>
       <Button
         type="button"

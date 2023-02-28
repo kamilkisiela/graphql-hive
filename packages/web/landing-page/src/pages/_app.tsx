@@ -7,7 +7,7 @@ import '@theguild/components/style.css';
 
 const TITLE = 'GraphQL Hive - Schema Registry and Monitoring';
 const DESCRIPTION =
-  'Prevent breaking changes, monitor performance of your GraphQL API, and manage your API gateway (Federation, Stitching) with the Schema Registry. GraphQL Hive is a SAAS solution that is also 100% open source and can be self-hosted.';
+  'Prevent breaking changes, monitor performance of your GraphQL API, and manage your API gateway (Federation, Stitching) with the Schema Registry. GraphQL Hive is a Cloud solution that is also 100% open source and can be self-hosted.';
 
 export default function App({ Component, pageProps }: AppProps): ReactElement {
   return (

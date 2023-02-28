@@ -8,7 +8,6 @@ import { OperationsList } from '@/components/target/operations/List';
 import { OperationsStats } from '@/components/target/operations/Stats';
 import { EmptyList, RadixSelect, Title } from '@/components/v2';
 import { graphql } from '@/gql';
-import { getDocsUrl } from '@/lib/docs-url';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
 function floorDate(date: Date): Date {
@@ -131,9 +130,6 @@ function OperationsPage(): ReactElement {
         {({ organization, project, target, hasCollectedOperations }) =>
           organization && project && target ? (
             <div className="relative">
-              <p className="mb-5 font-light text-gray-500">
-                Data collected based on operation executed against your GraphQL schema.
-              </p>
               {hasCollectedOperations ? (
                 <OperationsView
                   organizationCleanId={organization.organization.cleanId}
@@ -144,7 +140,7 @@ function OperationsPage(): ReactElement {
                 <EmptyList
                   title="Hive is waiting for your first collected operation"
                   description="You can collect usage of your GraphQL API with Hive Client"
-                  docsUrl={getDocsUrl('/features/monitoring')}
+                  docsUrl="/features/usage-reporting"
                 />
               )}
             </div>
