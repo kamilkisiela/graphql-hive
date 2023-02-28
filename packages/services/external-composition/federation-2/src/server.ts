@@ -1,9 +1,15 @@
 import { parse, printSchema } from 'graphql';
+import LRU from 'lru-cache';
 import { composeServices } from '@apollo/composition';
 import { compose, signatureHeaderName, verifyRequest } from '@graphql-hive/external-composition';
 import { Response } from '@whatwg-node/fetch';
 import { createServerAdapter } from '@whatwg-node/server';
 import { ResolvedEnv } from './environment';
+
+const cache = new LRU<string, Promise<string>>({
+  max: 20,
+  allowStale: true,
+});
 
 const composeFederation = compose(services => {
   try {
@@ -23,11 +29,17 @@ const composeFederation = compose(services => {
         result: {
           errors: result.errors.map(error => ({
             message: error.message,
-            source: typeof error.extensions?.code === 'string' ? 'composition' : 'graphql',
+            source:
+              typeof error.extensions?.code === 'string' &&
+              // `INVALID_GRAPHQL` is a special error code that is used to indicate that the error comes from GraphQL-JS
+              error.extensions.code !== 'INVALID_GRAPHQL'
+                ? 'composition'
+                : 'graphql',
           })),
         },
       };
     }
+
     if (!result.supergraphSdl) {
       return {
         type: 'failure',
@@ -64,6 +76,23 @@ const composeFederation = compose(services => {
   }
 });
 
+async function composeFederationFromBody(body: string) {
+  return JSON.stringify(composeFederation(JSON.parse(body)));
+}
+
+async function composeFederationWithCache(body: string, signature: string) {
+  const cachedResult = cache.get(signature);
+
+  if (cachedResult) {
+    return cachedResult;
+  }
+
+  const value = composeFederationFromBody(body);
+
+  cache.set(signature, value);
+  return value;
+}
+
 export const createRequestListener = (env: ResolvedEnv): ReturnType<typeof createServerAdapter> =>
   createServerAdapter(async request => {
     const url = new URL(request.url);
@@ -94,8 +123,10 @@ export const createRequestListener = (env: ResolvedEnv): ReturnType<typeof creat
       if (error) {
         return new Response(error, { status: 500 });
       }
-      const result = composeFederation(JSON.parse(body));
-      return new Response(JSON.stringify(result), {
+
+      const result = await composeFederationWithCache(body, signatureHeaderValue);
+
+      return new Response(result, {
         status: 200,
         headers: {
           'content-type': 'application/json',
