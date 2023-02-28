@@ -69,6 +69,7 @@ export default class SchemaCheck extends Command {
       const endpoint = this.ensure({
         key: 'registry.endpoint',
         args: flags,
+        legacyFlagName: 'registry',
         defaultValue: graphqlEndpoint,
         env: 'HIVE_REGISTRY',
       });
@@ -76,6 +77,7 @@ export default class SchemaCheck extends Command {
       const accessToken = this.ensure({
         key: 'registry.accessToken',
         args: flags,
+        legacyFlagName: 'token',
         env: 'HIVE_TOKEN',
       });
       const sdl = await loadSchema(file);

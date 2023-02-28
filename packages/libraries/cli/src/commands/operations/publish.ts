@@ -54,14 +54,14 @@ export default class OperationsPublish extends Command {
       const endpoint = this.ensure({
         key: 'registry.endpoint',
         args: flags,
-        legacyFlagName: flags.registry,
+        legacyFlagName: 'registry',
         defaultValue: graphqlEndpoint,
         env: 'HIVE_REGISTRY',
       });
       const accessToken = this.ensure({
         key: 'registry.accessToken',
         args: flags,
-        legacyFlagName: flags.token,
+        legacyFlagName: 'token',
         env: 'HIVE_TOKEN',
       });
       const file: string = args.file;
