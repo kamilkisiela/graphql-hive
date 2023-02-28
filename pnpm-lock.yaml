@@ -1086,7 +1086,7 @@ importers:
       supertokens-node: 13.1.1
       supertokens-web-js: 0.5.0
       tailwindcss: 3.2.7
-      tailwindcss-radix: 2.7.0
+      tailwindcss-radix: 2.8.0
       tslib: 2.5.0
       urql: 3.0.3
       use-debounce: 9.0.3
@@ -1197,7 +1197,7 @@ importers:
       rimraf: 4.1.2
       storybook: 7.0.0-beta.54
       tailwindcss: 3.2.7_postcss@8.4.21
-      tailwindcss-radix: 2.7.0
+      tailwindcss-radix: 2.8.0
 
   packages/web/docs:
     specifiers:
@@ -27424,8 +27424,8 @@ packages:
     resolution: {integrity: sha512-4kl5w+nCB44EVRdO0g/UGoOp3vlwgycUVtkk/7DPyeLZUCuNFFKCFG6/t/DgHLrUPHjrZg6s5tNm+56Q2B0xyg==}
     dev: false
 
-  /tailwindcss-radix/2.7.0:
-    resolution: {integrity: sha512-fIVkT5zQYdsjT9+/Mvp+DTlJDdTFpRDuyS5+PLuJDAIIVr9+rWYKhK6rsB9QtjwUwwb0YF+BkAJN6CjZivOfLA==}
+  /tailwindcss-radix/2.8.0:
+    resolution: {integrity: sha512-1k1UfoIYgVyBl13FKwwoKavjnJ5VEaUClCTAsgz3VLquN4ay/lyaMPzkbqD71sACDs2fRGImytAUlMb4TzOt1A==}
     dev: true
 
   /tailwindcss/3.2.7:
