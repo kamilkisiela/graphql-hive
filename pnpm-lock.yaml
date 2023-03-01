@@ -5,27 +5,27 @@ overrides:
   tsup: 6.5.0
 
 patchedDependencies:
-  '@tgriesser/schemats@7.0.1':
-    hash: u3kbucfchakklx3sci2vh6wjau
-    path: patches/@tgriesser__schemats@7.0.1.patch
   '@theguild/buddy@0.1.0':
     hash: ryylgra5xglhidfoiaxehn22hq
     path: patches/@theguild__buddy@0.1.0.patch
+  '@tgriesser/schemats@7.0.1':
+    hash: u3kbucfchakklx3sci2vh6wjau
+    path: patches/@tgriesser__schemats@7.0.1.patch
   mjml-core@4.13.0:
     hash: zxxsxbqejjmcwuzpigutzzq6wa
     path: patches/mjml-core@4.13.0.patch
-  '@oclif/core@1.23.0':
-    hash: zhte2hlj7lfobytjpalcwwo474
-    path: patches/@oclif__core@1.23.0.patch
-  '@graphql-inspector/core@4.0.0':
-    hash: wf35oaq7brzyeva5aoncxac66a
-    path: patches/@graphql-inspector__core@4.0.0.patch
   oclif@3.7.0:
     hash: rxmtqiusuyruv7tkwux5gvotbm
     path: patches/oclif@3.7.0.patch
   '@slonik/migrator@0.11.3':
     hash: yfpv2xzdmnkrtu2wvaktxf5mmq
     path: patches/@slonik__migrator@0.11.3.patch
+  '@oclif/core@1.23.0':
+    hash: zhte2hlj7lfobytjpalcwwo474
+    path: patches/@oclif__core@1.23.0.patch
+  '@graphql-inspector/core@4.0.0':
+    hash: wf35oaq7brzyeva5aoncxac66a
+    path: patches/@graphql-inspector__core@4.0.0.patch
   '@apollo/federation@0.38.1':
     hash: rjgakkkphrejw6qrtph4ar24zq
     path: patches/@apollo__federation@0.38.1.patch
@@ -65,7 +65,6 @@ importers:
       eslint-plugin-cypress: 2.12.1
       eslint-plugin-hive: file:./rules
       eslint-plugin-tailwindcss: 3.10.1
-      glob: 9.2.1
       graphql: 16.6.0
       husky: 8.0.3
       jest-snapshot-serializer-raw: 1.2.0
@@ -106,7 +105,6 @@ importers:
       eslint-plugin-cypress: 2.12.1_eslint@8.35.0
       eslint-plugin-hive: file:rules
       eslint-plugin-tailwindcss: 3.10.1
-      glob: 9.2.1
       graphql: 16.6.0
       husky: 8.0.3
       jest-snapshot-serializer-raw: 1.2.0
@@ -13198,16 +13196,16 @@ packages:
       - '@types/node'
     dev: false
 
-  /@whatwg-node/server/0.7.4:
-    resolution: {integrity: sha512-0+c3Y1tmMTIz3+cM8GCOXZuJclHlOZrq2uWb9WVnv1sd98pcFQBW9163nmN7cUTyD84c/yMJmEW3F+Ka6zRZgQ==}
+  /@whatwg-node/server/0.7.3:
+    resolution: {integrity: sha512-ToaxdIXka8WHre92b1n9Wne/jXPOgg5w17Hx/UqFtL+HM2+0M+AAEz31kY9bjHGaKBfWE8YZwVVIYvGMgb3ARA==}
     dependencies:
       '@whatwg-node/fetch': 0.8.2
       tslib: 2.5.0
     transitivePeerDependencies:
       - '@types/node'
 
-  /@whatwg-node/server/0.7.3:
-    resolution: {integrity: sha512-ToaxdIXka8WHre92b1n9Wne/jXPOgg5w17Hx/UqFtL+HM2+0M+AAEz31kY9bjHGaKBfWE8YZwVVIYvGMgb3ARA==}
+  /@whatwg-node/server/0.7.4:
+    resolution: {integrity: sha512-0+c3Y1tmMTIz3+cM8GCOXZuJclHlOZrq2uWb9WVnv1sd98pcFQBW9163nmN7cUTyD84c/yMJmEW3F+Ka6zRZgQ==}
     dependencies:
       '@whatwg-node/fetch': 0.8.2
       tslib: 2.5.0

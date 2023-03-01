@@ -6,14 +6,14 @@ import { constants } from 'fs';
 import { access, readFile, writeFile } from 'fs/promises';
 import { dirname, join, relative } from 'path';
 import { parse } from 'dotenv';
-import glob from 'glob';
+import fg from 'fast-glob';
 
 if (process.env.CI) {
   console.log('[sync-env-files] CI Detected, skipping');
   process.exit(0);
 }
 
-const force = ['--force', '-f'].includes(process.argv[2] || '');
+const force = ['--force', '-f'].includes(process.argv[2]);
 const cwd = process.cwd();
 
 async function main() {
@@ -79,21 +79,9 @@ async function exists(file: string) {
 }
 
 function findLocalEnvFiles(): Promise<string[]> {
-  return new Promise((resolve, reject) => {
-    glob(
-      '{packages/**/*/.env.template,integration-tests/.env.template}',
-      {
-        ignore: ['**/node_modules/**', '**/dist/**'],
-        cwd,
-      },
-      (err, files) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(files);
-        }
-      },
-    );
+  return fg('**/.env.template', {
+    ignore: ['**/node_modules/**', '**/dist/**'],
+    cwd,
   });
 }
 
