@@ -2939,7 +2939,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       const limit = args.first ? (args.first > 0 ? Math.min(args.first, 20) : 20) : 20;
 
       if (args.cursor) {
-        cursor = decodeCDNAccessTokenCursor(args.cursor);
+        cursor = decodeCreatedAtAndUUIDIdBasedCursor(args.cursor);
       }
 
       const result = await pool.any(sql`
@@ -2981,7 +2981,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         return {
           node,
           get cursor() {
-            return encodeCDNAccessTokenCursor(node);
+            return encodeCreatedAtAndUUIDIdBasedCursor(node);
           },
         };
       });
@@ -3076,21 +3076,372 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       return result ? transformSchemaPolicy(result) : null;
     },
+    async getPaginatedDocumentCollectionsForTarget(args) {
+      let cursor: null | {
+        createdAt: string;
+        id: string;
+      } = null;
+
+      const limit = args.first ? (args.first > 0 ? Math.min(args.first, 20) : 20) : 20;
+
+      if (args.cursor) {
+        cursor = decodeCreatedAtAndUUIDIdBasedCursor(args.cursor);
+      }
+
+      const result = await pool.any(sql`
+        SELECT
+          "id"
+          , "title"
+          , "description"
+          , "target_id" as "targetId"
+          , "created_by_user_id" as "createdByUserId"
+          , to_json("created_at") as "createdAt"
+          , to_json("updated_at") as "updatedAt"
+        FROM
+          "public"."document_collections"
+        WHERE
+          "target_id" = ${args.targetId}
+          ${
+            cursor
+              ? sql`
+                AND (
+                  (
+                    "created_at" = ${cursor.createdAt}
+                    AND "id" < ${cursor.id}
+                  )
+                  OR "created_at" < ${cursor.createdAt}
+                )
+              `
+              : sql``
+          }
+        ORDER BY
+          "target_id" ASC
+          , "created_at" DESC
+          , "id" DESC
+        LIMIT ${limit + 1}
+      `);
+
+      let items = result.map(row => {
+        const node = DocumentCollectionModel.parse(row);
+
+        return {
+          node,
+          get cursor() {
+            return encodeCreatedAtAndUUIDIdBasedCursor(node);
+          },
+        };
+      });
+
+      const hasNextPage = items.length > limit;
+
+      items = items.slice(0, limit);
+
+      return {
+        items,
+        pageInfo: {
+          hasNextPage,
+          hasPreviousPage: cursor !== null,
+          get endCursor() {
+            return items[items.length - 1]?.cursor ?? '';
+          },
+          get startCursor() {
+            return items[0]?.cursor ?? '';
+          },
+        },
+      };
+    },
+
+    async createDocumentCollection(args) {
+      const result = await pool.maybeOne(sql`
+        INSERT INTO "public"."document_collections" (
+          "title"
+          , "description"
+          , "target_id"
+          , "created_by_user_id"
+        )
+        VALUES (
+          ${args.title},
+          ${args.description},
+          ${args.targetId},
+          ${args.createdByUserId}
+        )
+        RETURNING
+          "id"
+          , "title"
+          , "description"
+          , "target_id" as "targetId"
+          , "created_by_user_id" as "createdByUserId"
+          , to_json("created_at") as "createdAt"
+          , to_json("updated_at") as "updatedAt"
+      `);
+
+      return DocumentCollectionModel.parse(result);
+    },
+    async deleteDocumentCollection(args) {
+      const result = await pool.maybeOneFirst(sql`
+        DELETE
+        FROM
+          "public"."document_collections"
+        WHERE
+          "id" = ${args.documentCollectionId}
+        RETURNING
+          "id"
+      `);
+
+      if (result == null) {
+        return null;
+      }
+
+      return zod.string().parse(result);
+    },
+
+    async updateDocumentCollection(args) {
+      const result = await pool.maybeOne(sql`
+        UPDATE
+          "public"."document_collections"
+        SET
+          "title" = COALESCE(${args.title}, "title")
+          , "description" = COALESCE(${args.description}, "description")
+          , "updated_at" = NOW()
+        WHERE
+          "id" = ${args.documentCollectionId}
+        RETURNING
+          "id"
+          , "title"
+          , "description"
+          , "target_id" as "targetId"
+          , "created_by_user_id" as "createdByUserId"
+          , to_json("created_at") as "createdAt"
+          , to_json("updated_at") as "updatedAt"
+      `);
+
+      if (result == null) {
+        return null;
+      }
+
+      return DocumentCollectionModel.parse(result);
+    },
+
+    async getPaginatedDocumentsForDocumentCollection(args) {
+      let cursor: null | {
+        createdAt: string;
+        id: string;
+      } = null;
+
+      const limit = args.first ? (args.first > 0 ? Math.min(args.first, 20) : 20) : 20;
+
+      if (args.cursor) {
+        cursor = decodeCreatedAtAndUUIDIdBasedCursor(args.cursor);
+      }
+
+      const result = await pool.any(sql`
+        SELECT
+          "id"
+          , "title"
+          , "contents"
+          , "variables"
+          , "headers"
+          , "created_by_user_id" as "createdByUserId"
+          , "document_collection_id" as "documentCollectionId"
+          , to_json("created_at") as "createdAt"
+          , to_json("updated_at") as "updatedAt"
+        FROM
+          "public"."document_collection_documents"
+        WHERE
+          "document_collection_id" = ${args.documentCollectionId}
+          ${
+            cursor
+              ? sql`
+                AND (
+                  (
+                    "created_at" = ${cursor.createdAt}
+                    AND "id" < ${cursor.id}
+                  )
+                  OR "created_at" < ${cursor.createdAt}
+                )
+              `
+              : sql``
+          }
+        ORDER BY
+          "document_collection_id" ASC
+          , "created_at" DESC
+          , "id" DESC
+        LIMIT ${limit + 1}
+      `);
+
+      let items = result.map(row => {
+        const node = DocumentCollectionDocumentModel.parse(row);
+
+        return {
+          node,
+          get cursor() {
+            return encodeCreatedAtAndUUIDIdBasedCursor(node);
+          },
+        };
+      });
+
+      const hasNextPage = items.length > limit;
+
+      items = items.slice(0, limit);
+
+      return {
+        items,
+        pageInfo: {
+          hasNextPage,
+          hasPreviousPage: cursor !== null,
+          get endCursor() {
+            return items[items.length - 1]?.cursor ?? '';
+          },
+          get startCursor() {
+            return items[0]?.cursor ?? '';
+          },
+        },
+      };
+    },
+
+    async createDocumentCollectionDocument(args) {
+      const result = await pool.maybeOne(sql`
+        INSERT INTO "public"."document_collection_documents" (
+          "title"
+          , "contents"
+          , "variables"
+          , "headers"
+          , "created_by_user_id"
+          , "document_collection_id"
+        )
+        VALUES (
+          ${args.title}
+          , ${args.contents}
+          , ${args.variables}
+          , ${args.headers}
+          , ${args.createdByUserId}
+          , ${args.documentCollectionId}
+        )
+        RETURNING
+          "id"
+          , "title"
+          , "contents"
+          , "variables"
+          , "headers"
+          , "created_by_user_id" as "createdByUserId"
+          , "document_collection_id" as "documentCollectionId"
+          , to_json("created_at") as "createdAt"
+          , to_json("updated_at") as "updatedAt"
+      `);
+
+      return DocumentCollectionDocumentModel.parse(result);
+    },
+
+    async deleteDocumentCollectionDocument(args) {
+      const result = await pool.maybeOneFirst(sql`
+        DELETE
+        FROM
+          "public"."document_collection_documents"
+        WHERE
+          "id" = ${args.documentCollectionDocumentId}
+        RETURNING
+          "id"
+      `);
+
+      if (result == null) {
+        return null;
+      }
+
+      return zod.string().parse(result);
+    },
+
+    async getDocumentCollectionDocument(args) {
+      const result = await pool.maybeOne(sql`
+        SELECT
+          "id"
+          , "title"
+          , "contents"
+          , "variables"
+          , "headers"
+          , "created_by_user_id" as "createdByUserId"
+          , "document_collection_id" as "documentCollectionId"
+          , to_json("created_at") as "createdAt"
+          , to_json("updated_at") as "updatedAt"
+        FROM
+          "public"."document_collection_documents"
+        WHERE
+          "id" = ${args.id}
+      `);
+
+      if (result == null) {
+        return null;
+      }
+
+      return DocumentCollectionDocumentModel.parse(result);
+    },
+
+    async getDocumentCollection(args) {
+      const result = await pool.maybeOne(sql`
+        SELECT
+          "id"
+          , "title"
+          , "description"
+          , "target_id" as "targetId"
+          , "created_by_user_id" as "createdByUserId"
+          , to_json("created_at") as "createdAt"
+          , to_json("updated_at") as "updatedAt"
+        FROM
+          "public"."document_collections"
+        WHERE
+          "id" = ${args.id}
+      `);
+      if (result == null) {
+        return null;
+      }
+
+      return DocumentCollectionModel.parse(result);
+    },
+
+    async updateDocumentCollectionDocument(args) {
+      const result = await pool.maybeOne(sql`
+        UPDATE
+          "public"."document_collection_documents"
+        SET
+          "title" = COALESCE(${args.title}, "title")
+          , "contents" = COALESCE(${args.contents}, "contents")
+          , "variables" = COALESCE(${args.variables}, "variables")
+          , "headers" = COALESCE(${args.headers}, "headers")
+          , "updated_at" = NOW()
+        WHERE
+          "id" = ${args.documentCollectionDocumentId}
+        RETURNING
+          "id"
+          , "title"
+          , "contents"
+          , "variables"
+          , "headers"
+          , "created_by_user_id" as "createdByUserId"
+          , "document_collection_id" as "documentCollectionId"
+          , to_json("created_at") as "createdAt"
+          , to_json("updated_at") as "updatedAt"
+      `);
+
+      if (result == null) {
+        return null;
+      }
+
+      return DocumentCollectionDocumentModel.parse(result);
+    },
   };
 
   return storage;
 }
 
-function encodeCDNAccessTokenCursor(cursor: { createdAt: string; id: string }) {
+function encodeCreatedAtAndUUIDIdBasedCursor(cursor: { createdAt: string; id: string }) {
   return Buffer.from(`${cursor.createdAt}|${cursor.id}`).toString('base64');
 }
 
-function decodeCDNAccessTokenCursor(cursor: string) {
+function decodeCreatedAtAndUUIDIdBasedCursor(cursor: string) {
   const [createdAt, id] = Buffer.from(cursor, 'base64').toString('utf8').split('|');
   if (
     Number.isNaN(Date.parse(createdAt)) ||
     id === undefined ||
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id) === false
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)
   ) {
     throw new Error('Invalid cursor');
   }
@@ -3225,3 +3576,25 @@ const SchemaVersionModel = zod
     schemaCompositionErrors: value.schema_composition_errors ?? null,
     date: value.created_at,
   }));
+
+const DocumentCollectionModel = zod.object({
+  id: zod.string(),
+  title: zod.string(),
+  description: zod.union([zod.string(), zod.null()]),
+  targetId: zod.string(),
+  createdByUserId: zod.union([zod.string(), zod.null()]),
+  createdAt: zod.string(),
+  updatedAt: zod.string(),
+});
+
+const DocumentCollectionDocumentModel = zod.object({
+  id: zod.string(),
+  title: zod.string(),
+  contents: zod.string(),
+  variables: zod.string(),
+  headers: zod.string(),
+  createdByUserId: zod.union([zod.string(), zod.null()]),
+  documentCollectionId: zod.string(),
+  createdAt: zod.string(),
+  updatedAt: zod.string(),
+});

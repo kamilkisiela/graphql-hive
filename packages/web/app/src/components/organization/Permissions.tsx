@@ -239,6 +239,7 @@ export function usePermissionsManager({
     projectScopes,
     targetScopes,
     state,
+    noneSelected: !organizationScopes.length && !projectScopes.length && !targetScopes.length,
     // Methods
     canAccessOrganization: useCallback(
       (scope: OrganizationAccessScope) => canAccessOrganization(scope, organization.me),

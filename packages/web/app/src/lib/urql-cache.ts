@@ -9,13 +9,18 @@ import {
   AlertChannelsDocument,
   AlertsDocument,
   CheckIntegrationsDocument,
+  CollectionsDocument,
+  CreateCollectionDocument,
+  CreateOperationDocument,
   CreateOrganizationDocument,
   CreateProjectDocument,
   CreateTargetDocument,
   CreateTokenDocument,
   DeleteAlertChannelsDocument,
   DeleteAlertsDocument,
+  DeleteCollectionDocument,
   DeleteGitHubIntegrationDocument,
+  DeleteOperationDocument,
   DeleteOrganizationDocument,
   DeletePersistedOperationDocument,
   DeleteProjectDocument,
@@ -351,6 +356,79 @@ const deleteGitHubIntegration: TypedDocumentNodeUpdateResolver<
   );
 };
 
+const createCollection: TypedDocumentNodeUpdateResolver<typeof CreateCollectionDocument> = (
+  result,
+  args,
+  cache,
+) => {
+  updateQuery(
+    cache,
+    {
+      query: CollectionsDocument,
+      variables: {
+        targetId: args.input.targetId,
+      },
+    },
+    data => {
+      data.collections.nodes.push(result.createCollection);
+      return data;
+    },
+  );
+};
+
+const deleteCollection: TypedDocumentNodeUpdateResolver<typeof DeleteCollectionDocument> = (
+  result,
+  args,
+  cache,
+) => {
+  cache.invalidate({
+    __typename: result.deleteCollection.__typename!,
+    id: result.deleteCollection.id,
+  });
+};
+
+const deleteOperation: TypedDocumentNodeUpdateResolver<typeof DeleteOperationDocument> = (
+  result,
+  args,
+  cache,
+) => {
+  cache.invalidate({
+    __typename: result.deleteOperation.__typename!,
+    id: result.deleteOperation.id,
+  });
+};
+const createOperation: TypedDocumentNodeUpdateResolver<typeof CreateOperationDocument> = (
+  result,
+  args,
+  cache,
+) => {
+  const collectionsQueries = cache
+    .inspectFields('Query')
+    .filter(o => o.fieldName === 'collections');
+  // map over `collections` queries because we don't know `targetId`
+  for (const collectionsQuery of collectionsQueries) {
+    updateQuery(
+      cache,
+      {
+        query: CollectionsDocument,
+        variables: {
+          targetId: collectionsQuery.arguments!.targetId as string,
+        },
+      },
+      data => {
+        for (const node of data.collections.nodes) {
+          if (node.id === args.input.collectionId) {
+            node.items.edges.push({
+              node: result.createOperation,
+            });
+          }
+        }
+        return data;
+      },
+    );
+  }
+};
+
 // UpdateResolver
 export const Mutation = {
   createOrganization,
@@ -368,4 +446,8 @@ export const Mutation = {
   deleteAlertChannels,
   addAlert,
   deletePersistedOperation,
+  createCollection,
+  deleteCollection,
+  deleteOperation,
+  createOperation,
 };

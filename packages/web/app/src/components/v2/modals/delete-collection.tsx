@@ -1,21 +1,19 @@
 import { ReactElement } from 'react';
-import { useRouter } from 'next/router';
 import { useMutation } from 'urql';
 import { Button, Heading, Modal } from '@/components/v2';
-import { DeleteTargetDocument } from '@/graphql';
-import { useRouteSelector } from '@/lib/hooks';
+import { DeleteCollectionDocument } from '@/graphql';
 import { TrashIcon } from '@radix-ui/react-icons';
 
-export const DeleteTargetModal = ({
+export function DeleteCollectionModal({
   isOpen,
   toggleModalOpen,
+  collectionId,
 }: {
   isOpen: boolean;
   toggleModalOpen: () => void;
-}): ReactElement => {
-  const [, mutate] = useMutation(DeleteTargetDocument);
-  const router = useRouteSelector();
-  const { replace } = useRouter();
+  collectionId: string;
+}): ReactElement {
+  const [, mutate] = useMutation(DeleteCollectionDocument);
 
   return (
     <Modal
@@ -24,9 +22,9 @@ export const DeleteTargetModal = ({
       className="flex flex-col items-center gap-5"
     >
       <TrashIcon className="h-16 w-auto text-red-500 opacity-70" />
-      <Heading>Delete target</Heading>
+      <Heading>Delete Collection</Heading>
       <p className="text-sm text-gray-500">
-        Are you sure you wish to delete this target? This action is irreversible!
+        Are you sure you wish to delete this collection? This action is irreversible!
       </p>
       <div className="flex w-full gap-2">
         <Button type="button" size="large" block onClick={toggleModalOpen}>
@@ -37,20 +35,14 @@ export const DeleteTargetModal = ({
           block
           danger
           onClick={async () => {
-            await mutate({
-              selector: {
-                organization: router.organizationId,
-                project: router.projectId,
-                target: router.targetId,
-              },
-            });
+            await mutate({ id: collectionId });
             toggleModalOpen();
-            void replace(`/${router.organizationId}/${router.projectId}`);
           }}
+          data-cy="confirm"
         >
           Delete
         </Button>
       </div>
     </Modal>
   );
-};
+}

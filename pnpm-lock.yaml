@@ -132,6 +132,9 @@ importers:
       lint-staged:
         specifier: 13.2.2
         version: 13.2.2
+      pg:
+        specifier: ^8.10.0
+        version: 8.10.0
       prettier:
         specifier: 2.8.8
         version: 2.8.8
@@ -1425,9 +1428,12 @@ importers:
 
   packages/web/app:
     dependencies:
+      '@graphiql/react':
+        specifier: '*'
+        version: 0.17.3(@types/react@18.2.6)(graphql@16.6.0)(react-dom@18.2.0)(react@18.2.0)
       '@graphiql/toolkit':
-        specifier: 0.8.4
-        version: 0.8.4(graphql@16.6.0)
+        specifier: '*'
+        version: 0.8.3(graphql@16.6.0)
       '@graphql-tools/mock':
         specifier: 8.7.20
         version: 8.7.20(graphql@16.6.0)
@@ -7832,6 +7838,22 @@ packages:
       - '@types/react'
       - graphql-ws
       - react-is
+    dev: false
+
+  /@graphiql/toolkit@0.8.3(graphql@16.6.0):
+    resolution: {integrity: sha512-B5WfZlBes/tMmM7TeTTD/F2E1kbtQD6PYmyX76qWrIt1Sx3+lQoCe8NzHbBvNII77F5sr737RASmkhQ1fcdFWQ==}
+    peerDependencies:
+      graphql: ^15.5.0 || ^16.0.0
+      graphql-ws: '>= 4.5.0'
+    peerDependenciesMeta:
+      graphql-ws:
+        optional: true
+    dependencies:
+      '@n1ru4l/push-pull-async-iterable-iterator': 3.2.0
+      graphql: 16.6.0
+      meros: 1.2.1
+    transitivePeerDependencies:
+      - '@types/node'
     dev: false
 
   /@graphiql/toolkit@0.8.4(graphql@16.6.0):
@@ -25849,14 +25871,6 @@ packages:
     engines: {node: '>=4'}
     dev: false
 
-  /pg-pool@3.5.2(pg@8.9.0):
-    resolution: {integrity: sha512-His3Fh17Z4eg7oANLob6ZvH8xIVen3phEZh2QuyrIl4dQSDVEabNducv6ysROKpDNPSD+12tONZVWfSgMvDD9w==}
-    peerDependencies:
-      pg: '>=8.0'
-    dependencies:
-      pg: 8.9.0
-    dev: false
-
   /pg-pool@3.6.0(pg@8.10.0):
     resolution: {integrity: sha512-clFRf2ksqd+F497kWFyM21tMjeikn60oGDmqMT8UBrynEwVEX/5R5xd2sdvdo1cZCFlguORNpVuqxIj+aK4cfQ==}
     peerDependencies:
@@ -25864,6 +25878,14 @@ packages:
     dependencies:
       pg: 8.10.0
     dev: true
+
+  /pg-pool@3.6.0(pg@8.9.0):
+    resolution: {integrity: sha512-clFRf2ksqd+F497kWFyM21tMjeikn60oGDmqMT8UBrynEwVEX/5R5xd2sdvdo1cZCFlguORNpVuqxIj+aK4cfQ==}
+    peerDependencies:
+      pg: '>=8.0'
+    dependencies:
+      pg: 8.9.0
+    dev: false
 
   /pg-promise@11.4.3:
     resolution: {integrity: sha512-b4wuukB+pkrLRZ53Z+3L9IONlIhOUSM/VlLQV2SnQzNJPJmDZj6ticgcMtZMDanAUEj+zX1FJOBrSpSR9TumXg==}
@@ -25937,7 +25959,7 @@ packages:
       buffer-writer: 2.0.0
       packet-reader: 1.0.0
       pg-connection-string: 2.5.0
-      pg-pool: 3.5.2(pg@8.9.0)
+      pg-pool: 3.6.0(pg@8.9.0)
       pg-protocol: 1.6.0
       pg-types: 2.2.0
       pgpass: 1.0.5

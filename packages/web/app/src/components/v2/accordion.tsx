@@ -23,6 +23,7 @@ function Wrapper({
       collapsible
       defaultValue={defaultValue}
       className="space-y-4 w-full"
+      data-cy="accordion"
     >
       {children}
     </A.Root>
@@ -46,9 +47,15 @@ function Item({
   );
 }
 
-function Header({ children }: { children: ReactNode }): ReactElement {
+function Header({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}): ReactElement {
   return (
-    <A.Header className="w-full">
+    <A.Header className={clsx('w-full', className)}>
       <A.Trigger
         className={clsx(
           'group',
@@ -69,9 +76,15 @@ function Header({ children }: { children: ReactNode }): ReactElement {
   );
 }
 
-function Content({ children }: { children: ReactNode }): ReactElement {
+function Content({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}): ReactElement {
   return (
-    <A.Content className="pt-1 w-full rounded-b-lg px-4 pb-3">
+    <A.Content className={clsx('pt-1 w-full rounded-b-lg px-4 pb-3', className)}>
       <div className="text-sm text-gray-700 dark:text-gray-400">{children}</div>
     </A.Content>
   );

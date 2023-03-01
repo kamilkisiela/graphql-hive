@@ -24,9 +24,7 @@ const createOIDCSuperTokensProvider = (oidcConfig: {
 }): ThirdPartyEmailPasswordNode.TypeProvider => ({
   id: 'oidc',
   get: (redirectURI, authCodeFromRequest) => ({
-    getClientId: () => {
-      return oidcConfig.clientId;
-    },
+    getClientId: () => oidcConfig.clientId,
     getProfileInfo: async (rawTokenAPIResponse: unknown) => {
       const tokenResponse = OIDCTokenSchema.parse(rawTokenAPIResponse);
       const rawData: unknown = await fetch(oidcConfig.userinfoEndpoint, {
@@ -132,7 +130,7 @@ export const getOIDCThirdPartyEmailPasswordNodeOverrides = (args: {
 
 export const createOIDCSuperTokensNoopProvider = () => ({
   id: 'oidc',
-  get: () => {
+  get() {
     throw new Error('Provider implementation was not provided via overrides.');
   },
 });

@@ -193,6 +193,28 @@ export interface CDNAccessToken {
   readonly createdAt: string;
 }
 
+export interface DocumentCollection {
+  id: string;
+  title: string;
+  description: string | null;
+  targetId: string;
+  createdByUserId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DocumentCollectionDocument {
+  id: string;
+  title: string;
+  contents: string;
+  variables: string;
+  headers: string;
+  createdByUserId: string | null;
+  documentCollectionId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Project {
   id: string;
   cleanId: string;

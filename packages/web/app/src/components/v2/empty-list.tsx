@@ -10,10 +10,10 @@ export const EmptyList = ({
 }: {
   title: string;
   description: string;
-  docsUrl: string | null;
+  docsUrl?: string;
 }): ReactElement => {
   return (
-    <Card className="flex grow flex-col items-center gap-y-2">
+    <Card className="flex grow flex-col items-center gap-y-2" data-cy="empty-list">
       <Image
         src={magnifier}
         alt="Magnifier illustration"
@@ -23,9 +23,7 @@ export const EmptyList = ({
       />
       <Heading>{title}</Heading>
       <span className="text-center text-sm font-medium text-gray-500">{description}</span>
-      {docsUrl === null ? null : (
-        <DocsLink href={docsUrl}>Read about it in the documentation</DocsLink>
-      )}
+      {docsUrl && <DocsLink href={docsUrl}>Read about it in the documentation</DocsLink>}
     </Card>
   );
 };

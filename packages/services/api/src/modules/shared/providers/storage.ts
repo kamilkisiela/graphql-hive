@@ -12,6 +12,8 @@ import type {
   AlertChannel,
   CDNAccessToken,
   DeletedCompositeSchema,
+  DocumentCollection,
+  DocumentCollectionDocument,
   Member,
   OIDCIntegration,
   Organization,
@@ -94,27 +96,34 @@ export interface Storage {
       reservedNames: string[];
     },
   ): Promise<Organization | never>;
+
   deleteOrganization(_: OrganizationSelector): Promise<
     | (Organization & {
         tokens: string[];
       })
     | never
   >;
+
   updateOrganizationName(
     _: OrganizationSelector & Pick<Organization, 'name' | 'cleanId'> & { user: string },
   ): Promise<Organization | never>;
+
   updateOrganizationPlan(
     _: OrganizationSelector & Pick<Organization, 'billingPlan'>,
   ): Promise<Organization | never>;
+
   updateOrganizationRateLimits(
     _: OrganizationSelector & Pick<Organization, 'monthlyRateLimit'>,
   ): Promise<Organization | never>;
+
   createOrganizationInvitation(
     _: OrganizationSelector & { email: string },
   ): Promise<OrganizationInvitation | never>;
+
   deleteOrganizationInvitationByEmail(
     _: OrganizationSelector & { email: string },
   ): Promise<OrganizationInvitation | null>;
+
   createOrganizationTransferRequest(
     _: OrganizationSelector & {
       user: string;
@@ -122,6 +131,7 @@ export interface Storage {
   ): Promise<{
     code: string;
   }>;
+
   getOrganizationTransferRequest(
     _: OrganizationSelector & {
       code: string;
@@ -130,6 +140,7 @@ export interface Storage {
   ): Promise<{
     code: string;
   } | null>;
+
   answerOrganizationTransferRequest(
     _: OrganizationSelector & {
       code: string;
@@ -142,21 +153,29 @@ export interface Storage {
   ): Promise<void>;
 
   getOrganizationMembers(_: OrganizationSelector): Promise<readonly Member[] | never>;
+
   getOrganizationInvitations(_: OrganizationSelector): Promise<readonly OrganizationInvitation[]>;
+
   getOrganizationOwnerId(_: OrganizationSelector): Promise<string | null>;
+
   getOrganizationOwner(_: OrganizationSelector): Promise<Member | never>;
+
   getOrganizationMember(_: OrganizationSelector & { user: string }): Promise<Member | null>;
+
   getOrganizationMemberAccessPairs(
     _: readonly (OrganizationSelector & { user: string })[],
   ): Promise<
     ReadonlyArray<ReadonlyArray<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>>
   >;
+
   hasOrganizationMemberPairs(
     _: readonly (OrganizationSelector & { user: string })[],
   ): Promise<readonly boolean[]>;
+
   hasOrganizationProjectMemberPairs(
     _: readonly (ProjectSelector & { user: string })[],
   ): Promise<readonly boolean[]>;
+
   addOrganizationMemberViaInvitationCode(
     _: OrganizationSelector & {
       code: string;
@@ -164,7 +183,9 @@ export interface Storage {
       scopes: ReadonlyArray<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
     },
   ): Promise<void>;
+
   deleteOrganizationMembers(_: OrganizationSelector & { users: readonly string[] }): Promise<void>;
+
   updateOrganizationMemberAccess(
     _: OrganizationSelector & {
       user: string;
@@ -175,31 +196,41 @@ export interface Storage {
   getPersistedOperationId(_: PersistedOperationSelector): Promise<string | never>;
 
   getProject(_: ProjectSelector): Promise<Project | never>;
+
   getProjectId(_: ProjectSelector): Promise<string | never>;
+
   getProjectByCleanId(_: { cleanId: string } & OrganizationSelector): Promise<Project | null>;
+
   getProjects(_: OrganizationSelector): Promise<Project[] | never>;
+
   createProject(
     _: Pick<Project, 'name' | 'cleanId' | 'type'> & OrganizationSelector,
   ): Promise<Project | never>;
+
   deleteProject(_: ProjectSelector): Promise<
     | (Project & {
         tokens: string[];
       })
     | never
   >;
+
   updateProjectName(
     _: ProjectSelector & Pick<Project, 'name' | 'cleanId'> & { user: string },
   ): Promise<Project | never>;
+
   updateProjectGitRepository(
     _: ProjectSelector & Pick<Project, 'gitRepository'>,
   ): Promise<Project | never>;
+
   enableExternalSchemaComposition(
     _: ProjectSelector & {
       endpoint: string;
       encryptedSecret: string;
     },
   ): Promise<Project>;
+
   disableExternalSchemaComposition(_: ProjectSelector): Promise<Project>;
+
   updateProjectRegistryModel(
     _: ProjectSelector & {
       model: RegistryModel;
@@ -207,33 +238,44 @@ export interface Storage {
   ): Promise<Project>;
 
   getTargetId(_: TargetSelector & { useIds?: boolean }): Promise<string | never>;
+
   getTargetByCleanId(
     _: {
       cleanId: string;
     } & ProjectSelector,
   ): Promise<Target | null>;
+
   createTarget(_: Pick<Target, 'cleanId' | 'name'> & ProjectSelector): Promise<Target | never>;
+
   updateTargetName(
     _: TargetSelector & Pick<Project, 'name' | 'cleanId'> & { user: string },
   ): Promise<Target | never>;
+
   deleteTarget(_: TargetSelector): Promise<
     | (Target & {
         tokens: string[];
       })
     | never
   >;
+
   getTarget(_: TargetSelector): Promise<Target | never>;
+
   getTargets(_: ProjectSelector): Promise<readonly Target[]>;
+
   getTargetIdsOfOrganization(_: OrganizationSelector): Promise<readonly string[]>;
+
   getTargetSettings(_: TargetSelector): Promise<TargetSettings | never>;
+
   setTargetValidation(
     _: TargetSelector & { enabled: boolean },
   ): Promise<TargetSettings['validation'] | never>;
+
   updateTargetValidationSettings(
     _: TargetSelector & Omit<TargetSettings['validation'], 'enabled'>,
   ): Promise<TargetSettings['validation'] | never>;
 
   hasSchema(_: TargetSelector): Promise<boolean>;
+
   getLatestSchemas(
     _: {
       onlyComposable?: boolean;
@@ -243,9 +285,13 @@ export interface Storage {
     version: string;
     valid: boolean;
   } | null>;
+
   getLatestValidVersion(_: TargetSelector): Promise<SchemaVersion | never>;
+
   getMaybeLatestValidVersion(_: TargetSelector): Promise<SchemaVersion | null | never>;
+
   getLatestVersion(_: TargetSelector): Promise<SchemaVersion | never>;
+
   getMaybeLatestVersion(_: TargetSelector): Promise<SchemaVersion | null>;
 
   getSchemasOfVersion(
@@ -260,6 +306,7 @@ export interface Storage {
       onlyComposable: boolean;
     } & TargetSelector,
   ): Promise<readonly Schema[] | never>;
+
   getVersions(_: Paginated<TargetSelector>): Promise<
     | {
         versions: readonly SchemaVersion[];
@@ -267,6 +314,7 @@ export interface Storage {
       }
     | never
   >;
+
   getVersion(_: TargetSelector & { version: string }): Promise<SchemaVersion | never>;
   deleteSchema(
     _: {
@@ -359,27 +407,35 @@ export interface Storage {
   deletePersistedOperation(_: PersistedOperationSelector): Promise<PersistedOperation | never>;
 
   addSlackIntegration(_: OrganizationSelector & { token: string }): Promise<void>;
+
   deleteSlackIntegration(_: OrganizationSelector): Promise<void>;
+
   getSlackIntegrationToken(_: OrganizationSelector): Promise<string | null | undefined>;
 
   addGitHubIntegration(_: OrganizationSelector & { installationId: string }): Promise<void>;
+
   deleteGitHubIntegration(_: OrganizationSelector): Promise<void>;
+
   getGitHubIntegrationInstallationId(_: OrganizationSelector): Promise<string | null | undefined>;
 
   addAlertChannel(_: AddAlertChannelInput): Promise<AlertChannel>;
+
   deleteAlertChannels(
     _: ProjectSelector & {
       channels: readonly string[];
     },
   ): Promise<readonly AlertChannel[]>;
+
   getAlertChannels(_: ProjectSelector): Promise<readonly AlertChannel[]>;
 
   addAlert(_: AddAlertInput): Promise<Alert>;
+
   deleteAlerts(
     _: ProjectSelector & {
       alerts: readonly string[];
     },
   ): Promise<readonly Alert[]>;
+
   getAlerts(_: ProjectSelector): Promise<readonly Alert[]>;
 
   adminGetStats(period: { from: Date; to: Date }): Promise<
@@ -417,12 +473,15 @@ export interface Storage {
   >;
 
   getBillingParticipants(): Promise<ReadonlyArray<OrganizationBilling>>;
+
   getOrganizationBilling(_: OrganizationSelector): Promise<OrganizationBilling | null>;
+
   deleteOrganizationBilling(_: OrganizationSelector): Promise<void>;
 
   createOrganizationBilling(_: OrganizationBilling): Promise<OrganizationBilling>;
 
   getBaseSchema(_: TargetSelector): Promise<string | null>;
+
   updateBaseSchema(_: TargetSelector, base: string | null): Promise<void>;
 
   completeGetStartedStep(
@@ -432,7 +491,9 @@ export interface Storage {
   ): Promise<void>;
 
   getOIDCIntegrationForOrganization(_: { organizationId: string }): Promise<OIDCIntegration | null>;
+
   getOIDCIntegrationById(_: { oidcIntegrationId: string }): Promise<OIDCIntegration | null>;
+
   createOIDCIntegrationForOrganization(_: {
     organizationId: string;
     clientId: string;
@@ -441,6 +502,7 @@ export interface Storage {
     userinfoEndpoint: string;
     authorizationEndpoint: string;
   }): Promise<{ type: 'ok'; oidcIntegration: OIDCIntegration } | { type: 'error'; reason: string }>;
+
   updateOIDCIntegration(_: {
     oidcIntegrationId: string;
     clientId: string | null;
@@ -449,6 +511,7 @@ export interface Storage {
     userinfoEndpoint: string | null;
     authorizationEndpoint: string | null;
   }): Promise<OIDCIntegration>;
+
   deleteOIDCIntegration(_: { oidcIntegrationId: string }): Promise<void>;
 
   createCDNAccessToken(_: {
@@ -496,6 +559,99 @@ export interface Storage {
   findInheritedPolicies(selector: ProjectSelector): Promise<SchemaPolicy[]>;
   getSchemaPolicyForOrganization(organizationId: string): Promise<SchemaPolicy | null>;
   getSchemaPolicyForProject(projectId: string): Promise<SchemaPolicy | null>;
+
+  /** Document Collections */
+  getPaginatedDocumentCollectionsForTarget(_: {
+    targetId: string;
+    first: number | null;
+    cursor: null | string;
+  }): Promise<
+    Readonly<{
+      items: ReadonlyArray<{
+        node: DocumentCollection;
+        cursor: string;
+      }>;
+      pageInfo: Readonly<{
+        hasNextPage: boolean;
+        hasPreviousPage: boolean;
+        startCursor: string;
+        endCursor: string;
+      }>;
+    }>
+  >;
+
+  createDocumentCollection(_: {
+    targetId: string;
+    title: string;
+    description: string;
+    createdByUserId: string | null;
+  }): Promise<DocumentCollection>;
+
+  /**
+   * Returns null if the document collection does not exist (did not get deleted).
+   * Returns the id of the deleted document collection if it got deleted
+   */
+  deleteDocumentCollection(_: { documentCollectionId: string }): Promise<string | null>;
+
+  /**
+   * Returns null if the document collection does not exist (did not get updated).
+   */
+  updateDocumentCollection(_: {
+    documentCollectionId: string;
+    title: string | null;
+    description: string | null;
+  }): Promise<DocumentCollection | null>;
+
+  getDocumentCollection(_: { id: string }): Promise<DocumentCollection | null>;
+
+  getPaginatedDocumentsForDocumentCollection(_: {
+    documentCollectionId: string;
+    first: number | null;
+    cursor: null | string;
+  }): Promise<
+    Readonly<{
+      items: ReadonlyArray<{
+        node: DocumentCollectionDocument;
+        cursor: string;
+      }>;
+      pageInfo: Readonly<{
+        hasNextPage: boolean;
+        hasPreviousPage: boolean;
+        startCursor: string;
+        endCursor: string;
+      }>;
+    }>
+  >;
+
+  createDocumentCollectionDocument(_: {
+    documentCollectionId: string;
+    title: string;
+    contents: string;
+    variables: string | null;
+    headers: string | null;
+    createdByUserId: string | null;
+  }): Promise<DocumentCollectionDocument>;
+
+  /**
+   * Returns null if the document collection document does not exist (did not get deleted).
+   * Returns the id of the deleted document collection document if it got deleted
+   */
+  deleteDocumentCollectionDocument(_: {
+    documentCollectionDocumentId: string;
+  }): Promise<string | null>;
+
+  /**
+   * Returns null if the document collection document does not exist (did not get updated).
+   */
+  updateDocumentCollectionDocument(_: {
+    documentCollectionDocumentId: string;
+    title: string | null;
+    contents: string | null;
+    variables: string | null;
+    headers: string | null;
+  }): Promise<DocumentCollectionDocument | null>;
+
+  getDocumentCollectionDocument(_: { id: string }): Promise<DocumentCollectionDocument | null>;
 }
 
 @Injectable()

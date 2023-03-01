@@ -170,7 +170,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
             if (authHeaderParts.length === 2 && authHeaderParts[0] === 'Bearer') {
               const accessToken = authHeaderParts[1];
               // The token issued by Hive is always 32 characters long.
-              // Everything longer should be treated as an supertokens token (JWT).
+              // Everything longer should be treated as a supertokens token (JWT).
               if (accessToken.length > 32) {
                 return await verifySuperTokensSession(
                   options.supertokens.connectionUri,

@@ -1,17 +1,356 @@
-import { ReactElement } from 'react';
+import { ReactElement, useEffect, useRef, useState } from 'react';
+import clsx from 'clsx';
 import { GraphiQL } from 'graphiql';
+import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
-import { Button, DocsLink, DocsNote, Title } from '@/components/v2';
-import { HiveLogo, Link2Icon } from '@/components/v2/icon';
-import { ConnectLabModal } from '@/components/v2/modals/connect-lab';
-import { graphql } from '@/gql';
-import { useRouteSelector, useToggle } from '@/lib/hooks';
+import { TargetLayout_OrganizationFragment } from '@/components/layouts/target';
+import {
+  Accordion,
+  Button,
+  DocsLink,
+  DocsNote,
+  EmptyList,
+  Heading,
+  Link,
+  Spinner,
+  Title,
+} from '@/components/v2';
+import { HiveLogo, SaveIcon } from '@/components/v2/icon';
+import {
+  ConnectLabModal,
+  CreateCollectionModal,
+  CreateOperationModal,
+  DeleteCollectionModal,
+  DeleteOperationModal,
+} from '@/components/v2/modals';
+import { FragmentType, graphql, useFragment } from '@/gql';
+import { TargetAccessScope } from '@/gql/graphql';
+import { OperationDocument } from '@/graphql';
+import { canAccessTarget, CanAccessTarget_MemberFragment } from '@/lib/access/target';
+import { useClipboard, useNotifications, useRouteSelector, useToggle } from '@/lib/hooks';
+import { useCollections } from '@/lib/hooks/use-collections';
 import { withSessionProtection } from '@/lib/supertokens/guard';
+import { GraphiQLPlugin, Menu, ToolbarButton, useEditorContext } from '@graphiql/react';
 import { createGraphiQLFetcher } from '@graphiql/toolkit';
+import { BookmarkIcon, DotsVerticalIcon, Link1Icon } from '@radix-ui/react-icons';
 import 'graphiql/graphiql.css';
 
-const Page = ({ endpoint }: { endpoint: string }): ReactElement => {
+// function Share(): ReactElement {
+//   const { queryEditor, variableEditor, headerEditor } = useEditorContext({
+//     nonNull: true,
+//   });
+//   const copyToClipboard = useClipboard();
+//
+//   const headers = headerEditor?.getValue();
+//   const variables = variableEditor?.getValue();
+//   const query = queryEditor?.getValue();
+//
+//   const label = 'Share query';
+//
+//   return (
+//     <Menu>
+//       <Tooltip label={label}>
+//         <Menu.Button className="graphiql-toolbar-button" aria-label={label}>
+//           <Share2Icon className="graphiql-toolbar-icon" />
+//         </Menu.Button>
+//       </Tooltip>
+//
+//       <Menu.List>
+//         {['With headers', 'With variables', 'With both'].map((name, i) => (
+//           <Menu.Item
+//             key={name}
+//             onSelect={async () => {
+//               const data: { query: string; headers?: string; variables?: string } = { query };
+//               if (i === 0 || i === 3) data.headers = headers;
+//               if (i === 1 || i === 3) data.variables = variables;
+//
+//               await copyToClipboard(JSON.stringify(data));
+//             }}
+//           >
+//             {name}
+//           </Menu.Item>
+//         ))}
+//       </Menu.List>
+//     </Menu>
+//   );
+// }
+
+function hashFromTabContents(args: {
+  query: string | null;
+  variables?: string | null;
+  headers?: string | null;
+}): string {
+  return [args.query ?? '', args.variables ?? '', args.headers ?? ''].join('|');
+}
+
+function useOperation(operationId: string) {
+  const [{ data }] = useQuery({
+    query: OperationDocument,
+    variables: {
+      id: operationId,
+    },
+    pause: !operationId,
+  });
+  const editorContext = useEditorContext({ nonNull: true });
+
+  const hasAllEditors = !!(
+    editorContext.queryEditor &&
+    editorContext.variableEditor &&
+    editorContext.headerEditor
+  );
+
+  useEffect(() => {
+    const operation = data?.operation;
+    console.log('useEffect', operationId, operation);
+    if (hasAllEditors && operationId && operation) {
+      // first found tab hy hash
+      const operationHash = hashFromTabContents(operation);
+      const activeTabIndex = editorContext.tabs.findIndex(tab => operationHash === tab.hash);
+      if (activeTabIndex === -1) {
+        editorContext.addTab();
+        editorContext.queryEditor.setValue(operation.query);
+        editorContext.variableEditor.setValue(operation.variables);
+        editorContext.headerEditor.setValue(operation.headers);
+      } else {
+        editorContext.changeTab(activeTabIndex);
+      }
+    }
+  }, [hasAllEditors, operationId, data?.operation.id]);
+}
+
+function useOperationCollectionsPlugin(props: {
+  meRef: FragmentType<typeof CanAccessTarget_MemberFragment>;
+}) {
+  const propsRef = useRef(props);
+  propsRef.current = props;
+  const pluginRef = useRef<GraphiQLPlugin>();
+  pluginRef.current ||= {
+    title: 'Operation Collections',
+    icon: BookmarkIcon,
+    content: function Content() {
+      const [isCollectionModalOpen, toggleCollectionModal] = useToggle();
+      const [isOperationModalOpen, toggleOperationModal] = useToggle();
+      const { collections, loading } = useCollections();
+      const [operationId, setOperationId] = useState('');
+      const [collectionId, setCollectionId] = useState('');
+      const [isDeleteCollectionModalOpen, toggleDeleteCollectionModalOpen] = useToggle();
+      const [isDeleteOperationModalOpen, toggleDeleteOperationModalOpen] = useToggle();
+      const copyToClipboard = useClipboard();
+      const router = useRouteSelector();
+      const operation = router.query.operation as string;
+      useOperation(operation);
+
+      const canEdit = canAccessTarget(TargetAccessScope.Settings, props.meRef);
+      const canDelete = canAccessTarget(TargetAccessScope.Delete, props.meRef);
+      const shouldShowMenu = canEdit || canDelete;
+
+      const initialSelectedCollection =
+        operation &&
+        collections?.find(c => c.items.edges.some(({ node }) => node.id === operation))?.id;
+      return (
+        <>
+          <div className="flex justify-between">
+            <Heading>Operation Collections</Heading>
+            {canEdit ? (
+              <Button
+                variant="link"
+                onClick={() => {
+                  if (collectionId) setCollectionId('');
+                  toggleCollectionModal();
+                }}
+                data-cy="create-collection"
+              >
+                + Create
+              </Button>
+            ) : null}
+          </div>
+          <p className="mb-3 font-light text-gray-300">Shared across your organization</p>
+          {loading ? (
+            <Spinner />
+          ) : (
+            <Accordion defaultValue={initialSelectedCollection}>
+              <CreateCollectionModal
+                isOpen={isCollectionModalOpen}
+                toggleModalOpen={toggleCollectionModal}
+                collectionId={collectionId}
+              />
+              <DeleteCollectionModal
+                isOpen={isDeleteCollectionModalOpen}
+                toggleModalOpen={toggleDeleteCollectionModalOpen}
+                collectionId={collectionId}
+              />
+              <CreateOperationModal
+                isOpen={isOperationModalOpen}
+                toggleModalOpen={toggleOperationModal}
+                operationId={operationId}
+              />
+              <DeleteOperationModal
+                isOpen={isDeleteOperationModalOpen}
+                toggleModalOpen={toggleDeleteOperationModalOpen}
+                operationId={operationId}
+              />
+              {collections?.length ? (
+                collections.map(collection => (
+                  <Accordion.Item key={collection.id} value={collection.id}>
+                    <div className="flex">
+                      <Accordion.Header>{collection.name}</Accordion.Header>
+
+                      {shouldShowMenu ? (
+                        <Menu>
+                          <Menu.Button
+                            className="graphiql-toolbar-button !shrink-0"
+                            aria-label="More"
+                            data-cy="collection-3-dots"
+                          >
+                            <DotsVerticalIcon />
+                          </Menu.Button>
+
+                          <Menu.List>
+                            <Menu.Item
+                              onSelect={() => {
+                                setCollectionId(collection.id);
+                                toggleCollectionModal();
+                              }}
+                              data-cy="collection-edit"
+                            >
+                              Edit
+                            </Menu.Item>
+                            <Menu.Item
+                              onSelect={() => {
+                                setCollectionId(collection.id);
+                                toggleDeleteCollectionModalOpen();
+                              }}
+                              className="!text-red-500"
+                              data-cy="collection-delete"
+                            >
+                              Delete
+                            </Menu.Item>
+                          </Menu.List>
+                        </Menu>
+                      ) : null}
+                    </div>
+                    <Accordion.Content className="pr-0">
+                      {collection.items.edges.length
+                        ? collection.items.edges.map(({ node }) => (
+                            <div key={node.id} className="flex justify-between items-center">
+                              <Link
+                                href={{
+                                  query: {
+                                    operation: node.id,
+                                    orgId: router.organizationId,
+                                    projectId: router.projectId,
+                                    targetId: router.targetId,
+                                  },
+                                }}
+                                className={clsx(
+                                  'hover:bg-gray-100/10 w-full rounded p-2 !text-gray-300',
+                                  router.query.operation === node.id && 'bg-gray-100/10',
+                                )}
+                              >
+                                {node.name}
+                              </Link>
+                              <Menu>
+                                <Menu.Button
+                                  className="graphiql-toolbar-button"
+                                  aria-label="More"
+                                  data-cy="operation-3-dots"
+                                >
+                                  <DotsVerticalIcon />
+                                </Menu.Button>
+
+                                <Menu.List>
+                                  {canEdit ? (
+                                    <Menu.Item
+                                      onSelect={() => {
+                                        setOperationId(node.id);
+                                        toggleOperationModal();
+                                      }}
+                                      data-cy="edit-operation"
+                                    >
+                                      Edit operation
+                                    </Menu.Item>
+                                  ) : null}
+                                  <Menu.Item
+                                    onSelect={async () => {
+                                      const url = new URL(window.location.href);
+                                      await copyToClipboard(
+                                        `${url.origin}${url.pathname}?operation=${node.id}`,
+                                      );
+                                    }}
+                                  >
+                                    Copy link to operation
+                                  </Menu.Item>
+                                  {canDelete ? (
+                                    <Menu.Item
+                                      onSelect={() => {
+                                        setOperationId(node.id);
+                                        toggleDeleteOperationModalOpen();
+                                      }}
+                                      className="!text-red-500"
+                                      data-cy="remove-operation"
+                                    >
+                                      Delete
+                                    </Menu.Item>
+                                  ) : null}
+                                </Menu.List>
+                              </Menu>
+                            </div>
+                          ))
+                        : 'No operations yet. Use the editor to create an operation, and click Save to store and share it.'}
+                    </Accordion.Content>
+                  </Accordion.Item>
+                ))
+              ) : (
+                <EmptyList
+                  title="Add your first collection"
+                  description="Collections shared across organization"
+                />
+              )}
+            </Accordion>
+          )}
+        </>
+      );
+    },
+  };
+
+  return pluginRef.current;
+}
+
+function Save(): ReactElement {
+  const [isOpen, toggle] = useToggle();
+  const { collections } = useCollections();
+  const notify = useNotifications();
+  return (
+    <>
+      <ToolbarButton
+        onClick={() => {
+          if (collections?.length) {
+            toggle();
+          } else {
+            notify('You must create collection first!', 'warning');
+          }
+        }}
+        label="Save operation"
+        data-cy="save-collection"
+      >
+        <SaveIcon className="graphiql-toolbar-icon !h-5 w-auto" />
+      </ToolbarButton>
+      <CreateOperationModal isOpen={isOpen} toggleModalOpen={toggle} />
+    </>
+  );
+}
+
+function Page({
+  endpoint,
+  organizationRef,
+}: {
+  endpoint: string;
+  organizationRef: FragmentType<typeof TargetLayout_OrganizationFragment>;
+}): ReactElement {
+  const { me } = useFragment(TargetLayout_OrganizationFragment, organizationRef);
+  const operationCollectionsPlugin = useOperationCollectionsPlugin({ meRef: me });
+
   return (
     <>
       <DocsNote>
@@ -24,14 +363,26 @@ const Page = ({ endpoint }: { endpoint: string }): ReactElement => {
           --color-primary: 40, 89%, 60% !important;
         }
       `}</style>
-      <GraphiQL fetcher={createGraphiQLFetcher({ url: endpoint })}>
+      <GraphiQL
+        fetcher={createGraphiQLFetcher({ url: endpoint })}
+        toolbar={{
+          additionalContent: (
+            <>
+              {/*<Share />*/}
+              <Save />
+            </>
+          ),
+        }}
+        plugins={[operationCollectionsPlugin]}
+        visiblePlugin={operationCollectionsPlugin}
+      >
         <GraphiQL.Logo>
-          <HiveLogo className="h-6 w-6" />
+          <HiveLogo className="h-6 w-auto" />
         </GraphiQL.Logo>
       </GraphiQL>
     </>
   );
-};
+}
 
 const TargetLaboratoryPageQuery = graphql(`
   query TargetLaboratoryPageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
@@ -56,7 +407,7 @@ const TargetLaboratoryPageQuery = graphql(`
 function LaboratoryPage(): ReactElement {
   const [isModalOpen, toggleModalOpen] = useToggle();
   const router = useRouteSelector();
-  const endpoint = `${location.origin}/api/lab/${router.organizationId}/${router.projectId}/${router.targetId}`;
+  const endpoint = `${window.location.origin}/api/lab/${router.organizationId}/${router.projectId}/${router.targetId}`;
 
   return (
     <>
@@ -69,7 +420,7 @@ function LaboratoryPage(): ReactElement {
           <>
             <Button size="large" variant="primary" onClick={toggleModalOpen} className="ml-auto">
               Use Schema Externally
-              <Link2Icon className="ml-8 h-4 w-4" />
+              <Link1Icon className="ml-8 h-6 w-auto" />
             </Button>
             <ConnectLabModal
               isOpen={isModalOpen}
@@ -79,7 +430,9 @@ function LaboratoryPage(): ReactElement {
           </>
         }
       >
-        {() => <Page endpoint={endpoint} />}
+        {({ organization }) => (
+          <Page organizationRef={organization!.organization} endpoint={endpoint} />
+        )}
       </TargetLayout>
     </>
   );

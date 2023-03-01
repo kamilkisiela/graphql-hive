@@ -1,0 +1,12 @@
+query Operation($id: ID!) {
+  operation(id: $id) {
+    id
+    name
+    query
+    headers
+    variables
+    collection {
+      id
+    }
+  }
+}

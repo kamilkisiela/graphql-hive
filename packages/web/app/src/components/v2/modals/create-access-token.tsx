@@ -68,7 +68,7 @@ export function CreateAccessTokenModal({
   const organization = organizationQuery.data?.organization?.organization;
 
   return (
-    <Modal open={isOpen} onOpenChange={toggleModalOpen} className="w-[650px] h-5/6 flex">
+    <Modal open={isOpen} onOpenChange={toggleModalOpen} className="w-[800px] h-5/6 flex">
       {organization ? (
         <ModalContent
           organization={organization}
@@ -345,11 +345,17 @@ function ModalContent(props: {
 
           {mutation.error && <div className="text-sm text-red-500">{mutation.error.message}</div>}
 
-          <div className="flex w-full gap-2">
+          <div className="flex w-full gap-2 pb-2">
             <Button type="button" size="large" block onClick={props.toggleModalOpen}>
               Cancel
             </Button>
-            <Button type="submit" size="large" block variant="primary" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              size="large"
+              block
+              variant="primary"
+              disabled={isSubmitting || manager.noneSelected}
+            >
               Generate Token
             </Button>
           </div>

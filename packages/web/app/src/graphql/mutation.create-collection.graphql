@@ -1,0 +1,14 @@
+mutation CreateCollection($input: CreateCollectionInput!) {
+  createCollection(input: $input) {
+    id
+    name
+    items(first: 100) {
+      edges {
+        node {
+          id
+          name
+        }
+      }
+    }
+  }
+}

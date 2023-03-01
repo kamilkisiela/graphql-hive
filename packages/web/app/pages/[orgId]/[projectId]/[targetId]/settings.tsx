@@ -87,23 +87,19 @@ function RegistryAccessTokens(props: {
         targets/projects. In most cases, this token is used from the Hive CLI.
         <br />
         <DocsLink href="/management/targets#registry-access-tokens">
-          Learn more about Registry Access Token
+          Learn more about Registry Access Tokens
         </DocsLink>
       </DocsNote>
       {canManage && (
         <div className="my-3.5 flex justify-between">
-          <Button variant="secondary" onClick={toggleModalOpen} size="large" className="px-5">
-            Generate new token
+          <Button variant="primary" onClick={toggleModalOpen} size="large" className="px-5">
+            Create new registry token
           </Button>
-          <Button
-            size="large"
-            danger
-            disabled={checked.length === 0 || deleting}
-            className="px-9"
-            onClick={deleteTokens}
-          >
-            Delete {checked.length || null}
-          </Button>
+          {checked.length === 0 ? null : (
+            <Button size="large" danger disabled={deleting} className="px-9" onClick={deleteTokens}>
+              Delete {checked.length || null}
+            </Button>
+          )}
         </div>
       )}
       <Table>

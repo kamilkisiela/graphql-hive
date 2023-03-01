@@ -33,9 +33,7 @@ export class AlertsManager {
     private projectManager: ProjectManager,
     private storage: Storage,
   ) {
-    this.logger = logger.child({
-      source: 'AlertsManager',
-    });
+    this.logger = logger.child({ source: 'AlertsManager' });
   }
 
   async addChannel(input: AlertsModule.AddAlertChannelInput): Promise<AlertChannel> {
@@ -174,14 +172,8 @@ export class AlertsManager {
     });
 
     const [channels, alerts] = await Promise.all([
-      this.getChannels({
-        organization,
-        project,
-      }),
-      this.getAlerts({
-        organization,
-        project,
-      }),
+      this.getChannels({ organization, project }),
+      this.getAlerts({ organization, project }),
     ]);
 
     const matchingAlerts = alerts.filter(

@@ -1,5 +1,5 @@
 import { ReactElement, ReactNode } from 'react';
-import clsx from 'clsx';
+import { clsx } from 'clsx';
 import { Button } from '@/components/v2';
 import { XIcon } from '@/components/v2/icon';
 import {
@@ -16,9 +16,9 @@ import {
 } from '@radix-ui/react-dialog';
 
 const widthBySize = {
-  sm: 'w-[450px]',
-  md: 'w-[600px]',
-  lg: 'w-[800px]',
+  sm: clsx('w-[450px]'),
+  md: clsx('w-[600px]'),
+  lg: clsx('w-[800px]'),
 };
 
 const Modal = ({
