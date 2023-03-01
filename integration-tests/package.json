@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "prepare:env": "cd ../ && pnpm build:libraries && pnpm build:services",
-    "test:integration": "vitest ."
+    "test:integration": "vitest"
   },
   "dependencies": {
     "@apollo/gateway": "2.3.2",
@@ -32,6 +32,7 @@
     "@graphql-hive/client": "workspace:*",
     "@hive/rate-limit": "workspace:*",
     "@hive/server": "workspace:*",
+    "@hive/storage": "workspace:*",
     "@types/dockerode": "3.3.14",
     "@types/ioredis": "4.28.10",
     "tslib": "2.5.0",
