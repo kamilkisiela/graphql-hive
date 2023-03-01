@@ -52,6 +52,28 @@ export interface cdn_access_tokens {
   target_id: string;
 }
 
+export interface document_collection_documents {
+  contents: string;
+  created_at: Date;
+  created_by_user_id: string | null;
+  document_collection_id: string;
+  headers: string | null;
+  id: string;
+  title: string;
+  updated_at: Date;
+  variables: string | null;
+}
+
+export interface document_collections {
+  created_at: Date;
+  created_by_user_id: string | null;
+  description: string | null;
+  id: string;
+  target_id: string;
+  title: string;
+  updated_at: Date;
+}
+
 export interface migration {
   date: Date;
   hash: string;
