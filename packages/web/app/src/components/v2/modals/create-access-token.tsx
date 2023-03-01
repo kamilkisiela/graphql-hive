@@ -108,7 +108,11 @@ const TOKEN_SIMPLE_PRESETS: TokenPreset[] = [
     description:
       'This set of permissions allows the token to check new schemas, push schemas, and report GraphQL operations usage.',
     permissions: {
-      target: [TargetAccessScope.RegistryWrite],
+      target: [
+        TargetAccessScope.Read,
+        TargetAccessScope.RegistryRead,
+        TargetAccessScope.RegistryWrite,
+      ],
       project: [],
       organization: [],
     },
@@ -118,7 +122,11 @@ const TOKEN_SIMPLE_PRESETS: TokenPreset[] = [
     description:
       'This set of permissions allows the token to check new schemas. You can use this kind of token as part if your continuous integration pipeline.',
     permissions: {
-      target: [TargetAccessScope.RegistryRead],
+      target: [
+        TargetAccessScope.Read,
+        TargetAccessScope.RegistryRead,
+        TargetAccessScope.RegistryRead,
+      ],
       project: [],
       organization: [],
     },
@@ -128,7 +136,11 @@ const TOKEN_SIMPLE_PRESETS: TokenPreset[] = [
     description:
       'This set of permissions allows the token to check new schemas, push schemas, and report GraphQL operations usage.',
     permissions: {
-      target: [TargetAccessScope.RegistryWrite],
+      target: [
+        TargetAccessScope.Read,
+        TargetAccessScope.RegistryRead,
+        TargetAccessScope.RegistryWrite,
+      ],
       project: [],
       organization: [],
     },
@@ -239,13 +251,14 @@ function ModalContent(props: {
   return (
     <>
       {mutation.data?.createToken.ok ? (
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-5 grow">
           <Heading className="text-center">Token successfully created!</Heading>
           <CopyValue value={mutation.data.createToken.ok.secret} />
           <Tag color="green">
             This is your unique API key and it is non-recoverable. If you lose this key, you will
             need to create a new one.
           </Tag>
+          <div className="grow" />
           <Button
             variant="primary"
             size="large"
