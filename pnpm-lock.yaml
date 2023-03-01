@@ -162,8 +162,8 @@ importers:
       '@graphql-typed-document-node/core': 3.1.2
       '@hive/rate-limit': workspace:*
       '@hive/server': workspace:*
-      '@trpc/client': 10.13.0
-      '@trpc/server': 10.13.0
+      '@trpc/client': 10.13.2
+      '@trpc/server': 10.13.2
       '@types/dockerode': 3.3.14
       '@types/ioredis': 4.28.10
       '@whatwg-node/fetch': 0.8.1
@@ -186,8 +186,8 @@ importers:
       '@graphql-hive/client': link:../packages/libraries/client
       '@graphql-hive/core': link:../packages/libraries/core
       '@graphql-typed-document-node/core': 3.1.2_graphql@16.6.0
-      '@trpc/client': 10.13.0_@trpc+server@10.13.0
-      '@trpc/server': 10.13.0
+      '@trpc/client': 10.13.2_@trpc+server@10.13.2
+      '@trpc/server': 10.13.2
       '@whatwg-node/fetch': 0.8.1
       bcryptjs: 2.4.3
       date-fns: 2.29.3
@@ -373,8 +373,8 @@ importers:
       '@sentry/types': 7.39.0
       '@slack/web-api': 6.8.1
       '@theguild/buddy': 0.1.0
-      '@trpc/client': 10.13.0
-      '@trpc/server': 10.13.0
+      '@trpc/client': 10.13.2
+      '@trpc/server': 10.13.2
       '@types/bcryptjs': 2.4.2
       '@types/ioredis-mock': 8.2.1
       '@types/lodash': 4.14.191
@@ -410,8 +410,8 @@ importers:
       '@sentry/types': 7.39.0
       '@slack/web-api': 6.8.1
       '@theguild/buddy': 0.1.0_ryylgra5xglhidfoiaxehn22hq
-      '@trpc/client': 10.13.0_@trpc+server@10.13.0
-      '@trpc/server': 10.13.0
+      '@trpc/client': 10.13.2_@trpc+server@10.13.2
+      '@trpc/server': 10.13.2
       '@whatwg-node/fetch': 0.8.1
       agentkeepalive: 4.2.1
       bcryptjs: 2.4.3
@@ -507,7 +507,7 @@ importers:
     specifiers:
       '@hive/service-common': workspace:*
       '@sentry/node': 7.39.0
-      '@trpc/server': 10.13.0
+      '@trpc/server': 10.13.2
       '@types/mjml': 4.7.0
       '@types/nodemailer': 6.4.7
       '@types/sendmail': 1.4.4
@@ -525,7 +525,7 @@ importers:
       zod: 3.20.6
     dependencies:
       '@sentry/node': 7.39.0
-      '@trpc/server': 10.13.0
+      '@trpc/server': 10.13.2
       '@whatwg-node/fetch': 0.8.1
       bullmq: 3.9.0_xbmkiyyfti7h6orsfs6pdmi4s4
       dotenv: 16.0.3
@@ -580,8 +580,8 @@ importers:
       '@hive/storage': workspace:*
       '@sentry/node': 7.39.0
       '@sentry/tracing': 7.39.0
-      '@trpc/client': 10.13.0
-      '@trpc/server': 10.13.0
+      '@trpc/client': 10.13.2
+      '@trpc/server': 10.13.2
       '@whatwg-node/fetch': 0.8.1
       date-fns: 2.29.3
       dotenv: 16.0.3
@@ -593,8 +593,8 @@ importers:
     dependencies:
       '@sentry/node': 7.39.0
       '@sentry/tracing': 7.39.0
-      '@trpc/client': 10.13.0_@trpc+server@10.13.0
-      '@trpc/server': 10.13.0
+      '@trpc/client': 10.13.2_@trpc+server@10.13.2
+      '@trpc/server': 10.13.2
       '@whatwg-node/fetch': 0.8.1
       date-fns: 2.29.3
       dotenv: 16.0.3
@@ -617,7 +617,7 @@ importers:
       '@hive/service-common': workspace:*
       '@sentry/node': 7.39.0
       '@sentry/tracing': 7.39.0
-      '@trpc/server': 10.13.0
+      '@trpc/server': 10.13.2
       '@types/async-retry': 1.4.5
       '@types/ioredis-mock': 8.2.1
       '@whatwg-node/fetch': 0.8.1
@@ -636,7 +636,7 @@ importers:
       '@graphql-tools/stitching-directives': 2.3.31_graphql@16.6.0
       '@sentry/node': 7.39.0
       '@sentry/tracing': 7.39.0
-      '@trpc/server': 10.13.0
+      '@trpc/server': 10.13.2
       '@whatwg-node/fetch': 0.8.1
       dotenv: 16.0.3
       got: 12.5.3
@@ -673,7 +673,7 @@ importers:
       '@sentry/node': 7.39.0
       '@sentry/tracing': 7.39.0
       '@swc/core': 1.3.37
-      '@trpc/server': 10.13.0
+      '@trpc/server': 10.13.2
       '@whatwg-node/fetch': 0.8.1
       '@whatwg-node/server': 0.7.1
       dotenv: 16.0.3
@@ -700,7 +700,7 @@ importers:
       '@sentry/integrations': 7.39.0
       '@sentry/node': 7.39.0
       '@sentry/tracing': 7.39.0
-      '@trpc/server': 10.13.0
+      '@trpc/server': 10.13.2
       '@whatwg-node/fetch': 0.8.1
       '@whatwg-node/server': 0.7.1
       dotenv: 16.0.3
@@ -790,8 +790,8 @@ importers:
       '@hive/storage': workspace:*
       '@sentry/node': 7.39.0
       '@sentry/tracing': 7.39.0
-      '@trpc/client': 10.13.0
-      '@trpc/server': 10.13.0
+      '@trpc/client': 10.13.2
+      '@trpc/server': 10.13.2
       '@whatwg-node/fetch': 0.8.1
       date-fns: 2.29.3
       dotenv: 16.0.3
@@ -803,8 +803,8 @@ importers:
     dependencies:
       '@sentry/node': 7.39.0
       '@sentry/tracing': 7.39.0
-      '@trpc/client': 10.13.0_@trpc+server@10.13.0
-      '@trpc/server': 10.13.0
+      '@trpc/client': 10.13.2_@trpc+server@10.13.2
+      '@trpc/server': 10.13.2
       '@whatwg-node/fetch': 0.8.1
       date-fns: 2.29.3
       dotenv: 16.0.3
@@ -823,7 +823,7 @@ importers:
       '@hive/storage': workspace:*
       '@sentry/node': 7.39.0
       '@sentry/tracing': 7.39.0
-      '@trpc/server': 10.13.0
+      '@trpc/server': 10.13.2
       '@types/ms': 0.7.31
       dotenv: 16.0.3
       fastify: 3.29.5
@@ -838,7 +838,7 @@ importers:
     dependencies:
       '@sentry/node': 7.39.0
       '@sentry/tracing': 7.39.0
-      '@trpc/server': 10.13.0
+      '@trpc/server': 10.13.2
       dotenv: 16.0.3
       ioredis: 5.3.1
       ms: 2.1.3
@@ -861,8 +861,8 @@ importers:
       '@hive/usage-common': workspace:*
       '@sentry/node': 7.39.0
       '@sentry/tracing': 7.39.0
-      '@trpc/client': 10.13.0
-      '@trpc/server': 10.13.0
+      '@trpc/client': 10.13.2
+      '@trpc/server': 10.13.2
       '@whatwg-node/fetch': 0.8.1
       ajv: 8.12.0
       dotenv: 16.0.3
@@ -875,8 +875,8 @@ importers:
     dependencies:
       '@sentry/node': 7.39.0
       '@sentry/tracing': 7.39.0
-      '@trpc/client': 10.13.0_@trpc+server@10.13.0
-      '@trpc/server': 10.13.0
+      '@trpc/client': 10.13.2_@trpc+server@10.13.2
+      '@trpc/server': 10.13.2
       '@whatwg-node/fetch': 0.8.1
       ajv: 8.12.0
       dotenv: 16.0.3
@@ -903,7 +903,7 @@ importers:
       '@hive/service-common': workspace:*
       '@sentry/node': 7.39.0
       '@sentry/tracing': 7.39.0
-      '@trpc/server': 10.13.0
+      '@trpc/server': 10.13.2
       '@whatwg-node/fetch': 0.8.1
       dotenv: 16.0.3
       got: 12.5.3
@@ -914,7 +914,7 @@ importers:
     dependencies:
       '@sentry/node': 7.39.0
       '@sentry/tracing': 7.39.0
-      '@trpc/server': 10.13.0
+      '@trpc/server': 10.13.2
       '@whatwg-node/fetch': 0.8.1
       dotenv: 16.0.3
       got: 12.5.3
@@ -966,7 +966,7 @@ importers:
       '@hive/service-common': workspace:*
       '@sentry/node': 7.39.0
       '@sentry/tracing': 7.39.0
-      '@trpc/server': 10.13.0
+      '@trpc/server': 10.13.2
       bullmq: 3.9.0
       copyfiles: 2.4.1
       dotenv: 16.0.3
@@ -979,7 +979,7 @@ importers:
     dependencies:
       '@sentry/node': 7.39.0
       '@sentry/tracing': 7.39.0
-      '@trpc/server': 10.13.0
+      '@trpc/server': 10.13.2
       bullmq: 3.9.0_xbmkiyyfti7h6orsfs6pdmi4s4
       dotenv: 16.0.3
       got: 12.5.3
@@ -1034,8 +1034,8 @@ importers:
       '@tailwindcss/line-clamp': 0.4.2
       '@tanstack/react-table': 8.0.0-beta.8
       '@theguild/editor': 1.2.5
-      '@trpc/client': 10.13.0
-      '@trpc/server': 10.13.0
+      '@trpc/client': 10.13.2
+      '@trpc/server': 10.13.2
       '@types/cookies': 0.7.7
       '@types/dompurify': 2.4.0
       '@types/js-cookie': 3.0.3
@@ -1123,8 +1123,8 @@ importers:
       '@stripe/stripe-js': 1.47.0
       '@tanstack/react-table': 8.0.0-beta.8_biqbaboplfbrettd7655fr4n2y
       '@theguild/editor': 1.2.5_4cswkdzjgmv6w3vdsqfc5dospe
-      '@trpc/client': 10.13.0_@trpc+server@10.13.0
-      '@trpc/server': 10.13.0
+      '@trpc/client': 10.13.2_@trpc+server@10.13.2
+      '@trpc/server': 10.13.2
       '@urql/core': 3.1.1_graphql@16.6.0
       '@urql/devtools': 2.0.3_ioimjbecbkqzfeizgamzrgwc3y
       '@urql/exchange-graphcache': 5.0.9_graphql@16.6.0
@@ -10870,12 +10870,12 @@ packages:
       telejson: 7.0.4
     dev: true
 
-  /@storybook/channel-postmessage/7.0.0-beta.55:
-    resolution: {integrity: sha512-pwyCBThY/4re5VLBOd0kZJQpb9oGu959W49Iij75gRl8kytAjuXNrVuLqMCWYBN7auseQmuadzwiieLGPEWvhw==}
+  /@storybook/channel-postmessage/7.0.0-beta.56:
+    resolution: {integrity: sha512-7klCpylZTuU7ymwOOuGnvhYHjHLD5kNVBkEr95meqAmiB7FMhCrYSsFvs8d+r37/K4FQ64JrOzitgrDpSDDHBQ==}
     dependencies:
-      '@storybook/channels': 7.0.0-beta.55
-      '@storybook/client-logger': 7.0.0-beta.55
-      '@storybook/core-events': 7.0.0-beta.55
+      '@storybook/channels': 7.0.0-beta.56
+      '@storybook/client-logger': 7.0.0-beta.56
+      '@storybook/core-events': 7.0.0-beta.56
       '@storybook/global': 5.0.0
       qs: 6.11.0
       telejson: 7.0.4
@@ -10902,8 +10902,8 @@ packages:
     resolution: {integrity: sha512-CXV3koGjshDZvRrQ4Ck44vBbarMVtiFW9MeBrXaCW7/dElKTYEH8WBiGkqHuna9Pio5ZlVDGVzxn9JqN5J6bKA==}
     dev: true
 
-  /@storybook/channels/7.0.0-beta.55:
-    resolution: {integrity: sha512-Cdr3m2Ud27ERRzZCJqfBTWDH+RP74vkzW6UjRv+QTYfiwqCPZORoSGJiFSC2ExGGiJJ0kw0lDDeAixMJ+qpY2g==}
+  /@storybook/channels/7.0.0-beta.56:
+    resolution: {integrity: sha512-AYnUehsL2Y8kKeF45g/fvmBXGBXsK/BpymaJOjas3/JqC16xUNUTbRBYcD57NAEx3YJbhUArjcWYCpq0+u7YYQ==}
     dev: true
 
   /@storybook/cli/7.0.0-beta.54:
@@ -10975,8 +10975,8 @@ packages:
       '@storybook/global': 5.0.0
     dev: true
 
-  /@storybook/client-logger/7.0.0-beta.55:
-    resolution: {integrity: sha512-Nj8fieakoY1pKLLYoNa3D6efPOPxQe0u9hglL8hMclumabeTnvTI+KwdPM7ReFJH6fW6Ydvnt1dRUfM/LDCaCA==}
+  /@storybook/client-logger/7.0.0-beta.56:
+    resolution: {integrity: sha512-KaNVGK7ee8GQPzg7YdtAHSsDYQhOEzzuOnDdOK4d5WnBX3UphHIVEkhvjWAFY9gGlTZv3P/3ToGAYXkguqzfPQ==}
     dependencies:
       '@storybook/global': 5.0.0
     dev: true
@@ -11081,8 +11081,8 @@ packages:
     resolution: {integrity: sha512-/YDjgPHKqdkbB9+jTv3zKjNDRy0gZnVeFfXyS9jCXj4D0K1pYwzkttHAT/xEu6qFeCI8A8wwEgIh6+0t3xfL9g==}
     dev: true
 
-  /@storybook/core-events/7.0.0-beta.55:
-    resolution: {integrity: sha512-9LLasREVYpfhmVmsPDNx4BTTYHD6Pf11vvWtRQSUi5yWF9nhitr3d8hJrJL/i9Y1oBD1hu5tJZq2CZoj9fN2Lw==}
+  /@storybook/core-events/7.0.0-beta.56:
+    resolution: {integrity: sha512-x1hJwdF4PkClpfov7oPgewb4n4P18mc8PzXdNKyf3UCd6iKkKuVdmLPXSrCcWlLjOi5UAard9RWzA86qPRKMiQ==}
     dev: true
 
   /@storybook/core-server/7.0.0-beta.54:
@@ -11233,14 +11233,14 @@ packages:
       '@storybook/preview-api': 7.0.0-beta.54
     dev: true
 
-  /@storybook/instrumenter/7.0.0-beta.55:
-    resolution: {integrity: sha512-iz3YbwDH97Dg49sl6h4DU/c7Mct7CM5TvmXKcrKXGOkPMhHiPnXlrAYxVHK9Pvpj+IGA1wfM1iL+q4pY9JTpDg==}
+  /@storybook/instrumenter/7.0.0-beta.56:
+    resolution: {integrity: sha512-tmOA8uZcnnX7ocJqr2bGlYQP0yL78yFqoKnD78dD8AWn33dHieDVXcDCzMElO3TLQ1Rl/40LDytC1lAD3cynqA==}
     dependencies:
-      '@storybook/channels': 7.0.0-beta.55
-      '@storybook/client-logger': 7.0.0-beta.55
-      '@storybook/core-events': 7.0.0-beta.55
+      '@storybook/channels': 7.0.0-beta.56
+      '@storybook/client-logger': 7.0.0-beta.56
+      '@storybook/core-events': 7.0.0-beta.56
       '@storybook/global': 5.0.0
-      '@storybook/preview-api': 7.0.0-beta.55
+      '@storybook/preview-api': 7.0.0-beta.56
     dev: true
 
   /@storybook/manager-api/7.0.0-beta.54_biqbaboplfbrettd7655fr4n2y:
@@ -11428,16 +11428,16 @@ packages:
       util-deprecate: 1.0.2
     dev: true
 
-  /@storybook/preview-api/7.0.0-beta.55:
-    resolution: {integrity: sha512-wfSMNkpc1Ou+sqdHLvfTTe9daQq+Byl3QhxnrY/9NcJiPDA2h0a/MF4KJjBr+O0687AQQEpPF1gE2bYMqzdWfw==}
+  /@storybook/preview-api/7.0.0-beta.56:
+    resolution: {integrity: sha512-HEmlJ0/hTJ/KJWJp+usBLVjkWU0EqPdnpF1+Kcw9wDuo5ZcB4cjLWvCgZc0frsOYZWsLCsO07MO8EHl7ICItUA==}
     dependencies:
-      '@storybook/channel-postmessage': 7.0.0-beta.55
-      '@storybook/channels': 7.0.0-beta.55
-      '@storybook/client-logger': 7.0.0-beta.55
-      '@storybook/core-events': 7.0.0-beta.55
+      '@storybook/channel-postmessage': 7.0.0-beta.56
+      '@storybook/channels': 7.0.0-beta.56
+      '@storybook/client-logger': 7.0.0-beta.56
+      '@storybook/core-events': 7.0.0-beta.56
       '@storybook/csf': 0.0.2-next.10
       '@storybook/global': 5.0.0
-      '@storybook/types': 7.0.0-beta.55
+      '@storybook/types': 7.0.0-beta.56
       '@types/qs': 6.9.7
       dequal: 2.0.3
       lodash: 4.17.21
@@ -11627,8 +11627,8 @@ packages:
   /@storybook/testing-library/0.0.14-next.1:
     resolution: {integrity: sha512-1CAl40IKIhcPaCC4pYCG0b9IiYNymktfV/jTrX7ctquRY3akaN7f4A1SippVHosksft0M+rQTFE0ccfWW581fw==}
     dependencies:
-      '@storybook/client-logger': 7.0.0-beta.55
-      '@storybook/instrumenter': 7.0.0-beta.55
+      '@storybook/client-logger': 7.0.0-beta.56
+      '@storybook/instrumenter': 7.0.0-beta.56
       '@testing-library/dom': 8.20.0
       '@testing-library/user-event': 13.5.0_yxlyej73nftwmh2fiao7paxmlm
       ts-dedent: 2.2.0
@@ -11670,10 +11670,10 @@ packages:
       file-system-cache: 2.0.2
     dev: true
 
-  /@storybook/types/7.0.0-beta.55:
-    resolution: {integrity: sha512-eJbqJTRUTkSzEg+SwWQGtOOYsx6OV6yk4i0PDmHIFeYaPgC0aJ6jldSZ105ar5APBfx2c7YFrFeStHOU8wXEeA==}
+  /@storybook/types/7.0.0-beta.56:
+    resolution: {integrity: sha512-xpgQHdouTaoOAxJv+1TY5mj+Kt57VmkPXF8Kf0b4rXevvvgYnJ8gELOXYaYZZeW8eEvLhUGMzI++OQKiGdO1KQ==}
     dependencies:
-      '@storybook/channels': 7.0.0-beta.55
+      '@storybook/channels': 7.0.0-beta.56
       '@types/babel__core': 7.20.0
       '@types/express': 4.17.14
       file-system-cache: 2.0.2
@@ -12035,16 +12035,16 @@ packages:
       - supports-color
     dev: true
 
-  /@trpc/client/10.13.0_@trpc+server@10.13.0:
-    resolution: {integrity: sha512-r4KuN0os2J194lxg5jn4+o3uNlqunLFYptwTHcVW4Q0XGO0ZoTKLHuxT7c9IeDivkAs6G5oVEPiKhptkag36dQ==}
+  /@trpc/client/10.13.2_@trpc+server@10.13.2:
+    resolution: {integrity: sha512-iEZOAYS/Ak5T6j2lrN2NCYYLb8YY9sbj4JJR9VgxDL8Cz1dRFpFZ2BA4VwNW6xoh0G+MRdSGvivTYdggbJ4BBg==}
     peerDependencies:
-      '@trpc/server': 10.13.0
+      '@trpc/server': 10.13.2
     dependencies:
-      '@trpc/server': 10.13.0
+      '@trpc/server': 10.13.2
     dev: false
 
-  /@trpc/server/10.13.0:
-    resolution: {integrity: sha512-d/bu6utCC4ALxhTJkolEPAHMOSuCAu3mG79TZswa6wD2ob0/Z3AIvBF/meeSTqDxe4tvXY78lQqOkQI81dgi/g==}
+  /@trpc/server/10.13.2:
+    resolution: {integrity: sha512-/5L09a7EHxRy1D6RIFsIt5fMJ8bBspMp/eDPjAH7T033f9AMyYx0jWU7r5lswoBVSbdUDJgxKyLzwXIrVNVisg==}
     dev: false
 
   /@trysound/sax/0.2.0:
