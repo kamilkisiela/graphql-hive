@@ -3,6 +3,11 @@
   "version": "0.0.0",
   "license": "MIT",
   "private": true,
+  "exports": {
+    "./aws": "./src/aws.ts",
+    "./cdn-token": "./src/cdn-token.ts",
+    "./artifact-storage-reader": "./src/artifact-storage-reader.ts"
+  },
   "scripts": {
     "build": "node build.mjs",
     "dev": "tsup-node --config ../../../configs/tsup/dev.config.worker.ts src/dev.ts",

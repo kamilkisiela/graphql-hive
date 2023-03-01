@@ -10,6 +10,8 @@ import type {
   AlertChannel,
   CDNAccessToken,
   DeletedCompositeSchema,
+  DocumentCollection,
+  DocumentCollectionDocument,
   Member,
   OIDCIntegration,
   Organization,
@@ -484,6 +486,94 @@ export interface Storage {
       }>;
     }>
   >;
+
+  getPaginatedDocumentCollectionsForTarget(_: {
+    targetId: string;
+    first: number | null;
+    cursor: null | string;
+  }): Promise<
+    Readonly<{
+      items: ReadonlyArray<{
+        node: DocumentCollection;
+        cursor: string;
+      }>;
+      pageInfo: Readonly<{
+        hasNextPage: boolean;
+        hasPreviousPage: boolean;
+        startCursor: string;
+        endCursor: string;
+      }>;
+    }>
+  >;
+
+  createDocumentCollection(_: {
+    targetId: string;
+    title: string;
+    description: string;
+    createdByUserId: string | null;
+  }): Promise<DocumentCollection>;
+
+  /**
+   * Returns null if the document collection does not exist (did not get deleted).
+   * Returns the id of the deleted document collection if it got deleted
+   */
+  deleteDocumentCollection(_: { documentCollectionId: string }): Promise<string | null>;
+
+  /**
+   * Returns null if the document collection does not exist (did not get updated).
+   */
+  updateDocumentCollection(_: {
+    documentCollectionId: string;
+    title: string | null;
+    description: string | null;
+  }): Promise<DocumentCollection | null>;
+
+  getPaginatedDocumentsForDocumentCollection(_: {
+    documentCollectionId: string;
+    first: number | null;
+    cursor: null | string;
+  }): Promise<
+    Readonly<{
+      items: ReadonlyArray<{
+        node: DocumentCollectionDocument;
+        cursor: string;
+      }>;
+      pageInfo: Readonly<{
+        hasNextPage: boolean;
+        hasPreviousPage: boolean;
+        startCursor: string;
+        endCursor: string;
+      }>;
+    }>
+  >;
+
+  createDocumentCollectionDocument(_: {
+    documentCollectionId: string;
+    title: string;
+    contents: string;
+    variables: string | null;
+    headers: string | null;
+    createdByUserId: string | null;
+  }): Promise<DocumentCollectionDocument>;
+
+  /**
+   * Returns null if the document collection document does not exist (did not get deleted).
+   * Returns the id of the deleted document collection document if it got deleted
+   */
+  deleteDocumentCollectionDocument(_: {
+    documentCollectionDocumentId: string;
+  }): Promise<string | null>;
+
+  /**
+   * Returns null if the document collection document does not exist (did not get updated).
+   */
+  updateDocumentCollectionDocument(_: {
+    documentCollectionDocumentId: string;
+    title: string | null;
+    contents: string | null;
+    variables: string | null;
+    headers: string | null;
+  }): Promise<DocumentCollectionDocument | null>;
 }
 
 @Injectable()
