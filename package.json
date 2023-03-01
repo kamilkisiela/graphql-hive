@@ -72,7 +72,7 @@
     "eslint-plugin-cypress": "2.12.1",
     "eslint-plugin-hive": "file:./rules",
     "eslint-plugin-tailwindcss": "3.10.0",
-    "glob": "9.0.2",
+    "glob": "9.1.0",
     "graphql": "16.6.0",
     "husky": "8.0.3",
     "jest-snapshot-serializer-raw": "1.2.0",
