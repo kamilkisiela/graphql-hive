@@ -1,1 +1,4 @@
-ALTER TABLE public.tokens ADD COLUMN deleted_at timestamp with time zone DEFAULT NULL;
+ALTER TABLE
+  public.tokens
+ADD COLUMN
+  deleted_at TIMESTAMP WITH TIME ZONE DEFAULT NULL;

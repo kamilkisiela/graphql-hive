@@ -1,3 +1,5 @@
 --slack-integration (up)
-
-ALTER TABLE public.organizations ADD COLUMN slack_token text;
+ALTER TABLE
+  public.organizations
+ADD COLUMN
+  slack_token TEXT;
