@@ -1,3 +1,4 @@
+import { URL } from 'node:url';
 import { Injectable, Scope } from 'graphql-modules';
 import hashObject from 'object-hash';
 import type { CompositionFailureError } from '@hive/schema';
@@ -233,6 +234,16 @@ export class RegistryChecks {
     } satisfies CheckResult;
   }
 
+  private isValidURL(url: string): boolean {
+    try {
+      new URL(url);
+
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   async serviceUrl(
     service: { url: string | null },
     existingService: { url: string | null } | null,
@@ -246,6 +257,13 @@ export class RegistryChecks {
     }
 
     this.logger.debug('Service url is defined');
+
+    if (!this.isValidURL(service.url)) {
+      return {
+        status: 'failed',
+        reason: 'Invalid service URL provided',
+      } satisfies CheckResult;
+    }
 
     return {
       status: 'completed',
