@@ -42,7 +42,7 @@ jobs:
           codegen: false
 
       - name: patch compose file volumes
-        uses: mikefarah/yq@v4.31.1
+        uses: mikefarah/yq@v4.31.2
         with:
           cmd: yq -i 'del(.services.*.volumes)' docker/docker-compose.community.yml
 
