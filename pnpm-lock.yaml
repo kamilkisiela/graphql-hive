@@ -73,7 +73,7 @@ importers:
       prettier: 2.8.4
       prettier-plugin-tailwindcss: 0.2.4
       pretty-quick: 3.1.3
-      rimraf: 4.1.2
+      rimraf: 4.2.0
       ts-node: 10.9.1
       tsup: 6.5.0
       tsx: 3.12.3
@@ -114,7 +114,7 @@ importers:
       prettier: 2.8.4
       prettier-plugin-tailwindcss: 0.2.4_prettier@2.8.4
       pretty-quick: 3.1.3_prettier@2.8.4
-      rimraf: 4.1.2
+      rimraf: 4.2.0
       ts-node: 10.9.1_eqisezcfkwxkrscssoca4w5ep4
       tsup: 6.5.0_mukt2l7saygxjb5rpyhtkjnapy
       tsx: 3.12.3
@@ -231,7 +231,7 @@ importers:
       log-symbols: 4.1.0
       mkdirp: 2.1.4
       oclif: 3.7.0
-      rimraf: 4.1.2
+      rimraf: 4.2.0
       ts-node: 10.9.1
       tslib: 2.5.0
     dependencies:
@@ -254,7 +254,7 @@ importers:
       graphql-tag: 2.12.6_graphql@16.6.0
       log-symbols: 4.1.0
       mkdirp: 2.1.4
-      rimraf: 4.1.2
+      rimraf: 4.2.0
       ts-node: 10.9.1
       tslib: 2.5.0
     devDependencies:
@@ -1080,7 +1080,7 @@ importers:
       react-virtualized-auto-sizer: 1.0.7
       react-window: 1.8.8
       regenerator-runtime: 0.13.11
-      rimraf: 4.1.2
+      rimraf: 4.2.0
       snarkdown: 2.0.0
       storybook: ^7.0.0-beta.54
       supertokens-auth-react: 0.31.1
@@ -1196,7 +1196,7 @@ importers:
       autoprefixer: 10.4.13_postcss@8.4.21
       postcss: 8.4.21
       postcss-loader: 7.0.2_postcss@8.4.21
-      rimraf: 4.1.2
+      rimraf: 4.2.0
       storybook: 7.0.0-beta.54
       tailwindcss: 3.2.7_postcss@8.4.21
       tailwindcss-radix: 2.8.0
@@ -18672,7 +18672,6 @@ packages:
       minimatch: 7.4.2
       minipass: 4.2.4
       path-scurry: 1.6.1
-    dev: true
 
   /global-dirs/3.0.1:
     resolution: {integrity: sha512-NBcGGFbBA9s1VzD41QXDG+3++t9Mn5t1FpLdhESY6oKY4gYTFpX4wO3sqGUa0Srjtbfj3szX0RnemmrVRUdULA==}
@@ -22182,7 +22181,6 @@ packages:
     engines: {node: '>=10'}
     dependencies:
       brace-expansion: 2.0.1
-    dev: true
 
   /minimist-options/4.1.0:
     resolution: {integrity: sha512-Q4r8ghd80yhO/0j1O3B2BjweX3fiHg9cdOwjJd2J76Q135c+NDxGCqdYKQ1SKBuFfgWbAUzBfvYjPUEeNgqN1A==}
@@ -23894,7 +23892,6 @@ packages:
     dependencies:
       lru-cache: 7.18.1
       minipass: 4.2.4
-    dev: true
 
   /path-to-regexp/0.1.7:
     resolution: {integrity: sha512-5DFkuoqlv1uYQKxy8omFBeJPQcdoE07Kv2sferDCrAq1ohOU+MSDswDIbnx3YAM60qIOnYa53wBhXW0EbMonrQ==}
@@ -26103,10 +26100,12 @@ packages:
       glob: 7.2.3
     dev: true
 
-  /rimraf/4.1.2:
-    resolution: {integrity: sha512-BlIbgFryTbw3Dz6hyoWFhKk+unCcHMSkZGrTFVAx2WmttdBSonsdtRlwiuTbDqTKr+UlXIUqJVS4QT5tUzGENQ==}
+  /rimraf/4.2.0:
+    resolution: {integrity: sha512-tPt+gLORNVqRCk0NwuJ5SlMEcOGvt4CCU8sUPqgCFtCbnoNCTd9Q6vq7JlBbxQlACiH14OR28y7piA2Bak9Sxw==}
     engines: {node: '>=14'}
     hasBin: true
+    dependencies:
+      glob: 9.2.1
 
   /roarr/7.14.3:
     resolution: {integrity: sha512-AvUQY27C6/biXEAyYUXc8ONBtP1cA3MQM88e24Fmsl3LAqtNR309nMaWFALYk7ORTqgGrgrjBJ1vE20DZAc5qA==}
