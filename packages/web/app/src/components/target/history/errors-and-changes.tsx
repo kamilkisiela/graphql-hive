@@ -39,7 +39,7 @@ function ChangesBlock({
 
   return (
     <div>
-      <h2 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">
+      <h2 className="mb-2 text-base font-medium text-gray-900 dark:text-white">
         {titleMap[criticality]}
       </h2>
       <ul className="list-inside list-disc pl-3 text-base leading-relaxed">
@@ -85,48 +85,53 @@ export function VersionErrorsAndChanges(props: {
   const serviceErrorEntries = Array.from(groupedServiceErrors.entries());
 
   return (
-    <Accordion type="multiple" defaultValue={props.changes.total > 0 ? 'changes' : 'errors'}>
-      {props.changes.total ? (
-        <Accordion.Item value="changes">
-          <Accordion.Header>Changes</Accordion.Header>
-          <Accordion.Content>
-            <div className="space-y-3 p-6">
-              <ChangesBlock changes={props.changes.nodes} criticality={CriticalityLevel.Breaking} />
-              <ChangesBlock
-                changes={props.changes.nodes}
-                criticality={CriticalityLevel.Dangerous}
-              />
-              <ChangesBlock changes={props.changes.nodes} criticality={CriticalityLevel.Safe} />
-            </div>
-          </Accordion.Content>
-        </Accordion.Item>
-      ) : null}
-      {props.errors.total ? (
-        <Accordion.Item value="errors">
-          <Accordion.Header>Composition errors</Accordion.Header>
-          <Accordion.Content>
-            <ul className="list-inside list-disc pl-3 text-base leading-relaxed">
-              {generalErrors.map((error, key) => (
-                <li key={key}>
-                  <span className="text-gray-600 dark:text-white">{labelize(error.message)}</span>
-                </li>
-              ))}
-              {serviceErrorEntries.map(([service, errors]) => (
-                <li key={service}>
-                  <span className="text-gray-600 dark:text-white">{service}</span>
-                  <ul className="list-inside list-disc pl-3 text-base leading-relaxed">
-                    {errors.map((error, key) => (
-                      <li key={key}>
-                        <span className="text-gray-600 dark:text-white">{labelize(error)}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </li>
-              ))}
-            </ul>
-          </Accordion.Content>
-        </Accordion.Item>
-      ) : null}
-    </Accordion>
+    <div className="p-5">
+      <Accordion defaultValue={props.changes.total > 0 ? 'changes' : 'errors'}>
+        {props.changes.total ? (
+          <Accordion.Item value="changes">
+            <Accordion.Header>Changes</Accordion.Header>
+            <Accordion.Content>
+              <div className="space-y-3 p-6">
+                <ChangesBlock
+                  changes={props.changes.nodes}
+                  criticality={CriticalityLevel.Breaking}
+                />
+                <ChangesBlock
+                  changes={props.changes.nodes}
+                  criticality={CriticalityLevel.Dangerous}
+                />
+                <ChangesBlock changes={props.changes.nodes} criticality={CriticalityLevel.Safe} />
+              </div>
+            </Accordion.Content>
+          </Accordion.Item>
+        ) : null}
+        {props.errors.total ? (
+          <Accordion.Item value="errors">
+            <Accordion.Header>Composition errors</Accordion.Header>
+            <Accordion.Content>
+              <ul className="list-inside list-disc pl-3 text-base leading-relaxed">
+                {generalErrors.map((error, key) => (
+                  <li key={key}>
+                    <span className="text-gray-600 dark:text-white">{labelize(error.message)}</span>
+                  </li>
+                ))}
+                {serviceErrorEntries.map(([service, errors]) => (
+                  <li key={service}>
+                    <span className="text-gray-600 dark:text-white">{service}</span>
+                    <ul className="list-inside list-disc pl-3 text-base leading-relaxed">
+                      {errors.map((error, key) => (
+                        <li key={key}>
+                          <span className="text-gray-600 dark:text-white">{labelize(error)}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+                ))}
+              </ul>
+            </Accordion.Content>
+          </Accordion.Item>
+        ) : null}
+      </Accordion>
+    </div>
   );
 }
