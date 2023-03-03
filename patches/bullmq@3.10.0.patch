@@ -1,16 +1,16 @@
 diff --git a/dist/esm/commands/script-loader.js b/dist/esm/commands/script-loader.js
-index bcbe1b33d8c4adf3113e561584dbd17c48a197d2..671d1316123c29ea8bc0901e4e8236fbd6290dcd 100644
+index 60346713df81828c4358b1f82d6c47bcb8781b08..a1c91f295d83a4a087b1367079242fb29bc3149b 100644
 --- a/dist/esm/commands/script-loader.js
 +++ b/dist/esm/commands/script-loader.js
-@@ -2,6 +2,7 @@ import { createHash } from 'crypto';
- import { glob, hasMagic } from 'glob';
+@@ -3,6 +3,7 @@ import { glob, hasMagic } from 'glob';
  import * as path from 'path';
  import * as fs from 'fs';
-+import { fileURLToPath } from 'url';
  import { promisify } from 'util';
++import { fileURLToPath } from 'url';
  const readFile = promisify(fs.readFile);
  const readdir = promisify(fs.readdir);
-@@ -349,15 +350,7 @@ async function getFilenamesByPattern(pattern) {
+ const GlobOptions = { dot: true, silent: false };
+@@ -349,16 +350,7 @@ async function getFilenamesByPattern(pattern) {
  // Determine the project root
  // https://stackoverflow.com/a/18721515
  function getPkgJsonDir() {
@@ -23,7 +23,8 @@ index bcbe1b33d8c4adf3113e561584dbd17c48a197d2..671d1316123c29ea8bc0901e4e8236fb
 -        }
 -        catch (e) { }
 -    }
-+    return path.dirname(fileURLToPath(import.meta.url));
+-    return '';
++  return path.dirname(fileURLToPath(import.meta.url));
  }
  // https://stackoverflow.com/a/66842927
  // some dark magic here :-)
