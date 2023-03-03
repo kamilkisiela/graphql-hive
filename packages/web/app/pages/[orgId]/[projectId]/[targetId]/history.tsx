@@ -1,11 +1,10 @@
 import { ReactElement, useCallback, useState } from 'react';
 import NextLink from 'next/link';
 import { clsx } from 'clsx';
-import reactStringReplace from 'react-string-replace';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
-import { Label } from '@/components/common';
 import { TargetLayout } from '@/components/layouts';
+import { VersionErrorsAndChanges } from '@/components/target/history/errors-and-changes';
 import {
   Badge,
   Button,
@@ -19,63 +18,10 @@ import {
 } from '@/components/v2';
 import { DiffIcon } from '@/components/v2/icon';
 import { graphql } from '@/gql';
-import {
-  CompareDocument,
-  CriticalityLevel,
-  SchemaChangeFieldsFragment,
-  VersionsDocument,
-} from '@/graphql';
+import { CompareDocument, VersionsDocument } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 import { CrossCircledIcon, RowsIcon } from '@radix-ui/react-icons';
-
-function labelize(message: string) {
-  const findSingleQuotes = /'([^']+)'/gim;
-
-  return reactStringReplace(message, findSingleQuotes, (match, i) => (
-    <Label key={i}>{match}</Label>
-  ));
-}
-
-const titleMap: Record<CriticalityLevel, string> = {
-  Safe: 'Safe Changes',
-  Breaking: 'Breaking Changes',
-  Dangerous: 'Dangerous Changes',
-};
-
-const criticalityLevelMapping = {
-  [CriticalityLevel.Safe]: clsx('text-emerald-400'),
-  [CriticalityLevel.Dangerous]: clsx('text-yellow-400'),
-} as Record<CriticalityLevel, string>;
-
-function ChangesBlock({
-  changes,
-  criticality,
-}: {
-  changes: SchemaChangeFieldsFragment[];
-  criticality: CriticalityLevel;
-}): ReactElement | null {
-  const filteredChanges = changes.filter(c => c.criticality === criticality);
-
-  if (!filteredChanges.length) {
-    return null;
-  }
-
-  return (
-    <div>
-      <h2 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">
-        {titleMap[criticality]}
-      </h2>
-      <ul className="list-inside list-disc pl-3 text-base leading-relaxed">
-        {filteredChanges.map((change, key) => (
-          <li key={key} className={clsx(criticalityLevelMapping[criticality] ?? 'text-red-400')}>
-            <span className="text-gray-600 dark:text-white">{labelize(change.message)}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
 
 function DiffView({
   view,
@@ -95,6 +41,7 @@ function DiffView({
     },
   });
   const comparison = compareQuery.data?.schemaCompareToPrevious;
+  const compositionErrors = compareQuery.data?.schemaVersion?.errors;
   const { error } = compareQuery;
 
   if (error) {
@@ -114,7 +61,7 @@ function DiffView({
     );
   }
 
-  if (!comparison) {
+  if (!comparison || !compositionErrors) {
     return null;
   }
 
@@ -141,13 +88,7 @@ function DiffView({
     return <DiffEditor before={before} after={after} />;
   }
 
-  return (
-    <div className="space-y-3 p-6">
-      <ChangesBlock changes={comparison.changes.nodes} criticality={CriticalityLevel.Breaking} />
-      <ChangesBlock changes={comparison.changes.nodes} criticality={CriticalityLevel.Dangerous} />
-      <ChangesBlock changes={comparison.changes.nodes} criticality={CriticalityLevel.Safe} />
-    </div>
-  );
+  return <VersionErrorsAndChanges changes={comparison.changes} errors={compositionErrors} />;
 }
 
 // URQL's Infinite scrolling pattern

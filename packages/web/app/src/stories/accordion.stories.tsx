@@ -12,7 +12,7 @@ type Story = StoryObj<typeof Accordion>;
 
 export const Default: Story = {
   render: () => (
-    <div className="bg-white p-5">
+    <div className="p-5">
       <Accordion>
         <Accordion.Item value="First">
           <Accordion.Header>First</Accordion.Header>
@@ -35,7 +35,7 @@ export const Dynamic: Story = {
   render: () => {
     const [list, setList] = useState(['Tab #1', 'Tab #2', 'Tab #3']);
     return (
-      <div className="bg-white p-5">
+      <div className="p-5">
         <Accordion>
           {list.map(tab => (
             <Accordion.Item key={tab} value={tab}>
