@@ -482,6 +482,29 @@ export const resolvers: SchemaModule.Resolvers = {
         target: version.target,
       });
     },
+    async errors(version, _, { injector }) {
+      const schemaManager = injector.get(SchemaManager);
+      const schemaHelper = injector.get(SchemaHelper);
+      const [schemas, project] = await Promise.all([
+        schemaManager.getSchemasOfVersion({
+          version: version.id,
+          organization: version.organization,
+          project: version.project,
+          target: version.target,
+        }),
+        injector.get(ProjectManager).getProject({
+          organization: version.organization,
+          project: version.project,
+        }),
+      ]);
+
+      const orchestrator = schemaManager.matchOrchestrator(project.type);
+
+      return orchestrator.validate(
+        schemas.map(s => schemaHelper.createSchemaObject(s)),
+        project.externalComposition,
+      );
+    },
     async supergraph(version, _, { injector }) {
       const project = await injector.get(ProjectManager).getProject({
         organization: version.organization,

@@ -799,6 +799,12 @@ export function fetchLatestSchema(token: string) {
             }
             total
           }
+          errors {
+            nodes {
+              message
+            }
+            total
+          }
         }
       }
     `),

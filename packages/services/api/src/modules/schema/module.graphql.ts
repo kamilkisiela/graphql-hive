@@ -389,6 +389,7 @@ export default gql`
     Experimental: This field is not stable and may change in the future.
     """
     explorer(usage: SchemaExplorerUsageInput): SchemaExplorer!
+    errors: SchemaErrorConnection!
   }
 
   type SchemaVersionConnection {
