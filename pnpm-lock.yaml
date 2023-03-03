@@ -65,7 +65,7 @@ importers:
       eslint-plugin-cypress: 2.12.1
       eslint-plugin-hive: file:./rules
       eslint-plugin-tailwindcss: 3.10.1
-      glob: 9.0.2
+      glob: 9.2.1
       graphql: 16.6.0
       husky: 8.0.3
       jest-snapshot-serializer-raw: 1.2.0
@@ -106,7 +106,7 @@ importers:
       eslint-plugin-cypress: 2.12.1_eslint@8.35.0
       eslint-plugin-hive: file:rules
       eslint-plugin-tailwindcss: 3.10.1
-      glob: 9.0.2
+      glob: 9.2.1
       graphql: 16.6.0
       husky: 8.0.3
       jest-snapshot-serializer-raw: 1.2.0
@@ -18664,14 +18664,14 @@ packages:
       minimatch: 5.1.0
       once: 1.4.0
 
-  /glob/9.0.2:
-    resolution: {integrity: sha512-s6v83yj/qsUHZTp4d1Pq9HkB2tROINGxXhKYspF0kGvVqPlEPrUo4WDnSffO1611xYvkuK3mgoo86mdulYCX4A==}
+  /glob/9.2.1:
+    resolution: {integrity: sha512-Pxxgq3W0HyA3XUvSXcFhRSs+43Jsx0ddxcFrbjxNGkL2Ak5BAUBxLqI5G6ADDeCHLfzzXFhe0b1yYcctGmytMA==}
     engines: {node: '>=16 || 14 >=14.17'}
     dependencies:
       fs.realpath: 1.0.0
-      minimatch: 7.3.0
+      minimatch: 7.4.2
       minipass: 4.2.4
-      path-scurry: 1.5.0
+      path-scurry: 1.6.1
     dev: true
 
   /global-dirs/3.0.1:
@@ -22172,8 +22172,8 @@ packages:
     dependencies:
       brace-expansion: 2.0.1
 
-  /minimatch/7.3.0:
-    resolution: {integrity: sha512-WaMDuhKa7a6zKiwplR1AOz+zGvJba24k5VU1Cy6NhEguavT2YRlHxuINUgTas4wiS6fwBpYq4TcA1XIECSntyw==}
+  /minimatch/7.4.2:
+    resolution: {integrity: sha512-xy4q7wou3vUoC9k1xGTXc+awNdGaGVHtFUaey8tiX4H1QRc04DZ/rmDFwNm2EBsuYEhAZ6SgMmYf3InGY6OauA==}
     engines: {node: '>=10'}
     dependencies:
       brace-expansion: 2.0.1
@@ -23883,8 +23883,8 @@ packages:
       path-root-regex: 0.1.2
     dev: true
 
-  /path-scurry/1.5.0:
-    resolution: {integrity: sha512-hJ8rODLI9B2qwsYAd32rrI76gwVUPeu5kq/do6URDj2bJCVH3ilyT978Mv/NLuFMaqzHrn3XtiDLMZHaTTh4vA==}
+  /path-scurry/1.6.1:
+    resolution: {integrity: sha512-OW+5s+7cw6253Q4E+8qQ/u1fVvcJQCJo/VFD8pje+dbJCF1n5ZRMV2AEHbGp+5Q7jxQIYJxkHopnj6nzdGeZLA==}
     engines: {node: '>=14'}
     dependencies:
       lru-cache: 7.17.0
