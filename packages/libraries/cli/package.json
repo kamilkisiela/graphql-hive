@@ -53,7 +53,7 @@
     "@graphql-tools/url-loader": "~7.17.0",
     "@graphql-tools/utils": "9.2.1",
     "@oclif/core": "^1.23.0",
-    "@oclif/plugin-help": "5.2.6",
+    "@oclif/plugin-help": "5.2.7",
     "@oclif/plugin-update": "3.1.6",
     "colors": "1.4.0",
     "env-ci": "7.3.0",
