@@ -16,7 +16,7 @@
     "@trpc/server": "10.13.2",
     "@whatwg-node/fetch": "0.8.1",
     "dotenv": "16.0.3",
-    "got": "12.5.3",
+    "got": "12.6.0",
     "reflect-metadata": "0.1.13",
     "zod": "3.20.6"
   },
