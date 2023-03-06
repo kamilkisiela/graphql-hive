@@ -59,7 +59,7 @@
     "@apollo/subgraph": "2.3.2",
     "@envelop/types": "3.0.2",
     "@types/async-retry": "1.4.5",
-    "graphql-yoga": "3.7.1",
+    "graphql-yoga": "3.7.2",
     "nock": "13.3.0"
   },
   "publishConfig": {
