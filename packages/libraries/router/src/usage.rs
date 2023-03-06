@@ -155,7 +155,7 @@ impl UsagePlugin {
     }
 
     pub fn add_report(sender: mpsc::Sender<ExecutionReport>, report: ExecutionReport) {
-        if (sender.is_closed()) {
+        if sender.is_closed() {
             tracing::warn!("the channel has been closed! the `reciever` has been dropped!");
         }
         if let Err(e) = sender.try_send(report) {

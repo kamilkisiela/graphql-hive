@@ -151,11 +151,19 @@ impl UsageAgent {
 
         tokio::spawn(async move {
             loop {
-                let Some(execution_report) = rx.recv().await;
-                tracing::warn!("Agent recieved a message to add the report!");
-                agent_for_report_receiver
-                    .add_report(execution_report)
-                    .await
+                match rx.recv().await {
+                    Some(execution_report) => {
+                        tracing::warn!("Agent recieved a message to add the report!");
+                        agent_for_report_receiver
+                            .add_report(execution_report)
+                            .await
+                    },
+                    None => {
+                        tracing::warn!("Agent recieved a `None`!");
+                    }
+                }
+
+               
             }
         });
 
@@ -300,8 +308,13 @@ impl UsageAgent {
             }
         }
     }
+}
 
+
+impl Drop for UsageAgent {
     fn drop(&mut self) {
         tracing::warn!("`UsageAgent` has been dropped!");
     }
 }
+
+
