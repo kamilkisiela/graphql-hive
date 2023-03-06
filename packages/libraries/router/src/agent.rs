@@ -150,7 +150,8 @@ impl UsageAgent {
         // });
 
         tokio::spawn(async move {
-            while let Some(execution_report) = rx.recv().await {
+            loop {
+                let Some(execution_report) = rx.recv().await;
                 tracing::warn!("Agent recieved a message to add the report!");
                 agent_for_report_receiver
                     .add_report(execution_report)
