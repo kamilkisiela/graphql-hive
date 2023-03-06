@@ -119,13 +119,13 @@ impl UsageAgent {
     ) -> Self {
         let (tx, mut rx) = mpsc::channel::<ExecutionReport>(1024);
         let schema = parse_schema::<String>(&schema)
-            .expect("parsed schema")
+            .expect("parsing schema failed!")
             .into_static();
         let state = Arc::new(Mutex::new(State::new(schema)));
         let processor = Arc::new(Mutex::new(OperationProcessor::new()));
 
         let agent = Self {
-            sender: tx,
+            sender: tx.clone(),
             state,
             processor,
             endpoint,
@@ -133,8 +133,8 @@ impl UsageAgent {
             buffer_size,
         };
 
-        let agent_for_report_receiver = agent.clone();
-        let agent_for_interval = agent.clone();
+        let mut agent_for_report_receiver = agent.clone();
+        let mut agent_for_interval = agent.clone();
 
         // TODO: make this working
         // tokio::task::spawn(async move {
@@ -149,19 +149,19 @@ impl UsageAgent {
         //     tracing::info!("Closing spawn for shutdown signal receiver");
         // });
 
-        tokio::task::spawn(async move {
+        tokio::spawn(async move {
             while let Some(execution_report) = rx.recv().await {
+                tracing::warn!("Agent recieved a message to add the report!");
                 agent_for_report_receiver
-                    .clone()
                     .add_report(execution_report)
                     .await
             }
         });
 
-        tokio::task::spawn(async move {
+        tokio::spawn(async move {
             loop {
                 sleep(Duration::from_secs(5)).await;
-                agent_for_interval.clone().flush().await;
+                agent_for_interval.flush().await;
             }
         });
 
@@ -174,14 +174,14 @@ impl UsageAgent {
             map: HashMap::new(),
             operations: Vec::new(),
         };
-        let schema = self.state.lock().unwrap().schema.clone();
+        let schema = &self.state.lock().expect("failed to acquire the lock of the schema state when producing report!").schema;
         // iterate over reports and check if they are valid
         for op in reports {
             let operation = self
                 .processor
                 .lock()
-                .expect("lock normalizer")
-                .process(&op.operation_body, &schema);
+                .expect("failed to acquire the lock of the processor when producing report!")
+                .process(&op.operation_body, schema);
             match operation {
                 Err(e) => {
                     tracing::warn!("Dropping operation: {}", e);
@@ -226,11 +226,13 @@ impl UsageAgent {
     }
 
     async fn send_report(&self, report: Report) -> Result<(), String> {
+        const DELAY_BETWEEN_TRIES: Duration = Duration::from_millis(500);
+        const MAX_TRIES: i8 = 3;
+
         let client = reqwest::Client::new();
-        let mut delay = Duration::from_millis(0);
         let mut error_message = "Unexpected error".to_string();
 
-        for _ in 0..3 {
+        for _ in 0..MAX_TRIES {
             let resp = client
                 .post(self.endpoint.clone())
                 .header(
@@ -264,8 +266,7 @@ impl UsageAgent {
                     );
                 }
             }
-            delay += Duration::from_millis(500);
-            tokio::time::sleep(delay).await;
+            tokio::time::sleep(DELAY_BETWEEN_TRIES).await;
         }
 
         Err(error_message)
@@ -275,7 +276,7 @@ impl UsageAgent {
         let size = self
             .state
             .lock()
-            .expect("lock state")
+            .expect("failed to acquire the lock of the state when adding report!")
             .push(execution_report);
         self.flush_if_full(size).await;
     }
@@ -287,7 +288,7 @@ impl UsageAgent {
     }
 
     pub async fn flush(&mut self) {
-        let execution_reports = self.state.clone().lock().unwrap().drain();
+        let execution_reports = self.state.clone().lock().expect("failed to acquire the lock of the state when flushing the report!").drain();
         let size = execution_reports.len();
 
         if size > 0 {
@@ -297,5 +298,9 @@ impl UsageAgent {
                 Err(e) => tracing::error!("{}", e),
             }
         }
+    }
+
+    fn drop(&mut self) {
+        tracing::warn!("`UsageAgent` has been dropped!");
     }
 }

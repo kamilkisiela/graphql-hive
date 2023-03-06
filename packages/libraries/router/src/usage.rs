@@ -34,11 +34,12 @@ struct OperationContext {
 }
 
 struct UsagePlugin {
-    #[allow(dead_code)]
     config: Config,
     agent: UsageAgent,
+    /// This is an `Option` because `.send()` consumes Self aka. takes ownership, so we take the sender out of the Option and leave `None` in place
     shutdown_signal: Option<oneshot::Sender<()>>,
 }
+
 
 #[derive(Clone, Debug, Deserialize, JsonSchema)]
 struct Config {
@@ -122,9 +123,9 @@ impl UsagePlugin {
         };
 
         if !dropped {
-            match operation_name.clone() {
+            match &operation_name {
                 Some(name) => {
-                    if excluded_operation_names.contains(&name) {
+                    if excluded_operation_names.contains(name) {
                         dropped = true;
                     }
                 }
@@ -154,8 +155,13 @@ impl UsagePlugin {
     }
 
     pub fn add_report(sender: mpsc::Sender<ExecutionReport>, report: ExecutionReport) {
-        if let Err(e) = sender.to_owned().try_send(report) {
+        if (sender.is_closed()) {
+            tracing::warn!("the channel has been closed! the `reciever` has been dropped!");
+        }
+        if let Err(e) = sender.try_send(report) {
             tracing::error!("Failed to send report: {}", e);
+        } else {
+            tracing::info!("the add report sender pinged the reciever!");
         }
     }
 }
@@ -215,16 +221,13 @@ impl Plugin for UsagePlugin {
                         }
 
                         let result: supergraph::ServiceResult = fut.await;
-                        let client_name = operation_context.client_name;
-                        let client_version = operation_context.client_version;
-                        let operation_name = operation_context.operation_name;
-                        let operation_body = operation_context.operation_body;
-                        let timestamp = operation_context.timestamp;
+                        let OperationContext { client_name, client_version, operation_name, timestamp, operation_body, .. } = operation_context;
+
                         let duration = start.elapsed();
                         match result {
                             Err(e) => {
                                 Self::add_report(
-                                    sender.clone(),
+                                    sender,
                                     ExecutionReport {
                                         client_name,
                                         client_version,
@@ -242,7 +245,6 @@ impl Plugin for UsagePlugin {
                                 // router_response.
                                 let is_failure = !router_response.response.status().is_success();
                                 Ok(router_response.map(move |response_stream| {
-                                    let sender = sender.clone();
                                     let client_name = client_name.clone();
                                     let client_version = client_version.clone();
                                     let operation_body = operation_body.clone();
@@ -280,7 +282,9 @@ impl Plugin for UsagePlugin {
 impl Drop for UsagePlugin {
     fn drop(&mut self) {
         if let Some(sender) = self.shutdown_signal.take() {
+            // Currently, this does nothing, as it sends a graceful process termination, but no reciever is setup to handle it
             let _ = sender.send(());
+            tracing::warn!("`UsagePlugin` has been dropped!");
         }
     }
 }
