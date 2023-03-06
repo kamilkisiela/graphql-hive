@@ -84,7 +84,7 @@
     "valtio": "1.10.3",
     "wonka": "6.2.3",
     "yup": "1.0.2",
-    "zod": "3.20.6"
+    "zod": "3.21.2"
   },
   "devDependencies": {
     "@graphql-codegen/gql-tag-operations-preset": "2.1.0",
