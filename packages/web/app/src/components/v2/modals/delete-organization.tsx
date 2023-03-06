@@ -2,10 +2,10 @@ import { ReactElement } from 'react';
 import { useRouter } from 'next/router';
 import { useMutation } from 'urql';
 import { Button, Heading, Modal } from '@/components/v2';
-import { TrashIcon } from '@/components/v2/icon';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { DeleteOrganizationDocument } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks';
+import { TrashIcon } from '@radix-ui/react-icons';
 
 const DeleteOrganizationModal_OrganizationFragment = graphql(`
   fragment DeleteOrganizationModal_OrganizationFragment on Organization {
@@ -36,7 +36,7 @@ export const DeleteOrganizationModal = ({
       onOpenChange={toggleModalOpen}
       className="flex flex-col items-center gap-5"
     >
-      <TrashIcon className="h-24 w-24 text-red-500 opacity-70" />
+      <TrashIcon className="h-16 w-auto text-red-500 opacity-70" />
       <Heading>Delete organization</Heading>
       <p className="text-sm text-gray-500">
         Are you sure you wish to delete this organization? This action is irreversible!

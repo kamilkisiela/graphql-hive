@@ -1,0 +1,5 @@
+mutation CreateCollection($input: CreateCollectionInput!) {
+  createCollection(input: $input) {
+    id
+  }
+}

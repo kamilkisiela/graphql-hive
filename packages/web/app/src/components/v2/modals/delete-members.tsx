@@ -1,9 +1,9 @@
 import { ReactElement } from 'react';
 import { useMutation } from 'urql';
 import { Button, Heading, Modal } from '@/components/v2';
-import { TrashIcon } from '@/components/v2/icon';
 import { DeleteOrganizationMembersDocument } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks';
+import { TrashIcon } from '@radix-ui/react-icons';
 
 export const DeleteMembersModal = ({
   isOpen,
@@ -24,7 +24,7 @@ export const DeleteMembersModal = ({
       onOpenChange={toggleModalOpen}
       className="flex flex-col items-center gap-5"
     >
-      <TrashIcon className="h-24 w-24 text-red-500 opacity-70" />
+      <TrashIcon className="h-16 w-auto text-red-500 opacity-70" />
       <Heading>Delete member{isSingle ? '' : 's'}</Heading>
       <p className="text-sm text-gray-500">
         Are you sure you wish to delete {isSingle ? 'this user' : `${memberIds.length} users`}?
