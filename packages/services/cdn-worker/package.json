@@ -15,7 +15,7 @@
     "bcryptjs": "2.4.3",
     "graphql": "16.6.0",
     "toucan-js": "2.7.0",
-    "zod": "3.20.6"
+    "zod": "3.21.2"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "4.20230228.0",
