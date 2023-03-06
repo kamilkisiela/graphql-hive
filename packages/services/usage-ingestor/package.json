@@ -12,7 +12,7 @@
   "dependencies": {
     "@sentry/node": "7.40.0",
     "@sentry/tracing": "7.40.0",
-    "agentkeepalive": "4.2.1",
+    "agentkeepalive": "4.3.0",
     "date-fns": "2.29.3",
     "dotenv": "16.0.3",
     "got": "12.6.0",

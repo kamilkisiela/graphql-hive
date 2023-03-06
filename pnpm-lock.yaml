@@ -381,7 +381,7 @@ importers:
       '@types/ms': 0.7.31
       '@types/object-hash': 3.0.2
       '@whatwg-node/fetch': 0.8.2
-      agentkeepalive: 4.2.1
+      agentkeepalive: 4.3.0
       bcryptjs: 2.4.3
       dataloader: 2.2.2
       date-fns: 2.29.3
@@ -413,7 +413,7 @@ importers:
       '@trpc/client': 10.14.0_@trpc+server@10.14.0
       '@trpc/server': 10.14.0
       '@whatwg-node/fetch': 0.8.2
-      agentkeepalive: 4.2.1
+      agentkeepalive: 4.3.0
       bcryptjs: 2.4.3
       dataloader: 2.2.2
       date-fns: 2.29.3
@@ -933,7 +933,7 @@ importers:
       '@hive/usage-common': workspace:*
       '@sentry/node': 7.40.0
       '@sentry/tracing': 7.40.0
-      agentkeepalive: 4.2.1
+      agentkeepalive: 4.3.0
       date-fns: 2.29.3
       dotenv: 16.0.3
       got: 12.6.0
@@ -946,7 +946,7 @@ importers:
     dependencies:
       '@sentry/node': 7.40.0
       '@sentry/tracing': 7.40.0
-      agentkeepalive: 4.2.1
+      agentkeepalive: 4.3.0
       date-fns: 2.29.3
       dotenv: 16.0.3
       got: 12.6.0
@@ -13307,12 +13307,12 @@ packages:
     transitivePeerDependencies:
       - supports-color
 
-  /agentkeepalive/4.2.1:
-    resolution: {integrity: sha512-Zn4cw2NEqd+9fiSVWMscnjyQ1a8Yfoc5oBajLeo5w+YBHgDUcEBY2hS4YpTz6iN5f/2zQiktcuM6tS8x1p9dpA==}
+  /agentkeepalive/4.3.0:
+    resolution: {integrity: sha512-7Epl1Blf4Sy37j4v9f9FjICCh4+KAQOyXgHEwlyBiAQLbhKdq/i2QQU3amQalS/wPhdPzDXPL5DMR5bkn+YeWg==}
     engines: {node: '>= 8.0.0'}
     dependencies:
       debug: 4.3.4
-      depd: 1.1.2
+      depd: 2.0.0
       humanize-ms: 1.2.1
     transitivePeerDependencies:
       - supports-color
@@ -16284,10 +16284,6 @@ packages:
   /denque/2.1.0:
     resolution: {integrity: sha512-HVQE3AAb/pxF8fQAoiqpvg9i3evqug3hoiwakOyZAwJm+6vZehbkYXZ0l4JxS+I3QxM97v5aaRNhj8v5oBhekw==}
     engines: {node: '>=0.10'}
-
-  /depd/1.1.2:
-    resolution: {integrity: sha512-7emPTl6Dpo6JRXOXjLRxck+FlLRX5847cLKEn00PLAgc3g2hTZZgr+e4c2v6QpSmLeFP3n5yUo7ft6avBK/5jQ==}
-    engines: {node: '>= 0.6'}
 
   /depd/2.0.0:
     resolution: {integrity: sha512-g7nH6P6dyDioJogAAGprGpCtVImJhpPk/roCzdb3fIh61/s/nPsfR6onyMwkCAR/OlC3yBC0lESvUoQEAssIrw==}
@@ -21327,7 +21323,7 @@ packages:
     resolution: {integrity: sha512-NgOPbRiaQM10DYXvN3/hhGVI2M5MtITFryzBGxHM5p4wnFxsVCbxkrBrDsk+EZ5OB4jEOT7AjDxtdF+KVEFT7w==}
     engines: {node: ^12.13.0 || ^14.15.0 || >=16.0.0}
     dependencies:
-      agentkeepalive: 4.2.1
+      agentkeepalive: 4.3.0
       cacache: 16.1.3
       http-cache-semantics: 4.1.1
       http-proxy-agent: 5.0.0
@@ -21352,7 +21348,7 @@ packages:
     resolution: {integrity: sha512-5n/Pq41w/uZghpdlXAY5kIM85RgJThtTH/NYBRAZ9VUOBWV90USaQjwGrw76fZP3Lj5hl/VZjpVvOaRBMoL/2w==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
     dependencies:
-      agentkeepalive: 4.2.1
+      agentkeepalive: 4.3.0
       cacache: 17.0.4
       http-cache-semantics: 4.1.1
       http-proxy-agent: 5.0.0
@@ -21377,7 +21373,7 @@ packages:
     resolution: {integrity: sha512-+zopwDy7DNknmwPQplem5lAZX/eCOzSvSNNcSKm5eVwTkOBzoktEfXsa9L23J/GIRhxRsaxzkPEhrJEpE2F4Gg==}
     engines: {node: '>= 10'}
     dependencies:
-      agentkeepalive: 4.2.1
+      agentkeepalive: 4.3.0
       cacache: 15.3.0
       http-cache-semantics: 4.1.1
       http-proxy-agent: 4.0.1

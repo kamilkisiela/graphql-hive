@@ -23,7 +23,7 @@
     "@trpc/client": "10.14.0",
     "@trpc/server": "10.14.0",
     "@whatwg-node/fetch": "0.8.2",
-    "agentkeepalive": "4.2.1",
+    "agentkeepalive": "4.3.0",
     "bcryptjs": "2.4.3",
     "dataloader": "2.2.2",
     "date-fns": "2.29.3",
