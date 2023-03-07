@@ -10,8 +10,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@sentry/node": "7.40.0",
-    "@sentry/tracing": "7.40.0",
+    "@sentry/node": "7.41.0",
+    "@sentry/tracing": "7.41.0",
     "agentkeepalive": "4.3.0",
     "date-fns": "2.29.3",
     "dotenv": "16.0.3",
