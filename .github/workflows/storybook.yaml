@@ -11,7 +11,7 @@ jobs:
       - name: setup environment
         uses: ./.github/actions/setup
         with:
-          codegen: false
+          codegen: true
 
       - uses: the-guild-org/shared-config/website-cf@main
         name: build and deploy storybook
