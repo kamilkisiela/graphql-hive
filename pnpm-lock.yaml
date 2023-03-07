@@ -452,7 +452,7 @@ importers:
       '@cloudflare/workers-types': 4.20230228.0
       '@types/service-worker-mock': 2.0.1
       '@whatwg-node/fetch': 0.8.2
-      '@whatwg-node/server': 0.7.2
+      '@whatwg-node/server': 0.7.4
       esbuild: 0.17.11
       itty-router: 2.6.6
       itty-router-extras: 0.4.2
@@ -468,7 +468,7 @@ importers:
       '@cloudflare/workers-types': 4.20230228.0
       '@types/service-worker-mock': 2.0.1
       '@whatwg-node/fetch': 0.8.2
-      '@whatwg-node/server': 0.7.2
+      '@whatwg-node/server': 0.7.4
       esbuild: 0.17.11
       itty-router: 2.6.6
       itty-router-extras: 0.4.2
@@ -479,7 +479,7 @@ importers:
       '@cloudflare/workers-types': 4.20230228.0
       '@types/service-worker-mock': 2.0.1
       '@whatwg-node/fetch': 0.8.2
-      '@whatwg-node/server': 0.7.2
+      '@whatwg-node/server': 0.7.4
       bcryptjs: 2.4.3
       esbuild: 0.17.11
       fastify: 3.29.5
@@ -497,7 +497,7 @@ importers:
       '@cloudflare/workers-types': 4.20230228.0
       '@types/service-worker-mock': 2.0.1
       '@whatwg-node/fetch': 0.8.2
-      '@whatwg-node/server': 0.7.2
+      '@whatwg-node/server': 0.7.4
       esbuild: 0.17.11
       fastify: 3.29.5
       itty-router: 2.6.6
@@ -675,7 +675,7 @@ importers:
       '@swc/core': 1.3.38
       '@trpc/server': 10.14.0
       '@whatwg-node/fetch': 0.8.2
-      '@whatwg-node/server': 0.7.2
+      '@whatwg-node/server': 0.7.4
       dotenv: 16.0.3
       fastify: 3.29.5
       got: 12.6.0
@@ -702,7 +702,7 @@ importers:
       '@sentry/tracing': 7.40.0
       '@trpc/server': 10.14.0
       '@whatwg-node/fetch': 0.8.2
-      '@whatwg-node/server': 0.7.2
+      '@whatwg-node/server': 0.7.4
       dotenv: 16.0.3
       got: 12.6.0
       graphql: 16.6.0
@@ -13197,8 +13197,8 @@ packages:
     transitivePeerDependencies:
       - '@types/node'
 
-  /@whatwg-node/server/0.7.2:
-    resolution: {integrity: sha512-nYocQVVV6y2i2Gz7licM3JC3ct36v/lKGuB8t4qpP+2CTY6/v2otX0ceJheVMexih074VwEP4iUU4hoCr2iC3g==}
+  /@whatwg-node/server/0.7.4:
+    resolution: {integrity: sha512-0+c3Y1tmMTIz3+cM8GCOXZuJclHlOZrq2uWb9WVnv1sd98pcFQBW9163nmN7cUTyD84c/yMJmEW3F+Ka6zRZgQ==}
     dependencies:
       '@whatwg-node/fetch': 0.8.2
       tslib: 2.5.0
