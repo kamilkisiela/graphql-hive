@@ -8,7 +8,8 @@ import {
   SchemaExplorerProvider,
   useSchemaExplorerContext,
 } from '@/components/target/explorer/provider';
-import { DataWrapper, noSchema, Title } from '@/components/v2';
+import { DataWrapper, Title } from '@/components/v2';
+import { noSchemaVersion } from '@/components/v2/empty-list';
 import { graphql } from '@/gql';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
@@ -72,7 +73,7 @@ function SchemaView({
     <DataWrapper query={query}>
       {({ data }) => {
         if (!data.target?.latestSchemaVersion) {
-          return noSchema;
+          return noSchemaVersion;
         }
 
         const { query, mutation, subscription } = data.target.latestSchemaVersion.explorer;

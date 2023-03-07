@@ -35,6 +35,14 @@ export const EmptyList = ({
 
 export const noSchema = (
   <EmptyList
+    title="Schema Registry contains no schema"
+    description="You can publish a schema with Hive CLI and Hive Client"
+    docsUrl={getDocsUrl('/features/publish-schema')}
+  />
+);
+
+export const noSchemaVersion = (
+  <EmptyList
     title="Hive is waiting for your first schema"
     description="You can publish a schema with Hive CLI and Hive Client"
     docsUrl={getDocsUrl('/features/publish-schema')}

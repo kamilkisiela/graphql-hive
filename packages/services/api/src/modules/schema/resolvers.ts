@@ -501,7 +501,7 @@ export const resolvers: SchemaModule.Resolvers = {
       };
     },
     schemas(version, _, { injector }) {
-      return injector.get(SchemaManager).getSchemasOfVersion({
+      return injector.get(SchemaManager).getMaybeSchemasOfVersion({
         version: version.id,
         organization: version.organization,
         project: version.project,
@@ -512,7 +512,7 @@ export const resolvers: SchemaModule.Resolvers = {
       const schemaManager = injector.get(SchemaManager);
       const schemaHelper = injector.get(SchemaHelper);
       const [schemas, project] = await Promise.all([
-        schemaManager.getSchemasOfVersion({
+        schemaManager.getMaybeSchemasOfVersion({
           version: version.id,
           organization: version.organization,
           project: version.project,
@@ -523,6 +523,10 @@ export const resolvers: SchemaModule.Resolvers = {
           project: version.project,
         }),
       ]);
+
+      if (schemas.length === 0) {
+        return [];
+      }
 
       const orchestrator = schemaManager.matchOrchestrator(project.type);
 
@@ -545,13 +549,17 @@ export const resolvers: SchemaModule.Resolvers = {
       const orchestrator = schemaManager.matchOrchestrator(project.type);
       const helper = injector.get(SchemaHelper);
 
-      const schemas = await schemaManager.getSchemasOfVersion({
+      const schemas = await schemaManager.getMaybeSchemasOfVersion({
         version: version.id,
         organization: version.organization,
         project: version.project,
         target: version.target,
         includeMetadata: false,
       });
+
+      if (schemas.length === 0) {
+        return null;
+      }
 
       return orchestrator.supergraph(
         schemas.map(s => helper.createSchemaObject(s)),
@@ -568,13 +576,17 @@ export const resolvers: SchemaModule.Resolvers = {
       const orchestrator = schemaManager.matchOrchestrator(project.type);
       const helper = injector.get(SchemaHelper);
 
-      const schemas = await schemaManager.getSchemasOfVersion({
+      const schemas = await schemaManager.getMaybeSchemasOfVersion({
         version: version.id,
         organization: version.organization,
         project: version.project,
         target: version.target,
         includeMetadata: false,
       });
+
+      if (schemas.length === 0) {
+        return null;
+      }
 
       return (
         await orchestrator.build(

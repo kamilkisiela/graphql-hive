@@ -1734,7 +1734,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       };
     },
     async getSchemasOfVersion({ version, includeMetadata = false }) {
-      const results = await pool.many<
+      const result = await pool.query<
         Pick<
           OverrideProp<schema_log, 'action', 'PUSH'>,
           | 'id'
@@ -1777,7 +1777,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         `,
       );
 
-      return results.map(transformSchema);
+      return result.rows.map(transformSchema);
     },
     async getSchemasOfPreviousVersion({ version, target }) {
       const results = await pool.query<

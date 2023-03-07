@@ -80,6 +80,27 @@ export class SchemaManager {
       includeMetadata?: boolean;
     } & TargetSelector,
   ) {
+    this.logger.debug('Fetching non-empty list of schemas (selector=%o)', selector);
+    await this.authManager.ensureTargetAccess({
+      ...selector,
+      scope: TargetAccessScope.REGISTRY_READ,
+    });
+    const schemas = await this.storage.getSchemasOfVersion(selector);
+
+    if (schemas.length === 0) {
+      throw new HiveError('No schemas found for this version.');
+    }
+
+    return schemas;
+  }
+
+  @atomic(stringifySelector)
+  async getMaybeSchemasOfVersion(
+    selector: {
+      version: string;
+      includeMetadata?: boolean;
+    } & TargetSelector,
+  ) {
     this.logger.debug('Fetching schemas (selector=%o)', selector);
     await this.authManager.ensureTargetAccess({
       ...selector,

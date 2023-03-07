@@ -10,12 +10,12 @@ import {
   Button,
   DiffEditor,
   Heading,
-  noSchema,
   TimeAgo,
   Title,
   ToggleGroup,
   ToggleGroupItem,
 } from '@/components/v2';
+import { noSchemaVersion } from '@/components/v2/empty-list';
 import { DiffIcon } from '@/components/v2/icon';
 import { graphql } from '@/gql';
 import { CompareDocument, VersionsDocument } from '@/graphql';
@@ -269,7 +269,7 @@ function HistoryPage(): ReactElement {
       >
         {({ target }) => {
           const versionId = router.versionId ?? target?.latestSchemaVersion?.id;
-          return versionId ? <Page versionId={versionId} /> : noSchema;
+          return versionId ? <Page versionId={versionId} /> : noSchemaVersion;
         }}
       </TargetLayout>
     </>
