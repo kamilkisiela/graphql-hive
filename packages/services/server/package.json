@@ -24,7 +24,7 @@
     "@sentry/tracing": "7.40.0",
     "@trpc/server": "10.14.0",
     "@whatwg-node/fetch": "0.8.2",
-    "@whatwg-node/server": "0.7.2",
+    "@whatwg-node/server": "0.7.4",
     "dotenv": "16.0.3",
     "got": "12.6.0",
     "graphql": "16.6.0",
