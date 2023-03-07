@@ -59,7 +59,6 @@ const ExternalCompositionStatus = ({
   projectId,
   organizationId,
 }: {
-  endpoint: string;
   projectId: string;
   organizationId: string;
 }) => {
