@@ -5,13 +5,13 @@ import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
 import { MarkAsValid } from '@/components/target/history/MarkAsValid';
 import { Accordion, DataWrapper, GraphQLBlock, Input, noSchema, Title } from '@/components/v2';
+import { noSchemaVersion } from '@/components/v2/empty-list';
 import { GraphQLHighlight } from '@/components/v2/graphql-block';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { CompositeSchemaFieldsFragment, SingleSchemaFieldsFragment } from '@/gql/graphql';
 import { LatestSchemaDocument, ProjectType, RegistryModel } from '@/graphql';
 import { TargetAccessScope, useTargetAccess } from '@/lib/access/target';
 import { withSessionProtection } from '@/lib/supertokens/guard';
-import { noSchemaVersion } from '@/components/v2/empty-list';
 
 function isCompositeSchema(
   schema: SingleSchemaFieldsFragment | CompositeSchemaFieldsFragment,

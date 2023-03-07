@@ -95,10 +95,12 @@ export class SchemaManager {
   }
 
   @atomic(stringifySelector)
-  async getMaybeSchemasOfVersion(selector: {
-    version: string;
-    includeMetadata?: boolean;
-  } & TargetSelector) {
+  async getMaybeSchemasOfVersion(
+    selector: {
+      version: string;
+      includeMetadata?: boolean;
+    } & TargetSelector,
+  ) {
     this.logger.debug('Fetching schemas (selector=%o)', selector);
     await this.authManager.ensureTargetAccess({
       ...selector,

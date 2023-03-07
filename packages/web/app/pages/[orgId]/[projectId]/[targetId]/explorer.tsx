@@ -9,9 +9,9 @@ import {
   useSchemaExplorerContext,
 } from '@/components/target/explorer/provider';
 import { DataWrapper, Title } from '@/components/v2';
+import { noSchemaVersion } from '@/components/v2/empty-list';
 import { graphql } from '@/gql';
 import { withSessionProtection } from '@/lib/supertokens/guard';
-import { noSchemaVersion } from '@/components/v2/empty-list';
 
 const SchemaView_SchemaExplorer = graphql(`
   query SchemaView_SchemaExplorer(

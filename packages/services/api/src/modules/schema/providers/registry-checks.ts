@@ -63,7 +63,7 @@ export class RegistryChecks {
     );
     const isInitial = latestVersion === null;
 
-    if (isInitial  || latestVersion.schemas.length === 0) {
+    if (isInitial || latestVersion.schemas.length === 0) {
       this.logger.debug('No exiting version');
       return {
         status: 'completed',

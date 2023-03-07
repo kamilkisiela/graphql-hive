@@ -15,13 +15,13 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from '@/components/v2';
+import { noSchemaVersion } from '@/components/v2/empty-list';
 import { DiffIcon } from '@/components/v2/icon';
 import { graphql } from '@/gql';
 import { CompareDocument, VersionsDocument } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 import { CrossCircledIcon, RowsIcon } from '@radix-ui/react-icons';
-import { noSchemaVersion } from '@/components/v2/empty-list';
 
 function DiffView({
   view,
