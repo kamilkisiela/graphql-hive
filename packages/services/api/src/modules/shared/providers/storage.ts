@@ -2,7 +2,6 @@ import { Injectable } from 'graphql-modules';
 import type {
   AddAlertChannelInput,
   AddAlertInput,
-  ProjectType,
   RegistryModel,
 } from '../../../__generated__/types';
 import type {
@@ -289,18 +288,6 @@ export interface Storage {
   >;
   getVersion(_: TargetSelector & { version: string }): Promise<SchemaVersion | never>;
 
-  insertSchema(
-    _: {
-      schema: string;
-      commit: string;
-      author: string;
-      service?: string | null;
-      url?: string | null;
-      metadata: string | null;
-      projectType: ProjectType;
-    } & TargetSelector,
-  ): Promise<Schema | never>;
-
   deleteSchema(
     _: {
       serviceName: string;
@@ -310,11 +297,16 @@ export interface Storage {
 
   createVersion(
     _: {
+      schema: string;
+      author: string;
+      service?: string | null;
+      metadata: string | null;
       valid: boolean;
       url?: string | null;
       commit: string;
-      commits: string[];
+      logIds: string[];
       base_schema: string | null;
+      actionFn(): Promise<void>;
     } & TargetSelector,
   ): Promise<SchemaVersion | never>;
 

@@ -338,7 +338,8 @@ export class CompositeModel {
         compositionErrors: null,
         schema: incoming,
         schemas,
-        orchestrator,
+        supergraph: compositionCheck.result?.supergraph ?? null,
+        fullSchemaSdl: compositionCheck.result?.fullSchemaSdl ?? null,
       },
     };
   }

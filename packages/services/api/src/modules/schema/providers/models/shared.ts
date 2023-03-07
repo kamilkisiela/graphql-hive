@@ -1,5 +1,4 @@
 import { PushedCompositeSchema, SingleSchema } from 'packages/services/api/src/shared/entities';
-import { Orchestrator } from './../../../../shared/entities';
 import type { SchemaModule } from './../../__generated__/types';
 
 export const SchemaPublishConclusion = {
@@ -153,7 +152,8 @@ type SchemaPublishSuccess = {
     }> | null;
     schema: SingleSchema | PushedCompositeSchema;
     schemas: [SingleSchema] | PushedCompositeSchema[];
-    orchestrator: Orchestrator;
+    supergraph: string | null;
+    fullSchemaSdl: string | null;
   };
 };
 

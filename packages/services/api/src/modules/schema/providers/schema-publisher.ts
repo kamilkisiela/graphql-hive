@@ -4,7 +4,7 @@ import promClient from 'prom-client';
 import * as Sentry from '@sentry/node';
 import type { Span } from '@sentry/types';
 import * as Types from '../../../__generated__/types';
-import { Orchestrator, Project, ProjectType, Schema, Target } from '../../../shared/entities';
+import { Project, ProjectType, Schema, Target } from '../../../shared/entities';
 import { HiveError } from '../../../shared/errors';
 import { bolderize } from '../../../shared/markdown';
 import { sentry } from '../../../shared/sentry';
@@ -365,7 +365,10 @@ export class SchemaPublisher {
 
         const orchestrator = this.schemaManager.matchOrchestrator(project.type);
         const schemaObjects = schemas.map(s => this.helper.createSchemaObject(s));
-        const schema = await orchestrator.build(schemaObjects, project.externalComposition);
+        const compositionResult = await orchestrator.composeAndValidate(
+          schemaObjects,
+          project.externalComposition,
+        );
 
         this.logger.info(
           'Deploying version to CDN (reason="status_change" version=%s)',
@@ -375,15 +378,9 @@ export class SchemaPublisher {
         await this.updateCDN({
           target,
           project,
-          supergraph:
-            project.type === ProjectType.FEDERATION
-              ? await orchestrator.supergraph(
-                  schemas.map(s => this.helper.createSchemaObject(s)),
-                  project.externalComposition,
-                )
-              : null,
+          supergraph: compositionResult.supergraph,
           schemas,
-          fullSchemaSdl: schema.raw,
+          fullSchemaSdl: compositionResult.sdl!,
         });
       }
     }
@@ -721,27 +718,68 @@ export class SchemaPublisher {
       conclusion: 'accepted',
     });
 
-    const newVersion = await this.publishNewVersion({
-      input,
-      valid: publishResult.state.composable,
-      schemas: publishResult.state.schemas,
-      newSchema: publishResult.state.schema,
-      organizationId,
-      target,
-      project,
-      changes: publishResult.state.changes ?? [],
-      messages: publishResult.state.messages ?? [],
-      errors,
-      initial: publishResult.state.initial,
+    const composable = publishResult.state.composable;
+    const fullSchemaSdl = publishResult.state.fullSchemaSdl;
+
+    if (composable && !fullSchemaSdl) {
+      throw new Error('Version is composable but the full schema SDL is missing');
+    }
+
+    const changes = publishResult.state.changes ?? [];
+    const messages = publishResult.state.messages ?? [];
+    const initial = publishResult.state.initial;
+    const pushedSchema = publishResult.state.schema;
+    const schemas = [...publishResult.state.schemas];
+    const schemaLogIds = schemas
+      .filter(s => s.id !== pushedSchema.id) // do not include the incoming schema
+      .map(s => s.id);
+
+    const supergraph = publishResult.state.supergraph ?? null;
+
+    this.logger.debug(`Assigning ${schemaLogIds.length} schemas to new version`);
+    const schemaVersion = await this.schemaManager.createVersion({
+      valid: composable,
+      organization: organizationId,
+      project: project.id,
+      target: target.id,
+      commit: input.commit,
+      logIds: schemaLogIds,
+      service: input.service,
+      schema: input.sdl,
+      author: input.author,
+      url: input.url,
+      base_schema: baseSchema,
+      metadata: input.metadata ?? null,
+      projectType: project.type,
+      actionFn: async () => {
+        if (composable && fullSchemaSdl) {
+          await this.publishToCDN({
+            target,
+            project,
+            supergraph,
+            fullSchemaSdl,
+            schemas,
+          });
+        }
+      },
     });
 
-    await this.publishToCDN({
-      valid: newVersion.valid,
-      target,
-      project,
-      orchestrator: publishResult.state.orchestrator,
-      schemas: publishResult.state.schemas,
-    });
+    if (changes.length > 0 || errors.length > 0) {
+      void this.alertsManager
+        .triggerSchemaChangeNotifications({
+          organization,
+          project,
+          target,
+          schema: schemaVersion,
+          changes,
+          messages,
+          errors,
+          initial,
+        })
+        .catch(err => {
+          this.logger.error('Failed to trigger schema change notifications', err);
+        });
+    }
 
     const linkToWebsite =
       typeof this.schemaModuleConfig.schemaPublishLink === 'function'
@@ -755,7 +793,11 @@ export class SchemaPublisher {
             target: {
               cleanId: target.cleanId,
             },
-            version: latestVersion ? newVersion : undefined,
+            version: latestVersion
+              ? {
+                  id: schemaVersion.id,
+                }
+              : undefined,
           })
         : null;
 
@@ -870,119 +912,27 @@ export class SchemaPublisher {
     }
   }
 
-  @sentry('SchemaPublisher.publishNewVersion')
-  private async publishNewVersion({
-    valid,
-    input,
-    target,
-    project,
-    organizationId,
-    newSchema,
-    schemas,
-    changes,
-    messages,
-    errors,
-    initial,
-  }: {
-    valid: boolean;
-    input: PublishInput;
-    target: Target;
-    project: Project;
-    organizationId: string;
-    newSchema: Schema;
-    schemas: readonly Schema[];
-    changes: Types.SchemaChange[];
-    messages: string[];
-    errors: Types.SchemaError[];
-    initial: boolean;
-  }) {
-    const commits = schemas
-      .filter(s => s.id !== newSchema.id) // do not include the incoming schema
-      .map(s => s.id);
-
-    this.logger.debug(`Assigning ${commits.length} schemas to new version`);
-    const baseSchema = await this.schemaManager.getBaseSchema({
-      organization: input.organization,
-      project: input.project,
-      target: input.target,
-    });
-    const [schemaVersion, organization] = await Promise.all([
-      this.schemaManager.createVersion({
-        valid,
-        organization: organizationId,
-        project: project.id,
-        target: target.id,
-        commit: input.commit,
-        commits,
-        service: input.service,
-        schema: input.sdl,
-        author: input.author,
-        url: input.url,
-        base_schema: baseSchema,
-        metadata: input.metadata ?? null,
-        projectType: project.type,
-      }),
-      this.organizationManager.getOrganization({
-        organization: organizationId,
-      }),
-    ]);
-
-    if (changes.length > 0 || errors.length > 0) {
-      void this.alertsManager
-        .triggerSchemaChangeNotifications({
-          organization,
-          project,
-          target,
-          schema: schemaVersion,
-          changes,
-          messages,
-          errors,
-          initial,
-        })
-        .catch(err => {
-          this.logger.error('Failed to trigger schema change notifications', err);
-        });
-    }
-
-    return schemaVersion;
-  }
-
   @sentry('SchemaPublisher.publishToCDN')
   private async publishToCDN({
-    valid,
     target,
     project,
-    orchestrator,
+    supergraph,
+    fullSchemaSdl,
     schemas,
   }: {
-    valid: boolean;
     target: Target;
     project: Project;
-    orchestrator: Orchestrator;
+    supergraph: string | null;
+    fullSchemaSdl: string;
     schemas: readonly Schema[];
   }) {
-    try {
-      if (valid) {
-        const schemaObjects = schemas.map(s => this.helper.createSchemaObject(s));
-        const schema = await orchestrator.build(schemaObjects, project.externalComposition);
-
-        await this.updateCDN({
-          target,
-          project,
-          schemas,
-          supergraph:
-            project.type === ProjectType.FEDERATION
-              ? await orchestrator.supergraph(
-                  schemas.map(s => this.helper.createSchemaObject(s)),
-                  project.externalComposition,
-                )
-              : null,
-          fullSchemaSdl: schema.raw,
-        });
-      }
-    } catch (e) {
-      this.logger.error(`Failed to publish to CDN!`, e);
-    }
+    await this.updateCDN({
+      target,
+      project,
+      schemas,
+      supergraph,
+      fullSchemaSdl,
+    });
   }
 
   private async updateCDN(

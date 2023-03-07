@@ -281,59 +281,29 @@ export class SchemaManager {
       author: string;
       valid: boolean;
       service?: string | null;
-      commits: string[];
+      logIds: string[];
       url?: string | null;
       base_schema: string | null;
       metadata: string | null;
       projectType: ProjectType;
+      actionFn(): Promise<void>;
     } & TargetSelector,
   ) {
-    this.logger.info('Creating a new version (input=%o)', lodash.omit(input, ['schema']));
-    const {
-      valid,
-      project,
-      organization,
-      target,
-      commit,
-      schema,
-      author,
-      commits,
-      url,
-      metadata,
-      projectType,
-    } = input;
-    const service = input.service;
+    this.logger.info(
+      'Creating a new version (input=%o)',
+      lodash.omit(input, ['schema', 'actionFn']),
+    );
 
     await this.authManager.ensureTargetAccess({
-      project,
-      organization,
-      target,
+      project: input.project,
+      organization: input.organization,
+      target: input.target,
       scope: TargetAccessScope.REGISTRY_WRITE,
     });
 
-    // insert new schema
-    const insertedSchema = await this.insertSchema({
-      organization,
-      project,
-      target,
-      schema,
-      service,
-      commit,
-      author,
-      url,
-      metadata,
-      projectType,
-    });
-
-    // finally create a version
     return this.storage.createVersion({
-      valid,
-      organization,
-      project,
-      target,
-      commit: insertedSchema.id,
-      commits: commits.concat(insertedSchema.id),
-      base_schema: input.base_schema,
+      ...input,
+      logIds: input.logIds,
     });
   }
 
@@ -362,7 +332,7 @@ export class SchemaManager {
     const orchestrator = this.matchOrchestrator(project.type);
 
     try {
-      const errors = await orchestrator.validate(
+      const { errors } = await orchestrator.composeAndValidate(
         [
           {
             document: externalSchemaCompositionTestDocument,
@@ -408,25 +378,6 @@ export class SchemaManager {
         throw new HiveError(`Couldn't find an orchestrator for project type "${projectType}"`);
       }
     }
-  }
-
-  private async insertSchema(
-    input: {
-      schema: string;
-      commit: string;
-      author: string;
-      service?: string | null;
-      url?: string | null;
-      metadata: string | null;
-      projectType: ProjectType;
-    } & TargetSelector,
-  ) {
-    this.logger.info('Inserting schema (input=%o)', lodash.omit(input, ['schema']));
-    await this.authManager.ensureTargetAccess({
-      ...input,
-      scope: TargetAccessScope.REGISTRY_WRITE,
-    });
-    return this.storage.insertSchema(input);
   }
 
   async getBaseSchema(selector: TargetSelector) {

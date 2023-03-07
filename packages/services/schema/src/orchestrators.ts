@@ -23,14 +23,10 @@ import { stitchingDirectives } from '@graphql-tools/stitching-directives';
 import type { FastifyLoggerInstance } from '@hive/service-common';
 import type { Cache } from './cache';
 import type {
-  BuildInput,
-  BuildOutput,
+  ComposeAndValidateInput,
+  ComposeAndValidateOutput,
   ExternalComposition,
   SchemaType,
-  SupergraphInput,
-  SupergraphOutput,
-  ValidationInput,
-  ValidationOutput,
 } from './types';
 
 interface BrokerPayload {
@@ -148,8 +144,6 @@ function trimDescriptions(doc: DocumentNode): DocumentNode {
   });
 }
 
-const emptySource = '*';
-
 function toValidationError(error: any, source: CompositionErrorSource) {
   if (error instanceof GraphQLError) {
     return {
@@ -184,9 +178,10 @@ function errorWithPossibleCode(error: unknown) {
 }
 
 interface Orchestrator {
-  validate(schemas: ValidationInput, external: ExternalComposition): Promise<ValidationOutput>;
-  build(schemas: BuildInput, external: ExternalComposition): Promise<BuildOutput>;
-  supergraph(schemas: SupergraphInput, external: ExternalComposition): Promise<SupergraphOutput>;
+  composeAndValidate(
+    input: ComposeAndValidateInput,
+    external: ExternalComposition,
+  ): Promise<ComposeAndValidateOutput>;
 }
 
 function hash(secret: string, alg: string, value: string) {
@@ -311,7 +306,7 @@ const createFederation: (
   const timeoutMs = Math.min(cache.timeoutMs, 25_000);
   const compose = cache.reuse<
     {
-      schemas: ValidationInput | SupergraphInput;
+      schemas: ComposeAndValidateInput;
       external: ExternalComposition;
     },
     CompositionSuccess | CompositionFailure
@@ -412,90 +407,39 @@ const createFederation: (
   });
 
   return {
-    async validate(schemas, external) {
-      const result = await compose({ schemas, external });
-
-      if (result.type === 'failure') {
-        return {
-          errors: result.result.errors,
-        };
-      }
+    async composeAndValidate(schemas, external) {
+      const composed = await compose({ schemas, external });
 
       return {
-        errors: [],
-      };
-    },
-    async build(schemas, external) {
-      const result = await compose({ schemas, external });
-
-      // If `raw` SDL is present, it means that we were able to build a schema, but it still has composition errors
-      if (result.result.raw) {
-        return {
-          raw: result.result.raw,
-          source: emptySource,
-        };
-      }
-
-      if (result.type === 'failure') {
-        // If `raw` SDL is present, it means that we were able to build a schema, but it still has composition errors
-        if (result.result.raw) {
-          return {
-            raw: result.result.raw,
-            source: emptySource,
-          };
-        }
-
-        throw new Error(
-          [
-            `Schemas couldn't be merged:`,
-            result.result.errors.map(error => `\t - ${error.message}`),
-          ].join('\n'),
-        );
-      }
-
-      return {
-        raw: result.result.raw,
-        source: emptySource,
-      };
-    },
-    async supergraph(schemas, external) {
-      const result = await compose({ schemas, external });
-
-      return {
-        supergraph: 'supergraphSdl' in result.result ? result.result.supergraphSdl : null,
+        errors: composed.type === 'failure' ? composed.result.errors : [],
+        sdl: composed.result.raw ?? null,
+        supergraph: 'supergraphSdl' in composed.result ? composed.result.supergraphSdl : null,
       };
     },
   };
 };
 
-const single: Orchestrator = {
-  async validate(schemas) {
-    const schema = schemas[0];
-    const errors = validateSDL(parse(schema.raw)).map(errorWithSource('graphql'));
+function createSingle(): Orchestrator {
+  return {
+    async composeAndValidate(schemas) {
+      const schema = schemas[0];
+      const errors = validateSDL(parse(schema.raw)).map(errorWithSource('graphql'));
 
-    return {
-      errors,
-    };
-  },
-  async build(schemas) {
-    const schema = schemas[0];
-
-    return {
-      source: schema.source,
-      raw: print(trimDescriptions(parse(schema.raw))),
-    };
-  },
-  async supergraph() {
-    throw new Error('Single schema orchestrator does not support supergraph');
-  },
-};
+      return {
+        errors,
+        sdl: print(trimDescriptions(parse(schema.raw))),
+        supergraph: null,
+      };
+    },
+  };
+}
 
 const createStitching: (cache: Cache) => Orchestrator = cache => {
-  const stitchAndPrint = cache.reuse('stitching', async (schemas: ValidationInput) => {
+  const stitchAndPrint = cache.reuse('stitching', async (schemas: string[]) => {
     return printSchema(
       stitchSchemas({
         subschemas: schemas.map(schema =>
-          buildASTSchema(trimDescriptions(parse(schema.raw)), {
+          buildASTSchema(trimDescriptions(parse(schema)), {
             assumeValid: true,
             assumeValidSDL: true,
           }),
@@ -505,30 +449,22 @@ const createStitching: (cache: Cache) => Orchestrator = cache => {
   });
 
   return {
-    async validate(schemas) {
+    async composeAndValidate(schemas) {
       const parsed = schemas.map(s => parse(s.raw));
       const errors = parsed.map(schema => validateStitchedSchema(schema)).flat();
 
+      let sdl: string | null = null;
       try {
-        await stitchAndPrint(schemas);
+        sdl = await stitchAndPrint(schemas.map(s => s.raw));
       } catch (error) {
         errors.push(toValidationError(error, 'composition'));
       }
 
       return {
         errors,
+        sdl,
+        supergraph: null,
       };
-    },
-    async build(schemas) {
-      const raw = await stitchAndPrint(schemas);
-
-      return {
-        raw,
-        source: emptySource,
-      };
-    },
-    async supergraph() {
-      throw new Error('Stitching schema orchestrator does not support supergraph');
     },
   };
 };
@@ -575,7 +511,7 @@ export function pickOrchestrator(
         decrypt,
       );
     case 'single':
-      return single;
+      return createSingle();
     case 'stitching':
       return createStitching(cache);
     default:

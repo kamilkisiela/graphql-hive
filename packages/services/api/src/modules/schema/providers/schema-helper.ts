@@ -1,8 +1,9 @@
 import { createHash } from 'crypto';
-import { print } from 'graphql';
+import { parse, print } from 'graphql';
 import { Injectable, Scope } from 'graphql-modules';
 import objectHash from 'object-hash';
 import type {
+  ComposeAndValidateResult,
   CompositeSchema,
   PushedCompositeSchema,
   Schema,
@@ -12,6 +13,7 @@ import type {
 import { createSchemaObject } from '../../../shared/entities';
 import { cache } from '../../../shared/helpers';
 import { sortDocumentNode } from '../../../shared/schema';
+import { SchemaBuildError } from './orchestrators/errors';
 
 export function isSingleSchema(schema: Schema): schema is SingleSchema {
   return schema.kind === 'single';
@@ -92,13 +94,41 @@ export function extendWithBase(
   });
 }
 
+type CreateSchemaObjectInput = Parameters<typeof createSchemaObject>[0];
+
+export async function ensureSDL(
+  composeAndValidationResultPromise: Promise<ComposeAndValidateResult>,
+) {
+  const composeAndValidationResult = await composeAndValidationResultPromise;
+
+  if (!composeAndValidationResult.sdl) {
+    if (composeAndValidationResult.errors) {
+      throw new SchemaBuildError(
+        `Composition errors: \n` +
+          composeAndValidationResult.errors.map(err => ` - ${String(err)}`).join('\n'),
+      );
+    }
+
+    throw new Error('Expected to find SDL');
+  }
+
+  try {
+    return {
+      document: parse(composeAndValidationResult.sdl),
+      raw: composeAndValidationResult.sdl,
+    };
+  } catch (error) {
+    throw new SchemaBuildError(`Failed to parse schema: ${String(error)}`);
+  }
+}
+
 @Injectable({
   scope: Scope.Operation,
   global: true,
 })
 export class SchemaHelper {
-  @cache<SingleSchema | PushedCompositeSchema>(schema => JSON.stringify(schema))
-  createSchemaObject(schema: SingleSchema | PushedCompositeSchema): SchemaObject {
+  @cache<CreateSchemaObjectInput>(schema => JSON.stringify(schema))
+  createSchemaObject(schema: CreateSchemaObjectInput): SchemaObject {
     return createSchemaObject(schema);
   }
 

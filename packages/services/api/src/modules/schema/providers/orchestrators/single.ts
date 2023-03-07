@@ -1,4 +1,3 @@
-import { parse } from 'graphql';
 import { CONTEXT, Inject, Injectable, Scope } from 'graphql-modules';
 import type { SchemaBuilderApi } from '@hive/schema';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
@@ -7,7 +6,6 @@ import { Orchestrator, ProjectType, SchemaObject } from '../../../../shared/enti
 import { HiveError } from '../../../../shared/errors';
 import { sentry } from '../../../../shared/sentry';
 import { Logger } from '../../../shared/providers/logger';
-import { SchemaBuildError } from './errors';
 import type { SchemaServiceConfig } from './tokens';
 import { SCHEMA_SERVICE_CONFIG } from './tokens';
 
@@ -38,9 +36,10 @@ export class SingleOrchestrator implements Orchestrator {
     });
   }
 
-  @sentry('SingleOrchestrator.validate')
-  async validate(schemas: SchemaObject[]) {
-    this.logger.debug('Validating Single Schema');
+  @sentry('SingleOrchestrator.composeAndValidate')
+  async composeAndValidate(schemas: SchemaObject[]) {
+    this.logger.debug('Composing and Validating Single Schema');
+
     if (schemas.length > 1) {
       this.logger.debug('More than one schema (sources=%o)', {
         sources: schemas.map(s => s.source),
@@ -48,7 +47,7 @@ export class SingleOrchestrator implements Orchestrator {
       throw new HiveError('too many schemas');
     }
 
-    const result = await this.schemaService.validate.mutate({
+    const result = await this.schemaService.composeAndValidate.mutate({
       type: 'single',
       schemas: schemas.map(s => ({
         raw: s.raw,
@@ -57,39 +56,6 @@ export class SingleOrchestrator implements Orchestrator {
       external: null,
     });
 
-    return result.errors;
-  }
-
-  @sentry('SingleOrchestrator.build')
-  async build(schemas: SchemaObject[]) {
-    try {
-      if (schemas.length > 1) {
-        this.logger.error('More than one schema (sources=%o)', {
-          sources: schemas.map(s => s.source),
-        });
-        throw new HiveError('too many schemas');
-      }
-
-      const result = await this.schemaService.build.mutate({
-        type: 'single',
-        schemas: schemas.map(s => ({
-          raw: s.raw,
-          source: s.source,
-        })),
-        external: null,
-      });
-
-      return {
-        document: parse(result.raw),
-        raw: result.raw,
-        source: result.source,
-      };
-    } catch (error) {
-      throw new SchemaBuildError(error as Error);
-    }
-  }
-
-  async supergraph() {
-    return null;
+    return result;
   }
 }

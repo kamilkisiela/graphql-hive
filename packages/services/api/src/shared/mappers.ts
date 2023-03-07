@@ -116,14 +116,15 @@ export type SchemaVersionConnection = {
   nodes: readonly SchemaVersion[];
   hasMore: boolean;
 };
+type SchemaOnlyObject = Pick<SchemaObject, 'document' | 'raw'>;
 export type SchemaComparePayload =
   | SchemaCompareResult
   | {
       message: string;
     };
 export type SchemaCompareResult =
-  | readonly [SchemaObject, SchemaObject]
-  | readonly [undefined | null, SchemaObject];
+  | readonly [SchemaOnlyObject, SchemaOnlyObject]
+  | readonly [undefined | null, SchemaOnlyObject];
 
 export type SingleSchema = SingleSchemaEntity;
 export type PushedCompositeSchema = PushedCompositeSchemaEntity;
