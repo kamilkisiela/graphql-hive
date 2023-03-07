@@ -1,3 +1,5 @@
 --slack-integration (down)
-
-ALTER TABLE public.organizations DROP COLUMN slack_token;
+ALTER TABLE
+  public.organizations
+DROP COLUMN
+  slack_token;

@@ -1,1 +1,4 @@
-ALTER TABLE public.targets DROP COLUMN validation_excluded_clients;
+ALTER TABLE
+  public.targets
+DROP COLUMN
+  validation_excluded_clients;

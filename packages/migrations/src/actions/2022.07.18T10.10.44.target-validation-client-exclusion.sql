@@ -1,1 +1,4 @@
-ALTER TABLE public.targets ADD COLUMN validation_excluded_clients text[];
+ALTER TABLE
+  public.targets
+ADD COLUMN
+  validation_excluded_clients TEXT[];

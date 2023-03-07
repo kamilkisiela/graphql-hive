@@ -1,3 +1,4 @@
-ALTER TABLE public.commits
-  DROP COLUMN "metadata"
-;
+ALTER TABLE
+  public.commits
+DROP COLUMN
+  "metadata";

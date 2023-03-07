@@ -1,3 +1,4 @@
-ALTER TABLE public.commits
-  ADD COLUMN "metadata" text
-;
+ALTER TABLE
+  public.commits
+ADD COLUMN
+  "metadata" TEXT;
