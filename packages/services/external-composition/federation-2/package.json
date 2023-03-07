@@ -13,7 +13,7 @@
     "@whatwg-node/server": "^0.7.0",
     "graphql": "^16.6.0",
     "lru-cache": "^7.17.0",
-    "zod": "3.21.2"
+    "zod": "3.21.4"
   },
   "devDependencies": {
     "@graphql-hive/external-composition": "workspace:*"

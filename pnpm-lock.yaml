@@ -177,7 +177,7 @@ importers:
       slonik: 30.4.4
       tslib: 2.5.0
       vitest: 0.29.2
-      zod: 3.21.2
+      zod: 3.21.4
     dependencies:
       '@apollo/gateway': 2.3.2_graphql@16.6.0
       '@apollo/server': 4.4.1_graphql@16.6.0
@@ -197,7 +197,7 @@ importers:
       human-id: 4.0.0
       ioredis: 5.3.1
       slonik: 30.4.4
-      zod: 3.21.2
+      zod: 3.21.4
     devDependencies:
       '@hive/rate-limit': link:../packages/services/rate-limit
       '@hive/server': link:../packages/services/server
@@ -336,7 +336,7 @@ importers:
       ts-node: 10.9.1
       tslib: 2.5.0
       typescript: 4.9.5
-      zod: 3.21.2
+      zod: 3.21.4
     dependencies:
       '@slonik/migrator': 0.11.3_yfpv2xzdmnkrtu2wvaktxf5mmq_slonik@30.4.4
       '@whatwg-node/fetch': 0.8.2_@types+node@18.14.6
@@ -347,7 +347,7 @@ importers:
       slonik: 30.4.4
       ts-node: 10.9.1_alpjt73dvgv6kni625hu7f2l4m
       typescript: 4.9.5
-      zod: 3.21.2
+      zod: 3.21.4
     devDependencies:
       '@types/bcryptjs': 2.4.2
       '@types/node': 18.14.6
@@ -400,7 +400,7 @@ importers:
       prom-client: 14.2.0
       supertokens-node: 13.1.2
       tslib: 2.5.0
-      zod: 3.21.2
+      zod: 3.21.4
     dependencies:
       '@aws-sdk/client-s3': 3.282.0
       '@aws-sdk/s3-request-presigner': 3.282.0
@@ -430,7 +430,7 @@ importers:
       param-case: 3.0.4
       prom-client: 14.2.0
       supertokens-node: 13.1.2
-      zod: 3.21.2
+      zod: 3.21.4
     devDependencies:
       '@graphql-hive/core': link:../../libraries/core
       '@hive/cdn-script': link:../cdn-worker
@@ -459,11 +459,11 @@ importers:
       nock: 13.3.0
       toucan-js: 3.1.0
       workers-loki-logger: 0.1.14
-      zod: 3.21.2
+      zod: 3.21.4
     dependencies:
       toucan-js: 3.1.0
       workers-loki-logger: 0.1.14
-      zod: 3.21.2
+      zod: 3.21.4
     devDependencies:
       '@cloudflare/workers-types': 4.20230228.0
       '@types/service-worker-mock': 2.0.1
@@ -487,12 +487,12 @@ importers:
       itty-router: 2.6.6
       itty-router-extras: 0.4.2
       toucan-js: 2.7.0
-      zod: 3.21.2
+      zod: 3.21.4
     dependencies:
       bcryptjs: 2.4.3
       graphql: 16.6.0
       toucan-js: 2.7.0
-      zod: 3.21.2
+      zod: 3.21.4
     devDependencies:
       '@cloudflare/workers-types': 4.20230228.0
       '@types/service-worker-mock': 2.0.1
@@ -522,7 +522,7 @@ importers:
       pino-pretty: 9.4.0
       sendmail: 1.6.1
       tslib: 2.5.0
-      zod: 3.21.2
+      zod: 3.21.4
     dependencies:
       '@sentry/node': 7.41.0
       '@trpc/server': 10.14.0
@@ -534,7 +534,7 @@ importers:
       nodemailer: 6.9.1
       p-timeout: 6.1.1
       sendmail: 1.6.1
-      zod: 3.21.2
+      zod: 3.21.4
     devDependencies:
       '@hive/service-common': link:../service-common
       '@types/mjml': 4.7.0
@@ -552,14 +552,14 @@ importers:
       '@whatwg-node/server': ^0.7.0
       graphql: ^16.6.0
       lru-cache: ^7.17.0
-      zod: 3.21.2
+      zod: 3.21.4
     dependencies:
       '@apollo/composition': 2.2.2_graphql@16.6.0
       '@whatwg-node/fetch': 0.8.1
       '@whatwg-node/server': 0.7.1
       graphql: 16.6.0
       lru-cache: 7.17.0
-      zod: 3.21.2
+      zod: 3.21.4
     devDependencies:
       '@graphql-hive/external-composition': link:../../../libraries/external-composition
 
@@ -589,7 +589,7 @@ importers:
       pino-pretty: 9.4.0
       reflect-metadata: 0.1.13
       tslib: 2.5.0
-      zod: 3.21.2
+      zod: 3.21.4
     dependencies:
       '@sentry/node': 7.41.0
       '@sentry/tracing': 7.41.0
@@ -600,7 +600,7 @@ importers:
       dotenv: 16.0.3
       got: 12.6.0
       reflect-metadata: 0.1.13
-      zod: 3.21.2
+      zod: 3.21.4
     devDependencies:
       '@hive/emails': link:../emails
       '@hive/service-common': link:../service-common
@@ -629,7 +629,7 @@ importers:
       ioredis-mock: 8.2.6
       p-timeout: 6.1.1
       pino-pretty: 9.4.0
-      zod: 3.21.2
+      zod: 3.21.4
     dependencies:
       '@apollo/federation': 0.38.1_rjgakkkphrejw6qrtph4ar24zq_graphql@16.6.0
       '@graphql-tools/stitch': 8.7.43_graphql@16.6.0
@@ -643,7 +643,7 @@ importers:
       graphql: 16.6.0
       ioredis: 5.3.1
       p-timeout: 6.1.1
-      zod: 3.21.2
+      zod: 3.21.4
     devDependencies:
       '@graphql-hive/external-composition': link:../../libraries/external-composition
       '@hive/service-common': link:../service-common
@@ -686,7 +686,7 @@ importers:
       prom-client: 14.2.0
       reflect-metadata: 0.1.13
       tslib: 2.5.0
-      zod: 3.21.2
+      zod: 3.21.4
     dependencies:
       '@envelop/core': 3.0.6
       '@envelop/generic-auth': 5.0.6_adj6itjezth6avcd67ktx7eo6a
@@ -710,7 +710,7 @@ importers:
       hyperid: 3.1.1
       prom-client: 14.2.0
       reflect-metadata: 0.1.13
-      zod: 3.21.2
+      zod: 3.21.4
     devDependencies:
       '@graphql-hive/client': link:../../libraries/client
       '@hive/api': link:../api
@@ -733,14 +733,14 @@ importers:
       fastify-cors: 6.0.2
       fastify-plugin: 3.0.1
       prom-client: 14.2.0
-      zod: 3.21.2
+      zod: 3.21.4
     dependencies:
       '@whatwg-node/fetch': 0.8.2
       fastify: 3.29.5
       fastify-cors: 6.0.2
       fastify-plugin: 3.0.1
       prom-client: 14.2.0
-      zod: 3.21.2
+      zod: 3.21.4
     devDependencies:
       '@sentry/node': 7.41.0
       '@sentry/tracing': 7.41.0
@@ -764,7 +764,7 @@ importers:
       slonik-utilities: 1.9.4
       tslib: 2.5.0
       typescript: 4.9.5
-      zod: 3.21.2
+      zod: 3.21.4
     dependencies:
       '@sentry/node': 7.41.0
       '@theguild/buddy': 0.1.0_ryylgra5xglhidfoiaxehn22hq
@@ -774,7 +774,7 @@ importers:
       slonik: 30.4.4
       slonik-interceptor-query-logging: 1.4.7_slonik@30.4.4
       slonik-utilities: 1.9.4_slonik@30.4.4
-      zod: 3.21.2
+      zod: 3.21.4
     devDependencies:
       '@sentry/types': 7.41.0
       '@tgriesser/schemats': 7.0.1_u3kbucfchakklx3sci2vh6wjau
@@ -799,7 +799,7 @@ importers:
       pino-pretty: 9.4.0
       reflect-metadata: 0.1.13
       stripe: 11.13.0
-      zod: 3.21.2
+      zod: 3.21.4
     dependencies:
       '@sentry/node': 7.41.0
       '@sentry/tracing': 7.41.0
@@ -811,7 +811,7 @@ importers:
       got: 12.6.0
       reflect-metadata: 0.1.13
       stripe: 11.13.0
-      zod: 3.21.2
+      zod: 3.21.4
     devDependencies:
       '@hive/service-common': link:../service-common
       '@hive/storage': link:../storage
@@ -834,7 +834,7 @@ importers:
       reflect-metadata: 0.1.13
       tiny-lru: 8.0.2
       tslib: 2.5.0
-      zod: 3.21.2
+      zod: 3.21.4
     dependencies:
       '@sentry/node': 7.41.0
       '@sentry/tracing': 7.41.0
@@ -845,7 +845,7 @@ importers:
       p-timeout: 6.1.1
       reflect-metadata: 0.1.13
       tiny-lru: 8.0.2
-      zod: 3.21.2
+      zod: 3.21.4
     devDependencies:
       '@hive/service-common': link:../service-common
       '@hive/storage': link:../storage
@@ -871,7 +871,7 @@ importers:
       kafkajs: 2.2.4
       pino-pretty: 9.4.0
       tiny-lru: 8.0.2
-      zod: 3.21.2
+      zod: 3.21.4
     dependencies:
       '@sentry/node': 7.41.0
       '@sentry/tracing': 7.41.0
@@ -884,7 +884,7 @@ importers:
       graphql: 16.6.0
       kafkajs: 2.2.4
       tiny-lru: 8.0.2
-      zod: 3.21.2
+      zod: 3.21.4
     devDependencies:
       '@hive/service-common': link:../service-common
       '@hive/tokens': link:../tokens
@@ -910,7 +910,7 @@ importers:
       pino-pretty: 9.4.0
       reflect-metadata: 0.1.13
       tslib: 2.5.0
-      zod: 3.21.2
+      zod: 3.21.4
     dependencies:
       '@sentry/node': 7.41.0
       '@sentry/tracing': 7.41.0
@@ -919,7 +919,7 @@ importers:
       dotenv: 16.0.3
       got: 12.6.0
       reflect-metadata: 0.1.13
-      zod: 3.21.2
+      zod: 3.21.4
     devDependencies:
       '@hive/api': link:../api
       '@hive/service-common': link:../service-common
@@ -942,7 +942,7 @@ importers:
       pino-pretty: 9.4.0
       tiny-lru: 8.0.2
       tslib: 2.5.0
-      zod: 3.21.2
+      zod: 3.21.4
     dependencies:
       '@sentry/node': 7.41.0
       '@sentry/tracing': 7.41.0
@@ -953,7 +953,7 @@ importers:
       graphql: 16.6.0
       kafkajs: 2.2.4
       tiny-lru: 8.0.2
-      zod: 3.21.2
+      zod: 3.21.4
     devDependencies:
       '@graphql-hive/core': link:../../libraries/core
       '@hive/service-common': link:../service-common
@@ -975,7 +975,7 @@ importers:
       p-timeout: 6.1.1
       pino-pretty: 9.4.0
       tslib: 2.5.0
-      zod: 3.21.2
+      zod: 3.21.4
     dependencies:
       '@sentry/node': 7.41.0
       '@sentry/tracing': 7.41.0
@@ -985,7 +985,7 @@ importers:
       got: 12.6.0
       ioredis: 5.3.1
       p-timeout: 6.1.1
-      zod: 3.21.2
+      zod: 3.21.4
     devDependencies:
       '@hive/service-common': link:../service-common
       copyfiles: 2.4.1
@@ -1095,7 +1095,7 @@ importers:
       valtio: 1.10.3
       wonka: 6.2.3
       yup: 1.0.2
-      zod: 3.21.2
+      zod: 3.21.4
     dependencies:
       '@graphiql/toolkit': 0.8.2_graphql@16.6.0
       '@graphql-tools/mock': 8.7.19_graphql@16.6.0
@@ -1167,7 +1167,7 @@ importers:
       valtio: 1.10.3_react@18.2.0
       wonka: 6.2.3
       yup: 1.0.2
-      zod: 3.21.2
+      zod: 3.21.4
     devDependencies:
       '@graphql-codegen/gql-tag-operations-preset': 2.1.0_graphql@16.6.0
       '@graphql-typed-document-node/core': 3.1.2_graphql@16.6.0
@@ -1210,14 +1210,14 @@ importers:
       react: 18.2.0
       react-dom: 18.2.0
       tailwindcss: 3.2.7
-      zod: 3.21.2
+      zod: 3.21.4
     dependencies:
       '@theguild/components': 4.5.5_qgtcjgzkkjtbiyvnx7d32fl5vu
       next: 13.2.1_biqbaboplfbrettd7655fr4n2y
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
       tailwindcss: 3.2.7
-      zod: 3.21.2
+      zod: 3.21.4
     devDependencies:
       '@theguild/tailwind-config': 0.2.1
       '@types/react': 18.0.28
@@ -14261,7 +14261,7 @@ packages:
       tsup: 6.5.0_cd6sh26lfh5szikgycxvpuhwf4
       typescript: 4.9.5
       yargs: 17.6.2
-      zod: 3.21.2
+      zod: 3.21.4
     transitivePeerDependencies:
       - '@swc/core'
       - postcss
@@ -23094,7 +23094,7 @@ packages:
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
       scroll-into-view-if-needed: 3.0.4
-      zod: 3.21.2
+      zod: 3.21.4
     dev: false
 
   /nextra/2.2.16_qgtcjgzkkjtbiyvnx7d32fl5vu:
@@ -26812,7 +26812,7 @@ packages:
       roarr: 7.14.3
       serialize-error: 8.1.0
       through2: 4.0.2
-      zod: 3.21.2
+      zod: 3.21.4
     transitivePeerDependencies:
       - pg-native
     dev: false
@@ -29818,8 +29818,8 @@ packages:
     resolution: {integrity: sha512-PQ2PC7R9rslx84ndNBZB/Dkv8V8fZEpk83RLgXtYd0fwUgEjseMn1Dgajh2x6S8QbZAFa9p2qVCEuYZNgve0dQ==}
     dev: false
 
-  /zod/3.21.2:
-    resolution: {integrity: sha512-0Ygy2/IZNIxHterZdHjE5Vb8hp1fUHJD/BGvSHj8QJx+UipEVNvo9WLchoyBpz5JIaN6KmdGDGYdloGzpFK98g==}
+  /zod/3.21.4:
+    resolution: {integrity: sha512-m46AKbrzKVzOzs/DZgVnG5H55N1sv1M8qZU3A8RIKbs3mrACDNeIOeilDymVb2HdmP8uwshOCF4uJ8uM9rCqJw==}
 
   /zrender/5.4.1:
     resolution: {integrity: sha512-M4Z05BHWtajY2241EmMPHglDQAJ1UyHQcYsxDNzD9XLSkPDqMq4bB28v9Pb4mvHnVQ0GxyTklZ/69xCFP6RXBA==}
