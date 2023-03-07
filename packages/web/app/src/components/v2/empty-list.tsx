@@ -47,4 +47,4 @@ export const noSchemaVersion = (
     description="You can publish a schema with Hive CLI and Hive Client"
     docsUrl={getDocsUrl('/features/publish-schema')}
   />
-)
+);
