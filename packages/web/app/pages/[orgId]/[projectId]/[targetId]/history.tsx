@@ -10,7 +10,6 @@ import {
   Button,
   DiffEditor,
   Heading,
-  noSchema,
   TimeAgo,
   Title,
   ToggleGroup,
@@ -22,6 +21,7 @@ import { CompareDocument, VersionsDocument } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 import { CrossCircledIcon, RowsIcon } from '@radix-ui/react-icons';
+import { noSchemaVersion } from '@/components/v2/empty-list';
 
 function DiffView({
   view,
@@ -269,7 +269,7 @@ function HistoryPage(): ReactElement {
       >
         {({ target }) => {
           const versionId = router.versionId ?? target?.latestSchemaVersion?.id;
-          return versionId ? <Page versionId={versionId} /> : noSchema;
+          return versionId ? <Page versionId={versionId} /> : noSchemaVersion;
         }}
       </TargetLayout>
     </>

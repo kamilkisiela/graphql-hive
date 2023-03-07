@@ -11,6 +11,7 @@ import { CompositeSchemaFieldsFragment, SingleSchemaFieldsFragment } from '@/gql
 import { LatestSchemaDocument, ProjectType, RegistryModel } from '@/graphql';
 import { TargetAccessScope, useTargetAccess } from '@/lib/access/target';
 import { withSessionProtection } from '@/lib/supertokens/guard';
+import { noSchemaVersion } from '@/components/v2/empty-list';
 
 function isCompositeSchema(
   schema: SingleSchemaFieldsFragment | CompositeSchemaFieldsFragment,
@@ -175,7 +176,12 @@ function SchemaView(props: {
   return (
     <DataWrapper query={query}>
       {query => {
-        if (!query.data?.target?.latestSchemaVersion?.schemas.nodes.length) {
+        const latestSchemaVersion = query.data?.target?.latestSchemaVersion;
+        if (!latestSchemaVersion) {
+          return noSchemaVersion;
+        }
+
+        if (!latestSchemaVersion.schemas.nodes.length) {
           return noSchema;
         }
 
@@ -195,7 +201,7 @@ function SchemaView(props: {
                 )}
                 {canManage && project.registryModel === RegistryModel.Legacy ? (
                   <>
-                    <MarkAsValid version={query.data.target.latestSchemaVersion} />{' '}
+                    <MarkAsValid version={latestSchemaVersion} />{' '}
                   </>
                 ) : null}
               </div>
@@ -203,7 +209,7 @@ function SchemaView(props: {
             <Schemas
               project={project}
               filterService={filterService}
-              schemas={query.data.target.latestSchemaVersion.schemas.nodes ?? []}
+              schemas={latestSchemaVersion.schemas.nodes ?? []}
             />
           </>
         );

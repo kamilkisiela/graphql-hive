@@ -13,10 +13,11 @@ import {
 } from '@/components/target/explorer/provider';
 import { GraphQLScalarTypeComponent } from '@/components/target/explorer/scalar-type';
 import { GraphQLUnionTypeComponent } from '@/components/target/explorer/union-type';
-import { DataWrapper, noSchema, Title } from '@/components/v2';
+import { DataWrapper, Title } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { withSessionProtection } from '@/lib/supertokens/guard';
+import { noSchemaVersion } from '@/components/v2/empty-list';
 
 const SchemaTypeExplorer_Type = graphql(`
   query SchemaTypeExplorer_Type(
@@ -111,7 +112,7 @@ function SchemaTypeExplorer({
     <DataWrapper query={query}>
       {({ data }) => {
         if (!data.target?.latestSchemaVersion) {
-          return noSchema;
+          return noSchemaVersion;
         }
 
         const { type } = data.target.latestSchemaVersion.explorer;

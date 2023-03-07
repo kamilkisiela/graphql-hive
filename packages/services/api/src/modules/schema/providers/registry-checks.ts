@@ -63,7 +63,7 @@ export class RegistryChecks {
     );
     const isInitial = latestVersion === null;
 
-    if (isInitial) {
+    if (isInitial  || latestVersion.schemas.length === 0) {
       this.logger.debug('No exiting version');
       return {
         status: 'completed',
@@ -147,7 +147,7 @@ export class RegistryChecks {
       target: string;
     };
   }) {
-    if (!latestVersion) {
+    if (!latestVersion || latestVersion.schemas.length === 0) {
       this.logger.debug('Skipping diff check, no existing version');
       return {
         status: 'skipped',
