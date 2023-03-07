@@ -16,7 +16,7 @@
     "fastify-cors": "6.0.2",
     "fastify-plugin": "3.0.1",
     "prom-client": "14.2.0",
-    "zod": "3.21.2"
+    "zod": "3.21.4"
   },
   "devDependencies": {
     "@sentry/node": "7.41.0",
