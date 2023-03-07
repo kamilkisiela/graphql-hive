@@ -49,9 +49,10 @@ test.concurrent('call an external service to compose and validate services', asy
     },
     writeToken.secret,
   ).then(r => r.expectNoGraphQLErrors());
-  expect(externalCompositionResult.enableExternalSchemaComposition.ok?.endpoint).toBe(
-    `http://${dockerAddress}/compose`,
-  );
+  expect(
+    externalCompositionResult.enableExternalSchemaComposition.ok?.externalSchemaComposition
+      ?.endpoint,
+  ).toBe(`http://${dockerAddress}/compose`);
 
   const productsServiceName = generateUnique();
   const publishProductsResult = await writeToken

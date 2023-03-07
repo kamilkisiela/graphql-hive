@@ -1,13 +1,28 @@
-import { ReactElement, ReactNode } from 'react';
+import { ComponentProps, ReactElement, ReactNode } from 'react';
 import { clsx } from 'clsx';
 import * as T from '@radix-ui/react-tooltip';
 
-function Wrapper({ children, content }: { children: ReactNode; content: ReactNode }): ReactElement {
+function Wrapper({
+  children,
+  content,
+  contentProps = {},
+}: {
+  children: ReactNode;
+  content: ReactNode;
+  contentProps?: ComponentProps<typeof T.Content>;
+}): ReactElement {
   return (
     <T.Root>
-      <T.Trigger>{children}</T.Trigger>
+      <T.Trigger
+        onClick={e => {
+          e.preventDefault();
+        }}
+      >
+        {children}
+      </T.Trigger>
       <T.Content
         sideOffset={4}
+        {...contentProps}
         className={clsx(
           'radix-side-top:animate-slide-down-fade',
           'radix-side-right:animate-slide-left-fade',
