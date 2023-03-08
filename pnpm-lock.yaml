@@ -129,7 +129,7 @@ importers:
       '@pulumi/kubernetes': 3.24.1
       '@pulumi/kubernetesx': 0.1.6
       '@pulumi/pulumi': 3.56.0
-      '@pulumi/random': 4.11.2
+      '@pulumi/random': 4.11.3
       '@types/js-yaml': 4.0.5
       '@types/mime-types': 2.1.1
       '@types/node': 18.14.6
@@ -142,7 +142,7 @@ importers:
       '@pulumi/kubernetes': 3.24.1
       '@pulumi/kubernetesx': 0.1.6_wg363asvhj7s6ayge2a62bbd5y
       '@pulumi/pulumi': 3.56.0
-      '@pulumi/random': 4.11.2
+      '@pulumi/random': 4.11.3
       js-yaml: 4.1.0
       pg-connection-string: 2.5.0
     devDependencies:
@@ -9135,8 +9135,8 @@ packages:
     resolution: {integrity: sha512-xfo+yLRM2zVjVEA4p23IjQWzyWl1ZhWOGobsBqRpIarzLvwNH/RAGaoehdxlhx4X92302DrpdIFgTICMN4P38w==}
     dev: false
 
-  /@pulumi/random/4.11.2:
-    resolution: {integrity: sha512-fNJb43K9wIXNnQ+PzdoxWoh6YSkcjfzlj+X1xiUF84H0zRqaRs+R7rTb6kbohK/prMfwWhdHKTtiqCCmQul1Gg==}
+  /@pulumi/random/4.11.3:
+    resolution: {integrity: sha512-ns6OCLEncWC7fRKw3+E/R0kYh/IfYMvIiVi54oydmxRC7OFlMXHhQf2OS0AXjzsWiza7IWIO0miF+vu3pTNoIw==}
     requiresBuild: true
     dependencies:
       '@pulumi/pulumi': 3.56.0
