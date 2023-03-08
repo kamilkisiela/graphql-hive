@@ -72,6 +72,13 @@ function Channels(): ReactElement {
                 />
               </Td>
               <Td>{channelAlert.name}</Td>
+              <Td className="text-xs truncate text-gray-400">
+                {channelAlert.__typename === 'AlertSlackChannel'
+                  ? channelAlert.channel
+                  : channelAlert.__typename === 'AlertWebhookChannel'
+                  ? channelAlert.endpoint
+                  : ''}
+              </Td>
               <Td>
                 <Tag color={channelAlert.type === AlertChannelType.Webhook ? 'green' : 'yellow'}>
                   {channelAlert.type}
