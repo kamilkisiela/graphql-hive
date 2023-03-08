@@ -26,7 +26,6 @@ import { FragmentType, graphql, useFragment } from '@/gql';
 import { ProjectActivitiesDocument } from '@/graphql';
 import { canAccessProject, ProjectAccessScope } from '@/lib/access/project';
 import { writeLastVisitedOrganization } from '@/lib/cookies';
-import { getDocsUrl } from '@/lib/docs-url';
 import { fixDuplicatedFragments } from '@/lib/graphql';
 import { useClipboard } from '@/lib/hooks/use-clipboard';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
@@ -162,7 +161,7 @@ function ProjectsPage(): ReactElement {
                   <EmptyList
                     title="Hive is waiting for your first project"
                     description='You can create a project by clicking the "Create Project" button'
-                    docsUrl={getDocsUrl('/get-started/projects')}
+                    docsUrl="/management/projects#create-a-new-project"
                   />
                 ) : (
                   <div className="grid grid-cols-2 gap-5 items-stretch">

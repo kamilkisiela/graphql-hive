@@ -233,6 +233,7 @@ function Inner(props: {
       <Card className="w-full">
         <Heading className="mb-4">Choose Your Plan</Heading>
         <BillingPlanPicker
+          disabled={organization.plan === BillingPlanType.Enterprise}
           activePlan={organization.plan}
           value={plan}
           plans={billingPlans}

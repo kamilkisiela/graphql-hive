@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { crypto, Headers, ReadableStream, Request, Response } from '@whatwg-node/fetch';
 
 if (!globalThis.Response) {

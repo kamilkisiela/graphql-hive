@@ -1,6 +1,6 @@
 # Note: this is an overrides file for ./docker/docker-compose.community.yml:
 # It's used for setting special environment and configurations for running integration tests.
-# This file also includes services that only exists in Hive's SaaS version, and are not available in the self-hosted version.
+# This file also includes services that only exists in Hive's Cloud version, and are not available in the self-hosted version.
 # Please refer to TESTING.md for more information.
 
 version: '3.8'

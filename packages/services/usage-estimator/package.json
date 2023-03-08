@@ -2,7 +2,7 @@
   "name": "@hive/usage-estimator",
   "version": "0.0.0",
   "type": "module",
-  "description": "A microservice for Hive SaaS, that calculates and exposes usage information.",
+  "description": "A microservice for Hive Cloud, that calculates and exposes usage information.",
   "license": "MIT",
   "private": true,
   "scripts": {

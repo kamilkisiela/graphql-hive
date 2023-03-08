@@ -1,4 +1,4 @@
-# Usage reports
+# Usage Reporting
 
 The official JavaScript Hive Client (`@graphql-hive/client`) collects executed operations and sends
 them in batches (as a single report, when a buffer is full or every few seconds) over HTTP.

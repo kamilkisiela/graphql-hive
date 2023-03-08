@@ -77,28 +77,37 @@ function GetStartedWizard({
       <Drawer.Title>Get Started</Drawer.Title>
       <p>Complete these steps to experience the full power of GraphQL Hive</p>
       <div className="mt-4 flex flex-col divide-y-2 divide-gray-900">
-        <Task link={getDocsUrl('/get-started/projects')} completed={tasks.creatingProject}>
+        <Task
+          link={getDocsUrl('/management/projects#create-a-new-project')}
+          completed={tasks.creatingProject}
+        >
           Create a project
         </Task>
-        <Task link={getDocsUrl('/features/publish-schema')} completed={tasks.publishingSchema}>
+        <Task
+          link={getDocsUrl('/features/schema-registry#publish-a-schema')}
+          completed={tasks.publishingSchema}
+        >
           Publish a schema
         </Task>
-        <Task link={getDocsUrl('/features/checking-schema')} completed={tasks.checkingSchema}>
+        <Task
+          link={getDocsUrl('/features/schema-registry#check-a-schema')}
+          completed={tasks.checkingSchema}
+        >
           Check a schema
         </Task>
         {'invitingMembers' in tasks && typeof tasks.invitingMembers === 'boolean' ? (
           <Task
-            link={getDocsUrl('/get-started/organizations#members')}
+            link={getDocsUrl('/management/organizations#members')}
             completed={tasks.invitingMembers}
           >
             Invite members
           </Task>
         ) : null}
-        <Task link={getDocsUrl('/features/monitoring')} completed={tasks.reportingOperations}>
+        <Task link={getDocsUrl('/features/usage-reporting')} completed={tasks.reportingOperations}>
           Report operations
         </Task>
         <Task
-          link={getDocsUrl('/features/checking-schema#with-usage-enabled')}
+          link={getDocsUrl('/management/targets#conditional-breaking-changes')}
           completed={tasks.enablingUsageBasedBreakingChanges}
         >
           Enable usage-based breaking changes

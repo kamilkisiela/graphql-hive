@@ -1,5 +1,5 @@
 {
   "integrations": "Integrations",
-  "usage-reports": "Usage Reports",
-  "schema-reports": "Schema Reports"
+  "schema-reports": "Schema Publication",
+  "usage-reports": "Usage Reports"
 }

@@ -16,7 +16,7 @@ GraphQL Hive has been built with 3 main objectives in mind:
   Registry, Performance Monitoring, Alerts, and Integrations.
 - **Support all kinds of GraphQL APIs**, from Federation, and Stitching, to standalone APIs.
 - **Open Source at the heart**: 100% open-source and build in public with the community.
-- **A plug and play SaaS solution**: to give access to Hive to most people with a generous free
+- **A plug and play Cloud solution**: to give access to Hive to most people with a generous free
   "Hobby plan"
 
 ## Features Overview
@@ -75,10 +75,10 @@ See you in Hive! 🐝
 - General: NodeJS, TypeScript
 - Authentication: SuperTokens
 - HTTP Server: Fastify
-- APIs: GraphQL, GraphQL-Yoga, GraphQL-Codegen, GraphQL Inspector, GraphQL-Modules
+- APIs: GraphQL, GraphQL-Yoga, GraphQL-Codegen, GraphQL-Inspector, GraphQL-Modules
 - App: React, Next.js, Tailwind CSS, Radix Primitives
 - CLI: Oclif
-- Deployment (SaaS): Pulumi, K8s, Contour (Envoy), Azure Cloud, CloudFlare Workers, KV Cache, R2
+- Deployment (Cloud): Pulumi, K8s, Contour (Envoy), Azure Cloud, CloudFlare Workers, CloudFlare R2
 - Monitoring: Prometheus, Grafana, Sentry
 - Databases: Postgres, Redis, ClickHouse
 

@@ -2,9 +2,9 @@ import { Callout } from '@theguild/components'
 
 # OIDC Login
 
-By default GraphQL Hive allows you to login using a email and password. However, you can also enable
-OIDC (often refered to as social login). This allows you to login using a third party provider such
-as GitHub and Google.
+By default Hive allows you to login using a email and password. However, you can also enable OIDC
+(often refered to as social login). This allows you to login using a third party provider such as
+GitHub and Google.
 
 <Callout>
   Don't confused OIDC Login with [organization scoped OIDC login](/features/sso-oidc-provider). If
@@ -22,7 +22,7 @@ For the `Authorization callback URL` option use the web app base URL followed by
 
 Create the app and generate a new client secret.
 
-Then, you need to add the following environment variables for your GraphQL Hive `app` instance:
+Then, you need to add the following environment variables for your Hive `app` instance:
 
 ```bash
 AUTH_GITHUB=1
@@ -41,7 +41,7 @@ For the `Homepage URL` option full in the web app base URL (e.g. `https://app.gr
 For the `Authorization callback URL` option use the web app base URL followed by
 `/auth/callback/google` (e.g. `https://app.graphql-hive.com/auth/callback/google`)`.
 
-Then, you need to add the following environment variables for your GraphQL Hive `app` instance:
+Then, you need to add the following environment variables for your Hive `app` instance:
 
 ```bash
 AUTH_GOOGLE=1
@@ -79,7 +79,7 @@ Last, switch over to the `Okta API Scopes` tab and grant access to the `okta.use
 
 ![Application general settings](/docs/pages/self-hosting/oidc-login/okta-okta-api-scopes.png)
 
-Then, you need to add the following environment variables for your GraphQL Hive `app` instance:
+Then, you need to add the following environment variables for your Hive `app` instance:
 
 ```bash
 AUTH_OKTA=1

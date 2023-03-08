@@ -1,0 +1,23 @@
+import { readFileSync } from 'node:fs'
+import { RemoteContent } from 'nextra/data'
+import { buildDynamicMDX, buildDynamicMeta } from 'nextra/remote'
+import { Callout, PackageCmd } from '@theguild/components'
+
+export const getStaticProps = async ({ params }) => {
+  const content = readFileSync('../../libraries/cli/README.md', 'utf-8')
+    .replace(/<!-- .*? -->/g, '')
+    .split('## Commands')[1]
+    .replace(/## `hive/g, '### `hive')
+  const header = readFileSync('./src/pages/api-reference/_cli-header.mdx', 'utf-8')
+  return {
+    props: {
+      ...(await buildDynamicMDX([header, content].join('\n'), {
+        defaultShowCopyCode: false
+      })),
+      ...(await buildDynamicMeta())
+    },
+    revalidate: 60 * 60 * 24 * 7
+  }
+}
+
+<RemoteContent components={{ Callout, PackageCmd }} />

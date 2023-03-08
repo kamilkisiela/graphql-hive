@@ -1,6 +1,7 @@
 import { ReactElement, ReactNode } from 'react';
 import clsx from 'clsx';
-import { Fallback, Image, Root } from '@radix-ui/react-avatar';
+import { Image, Root } from '@radix-ui/react-avatar';
+import { PersonIcon } from '@radix-ui/react-icons';
 
 type Size = 'lg' | 'md' | 'sm' | 'xs';
 //           50     40     34     20
@@ -18,7 +19,6 @@ export const Avatar = ({
   alt,
   shape = 'square',
   size = 'md',
-  fallback,
   className,
   ...props
 }: AvatarProps & { className?: string }): ReactElement => {
@@ -38,8 +38,17 @@ export const Avatar = ({
       )}
       {...props}
     >
-      <Image src={src ?? undefined} alt={alt} className="drag-none h-full w-full object-cover" />
-      {fallback && <Fallback delayMs={500}>{fallback}</Fallback>}
+      {src ? (
+        <>
+          <Image
+            src={src ?? undefined}
+            alt={alt}
+            className="drag-none h-full w-full object-cover"
+          />
+        </>
+      ) : (
+        <PersonIcon />
+      )}
     </Root>
   );
 };

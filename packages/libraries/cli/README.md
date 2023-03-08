@@ -1,38 +1,36 @@
-# GraphQL Hive CLI
+# Hive CLI (Command Line Interface)
 
-A CLI util to manage and control your GraphQL Hive
+A CLI util to manage and control your GraphQL Hive. You can perform
+[schema-registry actions](https://docs.graphql-hive.com/features/schema-registry#actions-on-schemas)
+on your Hive targets using the Hive CLI.
 
-[![oclif](https://img.shields.io/badge/cli-oclif-brightgreen.svg)](https://oclif.io)
 [![Version](https://img.shields.io/npm/v/@graphql-hive/cli.svg)](https://npmjs.org/package/@graphql-hive/cli)
-[![Downloads/week](https://img.shields.io/npm/dw/@graphql-hive/cli.svg)](https://npmjs.org/package/@graphql-hive/cli)
 
-<!-- toc -->
+## Installation
 
-- [GraphQL Hive CLI](#graphql-hive-cli)
-- [Usage](#usage)
-- [Commands](#commands)
-- [Config](#config)
-<!-- tocstop -->
+### NodeJS
 
-# Usage
+If you are running a JavaScript/NodeJS project, you can install Hive CLI from the `npm` registry:
 
-<!-- usage -->
-
-```sh-session
-$ npm install -g @graphql-hive/cli
-$ hive COMMAND
-running command...
-$ hive (--version)
-@graphql-hive/cli/0.20.0 darwin-arm64 node-v18.14.0
-$ hive --help [COMMAND]
-USAGE
-  $ hive COMMAND
-...
+```
+pnpm install -D @graphql-hive/cli
+yarn add -D @graphql-hive/cli
+npm install -D @graphql-hive/cli
 ```
 
-<!-- usagestop -->
+> We recommend installing Hive CLI as part of your project, under `devDependencies`, instead of
+> using a global installation.
 
-# Commands
+### Binary
+
+If you are running a non-JavaScript project, you can download the prebuilt binary of Hive CLI using
+the following command:
+
+```bash
+curl -sSL https://graphql-hive.com/install.sh | sh
+```
+
+## Commands
 
 <!-- commands -->
 
@@ -55,7 +53,7 @@ deletes specific cli configuration
 
 ```
 USAGE
-  $ hive config:delete [KEY]
+  $ hive config:delete KEY
 
 ARGUMENTS
   KEY  config key
@@ -65,7 +63,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/config/delete.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.0/dist/commands/config/delete.js)_
+[dist/commands/config/delete.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.2/dist/commands/config/delete.js)_
 
 ## `hive config:get KEY`
 
@@ -73,7 +71,7 @@ prints specific cli configuration
 
 ```
 USAGE
-  $ hive config:get [KEY]
+  $ hive config:get KEY
 
 ARGUMENTS
   KEY  config key
@@ -83,7 +81,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/config/get.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.0/dist/commands/config/get.js)_
+[dist/commands/config/get.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.2/dist/commands/config/get.js)_
 
 ## `hive config:reset`
 
@@ -98,7 +96,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/config/reset.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.0/dist/commands/config/reset.js)_
+[dist/commands/config/reset.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.2/dist/commands/config/reset.js)_
 
 ## `hive config:set KEY VALUE`
 
@@ -106,7 +104,7 @@ updates specific cli configuration
 
 ```
 USAGE
-  $ hive config:set [KEY] [VALUE]
+  $ hive config:set KEY VALUE
 
 ARGUMENTS
   KEY    config key
@@ -117,7 +115,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/config/set.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.0/dist/commands/config/set.js)_
+[dist/commands/config/set.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.2/dist/commands/config/set.js)_
 
 ## `hive help [COMMANDS]`
 
@@ -138,7 +136,7 @@ DESCRIPTION
 ```
 
 _See code:
-[@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.2.4/src/commands/help.ts)_
+[@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.2.6/src/commands/help.ts)_
 
 ## `hive operations:check FILE`
 
@@ -146,7 +144,7 @@ checks operations against a published schema
 
 ```
 USAGE
-  $ hive operations:check [FILE] [--registry <value>] [--token <value>] [--require <value>]
+  $ hive operations:check FILE [--registry <value>] [--token <value>] [--require <value>]
 
 ARGUMENTS
   FILE  Glob pattern to find the operations
@@ -161,7 +159,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/operations/check.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.0/dist/commands/operations/check.js)_
+[dist/commands/operations/check.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.2/dist/commands/operations/check.js)_
 
 ## `hive operations:publish FILE`
 
@@ -169,7 +167,7 @@ saves operations to the store
 
 ```
 USAGE
-  $ hive operations:publish [FILE] [--registry <value>] [--token <value>] [--require <value>]
+  $ hive operations:publish FILE [--registry <value>] [--token <value>] [--require <value>]
 
 ARGUMENTS
   FILE  Glob pattern to find the operations
@@ -185,7 +183,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/operations/publish.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.0/dist/commands/operations/publish.js)_
+[dist/commands/operations/publish.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.2/dist/commands/operations/publish.js)_
 
 ## `hive schema:check FILE`
 
@@ -193,7 +191,7 @@ checks schema
 
 ```
 USAGE
-  $ hive schema:check [FILE] [--service <value>] [--registry <value>] [--token <value>] [--forceSafe] [--github]
+  $ hive schema:check FILE [--service <value>] [--registry <value>] [--token <value>] [--forceSafe] [--github]
     [--require <value>]
 
 ARGUMENTS
@@ -213,7 +211,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/schema/check.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.0/dist/commands/schema/check.js)_
+[dist/commands/schema/check.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.2/dist/commands/schema/check.js)_
 
 ## `hive schema:delete SERVICE`
 
@@ -221,7 +219,7 @@ deletes a schema
 
 ```
 USAGE
-  $ hive schema:delete [SERVICE] [--registry <value>] [--token <value>] [--dryRun] [--confirm]
+  $ hive schema:delete SERVICE [--registry <value>] [--token <value>] [--dryRun] [--confirm]
 
 ARGUMENTS
   SERVICE  name of the service
@@ -237,7 +235,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/schema/delete.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.0/dist/commands/schema/delete.js)_
+[dist/commands/schema/delete.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.2/dist/commands/schema/delete.js)_
 
 ## `hive schema:publish FILE`
 
@@ -245,8 +243,8 @@ publishes schema
 
 ```
 USAGE
-  $ hive schema:publish [FILE] [--service <value>] [--url <value>] [--metadata <value>] [--registry <value>]
-    [--token <value>] [--author <value>] [--commit <value>] [--github] [--force] [--experimental_acceptBreakingChanges]
+  $ hive schema:publish FILE [--service <value>] [--url <value>] [--metadata <value>] [--registry <value>] [--token
+    <value>] [--author <value>] [--commit <value>] [--github] [--force] [--experimental_acceptBreakingChanges]
     [--require <value>]
 
 ARGUMENTS
@@ -273,7 +271,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/schema/publish.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.0/dist/commands/schema/publish.js)_
+[dist/commands/schema/publish.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.2/dist/commands/schema/publish.js)_
 
 ## `hive update [CHANNEL]`
 
@@ -311,7 +309,7 @@ EXAMPLES
 ```
 
 _See code:
-[@oclif/plugin-update](https://github.com/oclif/plugin-update/blob/v3.1.3/src/commands/update.ts)_
+[@oclif/plugin-update](https://github.com/oclif/plugin-update/blob/v3.1.6/src/commands/update.ts)_
 
 ## `hive whoami`
 
@@ -330,30 +328,25 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/whoami.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.0/dist/commands/whoami.js)_
+[dist/commands/whoami.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.2/dist/commands/whoami.js)_
 
 <!-- commandsstop -->
 
-<!-- config -->
+## Configuration
 
-# Config
+### Environment Variables
 
-In addition to using the CLI args, you can also define your configuration in a JSON file which the
-CLI would pick up when it runs.
+You may set the `HIVE_TOKEN` environment variable while running the Hive CLI, in order to set it
+globally.
 
-You can use the `HIVE_CONFIG` environment variable to define the path to the JSON file as follows:
+### Config file (`hive.json`)
 
-`HIVE_CONFIG=/path/to/hive.json hive schema:publish --author Vignesh path/to/file.gql`
-
-Note that the CLI args will override the values in config if both are specified.
-
-This is how the structure of the config file should look like:
+You can create a `hive.json` file to manage your Hive configuration, you may use the following JSON
+keys:
 
 ```json
 {
-  "registry": "<yourRegistryURL>",
-  "token": "<yourtoken>"
+  "registry": "<HIVE_REGISTRY_URL_GRAPHQL_ENDPOINT>",
+  "token": "<HIVE_REGISTRY_TOKEN>"
 }
 ```
-
-<!-- configstop -->

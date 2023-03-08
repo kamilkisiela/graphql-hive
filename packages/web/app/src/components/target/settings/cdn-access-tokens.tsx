@@ -6,6 +6,8 @@ import * as Yup from 'yup';
 import {
   Button,
   Card,
+  DocsLink,
+  DocsNote,
   Heading,
   Input,
   Modal,
@@ -111,7 +113,7 @@ function CreateCDNAccessTokenModal(props: {
 
       <div className="mt-auto flex w-full gap-2 self-end">
         <Button size="large" className="ml-auto" onClick={props.onClose}>
-          Abort
+          Cancel
         </Button>
 
         <Button
@@ -224,7 +226,7 @@ function DeleteCDNAccessTokenModal(props: {
 
       <div className="mt-auto flex w-full gap-2 self-end">
         <Button variant="primary" size="large" className="ml-auto" onClick={onClose}>
-          Abort
+          Cancel
         </Button>
         <Button
           disabled={deleteCdnAccessToken.fetching}
@@ -380,9 +382,14 @@ export function CDNAccessTokens(props: {
       <Heading id="cdn-access-tokens" className="mb-2">
         CDN Access Token
       </Heading>
-      <p className="mb-3 font-light text-gray-300">
-        Be careful! These tokens allow accessing the schema artifacts of your target.
-      </p>
+      <DocsNote>
+        CDN Access Tokens are used to access to Hive High-Availability CDN and read your schema
+        artifacts.
+        <br />
+        <DocsLink href="/management/targets#cdn-access-tokens">
+          Learn more about CDN Access Token
+        </DocsLink>
+      </DocsNote>
       {canManage && (
         <div className="my-3.5 flex justify-between">
           <Button

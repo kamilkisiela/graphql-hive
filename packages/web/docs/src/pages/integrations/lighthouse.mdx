@@ -1,0 +1,38 @@
+# Lighthouse (Laravel)
+
+## Installation
+
+```bash
+composer require stayallive/lighthouse-graphql-hive
+```
+
+### Publishing Schemas
+
+Publishing schemas directly from this extension is not enabled at the moment. You may publish the
+GraphQL schema using the Hive CLI, and then use usage reporting feature with this extension.
+
+### Usage Reporting
+
+Add the following snippet to your `config/services.php` file:
+
+```php
+    'graphqlhive' => [
+        'enabled'   => env('GRAPHQL_HIVE_ENABLED', false),
+        'token'     => env('GRAPHQL_HIVE_TOKEN'),
+        'submitter' => env('GRAPHQL_HIVE_SUBMITTER'),
+        'queue'     => env('GRAPHQL_HIVE_QUEUE'),
+    ],
+```
+
+In your `.env` configure at least the following:
+
+```text
+GRAPHQL_HIVE_ENABLED=true
+GRAPHQL_HIVE_TOKEN=<your Hive access token>
+```
+
+## Additional Resources
+
+- [`lighthouse-graphql-hive` configuration](https://github.com/stayallive/lighthouse-graphql-hive#submitters)
+- [`lighthouse-graphql-hive` source code](https://github.com/stayallive/lighthouse-graphql-hive)
+- [Lighthouse](https://lighthouse-php.com/)

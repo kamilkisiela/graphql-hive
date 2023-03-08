@@ -1,6 +1,6 @@
-# Schema reports
+# Schema Publication
 
-Technical details about the schema reports.
+Technical details about publishing GraphQL schemas to Hive.
 
 | Name     | Value                                                   |
 | -------- | ------------------------------------------------------- |
@@ -32,7 +32,7 @@ input SchemaPublishInput {
   """
   commit: String!
   """
-  GraphQL Hive prevents from publishing breaking changes or broken schemas by default, use this flag to override this behavior.
+  Hive prevents from publishing breaking changes or broken schemas by default, use this flag to override this behavior.
   """
   force: Boolean @deprecated(reason: "No longer needed for new projects")
   """

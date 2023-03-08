@@ -2,7 +2,17 @@ import { useCallback, useState } from 'react';
 import { useFormik } from 'formik';
 import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
-import { Button, Card, Heading, Input, Spinner, Switch, Tooltip } from '@/components/v2';
+import {
+  Button,
+  Card,
+  DocsLink,
+  DocsNote,
+  Heading,
+  Input,
+  Spinner,
+  Switch,
+  Tooltip,
+} from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { useNotifications } from '@/lib/hooks';
 import { CheckIcon, Cross2Icon, UpdateIcon } from '@radix-ui/react-icons';
@@ -332,9 +342,13 @@ export const ExternalCompositionSettings = (props: {
           )}
         </div>
       </Heading>
-      <p className="mb-3 font-light text-gray-300">
-        Compose and validate schema outside GraphQL Hive
-      </p>
+      <DocsNote>
+        External Schema Composition is required for using Apollo Federation 2 with Hive.
+        <br />
+        <DocsLink href="/management/external-schema-composition">
+          Learn more about Apollo Federation 2 support
+        </DocsLink>
+      </DocsNote>
       {isFormVisible ? (
         <ExternalCompositionForm
           project={project}

@@ -6,8 +6,18 @@ import { authenticated } from '@/components/authenticated-container';
 import { ProjectLayout } from '@/components/layouts';
 import { ExternalCompositionSettings } from '@/components/project/settings/external-composition';
 import { ModelMigrationSettings } from '@/components/project/settings/model-migration';
-import { Button, Card, Heading, Input, Link, Select, Tag, Title } from '@/components/v2';
-import { AlertTriangleIcon } from '@/components/v2/icon';
+import {
+  Button,
+  Card,
+  DocsLink,
+  DocsNote,
+  Heading,
+  Input,
+  Link,
+  Select,
+  Tag,
+  Title,
+} from '@/components/v2';
 import { DeleteProjectModal } from '@/components/v2/modals';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { GetGitHubIntegrationDetailsDocument, ProjectType } from '@/graphql';
@@ -212,9 +222,14 @@ const Page = (props: {
       <ModelMigrationSettings project={project} organizationId={organization.cleanId} />
       <Card>
         <Heading className="mb-2">Project Name</Heading>
-        <p className="mb-3 font-light text-gray-300">
-          Name of your project visible within organization
-        </p>
+        <DocsNote warn>
+          Changing the name of your project will also change the slug of your project URL, and will
+          invalidate any existing links to your project.
+          <br />
+          <DocsLink href="/management/projects#rename-a-project">
+            You can read more about it in the documentation
+          </DocsLink>
+        </DocsNote>
         <form onSubmit={handleSubmit} className="flex gap-x-2">
           <Input
             placeholder="Project name"
@@ -248,9 +263,14 @@ const Page = (props: {
 
       <Card>
         <Heading className="mb-2">Git Repository</Heading>
-        <p className="mb-3 font-light text-gray-300">
-          Connect the project with your Git repository
-        </p>
+        <DocsNote>
+          Associate your project with a Git repository to enable commit linking and to allow CI
+          integration.
+          <br />
+          <DocsLink href="/management/projects#github-repository">
+            Learn more about GitHub integration
+          </DocsLink>
+        </DocsNote>
         <GitHubIntegration gitRepository={project.gitRepository ?? null} />
       </Card>
 
@@ -260,24 +280,30 @@ const Page = (props: {
 
       {canAccessProject(ProjectAccessScope.Delete, organization.me) && (
         <Card>
-          <Heading className="mb-2">Delete Project</Heading>
-          <p className="mb-3 font-light text-gray-300">
-            Permanently remove your Project and all targets from the Organization
-          </p>
-          <div className="flex items-center gap-x-2">
-            <Button
-              variant="primary"
-              size="large"
-              danger
-              onClick={toggleModalOpen}
-              className="px-5"
-            >
-              Delete Project
-            </Button>
-            <Tag color="yellow" className="py-2.5 px-4">
-              <AlertTriangleIcon className="h-5 w-5" />
-              This action is not reversible!
-            </Tag>
+          <div className="flex items-center justify-between">
+            <div>
+              <Heading className="mb-2">Delete Project</Heading>
+              <DocsNote warn>
+                Deleting an project will delete all the targets, schemas and data associated with
+                it.
+                <br />
+                <DocsLink href="/management/projects#delete-a-project">
+                  <strong>This action is not reversible!</strong> You can find more information
+                  about this process in the documentation
+                </DocsLink>
+              </DocsNote>
+            </div>
+            <div className="flex items-center gap-x-2">
+              <Button
+                variant="primary"
+                size="large"
+                danger
+                onClick={toggleModalOpen}
+                className="px-5"
+              >
+                Delete Project
+              </Button>
+            </div>
           </div>
         </Card>
       )}

@@ -1,0 +1,201 @@
+import { Callout, PackageCmd } from '@theguild/components'
+
+# Hive CLI (Command Line Interface)
+
+You can perform [schema-registry actions](/features/schema-registry#actions-on-schemas) on your Hive
+targets schemas using the Hive CLI.
+
+## Installation
+
+### NodeJS
+
+If you are running a JavaScript/NodeJS project, you can install Hive CLI from the `npm` registry:
+
+<PackageCmd packages={['-D @graphql-hive/cli']} />
+
+<Callout type="info">
+  We recommend installing Hive CLI as part of your project, under `devDependencies`, instead of
+  using a global installation.
+</Callout>
+
+### Binary
+
+If you are running a non-JavaScript project, you can download the prebuilt binary of Hive CLI using
+the following command:
+
+```bash
+curl -sSL https://graphql-hive.com/install.sh | sh
+```
+
+## Usage
+
+### Publish a schema
+
+<Callout type="info" emoji="🔑">
+  This CLI command requires an active registry token with **Read & Write** permissions to the
+  target.
+</Callout>
+
+Start by setting your Hive token in [`hive.json`](/api-reference/cli#config-file-hivejson) file, or
+set it as `HIVE_TOKEN` environment variable.
+
+Further reading:
+
+- [Publishing a schema to the Schema Registry](/features/schema-registry#publish-a-schema)
+
+#### Single Schema Project
+
+If you have a single file for your GraphQL schema:
+
+```bash
+hive schema:publish schema.graphql
+```
+
+Or, multiple files using a `glob` expression:
+
+```bash
+hive schema:publish "src/*.graphql"
+```
+
+Further reading:
+
+- [`schema:publish` API Reference](/api-reference/cli#hive-schemapublish-file)
+
+#### Apollo Federation / Schema-Stitching projects
+
+```bash
+hive schema:publish --service reviews --url http://my-service.com/graphql schema.graphql
+```
+
+Further reading:
+
+- [`schema:publish` API Reference](/api-reference/cli#hive-schemapublish-file)
+- [Apollo Router integration](/integrations/apollo-router)
+- [Apollo-Server integration](/integrations/apollo-server)
+
+#### Hive Metadata
+
+If your GraphQL schema runtime requires any metadata to run, you can attach metadata to your schema
+publication. Hive metadata published to Hive must be a valid JSON, and limited to `25MB`.
+
+To attach metadata to your published schema, you can use `--metadata` flag when publishing.
+
+You can load the metadata from a file:
+
+```bash
+hive schema:publish schema.graphql --metadata metadata.json
+```
+
+Or, use an inline JSON passed as a string:
+
+```bash
+hive schema:publish schema.graphql --metadata '{ "someData": true }'
+```
+
+Further reading:
+
+- [Fetching Hive Metadata from the CDN](/features/high-availability-cdn#hive-metadata)
+
+### Check a schema
+
+<Callout type="info" emoji="🔑">
+  This CLI command requires an active registry token with **Read** permissions to the target.
+</Callout>
+
+Start by setting your Hive token in [`hive.json`](/api-reference/cli#config-file-hivejson) file, or
+set it as `HIVE_TOKEN` environment variable.
+
+Checking a GraphQL schema is the form of checking the compatbility of an upcoming schema, compared
+to the latest published version.
+
+This process of checking a schema needs to be done before **publishing** a new schema version. This
+is usually done as part of a CI/CD pipeline, and as part of Pull Request flow.
+
+Hive CLI will give you a list of all changes, sorted by criticality level (Breaking, Dangerous,
+Safe) and fail the check once breaking change is detected.
+
+```bash
+hive schema:check schema.graphql
+```
+
+Or, multiple files using a `glob` expression:
+
+```bash
+hive schema:check "src/*.graphql"
+```
+
+Further reading:
+
+- [`schema:check` API Reference](/api-reference/cli#check-a-schema)
+- [Publishing a schema to the Schema Registry](/features/schema-registry#publish-a-schema)
+- [Conditional Breaking Changes](/management/targets#conditional-breaking-changes)
+
+### Delete a schema
+
+<Callout type="info" emoji="🔑">
+  This CLI command requires an active registry token with **Read & Write** permissions to the target
+  and the project.
+</Callout>
+
+<Callout type="info">
+  This action is only available for Schema-Stitching and Apollo Federation projects.
+</Callout>
+
+Start by setting your Hive token in [`hive.json`](/api-reference/cli#config-file-hivejson) file, or
+set it as `HIVE_TOKEN` environment variable.
+
+In case you want to delete a schema (or a subgraph in case of Federation), you can do so by using
+the `hive schema:delete` command.
+
+```bash
+hive schema:delete SERVICE_NAME
+```
+
+<Callout>
+
+You can also use `--dryRun` flag first to see what effect the command will have on the registry.
+
+In case you want to confirm deletion of the service without typing anything in the terminal, use
+`--confirm` flag.
+
+</Callout>
+
+### Git Metadata
+
+If you are running `hive` command line in a directory that has a Git repository configured (`.git`),
+then Hive will be able to automatically detect and extract the values for `--author` and `--commit`,
+in order to tag schemas published using the `schema:publish` command.
+
+You may override these values by passing the `--author` and `--commit` flags to the CLI.
+
+If your project does not have a Git repository configured with a user name and email, you are
+required to pass the `--author` and `--commit` flags to the CLI.
+
+<Callout type="info">
+
+If you need to change the way Git identifies your `author` property, you may use the following
+commands:
+
+```bash
+git config --global user.name "John Doe"
+git config --global user.email "john@doe.org"
+```
+
+</Callout>
+
+### CLI and GitHub Integration
+
+If [GitHub Integration](/management/organizations#github) is enabled for your organization, and a
+[GitHub repository is linked to the Hive project](/management/projects#github-repository) is active,
+you may specify an additional `--github` flag to report the results back to GitHub as Check Suite
+(for `schema:check` and `schema:publish` commands):
+
+```bash
+hive schema:publish schema.graphql --github
+```
+
+```bash
+hive schema:check schema.graphql --github
+```
+
+## API Reference

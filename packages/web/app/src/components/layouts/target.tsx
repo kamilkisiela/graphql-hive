@@ -199,7 +199,7 @@ export const TargetLayout = <
                   onClick={toggleModalOpen}
                   className="ml-auto"
                 >
-                  Connect
+                  Connect to CDN
                   <Link2Icon className="ml-8 h-4 w-4" />
                 </Button>
                 <ConnectSchemaModal isOpen={isModalOpen} toggleModalOpen={toggleModalOpen} />

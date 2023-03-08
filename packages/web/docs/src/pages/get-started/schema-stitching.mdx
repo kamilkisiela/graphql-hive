@@ -1,0 +1,516 @@
+import NextImage from 'next/image'
+import { Callout, FileTree, Steps, Tab, Tabs } from '@theguild/components'
+import cdnTokenImage from '../../../public/docs/pages/guides/cdn_token.png'
+import historyImage from '../../../public/docs/pages/guides/history.png'
+import stitchingExplorerImage from '../../../public/docs/pages/guides/stitching-explorer.png'
+import stitchingHistoryImage from '../../../public/docs/pages/guides/stitching-history.png'
+import stitchingUserSchemaImage from '../../../public/docs/pages/guides/stitching-users-schema.png'
+import tokenImage from '../../../public/docs/pages/guides/token.png'
+
+# Guide: Schema-Stitching Project
+
+Once you've created a Hive project of type **Schema-Stitching**, you can simply push your GraphQL
+schema to the registry. This guide will guide you through the basics of schema pushing, checking and
+fetching, and also the implementation of a simple schema-stitching gateway.
+
+This guide is going to use the
+[Stitching Directives approach](https://the-guild.dev/graphql/stitching/docs/approaches/stitching-directives)
+of Schema-Stitching; the advantage of this approach is that all schema and type merging
+configuration is represented in a single document managed by each subservice, and can be reloaded by
+the gateway without the need to specify any stitching configurations on the gateway.
+
+<Steps>
+
+### Schemas and Services
+
+For this guide, we are going to use the following schemas and services:
+
+<FileTree>
+  <FileTree.Folder name="subschemas" defaultOpen>
+    <FileTree.File name="users.graphql" />
+    <FileTree.File name="posts.graphql" />
+  </FileTree.Folder>
+</FileTree>
+
+Here's the GraphQL schema (SDL) for every service we are going to publish to Hive:
+
+<Tabs items={['Users', 'Posts']}>
+  <Tab>
+
+<Callout type="info">
+  The `@merge` directive denotes a root field used to query a merged type across services. The
+  `keyField` argument specifies the name of a field to pick off origin objects as the key value.
+
+The `@canonical` directive specifies types and fields that provide a
+[canonical definition](https://the-guild.dev/graphql/stitching/docs/approaches/type-merging#canonical-definitions)
+to be built into the gateway schema.
+
+[You can read more about the Stitching Directives in the documentation.](https://the-guild.dev/graphql/stitching/docs/approaches/stitching-directives#directives-glossary)
+
+</Callout>
+
+```graphql filename="subschemas/users.graphql"
+directive @merge(
+  keyField: String
+  keyArg: String
+  additionalArgs: String
+  key: [String!]
+  argsExpr: String
+) on FIELD_DEFINITION
+
+directive @canonical on OBJECT | INTERFACE | INPUT_OBJECT | UNION | ENUM | SCALAR | FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+type User {
+  id: ID!
+  username: String!
+  email: String!
+}
+
+type Query {
+  users(ids: [ID!]!): [User]! @merge(keyField: "id") @canonical
+}
+```
+
+  </Tab>
+  <Tab>
+
+<Callout type="info">
+  The `@merge` directive denotes a root field used to query a merged type across services. The
+  `keyField` argument specifies the name of a field to pick off origin objects as the key value.
+
+[You can read more about the Stitching Directives in the documentation.](https://the-guild.dev/graphql/stitching/docs/approaches/stitching-directives#directives-glossary)
+
+</Callout>
+
+```graphql filename="subschemas/posts.graphql"
+directive @merge(
+  keyField: String
+  keyArg: String
+  additionalArgs: String
+  key: [String!]
+  argsExpr: String
+) on FIELD_DEFINITION
+
+type Post {
+  id: ID!
+  message: String!
+  author: User
+}
+
+type User {
+  id: ID!
+  posts: [Post]
+}
+
+type Query {
+  post(id: ID!): Post
+  users(ids: [ID!]!): [User]! @merge(keyField: "id")
+}
+```
+
+  </Tab>
+</Tabs>
+
+### Hive CLI Access Token
+
+As you may have noticed, Hive has created three targets under your project: `development`,
+`staging`, and `production`. This guide will use the `development` target to explore the features
+Hive offers.
+
+To begin, select the `development` target under your Hive project and then choose the **Settings**
+tab. On the Settings screen, you can manage your target's settings and access tokens.
+
+Under the **Registry Access Tokens** section, click the **Generate new token** button. Give your
+access token a name and select **Schema Check & Push** from the list of token presets:
+
+<NextImage
+  alt="Create Registry Token Form"
+  src={tokenImage}
+  className="mt-10 max-w-md drop-shadow-md"
+/>
+
+Click on **Generate Token** button and you should get your CLI token created, with permissions to
+publish GraphQL schemas.
+
+Make sure to copy your token and keep it safe. **You won't be able to see it again.**
+
+<Callout type="info">
+  **Note:** You can create multiple tokens with different permissions for different use cases.
+</Callout>
+
+### Publish your schemas
+
+Now that you have your access token, you can publish your schema to the registry.
+
+We'll start with the **Users** service.
+
+Run the following command in your terminal, to publish your `subschemas/users.graphql` to the
+registry (replace `YOUR_TOKEN_HERE` with the token you have just created):
+
+```bash
+hive schema:publish --token YOUR_TOKEN_HERE \
+  --service="users" --url="http://fake.com/users/graphql" --author "Me" --commit "First" subschemas/users.graphql
+```
+
+<Callout type="info">
+  If you are running under a NodeJS project, make sure to include the `npx`, `yarn` or `pnpm` prefix
+  to the command.
+</Callout>
+
+If everything goes well, you should see the following output:
+
+```bash copy=false
+✔ Published initial schema.
+```
+
+If you'll get to your target's page on Hive dashboard, you should see that it was updated with the
+new schema you just published 🎉
+
+<NextImage
+  alt="Stitching SDL"
+  src={stitchingUserSchemaImage}
+  className="mt-10 max-w-2xl drop-shadow-md"
+/>
+
+<Callout type="info">
+  You should also check out the **Explorer** tab: you can see the schema you just published, and
+  explore the API types, fields, and arguments.
+</Callout>
+
+Now, let's publish the **Posts** service schema to Hive:
+
+```bash
+hive schema:publish --token YOUR_TOKEN_HERE \
+  --service="posts" --url="http://fake.com/posts/graphql" --author "Me" --commit "Second" subschemas/posts.graphql
+```
+
+If everything goes well, you should see the following output:
+
+```bash copy=false
+✔ Schema published
+```
+
+On your target's **Explorer** page now, you'll be able to see the schema of both services 🎉
+
+<NextImage
+  alt="Schema Explorer"
+  src={stitchingExplorerImage}
+  className="mt-10 max-w-2xl drop-shadow-md"
+/>
+
+### Schema Checks
+
+Hive can perform several checks on your schema before publishing it to the registry. You can use
+Hive CLI to run these check and find potential breaking changes, and potential composition issues
+when a Stitching project is used.
+
+To see how schema checks works, let's make a small change to our schema. First, we'll start with a
+non-breaking change - we'll add a new field to the `User` type under the **Users** service:
+
+```graphql {15} filename="subschemas/users.graphql"
+directive @merge(
+  keyField: String
+  keyArg: String
+  additionalArgs: String
+  key: [String!]
+  argsExpr: String
+) on FIELD_DEFINITION
+
+directive @canonical on OBJECT | INTERFACE | INPUT_OBJECT | UNION | ENUM | SCALAR | FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+type User {
+  id: ID!
+  username: String!
+  email: String!
+  age: Int
+}
+
+type Query {
+  users(ids: [ID!]!): [User]! @merge(keyField: "id") @canonical
+}
+```
+
+Now, run the Hive CLI with the `schema:check` command and your modified `subschemas/users.graphql`
+file:
+
+```bash
+hive --token YOUR_TOKEN_HERE schema:check --service="users" subschemas/users.graphql
+```
+
+You should see that Hive successfully detect the change you made, and exists with a `0` exit code,
+meaning that the schema is compatible, valid and has no breaking changes:
+
+```bash copy=false
+ℹ Detected 1 change
+
+- Field age was added to object type User
+```
+
+Now, are going to try introduce a breaking change. To do that, we'll rename an existing field in the
+GraphQL schema of the **Users** service:
+
+```graphql {14} filename="subschemas/users.graphql"
+directive @merge(
+  keyField: String
+  keyArg: String
+  additionalArgs: String
+  key: [String!]
+  argsExpr: String
+) on FIELD_DEFINITION
+
+directive @canonical on OBJECT | INTERFACE | INPUT_OBJECT | UNION | ENUM | SCALAR | FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+type User {
+  id: ID!
+  username: String!
+  emailAddress: String! # was "email" before
+}
+
+type Query {
+  users(ids: [ID!]!): [User]! @merge(keyField: "id") @canonical
+}
+```
+
+Now, run the Hive CLI with the `schema:check` command again and the modified
+`subschemas/users.graphql` file:
+
+```bash
+hive --token YOUR_TOKEN_HERE schema:check --service="users" subschemas/users.graphql
+```
+
+In that case, you'll notice that Hive CLI exists with a `1` exit code, meaning that the schema has
+breaking changes, and it's not compatible with the current schema in the registry:
+
+```bash copy=false
+✖ Detected 1 error
+
+- Breaking Change: Field email was removed from object type User
+
+ℹ Detected 2 changes
+
+- Field email was removed from object type User
+- Field emailAddress was added to object type User
+```
+
+In addition to detecting simple breaking changes, Hive is capable of detecting composability issues
+across your services. To see how it works, let's make a small change to our schema.
+
+We are going to add a conflict to the **Users** service. We are going to add a new field (`posts`)
+to the `User` type, that conflicts with the `User` type in the **Posts** service.
+
+```graphql {15} filename="subschemas/users.graphql"
+directive @merge(
+  keyField: String
+  keyArg: String
+  additionalArgs: String
+  key: [String!]
+  argsExpr: String
+) on FIELD_DEFINITION
+
+directive @canonical on OBJECT | INTERFACE | INPUT_OBJECT | UNION | ENUM | SCALAR | FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+type User {
+  id: ID!
+  username: String!
+  email: String!
+  posts: Boolean # conflict with the "Posts" service
+}
+
+type Query {
+  users(ids: [ID!]!): [User]! @merge(keyField: "id") @canonical
+}
+```
+
+Run the Hive CLI with the `schema:check` command again and the modified `subschemas/users.graphql`
+file:
+
+```bash
+hive --token YOUR_TOKEN_HERE schema:check --service="users" subschemas/users.graphql
+```
+
+And now you can see that the schema check process has failed, due to conflicts and inconsistencies
+between the schemas:
+
+```bash copy=false
+✖ Detected 2 errors
+
+- Failed to compare schemas: Failed to build schema: Error: Definitions of field User.posts implement inconsistent list types across subschemas and cannot be merged.
+- Definitions of field User.posts implement inconsistent list types across subschemas and cannot be merged.
+```
+
+### Evolve your schema
+
+Now that you have your schema published, you can evolve it over time. You can add new types, fields,
+and implement new capabilities for your consumers.
+
+Let's make a valid change in our schema and push it again to the registry:
+
+```graphql {15} filename="subschemas/users.graphql"
+directive @merge(
+  keyField: String
+  keyArg: String
+  additionalArgs: String
+  key: [String!]
+  argsExpr: String
+) on FIELD_DEFINITION
+
+directive @canonical on OBJECT | INTERFACE | INPUT_OBJECT | UNION | ENUM | SCALAR | FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+type User {
+  id: ID!
+  username: String!
+  email: String!
+  age: Int
+}
+
+type Query {
+  users(ids: [ID!]!): [User]! @merge(keyField: "id") @canonical
+}
+```
+
+And publish it to Hive:
+
+```bash
+hive schema:publish --token YOUR_TOKEN_HERE \
+  --service="users" --url="http://fake.com/users/graphql" --author "Me" --commit "Third" subschemas/users.graphql
+```
+
+You should see now that Hive accepted your published schema and updated the registry:
+
+```bash copy=false
+✔ Schema published
+```
+
+It's a good timing to check the **History** tab of your Hive target. You should see that a new
+schema is published now, and you can see the changes you made:
+
+<NextImage
+  alt="Schema History"
+  src={stitchingHistoryImage}
+  className="mt-10 max-w-2xl drop-shadow-md"
+/>
+
+### Fetch your schema
+
+Now that your GraphQL schema is stored in the Hive registry, you can access and fetch it through
+Hive's CDN (Content Delivery Network).
+
+The Hive Cloud service leverages the
+[CloudFlare Global Network](https://www.cloudflare.com/network/) to deliver your GraphQL schema and
+schema metadata. This means that your schema will be available from the nearest location to your
+GraphQL gateway, with 100% uptime, regardless of Hive's status. This ensures that everything
+required for your GraphQL API is always available, and reduces the risk of depending on Hive as a
+single point of failure. [You can read more about Hive's CDN here](/features/high-availability-cdn).
+
+To get started with Hive's CDN access, you'll need to create a CDN token from your target's
+**Settings** page. You'll see a separate section for managing and creating CDN tokens, called **CDN
+Access Token**.
+
+Click on **Create new CDN Token** to create a new CDN token. Describe your token with an alias, and
+click **Create**. Please store this access token securely. **You will not be able to see it again.**
+
+<Callout type="info">
+**Why are Registry and CDN tokens different?**
+
+We use a separate, externally managed storage to manage CDN tokens to ensure high availability of
+your schemas. This approach ensures that your GraphQL schemas are fully secured and highly
+available. CDN tokens are read-only and can only fetch schemas from the CDN. They do not have
+permissions to perform any other action on your Hive organization.
+
+</Callout>
+
+To use your access token, go to your target's page on Hive's dashboard and click on the **Connect to
+CDN** button. You will see a screen with instructions on how to obtain different types of artifacts
+from the CDN. For this guide, you can pick the **GraphQL SDL** artifact.
+
+<NextImage alt="CDN Token Form" src={cdnTokenImage} className="mt-10 max-w-2xl drop-shadow-md" />
+
+Copy the URL and let's try to fetch your schema using `curl` (replace `YOUR_HIVE_CDN_TOKEN` with
+your CDN token, and `CDN_ENDPOINT_HERE` with the endpoint you copied from Hive's dashboard):
+
+```bash
+curl -L -H "X-Hive-CDN-Key: YOUR_HIVE_CDN_TOKEN" CDN_ENDPOINT_HERE
+```
+
+You should see that Hive CDN returns your full GraphQL schema as an output for that command.
+
+### A simple gateway
+
+Now that you have your schema published, and the schema is available on Hive's CDN, you can use it
+to build a simple GraphQL gateway.
+
+In addition to the SDL endpoint exposed from Hive's CDN, you can also use the `/services` endpoint
+to fetch a list of all services and their metadata (url and name).
+
+As part of [Hive Client](/api-reference/client#javascript--nodejs-client) library, we are also
+exposing utilities for fetching and integrating your schema with your gateway.
+
+Here's a short snippet of how you can fetch the services information from Hive CDN, and start a
+GraphQL gateway using GraphQL-Yoga:
+
+```ts
+import { createServer } from 'node:http'
+import { buildSchema } from 'graphql'
+import { createYoga } from 'graphql-yoga'
+import { createServicesFetcher } from '@graphql-hive/client'
+import { stitchSchemas } from '@graphql-tools/stitch'
+import { stitchingDirectives } from '@graphql-tools/stitching-directives'
+
+const { stitchingDirectivesTransformer } = stitchingDirectives()
+
+const fetchServices = createServicesFetcher({
+  endpoint: process.env.HIVE_CDN_ENDPOINT,
+  key: process.env.HIVE_CDN_KEY
+})
+
+async function main() {
+  const services = await fetchServices()
+  const subschemas = services.map(service => {
+    return {
+      schema: buildSchema(service.sdl, { assumeValid: true, assumeValidSDL: true }),
+      executor: buildHTTPExecutor({ endpoint: service.url }),
+      subschemaConfigTransforms: [stitchingDirectivesTransformer]
+    }
+  })
+
+  const schema = stitchSchemas({
+    subschemas
+  })
+  const yoga = createYoga({ schema })
+  const server = createServer(yoga)
+
+  server.listen(4000, () => {
+    console.info('Gateway is running on http://localhost:4000/graphql')
+  })
+}
+
+main().catch(err => {
+  console.error(err)
+  process.exit(1)
+})
+```
+
+<Callout type="info">
+
+Make sure to add environment variables:
+
+`HIVE_CDN_ENDPOINT` is your Hive CDN endpoint (without the artficat type, just drop the `/sdl` or
+`/services` from the URL).
+
+`HIVE_CDN_KEY` is the Hive CDN Access Token you created earlier.
+
+</Callout>
+
+### Next Steps
+
+Now that you use the basic functionality of Hive as a schema registry, we recommend following other
+powerful features of Hive:
+
+- [Schema Stitching Integration with Hive](/integrations/schema-stitching)
+- [How to implement and run subschemas and gateway with Schema-Stitching](https://the-guild.dev/graphql/stitching/docs/approaches/stitching-directives#schema-setup)
+- [Usage Reporting and Monintoring](/features/usage-reporting)
+- [Conditional Breaking Changes](/features/conditional-breaking-changes)
+- [Alerts and Notifications](/features/alerts-and-notifications)
+- [CI/CD Integration](/features/ci-integration)
+
+</Steps>
