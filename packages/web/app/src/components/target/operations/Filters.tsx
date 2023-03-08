@@ -243,7 +243,7 @@ export function OperationsFilterTrigger({
 
   return (
     <>
-      <Button variant="secondary" className="gap-2" onClick={toggle}>
+      <Button variant="secondary" className="gap-2 rounded-md" onClick={toggle}>
         Operations ({selected?.length || 'all'})<ChevronUpIcon className="rotate-180" />
       </Button>
       <OperationsFilterContainer
