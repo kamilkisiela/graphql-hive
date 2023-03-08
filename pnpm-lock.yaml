@@ -1205,19 +1205,35 @@ importers:
 
   packages/web/docs:
     specifiers:
+      '@next/env': '*'
+      '@radix-ui/react-navigation-menu': '*'
+      '@swc/helpers': '*'
       '@theguild/components': 4.5.6
       '@theguild/tailwind-config': 0.2.1
       '@types/react': 18.0.28
-      next: 13.2.1
+      algoliasearch: '*'
+      clsx: '*'
+      next: '*'
+      next-themes: '*'
+      nextra: '*'
       react: 18.2.0
       react-dom: 18.2.0
+      styled-jsx: '*'
       tailwindcss: 3.2.7
       zod: 3.21.4
     dependencies:
+      '@next/env': 13.2.1
+      '@radix-ui/react-navigation-menu': 1.1.1_biqbaboplfbrettd7655fr4n2y
+      '@swc/helpers': 0.4.14
       '@theguild/components': 4.5.6_qgtcjgzkkjtbiyvnx7d32fl5vu
+      algoliasearch: 4.15.0
+      clsx: 1.2.1
       next: 13.2.1_biqbaboplfbrettd7655fr4n2y
+      next-themes: 0.2.1_qgtcjgzkkjtbiyvnx7d32fl5vu
+      nextra: 2.2.18_qgtcjgzkkjtbiyvnx7d32fl5vu
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
+      styled-jsx: 5.1.1_react@18.2.0
       tailwindcss: 3.2.7
       zod: 3.21.4
     devDependencies:

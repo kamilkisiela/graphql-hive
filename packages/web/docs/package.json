@@ -10,10 +10,18 @@
     "start": "next start"
   },
   "dependencies": {
+    "@next/env": "*",
+    "@radix-ui/react-navigation-menu": "*",
+    "@swc/helpers": "*",
     "@theguild/components": "4.5.6",
-    "next": "13.2.1",
+    "algoliasearch": "*",
+    "clsx": "*",
+    "next": "*",
+    "next-themes": "*",
+    "nextra": "*",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "styled-jsx": "*",
     "tailwindcss": "3.2.7",
     "zod": "3.21.4"
   },
