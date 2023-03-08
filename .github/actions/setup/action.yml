@@ -43,13 +43,23 @@ runs:
       run: echo "pnpm_cache_dir=$(pnpm store path)" >> $GITHUB_OUTPUT
 
     - uses: actions/cache@v3
-      name: restore pnpm cache
+      name: restore cache
       with:
         path: |
           ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
           ~/.cache/Cypress
-          packages/web/app/.next/cache
-          packages/web/docs/.next/cache
+          - uses: actions/cache@v3
+      name: restore cache
+      with:
+        path: |
+          ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
+          ~/.cache/Cypress
+          ./packages/web/app/.next/cache
+          ./packages/web/docs/.next/cache
+          ./node_modules/.cache/turbo
+        key: ${{ runner.os }}-pnpm-store-n19-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-n19-
         key: ${{ runner.os }}-pnpm-store-n18-${{ hashFiles('**/pnpm-lock.yaml') }}
         restore-keys: |
           ${{ runner.os }}-pnpm-store-n18-
