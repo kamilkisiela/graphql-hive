@@ -48,6 +48,8 @@ runs:
         path: |
           ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
           ~/.cache/Cypress
+          packages/web/app/.next/cache
+          packages/web/docs/.next/cache
         key: ${{ runner.os }}-pnpm-store-n18-${{ hashFiles('**/pnpm-lock.yaml') }}
         restore-keys: |
           ${{ runner.os }}-pnpm-store-n18-
