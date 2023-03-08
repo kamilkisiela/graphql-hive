@@ -13,8 +13,8 @@
   "dependencies": {
     "@sentry/node": "7.41.0",
     "@sentry/tracing": "7.41.0",
-    "@trpc/client": "10.14.0",
-    "@trpc/server": "10.14.0",
+    "@trpc/client": "10.14.1",
+    "@trpc/server": "10.14.1",
     "@whatwg-node/fetch": "0.8.2",
     "date-fns": "2.29.3",
     "dotenv": "16.0.3",
