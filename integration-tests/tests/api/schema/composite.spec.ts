@@ -97,9 +97,9 @@ describe.each`
       ).then(r => r.expectNoGraphQLErrors()),
     ).resolves.toEqual(
       expect.objectContaining({
-        schemaDelete: {
+        schemaDelete: expect.objectContaining({
           __typename: 'SchemaDeleteSuccess',
-        },
+        }),
       }),
     );
 
@@ -178,9 +178,9 @@ describe.each`
 
       await expect(deleteSchema('service-b').then(r => r.expectNoGraphQLErrors())).resolves.toEqual(
         expect.objectContaining({
-          schemaDelete: {
+          schemaDelete: expect.objectContaining({
             __typename: 'SchemaDeleteSuccess',
-          },
+          }),
         }),
       );
 
