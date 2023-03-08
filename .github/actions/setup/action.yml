@@ -48,12 +48,6 @@ runs:
         path: |
           ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
           ~/.cache/Cypress
-          - uses: actions/cache@v3
-      name: restore cache
-      with:
-        path: |
-          ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
-          ~/.cache/Cypress
           ./packages/web/app/.next/cache
           ./packages/web/docs/.next/cache
           ./node_modules/.cache/turbo
