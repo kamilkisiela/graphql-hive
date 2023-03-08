@@ -105,7 +105,7 @@ export async function ensureSDL(
     if (composeAndValidationResult.errors) {
       throw new SchemaBuildError(
         `Composition errors: \n` +
-          composeAndValidationResult.errors.map(err => ` - ${String(err)}`).join('\n'),
+          composeAndValidationResult.errors.map(err => ` - ${err.message}`).join('\n'),
       );
     }
 
