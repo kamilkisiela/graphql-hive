@@ -33,7 +33,7 @@ import { TargetManager } from '../target/providers/target-manager';
 import type { SchemaModule } from './__generated__/types';
 import { Inspector } from './providers/inspector';
 import { SchemaBuildError } from './providers/orchestrators/errors';
-import { SchemaHelper } from './providers/schema-helper';
+import { ensureSDL, SchemaHelper } from './providers/schema-helper';
 import { SchemaManager } from './providers/schema-manager';
 import { SchemaPublisher } from './providers/schema-publisher';
 
@@ -288,13 +288,17 @@ export const resolvers: SchemaModule.Resolvers = {
       ]);
 
       return Promise.all([
-        orchestrator.build(
-          schemasBefore.map(s => helper.createSchemaObject(s)),
-          project.externalComposition,
+        ensureSDL(
+          orchestrator.composeAndValidate(
+            schemasBefore.map(s => helper.createSchemaObject(s)),
+            project.externalComposition,
+          ),
         ),
-        orchestrator.build(
-          schemasAfter.map(s => helper.createSchemaObject(s)),
-          project.externalComposition,
+        ensureSDL(
+          orchestrator.composeAndValidate(
+            schemasAfter.map(s => helper.createSchemaObject(s)),
+            project.externalComposition,
+          ),
         ),
       ]).catch(reason => {
         if (reason instanceof SchemaBuildError) {
@@ -342,14 +346,18 @@ export const resolvers: SchemaModule.Resolvers = {
 
       return Promise.all([
         schemasBefore.length
-          ? orchestrator.build(
-              schemasBefore.map(s => helper.createSchemaObject(s)),
-              project.externalComposition,
+          ? ensureSDL(
+              orchestrator.composeAndValidate(
+                schemasBefore.map(s => helper.createSchemaObject(s)),
+                project.externalComposition,
+              ),
             )
           : null,
-        orchestrator.build(
-          schemasAfter.map(s => helper.createSchemaObject(s)),
-          project.externalComposition,
+        ensureSDL(
+          orchestrator.composeAndValidate(
+            schemasAfter.map(s => helper.createSchemaObject(s)),
+            project.externalComposition,
+          ),
         ),
       ]).catch(reason => {
         if (reason instanceof SchemaBuildError) {
@@ -529,11 +537,12 @@ export const resolvers: SchemaModule.Resolvers = {
       }
 
       const orchestrator = schemaManager.matchOrchestrator(project.type);
-
-      return orchestrator.validate(
+      const validation = await orchestrator.composeAndValidate(
         schemas.map(s => schemaHelper.createSchemaObject(s)),
         project.externalComposition,
       );
+
+      return validation.errors;
     },
     async supergraph(version, _, { injector }) {
       const project = await injector.get(ProjectManager).getProject({
@@ -561,10 +570,12 @@ export const resolvers: SchemaModule.Resolvers = {
         return null;
       }
 
-      return orchestrator.supergraph(
-        schemas.map(s => helper.createSchemaObject(s)),
-        project.externalComposition,
-      );
+      return orchestrator
+        .composeAndValidate(
+          schemas.map(s => helper.createSchemaObject(s)),
+          project.externalComposition,
+        )
+        .then(r => r.supergraph);
     },
     async sdl(version, _, { injector }) {
       const project = await injector.get(ProjectManager).getProject({
@@ -589,9 +600,11 @@ export const resolvers: SchemaModule.Resolvers = {
       }
 
       return (
-        await orchestrator.build(
-          schemas.map(s => helper.createSchemaObject(s)),
-          project.externalComposition,
+        await ensureSDL(
+          orchestrator.composeAndValidate(
+            schemas.map(s => helper.createSchemaObject(s)),
+            project.externalComposition,
+          ),
         )
       ).raw;
     },
@@ -615,9 +628,11 @@ export const resolvers: SchemaModule.Resolvers = {
         target: version.target,
       });
 
-      const schema = await orchestrator.build(
-        schemas.map(s => helper.createSchemaObject(s)),
-        project.externalComposition,
+      const schema = await ensureSDL(
+        orchestrator.composeAndValidate(
+          schemas.map(s => helper.createSchemaObject(s)),
+          project.externalComposition,
+        ),
       );
 
       return {

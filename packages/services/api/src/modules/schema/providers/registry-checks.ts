@@ -11,7 +11,7 @@ import type {
 } from './../../../shared/entities';
 import { Logger } from './../../shared/providers/logger';
 import { Inspector } from './inspector';
-import { extendWithBase, SchemaHelper } from './schema-helper';
+import { ensureSDL, extendWithBase, SchemaHelper } from './schema-helper';
 
 // The reason why I'm using `result` and `reason` instead of just `data` for both:
 // https://bit.ly/hive-check-result-data
@@ -102,10 +102,12 @@ export class RegistryChecks {
     schemas: Schemas;
     baseSchema: string | null;
   }) {
-    const validationErrors = await orchestrator.validate(
+    const result = await orchestrator.composeAndValidate(
       extendWithBase(schemas, baseSchema).map(s => this.helper.createSchemaObject(s)),
       project.externalComposition,
     );
+
+    const validationErrors = result.errors;
 
     if (Array.isArray(validationErrors) && validationErrors.length) {
       this.logger.debug('Detected validation errors');
@@ -124,9 +126,16 @@ export class RegistryChecks {
 
     this.logger.debug('No validation errors');
 
+    if (!result.sdl) {
+      throw new Error('No SDL, but no errors either');
+    }
+
     return {
       status: 'completed',
-      result: null,
+      result: {
+        fullSchemaSdl: result.sdl,
+        supergraph: result.supergraph,
+      },
     } satisfies CheckResult;
   }
 
@@ -156,18 +165,30 @@ export class RegistryChecks {
 
     try {
       const [existingSchema, incomingSchema] = await Promise.all([
-        orchestrator
-          .build(
+        ensureSDL(
+          orchestrator.composeAndValidate(
             latestVersion.schemas.map(s => this.helper.createSchemaObject(s)),
             project.externalComposition,
-          )
-          .then(buildSchema),
-        orchestrator
-          .build(
+          ),
+        ).then(schema => {
+          return buildSchema(
+            this.helper.createSchemaObject({
+              sdl: schema.raw,
+            }),
+          );
+        }),
+        ensureSDL(
+          orchestrator.composeAndValidate(
             schemas.map(s => this.helper.createSchemaObject(s)),
             project.externalComposition,
-          )
-          .then(buildSchema),
+          ),
+        ).then(schema => {
+          return buildSchema(
+            this.helper.createSchemaObject({
+              sdl: schema.raw,
+            }),
+          );
+        }),
       ]);
 
       const changes = await this.inspector.diff(existingSchema, incomingSchema, selector);

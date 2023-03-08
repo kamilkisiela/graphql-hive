@@ -257,7 +257,8 @@ export class SingleLegacyModel {
           compositionErrors,
           schema: incoming,
           schemas,
-          orchestrator: this.orchestrator,
+          supergraph: null,
+          fullSchemaSdl: compositionCheck.result?.fullSchemaSdl ?? null,
         },
       };
     }

@@ -2,35 +2,18 @@ import type { CompositionErrorSource } from './orchestrators';
 
 export type SchemaType = 'single' | 'federation' | 'stitching';
 
-export type BuildInput = Array<{
-  raw: string;
-  source: string;
-}>;
-
-export interface BuildOutput {
-  source: string;
-  raw: string;
-}
-
-export type ValidationInput = Array<{
-  raw: string;
-  source: string;
-}>;
-
-export interface ValidationOutput {
-  errors: Array<{
-    message: string;
-    source: CompositionErrorSource;
-  }>;
-}
-
-export type SupergraphInput = Array<{
+export type ComposeAndValidateInput = Array<{
   raw: string;
   source: string;
   url?: string | null;
 }>;
 
-export type SupergraphOutput = {
+export type ComposeAndValidateOutput = {
+  errors: Array<{
+    message: string;
+    source: CompositionErrorSource;
+  }>;
+  sdl: string | null;
   supergraph: string | null;
 };
 

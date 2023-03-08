@@ -624,6 +624,31 @@ export function deleteSchema(
       mutation schemaDelete($input: SchemaDeleteInput!) {
         schemaDelete(input: $input) {
           __typename
+          ... on SchemaDeleteSuccess {
+            valid
+            changes {
+              nodes {
+                criticality
+                message
+              }
+              total
+            }
+            errors {
+              nodes {
+                message
+              }
+              total
+            }
+          }
+          ... on SchemaDeleteError {
+            valid
+            errors {
+              nodes {
+                message
+              }
+              total
+            }
+          }
         }
       }
     `),

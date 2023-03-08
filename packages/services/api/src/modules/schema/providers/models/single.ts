@@ -250,7 +250,8 @@ export class SingleModel {
         compositionErrors: null,
         schema: incoming,
         schemas,
-        orchestrator: this.orchestrator,
+        supergraph: null,
+        fullSchemaSdl: compositionCheck.result?.fullSchemaSdl ?? null,
       },
     };
   }

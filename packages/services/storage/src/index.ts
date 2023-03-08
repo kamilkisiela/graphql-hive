@@ -1865,47 +1865,6 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         hasMore,
       };
     },
-    async insertSchema({
-      schema,
-      commit,
-      author,
-      project,
-      projectType,
-      target,
-      service = null,
-      url = null,
-      metadata,
-    }) {
-      const result = await pool.one<OverrideProp<schema_log, 'action', 'PUSH'>>(sql`
-        INSERT INTO public.schema_log
-          (
-            author,
-            service_name,
-            service_url,
-            commit,
-            sdl,
-            project_id,
-            target_id,
-            metadata,
-            action
-          )
-        VALUES
-          (
-            ${author},
-            lower(${service}::text),
-            ${url}::text,
-            ${commit}::text,
-            ${schema}::text,
-            ${project},
-            ${target},
-            ${metadata},
-            'PUSH'
-          )
-        RETURNING *
-      `);
-
-      return transformSchema({ ...result, type: projectType });
-    },
     async deleteSchema({ project, target, serviceName, composable }) {
       return pool.transaction(async trx => {
         // fetch the latest version
@@ -1991,9 +1950,40 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       });
     },
     async createVersion(input) {
-      const newVersion = await pool.transaction(async trx => {
+      const url = input.url ?? null;
+      const service = input.service ?? null;
+
+      const output = await pool.transaction(async trx => {
+        const log = await pool.one<Pick<schema_log, 'id'>>(sql`
+          INSERT INTO public.schema_log
+            (
+              author,
+              service_name,
+              service_url,
+              commit,
+              sdl,
+              project_id,
+              target_id,
+              metadata,
+              action
+            )
+          VALUES
+            (
+              ${input.author},
+              lower(${service}::text),
+              ${url}::text,
+              ${input.commit}::text,
+              ${input.schema}::text,
+              ${input.project},
+              ${input.target},
+              ${input.metadata},
+              'PUSH'
+            )
+          RETURNING id
+        `);
+
         // creates a new version
-        const newVersion = await trx.one<Slonik<Pick<schema_versions, 'id' | 'created_at'>>>(sql`
+        const version = await trx.one<Slonik<Pick<schema_versions, 'id' | 'created_at'>>>(sql`
           INSERT INTO public.schema_versions
             (
               is_composable,
@@ -2005,7 +1995,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             (
               ${input.valid},
               ${input.target},
-              ${input.commit},
+              ${log.id},
               ${input.base_schema}
             )
           RETURNING
@@ -2014,25 +2004,30 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         `);
 
         await Promise.all(
-          input.commits.map(async cid => {
+          input.logIds.concat(log.id).map(async lid => {
             await trx.query(sql`
               INSERT INTO public.schema_version_to_log
                 (version_id, action_id)
               VALUES
-              (${newVersion.id}, ${cid})
+              (${version.id}, ${lid})
             `);
           }),
         );
 
-        return newVersion;
+        await input.actionFn();
+
+        return {
+          version,
+          log,
+        };
       });
 
       return {
-        id: newVersion.id,
-        date: newVersion.created_at as any,
-        url: input.url,
+        id: output.version.id,
+        date: output.version.created_at as any,
+        url,
         valid: input.valid,
-        commit: input.commit,
+        commit: output.log.id,
         base_schema: input.base_schema,
       };
     },

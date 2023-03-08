@@ -4,7 +4,7 @@ import { handleTRPCError } from '@hive/service-common';
 import type { inferRouterInputs } from '@trpc/server';
 import { initTRPC } from '@trpc/server';
 import type { Cache } from './cache';
-import { buildCounter, supergraphCounter, validateCounter } from './metrics';
+import { composeAndValidateCounter } from './metrics';
 import { pickOrchestrator } from './orchestrators';
 
 export type { CompositionFailureError, CompositionErrorSource } from './orchestrators';
@@ -24,131 +24,52 @@ const t = initTRPC.context<Context>().create();
 const errorMiddleware = t.middleware(handleTRPCError);
 const procedure = t.procedure.use(errorMiddleware);
 
-const COMPOSITE_SCHEMA_OBJECT_VALIDATION = {
-  raw: z.string().nonempty(),
-  source: z.string().nonempty(),
-};
-const COMPOSITE_SCHEMAS_VALIDATION = z.array(z.object(COMPOSITE_SCHEMA_OBJECT_VALIDATION));
-
-const SINGLE_SCHEMA_OBJECT_VALIDATION = {
-  raw: z.string().nonempty(),
-};
-const SINGLE_SCHEMA_VALIDATION = z.array(z.object(SINGLE_SCHEMA_OBJECT_VALIDATION));
-
 const EXTERNAL_VALIDATION = z
   .object({
-    endpoint: z.string().url().nonempty(),
-    encryptedSecret: z.string().nonempty(),
+    endpoint: z.string().url().min(1),
+    encryptedSecret: z.string().min(1),
   })
   .nullable();
 
 export const schemaBuilderApiRouter = t.router({
-  supergraph: procedure
+  composeAndValidate: procedure
     .input(
-      z
-        .object({
-          type: z.literal('federation'),
-          schemas: z.array(
-            z
-              .object({
-                raw: z.string().nonempty(),
-                source: z.string().nonempty(),
-                url: z.string().nullish(),
-              })
-              .required(),
-          ),
-          external: EXTERNAL_VALIDATION.optional(),
-        })
-        .required(),
+      z.union([
+        z
+          .object({
+            type: z.literal('single'),
+            schemas: z.array(
+              z
+                .object({
+                  raw: z.string().min(1),
+                  source: z.string().min(1),
+                })
+                .required(),
+            ),
+            external: EXTERNAL_VALIDATION,
+          })
+          .required(),
+        z
+          .object({
+            type: z.union([z.literal('federation'), z.literal('stitching')]),
+            schemas: z.array(
+              z
+                .object({
+                  raw: z.string().min(1),
+                  source: z.string().min(1),
+                  url: z.string().nullish(),
+                })
+                .required(),
+            ),
+            external: EXTERNAL_VALIDATION,
+          })
+          .required(),
+      ]),
     )
     .mutation(async ({ ctx, input }) => {
-      supergraphCounter
-        .labels({
-          type: input.type,
-        })
-        .inc();
-      return await pickOrchestrator(input.type, ctx.cache, ctx.req, ctx.decrypt).supergraph(
+      composeAndValidateCounter.inc({ type: input.type });
+      return await pickOrchestrator(input.type, ctx.cache, ctx.req, ctx.decrypt).composeAndValidate(
         input.schemas,
-        input.external
-          ? {
-              ...input.external,
-              broker: ctx.broker,
-            }
-          : null,
-      );
-    }),
-  validate: procedure
-    .input(
-      z.union([
-        z
-          .object({
-            type: z.literal('single'),
-            schemas: SINGLE_SCHEMA_VALIDATION,
-            external: EXTERNAL_VALIDATION,
-          })
-          .required(),
-        z
-          .object({
-            type: z.union([z.literal('federation'), z.literal('stitching')]),
-            schemas: COMPOSITE_SCHEMAS_VALIDATION,
-            external: EXTERNAL_VALIDATION,
-          })
-          .required(),
-      ]),
-    )
-    .mutation(async ({ ctx, input }) => {
-      validateCounter
-        .labels({
-          type: input.type,
-        })
-        .inc();
-      return await pickOrchestrator(input.type, ctx.cache, ctx.req, ctx.decrypt).validate(
-        input.type === 'single'
-          ? input.schemas.map(s => ({
-              ...s,
-              source: 'single',
-            }))
-          : input.schemas,
-        input.external
-          ? {
-              ...input.external,
-              broker: ctx.broker,
-            }
-          : null,
-      );
-    }),
-  build: procedure
-    .input(
-      z.union([
-        z
-          .object({
-            type: z.literal('single'),
-            schemas: SINGLE_SCHEMA_VALIDATION,
-            external: EXTERNAL_VALIDATION,
-          })
-          .required(),
-        z
-          .object({
-            type: z.union([z.literal('federation'), z.literal('stitching')]),
-            schemas: COMPOSITE_SCHEMAS_VALIDATION,
-            external: EXTERNAL_VALIDATION,
-          })
-          .required(),
-      ]),
-    )
-    .mutation(async ({ ctx, input }) => {
-      buildCounter
-        .labels({
-          type: input.type,
-        })
-        .inc();
-      return await pickOrchestrator(input.type, ctx.cache, ctx.req, ctx.decrypt).build(
-        input.type === 'single'
-          ? input.schemas.map(s => ({
-              ...s,
-              source: 'single',
-            }))
-          : input.schemas,
         input.external
           ? {
               ...input.external,
