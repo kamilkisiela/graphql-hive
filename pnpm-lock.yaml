@@ -8,27 +8,27 @@ patchedDependencies:
   mjml-core@4.13.0:
     hash: zxxsxbqejjmcwuzpigutzzq6wa
     path: patches/mjml-core@4.13.0.patch
+  '@theguild/buddy@0.1.0':
+    hash: ryylgra5xglhidfoiaxehn22hq
+    path: patches/@theguild__buddy@0.1.0.patch
   oclif@3.7.0:
     hash: rxmtqiusuyruv7tkwux5gvotbm
     path: patches/oclif@3.7.0.patch
   '@graphql-inspector/core@4.0.0':
     hash: wf35oaq7brzyeva5aoncxac66a
     path: patches/@graphql-inspector__core@4.0.0.patch
-  '@oclif/core@1.23.0':
-    hash: zhte2hlj7lfobytjpalcwwo474
-    path: patches/@oclif__core@1.23.0.patch
-  '@slonik/migrator@0.11.3':
-    hash: yfpv2xzdmnkrtu2wvaktxf5mmq
-    path: patches/@slonik__migrator@0.11.3.patch
   '@tgriesser/schemats@7.0.1':
     hash: u3kbucfchakklx3sci2vh6wjau
     path: patches/@tgriesser__schemats@7.0.1.patch
-  '@theguild/buddy@0.1.0':
-    hash: ryylgra5xglhidfoiaxehn22hq
-    path: patches/@theguild__buddy@0.1.0.patch
-  bullmq@3.10.0:
+  '@oclif/core@1.23.0':
+    hash: zhte2hlj7lfobytjpalcwwo474
+    path: patches/@oclif__core@1.23.0.patch
+  bullmq@3.10.1:
     hash: kobtuuqaglbtaadx3jiqtahl3i
-    path: patches/bullmq@3.10.0.patch
+    path: patches/bullmq@3.10.1.patch
+  '@slonik/migrator@0.11.3':
+    hash: yfpv2xzdmnkrtu2wvaktxf5mmq
+    path: patches/@slonik__migrator@0.11.3.patch
   '@apollo/federation@0.38.1':
     hash: rjgakkkphrejw6qrtph4ar24zq
     path: patches/@apollo__federation@0.38.1.patch
@@ -512,7 +512,7 @@ importers:
       '@types/nodemailer': 6.4.7
       '@types/sendmail': 1.4.4
       '@whatwg-node/fetch': 0.8.2
-      bullmq: 3.10.0
+      bullmq: 3.10.1
       copyfiles: 2.4.1
       dotenv: 16.0.3
       ioredis: 5.3.1
@@ -527,7 +527,7 @@ importers:
       '@sentry/node': 7.41.0
       '@trpc/server': 10.14.1
       '@whatwg-node/fetch': 0.8.2
-      bullmq: 3.10.0_kobtuuqaglbtaadx3jiqtahl3i
+      bullmq: 3.10.1_kobtuuqaglbtaadx3jiqtahl3i
       dotenv: 16.0.3
       ioredis: 5.3.1
       mjml: 4.13.0
@@ -967,7 +967,7 @@ importers:
       '@sentry/node': 7.41.0
       '@sentry/tracing': 7.41.0
       '@trpc/server': 10.14.1
-      bullmq: 3.10.0
+      bullmq: 3.10.1
       copyfiles: 2.4.1
       dotenv: 16.0.3
       got: 12.6.0
@@ -980,7 +980,7 @@ importers:
       '@sentry/node': 7.41.0
       '@sentry/tracing': 7.41.0
       '@trpc/server': 10.14.1
-      bullmq: 3.10.0_kobtuuqaglbtaadx3jiqtahl3i
+      bullmq: 3.10.1_kobtuuqaglbtaadx3jiqtahl3i
       dotenv: 16.0.3
       got: 12.6.0
       ioredis: 5.3.1
@@ -14451,8 +14451,8 @@ packages:
       semver: 7.3.8
     dev: true
 
-  /bullmq/3.10.0_kobtuuqaglbtaadx3jiqtahl3i:
-    resolution: {integrity: sha512-oC8bDXS5P9/KjSAAPgoV/oTUR44lB3QlJ2739gjizqvdScU4umBBd2XRGd7zo2AekmoVpS3sgHBzOVR1kAxSwg==}
+  /bullmq/3.10.1_kobtuuqaglbtaadx3jiqtahl3i:
+    resolution: {integrity: sha512-NHysIgywLRB0C1OXY1YQPXsDRnozBWBREPTyeX72ARolkHMkj0IXY+nG36N1pxc2OToPkMHyhSQxaY4jmaM0VQ==}
     dependencies:
       cron-parser: 4.6.0
       glob: 8.1.0
