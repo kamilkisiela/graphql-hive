@@ -60,9 +60,6 @@ runs:
         key: ${{ runner.os }}-pnpm-store-n19-${{ hashFiles('**/pnpm-lock.yaml') }}
         restore-keys: |
           ${{ runner.os }}-pnpm-store-n19-
-        key: ${{ runner.os }}-pnpm-store-n18-${{ hashFiles('**/pnpm-lock.yaml') }}
-        restore-keys: |
-          ${{ runner.os }}-pnpm-store-n18-
 
     - name: pnpm install
       if: ${{ inputs.installDependencies == 'true' }}
