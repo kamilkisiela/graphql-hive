@@ -66,7 +66,7 @@ function OperationsView({
 
   return (
     <>
-      <div className="absolute top-0 right-0 flex gap-2">
+      <div className="flex justify-end gap-2 pb-7">
         <OperationsFilterTrigger
           period={period}
           selected={selectedOperations}
