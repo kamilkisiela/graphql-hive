@@ -54,21 +54,19 @@ runs:
 
     - uses: actions/cache@v3
       name: restore turbo cache
-      working-directory: ${{ inputs.workingDirectory }}
       with:
         path: |
-          node_modules/.cache/turbo
+          ${{ inputs.workingDirectory }}node_modules/.cache/turbo
         key: ${{ runner.os }}-turbo-store-n18-${{ hashFiles('**/pnpm-lock.yaml') }}
         restore-keys: |
           ${{ runner.os }}-turbo-store-n18-
 
     - uses: actions/cache@v3
       name: restore next cache
-      working-directory: ${{ inputs.workingDirectory }}
       with:
         path: |
-          packages/web/app/.next/cache
-          packages/web/docs/.next/cache
+          ${{ inputs.workingDirectory }}packages/web/app/.next/cache
+          ${{ inputs.workingDirectory }}packages/web/docs/.next/cache
         key: ${{ runner.os }}-next-store-n18-${{ hashFiles('**/pnpm-lock.yaml') }}
         restore-keys: |
           ${{ runner.os }}-next-store-n18-
