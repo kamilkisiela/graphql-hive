@@ -27,6 +27,16 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-eslint
 
+      - name: Cache ESLint and Prettier
+        uses: actions/cache@v3
+        with:
+          path: |
+            .eslintcache
+            node_modules/.cache/prettier
+          key: lint-cache-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ github.sha }}
+          restore-keys: |
+            lint-cache-${{ hashFiles('**/pnpm-lock.yaml') }}-
+
       - name: eslint
         id: eslint
         run: pnpm lint

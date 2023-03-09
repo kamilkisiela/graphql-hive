@@ -48,7 +48,7 @@ jobs:
       - name: setup environment
         if: ${{ inputs.build }}
         uses: ./.github/actions/setup
-        with: 
+        with:
           actor: build-and-dockerize
 
       - name: build packages and applications

@@ -71,7 +71,8 @@ runs:
         path: |
           packages/web/app/.next/cache
           packages/web/docs/.next/cache
-        key: nextjs-cache-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ inputs.actor }}-${{ github.sha }}
+        key:
+          nextjs-cache-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ inputs.actor }}-${{ github.sha }}
         restore-keys: |
           nextjs-cache-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ inputs.actor }}-
           nextjs-cache-${{ hashFiles('**/pnpm-lock.yaml') }}-
