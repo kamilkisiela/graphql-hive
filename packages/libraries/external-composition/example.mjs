@@ -133,6 +133,16 @@ async function main() {
     },
   });
 
+  server.route({
+    method: ['POST'],
+    url: '/timeout',
+    handler(_req, res) {
+      setTimeout(() => {
+        res.status(500).send('did not expect to get here');
+      }, 35_000);
+    },
+  });
+
   /**
    * ok, we're back from testing
    */
