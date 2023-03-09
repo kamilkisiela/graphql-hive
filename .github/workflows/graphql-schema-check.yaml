@@ -27,6 +27,8 @@ jobs:
 
       - name: setup environment
         uses: ./.github/actions/setup
+        with:
+          actor: ${{ github.workflow }}
 
       - name: check pull request label
         if: contains(github.event.pull_request.labels.*.name, 'non-breaking')

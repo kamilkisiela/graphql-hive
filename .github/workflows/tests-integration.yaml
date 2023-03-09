@@ -39,6 +39,8 @@ jobs:
 
       - name: setup environment
         uses: ./.github/actions/setup
+        with:
+          actor: ${{ github.workflow }}
 
       - name: prepare packages
         run: pnpm --filter integration-tests prepare:env

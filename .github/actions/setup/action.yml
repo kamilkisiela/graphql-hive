@@ -14,6 +14,10 @@ inputs:
   workingDirectory:
     description: Working dir
     default: ${{ github.workspace }}
+  actor:
+    description: Name of the workflow that called this action
+    required: true
+    type: string
 
 runs:
   using: 'composite'
@@ -52,24 +56,33 @@ runs:
         restore-keys: |
           ${{ runner.os }}-pnpm-store-n18
 
-    - uses: actions/cache@v3
-      name: restore turbo cache
+    - name: Cache Turbo
+      uses: actions/cache@v3
       with:
-        path: |
-          ${{ inputs.workingDirectory }}/node_modules/.cache/turbo
-        key: ${{ runner.os }}-turbo-store-n18-v1-${{ hashFiles('**/pnpm-lock.yaml') }}
+        path: node_modules/.cache/turbo
+        key: turbo-cache-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ inputs.actor }}-${{ github.sha }}
         restore-keys: |
-          ${{ runner.os }}-turbo-store-n18-v1-
+          turbo-cache-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ inputs.actor }}-
+          turbo-cache-${{ hashFiles('**/pnpm-lock.yaml') }}-
 
-    - uses: actions/cache@v3
-      name: restore next cache
-      with:
-        path: |
-          ${{ inputs.workingDirectory }}/packages/web/app/.next/cache
-          ${{ inputs.workingDirectory }}/packages/web/docs/.next/cache
-        key: ${{ runner.os }}-next-store-n18-v1-${{ hashFiles('**/pnpm-lock.yaml') }}
-        restore-keys: |
-          ${{ runner.os }}-next-store-n18-v1-
+    # - uses: actions/cache@v3
+    #   name: restore turbo cache
+    #   with:
+    #     path: |
+    #       ${{ inputs.workingDirectory }}/node_modules/.cache/turbo
+    #     key: ${{ runner.os }}-turbo-store-n18-v1-${{ hashFiles('**/pnpm-lock.yaml') }}
+    #     restore-keys: |
+    #       ${{ runner.os }}-turbo-store-n18-v1-
+
+    # - uses: actions/cache@v3
+    #   name: restore next cache
+    #   with:
+    #     path: |
+    #       ${{ inputs.workingDirectory }}/packages/web/app/.next/cache
+    #       ${{ inputs.workingDirectory }}/packages/web/docs/.next/cache
+    #     key: ${{ runner.os }}-next-store-n18-v1-${{ hashFiles('**/pnpm-lock.yaml') }}
+    #     restore-keys: |
+    #       ${{ runner.os }}-next-store-n18-v1-
 
     - name: pnpm install
       if: ${{ inputs.installDependencies == 'true' }}

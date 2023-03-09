@@ -12,6 +12,8 @@ jobs:
 
       - name: setup environment
         uses: ./.github/actions/setup
+        with:
+          actor: ${{ github.workflow }}
 
       - name: unit tests
         run: pnpm test

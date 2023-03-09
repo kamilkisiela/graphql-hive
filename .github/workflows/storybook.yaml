@@ -14,6 +14,7 @@ jobs:
         uses: ./.github/actions/setup
         with:
           codegen: true
+          actor: ${{ github.workflow }}
 
       - uses: the-guild-org/shared-config/website-cf@main
         name: build and deploy storybook

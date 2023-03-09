@@ -13,6 +13,8 @@ jobs:
 
       - name: setup environment
         uses: ./.github/actions/setup
+        with:
+          actor: ${{ github.workflow }}
 
       - name: lint .env.template files
         run: pnpm lint:env-template

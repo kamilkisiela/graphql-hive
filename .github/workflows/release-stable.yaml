@@ -20,6 +20,7 @@ jobs:
         uses: ./.github/actions/setup
         with:
           codegen: false # no need to run because release script will run it anyway
+          actor: ${{ github.workflow }}
 
       - name: prepare npm credentials
         run: |
