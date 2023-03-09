@@ -34,7 +34,7 @@ jobs:
         uses: ./.github/actions/setup
         with:
           codegen: false # no need to run codegen in this case, we can skip
-          actor: ${{ github.workflow }}
+          actor: ${{ github.job }}
 
       - name: migrations tests
         run: pnpm test
