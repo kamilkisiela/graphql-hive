@@ -43,17 +43,35 @@ runs:
       run: echo "pnpm_cache_dir=$(pnpm store path)" >> $GITHUB_OUTPUT
 
     - uses: actions/cache@v3
-      name: restore cache
+      name: restore pnpm cache
       with:
         path: |
           ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
           ~/.cache/Cypress
-          ./packages/web/app/.next/cache
-          ./packages/web/docs/.next/cache
-          ./node_modules/.cache/turbo
-        key: ${{ runner.os }}-pnpm-store-n19-${{ hashFiles('**/pnpm-lock.yaml') }}
+        key: ${{ runner.os }}-pnpm-store-n18-${{ hashFiles('**/pnpm-lock.yaml') }}
         restore-keys: |
-          ${{ runner.os }}-pnpm-store-n19-
+          ${{ runner.os }}-pnpm-store-n18
+
+    - uses: actions/cache@v3
+      name: restore turbo cache
+      working-directory: ${{ inputs.workingDirectory }}
+      with:
+        path: |
+          node_modules/.cache/turbo
+        key: ${{ runner.os }}-turbo-store-n18-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-turbo-store-n18-
+
+    - uses: actions/cache@v3
+      name: restore next cache
+      working-directory: ${{ inputs.workingDirectory }}
+      with:
+        path: |
+          packages/web/app/.next/cache
+          packages/web/docs/.next/cache
+        key: ${{ runner.os }}-next-store-n18-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-next-store-n18-
 
     - name: pnpm install
       if: ${{ inputs.installDependencies == 'true' }}
