@@ -57,9 +57,9 @@ runs:
       with:
         path: |
           ${{ inputs.workingDirectory }}/node_modules/.cache/turbo
-        key: ${{ runner.os }}-turbo-store-n18-${{ hashFiles('**/pnpm-lock.yaml') }}
+        key: ${{ runner.os }}-turbo-store-n18-v1-${{ hashFiles('**/pnpm-lock.yaml') }}
         restore-keys: |
-          ${{ runner.os }}-turbo-store-n18-
+          ${{ runner.os }}-turbo-store-n18-v1-
 
     - uses: actions/cache@v3
       name: restore next cache
@@ -67,9 +67,9 @@ runs:
         path: |
           ${{ inputs.workingDirectory }}/packages/web/app/.next/cache
           ${{ inputs.workingDirectory }}/packages/web/docs/.next/cache
-        key: ${{ runner.os }}-next-store-n18-${{ hashFiles('**/pnpm-lock.yaml') }}
+        key: ${{ runner.os }}-next-store-n18-v1-${{ hashFiles('**/pnpm-lock.yaml') }}
         restore-keys: |
-          ${{ runner.os }}-next-store-n18-
+          ${{ runner.os }}-next-store-n18-v1-
 
     - name: pnpm install
       if: ${{ inputs.installDependencies == 'true' }}
