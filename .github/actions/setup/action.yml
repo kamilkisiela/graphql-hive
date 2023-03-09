@@ -56,7 +56,7 @@ runs:
       name: restore turbo cache
       with:
         path: |
-          ${{ inputs.workingDirectory }}node_modules/.cache/turbo
+          ${{ inputs.workingDirectory }}/node_modules/.cache/turbo
         key: ${{ runner.os }}-turbo-store-n18-${{ hashFiles('**/pnpm-lock.yaml') }}
         restore-keys: |
           ${{ runner.os }}-turbo-store-n18-
@@ -65,8 +65,8 @@ runs:
       name: restore next cache
       with:
         path: |
-          ${{ inputs.workingDirectory }}packages/web/app/.next/cache
-          ${{ inputs.workingDirectory }}packages/web/docs/.next/cache
+          ${{ inputs.workingDirectory }}/packages/web/app/.next/cache
+          ${{ inputs.workingDirectory }}/packages/web/docs/.next/cache
         key: ${{ runner.os }}-next-store-n18-${{ hashFiles('**/pnpm-lock.yaml') }}
         restore-keys: |
           ${{ runner.os }}-next-store-n18-
