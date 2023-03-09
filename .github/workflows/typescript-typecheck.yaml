@@ -14,7 +14,7 @@ jobs:
       - name: setup environment
         uses: ./.github/actions/setup
         with:
-          actor: ${{ github.workflow }}
+          actor: typescript-typecheck
 
       - name: typecheck
         run: pnpm typecheck
