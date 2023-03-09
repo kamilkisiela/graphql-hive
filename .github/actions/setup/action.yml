@@ -65,24 +65,16 @@ runs:
           turbo-cache-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ inputs.actor }}-
           turbo-cache-${{ hashFiles('**/pnpm-lock.yaml') }}-
 
-    # - uses: actions/cache@v3
-    #   name: restore turbo cache
-    #   with:
-    #     path: |
-    #       ${{ inputs.workingDirectory }}/node_modules/.cache/turbo
-    #     key: ${{ runner.os }}-turbo-store-n18-v1-${{ hashFiles('**/pnpm-lock.yaml') }}
-    #     restore-keys: |
-    #       ${{ runner.os }}-turbo-store-n18-v1-
-
-    # - uses: actions/cache@v3
-    #   name: restore next cache
-    #   with:
-    #     path: |
-    #       ${{ inputs.workingDirectory }}/packages/web/app/.next/cache
-    #       ${{ inputs.workingDirectory }}/packages/web/docs/.next/cache
-    #     key: ${{ runner.os }}-next-store-n18-v1-${{ hashFiles('**/pnpm-lock.yaml') }}
-    #     restore-keys: |
-    #       ${{ runner.os }}-next-store-n18-v1-
+    - uses: actions/cache@v3
+      name: Cache Next.js
+      with:
+        path: |
+          packages/web/app/.next/cache
+          packages/web/docs/.next/cache
+        key: nextjs-cache-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ inputs.actor }}-${{ github.sha }}
+        restore-keys: |
+          nextjs-cache-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ inputs.actor }}-
+          nextjs-cache-${{ hashFiles('**/pnpm-lock.yaml') }}-
 
     - name: pnpm install
       if: ${{ inputs.installDependencies == 'true' }}
