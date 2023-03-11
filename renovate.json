@@ -15,7 +15,7 @@
     },
     {
       "groupName": "radix",
-      "matchPackagePrefixes": ["@radix/"],
+      "matchPackagePrefixes": ["@radix/", "@radix-ui"],
       "recreateClosed": false
     },
     {
