@@ -4,9 +4,6 @@ use serde::Serialize;
 use std::collections::{HashMap, VecDeque};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
-use tokio::sync::mpsc;
-use tokio::sync::oneshot;
-use tokio::time::sleep;
 
 static COMMIT: Option<&'static str> = option_env!("GITHUB_SHA");
 
@@ -91,7 +88,6 @@ impl State {
 
 #[derive(Clone)]
 pub struct UsageAgent {
-    pub sender: mpsc::Sender<ExecutionReport>,
     token: String,
     endpoint: String,
     buffer_size: usize,
@@ -115,9 +111,8 @@ impl UsageAgent {
         token: String,
         endpoint: String,
         buffer_size: usize,
-        _shutdown_signal: Option<oneshot::Receiver<()>>,
     ) -> Self {
-        let (tx, mut rx) = mpsc::channel::<ExecutionReport>(1024);
+        let (tx, mut rx) = std::sync::mpsc::channel::<ExecutionReport>();
         let schema = parse_schema::<String>(&schema)
             .expect("parsing schema failed!")
             .into_static();
@@ -125,7 +120,6 @@ impl UsageAgent {
         let processor = Arc::new(Mutex::new(OperationProcessor::new()));
 
         let agent = Self {
-            sender: tx.clone(),
             state,
             processor,
             endpoint,
@@ -146,31 +140,10 @@ impl UsageAgent {
         //         // tracing::info!("Flushed because of shutdown");
         //     }
 
-        //     tracing::info!("Closing spawn for shutdown signal receiver");
-        // });
-
-        tokio::spawn(async move {
+        std::thread::spawn(move || {
             loop {
-                match rx.recv().await {
-                    Some(execution_report) => {
-                        tracing::warn!("Agent recieved a message to add the report!");
-                        agent_for_report_receiver
-                            .add_report(execution_report)
-                            .await
-                    },
-                    None => {
-                        tracing::warn!("Agent recieved a `None`!");
-                    }
-                }
-
-               
-            }
-        });
-
-        tokio::spawn(async move {
-            loop {
-                sleep(Duration::from_secs(5)).await;
-                agent_for_interval.flush().await;
+                std::thread::sleep(Duration::from_secs(5));
+                agent_for_interval.flush();
             }
         });
 
@@ -234,11 +207,11 @@ impl UsageAgent {
         report
     }
 
-    async fn send_report(&self, report: Report) -> Result<(), String> {
+    fn send_report(&self, report: Report) -> Result<(), String> {
         const DELAY_BETWEEN_TRIES: Duration = Duration::from_millis(500);
         const MAX_TRIES: i8 = 3;
 
-        let client = reqwest::Client::new();
+        let client = reqwest::blocking::Client::new();
         let mut error_message = "Unexpected error".to_string();
 
         for _ in 0..MAX_TRIES {
@@ -254,7 +227,6 @@ impl UsageAgent {
                 )
                 .json(&report)
                 .send()
-                .await
                 .map_err(|e| e.to_string())?;
 
             match resp.status() {
@@ -271,38 +243,38 @@ impl UsageAgent {
                     error_message = format!(
                         "Could not send usage report: ({}) {}",
                         resp.status().as_str(),
-                        resp.text().await.unwrap_or_default()
+                        resp.text().unwrap_or_default()
                     );
                 }
             }
-            tokio::time::sleep(DELAY_BETWEEN_TRIES).await;
+            std::thread::sleep(DELAY_BETWEEN_TRIES);
         }
 
         Err(error_message)
     }
 
-    async fn add_report(&mut self, execution_report: ExecutionReport) {
+    pub fn add_report(&mut self, execution_report: ExecutionReport) {
         let size = self
             .state
             .lock()
             .expect("failed to acquire the lock of the state when adding report!")
             .push(execution_report);
-        self.flush_if_full(size).await;
+        self.flush_if_full(size);
     }
 
-    async fn flush_if_full(&mut self, size: usize) {
+    fn flush_if_full(&mut self, size: usize) {
         if size >= self.buffer_size {
-            self.flush().await;
+            self.flush();
         }
     }
 
-    pub async fn flush(&mut self) {
+    pub fn flush(&mut self) {
         let execution_reports = self.state.clone().lock().expect("failed to acquire the lock of the state when flushing the report!").drain();
         let size = execution_reports.len();
 
         if size > 0 {
             let report = self.produce_report(execution_reports);
-            match self.send_report(report).await {
+            match self.send_report(report) {
                 Ok(_) => tracing::debug!("Reported {} operations", size),
                 Err(e) => tracing::error!("{}", e),
             }

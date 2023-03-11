@@ -14,8 +14,6 @@ use std::collections::HashSet;
 use std::env;
 use std::time::Instant;
 use std::time::{SystemTime, UNIX_EPOCH};
-use tokio::sync::mpsc;
-use tokio::sync::oneshot;
 use tower::BoxError;
 use tower::ServiceExt as TowerServiceExt;
 
@@ -36,8 +34,6 @@ struct OperationContext {
 struct UsagePlugin {
     config: Config,
     agent: UsageAgent,
-    /// This is an `Option` because `.send()` consumes Self aka. takes ownership, so we take the sender out of the Option and leave `None` in place
-    shutdown_signal: Option<oneshot::Sender<()>>,
 }
 
 
@@ -154,23 +150,17 @@ impl UsagePlugin {
         );
     }
 
-    pub fn add_report(sender: mpsc::Sender<ExecutionReport>, report: ExecutionReport) {
-        if sender.is_closed() {
-            tracing::warn!("the channel has been closed! the `reciever` has been dropped!");
-        }
-        if let Err(e) = sender.try_send(report) {
-            tracing::error!("Failed to send report: {}", e);
-        } else {
-            tracing::info!("the add report sender pinged the reciever!");
-        }
+    pub fn add_report(&self, report: ExecutionReport) {
+        tracing::warn!("Agent recieved a message to add the report!");
+        self.agent
+            .add_report(report);
     }
 }
 
-#[async_trait::async_trait]
 impl Plugin for UsagePlugin {
     type Config = Config;
 
-    async fn new(init: PluginInit<Config>) -> Result<Self, BoxError> {
+    fn new(init: PluginInit<Config>) -> Result<Self, BoxError> {
         tracing::debug!("Starting GraphQL Hive Usage plugin");
         let token =
             env::var("HIVE_TOKEN").map_err(|_| "environment variable HIVE_TOKEN not found")?;
@@ -182,8 +172,6 @@ impl Plugin for UsagePlugin {
 
         let buffer_size = init.config.buffer_size.unwrap_or(1000);
 
-        let (shutdown_tx, shutdown_rx) = oneshot::channel::<()>();
-
         Ok(UsagePlugin {
             config: init.config,
             agent: UsageAgent::new(
@@ -191,25 +179,21 @@ impl Plugin for UsagePlugin {
                 token,
                 endpoint,
                 buffer_size,
-                Some(shutdown_rx),
-            ),
-            shutdown_signal: Some(shutdown_tx),
+            )
         })
     }
 
     fn supergraph_service(&self, service: supergraph::BoxService) -> supergraph::BoxService {
         let config = self.config.clone();
-        let report_sender = self.agent.sender.clone();
 
         service
             .map_future_with_request_data(
                 move |req: &supergraph::Request| {
-                    Self::populate_context(config.clone(), req);
+                    self.populate_context(config.clone(), req);
                     req.context.clone()
                 },
                 move |ctx: Context, fut| {
                     let start = Instant::now();
-                    let sender = report_sender.clone();
                     async move {
                         let operation_context = ctx
                             .get::<_, OperationContext>(OPERATION_CONTEXT)
@@ -226,8 +210,7 @@ impl Plugin for UsagePlugin {
                         let duration = start.elapsed();
                         match result {
                             Err(e) => {
-                                Self::add_report(
-                                    sender,
+                                self.add_report(
                                     ExecutionReport {
                                         client_name,
                                         client_version,
@@ -253,8 +236,7 @@ impl Plugin for UsagePlugin {
                                         .map(move |response| {
                                             // make sure we send a single report, not for each chunk
                                             let response_has_errors = !response.errors.is_empty();
-                                            Self::add_report(
-                                                sender.clone(),
+                                            self.add_report(
                                                 ExecutionReport {
                                                     client_name: client_name.clone(),
                                                     client_version: client_version.clone(),
@@ -281,11 +263,12 @@ impl Plugin for UsagePlugin {
 
 impl Drop for UsagePlugin {
     fn drop(&mut self) {
-        if let Some(sender) = self.shutdown_signal.take() {
-            // Currently, this does nothing, as it sends a graceful process termination, but no reciever is setup to handle it
-            let _ = sender.send(());
-            tracing::warn!("`UsagePlugin` has been dropped!");
-        }
+        // Shut down the stuff.
+        // if let Some(sender) = self.shutdown_signal.take() {
+        //     // Currently, this does nothing, as it sends a graceful process termination, but no reciever is setup to handle it
+        //     let _ = sender.send(());
+        //     tracing::warn!("`UsagePlugin` has been dropped!");
+        // }
     }
 }
 
