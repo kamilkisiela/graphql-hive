@@ -398,7 +398,7 @@ importers:
       object-hash: 3.0.0
       param-case: 3.0.4
       prom-client: 14.2.0
-      supertokens-node: 13.1.2
+      supertokens-node: 13.1.3
       tslib: 2.5.0
       zod: 3.21.4
     dependencies:
@@ -429,7 +429,7 @@ importers:
       object-hash: 3.0.0
       param-case: 3.0.4
       prom-client: 14.2.0
-      supertokens-node: 13.1.2
+      supertokens-node: 13.1.3
       zod: 3.21.4
     devDependencies:
       '@graphql-hive/core': link:../../libraries/core
@@ -1085,9 +1085,9 @@ importers:
       rimraf: 4.3.1
       snarkdown: 2.0.0
       storybook: ^7.0.0-beta.54
-      supertokens-auth-react: 0.31.1
+      supertokens-auth-react: 0.31.2
       supertokens-js-override: 0.0.4
-      supertokens-node: 13.1.2
+      supertokens-node: 13.1.3
       supertokens-web-js: 0.5.0
       tailwindcss: 3.2.7
       tailwindcss-radix: 2.8.0
@@ -1159,9 +1159,9 @@ importers:
       react-window: 1.8.8_biqbaboplfbrettd7655fr4n2y
       regenerator-runtime: 0.13.11
       snarkdown: 2.0.0
-      supertokens-auth-react: 0.31.1_zh4rdguscatxykxktv3lwuw3je
+      supertokens-auth-react: 0.31.2_zh4rdguscatxykxktv3lwuw3je
       supertokens-js-override: 0.0.4
-      supertokens-node: 13.1.2
+      supertokens-node: 13.1.3
       supertokens-web-js: 0.5.0
       tslib: 2.5.0
       urql: 3.0.3_onqnqwb3ubg5opvemcqf7c2qhy
@@ -27354,8 +27354,8 @@ packages:
       ts-interface-checker: 0.1.13
     dev: true
 
-  /supertokens-auth-react/0.31.1_zh4rdguscatxykxktv3lwuw3je:
-    resolution: {integrity: sha512-SPY9IxpkebviHPBdkSBER6Bw7JyQMCy4Pqz4cK1eqKUYQdr5VltCafXCOSGEDp01MRGwkXAwuJ5QcaW2XA0LFw==}
+  /supertokens-auth-react/0.31.2_zh4rdguscatxykxktv3lwuw3je:
+    resolution: {integrity: sha512-fnxcBO/Jt8Tvmob2G8X5OHRBjyfpm6O0qx3bk+g+wVvcLOH34fE7ERb/2V37cNZjuaGkQ1sRJYnvCWF3VubY9Q==}
     engines: {node: '>=16.0.0', npm: ^8}
     peerDependencies:
       react: '>=16.8.0'
@@ -27374,8 +27374,8 @@ packages:
     resolution: {integrity: sha512-r0JFBjkMIdep3Lbk3JA+MpnpuOtw4RSyrlRAbrzMcxwiYco3GFWl/daimQZ5b1forOiUODpOlXbSOljP/oyurg==}
     dev: false
 
-  /supertokens-node/13.1.2:
-    resolution: {integrity: sha512-GPq/So8fznl+EIugOS4qGp89ugfQL5ZqwmB+KjzC49TCooqmcQh5L8uPCw2svnqIMIh5R2so100RtuGhGrTalg==}
+  /supertokens-node/13.1.3:
+    resolution: {integrity: sha512-iVpP1tPa0nDI3zqP+qgNdJNia9OsGeLsv07u6X2k3xvMYf4oQDdFTW2gBvz0pha2kfwomWzi8G9XmZ01mCQ0Zg==}
     dependencies:
       axios: 0.21.4_debug@4.3.4
       body-parser: 1.20.1
