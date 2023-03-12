@@ -10,8 +10,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@sentry/node": "7.42.0",
-    "@sentry/tracing": "7.42.0",
+    "@sentry/node": "7.41.0",
+    "@sentry/tracing": "7.41.0",
     "@trpc/server": "10.14.1",
     "dotenv": "16.0.3",
     "ioredis": "5.3.1",
