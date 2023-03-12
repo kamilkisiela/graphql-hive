@@ -1072,7 +1072,7 @@ importers:
       postcss: 8.4.21
       postcss-loader: 7.0.2
       react: 18.2.0
-      react-children-utilities: 2.8.0
+      react-children-utilities: 2.9.0
       react-date-range: 1.4.0
       react-dom: 18.2.0
       react-highlight-words: 0.20.0
@@ -1148,7 +1148,7 @@ importers:
       next: 13.2.1_biqbaboplfbrettd7655fr4n2y
       nextjs-cors: 2.1.2_next@13.2.1
       react: 18.2.0
-      react-children-utilities: 2.8.0_react@18.2.0
+      react-children-utilities: 2.9.0_react@18.2.0
       react-date-range: 1.4.0_r6j3756ioqf5pjc2u22wj25rla
       react-dom: 18.2.0_react@18.2.0
       react-highlight-words: 0.20.0_react@18.2.0
@@ -25363,8 +25363,8 @@ packages:
       iconv-lite: 0.4.24
       unpipe: 1.0.0
 
-  /react-children-utilities/2.8.0_react@18.2.0:
-    resolution: {integrity: sha512-g42oRsZLrFJgCcIdK1lad1CWujNH4gh1Cp1lsMQpHWdDjWQ8gUlaBebgy2iXofyPEpfJ4T/xt4qWrvDkgVCCNg==}
+  /react-children-utilities/2.9.0_react@18.2.0:
+    resolution: {integrity: sha512-B3enhwcibIziobkMVccLd+6uIRoiCC9OZ1nR2B5sFCTnUYoGOCqgPOWUL+IC4S8IYaaN5AeF+SS0X1wernPdZA==}
     peerDependencies:
       react: 18 || 17 || 16 || 15
     dependencies:
