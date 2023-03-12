@@ -49,6 +49,9 @@
       "recreateClosed": false
     }
   ],
+  "dockerfile": {
+    "fileMatch": [".*?\\.Dockerfile"]
+  },
   "regexManagers": [
     {
       "fileMatch": ["deployment/.*?\\.ts$"],
