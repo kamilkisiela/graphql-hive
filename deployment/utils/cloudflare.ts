@@ -111,7 +111,7 @@ export class CloudflareBroker {
       secretSignature: pulumi.Output<string>;
       sentryDsn: string;
       release: string;
-      loki: {
+      loki: null | {
         endpoint: string;
         username: string;
         password: pulumi.Output<string>;
@@ -120,31 +120,27 @@ export class CloudflareBroker {
   ) {}
 
   deploy() {
-    const script = new cf.WorkerScript('hive-broker-worker', {
-      content: readFileSync(
-        // eslint-disable-next-line no-process-env
-        process.env.BROKER_WORKER_ARTIFACT_PATH ||
-          resolve(__dirname, '../../packages/services/broker-worker/dist/index.worker.js'),
-        'utf-8',
-      ),
-      name: `hive-broker-${this.config.envName}`,
-      secretTextBindings: [
-        {
-          name: 'SIGNATURE',
-          text: this.config.secretSignature,
-        },
-        {
-          name: 'SENTRY_DSN',
-          text: this.config.sentryDsn,
-        },
-        {
-          name: 'SENTRY_ENVIRONMENT',
-          text: this.config.envName,
-        },
-        {
-          name: 'SENTRY_RELEASE',
-          text: this.config.release,
-        },
+    const secretTextBindings = [
+      {
+        name: 'SIGNATURE',
+        text: this.config.secretSignature,
+      },
+      {
+        name: 'SENTRY_DSN',
+        text: this.config.sentryDsn,
+      },
+      {
+        name: 'SENTRY_ENVIRONMENT',
+        text: this.config.envName,
+      },
+      {
+        name: 'SENTRY_RELEASE',
+        text: this.config.release,
+      },
+    ];
+
+    if (this.config.loki) {
+      secretTextBindings.push(
         {
           name: 'LOKI_PASSWORD',
           text: this.config.loki.password,
@@ -157,7 +153,18 @@ export class CloudflareBroker {
           name: 'LOKI_ENDPOINT',
           text: this.config.loki.endpoint,
         },
-      ],
+      );
+    }
+
+    const script = new cf.WorkerScript('hive-broker-worker', {
+      content: readFileSync(
+        // eslint-disable-next-line no-process-env
+        process.env.BROKER_WORKER_ARTIFACT_PATH ||
+          resolve(__dirname, '../../packages/services/broker-worker/dist/index.worker.js'),
+        'utf-8',
+      ),
+      name: `hive-broker-${this.config.envName}`,
+      secretTextBindings,
     });
 
     const workerBase = this.config.cdnDnsRecord;

@@ -32,25 +32,28 @@ self.addEventListener('fetch', async event => {
     sentry.captureMessage('Request aborted');
   });
 
-  const loki = new Logger({
-    lokiSecret: btoa(`${LOKI_USERNAME}:${LOKI_PASSWORD}`),
-    lokiUrl: `https://${LOKI_ENDPOINT}`,
-    stream: {
-      container_name: 'broker-worker',
-      env: SENTRY_ENVIRONMENT,
-    },
-    mdc: {
-      requestId,
-    },
-  });
+  const loki =
+    LOKI_ENDPOINT && LOKI_USERNAME && LOKI_PASSWORD
+      ? new Logger({
+          lokiSecret: btoa(`${LOKI_USERNAME}:${LOKI_PASSWORD}`),
+          lokiUrl: `https://${LOKI_ENDPOINT}`,
+          stream: {
+            container_name: 'broker-worker',
+            env: SENTRY_ENVIRONMENT,
+          },
+          mdc: {
+            requestId,
+          },
+        })
+      : null;
 
   const logger = {
     info(message: string) {
-      loki.info(message);
+      loki?.info(message);
       console.info(message);
     },
     error(message: string, error: Error) {
-      loki.error(message, error);
+      loki?.error(message, error);
       console.error(message, error);
       sentry.setTag('requestId', requestId);
       sentry.captureException(error);
@@ -58,7 +61,7 @@ self.addEventListener('fetch', async event => {
   };
 
   function flush() {
-    event.waitUntil(loki.flush());
+    loki && event.waitUntil(loki.flush());
   }
 
   try {
