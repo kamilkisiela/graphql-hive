@@ -27,11 +27,8 @@ export class Observability {
     // We are using otel-collector to scrape metrics from Pods
     // dotansimha: once Vector supports scraping K8s metrics based on Prom, we can drop this.
     new k8s.helm.v3.Chart('metrics', {
-      ...helmChart(
-        'https://open-telemetry.github.io/opentelemetry-helm-charts',
-        'opentelemetry-collector',
-        '0.17.0',
-      ),
+      // prettier-ignore
+      ...helmChart('https://open-telemetry.github.io/opentelemetry-helm-charts', 'opentelemetry-collector', '0.17.0'),
       namespace: ns.metadata.name,
       // https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-collector/values.yaml
       values: {
@@ -292,6 +289,7 @@ export class Observability {
     new k8s.helm.v3.Chart(
       'vector-logging',
       {
+        // prettier-ignore
         ...helmChart('https://helm.vector.dev', 'vector', '0.10.3'),
         namespace: ns.metadata.name,
         // https://vector.dev/docs/reference/configuration/

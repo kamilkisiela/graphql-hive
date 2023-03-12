@@ -18,6 +18,7 @@ export class BotKube {
     new k8s.helm.v3.Chart(
       'botkube',
       {
+        // prettier-ignore
         ...helmChart('https://infracloudio.github.io/charts', 'botkube', '0.12.4'),
         namespace: ns.metadata.name,
         values: {
