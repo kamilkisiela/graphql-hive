@@ -51,7 +51,7 @@
   ],
   "dockerfile": {
     "enabled": true,
-    "fileMatch": [".*?\\.Dockerfile"]
+    "fileMatch": [".*?\\.[dD]ockerfile"]
   },
   "regexManagers": [
     {
