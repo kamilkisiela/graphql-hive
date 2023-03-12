@@ -218,7 +218,7 @@ importers:
       '@graphql-tools/url-loader': ~7.17.0
       '@graphql-tools/utils': 9.2.1
       '@oclif/core': ^1.23.0
-      '@oclif/plugin-help': 5.2.7
+      '@oclif/plugin-help': 5.2.8
       '@oclif/plugin-update': 3.1.6
       '@types/env-ci': 3.1.1
       '@types/mkdirp': 1.0.2
@@ -244,7 +244,7 @@ importers:
       '@graphql-tools/url-loader': 7.17.1_graphql@16.6.0
       '@graphql-tools/utils': 9.2.1_graphql@16.6.0
       '@oclif/core': 1.23.0_zhte2hlj7lfobytjpalcwwo474
-      '@oclif/plugin-help': 5.2.7
+      '@oclif/plugin-help': 5.2.8
       '@oclif/plugin-update': 3.1.6
       colors: 1.4.0
       env-ci: 7.3.0
@@ -8358,8 +8358,8 @@ packages:
       wrap-ansi: 7.0.0
     dev: false
 
-  /@oclif/core/2.4.0:
-    resolution: {integrity: sha512-wWUnOOfQQty0k1Cstm/iWW6pbG0mHzU7rcUtab2Sni9kjBPCcy6ENTgpsWbb/WdITopqtXmvpYII2fgcjKdzUA==}
+  /@oclif/core/2.6.2:
+    resolution: {integrity: sha512-roxcBLr4BuoOEDEkMQk4Yy0Tolr39n6i+A63qPLa19vrgxjZZJygh2HpThsn69/UPuEzMq051FnvJ9tNln3Y5g==}
     engines: {node: '>=14.0.0'}
     dependencies:
       '@types/cli-progress': 3.11.0
@@ -8386,19 +8386,30 @@ packages:
       strip-ansi: 6.0.1
       supports-color: 8.1.1
       supports-hyperlinks: 2.3.0
+      ts-node: 10.9.1
       tslib: 2.5.0
       widest-line: 3.1.0
       wordwrap: 1.0.0
       wrap-ansi: 7.0.0
+    transitivePeerDependencies:
+      - '@swc/core'
+      - '@swc/wasm'
+      - '@types/node'
+      - typescript
 
   /@oclif/linewrap/1.0.0:
     resolution: {integrity: sha512-Ups2dShK52xXa8w6iBWLgcjPJWjais6KPJQq3gQ/88AY6BXoTX+MIGFPrWQO1KLMiQfoTpcLnUwloN4brrVUHw==}
 
-  /@oclif/plugin-help/5.2.7:
-    resolution: {integrity: sha512-p6DJk0QMfzGvXGqrSZTQPitUGi68oGzr48tRKdrVxDDPMAELxHeXXFbkNRNdvjldPpTk44m0PbxV5tWhwurRwg==}
+  /@oclif/plugin-help/5.2.8:
+    resolution: {integrity: sha512-Fl1DD6Hm7USG/BYqcUmc/hMXK6Bnd3HvkZsRG+qi0dbYaNtY9zJ58C5b3lgPn69bXJlyi1eWX4S8djSUWD8VYg==}
     engines: {node: '>=12.0.0'}
     dependencies:
-      '@oclif/core': 2.4.0
+      '@oclif/core': 2.6.2
+    transitivePeerDependencies:
+      - '@swc/core'
+      - '@swc/wasm'
+      - '@types/node'
+      - typescript
 
   /@oclif/plugin-not-found/2.3.8:
     resolution: {integrity: sha512-PfUVr67dHORFSeQthUwrPMJB/mRRNT4ENNdbafCOlL0HqC+WTuFy5nih+qnHBEli15RaOuMNoW3kR5MyBH82hA==}
@@ -23495,7 +23506,7 @@ packages:
     hasBin: true
     dependencies:
       '@oclif/core': 2.3.0
-      '@oclif/plugin-help': 5.2.7
+      '@oclif/plugin-help': 5.2.8
       '@oclif/plugin-not-found': 2.3.8
       '@oclif/plugin-warn-if-update-available': 2.0.17
       aws-sdk: 2.1231.0
@@ -23514,9 +23525,13 @@ packages:
       yeoman-generator: 5.7.0_yeoman-environment@3.12.1
       yosay: 2.0.2
     transitivePeerDependencies:
+      - '@swc/core'
+      - '@swc/wasm'
+      - '@types/node'
       - bluebird
       - encoding
       - supports-color
+      - typescript
     dev: true
     patched: true
 
@@ -27992,7 +28007,6 @@ packages:
       make-error: 1.3.6
       v8-compile-cache-lib: 3.0.1
       yn: 3.1.1
-    dev: false
 
   /ts-node/10.9.1_lwgqdwokjtwlohdqtbb6s252kq:
     resolution: {integrity: sha512-NtVysVPkxxrwFGUUxGYhfux8k78pQB3JqYBXlLRZgdGUqTO5wU/UyHop5p70iEbGhB7q5KmiZiU0Y3KlJrScEw==}
