@@ -50,6 +50,7 @@
     }
   ],
   "dockerfile": {
+    "enabled": true,
     "fileMatch": [".*?\\.Dockerfile"]
   },
   "regexManagers": [
