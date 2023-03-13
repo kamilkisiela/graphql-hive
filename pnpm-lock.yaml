@@ -124,6 +124,7 @@ importers:
 
   deployment:
     specifiers:
+      '@lbrlabs/pulumi-grafana': 0.0.9
       '@manypkg/get-packages': 2.1.0
       '@pulumi/cloudflare': 4.16.0
       '@pulumi/kubernetes': 3.24.1
@@ -137,6 +138,7 @@ importers:
       pg-connection-string: 2.5.0
       typescript: 4.9.5
     dependencies:
+      '@lbrlabs/pulumi-grafana': 0.0.9
       '@manypkg/get-packages': 2.1.0
       '@pulumi/cloudflare': 4.16.0
       '@pulumi/kubernetes': 3.24.1
@@ -7598,6 +7600,15 @@ packages:
   /@juggle/resize-observer/3.4.0:
     resolution: {integrity: sha512-dfLbk+PwWvFzSxwk3n5ySL0hfBog779o8h68wK/7/APo/7cgyWp5jcXockbxdk5kFRkbeXWm4Fbi9FrdN381sA==}
     dev: true
+
+  /@lbrlabs/pulumi-grafana/0.0.9:
+    resolution: {integrity: sha512-tUEY+BV1uY+7in5LJ7jy+NwAulq0v4XCLa5N7PYFcZUBLTK3+A/g3181BsxgEhA6P3bN7m+nrMt6pTU9SWqUjw==}
+    requiresBuild: true
+    dependencies:
+      '@pulumi/pulumi': 3.57.1
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
 
   /@lit-labs/ssr-dom-shim/1.0.0:
     resolution: {integrity: sha512-ic93MBXfApIFTrup4a70M/+ddD8xdt2zxxj9sRwHQzhS9ag/syqkD8JPdTXsc1gUy2K8TTirhlCqyTEM/sifNw==}
