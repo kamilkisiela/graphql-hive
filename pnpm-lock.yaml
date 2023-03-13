@@ -166,7 +166,7 @@ importers:
       '@hive/server': workspace:*
       '@trpc/client': 10.15.0
       '@trpc/server': 10.15.0
-      '@types/dockerode': 3.3.14
+      '@types/dockerode': 3.3.15
       '@types/ioredis': 4.28.10
       '@whatwg-node/fetch': 0.8.2
       bcryptjs: 2.4.3
@@ -203,7 +203,7 @@ importers:
     devDependencies:
       '@hive/rate-limit': link:../packages/services/rate-limit
       '@hive/server': link:../packages/services/server
-      '@types/dockerode': 3.3.14
+      '@types/dockerode': 3.3.15
       '@types/ioredis': 4.28.10
       tslib: 2.5.0
       vitest: 0.29.2
@@ -11015,12 +11015,12 @@ packages:
       telejson: 7.0.4
     dev: true
 
-  /@storybook/channel-postmessage/7.0.0-rc.1:
-    resolution: {integrity: sha512-lIj0oDecEOSy6ZSNXBgWs0hqnjKudrDxuRyR0gAC5w5lZ8sMaj6er9caqaii61S4HRAcT5312RpA0V1J746hZw==}
+  /@storybook/channel-postmessage/7.0.0-rc.2:
+    resolution: {integrity: sha512-3rmH7PNu3hOYKaXMLwoUgjZ4SZxoowP5iatMOoW1Tbha1Xt2C7kFoqVmPi1YDc2p1Bf4o55F8rEqDlSc6QAEnQ==}
     dependencies:
-      '@storybook/channels': 7.0.0-rc.1
-      '@storybook/client-logger': 7.0.0-rc.1
-      '@storybook/core-events': 7.0.0-rc.1
+      '@storybook/channels': 7.0.0-rc.2
+      '@storybook/client-logger': 7.0.0-rc.2
+      '@storybook/core-events': 7.0.0-rc.2
       '@storybook/global': 5.0.0
       qs: 6.11.0
       telejson: 7.0.4
@@ -11047,8 +11047,8 @@ packages:
     resolution: {integrity: sha512-CXV3koGjshDZvRrQ4Ck44vBbarMVtiFW9MeBrXaCW7/dElKTYEH8WBiGkqHuna9Pio5ZlVDGVzxn9JqN5J6bKA==}
     dev: true
 
-  /@storybook/channels/7.0.0-rc.1:
-    resolution: {integrity: sha512-hBER6gliJxsrYEbWlXNljf0/1ybIlYCtaK0Vcgqdw/zmTLG6hEbBpVnxJh56T3mD0Beng8ro9D4EkcLZGQ1LlA==}
+  /@storybook/channels/7.0.0-rc.2:
+    resolution: {integrity: sha512-lJWT6aLSphMRUGWIzOdPYJAA02PByxm57Ll0/q3pXWHUYd8pOHNk45p4+ksEgZ1WnbXSL8U9FLeSifHgmw9wRA==}
     dev: true
 
   /@storybook/cli/7.0.0-beta.54:
@@ -11120,8 +11120,8 @@ packages:
       '@storybook/global': 5.0.0
     dev: true
 
-  /@storybook/client-logger/7.0.0-rc.1:
-    resolution: {integrity: sha512-ltdDjd5wwq1xyFmA7Q7PT0Rx4Jrd0u8m0hnjnlou7qjKd7J+tqi8019oC4t5CSWRhl8lDg0QbI11LUM2SmkRMA==}
+  /@storybook/client-logger/7.0.0-rc.2:
+    resolution: {integrity: sha512-M8cV0N6dq2gzym9P3bisiooXbslrcvllR0EcV7o/QUG02hBN+IppYo2i5++pa6syAo067OPvzaNylfjGv9Kd+g==}
     dependencies:
       '@storybook/global': 5.0.0
     dev: true
@@ -11226,8 +11226,8 @@ packages:
     resolution: {integrity: sha512-/YDjgPHKqdkbB9+jTv3zKjNDRy0gZnVeFfXyS9jCXj4D0K1pYwzkttHAT/xEu6qFeCI8A8wwEgIh6+0t3xfL9g==}
     dev: true
 
-  /@storybook/core-events/7.0.0-rc.1:
-    resolution: {integrity: sha512-kp5p7U8H4X+XnJwzm3S9UM1vOREZ/bziQ34882FevPq7HaAQ5JI7p9gQO50JdTbDoe8gtn8cgfzxSkqO6FlY1w==}
+  /@storybook/core-events/7.0.0-rc.2:
+    resolution: {integrity: sha512-XpCOlsoDbSaBjHzFU6A1U/LpuROSmGnrvL5PaYLWtF896RHFK+iiG/8qbpRENyC0S+h3SQ8/2f7Mkp13E93p2A==}
     dev: true
 
   /@storybook/core-server/7.0.0-beta.54:
@@ -11378,14 +11378,14 @@ packages:
       '@storybook/preview-api': 7.0.0-beta.54
     dev: true
 
-  /@storybook/instrumenter/7.0.0-rc.1:
-    resolution: {integrity: sha512-spihMm1Xb+lw1Vac5Uo+06m2jdDEhGGkM/nesXO3ZkYyNatC0IGXgU9NyELI6YCkhEprwK3MIXoo8in97Kjk+w==}
+  /@storybook/instrumenter/7.0.0-rc.2:
+    resolution: {integrity: sha512-t9PY/LG7UTj1lQVXOJEpnGa7OjAzNTnTD2bwqHqXbwragBNgi4cuoYKkrTncJf3NpfA4V5TSIwQ3gpeJmxIeBg==}
     dependencies:
-      '@storybook/channels': 7.0.0-rc.1
-      '@storybook/client-logger': 7.0.0-rc.1
-      '@storybook/core-events': 7.0.0-rc.1
+      '@storybook/channels': 7.0.0-rc.2
+      '@storybook/client-logger': 7.0.0-rc.2
+      '@storybook/core-events': 7.0.0-rc.2
       '@storybook/global': 5.0.0
-      '@storybook/preview-api': 7.0.0-rc.1
+      '@storybook/preview-api': 7.0.0-rc.2
     dev: true
 
   /@storybook/manager-api/7.0.0-beta.54_biqbaboplfbrettd7655fr4n2y:
@@ -11573,16 +11573,16 @@ packages:
       util-deprecate: 1.0.2
     dev: true
 
-  /@storybook/preview-api/7.0.0-rc.1:
-    resolution: {integrity: sha512-KrXMxCffKsXLsWb8ptXmLcbetZOPLbPpnKU43S1iHnvc5Jp89lrJBpztHZsUnuwGMJ1K5ajdZd+l/kGs75ru6Q==}
+  /@storybook/preview-api/7.0.0-rc.2:
+    resolution: {integrity: sha512-v9XB2GghfMAszvn6964X9ilOIQIih5JfZ0kU44wG6m0K6t5wBAakYvxDM10gTF/bJ6nL+SS2ps8ysi8jTPwxAA==}
     dependencies:
-      '@storybook/channel-postmessage': 7.0.0-rc.1
-      '@storybook/channels': 7.0.0-rc.1
-      '@storybook/client-logger': 7.0.0-rc.1
-      '@storybook/core-events': 7.0.0-rc.1
+      '@storybook/channel-postmessage': 7.0.0-rc.2
+      '@storybook/channels': 7.0.0-rc.2
+      '@storybook/client-logger': 7.0.0-rc.2
+      '@storybook/core-events': 7.0.0-rc.2
       '@storybook/csf': 0.0.2-next.10
       '@storybook/global': 5.0.0
-      '@storybook/types': 7.0.0-rc.1
+      '@storybook/types': 7.0.0-rc.2
       '@types/qs': 6.9.7
       dequal: 2.0.3
       lodash: 4.17.21
@@ -11772,8 +11772,8 @@ packages:
   /@storybook/testing-library/0.0.14-next.1:
     resolution: {integrity: sha512-1CAl40IKIhcPaCC4pYCG0b9IiYNymktfV/jTrX7ctquRY3akaN7f4A1SippVHosksft0M+rQTFE0ccfWW581fw==}
     dependencies:
-      '@storybook/client-logger': 7.0.0-rc.1
-      '@storybook/instrumenter': 7.0.0-rc.1
+      '@storybook/client-logger': 7.0.0-rc.2
+      '@storybook/instrumenter': 7.0.0-rc.2
       '@testing-library/dom': 8.20.0
       '@testing-library/user-event': 13.5.0_yxlyej73nftwmh2fiao7paxmlm
       ts-dedent: 2.2.0
@@ -11815,10 +11815,10 @@ packages:
       file-system-cache: 2.0.2
     dev: true
 
-  /@storybook/types/7.0.0-rc.1:
-    resolution: {integrity: sha512-wWFGKzXXD04j52iHTE7mxCz0zkJH0J/wh7pSsYAxUgyQaYHIIqLZUb9PLWVWf1v6RiSSa5k0HXhFWnfBOJeVIQ==}
+  /@storybook/types/7.0.0-rc.2:
+    resolution: {integrity: sha512-f+dnnGbzsGIrjTdNtcrZRlwKVKvdlfKEsZaChigdb5wgxEqX90a+f1l0eVBBzyImE5RLCqrGOa8Am/qI19QP4g==}
     dependencies:
-      '@storybook/channels': 7.0.0-rc.1
+      '@storybook/channels': 7.0.0-rc.2
       '@types/babel__core': 7.20.0
       '@types/express': 4.17.14
       file-system-cache: 2.0.2
@@ -12332,8 +12332,8 @@ packages:
       '@types/ssh2': 1.11.6
     dev: true
 
-  /@types/dockerode/3.3.14:
-    resolution: {integrity: sha512-PUTwtySPzCbjZ/uqRMBWKHtLGqBAlhnLitzHuom19NEX0KBYsQXqbVlig+zbUgYQU1paDeQURXj7QNglh1RI6A==}
+  /@types/dockerode/3.3.15:
+    resolution: {integrity: sha512-az35KbxZZUCRgCoXqJUEvEbsOL3L7UbItuHSYoZ0uo/MWuNc03y7XMBVSCLLvxpxWK8X8pM5PoM0F/5TFHDF0g==}
     dependencies:
       '@types/docker-modem': 3.0.2
       '@types/node': 18.15.1
