@@ -26,7 +26,7 @@
     "@hive/emails": "workspace:*",
     "@hive/service-common": "workspace:*",
     "@hive/storage": "workspace:*",
-    "pino-pretty": "9.4.0",
+    "pino-pretty": "10.0.0",
     "tslib": "2.5.0"
   },
   "buildOptions": {

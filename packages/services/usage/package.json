@@ -27,7 +27,7 @@
     "@hive/service-common": "workspace:*",
     "@hive/tokens": "workspace:*",
     "@hive/usage-common": "workspace:*",
-    "pino-pretty": "9.4.0"
+    "pino-pretty": "10.0.0"
   },
   "buildOptions": {
     "runify": true,
