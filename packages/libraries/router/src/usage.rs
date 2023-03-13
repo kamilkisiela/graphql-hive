@@ -1,3 +1,4 @@
+use crate::agent::{ExecutionReport, UsageAgent};
 use apollo_router::layers::ServiceExt;
 use apollo_router::plugin::Plugin;
 use apollo_router::plugin::PluginInit;
@@ -17,8 +18,6 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use tower::BoxError;
 use tower::ServiceExt as TowerServiceExt;
 
-use crate::agent::{ExecutionReport, UsageAgent};
-
 pub(crate) static OPERATION_CONTEXT: &str = "hive::operation_context";
 
 #[derive(Serialize, Deserialize)]
@@ -35,7 +34,6 @@ struct UsagePlugin {
     config: Config,
     agent: UsageAgent,
 }
-
 
 #[derive(Clone, Debug, Deserialize, JsonSchema)]
 struct Config {
@@ -70,6 +68,7 @@ impl UsagePlugin {
         let context = &req.context;
         let http_request = &req.supergraph_request;
         let headers = http_request.headers();
+
         let client_name_header = config
             .client_name_header
             .unwrap_or("graphql-client-name".to_string());
@@ -77,21 +76,18 @@ impl UsagePlugin {
             .client_version_header
             .unwrap_or("graphql-client-version".to_string());
 
-        let client_name = headers
-            .get(client_name_header)
-            .cloned()
-            .unwrap_or_else(|| HeaderValue::from_static(""))
-            .to_str()
-            .ok()
-            .map(|v| v.to_string());
+        let get_header_value = |key: &str| {
+            headers
+                .get(key)
+                .cloned()
+                .unwrap_or_else(|| HeaderValue::from_static(""))
+                .to_str()
+                .ok()
+                .map(|v| v.to_string())
+        };
 
-        let client_version = headers
-            .get(client_version_header)
-            .cloned()
-            .unwrap_or_else(|| HeaderValue::from_static(""))
-            .to_str()
-            .ok()
-            .map(|v| v.to_string());
+        let client_name = get_header_value(&client_name_header);
+        let client_version = get_header_value(&client_version_header);
 
         let operation_name = req.supergraph_request.body().operation_name.clone();
         let operation_body = req
@@ -133,7 +129,7 @@ impl UsagePlugin {
             tracing::debug!("Dropped the operation");
         }
 
-        let _ = context.insert(
+        context.insert(
             OPERATION_CONTEXT,
             OperationContext {
                 dropped,
@@ -150,17 +146,22 @@ impl UsagePlugin {
         );
     }
 
-    pub fn add_report(&self, report: ExecutionReport) {
-        tracing::warn!("Agent recieved a message to add the report!");
-        self.agent
-            .add_report(report);
+    pub fn add_report(&mut self, report: ExecutionReport) {
+        let size = self
+            .agent
+            .state
+            .lock()
+            .expect("couldn't acquire the state lock")
+            .push(report);
+        self.agent.flush_if_full(size);
     }
 }
 
+#[async_trait::async_trait]
 impl Plugin for UsagePlugin {
     type Config = Config;
 
-    fn new(init: PluginInit<Config>) -> Result<Self, BoxError> {
+    async fn new(init: PluginInit<Config>) -> Result<Self, BoxError> {
         tracing::debug!("Starting GraphQL Hive Usage plugin");
         let token =
             env::var("HIVE_TOKEN").map_err(|_| "environment variable HIVE_TOKEN not found")?;
@@ -179,7 +180,7 @@ impl Plugin for UsagePlugin {
                 token,
                 endpoint,
                 buffer_size,
-            )
+            ),
         })
     }
 
@@ -189,39 +190,49 @@ impl Plugin for UsagePlugin {
         service
             .map_future_with_request_data(
                 move |req: &supergraph::Request| {
-                    self.populate_context(config.clone(), req);
+                    Self::populate_context(config.clone(), req);
                     req.context.clone()
                 },
                 move |ctx: Context, fut| {
                     let start = Instant::now();
+
+                    // nested async block, bc async is unstable with closures that receive arguments
                     async move {
                         let operation_context = ctx
                             .get::<_, OperationContext>(OPERATION_CONTEXT)
                             .unwrap_or_default()
                             .unwrap();
+
+                        let result: supergraph::ServiceResult = fut.await;
+
                         if operation_context.dropped {
-                            let result: supergraph::ServiceResult = fut.await;
                             return result;
                         }
 
-                        let result: supergraph::ServiceResult = fut.await;
-                        let OperationContext { client_name, client_version, operation_name, timestamp, operation_body, .. } = operation_context;
+                        let OperationContext {
+                            client_name,
+                            client_version,
+                            operation_name,
+                            timestamp,
+                            operation_body,
+                            ..
+                        } = operation_context;
 
                         let duration = start.elapsed();
+
                         match result {
                             Err(e) => {
-                                self.add_report(
-                                    ExecutionReport {
-                                        client_name,
-                                        client_version,
-                                        timestamp,
-                                        duration,
-                                        ok: false,
-                                        errors: 1,
-                                        operation_body,
-                                        operation_name,
-                                    },
-                                );
+                                // we need to clone the `agent` here, bc apollo router's trait enforces us to have an immutable reference to `self`
+                                self.agent.clone().add_report_to_state(ExecutionReport {
+                                    client_name,
+                                    client_version,
+                                    timestamp,
+                                    duration,
+                                    ok: false,
+                                    errors: 1,
+                                    operation_body,
+                                    operation_name,
+                                });
                                 Err(e)
                             }
                             Ok(router_response) => {
@@ -232,11 +243,13 @@ impl Plugin for UsagePlugin {
                                     let client_version = client_version.clone();
                                     let operation_body = operation_body.clone();
                                     let operation_name = operation_name.clone();
-                                    response_stream
+
+                                    let response = response_stream
                                         .map(move |response| {
                                             // make sure we send a single report, not for each chunk
                                             let response_has_errors = !response.errors.is_empty();
-                                            self.add_report(
+                                            // we need to clone the `agent` here, bc apollo router's trait enforces us to have an immutable reference to `self`
+                                            self.agent.clone().add_report_to_state(
                                                 ExecutionReport {
                                                     client_name: client_name.clone(),
                                                     client_version: client_version.clone(),
@@ -250,7 +263,9 @@ impl Plugin for UsagePlugin {
                                             );
                                             response
                                         })
-                                        .boxed()
+                                        .boxed();
+
+                                    response
                                 }))
                             }
                         }

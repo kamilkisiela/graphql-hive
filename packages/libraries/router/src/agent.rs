@@ -1,9 +1,11 @@
 use super::graphql::OperationProcessor;
 use graphql_parser::schema::{parse_schema, Document};
 use serde::Serialize;
-use std::collections::{HashMap, VecDeque};
-use std::sync::{Arc, Mutex};
-use std::time::Duration;
+use std::{
+    collections::{HashMap, VecDeque},
+    sync::{Arc, Mutex},
+    time::Duration,
+};
 
 static COMMIT: Option<&'static str> = option_env!("GITHUB_SHA");
 
@@ -91,7 +93,9 @@ pub struct UsageAgent {
     token: String,
     endpoint: String,
     buffer_size: usize,
-    state: Arc<Mutex<State>>,
+    /// We need the Arc wrapper to be able to clone the agent while preserving multiple mutable reference to processor
+    /// We also need the Mutex wrapper bc we cannot borrow data in an `Arc` as mutable
+    pub state: Arc<Mutex<State>>,
     processor: Arc<Mutex<OperationProcessor>>,
 }
 
@@ -106,13 +110,7 @@ fn non_empty_string(value: Option<String>) -> Option<String> {
 }
 
 impl UsageAgent {
-    pub fn new(
-        schema: String,
-        token: String,
-        endpoint: String,
-        buffer_size: usize,
-    ) -> Self {
-        let (tx, mut rx) = std::sync::mpsc::channel::<ExecutionReport>();
+    pub fn new(schema: String, token: String, endpoint: String, buffer_size: usize) -> Self {
         let schema = parse_schema::<String>(&schema)
             .expect("parsing schema failed!")
             .into_static();
@@ -127,7 +125,6 @@ impl UsageAgent {
             buffer_size,
         };
 
-        let mut agent_for_report_receiver = agent.clone();
         let mut agent_for_interval = agent.clone();
 
         // TODO: make this working
@@ -140,11 +137,9 @@ impl UsageAgent {
         //         // tracing::info!("Flushed because of shutdown");
         //     }
 
-        std::thread::spawn(move || {
-            loop {
-                std::thread::sleep(Duration::from_secs(5));
-                agent_for_interval.flush();
-            }
+        std::thread::spawn(move || loop {
+            std::thread::sleep(Duration::from_secs(5));
+            agent_for_interval.flush();
         });
 
         agent
@@ -156,13 +151,17 @@ impl UsageAgent {
             map: HashMap::new(),
             operations: Vec::new(),
         };
-        let schema = &self.state.lock().expect("failed to acquire the lock of the schema state when producing report!").schema;
+        let schema = &self
+            .state
+            .lock()
+            .expect("couldn't acquire the state lock")
+            .schema;
         // iterate over reports and check if they are valid
         for op in reports {
             let operation = self
                 .processor
                 .lock()
-                .expect("failed to acquire the lock of the processor when producing report!")
+                .expect("couldn't acquire the processor lock")
                 .process(&op.operation_body, schema);
             match operation {
                 Err(e) => {
@@ -207,9 +206,18 @@ impl UsageAgent {
         report
     }
 
-    fn send_report(&self, report: Report) -> Result<(), String> {
+    pub fn add_report_to_state(&mut self, execution_report: ExecutionReport) {
+        let size = self
+            .state
+            .lock()
+            .expect("couldn't acquire the state lock")
+            .push(execution_report);
+        self.flush_if_full(size);
+    }
+
+    pub fn send_report(&self, report: Report) -> Result<(), String> {
         const DELAY_BETWEEN_TRIES: Duration = Duration::from_millis(500);
-        const MAX_TRIES: i8 = 3;
+        const MAX_TRIES: u8 = 3;
 
         let client = reqwest::blocking::Client::new();
         let mut error_message = "Unexpected error".to_string();
@@ -253,23 +261,18 @@ impl UsageAgent {
         Err(error_message)
     }
 
-    pub fn add_report(&mut self, execution_report: ExecutionReport) {
-        let size = self
-            .state
-            .lock()
-            .expect("failed to acquire the lock of the state when adding report!")
-            .push(execution_report);
-        self.flush_if_full(size);
-    }
-
-    fn flush_if_full(&mut self, size: usize) {
+    pub fn flush_if_full(&mut self, size: usize) {
         if size >= self.buffer_size {
             self.flush();
         }
     }
 
     pub fn flush(&mut self) {
-        let execution_reports = self.state.clone().lock().expect("failed to acquire the lock of the state when flushing the report!").drain();
+        let execution_reports = self
+            .state
+            .lock()
+            .expect("couldn't acquire the state lock")
+            .drain();
         let size = execution_reports.len();
 
         if size > 0 {
@@ -281,12 +284,3 @@ impl UsageAgent {
         }
     }
 }
-
-
-impl Drop for UsageAgent {
-    fn drop(&mut self) {
-        tracing::warn!("`UsageAgent` has been dropped!");
-    }
-}
-
-
