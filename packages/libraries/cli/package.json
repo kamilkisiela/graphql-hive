@@ -61,7 +61,7 @@
     "graphql": "^16.0.0",
     "graphql-request": "5.1.0",
     "graphql-tag": "2.12.6",
-    "log-symbols": "4.1.0",
+    "log-symbols": "5.1.0",
     "mkdirp": "2.1.5",
     "rimraf": "4.4.0",
     "ts-node": "10.9.1",
