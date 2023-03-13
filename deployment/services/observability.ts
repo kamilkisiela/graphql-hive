@@ -1,5 +1,6 @@
 import * as pulumi from '@pulumi/pulumi';
 import { Observability } from '../utils/observability';
+import { deployGrafana } from './grafana';
 
 const observabilityConfig = new pulumi.Config('observability');
 
@@ -20,6 +21,8 @@ export function deployMetrics(config: { envName: string }) {
       password: observabilityConfig.requireSecret('lokiPassword'),
     },
   });
-  // logging.deployMetrics(logzioConfig.requireSecret('metricsSecret'));
+
+  deployGrafana();
+
   observability.deploy();
 }
