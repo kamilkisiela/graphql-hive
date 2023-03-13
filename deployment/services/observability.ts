@@ -22,7 +22,10 @@ export function deployMetrics(config: { envName: string }) {
     },
   });
 
-  deployGrafana();
+  
 
-  observability.deploy();
+  return {
+    observability: observability.deploy(),
+    grafana: deployGrafana(config.envName)
+  }
 }
