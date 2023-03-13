@@ -3359,7 +3359,7 @@
   "revision": 1,
   "schemaVersion": 38,
   "style": "dark",
-  "tags": ["overview"],
+  "tags": ["overview", "hive"],
   "templating": {
     "list": [
       {

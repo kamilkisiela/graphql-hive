@@ -14,6 +14,8 @@ export function deployGrafana(envName: string) {
   const params = new pulumi.Config('grafanaDashboards').requireObject<Record<string, string>>(
     'params',
   );
+  params['ENV_NAME'] = envName;
+
   const dashboards = availableFiles.map(filePath => {
     const fullPath = join(dashboardDirectory, filePath);
     const identifier = parse(fullPath).name;
