@@ -244,7 +244,7 @@ impl Plugin for UsagePlugin {
                                     let operation_body = operation_body.clone();
                                     let operation_name = operation_name.clone();
 
-                                    let response = response_stream
+                                    let res = response_stream
                                         .map(move |response| {
                                             // make sure we send a single report, not for each chunk
                                             let response_has_errors = !response.errors.is_empty();
@@ -265,7 +265,7 @@ impl Plugin for UsagePlugin {
                                         })
                                         .boxed();
 
-                                    response
+                                    res
                                 }))
                             }
                         }
