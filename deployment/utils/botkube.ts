@@ -5,7 +5,8 @@ import { helmChart } from './helm';
 export class BotKube {
   deploy(config: {
     slackChannelName: string;
-    slackToken: Output<string>;
+    slackBotToken: Output<string>;
+    slackAppToken: Output<string>;
     clusterName: string;
     enableKubectl: boolean;
   }) {
@@ -19,60 +20,63 @@ export class BotKube {
       'botkube',
       {
         // prettier-ignore
-        ...helmChart('https://infracloudio.github.io/charts', 'botkube', '0.12.4'),
+        ...helmChart('https://charts.botkube.io', 'botkube', '0.18.0'),
         namespace: ns.metadata.name,
         values: {
-          communications: {
-            slack: {
-              enabled: true,
-              channel: config.slackChannelName,
-              token: config.slackToken,
-              notiftype: 'short',
-            },
+          settings: {
+            clusterName: config.clusterName,
           },
-          config: {
-            resources: [
-              {
-                name: 'apps/v1/deployments',
-                namespaces: {
-                  include: ['default', 'ingress-nginx'],
-                },
-                events: ['all'],
-              },
-              {
-                name: 'v1/pods',
-                namespaces: {
-                  include: ['default', 'ingress-nginx'],
-                },
-                events: ['all'],
-              },
-            ],
-            recommendations: true,
-            settings: {
-              clustername: config.clusterName,
+          executors: {
+            'kubectl-all-ns': {
               kubectl: {
+                enabled: true,
+                namespaces: {
+                  include: ['.*'],
+                },
+                restrictAccess: false,
                 defaultNamespace: 'default',
-                restrictAccess: 'true',
-                enabled: String(config.enableKubectl),
                 commands: {
-                  verbs: ['cluster-info', 'describe', 'get', 'logs', 'top', 'restart'],
+                  verbs: ['cluster-info', 'diff', 'explain', 'get', 'logs', 'top'],
                   resources: [
                     'deployments',
                     'pods',
-                    'namespaces',
                     'services',
+                    'namespaces',
                     'daemonsets',
-                    'httpproxy',
                     'statefulsets',
+                    'storageclasses',
                     'nodes',
+                    'configmaps',
                   ],
                 },
               },
             },
+            helm: {
+              'botkube/helm': {
+                enabled: false,
+              },
+            },
           },
-          image: {
-            repository: 'infracloudio/botkube',
-            tag: 'v0.12.4',
+          communications: {
+            'default-group': {
+              socketSlack: {
+                enabled: true,
+                botToken: config.slackBotToken,
+                appToken: config.slackAppToken,
+                channels: {
+                  default: {
+                    name: config.slackChannelName,
+                    notification: {
+                      disabled: false,
+                    },
+                    bindings: {
+                      executors: ['kubectl-all-ns'],
+                      sources: ['k8s-all-events'],
+                    },
+                  },
+                },
+              },
+            },
           },
         },
       },
