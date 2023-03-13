@@ -20,7 +20,7 @@
     "@whatwg-node/fetch": "0.8.2",
     "bcryptjs": "2.4.3",
     "date-fns": "2.29.3",
-    "dockerode": "3.3.4",
+    "dockerode": "3.3.5",
     "dotenv": "16.0.3",
     "graphql": "16.6.0",
     "human-id": "4.0.0",
