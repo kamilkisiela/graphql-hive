@@ -5,6 +5,15 @@ service.
 
 > If you wish to use these metrics and dashboards, please contact us for additional information.
 
+## Datasources in use and their names
+
+- `CDN`: Datasource of kind `vertamedia-clickhouse-datasource`
+  (https://grafana.com/grafana/plugins/vertamedia-clickhouse-datasource/) linked to CloudFlare
+  Worker Analytics (https://developers.cloudflare.com/analytics/analytics-engine/get-started/)
+- `Azure Monitor`: https://grafana.com/docs/grafana/latest/datasources/azure-monitor/
+- `grafanacloud-logs`: Loki data source for logs
+- `grafanacloud-prom`: Prometheus data source with metrics scraped from Hive services
+
 ## Adding a new dashboard
 
 Create a new dashboard in Grafana dashboard, and then click the "Share" icon, pick "Export" tab and
