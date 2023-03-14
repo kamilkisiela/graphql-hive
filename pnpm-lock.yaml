@@ -1041,7 +1041,7 @@ importers:
       '@trpc/client': 10.15.0
       '@trpc/server': 10.15.0
       '@types/cookies': 0.7.7
-      '@types/dompurify': 2.4.0
+      '@types/dompurify': 3.0.0
       '@types/js-cookie': 3.0.3
       '@types/react': 18.0.28
       '@types/react-date-range': 1.4.4
@@ -1188,7 +1188,7 @@ importers:
       '@storybook/testing-library': 0.0.14-next.1
       '@tailwindcss/line-clamp': 0.4.2_tailwindcss@3.2.7
       '@types/cookies': 0.7.7
-      '@types/dompurify': 2.4.0
+      '@types/dompurify': 3.0.0
       '@types/js-cookie': 3.0.3
       '@types/react': 18.0.28
       '@types/react-date-range': 1.4.4
@@ -12343,8 +12343,8 @@ packages:
     resolution: {integrity: sha512-w5jZ0ee+HaPOaX25X2/2oGR/7rgAQSYII7X7pp0m9KgBfMP7uKfMfTvcpl5Dj+eDBbpxKGiqE+flqDr6XTd2RA==}
     dev: true
 
-  /@types/dompurify/2.4.0:
-    resolution: {integrity: sha512-IDBwO5IZhrKvHFUl+clZxgf3hn2b/lU6H1KaBShPkQyGJUQ0xwebezIPSuiyGwfz1UzJWQl4M7BDxtHtCCPlTg==}
+  /@types/dompurify/3.0.0:
+    resolution: {integrity: sha512-EcSqmgm/xJwH8CcJPy9AHNypp/j58CYga3nWdl93/wLxX6OH+rSD3aAj75NQazcZd1YKHJ/pjNZ9qmgVajggwQ==}
     dependencies:
       '@types/trusted-types': 2.0.2
     dev: true
