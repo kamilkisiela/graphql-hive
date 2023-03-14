@@ -74,11 +74,13 @@ function Manage() {
         <div className="flex gap-4 pb-2">
           <Tooltip.Provider delayDuration={200}>
             <Tooltip content="Date filter applies only to collected operations data">
-              <RadixSelect
-                defaultValue={dateRangeKey}
-                onChange={setDateRangeKey}
-                options={dateRangeOptions.map(({ key, label }) => ({ value: key, label }))}
-              />
+              <div>
+                <RadixSelect
+                  defaultValue={dateRangeKey}
+                  onChange={setDateRangeKey}
+                  options={dateRangeOptions.map(({ key, label }) => ({ value: key, label }))}
+                />
+              </div>
             </Tooltip>
             {CHECKBOXES.map(({ value, label, tooltip }) => (
               <span className="flex items-center gap-2" key={value}>

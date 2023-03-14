@@ -27,6 +27,7 @@ export { Select } from '@/components/v2/select';
 export { ShineBackground } from '@/components/v2/shine-background';
 export { Skeleton } from '@/components/v2/skeleton';
 export { Slider } from '@/components/v2/slider';
+export { Sortable } from '@/components/v2/sortable';
 export { Spinner } from '@/components/v2/spinner';
 export { default as Stat } from '@/components/v2/stat';
 export { SubHeader } from '@/components/v2/sub-header';
