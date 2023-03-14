@@ -1,8 +1,11 @@
 import colors from 'colors';
-import { ClientError, GraphQLClient } from 'graphql-request';
+import { print, type GraphQLError } from 'graphql';
 import symbols from 'log-symbols';
 import { Command, Errors, Config as OclifConfig } from '@oclif/core';
 import { Config, GetConfigurationValueType, ValidConfigurationKeys } from './helpers/config';
+import { fetch } from '@whatwg-node/fetch';
+import type { TypedDocumentNode } from "@graphql-typed-document-node/core";
+import type { ExecutionResult } from 'graphql'
 
 type OmitNever<T> = { [K in keyof T as T[K] extends never ? never : K]: T[K] };
 
@@ -142,17 +145,41 @@ export default abstract class extends Command {
   }
 
   registryApi(registry: string, token: string) {
-    const client = new GraphQLClient(registry, {
-      headers: {
-        Accept: 'application/json',
-        'User-Agent': `hive-cli/${this.config.version}`,
-        Authorization: `Bearer ${token}`,
-        'graphql-client-name': 'Hive CLI',
-        'graphql-client-version': this.config.version,
-      },
-    });
+    const requestHeaders = {
+      Accept: 'application/json',
+      'User-Agent': `hive-cli/${this.config.version}`,
+      Authorization: `Bearer ${token}`,
+      'graphql-client-name': 'Hive CLI',
+      'graphql-client-version': this.config.version,
+    };
 
-    return client;
+    return {
+      async request<TData = any, TVariables = Record<string, any>>(operation: TypedDocumentNode<TData, TVariables>, variables: TVariables) {
+        const response = await fetch(registry, {
+          headers: requestHeaders,
+          method: 'POST',
+          body: JSON.stringify({
+              query: typeof operation === 'string' ? operation : print(operation),
+              variables,
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`Invalid status code for registry HTTP call: ${response.status}`);
+        }
+
+        const jsonData = await response.json() as ExecutionResult<TData>;
+
+        if (jsonData.errors && jsonData.errors.length > 0) {
+          throw new ClientError(`Failed to execute GraphQL operation: ${jsonData.errors.map(e => e.message).join('\n')}`, {
+            errors: jsonData.errors,
+            headers: response.headers,
+          });
+        }
+
+        return jsonData.data!;
+      }
+    }
   }
 
   handleFetchError(error: unknown): never {
@@ -195,6 +222,15 @@ export default abstract class extends Command {
   }
 }
 
+class ClientError extends Error {
+  constructor(message: string, public response: {
+    errors?: readonly GraphQLError[];
+    headers: Headers,
+  }) {
+    super(message);
+  }
+}
+
 function isClientError(error: Error): error is ClientError {
-  return 'response' in error;
+  return error instanceof ClientError; 
 }
