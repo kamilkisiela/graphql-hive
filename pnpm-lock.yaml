@@ -390,7 +390,7 @@ importers:
       got: 12.6.0
       graphql-modules: 2.1.0
       graphql-parse-resolve-info: 4.13.0
-      graphql-scalars: 1.20.1
+      graphql-scalars: 1.20.4
       graphql-yoga: 3.7.2
       ioredis: 5.3.1
       ioredis-mock: 8.2.6
@@ -422,7 +422,7 @@ importers:
       got: 12.6.0
       graphql-modules: 2.1.0
       graphql-parse-resolve-info: 4.13.0
-      graphql-scalars: 1.20.1
+      graphql-scalars: 1.20.4
       graphql-yoga: 3.7.2
       ioredis: 5.3.1
       lodash: 4.17.21
@@ -19132,13 +19132,13 @@ packages:
     transitivePeerDependencies:
       - encoding
 
-  /graphql-scalars/1.20.1:
-    resolution: {integrity: sha512-HCSosMh8l/DVYL3/wCesnZOb+gbiaO/XlZQEIKOkWDJUGBrc15xWAs5TCQVmrycT0tbEInii+J8eoOyMwxx8zg==}
+  /graphql-scalars/1.20.4:
+    resolution: {integrity: sha512-/hDzWcphV/aV4MEx2pqVMMekBLi9VXYD/HrJSclpOCLkSB/dE3Rb5VVZBXsQhgBxqeCsE7K0PEO2/cWAUzQsrQ==}
     engines: {node: '>=10'}
     peerDependencies:
       graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
-      tslib: 2.4.1
+      tslib: 2.5.0
     dev: false
 
   /graphql-tag/2.12.6_graphql@16.6.0:
